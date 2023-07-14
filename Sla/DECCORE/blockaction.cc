@@ -1182,9 +1182,6 @@ void CollapseStructure::orderLoopBodies(void)
   loopbodyiter = loopbody.begin();
 }
 
-/// Find the current innermost loop, make sure its \e likely \e goto edges are calculated.
-/// If there are no loops, make sure the \e likely \e goto edges are calculated for the final DAG.
-/// \return true if there are likely \e unstructured edges left to provide
 bool CollapseStructure::updateLoopBody(void)
 
 {

@@ -57,11 +57,28 @@ namespace ghidra
         internal static readonly AttributeId ATTRIB_CONTAIN = new AttributeId("contain", 44);
         internal static readonly AttributeId ATTRIB_DEFAULTSPACE = new AttributeId("defaultspace", 45);
         internal static readonly AttributeId ATTRIB_UNIQBASE = new AttributeId("uniqbase", 46);
+        internal static readonly AttributeId ATTRIB_ALTINDEX = new AttributeId("altindex", 75);
+        internal static readonly AttributeId ATTRIB_DEPTH = new AttributeId("depth", 76);
+        internal static readonly AttributeId ATTRIB_END = new AttributeId("end", 77);
+        internal static readonly AttributeId ATTRIB_OPCODE = new AttributeId("opcode", 78);
+        internal static readonly AttributeId ATTRIB_REV = new AttributeId("rev", 79);
         internal static readonly AttributeId ATTRIB_BASE = new AttributeId("base", 89);
         internal static readonly AttributeId ATTRIB_DEADCODEDELAY = new AttributeId("deadcodedelay", 90);
         internal static readonly AttributeId ATTRIB_DELAY = new AttributeId("delay", 91);
         internal static readonly AttributeId ATTRIB_LOGICALSIZE = new AttributeId("logicalsize", 92);
         internal static readonly AttributeId ATTRIB_PHYSICAL = new AttributeId("physical", 93);
+        internal static readonly AttributeId ATTRIB_ADJUSTVMA = new AttributeId("adjustvma", 103);
+        internal static readonly AttributeId ATTRIB_ENABLE = new AttributeId("enable", 104);
+        internal static readonly AttributeId ATTRIB_GROUP = new AttributeId("group", 105);
+        internal static readonly AttributeId ATTRIB_GROWTH = new AttributeId("growth", 106);
+        internal static readonly AttributeId ATTRIB_KEY = new AttributeId("key", 107);
+        internal static readonly AttributeId ATTRIB_LOADERSYMBOLS = new AttributeId("loadersymbols", 108);
+        internal static readonly AttributeId ATTRIB_PARENT = new AttributeId("parent", 109);
+        internal static readonly AttributeId ATTRIB_REGISTER = new AttributeId("register", 110);
+        internal static readonly AttributeId ATTRIB_REVERSEJUSTIFY = new AttributeId("reversejustify", 111);
+        internal static readonly AttributeId ATTRIB_SIGNEXT = new AttributeId("signext", 112);
+        internal static readonly AttributeId ATTRIB_STYLE = new AttributeId("style", 113);
+        internal static readonly AttributeId ATTRIB_ADDRESS = new AttributeId("address", 148);
 
         // ATTRIB_PIECE is a special attribute for supporting the legacy attributes "piece1", "piece2", ..., "piece9",
         // It is effectively a sequence of indexed attributes for use with Encoder::writeStringIndexed.

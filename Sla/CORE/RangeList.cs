@@ -256,7 +256,7 @@ namespace ghidra
         /// \param addr is the first Address in the target range
         /// \param size is the number of bytes in the target range
         /// \return \b true is the range is fully contained by this RangeList
-        public bool inRange(ref Address addr,int size)
+        public bool inRange(Address addr,int size)
         {
             if (addr.isInvalid()) {
                 // We don't really care

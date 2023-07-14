@@ -230,7 +230,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DECCORE\" />
     <Folder Include="GHIDRA\" />
     <Folder Include="COREEXT\" />
     <Folder Include="SLACOMP\" />

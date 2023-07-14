@@ -293,7 +293,7 @@ namespace ghidra
         /// \param mem is the specified storage region
         /// \param point is the code address
         /// \return the tracked value or zero
-        protected ulong getTrackedValue(ref VarnodeData mem, ref Address point)
+        internal ulong getTrackedValue(ref VarnodeData mem, ref Address point)
         {
             TrackedSet tset = getTrackedSet(point);
             ulong endoff = mem.offset + mem.size - 1;

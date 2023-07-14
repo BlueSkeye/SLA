@@ -253,14 +253,6 @@ bool Architecture::hasModel(const string &nm) const
   return (iter != protoModels.end());
 }
 
-/// Get the address space associated with the indicated
-/// \e spacebase register. I.e. if the location of the
-/// \e stack \e pointer is passed in, this routine would return
-/// a pointer to the \b stack space. An exception is thrown
-/// if no corresponding space is found.
-/// \param loc is the location of the \e spacebase register
-/// \param size is the size of the register in bytes
-/// \return a pointer to the address space
 AddrSpace *Architecture::getSpaceBySpacebase(const Address &loc,int4 size) const
 
 {
@@ -1147,68 +1139,6 @@ ProtoModel *Architecture::createUnknownModel(const string &modelName)
 /// \param store is the document store holding the tag
 void Architecture::parseProcessorConfig(DocumentStorage &store)
 
-{
-  const Element *el = store.getTag("processor_spec");
-  if (el == (const Element *)0)
-    throw LowlevelError("No processor configuration tag found");
-  XmlDecode decoder(this,el);
-  
-  uint4 elemId = decoder.openElement(ELEM_PROCESSOR_SPEC);
-  for(;;) {
-    uint4 subId = decoder.peekElement();
-    if (subId == 0) break;
-    if (subId == ELEM_PROGRAMCOUNTER) {
-      decoder.openElement();
-      decoder.closeElementSkipping(subId);
-    }
-    else if (subId == ELEM_VOLATILE)
-      decodeVolatile(decoder);
-    else if (subId == ELEM_INCIDENTALCOPY)
-      decodeIncidentalCopy(decoder);
-    else if (subId == ELEM_CONTEXT_DATA)
-      context->decodeFromSpec(decoder);
-    else if (subId == ELEM_JUMPASSIST)
-      userops.decodeJumpAssist(decoder, this);
-    else if (subId == ELEM_SEGMENTOP)
-      userops.decodeSegmentOp(decoder,this);
-    else if (subId == ELEM_REGISTER_DATA) {
-      decodeLaneSizes(decoder);
-    }
-    else if (subId == ELEM_DATA_SPACE) {
-      uint4 elemId = decoder.openElement();
-      AddrSpace *spc = decoder.readSpace(ATTRIB_SPACE);
-      decoder.closeElement(elemId);
-      setDefaultDataSpace(spc->getIndex());
-    }
-    else if (subId == ELEM_INFERPTRBOUNDS) {
-      decodeInferPtrBounds(decoder);
-    }
-    else if (subId == ELEM_SEGMENTED_ADDRESS) {
-      decoder.openElement();
-      decoder.closeElementSkipping(subId);
-    }
-    else if (subId == ELEM_DEFAULT_SYMBOLS) {
-      decoder.openElement();
-      store.registerTag(decoder.getCurrentXmlElement());
-      decoder.closeElementSkipping(subId);
-    }
-    else if (subId == ELEM_DEFAULT_MEMORY_BLOCKS) {
-      decoder.openElement();
-      decoder.closeElementSkipping(subId);
-    }
-    else if (subId == ELEM_ADDRESS_SHIFT_AMOUNT) {
-      decoder.openElement();
-      decoder.closeElementSkipping(subId);
-    }
-    else if (subId == ELEM_PROPERTIES) {
-      decoder.openElement();
-      decoder.closeElementSkipping(subId);
-    }
-    else
-      throw LowlevelError("Unknown element in <processor_spec>");
-  }
-  decoder.closeElement(elemId);
-}
 
 /// This looks for the \<compiler_spec> tag and sets configuration parameters based on it.
 /// \param store is the document store holding the tag

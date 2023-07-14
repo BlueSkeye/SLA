@@ -112,7 +112,7 @@ namespace ghidra
         /// Write a raw version of the address to a stream
         /// Write a short-hand or debug version of this address to a stream.
         /// \param s is the stream being written
-        public void printRaw(StreamWriter s)
+        public void printRaw(TextWriter s)
         {
             if (@base == null) {
                 s.Write("invalid_addr");

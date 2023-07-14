@@ -420,7 +420,6 @@ public:
 };
 
 /// \brief This class is used to mirror the BlockBasic objects in the fixed control-flow graph for a function
-///
 /// The decompiler does control-flow structuring by making an initial copy of the control-flow graph,
 /// then iteratively collapsing nodes (in the copy) into \e structured nodes.  So an instance of this
 /// class acts as the mirror of an original basic block within the copy of the graph.  During the
