@@ -1,0 +1,177 @@
+﻿/** \page sleighAPIemulate The SLEIGH Emulator
+    
+  \section emu_overview Overview
+  
+  \b SLEIGH provides a framework for emulating the processors which have a specification written
+   for them.  The key classes in this framework are:
+
+  \b Key \b Classes
+    - \ref MemoryState
+    - \ref MemoryBank
+    - \ref BreakTable
+    - \ref BreakCallBack
+    - \ref Emulate
+    - \ref EmulatePcodeCache
+
+  The MemoryState object holds the representation of registers and memory during emulation.  It
+  understands the address spaces defined in the \b SLEIGH specification and how data is encoded
+  in these spaces.  It also knows any register names defined by the specification, so these
+  can be used to set or query the state of these registers naturally.
+
+  The emulation framework can be tailored to a particular environment by creating \b breakpoint
+  objects, which derive off the BreakCallBack interface.  These can be used to create callbacks
+  during emulation that have full access to the memory state and the emulator, so any action
+  can be accomplished.  The breakpoint callbacks can be designed to either augment or replace
+  the instruction at a particular address, or the callback can be used to implement the action
+  of a user-defined pcode op.  The BreakCallBack objects are managed by the BreakTable object,
+  which takes care of invoking the callback at the appropriate time.
+
+  The Emulate object serves as a basic execution engine.  Its main method is
+  Emulate::executeCurrentOp() which executes a single pcode operation on the memory state.
+  Methods exist for querying and setting the current execution address and examining the pcode
+  op being executed.
+
+  The main implementation of the Emulate interface is the EmulatePcodeCache object.  It uses
+  SLEIGH to translate machine instructions as they are executed.  The currently executing instruction
+  is translated into a cached sequence of pcode operations.  Additional methods allow this entire
+  sequence to be inspected, and there is another stepping function which allows the emulator
+  to be stepped through an entire machine instruction at a time.  The single pcode stepping methods
+  are of course still available and the two methods can be used together without conflict.
+
+  \section emu_membuild Building a Memory State
+
+  Assuming the SLEIGH Translate object and the LoadImage object have already been built
+  (see \ref sleighAPIbasic), the only required step left before instantiating an emulator
+  is to create a MemoryState object.  The MemoryState object can be instantiated simply by
+  passing the constructor the Translate object, but before it will work properly, you need
+  to register individual MemoryBank objects with it, for each address space that might
+  get used by the emulator.
+
+  A MemoryBank is a representation of data stored in a single address space
+  There are some choices for the type of MemoryBank associated with an address space.
+  A MemoryImage is a read-only memory bank that gets its data from a LoadImage.  In order
+  to make this writeable, or to create a writeable memory bank which starts with its bytes
+  initialized to zero, you can use a MemoryHashOverlay or a MemoryPageOverlay.
+
+  A MemoryHashOverlay overlays some other memory bank, such as a MemoryImage.  If you read
+  from a location that hasn't been written to directly before, you get the data in the underlying
+  memory bank.  But if you write to this overlay, the value is stored in a hash table, and
+  subsequent reads will return this value.  Internally, the hashtable stores values in a \e preferred
+  wordsize only on aligned addresses, but this is irrelevant to the interface. Unaligned requests
+  are split up and handled transparently.
+
+  A MemoryPageOverlay overlays another memory bank as well.  But it implements writes to the bank
+  by caching memory \e pages.  Any write creates an aligned page to hold the new data.  The class
+  takes care of loading and filling in pages as needed.
+
+  Here is an example of instantiating a MemoryState and registering memory banks for a
+  \e ram space which is initialized with the load image. The \e ram space is implemented
+  with the MemoryPageOverlay, and the \e register space and the \e temporary space are implemented
+  using the MemoryHashOverlay.
+
+  \code
+    void setupMemoryState(Translate &trans,LoadImage &loader) {
+      // Set up memory state object
+      MemoryImage loadmemory(trans.getDefaultCodeSpace(),8,4096,&loader);
+      MemoryPageOverlay ramstate(trans.getDefaultCodeSpace(),8,4096,&loadmemory);
+      MemoryHashOverlay registerstate(trans.getSpaceByName("register"),8,4096,4096,(MemoryBank *)0);
+      MemoryHashOverlay tmpstate(trans.getUniqueSpace(),8,4096,4096,(MemoryBank *)0);
+
+      MemoryState memstate(&trans);	// Instantiate the memory state object
+      memstate.setMemoryBank(&ramstate);
+      memstate.setMemoryBank(&registerstate);
+      memstate.setMemoryBank(&tmpstate);
+   }
+  \endcode
+
+  All the memory bank constructors need a preferred wordsize, which is most relevant to the hashtable
+  implementation, and a page size, which is most relevant to the page implementation.  The hash
+  overlays need an additional initializer specifying how big the hashtable should be.  The
+  null pointers passed in, in place of a real memory bank, indicate that the memory bank is initialized
+  with all zeroes. Once the memory banks are instantiated, they are registered with the memory state
+  via the MemoryState::setMemoryBank() method.
+
+  \section emu_breakpoints Breakpoints
+
+  In order to provide behavior within the emulator beyond just what the core instruction emulation
+  provides, the framework supports \b breakpoint classes.  A breakpoint is created by deriving a
+  class from the BreakCallBack class and overriding either BreakCallBack::addressCallback() or
+  BreakCallBack::pcodeCallback().  Here is an example of a breakpoint that implements a
+  standard C library \e puts call an the x86 architecture.  When the breakpoint is invoked,
+  a call to \e puts has just been made, so the stack pointer is pointing to the return address
+  and the next 4 bytes on the stack are a pointer to the string being passed in.
+
+  \code
+    class PutsCallBack : public BreakCallBack {
+    public:
+      virtual bool addressCallback(const Address &addr);
+    };
+
+    bool PutsCallBack::addressCallback(const Address &addr)
+
+    {
+      MemoryState *mem = emulate->getMemoryState();
+      uint1 buffer[256];
+      uint4 esp = mem->getValue("ESP");
+      AddrSpace *ram = mem->getTranslate()->getSpaceByName("ram");
+
+      uint4 param1 = mem->getValue(ram,esp+4,4);
+      mem->getChunk(buffer,ram,param1,255);
+
+      cout << (char *)&buffer << endl;
+
+      uint4 returnaddr = mem->getValue(ram,esp,4);
+      mem->setValue("ESP",esp+8);
+      emulate->setExecuteAddress(Address(ram,returnaddr));
+  
+      return true;			// This replaces the indicated instruction
+    }
+      
+  \endcode
+
+  Notice that the callback retrieves the value of the stack pointer by name.  Using this
+  value, the string pointer is retrieved, then the data for the actual string is retrieved.
+  After dumping the string to standard out, the return address is recovered and the \e return
+  instruction is emulated by explicitly setting the next execution address to be the return value.
+
+  \section emu_finalsetup Running the Emulator
+  Here is an example of instantiating an EmulatePcodeCache object. A breakpoint is also instantiated
+  and registered with the BreakTable.  
+
+  \code
+    ...
+    Sleigh trans(&loader,&context);    // Instantiate the translator
+    ...
+    MemoryState memstate(&trans);      // Instantiate the memory state
+    ...
+    BreakTableCallBack breaktable(&trans);  // Instantiate a breakpoint table
+    EmulatePcodeCache emulator(&trans,&memstate,&breaktable);  // Instantiate the emulator
+
+    // Set up the initial stack pointer
+    memstate.setValue("ESP",0xbffffffc);
+    emulator.setExecuteAddress(Address(trans.getDefaultCodeSpace(),0x1D00114));  // Initial execution address
+    
+    PutsCallBack putscallback;
+    breaktable.registerAddressCallback(Address(trans.getDefaultCodeSpace(),0x1D00130),&putscallback);
+
+    AssemblyRaw assememit;
+    for(;;) {
+      Address addr = emulator.getExecuteAddress();
+      trans.printAssembly(assememit,addr);
+      emulator.executeInstruction();
+    }
+
+  \endcode
+
+  Notice how the initial stack pointer and initial execute address is set up.  The breakpoint
+  is registered with the BreakTable, giving it a specific address.  The executeInstruction method
+  is called inside the loop, to actually run the emulator.  Notice that a disassembly of each
+  instruction is printed after each step of the emulator.
+
+  Other information can be examined from within this execution loop or in other tailored breakpoints.
+  In particular, the Emulate::getCurrentOp() method can be used to retrieve the an instance
+  of the currently executing pcode operation. From this starting point, you can examine the
+  low-level objects:
+    - PcodeOpRaw   and
+    - VarnodeData
+ */
