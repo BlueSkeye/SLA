@@ -62,6 +62,11 @@ namespace ghidra
         internal static readonly AttributeId ATTRIB_MERGE = new AttributeId("merge", 63);
         internal static readonly AttributeId ATTRIB_SCOPEIDBYNAME = new AttributeId("scopeidbyname", 64);
         internal static readonly AttributeId ATTRIB_VOLATILE = new AttributeId("volatile", 65);
+        internal static readonly AttributeId ATTRIB_DYNAMIC = new AttributeId("dynamic", 70);
+        internal static readonly AttributeId ATTRIB_INCIDENTALCOPY = new AttributeId("incidentalcopy", 71);
+        internal static readonly AttributeId ATTRIB_INJECT = new AttributeId("inject", 72);
+        internal static readonly AttributeId ATTRIB_PARAMSHIFT = new AttributeId("paramshift", 73);
+        internal static readonly AttributeId ATTRIB_TARGETOP = new AttributeId("targetop", 74);
         internal static readonly AttributeId ATTRIB_ALTINDEX = new AttributeId("altindex", 75);
         internal static readonly AttributeId ATTRIB_DEPTH = new AttributeId("depth", 76);
         internal static readonly AttributeId ATTRIB_END = new AttributeId("end", 77);
