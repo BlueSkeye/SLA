@@ -623,7 +623,7 @@ class AncestorRealistic {
     /// \brief Constructor given a Varnode read
     ///
     /// \param o is the PcodeOp reading the Varnode
-    /// \param s is the input slot
+        /// \param s is the input slot
     State(PcodeOp *o,int4 s) {
       op = o;
       slot = s;

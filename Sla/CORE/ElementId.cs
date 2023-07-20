@@ -69,6 +69,11 @@ namespace ghidra
         internal static readonly ElementId ELEM_CONSTANTPOOL = new ElementId("constantpool", 109);
         internal static readonly ElementId ELEM_CPOOLREC = new ElementId("cpoolrec", 110);
         internal static readonly ElementId ELEM_REF = new ElementId("ref", 111);
+        internal static readonly ElementId ELEM_AST = new ElementId("ast", 115);
+        internal static readonly ElementId ELEM_FUNCTION = new ElementId("function", 116);
+        internal static readonly ElementId ELEM_HIGHLIST = new ElementId("highlist", 117);
+        internal static readonly ElementId ELEM_JUMPTABLELIST = new ElementId("jumptablelist", 118);
+        internal static readonly ElementId ELEM_VARNODES = new ElementId("varnodes", 119);
         internal static readonly ElementId ELEM_TOKEN = new ElementId("token", 112);
         internal static readonly ElementId ELEM_CONTEXT_DATA = new ElementId("context_data", 120);
         internal static readonly ElementId ELEM_CONTEXT_POINTS = new ElementId("context_points", 121);
@@ -107,8 +112,27 @@ namespace ghidra
         internal static readonly ElementId ELEM_SPECEXTENSIONS = new ElementId("specextensions", 157);
         internal static readonly ElementId ELEM_STACKPOINTER = new ElementId("stackpointer", 158);
         internal static readonly ElementId ELEM_VOLATILE = new ElementId("volatile", 159);
-        // Number serves as next open index
-        internal static readonly ElementId ELEM_UNKNOWN = new ElementId("XMLunknown", 272);
+        internal static readonly ElementId ELEM_GROUP = new ElementId("group", 160);
+        internal static readonly ElementId ELEM_INTERNALLIST = new ElementId("internallist", 161);
+        internal static readonly ElementId ELEM_KILLEDBYCALL = new ElementId("killedbycall", 162);
+        internal static readonly ElementId ELEM_LIKELYTRASH = new ElementId("likelytrash", 163);
+        internal static readonly ElementId ELEM_LOCALRANGE = new ElementId("localrange", 164);
+        internal static readonly ElementId ELEM_MODEL = new ElementId("model", 165);
+        internal static readonly ElementId ELEM_PARAM = new ElementId("param", 166);
+        internal static readonly ElementId ELEM_PARAMRANGE = new ElementId("paramrange", 167);
+        internal static readonly ElementId ELEM_PENTRY = new ElementId("pentry", 168);
+        internal static readonly ElementId ELEM_PROTOTYPE = new ElementId("prototype", 169);
+        internal static readonly ElementId ELEM_RESOLVEPROTOTYPE = new ElementId("resolveprototype", 170);
+        internal static readonly ElementId ELEM_RETPARAM = new ElementId("retparam", 171);
+        internal static readonly ElementId ELEM_RETURNSYM = new ElementId("returnsym", 172);
+        internal static readonly ElementId ELEM_UNAFFECTED = new ElementId("unaffected", 173);        // Number serves as next open index
+        internal static readonly ElementId ELEM_BASICOVERRIDE = new ElementId("basicoverride", 211);
+        internal static readonly ElementId ELEM_DEST = new ElementId("dest", 212);
+        internal static readonly ElementId ELEM_JUMPTABLE = new ElementId("jumptable", 213);
+        internal static readonly ElementId ELEM_LOADTABLE = new ElementId("loadtable", 214);
+        internal static readonly ElementId ELEM_NORMADDR = new ElementId("normaddr", 215);
+        internal static readonly ElementId ELEM_NORMHASH = new ElementId("normhash", 216);
+        internal static readonly ElementId ELEM_STARTVAL = new ElementId("startval", 217); internal static readonly ElementId ELEM_UNKNOWN = new ElementId("XMLunknown", 272);
 
         /// The name of the element
         private string name;

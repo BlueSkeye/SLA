@@ -71,6 +71,7 @@ namespace ghidra
         internal static readonly AttributeId ATTRIB_B = new AttributeId("b", 81);
         internal static readonly AttributeId ATTRIB_LENGTH = new AttributeId("length", 82);
         internal static readonly AttributeId ATTRIB_TAG = new AttributeId("tag", 83);
+        internal static readonly AttributeId ATTRIB_NOCODE = new AttributeId("nocode", 84);
         internal static readonly AttributeId ATTRIB_BASE = new AttributeId("base", 89);
         internal static readonly AttributeId ATTRIB_DEADCODEDELAY = new AttributeId("deadcodedelay", 90);
         internal static readonly AttributeId ATTRIB_DELAY = new AttributeId("delay", 91);
@@ -87,6 +88,24 @@ namespace ghidra
         internal static readonly AttributeId ATTRIB_REVERSEJUSTIFY = new AttributeId("reversejustify", 111);
         internal static readonly AttributeId ATTRIB_SIGNEXT = new AttributeId("signext", 112);
         internal static readonly AttributeId ATTRIB_STYLE = new AttributeId("style", 113);
+        internal static readonly AttributeId ATTRIB_CUSTOM = new AttributeId("custom", 114);
+        internal static readonly AttributeId ATTRIB_DOTDOTDOT = new AttributeId("dotdotdot", 115);
+        internal static readonly AttributeId ATTRIB_EXTENSION = new AttributeId("extension", 116);
+        internal static readonly AttributeId ATTRIB_HASTHIS = new AttributeId("hasthis", 117);
+        internal static readonly AttributeId ATTRIB_INLINE = new AttributeId("inline", 118);
+        internal static readonly AttributeId ATTRIB_KILLEDBYCALL = new AttributeId("killedbycall", 119);
+        internal static readonly AttributeId ATTRIB_MAXSIZE = new AttributeId("maxsize", 120);
+        internal static readonly AttributeId ATTRIB_MINSIZE = new AttributeId("minsize", 121);
+        internal static readonly AttributeId ATTRIB_MODELLOCK = new AttributeId("modellock", 122);
+        internal static readonly AttributeId ATTRIB_NORETURN = new AttributeId("noreturn", 123);
+        internal static readonly AttributeId ATTRIB_POINTERMAX = new AttributeId("pointermax", 124);
+        internal static readonly AttributeId ATTRIB_SEPARATEFLOAT = new AttributeId("separatefloat", 125);
+        internal static readonly AttributeId ATTRIB_STACKSHIFT = new AttributeId("stackshift", 126);
+        internal static readonly AttributeId ATTRIB_STRATEGY = new AttributeId("strategy", 127);
+        internal static readonly AttributeId ATTRIB_THISBEFORERETPOINTER = new AttributeId("thisbeforeretpointer", 128);
+        internal static readonly AttributeId ATTRIB_VOIDLOCK = new AttributeId("voidlock", 129);
+        internal static readonly AttributeId ATTRIB_LABEL = new AttributeId("label", 131);
+        internal static readonly AttributeId ATTRIB_NUM = new AttributeId("num", 132);
         internal static readonly AttributeId ATTRIB_ADDRESS = new AttributeId("address", 148);
 
         // ATTRIB_PIECE is a special attribute for supporting the legacy attributes "piece1", "piece2", ..., "piece9",

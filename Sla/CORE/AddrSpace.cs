@@ -791,7 +791,7 @@ namespace ghidra {
             return offset;
         }
 
-        ///< Write the details of this space as XML
+        /// Write the details of this space as XML
         /// Write a tag fully describing the details of this space
         /// suitable for later recovery via decode.
         /// \param s is the stream being written
@@ -803,8 +803,8 @@ namespace ghidra {
             s.WriteLine("/>");
         }
 
-        ///< Recover the details of this space from XML
-        public void decode(Decoder decoder)
+        /// Recover the details of this space from XML
+        public virtual void decode(Decoder decoder)
         {
             // Multiple tags: <space>, <space_other>, <space_unique>
             uint elemId = decoder.openElement();

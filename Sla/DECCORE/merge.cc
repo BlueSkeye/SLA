@@ -1540,17 +1540,7 @@ void Merge::registerProtoPartialRoot(Varnode *vn)
   protoPartial.push_back(vn->getDef());
 }
 
-/// \brief Perform low-level details of merging two HighVariables if possible
-///
-/// This routine only fails (returning \b false) if there is a Cover intersection between
-/// the two variables. Otherwise, all the Varnode instances from the second HighVariable
-/// are merged into the first and its Cover is updated. The second variable is deleted.
-/// The cached intersection tests are also updated to reflect the merge.
-/// \param high1 is the first HighVariable being merged
-/// \param high2 is the second
-/// \param isspeculative is \b true if the desired merge is speculative
-/// \return \b true if the merge was successful
-bool Merge::merge(HighVariable *high1,HighVariable *high2,bool isspeculative)
+Merge::merge(HighVariable *high1,HighVariable *high2,bool isspeculative)
 
 {
   if (high1 == high2) return true; // Already merged
