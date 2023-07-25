@@ -1,9 +1,13 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
+using System.Runtime.ConstrainedExecution;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.WebRequestMethods;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ghidra
@@ -677,6 +681,86 @@ namespace ghidra
                 if (vn1->getDef()->code() == CPUI_SUBPIECE)
                     return vn1->getDef()->getIn(0);
             return (Varnode*)0;
+        }
+
+        internal static int4 run_xml(string filein, SleighCompile compiler)
+        {
+            ifstream s = new ifstream(filein);
+            Document doc;
+            string specfileout;
+            string specfilein;
+
+            try
+            {
+                doc = xml_tree(s);
+            }
+            catch (DecoderError)
+            {
+                cerr << "Unable to parse single input file as XML spec: " << filein << endl;
+                exit(1);
+            }
+            s.close();
+
+            Element* el = doc->getRoot();
+            for (; ; )
+            {
+                List & list(el->getChildren());
+                List::const_iterator iter;
+                for (iter = list.begin(); iter != list.end(); ++iter)
+                {
+                    el = *iter;
+                    if (el->getName() == "processorfile")
+                    {
+                        specfileout = el->getContent();
+                        int4 num = el->getNumAttributes();
+                        for (int4 i = 0; i < num; ++i)
+                        {
+                            if (el->getAttributeName(i) == "slaspec")
+                                specfilein = el->getAttributeValue(i);
+                            else
+                            {
+                                compiler.setPreprocValue(el->getAttributeName(i), el->getAttributeValue(i));
+                            }
+                        }
+                    }
+                    else if (el->getName() == "language_spec")
+                        break;
+                    else if (el->getName() == "language_description")
+                        break;
+                }
+                if (iter == list.end()) break;
+            }
+            delete doc;
+
+            if (specfilein.size() == 0)
+            {
+                cerr << "Input slaspec file was not specified in " << filein << endl;
+                exit(1);
+            }
+            if (specfileout.size() == 0)
+            {
+                cerr << "Output sla file was not specified in " << filein << endl;
+                exit(1);
+            }
+            return compiler.run_compilation(specfilein, specfileout);
+        }
+
+        internal static void findSlaSpecs(vector<string> res, string dir, string suffix)
+        {
+            FileManage::matchListDir(res, suffix, true, dir, false);
+
+            vector<string> dirs;
+            FileManage::directoryList(dirs, dir);
+            vector<string>::const_iterator iter;
+            for (iter = dirs.begin(); iter != dirs.end(); ++iter)
+            {
+                const string &nextdir(*iter);
+                findSlaSpecs(res, nextdir, suffix);
+            }
+        }
+        internal static void segvHandler(int sig)
+        {
+            exit(1);            // Just die - prevents OS from popping-up a dialog
         }
     }
 }
