@@ -9,7 +9,7 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A jump-table model assisted by pseudo-op directives in the code
     ///

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using _List = System.Collections.Generic.List<ghidra.Element>;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief An XML element.  A node in the DOM tree.
     /// This is the main node for the in-memory representation of the XML (DOM) tree.

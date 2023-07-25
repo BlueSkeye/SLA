@@ -6,7 +6,7 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Context needed to emit a p-code injection as a full set of p-code operations
     ///

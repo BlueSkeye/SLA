@@ -17,7 +17,7 @@
 #include "funcdata.hh"
 #include "prefersplit.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// Update disjoint cover making sure (addr,size) is contained in a single element and return
 /// an iterator to this element. The element's \b pass number is set to be the smallest value
@@ -2673,4 +2673,4 @@ void Heritage::clear(void)
   pass = 0;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

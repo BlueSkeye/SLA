@@ -21,7 +21,7 @@
 
 #include "address.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class FlowBlock;
 class PcodeOp;
@@ -251,5 +251,5 @@ public:
   Comment *getNext(void) const { Comment *res=(*start).second; ++start; return res; }	///< Advance to the next comment
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

@@ -18,7 +18,7 @@
 #include "subflow.hh"
 #include "rangeutil.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \class RuleEarlyRemoval
 /// \brief Get rid of unused PcodeOp objects where we can guarantee the output is unused
@@ -10312,4 +10312,4 @@ int4 RuleLzcountShiftBool::applyOp(PcodeOp *op,Funcdata &data)
   return 0;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

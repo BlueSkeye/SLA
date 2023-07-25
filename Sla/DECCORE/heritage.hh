@@ -22,7 +22,7 @@
 
 #include "block.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// Container holding the stack system for the renaming algorithm.  Every disjoint address
 /// range (indexed by its initial address) maps to its own Varnode stack.
@@ -296,5 +296,5 @@ public:
   const LoadGuard *getStoreGuard(PcodeOp *op) const;	///< Get LoadGuard record associated with given PcodeOp
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

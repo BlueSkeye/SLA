@@ -6,7 +6,7 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Emulate a \e snippet of PcodeOps out of a functional context
     /// Emulation is performed on a short sequence (\b snippet) of PcodeOpRaw objects.

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief An annotation for a specific collection of hierarchical data
     /// This class parallels the XML concept of an \b element.  An ElementId describes a collection of data, where each
@@ -34,6 +34,16 @@ namespace ghidra
         internal static readonly ElementId ELEM_REGISTER = new ElementId("register", 14);
         internal static readonly ElementId ELEM_SEQNUM = new ElementId("seqnum", 15);
         internal static readonly ElementId ELEM_VARNODE = new ElementId("varnode", 16);
+        internal static readonly ElementId ELEM_BREAK = new ElementId("break", 17);
+        internal static readonly ElementId ELEM_CLANG_DOCUMENT = new ElementId("clang_document", 18);
+        internal static readonly ElementId ELEM_FUNCNAME = new ElementId("funcname", 19);
+        internal static readonly ElementId ELEM_FUNCPROTO = new ElementId("funcproto", 20);
+        internal static readonly ElementId ELEM_LABEL = new ElementId("label", 21);
+        internal static readonly ElementId ELEM_RETURN_TYPE = new ElementId("return_type", 22);
+        internal static readonly ElementId ELEM_STATEMENT = new ElementId("statement", 23);
+        internal static readonly ElementId ELEM_SYNTAX = new ElementId("syntax", 24);
+        internal static readonly ElementId ELEM_VARDECL = new ElementId("vardecl", 25);
+        internal static readonly ElementId ELEM_VARIABLE = new ElementId("variable", 26);
         internal static readonly ElementId ELEM_OP = new ElementId("op", 27);
         internal static readonly ElementId ELEM_SLEIGH = new ElementId("sleigh", 28);
         internal static readonly ElementId ELEM_SPACE = new ElementId("space", 29);
@@ -44,6 +54,36 @@ namespace ghidra
         internal static readonly ElementId ELEM_SPACE_OVERLAY = new ElementId("space_overlay", 34);
         internal static readonly ElementId ELEM_SPACE_UNIQUE = new ElementId("space_unique", 35);
         internal static readonly ElementId ELEM_TRUNCATE_SPACE = new ElementId("truncate_space", 36);
+        //ElementId ELEM_ABSOLUTE_MAX_ALIGNMENT = ElementId("absolute_max_alignment", 37);
+        //ElementId ELEM_BITFIELD_PACKING = ElementId("bitfield_packing", 38);
+        //ElementId ELEM_CHAR_SIZE = ElementId("char_size", 39);
+        //ElementId ELEM_CHAR_TYPE = ElementId("char_type", 40);
+        internal static readonly ElementId ELEM_CORETYPES = new ElementId("coretypes", 41);
+        internal static readonly ElementId ELEM_DATA_ORGANIZATION = new ElementId("data_organization", 42);
+        internal static readonly ElementId ELEM_DEF = new ElementId("def", 43);
+        //ElementId ELEM_DEFAULT_ALIGNMENT = ElementId("default_alignment", 44);
+        //ElementId ELEM_DEFAULT_POINTER_ALIGNMENT = ElementId("default_pointer_alignment", 45);
+        //ElementId ELEM_DOUBLE_SIZE = ElementId("double_size", 46);
+        internal static readonly ElementId ELEM_ENTRY = new ElementId("entry", 47);
+        internal static readonly ElementId ELEM_ENUM = new ElementId("enum", 48);
+        internal static readonly ElementId ELEM_FIELD = new ElementId("field", 49);
+        //ElementId ELEM_FLOAT_SIZE = ElementId("float_size", 50);
+        internal static readonly ElementId ELEM_INTEGER_SIZE = new ElementId("integer_size", 51);
+        //ElementId ELEM_LONG_DOUBLE_SIZE = ElementId("long_double_size", 52);
+        //ElementId ELEM_LONG_LONG_SIZE = ElementId("long_long_size", 53);
+        internal static readonly ElementId ELEM_LONG_SIZE = new ElementId("long_size", 54);
+        //ElementId ELEM_MACHINE_ALIGNMENT = ElementId("machine_alignment", 55);
+        //ElementId ELEM_POINTER_SHIFT = ElementId("pointer_shift", 56);
+        //ElementId ELEM_POINTER_SIZE = ElementId("pointer_size", 57);
+        //ElementId ELEM_SHORT_SIZE = ElementId("short_size", 58);
+        internal static readonly ElementId ELEM_SIZE_ALIGNMENT_MAP = new ElementId("size_alignment_map", 59);
+        internal static readonly ElementId ELEM_TYPE = new ElementId("type", 60);
+        //ElementId ELEM_TYPE_ALIGNMENT_ENABLED = ElementId("type_alignment_enabled", 61);
+        internal static readonly ElementId ELEM_TYPEGRP = new ElementId("typegrp", 62);
+        internal static readonly ElementId ELEM_TYPEREF = new ElementId("typeref", 63);
+        //ElementId ELEM_USE_MS_CONVENTION = ElementId("use_MS_convention", 64);
+        //ElementId ELEM_WCHAR_SIZE = ElementId("wchar_size", 65);
+        //ElementId ELEM_ZERO_LENGTH_BOUNDARY = ElementId("zero_length_boundary", 66);
         internal static readonly ElementId ELEM_COLLISION = new ElementId("collision", 67);
         internal static readonly ElementId ELEM_DB = new ElementId("db", 68);
         internal static readonly ElementId ELEM_EQUATESYMBOL = new ElementId("equatesymbol", 69);
@@ -59,6 +99,10 @@ namespace ghidra
         internal static readonly ElementId ELEM_RANGEEQUALSSYMBOLS = new ElementId("rangeequalssymbols", 79);
         internal static readonly ElementId ELEM_SCOPE = new ElementId("scope", 80);
         internal static readonly ElementId ELEM_SYMBOLLIST = new ElementId("symbollist", 81);
+        internal static readonly ElementId ELEM_HIGH = new ElementId("high", 82);
+        internal static readonly ElementId ELEM_BYTES = new ElementId("bytes", 83);
+        internal static readonly ElementId ELEM_STRING = new ElementId("string", 84);
+        internal static readonly ElementId ELEM_STRINGMANAGE = new ElementId("stringmanage", 85);
         internal static readonly ElementId ELEM_COMMENT = new ElementId("comment", 86);
         internal static readonly ElementId ELEM_COMMENTDB = new ElementId("commentdb", 87);
         internal static readonly ElementId ELEM_TEXT = new ElementId("text", 88);
@@ -100,6 +144,9 @@ namespace ghidra
         internal static readonly ElementId ELEM_SET = new ElementId("set", 124);
         internal static readonly ElementId ELEM_TRACKED_POINTSET = new ElementId("tracked_pointset", 125);
         internal static readonly ElementId ELEM_TRACKED_SET = new ElementId("tracked_set", 126);
+        internal static readonly ElementId ELEM_CONSTRESOLVE = new ElementId("constresolve", 127);
+        internal static readonly ElementId ELEM_JUMPASSIST = new ElementId("jumpassist", 128);
+        internal static readonly ElementId ELEM_SEGMENTOP = new ElementId("segmentop", 129);
         internal static readonly ElementId ELEM_ADDRESS_SHIFT_AMOUNT = new ElementId("address_shift_amount", 130);
         internal static readonly ElementId ELEM_AGGRESSIVETRIM = new ElementId("aggressivetrim", 131);
         internal static readonly ElementId ELEM_COMPILER_SPEC = new ElementId("compiler_spec", 132);
@@ -196,6 +243,7 @@ namespace ghidra
         internal static readonly ElementId ELEM_MULTISTAGEJUMP = new ElementId("multistagejump", 222);
         internal static readonly ElementId ELEM_OVERRIDE = new ElementId("override", 223);
         internal static readonly ElementId ELEM_PROTOOVERRIDE = new ElementId("protooverride", 224); internal static readonly ElementId ELEM_JUMPTABLEMAX = new ElementId("jumptablemax", 271);
+        internal static readonly ElementId ELEM_LOCALDB = new ElementId("localdb", 228);
         internal static readonly ElementId ELEM_UNKNOWN = new ElementId("XMLunknown", 272);
 
         /// The name of the element

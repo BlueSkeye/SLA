@@ -15,7 +15,7 @@
  */
 #include "loadimage.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// This is a convenience method wrapped around the core
 /// loadFill() routine.  It automatically allocates an array
@@ -113,4 +113,4 @@ void RawLoadImage::loadFill(uint1 *ptr,int4 size,const Address &addr)
   }
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

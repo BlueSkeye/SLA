@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A breakpoint object
     /// This is a base class for breakpoint objects in an emulator.  The breakpoints are implemented

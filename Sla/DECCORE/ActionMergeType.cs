@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Try to merge Varnodes of the same type (if they don't hold different values at the same time)
     internal class ActionMergeType : Action

@@ -24,7 +24,7 @@
 #include <cmath>
 #endif
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 #ifdef CPUI_STATISTICS
 using std::sqrt;
@@ -1471,4 +1471,4 @@ void Statistics::printResults(ostream &s)
 
 #endif
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

@@ -18,7 +18,7 @@
 
 #include "varnode.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class Funcdata;			// Forward declaration
 
@@ -71,5 +71,5 @@ public:
   void splitAdditional(void);
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

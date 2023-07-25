@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Container class for PcodeOps associated with a single function
     ///

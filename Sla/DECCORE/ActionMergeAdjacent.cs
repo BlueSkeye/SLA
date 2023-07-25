@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Try to merge an op's input Varnode to its output, if they are at the same storage location.
     internal class ActionMergeAdjacent : Action

@@ -26,7 +26,7 @@
 #include "dynamic.hh"
 #include "unionresolve.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class FlowInfo;
 
@@ -686,5 +686,5 @@ extern PcodeOp *cseElimination(Funcdata &data,PcodeOp *op1,PcodeOp *op2);
 extern void cseEliminateList(Funcdata &data,vector< pair<uintm,PcodeOp *> > &list,
 			     vector<Varnode *> &outlist);
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

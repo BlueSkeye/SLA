@@ -28,7 +28,7 @@
 #include "blockaction.hh"
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \brief Gather raw p-code for a function.
 class ActionStart : public Action {
@@ -1092,5 +1092,5 @@ public:
 inline bool TermOrder::additiveCompare(const AdditiveEdge *op1,const AdditiveEdge *op2) {
     return (-1 == op1->getVarnode()->termOrder(op2->getVarnode())); }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

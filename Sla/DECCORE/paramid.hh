@@ -18,7 +18,7 @@
 
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 extern ElementId ELEM_PARAMMEASURES;	///< Marshaling element \<parammeasures>
 extern ElementId ELEM_PROTO;		///< Marshaling element \<proto>
@@ -78,5 +78,5 @@ public:
   void savePretty( ostream &s, bool moredetail ) const;
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif //ifndef __PARAMID_HH__

@@ -23,7 +23,7 @@
 #include "cast.hh"
 #include "prettyprint.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class PrintLanguage;
 class ResolvedUnion;
@@ -563,5 +563,5 @@ public:
   static void formatBinary(ostream &s,uintb val);		///< Print a number in binary form
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

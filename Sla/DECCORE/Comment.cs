@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A comment attached to a specific function and code address
     /// Things contains the actual character data of the comment. It is

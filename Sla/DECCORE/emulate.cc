@@ -15,7 +15,7 @@
  */
 #include "emulate.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// Any time the emulator is about to execute a user-defined pcode op with the given name,
 /// the indicated breakpoint is invoked first. The break table does \e not assume responsibility
@@ -457,4 +457,4 @@ void EmulatePcodeCache::executeInstruction(void)
   } while(!instruction_start);
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A class that holds a data-type traversal state during type propagation
     ///

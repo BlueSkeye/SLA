@@ -16,7 +16,7 @@
 #include "prettyprint.hh"
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 AttributeId ATTRIB_BLOCKREF = AttributeId("blockref",35);
 AttributeId ATTRIB_CLOSE = AttributeId("close",36);
@@ -1172,4 +1172,4 @@ void EmitPrettyPrint::resetDefaults(void)
   resetDefaultsPrettyPrint();
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Manage the construction of Static Single Assignment (SSA) form
     ///

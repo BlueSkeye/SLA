@@ -30,7 +30,7 @@ using System.Drawing;
 using System.Reflection;
 
 
-namespace ghidra
+namespace Sla.CORE
 {
     // using namespace PackedFormat;
     // Dictionary<string,uint> ElementId::lookupElementId;

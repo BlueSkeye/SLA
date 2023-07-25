@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief A container for parsed XML documents
     /// This holds multiple XML documents that have already been parsed. Documents

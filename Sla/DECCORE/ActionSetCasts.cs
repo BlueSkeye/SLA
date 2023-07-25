@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using static ghidra.XmlScan;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Fill-in CPUI_CAST p-code ops as required by the casting strategy
     ///

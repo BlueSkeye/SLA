@@ -21,7 +21,7 @@
 
 #include "type.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 extern AttributeId ATTRIB_A;		///< Marshaling attribute "a"
 extern AttributeId ATTRIB_B;		///< Marshaling attribute "b"
@@ -207,5 +207,5 @@ public:
   virtual void decode(Decoder &decoder,TypeFactory &typegrp);
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

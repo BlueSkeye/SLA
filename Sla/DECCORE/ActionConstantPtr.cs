@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Check for constants, with pointer type, that correspond to global symbols
     internal class ActionConstantPtr

@@ -21,7 +21,7 @@
 
 #include "type.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class Varnode;
 class PcodeOp;
@@ -1062,5 +1062,5 @@ inline void Emit::emitPending(void)
   }
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

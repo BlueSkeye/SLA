@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Perform Common Sub-expression Elimination on CPUI_MULTIEQUAL ops
     internal class ActionMultiCse : Action

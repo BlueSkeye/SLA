@@ -17,7 +17,7 @@
 #include "op.hh"
 #include "database.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 AttributeId ATTRIB_CLASS = AttributeId("class",66);
 AttributeId ATTRIB_REPREF = AttributeId("repref",67);
@@ -1156,4 +1156,4 @@ bool HighIntersectTest::intersection(HighVariable *a,HighVariable *b)
   return res;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

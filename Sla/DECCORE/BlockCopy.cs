@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static ghidra.FlowBlock;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief This class is used to mirror the BlockBasic objects in the fixed control-flow graph for a function
     /// The decompiler does control-flow structuring by making an initial copy of the control-flow graph,

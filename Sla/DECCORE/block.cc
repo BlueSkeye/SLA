@@ -17,7 +17,7 @@
 #include "block.hh"
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 AttributeId ATTRIB_ALTINDEX = AttributeId("altindex",75);
 AttributeId ATTRIB_DEPTH = AttributeId("depth",76);
@@ -3569,4 +3569,4 @@ FlowBlock *BlockMap::createBlock(const string &name)
   return bl;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

@@ -21,7 +21,7 @@
 
 #include "emulateutil.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class Architecture;
 
@@ -273,5 +273,5 @@ public:
   virtual const vector<OpBehavior *> &getBehaviors(void)=0;
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

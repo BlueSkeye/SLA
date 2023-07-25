@@ -27,7 +27,7 @@ using System.Text;
 using System.Threading;
 using System.Xml.Linq;
 
-namespace ghidra
+namespace Sla.CORE
 {
     //using std::ldexp;
     //using std::frexp;

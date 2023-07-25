@@ -27,7 +27,7 @@
 
 #include "action.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \brief Structure for sorting out pointer expression trees
 ///
@@ -1641,5 +1641,5 @@ public:
   virtual int4 applyOp(PcodeOp *op,Funcdata &data);
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

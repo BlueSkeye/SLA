@@ -22,7 +22,7 @@
 #include "pcoderaw.hh"
 #include "loadimage.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \brief Memory storage/state for a single AddressSpace
 ///
@@ -204,5 +204,5 @@ inline uintb MemoryState::getValue(const VarnodeData *vn) const
   return getValue(vn->space,vn->offset,vn->size);
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
  #endif

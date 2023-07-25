@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief An in-memory implementation of the CommentDatabase API
     /// All Comment objects are held in memory in a sorted container.  This

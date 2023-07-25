@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief A complete in-memory XML document.
     /// This is actually just an Element object itself, with the document's \e root element

@@ -16,7 +16,7 @@
 #include "typeop.hh"
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \param inst will hold the array of TypeOp objects, indexed on op-code
 /// \param tlst is the corresponding TypeFactory for the Architecture
@@ -2363,4 +2363,4 @@ TypeOpLzcount::TypeOpLzcount(TypeFactory *t)
   behave = new OpBehaviorLzcount();
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

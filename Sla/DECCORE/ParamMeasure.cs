@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     // NOTES FROM 20121206 W/Decompiler-Man
     // direct reads is for all opcodes, with special for these:

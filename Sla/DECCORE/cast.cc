@@ -16,7 +16,7 @@
 #include "cast.hh"
 #include "op.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// Sets the TypeFactory used to produce data-types for the arithmeticOutputStandard() method
 /// \param t is the TypeFactory
@@ -533,4 +533,4 @@ bool CastStrategyJava::isZextCast(Datatype *outtype,Datatype *intype) const
   return true;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

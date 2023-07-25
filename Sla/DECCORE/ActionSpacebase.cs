@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Mark Varnode objects that hold stack-pointer values and set-up special data-type
     internal class ActionSpacebase : Action

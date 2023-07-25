@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief An annotation for a data element to being transferred to/from a stream
     /// This class parallels the XML concept of an \b attribute on an element. An AttributeId describes
@@ -53,15 +53,46 @@ namespace ghidra
         internal static readonly AttributeId ATTRIB_FIRST = new AttributeId("first", 27);
         internal static readonly AttributeId ATTRIB_LAST = new AttributeId("last", 28);
         internal static readonly AttributeId ATTRIB_UNIQ = new AttributeId("uniq", 29);
+        internal static readonly AttributeId ATTRIB_ADDRTIED = new AttributeId("addrtied", 30);
+        internal static readonly AttributeId ATTRIB_GRP = new AttributeId("grp", 31);
+        internal static readonly AttributeId ATTRIB_INPUT = new AttributeId("input", 32);
+        internal static readonly AttributeId ATTRIB_PERSISTS = new AttributeId("persists", 33);
+        internal static readonly AttributeId ATTRIB_UNAFF = new AttributeId("unaff", 34);
+        internal static readonly AttributeId ATTRIB_BLOCKREF = new AttributeId("blockref", 35);
+        internal static readonly AttributeId ATTRIB_CLOSE = new AttributeId("close", 36);
+        internal static readonly AttributeId ATTRIB_COLOR = new AttributeId("color", 37);
+        internal static readonly AttributeId ATTRIB_INDENT = new AttributeId("indent", 38);
+        internal static readonly AttributeId ATTRIB_OFF = new AttributeId("off", 39);
+        internal static readonly AttributeId ATTRIB_OPEN = new AttributeId("open", 40);
+        internal static readonly AttributeId ATTRIB_OPREF = new AttributeId("opref", 41);
+        internal static readonly AttributeId ATTRIB_VARREF = new AttributeId("varref", 42);
         internal static readonly AttributeId ATTRIB_CODE = new AttributeId("code", 43);
         internal static readonly AttributeId ATTRIB_CONTAIN = new AttributeId("contain", 44);
         internal static readonly AttributeId ATTRIB_DEFAULTSPACE = new AttributeId("defaultspace", 45);
         internal static readonly AttributeId ATTRIB_UNIQBASE = new AttributeId("uniqbase", 46);
+        internal static readonly AttributeId ATTRIB_ALIGNMENT = new AttributeId("alignment", 47);
+        internal static readonly AttributeId ATTRIB_ARRAYSIZE = new AttributeId("arraysize", 48);
+        internal static readonly AttributeId ATTRIB_CHAR = new AttributeId("char", 49);
+        internal static readonly AttributeId ATTRIB_CORE = new AttributeId("core", 50);
+        internal static readonly AttributeId ATTRIB_ENUM = new AttributeId("enum", 51);
+        internal static readonly AttributeId ATTRIB_ENUMSIGNED = new AttributeId("enumsigned", 52);
+        internal static readonly AttributeId ATTRIB_ENUMSIZE = new AttributeId("enumsize", 53);
+        internal static readonly AttributeId ATTRIB_INTSIZE = new AttributeId("intsize", 54);
+        internal static readonly AttributeId ATTRIB_LONGSIZE = new AttributeId("longsize", 55);
+        internal static readonly AttributeId ATTRIB_OPAQUESTRING = new AttributeId("opaquestring", 56);
+        internal static readonly AttributeId ATTRIB_SIGNED = new AttributeId("signed", 57);
+        internal static readonly AttributeId ATTRIB_STRUCTALIGN = new AttributeId("structalign", 58);
+        internal static readonly AttributeId ATTRIB_UTF = new AttributeId("utf", 59);
+        internal static readonly AttributeId ATTRIB_VARLENGTH = new AttributeId("varlength", 60);
         internal static readonly AttributeId ATTRIB_CAT = new AttributeId("cat", 61);
         internal static readonly AttributeId ATTRIB_FIELD = new AttributeId("field", 62);
         internal static readonly AttributeId ATTRIB_MERGE = new AttributeId("merge", 63);
         internal static readonly AttributeId ATTRIB_SCOPEIDBYNAME = new AttributeId("scopeidbyname", 64);
         internal static readonly AttributeId ATTRIB_VOLATILE = new AttributeId("volatile", 65);
+        internal static readonly AttributeId ATTRIB_CLASS = new AttributeId("class", 66);
+        internal static readonly AttributeId ATTRIB_REPREF = new AttributeId("repref", 67);
+        internal static readonly AttributeId ATTRIB_SYMREF = new AttributeId("symref", 68);
+        internal static readonly AttributeId ATTRIB_TRUNC = new AttributeId("trunc", 69);
         internal static readonly AttributeId ATTRIB_DYNAMIC = new AttributeId("dynamic", 70);
         internal static readonly AttributeId ATTRIB_INCIDENTALCOPY = new AttributeId("incidentalcopy", 71);
         internal static readonly AttributeId ATTRIB_INJECT = new AttributeId("inject", 72);
@@ -77,6 +108,10 @@ namespace ghidra
         internal static readonly AttributeId ATTRIB_LENGTH = new AttributeId("length", 82);
         internal static readonly AttributeId ATTRIB_TAG = new AttributeId("tag", 83);
         internal static readonly AttributeId ATTRIB_NOCODE = new AttributeId("nocode", 84);
+        internal static readonly AttributeId ATTRIB_FARPOINTER = new AttributeId("farpointer", 85);
+        internal static readonly AttributeId ATTRIB_INPUTOP = new AttributeId("inputop", 86);
+        internal static readonly AttributeId ATTRIB_OUTPUTOP = new AttributeId("outputop", 87);
+        internal static readonly AttributeId ATTRIB_USEROP = new AttributeId("userop", 88);
         internal static readonly AttributeId ATTRIB_BASE = new AttributeId("base", 89);
         internal static readonly AttributeId ATTRIB_DEADCODEDELAY = new AttributeId("deadcodedelay", 90);
         internal static readonly AttributeId ATTRIB_DELAY = new AttributeId("delay", 91);
@@ -109,8 +144,11 @@ namespace ghidra
         internal static readonly AttributeId ATTRIB_STRATEGY = new AttributeId("strategy", 127);
         internal static readonly AttributeId ATTRIB_THISBEFORERETPOINTER = new AttributeId("thisbeforeretpointer", 128);
         internal static readonly AttributeId ATTRIB_VOIDLOCK = new AttributeId("voidlock", 129);
+        internal static readonly AttributeId ATTRIB_VECTOR_LANE_SIZES = new AttributeId("vector_lane_sizes", 130);
         internal static readonly AttributeId ATTRIB_LABEL = new AttributeId("label", 131);
         internal static readonly AttributeId ATTRIB_NUM = new AttributeId("num", 132);
+        internal static readonly AttributeId ATTRIB_LOCK = AttributeId("lock", 133);
+        internal static readonly AttributeId ATTRIB_MAIN = AttributeId("main", 134);
         internal static readonly AttributeId ATTRIB_ADDRESS = new AttributeId("address", 148);
 
         // ATTRIB_PIECE is a special attribute for supporting the legacy attributes "piece1", "piece2", ..., "piece9",

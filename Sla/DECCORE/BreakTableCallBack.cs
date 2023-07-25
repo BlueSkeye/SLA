@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A basic instantiation of a breakpoint table
     ///

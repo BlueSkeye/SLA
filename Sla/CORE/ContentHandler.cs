@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Locator = object;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief The SAX interface for parsing XML documents
     /// This is the formal interface for handling the low-level string pieces of an XML document as

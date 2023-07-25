@@ -27,7 +27,7 @@
 #include "partmap.hh"
 #include "rangemap.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class Architecture;
 class Funcdata;
@@ -985,5 +985,5 @@ inline Symbol::Symbol(Scope *sc)
   depthResolution = 0;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

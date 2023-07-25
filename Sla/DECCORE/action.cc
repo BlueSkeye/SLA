@@ -18,7 +18,7 @@
 
 #include "coreaction.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// Specify the name, group, and properties of the Action
 /// \param f is the collection of property flags
@@ -1159,4 +1159,4 @@ Action *ActionDatabase::deriveAction(const string &baseaction, const string &grp
   return newact;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

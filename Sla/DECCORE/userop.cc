@@ -16,7 +16,7 @@
 #include "userop.hh"
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 AttributeId ATTRIB_FARPOINTER = AttributeId("farpointer",85);
 AttributeId ATTRIB_INPUTOP = AttributeId("inputop",86);
@@ -514,4 +514,4 @@ void UserOpManage::manualCallOtherFixup(const string &useropname,const string &o
   }
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

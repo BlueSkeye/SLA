@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief A byte-based decoder designed to marshal info to the decompiler efficiently
     /// The decoder expects an encoding as described in PackedFormat.  When ingested, the stream bytes are

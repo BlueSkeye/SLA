@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 using TrackedSet = System.Collections.Generic.List<ghidra.TrackedContext>;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief An interface to a database of disassembly/decompiler \b context information
     /// \b Context \b information is a set of named variables that hold concrete values at specific

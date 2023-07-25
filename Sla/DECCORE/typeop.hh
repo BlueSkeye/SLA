@@ -24,7 +24,7 @@
 #include "opbehavior.hh"
 #include "printlanguage.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class PcodeOp;
 class Translate;
@@ -878,5 +878,5 @@ public:
   virtual void push(PrintLanguage *lng,const PcodeOp *op,const PcodeOp *readOp) const { lng->opLzcountOp(op); }
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

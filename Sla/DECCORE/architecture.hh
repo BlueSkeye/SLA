@@ -34,7 +34,7 @@
 #include "transform.hh"
 #include "prefersplit.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 #ifdef CPUI_STATISTICS
 /// \brief Class for collecting statistics while processing over multiple functions
@@ -401,5 +401,5 @@ inline bool Architecture::highPtrPossible(const Address &loc,int4 size) const {
   return !nohighptr.inRange(loc,size);
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

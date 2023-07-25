@@ -21,7 +21,7 @@
 
 #include "type.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class Varnode;
 class PcodeOp;
@@ -201,5 +201,5 @@ public:
   virtual bool isZextCast(Datatype *outtype,Datatype *intype) const;
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

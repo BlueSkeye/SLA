@@ -16,7 +16,7 @@
 #include "type.hh"
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// The base propagation ordering associated with each meta-type.
 /// The array elements correspond to the ordering of #type_metatype.
@@ -4165,4 +4165,4 @@ void TypeFactory::parseEnumConfig(Decoder &decoder)
   decoder.closeElement(elemId);
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

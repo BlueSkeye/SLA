@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief Protocol format for PackedEncode and PackedDecode classes
     /// All bytes in the encoding are expected to be non-zero.  Element encoding looks like

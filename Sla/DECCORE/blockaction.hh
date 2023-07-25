@@ -21,7 +21,7 @@
 
 #include "action.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \brief Class for holding an edge while the underlying graph is being manipulated
 ///
@@ -357,5 +357,5 @@ public:
   virtual int4 apply(Funcdata &data);
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

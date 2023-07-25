@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Make final attachments of \e dynamically mapped symbols to Varnodes
     internal class ActionDynamicSymbols : Action

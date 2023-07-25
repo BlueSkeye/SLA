@@ -22,7 +22,7 @@
 #include "emulateutil.hh"
 #include "rangeutil.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class EmulateFunction;
 
@@ -601,5 +601,5 @@ inline bool JumpTable::IndexPair::compareByPosition(const IndexPair &op1,const I
   return (op1.blockPosition < op2.blockPosition);
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

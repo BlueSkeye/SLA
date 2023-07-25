@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief A byte-based encoder designed to marshal from the decompiler efficiently
     /// See PackedDecode for details of the encoding format.

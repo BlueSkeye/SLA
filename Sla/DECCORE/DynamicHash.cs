@@ -9,7 +9,7 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A hash utility to uniquely identify a temporary Varnode in data-flow
     ///

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief An Address range associated with the symbol Scope that owns it
     /// As part of a rangemap, this forms a map from addresses to

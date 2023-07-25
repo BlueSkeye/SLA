@@ -16,7 +16,7 @@
  */
 #include "graph.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 static void print_varnode_vertex(Varnode *vn,ostream &s)
 
@@ -499,4 +499,4 @@ void dump_dom_graph(const string &name,const BlockGraph &graph,ostream &s)
   dump_dom_edges(graph,s,falsenode);
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

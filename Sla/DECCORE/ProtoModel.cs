@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.Intrinsics;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A \b prototype \b model: a model for passing parameters between functions
     ///

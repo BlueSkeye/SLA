@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ghidra
 {
@@ -632,5 +633,50 @@ namespace ghidra
         //extern void unsignedSubtract128(ulong* a, ulong* b);
         //extern int unsignedCompare128(ulong* a, ulong* b);
         //extern int power2Divide(int n, ulong divisor, ulong &q, ulong &r);
+
+        /// Return true if \b vn1 contains the high part and \b vn2 the low part
+        /// of what was(is) a single value.
+        /// \param vn1 is the putative high Varnode
+        /// \param vn2 is the putative low Varnode
+        /// \return \b true if they are pieces of a whole
+        internal static bool contiguous_test(Varnode vn1, Varnode vn2)
+        {
+            if (vn1->isInput() || vn2->isInput())
+            {
+                return false;
+            }
+            if ((!vn1->isWritten()) || (!vn2->isWritten())) return false;
+            PcodeOp* op1 = vn1->getDef();
+            PcodeOp* op2 = vn2->getDef();
+            Varnode* vnwhole;
+            switch (op1->code())
+            {
+                case CPUI_SUBPIECE:
+                    if (op2->code() != CPUI_SUBPIECE) return false;
+                    vnwhole = op1->getIn(0);
+                    if (op2->getIn(0) != vnwhole) return false;
+                    if (op2->getIn(1)->getOffset() != 0)
+                        return false;       // Must be least sig
+                    if (op1->getIn(1)->getOffset() != vn2->getSize())
+                        return false;       // Must be contiguous
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        /// Assuming vn1,vn2 has passed the contiguous_test(), return
+        /// the Varnode containing the whole value.
+        /// \param data is the underlying function
+        /// \param vn1 is the high Varnode
+        /// \param vn2 is the low Varnode
+        /// \return the whole Varnode
+        internal static Varnode findContiguousWhole(Funcdata data, Varnode vn1, Varnode vn2)
+        {
+            if (vn1->isWritten())
+                if (vn1->getDef()->code() == CPUI_SUBPIECE)
+                    return vn1->getDef()->getIn(0);
+            return (Varnode*)0;
+        }
     }
 }

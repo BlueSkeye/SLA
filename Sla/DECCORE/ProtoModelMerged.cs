@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using static ghidra.ProtoModel;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A prototype model made by merging together other models
     ///

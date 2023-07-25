@@ -11,7 +11,7 @@ using System.Collections;
 using System.Runtime.Intrinsics;
 using System.Drawing;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Manager for all the major decompiler subsystems
     /// An instantiation is tailored to a specific LoadImage,

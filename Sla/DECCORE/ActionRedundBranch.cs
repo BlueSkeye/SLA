@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Get rid of \b redundant branches: duplicate edges between the same input and output block
     internal class ActionRedundBranch : Action

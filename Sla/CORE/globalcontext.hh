@@ -22,7 +22,7 @@
 #include "pcoderaw.hh"
 #include "partmap.hh"
 
-namespace ghidra {
+namespace Sla.CORE {
 
 extern ElementId ELEM_CONTEXT_DATA;	///< Marshaling element \<context_data>
 extern ElementId ELEM_CONTEXT_POINTS;	///< Marshaling element \<context_points>
@@ -329,5 +329,5 @@ public:
   void setContext(const Address &addr1,const Address &addr2,int4 num,uintm mask,uintm value);
 };
 
-} // End namespace ghidra
+} // End namespace Sla.CORE
 #endif

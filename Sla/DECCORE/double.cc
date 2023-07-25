@@ -15,7 +15,7 @@
  */
 #include "double.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// Internally, the \b lo and \b hi Varnodes are set to null, and the \b val field
 /// holds the constant value.
@@ -3497,4 +3497,4 @@ void RuleDoubleStore::reassignIndirects(Funcdata &data,PcodeOp *newStore,const v
   }
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

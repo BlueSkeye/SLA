@@ -21,7 +21,7 @@
 
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \brief A class for generating the control-flow structure for a single function
 ///
@@ -167,5 +167,5 @@ public:
   bool doesJumpRecord(void) const { return ((flags & record_jumploads)!=0); }	///< Should jump table structure be recorded
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

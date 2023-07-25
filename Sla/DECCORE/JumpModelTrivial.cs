@@ -7,7 +7,7 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A trivial jump-table model, where the BRANCHIND input Varnode is the switch variable
     /// This class treats the input Varnode to the BRANCHIND as the switch variable, and recovers

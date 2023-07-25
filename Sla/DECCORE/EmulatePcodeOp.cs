@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Emulation based on (existing) PcodeOps and Varnodes.
     /// This is still an abstract class.  It does most of the work of emulating

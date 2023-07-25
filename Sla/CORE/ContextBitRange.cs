@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief Description of a context variable within the disassembly context \e blob
     /// Disassembly context is stored as individual (integer) values packed into a sequence of words. This class

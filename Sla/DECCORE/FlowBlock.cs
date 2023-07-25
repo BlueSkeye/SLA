@@ -14,7 +14,7 @@ using System.Runtime.Intrinsics;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Description of a control-flow block containing PcodeOps
     /// This is the base class for basic blocks (BlockBasic) and the

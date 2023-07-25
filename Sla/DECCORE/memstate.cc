@@ -16,7 +16,7 @@
 #include "memstate.hh"
 #include "translate.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// This is a static convenience routine for decoding a value from a sequence of bytes depending
 /// on the desired endianness
@@ -735,4 +735,4 @@ void MemoryState::setChunk(const uint1 *val,AddrSpace *spc,uintb off,int4 size)
   mspace->setChunk(off,size,val);
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

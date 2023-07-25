@@ -20,7 +20,7 @@
 
 #include "block.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \brief The list of groups defining a \e root Action
 ///

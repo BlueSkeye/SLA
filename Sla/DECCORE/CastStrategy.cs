@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A strategy for applying type casts
     /// A \e cast operation in C or other languages masks a variety of possible low-level conversions,

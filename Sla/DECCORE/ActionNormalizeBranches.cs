@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Flip conditional control-flow so that \e preferred comparison operators are used
     /// This is used as an alternative to the standard algorithm that structures control-flow, when

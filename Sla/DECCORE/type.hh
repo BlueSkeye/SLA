@@ -21,7 +21,7 @@
 
 #include "address.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 extern AttributeId ATTRIB_ALIGNMENT;	///< Marshaling attribute "alignment"
 extern AttributeId ATTRIB_ARRAYSIZE;	///< Marshaling attribute "arraysize"
@@ -816,5 +816,5 @@ inline void TypePointerRel::markEphemeral(TypeFactory &typegrp)
     submeta = SUB_PTRREL_UNK;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

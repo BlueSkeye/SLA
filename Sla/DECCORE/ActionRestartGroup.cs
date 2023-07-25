@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Action which checks if restart (sub)actions have been generated and restarts itself.
     /// Actions or Rules can request a restart on a Funcdata object by calling

@@ -18,7 +18,7 @@
 
 #include "op.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \brief A data-type \e resolved from an associated TypeUnion or TypeStruct
 ///
@@ -179,5 +179,5 @@ inline bool ResolveEdge::operator<(const ResolveEdge &op2) const
   return (opTime < op2.opTime);
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

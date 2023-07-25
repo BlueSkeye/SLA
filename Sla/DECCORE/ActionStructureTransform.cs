@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Give each control-flow structure an opportunity to make a final transform
     /// This is currently used to set up \e for loops via BlockWhileDo

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Discover and eliminate \e split conditions
     /// A \b split condition is when a conditional expression, resulting in a CBRANCH,

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A loop structure where the condition is checked at the bottom.
     /// This has exactly one component with two outgoing edges: one edge flows to itself,

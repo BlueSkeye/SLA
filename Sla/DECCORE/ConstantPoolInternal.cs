@@ -7,7 +7,7 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief An implementation of the ConstantPool interface storing records internally in RAM
     /// The CPoolRecord objects are held directly in a map container. This class can be used

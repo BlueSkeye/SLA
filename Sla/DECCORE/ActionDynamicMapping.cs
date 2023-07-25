@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Attach \e dynamically mapped symbols to Varnodes in time for data-type propagation
     internal class ActionDynamicMapping : Action

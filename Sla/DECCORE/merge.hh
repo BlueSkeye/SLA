@@ -21,7 +21,7 @@
 
 #include "op.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \brief Helper class associating a Varnode with the block where it is defined
 ///
@@ -158,5 +158,5 @@ inline bool Merge::compareHighByBlock(const HighVariable *a,const HighVariable *
   return (result < 0);
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

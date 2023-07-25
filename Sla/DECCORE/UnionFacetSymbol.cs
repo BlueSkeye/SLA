@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Formats.Asn1.AsnWriter;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A Symbol that forces a particular \e union field at a particular point in the body of a function
     ///

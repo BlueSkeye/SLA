@@ -16,7 +16,7 @@
 #include "stringmanage.hh"
 #include "architecture.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 AttributeId ATTRIB_TRUNC = AttributeId("trunc",69);
 
@@ -404,4 +404,4 @@ bool StringManagerUnicode::writeUnicode(ostream &s,uint1 *buffer,int4 size,int4 
   return true;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

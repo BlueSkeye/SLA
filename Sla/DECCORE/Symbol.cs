@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Formats.Asn1.AsnWriter;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief The base class for a symbol in a symbol table or scope
     /// At its most basic, a Symbol is a \b name and a \b data-type.

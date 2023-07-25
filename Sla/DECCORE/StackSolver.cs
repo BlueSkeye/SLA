@@ -8,7 +8,7 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A class that solves for stack-pointer changes across unknown sub-functions
     internal class StackSolver

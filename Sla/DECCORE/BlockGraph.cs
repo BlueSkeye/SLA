@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using static ghidra.FlowBlock;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A control-flow block built out of sub-components
     /// This is the core class for building a hierarchy of control-flow blocks.

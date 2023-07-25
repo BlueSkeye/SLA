@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief A low-level machine address for labelling bytes and data.
     /// All data that can be manipulated within the processor reverse engineering model

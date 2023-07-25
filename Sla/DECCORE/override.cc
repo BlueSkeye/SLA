@@ -16,7 +16,7 @@
 #include "override.hh"
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 ElementId ELEM_DEADCODEDELAY = ElementId("deadcodedelay",218);
 ElementId ELEM_FLOW = ElementId("flow",219);
@@ -432,4 +432,4 @@ uint4 Override::stringToType(const string &nm)
   return Override::NONE;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

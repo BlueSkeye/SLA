@@ -17,7 +17,7 @@
 #include "emulate.hh"
 #include "flow.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 
 AttributeId ATTRIB_LABEL = AttributeId("label",131);
@@ -2819,4 +2819,4 @@ bool JumpTable::checkForMultistage(Funcdata *fd)
   return false;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

@@ -14,7 +14,7 @@ using System.Xml.Linq;
 using System.Xml;
 using System.Runtime.Intrinsics;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A collection of Symbol objects within a single (namespace or functional) scope
     ///

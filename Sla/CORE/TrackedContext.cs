@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief A tracked register (Varnode) and the value it contains
     /// This is the object returned when querying for tracked registers,

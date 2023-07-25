@@ -15,7 +15,7 @@
  */
 #include "flow.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// Prepare for tracing flow for a new function.
 /// The Funcdata object and references to its internal containers must be explicitly given.
@@ -1419,4 +1419,4 @@ void FlowInfo::recoverJumpTables(vector<JumpTable *> &newTables,vector<PcodeOp *
   }
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

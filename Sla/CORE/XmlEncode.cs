@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief An XML based encoder
     /// The underlying transfer encoding is an XML document.  The encoder is initialized with a stream which will

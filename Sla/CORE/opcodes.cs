@@ -16,7 +16,7 @@
 //#include "opcodes.hh"
 //#include "types.h"
 
-namespace ghidra {
+namespace Sla.CORE {
 
     /// \brief The op-code defining a specific p-code operation (PcodeOp)
     ///

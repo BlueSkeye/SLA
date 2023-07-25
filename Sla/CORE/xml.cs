@@ -110,7 +110,7 @@ using System.Linq;
 //#include <string>
 
 
-namespace ghidra {
+namespace Sla.CORE {
     public static partial class Globals
     {
         /// \brief Start-up the XML parser given a stream and a handler

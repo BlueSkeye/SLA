@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Mark illegal Varnode inputs used only in CPUI_INDIRECT ops
     internal class ActionMarkIndirectOnly

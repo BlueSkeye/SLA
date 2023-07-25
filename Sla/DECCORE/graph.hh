@@ -18,11 +18,11 @@
 
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 extern void dump_dataflow_graph(Funcdata &data,ostream &s);
 extern void dump_controlflow_graph(const string &name,const BlockGraph &graph,ostream &s);
 extern void dump_dom_graph(const string &name,const BlockGraph &graph,ostream &s);
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

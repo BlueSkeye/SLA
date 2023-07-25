@@ -9,7 +9,7 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief An in-memory implementation of the Scope interface.
     /// This can act as a stand-alone Scope object or serve as an in-memory cache for

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief A class for reading structured data from a stream
     /// All data is loosely structured as with an XML document.  A document contains a nested set

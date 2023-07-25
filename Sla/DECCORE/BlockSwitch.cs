@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using static ghidra.FlowBlock;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A structured \e switch construction
     ///

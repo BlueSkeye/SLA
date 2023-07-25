@@ -21,7 +21,7 @@
 
 #include <string>
 
-namespace ghidra {
+namespace Sla.CORE {
 
 using std::string;
 
@@ -135,5 +135,5 @@ extern OpCode get_opcode(const string &nm);		///< Convert a name string to the m
 
 extern OpCode get_booleanflip(OpCode opc,bool &reorder);	///< Get the complementary OpCode
 
-} // End namespace ghidra
+} // End namespace Sla.CORE
 #endif

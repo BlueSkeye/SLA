@@ -16,7 +16,7 @@
 #include "opbehavior.hh"
 #include "translate.hh"
 
-namespace ghidra {
+namespace Sla.CORE {
 
 /// This routine generates a vector of OpBehavior objects indexed by opcode
 /// \param inst is the vector of behaviors to be filled
@@ -766,4 +766,4 @@ uintb OpBehaviorLzcount::evaluateUnary(int4 sizeout,int4 sizein,uintb in1) const
   return (uintb)(count_leading_zeros(in1) - 8*(sizeof(uintb) - sizein));
 }
 
-} // End namespace ghidra
+} // End namespace Sla.CORE

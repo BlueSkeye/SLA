@@ -24,7 +24,7 @@
 #include "pcoderaw.hh"
 #include "float.hh"
 
-namespace ghidra {
+namespace Sla.CORE {
 
 extern AttributeId ATTRIB_CODE;		///< Marshaling attribute "code"
 extern AttributeId ATTRIB_CONTAIN;	///< Marshaling attribute "contain"
@@ -603,5 +603,5 @@ inline uint4 Translate::getUniqueStart(UniqueLayout layout) const {
   return (layout != ANALYSIS) ? layout + unique_base : layout;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.CORE
 #endif

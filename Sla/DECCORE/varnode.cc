@@ -16,7 +16,7 @@
 #include "varnode.hh"
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 AttributeId ATTRIB_ADDRTIED = AttributeId("addrtied",30);
 AttributeId ATTRIB_GRP = AttributeId("grp",31);
@@ -1956,4 +1956,4 @@ Varnode *findContiguousWhole(Funcdata &data,Varnode *vn1,Varnode *vn2)
   return (Varnode *)0;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

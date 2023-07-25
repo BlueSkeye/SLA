@@ -16,7 +16,7 @@
 #include "varmap.hh"
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 AttributeId ATTRIB_LOCK = AttributeId("lock",133);
 AttributeId ATTRIB_MAIN = AttributeId("main",134);
@@ -1444,4 +1444,4 @@ void ScopeLocal::addRecommendName(Symbol *sym)
     removeSymbol(sym);
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

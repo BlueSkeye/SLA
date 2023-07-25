@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief P-code emitter that dumps its raw Varnodes and PcodeOps to an in memory cache
     ///

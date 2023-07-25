@@ -21,7 +21,7 @@
 
 #include "printc.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \brief Factory and static initializer for the "java-language" back-end to the decompiler
 ///
@@ -74,5 +74,5 @@ public:
   virtual void opCpoolRefOp(const PcodeOp *op);
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

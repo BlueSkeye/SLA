@@ -20,7 +20,7 @@
 
 #include "varnode.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class Funcdata;			// Forward declaration
 class TransformOp;
@@ -251,5 +251,5 @@ inline bool TransformManager::preexistingGuard(int4 slot,TransformVar *rvn)
   return true;			// The op was not (will not be) visited on slot 0, build now
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A manager for symbol scopes for a whole executable
     /// This is the highest level container for anything related to Scope and Symbol

@@ -7,7 +7,7 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A description of the body of a loop.
     /// Following Tarjan, assuming there are no \e irreducible edges, a loop body is defined

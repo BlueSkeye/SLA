@@ -20,7 +20,7 @@
 #include <list>
 #include <unordered_map>
 
-namespace ghidra {
+namespace Sla.CORE {
 
 using std::list;
 using std::unordered_map;
@@ -353,5 +353,5 @@ extern ElementId ELEM_VAL;		///< Marshaling element \<val>
 extern ElementId ELEM_VALUE;		///< Marshaling element \<value>
 extern ElementId ELEM_VOID;		///< Marshaling element \<void>
 
-} // End namespace ghidra
+} // End namespace Sla.CORE
 #endif

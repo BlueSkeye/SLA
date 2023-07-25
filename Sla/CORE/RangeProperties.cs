@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief A partially parsed description of a Range
     /// Class that allows \<range> tags to be parsed, when the address space doesn't yet exist

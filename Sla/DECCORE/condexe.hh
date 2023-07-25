@@ -20,7 +20,7 @@
 
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \brief A helper class for describing the similarity of the boolean condition between 2 CBRANCH operations
 ///
@@ -236,5 +236,5 @@ public:
   virtual int4 applyOp(PcodeOp *op,Funcdata &data);
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

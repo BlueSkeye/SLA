@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static ghidra.ParameterPieces;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A stand-alone parameter with no backing symbol
     ///

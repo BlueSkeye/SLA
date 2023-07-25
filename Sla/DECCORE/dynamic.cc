@@ -17,7 +17,7 @@
 #include "funcdata.hh"
 #include "crc32.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 // Table for how to hash opcodes, lumps certain operators (i.e. ADD SUB PTRADD PTRSUB) into one hash
 // zero indicates the operator should be skipped
@@ -770,4 +770,4 @@ void DynamicHash::clearTotalPosition(uint8 &h)
   h &= val;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

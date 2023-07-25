@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Search for and remove various forms of redundant CBRANCH operations
     /// This action wraps the analysis performed by ConditionalExecution to simplify control-flow

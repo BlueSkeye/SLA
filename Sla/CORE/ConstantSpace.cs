@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief Special AddrSpace for representing constants during analysis.
     /// The underlying RTL (See PcodeOp) represents all data in terms of

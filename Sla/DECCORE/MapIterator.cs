@@ -6,7 +6,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief An iterator over SymbolEntry objects in multiple address spaces
     /// Given an EntryMap (a rangemap of SymbolEntry objects in a single address space)

@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Space for storing internal PcodeOp pointers as addresses
     ///

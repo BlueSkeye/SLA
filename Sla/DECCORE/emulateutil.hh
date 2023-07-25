@@ -22,7 +22,7 @@
 #include "emulate.hh"
 #include "op.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \brief Emulation based on (existing) PcodeOps and Varnodes.
 ///
@@ -174,5 +174,5 @@ public:
   uintb getTempValue(uintb offset) const;
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

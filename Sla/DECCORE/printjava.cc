@@ -16,7 +16,7 @@
 #include "printjava.hh"
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 OpToken PrintJava::instanceof = { "instanceof", "", 2, 60, true, OpToken::binary, 1, 0, (OpToken *)0 };
 
@@ -362,4 +362,4 @@ void PrintJava::opCpoolRefOp(const PcodeOp *op)
   }
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

@@ -29,7 +29,7 @@ using System.Windows.Markup;
 using System.Xml.Linq;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra {
+namespace Sla.CORE {
     /// \brief A region where processor data is stored
     /// An AddrSpace (Address Space) is an arbitrary sequence of bytes where a processor
     /// can store data. As is usual with most processors' concept of RAM, an integer

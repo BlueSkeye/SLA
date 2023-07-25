@@ -21,7 +21,7 @@
 
 #include "typeop.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 extern AttributeId ATTRIB_FARPOINTER;	///< Marshaling attribute "farpointer"
 extern AttributeId ATTRIB_INPUTOP;	///< Marshaling attribute "inputop"
@@ -303,5 +303,5 @@ public:
 			    const vector<string> &inname,const string &snippet,Architecture *glb);
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

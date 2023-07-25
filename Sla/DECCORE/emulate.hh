@@ -22,7 +22,7 @@
 #include "memstate.hh"
 #include "translate.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class Emulate;			// Forward declaration
 
@@ -547,5 +547,5 @@ inline Address EmulatePcodeCache::getExecuteAddress(void) const
     - VarnodeData
  */
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

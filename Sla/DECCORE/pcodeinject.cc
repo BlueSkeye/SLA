@@ -16,7 +16,7 @@
 #include "pcodeinject.hh"
 #include "architecture.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 AttributeId ATTRIB_DYNAMIC = AttributeId("dynamic",70);
 AttributeId ATTRIB_INCIDENTALCOPY = AttributeId("incidentalcopy",71);
@@ -358,4 +358,4 @@ int4 PcodeInjectLibrary::decodeInject(const string &src,const string &nm,int4 tp
   return injectid;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

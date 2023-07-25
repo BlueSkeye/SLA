@@ -21,7 +21,7 @@
 
 #include "types.h"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 extern uint4 crc32tab[];	///< Table for quickly computing a 32-bit Cyclic Redundacy Check (CRC)
 
@@ -33,5 +33,5 @@ extern uint4 crc32tab[];	///< Table for quickly computing a 32-bit Cyclic Redund
 inline uint4 crc_update(uint4 reg,uint4 val) {
   return crc32tab[(reg ^ val)&0xff] ^ (reg>>8); }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

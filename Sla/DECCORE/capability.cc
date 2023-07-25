@@ -15,7 +15,7 @@
  */
 #include "capability.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// Access static vector of CapabilityPoint objects that are registered during static initialization
 /// The list itself is created once on the first call to this method
@@ -48,4 +48,4 @@ void CapabilityPoint::initializeAll(void)
   list.clear();
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

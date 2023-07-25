@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Database of root Action objects that can be used to transform a function
     /// This is a container for Action objects. It also manages \b root Action objects,

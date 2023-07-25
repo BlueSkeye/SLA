@@ -16,7 +16,7 @@
 #include "blockaction.hh"
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// Retrieve the current edge (as a \e top FlowBlock and the index of the outgoing edge).
 /// If the end-points have been collapsed together, this returns NULL.
@@ -2350,4 +2350,4 @@ int4 ActionNodeJoin::apply(Funcdata &data)
   return 0;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

@@ -1,16 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using static ghidra.XmlScan;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace ghidra
+﻿namespace Sla.DECCORE
 {
     /// \brief Large scale transformations applied to the varnode/op graph
     /// The base for objects that make changes to the syntax tree of a Funcdata

@@ -22,7 +22,7 @@
 
 #include "varnode.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \brief An edge between a Varnode and a PcodeOp
 ///
@@ -104,5 +104,5 @@ public:
   static const uint4 transtable[];				///< Translation of op-codes to hash values
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

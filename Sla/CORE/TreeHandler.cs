@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Locator = object;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief A SAX interface implementation for constructing an in-memory DOM model.
     /// This implementation builds a DOM model of the XML stream being parsed, creating an

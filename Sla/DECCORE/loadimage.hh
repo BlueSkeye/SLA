@@ -21,7 +21,7 @@
 
 #include "address.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \brief Exception indicating data was not available
 ///
@@ -226,5 +226,5 @@ inline void LoadImage::getReadonly(RangeList &list) const {
 /// \param size is the number of bytes to retrieve from the image
 /// \param addr is the starting address of the bytes to retrieve
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

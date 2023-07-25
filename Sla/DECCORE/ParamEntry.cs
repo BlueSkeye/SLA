@@ -6,7 +6,7 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A contiguous range of memory that can be used to pass parameters
     /// This range can be used to pass a single parameter (isExclusion() == \b true).  This

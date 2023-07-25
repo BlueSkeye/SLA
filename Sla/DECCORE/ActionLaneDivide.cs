@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Find Varnodes with a vectorized lane scheme and attempt to split the lanes
     /// The Architecture lists (vector) registers that may be used to perform parallelized operations

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Formats.Asn1.AsnWriter;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A Symbol that holds \b equate information for a constant
     /// This is a symbol that labels a constant. It can either replace the

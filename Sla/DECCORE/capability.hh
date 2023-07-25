@@ -22,7 +22,7 @@
 #include <vector>
 #include <string>
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 using std::vector;
 using std::string;
@@ -51,5 +51,5 @@ public:
   static void initializeAll(void);	///< Finish initialization for all extension points
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

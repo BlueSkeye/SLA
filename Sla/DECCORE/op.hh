@@ -20,7 +20,7 @@
 
 #include "typeop.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 extern ElementId ELEM_IOP;		///< Marshaling element \<iop>
 extern ElementId ELEM_UNIMPL;		///< Marshaling element \<unimpl>
@@ -376,5 +376,5 @@ inline bool PcodeOpNode::operator<(const PcodeOpNode &op2) const
   return false;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

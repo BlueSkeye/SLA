@@ -20,7 +20,7 @@
 
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \brief Class for shrinking big Varnodes carrying smaller logical values
 ///
@@ -259,5 +259,5 @@ public:
   bool doTrace(void);		///< Trace lanes as far as possible from the root Varnode
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

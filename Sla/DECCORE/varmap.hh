@@ -21,7 +21,7 @@
 
 #include "database.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 extern AttributeId ATTRIB_LOCK;		///< Marshaling attribute "lock"
 extern AttributeId ATTRIB_MAIN;		///< Marshaling attribute "main"
@@ -253,5 +253,5 @@ public:
   void addTypeRecommendation(const Address &addr,Datatype *dt);		///< Add a new data-type recommendation
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

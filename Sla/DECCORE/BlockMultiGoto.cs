@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static ghidra.FlowBlock;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A block with multiple edges out, at least one of which is an unstructured (goto) branch.
     /// An instance of this class is used to mirror a basic block with multiple out edges at the point

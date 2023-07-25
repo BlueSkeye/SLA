@@ -15,7 +15,7 @@
  */
 #include "condexe.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 ConditionMarker::ConditionMarker(void)
 
@@ -1097,4 +1097,4 @@ int4 RuleOrPredicate::applyOp(PcodeOp *op,Funcdata &data)
   return 1;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

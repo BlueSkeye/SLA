@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Description of the indirect effect a sub-function has on a memory range
     /// This object applies only to the specific memory range, which is seen from the

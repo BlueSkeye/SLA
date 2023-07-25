@@ -26,7 +26,7 @@
 #include <iostream>
 #include <string>
 
-namespace ghidra {
+namespace Sla.CORE {
 
 string Attributes::bogus_uri("http://unused.uri");
 
@@ -646,4 +646,4 @@ void xml_escape(ostream &s,const char *str)
   }
 }
 
-} // End namespace ghidra
+} // End namespace Sla.CORE

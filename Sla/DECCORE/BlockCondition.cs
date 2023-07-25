@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static ghidra.FlowBlock;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Two conditional blocks combined into one conditional using BOOL_AND or BOOL_OR
     /// This class is used to construct full conditional expressions.  An instance glues together

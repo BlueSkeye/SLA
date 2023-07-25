@@ -16,7 +16,7 @@
 #include "printc.hh"
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 // Operator tokens for expressions
 //                        token #in prec assoc   optype       space bump
@@ -3346,4 +3346,4 @@ string PrintC::genericTypeName(const Datatype *ct)
   return s.str();
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

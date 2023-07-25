@@ -5,7 +5,7 @@ using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief A helper class for caching the active context blob to minimize database lookups
     /// This merely caches the last retrieved context blob ("array of words") and the range of

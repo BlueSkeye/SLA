@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Formats.Asn1.AsnWriter;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A Symbol representing an executable function
     /// This Symbol owns the Funcdata object for the function it represents. The formal

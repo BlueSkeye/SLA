@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief An active container for a set of p-code operations that can be injected into data-flow
     ///

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief An edge between a Varnode and a PcodeOp
     /// A DynamicHash is defined on a sub-graph of the data-flow, and this defines an edge

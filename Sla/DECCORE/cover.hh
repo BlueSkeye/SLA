@@ -20,7 +20,7 @@
 
 #include "type.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class PcodeOp;
 class FlowBlock;
@@ -91,5 +91,5 @@ public:
   map<int4,CoverBlock>::const_iterator end(void) const { return cover.end(); }		///< Get end of CoverBlocks
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

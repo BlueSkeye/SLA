@@ -16,7 +16,7 @@
 #include "cover.hh"
 #include "block.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 const CoverBlock Cover::emptyBlock;
 
@@ -565,4 +565,4 @@ void Cover::print(ostream &s) const
   }
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

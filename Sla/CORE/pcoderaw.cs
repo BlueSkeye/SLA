@@ -20,7 +20,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Text;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief A low-level representation of a single pcode operation
     /// This is just the minimum amount of data to represent a pcode operation

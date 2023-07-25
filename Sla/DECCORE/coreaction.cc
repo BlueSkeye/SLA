@@ -18,7 +18,7 @@
 #include "double.hh"
 #include "subflow.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \brief A stack equation
 struct StackEqn {
@@ -5553,4 +5553,4 @@ void ActionDatabase::universalAction(Architecture *conf)
   act->addAction( new ActionStop("base") );
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

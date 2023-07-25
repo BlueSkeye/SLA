@@ -6,7 +6,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A resolver for segmented architectures
     /// When the decompiler is attempting to resolve embedded constants as pointers,

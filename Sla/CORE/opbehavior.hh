@@ -21,7 +21,7 @@
 #include "error.hh"
 #include "opcodes.hh"
 
-namespace ghidra {
+namespace Sla.CORE {
 
 class Translate;		// Forward declaration
 
@@ -520,5 +520,5 @@ public:
   virtual uintb evaluateUnary(int4 sizeout,int4 sizein,uintb in1) const;
 };
 
-} // End namespace ghidra
+} // End namespace Sla.CORE
 #endif

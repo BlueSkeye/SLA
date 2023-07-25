@@ -19,7 +19,7 @@
 #include "ruleaction.hh"
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \brief A logical value whose storage is split between two Varnodes
 ///
@@ -342,5 +342,5 @@ public:
   static void reassignIndirects(Funcdata &data,PcodeOp *newStore,const vector<PcodeOp *> &indirects);
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

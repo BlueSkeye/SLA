@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A series of blocks that execute in sequence.
     /// When structuring control-flow, an instance of this class represents blocks

@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A class for sorting comments into and within basic blocks
     /// The decompiler endeavors to display comments within the flow of the

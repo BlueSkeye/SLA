@@ -22,7 +22,7 @@
 #include "error.hh"
 #include "marshal.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class Architecture;
 
@@ -343,5 +343,5 @@ public:
   virtual string apply(Architecture *glb,const string &p1,const string &p2,const string &p3) const;
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

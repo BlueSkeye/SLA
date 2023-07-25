@@ -29,7 +29,7 @@ using static System.Formats.Asn1.AsnWriter;
 using System.Xml.Linq;
 using System.Diagnostics.CodeAnalysis;
 
-namespace ghidra {
+namespace Sla.CORE {
 
     /// \brief Exception for encountering unimplemented pcode
     /// This error is thrown when a particular machine instruction

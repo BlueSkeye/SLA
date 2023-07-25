@@ -6,7 +6,7 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Class for automatically registering extension points to the decompiler
     /// This uses the C++ static initializer feature to automatically \e discover

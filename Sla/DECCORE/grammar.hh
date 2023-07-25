@@ -18,7 +18,7 @@
 
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class GrammarToken {
   friend class GrammarLexer;
@@ -290,5 +290,5 @@ extern Address parse_machaddr(istream &s,int4 &defaultsize,const TypeFactory &ty
 extern Address parse_varnode(istream &s,int4 &size,Address &pc,uintm &uq,const TypeFactory &typegrp);
 extern Address parse_op(istream &s,uintm &uq,const TypeFactory &typegrp);
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

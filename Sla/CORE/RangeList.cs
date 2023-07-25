@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief A disjoint set of Ranges, possibly across multiple address spaces
     /// This is a container for addresses. It maintains a disjoint list of Ranges

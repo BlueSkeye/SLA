@@ -21,7 +21,7 @@
 
 #include "type.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class Architecture;
 
@@ -89,5 +89,5 @@ public:
   bool writeUnicode(ostream &s,uint1 *buffer,int4 size,int4 charsize);	///< Translate/copy unicode to UTF8
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

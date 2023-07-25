@@ -15,7 +15,7 @@
  */
 #include "cpool.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 AttributeId ATTRIB_A = AttributeId("a",80);
 AttributeId ATTRIB_B = AttributeId("b",81);
@@ -242,4 +242,4 @@ void ConstantPoolInternal::decode(Decoder &decoder,TypeFactory &typegrp)
   decoder.closeElement(elemId);
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

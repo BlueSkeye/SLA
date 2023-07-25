@@ -13,7 +13,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Runtime.Intrinsics;
 using System.Runtime.ConstrainedExecution;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A \b function \b prototype
     ///

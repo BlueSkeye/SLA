@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Formats.Asn1.AsnWriter;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A Symbol that labels code internal to a function
     internal class LabSymbol : Symbol

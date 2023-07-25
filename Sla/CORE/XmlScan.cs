@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief The XML character scanner
     /// Tokenize a byte stream suitably for the main XML parser.  The scanner expects an ASCII or UTF-8

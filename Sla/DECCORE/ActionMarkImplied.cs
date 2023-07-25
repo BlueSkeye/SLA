@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Mark all the \e implied Varnode objects, which will have no explicit token in the output
     internal class ActionMarkImplied : Action

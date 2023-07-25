@@ -22,7 +22,7 @@
 #include "op.hh"
 #include "rangemap.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class JoinRecord;
 
@@ -1720,5 +1720,5 @@ inline bool EffectRecord::operator!=(const EffectRecord &op2) const
   return (type != op2.type);
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

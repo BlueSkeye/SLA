@@ -18,7 +18,7 @@
 #include "flow.hh"
 #include "printc.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 ElementId ELEM_ALIASBLOCK = ElementId("aliasblock",174);
 ElementId ELEM_ALLOWCONTEXTSET = ElementId("allowcontextset",175);
@@ -985,4 +985,4 @@ string OptionSplitDatatypes::apply(Architecture *glb,const string &p1,const stri
   return "Split data-type configuration set";
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

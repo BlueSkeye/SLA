@@ -21,7 +21,7 @@
 
 #include "varnode.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class Symbol;
 
@@ -294,5 +294,5 @@ inline const Cover &HighVariable::getCover(void) const
   return piece->getCover();
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

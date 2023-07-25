@@ -18,7 +18,7 @@
 #include "crc32.hh"
 #include <ctype.h>
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 AttributeId ATTRIB_CAT = AttributeId("cat",61);
 AttributeId ATTRIB_FIELD = AttributeId("field",62);
@@ -3429,4 +3429,4 @@ Scope *Database::decodeScopePath(Decoder &decoder)
   return curscope;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

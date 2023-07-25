@@ -22,7 +22,7 @@
 #include "printlanguage.hh"
 #include "comment.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class FuncProto;
 class JumpTable;
@@ -358,5 +358,5 @@ inline void PrintC::pushTypePointerRel(const PcodeOp *op)
   pushAtom(Atom(typePointerRelToken,optoken,EmitMarkup::funcname_color,op));
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief The pool of logically joined variables
     /// Some logical variables are split across non-contiguous regions of memory. This space

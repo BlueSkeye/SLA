@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static ghidra.FuncCallSpecs;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A p-code emitter for building PcodeOp objects
     ///

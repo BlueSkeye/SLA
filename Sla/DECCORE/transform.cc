@@ -16,7 +16,7 @@
 #include "transform.hh"
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 AttributeId ATTRIB_VECTOR_LANE_SIZES = AttributeId("vector_lane_sizes",130);
 
@@ -759,4 +759,4 @@ void TransformManager::apply(void)
   placeInputs();
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

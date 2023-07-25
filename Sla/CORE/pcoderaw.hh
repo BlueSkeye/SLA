@@ -21,7 +21,7 @@
 #include "address.hh"
 #include "opbehavior.hh"
 
-namespace ghidra {
+namespace Sla.CORE {
 
 /// \brief Data defining a specific memory location
 ///
@@ -236,5 +236,5 @@ inline VarnodeData *PcodeOpRaw::getInput(int4 i) const
   return in[i];
 }
 
-} // End namespace ghidra
+} // End namespace Sla.CORE
 #endif

@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static ghidra.FlowBlock;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief An infinite loop structure
     ///

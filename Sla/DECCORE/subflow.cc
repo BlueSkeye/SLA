@@ -15,7 +15,7 @@
  */
 #include "subflow.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \brief Return \e slot of constant if INT_OR op sets all bits in mask, otherwise -1
 ///
@@ -3327,4 +3327,4 @@ bool LaneDivide::doTrace(void)
   return true;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

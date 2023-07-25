@@ -22,7 +22,7 @@
 #include "error.hh"
 #include "marshal.hh"
 
-namespace ghidra {
+namespace Sla.CORE {
 
 /// \brief Fundemental address space types
 ///
@@ -556,5 +556,5 @@ inline bool AddrSpace::compareByIndex(const AddrSpace *a,const AddrSpace *b) {
   return (a->index < b->index);
 }
 
-} // End namespace ghidra
+} // End namespace Sla.CORE
 #endif

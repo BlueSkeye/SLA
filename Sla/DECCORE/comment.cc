@@ -16,7 +16,7 @@
 #include "comment.hh"
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 ElementId ELEM_COMMENT = ElementId("comment",86);
 ElementId ELEM_COMMENTDB = ElementId("commentdb",87);
@@ -403,4 +403,4 @@ void CommentSorter::setupHeader(uint4 headerType)
   opstop = commmap.upper_bound(subsort);
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

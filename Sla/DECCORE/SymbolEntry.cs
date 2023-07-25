@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A storage location for a particular Symbol
     /// Where a Symbol is stored, as a byte address and a size, is of particular importance

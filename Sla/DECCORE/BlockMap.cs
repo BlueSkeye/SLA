@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Helper class for resolving cross-references while deserializing BlockGraph objects
     /// FlowBlock objects are serialized with their associated \b index value and edges are serialized

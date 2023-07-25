@@ -16,7 +16,7 @@
 #include "unionresolve.hh"
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// The original parent must either be a union, a partial union, a structure with a single field,
 /// an array with a single element, or a pointer to one of these data-types.
@@ -1107,4 +1107,4 @@ ScoreUnionFields::ScoreUnionFields(TypeFactory &tgrp,TypeUnion *unionType,int4 o
   computeBestIndex();
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

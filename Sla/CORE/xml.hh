@@ -25,7 +25,7 @@
 #include <vector>
 #include <map>
 
-namespace ghidra {
+namespace Sla.CORE {
 
 using std::string;
 using std::vector;
@@ -399,5 +399,5 @@ inline bool xml_readbool(const string &attr)
   return false;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.CORE
 #endif

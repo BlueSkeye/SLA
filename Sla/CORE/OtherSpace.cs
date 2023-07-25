@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief Special AddrSpace for special/user-defined address spaces
     public class OtherSpace : AddrSpace

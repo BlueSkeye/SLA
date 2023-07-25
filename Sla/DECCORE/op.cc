@@ -16,7 +16,7 @@
 #include "op.hh"
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 ElementId ELEM_IOP = ElementId("iop",113);
 ElementId ELEM_UNIMPL = ElementId("unimpl",114);
@@ -1332,4 +1332,4 @@ bool functionalDifference(Varnode *vn1,Varnode *vn2,int4 depth)
   return false;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

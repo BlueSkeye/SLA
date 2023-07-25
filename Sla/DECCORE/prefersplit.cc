@@ -16,7 +16,7 @@
 #include "prefersplit.hh"
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 ElementId ELEM_PREFERSPLIT = ElementId("prefersplit",225);
 
@@ -628,4 +628,4 @@ void PreferSplitManager::splitAdditional(void)
   }
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

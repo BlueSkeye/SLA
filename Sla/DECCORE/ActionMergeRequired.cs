@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Make \e required Varnode merges as dictated by CPUI_MULTIEQUAL, CPUI_INDIRECT, and \e addrtied property
     internal class ActionMergeRequired : Action

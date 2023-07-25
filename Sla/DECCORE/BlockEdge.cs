@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief A control-flow edge between blocks (FlowBlock)
     /// The edge is owned by the source block and can have FlowBlock::edge_flags

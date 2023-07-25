@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Perform final organization of the control-flow structure
     /// Label unstructured edges, order switch cases, and order disjoint components of the control-flow

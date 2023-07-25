@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief A class for writing structured data to a stream
     /// The resulting encoded data is structured similarly to an XML document. The document contains a nested set

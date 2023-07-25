@@ -16,7 +16,7 @@
 #include "funcdata.hh"
 #include "flow.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 // Funcdata members pertaining directly to ops
 
@@ -1415,4 +1415,4 @@ bool Funcdata::moveRespectingCover(PcodeOp *op,PcodeOp *lastOp)
   return false;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

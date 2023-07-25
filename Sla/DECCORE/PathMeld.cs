@@ -8,7 +8,7 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief All paths from a (putative) switch variable to the CPUI_BRANCHIND
     ///

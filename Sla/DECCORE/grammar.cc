@@ -90,7 +90,7 @@
 
 #include "grammar.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 extern int grammarlex(void);
 extern int grammarerror(const char *str);
@@ -3362,4 +3362,4 @@ Address parse_machaddr(istream &s,int4 &defaultsize,const TypeFactory &typegrp,b
   return res;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

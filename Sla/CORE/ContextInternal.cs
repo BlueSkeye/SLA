@@ -12,7 +12,7 @@ using System.Diagnostics.CodeAnalysis;
 using TrackedSet = System.Collections.Generic.List<ghidra.TrackedContext>;
 using static System.Diagnostics.Activity;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief An in-memory implementation of the ContextDatabase interface
     /// Context blobs are held in a partition map on addresses.  Any address within the map

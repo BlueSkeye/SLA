@@ -20,7 +20,7 @@
 
 #include "op.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 /// \brief A class for manipulating integer value ranges.
 ///
@@ -406,5 +406,5 @@ inline void ValueSetSolver::partitionPrepend(const Partition &head,Partition &pa
     part.stopNode = head.stopNode;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

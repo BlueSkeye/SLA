@@ -9,7 +9,7 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief Class encapsulating the action/behavior of specific pcode opcodes
     ///

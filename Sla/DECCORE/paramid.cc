@@ -15,7 +15,7 @@
  */
 #include "paramid.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 ElementId ELEM_PARAMMEASURES = ElementId("parammeasures",106);
 ElementId ELEM_PROTO = ElementId("proto",107);
@@ -281,4 +281,4 @@ void ParamIDAnalysis::savePretty( ostream &s,bool moredetail ) const
   s << "\n";
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

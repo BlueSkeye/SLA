@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using static ghidra.ScoreProtoModel;
 using static System.Formats.Asn1.AsnWriter;
 
-namespace ghidra
+namespace Sla.DECCORE
 {
     /// \brief Container for data structures associated with a single function
     ///

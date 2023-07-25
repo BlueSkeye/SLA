@@ -21,7 +21,7 @@
 
 #include "database.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class FuncCallSpecs;		// Forward declaration
 
@@ -91,5 +91,5 @@ public:
   static uint4 stringToType(const string &nm);		///< Convert a string to a flow override type
 };
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

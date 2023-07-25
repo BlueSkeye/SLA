@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ghidra
+namespace Sla.CORE
 {
     /// \brief The \e attributes for a single XML element
     /// A container for name/value pairs (of strings) for the formal attributes, as collected during parsing.

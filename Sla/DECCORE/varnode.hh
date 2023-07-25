@@ -21,7 +21,7 @@
 #include "pcoderaw.hh"
 #include "cover.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 class HighVariable;
 
@@ -436,5 +436,5 @@ inline AddrSpace *Varnode::getSpaceFromConst(void) const {
   return (AddrSpace *)(uintp)loc.getOffset();
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
 #endif

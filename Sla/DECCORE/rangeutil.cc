@@ -16,7 +16,7 @@
 #include "rangeutil.hh"
 #include "block.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 const char CircleRange::arrange[] = "gcgbegdagggggggeggggcgbggggggggcdfgggggggegdggggbgggfggggcgbegda";
 
@@ -2603,4 +2603,4 @@ void ValueSetSolver::dumpValueSets(ostream &s) const
 
 #endif
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE

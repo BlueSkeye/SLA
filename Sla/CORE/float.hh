@@ -21,7 +21,7 @@
 
 #include "xml.hh"
 
-namespace ghidra {
+namespace Sla.CORE {
 
 /// \brief Encoding information for a single floating-point format
 ///
@@ -98,5 +98,5 @@ public:
   void restoreXml(const Element *el);			///< Restore the format from XML
 };
 
-} // End namespace ghidra
+} // End namespace Sla.CORE
 #endif

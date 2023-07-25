@@ -15,7 +15,7 @@
  */
 #include "funcdata.hh"
 
-namespace ghidra {
+namespace Sla.DECCORE {
 
 // Funcdata members pertaining directly to varnodes
 
@@ -2047,4 +2047,4 @@ bool AncestorRealistic::execute(PcodeOp *op,int4 slot,ParamTrial *t,bool allowFa
   return false;
 }
 
-} // End namespace ghidra
+} // End namespace Sla.DECCORE
