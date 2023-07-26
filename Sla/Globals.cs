@@ -1,4 +1,5 @@
 ﻿using Sla.CORE;
+using Sla.SLEIGH;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -761,6 +762,17 @@ namespace ghidra
         internal static void segvHandler(int sig)
         {
             exit(1);            // Just die - prevents OS from popping-up a dialog
+        }
+
+        int pcodelex()
+        {
+            return pcode->lex();
+        }
+
+        int pcodeerror(string s)
+        {
+            pcode->reportError((Location*)0, s);
+            return 0;
         }
     }
 }

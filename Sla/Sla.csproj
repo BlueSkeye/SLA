@@ -232,7 +232,6 @@
   <ItemGroup>
     <Folder Include="GHIDRA\" />
     <Folder Include="COREEXT\" />
-    <Folder Include="SLEIGH\" />
     <Folder Include="SPECIAL\" />
   </ItemGroup>
 
