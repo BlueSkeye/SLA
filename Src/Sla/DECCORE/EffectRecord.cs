@@ -22,7 +22,7 @@ namespace Sla.DECCORE
         }
 
         private VarnodeData range;        ///< The memory range affected
-        private uint4 type;         ///< The type of effect
+        private uint type;         ///< The type of effect
 
         /// Constructor for use with decode()
         public EffectRecord()
@@ -40,7 +40,7 @@ namespace Sla.DECCORE
         /// The type is set to \e unknown_effect
         /// \param addr is the start of the memory range
         /// \param size is the number of bytes in the memory range
-        public EffectRecord(Address addr, int4 size)
+        public EffectRecord(Address addr, int size)
         {
             range.space = addr.getSpace();
             range.offset = addr.getOffset();
@@ -51,7 +51,7 @@ namespace Sla.DECCORE
         /// Construct an effect on a parameter storage location
         /// \param entry is a model of the parameter storage
         /// \param t is the effect type
-        public EffectRecord(ParamEntry entry, uint4 t)
+        public EffectRecord(ParamEntry entry, uint t)
         {
             range.space = entry.getSpace();
             range.offset = entry.getBase();
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
         /// Construct an effect on a memory range
         /// \param data is the memory range affected
         /// \param t is the effect type
-        public EffectRecord(VarnodeData addr, uint4 t)
+        public EffectRecord(VarnodeData addr, uint t)
         {
             range = data;
             type = t;

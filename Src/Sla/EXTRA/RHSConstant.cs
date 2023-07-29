@@ -15,7 +15,7 @@ namespace Sla.EXTRA
         }
         public abstract RHSConstant clone();
 
-        public abstract uintb getConstant(UnifyState state);
+        public abstract ulong getConstant(UnifyState state);
 
         public abstract void writeExpression(TextWriter s, UnifyCPrinter printstate);
     }

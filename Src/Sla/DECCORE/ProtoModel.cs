@@ -43,7 +43,7 @@ namespace Sla.DECCORE
         /// Name of the model
         private string name;
         /// Extra bytes popped from stack
-        private int4 extrapop;
+        private int extrapop;
         /// Resource model for input parameters
         private ParamList input;
         /// Resource model for output parameters
@@ -55,9 +55,9 @@ namespace Sla.DECCORE
         /// Storage locations potentially carrying \e trash values
         private List<VarnodeData> likelytrash;
         /// Id of injection to perform at beginning of function (-1 means not used)
-        private int4 injectUponEntry;
+        private int injectUponEntry;
         /// Id of injection to perform after a call to this function (-1 means not used)
-        private int4 injectUponReturn;
+        private int injectUponReturn;
         /// Memory range(s) of space-based locals
         private RangeList localrange;
         /// Memory range(s) of space-based parameters
@@ -75,7 +75,7 @@ namespace Sla.DECCORE
         private void defaultLocalRange()
         {
             AddrSpace* spc = glb.getStackSpace();
-            uintb first, last;
+            ulong first, last;
 
             if (stackgrowsnegative)
             {   // This the normal stack convention
@@ -106,7 +106,7 @@ namespace Sla.DECCORE
         private void defaultParamRange()
         {
             AddrSpace* spc = glb.getStackSpace();
-            uintb first, last;
+            ulong first, last;
 
             if (stackgrowsnegative)
             {   // This the normal stack convention
@@ -234,15 +234,15 @@ namespace Sla.DECCORE
         /// \param addr is the starting address of the given memory range
         /// \param size is the number of bytes in the given range
         /// \return the EffectRecord type
-        public uint4 hasEffect(Address addr, int4 size)
+        public uint hasEffect(Address addr, int size)
         {
             return lookupEffect(effectlist, addr, size);
         }
 
         /// Get the stack-pointer \e extrapop for \b this model
-        public int4 getExtraPop() => extrapop;
+        public int getExtraPop() => extrapop;
 
-        public void setExtraPop(int4 ep)
+        public void setExtraPop(int ep)
         {
             extrapop = ep;
         }      ///< Set the stack-pointer \e extrapop
@@ -332,7 +332,7 @@ namespace Sla.DECCORE
         /// \param loaddr is the address of the least significant part of the value
         /// \param losize is the size of the least significant part in bytes
         /// \return \b true if the two pieces can be joined
-        public bool checkInputJoin(Address hiaddr, int4 hisize, Address loaddr, int4 losize)
+        public bool checkInputJoin(Address hiaddr, int hisize, Address loaddr, int losize)
         {
             return input.checkJoin(hiaddr, hisize, loaddr, losize);
         }
@@ -346,7 +346,7 @@ namespace Sla.DECCORE
         /// \param loaddr is the address of the least significant part of the value
         /// \param losize is the size of the least significant part in bytes
         /// \return \b true if the two pieces can be joined
-        public bool checkOutputJoin(Address hiaddr, int4 hisize, Address loaddr, int4 losize)
+        public bool checkOutputJoin(Address hiaddr, int hisize, Address loaddr, int losize)
         {
             return output.checkJoin(hiaddr, hisize, loaddr, losize);
         }
@@ -359,7 +359,7 @@ namespace Sla.DECCORE
         /// \param size is the size of the location in bytes
         /// \param splitpoint is the number of bytes to consider in the first (in address order) piece
         /// \return \b true if the storage location can be split
-        public bool checkInputSplit(Address loc, int4 size, int4 splitpoint)
+        public bool checkInputSplit(Address loc, int size, int splitpoint)
         {
             return input.checkSplit(loc, size, splitpoint);
         }
@@ -387,7 +387,7 @@ namespace Sla.DECCORE
         /// \param loc is the starting address of the given range
         /// \param size is the number of bytes in the given range
         /// \return the characterization code
-        public int4 characterizeAsInputParam(Address loc, int4 size)
+        public int characterizeAsInputParam(Address loc, int size)
         {
             return input.characterizeAsParam(loc, size);
         }
@@ -403,7 +403,7 @@ namespace Sla.DECCORE
         /// \param loc is the starting address of the given range
         /// \param size is the number of bytes in the given range
         /// \return the characterization code
-        public int4 characterizeAsOutput(Address loc, int4 size)
+        public int characterizeAsOutput(Address loc, int size)
         {
             return output.characterizeAsParam(loc, size);
         }
@@ -414,7 +414,7 @@ namespace Sla.DECCORE
         /// \param loc is the starting address of the storage location
         /// \param size is the number of bytes in the storage location
         /// \return \b true if the location can be a parameter
-        public bool possibleInputParam(Address loc, int4 size)
+        public bool possibleInputParam(Address loc, int size)
         {
             return input.possibleParam(loc, size);
         }
@@ -425,7 +425,7 @@ namespace Sla.DECCORE
         /// \param loc is the starting address of the storage location
         /// \param size is the number of bytes in the storage location
         /// \return \b true if the location can be a parameter
-        public bool possibleOutputParam(Address loc, int4 size)
+        public bool possibleOutputParam(Address loc, int size)
         {
             return output.possibleParam(loc, size);
         }
@@ -439,7 +439,7 @@ namespace Sla.DECCORE
         /// \param slot if the \e slot number to pass back
         /// \param slotsize is the number of consumed slots to pass back
         /// \return \b true if the location can be a parameter
-        public bool possibleInputParamWithSlot(Address loc, int4 size, int4 slot, int4 slotsize)
+        public bool possibleInputParamWithSlot(Address loc, int size, int slot, int slotsize)
         {
             return input.possibleParamWithSlot(loc, size, slot, slotsize);
         }
@@ -453,7 +453,7 @@ namespace Sla.DECCORE
         /// \param slot if the \e slot number to pass back
         /// \param slotsize is the number of consumed slots to pass back
         /// \return \b true if the location can be a parameter
-        public bool possibleOutputParamWithSlot(Address loc, int4 size, int4 slot, int4 slotsize)
+        public bool possibleOutputParamWithSlot(Address loc, int size, int slot, int slotsize)
         {
             return output.possibleParamWithSlot(loc, size, slot, slotsize);
         }
@@ -467,7 +467,7 @@ namespace Sla.DECCORE
         /// \param size is the number of bytes in the given storage
         /// \param res is the full parameter storage to pass back
         /// \return \b true if the given storage is unjustified within its parameter container
-        public bool unjustifiedInputParam(Address loc, int4 size, VarnodeData res)
+        public bool unjustifiedInputParam(Address loc, int size, VarnodeData res)
         {
             return input.unjustifiedContainer(loc, size, res);
         }
@@ -482,7 +482,7 @@ namespace Sla.DECCORE
         /// \param res is the parameter storage to pass back
         /// \return the extension operator (INT_ZEXT INT_SEXT) or INT_COPY if there is no extension.
         /// INT_PIECE indicates the extension is determined by the specific prototype.
-        public OpCode assumedInputExtension(Address addr, int4 size, VarnodeData res)
+        public OpCode assumedInputExtension(Address addr, int size, VarnodeData res)
         {
             return input.assumedExtension(addr, size, res);
         }
@@ -497,7 +497,7 @@ namespace Sla.DECCORE
         /// \param res is the parameter storage to pass back
         /// \return the extension operator (INT_ZEXT INT_SEXT) or INT_COPY if there is no extension.
         /// INT_PIECE indicates the extension is determined by the specific prototype.
-        public OpCode assumedOutputExtension(Address addr, int4 size, VarnodeData res)
+        public OpCode assumedOutputExtension(Address addr, int size, VarnodeData res)
         {
             return output.assumedExtension(addr, size, res);
         }
@@ -508,7 +508,7 @@ namespace Sla.DECCORE
         /// \param size is the number of bytes in the range
         /// \param res will hold the parameter storage description being passed back
         /// \return \b true if there is at least one parameter contained in the range
-        public bool getBiggestContainedInputParam(Address loc, int4 size, VarnodeData res)
+        public bool getBiggestContainedInputParam(Address loc, int size, VarnodeData res)
         {
             return input.getBiggestContainedParam(loc, size, res);
         }
@@ -519,7 +519,7 @@ namespace Sla.DECCORE
         /// \param size is the number of bytes in the range
         /// \param res will hold the storage description being passed back
         /// \return \b true if there is at least one possible output parameter contained in the range
-        public bool getBiggestContainedOutput(Address loc, int4 size, VarnodeData res)
+        public bool getBiggestContainedOutput(Address loc, int size, VarnodeData res)
         {
             return output.getBiggestContainedParam(loc, size, res);
         }
@@ -545,7 +545,7 @@ namespace Sla.DECCORE
         /// extra transform passes have completed. This method returns the number of passes
         /// that must occur before we can guarantee that all parameters have data-flow info.
         /// \return the maximum number of passes across all input parameters in \b this model
-        public int4 getMaxInputDelay() => input.getMaxDelay();
+        public int getMaxInputDelay() => input.getMaxDelay();
 
         /// \brief Return the maximum heritage delay across all possible return values
         ///
@@ -553,7 +553,7 @@ namespace Sla.DECCORE
         /// extra transform passes have completed. This method returns the number of passes
         /// that must occur before we can guarantee that any return value has data-flow info.
         /// \return the maximum number of passes across all output parameters in \b this model
-        public int4 getMaxOutputDelay() => output.getMaxDelay();
+        public int getMaxOutputDelay() => output.getMaxDelay();
 
         /// Is \b this a merged prototype model
         public virtual bool isMerged() => false;
@@ -584,10 +584,10 @@ namespace Sla.DECCORE
             injectUponEntry = -1;
             injectUponReturn = -1;
             likelytrash.clear();
-            uint4 elemId = decoder.openElement(ELEM_PROTOTYPE);
+            uint elemId = decoder.openElement(ELEM_PROTOTYPE);
             for (; ; )
             {
-                uint4 attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == ATTRIB_NAME)
                     name = decoder.readString();
@@ -622,7 +622,7 @@ namespace Sla.DECCORE
             buildParamList(strategystring); // Allocate input and output ParamLists
             for (; ; )
             {
-                uint4 subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ELEM_INPUT)
                 {
@@ -705,7 +705,7 @@ namespace Sla.DECCORE
                 }
                 else if (subId == ELEM_PCODE)
                 {
-                    int4 injectId = glb.pcodeinjectlib.decodeInject("Protomodel : " + name, name,
+                    int injectId = glb.pcodeinjectlib.decodeInject("Protomodel : " + name, name,
                                           InjectPayload::CALLMECHANISM_TYPE, decoder);
                     InjectPayload* payload = glb.pcodeinjectlib.getPayload(injectId);
                     if (payload.getName().find("uponentry") != string::npos)
@@ -738,7 +738,7 @@ namespace Sla.DECCORE
         /// \param addr is the starting address of the given memory range
         /// \param size is the number of bytes in the memory range
         /// \return the EffectRecord type
-        public static uint4 lookupEffect(List<EffectRecord> efflist, Address addr, int4 size)
+        public static uint lookupEffect(List<EffectRecord> efflist, Address addr, int size)
         {
             // Unique is always local to function
             if (addr.getSpace().getType() == IPTR_INTERNAL) return EffectRecord::unaffected;
@@ -753,10 +753,10 @@ namespace Sla.DECCORE
             if (iter == efflist.begin()) return EffectRecord::unknown_effect; // Can't go back one
             --iter;
             Address hit = (*iter).getAddress();
-            int4 sz = (*iter).getSize();
+            int sz = (*iter).getSize();
             if (sz == 0 && (hit.getSpace() == addr.getSpace())) // A size of zero indicates the whole space is unaffected
                 return EffectRecord::unaffected;
-            int4 where = addr.overlap(0, hit, sz);
+            int where = addr.overlap(0, hit, sz);
             if ((where >= 0) && (where + size <= sz))
                 return (*iter).getType();
             return EffectRecord::unknown_effect;
@@ -775,8 +775,8 @@ namespace Sla.DECCORE
         /// \param addr is the starting Address of the record to find
         /// \param size is the size of the record to find
         /// \return the index of the matching record or a negative number
-        public static int4 lookupRecord(List<EffectRecord> efflist, int4 listSize, Address addr,
-            int4 size)
+        public static int lookupRecord(List<EffectRecord> efflist, int listSize, Address addr,
+            int size)
         {
             if (listSize == 0) return -1;
             EffectRecord cur(addr, size);
@@ -795,7 +795,7 @@ namespace Sla.DECCORE
             }
             --iter;
             Address closeAddr = (*iter).getAddress();
-            int4 sz = (*iter).getSize();
+            int sz = (*iter).getSize();
             if (addr == closeAddr && size == sz)
                 return iter - begiter;
             return (addr.overlap(0, closeAddr, sz) < 0) ? -1 : -2;

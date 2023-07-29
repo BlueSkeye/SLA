@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         {
         }
         
-        public override uint4 getType() => p_register;
+        public override uint getType() => p_register;
 
         public override void fillinMap(ParamActive active);
 

@@ -22,13 +22,13 @@ namespace Sla.DECCORE
             hi = h;
             lo = l;
             andop = aop;
-            int4 hislot = andop.getSlot(hi);
+            int hislot = andop.getSlot(hi);
             if (andop.getIn(1 - hislot) != lo) return false;   // hi and lo must be ANDed together
             compareop = andop.getOut().loneDescend();
             if (compareop == (PcodeOp*)0) return false;
             if ((compareop.code() != CPUI_INT_EQUAL) && (compareop.code() != CPUI_INT_NOTEQUAL))
                 return false;
-            uintb allonesval = calc_mask(lo.getSize());
+            ulong allonesval = calc_mask(lo.getSize());
             smallc = compareop.getIn(1);
             if (!smallc.isConstant()) return false;
             if (smallc.getOffset() != allonesval) return false;

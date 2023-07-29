@@ -29,7 +29,7 @@ namespace Sla.EXTRA
                 throw IfaceExecutionError("Unable to create symbol");
             string formatString;
             s >> ws >> formatString;
-            uint4 format = Datatype::encodeIntegerFormat(formatString);
+            uint format = Datatype::encodeIntegerFormat(formatString);
             sym.getScope().setDisplayFormat(sym, format);
             sym.getScope().setAttribute(sym, Varnode::typelock);
             *status.optr << "Successfully forced format display" << endl;

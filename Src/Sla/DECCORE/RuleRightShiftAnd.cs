@@ -27,13 +27,13 @@ namespace Sla.DECCORE
         ///
         /// - `( V & 0xf000 ) >> 24   =>   V >> 24`
         /// - `( V & 0xf000 ) s>> 24  =>   V s>> 24`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_RIGHT);
             oplist.push_back(CPUI_INT_SRIGHT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* constVn = op.getIn(1);
             if (!constVn.isConstant()) return 0;
@@ -44,10 +44,10 @@ namespace Sla.DECCORE
             Varnode* maskVn = andOp.getIn(1);
             if (!maskVn.isConstant()) return 0;
 
-            int4 sa = (int4)constVn.getOffset();
-            uintb mask = maskVn.getOffset() >> sa;
+            int sa = (int)constVn.getOffset();
+            ulong mask = maskVn.getOffset() >> sa;
             Varnode* rootVn = andOp.getIn(0);
-            uintb full = calc_mask(rootVn.getSize()) >> sa;
+            ulong full = calc_mask(rootVn.getSize()) >> sa;
             if (full != mask) return 0;
             if (rootVn.isFree()) return 0;
             data.opSetInput(op, rootVn, 0); // Bypass the INT_AND

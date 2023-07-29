@@ -27,29 +27,29 @@ namespace Sla.DECCORE
         ///
         /// V and small must be small enough so that there is no overflow in the INT_MULT.
         /// The SUBPIECE must be extracting the high part of the INT_MULT.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_SRIGHT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* constVn = op.getIn(1);
             if (!constVn.isConstant()) return 0;
             Varnode* inVn = op.getIn(0);
-            int4 sizeout = inVn.getSize();
-            if ((int4)constVn.getOffset() != sizeout * 8 - 1) return 0;
+            int sizeout = inVn.getSize();
+            if ((int)constVn.getOffset() != sizeout * 8 - 1) return 0;
             if (!inVn.isWritten()) return 0;
             PcodeOp* subOp = inVn.getDef();
             if (subOp.code() != CPUI_SUBPIECE) return 0;
-            int4 c = subOp.getIn(1).getOffset();
+            int c = subOp.getIn(1).getOffset();
             Varnode* multOut = subOp.getIn(0);
-            int4 multSize = multOut.getSize();
+            int multSize = multOut.getSize();
             if (c + sizeout != multSize) return 0;  // Must be extracting high part
             if (!multOut.isWritten()) return 0;
             PcodeOp* multOp = multOut.getDef();
             if (multOp.code() != CPUI_INT_MULT) return 0;
-            int4 slot;
+            int slot;
             PcodeOp* sextOp;
             for (slot = 0; slot < 2; ++slot)
             {           // Search for the INT_SEXT

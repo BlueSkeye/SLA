@@ -36,29 +36,29 @@ namespace Sla.DECCORE
         /// A copy of \b ct, if it is a relative pointer
         private TypePointerRel pRelType;
         /// Size of the pointer
-        private int4 ptrsize;
+        private int ptrsize;
         /// Size of data-type being pointed to (in address units) or 0 for open ended pointer
-        private int4 size;
+        private int size;
         /// Slot of the ADD tree base that is holding the pointer
-        private int4 baseSlot;
+        private int baseSlot;
         /// Mask for modulo calculations in ptr space
-        private uintb ptrmask;
+        private ulong ptrmask;
         /// Number of bytes we dig into the base data-type
-        private uintb offset;
+        private ulong offset;
         /// Number of bytes being double counted
-        private uintb correct;
+        private ulong correct;
         /// Varnodes which are multiples of size
         private List<Varnode> multiple;
         /// Associated constant multiple
-        private List<intb> coeff;
+        private List<long> coeff;
         /// Varnodes which are not multiples
         private List<Varnode> nonmult;
         /// A CPUI_INT_MULT op that needs to be distributed
         private PcodeOp distributeOp;
         /// Sum of multiple constants
-        private uintb multsum;
+        private ulong multsum;
         /// Sum of non-multiple constants
-        private uintb nonmultsum;
+        private ulong nonmultsum;
         /// Do not distribute "multiply by constant" operation
         private bool preventDistribution;
         /// Are terms produced by distributing used
@@ -77,14 +77,14 @@ namespace Sla.DECCORE
         /// indicates a likely element size. Return a non-zero value, the likely element size, if there
         /// is evidence of a non-constant non-multiple term. Return zero otherwise.
         /// \return a non-zero value indicating likely element size, or zero
-        private uint4 findArrayHint()
+        private uint findArrayHint()
         {
-            uint4 res = 0;
-            for (int4 i = 0; i < nonmult.size(); ++i)
+            uint res = 0;
+            for (int i = 0; i < nonmult.size(); ++i)
             {
                 Varnode* vn = nonmult[i];
                 if (vn.isConstant()) continue;
-                uint4 vncoeff = 1;
+                uint vncoeff = 1;
                 if (vn.isWritten())
                 {
                     PcodeOp* op = vn.getDef();
@@ -93,9 +93,9 @@ namespace Sla.DECCORE
                         Varnode* vnconst = op.getIn(1);
                         if (vnconst.isConstant())
                         {
-                            intb sval = vnconst.getOffset();
+                            long sval = vnconst.getOffset();
                             sign_extend(sval, vnconst.getSize() * 8 - 1);
-                            vncoeff = (sval < 0) ? (uint4) - sval : (uint4)sval;
+                            vncoeff = (sval < 0) ? (uint) - sval : (uint)sval;
                         }
                     }
                 }
@@ -116,19 +116,19 @@ namespace Sla.DECCORE
         /// \param arrayHint if non-zero indicates array access, where the value is the element size
         /// \param newoff is used to pass back the actual offset of the selected component
         /// \return \b true if a good component match was found
-        private bool hasMatchingSubType(uintb off, uint4 arrayHint, uintb newoff)
+        private bool hasMatchingSubType(ulong off, uint arrayHint, ulong newoff)
         {
             if (arrayHint == 0)
                 return (baseType.getSubType(off, newoff) != (Datatype*)0);
 
-            int4 elSizeBefore;
-            uintb offBefore;
+            int elSizeBefore;
+            ulong offBefore;
             Datatype* typeBefore = baseType.nearestArrayedComponentBackward(off, &offBefore, &elSizeBefore);
             if (typeBefore != (Datatype*)0)
             {
                 if (arrayHint == 1 || elSizeBefore == arrayHint)
                 {
-                    int4 sizeAddr = AddrSpace::byteToAddressInt(typeBefore.getSize(), ct.getWordSize());
+                    int sizeAddr = AddrSpace::byteToAddressInt(typeBefore.getSize(), ct.getWordSize());
                     if (offBefore < sizeAddr)
                     {
                         // If the offset is \e inside a component with a compatible array, return it.
@@ -137,8 +137,8 @@ namespace Sla.DECCORE
                     }
                 }
             }
-            int4 elSizeAfter;
-            uintb offAfter;
+            int elSizeAfter;
+            ulong offAfter;
             Datatype* typeAfter = baseType.nearestArrayedComponentForward(off, &offAfter, &elSizeAfter);
             if (typeBefore == (Datatype*)0 && typeAfter == (Datatype*)0)
                 return (baseType.getSubType(off, newoff) != (Datatype*)0);
@@ -153,8 +153,8 @@ namespace Sla.DECCORE
                 return true;
             }
 
-            uintb distBefore = offBefore;
-            uintb distAfter = -offAfter;
+            ulong distBefore = offBefore;
+            ulong distAfter = -offAfter;
             if (arrayHint != 1)
             {
                 if (elSizeBefore != arrayHint)
@@ -176,11 +176,11 @@ namespace Sla.DECCORE
         /// \param op is the CPUI_INT_MULT operation
         /// \param treeCoeff is constant multiple being applied to the node
         /// \return \b true if there are no multiples of the base data-type size discovered
-        private bool checkMultTerm(Varnode vn, PcodeOp op, uintb treeCoeff)
+        private bool checkMultTerm(Varnode vn, PcodeOp op, ulong treeCoeff)
         {
             Varnode* vnconst = op.getIn(1);
             Varnode* vnterm = op.getIn(0);
-            uintb val;
+            ulong val;
 
             if (vnterm.isFree())
             {
@@ -190,9 +190,9 @@ namespace Sla.DECCORE
             if (vnconst.isConstant())
             {
                 val = (vnconst.getOffset() * treeCoeff) & ptrmask;
-                intb sval = (intb)val;
+                long sval = (long)val;
                 sign_extend(sval, vn.getSize() * 8 - 1);
-                intb rem = (size == 0) ? sval : sval % size;
+                long rem = (size == 0) ? sval : sval % size;
                 if (rem != 0)
                 {
                     if ((val > size) && (size != 0))
@@ -229,18 +229,18 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode term
         /// \param treeCoeff is a constant multiple applied to the entire sub-tree
         /// \return \b true if the sub-tree rooted at the given Varnode contains no multiples
-        private bool checkTerm(Varnode vn, uintb treeCoeff)
+        private bool checkTerm(Varnode vn, ulong treeCoeff)
         {
-            uintb val;
+            ulong val;
             PcodeOp* def;
 
             if (vn == ptr) return false;
             if (vn.isConstant())
             {
                 val = vn.getOffset() * treeCoeff;
-                intb sval = (intb)val;
+                long sval = (long)val;
                 sign_extend(sval, vn.getSize() * 8 - 1);
-                intb rem = (size == 0) ? sval : (sval % size);
+                long rem = (size == 0) ? sval : (sval % size);
                 if (rem != 0)
                 {       // constant is not multiple of size
                     if (treeCoeff != 1)
@@ -292,7 +292,7 @@ namespace Sla.DECCORE
         /// \param op is the root of the sub-expression to traverse
         /// \param treeCoeff is a constant multiple applied to the entire additive tree
         /// \return \b true if the given sub-tree contains no multiple nodes
-        private bool spanAddTree(PcodeOp op, uintb treeCoeff)
+        private bool spanAddTree(PcodeOp op, ulong treeCoeff)
         {
             bool one_is_non, two_is_non;
 
@@ -329,12 +329,12 @@ namespace Sla.DECCORE
                 // type of constant term added to an array index either at the current level or lower.
                 // If we knew here whether an array of the baseType was possible we could make a slightly
                 // better decision.
-                intb snonmult = (intb)nonmultsum;
+                long snonmult = (long)nonmultsum;
                 sign_extend(snonmult, ptrsize * 8 - 1);
                 snonmult = snonmult % size;
                 if (snonmult >= 0)
                     // We assume the sum is big enough it represents an array index at this level
-                    offset = (uintb)snonmult;
+                    offset = (ulong)snonmult;
                 else
                 {
                     // For a negative sum, if the baseType is a structure and there is array hints,
@@ -342,7 +342,7 @@ namespace Sla.DECCORE
                     if (baseType.getMetatype() == TYPE_STRUCT && findArrayHint() != 0)
                         offset = nonmultsum;
                     else
-                        offset = (uintb)(snonmult + size);
+                        offset = (ulong)(snonmult + size);
                 }
             }
             correct = nonmultsum - offset;
@@ -359,9 +359,9 @@ namespace Sla.DECCORE
             }
             else if (baseType.getMetatype() == TYPE_SPACEBASE)
             {
-                uintb nonmultbytes = AddrSpace::addressToByte(nonmultsum, ct.getWordSize()); // Convert to bytes
-                uintb extra;
-                uint4 arrayHint = findArrayHint();
+                ulong nonmultbytes = AddrSpace::addressToByte(nonmultsum, ct.getWordSize()); // Convert to bytes
+                ulong extra;
+                uint arrayHint = findArrayHint();
                 // Get offset into mapped variable
                 if (!hasMatchingSubType(nonmultbytes, arrayHint, &extra))
                 {
@@ -374,9 +374,9 @@ namespace Sla.DECCORE
             }
             else if (baseType.getMetatype() == TYPE_STRUCT)
             {
-                uintb nonmultbytes = AddrSpace::addressToByte(nonmultsum, ct.getWordSize()); // Convert to bytes
-                uintb extra;
-                uint4 arrayHint = findArrayHint();
+                ulong nonmultbytes = AddrSpace::addressToByte(nonmultsum, ct.getWordSize()); // Convert to bytes
+                ulong extra;
+                uint arrayHint = findArrayHint();
                 // Get offset into field in structure
                 if (!hasMatchingSubType(nonmultbytes, arrayHint, &extra))
                 {
@@ -423,16 +423,16 @@ namespace Sla.DECCORE
 
             // Be sure to preserve sign in division below
             // Calc size-relative constant PTR addition
-            intb smultsum = (intb)multsum;
+            long smultsum = (long)multsum;
             sign_extend(smultsum, ptrsize * 8 - 1);
-            uintb constCoeff = (size == 0) ? (uintb)0 : (smultsum / size) & ptrmask;
+            ulong constCoeff = (size == 0) ? (ulong)0 : (smultsum / size) & ptrmask;
             if (constCoeff == 0)
                 resNode = (Varnode*)0;
             else
                 resNode = data.newConstant(ptrsize, constCoeff);
-            for (int4 i = 0; i < multiple.size(); ++i)
+            for (int i = 0; i < multiple.size(); ++i)
             {
-                uintb finalCoeff = (size == 0) ? (uintb)0 : (coeff[i] / size) & ptrmask;
+                ulong finalCoeff = (size == 0) ? (ulong)0 : (coeff[i] / size) & ptrmask;
                 Varnode* vn = multiple[i];
                 if (finalCoeff != 1)
                 {
@@ -459,7 +459,7 @@ namespace Sla.DECCORE
         {
             correct = correct + offset; // Total correction that needs to be made
             Varnode* resNode = (Varnode*)0;
-            for (int4 i = 0; i < nonmult.size(); ++i)
+            for (int i = 0; i < nonmult.size(); ++i)
             {
                 Varnode* vn = nonmult[i];
                 if (vn.isConstant())
@@ -503,7 +503,7 @@ namespace Sla.DECCORE
             if (baseOp.getOut().getTypeDefFacing().getMetatype() != TYPE_PTR)    // Make sure pointer propagates thru INT_ADD
                 return false;
             List<Varnode*> newparams;
-            int4 slot = baseOp.getSlot(ptr);
+            int slot = baseOp.getSlot(ptr);
             newparams.push_back(ptr);
             newparams.push_back(baseOp.getIn(1 - slot));
             newparams.push_back(data.newConstant(ct.getSize(), 1));
@@ -520,7 +520,7 @@ namespace Sla.DECCORE
         private void buildTree()
         {
             if (pRelType != (TypePointerRel*)0) {
-                int4 ptrOff = ((TypePointerRel*)ct).getPointerOffset();
+                int ptrOff = ((TypePointerRel*)ct).getPointerOffset();
                 offset -= ptrOff;
                 offset &= ptrmask;
             }
@@ -585,7 +585,7 @@ namespace Sla.DECCORE
         }
 
         /// Construct given root of ADD tree and pointer
-        public AddTreeState(Funcdata d, PcodeOp op, int4 slot)
+        public AddTreeState(Funcdata d, PcodeOp op, int slot)
         {
             data = d;
             baseOp = op;
@@ -616,7 +616,7 @@ namespace Sla.DECCORE
             isDistributeUsed = false;
             isSubtype = false;
             distributeOp = (PcodeOp*)0;
-            int4 unitsize = AddrSpace::addressToByteInt(1, ct.getWordSize());
+            int unitsize = AddrSpace::addressToByteInt(1, ct.getWordSize());
             isDegenerate = (baseType.getSize() <= unitsize && baseType.getSize() > 0);
         }
 
@@ -685,7 +685,7 @@ namespace Sla.DECCORE
                 size = 0;       // Open-ended size being pointed to, there will be no "multiples" component
             else
                 size = AddrSpace::byteToAddressInt(baseType.getSize(), ct.getWordSize());
-            int4 unitsize = AddrSpace::addressToByteInt(1, ct.getWordSize());
+            int unitsize = AddrSpace::addressToByteInt(1, ct.getWordSize());
             isDegenerate = (baseType.getSize() <= unitsize && baseType.getSize() > 0);
             preventDistribution = false;
             clear();

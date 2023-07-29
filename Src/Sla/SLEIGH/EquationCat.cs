@@ -36,8 +36,8 @@ namespace Sla.SLEIGH
         {
             bool res = left.resolveOperandLeft(state);
             if (!res) return false;
-            int4 cur_base = state.base;
-            int4 cur_offset = state.offset;
+            int cur_base = state.base;
+            int cur_offset = state.offset;
             if ((!left.getTokenPattern().getLeftEllipsis()) && (!left.getTokenPattern().getRightEllipsis()))
             {
                 // Keep the same base
@@ -56,8 +56,8 @@ namespace Sla.SLEIGH
             {
                 state.base = -2;        // We have no anchor
             }
-            int4 cur_rightmost = state.cur_rightmost;
-            int4 cur_size = state.size;
+            int cur_rightmost = state.cur_rightmost;
+            int cur_size = state.size;
             res = right.resolveOperandLeft(state);
             if (!res) return false;
             state.base = cur_base;  // Restore base and offset

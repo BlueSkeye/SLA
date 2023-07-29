@@ -24,12 +24,12 @@ namespace Sla.DECCORE
 
         /// \class RuleSignDiv2
         /// \brief Convert INT_SRIGHT form into INT_SDIV:  `(V + -1*(V s>> 31)) s>> 1  =>  V s/ 2`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_SRIGHT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* addout,*multout,*shiftout,*a;
             PcodeOp* addop,*multop,*shiftop;
@@ -40,7 +40,7 @@ namespace Sla.DECCORE
             if (!addout.isWritten()) return 0;
             addop = addout.getDef();
             if (addop.code() != CPUI_INT_ADD) return 0;
-            int4 i;
+            int i;
             a = (Varnode*)0;
             for (i = 0; i < 2; ++i)
             {
@@ -59,7 +59,7 @@ namespace Sla.DECCORE
                 if (shiftop.code() != CPUI_INT_SRIGHT)
                     continue;
                 if (!shiftop.getIn(1).isConstant()) continue;
-                int4 n = shiftop.getIn(1).getOffset();
+                int n = shiftop.getIn(1).getOffset();
                 a = shiftop.getIn(0);
                 if (a != addop.getIn(1 - i)) continue;
                 if (n != 8 * a.getSize() - 1) continue;

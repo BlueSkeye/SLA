@@ -463,7 +463,7 @@ namespace Sla.DECCORE
         /// are consistent.
         private void checkEdges()
         {
-        for(int4 i=0;i<intothis.size();++i) {
+        for(int i=0;i<intothis.size();++i) {
             BlockEdge edge = new BlockEdge(intothis[i] );
             int rev = edge.reverse_index;
             FlowBlock bl = edge.point;

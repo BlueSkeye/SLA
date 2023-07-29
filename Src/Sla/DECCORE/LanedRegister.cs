@@ -15,14 +15,14 @@ namespace Sla.DECCORE
         public class LanedIterator
         {
             /// Current lane size
-            private int4 size;
+            private int size;
             /// Collection being iterated over
-            private uint4 mask;
+            private uint mask;
 
             /// Normalize the iterator, after increment or initialization
             private void normalize()
             {
-                uint4 flag = 1;
+                uint flag = 1;
                 flag <<= size;
                 while (flag <= mask)
                 {
@@ -55,7 +55,7 @@ namespace Sla.DECCORE
             }
 
             /// Dereference operator
-            public static int4 operator *() => size;
+            public static int operator *() => size;
 
             ///< Assignment
             public static LanedIterator operator=(LanedIterator op2)
@@ -75,9 +75,9 @@ namespace Sla.DECCORE
         // typedef LanedIterator const_iterator;
 
         /// Size of the whole register
-        private int4 wholeSize;
+        private int wholeSize;
         /// A 1-bit for every permissible lane size
-        private uint4 sizeBitMask;
+        private uint sizeBitMask;
 
         /// Constructor for use with decode
         public LanedRegister()
@@ -86,7 +86,7 @@ namespace Sla.DECCORE
             sizeBitMask = 0;
         }
 
-        public LanedRegister(int4 sz, uint4 mask)
+        public LanedRegister(int sz, uint mask)
         {
             wholeSize = sz;
             sizeBitMask = mask;
@@ -98,11 +98,11 @@ namespace Sla.DECCORE
         /// \return \b true if the XML description provides lane sizes
         public bool decode(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement(ELEM_REGISTER);
+            uint elemId = decoder.openElement(ELEM_REGISTER);
             string laneSizes;
             for (; ; )
             {
-                uint4 attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == ATTRIB_VECTOR_LANE_SIZES)
                 {
@@ -141,7 +141,7 @@ namespace Sla.DECCORE
                 }
                 istringstream s(value);
                 s.unsetf(ios::dec | ios::hex | ios::oct);
-                int4 sz = -1;
+                int sz = -1;
                 s >> sz;
                 if (sz < 0 || sz > 16)
                     throw new LowlevelError("Bad lane size: " + value);
@@ -151,19 +151,19 @@ namespace Sla.DECCORE
         }
 
         /// Get the size in bytes of the whole laned register
-        public int4 getWholeSize() => wholeSize;
+        public int getWholeSize() => wholeSize;
 
         /// Get the bit mask of possible lane sizes
-        public uint4 getSizeBitMask() => sizeBitMask;
+        public uint getSizeBitMask() => sizeBitMask;
 
         /// Add a new \e size to the allowed list
-        public void addLaneSize(int4 size)
+        public void addLaneSize(int size)
         {
-            sizeBitMask |= ((uint4)1 << size);
+            sizeBitMask |= ((uint)1 << size);
         }
 
         /// Is \e size among the allowed lane sizes
-        public bool allowedLane(int4 size) => (((sizeBitMask >> size) &1) != 0);
+        public bool allowedLane(int size) => (((sizeBitMask >> size) &1) != 0);
 
         /// Starting iterator over possible lane sizes
         public const_iterator begin() => new LanedIterator(this);

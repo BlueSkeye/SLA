@@ -12,13 +12,13 @@ namespace Sla.EXTRA
 {
     internal class LoadImageBfd : LoadImage
     {
-        private static int4 bfdinit = 0;        // Is the library (globally) initialized
+        private static int bfdinit = 0;        // Is the library (globally) initialized
         private string target;      // File format (supported by BFD)
         private bfd thebfd;
         private AddrSpace spaceid;     // We need to map space id to segments but since
                                        // we are currently ignoring segments anyway...
-        private uintb bufoffset;        // Starting offset of byte buffer
-        private uint4 bufsize;      // Number of bytes in the buffer
+        private ulong bufoffset;        // Starting offset of byte buffer
+        private uint bufsize;      // Number of bytes in the buffer
         private byte[] buffer;      // The actual buffer
         private /*mutable*/ asymbol[] symbol_table;
         private /*mutable*/ long number_of_symbols;
@@ -26,10 +26,10 @@ namespace Sla.EXTRA
         private /*mutable*/ asection* secinfoptr;
 
         // Find section containing given offset
-        private asection findSection(uintb offset, uintb ssize)
+        private asection findSection(ulong offset, ulong ssize)
         { // Return section containing offset, or closest greater section
             asection* p;
-            uintb start, stop;
+            ulong start, stop;
 
             for (p = thebfd.sections; p != (asection*)NULL; p = p.next)
             {
@@ -81,8 +81,8 @@ namespace Sla.EXTRA
             symbol_table = (asymbol**)0;
 
             bufsize = 512;      // Default buffer size
-            bufoffset = ~((uintb)0);
-            buffer = new uint1[bufsize];
+            bufoffset = ~((ulong)0);
+            buffer = new byte[bufsize];
         }
 
         public void attachToSpace(AddrSpace id)
@@ -132,20 +132,20 @@ namespace Sla.EXTRA
         }
 
         // Load a chunk of image
-        public override void loadFill(byte[] ptr, int4 size, Address addr)
+        public override void loadFill(byte[] ptr, int size, Address addr)
         {
             asection* p;
-            uintb secsize;
-            uintb curaddr, offset;
+            ulong secsize;
+            ulong curaddr, offset;
             bfd_size_type readsize;
-            int4 cursize;
+            int cursize;
 
             if (addr.getSpace() != spaceid)
                 throw DataUnavailError("Trying to get loadimage bytes from space: " + addr.getSpace().getName());
             curaddr = addr.getOffset();
             if ((curaddr >= bufoffset) && (curaddr + size < bufoffset + bufsize))
             {   // Requested bytes were previously buffered
-                uint1* bufptr = buffer + (curaddr - bufoffset);
+                byte* bufptr = buffer + (curaddr - bufoffset);
                 memcpy(ptr, bufptr, size);
                 return;
             }
@@ -217,7 +217,7 @@ namespace Sla.EXTRA
                 return;
             }
 
-            symbol_table = (asymbol**)new uint1[storage_needed]; // Storage needed in bytes
+            symbol_table = (asymbol**)new byte[storage_needed]; // Storage needed in bytes
             number_of_symbols = bfd_canonicalize_symtab(thebfd, symbol_table);
             if (number_of_symbols <= 0)
             {
@@ -247,7 +247,7 @@ namespace Sla.EXTRA
             cursymbol += 1;
             advanceToNextSymbol();
             record.name = a.name;
-            uintb val = bfd_asymbol_value(a);
+            ulong val = bfd_asymbol_value(a);
             record.address = Address(spaceid, val);
             return true;
         }
@@ -286,7 +286,7 @@ namespace Sla.EXTRA
 
         public override void getReadonly(RangeList list)
         { // List all ranges that are read only
-            uintb start, stop, secsize;
+            ulong start, stop, secsize;
             asection* p;
 
             for (p = thebfd.sections; p != (asection*)NULL; p = p.next)

@@ -12,7 +12,7 @@ namespace Sla.EXTRA
     internal class ConsoleCommands : IfaceStatus
     {
         private List<string> commands = new List<string>();     ///< Sequence of commands
-        private uint4 pos;                ///< Position of next command to execute
+        private uint pos;                ///< Position of next command to execute
         
         protected override void readLine(string line)
         {

@@ -22,7 +22,7 @@ namespace Sla.DECCORE
     
         public override int apply(Funcdata data)
         {               // Remove blocks that do nothing
-            int4 i;
+            int i;
             BlockGraph graph = data.getBasicBlocks();
             BlockBasic* bb;
 

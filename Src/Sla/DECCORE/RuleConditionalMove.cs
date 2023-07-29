@@ -16,13 +16,13 @@ namespace Sla.DECCORE
         private class BoolExpress
         {
             /// 0=constant 1=unary 2=binary
-            private int4 optype;
+            private int optype;
             /// OpCode constructing the boolean value
             private OpCode opc;
             /// PcodeOp constructing the boolean value
             private PcodeOp op;
             /// Value (if boolean is constant)
-            private uintb val;
+            private ulong val;
             /// First input
             private Varnode in0;
             /// Second input
@@ -34,7 +34,7 @@ namespace Sla.DECCORE
             public bool isConstant() => (optype==0);
 
             /// Get the constant boolean value
-            public uintb getVal() => val;
+            public ulong getVal() => val;
 
             /// Initialize based on output Varnode
             /// Check if given Varnode is a boolean value and break down its construction.
@@ -54,7 +54,7 @@ namespace Sla.DECCORE
                         {
                             optype = 0;
                             val = in0.getOffset();
-                            return ((val & ~((uintb)1)) == 0);
+                            return ((val & ~((ulong)1)) == 0);
                         }
                         return false;
                     case CPUI_INT_EQUAL:
@@ -198,12 +198,12 @@ namespace Sla.DECCORE
         /// \endcode
         ///
         /// which gets simplified to `res = boolcond || differentcond`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_MULTIEQUAL);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             BoolExpress bool0;
             BoolExpress bool1;
@@ -312,7 +312,7 @@ namespace Sla.DECCORE
 
             // Below here some change is being made
             data.opUninsert(op);    // Changing from MULTIEQUAL, this should be reinserted
-            int4 sz = op.getOut().getSize();
+            int sz = op.getOut().getSize();
             if (bool0.isConstant() && bool1.isConstant())
             {
                 if (bool0.getVal() == bool1.getVal())

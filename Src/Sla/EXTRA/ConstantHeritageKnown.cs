@@ -11,24 +11,24 @@ namespace Sla.EXTRA
     internal class ConstantHeritageKnown : RHSConstant
     {
         // A varnode's consume mask
-        private int4 varindex;
+        private int varindex;
         
-        public ConstantHeritageKnown(int4 ind)
+        public ConstantHeritageKnown(int ind)
         {
             varindex = ind;
         }
         
         public override RHSConstant clone() => new ConstantHeritageKnown(varindex);
 
-        public override uintb getConstant(UnifyState state)
+        public override ulong getConstant(UnifyState state)
         {
             Varnode* vn = state.data(varindex).getVarnode();
-            return (uintb)(vn.isHeritageKnown() ? 1 : 0);
+            return (ulong)(vn.isHeritageKnown() ? 1 : 0);
         }
 
         public override void writeExpression(TextWriter s, UnifyCPrinter printstate)
         {
-            s << "(uintb)" << printstate.getName(varindex) << ".isHeritageKnown()";
+            s << "(ulong)" << printstate.getName(varindex) << ".isHeritageKnown()";
         }
     }
 }

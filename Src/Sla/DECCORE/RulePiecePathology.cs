@@ -20,8 +20,8 @@ namespace Sla.DECCORE
         private static bool isPathology(Varnode vn, Funcdata data)
         {
             List<PcodeOp*> worklist;
-            int4 pos = 0;
-            int4 slot = 0;
+            int pos = 0;
+            int slot = 0;
             bool res = false;
             for (; ; )
             {
@@ -93,7 +93,7 @@ namespace Sla.DECCORE
                     slot = 1;
                 }
             }
-            for (int4 i = 0; i < worklist.size(); ++i)
+            for (int i = 0; i < worklist.size(); ++i)
                 worklist[i].clearMark();
             return res;
         }
@@ -106,12 +106,12 @@ namespace Sla.DECCORE
         /// \param op is CPUI_PIECE op that is the pathological concatenation
         /// \param data is the function containing the data-flow
         /// \return a non-zero value if new bytes are labeled as unconsumed
-        private static int4 tracePathologyForward(PcodeOp op, Funcdata data)
+        private static int tracePathologyForward(PcodeOp op, Funcdata data)
         {
-            int4 count = 0;
+            int count = 0;
             FuncCallSpecs fProto;
             List<PcodeOp> worklist = new List<PcodeOp>();
-            int4 pos = 0;
+            int pos = 0;
             op.setMark();
             worklist.push_back(op);
             while (pos < worklist.size())
@@ -140,8 +140,8 @@ namespace Sla.DECCORE
                             fProto = data.getCallSpecs(curOp);
                             if (fProto != (FuncProto*)0 && !fProto.isInputActive() && !fProto.isInputLocked())
                             {
-                                int4 bytesConsumed = op.getIn(1).getSize();
-                                for (int4 i = 1; i < curOp.numInput(); ++i)
+                                int bytesConsumed = op.getIn(1).getSize();
+                                for (int i = 1; i < curOp.numInput(); ++i)
                                 {
                                     if (curOp.getIn(i) == outVn)
                                     {
@@ -163,7 +163,7 @@ namespace Sla.DECCORE
                     }
                 }
             }
-            for (int4 i = 0; i < worklist.size(); ++i)
+            for (int i = 0; i < worklist.size(); ++i)
                 worklist[i].clearMark();
             return count;
         }
@@ -190,12 +190,12 @@ namespace Sla.DECCORE
         ///     ...
         ///     retreg = CONCAT(SUBPIECE(retreg,#4),smallval);
         /// \endcode
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_PIECE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn = op.getIn(0);
             if (!vn.isWritten()) return 0;

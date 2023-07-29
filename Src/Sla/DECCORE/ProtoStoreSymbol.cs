@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         /// allocate an (uninitialized) parameter.
         /// \param i is the specified input slot
         /// \return the corresponding parameter
-        private ParameterSymbol getSymbolBacked(int4 i)
+        private ParameterSymbol getSymbolBacked(int i)
         {
             while (inparam.size() <= i)
                 inparam.push_back((ProtoParameter*)0);
@@ -59,7 +59,7 @@ namespace Sla.DECCORE
 
         ~ProtoStoreSymbol()
         {
-            for (int4 i = 0; i < inparam.size(); ++i)
+            for (int i = 0; i < inparam.size(); ++i)
             {
                 ProtoParameter* param = inparam[i];
                 if (param != (ProtoParameter*)0)
@@ -69,7 +69,7 @@ namespace Sla.DECCORE
                 delete outparam;
         }
 
-        public override ProtoParameter setInput(int4 i, string nm, ParameterPieces pieces)
+        public override ProtoParameter setInput(int i, string nm, ParameterPieces pieces)
         {
             ParameterSymbol* res = getSymbolBacked(i);
             res.sym = scope.getCategorySymbol(Symbol::function_parameter, i);
@@ -95,7 +95,7 @@ namespace Sla.DECCORE
                 scope.setCategory(res.sym, Symbol::function_parameter, i);
                 if (isindirect || ishidden)
                 {
-                    uint4 mirror = 0;
+                    uint mirror = 0;
                     if (isindirect)
                         mirror |= Varnode::indirectstorage;
                     if (ishidden)
@@ -125,7 +125,7 @@ namespace Sla.DECCORE
             return res;
         }
 
-        public override void clearInput(int4 i)
+        public override void clearInput(int i)
         {
             Symbol* sym = scope.getCategorySymbol(Symbol::function_parameter, i);
             if (sym != (Symbol*)0)
@@ -134,8 +134,8 @@ namespace Sla.DECCORE
                 scope.removeSymbol(sym);   // Remove it altogether
             }
             // Renumber any category 0 symbol with index greater than i
-            int4 sz = scope.getCategorySize(Symbol::function_parameter);
-            for (int4 j = i + 1; j < sz; ++j)
+            int sz = scope.getCategorySize(Symbol::function_parameter);
+            for (int j = i + 1; j < sz; ++j)
             {
                 sym = scope.getCategorySymbol(Symbol::function_parameter, j);
                 if (sym != (Symbol*)0)
@@ -148,12 +148,12 @@ namespace Sla.DECCORE
             scope.clearCategory(0);
         }
 
-        public override int4 getNumInputs()
+        public override int getNumInputs()
         {
             return scope.getCategorySize(Symbol::function_parameter);
         }
 
-        public override ProtoParameter getInput(int4 i)
+        public override ProtoParameter getInput(int i)
         {
             Symbol* sym = scope.getCategorySymbol(Symbol::function_parameter, i);
             if (sym == (Symbol*)0)

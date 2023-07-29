@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         /// type of which we have an array
         protected Datatype arrayof;
         /// Number of elements in the array
-        protected int4 arraysize;
+        protected int arraysize;
 
         /// Restore \b this array from a stream
         /// Parse a \<type> element with a child describing the array element data-type.
@@ -24,13 +24,13 @@ namespace Sla.DECCORE
         /// \param typegrp is the factory owning \b this data-type
         protected void decode(Decoder decoder, TypeFactory typegrp)
         {
-            //  uint4 elemId = decoder.openElement();
+            //  uint elemId = decoder.openElement();
             decodeBasic(decoder);
             arraysize = -1;
             decoder.rewindAttributes();
             for (; ; )
             {
-                uint4 attrib = decoder.getNextAttributeId();
+                uint attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
                 if (attrib == ATTRIB_ARRAYSIZE)
                 {
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
         }
 
         /// Construct given an array size and element data-type
-        public TypeArray(int4 n, Datatype ao)
+        public TypeArray(int n, Datatype ao)
         {
             arraysize = n;
             arrayof = ao;
@@ -76,7 +76,7 @@ namespace Sla.DECCORE
         public Datatype getBase() => arrayof;
 
         /// Get the number of elements
-        public int4 numElements() => arraysize;
+        public int numElements() => arraysize;
 
         /// Figure out what a byte range overlaps
         /// Given some contiguous piece of the array, figure out which element overlaps
@@ -86,10 +86,10 @@ namespace Sla.DECCORE
         /// \param newoff is a pointer to the renormalized offset to pass back
         /// \param el is a pointer to the array index to pass back
         /// \return the element data-type or NULL if the piece overlaps more than one
-        public Datatype getSubEntry(int4 off, int4 sz, int4 newoff, int4 el)
+        public Datatype getSubEntry(int off, int sz, int newoff, int el)
         {
-            int4 noff = off % arrayof.getSize();
-            int4 nel = off / arrayof.getSize();
+            int noff = off % arrayof.getSize();
+            int nel = off / arrayof.getSize();
             if (noff + sz > arrayof.getSize()) // Requesting parts of more then one element
                 return (Datatype*)0;
             *newoff = noff;
@@ -103,22 +103,22 @@ namespace Sla.DECCORE
             s << " [" << dec << arraysize << ']';
         }
 
-        public override Datatype getSubType(uintb off, uintb newoff)
+        public override Datatype getSubType(ulong off, ulong newoff)
         {
             // Go down exactly one level, to type of element
             *newoff = off % arrayof.getSize();
             return arrayof;
         }
 
-        public override int4 getHoleSize(int4 off)
+        public override int getHoleSize(int off)
         {
-            int4 newOff = off % arrayof.getSize();
+            int newOff = off % arrayof.getSize();
             return arrayof.getHoleSize(newOff);
         }
 
-        public override int4 numDepend() => 1;
+        public override int numDepend() => 1;
 
-        public override Datatype getDepend(int4 index) => arrayof;
+        public override Datatype getDepend(int index) => arrayof;
 
         public override void printNameBase(TextWriter s) 
         {
@@ -127,9 +127,9 @@ namespace Sla.DECCORE
         }
 
         // For tree structure
-        public override int4 compare(Datatype op, int4 level)
+        public override int compare(Datatype op, int level)
         {
-            int4 res = Datatype::compare(op, level);
+            int res = Datatype::compare(op, level);
             if (res != 0) return res;
             level -= 1;
             if (level < 0)
@@ -142,7 +142,7 @@ namespace Sla.DECCORE
         }
 
         // For tree structure
-        public override int4 compareDependency(Datatype op)
+        public override int compareDependency(Datatype op)
         {
             if (submeta != op.getSubMeta()) return (submeta < op.getSubMeta()) ? -1 : 1;
             TypeArray* ta = (TypeArray*)&op;    // Both must be arrays
@@ -166,21 +166,21 @@ namespace Sla.DECCORE
             encoder.closeElement(ELEM_TYPE);
         }
 
-        public override Datatype resolveInFlow(PcodeOp op, int4 slot)
+        public override Datatype resolveInFlow(PcodeOp op, int slot)
         {
             Funcdata* fd = op.getParent().getFuncdata();
             ResolvedUnion res = fd.getUnionField(this, op, slot);
             if (res != (ResolvedUnion*)0)
                 return res.getDatatype();
 
-            int4 fieldNum = TypeStruct::scoreSingleComponent(this, op, slot);
+            int fieldNum = TypeStruct::scoreSingleComponent(this, op, slot);
 
             ResolvedUnion compFill(this, fieldNum,* fd.getArch().types);
             fd.setUnionField(this, op, slot, compFill);
             return compFill.getDatatype();
         }
 
-        public override Datatype findResolve(PcodeOp op, int4 slot)
+        public override Datatype findResolve(PcodeOp op, int slot)
         {
             Funcdata fd = op.getParent().getFuncdata();
             ResolvedUnion res = fd.getUnionField(this, op, slot);
@@ -189,7 +189,7 @@ namespace Sla.DECCORE
             return arrayof;     // If not calculated before, assume referring to the element
         }
 
-        public override int4 findCompatibleResolve(Datatype ct)
+        public override int findCompatibleResolve(Datatype ct)
         {
             if (ct.needsResolution() && !arrayof.needsResolution())
             {

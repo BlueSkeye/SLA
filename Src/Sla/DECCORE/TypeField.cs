@@ -11,9 +11,9 @@ namespace Sla.DECCORE
     internal class TypeField
     {
         /// Id for identifying \b this within its containing structure or union
-        public int4 ident;
+        public int ident;
         /// Offset (into containing structure or union) of subfield
-        public int4 offset;
+        public int offset;
         /// Name of subfield
         public string name;
         /// Data-type of subfield
@@ -25,12 +25,12 @@ namespace Sla.DECCORE
         /// \param typegrp is the TypeFactory for parsing data-type info
         public TypeField(Decoder decoder, TypeFactory typegrp)
         {
-            uint4 elemId = decoder.openElement(ELEM_FIELD);
+            uint elemId = decoder.openElement(ELEM_FIELD);
             ident = -1;
             offset = -1;
             for (; ; )
             {
-                uint4 attrib = decoder.getNextAttributeId();
+                uint attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
                 if (attrib == ATTRIB_NAME)
                     name = decoder.readString();
@@ -54,7 +54,7 @@ namespace Sla.DECCORE
         }
 
         /// Construct from components
-        public TypeField(int4 id, int4 off,string nm,Datatype ct)
+        public TypeField(int id, int off,string nm,Datatype ct)
         {
             ident=id;
             offset=off;

@@ -18,6 +18,6 @@ namespace Sla.SLEIGH
     internal struct RelativeRecord
     {
         internal VarnodeData dataptr;       ///< Varnode indicating relative offset
-        internal uintb calling_index;		///< Index of instruction containing relative offset
+        internal ulong calling_index;		///< Index of instruction containing relative offset
     }
 }

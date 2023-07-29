@@ -12,11 +12,11 @@ namespace Sla.EXTRA
 {
     internal class ConstraintConstCompare : UnifyConstraint
     {
-        private int4 const1index;       // Compare two constants resulting in a boolean
-        private int4 const2index;
+        private int const1index;       // Compare two constants resulting in a boolean
+        private int const2index;
         private OpCode opc;
         
-        public ConstraintConstCompare(int4 c1ind, int4 c2ind, OpCode oc)
+        public ConstraintConstCompare(int c1ind, int c2ind, OpCode oc)
         {
             const1index = c1ind; const2index = c2ind; opc = oc;
             maxnum = (const1index > const2index) ? const1index : const2index;
@@ -29,11 +29,11 @@ namespace Sla.EXTRA
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
-            uintb c1 = state.data(const1index).getConstant();
-            uintb c2 = state.data(const2index).getConstant();
+            ulong c1 = state.data(const1index).getConstant();
+            ulong c2 = state.data(const2index).getConstant();
             // This only does operations with boolean result
             OpBehavior* behavior = state.getBehavior(opc);
-            uintb res = behavior.evaluateBinary(1, sizeof(uintb), c1, c2);
+            ulong res = behavior.evaluateBinary(1, sizeof(ulong), c1, c2);
             return (res != 0);
         }
 
@@ -43,7 +43,7 @@ namespace Sla.EXTRA
             typelist[const2index] = UnifyDatatype(UnifyDatatype::const_type);
         }
 
-        public override int4 getBaseIndex() => const1index;
+        public override int getBaseIndex() => const1index;
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {

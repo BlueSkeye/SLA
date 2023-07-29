@@ -21,7 +21,7 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             string name;
-            int4 delay = -1;
+            int delay = -1;
             AddrSpace* spc;
 
             s >> name;

@@ -24,6 +24,6 @@ namespace Sla.EXTRA
         };
         
         internal Flags flags;
-        internal int4 size;
+        internal int size;
     }
 }

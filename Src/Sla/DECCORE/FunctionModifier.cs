@@ -32,7 +32,7 @@ namespace Sla.DECCORE
 
         public void getInTypes(List<Datatype> intypes, Architecture glb)
         {
-            for (uint4 i = 0; i < paramlist.size(); ++i)
+            for (uint i = 0; i < paramlist.size(); ++i)
             {
                 Datatype* ct = paramlist[i].buildType(glb);
                 intypes.push_back(ct);
@@ -41,17 +41,17 @@ namespace Sla.DECCORE
 
         public void getInNames(List<string> innames)
         {
-            for (uint4 i = 0; i < paramlist.size(); ++i)
+            for (uint i = 0; i < paramlist.size(); ++i)
                 innames.push_back(paramlist[i].getIdentifier());
         }
 
         public bool isDotdotdot() => dotdotdot;
     
-        public override uint4 getType() => function_mod;
+        public override uint getType() => function_mod;
 
         public override bool isValid()
         {
-            for (uint4 i = 0; i < paramlist.size(); ++i)
+            for (uint i = 0; i < paramlist.size(); ++i)
             {
                 TypeDeclarator* decl = paramlist[i];
                 if (!decl.isValid()) return false;

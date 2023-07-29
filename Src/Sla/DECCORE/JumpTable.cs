@@ -21,11 +21,11 @@ namespace Sla.DECCORE
         internal struct IndexPair
         {
             /// Out-edge index for the basic-block
-            private int4 blockPosition;
+            private int blockPosition;
             /// Index of address targeting the basic-block
-            private int4 addressIndex;
+            private int addressIndex;
             
-            internal IndexPair(int4 pos, int4 index)
+            internal IndexPair(int pos, int index)
             {
                 blockPosition = pos;
                 addressIndex = index;
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
         /// Map from basic-blocks to address table index
         private List<IndexPair> block2addr;
         /// The case label for each explicit target
-        private List<uintb> label;
+        private List<ulong> label;
         /// Any recovered in-memory data for the jump-table
         private List<LoadTable> loadpoints;
         /// Absolute address of the BRANCHIND jump
@@ -70,19 +70,19 @@ namespace Sla.DECCORE
         /// CPUI_BRANCHIND linked to \b this jump-table
         private PcodeOp indirect;
         /// Bits of the switch variable being consumed
-        private uintb switchVarConsume;
+        private ulong switchVarConsume;
         /// The out-edge corresponding to the \e default switch destination (-1 = undefined)
-        private int4 defaultBlock;
+        private int defaultBlock;
         /// Block out-edge corresponding to last entry in the address table
-        private int4 lastBlock;
+        private int lastBlock;
         /// Maximum ADDs or SUBs to normalize
-        private uint4 maxaddsub;
+        private uint maxaddsub;
         /// Maximum shifts to normalize
-        private uint4 maxleftright;
+        private uint maxleftright;
         /// Maximum extensions to normalize
-        private uint4 maxext;
+        private uint maxext;
         /// 0=no stages recovered, 1=additional stage needed, 2=complete
-        private int4 recoverystage;
+        private int recoverystage;
         /// Set to \b true if information about in-memory model data is/should be collected
         private bool collectloads;
 
@@ -137,7 +137,7 @@ namespace Sla.DECCORE
 
             if (parent.sizeOut() != addresstable.size())
                 throw new LowlevelError("Trivial addresstable and switch block size do not match");
-            for (uint4 i = 0; i < parent.sizeOut(); ++i)
+            for (uint i = 0; i < parent.sizeOut(); ++i)
                 block2addr.push_back(IndexPair(i, i));  // Addresses corresponds exactly to out-edges of switch block
             lastBlock = parent.sizeOut() - 1;
             defaultBlock = -1;      // Trivial case does not have default case
@@ -151,14 +151,14 @@ namespace Sla.DECCORE
         /// \param fd is the function containing the switch
         private void sanityCheck(Funcdata fd)
         {
-            uint4 sz = addresstable.size();
+            uint sz = addresstable.size();
 
             if (!isReachable(indirect))
                 throw JumptableNotReachableError("No legal flow");
             if (addresstable.size() == 1)
             { // One entry is likely some kind of thunk
                 bool isthunk = false;
-                uintb diff;
+                ulong diff;
                 Address addr = addresstable[0];
                 if (addr.getOffset() == 0)
                     isthunk = true;
@@ -193,10 +193,10 @@ namespace Sla.DECCORE
         /// If no edge hits it, throw an exception.
         /// \param bl is the specific basic-block
         /// \return the position of the basic-block
-        private int4 block2Position(FlowBlock bl)
+        private int block2Position(FlowBlock bl)
         {
             FlowBlock* parent;
-            int4 position;
+            int position;
 
             parent = indirect.getParent();
             for (position = 0; position < bl.sizeIn(); ++position)
@@ -214,7 +214,7 @@ namespace Sla.DECCORE
         {
             BlockBasic* parent = op.getParent();
 
-            for (int4 i = 0; i < 2; ++i)
+            for (int i = 0; i < 2; ++i)
             {   // Only check two levels
                 if (parent.sizeIn() != 1) return true;
                 BlockBasic* bl = (BlockBasic*)parent.getIn(0);
@@ -224,7 +224,7 @@ namespace Sla.DECCORE
                     continue;
                 Varnode* vn = cbranch.getIn(1); // Get the boolean variable
                 if (!vn.isConstant()) continue; // Has the guard collapsed
-                int4 trueslot = cbranch.isBooleanFlip() ? 0 : 1;
+                int trueslot = cbranch.isBooleanFlip() ? 0 : 1;
                 if (vn.getOffset() == 0)
                     trueslot = 1 - trueslot;
                 if (bl.getOut(trueslot) != parent) // If the remaining path does not lead to -op-
@@ -243,7 +243,7 @@ namespace Sla.DECCORE
             jmodel = (JumpModel*)0;
             origmodel = (JumpModel*)0;
             indirect = (PcodeOp*)0;
-            switchVarConsume = ~((uintb)0);
+            switchVarConsume = ~((ulong)0);
             defaultBlock = -1;
             lastBlock = -1;
             maxaddsub = 1;
@@ -262,7 +262,7 @@ namespace Sla.DECCORE
             jmodel = (JumpModel*)0;
             origmodel = (JumpModel*)0;
             indirect = (PcodeOp*)0;
-            switchVarConsume = ~((uintb)0);
+            switchVarConsume = ~((ulong)0);
             defaultBlock = -1;
             lastBlock = op2.lastBlock;
             maxaddsub = op2.maxaddsub;
@@ -304,16 +304,16 @@ namespace Sla.DECCORE
         private bool isPossibleMultistage() => (addresstable.size()== 1);
 
         /// Return what stage of recovery this jump-table is in.
-        private int4 getStage() => recoverystage;
+        private int getStage() => recoverystage;
 
         /// Return the size of the address table for \b this jump-table
-        private int4 numEntries() => addresstable.size();
+        private int numEntries() => addresstable.size();
 
         /// Get bits of switch variable consumed by \b this table
-        private uintb getSwitchVarConsume() => switchVarConsume;
+        private ulong getSwitchVarConsume() => switchVarConsume;
 
         /// Get the out-edge corresponding to the \e default switch destination
-        private int4 getDefaultBlock() => defaultBlock;
+        private int getDefaultBlock() => defaultBlock;
 
         /// Get the address of the BRANCHIND for the switch
         private Address getOpAddress() => opaddress;
@@ -328,7 +328,7 @@ namespace Sla.DECCORE
         }  ///< Set the BRANCHIND PcodeOp
 
         /// Set the switch variable normalization model restrictions
-        private void setNormMax(uint4 maddsub, uint4 mleftright, uint4 mext)
+        private void setNormMax(uint maddsub, uint mleftright, uint mext)
         {
             maxaddsub = maddsub; maxleftright = mleftright; maxext = mext;
         }
@@ -344,7 +344,7 @@ namespace Sla.DECCORE
         /// \param naddr is the address where the normalized switch variable is defined
         /// \param h is a hash identifying the normalized switch variable (or 0)
         /// \param sv is the starting value for the range of possible normalized switch variable values (usually 0)
-        private void setOverride(List<Address> addrtable, Address naddr, uintb h, uintb sv)
+        private void setOverride(List<Address> addrtable, Address naddr, ulong h, ulong sv)
         {
             if (jmodel != (JumpModel*)0)
                 delete jmodel;
@@ -360,7 +360,7 @@ namespace Sla.DECCORE
         ///
         /// \param bl is the given basic-block
         /// \return the count of entries
-        private int4 numIndicesByBlock(FlowBlock bl)
+        private int numIndicesByBlock(FlowBlock bl)
         {
             IndexPair val(block2Position(bl),0);
             pair<List<IndexPair>::const_iterator, List<IndexPair>::const_iterator> range;
@@ -374,10 +374,10 @@ namespace Sla.DECCORE
         /// \param bl is the given basic-block
         /// \param i requests a specific position within the duplicate entries
         /// \return the address table index
-        private int4 getIndexByBlock(FlowBlock bl, int4 i)
+        private int getIndexByBlock(FlowBlock bl, int i)
         {
             IndexPair val(block2Position(bl),0);
-            int4 count = 0;
+            int count = 0;
             List<IndexPair>::const_iterator iter = lower_bound(block2addr.begin(), block2addr.end(), val, IndexPair::compareByPosition);
             while (iter != block2addr.end())
             {
@@ -393,7 +393,7 @@ namespace Sla.DECCORE
         }
 
         /// Get the i-th address table entry
-        private Address getAddressByIndex(int4 i) => addresstable[i];
+        private Address getAddressByIndex(int i) => addresstable[i];
 
         /// Set the most common jump-table target to be the last address in the table
         private void setLastAsMostCommon()
@@ -402,7 +402,7 @@ namespace Sla.DECCORE
         }
 
         /// Set out-edge of the switch destination considered to be \e default
-        private void setDefaultBlock(int4 bl)
+        private void setDefaultBlock(int bl)
         {
             defaultBlock = bl;
         }
@@ -419,7 +419,7 @@ namespace Sla.DECCORE
         /// can also be provided. The new target is appended directly to the end of the table.
         /// \param bl is the given basic-block
         /// \param lab is the case label for the block
-        private void addBlockToSwitch(BlockBasic bl, uintb lab)
+        private void addBlockToSwitch(BlockBasic bl, ulong lab)
         {
             addresstable.push_back(bl.getStart());
             lastBlock = indirect.getParent().sizeOut();       // The block WILL be added to the end of the out-edges
@@ -437,14 +437,14 @@ namespace Sla.DECCORE
         private void switchOver(FlowInfo flow)
         {
             FlowBlock* parent,*tmpbl;
-            int4 pos;
+            int pos;
             PcodeOp* op;
 
             block2addr.clear();
             block2addr.reserve(addresstable.size());
             parent = indirect.getParent();
 
-            for (int4 i = 0; i < addresstable.size(); ++i)
+            for (int i = 0; i < addresstable.size(); ++i)
             {
                 Address addr = addresstable[i];
                 op = flow.target(addr);
@@ -459,13 +459,13 @@ namespace Sla.DECCORE
             sort(block2addr.begin(), block2addr.end());
 
             defaultBlock = -1;          // There is no default case initially
-            int4 maxcount = 1;          // If the maxcount is less than 2
+            int maxcount = 1;          // If the maxcount is less than 2
             List<IndexPair>::const_iterator iter = block2addr.begin();
             while (iter != block2addr.end())
             {
-                int4 curPos = (*iter).blockPosition;
+                int curPos = (*iter).blockPosition;
                 List<IndexPair>::const_iterator nextiter = iter;
-                int4 count = 0;
+                int count = 0;
                 while (nextiter != block2addr.end() && (*nextiter).blockPosition == curPos)
                 {
                     count += 1;
@@ -481,7 +481,7 @@ namespace Sla.DECCORE
         }
 
         /// Given a \e case index, get its label
-        private uintb getLabelByIndex(int4 index) => label[index];
+        private ulong getLabelByIndex(int index) => label[index];
 
         /// Hide the normalization code for the switch
         /// Eliminate any code involved in actually computing the destination address so
@@ -696,7 +696,7 @@ namespace Sla.DECCORE
             label.clear();
             loadpoints.clear();
             indirect = (PcodeOp*)0;
-            switchVarConsume = ~((uintb)0);
+            switchVarConsume = ~((ulong)0);
             defaultBlock = -1;
             recoverystage = 0;
             // -opaddress- -maxtablesize- -maxaddsub- -maxleftright- -maxext- -collectloads- are permanent
@@ -713,11 +713,11 @@ namespace Sla.DECCORE
 
             encoder.openElement(ELEM_JUMPTABLE);
             opaddress.encode(encoder);
-            for (int4 i = 0; i < addresstable.size(); ++i)
+            for (int i = 0; i < addresstable.size(); ++i)
             {
                 encoder.openElement(ELEM_DEST);
                 AddrSpace* spc = addresstable[i].getSpace();
-                uintb off = addresstable[i].getOffset();
+                ulong off = addresstable[i].getOffset();
                 if (spc != (AddrSpace*)0)
                     spc.encodeAttributes(encoder, off);
                 if (i < label.size())
@@ -729,7 +729,7 @@ namespace Sla.DECCORE
             }
             if (!loadpoints.empty())
             {
-                for (int4 i = 0; i < loadpoints.size(); ++i)
+                for (int i = 0; i < loadpoints.size(); ++i)
                     loadpoints[i].encode(encoder);
             }
             if ((jmodel != (JumpModel*)0) && (jmodel.isOverride()))
@@ -743,12 +743,12 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         private void decode(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement(ELEM_JUMPTABLE);
+            uint elemId = decoder.openElement(ELEM_JUMPTABLE);
             opaddress = Address::decode(decoder);
             bool missedlabel = false;
             for (; ; )
             {
-                uint4 subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ELEM_DEST)
                 {
@@ -756,13 +756,13 @@ namespace Sla.DECCORE
                     bool foundlabel = false;
                     for (; ; )
                     {
-                        uint4 attribId = decoder.getNextAttributeId();
+                        uint attribId = decoder.getNextAttributeId();
                         if (attribId == 0) break;
                         if (attribId == ATTRIB_LABEL)
                         {
                             if (missedlabel)
                                 throw new LowlevelError("Jumptable entries are missing labels");
-                            uintb lab = decoder.readUnsignedInteger();
+                            ulong lab = decoder.readUnsignedInteger();
                             label.push_back(lab);
                             foundlabel = true;
                             break;

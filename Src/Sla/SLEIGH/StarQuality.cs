@@ -9,6 +9,6 @@ namespace Sla.SLEIGH
     internal struct StarQuality
     {
         internal ConstTpl id;
-        internal uint4 size;
+        internal uint size;
     }
 }

@@ -17,7 +17,7 @@ namespace Sla.DECCORE
         /// Underlying memory object
         private MemoryBank underlie;
         /// Overlayed pages
-        private Dictionary<uintb, uint1> page;
+        private Dictionary<ulong, byte> page;
 
         /// Overridden aligned word insert
         /// This derived method looks for a previously cached page of the underlying memory bank.
@@ -26,30 +26,30 @@ namespace Sla.DECCORE
         /// cached page.
         /// \param addr is the aligned address of the word to be written
         /// \param val is the value to be written at that word
-        protected override void insert(uintb addr, uintb val)
+        protected override void insert(ulong addr, ulong val)
         {
-            uintb pageaddr = addr & ~((uintb)(getPageSize() - 1));
-            map<uintb, uint1*>::iterator iter;
+            ulong pageaddr = addr & ~((ulong)(getPageSize() - 1));
+            map<ulong, byte*>::iterator iter;
 
-            uint1* pageptr;
+            byte* pageptr;
 
             iter = page.find(pageaddr);
             if (iter != page.end())
                 pageptr = (*iter).second;
             else
             {
-                pageptr = new uint1[getPageSize()];
+                pageptr = new byte[getPageSize()];
                 page[pageaddr] = pageptr;
                 if (underlie == (MemoryBank*)0)
                 {
-                    for (int4 i = 0; i < getPageSize(); ++i)
+                    for (int i = 0; i < getPageSize(); ++i)
                         pageptr[i] = 0;
                 }
                 else
                     underlie.getPage(pageaddr, pageptr, 0, getPageSize());
             }
 
-            uintb pageoffset = addr & ((uintb)(getPageSize() - 1));
+            ulong pageoffset = addr & ((ulong)(getPageSize() - 1));
             deconstructValue(pageptr + pageoffset, val, getWordSize(), getSpace().isBigEndian());
         }
 
@@ -59,22 +59,22 @@ namespace Sla.DECCORE
         /// If there is no underlying bank, zero is returned.
         /// \param addr is the aligned offset of the word
         /// \return the retrieved value
-        protected override uintb find(uintb addr)
+        protected override ulong find(ulong addr)
         {
-            uintb pageaddr = addr & ~((uintb)(getPageSize() - 1));
-            map<uintb, uint1*>::const_iterator iter;
+            ulong pageaddr = addr & ~((ulong)(getPageSize() - 1));
+            map<ulong, byte*>::const_iterator iter;
 
             iter = page.find(pageaddr);
             if (iter == page.end())
             {
                 if (underlie == (MemoryBank*)0)
-                    return (uintb)0;
+                    return (ulong)0;
                 return underlie.find(addr);
             }
 
-            uint1* pageptr = (*iter).second;
+            byte* pageptr = (*iter).second;
 
-            uintb pageoffset = addr & ((uintb)(getPageSize() - 1));
+            ulong pageoffset = addr & ((ulong)(getPageSize() - 1));
             return constructValue(pageptr + pageoffset, getWordSize(), getSpace().isBigEndian());
         }
 
@@ -86,23 +86,23 @@ namespace Sla.DECCORE
         /// \param res is the pointer to where retrieved bytes should be stored
         /// \param skip is the offset \e into \e the \e page from where bytes should be retrieved
         /// \param size is the number of bytes to retrieve
-        protected override void getPage(uintb addr, uint1[] res, int4 skip, int4 size)
+        protected override void getPage(ulong addr, byte[] res, int skip, int size)
         {
-            map<uintb, uint1*>::const_iterator iter;
+            map<ulong, byte*>::const_iterator iter;
 
             iter = page.find(addr);
             if (iter == page.end())
             {
                 if (underlie == (MemoryBank*)0)
                 {
-                    for (int4 i = 0; i < size; ++i)
+                    for (int i = 0; i < size; ++i)
                         res[i] = 0;
                     return;
                 }
                 underlie.getPage(addr, res, skip, size);
                 return;
             }
-            uint1* pageptr = (*iter).second;
+            byte* pageptr = (*iter).second;
             memcpy(res, pageptr + skip, size);
         }
 
@@ -114,21 +114,21 @@ namespace Sla.DECCORE
         /// \param val is a pointer to bytes to be written into the page
         /// \param skip is the offset \e into \e the \e page where bytes should be written
         /// \param size is the number of bytes to write
-        protected override void setPage(uintb addr, uint1[] val, int4 skip,int4 size)
+        protected override void setPage(ulong addr, byte[] val, int skip,int size)
         {
-            map<uintb, uint1*>::iterator iter;
-            uint1* pageptr;
+            map<ulong, byte*>::iterator iter;
+            byte* pageptr;
 
             iter = page.find(addr);
             if (iter == page.end())
             {
-                pageptr = new uint1[getPageSize()];
+                pageptr = new byte[getPageSize()];
                 page[addr] = pageptr;
                 if (size != getPageSize())
                 {
                     if (underlie == (MemoryBank*)0)
                     {
-                        for (int4 i = 0; i < getPageSize(); ++i)
+                        for (int i = 0; i < getPageSize(); ++i)
                             pageptr[i] = 0;
                     }
                     else
@@ -148,7 +148,7 @@ namespace Sla.DECCORE
         /// \param ws is the number of bytes in the preferred wordsize (must be power of 2)
         /// \param ps is the number of bytes in a page (must be power of 2)
         /// \param ul is the underlying MemoryBank
-        public MemoryPageOverlay(AddrSpace spc, int4 ws, int4 ps, MemoryBank ul)
+        public MemoryPageOverlay(AddrSpace spc, int ws, int ps, MemoryBank ul)
             : base(spc, ws, ps)
         {
             underlie = ul;
@@ -156,7 +156,7 @@ namespace Sla.DECCORE
 
         ~MemoryPageOverlay()
         {
-            map<uintb, uint1*>::iterator iter;
+            map<ulong, byte*>::iterator iter;
 
             for (iter = page.begin(); iter != page.end(); ++iter)
                 delete[](*iter).second;

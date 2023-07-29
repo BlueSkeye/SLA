@@ -212,17 +212,17 @@ namespace Sla.DECCORE
         /// \param proto is the given function prototype
         protected void pushPrototypeInputs(FuncProto proto)
         {
-            int4 sz = proto.numParams();
+            int sz = proto.numParams();
 
             if ((sz == 0) && (!proto.isDotdotdot()))
                 pushAtom(Atom(KEYWORD_VOID, syntax, EmitMarkup::keyword_color));
             else
             {
-                for (int4 i = 0; i < sz - 1; ++i)
+                for (int i = 0; i < sz - 1; ++i)
                     pushOp(&comma, (PcodeOp*)0); // Print a comma for each parameter (above 1)
                 if (proto.isDotdotdot() && (sz != 0)) // Print comma for dotdotdot (if it is not by itself)
                     pushOp(&comma, (PcodeOp*)0);
-                for (int4 i = 0; i < sz; ++i)
+                for (int i = 0; i < sz; ++i)
                 {
                     ProtoParameter* param = proto.getParam(i);
                     pushTypeStart(param.getType(), true);
@@ -249,7 +249,7 @@ namespace Sla.DECCORE
         /// \param symbol is the given symbol
         protected void pushSymbolScope(Symbol symbol)
         {
-            int4 scopedepth;
+            int scopedepth;
             if (namespc_strategy == MINIMAL_NAMESPACES)
                 scopedepth = symbol.getResolutionDepth(curscope);
             else if (namespc_strategy == ALL_NAMESPACES)
@@ -265,13 +265,13 @@ namespace Sla.DECCORE
             {
                 List <Scope*> scopeList;
                 Scope* point = symbol.getScope();
-                for (int4 i = 0; i < scopedepth; ++i)
+                for (int i = 0; i < scopedepth; ++i)
                 {
                     scopeList.push_back(point);
                     point = point.getParent();
                     pushOp(&scope, (PcodeOp*)0);
                 }
-                for (int4 i = scopedepth - 1; i >= 0; --i)
+                for (int i = scopedepth - 1; i >= 0; --i)
                 {
                     pushAtom(Atom(scopeList[i].getDisplayName(), syntax, EmitMarkup::global_color, (PcodeOp*)0, (Varnode*)0));
                 }
@@ -284,7 +284,7 @@ namespace Sla.DECCORE
         /// \param symbol is the given Symbol
         protected void emitSymbolScope(Symbol symbol)
         {
-            int4 scopedepth;
+            int scopedepth;
             if (namespc_strategy == MINIMAL_NAMESPACES)
                 scopedepth = symbol.getResolutionDepth(curscope);
             else if (namespc_strategy == ALL_NAMESPACES)
@@ -300,12 +300,12 @@ namespace Sla.DECCORE
             {
                 List <Scope*> scopeList;
                 Scope* point = symbol.getScope();
-                for (int4 i = 0; i < scopedepth; ++i)
+                for (int i = 0; i < scopedepth; ++i)
                 {
                     scopeList.push_back(point);
                     point = point.getParent();
                 }
-                for (int4 i = scopedepth - 1; i >= 0; --i)
+                for (int i = scopedepth - 1; i >= 0; --i)
                 {
                     emit.print(scopeList[i].getDisplayName(), EmitMarkup::global_color);
                     emit.print(scope.print1, EmitMarkup::no_color);
@@ -344,7 +344,7 @@ namespace Sla.DECCORE
                 pushOp(tok, (PcodeOp*)0);
                 pushAtom(Atom(ct.getDisplayName(), typetoken, EmitMarkup::type_color, ct));
             }
-            for (int4 i = typestack.size() - 2; i >= 0; --i)
+            for (int i = typestack.size() - 2; i >= 0; --i)
             {
                 ct = typestack[i];
                 if (ct.getMetatype() == TYPE_PTR)
@@ -414,7 +414,7 @@ namespace Sla.DECCORE
         /// \param ct is the data-type associated with the value
         /// \param vn is the Varnode holding the value
         /// \param op is the PcodeOp using the value
-        protected void pushBoolConstant(uintb val, TypeBase ct, Varnode vn, PcodeOp op)
+        protected void pushBoolConstant(ulong val, TypeBase ct, Varnode vn, PcodeOp op)
         {
             if (val != 0)
                 pushAtom(Atom(KEYWORD_TRUE, vartoken, EmitMarkup::const_color, op, vn));
@@ -430,9 +430,9 @@ namespace Sla.DECCORE
         /// \param ct is data-type attached to the value
         /// \param vn is the Varnode holding the value
         /// \param op is the PcodeOp using the value
-        protected void pushCharConstant(uintb val, Datatype ct, Varnode vn, PcodeOp op)
+        protected void pushCharConstant(ulong val, Datatype ct, Varnode vn, PcodeOp op)
         {
-            uint4 displayFormat = 0;
+            uint displayFormat = 0;
             bool isSigned = (ct.getMetatype() == TYPE_INT);
             if ((vn != (Varnode*)0)&& (!vn.isAnnotation())) {
                 HighVariable* high = vn.getHigh();
@@ -479,15 +479,15 @@ namespace Sla.DECCORE
             t << '\'';          // char is surrounded with single quotes
             if (displayFormat == Symbol::force_hex)
             {
-                printCharHexEscape(t, (int4)val);
+                printCharHexEscape(t, (int)val);
             }
             else
-                printUnicode(t, (int4)val);
+                printUnicode(t, (int)val);
             t << '\'';
             pushAtom(Atom(t.str(), vartoken, EmitMarkup::const_color, op, vn));
         }
 
-        protected virtual void pushConstant(uintb val, Datatype ct, Varnode vn, PcodeOp op)
+        protected virtual void pushConstant(ulong val, Datatype ct, Varnode vn, PcodeOp op)
         {
             Datatype* subtype;
             switch (ct.getMetatype())
@@ -569,7 +569,7 @@ namespace Sla.DECCORE
         /// \param ct is the enumerated data-type attached to the value
         /// \param vn is the Varnode holding the value
         /// \param op is the PcodeOp using the value
-        protected void pushEnumConstant(uintb val, TypeEnum ct, Varnode vn, PcodeOp op)
+        protected void pushEnumConstant(ulong val, TypeEnum ct, Varnode vn, PcodeOp op)
         {
             List<string> valnames;
 
@@ -578,9 +578,9 @@ namespace Sla.DECCORE
             {
                 if (complement)
                     pushOp(&bitwise_not, op);
-                for (int4 i = valnames.size() - 1; i > 0; --i)
+                for (int i = valnames.size() - 1; i > 0; --i)
                     pushOp(&enum_cat, op);
-                for (int4 i = 0; i < valnames.size(); ++i)
+                for (int i = 0; i < valnames.size(); ++i)
                     pushAtom(Atom(valnames[i], vartoken, EmitMarkup::const_color, op, vn));
             }
             else
@@ -601,11 +601,11 @@ namespace Sla.DECCORE
         /// \param vn is the Varnode holding the value (may be null)
         /// \param op is the PcodeOp using the value (may be null)
         /// \return \b true if a quoted string was pushed to the RPN stack
-        protected virtual bool pushPtrCharConstant(uintb val, TypePointer ct, Varnode vn, PcodeOp op)
+        protected virtual bool pushPtrCharConstant(ulong val, TypePointer ct, Varnode vn, PcodeOp op)
         {
             if (val == 0) return false;
             AddrSpace* spc = glb.getDefaultDataSpace();
-            uintb fullEncoding;
+            ulong fullEncoding;
             Address point;
             if (op != (PcodeOp*)0)
                 point = op.getAddr();
@@ -632,7 +632,7 @@ namespace Sla.DECCORE
         /// \param vn is the Varnode holding the value
         /// \param op is the PcodeOp using the value
         /// \return \b true if a name was pushed to the RPN stack, return \b false otherwise
-        protected bool pushPtrCodeConstant(uintb val, TypePointer ct, Varnode vn, PcodeOp op)
+        protected bool pushPtrCodeConstant(ulong val, TypePointer ct, Varnode vn, PcodeOp op)
         {
             AddrSpace* spc = glb.getDefaultCodeSpace();
             Funcdata* fd = (Funcdata*)0;
@@ -698,7 +698,7 @@ namespace Sla.DECCORE
             emit.tagLine();
             emit.print("typedef struct", EmitMarkup::keyword_color);
             emit.spaces(1);
-            int4 id = emit.startIndent();
+            int id = emit.startIndent();
             emit.print(OPEN_CURLY);
             emit.tagLine();
             iter = ct.beginField();
@@ -727,7 +727,7 @@ namespace Sla.DECCORE
         /// \param ct is the enumerated data-type
         protected void emitEnumDefinition(TypeEnum ct)
         {
-            map<uintb, string>::const_iterator iter;
+            map<ulong, string>::const_iterator iter;
 
             if (ct.getName().size() == 0)
             {
@@ -740,7 +740,7 @@ namespace Sla.DECCORE
             emit.tagLine();
             emit.print("typedef enum", EmitMarkup::keyword_color);
             emit.spaces(1);
-            int4 id = emit.startIndent();
+            int id = emit.startIndent();
             emit.print(OPEN_CURLY);
             emit.tagLine();
             iter = ct.beginEnum();
@@ -791,7 +791,7 @@ namespace Sla.DECCORE
                 vn = op.getIn(1);
             else
                 vn = (Varnode*)0;
-            int4 id = emit.beginReturnType(vn);
+            int id = emit.beginReturnType(vn);
             pushType(outtype);
             recurse();
             emit.endReturnType(id);
@@ -803,14 +803,14 @@ namespace Sla.DECCORE
         /// \param proto is the given prototype of the function
         protected void emitPrototypeInputs(FuncProto proto)
         {
-            int4 sz = proto.numParams();
+            int sz = proto.numParams();
 
             if (sz == 0)
                 emit.print(KEYWORD_VOID, EmitMarkup::keyword_color);
             else
             {
                 bool printComma = false;
-                for (int4 i = 0; i < sz; ++i)
+                for (int i = 0; i < sz; ++i)
                 {
                     if (printComma)
                         emit.print(COMMA);
@@ -888,7 +888,7 @@ namespace Sla.DECCORE
         /// \param inst is the given root PcodeOp of the statement
         protected void emitStatement(PcodeOp inst)
         {
-            int4 id = emit.beginStatement(inst);
+            int id = emit.beginStatement(inst);
             emitExpression(inst);
             emit.endStatement(id);
             if (!isSet(comma_separate))
@@ -958,9 +958,9 @@ namespace Sla.DECCORE
         /// \param bl is the source block
         /// \param exp_bl is the destination block (which may provide a label)
         /// \param type is the given type of the branch
-        protected void emitGotoStatement(FlowBlock bl, FlowBlock exp_bl, uint4 type)
+        protected void emitGotoStatement(FlowBlock bl, FlowBlock exp_bl, uint type)
         {
-            int4 id = emit.beginStatement(bl.lastOp());
+            int id = emit.beginStatement(bl.lastOp());
             switch (type)
             {
                 case FlowBlock::f_break_goto:
@@ -985,10 +985,10 @@ namespace Sla.DECCORE
         /// using formal labels with the \b case keyword and a ':' terminator.
         /// \param casenum is the given index of the \e case block
         /// \param switchbl is the root block of the switch
-        protected void emitSwitchCase(int4 casenum, BlockSwitch switchbl)
+        protected void emitSwitchCase(int casenum, BlockSwitch switchbl)
         {
-            int4 i, num;
-            uintb val;
+            int i, num;
+            ulong val;
             Datatype ct;
 
             ct = switchbl.getSwitchType();
@@ -1027,7 +1027,7 @@ namespace Sla.DECCORE
             BlockBasic* bb = (BlockBasic*)bl.subBlock(0);
             Address addr = bb.getEntryAddr();
             AddrSpace* spc = addr.getSpace();
-            uintb off = addr.getOffset();
+            ulong off = addr.getOffset();
             if (!bb.hasSpecialLabel())
             {
                 if (bb.getType() == FlowBlock::t_basic)
@@ -1122,8 +1122,8 @@ namespace Sla.DECCORE
             if (bl.getType() != FlowBlock::t_basic)
             {
                 BlockGraph* rootbl = (BlockGraph*)bl;
-                int4 size = rootbl.getSize();
-                for (int4 i = 0; i < size; ++i)
+                int size = rootbl.getSize();
+                for (int i = 0; i < size; ++i)
                 {
                     emitCommentBlockTree(rootbl.subBlock(i));
                 }
@@ -1192,7 +1192,7 @@ namespace Sla.DECCORE
         protected void emitForLoop(BlockWhileDo bl)
         {
             PcodeOp op;
-            int4 indent;
+            int indent;
 
             pushMod();
             unsetMod(no_branch | only_branch);
@@ -1203,13 +1203,13 @@ namespace Sla.DECCORE
             op = condBlock.lastOp();
             emit.tagOp(KEYWORD_FOR, EmitMarkup::keyword_color, op);
             emit.spaces(1);
-            int4 id1 = emit.openParen(OPEN_PAREN);
+            int id1 = emit.openParen(OPEN_PAREN);
             pushMod();
             setMod(comma_separate);
             op = bl.getInitializeOp();     // Emit the (optional) initializer statement
             if (op != (PcodeOp*)0)
             {
-                int4 id3 = emit.beginStatement(op);
+                int id3 = emit.beginStatement(op);
                 emitExpression(op);
                 emit.endStatement(id3);
             }
@@ -1219,7 +1219,7 @@ namespace Sla.DECCORE
             emit.print(SEMICOLON);
             emit.spaces(1);
             op = bl.getIterateOp();        // Emit the iterator statement
-            int4 id4 = emit.beginStatement(op);
+            int id4 = emit.beginStatement(op);
             emitExpression(op);
             emit.endStatement(id4);
             popMod();
@@ -1228,7 +1228,7 @@ namespace Sla.DECCORE
             indent = emit.startIndent();
             emit.print(OPEN_CURLY);
             setMod(no_branch); // Dont print goto at bottom of clause
-            int4 id2 = emit.beginBlock(bl.getBlock(1));
+            int id2 = emit.beginBlock(bl.getBlock(1));
             bl.getBlock(1).emit(this);
             emit.endBlock(id2);
             emit.stopIndent(indent);
@@ -1251,11 +1251,11 @@ namespace Sla.DECCORE
             pushAtom(Atom(nm, optoken, EmitMarkup::no_color, op));
             if (op.numInput() > 0)
             {
-                for (int4 i = 0; i < op.numInput() - 1; ++i)
+                for (int i = 0; i < op.numInput() - 1; ++i)
                     pushOp(&comma, op);
                 // implied vn's pushed on in reverse order for efficiency
                 // see PrintLanguage::pushVnImplied
-                for (int4 i = op.numInput() - 1; i >= 0; --i)
+                for (int i = op.numInput() - 1; i >= 0; --i)
                     pushVn(op.getIn(i), op, mods);
             }
             else                // Push empty token for void
@@ -1296,7 +1296,7 @@ namespace Sla.DECCORE
         /// Print the given value using the standard character hexadecimal escape sequence.
         /// \param s is the stream to write to
         /// \param val is the given value
-        protected static void printCharHexEscape(TextWriter s, int4 val)
+        protected static void printCharHexEscape(TextWriter s, int val)
         {
             if (val < 256)
             {
@@ -1325,7 +1325,7 @@ namespace Sla.DECCORE
 
             // Retrieve UTF8 version of string
             bool isTrunc = false;
-            List<uint1> buffer = manager.getStringData(addr, charType, isTrunc);
+            List<byte> buffer = manager.getStringData(addr, charType, isTrunc);
             if (buffer.empty())
                 return false;
             if (doEmitWideCharPrefix() && charType.getSize() > 1 && !charType.isOpaqueString())
@@ -1347,12 +1347,12 @@ namespace Sla.DECCORE
         /// \param op is the given CALL PcodeOp
         /// \param fc is the function prototype corresponding to the CALL
         /// \return the "this" Varnode slot or -1
-        protected int4 getHiddenThisSlot(PcodeOp op, FuncProto fc)
+        protected int getHiddenThisSlot(PcodeOp op, FuncProto fc)
         {
-            int4 numInput = op.numInput();
+            int numInput = op.numInput();
             if (isSet(hide_thisparam) && fc.hasThisPointer())
             {
-                for (int4 i = 1; i < numInput - 1; ++i)
+                for (int i = 1; i < numInput - 1; ++i)
                 {
                     ProtoParameter* param = fc.getParam(i - 1);
                     if (param != (ProtoParameter*)0 && param.isThisPointer())
@@ -1388,9 +1388,9 @@ namespace Sla.DECCORE
         /// \param ct is data-type attached to the value
         /// \param vn is the Varnode holding the value
         /// \param op is the PcodeOp using the value
-        protected virtual void pushConstant(uintb val, Datatype ct, Varnode vn, PcodeOp op)
+        protected virtual void pushConstant(ulong val, Datatype ct, Varnode vn, PcodeOp op)
         {
-            uint4 displayFormat = 0;
+            uint displayFormat = 0;
             bool isSigned = (ct.getMetatype() == TYPE_INT);
             if ((vn != (Varnode*)0)&& (!vn.isAnnotation())) {
                 HighVariable* high = vn.getHigh();
@@ -1437,22 +1437,22 @@ namespace Sla.DECCORE
             t << '\'';          // char is surrounded with single quotes
             if (displayFormat == Symbol::force_hex)
             {
-                printCharHexEscape(t, (int4)val);
+                printCharHexEscape(t, (int)val);
             }
             else
-                printUnicode(t, (int4)val);
+                printUnicode(t, (int)val);
             t << '\'';
             pushAtom(Atom(t.str(), vartoken, EmitMarkup::const_color, op, vn));
         }
 
-        protected virtual bool pushEquate(uintb val, int4 sz, EquateSymbol sym, Varnode vn, PcodeOp op)
+        protected virtual bool pushEquate(ulong val, int sz, EquateSymbol sym, Varnode vn, PcodeOp op)
         {
-            uintb mask = calc_mask(sz);
-            uintb baseval = sym.getValue();
-            uintb modval = baseval & mask;
+            ulong mask = calc_mask(sz);
+            ulong baseval = sym.getValue();
+            ulong modval = baseval & mask;
             if (modval != baseval)
             {                   // If 1-bits are getting masked
-                if (sign_extend(modval, sz, sizeof(uintb)) != baseval)  // make sure we only mask sign extension bits
+                if (sign_extend(modval, sz, sizeof(ulong)) != baseval)  // make sure we only mask sign extension bits
                     return false;
             }
             if (modval == val)
@@ -1496,10 +1496,10 @@ namespace Sla.DECCORE
         protected virtual void pushAnnotation(Varnode vn, PcodeOp op)
         {
             Scope symScope = op.getParent().getFuncdata().getScopeLocal();
-            int4 size = 0;
+            int size = 0;
             if (op.code() == CPUI_CALLOTHER)
             {
-                int4 userind = (int4)op.getIn(0).getOffset();
+                int userind = (int)op.getIn(0).getOffset();
                 size = glb.userops.getOp(userind).extractAnnotationSize(vn, op);
             }
             SymbolEntry* entry;
@@ -1520,7 +1520,7 @@ namespace Sla.DECCORE
                     pushSymbol(entry.getSymbol(), vn, op);
                 else
                 {
-                    int4 symboloff = vn.getOffset() - entry.getFirst();
+                    int symboloff = vn.getOffset() - entry.getFirst();
                     pushPartialSymbol(entry.getSymbol(), symboloff, size, vn, op, -1);
                 }
             }
@@ -1583,8 +1583,8 @@ namespace Sla.DECCORE
             pushAtom(Atom(s.str(), vartoken, EmitMarkup::var_color, op, vn));
         }
 
-        protected virtual void pushPartialSymbol(Symbol sym, int4 off, int4 sz, Varnode vn, PcodeOp op,
-            int4 inslot)
+        protected virtual void pushPartialSymbol(Symbol sym, int off, int sz, Varnode vn, PcodeOp op,
+            int inslot)
         {
             // We need to print "bottom up" in order to get parentheses right
             // I.e. we want to print globalstruct.arrayfield[0], rather than
@@ -1626,7 +1626,7 @@ namespace Sla.DECCORE
                 }
                 else if (ct.getMetatype() == TYPE_ARRAY)
                 {
-                    int4 el;
+                    int el;
                     Datatype* arrayof = ((TypeArray*)ct).getSubEntry(off, sz, &off, &el);
                     if (arrayof != (Datatype*)0)
                     {
@@ -1692,10 +1692,10 @@ namespace Sla.DECCORE
                 pushType(finalcast);
             }
             // Push these on the RPN stack in reverse order
-            for (int4 i = stack.size() - 1; i >= 0; --i)
+            for (int i = stack.size() - 1; i >= 0; --i)
                 pushOp(stack[i].token, op);
             pushSymbol(sym, vn, op);    // Push base symbol name
-            for (int4 i = 0; i < stack.size(); ++i)
+            for (int i = 0; i < stack.size(); ++i)
             {
                 TypeField field = stack[i].field;
                 if (field == (TypeField*)0)
@@ -1705,7 +1705,7 @@ namespace Sla.DECCORE
             }
         }
 
-        protected virtual void pushMismatchSymbol(Symbol sym, int4 off, int4 sz, Varnode vn, PcodeOp op)
+        protected virtual void pushMismatchSymbol(Symbol sym, int off, int sz, Varnode vn, PcodeOp op)
         {
             if (off == 0)
             {
@@ -1731,7 +1731,7 @@ namespace Sla.DECCORE
             if (parent.needsResolution() && parent.getMetatype() != TYPE_PTR)
             {
                 Funcdata fd = op.getParent().getFuncdata();
-                int4 slot = op.getSlot(vn);
+                int slot = op.getSlot(vn);
                 ResolvedUnion* res = fd.getUnionField(parent, op, slot);
                 if (res != (ResolvedUnion*)0 && res.getFieldNum() >= 0) {
                     if (parent.getMetatype() == TYPE_STRUCT && res.getFieldNum() == 0)
@@ -1770,12 +1770,12 @@ namespace Sla.DECCORE
         /// \param sign is set to \b true if the integer should be treated as a signed value
         /// \param vn is the Varnode holding the value
         /// \param op is the PcodeOp using the value
-        protected virtual void push_integer(uintb val, int4 sz, bool sign, Varnode vn, PcodeOp op)
+        protected virtual void push_integer(ulong val, int sz, bool sign, Varnode vn, PcodeOp op)
         {
             bool print_negsign;
             bool force_unsigned_token;
             bool force_sized_token;
-            uint4 displayFormat = 0;
+            uint displayFormat = 0;
 
             force_unsigned_token = false;
             force_sized_token = false;
@@ -1798,8 +1798,8 @@ namespace Sla.DECCORE
             }
             if (sign && displayFormat != Symbol::force_char)
             { // Print the constant as signed
-                uintb mask = calc_mask(sz);
-                uintb flip = val ^ mask;
+                ulong mask = calc_mask(sz);
+                ulong flip = val ^ mask;
                 print_negsign = (flip < val);
                 if (print_negsign)
                     val = flip + 1;
@@ -1843,9 +1843,9 @@ namespace Sla.DECCORE
                     t << 'L';           // Print symbol indicating wide character
                 t << '\'';          // char is surrounded with single quotes
                 if (sz == 1 && val >= 0x80)
-                    printCharHexEscape(t, (int4)val);
+                    printCharHexEscape(t, (int)val);
                 else
-                    printUnicode(t, (int4)val);
+                    printUnicode(t, (int)val);
                 t << '\'';
             }
             else
@@ -1873,7 +1873,7 @@ namespace Sla.DECCORE
         /// \param sz is the size (in bytes) of the encoded value
         /// \param vn is the Varnode holding the value
         /// \param op is the PcodeOp using the value
-        protected virtual void push_float(uintb val, int4 sz, Varnode vn, PcodeOp op)
+        protected virtual void push_float(ulong val, int sz, Varnode vn, PcodeOp op)
         {
             string token;
 
@@ -1917,7 +1917,7 @@ namespace Sla.DECCORE
                         t << floatval;
                         token = t.str();
                         bool looksLikeFloat = false;
-                        for (int4 i = 0; i < token.Length; ++i)
+                        for (int i = 0; i < token.Length; ++i)
                         {
                             char c = token[i];
                             if (c == '.' || c == 'e')
@@ -1939,7 +1939,7 @@ namespace Sla.DECCORE
                 pushAtom(Atom(token, vartoken, EmitMarkup::const_color, op, vn));
         }
 
-        protected virtual void printUnicode(TextWriter s, int4 onechar)
+        protected virtual void printUnicode(TextWriter s, int onechar)
         {
             if (unicodeNeedsEscape(onechar))
             {
@@ -2070,7 +2070,7 @@ namespace Sla.DECCORE
 
         protected virtual void emitVarDecl(Symbol sym)
         {
-            int4 id = emit.beginVarDecl(sym);
+            int id = emit.beginVarDecl(sym);
 
             pushTypeStart(sym.getType(), false);
             pushSymbol(sym, (Varnode*)0, (PcodeOp*)0);
@@ -2087,14 +2087,14 @@ namespace Sla.DECCORE
             emit.print(SEMICOLON);
         }
 
-        protected virtual bool emitScopeVarDecls(Scope symScope, int4 cat)
+        protected virtual bool emitScopeVarDecls(Scope symScope, int cat)
         {
             bool notempty = false;
 
             if (cat >= 0)
             {       // If a category is specified
-                int4 sz = symScope.getCategorySize(cat);
-                for (int4 i = 0; i < sz; ++i)
+                int sz = symScope.getCategorySize(cat);
+                for (int i = 0; i < sz; ++i)
                 {
                     Symbol* sym = symScope.getCategorySymbol(cat, i);
                     // Slightly different handling for categorized symbols (cat=1 is dynamic symbols)
@@ -2154,7 +2154,7 @@ namespace Sla.DECCORE
         protected virtual void emitFunctionDeclaration(Funcdata fd)
         {
             FuncProto proto = &fd.getFuncProto();
-            int4 id = emit.beginFuncProto();
+            int id = emit.beginFuncProto();
             emitPrototypeOutput(proto, fd);
             emit.spaces(1);
             if (option_convention)
@@ -2166,12 +2166,12 @@ namespace Sla.DECCORE
                     emit.spaces(1);
                 }
             }
-            int4 id1 = emit.openGroup();
+            int id1 = emit.openGroup();
             emitSymbolScope(fd.getSymbol());
             emit.tagFuncName(fd.getDisplayName(), EmitMarkup::funcname_color, fd, (PcodeOp*)0);
 
             emit.spaces(function_call.spacing, function_call.bump);
-            int4 id2 = emit.openParen(OPEN_PAREN);
+            int id2 = emit.openParen(OPEN_PAREN);
             emit.spaces(0, function_call.bump);
             pushScope(fd.getScopeLocal());     // Enter the function's scope for parameters
             emitPrototypeInputs(proto);
@@ -2349,7 +2349,7 @@ namespace Sla.DECCORE
 
         public virtual void docAllGlobals()
         {
-            int4 id = emit.beginDocument();
+            int id = emit.beginDocument();
             emitGlobalVarDeclsRecursive(glb.symboltab.getGlobalScope());
             emit.tagLine();
             emit.endDocument(id);
@@ -2358,7 +2358,7 @@ namespace Sla.DECCORE
 
         public virtual void docSingleGlobal(Symbol sym)
         {
-            int4 id = emit.beginDocument();
+            int id = emit.beginDocument();
             emitVarDeclStatement(sym);
             emit.tagLine();        // Extra line
             emit.endDocument(id);
@@ -2367,7 +2367,7 @@ namespace Sla.DECCORE
 
         public virtual void docFunction(Funcdata fd)
         {
-            uint4 modsave = mods;
+            uint modsave = mods;
             if (!fd.isProcStarted())
                 throw RecovError("Function not decompiled");
             if ((!isSet(flat)) && (fd.hasNoStructBlocks()))
@@ -2375,13 +2375,13 @@ namespace Sla.DECCORE
             try
             {
                 commsorter.setupFunctionList(instr_comment_type | head_comment_type, fd, *fd.getArch().commentdb, option_unplaced);
-                int4 id1 = emit.beginFunction(fd);
+                int id1 = emit.beginFunction(fd);
                 emitCommentFuncHeader(fd);
                 emit.tagLine();
                 emitFunctionDeclaration(fd);    // Causes us to enter function's scope
                 emit.tagLine();
                 emit.tagLine();
-                int4 id = emit.startIndent();
+                int id = emit.startIndent();
                 emit.print(OPEN_CURLY);
                 emitLocalVarDecls(fd);
                 if (isSet(flat))
@@ -2465,7 +2465,7 @@ namespace Sla.DECCORE
                 {
                     inst = bb.lastOp();
                     emit.tagLine();
-                    int4 id = emit.beginStatement(inst);
+                    int id = emit.beginStatement(inst);
                     emit.print(KEYWORD_GOTO, EmitMarkup::keyword_color);
                     emit.spaces(1);
                     if (bb.sizeOut() == 2)
@@ -2491,7 +2491,7 @@ namespace Sla.DECCORE
 
             for (iter = list.begin(); iter != list.end(); ++iter)
             {
-                int4 id = emit.beginBlock(*iter);
+                int id = emit.beginBlock(*iter);
                 (*iter).emit(this);
                 emit.endBlock(id);
             }
@@ -2520,7 +2520,7 @@ namespace Sla.DECCORE
 
         public virtual void emitBlockLs(BlockList bl)
         {
-            int4 i;
+            int i;
             FlowBlock* subbl;
 
             if (isSet(only_branch))
@@ -2533,7 +2533,7 @@ namespace Sla.DECCORE
             if (bl.getSize() == 0) return;
             i = 0;
             subbl = bl.getBlock(i++);
-            int4 id1 = emit.beginBlock(subbl);
+            int id1 = emit.beginBlock(subbl);
             if (i == bl.getSize())
             {
                 subbl.emit(this);
@@ -2559,7 +2559,7 @@ namespace Sla.DECCORE
             while (i < bl.getSize() - 1)
             {
                 subbl = bl.getBlock(i++);
-                int4 id2 = emit.beginBlock(subbl);
+                int id2 = emit.beginBlock(subbl);
                 if (bl.getBlock(i) != subbl.nextInFlow())
                 {
                     pushMod();
@@ -2573,7 +2573,7 @@ namespace Sla.DECCORE
             }
             popMod();
             subbl = bl.getBlock(i);        // The final block
-            int4 id3 = emit.beginBlock(subbl);
+            int id3 = emit.beginBlock(subbl);
             subbl.emit(this);      // Pass original no_branch state
             emit.endBlock(id3);
         }
@@ -2583,14 +2583,14 @@ namespace Sla.DECCORE
             // FIXME: get rid of parens and properly emit && and ||
             if (isSet(no_branch))
             {
-                int4 id = emit.beginBlock(bl.getBlock(0));
+                int id = emit.beginBlock(bl.getBlock(0));
                 bl.getBlock(0).emit(this);
                 emit.endBlock(id);
                 return;
             }
             if (isSet(only_branch) || isSet(comma_separate))
             {
-                int4 id = emit.openParen(OPEN_PAREN);
+                int id = emit.openParen(OPEN_PAREN);
                 bl.getBlock(0).emit(this);
                 pushMod();
                 unsetMod(only_branch);
@@ -2607,7 +2607,7 @@ namespace Sla.DECCORE
                     pol.tok = &boolean_or;
                 emitOp(pol);
 
-                int4 id2 = emit.openParen(OPEN_PAREN);
+                int id2 = emit.openParen(OPEN_PAREN);
                 bl.getBlock(1).emit(this);
                 emit.closeParen(CLOSE_PAREN, id2);
                 popMod();
@@ -2657,9 +2657,9 @@ namespace Sla.DECCORE
             {
                 setMod(no_branch);
                 emit.spaces(1);
-                int4 id = emit.startIndent();
+                int id = emit.startIndent();
                 emit.print(OPEN_CURLY);
-                int4 id1 = emit.beginBlock(bl.getBlock(1));
+                int id1 = emit.beginBlock(bl.getBlock(1));
                 bl.getBlock(1).emit(this);
                 emit.endBlock(id1);
                 emit.stopIndent(id);
@@ -2675,15 +2675,15 @@ namespace Sla.DECCORE
                     {
                         // Attempt to merge the "else" and "if" syntax
                         setMod(pending_brace);
-                        int4 id2 = emit.beginBlock(elseBlock);
+                        int id2 = emit.beginBlock(elseBlock);
                         elseBlock.emit(this);
                         emit.endBlock(id2);
                     }
                     else
                     {
-                        int4 id2 = emit.startIndent();
+                        int id2 = emit.startIndent();
                         emit.print(OPEN_CURLY);
-                        int4 id3 = emit.beginBlock(elseBlock);
+                        int id3 = emit.beginBlock(elseBlock);
                         elseBlock.emit(this);
                         emit.endBlock(id3);
                         emit.stopIndent(id2);
@@ -2704,7 +2704,7 @@ namespace Sla.DECCORE
         public virtual void emitBlockWhileDo(BlockWhileDo bl)
         {
             PcodeOp op;
-            int4 indent;
+            int indent;
 
             if (bl.getIterateOp() != (PcodeOp*)0)
             {
@@ -2725,7 +2725,7 @@ namespace Sla.DECCORE
                 //       if (conditionalbranch) break;
                 emit.tagLine();
                 emit.tagOp(KEYWORD_WHILE, EmitMarkup::keyword_color, op);
-                int4 id1 = emit.openParen(OPEN_PAREN);
+                int id1 = emit.openParen(OPEN_PAREN);
                 emit.spaces(1);
                 emit.print(KEYWORD_TRUE, EmitMarkup::const_color);
                 emit.spaces(1);
@@ -2756,7 +2756,7 @@ namespace Sla.DECCORE
                 emit.tagLine();
                 emit.tagOp(KEYWORD_WHILE, EmitMarkup::keyword_color, op);
                 emit.spaces(1);
-                int4 id1 = emit.openParen(OPEN_PAREN);
+                int id1 = emit.openParen(OPEN_PAREN);
                 pushMod();
                 setMod(comma_separate);
                 condBlock.emit(this);
@@ -2767,7 +2767,7 @@ namespace Sla.DECCORE
                 emit.print(OPEN_CURLY);
             }
             setMod(no_branch); // Dont print goto at bottom of clause
-            int4 id2 = emit.beginBlock(bl.getBlock(1));
+            int id2 = emit.beginBlock(bl.getBlock(1));
             bl.getBlock(1).emit(this);
             emit.endBlock(id2);
             emit.stopIndent(indent);
@@ -2787,10 +2787,10 @@ namespace Sla.DECCORE
             emit.tagLine();
             emit.print(KEYWORD_DO, EmitMarkup::keyword_color);
             emit.spaces(1);
-            int4 id = emit.startIndent();
+            int id = emit.startIndent();
             emit.print(OPEN_CURLY);
             pushMod();
-            int4 id2 = emit.beginBlock(bl.getBlock(0));
+            int id2 = emit.beginBlock(bl.getBlock(0));
             setMod(no_branch);
             bl.getBlock(0).emit(this);
             emit.endBlock(id2);
@@ -2818,9 +2818,9 @@ namespace Sla.DECCORE
             emit.tagLine();
             emit.print(KEYWORD_DO, EmitMarkup::keyword_color);
             emit.spaces(1);
-            int4 id = emit.startIndent();
+            int id = emit.startIndent();
             emit.print(OPEN_CURLY);
-            int4 id1 = emit.beginBlock(bl.getBlock(0));
+            int id1 = emit.beginBlock(bl.getBlock(0));
             bl.getBlock(0).emit(this);
             emit.endBlock(id1);
             emit.stopIndent(id);
@@ -2829,7 +2829,7 @@ namespace Sla.DECCORE
             emit.spaces(1);
             op = bl.getBlock(0).lastOp();
             emit.tagOp(KEYWORD_WHILE, EmitMarkup::keyword_color, op);
-            int4 id2 = emit.openParen(OPEN_PAREN);
+            int id2 = emit.openParen(OPEN_PAREN);
             emit.spaces(1);
             emit.print(KEYWORD_TRUE, EmitMarkup::const_color);
             emit.spaces(1);
@@ -2856,10 +2856,10 @@ namespace Sla.DECCORE
             emit.spaces(1);
             emit.print(OPEN_CURLY);
 
-            for (int4 i = 0; i < bl.getNumCaseBlocks(); ++i)
+            for (int i = 0; i < bl.getNumCaseBlocks(); ++i)
             {
                 emitSwitchCase(i, bl);
-                int4 id = emit.startIndent();
+                int id = emit.startIndent();
                 if (bl.getGotoType(i) != 0)
                 {
                     emit.tagLine();
@@ -2868,7 +2868,7 @@ namespace Sla.DECCORE
                 else
                 {
                     bl2 = bl.getCaseBlock(i);
-                    int4 id2 = emit.beginBlock(bl2);
+                    int id2 = emit.beginBlock(bl2);
                     bl2.emit(this);
                     if (bl.isExit(i) && (i != bl.getNumCaseBlocks() - 1))
                     {   // Blocks that formally exit the switch
@@ -2892,7 +2892,7 @@ namespace Sla.DECCORE
         public virtual void opLoad(PcodeOp op)
         {
             bool usearray = checkArrayDeref(op.getIn(1));
-            uint4 m = mods;
+            uint m = mods;
             if (usearray && (!isSet(force_pointer)))
                 m |= print_load_value;
             else
@@ -2907,7 +2907,7 @@ namespace Sla.DECCORE
             bool usearray;
 
             // We assume the STORE is a statement
-            uint4 m = mods;
+            uint m = mods;
             pushOp(&assignment, op);    // This is an assignment
             usearray = checkArrayDeref(op.getIn(1));
             if (usearray && (!isSet(force_pointer)))
@@ -2944,7 +2944,7 @@ namespace Sla.DECCORE
             bool yesif = isSet(flat);
             bool yesparen = !isSet(comma_separate);
             bool booleanflip = op.isBooleanFlip();
-            uint4 m = mods;
+            uint m = mods;
 
             if (yesif)
             {           // If not printing block structure
@@ -2956,7 +2956,7 @@ namespace Sla.DECCORE
                     m |= falsebranch;     // and print the false (non-fallthru) branch
                 }
             }
-            int4 id;
+            int id;
             if (yesparen)
                 id = emit.openParen(OPEN_PAREN);
             else
@@ -2992,7 +2992,7 @@ namespace Sla.DECCORE
         {
             // FIXME:  This routine shouldn't emit directly
             emit.tagOp(KEYWORD_SWITCH, EmitMarkup::keyword_color, op); // Print header for switch
-            int4 id = emit.openParen(OPEN_PAREN);
+            int id = emit.openParen(OPEN_PAREN);
             pushVn(op.getIn(0), op, mods);
             recurse();
             emit.closeParen(CLOSE_PAREN, id);
@@ -3027,17 +3027,17 @@ namespace Sla.DECCORE
             // TODO: Cannot hide "this" on a direct call until we print the whole
             // thing with the proper C++ method invocation format. Otherwise the output
             // gives no indication of what object has a method being called.
-            // int4 skip = getHiddenThisSlot(op, fc);
-            int4 skip = -1;
-            int4 count = op.numInput() - 1;    // Number of parameter expressions printed
+            // int skip = getHiddenThisSlot(op, fc);
+            int skip = -1;
+            int count = op.numInput() - 1;    // Number of parameter expressions printed
             count -= (skip < 0) ? 0 : 1;        // Subtract one if "this" is hidden
             if (count > 0)
             {
-                for (int4 i = 0; i < count - 1; ++i)
+                for (int i = 0; i < count - 1; ++i)
                     pushOp(&comma, op);
                 // implied vn's pushed on in reverse order for efficiency
                 // see PrintLanguage::pushVnImplied
-                for (int4 i = op.numInput() - 1; i >= 1; --i)
+                for (int i = op.numInput() - 1; i >= 1; --i)
                 {
                     if (i == skip) continue;
                     pushVn(op.getIn(i), op, mods);
@@ -3055,17 +3055,17 @@ namespace Sla.DECCORE
             FuncCallSpecs* fc = fd.getCallSpecs(op);
             if (fc == (FuncCallSpecs*)0)
                 throw new LowlevelError("Missing indirect function callspec");
-            int4 skip = getHiddenThisSlot(op, fc);
-            int4 count = op.numInput() - 1;
+            int skip = getHiddenThisSlot(op, fc);
+            int count = op.numInput() - 1;
             count -= (skip < 0) ? 0 : 1;
             if (count > 1)
             {   // Multiple parameters
                 pushVn(op.getIn(0), op, mods);
-                for (int4 i = 0; i < count - 1; ++i)
+                for (int i = 0; i < count - 1; ++i)
                     pushOp(&comma, op);
                 // implied vn's pushed on in reverse order for efficiency
                 // see PrintLanguage::pushVnImplied
-                for (int4 i = op.numInput() - 1; i >= 1; --i)
+                for (int i = op.numInput() - 1; i >= 1; --i)
                 {
                     if (i == skip) continue;
                     pushVn(op.getIn(i), op, mods);
@@ -3089,7 +3089,7 @@ namespace Sla.DECCORE
         public virtual void opCallother(PcodeOp op)
         {
             UserPcodeOp* userop = glb.userops.getOp(op.getIn(0).getOffset());
-            uint4 display = userop.getDisplay();
+            uint display = userop.getDisplay();
             if (display == UserPcodeOp::annotation_assignment)
             {
                 pushOp(&assignment, op);
@@ -3107,11 +3107,11 @@ namespace Sla.DECCORE
                 pushAtom(Atom(nm, optoken, EmitMarkup::funcname_color, op));
                 if (op.numInput() > 1)
                 {
-                    for (int4 i = 1; i < op.numInput() - 1; ++i)
+                    for (int i = 1; i < op.numInput() - 1; ++i)
                         pushOp(&comma, op);
                     // implied vn's pushed on in reverse order for efficiency
                     // see PrintLanguage::pushVnImplied
-                    for (int4 i = op.numInput() - 1; i >= 1; --i)
+                    for (int i = op.numInput() - 1; i >= 1; --i)
                         pushVn(op.getIn(i), op, mods);
                 }
                 else
@@ -3146,9 +3146,9 @@ namespace Sla.DECCORE
             // see PrintLanguage::pushVnImplied
             if (op.numInput() > 3)
             {   // Multiple (non-this) parameters
-                for (int4 i = 2; i < op.numInput() - 1; ++i)
+                for (int i = 2; i < op.numInput() - 1; ++i)
                     pushOp(&comma, op);
-                for (int4 i = op.numInput() - 1; i >= 2; --i)
+                for (int i = op.numInput() - 1; i >= 2; --i)
                     pushVn(op.getIn(i), op, mods);
             }
             else if (op.numInput() == 3)
@@ -3486,8 +3486,8 @@ namespace Sla.DECCORE
                 Datatype* ct = vn.getHighTypeReadFacing(op);
                 if (ct.isPieceStructured())
                 {
-                    int4 offset;
-                    int4 byteOff = TypeOpSubpiece::computeByteOffsetForComposite(op);
+                    int offset;
+                    int byteOff = TypeOpSubpiece::computeByteOffsetForComposite(op);
                     TypeField* field = ct.findTruncation(byteOff, op.getOut().getSize(), op, 1, offset);   // Use artificial slot
                     if (field != (TypeField*)0 && offset == 0) {      // A formal structure field
                         pushOp(&object_member, op);
@@ -3500,8 +3500,8 @@ namespace Sla.DECCORE
                         Symbol* sym = vn.getHigh().getSymbol();
                         if (sym != (Symbol*)0)
                         {
-                            int4 sz = op.getOut().getSize();
-                            int4 off = (int4)op.getIn(1).getOffset();
+                            int sz = op.getOut().getSize();
+                            int off = (int)op.getIn(1).getOffset();
                             off = vn.getSpace().isBigEndian() ? vn.getSize() - (sz + off) : off;
                             pushPartialSymbol(sym, off, sz, vn, op, -1);
                             return;
@@ -3512,7 +3512,7 @@ namespace Sla.DECCORE
             }
             if (castStrategy.isSubpieceCast(op.getOut().getHighTypeDefFacing(),
                              op.getIn(0).getHighTypeReadFacing(op),
-                             (uint4)op.getIn(1).getOffset()))
+                             (uint)op.getIn(1).getOffset()))
                 opTypeCast(op);
             else
                 opFunc(op);
@@ -3526,7 +3526,7 @@ namespace Sla.DECCORE
         public virtual void opPtradd(PcodeOp op)
         {
             bool printval = isSet(print_load_value | print_store_value);
-            uint4 m = mods & ~(print_load_value | print_store_value);
+            uint m = mods & ~(print_load_value | print_store_value);
             if (!printval)
             {
                 TypePointer* tp = (TypePointer*)op.getIn(0).getHighTypeReadFacing(op);
@@ -3568,9 +3568,9 @@ namespace Sla.DECCORE
             TypePointerRel* ptrel;
             Datatype* ct;
             Varnode* in0;
-            uintb in1const;
+            ulong in1const;
             bool valueon, flex, arrayvalue;
-            uint4 m;
+            uint m;
 
             in0 = op.getIn(0);
             in1const = op.getIn(1).getOffset();
@@ -3596,7 +3596,7 @@ namespace Sla.DECCORE
 
             if (ct.getMetatype() == TYPE_STRUCT || ct.getMetatype() == TYPE_UNION)
             {
-                uintb suboff = in1const;    // How far into container
+                ulong suboff = in1const;    // How far into container
                 if (ptrel != (TypePointerRel*)0)
                 {
                     suboff += ptrel.getPointerOffset();
@@ -3615,8 +3615,8 @@ namespace Sla.DECCORE
                 suboff = AddrSpace::addressToByte(suboff, ptype.getWordSize());
                 string fieldname;
                 Datatype* fieldtype;
-                int4 fieldid;
-                int4 newoff;
+                int fieldid;
+                int newoff;
                 if (ct.getMetatype() == TYPE_UNION)
                 {
                     if (suboff != 0)
@@ -3632,7 +3632,7 @@ namespace Sla.DECCORE
                 }
                 else
                 {   // TYPE_STRUCT
-                    TypeField* fld = ct.findTruncation((int4)suboff, 0, op, 0, newoff);
+                    TypeField* fld = ct.findTruncation((int)suboff, 0, op, 0, newoff);
                     if (fld == (TypeField*)0) {
                         if (ct.getSize() <= suboff)
                         {
@@ -3740,7 +3740,7 @@ namespace Sla.DECCORE
                 }
                 else
                 {
-                    int4 off = high.getSymbolOffset();
+                    int off = high.getSymbolOffset();
                     if (off == 0)
                         pushSymbol(symbol, (Varnode*)0, op);
                     else
@@ -3825,8 +3825,8 @@ namespace Sla.DECCORE
         {
             Varnode* outvn = op.getOut();
             Varnode* vn0 = op.getIn(0);
-            List<uintb> refs;
-            for (int4 i = 1; i < op.numInput(); ++i)
+            List<ulong> refs;
+            for (int i = 1; i < op.numInput(); ++i)
                 refs.push_back(op.getIn(i).getOffset());
             CPoolRecord* rec = glb.cpool.getRecord(refs);
             if (rec == (CPoolRecord*)0) {
@@ -3839,7 +3839,7 @@ namespace Sla.DECCORE
                     case CPoolRecord::string_literal:
                         {
                             ostringstream str;
-                            int4 len = rec.getByteDataLength();
+                            int len = rec.getByteDataLength();
                             if (len > 2048)
                                 len = 2048;
                             str << '\"';

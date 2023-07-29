@@ -34,13 +34,13 @@ namespace Sla.DECCORE
         /// Formal name of the payload
         protected string name;
         /// Type of this payload: CALLFIXUP_TYPE, CALLOTHERFIXUP_TYPE, etc.
-        protected int4 type;
+        protected int type;
         /// True if the injection is generated dynamically
         protected bool dynamic;
         /// True if injected COPYs are considered \e incidental
         protected bool incidentalCopy;
         /// Number of parameters shifted in the original call
-        protected int4 paramshift;
+        protected int paramshift;
         /// List of input parameters to this payload
         protected List<InjectParameter> inputlist;
         /// List of output parameters
@@ -51,14 +51,14 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         /// \param name is used to pass back the parameter name
         /// \param size is used to pass back the parameter size
-        protected static void decodeParameter(Decoder decoder, string name, uint4 size)
+        protected static void decodeParameter(Decoder decoder, string name, uint size)
         {
             name = "";
             size = 0;
-            uint4 elemId = decoder.openElement();
+            uint elemId = decoder.openElement();
             for (; ; )
             {
-                uint4 attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == ATTRIB_NAME)
                     name = decoder.readString();
@@ -76,13 +76,13 @@ namespace Sla.DECCORE
         /// Input and output parameters are assigned a unique index
         protected void orderParameters()
         {
-            int4 id = 0;
-            for (int4 i = 0; i < inputlist.size(); ++i)
+            int id = 0;
+            for (int i = 0; i < inputlist.size(); ++i)
             {
                 inputlist[i].index = id;
                 id += 1;
             }
-            for (int4 i = 0; i < output.size(); ++i)
+            for (int i = 0; i < output.size(); ++i)
             {
                 output[i].index = id;
                 id += 1;
@@ -98,7 +98,7 @@ namespace Sla.DECCORE
             dynamic = false;
             for (; ; )
             {
-                uint4 attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == ATTRIB_PARAMSHIFT)
                 {
@@ -127,18 +127,18 @@ namespace Sla.DECCORE
         {
             for (; ; )
             {
-                uint4 subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == ELEM_INPUT)
                 {
                     string paramName;
-                    uint4 size;
+                    uint size;
                     decodeParameter(decoder, paramName, size);
                     inputlist.push_back(InjectParameter(paramName, size));
                 }
                 else if (subId == ELEM_OUTPUT)
                 {
                     string paramName;
-                    uint4 size;
+                    uint size;
                     decodeParameter(decoder, paramName, size);
                     output.push_back(InjectParameter(paramName, size));
                 }
@@ -148,7 +148,7 @@ namespace Sla.DECCORE
             orderParameters();
         }
 
-        public InjectPayload(string nm,int4 tp)
+        public InjectPayload(string nm,int tp)
         {
             name=nm;
             type=tp;
@@ -158,7 +158,7 @@ namespace Sla.DECCORE
         }   ///< Construct for use with decode
 
         /// Get the number of parameters shifted
-        protected int4 getParamShift() => paramshift;
+        protected int getParamShift() => paramshift;
 
         /// Return \b true if p-code in the injection is generated dynamically
         protected bool isDynamic() => dynamic;
@@ -167,16 +167,16 @@ namespace Sla.DECCORE
         protected bool isIncidentalCopy() => incidentalCopy;
 
         /// Return the number of input parameters
-        protected int4 sizeInput() => inputlist.size();
+        protected int sizeInput() => inputlist.size();
 
         /// Return the number of output parameters
-        protected int4 sizeOutput() => output.size();
+        protected int sizeOutput() => output.size();
 
         /// Get the i-th input parameter
-        protected InjectParameter getInput(int4 i) => inputlist[i];
+        protected InjectParameter getInput(int i) => inputlist[i];
 
         /// Get the i-th output parameter
-        protected InjectParameter getOutput(int4 i) => output[i];
+        protected InjectParameter getOutput(int i) => output[i];
 
         ~InjectPayload()
         {
@@ -203,7 +203,7 @@ namespace Sla.DECCORE
         protected abstract string getName() => name;
 
         /// Return the type of injection (CALLFIXUP_TYPE, CALLOTHERFIXUP_TYPE, etc.)
-        protected abstract int4 getType() => type;
+        protected abstract int getType() => type;
 
         /// Return a string describing the \e source of the injection (.cspec, prototype model, etc.)
         protected abstract string getSource();

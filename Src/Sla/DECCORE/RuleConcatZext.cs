@@ -24,12 +24,12 @@ namespace Sla.DECCORE
 
         /// \class RuleConcatZext
         /// \brief Commute PIECE with INT_ZEXT:  `concat(zext(V),W)  =>  zext(concat(V,W))`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_PIECE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             PcodeOp* zextop;
             Varnode* hi,*lo;

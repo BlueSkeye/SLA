@@ -20,13 +20,13 @@ namespace Sla.DECCORE
         /// CPUI_PIECE operation combining this particular Varnode piece
         private PcodeOp pieceOp;
         /// The particular slot of this Varnode within CPUI_PIECE
-        private int4 slot;
+        private int slot;
         /// Byte offset into structure/array
-        private int4 typeOffset;
+        private int typeOffset;
         /// \b true if this is a leaf of the tree structure
         private bool leaf;
         
-        public PieceNode(PcodeOp op, int4 sl, int4 off, bool l)
+        public PieceNode(PcodeOp op, int sl, int off, bool l)
         {
             pieceOp = op;
             slot = sl;
@@ -38,10 +38,10 @@ namespace Sla.DECCORE
         public bool isLeaf() => leaf;
 
         /// Get the byte offset of \b this node into the data-type
-        public int4 getTypeOffset() => typeOffset;
+        public int getTypeOffset() => typeOffset;
 
         /// Get the input slot associated with \b this node
-        public int4 getSlot() => slot;
+        public int getSlot() => slot;
 
         /// Get the PcodeOp reading \b this piece
         public PcodeOp getOp() => pieceOp;
@@ -58,7 +58,7 @@ namespace Sla.DECCORE
         /// \param vn is the Varnode to test as a leaf
         /// \param typeOffset is byte offset of the test Varnode within fully concatenated value
         /// \return \b true is the test Varnode is a leaf of the tree
-        public static bool isLeaf(Varnode rootVn, Varnode vn, int4 typeOffset)
+        public static bool isLeaf(Varnode rootVn, Varnode vn, int typeOffset)
         {
             if (vn.isMapped() && rootVn.getSymbolEntry() != vn.getSymbolEntry())
             {
@@ -93,7 +93,7 @@ namespace Sla.DECCORE
                     PcodeOp* op = *iter;
                     ++iter;
                     if (op.code() != CPUI_PIECE) continue;
-                    int4 slot = op.getSlot(vn);
+                    int slot = op.getSlot(vn);
                     Address addr = op.getOut().getAddr();
                     if (addr.getSpace().isBigEndian() == (slot == 1))
                         addr = addr + op.getIn(1 - slot).getSize();
@@ -125,12 +125,12 @@ namespace Sla.DECCORE
         /// \param rootVn is the given root of the tree
         /// \param op is the current PIECE op to explore as part of the tree
         /// \param baseOffset is the offset associated with the output of the current PIECE op
-        public static void gatherPieces(List<PieceNode> stack, Varnode rootVn, PcodeOp op, int4 baseOffset)
+        public static void gatherPieces(List<PieceNode> stack, Varnode rootVn, PcodeOp op, int baseOffset)
         {
-            for (int4 i = 0; i < 2; ++i)
+            for (int i = 0; i < 2; ++i)
             {
                 Varnode* vn = op.getIn(i);
-                int4 offset = (rootVn.getSpace().isBigEndian() == (i == 1)) ? baseOffset + op.getIn(1 - i).getSize() : baseOffset;
+                int offset = (rootVn.getSpace().isBigEndian() == (i == 1)) ? baseOffset + op.getIn(1 - i).getSize() : baseOffset;
                 bool res = isLeaf(rootVn, vn, offset);
                 stack.emplace_back(op, i, offset, res);
                 if (!res)

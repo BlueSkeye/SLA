@@ -10,9 +10,9 @@ namespace Sla.SLEIGH
     internal class OperandEquation : PatternEquation
     {
         // Equation that defines operand
-        private int4 index;
+        private int index;
         
-        public OperandEquation(int4 ind)
+        public OperandEquation(int ind)
         {
             index = ind;
         }

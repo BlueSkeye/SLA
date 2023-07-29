@@ -29,13 +29,13 @@ namespace Sla.DECCORE
         ///  - `V * -1 == c  =>  V == -c`
         ///  - `V + c == d  =>  V == (d-c)`
         ///  - `~V == c     =>  V == ~c`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
-            uint4 list[] = { CPUI_INT_EQUAL, CPUI_INT_NOTEQUAL };
+            uint list[] = { CPUI_INT_EQUAL, CPUI_INT_NOTEQUAL };
             oplist.insert(oplist.end(), list, list + 2);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* cvn = op.getIn(1);
             if (!cvn.isConstant()) return 0;
@@ -44,7 +44,7 @@ namespace Sla.DECCORE
             if (!lhs.isWritten()) return 0;
             PcodeOp* leftop = lhs.getDef();
             Varnode* a;
-            uintb newconst;
+            ulong newconst;
             OpCode opc = leftop.code();
             if (opc == CPUI_INT_ADD)
             {

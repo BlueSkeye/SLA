@@ -48,7 +48,7 @@ namespace Sla.SLEIGH
             right.listValues(list);
         }
 
-        public override void getMinMax(List<intb> minlist, List<intb> maxlist) 
+        public override void getMinMax(List<long> minlist, List<long> maxlist) 
         {
             left.getMinMax(minlist, maxlist);
             right.getMinMax(minlist, maxlist);

@@ -80,9 +80,9 @@ namespace Sla.DECCORE
         /// \param data is the function being analyzed
         private static void lookForBadJumpTables(Funcdata data)
         {
-            int4 numfunc = data.numCalls();
+            int numfunc = data.numCalls();
             ScopeLocal* localmap = data.getScopeLocal();
-            for (int4 i = 0; i < numfunc; ++i)
+            for (int i = 0; i < numfunc; ++i)
             {
                 FuncCallSpecs* fc = data.getCallSpecs(i);
                 if (fc.isBadJumpTable())
@@ -115,21 +115,21 @@ namespace Sla.DECCORE
         /// \param varlist is a list of Varnodes representing HighVariables that need names
         private static void lookForFuncParamNames(Funcdata data, List<Varnode> varlist)
         {
-            int4 numfunc = data.numCalls();
+            int numfunc = data.numCalls();
             if (numfunc == 0) return;
 
             map<HighVariable*, OpRecommend> recmap;
 
             ScopeLocal* localmap = data.getScopeLocal();
-            for (int4 i = 0; i < numfunc; ++i)
+            for (int i = 0; i < numfunc; ++i)
             {   // Run through all calls to functions
                 FuncCallSpecs* fc = data.getCallSpecs(i);
                 if (!fc.isInputLocked()) continue;
                 PcodeOp* op = fc.getOp();
-                int4 numparam = fc.numParams();
+                int numparam = fc.numParams();
                 if (numparam >= op.numInput())
                     numparam = op.numInput() - 1;
-                for (int4 j = 0; j < numparam; ++j)
+                for (int j = 0; j < numparam; ++j)
                 {
                     ProtoParameter* param = fc.getParam(j); // Looking for a parameter
                     Varnode* vn = op.getIn(j + 1);
@@ -139,7 +139,7 @@ namespace Sla.DECCORE
             if (recmap.empty()) return;
 
             map<HighVariable*, OpRecommend>::iterator iter;
-            for (uint4 i = 0; i < varlist.size(); ++i)
+            for (uint i = 0; i < varlist.size(); ++i)
             {   // Do the actual naming in the original (address based) order
                 Varnode* vn = varlist[i];
                 if (vn.isFree()) continue;
@@ -204,7 +204,7 @@ namespace Sla.DECCORE
                     linkSpacebaseSymbol(curvn, data, namerec);
             }
 
-            for (int4 i = 0; i < manage.numSpaces(); ++i)
+            for (int i = 0; i < manage.numSpaces(); ++i)
             { // Build a list of nameable highs
                 spc = manage.getSpace(i);
                 if (spc == (AddrSpace*)0) continue;
@@ -257,8 +257,8 @@ namespace Sla.DECCORE
             lookForBadJumpTables(data);
             lookForFuncParamNames(data, namerec);
 
-            int4 base = 1;
-            for (uint4 i = 0; i < namerec.size(); ++i)
+            int base = 1;
+            for (uint i = 0; i < namerec.size(); ++i)
             {
                 Varnode* vn = namerec[i];
                 Symbol* sym = vn.getHigh().getSymbol();

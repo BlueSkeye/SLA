@@ -23,30 +23,30 @@ namespace Sla.SLEIGH
         internal VarnodeData endpool;           ///< End of the pool of VarnodeData objects
         internal List<PcodeData> issued;       ///< P-code ops issued for the current instruction
         internal List<RelativeRecord> label_refs;    ///< References to labels
-        internal List<uintb> labels;           ///< Locations of labels
+        internal List<ulong> labels;           ///< Locations of labels
 
         ///< Expand the memory pool
         /// Expand the VarnodeData pool so that \e size more elements fit, and return
         /// a pointer to first available element.
         /// \param size is the number of elements to expand the pool by
         /// \return the first available VarnodeData
-        internal VarnodeData expandPool(uint4 size)
+        internal VarnodeData expandPool(uint size)
         {
-            uint4 curmax = endpool - poolstart;
-            uint4 cursize = curpool - poolstart;
+            uint curmax = endpool - poolstart;
+            uint cursize = curpool - poolstart;
             if (cursize + size <= curmax)
                 return curpool;     // No expansion necessary
-            uint4 increase = (cursize + size) - curmax;
+            uint increase = (cursize + size) - curmax;
             if (increase < 100)     // Increase by at least 100
                 increase = 100;
 
-            uint4 newsize = curmax + increase;
+            uint newsize = curmax + increase;
 
             VarnodeData* newpool = new VarnodeData[newsize];
-            for (uint4 i = 0; i < cursize; ++i)
+            for (uint i = 0; i < cursize; ++i)
                 newpool[i] = poolstart[i];  // Copy old data
                                             // Update references to the old pool
-            for (uint4 i = 0; i < issued.size(); ++i)
+            for (uint i = 0; i < issued.size(); ++i)
             {
                 VarnodeData* outvar = issued[i].outvar;
                 if (outvar != (VarnodeData*)0)
@@ -78,7 +78,7 @@ namespace Sla.SLEIGH
         public PcodeCacher()
         {
             // We aim to allocate this array only once
-            uint4 maxsize = 600;
+            uint maxsize = 600;
             poolstart = new VarnodeData[maxsize];
             endpool = poolstart + maxsize;
             curpool = poolstart;
@@ -93,7 +93,7 @@ namespace Sla.SLEIGH
         ///
         /// \param size is the number of objects to allocate
         /// \return a pointer to the array of available VarnodeData objects
-        public VarnodeData allocateVarnodes(uint4 size)
+        public VarnodeData allocateVarnodes(uint size)
         {
             VarnodeData* newptr = curpool + size;
             if (newptr <= endpool)
@@ -130,7 +130,7 @@ namespace Sla.SLEIGH
 
         /// Attach a label to the \e next p-code instruction
         ///< Pass the cached p-code data to the emitter
-        public void addLabel(uint4 id)
+        public void addLabel(uint id)
         {
             while (labels.size() <= id)
                 labels.push_back(0xbadbeef);
@@ -156,11 +156,11 @@ namespace Sla.SLEIGH
             for (iter = label_refs.begin(); iter != label_refs.end(); ++iter)
             {
                 VarnodeData* ptr = (*iter).dataptr;
-                uint4 id = ptr.offset;
+                uint id = ptr.offset;
                 if ((id >= labels.size()) || (labels[id] == 0xbadbeef))
                     throw new LowlevelError("Reference to non-existant sleigh label");
                 // Calculate the relative index given the two absolute indices
-                uintb res = labels[id] - (*iter).calling_index;
+                ulong res = labels[id] - (*iter).calling_index;
                 res &= calc_mask(ptr.size);
                 ptr.offset = res;
             }

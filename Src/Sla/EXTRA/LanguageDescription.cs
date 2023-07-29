@@ -22,7 +22,7 @@ namespace Sla.EXTRA
     {
         private string processor;       ///< Name of processor
         private bool isbigendian;       ///< Set to \b true if this processor is \e big-endian
-        private int4 size;          ///< Size of address bus in bits
+        private int size;          ///< Size of address bus in bits
         private string variant;     ///< Name of processor variant or "default"
         private string version;     ///< Version of the specification
         private string slafile;     ///< Name of .sla file for processor
@@ -42,7 +42,7 @@ namespace Sla.EXTRA
         /// \param decoder is the stream decoder
         public void decode(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement(ELEM_LANGUAGE);
+            uint elemId = decoder.openElement(ELEM_LANGUAGE);
             processor = decoder.readString(ATTRIB_PROCESSOR);
             isbigendian = (decoder.readString(ATTRIB_ENDIAN) == "big");
             size = decoder.readSignedInteger(ATTRIB_SIZE);
@@ -54,14 +54,14 @@ namespace Sla.EXTRA
             deprecated = false;
             for (; ; )
             {
-                uint4 attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == ATTRIB_DEPRECATED)
                     deprecated = decoder.readBool();
             }
             for (; ; )
             {
-                uint4 subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ELEM_DESCRIPTION)
                 {
@@ -95,7 +95,7 @@ namespace Sla.EXTRA
         public bool isBigEndian() => isbigendian;
 
         /// Get the size of the address bus
-        public int4 getSize() => size;
+        public int getSize() => size;
 
         /// Get the processor variant
         public string getVariant() => variant;
@@ -124,8 +124,8 @@ namespace Sla.EXTRA
         /// \return a reference to the matching CompilerTag
         public CompilerTag getCompiler(string nm)
         {
-            int4 defaultind = -1;
-            for (int4 i = 0; i < compilers.size(); ++i)
+            int defaultind = -1;
+            for (int i = 0; i < compilers.size(); ++i)
             {
                 if (compilers[i].getId() == nm)
                     return compilers[i];
@@ -138,15 +138,15 @@ namespace Sla.EXTRA
         }
 
         /// Get the number of compiler records
-        public int4 numCompilers() => compilers.size();
+        public int numCompilers() => compilers.size();
 
         /// Get the i-th compiler record
-        public CompilerTag getCompiler(int4 i) => compilers[i] ;
+        public CompilerTag getCompiler(int i) => compilers[i] ;
 
         /// Get the number of truncation records
-        public int4 numTruncations() => truncations.size();
+        public int numTruncations() => truncations.size();
 
         /// Get the i-th truncation record
-        public TruncationTag getTruncation(int4 i) => truncations[i] ;
+        public TruncationTag getTruncation(int i) => truncations[i] ;
     }
 }

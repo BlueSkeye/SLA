@@ -25,14 +25,14 @@ namespace Sla.SLEIGH
             marked = 8
         }
         
-        private uint4 reloffset;      // Relative offset
-        private int4 offsetbase;        // Base operand to which offset is relative (-1=constructor start)
-        private int4 minimumlength;     // Minimum size of operand (within instruction tokens)
-        private int4 hand;          // Handle index
+        private uint reloffset;      // Relative offset
+        private int offsetbase;        // Base operand to which offset is relative (-1=constructor start)
+        private int minimumlength;     // Minimum size of operand (within instruction tokens)
+        private int hand;          // Handle index
         private OperandValue localexp;
         private TripleSymbol triple;       // Defining symbol
         private PatternExpression defexp;  // OR defining expression
-        private uint4 flags;
+        private uint flags;
 
         private void setVariableLength()
         {
@@ -45,7 +45,7 @@ namespace Sla.SLEIGH
         {
         }
 
-        public OperandSymbol(string nm, int4 index, Constructor ct)
+        public OperandSymbol(string nm, int index, Constructor ct)
             : base(nm)
         {
             flags = 0;
@@ -56,17 +56,17 @@ namespace Sla.SLEIGH
             triple = (TripleSymbol*)0;
         }
 
-        public uint4 getRelativeOffset() => reloffset;
+        public uint getRelativeOffset() => reloffset;
 
-        public int4 getOffsetBase() => offsetbase;
+        public int getOffsetBase() => offsetbase;
 
-        public int4 getMinimumLength() => minimumlength;
+        public int getMinimumLength() => minimumlength;
 
         public PatternExpression getDefiningExpression() => defexp;
 
         public TripleSymbol getDefiningSymbol() => triple;
 
-        public int4 getIndex() => hand;
+        public int getIndex() => hand;
 
         public void defineOperand(PatternExpression pe)
         {
@@ -104,7 +104,7 @@ namespace Sla.SLEIGH
 
         public void clearMark()
         {
-            flags &= ~((uint4)marked);
+            flags &= ~((uint)marked);
         }
 
         public bool isMarked() => ((flags&marked)!= 0);
@@ -142,7 +142,7 @@ namespace Sla.SLEIGH
             hnd = walker.getFixedHandle(hand);
         }
 
-        public override int4 getSize()
+        public override int getSize()
         {
             if (triple != (TripleSymbol*)0)
                 return triple.getSize();
@@ -161,7 +161,7 @@ namespace Sla.SLEIGH
             }
             else
             {
-                intb val = defexp.getValue(walker);
+                long val = defexp.getValue(walker);
                 if (val >= 0)
                     s << "0x" << hex << val;
                 else
@@ -170,7 +170,7 @@ namespace Sla.SLEIGH
             walker.popOperand();
         }
 
-        public override void collectLocalValues(List<uintb> results)
+        public override void collectLocalValues(List<ulong> results)
         {
             if (triple != (TripleSymbol*)0)
                 triple.collectLocalValues(results);
@@ -228,11 +228,11 @@ namespace Sla.SLEIGH
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> minimumlength;
             }
-            for (int4 i = 0; i < el.getNumAttributes(); ++i)
+            for (int i = 0; i < el.getNumAttributes(); ++i)
             {
                 if (el.getAttributeName(i) == "subsym")
                 {
-                    uintm id;
+                    uint id;
                     istringstream s(el.getAttributeValue(i));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> id;

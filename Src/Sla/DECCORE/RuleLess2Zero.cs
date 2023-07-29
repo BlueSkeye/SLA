@@ -30,12 +30,12 @@ namespace Sla.DECCORE
         ///  - `V < 0  =>  false`
         ///  - `ffff < V  =>  false`
         ///  - `V < ffff` =>  V != ffff`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_LESS);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* lvn,*rvn;
             lvn = op.getIn(0);

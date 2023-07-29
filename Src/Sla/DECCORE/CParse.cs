@@ -38,22 +38,22 @@ namespace Sla.DECCORE
         }
         
         private Architecture glb;
-        private Dictionary<string, uint4> keywords;
+        private Dictionary<string, uint> keywords;
         private GrammarLexer lexer;
-        private int4 lineno;
+        private int lineno;
         private int colno;
         private int filenum;    // Location of last token
         private List<TypeDeclarator> typedec_alloc;
         private List<TypeSpecifiers> typespec_alloc;
-        private List<List<uint4>> vecuint4_alloc;
+        private List<List<uint>> vecuint4_alloc;
         private List<List<TypeDeclarator>> vecdec_alloc;
         private List<string> string_alloc;
-        private List<uintb> num_alloc;
+        private List<ulong> num_alloc;
         private List<Enumerator> enum_alloc;
         private List<List<Enumerator>> vecenum_alloc;
 
         private List<TypeDeclarator> lastdecls;
-        private int4 firsttoken;        // Message to parser indicating desired object
+        private int firsttoken;        // Message to parser indicating desired object
         private string lasterror;
 
         private void setError(string msg)
@@ -67,9 +67,9 @@ namespace Sla.DECCORE
             lasterror = s.str();
         }
 
-        private int4 lookupIdentifier(string nm)
+        private int lookupIdentifier(string nm)
         {
-            map<string, uint4>::const_iterator iter = keywords.find(nm);
+            map<string, uint>::const_iterator iter = keywords.find(nm);
             if (iter != keywords.end())
             {
                 switch ((*iter).second)
@@ -107,7 +107,7 @@ namespace Sla.DECCORE
             return IDENTIFIER;      // Unknown identifier
         }
 
-        private bool runParse(uint4 doctype)
+        private bool runParse(uint doctype)
         { // Assuming the stream has been setup, parse it
             switch (doctype)
             {
@@ -121,7 +121,7 @@ namespace Sla.DECCORE
                     throw new LowlevelError("Bad document type");
             }
             parse = this;           // Setup global object for yyparse
-            int4 res = yyparse();
+            int res = yyparse();
             if (res != 0)
             {
                 if (lasterror.size() == 0)
@@ -131,7 +131,7 @@ namespace Sla.DECCORE
             return true;
         }
 
-        public CParse(Architecture g, int4 maxbuf)
+        public CParse(Architecture g, int maxbuf)
         {
             lexer = new GrammarLexer(maxbuf);
             glb = g;
@@ -182,7 +182,7 @@ namespace Sla.DECCORE
         public List<TypeDeclarator> mergeSpecDecVec(TypeSpecifiers spec,
             List<TypeDeclarator> declist)
         {
-            for (uint4 i = 0; i < declist.size(); ++i)
+            for (uint i = 0; i < declist.size(); ++i)
                 mergeSpecDec(spec, (*declist)[i]);
             return declist;
         }
@@ -205,7 +205,7 @@ namespace Sla.DECCORE
 
         public TypeSpecifiers addSpecifier(TypeSpecifiers spec, string str)
         {
-            uint4 flag = convertFlag(str);
+            uint flag = convertFlag(str);
             spec.flags |= flag;
             return spec;
         }
@@ -220,7 +220,7 @@ namespace Sla.DECCORE
 
         public TypeSpecifiers addFuncSpecifier(TypeSpecifiers spec, string str)
         {
-            map<string, uint4>::const_iterator iter;
+            map<string, uint>::const_iterator iter;
 
             iter = keywords.find(*str);
             if (iter != keywords.end())
@@ -234,9 +234,9 @@ namespace Sla.DECCORE
             return spec;
         }
 
-        public TypeDeclarator mergePointer(List<uint4> ptr, TypeDeclarator dec)
+        public TypeDeclarator mergePointer(List<uint> ptr, TypeDeclarator dec)
         {
-            for (uint4 i = 0; i < ptr.size(); ++i)
+            for (uint i = 0; i < ptr.size(); ++i)
             {
                 PointerModifier* newmod = new PointerModifier((*ptr)[i]);
                 dec.mods.push_back(newmod);
@@ -272,16 +272,16 @@ namespace Sla.DECCORE
             return res;
         }
 
-        public List<uint4> newPointer()
+        public List<uint> newPointer()
         {
-            List<uint4>* res = new List<uint4>();
+            List<uint>* res = new List<uint>();
             vecuint4_alloc.push_back(res);
             return res;
         }
 
-        public TypeDeclarator newArray(TypeDeclarator dec, uint4 flags, uintb num)
+        public TypeDeclarator newArray(TypeDeclarator dec, uint flags, ulong num)
         {
-            ArrayModifier* newmod = new ArrayModifier(flags, (int4) * num);
+            ArrayModifier* newmod = new ArrayModifier(flags, (int) * num);
             dec.mods.push_back(newmod);
             return dec;
         }
@@ -307,7 +307,7 @@ namespace Sla.DECCORE
             TypeStruct* res = glb.types.getTypeStruct(ident); // Create stub (for recursion)
             List<TypeField> sublist;
 
-            for (uint4 i = 0; i < declist.size(); ++i)
+            for (uint i = 0; i < declist.size(); ++i)
             {
                 TypeDeclarator* decl = (*declist)[i];
                 if (!decl.isValid())
@@ -342,7 +342,7 @@ namespace Sla.DECCORE
             TypeUnion* res = glb.types.getTypeUnion(ident); // Create stub (for recursion)
             List<TypeField> sublist;
 
-            for (uint4 i = 0; i < declist.size(); ++i)
+            for (uint i = 0; i < declist.size(); ++i)
             {
                 TypeDeclarator* decl = (*declist)[i];
                 if (!decl.isValid())
@@ -378,7 +378,7 @@ namespace Sla.DECCORE
             return res;
         }
 
-        public Enumerator newEnumerator(string ident,uintb val)
+        public Enumerator newEnumerator(string ident,ulong val)
         {
             Enumerator* res = new Enumerator(ident, val);
             enum_alloc.push_back(res);
@@ -396,9 +396,9 @@ namespace Sla.DECCORE
         {
             TypeEnum* res = glb.types.getTypeEnum(ident);
             List<string> namelist;
-            List<uintb> vallist;
+            List<ulong> vallist;
             List<bool> assignlist;
-            for (uint4 i = 0; i < vecenum.size(); ++i)
+            for (uint i = 0; i < vecenum.size(); ++i)
             {
                 Enumerator* enumer = (*vecenum)[i];
                 namelist.push_back(enumer.enumconstant);
@@ -422,9 +422,9 @@ namespace Sla.DECCORE
             return res;
         }
 
-        public uint4 convertFlag(string str)
+        public uint convertFlag(string str)
         {
-            map<string, uint4>::const_iterator iter;
+            map<string, uint>::const_iterator iter;
 
             iter = keywords.find(*str);
             if (iter != keywords.end())
@@ -446,7 +446,7 @@ namespace Sla.DECCORE
                 delete* iter2;
             typespec_alloc.clear();
 
-            list<List<uint4>*>::iterator iter3;
+            list<List<uint>*>::iterator iter3;
             for (iter3 = vecuint4_alloc.begin(); iter3 != vecuint4_alloc.end(); ++iter3)
                 delete* iter3;
             vecuint4_alloc.clear();
@@ -461,7 +461,7 @@ namespace Sla.DECCORE
                 delete* iter5;
             string_alloc.clear();
 
-            list<uintb*>::iterator iter6;
+            list<ulong*>::iterator iter6;
             for (iter6 = num_alloc.begin(); iter6 != num_alloc.end(); ++iter6)
                 delete* iter6;
             num_alloc.clear();
@@ -477,13 +477,13 @@ namespace Sla.DECCORE
             vecenum_alloc.clear();
         }
 
-        public int4 lex()
+        public int lex()
         {
             GrammarToken tok;
 
             if (firsttoken != -1)
             {
-                int4 retval = firsttoken;
+                int retval = firsttoken;
                 firsttoken = -1;
                 return retval;
             }
@@ -497,7 +497,7 @@ namespace Sla.DECCORE
             {
                 case GrammarToken::integer:
                 case GrammarToken::charconstant:
-                    yylval.i = new uintb(tok.getInteger());
+                    yylval.i = new ulong(tok.getInteger());
                     num_alloc.push_back(yylval.i);
                     return NUMBER;
                 case GrammarToken::identifier:
@@ -516,11 +516,11 @@ namespace Sla.DECCORE
                 case GrammarToken::endoffile:
                     return -1;          // No more tokens
                 default:
-                    return (int4)tok.getType();
+                    return (int)tok.getType();
             }
         }
 
-        public bool parseFile(string filename, uint4 doctype)
+        public bool parseFile(string filename, uint doctype)
         { // Run the parser on a file, return true if no parse errors
             clear();            // Clear out any old parsing
 
@@ -534,7 +534,7 @@ namespace Sla.DECCORE
             return res;
         }
 
-        public bool parseStream(istream s, uint4 doctype)
+        public bool parseStream(istream s, uint doctype)
         {
             clear();
 

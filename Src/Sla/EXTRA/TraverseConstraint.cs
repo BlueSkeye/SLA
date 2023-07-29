@@ -8,9 +8,9 @@ namespace Sla.EXTRA
 {
     internal class TraverseConstraint
     {
-        protected int4 uniqid;
+        protected int uniqid;
         
-        public TraverseConstraint(int4 i)
+        public TraverseConstraint(int i)
         {
             uniqid = i;
         }
@@ -19,6 +19,6 @@ namespace Sla.EXTRA
         {
         }
   
-        //  int4 getId(void) { return uniqid; }
+        //  int getId(void) { return uniqid; }
     }
 }

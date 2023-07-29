@@ -33,7 +33,7 @@ namespace Sla.SLEIGH
             ptroffset = vn.getOffset();
         }
 
-        public HandleTpl(ConstTpl spc, ConstTpl sz, VarnodeTpl vn, AddrSpace t_space,uintb t_offset)
+        public HandleTpl(ConstTpl spc, ConstTpl sz, VarnodeTpl vn, AddrSpace t_space,ulong t_offset)
         {
             // Build handle to thing being pointed at by -vn-
             space = new ConstTpl(spc);
@@ -69,12 +69,12 @@ namespace Sla.SLEIGH
             ptrsize = sz;
         }
 
-        public void setPtrOffset(uintb val)
+        public void setPtrOffset(ulong val)
         {
             ptroffset = new ConstTpl(ConstTpl::real, val);
         }
 
-        public void setTempOffset(uintb val)
+        public void setTempOffset(ulong val)
         {
             temp_offset = new ConstTpl(ConstTpl::real, val);
         }
@@ -111,7 +111,7 @@ namespace Sla.SLEIGH
             }
         }
 
-        public void changeHandleIndex(List<int4> handmap)
+        public void changeHandleIndex(List<int> handmap)
         {
             space.changeHandleIndex(handmap);
             size.changeHandleIndex(handmap);

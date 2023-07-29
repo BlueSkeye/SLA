@@ -13,7 +13,7 @@ namespace Sla.DECCORE
     /// is the actual value read from memory.
     internal class VolatileReadOp : VolatileOp
     {
-        public VolatileReadOp(Architecture g, string nm,int4 ind,bool functional)
+        public VolatileReadOp(Architecture g, string nm,int ind,bool functional)
             : base(g, nm, ind)
         {
             flags = functional ? 0 : no_operator;
@@ -25,7 +25,7 @@ namespace Sla.DECCORE
             return appendSize(name, op.getOut().getSize());
         }
 
-        public override int4 extractAnnotationSize(Varnode vn, PcodeOp op)
+        public override int extractAnnotationSize(Varnode vn, PcodeOp op)
         {
             Varnode outvn = op.getOut();
             if (outvn != (Varnode*)0)

@@ -28,23 +28,23 @@ namespace Sla.DECCORE
         /// This supports forms:
         ///   - `concat( V & c, W)  =>  concat(V,W) & (c<<16 | 0xffff)`
         ///   - `concat( V, W | c)  =>  concat(V,W) | c`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_PIECE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn;
             Varnode* hi,*lo,*newvn;
             PcodeOp* logicop,*newconcat;
             OpCode opc;
-            uintb val;
+            ulong val;
 
-            int4 outsz = op.getOut().getSize();
-            if (outsz > sizeof(uintb))
+            int outsz = op.getOut().getSize();
+            if (outsz > sizeof(ulong))
                 return 0;           // FIXME:  precision problem for constants
-            for (int4 i = 0; i < 2; ++i)
+            for (int i = 0; i < 2; ++i)
             {
                 vn = op.getIn(i);
                 if (!vn.isWritten()) continue;

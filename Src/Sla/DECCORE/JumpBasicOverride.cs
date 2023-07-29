@@ -21,15 +21,15 @@ namespace Sla.DECCORE
         /// Absolute address table (manually specified)
         private set<Address> adset;
         /// Normalized switch variable values associated with addresses
-        private List<uintb> values;
+        private List<ulong> values;
         /// Address associated with each value
         private List<Address> addrtable;
         /// Possible start for guessing values that match addresses
-        private uintb startingvalue;
+        private ulong startingvalue;
         /// Dynamic info for recovering normalized switch variable
         private Address normaddress;
         /// if (hash==0) there is no normalized switch (use trivial model)
-        private uint8 hash;
+        private ulong hash;
         /// \b true if we use a trivial value model
         private bool istrivial;
 
@@ -38,15 +38,15 @@ namespace Sla.DECCORE
         /// If there no PcodeOp in the set reading the Varnode, null is returned
         /// \param vn is the given Varnode
         /// \return the PcodeOp or null
-        private int4 findStartOp(Varnode vn)
+        private int findStartOp(Varnode vn)
         {
             list<PcodeOp*>::const_iterator iter, enditer;
             iter = vn.beginDescend();
             enditer = vn.endDescend();
             for (; iter != enditer; ++iter)
                 (*iter).setMark();
-            int4 res = -1;
-            for (int4 i = 0; i < pathMeld.numOps(); ++i)
+            int res = -1;
+            for (int i = 0; i < pathMeld.numOps(); ++i)
             {
                 if (pathMeld.getOp(i).isMark())
                 {
@@ -71,9 +71,9 @@ namespace Sla.DECCORE
         /// \param trialvn is the given trial normalized switch variable
         /// \param tolerance is the number of misses that will be tolerated
         /// \return the index of the starting PcodeOp within the PathMeld or -1
-        private int4 trialNorm(Funcdata fd, Varnode trialvn, uint4 tolerance)
+        private int trialNorm(Funcdata fd, Varnode trialvn, uint tolerance)
         {
-            int4 opi = findStartOp(trialvn);
+            int opi = findStartOp(trialvn);
             if (opi < 0) return -1;
             PcodeOp* startop = pathMeld.getOp(opi);
 
@@ -85,10 +85,10 @@ namespace Sla.DECCORE
             //    emul.setLoadCollect(true);
 
             AddrSpace* spc = startop.getAddr().getSpace();
-            uintb val = startingvalue;
-            uintb addr;
-            uint4 total = 0;
-            uint4 miss = 0;
+            ulong val = startingvalue;
+            ulong addr;
+            uint total = 0;
+            uint miss = 0;
             set<Address> alreadyseen;
             while (total < adset.size())
             {
@@ -146,7 +146,7 @@ namespace Sla.DECCORE
                 }
             }
             values.clear();
-            for (int4 i = 0; i < addrtable.size(); ++i)
+            for (int i = 0; i < addrtable.size(); ++i)
                 values.push_back(addrtable[i].getOffset());
             varnodeIndex = 0;
             normalvn = pathMeld.getVarnode(0);
@@ -163,7 +163,7 @@ namespace Sla.DECCORE
         {
             Varnode* res = (Varnode*)0;
             PcodeOp* op;
-            uint4 i;
+            uint i;
 
             for (i = 0; i < pathMeld.numOps(); ++i)
             { // Look for last LOAD
@@ -222,27 +222,27 @@ namespace Sla.DECCORE
         /// \param adtable is the list of externally provided addresses, which will be deduped
         public void setAddresses(List<Address> adtable)
         {
-            for (int4 i = 0; i < adtable.size(); ++i)
+            for (int i = 0; i < adtable.size(); ++i)
                 adset.insert(adtable[i]);
         }
 
-        public void setNorm(Address addr, uintb h)
+        public void setNorm(Address addr, ulong h)
         {
             normaddress = addr;
             hash = h;
         }   ///< Set the normalized switch variable
 
-        public void setStartingValue(uintb val)
+        public void setStartingValue(ulong val)
         {
             startingvalue = val;
         }       ///< Set the starting value for the normalized range
 
         public override bool isOverride() => true;
 
-        public override int4 getTableSize() => addrtable.size();
+        public override int getTableSize() => addrtable.size();
 
-        public override bool recoverModel(Funcdata fd, PcodeOp indop, uint4 matchsize,
-            uint4 maxtablesize)
+        public override bool recoverModel(Funcdata fd, PcodeOp indop, uint matchsize,
+            uint maxtablesize)
         {
             clearCopySpecific();
             findDeterminingVarnodes(indop, 0);
@@ -260,7 +260,7 @@ namespace Sla.DECCORE
 
                 if (trialvn != (Varnode*)0)
                 {
-                    int4 opi = trialNorm(fd, trialvn, 10);
+                    int opi = trialNorm(fd, trialvn, 10);
                     if (opi >= 0)
                     {
                         varnodeIndex = opi;
@@ -281,11 +281,11 @@ namespace Sla.DECCORE
 
         // findUnnormalized inherited from JumpBasic
         public override void buildLabels(Funcdata fd, List<Address> addresstable,
-            List<uintb> label, JumpModel orig)
+            List<ulong> label, JumpModel orig)
         {
-            uintb addr;
+            ulong addr;
 
-            for (uint4 i = 0; i < values.size(); ++i)
+            for (uint i = 0; i < values.size(); ++i)
             {
                 try
                 {
@@ -342,7 +342,7 @@ namespace Sla.DECCORE
             {
                 encoder.openElement(ELEM_DEST);
                 AddrSpace* spc = (*iter).getSpace();
-                uintb off = (*iter).getOffset();
+                ulong off = (*iter).getOffset();
                 spc.encodeAttributes(encoder, off);
                 encoder.closeElement(ELEM_DEST);
             }
@@ -366,10 +366,10 @@ namespace Sla.DECCORE
 
         public override void decode(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement(ELEM_BASICOVERRIDE);
+            uint elemId = decoder.openElement(ELEM_BASICOVERRIDE);
             for (; ; )
             {
-                uint4 subId = decoder.openElement();
+                uint subId = decoder.openElement();
                 if (subId == 0) break;
                 if (subId == ELEM_DEST)
                 {

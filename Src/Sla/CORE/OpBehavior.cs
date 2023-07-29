@@ -17,10 +17,10 @@ namespace Sla.CORE
     /// operate on varnodes (address space, offset, size). Classes derived from
     /// this base class encapsulate this basic behavior for each possible opcode.
     /// These classes describe the most basic behaviors and include:
-    ///    * uintb evaluateBinary(int4 sizeout,int4 sizein,uintb in1,uintb int2)
-    ///    * uintb evaluateUnary(int4 sizeout,int4 sizein,uintb in1)
-    ///    * uintb recoverInputBinary(int4 slo  t,int4 sizeout,uintb out,int4 sizein,uintb in)
-    ///    * uintb recoverInputUnary(int4 sizeout,uintb out,int4 sizein)
+    ///    * ulong evaluateBinary(int sizeout,int sizein,ulong in1,ulong int2)
+    ///    * ulong evaluateUnary(int sizeout,int sizein,ulong in1)
+    ///    * ulong recoverInputBinary(int slo  t,int sizeout,ulong out,int sizein,ulong in)
+    ///    * ulong recoverInputUnary(int sizeout,ulong out,int sizein)
     public class OpBehavior
     {
         /// the internal enumeration for pcode types

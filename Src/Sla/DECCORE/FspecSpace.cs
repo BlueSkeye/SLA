@@ -39,9 +39,9 @@ namespace Sla.DECCORE
                 setFlags(big_endian);
         }
 
-        public override void encodeAttributes(Encoder encoder, uintb offset)
+        public override void encodeAttributes(Encoder encoder, ulong offset)
         {
-            FuncCallSpecs* fc = (FuncCallSpecs*)(uintp)offset;
+            FuncCallSpecs* fc = (FuncCallSpecs*)(ulong)offset;
 
             if (fc.getEntryAddress().isInvalid())
                 encoder.writeString(ATTRIB_SPACE, "fspec");
@@ -53,9 +53,9 @@ namespace Sla.DECCORE
             }
         }
 
-        public override void encodeAttributes(Encoder encoder, uintb offset, int size)
+        public override void encodeAttributes(Encoder encoder, ulong offset, int size)
         {
-            FuncCallSpecs* fc = (FuncCallSpecs*)(uintp)offset;
+            FuncCallSpecs* fc = (FuncCallSpecs*)(ulong)offset;
 
             if (fc.getEntryAddress().isInvalid())
                 encoder.writeString(ATTRIB_SPACE, "fspec");
@@ -68,9 +68,9 @@ namespace Sla.DECCORE
             }
         }
 
-        public override void printRaw(TextWriter s, uintb offset)
+        public override void printRaw(TextWriter s, ulong offset)
         {
-            FuncCallSpecs* fc = (FuncCallSpecs*)(uintp)offset;
+            FuncCallSpecs* fc = (FuncCallSpecs*)(ulong)offset;
 
             if (fc.getName().size() != 0)
                 s << fc.getName();

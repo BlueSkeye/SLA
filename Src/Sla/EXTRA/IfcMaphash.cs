@@ -23,8 +23,8 @@ namespace Sla.EXTRA
                 throw IfaceExecutionError("No function loaded");
             Datatype* ct;
             string name;
-            uint8 hash;
-            int4 size;
+            ulong hash;
+            int size;
             Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read pc address of hash
 
             s >> hex >> hash;       // Parse the hash value

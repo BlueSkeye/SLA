@@ -14,14 +14,14 @@ namespace Sla.SLEIGH
         private PcodeLexer lexer;
         private readonly SleighBase sleigh;   // Language from which we get symbols
         private SymbolTree tree;        // Symbols in the local scope of the snippet  (temporaries)
-        private uint4 tempbase;
-        private int4 errorcount;
+        private uint tempbase;
+        private int errorcount;
         private string firsterror;
         private ConstructTpl result;
 
-        protected virtual uint4 allocateTemp()
+        protected virtual uint allocateTemp()
         { // Allocate a variable in the unique space and return the offset
-            uint4 res = tempbase;
+            uint res = tempbase;
             tempbase += 16;
             return res;
         }
@@ -47,8 +47,8 @@ namespace Sla.SLEIGH
             setDefaultSpace(slgh.getDefaultCodeSpace());
             setConstantSpace(slgh.getConstantSpace());
             setUniqueSpace(slgh.getUniqueSpace());
-            int4 num = slgh.numSpaces();
-            for (int4 i = 0; i < num; ++i)
+            int num = slgh.numSpaces();
+            for (int i = 0; i < num; ++i)
             {
                 AddrSpace* spc = slgh.getSpace(i);
                 spacetype type = spc.getType();
@@ -100,12 +100,12 @@ namespace Sla.SLEIGH
 
         public string getErrorMessage() => firsterror;
 
-        public void setUniqueBase(uint4 val)
+        public void setUniqueBase(uint val)
         {
             tempbase = val;
         }
 
-        public uint4 getUniqueBase() => tempbase;
+        public uint getUniqueBase() => tempbase;
 
         public void clear()
         { // Clear everything, prepare for a new parse against the same language
@@ -135,7 +135,7 @@ namespace Sla.SLEIGH
 
         public int lex()
         {
-            int4 tok = lexer.getNextToken();
+            int tok = lexer.getNextToken();
             if (tok == STRING)
             {
                 SleighSymbol* sym;
@@ -185,7 +185,7 @@ namespace Sla.SLEIGH
             }
             if (tok == INTEGER)
             {
-                yylval.i = new uintb(lexer.getNumber());
+                yylval.i = new ulong(lexer.getNumber());
                 return INTEGER;
             }
             return tok;
@@ -195,7 +195,7 @@ namespace Sla.SLEIGH
         {
             lexer.initialize(&s);
             pcode = this;           // Setup global object for yyparse
-            int4 res = yyparse();
+            int res = yyparse();
             if (res != 0)
             {
                 reportError((Location*)0,"Syntax error");
@@ -209,7 +209,7 @@ namespace Sla.SLEIGH
             return true;
         }
 
-        public void addOperand(string name, int4 index)
+        public void addOperand(string name, int index)
         { // Add an operand symbol for this snippet
             OperandSymbol* sym = new OperandSymbol(name, index, (Constructor*)0);
             addSymbol(sym);

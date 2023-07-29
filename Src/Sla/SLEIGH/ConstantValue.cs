@@ -12,30 +12,30 @@ namespace Sla.SLEIGH
 {
     internal class ConstantValue : PatternValue
     {
-        private intb val;
+        private long val;
         
         public ConstantValue()
         {
         }
 
-        public ConstantValue(intb v)
+        public ConstantValue(long v)
         {
             val = v;
         }
         
-        public override intb getValue(ParserWalker walker) => val;
+        public override long getValue(ParserWalker walker) => val;
 
         public override TokenPattern genMinPattern(List<TokenPattern> ops) => TokenPattern();
 
-        public override TokenPattern genPattern(intb v) => TokenPattern(val==v);
+        public override TokenPattern genPattern(long v) => TokenPattern(val==v);
 
-        public override intb minValue() => val;
+        public override long minValue() => val;
 
-        public override intb maxValue() => val;
+        public override long maxValue() => val;
 
         public override void saveXml(TextWriter s)
         {
-            s << "<intb val=\"" << dec << val << "\"/>\n";
+            s << "<long val=\"" << dec << val << "\"/>\n";
         }
 
         public override void restoreXml(Element el, Translate trans)

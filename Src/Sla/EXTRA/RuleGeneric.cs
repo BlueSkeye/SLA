@@ -18,11 +18,11 @@ namespace Sla.EXTRA
     {
         // A user configurable rule, (a rule read in from a file)
         private List<OpCode> starterops;
-        private int4 opinit;            // Index of initialized op
+        private int opinit;            // Index of initialized op
         private ConstraintGroup constraint;
         private UnifyState state;
         
-        public RuleGeneric(string g, string nm, List<OpCode> sops,int4 opi, ConstraintGroup c)
+        public RuleGeneric(string g, string nm, List<OpCode> sops,int opi, ConstraintGroup c)
             : base(g,0, nm)
         {
             state = new UnifyState(c);
@@ -43,13 +43,13 @@ namespace Sla.EXTRA
                 (ConstraintGroup*)constraint.clone());
         }
 
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
-            for (int4 i = 0; i < starterops.size(); ++i)
-                oplist.push_back((uint4)starterops[i]);
+            for (int i = 0; i < starterops.size(); ++i)
+                oplist.push_back((uint)starterops[i]);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             state.setFunction(&data);
             state.initialize(opinit, op);
@@ -66,7 +66,7 @@ namespace Sla.EXTRA
                 throw new LowlevelError("Unable to parse dynamic rule: " + nm);
 
             List<OpCode> opcodelist;
-            int4 opinit = compiler.postProcessRule(opcodelist);
+            int opinit = compiler.postProcessRule(opcodelist);
             RuleGeneric* res = new RuleGeneric(gp, nm, opcodelist, opinit, compiler.releaseRule());
             return res;
         }

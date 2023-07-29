@@ -21,9 +21,9 @@ namespace Sla.EXTRA
         {
             Datatype* ct;
             string unionName;
-            int4 fieldNum;
-            int4 size;
-            uint8 hash;
+            int fieldNum;
+            int size;
+            ulong hash;
 
             if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function loaded");

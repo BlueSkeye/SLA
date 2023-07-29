@@ -62,11 +62,11 @@ namespace Sla.DECCORE
         /// The member Varnode objects making up \b this HighVariable
         private List<Varnode> inst;
         /// Number of different speculative merge classes in \b this
-        private int4 numMergeClasses;
+        private int numMergeClasses;
         /// Dirtiness flags
-        private /*mutable*/ uint4 highflags;
+        private /*mutable*/ uint highflags;
         /// Boolean properties inherited from Varnode members
-        private /*mutable*/ uint4 flags;
+        private /*mutable*/ uint flags;
         /// The data-type for \b this
         private /*mutable*/ Datatype type;
         /// The storage location used to generate a Symbol name
@@ -78,15 +78,15 @@ namespace Sla.DECCORE
         /// The Symbol \b this HighVariable is tied to
         private /*mutable*/ Symbol symbol;
         /// -1=perfect symbol match >=0, offset
-        private /*mutable*/ int4 symboloffset;
+        private /*mutable*/ int symboloffset;
 
         /// Find the index of a specific Varnode member
         /// Find the index, for use with getInstance(), that will retrieve the given Varnode member
         /// \param vn is the given Varnode member
         /// \return the index of the member or -1 if it is not a member
-        private int4 instanceIndex(Varnode vn)
+        private int instanceIndex(Varnode vn)
         {
-            int4 i;
+            int i;
 
             for (i = 0; i < inst.size(); ++i)
                 if (inst[i] == vn) return i;
@@ -103,7 +103,7 @@ namespace Sla.DECCORE
             if ((highflags & flagsdirty) == 0) return; // flags are up to date
 
             List<Varnode*>::const_iterator iter;
-            uint4 fl = 0;
+            uint fl = 0;
 
             for (iter = inst.begin(); iter != inst.end(); ++iter)
                 fl |= (*iter).getFlags();
@@ -125,7 +125,7 @@ namespace Sla.DECCORE
                 internalCover.clear();
                 if (inst[0].hasCover())
                 {
-                    for (int4 i = 0; i < inst.size(); ++i)
+                    for (int i = 0; i < inst.size(); ++i)
                         internalCover.merge(*inst[i].getCover());
                 }
                 highflags &= ~coverdirty;
@@ -182,7 +182,7 @@ namespace Sla.DECCORE
         private void updateSymbol()
         {
             if ((highflags & symboldirty) == 0) return; // flags are up to date
-            highflags &= ~((uint4)symboldirty);
+            highflags &= ~((uint)symboldirty);
             List<Varnode*>::const_iterator iter;
             symbol = (Symbol*)0;
 
@@ -250,7 +250,7 @@ namespace Sla.DECCORE
         /// \param isspeculative is \b true to keep the new members in separate \e merge classes
         private void mergeInternal(HighVariable tv2, bool isspeculative)
         {
-            int4 i;
+            int i;
 
             highflags |= (flagsdirty | namerepdirty | typedirty);
             if (tv2.symbol != (Symbol*)0)
@@ -259,7 +259,7 @@ namespace Sla.DECCORE
                 {
                     symbol = tv2.symbol;           // Overwrite our Symbol (assume it is the same)
                     symboloffset = tv2.symboloffset;
-                    highflags &= ~((uint4)symboldirty); // Mark that we are not symbol dirty
+                    highflags &= ~((uint)symboldirty); // Mark that we are not symbol dirty
                 }
             }
 
@@ -334,7 +334,7 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Trying speculatively merge variables in separate groups");
             List<HighVariable*> mergePairs;
             piece.mergeGroups(tv2.piece, mergePairs);
-            for (int4 i = 0; i < mergePairs.size(); i += 2)
+            for (int i = 0; i < mergePairs.size(); i += 2)
             {
                 HighVariable* high1 = mergePairs[i];
                 HighVariable* high2 = mergePairs[i + 1];
@@ -379,7 +379,7 @@ namespace Sla.DECCORE
 
             if (type != (Datatype*)0 && type.getMetatype() == TYPE_PARTIALUNION)
                 highflags |= typedirty;
-            highflags &= ~((uint4)symboldirty);     // We are no longer dirty
+            highflags &= ~((uint)symboldirty);     // We are no longer dirty
         }
 
         /// Attach a reference to a Symbol to \b this
@@ -389,11 +389,11 @@ namespace Sla.DECCORE
         /// the actual value of the Symbol.
         /// \param sym is the given Symbol to attach
         /// \param off is the byte offset into the Symbol of the reference
-        private void setSymbolReference(Symbol sym, int4 off)
+        private void setSymbolReference(Symbol sym, int off)
         {
             symbol = sym;
             symboloffset = off;
-            highflags &= ~((uint4)symboldirty);
+            highflags &= ~((uint)symboldirty);
         }
 
         /// Transfer ownership of another's VariablePiece to \b this
@@ -403,7 +403,7 @@ namespace Sla.DECCORE
             tv2.piece = (VariablePiece*)0;
             piece.setHigh(this);
             highflags |= (tv2.highflags & (intersectdirty | extendcoverdirty));
-            tv2.highflags &= ~(uint4)(intersectdirty | extendcoverdirty);
+            tv2.highflags &= ~(uint)(intersectdirty | extendcoverdirty);
         }
 
         /// Mark the boolean properties as \e dirty
@@ -504,7 +504,7 @@ namespace Sla.DECCORE
         /// \return the SymbolEntry that mapped the Symbol to \b this or null if no Symbol is attached
         public SymbolEntry getSymbolEntry()
         {
-            for (int4 i = 0; i < inst.size(); ++i)
+            for (int i = 0; i < inst.size(); ++i)
             {
                 SymbolEntry* entry = inst[i].getSymbolEntry();
                 if (entry != (SymbolEntry*)0 && entry.getSymbol() == symbol)
@@ -514,13 +514,13 @@ namespace Sla.DECCORE
         }
 
         /// Get the Symbol offset associated with \b this
-        public int4 getSymbolOffset() => symboloffset;
+        public int getSymbolOffset() => symboloffset;
 
         /// Get the number of member Varnodes \b this has
-        public int4 numInstances() => inst.size();
+        public int numInstances() => inst.size();
 
         /// Get the i-th member Varnode
-        public Varnode getInstance(int4 i) => inst[i];
+        public Varnode getInstance(int i) => inst[i];
 
         /// Set a final datatype for \b this variable
         /// The data-type its dirtying mechanism is disabled.  The data-type will not change, unless
@@ -550,7 +550,7 @@ namespace Sla.DECCORE
         /// If one of the HighVariables is already in a group, the other HighVariable is added to this group.
         /// \param off is the relative byte offset of \b this with the other HighVariable
         /// \param hi2 is the other HighVariable
-        public void groupWith(int4 off, HighVariable hi2)
+        public void groupWith(int off, HighVariable hi2)
         {
             if (piece == (VariablePiece*)0 && hi2.piece == (VariablePiece*)0)
             {
@@ -569,7 +569,7 @@ namespace Sla.DECCORE
             }
             else if (hi2.piece == (VariablePiece*)0)
             {
-                int4 hi2Off = piece.getOffset() - off;
+                int hi2Off = piece.getOffset() - off;
                 if (hi2Off < 0)
                 {
                     piece.getGroup().adjustOffsets(-hi2Off);
@@ -582,7 +582,7 @@ namespace Sla.DECCORE
             }
             else
             {
-                int4 offDiff = hi2.piece.getOffset() + off - piece.getOffset();
+                int offDiff = hi2.piece.getOffset() + off - piece.getOffset();
                 if (offDiff != 0)
                     piece.getGroup().adjustOffsets(offDiff);
                 hi2.piece.getGroup().combineGroups(piece.getGroup());
@@ -597,7 +597,7 @@ namespace Sla.DECCORE
         public void establishGroupSymbolOffset()
         {
             VariableGroup* group = piece.getGroup();
-            int4 off = symboloffset;
+            int off = symboloffset;
             if (off < 0)
                 off = 0;
             off -= piece.getOffset();
@@ -656,7 +656,7 @@ namespace Sla.DECCORE
         public bool hasName()
         {
             bool indirectonly = true;
-            for (int4 i = 0; i < inst.size(); ++i)
+            for (int i = 0; i < inst.size(); ++i)
             {
                 Varnode* vn = inst[i];
                 if (!vn.hasCover())
@@ -694,7 +694,7 @@ namespace Sla.DECCORE
         /// \return the first address tied member
         public Varnode getTiedVarnode()
         {
-            int4 i;
+            int i;
 
             for (i = 0; i < inst.size(); ++i)
                 if (inst[i].isAddrTied())
@@ -709,7 +709,7 @@ namespace Sla.DECCORE
         /// \return the input Varnode member
         public Varnode getInputVarnode()
         {
-            for (int4 i = 0; i < inst.size(); ++i)
+            for (int i = 0; i < inst.size(); ++i)
                 if (inst[i].isInput())
                     return inst[i];
             throw new LowlevelError("Could not find input varnode");
@@ -770,7 +770,7 @@ namespace Sla.DECCORE
         }
 
         /// Get the number of speculative merges for \b this
-        public int4 getNumMergeClasses() => numMergeClasses;
+        public int getNumMergeClasses() => numMergeClasses;
 
         /// Return \b true if \b this is mapped
         public bool isMapped() 
@@ -922,7 +922,7 @@ namespace Sla.DECCORE
                     encoder.writeSignedInteger(ATTRIB_OFFSET, symboloffset);
             }
             getType().encode(encoder);
-            for (int4 j = 0; j < inst.size(); ++j)
+            for (int j = 0; j < inst.size(); ++j)
             {
                 encoder.openElement(ELEM_ADDR);
                 encoder.writeUnsignedInteger(ATTRIB_REF, inst[j].getCreateIndex());
@@ -940,10 +940,10 @@ namespace Sla.DECCORE
         {
           Cover accumCover;
 
-          for(int4 i=0;i<inst.size();++i) {
+          for(int i=0;i<inst.size();++i) {
             Varnode *vn = inst[i];
             if (accumCover.intersect(*vn.getCover()) == 2) {
-              for(int4 j=0;j<i;++j) {
+              for(int j=0;j<i;++j) {
 	        Varnode *otherVn = inst[j];
 	        if (otherVn.getCover().intersect(*vn.getCover())==2) {
 	          if (!otherVn.copyShadow(vn))
@@ -1023,12 +1023,12 @@ namespace Sla.DECCORE
         /// \param vn is the given root Varnode of the expression
         /// \param highList will hold the collected HighVariables
         /// \return a value based on call and LOAD instructions in the expression
-        public static int4 markExpression(Varnode vn, List<HighVariable> highList)
+        public static int markExpression(Varnode vn, List<HighVariable> highList)
         {
             HighVariable* high = vn.getHigh();
             high.setMark();
             highList.push_back(high);
-            int4 retVal = 0;
+            int retVal = 0;
             if (!vn.isWritten()) return retVal;
 
             List<PcodeOpNode> path;

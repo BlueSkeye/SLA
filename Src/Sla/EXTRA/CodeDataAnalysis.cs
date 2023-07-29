@@ -13,13 +13,13 @@ namespace Sla.EXTRA
 {
     internal class CodeDataAnalysis : IfaceData
     {
-        public int4 alignment;       // Alignment of instructions
+        public int alignment;       // Alignment of instructions
         public Architecture glb;
         public DisassemblyEngine disengine;
         public RangeList modelhits;
         public Dictionary<Address, CodeUnit> codeunit;
-        public Dictionary<AddrLink, uint4> fromto_crossref;
-        public Dictionary<AddrLink, uint4> tofrom_crossref;
+        public Dictionary<AddrLink, uint> fromto_crossref;
+        public Dictionary<AddrLink, uint> tofrom_crossref;
         public List<Dictionary<Address, CodeUnit>::iterator> taintlist;
         public List<Address> unlinkedstarts;
         public List<TargetHit> targethits;
@@ -77,7 +77,7 @@ namespace Sla.EXTRA
                         taintlist.push_back(iter);
                 }
             }
-            map<AddrLink, uint4>::iterator ftiter, diter, enditer;
+            map<AddrLink, uint>::iterator ftiter, diter, enditer;
             ftiter = fromto_crossref.lower_bound(AddrLink(startaddr));
             enditer = fromto_crossref.lower_bound(AddrLink(endaddr));
             fromto_crossref.erase(ftiter, enditer); // Erase all cross-references coming out of this block
@@ -94,15 +94,15 @@ namespace Sla.EXTRA
         }
 
         public Address commitCodeVec(Address addr, List<CodeUnit> codevec,
-            Dictionary<AddrLink, uint4> fromto_vec)
+            Dictionary<AddrLink, uint> fromto_vec)
         { // Commit all the code units in the List, build all the crossrefs
             Address curaddr = addr;
-            for (int4 i = 0; i < codevec.size(); ++i)
+            for (int i = 0; i < codevec.size(); ++i)
             {
                 codeunit[curaddr] = codevec[i];
                 curaddr = curaddr + codevec[i].size;
             }
-            map<AddrLink, uint4>::iterator citer;
+            map<AddrLink, uint>::iterator citer;
             for (citer = fromto_vec.begin(); citer != fromto_vec.end(); ++citer)
             {
                 AddrLink fromto = (*citer).first;
@@ -126,7 +126,7 @@ namespace Sla.EXTRA
 
         public void clearCrossRefs(Address addr, Address endaddr)
         { // Clear all crossrefs originating from [addr,endaddr)
-            map<AddrLink, uint4>::iterator startiter, iter, enditer, tfiter;
+            map<AddrLink, uint>::iterator startiter, iter, enditer, tfiter;
 
             startiter = fromto_crossref.lower_bound(AddrLink(addr));
             enditer = fromto_crossref.lower_bound(AddrLink(endaddr));
@@ -150,7 +150,7 @@ namespace Sla.EXTRA
             clearCrossRefs(addr, endaddr);
         }
 
-        public void addTarget(string nm, Address addr,uint4 mask)
+        public void addTarget(string nm, Address addr,uint mask)
         { // Add a target thunk to be searched for
             TargetFeature & targfeat(targets[addr]);
             targfeat.name = nm;
@@ -158,13 +158,13 @@ namespace Sla.EXTRA
             disengine.addTarget(addr);  // Tell the disassembler to search for address
         }
 
-        public int4 getNumTargets() => targets.size();
+        public int getNumTargets() => targets.size();
 
         public Address disassembleBlock(Address addr, Address endaddr)
         {
             DisassemblyResult disresult;
             List<CodeUnit> codevec;
-            map<AddrLink, uint4> fromto_vec;
+            map<AddrLink, uint> fromto_vec;
             bool flowin = false;
             bool hardend = false;
 
@@ -261,7 +261,7 @@ namespace Sla.EXTRA
             cu.flags = CodeUnit::notcode;
             if (hardend && (lastaddr < curaddr))
                 curaddr = lastaddr;
-            int4 wholesize = curaddr.getOffset() - addr.getOffset();
+            int wholesize = curaddr.getOffset() - addr.getOffset();
             if ((!flowin) && (wholesize < 10))
             {
                 wholesize = 1;
@@ -330,14 +330,14 @@ namespace Sla.EXTRA
 
         public void markCrossHits()
         { // Mark every codeunit hit by a call or jump
-            map<AddrLink, uint4>::iterator iter;
+            map<AddrLink, uint>::iterator iter;
             map<Address, CodeUnit>::iterator fiter;
 
             for (iter = tofrom_crossref.begin(); iter != tofrom_crossref.end(); ++iter)
             {
                 fiter = codeunit.find((*iter).first.a);
                 if (fiter == codeunit.end()) continue;
-                uint4 fromflags = (*iter).second;
+                uint fromflags = (*iter).second;
                 CodeUnit & to((*fiter).second);
                 if ((fromflags & CodeUnit::call) != 0)
                     to.flags |= CodeUnit::hit_by_call;
@@ -346,11 +346,11 @@ namespace Sla.EXTRA
             }
         }
 
-        public void addTargetHit(Address codeaddr, uintb targethit)
+        public void addTargetHit(Address codeaddr, ulong targethit)
         {
             Address funcstart = findFunctionStart(codeaddr);
             Address thunkaddr = Address(glb.translate.getDefaultCodeSpace(), targethit);
-            uint4 mask;
+            uint mask;
             map<Address, TargetFeature>::const_iterator titer;
             titer = targets.find(thunkaddr);
             if (titer != targets.end())
@@ -360,17 +360,17 @@ namespace Sla.EXTRA
             targethits.emplace_back(funcstart, codeaddr, thunkaddr, mask);
         }
 
-        public void resolveThunkHit(Address codeaddr, uintb targethit)
+        public void resolveThunkHit(Address codeaddr, ulong targethit)
         { // Code unit make indirect jump to target
           // Assume the address of the jump is another level of thunk
           // Look for direct calls to it and include those as TargetHits
-            map<AddrLink, uint4>::iterator iter, enditer;
+            map<AddrLink, uint>::iterator iter, enditer;
             iter = tofrom_crossref.lower_bound(AddrLink(codeaddr));
             Address endaddr = codeaddr + 1;
             enditer = tofrom_crossref.lower_bound(AddrLink(endaddr));
             while (iter != enditer)
             {
-                uint4 flags = (*iter).second;
+                uint flags = (*iter).second;
                 if ((flags & CodeUnit::call) != 0)
                     addTargetHit((*iter).first.b, targethit);
                 ++iter;
@@ -403,7 +403,7 @@ namespace Sla.EXTRA
 
         public bool checkErrantStart(Dictionary<Address, CodeUnit>::iterator iter)
         {
-            int4 count = 0;
+            int count = 0;
 
             while (count < 1000)
             {
@@ -422,16 +422,16 @@ namespace Sla.EXTRA
             return false;
         }
 
-        public bool repairJump(Address addr, int4 max)
+        public bool repairJump(Address addr, int max)
         { // Assume -addr- is a correct instruction start. Try to repair
           // disassembly for up to -max- instructions following it,
           // trying to get back on cut
             DisassemblyResult disresult;
             List<CodeUnit> codevec;
-            map<AddrLink, uint4> fromto_vec;
+            map<AddrLink, uint> fromto_vec;
             Address curaddr = addr;
             map<Address, CodeUnit>::iterator iter;
-            int4 count = 0;
+            int count = 0;
 
             iter = codeunit.lower_bound(addr);
             if (iter == codeunit.end()) return false;
@@ -463,7 +463,7 @@ namespace Sla.EXTRA
 
         public void findOffCut()
         {
-            map<AddrLink, uint4>::iterator iter;
+            map<AddrLink, uint>::iterator iter;
             map<Address, CodeUnit>::iterator citer;
 
             iter = tofrom_crossref.begin();
@@ -517,7 +517,7 @@ namespace Sla.EXTRA
 
         public Address findFunctionStart(Address addr)
         { // Find the starting address of a function containing the address addr
-            map<AddrLink, uint4>::const_iterator iter;
+            map<AddrLink, uint>::const_iterator iter;
 
             iter = tofrom_crossref.lower_bound(AddrLink(addr));
             while (iter != tofrom_crossref.begin())
@@ -538,15 +538,15 @@ namespace Sla.EXTRA
             enditer = modelhits.end();
             while (iter != enditer)
             {
-                uintb off = (*iter).getFirst();
+                ulong off = (*iter).getFirst();
                 s << hex << "0x" << off << ' ';
-                uintb endoff = (*iter).getLast();
+                ulong endoff = (*iter).getLast();
                 s << hex << "0x" << endoff;
                 ++iter;
                 if (iter != enditer)
                 {
                     off = (*iter).getFirst();
-                    s << ' ' << dec << (int4)(off - endoff);
+                    s << ' ' << dec << (int)(off - endoff);
                 }
                 s << endl;
             }
@@ -554,12 +554,12 @@ namespace Sla.EXTRA
 
         public void dumpCrossRefs(TextWriter s)
         {
-            map<AddrLink, uint4>::const_iterator iter;
+            map<AddrLink, uint>::const_iterator iter;
 
             for (iter = fromto_crossref.begin(); iter != fromto_crossref.end(); ++iter)
             {
                 AddrLink addrlink = (*iter).first;
-                uint4 flags = (*iter).second;
+                uint flags = (*iter).second;
 
                 s << hex << "0x" << addrlink.a.getOffset() << " . 0x" << addrlink.b.getOffset();
                 if ((flags & CodeUnit::call) != 0)
@@ -570,12 +570,12 @@ namespace Sla.EXTRA
 
         public void dumpFunctionStarts(TextWriter s)
         {
-            map<AddrLink, uint4>::const_iterator iter;
+            map<AddrLink, uint>::const_iterator iter;
 
             for (iter = tofrom_crossref.begin(); iter != tofrom_crossref.end(); ++iter)
             {
                 AddrLink addrlink = (*iter).first;
-                uint4 flags = (*iter).second;
+                uint flags = (*iter).second;
 
                 if ((flags & CodeUnit::call) != 0)
                     s << hex << "0x" << addrlink.a.getOffset() << endl;

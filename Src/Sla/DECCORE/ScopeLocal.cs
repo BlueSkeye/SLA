@@ -34,9 +34,9 @@ namespace Sla.DECCORE
         /// Data-types for specific storage locations
         private List<TypeRecommend> typeRecommend;
         /// Minimum offset of parameter passed (to a called function) on the stack
-        private uintb minParamOffset;
+        private ulong minParamOffset;
         /// Maximum offset of parameter passed (to a called function) on the stack
-        private uintb maxParamOffset;
+        private ulong maxParamOffset;
         /// Marked \b true if the stack is considered to \e grow towards smaller offsets
         private bool stackGrowsNegative;
         /// True if the subset of addresses \e mapped to \b this scope has been locked
@@ -52,12 +52,12 @@ namespace Sla.DECCORE
             if (a.size == 0) return false;  // Nothing to fit
             if ((a.flags & Varnode::typelock) != 0) return false; // Already entered
             Address addr(space, a.start);
-            uintb maxsize = getRangeTree().longestFit(addr, a.size);
+            ulong maxsize = getRangeTree().longestFit(addr, a.size);
             if (maxsize == 0) return false;
             if (maxsize < a.size)
             {   // Suggested range doesn't fit
                 if (maxsize < a.type.getSize()) return false; // Can't shrink that match
-                a.size = (int4)maxsize;
+                a.size = (int)maxsize;
             }
             // We want ANY symbol that might be within this range
             SymbolEntry* entry = findOverlap(addr, a.size);
@@ -84,7 +84,7 @@ namespace Sla.DECCORE
             Address addr(space, a.start);
             Address usepoint;
             Datatype* ct = glb.types.concretize(a.type);
-            int4 num = a.size / ct.getSize();
+            int num = a.size / ct.getSize();
             if (num > 1)
                 ct = glb.types.getTypeArray(num, ct);
 
@@ -140,7 +140,7 @@ namespace Sla.DECCORE
         /// how far an alias start might extend.  Otherwise a heuristic is used to determine if the Symbol
         /// is far enough away from the start of the alias to be considered unaliased.
         /// \param alias is the given set of alias starting offsets
-        private void markUnaliased(List<uintb> alias)
+        private void markUnaliased(List<ulong> alias)
         {
             EntryMap* rangemap = maptable[space.getIndex()];
             if (rangemap == (EntryMap*)0) return;
@@ -149,10 +149,10 @@ namespace Sla.DECCORE
             rangeIter = getRangeTree().begin();
             rangeEndIter = getRangeTree().end();
 
-            int4 alias_block_level = glb.alias_block_level;
+            int alias_block_level = glb.alias_block_level;
             bool aliason = false;
-            uintb curalias = 0;
-            int4 i = 0;
+            ulong curalias = 0;
+            int i = 0;
 
             iter = rangemap.begin_list();
             enditer = rangemap.end_list();
@@ -160,7 +160,7 @@ namespace Sla.DECCORE
             while (iter != enditer)
             {
                 SymbolEntry & entry(*iter++);
-                uintb curoff = entry.getAddr().getOffset() + entry.getSize() - 1;
+                ulong curoff = entry.getAddr().getOffset() + entry.getSize() - 1;
                 while ((i < alias.size()) && (alias[i] <= curoff))
                 {
                     aliason = true;
@@ -208,7 +208,7 @@ namespace Sla.DECCORE
         /// the scope marked as category '0').
         private void fakeInputSymbols()
         {
-            int4 lockedinputs = getCategorySize(Symbol::function_parameter);
+            int lockedinputs = getCategorySize(Symbol::function_parameter);
             VarnodeDefSet::const_iterator iter, enditer;
 
             iter = fd.beginDef(Varnode::input);
@@ -222,13 +222,13 @@ namespace Sla.DECCORE
                 if (addr.getSpace() != space) continue;
                 // Only allow offsets which can be parameters
                 if (!fd.getFuncProto().getParamRange().inRange(addr, 1)) continue;
-                uintb endpoint = addr.getOffset() + vn.getSize() - 1;
+                ulong endpoint = addr.getOffset() + vn.getSize() - 1;
                 while (iter != enditer)
                 {
                     vn = *iter;
                     if (vn.getSpace() != space) break;
                     if (endpoint < vn.getOffset()) break;
-                    uintb newendpoint = vn.getOffset() + vn.getSize() - 1;
+                    ulong newendpoint = vn.getOffset() + vn.getSize() - 1;
                     if (endpoint < newendpoint)
                         endpoint = newendpoint;
                     if (vn.isTypeLock())
@@ -246,7 +246,7 @@ namespace Sla.DECCORE
                     // corresponding varnodes won't get typelocked
                     if (lockedinputs != 0)
                     {
-                        uint4 vflags = 0;
+                        uint vflags = 0;
                         SymbolEntry* entry = queryProperties(vn.getAddr(), vn.getSize(), usepoint, vflags);
                         if (entry != (SymbolEntry*)0)
                         {
@@ -255,7 +255,7 @@ namespace Sla.DECCORE
                         }
                     }
 
-                    int4 size = (endpoint - addr.getOffset()) + 1;
+                    int size = (endpoint - addr.getOffset()) + 1;
                     Datatype* ct = fd.getArch().types.getBase(size, TYPE_UNKNOWN);
                     try
                     {
@@ -351,10 +351,10 @@ namespace Sla.DECCORE
                     continue;
                 refOps.push_back(op);
             }
-            for (int4 i = 0; i < refOps.size(); ++i)
+            for (int i = 0; i < refOps.size(); ++i)
             {
                 PcodeOp* op = refOps[i];
-                int4 slot = op.getSlot(spVn);
+                int slot = op.getSlot(spVn);
                 PcodeOp* ptrsub = fd.newOpBefore(op, CPUI_PTRSUB, spVn, fd.newConstant(spVn.getSize(), 0));
                 fd.opSetInput(op, ptrsub.getOut(), slot);
             }
@@ -365,11 +365,11 @@ namespace Sla.DECCORE
         /// \param spc is the (stack) address space associated with this function's local variables
         /// \param fd is the function associated with these local variables
         /// \param g is the Architecture
-        public ScopeLocal(uint8 id, AddrSpace spc, Funcdata fd, Architecture g)
+        public ScopeLocal(ulong id, AddrSpace spc, Funcdata fd, Architecture g)
             : base(id, fd.getName(), g)
         {
             space = spc;
-            minParamOffset = ~((uintb)0);
+            minParamOffset = ~((ulong)0);
             maxParamOffset = 0;
             rangeLocked = false;
             stackGrowsNegative = true;
@@ -412,10 +412,10 @@ namespace Sla.DECCORE
         /// \param first is the starting offset of the given range
         /// \param sz is the number of bytes in the range
         /// \param parameter is \b true if the range is being used to store a sub-function parameter
-        public void markNotMapped(AddrSpace spc, uintb first, int4 sz, bool param)
+        public void markNotMapped(AddrSpace spc, ulong first, int sz, bool param)
         {
             if (space != spc) return;
-            uintb last = first + sz - 1;
+            ulong last = first + sz - 1;
             // Do not allow the range to cover the split point between "negative" and "positive" stack offsets
             if (last < first)       // Check for possible wrap around
                 last = spc.getHighest();
@@ -473,14 +473,14 @@ namespace Sla.DECCORE
             space = decoder.readSpace(ATTRIB_MAIN);
         }
 
-        public override string buildVariableName(Address addr, Address pc, Datatype ct, int4 index, uint4 flags)
+        public override string buildVariableName(Address addr, Address pc, Datatype ct, int index, uint flags)
         {
             if (((flags & (Varnode::addrtied | Varnode::persist)) == Varnode::addrtied) &&
                 addr.getSpace() == space)
             {
                 if (fd.getFuncProto().getLocalRange().inRange(addr, 1))
                 {
-                    intb start = (intb)AddrSpace::byteToAddress(addr.getOffset(), space.getWordSize());
+                    long start = (long)AddrSpace::byteToAddress(addr.getOffset(), space.getWordSize());
                     sign_extend(start, addr.getAddrSize() * 8 - 1);
                     if (stackGrowsNegative)
                         start = -start;
@@ -516,7 +516,7 @@ namespace Sla.DECCORE
         public void resetLocalWindow()
         {
             stackGrowsNegative = fd.getFuncProto().isStackGrowsNegative();
-            minParamOffset = ~(uintb)0;
+            minParamOffset = ~(ulong)0;
             maxParamOffset = 0;
 
             if (rangeLocked) return;
@@ -530,15 +530,15 @@ namespace Sla.DECCORE
             for (iter = localRange.begin(); iter != localRange.end(); ++iter)
             {
                 AddrSpace* spc = (*iter).getSpace();
-                uintb first = (*iter).getFirst();
-                uintb last = (*iter).getLast();
+                ulong first = (*iter).getFirst();
+                ulong last = (*iter).getLast();
                 newrange.insertRange(spc, first, last);
             }
             for (iter = paramrange.begin(); iter != paramrange.end(); ++iter)
             {
                 AddrSpace* spc = (*iter).getSpace();
-                uintb first = (*iter).getFirst();
-                uintb last = (*iter).getLast();
+                ulong first = (*iter).getFirst();
+                ulong last = (*iter).getLast();
                 newrange.insertRange(spc, first, last);
             }
             glb.symboltab.setRange(this, newrange);
@@ -612,7 +612,7 @@ namespace Sla.DECCORE
         public SymbolEntry remapSymbol(Symbol sym, Address addr, Address usepoint)
         {
             SymbolEntry* entry = sym.getFirstWholeMap();
-            int4 size = entry.getSize();
+            int size = entry.getSize();
             if (!entry.isDynamic())
             {
                 if (entry.getAddr() == addr)
@@ -638,10 +638,10 @@ namespace Sla.DECCORE
         /// \param hash is the dynamic hash
         /// \param usepoint is the use point for the mapping
         /// \return the new dynamic mapping
-        public SymbolEntry remapSymbolDynamic(Symbol sym, uint8 hash, Address usepoint)
+        public SymbolEntry remapSymbolDynamic(Symbol sym, ulong hash, Address usepoint)
         {
             SymbolEntry* entry = sym.getFirstWholeMap();
-            int4 size = entry.getSize();
+            int size = entry.getSize();
             if (entry.isDynamic())
             {
                 if (entry.getHash() == hash && entry.getFirstUseAddress() == usepoint)
@@ -668,7 +668,7 @@ namespace Sla.DECCORE
             {
                 Address addr = (*iter).getAddr();
                 Address usepoint = (*iter).getUseAddr();
-                int4 size = (*iter).getSize();
+                int size = (*iter).getSize();
                 Symbol* sym;
                 Varnode* vn = (Varnode*)0;
                 if (usepoint.isInvalid())

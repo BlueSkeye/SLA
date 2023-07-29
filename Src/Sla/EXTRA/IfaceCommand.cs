@@ -64,7 +64,7 @@ namespace Sla.EXTRA
         }
 
         ///< Get the i-th command token
-        public string getCommandWord(int4 i) => com[i];
+        public string getCommandWord(int i) => com[i];
 
         ///< Add words to the associated command line string
         public void addWords(List<string> wordlist)
@@ -75,7 +75,7 @@ namespace Sla.EXTRA
                 com.push_back(*iter);
         }
 
-        public int4 numWords() => com.size();   ///< Return the number of tokens in the command line string
+        public int numWords() => com.size();   ///< Return the number of tokens in the command line string
 
         ///< Get the complete command line string
         /// \param res is overwritten with the full command line string
@@ -89,9 +89,9 @@ namespace Sla.EXTRA
         /// the comparing tokens in their respective command line strings
         /// \param op2 is the other command to compare with \b this
         /// \return -1, 0, 1 if \b this is earlier, equal to, or after to the other command
-        public int4 compare(IfaceCommand op2)
+        public int compare(IfaceCommand op2)
         {
-            int4 res;
+            int res;
             List<string>::const_iterator iter1, iter2;
 
             for (iter1 = com.begin(), iter2 = op2.com.begin(); ; ++iter1, ++iter2)

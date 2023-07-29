@@ -1400,7 +1400,7 @@ namespace Sla.SLEIGH
 
         //        case 85: /* statement  */
 
-        //            { if (((*yyvaluep).stmt) != (List<OpTpl*>*)0) { for (int4 i = 0; i < ((*yyvaluep).stmt).size(); ++i) delete(*((*yyvaluep).stmt))[i]; delete((*yyvaluep).stmt); } }
+        //            { if (((*yyvaluep).stmt) != (List<OpTpl*>*)0) { for (int i = 0; i < ((*yyvaluep).stmt).size(); ++i) delete(*((*yyvaluep).stmt))[i]; delete((*yyvaluep).stmt); } }
 
         //            break;
 
@@ -1442,7 +1442,7 @@ namespace Sla.SLEIGH
 
         //        case 94: /* paramlist  */
 
-        //            { for (int4 i = 0; i < ((*yyvaluep).param).size(); ++i) delete(*((*yyvaluep).param))[i]; delete((*yyvaluep).param); }
+        //            { for (int i = 0; i < ((*yyvaluep).param).size(); ++i) delete(*((*yyvaluep).param))[i]; delete((*yyvaluep).param); }
 
         //            break;
 
@@ -1784,7 +1784,7 @@ namespace Sla.SLEIGH
 
         //    case 15:
 
-        //        { (yyval.stmt) = pcode.assignBitRange((yyvsp[-8].varnode), (uint4) * (yyvsp[-6].i), (uint4) * (yyvsp[-4].i), (yyvsp[-1].tree)); delete(yyvsp[-6].i), delete(yyvsp[-4].i); }
+        //        { (yyval.stmt) = pcode.assignBitRange((yyvsp[-8].varnode), (uint) * (yyvsp[-6].i), (uint) * (yyvsp[-4].i), (yyvsp[-1].tree)); delete(yyvsp[-6].i), delete(yyvsp[-4].i); }
 
         //        break;
 
@@ -2210,13 +2210,13 @@ namespace Sla.SLEIGH
 
         //    case 86:
 
-        //        { (yyval.tree) = pcode.createBitRange((yyvsp[-2].specsym), 0, (uint4)(*(yyvsp[0].i) * 8)); delete(yyvsp[0].i); }
+        //        { (yyval.tree) = pcode.createBitRange((yyvsp[-2].specsym), 0, (uint)(*(yyvsp[0].i) * 8)); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 87:
 
-        //        { (yyval.tree) = pcode.createBitRange((yyvsp[-5].specsym), (uint4) * (yyvsp[-3].i), (uint4) * (yyvsp[-1].i)); delete(yyvsp[-3].i), delete(yyvsp[-1].i); }
+        //        { (yyval.tree) = pcode.createBitRange((yyvsp[-5].specsym), (uint) * (yyvsp[-3].i), (uint) * (yyvsp[-1].i)); delete(yyvsp[-3].i), delete(yyvsp[-1].i); }
 
         //        break;
 
@@ -2288,7 +2288,7 @@ namespace Sla.SLEIGH
 
         //    case 99:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(pcode.getConstantSpace()), ConstTpl(ConstTpl::j_relative, (yyvsp[0].labelsym).getIndex()), ConstTpl(ConstTpl::real, sizeof(uintm))); (yyvsp[0].labelsym).incrementRefCount(); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(pcode.getConstantSpace()), ConstTpl(ConstTpl::j_relative, (yyvsp[0].labelsym).getIndex()), ConstTpl(ConstTpl::real, sizeof(uint))); (yyvsp[0].labelsym).incrementRefCount(); }
 
         //        break;
 

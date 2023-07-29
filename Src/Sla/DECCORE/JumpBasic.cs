@@ -21,7 +21,7 @@ namespace Sla.DECCORE
         protected JumpValuesRange jrange;      ///< Range of values for the (normalized) switch variable
         protected PathMeld pathMeld;          ///< Set of PcodeOps and Varnodes producing the final target addresses
         protected List<GuardRecord> selectguards;   ///< Any guards associated with \b model
-        protected int4 varnodeIndex;          ///< Position of the normalized switch Varnode within PathMeld
+        protected int varnodeIndex;          ///< Position of the normalized switch Varnode within PathMeld
         protected Varnode normalvn;          ///< Normalized switch Varnode
         protected Varnode switchvn;          ///< Unnormalized switch Varnode
 
@@ -53,12 +53,12 @@ namespace Sla.DECCORE
         /// be zero, translate this into a stride for the jumptable range.
         /// \param vn is the given Varnode
         /// \return the calculated stride = 1,2,4,...
-        protected static int4 getStride(Varnode vn)
+        protected static int getStride(Varnode vn)
         {
-            uintb mask = vn.getNZMask();
+            ulong mask = vn.getNZMask();
             if ((mask & 0x3f) == 0)     // Limit the maximum stride we can return
                 return 32;
-            int4 stride = 1;
+            int stride = 1;
             while ((mask & 1) == 0)
             {
                 mask >>= 1;
@@ -75,12 +75,12 @@ namespace Sla.DECCORE
         /// \param outvn is the output Varnode of the data-flow
         /// \param invn is the input Varnode to back up to
         /// \return the recovered value associated with the input Varnode
-        protected static uintb backup2Switch(Funcdata fd, uintb output, Varnode outvn, Varnode invn)
+        protected static ulong backup2Switch(Funcdata fd, ulong output, Varnode outvn, Varnode invn)
         {
             Varnode* curvn = outvn;
             PcodeOp* op;
             TypeOp* top;
-            int4 slot;
+            int slot;
 
             while (curvn != invn)
             {
@@ -91,7 +91,7 @@ namespace Sla.DECCORE
                 if (op.getEvalType() == PcodeOp::binary)
                 {
                     Address addr = op.getIn(1 - slot).getAddr();
-                    uintb otherval;
+                    ulong otherval;
                     if (!addr.isConstant())
                     {
                         MemoryImage mem(addr.getSpace(),4,1024,fd.getArch().loader);
@@ -119,9 +119,9 @@ namespace Sla.DECCORE
         /// Otherwise, 0 is returned, indicating that the Varnode can take all possible values.
         /// \param vn is the given Varnode
         /// \return the maximum value or 0
-        protected static uintb getMaxValue(Varnode vn)
+        protected static ulong getMaxValue(Varnode vn)
         {
-            uintb maxValue = 0;     // 0 indicates maximum possible value
+            ulong maxValue = 0;     // 0 indicates maximum possible value
             if (!vn.isWritten())
                 return maxValue;
             PcodeOp* op = vn.getDef();
@@ -136,7 +136,7 @@ namespace Sla.DECCORE
             }
             else if (op.code() == CPUI_MULTIEQUAL)
             {   // Its possible the AND is duplicated across multiple blocks
-                int4 i;
+                int i;
                 for (i = 0; i < op.numInput(); ++i)
                 {
                     Varnode* subvn = op.getIn(i);
@@ -165,7 +165,7 @@ namespace Sla.DECCORE
         /// in a PathMeld object that determines Varnodes that are common to all the paths.
         /// \param op is the given PcodeOp
         /// \param slot is input slot to the PcodeOp all paths must terminate at
-        protected void findDeterminingVarnodes(PcodeOp op, int4 slot)
+        protected void findDeterminingVarnodes(PcodeOp op, int slot)
         {
             List<PcodeOpNode> path;
             bool firstpoint = false;    // Have not seen likely switch variable yet
@@ -223,11 +223,11 @@ namespace Sla.DECCORE
         /// A GuardRecord is created for each of these restrictions.
         /// \param bl is the given basic-block
         /// \param pathout is an optional path from the basic-block to the switch or -1
-        protected void analyzeGuards(BlockBasic bl, int4 pathout)
+        protected void analyzeGuards(BlockBasic bl, int pathout)
         {
-            int4 i, j, indpath;
-            int4 maxbranch = 2;     // Maximum number of CBRANCHs to consider
-            int4 maxpullback = 2;
+            int i, j, indpath;
+            int maxbranch = 2;     // Maximum number of CBRANCHs to consider
+            int maxpullback = 2;
             bool usenzmask = (jumptable.getStage() == 0);
 
             selectguards.clear();
@@ -283,7 +283,7 @@ namespace Sla.DECCORE
                 CircleRange rng(toswitchval);
 
                 // The boolean variable could conceivably be the switch variable
-                int4 indpathstore = prevbl.getFlipPath() ? 1 - indpath : indpath;
+                int indpathstore = prevbl.getFlipPath() ? 1 - indpath : indpath;
                 selectguards.push_back(GuardRecord(cbranch, cbranch, indpathstore, rng, vn));
                 for (j = 0; j < maxpullback; ++j)
                 {
@@ -307,26 +307,26 @@ namespace Sla.DECCORE
         protected void calcRange(Varnode vn, CircleRange rng)
         {
             // Get an initial range, based on the size/type of -vn-
-            int4 stride = 1;
+            int stride = 1;
             if (vn.isConstant())
                 rng = CircleRange(vn.getOffset(), vn.getSize());
             else if (vn.isWritten() && vn.getDef().isBoolOutput())
                 rng = CircleRange(0, 2, 1, 1);  // Only 0 or 1 possible
             else
             {           // Should we go ahead and use nzmask in all cases?
-                uintb maxValue = getMaxValue(vn);
+                ulong maxValue = getMaxValue(vn);
                 stride = getStride(vn);
                 rng = CircleRange(0, maxValue, vn.getSize(), stride);
             }
 
             // Intersect any guard ranges which apply to -vn-
-            int4 bitsPreserved;
+            int bitsPreserved;
             Varnode* baseVn = GuardRecord::quasiCopy(vn, bitsPreserved);
             List<GuardRecord>::const_iterator iter;
             for (iter = selectguards.begin(); iter != selectguards.end(); ++iter)
             {
                 GuardRecord guard = *iter;
-                int4 matchval = guard.valueMatch(vn, baseVn, bitsPreserved);
+                int matchval = guard.valueMatch(vn, baseVn, bitsPreserved);
                 // if (matchval == 2)   TODO: we need to check for aliases
                 if (matchval == 0) continue;
                 if (rng.intersect(guard.getRange()) != 0) continue;
@@ -351,10 +351,10 @@ namespace Sla.DECCORE
         /// Varnode as the switch variable.  Whatever Varnode is selected,
         /// the JumpValue object is set up to iterator over its range.
         /// \param matchsize optionally gives an expected size of the range, or it can be 0
-        protected void findSmallestNormal(uint4 matchsize)
+        protected void findSmallestNormal(uint matchsize)
         {
             CircleRange rng;
-            uintb sz, maxsize;
+            ulong sz, maxsize;
 
             varnodeIndex = 0;
             calcRange(pathMeld.getVarnode(0), rng);
@@ -362,7 +362,7 @@ namespace Sla.DECCORE
             jrange.setStartVn(pathMeld.getVarnode(0));
             jrange.setStartOp(pathMeld.getOp(0));
             maxsize = rng.getSize();
-            for (uint4 i = 1; i < pathMeld.numCommonVarnode(); ++i)
+            for (uint i = 1; i < pathMeld.numCommonVarnode(); ++i)
             {
                 if (maxsize == matchsize)   // Found variable that gives (already recovered) size
                     return;
@@ -392,10 +392,10 @@ namespace Sla.DECCORE
         /// \param pathout is the (optional) path to the BRANCHIND or -1
         /// \param matchsize is an (optional) size to expect for the normalized switch variable range
         /// \param maxtablesize is the maximum size expected for the normalized switch variable range
-        protected void findNormalized(Funcdata fd, BlockBasic rootbl, int4 pathout, uint4 matchsize,
-            uint4 maxtablesize)
+        protected void findNormalized(Funcdata fd, BlockBasic rootbl, int pathout, uint matchsize,
+            uint maxtablesize)
         {
-            uintb sz;
+            ulong sz;
 
             analyzeGuards(rootbl, pathout);
             findSmallestNormal(matchsize);
@@ -416,7 +416,7 @@ namespace Sla.DECCORE
                 if (vn.isReadOnly())
                 {
                     MemoryImage mem(vn.getSpace(),4,16,glb.loader);
-                    uintb val = mem.getValue(vn.getOffset(), vn.getSize());
+                    ulong val = mem.getValue(vn.getOffset(), vn.getSize());
                     varnodeIndex = 0;
                     jrange.setRange(CircleRange(val, vn.getSize()));
                     jrange.setStartVn(vn);
@@ -432,9 +432,9 @@ namespace Sla.DECCORE
         protected void markFoldableGuards()
         {
             Varnode* vn = pathMeld.getVarnode(varnodeIndex);
-            int4 bitsPreserved;
+            int bitsPreserved;
             Varnode* baseVn = GuardRecord::quasiCopy(vn, bitsPreserved);
-            for (int4 i = 0; i < selectguards.size(); ++i)
+            for (int i = 0; i < selectguards.size(); ++i)
             {
                 GuardRecord & guardRecord(selectguards[i]);
                 if (guardRecord.valueMatch(vn, baseVn, bitsPreserved) == 0 || guardRecord.isUnrolled())
@@ -449,7 +449,7 @@ namespace Sla.DECCORE
         protected void markModel(bool val)
         {
             pathMeld.markPaths(val, varnodeIndex);
-            for (int4 i = 0; i < selectguards.size(); ++i)
+            for (int i = 0; i < selectguards.size(); ++i)
             {
                 PcodeOp* op = selectguards[i].getBranch();
                 if (op == (PcodeOp*)0) continue;
@@ -493,10 +493,10 @@ namespace Sla.DECCORE
             PcodeOp* op = curBlock.lastOp();
             if (op == (PcodeOp*)0 || op.code() != CPUI_CBRANCH)
                 return false;
-            int4 outslot = bl.getInRevIndex(0);
+            int outslot = bl.getInRevIndex(0);
             bool isOpFlip = op.isBooleanFlip();
             varArray.push_back(op.getIn(1));   // Pass back boolean input to CBRANCH
-            for (int4 i = 1; i < bl.sizeIn(); ++i)
+            for (int i = 1; i < bl.sizeIn(); ++i)
             {
                 curBlock = (BlockBasic*)bl.getIn(i);
                 op = curBlock.lastOp();
@@ -520,20 +520,20 @@ namespace Sla.DECCORE
         /// \param bl is the basic block on the path to the switch with multiple incoming flows
         /// \param maxpullback is the maximum number of times to pull back from the guard CBRANCH to the putative switch variable
         /// \param usenzmask is \b true if the NZMASK should be used as part of the pull-back operation
-        protected void checkUnrolledGuard(BlockBasic bl, int4 maxpullback, bool usenzmask)
+        protected void checkUnrolledGuard(BlockBasic bl, int maxpullback, bool usenzmask)
         {
             List<Varnode*> varArray;
             if (!checkCommonCbranch(varArray, bl))
                 return;
-            int4 indpath = bl.getInRevIndex(0);
+            int indpath = bl.getInRevIndex(0);
             bool toswitchval = (indpath == 1);
             PcodeOp* cbranch = ((BlockBasic*)bl.getIn(0)).lastOp();
             if (cbranch.isBooleanFlip())
                 toswitchval = !toswitchval;
             CircleRange rng(toswitchval);
-            int4 indpathstore = bl.getIn(0).getFlipPath() ? 1 - indpath : indpath;
+            int indpathstore = bl.getIn(0).getFlipPath() ? 1 - indpath : indpath;
             PcodeOp* readOp = cbranch;
-            for (int4 j = 0; j < maxpullback; ++j)
+            for (int j = 0; j < maxpullback; ++j)
             {
                 PcodeOp* multiOp = bl.findMultiequal(varArray);
                 if (multiOp != (PcodeOp*)0)
@@ -562,13 +562,13 @@ namespace Sla.DECCORE
         protected virtual bool foldInOneGuard(Funcdata fd, GuardRecord guard, JumpTable jump)
         {
             PcodeOp* cbranch = guard.getBranch();
-            int4 indpath = guard.getPath(); // Get stored path to indirect block
+            int indpath = guard.getPath(); // Get stored path to indirect block
             BlockBasic* cbranchblock = cbranch.getParent();
             if (cbranchblock.getFlipPath()) // Based on whether out branches have been flipped
                 indpath = 1 - indpath;  // get actual path to indirect block
             BlockBasic* guardtarget = (BlockBasic*)cbranchblock.getOut(1 - indpath);
             bool change = false;
-            int4 pos;
+            int pos;
 
             // Its possible the guard branch has been converted between the switch recovery and now
             if (cbranchblock.sizeOut() != 2) return false; // In which case, we can't fold it in
@@ -594,7 +594,7 @@ namespace Sla.DECCORE
                 // statements between the guard and the switch. But the
                 // fact that the guard target is also a switch target
                 // is a good indicator that there are none
-                uintb val = ((indpath == 0) != (cbranch.isBooleanFlip())) ? 0 : 1;
+                ulong val = ((indpath == 0) != (cbranch.isBooleanFlip())) ? 0 : 1;
                 fd.opSetInput(cbranch, fd.newConstant(cbranch.getIn(0).getSize(), val), 1);
                 jump.setDefaultBlock(pos); // A guard branch generally targets the default case
                 guard.clear();
@@ -624,10 +624,10 @@ namespace Sla.DECCORE
 
         public override bool isOverride() => false;
 
-        public override int4 getTableSize() => jrange.getSize();
+        public override int getTableSize() => jrange.getSize();
 
-        public override bool recoverModel(Funcdata fd, PcodeOp indop, uint4 matchsize,
-            uint4 maxtablesize)
+        public override bool recoverModel(Funcdata fd, PcodeOp indop, uint matchsize,
+            uint maxtablesize)
         {
             // Basically there needs to be a straight line calculation from a switch variable to the final
             // address used for the BRANCHIND.  The switch variable is restricted to a small range by one
@@ -645,15 +645,15 @@ namespace Sla.DECCORE
         public override virtual void buildAddresses(Funcdata fd, PcodeOp indop,
             List<Address> addresstable, List<LoadTable> loadpoints)
         {
-            uintb val, addr;
+            ulong val, addr;
             addresstable.clear();       // Clear out any partial recoveries
                                         // Build the emulation engine
             EmulateFunction emul(fd);
             if (loadpoints != (List<LoadTable>*)0)
                 emul.setLoadCollect(true);
 
-            uintb mask = ~((uintb)0);
-            int4 bit = fd.getArch().funcptr_align;
+            ulong mask = ~((ulong)0);
+            int bit = fd.getArch().funcptr_align;
             if (bit != 0)
             {
                 mask = (mask >> bit) << bit;
@@ -673,17 +673,17 @@ namespace Sla.DECCORE
                 emul.collectLoadPoints(*loadpoints);
         }
 
-        public override void findUnnormalized(uint4 maxaddsub, uint4 maxleftright, uint4 maxext)
+        public override void findUnnormalized(uint maxaddsub, uint maxleftright, uint maxext)
         {
-            int4 i, j;
+            int i, j;
 
             i = varnodeIndex;
             normalvn = pathMeld.getVarnode(i++);
             switchvn = normalvn;
             markModel(true);
 
-            int4 countaddsub = 0;
-            int4 countext = 0;
+            int countaddsub = 0;
+            int countext = 0;
             PcodeOp* normop = (PcodeOp*)0;
             while (i < pathMeld.numCommonVarnode())
             {
@@ -719,16 +719,16 @@ namespace Sla.DECCORE
         }
 
         public override void buildLabels(Funcdata fd, List<Address> addresstable,
-            List<uintb> label, JumpModel orig)
+            List<ulong> label, JumpModel orig)
         {
-            uintb val, switchval;
+            ulong val, switchval;
             JumpValuesRange origrange = ((JumpBasic*)orig).getValueRange();
 
             bool notdone = origrange.initializeForReading();
             while (notdone)
             {
                 val = origrange.getValue();
-                int4 needswarning = 0;  // 0=nowarning, 1=this code block may not be properly labeled, 2=calculation failed
+                int needswarning = 0;  // 0=nowarning, 1=this code block may not be properly labeled, 2=calculation failed
                 if (origrange.isReversible())
                 {   // If the current value is reversible
                     if (!jrange.contains(val))
@@ -774,7 +774,7 @@ namespace Sla.DECCORE
         public override bool foldInGuards(Funcdata fd, JumpTable jump)
         {
             bool change = false;
-            for (int4 i = 0; i < selectguards.size(); ++i)
+            for (int i = 0; i < selectguards.size(); ++i)
             {
                 PcodeOp* cbranch = selectguards[i].getBranch();
                 if (cbranch == (PcodeOp*)0) continue; // Already normalized
@@ -793,8 +793,8 @@ namespace Sla.DECCORE
         {
             // Test all the addresses in \b this address table checking
             // that they are reasonable. We cut off at the first unreasonable address.
-            int4 i;
-            uintb diff;
+            int i;
+            ulong diff;
             if (addresstable.empty()) return true;
             Address addr = addresstable[0];
             i = 0;
@@ -808,7 +808,7 @@ namespace Sla.DECCORE
                         (addr.getOffset() - addresstable[i].getOffset());
                     if (diff > 0xffff)
                     {
-                        uint1 buffer[8];
+                        byte buffer[8];
                         LoadImage* loadimage = fd.getArch().loader;
                         bool dataavail = true;
                         try

@@ -27,13 +27,13 @@ namespace Sla.DECCORE
         ///
         /// Verify that the inputs to the logical operator are booleans, then convert
         /// INT_AND to BOOL_AND, INT_OR to BOOL_OR etc.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
-            uint4 list[] = { CPUI_INT_AND, CPUI_INT_OR, CPUI_INT_XOR };
+            uint list[] = { CPUI_INT_AND, CPUI_INT_OR, CPUI_INT_XOR };
             oplist.insert(oplist.end(), list, list + 3);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* boolVn;
 
@@ -42,7 +42,7 @@ namespace Sla.DECCORE
             Varnode* in1 = op.getIn(1);
             if (in1.isConstant())
             {
-                if (in1.getOffset() > (uintb)1) // If one side is a constant 0 or 1, this is boolean
+                if (in1.getOffset() > (ulong)1) // If one side is a constant 0 or 1, this is boolean
                     return 0;
             }
             else if (!in1.isBooleanValue(data.isTypeRecoveryOn()))

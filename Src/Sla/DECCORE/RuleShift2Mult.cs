@@ -27,19 +27,19 @@ namespace Sla.DECCORE
         /// \brief Convert INT_LEFT to INT_MULT:  `V << 2  =>  V * 4`
         ///
         /// This only applies if the result is involved in an arithmetic expression.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_LEFT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            int4 flag;
+            int flag;
             list<PcodeOp*>::const_iterator desc;
             Varnode* vn,*constvn;
             PcodeOp* arithop;
             OpCode opc;
-            int4 val;
+            int val;
 
             flag = 0;
             vn = op.getOut();
@@ -67,7 +67,7 @@ namespace Sla.DECCORE
             }
 
             if (flag == 0) return 0;
-            constvn = data.newConstant(vn.getSize(), ((uintb)1) << val);
+            constvn = data.newConstant(vn.getSize(), ((ulong)1) << val);
             data.opSetInput(op, constvn, 1);
             data.opSetOpcode(op, CPUI_INT_MULT);
             return 1;

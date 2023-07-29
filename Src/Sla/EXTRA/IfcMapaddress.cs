@@ -15,7 +15,7 @@ namespace Sla.EXTRA
         ///
         /// Create a new variable in the current scope
         /// \code
-        ///    map address r0x1000 int4 globalvar
+        ///    map address r0x1000 int globalvar
         /// \endcode
         /// The symbol specified in the type declaration can qualify the namespace using the "::"
         /// specifier.  If there is a current function, the variable is local to the function.
@@ -24,7 +24,7 @@ namespace Sla.EXTRA
         {
             Datatype* ct;
             string name;
-            int4 size;
+            int size;
             Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read required address;
 
             s >> ws;
@@ -38,7 +38,7 @@ namespace Sla.EXTRA
             else
             {
                 Symbol* sym;
-                uint4 flags = Varnode::namelock | Varnode::typelock;
+                uint flags = Varnode::namelock | Varnode::typelock;
                 flags |= dcp.conf.symboltab.getProperty(addr); // Inherit existing properties
                 string basename;
                 Scope* scope = dcp.conf.symboltab.findCreateScopeFromSymbolName(name, "::", basename, (Scope*)0);

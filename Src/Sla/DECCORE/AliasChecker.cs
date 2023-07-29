@@ -39,17 +39,17 @@ namespace Sla.DECCORE
         /// Collection of pointers into the AddressSpace
         private /*mutable*/ List<AddBase> addBase;
         /// List of aliased addresses (as offsets)
-        private /*mutable*/ List<uintb> alias;
+        private /*mutable*/ List<ulong> alias;
         /// Have aliases been calculated
         private /*mutable*/ bool calculated;
         /// Largest possible offset for a local variable
-        private uintb localExtreme;
+        private ulong localExtreme;
         /// Boundary offset separating locals and parameters
-        private uintb localBoundary;
+        private ulong localBoundary;
         /// Shallowest alias
-        private /*mutable*/ uintb aliasBoundary;
+        private /*mutable*/ ulong aliasBoundary;
         /// 1=stack grows negative, -1=positive
-        private int4 direction;
+        private int direction;
 
         /// Set up basic boundaries for the stack layout
         /// Set up basic offset boundaries for what constitutes a local variable
@@ -57,7 +57,7 @@ namespace Sla.DECCORE
         /// \param proto is the function prototype to use as a prototype model
         private void deriveBoundaries(FuncProto proto)
         {
-            localExtreme = ~((uintb)0);         // Default settings
+            localExtreme = ~((ulong)0);         // Default settings
             localBoundary = 0x1000000;
             if (direction == -1)
                 localExtreme = localBoundary;
@@ -94,7 +94,7 @@ namespace Sla.DECCORE
             gatherAdditiveBase(spacebase, addBase);
             for (List<AddBase>::iterator iter = addBase.begin(); iter != addBase.end(); ++iter)
             {
-                uintb offset = gatherOffset((*iter).base);
+                ulong offset = gatherOffset((*iter).base);
                 offset = AddrSpace::addressToByte(offset, space.getWordSize()); // Convert to byte offset
                 alias.push_back(offset);
                 if (direction == 1)
@@ -169,7 +169,7 @@ namespace Sla.DECCORE
         public List<AddBase> getAddBase() => addBase;
 
         /// Get the list of alias starting offsets
-        public List<uintb> getAlias() => alias;
+        public List<ulong> getAlias() => alias;
 
         /// \brief Gather result Varnodes for all \e sums that the given starting Varnode is involved in
         ///
@@ -187,7 +187,7 @@ namespace Sla.DECCORE
             list<PcodeOp*>::const_iterator iter;
             PcodeOp* op;
             bool nonadduse;
-            int4 i = 0;
+            int i = 0;
 
             vn = startvn;
             vn.setMark();
@@ -262,9 +262,9 @@ namespace Sla.DECCORE
         /// the syntax tree rooted at \b vn, backwards, only through additive operations.
         /// \param vn is the given Varnode to gather off of
         /// \return the resulting sub-sum
-        public static uintb gatherOffset(Varnode vn)
+        public static ulong gatherOffset(Varnode vn)
         {
-            uintb retval;
+            ulong retval;
             Varnode* othervn;
 
             if (vn.isConstant()) return vn.getOffset();

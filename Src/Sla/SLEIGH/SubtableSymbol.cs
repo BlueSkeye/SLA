@@ -60,13 +60,13 @@ namespace Sla.SLEIGH
             if (pattern == (TokenPattern*)0) return; // Pattern not fully formed
             Pattern* pat;
             decisiontree = new DecisionNode((DecisionNode*)0);
-            for (int4 i = 0; i < construct.size(); ++i)
+            for (int i = 0; i < construct.size(); ++i)
             {
                 pat = construct[i].getPattern().getPattern();
                 if (pat.numDisjoint() == 0)
                     decisiontree.addConstructorPair((DisjointPattern*)pat, construct[i]);
                 else
-                    for (int4 j = 0; j < pat.numDisjoint(); ++j)
+                    for (int j = 0; j < pat.numDisjoint(); ++j)
                         decisiontree.addConstructorPair(pat.getDisjoint(j), construct[i]);
             }
             decisiontree.split(props); // Create the decision strategy
@@ -96,7 +96,7 @@ namespace Sla.SLEIGH
                 errors = true;
             }
             *pattern = *construct.front().getPattern();
-            for (int4 i = 1; i < construct.size(); ++i)
+            for (int i = 1; i < construct.size(); ++i)
             {
                 try
                 {
@@ -116,9 +116,9 @@ namespace Sla.SLEIGH
 
         public TokenPattern getPattern() => pattern;
 
-        public int4 getNumConstructors() => construct.size();
+        public int getNumConstructors() => construct.size();
 
-        public Constructor getConstructor(uintm id) => construct[id];
+        public Constructor getConstructor(uint id) => construct[id];
 
         public override Constructor resolve(ParserWalker walker) => decisiontree.resolve(walker);
 
@@ -132,16 +132,16 @@ namespace Sla.SLEIGH
             throw SleighError("Cannot use subtable in expression");
         }
 
-        public override int4 getSize() => -1;
+        public override int getSize() => -1;
 
         public override void print(TextWriter s, ParserWalker walker)
         {
             throw SleighError("Cannot use subtable in expression");
         }
 
-        public override void collectLocalValues(List<uintb> results)
+        public override void collectLocalValues(List<ulong> results)
         {
-            for (int4 i = 0; i < construct.size(); ++i)
+            for (int i = 0; i < construct.size(); ++i)
                 construct[i].collectLocalExports(results);
         }
 
@@ -153,7 +153,7 @@ namespace Sla.SLEIGH
             s << "<subtable_sym";
             SleighSymbol::saveXmlHeader(s);
             s << " numct=\"" << dec << construct.size() << "\">\n";
-            for (int4 i = 0; i < construct.size(); ++i)
+            for (int i = 0; i < construct.size(); ++i)
                 construct[i].saveXml(s);
             decisiontree.saveXml(s);
             s << "</subtable_sym>\n";
@@ -169,7 +169,7 @@ namespace Sla.SLEIGH
         public override void restoreXml(Element el, SleighBase trans)
         {
             {
-                int4 numct;
+                int numct;
                 istringstream s(el.getAttributeValue("numct"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> numct;

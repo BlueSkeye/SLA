@@ -15,7 +15,7 @@ namespace Sla.SLACOMP
         {
             // using namespace ghidra;
 
-            int4 retval = 0;
+            int retval = 0;
 
             signal(SIGSEGV, &segvHandler); // Exit on SEGV errors
 
@@ -53,7 +53,7 @@ namespace Sla.SLACOMP
 
             bool compileAll = false;
 
-            int4 i;
+            int i;
             for (i = 1; i < argc; ++i)
             {
                 if (argv[i][0] != '-') break;
@@ -115,7 +115,7 @@ namespace Sla.SLACOMP
                     dirStr = argv[i];
                 findSlaSpecs(slaspecs, dirStr, SLASPECEXT);
                 cout << "Compiling " << dec << slaspecs.size() << " slaspec files in " << dirStr << endl;
-                for (int4 j = 0; j < slaspecs.size(); ++j)
+                for (int j = 0; j < slaspecs.size(); ++j)
                 {
                     string slaspec = slaspecs[j];
                     cout << "Compiling (" << dec << (j + 1) << " of " << dec << slaspecs.size() << ") " << slaspec << endl;

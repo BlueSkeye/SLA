@@ -12,7 +12,7 @@ namespace Sla.DECCORE
     /// The open brace can be canceled if the block decides it wants to use "else if" syntax.
     internal class PendingBrace : PendPrint
     {
-        private int4 indentId;      ///< Id associated with the new indent level
+        private int indentId;      ///< Id associated with the new indent level
         
         public PendingBrace()
         {
@@ -20,7 +20,7 @@ namespace Sla.DECCORE
         }
 
         ///< If commands have been issued, returns the new indent level id.
-        public int4 getIndentId() => indentId; 
+        public int getIndentId() => indentId; 
         
         public override void callback(Emit emit)
         {

@@ -16,32 +16,32 @@ namespace Sla.SLEIGH
         private bool leftellipsis;
         private bool rightellipsis;
 
-        private static PatternBlock buildSingle(int4 startbit, int4 endbit, uintm byteval)
+        private static PatternBlock buildSingle(int startbit, int endbit, uint byteval)
         {               // Create a mask/value pattern within a single word
                         // The field is given by the bitrange [startbit,endbit]
                         // bit 0 is the MOST sig bit of the word
                         // use the least sig bits of byteval to fill in
                         // the field's value
-            uintm mask;
-            int4 offset = 0;
-            int4 size = endbit - startbit + 1;
+            uint mask;
+            int offset = 0;
+            int size = endbit - startbit + 1;
             while (startbit >= 8)
             {
                 offset += 1;
                 startbit -= 8;
                 endbit -= 8;
             }
-            mask = (~((uintm)0)) << (sizeof(uintm) * 8 - size);
-            byteval = (byteval << (sizeof(uintm) * 8 - size)) & mask;
+            mask = (~((uint)0)) << (sizeof(uint) * 8 - size);
+            byteval = (byteval << (sizeof(uint) * 8 - size)) & mask;
             mask >>= startbit;
             byteval >>= startbit;
             return new PatternBlock(offset, mask, byteval);
         }
 
-        private static PatternBlock buildBigBlock(int4 size, int4 bitstart, int4 bitend, intb value)
+        private static PatternBlock buildBigBlock(int size, int bitstart, int bitend, long value)
         {               // Build pattern block given a bigendian contiguous
                         // range of bits and a value for those bits
-            int4 tmpstart, startbit, endbit;
+            int tmpstart, startbit, endbit;
             PatternBlock* tmpblock,*block;
 
             startbit = 8 * size - 1 - bitend;
@@ -53,7 +53,7 @@ namespace Sla.SLEIGH
                 tmpstart = endbit - (endbit & 7);
                 if (tmpstart < startbit)
                     tmpstart = startbit;
-                tmpblock = buildSingle(tmpstart, endbit, (uintm)value);
+                tmpblock = buildSingle(tmpstart, endbit, (uint)value);
                 if (block == (PatternBlock*)0)
                     block = tmpblock;
                 else
@@ -69,11 +69,11 @@ namespace Sla.SLEIGH
             return block;
         }
 
-        private static PatternBlock buildLittleBlock(int4 size, int4 bitstart, int4 bitend, intb value)
+        private static PatternBlock buildLittleBlock(int size, int bitstart, int bitend, long value)
         {               // Build pattern block given a littleendian contiguous
                         // range of bits and a value for those bits
             PatternBlock* tmpblock,*block;
-            int4 startbit, endbit;
+            int startbit, endbit;
 
             block = (PatternBlock*)0;
 
@@ -93,16 +93,16 @@ namespace Sla.SLEIGH
             {
                 startbit += 7 - bitend;
                 endbit += 7 - bitstart;
-                block = buildSingle(startbit, endbit, (uintm)value);
+                block = buildSingle(startbit, endbit, (uint)value);
             }
             else
             {
-                block = buildSingle(startbit, startbit + (7 - bitstart), (uintm)value);
+                block = buildSingle(startbit, startbit + (7 - bitstart), (uint)value);
                 value >>= (8 - bitstart);   // Cut off bits we just encoded
                 startbit += 8;
                 while (startbit != endbit)
                 {
-                    tmpblock = buildSingle(startbit, startbit + 7, (uintm)value);
+                    tmpblock = buildSingle(startbit, startbit + 7, (uint)value);
                     if (block == (PatternBlock*)0)
                         block = tmpblock;
                     else
@@ -115,7 +115,7 @@ namespace Sla.SLEIGH
                     value >>= 8;
                     startbit += 8;
                 }
-                tmpblock = buildSingle(endbit + (7 - bitend), endbit + 7, (uintm)value);
+                tmpblock = buildSingle(endbit + (7 - bitend), endbit + 7, (uint)value);
                 if (block == (PatternBlock*)0)
                     block = tmpblock;
                 else
@@ -129,7 +129,7 @@ namespace Sla.SLEIGH
             return block;
         }
 
-        private int4 resolveTokens(TokenPattern tokpat1, TokenPattern tokpat2)
+        private int resolveTokens(TokenPattern tokpat1, TokenPattern tokpat2)
         {               // Use the token lists to decide how the two patterns
                         // should be aligned relative to each other
                         // return how much -tok2- needs to be shifted
@@ -137,8 +137,8 @@ namespace Sla.SLEIGH
             bool reversedirection = false;
             leftellipsis = false;
             rightellipsis = false;
-            int4 ressa = 0;
-            int4 minsize = tok1.toklist.size() < tok2.toklist.size() ? tok1.toklist.size() : tok2.toklist.size();
+            int ressa = 0;
+            int minsize = tok1.toklist.size() < tok2.toklist.size() ? tok1.toklist.size() : tok2.toklist.size();
             if (minsize == 0)
             {
                 // Check if pattern doesn't care about tokens
@@ -239,7 +239,7 @@ namespace Sla.SLEIGH
             }
             if (reversedirection)
             {
-                for (int4 i = 0; i < minsize; ++i)
+                for (int i = 0; i < minsize; ++i)
                     if (tok1.toklist[tok1.toklist.size() - 1 - i] != tok2.toklist[tok2.toklist.size() - 1 - i])
                     {
 
@@ -251,17 +251,17 @@ namespace Sla.SLEIGH
                         throw SleighError(msg.str());
                     }
                 if (tok1.toklist.size() <= tok2.toklist.size())
-                    for (int4 i = minsize; i < tok2.toklist.size(); ++i)
+                    for (int i = minsize; i < tok2.toklist.size(); ++i)
                         ressa += tok2.toklist[tok2.toklist.size() - 1 - i].getSize();
                 else
-                    for (int4 i = minsize; i < tok1.toklist.size(); ++i)
+                    for (int i = minsize; i < tok1.toklist.size(); ++i)
                         ressa += tok1.toklist[tok1.toklist.size() - 1 - i].getSize();
                 if (tok1.toklist.size() < tok2.toklist.size())
                     ressa = -ressa;
             }
             else
             {
-                for (int4 i = 0; i < minsize; ++i)
+                for (int i = 0; i < minsize; ++i)
                     if (tok1.toklist[i] != tok2.toklist[i])
                     {
                         ostringstream msg;
@@ -312,7 +312,7 @@ namespace Sla.SLEIGH
             toklist.push_back(tok);
         }
 
-        public TokenPattern(Token tok, intb value, int4 bitstart, int4 bitend)
+        public TokenPattern(Token tok, long value, int bitstart, int bitend)
         {               // A basic instruction pattern
 
             toklist.push_back(tok);
@@ -327,12 +327,12 @@ namespace Sla.SLEIGH
             pattern = new InstructionPattern(block);
         }
 
-        public TokenPattern(intb value, int4 startbit, int4 endbit)
+        public TokenPattern(long value, int startbit, int endbit)
         {               // A basic context pattern
             leftellipsis = false;
             rightellipsis = false;
             PatternBlock* block;
-            int4 size = (endbit / 8) + 1;
+            int size = (endbit / 8) + 1;
 
             block = buildBigBlock(size, size * 8 - 1 - endbit, size * 8 - 1 - startbit, value);
             pattern = new ContextPattern(block);
@@ -379,7 +379,7 @@ namespace Sla.SLEIGH
         public TokenPattern doAnd(TokenPattern tokpat)
         {               // Return -this- AND tokpat
             TokenPattern res((Pattern*)0);
-            int4 sa = res.resolveTokens(*this, tokpat);
+            int sa = res.resolveTokens(*this, tokpat);
 
             res.pattern = pattern.doAnd(tokpat.pattern, sa);
             return res;
@@ -388,7 +388,7 @@ namespace Sla.SLEIGH
         public TokenPattern doOr(TokenPattern tokpat)
         {               // Return -this- OR tokpat
             TokenPattern res((Pattern*)0);
-            int4 sa = res.resolveTokens(*this, tokpat);
+            int sa = res.resolveTokens(*this, tokpat);
 
             res.pattern = pattern.doOr(tokpat.pattern, sa);
             return res;
@@ -397,7 +397,7 @@ namespace Sla.SLEIGH
         public TokenPattern doCat(TokenPattern tokpat)
         {               // Return Concatenation of -this- and -tokpat-
             TokenPattern res((Pattern*)0);
-            int4 sa;
+            int sa;
 
             res.leftellipsis = leftellipsis;
             res.rightellipsis = rightellipsis;
@@ -441,7 +441,7 @@ namespace Sla.SLEIGH
         {               // Construct pattern that matches anything
                         // that matches either -this- or -tokpat-
             TokenPattern patres((Pattern*)0); // Empty shell
-            int4 i;
+            int i;
             bool reversedirection = false;
 
             if (leftellipsis || tokpat.leftellipsis)
@@ -454,11 +454,11 @@ namespace Sla.SLEIGH
             // Find common subset of tokens and ellipses
             patres.leftellipsis = leftellipsis || tokpat.leftellipsis;
             patres.rightellipsis = rightellipsis || tokpat.rightellipsis;
-            int4 minnum = toklist.size();
-            int4 maxnum = tokpat.toklist.size();
+            int minnum = toklist.size();
+            int maxnum = tokpat.toklist.size();
             if (maxnum < minnum)
             {
-                int4 tmp = minnum;
+                int tmp = minnum;
                 minnum = maxnum;
                 maxnum = tmp;
             }
@@ -495,10 +495,10 @@ namespace Sla.SLEIGH
 
         public Pattern getPattern() => pattern;
 
-        public int4 getMinimumLength()
+        public int getMinimumLength()
         {               // Add up length of concatenated tokens
-            int4 length = 0;
-            for (int4 i = 0; i < toklist.size(); ++i)
+            int length = 0;
+            for (int i = 0; i < toklist.size(); ++i)
                 length += toklist[i].getSize();
             return length;
         }

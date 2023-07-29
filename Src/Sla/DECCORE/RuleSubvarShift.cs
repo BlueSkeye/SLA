@@ -28,19 +28,19 @@ namespace Sla.DECCORE
         /// If the INT_RIGHT input has only 1 bit that can possibly be non-zero
         /// and it is getting shifted into the least significant bit position,
         /// trigger the full SubvariableFlow analysis.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_RIGHT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn = op.getIn(0);
             if (vn.getSize() != 1) return 0;
             if (!op.getIn(1).isConstant()) return 0;
-            int4 sa = (int4)op.getIn(1).getOffset();
-            uintb mask = vn.getNZMask();
-            if ((mask >> sa) != (uintb)1) return 0; // Pulling out a single bit
+            int sa = (int)op.getIn(1).getOffset();
+            ulong mask = vn.getNZMask();
+            if ((mask >> sa) != (ulong)1) return 0; // Pulling out a single bit
             mask = (mask >> sa) << sa;
             if (op.getOut().hasNoDescend()) return 0;
 

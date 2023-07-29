@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         private SplitVarnode @in;
         private Varnode vn;
         private Varnode cvn;
-        private int4 inslot;
+        private int inslot;
         private bool signcompare;
         private bool hilessequalform;
         private SplitVarnode constin;
@@ -32,14 +32,14 @@ namespace Sla.DECCORE
             vn = @in.getHi();
             inslot = op.getSlot(vn);
             cvn = op.getIn(1 - inslot);
-            int4 losize = @in.getSize() - vn.getSize();
+            int losize = @in.getSize() - vn.getSize();
 
             if (!cvn.isConstant()) return false;
 
             signcompare = ((op.code() == CPUI_INT_SLESSEQUAL) || (op.code() == CPUI_INT_SLESS));
             hilessequalform = ((op.code() == CPUI_INT_SLESSEQUAL) || (op.code() == CPUI_INT_LESSEQUAL));
 
-            uintb val = cvn.getOffset() << 8 * losize;
+            ulong val = cvn.getOffset() << 8 * losize;
             if (hilessequalform != (inslot == 1))
                 val |= calc_mask(losize);
 

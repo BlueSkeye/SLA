@@ -15,7 +15,7 @@ namespace Sla.DECCORE
             behave = new OpBehavior(CPUI_CBRANCH, false, true); // Dummy behavior
         }
 
-        public override Datatype getInputLocal(PcodeOp op, int4 slot)
+        public override Datatype getInputLocal(PcodeOp op, int slot)
         {
             Datatype* td;
 

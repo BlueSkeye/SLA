@@ -23,7 +23,7 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode
         /// \param baseOffset is used to pass back the starting offset
         /// \return the structure or array data-type, or null otherwise
-        private static Datatype determineDatatype(Varnode vn, int4 baseOffset)
+        private static Datatype determineDatatype(Varnode vn, int baseOffset)
         {
             Datatype* ct = vn.getStructuredType();
             if (ct == (Datatype*)0)
@@ -38,7 +38,7 @@ namespace Sla.DECCORE
                 baseOffset += entry.getOffset();
                 // Find concrete sub-type that matches the size of the Varnode
                 Datatype* subType = ct;
-                uintb subOffset = baseOffset;
+                ulong subOffset = baseOffset;
                 while (subType != (Datatype*)0 && subType.getSize() > vn.getSize())
                 {
                     subType = subType.getSubType(subOffset, &subOffset);
@@ -64,15 +64,15 @@ namespace Sla.DECCORE
         /// \param offset is the start of the given range
         /// \param size is the number of bytes in the range
         /// \return \b true if the range spans multiple elements
-        private static bool spanningRange(Datatype ct, int4 off, int4 size)
+        private static bool spanningRange(Datatype ct, int off, int size)
         {
             if (offset + size > ct.getSize()) return false;
-            uintb newOff = offset;
+            ulong newOff = offset;
             for (; ; )
             {
                 ct = ct.getSubType(newOff, &newOff);
                 if (ct == (Datatype*)0) return true;    // Don't know what it spans, assume multiple
-                if ((int4)newOff + size > ct.getSize()) return true;   // Spans more than 1
+                if ((int)newOff + size > ct.getSize()) return true;   // Spans more than 1
                 if (!ct.isPieceStructured()) break;
             }
             return false;
@@ -88,16 +88,16 @@ namespace Sla.DECCORE
         /// \param offset is the byte offset of the \e output within the parent data-type
         /// \param data is the function containing the operation
         /// \return true if the INT_ZEXT was successfully converted
-        private static bool convertZextToPiece(PcodeOp zext, Datatype structuredType, int4 offset,
+        private static bool convertZextToPiece(PcodeOp zext, Datatype structuredType, int offset,
             Funcdata data)
         {
             Varnode* outvn = zext.getOut();
             Varnode* invn = zext.getIn(0);
             if (invn.isConstant()) return false;
-            int4 sz = outvn.getSize() - invn.getSize();
-            if (sz > sizeof(uintb)) return false;
+            int sz = outvn.getSize() - invn.getSize();
+            if (sz > sizeof(ulong)) return false;
             offset += outvn.getSpace().isBigEndian() ? 0 : invn.getSize();
-            uintb newOff = offset;
+            ulong newOff = offset;
             while (ct != (Datatype*)0 && ct.getSize() > sz)
             {
                 ct = ct.getSubType(newOff, &newOff);
@@ -123,7 +123,7 @@ namespace Sla.DECCORE
         private static bool findReplaceZext(List<PieceNode> &stack, Datatype structuredType, Funcdata data)
         {
             bool change = false;
-            for (int4 i = 0; i < stack.size(); ++i)
+            for (int i = 0; i < stack.size(); ++i)
             {
                 PieceNode & node(stack[i]);
                 if (!node.isLeaf()) continue;
@@ -174,17 +174,17 @@ namespace Sla.DECCORE
         ///
         /// Set properties so that a CONCAT expression like `v = CONCAT(CONCAT(v1,v2),CONCAT(v3,v4))` gets
         /// rendered as a sequence of separate write statements. `v.field1 = v1; v.field2 = v2; v.field3 = v3; v.field4 = v4;`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_PIECE);
             oplist.push_back(CPUI_INT_ZEXT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (op.isPartialRoot()) return 0;      // Check if CONCAT tree already been visited
             Varnode* outvn = op.getOut();
-            int4 baseOffset;
+            int baseOffset;
             Datatype* ct = determineDatatype(outvn, baseOffset);
             if (ct == (Datatype*)0) return 0;
 
@@ -221,7 +221,7 @@ namespace Sla.DECCORE
             op.setPartialRoot();
             bool anyAddrTied = outvn.isAddrTied();
             Address baseAddr = outvn.getAddr() - baseOffset;
-            for (int4 i = 0; i < stack.size(); ++i)
+            for (int i = 0; i < stack.size(); ++i)
             {
                 PieceNode & node(stack[i]);
                 Varnode* vn = node.getVarnode();
@@ -272,7 +272,7 @@ namespace Sla.DECCORE
                     // We completely replace the Varnode with one having the correct storage
                     PcodeOp* defOp = vn.getDef();
                     PcodeOp* loneOp = vn.loneDescend();
-                    int4 slot = loneOp.getSlot(vn);
+                    int slot = loneOp.getSlot(vn);
                     Varnode* newVn = data.newVarnode(vn.getSize(), addr, vn.getType());
                     data.opSetOutput(defOp, newVn);
                     data.opSetInput(loneOp, newVn, slot);

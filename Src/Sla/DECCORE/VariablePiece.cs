@@ -21,9 +21,9 @@ namespace Sla.DECCORE
         /// HighVariable owning \b this piece
         private HighVariable high;
         /// Byte offset of \b this piece within the group
-        private int4 groupOffset;
+        private int groupOffset;
         /// Number of bytes in \b this piece
-        private int4 size;
+        private int size;
 
         /// List of VariablePieces \b this piece intersects with
         private /*mutable*/ List<VariablePiece> intersection;
@@ -35,7 +35,7 @@ namespace Sla.DECCORE
         /// \param h is the given HighVariable to treat as a piece
         /// \param offset is the byte offset of the piece within the whole
         /// \param grp is another HighVariable in the whole, or null if \b this is the first piece
-        public VariablePiece(HighVariable h, int4 offset, HighVariable grp = (HighVariable*)0)
+        public VariablePiece(HighVariable h, int offset, HighVariable grp = (HighVariable*)0)
         {
             high = h;
             groupOffset = offset;
@@ -63,19 +63,19 @@ namespace Sla.DECCORE
         public VariableGroup getGroup() => group;
 
         /// Get the offset of \b this within its group
-        public int4 getOffset() => groupOffset;
+        public int getOffset() => groupOffset;
 
         /// Return the number of bytes in \b this piece.
-        public int4 getSize() => size;
+        public int getSize() => size;
 
         /// Get the cover associated with \b this piece.
         public Cover getCover() => cover;
 
         /// Get number of pieces \b this intersects with
-        public int4 numIntersection() => intersection.size();
+        public int numIntersection() => intersection.size();
 
         /// Get i-th piece \b this intersects with
-        public VariablePiece getIntersection(int4 i) => intersection[i];
+        public VariablePiece getIntersection(int i) => intersection[i];
 
         /// Mark all pieces as needing intersection recalculation
         public void markIntersectionDirty()
@@ -91,7 +91,7 @@ namespace Sla.DECCORE
         {
             if ((high.highflags & HighVariable::intersectdirty) != 0)
                 return; // intersection list itself is dirty, extended covers will be recomputed anyway
-            for (int4 i = 0; i < intersection.size(); ++i)
+            for (int i = 0; i < intersection.size(); ++i)
             {
                 intersection[i].high.highflags |= HighVariable::extendcoverdirty;
             }
@@ -105,18 +105,18 @@ namespace Sla.DECCORE
             if ((high.highflags & HighVariable::intersectdirty) == 0) return;
             set<VariablePiece*, VariableGroup::PieceCompareByOffset>::const_iterator iter;
 
-            int4 endOffset = groupOffset + size;
+            int endOffset = groupOffset + size;
             intersection.clear();
             for (iter = group.pieceSet.begin(); iter != group.pieceSet.end(); ++iter)
             {
                 VariablePiece* otherPiece = *iter;
                 if (otherPiece == this) continue;
                 if (endOffset <= otherPiece.groupOffset) continue;
-                int4 otherEndOffset = otherPiece.groupOffset + otherPiece.size;
+                int otherEndOffset = otherPiece.groupOffset + otherPiece.size;
                 if (groupOffset >= otherEndOffset) continue;
                 intersection.push_back(otherPiece);
             }
-            high.highflags &= ~(uint4)HighVariable::intersectdirty;
+            high.highflags &= ~(uint)HighVariable::intersectdirty;
         }
 
         /// Calculate extended cover based on intersections
@@ -126,13 +126,13 @@ namespace Sla.DECCORE
             if ((high.highflags & (HighVariable::coverdirty | HighVariable::extendcoverdirty)) == 0) return;
             high.updateInternalCover();
             cover = high.internalCover;
-            for (int4 i = 0; i < intersection.size(); ++i)
+            for (int i = 0; i < intersection.size(); ++i)
             {
                 HighVariable high = intersection[i].high;
                 high.updateInternalCover();
                 cover.merge(high.internalCover);
             }
-            high.highflags &= ~(uint4)HighVariable::extendcoverdirty;
+            high.highflags &= ~(uint)HighVariable::extendcoverdirty;
         }
 
         /// Transfer \b this piece to another VariableGroup
@@ -163,7 +163,7 @@ namespace Sla.DECCORE
         /// \param mergePairs passes back the collection of HighVariable pairs that must be merged
         public void mergeGroups(VariablePiece op2, List<HighVariable> mergePairs)
         {
-            int4 diff = groupOffset - op2.groupOffset; // Add to op2, or subtract from this
+            int diff = groupOffset - op2.groupOffset; // Add to op2, or subtract from this
             if (diff > 0)
                 op2.group.adjustOffsets(diff);
             else if (diff < 0)

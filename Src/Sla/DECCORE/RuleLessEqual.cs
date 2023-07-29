@@ -29,12 +29,12 @@ namespace Sla.DECCORE
         /// Similarly: `V < W || V != W  =>  V != W`
         ///
         /// Handle INT_SLESS variants as well.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_BOOL_OR);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* compvn1,*compvn2,*vnout1,*vnout2;
             PcodeOp* op_less,*op_equal;

@@ -28,7 +28,7 @@ namespace Sla.DECCORE
 
         public abstract Address getAddress();      ///< Get the storage address for \b this parameter
 
-        public abstract int4 getSize();            ///< Get the number of bytes occupied by \b this parameter
+        public abstract int getSize();            ///< Get the number of bytes occupied by \b this parameter
 
         public abstract bool isTypeLocked();       ///< Is the parameter data-type locked
 

@@ -24,13 +24,13 @@ namespace Sla.EXTRA
         /// Stack of command prompts corresponding to script nesting level
         private List<string> promptstack = new List<string>();
         /// Stack of flag state corresponding to script nesting level
-        private List<uint4> flagstack = new List<uint4>();
+        private List<uint> flagstack = new List<uint>();
         /// The current command prompt
         private string prompt;
         /// Maximum number of command lines to store in history
-        private int4 maxhistory;
+        private int maxhistory;
         /// Most recent history
-        private int4 curhistory;
+        private int curhistory;
         /// History of commands executed through this interface
         private List<string> history = new List<string>();
         /// Set to \b true if commands are sorted
@@ -99,11 +99,11 @@ namespace Sla.EXTRA
         /// \param first will hold the beginning of the matching range of commands
         /// \param last will hold the end of the matching range of commands
         /// \return the number of matching commands
-        protected int4 expandCom(List<string> expand, TextReader s,
+        protected int expandCom(List<string> expand, TextReader s,
               List<IfaceCommand>::const_iterator first,
               List<IfaceCommand>::const_iterator last)
         {
-            int4 pos;           // Which word are we currently expanding
+            int pos;           // Which word are we currently expanding
             string tok;
             bool res;
 
@@ -154,7 +154,7 @@ namespace Sla.EXTRA
         /// \param prmpt is the base command line prompt
         /// \param os is the base stream to write output to
         /// \param mxhist is the maximum number of lines to store in history
-        public IfaceStatus(string prmpt, TextWriter os, int4 mxhist = 10)
+        public IfaceStatus(string prmpt, TextWriter os, int mxhist = 10)
         {
             optr = &os;
             fileoptr = optr;        // Bulk out, defaults to command line output
@@ -176,7 +176,7 @@ namespace Sla.EXTRA
             }
             while (!promptstack.empty())
                 popScript();
-            for (int4 i = 0; i < comlist.size(); ++i)
+            for (int i = 0; i < comlist.size(); ++i)
                 delete comlist[i];
             map<string, IfaceData*>::const_iterator iter;
             for (iter = datamap.begin(); iter != datamap.end(); ++iter)
@@ -212,7 +212,7 @@ namespace Sla.EXTRA
         public override void pushScript(TextReader iptr, string newprompt)
         {
             promptstack.push_back(prompt);
-            uint4 flags = 0;
+            uint flags = 0;
             if (errorisdone)
                 flags |= 1;
             flagstack.push_back(flags);
@@ -228,7 +228,7 @@ namespace Sla.EXTRA
         {
             prompt = promptstack.back();
             promptstack.pop_back();
-            uint4 flags = flagstack.back();
+            uint flags = flagstack.back();
             flagstack.pop_back();
             errorisdone = ((flags & 1) != 0);
             inerror = false;
@@ -244,7 +244,7 @@ namespace Sla.EXTRA
         }
 
         /// Get depth of script nesting
-        public int4 getNumInputStreamSize() => promptstack.size();
+        public int getNumInputStreamSize() => promptstack.size();
 
         /// Write the current command prompt to the current output stream
         public void writePrompt()
@@ -328,7 +328,7 @@ namespace Sla.EXTRA
             List<IfaceCommand*>::const_iterator first = comlist.begin();
             List<IfaceCommand*>::const_iterator last = comlist.end();
             istringstream is (line);
-            int4 match;
+            int match;
 
             match = expandCom(fullcommand, is, first, last); // Try to expand the command
             if (match == 0)
@@ -358,7 +358,7 @@ namespace Sla.EXTRA
         /// to go back through the list of successful command lines.
         /// \param line will hold the selected command line from history
         /// \param i is the number of steps back to go
-        public void getHistory(string line, int4 i)
+        public void getHistory(string line, int i)
         {
             if (i >= history.size())
                 return; // No change to line if history too far back
@@ -369,7 +369,7 @@ namespace Sla.EXTRA
         }
 
         /// Get the number of command lines in history
-        public int4 getHistorySize() => history.size();
+        public int getHistorySize() => history.size();
 
         /// Return \b true if the current stream is finished
         public abstract bool isStreamFinished();
@@ -415,12 +415,12 @@ namespace Sla.EXTRA
         private static bool maxmatch(string res, string op1, string op2)
         {               // Set res to maximum characters in common
                         // at the beginning of op1 and op2
-            int4 len;
+            int len;
 
             len = (op1.size() < op2.size()) ? op1.size() : op2.size();
 
             res.erase();
-            for (int4 i = 0; i < len; ++i) {
+            for (int i = 0; i < len; ++i) {
                 if (op1[i] == op2[i])
                     res += op1[i];
                 else

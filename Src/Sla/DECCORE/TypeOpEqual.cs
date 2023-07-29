@@ -22,7 +22,7 @@ namespace Sla.DECCORE
             lng.opIntEqual(op);
         }
 
-        public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
+        public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
             Datatype* reqtype = op.getIn(0).getHighTypeReadFacing(op);    // Input arguments should be the same type
             Datatype* othertype = op.getIn(1).getHighTypeReadFacing(op);
@@ -35,7 +35,7 @@ namespace Sla.DECCORE
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
-            int4 inslot, int4 outslot)
+            int inslot, int outslot)
         {
             return TypeOpEqual::propagateAcrossCompare(alttype, tlst, invn, outvn, inslot, outslot);
         }
@@ -53,7 +53,7 @@ namespace Sla.DECCORE
         /// \param outslot indicates how the outgoing Varnode is attached to the PcodeOp
         /// \return the outgoing data-type or null (to indicate no propagation)
         public static Datatype propagateAcrossCompare(Datatype alttype, TypeFactory typegrp, Varnode invn,
-            Varnode outvn, int4 inslot, int4 outslot)
+            Varnode outvn, int inslot, int outslot)
         {
             if (inslot == -1 || outslot == -1) return (Datatype*)0;
             Datatype* newtype;

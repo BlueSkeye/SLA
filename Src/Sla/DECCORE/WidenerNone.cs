@@ -16,14 +16,14 @@ namespace Sla.DECCORE
     internal class WidenerNone : Widener
     {
         /// The iteration at which all change ceases
-        private int4 freezeIteration;
+        private int freezeIteration;
         
         public WidenerNone()
         {
             freezeIteration = 3;
         }
         
-        public override int4 determineIterationReset(ValueSet valueSet)
+        public override int determineIterationReset(ValueSet valueSet)
         {
             if (valueSet.getCount() >= freezeIteration)
                 return freezeIteration; // Reset to point just after any widening

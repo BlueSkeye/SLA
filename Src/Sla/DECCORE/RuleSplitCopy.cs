@@ -28,12 +28,12 @@ namespace Sla.DECCORE
         ///
         /// If more than one logical component of a structure or array is copied at once,
         /// rewrite the COPY operator as multiple COPYs.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_COPY);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Datatype* inType = op.getIn(0).getTypeReadFacing(op);
             Datatype* outType = op.getOut().getTypeDefFacing();

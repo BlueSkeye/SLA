@@ -16,7 +16,7 @@ namespace Sla.DECCORE
             behave = new OpBehaviorPiece();
         }
 
-        public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
+        public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
             return (Datatype*)0;        // Never need a cast into a PIECE
         }

@@ -16,8 +16,8 @@ namespace Sla.SLEIGH
     {
         // friend class SleighCompile;
         
-        protected uint4 delayslot;
-        protected uint4 numlabels;        // Number of label templates
+        protected uint delayslot;
+        protected uint numlabels;        // Number of label templates
         protected List<OpTpl> vec;
         protected HandleTpl result;
 
@@ -26,7 +26,7 @@ namespace Sla.SLEIGH
             vec = opvec;
         }
 
-        protected void setNumLabels(uint4 val)
+        protected void setNumLabels(uint val)
         {
             numlabels = val;
         }
@@ -47,9 +47,9 @@ namespace Sla.SLEIGH
                 delete result;
         }
 
-        public uint4 delaySlot() => delayslot;
+        public uint delaySlot() => delayslot;
 
-        public uint4 numLabels() => numlabels;
+        public uint numLabels() => numlabels;
 
         public List<OpTpl> getOpvec() => vec;
 
@@ -71,7 +71,7 @@ namespace Sla.SLEIGH
 
         public bool addOpList(List<OpTpl> oplist)
         {
-            for (int4 i = 0; i < oplist.size(); ++i)
+            for (int i = 0; i < oplist.size(); ++i)
                 if (!addOp(oplist[i]))
                     return false;
             return true;
@@ -82,7 +82,7 @@ namespace Sla.SLEIGH
             result = t;
         }
 
-        public int4 fillinBuild(List<int4> check, AddrSpace const_space)
+        public int fillinBuild(List<int> check, AddrSpace const_space)
         { // Make sure there is a build statement for all subtable params
           // Return 0 upon success, 1 if there is a duplicate BUILD, 2 if there is a build for a non-subtable
             List<OpTpl*>::iterator iter;
@@ -94,13 +94,13 @@ namespace Sla.SLEIGH
                 op = *iter;
                 if (op.getOpcode() == BUILD)
                 {
-                    int4 index = op.getIn(0).getOffset().getReal();
+                    int index = op.getIn(0).getOffset().getReal();
                     if (check[index] != 0)
                         return check[index];    // Duplicate BUILD statement or non-subtable
                     check[index] = 1;       // Mark to avoid future duplicate build
                 }
             }
-            for (int4 i = 0; i < check.size(); ++i)
+            for (int i = 0; i < check.size(); ++i)
             {
                 if (check[i] == 0)
                 {   // Didn't see a BUILD statement
@@ -128,7 +128,7 @@ namespace Sla.SLEIGH
             return true;
         }
 
-        public void changeHandleIndex(List<int4> handmap)
+        public void changeHandleIndex(List<int> handmap)
         {
             List<OpTpl*>::const_iterator iter;
             OpTpl* op;
@@ -138,7 +138,7 @@ namespace Sla.SLEIGH
                 op = *iter;
                 if (op.getOpcode() == BUILD)
                 {
-                    int4 index = op.getIn(0).getOffset().getReal();
+                    int index = op.getIn(0).getOffset().getReal();
                     index = handmap[index];
                     op.getIn(0).setOffset(index);
                 }
@@ -149,7 +149,7 @@ namespace Sla.SLEIGH
                 result.changeHandleIndex(handmap);
         }
 
-        public void setInput(VarnodeTpl vn, int4 index, int4 slot)
+        public void setInput(VarnodeTpl vn, int index, int slot)
         { // set the VarnodeTpl input for a particular op
           // for use with optimization routines
             OpTpl* op = vec[index];
@@ -159,7 +159,7 @@ namespace Sla.SLEIGH
                 delete oldvn;
         }
 
-        public void setOutput(VarnodeTpl vn, int4 index)
+        public void setOutput(VarnodeTpl vn, int index)
         { // set the VarnodeTpl output for a particular op
           // for use with optimization routines
             OpTpl* op = vec[index];
@@ -169,15 +169,15 @@ namespace Sla.SLEIGH
                 delete oldvn;
         }
 
-        public void deleteOps(List<int4> indices)
+        public void deleteOps(List<int> indices)
         { // delete a particular set of ops
-            for (uint4 i = 0; i < indices.size(); ++i)
+            for (uint i = 0; i < indices.size(); ++i)
             {
                 delete vec[indices[i]];
                 vec[indices[i]] = (OpTpl*)0;
             }
-            uint4 poscur = 0;
-            for (uint4 i = 0; i < vec.size(); ++i)
+            uint poscur = 0;
+            for (uint i = 0; i < vec.size(); ++i)
             {
                 OpTpl* op = vec[i];
                 if (op != (OpTpl*)0)
@@ -190,7 +190,7 @@ namespace Sla.SLEIGH
                 vec.pop_back();
         }
 
-        public void saveXml(TextWriter s, int4 sectionid)
+        public void saveXml(TextWriter s, int sectionid)
         {
             s << "<construct_tpl";
             if (sectionid >= 0)
@@ -204,15 +204,15 @@ namespace Sla.SLEIGH
                 result.saveXml(s);
             else
                 s << "<null/>";
-            for (int4 i = 0; i < vec.size(); ++i)
+            for (int i = 0; i < vec.size(); ++i)
                 vec[i].saveXml(s);
             s << "</construct_tpl>\n";
         }
 
-        public int4 restoreXml(Element el, AddrSpaceManager manage)
+        public int restoreXml(Element el, AddrSpaceManager manage)
         {
-            int4 sectionid = -1;
-            for (int4 i = 0; i < el.getNumAttributes(); ++i)
+            int sectionid = -1;
+            for (int i = 0; i < el.getNumAttributes(); ++i)
             {
                 if (el.getAttributeName(i) == "delay")
                 {

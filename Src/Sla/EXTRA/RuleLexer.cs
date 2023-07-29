@@ -12,7 +12,7 @@ namespace Sla.EXTRA
     internal class RuleLexer
     {
         // 1 is identifier, 2 is digit, 4=namechar
-        private static int4[] identlist = new int4[256] {
+        private static int[] identlist = new int[256] {
           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -31,19 +31,19 @@ namespace Sla.EXTRA
           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         };
 
-        private Dictionary<string, int4> keywordmap = new Dictionary<string, int4>();
+        private Dictionary<string, int> keywordmap = new Dictionary<string, int>();
         private TextReader s;
         private char[] identifier = new char[256];
-        private int4 identlength;
-        private int4[] lookahead = new int4[4];
-        private int4 pos;
+        private int identlength;
+        private int[] lookahead = new int[4];
+        private int pos;
         bool endofstream;
-        private int4 lineno;
+        private int lineno;
 
-        private int4 getNextChar()
+        private int getNextChar()
         {
             char c;
-            int4 ret = lookahead[pos];
+            int ret = lookahead[pos];
             if (!endofstream)
             {
                 (*s).get(c);
@@ -61,11 +61,11 @@ namespace Sla.EXTRA
             return ret;
         }
 
-        private int4 next(int4 i) => lookahead[(pos + i) & 3];
+        private int next(int i) => lookahead[(pos + i) & 3];
 
-        private int4 scanIdentifier()
+        private int scanIdentifier()
         {
-            int4 i = 0;
+            int i = 0;
             identifier[i] = (char)getNextChar(); // Scan at least the first character
             i += 1;
             do
@@ -83,7 +83,7 @@ namespace Sla.EXTRA
             identifier[i] = '\0';
             identlength = i;
 
-            if ((identlist[(int4)identifier[0]] & 2) != 0) // First number is digit
+            if ((identlist[(int)identifier[0]] & 2) != 0) // First number is digit
                 return scanNumber();
 
             switch (identifier[0])
@@ -105,24 +105,24 @@ namespace Sla.EXTRA
             }
         }
 
-        private int4 scanNumber()
+        private int scanNumber()
         {
             istringstream s(identifier);
             s.unsetf(ios::dec | ios::hex | ios::oct);
-            uint8 val;
+            ulong val;
             s >> val;
             if (!s)
                 return BADINTEGER;
-            ruleparselval.big = new int8(val);
+            ruleparselval.big = new long(val);
             return INTB;
         }
 
-        private int4 buildString(int4 tokentype)
+        private int buildString(int tokentype)
         {
             if (identlength <= 1) return -1;
-            for (int4 i = 1; i < identlength; ++i)
+            for (int i = 1; i < identlength; ++i)
             {
-                if ((identlist[(int4)identifier[i]] & 4) == 0) return -1;
+                if ((identlist[(int)identifier[i]] & 4) == 0) return -1;
             }
 
             if (identifier[0] == '.')
@@ -137,9 +137,9 @@ namespace Sla.EXTRA
             return tokentype;
         }
 
-        private int4 otherIdentifiers()
+        private int otherIdentifiers()
         {
-            map<string, int4>::const_iterator iter;
+            map<string, int>::const_iterator iter;
             iter = keywordmap.find(string(identifier));
             if (iter != keywordmap.end())
                 return (*iter).second;
@@ -199,13 +199,13 @@ namespace Sla.EXTRA
             getNextChar();      // Fill lookahead buffer
         }
 
-        public int4 getLineNo() => lineno;
+        public int getLineNo() => lineno;
 
-        public int4 nextToken()
+        public int nextToken()
         {
             for (; ; )
             {
-                int4 mychar = next(0);
+                int mychar = next(0);
                 switch (mychar)
                 {
                     case '(':

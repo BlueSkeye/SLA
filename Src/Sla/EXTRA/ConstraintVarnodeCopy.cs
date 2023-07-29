@@ -12,10 +12,10 @@ namespace Sla.EXTRA
 {
     internal class ConstraintVarnodeCopy : UnifyConstraint
     {
-        private int4 oldvarindex;
-        private int4 newvarindex;
+        private int oldvarindex;
+        private int newvarindex;
         
-        public ConstraintVarnodeCopy(int4 oldind, int4 newind)
+        public ConstraintVarnodeCopy(int oldind, int newind)
         {
             oldvarindex = oldind;
             newvarindex = newind;
@@ -40,7 +40,7 @@ namespace Sla.EXTRA
             typelist[newvarindex] = UnifyDatatype(UnifyDatatype::var_type);
         }
 
-        public override int4 getBaseIndex() => oldvarindex;
+        public override int getBaseIndex() => oldvarindex;
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {

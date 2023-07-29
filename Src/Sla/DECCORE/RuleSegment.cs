@@ -25,12 +25,12 @@ namespace Sla.DECCORE
 
         /// \class RuleSegment
         /// \brief Propagate constants through a SEGMENTOP
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_SEGMENTOP);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             SegmentOp* segdef = data.getArch().userops.getSegmentOp(op.getIn(0).getSpaceFromConst().getIndex());
             if (segdef == (SegmentOp*)0)
@@ -41,10 +41,10 @@ namespace Sla.DECCORE
 
             if (vn1.isConstant() && vn2.isConstant())
             {
-                List<uintb> bindlist;
+                List<ulong> bindlist;
                 bindlist.push_back(vn1.getOffset());
                 bindlist.push_back(vn2.getOffset());
-                uintb val = segdef.execute(bindlist);
+                ulong val = segdef.execute(bindlist);
                 data.opRemoveInput(op, 2);
                 data.opRemoveInput(op, 1);
                 data.opSetInput(op, data.newConstant(op.getOut().getSize(), val), 0);

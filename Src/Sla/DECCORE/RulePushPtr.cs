@@ -71,14 +71,14 @@ namespace Sla.DECCORE
         ///
         /// This is part of the normalizing process for pointer expressions. The pointer should be added last
         /// onto the expression calculating the offset into its data-type.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_ADD);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            int4 slot;
+            int slot;
             Varnode* vni = (Varnode*)0;
 
             if (!data.hasTypeRecoveryStarted()) return 0;
@@ -101,7 +101,7 @@ namespace Sla.DECCORE
                 list<PcodeOp*>::const_iterator iter = vn.beginDescend();
                 if (iter == vn.endDescend()) break;
                 PcodeOp* decop = *iter;
-                int4 j = decop.getSlot(vn);
+                int j = decop.getSlot(vn);
 
                 Varnode* vnadd1 = decop.getIn(1 - j);
                 Varnode* newout;
@@ -123,7 +123,7 @@ namespace Sla.DECCORE
             }
             if (!vn.isAutoLive())
                 data.opDestroy(op);
-            for (int4 i = 0; i < duplicateList.size(); ++i)
+            for (int i = 0; i < duplicateList.size(); ++i)
                 duplicateNeed(duplicateList[i], data);
 
             return 1;
@@ -147,7 +147,7 @@ namespace Sla.DECCORE
             do
             {
                 PcodeOp* decOp = *iter;
-                int4 slot = decOp.getSlot(outVn);
+                int slot = decOp.getSlot(outVn);
                 PcodeOp* newOp = data.newOp(num, op.getAddr());    // Duplicate op associated with original address
                 Varnode* newOut = buildVarnodeOut(outVn, newOp, data);  // Result contained in original storage
                 newOut.updateType(outVn.getType(), false, false);

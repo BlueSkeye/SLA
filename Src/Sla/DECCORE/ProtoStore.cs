@@ -26,23 +26,23 @@ namespace Sla.DECCORE
         /// \param nm is the (optional) name of the parameter
         /// \param pieces holds the raw storage address and data-type to set
         /// \return the new/modified ProtoParameter
-        public abstract ProtoParameter setInput(int4 i, string nm, ParameterPieces pieces);
+        public abstract ProtoParameter setInput(int i, string nm, ParameterPieces pieces);
 
         /// \brief Clear the input parameter at the specified slot
         ///
         /// The parameter is excised, any following parameters are shifted to fill its spot.
         /// If there is a backing Symbol, it is removed from the SymbolTable
         /// \param i is the specified parameter slot to remove
-        public abstract void clearInput(int4 i);
+        public abstract void clearInput(int i);
 
         /// Clear all input parameters (and any backing symbols)
         public abstract void clearAllInputs();
 
         /// Get the number of input parameters for \b this prototype
-        public abstract int4 getNumInputs();
+        public abstract int getNumInputs();
 
         /// Get the i-th input parameter (or NULL if it doesn't exist)
-        public abstract ProtoParameter getInput(int4 i);
+        public abstract ProtoParameter getInput(int i);
 
         /// \brief Establish the data-type and storage of the return value
         ///

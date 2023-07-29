@@ -20,7 +20,7 @@ namespace Sla.EXTRA
         /// then the destination address.
         public override void execute(TextReader s)
         {
-            int4 discard;
+            int discard;
 
             if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");

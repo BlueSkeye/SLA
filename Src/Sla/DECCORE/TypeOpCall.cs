@@ -34,7 +34,7 @@ namespace Sla.DECCORE
             {
                 s << '(';
                 Varnode::printRaw(s, op.getIn(1));
-                for (int4 i = 2; i < op.numInput(); ++i)
+                for (int i = 2; i < op.numInput(); ++i)
                 {
                     s << ',';
                     Varnode::printRaw(s, op.getIn(i));
@@ -43,7 +43,7 @@ namespace Sla.DECCORE
             }
         }
 
-        public override Datatype getInputLocal(PcodeOp op, int4 slot)
+        public override Datatype getInputLocal(PcodeOp op, int slot)
         {
             FuncCallSpecs fc;
             Varnode vn;

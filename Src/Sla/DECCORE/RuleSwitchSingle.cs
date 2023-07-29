@@ -24,12 +24,12 @@ namespace Sla.DECCORE
 
         /// \class RuleSwitchSingle
         /// \brief Convert BRANCHIND with only one computed destination to a BRANCH
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_BRANCHIND);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             BlockBasic* bb = op.getParent();
             if (bb.sizeOut() != 1) return 0;
@@ -45,7 +45,7 @@ namespace Sla.DECCORE
             {
                 needwarning = true;
                 allcasesmatch = true;
-                for (int4 i = 1; i < jt.numEntries(); ++i)
+                for (int i = 1; i < jt.numEntries(); ++i)
                 {
                     if (jt.getAddressByIndex(i) != addr)
                     {

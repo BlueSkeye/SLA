@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// the default prototype model is modified.
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            int4 expop = -300;
+            int expop = -300;
             string res;
             if (p1 == "unknown")
                 expop = ProtoModel::extrapop_unknown;

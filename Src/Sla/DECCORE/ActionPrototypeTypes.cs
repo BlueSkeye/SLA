@@ -112,7 +112,7 @@ namespace Sla.DECCORE
                     topbl = (BlockBasic*)data.getBasicBlocks().getBlock(0);
                 if ((stackspc != (AddrSpace*)0) && (topbl != (BlockBasic*)0))
                 {
-                    for (int4 i = 0; i < stackspc.numSpacebase(); ++i)
+                    for (int i = 0; i < stackspc.numSpacebase(); ++i)
                     {
                         VarnodeData &fullReg(stackspc.getSpacebaseFull(i));
                         VarnodeData &truncReg(stackspc.getSpacebase(i));
@@ -136,13 +136,13 @@ namespace Sla.DECCORE
             if (data.getFuncProto().isInputLocked())
             {
 
-                int4 ptr_size = spc.isTruncated() ? spc.getAddrSize() : 0; // Check if we need to do pointer trimming
+                int ptr_size = spc.isTruncated() ? spc.getAddrSize() : 0; // Check if we need to do pointer trimming
                 BlockBasic* topbl = (BlockBasic*)0;
                 if (data.getBasicBlocks().getSize() > 0)
                     topbl = (BlockBasic*)data.getBasicBlocks().getBlock(0);
 
-                int4 numparams = data.getFuncProto().numParams();
-                for (int4 i = 0; i < numparams; ++i)
+                int numparams = data.getFuncProto().numParams();
+                for (int i = 0; i < numparams; ++i)
                 {
                     ProtoParameter* param = data.getFuncProto().getParam(i);
                     Varnode* vn = data.newVarnode(param.getSize(), param.getAddress());

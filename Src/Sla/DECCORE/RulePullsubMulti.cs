@@ -27,14 +27,14 @@ namespace Sla.DECCORE
 
         /// \class RulePullsubMulti
         /// \brief Pull SUBPIECE back through MULTIEQUAL
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_SUBPIECE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            int4 maxByte, minByte, newSize;
+            int maxByte, minByte, newSize;
 
             Varnode* vn = op.getIn(0);
             if (!vn.isWritten()) return 0;
@@ -51,10 +51,10 @@ namespace Sla.DECCORE
             if (outvn.isPrecisLo() || outvn.isPrecisHi()) return 0; // Don't pull apart a double precision object
 
             // Make sure we don't new add SUBPIECE ops that aren't going to cancel in some way
-            int4 branches = mult.numInput();
-            uintb consume = calc_mask(newSize) << 8 * minByte;
+            int branches = mult.numInput();
+            ulong consume = calc_mask(newSize) << 8 * minByte;
             consume = ~consume;         // Check for use of bits outside of what gets truncated later
-            for (int4 i = 0; i < branches; ++i)
+            for (int i = 0; i < branches; ++i)
             {
                 Varnode* inVn = mult.getIn(i);
                 if ((consume & inVn.getConsume()) != 0)
@@ -82,7 +82,7 @@ namespace Sla.DECCORE
 
             List < Varnode *> @params;
 
-            for (int4 i = 0; i < branches; ++i)
+            for (int i = 0; i < branches; ++i)
             {
                 Varnode* vn_piece = mult.getIn(i);
                 // We have to be wary of exponential splittings here, do not pull the SUBPIECE
@@ -112,12 +112,12 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode
         /// \param maxByte will hold the index of the maximum byte
         /// \param minByte will hold the index of the minimum byte
-        public static void minMaxUse(Varnode vn, int4 maxByte, int4 minByte)
+        public static void minMaxUse(Varnode vn, int maxByte, int minByte)
         {
             list<PcodeOp*>::const_iterator iter, enditer;
             enditer = vn.endDescend();
 
-            int4 inSize = vn.getSize();
+            int inSize = vn.getSize();
             maxByte = -1;
             minByte = inSize;
             for (iter = vn.beginDescend(); iter != enditer; ++iter)
@@ -126,8 +126,8 @@ namespace Sla.DECCORE
                 OpCode opc = op.code();
                 if (opc == CPUI_SUBPIECE)
                 {
-                    int4 min = (int4)op.getIn(1).getOffset();
-                    int4 max = min + op.getOut().getSize() - 1;
+                    int min = (int)op.getIn(1).getOffset();
+                    int max = min + op.getOut().getSize() - 1;
                     if (min < minByte)
                         minByte = min;
                     if (max > maxByte)
@@ -150,7 +150,7 @@ namespace Sla.DECCORE
         /// \param maxByte is the maximum byte immediately used in \b origVn
         /// \param minByte is the minimum byte immediately used in \b origVn
         /// \param data is the function being analyzed
-        public static void replaceDescendants(Varnode origVn, Varnode newVn, int4 maxByte, int4 minByte,
+        public static void replaceDescendants(Varnode origVn, Varnode newVn, int maxByte, int minByte,
             Funcdata data)
         {
             list<PcodeOp*>::const_iterator iter, enditer;
@@ -162,8 +162,8 @@ namespace Sla.DECCORE
                 ++iter;
                 if (op.code() == CPUI_SUBPIECE)
                 {
-                    int4 truncAmount = (int4)op.getIn(1).getOffset();
-                    int4 outSize = op.getOut().getSize();
+                    int truncAmount = (int)op.getIn(1).getOffset();
+                    int outSize = op.getOut().getSize();
                     data.opSetInput(op, newVn, 0);
                     if (newVn.getSize() == outSize)
                     {
@@ -174,12 +174,12 @@ namespace Sla.DECCORE
                     }
                     else if (newVn.getSize() > outSize)
                     {
-                        int4 newTrunc = truncAmount - minByte;
+                        int newTrunc = truncAmount - minByte;
                         if (newTrunc < 0)
                             throw new LowlevelError("Could not perform -replaceDescendants-");
                         if (newTrunc != truncAmount)
                         {
-                            data.opSetInput(op, data.newConstant(4, (uintb)newTrunc), 1);
+                            data.opSetInput(op, data.newConstant(4, (ulong)newTrunc), 1);
                         }
                     }
                     else
@@ -194,7 +194,7 @@ namespace Sla.DECCORE
         ///
         /// \param size is the given size
         /// \return \b true if it is acceptable
-        public static bool acceptableSize(int4 size)
+        public static bool acceptableSize(int size)
         {
             if (size == 0) return false;
             if (size >= 8) return true;
@@ -211,7 +211,7 @@ namespace Sla.DECCORE
         /// \param shift is the number of least significant bytes to truncate
         /// \param data is the function being analyzed
         /// \return the output Varnode of the new SUBPIECE
-        public static Varnode buildSubpiece(Varnode basevn, uint4 outsize, uint4 shift, Funcdata data)
+        public static Varnode buildSubpiece(Varnode basevn, uint outsize, uint shift, Funcdata data)
         {
             Address newaddr;
             PcodeOp* new_op;
@@ -235,8 +235,8 @@ namespace Sla.DECCORE
                 JoinRecord* joinrec = data.getArch().findJoin(basevn.getOffset());
                 if (joinrec.numPieces() > 1)
                 { // If only 1 piece (float extension) automatically use unique
-                    uint4 skipleft = shift;
-                    for (int4 i = joinrec.numPieces() - 1; i >= 0; --i)
+                    uint skipleft = shift;
+                    for (int i = joinrec.numPieces() - 1; i >= 0; --i)
                     { // Move from least significant to most
                         VarnodeData vdata = joinrec.getPiece(i);
                         if (skipleft >= vdata.size)
@@ -292,7 +292,7 @@ namespace Sla.DECCORE
         /// \param outsize is the desired truncation size
         /// \param shift if the desired truncation shift
         /// \return the truncated Varnode or NULL
-        public static Varnode findSubpiece(Varnode basevn, uint4 outsize, uint4 shift)
+        public static Varnode findSubpiece(Varnode basevn, uint outsize, uint shift)
         {
             list<PcodeOp*>::const_iterator iter;
             PcodeOp* prevop;

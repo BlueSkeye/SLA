@@ -26,7 +26,7 @@ namespace Sla.EXTRA
             if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");
 
-            int4 size;
+            int size;
             Address addr = parse_machaddr(s, size, *dcp.conf.types);
             s >> ws;
             string comment;
@@ -37,7 +37,7 @@ namespace Sla.EXTRA
                 comment += tok;
                 s.get(tok);
             }
-            uint4 type = dcp.conf.print.getInstructionComment();
+            uint type = dcp.conf.print.getInstructionComment();
             dcp.conf.commentdb.addComment(type,
                             dcp.fd.getAddress(), addr, comment);
         }

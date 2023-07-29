@@ -16,7 +16,7 @@ namespace Sla.DECCORE
     internal class BlockVarnode
     {
         /// Index of BlockBasic defining Varnode
-        private int4 index;
+        private int index;
         /// The Varnode itself
         private Varnode vn;
 
@@ -44,7 +44,7 @@ namespace Sla.DECCORE
         public Varnode getVarnode() => vn;
 
         /// Get the Varnode's defining block index
-        public int4 getIndex() => index;
+        public int getIndex() => index;
 
         /// \brief Find the first Varnode defined in the BlockBasic of the given index
         ///
@@ -53,14 +53,14 @@ namespace Sla.DECCORE
         /// \param blocknum is the index of the BlockBasic to search for
         /// \param list is the sorted list of BlockVarnodes
         /// \return the index of the BlockVarnode within the list or -1 if no Varnode in the block is found
-        public static int4 findFront(int4 blocknum, List<BlockVarnode> list)
+        public static int findFront(int blocknum, List<BlockVarnode> list)
         {
-            int4 min = 0;
-            int4 max = list.size() - 1;
+            int min = 0;
+            int max = list.size() - 1;
             while (min < max)
             {
-                int4 cur = (min + max) / 2;
-                int4 curblock = list[cur].getIndex();
+                int cur = (min + max) / 2;
+                int curblock = list[cur].getIndex();
                 if (curblock >= blocknum)
                     max = cur;
                 else

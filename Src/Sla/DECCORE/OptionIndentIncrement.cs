@@ -21,7 +21,7 @@ namespace Sla.DECCORE
         {
             istringstream s(p1);
             s.unsetf(ios::dec | ios::hex | ios::oct);
-            int4 val = -1;
+            int val = -1;
             s >> val;
             if (val == -1)
                 throw ParseError("Must specify integer increment");

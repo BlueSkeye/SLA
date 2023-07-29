@@ -38,9 +38,9 @@ namespace Sla.SLEIGH
 
         public VarnodeTpl getOut() => output;
 
-        public int4 numInput() => input.size();
+        public int numInput() => input.size();
 
-        public VarnodeTpl getIn(int4 i) => input[i];
+        public VarnodeTpl getIn(int i) => input[i];
 
         public OpCode getOpcode() => opc;
 
@@ -76,20 +76,20 @@ namespace Sla.SLEIGH
             input.push_back(vt);
         }
 
-        public void setInput(VarnodeTpl vt, int4 slot)
+        public void setInput(VarnodeTpl vt, int slot)
         {
             input[slot] = vt;
         }
 
-        public void removeInput(int4 index)
+        public void removeInput(int index)
         { // Remove the indicated input
             delete input[index];
-            for (int4 i = index; i < input.size() - 1; ++i)
+            for (int i = index; i < input.size() - 1; ++i)
                 input[i] = input[i + 1];
             input.pop_back();
         }
 
-        public void changeHandleIndex(List<int4> handmap)
+        public void changeHandleIndex(List<int> handmap)
         {
             if (output != (VarnodeTpl*)0)
                 output.changeHandleIndex(handmap);
@@ -106,7 +106,7 @@ namespace Sla.SLEIGH
                 s << "<null/>\n";
             else
                 output.saveXml(s);
-            for (int4 i = 0; i < input.size(); ++i)
+            for (int i = 0; i < input.size(); ++i)
                 input[i].saveXml(s);
             s << "</op_tpl>\n";
         }

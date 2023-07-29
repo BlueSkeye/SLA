@@ -12,11 +12,11 @@ namespace Sla.EXTRA
 {
     internal class ConstraintVarCompare : UnifyConstraint
     {
-        private int4 var1index;
-        private int4 var2index;
+        private int var1index;
+        private int var2index;
         private bool istrue;
         
-        public ConstraintVarCompare(int4 var1ind, int4 var2ind, bool val)
+        public ConstraintVarCompare(int var1ind, int var2ind, bool val)
         {
             var1index = var1ind;
             var2index = var2ind;
@@ -42,7 +42,7 @@ namespace Sla.EXTRA
             typelist[var2index] = UnifyDatatype(UnifyDatatype::var_type);
         }
 
-        public override int4 getBaseIndex() => var1index;
+        public override int getBaseIndex() => var1index;
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {

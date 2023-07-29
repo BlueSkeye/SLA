@@ -25,13 +25,13 @@ namespace Sla.EXTRA
             {
                 if (dcp.fd != (Funcdata*)0)
                 {
-                    int4 num = dcp.fd.numCalls();
-                    for (int4 i = 0; i < num; ++i)
+                    int num = dcp.fd.numCalls();
+                    for (int i = 0; i < num; ++i)
                     {
                         FuncCallSpecs* fc = dcp.fd.getCallSpecs(i);
                         *status.optr << "ExtraPop for " << fc.getName() << '(';
                         *status.optr << fc.getOp().getAddr() << ')';
-                        int4 expop = fc.getEffectiveExtraPop();
+                        int expop = fc.getEffectiveExtraPop();
                         *status.optr << " ";
                         if (expop == ProtoModel::extrapop_unknown)
                             *status.optr << "unknown";
@@ -48,7 +48,7 @@ namespace Sla.EXTRA
                 }
                 else
                 {
-                    int4 expop = dcp.conf.defaultfp.getExtraPop();
+                    int expop = dcp.conf.defaultfp.getExtraPop();
                     *status.optr << "Default extra pop = ";
                     if (expop == ProtoModel::extrapop_unknown)
                         *status.optr << "unknown" << endl;
@@ -62,7 +62,7 @@ namespace Sla.EXTRA
                 fd = dcp.conf.symboltab.getGlobalScope().queryFunction(name);
                 if (fd == (Funcdata*)0)
                     throw IfaceExecutionError("Unknown function: " + name);
-                int4 expop = fd.getFuncProto().getExtraPop();
+                int expop = fd.getFuncProto().getExtraPop();
                 *status.optr << "ExtraPop for function " << name << " is ";
                 if (expop == ProtoModel::extrapop_unknown)
                     *status.optr << "unknown" << endl;
@@ -70,8 +70,8 @@ namespace Sla.EXTRA
                     *status.optr << dec << expop << endl;
                 if (dcp.fd != (Funcdata*)0)
                 {
-                    int4 num = dcp.fd.numCalls();
-                    for (int4 i = 0; i < num; ++i)
+                    int num = dcp.fd.numCalls();
+                    for (int i = 0; i < num; ++i)
                     {
                         FuncCallSpecs* fc = dcp.fd.getCallSpecs(i);
                         if (fc.getName() == fd.getName())

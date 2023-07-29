@@ -27,19 +27,19 @@ namespace Sla.DECCORE
         ///
         /// Works with both INT_EQUAL and INT_NOTEQUAL.  Both sides of the comparison
         /// must be boolean values.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
-            uint4 list[] = { CPUI_INT_NOTEQUAL, CPUI_INT_EQUAL };
+            uint list[] = { CPUI_INT_NOTEQUAL, CPUI_INT_EQUAL };
             oplist.insert(oplist.end(), list, list + 2);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             OpCode opc;
             Varnode* constvn;
             Varnode* subbool;
             bool negate;
-            uintb val;
+            ulong val;
 
             opc = op.code();
             constvn = op.getIn(1);

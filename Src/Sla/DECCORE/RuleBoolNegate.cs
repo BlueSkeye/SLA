@@ -33,12 +33,12 @@ namespace Sla.DECCORE
         ///  - `!(V != W)  =>  V == W`
         ///
         /// This supports signed and floating-point variants as well
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_BOOL_NEGATE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn;
             PcodeOp* flip_op;

@@ -23,7 +23,7 @@ namespace Sla.SLEIGH
         {
         }
 
-        public VarnodeSymbol(string nm, AddrSpace @base,uintb offset, int4 size)
+        public VarnodeSymbol(string nm, AddrSpace @base,ulong offset, int size)
             : base(nm)
         {
             fix.space = @base;
@@ -51,14 +51,14 @@ namespace Sla.SLEIGH
             hand.size = fix.size;
         }
 
-        public override int4 getSize() => fix.size;
+        public override int getSize() => fix.size;
 
         public override void print(TextWriter s, ParserWalker walker)
         {
             s << getName();
         }
 
-        public override void collectLocalValues(List<uintb> results)
+        public override void collectLocalValues(List<ulong> results)
         {
             if (fix.space.getType() == IPTR_INTERNAL)
                 results.push_back(fix.offset);

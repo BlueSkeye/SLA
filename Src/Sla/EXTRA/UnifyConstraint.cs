@@ -15,8 +15,8 @@ namespace Sla.EXTRA
     {
         // friend class ConstraintGroup;
         // Unique identifier for constraint for retrieving state
-        protected int4 uniqid;
-        protected int4 maxnum;
+        protected int uniqid;
+        protected int maxnum;
 
         protected UnifyConstraint copyid(UnifyConstraint op)
         {
@@ -29,9 +29,9 @@ namespace Sla.EXTRA
         {
         }
 
-        public int4 getId() => uniqid;
+        public int getId() => uniqid;
 
-        public int4 getMaxNum() => maxnum;
+        public int getMaxNum() => maxnum;
 
         public abstract UnifyConstraint clone();
 
@@ -46,7 +46,7 @@ namespace Sla.EXTRA
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
-            uintb ourconst = expr.getConstant(state);
+            ulong ourconst = expr.getConstant(state);
             if (istrue)
                 return (ourconst != 0);
             return (ourconst == 0);
@@ -61,7 +61,7 @@ namespace Sla.EXTRA
             state.registerTraverseConstraint(newt);
         }
 
-        public override void setId(int4 id)
+        public override void setId(int id)
         {
             uniqid = id;
             id += 1;
@@ -71,7 +71,7 @@ namespace Sla.EXTRA
         {
         }
 
-        public override int4 getBaseIndex() => -1;
+        public override int getBaseIndex() => -1;
 
         public abstract void print(TextWriter s, UnifyCPrinter printstate);
 

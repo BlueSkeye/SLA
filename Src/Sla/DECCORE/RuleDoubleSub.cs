@@ -24,16 +24,16 @@ namespace Sla.DECCORE
 
         /// \class RuleDoubleSub
         /// \brief Simplify chained SUBPIECE:  `sub( sub(V,c), d)  =>  sub(V, c+d)`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_SUBPIECE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             PcodeOp* op2;
             Varnode* vn;
-            int4 offset1, offset2;
+            int offset1, offset2;
 
             vn = op.getIn(0);
             if (!vn.isWritten()) return 0;

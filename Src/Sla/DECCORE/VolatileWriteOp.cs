@@ -15,7 +15,7 @@ namespace Sla.DECCORE
     ///   - The Varnode value being written to the memory
     internal class VolatileWriteOp : VolatileOp
     {
-        public VolatileWriteOp(Architecture g, string nm,int4 ind,bool functional)
+        public VolatileWriteOp(Architecture g, string nm,int ind,bool functional)
             : base(g, nm, ind)
         {
             flags = functional ? 0 : annotation_assignment;
@@ -27,7 +27,7 @@ namespace Sla.DECCORE
             return appendSize(name, op.getIn(2).getSize());
         }
 
-        public override int4 extractAnnotationSize(Varnode vn, PcodeOp op)
+        public override int extractAnnotationSize(Varnode vn, PcodeOp op)
         {
             return op.getIn(2).getSize(); // Get size from the 3rd parameter of write function
         }

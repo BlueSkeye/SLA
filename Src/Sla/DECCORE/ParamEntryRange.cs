@@ -12,11 +12,11 @@ namespace Sla.DECCORE
     internal class ParamEntryRange
     {
         /// Starting offset of the ParamEntry's range
-        private uintb first;
+        private ulong first;
         /// Ending offset of the ParamEntry's range
-        private uintb last;
+        private ulong last;
         /// Position of the ParamEntry within the entire prototype list
-        private int4 position;
+        private int position;
         /// Pointer to the actual ParamEntry
         private ParamEntry entry;
 
@@ -25,7 +25,7 @@ namespace Sla.DECCORE
         {
             // friend class ParamEntryRange;
             /// Position (within the full list) being assigned to the ParamEntryRange
-            private int4 position;
+            private int position;
             /// Underlying ParamEntry being assigned to the ParamEntryRange
             private ParamEntry entry;
             
@@ -64,21 +64,21 @@ namespace Sla.DECCORE
             }
         }
 
-        //typedef uintb linetype;		///< The linear element for a rangemap
+        //typedef ulong linetype;		///< The linear element for a rangemap
         //typedef SubsortPosition subsorttype;	///< The sub-sort object for a rangemap
         //typedef InitData inittype;		///< Initialization data for a ScopeMapper
 
         /// Initialize the range
-        public ParamEntryRange(inittype data, uintb f, uintb l)
+        public ParamEntryRange(inittype data, ulong f, ulong l)
         {
             first = f; last = l; position = data.position; entry = data.entry;
         }
 
         /// Get the first address in the range
-        public uintb getFirst() => first;
+        public ulong getFirst() => first;
 
         /// Get the last address in the range
-        public uintb getLast() => last;
+        public ulong getLast() => last;
 
         /// Get the sub-subsort object
         public subsorttype getSubsort() => new SubsortPosition(position);

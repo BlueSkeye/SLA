@@ -30,8 +30,8 @@ namespace Sla.DECCORE
         /// \return the number of marks set
         private static uint countMarks(PcodeOp op)
         {
-            uint4 res = 0;
-            for (int4 i = 0; i < op.numInput(); ++i)
+            uint res = 0;
+            for (int i = 0; i < op.numInput(); ++i)
             {
                 Varnode* vn = op.getIn(i);
                 for (; ; )
@@ -77,8 +77,8 @@ namespace Sla.DECCORE
             List<Varnode*> markedlist;    // All varnodes we have visited on paths from -vn-
             list<PcodeOp*>::const_iterator iter, enditer;
             Varnode* outvn;
-            uintb val;
-            uint4 traced = 0;
+            ulong val;
+            uint traced = 0;
             vn.setMark();
             markedlist.push_back(vn);
             bool istrash = true;
@@ -131,7 +131,7 @@ namespace Sla.DECCORE
                                     op.setMark();
                                     allroutes.push_back(op);
                                 }
-                                uint4 nummark = countMarks(op);
+                                uint nummark = countMarks(op);
                                 if (nummark == op.numInput())
                                 {
                                     if (!outvn.isMark())
@@ -147,7 +147,7 @@ namespace Sla.DECCORE
                             if (op.getIn(1).isConstant())
                             {
                                 val = op.getIn(1).getOffset();
-                                uintb mask = calc_mask(op.getIn(1).getSize());
+                                ulong mask = calc_mask(op.getIn(1).getSize());
                                 if ((val == ((mask << 8) & mask)) || (val == ((mask << 16) & mask)) || (val == ((mask << 32) & mask)))
                                 {
                                     indlist.push_back(op);
@@ -165,13 +165,13 @@ namespace Sla.DECCORE
                 if (!istrash) break;
             }
 
-            for (uint4 i = 0; i < allroutes.size(); ++i)
+            for (uint i = 0; i < allroutes.size(); ++i)
             {
                 if (!allroutes[i].getOut().isMark())
                     istrash = false;        // Didn't see all inputs
                 allroutes[i].clearMark();
             }
-            for (uint4 i = 0; i < markedlist.size(); ++i)
+            for (uint i = 0; i < markedlist.size(); ++i)
                 markedlist[i].clearMark();
 
             return istrash;
@@ -203,7 +203,7 @@ namespace Sla.DECCORE
                 indlist.clear();
                 if (!traceTrash(vn, indlist)) continue;
 
-                for (uint4 i = 0; i < indlist.size(); ++i)
+                for (uint i = 0; i < indlist.size(); ++i)
                 {
                     PcodeOp* op = indlist[i];
                     if (op.code() == CPUI_INDIRECT)

@@ -26,13 +26,13 @@ namespace Sla.DECCORE
         /// \brief Simplify INT_EQUAL applied to 0: `0 == V + W * -1  =>  V == W  or  0 == V + c  =>  V == -c`
         ///
         /// The Rule also applies to INT_NOTEQUAL comparisons.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
-            uint4 list[] = { CPUI_INT_EQUAL, CPUI_INT_NOTEQUAL };
+            uint list[] = { CPUI_INT_EQUAL, CPUI_INT_NOTEQUAL };
             oplist.insert(oplist.end(), list, list + 2);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn,*vn2,*addvn;
             Varnode* posvn,*negvn,*unnegvn;
@@ -81,7 +81,7 @@ namespace Sla.DECCORE
                 }
                 else
                     return 0;
-                uintb multiplier;
+                ulong multiplier;
                 if (!negvn.getDef().getIn(1).isConstant()) return 0;
                 unnegvn = negvn.getDef().getIn(0);
                 multiplier = negvn.getDef().getIn(1).getOffset();

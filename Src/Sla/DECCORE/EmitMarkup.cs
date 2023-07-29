@@ -43,36 +43,36 @@ namespace Sla.DECCORE
                 delete encoder;
         }
 
-        public override int4 beginDocument()
+        public override int beginDocument()
         {
             encoder.openElement(ELEM_CLANG_DOCUMENT);
             return 0;
         }
 
-        public override void endDocument(int4 id)
+        public override void endDocument(int id)
         {
             encoder.closeElement(ELEM_CLANG_DOCUMENT);
         }
 
-        public override int4 beginFunction(Funcdata fd)
+        public override int beginFunction(Funcdata fd)
         {
             encoder.openElement(ELEM_FUNCTION);
             return 0;
         }
 
-        public override void endFunction(int4 id)
+        public override void endFunction(int id)
         {
             encoder.closeElement(ELEM_FUNCTION);
         }
 
-        public override int4 beginBlock(FlowBlock bl)
+        public override int beginBlock(FlowBlock bl)
         {
             encoder.openElement(ELEM_BLOCK);
             encoder.writeSignedInteger(ATTRIB_BLOCKREF, bl.getIndex());
             return 0;
         }
 
-        public override void endBlock(int4 id)
+        public override void endBlock(int id)
         {
             encoder.closeElement(ELEM_BLOCK);
         }
@@ -86,7 +86,7 @@ namespace Sla.DECCORE
         }
 
 
-        public override void tagLine(int4 indent)
+        public override void tagLine(int indent)
         {
             emitPending();
             encoder.openElement(ELEM_BREAK);
@@ -94,7 +94,7 @@ namespace Sla.DECCORE
             encoder.closeElement(ELEM_BREAK);
         }
 
-        public override int4 beginReturnType(Varnode vn)
+        public override int beginReturnType(Varnode vn)
         {
             encoder.openElement(ELEM_RETURN_TYPE);
             if (vn != (Varnode*)0)
@@ -102,24 +102,24 @@ namespace Sla.DECCORE
             return 0;
         }
 
-        public override void endReturnType(int4 id)
+        public override void endReturnType(int id)
         {
             encoder.closeElement(ELEM_RETURN_TYPE);
         }
 
-        public override int4 beginVarDecl(Symbol sym)
+        public override int beginVarDecl(Symbol sym)
         {
             encoder.openElement(ELEM_VARDECL);
             encoder.writeUnsignedInteger(ATTRIB_SYMREF, sym.getId());
             return 0;
         }
 
-        public override void endVarDecl(int4 id)
+        public override void endVarDecl(int id)
         {
             encoder.closeElement(ELEM_VARDECL);
         }
 
-        public override int4 beginStatement(PcodeOp op)
+        public override int beginStatement(PcodeOp op)
         {
             encoder.openElement(ELEM_STATEMENT);
             if (op != (PcodeOp*)0)
@@ -127,18 +127,18 @@ namespace Sla.DECCORE
             return 0;
         }
 
-        public override void endStatement(int4 id)
+        public override void endStatement(int id)
         {
             encoder.closeElement(ELEM_STATEMENT);
         }
 
-        public override int4 beginFuncProto()
+        public override int beginFuncProto()
         {
             encoder.openElement(ELEM_FUNCPROTO);
             return 0;
         }
 
-        public override void endFuncProto(int4 id)
+        public override void endFuncProto(int id)
         {
             encoder.closeElement(ELEM_FUNCPROTO);
         }
@@ -191,7 +191,7 @@ namespace Sla.DECCORE
             encoder.closeElement(ELEM_TYPE);
         }
 
-        public override void tagField(string name, syntax_highlight hl, Datatype ct, int4 off, PcodeOp op)
+        public override void tagField(string name, syntax_highlight hl, Datatype ct, int off, PcodeOp op)
         {
             encoder.openElement(ELEM_FIELD);
             if (hl != no_color)
@@ -210,7 +210,7 @@ namespace Sla.DECCORE
             encoder.closeElement(ELEM_FIELD);
         }
 
-        public override void tagComment(string name, syntax_highlight hl, AddrSpace spc, uintb off)
+        public override void tagComment(string name, syntax_highlight hl, AddrSpace spc, ulong off)
         {
             encoder.openElement(ELEM_COMMENT);
             if (hl != no_color)
@@ -221,7 +221,7 @@ namespace Sla.DECCORE
             encoder.closeElement(ELEM_COMMENT);
         }
 
-        public override void tagLabel(string name, syntax_highlight hl, AddrSpace spc, uintb off)
+        public override void tagLabel(string name, syntax_highlight hl, AddrSpace spc, ulong off)
         {
             encoder.openElement(ELEM_LABEL);
             if (hl != no_color)
@@ -241,7 +241,7 @@ namespace Sla.DECCORE
             encoder.closeElement(ELEM_SYNTAX);
         }
 
-        public override int4 openParen(string paren, int4 id = 0)
+        public override int openParen(string paren, int id = 0)
         {
             encoder.openElement(ELEM_SYNTAX);
             encoder.writeSignedInteger(ATTRIB_OPEN, id);
@@ -251,7 +251,7 @@ namespace Sla.DECCORE
             return 0;
         }
 
-        public override void closeParen(string paren,int4 id)
+        public override void closeParen(string paren,int id)
         {
             encoder.openElement(ELEM_SYNTAX);
             encoder.writeSignedInteger(ATTRIB_CLOSE, id);

@@ -24,14 +24,14 @@ namespace Sla.DECCORE
 
         /// \class RuleAndOrLump
         /// \brief Collapse constants in logical expressions:  `(V & c) & d  =>  V & (c & d)`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_AND);
             oplist.push_back(CPUI_INT_OR);
             oplist.push_back(CPUI_INT_XOR);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             OpCode opc;
             Varnode* vn1,*basevn;
@@ -47,8 +47,8 @@ namespace Sla.DECCORE
             basevn = op2.getIn(0);
             if (basevn.isFree()) return 0;
 
-            uintb val = op.getIn(1).getOffset();
-            uintb val2 = op2.getIn(1).getOffset();
+            ulong val = op.getIn(1).getOffset();
+            ulong val2 = op2.getIn(1).getOffset();
             if (opc == CPUI_INT_AND)
                 val &= val2;
             else if (opc == CPUI_INT_OR)

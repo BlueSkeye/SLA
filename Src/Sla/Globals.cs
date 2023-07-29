@@ -684,7 +684,7 @@ namespace ghidra
             return (Varnode*)0;
         }
 
-        internal static int4 run_xml(string filein, SleighCompile compiler)
+        internal static int run_xml(string filein, SleighCompile compiler)
         {
             ifstream s = new ifstream(filein);
             Document doc;
@@ -713,8 +713,8 @@ namespace ghidra
                     if (el.getName() == "processorfile")
                     {
                         specfileout = el.getContent();
-                        int4 num = el.getNumAttributes();
-                        for (int4 i = 0; i < num; ++i)
+                        int num = el.getNumAttributes();
+                        for (int i = 0; i < num; ++i)
                         {
                             if (el.getAttributeName(i) == "slaspec")
                                 specfilein = el.getAttributeValue(i);

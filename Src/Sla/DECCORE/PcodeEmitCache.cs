@@ -19,16 +19,16 @@ namespace Sla.DECCORE
         /// Array of behaviors for translating OpCode
         private List<OpBehavior> inst;
         /// Starting offset for defining temporaries in \e unique space
-        private uintm uniq;
+        private uint uniq;
 
         /// Clone and cache a raw VarnodeData
         private VarnodeData createVarnode(VarnodeData var);
 
         /// Constructor
         public PcodeEmitCache(List<PcodeOpRaw> ocache, List<VarnodeData> vcache,
-            List<OpBehavior> @in, uintb uniqReserve);
+            List<OpBehavior> @in, ulong uniqReserve);
 
         public override void dump(Address addr, OpCode opc, VarnodeData outvar, VarnodeData vars,
-            int4 isize);
+            int isize);
     }
 }

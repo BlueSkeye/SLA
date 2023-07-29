@@ -18,7 +18,7 @@ namespace Sla.EXTRA
         /// any active break points or traces, so decompilation may not complete.
         public override void execute(TextReader s)
         {
-            int4 res;
+            int res;
 
             if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");

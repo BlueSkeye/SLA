@@ -14,7 +14,7 @@ namespace Sla.DECCORE
         {
             list<PcodeOp*>::const_iterator oiter;
             PcodeOp* op;
-            int4 i, start, stop;
+            int i, start, stop;
 
             s << "\n\n// Add Vertices\n";
             s << "*CMD=*COLUMNAR_INPUT,\n";
@@ -94,7 +94,7 @@ namespace Sla.DECCORE
             s << "  Fields=({Name=*FromKey, Location=1},\n";
             s << "          {Name=*ToKey, Location=2});\n\n";
 
-            for (int4 i = 0; i < graph.getSize(); ++i)
+            for (int i = 0; i < graph.getSize(); ++i)
                 print_dom_edge(graph.getBlock(i), s, falsenode);
             s << "*END_COLUMNS\n";
         }

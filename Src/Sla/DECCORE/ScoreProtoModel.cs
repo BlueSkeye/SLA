@@ -20,11 +20,11 @@ namespace Sla.DECCORE
         internal class PEntry
         {
             /// Original index of trial
-            public int4 origIndex;
+            public int origIndex;
             /// Matching slot within the resource list
-            public int4 slot;
+            public int slot;
             /// Number of slots occupied
-            public int4 size;
+            public int size;
 
             /// \brief Compare PEntry objects by slot
             ///
@@ -43,15 +43,15 @@ namespace Sla.DECCORE
         /// Prototype model to score against
         private ProtoModel model;
         /// The final fitness score
-        private int4 finalscore;
+        private int finalscore;
         /// Number of trials that don't fit the prototype model at all
-        private int4 mismatch;
+        private int mismatch;
 
         /// Constructor
         /// \param isinput is set to \b true to compute scores against the input part of the model
         /// \param mod is the prototype model to score against
         /// \param numparam is the presumed number of trials that will constitute the score
-        public ScoreProtoModel(bool isinput, ProtoModel mod, int4 numparam)
+        public ScoreProtoModel(bool isinput, ProtoModel mod, int numparam)
         {
             isinputscore = isinput;
             model = mod;
@@ -63,10 +63,10 @@ namespace Sla.DECCORE
         /// Register a trial to be scored
         /// \param addr is the starting address of the trial
         /// \param sz is the number of bytes in the trial
-        public void addParameter(Address addr, int4 sz)
+        public void addParameter(Address addr, int sz)
         {
-            int4 orig = entry.size();
-            int4 slot, slotsize;
+            int orig = entry.size();
+            int slot, slotsize;
             bool isparam;
             if (isinputscore)
                 isparam = model.possibleInputParamWithSlot(addr, sz, slot, slotsize);
@@ -90,17 +90,17 @@ namespace Sla.DECCORE
         {
             sort(entry.begin(), entry.end()); // Sort our entries via slot
 
-            int4 nextfree = 0;      // Next slot we expect to see
-            int4 basescore = 0;
-            int4 penalty[4];
+            int nextfree = 0;      // Next slot we expect to see
+            int basescore = 0;
+            int penalty[4];
             penalty[0] = 16;
             penalty[1] = 10;
             penalty[2] = 7;
             penalty[3] = 5;
-            int4 penaltyfinal = 3;
-            int4 mismatchpenalty = 20;
+            int penaltyfinal = 3;
+            int mismatchpenalty = 20;
 
-            for (int4 i = 0; i < entry.size(); ++i)
+            for (int i = 0; i < entry.size(); ++i)
             {
                 PEntry p = entry[i];
                 if (p.slot > nextfree)
@@ -130,9 +130,9 @@ namespace Sla.DECCORE
         }
 
         /// Get the fitness score
-        public int4 getScore() => finalscore;
+        public int getScore() => finalscore;
 
         /// Get the number of mismatched trials
-        public int4 getNumMismatch() => mismatch; 
+        public int getNumMismatch() => mismatch; 
     }
 }

@@ -16,11 +16,11 @@ namespace Sla.DECCORE
         /// \param op is the MULTIEQUAL
         /// \param npow is the constant 2^n
         /// \return the Varnode V in the form, or null if the form doesn't match
-        private static Varnode checkMultiequalForm(PcodeOp op, uintb npow)
+        private static Varnode checkMultiequalForm(PcodeOp op, ulong npow)
         {
             if (op.numInput() != 2) return (Varnode*)0;
             npow -= 1;      // 2^n - 1
-            int4 slot;
+            int slot;
             Varnode * base;
             for (slot = 0; slot < op.numInput(); ++slot)
             {
@@ -38,7 +38,7 @@ namespace Sla.DECCORE
             }
             if (slot > 1) return (Varnode*)0;
             BlockBasic* bl = op.getParent();
-            int4 innerSlot = 0;
+            int innerSlot = 0;
             BlockBasic* inner = (BlockBasic*)bl.getIn(innerSlot);
             if (inner.sizeOut() != 1 || inner.sizeIn() != 1)
             {
@@ -58,7 +58,7 @@ namespace Sla.DECCORE
             if (!lessOp.getIn(1).isConstant()) return (Varnode*)0;
             if (lessOp.getIn(1).getOffset() != 0) return (Varnode*)0;
             FlowBlock* negBlock = cbranch.isBooleanFlip() ? decision.getFalseOut() : decision.getTrueOut();
-            int4 negSlot = (negBlock == inner) ? innerSlot : (1 - innerSlot);
+            int negSlot = (negBlock == inner) ? innerSlot : (1 - innerSlot);
             if (negSlot != slot) return (Varnode*)0;
             return base;
         }
@@ -69,7 +69,7 @@ namespace Sla.DECCORE
         /// \return the Varnode V in the form, or null if the form doesn't match
         private static Varnode checkSignExtForm(PcodeOp op)
         {
-            int4 slot;
+            int slot;
             for (slot = 0; slot < 2; ++slot)
             {
                 Varnode* minusVn = op.getIn(slot);
@@ -87,7 +87,7 @@ namespace Sla.DECCORE
                 if (shiftOp.getIn(0) != base) continue;
                 constVn = shiftOp.getIn(1);
                 if (!constVn.isConstant()) continue;
-                if ((int4)constVn.getOffset() != 8 * base.getSize() - 1) continue;
+                if ((int)constVn.getOffset() != 8 * base.getSize() - 1) continue;
                 return base;
             }
             return (Varnode*)0;
@@ -108,16 +108,16 @@ namespace Sla.DECCORE
         /// \brief Convert INT_SREM form:  `V - (Vadj & ~(2^n-1)) =>  V s% 2^n`
         ///
         /// Note: `Vadj = (V<0) ? V + 2^n-1 : V`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_MULT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* constVn = op.getIn(1);
             if (!constVn.isConstant()) return 0;
-            uintb mask = calc_mask(constVn.getSize());
+            ulong mask = calc_mask(constVn.getSize());
             if (constVn.getOffset() != mask) return 0; // Must be INT_MULT by -1
             Varnode* andOut = op.getIn(0);
             if (!andOut.isWritten()) return 0;
@@ -125,7 +125,7 @@ namespace Sla.DECCORE
             if (andOp.code() != CPUI_INT_AND) return 0;
             constVn = andOp.getIn(1);
             if (!constVn.isConstant()) return 0;
-            uintb npow = (~constVn.getOffset() + 1) & mask;
+            ulong npow = (~constVn.getOffset() + 1) & mask;
             if (popcount(npow) != 1) return 0;      // constVn must be of form 11111..000..
             if (npow == 1) return 0;
             Varnode* adjVn = andOp.getIn(0);
@@ -151,7 +151,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* rootOp = *iter;
                 if (rootOp.code() != CPUI_INT_ADD) continue;
-                int4 slot = rootOp.getSlot(multOut);
+                int slot = rootOp.getSlot(multOut);
                 if (rootOp.getIn(1 - slot) != base) continue;
                 if (slot == 0)
                     data.opSetInput(rootOp, base, 0);

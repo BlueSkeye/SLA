@@ -18,7 +18,7 @@ namespace Sla.DECCORE
             behave = new OpBehavior(CPUI_INDIRECT, false, true); // Dummy behavior
         }
 
-        public override Datatype getInputLocal(PcodeOp op, int4 slot)
+        public override Datatype getInputLocal(PcodeOp op, int slot)
         {
             Datatype* ct;
 
@@ -31,7 +31,7 @@ namespace Sla.DECCORE
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
-            int4 inslot, int4 outslot)
+            int inslot, int outslot)
         {
             if (op.isIndirectCreation()) return (Datatype*)0;
             if ((inslot == 1) || (outslot == 1)) return (Datatype*)0;

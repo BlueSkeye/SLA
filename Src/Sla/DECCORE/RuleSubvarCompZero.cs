@@ -29,18 +29,18 @@ namespace Sla.DECCORE
         /// check that input has only 1 bit that can possibly be non-zero
         /// and that the constant is testing this.  This then triggers
         /// the full SubvariableFlow analysis.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_NOTEQUAL);
             oplist.push_back(CPUI_INT_EQUAL);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (!op.getIn(1).isConstant()) return 0;
             Varnode* vn = op.getIn(0);
-            uintb mask = vn.getNZMask();
-            int4 bitnum = leastsigbit_set(mask);
+            ulong mask = vn.getNZMask();
+            int bitnum = leastsigbit_set(mask);
             if (bitnum == -1) return 0;
             if ((mask >> bitnum) != 1) return 0; // Check if only one bit active
 
@@ -64,8 +64,8 @@ namespace Sla.DECCORE
                     case CPUI_INT_RIGHT:
                         {
                             if (vn0.isConstant()) return 0;
-                            uintb mask0 = vn0.getConsume() & vn0.getNZMask();
-                            uintb wholemask = calc_mask(vn0.getSize()) & mask0;
+                            ulong mask0 = vn0.getConsume() & vn0.getNZMask();
+                            ulong wholemask = calc_mask(vn0.getSize()) & mask0;
                             // We really need a popcnt here
                             // We want: if the number of bits that are both consumed
                             // and not known to be zero are "big" then don't continue

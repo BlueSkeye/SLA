@@ -11,14 +11,14 @@ namespace Sla.SLEIGH
     {
         // A smaller bitrange within a varnode
         private VarnodeSymbol varsym;  // Varnode containing the bitrange
-        private uint4 bitoffset;        // least significant bit of range
-        private uint4 numbits;      // number of bits in the range
+        private uint bitoffset;        // least significant bit of range
+        private uint numbits;      // number of bits in the range
         
         public BitrangeSymbol()
         {
         }
 
-        public BitrangeSymbol(string nm,VarnodeSymbol sym, uint4 bitoff,uint4 num)
+        public BitrangeSymbol(string nm,VarnodeSymbol sym, uint bitoff,uint num)
             : base(nm)
         {
             varsym = sym;
@@ -28,9 +28,9 @@ namespace Sla.SLEIGH
 
         public VarnodeSymbol getParentSymbol() => varsym;
 
-        public uint4 getBitOffset() => bitoffset;
+        public uint getBitOffset() => bitoffset;
 
-        public uint4 numBits() => numbits;
+        public uint numBits() => numbits;
 
         public override symbol_type getType() => bitrange_symbol;
     }

@@ -15,10 +15,10 @@ namespace Sla.EXTRA
 {
     internal class ConstraintOpcode : UnifyConstraint
     {
-        private int4 opindex;
+        private int opindex;
         private List<OpCode> opcodes; // Which opcodes match
         
-        public ConstraintOpcode(int4 ind, List<OpCode> o)
+        public ConstraintOpcode(int ind, List<OpCode> o)
         {
             maxnum = opindex = ind;
             opcodes = o;
@@ -33,7 +33,7 @@ namespace Sla.EXTRA
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
             PcodeOp* op = state.data(opindex).getOp();
-            for (int4 i = 0; i < opcodes.size(); ++i)
+            for (int i = 0; i < opcodes.size(); ++i)
                 if (op.code() == opcodes[i]) return true;
             return false;
         }
@@ -43,7 +43,7 @@ namespace Sla.EXTRA
             typelist[opindex] = UnifyDatatype(UnifyDatatype::op_type);
         }
 
-        public override int4 getBaseIndex() => opindex;
+        public override int getBaseIndex() => opindex;
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
@@ -56,7 +56,7 @@ namespace Sla.EXTRA
             else
             {
                 s << '(' << printstate.getName(opindex) << ".code() != CPUI_" << get_opname(opcodes[0]) << ')';
-                for (int4 i = 1; i < opcodes.size(); ++i)
+                for (int i = 1; i < opcodes.size(); ++i)
                 {
                     s << "&&";
                     s << '(' << printstate.getName(opindex) << ".code() != CPUI_" << get_opname(opcodes[i]) << ')';

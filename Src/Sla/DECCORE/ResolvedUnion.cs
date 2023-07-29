@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         /// Union or Structure being resolved
         private Datatype baseType;
         /// Index of field referenced by \b resolve
-        private int4 fieldNum;
+        private int fieldNum;
         /// If \b true, resolution cannot be overridden
         private bool @lock;
 
@@ -54,7 +54,7 @@ namespace Sla.DECCORE
         /// \param parent is the original parent
         /// \param fldNum is the index of the particular field to resolve to (or -1 to resolve to parent)
         /// \param typegrp is a TypeFactory used to construct the resolved data-type of the field
-        public ResolvedUnion(Datatype parent, int4 fldNum, TypeFactory typegrp)
+        public ResolvedUnion(Datatype parent, int fldNum, TypeFactory typegrp)
         {
             if (parent.getMetatype() == TYPE_PARTIALUNION)
                 parent = ((TypePartialUnion*)parent).getParentUnion();
@@ -83,7 +83,7 @@ namespace Sla.DECCORE
         public Datatype getBase() => baseType;
 
         /// Get the index of the resolved field or -1
-        public int4 getFieldNum() => fieldNum;
+        public int getFieldNum() => fieldNum;
 
         /// Is \b this locked against overrides
         public bool isLocked() => @lock;

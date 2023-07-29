@@ -33,7 +33,7 @@ namespace Sla.DECCORE
         /// \param pass is the pass number when the range was heritaged
         /// \param intersect is a reference for passing back the intersect code
         /// \return the iterator to the map element containing the added range
-        public IEnumerator add(Address addr, int4 size, int4 pass, int4 intersect)
+        public IEnumerator add(Address addr, int size, int pass, int intersect)
         {
             iterator iter = themap.lower_bound(addr);
             if (iter != themap.begin())
@@ -41,7 +41,7 @@ namespace Sla.DECCORE
             if ((iter != themap.end()) && (-1 == addr.overlap(0, (*iter).first, (*iter).second.size)))
                 ++iter;
 
-            int4 where = 0;
+            int where = 0;
             intersect = 0;
             if ((iter != themap.end()) && (-1 != (where = addr.overlap(0, (*iter).first, (*iter).second.size))))
             {
@@ -95,7 +95,7 @@ namespace Sla.DECCORE
         /// Return the pass number when the given address was heritaged, or -1 if it was not heritaged
         /// \param addr is the given address
         /// \return the pass number of -1
-        public int4 findPass(Address addr)
+        public int findPass(Address addr)
         {
             map<Address, SizePass>::const_iterator iter = themap.upper_bound(addr); // First range after address
             if (iter == themap.begin()) return -1;

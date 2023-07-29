@@ -25,16 +25,16 @@ namespace Sla.DECCORE
         /// \param y is the multiplicative coefficient
         /// \param xsize is the maximum power of 2
         /// \return the divisor or 0 if the checks fail
-        private static uintb calcDivisor(uintb n, uint8 y, int4 xsize)
+        private static ulong calcDivisor(ulong n, ulong y, int xsize)
         {
             if (n > 127) return 0;      // Not enough precision
             if (y <= 1) return 0;       // Boundary cases are wrong form
 
-            uint8 d, r;
-            uint8 power;
+            ulong d, r;
+            ulong power;
             if (n < 64)
             {
-                power = ((uint8)1) << n;
+                power = ((ulong)1) << n;
                 d = power / (y - 1);
                 r = power % (y - 1);
             }
@@ -48,20 +48,20 @@ namespace Sla.DECCORE
             // The optimization of division to multiplication
             // by the reciprocal holds true, if the maximum value
             // of x times the remainder is less than 2^n
-            uint8 maxx = 1;
+            ulong maxx = 1;
             maxx <<= xsize;
             maxx -= 1;          // Maximum possible x value
-            uint8 tmp;
+            ulong tmp;
             if (n < 64)
                 tmp = power / (d - r);  // r < d => divisor is non-zero
             else
             {
-                uint8 unused;
+                ulong unused;
                 if (0 != power2Divide(n, d - r, tmp, unused))
-                    return (uintb)d;        // tmp is bigger than 2^64 > maxx
+                    return (ulong)d;        // tmp is bigger than 2^64 > maxx
             }
             if (tmp <= maxx) return 0;
-            return (uintb)d;
+            return (ulong)d;
         }
 
         /// \brief Replace sign-bit extractions from the first given Varnode with the second Varnode
@@ -87,7 +87,7 @@ namespace Sla.DECCORE
                     testList.push_back(op.getIn(0));
                 }
             }
-            for (int4 i = 0; i < testList.size(); ++i)
+            for (int i = 0; i < testList.size(); ++i)
             {
                 Varnode* vn = testList[i];
                 list<PcodeOp*>::const_iterator iter = vn.beginDescend();
@@ -114,8 +114,8 @@ namespace Sla.DECCORE
                         }
                         if (constVn.isConstant())
                         {
-                            int4 sa = firstVn.getSize() * 8 - 1;
-                            if (sa == (int4)constVn.getOffset())
+                            int sa = firstVn.getSize() * 8 - 1;
+                            if (sa == (int)constVn.getOffset())
                             {
                                 data.opSetInput(op, replaceVn, 0);
                             }
@@ -146,8 +146,8 @@ namespace Sla.DECCORE
                 if (opc != CPUI_INT_RIGHT && opc != CPUI_INT_SRIGHT) continue;
                 Varnode* cvn = superOp.getIn(1);
                 if (!cvn.isConstant()) return true;    // Might be a form where constant has propagated yet
-                int4 n, xsize;
-                uintb y;
+                int n, xsize;
+                ulong y;
                 OpCode extopc;
                 Varnode* inVn = findForm(superOp, n, y, xsize, extopc);
                 if (inVn != (Varnode*)0) return true;
@@ -172,26 +172,26 @@ namespace Sla.DECCORE
         /// The unsigned and signed variants are:
         ///   - `sub( (zext(V)*c)>>n, 0)   =>  V / (2^n/(c-1))`
         ///   - `sub( (sext(V)*c)s>>n, 0)  =>  V s/ (2^n/(c-1))`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_SUBPIECE);
             oplist.push_back(CPUI_INT_RIGHT);
             oplist.push_back(CPUI_INT_SRIGHT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            int4 n, xsize;
-            uintb y;
+            int n, xsize;
+            ulong y;
             OpCode extOpc;
             Varnode* inVn = findForm(op, n, y, xsize, extOpc);
             if (inVn == (Varnode*)0) return 0;
             if (checkFormOverlap(op)) return 0;
             if (extOpc == CPUI_INT_SEXT)
                 xsize -= 1;     // one less bit for signed, because of signbit
-            uintb divisor = calcDivisor(n, y, xsize);
+            ulong divisor = calcDivisor(n, y, xsize);
             if (divisor == 0) return 0;
-            int4 outSize = op.getOut().getSize();
+            int outSize = op.getOut().getSize();
 
             if (inVn.getSize() < outSize)
             {   // Do we need an extension to get to final size
@@ -265,7 +265,7 @@ namespace Sla.DECCORE
         /// \param xsize will hold the number of (non-zero) bits in the numerand
         /// \param extopc holds whether the extension is INT_ZEXT or INT_SEXT
         /// \return the extended numerand if possible, or the unextended numerand, or NULL
-        public static Varnode findForm(PcodeOp op, int4 n, uintb y, int4 xsize, OpCode extopc)
+        public static Varnode findForm(PcodeOp op, int n, ulong y, int xsize, OpCode extopc)
         {
             PcodeOp* curOp = op;
             OpCode shiftopc = curOp.code();
@@ -286,7 +286,7 @@ namespace Sla.DECCORE
             }
             if (curOp.code() == CPUI_SUBPIECE)
             {       // Optional SUBPIECE
-                int4 c = curOp.getIn(1).getOffset();
+                int c = curOp.getIn(1).getOffset();
                 Varnode* inVn = curOp.getIn(0);
                 if (!inVn.isWritten()) return (Varnode*)0;
                 if (curOp.getOut().getSize() + c != inVn.getSize())
@@ -310,8 +310,8 @@ namespace Sla.DECCORE
             extopc = extOp.code();
             if (extopc != CPUI_INT_SEXT)
             {
-                uintb nzMask = inVn.getNZMask();
-                xsize = 8 * sizeof(uintb) - count_leading_zeros(nzMask);
+                ulong nzMask = inVn.getNZMask();
+                xsize = 8 * sizeof(ulong) - count_leading_zeros(nzMask);
                 if (xsize == 0) return (Varnode*)0;
                 if (xsize > 4 * inVn.getSize()) return (Varnode*)0;
             }

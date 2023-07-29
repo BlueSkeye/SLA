@@ -40,7 +40,7 @@ namespace Sla.SLEIGH
             unary.listValues(list);
         }
 
-        public override void getMinMax(List<intb> minlist, List<intb> maxlist)
+        public override void getMinMax(List<long> minlist, List<long> maxlist)
         {
             unary.getMinMax(minlist, maxlist);
         }

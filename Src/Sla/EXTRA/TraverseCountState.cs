@@ -9,17 +9,17 @@ namespace Sla.EXTRA
 {
     internal class TraverseCountState : TraverseConstraint
     {
-        private int4 state;
-        private int4 endstate;
+        private int state;
+        private int endstate;
         
-        public TraverseCountState(int4 i)
+        public TraverseCountState(int i)
             : base(i)
         {
         }
         
-        public int4 getState() => state;
+        public int getState() => state;
 
-        public void initialize(int4 end)
+        public void initialize(int end)
         {
             state = -1;
             endstate = end;

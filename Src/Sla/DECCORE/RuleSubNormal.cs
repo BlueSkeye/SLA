@@ -28,12 +28,12 @@ namespace Sla.DECCORE
         /// The form looks like:
         ///  - `sub( V>>n ,c )  =>  sub( V, c+k/8 ) >> (n-k)  where k = (n/8)*8`  or
         ///  - `sub( V>>n, c )  =>  ext( sub( V, c+k/8 ) )  if n is big`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_SUBPIECE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* shiftout = op.getIn(0);
             if (!shiftout.isWritten()) return 0;
@@ -44,11 +44,11 @@ namespace Sla.DECCORE
             if (!shiftop.getIn(1).isConstant()) return 0;
             Varnode* a = shiftop.getIn(0);
             if (a.isFree()) return 0;
-            int4 n = shiftop.getIn(1).getOffset();
-            int4 c = op.getIn(1).getOffset();
-            int4 k = (n / 8);
-            int4 insize = a.getSize();
-            int4 outsize = op.getOut().getSize();
+            int n = shiftop.getIn(1).getOffset();
+            int c = op.getIn(1).getOffset();
+            int k = (n / 8);
+            int insize = a.getSize();
+            int outsize = op.getOut().getSize();
 
             // Total shift + outsize must be greater equal to size of input
             if ((n + 8 * c + 8 * outsize < 8 * insize) && (n != k * 8)) return 0;
@@ -56,7 +56,7 @@ namespace Sla.DECCORE
             // If totalcut + remain > original input
             if (k + c + outsize > insize)
             {
-                int4 truncSize = insize - c - k;
+                int truncSize = insize - c - k;
                 if (n == k * 8 && truncSize > 0 && popcount(truncSize) == 1)
                 {
                     // We need an additional extension

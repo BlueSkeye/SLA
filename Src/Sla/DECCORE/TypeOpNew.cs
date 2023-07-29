@@ -19,13 +19,13 @@ namespace Sla.DECCORE
         }
 
         // Never needs casting
-        public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
+        public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
             return (Datatype*)0;
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
-            int4 inslot, int4 outslot)
+            int inslot, int outslot)
         {
             if ((inslot != 0) || (outslot != -1)) return (Datatype*)0;
             Varnode* vn0 = op.getIn(0);
@@ -49,7 +49,7 @@ namespace Sla.DECCORE
             s << getOperatorName(op);
             s << '(';
             Varnode::printRaw(s, op.getIn(0));
-            for (int4 i = 1; i < op.numInput(); ++i)
+            for (int i = 1; i < op.numInput(); ++i)
             {
                 s << ',';
                 Varnode::printRaw(s, op.getIn(i));

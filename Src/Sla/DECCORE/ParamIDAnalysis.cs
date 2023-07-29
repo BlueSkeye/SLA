@@ -19,8 +19,8 @@ namespace Sla.DECCORE
             if (justproto)
             {       // We only provide info on the recovered prototype
                 FuncProto fproto = fd.getFuncProto();
-                int4 num = fproto.numParams();
-                for (int4 i = 0; i < num; ++i)
+                int num = fproto.numParams();
+                for (int i = 0; i < num; ++i)
                 {
                     ProtoParameter* param = fproto.getParam(i);
                     InputParamMeasures.push_back(ParamMeasure(param.getAddress(), param.getSize(),
@@ -79,7 +79,7 @@ namespace Sla.DECCORE
             encoder.openElement(ELEM_PROTO);
 
             encoder.writeString(ATTRIB_MODEL, fd.getFuncProto().getModelName());
-            int4 extrapop = fd.getFuncProto().getExtraPop();
+            int extrapop = fd.getFuncProto().getExtraPop();
             if (extrapop == ProtoModel::extrapop_unknown)
                 encoder.writeString(ATTRIB_EXTRAPOP, "unknown");
             else

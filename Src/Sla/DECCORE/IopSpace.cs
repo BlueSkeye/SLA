@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         /// \param m is the associated address space manager
         /// \param t is the associated processor translator
         /// \param ind is the associated index
-        public IopSpace(AddrSpaceManager m, Translate t, int4 ind)
+        public IopSpace(AddrSpaceManager m, Translate t, int ind)
             : base(m, t, IPTR_IOP, NAME,sizeof(void*),1, ind,0,1)
         {
             clearFlags(heritaged | does_deadcode | big_endian);
@@ -38,21 +38,21 @@ namespace Sla.DECCORE
                 setFlags(big_endian);
         }
 
-        public override void encodeAttributes(Encoder encoder, uintb offset)
+        public override void encodeAttributes(Encoder encoder, ulong offset)
         {
             encoder.writeString(ATTRIB_SPACE, "iop");
         }
 
-        public override void encodeAttributes(Encoder encoder, uintb offset, int4 size)
+        public override void encodeAttributes(Encoder encoder, ulong offset, int size)
         {
             encoder.writeString(ATTRIB_SPACE, "iop");
         }
 
-        public override void printRaw(TextWriter s, uintb offset)
+        public override void printRaw(TextWriter s, ulong offset)
         {               // Print info about op this address refers to
             BlockBasic* bs;
             BlockBasic* bl;
-            PcodeOp* op = (PcodeOp*)(uintp)offset; // Treat offset as op
+            PcodeOp* op = (PcodeOp*)(ulong)offset; // Treat offset as op
 
             if (!op.isBranch())
             {   // op parameter for CPUI_INDIRECT

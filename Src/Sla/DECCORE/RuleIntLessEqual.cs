@@ -24,13 +24,13 @@ namespace Sla.DECCORE
 
         /// \class RuleIntLessEqual
         /// \brief Convert LESSEQUAL to LESS:  `V <= c  =>  V < (c+1)`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_LESSEQUAL);
             oplist.push_back(CPUI_INT_SLESSEQUAL);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (data.replaceLessequal(op))
                 return 1;

@@ -16,10 +16,10 @@ namespace Sla.SLEIGH
 
         private void checkTableFill()
         { // Check if all possible entries in the table have been filled
-            intb min = patval.minValue();
-            intb max = patval.maxValue();
+            long min = patval.minValue();
+            long max = patval.maxValue();
             tableisfilled = (min >= 0) && (max < nametable.size());
-            for (uint4 i = 0; i < nametable.size(); ++i)
+            for (uint i = 0; i < nametable.size(); ++i)
             {
                 if ((nametable[i] == "_") || (nametable[i] == "\t"))
                 {
@@ -44,7 +44,7 @@ namespace Sla.SLEIGH
         {
             if (!tableisfilled)
             {
-                intb ind = patval.getValue(walker);
+                long ind = patval.getValue(walker);
                 if ((ind >= nametable.size()) || (ind < 0) || ((nametable[ind].size() == 1) && (nametable[ind][0] == '\t')))
                 {
                     ostringstream s;
@@ -59,7 +59,7 @@ namespace Sla.SLEIGH
 
         public override void print(TextWriter s, ParserWalker walker)
         {
-            uint4 ind = (uint4)patval.getValue(walker);
+            uint ind = (uint)patval.getValue(walker);
             // ind is already checked to be in range by the resolve routine
             s << nametable[ind];
         }
@@ -72,7 +72,7 @@ namespace Sla.SLEIGH
             SleighSymbol::saveXmlHeader(s);
             s << ">\n";
             patval.saveXml(s);
-            for (int4 i = 0; i < nametable.size(); ++i)
+            for (int i = 0; i < nametable.size(); ++i)
             {
                 if (nametable[i] == "\t")       // TAB indicates an illegal index
                     s << "<nametab/>\n";        // Emit tag with no name attribute

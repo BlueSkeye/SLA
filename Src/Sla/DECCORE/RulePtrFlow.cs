@@ -93,7 +93,7 @@ namespace Sla.DECCORE
         /// \param slot is the input slot reading the pointer
         /// \param data is the function being analyzed
         /// \return the new truncated Varnode
-        private Varnode truncatePointer(AddrSpace spc, PcodeOp op, Varnode vn, int4 slot, Funcdata data)
+        private Varnode truncatePointer(AddrSpace spc, PcodeOp op, Varnode vn, int slot, Funcdata data)
         {
             Varnode* newvn;
             PcodeOp* truncop = data.newOp(2, op.getAddr());
@@ -136,7 +136,7 @@ namespace Sla.DECCORE
             return new RulePtrFlow(getGroup(), glb);
         }
 
-        private void getOpList(List<uint4> oplist)
+        private void getOpList(List<uint> oplist)
         {
             if (!hasTruncations) return;    // Only stick ourselves into pool if aggresiveness is turned on
             oplist.push_back(CPUI_STORE);
@@ -151,11 +151,11 @@ namespace Sla.DECCORE
             oplist.push_back(CPUI_PTRADD);
         }
 
-        private int4 applyOp(PcodeOp op, Funcdata data)
+        private int applyOp(PcodeOp op, Funcdata data)
         { // Push pointer-ness 
             Varnode* vn;
             AddrSpace* spc;
-            int4 madeChange = 0;
+            int madeChange = 0;
 
             switch (op.code())
             {
@@ -214,7 +214,7 @@ namespace Sla.DECCORE
                     vn = op.getOut();
                     if (propagateFlowToReads(vn))
                         madeChange = 1;
-                    for (int4 i = 0; i < op.numInput(); ++i)
+                    for (int i = 0; i < op.numInput(); ++i)
                     {
                         vn = op.getIn(i);
                         if (propagateFlowToDef(vn))

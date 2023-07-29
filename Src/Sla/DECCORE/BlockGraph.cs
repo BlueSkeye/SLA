@@ -702,7 +702,7 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Bad loopedge create");
             }
 #endif
-            //  int4 i;
+            //  int i;
             //  i = begin.OutIndex(end);
             // using OutIndex did not necessarily get the right edge
             // if there were multiple outedges to the same block
@@ -1589,8 +1589,8 @@ namespace Sla.DECCORE
         public bool isConsistent()
         {
             FlowBlock *bl1,*bl2;
-            int4 i,j,k;
-            int4 count1,count2;
+            int i,j,k;
+            int count1,count2;
 
             for(i=0;i<list.size();++i) {
                 bl1 = list[i];

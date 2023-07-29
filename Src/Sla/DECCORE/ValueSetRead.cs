@@ -17,9 +17,9 @@ namespace Sla.DECCORE
     {
         // friend class ValueSetSolver;
         /// 0=pure constant 1=stack relative
-        private int4 typeCode;
+        private int typeCode;
         /// The slot being read
-        private int4 slot;
+        private int slot;
         /// The PcodeOp at the point of the value set read
         private PcodeOp op;
         /// Range of values or offsets in this set
@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         /// Constraint associated with the equation
         private CircleRange equationConstraint;
         /// Type code of the associated equation
-        private int4 equationTypeCode;
+        private int equationTypeCode;
         /// Set to \b true if left boundary of range didn't change (last iteration)
         private bool leftIsStable;
         /// Set to \b true if right boundary of range didn't change (last iteration)
@@ -36,7 +36,7 @@ namespace Sla.DECCORE
         /// Establish \e read this value set corresponds to
         /// \param o is the PcodeOp reading the value set
         /// \param slt is the input slot the values are coming in from
-        private void setPcodeOp(PcodeOp o, int4 slt)
+        private void setPcodeOp(PcodeOp o, int slt)
         {
             typeCode = 0;
             op = o;
@@ -48,7 +48,7 @@ namespace Sla.DECCORE
         /// \param slt is the given slot
         /// \param type is the constraint characteristic
         /// \param constraint is the given range
-        private void addEquation(int4 slt, int4 type, CircleRange constraint)
+        private void addEquation(int slt, int type, CircleRange constraint)
         {
             if (slot == slt)
             {
@@ -58,7 +58,7 @@ namespace Sla.DECCORE
         }
 
         /// Return '0' for normal constant, '1' for spacebase relative
-        public int4 getTypeCode() => typeCode;
+        public int getTypeCode() => typeCode;
 
         /// Get the actual range of values
         public CircleRange getRange() => range;

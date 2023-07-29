@@ -21,13 +21,13 @@ namespace Sla.DECCORE
         }
 
         /// Construct TypeBase from a size and meta-type
-        public TypeBase(int4 s, type_metatype m)
+        public TypeBase(int s, type_metatype m)
             : base(s, m)
         {
         }
 
         /// Construct TypeBase from a size, meta-type, and name
-        public TypeBase(int4 s, type_metatype m, string n)
+        public TypeBase(int s, type_metatype m, string n)
             : base(s, m)
         {
             name = n;

@@ -28,13 +28,13 @@ namespace Sla.DECCORE
         /// Right shifts (signed and unsigned) can throw away the least significant part
         /// of a concatentation.  The result is a (sign or zero) extension of the most significant part.
         /// Depending on the original shift amount, the extension may still need to be shifted.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_RIGHT);
             oplist.push_back(CPUI_INT_SRIGHT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (!op.getIn(1).isConstant()) return 0;
 
@@ -43,8 +43,8 @@ namespace Sla.DECCORE
             PcodeOp* concat = shiftin.getDef();
             if (concat.code() != CPUI_PIECE) return 0;
 
-            int4 sa = op.getIn(1).getOffset();
-            int4 leastsize = concat.getIn(1).getSize() * 8;
+            int sa = op.getIn(1).getOffset();
+            int leastsize = concat.getIn(1).getSize() * 8;
             if (sa < leastsize) return 0;   // Does shift throw away least sig part
             Varnode* mainin = concat.getIn(0);
             if (mainin.isFree()) return 0;

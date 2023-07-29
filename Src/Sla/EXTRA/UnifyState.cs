@@ -27,20 +27,20 @@ namespace Sla.EXTRA
 
         ~UnifyState()
         {
-            for (int4 i = 0; i < traverselist.size(); ++i)
+            for (int i = 0; i < traverselist.size(); ++i)
                 delete traverselist[i];
         }
 
-        public int4 numTraverse() => traverselist.size();
+        public int numTraverse() => traverselist.size();
 
         public void registerTraverseConstraint(TraverseConstraint t)
         {
             traverselist.push_back(t);
         }
 
-        public UnifyDatatype data(int4 slot) => storemap[slot];
+        public UnifyDatatype data(int slot) => storemap[slot];
 
-        public TraverseConstraint getTraverse(int4 slot) => traverselist[slot];
+        public TraverseConstraint getTraverse(int slot) => traverselist[slot];
 
         public Funcdata getFunction() => fd;
 
@@ -55,12 +55,12 @@ namespace Sla.EXTRA
             fd = f;
         }
 
-        public void initialize(int4 id, Varnode vn)
+        public void initialize(int id, Varnode vn)
         { // Enter an initial varnode (root) starting point
             storemap[id].setVarnode(vn);
         }
 
-        public void initialize(int4 id, PcodeOp op)
+        public void initialize(int id, PcodeOp op)
         { // Enter an initial op (root) starting point
             storemap[id].setOp(op);
         }

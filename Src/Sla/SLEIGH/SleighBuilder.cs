@@ -24,10 +24,10 @@ namespace Sla.SLEIGH
             VarnodeData* loadvars;
             VarnodeData* storevars;
             VarnodeTpl* vn,*outvn;
-            int4 isize = op.numInput();
+            int isize = op.numInput();
             // First build all the inputs
             invars = cache.allocateVarnodes(isize);
-            for (int4 i = 0; i < isize; ++i)
+            for (int i = 0; i < isize; ++i)
             {
                 vn = op.getIn(i);
                 if (vn.isDynamic(*walker))
@@ -40,7 +40,7 @@ namespace Sla.SLEIGH
                     loadvars = load_op.invar = cache.allocateVarnodes(2);
                     AddrSpace* spc = generatePointer(vn, loadvars[1]);
                     loadvars[0].space = const_space;
-                    loadvars[0].offset = (uintb)(uintp)spc;
+                    loadvars[0].offset = (ulong)(ulong)spc;
                     loadvars[0].size = sizeof(spc);
                     if (vn.getOffset().getSelect() == ConstTpl::v_offset_plus)
                         generatePointerAdd(load_op, vn);
@@ -72,7 +72,7 @@ namespace Sla.SLEIGH
                     store_op.invar = storevars;
                     AddrSpace* spc = generatePointer(outvn, storevars[1]); // pointer
                     storevars[0].space = const_space;
-                    storevars[0].offset = (uintb)(uintp)spc; // space in which to store
+                    storevars[0].offset = (ulong)(ulong)spc; // space in which to store
                     storevars[0].size = sizeof(spc);
                     if (outvn.getOffset().getSelect() == ConstTpl::v_offset_plus)
                         generatePointerAdd(store_op, outvn);
@@ -87,8 +87,8 @@ namespace Sla.SLEIGH
 
         private AddrSpace const_space;     ///< The constant address space
         private AddrSpace uniq_space;      ///< The unique address space
-        private uintb uniquemask;           ///< Mask of address bits to use to uniquify temporary registers
-        private uintb uniqueoffset;         ///< Uniquifier bits for \b this instruction
+        private ulong uniquemask;           ///< Mask of address bits to use to uniquify temporary registers
+        private ulong uniqueoffset;         ///< Uniquifier bits for \b this instruction
         private DisassemblyCache discache;     ///< Cache of disassembled instructions
         private PcodeCacher cache;         ///< Cache accumulating p-code data for the instruction
 
@@ -100,11 +100,11 @@ namespace Sla.SLEIGH
         /// in the otherwise empty section.
         /// \param ct is the matching currently Constructor being built
         /// \param secnum is the particular \e named section number to build
-        private void buildEmpty(Constructor ct, int4 secnum)
+        private void buildEmpty(Constructor ct, int secnum)
         {
-            int4 numops = ct.getNumOperands();
+            int numops = ct.getNumOperands();
 
-            for (int4 i = 0; i < numops; ++i)
+            for (int i = 0; i < numops; ++i)
             {
                 SubtableSymbol* sym = (SubtableSymbol*)ct.getOperand(i).getDefiningSymbol();
                 if (sym == (SubtableSymbol*)0) continue;
@@ -164,7 +164,7 @@ namespace Sla.SLEIGH
 
         private void generatePointerAdd(PcodeData op, VarnodeTpl vntpl)
         {
-            uintb offsetPlus = vntpl.getOffset().getReal() & 0xffff;
+            ulong offsetPlus = vntpl.getOffset().getReal() & 0xffff;
             if (offsetPlus == 0)
             {
                 return;
@@ -203,7 +203,7 @@ namespace Sla.SLEIGH
         /// \param cspc is the constant address space
         /// \param uspc is the unique address space
         /// \param umask is the mask to use to find unique bits within an Address
-        public SleighBuilder(ParserWalker w, DisassemblyCache dcache, PcodeCacher pc, AddrSpace cspc, AddrSpace uspc, uint4 umask)
+        public SleighBuilder(ParserWalker w, DisassemblyCache dcache, PcodeCacher pc, AddrSpace cspc, AddrSpace uspc, uint umask)
             : base(0)
         {
             walker = w;
@@ -215,10 +215,10 @@ namespace Sla.SLEIGH
             uniqueoffset = (walker.getAddr().getOffset() & uniquemask) << 4;
         }
 
-        private override void appendBuild(OpTpl bld, int4 secnum)
+        private override void appendBuild(OpTpl bld, int secnum)
         {
             // Append p-code for a particular build statement
-            int4 index = bld.getIn(0).getOffset().getReal(); // Recover operand index from build statement
+            int index = bld.getIn(0).getOffset().getReal(); // Recover operand index from build statement
                                                                // Check if operand is a subtable
             SubtableSymbol* sym = (SubtableSymbol*)walker.getConstructor().getOperand(index).getDefiningSymbol();
             if ((sym == (SubtableSymbol*)0) || (sym.getType() != SleighSymbol::subtable_symbol)) return;
@@ -246,12 +246,12 @@ namespace Sla.SLEIGH
             // Append pcode for an entire instruction (delay slot)
             // in the middle of the current instruction
             ParserWalker* tmp = walker;
-            uintb olduniqueoffset = uniqueoffset;
+            ulong olduniqueoffset = uniqueoffset;
 
             Address baseaddr = tmp.getAddr();
-            int4 fallOffset = tmp.getLength();
-            int4 delaySlotByteCnt = tmp.getParserContext().getDelaySlot();
-            int4 bytecount = 0;
+            int fallOffset = tmp.getLength();
+            int delaySlotByteCnt = tmp.getParserContext().getDelaySlot();
+            int bytecount = 0;
             do
             {
                 Address newaddr = baseaddr + fallOffset;
@@ -259,7 +259,7 @@ namespace Sla.SLEIGH
                 ParserContext pos = discache.getParserContext(newaddr);
                 if (pos.getParserState() != ParserContext::pcode)
                     throw new LowlevelError("Could not obtain cached delay slot instruction");
-                int4 len = pos.getLength();
+                int len = pos.getLength();
 
                 ParserWalker newwalker(pos );
                 walker = &newwalker;
@@ -277,7 +277,7 @@ namespace Sla.SLEIGH
             cache.addLabel(op.getIn(0).getOffset().getReal() + getLabelBase());
         }
 
-        private override void appendCrossBuild(OpTpl bld, int4 secnum)
+        private override void appendCrossBuild(OpTpl bld, int secnum)
         {
             // Weave in the p-code section from an instruction at another address
             // bld-param(0) contains the address of the instruction
@@ -287,10 +287,10 @@ namespace Sla.SLEIGH
             secnum = bld.getIn(1).getOffset().getReal();
             VarnodeTpl* vn = bld.getIn(0);
             AddrSpace* spc = vn.getSpace().fixSpace(*walker);
-            uintb addr = spc.wrapOffset(vn.getOffset().fix(*walker));
+            ulong addr = spc.wrapOffset(vn.getOffset().fix(*walker));
 
             ParserWalker* tmp = walker;
-            uintb olduniqueoffset = uniqueoffset;
+            ulong olduniqueoffset = uniqueoffset;
 
             Address newaddr(spc, addr);
             setUniqueOffset(newaddr);

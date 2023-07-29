@@ -34,7 +34,7 @@ namespace Sla.DECCORE
         /// comparisons of the three-way, such as
         ///  - `X < 1`  which simplifies to
         ///  - `V <= W`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_SLESS);
             oplist.push_back(CPUI_INT_SLESSEQUAL);
@@ -42,10 +42,10 @@ namespace Sla.DECCORE
             oplist.push_back(CPUI_INT_NOTEQUAL);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            int4 constSlot = 0;
-            int4 form;
+            int constSlot = 0;
+            int form;
             Varnode* tmpvn = op.getIn(constSlot);
             if (!tmpvn.isConstant())
             {       // One of the two inputs must be a constant
@@ -53,7 +53,7 @@ namespace Sla.DECCORE
                 tmpvn = op.getIn(constSlot);
                 if (!tmpvn.isConstant()) return 0;
             }
-            uintb val = tmpvn.getOffset(); // Encode const value (-1, 0, 1, 2) as highest 3 bits of form (000, 001, 010, 011)
+            ulong val = tmpvn.getOffset(); // Encode const value (-1, 0, 1, 2) as highest 3 bits of form (000, 001, 010, 011)
             if (val <= 2)
                 form = (int)val + 1;
             else if (val == calc_mask(tmpvn.getSize()))
@@ -177,7 +177,7 @@ namespace Sla.DECCORE
             Varnode* vn1, *vn2, *tmpvn;
             PcodeOp* zext1, *zext2;
             PcodeOp* addop, *lessop, *lessequalop;
-            uintb mask;
+            ulong mask;
             vn2 = op.getIn(1);
             if (vn2.isConstant())
             {       // Form 1 :  (z + z) - 1
@@ -258,7 +258,7 @@ namespace Sla.DECCORE
                 lessop = lessequalop;
                 lessequalop = tmpop;
             }
-            int4 form = testCompareEquivalence(lessop, lessequalop);
+            int form = testCompareEquivalence(lessop, lessequalop);
             if (form < 0)
                 return (PcodeOp*)0;
             if (form == 1)
@@ -281,7 +281,7 @@ namespace Sla.DECCORE
         /// \param lessop is the putative LESS PcodeOp
         /// \param lessequalop is the putative LESSEQUAL PcodeOp
         /// \return 0, 1, or -1
-        public static int4 testCompareEquivalence(PcodeOp lessop, PcodeOp lessequalop)
+        public static int testCompareEquivalence(PcodeOp lessop, PcodeOp lessequalop)
         {
             bool twoLessThan;
             if (lessop.code() == CPUI_INT_LESS)
@@ -315,7 +315,7 @@ namespace Sla.DECCORE
             Varnode* a2 = lessequalop.getIn(0);
             Varnode* b1 = lessop.getIn(1);
             Varnode* b2 = lessequalop.getIn(1);
-            int4 res = 0;
+            int res = 0;
             if (a1 != a2)
             {   // Make sure a1 and a2 are equivalent
                 if ((!a1.isConstant()) || (!a2.isConstant())) return -1;

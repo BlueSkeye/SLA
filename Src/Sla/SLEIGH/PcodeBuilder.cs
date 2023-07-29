@@ -11,14 +11,14 @@ namespace Sla.SLEIGH
     internal abstract class PcodeBuilder
     {
         // SLEIGH specific pcode generator
-        private uint4 labelbase;
-        private uint4 labelcount;
+        private uint labelbase;
+        private uint labelcount;
         
         protected ParserWalker walker;
         
         protected abstract void dump(OpTpl op);
 
-        public PcodeBuilder(uint4 lbcnt)
+        public PcodeBuilder(uint lbcnt)
         {
             labelbase = labelcount = lbcnt;
         }
@@ -27,16 +27,16 @@ namespace Sla.SLEIGH
         {
         }
 
-        public uint4 getLabelBase() => labelbase;
+        public uint getLabelBase() => labelbase;
 
         public ParserWalker getCurrentWalker() => walker;
 
-        public void build(ConstructTpl construct, int4 secnum)
+        public void build(ConstructTpl construct, int secnum)
         {
             if (construct == (ConstructTpl*)0)
                 throw UnimplError("", 0);   // Pcode is not implemented for this constructor
 
-            uint4 oldbase = labelbase;  // Recursively store old labelbase
+            uint oldbase = labelbase;  // Recursively store old labelbase
             labelbase = labelcount; // Set the newbase
             labelcount += construct.numLabels();   // Add labels from this template
 
@@ -69,12 +69,12 @@ namespace Sla.SLEIGH
             labelbase = oldbase;        // Restore old labelbase
         }
 
-        public abstract void appendBuild(OpTpl bld, int4 secnum);
+        public abstract void appendBuild(OpTpl bld, int secnum);
 
         public abstract void delaySlot(OpTpl op);
 
         public abstract void setLabel(OpTpl op);
 
-        public abstract void appendCrossBuild(OpTpl bld, int4 secnum);
+        public abstract void appendCrossBuild(OpTpl bld, int secnum);
     }
 }

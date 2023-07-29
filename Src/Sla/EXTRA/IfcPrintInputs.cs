@@ -32,7 +32,7 @@ namespace Sla.EXTRA
             List<Varnode*> vnlist;
             bool res = false;
             vnlist.push_back(vn);
-            uint4 proc = 0;
+            uint proc = 0;
             while (proc < vnlist.size())
             {
                 Varnode* tmpvn = vnlist[proc];
@@ -60,7 +60,7 @@ namespace Sla.EXTRA
                     }
                 }
             }
-            for (int4 i = 0; i < vnlist.size(); ++i)
+            for (int i = 0; i < vnlist.size(); ++i)
                 vnlist[i].clearMark();
             return res;
         }
@@ -71,12 +71,12 @@ namespace Sla.EXTRA
         /// a COPY, CAST, INDIRECT, or MULTIEQUAL
         /// \param vn is the given Varnode
         /// \return 0 if Varnode is restored, 1 otherwise
-        public static int4 checkRestore(Varnode vn)
+        public static int checkRestore(Varnode vn)
         {
             List<Varnode*> vnlist;
-            int4 res = 0;
+            int res = 0;
             vnlist.push_back(vn);
-            uint4 proc = 0;
+            uint proc = 0;
             while (proc < vnlist.size())
             {
                 Varnode* tmpvn = vnlist[proc];
@@ -118,7 +118,7 @@ namespace Sla.EXTRA
                     }
                     else if (op.code() == CPUI_MULTIEQUAL)
                     {
-                        for (int4 i = 0; i < op.numInput(); ++i)
+                        for (int i = 0; i < op.numInput(); ++i)
                         {
                             tmpvn = op.getIn(i);
                             if (!tmpvn.isMark())
@@ -135,7 +135,7 @@ namespace Sla.EXTRA
                     }
                 }
             }
-            for (int4 i = 0; i < vnlist.size(); ++i)
+            for (int i = 0; i < vnlist.size(); ++i)
                 vnlist[i].clearMark();
             return res;
         }
@@ -151,7 +151,7 @@ namespace Sla.EXTRA
 
             iter = fd.beginLoc(vn.getAddr());
             enditer = fd.endLoc(vn.getAddr());
-            int4 count = 0;
+            int count = 0;
             while (iter != enditer)
             {
                 Varnode* vn = *iter;
@@ -160,7 +160,7 @@ namespace Sla.EXTRA
                 if (!vn.isWritten()) continue;
                 PcodeOp* op = vn.getDef();
                 if (op.code() == CPUI_INDIRECT) continue; // Not a global return address force
-                int4 res = checkRestore(vn);
+                int res = checkRestore(vn);
                 if (res != 0) return false;
                 count += 1;
             }

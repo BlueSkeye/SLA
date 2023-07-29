@@ -26,12 +26,12 @@ namespace Sla.DECCORE
         /// \brief Simplify INT_LESSEQUAL && INT_NOTEQUAL:  `V <= W && V != W  =>  V < W`
         ///
         /// Handle INT_SLESSEQUAL variant.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_BOOL_AND);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {               // Convert [(s)lessequal AND notequal] to (s)less
             Varnode* compvn1,*compvn2,*vnout1,*vnout2;
             PcodeOp* op_less,*op_equal;

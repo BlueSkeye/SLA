@@ -29,12 +29,12 @@ namespace Sla.DECCORE
         /// branch directions as \b true or \b false, but this may conflict with the
         /// natural meaning of the boolean calculation feeding into a CBRANCH.
         /// This Rule introduces a BOOL_NEGATE op as necessary to get the meanings to align.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_CBRANCH);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             PcodeOp* newop;
             Varnode* vn,*outvn;

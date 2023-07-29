@@ -27,15 +27,15 @@ namespace Sla.DECCORE
         ///
         /// There is also the variation:
         ///  - `concat( sub(V,c), sub(V,d) )  => sub(V,d)`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_PIECE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            uintb pos1, pos2;
-            int4 size1, size2;
+            ulong pos1, pos2;
+            int size1, size2;
             Varnode* vn1,*vn2,*root;
             PcodeOp* sub1,*sub2;
             // op is something "put together"

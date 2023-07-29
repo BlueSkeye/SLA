@@ -12,9 +12,9 @@ namespace Sla.SLEIGH
         // friend class SymbolTable;
         private SymbolScope parent;
         private SymbolTree tree;
-        private uintm id;
+        private uint id;
         
-        public SymbolScope(SymbolScope p, uintm i)
+        public SymbolScope(SymbolScope p, uint i)
         {
             parent = p;
             id = i;
@@ -47,7 +47,7 @@ namespace Sla.SLEIGH
 
         public SymbolTree::const_iterator end() => tree.end();
 
-        public uintm getId() => id;
+        public uint getId() => id;
 
         public void removeSymbol(SleighSymbol a)
         {

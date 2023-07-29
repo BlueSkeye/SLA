@@ -17,7 +17,7 @@ namespace Sla.DECCORE
             behave = new OpBehaviorIntSless();
         }
 
-        public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
+        public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
             Datatype* reqtype = op.inputTypeLocal(slot);
             if (castStrategy.checkIntPromotionForCompare(op, slot))
@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
-            int4 inslot, int4 outslot)
+            int inslot, int outslot)
         {
             if ((inslot == -1) || (outslot == -1)) return (Datatype*)0; // Must propagate input <. input
             if (alttype.getMetatype() != TYPE_INT) return (Datatype*)0;    // Only propagate signed things

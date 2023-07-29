@@ -16,9 +16,9 @@ namespace Sla.DECCORE
             behave = new OpBehavior(CPUI_STORE, false, true); // Dummy behavior
         }
 
-        //  virtual Datatype *getInputLocal(PcodeOp *op,int4 slot) const;
+        //  virtual Datatype *getInputLocal(PcodeOp *op,int slot) const;
 
-        public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
+        public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
             if (slot == 0) return (Datatype*)0;
             Varnode pointerVn = op.getIn(1);
@@ -26,7 +26,7 @@ namespace Sla.DECCORE
             Datatype* pointedToType = pointerType;
             Datatype* valueType = op.getIn(2).getHighTypeReadFacing(op);
             AddrSpace* spc = op.getIn(0).getSpaceFromConst();
-            int4 destSize;
+            int destSize;
             if (pointerType.getMetatype() == TYPE_PTR)
             {
                 pointedToType = ((TypePointer*)pointerType).getPtrTo();
@@ -60,7 +60,7 @@ namespace Sla.DECCORE
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
-            int4 inslot, int4 outslot)
+            int inslot, int outslot)
         {
             if ((inslot == 0) || (outslot == 0)) return (Datatype*)0; // Don't propagate along this edge
             if (invn.isSpacebase()) return (Datatype*)0;

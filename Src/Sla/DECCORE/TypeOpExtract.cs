@@ -16,7 +16,7 @@ namespace Sla.DECCORE
             behave = new OpBehavior(CPUI_EXTRACT, false);   // Dummy behavior
         }
 
-        public override Datatype getInputLocal(PcodeOp op, int4 slot)
+        public override Datatype getInputLocal(PcodeOp op, int slot)
         {
             if (slot == 0)
                 return tlst.getBase(op.getIn(slot).getSize(), TYPE_UNKNOWN);

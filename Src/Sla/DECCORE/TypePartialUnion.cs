@@ -25,7 +25,7 @@ namespace Sla.DECCORE
         /// Union data-type containing \b this partial data-type
         protected TypeUnion container;
         /// Offset (in bytes) into the \e container union
-        protected int4 offset;
+        protected int offset;
 
         /// Construct from another TypePartialUnion
         public TypePartialUnion(TypePartialUnion op)
@@ -36,7 +36,7 @@ namespace Sla.DECCORE
             offset = op.offset;
         }
 
-        public TypePartialUnion(TypeUnion contain, int4 off, int4 sz, Datatype strip)
+        public TypePartialUnion(TypeUnion contain, int off, int sz, Datatype strip)
             : base(sz, TYPE_PARTIALUNION)
         {
             flags |= (needs_resolution | has_stripped);
@@ -54,14 +54,14 @@ namespace Sla.DECCORE
             s << "[off=" << dec << offset << ",sz=" << size << ']';
         }
 
-        public override TypeField findTruncation(int4 off, int4 sz, PcodeOp op, int4 slot, int4 newoff)
+        public override TypeField findTruncation(int off, int sz, PcodeOp op, int slot, int newoff)
         {
             return container.findTruncation(off + offset, sz, op, slot, newoff);
         }
 
-        public override int4 numDepend() => container.numDepend();
+        public override int numDepend() => container.numDepend();
 
-        public override Datatype getDepend(int4 index)
+        public override Datatype getDepend(int index)
         {
             // Treat dependents as coming from the underlying union
             Datatype* res = container.getDepend(index);
@@ -70,9 +70,9 @@ namespace Sla.DECCORE
             return res;
         }
 
-        public override int4 compare(Datatype op, int4 level)
+        public override int compare(Datatype op, int level)
         {
-            int4 res = Datatype::compare(op, level);
+            int res = Datatype::compare(op, level);
             if (res != 0) return res;
             // Both must be partial unions
             TypePartialUnion* tp = (TypePartialUnion*)&op;
@@ -86,7 +86,7 @@ namespace Sla.DECCORE
             return container.compare(*tp.container, level); // Compare the underlying union
         }
 
-        public override int4 compareDependency(Datatype op)
+        public override int compareDependency(Datatype op)
         {
             if (submeta != op.getSubMeta()) return (submeta < op.getSubMeta()) ? -1 : 1;
             TypePartialUnion* tp = (TypePartialUnion*)&op;  // Both must be partial unions
@@ -108,10 +108,10 @@ namespace Sla.DECCORE
 
         public override Datatype getStripped() => stripped;
 
-        public override Datatype resolveInFlow(PcodeOp op, int4 slot)
+        public override Datatype resolveInFlow(PcodeOp op, int slot)
         {
             Datatype* curType = container;
-            int4 curOff = offset;
+            int curOff = offset;
             while (curType != (Datatype*)0 && curType.getSize() > size)
             {
                 if (curType.getMetatype() == TYPE_UNION)
@@ -121,7 +121,7 @@ namespace Sla.DECCORE
                 }
                 else
                 {
-                    uintb newOff;
+                    ulong newOff;
                     curType = curType.getSubType(curOff, &newOff);
                     curOff = newOff;
                 }
@@ -131,10 +131,10 @@ namespace Sla.DECCORE
             return stripped;
         }
 
-        public override Datatype findResolve(PcodeOp op, int4 slot)
+        public override Datatype findResolve(PcodeOp op, int slot)
         {
             Datatype* curType = container;
-            int4 curOff = offset;
+            int curOff = offset;
             while (curType != (Datatype*)0 && curType.getSize() > size)
             {
                 if (curType.getMetatype() == TYPE_UNION)
@@ -144,7 +144,7 @@ namespace Sla.DECCORE
                 }
                 else
                 {
-                    uintb newOff;
+                    ulong newOff;
                     curType = curType.getSubType(curOff, &newOff);
                     curOff = newOff;
                 }
@@ -154,10 +154,10 @@ namespace Sla.DECCORE
             return stripped;
         }
 
-        public override int4 findCompatibleResolve(Datatype ct)
+        public override int findCompatibleResolve(Datatype ct)
             => container.findCompatibleResolve(ct);
 
-        public override TypeField resolveTruncation(int4 off, PcodeOp op, int4 slot, int4 newoff)
+        public override TypeField resolveTruncation(int off, PcodeOp op, int slot, int newoff)
             => container.resolveTruncation(off + offset, op, slot, newoff);
     }
 }

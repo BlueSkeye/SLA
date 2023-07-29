@@ -20,14 +20,14 @@ namespace Sla.CORE
         private string archtype;                ///< The architecture string
         private AddrSpaceManager manage;     ///< Manager of addresses
         private set<Address> readonlyset;           ///< Starting address of read-only chunks
-        private Dictionary<Address, List<uint1>> chunk;      ///< Chunks of image data, mapped by address
+        private Dictionary<Address, List<byte>> chunk;      ///< Chunks of image data, mapped by address
         private Dictionary<Address, string> addrtosymbol;      ///< Symbols sorted by address
         private /*mutable*/ Dictionary<Address, string>::const_iterator cursymbol; ///< Current symbol being reported
 
         /// Make sure every chunk is followed by at least 512 bytes of pad
         private void pad()
         {
-            map<Address, List<uint1>>::iterator iter, lastiter;
+            map<Address, List<byte>>::iterator iter, lastiter;
 
             // Search for completely redundant chunks
             if (chunk.empty()) return;
@@ -38,8 +38,8 @@ namespace Sla.CORE
             {
                 if ((*lastiter).first.getSpace() == (*iter).first.getSpace())
                 {
-                    uintb end1 = (*lastiter).first.getOffset() + (*lastiter).second.size() - 1;
-                    uintb end2 = (*iter).first.getOffset() + (*iter).second.size() - 1;
+                    ulong end1 = (*lastiter).first.getOffset() + (*lastiter).second.size() - 1;
+                    ulong end2 = (*iter).first.getOffset() + (*iter).second.size() - 1;
                     if (end1 >= end2)
                     {
                         chunk.erase(iter);
@@ -62,19 +62,19 @@ namespace Sla.CORE
                     continue; // All the way to end of space
                 }
                 ++iter;
-                int4 maxsize = 512;
-                uintb room = endaddr.getSpace().getHighest() - endaddr.getOffset() + 1;
-                if ((uintb)maxsize > room)
-                    maxsize = (int4)room;
+                int maxsize = 512;
+                ulong room = endaddr.getSpace().getHighest() - endaddr.getOffset() + 1;
+                if ((ulong)maxsize > room)
+                    maxsize = (int)room;
                 if ((iter != chunk.end()) && ((*iter).first.getSpace() == endaddr.getSpace()))
                 {
                     if (endaddr.getOffset() >= (*iter).first.getOffset()) continue;
                     room = (*iter).first.getOffset() - endaddr.getOffset();
-                    if ((uintb)maxsize > room)
-                        maxsize = (int4)room;
+                    if ((ulong)maxsize > room)
+                        maxsize = (int)room;
                 }
-                List<uint1> & vec(chunk[endaddr]);
-                for (int4 i = 0; i < maxsize; ++i)
+                List<byte> & vec(chunk[endaddr]);
+                for (int i = 0; i < maxsize; ++i)
                     vec.push_back(0);
             }
         }
@@ -97,14 +97,14 @@ namespace Sla.CORE
         public void open(AddrSpaceManager m)
         {
             manage = m;
-            uint4 sz;           // unused size
+            uint sz;           // unused size
 
             // Read parsed xml file
             XmlDecode decoder(m, rootel);
-            uint4 elemId = decoder.openElement(ELEM_BINARYIMAGE);
+            uint elemId = decoder.openElement(ELEM_BINARYIMAGE);
             for (; ; )
             {
-                uint4 subId = decoder.openElement();
+                uint subId = decoder.openElement();
                 if (subId == 0) break;
                 if (subId == ELEM_SYMBOL)
                 {
@@ -116,19 +116,19 @@ namespace Sla.CORE
                 else if (subId == ELEM_BYTECHUNK) {
                     AddrSpace @base = decoder.readSpace(ATTRIB_SPACE);
                     Address addr(@base, @base.decodeAttributes(decoder, sz));
-                    map<Address, List<uint1>>::iterator chnkiter;
-                    List<uint1> & vec(chunk[addr]);
+                    map<Address, List<byte>>::iterator chnkiter;
+                    List<byte> & vec(chunk[addr]);
                     vec.clear();
                     decoder.rewindAttributes();
                     for (; ; ) {
-                        uint4 attribId = decoder.getNextAttributeId();
+                        uint attribId = decoder.getNextAttributeId();
                         if (attribId == 0) break;
                         if (attribId == ATTRIB_READONLY)
                             if (decoder.readBool())
                                 readonlyset.insert(addr);
                     }
                     istringstream @is = new istringstream(decoder.readString(ATTRIB_CONTENT));
-                    int4 val;
+                    int val;
                     char c1, c2;
                     @is >> ws;
                     c1 = @is.get();
@@ -147,7 +147,7 @@ namespace Sla.CORE
                         else
                             c2 = c2 + 10 - 'a';
                         val = c1 * 16 + c2;
-                        vec.push_back((uint1)val);
+                        vec.push_back((byte)val);
                         @is >> ws;
                         c1 = @is.get();
                         c2 = @is.get();
@@ -178,10 +178,10 @@ namespace Sla.CORE
             encoder.openElement(ELEM_BINARYIMAGE);
             encoder.writeString(ATTRIB_ARCH, archtype);
 
-            map<Address, List<uint1>>::const_iterator iter1;
+            map<Address, List<byte>>::const_iterator iter1;
             for (iter1 = chunk.begin(); iter1 != chunk.end(); ++iter1)
             {
-                List<uint1> &vec((*iter1).second);
+                List<byte> &vec((*iter1).second);
                 if (vec.size() == 0) continue;
                 encoder.openElement(ELEM_BYTECHUNK);
                 (*iter1).first.getSpace().encodeAttributes(encoder, (*iter1).first.getOffset());
@@ -189,9 +189,9 @@ namespace Sla.CORE
                     encoder.writeBool(ATTRIB_READONLY, "true");
                 ostringstream s;
                 s << '\n' << setfill('0');
-                for (int4 i = 0; i < vec.size(); ++i)
+                for (int i = 0; i < vec.size(); ++i)
                 {
-                    s << hex << setw(2) << (int4)vec[i];
+                    s << hex << setw(2) << (int)vec[i];
                     if (i % 20 == 19)
                         s << '\n';
                 }
@@ -216,9 +216,9 @@ namespace Sla.CORE
             clear();
         }
 
-        public override void loadFill(byte[] ptr, int4 size, Address addr)
+        public override void loadFill(byte[] ptr, int size, Address addr)
         {
-            map<Address, List<uint1>>::const_iterator iter;
+            map<Address, List<byte>>::const_iterator iter;
             Address curaddr;
             bool emptyhit = false;
 
@@ -228,14 +228,14 @@ namespace Sla.CORE
                 --iter;         // Last one less or equal
             while ((size > 0) && (iter != chunk.end()))
             {
-                List<uint1> &chnk((*iter).second);
-                int4 chnksize = chnk.size();
-                int4 over = curaddr.overlap(0, (*iter).first, chnksize);
+                List<byte> &chnk((*iter).second);
+                int chnksize = chnk.size();
+                int over = curaddr.overlap(0, (*iter).first, chnksize);
                 if (over != -1)
                 {
                     if (chnksize - over > size)
                         chnksize = over + size;
-                    for (int4 i = over; i < chnksize; ++i)
+                    for (int i = over; i < chnksize; ++i)
                         *ptr++ = chnk[i];
                     size -= (chnksize - over);
                     curaddr = curaddr + (chnksize - over);
@@ -273,16 +273,16 @@ namespace Sla.CORE
 
         public override void getReadonly(RangeList list)
         {
-            map<Address, List<uint1>>::const_iterator iter;
+            map<Address, List<byte>>::const_iterator iter;
 
             // List all the readonly chunks
             for (iter = chunk.begin(); iter != chunk.end(); ++iter)
             {
                 if (readonlyset.find((*iter).first) != readonlyset.end())
                 {
-                    List<uint1> &chnk((*iter).second);
-                    uintb start = (*iter).first.getOffset();
-                    uintb stop = start + chnk.size() - 1;
+                    List<byte> &chnk((*iter).second);
+                    ulong start = (*iter).first.getOffset();
+                    ulong stop = start + chnk.size() - 1;
                     list.insertRange((*iter).first.getSpace(), start, stop);
                 }
             }
@@ -292,16 +292,16 @@ namespace Sla.CORE
 
         public override void adjustVma(long adjust)
         {
-            map<Address, List<uint1>>::iterator iter1;
+            map<Address, List<byte>>::iterator iter1;
             map<Address, string>::iterator iter2;
 
-            map<Address, List<uint1>> newchunk;
+            map<Address, List<byte>> newchunk;
             map<Address, string> newsymbol;
 
             for (iter1 = chunk.begin(); iter1 != chunk.end(); ++iter1)
             {
                 AddrSpace* spc = (*iter1).first.getSpace();
-                int4 off = AddrSpace::addressToByte(adjust, spc.getWordSize());
+                int off = AddrSpace::addressToByte(adjust, spc.getWordSize());
                 Address newaddr = (*iter1).first + off;
                 newchunk[newaddr] = (*iter1).second;
             }
@@ -309,7 +309,7 @@ namespace Sla.CORE
             for (iter2 = addrtosymbol.begin(); iter2 != addrtosymbol.end(); ++iter2)
             {
                 AddrSpace* spc = (*iter2).first.getSpace();
-                int4 off = AddrSpace::addressToByte(adjust, spc.getWordSize());
+                int off = AddrSpace::addressToByte(adjust, spc.getWordSize());
                 Address newaddr = (*iter2).first + off;
                 newsymbol[newaddr] = (*iter2).second;
             }

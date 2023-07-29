@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         /// The \e jumpassist p-code models
         private JumpAssistOp userop;
         /// Total number of indices in the table (not including the defaultaddress)
-        private int4 sizeIndices;
+        private int sizeIndices;
         /// The switch variable
         private Varnode switchvn;
         
@@ -46,10 +46,10 @@ namespace Sla.DECCORE
         
         public override bool isOverride() => false;
 
-        public override int4 getTableSize() => sizeIndices+1;
+        public override int getTableSize() => sizeIndices+1;
 
-        public override bool recoverModel(Funcdata fd, PcodeOp indop, uint4 matchsize,
-            uint4 maxtablesize)
+        public override bool recoverModel(Funcdata fd, PcodeOp indop, uint matchsize,
+            uint maxtablesize)
         {
             // Look for the special "jumpassist" pseudo-op
             Varnode* addrVn = indop.getIn(0);
@@ -58,12 +58,12 @@ namespace Sla.DECCORE
             if (assistOp == (PcodeOp*)0) return false;
             if (assistOp.code() != CPUI_CALLOTHER) return false;
             if (assistOp.numInput() < 3) return false;
-            int4 index = assistOp.getIn(0).getOffset();
+            int index = assistOp.getIn(0).getOffset();
             userop = dynamic_cast<JumpAssistOp*>(fd.getArch().userops.getOp(index));
             if (userop == (JumpAssistOp*)0) return false;
 
             switchvn = assistOp.getIn(1);      // The switch variable
-            for (int4 i = 2; i < assistOp.numInput(); ++i)
+            for (int i = 2; i < assistOp.numInput(); ++i)
                 if (!assistOp.getIn(i).isConstant())
                     return false;               // All remaining params must be constant
             if (userop.getCalcSize() == -1)        // If no size script, first param after switch var is size
@@ -71,11 +71,11 @@ namespace Sla.DECCORE
             else
             {
                 ExecutablePcode* pcodeScript = (ExecutablePcode*)fd.getArch().pcodeinjectlib.getPayload(userop.getCalcSize());
-                List<uintb> inputs;
-                int4 numInputs = assistOp.numInput() - 1;  // How many remaining varnodes after useropid
+                List<ulong> inputs;
+                int numInputs = assistOp.numInput() - 1;  // How many remaining varnodes after useropid
                 if (pcodeScript.sizeInput() != numInputs)
                     throw new LowlevelError(userop.getName() + ": <size_pcode> has wrong number of parameters");
-                for (int4 i = 0; i < numInputs; ++i)
+                for (int i = 0; i < numInputs; ++i)
                     inputs.push_back(assistOp.getIn(i + 1).getOffset());
                 sizeIndices = pcodeScript.evaluate(inputs);
             }
@@ -96,23 +96,23 @@ namespace Sla.DECCORE
             addresstable.clear();
 
             AddrSpace* spc = indop.getAddr().getSpace();
-            List<uintb> inputs;
-            int4 numInputs = assistOp.numInput() - 1;  // How many remaining varnodes after useropid
+            List<ulong> inputs;
+            int numInputs = assistOp.numInput() - 1;  // How many remaining varnodes after useropid
             if (pcodeScript.sizeInput() != numInputs)
                 throw new LowlevelError(userop.getName() + ": <addr_pcode> has wrong number of parameters");
-            for (int4 i = 0; i < numInputs; ++i)
+            for (int i = 0; i < numInputs; ++i)
                 inputs.push_back(assistOp.getIn(i + 1).getOffset());
 
-            uintb mask = ~((uintb)0);
-            int4 bit = fd.getArch().funcptr_align;
+            ulong mask = ~((ulong)0);
+            int bit = fd.getArch().funcptr_align;
             if (bit != 0)
             {
                 mask = (mask >> bit) << bit;
             }
-            for (int4 index = 0; index < sizeIndices; ++index)
+            for (int index = 0; index < sizeIndices; ++index)
             {
                 inputs[0] = index;
-                uintb output = pcodeScript.evaluate(inputs);
+                ulong output = pcodeScript.evaluate(inputs);
                 output &= mask;
                 addresstable.push_back(Address(spc, output));
             }
@@ -120,38 +120,38 @@ namespace Sla.DECCORE
             if (defaultScript.sizeInput() != numInputs)
                 throw new LowlevelError(userop.getName() + ": <default_pcode> has wrong number of parameters");
             inputs[0] = 0;
-            uintb defaultAddress = defaultScript.evaluate(inputs);
+            ulong defaultAddress = defaultScript.evaluate(inputs);
             addresstable.push_back(Address(spc, defaultAddress));       // Add default location to end of addresstable
         }
 
-        public override void findUnnormalized(uint4 maxaddsub, uint4 maxleftright, uint4 maxext)
+        public override void findUnnormalized(uint maxaddsub, uint maxleftright, uint maxext)
         {
         }
 
         public override void buildLabels(Funcdata fd, List<Address> addresstable,
-            List<uintb> label, JumpModel orig)
+            List<ulong> label, JumpModel orig)
         {
             if (((JumpAssisted*)orig).sizeIndices != sizeIndices)
     throw new LowlevelError("JumpAssisted table size changed during recovery");
             if (userop.getIndex2Case() == -1)
             {
-                for (int4 i = 0; i < sizeIndices; ++i)
+                for (int i = 0; i < sizeIndices; ++i)
                     label.push_back(i);     // The index is the label
             }
             else
             {
                 ExecutablePcode* pcodeScript = (ExecutablePcode*)fd.getArch().pcodeinjectlib.getPayload(userop.getIndex2Case());
-                List<uintb> inputs;
-                int4 numInputs = assistOp.numInput() - 1;  // How many remaining varnodes after useropid
+                List<ulong> inputs;
+                int numInputs = assistOp.numInput() - 1;  // How many remaining varnodes after useropid
                 if (numInputs != pcodeScript.sizeInput())
                     throw new LowlevelError(userop.getName() + ": <case_pcode> has wrong number of parameters");
-                for (int4 i = 0; i < numInputs; ++i)
+                for (int i = 0; i < numInputs; ++i)
                     inputs.push_back(assistOp.getIn(i + 1).getOffset());
 
-                for (int4 index = 0; index < sizeIndices; ++index)
+                for (int index = 0; index < sizeIndices; ++index)
                 {
                     inputs[0] = index;
-                    uintb output = pcodeScript.evaluate(inputs);
+                    ulong output = pcodeScript.evaluate(inputs);
                     label.push_back(output);
                 }
             }
@@ -175,7 +175,7 @@ namespace Sla.DECCORE
 
         public override bool foldInGuards(Funcdata fd, JumpTable jump)
         {
-            int4 origVal = jump.getDefaultBlock();
+            int origVal = jump.getDefaultBlock();
             jump.setLastAsMostCommon();            // Default case is always the last block
             return (origVal != jump.getDefaultBlock());
         }

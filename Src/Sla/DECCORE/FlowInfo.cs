@@ -146,7 +146,7 @@ namespace Sla.DECCORE
         /// Clear any discovered flow properties
         private void clearProperties()
         {
-            flags &= ~((uint4)(unimplemented_present | baddata_present | outofbounds_present));
+            flags &= ~((uint)(unimplemented_present | baddata_present | outofbounds_present));
             insn_count = 0;
         }
 
@@ -238,7 +238,7 @@ namespace Sla.DECCORE
         {
             PcodeOp* op = (PcodeOp*)0;
             isfallthru = false;
-            uintm maxtime = 0;  // Deepest internal relative branch
+            uint maxtime = 0;  // Deepest internal relative branch
             while (oiter != obank.endDead())
             {
                 op = *oiter++;
@@ -259,7 +259,7 @@ namespace Sla.DECCORE
                                 if (destop != (PcodeOp*)0)
                                 {
                                     data.opMarkStartBasic(destop);  // Make sure the target op is a basic block start
-                                    uintm newtime = destop.getTime();
+                                    uint newtime = destop.getTime();
                                     if (newtime > maxtime)
                                         maxtime = newtime;
                                 }
@@ -281,7 +281,7 @@ namespace Sla.DECCORE
                                 if (destop != (PcodeOp*)0)
                                 {
                                     data.opMarkStartBasic(destop);  // Make sure the target op is a basic block start
-                                    uintm newtime = destop.getTime();
+                                    uint newtime = destop.getTime();
                                     if (newtime > maxtime)
                                         maxtime = newtime;
                                 }
@@ -372,8 +372,8 @@ namespace Sla.DECCORE
             bool isfallthru = true;
             //  JumpTable *jt;
             list<PcodeOp*>::const_iterator oiter;
-            int4 step;
-            uint4 flowoverride;
+            int step;
+            uint flowoverride;
 
             if (insn_count >= insn_max)
             {
@@ -535,7 +535,7 @@ namespace Sla.DECCORE
         private PcodeOp findRelTarget(PcodeOp op, Address res)
         {
             Address addr = op.getIn(0).getAddr();
-            uintm id = op.getTime() + addr.getOffset();
+            uint id = op.getTime() + addr.getOffset();
             SeqNum seqnum(op.getAddr(), id);
             PcodeOp* retop = obank.findOp(seqnum);
             if (retop != (PcodeOp*)0)   // Is this a "properly" internal branch
@@ -636,7 +636,7 @@ namespace Sla.DECCORE
             PcodeOp* op,*targ_op;
             JumpTable* jt;
             bool nextstart;
-            int4 i, num;
+            int i, num;
 
             if (bblocks.getSize() != 0)
                 throw RecovError("Basic blocks already calculated\n");
@@ -844,7 +844,7 @@ namespace Sla.DECCORE
         /// \param addr is the target address for the new p-code op
         /// \param flag is the desired \e type
         /// \return the new p-code op
-        private PcodeOp artificialHalt(Address addr, uint4 flag)
+        private PcodeOp artificialHalt(Address addr, uint flag)
         {
             PcodeOp* haltop = data.newOp(1, addr);
             data.opSetOpcode(haltop, CPUI_RETURN);
@@ -1051,13 +1051,13 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp
         private void injectUserOp(PcodeOp op)
         {
-            InjectedUserOp* userop = (InjectedUserOp*)glb.userops.getOp((int4)op.getIn(0).getOffset());
+            InjectedUserOp* userop = (InjectedUserOp*)glb.userops.getOp((int)op.getIn(0).getOffset());
             InjectPayload* payload = glb.pcodeinjectlib.getPayload(userop.getInjectId());
             InjectContext & icontext(glb.pcodeinjectlib.getCachedContext());
             icontext.clear();
             icontext.baseaddr = op.getAddr();
             icontext.nextaddr = icontext.baseaddr;
-            for (int4 i = 1; i < op.numInput(); ++i)
+            for (int i = 1; i < op.numInput(); ++i)
             {       // Skip the first operand containing the injectid
                 Varnode* vn = op.getIn(i);
                 icontext.inputlist.emplace_back();
@@ -1177,8 +1177,8 @@ namespace Sla.DECCORE
         /// \brief Look for changes in control-flow near indirect jumps that were discovered \e after the jumptable recovery
         private void checkMultistageJumptables()
         {
-            int4 num = data.numJumpTables();
-            for (int4 i = 0; i < num; ++i)
+            int num = data.numJumpTables();
+            for (int i = 0; i < num; ++i)
             {
                 JumpTable* jt = data.getJumpTable(i);
                 if (jt.checkForMultistage(&data))
@@ -1205,10 +1205,10 @@ namespace Sla.DECCORE
             // Prepare partial Funcdata object for analysis if necessary
             Funcdata partial(nm, nm, data.getScopeLocal().getParent(), data.getAddress(), (FunctionSymbol*)0);
 
-            for (int4 i = 0; i < tablelist.size(); ++i)
+            for (int i = 0; i < tablelist.size(); ++i)
             {
                 op = tablelist[i];
-                int4 failuremode;
+                int failuremode;
                 JumpTable* jt = data.recoverJumpTable(partial, op, this, failuremode); // Recover it
                 if (jt == (JumpTable*)0)
                 { // Could not recover jumptable
@@ -1229,7 +1229,7 @@ namespace Sla.DECCORE
         /// \param fc is the given call site (which is freed by this method)
         private void deleteCallSpec(FuncCallSpecs fc)
         {
-            int4 i;
+            int i;
             for (i = 0; i < qlst.size(); ++i)
                 if (qlst[i] == fc) break;
 
@@ -1243,7 +1243,7 @@ namespace Sla.DECCORE
         /// Treat indirect jump as indirect call that never returns
         /// \param op is the BRANCHIND operation to convert
         /// \param failuremode is a code indicating the type of failure when trying to recover the jump table
-        private void truncateIndirectJump(PcodeOp op, int4 failuremode)
+        private void truncateIndirectJump(PcodeOp op, int failuremode)
         {
             data.opSetOpcode(op, CPUI_CALLIND); // Turn jump into call
             setupCallindSpecs(op, (FuncCallSpecs*)0);
@@ -1264,7 +1264,7 @@ namespace Sla.DECCORE
         /// \return \b true if the op is a member of the array
         private static bool isInArray(List<PcodeOp> array, PcodeOp op)
         {
-            for (int4 i = 0; i < array.size(); ++i)
+            for (int i = 0; i < array.size(); ++i)
             {
                 if (array[i] == op) return true;
             }
@@ -1284,7 +1284,7 @@ namespace Sla.DECCORE
             bblocks = b;
             qlst = q;
             baddr = new Address(d.getAddress().getSpace(), 0);
-            eaddr = new Address(d.getAddress().getSpace(), ~((uintb)0));
+            eaddr = new Address(d.getAddress().getSpace(), ~((ulong)0));
             minaddr = new Address(d.getAddress());
             maxaddr = new Address(d.getAddress());
             glb = data.getArch();
@@ -1293,7 +1293,7 @@ namespace Sla.DECCORE
             inline_head = (Funcdata*)0;
             inline_recursion = (set<Address>*)0;
             insn_count = 0;
-            insn_max = ~((uint4)0);
+            insn_max = ~((uint)0);
             flowoverride_present = data.getOverride().hasFlowOverride();
         }
 
@@ -1420,7 +1420,7 @@ namespace Sla.DECCORE
         public void generateOps()
         {
             List<PcodeOp*> notreached;    // indirect ops that are not reachable
-            int4 notreachcnt = 0;
+            int notreachcnt = 0;
             clearProperties();
             addrlist.push_back(data.getAddress());
             while (!addrlist.empty())   // Recovering as much as possible except jumptables
@@ -1435,13 +1435,13 @@ namespace Sla.DECCORE
                     List<JumpTable*> newTables;
                     recoverJumpTables(newTables, notreached);
                     tablelist.clear();
-                    for (int4 i = 0; i < newTables.size(); ++i)
+                    for (int i = 0; i < newTables.size(); ++i)
                     {
                         JumpTable* jt = newTables[i];
                         if (jt == (JumpTable*)0) continue;
 
-                        int4 num = jt.numEntries();
-                        for (int4 i = 0; i < num; ++i)
+                        int num = jt.numEntries();
+                        for (int i = 0; i < num; ++i)
                             newAddress(jt.getIndirectOp(), jt.getAddressByIndex(i));
                         if (jt.isPossibleMultistage())
                             collapsed_jumptable = true;
@@ -1570,7 +1570,7 @@ namespace Sla.DECCORE
                 inline_recursion.insert(data.getAddress()); // Insert ourselves
             }
 
-            for (int4 i = 0; i < injectlist.size(); ++i)
+            for (int i = 0; i < injectlist.size(); ++i)
             {
                 PcodeOp* op = injectlist[i];
                 if (op == (PcodeOp*)0) continue;

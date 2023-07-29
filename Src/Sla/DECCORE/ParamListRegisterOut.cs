@@ -30,14 +30,14 @@ namespace Sla.DECCORE
         {
         }
         
-        public override uint4 getType() => p_register_out;
+        public override uint getType() => p_register_out;
 
         public override void assignMap(List<Datatype> proto, TypeFactory typefactory,
             List<ParameterPieces> res);
 
         public override void fillinMap(ParamActive active);
 
-        public override bool possibleParam(Address loc, int4 size);
+        public override bool possibleParam(Address loc, int size);
 
         public override ParamList clone();
     }

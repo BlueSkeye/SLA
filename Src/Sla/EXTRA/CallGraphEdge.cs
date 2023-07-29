@@ -19,7 +19,7 @@ namespace Sla.EXTRA
         private CallGraphNode from;        // Node of the caller
         private CallGraphNode to;      // Node of the callee
         private Address callsiteaddr;       // Address where call was made from
-        private int4 complement;        // Index of complementary edge
+        private int complement;        // Index of complementary edge
         private /*mutable*/ Flags flags;
 
         public CallGraphEdge()
@@ -42,7 +42,7 @@ namespace Sla.EXTRA
 
         public static void decode(Decoder decoder, CallGraph graph)
         {
-            uint4 elemId = decoder.openElement(ELEM_EDGE);
+            uint elemId = decoder.openElement(ELEM_EDGE);
             Address fromaddr, toaddr, siteaddr;
 
             fromaddr = Address::decode(decoder);

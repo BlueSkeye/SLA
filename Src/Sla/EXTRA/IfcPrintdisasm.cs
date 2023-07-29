@@ -20,7 +20,7 @@ namespace Sla.EXTRA
         {
             Architecture* glb;
             Address addr;
-            int4 size;
+            int size;
             // TODO add partial listings
 
             s >> ws;
@@ -44,7 +44,7 @@ namespace Sla.EXTRA
             IfaceAssemblyEmit assem(status.fileoptr,10);
             while (size > 0)
             {
-                int4 sz;
+                int sz;
                 sz = glb.translate.printAssembly(assem, addr);
                 addr = addr + sz;
                 size -= sz;

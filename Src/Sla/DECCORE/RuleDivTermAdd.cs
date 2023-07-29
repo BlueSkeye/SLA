@@ -30,16 +30,16 @@ namespace Sla.DECCORE
         ///
         /// where n = d + b*8, and the left-shift signedness (if it exists)
         /// matches the extension signedness.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_SUBPIECE);
             oplist.push_back(CPUI_INT_RIGHT); // added
             oplist.push_back(CPUI_INT_SRIGHT); // added
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            int4 n;
+            int n;
             OpCode shiftopc;
             PcodeOp* subop = findSubshift(op, n, shiftopc);
             if (subop == (PcodeOp*)0) return 0;
@@ -50,8 +50,8 @@ namespace Sla.DECCORE
             if (!multvn.isWritten()) return 0;
             PcodeOp* multop = multvn.getDef();
             if (multop.code() != CPUI_INT_MULT) return 0;
-            uintb multConst;
-            int4 constExtType = multop.getIn(1).isConstantExtended(multConst);
+            ulong multConst;
+            int constExtType = multop.getIn(1).isConstantExtended(multConst);
             if (constExtType < 0) return 0;
 
             Varnode* extvn = multop.getIn(0);
@@ -67,10 +67,10 @@ namespace Sla.DECCORE
                 if (op.code() == CPUI_INT_RIGHT) return 0;
             }
 
-            uintb newc;
+            ulong newc;
             if (n < 64 || (extvn.getSize() <= 8))
             {
-                uintb pow = 1;
+                ulong pow = 1;
                 pow <<= n;          // Calculate 2^n
                 newc = multConst + pow;
             }
@@ -143,7 +143,7 @@ namespace Sla.DECCORE
         /// \param n is the reference that will hold the total truncation
         /// \param shiftopc will hold the shift OpCode if used, CPUI_MAX otherwise
         /// \return the SUBPIECE op if present or NULL otherwise
-        public static PcodeOp findSubshift(PcodeOp op, int4 n, OpCode shiftopc)
+        public static PcodeOp findSubshift(PcodeOp op, int n, OpCode shiftopc)
         { // SUB( .,#c) or SUB(.,#c)>>n  return baseop and n+c*8
           // make SUB is high
             PcodeOp* subop;
@@ -163,7 +163,7 @@ namespace Sla.DECCORE
                 subop = op;
                 n = 0;
             }
-            int4 c = subop.getIn(1).getOffset();
+            int c = subop.getIn(1).getOffset();
             if (subop.getOut().getSize() + c != subop.getIn(0).getSize())
                 return (PcodeOp*)0; // SUB is not high
             n += 8 * c;

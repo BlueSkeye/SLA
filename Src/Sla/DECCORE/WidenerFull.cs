@@ -14,9 +14,9 @@ namespace Sla.DECCORE
     internal class WidenerFull :  Widener
     {
         /// The iteration at which widening is attempted
-        private int4 widenIteration;
+        private int widenIteration;
         /// The iteration at which a full range is produced
-        private int4 fullIteration;
+        private int fullIteration;
 
         /// Constructor with default iterations
         public WidenerFull()
@@ -26,13 +26,13 @@ namespace Sla.DECCORE
         }
 
         /// Constructor specifying iterations
-        public WidenerFull(int4 wide, int4 full)
+        public WidenerFull(int wide, int full)
         {
             widenIteration = wide;
             fullIteration = full;
         }
 
-        public override int4 determineIterationReset(ValueSet valueSet)
+        public override int determineIterationReset(ValueSet valueSet)
         {
             if (valueSet.getCount() >= widenIteration)
                 return widenIteration;  // Reset to point just after any widening

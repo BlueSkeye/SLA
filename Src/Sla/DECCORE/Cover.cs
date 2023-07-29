@@ -33,8 +33,8 @@ namespace Sla.DECCORE
         /// \param bl is the starting block to add
         private void addRefRecurse(FlowBlock bl)
         {
-            int4 j;
-            uintm ustart, ustop;
+            int j;
+            uint ustart, ustop;
 
             CoverBlock & block(cover[bl.getIndex()]);
             if (block.empty())
@@ -50,11 +50,11 @@ namespace Sla.DECCORE
                 PcodeOp* op = block.getStop();
                 ustart = CoverBlock::getUIndex(block.getStart());
                 ustop = CoverBlock::getUIndex(op);
-                if ((ustop != ~((uintm)0)) && (ustop >= ustart))
+                if ((ustop != ~((uint)0)) && (ustop >= ustart))
                     block.setEnd((PcodeOp*)1); // Fill in to the bottom
 
 
-                if ((ustop == (uintm)0) && (block.getStart() == (PcodeOp*)0)) {
+                if ((ustop == (uint)0) && (block.getStart() == (PcodeOp*)0)) {
                     if ((op != (PcodeOp*)0)&& (op.code() == CPUI_MULTIEQUAL)) {
                         // This block contains only an infinitesimal tip
                         // of cover through one branch of a MULTIEQUAL
@@ -83,9 +83,9 @@ namespace Sla.DECCORE
         /// \return the comparison value
         public int compareTo(Cover op2)
         {
-            int4 a, b;
+            int a, b;
 
-            map<int4, CoverBlock>::const_iterator iter;
+            map<int, CoverBlock>::const_iterator iter;
             iter = cover.begin();
             if (iter == cover.end())
                 a = 1000000;
@@ -115,7 +115,7 @@ namespace Sla.DECCORE
         /// \return a reference to the corresponding CoverBlock
         public CoverBlock getCoverBlock(int i)
         {
-            map<int4, CoverBlock>::const_iterator iter = cover.find(i);
+            map<int, CoverBlock>::const_iterator iter = cover.find(i);
             if (iter == cover.end())
                 return emptyBlock;
             return (*iter).second;
@@ -131,8 +131,8 @@ namespace Sla.DECCORE
         /// \return the intersection characterization
         public int intersect(Cover op2)
         {
-            map<int4, CoverBlock>::const_iterator iter, iter2;
-            int4 res, newres;
+            map<int, CoverBlock>::const_iterator iter, iter2;
+            int res, newres;
 
             res = 0;
             iter = cover.begin();
@@ -171,12 +171,12 @@ namespace Sla.DECCORE
         /// \return the characterization
         public int intersectByBlock(int blk, Cover op2)
         {
-            map<int4, CoverBlock>::const_iterator iter;
+            map<int, CoverBlock>::const_iterator iter;
 
             iter = cover.find(blk);
             if (iter == cover.end()) return 0;
 
-            map<int4, CoverBlock>::const_iterator iter2;
+            map<int, CoverBlock>::const_iterator iter2;
 
             iter2 = op2.cover.find(blk);
             if (iter2 == op2.cover.end()) return 0;
@@ -194,8 +194,8 @@ namespace Sla.DECCORE
         /// \param level is the characterization threshold which must be exceeded
         public void intersectList(List<int> listout, Cover op2, int level)
         {
-            map<int4, CoverBlock>::const_iterator iter, iter2;
-            int4 val;
+            map<int, CoverBlock>::const_iterator iter, iter2;
+            int val;
 
             listout.clear();
 
@@ -229,7 +229,7 @@ namespace Sla.DECCORE
         /// \return true if there is containment
         public bool contain(PcodeOp op, int max)
         {
-            map<int4, CoverBlock>::const_iterator iter;
+            map<int, CoverBlock>::const_iterator iter;
 
             iter = cover.find(op.getParent().getIndex());
             if (iter == cover.end()) return false;
@@ -258,7 +258,7 @@ namespace Sla.DECCORE
         public int containVarnodeDef(Varnode vn)
         {
             PcodeOp? op = vn.getDef();
-            int4 blk;
+            int blk;
 
             if (op == null) {
                 op = (PcodeOp*)2;
@@ -266,11 +266,11 @@ namespace Sla.DECCORE
             }
             else
                 blk = op.getParent().getIndex();
-            map<int4, CoverBlock>::const_iterator iter = cover.find(blk);
+            map<int, CoverBlock>::const_iterator iter = cover.find(blk);
             if (iter == cover.end()) return 0;
             if ((*iter).second.contain(op))
             {
-                int4 boundtype = (*iter).second.boundary(op);
+                int boundtype = (*iter).second.boundary(op);
                 if (boundtype == 0) return 1;
                 if (boundtype == 2) return 2;
                 return 3;
@@ -282,7 +282,7 @@ namespace Sla.DECCORE
         /// \param op2 is the other Cover
         public void merge(Cover op2)
         {
-            map<int4, CoverBlock>::const_iterator iter;
+            map<int, CoverBlock>::const_iterator iter;
 
             for (iter = op2.cover.begin(); iter != op2.cover.end(); ++iter)
                 cover[(*iter).first].merge((*iter).second);
@@ -333,9 +333,9 @@ namespace Sla.DECCORE
         /// \param vn is the Varnode being read
         public void addRefPoint(PcodeOp @ref, Varnode vn)
         {
-            int4 j;
+            int j;
             FlowBlock* bl;
-            uintm ustop;
+            uint ustop;
 
             bl = @ref.getParent();
             CoverBlock & block(cover[bl.getIndex()]);
@@ -392,7 +392,7 @@ namespace Sla.DECCORE
         /// \param s is the output stream
         public void print(ostream s)
         {
-            map<int4, CoverBlock>::const_iterator iter;
+            map<int, CoverBlock>::const_iterator iter;
 
             for (iter = cover.begin(); iter != cover.end(); ++iter)
             {
@@ -408,6 +408,6 @@ namespace Sla.DECCORE
             return cover.GetEnumerator();
         }
 
-        // map<int4, CoverBlock>::const_iterator end(void) { return cover.end(); }		///< Get end of CoverBlocks
+        // map<int, CoverBlock>::const_iterator end(void) { return cover.end(); }		///< Get end of CoverBlocks
     }
 }

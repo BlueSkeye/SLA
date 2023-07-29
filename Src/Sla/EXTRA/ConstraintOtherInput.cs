@@ -13,11 +13,11 @@ namespace Sla.EXTRA
 {
     internal class ConstraintOtherInput : UnifyConstraint
     {
-        private int4 opindex;           // For a particular binary op
-        private int4 varindex_in;       // Given one of its input varnodes
-        private int4 varindex_out;      // Label the other input to op
+        private int opindex;           // For a particular binary op
+        private int varindex_in;       // Given one of its input varnodes
+        private int varindex_out;      // Label the other input to op
         
-        public ConstraintOtherInput(int4 oind, int4 v_in, int4 v_out)
+        public ConstraintOtherInput(int oind, int v_in, int v_out)
         {
             maxnum = opindex = oind; varindex_in = v_in; varindex_out = v_out;
             if (varindex_in > maxnum) maxnum = varindex_in; if (varindex_out > maxnum) maxnum = varindex_out;
@@ -26,7 +26,7 @@ namespace Sla.EXTRA
         public override UnifyConstraint clone()
             => (new ConstraintOtherInput(opindex, varindex_in, varindex_out)).copyid(this);
 
-        public override int4 getBaseIndex() => varindex_out;
+        public override int getBaseIndex() => varindex_out;
 
         public override bool step(UnifyState state)
         {

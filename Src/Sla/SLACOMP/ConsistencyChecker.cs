@@ -34,14 +34,14 @@ namespace Sla.SLACOMP
         /// only once, the particular p-code op writing it is recorded.
         private struct OptimizeRecord
         {
-            internal int4 writeop;       ///< Index of the (last) p-code op writing to register (or -1)
-            internal int4 readop;        ///< Index of the (last) p-code op reading the register (or -1)
-            internal int4 inslot;        ///< Input slot of p-code op reading the register (or -1)
-            internal int4 writecount;        ///< Number of times the register is written
-            internal int4 readcount;     ///< Number of times the register is read
-            internal int4 writesection;      ///< Section containing (last) p-code op writing to the register (or -2)
-            internal int4 readsection;       ///< Section containing (last) p-code op reading the register (or -2)
-            internal /*mutable*/ int4 opttype;  ///< 0 = register read by a COPY, 1 = register written by a COPY (-1 otherwise)
+            internal int writeop;       ///< Index of the (last) p-code op writing to register (or -1)
+            internal int readop;        ///< Index of the (last) p-code op reading the register (or -1)
+            internal int inslot;        ///< Input slot of p-code op reading the register (or -1)
+            internal int writecount;        ///< Number of times the register is written
+            internal int readcount;     ///< Number of times the register is read
+            internal int writesection;      ///< Section containing (last) p-code op writing to the register (or -2)
+            internal int readsection;       ///< Section containing (last) p-code op reading the register (or -2)
+            internal /*mutable*/ int opttype;  ///< 0 = register read by a COPY, 1 = register written by a COPY (-1 otherwise)
 
             /// \brief Construct a record, initializing counts
             internal OptimizeRecord()
@@ -51,16 +51,16 @@ namespace Sla.SLACOMP
         }
         
         private SleighCompile compiler;    ///< Parsed form of the SLEIGH file being examined
-        private int4 unnecessarypcode;  ///< Count of unnecessary extension/truncation operations
-        private int4 readnowrite;       ///< Count of temporary registers that are read but not written
-        private int4 writenoread;       ///< Count of temporary registers that are written but not read
-        private int4 largetemp;     ///< Count of temporary registers that are too large
+        private int unnecessarypcode;  ///< Count of unnecessary extension/truncation operations
+        private int readnowrite;       ///< Count of temporary registers that are read but not written
+        private int writenoread;       ///< Count of temporary registers that are written but not read
+        private int largetemp;     ///< Count of temporary registers that are too large
         private bool printextwarning;       ///< Set to \b true if warning emitted for each unnecessary truncation/extension
         private bool printdeadwarning;  ///< Set to \b true if warning emitted for each written but not read temporary
         private bool printlargetempwarning; ///< Set to \b true if warning emitted for each too large temporary
         private SubtableSymbol root_symbol;    ///< The root symbol table for the parsed SLEIGH file
         private List<SubtableSymbol> postorder;  ///< Subtables sorted into \e post order (dependent tables listed earlier)
-        private Dictionary<SubtableSymbol, int4> sizemap; ///< Sizes associated with table \e exports
+        private Dictionary<SubtableSymbol, int> sizemap; ///< Sizes associated with table \e exports
 
         /// \brief Get the OperandSymbol associated with an input/output Varnode of the given p-code operator
         ///
@@ -72,11 +72,11 @@ namespace Sla.SLACOMP
         /// \param op is the p-code operator using the Varnode
         /// \param ct is the Constructor containing the p-code and operands
         /// \return the associated operand or null
-        private OperandSymbol getOperandSymbol(int4 slot, OpTpl op, Constructor ct)
+        private OperandSymbol getOperandSymbol(int slot, OpTpl op, Constructor ct)
         {
             VarnodeTpl* vn;
             OperandSymbol* opsym;
-            int4 handindex;
+            int handindex;
 
             if (slot == -1)
                 vn = op.getOut();
@@ -319,7 +319,7 @@ namespace Sla.SLACOMP
         /// \param err1 is the slot of the first violating Varnode
         /// \param err2 is the slot of the second violating Varnode (or equal to \b err1)
         /// \param msg is additional description that is appended to the error message
-        private void printOpError(OpTpl op, Constructor ct, int4 err1, int4 err2, string message)
+        private void printOpError(OpTpl op, Constructor ct, int err1, int err2, string message)
         {
             SubtableSymbol* sym = ct.getParent();
             OperandSymbol* op1,*op2;
@@ -359,17 +359,17 @@ namespace Sla.SLACOMP
         /// \param sizeconst is the Varnode size template
         /// \param ct is the Constructor containing the Varnode
         /// \return the integer value
-        private int4 recoverSize(ConstTpl sizeconst,Constructor ct)
+        private int recoverSize(ConstTpl sizeconst,Constructor ct)
         {
-            int4 size, handindex;
+            int size, handindex;
             OperandSymbol* opsym;
             SubtableSymbol* tabsym;
-            map<SubtableSymbol*, int4>::const_iterator iter;
+            map<SubtableSymbol*, int>::const_iterator iter;
 
             switch (sizeconst.getType())
             {
                 case ConstTpl::real:
-                    size = (int4)sizeconst.getReal();
+                    size = (int)sizeconst.getReal();
                     break;
                 case ConstTpl::handle:
                     handindex = sizeconst.getHandleIndex();
@@ -430,7 +430,7 @@ namespace Sla.SLACOMP
         private bool sizeRestriction(OpTpl op, Constructor ct)
         { // Make sure op template meets size restrictions
           // Return false and any info about mismatched sizes
-            int4 vnout, vn0, vn1;
+            int vnout, vn0, vn1;
             AddrSpace* spc;
 
             switch (op.getOpcode())
@@ -769,7 +769,7 @@ namespace Sla.SLACOMP
             if ((out != (VarnodeTpl*)0x0) && isTemporaryAndTooBig(out)) {
                 return true;
             }
-            for (int4 i = 0; i < op.numInput(); ++i)
+            for (int i = 0; i < op.numInput(); ++i)
             {
                 VarnodeTpl *in = op.getIn(i);
                 if (isTemporaryAndTooBig(in))
@@ -805,7 +805,7 @@ namespace Sla.SLACOMP
         /// \param vn is the given truncated Varnode
         /// \param isbigendian is \b true if the Varnode is in a big endian address space
         /// \return \b true if the truncation expression was valid
-        private bool checkVarnodeTruncation(Constructor ct, int4 slot, OpTpl op, VarnodeTpl vn, bool isbigendian)
+        private bool checkVarnodeTruncation(Constructor ct, int slot, OpTpl op, VarnodeTpl vn, bool isbigendian)
         {
             ConstTpl off = vn.getOffset();
             if (off.getType() != ConstTpl::handle) return true;
@@ -816,7 +816,7 @@ namespace Sla.SLACOMP
                 printOpError(op, ct, slot, slot, "Bad truncation expression");
                 return false;
             }
-            int4 sz = recoverSize(off, ct); // Recover the size of the original operand
+            int sz = recoverSize(off, ct); // Recover the size of the original operand
             if (sz <= 0)
             {
                 printOpError(op, ct, slot, slot, "Could not recover size");
@@ -855,7 +855,7 @@ namespace Sla.SLACOMP
                     if (!checkVarnodeTruncation(ct, -1, op, outvn, isbigendian))
                         testresult = false;
                 }
-                for (int4 i = 0; i < op.numInput(); ++i)
+                for (int i = 0; i < op.numInput(); ++i)
                 {
                     if (!checkVarnodeTruncation(ct, i, op, op.getIn(i), isbigendian))
                         testresult = false;
@@ -873,20 +873,20 @@ namespace Sla.SLACOMP
         /// \return \b true if there are no fatal misuse or consistency violations
         private bool checkSubtable(SubtableSymbol sym)
         {
-            int4 tablesize = -1;
-            int4 numconstruct = sym.getNumConstructors();
+            int tablesize = -1;
+            int numconstruct = sym.getNumConstructors();
             Constructor* ct;
             bool testresult = true;
             bool seenemptyexport = false;
             bool seennonemptyexport = false;
 
-            for (int4 i = 0; i < numconstruct; ++i)
+            for (int i = 0; i < numconstruct; ++i)
             {
                 ct = sym.getConstructor(i);
                 if (!checkConstructorSection(ct, ct.getTempl()))
                     testresult = false;
-                int4 numsection = ct.getNumSections();
-                for (int4 j = 0; j < numsection; ++j)
+                int numsection = ct.getNumSections();
+                for (int j = 0; j < numsection; ++j)
                 {
                     if (!checkConstructorSection(ct, ct.getNamedTempl(j)))
                         testresult = false;
@@ -905,7 +905,7 @@ namespace Sla.SLACOMP
                         testresult = false;
                     }
                     seennonemptyexport = true;
-                    int4 exsize = recoverSize(exportres.getSize(), ct);
+                    int exsize = recoverSize(exportres.getSize(), ct);
                     if (tablesize == -1)
                         tablesize = exsize;
                     if (exsize != tablesize)
@@ -998,8 +998,8 @@ namespace Sla.SLACOMP
             sizemap.clear();
 
             List<SubtableSymbol*> path;
-            List<int4> state;
-            List<int4> ctstate;
+            List<int> state;
+            List<int> ctstate;
 
             sizemap[root] = -1;     // Mark root as traversed
             path.push_back(root);
@@ -1009,7 +1009,7 @@ namespace Sla.SLACOMP
             while (!path.empty())
             {
                 SubtableSymbol* cur = path.back();
-                int4 ctind = state.back();
+                int ctind = state.back();
                 if (ctind >= cur.getNumConstructors())
                 {
                     path.pop_back();        // Table is fully traversed
@@ -1020,7 +1020,7 @@ namespace Sla.SLACOMP
                 else
                 {
                     Constructor* ct = cur.getConstructor(ctind);
-                    int4 oper = ctstate.back();
+                    int oper = ctstate.back();
                     if (oper >= ct.getNumOperands())
                     {
                         state.back() = ctind + 1; // Constructor fully traversed
@@ -1033,7 +1033,7 @@ namespace Sla.SLACOMP
                         SubtableSymbol* subsym = dynamic_cast<SubtableSymbol*>(opsym.getDefiningSymbol());
                         if (subsym != (SubtableSymbol*)0)
                         {
-                            map<SubtableSymbol*, int4>::const_iterator iter;
+                            map<SubtableSymbol*, int>::const_iterator iter;
                             iter = sizemap.find(subsym);
                             if (iter == sizemap.end())
                             { // Not traversed yet
@@ -1059,14 +1059,14 @@ namespace Sla.SLACOMP
         /// \param i is the index of the operator using the Varnode (within its p-code section)
         /// \param inslot is the \e slot index of the Varnode within its operator
         /// \param secnum is the section number containing the operator
-        private static void examineVn(Dictionary<uintb, OptimizeRecord> recs, VarnodeTpl vn, uint4 i,int4 inslot, int4 secnum)
+        private static void examineVn(Dictionary<ulong, OptimizeRecord> recs, VarnodeTpl vn, uint i,int inslot, int secnum)
         {
             if (vn == (VarnodeTpl*)0) return;
             if (!vn.getSpace().isUniqueSpace()) return;
             if (vn.getOffset().getType() != ConstTpl::real) return;
 
-            map<uintb, OptimizeRecord>::iterator iter;
-            iter = recs.insert(pair<uint4, OptimizeRecord>(vn.getOffset().getReal(), OptimizeRecord())).first;
+            map<ulong, OptimizeRecord>::iterator iter;
+            iter = recs.insert(pair<uint, OptimizeRecord>(vn.getOffset().getReal(), OptimizeRecord())).first;
             if (inslot >= 0)
             {
                 (*iter).second.readop = i;
@@ -1111,10 +1111,10 @@ namespace Sla.SLACOMP
             if (vn1.getOffset().getType() != ConstTpl::real) return true;
             if (vn1.getSize().getType() != ConstTpl::real) return true;
 
-            uintb offset = vn1.getOffset().getReal();
-            uintb size = vn1.getSize().getReal();
+            ulong offset = vn1.getOffset().getReal();
+            ulong size = vn1.getSize().getReal();
 
-            uintb off = vn2.getOffset().getReal();
+            ulong off = vn2.getOffset().getReal();
             if (off + vn2.getSize().getReal() - 1 < offset) return false;
             if (off > (offset + size - 1)) return false;
             return true;
@@ -1155,8 +1155,8 @@ namespace Sla.SLACOMP
 
             if (checkread)
             {
-                int4 numinputs = op.numInput();
-                for (int4 i = 0; i < numinputs; ++i)
+                int numinputs = op.numInput();
+                for (int i = 0; i < numinputs; ++i)
                     if (possibleIntersection(vn, op.getIn(i)))
                         return true;
             }
@@ -1177,7 +1177,7 @@ namespace Sla.SLACOMP
         /// \param ct is the given Constructor
         /// \param recs is the (initially empty) collection of count records
         /// \param secnum is the given p-code section number
-        private void optimizeGather1(Constructor ct, Dictionary<uintb, OptimizeRecord> recs, int4 secnum)
+        private void optimizeGather1(Constructor ct, Dictionary<ulong, OptimizeRecord> recs, int secnum)
         {
             ConstructTpl* tpl;
             if (secnum < 0)
@@ -1187,10 +1187,10 @@ namespace Sla.SLACOMP
             if (tpl == (ConstructTpl*)0)
                 return;
             List<OpTpl> ops = tpl.getOpvec();
-            for (uint4 i = 0; i < ops.size(); ++i)
+            for (uint i = 0; i < ops.size(); ++i)
             {
                 OpTpl op = ops[i];
-                for (uint4 j = 0; j < op.numInput(); ++j)
+                for (uint j = 0; j < op.numInput(); ++j)
                 {
                     VarnodeTpl vnin = op.getIn(j);
                     examineVn(recs, vnin, i, j, secnum);
@@ -1208,7 +1208,7 @@ namespace Sla.SLACOMP
         /// \param ct is the given Constructor
         /// \param recs is the collection of count records
         /// \param secnum is the given p-code section number
-        private void optimizeGather2(Constructor ct, Dictionary<uintb, OptimizeRecord> recs, int4 secnum)
+        private void optimizeGather2(Constructor ct, Dictionary<ulong, OptimizeRecord> recs, int secnum)
         {
             ConstructTpl* tpl;
             if (secnum < 0)
@@ -1223,9 +1223,9 @@ namespace Sla.SLACOMP
             {
                 if (hand.getPtrOffset().getType() == ConstTpl::real)
                 {
-                    pair<map<uintb, OptimizeRecord>::iterator, bool> res;
-                    uintb offset = hand.getPtrOffset().getReal();
-                    res = recs.insert(pair<uintb, OptimizeRecord>(offset, OptimizeRecord()));
+                    pair<map<ulong, OptimizeRecord>::iterator, bool> res;
+                    ulong offset = hand.getPtrOffset().getReal();
+                    res = recs.insert(pair<ulong, OptimizeRecord>(offset, OptimizeRecord()));
                     (*res.first).second.writeop = 0;
                     (*res.first).second.readop = 0;
                     (*res.first).second.writecount = 2;
@@ -1239,9 +1239,9 @@ namespace Sla.SLACOMP
                 if ((hand.getPtrSpace().getType() == ConstTpl::real) &&
                 (hand.getPtrOffset().getType() == ConstTpl::real))
                 {
-                    pair<map<uintb, OptimizeRecord>::iterator, bool> res;
-                    uintb offset = hand.getPtrOffset().getReal();
-                    res = recs.insert(pair<uintb, OptimizeRecord>(offset, OptimizeRecord()));
+                    pair<map<ulong, OptimizeRecord>::iterator, bool> res;
+                    ulong offset = hand.getPtrOffset().getReal();
+                    res = recs.insert(pair<ulong, OptimizeRecord>(offset, OptimizeRecord()));
                     (*res.first).second.writeop = 0;
                     (*res.first).second.readop = 0;
                     (*res.first).second.writecount = 2;
@@ -1263,9 +1263,9 @@ namespace Sla.SLACOMP
         /// \param ct is the Constructor owning the p-code
         /// \param recs is the collection of OptimizeRecords to search
         /// \return a passing OptimizeRecord or null
-        private OptimizeRecord findValidRule(Constructor ct, Dictionary<uintb, OptimizeRecord> recs)
+        private OptimizeRecord findValidRule(Constructor ct, Dictionary<ulong, OptimizeRecord> recs)
         {
-            map<uintb, OptimizeRecord>::const_iterator iter;
+            map<ulong, OptimizeRecord>::const_iterator iter;
             iter = recs.begin();
             while (iter != recs.end())
             {
@@ -1288,7 +1288,7 @@ namespace Sla.SLACOMP
                         bool saverecord = true;
                         currec.opttype = 0; // Read op is a COPY
                         VarnodeTpl vn = op.getOut();
-                        for (int4 i = currec.writeop + 1; i < currec.readop; ++i)
+                        for (int i = currec.writeop + 1; i < currec.readop; ++i)
                         { // Check for interference between write and read
                             if (readWriteInterference(vn, ops[i], true))
                             {
@@ -1305,7 +1305,7 @@ namespace Sla.SLACOMP
                         bool saverecord = true;
                         currec.opttype = 1; // Write op is a COPY
                         VarnodeTpl vn = op.getIn(0);
-                        for (int4 i = currec.writeop + 1; i < currec.readop; ++i)
+                        for (int i = currec.writeop + 1; i < currec.readop; ++i)
                         { // Check for interference between write and read
                             if (readWriteInterference(vn, ops[i], false))
                             {
@@ -1333,7 +1333,7 @@ namespace Sla.SLACOMP
         /// \param rec is record describing the temporary and its read/write operators
         private void applyOptimization(Constructor ct, OptimizeRecord rec)
         {
-            List<int4> deleteops;
+            List<int> deleteops;
             ConstructTpl* ctempl;
             if (rec.readsection < 0)
                 ctempl = ct.getTempl();
@@ -1342,7 +1342,7 @@ namespace Sla.SLACOMP
 
             if (rec.opttype == 0)
             { // If read op is COPY
-                int4 readop = rec.readop;
+                int readop = rec.readop;
                 OpTpl* op = ctempl.getOpvec()[readop];
                 VarnodeTpl* vnout = new VarnodeTpl(*op.getOut()); // Make COPY output
                 ctempl.setOutput(vnout, rec.writeop); // become write output
@@ -1350,7 +1350,7 @@ namespace Sla.SLACOMP
             }
             else if (rec.opttype == 1)
             { // If write op is COPY
-                int4 writeop = rec.writeop;
+                int writeop = rec.writeop;
                 OpTpl* op = ctempl.getOpvec()[writeop];
                 VarnodeTpl* vnin = new VarnodeTpl(*op.getIn(0));   // Make COPY input
                 ctempl.setInput(vnin, rec.readop, rec.inslot); // become read input
@@ -1365,9 +1365,9 @@ namespace Sla.SLACOMP
         /// A warning may be issued if a temporary is written but not read.
         /// \param ct is the Constructor
         /// \param recs is the collection of records associated with each temporary Varnode
-        private void checkUnusedTemps(Constructor ct, Dictionary<uintb, OptimizeRecord> recs)
+        private void checkUnusedTemps(Constructor ct, Dictionary<ulong, OptimizeRecord> recs)
         {
-            map<uintb, OptimizeRecord>::const_iterator iter;
+            map<ulong, OptimizeRecord>::const_iterator iter;
             iter = recs.begin();
             while (iter != recs.end())
             {
@@ -1421,12 +1421,12 @@ namespace Sla.SLACOMP
         private void optimize(Constructor ct)
         {
             OptimizeRecord currec;
-            map<uintb, OptimizeRecord> recs;
-            int4 numsections = ct.getNumSections();
+            map<ulong, OptimizeRecord> recs;
+            int numsections = ct.getNumSections();
             do
             {
                 recs.clear();
-                for (int4 i = -1; i < numsections; ++i)
+                for (int i = -1; i < numsections; ++i)
                 {
                     optimizeGather1(ct, recs, i);
                     optimizeGather2(ct, recs, i);
@@ -1466,7 +1466,7 @@ namespace Sla.SLACOMP
             setPostOrder(root_symbol);
             bool testresult = true;
 
-            for (int4 i = 0; i < postorder.size(); ++i)
+            for (int i = 0; i < postorder.size(); ++i)
             {
                 SubtableSymbol* sym = postorder[i];
                 if (!checkSubtable(sym))
@@ -1483,17 +1483,17 @@ namespace Sla.SLACOMP
         {
             bool testresult = true;
             bool isbigendian = slgh.isBigEndian();
-            for (int4 i = 0; i < postorder.size(); ++i)
+            for (int i = 0; i < postorder.size(); ++i)
             {
                 SubtableSymbol* sym = postorder[i];
-                int4 numconstruct = sym.getNumConstructors();
+                int numconstruct = sym.getNumConstructors();
                 Constructor* ct;
-                for (int4 j = 0; j < numconstruct; ++j)
+                for (int j = 0; j < numconstruct; ++j)
                 {
                     ct = sym.getConstructor(j);
 
-                    int4 numsections = ct.getNumSections();
-                    for (int4 k = -1; k < numsections; ++k)
+                    int numsections = ct.getNumSections();
+                    for (int k = -1; k < numsections; ++k)
                     {
                         ConstructTpl* tpl;
                         if (k < 0)
@@ -1515,17 +1515,17 @@ namespace Sla.SLACOMP
         /// If requested, an individual warning is printed for each Constructor.
         public void testLargeTemporary()
         {
-            for (int4 i = 0; i < postorder.size(); ++i)
+            for (int i = 0; i < postorder.size(); ++i)
             {
                 SubtableSymbol* sym = postorder[i];
-                int4 numconstruct = sym.getNumConstructors();
+                int numconstruct = sym.getNumConstructors();
                 Constructor* ct;
-                for (int4 j = 0; j < numconstruct; ++j)
+                for (int j = 0; j < numconstruct; ++j)
                 {
                     ct = sym.getConstructor(j);
 
-                    int4 numsections = ct.getNumSections();
-                    for (int4 k = -1; k < numsections; ++k)
+                    int numsections = ct.getNumSections();
+                    for (int k = -1; k < numsections; ++k)
                     {
                         ConstructTpl* tpl;
                         if (k < 0)
@@ -1543,12 +1543,12 @@ namespace Sla.SLACOMP
         /// Do COPY propagation optimization on all p-code
         public void optimizeAll()
         {
-            for (int4 i = 0; i < postorder.size(); ++i)
+            for (int i = 0; i < postorder.size(); ++i)
             {
                 SubtableSymbol* sym = postorder[i];
-                int4 numconstruct = sym.getNumConstructors();
+                int numconstruct = sym.getNumConstructors();
                 Constructor* ct;
-                for (int4 i = 0; i < numconstruct; ++i)
+                for (int i = 0; i < numconstruct; ++i)
                 {
                     ct = sym.getConstructor(i);
                     optimize(ct);
@@ -1556,12 +1556,12 @@ namespace Sla.SLACOMP
             }
         }
 
-        public int4 getNumUnnecessaryPcode() => unnecessarypcode; ///< Return the number of unnecessary extensions and truncations
+        public int getNumUnnecessaryPcode() => unnecessarypcode; ///< Return the number of unnecessary extensions and truncations
 
-        public int4 getNumReadNoWrite() => readnowrite; ///< Return the number of temporaries read but not written
+        public int getNumReadNoWrite() => readnowrite; ///< Return the number of temporaries read but not written
 
-        public int4 getNumWriteNoRead() => writenoread; ///< Return the number of temporaries written but not read
+        public int getNumWriteNoRead() => writenoread; ///< Return the number of temporaries written but not read
 
-        public int4 getNumLargeTemporaries() => largetemp; ///< Return the number of \e too large temporaries
+        public int getNumLargeTemporaries() => largetemp; ///< Return the number of \e too large temporaries
     }
 }

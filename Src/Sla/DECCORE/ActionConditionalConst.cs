@@ -17,7 +17,7 @@ namespace Sla.DECCORE
         /// \param opList is the given list
         private static void clearMarks(List<PcodeOp> opList)
         {
-            for (int4 i = 0; i < opList.size(); ++i)
+            for (int i = 0; i < opList.size(); ++i)
                 opList[i].clearMark();
         }
 
@@ -32,7 +32,7 @@ namespace Sla.DECCORE
             List<PcodeOp> reachable)
         {
             sort(phiNodeEdges.begin(), phiNodeEdges.end());
-            int4 count = 0;
+            int count = 0;
             if (vn.isWritten())
             {
                 PcodeOp* op = vn.getDef();
@@ -87,7 +87,7 @@ namespace Sla.DECCORE
             Varnode* vn = op.getOut();
             markSet.push_back(vn);
             vn.setMark();
-            int4 count = 0;
+            int count = 0;
             bool foundPath = false;
             while (count < markSet.size())
             {
@@ -115,7 +115,7 @@ namespace Sla.DECCORE
                 }
                 if (foundPath) break;
             }
-            for (int4 i = 0; i < markSet.size(); ++i)
+            for (int i = 0; i < markSet.size(); ++i)
                 markSet[i].clearMark();
             return foundPath;
         }
@@ -134,7 +134,7 @@ namespace Sla.DECCORE
             List<PcodeOpNode> excise; // No edge excised
             collectReachable(edges[i].op.getOut(), excise, reachable);
             bool res = false;
-            for (int4 j = 0; j < edges.size(); ++j)
+            for (int j = 0; j < edges.size(); ++j)
             {
                 if (i == j) continue;
                 if (result[j] == 0) continue;   // Check for disconnected path
@@ -198,7 +198,7 @@ namespace Sla.DECCORE
         {
             List<FlowBlock*> blocks;
             PcodeOp* op = (PcodeOp*)0;
-            for (int4 i = 0; i < phiNodeEdges.size(); ++i)
+            for (int i = 0; i < phiNodeEdges.size(); ++i)
             {
                 if (marks[i] != 2) continue;    // Check that the MULTIQUAL is marked as flowing together
                 op = phiNodeEdges[i].op;
@@ -208,7 +208,7 @@ namespace Sla.DECCORE
             }
             BlockBasic* rootBlock = (BlockBasic*)FlowBlock::findCommonBlock(blocks);
             Varnode* outVn = placeCopy(op, rootBlock, constVn, data);
-            for (int4 i = 0; i < phiNodeEdges.size(); ++i)
+            for (int i = 0; i < phiNodeEdges.size(); ++i)
             {
                 if (marks[i] != 2) continue;
                 data.opSetInput(phiNodeEdges[i].op, outVn, phiNodeEdges[i].slot);
@@ -227,11 +227,11 @@ namespace Sla.DECCORE
         private void handlePhiNodes(Varnode varVn, Varnode constVn, List<PcodeOpNode> phiNodeEdges,
             Funcdata data)
         {
-            List<PcodeOp*> alternateFlow;
-            List<int4> results(phiNodeEdges.size(),0);
+            List<PcodeOp> alternateFlow = new List<PcodeOp>();
+            List<int> results = new List<int>(phiNodeEdges.size());
             collectReachable(varVn, phiNodeEdges, alternateFlow);
-            int4 alternate = 0;
-            for (int4 i = 0; i < phiNodeEdges.size(); ++i)
+            int alternate = 0;
+            for (int i = 0; i < phiNodeEdges.size(); ++i)
             {
                 if (!flowToAlternatePath(phiNodeEdges[i].op))
                 {
@@ -245,7 +245,7 @@ namespace Sla.DECCORE
             if (alternate > 1)
             {
                 // If we reach here, multiple MULTIEQUAL are disjoint from the non-constant flow
-                for (int4 i = 0; i < results.size(); ++i)
+                for (int i = 0; i < results.size(); ++i)
                 {
                     if (results[i] == 0) continue;      // Is this a disconnected path
                     if (flowTogether(phiNodeEdges, i, results)) // Check if the disconnected paths flow together
@@ -253,11 +253,11 @@ namespace Sla.DECCORE
                 }
             }
             // Add COPY assignment for each edge that has its own disconnected path going forward
-            for (int4 i = 0; i < phiNodeEdges.size(); ++i)
+            for (int i = 0; i < phiNodeEdges.size(); ++i)
             {
                 if (results[i] != 1) continue;      // Check for disconnected path that does not flow into another path
                 PcodeOp* op = phiNodeEdges[i].op;
-                int4 slot = phiNodeEdges[i].slot;
+                int slot = phiNodeEdges[i].slot;
                 BlockBasic* bl = (BlockBasic*)op.getParent().getIn(slot);
                 Varnode* outVn = placeCopy(op, bl, constVn, data);
                 data.opSetInput(op, outVn, slot);
@@ -301,7 +301,7 @@ namespace Sla.DECCORE
                     if (varVn.isAddrTied() && varVn.getAddr() == op.getOut().getAddr())
                         continue;
                     FlowBlock* bl = op.getParent();
-                    for (int4 slot = 0; slot < op.numInput(); ++slot)
+                    for (int slot = 0; slot < op.numInput(); ++slot)
                     {
                         if (op.getIn(slot) == varVn)
                         {
@@ -323,7 +323,7 @@ namespace Sla.DECCORE
                 }
                 if (constBlock.dominates(op.getParent()))
                 {
-                    int4 slot = op.getSlot(varVn);
+                    int slot = op.getSlot(varVn);
                     data.opSetInput(op, constVn, slot); // Replace ref with constant!
                     count += 1;         // We made a change
                 }
@@ -350,12 +350,12 @@ namespace Sla.DECCORE
             {
                 // Determining if conditional constants should apply to MULTIEQUAL operations may require
                 // flow calculations.
-                int4 numPasses = data.numHeritagePasses(stackSpace);
+                int numPasses = data.numHeritagePasses(stackSpace);
                 if (numPasses <= 0)     // If the stack hasn't been heritaged yet
                     useMultiequal = false;  // Don't propagate into MULTIEQUAL
             }
             BlockGraph blockGraph = data.getBasicBlocks();
-            for (int4 i = 0; i < blockGraph.getSize(); ++i)
+            for (int i = 0; i < blockGraph.getSize(); ++i)
             {
                 FlowBlock* bl = blockGraph.getBlock(i);
                 PcodeOp* cBranch = bl.lastOp();
@@ -373,7 +373,7 @@ namespace Sla.DECCORE
                     compOp = boolVn.getDef();
                     opc = compOp.code();
                 }
-                int4 constEdge;         // Out edge where value is constant
+                int constEdge;         // Out edge where value is constant
                 if (opc == CPUI_INT_EQUAL)
                     constEdge = 1;
                 else if (opc == CPUI_INT_NOTEQUAL)

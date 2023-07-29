@@ -45,7 +45,7 @@ namespace Sla.EXTRA
                 throw IfaceError("Could not create socket");
             sockaddr_un addr;
             addr.sun_family = AF_UNIX;
-            int4 len = filename.length();
+            int len = filename.length();
             if (len >= sizeof(addr.sun_path))
                 throw IfaceError("Socket name too long");
             memcpy(addr.sun_path, filename.c_str(), len);

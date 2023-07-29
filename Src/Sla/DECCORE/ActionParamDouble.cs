@@ -30,21 +30,21 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            for (int4 i = 0; i < data.numCalls(); ++i)
+            for (int i = 0; i < data.numCalls(); ++i)
             {
                 FuncCallSpecs* fc = data.getCallSpecs(i);
                 PcodeOp* op = fc.getOp();
                 if (fc.isInputActive())
                 {
                     ParamActive* active = fc.getActiveInput();
-                    for (int4 j = 0; j < active.getNumTrials(); ++j)
+                    for (int j = 0; j < active.getNumTrials(); ++j)
                     {
                         ParamTrial paramtrial = active.getTrial(j);
                         if (paramtrial.isChecked()) continue;
                         if (paramtrial.isUnref()) continue;
                         AddrSpace* spc = paramtrial.getAddress().getSpace();
                         if (spc.getType() != IPTR_SPACEBASE) continue;
-                        int4 slot = paramtrial.getSlot();
+                        int slot = paramtrial.getSlot();
                         Varnode* vn = op.getIn(slot);
                         if (!vn.isWritten()) continue;
                         PcodeOp* concatop = vn.getDef();
@@ -52,7 +52,7 @@ namespace Sla.DECCORE
                         if (!fc.hasModel()) continue;
                         Varnode* mostvn = concatop.getIn(0);
                         Varnode* leastvn = concatop.getIn(1);
-                        int4 splitsize = spc.isBigEndian() ? mostvn.getSize() : leastvn.getSize();
+                        int splitsize = spc.isBigEndian() ? mostvn.getSize() : leastvn.getSize();
                         if (fc.checkInputSplit(paramtrial.getAddress(), paramtrial.getSize(), splitsize))
                         {
                             active.splitTrial(j, splitsize);
@@ -75,9 +75,9 @@ namespace Sla.DECCORE
                 else if ((!fc.isInputLocked()) && (data.isDoublePrecisOn()))
                 {
                     // Search for double precision objects that might become params
-                    int4 max = op.numInput() - 1;
+                    int max = op.numInput() - 1;
                     // Look for adjacent slots that form pieces of a double precision whole
-                    for (int4 j = 1; j < max; ++j)
+                    for (int j = 1; j < max; ++j)
                     {
                         Varnode* vn1 = op.getIn(j);
                         Varnode* vn2 = op.getIn(j + 1);
@@ -114,9 +114,9 @@ namespace Sla.DECCORE
                 // Search for locked parameters that are being split into hi and lo components
                 List<Varnode*> lovec;
                 List<Varnode*> hivec;
-                int4 minDoubleSize = data.getArch().getDefaultSize();  // Minimum size to consider
-                int4 numparams = fp.numParams();
-                for (int4 i = 0; i < numparams; ++i)
+                int minDoubleSize = data.getArch().getDefaultSize();  // Minimum size to consider
+                int numparams = fp.numParams();
+                for (int i = 0; i < numparams; ++i)
                 {
                     ProtoParameter* param = fp.getParam(i);
                     Datatype* tp = param.getType();
@@ -125,7 +125,7 @@ namespace Sla.DECCORE
                     Varnode* vn = data.findVarnodeInput(tp.getSize(), param.getAddress());
                     if (vn == (Varnode*)0) continue;
                     if (vn.getSize() < minDoubleSize) continue;
-                    int4 halfSize = vn.getSize() / 2;
+                    int halfSize = vn.getSize() / 2;
                     lovec.clear();
                     hivec.clear();
                     bool otherUse = false;      // Have we seen use other than splitting into hi and lo
@@ -151,7 +151,7 @@ namespace Sla.DECCORE
                     }
                     if ((!otherUse) && (!lovec.empty()) && (!hivec.empty()))
                     {   // Seen (only) hi and lo uses
-                        for (int4 j = 0; j < lovec.size(); ++j)
+                        for (int j = 0; j < lovec.size(); ++j)
                         {
                             Varnode* piecevn = lovec[j];
                             if (!piecevn.isPrecisLo())
@@ -160,7 +160,7 @@ namespace Sla.DECCORE
                                 count += 1;     // Indicate we made change
                             }
                         }
-                        for (int4 j = 0; j < hivec.size(); ++j)
+                        for (int j = 0; j < hivec.size(); ++j)
                         {
                             Varnode* piecevn = hivec[j];
                             if (!piecevn.isPrecisHi())

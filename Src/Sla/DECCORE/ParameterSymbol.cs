@@ -29,7 +29,7 @@ namespace Sla.DECCORE
 
         public override Address getAddress() => sym.getFirstWholeMap().getAddr();
 
-        public override int4 getSize() => sym.getFirstWholeMap().getSize();
+        public override int getSize() => sym.getFirstWholeMap().getSize();
 
         public override bool isTypeLocked() => sym.isTypeLocked();
 
@@ -48,7 +48,7 @@ namespace Sla.DECCORE
         public override void setTypeLock(bool val)
         {
             Scope* scope = sym.getScope();
-            uint4 attrs = Varnode::typelock;
+            uint attrs = Varnode::typelock;
             if (!sym.isNameUndefined())
                 attrs |= Varnode::namelock;
             if (val)

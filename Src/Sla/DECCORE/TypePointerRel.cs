@@ -23,7 +23,7 @@ namespace Sla.DECCORE
         /// Parent structure or array which \b this is pointing into
         protected Datatype parent;
         /// Byte offset within the parent where \b this points to
-        protected int4 offset;
+        protected int offset;
 
         /// \brief Mark \b this as an ephemeral data-type, to be replaced in the final output
         ///
@@ -50,14 +50,14 @@ namespace Sla.DECCORE
         /// \param typegrp is the factory owning \b this data-type
         protected void decode(Decoder decoder, TypeFactory typegrp)
         {
-            //  uint4 elemId = decoder.openElement();
+            //  uint elemId = decoder.openElement();
             flags |= is_ptrrel;
             decodeBasic(decoder);
             metatype = TYPE_PTR;        // Don't use TYPE_PTRREL internally
             decoder.rewindAttributes();
             for (; ; )
             {
-                uint4 attrib = decoder.getNextAttributeId();
+                uint attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
                 if (attrib == ATTRIB_WORDSIZE)
                 {
@@ -70,7 +70,7 @@ namespace Sla.DECCORE
             }
             ptrto = typegrp.decodeType(decoder);
             parent = typegrp.decodeType(decoder);
-            uint4 subId = decoder.openElement(ELEM_OFF);
+            uint subId = decoder.openElement(ELEM_OFF);
             offset = decoder.readSignedInteger(ATTRIB_CONTENT);
             decoder.closeElement(subId);
             if (offset == 0)
@@ -102,7 +102,7 @@ namespace Sla.DECCORE
         }
         
         /// Construct given a size, pointed-to type, parent, and offset
-        public TypePointerRel(int4 sz, Datatype pt, uint4 ws, Datatype par, int4 off)
+        public TypePointerRel(int sz, Datatype pt, uint ws, Datatype par, int off)
             : base(sz, pt, ws)
         {
             parent = par; 
@@ -120,9 +120,9 @@ namespace Sla.DECCORE
         /// displayed either as coming from the variable itself or from the parent object.
         /// \param addrOff is the given offset in address units
         /// \return \b true if the variable should be displayed as coming from the parent
-        public bool evaluateThruParent(uintb addrOff)
+        public bool evaluateThruParent(ulong addrOff)
         {
-            uintb byteOff = AddrSpace::addressToByte(addrOff, wordsize);
+            ulong byteOff = AddrSpace::addressToByte(addrOff, wordsize);
             if (ptrto.getMetatype() == TYPE_STRUCT && byteOff < ptrto.getSize())
                 return false;
             byteOff = (byteOff + offset) & calc_mask(size);
@@ -132,7 +132,7 @@ namespace Sla.DECCORE
         /// \brief Get offset of \b this pointer relative to start of the containing data-type
         ///
         /// \return the offset value in \e address \e units
-        public int4 getPointerOffset() => AddrSpace::byteToAddressInt(offset, wordsize);
+        public int getPointerOffset() => AddrSpace::byteToAddressInt(offset, wordsize);
 
         public override void printRaw(TextWriter s)
         {
@@ -144,9 +144,9 @@ namespace Sla.DECCORE
             s << ']';
         }
 
-        public override int4 compare(Datatype op, int4 level)
+        public override int compare(Datatype op, int level)
         {
-            int4 res = TypePointer::compare(op, level); // Compare as plain pointers first
+            int res = TypePointer::compare(op, level); // Compare as plain pointers first
             if (res != 0) return res;
             // Both must be relative pointers
             TypePointerRel* tp = (TypePointerRel*)&op;
@@ -165,7 +165,7 @@ namespace Sla.DECCORE
             return 0;
         }
 
-        public override int4 compareDependency(Datatype op)
+        public override int compareDependency(Datatype op)
         {
             if (submeta != op.getSubMeta()) return (submeta < op.getSubMeta()) ? -1 : 1;
             TypePointerRel tp = (TypePointerRel*)&op;  // Both must be TypePointerRel
@@ -193,7 +193,7 @@ namespace Sla.DECCORE
             encoder.closeElement(ELEM_TYPE);
         }
 
-        public override TypePointer downChain(uintb off, TypePointer par, uintb parOff, bool allowArrayWrap,
+        public override TypePointer downChain(ulong off, TypePointer par, ulong parOff, bool allowArrayWrap,
             TypeFactory typegrp)
         {
             type_metatype ptrtoMeta = ptrto.getMetatype();
@@ -201,7 +201,7 @@ namespace Sla.DECCORE
             {
                 return TypePointer::downChain(off, par, parOff, allowArrayWrap, typegrp);
             }
-            uintb relOff = (off + offset) & calc_mask(size);        // Convert off to be relative to the parent container
+            ulong relOff = (off + offset) & calc_mask(size);        // Convert off to be relative to the parent container
             if (relOff >= parent.getSize())
                 return (TypePointer*)0;         // Don't let pointer shift beyond original container
 
@@ -212,11 +212,11 @@ namespace Sla.DECCORE
             return origPointer.downChain(off, par, parOff, allowArrayWrap, typegrp);
         }
 
-        public override bool isPtrsubMatching(uintb off)
+        public override bool isPtrsubMatching(ulong off)
         {
             if (stripped != (TypePointer*)0)
                 return TypePointer::isPtrsubMatching(off);
-            int4 iOff = AddrSpace::addressToByteInt((int4)off, wordsize);
+            int iOff = AddrSpace::addressToByteInt((int)off, wordsize);
             iOff += offset;
             return (iOff >= 0 && iOff <= parent.getSize());
         }
@@ -232,11 +232,11 @@ namespace Sla.DECCORE
         /// \param off is the offset relative to the start of the container
         /// \param typegrp is the factory owning the data-types
         /// \return the "pointed to" data-type
-        public static Datatype getPtrToFromParent(Datatype @base, int4 off, TypeFactory typegrp)
+        public static Datatype getPtrToFromParent(Datatype @base, int off, TypeFactory typegrp)
         {
             if (off > 0)
             {
-                uintb curoff = off;
+                ulong curoff = off;
                 do
                 {
                     @base = @base.getSubType(curoff, &curoff);

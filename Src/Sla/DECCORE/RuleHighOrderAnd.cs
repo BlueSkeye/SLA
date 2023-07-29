@@ -27,12 +27,12 @@ namespace Sla.DECCORE
         ///
         /// If V and W are aligned to a mask, then
         /// `((V + c) + W) & 0xfff0   =>   (V + (c & 0xfff0)) + W`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_AND);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* xalign;
             Varnode* cvn1 = op.getIn(1);
@@ -41,8 +41,8 @@ namespace Sla.DECCORE
             PcodeOp* addop = op.getIn(0).getDef();
             if (addop.code() != CPUI_INT_ADD) return 0;
 
-            uintb val = cvn1.getOffset();
-            int4 size = cvn1.getSize();
+            ulong val = cvn1.getOffset();
+            int size = cvn1.getSize();
             // Check that cvn1 is of the form    11110000
             if (((val - 1) | val) != calc_mask(size)) return 0;
 
@@ -51,7 +51,7 @@ namespace Sla.DECCORE
             {
                 xalign = addop.getIn(0);
                 if (xalign.isFree()) return 0;
-                uintb mask1 = xalign.getNZMask();
+                ulong mask1 = xalign.getNZMask();
                 // addop.Input(0) must be unaffected by the AND
                 if ((mask1 & val) != mask1) return 0;
 
@@ -64,10 +64,10 @@ namespace Sla.DECCORE
             else
             {
                 if (addop.getOut().loneDescend() != op) return 0;
-                for (int4 i = 0; i < 2; ++i)
+                for (int i = 0; i < 2; ++i)
                 {
                     Varnode* zerovn = addop.getIn(i);
-                    uintb mask2 = zerovn.getNZMask();
+                    ulong mask2 = zerovn.getNZMask();
                     if ((mask2 & val) != mask2) continue; // zerovn must be unaffected by the AND operation
                     Varnode* nonzerovn = addop.getIn(1 - i);
                     if (!nonzerovn.isWritten()) continue;

@@ -27,12 +27,12 @@ namespace Sla.DECCORE
         ///
         /// This supports the more general form:
         ///  - `(V & W) | (V & X)  =>  V & (W|X)`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_OR);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn1,*vn2;
             Varnode* a, *b, *c, *d;
@@ -74,7 +74,7 @@ namespace Sla.DECCORE
             // We know a is not free, because there are at least two references to it
             if (b.isConstant() && c.isConstant())
             {
-                uintb totalbits = b.getOffset() | c.getOffset();
+                ulong totalbits = b.getOffset() | c.getOffset();
                 if (totalbits == calc_mask(a.getSize()))
                 {
                     // Between the two sides, we get all bits of a. Convert to COPY
@@ -95,7 +95,7 @@ namespace Sla.DECCORE
             {
                 if (!b.isHeritageKnown()) return 0;
                 if (!c.isHeritageKnown()) return 0;
-                uintb aMask = a.getNZMask();
+                ulong aMask = a.getNZMask();
                 if ((b.getNZMask() & aMask) == 0) return 0; // RuleAndDistribute would reverse us
                 if ((c.getNZMask() & aMask) == 0) return 0; // RuleAndDistribute would reverse us
                 PcodeOp* newOrOp = data.newOp(2, op.getAddr());

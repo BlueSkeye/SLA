@@ -11,9 +11,9 @@ namespace Sla.EXTRA
 {
     internal class DummyConstConstraint : UnifyConstraint
     {
-        private int4 constindex;
+        private int constindex;
         
-        public DummyConstConstraint(int4 ind)
+        public DummyConstConstraint(int ind)
         {
             maxnum = constindex = ind;
         }
@@ -27,7 +27,7 @@ namespace Sla.EXTRA
             typelist[constindex] = UnifyDatatype(UnifyDatatype::const_type);
         }
 
-        public override int4 getBaseIndex() => constindex;
+        public override int getBaseIndex() => constindex;
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {

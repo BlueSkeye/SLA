@@ -26,29 +26,29 @@ namespace Sla.DECCORE
 
         /// \class RuleMultiCollapse
         /// \brief Collapse MULTIEQUAL whose inputs all trace to the same value
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_MULTIEQUAL);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             List<Varnode*> skiplist, matchlist;
             Varnode* defcopyr,*copyr;
             bool func_eq, nofunc;
             PcodeOp* newop;
-            int4 j;
+            int j;
 
-            for (int4 i = 0; i < op.numInput(); ++i)   // Everything must be heritaged before collapse
+            for (int i = 0; i < op.numInput(); ++i)   // Everything must be heritaged before collapse
                 if (!op.getIn(i).isHeritageKnown()) return 0;
 
             func_eq = false;        // Start assuming absolute equality of branches
             nofunc = false;     // Functional equalities are initially allowed
             defcopyr = (Varnode*)0;
             j = 0;
-            for (int4 i = 0; i < op.numInput(); ++i)
+            for (int i = 0; i < op.numInput(); ++i)
                 matchlist.push_back(op.getIn(i));
-            for (int4 i = 0; i < op.numInput(); ++i)
+            for (int i = 0; i < op.numInput(); ++i)
             { // Find base branch to match
                 copyr = matchlist[i];
                 if ((!copyr.isWritten()) || (copyr.getDef().code() != CPUI_MULTIEQUAL))
@@ -94,7 +94,7 @@ namespace Sla.DECCORE
                     newop = copyr.getDef();
                     skiplist.push_back(copyr); // We give the branch one last chance and
                     copyr.setMark();
-                    for (int4 i = 0; i < newop.numInput(); ++i) // add its inputs to list of things to match
+                    for (int i = 0; i < newop.numInput(); ++i) // add its inputs to list of things to match
                         matchlist.push_back(newop.getIn(i));
                 }
                 else
@@ -115,7 +115,7 @@ namespace Sla.DECCORE
                         PcodeOp* earliest = earliestUseInBlock(op.getOut(), op.getParent());
                         newop = defcopyr.getDef(); // We must copy newop (defcopyr)
                         PcodeOp* substitute = (PcodeOp*)0;
-                        for (int4 i = 0; i < newop.numInput(); ++i)
+                        for (int i = 0; i < newop.numInput(); ++i)
                         {
                             Varnode* invn = newop.getIn(i);
                             if (!invn.isConstant())
@@ -133,7 +133,7 @@ namespace Sla.DECCORE
                         {           // Otherwise, create a copy
                             bool needsreinsert = (op.code() == CPUI_MULTIEQUAL);
                             List<Varnode*> parms;
-                            for (int4 i = 0; i < newop.numInput(); ++i)
+                            for (int i = 0; i < newop.numInput(); ++i)
                                 parms.push_back(newop.getIn(i)); // Copy parameters
                             data.opSetAllInput(op, parms);
                             data.opSetOpcode(op, newop.code()); // Copy opcode

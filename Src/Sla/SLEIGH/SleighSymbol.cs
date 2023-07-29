@@ -22,8 +22,8 @@ namespace Sla.SLEIGH
         }
 
         private string name;
-        private uintm id;           // Unique id across all symbols
-        private uintm scopeid;      // Unique id of scope this symbol is in
+        private uint id;           // Unique id across all symbols
+        private uint scopeid;      // Unique id of scope this symbol is in
         
         public SleighSymbol()
         {
@@ -41,7 +41,7 @@ namespace Sla.SLEIGH
 
         public string getName() => name;
 
-        public uintm getId() => id;
+        public uint getId() => id;
 
         public virtual symbol_type getType() => dummy_symbol;
 

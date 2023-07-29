@@ -38,15 +38,15 @@ namespace Sla.DECCORE
     internal class CircleRange
     {
         /// Left boundary of the open range [left,right)
-        private uintb left;
+        private ulong left;
         /// Right boundary of the open range [left,right)
-        private uintb right;
+        private ulong right;
         /// Bit mask defining the size (modulus) and stop of the range
-        private uintb mask;
+        private ulong mask;
         /// \b true if set is empty
         private bool isempty;
         /// Explicit step size
-        private int4 step;
+        private int step;
         /// Map from raw overlaps to normalized overlap code
         private static const string arrange =
             "gcgbegdagggggggeggggcgbggggggggcdfgggggggegdggggbgggfggggcgbegda";
@@ -82,7 +82,7 @@ namespace Sla.DECCORE
                 isempty = true;
                 return;
             }
-            uintb tmp = left;
+            ulong tmp = left;
             left = right;
             right = tmp;
         }
@@ -137,18 +137,18 @@ namespace Sla.DECCORE
         /// \param myleft is a reference to the left boundary of the specified range
         /// \param myright is a reference to the right boundary of the specified range
         /// \return \b true if result is empty
-        private static bool newStride(uintb mask, int4 step, int4 oldStep, uint4 rem, uintb myleft,
-            uintb myright)
+        private static bool newStride(ulong mask, int step, int oldStep, uint rem, ulong myleft,
+            ulong myright)
         {
             if (oldStep != 1)
             {
-                uint4 oldRem = (uint4)(myleft % oldStep);
+                uint oldRem = (uint)(myleft % oldStep);
                 if (oldRem != (rem % oldStep))
                     return true;            // Step is completely off
             }
             bool origOrder = (myleft < myright);
-            uint4 leftRem = (uint4)(myleft % step);
-            uint4 rightRem = (uint4)(myright % step);
+            uint leftRem = (uint)(myleft % step);
+            uint rightRem = (uint)(myright % step);
             if (leftRem > rem)
                 myleft += rem + step - leftRem;
             else
@@ -178,9 +178,9 @@ namespace Sla.DECCORE
         /// \param myleft is a reference to the left edge of the range to fit
         /// \param myright is a reference to the right edge of the range to fit
         /// \return \b true if the truncated domain is empty
-        private static bool newDomain(uintb newMask, int4 newStep, uintb myleft, uintb myright)
+        private static bool newDomain(ulong newMask, int newStep, ulong myleft, ulong myright)
         {
-            uintb rem;
+            ulong rem;
             if (newStep != 1)
                 rem = myleft % newStep;
             else
@@ -228,9 +228,9 @@ namespace Sla.DECCORE
         /// \param op2left is the left boundary of the second range
         /// \param op2right is the right boundary of the second range
         /// \return the character code of the normalized overlap category
-        private static char encodeRangeOverlaps(uintb op1left, uintb op1right, uintb op2left, uintb op2right)
+        private static char encodeRangeOverlaps(ulong op1left, ulong op1right, ulong op2left, ulong op2right)
         {
-            int4 val = (op1left <= op1right) ? 0x20 : 0;
+            int val = (op1left <= op1right) ? 0x20 : 0;
             val |= (op1left <= op2left) ? 0x10 : 0;
             val |= (op1left <= op2right) ? 0x8 : 0;
             val |= (op1right <= op2left) ? 4 : 0;
@@ -255,7 +255,7 @@ namespace Sla.DECCORE
         /// \param rgt is the right boundary of the range
         /// \param size is the domain size in bytes (1,2,4,8,..)
         /// \param stp is the desired step (1,2,4,8,..)
-        public CircleRange(uintb lft, uintb rgt, int4 size, int4 stp)
+        public CircleRange(ulong lft, ulong rgt, int size, int stp)
         {
             mask = calc_mask(size);
             step = stp;
@@ -281,7 +281,7 @@ namespace Sla.DECCORE
         /// The stride is assumed to be 1.
         /// \param val is is the single value
         /// \param size is the size of the mask in bytes
-        public CircleRange(uintb val, int4 size)
+        public CircleRange(ulong val, int size)
         {
             mask = calc_mask(size);
             step = 1;
@@ -295,7 +295,7 @@ namespace Sla.DECCORE
         /// \param rgt is the right boundary of the range
         /// \param size is the size of the range domain in bytes
         /// \param stp is the step/stride of the range
-        public void setRange(uintb lft, uintb rgt, int4 size, int4 step)
+        public void setRange(ulong lft, ulong rgt, int size, int step)
         {
             mask = calc_mask(size);
             left = lft;
@@ -309,7 +309,7 @@ namespace Sla.DECCORE
         /// The stride is assumed to be 1.
         /// \param val is is the single value
         /// \param size is the size of the mask in bytes
-        public void setRange(uintb val, int4 size)
+        public void setRange(ulong val, int size)
         {
             mask = calc_mask(size);
             step = 1;
@@ -321,7 +321,7 @@ namespace Sla.DECCORE
         /// Set a completely full range
         /// Make a range of values that holds everything.
         /// \param size is the size (in bytes) of the range
-        public void setFull(int4 size)
+        public void setFull(int size)
         {
             mask = calc_mask(size);
             step = 1;
@@ -340,30 +340,30 @@ namespace Sla.DECCORE
         public bool isSingle() => (!isempty) && (right == ((left + step) & mask));
 
         /// Get the left boundary of the range
-        public uintb getMin() => left;
+        public ulong getMin() => left;
 
         /// Get the right-most integer contained in the range
-        public uintb getMax() => (right-step)&mask;
+        public ulong getMax() => (right-step)&mask;
 
         /// Get the right boundary of the range
-        public uintb getEnd() => right;
+        public ulong getEnd() => right;
 
         /// Get the mask
-        public uintb getMask() => mask;
+        public ulong getMask() => mask;
 
         /// Get the size of this range
         /// \return the number of integers contained in this range
-        public uintb getSize()
+        public ulong getSize()
         {
             if (isempty) return 0;
-            uintb val;
+            ulong val;
             if (left < right)
                 val = (right - left) / step;
             else
             {
                 val = (mask - (left - right) + step) / step;
                 if (val == 0)
-                {       // This is an overflow, when all uintb values are in the range
+                {       // This is an overflow, when all ulong values are in the range
                     val = mask;               // We lie by one, which shouldn't matter for our jumptable application
                     if (step > 1)
                     {
@@ -376,19 +376,19 @@ namespace Sla.DECCORE
         }
 
         /// Get the step for \b this range
-        public int4 getStep() => step;
+        public int getStep() => step;
 
         /// Get maximum information content of range
         /// In this context, the information content of a value is the index (+1) of the
         /// most significant non-zero bit (of the absolute value). This routine returns
         /// the maximum information across all values in the range.
         /// \return the maximum information
-        public int4 getMaxInfo()
+        public int getMaxInfo()
         {
-            uintb halfPoint = mask ^ (mask >> 1);
+            ulong halfPoint = mask ^ (mask >> 1);
             if (contains(halfPoint))
-                return 8 * sizeof(uintb) - count_leading_zeros(halfPoint);
-            int4 sizeLeft, sizeRight;
+                return 8 * sizeof(ulong) - count_leading_zeros(halfPoint);
+            int sizeLeft, sizeRight;
             if ((halfPoint & left) == 0)
                 sizeLeft = count_leading_zeros(left);
             else
@@ -397,7 +397,7 @@ namespace Sla.DECCORE
                 sizeRight = count_leading_zeros(right);
             else
                 sizeRight = count_leading_zeros(~right & mask);
-            int4 size1 = 8 * sizeof(uintb) - (sizeRight < sizeLeft ? sizeRight : sizeLeft);
+            int size1 = 8 * sizeof(ulong) - (sizeRight < sizeLeft ? sizeRight : sizeLeft);
             return size1;
         }
 
@@ -412,7 +412,7 @@ namespace Sla.DECCORE
         }
 
         /// Advance an integer within the range
-        public bool getNext(uintb val)
+        public bool getNext(ulong val)
         {
             val = (val+step)&mask;
             return (val != right);
@@ -455,7 +455,7 @@ namespace Sla.DECCORE
         /// Check if a specific integer is a member of \b this range.
         /// \param val is the specific integer
         /// \return \b true if it is contained in \b this
-        public bool contains(uintb val)
+        public bool contains(ulong val)
         {
             if (isempty) return false;
             if (step != 1)
@@ -485,10 +485,10 @@ namespace Sla.DECCORE
         /// If result is not zero, \b this is not modified
         /// \param op2 is the second range
         /// \return the intersection code
-        public int4 intersect(CircleRange op2)
+        public int intersect(CircleRange op2)
         {
-            int4 retval, newStep;
-            uintb newMask, myleft, myright, op2left, op2right;
+            int retval, newStep;
+            ulong newMask, myleft, myright, op2left, op2right;
 
             if (isempty) return 0;  // Intersection with empty is empty
             if (op2.isempty)
@@ -503,7 +503,7 @@ namespace Sla.DECCORE
             if (step < op2.step)
             {
                 newStep = op2.step;
-                uint4 rem = (uint4)(op2left % newStep);
+                uint rem = (uint)(op2left % newStep);
                 if (newStride(mask, newStep, step, rem, myleft, myright))
                 {   // Increase the smaller stride
                     isempty = true;
@@ -513,7 +513,7 @@ namespace Sla.DECCORE
             else if (op2.step < step)
             {
                 newStep = step;
-                uint4 rem = (uint4)(myleft % newStep);
+                uint rem = (uint)(myleft % newStep);
                 if (newStride(op2.mask, newStep, op2.step, rem, op2left, op2right))
                 {
                     isempty = true;
@@ -623,9 +623,9 @@ namespace Sla.DECCORE
         /// \param nzmask is the putative mask
         /// \param size is a maximum size (in bytes) for the mask
         /// \return \b true if the mask is valid
-        public bool setNZMask(uintb nzmask, int4 size)
+        public bool setNZMask(ulong nzmask, int size)
         {
-            int4 trans = bit_transitions(nzmask, size);
+            int trans = bit_transitions(nzmask, size);
             if (trans > 2) return false;    // Too many transitions to form a valid range
             bool hasstep = ((nzmask & 1) == 0);
             if ((!hasstep) && (trans == 2)) return false; // Two sections of non-zero bits
@@ -647,7 +647,7 @@ namespace Sla.DECCORE
                 }
                 return true;
             }
-            int4 shift = leastsigbit_set(nzmask);
+            int shift = leastsigbit_set(nzmask);
             step = 1;
             step <<= shift;
             mask = calc_mask(size);
@@ -663,7 +663,7 @@ namespace Sla.DECCORE
         /// If result is not zero, \b this is not modified.
         /// \param op2 is the range to union with
         /// \return the result code
-        public int4 circleUnion(CircleRange op2)
+        public int circleUnion(CircleRange op2)
         {
             if (op2.isempty) return 0;
             if (isempty)
@@ -672,9 +672,9 @@ namespace Sla.DECCORE
                 return 0;
             }
             if (mask != op2.mask) return 2; // Cannot do proper union with different domains
-            uintb aRight = right;
-            uintb bRight = op2.right;
-            int4 newStep = step;
+            ulong aRight = right;
+            ulong bRight = op2.right;
+            int newStep = step;
             if (step < op2.step)
             {
                 if (isSingle())
@@ -695,7 +695,7 @@ namespace Sla.DECCORE
                 else
                     return 2;
             }
-            uintb rem;
+            ulong rem;
             if (newStep != 1)
             {
                 rem = left % newStep;
@@ -767,11 +767,11 @@ namespace Sla.DECCORE
         /// \param op2 is the other given range to combine with \b this
         /// \param maxStep is the step bound that can be induced for a container with two singles
         /// \return \b true if the container is everything (full)
-        public bool minimalContainer(CircleRange op2, int4 maxStep)
+        public bool minimalContainer(CircleRange op2, int maxStep)
         {
             if (isSingle() && op2.isSingle())
             {
-                uintb min, max;
+                ulong min, max;
                 if (getMin() < op2.getMin())
                 {
                     min = getMin();
@@ -782,12 +782,12 @@ namespace Sla.DECCORE
                     min = op2.getMin();
                     max = getMin();
                 }
-                uintb diff = max - min;
+                ulong diff = max - min;
                 if (diff > 0 && diff <= maxStep)
                 {
                     if (leastsigbit_set(diff) == mostsigbit_set(diff))
                     {
-                        step = (int4)diff;
+                        step = (int)diff;
                         left = min;
                         right = (max + step) & mask;
                         return false;
@@ -795,11 +795,11 @@ namespace Sla.DECCORE
                 }
             }
 
-            uintb aRight = right - step + 1;        // Treat original ranges as having step=1
-            uintb bRight = op2.right - op2.step + 1;
+            ulong aRight = right - step + 1;        // Treat original ranges as having step=1
+            ulong bRight = op2.right - op2.step + 1;
             step = 1;
             mask |= op2.mask;
-            uintb vacantSize1, vacantSize2;
+            ulong vacantSize1, vacantSize2;
 
             char overlapCode = encodeRangeOverlaps(left, aRight, op2.left, bRight);
             switch (overlapCode)
@@ -856,9 +856,9 @@ namespace Sla.DECCORE
         /// Convert to complementary range
         /// Convert range to its complement.  The step is automatically converted to 1 first.
         /// \return the original step size
-        public int4 invert()
+        public int invert()
         {
-            int4 res = step;
+            int res = step;
             step = 1;
             complement();
             return res;
@@ -869,14 +869,14 @@ namespace Sla.DECCORE
         /// The boundaries of the range do not change except for the remainder modulo the new step.
         /// \param newStep is the new step amount
         /// \param rem is the desired phase (remainder of the values modulo the step)
-        public void setStride(int4 newStep, uintb rem)
+        public void setStride(int newStep, ulong rem)
         {
             bool iseverything = (!isempty) && (left == right);
             if (newStep == step) return;
-            uintb aRight = right - step;
+            ulong aRight = right - step;
             step = newStep;
             if (step == 1) return;      // No remainder to fill in
-            uintb curRem = left % step;
+            ulong curRem = left % step;
             left = (left - curRem) + rem;
             curRem = aRight % step;
             aRight = (aRight - curRem) + rem;
@@ -890,9 +890,9 @@ namespace Sla.DECCORE
         /// \param inSize is the storage size in bytes of the resulting input
         /// \param outSize is the storage size in bytes of the range to pull-back
         /// \return \b true if a valid range is formed in the pull-back
-        public bool pullBackUnary(OpCode opc, int4 inSize, int4 outSize)
+        public bool pullBackUnary(OpCode opc, int inSize, int outSize)
         {
-            uintb val;
+            ulong val;
             // If there is nothing in the output set, no input will map to it
             if (isempty) return true;
 
@@ -919,7 +919,7 @@ namespace Sla.DECCORE
                 case CPUI_INT_ZEXT:
                     {
                         val = calc_mask(inSize); // (smaller) input mask
-                        uintb rem = left % step;
+                        ulong rem = left % step;
                         CircleRange zextrange;
                         zextrange.left = rem;
                         zextrange.right = val + 1 + rem;    // Biggest possible range of ZEXT
@@ -936,7 +936,7 @@ namespace Sla.DECCORE
                 case CPUI_INT_SEXT:
                     {
                         val = calc_mask(inSize); // (smaller) input mask
-                        uintb rem = left & step;
+                        ulong rem = left & step;
                         CircleRange sextrange;
                         sextrange.left = val ^ (val >> 1); // High order bit for (small) input space
                         sextrange.left += rem;
@@ -972,7 +972,7 @@ namespace Sla.DECCORE
         /// \param inSize is the storage size in bytes of the resulting input
         /// \param outSize is the storage size in bytes of the range to pull-back
         /// \return \b true if a valid range is formed in the pull-back
-        public bool pullBackBinary(OpCode opc, uintb val, int4 slot, int4 inSize, int4 outSize)
+        public bool pullBackBinary(OpCode opc, ulong val, int slot, int inSize, int outSize)
         {
             bool yescomplement;
             bool bothTrueFalse;
@@ -1130,7 +1130,7 @@ namespace Sla.DECCORE
                     {
                         if (step == 1)
                         {
-                            uintb rightBound = (calc_mask(inSize) >> val) + 1; // The maximal right bound
+                            ulong rightBound = (calc_mask(inSize) >> val) + 1; // The maximal right bound
                             if (((left >= rightBound) && (right >= rightBound) && (left >= right))
                                 || ((left == 0) && (right >= rightBound)) || (left == right))
                             {
@@ -1158,8 +1158,8 @@ namespace Sla.DECCORE
                     {
                         if (step == 1)
                         {
-                            uintb rightb = calc_mask(inSize);
-                            uintb leftb = rightb >> (val + 1);
+                            ulong rightb = calc_mask(inSize);
+                            ulong leftb = rightb >> (val + 1);
                             rightb = leftb ^ rightb; // Smallest negative possible
                             leftb += 1;     // Biggest positive (+1) possible
                             if (((left >= leftb) && (left <= rightb) && (right >= leftb)
@@ -1223,10 +1223,10 @@ namespace Sla.DECCORE
             else if (op.numInput() == 2)
             {
                 Varnode* constvn;
-                uintb val;
+                ulong val;
                 // Find non-constant varnode input, and slot
                 // Make sure second input is constant
-                int4 slot = 0;
+                int slot = 0;
                 res = op.getIn(slot);
                 constvn = op.getIn(1 - slot);
                 if (res.isConstant())
@@ -1246,7 +1246,7 @@ namespace Sla.DECCORE
                     if (usenzmask && opc == CPUI_SUBPIECE && val == 0)
                     {
                         // If everything we are truncating is known to be zero, we may still have a range
-                        int4 msbset = mostsigbit_set(res.getNZMask());
+                        int msbset = mostsigbit_set(res.getNZMask());
                         msbset = (msbset + 8) / 8;
                         if (op.getOut().getSize() < msbset) // Some bytes we are chopping off might not be zero
                             return (Varnode*)0;
@@ -1287,7 +1287,7 @@ namespace Sla.DECCORE
         /// \param inSize is the storage space in bytes for the input
         /// \param outSize is the storage space in bytes for the output
         /// \return \b true if the result is known and forms a range
-        public bool pushForwardUnary(OpCode opc, CircleRange in1, int4 inSize, int4 outSize)
+        public bool pushForwardUnary(OpCode opc, CircleRange in1, int inSize, int outSize)
         {
             if (in1.isempty)
             {
@@ -1324,7 +1324,7 @@ namespace Sla.DECCORE
                     mask = calc_mask(outSize);
                     if (in1.left == in1.right)
                     {
-                        uintb rem = in1.left % step;
+                        ulong rem = in1.left % step;
                         right = calc_mask(inSize) >> 1;
                         left = (calc_mask(outSize) ^ right) + rem;
                         right = right + 1 + rem;
@@ -1333,7 +1333,7 @@ namespace Sla.DECCORE
                     {
                         left = sign_extend(in1.left, inSize, outSize);
                         right = sign_extend((in1.right - in1.step) & in1.mask, inSize, outSize);
-                        if ((intb)right < (intb)left)
+                        if ((long)right < (long)left)
                             return false;   // Extending causes 2 pieces
                         right = (right + step) & mask;
                     }
@@ -1379,8 +1379,8 @@ namespace Sla.DECCORE
         /// \param outSize is the storage space in bytes for the output
         /// \param maxStep is the maximum to allow step to grow via multiplication
         /// \return \b true if the result is known and forms a range
-        public bool pushForwardBinary(OpCode opc, CircleRange in1, CircleRange in2, int4 inSize, int4 outSize,
-            int4 maxStep)
+        public bool pushForwardBinary(OpCode opc, CircleRange in1, CircleRange in2, int inSize, int outSize,
+            int maxStep)
         {
             if (in1.isempty || in2.isempty)
             {
@@ -1414,10 +1414,10 @@ namespace Sla.DECCORE
                     else
                     {
                         step = (in1.step < in2.step) ? in1.step : in2.step; // Smaller step
-                        uintb size1 = (in1.left < in1.right) ? (in1.right - in1.left) : (in1.mask - (in1.left - in1.right) + in1.step);
+                        ulong size1 = (in1.left < in1.right) ? (in1.right - in1.left) : (in1.mask - (in1.left - in1.right) + in1.step);
                         left = (in1.left + in2.left) & mask;
                         right = (in1.right - in1.step + in2.right - in2.step + step) & mask;
-                        uintb sizenew = (left < right) ? (right - left) : (mask - (left - right) + step);
+                        ulong sizenew = (left < right) ? (right - left) : (mask - (left - right) + step);
                         if (sizenew < size1)
                         {
                             right = left;   // Over-flow, we covered everything
@@ -1429,7 +1429,7 @@ namespace Sla.DECCORE
                     {
                         isempty = false;
                         mask = in1.mask | in2.mask;
-                        uintb constVal;
+                        ulong constVal;
                         if (in1.isSingle())
                         {
                             constVal = in1.getMin();
@@ -1442,14 +1442,14 @@ namespace Sla.DECCORE
                         }
                         else
                             return false;
-                        uint4 tmp = (uint4)constVal;
+                        uint tmp = (uint)constVal;
                         while (step < maxStep)
                         {
                             if ((tmp & 1) != 0) break;
                             step <<= 1;
                             tmp >>= 1;
                         }
-                        int4 wholeSize = 8 * sizeof(uintb) - count_leading_zeros(mask);
+                        int wholeSize = 8 * sizeof(ulong) - count_leading_zeros(mask);
                         if (in1.getMaxInfo() + in2.getMaxInfo() > wholeSize)
                         {
                             left = in1.left;    // Covered everything
@@ -1475,8 +1475,8 @@ namespace Sla.DECCORE
                         isempty = false;
                         mask = in1.mask;
                         step = in1.step;
-                        uint4 sa = (uint4)in2.getMin();
-                        uint4 tmp = sa;
+                        uint sa = (uint)in2.getMin();
+                        uint tmp = sa;
                         while (step < maxStep && tmp > 0)
                         {
                             step <<= 1;
@@ -1484,7 +1484,7 @@ namespace Sla.DECCORE
                         }
                         left = (in1.left << sa) & mask;
                         right = (in1.right << sa) & mask;
-                        int4 wholeSize = 8 * sizeof(uintb) - count_leading_zeros(mask);
+                        int wholeSize = 8 * sizeof(ulong) - count_leading_zeros(mask);
                         if (in1.getMaxInfo() + sa > wholeSize)
                         {
                             right = left;   // Covered everything
@@ -1497,7 +1497,7 @@ namespace Sla.DECCORE
                     {
                         if (!in2.isSingle()) return false;
                         isempty = false;
-                        int4 sa = (int4)in2.left * 8;
+                        int sa = (int)in2.left * 8;
                         mask = calc_mask(outSize);
                         step = (sa == 0) ? in1.step : 1;
 
@@ -1519,7 +1519,7 @@ namespace Sla.DECCORE
                     {
                         if (!in2.isSingle()) return false;
                         isempty = false;
-                        int4 sa = (int4)in2.left;
+                        int sa = (int)in2.left;
                         mask = calc_mask(outSize);
                         step = 1;           // Lose any step
                         if (in1.left < in1.right)
@@ -1540,17 +1540,17 @@ namespace Sla.DECCORE
                     {
                         if (!in2.isSingle()) return false;
                         isempty = false;
-                        int4 sa = (int4)in2.left;
+                        int sa = (int)in2.left;
                         mask = calc_mask(outSize);
                         step = 1;           // Lose any step
-                        intb valLeft = in1.left;
-                        intb valRight = in1.right;
-                        int4 bitPos = 8 * inSize - 1;
+                        long valLeft = in1.left;
+                        long valRight = in1.right;
+                        int bitPos = 8 * inSize - 1;
                         sign_extend(valLeft, bitPos);
                         sign_extend(valRight, bitPos);
                         if (valLeft >= valRight)
                         {
-                            valRight = (intb)(mask >> 1);   // Max positive
+                            valRight = (long)(mask >> 1);   // Max positive
                             valLeft = valRight + 1;     // Min negative
                             sign_extend(valLeft, bitPos);
                         }
@@ -1602,7 +1602,7 @@ namespace Sla.DECCORE
         /// \param maxStep is the maximum to allow step to grow via multiplication
         /// \return \b true if the result is known and forms a range
         public bool pushForwardTrinary(OpCode opc, CircleRange in1, CircleRange in2, CircleRange in3,
-            int4 inSize, int4 outSize, int4 maxStep)
+            int inSize, int outSize, int maxStep)
         {
             if (opc != CPUI_PTRADD) return false;
             CircleRange tmpRange;
@@ -1620,8 +1620,8 @@ namespace Sla.DECCORE
         {
             if (leftIsStable)
             {
-                uintb lmod = left % step;
-                uintb mod = op2.right % step;
+                ulong lmod = left % step;
+                ulong mod = op2.right % step;
                 if (mod <= lmod)
                     right = op2.right + (lmod - mod);
                 else
@@ -1647,7 +1647,7 @@ namespace Sla.DECCORE
         /// \param c will contain the constant input to the op
         /// \param cslot will indicate the slot holding the constant
         /// \return the success code
-        public int4 translate2Op(OpCode opc, uintb c, int4 cslot)
+        public int translate2Op(OpCode opc, ulong c, int cslot)
         {
             if (isempty) return 3;
             if (step != 1) return 2;    // Not possible with a stride

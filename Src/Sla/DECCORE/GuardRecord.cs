@@ -22,9 +22,9 @@ namespace Sla.DECCORE
         /// Value being (quasi)copied to the Varnode
         private Varnode baseVn;
         /// Specific CBRANCH path going to the switch
-        private int4 indpath;
+        private int indpath;
         /// Number of bits copied (all other bits are zero)
-        private int4 bitsPreserved;
+        private int bitsPreserved;
         /// Range of values causing the CBRANCH to take the path to the switch
         private CircleRange range;
         /// \b true if guarding CBRANCH is duplicated across multiple blocks
@@ -36,7 +36,7 @@ namespace Sla.DECCORE
         /// \param rng is the range of values causing the switch path to be taken
         /// \param v is the Varnode holding the value controlling the CBRANCH
         /// \param unr is \b true if the guard is duplicated across multiple blocks
-        public GuardRecord(PcodeOp bOp, PcodeOp rOp, int4 path, CircleRange rng,Varnode v,
+        public GuardRecord(PcodeOp bOp, PcodeOp rOp, int path, CircleRange rng,Varnode v,
             bool unr = false)
         {
             cbranch = bOp;
@@ -58,7 +58,7 @@ namespace Sla.DECCORE
         public PcodeOp getReadOp() => readOp;
 
         /// Get the specific path index going towards the switch
-        public int4 getPath() => indpath;
+        public int getPath() => indpath;
 
         /// Get the range of values causing the switch path to be taken
         public CircleRange getRange() => range;
@@ -81,7 +81,7 @@ namespace Sla.DECCORE
         /// \param baseVn2 is the earliest Varnode from which the given Varnode is quasi-copied.
         /// \param bitsPreserved2 is the number of potentially non-zero bits in the given Varnode
         /// \return the matching code 0, 1, or 2
-        public int4 valueMatch(Varnode vn2, Varnode baseVn2, int4 bitsPreserved2)
+        public int valueMatch(Varnode vn2, Varnode baseVn2, int bitsPreserved2)
         {
             if (vn == vn2) return 1;        // Same varnode, same value
             PcodeOp* loadOp,*loadOp2;
@@ -129,7 +129,7 @@ namespace Sla.DECCORE
         /// \param op1 is the first given PcodeOp to test
         /// \param op2 is the second given PcodeOp
         /// \return 1 if the same value is produced, 0 otherwise
-        public static int4 oneOffMatch(PcodeOp op1, PcodeOp op2)
+        public static int oneOffMatch(PcodeOp op1, PcodeOp op2)
         {
             if (op1.code() != op2.code())
                 return 0;
@@ -164,11 +164,11 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode
         /// \param bitsPreserved will hold the number of least significant bits preserved by the sequence
         /// \return the earliest source of the quasi-copy, which may just be the given Varnode
-        public static Varnode quasiCopy(Varnode vn, int4 bitsPreserved)
+        public static Varnode quasiCopy(Varnode vn, int bitsPreserved)
         {
             bitsPreserved = mostsigbit_set(vn.getNZMask()) + 1;
             if (bitsPreserved == 0) return vn;
-            uintb mask = 1;
+            ulong mask = 1;
             mask <<= bitsPreserved;
             mask -= 1;
             PcodeOp* op = vn.getDef();

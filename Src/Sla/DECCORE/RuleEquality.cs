@@ -27,13 +27,13 @@ namespace Sla.DECCORE
         ///
         /// If both inputs to an INT_EQUAL or INT_NOTEQUAL op are functionally equivalent,
         /// the op can be collapsed to a COPY of a \b true or \b false.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_EQUAL);
             oplist.push_back(CPUI_INT_NOTEQUAL);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn;
             if (!functionalEquality(op.getIn(0), op.getIn(1)))

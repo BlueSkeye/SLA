@@ -12,9 +12,9 @@ namespace Sla.EXTRA
         /// \brief Parse a line of C syntax: `parse line ...`
         ///
         /// The line can contain a declaration either a data-type or a function prototype:
-        ///    - `parse line typedef int4 *specialint;`
-        ///    - `parse line struct mystruct { int4 a; int4 b; }`
-        ///    - `parse line extern void myfunc(int4 a,int4 b);`
+        ///    - `parse line typedef int *specialint;`
+        ///    - `parse line struct mystruct { int a; int b; }`
+        ///    - `parse line extern void myfunc(int a,int b);`
         ///
         /// Data-types go straight into the program.  For a prototype, the function symbol
         /// must already exist.

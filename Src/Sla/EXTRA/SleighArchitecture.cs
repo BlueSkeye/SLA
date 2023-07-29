@@ -24,9 +24,9 @@ namespace Sla.EXTRA
     /// object is able to automatically load in configuration and construct the Translate object.
     internal class SleighArchitecture : Architecture
     {
-        private static Dictionary<int4, Sleigh> translators = new Dictionary<int4, Sleigh>();      ///< Map from language index to instantiated translators
+        private static Dictionary<int, Sleigh> translators = new Dictionary<int, Sleigh>();      ///< Map from language index to instantiated translators
         private static List<LanguageDescription> description = new List<LanguageDescription>(); ///< List of languages we know about
-        private int4 languageindex;                 ///< Index (within LanguageDescription array) of the active language
+        private int languageindex;                 ///< Index (within LanguageDescription array) of the active language
         private string filename;                    ///< Name of active load-image file
         private string target;                  ///< The \e language \e id of the active load-image
 
@@ -50,10 +50,10 @@ namespace Sla.EXTRA
                 return;
             }
 
-            uint4 elemId = decoder.openElement(ELEM_LANGUAGE_DEFINITIONS);
+            uint elemId = decoder.openElement(ELEM_LANGUAGE_DEFINITIONS);
             for (; ; )
             {
-                uint4 subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ELEM_LANGUAGE)
                 {
@@ -98,7 +98,7 @@ namespace Sla.EXTRA
 
         protected override Translate buildTranslator(DocumentStorage store)
         {               // Build a sleigh translator
-            map<int4, Sleigh*>::const_iterator iter;
+            map<int, Sleigh*>::const_iterator iter;
             Sleigh* sleigh;
             iter = translators.find(languageindex);
             if (iter != translators.end())
@@ -133,14 +133,14 @@ namespace Sla.EXTRA
                 // Put in the core types
                 types.setCoreType("void", 1, TYPE_VOID, false);
                 types.setCoreType("bool", 1, TYPE_BOOL, false);
-                types.setCoreType("uint1", 1, TYPE_UINT, false);
+                types.setCoreType("byte", 1, TYPE_UINT, false);
                 types.setCoreType("uint2", 2, TYPE_UINT, false);
-                types.setCoreType("uint4", 4, TYPE_UINT, false);
-                types.setCoreType("uint8", 8, TYPE_UINT, false);
+                types.setCoreType("uint", 4, TYPE_UINT, false);
+                types.setCoreType("ulong", 8, TYPE_UINT, false);
                 types.setCoreType("int1", 1, TYPE_INT, false);
                 types.setCoreType("int2", 2, TYPE_INT, false);
-                types.setCoreType("int4", 4, TYPE_INT, false);
-                types.setCoreType("int8", 8, TYPE_INT, false);
+                types.setCoreType("int", 4, TYPE_INT, false);
+                types.setCoreType("long", 8, TYPE_INT, false);
                 types.setCoreType("float4", 4, TYPE_FLOAT, false);
                 types.setCoreType("float8", 8, TYPE_FLOAT, false);
                 types.setCoreType("float10", 10, TYPE_FLOAT, false);
@@ -182,17 +182,17 @@ namespace Sla.EXTRA
             Element* symtag = store.getTag(ELEM_DEFAULT_SYMBOLS.getName());
             if (symtag == (Element)null) return;
             XmlDecode decoder = new XmlDecode(this, symtag);
-            uint4 el = decoder.openElement(ELEM_DEFAULT_SYMBOLS);
+            uint el = decoder.openElement(ELEM_DEFAULT_SYMBOLS);
             while (decoder.peekElement() != 0)
             {
-                uint4 subel = decoder.openElement(ELEM_SYMBOL);
+                uint subel = decoder.openElement(ELEM_SYMBOL);
                 Address addr;
                 string name;
-                int4 size = 0;
-                int4 volatileState = -1;
+                int size = 0;
+                int volatileState = -1;
                 for (; ; )
                 {
-                    uint4 attribId = decoder.getNextAttributeId();
+                    uint attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;
                     if (attribId == ATTRIB_NAME)
                         name = decoder.readString();
@@ -306,7 +306,7 @@ namespace Sla.EXTRA
         protected override void modifySpaces(Translate trans)
         {
             LanguageDescription language = description[languageindex];
-            for (int4 i = 0; i < language.numTruncations(); ++i)
+            for (int i = 0; i < language.numTruncations(); ++i)
             {
                 trans.truncateSpace(language.getTruncation(i));
             }
@@ -328,7 +328,7 @@ namespace Sla.EXTRA
 
             archid = normalizeArchitecture(archid);
             string baseid = archid.substr(0, archid.rfind(':'));
-            int4 i;
+            int i;
             languageindex = -1;
             for (i = 0; i < description.size(); ++i)
             {
@@ -454,7 +454,7 @@ namespace Sla.EXTRA
             string compile;
 
             string::size_type pos[4];
-            int4 i;
+            int i;
             string::size_type curpos = 0;
             for (i = 0; i < 4; ++i)
             {
@@ -498,29 +498,29 @@ namespace Sla.EXTRA
             List<string> languagesubdirs;
 
             FileManage::scanDirectoryRecursive(ghidradir, "Ghidra", rootpath, 2);
-            for (uint4 i = 0; i < ghidradir.size(); ++i)
+            for (uint i = 0; i < ghidradir.size(); ++i)
             {
                 FileManage::scanDirectoryRecursive(procdir, "Processors", ghidradir[i], 1); // Look for Processors structure
                 FileManage::scanDirectoryRecursive(procdir, "contrib", ghidradir[i], 1);
             }
             if (procdir.size() != 0)
             {
-                for (uint4 i = 0; i < procdir.size(); ++i)
+                for (uint i = 0; i < procdir.size(); ++i)
                     FileManage::directoryList(procdir2, procdir[i]);
 
                 List<string> datadirs;
-                for (uint4 i = 0; i < procdir2.size(); ++i)
+                for (uint i = 0; i < procdir2.size(); ++i)
                     FileManage::scanDirectoryRecursive(datadirs, "data", procdir2[i], 1);
 
                 List<string> languagedirs;
-                for (uint4 i = 0; i < datadirs.size(); ++i)
+                for (uint i = 0; i < datadirs.size(); ++i)
                     FileManage::scanDirectoryRecursive(languagedirs, "languages", datadirs[i], 1);
 
-                for (uint4 i = 0; i < languagedirs.size(); ++i)
+                for (uint i = 0; i < languagedirs.size(); ++i)
                     languagesubdirs.push_back(languagedirs[i]);
 
                 // In the old version we have to go down one more level to get to the ldefs
-                for (uint4 i = 0; i < languagedirs.size(); ++i)
+                for (uint i = 0; i < languagedirs.size(); ++i)
                     FileManage::directoryList(languagesubdirs, languagedirs[i]);
             }
             // If we haven't matched this directory structure, just use the rootpath as the directory containing
@@ -528,7 +528,7 @@ namespace Sla.EXTRA
             if (languagesubdirs.size() == 0)
                 languagesubdirs.push_back(rootpath);
 
-            for (uint4 i = 0; i < languagesubdirs.size(); ++i)
+            for (uint i = 0; i < languagesubdirs.size(); ++i)
                 specpaths.addDir2Path(languagesubdirs[i]);
         }
 
@@ -549,7 +549,7 @@ namespace Sla.EXTRA
         public static void shutdown()
         {
             if (translators.empty()) return;    // Already cleared
-            for (map<int4, Sleigh*>::const_iterator iter = translators.begin(); iter != translators.end(); ++iter)
+            for (map<int, Sleigh*>::const_iterator iter = translators.begin(); iter != translators.end(); ++iter)
                 delete(*iter).second;
             translators.clear();
             // description.clear();  // static List is destroyed by the normal exit handler

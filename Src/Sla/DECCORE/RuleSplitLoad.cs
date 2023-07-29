@@ -28,12 +28,12 @@ namespace Sla.DECCORE
         ///
         /// If more than one logical component of a structure or array is loaded at once,
         /// rewrite the LOAD operator as multiple LOADs.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_LOAD);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Datatype* inType = SplitDatatype::getValueDatatype(op, op.getOut().getSize(), data.getArch().types);
             if (inType == (Datatype*)0)

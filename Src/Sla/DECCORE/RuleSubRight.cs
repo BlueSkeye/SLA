@@ -30,12 +30,12 @@ namespace Sla.DECCORE
         /// from a structure. If so, mark the op as requiring special printing and return.
         /// If the lone descendant of the SUBPIECE is a INT_RIGHT or INT_SRIGHT,
         /// we lump that into the shift as well.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_SUBPIECE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (op.doesSpecialPrinting())
                 return 0;
@@ -45,7 +45,7 @@ namespace Sla.DECCORE
                 return 0;
             }
 
-            int4 c = op.getIn(1).getOffset();
+            int c = op.getIn(1).getOffset();
             if (c == 0) return 0;       // SUBPIECE is not least sig
             Varnode* a = op.getIn(0);
             Varnode* outvn = op.getOut();
@@ -55,7 +55,7 @@ namespace Sla.DECCORE
                     return 0;           // So don't convert it
             }
             OpCode opc = CPUI_INT_RIGHT; // Default shift type
-            int4 d = c * 8;         // Convert to bit shift
+            int d = c * 8;         // Convert to bit shift
                                     // Search for lone right shift descendant
             PcodeOp* lone = outvn.loneDescend();
             if (lone != (PcodeOp*)0)

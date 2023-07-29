@@ -23,9 +23,9 @@ namespace Sla.DECCORE
         // applies to all opcodes
         /// \class RuleCollapseConstants
         /// \brief Collapse constant expressions
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            int4 i;
+            int i;
             Varnode* vn;
 
             if (!op.isCollapsible()) return 0; // Expression must be collapsible

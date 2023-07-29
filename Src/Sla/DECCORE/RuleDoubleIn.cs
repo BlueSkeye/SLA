@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         private int attemptMarking(Funcdata data, Varnode vn, PcodeOp subpieceOp)
         {
             Varnode* whole = subpieceOp.getIn(0);
-            int4 offset = (int4)subpieceOp.getIn(1).getOffset();
+            int offset = (int)subpieceOp.getIn(1).getOffset();
             if (offset != vn.getSize()) return 0;
             if (offset * 2 != whole.getSize()) return 0;       // Truncate exactly half
             if (whole.isInput())
@@ -127,10 +127,10 @@ namespace Sla.DECCORE
             List<SplitVarnode> splitvec;
             SplitVarnode::wholeList(op.getIn(0), splitvec);
             if (splitvec.empty()) return 0;
-            for (int4 i = 0; i < splitvec.size(); ++i)
+            for (int i = 0; i < splitvec.size(); ++i)
             {
                 SplitVarnode @in(splitvec[i]);
-                int4 res = SplitVarnode::applyRuleIn(@in, data);
+                int res = SplitVarnode::applyRuleIn(@in, data);
                 if (res != 0)
                     return res;
             }

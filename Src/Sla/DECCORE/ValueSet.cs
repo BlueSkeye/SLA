@@ -22,7 +22,7 @@ namespace Sla.DECCORE
     internal class ValueSet
     {
         ///< Maximum step inferred for a value set
-        public const int4 MAX_STEP = 32;
+        public const int MAX_STEP = 32;
 
         /// \brief An external that can be applied to a ValueSet
         /// An Equation is attached to a particular ValueSet and its underlying Varnode
@@ -32,13 +32,13 @@ namespace Sla.DECCORE
         {
             // friend class ValueSet;
             /// The input parameter slot to which the constraint is attached
-            private int4 slot;
+            private int slot;
             /// The constraint characteristic 0=absolute 1=relative to a spacebase register
-            private int4 typeCode;
+            private int typeCode;
             /// The range constraint
             private CircleRange range;
 
-            public Equation(int4 s, int4 tc, CircleRange rng)
+            public Equation(int s, int tc, CircleRange rng)
             {
                 slot = s;
                 typeCode = tc;
@@ -48,11 +48,11 @@ namespace Sla.DECCORE
 
         // friend class ValueSetSolver;
         /// 0=pure constant 1=stack relative
-        private int4 typeCode;
+        private int typeCode;
         /// Number of input parameters to defining operation
-        private int4 numParams;
+        private int numParams;
         /// Depth first numbering / widening count
-        private int4 count;
+        private int count;
         /// Op-code defining Varnode
         private OpCode opCode;
         /// Set to \b true if left boundary of range didn't change (last iteration)
@@ -76,7 +76,7 @@ namespace Sla.DECCORE
         /// \param num is the index selecting an Equation
         /// \param slot is the indicated slot
         /// \return \b true if the Equation exists and applies
-        private bool doesEquationApply(int4 num, int4 slot)
+        private bool doesEquationApply(int num, int slot)
         {
             if (num < equations.size())
             {
@@ -104,7 +104,7 @@ namespace Sla.DECCORE
         ///
         /// \param v is the given Varnode to attach to
         /// \param tCode indicates whether to treat values as constants are relative offsets
-        private void setVarnode(Varnode v, int4 tCode)
+        private void setVarnode(Varnode v, int tCode)
         {
             typeCode = tCode;
             vn = v;
@@ -155,7 +155,7 @@ namespace Sla.DECCORE
         /// \param slot is the given slot
         /// \param type is the constraint characteristic
         /// \param constraint is the given range
-        private void addEquation(int4 slot, int4 type, CircleRange constraint)
+        private void addEquation(int slot, int type, CircleRange constraint)
         {
             List<Equation>::iterator iter;
             iter = equations.begin();
@@ -169,7 +169,7 @@ namespace Sla.DECCORE
         }
 
         /// Add a widening landmark
-        private void addLandmark(int4 type, CircleRange constraint)
+        private void addLandmark(int type, CircleRange constraint)
         {
             addEquation(numParams, type, constraint);
         }
@@ -182,10 +182,10 @@ namespace Sla.DECCORE
         /// \return \b true if there is an indeterminate combination
         private bool computeTypeCode()
         {
-            int4 relCount = 0;
-            int4 lastTypeCode = 0;
+            int relCount = 0;
+            int lastTypeCode = 0;
             PcodeOp* op = vn.getDef();
-            for (int4 i = 0; i < numParams; ++i)
+            for (int i = 0; i < numParams; ++i)
             {
                 ValueSet* valueSet = op.getIn(i).getValueSet();
                 if (valueSet.typeCode != 0)
@@ -243,11 +243,11 @@ namespace Sla.DECCORE
             count += 1;     // Count this iteration
             CircleRange res;
             PcodeOp* op = vn.getDef();
-            int4 eqPos = 0;
+            int eqPos = 0;
             if (opCode == CPUI_MULTIEQUAL)
             {
-                int4 pieces = 0;
-                for (int4 i = 0; i < numParams; ++i)
+                int pieces = 0;
+                for (int i = 0; i < numParams; ++i)
                 {
                     ValueSet* inSet = op.getIn(i).getValueSet();
                     if (doesEquationApply(eqPos, i))
@@ -383,7 +383,7 @@ namespace Sla.DECCORE
         }
 
         /// Get the current iteration count
-        public int4 getCount() => count;
+        public int getCount() => count;
 
         /// Get any \e landmark range
         /// If a landmark was associated with \b this value set, return its range,
@@ -394,7 +394,7 @@ namespace Sla.DECCORE
             // Any equation can serve as a landmark.  We prefer the one restricting the
             // value of an input branch, as these usually give a tighter approximation
             // of the stable point.
-            for (int4 i = 0; i < equations.size(); ++i)
+            for (int i = 0; i < equations.size(); ++i)
             {
                 if (equations[i].typeCode == typeCode)
                     return &equations[i].range;
@@ -403,7 +403,7 @@ namespace Sla.DECCORE
         }
 
         /// Return '0' for normal constant, '1' for spacebase relative
-        public int4 getTypeCode() => typeCode;
+        public int getTypeCode() => typeCode;
 
         /// Get the Varnode attached to \b this ValueSet
         public Varnode getVarnode() => vn;

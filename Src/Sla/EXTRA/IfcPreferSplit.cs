@@ -21,13 +21,13 @@ namespace Sla.EXTRA
         /// involving it can also be split.  See PreferSplitManager.
         public override void execute(TextReader s)
         {
-            int4 size = 0;
+            int size = 0;
             if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("No load image present");
             Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read storage location
             if (size == 0)
                 throw IfaceExecutionError("Must specify a size");
-            int4 split = -1;
+            int split = -1;
 
             s >> ws;
             if (s.eof())

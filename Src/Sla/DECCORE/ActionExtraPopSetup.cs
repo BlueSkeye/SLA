@@ -39,9 +39,9 @@ namespace Sla.DECCORE
             if (stackspace == (AddrSpace*)0) return 0; // No stack to speak of
             VarnodeData point = stackspace.getSpacebase(0);
             Address sb_addr(point.space, point.offset);
-            int4 sb_size = point.size;
+            int sb_size = point.size;
 
-            for (int4 i = 0; i < data.numCalls(); ++i)
+            for (int i = 0; i < data.numCalls(); ++i)
             {
                 fc = data.getCallSpecs(i);
                 if (fc.getExtraPop() == 0) continue; // Stack pointer is undisturbed

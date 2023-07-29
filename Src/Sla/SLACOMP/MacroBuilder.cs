@@ -39,10 +39,10 @@ namespace Sla.SLACOMP
         { // Fix handle details of a macro generated OpTpl relative to its specific invocation
           // and transfer it into the output stream
             VarnodeTpl* outvn = op.getOut();
-            int4 handleIndex = 0;
-            int4 plus;
+            int handleIndex = 0;
+            int plus;
             bool hasrealsize = false;
-            uintb realsize = 0;
+            ulong realsize = 0;
 
             if (outvn != (VarnodeTpl*)0)
             {
@@ -53,7 +53,7 @@ namespace Sla.SLACOMP
                     return false;
                 }
             }
-            for (int4 i = 0; i < op.numInput(); ++i)
+            for (int i = 0; i < op.numInput(); ++i)
             {
                 VarnodeTpl* vn = op.getIn(i);
                 if (vn.getOffset().getType() == ConstTpl::handle)
@@ -70,7 +70,7 @@ namespace Sla.SLACOMP
                         reportError((Location*)0, "Problem with bit range operator in macro");
                         return false;
                     }
-                    uintb newtemp = slgh.getUniqueAddr(); // Generate a new temporary location
+                    ulong newtemp = slgh.getUniqueAddr(); // Generate a new temporary location
 
                     // Generate a SUBPIECE op that implements the offset_plus
                     OpTpl* subpieceop = new OpTpl(CPUI_SUBPIECE);
@@ -105,14 +105,14 @@ namespace Sla.SLACOMP
                 v_clone = new VarnodeTpl(*vn);
                 clone.setOutput(v_clone);
             }
-            for (int4 i = 0; i < op.numInput(); ++i)
+            for (int i = 0; i < op.numInput(); ++i)
             {
                 vn = op.getIn(i);
                 v_clone = new VarnodeTpl(*vn);
                 if (v_clone.isRelative())
                 {
                     // Adjust relative index, depending on the labelbase
-                    uintb val = v_clone.getOffset().getReal() + getLabelBase();
+                    ulong val = v_clone.getOffset().getReal() + getLabelBase();
                     v_clone.setRelative(val);
                 }
                 clone.addInput(v_clone);
@@ -143,7 +143,7 @@ namespace Sla.SLACOMP
             haserror = true;
         }
 
-        public MacroBuilder(SleighCompile sl, List<OpTpl> ovec, uint4 lbcnt) : PcodeBuilder(lbcnt),outvec(ovec)
+        public MacroBuilder(SleighCompile sl, List<OpTpl> ovec, uint lbcnt) : PcodeBuilder(lbcnt),outvec(ovec)
         {
             slgh = sl; haserror = false;
         }
@@ -156,7 +156,7 @@ namespace Sla.SLACOMP
             VarnodeTpl* vn;
             HandleTpl* hand;
             free();
-            for (int4 i = 1; i < macroop.numInput(); ++i)
+            for (int i = 1; i < macroop.numInput(); ++i)
             {
                 vn = macroop.getIn(i);
                 hand = new HandleTpl(vn);
@@ -171,7 +171,7 @@ namespace Sla.SLACOMP
             free();
         }
 
-        public virtual void appendBuild(OpTpl bld, int4 secnum)
+        public virtual void appendBuild(OpTpl bld, int secnum)
         {
             dump(bld);
         }
@@ -192,13 +192,13 @@ namespace Sla.SLACOMP
             clone = new OpTpl(op.getOpcode());
             v_clone = new VarnodeTpl(*op.getIn(0)); // Clone the label index
                                                      // Make adjustment to macro local value so that it is parent local
-            uintb val = v_clone.getOffset().getReal() + getLabelBase();
+            ulong val = v_clone.getOffset().getReal() + getLabelBase();
             v_clone.setOffset(val);
             clone.addInput(v_clone);
             outvec.push_back(clone);
         }
 
-        public virtual void appendCrossBuild(OpTpl bld, int4 secnum)
+        public virtual void appendCrossBuild(OpTpl bld, int secnum)
         {
             dump(bld);
         }

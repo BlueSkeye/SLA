@@ -26,12 +26,12 @@ namespace Sla.DECCORE
         /// \brief Convert INT_AND to INT_ZEXT where appropriate: `sext(X) & 0xffff  =>  zext(X)`
         ///
         /// Similarly `concat(Y,X) & 0xffff  =>  zext(X)`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_AND);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* cvn1 = op.getIn(1);
             if (!cvn1.isConstant()) return 0;
@@ -45,12 +45,12 @@ namespace Sla.DECCORE
                 rootvn = otherop.getIn(1);
             else
                 return 0;
-            uintb mask = calc_mask(rootvn.getSize());
+            ulong mask = calc_mask(rootvn.getSize());
             if (mask != cvn1.getOffset())
                 return 0;
             if (rootvn.isFree())
                 return 0;
-            if (rootvn.getSize() > sizeof(uintb))  // FIXME: Should be arbitrary precision
+            if (rootvn.getSize() > sizeof(ulong))  // FIXME: Should be arbitrary precision
                 return 0;
             data.opSetOpcode(op, CPUI_INT_ZEXT);
             data.opRemoveInput(op, 1);

@@ -28,9 +28,9 @@ namespace Sla.DECCORE
         /// The emulator
         private EmulateSnippet emulator;
         /// Temporary ids of input varnodes
-        private List<uintb> inputList;
+        private List<ulong> inputList;
         /// Temporary ids of output varnodes
-        private List<uintb> outputList;
+        private List<ulong> outputList;
         /// Emitter (allocated temporarily) for initializing the emulator
         private PcodeEmit emitter;
 
@@ -40,12 +40,12 @@ namespace Sla.DECCORE
             if (built) return;
             InjectContext & icontext(glb.pcodeinjectlib.getCachedContext());
             icontext.clear();
-            uintb uniqReserve = 0x10;           // Temporary register space reserved for inputs and output
+            ulong uniqReserve = 0x10;           // Temporary register space reserved for inputs and output
             AddrSpace* codeSpace = glb.getDefaultCodeSpace();
             AddrSpace* uniqSpace = glb.getUniqueSpace();
             icontext.baseaddr = Address(codeSpace, 0x1000); // Fake address
             icontext.nextaddr = icontext.baseaddr;
-            for (int4 i = 0; i < sizeInput(); ++i)
+            for (int i = 0; i < sizeInput(); ++i)
             {   // Skip the first operand containing the injectid
                 InjectParameter & param(getInput(i));
                 icontext.inputlist.emplace_back();
@@ -55,7 +55,7 @@ namespace Sla.DECCORE
                 inputList.push_back(uniqReserve);
                 uniqReserve += 0x20;
             }
-            for (int4 i = 0; i < sizeOutput(); ++i)
+            for (int i = 0; i < sizeOutput(); ++i)
             {
                 InjectParameter & param(getOutput(i));
                 icontext.output.emplace_back();
@@ -101,7 +101,7 @@ namespace Sla.DECCORE
         /// value of this parameter is read from the emulator state and returned.
         /// \param input is the ordered list of input values to feed to \b this script
         /// \return the value of the output parameter after script execution
-        public uintb evaluate(List<uintb> input)
+        public ulong evaluate(List<ulong> input)
         {
             build();        // Build the PcodeOpRaws (if we haven't before)
             emulator.resetMemory();
@@ -109,7 +109,7 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Wrong number of input parameters to executable snippet");
             if (outputList.size() == 0)
                 throw new LowlevelError("No registered outputs to executable snippet");
-            for (int4 i = 0; i < input.size(); ++i)
+            for (int i = 0; i < input.size(); ++i)
                 emulator.setVarnodeValue(inputList[i], input[i]);
             while (!emulator.getHalt())
                 emulator.executeCurrentOp();

@@ -20,26 +20,26 @@ namespace Sla.DECCORE
     {
         // friend class TypeFactory;
         /// Map from integer to name
-        protected Dictionary<uintb, string> namemap;
+        protected Dictionary<ulong, string> namemap;
         /// Masks for each bitfield within the enum
-        protected List<uintb> masklist;
+        protected List<ulong> masklist;
 
         /// Establish the value . name map
         /// Set the map. Calculate the independent bit-fields within the named values of the enumeration
         /// Two bits are in the same bit-field if there is a name in the map whose value
         /// has those two bits set.  Bit-fields must be a contiguous range of bits.
-        protected void setNameMap(Dictionary<uintb, string> nmap)
+        protected void setNameMap(Dictionary<ulong, string> nmap)
         {
-            map<uintb, string>::const_iterator iter;
-            uintb curmask, lastmask;
-            int4 maxbit;
-            int4 curmaxbit;
+            map<ulong, string>::const_iterator iter;
+            ulong curmask, lastmask;
+            int maxbit;
+            int curmaxbit;
             bool fieldisempty;
 
             namemap = nmap;
             masklist.clear();
 
-            flags &= ~((uint4)poweroftwo);
+            flags &= ~((uint)poweroftwo);
 
             maxbit = 8 * size - 1;
 
@@ -56,7 +56,7 @@ namespace Sla.DECCORE
 
                     for (iter = namemap.begin(); iter != namemap.end(); ++iter)
                     { // For every named enumeration value
-                        uintb val = (*iter).first;
+                        ulong val = (*iter).first;
                         if ((val & curmask) != 0)
                         {   // If the value shares ANY bits in common with the current mask
                             curmask |= val;     // Absorb ALL defined bits of the value into the current mask
@@ -65,14 +65,14 @@ namespace Sla.DECCORE
                     }
 
                     // Fill in any holes in the mask (bit field must consist of contiguous bits
-                    int4 lsb = leastsigbit_set(curmask);
-                    int4 msb = mostsigbit_set(curmask);
+                    int lsb = leastsigbit_set(curmask);
+                    int msb = mostsigbit_set(curmask);
                     if (msb > curmaxbit)
                         curmaxbit = msb;
 
-                    uintb mask1 = 1;
+                    ulong mask1 = 1;
                     mask1 = (mask1 << lsb) - 1;     // every bit below lsb is set to 1
-                    uintb mask2 = 1;
+                    ulong mask2 = 1;
                     mask2 <<= msb;
                     mask2 <<= 1;
                     mask2 -= 1;                  // every bit below or equal to msb is set to 1
@@ -99,25 +99,25 @@ namespace Sla.DECCORE
         /// \param typegrp is the factory owning \b this data-type
         protected void decode(Decoder decoder, TypeFactory typegrp)
         {
-            //  uint4 elemId = decoder.openElement();
+            //  uint elemId = decoder.openElement();
             decodeBasic(decoder);
             submeta = (metatype == TYPE_INT) ? SUB_INT_ENUM : SUB_UINT_ENUM;
-            map<uintb, string> nmap;
+            map<ulong, string> nmap;
 
             for (; ; )
             {
-                uint4 childId = decoder.openElement();
+                uint childId = decoder.openElement();
                 if (childId == 0) break;
-                uintb val = 0;
+                ulong val = 0;
                 string nm;
                 for (; ; )
                 {
-                    uint4 attrib = decoder.getNextAttributeId();
+                    uint attrib = decoder.getNextAttributeId();
                     if (attrib == 0) break;
                     if (attrib == ATTRIB_VALUE)
                     {
-                        intb valsign = decoder.readSignedInteger(); // Value might be negative
-                        val = (uintb)valsign & calc_mask(size);
+                        long valsign = decoder.readSignedInteger(); // Value might be negative
+                        val = (ulong)valsign & calc_mask(size);
                     }
                     else if (attrib == ATTRIB_NAME)
                         nm = decoder.readString();
@@ -141,7 +141,7 @@ namespace Sla.DECCORE
         }
 
         /// Construct from a size and meta-type (TYPE_INT or TYPE_UINT)
-        public TypeEnum(int4 s, type_metatype m)
+        public TypeEnum(int s, type_metatype m)
             : base(s, m)
         {
             flags |= enumtype;
@@ -149,7 +149,7 @@ namespace Sla.DECCORE
         }
 
         /// Construct from a size, meta-type, and name
-        public TypeEnum(int4 s, type_metatype m, string nm)
+        public TypeEnum(int s, type_metatype m, string nm)
             : base(s, m, nm)
         {
             flags |= enumtype;
@@ -157,10 +157,10 @@ namespace Sla.DECCORE
         }
 
         /// Beginning of name map
-        public IEnumerator<KeyValuePair<uintb, string>> beginEnum() => namemap.begin();
+        public IEnumerator<KeyValuePair<ulong, string>> beginEnum() => namemap.begin();
 
         /// End of name map
-        public IEnumerator<KeyValuePair<uintb, string>> endEnum() => namemap.end();
+        public IEnumerator<KeyValuePair<ulong, string>> endEnum() => namemap.end();
 
         /// Recover the named representation
         /// Given a specific value of the enumeration, calculate the named representation of that value.
@@ -169,10 +169,10 @@ namespace Sla.DECCORE
         /// \param val is the value to find the representation for
         /// \param valnames will hold the returned list of names
         /// \return true if the representation needs to be complemented
-        public bool getMatches(uintb val, List<string> matchname)
+        public bool getMatches(ulong val, List<string> matchname)
         {
-            map<uintb, string>::const_iterator iter;
-            int4 count;
+            map<ulong, string>::const_iterator iter;
+            int count;
 
             for (count = 0; count < 2; ++count)
             {
@@ -187,9 +187,9 @@ namespace Sla.DECCORE
                 }
                 else
                 {
-                    for (int4 i = 0; i < masklist.size(); ++i)
+                    for (int i = 0; i < masklist.size(); ++i)
                     {
-                        uintb maskedval = val & masklist[i];
+                        ulong maskedval = val & masklist[i];
                         if (maskedval == 0) // No component of -val- in this mask
                             continue;       // print nothing
                         iter = namemap.find(maskedval);
@@ -210,18 +210,18 @@ namespace Sla.DECCORE
             return false;   // If we reach here, no representation was possible, -valnames- is empty
         }
 
-        public override int4 compare(Datatype op, int4 level)
+        public override int compare(Datatype op, int level)
         {
             return compareDependency(op);
         }
 
-        public override int4 compareDependency(Datatype op)
+        public override int compareDependency(Datatype op)
         {
-            int4 res = TypeBase::compareDependency(op); // Compare as basic types first
+            int res = TypeBase::compareDependency(op); // Compare as basic types first
             if (res != 0) return res;
 
             TypeEnum te = (TypeEnum*) &op;
-            map<uintb, string>::const_iterator iter1, iter2;
+            map<ulong, string>::const_iterator iter1, iter2;
 
             if (namemap.size() != te.namemap.size())
             {
@@ -253,7 +253,7 @@ namespace Sla.DECCORE
             encoder.openElement(ELEM_TYPE);
             encodeBasic(metatype, encoder);
             encoder.writeString(ATTRIB_ENUM, "true");
-            map<uintb, string>::const_iterator iter;
+            map<ulong, string>::const_iterator iter;
             for (iter = namemap.begin(); iter != namemap.end(); ++iter)
             {
                 encoder.openElement(ELEM_VAL);

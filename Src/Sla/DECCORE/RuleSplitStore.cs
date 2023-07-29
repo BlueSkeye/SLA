@@ -28,12 +28,12 @@ namespace Sla.DECCORE
         ///
         /// If more than one logical component of a structure or array is stored at once,
         /// rewrite the STORE operator as multiple STOREs.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_STORE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Datatype* outType = SplitDatatype::getValueDatatype(op, op.getIn(2).getSize(), data.getArch().types);
             if (outType == (Datatype*)0)

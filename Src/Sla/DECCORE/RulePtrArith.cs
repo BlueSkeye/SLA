@@ -18,7 +18,7 @@ namespace Sla.DECCORE
         /// \param op is the given op
         /// \param slot is the input slot of the putative base pointer
         /// \return \b true if the indicated slot holds the preferred pointer
-        private static bool verifyPreferredPointer(PcodeOp op, int4 slot)
+        private static bool verifyPreferredPointer(PcodeOp op, int slot)
         {
             Varnode* vn = op.getIn(slot);
             if (!vn.isWritten()) return true;
@@ -64,14 +64,14 @@ namespace Sla.DECCORE
         /// We need to be wary of most things being in the units of the
         /// space being pointed at. Type calculations are always in bytes
         /// so we need to convert between space units and bytes.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_ADD);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            int4 slot;
+            int slot;
             Datatype ct = (Datatype*)0; // Unnecessary initialization
 
             if (!data.hasTypeRecoveryStarted()) return 0;
@@ -106,10 +106,10 @@ namespace Sla.DECCORE
         /// \param op is the given INT_ADD
         /// \param slot is the index of the pointer
         /// \return the command code
-        public static int4 evaluatePointerExpression(PcodeOp op, int4 slot)
+        public static int evaluatePointerExpression(PcodeOp op, int slot)
         {
-            int4 res = 1;       // Assume we are going to push
-            int4 count = 0; // Count descendants
+            int res = 1;       // Assume we are going to push
+            int count = 0; // Count descendants
             Varnode* ptrBase = op.getIn(slot);
             if (ptrBase.isFree() && !ptrBase.isConstant())
                 return 0;

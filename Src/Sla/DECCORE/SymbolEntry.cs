@@ -82,7 +82,7 @@ namespace Sla.DECCORE
         {
             // friend class SymbolEntry;
             private int useindex;          ///< Index of the sub-sorting address space
-            private uintb useoffset;            ///< Offset into the sub-sorting address space
+            private ulong useoffset;            ///< Offset into the sub-sorting address space
 
             public EntrySubsort(Address addr) {
                 useindex = addr.getSpace().getIndex();
@@ -121,7 +121,7 @@ namespace Sla.DECCORE
             }
         }
 
-        //typedef uintb linetype;     ///< The linear element for a rangemap of SymbolEntry
+        //typedef ulong linetype;     ///< The linear element for a rangemap of SymbolEntry
         //typedef EntrySubsort subsorttype;   ///< The sub-sort object for a rangemap
         //typedef EntryInitData inittype; ///< Initialization data for a SymbolEntry in a rangemap
 
@@ -130,7 +130,7 @@ namespace Sla.DECCORE
         /// \param data contains the raw initialization data
         /// \param a is the starting offset of the entry
         /// \param b is the ending offset of the entry
-        public SymbolEntry(EntryInitData data, uintb a, uintb b)
+        public SymbolEntry(EntryInitData data, ulong a, ulong b)
         {
             addr = new Address(data.space, a);
             size = (b - a) + 1;
@@ -181,10 +181,10 @@ namespace Sla.DECCORE
         public int getOffset() => offset;
 
         /// Get the first offset of \b this storage location
-        public uintb getFirst() => addr.getOffset();
+        public ulong getFirst() => addr.getOffset();
 
         /// Get the last offset of \b this storage location
-        public uintb getLast() => (addr.getOffset()+size - 1);
+        public ulong getLast() => (addr.getOffset()+size - 1);
 
         /// Get the sub-sort object
         /// Get data used to sub-sort entries (in a rangemap) at the same address
@@ -210,10 +210,10 @@ namespace Sla.DECCORE
         public Address getAddr() => addr;
 
         /// Get the hash used to identify \b this storage
-        public uint8 getHash() => hash;
+        public ulong getHash() => hash;
 
         /// Get the number of bytes consumed by \b this storage
-        public int4 getSize() => size;
+        public int getSize() => size;
 
         /// Is \b this storage valid for the given code address
         /// This storage location may only hold the Symbol value for a limited portion of the code.
@@ -270,12 +270,12 @@ namespace Sla.DECCORE
         /// \return the matching data-type or NULL
         public Datatype getSizedType(Address addr, int sz)
         {
-            int4 off;
+            int off;
 
             if (isDynamic())
                 off = offset;
             else
-                off = (int4)(inaddr.getOffset() - addr.getOffset()) + offset;
+                off = (int)(inaddr.getOffset() - addr.getOffset()) + offset;
             Datatype* cur = symbol.getType();
             return symbol.getScope().getArch().types.getExactPiece(cur, off, sz);
         }
@@ -293,7 +293,7 @@ namespace Sla.DECCORE
                 s << addr.getShortcut();
                 addr.printRaw(s);
             }
-            s << ':' << dec << (uint4)symbol.getType().getSize();
+            s << ':' << dec << (uint)symbol.getType().getSize();
             s << ' ';
             symbol.getType().printRaw(s);
             s << " : ";

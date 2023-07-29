@@ -30,19 +30,19 @@ namespace Sla.DECCORE
         ///   - `zext(V) != c =>  V != c`
         ///   - `zext(V) < c  =>  V < c`
         ///   - `zext(V) <= c =>  V <= c`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
-            uint4 list[] = {CPUI_INT_EQUAL, CPUI_INT_NOTEQUAL,
+            uint list[] = {CPUI_INT_EQUAL, CPUI_INT_NOTEQUAL,
           CPUI_INT_LESS,CPUI_INT_LESSEQUAL };
             oplist.insert(oplist.end(), list, list + 4);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             PcodeOp* zext;
             Varnode* vn1,*vn2,*newvn;
-            uintb val;
-            int4 smallsize, zextslot, otherslot;
+            ulong val;
+            int smallsize, zextslot, otherslot;
 
             // vn1 equals ZEXTed input
             // vn2 = other input

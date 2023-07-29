@@ -12,10 +12,10 @@ namespace Sla.EXTRA
 {
     internal class ConstraintOpCopy : UnifyConstraint
     {
-        private int4 oldopindex;
-        private int4 newopindex;
+        private int oldopindex;
+        private int newopindex;
         
-        public ConstraintOpCopy(int4 oldind, int4 newind)
+        public ConstraintOpCopy(int oldind, int newind)
         {
             oldopindex = oldind;
             newopindex = newind;
@@ -39,7 +39,7 @@ namespace Sla.EXTRA
             typelist[newopindex] = UnifyDatatype(UnifyDatatype::op_type);
         }
 
-        public override int4 getBaseIndex() => oldopindex;
+        public override int getBaseIndex() => oldopindex;
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {

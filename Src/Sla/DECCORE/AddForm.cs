@@ -21,8 +21,8 @@ namespace Sla.DECCORE
         private PcodeOp add2;
         private Varnode hizext1;
         private Varnode hizext2;
-        private int4 slot1;
-        private uintb negconst;
+        private int slot1;
+        private ulong negconst;
         private PcodeOp existop;
         private SplitVarnode indoub;
         private SplitVarnode outdoub;
@@ -119,7 +119,7 @@ namespace Sla.DECCORE
             hi1 = h;
             lo1 = l;
             slot1 = op.getSlot(hi1);
-            for (int4 i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 if (i == 0)
                 {       // Assume we have to descend one more add
@@ -146,7 +146,7 @@ namespace Sla.DECCORE
                     hizext1 = op.getIn(1 - slot1);
                     hizext2 = (Varnode*)0;
                 }
-                for (int4 j = 0; j < 2; ++j)
+                for (int j = 0; j < 2; ++j)
                 {
                     if (i == 2)
                     {       // hi2 is an implied 0

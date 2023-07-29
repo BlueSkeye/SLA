@@ -73,17 +73,17 @@ namespace Sla.DECCORE
         /// \return the hash of the parent id and name
         private static ulong hashScopeName(ulong baseId, string nm)
         {
-            uint4 reg1 = (uint4)(baseId >> 32);
-            uint4 reg2 = (uint4)baseId;
+            uint reg1 = (uint)(baseId >> 32);
+            uint reg2 = (uint)baseId;
             reg1 = crc_update(reg1, 0xa9);
             reg2 = crc_update(reg2, reg1);
-            for (int4 i = 0; i < nm.size(); ++i)
+            for (int i = 0; i < nm.size(); ++i)
             {
-                uint4 val = nm[i];
+                uint val = nm[i];
                 reg1 = crc_update(reg1, val);
                 reg2 = crc_update(reg2, reg1);
             }
-            uint8 res = reg1;
+            ulong res = reg1;
             res = (res << 32) | reg2;
             return res;
         }
@@ -311,7 +311,7 @@ namespace Sla.DECCORE
         /// \param spc is the address space of the range
         /// \param first is the offset of the first byte in the range
         /// \param last is the offset of the last byte in the range
-        protected virtual void addRange(AddrSpace spc, uintb first, uintb last)
+        protected virtual void addRange(AddrSpace spc, ulong first, ulong last)
         {
             rangetree.insertRange(spc, first, last);
         }
@@ -320,7 +320,7 @@ namespace Sla.DECCORE
         /// \param spc is the address space of the range
         /// \param first is the offset of the first byte in the range
         /// \param last is the offset of the last byte in the range
-        protected virtual void removeRange(AddrSpace spc, uintb first, uintb last)
+        protected virtual void removeRange(AddrSpace spc, ulong first, ulong last)
         {
             rangetree.removeRange(spc, first, last);
         }
@@ -381,7 +381,7 @@ namespace Sla.DECCORE
             }
 
             SymbolEntry* res;
-            int4 consumeSize = entry.symbol.getBytesConsumed();
+            int consumeSize = entry.symbol.getBytesConsumed();
             if (entry.addr.isInvalid())
                 res = addDynamicMapInternal(entry.symbol, Varnode::mapped, entry.hash, 0, consumeSize, entry.uselimit);
             else
@@ -398,13 +398,13 @@ namespace Sla.DECCORE
                 {
                     // The address is a join,  we add extra SymbolEntry maps for each of the pieces
                     JoinRecord* rec = glb.findJoin(entry.addr.getOffset());
-                    uint4 exfl;
-                    int4 num = rec.numPieces();
-                    uintb off = 0;
+                    uint exfl;
+                    int num = rec.numPieces();
+                    ulong off = 0;
                     bool bigendian = entry.addr.isBigEndian();
-                    for (int4 j = 0; j < num; ++j)
+                    for (int j = 0; j < num; ++j)
                     {
-                        int4 i = bigendian ? j : (num - 1 - j); // Take pieces in endian order
+                        int i = bigendian ? j : (num - 1 - j); // Take pieces in endian order
                         VarnodeData vdat = rec.getPiece(i);
                         if (i == 0)     // i==0 is most signif
                             exfl = Varnode::precishi;
@@ -710,7 +710,7 @@ namespace Sla.DECCORE
         {
             List<Symbol*> symList;
             queryByName(nm, symList);
-            for (int4 i = 0; i < symList.size(); ++i)
+            for (int i = 0; i < symList.size(); ++i)
             {
                 Symbol* sym = symList[i];
                 FunctionSymbol* funcsym = dynamic_cast<FunctionSymbol*>(sym);
@@ -834,7 +834,7 @@ namespace Sla.DECCORE
         {
             if (strategy)
             {
-                uint8 key = hashScopeName(uniqueId, nm);
+                ulong key = hashScopeName(uniqueId, nm);
                 ScopeMap::const_iterator iter = children.find(key);
                 if (iter == children.end()) return (Scope*)0;
                 Scope* scope = (*iter).second;
@@ -846,7 +846,7 @@ namespace Sla.DECCORE
                 // Allow the string to directly specify the id
                 istringstream s(nm);
                 s.unsetf(ios::dec | ios::hex | ios::oct);
-                uint8 key;
+                ulong key;
                 s >> key;
                 ScopeMap::const_iterator iter = children.find(key);
                 if (iter == children.end()) return (Scope*)0;
@@ -931,7 +931,7 @@ namespace Sla.DECCORE
         public void resetSizeLockType(Symbol sym)
         {
             if (sym.type.getMetatype() == TYPE_UNKNOWN) return;   // Nothing to do
-            int4 size = sym.type.getSize();
+            int size = sym.type.getSize();
             sym.type = glb.types.getBase(size, TYPE_UNKNOWN);
         }
 
@@ -975,7 +975,7 @@ namespace Sla.DECCORE
         /// \param vec is storage for the array of scopes
         public void getScopePath(List<Scope> vec)
         {
-            int4 count = 0;
+            int count = 0;
             Scope cur = this;
             while (cur != (Scope*)0) {    // Count number of elements in path
                 count += 1;
@@ -1006,10 +1006,10 @@ namespace Sla.DECCORE
             List<Scope> op2Path = new List<Scope>();
             getScopePath(thisPath);
             op2.getScopePath(op2Path);
-            int4 min = thisPath.size();
+            int min = thisPath.size();
             if (op2Path.size() < min)
                 min = op2Path.size();
-            for (int4 i = 0; i < min; ++i)
+            for (int i = 0; i < min; ++i)
             {
                 if (thisPath[i] != op2Path[i])
                     return thisPath[i];
@@ -1064,8 +1064,8 @@ namespace Sla.DECCORE
         /// \return the new Symbol
         public Symbol addMapSym(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement(ELEM_MAPSYM);
-            uint4 subId = decoder.peekElement();
+            uint elemId = decoder.openElement(ELEM_MAPSYM);
+            uint subId = decoder.peekElement();
             Symbol* sym;
             if (subId == ELEM_SYMBOL)
                 sym = new Symbol(owner);
@@ -1154,7 +1154,7 @@ namespace Sla.DECCORE
             SymbolEntry* ret = addMapPoint(sym, addr, Address());
             // Even if the external reference is in a readonly region, treat it as not readonly
             // As the value in the image probably isn't valid
-            ret.symbol.flags &= ~((uint4)Varnode::readonly);
+            ret.symbol.flags &= ~((uint)Varnode::readonly);
             return sym;
         }
 
@@ -1211,7 +1211,7 @@ namespace Sla.DECCORE
         /// \param addr is the address of the p-code op reading the constant
         /// \param hash is the dynamic hash identifying the constant
         /// \return the new EquateSymbol
-        public Symbol addEquateSymbol(string nm, uint format, uintb value, Address addr, ulong hash)
+        public Symbol addEquateSymbol(string nm, uint format, ulong value, Address addr, ulong hash)
         {
             Symbol* sym;
 
@@ -1265,7 +1265,7 @@ namespace Sla.DECCORE
                 HighVariable* high = vn.getHigh();
                 if (sym.getCategory() == Symbol::function_parameter || high.isInput())
                 {
-                    int4 index = -1;
+                    int index = -1;
                     if (sym.getCategory() == Symbol::function_parameter)
                         index = sym.getCategoryIndex() + 1;
                     return buildVariableName(vn.getAddr(), usepoint, sym.getType(), index, vn.getFlags() | Varnode::input);
@@ -1277,11 +1277,11 @@ namespace Sla.DECCORE
                 SymbolEntry* entry = sym.getMapEntry(0);
                 Address addr = entry.getAddr();
                 Address usepoint = entry.getFirstUseAddress();
-                uint4 flags = usepoint.isInvalid() ? Varnode::addrtied : 0;
+                uint flags = usepoint.isInvalid() ? Varnode::addrtied : 0;
                 if (sym.getCategory() == Symbol::function_parameter)
                 {
                     flags |= Varnode::input;
-                    int4 index = sym.getCategoryIndex() + 1;
+                    int index = sym.getCategoryIndex() + 1;
                     return buildVariableName(addr, usepoint, sym.getType(), index, flags);
                 }
                 return buildVariableName(addr, usepoint, sym.getType(), base, flags);
@@ -1300,7 +1300,7 @@ namespace Sla.DECCORE
         /// \return \b true if the memory is marked as \e read-only
         public bool isReadOnly(Address addr, int size, Address usepoint)
         {
-            uint4 flags;
+            uint flags;
             queryProperties(addr, size, usepoint, flags);
             return ((flags & Varnode::readonly)!= 0);
         }

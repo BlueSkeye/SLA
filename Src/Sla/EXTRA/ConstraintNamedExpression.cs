@@ -12,10 +12,10 @@ namespace Sla.EXTRA
 {
     internal class ConstraintNamedExpression : UnifyConstraint
     {
-        private int4 constindex;
+        private int constindex;
         private RHSConstant expr;
         
-        public ConstraintNamedExpression(int4 ind, RHSConstant ex)
+        public ConstraintNamedExpression(int ind, RHSConstant ex)
         {
             constindex = ind, expr = ex;
             maxnum = constindex;
@@ -33,7 +33,7 @@ namespace Sla.EXTRA
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
-            uintb ourconst = expr.getConstant(state);
+            ulong ourconst = expr.getConstant(state);
             state.data(constindex).setConstant(ourconst);
             return true;
         }
@@ -43,7 +43,7 @@ namespace Sla.EXTRA
             typelist[constindex] = UnifyDatatype(UnifyDatatype::const_type);
         }
 
-        public override int4 getBaseIndex() => constindex;
+        public override int getBaseIndex() => constindex;
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {

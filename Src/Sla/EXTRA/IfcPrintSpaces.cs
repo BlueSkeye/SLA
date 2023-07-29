@@ -21,8 +21,8 @@ namespace Sla.EXTRA
                 throw IfaceExecutionError("No load image present");
 
             AddrSpaceManager manage = dcp.conf;
-            int4 num = manage.numSpaces();
-            for (int4 i = 0; i < num; ++i)
+            int num = manage.numSpaces();
+            for (int i = 0; i < num; ++i)
             {
                 AddrSpace* spc = manage.getSpace(i);
                 if (spc == (AddrSpace*)0) continue;

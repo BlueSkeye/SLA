@@ -28,16 +28,16 @@ namespace Sla.DECCORE
         /// The pointer can either be a constant offset into the STORE's specified address space,
         /// or it can be a \e spacebase register plus an offset, in which case it points into
         /// the \e spacebase register's address space.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_STORE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            int4 size;
+            int size;
             AddrSpace* baseoff;
-            uintb offoff;
+            ulong offoff;
 
             baseoff = RuleLoadVarnode::checkSpacebase(data.getArch(), op, offoff);
             if (baseoff == (AddrSpace*)0) return 0;

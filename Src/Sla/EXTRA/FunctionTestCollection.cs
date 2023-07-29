@@ -27,8 +27,8 @@ namespace Sla.EXTRA
         private List<string> commands = new List<string>();    ///< Sequence of commands for current test
         private IfaceStatus console;       ///< Decompiler console for executing scripts
         private bool consoleOwner;      ///< Set to \b true if \b this object owns the console
-        private /*mutable*/ int4 numTestsApplied;       ///< Count of tests that were executed
-        private /*mutable*/ int4 numTestsSucceeded; ///< Count of tests that passed
+        private /*mutable*/ int numTestsApplied;       ///< Count of tests that were executed
+        private /*mutable*/ int numTestsSucceeded; ///< Count of tests that passed
 
         /// Clear any previous architecture and function
         private void clear()
@@ -153,16 +153,16 @@ namespace Sla.EXTRA
         }
 
         /// Get the number of tests executed
-        public int4 getTestsApplied() => numTestsApplied;
+        public int getTestsApplied() => numTestsApplied;
 
         /// Get the number of tests that passed
-        public int4 getTestsSucceeded() => numTestsSucceeded;
+        public int getTestsSucceeded() => numTestsSucceeded;
 
         /// Get the number of commands in the current script
-        public int4 numCommands() => commands.size();
+        public int numCommands() => commands.size();
 
         /// Get the i-th command
-        public string getCommand(int4 i) => commands[i];
+        public string getCommand(int i) => commands[i];
 
         /// Load a test program, tests, and script
         /// Load the architecture based on the discovered \<binaryimage> tag.
@@ -287,11 +287,11 @@ namespace Sla.EXTRA
         /// \param s is the output stream to print results to
         public static int runTestFiles(List<string> testFiles, TextWriter s)
         {
-            int4 totalTestsApplied = 0;
-            int4 totalTestsSucceeded = 0;
+            int totalTestsApplied = 0;
+            int totalTestsSucceeded = 0;
             list<string> failures;
             FunctionTestCollection testCollection(s);
-            for (int4 i = 0; i < testFiles.size(); ++i)
+            for (int i = 0; i < testFiles.size(); ++i)
             {
                 try
                 {
@@ -321,7 +321,7 @@ namespace Sla.EXTRA
             if (!failures.empty()) {
                 s << "Failures: " << endl;
                 list<string>::const_iterator iter = failures.begin();
-                for (int4 i = 0; i < 10; ++i) {
+                for (int i = 0; i < 10; ++i) {
                     s << "  " << *iter << endl;
                     ++iter;
                     if (iter == failures.end()) break;

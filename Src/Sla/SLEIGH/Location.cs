@@ -9,13 +9,13 @@ namespace Sla.SLEIGH
     internal class Location
     {
         private string filename;
-        private int4 lineno;
+        private int lineno;
         
         public Location()
         {
         }
 
-        public Location(string fname, int4 line)
+        public Location(string fname, int line)
         {
             filename = fname;
             lineno = line;
@@ -23,7 +23,7 @@ namespace Sla.SLEIGH
 
         public string getFilename() => filename;
 
-        public int4 getLineno() => lineno;
+        public int getLineno() => lineno;
 
         public string format()
         {

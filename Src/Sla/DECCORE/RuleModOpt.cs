@@ -25,13 +25,13 @@ namespace Sla.DECCORE
 
         /// \class RuleModOpt
         /// \brief Simplify expressions that optimize INT_REM and INT_SREM
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_DIV);
             oplist.push_back(CPUI_INT_SDIV);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             PcodeOp* multop,*addop;
             Varnode* div,*x,*outvn,*outvn2,*div2;
@@ -51,7 +51,7 @@ namespace Sla.DECCORE
                 if (div2.isConstant())
                 {
                     if (!div.isConstant()) continue;
-                    uintb mask = calc_mask(div2.getSize());
+                    ulong mask = calc_mask(div2.getSize());
                     if ((((div2.getOffset() ^ mask) + 1) & mask) != div.getOffset())
                         continue;
                 }

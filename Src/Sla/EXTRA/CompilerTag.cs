@@ -25,7 +25,7 @@ namespace Sla.EXTRA
         /// \param decoder is the stream decoder
         public void decode(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement(ELEM_COMPILER);
+            uint elemId = decoder.openElement(ELEM_COMPILER);
             name = decoder.readString(ATTRIB_NAME);
             spec = decoder.readString(ATTRIB_SPEC);
             id = decoder.readString(ATTRIB_ID);

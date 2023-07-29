@@ -14,11 +14,11 @@ namespace Sla.EXTRA
     /// The property may "match" more than once or not at all.
     internal class FunctionTestProperty
     {
-        private int4 minimumMatch;      ///< Minimum number of times property is expected to match
-        private int4 maximumMatch;      ///< Maximum number of times property is expected to match
+        private int minimumMatch;      ///< Minimum number of times property is expected to match
+        private int maximumMatch;      ///< Maximum number of times property is expected to match
         private string name;            ///< Name of the test, to be printed in test summaries
         private std::regex pattern;     ///< Regular expression to match against a line of output
-        private /*mutable*/ uint4 count;		///< Number of times regular expression has been seen
+        private /*mutable*/ uint count;		///< Number of times regular expression has been seen
 
         /// Get the name of the property
         public string getName() => name;

@@ -14,18 +14,18 @@ namespace Sla.SLEIGH
     internal class MacroSymbol : SleighSymbol
     {
         // A user-defined pcode-macro
-        private int4 index;
+        private int index;
         private ConstructTpl construct;
         private List<OperandSymbol> operands;
         
-        public MacroSymbol(string nm,int4 i)
+        public MacroSymbol(string nm,int i)
             : base(nm)
         {
             index = i;
             construct = (ConstructTpl*)0;
         }
         
-        public int4 getIndex() => index;
+        public int getIndex() => index;
 
         public void setConstruct(ConstructTpl ct)
         {
@@ -39,9 +39,9 @@ namespace Sla.SLEIGH
             operands.push_back(sym);
         }
 
-        public int4 getNumOperands() => operands.size();
+        public int getNumOperands() => operands.size();
 
-        public OperandSymbol getOperand(int4 i) => operands[i];
+        public OperandSymbol getOperand(int i) => operands[i];
 
         ~MacroSymbol()
         {

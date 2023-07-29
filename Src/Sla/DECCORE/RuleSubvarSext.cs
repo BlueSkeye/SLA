@@ -12,7 +12,7 @@ namespace Sla.DECCORE
     internal class RuleSubvarSext : Rule
     {
         /// Is it guaranteed the root is a sub-variable needing to be trimmed
-        private int4 isaggressive;
+        private int isaggressive;
         
         public RuleSubvarSext(string g)
             : base(g, 0, "subvar_sext")
@@ -28,16 +28,16 @@ namespace Sla.DECCORE
 
         /// \class RuleSubvarSext
         /// \brief Perform SubvariableFlow analysis triggered by INT_SEXT
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_SEXT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn = op.getOut();
             Varnode* invn = op.getIn(0);
-            uintb mask = calc_mask(invn.getSize());
+            ulong mask = calc_mask(invn.getSize());
 
             SubvariableFlow subflow(&data,vn,mask,isaggressive,true,false);
             if (!subflow.doTrace()) return 0;

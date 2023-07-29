@@ -21,18 +21,18 @@ namespace Sla.SLEIGH
     internal class SleighBase : Translate
     {
         /// Maximum size of a varnode in the unique space (should match value in SleighBase.java)
-        public const uint4 MAX_UNIQUE_SIZE = 128;
+        public const uint MAX_UNIQUE_SIZE = 128;
         /// Current version of the .sla file read/written by SleighBash
-        private const int4 SLA_FORMAT_VERSION = 3;
+        private const int SLA_FORMAT_VERSION = 3;
         
         private List<string> userop;      ///< Names of user-define p-code ops for \b this Translate object
         private Dictionary<VarnodeData, string> varnode_xref;  ///< A map from Varnodes in the \e register space to register names
         
         protected SubtableSymbol root;     ///< The root SLEIGH decoding symbol
         protected SymbolTable symtab;     ///< The SLEIGH symbol table
-        protected uint4 maxdelayslotbytes;    ///< Maximum number of bytes in a delay-slot directive
-        protected uint4 unique_allocatemask;  ///< Bits that are guaranteed to be zero in the unique allocation scheme
-        protected uint4 numSections;      ///< Number of \e named sections
+        protected uint maxdelayslotbytes;    ///< Maximum number of bytes in a delay-slot directive
+        protected uint unique_allocatemask;  ///< Bits that are guaranteed to be zero in the unique allocation scheme
+        protected uint numSections;      ///< Number of \e named sections
         protected SourceFileIndexer indexer;    ///< source file index used when generating SLEIGH constructor debug info
 
         /// Build register map. Collect user-ops and context-fields.
@@ -60,7 +60,7 @@ namespace Sla.SLEIGH
                 }
                 else if (sym.getType() == SleighSymbol::userop_symbol)
                 {
-                    int4 index = ((UserOpSymbol*)sym).getIndex();
+                    int index = ((UserOpSymbol*)sym).getIndex();
                     while (userop.size() <= index)
                         userop.push_back("");
                     userop[index] = sym.getName();
@@ -69,8 +69,8 @@ namespace Sla.SLEIGH
                 {
                     ContextSymbol* csym = (ContextSymbol*)sym;
                     ContextField* field = (ContextField*)csym.getPatternValue();
-                    int4 startbit = field.getStartBit();
-                    int4 endbit = field.getEndBit();
+                    int startbit = field.getStartBit();
+                    int endbit = field.getEndBit();
                     registerContext(csym.getName(), startbit, endbit);
                 }
             }
@@ -91,8 +91,8 @@ namespace Sla.SLEIGH
                 {
                     ContextSymbol* csym = (ContextSymbol*)sym;
                     ContextField* field = (ContextField*)csym.getPatternValue();
-                    int4 startbit = field.getStartBit();
-                    int4 endbit = field.getEndBit();
+                    int startbit = field.getStartBit();
+                    int endbit = field.getEndBit();
                     registerContext(csym.getName(), startbit, endbit);
                 }
             }
@@ -107,7 +107,7 @@ namespace Sla.SLEIGH
             maxdelayslotbytes = 0;
             unique_allocatemask = 0;
             numSections = 0;
-            int4 version = 0;
+            int version = 0;
             setBigEndian(xml_readbool(el.getAttributeValue("bigendian")));
             {
                 istringstream s(el.getAttributeValue("align"));
@@ -117,12 +117,12 @@ namespace Sla.SLEIGH
             {
                 istringstream s(el.getAttributeValue("uniqbase"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
-                uintm ubase;
+                uint ubase;
                 s >> ubase;
                 setUniqueBase(ubase);
             }
-            int4 numattr = el.getNumAttributes();
-            for (int4 i = 0; i < numattr; ++i)
+            int numattr = el.getNumAttributes();
+            for (int i = 0; i < numattr; ++i)
             {
                 string attrname = el.getAttributeName(i);
                 if (attrname == "maxdelay")
@@ -200,7 +200,7 @@ namespace Sla.SLEIGH
             return sym.getFixedVarnode();
         }
 
-        public override string getRegisterName(AddrSpace @base, uintb off, int4 size)
+        public override string getRegisterName(AddrSpace @base, ulong off, int size)
         {
             VarnodeData sym;
             sym.space = base;
@@ -211,7 +211,7 @@ namespace Sla.SLEIGH
             iter--;
             VarnodeData point = (*iter).first;
             if (point.space != base) return "";
-            uintb offbase = point.offset;
+            ulong offbase = point.offset;
             if (point.offset + point.size >= off + size)
                 return (*iter).second;
 
@@ -240,7 +240,7 @@ namespace Sla.SLEIGH
         public SleighSymbol findSymbol(string nm) => symtab.findSymbol(nm);
 
         /// Find a specific SLEIGH symbol by id
-        public SleighSymbol findSymbol(uintm id) => symtab.findSymbol(id);
+        public SleighSymbol findSymbol(uint id) => symtab.findSymbol(id);
 
         /// Find a specific global SLEIGH symbol by name
         public SleighSymbol findGlobalSymbol(string nm) => symtab.findGlobalSymbol(nm);
@@ -266,7 +266,7 @@ namespace Sla.SLEIGH
             s << "<spaces";
             a_v(s, "defaultspace", getDefaultCodeSpace().getName());
             s << ">\n";
-            for (int4 i = 0; i < numSpaces(); ++i)
+            for (int i = 0; i < numSpaces(); ++i)
             {
                 AddrSpace* spc = getSpace(i);
                 if (spc == (AddrSpace*)0) continue;

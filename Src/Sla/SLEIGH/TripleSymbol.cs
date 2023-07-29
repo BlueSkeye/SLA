@@ -26,11 +26,11 @@ namespace Sla.SLEIGH
 
         public abstract void getFixedHandle(FixedHandle hand, ParserWalker walker);
         
-        public override int4 getSize() => 0;
+        public override int getSize() => 0;
 
         public abstract void print(TextWriter s, ParserWalker walker);
     
-        public virtual void collectLocalValues(List<uintb> results)
+        public virtual void collectLocalValues(List<ulong> results)
         {
         }
     }

@@ -36,9 +36,9 @@ namespace Sla.DECCORE
         /// The set of VariablePieces making up \b this group
         private set<VariablePiece, PieceCompareByOffset> pieceSet;
         /// Number of contiguous bytes covered by the whole group
-        private int4 size;
+        private int size;
         /// Byte offset of \b this group within its containing Symbol
-        private int4 symbolOffset;
+        private int symbolOffset;
         
         public VariableGroup()
         {
@@ -57,7 +57,7 @@ namespace Sla.DECCORE
             piece.group = this;
             if (!pieceSet.insert(piece).second)
                 throw new LowlevelError("Duplicate VariablePiece");
-            int4 pieceMax = piece.getOffset() + piece.getSize();
+            int pieceMax = piece.getOffset() + piece.getSize();
             if (pieceMax > size)
                 size = pieceMax;
         }
@@ -65,7 +65,7 @@ namespace Sla.DECCORE
         /// Adjust offset for every piece by the given amount
         /// The adjustment amount must be positive, and this effectively increases the size of the group.
         /// \param amt is the given amount to add to offsets
-        public void adjustOffsets(int4 amt)
+        public void adjustOffsets(int amt)
         {
             set<VariablePiece*, VariableGroup::PieceCompareByOffset>::iterator iter;
 
@@ -84,16 +84,16 @@ namespace Sla.DECCORE
         }
 
         /// Get the number of bytes \b this group covers
-        public int4 getSize() => size;
+        public int getSize() => size;
 
         /// Cache the symbol offset for the group
-        public void setSymbolOffset(int4 val)
+        public void setSymbolOffset(int val)
         {
             symbolOffset = val;
         }
 
         /// Get offset of \b this group within its Symbol
-        public int4 getSymbolOffset() => symbolOffset;
+        public int getSymbolOffset() => symbolOffset;
 
         /// Combine given VariableGroup into \b this
         /// Every VariablePiece in the given group is moved into \b this and the VariableGroup object is deleted.

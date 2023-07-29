@@ -24,13 +24,13 @@ namespace Sla.DECCORE
             return (!grouplist.contains(getGroup())) ? null : new ActionRestrictLocal(getGroup());
         }
 
-        public override int4 apply(Funcdata data)
+        public override int apply(Funcdata data)
         {
             FuncCallSpecs* fc;
             list<PcodeOp*>::const_iterator iter;
             PcodeOp* op;
             Varnode* vn;
-            int4 i;
+            int i;
             List<EffectRecord>::const_iterator eiter, endeiter;
 
             for (i = 0; i < data.numCalls(); ++i)
@@ -40,13 +40,13 @@ namespace Sla.DECCORE
 
                 if (!fc.isInputLocked()) continue;
                 if (fc.getSpacebaseOffset() == FuncCallSpecs::offset_unknown) continue;
-                int4 numparam = fc.numParams();
-                for (int4 j = 0; j < numparam; ++j)
+                int numparam = fc.numParams();
+                for (int j = 0; j < numparam; ++j)
                 {
                     ProtoParameter* param = fc.getParam(j);
                     Address addr = param.getAddress();
                     if (addr.getSpace().getType() != IPTR_SPACEBASE) continue;
-                    uintb off = addr.getSpace().wrapOffset(fc.getSpacebaseOffset() + addr.getOffset());
+                    ulong off = addr.getSpace().wrapOffset(fc.getSpacebaseOffset() + addr.getOffset());
                     data.getScopeLocal().markNotMapped(addr.getSpace(), off, param.getSize(), true);
                 }
             }

@@ -24,21 +24,21 @@ namespace Sla.DECCORE
 
         /// \class RuleAndDistribute
         /// \brief Distribute INT_AND through INT_OR if result is simpler
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_AND);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* orvn,*othervn,*newvn1,*newvn2;
             PcodeOp* orop = (PcodeOp*)0;
             PcodeOp* newop1,*newop2;
-            uintb ormask1, ormask2, othermask, fullmask;
-            int4 i, size;
+            ulong ormask1, ormask2, othermask, fullmask;
+            int i, size;
 
             size = op.getOut().getSize();
-            if (size > sizeof(uintb)) return 0; // FIXME: uintb should be arbitrary precision
+            if (size > sizeof(ulong)) return 0; // FIXME: ulong should be arbitrary precision
             fullmask = calc_mask(size);
             for (i = 0; i < 2; ++i)
             {

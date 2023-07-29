@@ -12,10 +12,10 @@ namespace Sla.EXTRA
 {
     internal class ConstraintDescend : UnifyConstraint
     {
-        private int4 opindex;
-        private int4 varindex;
+        private int opindex;
+        private int varindex;
         
-        public ConstraintDescend(int4 oind, int4 vind)
+        public ConstraintDescend(int oind, int vind)
         {
             opindex = oind;
             varindex = vind;
@@ -55,7 +55,7 @@ namespace Sla.EXTRA
             typelist[varindex] = UnifyDatatype(UnifyDatatype::var_type);
         }
 
-        public override int4 getBaseIndex() => opindex;
+        public override int getBaseIndex() => opindex;
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {

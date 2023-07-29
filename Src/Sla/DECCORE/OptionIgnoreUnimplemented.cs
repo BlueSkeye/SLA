@@ -31,7 +31,7 @@ namespace Sla.DECCORE
             else
             {
                 res = "Unimplemented instructions now generate warnings";
-                glb.flowoptions &= ~((uint4)FlowInfo::ignore_unimplemented);
+                glb.flowoptions &= ~((uint)FlowInfo::ignore_unimplemented);
             }
 
             return res;

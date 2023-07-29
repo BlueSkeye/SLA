@@ -16,11 +16,11 @@ namespace Sla.DECCORE
     internal class LaneDescription
     {
         /// Size of the region being split in bytes
-        private int4 wholeSize;
+        private int wholeSize;
         /// Size of lanes in bytes
-        private List<int4> laneSize;
+        private List<int> laneSize;
         /// Significance positions of lanes in bytes
-        private List<int4> lanePosition;
+        private List<int> lanePosition;
 
         /// Copy constructor
         /// \param op2 is the lane description to copy from
@@ -35,14 +35,14 @@ namespace Sla.DECCORE
         /// Create lanes that are all the same size
         /// \param origSize is the size of the whole in bytes
         /// \param sz is the size of a lane in bytes
-        public LaneDescription(int4 origSize, int4 sz)
+        public LaneDescription(int origSize, int sz)
         {
             wholeSize = origSize;
-            int4 numLanes = origSize / sz;
+            int numLanes = origSize / sz;
             laneSize.resize(numLanes);
             lanePosition.resize(numLanes);
-            int4 pos = 0;
-            for (int4 i = 0; i < numLanes; ++i)
+            int pos = 0;
+            for (int i = 0; i < numLanes; ++i)
             {
                 laneSize[i] = sz;
                 lanePosition[i] = pos;
@@ -54,7 +54,7 @@ namespace Sla.DECCORE
         /// \param origSize is the size of the whole in bytes
         /// \param lo is the size of the least significant lane in bytes
         /// \param hi is the size of the most significant lane in bytes
-        public LaneDescription(int4 origSize, int4 lo, int4 hi)
+        public LaneDescription(int origSize, int lo, int hi)
         {
             wholeSize = origSize;
             laneSize.resize(2);
@@ -73,20 +73,20 @@ namespace Sla.DECCORE
         /// \param lsbOffset is the number of bytes to remove from the front of the description
         /// \param size is the number of bytes in the subrange
         /// \return \b true if \b this was successfully transformed to the subrange
-        public bool subset(int4 lsbOffset, int4 size)
+        public bool subset(int lsbOffset, int size)
         {
             if (lsbOffset == 0 && size == wholeSize)
                 return true;            // subrange is the whole range
-            int4 firstLane = getBoundary(lsbOffset);
+            int firstLane = getBoundary(lsbOffset);
             if (firstLane < 0) return false;
-            int4 lastLane = getBoundary(lsbOffset + size);
+            int lastLane = getBoundary(lsbOffset + size);
             if (lastLane < 0) return false;
-            List<int4> newLaneSize;
+            List<int> newLaneSize;
             lanePosition.clear();
-            int4 newPosition = 0;
-            for (int4 i = firstLane; i < lastLane; ++i)
+            int newPosition = 0;
+            for (int i = firstLane; i < lastLane; ++i)
             {
-                int4 sz = laneSize[i];
+                int sz = laneSize[i];
                 lanePosition.push_back(newPosition);
                 newLaneSize.push_back(sz);
                 newPosition += sz;
@@ -97,16 +97,16 @@ namespace Sla.DECCORE
         }
 
         /// Get the total number of lanes
-        public int4 getNumLanes() => laneSize.size();
+        public int getNumLanes() => laneSize.size();
 
         /// Get the size of the region being split
-        public int4 getWholeSize() => wholeSize;
+        public int getWholeSize() => wholeSize;
 
         /// Get the size of the i-th lane
-        public int4 getSize(int4 i) => laneSize[i];
+        public int getSize(int i) => laneSize[i];
 
         /// Get the significance offset of the i-th lane
-        public int4 getPosition(int4 i) => lanePosition[i];
+        public int getPosition(int i) => lanePosition[i];
 
         /// Get index of lane that starts at the given byte position
         /// Position 0 will map to index 0 and a position equal to whole size will
@@ -114,18 +114,18 @@ namespace Sla.DECCORE
         /// not fall on a lane boundary will return -1.
         /// \param bytePos is the given byte position to test
         /// \return the index of the lane that start at the given position
-        public int4 getBoundary(int4 bytePos)
+        public int getBoundary(int bytePos)
         {
             if (bytePos < 0 || bytePos > wholeSize)
                 return -1;
             if (bytePos == wholeSize)
                 return lanePosition.size();
-            int4 min = 0;
-            int4 max = lanePosition.size() - 1;
+            int min = 0;
+            int max = lanePosition.size() - 1;
             while (min <= max)
             {
-                int4 index = (min + max) / 2;
-                int4 pos = lanePosition[index];
+                int index = (min + max) / 2;
+                int pos = lanePosition[index];
                 if (pos == bytePos) return index;
                 if (pos < bytePos)
                     min = index + 1;
@@ -147,12 +147,12 @@ namespace Sla.DECCORE
         /// \param resNumLanes will hold the number of lanes in the truncation
         /// \param resSkipLanes will hold the starting lane in the truncation
         /// \return \b true if the truncation is natural
-        public bool restriction(int4 numLanes, int4 skipLanes, int4 bytePos, int4 size, int4 resNumLanes,
-            int4 resSkipLanes)
+        public bool restriction(int numLanes, int skipLanes, int bytePos, int size, int resNumLanes,
+            int resSkipLanes)
         {
             resSkipLanes = getBoundary(lanePosition[skipLanes] + bytePos);
             if (resSkipLanes < 0) return false;
-            int4 finalIndex = getBoundary(lanePosition[skipLanes] + bytePos + size);
+            int finalIndex = getBoundary(lanePosition[skipLanes] + bytePos + size);
             if (finalIndex < 0) return false;
             resNumLanes = finalIndex - resSkipLanes;
             return (resNumLanes != 0);
@@ -171,12 +171,12 @@ namespace Sla.DECCORE
         /// \param resNumLanes will hold the number of lanes in the extension
         /// \param resSkipLanes will hold the starting lane in the extension
         /// \return \b true if the extension is natural
-        public bool extension(int4 numLanes, int4 skipLanes, int4 bytePos, int4 size, int4 resNumLanes,
-            int4 resSkipLanes)
+        public bool extension(int numLanes, int skipLanes, int bytePos, int size, int resNumLanes,
+            int resSkipLanes)
         {
             resSkipLanes = getBoundary(lanePosition[skipLanes] - bytePos);
             if (resSkipLanes < 0) return false;
-            int4 finalIndex = getBoundary(lanePosition[skipLanes] - bytePos + size);
+            int finalIndex = getBoundary(lanePosition[skipLanes] - bytePos + size);
             if (finalIndex < 0) return false;
             resNumLanes = finalIndex - resSkipLanes;
             return (resNumLanes != 0);

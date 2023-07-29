@@ -12,11 +12,11 @@ namespace Sla.EXTRA
 {
     internal class ConstraintOpCompare : UnifyConstraint
     {
-        private int4 op1index;
-        private int4 op2index;
+        private int op1index;
+        private int op2index;
         private bool istrue;
         
-        public ConstraintOpCompare(int4 op1ind, int4 op2ind, bool val)
+        public ConstraintOpCompare(int op1ind, int op2ind, bool val)
         {
             op1index = op1ind;
             op2index = op2ind;
@@ -42,7 +42,7 @@ namespace Sla.EXTRA
             typelist[op2index] = UnifyDatatype(UnifyDatatype::op_type);
         }
 
-        public override int4 getBaseIndex() => op1index;
+        public override int getBaseIndex() => op1index;
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {

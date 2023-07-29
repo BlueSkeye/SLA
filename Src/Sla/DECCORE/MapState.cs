@@ -42,7 +42,7 @@ namespace Sla.DECCORE
         private void addGuard(LoadGuard guard,OpCode opc, TypeFactory typeFactory)
         {
             if (!guard.isValid(opc)) return;
-            int4 step = guard.getStep();
+            int step = guard.getStep();
             if (step == 0) return;      // No definitive sign of array access
             Datatype* ct = guard.getOp().getIn(1).getTypeReadFacing(guard.getOp());
             if (ct.getMetatype() == TYPE_PTR)
@@ -51,7 +51,7 @@ namespace Sla.DECCORE
                 while (ct.getMetatype() == TYPE_ARRAY)
                     ct = ((TypeArray*)ct).getBase();
             }
-            int4 outSize;
+            int outSize;
             if (opc == CPUI_STORE)
                 outSize = guard.getOp().getIn(2).getSize();   // The Varnode being stored
             else
@@ -73,7 +73,7 @@ namespace Sla.DECCORE
             }
             if (guard.isRangeLocked())
             {
-                int4 minItems = ((guard.getMaximum() - guard.getMinimum()) + 1) / step;
+                int minItems = ((guard.getMaximum() - guard.getMinimum()) + 1) / step;
                 addRange(guard.getMinimum(), ct, 0, RangeHint::open, minItems - 1);
             }
             else
@@ -88,16 +88,16 @@ namespace Sla.DECCORE
         /// \param fl is additional boolean properties
         /// \param rt is the type of the hint
         /// \param hi is the biggest guaranteed index for \e open range hints
-        private void addRange(uintb st, Datatype ct, uint4 fl, RangeHint::RangeType rt, int4 hi)
+        private void addRange(ulong st, Datatype ct, uint fl, RangeHint::RangeType rt, int hi)
         {
             if ((ct == (Datatype*)0) || (ct.getSize() == 0)) // Must have a real type
                 ct = defaultType;
-            int4 sz = ct.getSize();
+            int sz = ct.getSize();
             if (!range.inRange(Address(spaceid, st), sz))
                 return;
-            intb sst = (intb)AddrSpace::byteToAddress(st, spaceid.getWordSize());
+            long sst = (long)AddrSpace::byteToAddress(st, spaceid.getWordSize());
             sign_extend(sst, spaceid.getAddrSize() * 8 - 1);
-            sst = (intb)AddrSpace::addressToByte(sst, spaceid.getWordSize());
+            sst = (long)AddrSpace::addressToByte(sst, spaceid.getWordSize());
             RangeHint* newRange = new RangeHint(st, sz, sst, ct, fl, rt, hi);
             maplist.push_back(newRange);
 #if OPACTION_DEBUG
@@ -120,11 +120,11 @@ namespace Sla.DECCORE
         {
             List<RangeHint*> newList;
             newList.reserve(maplist.size());
-            int4 startPos = 0;
+            int startPos = 0;
             RangeHint* startHint = maplist[0];
             Datatype* startDatatype = startHint.type;
             newList.push_back(startHint);
-            int4 curPos = 1;
+            int curPos = 1;
             while (curPos < maplist.size())
             {
                 RangeHint* curHint = maplist[curPos++];
@@ -185,8 +185,8 @@ namespace Sla.DECCORE
             for (pmiter = pm.begin(); pmiter != pm.end(); ++pmiter)
             {
                 AddrSpace* pmSpc = (*pmiter).getSpace();
-                uintb first = (*pmiter).getFirst();
-                uintb last = (*pmiter).getLast();
+                ulong first = (*pmiter).getFirst();
+                ulong last = (*pmiter).getLast();
                 range.removeRange(pmSpc, first, last); // Clear possible input symbols
             }
 #if OPACTION_DEBUG
@@ -210,10 +210,10 @@ namespace Sla.DECCORE
             Range lastrange = range.getLastSignedRange(spaceid);
             if (lastrange == (Range*)0) return false;
             if (maplist.empty()) return false;
-            uintb high = spaceid.wrapOffset(lastrange.getLast() + 1);
-            intb sst = (intb)AddrSpace::byteToAddress(high, spaceid.getWordSize());
+            ulong high = spaceid.wrapOffset(lastrange.getLast() + 1);
+            long sst = (long)AddrSpace::byteToAddress(high, spaceid.getWordSize());
             sign_extend(sst, spaceid.getAddrSize() * 8 - 1);
-            sst = (intb)AddrSpace::addressToByte(sst, spaceid.getWordSize());
+            sst = (long)AddrSpace::addressToByte(sst, spaceid.getWordSize());
             // Add extra range to bound any final open entry
             RangeHint* termRange = new RangeHint(high, 1, sst, defaultType, 0, RangeHint::endpoint, -2);
             maplist.push_back(termRange);
@@ -231,7 +231,7 @@ namespace Sla.DECCORE
         }
 
         /// Get the list of alias starting offsets
-        public List<uintb> getAlias() => checker.getAlias();
+        public List<ulong> getAlias() => checker.getAlias();
 
         /// Add Symbol information as hints to the collection
         /// Run through all Symbols in the given map and create a corresponding RangeHint
@@ -247,7 +247,7 @@ namespace Sla.DECCORE
                 sym = (*riter).getSymbol();
                 if (sym == (Symbol*)0) continue;
                 //    if ((*iter).isPiece()) continue;     // This should probably never happen
-                uintb start = (*riter).getAddr().getOffset();
+                ulong start = (*riter).getAddr().getOffset();
                 Datatype* ct = sym.getType();
                 addRange(start, ct, sym.getFlags(), RangeHint::@fixed, -1);
             }
@@ -268,7 +268,7 @@ namespace Sla.DECCORE
             {
                 vn = *riter++;
                 if (vn.isFree()) continue;
-                uintb start = vn.getOffset();
+                ulong start = vn.getOffset();
                 Datatype* ct = vn.getType();
                 // Assume parents are present so partials aren't needed
                 if (ct.getMetatype() == TYPE_PARTIALSTRUCT) continue;
@@ -302,12 +302,12 @@ namespace Sla.DECCORE
                 vn = high.getTiedVarnode();    // Original vn may not be good representative
                 high.setMark();
                 varvec.push_back(high);
-                uintb start = vn.getOffset();
+                ulong start = vn.getOffset();
                 Datatype* ct = high.getType(); // Get type from high
                 if (ct.getMetatype() == TYPE_PARTIALUNION) continue;
                 addRange(start, ct, 0, RangeHint::fixed,-1);
             }
-            for (int4 i = 0; i < varvec.size(); ++i)
+            for (int i = 0; i < varvec.size(); ++i)
                 varvec[i].clearMark();
         }
 
@@ -320,11 +320,11 @@ namespace Sla.DECCORE
             checker.gather(&fd, spaceid, false);
 
             List<AliasChecker::AddBase> addbase = checker.getAddBase();
-            List<uintb> alias = checker.getAlias();
-            uintb offset;
+            List<ulong> alias = checker.getAlias();
+            ulong offset;
             Datatype* ct;
 
-            for (int4 i = 0; i < addbase.size(); ++i)
+            for (int i = 0; i < addbase.size(); ++i)
             {
                 offset = alias[i];
                 ct = addbase[i].base.getType();
@@ -336,7 +336,7 @@ namespace Sla.DECCORE
                 }
                 else
                     ct = (Datatype*)0;  // Do unknown array
-                int4 minItems;
+                int minItems;
                 if (addbase[i].index != (Varnode*)0)
                 {
                     minItems = 3;           // If there is an index, assume it takes on at least the 4 values [0,3]

@@ -12,10 +12,10 @@ namespace Sla.EXTRA
 {
     internal class ConstraintDef : UnifyConstraint
     {
-        private int4 opindex;           // Where to store defining op
-        private int4 varindex;      // Which varnode to examine for def
+        private int opindex;           // Where to store defining op
+        private int varindex;      // Which varnode to examine for def
         
-        public ConstraintDef(int4 oind, int4 vind)
+        public ConstraintDef(int oind, int vind)
         {
             opindex = oind;
             varindex = vind;
@@ -42,7 +42,7 @@ namespace Sla.EXTRA
             typelist[varindex] = UnifyDatatype(UnifyDatatype::var_type);
         }
 
-        public override int4 getBaseIndex() => opindex;
+        public override int getBaseIndex() => opindex;
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {

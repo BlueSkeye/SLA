@@ -19,7 +19,7 @@ namespace Sla.EXTRA
         /// raw p-code and control-flow are generated.
         public override void execute(TextReader s)
         {
-            int4 size;
+            int size;
             string name;
             Address offset = parse_machaddr(s, size, *dcp.conf.types); // Read required address
 

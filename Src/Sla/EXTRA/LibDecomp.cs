@@ -27,7 +27,7 @@ namespace Sla.EXTRA
             CapabilityPoint::initializeAll();
             ArchitectureCapability::sortCapabilities();
 
-            for (uint4 i = 0; i < extrapaths.size(); ++i)
+            for (uint i = 0; i < extrapaths.size(); ++i)
                 SleighArchitecture::specpaths.addDir2Path(extrapaths[i]);
         }
 
@@ -41,7 +41,7 @@ namespace Sla.EXTRA
             if (sleighhome != null)
                 SleighArchitecture::scanForSleighDirectories(sleighhome);
 
-            for (uint4 i = 0; i < extrapaths.size(); ++i)
+            for (uint i = 0; i < extrapaths.size(); ++i)
                 SleighArchitecture::specpaths.addDir2Path(extrapaths[i]);
         }
 

@@ -13,10 +13,10 @@ namespace Sla.EXTRA
 {
     internal class ConstraintRemoveInput : UnifyConstraint
     {
-        private int4 opindex;
+        private int opindex;
         private RHSConstant slot;
         
-        public ConstraintRemoveInput(int4 oind, RHSConstant sl)
+        public ConstraintRemoveInput(int oind, RHSConstant sl)
         {
             opindex = oind;
             slot = sl;
@@ -31,7 +31,7 @@ namespace Sla.EXTRA
         public override UnifyConstraint clone() 
             => (new ConstraintRemoveInput(opindex, slot.clone())).copyid(this);
 
-        public override int4 getBaseIndex() => opindex;
+        public override int getBaseIndex() => opindex;
 
         public override bool step(UnifyState state)
         {
@@ -39,7 +39,7 @@ namespace Sla.EXTRA
             if (!traverse.step()) return false;
             Funcdata* fd = state.getFunction();
             PcodeOp* op = state.data(opindex).getOp();
-            int4 slt = (int4)slot.getConstant(state);
+            int slt = (int)slot.getConstant(state);
             fd.opRemoveInput(op, slt);
             return true;
         }

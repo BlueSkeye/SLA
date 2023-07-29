@@ -45,7 +45,7 @@ namespace Sla.SLEIGH
                 delete outvn;
             if (ops != (List<OpTpl*>*)0)
             {
-                for (int4 i = 0; i < ops.size(); ++i)
+                for (int i = 0; i < ops.size(); ++i)
                     delete(*ops)[i];
                 delete ops;
             }
@@ -84,7 +84,7 @@ namespace Sla.SLEIGH
                         // inputs
             List<OpTpl*>* res = new List<OpTpl*>;
 
-            for (int4 i = 0; i < param.size(); ++i)
+            for (int i = 0; i < param.size(); ++i)
             {
                 res.insert(res.end(), (*param)[i].ops.begin(), (*param)[i].ops.end());
                 (*param)[i].ops.clear();

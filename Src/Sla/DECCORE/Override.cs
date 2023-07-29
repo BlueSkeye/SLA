@@ -44,7 +44,7 @@ namespace Sla.DECCORE
         /// Force goto on jump at \b targetpc to \b destpc
         private Dictionary<Address, Address> forcegoto;
         /// Delay count indexed by address space
-        private List<int4> deadcodedelay;
+        private List<int> deadcodedelay;
         /// Override indirect at \b call-point into direct to \b addr
         private Dictionary<Address, Address> indirectover;
         /// Override prototype at \b call-point
@@ -52,7 +52,7 @@ namespace Sla.DECCORE
         /// Addresses of indirect jumps that need multistage recovery
         private List<Address> multistagejump;
         /// Override the CALL <. BRANCH
-        private Dictionary<Address, uint4> flowoverride;
+        private Dictionary<Address, uint> flowoverride;
 
         /// Clear the entire set of overrides
         private void clear()
@@ -76,7 +76,7 @@ namespace Sla.DECCORE
         /// \param index is the index of the address space
         /// \param glb is the Architecture object
         /// \return the generated message
-        private static string generateDeadcodeDelayMessage(int4 index, Architecture glb)
+        private static string generateDeadcodeDelayMessage(int index, Architecture glb)
         {
             AddrSpace* spc = glb.getSpace(index);
             string res = "Restarted to delay deadcode elimination for space: " + spc.getName();
@@ -107,7 +107,7 @@ namespace Sla.DECCORE
         /// delay for a specific address space to be increased so that new Varnode accesses can be discovered.
         /// \param spc is the address space to modify
         /// \param delay is the size of the delay (in passes)
-        public void insertDeadcodeDelay(AddrSpace spc, int4 delay)
+        public void insertDeadcodeDelay(AddrSpace spc, int delay)
         {
             while (deadcodedelay.size() <= spc.getIndex())
                 deadcodedelay.push_back(-1);
@@ -121,10 +121,10 @@ namespace Sla.DECCORE
         /// \return \b true if an override has already been installed
         public bool hasDeadcodeDelay(AddrSpace spc)
         {
-            int4 index = spc.getIndex();
+            int index = spc.getIndex();
             if (index >= deadcodedelay.size())
                 return false;
-            int4 val = deadcodedelay[index];
+            int val = deadcodedelay[index];
             if (val == -1) return false;
             return (val != spc.getDeadcodeDelay());
         }
@@ -171,7 +171,7 @@ namespace Sla.DECCORE
         /// Change the interpretation of a BRANCH, CALL, or RETURN
         /// \param addr is the address of the branch instruction
         /// \param type is the type of flow that should be forced
-        public void insertFlowOverride(Address addr, uint4 type)
+        public void insertFlowOverride(Address addr, uint type)
         {
             flowoverride[addr] = type;
         }
@@ -216,7 +216,7 @@ namespace Sla.DECCORE
         /// \param addr is the address of the indirect jump
         public bool queryMultistageJumptable(Address addr)
         {
-            for (int4 i = 0; i < multistagejump.size(); ++i)
+            for (int i = 0; i < multistagejump.size(); ++i)
             {
                 if (multistagejump[i] == addr)
                     return true;
@@ -231,9 +231,9 @@ namespace Sla.DECCORE
         public void applyDeadCodeDelay(Funcdata data)
         {
             Architecture* glb = data.getArch();
-            for (int4 i = 0; i < deadcodedelay.size(); ++i)
+            for (int i = 0; i < deadcodedelay.size(); ++i)
             {
-                int4 delay = deadcodedelay[i];
+                int delay = deadcodedelay[i];
                 if (delay < 0) continue;
                 AddrSpace* spc = glb.getSpace(i);
                 data.setDeadCodeDelay(spc, delay);
@@ -258,9 +258,9 @@ namespace Sla.DECCORE
         ///
         /// \param addr is the address of a branch instruction
         /// \return the override type
-        public uint4 getFlowOverride(Address addr)
+        public uint getFlowOverride(Address addr)
         {
-            map<Address, uint4>::const_iterator iter;
+            map<Address, uint>::const_iterator iter;
             iter = flowoverride.find(addr);
             if (iter == flowoverride.end())
                 return Override::NONE;
@@ -279,7 +279,7 @@ namespace Sla.DECCORE
             for (iter = forcegoto.begin(); iter != forcegoto.end(); ++iter)
                 s << "force goto at " << (*iter).first << " jumping to " << (*iter).second << endl;
 
-            for (int4 i = 0; i < deadcodedelay.size(); ++i)
+            for (int i = 0; i < deadcodedelay.size(); ++i)
             {
                 if (deadcodedelay[i] < 0) continue;
                 AddrSpace* spc = glb.getSpace(i);
@@ -307,7 +307,7 @@ namespace Sla.DECCORE
         public void generateOverrideMessages(List<string> messagelist, Architecture glb)
         {
             // Generate deadcode delay messages
-            for (int4 i = 0; i < deadcodedelay.size(); ++i)
+            for (int i = 0; i < deadcodedelay.size(); ++i)
             {
                 if (deadcodedelay[i] >= 0)
                     messagelist.push_back(generateDeadcodeDelayMessage(i, glb));
@@ -336,7 +336,7 @@ namespace Sla.DECCORE
                 encoder.closeElement(ELEM_FORCEGOTO);
             }
 
-            for (int4 i = 0; i < deadcodedelay.size(); ++i)
+            for (int i = 0; i < deadcodedelay.size(); ++i)
             {
                 if (deadcodedelay[i] < 0) continue;
                 AddrSpace* spc = glb.getSpace(i);
@@ -364,14 +364,14 @@ namespace Sla.DECCORE
                 encoder.closeElement(ELEM_PROTOOVERRIDE);
             }
 
-            for (int4 i = 0; i < multistagejump.size(); ++i)
+            for (int i = 0; i < multistagejump.size(); ++i)
             {
                 encoder.openElement(ELEM_MULTISTAGEJUMP);
                 multistagejump[i].encode(encoder);
                 encoder.closeElement(ELEM_MULTISTAGEJUMP);
             }
 
-            map<Address, uint4>::const_iterator titer;
+            map<Address, uint>::const_iterator titer;
             for (titer = flowoverride.begin(); titer != flowoverride.end(); ++titer)
             {
                 encoder.openElement(ELEM_FLOW);
@@ -388,10 +388,10 @@ namespace Sla.DECCORE
         /// \param glb is the Architecture
         public void decode(Decoder decoder, Architecture glb)
         {
-            uint4 elemId = decoder.openElement(ELEM_OVERRIDE);
+            uint elemId = decoder.openElement(ELEM_OVERRIDE);
             for (; ; )
             {
-                uint4 subId = decoder.openElement();
+                uint subId = decoder.openElement();
                 if (subId == 0) break;
                 if (subId == ELEM_INDIRECTOVERRIDE)
                 {
@@ -415,7 +415,7 @@ namespace Sla.DECCORE
                 }
                 else if (subId == ELEM_DEADCODEDELAY)
                 {
-                    int4 delay = decoder.readSignedInteger(ATTRIB_DELAY);
+                    int delay = decoder.readSignedInteger(ATTRIB_DELAY);
                     AddrSpace* spc = decoder.readSpace(ATTRIB_SPACE);
                     if (delay < 0)
                         throw new LowlevelError("Bad deadcodedelay tag");
@@ -428,7 +428,7 @@ namespace Sla.DECCORE
                 }
                 else if (subId == ELEM_FLOW)
                 {
-                    uint4 type = stringToType(decoder.readString(ATTRIB_TYPE));
+                    uint type = stringToType(decoder.readString(ATTRIB_TYPE));
                     Address addr = Address::decode(decoder);
                     if ((type == Override::NONE) || (addr.isInvalid()))
                         throw new LowlevelError("Bad flowoverride tag");
@@ -442,7 +442,7 @@ namespace Sla.DECCORE
         /// Convert a flow override type to a string
         /// \param tp is the override type
         /// \return the corresponding name string
-        public static string typeToString(uint4 tp)
+        public static string typeToString(uint tp)
         {
             if (tp == Override::BRANCH)
                 return "branch";
@@ -458,7 +458,7 @@ namespace Sla.DECCORE
         /// Convert a string to a flow override type
         /// \param nm is the override name
         /// \return the override enumeration type
-        public static uint4 stringToType(string nm)
+        public static uint stringToType(string nm)
         {
             if (nm == "branch")
                 return Override::BRANCH;

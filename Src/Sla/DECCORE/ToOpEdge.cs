@@ -18,7 +18,7 @@ namespace Sla.DECCORE
         /// Slot containing the input Varnode or -1 for the p-code op output
         private int slot;
         
-        public ToOpEdge(PcodeOp o, int4 s)
+        public ToOpEdge(PcodeOp o, int s)
         {
             op = o;
             slot = s;
@@ -41,8 +41,8 @@ namespace Sla.DECCORE
             Address addr2 = op2.op.getSeqNum().getAddr();
             if (addr1 != addr2)
                 return (addr1 < addr2);
-            uintm ord1 = op.getSeqNum().getOrder();
-            uintm ord2 = op2.op.getSeqNum().getOrder();
+            uint ord1 = op.getSeqNum().getOrder();
+            uint ord2 = op2.op.getSeqNum().getOrder();
             if (ord1 != ord2)
                 return (ord1 < ord2);
             return (slot < op2.slot);
@@ -60,13 +60,13 @@ namespace Sla.DECCORE
         /// \return the accumulator value with \b this edge folded in
         public uint hash(uint reg)
         {
-            reg = crc_update(reg, (uint4)slot);
+            reg = crc_update(reg, (uint)slot);
             reg = crc_update(reg, DynamicHash::transtable[op.code()]);
-            uintb val = op.getSeqNum().getAddr().getOffset();
-            int4 sz = op.getSeqNum().getAddr().getAddrSize();
-            for (int4 i = 0; i < sz; ++i)
+            ulong val = op.getSeqNum().getAddr().getOffset();
+            int sz = op.getSeqNum().getAddr().getAddrSize();
+            for (int i = 0; i < sz; ++i)
             {
-                reg = crc_update(reg, (uint4)val); // Hash in the address
+                reg = crc_update(reg, (uint)val); // Hash in the address
                 val >>= 8;
             }
             return reg;

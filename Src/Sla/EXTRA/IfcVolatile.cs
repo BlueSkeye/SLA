@@ -17,7 +17,7 @@ namespace Sla.EXTRA
         /// the decompiler analysis that values in the range my change unexpectedly.
         public override void execute(TextReader s)
         {
-            int4 size = 0;
+            int size = 0;
             if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("No load image present");
             Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read required address

@@ -11,16 +11,16 @@ namespace Sla.EXTRA
     internal class ConstantConsumed : RHSConstant
     {
         // A varnode's consume mask
-        private int4 varindex;
+        private int varindex;
         
-        public ConstantConsumed(int4 ind)
+        public ConstantConsumed(int ind)
         {
             varindex = ind;
         }
         
         public override RHSConstant clone() => new ConstantConsumed(varindex);
 
-        public override uintb getConstant(UnifyState state)
+        public override ulong getConstant(UnifyState state)
         {
             Varnode* vn = state.data(varindex).getVarnode();
             return vn.getConsume();

@@ -29,13 +29,13 @@ namespace Sla.DECCORE
         /// amount must be a multiple of 8.
         ///
         /// `(V << c) s>> c  =>  sext( sub(V, #0) )`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_RIGHT);
             oplist.push_back(CPUI_INT_SRIGHT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (!op.getIn(1).isConstant()) return 0;
 
@@ -44,12 +44,12 @@ namespace Sla.DECCORE
             PcodeOp* leftshift = shiftin.getDef();
             if (leftshift.code() != CPUI_INT_LEFT) return 0;
             if (!leftshift.getIn(1).isConstant()) return 0;
-            uintb sa = op.getIn(1).getOffset();
+            ulong sa = op.getIn(1).getOffset();
             if (leftshift.getIn(1).getOffset() != sa) return 0; // Left shift must be by same amount
 
             if ((sa & 7) != 0) return 0;    // Must be multiple of 8
-            int4 isa = (int4)(sa >> 3);
-            int4 tsz = shiftin.getSize() - isa;
+            int isa = (int)(sa >> 3);
+            int tsz = shiftin.getSize() - isa;
             if ((tsz != 1) && (tsz != 2) && (tsz != 4) && (tsz != 8)) return 0;
 
             if (shiftin.loneDescend() != op) return 0;

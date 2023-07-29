@@ -19,7 +19,7 @@ namespace Sla.DECCORE
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
-            int4 inslot, int4 outslot)
+            int inslot, int outslot)
         {
             if ((inslot != -1) && (outslot != -1))
             {
@@ -50,7 +50,7 @@ namespace Sla.DECCORE
             //    s << '(' << op.Input(0).Def().Start() << ')';
             if (op.numInput() == 1)
                 s << ' ' << getOperatorName(op);
-            for (int4 i = 1; i < op.numInput(); ++i)
+            for (int i = 1; i < op.numInput(); ++i)
             {
                 s << ' ' << getOperatorName(op) << ' ';
                 Varnode::printRaw(s, op.getIn(i));

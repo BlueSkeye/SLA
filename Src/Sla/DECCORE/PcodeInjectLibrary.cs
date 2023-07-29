@@ -27,17 +27,17 @@ namespace Sla.DECCORE
         /// The Architecture to which the injection payloads apply
         protected Architecture glb;
         /// Offset within \e unique space for allocating temporaries within a payload
-        protected uint4 tempbase;
+        protected uint tempbase;
         /// Registered injections
         protected List<InjectPayload> injection;
         /// Map of registered call-fixup names to injection id
-        protected Dictionary<string, int4> callFixupMap;
+        protected Dictionary<string, int> callFixupMap;
         /// Map of registered callother-fixup names to injection id
-        protected Dictionary<string, int4> callOtherFixupMap;
+        protected Dictionary<string, int> callOtherFixupMap;
         /// Map of registered mechanism names to injection id
-        protected Dictionary<string, int4> callMechFixupMap;
+        protected Dictionary<string, int> callMechFixupMap;
         /// Map of registered script names to ExecutablePcode id
-        protected Dictionary<string, int4> scriptMap;
+        protected Dictionary<string, int> scriptMap;
         /// Map from injectid to call-fixup name
         protected List<string> callFixupNames;
         /// Map from injectid to callother-fixup target-op name
@@ -51,10 +51,10 @@ namespace Sla.DECCORE
         ///
         /// \param fixupName is the formal name of the call-fixup
         /// \param injectid is the integer id
-        protected void registerCallFixup(string fixupName, int4 injectid/* , List<string> targets */)
+        protected void registerCallFixup(string fixupName, int injectid/* , List<string> targets */)
         {
-            pair<map<string, int4>::iterator, bool> check;
-            check = callFixupMap.insert(pair<string, int4>(fixupName, injectid));
+            pair<map<string, int>::iterator, bool> check;
+            check = callFixupMap.insert(pair<string, int>(fixupName, injectid));
             if (!check.second)      // This symbol is already mapped
                 throw new LowlevelError("Duplicate <callfixup>: " + fixupName);
             while (callFixupNames.size() <= injectid)
@@ -66,10 +66,10 @@ namespace Sla.DECCORE
         ///
         /// \param fixupName is the formal name of the callother-fixup
         /// \param injectid is the integer id
-        protected void registerCallOtherFixup(string fixupName, int4 injectid)
+        protected void registerCallOtherFixup(string fixupName, int injectid)
         {
-            pair<map<string, int4>::iterator, bool> check;
-            check = callOtherFixupMap.insert(pair<string, int4>(fixupName, injectid));
+            pair<map<string, int>::iterator, bool> check;
+            check = callOtherFixupMap.insert(pair<string, int>(fixupName, injectid));
             if (!check.second)      // This symbol is already mapped
                 throw new LowlevelError("Duplicate <callotherfixup>: " + fixupName);
             while (callOtherTarget.size() <= injectid)
@@ -81,10 +81,10 @@ namespace Sla.DECCORE
         ///
         /// \param fixupName is the formal name of the call mechanism
         /// \param injectid is the integer id
-        protected void registerCallMechanism(string fixupName,int4 injectid)
+        protected void registerCallMechanism(string fixupName,int injectid)
         {
-            pair<map<string, int4>::iterator, bool> check;
-            check = callMechFixupMap.insert(pair<string, int4>(fixupName, injectid));
+            pair<map<string, int>::iterator, bool> check;
+            check = callMechFixupMap.insert(pair<string, int>(fixupName, injectid));
             if (!check.second)      // This symbol is already mapped
                 throw new LowlevelError("Duplicate <callmechanism>: " + fixupName);
             while (callMechTarget.size() <= injectid)
@@ -96,10 +96,10 @@ namespace Sla.DECCORE
         ///
         /// \param scriptName is the formal name of the p-code script
         /// \param injectid is the integer id
-        protected void registerExeScript(string scriptName,int4 injectid)
+        protected void registerExeScript(string scriptName,int injectid)
         {
-            pair<map<string, int4>::iterator, bool> check;
-            check = scriptMap.insert(pair<string, int4>(scriptName, injectid));
+            pair<map<string, int>::iterator, bool> check;
+            check = scriptMap.insert(pair<string, int>(scriptName, injectid));
             if (!check.second)      // This symbol is already mapped
                 throw new LowlevelError("Duplicate <script>: " + scriptName);
             while (scriptNames.size() <= injectid)
@@ -115,7 +115,7 @@ namespace Sla.DECCORE
         /// \param name is the formal name of the payload
         /// \param type is the formal type (CALLFIXUP_TYPE, CALLOTHERFIXUP_TYPE, etc.) of the payload
         /// \return the id associated with the new InjectPayload object
-        protected abstract int4 allocateInject(string sourceName, string name,int4 type);
+        protected abstract int allocateInject(string sourceName, string name,int type);
 
         ///\brief Finalize a payload within the library, once the payload is initialized
         ///
@@ -123,9 +123,9 @@ namespace Sla.DECCORE
         /// symbol tables or do anything else it needs to once the InjectPayload object
         /// has been fully initialized.
         /// \param injectid is the id of the InjectPayload to finalize
-        protected abstract void registerInject(int4 injectid)=0;
+        protected abstract void registerInject(int injectid)=0;
 
-        public PcodeInjectLibrary(Architecture g, uint4 tmpbase)
+        public PcodeInjectLibrary(Architecture g, uint tmpbase)
         {
             glb = g;
             tempbase = tmpbase;
@@ -139,7 +139,7 @@ namespace Sla.DECCORE
         }
 
         /// Get the (current) offset for building temporary registers
-        public uint4 getUniqueBase() => tempbase;
+        public uint getUniqueBase() => tempbase;
 
         /// Map name and type to the payload id
         /// The given name is looked up in a symbol table depending on the given type.
@@ -147,9 +147,9 @@ namespace Sla.DECCORE
         /// \param type is the payload type
         /// \param nm is the formal name of the payload
         /// \return the payload id or -1 if there is no matching payload
-        public int4 getPayloadId(int4 type, string nm)
+        public int getPayloadId(int type, string nm)
         {
-            map<string, int4>::const_iterator iter;
+            map<string, int>::const_iterator iter;
             if (type == InjectPayload::CALLFIXUP_TYPE)
             {
                 iter = callFixupMap.find(nm);
@@ -178,12 +178,12 @@ namespace Sla.DECCORE
         }
 
         /// Get the InjectPayload by id
-        public InjectPayload getPayload(int4 id) => injection[id];
+        public InjectPayload getPayload(int id) => injection[id];
 
         /// Get the call-fixup name associated with an id
         /// \param injectid is an integer id of a call-fixup payload
         /// \return the name of the payload or the empty string
-        public string getCallFixupName(int4 injectid)
+        public string getCallFixupName(int injectid)
         {
             if ((injectid < 0) || (injectid >= callFixupNames.size()))
                 return "";
@@ -193,7 +193,7 @@ namespace Sla.DECCORE
         /// Get the callother-fixup name associated with an id
         /// \param injectid is an integer id of a callother-fixup payload
         /// \return the name of the payload or the empty string
-        public string getCallOtherTarget(int4 injectid)
+        public string getCallOtherTarget(int injectid)
         {
             if ((injectid < 0) || (injectid >= callOtherTarget.size()))
                 return "";
@@ -203,7 +203,7 @@ namespace Sla.DECCORE
         /// Get the call mechanism name associated with an id
         /// \param injectid is an integer id of a call mechanism payload
         /// \return the name of the payload or the empty string
-        public string getCallMechanismName(int4 injectid)
+        public string getCallMechanismName(int injectid)
         {
             if ((injectid < 0) || (injectid >= callMechTarget.size()))
                 return "";
@@ -220,9 +220,9 @@ namespace Sla.DECCORE
         /// \param tp is the type of the payload (CALLFIXUP_TYPE, EXECUTABLEPCODE_TYPE, etc.)
         /// \param decoder is the stream decoder
         /// \return the id of the newly registered payload
-        public int4 decodeInject(string src, string suffix, int4 tp, Decoder decoder)
+        public int decodeInject(string src, string suffix, int tp, Decoder decoder)
         {
-            int4 injectid = allocateInject(src, nm, tp);
+            int injectid = allocateInject(src, nm, tp);
             getPayload(injectid).decode(decoder);
             registerInject(injectid);
             return injectid;
@@ -244,7 +244,7 @@ namespace Sla.DECCORE
         /// \param name is the formal name of the new payload
         /// \param snippetstring is the compilable snippet of p-code \e source
         /// \return the id of the new payload
-        public abstract int4 manualCallFixup(string name, string snippetstring);
+        public abstract int manualCallFixup(string name, string snippetstring);
 
         /// \brief Manually add a callother-fixup payload given a compilable snippet of p-code \e source
         ///
@@ -255,7 +255,7 @@ namespace Sla.DECCORE
         /// \param inname is the ordered list of input symbol names
         /// \param snippet is the compilable snippet of p-code \e source
         /// \return the id of the new payload
-        public abstract int4 manualCallOtherFixup(string name, string  outname, List<string> inname,
+        public abstract int manualCallOtherFixup(string name, string  outname, List<string> inname,
             string snippet);
 
         /// \brief Retrieve a reusable context object for \b this library

@@ -19,11 +19,11 @@ namespace Sla.DECCORE
         /// The address space \b this record describes
         private AddrSpace space;
         /// How many passes to delay heritage of this space
-        private int4 delay;
+        private int delay;
         /// How many passes to delay deadcode removal of this space
-        private int4 deadcodedelay;
+        private int deadcodedelay;
         /// >0 if Varnodes in this space have been eliminated
-        private int4 deadremoved;
+        private int deadremoved;
         /// \b true if the search for LOAD ops to guard has been performed
         private bool loadGuardSearch;
         /// \b true if warning issued previously

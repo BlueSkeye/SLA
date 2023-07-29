@@ -26,13 +26,13 @@ namespace Sla.DECCORE
         /// \brief Merge range conditions of the form: `V f< c, c f< V, V f== c` etc.
         ///
         /// Convert `(V f< W)||(V f== W)   =>   V f<= W` (and similar variants)
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_BOOL_OR);
             oplist.push_back(CPUI_BOOL_AND);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             PcodeOp* cmp1,*cmp2;
             Varnode* vn1,*vn2;
@@ -67,7 +67,7 @@ namespace Sla.DECCORE
 
             // Make sure both operators are comparing the same things
             Varnode* nvn1,*cvn1;
-            int4 slot1 = 0;
+            int slot1 = 0;
             nvn1 = cmp1.getIn(slot1);  // Set nvn1 to a non-constant off of cmp1
             if (nvn1.isConstant())
             {
@@ -77,7 +77,7 @@ namespace Sla.DECCORE
             }
             if (nvn1.isFree()) return 0;
             cvn1 = cmp1.getIn(1 - slot1);  // Set cvn1 to the "other" slot off of cmp1
-            int4 slot2;
+            int slot2;
             if (nvn1 != cmp2.getIn(0))
             {
                 slot2 = 1;

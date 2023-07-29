@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         ///
         /// \param val is the option string
         /// \return the corresponding configuration bit
-        public static uint4 getOptionBit(string val)
+        public static uint getOptionBit(string val)
         {
             if (val.size() == 0) return 0;
             if (val == "struct") return option_struct;
@@ -44,7 +44,7 @@ namespace Sla.DECCORE
 
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            uint4 oldConfig = glb.split_datatype_config;
+            uint oldConfig = glb.split_datatype_config;
             glb.split_datatype_config = getOptionBit(p1);
             glb.split_datatype_config |= getOptionBit(p2);
             glb.split_datatype_config |= getOptionBit(p3);

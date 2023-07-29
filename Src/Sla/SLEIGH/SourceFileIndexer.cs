@@ -31,7 +31,7 @@ namespace Sla.SLEIGH
         }
         
         ///Returns the index of the file.  If the file is not in the index it is added.
-        public int4 index(string filename)
+        public int index(string filename)
         {
             auto it = fileToIndex.find(filename);
             if (fileToIndex.end() != it)
@@ -44,13 +44,13 @@ namespace Sla.SLEIGH
         }
 
         /// get the index of a file.  Error if the file is not in the index.
-        public int4 getIndex(string filename)
+        public int getIndex(string filename)
         {
             return fileToIndex[filename];
         }
 
         /// get the filename corresponding to an index
-        public string getFilename(int4 index)
+        public string getFilename(int index)
         {
             return indexToFile[index];
         }
@@ -63,7 +63,7 @@ namespace Sla.SLEIGH
             for (; iter != sourceFiles.end(); ++iter)
             {
                 string filename = (*iter).getAttributeValue("name");
-                int4 index = stoi((*iter).getAttributeValue("index"), NULL, 10);
+                int index = stoi((*iter).getAttributeValue("index"), NULL, 10);
                 fileToIndex[filename] = index;
                 indexToFile[index] = filename;
             }
@@ -73,7 +73,7 @@ namespace Sla.SLEIGH
         public void saveXml(TextWriter s)
         {
             s << "<sourcefiles>\n";
-            for (int4 i = 0; i < leastUnusedIndex; ++i)
+            for (int i = 0; i < leastUnusedIndex; ++i)
             {
                 s << ("<sourcefile name=\"");
                 string str = indexToFile.at(i).c_str();
@@ -83,8 +83,8 @@ namespace Sla.SLEIGH
             s << "</sourcefiles>\n";
         }
 
-        private int4 leastUnusedIndex; ///< one-up count for assigning indices to files
-        private Dictionary<int4, string> indexToFile;  ///< map from indices to files
-        private Dictionary<string, int4> fileToIndex;  ///< map from files to indices
+        private int leastUnusedIndex; ///< one-up count for assigning indices to files
+        private Dictionary<int, string> indexToFile;  ///< map from indices to files
+        private Dictionary<string, int> fileToIndex;  ///< map from files to indices
     }
 }

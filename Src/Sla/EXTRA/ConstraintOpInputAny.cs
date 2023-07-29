@@ -13,10 +13,10 @@ namespace Sla.EXTRA
     internal class ConstraintOpInputAny : UnifyConstraint
     {
         // Move from op to ANY of its input varnodes
-        private int4 opindex;           // Which op
-        private int4 varnodeindex;      // What to label input varnode
+        private int opindex;           // Which op
+        private int varnodeindex;      // What to label input varnode
         
-        public ConstraintOpInputAny(int4 oind, int4 vind)
+        public ConstraintOpInputAny(int oind, int vind)
         {
             opindex = oind;
             varnodeindex = vind;
@@ -49,12 +49,12 @@ namespace Sla.EXTRA
             typelist[varnodeindex] = UnifyDatatype(UnifyDatatype::var_type);
         }
 
-        public override int4 getBaseIndex() => varnodeindex;
+        public override int getBaseIndex() => varnodeindex;
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << "for(int4 i" << dec << printstate.getDepth() << "=0;i" << printstate.getDepth() << '<';
+            s << "for(int i" << dec << printstate.getDepth() << "=0;i" << printstate.getDepth() << '<';
             s << printstate.getName(opindex) << ".numInput();++i" << printstate.getDepth() << ") {" << endl;
             printstate.incDepth();  // A permanent increase in depth
             printstate.printIndent(s);

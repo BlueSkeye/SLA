@@ -13,7 +13,7 @@ namespace Sla.EXTRA
         /// \brief History command to list the most recent successful commands
         public override void execute(TextReader s)
         {               // List most recent command lines
-            int4 num;
+            int num;
             string historyline;
 
             if (!s.eof())
@@ -28,7 +28,7 @@ namespace Sla.EXTRA
             if (num > status.getHistorySize())
                 num = status.getHistorySize();
 
-            for (int4 i = num - 1; i >= 0; --i)
+            for (int i = num - 1; i >= 0; --i)
             {   // List oldest to newest
                 status.getHistory(historyline, i);
                 *status.optr << historyline << endl;

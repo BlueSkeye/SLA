@@ -16,7 +16,7 @@ namespace Sla.SLEIGH
         private ConstTpl size;
         private bool unnamed_flag;
         
-        public VarnodeTpl(int4 hand, bool zerosize)
+        public VarnodeTpl(int hand, bool zerosize)
         {
             space = new ConstTpl(ConstTpl::handle, hand, ConstTpl::v_space);
             offset = new ConstTpl(ConstTpl::handle, hand, ConstTpl::v_offset);
@@ -70,15 +70,15 @@ namespace Sla.SLEIGH
             return (hand.offset_space != (AddrSpace*)0);
         }
 
-        public int4 transfer(List<HandleTpl> @params)
+        public int transfer(List<HandleTpl> @params)
         {
             bool doesOffsetPlus = false;
-            int4 handleIndex;
-            int4 plus;
+            int handleIndex;
+            int plus;
             if ((offset.getType() == ConstTpl::handle) && (offset.getSelect() == ConstTpl::v_offset_plus))
             {
                 handleIndex = offset.getHandleIndex();
-                plus = (int4)offset.getReal();
+                plus = (int)offset.getReal();
                 doesOffsetPlus = true;
             }
             space.transfer (@params);
@@ -104,12 +104,12 @@ namespace Sla.SLEIGH
             return false;
         }
 
-        public void setOffset(uintb constVal)
+        public void setOffset(ulong constVal)
         {
             offset = new ConstTpl(ConstTpl::real, constVal);
         }
 
-        public void setRelative(uintb constVal)
+        public void setRelative(ulong constVal)
         {
             offset = new ConstTpl(ConstTpl::j_relative, constVal);
         }
@@ -138,33 +138,33 @@ namespace Sla.SLEIGH
             return (offset.getType() == ConstTpl::j_relative);
         }
 
-        public void changeHandleIndex(List<int4> handmap)
+        public void changeHandleIndex(List<int> handmap)
         {
             space.changeHandleIndex(handmap);
             offset.changeHandleIndex(handmap);
             size.changeHandleIndex(handmap);
         }
 
-        public bool adjustTruncation(int4 sz, bool isbigendian)
+        public bool adjustTruncation(int sz, bool isbigendian)
         { // We know this.offset is an offset_plus, check that the truncation is in bounds (given -sz-)
           // adjust plus for endianness if necessary
           // return true if truncation is in bounds
             if (size.getType() != ConstTpl::real)
                 return false;
-            int4 numbytes = (int4)size.getReal();
-            int4 byteoffset = (int4)offset.getReal();
+            int numbytes = (int)size.getReal();
+            int byteoffset = (int)offset.getReal();
             if (numbytes + byteoffset > sz) return false;
 
             // Encode the original truncation amount with the plus value
-            uintb val = byteoffset;
+            ulong val = byteoffset;
             val <<= 16;
             if (isbigendian)
             {
-                val |= (uintb)(sz - (numbytes + byteoffset));
+                val |= (ulong)(sz - (numbytes + byteoffset));
             }
             else
             {
-                val |= (uintb)byteoffset;
+                val |= (ulong)byteoffset;
             }
 
 

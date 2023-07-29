@@ -15,6 +15,6 @@ namespace Sla.SLEIGH
         internal OpCode opc;         ///< The op code
         internal VarnodeData outvar;            ///< Output Varnode data (or null)
         internal VarnodeData invar;     ///< Array of input Varnode data
-        internal int4 isize;			///< Number of input Varnodes
+        internal int isize;			///< Number of input Varnodes
     }
 }

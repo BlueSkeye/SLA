@@ -15,8 +15,8 @@ namespace Sla.EXTRA
         {
             if (dcp.testCollection == (FunctionTestCollection*)0)
                 throw IfaceExecutionError("No test file is loaded");
-            int4 first = -1;
-            int4 last = -1;
+            int first = -1;
+            int last = -1;
             char hyphen;
 
             s >> ws >> dec >> first;
@@ -39,7 +39,7 @@ namespace Sla.EXTRA
                 last = first;
             }
             ostringstream s1;
-            for (int4 i = first; i <= last; ++i)
+            for (int i = first; i <= last; ++i)
             {
                 s1 << dcp.testCollection.getCommand(i) << endl;
             }

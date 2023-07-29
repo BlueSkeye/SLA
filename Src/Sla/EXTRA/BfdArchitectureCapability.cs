@@ -40,7 +40,7 @@ namespace Sla.EXTRA
             ifstream s(filename.c_str());
             if (!s)
                 return false;
-            int4 val1, val2, val3;
+            int val1, val2, val3;
             s >> ws;
             val1 = s.get();
             val2 = s.get();

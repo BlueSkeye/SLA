@@ -14,10 +14,10 @@ namespace Sla.EXTRA
     /// followed by the mnemonic and then column aligned operands.
     internal class IfaceAssemblyEmit : AssemblyEmit
     {
-        private int4 mnemonicpad;       ///< How much to pad the mnemonic
+        private int mnemonicpad;       ///< How much to pad the mnemonic
         private TextWriter s;         ///< The current stream to write to
 
-        public IfaceAssemblyEmit(TextWriter val, int4 mp)
+        public IfaceAssemblyEmit(TextWriter val, int mp)
         {
             s = val;
             mnemonicpad = mp;
@@ -27,7 +27,7 @@ namespace Sla.EXTRA
         {
             addr.printRaw(*s);
             *s << ": " << mnem;
-            for (int4 i = mnem.size(); i < mnemonicpad; ++i) *s << ' ';
+            for (int i = mnem.size(); i < mnemonicpad; ++i) *s << ' ';
             *s << body << endl;
         }
     }

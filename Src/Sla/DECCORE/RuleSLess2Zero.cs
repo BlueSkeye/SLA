@@ -25,12 +25,12 @@ namespace Sla.DECCORE
 
             Varnode* vn1 = op.getIn(0);
             Varnode* vn2 = op.getIn(1);
-            uintb mask = calc_mask(vn1.getSize());
+            ulong mask = calc_mask(vn1.getSize());
             mask = (mask ^ (mask >> 1));    // Only high-bit is set
-            uintb nzmask1 = vn1.getNZMask();
+            ulong nzmask1 = vn1.getNZMask();
             if ((nzmask1 != mask) && ((nzmask1 & mask) != 0)) // If high-bit is set AND some other bit
                 return (Varnode*)0;
-            uintb nzmask2 = vn2.getNZMask();
+            ulong nzmask2 = vn2.getNZMask();
             if ((nzmask2 != mask) && ((nzmask2 & mask) != 0))
                 return (Varnode*)0;
 
@@ -73,12 +73,12 @@ namespace Sla.DECCORE
         ///  - `-1 s< (hi + lo)  =>  -1 s< hi`
         ///  - `(hi + lo) s< 0   =>  hi s< 0`
         ///
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_SLESS);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* lvn,*rvn,*coeff,*avn;
             PcodeOp* feedOp;
@@ -125,7 +125,7 @@ namespace Sla.DECCORE
                         avn = feedOp.getIn(0);
                         if (avn.isFree() || avn.getSize() > 8)    // Don't create comparison bigger than 8 bytes
                             return 0;
-                        if (rvn.getSize() + (int4)feedOp.getIn(1).getOffset() == avn.getSize())
+                        if (rvn.getSize() + (int)feedOp.getIn(1).getOffset() == avn.getSize())
                         {
                             // We have -1 s< SUB( avn, #hi )
                             data.opSetInput(op, avn, 1);
@@ -152,7 +152,7 @@ namespace Sla.DECCORE
                         Varnode* maskVn = feedOp.getIn(1);
                         if (maskVn.isConstant())
                         {
-                            uintb mask = maskVn.getOffset();
+                            ulong mask = maskVn.getOffset();
                             mask >>= (8 * avn.getSize() - 1);  // Fetch sign-bit
                             if ((mask & 1) != 0)
                             {
@@ -209,7 +209,7 @@ namespace Sla.DECCORE
                             avn = feedOp.getIn(0);
                             if (avn.isFree() || avn.getSize() > 8)    // Don't create comparison greater than 8 bytes
                                 return 0;
-                            if (lvn.getSize() + (int4)feedOp.getIn(1).getOffset() == avn.getSize())
+                            if (lvn.getSize() + (int)feedOp.getIn(1).getOffset() == avn.getSize())
                             {
                                 // We have SUB( avn, #hi ) s< 0
                                 data.opSetInput(op, avn, 0);
@@ -234,7 +234,7 @@ namespace Sla.DECCORE
                             Varnode* maskVn = feedOp.getIn(1);
                             if (maskVn.isConstant())
                             {
-                                uintb mask = maskVn.getOffset();
+                                ulong mask = maskVn.getOffset();
                                 mask >>= (8 * avn.getSize() - 1);  // Fetch sign-bit
                                 if ((mask & 1) != 0)
                                 {

@@ -20,13 +20,13 @@ namespace Sla.DECCORE
     internal class JumpAssistOp : UserPcodeOp
     {
         /// Id of p-code script performing index2case (== -1 if no script and index==case)
-        private int4 index2case;
+        private int index2case;
         /// Id of p-code script performing index2addr (must be present)
-        private int4 index2addr;
+        private int index2addr;
         /// Id of p-code script performing calculation of default address (must be present)
-        private int4 defaultaddr;
+        private int defaultaddr;
         /// Id of p-code script that calculates number of indices (== -1 if no script)
-        private int4 calcsize;
+        private int calcsize;
 
         /// \param g is the Architecture owning this set of jump assist scripts
         public JumpAssistOp(Architecture g)
@@ -39,20 +39,20 @@ namespace Sla.DECCORE
         }
 
         /// Get the injection id for \b index2case
-        public int4 getIndex2Case() => index2case;
+        public int getIndex2Case() => index2case;
 
         /// Get the injection id for \b index2addr
-        public int4 getIndex2Addr() => index2addr;
+        public int getIndex2Addr() => index2addr;
 
         /// Get the injection id for \b defaultaddr
-        public int4 getDefaultAddr() => defaultaddr;
+        public int getDefaultAddr() => defaultaddr;
 
         /// Get the injection id for \b calcsize
-        public int4 getCalcSize() => calcsize;
+        public int getCalcSize() => calcsize;
 
         public override void decode(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement(ELEM_JUMPASSIST);
+            uint elemId = decoder.openElement(ELEM_JUMPASSIST);
             name = decoder.readString(ATTRIB_NAME);
             index2case = -1;    // Mark as not present until we see a tag
             index2addr = -1;
@@ -60,7 +60,7 @@ namespace Sla.DECCORE
             calcsize = -1;
             for (; ; )
             {
-                uint4 subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ELEM_CASE_PCODE)
                 {

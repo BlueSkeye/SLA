@@ -17,7 +17,7 @@ namespace Sla.DECCORE
             behave = new OpBehaviorSubpiece();
         }
 
-        public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
+        public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
             return (Datatype*)0;        // Never need a cast into a SUBPIECE
         }
@@ -27,8 +27,8 @@ namespace Sla.DECCORE
             Varnode outvn = op.getOut();
             TypeField field;
             Datatype* ct = op.getIn(0).getHighTypeReadFacing(op);
-            int4 offset;
-            int4 byteOff = computeByteOffsetForComposite(op);
+            int offset;
+            int byteOff = computeByteOffsetForComposite(op);
             field = ct.findTruncation(byteOff, outvn.getSize(), op, 1, offset);   // Use artificial slot
             if (field != (TypeField*)0) {
                 if (outvn.getSize() == field.type.getSize())
@@ -41,11 +41,11 @@ namespace Sla.DECCORE
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
-            int4 inslot, int4 outslot)
+            int inslot, int outslot)
         {
             if (inslot != 0 || outslot != -1) return (Datatype*)0;  // Propagation must be from in0 to out
-            int4 byteOff;
-            int4 newoff;
+            int byteOff;
+            int newoff;
             TypeField field;
             type_metatype meta = alttype.getMetatype();
             if (meta == TYPE_UNION || meta == TYPE_PARTIALUNION)
@@ -57,7 +57,7 @@ namespace Sla.DECCORE
             }
             else if (alttype.getMetatype() == TYPE_STRUCT)
             {
-                int4 byteOff = computeByteOffsetForComposite(op);
+                int byteOff = computeByteOffsetForComposite(op);
                 field = alttype.findTruncation(byteOff, outvn.getSize(), op, 1, newoff);
             }
             else
@@ -88,10 +88,10 @@ namespace Sla.DECCORE
         /// depends on endianness of the input.
         /// \param op is the given CPUI_SUBPIECE
         /// \return the byte offset into the composite represented by the output of the SUBPIECE
-        public static int4 computeByteOffsetForComposite(PcodeOp op)
+        public static int computeByteOffsetForComposite(PcodeOp op)
         {
-            int4 outSize = op.getOut().getSize();
-            int4 lsb = (int4)op.getIn(1).getOffset();
+            int outSize = op.getOut().getSize();
+            int lsb = (int)op.getIn(1).getOffset();
             Varnode vn = op.getIn(0);
             int byteOff;
             if (vn.getSpace().isBigEndian())

@@ -14,13 +14,13 @@ namespace Sla.EXTRA
     // Action constraints, these must always step exactly once (returning true), and do their action
     internal class ConstraintNewOp : UnifyConstraint
     {
-        private int4 newopindex;
-        private int4 oldopindex;
+        private int newopindex;
+        private int oldopindex;
         private bool insertafter;       // true if inserted AFTER oldop
         private OpCode opc;         // new opcode
-        private int4 numparams;
+        private int numparams;
         
-        public ConstraintNewOp(int4 newind, int4 oldind, OpCode oc, bool iafter, int4 num)
+        public ConstraintNewOp(int newind, int oldind, OpCode oc, bool iafter, int num)
         {
             newopindex = newind;
             oldopindex = oldind;
@@ -33,7 +33,7 @@ namespace Sla.EXTRA
         public override UnifyConstraint clone()
             => (new ConstraintNewOp(newopindex, oldopindex, opc, insertafter, numparams)).copyid(this);
 
-        public override int4 getBaseIndex() => newopindex;
+        public override int getBaseIndex() => newopindex;
 
         public override bool step(UnifyState state)
         {

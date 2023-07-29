@@ -12,17 +12,17 @@ namespace Sla.DECCORE
 {
     internal class GrammarLexer
     {
-        private Dictionary<int4, string> filenamemap;  // All files ever seen
-        private Dictionary<int4, istream> streammap;
-        private List<int4> filestack; // Stack of current files
-        private int4 buffersize;        // maximum characters in buffer
+        private Dictionary<int, string> filenamemap;  // All files ever seen
+        private Dictionary<int, istream> streammap;
+        private List<int> filestack; // Stack of current files
+        private int buffersize;        // maximum characters in buffer
         private char[] buffer;           // Current line being processed
-        private int4 bufstart;      // Next character to process
-        private int4 bufend;            // Next open position in buffer
-        private int4 curlineno;
+        private int bufstart;      // Next character to process
+        private int bufend;            // Next open position in buffer
+        private int curlineno;
         private istream @in;            // Current stream
         private bool endoffile;
-        private uint4 state;            // State of parser
+        private uint state;            // State of parser
         private string error;
         private enum State
         {
@@ -50,9 +50,9 @@ namespace Sla.DECCORE
             bufend = 0;
         }
 
-        private uint4 moveState(char lookahead)
+        private uint moveState(char lookahead)
         { // Change finite state machine based on lookahead
-            uint4 res;
+            uint res;
             bool newline = false;
 
             if (lookahead < 32)
@@ -213,7 +213,7 @@ namespace Sla.DECCORE
                     break;
                 case punctuation:
                     state = start;
-                    res = (uint4)buffer[bufstart];
+                    res = (uint)buffer[bufstart];
                     break;
                 case endofline_comment:
                     if (newline)
@@ -300,7 +300,7 @@ namespace Sla.DECCORE
             return res;
         }
 
-        private void establishToken(GrammarToken token, uint4 val)
+        private void establishToken(GrammarToken token, uint val)
         {
             if (val < GrammarToken::integer)
                 token.set(val);
@@ -316,7 +316,7 @@ namespace Sla.DECCORE
             error = err;
         }
     
-        public GrammarLexer(int4 maxbuffer)
+        public GrammarLexer(int maxbuffer)
         {
             buffersize = maxbuffer;
             buffer = new char[maxbuffer];
@@ -351,7 +351,7 @@ namespace Sla.DECCORE
 
         public void pushFile(string filename, istream i)
         {
-            int4 filenum = filenamemap.size();
+            int filenum = filenamemap.size();
             filenamemap[filenum] = filename;
             streammap[filenum] = i;
             filestack.push_back(filenum);
@@ -367,14 +367,14 @@ namespace Sla.DECCORE
                 endoffile = true;
                 return;
             }
-            int4 filenum = filestack.back();
+            int filenum = filestack.back();
             @in = streammap[filenum];  // Get previous stream
         }
 
         public void getNextToken(GrammarToken token)
         { // Read next token, return true if end of stream
             char nextchar;
-            uint4 tok = GrammarToken::badtoken;
+            uint tok = GrammarToken::badtoken;
             bool firsttimethru = true;
 
             if (endoffile)
@@ -417,19 +417,19 @@ namespace Sla.DECCORE
             establishToken(token, tok);
         }
 
-        public void writeLocation(ostream s, int4 line, int4 filenum)
+        public void writeLocation(ostream s, int line, int filenum)
         {
             s << " at line " << dec << line;
             s << " in " << filenamemap[filenum];
         }
 
-        public void writeTokenLocation(ostream s, int4 line, int4 colno)
+        public void writeTokenLocation(ostream s, int line, int colno)
         {
             if (line != curlineno) return;  // Does line match current line in buffer
-            for (int4 i = 0; i < bufend; ++i)
+            for (int i = 0; i < bufend; ++i)
                 s << buffer[i];
             s << '\n';
-            for (int4 i = 0; i < colno; ++i)
+            for (int i = 0; i < colno; ++i)
                 s << ' ';
             s << "^--\n";
         }

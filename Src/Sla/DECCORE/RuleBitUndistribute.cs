@@ -29,13 +29,13 @@ namespace Sla.DECCORE
         ///  - `(V >> X) | (W >> X)  =>  (V | W) >> X`
         ///
         /// Works with INT_ZEXT, INT_SEXT, INT_LEFT, INT_RIGHT, and INT_SRIGHT.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
-            uint4 list[] = { CPUI_INT_AND, CPUI_INT_OR, CPUI_INT_XOR };
+            uint list[] = { CPUI_INT_AND, CPUI_INT_OR, CPUI_INT_XOR };
             oplist.insert(oplist.end(), list, list + 3);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn1 = op.getIn(0);
             Varnode* vn2 = op.getIn(1);

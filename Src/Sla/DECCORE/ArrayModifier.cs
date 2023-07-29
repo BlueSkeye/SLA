@@ -9,16 +9,16 @@ namespace Sla.DECCORE
 {
     internal class ArrayModifier : TypeModifier
     {
-        private uint4 flags;
-        private int4 arraysize;
+        private uint flags;
+        private int arraysize;
         
-        public ArrayModifier(uint4 fl, int4 @as)
+        public ArrayModifier(uint fl, int @as)
         {
             flags = fl;
             arraysize = @as;
         }
         
-        public override uint4 getType() => array_mod;
+        public override uint getType() => array_mod;
     
         public override bool isValid() => (arraysize>0);
 

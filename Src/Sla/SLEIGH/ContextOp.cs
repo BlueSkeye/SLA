@@ -13,11 +13,11 @@ namespace Sla.SLEIGH
     internal class ContextOp : ContextChange
     {
         private PatternExpression patexp;  // Expression determining value
-        private int4 num;           // index of word containing context variable to set
-        private uintm mask;         // Mask off size of variable
-        private int4 shift;         // Number of bits to shift value into place
+        private int num;           // index of word containing context variable to set
+        private uint mask;         // Mask off size of variable
+        private int shift;         // Number of bits to shift value into place
 
-        public ContextOp(int4 startbit, int4 endbit, PatternExpression pe)
+        public ContextOp(int startbit, int endbit, PatternExpression pe)
         {
             calc_maskword(startbit, endbit, out num, out shift, out mask);
             patexp = pe;
@@ -38,7 +38,7 @@ namespace Sla.SLEIGH
             List<PatternValue*> values;
 
             patexp.listValues(values); // Get all the expression tokens
-            for (int4 i = 0; i < values.size(); ++i)
+            for (int i = 0; i < values.size(); ++i)
             {
                 OperandValue* val = dynamic_cast<OperandValue*>(values[i]);
                 if (val == (OperandValue*)0) continue;
@@ -87,7 +87,7 @@ namespace Sla.SLEIGH
 
         public override void apply(ParserWalkerChange walker)
         {
-            uintm val = patexp.getValue(walker); // Get our value based on context
+            uint val = patexp.getValue(walker); // Get our value based on context
             val <<= shift;
             walker.getParserContext().setContextWord(num, val, mask);
         }

@@ -45,7 +45,7 @@ namespace Sla.DECCORE
                 typelist.push_back(voidtype);
             else
                 typelist.push_back(outtype);
-            for (int4 i = 0; i < intypes.size(); ++i)
+            for (int i = 0; i < intypes.size(); ++i)
                 typelist.push_back(intypes[i]);
 
             proto.updateAllTypes(blanknames, typelist, dotdotdot);
@@ -135,7 +135,7 @@ namespace Sla.DECCORE
         ///    -   2 if they are equal on the surface, but additional comparisons must be made on parameters
         /// \param op is the other data-type to compare to
         /// \return the comparison value
-        public int4 compareBasic(TypeCode op)
+        public int compareBasic(TypeCode op)
         {
             if (proto == (FuncProto*)0)
             {
@@ -157,12 +157,12 @@ namespace Sla.DECCORE
                 if (model1 != model2)
                     return (model1 < model2) ? -1 : 1;
             }
-            int4 nump = proto.numParams();
-            int4 opnump = op.proto.numParams();
+            int nump = proto.numParams();
+            int opnump = op.proto.numParams();
             if (nump != opnump)
                 return (opnump < nump) ? -1 : 1;
-            uint4 myflags = proto.getComparableFlags();
-            uint4 opflags = op.proto.getComparableFlags();
+            uint myflags = proto.getComparableFlags();
+            uint opflags = op.proto.getComparableFlags();
             if (myflags != opflags)
                 return (myflags < opflags) ? -1 : 1;
 
@@ -187,16 +187,16 @@ namespace Sla.DECCORE
             s << "()";
         }
 
-        public override Datatype getSubType(uintb off, uintb newoff)
+        public override Datatype getSubType(ulong off, ulong newoff)
         {
             if (factory == (TypeFactory*)0) return (Datatype*)0;
             *newoff = 0;
             return factory.getBase(1, TYPE_CODE);  // Return code byte unattached to function prototype
         }
 
-        public override int4 compare(Datatype op, int4 level)
+        public override int compare(Datatype op, int level)
         {
-            int4 res = Datatype::compare(op, level);
+            int res = Datatype::compare(op, level);
             if (res != 0) return res;
             TypeCode tc = (TypeCode*)&op;
             res = compareBasic(tc);
@@ -208,12 +208,12 @@ namespace Sla.DECCORE
                 if (id == op.getId()) return 0;
                 return (id < op.getId()) ? -1 : 1;
             }
-            int4 nump = proto.numParams();
-            for (int4 i = 0; i < nump; ++i)
+            int nump = proto.numParams();
+            for (int i = 0; i < nump; ++i)
             {
                 Datatype* param = proto.getParam(i).getType();
                 Datatype* opparam = tc.proto.getParam(i).getType();
-                int4 c = param.compare(*opparam, level);
+                int c = param.compare(*opparam, level);
                 if (c != 0)
                     return c;
             }
@@ -228,16 +228,16 @@ namespace Sla.DECCORE
             return otype.compare(*opotype, level);
         }
 
-        public override int4 compareDependency(Datatype op)
+        public override int compareDependency(Datatype op)
         {
-            int4 res = Datatype::compareDependency(op);
+            int res = Datatype::compareDependency(op);
             if (res != 0) return res;
             TypeCode tc = (TypeCode*)&op;
             res = compareBasic(tc);
             if (res != 2) return res;
 
-            int4 nump = proto.numParams();
-            for (int4 i = 0; i < nump; ++i)
+            int nump = proto.numParams();
+            for (int i = 0; i < nump; ++i)
             {
                 Datatype* param = proto.getParam(i).getType();
                 Datatype* opparam = tc.proto.getParam(i).getType();

@@ -29,8 +29,8 @@ namespace Sla.DECCORE
         /// Starting address of section
         internal Address address;
         /// Number of bytes in section
-        internal uintb size;
+        internal ulong size;
         /// Properties of the section
-        internal uint4 flags;
+        internal uint flags;
     }
 }

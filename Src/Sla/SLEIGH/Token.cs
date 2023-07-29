@@ -10,11 +10,11 @@ namespace Sla.SLEIGH
     {
         // A multiple-byte sized chunk of pattern in a bitstream
         private string name;
-        private int4 size;          // Number of bytes in token;
-        private int4 index;         // Index of this token, for resolving offsets
+        private int size;          // Number of bytes in token;
+        private int index;         // Index of this token, for resolving offsets
         private bool bigendian;
         
-        public Token(string ,int4 sz,bool be, int4 ind)
+        public Token(string ,int sz,bool be, int ind)
         {
             name = nm;
             size = sz;
@@ -22,11 +22,11 @@ namespace Sla.SLEIGH
             index = ind;
         }
         
-        public int4 getSize() => size;
+        public int getSize() => size;
 
         public bool isBigEndian() => bigendian;
 
-        public int4 getIndex() => index;
+        public int getIndex() => index;
 
         public string getName() => name;
     }

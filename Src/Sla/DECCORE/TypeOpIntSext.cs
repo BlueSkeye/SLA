@@ -29,7 +29,7 @@ namespace Sla.DECCORE
             return s.str();
         }
 
-        public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
+        public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
             Datatype* reqtype = op.inputTypeLocal(slot);
             if (castStrategy.checkIntPromotionForExtension(op))

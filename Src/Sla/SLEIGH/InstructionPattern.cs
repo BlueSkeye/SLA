@@ -41,12 +41,12 @@ namespace Sla.SLEIGH
 
         public override Pattern simplifyClone() => new InstructionPattern(maskvalue.clone());
 
-        public override void shiftInstruction(int4 sa)
+        public override void shiftInstruction(int sa)
         {
             maskvalue.shift(sa);
         }
 
-        public override Pattern doOr(Pattern b, int4 sa)
+        public override Pattern doOr(Pattern b, int sa)
         {
             if (b.numDisjoint() > 0)
                 return b.doOr(this, -sa);
@@ -65,7 +65,7 @@ namespace Sla.SLEIGH
             return new OrPattern(res1, res2);
         }
 
-        public override Pattern doAnd(Pattern b, int4 sa)
+        public override Pattern doAnd(Pattern b, int sa)
         {
             if (b.numDisjoint() > 0)
                 return b.doAnd(this, -sa);
@@ -101,7 +101,7 @@ namespace Sla.SLEIGH
             return new InstructionPattern(respattern);
         }
 
-        public override Pattern commonSubPattern(Pattern b, int4 sa)
+        public override Pattern commonSubPattern(Pattern b, int sa)
         {
             if (b.numDisjoint() > 0)
                 return b.commonSubPattern(this, -sa);

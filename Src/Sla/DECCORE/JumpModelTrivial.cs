@@ -17,7 +17,7 @@ namespace Sla.DECCORE
     internal class JumpModelTrivial : JumpModel
     {
         /// Number of addresses in the table as reported by the JumpTable
-        private uint4 size;
+        private uint size;
 
         /// Construct given a parent JumpTable
         public JumpModelTrivial(JumpTable jt)
@@ -28,10 +28,10 @@ namespace Sla.DECCORE
 
         public override bool isOverride() => false;
 
-        public override int4 getTableSize() => size;
+        public override int getTableSize() => size;
 
-        public override bool recoverModel(Funcdata fd, PcodeOp indop, uint4 matchsize,
-            uint4 maxtablesize)
+        public override bool recoverModel(Funcdata fd, PcodeOp indop, uint matchsize,
+            uint maxtablesize)
         {
             size = indop.getParent().sizeOut();
             return ((size != 0) && (size <= matchsize));
@@ -42,21 +42,21 @@ namespace Sla.DECCORE
         {
             addresstable.clear();
             BlockBasic* bl = indop.getParent();
-            for (int4 i = 0; i < bl.sizeOut(); ++i)
+            for (int i = 0; i < bl.sizeOut(); ++i)
             {
                 BlockBasic outbl = (BlockBasic)bl.getOut(i);
                 addresstable.push_back(outbl.getStart());
             }
         }
 
-        public override void findUnnormalized(uint4 maxaddsub, uint4 maxleftright, uint4 maxext)
+        public override void findUnnormalized(uint maxaddsub, uint maxleftright, uint maxext)
         {
         }
 
         public override void buildLabels(Funcdata fd, List<Address> addresstable,
-            List<uintb> label, JumpModel orig)
+            List<ulong> label, JumpModel orig)
         {
-            for (int4 i = 0; i < addresstable.size(); ++i)
+            for (int i = 0; i < addresstable.size(); ++i)
                 label.push_back(addresstable[i].getOffset()); // Address itself is the label
         }
 

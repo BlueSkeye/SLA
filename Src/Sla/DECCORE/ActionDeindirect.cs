@@ -28,7 +28,7 @@ namespace Sla.DECCORE
             PcodeOp* op;
             Varnode* vn;
 
-            for (int4 i = 0; i < data.numCalls(); ++i)
+            for (int i = 0; i < data.numCalls(); ++i)
             {
                 fc = data.getCallSpecs(i);
                 op = fc.getOp();
@@ -50,8 +50,8 @@ namespace Sla.DECCORE
                 {
                     AddrSpace* sp = data.getAddress().getSpace(); // Assume function is in same space as calling function
                                                                   // Convert constant to a byte address in this space
-                    uintb offset = AddrSpace::addressToByte(vn.getOffset(), sp.getWordSize());
-                    int4 align = data.getArch().funcptr_align;
+                    ulong offset = AddrSpace::addressToByte(vn.getOffset(), sp.getWordSize());
+                    int align = data.getArch().funcptr_align;
                     if (align != 0)
                     {       // If we know function pointer should be aligned
                         offset >>= align;   // Remove any encoding bits before querying for the function

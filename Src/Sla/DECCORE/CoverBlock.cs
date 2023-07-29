@@ -39,20 +39,20 @@ namespace Sla.DECCORE
         /// \return a value for comparison
         public static ulong getUIndex(PcodeOp op)
         {
-            uintp switchval = (uintp)op;
+            ulong switchval = (ulong)op;
             switch (switchval)
             {
                 case 0:         // Special marker for very beginning of block
-                    return (uintm)0;
+                    return (uint)0;
                 case 1:         // Special marker for very end of block
-                    return ~((uintm)0);
+                    return ~((uint)0);
                 case 2:         // Special marker for input
-                    return (uintm)0;
+                    return (uint)0;
             }
             if (op.isMarker())
             {
                 if (op.code() == CPUI_MULTIEQUAL) // MULTIEQUALs are considered very beginning
-                    return (uintm)0;
+                    return (uint)0;
                 else if (op.code() == CPUI_INDIRECT) // INDIRECTs are considered to be at
                                                       // the location of the op they are indirect for
                     return PcodeOp::getOpFromConst(op.getIn(1).getAddr()).getSeqNum().getOrder();
@@ -105,8 +105,8 @@ namespace Sla.DECCORE
         /// \return the intersection characterization
         public int intersect(CoverBlock op2)
         {
-            uintm ustart, ustop;
-            uintm u2start, u2stop;
+            uint ustart, ustop;
+            uint u2start, u2stop;
 
             if (empty()) return 0;
             if (op2.empty()) return 0;
@@ -167,7 +167,7 @@ namespace Sla.DECCORE
         /// \return \b true if the point is contained
         public bool contain(PcodeOp point)
         {
-            uintm ustart, ustop, upoint;
+            uint ustart, ustop, upoint;
 
             if (empty()) return false;
             upoint = getUIndex(point);
@@ -189,7 +189,7 @@ namespace Sla.DECCORE
         /// \return the characterization
         public int boundary(PcodeOp point)
         {
-            uintm val;
+            uint val;
 
             if (empty()) return 0;
             val = getUIndex(point);
@@ -209,7 +209,7 @@ namespace Sla.DECCORE
         public void merge(CoverBlock op2)
         {
             bool internal1, internal2, internal3, internal4;
-            uintm ustart, u2start;
+            uint ustart, u2start;
 
             if (op2.empty()) return;    // Nothing to merge in
             if (empty())
@@ -221,7 +221,7 @@ namespace Sla.DECCORE
             ustart = getUIndex(start);
             u2start = getUIndex(op2.start);
             // Is start contained in op2
-            internal4 = ((ustart == (uintm)0) && (op2.stop == (PcodeOp*)1));
+            internal4 = ((ustart == (uint)0) && (op2.stop == (PcodeOp*)1));
             internal1 = internal4 || op2.contain(start);
             // Is op2.start contained in this
             internal3 = ((u2start == 0) && (stop == (PcodeOp*)1));
@@ -252,7 +252,7 @@ namespace Sla.DECCORE
         /// \param s is the output stream
         public void print(ostream s)
         {
-            uintm ustart, ustop;
+            uint ustart, ustop;
 
             if (empty())
             {
@@ -262,18 +262,18 @@ namespace Sla.DECCORE
 
             ustart = getUIndex(start);
             ustop = getUIndex(stop);
-            if (ustart == (uintm)0)
+            if (ustart == (uint)0)
                 s << "begin";
-            else if (ustart == ~((uintm)0))
+            else if (ustart == ~((uint)0))
                 s << "end";
             else
                 s << start.getSeqNum();
 
             s << '-';
 
-            if (ustop == (uintm)0)
+            if (ustop == (uint)0)
                 s << "begin";
-            else if (ustop == ~((uintm)0))
+            else if (ustop == ~((uint)0))
                 s << "end";
             else
                 s << stop.getSeqNum();

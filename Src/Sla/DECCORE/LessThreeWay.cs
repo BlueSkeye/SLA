@@ -36,7 +36,7 @@ namespace Sla.DECCORE
         private Varnode lo;
         private Varnode hi2;
         private Varnode lo2;
-        private int4 hislot;
+        private int hislot;
         private bool hiflip;
         private bool equalflip;
         private bool loflip;
@@ -50,9 +50,9 @@ namespace Sla.DECCORE
         private bool hiconstform;
         private bool midconstform;
         private bool loconstform;
-        private uintb hival;
-        private uintb midval;
-        private uintb loval;
+        private ulong hival;
+        private ulong midval;
+        private ulong loval;
         private OpCode finalopc;
 
         private bool mapBlocksFromLow(BlockBasic lobl)
@@ -206,7 +206,7 @@ namespace Sla.DECCORE
                 hiconstform = true;
                 hival = vnhil2.getOffset();
                 SplitVarnode::getTrueFalse(hilessbool, hiflip, hilesstrue, hilessfalse);
-                int4 inc = 1;
+                int inc = 1;
                 if (hilessfalse != hieqbl)
                 {   // Make sure the hiless false branch goes to the hieq block
                     hiflip = !hiflip;
@@ -262,7 +262,7 @@ namespace Sla.DECCORE
                 midval = vnhie2.getOffset();
                 if (vnhie2.getSize() == @in.getSize()) {
                     // Convert to comparison on high part
-                    uintb lopart = midval & calc_mask(@in.getLo().getSize());
+                    ulong lopart = midval & calc_mask(@in.getLo().getSize());
                     midval >>= @in.getLo().getSize() * 8;
                     if (midlessform)
                     {

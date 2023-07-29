@@ -32,15 +32,15 @@ namespace Sla.DECCORE
         ///
         /// This also supports the corner case:
         ///  - `sub(zext(V),c)  =>  0  when c is big enough`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_SUBPIECE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {               // A SUBPIECE of an extension may cancel
             Varnode * base,*thruvn;
-            int4 offset, outsize, insize, farinsize;
+            int offset, outsize, insize, farinsize;
             PcodeOp* extop;
             OpCode opc;
 
@@ -60,7 +60,7 @@ namespace Sla.DECCORE
                 thruvn = extop.getIn(0);   // Something still comes through
                 if (thruvn.isFree())
                 {
-                    if (thruvn.isConstant() && (insize > sizeof(uintb)) && (outsize == farinsize))
+                    if (thruvn.isConstant() && (insize > sizeof(ulong)) && (outsize == farinsize))
                     {
                         // If we have a constant that is too big to represent, and the elimination is total
                         opc = CPUI_COPY;    // go ahead and do elimination

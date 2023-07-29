@@ -15,11 +15,11 @@ namespace Sla.SLEIGH
         }
         
         private Translate translate;     // Instruction parser
-        private int4 parsestate;
+        private int parsestate;
         private AddrSpace const_space;
-        private uint1[] buf = new uint1[16];      // Buffer of bytes in the instruction stream
-        private uintm context;     // Pointer to local context
-        private int4 contextsize;       // Number of entries in context array
+        private byte[] buf = new byte[16];      // Buffer of bytes in the instruction stream
+        private uint context;     // Pointer to local context
+        private int contextsize;       // Number of entries in context array
         private ContextCache contcache;   // Interface for getting/setting context
         private List<ContextSet> contextcommit;
         private Address addr;       // Address of start of instruction
@@ -28,8 +28,8 @@ namespace Sla.SLEIGH
         private Address calladdr;     // For injections, this is the address of the call being overridden
         private List<ConstructState> state; // Current resolved instruction
         private ConstructState base_state;
-        private int4 alloc;         // Number of ConstructState's allocated
-        private int4 delayslot;     // delayslot depth
+        private int alloc;         // Number of ConstructState's allocated
+        private int delayslot;     // delayslot depth
         
         public ParserContext(ContextCache ccache, Translate trans)
         {
@@ -39,35 +39,35 @@ namespace Sla.SLEIGH
             if (ccache != (ContextCache*)0)
             {
                 contextsize = ccache.getDatabase().getContextSize();
-                context = new uintm[contextsize];
+                context = new uint[contextsize];
             }
             else
             {
                 contextsize = 0;
-                context = (uintm*)0;
+                context = (uint*)0;
             }
         }
 
         ~ParserContext()
         {
-            if (context != (uintm*)0) delete[] context;
+            if (context != (uint*)0) delete[] context;
         }
 
-        public uint1 getBuffer() => buf;
+        public byte getBuffer() => buf;
 
-        public void initialize(int4 maxstate, int4 maxparam, AddrSpace spc)
+        public void initialize(int maxstate, int maxparam, AddrSpace spc)
         {
             const_space = spc;
             state.resize(maxstate);
             state[0].parent = (ConstructState*)0;
-            for (int4 i = 0; i < maxstate; ++i)
+            for (int i = 0; i < maxstate; ++i)
                 state[i].resolve.resize(maxparam);
             base_state = &state[0];
         }
 
-        public int4 getParserState() => parsestate;
+        public int getParserState() => parsestate;
 
-        public void setParserState(int4 st)
+        public void setParserState(int st)
         {
             parsestate = st;
         }
@@ -79,7 +79,7 @@ namespace Sla.SLEIGH
             walker.baseState();
         }
 
-        public void allocateOperand(int4 i, ParserWalkerChange walker)
+        public void allocateOperand(int i, ParserWalkerChange walker)
         {
             ConstructState* opstate = &state[alloc++];
             opstate.parent = walker.point;
@@ -106,7 +106,7 @@ namespace Sla.SLEIGH
             calladdr = ad;
         }
 
-        public void addCommit(TripleSymbol sym, int4 num, uintm mask, bool flow, ConstructState point)
+        public void addCommit(TripleSymbol sym, int num, uint mask, bool flow, ConstructState point)
         {
             contextcommit.emplace_back();
             ContextSet & set(contextcommit.back());
@@ -141,7 +141,7 @@ namespace Sla.SLEIGH
                     // The value for an OperandSymbol is probabably already
                     // calculated, we just need to find the right
                     // tree node of the state
-                    int4 i = ((OperandSymbol*)sym).getIndex();
+                    int i = ((OperandSymbol*)sym).getIndex();
                     FixedHandle & h((*iter).point.resolve[i].hand);
                     commitaddr = Address(h.space, h.offset_offset);
                 }
@@ -156,7 +156,7 @@ namespace Sla.SLEIGH
                     // If the symbol handed to globalset was a computed value, the getFixedHandle calculation
                     // will return a value in the constant space. If this is a case, we explicitly convert the
                     // offset into the current address space
-                    uintb newoff = AddrSpace::addressToByte(commitaddr.getOffset(), addr.getSpace().getWordSize());
+                    ulong newoff = AddrSpace::addressToByte(commitaddr.getOffset(), addr.getSpace().getWordSize());
                     commitaddr = Address(addr.getSpace(), newoff);
                 }
 
@@ -184,7 +184,7 @@ namespace Sla.SLEIGH
             {
                 if (translate == (Translate*)0 || parsestate == uninitialized)
                     throw new LowlevelError("inst_next2 not available in this context");
-                int4 length = translate.instructionLength(naddr);
+                int length = translate.instructionLength(naddr);
                 n2addr = naddr + length;
             }
             return n2addr;
@@ -198,15 +198,15 @@ namespace Sla.SLEIGH
 
         public AddrSpace getConstSpace() => const_space;
 
-        public uintm getInstructionBytes(int4 byteoff, int4 numbytes, uint4 off)
+        public uint getInstructionBytes(int byteoff, int numbytes, uint off)
         {               // Get bytes from the instruction stream into a intm
                         // (assuming big endian format)
             off += bytestart;
             if (off >= 16)
                 throw BadDataError("Instruction is using more than 16 bytes");
-            uint1* ptr = buf + off;
-            uintm res = 0;
-            for (int4 i = 0; i < size; ++i)
+            byte* ptr = buf + off;
+            uint res = 0;
+            for (int i = 0; i < size; ++i)
             {
                 res <<= 8;
                 res |= ptr[i];
@@ -214,64 +214,64 @@ namespace Sla.SLEIGH
             return res;
         }
 
-        public uintm getContextBytes(int4 byteoff, int4 numbytes)
-        {               // Get bytes from context into a uintm
-            int4 intstart = bytestart / sizeof(uintm);
-            uintm res = context[intstart];
-            int4 byteOffset = bytestart % sizeof(uintm);
-            int4 unusedBytes = sizeof(uintm) - size;
+        public uint getContextBytes(int byteoff, int numbytes)
+        {               // Get bytes from context into a uint
+            int intstart = bytestart / sizeof(uint);
+            uint res = context[intstart];
+            int byteOffset = bytestart % sizeof(uint);
+            int unusedBytes = sizeof(uint) - size;
             res <<= byteOffset * 8;
             res >>= unusedBytes * 8;
-            int4 remaining = size - sizeof(uintm) + byteOffset;
+            int remaining = size - sizeof(uint) + byteOffset;
             if ((remaining > 0) && (++intstart < contextsize))
-            { // If we extend beyond boundary of a single uintm
-                uintm res2 = context[intstart];
-                unusedBytes = sizeof(uintm) - remaining;
+            { // If we extend beyond boundary of a single uint
+                uint res2 = context[intstart];
+                unusedBytes = sizeof(uint) - remaining;
                 res2 >>= unusedBytes * 8;
                 res |= res2;
             }
             return res;
         }
 
-        public uintm getInstructionBits(int4 startbit, int4 size, uint4 off)
+        public uint getInstructionBits(int startbit, int size, uint off)
         {
             off += (startbit / 8);
             if (off >= 16)
                 throw BadDataError("Instruction is using more than 16 bytes");
-            uint1* ptr = buf + off;
+            byte* ptr = buf + off;
             startbit = startbit % 8;
-            int4 bytesize = (startbit + size - 1) / 8 + 1;
-            uintm res = 0;
-            for (int4 i = 0; i < bytesize; ++i)
+            int bytesize = (startbit + size - 1) / 8 + 1;
+            uint res = 0;
+            for (int i = 0; i < bytesize; ++i)
             {
                 res <<= 8;
                 res |= ptr[i];
             }
-            res <<= 8 * (sizeof(uintm) - bytesize) + startbit; // Move starting bit to highest position
-            res >>= 8 * sizeof(uintm) - size;   // Shift to bottom of intm
+            res <<= 8 * (sizeof(uint) - bytesize) + startbit; // Move starting bit to highest position
+            res >>= 8 * sizeof(uint) - size;   // Shift to bottom of intm
             return res;
         }
 
-        public uintm getContextBits(int4 startbit, int4 size)
+        public uint getContextBits(int startbit, int size)
         {
-            int4 intstart = startbit / (8 * sizeof(uintm));
-            uintm res = context[intstart]; // Get intm containing highest bit
-            int4 bitOffset = startbit % (8 * sizeof(uintm));
-            int4 unusedBits = 8 * sizeof(uintm) - size;
+            int intstart = startbit / (8 * sizeof(uint));
+            uint res = context[intstart]; // Get intm containing highest bit
+            int bitOffset = startbit % (8 * sizeof(uint));
+            int unusedBits = 8 * sizeof(uint) - size;
             res <<= bitOffset;  // Shift startbit to highest position
             res >>= unusedBits;
-            int4 remaining = size - 8 * sizeof(uintm) + bitOffset;
+            int remaining = size - 8 * sizeof(uint) + bitOffset;
             if ((remaining > 0) && (++intstart < contextsize))
             {
-                uintm res2 = context[intstart];
-                unusedBits = 8 * sizeof(uintm) - remaining;
+                uint res2 = context[intstart];
+                unusedBits = 8 * sizeof(uint) - remaining;
                 res2 >>= unusedBits;
                 res |= res2;
             }
             return res;
         }
 
-        public void setContextWord(int4 i, uintm val, uintm mask)
+        public void setContextWord(int i, uint val, uint mask)
         {
             context[i] = (context[i] & (~mask)) | (mask & val);
         }
@@ -281,13 +281,13 @@ namespace Sla.SLEIGH
             contcache.getContext(addr, context);
         }
 
-        public int4 getLength() => base_state.length;
+        public int getLength() => base_state.length;
 
-        public void setDelaySlot(int4 val)
+        public void setDelaySlot(int val)
         {
             delayslot = val;
         }
 
-        public int4 getDelaySlot() => delayslot;
+        public int getDelaySlot() => delayslot;
     }
 }

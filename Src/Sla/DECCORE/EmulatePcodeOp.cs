@@ -36,17 +36,17 @@ namespace Sla.DECCORE
         /// \param offset is the starting address offset (from within the space) to pull the value from
         /// \param sz is the number of bytes to pull from memory
         /// \return indicated bytes arranged as a constant value
-        protected override uintb getLoadImageValue(AddrSpace spc, uintb offset, int4 sz)
+        protected override ulong getLoadImageValue(AddrSpace spc, ulong offset, int sz)
         {
             LoadImage* loadimage = glb.loader;
-            uintb res;
+            ulong res;
 
-            loadimage.loadFill((uint1*)&res, sizeof(uintb), Address(spc, off));
+            loadimage.loadFill((byte*)&res, sizeof(ulong), Address(spc, off));
 
             if ((HOST_ENDIAN == 1) != spc.isBigEndian())
-                res = byte_swap(res, sizeof(uintb));
-            if (spc.isBigEndian() && (sz < sizeof(uintb)))
-                res >>= (sizeof(uintb) - sz) * 8;
+                res = byte_swap(res, sizeof(ulong));
+            if (spc.isBigEndian() && (sz < sizeof(ulong)))
+                res >>= (sizeof(ulong) - sz) * 8;
             else
                 res &= calc_mask(sz);
             return res;
@@ -54,17 +54,17 @@ namespace Sla.DECCORE
 
         protected override void executeUnary()
         {
-            uintb in1 = getVarnodeValue(currentOp.getIn(0));
-            uintb out = currentBehave.evaluateUnary(currentOp.getOut().getSize(),
+            ulong in1 = getVarnodeValue(currentOp.getIn(0));
+            ulong out = currentBehave.evaluateUnary(currentOp.getOut().getSize(),
                                  currentOp.getIn(0).getSize(), in1);
             setVarnodeValue(currentOp.getOut(), out);
         }
 
         protected override void executeBinary()
         {
-            uintb in1 = getVarnodeValue(currentOp.getIn(0));
-            uintb in2 = getVarnodeValue(currentOp.getIn(1));
-            uintb out = currentBehave.evaluateBinary(currentOp.getOut().getSize(),
+            ulong in1 = getVarnodeValue(currentOp.getIn(0));
+            ulong in2 = getVarnodeValue(currentOp.getIn(1));
+            ulong out = currentBehave.evaluateBinary(currentOp.getOut().getSize(),
                                   currentOp.getIn(0).getSize(), in1, in2);
             setVarnodeValue(currentOp.getOut(), out);
         }
@@ -72,19 +72,19 @@ namespace Sla.DECCORE
         protected override void executeLoad()
         {
             // op will be null, use current_op
-            uintb off = getVarnodeValue(currentOp.getIn(1));
+            ulong off = getVarnodeValue(currentOp.getIn(1));
             AddrSpace* spc = currentOp.getIn(0).getSpaceFromConst();
             off = AddrSpace::addressToByte(off, spc.getWordSize());
-            int4 sz = currentOp.getOut().getSize();
-            uintb res = getLoadImageValue(spc, off, sz);
+            int sz = currentOp.getOut().getSize();
+            ulong res = getLoadImageValue(spc, off, sz);
             setVarnodeValue(currentOp.getOut(), res);
         }
 
         protected override void executeStore()
         {
             // There is currently nowhere to store anything since the memstate is null
-            //  uintb val = getVarnodeValue(current_op.getIn(2)); // Value being stored
-            //  uintb off = getVarnodeValue(current_op.getIn(1));
+            //  ulong val = getVarnodeValue(current_op.getIn(2)); // Value being stored
+            //  ulong off = getVarnodeValue(current_op.getIn(1));
             //  AddrSpace *spc = current_op.getIn(0).getSpaceFromConst();
         }
 
@@ -92,7 +92,7 @@ namespace Sla.DECCORE
         protected override bool executeCbranch()
         {
             // op will be null, use current_op
-            uintb cond = getVarnodeValue(currentOp.getIn(1));
+            ulong cond = getVarnodeValue(currentOp.getIn(1));
             // We must take into account the booleanflip bit with pcode from the syntax tree
             return ((cond != 0) != currentOp.isBooleanFlip());
         }
@@ -105,7 +105,7 @@ namespace Sla.DECCORE
         protected override void executeMultiequal()
         {
             // op will be null, use current_op
-            int4 i;
+            int i;
             FlowBlock* bl = currentOp.getParent();
             FlowBlock* last_bl = lastOp.getParent();
 
@@ -113,7 +113,7 @@ namespace Sla.DECCORE
                 if (bl.getIn(i) == last_bl) break;
             if (i == bl.sizeIn())
                 throw new LowlevelError("Could not execute MULTIEQUAL");
-            uintb val = getVarnodeValue(currentOp.getIn(i));
+            ulong val = getVarnodeValue(currentOp.getIn(i));
             setVarnodeValue(currentOp.getOut(), val);
         }
 
@@ -122,7 +122,7 @@ namespace Sla.DECCORE
             // We could probably safely ignore this in the
             // context we are using it (jumptable recovery)
             // But we go ahead and assume it is equivalent to copy
-            uintb val = getVarnodeValue(currentOp.getIn(0));
+            ulong val = getVarnodeValue(currentOp.getIn(0));
             setVarnodeValue(currentOp.getOut(), val);
         }
 
@@ -132,12 +132,12 @@ namespace Sla.DECCORE
             if (segdef == (SegmentOp*)0)
                 throw new LowlevelError("Segment operand missing definition");
 
-            uintb in1 = getVarnodeValue(currentOp.getIn(1));
-            uintb in2 = getVarnodeValue(currentOp.getIn(2));
-            List<uintb> bindlist;
+            ulong in1 = getVarnodeValue(currentOp.getIn(1));
+            ulong in2 = getVarnodeValue(currentOp.getIn(2));
+            List<ulong> bindlist;
             bindlist.push_back(in1);
             bindlist.push_back(in2);
-            uintb res = segdef.execute(bindlist);
+            ulong res = segdef.execute(bindlist);
             setVarnodeValue(currentOp.getOut(), res);
         }
 
@@ -176,13 +176,13 @@ namespace Sla.DECCORE
         /// The value is \e stored using the Varnode as the \e address and \e storage \e size.
         /// \param vn is the specific Varnode
         /// \param val is the constant value to store
-        public abstract void setVarnodeValue(Varnode vn, uintb val);
+        public abstract void setVarnodeValue(Varnode vn, ulong val);
 
         /// \brief Given a specific Varnode, retrieve the current value for it from the machine state
         /// This is the placeholder internal operation for obtaining a Varnode value during emulation.
         /// The value is \e loaded using the Varnode as the \e address and \e storage \e size.
         /// \param vn is the specific Varnode
         /// \return the corresponding value from the machine state
-        public abstract uintb getVarnodeValue(Varnode vn);
+        public abstract ulong getVarnodeValue(Varnode vn);
     }
 }

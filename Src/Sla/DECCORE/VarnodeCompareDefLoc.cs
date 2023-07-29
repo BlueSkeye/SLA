@@ -17,7 +17,7 @@ namespace Sla.DECCORE
         /// \return true if \b a occurs earlier than \b b
         internal static bool operator/*()*/(Varnode a, Varnode b)
         {
-            uint4 f1, f2;
+            uint f1, f2;
 
             f1 = (a.getFlags() & (Varnode::input | Varnode::written));
             f2 = (b.getFlags() & (Varnode::input | Varnode::written));

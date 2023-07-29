@@ -29,7 +29,7 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            int4 i;
+            int i;
             FuncCallSpecs* fc;
             AliasChecker aliascheck;
             aliascheck.gather(&data, data.getArch().getStackSpace(), true);

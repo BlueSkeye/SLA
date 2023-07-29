@@ -24,16 +24,16 @@ namespace Sla.DECCORE
 
         /// \class RuleSubvarZext
         /// \brief Perform SubvariableFlow analysis triggered by INT_ZEXT
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_ZEXT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn = op.getOut();
             Varnode* invn = op.getIn(0);
-            uintb mask = calc_mask(invn.getSize());
+            ulong mask = calc_mask(invn.getSize());
 
             SubvariableFlow subflow(&data,vn,mask,invn.isPtrFlow(),false,false);
             if (!subflow.doTrace()) return 0;

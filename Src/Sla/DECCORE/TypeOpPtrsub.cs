@@ -29,12 +29,12 @@ namespace Sla.DECCORE
             return tlst.getBase(op.getOut().getSize(), TYPE_INT);
         }
 
-        public override Datatype getInputLocal(PcodeOp op, int4 slot)
+        public override Datatype getInputLocal(PcodeOp op, int slot)
         {
             return tlst.getBase(op.getIn(slot).getSize(), TYPE_INT);
         }
 
-        public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
+        public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
             if (slot == 0)
             {       // The operation expects the type of the VARNODE
@@ -51,8 +51,8 @@ namespace Sla.DECCORE
             TypePointer* ptype = (TypePointer*)op.getIn(0).getHighTypeReadFacing(op);
             if (ptype.getMetatype() == TYPE_PTR)
             {
-                uintb offset = AddrSpace::addressToByte(op.getIn(1).getOffset(), ptype.getWordSize());
-                uintb unusedOffset;
+                ulong offset = AddrSpace::addressToByte(op.getIn(1).getOffset(), ptype.getWordSize());
+                ulong unusedOffset;
                 TypePointer* unusedParent;
                 Datatype* rettype = ptype.downChain(offset, unusedParent, unusedOffset, false, *tlst);
                 if ((offset == 0) && (rettype != (Datatype*)0))
@@ -64,7 +64,7 @@ namespace Sla.DECCORE
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
-            int4 inslot, int4 outslot)
+            int inslot, int outslot)
         {
             if ((inslot != -1) && (outslot != -1)) return (Datatype*)0; // Must propagate input <. output
             type_metatype metain = alttype.getMetatype();

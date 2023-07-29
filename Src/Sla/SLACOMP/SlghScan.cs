@@ -1154,12 +1154,12 @@ namespace Sla.SLACOMP
         //    };
 
         //extern SleighCompile * slgh;
-        //    int4 last_preproc;   // lex state before last preprocessing erasure
-        //    int4 actionon;       // whether '&' '|' and '^' are treated as actionon in pattern section
-        //    int4 withsection = 0; // whether we are between the 'with' keyword and its open brace '{'
+        //    int last_preproc;   // lex state before last preprocessing erasure
+        //    int actionon;       // whether '&' '|' and '^' are treated as actionon in pattern section
+        //    int withsection = 0; // whether we are between the 'with' keyword and its open brace '{'
         //    List<FileStreamState> filebuffers;
-        //    List<int4> ifstack;
-        //    int4 negative_if = -1;
+        //    List<int> ifstack;
+        //    int negative_if = -1;
 
         //    void preproc_error(string &err)
 
@@ -1200,7 +1200,7 @@ namespace Sla.SLACOMP
         //    void preprocess_string(istream &s, string &res)
 
         //    {  // Grab string surrounded by double quotes from stream or call preprocess_error
-        //        int4 val;
+        //        int val;
 
         //        s >> ws;   // Skip any whitespace
         //        val = s.get();
@@ -1216,9 +1216,9 @@ namespace Sla.SLACOMP
         //            preproc_error("Missing terminating double quote");
         //    }
 
-        //extern int4 preprocess_if(istream &s); // Forward declaration for recursion
+        //extern int preprocess_if(istream &s); // Forward declaration for recursion
 
-        //    int4 read_defined_operator(istream &s)
+        //    int read_defined_operator(istream &s)
 
         //    {  // We have seen a -defined- keyword in an if or elif
         //       // Read macro name used as input, return 1 if it is defined
@@ -1229,22 +1229,22 @@ namespace Sla.SLACOMP
         //        if (tok != '(')
         //            preproc_error("Badly formed \"defined\" operator");
         //        macroname = read_identifier(s);
-        //        int4 res = slgh.getPreprocValue(macroname, macroname) ? 1 : 0;
+        //        int res = slgh.getPreprocValue(macroname, macroname) ? 1 : 0;
         //        s >> ws >> tok;
         //        if (tok != ')')
         //            preproc_error("Badly formed \"defined\" operator");
         //        return res;
         //    }
 
-        //    int4 read_boolean_clause(istream &s)
+        //    int read_boolean_clause(istream &s)
 
         //    {               // We have seen an if or elif
         //                    // return 1 if condition is true or else 0
         //        s >> ws;
         //        if (s.peek() == '(')
         //        {       // Parenthetical expression spawns recursion
-        //            int4 val = s.get();
-        //            int4 res = preprocess_if(s);
+        //            int val = s.get();
+        //            int res = preprocess_if(s);
         //            s >> ws;
         //            val = s.get();
         //            if (val != ')')
@@ -1290,10 +1290,10 @@ namespace Sla.SLACOMP
         //        return 0;
         //    }
 
-        //    int4 preprocess_if(istream &s)
+        //    int preprocess_if(istream &s)
 
         //    {
-        //        int4 res = read_boolean_clause(s);
+        //        int res = read_boolean_clause(s);
         //        s >> ws;
         //        while ((!s.eof()) && (s.peek() != ')'))
         //        {
@@ -1303,7 +1303,7 @@ namespace Sla.SLACOMP
         //            boolop += tok;
         //            s >> tok;
         //            boolop += tok;
-        //            int4 res2 = read_boolean_clause(s);
+        //            int res2 = read_boolean_clause(s);
         //            if (boolop == "&&")
         //                res = res & res2;
         //            else if (boolop == "||")
@@ -1357,7 +1357,7 @@ namespace Sla.SLACOMP
         //        }
         //    }
 
-        //    int4 preprocess(int4 cur_state, int4 blank_state)
+        //    int preprocess(int cur_state, int blank_state)
 
         //    {
         //        string str(sleightext);
@@ -1430,7 +1430,7 @@ namespace Sla.SLACOMP
         //            if (varname.size() == 0)
         //                preproc_error("Error in preprocessor ifdef");
         //            string value;
-        //            int4 truth = (slgh.getPreprocValue(varname, value)) ? 1 : 0;
+        //            int truth = (slgh.getPreprocValue(varname, value)) ? 1 : 0;
         //            ifstack.push_back(truth);
         //            check_to_endofline(s);
         //        }
@@ -1441,13 +1441,13 @@ namespace Sla.SLACOMP
         //            if (varname.size() == 0)
         //                preproc_error("Error in preprocessor ifndef");
         //            string value;
-        //            int4 truth = (slgh.getPreprocValue(varname, value)) ? 0 : 1;   // flipped from ifdef
+        //            int truth = (slgh.getPreprocValue(varname, value)) ? 0 : 1;   // flipped from ifdef
         //            ifstack.push_back(truth);
         //            check_to_endofline(s);
         //        }
         //        else if (type == "if")
         //        {
-        //            int4 truth = preprocess_if(s);
+        //            int truth = preprocess_if(s);
         //            if (!s.eof())
         //                preproc_error("Unbalanced parentheses");
         //            ifstack.push_back(truth);
@@ -1464,7 +1464,7 @@ namespace Sla.SLACOMP
         //                ifstack.back() = 4;               // don't include this elif
         //            else
         //            {
-        //                int4 truth = preprocess_if(s);
+        //                int truth = preprocess_if(s);
         //                if (!s.eof())
         //                    preproc_error("Unbalanced parentheses");
         //                if (truth == 0)
@@ -1529,7 +1529,7 @@ namespace Sla.SLACOMP
         //        slgh.parsePreprocMacro();
         //    }
 
-        //    int4 find_symbol(void)
+        //    int find_symbol(void)
         //    {
         //        string* newstring = new string(sleightext);
         //        SleighSymbol* sym = slgh.findSymbol(*newstring);
@@ -1604,10 +1604,10 @@ namespace Sla.SLACOMP
         //        return -1;   // Should never reach here
         //    }
 
-        //    int4 scan_number(char* numtext, SLEIGHSTYPE* lval, bool signednum)
+        //    int scan_number(char* numtext, SLEIGHSTYPE* lval, bool signednum)
 
         //    {
-        //        uintb val;
+        //        ulong val;
         //        if (numtext[0] == '0' && numtext[1] == 'b')
         //        {
         //            val = 0;
@@ -1632,10 +1632,10 @@ namespace Sla.SLACOMP
         //        }
         //        if (signednum)
         //        {
-        //            lval.big = new intb(val);
+        //            lval.big = new long(val);
         //            return INTB;
         //        }
-        //        lval.i = new uintb(val);
+        //        lval.i = new ulong(val);
         //        return INTEGER;
         //    }
 

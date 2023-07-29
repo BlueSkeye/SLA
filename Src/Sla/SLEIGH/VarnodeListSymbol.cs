@@ -16,10 +16,10 @@ namespace Sla.SLEIGH
 
         private void checkTableFill()
         {
-            intb min = patval.minValue();
-            intb max = patval.maxValue();
+            long min = patval.minValue();
+            long max = patval.maxValue();
             tableisfilled = (min >= 0) && (max < varnode_table.size());
-            for (uint4 i = 0; i < varnode_table.size(); ++i)
+            for (uint i = 0; i < varnode_table.size(); ++i)
             {
                 if (varnode_table[i] == (VarnodeSymbol*)0)
                     tableisfilled = false;
@@ -33,7 +33,7 @@ namespace Sla.SLEIGH
         public VarnodeListSymbol(string nm,PatternValue pv, List<SleighSymbol> vt)
             : base(nm, pv)
         {
-            for (int4 i = 0; i < vt.size(); ++i)
+            for (int i = 0; i < vt.size(); ++i)
                 varnode_table.push_back((VarnodeSymbol*)vt[i]);
             checkTableFill();
         }
@@ -42,7 +42,7 @@ namespace Sla.SLEIGH
         {
             if (!tableisfilled)
             {
-                intb ind = patval.getValue(walker);
+                long ind = patval.getValue(walker);
                 if ((ind < 0) || (ind >= varnode_table.size()) || (varnode_table[ind] == (VarnodeSymbol*)0))
                 {
                     ostringstream s;
@@ -57,7 +57,7 @@ namespace Sla.SLEIGH
 
         public override void getFixedHandle(FixedHandle hand, ParserWalker walker)
         {
-            uint4 ind = (uint4)patval.getValue(walker);
+            uint ind = (uint)patval.getValue(walker);
             // The resolve routine has checked that -ind- must be a valid index
             VarnodeData fix = varnode_table[ind].getFixedVarnode();
             hand.space = fix.space;
@@ -66,9 +66,9 @@ namespace Sla.SLEIGH
             hand.size = fix.size;
         }
 
-        public override int4 getSize()
+        public override int getSize()
         {
-            for (int4 i = 0; i < varnode_table.size(); ++i)
+            for (int i = 0; i < varnode_table.size(); ++i)
             {
                 VarnodeSymbol* vnsym = varnode_table[i]; // Assume all are same size
                 if (vnsym != (VarnodeSymbol*)0)
@@ -79,7 +79,7 @@ namespace Sla.SLEIGH
 
         public override void print(TextWriter s, ParserWalker walker)
         {
-            uint4 ind = (uint4)patval.getValue(walker);
+            uint ind = (uint)patval.getValue(walker);
             if (ind >= varnode_table.size())
                 throw SleighError("Value out of range for varnode table");
             s << varnode_table[ind].getName();
@@ -93,7 +93,7 @@ namespace Sla.SLEIGH
             SleighSymbol::saveXmlHeader(s);
             s << ">\n";
             patval.saveXml(s);
-            for (int4 i = 0; i < varnode_table.size(); ++i)
+            for (int i = 0; i < varnode_table.size(); ++i)
             {
                 if (varnode_table[i] == (VarnodeSymbol*)0)
                     s << "<null/>\n";
@@ -123,7 +123,7 @@ namespace Sla.SLEIGH
                 Element subel = *iter;
                 if (subel.getName() == "var")
                 {
-                    uintm id;
+                    uint id;
                     istringstream s(subel.getAttributeValue("id"));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> id;

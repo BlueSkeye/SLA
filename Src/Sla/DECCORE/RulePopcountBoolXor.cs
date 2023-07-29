@@ -27,12 +27,12 @@ namespace Sla.DECCORE
         ///
         /// Expressions involving boolean values (b1 and b2) are converted, such as:
         ///  - `popcount((b1 << 6) | (b2 << 2)) & 1  =>   b1 ^ b2`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_POPCOUNT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* outVn = op.getOut();
             list<PcodeOp*>::const_iterator iter;
@@ -47,11 +47,11 @@ namespace Sla.DECCORE
                 if (tmpVn.getSize() != 1) continue;    // Must be boolean sized output
                 Varnode* inVn = op.getIn(0);
                 if (!inVn.isWritten()) return 0;
-                int4 count = popcount(inVn.getNZMask());
+                int count = popcount(inVn.getNZMask());
                 if (count == 1)
                 {
-                    int4 leastPos = leastsigbit_set(inVn.getNZMask());
-                    int4 constRes;
+                    int leastPos = leastsigbit_set(inVn.getNZMask());
+                    int constRes;
                     Varnode* b1 = getBooleanResult(inVn, leastPos, constRes);
                     if (b1 == (Varnode*)0) continue;
                     data.opSetOpcode(baseOp, CPUI_COPY);    // Recognized  popcount( b1 << #pos ) & 1
@@ -61,9 +61,9 @@ namespace Sla.DECCORE
                 }
                 if (count == 2)
                 {
-                    int4 pos0 = leastsigbit_set(inVn.getNZMask());
-                    int4 pos1 = mostsigbit_set(inVn.getNZMask());
-                    int4 constRes0, constRes1;
+                    int pos0 = leastsigbit_set(inVn.getNZMask());
+                    int pos1 = mostsigbit_set(inVn.getNZMask());
+                    int constRes0, constRes1;
                     Varnode* b1 = getBooleanResult(inVn, pos0, constRes0);
                     if (b1 == (Varnode*)0 && constRes0 != 1) continue;
                     Varnode* b2 = getBooleanResult(inVn, pos1, constRes1);
@@ -93,14 +93,14 @@ namespace Sla.DECCORE
         /// \param bitPos is the bit position of the desired boolean value
         /// \param constRes is used to pass back a constant boolean result
         /// \return the boolean Varnode producing the desired value or null
-        public static Varnode getBooleanResult(Varnode vn, int4 bitPos, int4 constRes)
+        public static Varnode getBooleanResult(Varnode vn, int bitPos, int constRes)
         {
             constRes = -1;
-            uintb mask = 1;
+            ulong mask = 1;
             mask <<= bitPos;
             Varnode* vn0;
             Varnode* vn1;
-            int4 sa;
+            int sa;
             for (; ; )
             {
                 if (vn.isConstant())
@@ -141,7 +141,7 @@ namespace Sla.DECCORE
                         if (bitPos >= vn.getSize() * 8) return (Varnode*)0;
                         break;
                     case CPUI_SUBPIECE:
-                        sa = (int4)op.getIn(1).getOffset() * 8;
+                        sa = (int)op.getIn(1).getOffset() * 8;
                         bitPos += sa;
                         mask <<= sa;
                         vn = op.getIn(0);
@@ -149,7 +149,7 @@ namespace Sla.DECCORE
                     case CPUI_PIECE:
                         vn0 = op.getIn(0);
                         vn1 = op.getIn(1);
-                        sa = (int4)vn1.getSize() * 8;
+                        sa = (int)vn1.getSize() * 8;
                         if (bitPos >= sa)
                         {
                             vn = vn0;
@@ -164,7 +164,7 @@ namespace Sla.DECCORE
                     case CPUI_INT_LEFT:
                         vn1 = op.getIn(1);
                         if (!vn1.isConstant()) return (Varnode*)0;
-                        sa = (int4)vn1.getOffset();
+                        sa = (int)vn1.getOffset();
                         if (sa > bitPos) return (Varnode*)0;
                         bitPos -= sa;
                         mask >>= sa;
@@ -174,7 +174,7 @@ namespace Sla.DECCORE
                     case CPUI_INT_SRIGHT:
                         vn1 = op.getIn(1);
                         if (!vn1.isConstant()) return (Varnode*)0;
-                        sa = (int4)vn1.getOffset();
+                        sa = (int)vn1.getOffset();
                         vn = op.getIn(0);
                         bitPos += sa;
                         if (bitPos >= vn.getSize() * 8) return (Varnode*)0;

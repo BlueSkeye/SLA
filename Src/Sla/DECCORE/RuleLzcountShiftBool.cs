@@ -30,16 +30,16 @@ namespace Sla.DECCORE
         /// the result of lzcount on zero would have the 5th bit set.
         ///  - `lzcount(a ^ 3) >> 5  =>  a ^ 3 == 0  =>  a == 3` (by RuleXorCollapse)
         ///  - `lzcount(a - 3) >> 5  =>  a - 3 == 0  =>  a == 3` (by RuleEqual2Zero)
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_LZCOUNT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* outVn = op.getOut();
             list<PcodeOp*>::const_iterator iter, iter2;
-            uintb max_return = 8 * op.getIn(0).getSize();
+            ulong max_return = 8 * op.getIn(0).getSize();
             if (popcount(max_return) != 1)
             {
                 // This rule only makes sense with sizes that are powers of 2; if the maximum value
@@ -55,7 +55,7 @@ namespace Sla.DECCORE
                 if (baseOp.code() != CPUI_INT_RIGHT && baseOp.code() != CPUI_INT_SRIGHT) continue;
                 Varnode* vn1 = baseOp.getIn(1);
                 if (!vn1.isConstant()) continue;
-                uintb shift = vn1.getOffset();
+                ulong shift = vn1.getOffset();
                 if ((max_return >> shift) == 1)
                 {
                     // Becomes a comparison with zero

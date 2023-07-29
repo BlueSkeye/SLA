@@ -45,7 +45,7 @@ namespace Sla.DECCORE
         public string getFileName() => filename;
 
         /// Get data from the LoadImage
-        /// \fn void LoadImage::loadFill(uint1 *ptr,int4 size, Address addr)
+        /// \fn void LoadImage::loadFill(byte *ptr,int size, Address addr)
         /// This is the \e core routine of a LoadImage.  Given a particular
         /// address range, this routine retrieves the exact byte values
         /// that are stored at that address when the executable is loaded
@@ -57,7 +57,7 @@ namespace Sla.DECCORE
         /// \param ptr points to where the resulting bytes will be stored
         /// \param size is the number of bytes to retrieve from the image
         /// \param addr is the starting address of the bytes to retrieve
-        public abstract void loadFill(uint1 ptr, int4 size, Address addr);
+        public abstract void loadFill(byte ptr, int size, Address addr);
 
         /// Prepare to read symbols
         /// This routine should read in and parse any symbol information
@@ -172,10 +172,10 @@ namespace Sla.DECCORE
         /// \param size is the number of bytes to read from the image
         /// \param addr is the address of the first byte being read
         /// \return a pointer to the desired bytes
-        public virtual uint1[] load(int4 size, Address addr)
+        public virtual byte[] load(int size, Address addr)
         {
-            uint1[] buf = new uint1[size];
-            if (buf == (uint1*)0)
+            byte[] buf = new byte[size];
+            if (buf == (byte*)0)
                 throw new LowlevelError("Out of memory");
             loadFill(buf, size, addr);
             return buf;

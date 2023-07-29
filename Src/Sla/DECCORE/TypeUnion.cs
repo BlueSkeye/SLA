@@ -32,7 +32,7 @@ namespace Sla.DECCORE
             for (iter = fd.begin(); iter != fd.end(); ++iter)
             {
                 field.push_back(*iter);
-                int4 end = field.back().type.getSize();
+                int end = field.back().type.getSize();
                 if (end > size)
                     size = end;
             }
@@ -75,7 +75,7 @@ namespace Sla.DECCORE
         }  ///< Construct incomplete TypeUnion
 
         /// Get the i-th field of the union
-        public TypeField getField(int4 i) => field[i];
+        public TypeField getField(int i) => field[i];
 
         /// \param offset is the byte offset of the truncation
         /// \param sz is the number of bytes in the resulting truncation
@@ -83,7 +83,7 @@ namespace Sla.DECCORE
         /// \param slot is the input slot being read
         /// \param newoff is used to pass back any remaining offset into the field which still must be resolved
         /// \return the field to use with truncation or null if there is no appropriate field
-        public override TypeField findTruncation(int4 offset, int4 sz, PcodeOp op, int4 slot, int4 newoff)
+        public override TypeField findTruncation(int offset, int sz, PcodeOp op, int slot, int newoff)
         {
             // No new scoring is done, but if a cached result is available, return it.
             Funcdata fd = op.getParent().getFuncdata();
@@ -99,16 +99,16 @@ namespace Sla.DECCORE
             return (TypeField*)0;
         }
 
-        //  virtual Datatype *getSubType(uintb off,uintb *newoff);
+        //  virtual Datatype *getSubType(ulong off,ulong *newoff);
 
-        public override int4 numDepend() => field.size();
+        public override int numDepend() => field.size();
 
-        public override Datatype getDepend(int4 index) => field[index].type;
+        public override Datatype getDepend(int index) => field[index].type;
 
         // For tree structure
-        public override int4 compare(Datatype op, int4 level)
+        public override int compare(Datatype op, int level)
         {
-            int4 res = Datatype::compare(op, level);
+            int res = Datatype::compare(op, level);
             if (res != 0) return res;
             TypeUnion tu = (TypeUnion*)&op;
             List<TypeField>::const_iterator iter1, iter2;
@@ -139,7 +139,7 @@ namespace Sla.DECCORE
             {
                 if ((*iter1).type != (*iter2).type)
                 { // Short circuit recursive loops
-                    int4 c = (*iter1).type.compare(*(*iter2).type, level);
+                    int c = (*iter1).type.compare(*(*iter2).type, level);
                     if (c != 0) return c;
                 }
                 ++iter1;
@@ -149,9 +149,9 @@ namespace Sla.DECCORE
         }
 
         // For tree structure
-        public override int4 compareDependency(Datatype op)
+        public override int compareDependency(Datatype op)
         {
-            int4 res = Datatype::compareDependency(op);
+            int res = Datatype::compareDependency(op);
             if (res != 0) return res;
             TypeUnion* tu = (TypeUnion*)&op;
             List<TypeField>::const_iterator iter1, iter2;
@@ -193,7 +193,7 @@ namespace Sla.DECCORE
             encoder.closeElement(ELEM_TYPE);
         }
 
-        public override Datatype resolveInFlow(PcodeOp op, int4 slot)
+        public override Datatype resolveInFlow(PcodeOp op, int slot)
         {
             Funcdata* fd = op.getParent().getFuncdata();
             ResolvedUnion* res = fd.getUnionField(this, op, slot);
@@ -204,7 +204,7 @@ namespace Sla.DECCORE
             return scoreFields.getResult().getDatatype();
         }
 
-        public override Datatype findResolve(PcodeOp op, int4 slot)
+        public override Datatype findResolve(PcodeOp op, int slot)
         {
             Funcdata fd = op.getParent().getFuncdata();
             ResolvedUnion res = fd.getUnionField(this, op, slot);
@@ -213,11 +213,11 @@ namespace Sla.DECCORE
             return this;
         }
 
-        public override int4 findCompatibleResolve(Datatype ct)
+        public override int findCompatibleResolve(Datatype ct)
         {
             if (!ct.needsResolution())
             {
-                for (int4 i = 0; i < field.size(); ++i)
+                for (int i = 0; i < field.size(); ++i)
                 {
                     if (field[i].type == ct && field[i].offset == 0)
                         return i;
@@ -225,7 +225,7 @@ namespace Sla.DECCORE
             }
             else
             {
-                for (int4 i = 0; i < field.size(); ++i)
+                for (int i = 0; i < field.size(); ++i)
                 {
                     if (field[i].offset != 0) continue;
                     Datatype* fieldType = field[i].type;
@@ -238,7 +238,7 @@ namespace Sla.DECCORE
             return -1;
         }
 
-        public override TypeField resolveTruncation(int4 offset, PcodeOp op, int4 slot, int4 newoff)
+        public override TypeField resolveTruncation(int offset, PcodeOp op, int slot, int newoff)
         {
             Funcdata* fd = op.getParent().getFuncdata();
             ResolvedUnion res = fd.getUnionField(this, op, slot);

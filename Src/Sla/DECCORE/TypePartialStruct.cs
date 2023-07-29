@@ -19,7 +19,7 @@ namespace Sla.DECCORE
         /// Parent structure or array of which \b this is a part
         private Datatype container;
         /// Byte offset within the parent where \b this starts
-        private int4 offset;
+        private int offset;
 
         /// Construct from another TypePartialStruct
         public TypePartialStruct(TypePartialStruct op)
@@ -30,7 +30,7 @@ namespace Sla.DECCORE
             offset = op.offset;
         }
 
-        private TypePartialStruct(Datatype contain, int4 off, int4 sz, Datatype strip)
+        private TypePartialStruct(Datatype contain, int off, int sz, Datatype strip)
             : base(sz, TYPE_PARTIALSTRUCT)
         {
 #if CPUI_DEBUG
@@ -52,9 +52,9 @@ namespace Sla.DECCORE
             s << "[off=" << dec << offset << ",sz=" << size << ']';
         }
 
-        private override Datatype getSubType(uintb off, out uintb newoff)
+        private override Datatype getSubType(ulong off, out ulong newoff)
         {
-            int4 sizeLeft = (size - (int4)off);
+            int sizeLeft = (size - (int)off);
             off += offset;
             Datatype* ct = container;
             do
@@ -64,23 +64,23 @@ namespace Sla.DECCORE
                     break;
                 off = *newoff;
                 // Component can extend beyond range of this partial, in which case we go down another level
-            } while (ct.getSize() - (int4)off > sizeLeft);
+            } while (ct.getSize() - (int)off > sizeLeft);
             return ct;
         }
 
-        private override int4 getHoleSize(int4 off)
+        private override int getHoleSize(int off)
         {
-            int4 sizeLeft = size - off;
+            int sizeLeft = size - off;
             off += offset;
-            int4 res = container.getHoleSize(off);
+            int res = container.getHoleSize(off);
             if (res > sizeLeft)
                 res = sizeLeft;
             return res;
         }
 
-        private override int4 compare(Datatype op, int4 level)
+        private override int compare(Datatype op, int level)
         {
-            int4 res = Datatype::compare(op, level);
+            int res = Datatype::compare(op, level);
             if (res != 0) return res;
             // Both must be partial
             TypePartialStruct* tp = (TypePartialStruct*)&op;
@@ -94,7 +94,7 @@ namespace Sla.DECCORE
             return container.compare(*tp.container, level); // Compare the underlying union
         }
 
-        private override int4 compareDependency(Datatype op)
+        private override int compareDependency(Datatype op)
         {
             if (submeta != op.getSubMeta()) return (submeta < op.getSubMeta()) ? -1 : 1;
             TypePartialStruct* tp = (TypePartialStruct*)&op;    // Both must be partial

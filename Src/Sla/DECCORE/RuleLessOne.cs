@@ -24,18 +24,18 @@ namespace Sla.DECCORE
 
         /// \class RuleLessOne
         /// \brief Transform INT_LESS of 0 or 1:  `V < 1  =>  V == 0,  V <= 0  =>  V == 0`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_LESS);
             oplist.push_back(CPUI_INT_LESSEQUAL);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* constvn = op.getIn(1);
 
             if (!constvn.isConstant()) return 0;
-            uintb val = constvn.getOffset();
+            ulong val = constvn.getOffset();
             if ((op.code() == CPUI_INT_LESS) && (val != 1)) return 0;
             if ((op.code() == CPUI_INT_LESSEQUAL) && (val != 0)) return 0;
 

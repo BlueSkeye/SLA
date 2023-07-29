@@ -47,7 +47,7 @@ namespace Sla.DECCORE
                     ++iter;
                     if (data.getFuncProto().possibleInputParam(vn.getAddr(), vn.getSize()))
                     {
-                        int4 slot = active.getNumTrials();
+                        int slot = active.getNumTrials();
                         active.registerTrial(vn.getAddr(), vn.getSize());
                         if (!vn.hasNoDescend())
                             active.getTrial(slot).markActive(); // Mark as active if it has descendants
@@ -57,14 +57,14 @@ namespace Sla.DECCORE
                 data.getFuncProto().resolveModel(&active);
                 data.getFuncProto().deriveInputMap(&active); // Derive the correct prototype from trials
                                                              // Create any unreferenced input varnodes
-                for (int4 i = 0; i < active.getNumTrials(); ++i)
+                for (int i = 0; i < active.getNumTrials(); ++i)
                 {
                     ParamTrial & paramtrial(active.getTrial(i));
                     if (paramtrial.isUnref() && paramtrial.isUsed())
                     {
                         vn = data.newVarnode(paramtrial.getSize(), paramtrial.getAddress());
                         vn = data.setInputVarnode(vn);
-                        int4 slot = triallist.size();
+                        int slot = triallist.size();
                         triallist.push_back(vn);
                         paramtrial.setSlot(slot + 1);
                     }

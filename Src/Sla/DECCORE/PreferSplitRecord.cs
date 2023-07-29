@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     {
         internal VarnodeData storage;
         // Number of initial bytes (in address order) to split into first piece
-        internal int4 splitoffset;
+        internal int splitoffset;
 
         internal static bool operator <(PreferSplitRecord op1, PreferSplitRecord op2)
         {

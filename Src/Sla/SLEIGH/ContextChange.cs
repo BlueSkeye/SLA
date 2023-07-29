@@ -25,17 +25,17 @@ namespace Sla.SLEIGH
 
         public abstract ContextChange clone();
 
-        protected static void calc_maskword(int4 sbit, int4 ebit, out int4 num, out int4 shift,
-            out uintm mask)
+        protected static void calc_maskword(int sbit, int ebit, out int num, out int shift,
+            out uint mask)
         {
-            num = sbit / (8 * sizeof(uintm));
-            if (num != ebit / (8 * sizeof(uintm)))
+            num = sbit / (8 * sizeof(uint));
+            if (num != ebit / (8 * sizeof(uint)))
                 throw SleighError("Context field not contained within one machine int");
-            sbit -= num * 8 * sizeof(uintm);
-            ebit -= num * 8 * sizeof(uintm);
+            sbit -= num * 8 * sizeof(uint);
+            ebit -= num * 8 * sizeof(uint);
 
-            shift = 8 * sizeof(uintm) - ebit - 1;
-            mask = (~((uintm)0)) >> (sbit + shift);
+            shift = 8 * sizeof(uint) - ebit - 1;
+            mask = (~((uint)0)) >> (sbit + shift);
             mask <<= shift;
         }
     }

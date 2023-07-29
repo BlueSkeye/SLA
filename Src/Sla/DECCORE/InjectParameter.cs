@@ -19,11 +19,11 @@ namespace Sla.DECCORE
         /// Name of the parameter (for use in parsing p-code \e source)
         private string name;
         /// Unique index assigned (for cross referencing associated Varnode in the InjectContext)
-        private int4 index;
+        private int index;
         /// Size of the parameter Varnode in bytes
-        private uint4 size;
+        private uint size;
         
-        public InjectParameter(string nm, uint4 sz)
+        public InjectParameter(string nm, uint sz)
         {
             name = nm;
             index = 0;
@@ -34,9 +34,9 @@ namespace Sla.DECCORE
         public string getName() => name;
 
         /// Get the assigned index
-        public int4 getIndex() => index;
+        public int getIndex() => index;
 
         /// Get the size of the parameter in bytes
-        public uint4 getSize() => size;
+        public uint getSize() => size;
     }
 }

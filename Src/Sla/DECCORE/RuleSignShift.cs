@@ -27,14 +27,14 @@ namespace Sla.DECCORE
         ///
         /// A logical shift of the sign-bit gets converted to an arithmetic shift if it is involved
         /// in an arithmetic expression or a comparison.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_RIGHT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            uintb val;
+            ulong val;
             Varnode* constVn = op.getIn(1);
             if (!constVn.isConstant()) return 0;
             val = constVn.getOffset();

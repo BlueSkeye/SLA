@@ -23,7 +23,7 @@ namespace Sla.EXTRA
         /// \param decoder is the XML stream decoder
         protected void decodeBody(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement();       // Tag may not be present
+            uint elemId = decoder.openElement();       // Tag may not be present
             if (elemId == ELEM_BODY)
             {
                 parsestring = decoder.readString(ATTRIB_CONTENT);
@@ -33,7 +33,7 @@ namespace Sla.EXTRA
                 throw new LowlevelError("Missing <body> subtag in <pcode>: " + getSource());
         }
 
-        public InjectPayloadSleigh(string src, string nm, int4 tp)
+        public InjectPayloadSleigh(string src, string nm, int tp)
             : base(nm, tp)
         {
             source = src;
@@ -71,7 +71,7 @@ namespace Sla.EXTRA
         public override void decode(Decoder decoder)
         {
             // Restore a raw <pcode> tag.  Used for uponentry, uponreturn
-            uint4 elemId = decoder.openElement(ELEM_PCODE);
+            uint elemId = decoder.openElement(ELEM_PCODE);
             decodePayloadAttributes(decoder);
             decodePayloadParams(decoder);
             decodeBody(decoder);
@@ -90,17 +90,17 @@ namespace Sla.EXTRA
         { // Verify that the storage locations passed in -con- match the restrictions set for this payload
             if (inputlist.size() != con.inputlist.size())
                 throw new LowlevelError("Injection parameter list has different number of parameters than p-code operation: " + source);
-            for (int4 i = 0; i < inputlist.size(); ++i)
+            for (int i = 0; i < inputlist.size(); ++i)
             {
-                uint4 sz = inputlist[i].getSize();
+                uint sz = inputlist[i].getSize();
                 if ((sz != 0) && (sz != con.inputlist[i].size))
                     throw new LowlevelError("P-code input parameter size does not match injection specification: " + source);
             }
             if (output.size() != con.output.size())
                 throw new LowlevelError("Injection output does not match output of p-code operation: " + source);
-            for (int4 i = 0; i < output.size(); ++i)
+            for (int i = 0; i < output.size(); ++i)
             {
-                uint4 sz = output[i].getSize();
+                uint sz = output[i].getSize();
                 if ((sz != 0) && (sz != con.output[i].size))
                     throw new LowlevelError("P-code output size does not match injection specification: " + source);
             }
@@ -111,7 +111,7 @@ namespace Sla.EXTRA
         { // Set-up operands in the parser state so that they pick up storage locations in InjectContext
             checkParameterRestrictions(con, inputlist, output, source);
             ParserContext* pos = walker.getParserContext();
-            for (int4 i = 0; i < inputlist.size(); ++i)
+            for (int i = 0; i < inputlist.size(); ++i)
             {
                 pos.allocateOperand(inputlist[i].getIndex(), walker);
                 VarnodeData & data(con.inputlist[i]);
@@ -122,7 +122,7 @@ namespace Sla.EXTRA
                 hand.offset_space = (AddrSpace*)0;
                 walker.popOperand();
             }
-            for (int4 i = 0; i < output.size(); ++i)
+            for (int i = 0; i < output.size(); ++i)
             {
                 pos.allocateOperand(output[i].getIndex(), walker);
                 VarnodeData & data(con.output[i]);

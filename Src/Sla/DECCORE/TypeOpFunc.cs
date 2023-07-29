@@ -38,7 +38,7 @@ namespace Sla.DECCORE
 
         public override Datatype getOutputLocal(PcodeOp op) => tlst.getBase(op.getOut().getSize(), metaout);
 
-        public override Datatype getInputLocal(PcodeOp op, int4 slot)
+        public override Datatype getInputLocal(PcodeOp op, int slot)
             => tlst.getBase(op.getIn(slot).getSize(), metain);
 
         public override void printRaw(TextWriter s, PcodeOp op)
@@ -46,7 +46,7 @@ namespace Sla.DECCORE
             Varnode::printRaw(s, op.getOut());
             s << " = " << getOperatorName(op) << '(';
             Varnode::printRaw(s, op.getIn(0));
-            for (int4 i = 1; i < op.numInput(); ++i)
+            for (int i = 1; i < op.numInput(); ++i)
             {
                 s << ',';
                 Varnode::printRaw(s, op.getIn(i));

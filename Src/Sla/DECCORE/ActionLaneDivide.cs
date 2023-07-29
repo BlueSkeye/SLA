@@ -26,14 +26,14 @@ namespace Sla.DECCORE
             LanedRegister checkLanes)
         {
             list<PcodeOp*>::const_iterator iter = vn.beginDescend();
-            int4 step = 0;      // 0 = descendants, 1 = def, 2 = done
+            int step = 0;      // 0 = descendants, 1 = def, 2 = done
             if (iter == vn.endDescend())
             {
                 step = 1;
             }
             while (step < 2)
             {
-                int4 curSize;       // Putative lane size
+                int curSize;       // Putative lane size
                 if (step == 0)
                 {
                     PcodeOp* op = *iter;
@@ -50,7 +50,7 @@ namespace Sla.DECCORE
                     PcodeOp* op = vn.getDef();
                     if (op.code() != CPUI_PIECE) continue;     // Is the big register formed from smaller pieces
                     curSize = op.getIn(0).getSize();
-                    int4 tmpSize = op.getIn(1).getSize();
+                    int tmpSize = op.getIn(1).getSize();
                     if (tmpSize < curSize)
                         curSize = tmpSize;
                 }

@@ -57,7 +57,7 @@ namespace Sla.DECCORE
         public struct WalkState
         {
             internal bool best;
-            internal int4 depth;
+            internal int depth;
             internal ParamRank terminalrank;
         }
 
@@ -65,7 +65,7 @@ namespace Sla.DECCORE
         private Datatype vntype;
         private ParamRank rank;
         private ParamIDIO io;
-        private int4 numcalls;
+        private int numcalls;
 
         private void walkforward(WalkState state, PcodeOp ignoreop, Varnode vn)
         {
@@ -159,7 +159,7 @@ namespace Sla.DECCORE
                 case CPUI_MULTIEQUAL:
                     // The only op for which there can be a loop in the graph is with the MULTIEQUAL (not for CALL, etc.).
                     // Walk backward only if the path is not part of a loop.
-                    for (int4 slot = 0; slot < op.numInput() && rank != state.terminalrank; slot++)
+                    for (int slot = 0; slot < op.numInput() && rank != state.terminalrank; slot++)
                         if (!op.getParent().isLoopIn(slot)) walkbackward(state, op, op.getIn(slot));
                     break;
                 default:
@@ -182,7 +182,7 @@ namespace Sla.DECCORE
             rank = (best == true) ? min(rank, rank_in) : max(rank, rank_in);
         }
 
-        public ParamMeasure(Address addr, int4 sz, Datatype dt, ParamIDIO io_in)
+        public ParamMeasure(Address addr, int sz, Datatype dt, ParamIDIO io_in)
         {
             vndata.space = addr.getSpace();
             vndata.offset = addr.getOffset();
@@ -238,6 +238,6 @@ namespace Sla.DECCORE
             s << "  Rank: " << rank << "\n";
         }
 
-        private int4 getMeasure() => (int4) rank;
+        private int getMeasure() => (int) rank;
     }
 }

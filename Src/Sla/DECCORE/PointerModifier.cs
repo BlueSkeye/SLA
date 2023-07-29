@@ -9,20 +9,20 @@ namespace Sla.DECCORE
 {
     internal class PointerModifier : TypeModifier
     {
-        private uint4 flags;
+        private uint flags;
         
-        public PointerModifier(uint4 fl)
+        public PointerModifier(uint fl)
         {
             flags = fl;
         }
         
-        public override uint4 getType() => pointer_mod;
+        public override uint getType() => pointer_mod;
 
         public override bool isValid() => true;
 
         public override Datatype modType(Datatype @base, TypeDeclarator decl, Architecture glb)
         {
-            int4 addrsize = glb.getDefaultDataSpace().getAddrSize();
+            int addrsize = glb.getDefaultDataSpace().getAddrSize();
             Datatype* restype;
             restype = glb.types.getTypePointer(addrsize, @base,
                 glb.getDefaultDataSpace().getWordSize());

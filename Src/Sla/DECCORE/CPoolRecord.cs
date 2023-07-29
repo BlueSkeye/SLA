@@ -56,11 +56,11 @@ namespace Sla.DECCORE
         /// Name or token associated with the object
         private string token;
         /// Constant value of the object (if known)
-        private uintb value;
+        private ulong value;
         /// Data-type associated with the object
         private Datatype type;
         /// For string literals, the raw byte data of the string
-        private uint1 byteData;
+        private byte byteData;
         /// The number of bytes in the data for a string literal
         private int byteDataLen;
 
@@ -68,13 +68,13 @@ namespace Sla.DECCORE
         public CPoolRecord()
         {
             type = null;
-            byteData = (uint1*)0;
+            byteData = (byte*)0;
         }
 
         /// Destructor
         ~CPoolRecord()
         {
-            if (byteData != (uint1*)0) delete[] byteData;
+            if (byteData != (byte*)0) delete[] byteData;
         }
 
         /// Get the type of record
@@ -84,7 +84,7 @@ namespace Sla.DECCORE
         public string getToken() => token;
 
         /// Get pointer to string literal data
-        public uint1 getByteData() => byteData;
+        public byte getByteData() => byteData;
 
         /// Number of bytes of string literal data
         public int getByteDataLength() => byteDataLen;
@@ -93,7 +93,7 @@ namespace Sla.DECCORE
         public Datatype getType() => type;
 
         /// Get the constant value associated with \b this
-        public uintb getValue() => value;
+        public ulong getValue() => value;
 
         /// Is object a constructor method
         public bool isConstructor() => ((flags & MethodType.is_constructor)!= 0);
@@ -133,13 +133,13 @@ namespace Sla.DECCORE
                 encoder.writeUnsignedInteger(ATTRIB_CONTENT, value);
                 encoder.closeElement(ELEM_VALUE);
             }
-            if (byteData != (uint1*)0)
+            if (byteData != (byte*)0)
             {
                 encoder.openElement(ELEM_DATA);
                 encoder.writeSignedInteger(ATTRIB_LENGTH, byteDataLen);
-                int4 wrap = 0;
+                int wrap = 0;
                 ostringstream s;
-                for (int4 i = 0; i < byteDataLen; ++i)
+                for (int i = 0; i < byteDataLen; ++i)
                 {
                     s << setfill('0') << setw(2) << hex << byteData[i] << ' ';
                     wrap += 1;
@@ -171,10 +171,10 @@ namespace Sla.DECCORE
             tag = primitive;    // Default tag
             value = 0;
             flags = 0;
-            uint4 elemId = decoder.openElement(ELEM_CPOOLREC);
+            uint elemId = decoder.openElement(ELEM_CPOOLREC);
             for (; ; )
             {
-                uint4 attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == ATTRIB_TAG)
                 {
@@ -205,7 +205,7 @@ namespace Sla.DECCORE
                         flags |= CPoolRecord::is_destructor;
                 }
             }
-            uint4 subId;
+            uint subId;
             if (tag == primitive)
             {   // First tag must be value
                 subId = decoder.openElement(ELEM_VALUE);
@@ -219,16 +219,16 @@ namespace Sla.DECCORE
             {
                 byteDataLen = decoder.readSignedInteger(ATTRIB_LENGTH);
                 istringstream s3(decoder.readString(ATTRIB_CONTENT));
-                byteData = new uint1[byteDataLen];
-                for (int4 i = 0; i < byteDataLen; ++i)
+                byteData = new byte[byteDataLen];
+                for (int i = 0; i < byteDataLen; ++i)
                 {
-                    uint4 val;
+                    uint val;
                     s3 >> ws >> hex >> val;
-                    byteData[i] = (uint1)val;
+                    byteData[i] = (byte)val;
                 }
             }
             decoder.closeElement(subId);
-            if (tag == string_literal && (byteData == (uint1*)0))
+            if (tag == string_literal && (byteData == (byte*)0))
                 throw new LowlevelError("Bad constant pool record: missing <data>");
             if (flags != 0)
             {

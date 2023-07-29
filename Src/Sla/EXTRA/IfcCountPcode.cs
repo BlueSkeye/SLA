@@ -23,7 +23,7 @@ namespace Sla.EXTRA
             if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");
 
-            uint4 count = 0;
+            uint count = 0;
             list<PcodeOp*>::const_iterator iter, enditer;
             iter = dcp.fd.beginOpAlive();
             enditer = dcp.fd.endOpAlive();

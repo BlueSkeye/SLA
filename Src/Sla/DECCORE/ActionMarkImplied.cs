@@ -35,7 +35,7 @@ namespace Sla.DECCORE
             Varnode* var[2];
             var[0] = vn1;
             var[1] = vn2;
-            for (int4 i = 0; i < 2; ++i)
+            for (int i = 0; i < 2; ++i)
             {
                 Varnode* vncur = var[i];
                 if (!vncur.isWritten()) continue;
@@ -71,21 +71,21 @@ namespace Sla.DECCORE
             PcodeOp* op2 = vn2.getDef();
             OpCode opc1 = op1.code();
             OpCode opc2 = op2.code();
-            int4 mult1 = 1;
-            int4 mult2 = 1;
+            int mult1 = 1;
+            int mult2 = 1;
             if (opc1 == CPUI_PTRSUB)
                 opc1 = CPUI_INT_ADD;
             else if (opc1 == CPUI_PTRADD)
             {
                 opc1 = CPUI_INT_ADD;
-                mult1 = (int4)op1.getIn(2).getOffset();
+                mult1 = (int)op1.getIn(2).getOffset();
             }
             if (opc2 == CPUI_PTRSUB)
                 opc2 = CPUI_INT_ADD;
             else if (opc2 == CPUI_PTRADD)
             {
                 opc2 = CPUI_INT_ADD;
-                mult2 = (int4)op2.getIn(2).getOffset();
+                mult2 = (int)op2.getIn(2).getOffset();
             }
             if (opc1 != opc2) return true;
             if (depth == 0) return true;    // Couldn't find absolute difference
@@ -103,8 +103,8 @@ namespace Sla.DECCORE
                     cvn2 = op2.getIn(1);
                     if (cvn1.isConstant() && cvn2.isConstant())
                     {
-                        uintb val1 = mult1 * cvn1.getOffset();
-                        uintb val2 = mult2 * cvn2.getOffset();
+                        ulong val1 = mult1 * cvn1.getOffset();
+                        ulong val2 = mult2 * cvn2.getOffset();
                         if (val1 == val2)
                             return isPossibleAlias(op1.getIn(0), op2.getIn(0), depth);
                         return !functionalEquality(op1.getIn(0), op2.getIn(0));
@@ -136,7 +136,7 @@ namespace Sla.DECCORE
         {
             PcodeOp* op,*storeop,*callop;
             Varnode* defvn;
-            int4 i;
+            int i;
 
             op = vn.getDef();
             if (op.code() == CPUI_LOAD)
@@ -219,7 +219,7 @@ namespace Sla.DECCORE
                             // setting the implied type is now taken care of by ActionSetCasts
                             //    vn.updatetype(op.outputtype_token(),false,false); // implied must have parsed type
                             // Back propagate varnode's cover to inputs of defining op
-                            for (int4 i = 0; i < op.numInput(); ++i)
+                            for (int i = 0; i < op.numInput(); ++i)
                             {
                                 defvn = op.getIn(i);
                                 if (!defvn.hasCover()) continue;

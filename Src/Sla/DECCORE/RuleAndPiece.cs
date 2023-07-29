@@ -28,18 +28,18 @@ namespace Sla.DECCORE
         /// Conversion to INT_ZEXT works if we know the upper part of the result is zero.
         ///
         /// Similarly if the lower part is zero:  `V & concat(W,X)  =>  V & concat(#0,X)`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_AND);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* piecevn,*othervn,*highvn,*lowvn,*newvn,*newvn2;
             PcodeOp* pieceop,*newop;
-            uintb othermask, maskhigh, masklow;
+            ulong othermask, maskhigh, masklow;
             OpCode opc = CPUI_PIECE;    // Unnecessary initialization
-            int4 i, size;
+            int i, size;
 
             size = op.getOut().getSize();
             highvn = lowvn = (Varnode*)0; // Unnecessary initialization

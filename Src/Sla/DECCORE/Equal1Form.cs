@@ -19,8 +19,8 @@ namespace Sla.DECCORE
         private Varnode lo1;
         private Varnode hi2;
         private Varnode lo2;
-        private int4 hi1slot;
-        private int4 lo1slot;
+        private int hi1slot;
+        private int lo1slot;
         private bool notequalformhi;
         private bool notequalformlo;
         private bool setonlow;

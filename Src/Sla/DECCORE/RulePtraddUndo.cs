@@ -28,18 +28,18 @@ namespace Sla.DECCORE
         /// It is possible for Varnodes to be assigned incorrect types in the
         /// middle of simplification. This leads to incorrect PTRADD conversions.
         /// Once the correct type is found, the PTRADD must be converted back to an INT_ADD.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_PTRADD);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* basevn;
             TypePointer* tp;
 
             if (!data.hasTypeRecoveryStarted()) return 0;
-            int4 size = (int4)op.getIn(2).getOffset(); // Size the PTRADD thinks we are pointing
+            int size = (int)op.getIn(2).getOffset(); // Size the PTRADD thinks we are pointing
             basevn = op.getIn(0);
             tp = (TypePointer*)basevn.getTypeReadFacing(op);
             if (tp.getMetatype() == TYPE_PTR)                              // Make sure we are still a pointer

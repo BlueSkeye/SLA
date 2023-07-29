@@ -14,10 +14,10 @@ namespace Sla.SLEIGH
     // A mask/value pair viewed as two bitstreams
     internal class PatternBlock
     {
-        private int4 offset;            // Offset to non-zero byte of mask
-        private int4 nonzerosize;       // Last byte(+1) containing nonzero mask
-        private List<uintm> maskvec;  // Mask
-        private List<uintm> valvec;       // Value
+        private int offset;            // Offset to non-zero byte of mask
+        private int nonzerosize;       // Last byte(+1) containing nonzero mask
+        private List<uint> maskvec;  // Mask
+        private List<uint> valvec;       // Value
 
         private void normalize()
         {
@@ -28,7 +28,7 @@ namespace Sla.SLEIGH
                 valvec.clear();
                 return;
             }
-            List<uintm>::iterator iter1, iter2;
+            List<uint>::iterator iter1, iter2;
 
             iter1 = maskvec.begin();    // Cut zeros from beginning of mask
             iter2 = valvec.begin();
@@ -36,35 +36,35 @@ namespace Sla.SLEIGH
             {
                 iter1++;
                 iter2++;
-                offset += sizeof(uintm);
+                offset += sizeof(uint);
             }
             maskvec.erase(maskvec.begin(), iter1);
             valvec.erase(valvec.begin(), iter2);
 
             if (!maskvec.empty())
             {
-                int4 suboff = 0;        // Cut off unaligned zeros from beginning of mask
-                uintm tmp = maskvec[0];
+                int suboff = 0;        // Cut off unaligned zeros from beginning of mask
+                uint tmp = maskvec[0];
                 while (tmp != 0)
                 {
                     suboff += 1;
                     tmp >>= 8;
                 }
-                suboff = sizeof(uintm) - suboff;
+                suboff = sizeof(uint) - suboff;
                 if (suboff != 0)
                 {
                     offset += suboff;       // Slide up maskvec by suboff bytes
-                    for (int4 i = 0; i < maskvec.size() - 1; ++i)
+                    for (int i = 0; i < maskvec.size() - 1; ++i)
                     {
                         tmp = maskvec[i] << (suboff * 8);
-                        tmp |= (maskvec[i + 1] >> ((sizeof(uintm) - suboff) * 8));
+                        tmp |= (maskvec[i + 1] >> ((sizeof(uint) - suboff) * 8));
                         maskvec[i] = tmp;
                     }
                     maskvec.back() <<= suboff * 8;
-                    for (int4 i = 0; i < valvec.size() - 1; ++i)
+                    for (int i = 0; i < valvec.size() - 1; ++i)
                     { // Slide up valvec by suboff bytes
                         tmp = valvec[i] << (suboff * 8);
-                        tmp |= (valvec[i + 1] >> ((sizeof(uintm) - suboff) * 8));
+                        tmp |= (valvec[i + 1] >> ((sizeof(uint) - suboff) * 8));
                         valvec[i] = tmp;
                     }
                     valvec.back() <<= suboff * 8;
@@ -93,8 +93,8 @@ namespace Sla.SLEIGH
                 nonzerosize = 0;        // Always true
                 return;
             }
-            nonzerosize = maskvec.size() * sizeof(uintm);
-            uintm tmp = maskvec.back(); // tmp must be nonzero
+            nonzerosize = maskvec.size() * sizeof(uint);
+            uint tmp = maskvec.back(); // tmp must be nonzero
             while ((tmp & 0xff) == 0)
             {
                 nonzerosize -= 1;
@@ -102,12 +102,12 @@ namespace Sla.SLEIGH
             }
         }
 
-        public PatternBlock(int4 off, uintm msk, uintm val)
-        {               // Define mask and value pattern, confined to one uintm
+        public PatternBlock(int off, uint msk, uint val)
+        {               // Define mask and value pattern, confined to one uint
             offset = off;
             maskvec.push_back(msk);
             valvec.push_back(val);
-            nonzerosize = sizeof(uintm);    // Assume all non-zero bytes before normalization
+            nonzerosize = sizeof(uint);    // Assume all non-zero bytes before normalization
             normalize();
         }
 
@@ -141,7 +141,7 @@ namespace Sla.SLEIGH
                 return;
             }
             res = list[0];
-            for (int4 i = 1; i < list.size(); ++i)
+            for (int i = 1; i < list.size(); ++i)
             {
                 next = res.intersect(list[i]);
                 delete res;
@@ -159,23 +159,23 @@ namespace Sla.SLEIGH
                         // only if the two pieces have a 1-bit and the
                         // values agree
             PatternBlock* res = new PatternBlock(true);
-            int4 maxlength = (getLength() > b.getLength()) ? getLength() : b.getLength();
+            int maxlength = (getLength() > b.getLength()) ? getLength() : b.getLength();
 
             res.offset = 0;
-            int4 offset = 0;
-            uintm mask1, val1, mask2, val2;
-            uintm resmask, resval;
+            int offset = 0;
+            uint mask1, val1, mask2, val2;
+            uint resmask, resval;
             while (offset < maxlength)
             {
-                mask1 = getMask(offset * 8, sizeof(uintm) * 8);
-                val1 = getValue(offset * 8, sizeof(uintm) * 8);
-                mask2 = b.getMask(offset * 8, sizeof(uintm) * 8);
-                val2 = b.getValue(offset * 8, sizeof(uintm) * 8);
+                mask1 = getMask(offset * 8, sizeof(uint) * 8);
+                val1 = getValue(offset * 8, sizeof(uint) * 8);
+                mask2 = b.getMask(offset * 8, sizeof(uint) * 8);
+                val2 = b.getValue(offset * 8, sizeof(uint) * 8);
                 resmask = mask1 & mask2 & ~(val1 ^ val2);
                 resval = val1 & val2 & resmask;
                 res.maskvec.push_back(resmask);
                 res.valvec.push_back(resval);
-                offset += sizeof(uintm);
+                offset += sizeof(uint);
             }
             res.nonzerosize = maxlength;
             res.normalize();
@@ -187,18 +187,18 @@ namespace Sla.SLEIGH
             if (alwaysFalse() || b.alwaysFalse())
                 return new PatternBlock(false);
             PatternBlock* res = new PatternBlock(true);
-            int4 maxlength = (getLength() > b.getLength()) ? getLength() : b.getLength();
+            int maxlength = (getLength() > b.getLength()) ? getLength() : b.getLength();
 
             res.offset = 0;
-            int4 offset = 0;
-            uintm mask1, val1, mask2, val2, commonmask;
-            uintm resmask, resval;
+            int offset = 0;
+            uint mask1, val1, mask2, val2, commonmask;
+            uint resmask, resval;
             while (offset < maxlength)
             {
-                mask1 = getMask(offset * 8, sizeof(uintm) * 8);
-                val1 = getValue(offset * 8, sizeof(uintm) * 8);
-                mask2 = b.getMask(offset * 8, sizeof(uintm) * 8);
-                val2 = b.getValue(offset * 8, sizeof(uintm) * 8);
+                mask1 = getMask(offset * 8, sizeof(uint) * 8);
+                val1 = getValue(offset * 8, sizeof(uint) * 8);
+                mask2 = b.getMask(offset * 8, sizeof(uint) * 8);
+                val2 = b.getValue(offset * 8, sizeof(uint) * 8);
                 commonmask = mask1 & mask2; // Bits in mask shared by both patterns
                 if ((commonmask & val1) != (commonmask & val2))
                 {
@@ -210,7 +210,7 @@ namespace Sla.SLEIGH
                 resval = (mask1 & val1) | (mask2 & val2);
                 res.maskvec.push_back(resmask);
                 res.valvec.push_back(resval);
-                offset += sizeof(uintm);
+                offset += sizeof(uint);
             }
             res.nonzerosize = maxlength;
             res.normalize();
@@ -220,15 +220,15 @@ namespace Sla.SLEIGH
         public bool specializes(PatternBlock op2)
         {               // does every masked bit in -this- match the corresponding
                         // masked bit in -op2-
-            int4 length = 8 * op2.getLength();
-            int4 tmplength;
-            uintm mask1, mask2, value1, value2;
-            int4 sbit = 0;
+            int length = 8 * op2.getLength();
+            int tmplength;
+            uint mask1, mask2, value1, value2;
+            int sbit = 0;
             while (sbit < length)
             {
                 tmplength = length - sbit;
-                if (tmplength > 8 * sizeof(uintm))
-                    tmplength = 8 * sizeof(uintm);
+                if (tmplength > 8 * sizeof(uint))
+                    tmplength = 8 * sizeof(uint);
                 mask1 = getMask(sbit, tmplength);
                 value1 = getValue(sbit, tmplength);
                 mask2 = op2.getMask(sbit, tmplength);
@@ -242,18 +242,18 @@ namespace Sla.SLEIGH
 
         public bool identical(PatternBlock op2)
         {               // Do the mask and value match exactly
-            int4 tmplength;
-            int4 length = 8 * op2.getLength();
+            int tmplength;
+            int length = 8 * op2.getLength();
             tmplength = 8 * getLength();
             if (tmplength > length)
                 length = tmplength;     // Maximum of two lengths
-            uintm mask1, mask2, value1, value2;
-            int4 sbit = 0;
+            uint mask1, mask2, value1, value2;
+            int sbit = 0;
             while (sbit < length)
             {
                 tmplength = length - sbit;
-                if (tmplength > 8 * sizeof(uintm))
-                    tmplength = 8 * sizeof(uintm);
+                if (tmplength > 8 * sizeof(uint))
+                    tmplength = 8 * sizeof(uint);
                 mask1 = getMask(sbit, tmplength);
                 value1 = getValue(sbit, tmplength);
                 mask2 = op2.getMask(sbit, tmplength);
@@ -276,25 +276,25 @@ namespace Sla.SLEIGH
             return res;
         }
 
-        public void shift(int4 sa)
+        public void shift(int sa)
         {
             offset += sa;
             normalize();
         }
 
-        public int4 getLength() => offset+nonzerosize;
+        public int getLength() => offset+nonzerosize;
 
-        public uintm getMask(int4 startbit, int4 size)
+        public uint getMask(int startbit, int size)
         {
             startbit -= 8 * offset;
             // Note the division and remainder here is unsigned.  Then it is recast to signed. 
             // If startbit is negative, then wordnum1 is either negative or very big,
             // if (unsigned size is same as sizeof int)
-            // In either case, shift should come out between 0 and 8*sizeof(uintm)-1
-            int4 wordnum1 = startbit / (8 * sizeof(uintm));
-            int4 shift = startbit % (8 * sizeof(uintm));
-            int4 wordnum2 = (startbit + size - 1) / (8 * sizeof(uintm));
-            uintm res;
+            // In either case, shift should come out between 0 and 8*sizeof(uint)-1
+            int wordnum1 = startbit / (8 * sizeof(uint));
+            int shift = startbit % (8 * sizeof(uint));
+            int wordnum2 = (startbit + size - 1) / (8 * sizeof(uint));
+            uint res;
 
             if ((wordnum1 < 0) || (wordnum1 >= maskvec.size()))
                 res = 0;
@@ -304,25 +304,25 @@ namespace Sla.SLEIGH
             res <<= shift;
             if (wordnum1 != wordnum2)
             {
-                uintm tmp;
+                uint tmp;
                 if ((wordnum2 < 0) || (wordnum2 >= maskvec.size()))
                     tmp = 0;
                 else
                     tmp = maskvec[wordnum2];
-                res |= (tmp >> (8 * sizeof(uintm) - shift));
+                res |= (tmp >> (8 * sizeof(uint) - shift));
             }
-            res >>= (8 * sizeof(uintm) - size);
+            res >>= (8 * sizeof(uint) - size);
 
             return res;
         }
 
-        public uintm getValue(int4 startbit, int4 size)
+        public uint getValue(int startbit, int size)
         {
             startbit -= 8 * offset;
-            int4 wordnum1 = startbit / (8 * sizeof(uintm));
-            int4 shift = startbit % (8 * sizeof(uintm));
-            int4 wordnum2 = (startbit + size - 1) / (8 * sizeof(uintm));
-            uintm res;
+            int wordnum1 = startbit / (8 * sizeof(uint));
+            int shift = startbit % (8 * sizeof(uint));
+            int wordnum2 = (startbit + size - 1) / (8 * sizeof(uint));
+            uint res;
 
             if ((wordnum1 < 0) || (wordnum1 >= valvec.size()))
                 res = 0;
@@ -331,14 +331,14 @@ namespace Sla.SLEIGH
             res <<= shift;
             if (wordnum1 != wordnum2)
             {
-                uintm tmp;
+                uint tmp;
                 if ((wordnum2 < 0) || (wordnum2 >= valvec.size()))
                     tmp = 0;
                 else
                     tmp = valvec[wordnum2];
-                res |= (tmp >> (8 * sizeof(uintm) - shift));
+                res |= (tmp >> (8 * sizeof(uint) - shift));
             }
-            res >>= (8 * sizeof(uintm) - size);
+            res >>= (8 * sizeof(uint) - size);
 
             return res;
         }
@@ -350,12 +350,12 @@ namespace Sla.SLEIGH
         public bool isInstructionMatch(ParserWalker walker)
         {
             if (nonzerosize <= 0) return (nonzerosize == 0);
-            int4 off = offset;
-            for (int4 i = 0; i < maskvec.size(); ++i)
+            int off = offset;
+            for (int i = 0; i < maskvec.size(); ++i)
             {
-                uintm data = walker.getInstructionBytes(off, sizeof(uintm));
+                uint data = walker.getInstructionBytes(off, sizeof(uint));
                 if ((maskvec[i] & data) != valvec[i]) return false;
-                off += sizeof(uintm);
+                off += sizeof(uint);
             }
             return true;
         }
@@ -363,12 +363,12 @@ namespace Sla.SLEIGH
         public bool isContextMatch(ParserWalker walker)
         {
             if (nonzerosize <= 0) return (nonzerosize == 0);
-            int4 off = offset;
-            for (int4 i = 0; i < maskvec.size(); ++i)
+            int off = offset;
+            for (int i = 0; i < maskvec.size(); ++i)
             {
-                uintm data = walker.getContextBytes(off, sizeof(uintm));
+                uint data = walker.getContextBytes(off, sizeof(uint));
                 if ((maskvec[i] & data) != valvec[i]) return false;
-                off += sizeof(uintm);
+                off += sizeof(uint);
             }
             return true;
         }
@@ -378,7 +378,7 @@ namespace Sla.SLEIGH
             s << "<pat_block ";
             s << "offset=\"" << dec << offset << "\" ";
             s << "nonzero=\"" << nonzerosize << "\">\n";
-            for (int4 i = 0; i < maskvec.size(); ++i)
+            for (int i = 0; i < maskvec.size(); ++i)
             {
                 s << "  <mask_word ";
                 s << "mask=\"0x" << hex << maskvec[i] << "\" ";
@@ -402,7 +402,7 @@ namespace Sla.SLEIGH
             List list = el.getChildren();
             List::const_iterator iter;
             iter = list.begin();
-            uintm mask, val;
+            uint mask, val;
             while (iter != list.end())
             {
                 Element* subel = *iter;

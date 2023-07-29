@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         /// Varnodes allocated for ops
         private List<VarnodeData> varList;
         /// Values stored in temporary registers
-        private Dictionary<uintb, uintb> tempValues;
+        private Dictionary<ulong, ulong> tempValues;
         /// Current p-code op being executed
         private PcodeOpRaw currentOp;
         /// Index of current p-code op being executed
@@ -40,17 +40,17 @@ namespace Sla.DECCORE
         /// \param offset is the starting address offset (from within the space) to pull the value from
         /// \param sz is the number of bytes to pull from memory
         /// \return indicated bytes arranged as a constant value
-        private uintb getLoadImageValue(AddrSpace spc, uintb offset, int4 sz)
+        private ulong getLoadImageValue(AddrSpace spc, ulong offset, int sz)
         {
             LoadImage* loadimage = glb.loader;
-            uintb res;
+            ulong res;
 
-            loadimage.loadFill((uint1*)&res, sizeof(uintb), Address(spc, off));
+            loadimage.loadFill((byte*)&res, sizeof(ulong), Address(spc, off));
 
             if ((HOST_ENDIAN == 1) != spc.isBigEndian())
-                res = byte_swap(res, sizeof(uintb));
-            if (spc.isBigEndian() && (sz < sizeof(uintb)))
-                res >>= (sizeof(uintb) - sz) * 8;
+                res = byte_swap(res, sizeof(ulong));
+            if (spc.isBigEndian() && (sz < sizeof(ulong)))
+                res >>= (sizeof(ulong) - sz) * 8;
             else
                 res &= calc_mask(sz);
             return res;
@@ -58,17 +58,17 @@ namespace Sla.DECCORE
 
         protected override void executeUnary()
         {
-            uintb in1 = getVarnodeValue(currentOp.getInput(0));
-            uintb out = currentBehave.evaluateUnary(currentOp.getOutput().size,
+            ulong in1 = getVarnodeValue(currentOp.getInput(0));
+            ulong out = currentBehave.evaluateUnary(currentOp.getOutput().size,
                                  currentOp.getInput(0).size, in1);
             setVarnodeValue(currentOp.getOutput().offset, out);
         }
 
         protected override void executeBinary()
         {
-            uintb in1 = getVarnodeValue(currentOp.getInput(0));
-            uintb in2 = getVarnodeValue(currentOp.getInput(1));
-            uintb out = currentBehave.evaluateBinary(currentOp.getOutput().size,
+            ulong in1 = getVarnodeValue(currentOp.getInput(0));
+            ulong in2 = getVarnodeValue(currentOp.getInput(1));
+            ulong out = currentBehave.evaluateBinary(currentOp.getOutput().size,
                                   currentOp.getInput(0).size, in1, in2);
             setVarnodeValue(currentOp.getOutput().offset, out);
         }
@@ -76,11 +76,11 @@ namespace Sla.DECCORE
         protected override void executeLoad()
         {
             // op will be null, use current_op
-            uintb off = getVarnodeValue(currentOp.getInput(1));
+            ulong off = getVarnodeValue(currentOp.getInput(1));
             AddrSpace* spc = currentOp.getInput(0).getSpaceFromConst();
             off = AddrSpace::addressToByte(off, spc.getWordSize());
-            int4 sz = currentOp.getOutput().size;
-            uintb res = getLoadImageValue(spc, off, sz);
+            int sz = currentOp.getOutput().size;
+            ulong res = getLoadImageValue(spc, off, sz);
             setVarnodeValue(currentOp.getOutput().offset, res);
         }
 
@@ -94,7 +94,7 @@ namespace Sla.DECCORE
             VarnodeData* vn = currentOp.getInput(0);
             if (vn.space.getType() != IPTR_CONSTANT)
                 throw new LowlevelError("Tried to emulate absolute branch in snippet code");
-            int4 rel = (int4)vn.offset;
+            int rel = (int)vn.offset;
             pos += rel;
             if ((pos < 0) || (pos > opList.size()))
                 throw new LowlevelError("Relative branch out of bounds in snippet code");
@@ -109,7 +109,7 @@ namespace Sla.DECCORE
         protected override bool executeCbranch()
         {
             // op will be null, use current_op
-            uintb cond = getVarnodeValue(currentOp.getInput(1));
+            ulong cond = getVarnodeValue(currentOp.getInput(1));
             // We must take into account the booleanflip bit with pcode from the syntax tree
             return (cond != 0);
         }
@@ -179,9 +179,9 @@ namespace Sla.DECCORE
         
         ~EmulateSnippet()
         {
-            for (int4 i = 0; i < opList.size(); ++i)
+            for (int i = 0; i < opList.size(); ++i)
                 delete opList[i];
-            for (int4 i = 0; i < varList.size(); ++i)
+            for (int i = 0; i < varList.size(); ++i)
                 delete varList[i];
         }
 
@@ -212,7 +212,7 @@ namespace Sla.DECCORE
         /// \param inst is the \e opcode to \e behavior map the emitter will use
         /// \param uniqReserve is the starting offset within the \e unique address space for any temporary registers
         /// \return the newly constructed emitter
-        public PcodeEmit buildEmitter(List<OpBehavior> inst, uintb uniqReserve)
+        public PcodeEmit buildEmitter(List<OpBehavior> inst, ulong uniqReserve)
         {
             return new PcodeEmitCache(opList, varList, inst, uniqReserve);
         }
@@ -228,7 +228,7 @@ namespace Sla.DECCORE
         /// \return \b true if the current snippet is legal
         public bool checkForLegalCode()
         {
-            for (int4 i = 0; i < opList.size(); ++i)
+            for (int i = 0; i < opList.size(); ++i)
             {
                 PcodeOpRaw* op = opList[i];
                 VarnodeData* vn;
@@ -249,7 +249,7 @@ namespace Sla.DECCORE
                     if (vn.space.getType() != IPTR_INTERNAL)
                         return false;                   // Can only write to temporaries
                 }
-                for (int4 j = 0; j < op.numInput(); ++j)
+                for (int j = 0; j < op.numInput(); ++j)
                 {
                     vn = op.getInput(j);
                     if (vn.space.getType() == IPTR_PROCESSOR)
@@ -273,7 +273,7 @@ namespace Sla.DECCORE
         /// The temporary Varnode's storage offset is used as key into the machine state map.
         /// \param offset is the temporary storage offset
         /// \param val is the value to put into the machine state
-        public void setVarnodeValue(uintb offset, uintb val)
+        public void setVarnodeValue(ulong offset, ulong val)
         {
             tempValues[offset] = val;
         }
@@ -286,14 +286,14 @@ namespace Sla.DECCORE
         /// If the value does not exist, a "Read before write" exception is thrown.
         /// \param vn is the Varnode to read
         /// \return the retrieved value
-        public uintb getVarnodeValue(VarnodeData vn)
+        public ulong getVarnodeValue(VarnodeData vn)
         {
             AddrSpace* spc = vn.space;
             if (spc.getType() == IPTR_CONSTANT)
                 return vn.offset;
             if (spc.getType() == IPTR_INTERNAL)
             {
-                map<uintb, uintb>::const_iterator iter;
+                map<ulong, ulong>::const_iterator iter;
                 iter = tempValues.find(vn.offset);
                 if (iter != tempValues.end())
                     return (*iter).second;  // We have seen this varnode before
@@ -309,9 +309,9 @@ namespace Sla.DECCORE
         /// having to have the Varnode object in hand.
         /// \param offset is the offset of the temporary register to retrieve
         /// \return the calculated value or 0 if the register was never written
-        public uintb getTempValue(uintb offset)
+        public ulong getTempValue(ulong offset)
         {
-            map<uintb, uintb>::const_iterator iter = tempValues.find(offset);
+            map<ulong, ulong>::const_iterator iter = tempValues.find(offset);
             if (iter == tempValues.end())
                 return 0;
             return (*iter).second;

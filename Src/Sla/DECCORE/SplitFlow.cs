@@ -60,7 +60,7 @@ namespace Sla.DECCORE
         /// \param rvn is a known parameter of the op
         /// \param slot is the incoming slot of the known parameter (-1 means parameter is output)
         /// \return \b true if the op is successfully split
-        private bool addOp(PcodeOp op, TransformVar rvn, int4 slot)
+        private bool addOp(PcodeOp op, TransformVar rvn, int slot)
         {
             TransformVar* outvn;
             if (slot == -1)
@@ -77,14 +77,14 @@ namespace Sla.DECCORE
 
             TransformOp* loOp = newOpReplace(op.numInput(), op.code(), op);
             TransformOp* hiOp = newOpReplace(op.numInput(), op.code(), op);
-            int4 numParam = op.numInput();
+            int numParam = op.numInput();
             if (op.code() == CPUI_INDIRECT)
             {
                 opSetInput(loOp, newIop(op.getIn(1)), 1);
                 opSetInput(hiOp, newIop(op.getIn(1)), 1);
                 numParam = 1;
             }
-            for (int4 i = 0; i < numParam; ++i)
+            for (int i = 0; i < numParam; ++i)
             {
                 TransformVar* invn;
                 if (i == slot)
@@ -136,7 +136,7 @@ namespace Sla.DECCORE
                         {
                             if (outvn.isPrecisLo() || outvn.isPrecisHi())
                                 return false;       // Do not split if we know value comes from double precision pieces
-                            uintb val = op.getIn(1).getOffset();
+                            ulong val = op.getIn(1).getOffset();
                             if ((val == 0) && (outvn.getSize() == laneDescription.getSize(0)))
                             {
                                 TransformOp* rop = newPreexistingOp(1, CPUI_COPY, op);  // Grabs the low piece
@@ -156,7 +156,7 @@ namespace Sla.DECCORE
                             Varnode* tmpvn = op.getIn(1);
                             if (!tmpvn.isConstant())
                                 return false;
-                            uintb val = tmpvn.getOffset();
+                            ulong val = tmpvn.getOffset();
                             if (val < laneDescription.getSize(1) * 8)
                                 return false;           // Must obliterate all high bits
                             TransformOp* rop = newPreexistingOp(2, CPUI_INT_LEFT, op);      // Keep original shift
@@ -173,7 +173,7 @@ namespace Sla.DECCORE
                             Varnode* tmpvn = op.getIn(1);
                             if (!tmpvn.isConstant())
                                 return false;
-                            uintb val = tmpvn.getOffset();
+                            ulong val = tmpvn.getOffset();
                             if (val < laneDescription.getSize(0) * 8)
                                 return false;
                             OpCode extOpCode = (op.code() == CPUI_INT_RIGHT) ? CPUI_INT_ZEXT : CPUI_INT_SEXT;
@@ -184,7 +184,7 @@ namespace Sla.DECCORE
                             }
                             else
                             {
-                                uintb remainShift = val - laneDescription.getSize(0) * 8;
+                                ulong remainShift = val - laneDescription.getSize(0) * 8;
                                 TransformOp* rop = newPreexistingOp(2, op.code(), op);
                                 TransformOp* extrop = newOp(1, extOpCode, rop);
                                 opSetInput(extrop, rvn + 1, 0); // Input is the high piece
@@ -290,7 +290,7 @@ namespace Sla.DECCORE
             return traceForward(rvn);
         }
 
-        public SplitFlow(Funcdata f, Varnode root, int4 lowSize)
+        public SplitFlow(Funcdata f, Varnode root, int lowSize)
             : base(f)
 
         {

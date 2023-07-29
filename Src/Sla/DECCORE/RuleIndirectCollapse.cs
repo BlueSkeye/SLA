@@ -25,12 +25,12 @@ namespace Sla.DECCORE
 
         /// \class RuleIndirectCollapse
         /// \brief Remove a CPUI_INDIRECT if its blocking PcodeOp is dead
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INDIRECT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             PcodeOp* indop;
 
@@ -44,7 +44,7 @@ namespace Sla.DECCORE
                 { // STORE resolved to a COPY
                     Varnode* vn1 = indop.getOut();
                     Varnode* vn2 = op.getOut();
-                    int4 res = vn1.characterizeOverlap(*vn2);
+                    int res = vn1.characterizeOverlap(*vn2);
                     if (res > 0)
                     { // Copy has an effect of some sort
                         if (res == 2)
@@ -60,7 +60,7 @@ namespace Sla.DECCORE
                         if (vn1.contains(*vn2) == 0)
                         {   // INDIRECT output is properly contained in COPY output
                             // Convert INDIRECT to a SUBPIECE
-                            uintb trunc;
+                            ulong trunc;
                             if (vn1.getSpace().isBigEndian())
                                 trunc = vn1.getOffset() + vn1.getSize() - (vn2.getOffset() + vn2.getSize());
                             else

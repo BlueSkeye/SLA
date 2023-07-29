@@ -27,12 +27,12 @@ namespace Sla.DECCORE
         ///
         /// This makes the assumption that all floating-point calculations
         /// give valid results (not NaN).
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_FLOAT_NAN);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (op.numInput() == 2)
                 data.opRemoveInput(op, 1);

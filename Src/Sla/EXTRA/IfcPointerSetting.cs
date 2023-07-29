@@ -39,7 +39,7 @@ namespace Sla.EXTRA
             s >> setting >> ws;
             if (setting == "offset")
             {
-                int4 off = -1;
+                int off = -1;
                 s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
                 s >> off;
                 if (off <= 0)

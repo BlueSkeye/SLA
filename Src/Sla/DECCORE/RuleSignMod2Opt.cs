@@ -27,12 +27,12 @@ namespace Sla.DECCORE
         ///
         /// Note: `sign = V s>> 63`  The INT_AND may be performed on a truncated result and then reextended.
         /// This is a specialized form of RuleSignMod2nOpt.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_AND);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* constVn = op.getIn(1);
             if (!constVn.isConstant()) return 0;
@@ -41,7 +41,7 @@ namespace Sla.DECCORE
             if (!addOut.isWritten()) return 0;
             PcodeOp* addOp = addOut.getDef();
             if (addOp.code() != CPUI_INT_ADD) return 0;
-            int4 multSlot;
+            int multSlot;
             PcodeOp* multOp;
             bool trunc = false;
             for (multSlot = 0; multSlot < 2; ++multSlot)
@@ -63,7 +63,7 @@ namespace Sla.DECCORE
                 if (!base.isWritten() || !otherBase.isWritten()) return 0;
                 PcodeOp* subOp = base.getDef();
                 if (subOp.code() != CPUI_SUBPIECE) return 0;
-                int4 truncAmt = subOp.getIn(1).getOffset();
+                int truncAmt = subOp.getIn(1).getOffset();
                 if (truncAmt + base.getSize() != subOp.getIn(0).getSize()) return 0; // Must truncate all but high part
                 base = subOp.getIn(0);
                 subOp = otherBase.getDef();
@@ -86,7 +86,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* rootOp = *iter;
                 if (rootOp.code() != CPUI_INT_ADD) continue;
-                int4 slot = rootOp.getSlot(andOut);
+                int slot = rootOp.getSlot(andOut);
                 otherBase = RuleSignMod2nOpt::checkSignExtraction(rootOp.getIn(1 - slot));
                 if (otherBase != base) continue;
                 data.opSetOpcode(rootOp, CPUI_INT_SREM);

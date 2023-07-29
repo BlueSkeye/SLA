@@ -30,7 +30,7 @@ namespace Sla.DECCORE
                 List<Varnode*> vnlist;
                 if (op != (PcodeOp*)0)
                 {
-                    for (int4 i = 1; i < op.numInput(); ++i)
+                    for (int i = 1; i < op.numInput(); ++i)
                         vnlist.push_back(op.getIn(i));
                 }
                 if (data.isHighOn())

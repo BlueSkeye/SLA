@@ -15,7 +15,7 @@ namespace Sla.DECCORE
     internal class EquateSymbol : Symbol
     {
         ///< Value of the constant being equated
-        private uintb value;
+        private ulong value;
 
         /// Constructor
         /// Create a symbol either to associate a name with a constant or to force a display conversion
@@ -23,7 +23,7 @@ namespace Sla.DECCORE
         /// \param nm is the name of the equate (an empty string can be used for a convert)
         /// \param format is the desired display conversion (0 for no conversion)
         /// \param val is the constant value whose display is being altered
-        public EquateSymbol(Scope sc, string nm, uint format, uintb val)
+        public EquateSymbol(Scope sc, string nm, uint format, ulong val)
             : base(sc, nm, null)
         {
             value = val;
@@ -40,7 +40,7 @@ namespace Sla.DECCORE
             category = equate;
         }
         
-        public uintb getValue() => value; ///< Get the constant value
+        public ulong getValue() => value; ///< Get the constant value
 
         /// Is the given value similar to \b this equate
         /// An EquateSymbol should survive certain kinds of transforms during decompilation,
@@ -50,15 +50,15 @@ namespace Sla.DECCORE
         /// \param op2Value is the given value
         /// \param size is the number of bytes of precision
         /// \return \b true if it is a transformed form
-        public bool isValueClose(uintb op2Value, int size)
+        public bool isValueClose(ulong op2Value, int size)
         {
             if (value == op2Value) return true;
-            uintb mask = calc_mask(size);
-            uintb maskValue = value & mask;
+            ulong mask = calc_mask(size);
+            ulong maskValue = value & mask;
             if (maskValue != value)
             {       // If '1' bits are getting masked off
                     // Make sure only sign-extension is getting masked off
-                if (value != sign_extend(maskValue, size, sizeof(uintb)))
+                if (value != sign_extend(maskValue, size, sizeof(ulong)))
                     return false;
             }
             if (maskValue == (op2Value & mask)) return true;

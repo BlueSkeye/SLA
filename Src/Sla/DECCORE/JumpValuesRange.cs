@@ -17,7 +17,7 @@ namespace Sla.DECCORE
         /// First PcodeOp in the jump-table calculation
         protected PcodeOp startop;
         /// The current value pointed to be the iterator
-        protected /*mutable*/ uintb curval;
+        protected /*mutable*/ ulong curval;
 
         /// Set the range of values explicitly
         public void setRange(CircleRange rng)
@@ -41,19 +41,19 @@ namespace Sla.DECCORE
         /// ending value is set so there are exactly the given number of elements
         /// in the range.
         /// \param nm is the given number
-        public override void truncate(int4 nm)
+        public override void truncate(int nm)
         {
-            int4 rangeSize = 8 * sizeof(uintb) - count_leading_zeros(range.getMask());
+            int rangeSize = 8 * sizeof(ulong) - count_leading_zeros(range.getMask());
             rangeSize >>= 3;
-            uintb left = range.getMin();
-            int4 step = range.getStep();
-            uintb right = (left + step * nm) & range.getMask();
+            ulong left = range.getMin();
+            int step = range.getStep();
+            ulong right = (left + step * nm) & range.getMask();
             range.setRange(left, right, rangeSize, step);
         }
 
-        public override uintb getSize() => range.getSize();
+        public override ulong getSize() => range.getSize();
 
-        public override bool contains(uintb val) => range.contains(val);
+        public override bool contains(ulong val) => range.contains(val);
 
         public override bool initializeForReading()
         {
@@ -64,7 +64,7 @@ namespace Sla.DECCORE
 
         public override bool next() => range.getNext(curval);
 
-        public override uintb getValue() => curval;
+        public override ulong getValue() => curval;
 
         public override Varnode getStartVarnode() => normqvn;
 

@@ -15,9 +15,9 @@ namespace Sla.EXTRA
         {
         }
         
-        public override void loadFill(uint1[] ptr, int4 size, Address addr)
+        public override void loadFill(byte[] ptr, int size, Address addr)
         {
-            for(int4 i=0;i<size;++i) ptr[i] = 0;
+            for(int i=0;i<size;++i) ptr[i] = 0;
         }
 
         public override string getArchType() => "myload";

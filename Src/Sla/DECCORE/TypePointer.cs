@@ -20,7 +20,7 @@ namespace Sla.DECCORE
         /// If non-null, the address space \b this is intented to point into
         protected AddrSpace spaceid;
         /// What size unit does the pointer address
-        protected uint4 wordsize;
+        protected uint wordsize;
 
         /// Restore \b this pointer data-type from a stream
         /// Parse a \<type> element with a child describing the data-type being pointed to
@@ -28,12 +28,12 @@ namespace Sla.DECCORE
         /// \param typegrp is the factory owning \b this data-type
         protected void decode(Decoder decoder, TypeFactory typegrp)
         {
-            //  uint4 elemId = decoder.openElement();
+            //  uint elemId = decoder.openElement();
             decodeBasic(decoder); ;
             decoder.rewindAttributes();
             for (; ; )
             {
-                uint4 attrib = decoder.getNextAttributeId();
+                uint attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
                 if (attrib == ATTRIB_WORDSIZE)
                 {
@@ -90,7 +90,7 @@ namespace Sla.DECCORE
         }
 
         /// Construct from a size, pointed-to type, and wordsize
-        public TypePointer(int4 s, Datatype pt, uint4 ws)
+        public TypePointer(int s, Datatype pt, uint ws)
             : base(s, TYPE_PTR)
         {
             ptrto = pt;
@@ -115,7 +115,7 @@ namespace Sla.DECCORE
         public Datatype getPtrTo() => ptrto;
 
         /// Get the size of the addressable unit being pointed to
-        public uint4 getWordSize() => wordsize;
+        public uint getWordSize() => wordsize;
 
         /// Get any address space associated with \b this pointer
         public AddrSpace getSpace() => spaceid;
@@ -130,9 +130,9 @@ namespace Sla.DECCORE
             }
         }
 
-        public override int4 numDepend() => 1;
+        public override int numDepend() => 1;
 
-        public override Datatype getDepend(int4 index) => ptrto;
+        public override Datatype getDepend(int index) => ptrto;
 
         public override void printNameBase(TextWriter s) 
         {
@@ -140,9 +140,9 @@ namespace Sla.DECCORE
             ptrto.printNameBase(s);
         }
 
-        public override int4 compare(Datatype op, int4 level)
+        public override int compare(Datatype op, int level)
         {
-            int4 res = Datatype::compare(op, level);
+            int res = Datatype::compare(op, level);
             if (res != 0) return res;
             // Both must be pointers
             TypePointer* tp = (TypePointer*)&op;
@@ -162,7 +162,7 @@ namespace Sla.DECCORE
             return ptrto.compare(*tp.ptrto, level); // Compare whats pointed to
         }
 
-        public override int4 compareDependency(Datatype op)
+        public override int compareDependency(Datatype op)
         {
             if (submeta != op.getSubMeta()) return (submeta < op.getSubMeta()) ? -1 : 1;
             TypePointer* tp = (TypePointer*)&op;    // Both must be pointers
@@ -211,17 +211,17 @@ namespace Sla.DECCORE
         /// \param allowArrayWrap is \b true if the pointer should be treated as a pointer to an array
         /// \param typegrp is the factory producing the (possibly new) data-type
         /// \return a pointer datatype for the component or NULL
-        public override TypePointer downChain(uintb off, TypePointer par, uintb parOff, bool allowArrayWrap,
+        public override TypePointer downChain(ulong off, TypePointer par, ulong parOff, bool allowArrayWrap,
             TypeFactory typegrp)
         {
-            int4 ptrtoSize = ptrto.getSize();
+            int ptrtoSize = ptrto.getSize();
             if (off >= ptrtoSize)
             {   // Check if we are wrapping
                 if (ptrtoSize != 0 && !ptrto.isVariableLength())
                 {   // Check if pointed-to is wrappable
                     if (!allowArrayWrap)
                         return (TypePointer*)0;
-                    intb signOff = (intb)off;
+                    long signOff = (long)off;
                     sign_extend(signOff, size * 8 - 1);
                     signOff = signOff % ptrtoSize;
                     if (signOff < 0)
@@ -248,19 +248,19 @@ namespace Sla.DECCORE
             return typegrp.getTypePointer(size, pt, wordsize);
         }
 
-        public override bool isPtrsubMatching(uintb off)
+        public override bool isPtrsubMatching(ulong off)
         {
             if (ptrto.getMetatype() == TYPE_SPACEBASE)
             {
-                uintb newoff = AddrSpace::addressToByte(off, wordsize);
+                ulong newoff = AddrSpace::addressToByte(off, wordsize);
                 ptrto.getSubType(newoff, &newoff);
                 if (newoff != 0)
                     return false;
             }
             else if (ptrto.getMetatype() == TYPE_ARRAY || ptrto.getMetatype() == TYPE_STRUCT)
             {
-                int4 sz = off;
-                int4 typesize = ptrto.getSize();
+                int sz = off;
+                int typesize = ptrto.getSize();
                 if ((typesize <= AddrSpace::addressToByteInt(sz, wordsize)) && (typesize != 0))
                     return false;
             }
@@ -275,7 +275,7 @@ namespace Sla.DECCORE
             return true;
         }
 
-        public override Datatype resolveInFlow(PcodeOp op, int4 slot)
+        public override Datatype resolveInFlow(PcodeOp op, int slot)
         {
             if (ptrto.getMetatype() == TYPE_UNION)
             {
@@ -290,7 +290,7 @@ namespace Sla.DECCORE
             return this;
         }
 
-        public override Datatype findResolve(PcodeOp op, int4 slot)
+        public override Datatype findResolve(PcodeOp op, int slot)
         {
             if (ptrto.getMetatype() == TYPE_UNION)
             {

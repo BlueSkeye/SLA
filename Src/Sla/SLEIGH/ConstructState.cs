@@ -14,7 +14,7 @@ namespace Sla.SLEIGH
         internal FixedHandle hand;
         internal List<ConstructState> resolve;
         internal ConstructState parent;
-        internal int4 length;            // Length of this instantiation of the constructor
-        internal uint4 offset;			// Absolute offset (from start of instruction)
+        internal int length;            // Length of this instantiation of the constructor
+        internal uint offset;			// Absolute offset (from start of instruction)
     }
 }

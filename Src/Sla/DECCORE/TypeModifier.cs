@@ -22,7 +22,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public abstract uint4 getType();
+        public abstract uint getType();
 
         public abstract bool isValid();
 

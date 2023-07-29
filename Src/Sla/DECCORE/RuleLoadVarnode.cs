@@ -40,7 +40,7 @@ namespace Sla.DECCORE
         /// \param val is the reference for passing back the constant
         /// \param spc is the space being loaded from
         /// \return the associated space or NULL
-        private static AddrSpace vnSpacebase(Architecture glb, Varnode vn, uintb val, AddrSpace spc)
+        private static AddrSpace vnSpacebase(Architecture glb, Varnode vn, ulong val, AddrSpace spc)
         {
             PcodeOp* op;
             Varnode* vn1,*vn2;
@@ -86,7 +86,7 @@ namespace Sla.DECCORE
         /// \param op is the STORE or LOAD PcodeOp
         /// \param offoff is a reference to where the offset should get passed back
         /// \return the associated space or NULL
-        private static AddrSpace checkSpacebase(Architecture glb, PcodeOp op, uintb offoff)
+        private static AddrSpace checkSpacebase(Architecture glb, PcodeOp op, ulong offoff)
         {
             Varnode* offvn;
             AddrSpace* loadspace;
@@ -133,17 +133,17 @@ namespace Sla.DECCORE
         /// The pointer can either be a constant offset into the LOAD's specified address space,
         /// or it can be a \e spacebase register plus an offset, in which case it points into
         /// the \e spacebase register's address space.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_LOAD);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            int4 size;
+            int size;
             Varnode* newvn;
             AddrSpace* baseoff;
-            uintb offoff;
+            ulong offoff;
 
             baseoff = checkSpacebase(data.getArch(), op, offoff);
             if (baseoff == (AddrSpace*)0) return 0;

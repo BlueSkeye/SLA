@@ -11,9 +11,9 @@ namespace Sla.EXTRA
 {
     internal class DummyOpConstraint : UnifyConstraint
     {
-        private int4 opindex;
+        private int opindex;
         
-        public DummyOpConstraint(int4 ind)
+        public DummyOpConstraint(int ind)
         {
             maxnum = opindex = ind;
         }
@@ -27,7 +27,7 @@ namespace Sla.EXTRA
             typelist[opindex] = UnifyDatatype(UnifyDatatype::op_type);
         }
 
-        public override int4 getBaseIndex() => opindex;
+        public override int getBaseIndex() => opindex;
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {

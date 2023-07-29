@@ -11,22 +11,22 @@ namespace Sla.SLEIGH
 {
     internal abstract class PatternValue : PatternExpression
     {
-        public abstract TokenPattern genPattern(intb val);
+        public abstract TokenPattern genPattern(long val);
 
         public override void listValues(List<PatternValue> list)
         {
             list.push_back(this);
         }
 
-        public override void getMinMax(List<intb> minlist, List<intb> maxlist)
+        public override void getMinMax(List<long> minlist, List<long> maxlist)
         {
             minlist.push_back(minValue()); maxlist.push_back(maxValue());
         }
 
-        public override intb getSubValue(List<intb> replace, int4 listpos) => replace[listpos++];
+        public override long getSubValue(List<long> replace, int listpos) => replace[listpos++];
 
-        public abstract intb minValue();
+        public abstract long minValue();
 
-        public abstract intb maxValue();
+        public abstract long maxValue();
     }
 }

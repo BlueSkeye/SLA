@@ -9,18 +9,18 @@ namespace Sla.EXTRA
 {
     internal class ConstantNamed : RHSConstant
     {
-        private int4 constindex;
+        private int constindex;
         
-        public ConstantNamed(int4 id)
+        public ConstantNamed(int id)
         {
             constindex = id;
         }
         
-        public int4 getId() => constindex;
+        public int getId() => constindex;
 
         public override RHSConstant clone() => new ConstantNamed(constindex);
 
-        public override uintb getConstant(UnifyState state) => state.data(constindex).getConstant();
+        public override ulong getConstant(UnifyState state) => state.data(constindex).getConstant();
 
         public override void writeExpression(TextWriter s, UnifyCPrinter printstate)
         {

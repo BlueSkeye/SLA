@@ -14,11 +14,11 @@ namespace Sla.EXTRA
     {
         private Translate trans;
         private List<Address> jumpaddr;
-        private set<uintb> targetoffsets;
+        private set<ulong> targetoffsets;
         private OpCode lastop;
         private bool hascall;
         private bool hitsaddress;
-        private uintb targethit;
+        private ulong targethit;
         
         public void init(Translate t)
         {
@@ -28,7 +28,7 @@ namespace Sla.EXTRA
         }
 
         public override void dump(Address addr,OpCode opc, VarnodeData outvar,VarnodeData vars,
-            int4 isize)
+            int isize)
         {
             lastop = opc;
             switch (opc)
@@ -103,7 +103,7 @@ namespace Sla.EXTRA
                     res.flags |= CodeUnit::fallthru;
                     break;
             }
-            for (int4 i = 0; i < jumpaddr.size(); ++i)
+            for (int i = 0; i < jumpaddr.size(); ++i)
             {
                 if (jumpaddr[i] == lastaddr)
                     res.flags |= CodeUnit::fallthru;

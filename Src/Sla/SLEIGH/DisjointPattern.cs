@@ -13,11 +13,11 @@ namespace Sla.SLEIGH
         // A pattern with no ORs in it
         protected abstract PatternBlock getBlock(bool context);
         
-        public virtual int4 numDisjoint() => 0;
+        public virtual int numDisjoint() => 0;
 
-        public virtual DisjointPattern getDisjoint(int4 i) => (DisjointPattern*)0;
+        public virtual DisjointPattern getDisjoint(int i) => (DisjointPattern*)0;
 
-        public uintm getMask(int4 startbit, int4 size, bool context)
+        public uint getMask(int startbit, int size, bool context)
         {
             PatternBlock* block = getBlock(context);
             if (block != (PatternBlock*)0)
@@ -25,7 +25,7 @@ namespace Sla.SLEIGH
             return 0;
         }
 
-        public uintm getValue(int4 startbit, int4 size, bool context)
+        public uint getValue(int startbit, int size, bool context)
         {
             PatternBlock* block = getBlock(context);
             if (block != (PatternBlock*)0)
@@ -33,7 +33,7 @@ namespace Sla.SLEIGH
             return 0;
         }
 
-        public int4 getLength(bool context)
+        public int getLength(bool context)
         {
             PatternBlock* block = getBlock(context);
             if (block != (PatternBlock*)0)

@@ -27,12 +27,12 @@ namespace Sla.DECCORE
         ///
         /// There is a special case when the constant is zero:
         ///   - `carry(V,0)  => false`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_CARRY);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn1,*vn2;
 
@@ -40,7 +40,7 @@ namespace Sla.DECCORE
             if (!vn2.isConstant()) return 0;
             vn1 = op.getIn(0);
             if (vn1.isFree()) return 0;
-            uintb off = vn2.getOffset();
+            ulong off = vn2.getOffset();
             if (off == 0)
             {       // Trivial case
                 data.opRemoveInput(op, 1);  // Go down to 1 input

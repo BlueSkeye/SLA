@@ -30,13 +30,13 @@ namespace Sla.DECCORE
         ///  - `((V + c) + d)  =>  V + (c+d)`
         ///  - `((V * c) * d)  =>  V * (c*d)`
         ///  - `((V + (W + c)) + d)  =>  (W + (c+d)) + V`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
-            uint4 list[] = { CPUI_INT_ADD, CPUI_INT_MULT };
+            uint list[] = { CPUI_INT_ADD, CPUI_INT_MULT };
             oplist.insert(oplist.end(), list, list + 2);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* c[2];           // Constant varnodes
             Varnode* sub,*sub2,*newvn;
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
                 if (opc != CPUI_INT_ADD) return 0;
                 Varnode* othervn,*basevn;
                 PcodeOp* baseop;
-                for (int4 i = 0; i < 2; ++i)
+                for (int i = 0; i < 2; ++i)
                 {
                     othervn = subop.getIn(i);
                     if (othervn.isConstant()) continue;
@@ -77,7 +77,7 @@ namespace Sla.DECCORE
                     if (!basevn.isSpacebase()) continue; // Only apply this particular case if we are adding to a base pointer
                     if (!basevn.isInput()) continue;   // because this adds a new add operation
 
-                    uintb val = op.getOpcode().evaluateBinary(c[0].getSize(), c[0].getSize(), c[0].getOffset(), c[1].getOffset());
+                    ulong val = op.getOpcode().evaluateBinary(c[0].getSize(), c[0].getSize(), c[0].getOffset(), c[1].getOffset());
                     newvn = data.newConstant(c[0].getSize(), val);
                     if (c[0].getSymbolEntry() != (SymbolEntry*)0)
                         newvn.copySymbolIfValid(c[0]);
@@ -98,7 +98,7 @@ namespace Sla.DECCORE
             sub2 = subop.getIn(0);
             if (sub2.isFree()) return 0;
 
-            uintb val = op.getOpcode().evaluateBinary(c[0].getSize(), c[0].getSize(), c[0].getOffset(), c[1].getOffset());
+            ulong val = op.getOpcode().evaluateBinary(c[0].getSize(), c[0].getSize(), c[0].getOffset(), c[1].getOffset());
             newvn = data.newConstant(c[0].getSize(), val);
             if (c[0].getSymbolEntry() != (SymbolEntry*)0)
                 newvn.copySymbolIfValid(c[0]);

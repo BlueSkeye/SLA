@@ -13,7 +13,7 @@ namespace Sla.DECCORE
     /// but still has an unknown effect.
     internal class UnspecializedPcodeOp : UserPcodeOp
     {
-        public UnspecializedPcodeOp(Architecture g, string nm,int4 ind)
+        public UnspecializedPcodeOp(Architecture g, string nm,int ind)
             : base(g, nm, ind)
         {
         }

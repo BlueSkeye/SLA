@@ -22,7 +22,7 @@ namespace Sla.DECCORE
             lng.opIntLeft(op);
         }
 
-        public override Datatype getInputLocal(PcodeOp op, int4 slot)
+        public override Datatype getInputLocal(PcodeOp op, int slot)
         {
             if (slot == 1)
                 return tlst.getBaseNoChar(op.getIn(1).getSize(), TYPE_INT);

@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
-            int4 inslot, int4 outslot)
+            int inslot, int outslot)
         {
             type_metatype invnMeta = alttype.getMetatype();
             if (invnMeta != TYPE_PTR)
@@ -63,14 +63,14 @@ namespace Sla.DECCORE
         /// \param inslot is the edge to propagate along
         /// \return the transformed Datatype or the original output Datatype
         public static Datatype propagateAddIn2Out(Datatype alttype, TypeFactory typegrp, PcodeOp op,
-            int4 inslot)
+            int inslot)
         {
             TypePointer* pointer = (TypePointer*)alttype;
-            uintb uoffset;
-            int4 command = propagateAddPointer(uoffset, op, inslot, pointer.getPtrTo().getSize());
+            ulong uoffset;
+            int command = propagateAddPointer(uoffset, op, inslot, pointer.getPtrTo().getSize());
             if (command == 2) return op.getOut().getTempType(); // Doesn't look like a good pointer add
             TypePointer* parent = (TypePointer*)0;
-            uintb parentOff;
+            ulong parentOff;
             if (command != 3)
             {
                 uoffset = AddrSpace::addressToByte(uoffset, pointer.getWordSize());
@@ -120,13 +120,13 @@ namespace Sla.DECCORE
         /// \param slot is the input edge being propagated
         /// \param sz is the size of the data-type being pointed to
         /// \return a command indicating how the op should be treated
-        public static int4 propagateAddPointer(uintb off, PcodeOp op, int4 slot, int4 sz)
+        public static int propagateAddPointer(ulong off, PcodeOp op, int slot, int sz)
         {
             if (op.code() == CPUI_PTRADD)
             {
                 if (slot != 0) return 2;
                 Varnode* constvn = op.getIn(1);
-                uintb mult = op.getIn(2).getOffset();
+                ulong mult = op.getIn(2).getOffset();
                 if (constvn.isConstant())
                 {
                     off = (constvn.getOffset() * mult) & calc_mask(constvn.getSize());
@@ -156,7 +156,7 @@ namespace Sla.DECCORE
                             Varnode* constvn = multop.getIn(1);
                             if (constvn.isConstant())
                             {
-                                uintb mult = constvn.getOffset();
+                                ulong mult = constvn.getOffset();
                                 if (mult == calc_mask(constvn.getSize()))  // If multiplying by -1
                                     return 2;       // Assume this is a pointer difference and don't propagate
                                 if (sz != 0 && (mult % sz) != 0)

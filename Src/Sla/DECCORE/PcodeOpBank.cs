@@ -33,7 +33,7 @@ namespace Sla.DECCORE
         /// List of retired PcodeOps
         private List<PcodeOp> deadandgone;
         /// Counter for producing unique id's for each op
-        private uintm uniqid;
+        private uint uniqid;
 
         /// Add given PcodeOp to specific op-code list
         /// Add the PcodeOp to the list of ops with the same op-code. Currently only certain
@@ -124,13 +124,13 @@ namespace Sla.DECCORE
         }
 
         /// Set the unique id counter
-        public void setUniqId(uintm val)
+        public void setUniqId(uint val)
         {
             uniqid = val;
         }
 
         /// Get the next unique id
-        public uintm getUniqId() => uniqid;
+        public uint getUniqId() => uniqid;
 
         /// Create a PcodeOp with at a given Address
         /// Create a PcodeOp with a given sequence number
@@ -140,7 +140,7 @@ namespace Sla.DECCORE
         /// \param inputs is the number of input slots
         /// \param pc is the Address to associate with the PcodeOp
         /// \return the newly allocated PcodeOp
-        public PcodeOp create(int4 inputs, Address pc)
+        public PcodeOp create(int inputs, Address pc)
         {
             PcodeOp* op = new PcodeOp(inputs, SeqNum(pc, uniqid++));
             optree[op.getSeqNum()] = op;
@@ -155,7 +155,7 @@ namespace Sla.DECCORE
         /// \param inputs is the number of input slots
         /// \param sq is the specified sequence number
         /// \return the newly allocated PcodeOp
-        public PcodeOp create(int4 inputs, SeqNum sq)
+        public PcodeOp create(int inputs, SeqNum sq)
         {
             PcodeOp* op;
             op = new PcodeOp(inputs, sq);
@@ -365,7 +365,7 @@ namespace Sla.DECCORE
         /// \brief End of all PcodeOps at one Address
         public PcodeOpTree::const_iterator end(Address addr)
         {
-            return optree.upper_bound(SeqNum(addr, ~((uintm)0)));
+            return optree.upper_bound(SeqNum(addr, ~((uint)0)));
         }
 
         /// \brief Start of all PcodeOps marked as \e alive
@@ -430,11 +430,11 @@ namespace Sla.DECCORE
         /// \param res1 is a reference to the first returned Varnode
         /// \param res2 is a reference to the second returned Varnode
         /// \return the result of the comparison
-        internal static int4 functionalEqualityLevel(Varnode vn1, Varnode vn2,
+        internal static int functionalEqualityLevel(Varnode vn1, Varnode vn2,
             out Varnode res1, out Varnode res2)
 
         {
-            int4 testval = functionalEqualityLevel0(vn1, vn2);
+            int testval = functionalEqualityLevel0(vn1, vn2);
             if (testval != 1) return testval;
             PcodeOp* op1 = vn1.getDef();
             PcodeOp* op2 = vn2.getDef();
@@ -442,7 +442,7 @@ namespace Sla.DECCORE
 
             if (opc != op2.code()) return -1;
 
-            int4 num = op1.numInput();
+            int num = op1.numInput();
             if (num != op2.numInput()) return -1;
             if (op1.isMarker()) return -1;
             if (op2.isCall()) return -1;
@@ -459,7 +459,7 @@ namespace Sla.DECCORE
                 if (op1.getIn(2).getOffset() != op2.getIn(2).getOffset()) return -1; // Make sure the elsize constant is equal
                 num = 2;            // Otherwise treat as having 2 inputs
             }
-            for (int4 i = 0; i < num; ++i)
+            for (int i = 0; i < num; ++i)
             {
                 res1[i] = op1.getIn(i);
                 res2[i] = op2.getIn(i);
@@ -477,12 +477,12 @@ namespace Sla.DECCORE
                 return 1;
             }
             if (num == 1) return testval;
-            int4 testval2 = functionalEqualityLevel0(res1[1], res2[1]);
+            int testval2 = functionalEqualityLevel0(res1[1], res2[1]);
             if (testval2 == 0)
             {       // A match locks in this comparison ordering
                 return testval;
             }
-            int4 unmatchsize;
+            int unmatchsize;
             if ((testval == 1) && (testval2 == 1))
                 unmatchsize = 2;
             else
@@ -491,8 +491,8 @@ namespace Sla.DECCORE
             if (!op1.isCommutative()) return unmatchsize;
             // unmatchsize must be 2 or -1 here on a commutative operator,
             // try flipping
-            int4 comm1 = functionalEqualityLevel0(res1[0], res2[1]);
-            int4 comm2 = functionalEqualityLevel0(res1[1], res2[0]);
+            int comm1 = functionalEqualityLevel0(res1[0], res2[1]);
+            int comm2 = functionalEqualityLevel0(res1[1], res2[0]);
             if ((comm1 == 0) && (comm2 == 0))
                 return 0;
             if ((comm1 < 0) || (comm2 < 0))
@@ -537,10 +537,10 @@ namespace Sla.DECCORE
         /// \param vn2 is the second Varnode
         /// \param depth is the maximum level to recurse while testing
         /// \return \b true if they are different
-        internal static bool functionalDifference(Varnode vn1, Varnode vn2, int4 depth)
+        internal static bool functionalDifference(Varnode vn1, Varnode vn2, int depth)
         {
             PcodeOp* op1,*op2;
-            int4 i, num;
+            int i, num;
 
             if (vn1 == vn2) return false;
             if ((!vn1.isWritten()) || (!vn2.isWritten()))

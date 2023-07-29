@@ -15,16 +15,16 @@ namespace Sla.DECCORE
     /// The injection object is also referenced by an id and is managed by PcodeInjectLibrary.
     internal class InjectedUserOp : UserPcodeOp
     {
-        private uint4 injectid;         ///< The id of the injection object (to which this op maps)
+        private uint injectid;         ///< The id of the injection object (to which this op maps)
         
-        public InjectedUserOp(Architecture g, string nm,int4 ind, int4 injid)
+        public InjectedUserOp(Architecture g, string nm,int ind, int injid)
             : base(g, nm, ind)
         {
             injectid = injid;
         }
 
         /// Get the id of the injection object
-        public uint4 getInjectId() => injectid;
+        public uint getInjectId() => injectid;
     
         public override void decode(Decoder decoder)
         {

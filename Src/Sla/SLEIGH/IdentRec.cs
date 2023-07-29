@@ -9,9 +9,9 @@ namespace Sla.SLEIGH
     internal struct IdentRec
     {
         internal readonly string nm;
-        internal int4 id;
+        internal int id;
 
-        internal IdentRec(string name, int4 identifier)
+        internal IdentRec(string name, int identifier)
         {
             nm = name;
             id = identifier;

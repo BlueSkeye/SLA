@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         {
             Architecture* glb = data.getArch();
             bool cachereadonly = glb.readonlypropagate;
-            int4 pass = data.getHeritagePass();
+            int pass = data.getHeritagePass();
             VarnodeLocSet::const_iterator iter;
             Varnode* vn;
 
@@ -39,7 +39,7 @@ namespace Sla.DECCORE
             {
                 vn = *iter++;       // Advance iterator in case vn is deleted
                 if (vn.isAnnotation()) continue;
-                int4 vnSize = vn.getSize();
+                int vnSize = vn.getSize();
                 if (vn.isAutoLiveHold())
                 {
                     if (pass > 0)
@@ -79,9 +79,9 @@ namespace Sla.DECCORE
                         if (data.replaceVolatile(vn))
                             count += 1;     // Try to replace vn with pcode op
                 }
-                else if (((vn.getNZMask() & vn.getConsume()) == 0) && (vnSize <= sizeof(uintb)))
+                else if (((vn.getNZMask() & vn.getConsume()) == 0) && (vnSize <= sizeof(ulong)))
                 {
-                    // FIXME: uintb should be arbitrary precision
+                    // FIXME: ulong should be arbitrary precision
                     if (vn.isConstant()) continue; // Don't replace a constant
                     if (vn.isWritten())
                     {

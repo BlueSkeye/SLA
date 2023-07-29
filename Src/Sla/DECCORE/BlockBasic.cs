@@ -63,7 +63,7 @@ namespace Sla.DECCORE
             if (iter == op.end()) {
                 ordafter = ordbefore + 0x1000000;
                 if (ordafter <= ordbefore)
-                    ordafter = ~((uintm)0);
+                    ordafter = ~((uint)0);
             }
             else {
                 ordafter = (*iter).getSeqNum().getOrder();

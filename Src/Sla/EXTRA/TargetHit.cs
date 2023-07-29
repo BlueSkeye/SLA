@@ -13,9 +13,9 @@ namespace Sla.EXTRA
         public Address funcstart;        // Starting address of function making target call
         public Address codeaddr;       // Address of instruction refering to target call
         public Address thunkaddr;      // The target call
-        public uint4 mask;         // Mask associated with this target
+        public uint mask;         // Mask associated with this target
 
-        public TargetHit(Address func, Address code, Address thunk,uint4 m)
+        public TargetHit(Address func, Address code, Address thunk,uint m)
         {
             funcstart = new Address(ref func);
             codeaddr = new Address(ref code);

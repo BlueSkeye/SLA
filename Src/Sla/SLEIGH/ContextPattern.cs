@@ -36,11 +36,11 @@ namespace Sla.SLEIGH
 
         public override Pattern simplifyClone() => new ContextPattern(maskvalue.clone());
 
-        public override void shiftInstruction(int4 sa)
+        public override void shiftInstruction(int sa)
         {
         }
 
-        public override Pattern doOr(Pattern b, int4 sa)
+        public override Pattern doOr(Pattern b, int sa)
         {
             ContextPattern* b2 = dynamic_cast <ContextPattern*> (b);
             if (b2 == (ContextPattern*)0)
@@ -49,7 +49,7 @@ namespace Sla.SLEIGH
             return new OrPattern((DisjointPattern*)simplifyClone(), (DisjointPattern*)b2.simplifyClone());
         }
 
-        public override Pattern doAnd(Pattern b, int4 sa)
+        public override Pattern doAnd(Pattern b, int sa)
         {
             ContextPattern* b2 = dynamic_cast <ContextPattern*> (b);
             if (b2 == (ContextPattern*)0)
@@ -59,7 +59,7 @@ namespace Sla.SLEIGH
             return new ContextPattern(resblock);
         }
 
-        public override Pattern commonSubPattern(Pattern b, int4 sa)
+        public override Pattern commonSubPattern(Pattern b, int sa)
         {
             ContextPattern* b2 = dynamic_cast <ContextPattern*> (b);
             if (b2 == (ContextPattern*)0)

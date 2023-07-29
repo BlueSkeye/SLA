@@ -32,14 +32,14 @@ namespace Sla.DECCORE
         ///
         ///  - `(zext(V s>> 0x1f) << 0x20) + zext(V)  =>  sext(V)`
         ///  - `(zext(W s>> 0x1f) << 0x20) + X        =>  sext(W) where W = sub(X,0)`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_OR);
             oplist.push_back(CPUI_INT_XOR);
             oplist.push_back(CPUI_INT_ADD);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             PcodeOp* shiftop,*zextloop,*zexthiop;
             Varnode* vn1,*vn2;
@@ -67,14 +67,14 @@ namespace Sla.DECCORE
             vn1 = zexthiop.getIn(0);
             if (vn1.isConstant())
             {
-                if (vn1.getSize() < sizeof(uintb))
+                if (vn1.getSize() < sizeof(ulong))
                     return 0;       // Normally we let ZEXT of a constant collapse naturally
                                     // But if the ZEXTed constant is too big, this won't happen
             }
             else if (vn1.isFree())
                 return 0;
-            int4 sa = shiftop.getIn(1).getOffset();
-            int4 concatsize = sa + 8 * vn1.getSize();
+            int sa = shiftop.getIn(1).getOffset();
+            int concatsize = sa + 8 * vn1.getSize();
             if (op.getOut().getSize() * 8 < concatsize) return 0;
             if (zextloop.code() != CPUI_INT_ZEXT)
             {
@@ -91,7 +91,7 @@ namespace Sla.DECCORE
                 if (subop.getIn(1).getOffset() != 0) return 0;    //    (must be low part)
                 Varnode* bigVn = zextloop.getOut();
                 if (subop.getIn(0) != bigVn) return 0; // Verify we have link thru SUBPIECE with low part
-                int4 rsa = (int4)rShiftOp.getIn(1).getOffset();
+                int rsa = (int)rShiftOp.getIn(1).getOffset();
                 if (rsa != vn2.getSize() * 8 - 1) return 0;    // Arithmetic shift must copy sign-bit thru whole high part
                 if ((bigVn.getNZMask() >> sa) != 0) return 0;  // The original most significant bytes must be zero
                 if (sa != 8 * (vn2.getSize())) return 0;

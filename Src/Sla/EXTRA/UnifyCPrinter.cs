@@ -14,10 +14,10 @@ namespace Sla.EXTRA
     {
         private List<UnifyDatatype> storemap = new List<UnifyDatatype>();
         private List<string> namemap = new List<string>();
-        private int4 depth;
-        private int4 printingtype;      // 0 = standard rule
+        private int depth;
+        private int printingtype;      // 0 = standard rule
         private string classname;       // Name of the printed class
-        private int4 opparam;
+        private int opparam;
         private List<OpCode> opcodelist;  // List of opcodes that are recognized by rule
         
         private void initializeBase(ConstraintGroup g)
@@ -28,12 +28,12 @@ namespace Sla.EXTRA
             storemap.clear();
             opparam = -1;
             opcodelist.clear();
-            int4 maxop = g.getMaxNum();
+            int maxop = g.getMaxNum();
             storemap.resize(maxop + 1, UnifyDatatype());
 
             g.collectTypes(storemap);
 
-            for (int4 i = 0; i <= maxop; ++i)
+            for (int i = 0; i <= maxop; ++i)
             {
                 ostringstream s;
                 s << storemap[i].getBaseName() << dec << i;
@@ -43,10 +43,10 @@ namespace Sla.EXTRA
 
         private void printGetOpList(TextWriter s)
         { // Print the getOpList method of the new rule
-            s << "void " << classname << "::getOpList(List<uint4> &oplist) const" << endl;
+            s << "void " << classname << "::getOpList(List<uint> &oplist) const" << endl;
             s << endl;
             s << '{' << endl;
-            for (int4 i = 0; i < opcodelist.size(); ++i)
+            for (int i = 0; i < opcodelist.size(); ++i)
             {
                 s << "  oplist.push_back(CPUI_" << get_opname(opcodelist[i]) << ");" << endl;
             }
@@ -70,7 +70,7 @@ namespace Sla.EXTRA
             printingtype = 0;
         }
 
-        public int4 getDepth() => depth;
+        public int getDepth() => depth;
 
         public void incDepth()
         {
@@ -84,7 +84,7 @@ namespace Sla.EXTRA
 
         public void printIndent(TextWriter s) 
         {
-            for(int4 i=0;i<depth+1;++i) s << "  ";
+            for(int i=0;i<depth+1;++i) s << "  ";
         }
 
         public void printAbort(TextWriter s)
@@ -104,7 +104,7 @@ namespace Sla.EXTRA
             s << endl;
         }
 
-        public void popDepth(TextWriter s, int4 newdepth)
+        public void popDepth(TextWriter s, int newdepth)
         {
             while (depth != newdepth)
             {
@@ -114,9 +114,9 @@ namespace Sla.EXTRA
             }
         }
 
-        public string getName(int4 id) => namemap[id];
+        public string getName(int id) => namemap[id];
 
-        public void initializeRuleAction(ConstraintGroup g, int4 opparam, List<OpCode> olist)
+        public void initializeRuleAction(ConstraintGroup g, int opparam, List<OpCode> olist)
         {
             initializeBase(g);
             printingtype = 0;
@@ -138,13 +138,13 @@ namespace Sla.EXTRA
             classname = nm;
         }
 
-        public void addNames(Dictionary<string, int4> nmmap)
+        public void addNames(Dictionary<string, int> nmmap)
         {
-            map<string, int4>::const_iterator iter;
+            map<string, int>::const_iterator iter;
 
             for (iter = nmmap.begin(); iter != nmmap.end(); ++iter)
             {
-                int4 slot = (*iter).second;
+                int slot = (*iter).second;
                 if (namemap.size() <= slot)
                     throw new LowlevelError("Name indices do not match constraint");
                 namemap[slot] = (*iter).first;
@@ -153,7 +153,7 @@ namespace Sla.EXTRA
 
         public void printVarDecls(TextWriter s)
         { // Print the variables declarations
-            for (int4 i = 0; i < namemap.size(); ++i)
+            for (int i = 0; i < namemap.size(); ++i)
             {
                 if (i == opparam) continue;
                 storemap[i].printVarDecl(s, i, *this);

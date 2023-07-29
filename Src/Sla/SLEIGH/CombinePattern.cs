@@ -50,7 +50,7 @@ namespace Sla.SLEIGH
                           (InstructionPattern*)instr.simplifyClone());
         }
 
-        public override void shiftInstruction(int4 sa)
+        public override void shiftInstruction(int sa)
         {
             instr.shiftInstruction(sa);
         }
@@ -68,7 +68,7 @@ namespace Sla.SLEIGH
 
         public override bool alwaysInstructionTrue() => instr.alwaysInstructionTrue();
 
-        public override Pattern doOr(Pattern b, int4 sa)
+        public override Pattern doOr(Pattern b, int sa)
         {
             if (b.numDisjoint() != 0)
                 return b.doOr(this, -sa);
@@ -83,7 +83,7 @@ namespace Sla.SLEIGH
             return tmp;
         }
 
-        public override Pattern doAnd(Pattern b, int4 sa)
+        public override Pattern doAnd(Pattern b, int sa)
         {
             CombinePattern* tmp;
 
@@ -116,7 +116,7 @@ namespace Sla.SLEIGH
             return tmp;
         }
 
-        public override Pattern commonSubPattern(Pattern b, int4 sa)
+        public override Pattern commonSubPattern(Pattern b, int sa)
         {
             Pattern* tmp;
 

@@ -38,21 +38,21 @@ namespace Sla.DECCORE
         /// The Funcdata object for the called functon (if known)
         private Funcdata fd;
         /// Working extrapop for the CALL
-        private int4 effective_extrapop;
+        private int effective_extrapop;
         /// Relative offset of stack-pointer at time of this call
-        private uintb stackoffset;
+        private ulong stackoffset;
         /// Slot containing temporary stack tracing placeholder (-1 means unused)
-        private int4 stackPlaceholderSlot;
+        private int stackPlaceholderSlot;
         /// Number of input parameters to ignore before prototype
-        private int4 paramshift;
+        private int paramshift;
         /// Number of calls to this sub-function within the calling function
-        private int4 matchCallCount;
+        private int matchCallCount;
         /// Info for recovering input parameters
         private ParamActive activeinput;
         /// Info for recovering output parameters
         private ParamActive activeoutput;
         /// Number of bytes consumed by sub-function, for each input parameter
-        private /*mutable*/ List<int4> inputConsume;
+        private /*mutable*/ List<int> inputConsume;
         /// Are we actively trying to recover input parameters
         private bool isinputactive;
         /// Are we actively trying to recover output parameters
@@ -92,8 +92,8 @@ namespace Sla.DECCORE
             if (vn == (Varnode*)0)
             {   // Need to build a spacebase relative varnode
                 AddrSpace* spc = param.getAddress().getSpace();
-                uintb off = param.getAddress().getOffset();
-                int4 sz = param.getSize();
+                ulong off = param.getAddress().getOffset();
+                int sz = param.getSize();
                 vn = data.opStackLoad(spc, off, sz, op, stackref, false);
                 return vn;
             }
@@ -120,13 +120,13 @@ namespace Sla.DECCORE
         ///   - -1     if the parameter needs to be built from the stack
         /// \param param is the given parameter to match
         /// \return the encoded slot
-        private int4 transferLockedInputParam(ProtoParameter param)
+        private int transferLockedInputParam(ProtoParameter param)
         {
-            int4 numtrials = activeinput.getNumTrials();
+            int numtrials = activeinput.getNumTrials();
             Address startaddr = param.getAddress();
-            int4 sz = param.getSize();
+            int sz = param.getSize();
             Address lastaddr = startaddr + (sz - 1);
-            for (int4 i = 0; i < numtrials; ++i)
+            for (int i = 0; i < numtrials; ++i)
             {
                 ParamTrial & curtrial(activeinput.getTrial(i));
                 if (startaddr < curtrial.getAddress()) continue;
@@ -188,11 +188,11 @@ namespace Sla.DECCORE
         private bool transferLockedInput(List<Varnode> newinput, FuncProto source)
         {
             newinput.push_back(op.getIn(0)); // Always keep the call destination address
-            int4 numparams = source.numParams();
+            int numparams = source.numParams();
             Varnode* stackref = (Varnode*)0;
-            for (int4 i = 0; i < numparams; ++i)
+            for (int i = 0; i < numparams; ++i)
             {
-                int4 reuse = transferLockedInputParam(source.getParam(i));
+                int reuse = transferLockedInputParam(source.getParam(i));
                 if (reuse == 0) return false;
                 if (reuse > 0)
                     newinput.push_back(op.getIn(reuse));
@@ -252,11 +252,11 @@ namespace Sla.DECCORE
 
             // Clear activeinput and old placeholder
             stackPlaceholderSlot = -1;
-            int4 numPasses = activeinput.getNumPasses();
+            int numPasses = activeinput.getNumPasses();
             activeinput.clear();
 
-            int4 numparams = numParams();
-            for (int4 i = 0; i < numparams; ++i)
+            int numparams = numParams();
+            for (int i = 0; i < numparams; ++i)
             {
                 ProtoParameter* param = getParam(i);
                 Varnode* vn = buildParam(data, newinput[1 + i], param, stackref);
@@ -376,7 +376,7 @@ namespace Sla.DECCORE
                     }
                     else
                     {   // If all else fails, concatenate in extra byte from something "indirectly created" by -op-
-                        int4 hisz = newout.getSize() - param.getSize();
+                        int hisz = newout.getSize() - param.getSize();
                         if (!newout.getAddr().getSpace().isBigEndian())
                             hiaddr = hiaddr + param.getSize();
                         PcodeOp* newindop = data.newIndirectCreation(op, hiaddr, hisz, true);
@@ -424,7 +424,7 @@ namespace Sla.DECCORE
                 if (indop.isIndirectCreation())
                 {
                     Varnode* vn = indop.getOut();
-                    int4 index = activeoutput.whichTrial(vn.getAddr(), vn.getSize());
+                    int index = activeoutput.whichTrial(vn.getAddr(), vn.getSize());
                     if (index >= 0)
                     {
                         trialvn[index] = vn;
@@ -437,7 +437,7 @@ namespace Sla.DECCORE
         }
 
         /// Set the slot of the stack-pointer placeholder
-        private void setStackPlaceholderSlot(int4 slot)
+        private void setStackPlaceholderSlot(int slot)
         {
             stackPlaceholderSlot = slot;
             if (isinputactive) activeinput.setPlaceholderSlot();
@@ -534,35 +534,35 @@ namespace Sla.DECCORE
         public Address getEntryAddress() => entryaddress;
 
         /// Set the specific \e extrapop associate with \b this call site
-        public void setEffectiveExtraPop(int4 epop)
+        public void setEffectiveExtraPop(int epop)
         {
             effective_extrapop = epop;
         }
 
-        public int4 getEffectiveExtraPop() => effective_extrapop; ///< Get the specific \e extrapop associate with \b this call site
+        public int getEffectiveExtraPop() => effective_extrapop; ///< Get the specific \e extrapop associate with \b this call site
 
-        public uintb getSpacebaseOffset() => stackoffset; ///< Get the stack-pointer relative offset at the point of \b this call site
+        public ulong getSpacebaseOffset() => stackoffset; ///< Get the stack-pointer relative offset at the point of \b this call site
 
         /// Set a parameter shift for this call site
-        public void setParamshift(int4 val)
+        public void setParamshift(int val)
         {
             paramshift = val;
         }
 
         /// Get the parameter shift for this call site
-        public int4 getParamshift() => paramshift;
+        public int getParamshift() => paramshift;
 
         /// Get the number of calls the caller makes to \b this sub-function
-        public int4 getMatchCallCount() => matchCallCount;
+        public int getMatchCallCount() => matchCallCount;
 
         /// Get the slot of the stack-pointer placeholder
-        public int4 getStackPlaceholderSlot() => stackPlaceholderSlot;
+        public int getStackPlaceholderSlot() => stackPlaceholderSlot;
 
         /// Turn on analysis recovering input parameters
         public void initActiveInput()
         {
             isinputactive = true;
-            int4 maxdelay = getMaxInputDelay();
+            int maxdelay = getMaxInputDelay();
             if (maxdelay > 0)
                 maxdelay = 3;
             activeinput.setMaxPass(maxdelay);
@@ -613,7 +613,7 @@ namespace Sla.DECCORE
         /// \param vn1 is the Varnode corresponding to the first trial
         /// \param vn2 is the Varnode corresponding to the second trial
         /// \return \b true if the trials can be combined
-        public bool checkInputJoin(int4 slot1, bool ishislot, Varnode vn1, Varnode vn2)
+        public bool checkInputJoin(int slot1, bool ishislot, Varnode vn1, Varnode vn2)
         {
             if (isInputActive()) return false;
             if (slot1 >= activeinput.getNumTrials()) return false; // Not enough params
@@ -641,7 +641,7 @@ namespace Sla.DECCORE
         /// the given adjacent trials with a single merged parameter.
         /// \param slot1 is the trial slot of the first trial
         /// \param ishislot is \b true if the first slot will be the most significant piece
-        public void doInputJoin(int4 slot1, bool ishislot)
+        public void doInputJoin(int slot1, bool ishislot)
         {
             if (isInputLocked())
                 throw new LowlevelError("Trying to join parameters on locked function prototype");
@@ -786,7 +786,7 @@ namespace Sla.DECCORE
         /// \param data is the calling function
         public void insertPcode(Funcdata data)
         {
-            int4 id = getInjectUponReturn();
+            int id = getInjectUponReturn();
             if (id < 0) return;     // Nothing to inject
             InjectPayload* payload = data.getArch().pcodeinjectlib.getPayload(id);
 
@@ -805,7 +805,7 @@ namespace Sla.DECCORE
         /// \param spacebase is the given (stack) AddrSpace
         public void createPlaceholder(Funcdata data, AddrSpace spacebase)
         {
-            int4 slot = op.numInput();
+            int slot = op.numInput();
             Varnode* loadval = data.opStackLoad(spacebase, 0, 1, op, (Varnode*)0, false);
             data.opInsertInput(op, loadval, slot);
             setStackPlaceholderSlot(slot);
@@ -846,7 +846,7 @@ namespace Sla.DECCORE
             {
                 // The prototype is locked and had stack parameters, we grab the relative offset from this
                 // rather than from a placeholder
-                int4 slot = op.getSlot(phvn) - 1;
+                int slot = op.getSlot(phvn) - 1;
                 if (slot >= numParams())
                     throw new LowlevelError("Stack placeholder does not line up with locked parameter");
                 ProtoParameter* param = getParam(slot);
@@ -888,12 +888,12 @@ namespace Sla.DECCORE
         public void finalInputCheck()
         {
             AncestorRealistic ancestorReal;
-            for (int4 i = 0; i < activeinput.getNumTrials(); ++i)
+            for (int i = 0; i < activeinput.getNumTrials(); ++i)
             {
                 ParamTrial & trial(activeinput.getTrial(i));
                 if (!trial.isActive()) continue;
                 if (!trial.hasCondExeEffect()) continue;
-                int4 slot = trial.getSlot();
+                int slot = trial.getSlot();
                 if (!ancestorReal.execute(op, slot, &trial, false))
                     trial.markNoUse();
             }
@@ -911,9 +911,9 @@ namespace Sla.DECCORE
             if (op.isDead())
                 throw new LowlevelError("Function call in dead code");
 
-            int4 maxancestor = data.getArch().trim_recurse_max;
+            int maxancestor = data.getArch().trim_recurse_max;
             bool callee_pop = false;
-            int4 expop = 0;
+            int expop = 0;
             if (hasModel())
             {
                 callee_pop = (getModelExtraPop() == ProtoModel::extrapop_unknown);
@@ -932,11 +932,11 @@ namespace Sla.DECCORE
             }
 
             AncestorRealistic ancestorReal;
-            for (int4 i = 0; i < activeinput.getNumTrials(); ++i)
+            for (int i = 0; i < activeinput.getNumTrials(); ++i)
             {
                 ParamTrial & trial(activeinput.getTrial(i));
                 if (trial.isChecked()) continue;
-                int4 slot = trial.getSlot();
+                int slot = trial.getSlot();
                 Varnode* vn = op.getIn(slot);
                 if (vn.getSpace().getType() == IPTR_SPACEBASE)
                 {
@@ -946,7 +946,7 @@ namespace Sla.DECCORE
                         trial.markNoUse();
                     else if (callee_pop)
                     {
-                        if ((int4)(trial.getAddress().getOffset() + (trial.getSize() - 1)) < expop)
+                        if ((int)(trial.getAddress().getOffset() + (trial.getSize() - 1)) < expop)
                             trial.markActive();
                         else
                             trial.markNoUse();
@@ -996,7 +996,7 @@ namespace Sla.DECCORE
             // The location is either used or not.  If it is used it can either be the official output
             // or a killedbycall, so whether the trial is present as a varnode (as determined by dataflow
             // and deadcode analysis) determines whether we consider the trial active or not
-            for (int4 i = 0; i < trialvn.size(); ++i)
+            for (int i = 0; i < trialvn.size(); ++i)
             {
                 ParamTrial & curtrial(activeoutput.getTrial(i));
                 if (curtrial.isChecked())
@@ -1017,8 +1017,8 @@ namespace Sla.DECCORE
         public void buildInputFromTrials(Funcdata data)
         {
             AddrSpace* spc;
-            uintb off;
-            int4 sz;
+            ulong off;
+            int sz;
             bool isspacebase;
             Varnode* vn;
             List<Varnode*> newparam;
@@ -1032,7 +1032,7 @@ namespace Sla.DECCORE
                 activeinput.sortFixedPosition();
             }
 
-            for (int4 i = 0; i < activeinput.getNumTrials(); ++i)
+            for (int i = 0; i < activeinput.getNumTrials(); ++i)
             {
                 ParamTrial paramtrial = activeinput.getTrial(i);
                 if (!paramtrial.isUsed()) continue; // Don't keep unused parameters
@@ -1090,7 +1090,7 @@ namespace Sla.DECCORE
             Varnode* finaloutvn;
             List<Varnode*> finalvn;
 
-            for (int4 i = 0; i < activeoutput.getNumTrials(); ++i)
+            for (int i = 0; i < activeoutput.getNumTrials(); ++i)
             { // Reorder the varnodes
                 ParamTrial & curtrial(activeoutput.getTrial(i));
                 if (!curtrial.isUsed()) break;
@@ -1108,7 +1108,7 @@ namespace Sla.DECCORE
                 PcodeOp* indop = finaloutvn.getDef();
                 //     ParamTrial &curtrial(activeoutput.getTrial(0));
                 //     if (finaloutvn.getSize() != curtrial.getSize()) { // If the varnode does not exactly match the original trial
-                //       int4 res = curtrial.getEntry().justifiedContain(finaloutvn.getAddress(),finaloutvn.getSize());
+                //       int res = curtrial.getEntry().justifiedContain(finaloutvn.getAddress(),finaloutvn.getSize());
                 //       if (res > 0) {
                 // 	data.opUninsert(indop);
                 // 	data.opSetOpcode(indop,CPUI_SUBPIECE); // Insert a subpiece
@@ -1163,7 +1163,7 @@ namespace Sla.DECCORE
             else
                 return;
 
-            for (int4 i = 0; i < deletedops.size(); ++i)
+            for (int i = 0; i < deletedops.size(); ++i)
             { // Destroy the original INDIRECT ops
                 PcodeOp* dop = deletedops[i];
                 Varnode* in0 = dop.getIn(0);
@@ -1184,7 +1184,7 @@ namespace Sla.DECCORE
         /// of zero means all bytes are presumed used.
         /// \param slot is the slot of the given input parameter
         /// \return the number of bytes used (or 0)
-        public int4 getInputBytesConsumed(int4 slot)
+        public int getInputBytesConsumed(int slot)
         {
             if (slot >= inputConsume.size())
                 return 0;
@@ -1200,11 +1200,11 @@ namespace Sla.DECCORE
         /// \param slot is the slot of the given input parameter
         /// \param val is the number of bytes consumed (or 0)
         /// \return \b true if there was a change in the estimate
-        public bool setInputBytesConsumed(int4 slot, int4 val)
+        public bool setInputBytesConsumed(int slot, int val)
         {
             while (inputConsume.size() <= slot)
                 inputConsume.push_back(0);
-            int4 oldVal = inputConsume[slot];
+            int oldVal = inputConsume[slot];
             if (oldVal == 0 || val < oldVal)
                 inputConsume[slot] = val;
             return (oldVal != val);
@@ -1227,7 +1227,7 @@ namespace Sla.DECCORE
             setParamshiftApplied(true);
             if (op.numInput() < paramshift + 1)
                 throw new LowlevelError("Paramshift mechanism is confused");
-            for (int4 i = 0; i < paramshift; ++i)
+            for (int i = 0; i < paramshift; ++i)
             {
                 // ProtoStore should have been converted to ProtoStoreInternal by paramshiftModifyStart
                 data.opRemoveInput(op, 1);
@@ -1243,13 +1243,13 @@ namespace Sla.DECCORE
         /// \param addr is the starting address of the storage location
         /// \param size is the number of bytes in the storage
         /// \return the effect type
-        public uint4 hasEffectTranslate(Address addr, int4 size)
+        public uint hasEffectTranslate(Address addr, int size)
         {
             AddrSpace* spc = addr.getSpace();
             if (spc.getType() != IPTR_SPACEBASE)
                 return hasEffect(addr, size);
             if (stackoffset == offset_unknown) return EffectRecord::unknown_effect;
-            uintb newoff = spc.wrapOffset(addr.getOffset() - stackoffset); // Translate to callee's spacebase point of view
+            ulong newoff = spc.wrapOffset(addr.getOffset() - stackoffset); // Translate to callee's spacebase point of view
             return hasEffect(Address(spc, newoff), size);
         }
 
@@ -1275,7 +1275,7 @@ namespace Sla.DECCORE
         ///
         /// \param addr is the given \e fspec address
         /// \return the FuncCallSpecs object
-        public static FuncCallSpecs getFspecFromConst(Address addr) => (FuncCallSpecs)(uintp)addr.getOffset();
+        public static FuncCallSpecs getFspecFromConst(Address addr) => (FuncCallSpecs)(ulong)addr.getOffset();
 
         /// \brief Compare FuncCallSpecs by function entry address
         ///
@@ -1293,7 +1293,7 @@ namespace Sla.DECCORE
         {
             List<FuncCallSpecs*> copyList(qlst);
             sort(copyList.begin(), copyList.end(), compareByEntryAddress);
-            int4 i;
+            int i;
             for (i = 0; i < copyList.size(); ++i)
             {
                 if (!copyList[i].entryaddress.isInvalid()) break;
@@ -1301,8 +1301,8 @@ namespace Sla.DECCORE
             }
             if (i == copyList.size()) return;
             Address lastAddr = copyList[i].entryaddress;
-            int4 lastChange = i++;
-            int4 num;
+            int lastChange = i++;
+            int num;
             for (; i < copyList.size(); ++i)
             {
                 if (copyList[i].entryaddress == lastAddr) continue;

@@ -23,7 +23,7 @@ namespace Sla.EXTRA
             s >> name;
             if (name.size() == 0)
                 throw IfaceParseError("Need label name and address");
-            int4 size;
+            int size;
             Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read address
 
             Scope* scope;

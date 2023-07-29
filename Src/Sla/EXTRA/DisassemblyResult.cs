@@ -10,9 +10,9 @@ namespace Sla.EXTRA
     internal struct DisassemblyResult
     {
         internal bool success;
-        internal int4 length;
-        internal uint4 flags;
+        internal int length;
+        internal uint flags;
         internal Address jumpaddress;
-        internal uintb targethit;
+        internal ulong targethit;
     }
 }

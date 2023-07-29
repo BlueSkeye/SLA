@@ -27,7 +27,7 @@ namespace Sla.CORE
         private Funcdata fd;           // Pointer to funcdata if we have it
         private List<CallGraphEdge> inedge;
         private List<CallGraphEdge> outedge;
-        private int4 parentedge;        // Incoming edge for spanning tree
+        private int parentedge;        // Incoming edge for spanning tree
         private /*mutable*/ Flags flags;
 
         public CallGraphNode()
@@ -39,7 +39,7 @@ namespace Sla.CORE
         
         public void clearMark() 
         {
-            flags &= ~((uint4) mark);
+            flags &= ~((uint) mark);
         }
 
         public bool isMark() => ((flags&mark)!=0);
@@ -50,17 +50,17 @@ namespace Sla.CORE
 
         public Funcdata getFuncdata() => fd;
 
-        public int4 numInEdge() => inedge.size();
+        public int numInEdge() => inedge.size();
 
-        public CallGraphEdge getInEdge(int4 i) => inedge[i];
+        public CallGraphEdge getInEdge(int i) => inedge[i];
 
-        public CallGraphNode getInNode(int4 i) => inedge[i].from;
+        public CallGraphNode getInNode(int i) => inedge[i].from;
 
-        public int4 numOutEdge() => outedge.size();
+        public int numOutEdge() => outedge.size();
 
-        public CallGraphEdge getOutEdge(int4 i) => outedge[i];
+        public CallGraphEdge getOutEdge(int i) => outedge[i];
 
-        public CallGraphNode getOutNode(int4 i) => outedge[i].to;
+        public CallGraphNode getOutNode(int i) => outedge[i].to;
 
         public void setFuncdata(Funcdata f)
         {
@@ -83,11 +83,11 @@ namespace Sla.CORE
 
         public static void decode(Decoder decoder, CallGraph graph)
         {
-            uint4 elemId = decoder.openElement(ELEM_NODE);
+            uint elemId = decoder.openElement(ELEM_NODE);
             string name;
             for (; ; )
             {
-                uint4 attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == ATTRIB_NAME)
                     name = decoder.readString();

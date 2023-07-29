@@ -10,11 +10,11 @@ namespace Sla.SLEIGH
     internal class SectionSymbol : SleighSymbol
     {
         // Named p-code sections
-        private int4 templateid;        // Index into the ConstructTpl array
-        private int4 define_count;      // Number of definitions of this named section
-        private int4 ref_count;     // Number of references to this named section
+        private int templateid;        // Index into the ConstructTpl array
+        private int define_count;      // Number of definitions of this named section
+        private int ref_count;     // Number of references to this named section
         
-        public SectionSymbol(string nm,int4 id)
+        public SectionSymbol(string nm,int id)
             : base(nm)
         {
             templateid = id;
@@ -22,7 +22,7 @@ namespace Sla.SLEIGH
             ref_count = 0;
         }
         
-        public int4 getTemplateId() => templateid;
+        public int getTemplateId() => templateid;
 
         public void incrementDefineCount()
         {
@@ -34,9 +34,9 @@ namespace Sla.SLEIGH
             ref_count += 1;
         }
     
-        public int4 getDefineCount() => define_count;
+        public int getDefineCount() => define_count;
 
-        public int4 getRefCount() => ref_count;
+        public int getRefCount() => ref_count;
 
         public override symbol_type getType() => section_symbol;
     }

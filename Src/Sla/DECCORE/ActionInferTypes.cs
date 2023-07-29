@@ -101,7 +101,7 @@ namespace Sla.DECCORE
                 SymbolEntry* entry = vn.getSymbolEntry();
                 if (entry != (SymbolEntry*)0 && !vn.isTypeLock() && entry.getSymbol().isTypeLocked())
                 {
-                    int4 curOff = (vn.getAddr().getOffset() - entry.getAddr().getOffset()) + entry.getOffset();
+                    int curOff = (vn.getAddr().getOffset() - entry.getAddr().getOffset()) + entry.getOffset();
                     ct = typegrp.getExactPiece(entry.getSymbol().getType(), curOff, vn.getSize());
                     if (ct == (Datatype*)0 || ct.getMetatype() == TYPE_UNKNOWN)    // If we can't resolve, or resolve to UNKNOWN
                         ct = vn.getLocalType(needsBlock);      // Let data-type float, even though parent symbol is type-locked
@@ -153,8 +153,8 @@ namespace Sla.DECCORE
         /// \param inslot indicates the edge's input Varnode
         /// \param outslot indicates the edge's output Varnode
         /// \return \b true if the data-type propagates
-        private static bool propagateTypeEdge(TypeFactory typegrp, PcodeOp op, int4 inslot,
-            int4 outslot)
+        private static bool propagateTypeEdge(TypeFactory typegrp, PcodeOp op, int inslot,
+            int outslot)
         {
             Varnode* invn,*outvn;
 
@@ -254,7 +254,7 @@ namespace Sla.DECCORE
             if (ct.getMetatype() == TYPE_SPACEBASE) return;
             if (ct.getMetatype() == TYPE_UNKNOWN) return; // Don't bother propagating this
             VarnodeLocSet::const_iterator iter, enditer;
-            uintb off = addr.getOffset();
+            ulong off = addr.getOffset();
             TypeFactory* typegrp = data.getArch().types;
             Address endaddr = addr + ct.getSize();
             if (endaddr.getOffset() < off) // If the address wrapped
@@ -262,8 +262,8 @@ namespace Sla.DECCORE
             else
                 enditer = data.endLoc(endaddr);
             iter = data.beginLoc(addr);
-            uintb lastoff = 0;
-            int4 lastsize = ct.getSize();
+            ulong lastoff = 0;
+            int lastsize = ct.getSize();
             Datatype* lastct = ct;
             while (iter != enditer)
             {
@@ -273,8 +273,8 @@ namespace Sla.DECCORE
                 if ((!curvn.isWritten()) && curvn.hasNoDescend()) continue;
                 if (curvn.isTypeLock()) continue;
                 if (curvn.getSymbolEntry() != (SymbolEntry*)0) continue;
-                uintb curoff = curvn.getOffset() - off;
-                int4 cursize = curvn.getSize();
+                ulong curoff = curvn.getOffset() - off;
+                int cursize = curvn.getSize();
                 if (curoff + cursize > ct.getSize()) continue;
                 if ((cursize != lastsize) || (curoff != lastoff))
                 {
@@ -339,7 +339,7 @@ namespace Sla.DECCORE
                         vn = op.getIn(1);
                         if (vn.isConstant())
                         {
-                            uintb off = vn.getOffset() * op.getIn(2).getOffset();
+                            ulong off = vn.getOffset() * op.getIn(2).getOffset();
                             addr = sbtype.getAddress(off, vn.getSize(), op.getAddr());
                             propagateRef(data, op.getOut(), addr);
                         }
@@ -396,7 +396,7 @@ namespace Sla.DECCORE
             TypeFactory* typegrp = data.getArch().types;
             Varnode* baseVn = op.getIn(1);
             Datatype* ct = baseVn.getTempType();
-            int4 baseSize = baseVn.getSize();
+            int baseSize = baseVn.getSize();
             bool isBool = ct.getMetatype() == TYPE_BOOL;
             list<PcodeOp*>::const_iterator iter, iterend;
             iterend = data.endOp(CPUI_RETURN);

@@ -25,7 +25,7 @@ namespace Sla.DECCORE
         private Varnode hineg2;
         private Varnode hizext1;
         private Varnode hizext2;
-        private int4 slot1;
+        private int slot1;
         private PcodeOp existop;
         private SplitVarnode indoub;
         private SplitVarnode outdoub;
@@ -42,7 +42,7 @@ namespace Sla.DECCORE
             hi1 = h;
             lo1 = l;
             slot1 = op.getSlot(hi1);
-            for (int4 i = 0; i < 2; ++i)
+            for (int i = 0; i < 2; ++i)
             {
                 if (i == 0)
                 {       // Assume we have to descend one more add
@@ -69,7 +69,7 @@ namespace Sla.DECCORE
                 if (!SplitVarnode::verifyMultNegOne(hineg2.getDef())) continue;
                 hizext1 = hineg1.getDef().getIn(0);
                 hizext2 = hineg2.getDef().getIn(0);
-                for (int4 j = 0; j < 2; ++j)
+                for (int j = 0; j < 2; ++j)
                 {
                     if (j == 0)
                     {

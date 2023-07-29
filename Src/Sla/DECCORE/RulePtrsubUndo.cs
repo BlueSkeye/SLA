@@ -29,12 +29,12 @@ namespace Sla.DECCORE
         /// Incorrect data-types may be assigned to Varnodes in the middle of simplification. This causes
         /// incorrect PTRSUBs, which are discovered later. This rule converts the PTRSUB back to an INT_ADD
         /// when the mistake is discovered.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_PTRSUB);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (!data.hasTypeRecoveryStarted()) return 0;
 

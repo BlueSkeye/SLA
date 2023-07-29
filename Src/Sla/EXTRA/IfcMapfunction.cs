@@ -22,7 +22,7 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             string name;
-            int4 size;
+            int size;
             if ((dcp.conf == (Architecture*)0) || (dcp.conf.loader == (LoadImage*)0))
                 throw IfaceExecutionError("No binary loaded");
 

@@ -21,7 +21,7 @@ namespace Sla.DECCORE
             lng.opIntLessEqual(op);
         }
 
-        public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
+        public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
             Datatype* reqtype = op.inputTypeLocal(slot);
             if (castStrategy.checkIntPromotionForCompare(op, slot))
@@ -31,7 +31,7 @@ namespace Sla.DECCORE
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
-            int4 inslot, int4 outslot)
+            int inslot, int outslot)
         {
             return TypeOpEqual::propagateAcrossCompare(alttype, tlst, invn, outvn, inslot, outslot);
         }

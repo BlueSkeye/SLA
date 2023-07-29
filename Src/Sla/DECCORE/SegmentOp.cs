@@ -36,11 +36,11 @@ namespace Sla.DECCORE
         /// The physical address space into which a segmented pointer points
         private AddrSpace spc;
         /// Id of InjectPayload that emulates \b this operation
-        private int4 injectId;
+        private int injectId;
         /// The size in bytes of the \e base or \e segment value
-        private int4 baseinsize;
+        private int baseinsize;
         /// The size in bytes of the \e near pointer value
-        private int4 innerinsize;
+        private int innerinsize;
         /// Is \b true if the joined pair base:near acts as a \b far pointer
         private bool supportsfarpointer;
         /// How to resolve constant near pointers
@@ -49,7 +49,7 @@ namespace Sla.DECCORE
         /// \param g is the owning Architecture for this instance of the segment operation
         /// \param nm is the low-level name of the segment operation
         /// \param ind is the constant id identifying the specific CALLOTHER variant
-        public SegmentOp(Architecture g, string nm,int4 ind)
+        public SegmentOp(Architecture g, string nm,int ind)
             : base(g, nm, ind)
         {
             constresolve.space = (AddrSpace*)0;
@@ -62,16 +62,16 @@ namespace Sla.DECCORE
         public bool hasFarPointerSupport() => supportsfarpointer;
 
         /// Get size in bytes of the base/segment value
-        public int4 getBaseSize() => baseinsize;
+        public int getBaseSize() => baseinsize;
 
         /// Get size in bytes of the near value
-        public int4 getInnerSize() => innerinsize;
+        public int getInnerSize() => innerinsize;
 
         /// Get the default register for resolving indirect segments
         public VarnodeData getResolve() => constresolve;
         
 
-        public override int4 getNumVariableTerms()
+        public override int getNumVariableTerms()
         {
             if (baseinsize!=0) return 2; return 1;
         }
@@ -105,7 +105,7 @@ namespace Sla.DECCORE
             return true;
         }
 
-        public override uintb execute(List<uintb> input)
+        public override ulong execute(List<ulong> input)
         {
             ExecutablePcode* pcodeScript = (ExecutablePcode*)glb.pcodeinjectlib.getPayload(injectId);
             return pcodeScript.evaluate(input);
@@ -113,7 +113,7 @@ namespace Sla.DECCORE
 
         public override void decode(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement(ELEM_SEGMENTOP);
+            uint elemId = decoder.openElement(ELEM_SEGMENTOP);
             spc = (AddrSpace*)0;
             injectId = -1;
             baseinsize = 0;
@@ -122,7 +122,7 @@ namespace Sla.DECCORE
             name = "segment";       // Default name, might be overridden by userop attribute
             for (; ; )
             {
-                uint4 attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == ATTRIB_SPACE)
                     spc = decoder.readSpace();
@@ -144,11 +144,11 @@ namespace Sla.DECCORE
 
             for (; ; )
             {
-                uint4 subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ELEM_CONSTRESOLVE)
                 {
-                    int4 sz;
+                    int sz;
                     decoder.openElement();
                     if (decoder.peekElement() != 0)
                     {

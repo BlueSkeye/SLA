@@ -27,7 +27,7 @@ namespace Sla.EXTRA
                 throw IfaceParseError("Missing tracked register name");
 
             s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
-            uintb value = 0xbadbeef;
+            ulong value = 0xbadbeef;
             s >> value;
             if (value == 0xbadbeef)
                 throw IfaceParseError("Missing context value");
@@ -42,7 +42,7 @@ namespace Sla.EXTRA
                 return;
             }
 
-            int4 size1, size2;
+            int size1, size2;
             Address addr1 = parse_machaddr(s, size1, *dcp.conf.types);
             Address addr2 = parse_machaddr(s, size2, *dcp.conf.types);
 

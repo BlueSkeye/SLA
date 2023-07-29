@@ -25,7 +25,7 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            for (int4 i = 0; i < data.numJumpTables(); ++i)
+            for (int i = 0; i < data.numJumpTables(); ++i)
             {
                 JumpTable* jt = data.getJumpTable(i);
                 if (!jt.isLabelled())

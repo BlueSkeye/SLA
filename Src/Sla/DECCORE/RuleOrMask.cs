@@ -25,21 +25,21 @@ namespace Sla.DECCORE
 
         /// \class RuleOrMask
         /// \brief Simplify INT_OR with full mask:  `V = W | 0xffff  =>  V = W`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_OR);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            int4 size = op.getOut().getSize();
-            if (size > sizeof(uintb)) return 0; // FIXME: uintb should be arbitrary precision
+            int size = op.getOut().getSize();
+            if (size > sizeof(ulong)) return 0; // FIXME: ulong should be arbitrary precision
             Varnode* constvn;
 
             constvn = op.getIn(1);
             if (!constvn.isConstant()) return 0;
-            uintb val = constvn.getOffset();
-            uintb mask = calc_mask(size);
+            ulong val = constvn.getOffset();
+            ulong mask = calc_mask(size);
             if ((val & mask) != mask) return 0;
             data.opSetOpcode(op, CPUI_COPY);
             data.opSetInput(op, constvn, 0);

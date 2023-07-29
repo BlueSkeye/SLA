@@ -32,7 +32,7 @@ namespace Sla.DECCORE
             if (!salo.isConstant()) return false;
             if (!samid.isConstant()) return false;
             if (!sahi.isConstant()) return false;
-            uintb val = salo.getOffset();
+            ulong val = salo.getOffset();
             if (val != sahi.getOffset()) return false;
             if (val >= 8 * lo.getSize()) return false; // If shift amount is so big, we would not use this form
             val = 8 * lo.getSize() - val;

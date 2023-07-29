@@ -21,8 +21,8 @@ namespace Sla.EXTRA
         /// is \e name-locked as well.
         public override void execute(TextReader s)
         {
-            int4 size;
-            uintm uq;
+            int size;
+            uint uq;
             Datatype* ct;
             string name;
 

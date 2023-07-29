@@ -28,20 +28,20 @@ namespace Sla.DECCORE
         /// \brief Simplify INT_ZEXT and SUBPIECE in masked comparison: `zext(V) & c == 0  =>  V & (c & mask) == 0`
         ///
         /// Similarly:  `sub(V,c) & d == 0  =>  V & (d & mask) == 0`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_EQUAL);
             oplist.push_back(CPUI_INT_NOTEQUAL);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (!op.getIn(1).isConstant()) return 0;
             if (op.getIn(1).getOffset() != 0) return 0;
 
             Varnode* andvn,*subvn,*basevn,*constvn;
             PcodeOp* andop,*subop;
-            uintb andconst, baseconst;
+            ulong andconst, baseconst;
 
             andvn = op.getIn(0);
             if (!andvn.isWritten()) return 0;

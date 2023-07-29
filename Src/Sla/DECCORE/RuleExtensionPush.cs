@@ -27,13 +27,13 @@ namespace Sla.DECCORE
         ///
         /// By making the extension operation part of each pointer calculation (where it is usually an implied cast),
         /// we can frequently eliminate an explicit variable that would just hold the extension.
-        public override void getOpList(List<uint4> &oplist)
+        public override void getOpList(List<uint> &oplist)
         {
             oplist.push_back(CPUI_INT_ZEXT);
             oplist.push_back(CPUI_INT_SEXT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* inVn = op.getIn(0);
             if (inVn.isConstant()) return 0;
@@ -43,8 +43,8 @@ namespace Sla.DECCORE
             if (outVn.isTypeLock() || outVn.isNameLock()) return 0;
             if (outVn.isAddrForce() || outVn.isAddrTied()) return 0;
             list<PcodeOp*>::const_iterator iter;
-            int4 addcount = 0;      // Number of INT_ADD descendants
-            int4 ptrcount = 0;      // Number of PTRADD descendants
+            int addcount = 0;      // Number of INT_ADD descendants
+            int ptrcount = 0;      // Number of PTRADD descendants
             for (iter = outVn.beginDescend(); iter != outVn.endDescend(); ++iter)
             {
                 PcodeOp* decOp = *iter;

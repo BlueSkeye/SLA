@@ -9,22 +9,22 @@ namespace Sla.EXTRA
 {
     internal class ConstantAbsolute : RHSConstant
     {
-        private uintb val;          // The absolute value
+        private ulong val;          // The absolute value
         
-        public ConstantAbsolute(uintb v)
+        public ConstantAbsolute(ulong v)
         {
             val = v;
         }
 
-        public uintb getVal() => val;
+        public ulong getVal() => val;
 
         public override RHSConstant clone() => new ConstantAbsolute(val);
 
-        public override uintb getConstant(UnifyState state) => val;
+        public override ulong getConstant(UnifyState state) => val;
 
         public override void writeExpression(TextWriter s, UnifyCPrinter printstate)
         {
-            s << "(uintb)0x" << hex << val;
+            s << "(ulong)0x" << hex << val;
         }
     }
 }

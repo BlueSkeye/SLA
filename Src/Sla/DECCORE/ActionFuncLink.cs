@@ -34,9 +34,9 @@ namespace Sla.DECCORE
             if (inputlocked)
             {
                 PcodeOp* op = fc.getOp();
-                int4 numparam = fc.numParams();
+                int numparam = fc.numParams();
                 bool setplaceholder = varargs;
-                for (int4 i = 0; i < numparam; ++i)
+                for (int i = 0; i < numparam; ++i)
                 {
                     ProtoParameter* param = fc.getParam(i);
                     active.registerTrial(param.getAddress(), param.getSize());
@@ -46,8 +46,8 @@ namespace Sla.DECCORE
                         active.getTrial(i).setFixedPosition(i);
                     }
                     AddrSpace* spc = param.getAddress().getSpace();
-                    uintb off = param.getAddress().getOffset();
-                    int4 sz = param.getSize();
+                    ulong off = param.getAddress().getOffset();
+                    int sz = param.getSize();
                     if (spc.getType() == IPTR_SPACEBASE)
                     { // Param is stack relative
                         Varnode* loadval = data.opStackLoad(spc, off, sz, op, (Varnode*)0, false);
@@ -97,7 +97,7 @@ namespace Sla.DECCORE
                 Datatype* outtype = outparam.getType();
                 if (outtype.getMetatype() != TYPE_VOID)
                 {
-                    int4 sz = outparam.getSize();
+                    int sz = outparam.getSize();
                     if (sz == 1 && outtype.getMetatype() == TYPE_BOOL && data.isTypeRecoveryOn())
                         data.opMarkCalculatedBool(callop);
                     Address addr = outparam.getAddress();
@@ -139,7 +139,7 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            int4 i, size;
+            int i, size;
 
             size = data.numCalls();
             for (i = 0; i < size; ++i)

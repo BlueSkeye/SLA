@@ -104,7 +104,7 @@ namespace Sla.DECCORE
         /// \return the index of the overlapping trial, or -1 if no trial overlaps
         public int whichTrial(Address addr, int sz)
         {
-            for (int4 i = 0; i < trial.size(); ++i)
+            for (int i = 0; i < trial.size(); ++i)
             {
                 if (addr.overlap(0, trial[i].getAddress(), trial[i].getSize()) >= 0) return i;
                 if (sz <= 1) return -1;
@@ -146,7 +146,7 @@ namespace Sla.DECCORE
         /// Free up the stack placeholder slot, which may cause trial slots to get adjusted
         public void freePlaceholderSlot()
         {
-            for (int4 i = 0; i < trial.size(); ++i)
+            for (int i = 0; i < trial.size(); ++i)
             {
                 if (trial[i].getSlot() > stackplaceholder)
                     trial[i].setSlot(trial[i].getSlot() - 1);
@@ -190,9 +190,9 @@ namespace Sla.DECCORE
         public void deleteUnusedTrials()
         {
             List<ParamTrial> newtrials;
-            int4 slot = 1;
+            int slot = 1;
 
-            for (int4 i = 0; i < trial.size(); ++i)
+            for (int i = 0; i < trial.size(); ++i)
             {
                 ParamTrial & curtrial(trial[i]);
                 if (curtrial.isUsed())
@@ -214,21 +214,21 @@ namespace Sla.DECCORE
             if (stackplaceholder >= 0)
                 throw new LowlevelError("Cannot split parameter when the placeholder has not been recovered");
             List<ParamTrial> newtrials;
-            int4 slot = trial[i].getSlot();
+            int slot = trial[i].getSlot();
 
-            for (int4 j = 0; j < i; ++j)
+            for (int j = 0; j < i; ++j)
             {
                 newtrials.push_back(trial[j]);
-                int4 oldslot = newtrials.back().getSlot();
+                int oldslot = newtrials.back().getSlot();
                 if (oldslot > slot)
                     newtrials.back().setSlot(oldslot + 1);
             }
             newtrials.push_back(trial[i].splitHi(sz));
             newtrials.push_back(trial[i].splitLo(trial[i].getSize() - sz));
-            for (int4 j = i + 1; j < trial.size(); ++j)
+            for (int j = i + 1; j < trial.size(); ++j)
             {
                 newtrials.push_back(trial[j]);
-                int4 oldslot = newtrials.back().getSlot();
+                int oldslot = newtrials.back().getSlot();
                 if (oldslot > slot)
                     newtrials.back().setSlot(oldslot + 1);
             }
@@ -246,11 +246,11 @@ namespace Sla.DECCORE
             if (stackplaceholder >= 0)
                 throw new LowlevelError("Cannot join parameters when the placeholder has not been removed");
             List<ParamTrial> newtrials;
-            int4 sizecheck = 0;
-            for (int4 i = 0; i < trial.size(); ++i)
+            int sizecheck = 0;
+            for (int i = 0; i < trial.size(); ++i)
             {
                 ParamTrial & curtrial(trial[i]);
-                int4 curslot = curtrial.getSlot();
+                int curslot = curtrial.getSlot();
                 if (curslot < slot)
                     newtrials.push_back(curtrial);
                 else if (curslot == slot)
@@ -281,7 +281,7 @@ namespace Sla.DECCORE
         /// \return the number of formally used trials
         public int getNumUsed()
         {
-            int4 count;
+            int count;
             for (count = 0; count < trial.size(); ++count)
             {
                 if (!trial[count].isUsed()) break;

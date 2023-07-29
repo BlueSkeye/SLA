@@ -48,14 +48,14 @@ namespace Sla.DECCORE
 
         /// \class RuleTestSign
         /// \brief Convert sign-bit test to signed comparison:  `(V s>> 0x1f) != 0   =>  V s< 0`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_SRIGHT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            uintb val;
+            ulong val;
             Varnode* constVn = op.getIn(1);
             if (!constVn.isConstant()) return 0;
             val = constVn.getOffset();
@@ -66,15 +66,15 @@ namespace Sla.DECCORE
             if (inVn.isFree()) return 0;
             List<PcodeOp*> compareOps;
             findComparisons(outVn, compareOps);
-            int4 resultCode = 0;
-            for (int4 i = 0; i < compareOps.size(); ++i)
+            int resultCode = 0;
+            for (int i = 0; i < compareOps.size(); ++i)
             {
                 PcodeOp* compareOp = compareOps[i];
                 Varnode* compVn = compareOp.getIn(0);
-                int4 compSize = compVn.getSize();
+                int compSize = compVn.getSize();
 
-                uintb offset = compareOp.getIn(1).getOffset();
-                int4 sgn;
+                ulong offset = compareOp.getIn(1).getOffset();
+                int sgn;
                 if (offset == 0)
                     sgn = 1;
                 else if (offset == calc_mask(compSize))

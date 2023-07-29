@@ -14,7 +14,7 @@ namespace Sla.DECCORE
         /// The p-code end-point of the edge
         internal PcodeOp op;
         /// Slot indicating the input Varnode end-point of the edge
-        internal int4 slot;
+        internal int slot;
 
         internal PcodeOpNode()
         {
@@ -22,7 +22,7 @@ namespace Sla.DECCORE
             slot = 0;
         }   ///< Unused constructor
 
-        internal PcodeOpNode(PcodeOp o, int4 s)
+        internal PcodeOpNode(PcodeOp o, int s)
         {
             op = o;
             slot = s;

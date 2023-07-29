@@ -133,11 +133,11 @@ namespace Sla.DECCORE
         }
 
         /// The collection of boolean attributes for this Varnode
-        private /*mutable*/ uint4 flags;
+        private /*mutable*/ uint flags;
         /// Size of the Varnode in bytes
-        private int4 size;
+        private int size;
         /// A unique one-up index assigned to Varnode at its creation
-        private uint4 create_index;
+        private uint create_index;
         /// Which group of forced merges does this Varnode belong to
         private int2 mergegroup;
         /// Additional flags
@@ -173,9 +173,9 @@ namespace Sla.DECCORE
         private TempStorage temp;
 
         /// What parts of this varnode are used
-        private uintb consumed;
+        private ulong consumed;
         /// Which bits do we know are zero
-        private uintb nzm;
+        private ulong nzm;
         //friend class VarnodeBank;
         //friend class Merge;
         //friend class Funcdata;
@@ -221,7 +221,7 @@ namespace Sla.DECCORE
         /// Internal method for setting boolean attributes
         /// Set desired boolean attributes on this Varnode and then set dirty bits if appropriate
         /// \param fl is the mask containing the list of attributes to set
-        private void setFlags(uint4 fl)
+        private void setFlags(uint fl)
         {
             flags |= fl;
             if (high != (HighVariable*)0)
@@ -235,7 +235,7 @@ namespace Sla.DECCORE
         /// Internal method for clearing boolean attributes
         /// Clear desired boolean attributes on this Varnode and then set dirty bits if appropriate
         /// \param fl is the mask containing the list of attributes to clear
-        private void clearFlags(uint4 fl)
+        private void clearFlags(uint fl)
         {
             flags &= ~fl;
             if (high != (HighVariable*)0)
@@ -252,7 +252,7 @@ namespace Sla.DECCORE
         private void clearSymbolLinks()
         {
             bool foundEntry = false;
-            for (int4 i = 0; i < high.numInstances(); ++i)
+            for (int i = 0; i < high.numInstances(); ++i)
             {
                 Varnode* vn = high.getInstance(i);
                 foundEntry = foundEntry || (vn.mapentry != (SymbolEntry*)0);
@@ -320,7 +320,7 @@ namespace Sla.DECCORE
         private void setSymbolEntry(SymbolEntry entry)
         {
             mapentry = entry;
-            uint4 fl = Varnode::mapped; // Flags are generally not changed, but we do mark this as mapped
+            uint fl = Varnode::mapped; // Flags are generally not changed, but we do mark this as mapped
             if (entry.getSymbol().isNameLocked())
                 fl |= Varnode::namelock;
             setFlags(fl);
@@ -334,7 +334,7 @@ namespace Sla.DECCORE
         /// reference, not the actual value of the Symbol.
         /// \param entry is a mapping to the given Symbol
         /// \param off is the byte offset into the Symbol of the reference
-        private void setSymbolReference(SymbolEntry entry, int4 off)
+        private void setSymbolReference(SymbolEntry entry, int off)
         {
             if (high != (HighVariable*)0)
             {
@@ -397,13 +397,13 @@ namespace Sla.DECCORE
         /// In \b LOAD and \b STORE instructions, the particular address space being read/written is encoded
         /// as a constant Varnode.  Internally, this constant is the actual pointer to the AddrSpace.
         /// \return the AddrSpace pointer
-        public AddrSpace getSpaceFromConst() => (AddrSpace)(uintp)loc.getOffset();
+        public AddrSpace getSpaceFromConst() => (AddrSpace)(ulong)loc.getOffset();
 
         /// Get the offset (within its AddrSpace) where this is stored
-        public uintb getOffset() => loc.getOffset();
+        public ulong getOffset() => loc.getOffset();
 
         /// Get the number of bytes this Varnode stores
-        public int4 getSize() => size;
+        public int getSize() => size;
 
         /// Get the \e forced \e merge group of this Varnode
         public int2 getMergeGroup() => mergegroup;
@@ -433,7 +433,7 @@ namespace Sla.DECCORE
         public SymbolEntry getSymbolEntry() => mapentry;
 
         /// Get all the boolean attributes
-        public uint4 getFlags() => flags;
+        public uint getFlags() => flags;
 
         /// Get the Datatype associated with this Varnode
         public Datatype getType() => type;
@@ -509,7 +509,7 @@ namespace Sla.DECCORE
         public ValueSet getValueSet() => temp.valueSet;
 
         /// Get the creation index
-        public uint4 getCreateIndex() => create_index;
+        public uint getCreateIndex() => create_index;
 
         /// Get Varnode coverage information
         public Cover getCover()
@@ -525,10 +525,10 @@ namespace Sla.DECCORE
         public IEnumerator<PcodeOp> endDescend() => descend.end();
 
         /// Get mask of consumed bits
-        public uintb getConsume() => consumed;
+        public ulong getConsume() => consumed;
 
         /// Set the mask of consumed bits (used by dead-code algorithm)
-        public void setConsume(uintb val)
+        public void setConsume(ulong val)
         {
             consumed = val;
         }
@@ -601,18 +601,18 @@ namespace Sla.DECCORE
         /// to facilitate the printing of size modifiers by other print routines
         /// \param s is the output stream
         /// \return the expected size
-        public int4 printRawNoMarkup(TextWriter s)
+        public int printRawNoMarkup(TextWriter s)
         {
             AddrSpace* spc = loc.getSpace();
             Translate trans = spc.getTrans();
             string name;
-            int4 expect;
+            int expect;
 
             name = trans.getRegisterName(spc, loc.getOffset(), size);
             if (name.size() != 0)
             {
                 VarnodeData point = trans.getRegister(name);
-                uintb off = loc.getOffset() - point.offset;
+                ulong off = loc.getOffset() - point.offset;
                 s << name;
                 expect = point.size;
                 if (off != 0)
@@ -635,7 +635,7 @@ namespace Sla.DECCORE
         /// \param s is the output stream
         public void printRaw(TextWriter s)
         {
-            int4 expect = printRawNoMarkup(s);
+            int expect = printRawNoMarkup(s);
 
             if (expect != size)
                 s << ':' << setw(1) << size;
@@ -706,7 +706,7 @@ namespace Sla.DECCORE
         /// \param s is the size of the new Varnode
         /// \param m is the starting storage Address
         /// \param dt is the Datatype
-        public Varnode(int4 s, Address m, Datatype dt)
+        public Varnode(int s, Address m, Datatype dt)
         {
             // Construct a varnode
             loc = m;
@@ -715,7 +715,7 @@ namespace Sla.DECCORE
             type = dt;
             high = (HighVariable*)0;
             mapentry = (SymbolEntry*)0;
-            consumed = ~((uintb)0);
+            consumed = ~((ulong)0);
             cover = (Cover*)0;
             mergegroup = 0;
             addlflags = 0;
@@ -733,12 +733,12 @@ namespace Sla.DECCORE
             else if ((tp == IPTR_FSPEC) || (tp == IPTR_IOP))
             {
                 flags = Varnode::annotation | Varnode::coverdirty;
-                nzm = ~((uintb)0);
+                nzm = ~((ulong)0);
             }
             else
             {
                 flags = Varnode::coverdirty;
-                nzm = ~((uintb)0);
+                nzm = ~((ulong)0);
             }
         }
 
@@ -754,7 +754,7 @@ namespace Sla.DECCORE
         /// \return \b true if \b this is less than \b op2
         public static bool operator <(Varnode op1, Varnode op2)
         {
-            uint4 f1, f2;
+            uint f1, f2;
 
             if (loc != op2.loc) return (loc < op2.loc);
             if (size != op2.size) return (size < op2.size);
@@ -777,7 +777,7 @@ namespace Sla.DECCORE
         /// \return true if they are equivalent
         public static bool operator ==(Varnode op1, Varnode op2)
         {               // Compare two varnodes
-            uint4 f1, f2;
+            uint f1, f2;
 
             if (loc != op2.loc) return false;
             if (size != op2.size) return false;
@@ -814,8 +814,8 @@ namespace Sla.DECCORE
         {
             if (loc.getSpace() != op.loc.getSpace()) return false;
             if (loc.getSpace().getType() == IPTR_CONSTANT) return false;
-            uintb a = loc.getOffset();
-            uintb b = op.loc.getOffset();
+            ulong a = loc.getOffset();
+            ulong b = op.loc.getOffset();
             if (b < a)
             {
                 if (a >= b + op.size) return false;
@@ -830,12 +830,12 @@ namespace Sla.DECCORE
         /// \param op2loc is the start of the range
         /// \param op2size is the size of the range in bytes
         /// \return \b true if \b this intersects the range
-        public bool intersects(Address op2loc, int4 op2size)
+        public bool intersects(Address op2loc, int op2size)
         {
             if (loc.getSpace() != op2loc.getSpace()) return false;
             if (loc.getSpace().getType() == IPTR_CONSTANT) return false;
-            uintb a = loc.getOffset();
-            uintb b = op2loc.getOffset();
+            ulong a = loc.getOffset();
+            ulong b = op2loc.getOffset();
             if (b < a)
             {
                 if (a >= b + op2size) return false;
@@ -855,12 +855,12 @@ namespace Sla.DECCORE
         ///         -   3 if op and -this- are in non-comparable spaces
         /// \param op is the Varnode to test for containment
         /// \return the integer containment code
-        public int4 contains(Varnode op)
+        public int contains(Varnode op)
         {
             if (loc.getSpace() != op.loc.getSpace()) return 3;
             if (loc.getSpace().getType() == IPTR_CONSTANT) return 3;
-            uintb a = loc.getOffset();
-            uintb b = op.loc.getOffset();
+            ulong a = loc.getOffset();
+            ulong b = op.loc.getOffset();
             if (b < a) return -1;
             if (b >= a + size) return 2;
             if (b + op.size > a + size) return 1;
@@ -868,7 +868,7 @@ namespace Sla.DECCORE
         }
 
         /// Return 0, 1, or 2 for "no overlap", "partial overlap", "identical storage"
-        public int4 characterizeOverlap(Varnode op)
+        public int characterizeOverlap(Varnode op)
         {
             if (loc.getSpace() != op.loc.getSpace())
                 return 0;
@@ -876,12 +876,12 @@ namespace Sla.DECCORE
                 return (size == op.size) ? 2 : 1;   // Either total match or partial
             else if (loc.getOffset() < op.loc.getOffset())
             {
-                uintb thisright = loc.getOffset() + (size - 1);
+                ulong thisright = loc.getOffset() + (size - 1);
                 return (thisright < op.loc.getOffset()) ? 0 : 1;        // Test if this ends before op begins
             }
             else
             {
-                uintb opright = op.loc.getOffset() + (op.size - 1);
+                ulong opright = op.loc.getOffset() + (op.size - 1);
                 return (opright < loc.getOffset()) ? 0 : 1;         // Test if op ends before this begins
             }
         }
@@ -893,13 +893,13 @@ namespace Sla.DECCORE
         ///     - 1 if it overlaps op's second lsb  and so on
         /// \param op is the Varnode to test for overlap
         /// \return the relative overlap point or -1
-        public int4 overlap(Varnode op)
+        public int overlap(Varnode op)
         {
             if (!loc.isBigEndian()) // Little endian
                 return loc.overlap(0, op.loc, op.size);
             else
             {           // Big endian
-                int4 over = loc.overlap(size - 1, op.loc, op.size);
+                int over = loc.overlap(size - 1, op.loc, op.size);
                 if (over != -1)
                     return op.size - 1 - over;
             }
@@ -913,13 +913,13 @@ namespace Sla.DECCORE
         /// Otherwise, this method is equivalent to Varnode::overlap.
         /// \param op is the Varnode to test for overlap
         /// \return the relative overlap point or -1
-        public int4 overlapJoin(Varnode op)
+        public int overlapJoin(Varnode op)
         {
             if (!loc.isBigEndian()) // Little endian
                 return loc.overlapJoin(0, op.loc, op.size);
             else
             {           // Big endian
-                int4 over = loc.overlapJoin(size - 1, op.loc, op.size);
+                int over = loc.overlapJoin(size - 1, op.loc, op.size);
                 if (over != -1)
                     return op.size - 1 - over;
             }
@@ -934,13 +934,13 @@ namespace Sla.DECCORE
         /// \param op2loc is the starting Address of the range
         /// \param op2size is the size of the range in bytes
         /// \return the relative overlap point or -1
-        public int4 overlap(Address op2loc, int4 op2size)
+        public int overlap(Address op2loc, int op2size)
         {
             if (!loc.isBigEndian()) // Little endian
                 return loc.overlap(0, op2loc, op2size);
             else
             {           // Big endian
-                int4 over = loc.overlap(size - 1, op2loc, op2size);
+                int over = loc.overlap(size - 1, op2loc, op2size);
                 if (over != -1)
                     return op2size - 1 - over;
             }
@@ -948,13 +948,13 @@ namespace Sla.DECCORE
         }
 
         /// Get the mask of bits within \b this that are known to be zero
-        public uintb getNZMask() => nzm;
+        public ulong getNZMask() => nzm;
 
         /// Compare two Varnodes based on their term order
         /// Compare term order of two Varnodes. Used in Term Rewriting strategies to order operands of commutative ops
         /// \param op is the Varnode to order against \b this
         /// \return -1 if \b this comes before \b op, 1 if op before this, or 0
-        public int4 termOrder(Varnode op)
+        public int termOrder(Varnode op)
         {
             if (isConstant())
             {
@@ -981,9 +981,9 @@ namespace Sla.DECCORE
         /// Recursively print a terse textual representation of the data-flow (SSA) tree rooted at this Varnode
         /// \param s is the output stream
         /// \param depth is the current depth of the tree we are at
-        public void printRawHeritage(TextWriter s, int4 depth)
+        public void printRawHeritage(TextWriter s, int depth)
         {
-            for (int4 i = 0; i < depth; ++i)
+            for (int i = 0; i < depth; ++i)
                 s << ' ';
 
             if (isConstant())
@@ -1009,7 +1009,7 @@ namespace Sla.DECCORE
             if (def != (PcodeOp*)0)
             {
                 s << "\t\t" << def.getSeqNum() << endl;
-                for (int4 i = 0; i < def.numInput(); ++i)
+                for (int i = 0; i < def.numInput(); ++i)
                     def.getIn(i).printRawHeritage(s, depth + 5);
             }
             else
@@ -1149,7 +1149,7 @@ namespace Sla.DECCORE
         public bool hasNoDescend() => descend.empty();
 
         /// Return \b true if \b this is a constant with value \b val
-        public bool constantMatch(uintb val)
+        public bool constantMatch(ulong val)
         {
             if (!isConstant()) return false;
             return (loc.getOffset() == val);
@@ -1163,7 +1163,7 @@ namespace Sla.DECCORE
         ///   - 2 for a sign extension (INT_SEXT) of a normal constant
         /// \param val is a reference to the constant value that is passed back
         /// \return the extension code (or -1 if \b this cannot be interpreted as a constant)
-        public int4 isConstantExtended(uintb val)
+        public int isConstantExtended(ulong val)
         {
             if (isConstant())
             {
@@ -1511,7 +1511,7 @@ namespace Sla.DECCORE
 
             list<PcodeOp*>::const_iterator iter;
             PcodeOp* op;
-            int4 i;
+            int i;
             for (iter = descend.begin(); iter != descend.end(); ++iter)
             {
                 op = *iter;
@@ -1585,7 +1585,7 @@ namespace Sla.DECCORE
         /// \param whole is the given whole Varnode
         /// \param recurse is the current depth of recursion
         /// \return \b true if \b this and \b whole have the prescribed SUBPIECE relationship
-        public bool findSubpieceShadow(int4 leastByte, Varnode whole, int4 recurse)
+        public bool findSubpieceShadow(int leastByte, Varnode whole, int recurse)
         {
             Varnode vn = this;
             while (vn.isWritten() && vn.getDef().code() == CPUI_COPY)
@@ -1597,7 +1597,7 @@ namespace Sla.DECCORE
                     while (whole.isWritten() && whole.getDef().code() == CPUI_COPY)
                         whole = whole.getDef().getIn(0);
                     if (!whole.isConstant()) return false;
-                    uintb off = whole.getOffset() >> leastByte * 8;
+                    ulong off = whole.getOffset() >> leastByte * 8;
                     off &= calc_mask(vn.getSize());
                     return (off == vn.getOffset());
                 }
@@ -1607,7 +1607,7 @@ namespace Sla.DECCORE
             if (opc == CPUI_SUBPIECE)
             {
                 Varnode tmpvn = vn.getDef().getIn(0);
-                int4 off = (int4)vn.getDef().getIn(1).getOffset();
+                int off = (int)vn.getDef().getIn(1).getOffset();
                 if (off != leastByte || tmpvn.getSize() != whole.getSize())
                     return false;
                 if (tmpvn == whole) return true;
@@ -1629,7 +1629,7 @@ namespace Sla.DECCORE
                 PcodeOp smallOp = vn.getDef();
                 if (bigOp.getParent() != smallOp.getParent()) return false;
                 // Recurse search through all branches of the two MULTIEQUALs
-                for (int4 i = 0; i < smallOp.numInput(); ++i)
+                for (int i = 0; i < smallOp.numInput(); ++i)
                 {
                     if (!smallOp.getIn(i).findSubpieceShadow(leastByte, bigOp.getIn(i), recurse))
                         return false;
@@ -1646,7 +1646,7 @@ namespace Sla.DECCORE
         /// more than one PIECE operations to verify that \b this is formed out of \b piece.
         /// \param piece is the given Varnode piece
         /// \return \b true if \b this and \b whole have the prescribed PIECE relationship
-        public bool findPieceShadow(int4 leastByte, Varnode piece)
+        public bool findPieceShadow(int leastByte, Varnode piece)
         {
             Varnode vn = this;
             while (vn.isWritten() && vn.getDef().code() == CPUI_COPY)
@@ -1691,7 +1691,7 @@ namespace Sla.DECCORE
         /// \param op2 is the Varnode to compare to \b this
         /// \param relOff is the putative relative byte offset of \b this to \b op2
         /// \return \b true if one Varnode is contained, as a value, in the other
-        public bool partialCopyShadow(Varnode op2, int4 relOff)
+        public bool partialCopyShadow(Varnode op2, int relOff)
         {
             Varnode vn;
 
@@ -1713,7 +1713,7 @@ namespace Sla.DECCORE
                 return false;       // Not proper containment
 
             bool bigEndian = getSpace().isBigEndian();
-            int4 leastByte = bigEndian ? (op2.getSize() - vn.getSize()) - relOff : relOff;
+            int leastByte = bigEndian ? (op2.getSize() - vn.getSize()) - relOff : relOff;
             if (vn.findSubpieceShadow(leastByte, op2, 0))
                 return true;
 

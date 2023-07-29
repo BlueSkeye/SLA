@@ -133,9 +133,9 @@ namespace Sla.DECCORE
         /// Pointer to class providing behavioral details of the operation
         private TypeOp opcode;
         /// Collection of boolean attributes on this op
-        private /*mutable*/ uint4 flags;
+        private /*mutable*/ uint flags;
         /// Additional boolean attributes for this op
-        private /*mutable*/ uint4 addlflags;
+        private /*mutable*/ uint addlflags;
         /// What instruction address is this attached to
         private SeqNum start;
         /// Basic block in which this op is contained
@@ -173,43 +173,43 @@ namespace Sla.DECCORE
         }
 
         /// Clear a specific input Varnode to \e null
-        private void clearInput(int4 slot)
+        private void clearInput(int slot)
         {
             inrefs[slot] = (Varnode*)0;
         }
 
         /// Set a specific input Varnode
-        private void setInput(Varnode vn, int4 slot)
+        private void setInput(Varnode vn, int slot)
         {
             inrefs[slot] = vn;
         }
 
         /// Set specific boolean attribute(s) on this op
-        private void setFlag(uint4 fl)
+        private void setFlag(uint fl)
         {
             flags |= fl;
         }
 
         /// Clear specific boolean attribute(s)
-        private void clearFlag(uint4 fl)
+        private void clearFlag(uint fl)
         {
             flags &= ~fl;
         }
 
         /// Set specific boolean attribute
-        private void setAdditionalFlag(uint4 fl)
+        private void setAdditionalFlag(uint fl)
         {
             addlflags |= fl;
         }
 
         /// Clear specific boolean atribute
-        private void clearAdditionalFlag(uint4 fl)
+        private void clearAdditionalFlag(uint fl)
         {
             addlflags &= ~fl;
         }
 
         /// Flip the setting of specific boolean attribute(s)
-        private void flipFlag(uint4 fl)
+        private void flipFlag(uint fl)
         {
             flags ^= fl;
         }
@@ -218,10 +218,10 @@ namespace Sla.DECCORE
         /// Make sure there are exactly \e num input slots for this op.
         /// All slots, regardless of the total being increased or decreased, are set to \e null.
         /// \param num is the number of inputs to set
-        private void setNumInputs(int4 num)
+        private void setNumInputs(int num)
         {
             inrefs.resize(num);
-            for (int4 i = 0; i < num; ++i)
+            for (int i = 0; i < num; ++i)
                 inrefs[i] = (Varnode*)0;
         }
 
@@ -229,9 +229,9 @@ namespace Sla.DECCORE
         /// Remove the input Varnode in a specific slot.  The slot is eliminated and all Varnodes beyond this
         /// slot are renumbered.  All the other Varnodes are otherwise undisturbed.
         /// \param slot is the index of the Varnode to remove
-        private void removeInput(int4 slot)
+        private void removeInput(int slot)
         {
-            for (int4 i = slot + 1; i < inrefs.size(); ++i)
+            for (int i = slot + 1; i < inrefs.size(); ++i)
                 inrefs[i - 1] = inrefs[i];
             inrefs.pop_back();
         }
@@ -239,16 +239,16 @@ namespace Sla.DECCORE
         /// Make room for a new input Varnode at a specific position
         /// Insert space for a new Varnode before \e slot.  The new space is filled with \e null.
         /// \param slot is index of the slot where the new space is inserted
-        private void insertInput(int4 slot)
+        private void insertInput(int slot)
         {
             inrefs.push_back((Varnode*)0);
-            for (int4 i = inrefs.size() - 1; i > slot; --i)
+            for (int i = inrefs.size() - 1; i > slot; --i)
                 inrefs[i] = inrefs[i - 1];
             inrefs[slot] = (Varnode*)0;
         }
 
         /// Order this op within the ops for a single instruction
-        private void setOrder(uintm ord)
+        private void setOrder(uint ord)
         {
             start.setOrder(ord);
         }
@@ -270,7 +270,7 @@ namespace Sla.DECCORE
         /// but all are set initially to null.
         /// \param s indicates the number of input slots reserved
         /// \param sq is the sequence number to associate with the new PcodeOp
-        public PcodeOp(int4 s, SeqNum sq)
+        public PcodeOp(int s, SeqNum sq)
         {
             flags = 0;          // Start out life as dead
             addlflags = 0;
@@ -278,7 +278,7 @@ namespace Sla.DECCORE
 
             output = (Varnode*)0;
             opcode = (TypeOp*)0;
-            for (int4 i = 0; i < inrefs.size(); ++i)
+            for (int i = 0; i < inrefs.size(); ++i)
                 inrefs[i] = (Varnode*)0;
         }
 
@@ -287,7 +287,7 @@ namespace Sla.DECCORE
         }
 
         /// Get the number of inputs to this op
-        public int4 numInput() => inrefs.size();
+        public int numInput() => inrefs.size();
 
         /// Get the output Varnode of this op or \e null
         public Varnode getOut() => output;
@@ -296,10 +296,10 @@ namespace Sla.DECCORE
         public Varnode getOut() => (Varnode) output;
 
         /// Get a specific input Varnode to this op
-        public Varnode getIn(int4 slot) => inrefs[slot];
+        public Varnode getIn(int slot) => inrefs[slot];
 
         /// Get a specific input Varnode to this op
-        public Varnode getIn(int4 slot) => (Varnode) inrefs[slot];
+        public Varnode getIn(int slot) => (Varnode) inrefs[slot];
 
         /// Get the parent basic block
         public BlockBasic getParent() => (BlockBasic) parent;
@@ -308,7 +308,7 @@ namespace Sla.DECCORE
         public Address getAddr() => start.getAddr();
 
         /// Get the time index indicating when this op was created
-        public uintm getTime() => start.getTime();
+        public uint getTime() => start.getTime();
 
         /// Get the sequence number associated with this op
         public SeqNum getSeqNum() => start;
@@ -320,9 +320,9 @@ namespace Sla.DECCORE
         public IEnumerator<PcodeOp> getBasicIter() => basiciter;
 
         /// \brief Get the slot number of the indicated input varnode
-        public int4 getSlot(Varnode vn)
+        public int getSlot(Varnode vn)
         {
-            int4 i, n;
+            int i, n;
             n = inrefs.size();
             for (i = 0; i < n; ++i)
                 if (inrefs[i] == vn)
@@ -339,17 +339,17 @@ namespace Sla.DECCORE
         /// \param firstSlot is the first instance of the Varnode in \b this input list
         /// \param iter is the specific descendant iterator producing \b this
         /// \return the slot corresponding to the iterator
-        public int4 getRepeatSlot(Varnode vn, int4 firstSlot, IEnumerator<PcodeOp> iter)
+        public int getRepeatSlot(Varnode vn, int firstSlot, IEnumerator<PcodeOp> iter)
         {
-            int4 count = 1;
+            int count = 1;
             for (list<PcodeOp*>::const_iterator oiter = vn.beginDescend(); oiter != iter; ++oiter)
             {
                 if ((*oiter) == this)
                     count += 1;
             }
             if (count == 1) return firstSlot;
-            int4 recount = 1;
-            for (int4 i = firstSlot + 1; i < inrefs.size(); ++i)
+            int recount = 1;
+            for (int i = firstSlot + 1; i < inrefs.size(); ++i)
             {
                 if (inrefs[i] == vn)
                 {
@@ -362,10 +362,10 @@ namespace Sla.DECCORE
         }
 
         /// \brief Get the evaluation type of this op
-        public uint4 getEvalType() => (flags&(PcodeOp::unary|PcodeOp::binary|PcodeOp::special|PcodeOp::ternary));
+        public uint getEvalType() => (flags&(PcodeOp::unary|PcodeOp::binary|PcodeOp::special|PcodeOp::ternary));
 
         /// \brief Get type which indicates unusual halt in control-flow
-        public uint4 getHaltType() => (flags&(PcodeOp::halt|PcodeOp::badinstruction|PcodeOp::unimplemented| PcodeOp::noreturn|PcodeOp::missing));
+        public uint getHaltType() => (flags&(PcodeOp::halt|PcodeOp::badinstruction|PcodeOp::unimplemented| PcodeOp::noreturn|PcodeOp::missing));
 
         /// Return \b true if this op is dead
         public bool isDead() => ((flags&PcodeOp::dead)!= 0);
@@ -480,9 +480,9 @@ namespace Sla.DECCORE
             if ((flags & PcodeOp::nocollapse) != 0) return false;
             if (!isAssignment()) return false;
             if (inrefs.size() == 0) return false;
-            for (int4 i = 0; i < inrefs.size(); ++i)
+            for (int i = 0; i < inrefs.size(); ++i)
                 if (!getIn(i).isConstant()) return false;
-            if (getOut().getSize() > sizeof(uintb)) return false;
+            if (getOut().getSize() > sizeof(ulong)) return false;
             return true;
         }
 
@@ -544,21 +544,21 @@ namespace Sla.DECCORE
         /// Produce a hash of the following attributes: output size, the opcode, and the identity
         /// of each input varnode.  This is suitable for determining if two PcodeOps calculate identical values
         /// \return the calculated hash or 0 if the op is not cse hashable
-        public uintm getCseHash()
+        public uint getCseHash()
         {
-            uintm hash;
-            if ((getEvalType() & (PcodeOp::unary | PcodeOp::binary)) == 0) return ((uintm)0);
-            if (code() == CPUI_COPY) return ((uintm)0); // Let copy propagation deal with this
+            uint hash;
+            if ((getEvalType() & (PcodeOp::unary | PcodeOp::binary)) == 0) return ((uint)0);
+            if (code() == CPUI_COPY) return ((uint)0); // Let copy propagation deal with this
 
-            hash = (output.getSize() << 8) | (uintm)code();
-            for (int4 i = 0; i < inrefs.size(); ++i)
+            hash = (output.getSize() << 8) | (uint)code();
+            for (int i = 0; i < inrefs.size(); ++i)
             {
                 Varnode vn = getIn(i);
-                hash = (hash << 8) | (hash >> (sizeof(uintm) * 8 - 8));
+                hash = (hash << 8) | (hash >> (sizeof(uint) * 8 - 8));
                 if (vn.isConstant())
-                    hash ^= (uintm)vn.getOffset();
+                    hash ^= (uint)vn.getOffset();
                 else
-                    hash ^= (uintm)vn.getCreateIndex(); // Hash in pointer itself as unique id
+                    hash ^= (uint)vn.getCreateIndex(); // Hash in pointer itself as unique id
             }
             return hash;
         }
@@ -576,7 +576,7 @@ namespace Sla.DECCORE
             if (code() != op.code()) return false;
             if (code() == CPUI_COPY) return false; // Let copy propagation deal with this
             if (inrefs.size() != op.inrefs.size()) return false;
-            for (int4 i = 0; i < inrefs.size(); ++i)
+            for (int i = 0; i < inrefs.size(); ++i)
             {
                 Varnode vn1 = getIn(i);
                 Varnode vn2 = op.getIn(i);
@@ -627,7 +627,7 @@ namespace Sla.DECCORE
                 // Check for a normal op where all inputs and output are not address tied
                 if (output != (Varnode*)0 && !output.isAddrTied() && !output.isPersist())
                 {
-                    int4 i;
+                    int i;
                     for (i = 0; i < numInput(); ++i)
                     {
                         Varnode vn = getIn(i);
@@ -639,7 +639,7 @@ namespace Sla.DECCORE
                 }
             }
             List<Varnode> tiedList = new List<Varnode>();
-            for (int4 i = 0; i < numInput(); ++i)
+            for (int i = 0; i < numInput(); ++i)
             {
                 Varnode vn = getIn(i);
                 if (vn.isAddrTied())
@@ -691,7 +691,7 @@ namespace Sla.DECCORE
                     {
                         if (op.output.isAddrTied()) return false;
                     }
-                    for (int4 i = 0; i < tiedList.size(); ++i)
+                    for (int i = 0; i < tiedList.size(); ++i)
                     {
                         Varnode vn = tiedList[i];
                         if (vn.overlap(*op.output) >= 0)
@@ -720,7 +720,7 @@ namespace Sla.DECCORE
         /// Throw an exception if a constant result cannot be produced.
         /// \param markedInput will pass-back whether or not one of the inputs is a marked constant
         /// \return the constant result
-        public uintb collapse(bool markedInput)
+        public ulong collapse(bool markedInput)
         {
             Varnode vn0;
             Varnode vn1;
@@ -854,13 +854,13 @@ namespace Sla.DECCORE
         /// produced by this op is guaranteed to have zero bits at every location in the nzmask calculated by this function.
         /// \param cliploop indicates the calculation shouldn't include inputs from known looping edges
         /// \return the calculated non-zero mask
-        public uintb getNZMaskLocal(bool cliploop)
+        public ulong getNZMaskLocal(bool cliploop)
         {
-            int4 sa, sz1, sz2, size;
-            uintb resmask, val;
+            int sa, sz1, sz2, size;
+            ulong resmask, val;
 
             size = output.getSize();
-            uintb fullmask = calc_mask(size);
+            ulong fullmask = calc_mask(size);
 
             switch (opcode.getOpcode())
             {
@@ -921,32 +921,32 @@ namespace Sla.DECCORE
                         sa = getIn(1).getOffset(); // Get shift amount
                         resmask = getIn(0).getNZMask();
                         resmask = pcode_right(resmask, sa);
-                        if (sz1 > sizeof(uintb))
+                        if (sz1 > sizeof(ulong))
                         {
                             // resmask did not hold most sig bits of mask
                             if (sa >= 8 * sz1)
                                 resmask = 0;
-                            else if (sa >= 8 * sizeof(uintb))
+                            else if (sa >= 8 * sizeof(ulong))
                             {
-                                // Full mask shifted over 8*sizeof(uintb)
-                                resmask = calc_mask(sz1 - sizeof(uintb));
+                                // Full mask shifted over 8*sizeof(ulong)
+                                resmask = calc_mask(sz1 - sizeof(ulong));
                                 // Shift over remaining portion of sa
-                                resmask >>= (sa - 8 * sizeof(uintb));
+                                resmask >>= (sa - 8 * sizeof(ulong));
                             }
                             else
                             {
                                 // Fill in one bits from part of mask not originally
                                 // calculated
-                                uintb tmp = 0;
+                                ulong tmp = 0;
                                 tmp -= 1;
-                                tmp <<= (8 * sizeof(uintb) - sa);
+                                tmp <<= (8 * sizeof(ulong) - sa);
                                 resmask |= tmp;
                             }
                         }
                     }
                     break;
                 case CPUI_INT_SRIGHT:
-                    if ((!getIn(1).isConstant()) || (size > sizeof(uintb)))
+                    if ((!getIn(1).isConstant()) || (size > sizeof(ulong)))
                         resmask = fullmask;
                     else
                     {
@@ -982,7 +982,7 @@ namespace Sla.DECCORE
                     break;
                 case CPUI_POPCOUNT:
                     sz1 = popcount(getIn(0).getNZMask());
-                    resmask = coveringmask((uintb)sz1);
+                    resmask = coveringmask((ulong)sz1);
                     resmask &= fullmask;
                     break;
                 case CPUI_LZCOUNT:
@@ -991,21 +991,21 @@ namespace Sla.DECCORE
                     break;
                 case CPUI_SUBPIECE:
                     resmask = getIn(0).getNZMask();
-                    sz1 = (int4)getIn(1).getOffset();
-                    if ((int4)getIn(0).getSize() <= sizeof(uintb))
+                    sz1 = (int)getIn(1).getOffset();
+                    if ((int)getIn(0).getSize() <= sizeof(ulong))
                     {
-                        if (sz1 < sizeof(uintb))
+                        if (sz1 < sizeof(ulong))
                             resmask >>= 8 * sz1;
                         else
                             resmask = 0;
                     }
                     else
                     {           // Extended precision
-                        if (sz1 < sizeof(uintb))
+                        if (sz1 < sizeof(ulong))
                         {
                             resmask >>= 8 * sz1;
                             if (sz1 > 0)
-                                resmask |= fullmask << (8 * (sizeof(uintb) - sz1));
+                                resmask |= fullmask << (8 * (sizeof(ulong) - sz1));
                         }
                         else
                             resmask = fullmask;
@@ -1020,12 +1020,12 @@ namespace Sla.DECCORE
                 case CPUI_INT_MULT:
                     val = getIn(0).getNZMask();
                     resmask = getIn(1).getNZMask();
-                    sz1 = (size > sizeof(uintb)) ? 8 * size - 1 : mostsigbit_set(val);
+                    sz1 = (size > sizeof(ulong)) ? 8 * size - 1 : mostsigbit_set(val);
                     if (sz1 == -1)
                         resmask = 0;
                     else
                     {
-                        sz2 = (size > sizeof(uintb)) ? 8 * size - 1 : mostsigbit_set(resmask);
+                        sz2 = (size > sizeof(ulong)) ? 8 * size - 1 : mostsigbit_set(resmask);
                         if (sz2 == -1)
                             resmask = 0;
                         else
@@ -1034,7 +1034,7 @@ namespace Sla.DECCORE
                                 fullmask >>= (8 * size - 2 - sz1 - sz2);
                             sz1 = leastsigbit_set(val);
                             sz2 = leastsigbit_set(resmask);
-                            resmask = (~((uintb)0)) << (sz1 + sz2);
+                            resmask = (~((ulong)0)) << (sz1 + sz2);
                             resmask &= fullmask;
                         }
                     }
@@ -1053,7 +1053,7 @@ namespace Sla.DECCORE
                         resmask = fullmask;
                     else
                     {
-                        int4 i = 0;
+                        int i = 0;
                         resmask = 0;
                         if (cliploop)
                         {
@@ -1091,7 +1091,7 @@ namespace Sla.DECCORE
         /// execution order.
         /// \param bop is the PcodeOp to compare this to
         /// \return -1, 0, or 1, depending on the comparison
-        public int4 compareOrder(PcodeOp bop)
+        public int compareOrder(PcodeOp bop)
         {
             if (parent == bop.parent)
                 return (start.getOrder() < bop.start.getOrder()) ? -1 : 1;
@@ -1132,7 +1132,7 @@ namespace Sla.DECCORE
         public void encode(Encoder encoder)
         {
             encoder.openElement(ELEM_OP);
-            encoder.writeSignedInteger(ATTRIB_CODE, (int4)code());
+            encoder.writeSignedInteger(ATTRIB_CODE, (int)code());
             start.encode(encoder);
             if (output == (Varnode*)0)
             {
@@ -1145,7 +1145,7 @@ namespace Sla.DECCORE
                 encoder.writeUnsignedInteger(ATTRIB_REF, output.getCreateIndex());
                 encoder.closeElement(ELEM_ADDR);
             }
-            for (int4 i = 0; i < inrefs.size(); ++i)
+            for (int i = 0; i < inrefs.size(); ++i)
             {
                 Varnode* vn = getIn(i);
                 if (vn == (Varnode*)0) {
@@ -1194,12 +1194,12 @@ namespace Sla.DECCORE
         }
 
         /// \brief Retrieve the PcodeOp encoded as the address \e addr
-        public static PcodeOp getOpFromConst(Address addr) => (PcodeOp)(uintp)addr.getOffset();
+        public static PcodeOp getOpFromConst(Address addr) => (PcodeOp)(ulong)addr.getOffset();
 
         /// Calculate the local output type
         public Datatype outputTypeLocal() => opcode.getOutputLocal(this);
 
         /// Calculate the local input type
-        public Datatype inputTypeLocal(int4 slot) => opcode.getInputLocal(this, slot);
+        public Datatype inputTypeLocal(int slot) => opcode.getInputLocal(this, slot);
     }
 }

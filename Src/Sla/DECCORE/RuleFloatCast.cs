@@ -24,13 +24,13 @@ namespace Sla.DECCORE
 
         /// \class RuleFloatCast
         /// \brief Replace (casttosmall)(casttobig)V with identity or with single cast
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_FLOAT_FLOAT2FLOAT);
             oplist.push_back(CPUI_FLOAT_TRUNC);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn1 = op.getIn(0);
             if (!vn1.isWritten()) return 0;
@@ -40,9 +40,9 @@ namespace Sla.DECCORE
                 return 0;
             OpCode opc1 = op.code();
             Varnode* vn2 = castop.getIn(0);
-            int4 insize1 = vn1.getSize();
-            int4 insize2 = vn2.getSize();
-            int4 outsize = op.getOut().getSize();
+            int insize1 = vn1.getSize();
+            int insize2 = vn2.getSize();
+            int outsize = op.getOut().getSize();
 
             if (vn2.isFree()) return 0;    // Don't propagate free
 

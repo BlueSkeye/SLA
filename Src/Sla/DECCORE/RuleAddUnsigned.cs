@@ -25,12 +25,12 @@ namespace Sla.DECCORE
 
         /// \class RuleAddUnsigned
         /// \brief Cleanup:  Convert INT_ADD of constants to INT_SUB:  `V + 0xff...  =>  V - 0x00...`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_ADD);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* constvn = op.getIn(1);
 
@@ -39,10 +39,10 @@ namespace Sla.DECCORE
             if (dt.getMetatype() != TYPE_UINT) return 0;
             if (dt.isCharPrint()) return 0;    // Only change integer forms
             if (dt.isEnumType()) return 0;
-            uintb val = constvn.getOffset();
-            uintb mask = calc_mask(constvn.getSize());
-            int4 sa = constvn.getSize() * 6;   // 1/4 less than full bitsize
-            uintb quarter = (mask >> sa) << sa;
+            ulong val = constvn.getOffset();
+            ulong mask = calc_mask(constvn.getSize());
+            int sa = constvn.getSize() * 6;   // 1/4 less than full bitsize
+            ulong quarter = (mask >> sa) << sa;
             if ((val & quarter) != quarter) return 0;   // The first quarter of bits must all be 1's
             if (constvn.getSymbolEntry() != (SymbolEntry*)0)
             {

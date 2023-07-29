@@ -27,9 +27,9 @@ namespace Sla.DECCORE
         }
 
         //  virtual Datatype *getOutputLocal(PcodeOp *op) const;
-        //  virtual Datatype *getInputLocal(PcodeOp *op,int4 slot) const;
+        //  virtual Datatype *getInputLocal(PcodeOp *op,int slot) const;
 
-        public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
+        public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
             return (Datatype*)0;        // Never need a cast for inputs
         }
@@ -40,7 +40,7 @@ namespace Sla.DECCORE
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
-            int4 inslot, int4 outslot)
+            int inslot, int outslot)
         {
             // Must propagate  slot2 <. output
             if ((inslot == 0) || (inslot == 1)) return (Datatype*)0;

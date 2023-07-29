@@ -11,16 +11,16 @@ namespace Sla.EXTRA
     internal class ConstantNZMask : RHSConstant
     {
         // A varnode's non-zero mask
-        private  int4 varindex;
+        private  int varindex;
         
-        public ConstantNZMask(int4 ind)
+        public ConstantNZMask(int ind)
         {
             varindex = ind;
         }
         
         public override RHSConstant clone() => new ConstantNZMask(varindex);
 
-        public override uintb getConstant(UnifyState state)
+        public override ulong getConstant(UnifyState state)
         {
             Varnode* vn = state.data(varindex).getVarnode();
             return vn.getNZMask();

@@ -30,8 +30,8 @@ namespace Sla.DECCORE
             Varnode* vn;
             List<Varnode*> vnlist;
             list<PcodeOp*> oplist;
-            uintb startoffset;
-            for (int4 i = 0; i < bblocks.getSize(); ++i)
+            ulong startoffset;
+            for (int i = 0; i < bblocks.getSize(); ++i)
             {
                 vnlist.clear();
                 bl = (BlockBasic*)bblocks.getBlock(i);
@@ -55,7 +55,7 @@ namespace Sla.DECCORE
                         vnlist.push_back(vn);
                     }
                 }
-                for (int4 j = 0; j < vnlist.size(); ++j)
+                for (int j = 0; j < vnlist.size(); ++j)
                     vnlist[j].clearMark();
             }
             list<PcodeOp*>::iterator oiter;
@@ -66,7 +66,7 @@ namespace Sla.DECCORE
                 for (op2 = op.previousOp(); op2 != (PcodeOp*)0; op2 = op2.previousOp())
                 {
                     if (op2.code() != CPUI_MULTIEQUAL) continue;
-                    int4 i;
+                    int i;
                     for (i = 0; i < op.numInput(); ++i) // Check for match in each branch
                         if (op.getIn(i) != op2.getIn(i)) break;
                     if (i != op.numInput()) continue; // All branches did not match

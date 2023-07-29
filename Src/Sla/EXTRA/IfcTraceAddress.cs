@@ -11,8 +11,8 @@ namespace Sla.EXTRA
     {
         public override void execute(TextReader s)
 {				// Set a opactdbg trace point
-  uintm uqlow,uqhigh;
-  int4 discard;
+  uint uqlow,uqhigh;
+  int discard;
 
   if (dcp.fd == (Funcdata *)0)
     throw IfaceExecutionError("No function selected");
@@ -28,7 +28,7 @@ namespace Sla.EXTRA
     pchigh = parse_machaddr(s,discard,*dcp.conf.types);
     s >> ws;
   }
-  uqhigh = uqlow = ~((uintm)0);
+  uqhigh = uqlow = ~((uint)0);
   if (!s.eof()) {
     s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
     s >> uqlow >> uqhigh >> ws;

@@ -19,7 +19,7 @@ namespace Sla.DECCORE
         /// The first parameter must an integer value indicating the desired alignment
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            int4 val = -1;
+            int val = -1;
             istringstream s(p1);
             s >> dec >> val;
             if (val == -1)

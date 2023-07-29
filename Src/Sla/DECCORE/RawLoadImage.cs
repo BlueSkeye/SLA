@@ -15,11 +15,11 @@ namespace Sla.DECCORE
     internal class RawLoadImage : LoadImage
     {
         /// Address of first byte in the file
-        private uintb vma;
+        private ulong vma;
         /// Main file stream for image
         private ifstream thefile;
         /// Total number of bytes in the loadimage/file
-        private uintb filesize;
+        private ulong filesize;
         /// Address space that the file bytes are mapped to
         private AddrSpace spaceid;
 
@@ -63,11 +63,11 @@ namespace Sla.DECCORE
             }
         }
 
-        public override void loadFill(uint1 ptr, int4 size, Address addr)
+        public override void loadFill(byte ptr, int size, Address addr)
         {
-            uintb curaddr = addr.getOffset();
-            uintb offset = 0;
-            uintb readsize;
+            ulong curaddr = addr.getOffset();
+            ulong offset = 0;
+            ulong readsize;
 
             curaddr -= vma;     // Get relative offset of first byte
             while (size > 0)

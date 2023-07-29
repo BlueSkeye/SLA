@@ -39,7 +39,7 @@ namespace Sla.DECCORE
             populateResolver();
         }               ///< Fold-ins are finished, finalize \b this
 
-        public override uint4 getType() => p_merged;
+        public override uint getType() => p_merged;
 
         public override void assignMap(List<Datatype> proto, TypeFactory typefactory,
             List<ParameterPieces> res)

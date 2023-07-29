@@ -22,12 +22,12 @@ namespace Sla.SLEIGH
         private List<ContextChange> context; // Context commands
         private ConstructTpl templ;        // The main p-code section
         private List<ConstructTpl> namedtempl; // Other named p-code sections
-        private int4 minimumlength;     // Minimum length taken up by this constructor in bytes
-        private uintm id;           // Unique id of constructor within subtable
-        private int4 firstwhitespace;       // Index of first whitespace piece in -printpiece-
-        private int4 flowthruindex;     // if >=0 then print only a single operand no markup
-        private int4 lineno;
-        private int4 src_index;           //source file index
+        private int minimumlength;     // Minimum length taken up by this constructor in bytes
+        private uint id;           // Unique id of constructor within subtable
+        private int firstwhitespace;       // Index of first whitespace piece in -printpiece-
+        private int flowthruindex;     // if >=0 then print only a single operand no markup
+        private int lineno;
+        private int src_index;           //source file index
         private /*mutable*/ bool inerror;                 // An error is associated with this Constructor
 
         private void orderOperands()
@@ -35,10 +35,10 @@ namespace Sla.SLEIGH
             OperandSymbol* sym;
             List<OperandSymbol*> patternorder;
             List<OperandSymbol*> newops; // New order of the operands
-            int4 lastsize;
+            int lastsize;
 
             pateq.operandOrder(this, patternorder);
-            for (int4 i = 0; i < operands.size(); ++i)
+            for (int i = 0; i < operands.size(); ++i)
             { // Make sure patternorder contains all operands
                 sym = operands[i];
                 if (!sym.isMarked())
@@ -50,7 +50,7 @@ namespace Sla.SLEIGH
             do
             {
                 lastsize = newops.size();
-                for (int4 i = 0; i < patternorder.size(); ++i)
+                for (int i = 0; i < patternorder.size(); ++i)
                 {
                     sym = patternorder[i];
                     if (!sym.isMarked()) continue; // "unmarked" means it is already in newops
@@ -62,7 +62,7 @@ namespace Sla.SLEIGH
                     }
                 }
             } while (newops.size() != lastsize);
-            for (int4 i = 0; i < patternorder.size(); ++i)
+            for (int i = 0; i < patternorder.size(); ++i)
             { // Tack on expression Operands
                 sym = patternorder[i];
                 if (sym.isOffsetIrrelevant())
@@ -76,17 +76,17 @@ namespace Sla.SLEIGH
                 throw SleighError("Circular offset dependency between operands");
 
 
-            for (int4 i = 0; i < newops.size(); ++i)
+            for (int i = 0; i < newops.size(); ++i)
             { // Fix up operand indices
                 newops[i].hand = i;
                 newops[i].localexp.changeIndex(i);
             }
-            List<int4> handmap;       // Create index translation map
-            for (int4 i = 0; i < operands.size(); ++i)
+            List<int> handmap;       // Create index translation map
+            for (int i = 0; i < operands.size(); ++i)
                 handmap.push_back(operands[i].hand);
 
             // Fix up offsetbase
-            for (int4 i = 0; i < newops.size(); ++i)
+            for (int i = 0; i < newops.size(); ++i)
             {
                 sym = newops[i];
                 if (sym.offsetbase == -1) continue;
@@ -95,7 +95,7 @@ namespace Sla.SLEIGH
 
             if (templ != (ConstructTpl*)0) // Fix up templates
                 templ.changeHandleIndex(handmap);
-            for (int4 i = 0; i < namedtempl.size(); ++i)
+            for (int i = 0; i < namedtempl.size(); ++i)
             {
                 ConstructTpl* ntempl = namedtempl[i];
                 if (ntempl != (ConstructTpl*)0)
@@ -103,11 +103,11 @@ namespace Sla.SLEIGH
             }
 
             // Fix up printpiece operand refs
-            for (int4 i = 0; i < printpiece.size(); ++i)
+            for (int i = 0; i < printpiece.size(); ++i)
             {
                 if (printpiece[i][0] == '\n')
                 {
-                    int4 index = printpiece[i][1] - 'A';
+                    int index = printpiece[i][1] - 'A';
                     index = handmap[index];
                     printpiece[i][1] = 'A' + index;
                 }
@@ -144,7 +144,7 @@ namespace Sla.SLEIGH
                 PatternEquation::release(pateq);
             if (templ != (ConstructTpl*)0)
                 delete templ;
-            for (int4 i = 0; i < namedtempl.size(); ++i)
+            for (int i = 0; i < namedtempl.size(); ++i)
             {
                 ConstructTpl* ntpl = namedtempl[i];
                 if (ntpl != (ConstructTpl*)0)
@@ -163,7 +163,7 @@ namespace Sla.SLEIGH
             List<TokenPattern> oppattern;
             bool recursion = false;
             // Generate pattern for each operand, store in oppattern
-            for (int4 i = 0; i < operands.size(); ++i)
+            for (int i = 0; i < operands.size(); ++i)
             {
                 OperandSymbol* sym = operands[i];
                 TripleSymbol* triple = sym.getDefiningSymbol();
@@ -218,9 +218,9 @@ namespace Sla.SLEIGH
             if (!pateq.resolveOperandLeft(resolve))
                 throw SleighError("Unable to resolve operand offsets");
 
-            for (int4 i = 0; i < operands.size(); ++i)
+            for (int i = 0; i < operands.size(); ++i)
             { // Unravel relative offsets to absolute (if possible)
-                int4 base,offset;
+                int base,offset;
                 OperandSymbol* sym = operands[i];
                 if (sym.isOffsetIrrelevant())
                 {
@@ -246,7 +246,7 @@ namespace Sla.SLEIGH
             }
 
             // Make sure context expressions are valid
-            for (int4 i = 0; i < context.size(); ++i)
+            for (int i = 0; i < context.size(); ++i)
                 context[i].validate();
 
             orderOperands();        // Order the operands based on offset dependency
@@ -255,33 +255,33 @@ namespace Sla.SLEIGH
 
         public TokenPattern getPattern() => pattern;
 
-        public void setMinimumLength(int4 l)
+        public void setMinimumLength(int l)
         {
             minimumlength = l;
         }
 
-        public int4 getMinimumLength() => minimumlength;
+        public int getMinimumLength() => minimumlength;
 
-        public void setId(uintm i)
+        public void setId(uint i)
         {
             id = i;
         }
 
-        public uintm getId() => id;
+        public uint getId() => id;
 
-        public void setLineno(int4 ln)
+        public void setLineno(int ln)
         {
             lineno = ln;
         }
 
-        public int4 getLineno() => lineno;
+        public int getLineno() => lineno;
 
-        public void setSrcIndex(int4 index)
+        public void setSrcIndex(int index)
         {
             src_index = index;
         }
 
-        public int4 getSrcIndex() => src_index;
+        public int getSrcIndex() => src_index;
 
         public void addContext(List<ContextChange> vec)
         {
@@ -307,7 +307,7 @@ namespace Sla.SLEIGH
 
             if (syn.size() == 0) return;
             bool hasNonSpace = false;
-            for (int4 i = 0; i < syn.size(); ++i)
+            for (int i = 0; i < syn.size(); ++i)
             {
                 if (syn[i] != ' ')
                 {
@@ -345,7 +345,7 @@ namespace Sla.SLEIGH
             templ = tpl;
         }
 
-        public void setNamedSection(ConstructTpl tpl, int4 id)
+        public void setNamedSection(ConstructTpl tpl, int id)
         {               // Add a named section to the constructor
             while (namedtempl.size() <= id)
                 namedtempl.push_back((ConstructTpl*)0);
@@ -354,22 +354,22 @@ namespace Sla.SLEIGH
 
         public SubtableSymbol getParent() => parent;
 
-        public int4 getNumOperands() => operands.size();
+        public int getNumOperands() => operands.size();
 
-        public OperandSymbol getOperand(int4 i) => operands[i];
+        public OperandSymbol getOperand(int i) => operands[i];
 
         public PatternEquation getPatternEquation() => pateq;
 
         public ConstructTpl getTempl() => templ;
 
-        public ConstructTpl getNamedTempl(int4 secnum)
+        public ConstructTpl getNamedTempl(int secnum)
         {
             if (secnum < namedtempl.size())
                 return namedtempl[secnum];
             return (ConstructTpl*)0;
         }
 
-        public int4 getNumSections() => namedtempl.size();
+        public int getNumSections() => namedtempl.size();
 
         public void printInfo(TextWriter s)
         {               // Print identifying information about constructor
@@ -386,7 +386,7 @@ namespace Sla.SLEIGH
             {
                 if ((*piter)[0] == '\n')
                 {
-                    int4 index = (*piter)[1] - 'A';
+                    int index = (*piter)[1] - 'A';
                     operands[index].print(s, walker);
                 }
                 else
@@ -407,12 +407,12 @@ namespace Sla.SLEIGH
                     return;
                 }
             }
-            int4 endind = (firstwhitespace == -1) ? printpiece.size() : firstwhitespace;
-            for (int4 i = 0; i < endind; ++i)
+            int endind = (firstwhitespace == -1) ? printpiece.size() : firstwhitespace;
+            for (int i = 0; i < endind; ++i)
             {
                 if (printpiece[i][0] == '\n')
                 {
-                    int4 index = printpiece[i][1] - 'A';
+                    int index = printpiece[i][1] - 'A';
                     operands[index].print(s, walker);
                 }
                 else
@@ -434,11 +434,11 @@ namespace Sla.SLEIGH
                 }
             }
             if (firstwhitespace == -1) return; // Nothing to print after firstwhitespace
-            for (int4 i = firstwhitespace + 1; i < printpiece.size(); ++i)
+            for (int i = firstwhitespace + 1; i < printpiece.size(); ++i)
             {
                 if (printpiece[i][0] == '\n')
                 {
-                    int4 index = printpiece[i][1] - 'A';
+                    int index = printpiece[i][1] - 'A';
                     operands[index].print(s, walker);
                 }
                 else
@@ -462,10 +462,10 @@ namespace Sla.SLEIGH
                 (*iter).apply(walker);
         }
 
-        public void markSubtableOperands(List<int4> check)
+        public void markSubtableOperands(List<int> check)
         { // Adjust -check- so it has one entry for every operand, a 0 if it is a subtable, a 2 if it is not
             check.resize(operands.size());
-            for (int4 i = 0; i < operands.size(); ++i)
+            for (int i = 0; i < operands.size(); ++i)
             {
                 TripleSymbol* sym = operands[i].getDefiningSymbol();
                 if ((sym != (TripleSymbol*)0) && (sym.getType() == SleighSymbol::subtable_symbol))
@@ -475,7 +475,7 @@ namespace Sla.SLEIGH
             }
         }
 
-        public void collectLocalExports(List<uintb> results)
+        public void collectLocalExports(List<ulong> results)
         {
             if (templ == (ConstructTpl*)0) return;
             HandleTpl* handle = templ.getResult();
@@ -494,7 +494,7 @@ namespace Sla.SLEIGH
             }
             if (handle.getSpace().getType() == ConstTpl::handle)
             {
-                int4 handleIndex = handle.getSpace().getHandleIndex();
+                int handleIndex = handle.getSpace().getHandleIndex();
                 OperandSymbol* opSym = getOperand(handleIndex);
                 opSym.collectLocalValues(results);
             }
@@ -509,7 +509,7 @@ namespace Sla.SLEIGH
 
         public bool isRecursive()
         { // Does this constructor cause recursion with its table
-            for (int4 i = 0; i < operands.size(); ++i)
+            for (int i = 0; i < operands.size(); ++i)
             {
                 TripleSymbol* sym = operands[i].getDefiningSymbol();
                 if (sym == parent) return true;
@@ -524,13 +524,13 @@ namespace Sla.SLEIGH
             s << " first=\"" << dec << firstwhitespace << "\"";
             s << " length=\"" << minimumlength << "\"";
             s << " line=\"" << src_index << ":" << lineno << "\">\n";
-            for (int4 i = 0; i < operands.size(); ++i)
+            for (int i = 0; i < operands.size(); ++i)
                 s << "<oper id=\"0x" << hex << operands[i].getId() << "\"/>\n";
-            for (int4 i = 0; i < printpiece.size(); ++i)
+            for (int i = 0; i < printpiece.size(); ++i)
             {
                 if (printpiece[i][0] == '\n')
                 {
-                    int4 index = printpiece[i][1] - 'A';
+                    int index = printpiece[i][1] - 'A';
                     s << "<opprint id=\"" << dec << index << "\"/>\n";
                 }
                 else
@@ -540,11 +540,11 @@ namespace Sla.SLEIGH
                     s << "\"/>\n";
                 }
             }
-            for (int4 i = 0; i < context.size(); ++i)
+            for (int i = 0; i < context.size(); ++i)
                 context[i].saveXml(s);
             if (templ != (ConstructTpl*)0)
                 templ.saveXml(s, -1);
-            for (int4 i = 0; i < namedtempl.size(); ++i)
+            for (int i = 0; i < namedtempl.size(); ++i)
             {
                 if (namedtempl[i] == (ConstructTpl*)0) // Some sections may be NULL
                     continue;
@@ -555,7 +555,7 @@ namespace Sla.SLEIGH
 
         public void restoreXml(Element el, SleighBase trans)
         {
-            uintm id;
+            uint id;
             {
                 istringstream s(el.getAttributeValue("parent"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
@@ -585,7 +585,7 @@ namespace Sla.SLEIGH
             {
                 if ((*iter).getName() == "oper")
                 {
-                    uintm id;
+                    uint id;
                     {
                         istringstream s((* iter).getAttributeValue("id"));
                         s.unsetf(ios::dec | ios::hex | ios::oct);
@@ -598,7 +598,7 @@ namespace Sla.SLEIGH
                     printpiece.push_back((*iter).getAttributeValue("piece"));
                 else if ((*iter).getName() == "opprint")
                 {
-                    int4 index;
+                    int index;
                     istringstream s((* iter).getAttributeValue("id"));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> index;
@@ -621,7 +621,7 @@ namespace Sla.SLEIGH
                 else
                 {
                     ConstructTpl* cur = new ConstructTpl();
-                    int4 sectionid = cur.restoreXml(*iter, trans);
+                    int sectionid = cur.restoreXml(*iter, trans);
                     if (sectionid < 0)
                     {
                         if (templ != (ConstructTpl*)0)

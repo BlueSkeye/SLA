@@ -17,14 +17,14 @@ namespace Sla.SLEIGH
         {               // The void constructor must explicitly build
                         // the ConstantValue because it is not stored
                         // or restored via xml
-            patexp = new ConstantValue((intb)0);
+            patexp = new ConstantValue((long)0);
             patexp.layClaim();
         }
 
         public PatternlessSymbol(string nm)
             : base(nm)
         {
-            patexp = new ConstantValue((intb)0);
+            patexp = new ConstantValue((long)0);
             patexp.layClaim();
         }
 

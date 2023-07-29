@@ -21,7 +21,7 @@ namespace Sla.EXTRA
             throw new LowlevelError("Cannot add register to DummyTranslate");
         }
 
-        public override string getRegisterName(AddrSpace @base, uintb off, int4 size) => "";
+        public override string getRegisterName(AddrSpace @base, ulong off, int size) => "";
 
         public override void getAllRegisters(Dictionary<VarnodeData, string> reglist)
         {
@@ -31,11 +31,11 @@ namespace Sla.EXTRA
         {
         }
 
-        public override int4 instructionLength(Address baseaddr) => -1;
+        public override int instructionLength(Address baseaddr) => -1;
 
-        public override int4 oneInstruction(PcodeEmit emit, Address baseaddr) => -1;
+        public override int oneInstruction(PcodeEmit emit, Address baseaddr) => -1;
 
-        public override int4 printAssembly(AssemblyEmit emit, Address baseaddr) => -1;
+        public override int printAssembly(AssemblyEmit emit, Address baseaddr) => -1;
     }
 #endif
 }

@@ -33,7 +33,7 @@ namespace Sla.DECCORE
         /// \param typegrp is the factory owning \b this data-type
         protected void decode(Decoder decoder, TypeFactory typegrp)
         {
-            //  uint4 elemId = decoder.openElement();
+            //  uint elemId = decoder.openElement();
             decodeBasic(decoder);
             // Get endianness flag from architecture, rather than specific type encoding
             setflags();
@@ -54,7 +54,7 @@ namespace Sla.DECCORE
         }
 
         /// Construct given name,size, meta-type
-        public TypeUnicode(string nm,int4 sz, type_metatype m)
+        public TypeUnicode(string nm,int sz, type_metatype m)
             : base(sz, m, nm)
         {
             setflags();         // Set special unicode UTF flags

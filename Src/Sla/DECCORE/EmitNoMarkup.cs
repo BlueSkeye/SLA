@@ -26,55 +26,55 @@ namespace Sla.DECCORE
             s = (ostream*)0;
         }
 
-        public override int4 beginDocument() => 0;
+        public override int beginDocument() => 0;
 
-        public override void endDocument(int4 id)
+        public override void endDocument(int id)
         {
         }
 
-        public override int4 beginFunction(Funcdata fd) => 0;
+        public override int beginFunction(Funcdata fd) => 0;
 
-        public override void endFunction(int4 id)
+        public override void endFunction(int id)
         {
         }
 
-        public override int4 beginBlock(FlowBlock bl) => 0;
+        public override int beginBlock(FlowBlock bl) => 0;
 
-        public override void endBlock(int4 id)
+        public override void endBlock(int id)
         {
         }
 
         public override void tagLine()
         {
-            *s << endl; for (int4 i = indentlevel; i > 0; --i) *s << ' ';
+            *s << endl; for (int i = indentlevel; i > 0; --i) *s << ' ';
         }
 
-        public override void tagLine(int4 indent)
+        public override void tagLine(int indent)
         {
-            *s << endl; for (int4 i = indent; i > 0; --i) *s << ' ';
+            *s << endl; for (int i = indent; i > 0; --i) *s << ' ';
         }
 
-        public override int4 beginReturnType(Varnode vn) => 0;
+        public override int beginReturnType(Varnode vn) => 0;
 
-        public override void endReturnType(int4 id)
-        {
-        }
-
-        public override int4 beginVarDecl(Symbol sym) => 0;
-
-        public override void endVarDecl(int4 id)
+        public override void endReturnType(int id)
         {
         }
 
-        public override int4 beginStatement(PcodeOp op) => 0;
+        public override int beginVarDecl(Symbol sym) => 0;
 
-        public override void endStatement(int4 id)
+        public override void endVarDecl(int id)
         {
         }
 
-        public override int4 beginFuncProto() => 0;
+        public override int beginStatement(PcodeOp op) => 0;
 
-        public override void endFuncProto(int4 id)
+        public override void endStatement(int id)
+        {
+        }
+
+        public override int beginFuncProto() => 0;
+
+        public override void endFuncProto(int id)
         {
         }
 
@@ -98,17 +98,17 @@ namespace Sla.DECCORE
             *s << name;
         }
 
-        public override void tagField(string name, syntax_highlight hl, Datatype ct, int4 off, PcodeOp op)
+        public override void tagField(string name, syntax_highlight hl, Datatype ct, int off, PcodeOp op)
         {
             *s << name;
         }
 
-        public override void tagComment(string name, syntax_highlight hl, AddrSpace spc, uintb off)
+        public override void tagComment(string name, syntax_highlight hl, AddrSpace spc, ulong off)
         {
             *s << name;
         }
 
-        public override void tagLabel(string name, syntax_highlight hl, AddrSpace spc, uintb off)
+        public override void tagLabel(string name, syntax_highlight hl, AddrSpace spc, ulong off)
         {
             *s << name;
         }
@@ -118,12 +118,12 @@ namespace Sla.DECCORE
             *s << data;
         }
 
-        public override int4 openParen(string paren, int4 id = 0)
+        public override int openParen(string paren, int id = 0)
         {
             *s << paren; parenlevel += 1; return id;
         }
 
-        public override void closeParen(string paren, int4 id)
+        public override void closeParen(string paren, int id)
         {
             *s << paren; parenlevel -= 1;
         }

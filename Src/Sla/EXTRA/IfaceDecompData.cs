@@ -83,7 +83,7 @@ namespace Sla.EXTRA
         /// can be followed.  Otherwise, a zero \e size allows unbounded flow tracing.
         /// \param s is a output stream for reporting function details or errors
         /// \param size (if non-zero) is the maximum number of bytes to disassemble
-        public void followFlow(TextWriter s, int4 size)
+        public void followFlow(TextWriter s, int size)
         {
 #if OPACTION_DEBUG
             if (jumptabledebug)
@@ -135,8 +135,8 @@ namespace Sla.EXTRA
         /// \return the Varnode object
         public Varnode readVarnode(TextReader s)
         {
-            uintm uq;
-            int4 defsize;
+            uint uq;
+            int defsize;
             Varnode* vn = (Varnode*)0;
 
             if (fd == (Funcdata*)0)
@@ -146,13 +146,13 @@ namespace Sla.EXTRA
             Address loc(parse_varnode(s, defsize, pc, uq,* conf.types));
             if (loc.getSpace().getType() == IPTR_CONSTANT)
             {
-                if (pc.isInvalid() || (uq == ~((uintm)0)))
+                if (pc.isInvalid() || (uq == ~((uint)0)))
                     throw IfaceParseError("Missing p-code sequence number");
                 SeqNum seq(pc, uq);
                 PcodeOp* op = fd.findOp(seq);
                 if (op != (PcodeOp*)0)
                 {
-                    for (int4 i = 0; i < op.numInput(); ++i)
+                    for (int i = 0; i < op.numInput(); ++i)
                     {
                         Varnode* tmpvn = op.getIn(i);
                         if (tmpvn.getAddr() == loc)
@@ -163,9 +163,9 @@ namespace Sla.EXTRA
                     }
                 }
             }
-            else if (pc.isInvalid() && (uq == ~((uintm)0)))
+            else if (pc.isInvalid() && (uq == ~((uint)0)))
                 vn = fd.findVarnodeInput(defsize, loc);
-            else if ((!pc.isInvalid()) && (uq != ~((uintm)0)))
+            else if ((!pc.isInvalid()) && (uq != ~((uint)0)))
                 vn = fd.findVarnodeWritten(defsize, loc, pc, uq);
             else
             {
@@ -179,7 +179,7 @@ namespace Sla.EXTRA
                     if (vn.isWritten())
                     {
                         if ((!pc.isInvalid()) && (vn.getDef().getAddr() == pc)) break;
-                        if ((uq != ~((uintm)0)) && (vn.getDef().getTime() == uq)) break;
+                        if ((uq != ~((uint)0)) && (vn.getDef().getTime() == uq)) break;
                     }
                 }
             }

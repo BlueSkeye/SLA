@@ -32,7 +32,7 @@ namespace Sla.DECCORE
         /// Opcode of the new op
         private OpCode opc;
         /// Special handling code when creating
-        private uint4 special;
+        private uint special;
         /// Varnode output
         private TransformVar output;
         /// Varnode inputs
@@ -51,7 +51,7 @@ namespace Sla.DECCORE
                 fd.opSetOpcode(op, opc);
                 while (input.size() < op.numInput())
                     fd.opRemoveInput(op, op.numInput() - 1);
-                for (int4 i = 0; i < op.numInput(); ++i)
+                for (int i = 0; i < op.numInput(); ++i)
                     fd.opUnsetInput(op, i);            // Clear any remaining inputs
                 while (op.numInput() < input.size())
                     fd.opInsertInput(op, (Varnode*)0, op.numInput() - 1);
@@ -97,6 +97,6 @@ namespace Sla.DECCORE
         public TransformVar getOut() => output;
 
         /// Get the i-th input placeholder variable for \b this
-        public TransformVar getIn(int4 i) => input[i];
+        public TransformVar getIn(int i) => input[i];
     }
 }

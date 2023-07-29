@@ -20,15 +20,15 @@ namespace Sla.DECCORE
         /// The stack space being loaded from
         private AddrSpace spc;
         /// Base offset of the pointer
-        private uintb pointerBase;
+        private ulong pointerBase;
         /// Minimum offset of the LOAD
-        private uintb minimumOffset;
+        private ulong minimumOffset;
         /// Maximum offset of the LOAD
-        private uintb maximumOffset;
+        private ulong maximumOffset;
         /// Step of any access into this range (0=unknown)
-        private int4 step;
+        private int step;
         /// 0=unanalyzed, 1=analyzed(partial result), 2=analyzed(full result)
-        private int4 analysisState;
+        private int analysisState;
 
         /// Convert partial value set analysis into guard range
         /// Make some determination of the range of possible values for a LOAD based
@@ -42,8 +42,8 @@ namespace Sla.DECCORE
         private void establishRange(ValueSetRead valueSet)
         {
             CircleRange range = valueSet.getRange();
-            uintb rangeSize = range.getSize();
-            uintb size;
+            ulong rangeSize = range.getSize();
+            ulong size;
             if (range.isEmpty())
             {
                 minimumOffset = pointerBase;
@@ -79,7 +79,7 @@ namespace Sla.DECCORE
                 else
                     minimumOffset = pointerBase;
             }
-            uintb max = spc.getHighest();
+            ulong max = spc.getHighest();
             if (minimumOffset > max)
             {
                 minimumOffset = max;
@@ -87,7 +87,7 @@ namespace Sla.DECCORE
             }
             else
             {
-                uintb maxSize = (max - minimumOffset) + 1;
+                ulong maxSize = (max - minimumOffset) + 1;
                 if (size > maxSize)
                     size = maxSize;
                 maximumOffset = minimumOffset + size - 1;
@@ -99,7 +99,7 @@ namespace Sla.DECCORE
         {
             analysisState = 1;      // In all cases the settings determined here are final
             CircleRange range = valueSet.getRange();
-            uintb rangeSize = range.getSize();
+            ulong rangeSize = range.getSize();
             if (rangeSize == 0x100 || rangeSize == 0x10000)
             {
                 // These sizes likely result from the storage size of the index
@@ -130,7 +130,7 @@ namespace Sla.DECCORE
         /// \param o is the LOAD op
         /// \param s is the (stack) space it is loading from
         /// \param off is the base offset that is indexed from
-        private void set(PcodeOp o, AddrSpace s, uintb off)
+        private void set(PcodeOp o, AddrSpace s, ulong off)
         {
             op = o;
             spc = s;
@@ -145,13 +145,13 @@ namespace Sla.DECCORE
         public PcodeOp getOp() => op;
 
         /// Get minimum offset of the guarded range
-        public uintb getMinimum() => minimumOffset;
+        public ulong getMinimum() => minimumOffset;
 
         /// Get maximum offset of the guarded range
-        public uintb getMaximum() => maximumOffset;
+        public ulong getMaximum() => maximumOffset;
 
         /// Get the calculated step associated with the range (or 0)
-        public int4 getStep() => step;
+        public int getStep() => step;
 
         /// Does \b this guard apply to the given address
         /// Check if the address falls within the range defined by \b this

@@ -15,17 +15,17 @@ namespace Sla.DECCORE
     internal class ResolveEdge
     {
         /// Id of base data-type being resolved
-        private uint8 typeId;
+        private ulong typeId;
         /// Id of PcodeOp edge
-        private uintm opTime;
+        private uint opTime;
         /// Encoding of the slot and pointer-ness
-        private int4 encoding;
+        private int encoding;
 
         /// Construct from components
         /// \param parent is a parent data-type that needs to be resolved
         /// \param op is the PcodeOp reading/writing the \b parent data-type
         /// \param slot is the slot (>=0 for input, -1 for output) accessing the \b parent
-        public ResolveEdge(Datatype parent, PcodeOp op, int4 slot)
+        public ResolveEdge(Datatype parent, PcodeOp op, int slot)
         {
             opTime = op.getTime();
             encoding = slot;

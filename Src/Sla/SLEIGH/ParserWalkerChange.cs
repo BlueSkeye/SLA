@@ -22,7 +22,7 @@ namespace Sla.SLEIGH
 
         public ConstructState getPoint() => point;
 
-        public void setOffset(uint4 off)
+        public void setOffset(uint off)
         {
             point.offset = off;
         }
@@ -32,19 +32,19 @@ namespace Sla.SLEIGH
             point.ct = c;
         }
 
-        public void setCurrentLength(int4 len)
+        public void setCurrentLength(int len)
         {
             point.length = len;
         }
 
-        public void calcCurrentLength(int4 length, int4 numopers)
+        public void calcCurrentLength(int length, int numopers)
         {               // Calculate the length of the current constructor
                         // state assuming all its operands are constructed
             length += point.offset;    // Convert relative length to absolute length
-            for (int4 i = 0; i < numopers; ++i)
+            for (int i = 0; i < numopers; ++i)
             {
                 ConstructState* subpoint = point.resolve[i];
-                int4 sublength = subpoint.length + subpoint.offset;
+                int sublength = subpoint.length + subpoint.offset;
                 // Since subpoint.offset is an absolute offset
                 // (relative to beginning of instruction) sublength
                 if (sublength > length) // is absolute and must be compared to absolute length

@@ -42,7 +42,7 @@ namespace Sla.DECCORE
             if (0 != functionalEqualityLevel(in1, in2, buf1, buf2)) return (PcodeOp*)0;
             PcodeOp* op1 = in1.getDef();   // in1 and in2 must be written to not be equal and pass functional equality test
             PcodeOp* op2 = in2.getDef();
-            for (int4 i = 0; i < op1.numInput(); ++i)
+            for (int i = 0; i < op1.numInput(); ++i)
             {
                 Varnode* vn = op1.getIn(i);
                 if (vn.isConstant()) continue;
@@ -70,12 +70,12 @@ namespace Sla.DECCORE
         /// Look for a two-branch MULTIEQUAL where both inputs are constructed in
         /// functionally equivalent ways.  Remove (the reference to) one construction
         /// and move the other into the merge block.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_MULTIEQUAL);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (op.numInput() != 2) return 0;
 
@@ -88,7 +88,7 @@ namespace Sla.DECCORE
             if (in2.isSpacebase()) return 0;
             Varnode* buf1[2];
             Varnode* buf2[2];
-            int4 res = functionalEqualityLevel(in1, in2, buf1, buf2);
+            int res = functionalEqualityLevel(in1, in2, buf1, buf2);
             if (res < 0) return 0;
             if (res > 1) return 0;
             PcodeOp* op1 = in1.getDef();
@@ -116,7 +116,7 @@ namespace Sla.DECCORE
             data.opUninsert(op1);       // Move the unified op
             if (res == 1)
             {
-                int4 slot1 = op1.getSlot(buf1[0]);
+                int slot1 = op1.getSlot(buf1[0]);
                 PcodeOp* substitute = findSubstitute(buf1[0], buf2[0], bl, earliest);
                 if (substitute == (PcodeOp*)0)
                 {

@@ -76,17 +76,17 @@ namespace Sla.SLEIGH
             new IdentRec( "trunc", OP_TRUNC ),
             new IdentRec( "zext", OP_ZEXT )
         };
-        private int4 curstate;
+        private int curstate;
         private char curchar;
         private char lookahead1;
         private char lookahead2;
         private string curtoken;
-        private int4 tokpos;
+        private int tokpos;
         private bool endofstream;
         private bool endofstreamsent;
         private istream s;
         private string curidentifier;
-        private uintb curnum;
+        private ulong curnum;
 
         private void starttoken()
         {
@@ -108,14 +108,14 @@ namespace Sla.SLEIGH
 
         private bool isDec(char c) => isdigit(c);
 
-        private int4 findIdentifier(string str)
+        private int findIdentifier(string str)
         {
-            int4 low = 0;
-            int4 high = IDENTREC_SIZE - 1;
-            int4 comp;
+            int low = 0;
+            int high = IDENTREC_SIZE - 1;
+            int comp;
             do
             {
-                int4 targ = (low + high) / 2;
+                int targ = (low + high) / 2;
                 comp = str.compare(idents[targ].nm);
                 if (comp < 0)       // str comes before targ
                     high = targ - 1;
@@ -127,7 +127,7 @@ namespace Sla.SLEIGH
             return -1;
         }
 
-        private int4 moveState()
+        private int moveState()
         {
             switch (curstate)
             {
@@ -441,10 +441,10 @@ namespace Sla.SLEIGH
             }
         }
 
-        public int4 getNextToken()
+        public int getNextToken()
         { // Will return either: identifier, punctuation, hexstring, decstring, endstream, or illegal
           // If identifier, hexstring, or decstring,  curtoken will be filled with the characters
-            int4 tok;
+            int tok;
             do
             {
                 curchar = lookahead1;
@@ -466,7 +466,7 @@ namespace Sla.SLEIGH
             {
                 curtoken[tokpos] = '\0';    // Append null terminator
                 curidentifier = curtoken;
-                int4 num = findIdentifier(curidentifier);
+                int num = findIdentifier(curidentifier);
                 if (num < 0)            // Not a keyword
                     return STRING;
                 return idents[num].id;
@@ -492,11 +492,11 @@ namespace Sla.SLEIGH
             }
             else if (tok == illegal)
                 return 0;
-            return (int4)curchar;
+            return (int)curchar;
         }
 
         public string getIdentifier() => curidentifier;
 
-        public uintb getNumber() => curnum;
+        public ulong getNumber() => curnum;
     }
 }

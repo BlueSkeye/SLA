@@ -20,13 +20,13 @@ namespace Sla.DECCORE
         /// The code address at the point of use
         private Address useaddr;
         /// An optional/recommended size for the variable being stored
-        private int4 size;
+        private int size;
         /// The local symbol name recommendation
         private string name;
         /// Id associated with the original Symbol
-        private uint8 symbolId;
+        private ulong symbolId;
         
-        public NameRecommend(Address ad, Address use,int4 sz, string nm,uint8 id)
+        public NameRecommend(Address ad, Address use,int sz, string nm,ulong id)
         {
             addr = ad;
             useaddr = use;
@@ -42,12 +42,12 @@ namespace Sla.DECCORE
         public Address getUseAddr() => useaddr;
 
         /// Get the optional size
-        public int4 getSize() => size;
+        public int getSize() => size;
 
         /// Get the recommended name
         public string getName() => name;
 
         /// Get the original Symbol id
-        public uint8 getSymbolId() => symbolId;
+        public ulong getSymbolId() => symbolId;
     }
 }

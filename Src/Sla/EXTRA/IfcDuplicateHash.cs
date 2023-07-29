@@ -18,7 +18,7 @@ namespace Sla.EXTRA
             DynamicHash dhash;
 
             VarnodeLocSet::const_iterator iter, enditer;
-            pair<set<uint8>::iterator, bool> res;
+            pair<set<ulong>::iterator, bool> res;
             iter = fd.beginLoc();
             enditer = fd.endLoc();
             while (iter != enditer)
@@ -29,7 +29,7 @@ namespace Sla.EXTRA
                 if (vn.isConstant())
                 {
                     PcodeOp* op = vn.loneDescend();
-                    int4 slot = op.getSlot(vn);
+                    int slot = op.getSlot(vn);
                     if (slot == 0)
                     {
                         if (op.code() == CPUI_LOAD) continue;
@@ -57,7 +57,7 @@ namespace Sla.EXTRA
                     s << endl;
                     return;
                 }
-                uint4 total = DynamicHash::getTotalFromHash(dhash.getHash());
+                uint total = DynamicHash::getTotalFromHash(dhash.getHash());
                 if (total != 1)
                 {
                     PcodeOp op;

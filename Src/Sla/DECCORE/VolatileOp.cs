@@ -21,7 +21,7 @@ namespace Sla.DECCORE
         /// \param base is the string to append the suffix to
         /// \param size is the size to encode expressed as the number of bytes
         /// \return the appended string
-        protected static string appendSize(string @base, int4 size)
+        protected static string appendSize(string @base, int size)
         {
             if (size == 1)
                 return base + "_1";
@@ -36,7 +36,7 @@ namespace Sla.DECCORE
             return s.str();
         }
 
-        public VolatileOp(Architecture g, string nm,int4 ind)
+        public VolatileOp(Architecture g, string nm,int ind)
             : base(g, nm, ind)
         {
         }

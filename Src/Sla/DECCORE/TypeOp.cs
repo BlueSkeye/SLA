@@ -41,9 +41,9 @@ namespace Sla.DECCORE
         /// The op-code value
         protected OpCode opcode;
         /// Cached pcode-op properties for this op-code
-        protected uint4 opflags;
+        protected uint opflags;
         /// Additional properties
-        protected uint4 addlflags;
+        protected uint addlflags;
         /// Symbol denoting this operation
         protected string name;
         /// Object for emulating the behavior of the op-code
@@ -91,7 +91,7 @@ namespace Sla.DECCORE
         public OpCode getOpcode() => opcode;
 
         /// Get the properties associated with the op-code
-        public uint4 getFlags() => opflags;
+        public uint getFlags() => opflags;
 
         /// Get the behavior associated with the op-code
         public OpBehavior getBehavior() => behave;
@@ -102,7 +102,7 @@ namespace Sla.DECCORE
         /// \param sizein is the size of the input in bytes
         /// \param in1 is the input value
         /// \return the output value
-        public uintb evaluateUnary(int4 sizeout, int4 sizein, uintb in1) 
+        public ulong evaluateUnary(int sizeout, int sizein, ulong in1) 
             => behave.evaluateUnary(sizeout, sizein, in1);
 
         /// \brief Emulate the binary op-code on an input value
@@ -112,7 +112,7 @@ namespace Sla.DECCORE
         /// \param in1 is the first input value
         /// \param in2 is the second input value
         /// \return the output value
-        public uintb evaluateBinary(int4 sizeout, int4 sizein, uintb in1, uintb in2)
+        public ulong evaluateBinary(int sizeout, int sizein, ulong in1, ulong in2)
                     => behave.evaluateBinary(sizeout, sizein, in1, in2);
 
         /// \brief Reverse the binary op-code operation, recovering a constant input value
@@ -124,7 +124,7 @@ namespace Sla.DECCORE
         /// \param sizein is the size of the inputs in bytes
         /// \param in is the known input value
         /// \return the input value corresponding to the \b slot
-        public uintb recoverInputBinary(int4 slot, int4 sizeout, uintb @out, int4 sizein, uintb @in)
+        public ulong recoverInputBinary(int slot, int sizeout, ulong @out, int sizein, ulong @in)
             => behave.recoverInputBinary(slot, sizeout, @out, sizein, @in);
 
         /// \brief Reverse the unary op-code operation, recovering a constant input value
@@ -134,7 +134,7 @@ namespace Sla.DECCORE
         /// \param out is the output value
         /// \param sizein is the size of the input in bytes
         /// \return the input value
-        public uintb recoverInputUnary(int4 sizeout, uintb @out, int4 sizein) 
+        public ulong recoverInputUnary(int sizeout, ulong @out, int sizein) 
             => behave.recoverInputUnary(sizeout,out, sizein);
 
         /// Return \b true if this op-code is commutative
@@ -177,7 +177,7 @@ namespace Sla.DECCORE
         /// \param op is the PcodeOp being considered
         /// \param slot is the input being considered
         /// \return the data-type
-        public virtual Datatype getInputLocal(PcodeOp op, int4 slot)
+        public virtual Datatype getInputLocal(PcodeOp op, int slot)
         {               // Default type lookup
             return tlst.getBase(op.getIn(slot).getSize(), TYPE_UNKNOWN);
         }
@@ -201,7 +201,7 @@ namespace Sla.DECCORE
         /// \param slot is the input to consider
         /// \param castStrategy is the current casting strategy
         /// \return the data-type
-        public virtual Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
+        public virtual Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
             Varnode vn = op.getIn(slot);
             if (vn.isAnnotation()) return (Datatype*)0;
@@ -224,7 +224,7 @@ namespace Sla.DECCORE
         /// \param outslot indicates how the outgoing Varnode is attached to the PcodeOp
         /// \return the outgoing data-type or null (to indicate no propagation)
         public virtual Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
-                int4 inslot, int4 outslot)
+                int inslot, int outslot)
         {
             return (Datatype*)0;        // Don't propagate by default
         }

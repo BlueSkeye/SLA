@@ -25,20 +25,20 @@ namespace Sla.DECCORE
 
         /// \class RuleSelectCse
         /// \brief Look for common sub-expressions (built out of a restricted set of ops)
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_SUBPIECE);
             oplist.push_back(CPUI_INT_SRIGHT); // For division optimization corrections
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn = op.getIn(0);
             list<PcodeOp*>::const_iterator iter;
             OpCode opc = op.code();
             PcodeOp* otherop;
-            uintm hash;
-            List<pair<uintm, PcodeOp*>> list;
+            uint hash;
+            List<pair<uint, PcodeOp*>> list;
             List<Varnode*> vlist;
 
             for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
@@ -47,7 +47,7 @@ namespace Sla.DECCORE
                 if (otherop.code() != opc) continue;
                 hash = otherop.getCseHash();
                 if (hash == 0) continue;
-                list.push_back(pair<uintm, PcodeOp*>(hash, otherop));
+                list.push_back(pair<uint, PcodeOp*>(hash, otherop));
             }
             if (list.size() <= 1) return 0;
             cseEliminateList(data, list, vlist);

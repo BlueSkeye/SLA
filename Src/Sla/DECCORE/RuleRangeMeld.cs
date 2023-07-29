@@ -22,7 +22,7 @@ namespace Sla.DECCORE
             return new RuleRangeMeld(getGroup());
         }
 
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_BOOL_OR);
             oplist.push_back(CPUI_BOOL_AND);
@@ -37,12 +37,12 @@ namespace Sla.DECCORE
         ///
         /// Try to union or intersect the ranges to produce
         /// a more concise expression.
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             PcodeOp* sub1,*sub2;
             Varnode* vn1,*vn2;
             Varnode* A1,*A2;
-            int4 restype;
+            int restype;
 
             vn1 = op.getIn(0);
             if (!vn1.isWritten()) return 0;
@@ -93,8 +93,8 @@ namespace Sla.DECCORE
             if (restype == 0)
             {
                 OpCode opc;
-                uintb resc;
-                int4 resslot;
+                ulong resc;
+                int resslot;
                 restype = range1.translate2Op(opc, resc, resslot);
                 if (restype == 0)
                 {

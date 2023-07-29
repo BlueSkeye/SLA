@@ -18,7 +18,7 @@ namespace Sla.DECCORE
         /// Underlying architecture
         private Architecture glb;
         /// Temporary buffer for pulling in loadimage bytes
-        private uint1[] testBuffer;
+        private byte[] testBuffer;
 
         /// Make sure buffer has valid bounded set of unicode
         /// Check that the given buffer contains valid unicode.
@@ -28,16 +28,16 @@ namespace Sla.DECCORE
         /// \param size is the size of the buffer in bytes
         /// \param charsize is the UTF encoding (1=UTF8, 2=UTF16, 4=UTF32)
         /// \return the number of characters or -1 if there is an invalid encoding
-        private int4 checkCharacters(uint1[] buf, int4 size,int4 charsize)
+        private int checkCharacters(byte[] buf, int size,int charsize)
         {
-            if (buf == (uint1*)0) return -1;
+            if (buf == (byte*)0) return -1;
             bool bigend = glb.translate.isBigEndian();
-            int4 i = 0;
-            int4 count = 0;
-            int4 skip = charsize;
+            int i = 0;
+            int count = 0;
+            int skip = charsize;
             while (i < size)
             {
-                int4 codepoint = getCodepoint(buf + i, charsize, bigend, skip);
+                int codepoint = getCodepoint(buf + i, charsize, bigend, skip);
                 if (codepoint < 0) return -1;
                 if (codepoint == 0) break;
                 count += 1;
@@ -48,11 +48,11 @@ namespace Sla.DECCORE
 
         /// \param g is the underlying architecture (and loadimage)
         /// \param max is the maximum number of bytes to allow in a decoded string
-        public StringManagerUnicode(Architecture g, int4 max)
+        public StringManagerUnicode(Architecture g, int max)
             : base(max)
         {
             glb = g;
-            testBuffer = new uint1[max];
+            testBuffer = new byte[max];
         }
 
         ~StringManagerUnicode()
@@ -60,7 +60,7 @@ namespace Sla.DECCORE
             delete[] testBuffer;
         }
 
-        public override List<uint1> getStringData(Address addr, Datatype charType, bool isTrunc)
+        public override List<byte> getStringData(Address addr, Datatype charType, bool isTrunc)
         {
             map<Address, StringData>::iterator iter;
             iter = stringMap.find(addr);
@@ -77,16 +77,16 @@ namespace Sla.DECCORE
             if (charType.isOpaqueString())     // Cannot currently test for an opaque encoding
                 return stringData.byteData;         // Return the empty buffer
 
-            int4 curBufferSize = 0;
-            int4 charsize = charType.getSize();
+            int curBufferSize = 0;
+            int charsize = charType.getSize();
             bool foundTerminator = false;
 
             try
             {
                 do
                 {
-                    int4 amount = 32;   // Grab 32 bytes of image at a time
-                    uint4 newBufferSize = curBufferSize + amount;
+                    int amount = 32;   // Grab 32 bytes of image at a time
+                    uint newBufferSize = curBufferSize + amount;
                     if (newBufferSize > maximumChars)
                     {
                         newBufferSize = maximumChars;
@@ -107,7 +107,7 @@ namespace Sla.DECCORE
                 return stringData.byteData;         // Return the empty buffer
             }
 
-            int4 numChars = checkCharacters(testBuffer, curBufferSize, charsize);
+            int numChars = checkCharacters(testBuffer, curBufferSize, charsize);
             if (numChars < 0)
                 return stringData.byteData;     // Return the empty buffer (invalid encoding)
             if (charsize == 1 && numChars < maximumChars)
@@ -122,9 +122,9 @@ namespace Sla.DECCORE
                 if (!writeUnicode(s, testBuffer, curBufferSize, charsize))
                     return stringData.byteData;     // Return the empty buffer
                 string resString = s.str();
-                int4 newSize = resString.size();
+                int newSize = resString.size();
                 stringData.byteData.reserve(newSize + 1);
-                uint1* ptr = (uint1*)resString.c_str();
+                byte* ptr = (byte*)resString.c_str();
                 stringData.byteData.assign(ptr, ptr + newSize);
                 stringData.byteData[newSize] = 0;       // Make sure there is a null terminator
             }
@@ -141,15 +141,15 @@ namespace Sla.DECCORE
         /// \param size is the number of bytes in the buffer
         /// \param charsize specifies the encoding (1=UTF8 2=UTF16 4=UTF32)
         /// \return \b true if the byte array contains valid unicode
-        public bool writeUnicode(TextWriter s, uint1[] buffer, int4 size, int4 charsize)
+        public bool writeUnicode(TextWriter s, byte[] buffer, int size, int charsize)
         {
             bool bigend = glb.translate.isBigEndian();
-            int4 i = 0;
-            int4 count = 0;
-            int4 skip = charsize;
+            int i = 0;
+            int count = 0;
+            int skip = charsize;
             while (i < size)
             {
-                int4 codepoint = getCodepoint(buffer + i, charsize, bigend, skip);
+                int codepoint = getCodepoint(buffer + i, charsize, bigend, skip);
                 if (codepoint < 0) return false;
                 if (codepoint == 0) break;      // Terminator
                 writeUtf8(s, codepoint);

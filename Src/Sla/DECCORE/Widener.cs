@@ -21,7 +21,7 @@ namespace Sla.DECCORE
         ///
         /// \param valueSet is the given value set
         /// \return the value of the iteration counter to reset to
-        public abstract int4 determineIterationReset(ValueSet valueSet);
+        public abstract int determineIterationReset(ValueSet valueSet);
 
         /// \brief Check if the given value set has been frozen for the remainder of the iteration process
         ///

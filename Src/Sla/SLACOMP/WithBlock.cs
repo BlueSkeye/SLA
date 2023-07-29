@@ -38,7 +38,7 @@ namespace Sla.SLACOMP
                 pateq.layClaim();
             if (cvec != (List<ContextChange*>*)0)
             {
-                for (int4 i = 0; i < cvec.size(); ++i)
+                for (int i = 0; i < cvec.size(); ++i)
                     contvec.push_back((*cvec)[i]);  // Lay claim to -cvec-s pointers, we don't clone
                 delete cvec;
             }
@@ -48,7 +48,7 @@ namespace Sla.SLACOMP
         {
             if (pateq != (PatternEquation*)0)
                 PatternEquation::release(pateq);
-            for (int4 i = 0; i < contvec.size(); ++i)
+            for (int i = 0; i < contvec.size(); ++i)
             {
                 delete contvec[i];
             }
@@ -92,7 +92,7 @@ namespace Sla.SLACOMP
                 if (changelist.size() == 0) continue;
                 if (res == (List<ContextChange*>*)0)
                     res = new List<ContextChange*>();
-                for (int4 i = 0; i < changelist.size(); ++i)
+                for (int i = 0; i < changelist.size(); ++i)
                 {
                     res.push_back(changelist[i].clone());
                 }
@@ -103,7 +103,7 @@ namespace Sla.SLACOMP
                 {
                     if (res == (List<ContextChange*>*)0)
                         res = new List<ContextChange*>();
-                    for (int4 i = 0; i < contvec.size(); ++i)
+                    for (int i = 0; i < contvec.size(); ++i)
                         res.push_back((*contvec)[i]);      // lay claim to contvecs pointer
                 }
                 delete contvec;

@@ -23,12 +23,12 @@ namespace Sla.DECCORE
             return new RulePiece2Sext(getGroup());
         }
 
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_PIECE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* shiftout,*x;
             PcodeOp* shiftop;
@@ -38,7 +38,7 @@ namespace Sla.DECCORE
             shiftop = shiftout.getDef();
             if (shiftop.code() != CPUI_INT_SRIGHT) return 0;
             if (!shiftop.getIn(1).isConstant()) return 0;
-            int4 n = shiftop.getIn(1).getOffset();
+            int n = shiftop.getIn(1).getOffset();
             x = shiftop.getIn(0);
             if (x != op.getIn(1)) return 0;
             if (n != 8 * x.getSize() - 1) return 0;

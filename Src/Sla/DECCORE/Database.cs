@@ -104,8 +104,8 @@ namespace Sla.DECCORE
         /// \return the matching scope
         private Scope parseParentTag(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement(ELEM_PARENT);
-            uint8 id = decoder.readUnsignedInteger(ATTRIB_ID);
+            uint elemId = decoder.openElement(ELEM_PARENT);
+            ulong id = decoder.readUnsignedInteger(ATTRIB_ID);
             Scope* res = resolveScope(id);
             if (res == (Scope*)0)
                 throw new LowlevelError("Could not find scope matching id");
@@ -167,7 +167,7 @@ namespace Sla.DECCORE
             }
             if (newscope.name.size() == 0)
                 throw new LowlevelError("Non-global scope has empty name");
-            pair<uint8, Scope*> value(newscope.uniqueId, newscope);
+            pair<ulong, Scope*> value(newscope.uniqueId, newscope);
             pair<ScopeMap::iterator, bool> res;
             res = idmap.insert(value);
             if (res.second == false)
@@ -252,7 +252,7 @@ namespace Sla.DECCORE
         /// \param spc is the address space of the memory range being added
         /// \param first is the offset of the first byte in the array
         /// \param last is the offset of the last byte
-        public void addRange(Scope scope, AddrSpace spc, uintb first, uintb last)
+        public void addRange(Scope scope, AddrSpace spc, ulong first, ulong last)
         {
             clearResolve(scope);
             scope.addRange(spc, first, last);
@@ -266,7 +266,7 @@ namespace Sla.DECCORE
         /// \param spc is the address space of the memory range being removed
         /// \param first is the offset of the first byte in the array
         /// \param last is the offset of the last byte
-        public void removeRange(Scope scope, AddrSpace spc, uintb first, uintb last)
+        public void removeRange(Scope scope, AddrSpace spc, ulong first, ulong last)
         {
             clearResolve(scope);
             scope.removeRange(spc, first, last);
@@ -280,7 +280,7 @@ namespace Sla.DECCORE
         /// Find a Scope object, given its global id.  Return null if id is not mapped to a Scope.
         /// \param id is the global id
         /// \return the matching Scope or null
-        public Scope resolveScope(uint8 id)
+        public Scope resolveScope(ulong id)
         {
             ScopeMap::const_iterator iter = idmap.find(id);
             if (iter != idmap.end())
@@ -336,7 +336,7 @@ namespace Sla.DECCORE
         /// \param nm is the given name of the Scope
         /// \param parent is the given parent scope to search
         /// \return the subscope object either found or created
-        public Scope findCreateScope(uint8, string nm, Scope parent)
+        public Scope findCreateScope(ulong, string nm, Scope parent)
         {
             Scope* res = resolveScope(id);
             if (res != (Scope*)0)
@@ -373,7 +373,7 @@ namespace Sla.DECCORE
                 if (!idByNameHash)
                     throw new LowlevelError("Scope name hashes not allowed");
                 string scopename = fullname.substr(mark, endmark - mark);
-                uint8 nameId = Scope::hashScopeName(start.uniqueId, scopename);
+                ulong nameId = Scope::hashScopeName(start.uniqueId, scopename);
                 start = findCreateScope(nameId, scopename, start);
                 mark = endmark + delim.size();
             }
@@ -422,7 +422,7 @@ namespace Sla.DECCORE
         }
 
         /// Get boolean properties at the given address
-        public uint4 getProperty(Address addr) => flagbase.getValue(addr);
+        public uint getProperty(Address addr) => flagbase.getValue(addr);
 
         /// Set boolean properties over a given memory range
         /// This allows the standard boolean Varnode properties like
@@ -431,12 +431,12 @@ namespace Sla.DECCORE
         /// Scope::queryProperties() method in particular.
         /// \param flags is the set of boolean properties
         /// \param range is the memory range to label
-        public void setPropertyRange(uint4 flags, Range range)
+        public void setPropertyRange(uint flags, Range range)
         {
             Address addr1 = range.getFirstAddr();
             Address addr2 = range.getLastAddrOpen(glb);
             flagbase.split(addr1);
-            partmap<Address, uint4>::iterator aiter, biter;
+            partmap<Address, uint>::iterator aiter, biter;
 
             aiter = flagbase.begin(addr1);
             if (!addr2.isInvalid())
@@ -458,12 +458,12 @@ namespace Sla.DECCORE
         /// No other properties are altered.
         /// \param flags is the set of properties to clear
         /// \param range is the memory range to clear
-        public void clearPropertyRange(uint4 flags, Range range)
+        public void clearPropertyRange(uint flags, Range range)
         {
             Address addr1 = range.getFirstAddr();
             Address addr2 = range.getLastAddrOpen(glb);
             flagbase.split(addr1);
-            partmap<Address, uint4>::iterator aiter, biter;
+            partmap<Address, uint>::iterator aiter, biter;
 
             aiter = flagbase.begin(addr1);
             if (!addr2.isInvalid())
@@ -481,7 +481,7 @@ namespace Sla.DECCORE
             }
         }
 
-        public void setProperties(partmap<Address, uint4> newflags)
+        public void setProperties(partmap<Address, uint> newflags)
         {
             flagbase = newflags;
         }    ///< Replace the property map
@@ -495,7 +495,7 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         public void encode(Encoder encoder)
         {
-            partmap<Address, uint4>::const_iterator piter, penditer;
+            partmap<Address, uint>::const_iterator piter, penditer;
 
             encoder.openElement(ELEM_DB);
             if (idByNameHash)
@@ -506,7 +506,7 @@ namespace Sla.DECCORE
             for (; piter != penditer; ++piter)
             {
                 Address addr = (*piter).first;
-                uint4 val = (*piter).second;
+                uint val = (*piter).second;
                 encoder.openElement(ELEM_PROPERTY_CHANGEPOINT);
                 addr.getSpace().encodeAttributes(encoder, addr.getOffset());
                 encoder.writeUnsignedInteger(ATTRIB_VAL, val);
@@ -523,21 +523,21 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decode(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement(ELEM_DB);
+            uint elemId = decoder.openElement(ELEM_DB);
             idByNameHash = false;       // Default
             for (; ; )
             {
-                uint4 attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == ATTRIB_SCOPEIDBYNAME)
                     idByNameHash = decoder.readBool();
             }
             for (; ; )
             {
-                uint4 subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId != ELEM_PROPERTY_CHANGEPOINT) break;
                 decoder.openElement();
-                uint4 val = decoder.readUnsignedInteger(ATTRIB_VAL);
+                uint val = decoder.readUnsignedInteger(ATTRIB_VAL);
                 VarnodeData vData;
                 vData.decodeFromAttributes(decoder);
                 Address addr = vData.getAddr();
@@ -547,15 +547,15 @@ namespace Sla.DECCORE
 
             for (; ; )
             {
-                uint4 subId = decoder.openElement();
+                uint subId = decoder.openElement();
                 if (subId != ELEM_SCOPE) break;
                 string name;
                 string displayName;
-                uint8 id = 0;
+                ulong id = 0;
                 bool seenId = false;
                 for (; ; )
                 {
-                    uint4 attribId = decoder.getNextAttributeId();
+                    uint attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;
                     if (attribId == ATTRIB_NAME)
                         name = decoder.readString();
@@ -570,7 +570,7 @@ namespace Sla.DECCORE
                 if (name.empty() || !seenId)
                     throw DecoderError("Missing name and id attributes in scope");
                 Scope* parentScope = (Scope*)0;
-                uint4 parentId = decoder.peekElement();
+                uint parentId = decoder.peekElement();
                 if (parentId == ELEM_PARENT)
                 {
                     parentScope = parseParentTag(decoder);
@@ -594,7 +594,7 @@ namespace Sla.DECCORE
         /// \param newScope is the empty Scope
         public void decodeScope(Decoder decoder, Scope newScope)
         {
-            uint4 elemId = decoder.openElement();
+            uint elemId = decoder.openElement();
             if (elemId == ELEM_SCOPE)
             {
                 Scope* parentScope = parseParentTag(decoder);
@@ -604,7 +604,7 @@ namespace Sla.DECCORE
             else
             {
                 newScope.decodeWrappingAttributes(decoder);
-                uint4 subId = decoder.openElement(ELEM_SCOPE);
+                uint subId = decoder.openElement(ELEM_SCOPE);
                 Scope* parentScope = parseParentTag(decoder);
                 attachScope(newScope, parentScope);
                 newScope.decode(decoder);
@@ -620,18 +620,18 @@ namespace Sla.DECCORE
         public Scope decodeScopePath(Decoder decoder)
         {
             Scope* curscope = getGlobalScope();
-            uint4 elemId = decoder.openElement(ELEM_PARENT);
-            uint4 subId = decoder.openElement();
+            uint elemId = decoder.openElement(ELEM_PARENT);
+            uint subId = decoder.openElement();
             decoder.closeElementSkipping(subId);        // Skip element describing the root scope
             for (; ; )
             {
                 subId = decoder.openElement();
                 if (subId != ELEM_VAL) break;
                 string displayName;
-                uint8 scopeId = 0;
+                ulong scopeId = 0;
                 for (; ; )
                 {
-                    uint4 attribId = decoder.getNextAttributeId();
+                    uint attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;
                     if (attribId == ATTRIB_ID)
                         scopeId = decoder.readUnsignedInteger();

@@ -24,12 +24,12 @@ namespace Sla.DECCORE
 
         /// \class RuleZextCommute
         /// \brief Commute INT_ZEXT with INT_RIGHT: `zext(V) >> W  =>  zext(V >> W)`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_RIGHT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* zextvn = op.getIn(0);
             if (!zextvn.isWritten()) return 0;

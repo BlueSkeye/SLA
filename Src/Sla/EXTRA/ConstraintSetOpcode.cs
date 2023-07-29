@@ -13,10 +13,10 @@ namespace Sla.EXTRA
 {
     internal class ConstraintSetOpcode : UnifyConstraint
     {
-        private int4 opindex;
+        private int opindex;
         private OpCode opc;
         
-        public ConstraintSetOpcode(int4 oind, OpCode oc)
+        public ConstraintSetOpcode(int oind, OpCode oc)
         {
             opindex = oind;
             opc = oc;
@@ -26,7 +26,7 @@ namespace Sla.EXTRA
         public override UnifyConstraint clone() 
             => (new ConstraintSetOpcode(opindex, opc)).copyid(this);
 
-        public override int4 getBaseIndex() => opindex;
+        public override int getBaseIndex() => opindex;
 
         public override bool step(UnifyState state)
         {

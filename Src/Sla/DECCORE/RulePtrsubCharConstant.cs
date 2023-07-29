@@ -22,13 +22,13 @@ namespace Sla.DECCORE
         /// \param slot is the input slot receiving the collapsed PTRSUB
         /// \param val is the constant pointer value
         /// \return \b true if the descendant was collapsed
-        private bool pushConstFurther(Funcdata data, TypePointer outtype, PcodeOp op, int4 slot, uintb val)
+        private bool pushConstFurther(Funcdata data, TypePointer outtype, PcodeOp op, int slot, ulong val)
         {
             if (op.code() != CPUI_PTRADD) return false;        // Must be a PTRADD
             if (slot != 0) return false;
             Varnode* vn = op.getIn(1);
             if (!vn.isConstant()) return false;            // that is adding a constant
-            uintb addval = vn.getOffset();
+            ulong addval = vn.getOffset();
             addval *= op.getIn(2).getOffset();
             val += addval;
             Varnode* newconst = data.newConstant(vn.getSize(), val);
@@ -57,12 +57,12 @@ namespace Sla.DECCORE
         /// If a SUBPIECE refers to a global symbol, the output of the SUBPIECE is a (char *),
         /// and the address is read-only, then get rid of the SUBPIECE in favor
         /// of printing a constant string.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_PTRSUB);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* sb = op.getIn(0);
             Datatype* sbType = sb.getTypeReadFacing(op);

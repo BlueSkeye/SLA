@@ -22,7 +22,7 @@ namespace Sla.EXTRA
             List<ImportRecord> irec;
             LoadImageBfd* loadbfd = (LoadImageBfd*)dcp.conf.loader;
             loadbfd.getImportTable(irec);
-            int4 i;
+            int i;
             for (i = 0; i < irec.size(); ++i)
             {
                 if (irec[i].funcname == token) break;
@@ -31,7 +31,7 @@ namespace Sla.EXTRA
                 *status.fileoptr << "Unable to find reference to call " << token << endl;
             else
             {
-                codedata.addTarget(irec[i].funcname, irec[i].thunkaddress, (uint4)1);
+                codedata.addTarget(irec[i].funcname, irec[i].thunkaddress, (uint)1);
             }
         }
     }

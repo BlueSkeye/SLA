@@ -28,12 +28,12 @@ namespace Sla.DECCORE
         ///
         /// Division optimization in particular can produce a sequence of signed right shifts.
         /// The shift amounts add up to the point where the sign bit has saturated the entire result.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_SRIGHT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* constD = op.getIn(1);
             if (!constD.isConstant()) return 0;
@@ -45,8 +45,8 @@ namespace Sla.DECCORE
             if (!constC.isConstant()) return 0;
             Varnode* inVn = shift2op.getIn(0);
             if (inVn.isFree()) return 0;
-            int4 max = op.getOut().getSize() * 8 - 1; // This is maximum possible shift.
-            int4 sa = (int4)constC.getOffset() + (int4)constD.getOffset();
+            int max = op.getOut().getSize() * 8 - 1; // This is maximum possible shift.
+            int sa = (int)constC.getOffset() + (int)constD.getOffset();
             if (sa <= 0) return 0;  // Something is wrong
             if (sa > max)
                 sa = max;           // Shift amount has saturated

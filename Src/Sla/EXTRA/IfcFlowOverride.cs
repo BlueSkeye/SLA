@@ -22,8 +22,8 @@ namespace Sla.EXTRA
         ///   - return     -  Change a CALLIND or BRANCHIND to a RETURN
         public override void execute(TextReader s)
         {
-            int4 discard;
-            uint4 type;
+            int discard;
+            uint type;
             string token;
 
             if (dcp.fd == (Funcdata*)0)

@@ -18,8 +18,8 @@ namespace Sla.DECCORE
     {
         // friend class EmulateFunction;
         private Address addr;           ///< Starting address of table
-        private int4 size;          ///< Size of table entry
-        private int4 num;           ///< Number of entries in table;
+        private int size;          ///< Size of table entry
+        private int num;           ///< Number of entries in table;
 
         // Constructor for use with decode
         public LoadTable()
@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         }
 
         /// Constructor for a single entry table
-        public LoadTable(Address ad, int4 sz)
+        public LoadTable(Address ad, int sz)
         {
             addr = ad;
             size = sz;
@@ -35,7 +35,7 @@ namespace Sla.DECCORE
         }
 
         /// Construct a full table
-        public LoadTable(Address ad, int4 sz, int4 nm)
+        public LoadTable(Address ad, int sz, int nm)
         {
             addr = ad;
             size = sz;
@@ -60,7 +60,7 @@ namespace Sla.DECCORE
         /// Decode \b this table from a \<loadtable> element
         public void decode(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement(ELEM_LOADTABLE);
+            uint elemId = decoder.openElement(ELEM_LOADTABLE);
             size = decoder.readSignedInteger(ATTRIB_SIZE);
             num = decoder.readSignedInteger(ATTRIB_NUM);
             addr = Address::decode(decoder);
@@ -75,7 +75,7 @@ namespace Sla.DECCORE
         {
             if (table.empty()) return;
             List<LoadTable>::iterator iter, lastiter;
-            int4 count = 1;
+            int count = 1;
             iter = table.begin();
             lastiter = iter;
             Address nextaddr = (*iter).addr + (*iter).size * (*iter).num;

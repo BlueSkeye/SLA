@@ -24,7 +24,7 @@ namespace Sla.DECCORE
         {
             istringstream s(p1);
             s.unsetf(ios::dec | ios::hex | ios::oct);
-            uint4 val = 0;
+            uint val = 0;
             s >> val;
             if (val == 0)
                 throw ParseError("Must specify integer maximum");

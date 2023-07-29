@@ -25,7 +25,7 @@ namespace Sla.DECCORE
         {
             List<string> overridemessages;
             data.getOverride().generateOverrideMessages(overridemessages, data.getArch());
-            for (int4 i = 0; i < overridemessages.size(); ++i)
+            for (int i = 0; i < overridemessages.size(); ++i)
                 data.warningHeader(overridemessages[i]);
 
             FuncProto & ourproto(data.getFuncProto());
@@ -47,8 +47,8 @@ namespace Sla.DECCORE
                     s << " -- yet parameter storage is locked";
                 data.warningHeader(s.str());
             }
-            int4 numcalls = data.numCalls();
-            for (int4 i = 0; i < numcalls; ++i)
+            int numcalls = data.numCalls();
+            for (int i = 0; i < numcalls; ++i)
             {
                 FuncCallSpecs* fc = data.getCallSpecs(i);
                 Funcdata* fd = fc.getFuncdata();

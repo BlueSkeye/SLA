@@ -13,10 +13,10 @@ namespace Sla.EXTRA
     internal class ConstraintOpOutput : UnifyConstraint
     {
         // Move from op to its output varnode
-        private int4 opindex;           // Which op
-        private int4 varnodeindex;      // Label of output varnode
+        private int opindex;           // Which op
+        private int varnodeindex;      // Label of output varnode
         
-        public ConstraintOpOutput(int4 oind, int4 vind)
+        public ConstraintOpOutput(int oind, int vind)
         {
             opindex = oind;
             varnodeindex = vind;
@@ -42,7 +42,7 @@ namespace Sla.EXTRA
             typelist[varnodeindex] = UnifyDatatype(UnifyDatatype::var_type);
         }
 
-        public override int4 getBaseIndex() => varnodeindex;
+        public override int getBaseIndex() => varnodeindex;
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {

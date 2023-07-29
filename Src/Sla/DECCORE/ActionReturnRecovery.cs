@@ -23,7 +23,7 @@ namespace Sla.DECCORE
             List<Varnode*> newparam;
 
             newparam.push_back(retop.getIn(0)); // Keep the first param (the return indirect reference)
-            for (int4 i = 0; i < active.getNumTrials(); ++i)
+            for (int i = 0; i < active.getNumTrials(); ++i)
             { // Gather all the used varnodes to this return in proper order
                 ParamTrial & curtrial(active.getTrial(i));
                 if (!curtrial.isUsed()) break;
@@ -57,9 +57,9 @@ namespace Sla.DECCORE
               // Concatenate them into a single result
                 newparam.clear();
                 newparam.push_back(retop.getIn(0));
-                int4 offmatch = 0;
+                int offmatch = 0;
                 Varnode* preexist = (Varnode*)0;
-                for (int4 i = 0; i < active.getNumTrials(); ++i)
+                for (int i = 0; i < active.getNumTrials(); ++i)
                 {
                     ParamTrial & curtrial(active.getTrial(i));
                     if (!curtrial.isUsed()) break;
@@ -113,9 +113,9 @@ namespace Sla.DECCORE
                 PcodeOp* op;
                 Varnode* vn;
                 list<PcodeOp*>::const_iterator iter, iterend;
-                int4 i;
+                int i;
 
-                int4 maxancestor = data.getArch().trim_recurse_max;
+                int maxancestor = data.getArch().trim_recurse_max;
                 iterend = data.endOp(CPUI_RETURN);
                 AncestorRealistic ancestorReal;
                 for (iter = data.beginOp(CPUI_RETURN); iter != iterend; ++iter)
@@ -127,7 +127,7 @@ namespace Sla.DECCORE
                     {
                         ParamTrial & trial(active.getTrial(i));
                         if (trial.isChecked()) continue; // Already checked
-                        int4 slot = trial.getSlot();
+                        int slot = trial.getSlot();
                         vn = op.getIn(slot);
                         if (ancestorReal.execute(op, slot, &trial, false))
                             if (data.ancestorOpUse(maxancestor, vn, op, trial, 0, 0))

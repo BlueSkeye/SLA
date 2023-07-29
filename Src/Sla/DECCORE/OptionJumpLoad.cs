@@ -31,7 +31,7 @@ namespace Sla.DECCORE
             else
             {
                 res = "Jumptable analysis will NOT record loads";
-                glb.flowoptions &= ~((uint4)FlowInfo::record_jumploads);
+                glb.flowoptions &= ~((uint)FlowInfo::record_jumploads);
             }
             return res;
         }

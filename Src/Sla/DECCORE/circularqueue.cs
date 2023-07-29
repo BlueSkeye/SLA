@@ -17,14 +17,14 @@ namespace Sla.DECCORE
         /// An array of the template object
         private _type cache;
         /// Index within the array of the leftmost object in the queue
-        private int4 left;
+        private int left;
         /// Index within the array of the rightmost object in the queue
-        private int4 right;
+        private int right;
         /// Size of the array
-        private int4 max;
+        private int max;
 
         /// Construct queue of a given size
-        public circularqueue(int4 sz)
+        public circularqueue(int sz)
         {
             max = sz;
             left = 1;           // Set queue to be empty
@@ -40,7 +40,7 @@ namespace Sla.DECCORE
         /// Establish a new maximum queue size
         /// This destroys the old queue and reallocates a new queue with the given maximum size
         /// \param sz the maximum size of the new queue
-        public void setMax(int4 sz)
+        public void setMax(int sz)
         {
             if (max != sz)
             {
@@ -53,7 +53,7 @@ namespace Sla.DECCORE
         }
 
         /// Get the maximum queue size
-        public int4 getMax() => max;
+        public int getMax() => max;
 
         /// Expand the (maximum) size of the queue
         /// Expand the maximum size of \b this queue.  Objects currently in the queue
@@ -61,12 +61,12 @@ namespace Sla.DECCORE
         /// references referring to objects currently in the queue, although the references
         /// can be systematically adjusted to be valid again.
         /// \param amount is the number of additional objects the resized queue will support
-        public void expand(int4 amount)
+        public void expand(int amount)
         {
             _type* newcache = new _type[max + amount];
 
-            int4 i = left;
-            int4 j = 0;
+            int i = left;
+            int j = 0;
 
             // Assume there is at least one element in queue
             while (i != right)
@@ -93,13 +93,13 @@ namespace Sla.DECCORE
         public bool empty() => (left == (right+1)%max);
 
         /// Get a reference to the last object on the queue/stack
-        public int4 topref() => right;
+        public int topref() => right;
 
         /// Get a reference to the first object on the queue/stack
-        public int4 bottomref() => left;
+        public int bottomref() => left;
 
         /// Retrieve an object by its reference
-        public _type @ref(int4 r) => cache[r];
+        public _type @ref(int r) => cache[r];
 
         /// Get the last object on the queue/stack
         public _type top() => cache[right];
@@ -117,7 +117,7 @@ namespace Sla.DECCORE
         /// Pop the (last) object on the stack
         public _type pop()
         {
-            int4 tmp = right;
+            int tmp = right;
             right = (right + max - 1) % max;
             return cache[tmp];
         }
@@ -125,7 +125,7 @@ namespace Sla.DECCORE
         /// Get the (next) object in the queue
         public _type popbottom()
         {
-            int4 tmp = left;
+            int tmp = left;
             left = (left + 1) % max;
             return cache[tmp];
         }

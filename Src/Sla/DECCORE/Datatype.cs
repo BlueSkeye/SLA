@@ -52,11 +52,11 @@ namespace Sla.DECCORE
         // friend class TypeFactory;
         // friend struct DatatypeCompare;
         /// A unique id for the type (or 0 if an id is not assigned)
-        private uint8 id;
+        private ulong id;
         /// Size (of variable holding a value of this type)
-        private int4 size;
+        private int size;
         /// Boolean properties of the type
-        private uint4 flags;
+        private uint flags;
         /// Name of type
         private string name;
         /// Name to display in output
@@ -79,7 +79,7 @@ namespace Sla.DECCORE
             id = 0;
             for (; ; )
             {
-                uint4 attrib = decoder.getNextAttributeId();
+                uint attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
                 if (attrib == ATTRIB_NAME)
                 {
@@ -114,7 +114,7 @@ namespace Sla.DECCORE
                 }
                 else if (attrib == ATTRIB_FORMAT)
                 {
-                    uint4 val = encodeIntegerFormat(decoder.readString());
+                    uint val = encodeIntegerFormat(decoder.readString());
                     setDisplayFormat(val);
                 }
                 else if (attrib == ATTRIB_LABEL)
@@ -144,7 +144,7 @@ namespace Sla.DECCORE
         private void encodeBasic(type_metatype meta, Encoder encoder)
         {
             encoder.writeString(ATTRIB_NAME, name);
-            uint8 saveId;
+            ulong saveId;
             if (isVariableLength())
                 saveId = hashSize(id, size);
             else
@@ -163,7 +163,7 @@ namespace Sla.DECCORE
                 encoder.writeBool(ATTRIB_VARLENGTH, true);
             if ((flags & opaque_string) != 0)
                 encoder.writeBool(ATTRIB_OPAQUESTRING, true);
-            uint4 format = getDisplayFormat();
+            uint format = getDisplayFormat();
             if (format != 0)
                 encoder.writeString(ATTRIB_FORMAT, decodeIntegerFormat(format));
         }
@@ -178,7 +178,7 @@ namespace Sla.DECCORE
             encoder.openElement(ELEM_DEF);
             encoder.writeString(ATTRIB_NAME, name);
             encoder.writeUnsignedInteger(ATTRIB_ID, id);
-            uint4 format = getDisplayFormat();
+            uint format = getDisplayFormat();
             if (format != 0)
                 encoder.writeString(ATTRIB_FORMAT, Datatype::decodeIntegerFormat(format));
             typedefImm.encodeRef(encoder);
@@ -188,7 +188,7 @@ namespace Sla.DECCORE
         /// Mark \b this data-type as completely defined
         private void markComplete()
         {
-            flags &= ~(uint4)type_incomplete;
+            flags &= ~(uint)type_incomplete;
         }
 
         /// Set a specific display format
@@ -196,9 +196,9 @@ namespace Sla.DECCORE
         /// zero clears any preexisting format.  Otherwise the value can be one of:
         /// 1=\b hex, 2=\b dec, 3=\b oct, 4=\b bin, 5=\b char
         /// \param format is the given format
-        internal void setDisplayFormat(uint4 format)
+        internal void setDisplayFormat(uint format)
         {
-            flags &= ~(uint4)force_format;  // Clear preexisting
+            flags &= ~(uint)force_format;  // Clear preexisting
             flags |= (format << 12);
         }
 
@@ -210,17 +210,17 @@ namespace Sla.DECCORE
         /// to produce an id based on a hash of the name.  IDs produced this way will
         /// have their sign-bit set to distinguish it from other IDs.
         /// \param nm is the type name to be hashed
-        private static uint8 hashName(string nm)
+        private static ulong hashName(string nm)
         {
-            uint8 res = 123;
-            for (uint4 i = 0; i < nm.size(); ++i)
+            ulong res = 123;
+            for (uint i = 0; i < nm.size(); ++i)
             {
                 res = (res << 8) | (res >> 56);
-                res += (uint8)nm[i];
+                res += (ulong)nm[i];
                 if ((res & 1) == 0)
                     res ^= 0xfeabfeab;  // Some kind of feedback
             }
-            uint8 tmp = 1;
+            ulong tmp = 1;
             tmp <<= 63;
             res |= tmp; // Make sure the hash is negative (to distinguish it from database id's)
             return res;
@@ -233,9 +233,9 @@ namespace Sla.DECCORE
         /// \param id is the given ID to (de)uniquify
         /// \param size is the instance size of the structure
         /// \return the (de)uniquified id
-        private static uint8 hashSize(uint8 id, int4 size)
+        private static ulong hashSize(ulong id, int size)
         {
-            uint8 sizeHash = size;
+            ulong sizeHash = size;
             sizeHash *= 0x98251033aecbabaf; // Hash the size
             id ^= sizeHash;
             return id;
@@ -255,7 +255,7 @@ namespace Sla.DECCORE
         }
 
         /// Construct the base data-type providing size and meta-type
-        public Datatype(int4 s, type_metatype m)
+        public Datatype(int s, type_metatype m)
         {
             size = s;
             metatype = m;
@@ -302,8 +302,8 @@ namespace Sla.DECCORE
         {
             if (!isVariableLength()) return false;
             if (!ct.isVariableLength()) return false;
-            uint8 thisId = hashSize(id, size);
-            uint8 themId = hashSize(ct.id, ct.size);
+            ulong thisId = hashSize(id, size);
+            ulong themId = hashSize(ct.id, ct.size);
             return (thisId == themId);
         }
 
@@ -326,7 +326,7 @@ namespace Sla.DECCORE
         public bool needsResolution() => (flags & needs_resolution)!= 0;
 
         /// Get properties pointers inherit
-        public uint4 getInheritable() => (flags & coretype);
+        public uint getInheritable() => (flags & coretype);
 
         /// Get the display format for constants with \b this data-type
         /// A non-zero result indicates the type of formatting that is forced on the constant.
@@ -337,7 +337,7 @@ namespace Sla.DECCORE
         ///   - 4 for binary
         ///   - 5 for char
         ///
-        public uint4 getDisplayFormat() => (flags & force_format) >> 12;
+        public uint getDisplayFormat() => (flags & force_format) >> 12;
 
         /// Get the type \b meta-type
         public type_metatype getMetatype() => metatype;
@@ -346,10 +346,10 @@ namespace Sla.DECCORE
         public sub_metatype getSubMeta() => submeta;
 
         /// Get the type id
-        public uint8 getId() => id;
+        public ulong getId() => id;
 
         /// Get the type size
-        public int4 getSize() => size;
+        public int getSize() => size;
 
         /// Get the type name
         public string getName() => name;
@@ -384,7 +384,7 @@ namespace Sla.DECCORE
         /// \param slot is the index of the Varnode being accessed, -1 for the output, >=0 for an input
         /// \param newoff points to the renormalized offset to pass back
         /// \return the containing field or NULL if the range is not contained
-        public virtual TypeField findTruncation(int4 off, int4 sz, PcodeOp op, int4 slot, int4 newoff)
+        public virtual TypeField findTruncation(int off, int sz, PcodeOp op, int slot, int newoff)
         {
             return (TypeField*)0;
         }
@@ -398,7 +398,7 @@ namespace Sla.DECCORE
         /// \param off is the offset into \b this data-type
         /// \param newoff is a pointer to the passed-back offset
         /// \return a pointer to the component data-type or NULL
-        public virtual Datatype getSubType(uintb off, uintb newoff)
+        public virtual Datatype getSubType(ulong off, ulong newoff)
         {               // There is no subtype
             *newoff = off;
             return (Datatype*)0;
@@ -411,7 +411,7 @@ namespace Sla.DECCORE
         /// \param newoff is used to pass back the offset difference
         /// \param elSize is used to pass back the array element size
         /// \return the component data-type or null
-        public virtual Datatype nearestArrayedComponentForward(uintb off, uintb newoff, int4 elSize)
+        public virtual Datatype nearestArrayedComponentForward(ulong off, ulong newoff, int elSize)
         {
             return (TypeArray*)0;
         }
@@ -423,19 +423,19 @@ namespace Sla.DECCORE
         /// \param newoff is used to pass back the offset difference
         /// \param elSize is used to pass back the array element size
         /// \return the component data-type or null
-        public virtual Datatype nearestArrayedComponentBackward(uintb off, uintb newoff, int4 elSize)
+        public virtual Datatype nearestArrayedComponentBackward(ulong off, ulong newoff, int elSize)
         {
             return (TypeArray*)0;
         }
 
         /// Get number of bytes at the given offset that are padding
-        public virtual int4 getHoleSize(int4 off) => 0;
+        public virtual int getHoleSize(int off) => 0;
 
         /// Return number of component sub-types
-        public virtual int4 numDepend() => 0;
+        public virtual int numDepend() => 0;
 
         /// Return the i-th component sub-type
-        public virtual Datatype getDepend(int4 index) => (Datatype *)0;
+        public virtual Datatype getDepend(int index) => (Datatype *)0;
 
         /// Print name as short prefix
         public virtual void printNameBase(TextWriter s) 
@@ -449,7 +449,7 @@ namespace Sla.DECCORE
         /// \param op is the data-type to compare with \b this
         /// \param level is maximum level to descend when recursively comparing
         /// \return negative, 0, positive depending on ordering of types
-        public virtual int4 compare(Datatype op, int4 level)
+        public virtual int compare(Datatype op, int level)
         {
             if (size != op.size) return (op.size - size);
             if (submeta != op.submeta) return (submeta < op.submeta) ? -1 : 1;
@@ -464,7 +464,7 @@ namespace Sla.DECCORE
         /// to go down one level in the component structure before just comparing component pointers.
         /// \param op is the data-type to compare with \b this
         /// \return negative, 0, positive depending on ordering of types
-        public virtual int4 compareDependency(Datatype op)
+        public virtual int compareDependency(Datatype op)
         {
             if (submeta != op.submeta) return (submeta < op.submeta) ? -1 : 1;
             if (size != op.size) return (op.size - size);
@@ -488,7 +488,7 @@ namespace Sla.DECCORE
         /// Perform this check.
         /// \param off is the given offset
         /// \return \b true if \b this is a suitable PTRSUB data-type
-        public virtual bool isPtrsubMatching(uintb off) => false;
+        public virtual bool isPtrsubMatching(ulong off) => false;
 
         /// Get a stripped version of \b this for formal use in formal declarations
         /// Some data-types are ephemeral, and, in the final decompiler output, get replaced with a formal version
@@ -505,7 +505,7 @@ namespace Sla.DECCORE
         /// \param op is the specific PcodeOp
         /// \param slot indicates the input operand, or the output
         /// \return the resolved sub-type
-        public virtual Datatype resolveInFlow(PcodeOp op, int4 slot)
+        public virtual Datatype resolveInFlow(PcodeOp op, int slot)
         {
             return this;
         }
@@ -517,7 +517,7 @@ namespace Sla.DECCORE
         /// \param op is the PcodeOp using the Varnode assigned with \b this data-type
         /// \param slot is the slot reading or writing the Varnode
         /// \return the resolved subtype or the original data-type
-        public virtual Datatype findResolve(PcodeOp op, int4 slot)
+        public virtual Datatype findResolve(PcodeOp op, int slot)
         {
             return this;
         }
@@ -527,7 +527,7 @@ namespace Sla.DECCORE
         /// return an index indicating this form, otherwise return -1.
         /// \param ct is the given data-type
         /// \return the index of the matching form or -1
-        public virtual int4 findCompatibleResolve(Datatype ct)
+        public virtual int findCompatibleResolve(Datatype ct)
         {
             return -1;
         }
@@ -544,13 +544,13 @@ namespace Sla.DECCORE
         /// \param slot is either the input slot of the reading PcodeOp or the artificial SUBPIECE slot: 1
         /// \param newoff is used to pass back how much offset is left to resolve
         /// \return the field of the union best associated with the truncation or null
-        public virtual TypeField? resolveTruncation(int4 offset, PcodeOp op, int4 slot, int4 newoff)
+        public virtual TypeField? resolveTruncation(int offset, PcodeOp op, int slot, int newoff)
         {
             return (TypeField*)0;
         }
 
         /// Order this with -op- datatype
-        public int4 typeOrder(Datatype op)
+        public int typeOrder(Datatype op)
         {
             if (this==&op) return 0;
             return compare(op, 10);
@@ -563,7 +563,7 @@ namespace Sla.DECCORE
         /// and 1 indicates \b this is ordered later.
         /// \param op is the other data-type to compare with \b this
         /// \return -1, 0, or 1
-        public int4 typeOrderBool(Datatype op)
+        public int typeOrderBool(Datatype op)
         {
             if (this == &op) return 0;
             if (metatype == TYPE_BOOL) return 1;        // Never prefer bool over other data-types
@@ -619,7 +619,7 @@ namespace Sla.DECCORE
         ///
         /// \param val is the string to encode
         /// \return the encoded value
-        public static uint4 encodeIntegerFormat(string val)
+        public static uint encodeIntegerFormat(string val)
         {
             if (val == "hex")
                 return 1;
@@ -639,7 +639,7 @@ namespace Sla.DECCORE
         /// Possible encoded values are 1-5 corresponding to "hex", "dec", "oct", "bin", "char"
         /// \param val is the value to decode
         /// \return the decoded string
-        public static string decodeIntegerFormat(uint4 val)
+        public static string decodeIntegerFormat(uint val)
         {
             if (val == 1)
                 return "hex";

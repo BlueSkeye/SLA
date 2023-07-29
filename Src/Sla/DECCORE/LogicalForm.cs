@@ -20,7 +20,7 @@ namespace Sla.DECCORE
         private SplitVarnode indoub;
         private SplitVarnode outdoub;
 
-        private int4 findHiMatch()
+        private int findHiMatch()
         { // Look for the op computing the most significant part of the result for which -loop- computes
           // the least significant part,  look for a known double precis out, then look for known double
           // precis in.  If the other input is constant, look for a unique op that might be computing the high,
@@ -85,7 +85,7 @@ namespace Sla.DECCORE
                 list<PcodeOp*>::const_iterator iter, enditer;
                 iter = hi1.beginDescend();
                 enditer = hi1.endDescend();
-                int4 count = 0;
+                int count = 0;
                 PcodeOp* lastop = (PcodeOp*)0;
                 while (iter != enditer)
                 {
@@ -123,7 +123,7 @@ namespace Sla.DECCORE
             loop = lop;
             lo1 = l;
             hi1 = h;
-            int4 res = findHiMatch();
+            int res = findHiMatch();
 
             if (res == 0)
             {       // We found a matching lo presis operation

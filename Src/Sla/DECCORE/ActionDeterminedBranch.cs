@@ -20,9 +20,9 @@ namespace Sla.DECCORE
             return (!grouplist.contains(getGroup())) ? null : new ActionDeterminedBranch(getGroup());
         }
 
-        public override int4 apply(Funcdata data)
+        public override int apply(Funcdata data)
         {
-            int4 i;
+            int i;
             BlockGraph graph = data.getBasicBlocks();
             BlockBasic* bb;
             PcodeOp* cbranch;
@@ -33,8 +33,8 @@ namespace Sla.DECCORE
                 cbranch = bb.lastOp();
                 if ((cbranch == (PcodeOp*)0) || (cbranch.code() != CPUI_CBRANCH)) continue;
                 if (!cbranch.getIn(1).isConstant()) continue;
-                uintb val = cbranch.getIn(1).getOffset();
-                int4 num = ((val != 0) != cbranch.isBooleanFlip()) ? 0 : 1;
+                ulong val = cbranch.getIn(1).getOffset();
+                int num = ((val != 0) != cbranch.isBooleanFlip()) ? 0 : 1;
                 data.removeBranch(bb, num);
                 count += 1;
             }

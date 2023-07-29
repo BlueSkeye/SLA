@@ -17,9 +17,9 @@ namespace Sla.EXTRA
         private List<OpBehavior> inst;
         private InjectContextSleigh contextCache;
 
-        private int4 registerDynamicInject(InjectPayload payload)
+        private int registerDynamicInject(InjectPayload payload)
         {
-            int4 id = injection.size();
+            int id = injection.size();
             injection.push_back(payload);
             return id;
         }
@@ -31,7 +31,7 @@ namespace Sla.EXTRA
         /// than the hard-coded payload information.
         /// \param injectid is the id of the payload to treat dynamic
         /// \return the new dynamic payload object
-        private InjectPayloadDynamic forceDebugDynamic(int4 injectid)
+        private InjectPayloadDynamic forceDebugDynamic(int injectid)
         {
             InjectPayload* oldPayload = injection[injectid];
             InjectPayloadDynamic* newPayload = new InjectPayloadDynamic(glb, oldPayload.getName(), oldPayload.getType());
@@ -56,12 +56,12 @@ namespace Sla.EXTRA
             }
             PcodeSnippet compiler(slgh);
             //  compiler.clear();			// Not necessary unless we reuse
-            for (int4 i = 0; i < payload.sizeInput(); ++i)
+            for (int i = 0; i < payload.sizeInput(); ++i)
             {
                 InjectParameter & param(payload.getInput(i));
                 compiler.addOperand(param.getName(), param.getIndex());
             }
-            for (int4 i = 0; i < payload.sizeOutput(); ++i)
+            for (int i = 0; i < payload.sizeOutput(); ++i)
             {
                 InjectParameter & param(payload.getOutput(i));
                 compiler.addOperand(param.getName(), param.getIndex());
@@ -89,9 +89,9 @@ namespace Sla.EXTRA
             }
         }
 
-        protected override int4 allocateInject(string sourceName, string name,int4 type)
+        protected override int allocateInject(string sourceName, string name,int type)
         {
-            int4 injectid = injection.size();
+            int injectid = injection.size();
             if (type == InjectPayload::CALLFIXUP_TYPE)
                 injection.push_back(new InjectPayloadCallfixup(sourceName));
             else if (type == InjectPayload::CALLOTHERFIXUP_TYPE)
@@ -103,7 +103,7 @@ namespace Sla.EXTRA
             return injectid;
         }
 
-        protected override void registerInject(int4 injectid)
+        protected override void registerInject(int injectid)
         {
             InjectPayload* payload = injection[injectid];
             if (payload.isDynamic())
@@ -145,14 +145,14 @@ namespace Sla.EXTRA
 
         public override void decodeDebug(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement(ELEM_INJECTDEBUG);
+            uint elemId = decoder.openElement(ELEM_INJECTDEBUG);
             for (; ; )
             {
-                uint4 subId = decoder.openElement();
+                uint subId = decoder.openElement();
                 if (subId != ELEM_INJECT) break;
                 string name = decoder.readString(ATTRIB_NAME);
-                int4 type = decoder.readSignedInteger(ATTRIB_TYPE);
-                int4 id = getPayloadId(type, name);
+                int type = decoder.readSignedInteger(ATTRIB_TYPE);
+                int id = getPayloadId(type, name);
                 InjectPayloadDynamic* payload = dynamic_cast<InjectPayloadDynamic*>(getPayload(id));
                 if (payload == (InjectPayloadDynamic*)0)
                 {
@@ -164,23 +164,23 @@ namespace Sla.EXTRA
             decoder.closeElement(elemId);
         }
 
-        protected override int4 manualCallFixup(string name, string snippetstring)
+        protected override int manualCallFixup(string name, string snippetstring)
         {
             string sourceName = "(manual callfixup name=\"" + name + "\")";
-            int4 injectid = allocateInject(sourceName, name, InjectPayload::CALLFIXUP_TYPE);
+            int injectid = allocateInject(sourceName, name, InjectPayload::CALLFIXUP_TYPE);
             InjectPayloadSleigh* payload = (InjectPayloadSleigh*)getPayload(injectid);
             payload.parsestring = snippetstring;
             registerInject(injectid);
             return injectid;
         }
 
-        protected override int4 manualCallOtherFixup(string name, string outname, List<string> inname,
+        protected override int manualCallOtherFixup(string name, string outname, List<string> inname,
             string snippet)
         {
             string sourceName = "<manual callotherfixup name=\"" + name + "\")";
-            int4 injectid = allocateInject(sourceName, name, InjectPayload::CALLOTHERFIXUP_TYPE);
+            int injectid = allocateInject(sourceName, name, InjectPayload::CALLOTHERFIXUP_TYPE);
             InjectPayloadSleigh* payload = (InjectPayloadSleigh*)getPayload(injectid);
-            for (int4 i = 0; i < inname.size(); ++i)
+            for (int i = 0; i < inname.size(); ++i)
                 payload.inputlist.push_back(InjectParameter(inname[i], 0));
             if (outname.size() != 0)
                 payload.output.push_back(InjectParameter(outname, 0));

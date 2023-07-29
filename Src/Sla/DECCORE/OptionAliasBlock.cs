@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         {
             if (p1.size() == 0)
                 throw ParseError("Must specify alias block level");
-            int4 oldVal = glb.alias_block_level;
+            int oldVal = glb.alias_block_level;
             if (p1 == "none")
                 glb.alias_block_level = 0;
             else if (p1 == "struct")

@@ -22,7 +22,7 @@ namespace Sla.DECCORE
         /// Any issue with allocation (like a dupicate reference) causes an exception.
         /// \param refs is the \e reference of 1 or more identifying integers
         /// \return the new CPoolRecord
-        internal abstract CPoolRecord createRecord(List<uintb> refs);
+        internal abstract CPoolRecord createRecord(List<ulong> refs);
   
         ~ConstantPool()
         {
@@ -32,7 +32,7 @@ namespace Sla.DECCORE
         /// \param refs is the \e reference (made up of 1 or more identifying integers)
         /// \return the matching CPoolRecord or NULL if none matches the reference
 
-        public abstract CPoolRecord getRecord(List<uintb> refs);
+        public abstract CPoolRecord getRecord(List<ulong> refs);
 
         /// \brief A a new constant pool record to \b this database
         /// Given the basic constituents of the record, type, name, and data-type, create
@@ -41,7 +41,7 @@ namespace Sla.DECCORE
         /// \param tag is the type of record to create
         /// \param tok is the name associated with the object
         /// \param ct is the data-type associated with the object
-        public void putRecord(List<uintb> refs, uint tag, string tok, Datatype ct)
+        public void putRecord(List<ulong> refs, uint tag, string tok, Datatype ct)
         {
             CPoolRecord newrec = createRecord(refs);
             newrec.tag = tag;
@@ -56,7 +56,7 @@ namespace Sla.DECCORE
         /// \param decoder is the given stream decoder
         /// \param typegrp is the TypeFactory used to resolve data-type references in XML
         /// \return the newly allocated and initialized CPoolRecord
-        public CPoolRecord decodeRecord(List<uintb> refs, Decoder decoder, TypeFactory typegrp)
+        public CPoolRecord decodeRecord(List<ulong> refs, Decoder decoder, TypeFactory typegrp)
         {
             CPoolRecord* newrec = createRecord(refs);
             newrec.decode(decoder, typegrp);

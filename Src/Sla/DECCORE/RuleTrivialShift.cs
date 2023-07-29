@@ -24,15 +24,15 @@ namespace Sla.DECCORE
 
         /// \class RuleTrivialShift
         /// \brief Simplify trivial shifts:  `V << 0  =>  V,  V << #64  =>  0`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
-            uint4 list[] = { CPUI_INT_LEFT, CPUI_INT_RIGHT, CPUI_INT_SRIGHT };
+            uint list[] = { CPUI_INT_LEFT, CPUI_INT_RIGHT, CPUI_INT_SRIGHT };
             oplist.insert(oplist.end(), list, list + 3);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            uintb val;
+            ulong val;
             Varnode* constvn = op.getIn(1);
             if (!constvn.isConstant()) return 0;   // Must shift by a constant
             val = constvn.getOffset();

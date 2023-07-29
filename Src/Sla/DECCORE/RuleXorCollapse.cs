@@ -27,15 +27,15 @@ namespace Sla.DECCORE
         ///
         /// The comparison can be INT_EQUAL or INT_NOTEQUAL. This also supports the form:
         ///   - `(V ^ c) == d  => V == (c^d)`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_EQUAL);
             oplist.push_back(CPUI_INT_NOTEQUAL);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            uintb coeff1, coeff2;
+            ulong coeff1, coeff2;
 
             if (!op.getIn(1).isConstant()) return 0;
             PcodeOp* xorop = op.getIn(0).getDef();

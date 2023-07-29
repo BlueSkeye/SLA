@@ -29,16 +29,16 @@ namespace Sla.DECCORE
         /// We try to push SUBPIECE earlier in the expression trees (preferring short versions
         /// of ops over long) in the hopes that the SUBPIECE will run into a
         /// constant, a INT_SEXT, or a INT_ZEXT, canceling out
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_SUBPIECE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode * base,*vn,*newvn,*outvn;
             PcodeOp* longform,*newsub,*prevop;
-            int4 i, j, offset, insize;
+            int i, j, offset, insize;
 
             base = op.getIn(0);
             if (!base.isWritten()) return 0;
@@ -91,8 +91,8 @@ namespace Sla.DECCORE
                         }
                         else if (longform.getIn(1).isConstant() && (zext0In.getSize() <= outvn.getSize()))
                         {
-                            uintb val = longform.getIn(1).getOffset();
-                            uintb smallval = val & calc_mask(outvn.getSize());
+                            ulong val = longform.getIn(1).getOffset();
+                            ulong smallval = val & calc_mask(outvn.getSize());
                             if (val != smallval)
                                 return 0;
                         }
@@ -126,8 +126,8 @@ namespace Sla.DECCORE
                         }
                         else if (longform.getIn(1).isConstant() && (sext0In.getSize() <= outvn.getSize()))
                         {
-                            uintb val = longform.getIn(1).getOffset();
-                            uintb smallval = val & calc_mask(outvn.getSize());
+                            ulong val = longform.getIn(1).getOffset();
+                            ulong smallval = val & calc_mask(outvn.getSize());
                             smallval = sign_extend(smallval, outvn.getSize(), insize);
                             if (val != smallval)
                                 return 0;

@@ -68,10 +68,10 @@ namespace Sla.CORE
             while (!stack.empty())
             {
                 CallGraphNode* cur = stack.back().node; // Current node
-                int4 st = stack.back().outslot; // which out edge we will follow
+                int st = stack.back().outslot; // which out edge we will follow
                 if (st >= cur.outedge.size())
                 {
-                    cur.flags &= ~((uint4)CallGraphNode::currentcycle);
+                    cur.flags &= ~((uint)CallGraphNode::currentcycle);
                     stack.pop_back();
                 }
                 else
@@ -96,14 +96,14 @@ namespace Sla.CORE
             }
         }
 
-        private void snipEdge(CallGraphNode node, int4 i)
+        private void snipEdge(CallGraphNode node, int i)
         {
             node.outedge[i].flags |= CallGraphEdge::cycle | CallGraphEdge::dontfollow;
-            int4 toi = node.outedge[i].complement;
+            int toi = node.outedge[i].complement;
             CallGraphNode* to = node.outedge[i].to;
             to.inedge[toi].flags |= CallGraphEdge::cycle;
             bool onlycycle = true;
-            for (uint4 j = 0; j < to.inedge.size(); ++j)
+            for (uint j = 0; j < to.inedge.size(); ++j)
             {
                 if ((to.inedge[j].flags & CallGraphEdge::cycle) == 0)
                 {
@@ -127,7 +127,7 @@ namespace Sla.CORE
         { // Generate list of seeds nodes (from which we can get to everything)
             if (!seeds.empty())
                 return;
-            uint4 walked = 0;
+            uint walked = 0;
             bool allcovered;
 
             do
@@ -144,7 +144,7 @@ namespace Sla.CORE
             clearMarks();
         }
 
-        private CallGraphNode popPossible(CallGraphNode node, int4 outslot)
+        private CallGraphNode popPossible(CallGraphNode node, int outslot)
         {
             if ((node.flags & CallGraphNode::entrynode) != 0)
             {
@@ -155,7 +155,7 @@ namespace Sla.CORE
             return node.inedge[node.parentedge].from;
         }
 
-        private CallGraphNode pushPossible(CallGraphNode node, int4 outslot)
+        private CallGraphNode pushPossible(CallGraphNode node, int outslot)
         {
             if (node == (CallGraphNode*)0)
             {
@@ -173,14 +173,14 @@ namespace Sla.CORE
             return (CallGraphNode*)0;
         }
 
-        private CallGraphEdge insertBlankEdge(CallGraphNode node, int4 slot)
+        private CallGraphEdge insertBlankEdge(CallGraphNode node, int slot)
         {
             node.outedge.emplace_back();
             if (node.outedge.size() > 1)
             {
-                for (int4 i = node.outedge.size() - 2; i >= slot; --i)
+                for (int i = node.outedge.size() - 2; i >= slot; --i)
                 {
-                    int4 newi = i + 1;
+                    int newi = i + 1;
                     CallGraphEdge & edge(node.outedge[newi]);
                     edge = node.outedge[i];
                     CallGraphNode* nodeout = edge.to;
@@ -258,7 +258,7 @@ namespace Sla.CORE
 
         public void addEdge(CallGraphNode from, CallGraphNode to, Address addr)
         {
-            int4 i;
+            int i;
             for (i = 0; i < from.outedge.size(); ++i)
             {
                 CallGraphNode* outnode = from.outedge[i].to;
@@ -268,7 +268,7 @@ namespace Sla.CORE
 
             CallGraphEdge & fromedge(insertBlankEdge(from, i));
 
-            int4 toi = to.inedge.size();
+            int toi = to.inedge.size();
             to.inedge.emplace_back();
             CallGraphEdge & toedge(to.inedge.back());
 
@@ -283,14 +283,14 @@ namespace Sla.CORE
             toedge.complement = i;
         }
 
-        public void deleteInEdge(CallGraphNode node, int4 i)
+        public void deleteInEdge(CallGraphNode node, int i)
         {
-            int4 tosize = node.inedge.size();
-            int4 fromi = node.inedge[i].complement;
+            int tosize = node.inedge.size();
+            int fromi = node.inedge[i].complement;
             CallGraphNode* from = node.inedge[i].from;
-            int4 fromsize = from.outedge.size();
+            int fromsize = from.outedge.size();
 
-            for (int4 j = i + 1; j < tosize; ++j)
+            for (int j = i + 1; j < tosize; ++j)
             {
                 node.inedge[j - 1] = node.inedge[j];
                 if (node.inedge[j - 1].complement >= fromi)
@@ -298,7 +298,7 @@ namespace Sla.CORE
             }
             node.inedge.pop_back();
 
-            for (int4 j = fromi + 1; j < fromsize; ++j)
+            for (int j = fromi + 1; j < fromsize; ++j)
             {
                 from.outedge[j - 1] = from.outedge[j];
                 if (from.outedge[j - 1].complement >= i)
@@ -324,7 +324,7 @@ namespace Sla.CORE
 
         public CallGraphNode nextLeaf(CallGraphNode node)
         {
-            int4 outslot;
+            int outslot;
             node = popPossible(node, outslot);
             outslot += 1;
             for (; ; )
@@ -356,8 +356,8 @@ namespace Sla.CORE
             if (fd.getFuncProto().getModelExtraPop() == ProtoModel::extrapop_unknown)
                 fd.fillinExtrapop();
 
-            int4 numcalls = fd.numCalls();
-            for (int4 i = 0; i < numcalls; ++i)
+            int numcalls = fd.numCalls();
+            for (int i = 0; i < numcalls; ++i)
             {
                 FuncCallSpecs* fs = fd.getCallSpecs(i);
                 Address addr = fs.getEntryAddress();
@@ -389,7 +389,7 @@ namespace Sla.CORE
             {
                 CallGraphNode node = (*iter).second;
 
-                for (uint4 i = 0; i < node.inedge.size(); ++i)
+                for (uint i = 0; i < node.inedge.size(); ++i)
                     node.inedge[i].encode(encoder);
             }
 
@@ -398,10 +398,10 @@ namespace Sla.CORE
 
         public void decoder(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement(ELEM_CALLGRAPH);
+            uint elemId = decoder.openElement(ELEM_CALLGRAPH);
             for (; ; )
             {
-                uint4 subId = decoder.peekElement();
+                uint subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ELEM_EDGE)
                     CallGraphEdge::decode(decoder, this);

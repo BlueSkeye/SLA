@@ -35,8 +35,8 @@ namespace Sla.DECCORE
         {
             List<EffectRecord> newlist;
 
-            int4 i = 0;
-            int4 j = 0;
+            int i = 0;
+            int j = 0;
             while ((i < effectlist.size()) && (j < efflist.size()))
             {
                 EffectRecord eff1 = effectlist[i];
@@ -65,8 +65,8 @@ namespace Sla.DECCORE
         {
             List<VarnodeData> newlist;
 
-            int4 i = 0;
-            int4 j = 0;
+            int i = 0;
+            int j = 0;
             while ((i < likelytrash.size()) && (j < trashlist.size()))
             {
                 VarnodeData trs1 = likelytrash[i];
@@ -96,10 +96,10 @@ namespace Sla.DECCORE
         }
 
         /// Get the number of constituent models
-        public int4 numModels() => modellist.size();
+        public int numModels() => modellist.size();
 
         /// Get the i-th model
-        public ProtoModel getModel(int4 i) => modellist[i];
+        public ProtoModel getModel(int i) => modellist[i];
 
         /// Fold-in an additional prototype model
         /// \param model is the new prototype model to add to the merge
@@ -149,20 +149,20 @@ namespace Sla.DECCORE
         /// \return the prototype model that scores the best
         public ProtoModel selectModel(ParamActive active)
         {
-            int4 bestscore = 500;
-            int4 bestindex = -1;
-            for (int4 i = 0; i < modellist.size(); ++i)
+            int bestscore = 500;
+            int bestindex = -1;
+            for (int i = 0; i < modellist.size(); ++i)
             {
-                int4 numtrials = active.getNumTrials();
+                int numtrials = active.getNumTrials();
                 ScoreProtoModel scoremodel = new ScoreProtoModel(true, modellist[i], numtrials);
-                for (int4 j = 0; j < numtrials; ++j)
+                for (int j = 0; j < numtrials; ++j)
                 {
                     ParamTrial trial = new ParamTrial(active.getTrial(j));
                     if (trial.isActive())
                         scoremodel.addParameter(trial.getAddress(), trial.getSize());
                 }
                 scoremodel.doScore();
-                int4 score = scoremodel.getScore();
+                int score = scoremodel.getScore();
                 if (score < bestscore)
                 {
                     bestscore = score;
@@ -180,11 +180,11 @@ namespace Sla.DECCORE
 
         public override void decode(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement(ELEM_RESOLVEPROTOTYPE);
+            uint elemId = decoder.openElement(ELEM_RESOLVEPROTOTYPE);
             name = decoder.readString(ATTRIB_NAME);
             for (; ; )
             { // A tag for each merged prototype
-                uint4 subId = decoder.openElement();
+                uint subId = decoder.openElement();
                 if (subId != ELEM_MODEL) break;
                 string modelName = decoder.readString(ATTRIB_NAME);
                 ProtoModel* mymodel = glb.getModel(modelName);

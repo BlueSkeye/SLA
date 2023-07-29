@@ -15,8 +15,8 @@ namespace Sla.SLEIGH
         private readonly ParserContext cross_context;
 
         protected ConstructState point;    // The current node being visited
-        protected int4 depth;         // Depth of the current node
-        protected int4[] breadcrumb = new int4[32];    // Path of operands from root
+        protected int depth;         // Depth of the current node
+        protected int[] breadcrumb = new int[32];    // Path of operands from root
 
         public ParserWalker(ParserContext c)
         {
@@ -39,10 +39,10 @@ namespace Sla.SLEIGH
             breadcrumb[0] = 0;
         }
 
-        public void setOutOfBandState(Constructor ct, int4 index, ConstructState tempstate, ParserWalker otherwalker)
+        public void setOutOfBandState(Constructor ct, int index, ConstructState tempstate, ParserWalker otherwalker)
         { // Initialize walker for future calls into getInstructionBytes assuming -ct- is the current position in the walk
             ConstructState pt = otherwalker.point;
-            int4 curdepth = otherwalker.depth;
+            int curdepth = otherwalker.depth;
             while (pt.ct != ct)
             {
                 if (curdepth <= 0) return;
@@ -50,7 +50,7 @@ namespace Sla.SLEIGH
                 pt = pt.parent;
             }
             OperandSymbol* sym = ct.getOperand(index);
-            int4 i = sym.getOffsetBase();
+            int i = sym.getOffsetBase();
             // if i<0, i.e. the offset of the operand is constructor relative
             // its possible that the branch corresponding to the operand
             // has not been constructed yet. Context expressions are
@@ -70,7 +70,7 @@ namespace Sla.SLEIGH
 
         public bool isState() => (point != (ConstructState*)0);
 
-        public void pushOperand(int4 i)
+        public void pushOperand(int i)
         {
             breadcrumb[depth++] = i + 1;
             point = point.resolve[i];
@@ -83,7 +83,7 @@ namespace Sla.SLEIGH
             depth -= 1;
         }
 
-        public uint4 getOffset(int4 i)
+        public uint getOffset(int i)
         {
             if (i < 0) return point.offset;
             ConstructState op = point.resolve[i];
@@ -92,11 +92,11 @@ namespace Sla.SLEIGH
 
         public Constructor getConstructor() => point.ct;
 
-        public int4 getOperand() => breadcrumb[depth];
+        public int getOperand() => breadcrumb[depth];
 
         public FixedHandle getParentHandle() => point.hand;
 
-        public FixedHandle getFixedHandle(int4 i) => point.resolve[i].hand;
+        public FixedHandle getFixedHandle(int i) => point.resolve[i].hand;
 
         public AddrSpace getCurSpace() => const_context.getCurSpace();
 
@@ -132,24 +132,24 @@ namespace Sla.SLEIGH
             return const_context.getDestAddr();
         }
 
-        public int4 getLength() => const_context.getLength();
+        public int getLength() => const_context.getLength();
 
-        public uintm getInstructionBytes(int4 byteoff, int4 numbytes)
+        public uint getInstructionBytes(int byteoff, int numbytes)
         {
             return const_context.getInstructionBytes(byteoff, numbytes, point.offset);
         }
 
-        public uintm getContextBytes(int4 byteoff, int4 numbytes)
+        public uint getContextBytes(int byteoff, int numbytes)
         {
             return const_context.getContextBytes(byteoff, numbytes);
         }
 
-        public uintm getInstructionBits(int4 startbit, int4 size)
+        public uint getInstructionBits(int startbit, int size)
         {
             return const_context.getInstructionBits(startbit, size, point.offset);
         }
 
-        public uintm getContextBits(int4 startbit, int4 size)
+        public uint getContextBits(int startbit, int size)
         {
             return const_context.getContextBits(startbit, size);
         }

@@ -57,11 +57,11 @@ namespace Sla.DECCORE
         public const string EMPTY_STRING = string.Empty;
 
         /// Current indent level (in fixed width characters)
-        protected int4 indentlevel;
+        protected int indentlevel;
         /// Current depth of parentheses
-        protected int4 parenlevel;
+        protected int parenlevel;
         /// Change in indentlevel per level of nesting
-        protected int4 indentincrement;
+        protected int indentincrement;
         /// Pending print callback
         protected PendPrint pendPrint;
 
@@ -115,25 +115,25 @@ namespace Sla.DECCORE
         /// \brief Begin a whole document of output
         /// Inform the emitter that generation of the source code document has begun
         /// \return an id associated with the document
-        public abstract int4 beginDocument();
+        public abstract int beginDocument();
 
         /// \brief End a whole document of output
         ///
         /// Inform the emitter that generation of the source code document is finished
         /// \param id is the id associated with the document (as returned by beginDocument)
-        public abstract void endDocument(int4 id);
+        public abstract void endDocument(int id);
 
         /// \brief Begin a whole declaration and body of a function
         ///
         /// Inform the emitter that generation of a function body has begun
         /// \return an id associated with the function body
-        public abstract int4 beginFunction(Funcdata fd);
+        public abstract int beginFunction(Funcdata fd);
 
         /// \brief End a whole declaration and body of a function
         ///
         /// Inform the emitter that generation of a function body has ended
         /// \param id is the id associated with the function body (as returned by beginFunction)
-        public abstract void endFunction(int4 id);
+        public abstract void endFunction(int id);
 
         /// \brief Begin a control-flow element
         ///
@@ -141,13 +141,13 @@ namespace Sla.DECCORE
         /// usually surrounded with curly braces '{' and '}'.
         /// \param bl is the block structure object associated with the section
         /// \return an id associated with the section
-        public abstract int4 beginBlock(FlowBlock bl);
+        public abstract int beginBlock(FlowBlock bl);
 
         /// \brief End a control-flow element
         ///
         /// Inform the emitter that a control-flow section is ending.
         /// \param id is the id associated with the section (as returned by beginBlock)
-        public abstract void endBlock(int4 id);
+        public abstract void endBlock(int id);
 
         /// \brief Force a line break
         ///
@@ -159,58 +159,58 @@ namespace Sla.DECCORE
         /// Tell the emitter that a new line is desired at a specific indent level. The indent level
         /// is overridden only for the line, then it returns to its previous value.
         /// \param indent is the desired indent level for the new line
-        public abstract void tagLine(int4 indent);
+        public abstract void tagLine(int indent);
 
         /// \brief Begin a return type declaration
         ///
         /// Inform the emitter that generation of a function's return type is starting.
         /// \param vn (if non-null) is the storage location for the return value
         /// \return an id associated with the return type
-        public abstract int4 beginReturnTypeVarnode vn);
+        public abstract int beginReturnTypeVarnode vn);
 
         /// \brief End a return type declaration
         ///
         /// Inform the emitter that generation of a function's return type is ending.
         /// \param id is the id associated with the return type (as returned by beginReturnType)
-        public abstract void endReturnType(int4 id);
+        public abstract void endReturnType(int id);
 
         /// \brief Begin a variable declaration
         ///
         /// Inform the emitter that a variable declaration has started.
         /// \param sym is the symbol being declared
         /// \return an id associated with the declaration
-        public abstract int4 beginVarDecl(Symbol sym);
+        public abstract int beginVarDecl(Symbol sym);
 
         /// \brief End a variable declaration
         ///
         /// Inform the emitter that a variable declaration has ended.
         /// \param id is the id associated with the declaration (as returned by beginVarDecl)
-        public abstract void endVarDecl(int4 id);
+        public abstract void endVarDecl(int id);
 
         /// \brief Begin a source code statement
         ///
         /// Inform the emitter that a source code statement is beginning.
         /// \param op is the root p-code operation of the statement
         /// \return an id associated with the statement
-        public abstract int4 beginStatement(PcodeOp op);
+        public abstract int beginStatement(PcodeOp op);
 
         /// \brief End a source code statement
         ///
         /// Inform the emitter that a source code statement is ending.
         /// \param id is the id associated with the statement (as returned by beginStatement)
-        public abstract void endStatement(int4 id);
+        public abstract void endStatement(int id);
 
         /// \brief Begin a function prototype declaration
         ///
         /// Inform the emitter that a function prototype is starting.
         /// \return an id associated with the prototype
-        public abstract int4 beginFuncProto();
+        public abstract int beginFuncProto();
 
         /// \brief End a function prototype declaration
         ///
         /// Inform the emitter that a function prototype is ending.
         /// \param id is the id associated with the prototype (as returned by beginFuncProto)
-        public abstract void endFuncProto(int4 id);
+        public abstract void endFuncProto(int id);
 
         /// \brief Emit a variable token
         ///
@@ -258,7 +258,7 @@ namespace Sla.DECCORE
         /// \param ct is the data-type associated with the field
         /// \param off is the (byte) offset of the field within its structured data-type
         /// \param op is the PcodeOp associated with the field (usually PTRSUB or SUBPIECE)
-        public abstract void tagField(string name, syntax_highlight hl, Datatype ct, int4 off, PcodeOp op);
+        public abstract void tagField(string name, syntax_highlight hl, Datatype ct, int off, PcodeOp op);
 
         /// \brief Emit a comment string as part of the generated source code
         ///
@@ -269,7 +269,7 @@ namespace Sla.DECCORE
         /// \param hl indicates how the comment should be highlighted
         /// \param spc is the address space of the address where the comment is attached
         /// \param off is the offset of the address where the comment is attached
-        public abstract void tagComment(string name, syntax_highlight hl, AddrSpace spc, uintb off);
+        public abstract void tagComment(string name, syntax_highlight hl, AddrSpace spc, ulong off);
 
         /// \brief Emit a code label identifier
         ///
@@ -279,7 +279,7 @@ namespace Sla.DECCORE
         /// \param hl indicates how the label should be highlighted
         /// \param spc is the address space of the code address being labeled
         /// \param off is the offset of the code address being labeled
-        public abstract void tagLabel(string name, syntax_highlight hl, AddrSpace spc, uintb off);
+        public abstract void tagLabel(string name, syntax_highlight hl, AddrSpace spc, ulong off);
 
         /// \brief Emit other (more unusual) syntax as part of source code generation
         ///
@@ -296,7 +296,7 @@ namespace Sla.DECCORE
         /// \param paren is the open parenthesis character to emit
         /// \param id is an id to associate with the parenthesis
         /// \return an id associated with the parenthesis
-        public abstract int4 openParen(string paren, int4 id = 0);
+        public abstract int openParen(string paren, int id = 0);
 
         /// \brief Emit a close parenthesis
         ///
@@ -304,13 +304,13 @@ namespace Sla.DECCORE
         /// was started by the matching open parenthesis.
         /// \param paren is the close parenthesis character to emit
         /// \param id is the id associated with the matching open parenthesis (as returned by openParen)
-        public abstract void closeParen(string paren, int4 id);
+        public abstract void closeParen(string paren, int id);
 
         /// \brief Start a group of things that are printed together
         ///
         /// Inform the emitter that a new printing group is starting.
         /// \return an id associated with the group
-        public virtual int4 openGroup()
+        public virtual int openGroup()
         {
             return 0;
         }
@@ -319,7 +319,7 @@ namespace Sla.DECCORE
         ///
         /// Inform the emitter that a printing group is ending.
         /// \param id is the id associated with the group (as returned by openGroup)
-        public virtual void closeGroup(int4 id)
+        public virtual void closeGroup(int id)
         {
         }
 
@@ -341,7 +341,7 @@ namespace Sla.DECCORE
         ///
         /// \param num is the number of space characters to emit
         /// \param bump is the number of characters to indent if the spaces force a line break
-        public virtual void spaces(int4 num, int4 bump = 0)
+        public virtual void spaces(int num, int bump = 0)
         {
             static const string spacearray[] = { "", " ", "  ", "   ", "    ", "     ", "      ", "       ",
       "        ", "         ", "          " };
@@ -350,7 +350,7 @@ namespace Sla.DECCORE
             else
             {
                 string spc;
-                for (int4 i = 0; i < num; ++i)
+                for (int i = 0; i < num; ++i)
                     spc += ' ';
                 print(spc);
             }
@@ -360,7 +360,7 @@ namespace Sla.DECCORE
         ///
         /// Inform the emitter that one level of nesting is being added.
         /// \return an id associated with the nesting
-        public virtual int4 startIndent()
+        public virtual int startIndent()
         {
             indentlevel += indentincrement;
             return 0;
@@ -371,7 +371,7 @@ namespace Sla.DECCORE
         /// Inform the emitter that the current nesting has ended, and we are returning to the
         /// previous level.
         /// \param id is the id associated with the nesting (as returned by startIndent)
-        public virtual void stopIndent(int4 id)
+        public virtual void stopIndent(int id)
         {
             indentlevel -= indentincrement;
         }
@@ -380,7 +380,7 @@ namespace Sla.DECCORE
         ///
         /// Inform the emitter that a set of comment tokens/lines is starting.
         /// \return an id associated with the comment block
-        public virtual int4 startComment()
+        public virtual int startComment()
         {
             return 0;
         }
@@ -389,7 +389,7 @@ namespace Sla.DECCORE
         ///
         /// Inform the emitter that a set of comment tokens/lines is ending.
         /// \param id is the id associated with the block (as returned by startComment)
-        public virtual void stopComment(int4 id)
+        public virtual void stopComment(int id)
         {
         }
 
@@ -406,7 +406,7 @@ namespace Sla.DECCORE
         ///
         /// The emitter may insert line breaks to enforce this maximum.
         /// \param mls is the number of characters to set for the maximum line size
-        public virtual void setMaxLineSize(int4 mls)
+        public virtual void setMaxLineSize(int mls)
         {
         }
 
@@ -414,7 +414,7 @@ namespace Sla.DECCORE
         ///
         /// If the emitter respects a maximum line size, return that size.
         /// \return the maximum line size or -1 if the emitter does not have a maximum
-        public virtual int4 getMaxLineSize()
+        public virtual int getMaxLineSize()
         {
             return -1;
         }
@@ -442,17 +442,17 @@ namespace Sla.DECCORE
         /// \brief Get the current parentheses depth
         ///
         /// \return the current number of open parenthetical groups
-        public int4 getParenLevel() => parenlevel;
+        public int getParenLevel() => parenlevel;
 
         /// \brief Get the number of characters indented per level of nesting
         ///
         /// \return the number of characters
-        public int4 getIndentIncrement() => indentincrement;
+        public int getIndentIncrement() => indentincrement;
 
         /// \brief Set the number of characters indented per level of nesting
         ///
         /// \param val is the desired number of characters to indent
-        public void setIndentIncrement(int4 val)
+        public void setIndentIncrement(int val)
         {
             indentincrement = val;
         }

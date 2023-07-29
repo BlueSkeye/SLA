@@ -40,15 +40,15 @@ namespace Sla.DECCORE
         /// The new explicit lane Varnode
         private Varnode replacement;
         /// Type of new Varnode
-        private uint4 type;
+        private uint type;
         /// Boolean properties of the placeholder
-        private uint4 flags;
+        private uint flags;
         /// Size of the lane Varnode in bytes
-        private int4 byteSize;
+        private int byteSize;
         /// Size of the logical value in bits
-        private int4 bitSize;
+        private int bitSize;
         /// Value of constant or (bit) position within the original big Varnode
-        private uintb val;
+        private ulong val;
         /// Defining op for new Varnode
         private TransformOp def;
 
@@ -80,7 +80,7 @@ namespace Sla.DECCORE
                     break;
                 case TransformVar::piece:
                     {
-                        int4 bytePos = (int4)val;
+                        int bytePos = (int)val;
                         if ((bytePos & 7) != 0)
                             throw new LowlevelError("Varnode piece is not byte aligned");
                         bytePos >>= 3;
@@ -113,7 +113,7 @@ namespace Sla.DECCORE
         /// \param bits is the number of bits in the variable
         /// \param bytes is the number of bytes in the variable
         /// \param value is the associated value
-        private void initialize(uint4 tp, Varnode v, int4 bits, int4 bytes, uintb value)
+        private void initialize(uint tp, Varnode v, int bits, int bytes, ulong value)
         {
             type = tp;
             vn = v;

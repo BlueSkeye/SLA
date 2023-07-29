@@ -31,15 +31,15 @@ namespace Sla.DECCORE
         /// this is happening if we load or store too little data from the pointer, interpreting
         /// it as a pointer to the structure.  This Rule then applies a PTRSUB(,0) to the pointer
         /// to drill down to the first component.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
-            uint4 list[] = { CPUI_LOAD, CPUI_STORE };
+            uint list[] = { CPUI_LOAD, CPUI_STORE };
             oplist.insert(oplist.end(), list, list + 2);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            int4 movesize;          // Number of bytes being moved by load or store
+            int movesize;          // Number of bytes being moved by load or store
 
             if (!data.hasTypeRecoveryStarted()) return 0;
             if (op.code() == CPUI_LOAD)
@@ -57,14 +57,14 @@ namespace Sla.DECCORE
             Datatype* ct = ptrVn.getTypeReadFacing(op);
             if (ct.getMetatype() != TYPE_PTR) return 0;
             Datatype* baseType = ((TypePointer*)ct).getPtrTo();
-            uintb offset = 0;
+            ulong offset = 0;
             if (ct.isFormalPointerRel() && ((TypePointerRel*)ct).evaluateThruParent(0))
             {
                 TypePointerRel* ptRel = (TypePointerRel*)ct;
                 baseType = ptRel.getParent();
                 if (baseType.getMetatype() != TYPE_STRUCT)
                     return 0;
-                int4 iOff = ptRel.getPointerOffset();
+                int iOff = ptRel.getPointerOffset();
                 iOff = AddrSpace::addressToByteInt(iOff, ptRel.getWordSize());
                 if (iOff >= baseType.getSize())
                     return 0;

@@ -24,12 +24,12 @@ namespace Sla.DECCORE
 
         /// \class RuleNotDistribute
         /// \brief Distribute BOOL_NEGATE:  `!(V && W)  =>  !V || !W`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_BOOL_NEGATE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             PcodeOp* compop = op.getIn(0).getDef();
             PcodeOp* newneg1,*newneg2;

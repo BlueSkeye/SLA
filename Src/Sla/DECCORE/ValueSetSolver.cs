@@ -34,7 +34,7 @@ namespace Sla.DECCORE
             /// The list of nodes attached to the simulated root node (or NULL)
             private List<ValueSet> rootEdges;
             /// The iterator position for the simulated root node
-            private int4 rootPos;
+            private int rootPos;
             /// The Varnode attached to a normal ValueSet node (or NULL)
             private Varnode vn;
             /// The iterator position for a normal ValueSet node
@@ -105,17 +105,17 @@ namespace Sla.DECCORE
         /// Stack used to generate the topological ordering
         private List<ValueSet> nodeStack;
         /// (Global) depth first numbering for topological ordering
-        private int4 depthFirstIndex;
+        private int depthFirstIndex;
         /// Count of individual ValueSet iterations
-        private int4 numIterations;
+        private int numIterations;
         /// Maximum number of iterations before forcing termination
-        private int4 maxIterations;
+        private int maxIterations;
 
         /// Allocate storage for a new ValueSet
         /// The new ValueSet is attached to the given Varnode
         /// \param vn is the given Varnode
         /// \param tCode is the type to associate with the Varnode
-        private void newValueSet(Varnode vn, int4 tCode)
+        private void newValueSet(Varnode vn, int tCode)
         {
             valueNodes.emplace_back();
             valueNodes.back().setVarnode(vn, tCode);
@@ -176,18 +176,18 @@ namespace Sla.DECCORE
         /// \param vertex is the current Varnode being walked
         /// \param part is the current Partition being constructed
         /// \return the index of calculated head ValueSet for the current Parition
-        private int4 visit(ValueSet vertex, Partition part)
+        private int visit(ValueSet vertex, Partition part)
         {
             nodeStack.push_back(vertex);
             depthFirstIndex += 1;
             vertex.count = depthFirstIndex;
-            int4 head = depthFirstIndex;
+            int head = depthFirstIndex;
             bool loop = false;
             ValueSetEdge edgeIterator(vertex, rootNodes);
             ValueSet* succ = edgeIterator.getNext();
             while (succ != (ValueSet*)0)
             {
-                int4 min;
+                int min;
                 if (succ.count == 0)
                     min = visit(succ, part);
                 else
@@ -257,7 +257,7 @@ namespace Sla.DECCORE
         /// \param slot is the input slot of the constrained input Varnode
         /// \param type is the type of values
         /// \param range is the range of \b true values
-        private void generateTrueEquation(Varnode vn, PcodeOp op, int4 slot, int4 type, CircleRange range)
+        private void generateTrueEquation(Varnode vn, PcodeOp op, int slot, int type, CircleRange range)
         {
             if (vn != (Varnode*)0)
                 vn.getValueSet().addEquation(slot, type, range);
@@ -274,7 +274,7 @@ namespace Sla.DECCORE
         /// \param slot is the input slot of the constrained input Varnode
         /// \param type is the type of values
         /// \param range is the range of \b true values, which must be complemented
-        private void generateFalseEquation(Varnode vn, PcodeOp op, int4 slot, int4 type, CircleRange range)
+        private void generateFalseEquation(Varnode vn, PcodeOp op, int slot, int type, CircleRange range)
         {
             CircleRange falseRange(range);
             falseRange.invert();
@@ -294,7 +294,7 @@ namespace Sla.DECCORE
         /// \param type is the constraint characteristic
         /// \param range is the known constraint (assuming the \b true branch was taken)
         /// \param cbranch is conditional branch creating the constraint
-        private void applyConstraints(Varnode vn, int4 type, CircleRange range,PcodeOp cbranch)
+        private void applyConstraints(Varnode vn, int type, CircleRange range,PcodeOp cbranch)
         {
             FlowBlock* splitPoint = cbranch.getParent();
             FlowBlock* trueBlock,*falseBlock;
@@ -332,7 +332,7 @@ namespace Sla.DECCORE
                     if (!outVn.isMark()) continue;
                 }
                 FlowBlock* curBlock = op.getParent();
-                int4 slot = op.getSlot(vn);
+                int slot = op.getSlot(vn);
                 if (op.code() == CPUI_MULTIEQUAL)
                 {
                     if (curBlock == trueBlock)
@@ -385,7 +385,7 @@ namespace Sla.DECCORE
         /// \param startVn is the starting Varnode
         /// \param endVn is the given ending Varnode in the system
         /// \param cbranch is the PcodeOp causing the control-flow split
-        private void constraintsFromPath(int4 type, CircleRange lift, Varnode startVn, Varnode endVn,
+        private void constraintsFromPath(int type, CircleRange lift, Varnode startVn, Varnode endVn,
             PcodeOp cbranch)
         {
             while (startVn != endVn)
@@ -422,7 +422,7 @@ namespace Sla.DECCORE
                 PcodeOp* op = vn.getDef();
                 if (op.isCall() || op.isMarker())
                     break;
-                int4 num = op.numInput();
+                int num = op.numInput();
                 if (num == 0 || num > 2) break;
                 vn = op.getIn(0);
                 if (num == 2)
@@ -459,14 +459,14 @@ namespace Sla.DECCORE
         {
             List<FlowBlock*> blockList;
             // Collect all blocks that contain a system op (input) or dominate a container
-            for (int4 i = 0; i < worklist.size(); ++i)
+            for (int i = 0; i < worklist.size(); ++i)
             {
                 PcodeOp* op = worklist[i].getDef();
                 if (op == (PcodeOp*)0) continue;
                 FlowBlock* bl = op.getParent();
                 if (op.code() == CPUI_MULTIEQUAL)
                 {
-                    for (int4 j = 0; j < bl.sizeIn(); ++j)
+                    for (int j = 0; j < bl.sizeIn(); ++j)
                     {
                         FlowBlock* curBl = bl.getIn(j);
                         do
@@ -489,7 +489,7 @@ namespace Sla.DECCORE
                     } while (bl != (FlowBlock*)0);
                 }
             }
-            for (int4 i = 0; i < reads.size(); ++i)
+            for (int i = 0; i < reads.size(); ++i)
             {
                 FlowBlock* bl = reads[i].getParent();
                 do
@@ -500,15 +500,15 @@ namespace Sla.DECCORE
                     bl = bl.getImmedDom();
                 } while (bl != (FlowBlock*)0);
             }
-            for (int4 i = 0; i < blockList.size(); ++i)
+            for (int i = 0; i < blockList.size(); ++i)
                 blockList[i].clearMark();
 
             List<FlowBlock*> finalList;
             // Now go through input blocks to the previously calculated blocks
-            for (int4 i = 0; i < blockList.size(); ++i)
+            for (int i = 0; i < blockList.size(); ++i)
             {
                 FlowBlock* bl = blockList[i];
-                for (int4 j = 0; j < bl.sizeIn(); ++j)
+                for (int j = 0; j < bl.sizeIn(); ++j)
                 {
                     BlockBasic* splitPoint = (BlockBasic*)bl.getIn(j);
                     if (splitPoint.isMark()) continue;
@@ -522,7 +522,7 @@ namespace Sla.DECCORE
                     }
                 }
             }
-            for (int4 i = 0; i < finalList.size(); ++i)
+            for (int i = 0; i < finalList.size(); ++i)
                 finalList[i].clearMark();
         }
 
@@ -534,7 +534,7 @@ namespace Sla.DECCORE
         /// \param typeCode will hold the base register code (if found)
         /// \param value will hold the additive value relative to the base register (if found)
         /// \return \b true if the Varnode is a \e relative constant
-        private bool checkRelativeConstant(Varnode vn, int4 typeCode, uintb value)
+        private bool checkRelativeConstant(Varnode vn, int typeCode, ulong value)
         {
             value = 0;
             for (; ; )
@@ -592,8 +592,8 @@ namespace Sla.DECCORE
                 default:
                     return;
             }
-            int4 typeCode;
-            uintb value;
+            int typeCode;
+            ulong value;
             Varnode* vn;
             Varnode* inVn0 = compOp.getIn(0);
             Varnode* inVn1 = compOp.getIn(1);
@@ -647,7 +647,7 @@ namespace Sla.DECCORE
             bool indirectAsCopy)
         {
             List<Varnode*> worklist;
-            int4 workPos = 0;
+            int workPos = 0;
             if (stackReg != (Varnode*)0)
             {
                 newValueSet(stackReg, 1);       // Establish stack pointer as special
@@ -656,7 +656,7 @@ namespace Sla.DECCORE
                 workPos += 1;
                 rootNodes.push_back(stackReg.getValueSet());
             }
-            for (int4 i = 0; i < sinks.size(); ++i)
+            for (int i = 0; i < sinks.size(); ++i)
             {
                 Varnode* vn = sinks[i];
                 newValueSet(vn, 0);
@@ -725,7 +725,7 @@ namespace Sla.DECCORE
                         rootNodes.push_back(vn.getValueSet());
                         break;
                     default:
-                        for (int4 i = 0; i < op.numInput(); ++i)
+                        for (int i = 0; i < op.numInput(); ++i)
                         {
                             Varnode* inVn = op.getIn(i);
                             if (inVn.isMark() || inVn.isAnnotation()) continue;
@@ -736,10 +736,10 @@ namespace Sla.DECCORE
                         break;
                 }
             }
-            for (int4 i = 0; i < reads.size(); ++i)
+            for (int i = 0; i < reads.size(); ++i)
             {
                 PcodeOp* op = reads[i];
-                for (int4 slot = 0; slot < op.numInput(); ++slot)
+                for (int slot = 0; slot < op.numInput(); ++slot)
                 {
                     Varnode* vn = op.getIn(slot);
                     if (vn.isMark())
@@ -751,23 +751,23 @@ namespace Sla.DECCORE
                 }
             }
             generateConstraints(worklist, reads);
-            for (int4 i = 0; i < reads.size(); ++i)
+            for (int i = 0; i < reads.size(); ++i)
                 reads[i].clearMark();      // Clear marks on read ops
 
             establishTopologicalOrder();
-            for (int4 i = 0; i < worklist.size(); ++i)
+            for (int i = 0; i < worklist.size(); ++i)
                 worklist[i].clearMark();
         }
 
         /// Get the current number of iterations
-        public int4 getNumIterations() => numIterations;
+        public int getNumIterations() => numIterations;
 
         /// Iterate the ValueSet system until it stabilizes
         /// The ValueSets are recalculated in the established topological ordering, with looping
         /// at various levels until a fixed point is reached.
         /// \param max is the maximum number of iterations to allow before forcing termination
         /// \param widener is the Widening strategy to use to accelerate stabilization
-        public void solve(int4 max, Widener widener)
+        public void solve(int max, Widener widener)
         {
             maxIterations = max;
             numIterations = 0;

@@ -14,7 +14,7 @@ namespace Sla.EXTRA
         // Map from address to specific inject
         private Dictionary<Address, Document> addrMap = new Dictionary<Address, Document>();
         
-        public InjectPayloadDynamic(Architecture g, string nm,int4 tp)
+        public InjectPayloadDynamic(Architecture g, string nm,int tp)
             : base(nm, tp)
         {
             glb = g;
@@ -31,7 +31,7 @@ namespace Sla.EXTRA
         public void decodeEntry(Decoder decoder)
         {
             Address addr = Address::decode(decoder);
-            uint4 subId = decoder.openElement(ELEM_PAYLOAD);
+            uint subId = decoder.openElement(ELEM_PAYLOAD);
             istringstream s(decoder.readString(ATTRIB_CONTENT));
             try
             {
@@ -54,7 +54,7 @@ namespace Sla.EXTRA
                 throw new LowlevelError("Missing dynamic inject");
             Element el = (*eiter).second.getRoot();
             XmlDecode decoder(glb.translate, el);
-            uint4 rootId = decoder.openElement(ELEM_INST);
+            uint rootId = decoder.openElement(ELEM_INST);
             Address addr = Address::decode(decoder);
             while (decoder.peekElement() != 0)
                 emit.decodeOp(addr, decoder);

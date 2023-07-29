@@ -24,18 +24,18 @@ namespace Sla.DECCORE
 
         /// \class RuleAndMask
         /// \brief Collapse unnecessary INT_AND
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_AND);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            uintb mask1, mask2, andmask;
-            int4 size = op.getOut().getSize();
+            ulong mask1, mask2, andmask;
+            int size = op.getOut().getSize();
             Varnode* vn;
 
-            if (size > sizeof(uintb)) return 0; // FIXME: uintb should be arbitrary precision
+            if (size > sizeof(ulong)) return 0; // FIXME: ulong should be arbitrary precision
             mask1 = op.getIn(0).getNZMask();
             if (mask1 == 0)
                 andmask = 0;

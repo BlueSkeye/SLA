@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     {
         internal string enumconstant;        // Identifier associated with constant
         internal bool constantassigned;  // True if user specified explicit constant
-        internal uintb value;            // The actual constant
+        internal ulong value;            // The actual constant
 
         internal Enumerator(string nm)
         {
@@ -18,7 +18,7 @@ namespace Sla.DECCORE
             enumconstant = nm;
         }
 
-        internal Enumerator(string nm, uintb val)
+        internal Enumerator(string nm, ulong val)
         {
             constantassigned = true;
             enumconstant = nm;

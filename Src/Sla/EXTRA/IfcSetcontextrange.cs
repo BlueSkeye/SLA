@@ -28,7 +28,7 @@ namespace Sla.EXTRA
                 throw IfaceParseError("Missing context variable name");
 
             s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
-            uintm value = 0xbadbeef;
+            uint value = 0xbadbeef;
             s >> value;
             if (value == 0xbadbeef)
                 throw IfaceParseError("Missing context value");
@@ -42,7 +42,7 @@ namespace Sla.EXTRA
             }
 
             // Otherwise parse the range
-            int4 size1, size2;
+            int size1, size2;
             Address addr1 = parse_machaddr(s, size1, *dcp.conf.types); // Read begin address
             Address addr2 = parse_machaddr(s, size2, *dcp.conf.types); // Read end address
 

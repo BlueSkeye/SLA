@@ -31,7 +31,7 @@ namespace Sla.DECCORE
         {
         }
         
-        public override uint4 getType() => p_standard_out;
+        public override uint getType() => p_standard_out;
 
         public override void assignMap(List<Datatype> proto, TypeFactory typefactory,
             List<ParameterPieces> res);

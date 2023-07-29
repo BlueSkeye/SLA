@@ -13,21 +13,21 @@ namespace Sla.SLEIGH
     internal class ContextSymbol : ValueSymbol
     {
         private VarnodeSymbol vn;
-        private uint4 low, high;        // into a varnode
+        private uint low, high;        // into a varnode
         private bool flow;
         
         public ContextSymbol()
         {
         }
 
-        public ContextSymbol(string nm,ContextField pate, VarnodeSymbol v,uint4 l, uint4 h,
+        public ContextSymbol(string nm,ContextField pate, VarnodeSymbol v,uint l, uint h,
             bool flow);
 
         public VarnodeSymbol getVarnode() => vn;
 
-        public uint4 getLow() => low;
+        public uint getLow() => low;
 
-        public uint4 getHigh() => high;
+        public uint getHigh() => high;
 
         public bool getFlow() => flow;
 
@@ -57,7 +57,7 @@ namespace Sla.SLEIGH
         {
             ValueSymbol::restoreXml(el, trans);
             {
-                uintm id;
+                uint id;
                 istringstream s(el.getAttributeValue("varnode"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> id;
@@ -74,7 +74,7 @@ namespace Sla.SLEIGH
                 s >> high;
             }
             flow = true;
-            for (int4 i = el.getNumAttributes() - 1; i >= 0; --i)
+            for (int i = el.getNumAttributes() - 1; i >= 0; --i)
             {
                 if (el.getAttributeName(i) == "flow")
                 {

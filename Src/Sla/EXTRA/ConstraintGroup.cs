@@ -24,12 +24,12 @@ namespace Sla.EXTRA
 
         ~ConstraintGroup()
         {
-            for (uint4 i = 0; i < constraintlist.size(); ++i)
+            for (uint i = 0; i < constraintlist.size(); ++i)
                 delete constraintlist[i];
             // We do not own the traverselist objects
         }
 
-        public UnifyConstraint getConstraint(int4 slot) => constraintlist[slot];
+        public UnifyConstraint getConstraint(int slot) => constraintlist[slot];
 
         public void addConstraint(UnifyConstraint a)
         {
@@ -39,9 +39,9 @@ namespace Sla.EXTRA
                 maxnum = c.getMaxNum();
         }
 
-        public int4 numConstraints() => constraintlist.size();
+        public int numConstraints() => constraintlist.size();
 
-        public void deleteConstraint(int4 slot)
+        public void deleteConstraint(int slot)
         {
             List<UnifyConstraint*>::iterator iter = constraintlist.begin();
             iter = iter + slot;
@@ -52,7 +52,7 @@ namespace Sla.EXTRA
 
         public void mergeIn(ConstraintGroup b)
         { // Merge all the subconstraints from -b- into this
-            for (int4 i = 0; i < b.constraintlist.size(); ++i)
+            for (int i = 0; i < b.constraintlist.size(); ++i)
                 addConstraint(b.constraintlist[i]);
             b.constraintlist.clear();  // Constraints are no longer controlled by -b-
             delete b;
@@ -61,7 +61,7 @@ namespace Sla.EXTRA
         public override UnifyConstraint clone()
         {
             ConstraintGroup* res = new ConstraintGroup();
-            for (int4 i = 0; i < constraintlist.size(); ++i)
+            for (int i = 0; i < constraintlist.size(); ++i)
             {
                 UnifyConstraint* subconst = constraintlist[i].clone();
                 res.constraintlist.push_back(subconst);
@@ -82,9 +82,9 @@ namespace Sla.EXTRA
 
             UnifyConstraint* subconstraint;
             TraverseConstraint* subtraverse;
-            int4 subindex;
-            int4 stateint;
-            int4 max = constraintlist.size();
+            int subindex;
+            int stateint;
+            int max = constraintlist.size();
             do
             {
                 stateint = traverse.getState();
@@ -133,7 +133,7 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            for (int4 i = 0; i < constraintlist.size(); ++i)
+            for (int i = 0; i < constraintlist.size(); ++i)
                 constraintlist[i].collectTypes(typelist);
         }
 
@@ -144,7 +144,7 @@ namespace Sla.EXTRA
             TraverseGroupState* basetrav = new TraverseGroupState(uniqid);
             state.registerTraverseConstraint(basetrav);
 
-            for (int4 i = 0; i < constraintlist.size(); ++i)
+            for (int i = 0; i < constraintlist.size(); ++i)
             {
                 UnifyConstraint* subconstraint = constraintlist[i];
                 subconstraint.buildTraverseState(state);
@@ -153,18 +153,18 @@ namespace Sla.EXTRA
             }
         }
 
-        public override void setId(int4 id)
+        public override void setId(int id)
         {
             UnifyConstraint::setId(id);
-            for (int4 i = 0; i < constraintlist.size(); ++i)
+            for (int i = 0; i < constraintlist.size(); ++i)
                 constraintlist[i].setId(id);
         }
 
-        public override int4 getBaseIndex() => constraintlist.back().getBaseIndex();
+        public override int getBaseIndex() => constraintlist.back().getBaseIndex();
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
-            for (int4 i = 0; i < constraintlist.size(); ++i)
+            for (int i = 0; i < constraintlist.size(); ++i)
                 constraintlist[i].print(s, printstate);
         }
 
@@ -172,7 +172,7 @@ namespace Sla.EXTRA
         { // Remove any dummy constraints within us
             List<UnifyConstraint*> newlist;
 
-            for (int4 i = 0; i < constraintlist.size(); ++i)
+            for (int i = 0; i < constraintlist.size(); ++i)
             {
                 UnifyConstraint* cur = constraintlist[i];
                 if (cur.isDummy())

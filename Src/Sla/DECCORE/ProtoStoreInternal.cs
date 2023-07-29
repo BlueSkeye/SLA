@@ -37,7 +37,7 @@ namespace Sla.DECCORE
         {
             if (outparam != (ProtoParameter*)0)
                 delete outparam;
-            for (int4 i = 0; i < inparam.size(); ++i)
+            for (int i = 0; i < inparam.size(); ++i)
             {
                 ProtoParameter* param = inparam[i];
                 if (param != (ProtoParameter*)0)
@@ -45,7 +45,7 @@ namespace Sla.DECCORE
             }
         }
 
-        public override ProtoParameter setInput(int4 i, string nm, ParameterPieces pieces)
+        public override ProtoParameter setInput(int i, string nm, ParameterPieces pieces)
         {
             while (inparam.size() <= i)
                 inparam.push_back((ProtoParameter*)0);
@@ -55,14 +55,14 @@ namespace Sla.DECCORE
             return inparam[i];
         }
 
-        public override void clearInput(int4 i)
+        public override void clearInput(int i)
         {
-            int4 sz = inparam.size();
+            int sz = inparam.size();
             if (i >= sz) return;
             if (inparam[i] != (ProtoParameter*)0)
                 delete inparam[i];
             inparam[i] = (ProtoParameter*)0;
-            for (int4 j = i + 1; j < sz; ++j)
+            for (int j = i + 1; j < sz; ++j)
             {   // Renumber parameters with index > i
                 inparam[j - 1] = inparam[j];
                 inparam[j] = (ProtoParameter*)0;
@@ -73,7 +73,7 @@ namespace Sla.DECCORE
 
         public override void clearAllInputs()
         {
-            for (int4 i = 0; i < inparam.size(); ++i)
+            for (int i = 0; i < inparam.size(); ++i)
             {
                 if (inparam[i] != (ProtoParameter*)0)
                     delete inparam[i];
@@ -81,9 +81,9 @@ namespace Sla.DECCORE
             inparam.clear();
         }
 
-        public override int4 getNumInputs() => inparam.size();
+        public override int getNumInputs() => inparam.size();
 
-        public override ProtoParameter getInput(int4 i)
+        public override ProtoParameter getInput(int i)
         {
             if (i >= inparam.size())
                 return (ProtoParameter*)0;
@@ -115,7 +115,7 @@ namespace Sla.DECCORE
                 res.outparam = outparam.clone();
             else
                 res.outparam = (ProtoParameter*)0;
-            for (int4 i = 0; i < inparam.size(); ++i)
+            for (int i = 0; i < inparam.size(); ++i)
             {
                 ProtoParameter* param = inparam[i];
                 if (param != (ProtoParameter*)0)
@@ -147,7 +147,7 @@ namespace Sla.DECCORE
                 encoder.closeElement(ELEM_RETPARAM);
             }
 
-            for (int4 i = 0; i < inparam.size(); ++i)
+            for (int i = 0; i < inparam.size(); ++i)
             {
                 ProtoParameter* param = inparam[i];
                 encoder.openElement(ELEM_PARAM);
@@ -188,16 +188,16 @@ namespace Sla.DECCORE
             if (outparam.getAddress().isInvalid())
                 addressesdetermined = false;
 
-            uint4 elemId = decoder.openElement(ELEM_INTERNALLIST);
+            uint elemId = decoder.openElement(ELEM_INTERNALLIST);
             for (; ; )
             { // This is only the input params
-                uint4 subId = decoder.openElement();        // <retparam> or <param>
+                uint subId = decoder.openElement();        // <retparam> or <param>
                 if (subId == 0) break;
                 string name;
-                uint4 flags = 0;
+                uint flags = 0;
                 for (; ; )
                 {
-                    uint4 attribId = decoder.getNextAttributeId();
+                    uint attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;
                     if (attribId == ATTRIB_NAME)
                         name = decoder.readString();
@@ -245,13 +245,13 @@ namespace Sla.DECCORE
                 // If addresses for parameters are not provided, use
                 // the model to derive them from type info
                 List<Datatype*> typelist;
-                for (int4 i = 0; i < pieces.size(); ++i) // Save off the decoded types
+                for (int i = 0; i < pieces.size(); ++i) // Save off the decoded types
                     typelist.push_back(pieces[i].type);
                 List<ParameterPieces> addrPieces;
                 model.assignParameterStorage(typelist, addrPieces, true);
                 addrPieces.swap(pieces);
-                uint4 k = 0;
-                for (uint4 i = 0; i < pieces.size(); ++i)
+                uint k = 0;
+                for (uint i = 0; i < pieces.size(); ++i)
                 {
                     if ((pieces[i].flags & ParameterPieces::hiddenretparm) != 0)
                         continue;   // Increment i but not k
@@ -260,13 +260,13 @@ namespace Sla.DECCORE
                 }
                 if (pieces[0].addr.isInvalid())
                 {   // If could not get valid storage for output
-                    pieces[0].flags &= ~((uint4)ParameterPieces::typelock);     // Treat as unlocked void
+                    pieces[0].flags &= ~((uint)ParameterPieces::typelock);     // Treat as unlocked void
                 }
                 curparam = setOutput(pieces[0]);
                 curparam.setTypeLock((pieces[0].flags & ParameterPieces::typelock) != 0);
             }
-            uint4 j = 1;
-            for (uint4 i = 1; i < pieces.size(); ++i)
+            uint j = 1;
+            for (uint i = 1; i < pieces.size(); ++i)
             {
                 if ((pieces[i].flags & ParameterPieces::hiddenretparm) != 0)
                 {

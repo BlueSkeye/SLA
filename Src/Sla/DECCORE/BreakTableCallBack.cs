@@ -25,7 +25,7 @@ namespace Sla.DECCORE
         /// a container of pcode based breakpoints
         private Dictionary<Address, BreakCallBack> addresscallback;
         /// a container of addressed based breakpoints
-        private Dictionary<uintb, BreakCallBack> pcodecallback;
+        private Dictionary<ulong, BreakCallBack> pcodecallback;
 
         /// Basic breaktable constructor
         /// The break table needs a translator object so user-defined pcode ops can be registered against
@@ -48,11 +48,11 @@ namespace Sla.DECCORE
             func.setEmulate(emulate);
             List<string> userops;
             trans.getUserOpNames(userops);
-            for (int4 i = 0; i < userops.size(); ++i)
+            for (int i = 0; i < userops.size(); ++i)
             {
                 if (userops[i] == name)
                 {
-                    pcodecallback[(uintb)i] = func;
+                    pcodecallback[(ulong)i] = func;
                     return;
                 }
             }
@@ -82,7 +82,7 @@ namespace Sla.DECCORE
             for (iter1 = addresscallback.begin(); iter1 != addresscallback.end(); ++iter1)
                 (*iter1).second.setEmulate(emu);
 
-            map<uintb, BreakCallBack*>::iterator iter2;
+            map<ulong, BreakCallBack*>::iterator iter2;
 
 
             for (iter2 = pcodecallback.begin(); iter2 != pcodecallback.end(); ++iter2)
@@ -96,8 +96,8 @@ namespace Sla.DECCORE
         /// \return \b true if the breakpoint exists and returns \b true, otherwise return \b false
         public override bool doPcodeOpBreak(PcodeOpRaw curop)
         {
-            uintb val = curop.getInput(0).offset;
-            map<uintb, BreakCallBack*>::const_iterator iter;
+            ulong val = curop.getInput(0).offset;
+            map<ulong, BreakCallBack*>::const_iterator iter;
 
             iter = pcodecallback.find(val);
             if (iter == pcodecallback.end()) return false;

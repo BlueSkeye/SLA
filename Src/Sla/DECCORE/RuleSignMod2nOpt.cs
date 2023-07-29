@@ -26,20 +26,20 @@ namespace Sla.DECCORE
         /// \brief Convert INT_SREM forms:  `(V + (sign >> (64-n)) & (2^n-1)) - (sign >> (64-n)  =>  V s% 2^n`
         ///
         /// Note: `sign = V s>> 63`  The INT_AND may be performed on a truncated result and then reextended.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_RIGHT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (!op.getIn(1).isConstant()) return 0;
-            int4 shiftAmt = op.getIn(1).getOffset();
+            int shiftAmt = op.getIn(1).getOffset();
             Varnode* a = checkSignExtraction(op.getIn(0));
             if (a == (Varnode*)0 || a.isFree()) return 0;
             Varnode* correctVn = op.getOut();
-            int4 n = a.getSize() * 8 - shiftAmt;
-            uintb mask = 1;
+            int n = a.getSize() * 8 - shiftAmt;
+            ulong mask = 1;
             mask = (mask << n) - 1;
             list<PcodeOp*>::const_iterator iter;
             for (iter = correctVn.beginDescend(); iter != correctVn.endDescend(); ++iter)
@@ -52,11 +52,11 @@ namespace Sla.DECCORE
                 PcodeOp* baseOp = multop.getOut().loneDescend();
                 if (baseOp == (PcodeOp*)0) continue;
                 if (baseOp.code() != CPUI_INT_ADD) continue;
-                int4 slot = 1 - baseOp.getSlot(multop.getOut());
+                int slot = 1 - baseOp.getSlot(multop.getOut());
                 Varnode* andOut = baseOp.getIn(slot);
                 if (!andOut.isWritten()) continue;
                 PcodeOp* andOp = andOut.getDef();
-                int4 truncSize = -1;
+                int truncSize = -1;
                 if (andOp.code() == CPUI_INT_ZEXT)
                 {   // Look for intervening extension after INT_AND
                     andOut = andOp.getIn(0);
@@ -76,7 +76,7 @@ namespace Sla.DECCORE
                 PcodeOp* addOp = addOut.getDef();
                 if (addOp.code() != CPUI_INT_ADD) continue;
                 // Search for "a" as one of the inputs to addOp
-                int4 aSlot;
+                int aSlot;
                 for (aSlot = 0; aSlot < 2; ++aSlot)
                 {
                     Varnode* vn = addOp.getIn(aSlot);
@@ -98,7 +98,7 @@ namespace Sla.DECCORE
                 if (shiftOp.code() != CPUI_INT_RIGHT) continue;
                 constVn = shiftOp.getIn(1);
                 if (!constVn.isConstant()) continue;
-                int4 shiftval = constVn.getOffset();
+                int shiftval = constVn.getOffset();
                 if (truncSize >= 0)
                     shiftval += (a.getSize() - truncSize) * 8;
                 if (shiftval != shiftAmt) continue;
@@ -110,7 +110,7 @@ namespace Sla.DECCORE
                     if (!extVn.isWritten()) continue;
                     PcodeOp* subOp = extVn.getDef();
                     if (subOp.code() != CPUI_SUBPIECE) continue;
-                    if ((int4)subOp.getIn(1).getOffset() != truncSize) continue;
+                    if ((int)subOp.getIn(1).getOffset() != truncSize) continue;
                     extVn = subOp.getIn(0);
                 }
                 if (a != extVn) continue;
@@ -137,9 +137,9 @@ namespace Sla.DECCORE
             Varnode* constVn = signOp.getIn(1);
             if (!constVn.isConstant())
                 return (Varnode*)0;
-            int4 val = constVn.getOffset();
+            int val = constVn.getOffset();
             Varnode* resVn = signOp.getIn(0);
-            int4 insize = resVn.getSize();
+            int insize = resVn.getSize();
             if (val != insize * 8 - 1)
                 return (Varnode*)0;
             return resVn;

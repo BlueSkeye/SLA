@@ -46,7 +46,7 @@ namespace Sla.DECCORE
                 PcodeOp* subpieceOpHi = *iter;
                 if (subpieceOpHi.code() != CPUI_SUBPIECE) continue;
                 if (subpieceOpHi == subpieceOpLo) continue;
-                int4 offset = (int4)subpieceOpHi.getIn(1).getOffset();
+                int offset = (int)subpieceOpHi.getIn(1).getOffset();
                 if (offset != vnlo.getSize()) continue;
                 Varnode* vnhi = subpieceOpHi.getOut();
                 if (!vnhi.isPrecisHi()) continue;
@@ -102,12 +102,12 @@ namespace Sla.DECCORE
                 op2 = op1;
                 op1 = tmp;
             }
-            for (int4 i = 0; i < indirects.size(); ++i)
+            for (int i = 0; i < indirects.size(); ++i)
             {
                 Varnode* outvn = indirects[i].getOut();
                 list<PcodeOp*>::const_iterator iter;
-                int4 usecount = 0;
-                int4 usebyop2 = 0;
+                int usecount = 0;
+                int usebyop2 = 0;
                 for (iter = outvn.beginDescend(); iter != outvn.endDescend(); ++iter)
                 {
                     PcodeOp* op = *iter;
@@ -145,7 +145,7 @@ namespace Sla.DECCORE
             List<PcodeOp> indirects)
         {
             // Search for INDIRECT pairs.  The earlier is deleted.  The later gains the earlier's input.
-            for (int4 i = 0; i < indirects.size(); ++i)
+            for (int i = 0; i < indirects.size(); ++i)
             {
                 PcodeOp* op = indirects[i];
                 op.setMark();
@@ -158,7 +158,7 @@ namespace Sla.DECCORE
                     data.opDestroy(earlyop);
                 }
             }
-            for (int4 i = 0; i < indirects.size(); ++i)
+            for (int i = 0; i < indirects.size(); ++i)
             {
                 PcodeOp* op = indirects[i];
                 op.clearMark();

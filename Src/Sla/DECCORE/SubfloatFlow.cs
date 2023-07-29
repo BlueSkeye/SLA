@@ -16,9 +16,9 @@ namespace Sla.DECCORE
     internal class SubfloatFlow : TransformManager
     {
         /// Number of bytes of precision in the logical flow
-        private int4 precision;
+        private int precision;
         /// Number of terminating nodes reachable via the root
-        private int4 terminatorCount;
+        private int terminatorCount;
         /// The floating-point format of the logical value
         private FloatFormat format;
         /// Current list of placeholders that still need to be traced
@@ -51,7 +51,7 @@ namespace Sla.DECCORE
 
             if (vn.isTypeLock() && vn.getType().getMetatype() != TYPE_PARTIALSTRUCT)
             {
-                int4 sz = vn.getType().getSize();
+                int sz = vn.getType().getSize();
                 if (sz != precision)
                     return (TransformVar*)0;
             }
@@ -129,7 +129,7 @@ namespace Sla.DECCORE
                     case CPUI_FLOAT_LESS:
                     case CPUI_FLOAT_LESSEQUAL:
                         {
-                            int4 slot = op.getSlot(vn);
+                            int slot = op.getSlot(vn);
                             TransformVar* rvn2 = setReplacement(op.getIn(1 - slot));
                             if (rvn2 == (TransformVar*)0) return false;
                             if (rvn == rvn2)
@@ -195,7 +195,7 @@ namespace Sla.DECCORE
                             rop = newOpReplace(op.numInput(), op.code(), op);
                             opSetOutput(rop, rvn);
                         }
-                        for (int4 i = 0; i < op.numInput(); ++i)
+                        for (int i = 0; i < op.numInput(); ++i)
                         {
                             TransformVar* newvar = rop.getIn(i);
                             if (newvar == (TransformVar*)0)
@@ -273,7 +273,7 @@ namespace Sla.DECCORE
         /// \param f is the function being transformed
         /// \param root is the start Varnode containing the logical value
         /// \param prec is the precision to assume for the logical value
-        public SubfloatFlow(Funcdata f, Varnode root, int4 prec)
+        public SubfloatFlow(Funcdata f, Varnode root, int prec)
             : base(f)
         {
             precision = prec;
@@ -283,7 +283,7 @@ namespace Sla.DECCORE
             setReplacement(root);
         }
 
-        public override bool preserveAddress(Varnode vn, int4 bitSize, int4 lsbOffset)
+        public override bool preserveAddress(Varnode vn, int bitSize, int lsbOffset)
         {
             return vn.isInput();       // Only try to preserve address for input varnodes
         }

@@ -209,7 +209,7 @@ namespace Sla.SLEIGH
      AssemblyEmit *assememit = new AssemblyRaw();
 
      Address addr(trans.getDefaultCodeSpace(),0x80484c0);
-     int4 length;                  // Length of instruction in bytes
+     int length;                  // Length of instruction in bytes
 
      length = trans.printAssembly(*assememit,addr);
      addr = addr + length;        // Advance to next instruction
@@ -233,7 +233,7 @@ namespace Sla.SLEIGH
      \code
      class PcodeRawOut : public PcodeEmit {
      public:
-       virtual void dump(Address addr,OpCode opc,VarnodeData *outvar,VarnodeData *vars,int4 isize);
+       virtual void dump(Address addr,OpCode opc,VarnodeData *outvar,VarnodeData *vars,int isize);
      };
 
      static void print_vardata(ostream &s,VarnodeData &data)
@@ -244,7 +244,7 @@ namespace Sla.SLEIGH
        s << ',' << dec << data.size << ')';
      }
 
-     void PcodeRawOut::dump(Address addr,OpCode opc,VarnodeData *outvar,VarnodeData *vars,int4 isize)
+     void PcodeRawOut::dump(Address addr,OpCode opc,VarnodeData *outvar,VarnodeData *vars,int isize)
 
      {
        if (outvar != (VarnodeData *)0) {     // The output is optional
@@ -253,7 +253,7 @@ namespace Sla.SLEIGH
        }
        cout << get_opname(opc);
        // Possibly check for a code reference or a space reference
-       for(int4 i=0;i<isize;++i) {
+       for(int i=0;i<isize;++i) {
          cout << ' ';
          print_vardata(cout,vars[i]);
        }
@@ -269,8 +269,8 @@ namespace Sla.SLEIGH
      \code
      struct VarnodeData {
        AddrSpace *space;          // The address space
-       uintb offset;              // The offset within the space
-       uint4 size;                // The number of bytes at that location
+       ulong offset;              // The offset within the space
+       uint size;                // The number of bytes at that location
      };
      \endcode
 
@@ -282,7 +282,7 @@ namespace Sla.SLEIGH
      PcodeEmit *pcodeemit = new PcodeRawOut();
 
      Address addr(trans.getDefaultCodeSpace(),0x80484c0);
-     int4 length;                   // Length of instruction in bytes
+     int length;                   // Length of instruction in bytes
 
      length = trans.oneInstruction(*pcodeemit,addr);
      addr = addr + length;         // Advance to next instruction
@@ -313,7 +313,7 @@ namespace Sla.SLEIGH
      class MyLoadImage : public LoadImage {
      public:
        MyLoadImage(string &nm) : Loadimage(nm) {}
-       virtual void loadFill(uint1 *ptr,int4 size,Address &addr);
+       virtual void loadFill(byte *ptr,int size,Address &addr);
        virtual string getArchType(void) { return "mytype"; }
        virtual void adjustVma(long adjust) {}
      };
@@ -385,10 +385,10 @@ namespace Sla.SLEIGH
         /// \param addr is the given address of the instruction
         /// \param state is the desired parse state.
         /// \return the parse tree object (ParseContext)
-        protected ParserContext obtainContext(Address addr,int4 state)
+        protected ParserContext obtainContext(Address addr,int state)
         {
             ParserContext* pos = discache.getParserContext(addr);
-            int4 curstate = pos.getParserState();
+            int curstate = pos.getParserState();
             if (curstate >= state)
                 return pos;
             if (curstate == ParserContext::uninitialized)
@@ -411,8 +411,8 @@ namespace Sla.SLEIGH
             ParserWalkerChange walker(&pos);
             pos.deallocateState(walker);    // Clear the previous resolve and initialize the walker
             Constructor* ct,*subct;
-            uint4 off;
-            int4 oper, numoper;
+            uint off;
+            int oper, numoper;
 
             pos.setDelaySlot(0);
             walker.setOffset(0);        // Initial offset
@@ -469,7 +469,7 @@ namespace Sla.SLEIGH
         {
             TripleSymbol* triple;
             Constructor* ct;
-            int4 oper, numoper;
+            int oper, numoper;
 
             ParserWalker walker(&pos);
             walker.baseState();
@@ -493,11 +493,11 @@ namespace Sla.SLEIGH
                     else
                     {           // Must be an expression
                         PatternExpression* patexp = sym.getDefiningExpression();
-                        intb res = patexp.getValue(walker);
+                        long res = patexp.getValue(walker);
                         FixedHandle & hand(walker.getParentHandle());
                         hand.space = pos.getConstSpace(); // Result of expression is a constant
                         hand.offset_space = (AddrSpace*)0;
-                        hand.offset_offset = (uintb)res;
+                        hand.offset_offset = (ulong)res;
                         hand.size = 0;      // This size should not get used
                     }
                     walker.popOperand();
@@ -565,8 +565,8 @@ namespace Sla.SLEIGH
             }
             else
                 reregisterContext();
-            uint4 parser_cachesize = 2;
-            uint4 parser_windowsize = 32;
+            uint parser_cachesize = 2;
+            uint parser_windowsize = 32;
             if ((maxdelayslotbytes > 1) || (unique_allocatemask != 0))
             {
                 parser_cachesize = 8;
@@ -575,12 +575,12 @@ namespace Sla.SLEIGH
             discache = new DisassemblyCache(this, cache, getConstantSpace(), parser_cachesize, parser_windowsize);
         }
 
-        public override void registerContext(string name,int4 sbit, int4 ebit)
+        public override void registerContext(string name,int sbit, int ebit)
         {
             context_db.registerVariable(name, sbit, ebit);
         }
 
-        public override void setContextDefault(string nm,uintm val)
+        public override void setContextDefault(string nm,uint val)
         {
             context_db.setVariableDefault(name, val);
         }
@@ -590,15 +590,15 @@ namespace Sla.SLEIGH
             cache.allowSet(val);
         }
 
-        public override int4 instructionLength(Address baseaddr)
+        public override int instructionLength(Address baseaddr)
         {
             ParserContext* pos = obtainContext(baseaddr, ParserContext::disassembly);
             return pos.getLength();
         }
 
-        public override int4 oneInstruction(PcodeEmit emit, Address baseaddr)
+        public override int oneInstruction(PcodeEmit emit, Address baseaddr)
         {
-            int4 fallOffset;
+            int fallOffset;
             if (alignment != 1)
             {
                 if ((baseaddr.getOffset() % alignment) != 0)
@@ -615,13 +615,13 @@ namespace Sla.SLEIGH
 
             if (pos.getDelaySlot() > 0)
             {
-                int4 bytecount = 0;
+                int bytecount = 0;
                 do
                 {
                     // Do not pass pos.getNaddr() to obtainContext, as pos may have been previously cached and had naddr adjusted
                     ParserContext* delaypos = obtainContext(pos.getAddr() + fallOffset, ParserContext::pcode);
                     delaypos.applyCommits();
-                    int4 len = delaypos.getLength();
+                    int len = delaypos.getLength();
                     fallOffset += len;
                     bytecount += len;
                 } while (bytecount < pos.getDelaySlot());
@@ -655,9 +655,9 @@ namespace Sla.SLEIGH
             return fallOffset;
             }
 
-        public override int4 printAssembly(AssemblyEmit emit, Address baseaddr)
+        public override int printAssembly(AssemblyEmit emit, Address baseaddr)
         {
-            int4 sz;
+            int sz;
 
             ParserContext* pos = obtainContext(baseaddr, ParserContext::disassembly);
             ParserWalker walker(pos);

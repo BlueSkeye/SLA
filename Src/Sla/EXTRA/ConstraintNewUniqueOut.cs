@@ -13,11 +13,11 @@ namespace Sla.EXTRA
 {
     internal class ConstraintNewUniqueOut : UnifyConstraint
     {
-        private int4 opindex;
-        private int4 newvarindex;
-        private int4 sizevarindex;      // Negative is specific size, Positive is varnode index (for size)
+        private int opindex;
+        private int newvarindex;
+        private int sizevarindex;      // Negative is specific size, Positive is varnode index (for size)
         
-        public ConstraintNewUniqueOut(int4 oind, int4 newvarind, int4 sizeind)
+        public ConstraintNewUniqueOut(int oind, int newvarind, int sizeind)
         {
             opindex = oind;
             newvarindex = newvarind;
@@ -30,7 +30,7 @@ namespace Sla.EXTRA
         public override UnifyConstraint clone()
             => (new ConstraintNewUniqueOut(opindex, newvarindex, sizevarindex)).copyid(this);
 
-        public override int4 getBaseIndex() => newvarindex;
+        public override int getBaseIndex() => newvarindex;
 
         public override bool step(UnifyState state)
         {
@@ -38,7 +38,7 @@ namespace Sla.EXTRA
             if (!traverse.step()) return false;
             Funcdata* fd = state.getFunction();
             PcodeOp* op = state.data(opindex).getOp();
-            int4 sz;
+            int sz;
             if (sizevarindex < 0)
                 sz = -sizevarindex;     // A specific size
             else

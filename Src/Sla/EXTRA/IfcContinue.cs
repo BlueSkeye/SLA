@@ -16,7 +16,7 @@ namespace Sla.EXTRA
         /// This command assumes decompilation has been started and has hit a break point.
         public override void execute(TextReader s)
         {
-            int4 res;
+            int res;
 
             if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("Decompile action not loaded");

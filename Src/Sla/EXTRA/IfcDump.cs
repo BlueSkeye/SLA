@@ -16,8 +16,8 @@ namespace Sla.EXTRA
         /// The command does a hex listing of the specific memory region.
         public override void execute(TextReader s)
         {
-            int4 size;
-            uint1* buffer;
+            int size;
+            byte* buffer;
             Address offset = parse_machaddr(s, size, *dcp.conf.types);
 
             buffer = dcp.conf.loader.load(size, offset);

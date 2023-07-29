@@ -24,12 +24,12 @@ namespace Sla.DECCORE
 
         /// \class RuleSub2Add
         /// \brief Eliminate INT_SUB:  `V - W  =>  V + W * -1`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_SUB);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             PcodeOp* newop;
             Varnode* vn,*newvn;

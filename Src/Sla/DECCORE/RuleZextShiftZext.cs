@@ -24,12 +24,12 @@ namespace Sla.DECCORE
 
         /// \class RuleZextShiftZext
         /// \brief Simplify multiple INT_ZEXT operations: `zext( zext(V) << c )  => zext(V) << c`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_ZEXT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* invn = op.getIn(0);
             if (!invn.isWritten()) return 0;
@@ -51,8 +51,8 @@ namespace Sla.DECCORE
             Varnode* rootvn = zext2op.getIn(0);
             if (rootvn.isFree()) return 0;
 
-            uintb sa = shiftop.getIn(1).getOffset();
-            if (sa > 8 * (uintb)(zext2op.getOut().getSize() - rootvn.getSize()))
+            ulong sa = shiftop.getIn(1).getOffset();
+            if (sa > 8 * (ulong)(zext2op.getOut().getSize() - rootvn.getSize()))
                 return 0; // Shift might lose bits off the top
             PcodeOp* newop = data.newOp(1, op.getAddr());
             data.opSetOpcode(newop, CPUI_INT_ZEXT);

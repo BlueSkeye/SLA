@@ -19,7 +19,7 @@ namespace Sla.DECCORE
             behave = new OpBehavior(CPUI_PTRADD, false); // Dummy behavior
         }
 
-        public override Datatype getInputLocal(PcodeOp op, int4 slot)
+        public override Datatype getInputLocal(PcodeOp op, int slot)
         {
             return tlst.getBase(op.getIn(slot).getSize(), TYPE_INT); // For type propagation, treat same as INT_ADD
         }
@@ -34,7 +34,7 @@ namespace Sla.DECCORE
             return op.getIn(0).getHighTypeReadFacing(op);     // Cast to the input data-type
         }
 
-        public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
+        public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
             if (slot == 0)
             {       // The operation expects the type of the VARNODE
@@ -47,7 +47,7 @@ namespace Sla.DECCORE
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
-            int4 inslot, int4 outslot)
+            int inslot, int outslot)
         {
             if ((inslot == 2) || (outslot == 2)) return (Datatype*)0; // Don't propagate along this edge
             if ((inslot != -1) && (outslot != -1)) return (Datatype*)0; // Must propagate input <. output

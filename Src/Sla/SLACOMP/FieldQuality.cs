@@ -14,8 +14,8 @@ namespace Sla.SLACOMP
     internal struct FieldQuality
     {
         internal string name;        ///< Name of the field
-        internal uint4 low;      ///< The least significant bit of the field within the token
-        internal uint4 high;     ///< The most significant bit of the field within the token
+        internal uint low;      ///< The least significant bit of the field within the token
+        internal uint high;     ///< The most significant bit of the field within the token
         internal bool signext;       ///< \b true if the field's value is signed
         internal bool flow;      ///< \b true if the context \b flows for this field.
         internal bool hex;       ///< \b true if the field value is displayed in hex
@@ -25,7 +25,7 @@ namespace Sla.SLACOMP
         /// \param nm is the parsed name for the field
         /// \param l is the parsed lower bound of the bit range
         /// \param h is the parse upper bound of the bit range
-        internal FieldQuality(string nm, uintb l, uintb h)
+        internal FieldQuality(string nm, ulong l, ulong h)
         {
             name = *nm;
             low = *l;

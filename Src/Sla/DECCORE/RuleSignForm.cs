@@ -24,12 +24,12 @@ namespace Sla.DECCORE
 
         /// \class RuleSignForm
         /// \brief Normalize sign extraction:  `sub(sext(V),c)  =>  V s>> 31`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_SUBPIECE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* sextout,*a;
             PcodeOp* sextop;
@@ -40,12 +40,12 @@ namespace Sla.DECCORE
             if (sextop.code() != CPUI_INT_SEXT)
                 return 0;
             a = sextop.getIn(0);
-            int4 c = op.getIn(1).getOffset();
+            int c = op.getIn(1).getOffset();
             if (c < a.getSize()) return 0;
             if (a.isFree()) return 0;
 
             data.opSetInput(op, a, 0);
-            int4 n = 8 * a.getSize() - 1;
+            int n = 8 * a.getSize() - 1;
             data.opSetInput(op, data.newConstant(4, n), 1);
             data.opSetOpcode(op, CPUI_INT_SRIGHT);
             return 1;

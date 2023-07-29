@@ -37,29 +37,29 @@ namespace Sla.EXTRA
             return new ConstantExpression(ecopy1, ecopy2, opc);
         }
 
-        public override uintb getConstant(UnifyState state)
+        public override ulong getConstant(UnifyState state)
         {
             OpBehavior* behavior = state.getBehavior(opc);
             if (behavior.isSpecial())
                 throw new LowlevelError("Cannot evaluate special operator in constant expression");
-            uintb res;
+            ulong res;
             if (behavior.isUnary())
             {
-                uintb ourconst1 = expr1.getConstant(state);
-                res = behavior.evaluateUnary(sizeof(uintb), sizeof(uintb), ourconst1);
+                ulong ourconst1 = expr1.getConstant(state);
+                res = behavior.evaluateUnary(sizeof(ulong), sizeof(ulong), ourconst1);
             }
             else
             {
-                uintb ourconst1 = expr1.getConstant(state);
-                uintb ourconst2 = expr2.getConstant(state);
-                res = behavior.evaluateBinary(sizeof(uintb), sizeof(uintb), ourconst1, ourconst2);
+                ulong ourconst1 = expr1.getConstant(state);
+                ulong ourconst2 = expr2.getConstant(state);
+                res = behavior.evaluateBinary(sizeof(ulong), sizeof(ulong), ourconst1, ourconst2);
             }
             return res;
         }
 
         public override void writeExpression(TextWriter s, UnifyCPrinter printstate)
         {
-            int4 type;          // 0=binary 1=unarypre 2=unarypost 3=func
+            int type;          // 0=binary 1=unarypre 2=unarypost 3=func
             string name;            // name of operator
             switch (opc)
             {

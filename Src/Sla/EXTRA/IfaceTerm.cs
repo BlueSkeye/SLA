@@ -20,7 +20,7 @@ namespace Sla.EXTRA
     {
 #if __TERMINAL__
         private bool is_terminal;       ///< True if the input stream is a terminal
-        private int4 ifd;           ///< Underlying file descriptor
+        private int ifd;           ///< Underlying file descriptor
         private struct termios itty;		///< Original terminal settings
 #endif
         private TextReader sptr;        ///< The base input stream for the interface
@@ -34,13 +34,13 @@ namespace Sla.EXTRA
         /// \param line is current command-line and will hold the final completion
         /// \param cursor is the current position of the cursor
         /// \return the (possibly new) position of the cursor, after completion
-        private int4 doCompletion(string &line, int4 cursor)
+        private int doCompletion(string &line, int cursor)
         {
             List<string> fullcommand;
             istringstream s(line);
             string tok;
             List<IfaceCommand*>::const_iterator first, last;
-            int4 oldsize, match;
+            int oldsize, match;
 
             first = comlist.begin();
             last = comlist.end();
@@ -90,10 +90,10 @@ namespace Sla.EXTRA
         private override void readLine(string line)
         {
             char val;
-            int4 escval;
-            int4 cursor, lastlen, i;
+            int escval;
+            int cursor, lastlen, i;
             bool onecharecho;
-            int4 hist;
+            int hist;
             string saveline;
 
             line.erase();

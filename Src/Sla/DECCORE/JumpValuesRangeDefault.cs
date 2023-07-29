@@ -14,7 +14,7 @@ namespace Sla.DECCORE
     internal class JumpValuesRangeDefault : JumpValuesRange
     {
         /// The extra value
-        private uintb extravalue;
+        private ulong extravalue;
         /// The starting Varnode associated with the extra value
         private Varnode extravn;
         /// The starting PcodeOp associated with the extra value
@@ -23,7 +23,7 @@ namespace Sla.DECCORE
         private /*mutable*/ bool lastvalue;
 
         /// Set the extra value explicitly
-        public void setExtraValue(uintb val)
+        public void setExtraValue(ulong val)
         {
             extravalue = val;
         }
@@ -40,9 +40,9 @@ namespace Sla.DECCORE
             extraop = op;
         }
         
-        public override uintb getSize() => range.getSize() + 1;
+        public override ulong getSize() => range.getSize() + 1;
 
-        public override bool contains(uintb val)
+        public override bool contains(ulong val)
         {
             if (extravalue == val)
                 return true;

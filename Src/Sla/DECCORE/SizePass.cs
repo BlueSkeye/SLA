@@ -10,8 +10,8 @@ namespace Sla.DECCORE
     internal struct SizePass
     {
         /// Size of the range (in bytes)
-        internal int4 size;
+        internal int size;
         /// Pass when the range was heritaged
-        internal int4 pass;
+        internal int pass;
     }
 }

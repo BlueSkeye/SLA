@@ -21,7 +21,7 @@ namespace Sla.DECCORE
         /// The Architecture affected by the contained ArchOption
         private Architecture glb;
         /// A map from option id to registered ArchOption instance
-        private Dictionary<uint4, ArchOption> optionmap;
+        private Dictionary<uint, ArchOption> optionmap;
 
         /// Map from ArchOption name to its class instance
         /// To facilitate command parsing, enter the new ArchOption instance into
@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// \param option is the new ArchOption instance
         private void registerOption(ArchOption option)
         {
-            uint4 id = ElementId::find(option.getName());  // Option name must match a known element name
+            uint id = ElementId::find(option.getName());  // Option name must match a known element name
             optionmap[id] = option;
         }
 
@@ -79,7 +79,7 @@ namespace Sla.DECCORE
 
         ~OptionDatabase()
         {
-            map<uint4, ArchOption*>::iterator iter;
+            map<uint, ArchOption*>::iterator iter;
             for (iter = optionmap.begin(); iter != optionmap.end(); ++iter)
                 delete(*iter).second;
         }
@@ -91,9 +91,9 @@ namespace Sla.DECCORE
         /// \param p2 is the second optional parameter
         /// \param p3 is the third optional parameter
         /// \return the confirmation/failure method after trying to apply the option
-        public string set(uint4 nameId, string p1="", string p2="", string p3="")
+        public string set(uint nameId, string p1="", string p2="", string p3="")
         {
-            map<uint4, ArchOption*>::const_iterator iter;
+            map<uint, ArchOption*>::const_iterator iter;
             iter = optionmap.find(nameId);
             if (iter == optionmap.end())
                 throw ParseError("Unknown option");
@@ -108,8 +108,8 @@ namespace Sla.DECCORE
         {
             string p1, p2, p3;
 
-            uint4 elemId = decoder.openElement();
-            uint4 subId = decoder.openElement();
+            uint elemId = decoder.openElement();
+            uint subId = decoder.openElement();
             if (subId == ELEM_PARAM1)
             {
                 p1 = decoder.readString(ATTRIB_CONTENT);
@@ -138,7 +138,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decode(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement(ELEM_OPTIONSLIST);
+            uint elemId = decoder.openElement(ELEM_OPTIONSLIST);
 
             while (decoder.peekElement() != 0)
                 decodeOne(decoder);

@@ -11,12 +11,12 @@ namespace Sla.EXTRA
 {
     internal class ConstraintSetInputConstVal : UnifyConstraint
     {
-        private int4 opindex;
+        private int opindex;
         private RHSConstant slot;
         private RHSConstant val;
         private RHSConstant exprsz;
         
-        public ConstraintSetInputConstVal(int4 oind, RHSConstant sl, RHSConstant v, RHSConstant sz)
+        public ConstraintSetInputConstVal(int oind, RHSConstant sl, RHSConstant v, RHSConstant sz)
         {
             opindex = oind;
             slot = sl;
@@ -49,13 +49,13 @@ namespace Sla.EXTRA
             if (!traverse.step()) return false;
             Funcdata* fd = state.getFunction();
             PcodeOp* op = state.data(opindex).getOp();
-            uintb ourconst = val.getConstant(state);
-            int4 sz;
+            ulong ourconst = val.getConstant(state);
+            int sz;
             if (exprsz != (RHSConstant*)0)
-                sz = (int4)exprsz.getConstant(state);
+                sz = (int)exprsz.getConstant(state);
             else
-                sz = (int4)sizeof(uintb);
-            int4 slt = (int4)slot.getConstant(state);
+                sz = (int)sizeof(ulong);
+            int slt = (int)slot.getConstant(state);
             fd.opSetInput(op, fd.newConstant(sz, ourconst & calc_mask(sz)), slt);
             return true;
         }
@@ -73,12 +73,12 @@ namespace Sla.EXTRA
             if (exprsz != (RHSConstant*)0)
                 exprsz.writeExpression(s, printstate);
             else
-                s << dec << (int4)sizeof(uintb);
+                s << dec << (int)sizeof(ulong);
             s << ",calc_mask(";
             if (exprsz != (RHSConstant*)0)
                 exprsz.writeExpression(s, printstate);
             else
-                s << dec << (int4)sizeof(uintb);
+                s << dec << (int)sizeof(ulong);
             s << ")&";
             val.writeExpression(s, printstate);
             s << "),";

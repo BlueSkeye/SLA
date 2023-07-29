@@ -28,14 +28,14 @@ namespace Sla.DECCORE
         /// Look for SUBPIECE coming from a PIECE that has come through INDIRECTs and/or MULTIEQUAL
         /// Then: check if the input to SUBPIECE can be viewed as two independent pieces
         /// If so:  split the pieces into independent data-flows
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_SUBPIECE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            int4 loSize = (int4)op.getIn(1).getOffset();
+            int loSize = (int)op.getIn(1).getOffset();
             if (loSize == 0)            // Make sure SUBPIECE doesn't take least significant part
                 return 0;
             Varnode* vn = op.getIn(0);
@@ -60,7 +60,7 @@ namespace Sla.DECCORE
             }
             else if (multiOp.code() == CPUI_MULTIEQUAL)
             {   // Otherwise PIECE comes through MULTIEQUAL
-                for (int4 i = 0; i < multiOp.numInput(); ++i)
+                for (int i = 0; i < multiOp.numInput(); ++i)
                 {
                     Varnode* invn = multiOp.getIn(i);
                     if (!invn.isWritten()) continue;

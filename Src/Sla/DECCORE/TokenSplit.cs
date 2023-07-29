@@ -140,17 +140,17 @@ namespace Sla.DECCORE
         /// Additional markup associated with the token
         private AdditionalMarkup ptr_second;
         /// Offset associated either with address or field markup
-        private uintb off;
+        private ulong off;
         /// Amount to indent if a line breaks
-        private int4 indentbump;
+        private int indentbump;
         /// Number of spaces in a whitespace token (\e tokenbreak)
-        private int4 numspaces;
+        private int numspaces;
         /// Number of content characters or other size information
-        private int4 size;
+        private int size;
         /// Associated id (for matching begin/end pairs)
-        private int4 count;
+        private int count;
         /// Static counter for uniquely assigning begin/end pair ids.
-        private static int4 countbase = 0;
+        private static int countbase = 0;
 
         public TokenSplit()
         {
@@ -158,7 +158,7 @@ namespace Sla.DECCORE
 
         /// \brief Create a "begin document" command
         /// \return an id associated with the document
-        public int4 beginDocument()
+        public int beginDocument()
         {
             tagtype = docu_b;
             delimtype = begin;
@@ -170,7 +170,7 @@ namespace Sla.DECCORE
         /// \brief Create an "end document" command
         ///
         /// \param id is the id associated with the document (as returned by beginDocument)
-        public void endDocument(int4 id)
+        public void endDocument(int id)
         {
             tagtype = docu_e;
             delimtype = end;
@@ -181,7 +181,7 @@ namespace Sla.DECCORE
         /// \brief Create a "begin function body" command
         ///
         /// \return an id associated with the function body
-        public int4 beginFunction(Funcdata f)
+        public int beginFunction(Funcdata f)
         {
             tagtype = func_b;
             delimtype = begin;
@@ -194,7 +194,7 @@ namespace Sla.DECCORE
         /// \brief Create an "end function body" command
         ///
         /// \param id is the id associated with the function body (as returned by beginFunction)
-        public void endFunction(int4 id)
+        public void endFunction(int id)
         {
             tagtype = func_e;
             delimtype = end;
@@ -206,7 +206,7 @@ namespace Sla.DECCORE
         ///
         /// \param b is the block structure object associated with the section
         /// \return an id associated with the section
-        public int4 beginBlock(FlowBlock b)
+        public int beginBlock(FlowBlock b)
         {
             tagtype = bloc_b;
             delimtype = ignore;
@@ -218,7 +218,7 @@ namespace Sla.DECCORE
         /// \brief Create an "end control-flow element" command
         ///
         /// \param id is the id associated with the section (as returned by beginBlock)
-        public void endBlock(int4 id)
+        public void endBlock(int id)
         {
             tagtype = bloc_e;
             delimtype = ignore;
@@ -229,7 +229,7 @@ namespace Sla.DECCORE
         ///
         /// \param v (if non-null) is the storage location for the return value
         /// \return an id associated with the return type
-        public int4 beginReturnType(Varnode v)
+        public int beginReturnType(Varnode v)
         {
             tagtype = rtyp_b;
             delimtype = begin;
@@ -241,7 +241,7 @@ namespace Sla.DECCORE
         /// \brief Create an "end return type declaration" command
         ///
         /// \param id is the id associated with the return type (as returned by beginReturnType)
-        public void endReturnType(int4 id)
+        public void endReturnType(int id)
         {
             tagtype = rtyp_e;
             delimtype = end;
@@ -252,7 +252,7 @@ namespace Sla.DECCORE
         ///
         /// \param sym is the symbol being declared
         /// \return an id associated with the declaration
-        public int4 beginVarDecl(Symbol sym)
+        public int beginVarDecl(Symbol sym)
         {
             tagtype = vard_b;
             delimtype = begin;
@@ -264,7 +264,7 @@ namespace Sla.DECCORE
         /// \brief Create an "end variable declaration" command
         ///
         /// \param id is the id associated with the declaration (as returned by beginVarDecl)
-        public void endVarDecl(int4 id)
+        public void endVarDecl(int id)
         {
             tagtype = vard_e;
             delimtype = end;
@@ -275,7 +275,7 @@ namespace Sla.DECCORE
         ///
         /// \param o is the root p-code operation of the statement
         /// \return an id associated with the statement
-        public int4 beginStatement(PcodeOp o)
+        public int beginStatement(PcodeOp o)
         {
             tagtype = stat_b;
             delimtype = begin;
@@ -287,7 +287,7 @@ namespace Sla.DECCORE
         /// \brief Create an "end source code statement" command
         ///
         /// \param id is the id associated with the statement (as returned by beginStatement)
-        public void endStatement(int4 id)
+        public void endStatement(int id)
         {
             tagtype = stat_e;
             delimtype = end;
@@ -297,7 +297,7 @@ namespace Sla.DECCORE
         /// \brief Create a "begin function prototype declaration" command
         ///
         /// \return an id associated with the prototype
-        public int4 beginFuncProto()
+        public int beginFuncProto()
         {
             tagtype = prot_b;
             delimtype = begin;
@@ -308,7 +308,7 @@ namespace Sla.DECCORE
         /// \brief Create an "end function prototype declaration" command
         ///
         /// \param id is the id associated with the prototype (as returned by beginFuncProto)
-        public void endFuncProto(int4 id)
+        public void endFuncProto(int id)
         {
             tagtype = prot_e;
             delimtype = end;
@@ -386,7 +386,7 @@ namespace Sla.DECCORE
         /// \param ct is the data-type associated with the field
         /// \param o is the (byte) offset of the field within its structured data-type
         /// \param inOp is the PcodeOp associated with the field (usually PTRSUB or SUBPIECE)
-        public void tagField(string name, EmitMarkup::syntax_highlight h, Datatype ct, int4 o, PcodeOp inOp)
+        public void tagField(string name, EmitMarkup::syntax_highlight h, Datatype ct, int o, PcodeOp inOp)
         {
             tok = name;
             size = tok.size();
@@ -394,7 +394,7 @@ namespace Sla.DECCORE
             delimtype = tokenstring;
             hl = h;
             ptr_second.ct = ct;
-            off = (uintb)o;
+            off = (ulong)o;
             op = inOp;
         }
 
@@ -404,7 +404,7 @@ namespace Sla.DECCORE
         /// \param h indicates how the comment should be highlighted
         /// \param s is the address space of the address where the comment is attached
         /// \param o is the offset of the address where the comment is attached
-        public void tagComment(string name, EmitMarkup::syntax_highlight h, AddrSpace s, uintb o)
+        public void tagComment(string name, EmitMarkup::syntax_highlight h, AddrSpace s, ulong o)
         {
             tok = name;
             size = tok.size(); 
@@ -421,7 +421,7 @@ namespace Sla.DECCORE
         /// \param h indicates how the label should be highlighted
         /// \param s is the address space of the code address being labeled
         /// \param o is the offset of the code address being labeled
-        public void tagLabel(string name, EmitMarkup::syntax_highlight h, AddrSpace s, uintb o)
+        public void tagLabel(string name, EmitMarkup::syntax_highlight h, AddrSpace s, ulong o)
         {
             tok = name;
             size = tok.size();
@@ -449,7 +449,7 @@ namespace Sla.DECCORE
         ///
         /// \param paren is the open parenthesis character to emit
         /// \param id is an id to associate with the parenthesis
-        public void openParen(string paren, int4 id)
+        public void openParen(string paren, int id)
         {
             tok = paren;
             size = 1;
@@ -462,7 +462,7 @@ namespace Sla.DECCORE
         ///
         /// \param paren is the close parenthesis character to emit
         /// \param id is the id associated with the matching open parenthesis (as returned by openParen)
-        public void closeParen(string paren, int4 id)
+        public void closeParen(string paren, int id)
         {
             tok = paren;
             size = 1;
@@ -474,7 +474,7 @@ namespace Sla.DECCORE
         /// \brief Create a "start a printing group" command
         ///
         /// \return an id associated with the group
-        public int4 openGroup()
+        public int openGroup()
         {
             tagtype = oinv_t;
             delimtype = begin;
@@ -485,7 +485,7 @@ namespace Sla.DECCORE
         /// \brief Create an "end a printing group" command
         ///
         /// \param id is the id associated with the group (as returned by openGroup)
-        public void closeGroup(int4 id)
+        public void closeGroup(int id)
         {
             tagtype = cinv_t;
             delimtype = end;
@@ -496,7 +496,7 @@ namespace Sla.DECCORE
         ///
         /// \param bump the number of additional characters to indent
         /// \return an id associated with the nesting
-        public int4 startIndent(int4 bump)
+        public int startIndent(int bump)
         {
             tagtype = bump_t;
             delimtype = begin_indent;
@@ -509,7 +509,7 @@ namespace Sla.DECCORE
         /// \brief Create an "end an indent level" command
         ///
         /// \param id is the id associated with the nesting (as returned by startIndent)
-        public void stopIndent(int4 id)
+        public void stopIndent(int id)
         {
             tagtype = bump_t;
             delimtype = end_indent;
@@ -520,7 +520,7 @@ namespace Sla.DECCORE
         /// \brief Create a "start a comment block" command
         ///
         /// \return an id associated with the comment block
-        public int4 startComment()
+        public int startComment()
         {
             tagtype = oinv_t;
             delimtype = begin_comment;
@@ -531,7 +531,7 @@ namespace Sla.DECCORE
         /// \brief Create an "end a comment block" command
         ///
         /// \param id is the id associated with the block (as returned by startComment)
-        public void stopComment(int4 id)
+        public void stopComment(int id)
         {
             tagtype = cinv_t;
             delimtype = end_comment;
@@ -542,7 +542,7 @@ namespace Sla.DECCORE
         ///
         /// \param num is the number of space characters to emit
         /// \param bump is the number of characters to indent if the spaces force a line break
-        public void spaces(int4 num, int4 bump)
+        public void spaces(int num, int bump)
         {
             tagtype = spac_t;
             delimtype = tokenbreak;
@@ -560,7 +560,7 @@ namespace Sla.DECCORE
         }
 
         /// \brief Create a line break token with special indentation
-        public void tagLine(int4 indent)
+        public void tagLine(int indent)
         {
             tagtype = line_t;
             delimtype = tokenbreak;
@@ -632,7 +632,7 @@ namespace Sla.DECCORE
                     emit.tagType(tok, hl, ptr_second.ct);
                     break;
                 case field_t: // tagField
-                    emit.tagField(tok, hl, ptr_second.ct, (int4)off, op);
+                    emit.tagField(tok, hl, ptr_second.ct, (int)off, op);
                     break;
                 case comm_t:    // tagComment
                     emit.tagComment(tok, hl, ptr_second.spc, off);
@@ -664,16 +664,16 @@ namespace Sla.DECCORE
         }
 
         /// Get the extra indent after a line break
-        public int4 getIndentBump() => indentbump;
+        public int getIndentBump() => indentbump;
 
         /// Get the number of characters of whitespace
-        public int4 getNumSpaces() => numspaces;
+        public int getNumSpaces() => numspaces;
 
         /// Get the number of content characters
-        public int4 getSize() => size;
+        public int getSize() => size;
 
         /// Set the number of content characters
-        public void setSize(int4 sz)
+        public void setSize(int sz)
         {
             size = sz;
         }
@@ -686,7 +686,7 @@ namespace Sla.DECCORE
 
 #if PRETTY_DEBUG
         /// Get the delimiter id
-        public int4 getCount() => count;
+        public int getCount() => count;
         
         /// Print \b this token to stream for debugging
         public void printDebug(TextWriter s)

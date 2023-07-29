@@ -38,7 +38,7 @@ namespace Sla.DECCORE
         /// \param op is the new description object
         private void registerOp(UserPcodeOp op)
         {
-            int4 ind = op.getIndex();
+            int ind = op.getIndex();
             if (ind < 0) throw new LowlevelError("UserOp not assigned an index");
 
             map<string, UserPcodeOp*>::iterator iter;
@@ -65,7 +65,7 @@ namespace Sla.DECCORE
             SegmentOp* s_op = dynamic_cast<SegmentOp*>(op);
             if (s_op != (SegmentOp*)0)
             {
-                int4 index = s_op.getSpace().getIndex();
+                int index = s_op.getSpace().getIndex();
 
                 while (segmentop.size() <= index)
                     segmentop.push_back((SegmentOp*)0);
@@ -119,7 +119,7 @@ namespace Sla.DECCORE
         {
             List<string> basicops;
             glb.translate.getUserOpNames(basicops);
-            for (uint4 i = 0; i < basicops.size(); ++i)
+            for (uint i = 0; i < basicops.size(); ++i)
             {
                 if (basicops[i].size() == 0) continue;
                 UserPcodeOp* userop = new UnspecializedPcodeOp(glb, basicops[i], i);
@@ -146,12 +146,12 @@ namespace Sla.DECCORE
         }
 
         /// Number of segment operations supported
-        public int4 numSegmentOps() => segmentop.size();
+        public int numSegmentOps() => segmentop.size();
 
         /// Retrieve a user-op description object by index
         /// \param i is the index
         /// \return the indicated user-op description
-        public UserPcodeOp getOp(int4 i)
+        public UserPcodeOp getOp(int i)
         {
             if (i >= useroplist.size()) return (UserPcodeOp*)0;
             return useroplist[i];
@@ -171,7 +171,7 @@ namespace Sla.DECCORE
         /// Retrieve a segment-op description object by index
         /// \param i is the index
         /// \return the indicated segment-op description
-        public SegmentOp getSegmentOp(int4 i)
+        public SegmentOp getSegmentOp(int i)
         {
             if (i >= segmentop.size()) return (SegmentOp*)0;
             return segmentop[i];
@@ -215,7 +215,7 @@ namespace Sla.DECCORE
             bool functionalDisplay = false;
             for (; ; )
             {
-                uint4 attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == ATTRIB_INPUTOP)
                 {
@@ -310,7 +310,7 @@ namespace Sla.DECCORE
             if (dynamic_cast<UnspecializedPcodeOp*>(userop) == (UnspecializedPcodeOp*)0)
                 throw new LowlevelError("Cannot fixup userop: " + useropname);
 
-            int4 injectid = glb.pcodeinjectlib.manualCallOtherFixup(useropname, outname, inname, snippet);
+            int injectid = glb.pcodeinjectlib.manualCallOtherFixup(useropname, outname, inname, snippet);
             InjectedUserOp* op = new InjectedUserOp(glb, useropname, userop.getIndex(), injectid);
             try
             {

@@ -31,7 +31,7 @@ namespace Sla.SLEIGH
 
         public override bool resolveOperandLeft(OperandResolve state)
         {
-            int4 cur_base = state.base;
+            int cur_base = state.base;
             state.base = -2;
             bool res = eq.resolveOperandLeft(state);
             if (!res) return false;

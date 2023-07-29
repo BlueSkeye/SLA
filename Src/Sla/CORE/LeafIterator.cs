@@ -9,7 +9,7 @@ namespace Sla.CORE
     internal struct LeafIterator
     {
         internal CallGraphNode node;
-        internal int4 outslot;
+        internal int outslot;
 
         internal LeafIterator(CallGraphNode n)
         {

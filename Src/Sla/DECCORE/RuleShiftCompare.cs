@@ -29,18 +29,18 @@ namespace Sla.DECCORE
         /// Similarly: `V << c == d  =>  V & mask == (d >> c)`
         ///
         /// The rule works on both INT_EQUAL and INT_NOTEQUAL.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_EQUAL);
             oplist.push_back(CPUI_INT_NOTEQUAL);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* shiftvn,*constvn,*savn,*mainvn;
             PcodeOp* shiftop;
-            int4 sa;
-            uintb constval, nzmask, newconst;
+            int sa;
+            ulong constval, nzmask, newconst;
             OpCode opc;
             bool isleft;
 
@@ -74,18 +74,18 @@ namespace Sla.DECCORE
                 isleft = true;
                 savn = shiftop.getIn(1);
                 if (!savn.isConstant()) return 0;
-                uintb val = savn.getOffset();
+                ulong val = savn.getOffset();
                 sa = leastsigbit_set(val);
-                if ((val >> sa) != (uintb)1) return 0; // Not multiplying by a power of 2
+                if ((val >> sa) != (ulong)1) return 0; // Not multiplying by a power of 2
             }
             else if (opc == CPUI_INT_DIV)
             {
                 isleft = false;
                 savn = shiftop.getIn(1);
                 if (!savn.isConstant()) return 0;
-                uintb val = savn.getOffset();
+                ulong val = savn.getOffset();
                 sa = leastsigbit_set(val);
-                if ((val >> sa) != (uintb)1) return 0; // Not dividing by a power of 2
+                if ((val >> sa) != (ulong)1) return 0; // Not dividing by a power of 2
                 if (shiftvn.loneDescend() != op) return 0;
             }
             else
@@ -94,7 +94,7 @@ namespace Sla.DECCORE
             if (sa == 0) return 0;
             mainvn = shiftop.getIn(0);
             if (mainvn.isFree()) return 0;
-            if (mainvn.getSize() > sizeof(uintb)) return 0;    // FIXME: uintb should be arbitrary precision
+            if (mainvn.getSize() > sizeof(ulong)) return 0;    // FIXME: ulong should be arbitrary precision
 
             constval = constvn.getOffset();
             nzmask = mainvn.getNZMask();
@@ -102,14 +102,14 @@ namespace Sla.DECCORE
             {
                 newconst = constval >> sa;
                 if ((newconst << sa) != constval) return 0; // Information lost in constval
-                uintb tmp = (nzmask << sa) & calc_mask(shiftvn.getSize());
+                ulong tmp = (nzmask << sa) & calc_mask(shiftvn.getSize());
                 if ((tmp >> sa) != nzmask)
                 {   // Information is lost in main
                     // We replace the LEFT with and AND mask
                     // This must be the lone use of the shift
                     if (shiftvn.loneDescend() != op) return 0;
                     sa = 8 * shiftvn.getSize() - sa;
-                    tmp = (((uintb)1) << sa) - 1;
+                    tmp = (((ulong)1) << sa) - 1;
                     Varnode* newmask = data.newConstant(constvn.getSize(), tmp);
                     PcodeOp* newop = data.newOp(2, op.getAddr());
                     data.opSetOpcode(newop, CPUI_INT_AND);

@@ -68,7 +68,7 @@ namespace Sla.DECCORE
                 ++iter;
                 if (op == target)       // Caught up with target, nothing else before it
                     break;
-                int4 i, numinput;
+                int i, numinput;
                 numinput = op.numInput();
                 for (i = 0; i < numinput; ++i)
                 {
@@ -78,7 +78,7 @@ namespace Sla.DECCORE
                     if (vn == @in) break;
                 }
                 if (i < numinput) {
-                    int4 j;
+                    int j;
                     Varnode* buf1[2];
                     Varnode* buf2[2];
                     for (j = 0; j < numinput; ++j) {
@@ -119,9 +119,9 @@ namespace Sla.DECCORE
                 OpCode opc = op.code();
                 if (opc == CPUI_COPY) continue;
                 if (opc != CPUI_MULTIEQUAL) break;
-                int4 vnpos = vnlist.size();
-                int4 i;
-                int4 numinput = op.numInput();
+                int vnpos = vnlist.size();
+                int i;
+                int numinput = op.numInput();
                 for (i = 0; i < numinput; ++i)
                 {
                     Varnode* vn = op.getIn(i);
@@ -145,7 +145,7 @@ namespace Sla.DECCORE
             }
 
             // Clear out any of the marks we put down
-            for (int4 i = 0; i < vnlist.size(); ++i)
+            for (int i = 0; i < vnlist.size(); ++i)
                 vnlist[i].clearMark();
 
             if (targetop != (PcodeOp*)0)
@@ -182,8 +182,8 @@ namespace Sla.DECCORE
         public override int apply(Funcdata data)
         {
             BlockGraph bblocks = data.getBasicBlocks();
-            int4 sz = bblocks.getSize();
-            for (int4 i = 0; i < sz; ++i)
+            int sz = bblocks.getSize();
+            for (int i = 0; i < sz; ++i)
             {
                 BlockBasic* bl = (BlockBasic*)bblocks.getBlock(i);
                 while (processBlock(data, bl))

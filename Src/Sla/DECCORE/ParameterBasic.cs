@@ -23,10 +23,10 @@ namespace Sla.DECCORE
         /// Data-type of the parameter
         private Datatype type;
         /// Lock and other properties from ParameterPieces flags
-        private uint4 flags;
+        private uint flags;
 
         /// Construct from components
-        public ParameterBasic(string nm, Address ad, Datatype tp, uint4 fl)
+        public ParameterBasic(string nm, Address ad, Datatype tp, uint fl)
         {
             name = nm; addr = ad; type = tp; flags = fl;
         }
@@ -44,7 +44,7 @@ namespace Sla.DECCORE
 
         public override Address getAddress() => addr;
 
-        public override int4 getSize() => type.getSize();
+        public override int getSize() => type.getSize();
 
         public override bool isTypeLocked() => ((flags&ParameterPieces::typelock)!= 0);
 
@@ -69,7 +69,7 @@ namespace Sla.DECCORE
                     flags |= ParameterPieces::sizelock;
             }
             else
-                flags &= ~((uint4)(ParameterPieces::typelock | ParameterPieces::sizelock));
+                flags &= ~((uint)(ParameterPieces::typelock | ParameterPieces::sizelock));
         }
 
         public override void setNameLock(bool val)
@@ -77,7 +77,7 @@ namespace Sla.DECCORE
             if (val)
                 flags |= ParameterPieces::namelock;
             else
-                flags &= ~((uint4)ParameterPieces::namelock);
+                flags &= ~((uint)ParameterPieces::namelock);
         }
 
         public override void setThisPointer(bool val)
@@ -85,7 +85,7 @@ namespace Sla.DECCORE
             if (val)
                 flags |= ParameterPieces::isthis;
             else
-                flags &= ~((uint4)ParameterPieces::isthis);
+                flags &= ~((uint)ParameterPieces::isthis);
         }
 
         public override void overrideSizeLockType(Datatype ct)
@@ -103,7 +103,7 @@ namespace Sla.DECCORE
         public override void resetSizeLockType(TypeFactory factory)
         {
             if (type.getMetatype() == TYPE_UNKNOWN) return; // Nothing to do
-            int4 size = type.getSize();
+            int size = type.getSize();
             type = factory.getBase(size, TYPE_UNKNOWN);
         }
 

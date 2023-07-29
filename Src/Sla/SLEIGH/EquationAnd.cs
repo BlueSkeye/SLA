@@ -34,8 +34,8 @@ namespace Sla.SLEIGH
 
         public override bool resolveOperandLeft(OperandResolve state)
         {
-            int4 cur_rightmost = -1;    // Initially we don't know our rightmost
-            int4 cur_size = -1;     //   or size traversed since rightmost
+            int cur_rightmost = -1;    // Initially we don't know our rightmost
+            int cur_size = -1;     //   or size traversed since rightmost
             bool res = right.resolveOperandLeft(state);
             if (!res) return false;
             if ((state.cur_rightmost != -1) && (state.size != -1))

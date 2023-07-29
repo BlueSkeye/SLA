@@ -14,17 +14,17 @@ namespace Sla.SLEIGH
         private Token tok;
         private bool bigendian;
         private bool signbit;
-        private int4 bitstart;
-        private int4 bitend;      // Bits within the token, 0 bit is LEAST significant
-        private int4 bytestart;
-        private int4 byteend;    // Bytes to read to get value
-        private int4 shift;         // Amount to shift to align value  (bitstart % 8)
+        private int bitstart;
+        private int bitend;      // Bits within the token, 0 bit is LEAST significant
+        private int bytestart;
+        private int byteend;    // Bytes to read to get value
+        private int shift;         // Amount to shift to align value  (bitstart % 8)
         
         public TokenField()
         {
         }
         
-        public TokenField(Token tk, bool s, int4 bstart, int4 bend)
+        public TokenField(Token tk, bool s, int bstart, int bend)
         {
             tok = tk;
             bigendian = tok.isBigEndian();
@@ -44,9 +44,9 @@ namespace Sla.SLEIGH
             shift = bitstart % 8;
         }
 
-        public override intb getValue(ParserWalker walker)
+        public override long getValue(ParserWalker walker)
         {               // Construct value given specific instruction stream
-            intb res = getInstructionBytes(walker, bytestart, byteend, bigendian);
+            long res = getInstructionBytes(walker, bytestart, byteend, bigendian);
 
             res >>= shift;
             if (signbit)
@@ -58,17 +58,17 @@ namespace Sla.SLEIGH
 
         public override TokenPattern genMinPattern(List<TokenPattern> ops) => TokenPattern(tok);
 
-        public override TokenPattern genPattern(intb val)
+        public override TokenPattern genPattern(long val)
         {               // Generate corresponding pattern if the
                         // value is forced to be val
             return TokenPattern(tok, val, bitstart, bitend);
         }
 
-        public override intb minValue() => 0;
+        public override long minValue() => 0;
 
-        public override intb maxValue()
+        public override long maxValue()
         {
-            intb res=0;
+            long res=0;
             res = ~res;
             zero_extend(res, bitend - bitstart);
             return res;

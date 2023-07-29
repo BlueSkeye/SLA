@@ -11,7 +11,7 @@ namespace Sla.EXTRA
     {
         public override void execute(TextReader s)
 {				// Set a opactdbg trace break point
-  int4 count;
+  int count;
   
   if (dcp.fd == (Funcdata *)0)
     throw IfaceExecutionError("No function selected");

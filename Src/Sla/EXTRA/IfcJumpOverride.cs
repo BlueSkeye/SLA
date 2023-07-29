@@ -28,7 +28,7 @@ namespace Sla.EXTRA
         /// \endcode
         public override void execute(TextReader s)
         {
-            int4 discard;
+            int discard;
 
             if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");
@@ -38,8 +38,8 @@ namespace Sla.EXTRA
             JumpTable* jt = dcp.fd.installJumpTable(jmpaddr);
             List<Address> adtable;
             Address naddr;
-            uintb h = 0;
-            uintb sv = 0;
+            ulong h = 0;
+            ulong sv = 0;
             string token;
             s >> token;
             //   if (token == "norm") {

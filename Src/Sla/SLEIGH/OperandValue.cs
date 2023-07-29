@@ -11,20 +11,20 @@ namespace Sla.SLEIGH
 {
     internal class OperandValue : PatternValue
     {
-        private int4 index;         // This is the defining field of expression
+        private int index;         // This is the defining field of expression
         private Constructor ct;        // cached pointer to constructor
         
         public OperandValue()
         {
         } // For use with restoreXml
 
-        public OperandValue(int4 ind, Constructor c)
+        public OperandValue(int ind, Constructor c)
         {
             index = ind;
             ct = c;
         }
 
-        public void changeIndex(int4 newind)
+        public void changeIndex(int newind)
         {
             index = newind;
         }
@@ -41,11 +41,11 @@ namespace Sla.SLEIGH
             return sym.getName();
         }
 
-        public override TokenPattern genPattern(intb val);
+        public override TokenPattern genPattern(long val);
 
         public override TokenPattern genMinPattern(List<TokenPattern> ops) => ops[index];
 
-        public override intb getValue(ParserWalker walker)
+        public override long getValue(ParserWalker walker)
         {               // Get the value of an operand when it is used in
                         // an expression. 
             OperandSymbol* sym = ct.getOperand(index);
@@ -61,22 +61,22 @@ namespace Sla.SLEIGH
             ConstructState tempstate;
             ParserWalker newwalker(walker.getParserContext());
             newwalker.setOutOfBandState(ct, index, &tempstate, walker);
-            intb res = patexp.getValue(newwalker);
+            long res = patexp.getValue(newwalker);
             return res;
         }
 
-        public override intb getSubValue(List<intb> replace, int4 listpos)
+        public override long getSubValue(List<long> replace, int listpos)
         {
             OperandSymbol* sym = ct.getOperand(index);
             return sym.getDefiningExpression().getSubValue(replace, listpos);
         }
 
-        public override intb minValue()
+        public override long minValue()
         {
             throw SleighError("Operand used in pattern expression");
         }
 
-        public override intb maxValue()
+        public override long maxValue()
         {
             throw SleighError("Operand used in pattern expression");
         }
@@ -91,7 +91,7 @@ namespace Sla.SLEIGH
 
         public override void restoreXml(Element el, Translate trans)
         {
-            uintm ctid, tabid;
+            uint ctid, tabid;
             {
                 istringstream s(el.getAttributeValue("index"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);

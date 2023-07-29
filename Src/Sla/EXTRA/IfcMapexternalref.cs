@@ -20,7 +20,7 @@ namespace Sla.EXTRA
         /// A symbol name can be provided, otherwise a default one is generated.
         public override void execute(TextReader s)
         {
-            int4 size1, size2;
+            int size1, size2;
             Address addr1 = parse_machaddr(s, size1, *dcp.conf.types); // Read externalref address
             Address addr2 = parse_machaddr(s, size2, *dcp.conf.types); // Read referred to address
             string name;

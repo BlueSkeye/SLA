@@ -74,7 +74,7 @@ namespace Sla.DECCORE
         /// is locked, but the data-type is not locked (and can float)
         protected void checkSizeTypeLock()
         {
-            dispflags &= ~((uint4)size_typelock);
+            dispflags &= ~((uint)size_typelock);
             if (isTypeLocked() && (type.getMetatype() == TYPE_UNKNOWN))
                 dispflags |= size_typelock;
         }
@@ -86,7 +86,7 @@ namespace Sla.DECCORE
             if (val)
                 dispflags |= is_this_ptr;
             else
-                dispflags &= ~((uint4)is_this_ptr);
+                dispflags &= ~((uint)is_this_ptr);
         }
 
         /// \brief Possible display (dispflag) properties for a Symbol
@@ -228,7 +228,7 @@ namespace Sla.DECCORE
                 checkSizeTypeLock();
             }
             else
-                dispflags &= ~((uint4)isolate);
+                dispflags &= ~((uint)isolate);
         }
 
         /// Get the scope owning \b this Symbol
@@ -251,12 +251,12 @@ namespace Sla.DECCORE
         public SymbolEntry? getMapEntry(Address addr)
         {
             SymbolEntry* res;
-            for (int4 i = 0; i < mapentry.size(); ++i) {
+            for (int i = 0; i < mapentry.size(); ++i) {
                 res = &(*mapentry[i]);
                 Address entryaddr = res.getAddr();
                 if (addr.getSpace() != entryaddr.getSpace()) continue;
                 if (addr.getOffset() < entryaddr.getOffset()) continue;
-                int4 diff = (int4)(addr.getOffset() - entryaddr.getOffset());
+                int diff = (int)(addr.getOffset() - entryaddr.getOffset());
                 if (diff >= res.getSize()) continue;
                 return res;
             }
@@ -277,8 +277,8 @@ namespace Sla.DECCORE
         /// \return its position within the list or -1 if it is not in the list
         public int getMapEntryPosition(SymbolEntry entry)
         {
-            int4 pos = 0;
-            for (int4 i = 0; i < mapentry.size(); ++i)
+            int pos = 0;
+            for (int i = 0; i < mapentry.size(); ++i)
             {
                 SymbolEntry tmp = &(*mapentry[i]);
                 if (tmp == entry)
@@ -303,7 +303,7 @@ namespace Sla.DECCORE
             if (scope == useScope) return 0;    // Symbol is in scope where it is used
             if (useScope == null) {  // Treat null useScope as resolving the full path
                 Scope point = scope;
-                int4 count = 0;
+                int count = 0;
                 while (point != null) {
                     count += 1;
                     point = point.getParent();
@@ -359,7 +359,7 @@ namespace Sla.DECCORE
                 encoder.writeBool(ATTRIB_MERGE, false);
             if ((dispflags & is_this_ptr) != 0)
                 encoder.writeBool(ATTRIB_THISPTR, true);
-            int4 format = getDisplayFormat();
+            int format = getDisplayFormat();
             if (format != 0)
             {
                 encoder.writeString(ATTRIB_FORMAT, Datatype::decodeIntegerFormat(format));
@@ -379,7 +379,7 @@ namespace Sla.DECCORE
             symbolId = 0;
             for (; ; )
             {
-                uintb attribId = decoder.getNextAttributeId();
+                ulong attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == ATTRIB_CAT)
                 {
@@ -486,7 +486,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public override void decode(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement(ELEM_SYMBOL);
+            uint elemId = decoder.openElement(ELEM_SYMBOL);
             decodeHeader(decoder);
 
             decodeBody(decoder);

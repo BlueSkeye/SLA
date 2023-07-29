@@ -24,15 +24,15 @@ namespace Sla.DECCORE
 
         /// \class Rule2Comp2Mult
         /// \brief Eliminate INT_2COMP:  `-V  =>  V * -1`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_2COMP);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             data.opSetOpcode(op, CPUI_INT_MULT);
-            int4 size = op.getIn(0).getSize();
+            int size = op.getIn(0).getSize();
             Varnode* negone = data.newConstant(size, calc_mask(size));
             data.opInsertInput(op, negone, 1);
             return 1;

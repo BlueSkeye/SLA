@@ -10,11 +10,11 @@ namespace Sla.SLEIGH
     internal class LabelSymbol : SleighSymbol
     {
         // A branch label
-        private uint4 index;            // Local 1 up index of label
+        private uint index;            // Local 1 up index of label
         private bool isplaced;      // Has the label been placed (not just referenced)
-        private uint4 refcount;     // Number of references to this label
+        private uint refcount;     // Number of references to this label
         
-        public LabelSymbol(string nm,uint4 i)
+        public LabelSymbol(string nm,uint i)
             : base(nm)
         {
             index = i;
@@ -22,14 +22,14 @@ namespace Sla.SLEIGH
             isplaced = false;
         }
         
-        public uint4 getIndex() => index;
+        public uint getIndex() => index;
 
         public void incrementRefCount()
         {
             refcount += 1;
         }
 
-        public uint4 getRefCount() => refcount;
+        public uint getRefCount() => refcount;
 
         public void setPlaced()
         {

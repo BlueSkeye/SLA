@@ -21,8 +21,8 @@ namespace Sla.DECCORE
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
             bool toggle = onOrOff(p2);
-            uint4 flags = glb.print.getHeaderComment();
-            uint4 val = Comment::encodeCommentType(p1);
+            uint flags = glb.print.getHeaderComment();
+            uint val = Comment::encodeCommentType(p1);
             if (toggle)
                 flags |= val;
             else

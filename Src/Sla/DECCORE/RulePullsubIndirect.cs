@@ -24,14 +24,14 @@ namespace Sla.DECCORE
 
         /// \class RulePullsubIndirect
         /// \brief Pull-back SUBPIECE through INDIRECT
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_SUBPIECE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            int4 maxByte, minByte, newSize;
+            int maxByte, minByte, newSize;
 
             Varnode* vn = op.getIn(0);
             if (!vn.isWritten()) return 0;
@@ -50,7 +50,7 @@ namespace Sla.DECCORE
             Varnode* outvn = op.getOut();
             if (outvn.isPrecisLo() || outvn.isPrecisHi()) return 0; // Don't pull apart double precision object
 
-            uintb consume = calc_mask(newSize) << 8 * minByte;
+            ulong consume = calc_mask(newSize) << 8 * minByte;
             consume = ~consume;
             if ((consume & indir.getIn(0).getConsume()) != 0) return 0;
 

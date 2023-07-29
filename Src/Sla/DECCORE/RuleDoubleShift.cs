@@ -30,20 +30,20 @@ namespace Sla.DECCORE
         ///
         ///    - `(V << c) << d  =>  V << (c+d)`
         ///    - `(V << c) >> c` =>  V & 0xff`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_LEFT);
             oplist.push_back(CPUI_INT_RIGHT);
             oplist.push_back(CPUI_INT_MULT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* secvn,*newvn;
             PcodeOp* secop;
             OpCode opc1, opc2;
-            int4 sa1, sa2, size;
-            uintb mask;
+            int sa1, sa2, size;
+            ulong mask;
 
             if (!op.getIn(1).isConstant()) return 0;
             secvn = op.getIn(0);
@@ -59,18 +59,18 @@ namespace Sla.DECCORE
 
             if (opc1 == CPUI_INT_MULT)
             {
-                uintb val = op.getIn(1).getOffset();
+                ulong val = op.getIn(1).getOffset();
                 sa1 = leastsigbit_set(val);
-                if ((val >> sa1) != (uintb)1) return 0; // Not multiplying by a power of 2
+                if ((val >> sa1) != (ulong)1) return 0; // Not multiplying by a power of 2
                 opc1 = CPUI_INT_LEFT;
             }
             else
                 sa1 = op.getIn(1).getOffset();
             if (opc2 == CPUI_INT_MULT)
             {
-                uintb val = secop.getIn(1).getOffset();
+                ulong val = secop.getIn(1).getOffset();
                 sa2 = leastsigbit_set(val);
-                if ((val >> sa2) != (uintb)1) return 0; // Not multiplying by a power of 2
+                if ((val >> sa2) != (ulong)1) return 0; // Not multiplying by a power of 2
                 opc2 = CPUI_INT_LEFT;
             }
             else
@@ -92,7 +92,7 @@ namespace Sla.DECCORE
                     data.opRemoveInput(op, 1);
                 }
             }
-            else if (sa1 == sa2 && size <= sizeof(uintb))
+            else if (sa1 == sa2 && size <= sizeof(ulong))
             {   // FIXME:  precision
                 mask = calc_mask(size);
                 if (opc1 == CPUI_INT_LEFT)

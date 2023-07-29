@@ -64,7 +64,7 @@ namespace Sla.EXTRA
             List<string> inname;
 
             readPcodeSnippet(s, name, outname, inname, pcodestring);
-            int4 id = -1;
+            int id = -1;
             try
             {
                 id = dcp.conf.pcodeinjectlib.manualCallFixup(name, pcodestring);

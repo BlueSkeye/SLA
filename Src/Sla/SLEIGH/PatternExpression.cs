@@ -14,7 +14,7 @@ namespace Sla.SLEIGH
     internal abstract class PatternExpression
     {
         // Number of objects referencing this
-        private int4 refcount;
+        private int refcount;
 
         // for deletion
         ~PatternExpression()
@@ -26,22 +26,22 @@ namespace Sla.SLEIGH
             refcount = 0;
         }
         
-        public abstract intb getValue(ParserWalker walker);
+        public abstract long getValue(ParserWalker walker);
 
         public abstract TokenPattern genMinPattern(List<TokenPattern> ops);
 
         public abstract void listValues(List<PatternValue> list);
 
-        public abstract void getMinMax(List<intb> minlist, List<intb> maxlist);
+        public abstract void getMinMax(List<long> minlist, List<long> maxlist);
 
-        public abstract intb getSubValue(List<intb> replace,int4 listpos);
+        public abstract long getSubValue(List<long> replace,int listpos);
 
         public abstract void saveXml(TextWriter s);
 
         public abstract void restoreXml(Element el, Translate trans);
 
-        public abstract intb getSubValue(List<intb> replace) {
-            int4 listpos = 0;
+        public abstract long getSubValue(List<long> replace) {
+            int listpos = 0;
             return getSubValue(replace, listpos);
         }
 
@@ -66,7 +66,7 @@ namespace Sla.SLEIGH
                 res = new TokenField();
             else if (nm == "contextfield")
                 res = new ContextField();
-            else if (nm == "intb")
+            else if (nm == "long")
                 res = new ConstantValue();
             else if (nm == "operand_exp")
                 res = new OperandValue();

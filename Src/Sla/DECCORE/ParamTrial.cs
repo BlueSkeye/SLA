@@ -120,14 +120,14 @@ namespace Sla.DECCORE
         /// Mark that trial is not actively used
         public void markInactive()
         {
-            flags &= ~((uint4)active);
+            flags &= ~((uint)active);
             flags |= @checked;
         }
 
         /// Mark trial as definitely \e not a parameter
         public void markNoUse()
         {
-            flags &= ~((uint4)(active | used));
+            flags &= ~((uint)(active | used));
             flags |= (@checked| defnouse);
         }
 
@@ -221,7 +221,7 @@ namespace Sla.DECCORE
         /// Create a new ParamTrial based on the first bytes of the memory range.
         /// \param sz is the number of bytes to include in the new trial
         /// \return the new trial
-        public ParamTrial splitHi(int4 sz)
+        public ParamTrial splitHi(int sz)
         {
             ParamTrial res(addr, sz, slot);
             res.flags = flags;
@@ -232,7 +232,7 @@ namespace Sla.DECCORE
         /// Create a new ParamTrial based on the last bytes of the memory range.
         /// \param sz is the number of bytes to include in the new trial
         /// \return the new trial
-        public ParamTrial splitLo(int4 sz)
+        public ParamTrial splitLo(int sz)
         {
             Address newaddr = addr + (size - sz);
             ParamTrial res(newaddr, sz, slot+1);
@@ -258,7 +258,7 @@ namespace Sla.DECCORE
                 return false;
             if (entry != (ParamEntry*)0) return false;
             //  if (entry != (ParamEntry*)0) {
-            //    int4 res = entry.justifiedContain(newaddr,sz);
+            //    int res = entry.justifiedContain(newaddr,sz);
             //    if (res < 0) return false;
             //  }
             return true;
@@ -273,8 +273,8 @@ namespace Sla.DECCORE
         {
             if (entry == (ParamEntry*)0) return false;
             if (b.entry == (ParamEntry*)0) return true;
-            int4 grpa = entry.getGroup();
-            int4 grpb = b.entry.getGroup();
+            int grpa = entry.getGroup();
+            int grpb = b.entry.getGroup();
             if (grpa != grpb)
                 return (grpa < grpb);
             if (entry != b.entry)       // Compare entry pointers directly

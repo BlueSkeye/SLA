@@ -12,18 +12,18 @@ namespace Sla.SLEIGH
 {
     internal class ContextField : PatternValue
     {
-        private int4 startbit;
-        private int4 endbit;
-        private int4 startbyte;
-        private int4 endbyte;
-        private int4 shift;
+        private int startbit;
+        private int endbit;
+        private int startbyte;
+        private int endbyte;
+        private int shift;
         private bool signbit;
         
         public ContextField()
         {
         }
 
-        public ContextField(bool s, int4 sbit, int4 ebit)
+        public ContextField(bool s, int sbit, int ebit)
         {
             signbit = s;
             startbit = sbit;
@@ -33,15 +33,15 @@ namespace Sla.SLEIGH
             shift = 7 - (endbit % 8);
         }
 
-        public int4 getStartBit() => startbit;
+        public int getStartBit() => startbit;
 
-        public int4 getEndBit() => endbit;
+        public int getEndBit() => endbit;
 
         public bool getSignBit() => signbit;
 
-        public override intb getValue(ParserWalker walker)
+        public override long getValue(ParserWalker walker)
         {
-            intb res = getContextBytes(walker, startbyte, endbyte);
+            long res = getContextBytes(walker, startbyte, endbyte);
             res >>= shift;
             if (signbit)
                 sign_extend(res, endbit - startbit);
@@ -52,16 +52,16 @@ namespace Sla.SLEIGH
 
         public override TokenPattern genMinPattern(List<TokenPattern> ops) => new TokenPattern();
 
-        public override TokenPattern genPattern(intb val)
+        public override TokenPattern genPattern(long val)
         {
             return TokenPattern(val, startbit, endbit);
         }
 
-        public override intb minValue() => 0;
+        public override long minValue() => 0;
 
-        public override intb maxValue()
+        public override long maxValue()
         {
-            intb res=0;
+            long res=0;
             res = ~res;
             zero_extend(res, (endbit - startbit));
             return res;

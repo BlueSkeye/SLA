@@ -23,16 +23,16 @@ namespace Sla.DECCORE
             /// \b true if the the string is truncated
             public bool isTruncated;
             ///< UTF8 encoded string data
-            public List<uint1> byteData;
+            public List<byte> byteData;
         }
 
         /// Map from address to string data
         protected Dictionary<Address, StringData> stringMap;
         /// Maximum characters in a string before truncating
-        protected int4 maximumChars;
+        protected int maximumChars;
 
         /// \param max is the maximum number of characters to allow before truncating string
-        public StringManager(int4 max)
+        public StringManager(int max)
         {
             maximumChars = max;
         }
@@ -58,7 +58,7 @@ namespace Sla.DECCORE
         public bool isString(Address addr,Datatype charType)
         {
             bool isTrunc;       // unused here
-            List<uint1> buffer = getStringData(addr, charType, isTrunc);
+            List<byte> buffer = getStringData(addr, charType, isTrunc);
             return !buffer.empty();
         }
 
@@ -70,7 +70,7 @@ namespace Sla.DECCORE
         /// \param charType is a character data-type indicating the encoding
         /// \param isTrunc passes back whether the string is truncated
         /// \return the byte array of UTF8 data
-        public abstract List<uint1> getStringData(Address addr, Datatype charType, bool isTrunc);
+        public abstract List<byte> getStringData(Address addr, Datatype charType, bool isTrunc);
 
         /// Encode cached strings to a stream
         /// Encode \<stringmanage> element, with \<string> children.
@@ -89,9 +89,9 @@ namespace Sla.DECCORE
                 encoder.writeBool(ATTRIB_TRUNC, stringData.isTruncated);
                 ostringstream s;
                 s << '\n' << setfill('0');
-                for (int4 i = 0; i < stringData.byteData.size(); ++i)
+                for (int i = 0; i < stringData.byteData.size(); ++i)
                 {
-                    s << hex << setw(2) << (int4)stringData.byteData[i];
+                    s << hex << setw(2) << (int)stringData.byteData[i];
                     if (i % 20 == 19)
                         s << "\n  ";
                 }
@@ -107,17 +107,17 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decode(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement(ELEM_STRINGMANAGE);
+            uint elemId = decoder.openElement(ELEM_STRINGMANAGE);
             for (; ; )
             {
-                uint4 subId = decoder.openElement();
+                uint subId = decoder.openElement();
                 if (subId != ELEM_STRING) break;
                 Address addr = Address::decode(decoder);
                 StringData & stringData(stringMap[addr]);
-                uint4 subId2 = decoder.openElement(ELEM_BYTES);
+                uint subId2 = decoder.openElement(ELEM_BYTES);
                 stringData.isTruncated = decoder.readBool(ATTRIB_TRUNC);
                 istringstream @is = new istringstream(decoder.readString(ATTRIB_CONTENT));
-                int4 val;
+                int val;
                 char c1, c2;
                 @is >> ws;
                 c1 = @is.get();
@@ -137,7 +137,7 @@ namespace Sla.DECCORE
                     else
                         c2 = c2 + 10 - 'a';
                     val = c1 * 16 + c2;
-                    stringData.byteData.push_back((uint1)val);
+                    stringData.byteData.push_back((byte)val);
                     @is >> ws;
                     c1 = @is.get();
                     c2 = @is.get();
@@ -153,12 +153,12 @@ namespace Sla.DECCORE
         /// \param size is the number of bytes in the buffer
         /// \param charsize is the presumed size (in bytes) of character elements
         /// \return \b true if a string terminator is found
-        public static bool hasCharTerminator(uint1 buffer, int4 size,int4 charsize)
+        public static bool hasCharTerminator(byte buffer, int size,int charsize)
         {
-            for (int4 i = 0; i < size; i += charsize)
+            for (int i = 0; i < size; i += charsize)
             {
                 bool isTerminator = true;
-                for (int4 j = 0; j < charsize; ++j)
+                for (int j = 0; j < charsize; ++j)
                 {
                     if (buffer[i + j] != 0)
                     {   // Non-zero bytes means character can't be a null terminator
@@ -176,9 +176,9 @@ namespace Sla.DECCORE
         /// \param buf is the byte array
         /// \param bigend is \b true to request big endian encoding
         /// \return the decoded UTF16 element
-        public static int4 readUtf16(uint1 buf,bool bigend)
+        public static int readUtf16(byte buf,bool bigend)
         {
-            int4 codepoint;
+            int codepoint;
             if (bigend)
             {
                 codepoint = buf[0];
@@ -199,19 +199,19 @@ namespace Sla.DECCORE
         /// write the bytes to the stream.
         /// \param s is the output stream
         /// \param codepoint is the unicode codepoint
-        public static void writeUtf8(TextWriter s, int4 codepoint)
+        public static void writeUtf8(TextWriter s, int codepoint)
         {
-            uint1 bytes[4];
-            int4 size;
+            byte bytes[4];
+            int size;
 
             if (codepoint < 0)
                 throw new LowlevelError("Negative unicode codepoint");
             if (codepoint < 128)
             {
-                s.put((uint1)codepoint);
+                s.put((byte)codepoint);
                 return;
             }
-            int4 bits = mostsigbit_set(codepoint) + 1;
+            int bits = mostsigbit_set(codepoint) + 1;
             if (bits > 21)
                 throw new LowlevelError("Bad unicode codepoint");
             if (bits < 12)
@@ -245,17 +245,17 @@ namespace Sla.DECCORE
         /// \param bigend is \b true for big endian encoding of the UTF element
         /// \param skip is a reference for passing back the number of bytes consumed
         /// \return the codepoint or -1 if the encoding is invalid
-        public static int4 getCodepoint(uint1 buf, int4 charsize,bool bigend, int4 skip)
+        public static int getCodepoint(byte buf, int charsize,bool bigend, int skip)
         {
-            int4 codepoint;
-            int4 sk = 0;
+            int codepoint;
+            int sk = 0;
             if (charsize == 2)
             {       // UTF-16
                 codepoint = readUtf16(buf, bigend);
                 sk += 2;
                 if ((codepoint >= 0xD800) && (codepoint <= 0xDBFF))
                 { // high surrogate
-                    int4 trail = readUtf16(buf + 2, bigend);
+                    int trail = readUtf16(buf + 2, bigend);
                     sk += 2;
                     if ((trail < 0xDC00) || (trail > 0xDFFF)) return -1; // Bad trail
                     codepoint = (codepoint << 10) + trail + (0x10000 - (0xD800 << 10) - 0xDC00);
@@ -264,7 +264,7 @@ namespace Sla.DECCORE
             }
             else if (charsize == 1)
             {   // UTF-8
-                int4 val = buf[0];
+                int val = buf[0];
                 if ((val & 0x80) == 0)
                 {
                     codepoint = val;
@@ -272,24 +272,24 @@ namespace Sla.DECCORE
                 }
                 else if ((val & 0xe0) == 0xc0)
                 {
-                    int4 val2 = buf[1];
+                    int val2 = buf[1];
                     sk = 2;
                     if ((val2 & 0xc0) != 0x80) return -1; // Not a valid UTF8-encoding
                     codepoint = ((val & 0x1f) << 6) | (val2 & 0x3f);
                 }
                 else if ((val & 0xf0) == 0xe0)
                 {
-                    int4 val2 = buf[1];
-                    int4 val3 = buf[2];
+                    int val2 = buf[1];
+                    int val3 = buf[2];
                     sk = 3;
                     if (((val2 & 0xc0) != 0x80) || ((val3 & 0xc0) != 0x80)) return -1; // invalid encoding
                     codepoint = ((val & 0xf) << 12) | ((val2 & 0x3f) << 6) | (val3 & 0x3f);
                 }
                 else if ((val & 0xf8) == 0xf0)
                 {
-                    int4 val2 = buf[1];
-                    int4 val3 = buf[2];
-                    int4 val4 = buf[3];
+                    int val2 = buf[1];
+                    int val3 = buf[2];
+                    int val4 = buf[3];
                     sk = 4;
                     if (((val2 & 0xc0) != 0x80) || ((val3 & 0xc0) != 0x80) || ((val4 & 0xc0) != 0x80)) return -1;   // invalid encoding
                     codepoint = ((val & 7) << 18) | ((val2 & 0x3f) << 12) | ((val3 & 0x3f) << 6) | (val4 & 0x3f);

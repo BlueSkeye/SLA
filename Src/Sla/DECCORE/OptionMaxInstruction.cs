@@ -22,7 +22,7 @@ namespace Sla.DECCORE
             if (p1.size() == 0)
                 throw ParseError("Must specify number of instructions");
 
-            int4 newMax = -1;
+            int newMax = -1;
             istringstream s1(p1);
             s1.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
             s1 >> newMax;

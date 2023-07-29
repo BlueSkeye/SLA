@@ -11,7 +11,7 @@ namespace Sla.DECCORE
     {
         internal Datatype type_specifier;
         internal string function_specifier;
-        internal uint4 flags;
+        internal uint flags;
 
         internal TypeSpecifiers()
         {

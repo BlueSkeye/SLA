@@ -12,7 +12,7 @@ namespace Sla.DECCORE
     {
         private SplitVarnode @in;
         private SplitVarnode outvn;
-        private int4 inslot;
+        private int inslot;
         private Varnode hibase;
         private Varnode lobase;
         private BlockBasic blbase;
@@ -57,9 +57,9 @@ namespace Sla.DECCORE
             if (!verify(@in.getHi(), @in.getLo(), hphi))
                 return false;
 
-            int4 numin = hiphi.numInput();
+            int numin = hiphi.numInput();
             List<SplitVarnode> inlist;
-            for (int4 j = 0; j < numin; ++j)
+            for (int j = 0; j < numin; ++j)
             {
                 Varnode* vhi = hiphi.getIn(j);
                 Varnode* vlo = lophi.getIn(j);

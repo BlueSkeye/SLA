@@ -31,17 +31,17 @@ namespace Sla.DECCORE
         ///   - `V || true   =>  true`
         ///   - `V ^^ true   =>  !V`
         ///   - `V ^^ false  =>  V`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
-            uint4 list[] = { CPUI_BOOL_AND, CPUI_BOOL_OR, CPUI_BOOL_XOR };
+            uint list[] = { CPUI_BOOL_AND, CPUI_BOOL_OR, CPUI_BOOL_XOR };
             oplist.insert(oplist.end(), list, list + 3);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vnconst = op.getIn(1);
             Varnode* vn;
-            uintb val;
+            ulong val;
             OpCode opc;
 
             if (!vnconst.isConstant()) return 0;

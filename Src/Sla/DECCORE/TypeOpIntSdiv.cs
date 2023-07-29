@@ -22,12 +22,12 @@ namespace Sla.DECCORE
             lng.opIntSdiv(op);
         }
 
-        public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
+        public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
             Varnode vn = op.getIn(slot);
             Datatype* reqtype = op.inputTypeLocal(slot);
             Datatype* curtype = vn.getHighTypeReadFacing(op);
-            int4 promoType = castStrategy.intPromotionType(vn);
+            int promoType = castStrategy.intPromotionType(vn);
             if (promoType != CastStrategy::NO_PROMOTION && ((promoType & CastStrategy::SIGNED_EXTENSION) == 0))
                 return reqtype;
             return castStrategy.castStandard(reqtype, curtype, true, true);

@@ -16,13 +16,13 @@ namespace Sla.DECCORE
         /// Use point of the Symbol
         private Address usePoint;
         /// Hash encoding the Symbols environment
-        private uint8 hash;
+        private ulong hash;
         /// The local symbol name recommendation
         private string name;
         /// Id associated with the original Symbol
-        private uint8 symbolId;
+        private ulong symbolId;
         
-        public DynamicRecommend(Address addr,uint8 h, string nm,uint8 id)
+        public DynamicRecommend(Address addr,ulong h, string nm,ulong id)
         {
             usePoint = addr;
             hash = h;
@@ -34,12 +34,12 @@ namespace Sla.DECCORE
         public Address getAddress() => usePoint;
 
         /// Get the dynamic hash
-        public uint8 getHash() => hash;
+        public ulong getHash() => hash;
 
         /// Get the recommended name
         public string getName() => name;
 
         /// Get the original Symbol id
-        public uint8 getSymbolId() => symbolId;
+        public ulong getSymbolId() => symbolId;
     }
 }

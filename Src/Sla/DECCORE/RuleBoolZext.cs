@@ -30,19 +30,19 @@ namespace Sla.DECCORE
         ///   - `(zext(V) * -1) != -1  =>  V != true`
         ///   - `(zext(V) * -1) & (zext(W) * -1)  =>  zext(V && W) * -1`
         ///   - `(zext(V) * -1) | (zext(W) * -1)  =>  zext(V || W) * -1`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_ZEXT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* boolVn1,*boolVn2;
             PcodeOp* multop1,*actionop;
             PcodeOp* zextop2,*multop2;
-            uintb coeff, val;
+            ulong coeff, val;
             OpCode opc;
-            int4 size;
+            int size;
 
             boolVn1 = op.getIn(0);
             if (!boolVn1.isBooleanValue(data.isTypeRecoveryOn())) return 0;

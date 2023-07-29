@@ -33,14 +33,14 @@ namespace Sla.DECCORE
         /// Low-level name of p-code operator
         protected string name;
         /// Index passed in the CALLOTHER op
-        protected int4 useropindex;
+        protected int useropindex;
         /// Architecture owning the user defined op
         protected Architecture glb;
         /// Boolean attributes of the CALLOTHER
-        protected uint4 flags;
+        protected uint flags;
 
         /// Construct from name and index
-        public UserPcodeOp(Architecture g, string nm,int4 ind)
+        public UserPcodeOp(Architecture g, string nm,int ind)
         {
             name = nm;
             useropindex = ind;
@@ -52,10 +52,10 @@ namespace Sla.DECCORE
         public string getName() => name;
 
         /// Get the constant id of the op
-        public int4 getIndex() => useropindex;
+        public int getIndex() => useropindex;
 
         /// Get display type (0=functional)
-        public uint4 getDisplay() => (flags & (annotation_assignment | no_operator));
+        public uint getDisplay() => (flags & (annotation_assignment | no_operator));
 
         ~UserPcodeOp()
         {
@@ -75,7 +75,7 @@ namespace Sla.DECCORE
         /// size (in bytes) of the symbol, which isn't ordinarily stored as part of the annotation.
         /// \param vn is the annotation Varnode
         /// \param op is the specific PcodeOp instance of \b this userop
-        public virtual int4 extractAnnotationSize(Varnode vn, PcodeOp op)
+        public virtual int extractAnnotationSize(Varnode vn, PcodeOp op)
         {
             throw new LowlevelError("Unexpected annotation input for CALLOTHER " + name);
         }

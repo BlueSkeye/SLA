@@ -77,13 +77,13 @@ namespace Sla.CORE
 
         public override void restoreXml(DocumentStorage store)
         {
-            Element el = store.getTag("bfd_savefile");
+            Element? el = store.getTag("bfd_savefile");
             if (el == (Element)null)
                 throw new LowlevelError("Could not find bfd_savefile tag");
 
             restoreXmlHeader(el);
             {
-                istringstream s(el.getAttributeValue("adjustvma"));
+                istringstream s = new istringstream(el.getAttributeValue("adjustvma"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> adjustvma;
             }

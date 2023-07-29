@@ -19,13 +19,13 @@ namespace Sla.DECCORE
         }
 
         /// Truncate the number of values to the given number
-        public abstract void truncate(int4 nm);
+        public abstract void truncate(int nm);
 
         /// Return the number of values the variables can take
-        public abstract uintb getSize();
+        public abstract ulong getSize();
 
         /// Return \b true if the given value is in the set of possible values
-        public abstract bool contains(uintb val);
+        public abstract bool contains(ulong val);
 
         /// \brief Initialize \b this for iterating over the set of possible values
         ///
@@ -36,7 +36,7 @@ namespace Sla.DECCORE
         public abstract bool next();
 
         /// Get the current value
-        public abstract uintb getValue();
+        public abstract ulong getValue();
 
         /// Get the Varnode associated with the current value
         public abstract Varnode getStartVarnode();

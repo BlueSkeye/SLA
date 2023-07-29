@@ -234,7 +234,7 @@ namespace Sla.DECCORE
         /// \param singlelist will hold the resulting list of copied instances
         private static void findSingleCopy(HighVariable high, List<Varnode> singlelist)
         {
-            int4 i;
+            int i;
             Varnode* vn;
             PcodeOp* op;
 
@@ -262,7 +262,7 @@ namespace Sla.DECCORE
         /// \return \b true if the first HighVariable should be ordered before the second
         private static bool compareHighByBlock(HighVariable a, HighVariable b)
         {
-            int4 result = a.getCover().compareTo(b.getCover());
+            int result = a.getCover().compareTo(b.getCover());
             if (result == 0)
             {
                 Varnode* v1 = a.getInstance(0);
@@ -300,8 +300,8 @@ namespace Sla.DECCORE
             Varnode* inVn2 = op2.getIn(0);
             if (inVn1 != inVn2)     // First compare by Varnode inputs
                 return (inVn1.getCreateIndex() < inVn2.getCreateIndex());
-            int4 index1 = op1.getParent().getIndex();
-            int4 index2 = op2.getParent().getIndex();
+            int index1 = op1.getParent().getIndex();
+            int index2 = op2.getParent().getIndex();
             if (index1 != index2)
                 return (index1 < index2);
             return (op1.getSeqNum().getOrder() < op2.getSeqNum().getOrder());
@@ -315,7 +315,7 @@ namespace Sla.DECCORE
         {
             Varnode othervn;
             HighVariable high = vn.getHigh();
-            int4 num, i;
+            int num, i;
 
             num = high.numInstances();
             for (i = 0; i < num; ++i)
@@ -338,7 +338,7 @@ namespace Sla.DECCORE
         private static void findAllIntoCopies(HighVariable high, List<PcodeOp> copyIns,
             bool filterTemps)
         {
-            for (int4 i = 0; i < high.numInstances(); ++i)
+            for (int i = 0; i < high.numInstances(); ++i)
             {
                 Varnode* vn = high.getInstance(i);
                 if (!vn.isWritten()) continue;
@@ -361,8 +361,8 @@ namespace Sla.DECCORE
         /// \param op is the specific PcodeOp to test intersection with
         private void collectCovering(List<Varnode> vlist, HighVariable high, PcodeOp op)
         {
-            int4 blk = op.getParent().getIndex();
-            for (int4 i = 0; i < high.numInstances(); ++i)
+            int blk = op.getParent().getIndex();
+            for (int i = 0; i < high.numInstances(); ++i)
             {
                 Varnode* vn = high.getInstance(i);
                 if (vn.getCover().getCoverBlock(blk).contain(op))
@@ -380,15 +380,15 @@ namespace Sla.DECCORE
         /// \param op is the specific intersecting PcodeOp
         /// \return \b false if any instance in the list intersects the PcodeOp on the interior
         private bool collectCorrectable(List<Varnode> vlist, List<PcodeOp> oplist,
-            List<int4> slotlist, PcodeOp op)
+            List<int> slotlist, PcodeOp op)
         {
-            int4 blk = op.getParent().getIndex();
+            int blk = op.getParent().getIndex();
             List<Varnode*>::const_iterator viter;
             list<PcodeOp*>::const_iterator oiter;
             Varnode* vn;
             PcodeOp* edgeop;
-            int4 slot, bound;
-            uintm opuindex = CoverBlock::getUIndex(op);
+            int slot, bound;
+            uint opuindex = CoverBlock::getUIndex(op);
 
             for (viter = vlist.begin(); viter != vlist.end(); ++viter)
             {
@@ -427,14 +427,14 @@ namespace Sla.DECCORE
             {       // If the data-type needs resolution
                 if (inVn.isWritten())
                 {
-                    int4 fieldNum = data.inheritResolution(ct, copyOp, -1, inVn.getDef(), -1);
+                    int fieldNum = data.inheritResolution(ct, copyOp, -1, inVn.getDef(), -1);
                     data.forceFacingType(ct, fieldNum, copyOp, 0);
                 }
                 else
                 {
-                    int4 slot = trimOp.getSlot(inVn);
+                    int slot = trimOp.getSlot(inVn);
                     ResolvedUnion resUnion = data.getUnionField(ct, trimOp, slot);
-                    int4 fieldNum = (resUnion == (ResolvedUnion*)0) ? -1 : resUnion.getFieldNum();
+                    int fieldNum = (resUnion == (ResolvedUnion*)0) ? -1 : resUnion.getFieldNum();
                     data.forceFacingType(ct, fieldNum, copyOp, 0);
                 }
             }
@@ -488,7 +488,7 @@ namespace Sla.DECCORE
             for (iter = markedop.begin(); iter != markedop.end(); ++iter)
             {
                 op = *iter;
-                int4 slot = op.getSlot(vn);
+                int slot = op.getSlot(vn);
                 data.opSetInput(op, copyop.getOut(), slot);
             }
         }
@@ -505,7 +505,7 @@ namespace Sla.DECCORE
             PcodeOp* op = PcodeOp::getOpFromConst(indop.getIn(1).getAddr()); // Indirect effect op
             List<Varnode*> problemvn;
             list<PcodeOp*> correctable;
-            List<int4> correctslot;
+            List<int> correctslot;
             // Collect instances of output.high that are defined
             // before (and right up to) op. These need to be snipped.
             collectCovering(problemvn, indop.getOut().getHigh(), op);
@@ -528,7 +528,7 @@ namespace Sla.DECCORE
             snipop = allocateCopyTrim(refvn, op.getAddr(), correctable.front());
             data.opInsertBefore(snipop, op);
             list<PcodeOp*>::iterator oiter;
-            int4 i, slot;
+            int i, slot;
             for (oiter = correctable.begin(), i = 0; i < correctslot.size(); ++oiter, ++i)
             {
                 insertop = *oiter;
@@ -548,10 +548,10 @@ namespace Sla.DECCORE
         {
             list<PcodeOp*> markedop;
             list<PcodeOp*>::const_iterator oiter;
-            map<int4, CoverBlock>::const_iterator iter, enditer;
+            map<int, CoverBlock>::const_iterator iter, enditer;
             Varnode* vn2;
-            int4 boundtype;
-            int4 overlaptype;
+            int boundtype;
+            int overlaptype;
             bool insertop;
 
             for (oiter = vn.beginDescend(); oiter != vn.endDescend(); ++oiter)
@@ -565,9 +565,9 @@ namespace Sla.DECCORE
                 enditer = single.end();
                 while (iter != enditer)
                 {
-                    int4 blocknum = (*iter).first;
+                    int blocknum = (*iter).first;
                     ++iter;
-                    int4 slot = BlockVarnode::findFront(blocknum, blocksort);
+                    int slot = BlockVarnode::findFront(blocknum, blocksort);
                     if (slot == -1) continue;
                     while (slot < blocksort.size())
                     {
@@ -582,7 +582,7 @@ namespace Sla.DECCORE
                         if (overlaptype == 0) continue;     // No overlap in storage
                         if (overlaptype == 1)
                         {           // Partial overlap
-                            int4 off = (int4)(vn.getOffset() - vn2.getOffset());
+                            int off = (int)(vn.getOffset() - vn2.getOffset());
                             if (vn.partialCopyShadow(vn2, off))
                                 continue;       // SUBPIECE shadow, not a new value
                         }
@@ -625,7 +625,7 @@ namespace Sla.DECCORE
                             }
                             else
                             {
-                                int4 off = (int4)(vn.getOffset() - vn2.getOffset());
+                                int off = (int)(vn.getOffset() - vn2.getOffset());
                                 if (vn.partialCopyShadow(indop.getIn(0), off)) continue;
                             }
                         }
@@ -662,11 +662,11 @@ namespace Sla.DECCORE
                 isectlist.push_back(vn);
             }
             blocksort.resize(isectlist.size());
-            for (int4 i = 0; i < isectlist.size(); ++i)
+            for (int i = 0; i < isectlist.size(); ++i)
                 blocksort[i].set(isectlist[i]);
             stable_sort(blocksort.begin(), blocksort.end());
 
-            for (int4 i = 0; i < isectlist.size(); ++i)
+            for (int i = 0; i < isectlist.size(); ++i)
                 eliminateIntersect(isectlist[i], blocksort);
         }
 
@@ -692,7 +692,7 @@ namespace Sla.DECCORE
             data.opSetOpcode(copyop, CPUI_COPY);
             if (ct.needsResolution())
             {
-                int4 fieldNum = data.inheritResolution(ct, copyop, -1, op, -1);
+                int fieldNum = data.inheritResolution(ct, copyop, -1, op, -1);
                 data.forceFacingType(ct, fieldNum, copyop, 0);
                 if (ct.getMetatype() == TYPE_PARTIALUNION)
                     ct = vn.getTypeDefFacing();
@@ -712,7 +712,7 @@ namespace Sla.DECCORE
         /// other original inputs and output.
         /// \param op is the given PcodeOp
         /// \param slot is the specified slot of the input Varnode to be trimmed
-        private void trimOpInput(PcodeOp op, int4 slot)
+        private void trimOpInput(PcodeOp op, int slot)
         {
             PcodeOp* copyop;
             Varnode* vn;
@@ -769,7 +769,7 @@ namespace Sla.DECCORE
         {
             List<HighVariable*> testlist;
             HighVariable* high_out;
-            int4 i, nexttrim, max;
+            int i, nexttrim, max;
 
             max = (op.code() == CPUI_INDIRECT) ? 1 : op.numInput();
             high_out = op.getOut().getHigh();
@@ -783,7 +783,7 @@ namespace Sla.DECCORE
                     trimOpInput(op, i);
                     continue;
                 }
-                for (int4 j = 0; j < i; ++j)
+                for (int j = 0; j < i; ++j)
                     if (!mergeTestRequired(op.getIn(j).getHigh(), high_in))
                     {
                         trimOpInput(op, i);
@@ -928,7 +928,7 @@ namespace Sla.DECCORE
             range.addRefPoint(subOp, subOp.getIn(0));
             Varnode* inVn = domOp.getIn(0);
             // Look for high Varnodes in the range
-            for (int4 i = 0; i < high.numInstances(); ++i)
+            for (int i = 0; i < high.numInstances(); ++i)
             {
                 Varnode* vn = high.getInstance(i);
                 if (!vn.isWritten()) continue;
@@ -958,10 +958,10 @@ namespace Sla.DECCORE
         /// \param copy is the list of COPY ops into the HighVariable
         /// \param pos is the index of the first COPY from the specific input Varnode
         /// \param size is the number of COPYs (in sequence) from the same specific Varnode
-        private void buildDominantCopy(HighVariable high, List<PcodeOp> copy, int4 pos, int4 size)
+        private void buildDominantCopy(HighVariable high, List<PcodeOp> copy, int pos, int size)
         {
             List<FlowBlock*> blockSet;
-            for (int4 i = 0; i < size; ++i)
+            for (int i = 0; i < size; ++i)
                 blockSet.push_back(copy[pos + i].getParent());
             BlockBasic* domBl = (BlockBasic*)FlowBlock::findCommonBlock(blockSet);
             PcodeOp* domCopy = copy[pos];
@@ -982,7 +982,7 @@ namespace Sla.DECCORE
                 if (ct.needsResolution())
                 {
                     ResolvedUnion resUnion = data.getUnionField(ct, oldCopy, 0);
-                    int4 fieldNum = (resUnion == (ResolvedUnion*)0) ? -1 : resUnion.getFieldNum();
+                    int fieldNum = (resUnion == (ResolvedUnion*)0) ? -1 : resUnion.getFieldNum();
                     data.forceFacingType(ct, fieldNum, domCopy, 0);
                     data.forceFacingType(ct, fieldNum, domCopy, -1);
                     if (ct.getMetatype() == TYPE_PARTIALUNION)
@@ -995,7 +995,7 @@ namespace Sla.DECCORE
             }
             // Cover created by removing all the COPYs from rootVn
             Cover bCover;
-            for (int4 i = 0; i < high.numInstances(); ++i)
+            for (int i = 0; i < high.numInstances(); ++i)
             {
                 Varnode* vn = high.getInstance(i);
                 if (vn.isWritten())
@@ -1009,8 +1009,8 @@ namespace Sla.DECCORE
                 bCover.merge(*vn.getCover());
             }
 
-            int4 count = size;
-            for (int4 i = 0; i < size; ++i)
+            int count = size;
+            for (int i = 0; i < size; ++i)
             {
                 PcodeOp* op = copy[pos + i];
                 if (op == domCopy) continue;    // No intersections from domVn already proven
@@ -1029,7 +1029,7 @@ namespace Sla.DECCORE
 
             if (count <= 1)
             {   // Don't bother if we only replace one COPY with another
-                for (int4 i = 0; i < size; ++i)
+                for (int i = 0; i < size; ++i)
                     copy[pos + i].setMark();
                 count = 0;
                 if (domCopyIsNew)
@@ -1038,7 +1038,7 @@ namespace Sla.DECCORE
                 }
             }
             // Replace all non-intersecting COPYs with read of dominating Varnode
-            for (int4 i = 0; i < size; ++i)
+            for (int i = 0; i < size; ++i)
             {
                 PcodeOp* op = copy[pos + i];
                 if (op.isMark())
@@ -1069,13 +1069,13 @@ namespace Sla.DECCORE
         /// \param copy is the list of COPYs coming from the same source HighVariable
         /// \param pos is the starting index of a set of COPYs coming from the same Varnode
         /// \param size is the number of Varnodes in the set coming from the same Varnode
-        private void markRedundantCopies(HighVariable high, List<PcodeOp> copy, int4 pos, int4 size)
+        private void markRedundantCopies(HighVariable high, List<PcodeOp> copy, int pos, int size)
         {
-            for (int4 i = size - 1; i > 0; --i)
+            for (int i = size - 1; i > 0; --i)
             {
                 PcodeOp* subOp = copy[pos + i];
                 if (subOp.isDead()) continue;
-                for (int4 j = i - 1; j >= 0; --j)
+                for (int j = i - 1; j >= 0; --j)
                 {
                     // Make sure earlier index provides dominant op
                     PcodeOp* domOp = copy[pos + j];
@@ -1100,12 +1100,12 @@ namespace Sla.DECCORE
 
             findAllIntoCopies(high, copyIns, true); // Get all COPYs into this with temporary output
             if (copyIns.size() < 2) return;
-            int4 pos = 0;
+            int pos = 0;
             while (pos < copyIns.size())
             {
                 // Find a group of COPYs coming from the same Varnode
                 Varnode* inVn = copyIns[pos].getIn(0);
-                int4 sz = 1;
+                int sz = 1;
                 while (pos + sz < copyIns.size())
                 {
                     Varnode* nextVn = copyIns[pos + sz].getIn(0);
@@ -1130,12 +1130,12 @@ namespace Sla.DECCORE
 
             findAllIntoCopies(high, copyIns, false);
             if (copyIns.size() < 2) return;
-            int4 pos = 0;
+            int pos = 0;
             while (pos < copyIns.size())
             {
                 // Find a group of COPYs coming from the same Varnode
                 Varnode* inVn = copyIns[pos].getIn(0);
-                int4 sz = 1;
+                int sz = 1;
                 while (pos + sz < copyIns.size())
                 {
                     Varnode* nextVn = copyIns[pos + sz].getIn(0);
@@ -1161,7 +1161,7 @@ namespace Sla.DECCORE
             if (high.numInstances() != 1) return;
             List<PieceNode> pieces;
 
-            int4 baseOffset = 0;
+            int baseOffset = 0;
             SymbolEntry* entry = vn.getSymbolEntry();
             if (entry != (SymbolEntry*)0)
             {
@@ -1170,7 +1170,7 @@ namespace Sla.DECCORE
 
             PieceNode::gatherPieces(pieces, vn, vn.getDef(), baseOffset);
             bool throwOut = false;
-            for (int4 i = 0; i < pieces.size(); ++i)
+            for (int i = 0; i < pieces.size(); ++i)
             {
                 Varnode* nodeVn = pieces[i].getVarnode();
                 // Make sure each node is still marked and hasn't merged with anything else
@@ -1182,12 +1182,12 @@ namespace Sla.DECCORE
             }
             if (throwOut)
             {
-                for (int4 i = 0; i < pieces.size(); ++i)
+                for (int i = 0; i < pieces.size(); ++i)
                     pieces[i].getVarnode().clearProtoPartial();
             }
             else
             {
-                for (int4 i = 0; i < pieces.size(); ++i)
+                for (int i = 0; i < pieces.size(); ++i)
                 {
                     Varnode* nodeVn = pieces[i].getVarnode();
                     nodeVn.getHigh().groupWith(pieces[i].getTypeOffset() - baseOffset, high);
@@ -1227,7 +1227,7 @@ namespace Sla.DECCORE
             testCache.updateHigh(high);
             Cover highCover = high.internalCover;    // Only check for intersections with cover contributing to inflate
 
-            for (int4 i = 0; i < ahigh.numInstances(); ++i)
+            for (int i = 0; i < ahigh.numInstances(); ++i)
             {
                 Varnode* b = ahigh.getInstance(i);
                 if (b.copyShadow(a)) continue;     // Intersection with a or shadows of a is allowed
@@ -1240,12 +1240,12 @@ namespace Sla.DECCORE
             if (piece != (VariablePiece*)0)
             {
                 piece.updateIntersections();
-                for (int4 i = 0; i < piece.numIntersection(); ++i)
+                for (int i = 0; i < piece.numIntersection(); ++i)
                 {
                     VariablePiece otherPiece = piece.getIntersection(i);
                     HighVariable* otherHigh = otherPiece.getHigh();
-                    int4 off = otherPiece.getOffset() - piece.getOffset();
-                    for (int4 i = 0; i < otherHigh.numInstances(); ++i)
+                    int off = otherPiece.getOffset() - piece.getOffset();
+                    for (int i = 0; i < otherHigh.numInstances(); ++i)
                     {
                         Varnode* b = otherHigh.getInstance(i);
                         if (b.partialCopyShadow(a, off)) continue; // Intersection with partial shadow of a is allowed
@@ -1269,7 +1269,7 @@ namespace Sla.DECCORE
         {
             testCache.updateHigh(a.getHigh());
             testCache.updateHigh(high);
-            for (int4 i = 0; i < high.numInstances(); ++i)
+            for (int i = 0; i < high.numInstances(); ++i)
             {
                 Varnode* b = high.getInstance(i);
                 a.cover.merge(*b.cover);
@@ -1289,7 +1289,7 @@ namespace Sla.DECCORE
         {
             if (!high.hasCover()) return false;
 
-            for (int4 i = 0; i < tmplist.size(); ++i)
+            for (int i = 0; i < tmplist.size(); ++i)
             {
                 HighVariable* a = tmplist[i];
                 if (testCache.intersection(a, high))
@@ -1314,7 +1314,7 @@ namespace Sla.DECCORE
             Varnode* vn1,*vn2;
             BlockGraph bblocks = data.getBasicBlocks();
 
-            for (int4 i = 0; i < bblocks.getSize(); ++i)
+            for (int i = 0; i < bblocks.getSize(); ++i)
             { // Do merges in linear block order
                 bl = (BlockBasic*)bblocks.getBlock(i);
                 for (iter = bl.beginOp(); iter != bl.endOp(); ++iter)
@@ -1323,7 +1323,7 @@ namespace Sla.DECCORE
                     if (op.code() != opc) continue;
                     vn1 = op.getOut();
                     if (!mergeTestBasic(vn1)) continue;
-                    for (int4 j = 0; j < op.numInput(); ++j)
+                    for (int j = 0; j < op.numInput(); ++j)
                     {
                         vn2 = op.getIn(j);
                         if (!mergeTestBasic(vn2)) continue;
@@ -1418,22 +1418,22 @@ namespace Sla.DECCORE
                         continue;
                     }
                     bounds.clear();
-                    uint4 flags = data.overlapLoc(startiter, bounds);   // Collect maximally overlapping range of Varnodes
-                    int4 max = bounds.size() - 1;           // Index of last iterator
+                    uint flags = data.overlapLoc(startiter, bounds);   // Collect maximally overlapping range of Varnodes
+                    int max = bounds.size() - 1;           // Index of last iterator
                     if ((flags & Varnode::addrtied) != 0)
                     {
                         unifyAddress(startiter, bounds[max]);
-                        for (int4 i = 0; i < max; i += 2)
+                        for (int i = 0; i < max; i += 2)
                         {           // Skip last iterator
                             mergeRangeMust(bounds[i], bounds[i + 1]);
                         }
                         if (max > 2)
                         {
                             Varnode* vn1 = *bounds[0];
-                            for (int4 i = 2; i < max; i += 2)
+                            for (int i = 2; i < max; i += 2)
                             {
                                 Varnode* vn2 = *bounds[i];
-                                int4 off = (int4)(vn2.getOffset() - vn1.getOffset());
+                                int off = (int)(vn2.getOffset() - vn1.getOffset());
                                 vn2.getHigh().groupWith(off, vn1.getHigh());
                             }
                         }
@@ -1467,7 +1467,7 @@ namespace Sla.DECCORE
         ///
         public void groupPartials()
         {
-            for (int4 i = 0; i < protoPartial.size(); ++i)
+            for (int i = 0; i < protoPartial.size(); ++i)
             {
                 PcodeOp* op = protoPartial[i];
                 if (op.isDead()) continue;
@@ -1485,7 +1485,7 @@ namespace Sla.DECCORE
         {
             list<PcodeOp*>::const_iterator oiter;
             PcodeOp* op;
-            int4 i;
+            int i;
             HighVariable* high_in,*high_out;
             Varnode* vn1,*vn2;
             Datatype ct;
@@ -1526,13 +1526,13 @@ namespace Sla.DECCORE
             {
                 List<Varnode*> mergeList;
                 Symbol* symbol = *iter;
-                int4 numEntries = symbol.numEntries();
-                int4 mergeCount = 0;
-                int4 skipCount = 0;
-                int4 conflictCount = 0;
-                for (int4 i = 0; i < numEntries; ++i)
+                int numEntries = symbol.numEntries();
+                int mergeCount = 0;
+                int skipCount = 0;
+                int conflictCount = 0;
+                for (int i = 0; i < numEntries; ++i)
                 {
-                    int4 prevSize = mergeList.size();
+                    int prevSize = mergeList.size();
                     SymbolEntry* entry = symbol.getMapEntry(i);
                     if (entry.getSize() != symbol.getType().getSize())
                         continue;
@@ -1543,7 +1543,7 @@ namespace Sla.DECCORE
                 if (mergeList.empty()) continue;
                 HighVariable* high = mergeList[0].getHigh();
                 testCache.updateHigh(high);
-                for (int4 i = 0; i < mergeList.size(); ++i)
+                for (int i = 0; i < mergeList.size(); ++i)
                 {
                     HighVariable* newHigh = mergeList[i].getHigh();
                     if (newHigh == high) continue;      // Varnodes already merged
@@ -1595,7 +1595,7 @@ namespace Sla.DECCORE
         {
             List<Varnode*> singlelist;
             Varnode* vn1,*vn2;
-            int4 i, j;
+            int i, j;
             bool res = false;
 
             findSingleCopy(high, singlelist); // Find all things copied into this high
@@ -1636,7 +1636,7 @@ namespace Sla.DECCORE
         {
             List<HighVariable*> multiCopy;
 
-            for (int4 i = 0; i < copyTrims.size(); ++i)
+            for (int i = 0; i < copyTrims.size(); ++i)
             {
                 HighVariable* high = copyTrims[i].getOut().getHigh();
                 if (!high.hasCopyIn1())
@@ -1648,7 +1648,7 @@ namespace Sla.DECCORE
                     high.setCopyIn2();
             }
             copyTrims.clear();
-            for (int4 i = 0; i < multiCopy.size(); ++i)
+            for (int i = 0; i < multiCopy.size(); ++i)
             {
                 HighVariable* high = multiCopy[i];
                 if (high.hasCopyIn2())     // If the high has at least 2 COPYs into it
@@ -1671,7 +1671,7 @@ namespace Sla.DECCORE
             HighVariable* h1;
             Varnode* v1,*v2,*v3;
             VariablePiece* p1,*p2,*p3;
-            int4 val;
+            int val;
 
             for (iter = data.beginOpAlive(); iter != data.endOpAlive(); ++iter)
             {
@@ -1750,7 +1750,7 @@ namespace Sla.DECCORE
                         break;
                 }
             }
-            for (int4 i = 0; i < multiCopy.size(); ++i)
+            for (int i = 0; i < multiCopy.size(); ++i)
             {
                 HighVariable* high = multiCopy[i];
                 if (high.hasCopyIn2())

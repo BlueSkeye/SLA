@@ -22,10 +22,10 @@ namespace Sla.EXTRA
             if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function loaded");
             string name;
-            uintb value;
-            uint8 hash;
-            int4 size;
-            uint4 format = 0;
+            ulong value;
+            ulong hash;
+            int size;
+            uint format = 0;
 
             s >> name;      // Parse the format token
             if (name == "hex")

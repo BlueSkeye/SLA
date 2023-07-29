@@ -21,17 +21,17 @@ namespace Sla.DECCORE
         //friend class MemoryPageOverlay;
         //friend class MemoryHashOverlay;
         /// Number of bytes in an aligned word access
-        private int4 wordsize;
+        private int wordsize;
         /// Number of bytes in an aligned page access
-        private int4 pagesize;
+        private int pagesize;
         /// The address space associated with this memory
         private AddrSpace space;
 
         /// Insert a word in memory bank at an aligned location
-        protected abstract void insert(uintb addr, uintb val);
+        protected abstract void insert(ulong addr, ulong val);
 
         /// Retrieve a word from memory bank at an aligned location
-        protected abstract uintb find(uintb addr);
+        protected abstract ulong find(ulong addr);
 
         /// Retrieve data from a memory \e page 
         /// This routine only retrieves data from a single \e page in the memory bank. Bytes need not
@@ -44,26 +44,26 @@ namespace Sla.DECCORE
         /// \param res is a pointer to where fetched data should be written
         /// \param skip is the offset \e into \e the \e page to get the bytes from
         /// \param size is the number of bytes to retrieve
-        protected virtual void getPage(uintb addr, uint1 res, int4 skip, int4 size)
+        protected virtual void getPage(ulong addr, byte res, int skip, int size)
         { // Default implementation just iterates using find
           // but could be optimized
-            uintb ptraddr = addr + skip;
-            uintb endaddr = ptraddr + size;
-            uintb startalign = ptraddr & ~((uintb)(wordsize - 1));
-            uintb endalign = endaddr & ~((uintb)(wordsize - 1));
-            if ((endaddr & ((uintb)(wordsize - 1))) != 0)
+            ulong ptraddr = addr + skip;
+            ulong endaddr = ptraddr + size;
+            ulong startalign = ptraddr & ~((ulong)(wordsize - 1));
+            ulong endalign = endaddr & ~((ulong)(wordsize - 1));
+            if ((endaddr & ((ulong)(wordsize - 1))) != 0)
                 endalign += wordsize;
 
-            uintb curval;
+            ulong curval;
             bool bswap = ((HOST_ENDIAN == 1) != space.isBigEndian());
-            uint1* ptr;
+            byte* ptr;
             do
             {
                 curval = find(startalign);
                 if (bswap)
                     curval = byte_swap(curval, wordsize);
-                ptr = (uint1*)&curval;
-                int4 sz = wordsize;
+                ptr = (byte*)&curval;
+                int sz = wordsize;
                 if (startalign < addr)
                 {
                     ptr += (addr - startalign);
@@ -89,23 +89,23 @@ namespace Sla.DECCORE
         /// \param val is a pointer to the bytes to be written into the page
         /// \param skip is the offset \e into \e the \e page where bytes will be written
         /// \param size is the number of bytes to be written
-        protected virtual void setPage(uintb addr, uint1 val, int4 skip,int4 size)
+        protected virtual void setPage(ulong addr, byte val, int skip,int size)
         {  // Default implementation just iterates using insert
            // but could be optimized
-            uintb ptraddr = addr + skip;
-            uintb endaddr = ptraddr + size;
-            uintb startalign = ptraddr & ~((uintb)(wordsize - 1));
-            uintb endalign = endaddr & ~((uintb)(wordsize - 1));
-            if ((endaddr & ((uintb)(wordsize - 1))) != 0)
+            ulong ptraddr = addr + skip;
+            ulong endaddr = ptraddr + size;
+            ulong startalign = ptraddr & ~((ulong)(wordsize - 1));
+            ulong endalign = endaddr & ~((ulong)(wordsize - 1));
+            if ((endaddr & ((ulong)(wordsize - 1))) != 0)
                 endalign += wordsize;
 
-            uintb curval;
+            ulong curval;
             bool bswap = ((HOST_ENDIAN == 1) != space.isBigEndian());
-            uint1* ptr;
+            byte* ptr;
             do
             {
-                ptr = (uint1*)&curval;
-                int4 sz = wordsize;
+                ptr = (byte*)&curval;
+                int sz = wordsize;
                 if (startalign < addr)
                 {
                     ptr += (addr - startalign);
@@ -119,7 +119,7 @@ namespace Sla.DECCORE
                     memcpy(ptr, val, sz);    // Rest is taken from -val-
                 }
                 else
-                    curval = *((uintb*)val); // -val- supplies entire word
+                    curval = *((ulong*)val); // -val- supplies entire word
                 if (bswap)
                     curval = byte_swap(curval, wordsize);
                 insert(startalign, curval);
@@ -134,7 +134,7 @@ namespace Sla.DECCORE
         /// \param spc is the associated address space
         /// \param ws is the number of bytes in the preferred wordsize
         /// \param ps is the number of bytes in a page
-        public MemoryBank(AddrSpace spc, int4 ws, int4 ps)
+        public MemoryBank(AddrSpace spc, int ws, int ps)
         {
             space = spc;
             wordsize = ws;
@@ -149,13 +149,13 @@ namespace Sla.DECCORE
         /// A MemoryBank is instantiated with a \e natural word size. Requests for arbitrary byte ranges
         /// may be broken down into units of this size.
         /// \return the number of bytes in a \e word.
-        public int4 getWordSize() => wordsize;
+        public int getWordSize() => wordsize;
 
         /// Get the number of bytes in a page for this memory bank
         /// A MemoryBank is instantiated with a \e natural page size. Requests for large chunks of data
         /// may be broken down into units of this size.
         /// \return the number of bytes in a \e page.
-        public int4 getPageSize() => pagesize;
+        public int getPageSize() => pagesize;
 
         /// Get the address space associated with this memory bank
         /// A MemoryBank is a contiguous sequence of bytes associated with a particular address space.
@@ -172,15 +172,15 @@ namespace Sla.DECCORE
         /// \param offset is the start of the byte range to write
         /// \param size is the number of bytes in the range to write
         /// \param val is the value to be written
-        public void setValue(uintb offset, int4 size, uintb val)
+        public void setValue(ulong offset, int size, ulong val)
         {
-            uintb alignmask = (uintb)(wordsize - 1);
-            uintb ind = offset & (~alignmask);
-            int4 skip = offset & alignmask;
-            int4 size1 = wordsize - skip;
-            int4 size2;
-            int4 gap;
-            uintb val1, val2;
+            ulong alignmask = (ulong)(wordsize - 1);
+            ulong ind = offset & (~alignmask);
+            int skip = offset & alignmask;
+            int size1 = wordsize - skip;
+            int size2;
+            int gap;
+            ulong val1, val2;
 
             if (size > size1)
             {       // We have spill over
@@ -215,10 +215,10 @@ namespace Sla.DECCORE
                 }
                 else
                 {
-                    val1 &= (~((uintb)0)) << 8 * size1;
+                    val1 &= (~((ulong)0)) << 8 * size1;
                     val1 |= val >> 8 * size2;
                     insert(ind, val1);
-                    val2 &= (~((uintb)0)) >> 8 * size2;
+                    val2 &= (~((ulong)0)) >> 8 * size2;
                     val2 |= val << gap;
                     insert(ind + wordsize, val2);
                 }
@@ -233,10 +233,10 @@ namespace Sla.DECCORE
                 }
                 else
                 {
-                    val1 &= (~((uintb)0)) >> 8 * size1;
+                    val1 &= (~((ulong)0)) >> 8 * size1;
                     val1 |= val << skip;
                     insert(ind, val1);
-                    val2 &= (~((uintb)0)) << 8 * size2;
+                    val2 &= (~((ulong)0)) << 8 * size2;
                     val2 |= val >> 8 * size1;
                     insert(ind + wordsize, val2);
                 }
@@ -251,17 +251,17 @@ namespace Sla.DECCORE
         /// \param offset is the start of the byte range encoding the value
         /// \param size is the number of bytes in the range
         /// \return the decoded value
-        public uintb getValue(uintb offset, int4 size)
+        public ulong getValue(ulong offset, int size)
         {
-            uintb res;
+            ulong res;
 
-            uintb alignmask = (uintb)(wordsize - 1);
-            uintb ind = offset & (~alignmask);
-            int4 skip = offset & alignmask;
-            int4 size1 = wordsize - skip;
-            int4 size2;
-            int4 gap;
-            uintb val1, val2;
+            ulong alignmask = (ulong)(wordsize - 1);
+            ulong ind = offset & (~alignmask);
+            int skip = offset & alignmask;
+            int size1 = wordsize - skip;
+            int size2;
+            int gap;
+            ulong val1, val2;
             if (size > size1)
             {       // We have spill over
                 size2 = size - size1;
@@ -294,7 +294,7 @@ namespace Sla.DECCORE
                 else
                     res = (val1 >> (skip * 8)) | (val2 << (size1 * 8));
             }
-            res &= (uintb)calc_mask(size);
+            res &= (ulong)calc_mask(size);
             return res;
         }
 
@@ -305,13 +305,13 @@ namespace Sla.DECCORE
         /// \param offset is the start of the byte range to be written
         /// \param size is the number of bytes to write
         /// \param val is a pointer to the sequence of bytes to be written into the bank
-        public void setChunk(uintb offset, int4 size, uint1[] val)
+        public void setChunk(ulong offset, int size, byte[] val)
         {
-            int4 cursize;
-            int4 count;
-            uintb pagemask = (uintb)(pagesize - 1);
-            uintb offalign;
-            int4 skip;
+            int cursize;
+            int count;
+            ulong pagemask = (ulong)(pagesize - 1);
+            ulong offalign;
+            int skip;
 
             count = 0;
             while (count < size)
@@ -340,12 +340,12 @@ namespace Sla.DECCORE
         /// \param offset is the start of the byte range to read
         /// \param size is the number of bytes to read
         /// \param res is a pointer to where the retrieved bytes should be stored
-        public void getChunk(uintb offset, int4 size, uint1[] res)
+        public void getChunk(ulong offset, int size, byte[] res)
         {
-            int4 cursize, count;
-            uintb pagemask = (uintb)(pagesize - 1);
-            uintb offalign;
-            int4 skip;
+            int cursize, count;
+            ulong pagemask = (ulong)(pagesize - 1);
+            ulong offalign;
+            int skip;
 
             count = 0;
             while (count < size)
@@ -374,24 +374,24 @@ namespace Sla.DECCORE
         /// \param size is the number of bytes
         /// \param bigendian is \b true if the bytes are encoded in big endian form
         /// \return the decoded value
-        public static uintb constructValue(uint1[] ptr, int4 size,bool bigendian)
+        public static ulong constructValue(byte[] ptr, int size,bool bigendian)
         {
-            uintb res = 0;
+            ulong res = 0;
 
             if (bigendian)
             {
-                for (int4 i = 0; i < size; ++i)
+                for (int i = 0; i < size; ++i)
                 {
                     res <<= 8;
-                    res += (uintb)ptr[i];
+                    res += (ulong)ptr[i];
                 }
             }
             else
             {
-                for (int4 i = size - 1; i >= 0; --i)
+                for (int i = size - 1; i >= 0; --i)
                 {
                     res <<= 8;
-                    res += (uintb)ptr[i];
+                    res += (ulong)ptr[i];
                 }
             }
             return res;
@@ -404,21 +404,21 @@ namespace Sla.DECCORE
         /// \param val is the value to be encoded
         /// \param size is the number of bytes to encode
         /// \param bigendian is \b true if a big endian encoding is desired
-        public static void deconstructValue(uint1[] ptr, uintb val, int4 size, bool bigendian)
+        public static void deconstructValue(byte[] ptr, ulong val, int size, bool bigendian)
         {
             if (bigendian)
             {
-                for (int4 i = size - 1; i >= 0; --i)
+                for (int i = size - 1; i >= 0; --i)
                 {
-                    ptr[i] = (uint1)(val & 0xff);
+                    ptr[i] = (byte)(val & 0xff);
                     val >>= 8;
                 }
             }
             else
             {
-                for (int4 i = 0; i < size; ++i)
+                for (int i = 0; i < size; ++i)
                 {
-                    ptr[i] = (uint1)(val & 0xff);
+                    ptr[i] = (byte)(val & 0xff);
                     val >>= 8;
                 }
             }

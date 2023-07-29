@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \param typegrp is the factory owning \b this data-type
         private void decode(Decoder decoder, TypeFactory typegrp)
         {
-            //  uint4 elemId = decoder.openElement();
+            //  uint elemId = decoder.openElement();
             decodeBasic(decoder);
             spaceid = decoder.readSpace(ATTRIB_SPACE);
             localframe = Address::decode(decoder);
@@ -71,23 +71,23 @@ namespace Sla.DECCORE
         /// \param sz is the size of offset (as a pointer)
         /// \param point is a "context" reference for the request
         /// \return the referred to Address
-        public Address getAddress(uintb off, int4 sz, Address point)
+        public Address getAddress(ulong off, int sz, Address point)
         {
-            uintb fullEncoding;
+            ulong fullEncoding;
             // Currently a constant off of a global spacebase must be a full pointer encoding
             if (localframe.isInvalid())
                 sz = -1;    // Set size to -1 to guarantee that full encoding recovery isn't launched
             return glb.resolveConstant(spaceid, off, sz, point, fullEncoding);
         }
 
-        public override Datatype getSubType(uintb off, uintb newoff)
+        public override Datatype getSubType(ulong off, ulong newoff)
         {
             Scope* scope = getMap();
             off = AddrSpace::byteToAddress(off, spaceid.getWordSize());    // Convert from byte offset to address unit
                                                                             // It should always be the case that the given offset represents a full encoding of the
                                                                             // pointer, so the point of context is unused and the size is given as -1
             Address nullPoint;
-            uintb fullEncoding;
+            ulong fullEncoding;
             Address addr = glb.resolveConstant(spaceid, off, -1, nullPoint, fullEncoding);
             SymbolEntry* smallest;
 
@@ -104,14 +104,14 @@ namespace Sla.DECCORE
             return smallest.getSymbol().getType();
         }
 
-        public override Datatype nearestArrayedComponentForward(uintb off, uintb newoff, int4 elSize)
+        public override Datatype nearestArrayedComponentForward(ulong off, ulong newoff, int elSize)
         {
             Scope* scope = getMap();
             off = AddrSpace::byteToAddress(off, spaceid.getWordSize());    // Convert from byte offset to address unit
                                                                             // It should always be the case that the given offset represents a full encoding of the
                                                                             // pointer, so the point of context is unused and the size is given as -1
             Address nullPoint;
-            uintb fullEncoding;
+            ulong fullEncoding;
             Address addr = glb.resolveConstant(spaceid, off, -1, nullPoint, fullEncoding);
             SymbolEntry* smallest = scope.queryContainer(addr, 1, nullPoint);
             Address nextAddr;
@@ -123,8 +123,8 @@ namespace Sla.DECCORE
                 symbolType = smallest.getSymbol().getType();
                 if (symbolType.getMetatype() == TYPE_STRUCT)
                 {
-                    uintb structOff = addr.getOffset() - smallest.getAddr().getOffset();
-                    uintb dummyOff;
+                    ulong structOff = addr.getOffset() - smallest.getAddr().getOffset();
+                    ulong dummyOff;
                     Datatype* res = symbolType.nearestArrayedComponentForward(structOff, &dummyOff, elSize);
                     if (res != (Datatype*)0)
                     {
@@ -132,7 +132,7 @@ namespace Sla.DECCORE
                         return symbolType;
                     }
                 }
-                int4 sz = AddrSpace::byteToAddressInt(smallest.getSize(), spaceid.getWordSize());
+                int sz = AddrSpace::byteToAddressInt(smallest.getSize(), spaceid.getWordSize());
                 nextAddr = smallest.getAddr() + sz;
             }
             if (nextAddr < addr)
@@ -149,7 +149,7 @@ namespace Sla.DECCORE
             }
             if (symbolType.getMetatype() == TYPE_STRUCT)
             {
-                uintb dummyOff;
+                ulong dummyOff;
                 Datatype* res = symbolType.nearestArrayedComponentForward(0, &dummyOff, elSize);
                 if (res != (Datatype*)0)
                     return symbolType;
@@ -157,7 +157,7 @@ namespace Sla.DECCORE
             return (Datatype*)0;
         }
 
-        public override Datatype nearestArrayedComponentBackward(uintb off, uintb newoff, int4 elSize)
+        public override Datatype nearestArrayedComponentBackward(ulong off, ulong newoff, int elSize)
         {
             Datatype* subType = getSubType(off, newoff);
             if (subType == (Datatype*)0)
@@ -169,7 +169,7 @@ namespace Sla.DECCORE
             }
             if (subType.getMetatype() == TYPE_STRUCT)
             {
-                uintb dummyOff;
+                ulong dummyOff;
                 Datatype* res = subType.nearestArrayedComponentBackward(*newoff, &dummyOff, elSize);
                 if (res != (Datatype*)0)
                     return subType;
@@ -177,12 +177,12 @@ namespace Sla.DECCORE
             return (Datatype*)0;
         }
 
-        public override int4 compare(Datatype op,int4 level) => compareDependency(op);
+        public override int compare(Datatype op,int level) => compareDependency(op);
 
         // For tree structure
-        public override int4 compareDependency(Datatype op)
+        public override int compareDependency(Datatype op)
         {
-            int4 res = Datatype::compareDependency(op);
+            int res = Datatype::compareDependency(op);
             if (res != 0) return res;
             TypeSpacebase* tsb = (TypeSpacebase*)&op;
             if (spaceid != tsb.spaceid) return (spaceid < tsb.spaceid) ? -1 : 1;

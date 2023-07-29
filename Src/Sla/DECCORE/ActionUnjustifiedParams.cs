@@ -51,11 +51,11 @@ namespace Sla.DECCORE
                         --iter2;
                         vn = *iter2;
                         if (vn.getSpace() != vdata.space) continue;
-                        uintb offset = vn.getOffset() + vn.getSize() - 1; // Last offset in varnode
+                        ulong offset = vn.getOffset() + vn.getSize() - 1; // Last offset in varnode
                         if ((offset >= vdata.offset) && (vn.getOffset() < vdata.offset))
                         { // If there is overlap that extends size
                             overlaps = true;
-                            uintb endpoint = vdata.offset + vdata.size;
+                            ulong endpoint = vdata.offset + vdata.size;
                             vdata.offset = vn.getOffset();
                             vdata.size = endpoint - vdata.offset;
                         }

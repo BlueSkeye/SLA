@@ -38,10 +38,10 @@ namespace Sla.SLACOMP
         private bool contextlock;           ///< If the context layout has been established yet
         private List<string> relpath;     ///< Relative path (to cwd) for each filename
         private List<string> filename;        ///< Stack of current files being parsed
-        private List<int4> lineno;            ///< Current line number for each file in stack
+        private List<int> lineno;            ///< Current line number for each file in stack
         private Dictionary<Constructor, Location> ctorLocationMap;        ///< Map each Constructor to its defining parse location
         private Dictionary<SleighSymbol, Location> symbolLocationMap; ///< Map each symbol to its defining parse location
-        private int4 userop_count;          ///< Number of userops defined
+        private int userop_count;          ///< Number of userops defined
         private bool warnunnecessarypcode;      ///< \b true if we warn of unnecessary ZEXT or SEXT
         private bool warndeadtemps;         ///< \b true if we warn of temporaries that are written but not read
         private bool lenientconflicterrors;     ///< \b true if we ignore most pattern conflict errors
@@ -51,7 +51,7 @@ namespace Sla.SLACOMP
         private bool failinsensitivedups;       ///< \b true if case insensitive register duplicates cause error
         private List<string> noplist;     ///< List of individual NOP warnings
         private /*mutable*/ Location currentLocCache;   ///< Location for (last) request of current location
-        private int4 errors;              ///< Number of fatal errors encountered
+        private int errors;              ///< Number of fatal errors encountered
 
         ///< Get the current file and line number being parsed
         /// The current filename and line number are placed into a Location object
@@ -110,12 +110,12 @@ namespace Sla.SLACOMP
         /// \param sz is the provided number of definitions in the subset
         /// \param numbits is the number of previously allocated context bits
         /// \return the total number of allocated bits (after the new allocations)
-        private int4 calcContextVarLayout(int4 start, int4 sz, int4 numbits)
+        private int calcContextVarLayout(int start, int sz, int numbits)
         {
             VarnodeSymbol* sym = contexttable[start].sym;
             FieldQuality* qual;
-            int4 i, j;
-            int4 maxbits;
+            int i, j;
+            int maxbits;
 
             if ((sym.getSize()) % 4 != 0)
                 reportError(getCurrentLocation(), "Invalid size of context register '" + sym.getName() + "': must be a multiple of 4 bytes");
@@ -125,9 +125,9 @@ namespace Sla.SLACOMP
             {
 
                 qual = contexttable[i + start].qual;
-                int4 min = qual.low;
-                int4 max = qual.high;
-                if ((max - min) > (8 * sizeof(uintm)))
+                int min = qual.low;
+                int max = qual.high;
+                if ((max - min) > (8 * sizeof(uint)))
                     reportError(getCurrentLocation(), "Size of bitfield '" + qual.name + "' larger than 32 bits");
                 if (max > maxbits)
                     reportError(getCurrentLocation(), "Scope of bitfield '" + qual.name + "' extends beyond the size of context register");
@@ -147,20 +147,20 @@ namespace Sla.SLACOMP
                     j = j + 1;
                 }
 
-                int4 alloc = max - min + 1;
-                int4 startword = numbits / (8 * sizeof(uintm));
-                int4 endword = (numbits + alloc - 1) / (8 * sizeof(uintm));
+                int alloc = max - min + 1;
+                int startword = numbits / (8 * sizeof(uint));
+                int endword = (numbits + alloc - 1) / (8 * sizeof(uint));
                 if (startword != endword)
-                    numbits = endword * (8 * sizeof(uintm)); // Bump up to next word
+                    numbits = endword * (8 * sizeof(uint)); // Bump up to next word
 
-                uint4 low = numbits;
+                uint low = numbits;
                 numbits += alloc;
 
                 for (; i < j; ++i)
                 {
                     qual = contexttable[i + start].qual;
-                    uint4 l = qual.low - min + low;
-                    uint4 h = numbits - 1 - (max - qual.high);
+                    uint l = qual.low - min + low;
+                    uint h = numbits - 1 - (max - qual.high);
                     ContextField* field = new ContextField(qual.signext, l, h);
                     addSymbol(new ContextSymbol(qual.name, field, sym, qual.low, qual.high, qual.flow));
                 }
@@ -180,14 +180,14 @@ namespace Sla.SLACOMP
             DecisionProperties props;
             root.buildDecisionTree(props);
 
-            for (int4 i = 0; i < tables.size(); ++i)
+            for (int i = 0; i < tables.size(); ++i)
                 tables[i].buildDecisionTree(props);
 
             List<pair<Constructor, Constructor>> ierrors = props.getIdentErrors();
             if (ierrors.size() != 0)
             {
                 string identMsg = "Constructor has identical pattern to constructor at ";
-                for (int4 i = 0; i < ierrors.size(); ++i)
+                for (int i = 0; i < ierrors.size(); ++i)
                 {
                     errors += 1;
                     Location locA = getLocation(ierrors[i].first);
@@ -201,7 +201,7 @@ namespace Sla.SLACOMP
             if (!lenientconflicterrors && cerrors.size() != 0)
             {
                 string conflictMsg = "Constructor pattern cannot be distinguished from constructor at ";
-                for (int4 i = 0; i < cerrors.size(); ++i)
+                for (int i = 0; i < cerrors.size(); ++i)
                 {
                     errors += 1;
                     Location locA = getLocation(cerrors[i].first);
@@ -229,7 +229,7 @@ namespace Sla.SLACOMP
                 reportError(getLocation(root), msg.str());
                 errors += 1;
             }
-            for (int4 i = 0; i < tables.size(); ++i)
+            for (int i = 0; i < tables.size(); ++i)
             {
                 if (tables[i].isError())
                 {
@@ -304,15 +304,15 @@ namespace Sla.SLACOMP
         /// \param locals is the new given set of offsets
         /// \param operand is the new given set index
         /// \return the set index of an old matching offset or -1
-        private static int4 findCollision(Dictionary<uintb, int4> local2Operand, List<uintb> locals, int operand)
+        private static int findCollision(Dictionary<ulong, int> local2Operand, List<ulong> locals, int operand)
         {
-            for (int4 i = 0; i < locals.size(); ++i)
+            for (int i = 0; i < locals.size(); ++i)
             {
-                pair<map<uintb, int4>::iterator, bool> res;
-                res = local2Operand.insert(pair<uintb, int4>(locals[i], operand));
+                pair<map<ulong, int>::iterator, bool> res;
+                res = local2Operand.insert(pair<ulong, int>(locals[i], operand));
                 if (!res.second)
                 {
-                    int4 oldIndex = (*res.first).second;
+                    int oldIndex = (*res.first).second;
                     if (oldIndex != operand)
                         return oldIndex;
                 }
@@ -339,13 +339,13 @@ namespace Sla.SLACOMP
             if (ct.getNumOperands() < 2)
                 return true;        // Collision can only happen with multiple operands
             bool noCollisions = true;
-            map<uintb, int4> collect;
-            for (int4 i = 0; i < ct.getNumOperands(); ++i)
+            map<ulong, int> collect;
+            for (int i = 0; i < ct.getNumOperands(); ++i)
             {
-                List<uintb> newCollect;
+                List<ulong> newCollect;
                 ct.getOperand(i).collectLocalValues(newCollect);
                 if (newCollect.empty()) continue;
-                int4 collideOperand = findCollision(collect, newCollect, i);
+                int collideOperand = findCollision(collect, newCollect, i);
                 if (collideOperand >= 0)
                 {
                     noCollisions = false;
@@ -368,13 +368,13 @@ namespace Sla.SLACOMP
         /// generate a warning for each colliding Constructor.
         private void checkLocalCollisions()
         {
-            int4 collisionCount = 0;
+            int collisionCount = 0;
             SubtableSymbol* sym = root; // Start with the instruction table
-            int4 i = -1;
+            int i = -1;
             for (; ; )
             {
-                int4 numconst = sym.getNumConstructors();
-                for (int4 j = 0; j < numconst; ++j)
+                int numconst = sym.getNumConstructors();
+                for (int j = 0; j < numconst; ++j)
                 {
                     if (!checkLocalExports(sym.getConstructor(j)))
                         collisionCount += 1;
@@ -402,7 +402,7 @@ namespace Sla.SLACOMP
             {
                 if (warnallnops)
                 {
-                    for (int4 i = 0; i < noplist.size(); ++i)
+                    for (int i = 0; i < noplist.size(); ++i)
                         reportWarning(noplist[i]);
                 }
                 ostringstream msg;
@@ -501,11 +501,11 @@ namespace Sla.SLACOMP
         private SleighSymbol dedupSymbolList(List<SleighSymbol> symlist)
         {
             SleighSymbol* res = (SleighSymbol*)0;
-            for (int4 i = 0; i < symlist.size(); ++i)
+            for (int i = 0; i < symlist.size(); ++i)
             {
                 SleighSymbol* sym = (*symlist)[i];
                 if (sym == (SleighSymbol*)0) continue;
-                for (int4 j = i + 1; j < symlist.size(); ++j)
+                for (int j = i + 1; j < symlist.size(); ++j)
                 {
                     if ((*symlist)[j] == sym)
                     { // Found a duplicate
@@ -537,7 +537,7 @@ namespace Sla.SLACOMP
                 if (op.getOpcode() == MACROBUILD)
                 {
                     MacroBuilder builder(this, newvec, ctpl.numLabels());
-                    int4 index = op.getIn(0).getOffset().getReal();
+                    int index = op.getIn(0).getOffset().getReal();
                     if (index >= macrotable.size())
                         return false;
                     builder.setMacroOp(op);
@@ -571,9 +571,9 @@ namespace Sla.SLACOMP
             List<string> errors;
 
             RtlPair cur = vec.getMainPair();
-            int4 i = -1;
+            int i = -1;
             string sectionstring = "   Main section: ";
-            int4 max = vec.getMaxId();
+            int max = vec.getMaxId();
             for (; ; )
             {
                 string errstring;
@@ -587,9 +587,9 @@ namespace Sla.SLACOMP
                 {
                     if (!expandMacros(cur.section))
                         errors.push_back(sectionstring + "Could not expand macros");
-                    List<int4> check;
+                    List<int> check;
                     big.markSubtableOperands(check);
-                    int4 res = cur.section.fillinBuild(check, getConstantSpace());
+                    int res = cur.section.fillinBuild(check, getConstantSpace());
                     if (res == 1)
                         errors.push_back(sectionstring + "Duplicate BUILD statements");
                     if (res == 2)
@@ -638,7 +638,7 @@ namespace Sla.SLACOMP
                 s << "in ";
                 big.printInfo(s);
                 reportError(getLocation(big), s.str());
-                for (int4 j = 0; j < errors.size(); ++j)
+                for (int j = 0; j < errors.size(); ++j)
                     reportError(getLocation(big), errors[j]);
                 return false;
             }
@@ -656,7 +656,7 @@ namespace Sla.SLACOMP
             VarnodeTpl* vn;
             OpTpl* op;
 
-            for (int4 i = 0; i < ops.size(); ++i)
+            for (int i = 0; i < ops.size(); ++i)
             {
                 op = ops[i];
                 vn = op.getOut();
@@ -665,7 +665,7 @@ namespace Sla.SLACOMP
                     if (vn.getOffset() == offset)
                         return vn;
                 }
-                for (int4 j = 0; j < op.numInput(); ++j)
+                for (int j = 0; j < op.numInput(); ++j)
                 {
                     vn = op.getIn(j);
                     if (vn.isLocalTemp() && (vn.getOffset() == offset))
@@ -707,11 +707,11 @@ namespace Sla.SLACOMP
         ///
         /// \param vn is the given Varnode
         /// \param sa is the number of bits to shift by
-        private static void shiftUniqueVn(VarnodeTpl vn, int4 sa)
+        private static void shiftUniqueVn(VarnodeTpl vn, int sa)
         {
             if (vn.getSpace().isUniqueSpace() && (vn.getOffset().getType() == ConstTpl::real))
             {
-                uintb val = vn.getOffset().getReal();
+                ulong val = vn.getOffset().getReal();
                 val <<= sa;
                 vn.setOffset(val);
             }
@@ -721,12 +721,12 @@ namespace Sla.SLACOMP
         ///
         /// \param op is the given op
         /// \param sa is the number of bits to shift by
-        private static void shiftUniqueOp(OpTpl op, int4 sa)
+        private static void shiftUniqueOp(OpTpl op, int sa)
         {
             VarnodeTpl* outvn = op.getOut();
             if (outvn != (VarnodeTpl*)0)
                 shiftUniqueVn(outvn, sa);
-            for (int4 i = 0; i < op.numInput(); ++i)
+            for (int i = 0; i < op.numInput(); ++i)
                 shiftUniqueVn(op.getIn(i), sa);
         }
 
@@ -734,25 +734,25 @@ namespace Sla.SLACOMP
         ///
         /// \param hand is a handle template whose aspects should be modified
         /// \param sa is the number of bits to shift by
-        private static void shiftUniqueHandle(HandleTpl hand, int4 sa)
+        private static void shiftUniqueHandle(HandleTpl hand, int sa)
         {
             if (hand.getSpace().isUniqueSpace() && (hand.getPtrSpace().getType() == ConstTpl::real)
                 && (hand.getPtrOffset().getType() == ConstTpl::real))
             {
-                uintb val = hand.getPtrOffset().getReal();
+                ulong val = hand.getPtrOffset().getReal();
                 val <<= sa;
                 hand.setPtrOffset(val);
             }
             else if (hand.getPtrSpace().isUniqueSpace() && (hand.getPtrOffset().getType() == ConstTpl::real))
             {
-                uintb val = hand.getPtrOffset().getReal();
+                ulong val = hand.getPtrOffset().getReal();
                 val <<= sa;
                 hand.setPtrOffset(val);
             }
 
             if (hand.getTempSpace().isUniqueSpace() && (hand.getTempOffset().getType() == ConstTpl::real))
             {
-                uintb val = hand.getTempOffset().getReal();
+                ulong val = hand.getTempOffset().getReal();
                 val <<= sa;
                 hand.setTempOffset(val);
             }
@@ -762,13 +762,13 @@ namespace Sla.SLACOMP
         ///
         /// \param tpl is the given p-code section
         /// \param sa is the number of bits to shift by
-        private static void shiftUniqueConstruct(ConstructTpl tpl, int4 sa)
+        private static void shiftUniqueConstruct(ConstructTpl tpl, int sa)
         {
             HandleTpl* result = tpl.getResult();
             if (result != (HandleTpl*)0)
                 shiftUniqueHandle(result, sa);
             List<OpTpl> vec = tpl.getOpvec();
-            for (int4 i = 0; i < vec.size(); ++i)
+            for (int i = 0; i < vec.size(); ++i)
                 shiftUniqueOp(vec[i], sa);
         }
 
@@ -798,20 +798,20 @@ namespace Sla.SLACOMP
             if (unique_allocatemask == 0) return;   // We don't have any crossbuild directives
 
             unique_allocatemask = 0xff; // Provide 8 bits of free space
-            int4 sa = 8;
-            int4 secsize = sections.size(); // This is the upper bound for section numbers
+            int sa = 8;
+            int secsize = sections.size(); // This is the upper bound for section numbers
             SubtableSymbol* sym = root; // Start with the instruction table
-            int4 i = -1;
+            int i = -1;
             for (; ; )
             {
-                int4 numconst = sym.getNumConstructors();
-                for (int4 j = 0; j < numconst; ++j)
+                int numconst = sym.getNumConstructors();
+                for (int j = 0; j < numconst; ++j)
                 {
                     Constructor* ct = sym.getConstructor(j);
                     ConstructTpl* tpl = ct.getTempl();
                     if (tpl != (ConstructTpl*)0)
                         shiftUniqueConstruct(tpl, sa);
-                    for (int4 k = 0; k < secsize; ++k)
+                    for (int k = 0; k < secsize; ++k)
                     {
                         ConstructTpl* namedtpl = ct.getNamedTempl(k);
                         if (namedtpl != (ConstructTpl*)0)
@@ -822,7 +822,7 @@ namespace Sla.SLACOMP
                 if (i >= tables.size()) break;
                 sym = tables[i];
             }
-            uint4 ubase = getUniqueBase(); // We have to adjust the unique base
+            uint ubase = getUniqueBase(); // We have to adjust the unique base
             ubase <<= sa;
             setUniqueBase(ubase);
         }
@@ -853,7 +853,7 @@ namespace Sla.SLACOMP
             buildXrefs(errorPairs);     // Make sure we can build crossrefs properly
             if (!errorPairs.empty())
             {
-                for (int4 i = 0; i < errorPairs.size(); i += 2)
+                for (int i = 0; i < errorPairs.size(); i += 2)
                 {
                     ostringstream s;
                     s << "Duplicate (offset,size) pair for registers: ";
@@ -951,7 +951,7 @@ namespace Sla.SLACOMP
         }
 
         ///< Return the current number of fatal errors
-        public int4 numErrors() => errors;
+        public int numErrors() => errors;
 
         ///< Get the next available temporary register offset
         /// The \e unique space acts as a pool of temporary registers that are drawn as needed.
@@ -959,9 +959,9 @@ namespace Sla.SLACOMP
         /// this method does not make an assumption about the size of the requested temporary Varnode.
         /// It reserves a fixed amount of space and returns its starting offset.
         /// \return the starting offset of the new temporary register
-        public uint4 getUniqueAddr()
+        public uint getUniqueAddr()
         {
-            uint4 base = getUniqueBase();
+            uint base = getUniqueBase();
             setUniqueBase(base + SleighBase::MAX_UNIQUE_SIZE);
             return base;
         }
@@ -1037,8 +1037,8 @@ namespace Sla.SLACOMP
             if (contextlock) return;    // Already locked
             contextlock = true;
 
-            int4 context_offset = 0;
-            int4 begin, sz;
+            int context_offset = 0;
+            int begin, sz;
             stable_sort(contexttable.begin(), contexttable.end());
             begin = 0;
             while (begin < contexttable.size())
@@ -1050,10 +1050,10 @@ namespace Sla.SLACOMP
                 begin += sz;
             }
 
-            //  context_size = (context_offset+8*sizeof(uintm)-1)/(8*sizeof(uintm));
+            //  context_size = (context_offset+8*sizeof(uint)-1)/(8*sizeof(uint));
 
             // Delete the quals
-            for (int4 i = 0; i < contexttable.size(); ++i)
+            for (int i = 0; i < contexttable.size(); ++i)
             {
                 FieldQuality* qual = contexttable[i].qual;
                 delete qual;
@@ -1164,9 +1164,9 @@ namespace Sla.SLACOMP
         /// \param sz is the number of bits in the token
         /// \param endian is the endianness code
         /// \return the new token symbol
-        public TokenSymbol defineToken(string name, uintb sz, int4 endian)
+        public TokenSymbol defineToken(string name, ulong sz, int endian)
         {
-            uint4 size = *sz;
+            uint size = *sz;
             delete sz;
             if ((size & 7) != 0)
             {
@@ -1248,7 +1248,7 @@ namespace Sla.SLACOMP
                 return;
             }
 
-            int4 delay = (qual.type == SpaceQuality::registertype) ? 0 : 1;
+            int delay = (qual.type == SpaceQuality::registertype) ? 0 : 1;
             AddrSpace* spc = new AddrSpace(this, this, IPTR_PROCESSOR, qual.name, qual.size, qual.wordsize, numSpaces(), AddrSpace::hasphysical, delay);
             insertSpace(spc);
             if (qual.isdefault)
@@ -1289,7 +1289,7 @@ namespace Sla.SLACOMP
         /// This \b must be called at the very beginning of the parse.
         /// This method additionally establishes predefined symbols for the specification.
         /// \param end is the endianness value (0=little 1=big)
-        public void setEndian(int4 end)
+        public void setEndian(int end)
         {
             setBigEndian((end == 1));
             predefinedSymbols();        // Set up symbols now that we know endianess
@@ -1298,7 +1298,7 @@ namespace Sla.SLACOMP
         /// \brief Set instruction alignment for the SLEIGH specification
         ///
         /// \param val is the alignment value in bytes. 1 is the default indicating no alignment
-        public void setAlignment(int4 val)
+        public void setAlignment(int val)
         {
             alignment = val;
         }
@@ -1311,11 +1311,11 @@ namespace Sla.SLACOMP
         /// \param off is the starting offset
         /// \param size is the size (in bytes) to allocate for each Varnode
         /// \param names is the list of Varnode names to define
-        public void defineVarnodes(SpaceSymbol spacesym, uintb off, uintb size, List<string> names)
+        public void defineVarnodes(SpaceSymbol spacesym, ulong off, ulong size, List<string> names)
         {
             AddrSpace* spc = spacesym.getSpace();
-            uintb myoff = *off;
-            for (int4 i = 0; i < names.size(); ++i)
+            ulong myoff = *off;
+            for (int i = 0; i < names.size(); ++i)
             {
                 if ((*names)[i] != "_")
                     addSymbol(new VarnodeSymbol((*names)[i], spc, myoff, *size));
@@ -1335,11 +1335,11 @@ namespace Sla.SLACOMP
         /// \param sym is the parent Varnode
         /// \param bitoffset is the (least significant) starting bit of the new Varnode within the parent
         /// \param numb is the number of bits in the new Varnode
-        public void defineBitrange(string name, VarnodeSymbol sym, uint4 bitoffset, uint4 numb)
+        public void defineBitrange(string name, VarnodeSymbol sym, uint bitoffset, uint numb)
         {
             string namecopy = *name;
             delete name;
-            uint4 size = 8 * sym.getSize(); // Number of bits
+            uint size = 8 * sym.getSize(); // Number of bits
             if (numb == 0)
             {
                 reportError(getCurrentLocation(), "'" + namecopy + "': size of bitrange is zero");
@@ -1354,8 +1354,8 @@ namespace Sla.SLACOMP
             {
                 // This can be reduced to an ordinary varnode definition
                 AddrSpace* newspace = sym.getFixedVarnode().space;
-                uintb newoffset = sym.getFixedVarnode().offset;
-                int4 newsize = numb / 8;
+                ulong newoffset = sym.getFixedVarnode().offset;
+                int newsize = numb / 8;
                 if (isBigEndian())
                     newoffset += (size - bitoffset - numb) / 8;
                 else
@@ -1372,7 +1372,7 @@ namespace Sla.SLACOMP
         /// \param names is the list of names
         public void addUserOp(List<string> names)
         {
-            for (int4 i = 0; i < names.size(); ++i)
+            for (int i = 0; i < names.size(); ++i)
             {
                 UserOpSymbol* sym = new UserOpSymbol((*names)[i]);
                 sym.setIndex(userop_count++);
@@ -1387,12 +1387,12 @@ namespace Sla.SLACOMP
         /// value associated with the symbol. Instead it is used to map into this integer list.
         /// \param symlist is the given list of value symbols
         /// \param numlist is the list of integer values to attach
-        public void attachValues(List<SleighSymbol> symlist, List<intb> numlist)
+        public void attachValues(List<SleighSymbol> symlist, List<long> numlist)
         {
             SleighSymbol* dupsym = dedupSymbolList(symlist);
             if (dupsym != (SleighSymbol*)0)
                 reportWarning(getCurrentLocation(), "'attach values' list contains duplicate entries: " + dupsym.getName());
-            for (int4 i = 0; i < symlist.size(); ++i)
+            for (int i = 0; i < symlist.size(); ++i)
             {
                 ValueSymbol* sym = (ValueSymbol*)(*symlist)[i];
                 if (sym == (ValueSymbol*)0) continue;
@@ -1421,7 +1421,7 @@ namespace Sla.SLACOMP
             SleighSymbol* dupsym = dedupSymbolList(symlist);
             if (dupsym != (SleighSymbol*)0)
                 reportWarning(getCurrentLocation(), "'attach names' list contains duplicate entries: " + dupsym.getName());
-            for (int4 i = 0; i < symlist.size(); ++i)
+            for (int i = 0; i < symlist.size(); ++i)
             {
                 ValueSymbol* sym = (ValueSymbol*)(*symlist)[i];
                 if (sym == (ValueSymbol*)0) continue;
@@ -1450,7 +1450,7 @@ namespace Sla.SLACOMP
             SleighSymbol* dupsym = dedupSymbolList(symlist);
             if (dupsym != (SleighSymbol*)0)
                 reportWarning(getCurrentLocation(), "'attach variables' list contains duplicate entries: " + dupsym.getName());
-            for (int4 i = 0; i < symlist.size(); ++i)
+            for (int i = 0; i < symlist.size(); ++i)
             {
                 ValueSymbol* sym = (ValueSymbol*)(*symlist)[i];
                 if (sym == (ValueSymbol*)0) continue;
@@ -1462,8 +1462,8 @@ namespace Sla.SLACOMP
                     msg << "' (range 0.." << patval.maxValue() << ") is wrong size for list (of " << varlist.size() << " entries)";
                     reportError(getCurrentLocation(), msg.str());
                 }
-                int4 sz = 0;
-                for (int4 j = 0; j < varlist.size(); ++j)
+                int sz = 0;
+                for (int j = 0; j < varlist.size(); ++j)
                 {
                     VarnodeSymbol* vsym = (VarnodeSymbol*)(*varlist)[j];
                     if (vsym != (VarnodeSymbol*)0)
@@ -1506,7 +1506,7 @@ namespace Sla.SLACOMP
         /// \param nm is the name of the new operand
         public void newOperand(Constructor ct, string nm)
         {
-            int4 index = ct.getNumOperands();
+            int index = ct.getNumOperands();
             OperandSymbol* sym = new OperandSymbol(*nm, index, ct);
             addSymbol(sym);
             ct.addOperand(sym);
@@ -1566,7 +1566,7 @@ namespace Sla.SLACOMP
         /// \return an (unconstrained) operand pattern
         public PatternEquation defineInvisibleOperand(TripleSymbol sym)
         {
-            int4 index = curct.getNumOperands();
+            int index = curct.getNumOperands();
             OperandSymbol* opsym = new OperandSymbol(sym.getName(), index, curct);
             addSymbol(opsym);
             curct.addInvisibleOperand(opsym);
@@ -1663,7 +1663,7 @@ namespace Sla.SLACOMP
         {
             List<PatternValue> vallist =new List<PatternValue>();
             pe.listValues(vallist);
-            for (uint4 i = 0; i < vallist.size(); ++i)
+            for (uint i = 0; i < vallist.size(); ++i)
             {
                 if (dynamic_cast<EndInstructionValue*>(vallist[i]) != (EndInstructionValue*)0)
                     return false;
@@ -1708,7 +1708,7 @@ namespace Sla.SLACOMP
             addSymbol(curmacro);
             symtab.addScope();      // New scope for the body of the macro definition
             pcode.resetLabelCount();    // Macros have their own labels
-            for (int4 i = 0; i <params.size(); ++i) {
+            for (int i = 0; i <params.size(); ++i) {
                 OperandSymbol* oper = new OperandSymbol((*params)[i], i,(Constructor *)0);
                 addSymbol(oper);
                 curmacro.addOperand(oper);
@@ -1725,13 +1725,13 @@ namespace Sla.SLACOMP
         /// \param param is the list of expressions passed to the macro
         public void compareMacroParams(MacroSymbol sym, List<ExprTree> param)
         {
-            for (uint4 i = 0; i < param.size(); ++i)
+            for (uint i = 0; i < param.size(); ++i)
             {
                 VarnodeTpl* outvn = param[i].getOut();
                 if (outvn == (VarnodeTpl*)0) continue;
                 // Check if an OperandSymbol was passed into this macro
                 if (outvn.getOffset().getType() != ConstTpl::handle) continue;
-                int4 hand = outvn.getOffset().getHandleIndex();
+                int hand = outvn.getOffset().getHandleIndex();
 
                 // The matching operands
                 OperandSymbol* macroop = sym.getOperand(i);
@@ -1879,7 +1879,7 @@ namespace Sla.SLACOMP
             sym.addConstructor(curct);
             symtab.addScope();      // Make a new symbol scope for our constructor
             pcode.resetLabelCount();
-            int4 index = indexer.index(ctorLocationMap[curct].getFilename());
+            int index = indexer.index(ctorLocationMap[curct].getFilename());
             curct.setSrcIndex(index);
             return curct;
         }
@@ -1928,8 +1928,8 @@ namespace Sla.SLACOMP
                 if (noerrors)
                 {       // Attach the sections to the Constructor
                     big.setMainSection(vec.getMainSection());
-                    int4 max = vec.getMaxId();
-                    for (int4 i = 0; i < max; ++i)
+                    int max = vec.getMaxId();
+                    for (int i = 0; i < max; ++i)
                     {
                         ConstructTpl* section = vec.getNamedSection(i);
                         if (section != (ConstructTpl*)0)
@@ -1993,17 +1993,17 @@ namespace Sla.SLACOMP
         {
         }
 
-        public virtual int4 instructionLength(Address baseaddr)
+        public virtual int instructionLength(Address baseaddr)
         {
             return 0;
         }
 
-        public virtual int4 oneInstruction(PcodeEmit emit, Address baseaddr)
+        public virtual int oneInstruction(PcodeEmit emit, Address baseaddr)
         {
             return 0;
         }
 
-        public virtual int4 printAssembly(AssemblyEmit emit, Address baseaddr)
+        public virtual int printAssembly(AssemblyEmit emit, Address baseaddr)
         {
             return 0;
         }
@@ -2046,7 +2046,7 @@ namespace Sla.SLACOMP
         /// \param filein is the given path to the specification file to compile
         /// \param fileout is the path to output file
         /// \return an error code, where 0 indicates that a compiled file was successfully produced
-        public int4 run_compilation(string filein, string fileout)
+        public int run_compilation(string filein, string fileout)
         {
             parseFromNewFile(filein);
             slgh = this;        // Set global pointer up for parser
@@ -2059,7 +2059,7 @@ namespace Sla.SLACOMP
 
             try
             {
-                int4 parseres = sleighparse();  // Try to parse
+                int parseres = sleighparse();  // Try to parse
                 fclose(sleighin);
                 if (parseres == 0)
                     process();  // Do all the post-processing

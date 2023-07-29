@@ -27,12 +27,12 @@ namespace Sla.DECCORE
         ///
         /// Convert expressions involving boolean values b1 and b2:
         ///  - `(b1 << 6) | (b2 << 2)  != 0  =>  b1 || b2
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_OR);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* outVn = op.getOut();
             list<PcodeOp*>::const_iterator iter;
@@ -47,9 +47,9 @@ namespace Sla.DECCORE
                 Varnode* zerovn = baseOp.getIn(1);
                 if (!zerovn.isConstant()) continue;
                 if (zerovn.getOffset() != 0) continue;
-                int4 pos0 = leastsigbit_set(outVn.getNZMask());
-                int4 pos1 = mostsigbit_set(outVn.getNZMask());
-                int4 constRes0, constRes1;
+                int pos0 = leastsigbit_set(outVn.getNZMask());
+                int pos1 = mostsigbit_set(outVn.getNZMask());
+                int constRes0, constRes1;
                 Varnode* b1 = RulePopcountBoolXor::getBooleanResult(outVn, pos0, constRes0);
                 if (b1 == (Varnode*)0 && constRes0 != 1) continue;
                 Varnode* b2 = RulePopcountBoolXor::getBooleanResult(outVn, pos1, constRes1);

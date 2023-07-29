@@ -29,18 +29,18 @@ namespace Sla.DECCORE
         ///  - `sub( concat(V,W), 0)  =>  W`
         ///  - `sub( concat(V,W), c)  =>  V`
         ///  - `sub( concat(V,W), c)  =>  sub(V,c)`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_SUBPIECE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {               // If we append something to a varnode
                         // And then take a subpiece that cuts off what
                         // we just appended, treat whole thing as COPY
             Varnode * base,*vn,*vn1,*vn2;
             PcodeOp* pieceop;
-            int4 offset, outsize;
+            int offset, outsize;
 
             base = op.getIn(0);
             if (!base.isWritten()) return 0;

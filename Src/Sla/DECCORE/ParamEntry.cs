@@ -65,7 +65,7 @@ namespace Sla.DECCORE
         /// Address space containing the range
         private AddrSpace spaceid;
         /// Starting offset of the range
-        private uintb addressbase;
+        private ulong addressbase;
         /// Size of the range in bytes
         private int size;
         /// Minimum bytes allowed for the logical value
@@ -110,7 +110,7 @@ namespace Sla.DECCORE
             }
             joinrec = spaceid.getManager().findJoin(addressbase);
             groupSet.clear();
-            for (int4 i = 0; i < joinrec.numPieces(); ++i)
+            for (int i = 0; i < joinrec.numPieces(); ++i)
             {
                 ParamEntry entry = findEntryByStorage(curList, joinrec.getPiece(i));
                 if (entry != (ParamEntry*)0) {
@@ -135,7 +135,7 @@ namespace Sla.DECCORE
         {
             if (joinrec != (JoinRecord*)0)
                 return;     // Overlaps with join records dealt with in resolveJoin
-            List<int4> overlapSet;
+            List<int> overlapSet;
             list<ParamEntry>::const_iterator iter, enditer;
             Address addr(spaceid, addressbase);
             enditer = curList.end();
@@ -186,10 +186,10 @@ namespace Sla.DECCORE
         /// \return \b true if the group sets associated with each ParamEntry intersect at all
         public bool groupOverlap(ParamEntry op2)
         {
-            int4 i = 0;
-            int4 j = 0;
-            int4 valThis = groupSet[i];
-            int4 valOther = op2.groupSet[j];
+            int i = 0;
+            int j = 0;
+            int valThis = groupSet[i];
+            int valOther = op2.groupSet[j];
             while (valThis != valOther)
             {
                 if (valThis < valOther)
@@ -260,8 +260,8 @@ namespace Sla.DECCORE
         {
             if (spaceid != addr.getSpace()) return false;
             if (addressbase < addr.getOffset()) return false;
-            uintb entryoff = addressbase + size - 1;
-            uintb rangeoff = addr.getOffset() + sz - 1;
+            ulong entryoff = addressbase + size - 1;
+            ulong rangeoff = addr.getOffset() + sz - 1;
             return (entryoff <= rangeoff);
         }
 
@@ -273,15 +273,15 @@ namespace Sla.DECCORE
         /// \return \b true if there is any kind of intersection
         public bool intersects(Address addr, int sz)
         {
-            uintb rangeend;
+            ulong rangeend;
             if (joinrec != (JoinRecord*)0)
             {
                 rangeend = addr.getOffset() + sz - 1;
-                for (int4 i = 0; i < joinrec.numPieces(); ++i)
+                for (int i = 0; i < joinrec.numPieces(); ++i)
                 {
                     VarnodeData vdata = joinrec.getPiece(i);
                     if (addr.getSpace() != vdata.space) continue;
-                    uintb vdataend = vdata.offset + vdata.size - 1;
+                    ulong vdataend = vdata.offset + vdata.size - 1;
                     if (addr.getOffset() < vdata.offset && rangeend < vdataend)
                         continue;
                     if (addr.getOffset() > vdata.offset && rangeend > vdataend)
@@ -291,7 +291,7 @@ namespace Sla.DECCORE
             }
             if (spaceid != addr.getSpace()) return false;
             rangeend = addr.getOffset() + sz - 1;
-            uintb thisend = addressbase + size - 1;
+            ulong thisend = addressbase + size - 1;
             if (addr.getOffset() < addressbase && rangeend < thisend)
                 return false;
             if (addr.getOffset() > addressbase && rangeend > thisend)
@@ -311,11 +311,11 @@ namespace Sla.DECCORE
         {
             if (joinrec != (JoinRecord*)0)
             {
-                int4 res = 0;
-                for (int4 i = joinrec.numPieces() - 1; i >= 0; --i)
+                int res = 0;
+                for (int i = joinrec.numPieces() - 1; i >= 0; --i)
                 { // Move from least significant to most
                     VarnodeData vdata = joinrec.getPiece(i);
-                    int4 cur = vdata.getAddr().justifiedContain(vdata.size, addr, sz, false);
+                    int cur = vdata.getAddr().justifiedContain(vdata.size, addr, sz, false);
                     if (cur < 0)
                         res += vdata.size;  // We skipped this many less significant bytes
                     else
@@ -332,20 +332,20 @@ namespace Sla.DECCORE
                 return entry.justifiedContain(size, addr, sz, ((flags & force_left_justify) != 0));
             }
             if (spaceid != addr.getSpace()) return -1;
-            uintb startaddr = addr.getOffset();
+            ulong startaddr = addr.getOffset();
             if (startaddr < addressbase) return -1;
-            uintb endaddr = startaddr + sz - 1;
+            ulong endaddr = startaddr + sz - 1;
             if (endaddr < startaddr) return -1; // Don't allow wrap around
             if (endaddr > (addressbase + size - 1)) return -1;
             startaddr -= addressbase;
             endaddr -= addressbase;
             if (!isLeftJustified())
             {   // For right justified (big endian), endaddr must be aligned
-                int4 res = (int4)((endaddr + 1) % alignment);
+                int res = (int)((endaddr + 1) % alignment);
                 if (res == 0) return 0;
                 return (alignment - res);
             }
-            return (int4)(startaddr % alignment);
+            return (int)(startaddr % alignment);
         }
 
         /// \brief Calculate the containing memory range
@@ -363,7 +363,7 @@ namespace Sla.DECCORE
             Address endaddr = addr + (sz - 1);
             if (joinrec != (JoinRecord*)0)
             {
-                for (int4 i = joinrec.numPieces() - 1; i >= 0; --i)
+                for (int i = joinrec.numPieces() - 1; i >= 0; --i)
                 { // Move from least significant to most
                     VarnodeData vdata = joinrec.getPiece(i);
                     if ((addr.overlap(0, vdata.getAddr(), vdata.size) >= 0) &&
@@ -386,11 +386,11 @@ namespace Sla.DECCORE
                 res.size = size;
                 return true;
             }
-            uintb al = (addr.getOffset() - addressbase) % alignment;
+            ulong al = (addr.getOffset() - addressbase) % alignment;
             res.space = spaceid;
             res.offset = addr.getOffset() - al;
-            res.size = (int4)(endaddr.getOffset() - res.offset) + 1;
-            int4 al2 = res.size % alignment;
+            res.size = (int)(endaddr.getOffset() - res.offset) + 1;
+            int al2 = res.size % alignment;
             if (al2 != 0)
                 res.size += (alignment - al2); // Bump up size to nearest alignment
             return true;
@@ -410,7 +410,7 @@ namespace Sla.DECCORE
                 Address addr(spaceid, addressbase);
                 return op2.containedBy(addr, size);
             }
-            for (int4 i = 0; i < joinrec.numPieces(); ++i)
+            for (int i = 0; i < joinrec.numPieces(); ++i)
             {
                 VarnodeData vdata = joinrec.getPiece(i);
                 Address addr = vdata.getAddr();
@@ -455,7 +455,7 @@ namespace Sla.DECCORE
             else
             {   // Otherwise take up whole alignment
                 res.space = spaceid;
-                int4 alignAdjust = (addr.getOffset() - addressbase) % alignment;
+                int alignAdjust = (addr.getOffset() - addressbase) % alignment;
                 res.offset = addr.getOffset() - alignAdjust;
                 res.size = alignment;
             }
@@ -479,11 +479,11 @@ namespace Sla.DECCORE
         /// \return the slot index
         public int getSlot(Address addr, int skip)
         {
-            int4 res = groupSet[0];
+            int res = groupSet[0];
             if (alignment != 0)
             {
-                uintb diff = addr.getOffset() + skip - addressbase;
-                int4 baseslot = (int4)diff / alignment;
+                ulong diff = addr.getOffset() + skip - addressbase;
+                int baseslot = (int)diff / alignment;
                 if (isReverseStack())
                     res += (numslots - 1) - baseslot;
                 else
@@ -500,7 +500,7 @@ namespace Sla.DECCORE
         public AddrSpace getSpace() => spaceid;
 
         /// Get the starting offset of \b this entry
-        public uintb getBase() => addressbase;
+        public ulong getBase() => addressbase;
 
         /// \brief Calculate the storage address assigned when allocating a parameter of a given size
         ///
@@ -513,7 +513,7 @@ namespace Sla.DECCORE
         public Address getAddrBySlot(int slot, int sz)
         {
             Address res;            // Start with an invalid result
-            int4 spaceused;
+            int spaceused;
             if (sz < minsize) return res;
             if (alignment == 0)
             {       // If not an aligned entry (allowing multiple slots)
@@ -530,13 +530,13 @@ namespace Sla.DECCORE
             }
             else
             {
-                int4 slotsused = sz / alignment; // How many slots does a -sz- byte object need
+                int slotsused = sz / alignment; // How many slots does a -sz- byte object need
                 if ((sz % alignment) != 0)
                     slotsused += 1;
                 if (slotnum + slotsused > numslots) // Check if there are enough slots left
                     return res;
                 spaceused = slotsused * alignment;
-                int4 index;
+                int index;
                 if (isReverseStack())
                 {
                     index = numslots;
@@ -567,10 +567,10 @@ namespace Sla.DECCORE
             alignment = 0;      // default
             numslots = 1;
 
-            uint4 elemId = decoder.openElement(ELEM_PENTRY);
+            uint elemId = decoder.openElement(ELEM_PENTRY);
             for (; ; )
             {
-                uint4 attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == ATTRIB_MINSIZE)
                 {
@@ -592,7 +592,7 @@ namespace Sla.DECCORE
                     type = string2metatype(decoder.readString());
                 else if (attribId == ATTRIB_EXTENSION)
                 {
-                    flags &= ~((uint4)(smallsize_zext | smallsize_sext | smallsize_inttype));
+                    flags &= ~((uint)(smallsize_zext | smallsize_sext | smallsize_inttype));
                     string ext = decoder.readString();
                     if (ext == "sign")
                         flags |= smallsize_sext;

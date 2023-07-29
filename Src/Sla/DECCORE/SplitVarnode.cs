@@ -33,9 +33,9 @@ namespace Sla.DECCORE
         /// Block in which both \b lo and \b hi are defined
         private BlockBasic defblock;
         /// Value of a double precision constant
-        private uintb val;
+        private ulong val;
         /// Size in bytes of the (virtual) whole
-        private int4 wholesize;
+        private int wholesize;
 
         /// Find whole out of which \b hi and \b lo are split
         /// Look for CPUI_SUBPIECE operations off of a common Varnode.
@@ -223,7 +223,7 @@ namespace Sla.DECCORE
         /// holds the constant value.
         /// \param sz is the size in bytes of the constant
         /// \param v is the constant value
-        public SplitVarnode(int4 sz, uintb v)
+        public SplitVarnode(int sz, ulong v)
         {
             val = v;
             wholesize = sz;
@@ -257,7 +257,7 @@ namespace Sla.DECCORE
         /// (Re)initialize \b this SplitVarnode as a constant
         /// \param sz is the size of the constant in bytes
         /// \param v is the constant value
-        public void initPartial(int4 sz, uintb v)
+        public void initPartial(int sz, ulong v)
         {
             val = v;
             wholesize = sz;
@@ -275,7 +275,7 @@ namespace Sla.DECCORE
         /// \param sz is the size of the logical whole in bytes
         /// \param l is the given (least significant) Varnode piece
         /// \param h is the given (most significant) Varnode piece
-        public void initPartial(int4 sz, Varnode l, Varnode h)
+        public void initPartial(int sz, Varnode l, Varnode h)
         {
             if (h == (Varnode*)0)
             {   // hi is an implied zero
@@ -326,7 +326,7 @@ namespace Sla.DECCORE
                 if (op.code() == CPUI_SUBPIECE)
                 {
                     Varnode* w = op.getIn(0);
-                    if (op.getIn(1).getOffset() != (uintb)(w.getSize() - h.getSize())) return false;
+                    if (op.getIn(1).getOffset() != (ulong)(w.getSize() - h.getSize())) return false;
                     list<PcodeOp*>::const_iterator iter, enditer;
                     iter = w.beginDescend();
                     enditer = w.endDescend();
@@ -376,7 +376,7 @@ namespace Sla.DECCORE
                         Varnode* tmphi = tmpop.getOut();
                         if (!tmphi.isPrecisHi()) continue;
                         if (tmphi.getSize() + l.getSize() != w.getSize()) continue;
-                        if (tmpop.getIn(1).getOffset() != (uintb)l.getSize()) continue;
+                        if (tmpop.getIn(1).getOffset() != (ulong)l.getSize()) continue;
                         // There could conceivably be more than one, but this shouldn't happen with CSE
                         initAll(w, l, tmphi);
                         return true;
@@ -413,7 +413,7 @@ namespace Sla.DECCORE
                 Varnode* tmphi = tmpop.getOut();
                 if (!tmphi.isPrecisHi()) continue;
                 if (tmphi.getSize() + l.getSize() != w.getSize()) continue;
-                if (tmpop.getIn(1).getOffset() != (uintb)l.getSize()) continue;
+                if (tmpop.getIn(1).getOffset() != (ulong)l.getSize()) continue;
                 // There could conceivably be more than one, but this shouldn't happen with CSE
                 initAll(w, l, tmphi);
                 return true;
@@ -495,7 +495,7 @@ namespace Sla.DECCORE
         public bool hasBothPieces() => ((hi!=null)&&(lo!=null));
 
         /// Get the size of \b this SplitVarnode as a whole in bytes
-        public int4 getSize() => wholesize;
+        public int getSize() => wholesize;
 
         /// Get the least significant Varnode piece
         public Varnode getLo() => lo;
@@ -513,7 +513,7 @@ namespace Sla.DECCORE
         public BlockBasic getDefBlock() => defblock;
 
         /// Get the value of \b this, assuming it is a constant
-        public uintb getValue() => val;
+        public ulong getValue() => val;
 
         /// Does a whole Varnode already exist or can it be created before the given PcodeOp
         /// The whole Varnode must be defined or definable \e before the given PcodeOp.
@@ -786,7 +786,7 @@ namespace Sla.DECCORE
         /// \param vn2 is the second given Varnode
         /// \param size1 is the given size to add to \b vn1
         /// \return \b true if the values in \b vn1 and \b vn2 are related by the given size
-        public static bool adjacentOffsets(Varnode vn1, Varnode vn2, uintb size1)
+        public static bool adjacentOffsets(Varnode vn1, Varnode vn2, ulong size1)
         {
             if (vn1.isConstant())
             {
@@ -798,7 +798,7 @@ namespace Sla.DECCORE
             PcodeOp* op2 = vn2.getDef();
             if (op2.code() != CPUI_INT_ADD) return false;
             if (!op2.getIn(1).isConstant()) return false;
-            uintb c2 = op2.getIn(1).getOffset();
+            ulong c2 = op2.getIn(1).getOffset();
 
             if (op2.getIn(0) == vn1)
                 return (size1 == c2);
@@ -807,7 +807,7 @@ namespace Sla.DECCORE
             PcodeOp* op1 = vn1.getDef();
             if (op1.code() != CPUI_INT_ADD) return false;
             if (!op1.getIn(1).isConstant()) return false;
-            uintb c1 = op1.getIn(1).getOffset();
+            ulong c1 = op1.getIn(1).getOffset();
 
             if (op1.getIn(0) != op2.getIn(0)) return false;
             return ((c1 + size1) == c2);
@@ -846,14 +846,14 @@ namespace Sla.DECCORE
             }
             Varnode* firstptr = first.getIn(1);
             if (firstptr.isFree()) return false;
-            int4 sizeres;
+            int sizeres;
             if (first.code() == CPUI_LOAD)
                 sizeres = first.getOut().getSize(); // # of bytes read by lowest address load
             else        // CPUI_STORE
                 sizeres = first.getIn(2).getSize();
 
             // Check if the loads are adjacent to each other
-            return adjacentOffsets(first.getIn(1), second.getIn(1), (uintb)sizeres);
+            return adjacentOffsets(first.getIn(1), second.getIn(1), (ulong)sizeres);
         }
 
         /// \brief Return \b true if the given pieces can be melded into a contiguous storage location
@@ -881,8 +881,8 @@ namespace Sla.DECCORE
             }
             AddrSpace* spc = lo.getSpace();
             if (spc != hi.getSpace()) return false;
-            uintb looffset = lo.getOffset();
-            uintb hioffset = hi.getOffset();
+            ulong looffset = lo.getOffset();
+            ulong hioffset = hi.getOffset();
             if (spc.isBigEndian())
             {
                 if (hioffset >= looffset) return false;
@@ -917,7 +917,7 @@ namespace Sla.DECCORE
 
             iter = basic.whole.beginDescend();
             enditer = basic.whole.endDescend();
-            int4 res = 0;
+            int res = 0;
             while (iter != enditer)
             {
                 PcodeOp* subop = *iter;
@@ -1241,8 +1241,8 @@ namespace Sla.DECCORE
             if (existop.code() != CPUI_MULTIEQUAL)
                 throw new LowlevelError("Trying to create phi-node double precision op with phi-node pieces");
             BlockBasic* bl = existop.getParent();
-            int4 numin = inlist.size();
-            for (int4 i = 0; i < numin; ++i)
+            int numin = inlist.size();
+            for (int i = 0; i < numin; ++i)
                 if (!inlist[i].isWholePhiFeasible(bl.getIn(i)))
                     return (PcodeOp*)0;
             return existop;
@@ -1263,14 +1263,14 @@ namespace Sla.DECCORE
             // Unlike replaceBoolOp, we MUST create a newop even if the output whole already exists
             // because the MULTIEQUAL has a lot of placement constraints on it
             @out.findCreateOutputWhole(data);
-            int4 numin = inlist.size();
-            for (int4 i = 0; i < numin; ++i)
+            int numin = inlist.size();
+            for (int i = 0; i < numin; ++i)
                 inlist[i].findCreateWhole(data);
 
             PcodeOp* newop = data.newOp(numin, existop.getAddr());
             data.opSetOpcode(newop, CPUI_MULTIEQUAL);
             data.opSetOutput(newop, @out.getWhole());
-            for (int4 i = 0; i < numin; ++i)
+            for (int i = 0; i < numin; ++i)
                 data.opSetInput(newop, inlist[i].getWhole(), i);
             data.opInsertBefore(newop, existop);
             @out.buildLoFromWhole(data);
@@ -1321,9 +1321,9 @@ namespace Sla.DECCORE
         /// \param in is the given double precision input
         /// \param data is the function owning the Varnodes
         /// \return a count of the number of transforms applied, 0 or 1
-        public static int4 applyRuleIn(SplitVarnode @in, Funcdata data)
+        public static int applyRuleIn(SplitVarnode @in, Funcdata data)
         {
-            for (int4 i = 0; i < 2; ++i)
+            for (int i = 0; i < 2; ++i)
             {
                 Varnode* vn;
                 vn = (i == 0) ? in.getHi() : in.getLo();

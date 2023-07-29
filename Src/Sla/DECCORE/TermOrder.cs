@@ -65,7 +65,7 @@ namespace Sla.DECCORE
                 multop = multstack.back();
                 opstack.pop_back();
                 multstack.pop_back();
-                for (int4 i = 0; i < curop.numInput(); ++i)
+                for (int i = 0; i < curop.numInput(); ++i)
                 {
                     curvn = curop.getIn(i);    // curvn is a node of the subtree IF
                     if (!curvn.isWritten())

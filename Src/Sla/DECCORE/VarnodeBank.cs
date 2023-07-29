@@ -26,11 +26,11 @@ namespace Sla.DECCORE
         /// Space to allocate unique varnodes from
         private AddrSpace uniq_space;
         /// Base for unique addresses
-        private uintm uniqbase;
+        private uint uniqbase;
         /// Counter for generating unique offsets
-        private uintm uniqid;
+        private uint uniqid;
         /// Number of varnodes created
-        private uint4 create_index;
+        private uint create_index;
         /// Varnodes sorted by location then def
         private VarnodeLocSet loc_tree;
         /// Varnodes sorted by def then location
@@ -97,7 +97,7 @@ namespace Sla.DECCORE
         }
 
         /// Get number of Varnodes \b this contains
-        public int4 numVarnodes() => loc_tree.size();
+        public int numVarnodes() => loc_tree.size();
 
         /// Create a \e free Varnode object
         /// The Varnode is created and inserted into the maps as \e free: not
@@ -106,7 +106,7 @@ namespace Sla.DECCORE
         /// \param m is the starting address
         /// \param ct is the data-type of the new varnode (must not be NULL)
         /// \return the newly allocated Varnode object
-        public Varnode create(int4 s, Address m, Datatype ct)
+        public Varnode create(int s, Address m, Datatype ct)
         {
             Varnode* vn = new Varnode(s, m, ct);
 
@@ -123,7 +123,7 @@ namespace Sla.DECCORE
         /// \param m is the starting address
         /// \param ct is the data-type to associate
         /// \param op is the given PcodeOp
-        public Varnode createDef(int4 s, Address m, Datatype ct, PcodeOp op)
+        public Varnode createDef(int s, Address m, Datatype ct, PcodeOp op)
         {
             Varnode* vn = new Varnode(s, m, ct);
             vn.create_index = create_index++;
@@ -136,7 +136,7 @@ namespace Sla.DECCORE
         /// assigned an offset.  The Varnode is initially \e free.
         /// \param s is the size of the Varnode in bytes
         /// \param ct is the data-type to assign (must not be NULL)
-        public Varnode createUnique(int4 s, Datatype ct)
+        public Varnode createUnique(int s, Datatype ct)
         {
             Address addr(uniq_space, uniqid); // Generate a unique address
             uniqid += s;            // Update counter for next call
@@ -150,7 +150,7 @@ namespace Sla.DECCORE
         /// \param s is the size in bytes
         /// \param ct is the data-type to associate
         /// \param op is the given PcodeOp
-        public Varnode createDefUnique(int4 s, Datatype ct, PcodeOp op)
+        public Varnode createDefUnique(int s, Datatype ct, PcodeOp op)
         { // Create unique varnode as output of op
             Address addr(uniq_space, uniqid);
             uniqid += s;
@@ -249,7 +249,7 @@ namespace Sla.DECCORE
         {
             list<PcodeOp*>::iterator iter, tmpiter;
             PcodeOp* op;
-            int4 i;
+            int i;
 
             iter = oldvn.descend.begin();
             while (iter != oldvn.descend.end())
@@ -274,7 +274,7 @@ namespace Sla.DECCORE
         /// \param pc is the address where it is defined
         /// \param uniq is the sequence number or -1 if not specified
         /// \return the matching Varnode or NULL
-        public Varnode find(int4 s, Address loc, Address pc, uintm uniq = ~((uintm)0))
+        public Varnode find(int s, Address loc, Address pc, uint uniq = ~((uint)0))
         {
             VarnodeLocSet::const_iterator iter;
             Varnode* vn;
@@ -289,7 +289,7 @@ namespace Sla.DECCORE
                 op = vn.getDef();
                 if ((op != (PcodeOp*)0) && (op.getAddr() == pc))
                 {
-                    if ((uniq == ~((uintm)0)) || (op.getTime() == uniq)) return vn;
+                    if ((uniq == ~((uint)0)) || (op.getTime() == uniq)) return vn;
                 }
                 ++iter;
             }
@@ -301,7 +301,7 @@ namespace Sla.DECCORE
         /// \param s is the size
         /// \param loc is the starting address
         /// \return the match Varnode object or NULL
-        public Varnode findInput(int4 s, Address loc)
+        public Varnode findInput(int s, Address loc)
         {
             VarnodeLocSet::const_iterator iter;
             Varnode* vn;
@@ -322,12 +322,12 @@ namespace Sla.DECCORE
         /// \param s is the size of the range
         /// \param loc is the starting address of the range
         /// \return the Varnode object or NULL if no Varnode met the conditions
-        public Varnode findCoveredInput(int4 s, Address loc)
+        public Varnode findCoveredInput(int s, Address loc)
         {
             VarnodeDefSet::const_iterator iter, enditer;
             Varnode* vn;
-            uintb highest = loc.getSpace().getHighest();
-            uintb end = loc.getOffset() + s - 1;
+            ulong highest = loc.getSpace().getHighest();
+            ulong end = loc.getOffset() + s - 1;
 
             iter = beginDef(Varnode::input, loc);
             if (end == highest)
@@ -352,7 +352,7 @@ namespace Sla.DECCORE
         /// as an input to the function. If it exists, it is unique.
         /// \param s is the size of the range
         /// \param loc is the starting address of the range
-        public Varnode findCoveringInput(int4 s, Address loc)
+        public Varnode findCoveringInput(int s, Address loc)
         {
             VarnodeDefSet::const_iterator iter;
             Varnode* vn;
@@ -374,7 +374,7 @@ namespace Sla.DECCORE
         }
 
         /// Get the next creation index to be assigned
-        public uint4 getCreateIndex() => create_index;
+        public uint getCreateIndex() => create_index;
 
         /// Beginning of location list
         public VarnodeLocSet::const_iterator beginLoc() => loc_tree.begin();
@@ -433,7 +433,7 @@ namespace Sla.DECCORE
         /// \param s is the given size
         /// \param addr is the given starting address
         /// \return the beginning iterator
-        public VarnodeLocSet::const_iterator beginLoc(int4 s, Address addr)
+        public VarnodeLocSet::const_iterator beginLoc(int s, Address addr)
         {
             searchvn.size = s;
             searchvn.loc = addr;
@@ -447,7 +447,7 @@ namespace Sla.DECCORE
         /// \param s is the given size
         /// \param addr is the given starting address
         /// \return the ending iterator
-        public VarnodeLocSet::const_iterator endLoc(int4 s, Address addr)
+        public VarnodeLocSet::const_iterator endLoc(int s, Address addr)
         {
             searchvn.size = s + 1;
             searchvn.loc = addr;
@@ -466,7 +466,7 @@ namespace Sla.DECCORE
         /// \param addr is the given starting address
         /// \param fl is the property restriction
         /// \return the beginning iterator
-        public VarnodeLocSet::const_iterator beginLoc(int4 s, Address addr, uint4 fl)
+        public VarnodeLocSet::const_iterator beginLoc(int s, Address addr, uint fl)
         {
             VarnodeLocSet::const_iterator iter;
 
@@ -515,7 +515,7 @@ namespace Sla.DECCORE
         /// \param addr is the given starting address
         /// \param fl is the property restriction
         /// \return the ending iterator
-        public VarnodeLocSet::const_iterator endLoc(int4 s,Address addr, uint4 fl)
+        public VarnodeLocSet::const_iterator endLoc(int s,Address addr, uint fl)
         {
             VarnodeLocSet::const_iterator iter;
             searchvn.loc = addr;
@@ -555,14 +555,14 @@ namespace Sla.DECCORE
         /// \param pc is the address of the PcodeOp defining the Varnode
         /// \param uniq is the sequence number of the PcodeOp or -1 for now sequence number restriction
         /// \return the beginning iterator
-        public VarnodeLocSet::const_iterator beginLoc(int4 s, Address addr, Address pc, uintm uniq)
+        public VarnodeLocSet::const_iterator beginLoc(int s, Address addr, Address pc, uint uniq)
         {               // Find first varnode of given loc and size
                         // defined at a particular location
             VarnodeLocSet::const_iterator iter;
             searchvn.size = s;
             searchvn.loc = addr;
             searchvn.flags = Varnode::written;
-            if (uniq == ~((uintm)0))    // If don't care about uniq
+            if (uniq == ~((uint)0))    // If don't care about uniq
                 uniq = 0;           // find earliest
             SeqNum sq(pc, uniq);
             PcodeOp searchop(0,sq);
@@ -583,13 +583,13 @@ namespace Sla.DECCORE
         /// \param pc is the address of the PcodeOp defining the Varnode
         /// \param uniq is the sequence number of the PcodeOp or -1 for now sequence number restriction
         /// \return the ending iterator
-        public VarnodeLocSet::const_iterator endLoc(int4 s, Address addr, Address pc, uintm uniq)
+        public VarnodeLocSet::const_iterator endLoc(int s, Address addr, Address pc, uint uniq)
         {
             VarnodeLocSet::const_iterator iter;
             searchvn.size = s;
             searchvn.loc = addr;
             searchvn.flags = Varnode::written;
-            //  if (uniq==~((uintm)0))
+            //  if (uniq==~((uint)0))
             //    uniq = 0;
             SeqNum sq(pc, uniq);
             PcodeOp searchop(0,sq);
@@ -610,13 +610,13 @@ namespace Sla.DECCORE
         /// \param iter is an iterator to the given start Varnode
         /// \param bounds holds the array of iterator pairs passed back
         /// \return the union of Varnode flags across the range
-        public uint4 overlapLoc(VarnodeLocSet::const_iterator iter, List<VarnodeLocSet::const_iterator> bounds)
+        public uint overlapLoc(VarnodeLocSet::const_iterator iter, List<VarnodeLocSet::const_iterator> bounds)
         {
             Varnode* vn = *iter;
             AddrSpace* spc = vn.getSpace();
-            uintb off = vn.getOffset();
-            uintb maxOff = off + (vn.getSize() - 1);
-            uint4 flags = vn.getFlags();
+            ulong off = vn.getOffset();
+            ulong maxOff = off + (vn.getSize() - 1);
+            uint flags = vn.getFlags();
             bounds.push_back(iter);
             iter = endLoc(vn.getSize(), vn.getAddr(), Varnode::written);
             bounds.push_back(iter);
@@ -630,7 +630,7 @@ namespace Sla.DECCORE
                     iter = endLoc(vn.getSize(), vn.getAddr(), 0);
                     continue;
                 }
-                uintb endOff = vn.getOffset() + (vn.getSize() - 1);
+                ulong endOff = vn.getOffset() + (vn.getSize() - 1);
                 if (endOff > maxOff)
                     maxOff = endOff;
                 flags |= vn.getFlags();
@@ -657,7 +657,7 @@ namespace Sla.DECCORE
         ///    - 0 for \e free Varnodes
         /// \param fl is the property restriction
         /// \return the beginning iterator
-        public VarnodeDefSet::const_iterator beginDef(uint4 fl)
+        public VarnodeDefSet::const_iterator beginDef(uint fl)
         {
             VarnodeDefSet::const_iterator iter;
 
@@ -695,7 +695,7 @@ namespace Sla.DECCORE
         ///    - 0 for \e free Varnodes
         /// \param fl is the property restriction
         /// \return the ending iterator
-        public VarnodeDefSet::const_iterator endDef(uint4 fl)
+        public VarnodeDefSet::const_iterator endDef(uint fl)
         {
             VarnodeDefSet::const_iterator iter;
 
@@ -735,7 +735,7 @@ namespace Sla.DECCORE
         /// \param fl is the property restriction
         /// \param addr is the given starting address
         /// \return the beginning iterator
-        public VarnodeDefSet::const_iterator beginDef(uint4 fl, Address addr)
+        public VarnodeDefSet::const_iterator beginDef(uint fl, Address addr)
         {               // Get varnodes with addr and with definition type
             VarnodeDefSet::const_iterator iter;
 
@@ -769,7 +769,7 @@ namespace Sla.DECCORE
         /// \param fl is the property restriction
         /// \param addr is the given starting address
         /// \return the ending iterator
-        public VarnodeDefSet::const_iterator endDef(uint4 fl,Address addr)
+        public VarnodeDefSet::const_iterator endDef(uint fl,Address addr)
         {
             VarnodeDefSet::const_iterator iter;
 

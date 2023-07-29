@@ -18,7 +18,7 @@ namespace Sla.DECCORE
         /// An array of \e stacks, indexed by priority
         private List<List<FlowBlock>> queue;
         /// The current highest priority index with active blocks
-        private int4 curdepth;
+        private int curdepth;
         
         public PriorityQueue()
         {
@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// Any basic blocks currently in \b this queue are removed. Space is
         /// reserved for a new set of prioritized stacks.
         /// \param maxdepth is the number of stacks to allocate
-        public void reset(int4 maxdepth)
+        public void reset(int maxdepth)
         {
             if ((curdepth == -1) && (maxdepth == queue.size() - 1)) return; // Already reset
             queue.clear();
@@ -41,7 +41,7 @@ namespace Sla.DECCORE
         /// The block is pushed onto the stack of the given priority.
         /// \param bl is the block being added to the queue
         /// \param depth is the priority to associate with the block
-        public void insert(FlowBlock bl, int4 depth)
+        public void insert(FlowBlock bl, int depth)
         {
             queue[depth].push_back(bl);
             if (depth > curdepth)

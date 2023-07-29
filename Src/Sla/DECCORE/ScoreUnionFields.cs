@@ -43,7 +43,7 @@ namespace Sla.DECCORE
             /// The PcodeOp reading the Varnode (or null)
             private PcodeOp op;
             /// The slot reading the Varnode (or -1)
-            private int4 inslot;
+            private int inslot;
             /// Direction to push fit.  0=down 1=up
             private dir_type direction;
             /// Field can be accessed as an array
@@ -51,7 +51,7 @@ namespace Sla.DECCORE
             /// The putative data-type of the Varnode
             private Datatype fitType;
             /// The original field being scored by \b this trial
-            private int4 scoreIndex;
+            private int scoreIndex;
 
             /// \brief Construct a downward trial for a Varnode
             ///
@@ -60,7 +60,7 @@ namespace Sla.DECCORE
             /// \param ct is the trial data-type to fit
             /// \param index is the scoring index
             /// \param isArray is \b true if the data-type to fit is a pointer to an array
-            public Trial(PcodeOp o, int4 slot, Datatype ct, int4 index, bool isArray)
+            public Trial(PcodeOp o, int slot, Datatype ct, int index, bool isArray)
             {
                 op = o;
                 inslot = slot;
@@ -77,7 +77,7 @@ namespace Sla.DECCORE
             /// \param ct is the trial data-type to fit
             /// \param index is the scoring index
             /// \param isArray is \b true if the data-type to fit is a pointer to an array
-            public Trial(Varnode v, Datatype ct, int4 index, bool isArray)
+            public Trial(Varnode v, Datatype ct, int index, bool isArray)
             {
                 vn = v;
                 op = (PcodeOp*)0;
@@ -95,9 +95,9 @@ namespace Sla.DECCORE
             /// Varnode reached by trial field
             private Varnode vn;
             /// Index of the trial field
-            private int4 index;
+            private int index;
 
-            public VisitMark(Varnode v, int4 i)
+            public VisitMark(Varnode v, int i)
             {
                 vn = v;
                 index = i;
@@ -118,7 +118,7 @@ namespace Sla.DECCORE
         /// The factory containing data-types
         private TypeFactory typegrp;
         /// Score for each field, indexed by fieldNum + 1 (whole union is index=0)
-        private List<int4> scores;
+        private List<int> scores;
         /// Field corresponding to each score
         private List<Datatype> fields;
         /// Places that have already been visited
@@ -130,13 +130,13 @@ namespace Sla.DECCORE
         /// The best result
         private ResolvedUnion result;
         /// Number of trials evaluated so far
-        private int4 trialCount;
+        private int trialCount;
         /// Maximum number of levels to score through
-        private static const int4 maxPasses = 6;
+        private static const int maxPasses = 6;
         /// Threshold of trials over which to cancel additional passes
-        private const int4 threshold = 256;
+        private const int threshold = 256;
         /// Maximum number of trials to evaluate
-        private static const int4 maxTrials = 1024;
+        private static const int maxTrials = 1024;
 
         /// Check if given PcodeOp is operating on array with union elements
         /// If the \b op is adding a constant size or a multiple of a constant size to the given input slot, where the
@@ -144,7 +144,7 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp
         /// \param inslot is given input slot
         /// \return \b true if \b op is doing array arithmetic with elements at least as large as the union
-        private bool testArrayArithmetic(PcodeOp op, int4 inslot)
+        private bool testArrayArithmetic(PcodeOp op, int inslot)
         {
             if (op.code() == CPUI_INT_ADD)
             {
@@ -180,7 +180,7 @@ namespace Sla.DECCORE
         /// \param inslot is -1 if the union is the output, >=0 if the union is an input to the op
         /// \param parent is the parent union or pointer to union
         /// \return \b true if the union should \e not be resolved to a field
-        private bool testSimpleCases(PcodeOp op, int4 inslot, Datatype parent)
+        private bool testSimpleCases(PcodeOp op, int inslot, Datatype parent)
         {
             if (op.isMarker())
                 return true;        // Propagate raw union across MULTIEQUAL and INDIRECT
@@ -206,7 +206,7 @@ namespace Sla.DECCORE
         /// \param ct is the trial data-type
         /// \param lockType is the locked data-type
         /// \return the score
-        private int4 scoreLockedType(Datatype ct, Datatype lockType)
+        private int scoreLockedType(Datatype ct, Datatype lockType)
         {
             int score = 0;
 
@@ -249,7 +249,7 @@ namespace Sla.DECCORE
         /// \param callOp is the CALL
         /// \param paramSlot is the input slot of the trial data-type
         /// \return the score
-        private int4 scoreParameter(Datatype ct, PcodeOp callOp, int4 paramSlot)
+        private int scoreParameter(Datatype ct, PcodeOp callOp, int paramSlot)
         {
             Funcdata fd = callOp.getParent().getFuncdata();
 
@@ -270,7 +270,7 @@ namespace Sla.DECCORE
         /// \param ct is the trial data-type
         /// \param callOp is the CALL
         /// \return the score
-        private int4 scoreReturnType(Datatype ct, PcodeOp callOp)
+        private int scoreReturnType(Datatype ct, PcodeOp callOp)
         {
             Funcdata fd = callOp.getParent().getFuncdata();
 
@@ -294,7 +294,7 @@ namespace Sla.DECCORE
         /// \param vn is the Varnode holding the value being loaded or stored
         /// \param score is used to pass back the score
         /// \return the data-type of the value or null
-        private Datatype derefPointer(Datatype ct, Varnode vn, int4 score)
+        private Datatype derefPointer(Datatype ct, Varnode vn, int score)
         {
             Datatype* resType = (Datatype*)0;
             score = 0;
@@ -303,7 +303,7 @@ namespace Sla.DECCORE
                 Datatype* ptrto = ((TypePointer*)ct).getPtrTo();
                 while (ptrto != (Datatype*)0 && ptrto.getSize() > vn.getSize())
                 {
-                    uintb newoff;
+                    ulong newoff;
                     ptrto = ptrto.getSubType(0, &newoff);
                 }
                 if (ptrto != (Datatype*)0 && ptrto.getSize() == vn.getSize())
@@ -323,7 +323,7 @@ namespace Sla.DECCORE
         /// \param ct is the data-type to associate with the trial
         /// \param scoreIndex is the field index to score the trial against
         /// \param isArray is \b true if the data-type to fit is a pointer to an array
-        private void newTrialsDown(Varnode vn, Datatype ct, int4 scoreIndex, bool isArray)
+        private void newTrialsDown(Varnode vn, Datatype ct, int scoreIndex, bool isArray)
         {
             VisitMark mark(vn, scoreIndex);
             if (!visited.insert(mark).second)
@@ -348,7 +348,7 @@ namespace Sla.DECCORE
         /// \param ct is the data-type to associate with the trial
         /// \param scoreIndex is the field index to score the trial against
         /// \param isArray is \b true if the data-type to fit is a pointer to an array
-        private void newTrials(PcodeOp op, int4 slot, Datatype ct, int4 scoreIndex, bool isArray)
+        private void newTrials(PcodeOp op, int slot, Datatype ct, int scoreIndex, bool isArray)
         {
             Varnode* vn = op.getIn(slot);
             VisitMark mark(vn, scoreIndex);
@@ -364,7 +364,7 @@ namespace Sla.DECCORE
             for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {
                 PcodeOp* readOp = *iter;
-                int4 inslot = readOp.getSlot(vn);
+                int inslot = readOp.getSlot(vn);
                 if (readOp == op && inslot == slot)
                     continue;           // Don't go down PcodeOp we came from
                 trialNext.emplace_back(readOp, inslot, ct, scoreIndex, isArray);
@@ -385,7 +385,7 @@ namespace Sla.DECCORE
                 return;             // Trial doesn't push in this direction
             Datatype* resType = (Datatype*)0;   // Assume by default we don't propagate
             type_metatype meta = trial.fitType.getMetatype();
-            int4 score = 0;
+            int score = 0;
             switch (trial.op.code())
             {
                 case CPUI_COPY:
@@ -517,8 +517,8 @@ namespace Sla.DECCORE
                             if (vn.isConstant())
                             {
                                 TypePointer* baseType = (TypePointer*)trial.fitType;
-                                uintb off = vn.getOffset();
-                                uintb parOff;
+                                ulong off = vn.getOffset();
+                                ulong parOff;
                                 TypePointer* par;
                                 resType = baseType.downChain(off, par, parOff, trial.array, typegrp);
                                 if (resType != (Datatype*)0)
@@ -529,7 +529,7 @@ namespace Sla.DECCORE
                                 if (trial.array)
                                 {
                                     score = 1;
-                                    int4 elSize = 1;
+                                    int elSize = 1;
                                     if (vn.isWritten())
                                     {
                                         PcodeOp* multOp = vn.getDef();
@@ -537,7 +537,7 @@ namespace Sla.DECCORE
                                         {
                                             Varnode* multVn = multOp.getIn(1);
                                             if (multVn.isConstant())
-                                                elSize = (int4)multVn.getOffset();
+                                                elSize = (int)multVn.getOffset();
                                         }
                                     }
                                     TypePointer* baseType = (TypePointer*)trial.fitType;
@@ -690,7 +690,7 @@ namespace Sla.DECCORE
                     break;
                 case CPUI_SUBPIECE:
                     {
-                        int4 offset = TypeOpSubpiece::computeByteOffsetForComposite(trial.op);
+                        int offset = TypeOpSubpiece::computeByteOffsetForComposite(trial.op);
                         resType = scoreTruncation(trial.fitType, trial.op.getOut(), offset, trial.scoreIndex);
                         break;
                     }
@@ -755,7 +755,7 @@ namespace Sla.DECCORE
                 return;     // Nothing to propagate up through
             }
             Datatype* resType = (Datatype*)0;   // Assume by default we don't propagate
-            int4 newslot = 0;
+            int newslot = 0;
             type_metatype meta = trial.fitType.getMetatype();
             PcodeOp* def = trial.vn.getDef();
             switch (def.code())
@@ -950,16 +950,16 @@ namespace Sla.DECCORE
         /// \param offset is the number of bytes truncated off the start of the data-type
         /// \param scoreIndex is the field being scored
         /// \return the data-type to recurse or null
-        private Datatype scoreTruncation(Datatype ct, Varnode vn, int4 offset, int4 scoreIndex)
+        private Datatype scoreTruncation(Datatype ct, Varnode vn, int offset, int scoreIndex)
         {
-            int4 score;
+            int score;
             if (ct.getMetatype() == TYPE_UNION)
             {
                 TypeUnion* unionDt = (TypeUnion*)ct;
                 ct = (Datatype*)0;          // Don't recurse a data-type from truncation of a union
                 score = -10;            // Negative score if the union has no field matching the size
-                int4 num = unionDt.numDepend();
-                for (int4 i = 0; i < num; ++i)
+                int num = unionDt.numDepend();
+                for (int i = 0; i < num; ++i)
                 {
                     TypeField field = unionDt.getField(i);
                     if (field.offset == offset && field.type.getSize() == vn.getSize())
@@ -973,7 +973,7 @@ namespace Sla.DECCORE
             }
             else
             {
-                uintb off = offset;
+                ulong off = offset;
                 score = 10;     // If we can find a size match for the truncation
                 while (ct != (Datatype*)0 && (off != 0 || ct.getSize() != vn.getSize()))
                 {
@@ -1000,10 +1000,10 @@ namespace Sla.DECCORE
         /// \param trial is the trial of the constant Varnode
         private void scoreConstantFit(Trial trial)
         {
-            int4 size = trial.vn.getSize();
-            uintb val = trial.vn.getOffset();
+            int size = trial.vn.getSize();
+            ulong val = trial.vn.getOffset();
             type_metatype meta = trial.fitType.getMetatype();
-            int4 score = 0;
+            int score = 0;
             if (meta == TYPE_BOOL)
             {
                 score = (size == 1 && val < 2) ? 2 : -2;
@@ -1013,7 +1013,7 @@ namespace Sla.DECCORE
                 score = -1;
                 FloatFormat format = typegrp.getArch().translate.getFloatFormat(size);
                 if (format != (FloatFormat*)0) {
-                    int4 exp = format.extractExponentCode(val);
+                    int exp = format.extractExponentCode(val);
                     if (exp < 7 && exp > -4)        // Check for common exponent range
                         score = 2;
                 }
@@ -1071,9 +1071,9 @@ namespace Sla.DECCORE
         /// Assuming scoring is complete, compute the best index
         private void computeBestIndex()
         {
-            int4 bestScore = scores[0];
-            int4 bestIndex = 0;
-            for (int4 i = 1; i < scores.size(); ++i)
+            int bestScore = scores[0];
+            int bestIndex = 0;
+            for (int i = 1; i < scores.size(); ++i)
             {
                 if (scores[i] > bestScore)
                 {
@@ -1092,7 +1092,7 @@ namespace Sla.DECCORE
         private void run()
         {
             trialCount = 0;
-            for (int4 pass = 0; pass < maxPasses; ++pass)
+            for (int pass = 0; pass < maxPasses; ++pass)
             {
                 if (trialCurrent.empty())
                     break;
@@ -1117,14 +1117,14 @@ namespace Sla.DECCORE
         /// \param parentType is the given data-type to score
         /// \param op is PcodeOp of the given data-flow edge
         /// \param slot is slot of the given data-flow edge
-        public ScoreUnionFields(TypeFactory tgrp, Datatype parentType, PcodeOp op, int4 slot)
+        public ScoreUnionFields(TypeFactory tgrp, Datatype parentType, PcodeOp op, int slot)
         {
             typegrp = tgrp;
             result = new ResolvedUnion(parentType);
             if (testSimpleCases(op, slot, parentType))
                 return;
-            int4 wordSize = (parentType.getMetatype() == TYPE_PTR) ? ((TypePointer*)parentType).getWordSize() : 0;
-            int4 numFields = result.baseType.numDepend();
+            int wordSize = (parentType.getMetatype() == TYPE_PTR) ? ((TypePointer*)parentType).getWordSize() : 0;
+            int numFields = result.baseType.numDepend();
             scores.resize(numFields + 1, 0);
             fields.resize(numFields + 1, (Datatype*)0);
             Varnode* vn;
@@ -1146,7 +1146,7 @@ namespace Sla.DECCORE
             }
             fields[0] = parentType;
             visited.insert(VisitMark(vn, 0));
-            for (int4 i = 0; i < numFields; ++i)
+            for (int i = 0; i < numFields; ++i)
             {
                 Datatype* fieldType = result.baseType.getDepend(i);
                 bool isArray = false;
@@ -1184,7 +1184,7 @@ namespace Sla.DECCORE
         /// \param unionType is the data-type to score, which must be a TypeUnion
         /// \param offset is the given starting offset of the truncation
         /// \param op is the SUBPIECE op
-        public ScoreUnionFields(TypeFactory tgrp, TypeUnion unionType, int4 offset, PcodeOp op)
+        public ScoreUnionFields(TypeFactory tgrp, TypeUnion unionType, int offset, PcodeOp op)
         {
             typegrp = tgrp;
             result = new ResolvedUnion(unionType);
@@ -1194,7 +1194,7 @@ namespace Sla.DECCORE
             fields.resize(numFields + 1, (Datatype*)0);
             fields[0] = unionType;
             scores[0] = -10;
-            for (int4 i = 0; i < numFields; ++i)
+            for (int i = 0; i < numFields; ++i)
             {
                 TypeField unionField = unionType.getField(i);
                 fields[i + 1] = unionField.type;
@@ -1220,7 +1220,7 @@ namespace Sla.DECCORE
         /// \param offset is the given starting offset of the truncation
         /// \param op is the PcodeOp initially reading/writing the union
         /// \param slot is the -1 if the op is writing, >= 0 if reading
-        public ScoreUnionFields(TypeFactory tgrp, TypeUnion unionType, int4 offset, PcodeOp op, int4 slot)
+        public ScoreUnionFields(TypeFactory tgrp, TypeUnion unionType, int offset, PcodeOp op, int slot)
         {
             typegrp = tgrp;
             result = new ResolvedUnion(unionType);
@@ -1230,7 +1230,7 @@ namespace Sla.DECCORE
             fields.resize(numFields + 1, (Datatype*)0);
             fields[0] = unionType;
             scores[0] = -10;        // Assume the untruncated entire union is not a good fit
-            for (int4 i = 0; i < numFields; ++i)
+            for (int i = 0; i < numFields; ++i)
             {
                 TypeField unionField = unionType.getField(i);
                 fields[i + 1] = unionField.type;

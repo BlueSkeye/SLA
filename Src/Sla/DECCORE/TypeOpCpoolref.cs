@@ -27,8 +27,8 @@ namespace Sla.DECCORE
         // Never needs casting
         public override Datatype getOutputLocal(PcodeOp op)
         {
-            List<uintb> refs;
-            for (int4 i = 1; i < op.numInput(); ++i)
+            List<ulong> refs;
+            for (int i = 1; i < op.numInput(); ++i)
                 refs.push_back(op.getIn(i).getOffset());
             CPoolRecord* rec = cpool.getRecord(refs);
             if (rec == (CPoolRecord*)0)
@@ -38,12 +38,12 @@ namespace Sla.DECCORE
             return rec.getType();
         }
 
-        public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
+        public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
             return (Datatype*)0;
         }
 
-        public override Datatype getInputLocal(PcodeOp op, int4 slot)
+        public override Datatype getInputLocal(PcodeOp op, int slot)
         {
             return tlst.getBase(op.getIn(slot).getSize(), TYPE_INT);
         }
@@ -61,15 +61,15 @@ namespace Sla.DECCORE
                 s << " = ";
             }
             s << getOperatorName(op);
-            List<uintb> refs;
-            for (int4 i = 1; i < op.numInput(); ++i)
+            List<ulong> refs;
+            for (int i = 1; i < op.numInput(); ++i)
                 refs.push_back(op.getIn(i).getOffset());
             CPoolRecord* rec = cpool.getRecord(refs);
             if (rec != (CPoolRecord*)0)
                 s << '_' << rec.getToken();
             s << '(';
             Varnode::printRaw(s, op.getIn(0));
-            for (int4 i = 2; i < op.numInput(); ++i)
+            for (int i = 2; i < op.numInput(); ++i)
             {
                 s << ',';
                 Varnode::printRaw(s, op.getIn(i));

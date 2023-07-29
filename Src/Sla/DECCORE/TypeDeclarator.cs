@@ -17,7 +17,7 @@ namespace Sla.DECCORE
         private Datatype basetype;
         private string ident;           // variable identifier associated with type
         private string model;           // name of model associated with function pointer
-        private uint4 flags;            // Specifiers qualifiers
+        private uint flags;            // Specifiers qualifiers
         
         public TypeDeclarator()
         {
@@ -34,13 +34,13 @@ namespace Sla.DECCORE
     
         ~TypeDeclarator()
         {
-            for (uint4 i = 0; i < mods.size(); ++i)
+            for (uint i = 0; i < mods.size(); ++i)
                 delete mods[i];
         }
 
         private Datatype getBaseType() => basetype;
 
-        private int4 numModifiers() => mods.size();
+        private int numModifiers() => mods.size();
 
         private string getIdentifier() => ident;
 
@@ -85,7 +85,7 @@ namespace Sla.DECCORE
             return true;
         }
 
-        private bool hasProperty(uint4 mask) => ((flags & mask) != 0);
+        private bool hasProperty(uint mask) => ((flags & mask) != 0);
 
         private Datatype buildType(Architecture glb)
         { // Apply modifications to the basetype, (in reverse order of binding)
@@ -105,7 +105,7 @@ namespace Sla.DECCORE
             if (basetype == (Datatype*)0)
                 return false;       // No basetype
 
-            int4 count = 0;
+            int count = 0;
             if ((flags & CParse::f_typedef) != 0)
                 count += 1;
             if ((flags & CParse::f_extern) != 0)
@@ -129,7 +129,7 @@ namespace Sla.DECCORE
             if (count > 1)
                 throw ParseError("Multiple type qualifiers");
 
-            for (uint4 i = 0; i < mods.size(); ++i)
+            for (uint i = 0; i < mods.size(); ++i)
             {
                 if (!mods[i].isValid())
                     return false;

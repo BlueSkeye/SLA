@@ -31,23 +31,23 @@ namespace Sla.DECCORE
             stringval = 0x106,
         }
         
-        private uint4 type;
+        private uint type;
 
         private struct /*union*/ tokenvalue
         {
-            internal uintb integer;
+            internal ulong integer;
             internal string stringval;
         }
 
         private tokenvalue value;
-        private int4 lineno;            // Line number containing this token
-        private int4 colno;         // Column where this token starts
-        private int4 filenum;           // Which file were we in
+        private int lineno;            // Line number containing this token
+        private int colno;         // Column where this token starts
+        private int filenum;           // Which file were we in
 
-        private void set(uint4 tp);
-        private void set(uint4 tp, char ptr, int4 len);
+        private void set(uint tp);
+        private void set(uint tp, char ptr, int len);
 
-        private void setPosition(int4 file, int4 line, int4 col)
+        private void setPosition(int file, int line, int col)
         {
             filenum = file;
             lineno = line;
@@ -56,16 +56,16 @@ namespace Sla.DECCORE
     
         public GrammarToken();
 
-        public uint4 getType() => type;
+        public uint getType() => type;
 
-        public uintb getInteger() => value.integer;
+        public ulong getInteger() => value.integer;
 
         public string getString() => value.stringval;
 
-        public int4 getLineNo() => lineno;
+        public int getLineNo() => lineno;
 
-        public int4 getColNo() => colno;
+        public int getColNo() => colno;
 
-        public int4 getFileNum() => filenum;
+        public int getFileNum() => filenum;
     }
 }

@@ -13,11 +13,11 @@ namespace Sla.EXTRA
     internal class ConstraintVarConst : UnifyConstraint
     {
         // Create a new varnode constant
-        private int4 varindex;
+        private int varindex;
         private RHSConstant expr;
         private RHSConstant exprsz;
         
-        public ConstraintVarConst(int4 ind, RHSConstant ex, RHSConstant sz)
+        public ConstraintVarConst(int ind, RHSConstant ex, RHSConstant sz)
         {
             varindex = ind;
             maxnum = ind;
@@ -46,13 +46,13 @@ namespace Sla.EXTRA
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
-            uintb ourconst = expr.getConstant(state);
+            ulong ourconst = expr.getConstant(state);
             Funcdata* fd = state.getFunction();
-            int4 sz;
+            int sz;
             if (exprsz != (RHSConstant*)0)
-                sz = (int4)exprsz.getConstant(state);
+                sz = (int)exprsz.getConstant(state);
             else
-                sz = (int4)sizeof(uintb);
+                sz = (int)sizeof(ulong);
             ourconst &= calc_mask(sz);
             Varnode* vn = fd.newConstant(sz, ourconst);
             state.data(varindex).setVarnode(vn);
@@ -64,7 +64,7 @@ namespace Sla.EXTRA
             typelist[varindex] = UnifyDatatype(UnifyDatatype::var_type);
         }
 
-        public override int4 getBaseIndex() => varindex;
+        public override int getBaseIndex() => varindex;
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
@@ -73,7 +73,7 @@ namespace Sla.EXTRA
             if (exprsz != (RHSConstant*)0)
                 exprsz.writeExpression(s, printstate);
             else
-                s << dec << (int4)sizeof(uintb);
+                s << dec << (int)sizeof(ulong);
             s << ',';
             expr.writeExpression(s, printstate);
             s << " & calc_mask(";

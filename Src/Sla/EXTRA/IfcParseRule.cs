@@ -37,7 +37,7 @@ namespace Sla.EXTRA
     *status.optr << "Parsing aborted on error" << endl;
     return;
   }
-  int4 opparam;
+  int opparam;
   List<OpCode> opcodelist;
   opparam = ruler.postProcessRule(opcodelist);
   UnifyCPrinter cprinter;

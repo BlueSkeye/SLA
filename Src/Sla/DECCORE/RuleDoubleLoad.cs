@@ -31,7 +31,7 @@ namespace Sla.DECCORE
         {
             PcodeOp* loadlo,*loadhi;    // Load from lowest address, highest (NOT significance)
             AddrSpace* spc;
-            int4 size;
+            int size;
 
             Varnode* piece0 = op.getIn(0);
             Varnode* piece1 = op.getIn(1);

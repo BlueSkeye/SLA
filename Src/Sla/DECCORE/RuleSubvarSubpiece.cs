@@ -24,18 +24,18 @@ namespace Sla.DECCORE
 
         /// \class RuleSubvarSubpiece
         /// \brief Perform SubVariableFlow analysis triggered by SUBPIECE
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_SUBPIECE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn = op.getIn(0);
             Varnode* outvn = op.getOut();
-            int4 flowsize = outvn.getSize();
-            uintb mask = calc_mask(flowsize);
-            mask <<= 8 * ((int4)op.getIn(1).getOffset());
+            int flowsize = outvn.getSize();
+            ulong mask = calc_mask(flowsize);
+            mask <<= 8 * ((int)op.getIn(1).getOffset());
             bool aggressive = outvn.isPtrFlow();
             if (!aggressive)
             {

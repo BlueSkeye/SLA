@@ -90,7 +90,7 @@ namespace Sla.DECCORE
             mods |= hide_thisparam;     // turn on hiding of 'this' parameter
         }
 
-        protected override void printUnicode(TextWriter s, int4 onechar)
+        protected override void printUnicode(TextWriter s, int onechar)
         {
             if (unicodeNeedsEscape(onechar))
             {
@@ -172,7 +172,7 @@ namespace Sla.DECCORE
         /// \param noident is \b true if no identifier will be pushed with this declaration
         protected override void pushTypeStart(Datatype ct,bool noident)
         {
-            int4 arrayCount = 0;
+            int arrayCount = 0;
             for (; ; )
             {
                 if (ct.getMetatype() == TYPE_PTR)
@@ -197,7 +197,7 @@ namespace Sla.DECCORE
                 tok = &type_expr_space;
 
             pushOp(tok, (PcodeOp*)0);
-            for (int4 i = 0; i < arrayCount; ++i)
+            for (int i = 0; i < arrayCount; ++i)
                 pushOp(&subscript, (PcodeOp*)0);
 
             if (ct.getName().size() == 0)
@@ -210,7 +210,7 @@ namespace Sla.DECCORE
             {
                 pushAtom(Atom(ct.getDisplayName(), typetoken, EmitMarkup::type_color, ct));
             }
-            for (int4 i = 0; i < arrayCount; ++i)
+            for (int i = 0; i < arrayCount; ++i)
                 pushAtom(Atom(EMPTY_STRING, blanktoken, EmitMarkup::no_color));     // Fill in the blank array index
         }
 
@@ -229,7 +229,7 @@ namespace Sla.DECCORE
 
         public override void opLoad(PcodeOp op)
         {
-            uint4 m = mods | print_load_value;
+            uint m = mods | print_load_value;
             bool printArrayRef = needZeroArray(op.getIn(1));
             if (printArrayRef)
                 pushOp(&subscript, op);
@@ -240,7 +240,7 @@ namespace Sla.DECCORE
 
         public override void opStore(PcodeOp op)
         {
-            uint4 m = mods | print_store_value; // Inform sub-tree that we are storing
+            uint m = mods | print_store_value; // Inform sub-tree that we are storing
             pushOp(&assignment, op);    // This is an assignment
             if (needZeroArray(op.getIn(1)))
             {
@@ -265,17 +265,17 @@ namespace Sla.DECCORE
             FuncCallSpecs* fc = fd.getCallSpecs(op);
             if (fc == (FuncCallSpecs*)0)
                 throw new LowlevelError("Missing indirect function callspec");
-            int4 skip = getHiddenThisSlot(op, fc);
-            int4 count = op.numInput() - 1;
+            int skip = getHiddenThisSlot(op, fc);
+            int count = op.numInput() - 1;
             count -= (skip < 0) ? 0 : 1;
             if (count > 1)
             {   // Multiple parameters
                 pushVn(op.getIn(0), op, mods);
-                for (int4 i = 0; i < count - 1; ++i)
+                for (int i = 0; i < count - 1; ++i)
                     pushOp(&comma, op);
                 // implied vn's pushed on in reverse order for efficiency
                 // see PrintLanguage::pushVnImplied
-                for (int4 i = op.numInput() - 1; i >= 1; --i)
+                for (int i = op.numInput() - 1; i >= 1; --i)
                 {
                     if (i == skip) continue;
                     pushVn(op.getIn(i), op, mods);
@@ -300,8 +300,8 @@ namespace Sla.DECCORE
         {
             Varnode* outvn = op.getOut();
             Varnode* vn0 = op.getIn(0);
-            List<uintb> refs;
-            for (int4 i = 1; i < op.numInput(); ++i)
+            List<ulong> refs;
+            for (int i = 1; i < op.numInput(); ++i)
                 refs.push_back(op.getIn(i).getOffset());
             CPoolRecord* rec = glb.cpool.getRecord(refs);
             if (rec == (CPoolRecord*)0) {
@@ -314,7 +314,7 @@ namespace Sla.DECCORE
                     case CPoolRecord::string_literal:
                         {
                             ostringstream str;
-                            int4 len = rec.getByteDataLength();
+                            int len = rec.getByteDataLength();
                             if (len > 2048)
                                 len = 2048;
                             str << '\"';

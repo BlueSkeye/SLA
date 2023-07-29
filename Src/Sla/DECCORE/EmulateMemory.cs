@@ -26,35 +26,35 @@ namespace Sla.DECCORE
 
         protected override void executeUnary()
         {
-            uintb in1 = memstate.getValue(currentOp.getInput(0));
-            uintb @out = currentBehave.evaluateUnary(currentOp.getOutput().size,
+            ulong in1 = memstate.getValue(currentOp.getInput(0));
+            ulong @out = currentBehave.evaluateUnary(currentOp.getOutput().size,
                 currentOp.getInput(0).size, in1);
             memstate.setValue(currentOp.getOutput(), @out);
         }
 
         protected override void executeBinary()
         {
-            uintb in1 = memstate.getValue(currentOp.getInput(0));
-            uintb in2 = memstate.getValue(currentOp.getInput(1));
-            uintb @out = currentBehave.evaluateBinary(currentOp.getOutput().size,
+            ulong in1 = memstate.getValue(currentOp.getInput(0));
+            ulong in2 = memstate.getValue(currentOp.getInput(1));
+            ulong @out = currentBehave.evaluateBinary(currentOp.getOutput().size,
                 currentOp.getInput(0).size, in1, in2);
             memstate.setValue(currentOp.getOutput(), @out);
         }
 
         protected override void executeLoad()
         {
-            uintb off = memstate.getValue(currentOp.getInput(1));
+            ulong off = memstate.getValue(currentOp.getInput(1));
             AddrSpace* spc = currentOp.getInput(0).getSpaceFromConst();
 
             off = AddrSpace::addressToByte(off, spc.getWordSize());
-            uintb res = memstate.getValue(spc, off, currentOp.getOutput().size);
+            ulong res = memstate.getValue(spc, off, currentOp.getOutput().size);
             memstate.setValue(currentOp.getOutput(), res);
         }
 
         protected override void executeStore()
         {
-            uintb val = memstate.getValue(currentOp.getInput(2)); // Value being stored
-            uintb off = memstate.getValue(currentOp.getInput(1)); // Offset to store at
+            ulong val = memstate.getValue(currentOp.getInput(2)); // Value being stored
+            ulong off = memstate.getValue(currentOp.getInput(1)); // Offset to store at
             AddrSpace* spc = currentOp.getInput(0).getSpaceFromConst(); // Space to store in
 
             off = AddrSpace::addressToByte(off, spc.getWordSize());
@@ -68,13 +68,13 @@ namespace Sla.DECCORE
 
         protected override bool executeCbranch()
         {
-            uintb cond = memstate.getValue(currentOp.getInput(1));
+            ulong cond = memstate.getValue(currentOp.getInput(1));
             return (cond != 0);
         }
 
         protected override void executeBranchind()
         {
-            uintb off = memstate.getValue(currentOp.getInput(0));
+            ulong off = memstate.getValue(currentOp.getInput(0));
             setExecuteAddress(Address(currentOp.getAddr().getSpace(), off));
         }
 
@@ -85,7 +85,7 @@ namespace Sla.DECCORE
 
         protected override void executeCallind()
         {
-            uintb off = memstate.getValue(currentOp.getInput(0));
+            ulong off = memstate.getValue(currentOp.getInput(0));
             setExecuteAddress(Address(currentOp.getAddr().getSpace(), off));
         }
 

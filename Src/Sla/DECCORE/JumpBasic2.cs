@@ -78,8 +78,8 @@ namespace Sla.DECCORE
             origPathMeld.set(pMeld);
         }
 
-        public override bool recoverModel(Funcdata fd, PcodeOp indop, uint4 matchsize,
-            uint4 maxtablesize)
+        public override bool recoverModel(Funcdata fd, PcodeOp indop, uint matchsize,
+            uint maxtablesize)
         { // Try to recover a jumptable using the second model
           // Basically there is a guard on the main switch variable,
           // Along one path, an intermediate value is set to a default constant.
@@ -90,7 +90,7 @@ namespace Sla.DECCORE
             // We piggy back on the partial calculation from the basic model to see if we have the MULTIEQUAL
             Varnode* othervn = (Varnode*)0;
             PcodeOp* copyop = (PcodeOp*)0;
-            uintb extravalue = 0;
+            ulong extravalue = 0;
             Varnode* joinvn = extravn;  // extravn should be set to as far back as model 1 could trace
             if (joinvn == (Varnode*)0) return false;
             if (!joinvn.isWritten()) return false;
@@ -98,7 +98,7 @@ namespace Sla.DECCORE
             if (multiop.code() != CPUI_MULTIEQUAL) return false;
             if (multiop.numInput() != 2) return false; // Must be exactly 2 paths
                                                         // Search for a constant along one of the paths
-            int4 path;
+            int path;
             for (path = 0; path < 2; ++path)
             {
                 Varnode* vn = multiop.getIn(path);
@@ -114,7 +114,7 @@ namespace Sla.DECCORE
             }
             if (path == 2) return false;
             BlockBasic* rootbl = (BlockBasic*)multiop.getParent().getIn(1 - path);
-            int4 pathout = multiop.getParent().getInRevIndex(1 - path);
+            int pathout = multiop.getParent().getInRevIndex(1 - path);
             JumpValuesRangeDefault* jdef = new JumpValuesRangeDefault();
             jrange = jdef;
             jdef.setExtraValue(extravalue);
@@ -132,7 +132,7 @@ namespace Sla.DECCORE
             return true;
         }
 
-        public override void findUnnormalized(uint4 maxaddsub, uint4 maxleftright, uint4 maxext)
+        public override void findUnnormalized(uint maxaddsub, uint maxleftright, uint maxext)
         {
             normalvn = pathMeld.getVarnode(varnodeIndex);   // Normalized switch variable
             if (checkNormalDominance())

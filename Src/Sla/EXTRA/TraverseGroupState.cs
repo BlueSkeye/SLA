@@ -10,10 +10,10 @@ namespace Sla.EXTRA
     internal class TraverseGroupState : TraverseConstraint
     {
         private List<TraverseConstraint> traverselist = new List<TraverseConstraint>();
-        private int4 currentconstraint;
-        private int4 state;
+        private int currentconstraint;
+        private int state;
         
-        public TraverseGroupState(int4 i)
+        public TraverseGroupState(int i)
             : base(i)
         {
         }
@@ -23,18 +23,18 @@ namespace Sla.EXTRA
             traverselist.push_back(tc);
         }
 
-        public TraverseConstraint getSubTraverse(int4 slot) => traverselist[slot];
+        public TraverseConstraint getSubTraverse(int slot) => traverselist[slot];
 
-        public int4 getCurrentIndex() => currentconstraint;
+        public int getCurrentIndex() => currentconstraint;
 
-        public void setCurrentIndex(int4 val)
+        public void setCurrentIndex(int val)
         {
             currentconstraint = val;
         }
 
-        public int4 getState() => state;
+        public int getState() => state;
 
-        public void setState(int4 val)
+        public void setState(int val)
         {
             state = val;
         }

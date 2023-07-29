@@ -28,7 +28,7 @@ namespace Sla.DECCORE
             while (curVn.isWritten())
             {
                 PcodeOp* curOp = curVn.getDef();
-                uint4 evalType = curOp.getEvalType();
+                uint evalType = curOp.getEvalType();
                 if ((evalType & (PcodeOp::binary | PcodeOp::ternary)) != 0)
                 {
                     if (curOp.numInput() > 1)
@@ -53,7 +53,7 @@ namespace Sla.DECCORE
             }
             if (!curVn.isConstant()) return;
             // If we reach here, there is exactly one path, from a constant to a switch
-            for (int4 i = 0; i < indirects.size(); ++i)
+            for (int i = 0; i < indirects.size(); ++i)
             {
                 indirects[i].setNoIndirectCollapse();
             }
@@ -65,7 +65,7 @@ namespace Sla.DECCORE
         private static void protectSwitchPaths(Funcdata data)
         {
             BlockGraph bblocks = data.getBasicBlocks();
-            for (int4 i = 0; i < bblocks.getSize(); ++i)
+            for (int i = 0; i < bblocks.getSize(); ++i)
             {
                 PcodeOp* op = bblocks.getBlock(i).lastOp();
                 if (op == (PcodeOp*)0) continue;

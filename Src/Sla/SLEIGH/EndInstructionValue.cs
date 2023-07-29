@@ -16,18 +16,18 @@ namespace Sla.SLEIGH
         {
         }
 
-        public override intb getValue(ParserWalker walker)
+        public override long getValue(ParserWalker walker)
         {
-            return (intb)AddrSpace::byteToAddress(walker.getNaddr().getOffset(), walker.getNaddr().getSpace().getWordSize());
+            return (long)AddrSpace::byteToAddress(walker.getNaddr().getOffset(), walker.getNaddr().getSpace().getWordSize());
         }
 
         public override TokenPattern genMinPattern(List<TokenPattern> ops) => new TokenPattern();
 
-        public override TokenPattern genPattern(intb val) => new TokenPattern();
+        public override TokenPattern genPattern(long val) => new TokenPattern();
 
-        public override intb minValue() => (intb)0;
+        public override long minValue() => (long)0;
 
-        public override intb maxValue() => (intb)0;
+        public override long maxValue() => (long)0;
 
         public override void saveXml(TextWriter s) 
         {

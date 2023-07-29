@@ -32,7 +32,7 @@ namespace Sla.DECCORE
             else
                 op = fd.newOp(isize, addr);
             fd.opSetOpcode(op, opc);
-            int4 i = 0;
+            int i = 0;
             if (op.isCodeRef())
             { // Is the first input parameter a code reference
                 Address addrcode(vars[0].space, vars[0].offset);

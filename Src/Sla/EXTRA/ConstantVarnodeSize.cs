@@ -11,24 +11,24 @@ namespace Sla.EXTRA
     internal class ConstantVarnodeSize : RHSConstant
     {
         // A varnode's size as an actual constant
-        private int4 varindex;
+        private int varindex;
         
-        public ConstantVarnodeSize(int4 ind)
+        public ConstantVarnodeSize(int ind)
         {
             varindex = ind;
         }
         
         public override RHSConstant clone() => new ConstantVarnodeSize(varindex);
 
-        public override uintb getConstant(UnifyState state)
+        public override ulong getConstant(UnifyState state)
         {
             Varnode* vn = state.data(varindex).getVarnode();
-            return (uintb)vn.getSize();    // The size is the actual value
+            return (ulong)vn.getSize();    // The size is the actual value
         }
 
         public override void writeExpression(TextWriter s, UnifyCPrinter printstate)
         {
-            s << "(uintb)" << printstate.getName(varindex) << ".getSize()";
+            s << "(ulong)" << printstate.getName(varindex) << ".getSize()";
         }
     }
 }

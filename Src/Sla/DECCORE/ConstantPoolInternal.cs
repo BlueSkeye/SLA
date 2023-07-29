@@ -25,9 +25,9 @@ namespace Sla.DECCORE
         internal class CheapSorter
         {
             /// The first integer in a \e reference
-            public uintb a;
+            public ulong a;
             /// The second integer in a \e reference (or zero)
-            public uintb b;
+            public ulong b;
 
             /// Construct a zero reference
             public CheapSorter()
@@ -44,7 +44,7 @@ namespace Sla.DECCORE
             }
 
             /// Construct from an array of integers
-            public CheapSorter(List<uintb> refs)
+            public CheapSorter(List<ulong> refs)
             {
                 a = refs[0];
                 b = (refs.Count > 1) ? refs[1] : 0;
@@ -60,7 +60,7 @@ namespace Sla.DECCORE
 
             /// \brief Convert the reference back to a formal array of integers
             /// \param refs is the provided container of integers
-            public void apply(List<uintb> refs)
+            public void apply(List<ulong> refs)
             {
                 refs.Add(a);
                 refs.Add(b);
@@ -91,7 +91,7 @@ namespace Sla.DECCORE
         private Dictionary<CheapSorter, CPoolRecord> cpoolMap =
             new Dictionary<CheapSorter, CPoolRecord>();
 
-        private override CPoolRecord createRecord(List<uintb> refs)
+        private override CPoolRecord createRecord(List<ulong> refs)
         {
             CheapSorter sorter(refs);
             pair<map<CheapSorter, CPoolRecord>::iterator, bool> res;
@@ -101,7 +101,7 @@ namespace Sla.DECCORE
             return &(*res.first).second;
         }
 
-        public override CPoolRecord getRecord(List<uintb> refs)
+        public override CPoolRecord getRecord(List<ulong> refs)
         {
             CheapSorter sorter(refs);
             map<CheapSorter, CPoolRecord>::const_iterator iter = cpoolMap.find(sorter);
@@ -131,12 +131,12 @@ namespace Sla.DECCORE
 
         public override void decode(Decoder decoder, TypeFactory typegrp)
         {
-            uint4 elemId = decoder.openElement(ELEM_CONSTANTPOOL);
+            uint elemId = decoder.openElement(ELEM_CONSTANTPOOL);
             while (decoder.peekElement() != 0)
             {
                 CheapSorter sorter;
                 sorter.decode(decoder);
-                List<uintb> refs;
+                List<ulong> refs;
                 sorter.apply(refs);
                 CPoolRecord* newrec = createRecord(refs);
                 newrec.decode(decoder, typegrp);

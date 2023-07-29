@@ -24,18 +24,18 @@ namespace Sla.DECCORE
 
         /// \class RuleZextSless
         /// \brief Transform INT_ZEXT and INT_SLESS:  `zext(V) s< c  =>  V < c`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_SLESS);
             oplist.push_back(CPUI_INT_SLESSEQUAL);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             PcodeOp* zext;
             Varnode* vn1,*vn2;
-            int4 smallsize, zextslot, otherslot;
-            uintb val;
+            int smallsize, zextslot, otherslot;
+            ulong val;
 
             vn1 = op.getIn(0);
             vn2 = op.getIn(1);

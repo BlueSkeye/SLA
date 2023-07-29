@@ -18,7 +18,7 @@ namespace Sla.DECCORE
         /// The function being emulated
         private Funcdata fd;
         /// Light-weight memory state based on Varnodes
-        private Dictionary<Varnode, uintb> varnodeMap;
+        private Dictionary<Varnode, ulong> varnodeMap;
         /// Set to \b true if the emulator collects individual LOAD addresses
         private bool collectloads;
         /// The set of collected LOAD records
@@ -28,10 +28,10 @@ namespace Sla.DECCORE
         {
             if (collectloads)
             {
-                uintb off = getVarnodeValue(currentOp.getIn(1));
+                ulong off = getVarnodeValue(currentOp.getIn(1));
                 AddrSpace* spc = currentOp.getIn(0).getSpaceFromConst();
                 off = AddrSpace::addressToByte(off, spc.getWordSize());
-                int4 sz = currentOp.getOut().getSize();
+                int sz = currentOp.getOut().getSize();
                 loadpoints.push_back(LoadTable(Address(spc, off), sz));
             }
             EmulatePcodeOp::executeLoad();
@@ -95,14 +95,14 @@ namespace Sla.DECCORE
             currentBehave = currentOp.getOpcode().getBehavior();
         }
 
-        public override uintb getVarnodeValue(Varnode vn)
+        public override ulong getVarnodeValue(Varnode vn)
         {
             // Get the value of a Varnode which is in a syntax tree
             // We can't just use the memory location as, within the tree,
             // this is just part of the label
             if (vn.isConstant())
                 return vn.getOffset();
-            map<Varnode*, uintb>::const_iterator iter;
+            map<Varnode*, ulong>::const_iterator iter;
             iter = varnodeMap.find(vn);
             if (iter != varnodeMap.end())
                 return (*iter).second;  // We have seen this varnode before
@@ -110,7 +110,7 @@ namespace Sla.DECCORE
             return getLoadImageValue(vn.getSpace(), vn.getOffset(), vn.getSize());
         }
 
-        public override void setVarnodeValue(Varnode vn, uintb val)
+        public override void setVarnodeValue(Varnode vn, ulong val)
         {
             varnodeMap[vn] = val;
         }
@@ -124,14 +124,14 @@ namespace Sla.DECCORE
         /// \param startop is the starting PcodeOp within the path set
         /// \param startvn is the Varnode holding the starting value
         /// \return the calculated value at the common end-point
-        public uintb emulatePath(uintb val, PathMeld pathMeld, PcodeOp startop, Varnode startvn)
+        public ulong emulatePath(ulong val, PathMeld pathMeld, PcodeOp startop, Varnode startvn)
         {
-            uint4 i;
+            uint i;
             for (i = 0; i < pathMeld.numOps(); ++i)
                 if (pathMeld.getOp(i) == startop) break;
             if (startop.code() == CPUI_MULTIEQUAL)
             { // If we start on a MULTIEQUAL
-                int4 j;
+                int j;
                 for (j = 0; j < startop.numInput(); ++j)
                 { // Is our startvn one of the branches
                     if (startop.getIn(j) == startvn)

@@ -11,9 +11,9 @@ namespace Sla.EXTRA
 {
     internal class DummyVarnodeConstraint : UnifyConstraint
     {
-        private int4 varindex;
+        private int varindex;
         
-        public DummyVarnodeConstraint(int4 ind)
+        public DummyVarnodeConstraint(int ind)
         {
             maxnum = varindex = ind;
         }
@@ -27,7 +27,7 @@ namespace Sla.EXTRA
             typelist[varindex] = UnifyDatatype(UnifyDatatype::var_type);
         }
 
-        public override int4 getBaseIndex() => varindex;
+        public override int getBaseIndex() => varindex;
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {

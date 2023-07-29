@@ -49,7 +49,7 @@ namespace Sla.SLEIGH
 
         public override void print(TextWriter s, ParserWalker walker)
         {
-            intb val = (intb)walker.getDestAddr().getOffset();
+            long val = (long)walker.getDestAddr().getOffset();
             s << "0x" << hex << val;
         }
 

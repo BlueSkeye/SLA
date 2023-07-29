@@ -46,7 +46,7 @@ namespace Sla.DECCORE
         public void setMemoryBank(MemoryBank bank)
         {
             AddrSpace spc = bank.getSpace();
-            int4 index = spc.getIndex();
+            int index = spc.getIndex();
 
             while (index >= memspace.size())
                 memspace.push_back((MemoryBank*)0);
@@ -61,7 +61,7 @@ namespace Sla.DECCORE
         /// \return a pointer to the MemoryBank or \b null if no bank is associated with \e spc.
         public MemoryBank getMemoryBank(AddrSpace spc)
         {
-            int4 index = spc.getIndex();
+            int index = spc.getIndex();
             if (index >= memspace.size())
                 return (MemoryBank*)0;
             return memspace[index];
@@ -75,7 +75,7 @@ namespace Sla.DECCORE
         /// \param off is the offset where the value should be written
         /// \param size is the number of bytes to be written
         /// \param cval is the value to be written
-        public void setValue(AddrSpace spc, uintb off, int4 size, uintb cval)
+        public void setValue(AddrSpace spc, ulong off, int size, ulong cval)
         {
             MemoryBank* mspace = getMemoryBank(spc);
             if (mspace == (MemoryBank*)0)
@@ -91,7 +91,7 @@ namespace Sla.DECCORE
         /// \param off is the offset of the value being queried
         /// \param size is the number of bytes to query
         /// \return the queried value
-        public uintb getValue(AddrSpace spc, uintb off, int4 size)
+        public ulong getValue(AddrSpace spc, ulong off, int size)
         {
             if (spc.getType() == IPTR_CONSTANT) return off;
             MemoryBank* mspace = getMemoryBank(spc);
@@ -107,7 +107,7 @@ namespace Sla.DECCORE
         /// passed to the main setValue routine.
         /// \param nm is the name of the register
         /// \param cval is the value to write to the register
-        public void setValue(string nm,uintb cval)
+        public void setValue(string nm,ulong cval)
         {
             // Set a "register" value
             VarnodeData vdata = trans.getRegister(nm);
@@ -121,7 +121,7 @@ namespace Sla.DECCORE
         /// passed to the main getValue routine.
         /// \param nm is the name of the register
         /// \return the value associated with that register
-        public uintb getValue(string nm)
+        public ulong getValue(string nm)
         {
             // Get a "register" value
             VarnodeData vdata = trans.getRegister(nm);
@@ -133,7 +133,7 @@ namespace Sla.DECCORE
         /// breaking out the components
         /// \param vn is a pointer to the varnode to be written
         /// \param cval is the value to write into the varnode
-        public void setValue(VarnodeData vn, uintb cval)
+        public void setValue(VarnodeData vn, ulong cval)
         {
             setValue(vn.space, vn.offset, vn.size, cval);
         }
@@ -143,7 +143,7 @@ namespace Sla.DECCORE
         /// than querying for the offset and space
         /// \param vn is a pointer to the varnode to be read
         /// \return the value read from the varnode
-        public uintb getValue(VarnodeData vn) => getValue(vn.space, vn.offset, vn.size);
+        public ulong getValue(VarnodeData vn) => getValue(vn.space, vn.offset, vn.size);
 
         /// Get a chunk of data from memory state
         /// This is the main interface for reading a range of bytes from the MemorySate.
@@ -154,7 +154,7 @@ namespace Sla.DECCORE
         /// \param spc is the desired address space
         /// \param off is the starting offset of the byte range being queried
         /// \param size is the number of bytes being queried
-        public void getChunk(uint1[] res, AddrSpace spc, uintb off, int4 size)
+        public void getChunk(byte[] res, AddrSpace spc, ulong off, int size)
         {
             MemoryBank* mspace = getMemoryBank(spc);
             if (mspace == (MemoryBank*)0)
@@ -171,7 +171,7 @@ namespace Sla.DECCORE
         /// \param spc is the address space being written
         /// \param off is the starting offset of the range being written
         /// \param size is the number of bytes to write
-        public void setChunk(uint1[] val, AddrSpace spc,uintb off, int4 size)
+        public void setChunk(byte[] val, AddrSpace spc,ulong off, int size)
         {
             MemoryBank* mspace = getMemoryBank(spc);
             if (mspace == (MemoryBank*)0)

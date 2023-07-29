@@ -24,17 +24,17 @@ namespace Sla.DECCORE
 
         /// \class RuleConcatZero
         /// \brief Simplify concatenation with zero:  `concat(V,0)  =>  zext(V) << c`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_PIECE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (!op.getIn(1).isConstant()) return 0;
             if (op.getIn(1).getOffset() != 0) return 0;
 
-            int4 sa = 8 * op.getIn(1).getSize();
+            int sa = 8 * op.getIn(1).getSize();
             Varnode* highvn = op.getIn(0);
             PcodeOp* newop = data.newOp(1, op.getAddr());
             Varnode* outvn = data.newUniqueOut(op.getOut().getSize(), newop);

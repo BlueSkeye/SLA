@@ -14,7 +14,7 @@ namespace Sla.EXTRA
         public override UnifyConstraint clone()
         {
             ConstraintOr* res = new ConstraintOr();
-            for (int4 i = 0; i < constraintlist.size(); ++i)
+            for (int i = 0; i < constraintlist.size(); ++i)
             {
                 UnifyConstraint* subconst = constraintlist[i].clone();
                 res.constraintlist.push_back(subconst);
@@ -32,7 +32,7 @@ namespace Sla.EXTRA
         public override bool step(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            int4 stateind = traverse.getState();
+            int stateind = traverse.getState();
             UnifyConstraint* cur;
             if (stateind == -1)
             { // First time through
@@ -61,7 +61,7 @@ namespace Sla.EXTRA
             TraverseCountState* trav = new TraverseCountState(uniqid);
             state.registerTraverseConstraint(trav);
 
-            for (int4 i = 0; i < constraintlist.size(); ++i)
+            for (int i = 0; i < constraintlist.size(); ++i)
             {
                 UnifyConstraint* subconstraint = constraintlist[i];
                 subconstraint.buildTraverseState(state);
@@ -69,15 +69,15 @@ namespace Sla.EXTRA
         }
 
         // Does not have a base
-        public override int4 getBaseIndex() => -1;
+        public override int getBaseIndex() => -1;
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
             s << "for(i" << dec << printstate.getDepth() << "=0;i" << printstate.getDepth() << '<';
-            s << (int4)constraintlist.size() << ";++i" << printstate.getDepth() << ") {" << endl;
+            s << (int)constraintlist.size() << ";++i" << printstate.getDepth() << ") {" << endl;
             printstate.incDepth();  // permanent increase in depth
-            for (int4 i = 0; i < constraintlist.size(); ++i)
+            for (int i = 0; i < constraintlist.size(); ++i)
             {
                 printstate.printIndent(s);
                 if (i != 0)
@@ -85,7 +85,7 @@ namespace Sla.EXTRA
                 if (i != constraintlist.size() - 1)
                     s << "if (i" << printstate.getDepth() - 1 << " == " << dec << i << ") ";
                 s << '{' << endl;
-                int4 olddepth = printstate.getDepth();
+                int olddepth = printstate.getDepth();
                 printstate.incDepth();
                 constraintlist[i].print(s, printstate);
                 printstate.popDepth(s, olddepth);

@@ -27,14 +27,14 @@ namespace Sla.DECCORE
         ///
         /// `V = (a ^ b) ^ a => V = b`
         /// `V = a ^ (b ^ a) => V = b`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_XOR);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            for (int4 i = 0; i < 2; ++i)
+            for (int i = 0; i < 2; ++i)
             {
                 Varnode* vn = op.getIn(i);
                 if (!vn.isWritten()) continue;

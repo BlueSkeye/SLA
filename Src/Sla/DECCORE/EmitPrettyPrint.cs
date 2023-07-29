@@ -26,20 +26,20 @@ namespace Sla.DECCORE
     internal class EmitPrettyPrint : Emit
     {
 #if PRETTY_DEBUG
-        private List<int4> checkid;
+        private List<int> checkid;
 #endif
         /// The low-level emitter
         private Emit lowlevel;
         /// Space available for currently active nesting levels
-        private List<int4> indentstack;
+        private List<int> indentstack;
         /// Space remaining in current line
-        private int4 spaceremain;
+        private int spaceremain;
         /// Maximum number of characters allowed in a line
-        private int4 maxlinesize;
+        private int maxlinesize;
         /// # of characters committed from the current line
-        private int4 leftotal;
+        private int leftotal;
         /// # of characters yet to be committed from the current line
-        private int4 rightotal;
+        private int rightotal;
         /// \b true if break needed before next token
         private bool needbreak;
         /// \b true if in the middle of a comment
@@ -47,7 +47,7 @@ namespace Sla.DECCORE
         /// Used to fill comments if line breaks are forced
         private string commentfill;
         /// References to current \e open and \e whitespace tokens
-        private circularqueue<int4> scanqueue;
+        private circularqueue<int> scanqueue;
         /// The full stream of tokens
         private circularqueue<TokenSplit> tokqueue;
 
@@ -60,12 +60,12 @@ namespace Sla.DECCORE
         /// recalculated.
         private void expand()
         {
-            int4 max = tokqueue.getMax();
-            int4 left = tokqueue.bottomref();
+            int max = tokqueue.getMax();
+            int left = tokqueue.bottomref();
             tokqueue.expand(200);
             // Expanding puts the leftmost element at reference 0
             // So we need to adjust references
-            for (int4 i = 0; i < max; ++i)
+            for (int i = 0; i < max; ++i)
                 scanqueue.ref (i) = (scanqueue.ref (i) +max - left) % max;
             // The number of elements in scanqueue is always less than
             // or equal to the number of elements in tokqueue, so
@@ -138,15 +138,15 @@ namespace Sla.DECCORE
         /// but makes sure that at least half the line is available for the next token.
         private void overflow()
         {
-            int4 half = maxlinesize / 2;
-            for (int4 i = indentstack.size() - 1; i >= 0; --i)
+            int half = maxlinesize / 2;
+            for (int i = indentstack.size() - 1; i >= 0; --i)
             {
                 if (indentstack[i] < half)
                     indentstack[i] = half;
                 else
                     break;
             }
-            int4 newspaceremain;
+            int newspaceremain;
             if (!indentstack.empty())
                 newspaceremain = indentstack.back();
             else
@@ -170,7 +170,7 @@ namespace Sla.DECCORE
         /// \param tok is the given token to emit.
         private void print(TokenSplit tok)
         {
-            int4 val = 0;
+            int val = 0;
 
             switch (tok.getClass())
             {
@@ -272,7 +272,7 @@ namespace Sla.DECCORE
         /// by this method.
         private void advanceleft()
         {
-            int4 l = tokqueue.bottom().getSize();
+            int l = tokqueue.bottom().getSize();
             while (l >= 0)
             {
                 TokenSplit tok = tokqueue.bottom();
@@ -384,7 +384,7 @@ namespace Sla.DECCORE
         public EmitPrettyPrint()
             : base()
         {
-            scanqueue = new circularqueue<int4>(3 * 100);
+            scanqueue = new circularqueue<int>(3 * 100);
             tokqueue = new circularqueue<TokenSplit>(3 * 100);
             lowlevel = new EmitNoMarkup();  // Do not emit xml by default
             spaceremain = maxlinesize;
@@ -398,16 +398,16 @@ namespace Sla.DECCORE
             delete lowlevel;
         }
 
-        private override int4 beginDocument()
+        private override int beginDocument()
         {
             checkstart();
             TokenSplit & tok(tokqueue.push());
-            int4 id = tok.beginDocument();
+            int id = tok.beginDocument();
             scan();
             return id;
         }
 
-        private override void endDocument(int4 id)
+        private override void endDocument(int id)
         {
             checkend();
             TokenSplit & tok(tokqueue.push());
@@ -415,7 +415,7 @@ namespace Sla.DECCORE
             scan();
         }
 
-        private override int4 beginFunction(Funcdata fd)
+        private override int beginFunction(Funcdata fd)
         {
 #if PRETTY_DEBUG
             if (!tokqueue.empty())
@@ -423,12 +423,12 @@ namespace Sla.DECCORE
 #endif
             checkstart();
             TokenSplit & tok(tokqueue.push());
-            int4 id = tok.beginFunction(fd);
+            int id = tok.beginFunction(fd);
             scan();
             return id;
         }
 
-        private override void endFunction(int4 id)
+        private override void endFunction(int id)
         {
             checkend();
             TokenSplit & tok(tokqueue.push());
@@ -436,15 +436,15 @@ namespace Sla.DECCORE
             scan();
         }
 
-        private override int4 beginBlock(FlowBlock bl)
+        private override int beginBlock(FlowBlock bl)
         {
             TokenSplit & tok(tokqueue.push());
-            int4 id = tok.beginBlock(bl);
+            int id = tok.beginBlock(bl);
             scan();
             return id;
         }
 
-        private override void endBlock(int4 id)
+        private override void endBlock(int id)
         {
             TokenSplit & tok(tokqueue.push());
             tok.endBlock(id);
@@ -460,7 +460,7 @@ namespace Sla.DECCORE
             scan();
         }
 
-        private override void tagLine(int4 indent)
+        private override void tagLine(int indent)
         {
             emitPending();
             checkbreak();
@@ -469,16 +469,16 @@ namespace Sla.DECCORE
             scan();
         }
 
-        private override int4 beginReturnType(Varnode vn)
+        private override int beginReturnType(Varnode vn)
         {
             checkstart();
             TokenSplit & tok(tokqueue.push());
-            int4 id = tok.beginReturnType(vn);
+            int id = tok.beginReturnType(vn);
             scan();
             return id;
         }
 
-        private override void endReturnType(int4 id)
+        private override void endReturnType(int id)
         {
             checkend();
             TokenSplit & tok(tokqueue.push());
@@ -486,16 +486,16 @@ namespace Sla.DECCORE
             scan();
         }
 
-        private override int4 beginVarDecl(Symbol sym)
+        private override int beginVarDecl(Symbol sym)
         {
             checkstart();
             TokenSplit & tok(tokqueue.push());
-            int4 id = tok.beginVarDecl(sym);
+            int id = tok.beginVarDecl(sym);
             scan();
             return id;
         }
 
-        private override void endVarDecl(int4 id)
+        private override void endVarDecl(int id)
         {
             checkend();
             TokenSplit & tok(tokqueue.push());
@@ -503,16 +503,16 @@ namespace Sla.DECCORE
             scan();
         }
 
-        private override int4 beginStatement(PcodeOp op)
+        private override int beginStatement(PcodeOp op)
         {
             checkstart();
             TokenSplit & tok(tokqueue.push());
-            int4 id = tok.beginStatement(op);
+            int id = tok.beginStatement(op);
             scan();
             return id;
         }
 
-        private override void endStatement(int4 id)
+        private override void endStatement(int id)
         {
             checkend();
             TokenSplit & tok(tokqueue.push());
@@ -520,16 +520,16 @@ namespace Sla.DECCORE
             scan();
         }
 
-        private override int4 beginFuncProto()
+        private override int beginFuncProto()
         {
             checkstart();
             TokenSplit & tok(tokqueue.push());
-            int4 id = tok.beginFuncProto();
+            int id = tok.beginFuncProto();
             scan();
             return id;
         }
 
-        private override void endFuncProto(int4 id)
+        private override void endFuncProto(int id)
         {
             checkend();
             TokenSplit & tok(tokqueue.push());
@@ -569,7 +569,7 @@ namespace Sla.DECCORE
             scan();
         }
 
-        private override void tagField(string name,syntax_highlight hl, Datatype ct, int4 off, PcodeOp op)
+        private override void tagField(string name,syntax_highlight hl, Datatype ct, int off, PcodeOp op)
         {
             checkstring();
             TokenSplit & tok(tokqueue.push());
@@ -577,7 +577,7 @@ namespace Sla.DECCORE
             scan();
         }
 
-        private override void tagComment(string name,syntax_highlight hl, AddrSpace spc, uintb off)
+        private override void tagComment(string name,syntax_highlight hl, AddrSpace spc, ulong off)
         {
             checkstring();
             TokenSplit & tok(tokqueue.push());
@@ -585,7 +585,7 @@ namespace Sla.DECCORE
             scan();
         }
 
-        private override void tagLabel(string name,syntax_highlight hl, AddrSpace spc, uintb off)
+        private override void tagLabel(string name,syntax_highlight hl, AddrSpace spc, ulong off)
         {
             checkstring();
             TokenSplit & tok(tokqueue.push());
@@ -601,7 +601,7 @@ namespace Sla.DECCORE
             scan();
         }
 
-        private override int4 openParen(string paren,int4 id = 0)
+        private override int openParen(string paren,int id = 0)
         {
             id = openGroup();          // Open paren automatically opens group
             TokenSplit & tok(tokqueue.push());
@@ -611,7 +611,7 @@ namespace Sla.DECCORE
             return id;
         }
 
-        private override void closeParen(string paren,int4 id)
+        private override void closeParen(string paren,int id)
         {
             checkstring();
             TokenSplit & tok(tokqueue.push());
@@ -620,16 +620,16 @@ namespace Sla.DECCORE
             closeGroup(id);
         }
 
-        private override int4 openGroup()
+        private override int openGroup()
         {
             checkstart();
             TokenSplit & tok(tokqueue.push());
-            int4 id = tok.openGroup();
+            int id = tok.openGroup();
             scan();
             return id;
         }
 
-        private override void closeGroup(int4 id)
+        private override void closeGroup(int id)
         {
             checkend();
             TokenSplit & tok(tokqueue.push());
@@ -658,7 +658,7 @@ namespace Sla.DECCORE
 
         private override TextWriter getOutputStream() => lowlevel.getOutputStream();
 
-        private override void spaces(int4 num, int4 bump = 0)
+        private override void spaces(int num, int bump = 0)
         {
             checkbreak();
             TokenSplit & tok(tokqueue.push());
@@ -666,31 +666,31 @@ namespace Sla.DECCORE
             scan();
         }
 
-        private override int4 startIndent()
+        private override int startIndent()
         {
             TokenSplit & tok(tokqueue.push());
-            int4 id = tok.startIndent(indentincrement);
+            int id = tok.startIndent(indentincrement);
             scan();
             return id;
         }
 
-        private override void stopIndent(int4 id)
+        private override void stopIndent(int id)
         {
             TokenSplit & tok(tokqueue.push());
             tok.stopIndent(id);
             scan();
         }
 
-        private override int4 startComment()
+        private override int startComment()
         {
             checkstart();
             TokenSplit & tok(tokqueue.push());
-            int4 id = tok.startComment();
+            int id = tok.startComment();
             scan();
             return id;
         }
 
-        private override void stopComment(int4 id)
+        private override void stopComment(int id)
         {
             checkend();
             TokenSplit & tok(tokqueue.push());
@@ -717,7 +717,7 @@ namespace Sla.DECCORE
             lowlevel.flush();
         }
 
-        private override void setMaxLineSize(int4 val)
+        private override void setMaxLineSize(int val)
         {
             if ((val < 20) || (val > 10000))
                 throw new LowlevelError("Bad maximum line size");
@@ -728,7 +728,7 @@ namespace Sla.DECCORE
             clear();
         }
 
-        private override int4 getMaxLineSize() => maxlinesize;
+        private override int getMaxLineSize() => maxlinesize;
 
         private override void setCommentFill(string fill)
         {

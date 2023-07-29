@@ -40,13 +40,13 @@ namespace Sla.SLEIGH
         {
             hand.space = walker.getConstSpace();
             hand.offset_space = (AddrSpace*)0;
-            hand.offset_offset = (uintb)patval.getValue(walker);
+            hand.offset_offset = (ulong)patval.getValue(walker);
             hand.size = 0;      // Cannot provide size
         }
 
         public override void print(TextWriter s, ParserWalker walker)
         {
-            intb val = patval.getValue(walker);
+            long val = patval.getValue(walker);
             if (val >= 0)
                 s << "0x" << hex << val;
             else

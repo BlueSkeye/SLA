@@ -33,18 +33,18 @@ namespace Sla.DECCORE
         /// - `sborrow(V,W) == (V + (W * -1) s< 0)  =>  W s<= V`
         ///
         /// Supports variations where W is constant.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_SBORROW);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* svn = op.getOut();
             Varnode* cvn,*avn,*bvn;
             list<PcodeOp*>::const_iterator iter;
             PcodeOp* compop,*signop,*addop;
-            int4 zside;
+            int zside;
 
             // Check for trivial case
             if ((op.getIn(1).isConstant() && op.getIn(1).getOffset() == 0) ||

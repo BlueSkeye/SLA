@@ -29,8 +29,8 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            int4 size = data.numCalls();
-            for (int4 i = 0; i < size; ++i)
+            int size = data.numCalls();
+            for (int i = 0; i < size; ++i)
                 ActionFuncLink::funcLinkOutput(data.getCallSpecs(i), data);
             return 0;
         }

@@ -24,19 +24,19 @@ namespace Sla.DECCORE
 
         /// \class RuleConcatLeftShift
         /// \brief Simplify concatenation of extended value: `concat(V, zext(W) << c)  =>  concat( concat(V,W), 0)`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_PIECE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn2 = op.getIn(1);
             if (!vn2.isWritten()) return 0;
             PcodeOp* shiftop = vn2.getDef();
             if (shiftop.code() != CPUI_INT_LEFT) return 0;
             if (!shiftop.getIn(1).isConstant()) return 0; // Must be a constant shift
-            int4 sa = shiftop.getIn(1).getOffset();
+            int sa = shiftop.getIn(1).getOffset();
             if ((sa & 7) != 0) return 0;    // Not a multiple of 8
             Varnode* tmpvn = shiftop.getIn(0);
             if (!tmpvn.isWritten()) return 0;

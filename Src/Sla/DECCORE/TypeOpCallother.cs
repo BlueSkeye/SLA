@@ -33,7 +33,7 @@ namespace Sla.DECCORE
             {
                 s << '(';
                 Varnode::printRaw(s, op.getIn(1));
-                for (int4 i = 2; i < op.numInput(); ++i)
+                for (int i = 2; i < op.numInput(); ++i)
                 {
                     s << ',';
                     Varnode::printRaw(s, op.getIn(i));
@@ -48,7 +48,7 @@ namespace Sla.DECCORE
             if (bb != (BlockBasic*)0)
             {
                 Architecture* glb = bb.getFuncdata().getArch();
-                int4 index = op.getIn(0).getOffset();
+                int index = op.getIn(0).getOffset();
                 UserPcodeOp* userop = glb.userops.getOp(index);
                 if (userop != (UserPcodeOp*)0)
                     return userop.getOperatorName(op);
@@ -60,7 +60,7 @@ namespace Sla.DECCORE
             return res.str();
         }
 
-        public override Datatype getInputLocal(PcodeOp op, int4 slot)
+        public override Datatype getInputLocal(PcodeOp op, int slot)
         {
             if (!op.doesSpecialPropagation())
                 return TypeOp::getInputLocal(op, slot);
@@ -69,8 +69,8 @@ namespace Sla.DECCORE
             if ((vw_op.getIndex() == op.getIn(0).getOffset()) && (slot == 2))
             { // And we are requesting slot 2
                 Address addr = op.getIn(1).getAddr(); // Address of volatile memory
-                int4 size = op.getIn(2).getSize(); // Size of memory being written
-                uint4 vflags = 0;
+                int size = op.getIn(2).getSize(); // Size of memory being written
+                uint vflags = 0;
                 SymbolEntry* entry = glb.symboltab.getGlobalScope().queryProperties(addr, size, op.getAddr(), vflags);
                 if (entry != (SymbolEntry*)0)
                 {
@@ -91,8 +91,8 @@ namespace Sla.DECCORE
             if (vr_op.getIndex() == op.getIn(0).getOffset())
             {
                 Address addr = op.getIn(1).getAddr(); // Address of volatile memory
-                int4 size = op.getOut().getSize(); // Size of memory being written
-                uint4 vflags = 0;
+                int size = op.getOut().getSize(); // Size of memory being written
+                uint vflags = 0;
                 SymbolEntry* entry = glb.symboltab.getGlobalScope().queryProperties(addr, size, op.getAddr(), vflags);
                 if (entry != (SymbolEntry*)0)
                 {

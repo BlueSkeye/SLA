@@ -37,7 +37,7 @@ namespace Sla.DECCORE
         public abstract bool isOverride();
 
         /// Return the number of entries in the address table
-        public abstract int4 getTableSize();
+        public abstract int getTableSize();
 
         /// \brief Attempt to recover details of the model, given a specific BRANCHIND
         /// This generally recovers the normalized switch variable and any guards.
@@ -46,8 +46,8 @@ namespace Sla.DECCORE
         /// \param matchsize is the expected number of address table entries to recover, or 0 for no expectation
         /// \param maxtablesize is maximum number of address table entries to allow in the model
         /// \return \b true if details of the model were successfully recovered
-        public abstract bool recoverModel(Funcdata fd, PcodeOp indop, uint4 matchsize,
-            uint4 maxtablesize);
+        public abstract bool recoverModel(Funcdata fd, PcodeOp indop, uint matchsize,
+            uint maxtablesize);
 
         /// \brief Construct the explicit list of target addresses (the Address Table) from \b this model
         /// The addresses produced all come from the BRANCHIND and may not be deduped. Alternate guard
@@ -65,7 +65,7 @@ namespace Sla.DECCORE
         /// \param maxaddsub is a restriction on arithmetic operations
         /// \param maxleftright is a restriction on shift operations
         /// \param maxext is a restriction on extension operations
-        public abstract void findUnnormalized(uint4 maxaddsub, uint4 maxleftright, uint4 maxext);
+        public abstract void findUnnormalized(uint maxaddsub, uint maxleftright, uint maxext);
 
         /// \brief Recover \e case labels associated with the Address table
         /// The unnormalized switch variable must already be recovered.  Values that the normalized
@@ -76,7 +76,7 @@ namespace Sla.DECCORE
         /// \param addresstable is the address table (used to label code blocks with bad or missing labels)
         /// \param label will hold recovered labels in JumpValues order
         /// \param orig is the JumpModel to use for the JumpValues iterator
-        public abstract void buildLabels(Funcdata fd, List<Address> addresstable, List<uintb> label,
+        public abstract void buildLabels(Funcdata fd, List<Address> addresstable, List<ulong> label,
             JumpModel orig);
 
         /// \brief Do normalization of the given switch specific to \b this model.

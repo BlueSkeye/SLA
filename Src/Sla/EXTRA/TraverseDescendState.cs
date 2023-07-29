@@ -13,7 +13,7 @@ namespace Sla.EXTRA
         private List<PcodeOp>::const_iterator iter;    // Different forward branches we could traverse
         private List<PcodeOp>::const_iterator enditer;
 
-        public TraverseDescendState(int4 i)
+        public TraverseDescendState(int i)
             : base(i)
         {
         }

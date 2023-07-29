@@ -19,15 +19,15 @@ namespace Sla.SLEIGH
         {
         }
         
-        public override intb getValue(ParserWalker walker)
+        public override long getValue(ParserWalker walker)
         {
-            intb val = getUnary().getValue(walker);
+            long val = getUnary().getValue(walker);
             return ~val;
         }
 
-        public override intb getSubValue(List<intb> replace,int4 listpos)
+        public override long getSubValue(List<long> replace,int listpos)
         {
-            intb val = getUnary().getSubValue(replace, listpos);
+            long val = getUnary().getSubValue(replace, listpos);
             return ~val;
         }
 

@@ -22,7 +22,7 @@ namespace Sla.SLACOMP
     internal class SectionVector
     {
         /// Index of the section currently being parsed.
-        private int4 nextindex;
+        private int nextindex;
         /// The main section
         private RtlPair main;
         /// Named sections accessed by index
@@ -42,22 +42,22 @@ namespace Sla.SLACOMP
         public ConstructTpl getMainSection() => main.section;
 
         /// Get a \e named section by index
-        public ConstructTpl getNamedSection(int4 index) => named[index].section;
+        public ConstructTpl getNamedSection(int index) => named[index].section;
 
         /// Get the \e main section/namespace pair
         public RtlPair getMainPair() => main;
 
         /// Get a \e named section/namespace pair by index
-        public RtlPair getNamedPair(int4 i) => named[i];
+        public RtlPair getNamedPair(int i) => named[i];
 
         /// Set the index of the currently parsing \e named section
-        public void setNextIndex(int4 i)
+        public void setNextIndex(int i)
         {
             nextindex = i;
         }
 
         /// Get the maximum (exclusive) named section index
-        public int4 getMaxId() => named.size();
+        public int getMaxId() => named.size();
 
         /// Add a new \e named section
         /// Associate the new section with \b nextindex, established prior to parsing

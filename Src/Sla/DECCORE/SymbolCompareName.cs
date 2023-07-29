@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         /// \return \b true if the first is ordered before the second
         public bool operator()(Symbol sym1, Symbol sym2)
         {
-            int4 comp = sym1.name.compare(sym2.name);
+            int comp = sym1.name.compare(sym2.name);
             if (comp< 0) return true;
             if (comp > 0) return false;
             return (sym1.nameDedup<sym2.nameDedup);

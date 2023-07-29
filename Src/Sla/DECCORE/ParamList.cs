@@ -33,7 +33,7 @@ namespace Sla.DECCORE
         }
 
         /// Get the type of parameter list
-        public abstract uint4 getType();
+        public abstract uint getType();
 
         /// \brief Given list of data-types, map the list positions to storage locations
         ///
@@ -60,7 +60,7 @@ namespace Sla.DECCORE
         /// \param loaddr is the address of the least significant part of the value
         /// \param losize is the size of the least significant part in bytes
         /// \return \b true if the two pieces can be joined
-        public abstract bool checkJoin(Address hiaddr, int4 hisize, Address loaddr, int4 losize);
+        public abstract bool checkJoin(Address hiaddr, int hisize, Address loaddr, int losize);
 
         /// \brief Check if it makes sense to split a single storage location into two parameters
         /// A storage location and split point is provided, implying two new storage locations. Does
@@ -69,7 +69,7 @@ namespace Sla.DECCORE
         /// \param size is the size of the location in bytes
         /// \param splitpoint is the number of bytes to consider in the first (in address order) piece
         /// \return \b true if the storage location can be split
-        public abstract bool checkSplit(Address loc,int4 size, int4 splitpoint);
+        public abstract bool checkSplit(Address loc,int size, int splitpoint);
 
         /// \brief Characterize whether the given range overlaps parameter storage
         /// Does the range naturally fit inside a potential parameter entry from this list or does
@@ -81,14 +81,14 @@ namespace Sla.DECCORE
         /// \param loc is the starting address of the given range
         /// \param size is the number of bytes in the given range
         /// \return the characterization code
-        public abstract int4 characterizeAsParam(Address loc,int4 size);
+        public abstract int characterizeAsParam(Address loc,int size);
 
         /// \brief Does the given storage location make sense as a parameter
         /// Within \b this model, decide if the storage location can be considered a parameter.
         /// \param loc is the starting address of the storage location
         /// \param size is the number of bytes in the storage location
         /// \return \b true if the location can be a parameter
-        public abstract bool possibleParam(Address loc,int4 size);
+        public abstract bool possibleParam(Address loc,int size);
 
         /// \brief Pass-back the slot and slot size for the given storage location as a parameter
         /// This checks if the given storage location acts as a parameter in \b this model and
@@ -98,14 +98,14 @@ namespace Sla.DECCORE
         /// \param slot if the \e slot number to pass back
         /// \param slotsize is the number of consumed slots to pass back
         /// \return \b true if the location can be a parameter
-        public abstract bool possibleParamWithSlot(Address loc,int4 size, int4 slot,int4 slotsize);
+        public abstract bool possibleParamWithSlot(Address loc,int size, int slot,int slotsize);
 
         /// \brief Pass-back the biggest parameter contained within the given range
         /// \param loc is the starting address of the given range
         /// \param size is the number of bytes in the range
         /// \param res will hold the parameter storage description being passed back
         /// \return \b true if there is at least one parameter contained in the range
-        public abstract bool getBiggestContainedParam(Address loc,int4 size, VarnodeData res);
+        public abstract bool getBiggestContainedParam(Address loc,int size, VarnodeData res);
 
         /// \brief Check if the given storage location looks like an \e unjustified parameter
         /// The storage for a value may be contained in a normal parameter location but be
@@ -115,7 +115,7 @@ namespace Sla.DECCORE
         /// \param size is the number of bytes in the given storage
         /// \param res is the full parameter storage to pass back
         /// \return \b true if the given storage is unjustified within its parameter container
-        public abstract bool unjustifiedContainer(Address loc,int4 size, VarnodeData res);
+        public abstract bool unjustifiedContainer(Address loc,int size, VarnodeData res);
 
         /// \brief Get the type of extension and containing parameter for the given storage
         /// If the given storage is properly contained within a normal parameter and the model
@@ -126,7 +126,7 @@ namespace Sla.DECCORE
         /// \param res is the parameter storage to pass back
         /// \return the extension operator (INT_ZEXT INT_SEXT) or INT_COPY if there is no extension.
         /// INT_PIECE indicates the extension is determined by the specific prototype.
-        public abstract OpCode assumedExtension(Address addr,int4 size, VarnodeData res);
+        public abstract OpCode assumedExtension(Address addr,int size, VarnodeData res);
 
         /// \brief Get the address space associated with any stack based parameters in \b this list.
         /// \return the stack address space, if \b this models parameters passed on the stack, NULL otherwise
@@ -143,7 +143,7 @@ namespace Sla.DECCORE
         /// extra transform passes have completed. This method returns the number of passes
         /// that must occur before we can guarantee that all parameters have data-flow info.
         /// \return the maximum number of passes across all parameters in \b this model
-        public abstract int4 getMaxDelay();
+        public abstract int getMaxDelay();
 
         /// \brief Restore the model from an \<input> or \<output> element in the stream
         /// \param decoder is the stream decoder

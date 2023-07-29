@@ -23,9 +23,9 @@ namespace Sla.EXTRA
             dcp.conf.translate.getAllRegisters(reglist);
             map<VarnodeData, string>::const_iterator iter;
             AddrSpace* spc = (AddrSpace*)0;
-            uintb lastoff = 0;
+            ulong lastoff = 0;
             Scope* globalscope = dcp.conf.symboltab.getGlobalScope();
-            int4 count = 0;
+            int count = 0;
             for (iter = reglist.begin(); iter != reglist.end(); ++iter)
             {
                 VarnodeData dat = (*iter).first;
@@ -36,7 +36,7 @@ namespace Sla.EXTRA
                 spc = dat.space;
                 lastoff = dat.offset + dat.size - 1;
                 Address addr(spc, dat.offset);
-                uint4 flags = 0;
+                uint flags = 0;
                 // Check if the register location is global
                 globalscope.queryProperties(addr, dat.size, Address(), flags);
                 if ((flags & Varnode::persist) != 0)

@@ -18,8 +18,8 @@ namespace Sla.DECCORE
         private PcodeOp orop;
         private PcodeOp hixor;
         private PcodeOp loxor;
-        private int4 orhislot;
-        private int4 xorhislot;
+        private int orhislot;
+        private int xorhislot;
         private SplitVarnode param2;
 
         private bool checkLoForm()
@@ -98,7 +98,7 @@ namespace Sla.DECCORE
             }
             if (hi2.isConstant() && lo2.isConstant())
             {
-                uintb val = hi2.getOffset();
+                ulong val = hi2.getOffset();
                 val <<= 8 * lo1.getSize();
                 val |= lo2.getOffset();
                 param2.initPartial(in.getSize(), val);

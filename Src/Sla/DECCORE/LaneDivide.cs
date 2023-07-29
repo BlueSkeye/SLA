@@ -24,9 +24,9 @@ namespace Sla.DECCORE
             /// Lane placeholders for underyling Varnode
             internal TransformVar lanes;
             /// Number of lanes in the particular Varnode
-            internal int4 numLanes;
+            internal int numLanes;
             /// Number of lanes to skip in the global description
-            internal int4 skipLanes;
+            internal int skipLanes;
         }
 
         /// Global description of lanes that need to be split
@@ -45,7 +45,7 @@ namespace Sla.DECCORE
         /// \param numLanes is the number of lanes in the subset
         /// \param skipLanes is the start (least significant) lane in the subset
         /// \return the array of placeholders describing the split or null
-        private TransformVar setReplacement(Varnode vn, int4 numLanes, int4 skipLanes)
+        private TransformVar setReplacement(Varnode vn, int numLanes, int skipLanes)
         {
             if (vn.isMark())       // Already seen before
                 return getSplit(vn, description, numLanes, skipLanes);
@@ -85,9 +85,9 @@ namespace Sla.DECCORE
         /// \param outVars is the array of output variables, 1 for each unary op
         /// \param numLanes is the number of unary ops to create
         private void buildUnaryOp(OpCode opc, PcodeOp op, TransformVar inVars, TransformVar outVars,
-            int4 numLanes)
+            int numLanes)
         {
-            for (int4 i = 0; i < numLanes; ++i)
+            for (int i = 0; i < numLanes; ++i)
             {
                 TransformOp* rop = newOpReplace(1, opc, op);
                 opSetOutput(rop, outVars + i);
@@ -105,9 +105,9 @@ namespace Sla.DECCORE
         /// \param outVars is the array of output variables, 1 for each binary op
         /// \param numLanes is the number of binary ops to create
         private void buildBinaryOp(OpCode opc, PcodeOp op, TransformVar in0Vars, TransformVar in1Vars,
-            TransformVar outVars, int4 numLanes)
+            TransformVar outVars, int numLanes)
         {
-            for (int4 i = 0; i < numLanes; ++i)
+            for (int i = 0; i < numLanes; ++i)
             {
                 TransformOp* rop = newOpReplace(2, opc, op);
                 opSetOutput(rop, outVars + i);
@@ -126,10 +126,10 @@ namespace Sla.DECCORE
         /// \param numLanes is the number of lanes in the output
         /// \param skipLanes is the index of the least significant output lane within the global description
         /// \return \b true if the CPUI_PIECE was modeled as natural lane copies
-        private bool buildPiece(PcodeOp op, TransformVar outVars, int4 numLanes, int4 skipLanes)
+        private bool buildPiece(PcodeOp op, TransformVar outVars, int numLanes, int skipLanes)
         {
-            int4 highLanes, highSkip;
-            int4 lowLanes, lowSkip;
+            int highLanes, highSkip;
+            int lowLanes, lowSkip;
             Varnode* highVn = op.getIn(0);
             Varnode* lowVn = op.getIn(1);
 
@@ -148,8 +148,8 @@ namespace Sla.DECCORE
             {   // Multi-lane high
                 TransformVar* highRvn = setReplacement(highVn, highLanes, highSkip);
                 if (highRvn == (TransformVar*)0) return false;
-                int4 outHighStart = numLanes - highLanes;
-                for (int4 i = 0; i < highLanes; ++i)
+                int outHighStart = numLanes - highLanes;
+                for (int i = 0; i < highLanes; ++i)
                 {
                     TransformOp* rop = newOpReplace(1, CPUI_COPY, op);
                     opSetInput(rop, highRvn + i, 0);
@@ -167,7 +167,7 @@ namespace Sla.DECCORE
             {   // Multi-lane low
                 TransformVar* lowRvn = setReplacement(lowVn, lowLanes, lowSkip);
                 if (lowRvn == (TransformVar*)0) return false;
-                for (int4 i = 0; i < lowLanes; ++i)
+                for (int i = 0; i < lowLanes; ++i)
                 {
                     TransformOp* rop = newOpReplace(1, CPUI_COPY, op);
                     opSetInput(rop, lowRvn + i, 0);
@@ -186,21 +186,21 @@ namespace Sla.DECCORE
         /// \param numLanes is the number of lanes in the output
         /// \param skipLanes is the index of the least significant output lane within the global description
         /// \return \b true if the operation was fully modeled
-        private bool buildMultiequal(PcodeOp op, TransformVar outVars, int4 numLanes, int4 skipLanes)
+        private bool buildMultiequal(PcodeOp op, TransformVar outVars, int numLanes, int skipLanes)
         {
             List<TransformVar*> inVarSets;
-            int4 numInput = op.numInput();
-            for (int4 i = 0; i < numInput; ++i)
+            int numInput = op.numInput();
+            for (int i = 0; i < numInput; ++i)
             {
                 TransformVar* inVn = setReplacement(op.getIn(i), numLanes, skipLanes);
                 if (inVn == (TransformVar*)0) return false;
                 inVarSets.push_back(inVn);
             }
-            for (int4 i = 0; i < numLanes; ++i)
+            for (int i = 0; i < numLanes; ++i)
             {
                 TransformOp* rop = newOpReplace(numInput, CPUI_MULTIEQUAL, op);
                 opSetOutput(rop, outVars + i);
-                for (int4 j = 0; j < numInput; ++j)
+                for (int j = 0; j < numInput; ++j)
                     opSetInput(rop, inVarSets[j] + i, j);
             }
             return true;
@@ -214,12 +214,12 @@ namespace Sla.DECCORE
         /// \param numLanes is the number of lanes the STORE is split into
         /// \param skipLanes is the starting lane (within the global description) of the value being stored
         /// \return \b true if the CPUI_STORE was successfully modeled on lanes
-        private bool buildStore(PcodeOp op, int4 numLanes, int4 skipLanes)
+        private bool buildStore(PcodeOp op, int numLanes, int skipLanes)
         {
             TransformVar* inVars = setReplacement(op.getIn(2), numLanes, skipLanes);
             if (inVars == (TransformVar*)0) return false;
-            uintb spaceConst = op.getIn(0).getOffset();
-            int4 spaceConstSize = op.getIn(0).getSize();
+            ulong spaceConst = op.getIn(0).getOffset();
+            int spaceConstSize = op.getIn(0).getSize();
             AddrSpace* spc = op.getIn(0).getSpaceFromConst(); // Address space being stored to
             Varnode* origPtr = op.getIn(1);
             if (origPtr.isFree())
@@ -227,13 +227,13 @@ namespace Sla.DECCORE
                 if (!origPtr.isConstant()) return false;
             }
             TransformVar* basePtr = getPreexistingVarnode(origPtr);
-            int4 ptrSize = origPtr.getSize();
+            int ptrSize = origPtr.getSize();
             Varnode* valueVn = op.getIn(2);
-            for (int4 i = 0; i < numLanes; ++i)
+            for (int i = 0; i < numLanes; ++i)
             {
                 TransformOp* ropStore = newOpReplace(3, CPUI_STORE, op);
-                int4 bytePos = description.getPosition(skipLanes + i);
-                int4 sz = description.getSize(skipLanes + i);
+                int bytePos = description.getPosition(skipLanes + i);
+                int sz = description.getSize(skipLanes + i);
                 if (spc.isBigEndian())
                     bytePos = valueVn.getSize() - (bytePos + sz);  // Convert position to address order
 
@@ -266,10 +266,10 @@ namespace Sla.DECCORE
         /// \param numLanes is the number of lanes the LOAD is split into
         /// \param skipLanes is the starting lane (within the global description) of the value being loaded
         /// \return \b true if the CPUI_LOAD was successfully modeled on lanes
-        private bool buildLoad(PcodeOp op, TransformVar outVars, int4 numLanes, int4 skipLanes)
+        private bool buildLoad(PcodeOp op, TransformVar outVars, int numLanes, int skipLanes)
         {
-            uintb spaceConst = op.getIn(0).getOffset();
-            int4 spaceConstSize = op.getIn(0).getSize();
+            ulong spaceConst = op.getIn(0).getOffset();
+            int spaceConstSize = op.getIn(0).getSize();
             AddrSpace* spc = op.getIn(0).getSpaceFromConst(); // Address space being stored to
             Varnode* origPtr = op.getIn(1);
             if (origPtr.isFree())
@@ -277,13 +277,13 @@ namespace Sla.DECCORE
                 if (!origPtr.isConstant()) return false;
             }
             TransformVar* basePtr = getPreexistingVarnode(origPtr);
-            int4 ptrSize = origPtr.getSize();
-            int4 outSize = op.getOut().getSize();
-            for (int4 i = 0; i < numLanes; ++i)
+            int ptrSize = origPtr.getSize();
+            int outSize = op.getOut().getSize();
+            for (int i = 0; i < numLanes; ++i)
             {
                 TransformOp* ropLoad = newOpReplace(2, CPUI_LOAD, op);
-                int4 bytePos = description.getPosition(skipLanes + i);
-                int4 sz = description.getSize(skipLanes + i);
+                int bytePos = description.getPosition(skipLanes + i);
+                int sz = description.getSize(skipLanes + i);
                 if (spc.isBigEndian())
                     bytePos = outSize - (bytePos + sz); // Convert position to address order
 
@@ -316,17 +316,17 @@ namespace Sla.DECCORE
         /// \param numLanes is the number of lanes the shift is split into
         /// \param skipLanes is the starting lane (within the global description) of the value being loaded
         /// \return \b true if the CPUI_INT_RIGHT was successfully modeled on lanes
-        private bool buildRightShift(PcodeOp op, TransformVar outVars, int4 numLanes, int4 skipLanes)
+        private bool buildRightShift(PcodeOp op, TransformVar outVars, int numLanes, int skipLanes)
         {
             if (!op.getIn(1).isConstant()) return false;
-            int4 shiftSize = (int4)op.getIn(1).getOffset();
+            int shiftSize = (int)op.getIn(1).getOffset();
             if ((shiftSize & 7) != 0) return false;     // Not a multiple of 8
             shiftSize /= 8;
-            int4 startPos = shiftSize + description.getPosition(skipLanes);
-            int4 startLane = description.getBoundary(startPos);
+            int startPos = shiftSize + description.getPosition(skipLanes);
+            int startLane = description.getBoundary(startPos);
             if (startLane < 0) return false;        // Shift does not end on a lane boundary
-            int4 srcLane = startLane;
-            int4 destLane = skipLanes;
+            int srcLane = startLane;
+            int destLane = skipLanes;
             while (srcLane - skipLanes < numLanes)
             {
                 if (description.getSize(srcLane) != description.getSize(destLane)) return false;
@@ -336,7 +336,7 @@ namespace Sla.DECCORE
             TransformVar* inVars = setReplacement(op.getIn(0), numLanes, skipLanes);
             if (inVars == (TransformVar*)0) return false;
             buildUnaryOp(CPUI_COPY, op, inVars + (startLane - skipLanes), outVars, numLanes - (startLane - skipLanes));
-            for (int4 zeroLane = numLanes - (startLane - skipLanes); zeroLane < numLanes; ++zeroLane)
+            for (int zeroLane = numLanes - (startLane - skipLanes); zeroLane < numLanes; ++zeroLane)
             {
                 TransformOp* rop = newOpReplace(1, CPUI_COPY, op);
                 opSetOutput(rop, outVars + zeroLane);
@@ -354,7 +354,7 @@ namespace Sla.DECCORE
         /// \param numLanes is the number of lanes represented by the placeholder variable
         /// \param skipLanes is the index of the starting lane within the global description of the placeholder variable
         /// \return \b true if the lanes can be naturally pushed forward
-        private bool traceForward(TransformVar rvn, int4 numLanes, int4 skipLanes)
+        private bool traceForward(TransformVar rvn, int numLanes, int skipLanes)
         {
             Varnode* origvn = rvn.getOriginal();
             list<PcodeOp*>::const_iterator iter, enditer;
@@ -370,13 +370,13 @@ namespace Sla.DECCORE
                 {
                     case CPUI_SUBPIECE:
                         {
-                            int4 bytePos = (int4)op.getIn(1).getOffset();
-                            int4 outLanes, outSkip;
+                            int bytePos = (int)op.getIn(1).getOffset();
+                            int outLanes, outSkip;
                             if (!description.restriction(numLanes, skipLanes, bytePos, outvn.getSize(), outLanes, outSkip))
                             {
                                 if (allowSubpieceTerminator)
                                 {
-                                    int4 laneIndex = description.getBoundary(bytePos);
+                                    int laneIndex = description.getBoundary(bytePos);
                                     if (laneIndex < 0 || laneIndex >= description.getNumLanes())    // Does piece start on lane boundary?
                                         return false;
                                     if (description.getSize(laneIndex) <= outvn.getSize())     // Is the piece smaller than a lane?
@@ -404,8 +404,8 @@ namespace Sla.DECCORE
                         }
                     case CPUI_PIECE:
                         {
-                            int4 outLanes, outSkip;
-                            int4 bytePos = (op.getIn(0) == origvn) ? op.getIn(1).getSize() : 0;
+                            int outLanes, outSkip;
+                            int bytePos = (op.getIn(0) == origvn) ? op.getIn(1).getSize() : 0;
                             if (!description.extension(numLanes, skipLanes, bytePos, outvn.getSize(), outLanes, outSkip))
                                 return false;
                             TransformVar* outRvn = setReplacement(outvn, outLanes, outSkip);
@@ -454,7 +454,7 @@ namespace Sla.DECCORE
         /// \param numLanes is the number of lanes represented by the placeholder variable
         /// \param skipLanes is the index of the starting lane within the global description of the placeholder variable
         /// \return \b true if the lanes can be naturally pulled back
-        private bool traceBackward(TransformVar rvn, int4 numLanes, int4 skipLanes)
+        private bool traceBackward(TransformVar rvn, int numLanes, int skipLanes)
         {
             PcodeOp* op = rvn.getOriginal().getDef();
             if (op == (PcodeOp*)0) return true; // If vn is input
@@ -487,8 +487,8 @@ namespace Sla.DECCORE
                 case CPUI_SUBPIECE:
                     {
                         Varnode* inVn = op.getIn(0);
-                        int4 bytePos = (int4)op.getIn(1).getOffset();
-                        int4 inLanes, inSkip;
+                        int bytePos = (int)op.getIn(1).getOffset();
+                        int inLanes, inSkip;
                         if (!description.extension(numLanes, skipLanes, bytePos, inVn.getSize(), inLanes, inSkip))
                             return false;
                         TransformVar* inVars = setReplacement(inVn, inLanes, inSkip);
@@ -519,8 +519,8 @@ namespace Sla.DECCORE
         private bool processNextWork()
         {
             TransformVar* rvn = workList.back().lanes;
-            int4 numLanes = workList.back().numLanes;
-            int4 skipLanes = workList.back().skipLanes;
+            int numLanes = workList.back().numLanes;
+            int skipLanes = workList.back().skipLanes;
 
             workList.pop_back();
 

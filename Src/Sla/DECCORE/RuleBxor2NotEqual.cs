@@ -23,12 +23,12 @@ namespace Sla.DECCORE
 
         /// \class RuleBxor2NotEqual
         /// \brief Eliminate BOOL_XOR:  `V ^^ W  =>  V != W`
-        public override getOpList(List<uint4> oplist)
+        public override getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_BOOL_XOR);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             data.opSetOpcode(op, CPUI_INT_NOTEQUAL);
             return 1;

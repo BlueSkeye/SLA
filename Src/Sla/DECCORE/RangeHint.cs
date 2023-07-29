@@ -33,25 +33,25 @@ namespace Sla.DECCORE
         }
 
         /// Starting offset of \b this range of bytes
-        private uintb start;
+        private ulong start;
         /// Number of bytes in a single element of this range
-        private int4 size;
+        private int size;
         /// A signed version of the starting offset
-        private intb sstart;
+        private long sstart;
         /// Putative data-type for a single element of this range
         private Datatype type;
         /// Additional boolean properties of this range
-        private uint4 flags;
+        private uint flags;
         /// The type of range
         private RangeType rangeType;
         /// Minimum upper bound on the array index (if \b this is \e open)
-        private int4 highind;
+        private int highind;
     
         public RangeHint()
         {
         }
 
-        public RangeHint(uintb st, int4 sz, intb sst, Datatype ct, uint4 fl, RangeType rt, int4 hi)
+        public RangeHint(ulong st, int sz, long sst, Datatype ct, uint fl, RangeType rt, int hi)
         {
             start = st; size = sz; sstart = sst; type = ct; flags = fl; rangeType = rt; highind = hi;
         }
@@ -72,12 +72,12 @@ namespace Sla.DECCORE
                 b = a;          // Make sure b is smallest
                 a = tmp;
             }
-            intb mod = (b.sstart - a.sstart) % a.type.getSize();
+            long mod = (b.sstart - a.sstart) % a.type.getSize();
             if (mod < 0)
                 mod += a.type.getSize();
 
             Datatype* sub = a.type;
-            uintb umod = mod;
+            ulong umod = mod;
             while ((sub != (Datatype*)0) && (sub.getSize() > b.type.getSize()))
                 sub = sub.getSubType(umod, &umod);
 
@@ -195,7 +195,7 @@ namespace Sla.DECCORE
             if ((flags & Varnode::typelock) != 0) return false;
             if ((b.flags & Varnode::typelock) != 0) return false;
             if (flags != b.flags) return false;
-            intb diffsz = b.sstart - sstart;
+            long diffsz = b.sstart - sstart;
             if ((diffsz % settype.getSize()) != 0) return false;
             diffsz /= settype.getSize();
             if (diffsz > highind) return false;
@@ -216,9 +216,9 @@ namespace Sla.DECCORE
                 rangeType = open;
                 if (0 <= b.highind)
                 { // If b has array indexing
-                    intb diffsz = b.sstart - sstart;
+                    long diffsz = b.sstart - sstart;
                     diffsz /= type.getSize();
-                    int4 trialhi = b.highind + diffsz;
+                    int trialhi = b.highind + diffsz;
                     if (highind < trialhi)
                         highind = trialhi;
                 }
@@ -238,7 +238,7 @@ namespace Sla.DECCORE
         public bool merge(RangeHint b, AddrSpace space, TypeFactory typeFactory)
         {
             bool didReconcile;
-            int4 resType;       // 0=this, 1=b, 2=confuse
+            int resType;       // 0=this, 1=b, 2=confuse
 
             if (contain(b))
             {           // Does one range contain the other
@@ -285,7 +285,7 @@ namespace Sla.DECCORE
                 // Concede confusion about types, set unknown type rather than this or b's type
                 flags = 0;
                 rangeType = fixed;
-                int4 diff = (int4)(b.sstart - sstart);
+                int diff = (int)(b.sstart - sstart);
                 if (diff + b.size > size)
                     size = diff + b.size;
                 if (size != 1 && size != 2 && size != 4 && size != 8)
@@ -306,7 +306,7 @@ namespace Sla.DECCORE
         /// Datatype is \e not compared.
         /// \param op2 is the other RangeHint to compare with \b this
         /// \return -1, 0, or 1 depending on if \b this comes before, is equal to, or comes after
-        public int4 compare(RangeHint op2)
+        public int compare(RangeHint op2)
         {
             if (sstart != op2.sstart)
                 return (sstart < op2.sstart) ? -1 : 1;
@@ -314,8 +314,8 @@ namespace Sla.DECCORE
                 return (size < op2.size) ? -1 : 1;      // Small sizes come first
             if (rangeType != op2.rangeType)
                 return (rangeType < op2.rangeType) ? -1 : 1;
-            uint4 thisLock = flags & Varnode::typelock;
-            uint4 op2Lock = op2.flags & Varnode::typelock;
+            uint thisLock = flags & Varnode::typelock;
+            uint op2Lock = op2.flags & Varnode::typelock;
             if (thisLock != op2Lock)
                 return (thisLock < op2Lock) ? -1 : 1;
             if (highind != op2.highind)

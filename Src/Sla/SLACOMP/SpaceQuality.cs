@@ -24,11 +24,11 @@ namespace Sla.SLACOMP
         /// Name of the address space
         internal string name;
         /// Type of address space, \e ramtype or \e registertype
-        internal uint4 type;
+        internal uint type;
         /// Number of bytes required to index all bytes of the space
-        internal uint4 size;
+        internal uint size;
         /// Number of bytes in an addressable unit of the space
-        internal uint4 wordsize;
+        internal uint wordsize;
         /// \b true if the new address space will be the default
         internal bool isdefault;
 

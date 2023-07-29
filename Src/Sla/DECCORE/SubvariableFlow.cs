@@ -35,9 +35,9 @@ namespace Sla.DECCORE
             /// The new smaller Varnode
             internal Varnode replacement;
             /// Bits making up the logical sub-variable
-            internal uintb mask;
+            internal ulong mask;
             /// Value of constant (when vn==NULL)
-            internal uintb val;
+            internal ulong val;
             /// Defining op for new Varnode
             internal ReplaceOp def;
         }
@@ -53,7 +53,7 @@ namespace Sla.DECCORE
             /// Opcode of the new op
             internal OpCode opc;
             /// Number of parameters in (new) op
-            internal int4 numparams;
+            internal int numparams;
             /// Varnode output
             internal ReplaceVarnode output;
             /// Varnode inputs
@@ -87,13 +87,13 @@ namespace Sla.DECCORE
             /// (optional second parameter)
             internal ReplaceVarnode in2;
             /// slot being affected or other parameter
-            internal int4 slot;
+            internal int slot;
         }
 
         /// Size of the logical data-flow in bytes
-        private int4 flowsize;
+        private int flowsize;
         /// Number of bits in logical variable
-        private int4 bitsize;
+        private int bitsize;
         /// Have we tried to flow logical value across CPUI_RETURNs
         private bool returnsTraversed;
         /// Do we "know" initial seed point must be a sub variable
@@ -113,20 +113,20 @@ namespace Sla.DECCORE
         /// Subgraph variable nodes still needing to be traced
         private List<ReplaceVarnode> worklist;
         /// Number of instructions pulling out the logical value
-        private int4 pullcount;
+        private int pullcount;
 
         /// \brief Return \e slot of constant if INT_OR op sets all bits in mask, otherwise -1
         ///
         /// \param orop is the given CPUI_INT_OR op
         /// \param mask is the given mask
         /// \return constant slot or -1
-        private static int4 doesOrSet(PcodeOp orop, uintb mask)
+        private static int doesOrSet(PcodeOp orop, ulong mask)
         {
-            int4 index = (orop.getIn(1).isConstant() ? 1 : 0);
+            int index = (orop.getIn(1).isConstant() ? 1 : 0);
             if (!orop.getIn(index).isConstant())
                 return -1;
-            uintb orval = orop.getIn(index).getOffset();
-            if ((mask & (~orval)) == (uintb)0) // Are all masked bits one
+            ulong orval = orop.getIn(index).getOffset();
+            if ((mask & (~orval)) == (ulong)0) // Are all masked bits one
                 return index;
             return -1;
         }
@@ -136,13 +136,13 @@ namespace Sla.DECCORE
         /// \param andop is the given CPUI_INT_AND op
         /// \param mask is the given mask
         /// \return constant slot or -1
-        private static int4 doesAndClear(PcodeOp andop, uintb mask)
+        private static int doesAndClear(PcodeOp andop, ulong mask)
         {
-            int4 index = (andop.getIn(1).isConstant() ? 1 : 0);
+            int index = (andop.getIn(1).isConstant() ? 1 : 0);
             if (!andop.getIn(index).isConstant())
                 return -1;
-            uintb andval = andop.getIn(index).getOffset();
-            if ((mask & andval) == (uintb)0) // Are all masked bits zero
+            ulong andval = andop.getIn(index).getOffset();
+            if ((mask & andval) == (ulong)0) // Are all masked bits zero
                 return index;
             return -1;
         }
@@ -154,7 +154,7 @@ namespace Sla.DECCORE
         private Address getReplacementAddress(ReplaceVarnode rvn)
         {
             Address addr = rvn.vn.getAddr();
-            int4 sa = leastsigbit_set(rvn.mask) / 8; // Number of bytes value is shifted into container
+            int sa = leastsigbit_set(rvn.mask) / 8; // Number of bytes value is shifted into container
             if (addr.isBigEndian())
                 addr = addr + (rvn.vn.getSize() - flowsize - sa);
             else
@@ -174,7 +174,7 @@ namespace Sla.DECCORE
         /// \param mask is the given mask describing the bits of the logical value
         /// \param inworklist will hold \b true if the new node should be traced further
         /// \return the new subgraph variable node
-        private ReplaceVarnode setReplacement(Varnode vn, uintb mask, bool inworklist)
+        private ReplaceVarnode setReplacement(Varnode vn, ulong mask, bool inworklist)
         {
             ReplaceVarnode* res;
             if (vn.isMark())
@@ -193,9 +193,9 @@ namespace Sla.DECCORE
                 inworklist = false;
                 if (sextrestrictions)
                 {   // Check that -vn- is a sign extension
-                    uintb cval = vn.getOffset();
-                    uintb smallval = cval & mask; // From its logical size
-                    uintb sextval = sign_extend(smallval, flowsize, vn.getSize());// to its fullsize
+                    ulong cval = vn.getOffset();
+                    ulong smallval = cval & mask; // From its logical size
+                    ulong sextval = sign_extend(smallval, flowsize, vn.getSize());// to its fullsize
                     if (sextval != cval)
                         return (ReplaceVarnode*)0;
                 }
@@ -231,7 +231,7 @@ namespace Sla.DECCORE
                         return (ReplaceVarnode*)0; // This probably means the whole thing is a variable, i.e. quit
                     if (vn.isTypeLock() && vn.getType().getMetatype() != TYPE_PARTIALSTRUCT)
                     {
-                        int4 sz = vn.getType().getSize();
+                        int sz = vn.getType().getSize();
                         if (sz != flowsize)
                             return (ReplaceVarnode*)0;
                     }
@@ -280,7 +280,7 @@ namespace Sla.DECCORE
         /// \param numparam is the number of parameters in the new operator
         /// \param outrvn is the given output variable node
         /// \return the new logical subgraph operator object
-        private ReplaceOp createOp(OpCode opc, int4 numparam, ReplaceVarnode outrvn)
+        private ReplaceOp createOp(OpCode opc, int numparam, ReplaceVarnode outrvn)
         {
             if (outrvn.def != (ReplaceOp*)0)
                 return outrvn.def;
@@ -303,7 +303,7 @@ namespace Sla.DECCORE
         /// \param inrvn is the given input variable node
         /// \param slot is the input slot of the variable node
         /// \return the new logical subgraph operator objects
-        private ReplaceOp createOpDown(OpCode opc, int4 numparam, PcodeOp op, ReplaceVarnode inrvn, int4 slot)
+        private ReplaceOp createOpDown(OpCode opc, int numparam, PcodeOp op, ReplaceVarnode inrvn, int slot)
         {
             oplist.emplace_back();
             ReplaceOp* rop = &oplist.back();
@@ -326,7 +326,7 @@ namespace Sla.DECCORE
         /// \param rvn is the given subgraph variable acting as a parameter
         /// \param slot is the input slot of the variable within the CALL
         /// \return \b true if the parameter can be successfully trimmed to its logical size
-        private bool tryCallPull(PcodeOp op, ReplaceVarnode rvn, int4 slot)
+        private bool tryCallPull(PcodeOp op, ReplaceVarnode rvn, int slot)
         {
             if (slot == 0) return false;
             if (!aggressive)
@@ -356,7 +356,7 @@ namespace Sla.DECCORE
         /// \param rvn is the given subgraph variable flowing to the RETURN
         /// \param slot is the input slot of the subgraph variable
         /// \return \b true if the return value can be successfully trimmed to its logical size
-        private bool tryReturnPull(PcodeOp op, ReplaceVarnode rvn, int4 slot)
+        private bool tryReturnPull(PcodeOp op, ReplaceVarnode rvn, int slot)
         {
             if (slot == 0) return false;    // Don't deal with actual return address container
             if (fd.getFuncProto().isOutputLocked()) return false;
@@ -464,13 +464,13 @@ namespace Sla.DECCORE
             ReplaceOp* rop;
             PcodeOp* op;
             Varnode* outvn;
-            int4 slot;
-            int4 sa;
-            uintb newmask;
+            int slot;
+            int sa;
+            ulong newmask;
             bool booldir;
-            int4 dcount = 0;
-            int4 hcount = 0;
-            int4 callcount = 0;
+            int dcount = 0;
+            int hcount = 0;
+            int callcount = 0;
 
             list<PcodeOp*>::const_iterator iter, enditer;
             enditer = rvn.vn.endDescend();
@@ -556,7 +556,7 @@ namespace Sla.DECCORE
                             break;
                         }
                         if (!op.getIn(1).isConstant()) return false; // Dynamic shift
-                        sa = (int4)op.getIn(1).getOffset();
+                        sa = (int)op.getIn(1).getOffset();
                         newmask = (rvn.mask << sa) & calc_mask(outvn.getSize());
                         if (newmask == 0) break;    // Subvar is cleared, truncate flow
                         if (rvn.mask != (newmask >> sa)) return false; // subvar is clipped
@@ -583,7 +583,7 @@ namespace Sla.DECCORE
                             break;
                         }
                         if (!op.getIn(1).isConstant()) return false;
-                        sa = (int4)op.getIn(1).getOffset();
+                        sa = (int)op.getIn(1).getOffset();
                         newmask = rvn.mask >> sa;
                         if (newmask == 0)
                         {
@@ -611,7 +611,7 @@ namespace Sla.DECCORE
                         hcount += 1;        // Dealt with this descendant
                         break;
                     case CPUI_SUBPIECE:
-                        sa = (int4)op.getIn(1).getOffset() * 8;
+                        sa = (int)op.getIn(1).getOffset() * 8;
                         newmask = (rvn.mask >> sa) & calc_mask(outvn.getSize());
                         if (newmask == 0) break;    // subvar is set to zero, truncate flow
                         if (rvn.mask != (newmask << sa))
@@ -688,7 +688,7 @@ namespace Sla.DECCORE
                             if (!outvn.isConstant()) return false;
                             newmask = rvn.vn.getNZMask();
                             if (newmask != rvn.mask) return false;
-                            if (op.getIn(1 - slot).getOffset() == (uintb)0)
+                            if (op.getIn(1 - slot).getOffset() == (ulong)0)
                                 booldir = true;
                             else if (op.getIn(1 - slot).getOffset() == newmask)
                                 booldir = false;
@@ -701,7 +701,7 @@ namespace Sla.DECCORE
                             else
                             {
                                 rop = createOpDown(CPUI_BOOL_NEGATE, 1, op, rvn, 0);
-                                createNewOut(rop, (uintb)1);
+                                createNewOut(rop, (ulong)1);
                                 addTerminalPatch(op, rop.output);
                             }
                         }
@@ -758,8 +758,8 @@ namespace Sla.DECCORE
         {
             PcodeOp* op = rvn.vn.getDef();
             if (op == (PcodeOp*)0) return true; // If vn is input
-            int4 sa;
-            uintb newmask;
+            int sa;
+            ulong newmask;
             ReplaceOp* rop;
 
             switch (op.code())
@@ -769,7 +769,7 @@ namespace Sla.DECCORE
                 case CPUI_INT_NEGATE:
                 case CPUI_INT_XOR:
                     rop = createOp(op.code(), op.numInput(), rvn);
-                    for (int4 i = 0; i < op.numInput(); ++i)
+                    for (int i = 0; i < op.numInput(); ++i)
                         if (!createLink(rop, rvn.mask, i, op.getIn(i))) // Same inputs and mask
                             return false;
                     return true;
@@ -818,7 +818,7 @@ namespace Sla.DECCORE
                 case CPUI_INT_ADD:
                     if ((rvn.mask & 1) == 0)
                         break;          // Cannot account for carry
-                    if (rvn.mask == (uintb)1)
+                    if (rvn.mask == (ulong)1)
                         rop = createOp(CPUI_INT_XOR, 2, rvn); // Single bit add
                     else
                         rop = createOp(CPUI_INT_ADD, 2, rvn);
@@ -827,12 +827,12 @@ namespace Sla.DECCORE
                     return true;
                 case CPUI_INT_LEFT:
                     if (!op.getIn(1).isConstant()) break; // Dynamic shift
-                    sa = (int4)op.getIn(1).getOffset();
+                    sa = (int)op.getIn(1).getOffset();
                     newmask = rvn.mask >> sa;  // What mask looks like before shift
                     if (newmask == 0)
                     {       // Subvariable filled with shifted zero
                         rop = createOp(CPUI_COPY, 1, rvn);
-                        addNewConstant(rop, 0, (uintb)0);
+                        addNewConstant(rop, 0, (ulong)0);
                         return true;
                     }
                     if ((newmask << sa) != rvn.mask)
@@ -842,12 +842,12 @@ namespace Sla.DECCORE
                     return true;
                 case CPUI_INT_RIGHT:
                     if (!op.getIn(1).isConstant()) break; // Dynamic shift
-                    sa = (int4)op.getIn(1).getOffset();
+                    sa = (int)op.getIn(1).getOffset();
                     newmask = (rvn.mask << sa) & calc_mask(op.getIn(0).getSize());
                     if (newmask == 0)
                     {       // Subvariable filled with shifted zero
                         rop = createOp(CPUI_COPY, 1, rvn);
-                        addNewConstant(rop, 0, (uintb)0);
+                        addNewConstant(rop, 0, (ulong)0);
                         return true;
                     }
                     if ((newmask >> sa) != rvn.mask)
@@ -857,7 +857,7 @@ namespace Sla.DECCORE
                     return true;
                 case CPUI_INT_SRIGHT:
                     if (!op.getIn(1).isConstant()) break; // Dynamic shift
-                    sa = (int4)op.getIn(1).getOffset();
+                    sa = (int)op.getIn(1).getOffset();
                     newmask = (rvn.mask << sa) & calc_mask(op.getIn(0).getSize());
                     if ((newmask >> sa) != rvn.mask)
                         break;          // subvariable is truncated by shift
@@ -868,7 +868,7 @@ namespace Sla.DECCORE
                     sa = leastsigbit_set(rvn.mask);
                     if (sa != 0)
                     {
-                        int4 sa2 = leastsigbit_set(op.getIn(1).getNZMask());
+                        int sa2 = leastsigbit_set(op.getIn(1).getNZMask());
                         if (sa2 < sa) return false; // Cannot deal with carries into logical multiply
                         newmask = rvn.mask >> sa;
                         rop = createOp(CPUI_INT_MULT, 2, rvn);
@@ -877,7 +877,7 @@ namespace Sla.DECCORE
                     }
                     else
                     {
-                        if (rvn.mask == (uintb)1)
+                        if (rvn.mask == (ulong)1)
                             rop = createOp(CPUI_INT_AND, 2, rvn); // Single bit multiply
                         else
                             rop = createOp(CPUI_INT_MULT, 2, rvn);
@@ -886,7 +886,7 @@ namespace Sla.DECCORE
                     }
                     return true;
                 case CPUI_SUBPIECE:
-                    sa = (int4)op.getIn(1).getOffset() * 8;
+                    sa = (int)op.getIn(1).getOffset() * 8;
                     newmask = rvn.mask << sa;
                     rop = createOp(CPUI_COPY, 1, rvn);
                     if (!createLink(rop, newmask, 0, op.getIn(0))) return false;
@@ -933,7 +933,7 @@ namespace Sla.DECCORE
                     if ((rvn.mask & 1) == 1) break; // Not normal variable flow
                                                      // Variable is filled with zero
                     rop = createOp(CPUI_COPY, 1, rvn);
-                    addNewConstant(rop, 0, (uintb)0);
+                    addNewConstant(rop, 0, (ulong)0);
                     return true;
                 default:
                     break;          // Everything else we abort
@@ -952,10 +952,10 @@ namespace Sla.DECCORE
             ReplaceOp* rop;
             PcodeOp* op;
             Varnode* outvn;
-            int4 slot;
-            int4 dcount = 0;
-            int4 hcount = 0;
-            int4 callcount = 0;
+            int slot;
+            int dcount = 0;
+            int hcount = 0;
+            int callcount = 0;
 
             list<PcodeOp*>::const_iterator iter, enditer;
             enditer = rvn.vn.endDescend();
@@ -1058,7 +1058,7 @@ namespace Sla.DECCORE
                 case CPUI_INT_AND:
                 case CPUI_INT_OR:
                     rop = createOp(op.code(), op.numInput(), rvn);
-                    for (int4 i = 0; i < op.numInput(); ++i)
+                    for (int i = 0; i < op.numInput(); ++i)
                         if (!createLink(rop, rvn.mask, i, op.getIn(i))) // Same inputs and mask
                             return false;
                     return true;
@@ -1106,7 +1106,7 @@ namespace Sla.DECCORE
         /// \param slot is the input slot of the Varnode to the operation
         /// \param vn is the original input Varnode holding the logical value
         /// \return \b true is the subgraph is successfully extended to the input
-        private bool createLink(ReplaceOp rop, uintb mask, int4 slot, Varnode vn)
+        private bool createLink(ReplaceOp rop, ulong mask, int slot, Varnode vn)
         {
             bool inworklist;
             ReplaceVarnode* rep = setReplacement(vn, mask, inworklist);
@@ -1142,7 +1142,7 @@ namespace Sla.DECCORE
         /// \param slot is the input slot to the comparison of the variable already in the subgraph
         /// \param othervn is the Varnode holding the other side of the comparison
         /// \return \b true if the logical subgraph can successfully be extended through the comparison
-        private bool createCompareBridge(PcodeOp op, ReplaceVarnode inrvn, int4 slot, Varnode othervn)
+        private bool createCompareBridge(PcodeOp op, ReplaceVarnode inrvn, int slot, Varnode othervn)
         {
             bool inworklist;
             ReplaceVarnode* rep = setReplacement(othervn, inrvn.mask, inworklist);
@@ -1196,7 +1196,7 @@ namespace Sla.DECCORE
         /// \param pullop is the PcodeOp pulling the logical value out of the subgraph
         /// \param rvn is the given subgraph variable holding the logical value
         /// \param slot is the input slot to the operation
-        private void addTerminalPatchSameOp(PcodeOp pullop, ReplaceVarnode rvn, int4 slot)
+        private void addTerminalPatchSameOp(PcodeOp pullop, ReplaceVarnode rvn, int slot)
         {
             patchlist.emplace_back();
             patchlist.back().type = PatchRecord::parameter_patch;   // Keep the original op, just change input
@@ -1213,7 +1213,7 @@ namespace Sla.DECCORE
         /// \param pullop is the operation taking the boolean input
         /// \param rvn is the given bit variable
         /// \param slot is the input slot of the variable to the operation
-        private void addBooleanPatch(PcodeOp pullop, ReplaceVarnode rvn, int4 slot)
+        private void addBooleanPatch(PcodeOp pullop, ReplaceVarnode rvn, int slot)
         {
             patchlist.emplace_back();
             patchlist.back().type = PatchRecord::parameter_patch;   // Make no change to the operator, just put in the new input
@@ -1230,7 +1230,7 @@ namespace Sla.DECCORE
         /// \param rvn is the given subgraph variable
         /// \param pushop is the operation that pads the variable
         /// \param sa is the amount the logical value is shifted to the left
-        private void addSuggestedPatch(ReplaceVarnode rvn, PcodeOp pushop, int4 sa)
+        private void addSuggestedPatch(ReplaceVarnode rvn, PcodeOp pushop, int sa)
         {
             patchlist.emplace_back();
             patchlist.back().type = PatchRecord::extension_patch;
@@ -1266,7 +1266,7 @@ namespace Sla.DECCORE
         /// \param slot is the input slot to the operation
         /// \param constvn is the original constant
         /// \return the new constant variable node
-        private ReplaceVarnode addConstant(ReplaceOp rop, uintb mask, uint4 slot, Varnode constvn)
+        private ReplaceVarnode addConstant(ReplaceOp rop, ulong mask, uint slot, Varnode constvn)
         {
             newvarlist.emplace_back();
             ReplaceVarnode* res = &newvarlist.back();
@@ -1275,7 +1275,7 @@ namespace Sla.DECCORE
             res.mask = mask;
 
             // Calculate the actual constant value
-            int4 sa = leastsigbit_set(mask);
+            int sa = leastsigbit_set(mask);
             res.val = (mask & constvn.getOffset()) >> sa;
             res.def = (ReplaceOp*)0;
             if (rop != (ReplaceOp*)0)
@@ -1294,7 +1294,7 @@ namespace Sla.DECCORE
         /// \param slot is the input slot to the operation
         /// \param val is the constant value
         /// \return the new constant variable node
-        private ReplaceVarnode addNewConstant(ReplaceOp rop, uint4 slot, uintb val)
+        private ReplaceVarnode addNewConstant(ReplaceOp rop, uint slot, ulong val)
         {
             newvarlist.emplace_back();
             ReplaceVarnode* res = &newvarlist.back();
@@ -1318,7 +1318,7 @@ namespace Sla.DECCORE
         /// is defined by rop (the -def- field is filled in) this can still be distinguished from a constant.
         /// \param rop is the logical operation taking the new output
         /// \param mask describes the logical value
-        private void createNewOut(ReplaceOp rop, uintb mask)
+        private void createNewOut(ReplaceOp rop, ulong mask)
         {
             newvarlist.emplace_back();
             ReplaceVarnode* res = &newvarlist.back();
@@ -1359,12 +1359,12 @@ namespace Sla.DECCORE
             if ((rvn.mask & 1) == 0) return false; // Not aligned
             if (bitsize >= 8) return true;
             if (aggressive) return true;
-            uint4 bitmask = 1;
+            uint bitmask = 1;
             // Try to decide if this is the ONLY subvariable passing through
             // this container
             bitmask = (bitmask << bitsize) - 1;
-            uintb mask = rvn.vn.getConsume();
-            mask |= (uintb)bitmask;
+            ulong mask = rvn.vn.getConsume();
+            mask |= (ulong)bitmask;
             if (mask == rvn.mask) return true;
             return false;           // If more of the varnode is consumed than is in just this flow
         }
@@ -1434,11 +1434,11 @@ namespace Sla.DECCORE
         /// \param aggr is \b true if we should use aggressive (less restrictive) tests during the trace
         /// \param sext is \b true if we should assume sign extensions from the logical value into its container
         /// \param big is \b true if we look for subvariable flow for \e big (8-byte) logical values
-        public SubvariableFlow(Funcdata f, Varnode root, uintb mask, bool aggr, bool sext, bool big)
+        public SubvariableFlow(Funcdata f, Varnode root, ulong mask, bool aggr, bool sext, bool big)
         {
             fd = f;
             returnsTraversed = false;
-            if (mask == (uintb)0)
+            if (mask == (ulong)0)
             {
                 fd = (Funcdata*)0;
                 return;
@@ -1547,7 +1547,7 @@ namespace Sla.DECCORE
             for (iter = oplist.begin(); iter != oplist.end(); ++iter)
             {
                 PcodeOp* newop = (*iter).replacement;
-                for (uint4 i = 0; i < (*iter).input.size(); ++i)
+                for (uint i = 0; i < (*iter).input.size(); ++i)
                     fd.opSetInput(newop, getReplaceVarnode((*iter).input[i]), i);
             }
 
@@ -1575,10 +1575,10 @@ namespace Sla.DECCORE
                         {
                             // These are operations that flow the small variable into a bigger variable but
                             // where all the remaining bits are zero
-                            int4 sa = (*piter).slot;
+                            int sa = (*piter).slot;
                             List<Varnode*> invec;
                             Varnode* inVn = getReplaceVarnode((*piter).in1);
-                            int4 outSize = pullop.getOut().getSize();
+                            int outSize = pullop.getOut().getSize();
                             if (sa == 0)
                             {
                                 invec.push_back(inVn);

@@ -25,7 +25,7 @@ namespace Sla.EXTRA
         {
             internal PcodeOp op;
             internal Varnode vn;
-            internal uintb cn;
+            internal ulong cn;
             internal BlockBasic bl;
         }
         private Store storespot;
@@ -35,7 +35,7 @@ namespace Sla.EXTRA
             type = op_type;
         }
 
-        public UnifyDatatype(uint4 tp)
+        public UnifyDatatype(uint tp)
         {
             type = tp;
             switch (type)
@@ -45,7 +45,7 @@ namespace Sla.EXTRA
                 case block_type:
                     break;
                 case const_type:
-                    storespot.cn = new uintb;
+                    storespot.cn = new ulong;
                     break;
                 default:
                     throw new LowlevelError("Bad unify datatype");
@@ -62,7 +62,7 @@ namespace Sla.EXTRA
                 case block_type:
                     break;
                 case const_type:
-                    storespot.cn = new uintb; // Copy needs its own memory
+                    storespot.cn = new ulong; // Copy needs its own memory
                     break;
                 default:
                     throw new LowlevelError("Bad unify datatype");
@@ -91,7 +91,7 @@ namespace Sla.EXTRA
                 case block_type:
                     break;
                 case const_type:
-                    storespot.cn = new uintb; // Copy needs its own memory
+                    storespot.cn = new ulong; // Copy needs its own memory
                     break;
                 default:
                     throw new LowlevelError("Bad unify datatype");
@@ -115,7 +115,7 @@ namespace Sla.EXTRA
             }
         }
 
-        public uint4 getType() => type;
+        public uint getType() => type;
 
         public void setOp(PcodeOp o)
         {
@@ -138,14 +138,14 @@ namespace Sla.EXTRA
 
         public BlockBasic getBlock() => storespot.bl;
 
-        public void setConstant(uintb val)
+        public void setConstant(ulong val)
         {
             storespot.cn = val;
         }
 
-        public uintb getConstant() => storespot.cn;
+        public ulong getConstant() => storespot.cn;
 
-        public void printVarDecl(TextWriter s, int4 id, UnifyCPrinter cprinter)
+        public void printVarDecl(TextWriter s, int id, UnifyCPrinter cprinter)
         {
             cprinter.printIndent(s);
             switch (type)
@@ -160,7 +160,7 @@ namespace Sla.EXTRA
                     s << "BlockBasic *" << cprinter.getName(id) << ';' << endl;
                     break;
                 case const_type:
-                    s << "uintb " << cprinter.getName(id) << ';' << endl;
+                    s << "ulong " << cprinter.getName(id) << ';' << endl;
                     break;
                 default:
                     throw new LowlevelError("Bad unify datatype");

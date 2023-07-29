@@ -11,16 +11,16 @@ namespace Sla.EXTRA
     internal class ConstantOffset : RHSConstant
     {
         // A varnode's offset
-        private int4 varindex;
+        private int varindex;
         
-        public ConstantOffset(int4 ind)
+        public ConstantOffset(int ind)
         {
             varindex = ind;
         }
         
         public override RHSConstant clone() => new ConstantOffset(varindex);
 
-        public override uintb getConstant(UnifyState state)
+        public override ulong getConstant(UnifyState state)
         {
             Varnode* vn = state.data(varindex).getVarnode();
             return vn.getOffset();

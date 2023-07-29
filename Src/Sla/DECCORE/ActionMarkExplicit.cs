@@ -26,9 +26,9 @@ namespace Sla.DECCORE
             /// The Varnode at this particular point in the path
             internal Varnode vn;
             /// The slot of the first input Varnode to traverse in this subexpression
-            internal int4 slot;
+            internal int slot;
             /// The slot(+1) of the last input Varnode to traverse in this subexpression
-            internal int4 slotback;
+            internal int slotback;
 
             /// Record the Varnode just encountered and set-up the next (backward) edges to traverse.
             /// \param v is the Varnode just encountered
@@ -147,7 +147,7 @@ namespace Sla.DECCORE
                         maxref = 1000000;   // Should always be implicit, so remove limit on max references
                 }
             }
-            int4 desccount = 0;
+            int desccount = 0;
             for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {
                 PcodeOp* op = *iter;
@@ -171,18 +171,18 @@ namespace Sla.DECCORE
         {
             List<Varnode*> purgelist;
 
-            for (int4 i = 0; i < multlist.size(); ++i)
+            for (int i = 0; i < multlist.size(); ++i)
             {
                 Varnode* vn = multlist[i];  // All elements in this list should have a defining op
                 PcodeOp* op = vn.getDef();
                 OpCode opc = op.code();
                 if (op.isBoolOutput() || (opc == CPUI_INT_ZEXT) || (opc == CPUI_INT_SEXT) || (opc == CPUI_PTRADD))
                 {
-                    int4 maxparam = 2;
+                    int maxparam = 2;
                     if (op.numInput() < maxparam)
                         maxparam = op.numInput();
                     Varnode* topvn = (Varnode*)0;
-                    for (int4 j = 0; j < maxparam; ++j)
+                    for (int j = 0; j < maxparam; ++j)
                     {
                         topvn = op.getIn(j);
                         if (topvn.isMark())
@@ -206,7 +206,7 @@ namespace Sla.DECCORE
                 }
             }
 
-            for (int4 i = 0; i < purgelist.size(); ++i)
+            for (int i = 0; i < purgelist.size(); ++i)
             {
                 Varnode* vn = purgelist[i];
                 vn.setExplicit();
@@ -228,7 +228,7 @@ namespace Sla.DECCORE
         {
             List<OpStackElement> opstack;
             Varnode* vncur;
-            int4 finalcount = 0;
+            int finalcount = 0;
 
             opstack.push_back(vn);
             do
@@ -318,7 +318,7 @@ namespace Sla.DECCORE
         {
             VarnodeDefSet::const_iterator viter, enditer;
             List<Varnode*> multlist;      // implied varnodes with >1 descendants
-            int4 maxref;
+            int maxref;
 
             maxref = data.getArch().max_implied_ref;
             enditer = data.beginDef(0); // Cut out free varnodes
@@ -326,7 +326,7 @@ namespace Sla.DECCORE
             {
                 Varnode* vn = *viter;
 
-                int4 desccount = baseExplicit(vn, maxref);
+                int desccount = baseExplicit(vn, maxref);
                 if (desccount < 0)
                 {
                     vn.setExplicit();
@@ -342,14 +342,14 @@ namespace Sla.DECCORE
             }
 
             count += multipleInteraction(multlist);
-            int4 maxdup = data.getArch().max_term_duplication;
-            for (int4 i = 0; i < multlist.size(); ++i)
+            int maxdup = data.getArch().max_term_duplication;
+            for (int i = 0; i < multlist.size(); ++i)
             {
                 Varnode* vn = multlist[i];
                 if (vn.isMark())       // Mark may have been cleared by multipleInteraction
                     processMultiplier(vn, maxdup);
             }
-            for (int4 i = 0; i < multlist.size(); ++i)
+            for (int i = 0; i < multlist.size(); ++i)
                 multlist[i].clearMark();
             return 0;
         }

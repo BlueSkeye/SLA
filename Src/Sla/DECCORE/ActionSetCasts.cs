@@ -42,7 +42,7 @@ namespace Sla.DECCORE
         private static void checkPointerIssues(PcodeOp op, Varnode vn, Funcdata data)
         {
             Datatype* ptrtype = op.getIn(1).getHighTypeReadFacing(op);
-            int4 valsize = vn.getSize();
+            int valsize = vn.getSize();
             if ((ptrtype.getMetatype() != TYPE_PTR) || (((TypePointer*)ptrtype).getPtrTo().getSize() != valsize))
             {
                 string name = op.getOpcode().getName();
@@ -116,8 +116,8 @@ namespace Sla.DECCORE
             Datatype* outType = outvn.getHigh().getType();
             Datatype* inType = op.getIn(slot).getHigh().getType();
             if (!inType.needsResolution() && !outType.needsResolution()) return false;
-            int4 inResolve = -1;
-            int4 outResolve = -1;
+            int inResolve = -1;
+            int outResolve = -1;
             if (inType.needsResolution())
             {
                 inResolve = inType.findCompatibleResolve(outType);
@@ -176,7 +176,7 @@ namespace Sla.DECCORE
         /// \param slot is index of the input slot being read
         /// \param data is the containing function
         /// \return 1 if a PTRSUB is inserted, 0 otherwise
-        private static int4 resolveUnion(PcodeOp op, int slot, Funcdata data)
+        private static int resolveUnion(PcodeOp op, int slot, Funcdata data)
         {
             Varnode* vn = op.getIn(slot);
             if (vn.isAnnotation()) return 0;
@@ -425,7 +425,7 @@ namespace Sla.DECCORE
             // We follow data flow, doing basic blocks in dominance order
             // Doing operations in basic block order
             BlockGraph basicblocks = data.getBasicBlocks();
-            for (int4 j = 0; j < basicblocks.getSize(); ++j)
+            for (int j = 0; j < basicblocks.getSize(); ++j)
             {
                 BlockBasic* bb = (BlockBasic*)basicblocks.getBlock(j);
                 for (iter = bb.beginOp(); iter != bb.endOp(); ++iter)
@@ -436,7 +436,7 @@ namespace Sla.DECCORE
                     if (opc == CPUI_CAST) continue;
                     if (opc == CPUI_PTRADD)
                     {   // Check for PTRADD that no longer fits its pointer
-                        int4 sz = (int4)op.getIn(2).getOffset();
+                        int sz = (int)op.getIn(2).getOffset();
                         TypePointer* ct = (TypePointer*)op.getIn(0).getHighTypeReadFacing(op);
                         if ((ct.getMetatype() != TYPE_PTR) || (ct.getPtrTo().getSize() != AddrSpace::addressToByteInt(sz, ct.getWordSize())))
                             data.opUndoPtradd(op, true);
@@ -455,7 +455,7 @@ namespace Sla.DECCORE
                         }
                     }
                     // Do input casts first, as output may depend on input
-                    for (int4 i = 0; i < op.numInput(); ++i)
+                    for (int i = 0; i < op.numInput(); ++i)
                     {
                         count += resolveUnion(op, i, data);
                         count += castInput(op, i, data, castStrategy);

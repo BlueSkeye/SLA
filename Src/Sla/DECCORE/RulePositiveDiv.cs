@@ -27,16 +27,16 @@ namespace Sla.DECCORE
         ///
         /// If the sign bit of both the numerator and denominator of a signed division (or remainder)
         /// are zero, then convert to the unsigned form of the operation.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_SDIV);
             oplist.push_back(CPUI_INT_SREM);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
-            int4 sa = op.getOut().getSize();
-            if (sa > sizeof(uintb)) return 0;
+            int sa = op.getOut().getSize();
+            if (sa > sizeof(ulong)) return 0;
             sa = sa * 8 - 1;
             if (((op.getIn(0).getNZMask() >> sa) & 1) != 0)
                 return 0;       // Input 0 may be negative

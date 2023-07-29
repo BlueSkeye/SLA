@@ -23,15 +23,15 @@ namespace Sla.DECCORE
     internal class ParamListStandard : ParamList
     {
         /// Number of \e groups in this parameter convention
-        protected int4 numgroup;
+        protected int numgroup;
         /// Maximum heritage delay across all parameters
-        protected int4 maxdelay;
+        protected int maxdelay;
         /// If non-zero, maximum size of a data-type before converting to a pointer
-        protected int4 pointermax;
+        protected int pointermax;
         /// Does a \b this parameter come before a hidden return parameter
         protected bool thisbeforeret;
         /// The starting group for each resource section
-        protected List<int4> resourceStart;
+        protected List<int> resourceStart;
         /// The ordered list of parameter entries
         protected List<ParamEntry> entry;
         /// Map from space id to resolver
@@ -40,45 +40,45 @@ namespace Sla.DECCORE
         protected AddrSpace spacebase;
 
         /// Given storage location find matching ParamEntry
-        protected ParamEntry findEntry(Address loc,int4 size);
+        protected ParamEntry findEntry(Address loc,int size);
 
         /// Assign storage for given parameter data-type
-        protected Address assignAddress(Datatype tp, List<int4> status);
+        protected Address assignAddress(Datatype tp, List<int> status);
 
         /// Select entry to fill an unreferenced param
-        protected ParamEntry selectUnreferenceEntry(int4 grp, type_metatype prefType);
+        protected ParamEntry selectUnreferenceEntry(int grp, type_metatype prefType);
 
         /// Build map from parameter trials to model ParamEntrys
         protected void buildTrialMap(ParamActive active);
         
         protected void separateSections(ParamActive active, List<int> trialStart);
         
-        protected static void markGroupNoUse(ParamActive active, int4 activeTrial, int4 trialStart);
+        protected static void markGroupNoUse(ParamActive active, int activeTrial, int trialStart);
         
-        protected static void markBestInactive(ParamActive active, int4 group, int4 groupStart,
+        protected static void markBestInactive(ParamActive active, int group, int groupStart,
             type_metatype prefType);
         
         protected static void forceExclusionGroup(ParamActive active);
         
-        protected static void forceNoUse(ParamActive active, int4 start, int4 stop);
+        protected static void forceNoUse(ParamActive active, int start, int stop);
         
-        protected static void forceInactiveChain(ParamActive active, int4 maxchain, int4 start,
-            int4 stop, int4 groupstart);
+        protected static void forceInactiveChain(ParamActive active, int maxchain, int start,
+            int stop, int groupstart);
 
         /// Calculate the maximum heritage delay for any potential parameter in this list
         protected void calcDelay();
         
-        protected void addResolverRange(AddrSpace spc, uintb first, uintb last,
-            ParamEntry paramEntry, int4 position);
+        protected void addResolverRange(AddrSpace spc, ulong first, ulong last,
+            ParamEntry paramEntry, int position);
 
         /// Build the ParamEntry resolver maps
         protected void populateResolver();
         
         protected void parsePentry(Decoder decoder, List<EffectRecord> effectlist,
-                 int4 groupid, bool normalstack, bool autokill, bool splitFloat, bool grouped);
+                 int groupid, bool normalstack, bool autokill, bool splitFloat, bool grouped);
         
         protected void parseGroup(Decoder decoder, List<EffectRecord> effectlist,
-                int4 groupid, bool normalstack, bool autokill, bool splitFloat);
+                int groupid, bool normalstack, bool autokill, bool splitFloat);
 
         /// Construct for use with decode()
         public ParamListStandard()
@@ -93,34 +93,34 @@ namespace Sla.DECCORE
         /// Get the list of parameter entries
         public List<ParamEntry> getEntry() => entry;
 
-        public virtual uint4 getType() => p_standard;
+        public virtual uint getType() => p_standard;
 
         public virtual void assignMap(List<Datatype> proto, TypeFactory typefactory,
             List<ParameterPieces> res);
 
         public virtual void fillinMap(ParamActive active);
 
-        public virtual bool checkJoin(Address hiaddr, int4 hisize, Address loaddr, int4 losize);
+        public virtual bool checkJoin(Address hiaddr, int hisize, Address loaddr, int losize);
 
-        public virtual bool checkSplit(Address loc, int4 size, int4 splitpoint);
+        public virtual bool checkSplit(Address loc, int size, int splitpoint);
 
-        public virtual int4 characterizeAsParam(Address loc, int4 size);
+        public virtual int characterizeAsParam(Address loc, int size);
 
-        public virtual bool possibleParam(Address loc, int4 size);
+        public virtual bool possibleParam(Address loc, int size);
 
-        public virtual bool possibleParamWithSlot(Address loc, int4 size, int4 slot, int4 slotsize);
+        public virtual bool possibleParamWithSlot(Address loc, int size, int slot, int slotsize);
 
-        public virtual bool getBiggestContainedParam(Address loc, int4 size, VarnodeData res);
+        public virtual bool getBiggestContainedParam(Address loc, int size, VarnodeData res);
 
-        public virtual bool unjustifiedContainer(Address loc, int4 size, VarnodeData res);
+        public virtual bool unjustifiedContainer(Address loc, int size, VarnodeData res);
 
-        public virtual OpCode assumedExtension(Address addr, int4 size, VarnodeData res);
+        public virtual OpCode assumedExtension(Address addr, int size, VarnodeData res);
 
         public virtual AddrSpace getSpacebase() => spacebase;
 
         public virtual void getRangeList(AddrSpace spc, RangeList res);
 
-        public virtual int4 getMaxDelay() => maxdelay;
+        public virtual int getMaxDelay() => maxdelay;
 
         public virtual void decode(Decoder decoder, List<EffectRecord> effectlist, bool normalstack);
 

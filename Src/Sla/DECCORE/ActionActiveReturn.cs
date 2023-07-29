@@ -25,7 +25,7 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            int4 i;
+            int i;
             FuncCallSpecs* fc;
 
             for (i = 0; i < data.numCalls(); ++i)

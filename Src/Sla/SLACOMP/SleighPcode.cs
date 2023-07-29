@@ -15,7 +15,7 @@ namespace Sla.SLACOMP
     {
         private SleighCompile compiler;            ///< The main SLEIGH parser
         
-        protected virtual uint4 allocateTemp() => compiler.getUniqueAddr();
+        protected virtual uint allocateTemp() => compiler.getUniqueAddr();
 
         protected virtual Location getLocation(SleighSymbol sym) => compiler.getLocation(sym);
 

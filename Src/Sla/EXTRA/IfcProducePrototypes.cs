@@ -34,7 +34,7 @@ namespace Sla.EXTRA
             }
             ProtoModelMerged* model = (ProtoModelMerged*)dcp.conf.evalfp_current;
             *status.optr << "Trying to distinguish between prototypes:" << endl;
-            for (int4 i = 0; i < model.numModels(); ++i)
+            for (int i = 0; i < model.numModels(); ++i)
                 *status.optr << "  " << model.getModel(i).getName() << endl;
 
             iterateFunctionsLeafOrder();

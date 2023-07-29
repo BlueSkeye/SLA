@@ -24,12 +24,12 @@ namespace Sla.DECCORE
 
         /// \class RuleNegateIdentity
         /// \brief Apply INT_NEGATE identities:  `V & ~V  => #0,  V | ~V  .  #-1`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_NEGATE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn = op.getIn(0);
             Varnode* outVn = op.getOut();
@@ -40,9 +40,9 @@ namespace Sla.DECCORE
                 OpCode opc = logicOp.code();
                 if (opc != CPUI_INT_AND && opc != CPUI_INT_OR && opc != CPUI_INT_XOR)
                     continue;
-                int4 slot = logicOp.getSlot(outVn);
+                int slot = logicOp.getSlot(outVn);
                 if (logicOp.getIn(1 - slot) != vn) continue;
-                uintb value = 0;
+                ulong value = 0;
                 if (opc != CPUI_INT_AND)
                     value = calc_mask(vn.getSize());
                 data.opSetInput(logicOp, data.newConstant(vn.getSize(), value), 0);

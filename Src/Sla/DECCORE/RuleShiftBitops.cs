@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         ///
         /// `( V & 0xf000 ) << 4   =>   #0 << 4`
         /// `( V + 0xf000 ) << 4   =>    V << 4`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_LEFT);
             oplist.push_back(CPUI_INT_RIGHT);
@@ -35,28 +35,28 @@ namespace Sla.DECCORE
             oplist.push_back(CPUI_INT_MULT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* constvn = op.getIn(1);
             if (!constvn.isConstant()) return 0;   // Must be a constant shift
             Varnode* vn = op.getIn(0);
             if (!vn.isWritten()) return 0;
-            if (vn.getSize() > sizeof(uintb)) return 0;    // FIXME: Can't exceed uintb precision
-            int4 sa;
+            if (vn.getSize() > sizeof(ulong)) return 0;    // FIXME: Can't exceed ulong precision
+            int sa;
             bool leftshift;
 
             switch (op.code())
             {
                 case CPUI_INT_LEFT:
-                    sa = (int4)constvn.getOffset();
+                    sa = (int)constvn.getOffset();
                     leftshift = true;
                     break;
                 case CPUI_INT_RIGHT:
-                    sa = (int4)constvn.getOffset();
+                    sa = (int)constvn.getOffset();
                     leftshift = false;
                     break;
                 case CPUI_SUBPIECE:
-                    sa = (int4)constvn.getOffset();
+                    sa = (int)constvn.getOffset();
                     sa = sa * 8;
                     leftshift = false;
                     break;
@@ -84,16 +84,16 @@ namespace Sla.DECCORE
                     return 0;
             }
 
-            int4 i;
+            int i;
             for (i = 0; i < bitop.numInput(); ++i)
             {
-                uintb nzm = bitop.getIn(i).getNZMask();
-                uintb mask = calc_mask(op.getOut().getSize());
+                ulong nzm = bitop.getIn(i).getNZMask();
+                ulong mask = calc_mask(op.getOut().getSize());
                 if (leftshift)
                     nzm = pcode_left(nzm, sa);
                 else
                     nzm = pcode_right(nzm, sa);
-                if ((nzm & mask) == (uintb)0) break;
+                if ((nzm & mask) == (ulong)0) break;
             }
             if (i == bitop.numInput()) return 0;
             switch (bitop.code())

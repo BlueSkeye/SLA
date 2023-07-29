@@ -31,7 +31,7 @@ namespace Sla.DECCORE
             else
             {
                 res = "Unimplemented instructions now NOT a fatal error";
-                glb.flowoptions &= ~((uint4)FlowInfo::error_unimplemented);
+                glb.flowoptions &= ~((uint)FlowInfo::error_unimplemented);
             }
 
             return res;

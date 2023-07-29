@@ -30,12 +30,12 @@ namespace Sla.DECCORE
         ///
         /// where n = d*8. All extensions and right-shifts must be unsigned
         /// n must be equal to the size of SUBPIECE's truncation.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_RIGHT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (!op.getIn(1).isConstant()) return 0;
             if (op.getIn(1).getOffset() != 1) return 0;
@@ -45,7 +45,7 @@ namespace Sla.DECCORE
             Varnode* x = (Varnode*)0;
             Varnode* compvn;
             PcodeOp* compop;
-            int4 i;
+            int i;
             for (i = 0; i < 2; ++i)
             {
                 compvn = subop.getIn(i);
@@ -71,7 +71,7 @@ namespace Sla.DECCORE
             if (!z.isWritten()) return 0;
             PcodeOp* subpieceop = z.getDef();
             if (subpieceop.code() != CPUI_SUBPIECE) return 0;
-            int4 n = subpieceop.getIn(1).getOffset() * 8;
+            int n = subpieceop.getIn(1).getOffset() * 8;
             if (n != 8 * (subpieceop.getIn(0).getSize() - z.getSize())) return 0;
             Varnode* multvn = subpieceop.getIn(0);
             if (!multvn.isWritten()) return 0;
@@ -91,9 +91,9 @@ namespace Sla.DECCORE
                 if (addop.code() != CPUI_INT_ADD) continue;
                 if ((addop.getIn(0) != z) && (addop.getIn(1) != z)) continue;
 
-                uintb pow = 1;
+                ulong pow = 1;
                 pow <<= n;          // Calculate 2^n
-                uintb newc = multop.getIn(1).getOffset() + pow;
+                ulong newc = multop.getIn(1).getOffset() + pow;
                 PcodeOp* newmultop = data.newOp(2, op.getAddr());
                 data.opSetOpcode(newmultop, CPUI_INT_MULT);
                 Varnode* newmultvn = data.newUniqueOut(zextvn.getSize(), newmultop);

@@ -33,12 +33,12 @@ namespace Sla.DECCORE
         ///    - `sub(zext(V),0)  =>  zext(V)`
         ///
         /// This rule also works with INT_SEXT.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_SUBPIECE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode * base = op.getIn(0);
             if (!base.isWritten()) return 0;
@@ -47,7 +47,7 @@ namespace Sla.DECCORE
                 return 0;
             Varnode* invn = extop.getIn(0);
             if (invn.isFree()) return 0;
-            int4 subcut = (int4)op.getIn(1).getOffset();
+            int subcut = (int)op.getIn(1).getOffset();
             if (op.getOut().getSize() + subcut <= invn.getSize())
             {
                 // SUBPIECE doesn't hit the extended bits at all
@@ -68,7 +68,7 @@ namespace Sla.DECCORE
                 PcodeOp* newop = data.newOp(2, op.getAddr());
                 data.opSetOpcode(newop, CPUI_SUBPIECE);
                 newvn = data.newUniqueOut(invn.getSize() - subcut, newop);
-                data.opSetInput(newop, data.newConstant(op.getIn(1).getSize(), (uintb)subcut), 1);
+                data.opSetInput(newop, data.newConstant(op.getIn(1).getSize(), (ulong)subcut), 1);
                 data.opSetInput(newop, invn, 0);
                 data.opInsertBefore(newop, op);
             }

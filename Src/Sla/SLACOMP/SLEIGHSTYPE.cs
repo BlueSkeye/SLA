@@ -12,11 +12,11 @@ namespace Sla.SLACOMP
     internal class /*union*/ SLEIGHSTYPE
     {
         internal char ch;
-        internal uintb* i;
-        internal intb* big;
+        internal ulong* i;
+        internal long* big;
         internal string str;
         internal List<string> strlist;
-        internal List<intb> biglist;
+        internal List<long> biglist;
         internal List<ExprTree> param;
         internal SpaceQuality spacequal;
         internal FieldQuality fieldqual;

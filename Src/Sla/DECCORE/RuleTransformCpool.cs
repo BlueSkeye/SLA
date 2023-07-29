@@ -28,17 +28,17 @@ namespace Sla.DECCORE
         ///
         /// If a reference into the constant pool is a constant, convert the CPOOLREF to
         /// a COPY of the constant.  Otherwise just append the type id of the reference to the top.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_CPOOLREF);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             if (op.isCpoolTransformed()) return 0;     // Already visited
             data.opMarkCpoolTransformed(op);    // Mark our visit
-            List<uintb> refs;
-            for (int4 i = 1; i < op.numInput(); ++i)
+            List<ulong> refs;
+            for (int i = 1; i < op.numInput(); ++i)
                 refs.push_back(op.getIn(i).getOffset());
             CPoolRecord rec = data.getArch().cpool.getRecord(refs);    // Recover the record
             if (rec != (CPoolRecord*)0) {
@@ -48,7 +48,7 @@ namespace Sla.DECCORE
                 }
                 else if (rec.getTag() == CPoolRecord::primitive)
                 {
-                    int4 sz = op.getOut().getSize();
+                    int sz = op.getOut().getSize();
                     Varnode* cvn = data.newConstant(sz, rec.getValue() & calc_mask(sz));
                     cvn.updateType(rec.getType(), true, true);
                     while (op.numInput() > 1)

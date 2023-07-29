@@ -139,8 +139,8 @@ namespace Sla.DECCORE
             }
         }
 
-        protected override SymbolEntry addMapInternal(Symbol sym, uint4 exfl, Address addr,
-            int4 off, int4 sz, RangeList uselim)
+        protected override SymbolEntry addMapInternal(Symbol sym, uint exfl, Address addr,
+            int off, int sz, RangeList uselim)
         {
             // Find or create the appropriate rangemap
             AddrSpace* spc = addr.getSpace();
@@ -173,8 +173,8 @@ namespace Sla.DECCORE
             return &(*iter);
         }
 
-        protected override SymbolEntry addDynamicMapInternal(Symbol sym, uint4 exfl, uint8 hash,
-            int4 off, int4 sz, RangeList uselim)
+        protected override SymbolEntry addDynamicMapInternal(Symbol sym, uint exfl, ulong hash,
+            int off, int sz, RangeList uselim)
         {
             dynamicentry.push_back(SymbolEntry(sym, exfl, hash, off, sz, uselim));
             list<SymbolEntry>::iterator iter = dynamicentry.end();
@@ -200,13 +200,13 @@ namespace Sla.DECCORE
         /// Set of symbols with multiple entries
         protected SymbolNameTree multiEntrySet;
         /// Next available symbol id
-        protected uint8 nextUniqueId;
+        protected ulong nextUniqueId;
 
         /// Construct the Scope
         /// \param id is the globally unique id associated with the scope
         /// \param nm is the name of the Scope
         /// \param g is the Architecture it belongs to
-        public ScopeInternal(uint8 id, string nm, Architecture g)
+        public ScopeInternal(ulong id, string nm, Architecture g)
             : base(id, nm, g, this)
         {
             nextUniqueId = 0;
@@ -214,7 +214,7 @@ namespace Sla.DECCORE
         }
 
         /// Construct as a cache
-        public ScopeInternal(uint8 id, string nm,Architecture g, Scope own)
+        public ScopeInternal(ulong id, string nm,Architecture g, Scope own)
             : base(id, nm, g, own)
         {
             nextUniqueId = 0;
@@ -239,12 +239,12 @@ namespace Sla.DECCORE
         /// clear out the entire category, marking all symbols as uncategorized
         public override void categorySanity()
         {
-            for (int4 i = 0; i < category.size(); ++i)
+            for (int i = 0; i < category.size(); ++i)
             {
-                int4 num = category[i].size();
+                int num = category[i].size();
                 if (num == 0) continue;
                 bool nullsymbol = false;
-                for (int4 j = 0; j < num; ++j)
+                for (int j = 0; j < num; ++j)
                 {
                     Symbol* sym = category[i][j];
                     if (sym == (Symbol*)0)
@@ -256,9 +256,9 @@ namespace Sla.DECCORE
                 if (nullsymbol)
                 {       // Clear entire category
                     List<Symbol*> list;
-                    for (int4 j = 0; j < num; ++j)
+                    for (int j = 0; j < num; ++j)
                         list.push_back(category[i][j]);
-                    for (int4 j = 0; j < list.size(); ++j)
+                    for (int j = 0; j < list.size(); ++j)
                     {
                         Symbol* sym = list[j];
                         if (sym == (Symbol*)0) continue;
@@ -269,13 +269,13 @@ namespace Sla.DECCORE
 
         }
 
-        public override void clearCategory(int4 cat)
+        public override void clearCategory(int cat)
         {
             if (cat >= 0)
             {
                 if (cat >= category.size()) return; // Category doesn't exist
-                int4 sz = category[cat].size();
-                for (int4 i = 0; i < sz; ++i)
+                int sz = category[cat].size();
+                for (int i = 0; i < sz; ++i)
                 {
                     Symbol* sym = category[cat][i];
                     removeSymbol(sym);
@@ -327,13 +327,13 @@ namespace Sla.DECCORE
             }
         }
 
-        public override void clearUnlockedCategory(int4 cat)
+        public override void clearUnlockedCategory(int cat)
         {
             if (cat >= 0)
             {
                 if (cat >= category.size()) return; // Category doesn't exist
-                int4 sz = category[cat].size();
-                for (int4 i = 0; i < sz; ++i)
+                int sz = category[cat].size();
+                for (int i = 0; i < sz; ++i)
                 {
                     Symbol* sym = category[cat][i];
                     if (sym.isTypeLocked())
@@ -534,7 +534,7 @@ namespace Sla.DECCORE
             throw RecovError("Unable to retype symbol: " + sym.name);
         }
 
-        public override void setAttribute(Symbol sym, uint4 attr)
+        public override void setAttribute(Symbol sym, uint attr)
         {
             attr &= (Varnode::typelock | Varnode::namelock | Varnode::readonly | Varnode::incidental_copy |
                  Varnode::nolocalalias | Varnode::volatil | Varnode::indirectstorage | Varnode::hiddenretparm);
@@ -542,7 +542,7 @@ namespace Sla.DECCORE
             sym.checkSizeTypeLock();
         }
 
-        public override void clearAttribute(Symbol sym, uint4 attr)
+        public override void clearAttribute(Symbol sym, uint attr)
         {
             attr &= (Varnode::typelock | Varnode::namelock | Varnode::readonly | Varnode::incidental_copy |
                  Varnode::nolocalalias | Varnode::volatil | Varnode::indirectstorage | Varnode::hiddenretparm);
@@ -550,7 +550,7 @@ namespace Sla.DECCORE
             sym.checkSizeTypeLock();
         }
 
-        public override void setDisplayFormat(Symbol sym, uint4 attr)
+        public override void setDisplayFormat(Symbol sym, uint attr)
         {
             sym.setDisplayFormat(attr);
         }
@@ -583,7 +583,7 @@ namespace Sla.DECCORE
             return (SymbolEntry*)0;
         }
 
-        public override SymbolEntry findContainer(Address addr,int4 size, Address usepoint)
+        public override SymbolEntry findContainer(Address addr,int size, Address usepoint)
         {
             SymbolEntry* bestentry = (SymbolEntry*)0;
             EntryMap* rangemap = maptable[addr.getSpace().getIndex()];
@@ -598,8 +598,8 @@ namespace Sla.DECCORE
                     res = rangemap.find(addr.getOffset(),
                              EntryMap::subsorttype(false),
                              EntryMap::subsorttype(usepoint));
-                int4 oldsize = -1;
-                uintb end = addr.getOffset() + size - 1;
+                int oldsize = -1;
+                ulong end = addr.getOffset() + size - 1;
                 while (res.first != res.second)
                 {
                     --res.second;
@@ -621,7 +621,7 @@ namespace Sla.DECCORE
             return bestentry;
         }
 
-        public override SymbolEntry findClosestFit(Address addr,int4 size, Address usepoint)
+        public override SymbolEntry findClosestFit(Address addr,int size, Address usepoint)
         {
             SymbolEntry* bestentry = (SymbolEntry*)0;
             EntryMap* rangemap = maptable[addr.getSpace().getIndex()];
@@ -636,8 +636,8 @@ namespace Sla.DECCORE
                     res = rangemap.find(addr.getOffset(),
                              EntryMap::subsorttype(false),
                              EntryMap::subsorttype(usepoint));
-                int4 olddiff = -10000;
-                int4 newdiff;
+                int olddiff = -10000;
+                int newdiff;
 
                 while (res.first != res.second)
                 {
@@ -734,7 +734,7 @@ namespace Sla.DECCORE
             return sym;
         }
 
-        public override SymbolEntry findOverlap(Address addr,int4 size)
+        public override SymbolEntry findOverlap(Address addr,int size)
         {
             EntryMap* rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap*)0)
@@ -779,10 +779,10 @@ namespace Sla.DECCORE
         public override Funcdata resolveExternalRefFunction(ExternRefSymbol sym);
 
         public override string buildVariableName(Address addr, Address pc, Datatype ct,
-            int4 index, uint4 flags)
+            int index, uint flags)
         {
             ostringstream s;
-            int4 sz = (ct == (Datatype*)0) ? 1 : ct.getSize();
+            int sz = (ct == (Datatype*)0) ? 1 : ct.getSize();
 
             if ((flags & Varnode::unaffected) != 0)
             {
@@ -861,7 +861,7 @@ namespace Sla.DECCORE
                 s << "Var" << dec << index++;
                 if (findFirstByName(s.str()) != nametree.end())
                 {   // If the name already exists
-                    for (int4 i = 0; i < 10; ++i)
+                    for (int i = 0; i < 10; ++i)
                     {   // Try bumping up the index a few times before calling makeNameUnique
                         ostringstream s2;
                         if (ct != (Datatype*)0)
@@ -898,9 +898,9 @@ namespace Sla.DECCORE
                 if ((symname.size() == 15) && (0 == symname.compare(0, 7, "$$undef")))
                 {
                     istringstream s(symname.substr(7,8) );
-                    uint4 uniq = ~((uint4)0);
+                    uint uniq = ~((uint)0);
                     s >> hex >> uniq;
-                    if (uniq == ~((uint4)0))
+                    if (uniq == ~((uint)0))
                         throw new LowlevelError("Error creating undefined name");
                     uniq += 1;
                     ostringstream s2;
@@ -919,7 +919,7 @@ namespace Sla.DECCORE
             Symbol boundsym((Scope*)0,nm + "_x99999",(Datatype*)0);
             boundsym.nameDedup = 0xffffffff;
             SymbolNameTree::const_iterator iter2 = nametree.lower_bound(&boundsym);
-            uint4 uniqid;
+            uint uniqid;
             do
             {
                 uniqid = 0xffffffff;
@@ -928,11 +928,11 @@ namespace Sla.DECCORE
                 Symbol* bsym = *iter2;
                 string bname = bsym.getName();
                 bool isXForm = false;
-                int4 digCount = 0;
+                int digCount = 0;
                 if ((bname.size() >= (nm.size() + 3)) && (bname[nm.size()] == '_'))
                 {
                     // Collect the last id
-                    int4 i = nm.size() + 1;
+                    int i = nm.size() + 1;
                     if (bname[i] == 'x')
                     {
                         i += 1;         // 5 digit form
@@ -999,7 +999,7 @@ namespace Sla.DECCORE
                 for (iter = nametree.begin(); iter != nametree.end(); ++iter)
                 {
                     Symbol* sym = *iter;
-                    int4 symbolType = 0;
+                    int symbolType = 0;
                     if (!sym.mapentry.empty())
                     {
                         SymbolEntry entry = *sym.mapentry.front();
@@ -1031,11 +1031,11 @@ namespace Sla.DECCORE
 
         public override void decode(Decoder decoder)
         {
-            //  uint4 elemId = decoder.openElement(ELEM_SCOPE);
+            //  uint elemId = decoder.openElement(ELEM_SCOPE);
             //  name = el.getAttributeValue("name");	// Name must already be set in the constructor
             bool rangeequalssymbols = false;
 
-            uint4 subId = decoder.peekElement();
+            uint subId = decoder.peekElement();
             if (subId == ELEM_PARENT)
             {
                 decoder.skipElement();  // Skip <parent> tag processed elsewhere
@@ -1058,7 +1058,7 @@ namespace Sla.DECCORE
             {
                 for (; ; )
                 {
-                    uint4 symId = decoder.peekElement();
+                    uint symId = decoder.peekElement();
                     if (symId == 0) break;
                     if (symId == ELEM_MAPSYM)
                     {
@@ -1085,7 +1085,7 @@ namespace Sla.DECCORE
         public override void printEntries(TextWriter s)
         {
             s << "Scope " << name << endl;
-            for (int4 i = 0; i < maptable.size(); ++i)
+            for (int i = 0; i < maptable.size(); ++i)
             {
                 EntryMap* rangemap = maptable[i];
                 if (rangemap == (EntryMap*)0) continue;
@@ -1097,14 +1097,14 @@ namespace Sla.DECCORE
             }
         }
 
-        public override int4 getCategorySize(int4 cat)
+        public override int getCategorySize(int cat)
         {
             if ((cat >= category.size()) || (cat < 0))
                 return 0;
             return category[cat].size();
         }
 
-        public override Symbol getCategorySymbol(int4 cat, int4 ind)
+        public override Symbol getCategorySymbol(int cat, int ind)
         {
             if ((cat >= category.size()) || (cat < 0))
                 return (Symbol*)0;
@@ -1113,7 +1113,7 @@ namespace Sla.DECCORE
             return category[cat][ind];
         }
 
-        public override void setCategory(Symbol sym, int4 cat, int4 ind)
+        public override void setCategory(Symbol sym, int cat, int ind)
         {
             if (sym.category >= 0)
             {
@@ -1138,7 +1138,7 @@ namespace Sla.DECCORE
         /// Run through all the symbols whose name is undefined. Build a variable name, uniquify it, and
         /// rename the variable.
         /// \param base is the base index to start at for generating generic names
-        public override assignDefaultNames(int4 @base)
+        public override assignDefaultNames(int @base)
         {
             SymbolNameTree::const_iterator iter;
 

@@ -24,12 +24,12 @@ namespace Sla.DECCORE
 
         /// \class RuleMultNegOne
         /// \brief Cleanup: Convert INT_2COMP from INT_MULT:  `V * -1  =>  -V`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_MULT);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {               // a * -1 . -a
             Varnode* constvn = op.getIn(1);
 

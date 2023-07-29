@@ -29,15 +29,15 @@ namespace Sla.DECCORE
                 seen_kill = 4
             }
             private PcodeOp op;        ///< Operation along the path to the Varnode
-            private int4 slot;          ///< vn = op.getIn(slot)
-            private uint4 flags;        ///< Boolean properties of the node
-            private int4 offset;        ///< Offset of the (eventual) trial value, within a possibly larger register
+            private int slot;          ///< vn = op.getIn(slot)
+            private uint flags;        ///< Boolean properties of the node
+            private int offset;        ///< Offset of the (eventual) trial value, within a possibly larger register
 
             /// \brief Constructor given a Varnode read
             ///
             /// \param o is the PcodeOp reading the Varnode
             /// \param s is the input slot
-            private State(PcodeOp o, int4 s)
+            private State(PcodeOp o, int s)
             {
                 op = o;
                 slot = s;
@@ -55,14 +55,14 @@ namespace Sla.DECCORE
                 op = o;
                 slot = 0;
                 flags = 0;
-                offset = oldState.offset + (int4)op.getIn(1).getOffset();
+                offset = oldState.offset + (int)op.getIn(1).getOffset();
             }
 
             /// Get slot associated with \e solid movement
-            private int4 getSolidSlot() => ((flags & seen_solid0)!=0) ? 0 : 1;
+            private int getSolidSlot() => ((flags & seen_solid0)!=0) ? 0 : 1;
 
             /// Mark given slot as having \e solid movement
-            private void markSolid(int4 s)
+            private void markSolid(int s)
             {
                 flags |= (s == 0) ? seen_solid0 : seen_solid1;
             }
@@ -102,7 +102,7 @@ namespace Sla.DECCORE
         /// Holds visited Varnodes to properly trim cycles
         private List<Varnode> markedVn;
         /// Number of MULTIEQUAL ops along current traversal path
-        private int4 multiDepth;
+        private int multiDepth;
         /// True if we allow and test for failing paths due to conditional execution
         private bool allowFailingPath;
 
@@ -118,7 +118,7 @@ namespace Sla.DECCORE
         /// Traverse into a new Varnode
         /// Analyze a new node that has just entered, during the depth-first traversal
         /// \return the command indicating the next traversal step: push (enter_node), or pop (pop_success, pop_fail, pop_solid...)
-        private int4 enterNode()
+        private int enterNode()
         {
             State & state(stateStack.back());
             // If the node has already been visited, we truncate the traversal to prevent cycles.
@@ -159,7 +159,7 @@ namespace Sla.DECCORE
                     // are viewed as just another node on the path to traverse
                     if (op.getOut().getSpace().getType() == IPTR_INTERNAL
                     || op.isIncidentalCopy() || op.getIn(0).isIncidentalCopy()
-                    || (op.getOut().overlap(*op.getIn(0)) == (int4)op.getIn(1).getOffset()))
+                    || (op.getOut().overlap(*op.getIn(0)) == (int)op.getIn(1).getOffset()))
                     {
                         stateStack.push_back(State(op, state));
                         return enter_node;      // Push into the new node
@@ -246,7 +246,7 @@ namespace Sla.DECCORE
         /// Backtrack into a previously visited node
         /// \param pop_command is the type of pop (pop_success, pop_fail, pop_failkill, pop_solid) being performed
         /// \return the command to execute (push or pop) after the current pop
-        private int4 uponPop(int4 command)
+        private int uponPop(int command)
         {
             State & state(stateStack.back());
             if (state.op.code() == CPUI_MULTIEQUAL)
@@ -312,7 +312,7 @@ namespace Sla.DECCORE
             //  if (callbl != bl) {
             //    bool dominates = false;
             //    FlowBlock *dombl = callbl.getImmedDom();
-            //    for(int4 i=0;i<2;++i) {
+            //    for(int i=0;i<2;++i) {
             //      if (dombl == bl) {
             //	dominates = true;
             //	break;
@@ -333,7 +333,7 @@ namespace Sla.DECCORE
         /// \param t is the ParamTrial object corresponding to the varnode
         /// \param allowFail is \b true if we allow and test for failing paths due to conditional execution
         /// \return \b true if the varnode has realistic ancestors for a parameter passing location
-        public bool execute(PcodeOp op, int4 slot, ParamTrial t, bool allowFail)
+        public bool execute(PcodeOp op, int slot, ParamTrial t, bool allowFail)
         {
             trial = t;
             allowFailingPath = allowFail;
@@ -349,7 +349,7 @@ namespace Sla.DECCORE
                     return false;
             }
             // Run the depth first traversal
-            int4 command = enter_node;
+            int command = enter_node;
             stateStack.push_back(State(op, slot));      // Start by entering the initial node
             while (!stateStack.empty())
             {           // Continue until all paths have been exhausted
@@ -366,7 +366,7 @@ namespace Sla.DECCORE
                         break;
                 }
             }
-            for (int4 i = 0; i < markedVn.size(); ++i)      // Clean up marks we left along the way
+            for (int i = 0; i < markedVn.size(); ++i)      // Clean up marks we left along the way
                 markedVn[i].clearMark();
             if (command == pop_success)
             {

@@ -39,9 +39,9 @@ namespace Sla.DECCORE
         /// Free all the VarnodeData and PcodeOpRaw objects and clear the cache
         private void clearCache()
         {
-            for (int4 i = 0; i < opcache.size(); ++i)
+            for (int i = 0; i < opcache.size(); ++i)
                 delete opcache[i];
-            for (int4 i = 0; i < varcache.size(); ++i)
+            for (int i = 0; i < varcache.size(); ++i)
                 delete varcache[i];
             opcache.clear();
             varcache.clear();
@@ -95,8 +95,8 @@ namespace Sla.DECCORE
             Address destaddr = currentOp.getInput(0).getAddr();
             if (destaddr.isConstant())
             {
-                uintm id = destaddr.getOffset();
-                id = id + (uintm)current_op;
+                uint id = destaddr.getOffset();
+                id = id + (uint)current_op;
                 current_op = id;
                 if (current_op == opcache.size())
                     fallthruOp();
@@ -133,7 +133,7 @@ namespace Sla.DECCORE
         ~EmulatePcodeCache()
         {
             clearCache();
-            for (int4 i = 0; i < inst.size(); ++i)
+            for (int i = 0; i < inst.size(); ++i)
             {
                 OpBehavior* t_op = inst[i];
                 if (t_op != (OpBehavior*)0)

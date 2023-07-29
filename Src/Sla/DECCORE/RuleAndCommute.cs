@@ -28,22 +28,22 @@ namespace Sla.DECCORE
         /// This makes sense to do if W is constant and there is no other use of (V << W)
         /// If W is \b not constant, it only makes sense if the INT_AND is likely to cancel
         /// with a specific INT_OR or PIECE
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_AND);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* orvn,*shiftvn,*othervn,*newvn1,*newvn2,*savn;
             PcodeOp* orop,*shiftop,*newop1,*newop2;
-            uintb ormask1, ormask2, othermask, fullmask;
+            ulong ormask1, ormask2, othermask, fullmask;
             OpCode opc = CPUI_INT_OR; // Unnecessary initialization
-            int4 sa, i, size;
+            int sa, i, size;
 
             orvn = othervn = savn = (Varnode*)0; // Unnecessary initialization
             size = op.getOut().getSize();
-            if (size > sizeof(uintb)) return 0; // FIXME: uintb should be arbitrary precision
+            if (size > sizeof(ulong)) return 0; // FIXME: ulong should be arbitrary precision
             fullmask = calc_mask(size);
             for (i = 0; i < 2; ++i)
             {
@@ -54,7 +54,7 @@ namespace Sla.DECCORE
                 if ((opc != CPUI_INT_LEFT) && (opc != CPUI_INT_RIGHT)) continue;
                 savn = shiftop.getIn(1);
                 if (!savn.isConstant()) continue;
-                sa = (int4)savn.getOffset();
+                sa = (int)savn.getOffset();
 
                 othervn = op.getIn(1 - i);
                 if (!othervn.isHeritageKnown()) continue;

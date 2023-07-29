@@ -23,7 +23,7 @@ namespace Sla.DECCORE
         // This rule applies to all ops
         /// \class RuleEarlyRemoval
         /// \brief Get rid of unused PcodeOp objects where we can guarantee the output is unused
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn;
 

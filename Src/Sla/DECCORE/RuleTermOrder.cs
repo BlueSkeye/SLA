@@ -27,11 +27,11 @@ namespace Sla.DECCORE
         ///
         /// Constants always come last in particular which eliminates
         /// some of the combinatorial explosion of expression variations.
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             // FIXME:  All the commutative ops
             // Use the TypeOp::commutative function
-            uint4 list[] ={ CPUI_INT_EQUAL, CPUI_INT_NOTEQUAL, CPUI_INT_ADD, CPUI_INT_CARRY,
+            uint list[] ={ CPUI_INT_EQUAL, CPUI_INT_NOTEQUAL, CPUI_INT_ADD, CPUI_INT_CARRY,
          CPUI_INT_SCARRY, CPUI_INT_XOR, CPUI_INT_AND, CPUI_INT_OR,
          CPUI_INT_MULT, CPUI_BOOL_XOR, CPUI_BOOL_AND, CPUI_BOOL_OR,
          CPUI_FLOAT_EQUAL, CPUI_FLOAT_NOTEQUAL, CPUI_FLOAT_ADD,
@@ -39,7 +39,7 @@ namespace Sla.DECCORE
             oplist.insert(oplist.end(), list, list + 16);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn1 = op.getIn(0);
             Varnode* vn2 = op.getIn(1);

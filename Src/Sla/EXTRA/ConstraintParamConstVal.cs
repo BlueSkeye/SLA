@@ -12,11 +12,11 @@ namespace Sla.EXTRA
 {
     internal class ConstraintParamConstVal : UnifyConstraint
     {
-        private int4 opindex;           // Which opcode
-        private int4 slot;          // Which slot to examine for constant
-        private uintb val;          // What value parameter must match
+        private int opindex;           // Which opcode
+        private int slot;          // Which slot to examine for constant
+        private ulong val;          // What value parameter must match
         
-        public ConstraintParamConstVal(int4 oind, int4 sl, uintb v)
+        public ConstraintParamConstVal(int oind, int sl, ulong v)
         {
             maxnum = opindex = oind;
             slot = sl;

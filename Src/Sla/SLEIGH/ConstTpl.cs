@@ -34,13 +34,13 @@ namespace Sla.SLEIGH
 
         private class /*union*/ ValueKind
         {
-            //    uintb real;			// an actual constant
+            //    ulong real;			// an actual constant
             internal AddrSpace spaceid; // Id (pointer) for registered space
-            internal int4 handle_index;      // Place holder for run-time determined value
+            internal int handle_index;      // Place holder for run-time determined value
         }
     
         private ValueKind value;
-        private uintb value_real;
+        private ulong value_real;
         private v_field select;     // Which part of handle to use as constant
 
         private static void printHandleSelector(ostream &s, v_field val)
@@ -89,7 +89,7 @@ namespace Sla.SLEIGH
             select = op2.select;
         }
 
-        public ConstTpl(const_type tp, uintb val)
+        public ConstTpl(const_type tp, ulong val)
         {               // Constructor for real constants
             type = tp;
             value_real = val;
@@ -108,7 +108,7 @@ namespace Sla.SLEIGH
             value.spaceid = sid;
         }
 
-        public ConstTpl(const_type tp, int4 ht, v_field vf)
+        public ConstTpl(const_type tp, int ht, v_field vf)
         {               // Constructor for handle constant
             type = handle;
             value.handle_index = ht;
@@ -116,7 +116,7 @@ namespace Sla.SLEIGH
             value_real = 0;
         }
 
-        public ConstTpl(const_type tp, int4 ht, v_field vf, uintb plus)
+        public ConstTpl(const_type tp, int ht, v_field vf, ulong plus)
         {
             type = handle;
             value.handle_index = ht;
@@ -177,17 +177,17 @@ namespace Sla.SLEIGH
             return false;
         }
 
-        public uintb getReal() => value_real;
+        public ulong getReal() => value_real;
 
         public AddrSpace getSpace() => value.spaceid;
 
-        public int4 getHandleIndex() => value.handle_index;
+        public int getHandleIndex() => value.handle_index;
 
         public const_type getType() => type;
 
         public v_field getSelect() => select;
 
-        public uintb fix(ParserWalker walker)
+        public ulong fix(ParserWalker walker)
         { // Get the value of the ConstTpl in context
           // NOTE: if the property is dynamic this returns the property
           // of the temporary storage
@@ -210,7 +210,7 @@ namespace Sla.SLEIGH
                 case j_curspace_size:
                     return walker.getCurSpace().getAddrSize();
                 case j_curspace:
-                    return (uintb)(uintp)walker.getCurSpace();
+                    return (ulong)(ulong)walker.getCurSpace();
                 case handle:
                     {
                         FixedHandle hand = walker.getFixedHandle(value.handle_index);
@@ -218,8 +218,8 @@ namespace Sla.SLEIGH
                         {
                             case v_space:
                                 if (hand.offset_space == (AddrSpace*)0)
-                                    return (uintb)(uintp)hand.space;
-                                return (uintb)(uintp)hand.temp_space;
+                                    return (ulong)(ulong)hand.space;
+                                return (ulong)(ulong)hand.temp_space;
                             case v_offset:
                                 if (hand.offset_space == (AddrSpace*)0)
                                     return hand.offset_offset;
@@ -235,7 +235,7 @@ namespace Sla.SLEIGH
                                 }
                                 else
                                 {           // If we are a constant, we want to return a shifted value
-                                    uintb val;
+                                    ulong val;
                                     if (hand.offset_space == (AddrSpace*)0)
                                         val = hand.offset_offset;
                                     else
@@ -250,7 +250,7 @@ namespace Sla.SLEIGH
                 case real:
                     return value_real;
                 case spaceid:
-                    return (uintb)(uintp)value.spaceid;
+                    return (ulong)(ulong)value.spaceid;
             }
             return 0;           // Should never reach here
         }
@@ -301,7 +301,7 @@ namespace Sla.SLEIGH
                     break;
                 case v_offset_plus:
                     {
-                        uintb tmp = value_real;
+                        ulong tmp = value_real;
                         *this = newhandle.getPtrOffset();
                         if (type == real)
                         {
@@ -324,7 +324,7 @@ namespace Sla.SLEIGH
 
         public bool isZero() => ((type==real)&& (value_real == 0));
 
-        public void changeHandleIndex(List<int4> handmap)
+        public void changeHandleIndex(List<int> handmap)
         {
             if (type == handle)
                 value.handle_index = handmap[value.handle_index];

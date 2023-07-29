@@ -13,14 +13,14 @@ namespace Sla.DECCORE
         internal class SplitInstance
         {
             // friend class PreferSplitManager;
-            private int4 splitoffset;
+            private int splitoffset;
             private Varnode vn;
             // Most significant piece
             private Varnode hi;
             // Least significant piece
             private Varnode lo;
             
-            public SplitInstance(Varnode v, int4 off)
+            public SplitInstance(Varnode v, int off)
             {
                 vn = v;
                 splitoffset = off;
@@ -37,18 +37,18 @@ namespace Sla.DECCORE
         private void fillinInstance(SplitInstance inst, bool bigendian, bool sethi, bool setlo)
         { // Define the varnode pieces of -inst-
             Varnode* vn = inst.vn;
-            int4 losize;
+            int losize;
             if (bigendian)
                 losize = vn.getSize() - inst.splitoffset;
             else
                 losize = inst.splitoffset;
-            int4 hisize = vn.getSize() - losize;
+            int hisize = vn.getSize() - losize;
             if (vn.isConstant())
             {
-                uintb origval = vn.getOffset();
+                ulong origval = vn.getOffset();
 
-                uintb loval = origval & calc_mask(losize);// Split the constant into two pieces
-                uintb hival = (origval >> 8 * losize) & calc_mask(hisize);
+                ulong loval = origval & calc_mask(losize);// Split the constant into two pieces
+                ulong hival = (origval >> 8 * losize) & calc_mask(hisize);
                 if (setlo && (inst.lo == (Varnode*)0))
                     inst.lo = data.newConstant(losize, loval);
                 if (sethi && (inst.hi == (Varnode*)0))
@@ -152,7 +152,7 @@ namespace Sla.DECCORE
             if (invn.isConstant())
                 return true;
             bool bigendian = inst.vn.getSpace().isBigEndian();
-            int4 losize;
+            int losize;
             if (bigendian)
                 losize = inst.vn.getSize() - inst.splitoffset;
             else
@@ -164,7 +164,7 @@ namespace Sla.DECCORE
         private void splitZext(SplitInstance inst, PcodeOp op)
         {
             SplitInstance ininst(op.getIn(0),inst.splitoffset);
-            int4 losize, hisize;
+            int losize, hisize;
             bool bigendian = inst.vn.getSpace().isBigEndian();
             if (bigendian)
             {
@@ -178,9 +178,9 @@ namespace Sla.DECCORE
             }
             if (ininst.vn.isConstant())
             {
-                uintb origval = ininst.vn.getOffset();
-                uintb loval = origval & calc_mask(losize);// Split the constant into two pieces
-                uintb hival = (origval >> 8 * losize) & calc_mask(hisize);
+                ulong origval = ininst.vn.getOffset();
+                ulong loval = origval & calc_mask(losize);// Split the constant into two pieces
+                ulong hival = (origval >> 8 * losize) & calc_mask(hisize);
                 ininst.lo = data.newConstant(losize, loval);
                 ininst.hi = data.newConstant(hisize, hival);
             }
@@ -237,7 +237,7 @@ namespace Sla.DECCORE
         { // Check that -inst- read by SUBPIECE is really splittable
             Varnode* vn = inst.vn;
             Varnode* outvn = op.getOut();
-            int4 suboff = (int4)op.getIn(1).getOffset();
+            int suboff = (int)op.getIn(1).getOffset();
             if (suboff == 0)
             {
                 if (vn.getSize() - inst.splitoffset != outvn.getSize())
@@ -256,7 +256,7 @@ namespace Sla.DECCORE
         private void splitSubpiece(SplitInstance inst, PcodeOp op)
         { // Knowing -op- is a CPUI_SUBPIECE that extracts a logical piece from -inst-, rewrite it to a copy
             Varnode* vn = inst.vn;
-            int4 suboff = (int4)op.getIn(1).getOffset();
+            int suboff = (int)op.getIn(1).getOffset();
             bool grabbinglo = (suboff == 0);
 
             bool bigendian = vn.getSpace().isBigEndian();
@@ -569,14 +569,14 @@ namespace Sla.DECCORE
 
         public void split()
         {
-            for (int4 i = 0; i < records.size(); ++i)
+            for (int i = 0; i < records.size(); ++i)
                 splitRecord((*records)[i]);
         }
 
         public void splitAdditional()
         {
             List<PcodeOp*> defops;
-            for (int4 i = 0; i < tempsplits.size(); ++i)
+            for (int i = 0; i < tempsplits.size(); ++i)
             {
                 PcodeOp* op = tempsplits[i]; // Look at everything connected to COPYs in -tempsplits-
                 if (op.isDead()) continue;
@@ -606,13 +606,13 @@ namespace Sla.DECCORE
                     }
                 }
             }
-            for (int4 i = 0; i < defops.size(); ++i)
+            for (int i = 0; i < defops.size(); ++i)
             {
                 PcodeOp* op = defops[i];
                 if (op.isDead()) continue;
                 if (op.code() == CPUI_PIECE)
                 {
-                    int4 splitoff;
+                    int splitoff;
                     Varnode* vn = op.getOut();
                     if (vn.getSpace().isBigEndian())
                         splitoff = op.getIn(0).getSize();
@@ -624,22 +624,22 @@ namespace Sla.DECCORE
                 }
                 else if (op.code() == CPUI_SUBPIECE)
                 {
-                    int4 splitoff;
+                    int splitoff;
                     Varnode* vn = op.getIn(0);
-                    uintb suboff = op.getIn(1).getOffset();
+                    ulong suboff = op.getIn(1).getOffset();
                     if (vn.getSpace().isBigEndian())
                     {
                         if (suboff == 0)
                             splitoff = vn.getSize() - op.getOut().getSize();
                         else
-                            splitoff = vn.getSize() - (int4)suboff;
+                            splitoff = vn.getSize() - (int)suboff;
                     }
                     else
                     {
                         if (suboff == 0)
                             splitoff = op.getOut().getSize();
                         else
-                            splitoff = (int4)suboff;
+                            splitoff = (int)suboff;
                     }
                     SplitInstance inst(vn, splitoff);
                     if (testTemporary(&inst))

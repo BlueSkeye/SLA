@@ -13,11 +13,11 @@ namespace Sla.EXTRA
     internal class ConstraintOpInput : UnifyConstraint
     {
         // Move from op to one of its input varnodes
-        private int4 opindex;           // Which op
-        private int4 varnodeindex;      // Which input varnode
-        private int4 slot;          // Which slot to take
+        private int opindex;           // Which op
+        private int varnodeindex;      // Which input varnode
+        private int slot;          // Which slot to take
         
-        public ConstraintOpInput(int4 oind, int4 vind, int4 sl)
+        public ConstraintOpInput(int oind, int vind, int sl)
         {
             opindex = oind;
             varnodeindex = vind;
@@ -44,7 +44,7 @@ namespace Sla.EXTRA
             typelist[varnodeindex] = UnifyDatatype(UnifyDatatype::var_type);
         }
 
-        public override int4 getBaseIndex() => varnodeindex;
+        public override int getBaseIndex() => varnodeindex;
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {

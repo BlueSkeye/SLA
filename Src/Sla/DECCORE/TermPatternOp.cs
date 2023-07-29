@@ -20,13 +20,13 @@ namespace Sla.DECCORE
     /// constant inputs (matching the format determined by unify()).
     internal abstract class TermPatternOp : UserPcodeOp
     {
-        public TermPatternOp(Architecture g, string nm,int4 ind)
+        public TermPatternOp(Architecture g, string nm,int ind)
             : base(g, nm, ind)
         {
         }
 
         /// Get the number of input Varnodes expected
-        public abstract int4 getNumVariableTerms();
+        public abstract int getNumVariableTerms();
 
         /// \brief Gather the formal input Varnode objects given the root PcodeOp
         ///
@@ -40,6 +40,6 @@ namespace Sla.DECCORE
         ///
         /// \param input is the ordered list of constant inputs
         /// \return the resulting value as a constant
-        public abstract uintb execute(List<uintb> input);
+        public abstract ulong execute(List<ulong> input);
     }
 }

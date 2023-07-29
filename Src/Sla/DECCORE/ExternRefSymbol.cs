@@ -74,12 +74,12 @@ namespace Sla.DECCORE
 
         public override void decode(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement(ELEM_EXTERNREFSYMBOL);
+            uint elemId = decoder.openElement(ELEM_EXTERNREFSYMBOL);
             name.clear();           // Name is empty
             displayName.clear();
             for (; ; )
             {
-                uint4 attribId = decoder.getNextAttributeId();
+                uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == ATTRIB_NAME) // Unless we see it explicitly
                     name = decoder.readString();

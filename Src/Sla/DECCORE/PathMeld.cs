@@ -27,9 +27,9 @@ namespace Sla.DECCORE
             /// An op in the container
             internal PcodeOp op;
             /// The index, within commonVn, of the Varnode at the split point
-            internal int4 rootVn;
+            internal int rootVn;
             
-            internal RootedOp(PcodeOp o, int4 root)
+            internal RootedOp(PcodeOp o, int root)
             {
                 op = o;
                 rootVn = root;
@@ -48,11 +48,11 @@ namespace Sla.DECCORE
         /// Varnode in the old path with its index in the new path.  If the Varnode is
         /// not in the intersection, its index is mapped to -1.
         /// \param parentMap will hold the new index map
-        private void internalIntersect(List<int4> parentMap)
+        private void internalIntersect(List<int> parentMap)
         {
             List<Varnode*> newVn;
-            int4 lastIntersect = -1;
-            for (int4 i = 0; i < commonVn.size(); ++i)
+            int lastIntersect = -1;
+            for (int i = 0; i < commonVn.size(); ++i)
             {
                 Varnode* vn = commonVn[i];
                 if (vn.isMark())
@@ -67,9 +67,9 @@ namespace Sla.DECCORE
             }
             commonVn = newVn;
             lastIntersect = -1;
-            for (int4 i = parentMap.size() - 1; i >= 0; --i)
+            for (int i = parentMap.size() - 1; i >= 0; --i)
             {
-                int4 val = parentMap[i];
+                int val = parentMap[i];
                 if (val == -1)          // Fill in varnodes that are cut out of intersection
                     parentMap[i] = lastIntersect;   // with next earliest varnode that is in intersection
                 else
@@ -88,12 +88,12 @@ namespace Sla.DECCORE
         /// \param cutOff is the number of PcodeOps with an input in the common path
         /// \param parentMap is the map from old common Varnodes to the new common Varnodes
         /// \return the index of the last (earliest) Varnode in the common path or -1
-        private int4 meldOps(List<PcodeOpNode> path,int4 cutOff, List<int4> parentMap)
+        private int meldOps(List<PcodeOpNode> path,int cutOff, List<int> parentMap)
         {
             // First update opMeld.rootVn with new intersection information
-            for (int4 i = 0; i < opMeld.size(); ++i)
+            for (int i = 0; i < opMeld.size(); ++i)
             {
-                int4 pos = parentMap[opMeld[i].rootVn];
+                int pos = parentMap[opMeld[i].rootVn];
                 if (pos == -1)
                 {
                     opMeld[i].op = (PcodeOp*)0;     // Op split but did not rejoin
@@ -104,10 +104,10 @@ namespace Sla.DECCORE
 
             // Do a merge sort, keeping ops in execution order
             List<RootedOp> newMeld;
-            int4 curRoot = -1;
-            int4 meldPos = 0;               // Ops moved from old opMeld into newMeld
+            int curRoot = -1;
+            int meldPos = 0;               // Ops moved from old opMeld into newMeld
             BlockBasic lastBlock = (BlockBasic*)0;
-            for (int4 i = 0; i < cutOff; ++i)
+            for (int i = 0; i < cutOff; ++i)
             {
                 PcodeOp* op = path[i].op;           // Current op in the new path
                 PcodeOp* curOp = (PcodeOp*)0;
@@ -129,7 +129,7 @@ namespace Sla.DECCORE
                         else if (trialOp.getParent() != lastBlock)
                         {
                             // Both trialOp and op come from different blocks that are not the lastBlock
-                            int4 res = opMeld[meldPos].rootVn;      // Force truncatePath at (and above) this op
+                            int res = opMeld[meldPos].rootVn;      // Force truncatePath at (and above) this op
 
                             // Found a new cut point
                             opMeld = newMeld;               // Take what we've melded so far
@@ -167,7 +167,7 @@ namespace Sla.DECCORE
         /// The given Varnode is provided as an index into the current common Varnode list.
         /// All Varnodes and PcodeOps involved in execution before this new cut point are removed.
         /// \param cutPoint is the given new Varnode
-        private void truncatePaths(int4 cutPoint)
+        private void truncatePaths(int cutPoint)
         {
             while (opMeld.size() > 1)
             {
@@ -191,7 +191,7 @@ namespace Sla.DECCORE
         /// \param path is the list of PcodeOpNode edges in the path (in reverse execution order)
         public void set(List<PcodeOpNode> path)
         {
-            for (int4 i = 0; i < path.size(); ++i)
+            for (int i = 0; i < path.size(); ++i)
             {
                 PcodeOpNode node = path[i];
                 Varnode* vn = node.op.getIn(node.slot);
@@ -220,7 +220,7 @@ namespace Sla.DECCORE
             commonVn.insert(commonVn.begin(), op2.commonVn.begin(), op2.commonVn.end());
             opMeld.insert(opMeld.begin(), op2.opMeld.begin(), op2.opMeld.end());
             // Renumber all the rootVn refs to varnodes we have moved
-            for (int4 i = op2.opMeld.size(); i < opMeld.size(); ++i)
+            for (int i = op2.opMeld.size(); i < opMeld.size(); ++i)
                 opMeld[i].rootVn += op2.commonVn.size();
         }
 
@@ -238,18 +238,18 @@ namespace Sla.DECCORE
         /// \param path is the new path of PcodeOpNode edges to meld, in reverse execution order
         public void meld(List<PcodeOpNode> path)
         {
-            List<int4> parentMap;
+            List<int> parentMap;
 
-            for (int4 i = 0; i < path.size(); ++i)
+            for (int i = 0; i < path.size(); ++i)
             {
                 PcodeOpNode & node(path[i]);
                 node.op.getIn(node.slot).setMark();   // Mark varnodes in the new path, so its easy to see intersection
             }
             internalIntersect(parentMap);   // Calculate varnode intersection, and map from old intersection . new
-            int4 cutOff = -1;
+            int cutOff = -1;
 
             // Calculate where the cutoff point is in the new path
-            for (int4 i = 0; i < path.size(); ++i)
+            for (int i = 0; i < path.size(); ++i)
             {
                 PcodeOpNode & node(path[i]);
                 Varnode* vn = node.op.getIn(node.slot);
@@ -260,7 +260,7 @@ namespace Sla.DECCORE
                 else
                     vn.clearMark();
             }
-            int4 newCutoff = meldOps(path, cutOff, parentMap);  // Given cutoff point, meld in new ops
+            int newCutoff = meldOps(path, cutOff, parentMap);  // Given cutoff point, meld in new ops
             if (newCutoff >= 0)                 // If not all ops could be ordered
                 truncatePaths(newCutoff);               // Cut off at the point where we couldn't order
             path.resize(cutOff);
@@ -271,9 +271,9 @@ namespace Sla.DECCORE
         /// All PcodeOps up to the final BRANCHIND are (un)marked.
         /// \param val is \b true for marking, \b false for unmarking
         /// \param startVarnode is the index of the starting PcodeOp
-        public void markPaths(bool val, int4 startVarnode)
+        public void markPaths(bool val, int startVarnode)
         {
-            int4 startOp;
+            int startOp;
             for (startOp = opMeld.size() - 1; startOp >= 0; --startOp)
             {
                 if (opMeld[startOp].rootVn == startVarnode)
@@ -282,39 +282,39 @@ namespace Sla.DECCORE
             if (startOp < 0) return;
             if (val)
             {
-                for (int4 i = 0; i <= startOp; ++i)
+                for (int i = 0; i <= startOp; ++i)
                     opMeld[i].op.setMark();
             }
             else
             {
-                for (int4 i = 0; i <= startOp; ++i)
+                for (int i = 0; i <= startOp; ++i)
                     opMeld[i].op.clearMark();
             }
         }
 
         /// Return the number of Varnodes common to all paths
-        public int4 numCommonVarnode() => commonVn.size();
+        public int numCommonVarnode() => commonVn.size();
 
         /// Return the number of PcodeOps across all paths
-        public int4 numOps() => opMeld.size();
+        public int numOps() => opMeld.size();
 
         /// Get the i-th common Varnode
-        public Varnode getVarnode(int4 i) => commonVn[i];
+        public Varnode getVarnode(int i) => commonVn[i];
 
         /// Get the split-point for the i-th PcodeOp
-        public Varnode getOpParent(int4 i) => commonVn[opMeld[i].rootVn];
+        public Varnode getOpParent(int i) => commonVn[opMeld[i].rootVn];
 
         /// Get the i-th PcodeOp
-        public PcodeOp getOp(int4 i) => opMeld[i].op;
+        public PcodeOp getOp(int i) => opMeld[i].op;
 
         /// Find \e earliest PcodeOp that has a specific common Varnode as input
         /// The Varnode is specified by an index into sequence of Varnodes common to all paths in \b this PathMeld.
         /// We find the earliest (as in executed first) PcodeOp, within \b this PathMeld that uses the Varnode as input.
         /// \param pos is the index of the Varnode
         /// \return the earliest PcodeOp using the Varnode
-        public PcodeOp getEarliestOp(int4 pos)
+        public PcodeOp getEarliestOp(int pos)
         {
-            for (int4 i = opMeld.size() - 1; i >= 0; --i)
+            for (int i = opMeld.size() - 1; i >= 0; --i)
             {
                 if (opMeld[i].rootVn == pos)
                     return opMeld[i].op;

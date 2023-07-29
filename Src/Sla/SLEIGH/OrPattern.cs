@@ -62,7 +62,7 @@ namespace Sla.SLEIGH
             return new OrPattern(newlist);
         }
 
-        public override void shiftInstruction(int4 sa)
+        public override void shiftInstruction(int sa)
         {
             List<DisjointPattern*>::iterator iter;
 
@@ -72,15 +72,15 @@ namespace Sla.SLEIGH
 
         public override bool isMatch(ParserWalker walker)
         {
-            for (int4 i = 0; i < orlist.size(); ++i)
+            for (int i = 0; i < orlist.size(); ++i)
                 if (orlist[i].isMatch(walker))
                     return true;
             return false;
         }
 
-        public override int4 numDisjoint() => orlist.size();
+        public override int numDisjoint() => orlist.size();
 
-        public override DisjointPattern getDisjoint(int4 i) => orlist[i];
+        public override DisjointPattern getDisjoint(int i) => orlist[i];
 
         public override bool alwaysTrue()
         {               // This isn't quite right because different branches
@@ -110,7 +110,7 @@ namespace Sla.SLEIGH
             return true;
         }
 
-        public override Pattern doOr(Pattern b, int4 sa)
+        public override Pattern doOr(Pattern b, int sa)
         {
             OrPattern b2 = dynamic_cast <OrPattern> (b);
             List<DisjointPattern*> newlist;
@@ -130,14 +130,14 @@ namespace Sla.SLEIGH
                     newlist.push_back((DisjointPattern*)(*iter).simplifyClone());
             }
             if (sa > 0)
-                for (int4 i = 0; i < newlist.size(); ++i)
+                for (int i = 0; i < newlist.size(); ++i)
                     newlist[i].shiftInstruction(sa);
 
             OrPattern* tmpor = new OrPattern(newlist);
             return tmpor;
         }
 
-        public override Pattern doAnd(Pattern b, int4 sa)
+        public override Pattern doAnd(Pattern b, int sa)
         {
             OrPattern b2 = dynamic_cast <OrPattern*> (b);
             List<DisjointPattern*> newlist;
@@ -165,7 +165,7 @@ namespace Sla.SLEIGH
             return tmpor;
         }
 
-        public override Pattern commonSubPattern(Pattern b, int4 sa)
+        public override Pattern commonSubPattern(Pattern b, int sa)
         {
             List<DisjointPattern*>::const_iterator iter;
             Pattern* res,*next;
@@ -189,7 +189,7 @@ namespace Sla.SLEIGH
         public override void saveXml(TextWriter s)
         {
             s << "<or_pat>\n";
-            for (int4 i = 0; i < orlist.size(); ++i)
+            for (int i = 0; i < orlist.size(); ++i)
                 orlist[i].saveXml(s);
             s << "</or_pat>\n";
         }

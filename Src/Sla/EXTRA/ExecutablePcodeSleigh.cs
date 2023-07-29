@@ -50,13 +50,13 @@ namespace Sla.EXTRA
 
         public override void decode(Decoder decoder)
         {
-            uint4 elemId = decoder.openElement();
+            uint elemId = decoder.openElement();
             if (elemId != ELEM_PCODE && elemId != ELEM_CASE_PCODE &&
                 elemId != ELEM_ADDR_PCODE && elemId != ELEM_DEFAULT_PCODE && elemId != ELEM_SIZE_PCODE)
                 throw DecoderError("Expecting <pcode>, <case_pcode>, <addr_pcode>, <default_pcode>, or <size_pcode>");
             decodePayloadAttributes(decoder);
             decodePayloadParams(decoder);
-            uint4 subId = decoder.openElement(ELEM_BODY);
+            uint subId = decoder.openElement(ELEM_BODY);
             parsestring = decoder.readString(ATTRIB_CONTENT);
             decoder.closeElement(subId);
             decoder.closeElement(elemId);

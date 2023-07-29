@@ -25,7 +25,7 @@ namespace Sla.DECCORE
         /// \return the discovered AddrSpace or null
         private static AddrSpace searchForSpaceAttribute(Varnode vn, PcodeOp op)
         {
-            for (int4 i = 0; i < 3; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 Datatype* dt = vn.getType();
                 if (dt.getMetatype() == TYPE_PTR)
@@ -84,10 +84,10 @@ namespace Sla.DECCORE
                 if (spc != (AddrSpace*)0 && spc.getAddrSize() == vn.getSize())
                     return spc;
             }
-            for (int4 i = 0; i < spaceList.size(); ++i)
+            for (int i = 0; i < spaceList.size(); ++i)
             {
                 AddrSpace* spc = spaceList[i];
-                int4 minSize = spc.getMinimumPtrSize();
+                int minSize = spc.getMinimumPtrSize();
                 if (minSize == 0)
                 {
                     if (vn.getSize() != spc.getAddrSize())
@@ -121,8 +121,8 @@ namespace Sla.DECCORE
         /// \param fullEncoding will hold the full pointer encoding being passed back
         /// \param data is the function being analyzed
         /// \return the recovered symbol or NULL
-        private static SymbolEntry isPointer(AddrSpace spc, Varnode vn, PcodeOp* op, int4 slot,
-                Address &rampoint, uintb &fullEncoding, Funcdata &data)
+        private static SymbolEntry isPointer(AddrSpace spc, Varnode vn, PcodeOp* op, int slot,
+                Address &rampoint, ulong &fullEncoding, Funcdata &data)
         {
             bool needexacthit;
             Architecture* glb = data.getArch();
@@ -257,7 +257,7 @@ namespace Sla.DECCORE
                 if (op == (PcodeOp*)0) continue;
                 AddrSpace* rspc = selectInferSpace(vn, op, glb.inferPtrSpaces);
                 if (rspc == (AddrSpace*)0) continue;
-                int4 slot = op.getSlot(vn);
+                int slot = op.getSlot(vn);
                 OpCode opc = op.code();
                 if (opc == CPUI_INT_ADD)
                 {
@@ -266,7 +266,7 @@ namespace Sla.DECCORE
                 else if ((opc == CPUI_PTRSUB) || (opc == CPUI_PTRADD))
                     continue;
                 Address rampoint;
-                uintb fullEncoding;
+                ulong fullEncoding;
                 entry = isPointer(rspc, vn, op, slot, rampoint, fullEncoding, data);
                 vn.setPtrCheck();      // Set check flag AFTER searching for symbol
                 if (entry != (SymbolEntry*)0)

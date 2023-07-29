@@ -12,7 +12,7 @@ namespace Sla.SLEIGH
 {
     internal class UserOpSymbol : SleighSymbol
     {
-        private uint4 index;
+        private uint index;
         
         public UserOpSymbol()
         {
@@ -24,12 +24,12 @@ namespace Sla.SLEIGH
             index = 0;
         }
 
-        public void setIndex(uint4 ind)
+        public void setIndex(uint ind)
         {
             index = ind;
         }
 
-        public uint4 getIndex() => index;
+        public uint getIndex() => index;
 
         public override symbol_type getType() => userop_symbol;
 

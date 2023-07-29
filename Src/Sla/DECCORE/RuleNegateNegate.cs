@@ -24,12 +24,12 @@ namespace Sla.DECCORE
 
         /// \class RuleNegateNegate
         /// \brief Simplify INT_NEGATE chains:  `~~V  =>  V`
-        public override void getOpList(List<uint4> oplist)
+        public override void getOpList(List<uint> oplist)
         {
             oplist.push_back(CPUI_INT_NEGATE);
         }
 
-        public override int4 applyOp(PcodeOp op, Funcdata data)
+        public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* vn1 = op.getIn(0);
             if (!vn1.isWritten()) return 0;

@@ -18,9 +18,9 @@ namespace Sla.SLEIGH
             cur_rightmost = -1;
             size = 0;
         }
-        internal int4 @base;        // Current base operand (as we traverse the pattern equation from left to right)
-        internal int4 offset;      // Bytes we have traversed from the LEFT edge of the current base
-        internal int4 cur_rightmost; // (resulting) rightmost operand in our pattern
-        internal int4 size;		// (resulting) bytes traversed from the LEFT edge of the rightmost
+        internal int @base;        // Current base operand (as we traverse the pattern equation from left to right)
+        internal int offset;      // Bytes we have traversed from the LEFT edge of the current base
+        internal int cur_rightmost; // (resulting) rightmost operand in our pattern
+        internal int size;		// (resulting) bytes traversed from the LEFT edge of the rightmost
     }
 }

@@ -11,20 +11,20 @@ namespace Sla.SLEIGH
     internal class ContextCommit : ContextChange
     {
         private TripleSymbol sym;
-        private int4 num;           // Index of word containing context commit
-        private uintm mask;         // mask of bits in word being committed
+        private int num;           // Index of word containing context commit
+        private uint mask;         // mask of bits in word being committed
         private bool flow;          // Whether the context "flows" from the point of change
         
         public ContextCommit()
         {
         }
 
-        public ContextCommit(TripleSymbol s, int4 sbit, int4 ebit, bool fl)
+        public ContextCommit(TripleSymbol s, int sbit, int ebit, bool fl)
         {
             sym = s;
             flow = fl;
 
-            int4 shift;
+            int shift;
             calc_maskword(sbit, ebit, out num, out shift, out mask);
         }
 
@@ -44,7 +44,7 @@ namespace Sla.SLEIGH
 
         public override void restoreXml(Element el, SleighBase trans)
         {
-            uintm id;
+            uint id;
             {
                 istringstream s(el.getAttributeValue("id"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);

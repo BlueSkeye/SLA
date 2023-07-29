@@ -12,11 +12,11 @@ namespace Sla.EXTRA
 {
     internal class ConstraintParamConst : UnifyConstraint
     {
-        private int4 opindex;           // Which opcode
-        private int4 slot;          // Which slot to examine for constant
-        private int4 constindex;        // Which varnode is the constant
+        private int opindex;           // Which opcode
+        private int slot;          // Which slot to examine for constant
+        private int constindex;        // Which varnode is the constant
         
-        public ConstraintParamConst(int4 oind, int4 sl, int4 cind)
+        public ConstraintParamConst(int oind, int sl, int cind)
         {
             opindex = oind;
             slot = sl;
@@ -44,7 +44,7 @@ namespace Sla.EXTRA
             typelist[constindex] = UnifyDatatype(UnifyDatatype::const_type);
         }
 
-        public override int4 getBaseIndex() => constindex;
+        public override int getBaseIndex() => constindex;
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {

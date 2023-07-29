@@ -14,20 +14,20 @@ namespace Sla.SLEIGH
     {
         private List<pair<DisjointPattern, Constructor>> list;
         private List<DecisionNode> children;
-        private int4 num;           // Total number of patterns we distinguish
+        private int num;           // Total number of patterns we distinguish
         private bool contextdecision;       // True if this is decision based on context
-        private int4 startbit, bitsize;        // Bits in the stream on which to base the decision
+        private int startbit, bitsize;        // Bits in the stream on which to base the decision
         private DecisionNode parent;
 
         private void chooseOptimalField()
         {
             double score = 0.0;
 
-            int4 sbit, size;        // The current field
+            int sbit, size;        // The current field
             bool context;
             double sc;
 
-            int4 maxlength, numfixed, maxfixed;
+            int maxlength, numfixed, maxfixed;
 
             maxfixed = 1;
             context = true;
@@ -89,16 +89,16 @@ namespace Sla.SLEIGH
                 bitsize = 0;        // treat the node as terminal
         }
 
-        private double getScore(int4 low, int4 size, bool context)
+        private double getScore(int low, int size, bool context)
         {
-            int4 numBins = 1 << size;       // size is between 1 and 8
-            int4 i;
-            uintm val, mask;
-            uintm m = ((uintm)1) << size;
+            int numBins = 1 << size;       // size is between 1 and 8
+            int i;
+            uint val, mask;
+            uint m = ((uint)1) << size;
             m = m - 1;
 
-            int4 total = 0;
-            List<int4> count(numBins,0);
+            int total = 0;
+            List<int> count(numBins,0);
 
             for (i = 0; i < list.size(); ++i)
             {
@@ -120,15 +120,15 @@ namespace Sla.SLEIGH
             return (sc / log(2.0));
         }
 
-        private int4 getNumFixed(int4 low, int4 size, bool context)
+        private int getNumFixed(int low, int size, bool context)
         {               // Get number of patterns that specify this field
-            int4 count = 0;
-            uintm mask;
+            int count = 0;
+            uint mask;
             // Bits which must be specified in the mask
-            uintm m = (size == 8 * sizeof(uintm)) ? 0 : (((uintm)1) << size);
+            uint m = (size == 8 * sizeof(uint)) ? 0 : (((uint)1) << size);
             m = m - 1;
 
-            for (int4 i = 0; i < list.size(); ++i)
+            for (int i = 0; i < list.size(); ++i)
             {
                 mask = list[i].first.getMask(low, size, context);
                 if ((mask & m) == m)
@@ -137,10 +137,10 @@ namespace Sla.SLEIGH
             return count;
         }
 
-        private int4 getMaximumLength(bool context)
+        private int getMaximumLength(bool context)
         {               // Get maximum length of instruction pattern in bytes
-            int4 max = 0;
-            int4 val, i;
+            int max = 0;
+            int val, i;
 
             for (i = 0; i < list.size(); ++i)
             {
@@ -151,18 +151,18 @@ namespace Sla.SLEIGH
             return max;
         }
 
-        private void consistentValues(List<uint4> bins, DisjointPattern pat)
+        private void consistentValues(List<uint> bins, DisjointPattern pat)
         {               // Produce all possible values of -pat- by
                         // iterating through all possible values of the
                         // "don't care" bits within the value of -pat-
                         // that intersects with this node (startbit,bitsize,context)
-            uintm m = (bitsize == 8 * sizeof(uintm)) ? 0 : (((uintm)1) << bitsize);
+            uint m = (bitsize == 8 * sizeof(uint)) ? 0 : (((uint)1) << bitsize);
             m = m - 1;
-            uintm commonMask = m & pat.getMask(startbit, bitsize, contextdecision);
-            uintm commonValue = commonMask & pat.getValue(startbit, bitsize, contextdecision);
-            uintm dontCareMask = m ^ commonMask;
+            uint commonMask = m & pat.getMask(startbit, bitsize, contextdecision);
+            uint commonValue = commonMask & pat.getValue(startbit, bitsize, contextdecision);
+            uint dontCareMask = m ^ commonMask;
 
-            for (uintm i = 0; i <= dontCareMask; ++i)
+            for (uint i = 0; i <= dontCareMask; ++i)
             { // Iterate over values that contain all don't care bits
                 if ((i & dontCareMask) != i) continue; // If all 1 bits in the value are don't cares
                 bins.push_back(commonValue | i); // add 1 bits into full value and store
@@ -206,7 +206,7 @@ namespace Sla.SLEIGH
                 s << ": Unable to resolve constructor";
                 throw BadDataError(s.str());
             }
-            uintm val;
+            uint val;
             if (contextdecision)
                 val = walker.getContextBits(startbit, bitsize);
             else
@@ -238,27 +238,27 @@ namespace Sla.SLEIGH
             if ((parent != (DecisionNode*)0) && (list.size() >= parent.num))
                 throw new LowlevelError("Child has as many Patterns as parent");
 
-            int4 numChildren = 1 << bitsize;
+            int numChildren = 1 << bitsize;
 
-            for (int4 i = 0; i < numChildren; ++i)
+            for (int i = 0; i < numChildren; ++i)
             {
                 DecisionNode* nd = new DecisionNode(this);
                 children.push_back(nd);
             }
-            for (int4 i = 0; i < list.size(); ++i)
+            for (int i = 0; i < list.size(); ++i)
             {
-                List<uint4> vals;     // Bins this pattern belongs in
+                List<uint> vals;     // Bins this pattern belongs in
                                         // If the pattern does not care about some
                                         // bits in the field we are splitting on, that
                                         // pattern will get put into multiple bins
                 consistentValues(vals, list[i].first);
-                for (int4 j = 0; j < vals.size(); ++j)
+                for (int j = 0; j < vals.size(); ++j)
                     children[vals[j]].addConstructorPair(list[i].first, list[i].second);
                 delete list[i].first;   // We no longer need original pattern
             }
             list.clear();
 
-            for (int4 i = 0; i < numChildren; ++i)
+            for (int i = 0; i < numChildren; ++i)
                 children[i].split(props);
         }
 
@@ -284,7 +284,7 @@ namespace Sla.SLEIGH
             //   4) Other situations where the ability to distinguish between constructors is hidden in
             //      the subconstructors.
             // This routine can determine if an intersection results from case 1) or case 2)
-            int4 i, j, k;
+            int i, j, k;
             List<pair<DisjointPattern*, Constructor*>> newlist;
             List<pair<DisjointPattern*, Constructor*>> conflictlist;
 
@@ -368,13 +368,13 @@ namespace Sla.SLEIGH
             s << " start=\"" << startbit << "\"";
             s << " size=\"" << bitsize << "\"";
             s << ">\n";
-            for (int4 i = 0; i < list.size(); ++i)
+            for (int i = 0; i < list.size(); ++i)
             {
                 s << "<pair id=\"" << dec << list[i].second.getId() << "\">\n";
                 list[i].first.saveXml(s);
                 s << "</pair>\n";
             }
-            for (int4 i = 0; i < children.size(); ++i)
+            for (int i = 0; i < children.size(); ++i)
                 children[i].saveXml(s);
             s << "</decision>\n";
         }
@@ -407,7 +407,7 @@ namespace Sla.SLEIGH
                 {
                     Constructor* ct;
                     DisjointPattern* pat;
-                    uintm id;
+                    uint id;
                     istringstream s((* iter).getAttributeValue("id"));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> id;

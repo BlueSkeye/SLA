@@ -13,11 +13,11 @@ namespace Sla.EXTRA
 {
     internal class ConstraintSetInput : UnifyConstraint
     {
-        private int4 opindex;
+        private int opindex;
         private RHSConstant slot;
-        private int4 varindex;
+        private int varindex;
         
-        public ConstraintSetInput(int4 oind, RHSConstant sl, int4 varind)
+        public ConstraintSetInput(int oind, RHSConstant sl, int varind)
         {
             opindex = oind;
             slot = sl;
@@ -33,7 +33,7 @@ namespace Sla.EXTRA
         public override UnifyConstraint clone() 
             => (new ConstraintSetInput(opindex, slot.clone(), varindex)).copyid(this);
 
-        public override int4 getBaseIndex() => varindex;
+        public override int getBaseIndex() => varindex;
 
         public override bool step(UnifyState state)
         {
@@ -42,7 +42,7 @@ namespace Sla.EXTRA
             Funcdata* fd = state.getFunction();
             PcodeOp* op = state.data(opindex).getOp();
             Varnode* vn = state.data(varindex).getVarnode();
-            int4 slt = (int4)slot.getConstant(state);
+            int slt = (int)slot.getConstant(state);
             fd.opSetInput(op, vn, slt);
             return true;
         }
