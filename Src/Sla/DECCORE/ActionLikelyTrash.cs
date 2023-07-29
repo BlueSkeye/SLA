@@ -73,8 +73,8 @@ namespace Sla.DECCORE
         /// \return \b true if all flows look like trash
         private static bool traceTrash(Varnode vn, List<PcodeOp> indlist)
         {
-            vector<PcodeOp*> allroutes; // Keep track of merging ops (with more than 1 input)
-            vector<Varnode*> markedlist;    // All varnodes we have visited on paths from -vn-
+            List<PcodeOp*> allroutes; // Keep track of merging ops (with more than 1 input)
+            List<Varnode*> markedlist;    // All varnodes we have visited on paths from -vn-
             list<PcodeOp*>::const_iterator iter, enditer;
             Varnode* outvn;
             uintb val;
@@ -189,9 +189,9 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            vector<PcodeOp*> indlist;
+            List<PcodeOp*> indlist;
 
-            vector<VarnodeData>::const_iterator iter, enditer;
+            List<VarnodeData>::const_iterator iter, enditer;
             iter = data.getFuncProto().trashBegin();
             enditer = data.getFuncProto().trashEnd();
             for (; iter != enditer; ++iter)

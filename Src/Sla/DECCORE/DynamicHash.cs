@@ -254,7 +254,7 @@ namespace Sla.DECCORE
         private static void dedupVarnodes(List<Varnode> varlist)
         {
             if (varlist.size() < 2) return;
-            vector<Varnode*> resList;
+            List<Varnode*> resList;
             for (int4 i = 0; i < varlist.size(); ++i)
             {
                 Varnode* vn = varlist[i];
@@ -419,9 +419,9 @@ namespace Sla.DECCORE
         /// \param fd is the function (holding the data-flow graph)
         public void uniqueHash(Varnode root, Funcdata fd)
         {
-            vector<Varnode*> vnlist;
-            vector<Varnode*> vnlist2;
-            vector<Varnode*> champion;
+            List<Varnode*> vnlist;
+            List<Varnode*> vnlist2;
+            List<Varnode*> champion;
             uint4 method;
             uint8 tmphash;
             Address tmpaddr;
@@ -487,9 +487,9 @@ namespace Sla.DECCORE
         /// \param fd is the function containing the given PcodeOp
         public void uniqueHash(PcodeOp op, int4 slot, Funcdata fd)
         {
-            vector<PcodeOp*> oplist;
-            vector<PcodeOp*> oplist2;
-            vector<PcodeOp*> champion;
+            List<PcodeOp*> oplist;
+            List<PcodeOp*> oplist2;
+            List<PcodeOp*> champion;
             uint4 method;
             uint8 tmphash;
             Address tmpaddr;
@@ -573,8 +573,8 @@ namespace Sla.DECCORE
             uint4 total = getTotalFromHash(h);
             uint4 pos = getPositionFromHash(h);
             clearTotalPosition(h);
-            vector<Varnode*> vnlist;
-            vector<Varnode*> vnlist2;
+            List<Varnode*> vnlist;
+            List<Varnode*> vnlist2;
             gatherFirstLevelVars(vnlist, fd, addr, h);
             for (uint4 i = 0; i < vnlist.size(); ++i)
             {
@@ -606,8 +606,8 @@ namespace Sla.DECCORE
             int total = getTotalFromHash(h);
             int pos = getPositionFromHash(h);
             clearTotalPosition(h);
-            vector<PcodeOp*> oplist;
-            vector<PcodeOp*> oplist2;
+            List<PcodeOp*> oplist;
+            List<PcodeOp*> oplist2;
             gatherOpsAtAddress(oplist, fd, addr);
             for (uint4 i = 0; i < oplist.size(); ++i)
             {

@@ -157,7 +157,7 @@ namespace Sla.DECCORE
                 remain = specify;
             }
 
-            // vector<Action*>::iterator iter;
+            // List<Action*>::iterator iter;
             Action? lastaction = null;
             int matchcount = 0;
             foreach (Action iter in list) {
@@ -188,7 +188,7 @@ namespace Sla.DECCORE
                 remain = specify;
             }
 
-            // vector<Action*>::iterator iter;
+            // List<Action*>::iterator iter;
             Rule? lastrule = null;
             int matchcount = 0;
             foreach (Action iter in list) {

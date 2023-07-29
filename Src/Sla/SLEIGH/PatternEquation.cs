@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Sla.SLEIGH
 {
-    // operandOrder returns a vector of the self-defining OperandSymbols as the appear
+    // operandOrder returns a List of the self-defining OperandSymbols as the appear
     // in left to right order in the pattern
     internal abstract class PatternEquation
     {

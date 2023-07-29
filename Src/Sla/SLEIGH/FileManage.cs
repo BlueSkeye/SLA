@@ -48,8 +48,8 @@ namespace Sla.SLEIGH
             piecestr = parent.substr(parent.size() - 4);
             if (piecestr != ".git") return false;
             root = buildPath(pathels, level + 2);
-            vector<string> testpaths1;
-            vector<string> testpaths2;
+            List<string> testpaths1;
+            List<string> testpaths2;
             scanDirectoryRecursive(testpaths1, "ghidra.git", root, 1);
             if (testpaths1.size() != 1) return false;
             scanDirectoryRecursive(testpaths2, "Ghidra", testpaths1[0], 1);
@@ -60,8 +60,8 @@ namespace Sla.SLEIGH
         {
             if (level + 1 >= pathels.size()) return false;
             root = buildPath(pathels, level + 1);
-            vector<string> testpaths1;
-            vector<string> testpaths2;
+            List<string> testpaths1;
+            List<string> testpaths2;
             scanDirectoryRecursive(testpaths1, "server", root, 1);
             if (testpaths1.size() != 1) return false;
             scanDirectoryRecursive(testpaths2, "server.conf", testpaths1[0], 1);
@@ -105,7 +105,7 @@ namespace Sla.SLEIGH
         // Resolve full pathname
         public void findFile(string res, string name)
         {               // Search through paths to find file with given name
-            vector<string>::const_iterator iter;
+            List<string>::const_iterator iter;
 
             if (name[0] == separator)
             {
@@ -137,7 +137,7 @@ namespace Sla.SLEIGH
         // List of files with suffix
         public void matchList(List<string> res, string match,bool isSuffix)
         {
-            vector<string>::const_iterator iter;
+            List<string>::const_iterator iter;
 
             for (iter = pathlist.begin(); iter != pathlist.end(); ++iter)
                 matchListDir(res, match, isSuffix, *iter, false);
@@ -281,9 +281,9 @@ namespace Sla.SLEIGH
         public static void scanDirectoryRecursive(List<string> res, string matchname, string rootpath,int maxdepth)
         {
             if (maxdepth == 0) return;
-            vector<string> subdir;
+            List<string> subdir;
             directoryList(subdir, rootpath);
-            vector<string>::const_iterator iter;
+            List<string>::const_iterator iter;
             for (iter = subdir.begin(); iter != subdir.end(); ++iter)
             {
                 string curpath = *iter;
@@ -327,7 +327,7 @@ namespace Sla.SLEIGH
 
         public static string discoverGhidraRoot(string argv0)
         { // Find the root of the ghidra distribution based on current working directory and passed in path
-            vector<string> pathels;
+            List<string> pathels;
             string cur(argv0);
             string base;
             int skiplevel = 0;

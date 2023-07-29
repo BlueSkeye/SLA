@@ -36,10 +36,10 @@ namespace Sla.EXTRA
         /// \return the (possibly new) position of the cursor, after completion
         private int4 doCompletion(string &line, int4 cursor)
         {
-            vector<string> fullcommand;
+            List<string> fullcommand;
             istringstream s(line);
             string tok;
-            vector<IfaceCommand*>::const_iterator first, last;
+            List<IfaceCommand*>::const_iterator first, last;
             int4 oldsize, match;
 
             first = comlist.begin();

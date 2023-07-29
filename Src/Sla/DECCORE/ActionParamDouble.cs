@@ -112,8 +112,8 @@ namespace Sla.DECCORE
             if (fp.isInputLocked() && data.isDoublePrecisOn())
             {
                 // Search for locked parameters that are being split into hi and lo components
-                vector<Varnode*> lovec;
-                vector<Varnode*> hivec;
+                List<Varnode*> lovec;
+                List<Varnode*> hivec;
                 int4 minDoubleSize = data.getArch().getDefaultSize();  // Minimum size to consider
                 int4 numparams = fp.numParams();
                 for (int4 i = 0; i < numparams; ++i)

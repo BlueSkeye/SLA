@@ -70,7 +70,7 @@ namespace Sla.DECCORE
                 return (*iter).second.byteData;
             }
 
-            StringData & stringData(stringMap[addr]);       // Allocate (initially empty) byte vector
+            StringData & stringData(stringMap[addr]);       // Allocate (initially empty) byte List
             stringData.isTruncated = false;
             isTrunc = false;
 

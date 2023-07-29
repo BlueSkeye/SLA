@@ -83,7 +83,7 @@ namespace Sla.DECCORE
         private static bool flowToAlternatePath(PcodeOp op)
         {
             if (op.isMark()) return true;
-            vector<Varnode*> markSet;
+            List<Varnode*> markSet;
             Varnode* vn = op.getOut();
             markSet.push_back(vn);
             vn.setMark();
@@ -130,8 +130,8 @@ namespace Sla.DECCORE
         /// \return \b true if the selected edge flows together with any other edge
         private static bool flowTogether(List<PcodeOpNode> edges, int i, List<int> result)
         {
-            vector<PcodeOp*> reachable;
-            vector<PcodeOpNode> excise; // No edge excised
+            List<PcodeOp*> reachable;
+            List<PcodeOpNode> excise; // No edge excised
             collectReachable(edges[i].op.getOut(), excise, reachable);
             bool res = false;
             for (int4 j = 0; j < edges.size(); ++j)
@@ -196,7 +196,7 @@ namespace Sla.DECCORE
         private static void placeMultipleConstants(List<PcodeOpNode> phiNodeEdges,
             List<int> marks, Varnode constVn, Funcdata data)
         {
-            vector<FlowBlock*> blocks;
+            List<FlowBlock*> blocks;
             PcodeOp* op = (PcodeOp*)0;
             for (int4 i = 0; i < phiNodeEdges.size(); ++i)
             {
@@ -227,8 +227,8 @@ namespace Sla.DECCORE
         private void handlePhiNodes(Varnode varVn, Varnode constVn, List<PcodeOpNode> phiNodeEdges,
             Funcdata data)
         {
-            vector<PcodeOp*> alternateFlow;
-            vector<int4> results(phiNodeEdges.size(),0);
+            List<PcodeOp*> alternateFlow;
+            List<int4> results(phiNodeEdges.size(),0);
             collectReachable(varVn, phiNodeEdges, alternateFlow);
             int4 alternate = 0;
             for (int4 i = 0; i < phiNodeEdges.size(); ++i)
@@ -282,7 +282,7 @@ namespace Sla.DECCORE
         private void propagateConstant(Varnode varVn, Varnode constVn, FlowBlock constBlock,
             bool useMultiequal, Funcdata data)
         {
-            vector<PcodeOpNode> phiNodeEdges;
+            List<PcodeOpNode> phiNodeEdges;
             list<PcodeOp*>::const_iterator iter, enditer;
             iter = varVn.beginDescend();
             enditer = varVn.endDescend();

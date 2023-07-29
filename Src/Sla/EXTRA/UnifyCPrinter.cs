@@ -43,7 +43,7 @@ namespace Sla.EXTRA
 
         private void printGetOpList(TextWriter s)
         { // Print the getOpList method of the new rule
-            s << "void " << classname << "::getOpList(vector<uint4> &oplist) const" << endl;
+            s << "void " << classname << "::getOpList(List<uint4> &oplist) const" << endl;
             s << endl;
             s << '{' << endl;
             for (int4 i = 0; i < opcodelist.size(); ++i)

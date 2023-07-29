@@ -39,8 +39,8 @@ namespace Sla.DECCORE
                 delete proto;
             proto = new FuncProto();
             proto.setInternal(model, voidtype);
-            vector<Datatype*> typelist;
-            vector<string> blanknames(intypes.size()+1);
+            List<Datatype*> typelist;
+            List<string> blanknames(intypes.size()+1);
             if (outtype == (Datatype*)0)
                 typelist.push_back(voidtype);
             else

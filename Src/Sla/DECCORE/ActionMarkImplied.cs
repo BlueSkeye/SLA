@@ -194,7 +194,7 @@ namespace Sla.DECCORE
             list<PcodeOp*>::const_iterator oiter;
             Varnode* vn,*vncur,*defvn,*outvn;
             PcodeOp* op;
-            vector<DescTreeElement> varstack; // Depth first varnode traversal stack
+            List<DescTreeElement> varstack; // Depth first varnode traversal stack
 
             for (viter = data.beginLoc(); viter != data.endLoc(); ++viter)
             {

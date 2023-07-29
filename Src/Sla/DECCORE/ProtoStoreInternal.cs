@@ -173,8 +173,8 @@ namespace Sla.DECCORE
         public override void decode(Decoder decoder, ProtoModel model)
         {
             Architecture* glb = model.getArch();
-            vector<ParameterPieces> pieces;
-            vector<string> namelist;
+            List<ParameterPieces> pieces;
+            List<string> namelist;
             bool addressesdetermined = true;
 
             pieces.push_back(ParameterPieces()); // Push on placeholder for output pieces
@@ -244,10 +244,10 @@ namespace Sla.DECCORE
             {
                 // If addresses for parameters are not provided, use
                 // the model to derive them from type info
-                vector<Datatype*> typelist;
+                List<Datatype*> typelist;
                 for (int4 i = 0; i < pieces.size(); ++i) // Save off the decoded types
                     typelist.push_back(pieces[i].type);
-                vector<ParameterPieces> addrPieces;
+                List<ParameterPieces> addrPieces;
                 model.assignParameterStorage(typelist, addrPieces, true);
                 addrPieces.swap(pieces);
                 uint4 k = 0;

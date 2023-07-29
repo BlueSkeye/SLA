@@ -40,8 +40,8 @@ namespace Sla.EXTRA
             else
                 throw IfaceParseError("Must specify \"full\" or \"partial\" widening");
             Varnode* vn = dcp.readVarnode(s);
-            vector<Varnode*> sinks;
-            vector<PcodeOp*> reads;
+            List<Varnode*> sinks;
+            List<PcodeOp*> reads;
             sinks.push_back(vn);
             for (list<PcodeOp*>::const_iterator iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {

@@ -124,8 +124,8 @@ namespace Sla.DECCORE
                 if (sym.category >= 0)
                 {
                     while (category.size() <= sym.category)
-                        category.push_back(vector<Symbol*>());
-                    vector<Symbol*> & list(category[sym.category]);
+                        category.push_back(List<Symbol*>());
+                    List<Symbol*> & list(category[sym.category]);
                     if (sym.category > 0)
                         sym.catindex = list.size();
                     while (list.size() <= sym.catindex)
@@ -255,7 +255,7 @@ namespace Sla.DECCORE
                 }
                 if (nullsymbol)
                 {       // Clear entire category
-                    vector<Symbol*> list;
+                    List<Symbol*> list;
                     for (int4 j = 0; j < num; ++j)
                         list.push_back(category[i][j]);
                     for (int4 j = 0; j < list.size(); ++j)
@@ -383,7 +383,7 @@ namespace Sla.DECCORE
 
         ~ScopeInternal()
         {
-            vector<EntryMap*>::iterator iter1;
+            List<EntryMap*>::iterator iter1;
 
             for (iter1 = maptable.begin(); iter1 != maptable.end(); ++iter1)
                 if ((*iter1) != (EntryMap*)0)
@@ -398,7 +398,7 @@ namespace Sla.DECCORE
         public override MapIterator begin()
         {
             // The symbols are ordered via their mapping address
-            vector<EntryMap*>::const_iterator iter;
+            List<EntryMap*>::const_iterator iter;
             iter = maptable.begin();
             while ((iter != maptable.end()) && ((*iter) == (EntryMap*)0))
                 ++iter;
@@ -451,7 +451,7 @@ namespace Sla.DECCORE
 
         public override void removeSymbolMappings(Symbol symbol)
         {
-            vector<list<SymbolEntry>::iterator>::iterator iter;
+            List<list<SymbolEntry>::iterator>::iterator iter;
 
             if (symbol.wholeCount > 1)
                 multiEntrySet.erase(symbol);
@@ -475,7 +475,7 @@ namespace Sla.DECCORE
         {
             if (symbol.category >= 0)
             {
-                vector<Symbol*> & list(category[symbol.category]);
+                List<Symbol*> & list(category[symbol.category]);
                 list[symbol.catindex] = (Symbol*)0;
                 while ((!list.empty()) && (list.back() == (Symbol*)0))
                     list.pop_back();
@@ -1016,7 +1016,7 @@ namespace Sla.DECCORE
                     else if (symbolType == 2)
                         encoder.writeString(ATTRIB_TYPE, "equate");
                     sym.encode(encoder);
-                    vector<list<SymbolEntry>::iterator>::const_iterator miter;
+                    List<list<SymbolEntry>::iterator>::const_iterator miter;
                     for (miter = sym.mapentry.begin(); miter != sym.mapentry.end(); ++miter)
                     {
                         SymbolEntry entry = (*(*miter));
@@ -1117,7 +1117,7 @@ namespace Sla.DECCORE
         {
             if (sym.category >= 0)
             {
-                vector<Symbol*> & list(category[sym.category]);
+                List<Symbol*> & list(category[sym.category]);
                 list[sym.catindex] = (Symbol*)0;
                 while ((!list.empty()) && (list.back() == (Symbol*)0))
                     list.pop_back();
@@ -1127,8 +1127,8 @@ namespace Sla.DECCORE
             sym.catindex = ind;
             if (cat < 0) return;
             while (category.size() <= sym.category)
-                category.push_back(vector<Symbol*>());
-            vector<Symbol*> & list(category[sym.category]);
+                category.push_back(List<Symbol*>());
+            List<Symbol*> & list(category[sym.category]);
             while (list.size() <= sym.catindex)
                 list.push_back((Symbol*)0);
             list[sym.catindex] = sym;

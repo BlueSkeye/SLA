@@ -69,7 +69,7 @@ namespace Sla.EXTRA
         ///< Add words to the associated command line string
         public void addWords(List<string> wordlist)
         {
-            vector<string>::const_iterator iter;
+            List<string>::const_iterator iter;
 
             for (iter = wordlist.begin(); iter != wordlist.end(); ++iter)
                 com.push_back(*iter);
@@ -92,7 +92,7 @@ namespace Sla.EXTRA
         public int4 compare(IfaceCommand op2)
         {
             int4 res;
-            vector<string>::const_iterator iter1, iter2;
+            List<string>::const_iterator iter1, iter2;
 
             for (iter1 = com.begin(), iter2 = op2.com.begin(); ; ++iter1, ++iter2)
             {

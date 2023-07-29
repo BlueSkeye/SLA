@@ -571,7 +571,7 @@ namespace Sla.DECCORE
         /// add the Address to the \b unprocessed array.
         private void findUnprocessed()
         {
-            vector<Address>::iterator iter;
+            List<Address>::iterator iter;
 
             for (iter = addrlist.begin(); iter != addrlist.end(); ++iter)
             {
@@ -591,7 +591,7 @@ namespace Sla.DECCORE
         {
             if (unprocessed.empty()) return;
             sort(unprocessed.begin(), unprocessed.end());
-            vector<Address>::iterator iter1, iter2;
+            List<Address>::iterator iter1, iter2;
 
             iter1 = unprocessed.begin();
             Address lastaddr = *iter1++;
@@ -614,7 +614,7 @@ namespace Sla.DECCORE
         /// the \b unprocessed list.
         private void fillinBranchStubs()
         {
-            vector<Address>::iterator iter;
+            List<Address>::iterator iter;
 
             findUnprocessed();
             dedupUnprocessed();
@@ -1129,7 +1129,7 @@ namespace Sla.DECCORE
         /// This situation is most likely due to a Position Indepent Code construction.
         private void checkContainedCall()
         {
-            vector<FuncCallSpecs*>::iterator iter;
+            List<FuncCallSpecs*>::iterator iter;
             for (iter = qlst.begin(); iter != qlst.end(); ++iter)
             {
                 FuncCallSpecs* fc = *iter;
@@ -1419,7 +1419,7 @@ namespace Sla.DECCORE
         /// Generate raw control-flow from the function's base address
         public void generateOps()
         {
-            vector<PcodeOp*> notreached;    // indirect ops that are not reachable
+            List<PcodeOp*> notreached;    // indirect ops that are not reachable
             int4 notreachcnt = 0;
             clearProperties();
             addrlist.push_back(data.getAddress());
@@ -1432,7 +1432,7 @@ namespace Sla.DECCORE
                 bool collapsed_jumptable = false;
                 while (!tablelist.empty())
                 {   // For each jumptable found
-                    vector<JumpTable*> newTables;
+                    List<JumpTable*> newTables;
                     recoverJumpTables(newTables, notreached);
                     tablelist.clear();
                     for (int4 i = 0; i < newTables.size(); ++i)

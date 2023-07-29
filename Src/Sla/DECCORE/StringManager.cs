@@ -64,7 +64,7 @@ namespace Sla.DECCORE
 
         /// \brief Retrieve string data at the given address as a UTF8 byte array
         ///
-        /// If the address does not represent string data, a zero length vector is returned. Otherwise,
+        /// If the address does not represent string data, a zero length List is returned. Otherwise,
         /// the string data is fetched, converted to a UTF8 encoding, cached and returned.
         /// \param addr is the given address
         /// \param charType is a character data-type indicating the encoding

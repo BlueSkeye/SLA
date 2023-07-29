@@ -189,7 +189,7 @@ namespace Sla.DECCORE
         /// reordered too.
         public void deleteUnusedTrials()
         {
-            vector<ParamTrial> newtrials;
+            List<ParamTrial> newtrials;
             int4 slot = 1;
 
             for (int4 i = 0; i < trial.size(); ++i)
@@ -213,7 +213,7 @@ namespace Sla.DECCORE
         {
             if (stackplaceholder >= 0)
                 throw new LowlevelError("Cannot split parameter when the placeholder has not been recovered");
-            vector<ParamTrial> newtrials;
+            List<ParamTrial> newtrials;
             int4 slot = trial[i].getSlot();
 
             for (int4 j = 0; j < i; ++j)
@@ -245,7 +245,7 @@ namespace Sla.DECCORE
         {
             if (stackplaceholder >= 0)
                 throw new LowlevelError("Cannot join parameters when the placeholder has not been removed");
-            vector<ParamTrial> newtrials;
+            List<ParamTrial> newtrials;
             int4 sizecheck = 0;
             for (int4 i = 0; i < trial.size(); ++i)
             {

@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         ///
         /// By making the extension operation part of each pointer calculation (where it is usually an implied cast),
         /// we can frequently eliminate an explicit variable that would just hold the extension.
-        public override void getOpList(vector<uint4> &oplist)
+        public override void getOpList(List<uint4> &oplist)
         {
             oplist.push_back(CPUI_INT_ZEXT);
             oplist.push_back(CPUI_INT_SEXT);

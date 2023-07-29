@@ -50,7 +50,7 @@ namespace Sla.DECCORE
         /// \param parentMap will hold the new index map
         private void internalIntersect(List<int4> parentMap)
         {
-            vector<Varnode*> newVn;
+            List<Varnode*> newVn;
             int4 lastIntersect = -1;
             for (int4 i = 0; i < commonVn.size(); ++i)
             {
@@ -103,7 +103,7 @@ namespace Sla.DECCORE
             }
 
             // Do a merge sort, keeping ops in execution order
-            vector<RootedOp> newMeld;
+            List<RootedOp> newMeld;
             int4 curRoot = -1;
             int4 meldPos = 0;               // Ops moved from old opMeld into newMeld
             BlockBasic lastBlock = (BlockBasic*)0;
@@ -238,7 +238,7 @@ namespace Sla.DECCORE
         /// \param path is the new path of PcodeOpNode edges to meld, in reverse execution order
         public void meld(List<PcodeOpNode> path)
         {
-            vector<int4> parentMap;
+            List<int4> parentMap;
 
             for (int4 i = 0; i < path.size(); ++i)
             {

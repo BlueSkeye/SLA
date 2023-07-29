@@ -743,7 +743,7 @@ namespace Sla.SLACOMP
         {
             if (cttpl == (ConstructTpl*)0)
                 return true;        // Nothing to check
-            vector<OpTpl*>::const_iterator iter;
+            List<OpTpl*>::const_iterator iter;
             List<OpTpl> ops = cttpl.getOpvec();
             bool testresult = true;
 
@@ -842,7 +842,7 @@ namespace Sla.SLACOMP
         /// \return \b true if all truncation expressions were valid
         private bool checkSectionTruncations(Constructor ct, ConstructTpl cttpl, bool isbigendian)
         {
-            vector<OpTpl*>::const_iterator iter;
+            List<OpTpl*>::const_iterator iter;
             List<OpTpl> ops = cttpl.getOpvec();
             bool testresult = true;
 
@@ -997,9 +997,9 @@ namespace Sla.SLACOMP
             postorder.clear();
             sizemap.clear();
 
-            vector<SubtableSymbol*> path;
-            vector<int4> state;
-            vector<int4> ctstate;
+            List<SubtableSymbol*> path;
+            List<int4> state;
+            List<int4> ctstate;
 
             sizemap[root] = -1;     // Mark root as traversed
             path.push_back(root);
@@ -1333,7 +1333,7 @@ namespace Sla.SLACOMP
         /// \param rec is record describing the temporary and its read/write operators
         private void applyOptimization(Constructor ct, OptimizeRecord rec)
         {
-            vector<int4> deleteops;
+            List<int4> deleteops;
             ConstructTpl* ctempl;
             if (rec.readsection < 0)
                 ctempl = ct.getTempl();
@@ -1396,8 +1396,8 @@ namespace Sla.SLACOMP
         /// \param ctpl is the specific p-code section
         private void checkLargeTemporaries(Constructor ct, ConstructTpl ctpl)
         {
-            vector<OpTpl*> ops = ctpl.getOpvec();
-            for (vector<OpTpl*>::iterator iter = ops.begin(); iter != ops.end(); ++iter)
+            List<OpTpl*> ops = ctpl.getOpvec();
+            for (List<OpTpl*>::iterator iter = ops.begin(); iter != ops.end(); ++iter)
             {
                 if (hasLargeTemporary(*iter))
                 {

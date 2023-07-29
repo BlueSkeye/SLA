@@ -704,8 +704,8 @@ namespace Sla.DECCORE
             Varnode* outVn = copyOp.getOut();
             if (isArithmeticInput(outVn))   // Sanity check on output
                 return false;
-            vector<Varnode*> inVarnodes;
-            vector<Varnode*> outVarnodes;
+            List<Varnode*> inVarnodes;
+            List<Varnode*> outVarnodes;
             if (inVn.isConstant())
                 buildInConstants(inVn, inVarnodes);
             else
@@ -755,8 +755,8 @@ namespace Sla.DECCORE
             RootPointer root;
             if (!root.find(loadOp, inType))
                 return false;
-            vector<Varnode*> ptrVarnodes;
-            vector<Varnode*> outVarnodes;
+            List<Varnode*> ptrVarnodes;
+            List<Varnode*> outVarnodes;
             PcodeOp* insertPoint = (copyOp == (PcodeOp*)0) ? loadOp : copyOp;
             buildPointers(root.pointer, root.ptrType, root.baseOffset, loadOp, ptrVarnodes, true);
             buildOutVarnodes(outVn, outVarnodes);
@@ -830,12 +830,12 @@ namespace Sla.DECCORE
                     return false;
             }
 
-            vector<Varnode*> inVarnodes;
+            List<Varnode*> inVarnodes;
             if (inVn.isConstant())
                 buildInConstants(inVn, inVarnodes);
             else if (loadOp != (PcodeOp*)0)
             {
-                vector<Varnode*> loadPtrs;
+                List<Varnode*> loadPtrs;
                 buildPointers(loadRoot.pointer, loadRoot.ptrType, loadRoot.baseOffset, loadOp, loadPtrs, true);
                 AddrSpace* loadSpace = loadOp.getIn(0).getSpaceFromConst();
                 for (int4 i = 0; i < loadPtrs.size(); ++i)
@@ -854,7 +854,7 @@ namespace Sla.DECCORE
             else
                 buildInSubpieces(inVn, storeOp, inVarnodes);
 
-            vector<Varnode*> storePtrs;
+            List<Varnode*> storePtrs;
             buildPointers(storeRoot.pointer, storeRoot.ptrType, storeRoot.baseOffset, storeOp, storePtrs, false);
             AddrSpace* storeSpace = storeOp.getIn(0).getSpaceFromConst();
             // Preserve original STORE object, so that INDIRECT references are still valid

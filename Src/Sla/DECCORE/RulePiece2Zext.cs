@@ -24,7 +24,7 @@ namespace Sla.DECCORE
 
         /// \class RulePiece2Zext
         /// \brief Concatenation with 0 becomes an extension:  `V = concat(#0,W)  =>  V = zext(W)`
-        public override void getOpList(vector<uint4> oplist)
+        public override void getOpList(List<uint4> oplist)
         {
             oplist.push_back(CPUI_PIECE);
         }

@@ -22,7 +22,7 @@ namespace Sla.EXTRA
                 throw IfaceParseError("Missing symbol name");
 
             Symbol* sym;
-            vector<Symbol*> symList;
+            List<Symbol*> symList;
             dcp.readSymbol(symbolName, symList);
             if (symList.empty())
                 throw IfaceExecutionError("No symbol named: " + symbolName);

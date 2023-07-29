@@ -101,7 +101,7 @@ namespace Sla.DECCORE
 
         ~UserOpManage()
         {
-            vector<UserPcodeOp*>::iterator iter;
+            List<UserPcodeOp*>::iterator iter;
 
             for (iter = useroplist.begin(); iter != useroplist.end(); ++iter)
             {
@@ -117,7 +117,7 @@ namespace Sla.DECCORE
         /// \param glb is the Architecture from which to draw user defined operations
         public void initialize(Architecture glb)
         {
-            vector<string> basicops;
+            List<string> basicops;
             glb.translate.getUserOpNames(basicops);
             for (uint4 i = 0; i < basicops.size(); ++i)
             {

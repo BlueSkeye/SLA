@@ -175,8 +175,8 @@ namespace Sla.DECCORE
         {
             if (loadpoints.empty()) return;
             bool issorted = true;
-            vector<LoadTable>::const_iterator iter;
-            vector<LoadTable>::iterator lastiter;
+            List<LoadTable>::const_iterator iter;
+            List<LoadTable>::iterator lastiter;
 
             iter = loadpoints.begin();
             res.push_back(*iter);   // Copy the first entry

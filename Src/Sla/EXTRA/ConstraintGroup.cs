@@ -43,7 +43,7 @@ namespace Sla.EXTRA
 
         public void deleteConstraint(int4 slot)
         {
-            vector<UnifyConstraint*>::iterator iter = constraintlist.begin();
+            List<UnifyConstraint*>::iterator iter = constraintlist.begin();
             iter = iter + slot;
             UnifyConstraint* mydel = *iter;
             constraintlist.erase(iter);
@@ -170,7 +170,7 @@ namespace Sla.EXTRA
 
         public override void removeDummy()
         { // Remove any dummy constraints within us
-            vector<UnifyConstraint*> newlist;
+            List<UnifyConstraint*> newlist;
 
             for (int4 i = 0; i < constraintlist.size(); ++i)
             {

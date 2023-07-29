@@ -9,7 +9,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace Sla.DECCORE
 {
     /// \brief Find Varnodes with a vectorized lane scheme and attempt to split the lanes
-    /// The Architecture lists (vector) registers that may be used to perform parallelized operations
+    /// The Architecture lists (List) registers that may be used to perform parallelized operations
     /// on \b lanes within the register. This action looks for these registers as Varnodes, determines
     /// if a particular lane scheme makes sense in terms of the function's data-flow, and then
     /// rewrites the data-flow so that the lanes become explicit Varnodes.

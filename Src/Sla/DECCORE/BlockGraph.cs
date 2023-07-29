@@ -191,7 +191,7 @@ namespace Sla.DECCORE
             if (list.Count == 0) {
                 return;
             }
-            vector<FlowBlock> rpostorder;
+            List<FlowBlock> rpostorder;
             List<FlowBlock> state = new List<FlowBlock>();
             List<int> istate = new List<int>();
             FlowBlock tmpbl;
@@ -774,7 +774,7 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Bad block remove");
             }
 #endif
-            //vector<FlowBlock*>::iterator iter;
+            //List<FlowBlock*>::iterator iter;
             while (bl.sizeIn() > 0) {
                 // Rip the block out of the graph
                 removeEdge(bl.getIn(0), bl);
@@ -1453,7 +1453,7 @@ namespace Sla.DECCORE
             // Look for directed cycles in graph
             // Mark edges (loopedges) that can be removed
             // to prevent looping
-            vector<FlowBlock*>::iterator iter;
+            List<FlowBlock*>::iterator iter;
             FlowBlock bl;
             FlowBlock nextbl;
             int i;

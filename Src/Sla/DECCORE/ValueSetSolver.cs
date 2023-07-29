@@ -457,7 +457,7 @@ namespace Sla.DECCORE
         /// \param reads is the additional set of PcodeOps that read a Varnode from the system
         private void generateConstraints(List<Varnode> worklist, List<PcodeOp> reads)
         {
-            vector<FlowBlock*> blockList;
+            List<FlowBlock*> blockList;
             // Collect all blocks that contain a system op (input) or dominate a container
             for (int4 i = 0; i < worklist.size(); ++i)
             {
@@ -503,7 +503,7 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < blockList.size(); ++i)
                 blockList[i].clearMark();
 
-            vector<FlowBlock*> finalList;
+            List<FlowBlock*> finalList;
             // Now go through input blocks to the previously calculated blocks
             for (int4 i = 0; i < blockList.size(); ++i)
             {
@@ -646,7 +646,7 @@ namespace Sla.DECCORE
         public void establishValueSets(List<Varnode> sinks, List<PcodeOp> reads, Varnode stackReg,
             bool indirectAsCopy)
         {
-            vector<Varnode*> worklist;
+            List<Varnode*> worklist;
             int4 workPos = 0;
             if (stackReg != (Varnode*)0)
             {
@@ -774,7 +774,7 @@ namespace Sla.DECCORE
             for (list<ValueSet>::iterator iter = valueNodes.begin(); iter != valueNodes.end(); ++iter)
                 (*iter).count = 0;
 
-            vector<Partition*> componentStack;
+            List<Partition*> componentStack;
             Partition* curComponent = (Partition*)0;
             ValueSet* curSet = orderPartition.startNode;
 

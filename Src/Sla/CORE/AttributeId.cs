@@ -177,9 +177,9 @@ namespace Sla.CORE
         private static List<AttributeId>? _thelist;
 
         /// Retrieve the list of static AttributeId
-        /// Access static vector of AttributeId objects that are registered during static initialization
+        /// Access static List of AttributeId objects that are registered during static initialization
         /// The list itself is created once on the first call to this method.
-        /// \return a reference to the vector
+        /// \return a reference to the List
         private static ref List<AttributeId> getList()
         {
             if (null == _thelist) {

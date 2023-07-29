@@ -29,7 +29,7 @@ namespace Sla.EXTRA
         /// \return \b true if there is a non-trivial use
         public static bool nonTrivialUse(Varnode vn)
         {
-            vector<Varnode*> vnlist;
+            List<Varnode*> vnlist;
             bool res = false;
             vnlist.push_back(vn);
             uint4 proc = 0;
@@ -73,7 +73,7 @@ namespace Sla.EXTRA
         /// \return 0 if Varnode is restored, 1 otherwise
         public static int4 checkRestore(Varnode vn)
         {
-            vector<Varnode*> vnlist;
+            List<Varnode*> vnlist;
             int4 res = 0;
             vnlist.push_back(vn);
             uint4 proc = 0;

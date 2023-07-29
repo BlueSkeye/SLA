@@ -33,7 +33,7 @@ namespace Sla.DECCORE
         /// \param efflist is the given EffectRecord list
         private void intersectEffects(List<EffectRecord> efflist)
         {
-            vector<EffectRecord> newlist;
+            List<EffectRecord> newlist;
 
             int4 i = 0;
             int4 j = 0;
@@ -63,7 +63,7 @@ namespace Sla.DECCORE
         /// \param trashlist is the given \e likely-trash list
         private void intersectLikelyTrash(List<VarnodeData> trashlist)
         {
-            vector<VarnodeData> newlist;
+            List<VarnodeData> newlist;
 
             int4 i = 0;
             int4 j = 0;

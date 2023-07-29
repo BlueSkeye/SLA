@@ -261,7 +261,7 @@ namespace Sla.DECCORE
 
         public override bool turnOffDebug(string nm)
         {
-            vector<Rule *>::iterator iter;
+            List<Rule *>::iterator iter;
 
             if (base.turnOffDebug(nm)) {
                 return true;

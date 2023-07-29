@@ -76,7 +76,7 @@ namespace Sla.DECCORE
         /// \param data is the function holding the Varnodes
         private static void moveSignBitExtraction(Varnode firstVn, Varnode replaceVn, Funcdata data)
         {
-            vector<Varnode*> testList;
+            List<Varnode*> testList;
             testList.push_back(firstVn);
             if (firstVn.isWritten())
             {

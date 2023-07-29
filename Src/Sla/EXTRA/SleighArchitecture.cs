@@ -89,8 +89,8 @@ namespace Sla.EXTRA
         {
             if (!description.empty()) return; // Have we already collected before
 
-            vector<string> testspecs;
-            vector<string>::iterator iter;
+            List<string> testspecs;
+            List<string>::iterator iter;
             specpaths.matchList(testspecs, ".ldefs", true);
             for (iter = testspecs.begin(); iter != testspecs.end(); ++iter)
                 loadLanguageDescription(*iter, errs);
@@ -124,7 +124,7 @@ namespace Sla.EXTRA
         {
             Element* el = store.getTag("coretypes");
             types = new TypeFactory(this); // Initialize the object
-            if (el != (Element*)0) {
+            if (el != (Element)null) {
                 XmlDecode decoder = new XmlDecode(this, el);
                 types.decodeCoreTypes(decoder);
             }
@@ -180,7 +180,7 @@ namespace Sla.EXTRA
         protected override void buildSymbols(DocumentStorage store)
         {
             Element* symtag = store.getTag(ELEM_DEFAULT_SYMBOLS.getName());
-            if (symtag == (Element*)0) return;
+            if (symtag == (Element)null) return;
             XmlDecode decoder = new XmlDecode(this, symtag);
             uint4 el = decoder.openElement(ELEM_DEFAULT_SYMBOLS);
             while (decoder.peekElement() != 0)
@@ -492,10 +492,10 @@ namespace Sla.EXTRA
         /// \param rootpath is the root path of the Ghidra installation
         public static void scanForSleighDirectories(string rootpath)
         {
-            vector<string> ghidradir;
-            vector<string> procdir;
-            vector<string> procdir2;
-            vector<string> languagesubdirs;
+            List<string> ghidradir;
+            List<string> procdir;
+            List<string> procdir2;
+            List<string> languagesubdirs;
 
             FileManage::scanDirectoryRecursive(ghidradir, "Ghidra", rootpath, 2);
             for (uint4 i = 0; i < ghidradir.size(); ++i)
@@ -508,11 +508,11 @@ namespace Sla.EXTRA
                 for (uint4 i = 0; i < procdir.size(); ++i)
                     FileManage::directoryList(procdir2, procdir[i]);
 
-                vector<string> datadirs;
+                List<string> datadirs;
                 for (uint4 i = 0; i < procdir2.size(); ++i)
                     FileManage::scanDirectoryRecursive(datadirs, "data", procdir2[i], 1);
 
-                vector<string> languagedirs;
+                List<string> languagedirs;
                 for (uint4 i = 0; i < datadirs.size(); ++i)
                     FileManage::scanDirectoryRecursive(languagedirs, "languages", datadirs[i], 1);
 
@@ -552,7 +552,7 @@ namespace Sla.EXTRA
             for (map<int4, Sleigh*>::const_iterator iter = translators.begin(); iter != translators.end(); ++iter)
                 delete(*iter).second;
             translators.clear();
-            // description.clear();  // static vector is destroyed by the normal exit handler
+            // description.clear();  // static List is destroyed by the normal exit handler
         }
 
         /// Known directories that contain .ldefs files.

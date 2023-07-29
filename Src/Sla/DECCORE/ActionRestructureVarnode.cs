@@ -23,7 +23,7 @@ namespace Sla.DECCORE
         /// \param op is the given BRANCHIND op
         private static void protectSwitchPathIndirects(PcodeOp op)
         {
-            vector<PcodeOp*> indirects;
+            List<PcodeOp*> indirects;
             Varnode* curVn = op.getIn(0);
             while (curVn.isWritten())
             {

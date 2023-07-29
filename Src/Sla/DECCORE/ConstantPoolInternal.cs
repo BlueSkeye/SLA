@@ -18,7 +18,7 @@ namespace Sla.DECCORE
         /// \brief A cheap (efficient) placeholder for a \e reference to a constant pool record
         /// A \b reference can be an open-ended number of (1 or more) integers. In practice, the
         /// most integers we see in a reference is two.  So this is a slightly more efficient
-        /// container than an open-ended vector.
+        /// container than an open-ended List.
         /// The field \b a is the first integer, the field \b b is the second integer, or zero
         /// if there is no second integer. The references are ordered lexicographically.
         /// The class also serves to serialize/deserialize references from XML
@@ -136,7 +136,7 @@ namespace Sla.DECCORE
             {
                 CheapSorter sorter;
                 sorter.decode(decoder);
-                vector<uintb> refs;
+                List<uintb> refs;
                 sorter.apply(refs);
                 CPoolRecord* newrec = createRecord(refs);
                 newrec.decode(decoder, typegrp);

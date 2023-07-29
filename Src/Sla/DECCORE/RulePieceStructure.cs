@@ -209,7 +209,7 @@ namespace Sla.DECCORE
                 }
             }
 
-            vector<PieceNode> stack;
+            List<PieceNode> stack;
             for (; ; )
             {
                 PieceNode::gatherPieces(stack, outvn, op, baseOffset);

@@ -75,7 +75,7 @@ namespace Sla.DECCORE
         /// \param spaceList is the list of address spaces to select from
         /// \return the selected address space or null
         private static AddrSpace selectInferSpace(Varnode* vn, PcodeOp* op,
-            vector<AddrSpace*> &spaceList)
+            List<AddrSpace*> &spaceList)
         {
             AddrSpace* resSpace = (AddrSpace*)0;
             if (vn.getType().getMetatype() == TYPE_PTR)

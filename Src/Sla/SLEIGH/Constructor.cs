@@ -33,8 +33,8 @@ namespace Sla.SLEIGH
         private void orderOperands()
         {
             OperandSymbol* sym;
-            vector<OperandSymbol*> patternorder;
-            vector<OperandSymbol*> newops; // New order of the operands
+            List<OperandSymbol*> patternorder;
+            List<OperandSymbol*> newops; // New order of the operands
             int4 lastsize;
 
             pateq.operandOrder(this, patternorder);
@@ -81,7 +81,7 @@ namespace Sla.SLEIGH
                 newops[i].hand = i;
                 newops[i].localexp.changeIndex(i);
             }
-            vector<int4> handmap;       // Create index translation map
+            List<int4> handmap;       // Create index translation map
             for (int4 i = 0; i < operands.size(); ++i)
                 handmap.push_back(operands[i].hand);
 
@@ -150,7 +150,7 @@ namespace Sla.SLEIGH
                 if (ntpl != (ConstructTpl*)0)
                     delete ntpl;
             }
-            vector<ContextChange*>::iterator iter;
+            List<ContextChange*>::iterator iter;
             for (iter = context.begin(); iter != context.end(); ++iter)
                 delete* iter;
         }
@@ -160,7 +160,7 @@ namespace Sla.SLEIGH
             if (pattern != (TokenPattern*)0) return pattern; // Already built
 
             pattern = new TokenPattern();
-            vector<TokenPattern> oppattern;
+            List<TokenPattern> oppattern;
             bool recursion = false;
             // Generate pattern for each operand, store in oppattern
             for (int4 i = 0; i < operands.size(); ++i)
@@ -380,7 +380,7 @@ namespace Sla.SLEIGH
 
         public void print(TextWriter s, ParserWalker pos)
         {
-            vector<string>::const_iterator piter;
+            List<string>::const_iterator piter;
 
             for (piter = printpiece.begin(); piter != printpiece.end(); ++piter)
             {

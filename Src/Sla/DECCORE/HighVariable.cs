@@ -102,7 +102,7 @@ namespace Sla.DECCORE
         {
             if ((highflags & flagsdirty) == 0) return; // flags are up to date
 
-            vector<Varnode*>::const_iterator iter;
+            List<Varnode*>::const_iterator iter;
             uint4 fl = 0;
 
             for (iter = inst.begin(); iter != inst.end(); ++iter)
@@ -183,7 +183,7 @@ namespace Sla.DECCORE
         {
             if ((highflags & symboldirty) == 0) return; // flags are up to date
             highflags &= ~((uint4)symboldirty);
-            vector<Varnode*>::const_iterator iter;
+            List<Varnode*>::const_iterator iter;
             symbol = (Symbol*)0;
 
             for (iter = inst.begin(); iter != inst.end(); ++iter)
@@ -226,7 +226,7 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode member to remove
         private void remove(Varnode vn)
         {
-            vector<Varnode*>::iterator iter;
+            List<Varnode*>::iterator iter;
 
             iter = lower_bound(inst.begin(), inst.end(), vn, compareJustLoc);
             for (; iter != inst.end(); ++iter)
@@ -282,7 +282,7 @@ namespace Sla.DECCORE
                     vn.setHigh(this, vn.getMergeGroup());
                 }
             }
-            vector<Varnode*> instcopy(inst);
+            List<Varnode*> instcopy(inst);
             inst.resize(inst.size() + tv2.inst.size(), (Varnode*)0);
             std::merge(instcopy.begin(), instcopy.end(), tv2.inst.begin(), tv2.inst.end(), inst.begin(), compareJustLoc);
             tv2.inst.clear();
@@ -332,7 +332,7 @@ namespace Sla.DECCORE
             // Reaching here both HighVariables are part of a group
             if (isspeculative)
                 throw new LowlevelError("Trying speculatively merge variables in separate groups");
-            vector<HighVariable*> mergePairs;
+            List<HighVariable*> mergePairs;
             piece.mergeGroups(tv2.piece, mergePairs);
             for (int4 i = 0; i < mergePairs.size(); i += 2)
             {
@@ -621,7 +621,7 @@ namespace Sla.DECCORE
         /// \param s is the output stream
         public void printInfo(TextWriter s)
         {
-            vector<Varnode*>::const_iterator viter;
+            List<Varnode*>::const_iterator viter;
             Varnode* vn;
 
             updateType();
@@ -725,7 +725,7 @@ namespace Sla.DECCORE
         /// \return the representative member
         public Varnode getTypeRepresentative()
         {
-            vector<Varnode*>::const_iterator iter;
+            List<Varnode*>::const_iterator iter;
             Varnode* vn,*rep;
 
             iter = inst.begin();
@@ -754,7 +754,7 @@ namespace Sla.DECCORE
                 return nameRepresentative;      // Name representative is up to date
             highflags &= ~namerepdirty;
 
-            vector<Varnode*>::const_iterator iter;
+            List<Varnode*>::const_iterator iter;
             Varnode* vn;
 
             iter = inst.begin();
@@ -1031,7 +1031,7 @@ namespace Sla.DECCORE
             int4 retVal = 0;
             if (!vn.isWritten()) return retVal;
 
-            vector<PcodeOpNode> path;
+            List<PcodeOpNode> path;
             PcodeOp* op = vn.getDef();
             if (op.isCall())
                 retVal |= 1;

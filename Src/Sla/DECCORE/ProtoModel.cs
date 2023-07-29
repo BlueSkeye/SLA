@@ -745,7 +745,7 @@ namespace Sla.DECCORE
 
             EffectRecord cur(addr, size);
 
-            vector<EffectRecord>::const_iterator iter;
+            List<EffectRecord>::const_iterator iter;
 
             iter = upper_bound(efflist.begin(), efflist.end(), cur, EffectRecord::compareByAddress);
             // First element greater than cur  (address must be greater)
@@ -781,9 +781,9 @@ namespace Sla.DECCORE
             if (listSize == 0) return -1;
             EffectRecord cur(addr, size);
 
-            vector<EffectRecord>::const_iterator begiter = efflist.begin();
-            vector<EffectRecord>::const_iterator enditer = begiter + listSize;
-            vector<EffectRecord>::const_iterator iter;
+            List<EffectRecord>::const_iterator begiter = efflist.begin();
+            List<EffectRecord>::const_iterator enditer = begiter + listSize;
+            List<EffectRecord>::const_iterator iter;
 
             iter = upper_bound(begiter, enditer, cur, EffectRecord::compareByAddress);
             // First element greater than cur  (address must be greater)

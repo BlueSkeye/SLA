@@ -95,7 +95,7 @@ namespace Sla.EXTRA
 
         public Address commitCodeVec(Address addr, List<CodeUnit> codevec,
             Dictionary<AddrLink, uint4> fromto_vec)
-        { // Commit all the code units in the vector, build all the crossrefs
+        { // Commit all the code units in the List, build all the crossrefs
             Address curaddr = addr;
             for (int4 i = 0; i < codevec.size(); ++i)
             {
@@ -163,7 +163,7 @@ namespace Sla.EXTRA
         public Address disassembleBlock(Address addr, Address endaddr)
         {
             DisassemblyResult disresult;
-            vector<CodeUnit> codevec;
+            List<CodeUnit> codevec;
             map<AddrLink, uint4> fromto_vec;
             bool flowin = false;
             bool hardend = false;
@@ -427,7 +427,7 @@ namespace Sla.EXTRA
           // disassembly for up to -max- instructions following it,
           // trying to get back on cut
             DisassemblyResult disresult;
-            vector<CodeUnit> codevec;
+            List<CodeUnit> codevec;
             map<AddrLink, uint4> fromto_vec;
             Address curaddr = addr;
             map<Address, CodeUnit>::iterator iter;

@@ -92,7 +92,7 @@ namespace Sla.DECCORE
             if (RulePtrArith::evaluatePointerExpression(op, slot) != 1) return 0;
             Varnode* vn = op.getOut();
             Varnode* vnadd2 = op.getIn(1 - slot);
-            vector<PcodeOp*> duplicateList;
+            List<PcodeOp*> duplicateList;
             if (vn.loneDescend() == (PcodeOp*)0)
                 collectDuplicateNeeds(duplicateList, vnadd2);
 

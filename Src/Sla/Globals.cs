@@ -746,13 +746,13 @@ namespace ghidra
             return compiler.run_compilation(specfilein, specfileout);
         }
 
-        internal static void findSlaSpecs(vector<string> res, string dir, string suffix)
+        internal static void findSlaSpecs(List<string> res, string dir, string suffix)
         {
             FileManage::matchListDir(res, suffix, true, dir, false);
 
-            vector<string> dirs;
+            List<string> dirs;
             FileManage::directoryList(dirs, dir);
-            vector<string>::const_iterator iter;
+            List<string>::const_iterator iter;
             for (iter = dirs.begin(); iter != dirs.end(); ++iter)
             {
                 string nextdir = *iter;

@@ -17,12 +17,12 @@ namespace Sla.EXTRA
         {
             collectSpecFiles(*errorstream);
             Element* el = store.getTag("binaryimage");
-            if (el == (Element*)0) {
+            if (el == (Element)null) {
                 Document* doc = store.openDocument(getFilename());
                 store.registerTag(doc.getRoot());
                 el = store.getTag("binaryimage");
             }
-            if (el == (Element*)0)
+            if (el == (Element)null)
                 throw new LowlevelError("Could not find binaryimage tag");
             loader = new LoadImageXml(getFilename(), el);
         }
@@ -54,7 +54,7 @@ namespace Sla.EXTRA
         public override void restoreXml(DocumentStorage store)
         {
             Element el = store.getTag("xml_savefile");
-            if (el == (Element*)0)
+            if (el == (Element)null)
                 throw new LowlevelError("Could not find xml_savefile tag");
 
             restoreXmlHeader(el);

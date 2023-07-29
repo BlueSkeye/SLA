@@ -19,7 +19,7 @@ namespace Sla.DECCORE
         /// \return \b true if the configuration is a pathology
         private static bool isPathology(Varnode vn, Funcdata data)
         {
-            vector<PcodeOp*> worklist;
+            List<PcodeOp*> worklist;
             int4 pos = 0;
             int4 slot = 0;
             bool res = false;

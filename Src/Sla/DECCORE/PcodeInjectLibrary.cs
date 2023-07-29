@@ -51,7 +51,7 @@ namespace Sla.DECCORE
         ///
         /// \param fixupName is the formal name of the call-fixup
         /// \param injectid is the integer id
-        protected void registerCallFixup(string fixupName, int4 injectid/* , vector<string> targets */)
+        protected void registerCallFixup(string fixupName, int4 injectid/* , List<string> targets */)
         {
             pair<map<string, int4>::iterator, bool> check;
             check = callFixupMap.insert(pair<string, int4>(fixupName, injectid));
@@ -133,7 +133,7 @@ namespace Sla.DECCORE
 
         ~PcodeInjectLibrary()
         {
-            vector<InjectPayload*>::iterator iter;
+            List<InjectPayload*>::iterator iter;
             for (iter = injection.begin(); iter != injection.end(); ++iter)
                 delete* iter;
         }

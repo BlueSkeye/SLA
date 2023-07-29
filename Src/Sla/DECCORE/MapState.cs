@@ -118,7 +118,7 @@ namespace Sla.DECCORE
         /// the most specific data-type.  Set all elements to use this data-type, and eliminate duplicates.
         private void reconcileDatatypes()
         {
-            vector<RangeHint*> newList;
+            List<RangeHint*> newList;
             newList.reserve(maplist.size());
             int4 startPos = 0;
             RangeHint* startHint = maplist[0];
@@ -196,7 +196,7 @@ namespace Sla.DECCORE
 
         ~MapState()
         {
-            vector<RangeHint*>::iterator riter;
+            List<RangeHint*>::iterator riter;
             for (riter = maplist.begin(); riter != maplist.end(); ++riter)
                 delete* riter;
         }
@@ -286,7 +286,7 @@ namespace Sla.DECCORE
         /// \param fd is the given function
         public void gatherHighs(Funcdata fd)
         {
-            vector<HighVariable*> varvec;
+            List<HighVariable*> varvec;
             VarnodeLocSet::const_iterator riter, iterend;
             Varnode* vn;
             HighVariable* high;

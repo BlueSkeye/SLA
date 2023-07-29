@@ -65,7 +65,7 @@ using ghidra;
 using Locator = object;
 using System.Runtime.InteropServices.JavaScript;
 using System.Linq;
-// typedef vector<Element *> List;		///< A list of XML elements
+// typedef List<Element *> List;		///< A list of XML elements
 
 ///* Identify Bison output.  */
 //#define YYBISON 1

@@ -93,7 +93,7 @@ namespace Sla.DECCORE
         }
 
         /// Parse \<register> elements for lane sizes
-        /// Parse any vector lane sizes.
+        /// Parse any List lane sizes.
         /// \param decoder is the stream decoder
         /// \return \b true if the XML description provides lane sizes
         public bool decode(Decoder decoder)

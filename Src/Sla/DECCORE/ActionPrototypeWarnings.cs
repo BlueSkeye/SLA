@@ -23,7 +23,7 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            vector<string> overridemessages;
+            List<string> overridemessages;
             data.getOverride().generateOverrideMessages(overridemessages, data.getArch());
             for (int4 i = 0; i < overridemessages.size(); ++i)
                 data.warningHeader(overridemessages[i]);

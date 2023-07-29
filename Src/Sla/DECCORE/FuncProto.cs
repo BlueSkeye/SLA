@@ -104,7 +104,7 @@ namespace Sla.DECCORE
             List <EffectRecord*> unaffectedList;
             List <EffectRecord*> killedByCallList;
             EffectRecord retAddr = (EffectRecord*)0;
-            for (vector<EffectRecord>::const_iterator iter = effectlist.begin(); iter != effectlist.end(); ++iter)
+            for (List<EffectRecord>::const_iterator iter = effectlist.begin(); iter != effectlist.end(); ++iter)
             {
                 const EffectRecord &curRecord(*iter);
                 uint4 type = model.hasEffect(curRecord.getAddress(), curRecord.getSize());
@@ -148,11 +148,11 @@ namespace Sla.DECCORE
         private void encodeLikelyTrash(Encoder encoder)
         {
             if (likelytrash.empty()) return;
-            vector<VarnodeData>::const_iterator iter1, iter2;
+            List<VarnodeData>::const_iterator iter1, iter2;
             iter1 = model.trashBegin();
             iter2 = model.trashEnd();
             encoder.openElement(ELEM_LIKELYTRASH);
-            for (vector<VarnodeData>::const_iterator iter = likelytrash.begin(); iter != likelytrash.end(); ++iter)
+            for (List<VarnodeData>::const_iterator iter = likelytrash.begin(); iter != likelytrash.end(); ++iter)
             {
                 VarnodeData cur = *iter;
                 if (binary_search(iter1, iter2, cur)) continue; // Already exists in ProtoModel
@@ -170,15 +170,15 @@ namespace Sla.DECCORE
         private void decodeEffect()
         {
             if (effectlist.empty()) return;
-            vector<EffectRecord> tmpList;
+            List<EffectRecord> tmpList;
             tmpList.swap(effectlist);
-            for (vector<EffectRecord>::const_iterator iter = model.effectBegin(); iter != model.effectEnd(); ++iter)
+            for (List<EffectRecord>::const_iterator iter = model.effectBegin(); iter != model.effectEnd(); ++iter)
             {
                 effectlist.push_back(*iter);
             }
             bool hasNew = false;
             int4 listSize = effectlist.size();
-            for (vector<EffectRecord>::const_iterator iter = tmpList.begin(); iter != tmpList.end(); ++iter)
+            for (List<EffectRecord>::const_iterator iter = tmpList.begin(); iter != tmpList.end(); ++iter)
             {
                 EffectRecord curRecord = *iter;
                 int4 off = ProtoModel::lookupRecord(effectlist, listSize, curRecord.getAddress(), curRecord.getSize());
@@ -206,14 +206,14 @@ namespace Sla.DECCORE
         private void decodeLikelyTrash()
         {
             if (likelytrash.empty()) return;
-            vector<VarnodeData> tmpList;
+            List<VarnodeData> tmpList;
             tmpList.swap(likelytrash);
-            vector<VarnodeData>::const_iterator iter1, iter2;
+            List<VarnodeData>::const_iterator iter1, iter2;
             iter1 = model.trashBegin();
             iter2 = model.trashEnd();
-            for (vector<VarnodeData>::const_iterator iter = iter1; iter != iter2; ++iter)
+            for (List<VarnodeData>::const_iterator iter = iter1; iter != iter2; ++iter)
                 likelytrash.push_back(*iter);
-            for (vector<VarnodeData>::const_iterator iter = tmpList.begin(); iter != tmpList.end(); ++iter)
+            for (List<VarnodeData>::const_iterator iter = tmpList.begin(); iter != tmpList.end(); ++iter)
             {
                 if (!binary_search(iter1, iter2, *iter))
                     likelytrash.push_back(*iter);       // Add in the new register
@@ -231,8 +231,8 @@ namespace Sla.DECCORE
             if ((model == (ProtoModel*)0) || (store == (ProtoStore*)0))
                 throw new LowlevelError("Cannot parameter shift without a model");
 
-            vector<string> nmlist;
-            vector<Datatype*> typelist;
+            List<string> nmlist;
+            List<Datatype*> typelist;
             bool isdotdotdot = false;
             TypeFactory* typefactory = model.getArch().types;
 
@@ -263,7 +263,7 @@ namespace Sla.DECCORE
                 isdotdotdot = true;
 
             // Reassign the storage locations for this new parameter list
-            vector<ParameterPieces> pieces;
+            List<ParameterPieces> pieces;
             model.assignParameterStorage(typelist, pieces, false);
 
             delete store;
@@ -367,8 +367,8 @@ namespace Sla.DECCORE
         {
             if (pieces.model != (ProtoModel*)0)
                 setModel(pieces.model);
-            vector<Datatype*> typelist;
-            vector<string> nmlist;
+            List<Datatype*> typelist;
+            List<string> nmlist;
             typelist.push_back(pieces.outtype);
             nmlist.push_back("");
             for (int4 i = 0; i < pieces.intypes.size(); ++i)
@@ -939,7 +939,7 @@ namespace Sla.DECCORE
             flags &= ~((uint4)voidinputlock);
             setDotdotdot(dtdtdt);
 
-            vector<ParameterPieces> pieces;
+            List<ParameterPieces> pieces;
 
             // Calculate what memory locations hold each type
             try
@@ -1352,10 +1352,10 @@ namespace Sla.DECCORE
         {
             if (!model.hasThisPointer())
                 return Address();
-            vector<Datatype*> typelist;
+            List<Datatype*> typelist;
             typelist.push_back(getOutputType());
             typelist.push_back(dt);
-            vector<ParameterPieces> res;
+            List<ParameterPieces> res;
             model.assignParameterStorage(typelist, res, true);
             for (int4 i = 1; i < res.size(); ++i)
             {

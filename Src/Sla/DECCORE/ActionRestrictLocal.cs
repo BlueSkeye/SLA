@@ -31,7 +31,7 @@ namespace Sla.DECCORE
             PcodeOp* op;
             Varnode* vn;
             int4 i;
-            vector<EffectRecord>::const_iterator eiter, endeiter;
+            List<EffectRecord>::const_iterator eiter, endeiter;
 
             for (i = 0; i < data.numCalls(); ++i)
             {

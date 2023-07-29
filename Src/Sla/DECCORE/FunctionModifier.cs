@@ -67,7 +67,7 @@ namespace Sla.DECCORE
 
         public override Datatype modType(Datatype @base, TypeDeclarator decl, Architecture glb)
         {
-            vector<Datatype*> intypes;
+            List<Datatype*> intypes;
 
             // Varargs is encoded as extra null pointer in paramlist
             bool dotdotdot = false;

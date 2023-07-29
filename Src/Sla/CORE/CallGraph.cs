@@ -60,7 +60,7 @@ namespace Sla.CORE
         private void snipCycles(CallGraphNode node)
         { // Snip any cycles starting from root -node-
             CallGraphNode* next;
-            vector<LeafIterator> stack;
+            List<LeafIterator> stack;
 
             node.flags |= CallGraphNode::currentcycle;
             stack.push_back(LeafIterator(node));

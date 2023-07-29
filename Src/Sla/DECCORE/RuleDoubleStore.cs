@@ -59,7 +59,7 @@ namespace Sla.DECCORE
                     if (storeOp2.getIn(2) != vnhi) continue;
                     if (SplitVarnode::testContiguousPointers(storeOp2, op, storelo, storehi, spc))
                     {
-                        vector<PcodeOp*> indirects;
+                        List<PcodeOp*> indirects;
                         PcodeOp* latest = RuleDoubleLoad::noWriteConflict(storelo, storehi, spc, &indirects);
                         if (latest == (PcodeOp*)0) continue;    // There was a conflict
                         if (!testIndirectUse(storelo, storehi, indirects)) continue;

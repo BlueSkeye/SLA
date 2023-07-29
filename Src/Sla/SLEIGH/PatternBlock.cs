@@ -28,7 +28,7 @@ namespace Sla.SLEIGH
                 valvec.clear();
                 return;
             }
-            vector<uintm>::iterator iter1, iter2;
+            List<uintm>::iterator iter1, iter2;
 
             iter1 = maskvec.begin();    // Cut zeros from beginning of mask
             iter2 = valvec.begin();

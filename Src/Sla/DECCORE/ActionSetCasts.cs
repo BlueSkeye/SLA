@@ -88,7 +88,7 @@ namespace Sla.DECCORE
             if (highPtrTo.getMetatype() != TYPE_STRUCT) return false;
             TypeStruct* highStruct = (TypeStruct*)highPtrTo;
             if (highStruct.numDepend() == 0) return false;
-            vector<TypeField>::const_iterator iter = highStruct.beginField();
+            List<TypeField>::const_iterator iter = highStruct.beginField();
             if ((*iter).offset != 0) return false;
             Datatype* reqtype = ((TypePointer*)ct).getPtrTo();
             Datatype* curtype = (*iter).type;

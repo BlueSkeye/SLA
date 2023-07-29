@@ -157,7 +157,7 @@ namespace Sla.DECCORE
         /// \param constraint is the given range
         private void addEquation(int4 slot, int4 type, CircleRange constraint)
         {
-            vector<Equation>::iterator iter;
+            List<Equation>::iterator iter;
             iter = equations.begin();
             while (iter != equations.end())
             {

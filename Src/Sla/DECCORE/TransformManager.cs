@@ -502,7 +502,7 @@ namespace Sla.DECCORE
         /// Apply the full transform to the function
         public void apply()
         {
-            vector<TransformVar*> inputList;
+            List<TransformVar*> inputList;
             createOps();
             createVarnodes(inputList);
             removeOld();

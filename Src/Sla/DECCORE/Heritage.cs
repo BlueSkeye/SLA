@@ -126,7 +126,7 @@ namespace Sla.DECCORE
         /// Reset heritage status for all address spaces
         private void clearInfoList()
         {
-            vector<HeritageInfo>::iterator iter;
+            List<HeritageInfo>::iterator iter;
             for (iter = infolist.begin(); iter != infolist.end(); ++iter)
                 (*iter).reset();
         }
@@ -229,8 +229,8 @@ namespace Sla.DECCORE
                     preventConstCollapse = true;
             }
 
-            vector<Varnode*> lastcombo;
-            vector<Varnode*> nextlev;
+            List<Varnode*> lastcombo;
+            List<Varnode*> nextlev;
             lastcombo.push_back(vn);
             while (lastcombo.size() < joinrec.numPieces())
             {
@@ -278,8 +278,8 @@ namespace Sla.DECCORE
             PcodeOp* op = vn.getDef(); // vn cannot be free, either it has def, or it is input
             BlockBasic* bb = (BlockBasic*)fd.getBasicBlocks().getBlock(0);
 
-            vector<Varnode*> lastcombo;
-            vector<Varnode*> nextlev;
+            List<Varnode*> lastcombo;
+            List<Varnode*> nextlev;
             lastcombo.push_back(vn);
             while (lastcombo.size() < joinrec.numPieces())
             {
@@ -419,11 +419,11 @@ namespace Sla.DECCORE
         {
             BlockGraph bblocks = fd.getBasicBlocks();
             int4 size = bblocks.getSize();
-            vector<int4> a(size);
-            vector<int4> b(size,0);
-            vector<int4> t(size,0);
-            vector<int4> z(size);
-            vector<FlowBlock*> upstart, upend;  // Up edges (node pair)
+            List<int4> a(size);
+            List<int4> b(size,0);
+            List<int4> t(size,0);
+            List<int4> z(size);
+            List<FlowBlock*> upstart, upend;  // Up edges (node pair)
             FlowBlock* x,*u,*v;
             int4 i, j, k, l;
 
@@ -521,7 +521,7 @@ namespace Sla.DECCORE
                 }
             }
 
-            vector<Varnode*> newInputs;
+            List<Varnode*> newInputs;
             list<PcodeOp*>::iterator pos;
             for (int4 i = 0; i < remove.size(); ++i)
             {
@@ -981,7 +981,7 @@ namespace Sla.DECCORE
         private void handleNewLoadCopies()
         {
             if (loadCopyOps.empty()) return;
-            vector<PcodeOp*> forces;
+            List<PcodeOp*> forces;
             int4 copySinkSize = loadCopyOps.size();
             findAddressForces(loadCopyOps, forces);
 
@@ -1041,8 +1041,8 @@ namespace Sla.DECCORE
             }
             if (nothingToDo) return;
 
-            vector<Varnode*> sinks;
-            vector<PcodeOp*> reads;
+            List<Varnode*> sinks;
+            List<PcodeOp*> reads;
             list<LoadGuard>::iterator loadIter = loadGuard.end();
             while (loadIter != loadGuard.begin())
             {
@@ -1193,8 +1193,8 @@ namespace Sla.DECCORE
         {
             // We need to be careful of exponential ladders, so we mark Varnodes independently of
             // the depth first path we are traversing.
-            vector<Varnode*> markedVn;
-            vector<StackNode> path;
+            List<Varnode*> markedVn;
+            List<StackNode> path;
             bool unknownStackStorage = false;
             for (int4 i = 0; i < spc.numSpacebase(); ++i)
             {
@@ -1379,7 +1379,7 @@ namespace Sla.DECCORE
         {
             uint4 fl;
             Varnode* vn;
-            vector<Varnode*>::iterator iter;
+            List<Varnode*>::iterator iter;
 
             for (iter = read.begin(); iter != read.end(); ++iter)
             {
@@ -1439,7 +1439,7 @@ namespace Sla.DECCORE
             uintb end = cur + size;
             //  bool seenunspliced = false;
             Varnode* vn;
-            vector<Varnode*> newinput;
+            List<Varnode*> newinput;
 
             // Make sure the input range is filled
             while (cur < end)
@@ -2061,7 +2061,7 @@ namespace Sla.DECCORE
             List<Varnode> writevars, List<Varnode> inputvars)
         {
             if (size > 1024) return false;
-            vector<int4> refine(size+1,0);
+            List<int4> refine(size+1,0);
             buildRefinement(refine, addr, size, readvars);
             buildRefinement(refine, addr, size, writevars);
             buildRefinement(refine, addr, size, inputvars);
@@ -2077,7 +2077,7 @@ namespace Sla.DECCORE
             if (lastpos == 0) return false; // No non-trivial refinements
             refine[lastpos] = size - lastpos;
             remove13Refinement(refine);
-            vector<Varnode*> newvn;
+            List<Varnode*> newvn;
             for (uint4 i = 0; i < readvars.size(); ++i)
                 refineRead(readvars[i], addr, refine, newvn);
             for (uint4 i = 0; i < writevars.size(); ++i)
@@ -2116,7 +2116,7 @@ namespace Sla.DECCORE
         {
             int4 i, j, k;
             FlowBlock* v,*child;
-            vector<FlowBlock*>::iterator iter, enditer;
+            List<FlowBlock*>::iterator iter, enditer;
 
             i = vnode.getIndex();
             j = qnode.getIndex();
@@ -2206,7 +2206,7 @@ namespace Sla.DECCORE
         /// \param varstack is the system of stacks, organized by address
         private void renameRecurse(BlockBasic bl, VariableStack varstack)
         {
-            vector<Varnode*> writelist; // List varnodes that are written in this block
+            List<Varnode*> writelist; // List varnodes that are written in this block
             BlockBasic* subbl;
             list<PcodeOp*>::iterator oiter, suboiter;
             PcodeOp* op,*multiop;
@@ -2225,7 +2225,7 @@ namespace Sla.DECCORE
                         if (vnin.isHeritageKnown()) continue; // not free
                         if (!vnin.isActiveHeritage()) continue; // Not being heritaged this round
                         vnin.clearActiveHeritage();
-                        vector<Varnode*> & stack(varstack[vnin.getAddr()]);
+                        List<Varnode*> & stack(varstack[vnin.getAddr()]);
                         if (stack.empty())
                         {
                             vnnew = fd.newVarnode(vnin.getSize(), vnin.getAddr());
@@ -2273,7 +2273,7 @@ namespace Sla.DECCORE
                     vnin = multiop.getIn(slot);
                     if (!vnin.isHeritageKnown())
                     {
-                        vector<Varnode*> & stack(varstack[vnin.getAddr()]);
+                        List<Varnode*> & stack(varstack[vnin.getAddr()]);
                         if (stack.empty())
                         {
                             vnnew = fd.newVarnode(vnin.getSize(), vnin.getAddr());
@@ -2326,10 +2326,10 @@ namespace Sla.DECCORE
         private void placeMultiequals()
         {
             LocationMap::iterator iter;
-            vector<Varnode*> readvars;
-            vector<Varnode*> writevars;
-            vector<Varnode*> inputvars;
-            vector<Varnode*> removevars;
+            List<Varnode*> readvars;
+            List<Varnode*> writevars;
+            List<Varnode*> inputvars;
+            List<Varnode*> removevars;
 
             for (iter = disjoint.begin(); iter != disjoint.end(); ++iter)
             {
@@ -2541,7 +2541,7 @@ namespace Sla.DECCORE
             Varnode* warnvn = (Varnode*)0;
             int4 reprocessStackCount = 0;
             AddrSpace* stackSpace = (AddrSpace*)0;
-            vector<PcodeOp*> freeStores;
+            List<PcodeOp*> freeStores;
             PreferSplitManager splitmanage;
 
             if (maxdepth == -1)     // Has a restructure been forced

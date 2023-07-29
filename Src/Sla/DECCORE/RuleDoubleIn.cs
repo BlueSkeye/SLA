@@ -124,7 +124,7 @@ namespace Sla.DECCORE
             }
             if (data.hasUnreachableBlocks()) return 0;
 
-            vector<SplitVarnode> splitvec;
+            List<SplitVarnode> splitvec;
             SplitVarnode::wholeList(op.getIn(0), splitvec);
             if (splitvec.empty()) return 0;
             for (int4 i = 0; i < splitvec.size(); ++i)

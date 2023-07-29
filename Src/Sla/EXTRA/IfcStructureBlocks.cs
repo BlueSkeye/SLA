@@ -48,7 +48,7 @@ namespace Sla.EXTRA
                 ingraph.decode(decoder);
 
                 BlockGraph resultgraph;
-                vector<FlowBlock*> rootlist;
+                List<FlowBlock*> rootlist;
 
                 resultgraph.buildCopy(ingraph);
                 resultgraph.structureLoops(rootlist);

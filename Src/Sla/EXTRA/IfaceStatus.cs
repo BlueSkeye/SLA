@@ -48,7 +48,7 @@ namespace Sla.EXTRA
         private void restrictCom(List<IfaceCommand>::const_iterator first,
             List<IfaceCommand>::const_iterator last, List<string> input)
         {
-            vector<IfaceCommand*>::const_iterator newfirst, newlast;
+            List<IfaceCommand*>::const_iterator newfirst, newlast;
             IfaceCommandDummy dummy;
 
             dummy.addWords(input);
@@ -324,9 +324,9 @@ namespace Sla.EXTRA
             if (line.empty()) return false;
             saveHistory(line);
 
-            vector<string> fullcommand;
-            vector<IfaceCommand*>::const_iterator first = comlist.begin();
-            vector<IfaceCommand*>::const_iterator last = comlist.end();
+            List<string> fullcommand;
+            List<IfaceCommand*>::const_iterator first = comlist.begin();
+            List<IfaceCommand*>::const_iterator last = comlist.end();
             istringstream is (line);
             int4 match;
 
@@ -401,7 +401,7 @@ namespace Sla.EXTRA
         /// Concatenate a list of tokens into a single string, separated by a space character
         public static void wordsToString(string res, List<string> list)
         {
-            vector<string>::const_iterator iter;
+            List<string>::const_iterator iter;
 
             res.erase();
             for (iter = list.begin(); iter != list.end(); ++iter)

@@ -136,8 +136,8 @@ namespace Sla.CORE
         }
 
         /// Build all pcode behaviors
-        /// This routine generates a vector of OpBehavior objects indexed by opcode
-        /// \param inst is the vector of behaviors to be filled
+        /// This routine generates a List of OpBehavior objects indexed by opcode
+        /// \param inst is the List of behaviors to be filled
         /// \param trans is the translator object needed by the floating point behaviors
         public static void registerInstructions(ref List<OpBehavior> inst,
             Translate trans)

@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         // Never needs casting
         public override Datatype getOutputLocal(PcodeOp op)
         {
-            vector<uintb> refs;
+            List<uintb> refs;
             for (int4 i = 1; i < op.numInput(); ++i)
                 refs.push_back(op.getIn(i).getOffset());
             CPoolRecord* rec = cpool.getRecord(refs);
@@ -61,7 +61,7 @@ namespace Sla.DECCORE
                 s << " = ";
             }
             s << getOperatorName(op);
-            vector<uintb> refs;
+            List<uintb> refs;
             for (int4 i = 1; i < op.numInput(); ++i)
                 refs.push_back(op.getIn(i).getOffset());
             CPoolRecord* rec = cpool.getRecord(refs);

@@ -363,7 +363,7 @@ namespace Sla.DECCORE
         private int4 numIndicesByBlock(FlowBlock bl)
         {
             IndexPair val(block2Position(bl),0);
-            pair<vector<IndexPair>::const_iterator, vector<IndexPair>::const_iterator> range;
+            pair<List<IndexPair>::const_iterator, List<IndexPair>::const_iterator> range;
             range = equal_range(block2addr.begin(), block2addr.end(), val, IndexPair::compareByPosition);
             return range.second - range.first;
         }
@@ -378,7 +378,7 @@ namespace Sla.DECCORE
         {
             IndexPair val(block2Position(bl),0);
             int4 count = 0;
-            vector<IndexPair>::const_iterator iter = lower_bound(block2addr.begin(), block2addr.end(), val, IndexPair::compareByPosition);
+            List<IndexPair>::const_iterator iter = lower_bound(block2addr.begin(), block2addr.end(), val, IndexPair::compareByPosition);
             while (iter != block2addr.end())
             {
                 if ((*iter).blockPosition == val.blockPosition)
@@ -460,11 +460,11 @@ namespace Sla.DECCORE
 
             defaultBlock = -1;          // There is no default case initially
             int4 maxcount = 1;          // If the maxcount is less than 2
-            vector<IndexPair>::const_iterator iter = block2addr.begin();
+            List<IndexPair>::const_iterator iter = block2addr.begin();
             while (iter != block2addr.end())
             {
                 int4 curPos = (*iter).blockPosition;
-                vector<IndexPair>::const_iterator nextiter = iter;
+                List<IndexPair>::const_iterator nextiter = iter;
                 int4 count = 0;
                 while (nextiter != block2addr.end() && (*nextiter).blockPosition == curPos)
                 {
@@ -545,7 +545,7 @@ namespace Sla.DECCORE
             if (collectloads)
                 jmodel.buildAddresses(fd, indirect, addresstable, &loadpoints);
             else
-                jmodel.buildAddresses(fd, indirect, addresstable, (vector<LoadTable>*)0);
+                jmodel.buildAddresses(fd, indirect, addresstable, (List<LoadTable>*)0);
             sanityCheck(fd);
         }
 
@@ -559,7 +559,7 @@ namespace Sla.DECCORE
             origmodel = jmodel;
             jmodel = (JumpModel*)0;
 
-            vector<Address> oldaddresstable = addresstable;
+            List<Address> oldaddresstable = addresstable;
             addresstable.clear();
             loadpoints.clear();
             try
@@ -642,7 +642,7 @@ namespace Sla.DECCORE
             {
                 jmodel = new JumpModelTrivial(this);
                 jmodel.recoverModel(fd, indirect, addresstable.size(), glb.max_jumptable_size);
-                jmodel.buildAddresses(fd, indirect, addresstable, (vector<LoadTable>*)0);
+                jmodel.buildAddresses(fd, indirect, addresstable, (List<LoadTable>*)0);
                 trivialSwitchOver();
                 jmodel.buildLabels(fd, addresstable, label, origmodel);
             }

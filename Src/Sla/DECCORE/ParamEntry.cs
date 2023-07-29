@@ -135,7 +135,7 @@ namespace Sla.DECCORE
         {
             if (joinrec != (JoinRecord*)0)
                 return;     // Overlaps with join records dealt with in resolveJoin
-            vector<int4> overlapSet;
+            List<int4> overlapSet;
             list<ParamEntry>::const_iterator iter, enditer;
             Address addr(spaceid, addressbase);
             enditer = curList.end();

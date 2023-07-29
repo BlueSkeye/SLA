@@ -36,7 +36,7 @@ namespace Sla.SLACOMP
             pateq = pq;
             if (pateq != (PatternEquation*)0)
                 pateq.layClaim();
-            if (cvec != (vector<ContextChange*>*)0)
+            if (cvec != (List<ContextChange*>*)0)
             {
                 for (int4 i = 0; i < cvec.size(); ++i)
                     contvec.push_back((*cvec)[i]);  // Lay claim to -cvec-s pointers, we don't clone
@@ -78,31 +78,31 @@ namespace Sla.SLACOMP
         ///
         /// Given a list of ContextChanges parsed locally from a Constructor and the stack of
         /// surrounding \b with blocks, make a new list of ContextChanges, prepending everything from
-        /// the stack to the local vector.  Return the new list and delete the old.
+        /// the stack to the local List.  Return the new list and delete the old.
         /// \param stack is the current \b with block stack
         /// \param contvec is the local list of ContextChanges (or null)
         /// \return the new list of ContextChanges
         public static List<ContextChange> collectAndPrependContext(List<WithBlock> stack, List<ContextChange> contvec)
         {
-            vector<ContextChange*>* res = (vector<ContextChange*>*)0;
+            List<ContextChange*>* res = (List<ContextChange*>*)0;
             list<WithBlock>::const_iterator iter;
             for (iter = stack.begin(); iter != stack.end(); ++iter)
             {
                 List<ContextChange> changelist = (*iter).contvec;
                 if (changelist.size() == 0) continue;
-                if (res == (vector<ContextChange*>*)0)
-                    res = new vector<ContextChange*>();
+                if (res == (List<ContextChange*>*)0)
+                    res = new List<ContextChange*>();
                 for (int4 i = 0; i < changelist.size(); ++i)
                 {
                     res.push_back(changelist[i].clone());
                 }
             }
-            if (contvec != (vector<ContextChange*>*)0)
+            if (contvec != (List<ContextChange*>*)0)
             {
                 if (contvec.size() != 0)
                 {
-                    if (res == (vector<ContextChange*>*)0)
-                        res = new vector<ContextChange*>();
+                    if (res == (List<ContextChange*>*)0)
+                        res = new List<ContextChange*>();
                     for (int4 i = 0; i < contvec.size(); ++i)
                         res.push_back((*contvec)[i]);      // lay claim to contvecs pointer
                 }

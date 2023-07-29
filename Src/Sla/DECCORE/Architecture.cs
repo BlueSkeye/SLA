@@ -34,13 +34,13 @@ namespace Sla.DECCORE
         public bool readonlypropagate; ///< true if readonly values should be treated as constants
         public bool infer_pointers;        ///< True if we should infer pointers from constants that are likely addresses
         public bool analyze_for_loops; ///< True if we should attempt conversion of \e whiledo loops to \e for loops
-        vector<AddrSpace*> inferPtrSpaces;  ///< Set of address spaces in which a pointer constant is inferable
+        List<AddrSpace*> inferPtrSpaces;  ///< Set of address spaces in which a pointer constant is inferable
         public int funcptr_align;     ///< How many bits of alignment a function ptr has
         public uint flowoptions;            ///< options passed to flow following engine
         public uint max_instructions; ///< Maximum instructions that can be processed in one function
         public int alias_block_level; ///< Aliases blocked by 0=none, 1=struct, 2=array, 3=all
         public uint split_datatype_config;    ///< Toggle for data-types splitting: Bit 0=structs, 1=arrays, 2=pointers
-        vector<Rule*> extra_pool_rules; ///< Extra rules that go in the main pool (cpu specific, experimental)
+        List<Rule*> extra_pool_rules; ///< Extra rules that go in the main pool (cpu specific, experimental)
 
         public Database symboltab;        ///< Memory map of global variables and functions
         public ContextDatabase context;   ///< Map from addresses to context settings
@@ -58,12 +58,12 @@ namespace Sla.DECCORE
         public StringManager stringManager;   ///< Manager of decoded strings
         public ConstantPool cpool;        ///< Deferred constant values
         public PrintLanguage print;           ///< Current high-level language printer
-        vector<PrintLanguage*> printlist;   ///< List of high-level language printers supported
+        List<PrintLanguage*> printlist;   ///< List of high-level language printers supported
         public OptionDatabase options;    ///< Options that can be configured
-        vector<TypeOp*> inst;   ///< Registered p-code instructions
+        List<TypeOp*> inst;   ///< Registered p-code instructions
         public UserOpManage userops;       ///< Specifically registered user-defined p-code ops
-        vector<PreferSplitRecord> splitrecords; ///< registers that we would prefer to see split for this processor
-        vector<LanedRegister> lanerecords;  ///< Vector registers that have preferred lane sizes
+        List<PreferSplitRecord> splitrecords; ///< registers that we would prefer to see split for this processor
+        List<LanedRegister> lanerecords;  ///< Vector registers that have preferred lane sizes
         public ActionDatabase allacts; ///< Actions that can be applied in this architecture
         public bool loadersymbols_parsed;   ///< True if loader symbols have been read
 #if CPUI_STATISTICS
@@ -113,7 +113,7 @@ namespace Sla.DECCORE
         ~Architecture()
         {
             // Delete anything that was allocated
-            vector<TypeOp*>::iterator iter;
+            List<TypeOp*>::iterator iter;
 
             foreach (TypeOp iter in inst) {
                 TypeOp? t_op = iter;

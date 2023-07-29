@@ -502,7 +502,7 @@ namespace Sla.DECCORE
                 return false;   // Don't transform at all
             if (baseOp.getOut().getTypeDefFacing().getMetatype() != TYPE_PTR)    // Make sure pointer propagates thru INT_ADD
                 return false;
-            vector<Varnode*> newparams;
+            List<Varnode*> newparams;
             int4 slot = baseOp.getSlot(ptr);
             newparams.push_back(ptr);
             newparams.push_back(baseOp.getIn(1 - slot));

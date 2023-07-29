@@ -650,7 +650,7 @@ namespace Sla.DECCORE
                 }
                 if (!needreplace) continue;
                 // Construct artificial MULTIEQUAL
-                vector<Varnode*> branches;
+                List<Varnode*> branches;
                 if (neednewunique)
                     replacevn = newUnique(origvn.getSize());
                 else
@@ -704,8 +704,8 @@ namespace Sla.DECCORE
         /// The structured hierarchy is also reset.
         private void structureReset()
         {
-            vector<JumpTable*>::iterator iter;
-            vector<FlowBlock*> rootlist;
+            List<JumpTable*>::iterator iter;
+            List<FlowBlock*> rootlist;
 
             flags &= ~blocks_unreachable;   // Clear any old blocks flag
             bblocks.structureLoops(rootlist);
@@ -713,7 +713,7 @@ namespace Sla.DECCORE
             if (rootlist.size() > 1)
                 flags |= blocks_unreachable;
             // Check for dead jumptables
-            vector<JumpTable*> alivejumps;
+            List<JumpTable*> alivejumps;
             for (iter = jumpvec.begin(); iter != jumpvec.end(); ++iter)
             {
                 JumpTable* jt = *iter;
@@ -814,7 +814,7 @@ namespace Sla.DECCORE
         /// \param flow is the flow object (mapping addresses to p-code ops)
         private void switchOverJumpTables(FlowInfo flow)
         {
-            vector<JumpTable*>::iterator iter;
+            List<JumpTable*>::iterator iter;
 
             for (iter = jumpvec.begin(); iter != jumpvec.end(); ++iter)
                 (*iter).switchOver(flow);
@@ -824,8 +824,8 @@ namespace Sla.DECCORE
         /// Any override information is preserved.
         private void clearJumpTables()
         {
-            vector<JumpTable*> remain;
-            vector<JumpTable*>::iterator iter;
+            List<JumpTable*> remain;
+            List<JumpTable*>::iterator iter;
 
             for (iter = jumpvec.begin(); iter != jumpvec.end(); ++iter)
             {
@@ -855,7 +855,7 @@ namespace Sla.DECCORE
         /// \param op is the particular specification to remove
         private void deleteCallSpecs(PcodeOp op)
         {
-            vector<FuncCallSpecs*>::iterator iter;
+            List<FuncCallSpecs*>::iterator iter;
 
             for (iter = qlst.begin(); iter != qlst.end(); ++iter)
             {
@@ -981,9 +981,9 @@ namespace Sla.DECCORE
             PcodeOp* bop,*pop;
             Varnode* bvn,*pvn;
             map<PcodeOp*, PcodeOp*> btop; // Map from b to bprime
-            vector<PcodeOp*> pind;  // pop needing b input
-            vector<PcodeOp*> bind;  // bop giving input
-            vector<int4> pslot;     // slot within pop needing b input
+            List<PcodeOp*> pind;  // pop needing b input
+            List<PcodeOp*> bind;  // bop giving input
+            List<int4> pslot;     // slot within pop needing b input
 
             biter = b.beginOp();
             piter = bprime.beginOp();
@@ -1094,7 +1094,7 @@ namespace Sla.DECCORE
         /// \return \b true if all flows hit an INDIRECT op
         private static bool checkIndirectUse(Varnode vn)
         {
-            vector<Varnode*> vlist;
+            List<Varnode*> vlist;
             int4 i = 0;
             vlist.push_back(vn);
             vn.setMark();
@@ -1535,7 +1535,7 @@ namespace Sla.DECCORE
                 qlst.push_back(newspec);
             }
 
-            vector<JumpTable*>::const_iterator jiter; // Clone the jumptables
+            List<JumpTable*>::const_iterator jiter; // Clone the jumptables
             for (jiter = fd.jumpvec.begin(); jiter != fd.jumpvec.end(); ++jiter)
             {
                 PcodeOp* indop = (*jiter).getIndirectOp();
@@ -1613,7 +1613,7 @@ namespace Sla.DECCORE
                 Address retaddr;
                 if (!flow.testHardInlineRestrictions(inlinefd, callop, retaddr))
                     return false;
-                vector<JumpTable*>::const_iterator jiter; // Clone any jumptables from inline piece
+                List<JumpTable*>::const_iterator jiter; // Clone any jumptables from inline piece
                 for (jiter = inlinefd.jumpvec.begin(); jiter != inlinefd.jumpvec.end(); ++jiter)
                 {
                     JumpTable* jtclone = new JumpTable(*jiter);
@@ -1938,7 +1938,7 @@ namespace Sla.DECCORE
         public void encodeJumpTable(Encoder encoder)
         {
             if (jumpvec.empty()) return;
-            vector<JumpTable*>::const_iterator iter;
+            List<JumpTable*>::const_iterator iter;
 
             encoder.openElement(ELEM_JUMPTABLELIST);
             for (iter = jumpvec.begin(); iter != jumpvec.end(); ++iter)
@@ -2627,7 +2627,7 @@ namespace Sla.DECCORE
         public void adjustInputVarnodes(Address addr, int4 sz)
         {
             Address endaddr = addr + (sz - 1);
-            vector<Varnode*> inlist;
+            List<Varnode*> inlist;
             VarnodeDefSet::const_iterator iter, enditer;
             iter = vbank.beginDef(Varnode::input, addr);
             enditer = vbank.endDef(Varnode::input, endaddr);
@@ -2832,7 +2832,7 @@ namespace Sla.DECCORE
         /// \return the matching HighVariable or NULL
         public HighVariable findHigh(string nm)
         {
-            vector<Symbol*> symList;
+            List<Symbol*> symList;
             localmap.queryByName(nm, symList);
             if (symList.empty()) return (HighVariable*)0;
             Symbol* sym = symList[0];
@@ -2853,7 +2853,7 @@ namespace Sla.DECCORE
             Varnode* vn,*maxvn;
             Datatype* ct;
             uint4 fl;
-            vector<Varnode*> uncoveredVarnodes;
+            List<Varnode*> uncoveredVarnodes;
             bool inconsistentuse = false;
 
             iter = vbank.beginLoc(); // Go through all varnodes for this space
@@ -3011,7 +3011,7 @@ namespace Sla.DECCORE
         /// \return \b true if the Varnode seems only to be used as parameter to \b opmatch
         public bool onlyOpUse(Varnode invn, PcodeOp opmatch, ParamTrial trial, uint4 mainFlags)
         {
-            vector<TraverseNode> varlist;
+            List<TraverseNode> varlist;
             list<PcodeOp*>::const_iterator iter;
             Varnode* vn,*subvn;
             PcodeOp* op;
@@ -3551,7 +3551,7 @@ namespace Sla.DECCORE
         /// information forward through the data-flow until additional changes are apparent.
         public void calcNZMask()
         {
-            vector<PcodeOpNode> opstack;
+            List<PcodeOpNode> opstack;
             list<PcodeOp*>::const_iterator oiter;
 
             for (oiter = beginOpAlive(); oiter != endOpAlive(); ++oiter)
@@ -3604,7 +3604,7 @@ namespace Sla.DECCORE
                 } while (!opstack.empty());
             }
 
-            vector<PcodeOp*> worklist;
+            List<PcodeOp*> worklist;
             // Clear marks and push ops with looping edges onto worklist
             for (oiter = beginOpAlive(); oiter != endOpAlive(); ++oiter)
             {
@@ -4785,7 +4785,7 @@ namespace Sla.DECCORE
                 }
             }
             Varnode* rootvn = op.getOut();
-            vector<HighVariable*> highList;
+            List<HighVariable*> highList;
             int4 typeVal = HighVariable::markExpression(rootvn, highList);
             PcodeOp* curOp = op;
             do
@@ -4922,7 +4922,7 @@ namespace Sla.DECCORE
         /// \return the matching jump-table object or NULL
         public JumpTable linkJumpTable(PcodeOp op)
         {
-            vector<JumpTable*>::iterator iter;
+            List<JumpTable*>::iterator iter;
             JumpTable* jt;
 
             for (iter = jumpvec.begin(); iter != jumpvec.end(); ++iter)
@@ -4943,7 +4943,7 @@ namespace Sla.DECCORE
         /// \return the matching jump-table object or NULL
         public JumpTable findJumpTable(PcodeOp op)
         {
-            vector<JumpTable*>::const_iterator iter;
+            List<JumpTable*>::const_iterator iter;
             JumpTable* jt;
 
             for (iter = jumpvec.begin(); iter != jumpvec.end(); ++iter)
@@ -5125,8 +5125,8 @@ namespace Sla.DECCORE
         /// \param jt is the given JumpTable object
         public void removeJumpTable(JumpTable jt)
         {
-            vector<JumpTable*> remain;
-            vector<JumpTable*>::iterator iter;
+            List<JumpTable*> remain;
+            List<JumpTable*>::iterator iter;
 
             for (iter = jumpvec.begin(); iter != jumpvec.end(); ++iter)
                 if ((*iter) != jt)
@@ -5180,7 +5180,7 @@ namespace Sla.DECCORE
         /// \return \b true if unreachable blocks were actually found and removed
         public bool removeUnreachableBlocks(bool issuewarning, bool checkexistence)
         {
-            vector<FlowBlock*> list;
+            List<FlowBlock*> list;
             uint4 i;
 
             if (checkexistence)
@@ -5471,7 +5471,7 @@ namespace Sla.DECCORE
         /// Make sure default switch cases are properly labeled
         public void installSwitchDefaults()
         {
-            vector<JumpTable*>::iterator iter;
+            List<JumpTable*>::iterator iter;
             for (iter = jumpvec.begin(); iter != jumpvec.end(); ++iter)
             {
                 JumpTable* jt = *iter;
@@ -6050,7 +6050,7 @@ namespace Sla.DECCORE
             List<Varnode> outlist)
         {
             PcodeOp* op1,*op2,*resop;
-            vector<pair<uintm, PcodeOp*>>::iterator liter1, liter2;
+            List<pair<uintm, PcodeOp*>>::iterator liter1, liter2;
 
             if (list.empty()) return;
             stable_sort(list.begin(), list.end(), compareCseHash);

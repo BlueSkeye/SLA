@@ -43,7 +43,7 @@ namespace Sla.DECCORE
             list<PcodeOp*>::const_iterator oiter;
             Varnode* vn,*dvn;
             PcodeOp* op;
-            vector<Varnode*> worklist;
+            List<Varnode*> worklist;
 
             // Collect legal inputs and other auto direct writes
             for (iter = data.beginLoc(); iter != data.endLoc(); ++iter)

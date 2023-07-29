@@ -22,7 +22,7 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             string useropname, outname, pcodestring;
-            vector<string> inname;
+            List<string> inname;
 
             IfcCallFixup::readPcodeSnippet(s, useropname, outname, inname, pcodestring);
             dcp.conf.userops.manualCallOtherFixup(useropname, outname, inname, pcodestring, dcp.conf);

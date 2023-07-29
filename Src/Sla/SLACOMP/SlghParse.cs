@@ -2645,7 +2645,7 @@ namespace Sla.SLACOMP
 
         //    case 127:
 
-        //        { (yyval.contop) = (vector<ContextChange*>*)0; }
+        //        { (yyval.contop) = (List<ContextChange*>*)0; }
 
         //        break;
 
@@ -2657,7 +2657,7 @@ namespace Sla.SLACOMP
 
         //    case 129:
 
-        //        { (yyval.contop) = new vector<ContextChange*>; }
+        //        { (yyval.contop) = new List<ContextChange*>; }
 
         //        break;
 
@@ -2807,7 +2807,7 @@ namespace Sla.SLACOMP
 
         //    case 154:
 
-        //        { (yyval.stmt) = (vector<OpTpl*>*)0; string errmsg = "Redefinition of symbol: " + (yyvsp[-1].specsym).getName(); slgh.reportError(errmsg); YYERROR; }
+        //        { (yyval.stmt) = (List<OpTpl*>*)0; string errmsg = "Redefinition of symbol: " + (yyvsp[-1].specsym).getName(); slgh.reportError(errmsg); YYERROR; }
 
         //        break;
 
@@ -3611,25 +3611,25 @@ namespace Sla.SLACOMP
 
         //    case 288:
 
-        //        { (yyval.biglist) = new vector<intb>; (yyval.biglist).push_back(intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
+        //        { (yyval.biglist) = new List<intb>; (yyval.biglist).push_back(intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 289:
 
-        //        { (yyval.biglist) = new vector<intb>; (yyval.biglist).push_back(-intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
+        //        { (yyval.biglist) = new List<intb>; (yyval.biglist).push_back(-intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 290:
 
-        //        { (yyval.biglist) = new vector<intb>; (yyval.biglist).push_back(intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
+        //        { (yyval.biglist) = new List<intb>; (yyval.biglist).push_back(intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 291:
 
-        //        { (yyval.biglist) = new vector<intb>; (yyval.biglist).push_back(-intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
+        //        { (yyval.biglist) = new List<intb>; (yyval.biglist).push_back(-intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
 
         //        break;
 
@@ -3637,7 +3637,7 @@ namespace Sla.SLACOMP
 
         //        {
         //            if (*(yyvsp[0].str) != "_") { string errmsg = "Expecting integer but saw: " + *(yyvsp[0].str); delete(yyvsp[0].str); slgh.reportError(errmsg); YYERROR; }
-        //                                    (yyval.biglist) = new vector<intb>; (yyval.biglist).push_back((intb)0xBADBEEF); delete(yyvsp[0].str);
+        //                                    (yyval.biglist) = new List<intb>; (yyval.biglist).push_back((intb)0xBADBEEF); delete(yyvsp[0].str);
         //        }
 
         //        break;
@@ -3671,13 +3671,13 @@ namespace Sla.SLACOMP
 
         //    case 297:
 
-        //        { (yyval.strlist) = new vector<string>; (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.strlist) = new List<string>; (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
         //    case 298:
 
-        //        { (yyval.strlist) = new vector<string>; (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.strlist) = new List<string>; (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
@@ -3701,13 +3701,13 @@ namespace Sla.SLACOMP
 
         //    case 302:
 
-        //        { (yyval.strlist) = new vector<string>; (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.strlist) = new List<string>; (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
         //    case 303:
 
-        //        { (yyval.strlist) = new vector<string>; (yyval.strlist).push_back((yyvsp[0].anysym).getName()); }
+        //        { (yyval.strlist) = new List<string>; (yyval.strlist).push_back((yyvsp[0].anysym).getName()); }
 
         //        break;
 
@@ -3731,25 +3731,25 @@ namespace Sla.SLACOMP
 
         //    case 307:
 
-        //        { (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].valuesym)); }
+        //        { (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].valuesym)); }
 
         //        break;
 
         //    case 308:
 
-        //        { (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].contextsym)); }
+        //        { (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].contextsym)); }
 
         //        break;
 
         //    case 309:
 
-        //        { (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].valuesym)); }
+        //        { (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].valuesym)); }
 
         //        break;
 
         //    case 310:
 
-        //        { (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].contextsym)); }
+        //        { (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].contextsym)); }
 
         //        break;
 
@@ -3779,13 +3779,13 @@ namespace Sla.SLACOMP
 
         //    case 315:
 
-        //        { (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].varsym)); }
+        //        { (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].varsym)); }
 
         //        break;
 
         //    case 316:
 
-        //        { (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].varsym)); }
+        //        { (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].varsym)); }
 
         //        break;
 
@@ -3793,7 +3793,7 @@ namespace Sla.SLACOMP
 
         //        {
         //            if (*(yyvsp[0].str) != "_") { string errmsg = *(yyvsp[0].str) + ": is not a varnode symbol"; delete(yyvsp[0].str); slgh.reportError(errmsg); YYERROR; }
-        //                    (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist).push_back((SleighSymbol*)0); delete(yyvsp[0].str);
+        //                    (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).push_back((SleighSymbol*)0); delete(yyvsp[0].str);
         //        }
 
         //        break;
@@ -3815,13 +3815,13 @@ namespace Sla.SLACOMP
 
         //    case 320:
 
-        //        { (yyval.param) = new vector<ExprTree*>; }
+        //        { (yyval.param) = new List<ExprTree*>; }
 
         //        break;
 
         //    case 321:
 
-        //        { (yyval.param) = new vector<ExprTree*>; (yyval.param).push_back((yyvsp[0].tree)); }
+        //        { (yyval.param) = new List<ExprTree*>; (yyval.param).push_back((yyvsp[0].tree)); }
 
         //        break;
 
@@ -3833,13 +3833,13 @@ namespace Sla.SLACOMP
 
         //    case 323:
 
-        //        { (yyval.strlist) = new vector<string>; }
+        //        { (yyval.strlist) = new List<string>; }
 
         //        break;
 
         //    case 324:
 
-        //        { (yyval.strlist) = new vector<string>; (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.strlist) = new List<string>; (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 

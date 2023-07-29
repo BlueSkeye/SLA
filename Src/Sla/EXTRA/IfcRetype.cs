@@ -29,7 +29,7 @@ namespace Sla.EXTRA
             ct = parse_type(s, newname, dcp.conf);
 
             Symbol* sym;
-            vector<Symbol*> symList;
+            List<Symbol*> symList;
             dcp.readSymbol(name, symList);
 
             if (symList.empty())

@@ -23,7 +23,7 @@ namespace Sla.DECCORE
 
         /// \class RuleBxor2NotEqual
         /// \brief Eliminate BOOL_XOR:  `V ^^ W  =>  V != W`
-        public override getOpList(vector<uint4> oplist)
+        public override getOpList(List<uint4> oplist)
         {
             oplist.push_back(CPUI_BOOL_XOR);
         }

@@ -71,7 +71,7 @@ namespace Sla.DECCORE
             else
             {
                 ExecutablePcode* pcodeScript = (ExecutablePcode*)fd.getArch().pcodeinjectlib.getPayload(userop.getCalcSize());
-                vector<uintb> inputs;
+                List<uintb> inputs;
                 int4 numInputs = assistOp.numInput() - 1;  // How many remaining varnodes after useropid
                 if (pcodeScript.sizeInput() != numInputs)
                     throw new LowlevelError(userop.getName() + ": <size_pcode> has wrong number of parameters");
@@ -96,7 +96,7 @@ namespace Sla.DECCORE
             addresstable.clear();
 
             AddrSpace* spc = indop.getAddr().getSpace();
-            vector<uintb> inputs;
+            List<uintb> inputs;
             int4 numInputs = assistOp.numInput() - 1;  // How many remaining varnodes after useropid
             if (pcodeScript.sizeInput() != numInputs)
                 throw new LowlevelError(userop.getName() + ": <addr_pcode> has wrong number of parameters");
@@ -141,7 +141,7 @@ namespace Sla.DECCORE
             else
             {
                 ExecutablePcode* pcodeScript = (ExecutablePcode*)fd.getArch().pcodeinjectlib.getPayload(userop.getIndex2Case());
-                vector<uintb> inputs;
+                List<uintb> inputs;
                 int4 numInputs = assistOp.numInput() - 1;  // How many remaining varnodes after useropid
                 if (numInputs != pcodeScript.sizeInput())
                     throw new LowlevelError(userop.getName() + ": <case_pcode> has wrong number of parameters");

@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \param fd is the list of fields to copy in
         protected void setFields(List<TypeField> fd)
         {
-            vector<TypeField>::const_iterator iter;
+            List<TypeField>::const_iterator iter;
             // Need to calculate size
             size = 0;
             for (iter = fd.begin(); iter != fd.end(); ++iter)
@@ -111,7 +111,7 @@ namespace Sla.DECCORE
             int4 res = Datatype::compare(op, level);
             if (res != 0) return res;
             TypeUnion tu = (TypeUnion*)&op;
-            vector<TypeField>::const_iterator iter1, iter2;
+            List<TypeField>::const_iterator iter1, iter2;
 
             if (field.size() != tu.field.size()) return (tu.field.size() - field.size());
             iter1 = field.begin();
@@ -154,7 +154,7 @@ namespace Sla.DECCORE
             int4 res = Datatype::compareDependency(op);
             if (res != 0) return res;
             TypeUnion* tu = (TypeUnion*)&op;
-            vector<TypeField>::const_iterator iter1, iter2;
+            List<TypeField>::const_iterator iter1, iter2;
 
             if (field.size() != tu.field.size()) return (tu.field.size() - field.size());
             iter1 = field.begin();
@@ -185,7 +185,7 @@ namespace Sla.DECCORE
             }
             encoder.openElement(ELEM_TYPE);
             encodeBasic(metatype, encoder);
-            vector<TypeField>::const_iterator iter;
+            List<TypeField>::const_iterator iter;
             for (iter = field.begin(); iter != field.end(); ++iter)
             {
                 (*iter).encode(encoder);

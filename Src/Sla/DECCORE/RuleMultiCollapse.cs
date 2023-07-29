@@ -33,7 +33,7 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            vector<Varnode*> skiplist, matchlist;
+            List<Varnode*> skiplist, matchlist;
             Varnode* defcopyr,*copyr;
             bool func_eq, nofunc;
             PcodeOp* newop;
@@ -132,7 +132,7 @@ namespace Sla.DECCORE
                         else
                         {           // Otherwise, create a copy
                             bool needsreinsert = (op.code() == CPUI_MULTIEQUAL);
-                            vector<Varnode*> parms;
+                            List<Varnode*> parms;
                             for (int4 i = 0; i < newop.numInput(); ++i)
                                 parms.push_back(newop.getIn(i)); // Copy parameters
                             data.opSetAllInput(op, parms);

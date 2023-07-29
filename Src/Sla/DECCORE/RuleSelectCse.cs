@@ -38,8 +38,8 @@ namespace Sla.DECCORE
             OpCode opc = op.code();
             PcodeOp* otherop;
             uintm hash;
-            vector<pair<uintm, PcodeOp*>> list;
-            vector<Varnode*> vlist;
+            List<pair<uintm, PcodeOp*>> list;
+            List<Varnode*> vlist;
 
             for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {

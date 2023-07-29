@@ -676,7 +676,7 @@ namespace Sla.DECCORE
             if (loop == (PcodeOp*)0)
                 throw new LowlevelError("Building low piece that was originally undefined");
 
-            vector<Varnode*> inlist;
+            List<Varnode*> inlist;
             inlist.push_back(whole);
             inlist.push_back(data.newConstant(4, 0));
             if (loop.code() == CPUI_MULTIEQUAL)
@@ -717,7 +717,7 @@ namespace Sla.DECCORE
             if (hiop == (PcodeOp*)0)
                 throw new LowlevelError("Building low piece that was originally undefined");
 
-            vector<Varnode*> inlist;
+            List<Varnode*> inlist;
             inlist.push_back(whole);
             inlist.push_back(data.newConstant(4, lo.getSize()));
             if (hiop.code() == CPUI_MULTIEQUAL)
@@ -1231,7 +1231,7 @@ namespace Sla.DECCORE
         /// must already exist or be creatable.  The point where the output Varnode must exist is identified
         /// and returned.  If the MULTIEQUAL operation cannot be created, null is returned.
         /// \param out is the output of the MULTIEQUAL operation
-        /// \param inlist is a vector of the input operands to the MULTIEQUAL
+        /// \param inlist is a List of the input operands to the MULTIEQUAL
         /// \return the first PcodeOp where the output whole must exist
         public static PcodeOp preparePhiOp(SplitVarnode @out, List<SplitVarnode> inlist)
         {

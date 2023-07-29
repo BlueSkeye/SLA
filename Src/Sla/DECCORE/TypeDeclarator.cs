@@ -74,7 +74,7 @@ namespace Sla.DECCORE
 
             // Construct the output type
             pieces.outtype = basetype;
-            vector<TypeModifier*>::const_iterator iter;
+            List<TypeModifier*>::const_iterator iter;
             iter = mods.end();
             --iter;         // At least one modification
             while (iter != mods.begin())
@@ -90,7 +90,7 @@ namespace Sla.DECCORE
         private Datatype buildType(Architecture glb)
         { // Apply modifications to the basetype, (in reverse order of binding)
             Datatype* restype = basetype;
-            vector<TypeModifier*>::const_iterator iter;
+            List<TypeModifier*>::const_iterator iter;
             iter = mods.end();
             while (iter != mods.begin())
             {

@@ -61,7 +61,7 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             string name, outname, pcodestring;
-            vector<string> inname;
+            List<string> inname;
 
             readPcodeSnippet(s, name, outname, inname, pcodestring);
             int4 id = -1;

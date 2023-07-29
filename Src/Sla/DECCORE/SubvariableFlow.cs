@@ -1576,7 +1576,7 @@ namespace Sla.DECCORE
                             // These are operations that flow the small variable into a bigger variable but
                             // where all the remaining bits are zero
                             int4 sa = (*piter).slot;
-                            vector<Varnode*> invec;
+                            List<Varnode*> invec;
                             Varnode* inVn = getReplaceVarnode((*piter).in1);
                             int4 outSize = pullop.getOut().getSize();
                             if (sa == 0)

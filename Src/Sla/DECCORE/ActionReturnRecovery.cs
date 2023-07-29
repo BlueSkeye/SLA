@@ -20,7 +20,7 @@ namespace Sla.DECCORE
         /// \param data is the function being analyzed
         private static void buildReturnOutput(ParamActive active, PcodeOp retop, Funcdata data)
         {
-            vector<Varnode*> newparam;
+            List<Varnode*> newparam;
 
             newparam.push_back(retop.getIn(0)); // Keep the first param (the return indirect reference)
             for (int4 i = 0; i < active.getNumTrials(); ++i)

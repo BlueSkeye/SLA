@@ -23,7 +23,7 @@ namespace Sla.DECCORE
         /// \param fd is the list of fields to copy in
         protected void setFields(List<TypeField> fd)
         {
-            vector<TypeField>::const_iterator iter;
+            List<TypeField>::const_iterator iter;
             int4 end;
             // Need to calculate size
             size = 0;
@@ -260,7 +260,7 @@ namespace Sla.DECCORE
             int4 res = Datatype::compare(op, level);
             if (res != 0) return res;
             TypeStruct ts = (TypeStruct*)&op;
-            vector<TypeField>::const_iterator iter1, iter2;
+            List<TypeField>::const_iterator iter1, iter2;
 
             if (field.size() != ts.field.size()) return (ts.field.size() - field.size());
             iter1 = field.begin();
@@ -305,7 +305,7 @@ namespace Sla.DECCORE
             int4 res = Datatype::compareDependency(op);
             if (res != 0) return res;
             TypeStruct ts = (TypeStruct*)&op;
-            vector<TypeField>::const_iterator iter1, iter2;
+            List<TypeField>::const_iterator iter1, iter2;
 
             if (field.size() != ts.field.size()) return (ts.field.size() - field.size());
             iter1 = field.begin();
@@ -338,7 +338,7 @@ namespace Sla.DECCORE
             }
             encoder.openElement(ELEM_TYPE);
             encodeBasic(metatype, encoder);
-            vector<TypeField>::const_iterator iter;
+            List<TypeField>::const_iterator iter;
             for (iter = field.begin(); iter != field.end(); ++iter)
             {
                 (*iter).encode(encoder);
@@ -389,7 +389,7 @@ namespace Sla.DECCORE
         public override void assignFieldOffsets(List<TypeField> list, int4 align)
         {
             int4 offset = 0;
-            vector<TypeField>::iterator iter;
+            List<TypeField>::iterator iter;
             for (iter = list.begin(); iter != list.end(); ++iter)
             {
                 if ((*iter).offset != -1) continue;

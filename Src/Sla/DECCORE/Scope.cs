@@ -708,7 +708,7 @@ namespace Sla.DECCORE
         /// \return the Funcdata object of the matching function, or NULL if it doesn't exist
         public Funcdata queryFunction(string nm)
         {
-            vector<Symbol*> symList;
+            List<Symbol*> symList;
             queryByName(nm, symList);
             for (int4 i = 0; i < symList.size(); ++i)
             {

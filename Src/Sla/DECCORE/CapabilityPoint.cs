@@ -22,7 +22,7 @@ namespace Sla.DECCORE
         private static List<CapabilityPoint> thelist = new List<CapabilityPoint>();
 
         /// Retrieve the list of extension point singletons
-        /// Access static vector of CapabilityPoint objects that are registered during static initialization
+        /// Access static List of CapabilityPoint objects that are registered during static initialization
         /// The list itself is created once on the first call to this method
         /// \e after all the static initializers have run
         /// \return the list of registered extensions

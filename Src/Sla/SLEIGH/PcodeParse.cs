@@ -1400,7 +1400,7 @@ namespace Sla.SLEIGH
 
         //        case 85: /* statement  */
 
-        //            { if (((*yyvaluep).stmt) != (vector<OpTpl*>*)0) { for (int4 i = 0; i < ((*yyvaluep).stmt).size(); ++i) delete(*((*yyvaluep).stmt))[i]; delete((*yyvaluep).stmt); } }
+        //            { if (((*yyvaluep).stmt) != (List<OpTpl*>*)0) { for (int4 i = 0; i < ((*yyvaluep).stmt).size(); ++i) delete(*((*yyvaluep).stmt))[i]; delete((*yyvaluep).stmt); } }
 
         //            break;
 
@@ -1766,7 +1766,7 @@ namespace Sla.SLEIGH
 
         //    case 12:
 
-        //        { (yyval.stmt) = (vector<OpTpl*>*)0; string errmsg = "Redefinition of symbol: " + (yyvsp[-1].specsym).getName(); yyerror(errmsg.c_str()); YYERROR; }
+        //        { (yyval.stmt) = (List<OpTpl*>*)0; string errmsg = "Redefinition of symbol: " + (yyvsp[-1].specsym).getName(); yyerror(errmsg.c_str()); YYERROR; }
 
         //        break;
 
@@ -1790,13 +1790,13 @@ namespace Sla.SLEIGH
 
         //    case 16:
 
-        //        { (yyval.stmt) = (vector<OpTpl*>*)0; delete(yyvsp[-3].varnode); delete(yyvsp[-1].i); yyerror("Illegal truncation on left-hand side of assignment"); YYERROR; }
+        //        { (yyval.stmt) = (List<OpTpl*>*)0; delete(yyvsp[-3].varnode); delete(yyvsp[-1].i); yyerror("Illegal truncation on left-hand side of assignment"); YYERROR; }
 
         //        break;
 
         //    case 17:
 
-        //        { (yyval.stmt) = (vector<OpTpl*>*)0; delete(yyvsp[-3].varnode); delete(yyvsp[-1].i); yyerror("Illegal subpiece on left-hand side of assignment"); YYERROR; }
+        //        { (yyval.stmt) = (List<OpTpl*>*)0; delete(yyvsp[-3].varnode); delete(yyvsp[-1].i); yyerror("Illegal subpiece on left-hand side of assignment"); YYERROR; }
 
         //        break;
 
@@ -1832,7 +1832,7 @@ namespace Sla.SLEIGH
 
         //    case 23:
 
-        //        { (yyval.stmt) = (vector<OpTpl*>*)0; yyerror("Must specify an indirect parameter for return"); YYERROR; }
+        //        { (yyval.stmt) = (List<OpTpl*>*)0; yyerror("Must specify an indirect parameter for return"); YYERROR; }
 
         //        break;
 
@@ -2402,13 +2402,13 @@ namespace Sla.SLEIGH
 
         //    case 118:
 
-        //        { (yyval.param) = new vector<ExprTree*>; }
+        //        { (yyval.param) = new List<ExprTree*>; }
 
         //        break;
 
         //    case 119:
 
-        //        { (yyval.param) = new vector<ExprTree*>; (yyval.param).push_back((yyvsp[0].tree)); }
+        //        { (yyval.param) = new List<ExprTree*>; (yyval.param).push_back((yyvsp[0].tree)); }
 
         //        break;
 

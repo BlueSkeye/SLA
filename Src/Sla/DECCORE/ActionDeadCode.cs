@@ -27,7 +27,7 @@ namespace Sla.DECCORE
     /// a set of seed Varnodes which are marked as completely used
     /// (function inputs, branch conditions, ...) For each propagation
     /// the particular op being passed through can transform the
-    /// "bit usage" vector of the output to obtain the input.
+    /// "bit usage" List of the output to obtain the input.
     internal class ActionDeadCode : Action
     {
         /// Given a new \e consume value to push to a Varnode, determine if this changes
@@ -487,7 +487,7 @@ namespace Sla.DECCORE
             PcodeOp* op;
             Varnode* vn;
             uintb returnConsume;
-            vector<Varnode*> worklist;
+            List<Varnode*> worklist;
             VarnodeLocSet::const_iterator viter, endviter;
             AddrSpaceManager manage = data.getArch();
             AddrSpace* spc;

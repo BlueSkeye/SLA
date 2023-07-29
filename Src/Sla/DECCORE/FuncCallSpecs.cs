@@ -722,7 +722,7 @@ namespace Sla.DECCORE
 
             // Try our best to merge existing prototype
             // with the one we have just been handed
-            vector<Varnode*> newinput;
+            List<Varnode*> newinput;
             Varnode* newoutput;
             FuncProto & newproto(newfd.getFuncProto());
             if ((!newproto.isNoReturn()) && (!newproto.isInline()))
@@ -753,7 +753,7 @@ namespace Sla.DECCORE
         /// \param fp is the new (more restrictive) function prototype
         public void forceSet(Funcdata data, FuncProto fp)
         {
-            vector<Varnode*> newinput;
+            List<Varnode*> newinput;
             Varnode* newoutput;
 
             // Copy the recovered prototype into the override manager so that
@@ -1021,7 +1021,7 @@ namespace Sla.DECCORE
             int4 sz;
             bool isspacebase;
             Varnode* vn;
-            vector<Varnode*> newparam;
+            List<Varnode*> newparam;
 
             newparam.push_back(op.getIn(0)); // Preserve the fspec parameter
 
@@ -1088,7 +1088,7 @@ namespace Sla.DECCORE
         public void buildOutputFromTrials(Funcdata data, List<Varnode> trialvn)
         {
             Varnode* finaloutvn;
-            vector<Varnode*> finalvn;
+            List<Varnode*> finalvn;
 
             for (int4 i = 0; i < activeoutput.getNumTrials(); ++i)
             { // Reorder the varnodes
@@ -1100,7 +1100,7 @@ namespace Sla.DECCORE
             activeoutput.deleteUnusedTrials(); // This deletes unused, and renumbers used  (matches finalvn)
             if (activeoutput.getNumTrials() == 0) return; // Nothing is a formal output
 
-            vector<PcodeOp*> deletedops;
+            List<PcodeOp*> deletedops;
 
             if (activeoutput.getNumTrials() == 1)
             {       // We have a single, properly justified output
@@ -1291,7 +1291,7 @@ namespace Sla.DECCORE
         /// \param qlst is the list of call sites (FuncCallSpecs) for the calling function
         public static void countMatchingCalls(List<FuncCallSpecs> qlst)
         {
-            vector<FuncCallSpecs*> copyList(qlst);
+            List<FuncCallSpecs*> copyList(qlst);
             sort(copyList.begin(), copyList.end(), compareByEntryAddress);
             int4 i;
             for (i = 0; i < copyList.size(); ++i)

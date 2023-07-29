@@ -35,7 +35,7 @@ namespace Sla.SLEIGH
 
         public override void validate()
         { // Throw an exception if the PatternExpression is not valid
-            vector<PatternValue*> values;
+            List<PatternValue*> values;
 
             patexp.listValues(values); // Get all the expression tokens
             for (int4 i = 0; i < values.size(); ++i)

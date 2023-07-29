@@ -139,7 +139,7 @@ namespace Sla.DECCORE
             lineno = -1;
             colno = -1;
             filenum = -1;
-            lastdecls = (vector<TypeDeclarator*>*)0;
+            lastdecls = (List<TypeDeclarator*>*)0;
             keywords["typedef"] = f_typedef;
             keywords["extern"] = f_extern;
             keywords["static"] = f_static;
@@ -163,15 +163,15 @@ namespace Sla.DECCORE
         {
             clearAllocation();
             lasterror.clear();
-            lastdecls = (vector<TypeDeclarator*>*)0;
+            lastdecls = (List<TypeDeclarator*>*)0;
             lexer.clear();
             firsttoken = -1;
         }
 
         public List<TypeDeclarator> mergeSpecDecVec(TypeSpecifiers spec)
         {
-            vector<TypeDeclarator*>* declist;
-            declist = new vector<TypeDeclarator*>();
+            List<TypeDeclarator*>* declist;
+            declist = new List<TypeDeclarator*>();
             vecdec_alloc.push_back(declist);
             TypeDeclarator* dec = new TypeDeclarator();
             typedec_alloc.push_back(dec);
@@ -267,14 +267,14 @@ namespace Sla.DECCORE
 
         public List<TypeDeclarator> newVecDeclarator()
         {
-            vector<TypeDeclarator*>* res = new vector<TypeDeclarator*>();
+            List<TypeDeclarator*>* res = new List<TypeDeclarator*>();
             vecdec_alloc.push_back(res);
             return res;
         }
 
         public List<uint4> newPointer()
         {
-            vector<uint4>* res = new vector<uint4>();
+            List<uint4>* res = new List<uint4>();
             vecuint4_alloc.push_back(res);
             return res;
         }
@@ -305,7 +305,7 @@ namespace Sla.DECCORE
         public Datatype newStruct(string ident, List<TypeDeclarator> declist)
         { // Build a new structure
             TypeStruct* res = glb.types.getTypeStruct(ident); // Create stub (for recursion)
-            vector<TypeField> sublist;
+            List<TypeField> sublist;
 
             for (uint4 i = 0; i < declist.size(); ++i)
             {
@@ -340,7 +340,7 @@ namespace Sla.DECCORE
         public Datatype newUnion(string ident, List<TypeDeclarator> declist)
         {
             TypeUnion* res = glb.types.getTypeUnion(ident); // Create stub (for recursion)
-            vector<TypeField> sublist;
+            List<TypeField> sublist;
 
             for (uint4 i = 0; i < declist.size(); ++i)
             {
@@ -387,7 +387,7 @@ namespace Sla.DECCORE
 
         public List<Enumerator> newVecEnumerator()
         {
-            vector<Enumerator*>* res = new vector<Enumerator*>();
+            List<Enumerator*>* res = new List<Enumerator*>();
             vecenum_alloc.push_back(res);
             return res;
         }
@@ -395,9 +395,9 @@ namespace Sla.DECCORE
         public Datatype newEnum(string ident, List<Enumerator> vecenum)
         {
             TypeEnum* res = glb.types.getTypeEnum(ident);
-            vector<string> namelist;
-            vector<uintb> vallist;
-            vector<bool> assignlist;
+            List<string> namelist;
+            List<uintb> vallist;
+            List<bool> assignlist;
             for (uint4 i = 0; i < vecenum.size(); ++i)
             {
                 Enumerator* enumer = (*vecenum)[i];
@@ -446,12 +446,12 @@ namespace Sla.DECCORE
                 delete* iter2;
             typespec_alloc.clear();
 
-            list<vector<uint4>*>::iterator iter3;
+            list<List<uint4>*>::iterator iter3;
             for (iter3 = vecuint4_alloc.begin(); iter3 != vecuint4_alloc.end(); ++iter3)
                 delete* iter3;
             vecuint4_alloc.clear();
 
-            list<vector<TypeDeclarator*>*>::iterator iter4;
+            list<List<TypeDeclarator*>*>::iterator iter4;
             for (iter4 = vecdec_alloc.begin(); iter4 != vecdec_alloc.end(); ++iter4)
                 delete* iter4;
             vecdec_alloc.clear();
@@ -471,7 +471,7 @@ namespace Sla.DECCORE
                 delete* iter7;
             enum_alloc.clear();
 
-            list<vector<Enumerator*>*>::iterator iter8;
+            list<List<Enumerator*>*>::iterator iter8;
             for (iter8 = vecenum_alloc.begin(); iter8 != vecenum_alloc.end(); ++iter8)
                 delete* iter8;
             vecenum_alloc.clear();

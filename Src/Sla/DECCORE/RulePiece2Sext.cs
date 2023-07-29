@@ -23,7 +23,7 @@ namespace Sla.DECCORE
             return new RulePiece2Sext(getGroup());
         }
 
-        public override void getOpList(vector<uint4> oplist)
+        public override void getOpList(List<uint4> oplist)
         {
             oplist.push_back(CPUI_PIECE);
         }

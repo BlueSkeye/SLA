@@ -263,7 +263,7 @@ namespace Sla.DECCORE
                 scopedepth = 0;
             if (scopedepth != 0)
             {
-                vector <Scope*> scopeList;
+                List <Scope*> scopeList;
                 Scope* point = symbol.getScope();
                 for (int4 i = 0; i < scopedepth; ++i)
                 {
@@ -298,7 +298,7 @@ namespace Sla.DECCORE
                 scopedepth = 0;
             if (scopedepth != 0)
             {
-                vector <Scope*> scopeList;
+                List <Scope*> scopeList;
                 Scope* point = symbol.getScope();
                 for (int4 i = 0; i < scopedepth; ++i)
                 {
@@ -571,7 +571,7 @@ namespace Sla.DECCORE
         /// \param op is the PcodeOp using the value
         protected void pushEnumConstant(uintb val, TypeEnum ct, Varnode vn, PcodeOp op)
         {
-            vector<string> valnames;
+            List<string> valnames;
 
             bool complement = ct.getMatches(val, valnames);
             if (valnames.size() > 0)
@@ -687,7 +687,7 @@ namespace Sla.DECCORE
         /// \param ct is the structure data-type
         protected void emitStructDefinition(TypeStruct ct)
         {
-            vector<TypeField>::const_iterator iter;
+            List<TypeField>::const_iterator iter;
 
             if (ct.getName().size() == 0)
             {
@@ -1589,7 +1589,7 @@ namespace Sla.DECCORE
             // We need to print "bottom up" in order to get parentheses right
             // I.e. we want to print globalstruct.arrayfield[0], rather than
             //                       globalstruct.(arrayfield[0])
-            vector<PartialSymbolEntry> stack;
+            List<PartialSymbolEntry> stack;
             Datatype* finalcast = (Datatype*)0;
 
             Datatype* ct = sym.getType();
@@ -2336,8 +2336,8 @@ namespace Sla.DECCORE
 
         public virtual void docTypeDefinitions(TypeFactory typegrp)
         {
-            vector<Datatype*> deporder;
-            vector<Datatype*>::iterator iter;
+            List<Datatype*> deporder;
+            List<Datatype*>::iterator iter;
 
             typegrp.dependentOrder(deporder); // Put things in resolvable order
             for (iter = deporder.begin(); iter != deporder.end(); ++iter)
@@ -2487,7 +2487,7 @@ namespace Sla.DECCORE
         public virtual void emitBlockGraph(BlockGraph bl)
         {
             List<FlowBlock> list = bl.getList();
-            vector<FlowBlock*>::const_iterator iter;
+            List<FlowBlock*>::const_iterator iter;
 
             for (iter = list.begin(); iter != list.end(); ++iter)
             {
@@ -3825,7 +3825,7 @@ namespace Sla.DECCORE
         {
             Varnode* outvn = op.getOut();
             Varnode* vn0 = op.getIn(0);
-            vector<uintb> refs;
+            List<uintb> refs;
             for (int4 i = 1; i < op.numInput(); ++i)
                 refs.push_back(op.getIn(i).getOffset());
             CPoolRecord* rec = glb.cpool.getRecord(refs);

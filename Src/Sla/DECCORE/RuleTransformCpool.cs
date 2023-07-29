@@ -37,7 +37,7 @@ namespace Sla.DECCORE
         {
             if (op.isCpoolTransformed()) return 0;     // Already visited
             data.opMarkCpoolTransformed(op);    // Mark our visit
-            vector<uintb> refs;
+            List<uintb> refs;
             for (int4 i = 1; i < op.numInput(); ++i)
                 refs.push_back(op.getIn(i).getOffset());
             CPoolRecord rec = data.getArch().cpool.getRecord(refs);    // Recover the record

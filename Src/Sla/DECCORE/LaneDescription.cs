@@ -81,7 +81,7 @@ namespace Sla.DECCORE
             if (firstLane < 0) return false;
             int4 lastLane = getBoundary(lsbOffset + size);
             if (lastLane < 0) return false;
-            vector<int4> newLaneSize;
+            List<int4> newLaneSize;
             lanePosition.clear();
             int4 newPosition = 0;
             for (int4 i = firstLane; i < lastLane; ++i)

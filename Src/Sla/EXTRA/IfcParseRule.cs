@@ -38,7 +38,7 @@ namespace Sla.EXTRA
     return;
   }
   int4 opparam;
-  vector<OpCode> opcodelist;
+  List<OpCode> opcodelist;
   opparam = ruler.postProcessRule(opcodelist);
   UnifyCPrinter cprinter;
   cprinter.initializeRuleAction(ruler.getRule(),opparam,opcodelist);

@@ -86,7 +86,7 @@ namespace Sla.DECCORE
         /// \return \b true if an intersection occurs in the specified block
         private bool blockIntersection(HighVariable a, HighVariable b, int4 blk)
         {
-            vector<Varnode*> blist;
+            List<Varnode*> blist;
 
             Cover aCover = a.getCover();
             Cover bCover = b.getCover();
@@ -161,8 +161,8 @@ namespace Sla.DECCORE
         /// \param high2 is the variable object being eliminated
         public void moveIntersectTests(HighVariable high1, HighVariable high2)
         {
-            vector<HighVariable*> yesinter;     // Highs that high2 intersects
-            vector<HighVariable*> nointer;      // Highs that high2 does not intersect
+            List<HighVariable*> yesinter;     // Highs that high2 intersects
+            List<HighVariable*> nointer;      // Highs that high2 does not intersect
             map<HighEdge, bool>::iterator iterfirst = highedgemap.lower_bound(HighEdge(high2, (HighVariable*)0));
             map<HighEdge, bool>::iterator iterlast = highedgemap.lower_bound(HighEdge(high2, (HighVariable*)~((uintp)0)));
             map<HighEdge, bool>::iterator iter;
@@ -204,7 +204,7 @@ namespace Sla.DECCORE
                 else            // Keep any intersection==true tests
                     ++iter;
             }
-            vector<HighVariable*>::iterator titer;
+            List<HighVariable*>::iterator titer;
             for (titer = nointer.begin(); titer != nointer.end(); ++titer)
                 (*titer).clearMark();
 
@@ -253,7 +253,7 @@ namespace Sla.DECCORE
 
             bool res = false;
             int4 blk;
-            vector<int4> blockisect;
+            List<int4> blockisect;
             a.getCover().intersectList(blockisect, b.getCover(), 2);
             for (blk = 0; blk < blockisect.size(); ++blk)
             {

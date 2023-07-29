@@ -93,7 +93,7 @@ namespace Sla.SLEIGH
                 reportError(getLocation(labsym), "Label '" + labsym.getName() + "' is placed more than once");
             }
             labsym.setPlaced();
-            vector<OpTpl*>* res = new vector<OpTpl*>;
+            List<OpTpl*>* res = new List<OpTpl*>;
             OpTpl* op = new OpTpl(LABELBUILD);
             VarnodeTpl* idvn = new VarnodeTpl(ConstTpl(constantspace),
                                 ConstTpl(ConstTpl::real, labsym.getIndex()),
@@ -192,8 +192,8 @@ namespace Sla.SLEIGH
             OpTpl* op = new OpTpl(opc);
             op.addInput(vn.outvn);
             vn.outvn = (VarnodeTpl*)0; // There is no longer an output to this expression
-            vector<OpTpl*>* res = vn.ops;
-            vn.ops = (vector<OpTpl*>*)0;
+            List<OpTpl*>* res = vn.ops;
+            vn.ops = (List<OpTpl*>*)0;
             delete vn;
             res.push_back(op);
             return res;
@@ -202,8 +202,8 @@ namespace Sla.SLEIGH
         public List<OpTpl> createOpNoOut(OpCode opc, ExprTree vn1, ExprTree vn2)
         {               // Create new expression by creating op with given -opc-
                         // and inputs vn1 and vn2. Free the input expressions
-            vector<OpTpl*>* res = vn1.ops;
-            vn1.ops = (vector<OpTpl*>*)0;
+            List<OpTpl*>* res = vn1.ops;
+            vn1.ops = (List<OpTpl*>*)0;
             res.insert(res.end(), vn2.ops.begin(), vn2.ops.end());
             vn2.ops.clear();
             OpTpl* op = new OpTpl(opc);
@@ -222,7 +222,7 @@ namespace Sla.SLEIGH
             VarnodeTpl* vn = new VarnodeTpl(ConstTpl(constantspace),
                               ConstTpl(ConstTpl::real, val),
                               ConstTpl(ConstTpl::real, 4));
-            vector<OpTpl*>* res = new vector<OpTpl*>;
+            List<OpTpl*>* res = new List<OpTpl*>;
             OpTpl* op = new OpTpl(opc);
             op.addInput(vn);
             res.push_back(op);
@@ -253,8 +253,8 @@ namespace Sla.SLEIGH
 
         public List<OpTpl> createStore(StarQuality qual, ExprTree ptr, ExprTree val)
         {
-            vector<OpTpl*>* res = ptr.ops;
-            ptr.ops = (vector<OpTpl*>*)0;
+            List<OpTpl*>* res = ptr.ops;
+            ptr.ops = (List<OpTpl*>*)0;
             res.insert(res.end(), val.ops.begin(), val.ops.end());
             val.ops.clear();
             OpTpl* op = new OpTpl(CPUI_STORE);
@@ -402,8 +402,8 @@ namespace Sla.SLEIGH
             {   // Was there an error condition
                 reportError((Location*)0, errmsg);    // Report the error
                 delete vn;          // Clean up
-                vector<OpTpl*>* resops = rhs.ops; // Passthru old expression
-                rhs.ops = (vector<OpTpl*>*)0;
+                List<OpTpl*>* resops = rhs.ops; // Passthru old expression
+                rhs.ops = (List<OpTpl*>*)0;
                 delete rhs;
                 return resops;
             }
@@ -434,8 +434,8 @@ namespace Sla.SLEIGH
             }
             if (errmsg.size() > 0)
                 reportError((Location*)0, errmsg);
-            vector<OpTpl*>* resops = res.ops;
-            res.ops = (vector<OpTpl*>*)0;
+            List<OpTpl*>* resops = res.ops;
+            res.ops = (List<OpTpl*>*)0;
             delete res;
             return resops;
         }
@@ -722,8 +722,8 @@ namespace Sla.SLEIGH
         {               // Fill in size for varnodes with size 0
                         // Return first OpTpl with a size 0 varnode
                         // that cannot be filled in or NULL otherwise
-            vector<OpTpl*> zerovec, zerovec2;
-            vector<OpTpl*>::const_iterator iter;
+            List<OpTpl*> zerovec, zerovec2;
+            List<OpTpl*>::const_iterator iter;
             int4 lastsize;
 
             for (iter = ct.getOpvec().begin(); iter != ct.getOpvec().end(); ++iter)

@@ -53,8 +53,8 @@ namespace Sla.DECCORE
             PcodeOp* curop;
             PcodeOp* subop,*multop;
 
-            vector<PcodeOp*> opstack;   // Depth first traversal path
-            vector<PcodeOp*> multstack;
+            List<PcodeOp*> opstack;   // Depth first traversal path
+            List<PcodeOp*> multstack;
 
             opstack.push_back(root);
             multstack.push_back((PcodeOp*)0);
@@ -106,7 +106,7 @@ namespace Sla.DECCORE
         /// Sort the terms using additiveCompare()
         public void sortTerms()
         {
-            for (vector<AdditiveEdge>::iterator iter = terms.begin(); iter != terms.end(); ++iter)
+            for (List<AdditiveEdge>::iterator iter = terms.begin(); iter != terms.end(); ++iter)
                 sorter.push_back(&(*iter));
 
             sort(sorter.begin(), sorter.end(), additiveCompare);

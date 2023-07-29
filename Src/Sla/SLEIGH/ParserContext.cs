@@ -130,7 +130,7 @@ namespace Sla.SLEIGH
             ParserWalker walker(this);
             walker.baseState();
 
-            vector<ContextSet>::iterator iter;
+            List<ContextSet>::iterator iter;
 
             for (iter = contextcommit.begin(); iter != contextcommit.end(); ++iter)
             {

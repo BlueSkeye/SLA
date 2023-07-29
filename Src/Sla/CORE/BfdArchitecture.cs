@@ -77,8 +77,8 @@ namespace Sla.CORE
 
         public override void restoreXml(DocumentStorage store)
         {
-            Element* el = store.getTag("bfd_savefile");
-            if (el == (Element*)0)
+            Element el = store.getTag("bfd_savefile");
+            if (el == (Element)null)
                 throw new LowlevelError("Could not find bfd_savefile tag");
 
             restoreXmlHeader(el);

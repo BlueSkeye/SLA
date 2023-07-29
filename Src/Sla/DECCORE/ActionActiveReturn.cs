@@ -34,7 +34,7 @@ namespace Sla.DECCORE
                 if (fc.isOutputActive())
                 {
                     ParamActive* activeoutput = fc.getActiveOutput();
-                    vector<Varnode*> trialvn;
+                    List<Varnode*> trialvn;
                     fc.checkOutputTrialUse(data, trialvn);
                     fc.deriveOutputMap(activeoutput);
                     fc.buildOutputFromTrials(data, trialvn);

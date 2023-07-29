@@ -26,12 +26,12 @@ namespace Sla.SLEIGH
         public ExprTree(VarnodeTpl vn)
         {
             outvn = vn;
-            ops = new vector<OpTpl*>;
+            ops = new List<OpTpl*>;
         }
 
         public ExprTree(OpTpl op)
         {
-            ops = new vector<OpTpl*>;
+            ops = new List<OpTpl*>;
             ops.push_back(op);
             if (op.getOut() != (VarnodeTpl*)0)
                 outvn = new VarnodeTpl(*op.getOut());
@@ -43,7 +43,7 @@ namespace Sla.SLEIGH
         {
             if (outvn != (VarnodeTpl*)0)
                 delete outvn;
-            if (ops != (vector<OpTpl*>*)0)
+            if (ops != (List<OpTpl*>*)0)
             {
                 for (int4 i = 0; i < ops.size(); ++i)
                     delete(*ops)[i];
@@ -82,7 +82,7 @@ namespace Sla.SLEIGH
         public static List<OpTpl> appendParams(OpTpl op, List<ExprTree> param)
         {               // Create op expression with entire list of expression
                         // inputs
-            vector<OpTpl*>* res = new vector<OpTpl*>;
+            List<OpTpl*>* res = new List<OpTpl*>;
 
             for (int4 i = 0; i < param.size(); ++i)
             {
@@ -98,9 +98,9 @@ namespace Sla.SLEIGH
         }
 
         public static List<OpTpl> toVector(ExprTree expr)
-        {               // Grab the op vector and delete the output expression
-            vector<OpTpl*>* res = expr.ops;
-            expr.ops = (vector<OpTpl*>*)0;
+        {               // Grab the op List and delete the output expression
+            List<OpTpl*>* res = expr.ops;
+            expr.ops = (List<OpTpl*>*)0;
             delete expr;
             return res;
         }

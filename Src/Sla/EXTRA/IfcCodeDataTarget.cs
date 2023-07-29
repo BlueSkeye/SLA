@@ -19,7 +19,7 @@ namespace Sla.EXTRA
                 throw IfaceParseError("Missing system call name");
 
             s >> token;
-            vector<ImportRecord> irec;
+            List<ImportRecord> irec;
             LoadImageBfd* loadbfd = (LoadImageBfd*)dcp.conf.loader;
             loadbfd.getImportTable(irec);
             int4 i;

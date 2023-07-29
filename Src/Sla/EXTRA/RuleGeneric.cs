@@ -65,7 +65,7 @@ namespace Sla.EXTRA
             if (compiler.numErrors() != 0)
                 throw new LowlevelError("Unable to parse dynamic rule: " + nm);
 
-            vector<OpCode> opcodelist;
+            List<OpCode> opcodelist;
             int4 opinit = compiler.postProcessRule(opcodelist);
             RuleGeneric* res = new RuleGeneric(gp, nm, opcodelist, opinit, compiler.releaseRule());
             return res;

@@ -40,7 +40,7 @@ namespace Sla.SLEIGH
             labelbase = labelcount; // Set the newbase
             labelcount += construct.numLabels();   // Add labels from this template
 
-            vector<OpTpl*>::const_iterator iter;
+            List<OpTpl*>::const_iterator iter;
             OpTpl* op;
             List<OpTpl> ops = construct.getOpvec();
 

@@ -54,7 +54,7 @@ namespace Sla.DECCORE
 
         /// Create the new/modified variable this placeholder represents
         /// Create the new/modified op this placeholder represents
-        /// Create the Varnode object (constant, unique, vector piece) described by the
+        /// Create the Varnode object (constant, unique, List piece) described by the
         /// given placeholder. If the Varnode is an output, assume the op already exists
         /// and create the Varnode as an output. Set the \b replacement field with the
         /// new Varnode.

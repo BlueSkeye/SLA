@@ -40,7 +40,7 @@ namespace Sla.SLEIGH
                 delete pattern;
             if (decisiontree != (DecisionNode*)0)
                 delete decisiontree;
-            vector<Constructor*>::iterator iter;
+            List<Constructor*>::iterator iter;
             for (iter = construct.begin(); iter != construct.end(); ++iter)
                 delete* iter;
         }

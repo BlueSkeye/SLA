@@ -41,7 +41,7 @@ namespace Sla.DECCORE
 
             if (vn1.isConstant() && vn2.isConstant())
             {
-                vector<uintb> bindlist;
+                List<uintb> bindlist;
                 bindlist.push_back(vn1.getOffset());
                 bindlist.push_back(vn2.getOffset());
                 uintb val = segdef.execute(bindlist);

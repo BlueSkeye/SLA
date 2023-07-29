@@ -92,7 +92,7 @@ namespace Sla.DECCORE
             if (spacebase == (Varnode*)0) return; // No possible alias
 
             gatherAdditiveBase(spacebase, addBase);
-            for (vector<AddBase>::iterator iter = addBase.begin(); iter != addBase.end(); ++iter)
+            for (List<AddBase>::iterator iter = addBase.begin(); iter != addBase.end(); ++iter)
             {
                 uintb offset = gatherOffset((*iter).base);
                 offset = AddrSpace::addressToByte(offset, space.getWordSize()); // Convert to byte offset
@@ -182,7 +182,7 @@ namespace Sla.DECCORE
         /// \param addbase will contain all the collected roots
         public static void gatherAdditiveBase(Varnode startvn, List<AddBase> addbase)
         {
-            vector<AddBase> vnqueue;        // varnodes involved in addition with original vn
+            List<AddBase> vnqueue;        // varnodes involved in addition with original vn
             Varnode* vn,*subvn,*indexvn,*othervn;
             list<PcodeOp*>::const_iterator iter;
             PcodeOp* op;

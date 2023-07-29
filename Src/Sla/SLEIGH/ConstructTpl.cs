@@ -40,7 +40,7 @@ namespace Sla.SLEIGH
         
         ~ConstructTpl()
         {               // Constructor owns its ops and handles
-            vector<OpTpl*>::iterator oiter;
+            List<OpTpl*>::iterator oiter;
             for (oiter = vec.begin(); oiter != vec.end(); ++oiter)
                 delete* oiter;
             if (result != (HandleTpl*)0)
@@ -85,7 +85,7 @@ namespace Sla.SLEIGH
         public int4 fillinBuild(List<int4> check, AddrSpace const_space)
         { // Make sure there is a build statement for all subtable params
           // Return 0 upon success, 1 if there is a duplicate BUILD, 2 if there is a build for a non-subtable
-            vector<OpTpl*>::iterator iter;
+            List<OpTpl*>::iterator iter;
             OpTpl* op;
             VarnodeTpl* indvn;
 
@@ -117,7 +117,7 @@ namespace Sla.SLEIGH
 
         public bool buildOnly()
         {
-            vector<OpTpl*>::const_iterator iter;
+            List<OpTpl*>::const_iterator iter;
             OpTpl* op;
             for (iter = vec.begin(); iter != vec.end(); ++iter)
             {
@@ -128,9 +128,9 @@ namespace Sla.SLEIGH
             return true;
         }
 
-        public void changeHandleIndex(vector<int4> handmap)
+        public void changeHandleIndex(List<int4> handmap)
         {
-            vector<OpTpl*>::const_iterator iter;
+            List<OpTpl*>::const_iterator iter;
             OpTpl* op;
 
             for (iter = vec.begin(); iter != vec.end(); ++iter)

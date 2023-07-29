@@ -172,7 +172,7 @@ namespace Sla.SLEIGH
         /// \param emt is the emitter
         public void emit(Address addr,PcodeEmit emt)
         {
-            vector<PcodeData>::const_iterator iter;
+            List<PcodeData>::const_iterator iter;
 
             for (iter = issued.begin(); iter != issued.end(); ++iter)
                 emt.dump(addr, (*iter).opc, (*iter).outvar, (*iter).invar, (*iter).isize);

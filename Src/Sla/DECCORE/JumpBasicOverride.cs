@@ -81,7 +81,7 @@ namespace Sla.DECCORE
                 return opi;
 
             EmulateFunction emul(fd);
-            //  if (loadpoints != (vector<LoadTable> *)0)
+            //  if (loadpoints != (List<LoadTable> *)0)
             //    emul.setLoadCollect(true);
 
             AddrSpace* spc = startop.getAddr().getSpace();
@@ -121,7 +121,7 @@ namespace Sla.DECCORE
                 val += 1;
             }
 
-            //  if ((loadpoint != (vector<LoadTable> *)0)&&(total == adset.size()))
+            //  if ((loadpoint != (List<LoadTable> *)0)&&(total == adset.size()))
             //    emul.collectLoadPoints(*loadpoints);
             if (total == adset.size())
                 return opi;

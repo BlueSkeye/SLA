@@ -27,7 +27,7 @@ namespace Sla.EXTRA
                 throw IfaceParseError("Missing new name");
 
             Symbol* sym;
-            vector<Symbol*> symList;
+            List<Symbol*> symList;
             dcp.readSymbol(oldname, symList);
 
             if (symList.empty())

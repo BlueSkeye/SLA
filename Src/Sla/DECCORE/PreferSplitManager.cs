@@ -553,7 +553,7 @@ namespace Sla.DECCORE
             templ.storage.space = vn.getSpace();
             templ.storage.size = vn.getSize();
             templ.storage.offset = vn.getOffset();
-            vector<PreferSplitRecord>::const_iterator iter;
+            List<PreferSplitRecord>::const_iterator iter;
             iter = lower_bound(records.begin(), records.end(), templ);
             if (iter == records.end())
                 return (PreferSplitRecord*)0;
@@ -575,7 +575,7 @@ namespace Sla.DECCORE
 
         public void splitAdditional()
         {
-            vector<PcodeOp*> defops;
+            List<PcodeOp*> defops;
             for (int4 i = 0; i < tempsplits.size(); ++i)
             {
                 PcodeOp* op = tempsplits[i]; // Look at everything connected to COPYs in -tempsplits-

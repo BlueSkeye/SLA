@@ -169,7 +169,7 @@ namespace Sla.DECCORE
         /// \return the number Varnodes that were marked as explicit
         private static int multipleInteraction(List<Varnode> multlist)
         {
-            vector<Varnode*> purgelist;
+            List<Varnode*> purgelist;
 
             for (int4 i = 0; i < multlist.size(); ++i)
             {
@@ -226,7 +226,7 @@ namespace Sla.DECCORE
         /// \param max is the maximum number of terms to allow
         private static void processMultiplier(Varnode vn, int max)
         {
-            vector<OpStackElement> opstack;
+            List<OpStackElement> opstack;
             Varnode* vncur;
             int4 finalcount = 0;
 
@@ -317,7 +317,7 @@ namespace Sla.DECCORE
         public override int apply(Funcdata data)
         {
             VarnodeDefSet::const_iterator viter, enditer;
-            vector<Varnode*> multlist;      // implied varnodes with >1 descendants
+            List<Varnode*> multlist;      // implied varnodes with >1 descendants
             int4 maxref;
 
             maxref = data.getArch().max_implied_ref;

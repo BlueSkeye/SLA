@@ -74,7 +74,7 @@ namespace Sla.DECCORE
         public static void collapseTable(List<LoadTable> table)
         {
             if (table.empty()) return;
-            vector<LoadTable>::iterator iter, lastiter;
+            List<LoadTable>::iterator iter, lastiter;
             int4 count = 1;
             iter = table.begin();
             lastiter = iter;

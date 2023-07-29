@@ -210,7 +210,7 @@ namespace Sla.DECCORE
         private static void propagateOneType(TypeFactory typegrp, Varnode vn)
         {
             PropagationState* ptr;
-            vector<PropagationState> state;
+            List<PropagationState> state;
 
             state.emplace_back(vn);
             vn.setMark();

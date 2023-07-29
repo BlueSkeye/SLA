@@ -341,7 +341,7 @@ namespace Sla.DECCORE
             Varnode* spVn = fd.findSpacebaseInput(space);
             if (spVn == (Varnode*)0) return;
             list<PcodeOp*>::const_iterator iter;
-            vector<PcodeOp*> refOps;
+            List<PcodeOp*> refOps;
             for (iter = spVn.beginDescend(); iter != spVn.endDescend(); ++iter)
             {
                 PcodeOp* op = *iter;

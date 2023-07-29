@@ -27,7 +27,7 @@ namespace Sla.DECCORE
             if ((!outparam.isTypeLocked()) || outparam.isSizeTypeLocked())
             {
                 PcodeOp* op = data.getFirstReturnOp();
-                vector<Varnode*> vnlist;
+                List<Varnode*> vnlist;
                 if (op != (PcodeOp*)0)
                 {
                     for (int4 i = 1; i < op.numInput(); ++i)

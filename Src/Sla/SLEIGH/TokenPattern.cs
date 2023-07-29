@@ -420,7 +420,7 @@ namespace Sla.SLEIGH
             else
             {
                 sa = 0;
-                vector<Token*>::const_iterator iter;
+                List<Token*>::const_iterator iter;
 
                 for (iter = toklist.begin(); iter != toklist.end(); ++iter)
                     sa += (*iter).getSize();

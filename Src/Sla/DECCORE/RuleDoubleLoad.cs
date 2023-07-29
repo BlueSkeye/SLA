@@ -43,7 +43,7 @@ namespace Sla.DECCORE
                 return 0;
 
             size = piece0.getSize() + piece1.getSize();
-            PcodeOp* latest = noWriteConflict(loadlo, loadhi, spc, (vector<PcodeOp*>*)0);
+            PcodeOp* latest = noWriteConflict(loadlo, loadhi, spc, (List<PcodeOp*>*)0);
             if (latest == (PcodeOp*)0) return 0; // There was a conflict
 
             // Create new load op that combines the two smaller loads
@@ -125,7 +125,7 @@ namespace Sla.DECCORE
                         affector = PcodeOp::getOpFromConst(curop.getIn(1).getAddr());
                         if (affector == op1 || affector == op2)
                         {
-                            if (indirects != (vector<PcodeOp*>*)0)
+                            if (indirects != (List<PcodeOp*>*)0)
                                 indirects.push_back(curop);
                         }
                         else

@@ -300,7 +300,7 @@ namespace Sla.DECCORE
         {
             Varnode* outvn = op.getOut();
             Varnode* vn0 = op.getIn(0);
-            vector<uintb> refs;
+            List<uintb> refs;
             for (int4 i = 1; i < op.numInput(); ++i)
                 refs.push_back(op.getIn(i).getOffset());
             CPoolRecord* rec = glb.cpool.getRecord(refs);

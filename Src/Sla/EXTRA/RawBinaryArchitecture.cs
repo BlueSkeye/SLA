@@ -53,7 +53,7 @@ namespace Sla.EXTRA
         public override void restoreXml(DocumentStorage store)
         {
             Element el = store.getTag("raw_savefile");
-            if (el == (Element*)0)
+            if (el == (Element)null)
                 throw new LowlevelError("Could not find raw_savefile tag");
 
             restoreXmlHeader(el);

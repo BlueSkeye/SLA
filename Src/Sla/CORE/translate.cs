@@ -1702,7 +1702,7 @@ namespace Sla.CORE {
         /// \e user-defined instructions are all identified by a name
         /// and an index.  This method returns a list of these ops
         /// in index order.
-        /// \param res is the resulting vector of user op names
+        /// \param res is the resulting List of user op names
         public abstract void getUserOpNames(ref List<string> res);
 
         /// \brief Get the length of a machine instruction

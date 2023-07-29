@@ -250,7 +250,7 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            vector<Varnode*> namerec;
+            List<Varnode*> namerec;
 
             linkSymbols(data, namerec);
             data.getScopeLocal().recoverNameRecommendationsForSymbols(); // Make sure recommended names hit before subfunc

@@ -124,7 +124,7 @@ namespace Sla.SLACOMP
         /// Free resources used by the builder
         private void free()
         {
-            vector<HandleTpl*>::iterator iter;
+            List<HandleTpl*>::iterator iter;
 
             for (iter = @params.begin(); iter != @params.end(); ++iter)
                 delete* iter;

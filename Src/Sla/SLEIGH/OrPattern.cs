@@ -28,7 +28,7 @@ namespace Sla.SLEIGH
 
         public OrPattern(List<DisjointPattern> list)
         {
-            vector<DisjointPattern*>::const_iterator iter;
+            List<DisjointPattern*>::const_iterator iter;
 
             for (iter = list.begin(); iter != list.end(); ++iter)
                 orlist.push_back(*iter);
@@ -36,7 +36,7 @@ namespace Sla.SLEIGH
 
         ~OrPattern()
         {
-            vector<DisjointPattern*>::iterator iter;
+            List<DisjointPattern*>::iterator iter;
 
             for (iter = orlist.begin(); iter != orlist.end(); ++iter)
                 delete* iter;
@@ -44,13 +44,13 @@ namespace Sla.SLEIGH
 
         public override Pattern simplifyClone()
         {               // Look for alwaysTrue eliminate alwaysFalse
-            vector<DisjointPattern*>::const_iterator iter;
+            List<DisjointPattern*>::const_iterator iter;
 
             for (iter = orlist.begin(); iter != orlist.end(); ++iter) // Look for alwaysTrue
                 if ((*iter).alwaysTrue())
                     return new InstructionPattern(true);
 
-            vector<DisjointPattern*> newlist;
+            List<DisjointPattern*> newlist;
             for (iter = orlist.begin(); iter != orlist.end(); ++iter) // Look for alwaysFalse
                 if (!(*iter).alwaysFalse())
                     newlist.push_back((DisjointPattern*)(*iter).simplifyClone());
@@ -64,7 +64,7 @@ namespace Sla.SLEIGH
 
         public override void shiftInstruction(int4 sa)
         {
-            vector<DisjointPattern*>::iterator iter;
+            List<DisjointPattern*>::iterator iter;
 
             for (iter = orlist.begin(); iter != orlist.end(); ++iter)
                 (*iter).shiftInstruction(sa);
@@ -85,7 +85,7 @@ namespace Sla.SLEIGH
         public override bool alwaysTrue()
         {               // This isn't quite right because different branches
                         // may cover the entire gamut
-            vector<DisjointPattern*>::const_iterator iter;
+            List<DisjointPattern*>::const_iterator iter;
 
             for (iter = orlist.begin(); iter != orlist.end(); ++iter)
                 if ((*iter).alwaysTrue()) return true;
@@ -94,7 +94,7 @@ namespace Sla.SLEIGH
 
         public override bool alwaysFalse()
         {
-            vector<DisjointPattern*>::const_iterator iter;
+            List<DisjointPattern*>::const_iterator iter;
 
             for (iter = orlist.begin(); iter != orlist.end(); ++iter)
                 if (!(*iter).alwaysFalse()) return false;
@@ -103,7 +103,7 @@ namespace Sla.SLEIGH
 
         public override bool alwaysInstructionTrue()
         {
-            vector<DisjointPattern*>::const_iterator iter;
+            List<DisjointPattern*>::const_iterator iter;
 
             for (iter = orlist.begin(); iter != orlist.end(); ++iter)
                 if (!(*iter).alwaysInstructionTrue()) return false;
@@ -113,8 +113,8 @@ namespace Sla.SLEIGH
         public override Pattern doOr(Pattern b, int4 sa)
         {
             OrPattern b2 = dynamic_cast <OrPattern> (b);
-            vector<DisjointPattern*> newlist;
-            vector<DisjointPattern*>::const_iterator iter;
+            List<DisjointPattern*> newlist;
+            List<DisjointPattern*>::const_iterator iter;
 
             for (iter = orlist.begin(); iter != orlist.end(); ++iter)
                 newlist.push_back((DisjointPattern*)(*iter).simplifyClone());
@@ -140,8 +140,8 @@ namespace Sla.SLEIGH
         public override Pattern doAnd(Pattern b, int4 sa)
         {
             OrPattern b2 = dynamic_cast <OrPattern*> (b);
-            vector<DisjointPattern*> newlist;
-            vector<DisjointPattern*>::const_iterator iter, iter2;
+            List<DisjointPattern*> newlist;
+            List<DisjointPattern*>::const_iterator iter, iter2;
             DisjointPattern* tmp;
             OrPattern* tmpor;
 
@@ -167,7 +167,7 @@ namespace Sla.SLEIGH
 
         public override Pattern commonSubPattern(Pattern b, int4 sa)
         {
-            vector<DisjointPattern*>::const_iterator iter;
+            List<DisjointPattern*>::const_iterator iter;
             Pattern* res,*next;
 
             iter = orlist.begin();

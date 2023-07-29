@@ -46,8 +46,8 @@ namespace Sla.SLEIGH
         private void renumber()
         {               // Renumber all the scopes and symbols
                         // so that there are no gaps
-            vector<SymbolScope*> newtable;
-            vector<SleighSymbol*> newsymbol;
+            List<SymbolScope*> newtable;
+            List<SleighSymbol*> newsymbol;
             // First renumber the scopes
             SymbolScope* scope;
             for (int4 i = 0; i < table.size(); ++i)
@@ -82,10 +82,10 @@ namespace Sla.SLEIGH
         
         ~SymbolTable()
         {
-            vector<SymbolScope*>::iterator iter;
+            List<SymbolScope*>::iterator iter;
             for (iter = table.begin(); iter != table.end(); ++iter)
                 delete* iter;
-            vector<SleighSymbol*>::iterator siter;
+            List<SleighSymbol*>::iterator siter;
             for (siter = symbollist.begin(); siter != symbollist.end(); ++siter)
                 delete* siter;
         }

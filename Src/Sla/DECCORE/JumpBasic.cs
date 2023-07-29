@@ -167,7 +167,7 @@ namespace Sla.DECCORE
         /// \param slot is input slot to the PcodeOp all paths must terminate at
         protected void findDeterminingVarnodes(PcodeOp op, int4 slot)
         {
-            vector<PcodeOpNode> path;
+            List<PcodeOpNode> path;
             bool firstpoint = false;    // Have not seen likely switch variable yet
 
             path.push_back(PcodeOpNode(op, slot));
@@ -322,7 +322,7 @@ namespace Sla.DECCORE
             // Intersect any guard ranges which apply to -vn-
             int4 bitsPreserved;
             Varnode* baseVn = GuardRecord::quasiCopy(vn, bitsPreserved);
-            vector<GuardRecord>::const_iterator iter;
+            List<GuardRecord>::const_iterator iter;
             for (iter = selectguards.begin(); iter != selectguards.end(); ++iter)
             {
                 GuardRecord guard = *iter;
@@ -522,7 +522,7 @@ namespace Sla.DECCORE
         /// \param usenzmask is \b true if the NZMASK should be used as part of the pull-back operation
         protected void checkUnrolledGuard(BlockBasic bl, int4 maxpullback, bool usenzmask)
         {
-            vector<Varnode*> varArray;
+            List<Varnode*> varArray;
             if (!checkCommonCbranch(varArray, bl))
                 return;
             int4 indpath = bl.getInRevIndex(0);
@@ -649,7 +649,7 @@ namespace Sla.DECCORE
             addresstable.clear();       // Clear out any partial recoveries
                                         // Build the emulation engine
             EmulateFunction emul(fd);
-            if (loadpoints != (vector<LoadTable>*)0)
+            if (loadpoints != (List<LoadTable>*)0)
                 emul.setLoadCollect(true);
 
             uintb mask = ~((uintb)0);
@@ -669,7 +669,7 @@ namespace Sla.DECCORE
                 addresstable.push_back(Address(spc, addr));
                 notdone = jrange.next();
             }
-            if (loadpoints != (vector<LoadTable>*)0)
+            if (loadpoints != (List<LoadTable>*)0)
                 emul.collectLoadPoints(*loadpoints);
         }
 

@@ -89,7 +89,7 @@ namespace Sla.DECCORE
             int i, size, var1, var2, count, lastcount;
 
             soln.Clear();
-            soln.resize(vnlist.Count, 65535); // Initialize solutions vector
+            soln.resize(vnlist.Count, 65535); // Initialize solutions List
             // Duplicate and sort the equations
             duplicate();
 
@@ -151,7 +151,7 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Input value of stackpointer is not used");
             }
 
-            vector<Varnode*>::iterator iter;
+            List<Varnode*>::iterator iter;
             StackEqn eqn;
             for (int i = 1; i < vnlist.Count; ++i) {
                 Varnode vn = vnlist[i];

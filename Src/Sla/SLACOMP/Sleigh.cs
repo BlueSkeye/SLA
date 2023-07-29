@@ -109,7 +109,7 @@ namespace Sla.SLACOMP
                 }
                 string::size_type slaspecExtLen = SLASPECEXT.length();
 
-                vector<string> slaspecs;
+                List<string> slaspecs;
                 string dirStr = ".";
                 if (i != argc)
                     dirStr = argv[i];

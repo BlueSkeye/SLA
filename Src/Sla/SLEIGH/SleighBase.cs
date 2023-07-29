@@ -168,7 +168,7 @@ namespace Sla.SLEIGH
             iter++;
             symtab.restoreXml(*iter, this);
             root = (SubtableSymbol*)symtab.getGlobalScope().findSymbol("instruction");
-            vector<string> errorPairs;
+            List<string> errorPairs;
             buildXrefs(errorPairs);
             if (!errorPairs.empty())
                 throw SleighError("Duplicate register pairs");

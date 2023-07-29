@@ -559,7 +559,7 @@ namespace Sla.SLEIGH
             if (!isInitialized())
             {   // Initialize the base if not already
                 Element* el = store.getTag("sleigh");
-                if (el == (Element*)0)
+                if (el == (Element)null)
                     throw new LowlevelError("Could not find sleigh tag");
                 restoreXml(el);
             }

@@ -36,7 +36,7 @@ namespace Sla.EXTRA
             s >> ws;
             Address jmpaddr(parse_machaddr(s, discard,* dcp.conf.types));
             JumpTable* jt = dcp.fd.installJumpTable(jmpaddr);
-            vector<Address> adtable;
+            List<Address> adtable;
             Address naddr;
             uintb h = 0;
             uintb sv = 0;

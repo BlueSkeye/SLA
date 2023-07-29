@@ -107,7 +107,7 @@ namespace Sla.DECCORE
         /// return \b true if a CPUI_MULTIEQUAL was (successfully) deleted
         private bool processBlock(Funcdata data, BlockBasic bl)
         {
-            vector<Varnode*> vnlist;
+            List<Varnode*> vnlist;
             PcodeOp* targetop = (PcodeOp*)0;
             PcodeOp* pairop;
             list<PcodeOp*>::iterator iter = bl.beginOp();

@@ -1157,8 +1157,8 @@ namespace Sla.SLACOMP
         //    int4 last_preproc;   // lex state before last preprocessing erasure
         //    int4 actionon;       // whether '&' '|' and '^' are treated as actionon in pattern section
         //    int4 withsection = 0; // whether we are between the 'with' keyword and its open brace '{'
-        //    vector<FileStreamState> filebuffers;
-        //    vector<int4> ifstack;
+        //    List<FileStreamState> filebuffers;
+        //    List<int4> ifstack;
         //    int4 negative_if = -1;
 
         //    void preproc_error(string &err)

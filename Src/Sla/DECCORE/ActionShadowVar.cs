@@ -28,7 +28,7 @@ namespace Sla.DECCORE
             BlockBasic* bl;
             PcodeOp* op;
             Varnode* vn;
-            vector<Varnode*> vnlist;
+            List<Varnode*> vnlist;
             list<PcodeOp*> oplist;
             uintb startoffset;
             for (int4 i = 0; i < bblocks.getSize(); ++i)
@@ -71,7 +71,7 @@ namespace Sla.DECCORE
                         if (op.getIn(i) != op2.getIn(i)) break;
                     if (i != op.numInput()) continue; // All branches did not match
 
-                    vector<Varnode*> plist;
+                    List<Varnode*> plist;
                     plist.push_back(op2.getOut());
                     data.opSetOpcode(op, CPUI_COPY);
                     data.opSetAllInput(op, plist);

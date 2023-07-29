@@ -188,7 +188,7 @@ namespace Sla.DECCORE
         /// \return \b true if the operation was fully modeled
         private bool buildMultiequal(PcodeOp op, TransformVar outVars, int4 numLanes, int4 skipLanes)
         {
-            vector<TransformVar*> inVarSets;
+            List<TransformVar*> inVarSets;
             int4 numInput = op.numInput();
             for (int4 i = 0; i < numInput; ++i)
             {

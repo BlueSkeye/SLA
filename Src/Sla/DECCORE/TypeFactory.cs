@@ -707,7 +707,7 @@ namespace Sla.DECCORE
             if (!ot.isIncomplete())
                 throw new LowlevelError("Can only set fields on an incomplete structure");
             int4 offset = 0;
-            vector<TypeField>::iterator iter;
+            List<TypeField>::iterator iter;
 
             // Find the maximum offset, from the explicitly set offsets
             for (iter = fd.begin(); iter != fd.end(); ++iter)
@@ -758,7 +758,7 @@ namespace Sla.DECCORE
         {
             if (!ot.isIncomplete())
                 throw new LowlevelError("Can only set fields on an incomplete union");
-            vector<TypeField>::iterator iter;
+            List<TypeField>::iterator iter;
 
             for (iter = fd.begin(); iter != fd.end(); ++iter)
             {
@@ -1358,8 +1358,8 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         public void encode(Encoder encoder)
         {
-            vector<Datatype*> deporder;
-            vector<Datatype*>::iterator iter;
+            List<Datatype*> deporder;
+            List<Datatype*>::iterator iter;
 
             dependentOrder(deporder);   // Put types in correct order
             encoder.openElement(ELEM_TYPEGRP);

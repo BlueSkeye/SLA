@@ -27,7 +27,7 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            vector<Varnode*> triallist;
+            List<Varnode*> triallist;
             ParamActive active(false);
             Varnode* vn;
 

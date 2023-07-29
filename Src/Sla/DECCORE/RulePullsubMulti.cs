@@ -80,7 +80,7 @@ namespace Sla.DECCORE
             else
                 smalladdr2 = vn.getAddr() + (vn.getSize() - maxByte - 1);
 
-            vector < Varnode *> @params;
+            List < Varnode *> @params;
 
             for (int4 i = 0; i < branches; ++i)
             {

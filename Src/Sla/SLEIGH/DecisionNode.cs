@@ -98,7 +98,7 @@ namespace Sla.SLEIGH
             m = m - 1;
 
             int4 total = 0;
-            vector<int4> count(numBins,0);
+            List<int4> count(numBins,0);
 
             for (i = 0; i < list.size(); ++i)
             {
@@ -184,10 +184,10 @@ namespace Sla.SLEIGH
 
         ~DecisionNode()
         {               // We own sub nodes
-            vector<DecisionNode*>::iterator iter;
+            List<DecisionNode*>::iterator iter;
             for (iter = children.begin(); iter != children.end(); ++iter)
                 delete* iter;
-            vector<pair<DisjointPattern*, Constructor*>>::iterator piter;
+            List<pair<DisjointPattern*, Constructor*>>::iterator piter;
             for (piter = list.begin(); piter != list.end(); ++piter)
                 delete(*piter).first;   // Delete the patterns
         }
@@ -196,7 +196,7 @@ namespace Sla.SLEIGH
         {
             if (bitsize == 0)
             {       // The node is terminal
-                vector<pair<DisjointPattern*, Constructor*>>::const_iterator iter;
+                List<pair<DisjointPattern*, Constructor*>>::const_iterator iter;
                 for (iter = list.begin(); iter != list.end(); ++iter)
                     if ((*iter).first.isMatch(walker))
                         return (*iter).second;
@@ -247,7 +247,7 @@ namespace Sla.SLEIGH
             }
             for (int4 i = 0; i < list.size(); ++i)
             {
-                vector<uint4> vals;     // Bins this pattern belongs in
+                List<uint4> vals;     // Bins this pattern belongs in
                                         // If the pattern does not care about some
                                         // bits in the field we are splitting on, that
                                         // pattern will get put into multiple bins
@@ -285,8 +285,8 @@ namespace Sla.SLEIGH
             //      the subconstructors.
             // This routine can determine if an intersection results from case 1) or case 2)
             int4 i, j, k;
-            vector<pair<DisjointPattern*, Constructor*>> newlist;
-            vector<pair<DisjointPattern*, Constructor*>> conflictlist;
+            List<pair<DisjointPattern*, Constructor*>> newlist;
+            List<pair<DisjointPattern*, Constructor*>> conflictlist;
 
             // Check for identical patterns
             for (i = 0; i < list.size(); ++i)

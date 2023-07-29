@@ -342,7 +342,7 @@ namespace Sla.SLACOMP
             map<uintb, int4> collect;
             for (int4 i = 0; i < ct.getNumOperands(); ++i)
             {
-                vector<uintb> newCollect;
+                List<uintb> newCollect;
                 ct.getOperand(i).collectLocalValues(newCollect);
                 if (newCollect.empty()) continue;
                 int4 collideOperand = findCollision(collect, newCollect, i);
@@ -527,8 +527,8 @@ namespace Sla.SLACOMP
         /// \return \b true if there were no errors expanding a macro
         private bool expandMacros(ConstructTpl ctpl)
         {
-            vector<OpTpl*> newvec;
-            vector<OpTpl*>::const_iterator iter;
+            List<OpTpl*> newvec;
+            List<OpTpl*>::const_iterator iter;
             OpTpl* op;
 
             for (iter = ctpl.getOpvec().begin(); iter != ctpl.getOpvec().end(); ++iter)
@@ -568,7 +568,7 @@ namespace Sla.SLACOMP
         /// \return \b true if there were no fatal errors
         private bool finalizeSections(Constructor big, SectionVector vec)
         {
-            vector<string> errors;
+            List<string> errors;
 
             RtlPair cur = vec.getMainPair();
             int4 i = -1;
@@ -587,7 +587,7 @@ namespace Sla.SLACOMP
                 {
                     if (!expandMacros(cur.section))
                         errors.push_back(sectionstring + "Could not expand macros");
-                    vector<int4> check;
+                    List<int4> check;
                     big.markSubtableOperands(check);
                     int4 res = cur.section.fillinBuild(check, getConstantSpace());
                     if (res == 1)
@@ -849,7 +849,7 @@ namespace Sla.SLACOMP
             if (errors > 0) return;
             buildDecisionTrees();
             if (errors > 0) return;
-            vector<string> errorPairs;
+            List<string> errorPairs;
             buildXrefs(errorPairs);     // Make sure we can build crossrefs properly
             if (!errorPairs.empty())
             {
@@ -1761,7 +1761,7 @@ namespace Sla.SLACOMP
                 bool tooManyParams = param.size() > sym.getNumOperands();
                 string errmsg = "Invocation of macro '" + sym.getName() + "' passes too " + (tooManyParams ? "many" : "few") + " parameters";
                 reportError(getCurrentLocation(), errmsg);
-                return new vector<OpTpl*>;
+                return new List<OpTpl*>;
             }
             compareMacroParams(sym, *param);
             OpTpl* op = new OpTpl(MACROBUILD);
@@ -1845,10 +1845,10 @@ namespace Sla.SLACOMP
         /// \param addr is the address symbol indicating the instruction to \b crossbuild
         /// \param sym is the symbol indicating the p-code to be build
         /// \return the p-code template
-        public vector<OpTpl> createCrossBuild(VarnodeTpl addr, SectionSymbol sym)
+        public List<OpTpl> createCrossBuild(VarnodeTpl addr, SectionSymbol sym)
         {
             unique_allocatemask = 1;
-            vector<OpTpl*>* res = new vector<OpTpl*>();
+            List<OpTpl*>* res = new List<OpTpl*>();
             VarnodeTpl* sectionid = new VarnodeTpl(ConstTpl(getConstantSpace()),
                                                    ConstTpl(ConstTpl::real, sym.getTemplateId()),
                                                    ConstTpl(ConstTpl::real, 4));
@@ -1944,7 +1944,7 @@ namespace Sla.SLACOMP
                 contvec = WithBlock::collectAndPrependContext(withstack, contvec);
                 big.addEquation(pateq);
                 big.removeTrailingSpace();
-                if (contvec != (vector<ContextChange*>*)0)
+                if (contvec != (List<ContextChange*>*)0)
                 {
                     big.addContext(*contvec);
                     delete contvec;

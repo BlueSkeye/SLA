@@ -383,7 +383,7 @@ namespace Sla.DECCORE
             List<int4> slotlist, PcodeOp op)
         {
             int4 blk = op.getParent().getIndex();
-            vector<Varnode*>::const_iterator viter;
+            List<Varnode*>::const_iterator viter;
             list<PcodeOp*>::const_iterator oiter;
             Varnode* vn;
             PcodeOp* edgeop;
@@ -503,9 +503,9 @@ namespace Sla.DECCORE
         private void snipIndirect(PcodeOp indop)
         {
             PcodeOp* op = PcodeOp::getOpFromConst(indop.getIn(1).getAddr()); // Indirect effect op
-            vector<Varnode*> problemvn;
+            List<Varnode*> problemvn;
             list<PcodeOp*> correctable;
-            vector<int4> correctslot;
+            List<int4> correctslot;
             // Collect instances of output.high that are defined
             // before (and right up to) op. These need to be snipped.
             collectCovering(problemvn, indop.getOut().getHigh(), op);
@@ -652,8 +652,8 @@ namespace Sla.DECCORE
         {
             VarnodeLocSet::const_iterator iter;
             Varnode* vn;
-            vector<Varnode*> isectlist;
-            vector<BlockVarnode> blocksort;
+            List<Varnode*> isectlist;
+            List<BlockVarnode> blocksort;
 
             for (iter = startiter; iter != enditer; ++iter)
             {
@@ -767,7 +767,7 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp
         private void mergeOp(PcodeOp op)
         {
-            vector<HighVariable*> testlist;
+            List<HighVariable*> testlist;
             HighVariable* high_out;
             int4 i, nexttrim, max;
 
@@ -875,8 +875,8 @@ namespace Sla.DECCORE
         /// intersections, in which case that particular merge is skipped.
         private void mergeLinear(List<HighVariable> highvec)
         {
-            vector<HighVariable*> highstack;
-            vector<HighVariable*>::iterator initer, outiter;
+            List<HighVariable*> highstack;
+            List<HighVariable*>::iterator initer, outiter;
             HighVariable* high;
 
             if (highvec.size() <= 1) return;
@@ -960,7 +960,7 @@ namespace Sla.DECCORE
         /// \param size is the number of COPYs (in sequence) from the same specific Varnode
         private void buildDominantCopy(HighVariable high, List<PcodeOp> copy, int4 pos, int4 size)
         {
-            vector<FlowBlock*> blockSet;
+            List<FlowBlock*> blockSet;
             for (int4 i = 0; i < size; ++i)
                 blockSet.push_back(copy[pos + i].getParent());
             BlockBasic* domBl = (BlockBasic*)FlowBlock::findCommonBlock(blockSet);
@@ -1096,7 +1096,7 @@ namespace Sla.DECCORE
         /// \param high is the given HighVariable
         private void processHighDominantCopy(HighVariable high)
         {
-            vector<PcodeOp*> copyIns;
+            List<PcodeOp*> copyIns;
 
             findAllIntoCopies(high, copyIns, true); // Get all COPYs into this with temporary output
             if (copyIns.size() < 2) return;
@@ -1126,7 +1126,7 @@ namespace Sla.DECCORE
         /// \param high is the given HighVariable
         private void processHighRedundantCopy(HighVariable high)
         {
-            vector<PcodeOp*> copyIns;
+            List<PcodeOp*> copyIns;
 
             findAllIntoCopies(high, copyIns, false);
             if (copyIns.size() < 2) return;
@@ -1159,7 +1159,7 @@ namespace Sla.DECCORE
         {
             HighVariable* high = vn.getHigh();
             if (high.numInstances() != 1) return;
-            vector<PieceNode> pieces;
+            List<PieceNode> pieces;
 
             int4 baseOffset = 0;
             SymbolEntry* entry = vn.getSymbolEntry();
@@ -1344,7 +1344,7 @@ namespace Sla.DECCORE
         public void mergeByDatatype(VarnodeLocSet::const_iterator startiter,
             VarnodeLocSet::const_iterator enditer)
         {
-            vector<HighVariable*> highvec;
+            List<HighVariable*> highvec;
             list<HighVariable*> highlist;
 
             list<HighVariable*>::iterator hiter;
@@ -1398,7 +1398,7 @@ namespace Sla.DECCORE
         public void mergeAddrTied()
         {
             VarnodeLocSet::const_iterator startiter;
-            vector<VarnodeLocSet::const_iterator> bounds;
+            List<VarnodeLocSet::const_iterator> bounds;
             for (startiter = data.beginLoc(); startiter != data.endLoc();)
             {
                 AddrSpace* spc = (*startiter).getSpace();
@@ -1524,7 +1524,7 @@ namespace Sla.DECCORE
             SymbolNameTree::const_iterator enditer = data.getScopeLocal().endMultiEntry();
             for (; iter != enditer; ++iter)
             {
-                vector<Varnode*> mergeList;
+                List<Varnode*> mergeList;
                 Symbol* symbol = *iter;
                 int4 numEntries = symbol.numEntries();
                 int4 mergeCount = 0;
@@ -1593,7 +1593,7 @@ namespace Sla.DECCORE
         /// \return \b true if a change was made to data-flow
         public bool hideShadows(HighVariable high)
         {
-            vector<Varnode*> singlelist;
+            List<Varnode*> singlelist;
             Varnode* vn1,*vn2;
             int4 i, j;
             bool res = false;
@@ -1634,7 +1634,7 @@ namespace Sla.DECCORE
         /// and then tries to replace the COPYs with fewer or a single COPY.
         public void processCopyTrims()
         {
-            vector<HighVariable*> multiCopy;
+            List<HighVariable*> multiCopy;
 
             for (int4 i = 0; i < copyTrims.size(); ++i)
             {
@@ -1665,7 +1665,7 @@ namespace Sla.DECCORE
         /// These, as a result, are not printed in the final source code representation.
         public void markInternalCopies()
         {
-            vector<HighVariable*> multiCopy;
+            List<HighVariable*> multiCopy;
             list<PcodeOp*>::const_iterator iter;
             PcodeOp* op;
             HighVariable* h1;

@@ -58,7 +58,7 @@ namespace Sla.DECCORE
                 return false;
 
             int4 numin = hiphi.numInput();
-            vector<SplitVarnode> inlist;
+            List<SplitVarnode> inlist;
             for (int4 j = 0; j < numin; ++j)
             {
                 Varnode* vhi = hiphi.getIn(j);

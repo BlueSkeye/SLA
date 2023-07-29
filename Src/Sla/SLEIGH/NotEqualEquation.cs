@@ -20,9 +20,9 @@ namespace Sla.SLEIGH
             intb lhsmin = lhs.minValue();
             intb lhsmax = lhs.maxValue();
             List<PatternValue> semval = new List<PatternValue>();
-            vector<intb> min;
-            vector<intb> max;
-            vector<intb> cur;
+            List<intb> min;
+            List<intb> max;
+            List<intb> cur;
             int4 count = 0;
 
             rhs.listValues(semval);

@@ -24,7 +24,7 @@ namespace Sla.EXTRA
             if (name.size() == 0)
                 throw IfaceParseError("Missing symbol name");
 
-            vector<Symbol*> symList;
+            List<Symbol*> symList;
             dcp.readSymbol(name, symList);
 
             if (symList.empty())

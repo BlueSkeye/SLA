@@ -31,7 +31,7 @@ namespace Sla.SLEIGH
         {               // An OpTpl owns its varnode_tpls
             if (output != (VarnodeTpl*)0)
                 delete output;
-            vector<VarnodeTpl*>::iterator iter;
+            List<VarnodeTpl*>::iterator iter;
             for (iter = input.begin(); iter != input.end(); ++iter)
                 delete* iter;
         }
@@ -46,7 +46,7 @@ namespace Sla.SLEIGH
 
         public bool isZeroSize()
         {               // Return if any input or output has zero size
-            vector<VarnodeTpl*>::const_iterator iter;
+            List<VarnodeTpl*>::const_iterator iter;
 
             if (output != (VarnodeTpl*)0)
                 if (output.isZeroSize()) return true;
@@ -93,7 +93,7 @@ namespace Sla.SLEIGH
         {
             if (output != (VarnodeTpl*)0)
                 output.changeHandleIndex(handmap);
-            vector<VarnodeTpl*>::const_iterator iter;
+            List<VarnodeTpl*>::const_iterator iter;
 
             for (iter = input.begin(); iter != input.end(); ++iter)
                 (*iter).changeHandleIndex(handmap);
