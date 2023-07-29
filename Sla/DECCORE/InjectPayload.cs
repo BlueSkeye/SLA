@@ -194,7 +194,7 @@ namespace Sla.DECCORE
         protected abstract void inject(InjectContext context, PcodeEmit emit);
 
         /// Decode \b this payload from a stream
-        protected abstract void decode(Decoder decoder);
+        protected abstract void decode(Sla.CORE.Decoder decoder);
 
         /// Print the p-code ops of the injection to a stream (for debugging)
         protected abstract void printTemplate(TextWriter s);

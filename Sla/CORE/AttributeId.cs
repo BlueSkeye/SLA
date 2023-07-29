@@ -147,8 +147,18 @@ namespace Sla.CORE
         internal static readonly AttributeId ATTRIB_VECTOR_LANE_SIZES = new AttributeId("vector_lane_sizes", 130);
         internal static readonly AttributeId ATTRIB_LABEL = new AttributeId("label", 131);
         internal static readonly AttributeId ATTRIB_NUM = new AttributeId("num", 132);
-        internal static readonly AttributeId ATTRIB_LOCK = AttributeId("lock", 133);
-        internal static readonly AttributeId ATTRIB_MAIN = AttributeId("main", 134);
+        internal static readonly AttributeId ATTRIB_LOCK = new AttributeId("lock", 133);
+        internal static readonly AttributeId ATTRIB_MAIN = new AttributeId("main", 134);
+        internal static readonly AttributeId ATTRIB_ARCH = new AttributeId("arch", 135);
+        internal static readonly AttributeId ATTRIB_DEPRECATED = new AttributeId("deprecated", 136);
+        internal static readonly AttributeId ATTRIB_ENDIAN = new AttributeId("endian", 137);
+        internal static readonly AttributeId ATTRIB_PROCESSOR = new AttributeId("processor", 138);
+        internal static readonly AttributeId ATTRIB_PROCESSORSPEC = new AttributeId("processorspec", 139);
+        internal static readonly AttributeId ATTRIB_SLAFILE = new AttributeId("slafile", 140);
+        internal static readonly AttributeId ATTRIB_SPEC = new AttributeId("spec", 141);
+        internal static readonly AttributeId ATTRIB_TARGET = new AttributeId("target", 142);
+        internal static readonly AttributeId ATTRIB_VARIANT = new AttributeId("variant", 143);
+        internal static readonly AttributeId ATTRIB_VERSION = new AttributeId("version", 144);
         internal static readonly AttributeId ATTRIB_ADDRESS = new AttributeId("address", 148);
 
         // ATTRIB_PIECE is a special attribute for supporting the legacy attributes "piece1", "piece2", ..., "piece9",

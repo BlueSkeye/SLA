@@ -242,8 +242,20 @@ namespace Sla.CORE
         internal static readonly ElementId ELEM_INDIRECTOVERRIDE = new ElementId("indirectoverride", 221);
         internal static readonly ElementId ELEM_MULTISTAGEJUMP = new ElementId("multistagejump", 222);
         internal static readonly ElementId ELEM_OVERRIDE = new ElementId("override", 223);
-        internal static readonly ElementId ELEM_PROTOOVERRIDE = new ElementId("protooverride", 224); internal static readonly ElementId ELEM_JUMPTABLEMAX = new ElementId("jumptablemax", 271);
+        internal static readonly ElementId ELEM_PROTOOVERRIDE = new ElementId("protooverride", 224);
+        internal static readonly ElementId ELEM_CALLGRAPH = new ElementId("callgraph", 226);
+        internal static readonly ElementId ELEM_NODE = new ElementId("node", 227);
         internal static readonly ElementId ELEM_LOCALDB = new ElementId("localdb", 228);
+        internal static readonly ElementId ELEM_BINARYIMAGE = new ElementId("binaryimage", 230);
+        internal static readonly ElementId ELEM_BYTECHUNK = new ElementId("bytechunk", 231);
+        internal static readonly ElementId ELEM_COMPILER = new ElementId("compiler", 232);
+        internal static readonly ElementId ELEM_DESCRIPTION = new ElementId("description", 233);
+        internal static readonly ElementId ELEM_LANGUAGE = new ElementId("language", 234);
+        internal static readonly ElementId ELEM_LANGUAGE_DEFINITIONS = new ElementId("language_definitions", 235);
+        internal static readonly ElementId ELEM_XML_SAVEFILE = new ElementId("xml_savefile", 236);
+        internal static readonly ElementId ELEM_RAW_SAVEFILE = new ElementId("raw_savefile", 237);
+        internal static readonly ElementId ELEM_BFD_SAVEFILE = new ElementId("bfd_savefile", 238);
+        internal static readonly ElementId ELEM_JUMPTABLEMAX = new ElementId("jumptablemax", 271);
         internal static readonly ElementId ELEM_UNKNOWN = new ElementId("XMLunknown", 272);
 
         /// The name of the element
