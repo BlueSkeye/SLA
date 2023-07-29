@@ -101,9 +101,9 @@ namespace Sla.DECCORE
         private void encodeEffect(Encoder encoder)
         {
             if (effectlist.empty()) return;
-            vector <const EffectRecord*> unaffectedList;
-            vector <const EffectRecord*> killedByCallList;
-            const EffectRecord* retAddr = (const EffectRecord*)0;
+            List <EffectRecord*> unaffectedList;
+            List <EffectRecord*> killedByCallList;
+            EffectRecord retAddr = (EffectRecord*)0;
             for (vector<EffectRecord>::const_iterator iter = effectlist.begin(); iter != effectlist.end(); ++iter)
             {
                 const EffectRecord &curRecord(*iter);
@@ -134,7 +134,7 @@ namespace Sla.DECCORE
                 }
                 encoder.closeElement(ELEM_KILLEDBYCALL);
             }
-            if (retAddr != (const EffectRecord*)0) {
+            if (retAddr != (EffectRecord*)0) {
                 encoder.openElement(ELEM_RETURNADDRESS);
                 retAddr->encode(encoder);
                 encoder.closeElement(ELEM_RETURNADDRESS);
@@ -154,7 +154,7 @@ namespace Sla.DECCORE
             encoder.openElement(ELEM_LIKELYTRASH);
             for (vector<VarnodeData>::const_iterator iter = likelytrash.begin(); iter != likelytrash.end(); ++iter)
             {
-                const VarnodeData &cur(*iter);
+                VarnodeData cur = *iter;
                 if (binary_search(iter1, iter2, cur)) continue; // Already exists in ProtoModel
                 encoder.openElement(ELEM_ADDR);
                 cur.space->encodeAttributes(encoder, cur.offset, cur.size);
@@ -180,7 +180,7 @@ namespace Sla.DECCORE
             int4 listSize = effectlist.size();
             for (vector<EffectRecord>::const_iterator iter = tmpList.begin(); iter != tmpList.end(); ++iter)
             {
-                const EffectRecord &curRecord(*iter);
+                EffectRecord curRecord = *iter;
                 int4 off = ProtoModel::lookupRecord(effectlist, listSize, curRecord.getAddress(), curRecord.getSize());
                 if (off == -2)
                     throw new LowlevelError("Partial overlap of prototype override with existing effects");
@@ -647,7 +647,7 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < numparams; ++i)
             {
                 ProtoParameter* param = getParam(i);
-                const Address &addr(param->getAddress());
+                Address addr = param->getAddress();
                 if (addr.getSpace()->getType() != IPTR_SPACEBASE) continue;
                 int4 cur = (int4)addr.getOffset() + param->getSize();
                 cur = (cur + 3) & 0xffffffc;    // Must be 4-byte aligned

@@ -188,10 +188,10 @@ namespace Sla.EXTRA
         }
 
         /// Beginning of split points
-        //const_iterator begin(void) const { return database.begin(); }
+        //const_iterator begin(void) { return database.begin(); }
 
         /// End of split points
-        //const_iterator end(void) const { return database.end(); }
+        //const_iterator end(void) { return database.end(); }
 
         /// Beginning of split points
         public IEnumerator<KeyValuePair<_linetype, _valuetype>>? begin()

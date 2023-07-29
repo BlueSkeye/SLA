@@ -164,7 +164,7 @@ namespace Sla.DECCORE
             glb = g;
             input = (ParamList*)0;
             output = (ParamList*)0;
-            compatModel = (const ProtoModel*)0;
+            compatModel = (ProtoModel*)0;
             extrapop = 0;
             injectUponEntry = -1;
             injectUponReturn = -1;

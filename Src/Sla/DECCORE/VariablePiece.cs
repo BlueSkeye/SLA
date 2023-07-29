@@ -128,7 +128,7 @@ namespace Sla.DECCORE
             cover = high->internalCover;
             for (int4 i = 0; i < intersection.size(); ++i)
             {
-                const HighVariable* high = intersection[i]->high;
+                HighVariable high = intersection[i]->high;
                 high->updateInternalCover();
                 cover.merge(high->internalCover);
             }

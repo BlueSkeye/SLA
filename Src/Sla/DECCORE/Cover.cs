@@ -334,34 +334,34 @@ namespace Sla.DECCORE
         public void addRefPoint(PcodeOp @ref, Varnode vn)
         {
             int4 j;
-            const FlowBlock* bl;
+            FlowBlock* bl;
             uintm ustop;
 
-            bl = ref->getParent();
+            bl = @ref->getParent();
             CoverBlock & block(cover[bl->getIndex()]);
             if (block.empty())
             {
-                block.setEnd(ref);
+                block.setEnd(@ref);
             }
             else
             {
-                if (block.contain(ref))
+                if (block.contain(@ref))
                 {
-                    if (ref->code() != CPUI_MULTIEQUAL) return;
+                    if (@ref->code() != CPUI_MULTIEQUAL) return;
                     // Even if MULTIEQUAL ref is contained
                     // we may be adding new cover because we are
                     // looking at a different branch. So don't return
                 }
                 else
                 {
-                    const PcodeOp* op = block.getStop();
-                    const PcodeOp* startop = block.getStart();
-                    block.setEnd(ref);      // Otherwise update endpoint
+                    PcodeOp* op = block.getStop();
+                    PcodeOp* startop = block.getStart();
+                    block.setEnd(@ref);      // Otherwise update endpoint
                     ustop = CoverBlock::getUIndex(block.getStop());
                     if (ustop >= CoverBlock::getUIndex(startop))
                     {
-                        if ((op != (const PcodeOp*)0)&& (op != (const PcodeOp*)2)&&
-                            (op->code() == CPUI_MULTIEQUAL) && (startop == (const PcodeOp*)0)) {
+                        if ((op != (PcodeOp*)0)&& (op != (PcodeOp*)2)&&
+                            (op->code() == CPUI_MULTIEQUAL) && (startop == (PcodeOp*)0)) {
                             // This block contains only an infinitesimal tip
                             // of cover through one branch of a MULTIEQUAL
                             // we still need to traverse through branches
@@ -385,7 +385,7 @@ namespace Sla.DECCORE
                     addRefRecurse(bl->getIn(j));
         }
 
-        //  void remove_refpoint(const PcodeOp *ref,const Varnode *vn) {
+        //  void remove_refpoint(PcodeOp *ref,const Varnode *vn) {
         //    rebuild(vn); }		// Cheap but inefficient
 
         ///< Dump a description of \b this cover to stream
@@ -408,6 +408,6 @@ namespace Sla.DECCORE
             return cover.GetEnumerator();
         }
 
-        // map<int4, CoverBlock>::const_iterator end(void) const { return cover.end(); }		///< Get end of CoverBlocks
+        // map<int4, CoverBlock>::const_iterator end(void) { return cover.end(); }		///< Get end of CoverBlocks
     }
 }

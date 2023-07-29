@@ -84,7 +84,7 @@ namespace Sla.DECCORE
         public static PcodeOp noWriteConflict(PcodeOp op1, PcodeOp op2, AddrSpace spc,
             List<PcodeOp> indirects)
         {
-            const BlockBasic* bb = op1->getParent();
+            BlockBasic bb = op1->getParent();
 
             // Force the two ops to be in the same basic block
             if (bb != op2->getParent()) return (PcodeOp*)0;

@@ -137,7 +137,7 @@ namespace Sla.SLEIGH
 
         public void restoreXml(Element el, AddrSpaceManager manage)
         {
-            const List &list(el->getChildren());
+            List list = el->getChildren();
             List::const_iterator iter;
             iter = list.begin();
             space.restoreXml(*iter, manage);

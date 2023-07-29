@@ -116,8 +116,8 @@ namespace Sla.DECCORE
             {
                 if (curType->getMetatype() == TYPE_UNION)
                 {
-                    const TypeField* field = curType->resolveTruncation(curOff, op, slot, curOff);
-                    curType = (field == (const TypeField*)0) ? (Datatype*)0 : field->type;
+                    TypeField field = curType->resolveTruncation(curOff, op, slot, curOff);
+                    curType = (field == (TypeField*)0) ? (Datatype*)0 : field->type;
                 }
                 else
                 {

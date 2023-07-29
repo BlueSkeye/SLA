@@ -24,7 +24,7 @@ namespace Sla.DECCORE
 
         public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
         {
-            const Varnode* vn = op->getIn(slot);
+            Varnode vn = op->getIn(slot);
             Datatype* reqtype = op->inputTypeLocal(slot);
             Datatype* curtype = vn->getHighTypeReadFacing(op);
             int4 promoType = castStrategy->intPromotionType(vn);

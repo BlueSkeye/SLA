@@ -72,7 +72,7 @@ namespace Sla.DECCORE
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
             int4 slot;
-            const Datatype* ct = (const Datatype*)0; // Unnecessary initialization
+            Datatype ct = (Datatype*)0; // Unnecessary initialization
 
             if (!data.hasTypeRecoveryStarted()) return 0;
 

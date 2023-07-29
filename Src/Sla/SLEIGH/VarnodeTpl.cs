@@ -66,7 +66,7 @@ namespace Sla.SLEIGH
             // Technically we should probably check all three
             // ConstTpls for dynamic handles, but in all cases
             // if there is any dynamic piece then the offset is
-            const FixedHandle &hand(walker.getFixedHandle(offset.getHandleIndex()));
+            FixedHandle hand = walker.getFixedHandle(offset.getHandleIndex());
             return (hand.offset_space != (AddrSpace*)0);
         }
 
@@ -183,7 +183,7 @@ namespace Sla.SLEIGH
 
         public void restoreXml(Element el, AddrSpaceManager manage)
         {
-            const List &list(el->getChildren());
+            List list = el->getChildren();
             List::const_iterator iter;
             iter = list.begin();
             space.restoreXml(*iter, manage);

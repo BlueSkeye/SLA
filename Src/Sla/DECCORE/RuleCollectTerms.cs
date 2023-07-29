@@ -67,7 +67,7 @@ namespace Sla.DECCORE
             termorder.sortTerms();  // Sort them based on termorder
             Varnode* vn1,*vn2;
             uintb coef1, coef2;
-            const vector<AdditiveEdge*> &order(termorder.getSort());
+            List<AdditiveEdge> order = termorder.getSort();
             int4 i = 0;
 
             if (!order[0]->getVarnode()->isConstant())

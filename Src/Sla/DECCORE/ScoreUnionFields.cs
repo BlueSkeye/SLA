@@ -251,7 +251,7 @@ namespace Sla.DECCORE
         /// \return the score
         private int4 scoreParameter(Datatype ct, PcodeOp callOp, int4 paramSlot)
         {
-            const Funcdata* fd = callOp->getParent()->getFuncdata();
+            Funcdata fd = callOp->getParent()->getFuncdata();
 
             FuncCallSpecs* fc = fd->getCallSpecs(callOp);
             if (fc != (FuncCallSpecs*)0 && fc->isInputLocked() && fc->numParams() > paramSlot)
@@ -272,7 +272,7 @@ namespace Sla.DECCORE
         /// \return the score
         private int4 scoreReturnType(Datatype ct, PcodeOp callOp)
         {
-            const Funcdata* fd = callOp->getParent()->getFuncdata();
+            Funcdata fd = callOp->getParent()->getFuncdata();
 
             FuncCallSpecs* fc = fd->getCallSpecs(callOp);
             if (fc != (FuncCallSpecs*)0 && fc->isOutputLocked())
@@ -961,7 +961,7 @@ namespace Sla.DECCORE
                 int4 num = unionDt->numDepend();
                 for (int4 i = 0; i < num; ++i)
                 {
-                    const TypeField* field = unionDt->getField(i);
+                    TypeField field = unionDt->getField(i);
                     if (field->offset == offset && field->type->getSize() == vn->getSize())
                     {
                         score = 10;
@@ -1011,8 +1011,8 @@ namespace Sla.DECCORE
             else if (meta == TYPE_FLOAT)
             {
                 score = -1;
-                const FloatFormat* format = typegrp.getArch()->translate->getFloatFormat(size);
-                if (format != (const FloatFormat*)0) {
+                FloatFormat format = typegrp.getArch()->translate->getFloatFormat(size);
+                if (format != (FloatFormat*)0) {
                     int4 exp = format->extractExponentCode(val);
                     if (exp < 7 && exp > -4)        // Check for common exponent range
                         score = 2;
@@ -1062,7 +1062,7 @@ namespace Sla.DECCORE
                 trialCount += 1;
                 if (trialCount > maxTrials)
                     return;             // Absolute number of trials reached
-                const Trial &trial(*iter);
+                Trial trial = *iter;
                 scoreTrialDown(trial, lastPass);
                 scoreTrialUp(trial, lastPass);
             }
@@ -1196,7 +1196,7 @@ namespace Sla.DECCORE
             scores[0] = -10;
             for (int4 i = 0; i < numFields; ++i)
             {
-                const TypeField* unionField = unionType->getField(i);
+                TypeField unionField = unionType->getField(i);
                 fields[i + 1] = unionField->type;
                 if (unionField->type->getSize() != vn->getSize() || unionField->offset != offset)
                 {
@@ -1232,7 +1232,7 @@ namespace Sla.DECCORE
             scores[0] = -10;        // Assume the untruncated entire union is not a good fit
             for (int4 i = 0; i < numFields; ++i)
             {
-                const TypeField* unionField = unionType->getField(i);
+                TypeField unionField = unionType->getField(i);
                 fields[i + 1] = unionField->type;
                 // Score the implied truncation
                 Datatype* ct = scoreTruncation(unionField->type, vn, offset - unionField->offset, i + 1);

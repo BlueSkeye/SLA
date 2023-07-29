@@ -251,7 +251,7 @@ namespace Sla.DECCORE
                 {
                     case CPUI_CBRANCH:
                         {
-                            const Address &destaddr(op->getIn(0)->getAddr());
+                            Address destaddr = op->getIn(0)->getAddr();
                             if (destaddr.isConstant())
                             {
                                 Address fallThruAddr;
@@ -273,7 +273,7 @@ namespace Sla.DECCORE
                         break;
                     case CPUI_BRANCH:
                         {
-                            const Address &destaddr(op->getIn(0)->getAddr());
+                            Address destaddr = op->getIn(0)->getAddr();
                             if (destaddr.isConstant())
                             {
                                 Address fallThruAddr;
@@ -534,7 +534,7 @@ namespace Sla.DECCORE
         /// \return the target PcodeOp or NULL if the fall-thru address is passed back instead
         private PcodeOp findRelTarget(PcodeOp op, Address res)
         {
-            const Address &addr(op->getIn(0)->getAddr());
+            Address addr = op->getIn(0)->getAddr();
             uintm id = op->getTime() + addr.getOffset();
             SeqNum seqnum(op->getAddr(), id);
             PcodeOp* retop = obank.findOp(seqnum);
@@ -741,7 +741,7 @@ namespace Sla.DECCORE
                 }
                 else
                 {
-                    const Address &nextAddr(op->getAddr());
+                    Address nextAddr = op->getAddr();
                     if (stop < nextAddr)
                         stop = nextAddr;
                 }
@@ -780,7 +780,7 @@ namespace Sla.DECCORE
         private bool setFallthruBound(Address bound)
         {
             map<Address, VisitStat>::const_iterator iter;
-            const Address &addr(addrlist.back());
+            Address addr = addrlist.back();
 
             iter = visited.upper_bound(addr); // First range greater than addr
             if (iter != visited.begin())
@@ -865,7 +865,7 @@ namespace Sla.DECCORE
             iter = visited.upper_bound(addr);
             if (iter == visited.begin()) return; // Should never happen
             --iter;
-            const Address &addr2((*iter).first);
+            Address addr2 = (*iter).first;
             ostringstream s;
 
             s << "Instruction at (" << addr.getSpace()->getName() << ',';
@@ -1138,7 +1138,7 @@ namespace Sla.DECCORE
                 PcodeOp* op = fc->getOp();
                 if (op->code() != CPUI_CALL) continue;
 
-                const Address &addr(fc->getEntryAddress());
+                Address addr = fc->getEntryAddress();
                 map<Address, VisitStat>::const_iterator miter;
                 miter = visited.upper_bound(addr);
                 if (miter == visited.begin()) continue;
@@ -1376,7 +1376,7 @@ namespace Sla.DECCORE
             iter = visited.find(addr);
             while (iter != visited.end())
             {
-                const SeqNum &seq((*iter).second.seqnum);
+                SeqNum seq = (*iter).second.seqnum;
                 if (!seq.getAddr().isInvalid())
                 {
                     PcodeOp* retop = obank.findOp(seq);
@@ -1404,7 +1404,7 @@ namespace Sla.DECCORE
         /// \return the targetted p-code op
         public PcodeOp branchTarget(PcodeOp op)
         {
-            const Address &addr(op->getIn(0)->getAddr());
+            Address addr = op->getIn(0)->getAddr();
             if (addr.isConstant())
             {   // This is a relative sequence number
                 Address res;

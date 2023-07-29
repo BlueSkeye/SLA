@@ -27,7 +27,7 @@ namespace Sla.DECCORE
 
         public override int4 extractAnnotationSize(Varnode vn, PcodeOp op)
         {
-            const Varnode* outvn = op->getOut();
+            Varnode outvn = op->getOut();
             if (outvn != (Varnode*)0)
                 return op->getOut()->getSize(); // Get size from output of read function
             return 1;

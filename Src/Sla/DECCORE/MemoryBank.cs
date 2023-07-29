@@ -119,7 +119,7 @@ namespace Sla.DECCORE
                     memcpy(ptr, val, sz);    // Rest is taken from -val-
                 }
                 else
-                    curval = *((const uintb*)val); // -val- supplies entire word
+                    curval = *((uintb*)val); // -val- supplies entire word
                 if (bswap)
                     curval = byte_swap(curval, wordsize);
                 insert(startalign, curval);

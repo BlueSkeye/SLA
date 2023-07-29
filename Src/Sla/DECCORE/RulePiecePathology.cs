@@ -109,8 +109,8 @@ namespace Sla.DECCORE
         private static int4 tracePathologyForward(PcodeOp op, Funcdata data)
         {
             int4 count = 0;
-            const FuncCallSpecs* fProto;
-            vector<PcodeOp*> worklist;
+            FuncCallSpecs fProto;
+            List<PcodeOp> worklist = new List<PcodeOp>();
             int4 pos = 0;
             op->setMark();
             worklist.push_back(op);

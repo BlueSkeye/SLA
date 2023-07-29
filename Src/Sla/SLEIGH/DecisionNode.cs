@@ -398,7 +398,7 @@ namespace Sla.SLEIGH
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> bitsize;
             }
-            const List &childlist(el->getChildren());
+            List childlist = el->getChildren();
             List::const_iterator iter;
             iter = childlist.begin();
             while (iter != childlist.end())

@@ -235,7 +235,7 @@ namespace Sla.SLEIGH
           if (dirfinal[dirfinal.size() - 1] != separator)
             dirfinal += separator;
           string regex = dirfinal + "*";
-                const char* s = regex.c_str();
+                char* s = regex.c_str();
 
 
                 hFind = FindFirstFileA(s,&FindFileData);
@@ -286,7 +286,7 @@ namespace Sla.SLEIGH
             vector<string>::const_iterator iter;
             for (iter = subdir.begin(); iter != subdir.end(); ++iter)
             {
-                const string &curpath(*iter);
+                string curpath = *iter;
                 string::size_type pos = curpath.rfind(separator);
                 if (pos == string::npos)
                     pos = 0;

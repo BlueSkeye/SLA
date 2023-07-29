@@ -39,8 +39,8 @@ namespace Sla.DECCORE
             int4 j = 0;
             while ((i < effectlist.size()) && (j < efflist.size()))
             {
-                const EffectRecord &eff1(effectlist[i]);
-                const EffectRecord &eff2(efflist[j]);
+                EffectRecord eff1 = effectlist[i];
+                EffectRecord eff2 = efflist[j];
 
                 if (EffectRecord::compareByAddress(eff1, eff2))
                     i += 1;
@@ -69,8 +69,8 @@ namespace Sla.DECCORE
             int4 j = 0;
             while ((i < likelytrash.size()) && (j < trashlist.size()))
             {
-                const VarnodeData &trs1(likelytrash[i]);
-                const VarnodeData &trs2(trashlist[j]);
+                VarnodeData trs1 = likelytrash[i];
+                VarnodeData trs2 = trashlist[j];
 
                 if (trs1 < trs2)
                     i += 1;

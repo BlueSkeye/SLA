@@ -90,7 +90,7 @@ namespace Sla.SLEIGH
             if (b->numDisjoint() != 0)
                 return b->doAnd(this, -sa);
 
-            const CombinePattern* b2 = dynamic_cast <const CombinePattern*> (b);
+            CombinePattern b2 = dynamic_cast <CombinePattern*> (b);
             if (b2 != (CombinePattern*)0)
             {
                 ContextPattern* c = (ContextPattern*)context->doAnd(b2->context, 0);
@@ -123,7 +123,7 @@ namespace Sla.SLEIGH
             if (b->numDisjoint() != 0)
                 return b->commonSubPattern(this, -sa);
 
-            const CombinePattern* b2 = dynamic_cast <const CombinePattern*> (b);
+            CombinePattern b2 = dynamic_cast <CombinePattern*> (b);
             if (b2 != (CombinePattern*)0)
             {
                 ContextPattern* c = (ContextPattern*)context->commonSubPattern(b2->context, 0);
@@ -151,7 +151,7 @@ namespace Sla.SLEIGH
 
         public override void restoreXml(Element el)
         {
-            const List &list(el->getChildren());
+            List list = el->getChildren();
             List::const_iterator iter;
             iter = list.begin();
             context = new ContextPattern();

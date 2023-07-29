@@ -956,7 +956,7 @@ namespace Sla.DECCORE
         }
 #endif
 
-        //  Varnode *findGlobalRep(void) const;
+        //  Varnode *findGlobalRep(void);
         /// Determine which given Varnode is most nameable
         /// Given two Varnode (members), sort them based on naming properties:
         ///  - A Varnode with an assigned name is preferred

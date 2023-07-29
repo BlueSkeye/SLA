@@ -65,7 +65,7 @@ namespace Sla.DECCORE
                 proto = (FuncProto*)0;
                 factory = (TypeFactory*)0;
             }
-            if (fp != (const FuncProto*)0) {
+            if (fp != (FuncProto*)0) {
                 factory = typegrp;
                 proto = new FuncProto();
                 proto->copy(*fp);
@@ -152,8 +152,8 @@ namespace Sla.DECCORE
             else
             {
                 if (!op->proto->hasModel()) return -1;
-                const string &model1(proto->getModelName());
-                const string &model2(op->proto->getModelName());
+                string model1 = proto->getModelName());
+                string model2 = op->proto->getModelName());
                 if (model1 != model2)
                     return (model1 < model2) ? -1 : 1;
             }
@@ -198,7 +198,7 @@ namespace Sla.DECCORE
         {
             int4 res = Datatype::compare(op, level);
             if (res != 0) return res;
-            const TypeCode* tc = (const TypeCode*)&op;
+            TypeCode tc = (TypeCode*)&op;
             res = compareBasic(tc);
             if (res != 2) return res;
 
@@ -232,7 +232,7 @@ namespace Sla.DECCORE
         {
             int4 res = Datatype::compareDependency(op);
             if (res != 0) return res;
-            const TypeCode* tc = (const TypeCode*)&op;
+            TypeCode tc = (TypeCode*)&op;
             res = compareBasic(tc);
             if (res != 2) return res;
 

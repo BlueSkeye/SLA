@@ -23,7 +23,7 @@ namespace Sla.EXTRA
 
         // private RawBinaryArchitectureCapability(RawBinaryArchitectureCapability op2);	///< Not implemented
 
-        // private RawBinaryArchitectureCapability &operator=(const RawBinaryArchitectureCapability &op2);	///< Not implemented
+        // private RawBinaryArchitectureCapability &operator=(RawBinaryArchitectureCapability &op2);	///< Not implemented
 
         ~RawBinaryArchitectureCapability()
         {

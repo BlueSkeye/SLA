@@ -399,7 +399,7 @@ namespace Sla.DECCORE
                 if (equations[i].typeCode == typeCode)
                     return &equations[i].range;
             }
-            return (const CircleRange*)0;
+            return (CircleRange*)0;
         }
 
         /// Return '0' for normal constant, '1' for spacebase relative

@@ -443,8 +443,8 @@ namespace Sla.DECCORE
         public IEnumerator<PcodeOp> beginOp() => op.begin();
 
         // list<PcodeOp*>::iterator endOp(void) { return op.end(); }       ///< Return an iterator to the end of the PcodeOps
-        //list<PcodeOp*>::const_iterator beginOp(void) const { return op.begin(); }	///< Return an iterator to the beginning of the PcodeOps
-        //list<PcodeOp*>::const_iterator endOp(void) const { return op.end(); }	///< Return an iterator to the end of the PcodeOps
+        //list<PcodeOp*>::const_iterator beginOp(void) { return op.begin(); }	///< Return an iterator to the beginning of the PcodeOps
+        //list<PcodeOp*>::const_iterator endOp(void) { return op.end(); }	///< Return an iterator to the end of the PcodeOps
 
         /// Return \b true if \b block contains no operations
         public bool emptyOp() => (0 == op.Count);

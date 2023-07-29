@@ -112,7 +112,7 @@ namespace Sla.SLEIGH
 
         public override Pattern doOr(Pattern b, int4 sa)
         {
-            const OrPattern* b2 = dynamic_cast <const OrPattern*> (b);
+            OrPattern b2 = dynamic_cast <OrPattern> (b);
             vector<DisjointPattern*> newlist;
             vector<DisjointPattern*>::const_iterator iter;
 
@@ -139,7 +139,7 @@ namespace Sla.SLEIGH
 
         public override Pattern doAnd(Pattern b, int4 sa)
         {
-            const OrPattern* b2 = dynamic_cast <const OrPattern*> (b);
+            OrPattern b2 = dynamic_cast <OrPattern*> (b);
             vector<DisjointPattern*> newlist;
             vector<DisjointPattern*>::const_iterator iter, iter2;
             DisjointPattern* tmp;
@@ -196,7 +196,7 @@ namespace Sla.SLEIGH
 
         public override void restoreXml(Element el)
         {
-            const List &list(el->getChildren());
+            List list = el->getChildren();
             List::const_iterator iter;
             iter = list.begin();
             while (iter != list.end())

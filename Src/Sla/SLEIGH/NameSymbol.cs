@@ -91,7 +91,7 @@ namespace Sla.SLEIGH
 
         public override void restoreXml(Element el, SleighBase trans)
         {
-            const List &list(el->getChildren());
+            List list = el->getChildren();
             List::const_iterator iter;
             iter = list.begin();
             patval = (PatternValue*)PatternExpression::restoreExpression(*iter, trans);
@@ -99,7 +99,7 @@ namespace Sla.SLEIGH
             ++iter;
             while (iter != list.end())
             {
-                const Element* subel = *iter;
+                Element subel = *iter;
                 if (subel->getNumAttributes() >= 1)
                     nametable.push_back(subel->getAttributeValue("name"));
                 else

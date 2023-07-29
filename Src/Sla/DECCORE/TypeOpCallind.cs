@@ -46,7 +46,7 @@ namespace Sla.DECCORE
         public override Datatype getInputLocal(PcodeOp op, int4 slot)
         {
             Datatype* td;
-            const FuncCallSpecs* fc;
+            FuncCallSpecs fc;
             Datatype* ct;
 
             if (slot == 0)

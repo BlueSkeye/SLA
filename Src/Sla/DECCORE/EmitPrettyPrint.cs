@@ -275,7 +275,7 @@ namespace Sla.DECCORE
             int4 l = tokqueue.bottom().getSize();
             while (l >= 0)
             {
-                const TokenSplit &tok(tokqueue.bottom());
+                TokenSplit tok = tokqueue.bottom();
                 print(tok);
                 switch (tok.getClass())
                 {

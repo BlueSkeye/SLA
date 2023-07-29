@@ -146,7 +146,7 @@ namespace Sla.DECCORE
             catindex = 0;
             symbolId = 0;
             wholeCount = 0;
-            depthScope = (const Scope*)0;
+            depthScope = (Scope*)0;
             depthResolution = 0;
         }
 
@@ -253,7 +253,7 @@ namespace Sla.DECCORE
             SymbolEntry* res;
             for (int4 i = 0; i < mapentry.size(); ++i) {
                 res = &(*mapentry[i]);
-                const Address &entryaddr(res->getAddr());
+                Address entryaddr = res->getAddr();
                 if (addr.getSpace() != entryaddr.getSpace()) continue;
                 if (addr.getOffset() < entryaddr.getOffset()) continue;
                 int4 diff = (int4)(addr.getOffset() - entryaddr.getOffset());
@@ -280,7 +280,7 @@ namespace Sla.DECCORE
             int4 pos = 0;
             for (int4 i = 0; i < mapentry.size(); ++i)
             {
-                const SymbolEntry* tmp = &(*mapentry[i]);
+                SymbolEntry tmp = &(*mapentry[i]);
                 if (tmp == entry)
                     return pos;
                 if (entry->getSize() == type->getSize())

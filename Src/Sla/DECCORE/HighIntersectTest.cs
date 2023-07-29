@@ -88,8 +88,8 @@ namespace Sla.DECCORE
         {
             vector<Varnode*> blist;
 
-            const Cover &aCover(a->getCover());
-            const Cover &bCover(b->getCover());
+            Cover aCover = a->getCover();
+            Cover bCover = b->getCover();
             gatherBlockVarnodes(b, blk, aCover, blist);
             if (testBlockIntersection(a, blk, bCover, 0, blist))
                 return true;
@@ -98,7 +98,7 @@ namespace Sla.DECCORE
                 int4 baseOff = a->piece->getOffset();
                 for (int4 i = 0; i < a->piece->numIntersection(); ++i)
                 {
-                    const VariablePiece* interPiece = a->piece->getIntersection(i);
+                    VariablePiece interPiece = a->piece->getIntersection(i);
                     int4 off = interPiece->getOffset() - baseOff;
                     if (testBlockIntersection(interPiece->getHigh(), blk, bCover, off, blist))
                         return true;
@@ -110,7 +110,7 @@ namespace Sla.DECCORE
                 for (int4 i = 0; i < b->piece->numIntersection(); ++i)
                 {
                     blist.clear();
-                    const VariablePiece* bPiece = b->piece->getIntersection(i);
+                    VariablePiece bPiece = b->piece->getIntersection(i);
                     int4 bOff = bPiece->getOffset() - bBaseOff;
                     gatherBlockVarnodes(bPiece->getHigh(), blk, aCover, blist);
                     if (testBlockIntersection(a, blk, bCover, -bOff, blist))
@@ -120,7 +120,7 @@ namespace Sla.DECCORE
                         int4 baseOff = a->piece->getOffset();
                         for (int4 j = 0; j < a->piece->numIntersection(); ++j)
                         {
-                            const VariablePiece* interPiece = a->piece->getIntersection(j);
+                            VariablePiece interPiece = a->piece->getIntersection(j);
                             int4 off = (interPiece->getOffset() - baseOff) - bOff;
                             if (off > 0 && off >= bPiece->getSize()) continue;      // Do a piece and b piece intersect at all
                             if (off < 0 && -off >= interPiece->getSize()) continue;

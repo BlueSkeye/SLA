@@ -52,7 +52,7 @@ namespace Sla.EXTRA
             map<Address, Document*>::const_iterator eiter = addrMap.find(context.baseaddr);
             if (eiter == addrMap.end())
                 throw new LowlevelError("Missing dynamic inject");
-            const Element* el = (*eiter).second->getRoot();
+            Element el = (*eiter).second->getRoot();
             XmlDecode decoder(glb->translate, el);
             uint4 rootId = decoder.openElement(ELEM_INST);
             Address addr = Address::decode(decoder);

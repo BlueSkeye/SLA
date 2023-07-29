@@ -168,7 +168,7 @@ namespace Sla.DECCORE
         public override int4 compareDependency(Datatype op)
         {
             if (submeta != op.getSubMeta()) return (submeta < op.getSubMeta()) ? -1 : 1;
-            const TypePointerRel* tp = (const TypePointerRel*)&op;  // Both must be TypePointerRel
+            TypePointerRel tp = (TypePointerRel*)&op;  // Both must be TypePointerRel
             if (ptrto != tp->ptrto) return (ptrto < tp->ptrto) ? -1 : 1;    // Compare absolute pointers
             if (offset != tp->offset) return (offset < tp->offset) ? -1 : 1;
             if (parent != tp->parent) return (parent < tp->parent) ? -1 : 1;

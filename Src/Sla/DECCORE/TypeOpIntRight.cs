@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         {
             if (slot == 0)
             {
-                const Varnode* vn = op->getIn(0);
+                Varnode vn = op->getIn(0);
                 Datatype* reqtype = op->inputTypeLocal(slot);
                 Datatype* curtype = vn->getHighTypeReadFacing(op);
                 int4 promoType = castStrategy->intPromotionType(vn);

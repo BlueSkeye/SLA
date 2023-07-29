@@ -106,7 +106,7 @@ namespace Sla.DECCORE
             vector<RootedOp> newMeld;
             int4 curRoot = -1;
             int4 meldPos = 0;               // Ops moved from old opMeld into newMeld
-            const BlockBasic* lastBlock = (const BlockBasic*)0;
+            BlockBasic lastBlock = (BlockBasic*)0;
             for (int4 i = 0; i < cutOff; ++i)
             {
                 PcodeOp* op = path[i].op;           // Current op in the new path
@@ -193,7 +193,7 @@ namespace Sla.DECCORE
         {
             for (int4 i = 0; i < path.size(); ++i)
             {
-                const PcodeOpNode &node(path[i]);
+                PcodeOpNode node = path[i];
                 Varnode* vn = node.op->getIn(node.slot);
                 opMeld.push_back(RootedOp(node.op, i));
                 commonVn.push_back(vn);

@@ -88,13 +88,13 @@ namespace Sla.DECCORE
             list<ParamEntry>::const_reverse_iterator iter = entryList.rbegin();
             for (; iter != entryList.rend(); ++iter)
             {
-                const ParamEntry &entry(*iter);
+                ParamEntry entry = *iter;
                 if (entry.spaceid == vn.space && entry.addressbase == vn.offset && entry.size == vn.size)
                 {
                     return &entry;
                 }
             }
-            return (const ParamEntry*)0;
+            return (ParamEntry*)0;
         }
 
         /// Make adjustments for a \e join ParamEntry
@@ -142,7 +142,7 @@ namespace Sla.DECCORE
             --enditer;      // The last entry is \b this ParamEntry
             for (iter = curList.begin(); iter != enditer; ++iter)
             {
-                const ParamEntry &entry(*iter);
+                ParamEntry entry = *iter;
                 if (!entry.intersects(addr, size)) continue;
                 if (contains(entry))
                 {   // If this contains the intersecting entry
@@ -279,7 +279,7 @@ namespace Sla.DECCORE
                 rangeend = addr.getOffset() + sz - 1;
                 for (int4 i = 0; i < joinrec->numPieces(); ++i)
                 {
-                    const VarnodeData &vdata(joinrec->getPiece(i));
+                    VarnodeData vdata = joinrec->getPiece(i);
                     if (addr.getSpace() != vdata.space) continue;
                     uintb vdataend = vdata.offset + vdata.size - 1;
                     if (addr.getOffset() < vdata.offset && rangeend < vdataend)
@@ -314,7 +314,7 @@ namespace Sla.DECCORE
                 int4 res = 0;
                 for (int4 i = joinrec->numPieces() - 1; i >= 0; --i)
                 { // Move from least significant to most
-                    const VarnodeData &vdata(joinrec->getPiece(i));
+                    VarnodeData vdata = joinrec->getPiece(i);
                     int4 cur = vdata.getAddr().justifiedContain(vdata.size, addr, sz, false);
                     if (cur < 0)
                         res += vdata.size;  // We skipped this many less significant bytes
@@ -365,7 +365,7 @@ namespace Sla.DECCORE
             {
                 for (int4 i = joinrec->numPieces() - 1; i >= 0; --i)
                 { // Move from least significant to most
-                    const VarnodeData &vdata(joinrec->getPiece(i));
+                    VarnodeData vdata = joinrec->getPiece(i);
                     if ((addr.overlap(0, vdata.getAddr(), vdata.size) >= 0) &&
                     (endaddr.overlap(0, vdata.getAddr(), vdata.size) >= 0))
                     {
@@ -412,7 +412,7 @@ namespace Sla.DECCORE
             }
             for (int4 i = 0; i < joinrec->numPieces(); ++i)
             {
-                const VarnodeData &vdata(joinrec->getPiece(i));
+                VarnodeData vdata = joinrec->getPiece(i);
                 Address addr = vdata.getAddr();
                 if (op2.containedBy(addr, vdata.size))
                     return true;

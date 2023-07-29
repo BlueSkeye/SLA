@@ -52,7 +52,7 @@ namespace Sla.DECCORE
             if ((flags & actionalt) != 0)
                 return true;    // Alternate path traversed a dedicated COPY
             if (vn->loneDescend() == (PcodeOp*)0) return false;
-            const PcodeOp* op = vn->getDef();
+            PcodeOp op = vn->getDef();
             if (op == (PcodeOp*)0) return true;
             return !op->isMarker(); // MULTIEQUAL or INDIRECT indicates multiple values
         }

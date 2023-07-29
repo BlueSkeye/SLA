@@ -150,7 +150,7 @@ namespace Sla.SLEIGH
         /// \return the address space being pointed to
         private AddrSpace generatePointer(VarnodeTpl vntpl, VarnodeData vn)
         {
-            const FixedHandle &hand(walker->getFixedHandle(vntpl->getOffset().getHandleIndex()));
+            FixedHandle hand = walker->getFixedHandle(vntpl->getOffset().getHandleIndex());
             vn.space = hand.offset_space;
             vn.size = hand.offset_size;
             if (vn.space == const_space)
@@ -256,7 +256,7 @@ namespace Sla.SLEIGH
             {
                 Address newaddr = baseaddr + fallOffset;
                 setUniqueOffset(newaddr);
-                const ParserContext* pos = discache->getParserContext(newaddr);
+                ParserContext pos = discache->getParserContext(newaddr);
                 if (pos->getParserState() != ParserContext::pcode)
                     throw new LowlevelError("Could not obtain cached delay slot instruction");
                 int4 len = pos->getLength();
@@ -294,7 +294,7 @@ namespace Sla.SLEIGH
 
             Address newaddr(spc, addr);
             setUniqueOffset(newaddr);
-            const ParserContext* pos = discache->getParserContext(newaddr);
+            ParserContext pos = discache->getParserContext(newaddr);
             if (pos->getParserState() != ParserContext::pcode)
                 throw new LowlevelError("Could not obtain cached crossbuild instruction");
 

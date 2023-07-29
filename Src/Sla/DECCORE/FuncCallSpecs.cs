@@ -617,7 +617,7 @@ namespace Sla.DECCORE
         {
             if (isInputActive()) return false;
             if (slot1 >= activeinput.getNumTrials()) return false; // Not enough params
-            const ParamTrial* hislot,*loslot;
+            ParamTrial* hislot,*loslot;
             if (ishislot)
             {       // slot1 looks like the high slot
                 hislot = &activeinput.getTrialForInputVarnode(slot1);
@@ -646,11 +646,11 @@ namespace Sla.DECCORE
             if (isInputLocked())
                 throw new LowlevelError("Trying to join parameters on locked function prototype");
 
-            const ParamTrial &trial1(activeinput.getTrialForInputVarnode(slot1));
-            const ParamTrial &trial2(activeinput.getTrialForInputVarnode(slot1 + 1));
+            ParamTrial trial1 = activeinput.getTrialForInputVarnode(slot1);
+            ParamTrial trial2 = activeinput.getTrialForInputVarnode(slot1 + 1);
 
-            const Address &addr1(trial1.getAddress());
-            const Address &addr2(trial2.getAddress());
+            Address addr1 = trial1.getAddress();
+            Address addr2 = trial2.getAddress();
             Architecture* glb = getArch();
             Address joinaddr;
             if (ishislot)
@@ -1034,11 +1034,11 @@ namespace Sla.DECCORE
 
             for (int4 i = 0; i < activeinput.getNumTrials(); ++i)
             {
-                const ParamTrial &paramtrial(activeinput.getTrial(i));
+                ParamTrial paramtrial = activeinput.getTrial(i);
                 if (!paramtrial.isUsed()) continue; // Don't keep unused parameters
                 sz = paramtrial.getSize();
                 isspacebase = false;
-                const Address &addr(paramtrial.getAddress());
+                Address addr = paramtrial.getAddress();
                 spc = addr.getSpace();
                 off = addr.getOffset();
                 if (spc->getType() == IPTR_SPACEBASE)

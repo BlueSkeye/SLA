@@ -33,7 +33,7 @@ namespace Sla.SLEIGH
             res = tree.insert(sym);
             if (!res.second)
             {
-                reportError((const Location*)0,"Duplicate symbol name: " + sym->getName());
+                reportError((Location*)0,"Duplicate symbol name: " + sym->getName());
                 delete sym;     // Symbol is unattached to anything else
             }
         }
@@ -83,7 +83,7 @@ namespace Sla.SLEIGH
             }
         }
 
-        public virtual Location getLocation(SleighSymbol sym) => (const Location*)0;
+        public virtual Location getLocation(SleighSymbol sym) => (Location*)0;
 
         public virtual void reportError(Location loc, string msg)
         {
@@ -198,12 +198,12 @@ namespace Sla.SLEIGH
             int4 res = yyparse();
             if (res != 0)
             {
-                reportError((const Location*)0,"Syntax error");
+                reportError((Location*)0,"Syntax error");
                 return false;
             }
             if (!PcodeCompile::propagateSize(result))
             {
-                reportError((const Location*)0,"Could not resolve at least 1 variable size");
+                reportError((Location*)0,"Could not resolve at least 1 variable size");
                 return false;
             }
             return true;

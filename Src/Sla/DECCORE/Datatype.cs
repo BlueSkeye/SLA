@@ -386,7 +386,7 @@ namespace Sla.DECCORE
         /// \return the containing field or NULL if the range is not contained
         public virtual TypeField findTruncation(int4 off, int4 sz, PcodeOp op, int4 slot, int4 newoff)
         {
-            return (const TypeField*)0;
+            return (TypeField*)0;
         }
 
         /// Recover component data-type one-level down
@@ -546,7 +546,7 @@ namespace Sla.DECCORE
         /// \return the field of the union best associated with the truncation or null
         public virtual TypeField? resolveTruncation(int4 offset, PcodeOp op, int4 slot, int4 newoff)
         {
-            return (const TypeField*)0;
+            return (TypeField*)0;
         }
 
         /// Order this with -op- datatype

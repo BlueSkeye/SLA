@@ -193,7 +193,7 @@ namespace Sla.SLEIGH
      \code
      class AssemblyRaw : public AssemblyEmit {
      public:
-       virtual void dump(const Address &addr,const string &mnem,const string &body) {
+       virtual void dump(Address addr, string mnem, string body) {
          addr.printRaw(cout);
          cout << ": " << mnem << ' ' << body << endl;
        }
@@ -233,7 +233,7 @@ namespace Sla.SLEIGH
      \code
      class PcodeRawOut : public PcodeEmit {
      public:
-       virtual void dump(const Address &addr,OpCode opc,VarnodeData *outvar,VarnodeData *vars,int4 isize);
+       virtual void dump(Address addr,OpCode opc,VarnodeData *outvar,VarnodeData *vars,int4 isize);
      };
 
      static void print_vardata(ostream &s,VarnodeData &data)
@@ -244,7 +244,7 @@ namespace Sla.SLEIGH
        s << ',' << dec << data.size << ')';
      }
 
-     void PcodeRawOut::dump(const Address &addr,OpCode opc,VarnodeData *outvar,VarnodeData *vars,int4 isize)
+     void PcodeRawOut::dump(Address addr,OpCode opc,VarnodeData *outvar,VarnodeData *vars,int4 isize)
 
      {
        if (outvar != (VarnodeData *)0) {     // The output is optional
@@ -312,9 +312,9 @@ namespace Sla.SLEIGH
      \code
      class MyLoadImage : public LoadImage {
      public:
-       MyLoadImage(const string &nm) : Loadimage(nm) {}
-       virtual void loadFill(uint1 *ptr,int4 size,const Address &addr);
-       virtual string getArchType(void) const { return "mytype"; }
+       MyLoadImage(string &nm) : Loadimage(nm) {}
+       virtual void loadFill(uint1 *ptr,int4 size,Address &addr);
+       virtual string getArchType(void) { return "mytype"; }
        virtual void adjustVma(long adjust) {}
      };
      \endcode

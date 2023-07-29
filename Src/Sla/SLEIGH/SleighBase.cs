@@ -124,7 +124,7 @@ namespace Sla.SLEIGH
             int4 numattr = el->getNumAttributes();
             for (int4 i = 0; i < numattr; ++i)
             {
-                const string &attrname(el->getAttributeName(i));
+                string attrname = el->getAttributeName(i);
                 if (attrname == "maxdelay")
                 {
                     istringstream s1(el->getAttributeValue(i));
@@ -152,7 +152,7 @@ namespace Sla.SLEIGH
             }
             if (version != SLA_FORMAT_VERSION)
                 throw new LowlevelError(".sla file has wrong format");
-            const List &list(el->getChildren());
+            List list = el->getChildren();
             List::const_iterator iter;
             iter = list.begin();
             while ((*iter)->getName() == "floatformat")
@@ -209,7 +209,7 @@ namespace Sla.SLEIGH
             map<VarnodeData, string>::const_iterator iter = varnode_xref.upper_bound(sym); // First point greater than offset
             if (iter == varnode_xref.begin()) return "";
             iter--;
-            const VarnodeData &point((*iter).first);
+            VarnodeData point = (*iter).first;
             if (point.space != base) return "";
             uintb offbase = point.offset;
             if (point.offset + point.size >= off + size)
@@ -218,7 +218,7 @@ namespace Sla.SLEIGH
             while (iter != varnode_xref.begin())
             {
                 --iter;
-                const VarnodeData &point((*iter).first);
+                VarnodeData point = (*iter).first;
                 if ((point.space != base) || (point.offset != offbase)) return "";
                 if (point.offset + point.size >= off + size)
                     return (*iter).second;

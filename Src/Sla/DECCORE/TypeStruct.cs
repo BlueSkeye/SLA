@@ -54,7 +54,7 @@ namespace Sla.DECCORE
             while (min <= max)
             {
                 int4 mid = (min + max) / 2;
-                const TypeField &curfield(field[mid]);
+                TypeField curfield = field[mid];
                 if (curfield.offset > off)
                     max = mid - 1;
                 else
@@ -151,11 +151,11 @@ namespace Sla.DECCORE
             int4 noff;
 
             i = getFieldIter(off);
-            if (i < 0) return (const TypeField*)0;
-            const TypeField &curfield(field[i]);
+            if (i < 0) return (TypeField*)0;
+            TypeField curfield  = field[i];
             noff = off - curfield.offset;
             if (noff + sz > curfield.type->getSize()) // Requested piece spans more than one field
-                return (const TypeField*)0;
+                return (TypeField*)0;
             newoff = noff;
             return &curfield;
         }
@@ -166,7 +166,7 @@ namespace Sla.DECCORE
 
             i = getFieldIter(off);
             if (i < 0) return Datatype::getSubType(off, newoff);
-            const TypeField &curfield(field[i]);
+            TypeField curfield = field[i];
             *newoff = off - curfield.offset;
             return curfield.type;
         }
@@ -177,7 +177,7 @@ namespace Sla.DECCORE
             i += 1;
             while (i < field.size())
             {
-                const TypeField &subfield(field[i]);
+                TypeField subfield = field[i];
                 int4 diff = subfield.offset - off;
                 if (diff > 128) break;
                 Datatype* subtype = subfield.type;
@@ -207,7 +207,7 @@ namespace Sla.DECCORE
             int4 i = getLowerBoundField(off);
             while (i >= 0)
             {
-                const TypeField &subfield(field[i]);
+                TypeField subfield = field[i];
                 int4 diff = (int4)off - subfield.offset;
                 if (diff > 128) break;
                 Datatype* subtype = subfield.type;
@@ -237,7 +237,7 @@ namespace Sla.DECCORE
             int4 i = getLowerBoundField(off);
             if (i >= 0)
             {
-                const TypeField &curfield(field[i]);
+                TypeField curfield = field[i];
                 int4 newOff = off - curfield.offset;
                 if (newOff < curfield.type->getSize())
                     return curfield.type->getHoleSize(newOff);
@@ -259,7 +259,7 @@ namespace Sla.DECCORE
         {
             int4 res = Datatype::compare(op, level);
             if (res != 0) return res;
-            const TypeStruct* ts = (const TypeStruct*)&op;
+            TypeStruct ts = (TypeStruct*)&op;
             vector<TypeField>::const_iterator iter1, iter2;
 
             if (field.size() != ts->field.size()) return (ts->field.size() - field.size());
@@ -304,7 +304,7 @@ namespace Sla.DECCORE
         {
             int4 res = Datatype::compareDependency(op);
             if (res != 0) return res;
-            const TypeStruct* ts = (const TypeStruct*)&op;
+            TypeStruct ts = (TypeStruct*)&op;
             vector<TypeField>::const_iterator iter1, iter2;
 
             if (field.size() != ts->field.size()) return (ts->field.size() - field.size());
@@ -349,7 +349,7 @@ namespace Sla.DECCORE
         public override Datatype resolveInFlow(PcodeOp op, int4 slot)
         {
             Funcdata* fd = op->getParent()->getFuncdata();
-            const ResolvedUnion* res = fd->getUnionField(this, op, slot);
+            ResolvedUnion res = fd->getUnionField(this, op, slot);
             if (res != (ResolvedUnion*)0)
                 return res->getDatatype();
 
@@ -362,8 +362,8 @@ namespace Sla.DECCORE
 
         public override Datatype findResolve(PcodeOp op, int4 slot)
         {
-            const Funcdata* fd = op->getParent()->getFuncdata();
-            const ResolvedUnion* res = fd->getUnionField(this, op, slot);
+            Funcdata fd = op->getParent()->getFuncdata();
+            ResolvedUnion res = fd->getUnionField(this, op, slot);
             if (res != (ResolvedUnion*)0)
                 return res->getDatatype();
             return field[0].type;       // If not calculated before, assume referring to field

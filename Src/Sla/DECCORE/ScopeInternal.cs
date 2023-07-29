@@ -894,7 +894,7 @@ namespace Sla.DECCORE
                 --iter;
             if (iter != nametree.end())
             {
-                const string &symname((*iter)->getName());
+                string symname = (*iter)->getName();
                 if ((symname.size() == 15) && (0 == symname.compare(0, 7, "$$undef")))
                 {
                     istringstream s(symname.substr(7,8) );
@@ -985,7 +985,7 @@ namespace Sla.DECCORE
             encoder.openElement(ELEM_SCOPE);
             encoder.writeString(ATTRIB_NAME, name);
             encoder.writeUnsignedInteger(ATTRIB_ID, uniqueId);
-            if (getParent() != (const Scope*)0) {
+            if (getParent() != (Scope*)0) {
                 encoder.openElement(ELEM_PARENT);
                 encoder.writeUnsignedInteger(ATTRIB_ID, getParent()->getId());
                 encoder.closeElement(ELEM_PARENT);
@@ -1002,7 +1002,7 @@ namespace Sla.DECCORE
                     int4 symbolType = 0;
                     if (!sym->mapentry.empty())
                     {
-                        const SymbolEntry &entry(*sym->mapentry.front());
+                        SymbolEntry entry = *sym->mapentry.front();
                         if (entry.isDynamic())
                         {
                             if (sym->getCategory() == Symbol::union_facet)
@@ -1019,7 +1019,7 @@ namespace Sla.DECCORE
                     vector<list<SymbolEntry>::iterator>::const_iterator miter;
                     for (miter = sym->mapentry.begin(); miter != sym->mapentry.end(); ++miter)
                     {
-                        const SymbolEntry &entry((*(*miter)));
+                        SymbolEntry entry = (*(*miter));
                         entry.encode(encoder);
                     }
                     encoder.closeElement(ELEM_MAPSYM);

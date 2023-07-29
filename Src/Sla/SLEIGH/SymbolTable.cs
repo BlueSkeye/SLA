@@ -208,7 +208,7 @@ namespace Sla.SLEIGH
                 s >> size;
                 symbollist.resize(size, (SleighSymbol*)0);
             }
-            const List &list(el->getChildren());
+            List list = el->getChildren();
             List::const_iterator iter;
             iter = list.begin();
             for (int4 i = 0; i < table.size(); ++i)

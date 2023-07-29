@@ -399,7 +399,7 @@ namespace Sla.SLEIGH
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> nonzerosize;
             }
-            const List &list(el->getChildren());
+            List list = el->getChildren();
             List::const_iterator iter;
             iter = list.begin();
             uintm mask, val;

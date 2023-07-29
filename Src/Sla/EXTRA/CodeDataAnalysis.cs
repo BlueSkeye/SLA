@@ -105,7 +105,7 @@ namespace Sla.EXTRA
             map<AddrLink, uint4>::iterator citer;
             for (citer = fromto_vec.begin(); citer != fromto_vec.end(); ++citer)
             {
-                const AddrLink &fromto((*citer).first);
+                AddrLink fromto = (*citer).first;
                 fromto_crossref[fromto] = (*citer).second;
                 AddrLink tofrom(fromto.b, fromto.a );
                 tofrom_crossref[tofrom] = (*citer).second;
@@ -132,7 +132,7 @@ namespace Sla.EXTRA
             enditer = fromto_crossref.lower_bound(AddrLink(endaddr));
             for (iter = startiter; iter != enditer; ++iter)
             {
-                const AddrLink &fromto((*iter).first);
+                AddrLink fromto = (*iter).first;
                 tfiter = tofrom_crossref.find(AddrLink(fromto.b, fromto.a));
                 if (tfiter != tofrom_crossref.end())
                     tofrom_crossref.erase(tfiter);

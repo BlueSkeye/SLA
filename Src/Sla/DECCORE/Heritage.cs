@@ -199,7 +199,7 @@ namespace Sla.DECCORE
                         mosthalf = fd->newUnique(sizeaccum);
                     if ((j - recnum) == 2)
                     {
-                        const VarnodeData &vdata(joinrec->getPiece(recnum + 1));
+                        VarnodeData vdata = joinrec->getPiece(recnum + 1);
                         leasthalf = fd->newVarnode(vdata.size, vdata.space, vdata.offset);
                     }
                     else
@@ -338,7 +338,7 @@ namespace Sla.DECCORE
         {
             PcodeOp* op = vn->loneDescend(); // vn isFree, so loneDescend must be non-null
             PcodeOp* trunc = fd->newOp(1, op->getAddr());
-            const VarnodeData &vdata(joinrec->getPiece(0)); // Float extensions have exactly 1 piece
+            VarnodeData vdata = joinrec->getPiece(0); // Float extensions have exactly 1 piece
             Varnode* bigvn = fd->newVarnode(vdata.size, vdata.space, vdata.offset);
             fd->opSetOpcode(trunc, CPUI_FLOAT_FLOAT2FLOAT);
             fd->opSetOutput(trunc, vn);
@@ -362,7 +362,7 @@ namespace Sla.DECCORE
                 ext = fd->newOp(1, bb->getStart());
             else
                 ext = fd->newOp(1, op->getAddr());
-            const VarnodeData &vdata(joinrec->getPiece(0)); // Float extensions have exactly 1 piece
+            VarnodeData vdata = joinrec->getPiece(0); // Float extensions have exactly 1 piece
             fd->opSetOpcode(ext, CPUI_FLOAT_FLOAT2FLOAT);
             fd->newVarnodeOut(vdata.size, vdata.getAddr(), ext);
             fd->opSetInput(ext, vn, 0);
@@ -417,7 +417,7 @@ namespace Sla.DECCORE
         /// Assume the dominator tree is already built. Assume nodes are in dfs order.
         private void buildADT()
         {
-            const BlockGraph &bblocks(fd->getBasicBlocks());
+            BlockGraph bblocks = fd->getBasicBlocks();
             int4 size = bblocks.getSize();
             vector<int4> a(size);
             vector<int4> b(size,0);
@@ -990,7 +990,7 @@ namespace Sla.DECCORE
                 RangeList loadRanges;
                 for (list<LoadGuard>::const_iterator iter = loadGuard.begin(); iter != loadGuard.end(); ++iter)
                 {
-                    const LoadGuard &guard(*iter);
+                    LoadGuard guard = *iter;
                     loadRanges.insertRange(guard.spc, guard.minimumOffset, guard.maximumOffset);
                 }
                 // Mark everything on the boundary as address forced to prevent dead-code removal
@@ -1198,7 +1198,7 @@ namespace Sla.DECCORE
             bool unknownStackStorage = false;
             for (int4 i = 0; i < spc->numSpacebase(); ++i)
             {
-                const VarnodeData &stackPointer(spc->getSpacebase(i));
+                VarnodeData stackPointer = spc->getSpacebase(i);
                 Varnode* spInput = fd->findVarnodeInput(stackPointer.size, stackPointer.getAddr());
                 if (spInput == (Varnode*)0) continue;
                 path.push_back(StackNode(spInput, 0, 0));
@@ -2421,7 +2421,7 @@ namespace Sla.DECCORE
         /// \return the number of heritage passes performed
         public int4 numHeritagePasses(AddrSpace spc)
         {
-            const HeritageInfo* info = getInfo(spc);
+            HeritageInfo info = getInfo(spc);
             if (!info->isHeritaged())
                 throw new LowlevelError("Trying to calculate passes for non-heritaged space");
             return (pass - info->delay);
@@ -2444,7 +2444,7 @@ namespace Sla.DECCORE
         /// \return the number of passes heritage is delayed
         public int4 getDeadCodeDelay(AddrSpace spc)
         {
-            const HeritageInfo* info = getInfo(spc);
+            HeritageInfo info = getInfo(spc);
             return info->deadcodedelay;
         }
 
@@ -2470,7 +2470,7 @@ namespace Sla.DECCORE
         /// \return \b true if dead code removal is allowed
         public bool deadRemovalAllowed(AddrSpace spc)
         {
-            const HeritageInfo* info = getInfo(spc);
+            HeritageInfo info = getInfo(spc);
             return (pass > info->deadcodedelay);
         }
 
@@ -2497,7 +2497,7 @@ namespace Sla.DECCORE
         public void buildInfoList()
         {
             if (!infolist.empty()) return;
-            const AddrSpaceManager* manage = fd->getArch();
+            AddrSpaceManager manage = fd->getArch();
             infolist.reserve(manage->numSpaces());
             for (int4 i = 0; i < manage->numSpaces(); ++i)
                 infolist.emplace_back(manage->getSpace(i));
@@ -2657,7 +2657,7 @@ namespace Sla.DECCORE
                 if ((*iter).op == op)
                     return &(*iter);
             }
-            return (const LoadGuard*)0;
+            return (LoadGuard*)0;
         }
     }
 }

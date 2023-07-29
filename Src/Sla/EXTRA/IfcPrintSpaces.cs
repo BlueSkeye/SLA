@@ -20,7 +20,7 @@ namespace Sla.EXTRA
             if (dcp->conf == (Architecture*)0)
                 throw IfaceExecutionError("No load image present");
 
-            const AddrSpaceManager* manage = dcp->conf;
+            AddrSpaceManager manage = dcp->conf;
             int4 num = manage->numSpaces();
             for (int4 i = 0; i < num; ++i)
             {

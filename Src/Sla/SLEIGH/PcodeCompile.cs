@@ -400,7 +400,7 @@ namespace Sla.SLEIGH
 
             if (errmsg.size() > 0)
             {   // Was there an error condition
-                reportError((const Location*)0, errmsg);    // Report the error
+                reportError((Location*)0, errmsg);    // Report the error
                 delete vn;          // Clean up
                 vector<OpTpl*>* resops = rhs->ops; // Passthru old expression
                 rhs->ops = (vector<OpTpl*>*)0;
@@ -433,7 +433,7 @@ namespace Sla.SLEIGH
                 res = createOpOut(finalout, CPUI_INT_OR, res, rhs);
             }
             if (errmsg.size() > 0)
-                reportError((const Location*)0, errmsg);
+                reportError((Location*)0, errmsg);
             vector<OpTpl*>* resops = res->ops;
             res->ops = (vector<OpTpl*>*)0;
             delete res;

@@ -244,7 +244,7 @@ namespace Sla.SLEIGH
                         flags |= code_address;
                 }
             }
-            const List &list(el->getChildren());
+            List list = el->getChildren();
             List::const_iterator iter;
             iter = list.begin();
             localexp = (OperandValue*)PatternExpression::restoreExpression(*iter, trans);

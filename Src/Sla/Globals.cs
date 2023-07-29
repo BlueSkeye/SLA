@@ -755,7 +755,7 @@ namespace ghidra
             vector<string>::const_iterator iter;
             for (iter = dirs.begin(); iter != dirs.end(); ++iter)
             {
-                const string &nextdir(*iter);
+                string nextdir = *iter;
                 findSlaSpecs(res, nextdir, suffix);
             }
         }

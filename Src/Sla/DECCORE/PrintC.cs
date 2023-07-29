@@ -321,7 +321,7 @@ namespace Sla.DECCORE
         {
             // Find the root type (the one with an identifier) and layout
             // the stack of types, so we can access in reverse order
-            vector <const Datatype*> typestack;
+            List<Datatype> typestack = new List<Datatype>();
             buildTypeStack(ct, typestack);
 
             ct = typestack.back();  // The base type
@@ -666,7 +666,7 @@ namespace Sla.DECCORE
         /// \return \b false if '*' syntax is required, \b true if some other syntax is used
         protected bool checkArrayDeref(Varnode vn)
         {
-            const PcodeOp* op;
+            PcodeOp op;
 
             if (!vn->isImplied()) return false;
             if (!vn->isWritten()) return false;
@@ -941,7 +941,7 @@ namespace Sla.DECCORE
                 default:
                     return false;
             }
-            const Varnode* vn = op->getIn(0);
+            Varnode vn = op->getIn(0);
             if (op->getOut()->getHigh() != vn->getHigh()) return false;
             pushOp(tok, op);
             pushVnExplicit(vn, op);
@@ -989,7 +989,7 @@ namespace Sla.DECCORE
         {
             int4 i, num;
             uintb val;
-            const Datatype* ct;
+            Datatype ct;
 
             ct = switchbl->getSwitchType();
 
@@ -1191,7 +1191,7 @@ namespace Sla.DECCORE
         /// Then print the body of the loop
         protected void emitForLoop(BlockWhileDo bl)
         {
-            const PcodeOp* op;
+            PcodeOp op;
             int4 indent;
 
             pushMod();
@@ -1325,7 +1325,7 @@ namespace Sla.DECCORE
 
             // Retrieve UTF8 version of string
             bool isTrunc = false;
-            const vector<uint1> &buffer(manager->getStringData(addr, charType, isTrunc));
+            List<uint1> buffer = manager->getStringData(addr, charType, isTrunc);
             if (buffer.empty())
                 return false;
             if (doEmitWideCharPrefix() && charType->getSize() > 1 && !charType->isOpaqueString())
@@ -1495,7 +1495,7 @@ namespace Sla.DECCORE
 
         protected virtual void pushAnnotation(Varnode vn, PcodeOp op)
         {
-            const Scope* symScope = op->getParent()->getFuncdata()->getScopeLocal();
+            Scope symScope = op->getParent()->getFuncdata()->getScopeLocal();
             int4 size = 0;
             if (op->code() == CPUI_CALLOTHER)
             {
@@ -1697,7 +1697,7 @@ namespace Sla.DECCORE
             pushSymbol(sym, vn, op);    // Push base symbol name
             for (int4 i = 0; i < stack.size(); ++i)
             {
-                const TypeField* field = stack[i].field;
+                TypeField field = stack[i].field;
                 if (field == (TypeField*)0)
                     pushAtom(Atom(stack[i].fieldname, syntax, stack[i].hilite, op));
                 else
@@ -1730,7 +1730,7 @@ namespace Sla.DECCORE
             TypeField* field;
             if (parent->needsResolution() && parent->getMetatype() != TYPE_PTR)
             {
-                const Funcdata* fd = op->getParent()->getFuncdata();
+                Funcdata fd = op->getParent()->getFuncdata();
                 int4 slot = op->getSlot(vn);
                 ResolvedUnion* res = fd->getUnionField(parent, op, slot);
                 if (res != (ResolvedUnion*)0 && res->getFieldNum() >= 0) {
@@ -2040,7 +2040,7 @@ namespace Sla.DECCORE
 
         protected virtual void emitExpression(PcodeOp op)
         {
-            const Varnode* outvn = op->getOut();
+            Varnode outvn = op->getOut();
             if (outvn != (Varnode*)0)
             {
                 if (option_inplace_ops && emitInplaceOp(op)) return;
@@ -2050,7 +2050,7 @@ namespace Sla.DECCORE
             else if (op->doesSpecialPrinting())
             {
                 // Printing of constructor syntax
-                const PcodeOp* newop = op->getIn(1)->getDef();
+                PcodeOp newop = op->getIn(1)->getDef();
                 outvn = newop->getOut();
                 pushOp(&assignment, newop);
                 pushSymbolDetail(outvn, newop, false);
@@ -2109,7 +2109,7 @@ namespace Sla.DECCORE
             MapIterator enditer = symScope->end();
             for (; iter != enditer; ++iter)
             {
-                const SymbolEntry* entry = *iter;
+                SymbolEntry entry = *iter;
                 if (entry->isPiece()) continue; // Don't do a partial entry
                 Symbol* sym = entry->getSymbol();
                 if (sym->getCategory() != cat) continue;
@@ -2130,7 +2130,7 @@ namespace Sla.DECCORE
             list<SymbolEntry>::const_iterator enditer_d = symScope->endDynamic();
             for (; iter_d != enditer_d; ++iter_d)
             {
-                const SymbolEntry* entry = &(*iter_d);
+                SymbolEntry entry = &(*iter_d);
                 if (entry->isPiece()) continue; // Don't do a partial entry
                 Symbol* sym = (*iter_d).getSymbol();
                 if (sym->getCategory() != cat) continue;
@@ -2153,7 +2153,7 @@ namespace Sla.DECCORE
 
         protected virtual void emitFunctionDeclaration(Funcdata fd)
         {
-            const FuncProto* proto = &fd->getFuncProto();
+            FuncProto proto = &fd->getFuncProto();
             int4 id = emit->beginFuncProto();
             emitPrototypeOutput(proto, fd);
             emit->spaces(1);
@@ -2211,7 +2211,7 @@ namespace Sla.DECCORE
         {
             if (!vn->isImplied()) return false;
             if (!vn->isWritten()) return false;
-            const PcodeOp* op = vn->getDef();
+            PcodeOp op = vn->getDef();
             bool reorder = false;
             OpCode opc = get_booleanflip(op->code(), reorder); // This is the set of ops that can be negated as a token
             if (opc == CPUI_MAX)
@@ -2486,7 +2486,7 @@ namespace Sla.DECCORE
 
         public virtual void emitBlockGraph(BlockGraph bl)
         {
-            const vector<FlowBlock*> &list(bl->getList());
+            List<FlowBlock> list = bl->getList();
             vector<FlowBlock*>::const_iterator iter;
 
             for (iter = list.begin(); iter != list.end(); ++iter)
@@ -2617,7 +2617,7 @@ namespace Sla.DECCORE
 
         public virtual void emitBlockIf(BlockIf bl)
         {
-            const PcodeOp* op;
+            PcodeOp op;
             PendingBrace pendingBrace;
 
             if (isSet(pending_brace))
@@ -2703,7 +2703,7 @@ namespace Sla.DECCORE
 
         public virtual void emitBlockWhileDo(BlockWhileDo bl)
         {
-            const PcodeOp* op;
+            PcodeOp op;
             int4 indent;
 
             if (bl->getIterateOp() != (PcodeOp*)0)
@@ -2778,7 +2778,7 @@ namespace Sla.DECCORE
 
         public virtual void emitBlockDoWhile(BlockDoWhile bl)
         {
-            const PcodeOp* op;
+            PcodeOp op;
 
             // dowhile block NEVER prints final branch
             pushMod();
@@ -2810,7 +2810,7 @@ namespace Sla.DECCORE
 
         public virtual void emitBlockInfLoop(BlockInfLoop bl)
         {
-            const PcodeOp* op;
+            PcodeOp op;
 
             pushMod();
             unsetMod(no_branch | only_branch);
@@ -3051,7 +3051,7 @@ namespace Sla.DECCORE
         {
             pushOp(&function_call, op);
             pushOp(&dereference, op);
-            const Funcdata* fd = op->getParent()->getFuncdata();
+            Funcdata fd = op->getParent()->getFuncdata();
             FuncCallSpecs* fc = fd->getCallSpecs(op);
             if (fc == (FuncCallSpecs*)0)
                 throw new LowlevelError("Missing indirect function callspec");
@@ -3124,15 +3124,15 @@ namespace Sla.DECCORE
             Datatype* dt;
             if (withNew)
             {
-                const PcodeOp* newop = op->getIn(1)->getDef();
-                const Varnode* outvn = newop->getOut();
+                PcodeOp newop = op->getIn(1)->getDef();
+                Varnode outvn = newop->getOut();
                 pushOp(&new_op, newop);
                 pushAtom(Atom(KEYWORD_NEW, optoken, EmitMarkup::keyword_color, newop, outvn));
                 dt = outvn->getTypeDefFacing();
             }
             else
             {
-                const Varnode* thisvn = op->getIn(1);
+                Varnode thisvn = op->getIn(1);
                 dt = thisvn->getType();
             }
             if (dt->getMetatype() == TYPE_PTR)
@@ -3907,7 +3907,7 @@ namespace Sla.DECCORE
             Varnode* vn0 = op->getIn(0);
             if (op->numInput() == 2)
             {
-                const Varnode* vn1 = op->getIn(1);
+                Varnode vn1 = op->getIn(1);
                 if (!vn0->isConstant())
                 {
                     // Array allocation form
@@ -3960,7 +3960,7 @@ namespace Sla.DECCORE
         private static bool isValueFlexible(Varnode vn)
         {
             if ((vn->isImplied()) && (vn->isWritten())) {
-                const PcodeOp* def = vn->getDef();
+                PcodeOp def = vn->getDef();
                 if (def->code() == CPUI_PTRSUB) return true;
                 if (def->code() == CPUI_PTRADD) return true;
             }

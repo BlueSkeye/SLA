@@ -44,7 +44,7 @@ namespace Sla.DECCORE
 
         public override string getOperatorName(PcodeOp op)
         {
-            const BlockBasic* bb = op->getParent();
+            BlockBasic bb = op->getParent();
             if (bb != (BlockBasic*)0)
             {
                 Architecture* glb = bb->getFuncdata()->getArch();
@@ -68,7 +68,7 @@ namespace Sla.DECCORE
             VolatileWriteOp* vw_op = glb->userops.getVolatileWrite(); // Check if this a volatile write op
             if ((vw_op->getIndex() == op->getIn(0)->getOffset()) && (slot == 2))
             { // And we are requesting slot 2
-                const Address &addr(op->getIn(1)->getAddr()); // Address of volatile memory
+                Address addr = op->getIn(1)->getAddr(); // Address of volatile memory
                 int4 size = op->getIn(2)->getSize(); // Size of memory being written
                 uint4 vflags = 0;
                 SymbolEntry* entry = glb->symboltab->getGlobalScope()->queryProperties(addr, size, op->getAddr(), vflags);
@@ -90,7 +90,7 @@ namespace Sla.DECCORE
             VolatileReadOp* vr_op = glb->userops.getVolatileRead(); // Check if this a volatile read op
             if (vr_op->getIndex() == op->getIn(0)->getOffset())
             {
-                const Address &addr(op->getIn(1)->getAddr()); // Address of volatile memory
+                Address addr = op->getIn(1)->getAddr(); // Address of volatile memory
                 int4 size = op->getOut()->getSize(); // Size of memory being written
                 uint4 vflags = 0;
                 SymbolEntry* entry = glb->symboltab->getGlobalScope()->queryProperties(addr, size, op->getAddr(), vflags);

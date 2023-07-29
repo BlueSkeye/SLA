@@ -730,7 +730,7 @@ namespace ghidra
 //#else
 //#define YYSYNTAX_ERROR yysyntax_error (&yymsg_alloc, &yymsg, yyssp, yytoken)
 //                    {
-//                    char const *yymsgp = "syntax error";
+//                    char *yymsgp = "syntax error";
 //                    int yysyntax_error_status;
 //                    yysyntax_error_status = YYSYNTAX_ERROR;
 //                    if (yysyntax_error_status == 0)
@@ -1108,7 +1108,7 @@ namespace ghidra
         //#   define yystrlen strlen
         //#  else
         ///* Return the length of YYSTR.  */
-        //static ulong yystrlen (const char *yystr)
+        //static ulong yystrlen (char *yystr)
         //{
         //  ulong yylen;
         //  for (yylen = 0; yystr[yylen]; yylen++)
@@ -1123,10 +1123,10 @@ namespace ghidra
         //#   define yystpcpy stpcpy
         //#  else
         ///* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in YYDEST.  */
-        //static char *yystpcpy (char *yydest, const char *yysrc)
+        //static char *yystpcpy (char *yydest, char *yysrc)
         //{
         //  char *yyd = yydest;
-        //  const char *yys = yysrc;
+        //  char *yys = yysrc;
 
         //  while ((*yyd++ = *yys++) != '\0')
         //    continue;
@@ -1197,9 +1197,9 @@ namespace ghidra
         //  ulong yysize = yysize0;
         //  enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
         //  /* Internationalized format string. */
-        //  const char *yyformat = YY_NULLPTR;
+        //  char *yyformat = YY_NULLPTR;
         //  /* Arguments of yyformat. */
-        //  char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
+        //  char *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
         //  /* Number of reported tokens (one for the "unexpected", one per
         //     "expected"). */
         //  int yycount = 0;

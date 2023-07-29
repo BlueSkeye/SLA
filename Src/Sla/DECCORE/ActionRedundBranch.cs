@@ -24,7 +24,7 @@ namespace Sla.DECCORE
         {
             // Remove redundant branches, i.e. a CPUI_CBRANCH that falls thru and branches to the same place
             int4 i, j;
-            const BlockGraph &graph(data.getBasicBlocks());
+            BlockGraph graph = data.getBasicBlocks();
             BlockBasic* bb;
             FlowBlock* bl;
 

@@ -61,7 +61,7 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode
         private void buildVnUp(Varnode vn)
         {
-            const PcodeOp* op;
+            PcodeOp* op;
             for (; ; )
             {
                 if (!vn->isWritten()) return;
@@ -83,8 +83,8 @@ namespace Sla.DECCORE
 
             for (iter = vn->beginDescend(); iter != vn->endDescend(); ++iter)
             {
-                const PcodeOp* op = *iter;
-                const Varnode* tmpvn = vn;
+                PcodeOp* op = *iter;
+                Varnode* tmpvn = vn;
                 while (transtable[op->code()] == 0)
                 {
                     tmpvn = op->getOut();
@@ -109,7 +109,7 @@ namespace Sla.DECCORE
         {
             for (int4 i = 0; i < op->numInput(); ++i)
             {
-                const Varnode* vn = op->getIn(i);
+                Varnode* vn = op->getIn(i);
                 vnedge.push_back(vn);
             }
         }
@@ -118,8 +118,8 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp thats already in the sub-graph
         private void buildOpDown(PcodeOp op)
         {
-            const Varnode* vn = op->getOut();
-            if (vn == (const Varnode*)0) return;
+            Varnode* vn = op->getOut();
+            if (vn == (Varnode*)0) return;
             vnedge.push_back(vn);
         }
 
@@ -128,7 +128,7 @@ namespace Sla.DECCORE
         {
             for (int4 i = 0; i < vnedge.size(); ++i)
             {
-                const Varnode* vn = vnedge[i];
+                Varnode* vn = vnedge[i];
                 if (vn->isMark()) continue;
                 markvn.push_back(vn);
                 vn->setMark();
@@ -141,7 +141,7 @@ namespace Sla.DECCORE
         {
             for (; opedgeproc < opedge.size(); ++opedgeproc)
             {
-                const PcodeOp* op = opedge[opedgeproc].getOp();
+                PcodeOp* op = opedge[opedgeproc].getOp();
                 if (op->isMark()) continue;
                 markop.push_back(op);
                 op->setMark();
@@ -186,7 +186,7 @@ namespace Sla.DECCORE
                 reg = opedge[i].hash(reg);
 
             // Build the final 64-bit hash
-            const PcodeOp* op = (const PcodeOp*)0;
+            PcodeOp* op = (PcodeOp*)0;
             int4 slot = 0;
             uint4 ct;
             bool attachedop = true;
@@ -231,7 +231,7 @@ namespace Sla.DECCORE
             {
                 if (slot >= 0)
                 {
-                    const Varnode* vn = op->getOut();
+                    Varnode* vn = op->getOut();
                     op = vn->loneDescend();
                     if (op == (PcodeOp*)0)
                     {
@@ -241,7 +241,7 @@ namespace Sla.DECCORE
                 }
                 else
                 {
-                    const Varnode* vn = op->getIn(0);
+                    Varnode* vn = op->getIn(0);
                     if (!vn->isWritten()) return;   // Indicate the end of the data-flow path
                     op = vn->getDef();
                 }
@@ -343,14 +343,14 @@ namespace Sla.DECCORE
         /// Calculate hash for given PcodeOp, slot, and method
         public void calcHash(PcodeOp op, int4 slot, uint4 method)
         {
-            const Varnode* root;
+            Varnode* root;
 
             // slot may be from a hash unassociated with op
             // we need to check that slot indicates a valid Varnode
             if (slot < 0)
             {
                 root = op->getOut();
-                if (root == (const Varnode*)0) {
+                if (root == (Varnode*)0) {
                     hash = 0;
                     addrresult = Address();
                     return;     // slot does not fit op
@@ -496,7 +496,7 @@ namespace Sla.DECCORE
             uint4 maxduplicates = 8;
 
             moveOffSkip(op, slot);
-            if (op == (const PcodeOp*)0) {
+            if (op == (PcodeOp*)0) {
                 hash = (uint8)0;
                 addrresult = Address(); // Hash cannot be calculated
                 return;

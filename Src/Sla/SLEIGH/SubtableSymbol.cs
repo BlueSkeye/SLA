@@ -175,7 +175,7 @@ namespace Sla.SLEIGH
                 s >> numct;
                 construct.reserve(numct);
             }
-            const List &list(el->getChildren());
+            List list = el->getChildren();
             List::const_iterator iter;
             iter = list.begin();
             while (iter != list.end())

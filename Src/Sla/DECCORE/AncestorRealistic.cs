@@ -302,13 +302,13 @@ namespace Sla.DECCORE
         /// \return \b true if there are two input flows, one of which is a normal \e solid flow
         private bool checkConditionalExe(State state)
         {
-            const BlockBasic* bl = state.op->getParent();
+            BlockBasic* bl = state.op->getParent();
             if (bl->sizeIn() != 2)
                 return false;
-            const FlowBlock* solidBlock = bl->getIn(state.getSolidSlot());
+            FlowBlock* solidBlock = bl->getIn(state.getSolidSlot());
             if (solidBlock->sizeOut() != 1)
                 return false;
-            //  const BlockBasic *callbl = stateStack[0].op->getParent();
+            //  BlockBasic *callbl = stateStack[0].op->getParent();
             //  if (callbl != bl) {
             //    bool dominates = false;
             //    FlowBlock *dombl = callbl->getImmedDom();

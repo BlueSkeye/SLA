@@ -86,20 +86,20 @@ namespace Sla.DECCORE
         public override TypeField findTruncation(int4 offset, int4 sz, PcodeOp op, int4 slot, int4 newoff)
         {
             // No new scoring is done, but if a cached result is available, return it.
-            const Funcdata* fd = op->getParent()->getFuncdata();
-            const ResolvedUnion* res = fd->getUnionField(this, op, slot);
+            Funcdata fd = op->getParent()->getFuncdata();
+            ResolvedUnion res = fd->getUnionField(this, op, slot);
             if (res != (ResolvedUnion*)0 && res->getFieldNum() >= 0)
             {
-                const TypeField* field = getField(res->getFieldNum());
+                TypeField field = getField(res->getFieldNum());
                 newoff = offset - field->offset;
                 if (newoff + sz > field->type->getSize())
-                    return (const TypeField*)0; // Truncation spans more than one field
+                    return (TypeField*)0; // Truncation spans more than one field
                 return field;
             }
-            return (const TypeField*)0;
+            return (TypeField*)0;
         }
 
-        //  virtual Datatype *getSubType(uintb off,uintb *newoff) const;
+        //  virtual Datatype *getSubType(uintb off,uintb *newoff);
 
         public override int4 numDepend() => field.size();
 
@@ -110,7 +110,7 @@ namespace Sla.DECCORE
         {
             int4 res = Datatype::compare(op, level);
             if (res != 0) return res;
-            const TypeUnion* tu = (const TypeUnion*)&op;
+            TypeUnion tu = (TypeUnion*)&op;
             vector<TypeField>::const_iterator iter1, iter2;
 
             if (field.size() != tu->field.size()) return (tu->field.size() - field.size());
@@ -153,7 +153,7 @@ namespace Sla.DECCORE
         {
             int4 res = Datatype::compareDependency(op);
             if (res != 0) return res;
-            const TypeUnion* tu = (const TypeUnion*)&op;
+            TypeUnion* tu = (TypeUnion*)&op;
             vector<TypeField>::const_iterator iter1, iter2;
 
             if (field.size() != tu->field.size()) return (tu->field.size() - field.size());
@@ -196,7 +196,7 @@ namespace Sla.DECCORE
         public override Datatype resolveInFlow(PcodeOp op, int4 slot)
         {
             Funcdata* fd = op->getParent()->getFuncdata();
-            const ResolvedUnion* res = fd->getUnionField(this, op, slot);
+            ResolvedUnion* res = fd->getUnionField(this, op, slot);
             if (res != (ResolvedUnion*)0)
                 return res->getDatatype();
             ScoreUnionFields scoreFields(*fd->getArch()->types,this,op,slot);
@@ -206,8 +206,8 @@ namespace Sla.DECCORE
 
         public override Datatype findResolve(PcodeOp op, int4 slot)
         {
-            const Funcdata* fd = op->getParent()->getFuncdata();
-            const ResolvedUnion* res = fd->getUnionField(this, op, slot);
+            Funcdata fd = op->getParent()->getFuncdata();
+            ResolvedUnion res = fd->getUnionField(this, op, slot);
             if (res != (ResolvedUnion*)0)
                 return res->getDatatype();
             return this;
@@ -241,12 +241,12 @@ namespace Sla.DECCORE
         public override TypeField resolveTruncation(int4 offset, PcodeOp op, int4 slot, int4 newoff)
         {
             Funcdata* fd = op->getParent()->getFuncdata();
-            const ResolvedUnion* res = fd->getUnionField(this, op, slot);
+            ResolvedUnion res = fd->getUnionField(this, op, slot);
             if (res != (ResolvedUnion*)0)
             {
                 if (res->getFieldNum() >= 0)
                 {
-                    const TypeField* field = getField(res->getFieldNum());
+                    TypeField field = getField(res->getFieldNum());
                     newoff = offset - field->offset;
                     return field;
                 }
@@ -267,12 +267,12 @@ namespace Sla.DECCORE
                 fd->setUnionField(this, op, slot, scoreFields.getResult());
                 if (scoreFields.getResult().getFieldNum() >= 0)
                 {
-                    const TypeField* field = getField(scoreFields.getResult().getFieldNum());
+                    TypeField field = getField(scoreFields.getResult().getFieldNum());
                     newoff = offset - field->offset;
                     return field;
                 }
             }
-            return (const TypeField*)0;
+            return (TypeField*)0;
         }
     }
 }

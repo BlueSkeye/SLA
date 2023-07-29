@@ -90,7 +90,7 @@ namespace Sla.DECCORE
                     if (!op->getIn(slot)->isConstant()) break;
                 if (op->getEvalType() == PcodeOp::binary)
                 {
-                    const Address &addr(op->getIn(1 - slot)->getAddr());
+                    Address addr = op->getIn(1 - slot)->getAddr();
                     uintb otherval;
                     if (!addr.isConstant())
                     {
@@ -325,7 +325,7 @@ namespace Sla.DECCORE
             vector<GuardRecord>::const_iterator iter;
             for (iter = selectguards.begin(); iter != selectguards.end(); ++iter)
             {
-                const GuardRecord &guard(*iter);
+                GuardRecord guard = *iter;
                 int4 matchval = guard.valueMatch(vn, baseVn, bitsPreserved);
                 // if (matchval == 2)   TODO: we need to check for aliases
                 if (matchval == 0) continue;
@@ -722,7 +722,7 @@ namespace Sla.DECCORE
             List<uintb> label, JumpModel orig)
         {
             uintb val, switchval;
-            const JumpValuesRange* origrange = (( const JumpBasic*)orig)->getValueRange();
+            JumpValuesRange origrange = ((JumpBasic*)orig)->getValueRange();
 
             bool notdone = origrange->initializeForReading();
             while (notdone)

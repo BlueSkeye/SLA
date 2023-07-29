@@ -17,12 +17,12 @@ namespace Sla.DECCORE
             behave = new OpBehavior(CPUI_LOAD, false, true); // Dummy behavior
         }
 
-        //  virtual Datatype *getInputLocal(const PcodeOp *op,int4 slot) const;
+        //  virtual Datatype *getInputLocal(const PcodeOp *op,int4 slot);
         public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
         {
             if (slot != 1) return (Datatype*)0;
             Datatype* reqtype = op->getOut()->getHighTypeDefFacing();   // Cast load pointer to match output
-            const Varnode* invn = op->getIn(1);
+            Varnode invn = op->getIn(1);
             Datatype* curtype = invn->getHighTypeReadFacing(op);
             AddrSpace* spc = op->getIn(0)->getSpaceFromConst();
             // Its possible that the input type is not a pointer to the output type

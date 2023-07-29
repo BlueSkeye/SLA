@@ -203,7 +203,7 @@ namespace Sla.DECCORE
         /// \return the data-type
         public virtual Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
         {
-            const Varnode* vn = op->getIn(slot);
+            Varnode vn = op->getIn(slot);
             if (vn->isAnnotation()) return (Datatype*)0;
             Datatype* reqtype = op->inputTypeLocal(slot);
             Datatype* curtype = vn->getHighTypeReadFacing(op);

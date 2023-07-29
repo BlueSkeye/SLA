@@ -53,8 +53,8 @@ namespace Sla.DECCORE
             }
             else if (valueSet.getCount() == widenIteration)
             {
-                const CircleRange* landmark = valueSet.getLandMark();
-                if (landmark != (const CircleRange*)0) {
+                CircleRange landmark = valueSet.getLandMark();
+                if (landmark != (CircleRange*)0) {
                     bool leftIsStable = range.getMin() == newRange.getMin();
                     range = newRange;   // Preserve any new step information
                     if (landmark->contains(range))

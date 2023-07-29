@@ -53,9 +53,9 @@ namespace Sla.EXTRA
 
         public override void restoreXml(DocumentStorage store)
         {
-            const Element* el = store.getTag("xml_savefile");
-            if (el == (const Element*)0)
-    throw new LowlevelError("Could not find xml_savefile tag");
+            Element el = store.getTag("xml_savefile");
+            if (el == (Element*)0)
+                throw new LowlevelError("Could not find xml_savefile tag");
 
             restoreXmlHeader(el);
             {
@@ -63,7 +63,7 @@ namespace Sla.EXTRA
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> adjustvma;
             }
-            const List &list(el->getChildren());
+            List list = el->getChildren();
             List::const_iterator iter;
 
             iter = list.begin();

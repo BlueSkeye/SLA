@@ -60,7 +60,7 @@ namespace Sla.SLEIGH
         public static PatternExpression restoreExpression(Element el, Translate trans)
         {
             PatternExpression* res;
-            const string &nm(el->getName());
+            string nm = el->getName();
 
             if (nm == "tokenfield")
                 res = new TokenField();

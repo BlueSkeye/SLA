@@ -42,12 +42,12 @@ namespace Sla.EXTRA
         /// Reconstruct commands from an XML tag
         private void restoreXmlCommands(Element el)
         {
-            const List &list(el->getChildren());
+            List list = el->getChildren();
             List::const_iterator iter;
 
             for (iter = list.begin(); iter != list.end(); ++iter)
             {
-                const Element* subel = *iter;
+                Element subel = *iter;
                 commands.push_back(subel->getContent());
             }
         }
@@ -185,14 +185,14 @@ namespace Sla.EXTRA
         /// Load tests from a \<decompilertest> tag.
         public void restoreXml(DocumentStorage store, Element el)
         {
-            const List &list(el->getChildren());
+            List list = el->getChildren();
             List::const_iterator iter = list.begin();
             bool sawScript = false;
             bool sawTests = false;
             bool sawProgram = false;
             while (iter != list.end())
             {
-                const Element* subel = *iter;
+                Element subel = *iter;
                 ++iter;
                 if (subel->getName() == "script")
                 {

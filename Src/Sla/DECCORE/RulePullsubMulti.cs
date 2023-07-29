@@ -238,7 +238,7 @@ namespace Sla.DECCORE
                     uint4 skipleft = shift;
                     for (int4 i = joinrec->numPieces() - 1; i >= 0; --i)
                     { // Move from least significant to most
-                        const VarnodeData &vdata(joinrec->getPiece(i));
+                        VarnodeData vdata = joinrec->getPiece(i);
                         if (skipleft >= vdata.size)
                         {
                             skipleft -= vdata.size;

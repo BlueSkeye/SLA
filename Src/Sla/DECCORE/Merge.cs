@@ -313,8 +313,8 @@ namespace Sla.DECCORE
         /// \return \b true if \b vn is shadowed by another Varnode in its high-level variable
         private static bool shadowedVarnode(Varnode vn)
         {
-            const Varnode* othervn;
-            const HighVariable* high = vn->getHigh();
+            Varnode othervn;
+            HighVariable high = vn->getHigh();
             int4 num, i;
 
             num = high->numInstances();
@@ -433,8 +433,8 @@ namespace Sla.DECCORE
                 else
                 {
                     int4 slot = trimOp->getSlot(inVn);
-                    const ResolvedUnion* resUnion = data.getUnionField(ct, trimOp, slot);
-                    int4 fieldNum = (resUnion == (const ResolvedUnion*)0) ? -1 : resUnion->getFieldNum();
+                    ResolvedUnion resUnion = data.getUnionField(ct, trimOp, slot);
+                    int4 fieldNum = (resUnion == (ResolvedUnion*)0) ? -1 : resUnion->getFieldNum();
                     data.forceFacingType(ct, fieldNum, copyOp, 0);
                 }
             }
@@ -981,8 +981,8 @@ namespace Sla.DECCORE
                 Datatype* ct = rootVn->getType();
                 if (ct->needsResolution())
                 {
-                    const ResolvedUnion* resUnion = data.getUnionField(ct, oldCopy, 0);
-                    int4 fieldNum = (resUnion == (const ResolvedUnion*)0) ? -1 : resUnion->getFieldNum();
+                    ResolvedUnion resUnion = data.getUnionField(ct, oldCopy, 0);
+                    int4 fieldNum = (resUnion == (ResolvedUnion*)0) ? -1 : resUnion->getFieldNum();
                     data.forceFacingType(ct, fieldNum, domCopy, 0);
                     data.forceFacingType(ct, fieldNum, domCopy, -1);
                     if (ct->getMetatype() == TYPE_PARTIALUNION)
@@ -1225,7 +1225,7 @@ namespace Sla.DECCORE
             HighVariable* ahigh = a->getHigh();
 
             testCache.updateHigh(high);
-            const Cover &highCover(high->internalCover);    // Only check for intersections with cover contributing to inflate
+            Cover highCover = high->internalCover;    // Only check for intersections with cover contributing to inflate
 
             for (int4 i = 0; i < ahigh->numInstances(); ++i)
             {
@@ -1242,7 +1242,7 @@ namespace Sla.DECCORE
                 piece->updateIntersections();
                 for (int4 i = 0; i < piece->numIntersection(); ++i)
                 {
-                    const VariablePiece* otherPiece = piece->getIntersection(i);
+                    VariablePiece otherPiece = piece->getIntersection(i);
                     HighVariable* otherHigh = otherPiece->getHigh();
                     int4 off = otherPiece->getOffset() - piece->getOffset();
                     for (int4 i = 0; i < otherHigh->numInstances(); ++i)
@@ -1312,7 +1312,7 @@ namespace Sla.DECCORE
             list<PcodeOp*>::iterator iter;
             PcodeOp* op;
             Varnode* vn1,*vn2;
-            const BlockGraph &bblocks(data.getBasicBlocks());
+            BlockGraph bblocks = data.getBasicBlocks();
 
             for (int4 i = 0; i < bblocks.getSize(); ++i)
             { // Do merges in linear block order
@@ -1488,7 +1488,7 @@ namespace Sla.DECCORE
             int4 i;
             HighVariable* high_in,*high_out;
             Varnode* vn1,*vn2;
-            const Datatype* ct;
+            Datatype ct;
 
             for (oiter = data.beginOpAlive(); oiter != data.endOpAlive(); ++oiter)
             {

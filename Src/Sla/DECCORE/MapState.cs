@@ -207,7 +207,7 @@ namespace Sla.DECCORE
         public bool initialize()
         {
             // Enforce boundaries of local variables
-            const Range* lastrange = range.getLastSignedRange(spaceid);
+            Range lastrange = range.getLastSignedRange(spaceid);
             if (lastrange == (Range*)0) return false;
             if (maplist.empty()) return false;
             uintb high = spaceid->wrapOffset(lastrange->getLast() + 1);
@@ -319,8 +319,8 @@ namespace Sla.DECCORE
         {
             checker.gather(&fd, spaceid, false);
 
-            const vector<AliasChecker::AddBase> &addbase(checker.getAddBase());
-            const vector<uintb> &alias(checker.getAlias());
+            List<AliasChecker::AddBase> addbase = checker.getAddBase();
+            List<uintb> alias = checker.getAlias();
             uintb offset;
             Datatype* ct;
 
@@ -349,11 +349,11 @@ namespace Sla.DECCORE
             }
 
             TypeFactory* typeFactory = fd.getArch()->types;
-            const list<LoadGuard> &loadGuard(fd.getLoadGuards());
+            List<LoadGuard> loadGuard = fd.getLoadGuards();
             for (list<LoadGuard>::const_iterator giter = loadGuard.begin(); giter != loadGuard.end(); ++giter)
                 addGuard(*giter, CPUI_LOAD, typeFactory);
 
-            const list<LoadGuard> &storeGuard(fd.getStoreGuards());
+            List<LoadGuard> storeGuard = fd.getStoreGuards();
             for (list<LoadGuard>::const_iterator siter = storeGuard.begin(); siter != storeGuard.end(); ++siter)
                 addGuard(*siter, CPUI_STORE, typeFactory);
         }

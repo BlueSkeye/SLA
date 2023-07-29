@@ -45,8 +45,8 @@ namespace Sla.DECCORE
 
         public override Datatype getInputLocal(PcodeOp op, int4 slot)
         {
-            const FuncCallSpecs* fc;
-            const Varnode* vn;
+            FuncCallSpecs fc;
+            Varnode vn;
             Datatype* ct;
 
             vn = op->getIn(0);
@@ -80,8 +80,8 @@ namespace Sla.DECCORE
 
         public override Datatype getOutputLocal(PcodeOp op)
         {
-            const FuncCallSpecs* fc;
-            const Varnode* vn;
+            FuncCallSpecs fc;
+            Varnode vn;
             Datatype* ct;
 
             vn = op->getIn(0);      // Varnode containing pointer to fspec

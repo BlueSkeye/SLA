@@ -64,7 +64,7 @@ namespace Sla.DECCORE
         /// \param data is the function to examine
         private static void protectSwitchPaths(Funcdata data)
         {
-            const BlockGraph &bblocks(data.getBasicBlocks());
+            BlockGraph bblocks = data.getBasicBlocks();
             for (int4 i = 0; i < bblocks.getSize(); ++i)
             {
                 PcodeOp* op = bblocks.getBlock(i)->lastOp();

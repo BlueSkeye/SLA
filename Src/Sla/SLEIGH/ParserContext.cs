@@ -204,7 +204,7 @@ namespace Sla.SLEIGH
             off += bytestart;
             if (off >= 16)
                 throw BadDataError("Instruction is using more than 16 bytes");
-            const uint1* ptr = buf + off;
+            uint1* ptr = buf + off;
             uintm res = 0;
             for (int4 i = 0; i < size; ++i)
             {
@@ -238,7 +238,7 @@ namespace Sla.SLEIGH
             off += (startbit / 8);
             if (off >= 16)
                 throw BadDataError("Instruction is using more than 16 bytes");
-            const uint1* ptr = buf + off;
+            uint1* ptr = buf + off;
             startbit = startbit % 8;
             int4 bytesize = (startbit + size - 1) / 8 + 1;
             uintm res = 0;

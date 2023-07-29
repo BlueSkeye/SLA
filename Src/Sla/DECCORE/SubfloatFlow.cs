@@ -36,7 +36,7 @@ namespace Sla.DECCORE
 
             if (vn->isConstant())
             {
-                const FloatFormat* form2 = getFunction()->getArch()->translate->getFloatFormat(vn->getSize());
+                FloatFormat form2 = getFunction()->getArch()->translate->getFloatFormat(vn->getSize());
                 if (form2 == (FloatFormat*)0)
                     return (TransformVar*)0;  // Unsupported constant format
                                 // Return the converted form of the constant

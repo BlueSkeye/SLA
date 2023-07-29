@@ -32,7 +32,7 @@ namespace Sla.EXTRA
                 throw IfaceExecutionError("Unable to open file " + filename);
 
             buffer = dcp->conf->loader->load(size, offset);
-            os.write((const char*)buffer,size);
+            os.write((char*)buffer,size);
             delete[] buffer;
             os.close();
         }

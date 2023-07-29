@@ -23,7 +23,7 @@ namespace Sla.DECCORE
 
         public override Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)
         {
-            const Varnode* vn = op->getOut();
+            Varnode vn = op->getOut();
             Datatype* dt = vn->getHighTypeDefFacing();
             type_metatype meta = dt->getMetatype();
             if ((meta == TYPE_INT) || (meta == TYPE_UINT))      // PIECE casts to uint or int, based on output

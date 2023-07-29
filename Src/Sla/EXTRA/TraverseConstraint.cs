@@ -19,6 +19,6 @@ namespace Sla.EXTRA
         {
         }
   
-        //  int4 getId(void) const { return uniqid; }
+        //  int4 getId(void) { return uniqid; }
     }
 }

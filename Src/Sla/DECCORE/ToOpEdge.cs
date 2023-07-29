@@ -37,8 +37,8 @@ namespace Sla.DECCORE
         /// \return \b true if \b this should be ordered before the other edge
         public static bool operator <(ToOpEdge op1, ToOpEdge op2)
         {
-            const Address &addr1(op->getSeqNum().getAddr());
-            const Address &addr2(op2.op->getSeqNum().getAddr());
+            Address addr1 = op->getSeqNum().getAddr();
+            Address addr2 = op2.op->getSeqNum().getAddr();
             if (addr1 != addr2)
                 return (addr1 < addr2);
             uintm ord1 = op->getSeqNum().getOrder();

@@ -42,7 +42,7 @@ namespace Sla.SLEIGH
 
             vector<OpTpl*>::const_iterator iter;
             OpTpl* op;
-            const vector<OpTpl*> &ops(construct->getOpvec());
+            List<OpTpl> ops = construct->getOpvec();
 
             for (iter = ops.begin(); iter != ops.end(); ++iter)
             {

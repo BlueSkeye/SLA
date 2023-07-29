@@ -28,7 +28,7 @@ namespace Sla.EXTRA
             int4 count = 0;
             for (iter = reglist.begin(); iter != reglist.end(); ++iter)
             {
-                const VarnodeData &dat((*iter).first);
+                VarnodeData dat = (*iter).first;
                 if (dat.space == spc)
                 {
                     if (dat.offset <= lastoff) continue; // Nested register def

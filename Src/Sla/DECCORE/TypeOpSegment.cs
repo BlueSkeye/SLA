@@ -26,8 +26,8 @@ namespace Sla.DECCORE
             behave = new OpBehavior(CPUI_SEGMENTOP, false, true); // Dummy behavior
         }
 
-        //  virtual Datatype *getOutputLocal(const PcodeOp *op) const;
-        //  virtual Datatype *getInputLocal(const PcodeOp *op,int4 slot) const;
+        //  virtual Datatype *getOutputLocal(PcodeOp *op) const;
+        //  virtual Datatype *getInputLocal(PcodeOp *op,int4 slot) const;
 
         public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
         {

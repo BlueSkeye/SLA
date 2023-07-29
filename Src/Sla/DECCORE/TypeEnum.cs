@@ -220,7 +220,7 @@ namespace Sla.DECCORE
             int4 res = TypeBase::compareDependency(op); // Compare as basic types first
             if (res != 0) return res;
 
-            const TypeEnum* te = (const TypeEnum*) &op;
+            TypeEnum te = (TypeEnum*) &op;
             map<uintb, string>::const_iterator iter1, iter2;
 
             if (namemap.size() != te->namemap.size())

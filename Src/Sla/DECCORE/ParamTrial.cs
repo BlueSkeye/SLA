@@ -256,8 +256,8 @@ namespace Sla.DECCORE
                 testaddr = addr;
             if (testaddr != newaddr)
                 return false;
-            if (entry != (const ParamEntry*)0) return false;
-            //  if (entry != (const ParamEntry *)0) {
+            if (entry != (ParamEntry*)0) return false;
+            //  if (entry != (ParamEntry*)0) {
             //    int4 res = entry->justifiedContain(newaddr,sz);
             //    if (res < 0) return false;
             //  }

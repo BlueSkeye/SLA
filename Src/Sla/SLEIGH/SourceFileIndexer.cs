@@ -58,7 +58,7 @@ namespace Sla.SLEIGH
         /// read a stored index mapping from an XML file
         public void restoreXml(Element el)
         {
-            const List &sourceFiles(el->getChildren());
+            List sourceFiles = el->getChildren();
             List::const_iterator iter = sourceFiles.begin();
             for (; iter != sourceFiles.end(); ++iter)
             {
@@ -76,7 +76,7 @@ namespace Sla.SLEIGH
             for (int4 i = 0; i < leastUnusedIndex; ++i)
             {
                 s << ("<sourcefile name=\"");
-                const char* str = indexToFile.at(i).c_str();
+                string str = indexToFile.at(i).c_str();
                 xml_escape(s, str);
                 s << "\" index=\"" << dec << i << "\"/>\n";
             }

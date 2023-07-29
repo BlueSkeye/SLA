@@ -50,7 +50,7 @@ namespace Sla.DECCORE
 
             for (iter = scope->rangetree.begin(); iter != scope->rangetree.end(); ++iter)
             {
-                const Range &rng(*iter);
+                Range rng = *iter;
                 pair<ScopeResolve::const_iterator, ScopeResolve::const_iterator> res;
                 res = resolvemap.find(rng.getFirstAddr());
                 while (res.first != res.second)
@@ -91,7 +91,7 @@ namespace Sla.DECCORE
             set<Range>::const_iterator iter;
             for (iter = scope->rangetree.begin(); iter != scope->rangetree.end(); ++iter)
             {
-                const Range &rng(*iter);
+                Range rng = *iter;
                 resolvemap.insert(scope, rng.getFirstAddr(), rng.getLastAddr());
             }
         }
@@ -505,7 +505,7 @@ namespace Sla.DECCORE
             penditer = flagbase.end();
             for (; piter != penditer; ++piter)
             {
-                const Address &addr((*piter).first);
+                Address addr = (*piter).first;
                 uint4 val = (*piter).second;
                 encoder.openElement(ELEM_PROPERTY_CHANGEPOINT);
                 addr.getSpace()->encodeAttributes(encoder, addr.getOffset());

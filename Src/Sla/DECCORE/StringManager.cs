@@ -58,7 +58,7 @@ namespace Sla.DECCORE
         public bool isString(Address addr,Datatype charType)
         {
             bool isTrunc;       // unused here
-            const vector<uint1> &buffer(getStringData(addr, charType, isTrunc));
+            List<uint1> buffer = getStringData(addr, charType, isTrunc);
             return !buffer.empty();
         }
 
@@ -84,7 +84,7 @@ namespace Sla.DECCORE
             {
                 encoder.openElement(ELEM_STRING);
                 (*iter1).first.encode(encoder);
-                const StringData &stringData((*iter1).second);
+                StringData stringData = (*iter1).second;
                 encoder.openElement(ELEM_BYTES);
                 encoder.writeBool(ATTRIB_TRUNC, stringData.isTruncated);
                 ostringstream s;

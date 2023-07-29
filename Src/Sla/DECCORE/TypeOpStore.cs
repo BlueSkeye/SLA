@@ -16,12 +16,12 @@ namespace Sla.DECCORE
             behave = new OpBehavior(CPUI_STORE, false, true); // Dummy behavior
         }
 
-        //  virtual Datatype *getInputLocal(const PcodeOp *op,int4 slot) const;
+        //  virtual Datatype *getInputLocal(PcodeOp *op,int4 slot) const;
 
         public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
         {
             if (slot == 0) return (Datatype*)0;
-            const Varnode* pointerVn = op->getIn(1);
+            Varnode pointerVn = op->getIn(1);
             Datatype* pointerType = pointerVn->getHighTypeReadFacing(op);
             Datatype* pointedToType = pointerType;
             Datatype* valueType = op->getIn(2)->getHighTypeReadFacing(op);

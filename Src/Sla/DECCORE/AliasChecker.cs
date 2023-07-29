@@ -64,12 +64,12 @@ namespace Sla.DECCORE
 
             if (proto.hasModel())
             {
-                const RangeList &localrange(proto.getLocalRange());
-                const RangeList &paramrange(proto.getParamRange());
+                RangeList localrange = proto.getLocalRange();
+                RangeList paramrange = proto.getParamRange();
 
-                const Range* local = localrange.getFirstRange();
-                const Range* param = paramrange.getLastRange();
-                if ((local != (const Range*)0)&& (param != (const Range*)0)) {
+                Range local = localrange.getFirstRange();
+                Range param = paramrange.getLastRange();
+                if ((local != (Range*)0)&& (param != (Range*)0)) {
                     localBoundary = param->getLast();
                     if (direction == -1)
                     {
@@ -114,7 +114,7 @@ namespace Sla.DECCORE
 
         public AliasChecker()
         {
-            fd = (const Funcdata*)0;
+            fd = (Funcdata*)0;
             space = (AddrSpace*)0;
             calculated = false;
         }

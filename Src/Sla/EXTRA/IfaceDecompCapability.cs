@@ -21,7 +21,7 @@ namespace Sla.EXTRA
 
         // private IfaceDecompCapability(IfaceDecompCapability op2);	///< Not implemented
 
-        // private IfaceDecompCapability &operator=(const IfaceDecompCapability &op2);	///< Not implemented
+        // private IfaceDecompCapability &operator=(IfaceDecompCapability &op2);	///< Not implemented
 
         public override void registerCommands(IfaceStatus status)
         {

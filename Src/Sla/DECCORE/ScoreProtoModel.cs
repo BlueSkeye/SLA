@@ -102,7 +102,7 @@ namespace Sla.DECCORE
 
             for (int4 i = 0; i < entry.size(); ++i)
             {
-                const PEntry &p(entry[i]);
+                PEntry p = entry[i];
                 if (p.slot > nextfree)
                 {   // We have some kind of hole in our slot coverage
                     while (nextfree < p.slot)

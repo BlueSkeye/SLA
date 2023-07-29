@@ -208,7 +208,7 @@ private class AddrRange
                 (*iter).first = plus1;
                 typename std::multiset<AddrRange>::iterator newiter;
                 newiter = tree.insert(hint, AddrRange(i, (*iter).subsort));
-                const AddrRange &newrange(*newiter);
+                AddrRange newrange = *newiter;
                 newrange.first = f;
                 newrange.a = (*iter).a;
                 newrange.b = (*iter).b;

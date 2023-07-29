@@ -18,7 +18,7 @@ namespace Sla.DECCORE
             fd = fd_in;
             if (justproto)
             {       // We only provide info on the recovered prototype
-                const FuncProto &fproto(fd->getFuncProto());
+                FuncProto fproto = fd->getFuncProto();
                 int4 num = fproto.numParams();
                 for (int4 i = 0; i < num; ++i)
                 {
@@ -88,12 +88,12 @@ namespace Sla.DECCORE
             list<ParamMeasure>::const_iterator pm_iter;
             for (pm_iter = InputParamMeasures.begin(); pm_iter != InputParamMeasures.end(); ++pm_iter)
             {
-                const ParamMeasure &pm(*pm_iter);
+                ParamMeasure pm = *pm_iter;
                 pm.encode(encoder, ELEM_INPUT, moredetail);
             }
             for (pm_iter = OutputParamMeasures.begin(); pm_iter != OutputParamMeasures.end(); ++pm_iter)
             {
-                const ParamMeasure &pm(*pm_iter);
+                ParamMeasure pm = *pm_iter;
                 pm.encode(encoder, ELEM_OUTPUT, moredetail);
             }
             encoder.closeElement(ELEM_PARAMMEASURES);
@@ -107,14 +107,14 @@ namespace Sla.DECCORE
             list<ParamMeasure>::const_iterator pm_iter = InputParamMeasures.begin();
             for (pm_iter = InputParamMeasures.begin(); pm_iter != InputParamMeasures.end(); ++pm_iter)
             {
-                const ParamMeasure &pm(*pm_iter);
+                ParamMeasure pm = *pm_iter;
                 pm.savePretty(s, moredetail);
             }
             s << "Num Returns: " << OutputParamMeasures.size() << "\n";
             pm_iter = OutputParamMeasures.begin();
             for (pm_iter = OutputParamMeasures.begin(); pm_iter != OutputParamMeasures.end(); ++pm_iter)
             {
-                const ParamMeasure &pm(*pm_iter);
+                ParamMeasure pm = *pm_iter;
                 pm.savePretty(s, moredetail);
             }
             s << "\n";

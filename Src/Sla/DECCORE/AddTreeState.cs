@@ -301,7 +301,7 @@ namespace Sla.DECCORE
             two_is_non = checkTerm(op->getIn(1), treeCoeff);
             if (!valid) return false;
 
-            if (pRelType != (const TypePointerRel*)0) {
+            if (pRelType != (TypePointerRel*)0) {
                 if (multsum != 0 || nonmultsum >= size || !multiple.empty())
                 {
                     valid = false;
@@ -519,7 +519,7 @@ namespace Sla.DECCORE
         /// data-type offset has been calculated, and preserving and remaining terms.
         private void buildTree()
         {
-            if (pRelType != (const TypePointerRel*)0) {
+            if (pRelType != (TypePointerRel*)0) {
                 int4 ptrOff = ((TypePointerRel*)ct)->getPointerOffset();
                 offset -= ptrOff;
                 offset &= ptrmask;
@@ -569,7 +569,7 @@ namespace Sla.DECCORE
         {
             multsum = 0;
             nonmultsum = 0;
-            if (pRelType != (const TypePointerRel*)0) {
+            if (pRelType != (TypePointerRel*)0) {
                 nonmultsum = ((TypePointerRel*)ct)->getPointerOffset();
                 nonmultsum &= ptrmask;
             }
@@ -597,10 +597,10 @@ namespace Sla.DECCORE
             baseType = ct->getPtrTo();
             multsum = 0;        // Sums start out as zero
             nonmultsum = 0;
-            pRelType = (const TypePointerRel*)0;
+            pRelType = (TypePointerRel*)0;
             if (ct->isFormalPointerRel())
             {
-                pRelType = (const TypePointerRel*)ct;
+                pRelType = (TypePointerRel*)ct;
                 baseType = pRelType->getParent();
                 nonmultsum = pRelType->getPointerOffset();
                 nonmultsum &= ptrmask;

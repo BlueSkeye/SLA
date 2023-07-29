@@ -57,7 +57,7 @@ namespace Sla.EXTRA
         {
             while (cursymbol < number_of_symbols)
             {
-                const asymbol* a = symbol_table[cursymbol];
+                asymbol a = symbol_table[cursymbol];
                 if ((a->flags & BSF_FUNCTION) != 0)
                 {
                     if (a->name != null)
@@ -243,7 +243,7 @@ namespace Sla.EXTRA
         { // Get record for next symbol if it exists, otherwise return false
             if (cursymbol >= number_of_symbols) return false;
 
-            const asymbol* a = symbol_table[cursymbol];
+            asymbol a = symbol_table[cursymbol];
             cursymbol += 1;
             advanceToNextSymbol();
             record.name = a->name;

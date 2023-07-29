@@ -232,9 +232,9 @@ namespace Sla.EXTRA
         protected override void buildSpecFile(DocumentStorage store)
         { // Given a specific language, make sure relevant spec files are loaded
             bool language_reuse = isTranslateReused();
-            const LanguageDescription &language(description[languageindex]);
+            LanguageDescription language = description[languageindex];
             string compiler = archid.substr(archid.rfind(':') + 1);
-            const CompilerTag &compilertag(language.getCompiler(compiler));
+            CompilerTag compilertag = language.getCompiler(compiler);
 
             string processorfile;
             string compilerfile;
@@ -305,7 +305,7 @@ namespace Sla.EXTRA
 
         protected override void modifySpaces(Translate trans)
         {
-            const LanguageDescription &language(description[languageindex]);
+            LanguageDescription language = description[languageindex];
             for (int4 i = 0; i < language.numTruncations(); ++i)
             {
                 trans->truncateSpace(language.getTruncation(i));
@@ -389,7 +389,7 @@ namespace Sla.EXTRA
 
         ~SleighArchitecture()
         {
-            translate = (const Translate*)0;
+            translate = (Translate*)0;
         }
 
         public override string getDescription() => description[languageindex].getDescription();

@@ -59,7 +59,7 @@ namespace Sla.SLEIGH
         {
             uint4 ind = (uint4)patval->getValue(walker);
             // The resolve routine has checked that -ind- must be a valid index
-            const VarnodeData &fix(varnode_table[ind]->getFixedVarnode());
+            VarnodeData fix = varnode_table[ind]->getFixedVarnode();
             hand.space = fix.space;
             hand.offset_space = (AddrSpace*)0; // Not a dynamic value
             hand.offset_offset = fix.offset;
@@ -112,7 +112,7 @@ namespace Sla.SLEIGH
 
         public override void restoreXml(Element el, SleighBase trans)
         {
-            const List &list(el->getChildren());
+            List list = el->getChildren();
             List::const_iterator iter;
             iter = list.begin();
             patval = (PatternValue*)PatternExpression::restoreExpression(*iter, trans);
@@ -120,7 +120,7 @@ namespace Sla.SLEIGH
             ++iter;
             while (iter != list.end())
             {
-                const Element* subel = *iter;
+                Element subel = *iter;
                 if (subel->getName() == "var")
                 {
                     uintm id;

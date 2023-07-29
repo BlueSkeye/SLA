@@ -57,7 +57,7 @@ namespace Sla.DECCORE
                 }
                 else
                 {
-                    rootEdges = (const vector<ValueSet*>*)0;
+                    rootEdges = (List<ValueSet>*)0;
                     iter = vn->beginDescend();
                 }
             }

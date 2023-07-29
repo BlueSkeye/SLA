@@ -72,7 +72,7 @@ namespace Sla.DECCORE
                 return underlie->find(addr);
             }
 
-            const uint1* pageptr = (*iter).second;
+            uint1* pageptr = (*iter).second;
 
             uintb pageoffset = addr & ((uintb)(getPageSize() - 1));
             return constructValue(pageptr + pageoffset, getWordSize(), getSpace()->isBigEndian());
@@ -102,7 +102,7 @@ namespace Sla.DECCORE
                 underlie->getPage(addr, res, skip, size);
                 return;
             }
-            const uint1* pageptr = (*iter).second;
+            uint1* pageptr = (*iter).second;
             memcpy(res, pageptr + skip, size);
         }
 

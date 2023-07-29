@@ -73,7 +73,7 @@ namespace Sla.SLEIGH
 
         public override void restoreXml(Element el, SleighBase trans)
         {
-            const List &list(el->getChildren());
+            List list = el->getChildren();
             List::const_iterator iter;
             iter = list.begin();
             patval = (PatternValue*)PatternExpression::restoreExpression(*iter, trans);

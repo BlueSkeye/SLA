@@ -41,7 +41,7 @@ namespace Sla.SLEIGH
 
         public void setOutOfBandState(Constructor ct, int4 index, ConstructState tempstate, ParserWalker otherwalker)
         { // Initialize walker for future calls into getInstructionBytes assuming -ct- is the current position in the walk
-            const ConstructState* pt = otherwalker.point;
+            ConstructState pt = otherwalker.point;
             int4 curdepth = otherwalker.depth;
             while (pt->ct != ct)
             {

@@ -578,7 +578,7 @@ namespace Sla.SLEIGH
                 src_index = stoi(src_and_line.substr(0, pos), NULL, 10);
                 lineno = stoi(src_and_line.substr(pos + 1, src_and_line.length()), NULL, 10);
             }
-            const List &list(el->getChildren());
+            List list = el->getChildren();
             List::const_iterator iter;
             iter = list.begin();
             while (iter != list.end())

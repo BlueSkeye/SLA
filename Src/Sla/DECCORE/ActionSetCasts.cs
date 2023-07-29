@@ -424,7 +424,7 @@ namespace Sla.DECCORE
             CastStrategy* castStrategy = data.getArch()->print->getCastStrategy();
             // We follow data flow, doing basic blocks in dominance order
             // Doing operations in basic block order
-            const BlockGraph &basicblocks(data.getBasicBlocks());
+            BlockGraph basicblocks = data.getBasicBlocks();
             for (int4 j = 0; j < basicblocks.getSize(); ++j)
             {
                 BlockBasic* bb = (BlockBasic*)basicblocks.getBlock(j);

@@ -233,7 +233,7 @@ namespace Sla.SLEIGH
                     s >> sectionid;
                 }
             }
-            const List &list(el->getChildren());
+            List list = el->getChildren();
             List::const_iterator iter;
             iter = list.begin();
             if ((*iter)->getName() == "null")

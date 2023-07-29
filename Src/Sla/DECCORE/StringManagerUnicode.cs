@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         /// \return the number of characters or -1 if there is an invalid encoding
         private int4 checkCharacters(uint1[] buf, int4 size,int4 charsize)
         {
-            if (buf == (const uint1*)0) return -1;
+            if (buf == (uint1*)0) return -1;
             bool bigend = glb->translate->isBigEndian();
             int4 i = 0;
             int4 count = 0;
@@ -124,7 +124,7 @@ namespace Sla.DECCORE
                 string resString = s.str();
                 int4 newSize = resString.size();
                 stringData.byteData.reserve(newSize + 1);
-                const uint1* ptr = (const uint1*)resString.c_str();
+                uint1* ptr = (uint1*)resString.c_str();
                 stringData.byteData.assign(ptr, ptr + newSize);
                 stringData.byteData[newSize] = 0;       // Make sure there is a null terminator
             }

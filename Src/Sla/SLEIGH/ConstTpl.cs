@@ -213,7 +213,7 @@ namespace Sla.SLEIGH
                     return (uintb)(uintp)walker.getCurSpace();
                 case handle:
                     {
-                        const FixedHandle &hand(walker.getFixedHandle(value.handle_index));
+                        FixedHandle hand = walker.getFixedHandle(value.handle_index);
                         switch (select)
                         {
                             case v_space:
@@ -264,7 +264,7 @@ namespace Sla.SLEIGH
                     return walker.getCurSpace();
                 case handle:
                     {
-                        const FixedHandle &hand(walker.getFixedHandle(value.handle_index));
+                        FixedHandle hand = walker.getFixedHandle(value.handle_index);
                         switch (select)
                         {
                             case v_space:
@@ -339,7 +339,7 @@ namespace Sla.SLEIGH
                     return;
                 case handle:
                     {
-                        const FixedHandle &otherhand(walker.getFixedHandle(value.handle_index));
+                        FixedHandle otherhand = walker.getFixedHandle(value.handle_index);
                         switch (select)
                         {
                             case v_space:
@@ -366,7 +366,7 @@ namespace Sla.SLEIGH
           // we assume hand.space is already filled in
             if (type == handle)
             {
-                const FixedHandle &otherhand(walker.getFixedHandle(value.handle_index));
+                FixedHandle otherhand = walker.getFixedHandle(value.handle_index);
                 hand.offset_space = otherhand.offset_space;
                 hand.offset_offset = otherhand.offset_offset;
                 hand.offset_size = otherhand.offset_size;
@@ -435,7 +435,7 @@ namespace Sla.SLEIGH
 
         public void restoreXml(Element el, AddrSpaceManager manage)
         {
-            const string &typestring(el->getAttributeValue("type"));
+            string typestring = el->getAttributeValue("type");
             if (typestring == "real")
             {
                 type = real;

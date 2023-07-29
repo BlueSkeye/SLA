@@ -104,10 +104,10 @@
   \code
     class PutsCallBack : public BreakCallBack {
     public:
-      virtual bool addressCallback(const Address &addr);
+      virtual bool addressCallback(Address &addr);
     };
 
-    bool PutsCallBack::addressCallback(const Address &addr)
+    bool PutsCallBack::addressCallback(Address &addr)
 
     {
       MemoryState *mem = emulate->getMemoryState();

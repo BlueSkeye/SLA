@@ -261,7 +261,7 @@ namespace Sla.DECCORE
         public override void opCallind(PcodeOp op)
         {
             pushOp(&function_call, op);
-            const Funcdata* fd = op->getParent()->getFuncdata();
+            Funcdata fd = op->getParent()->getFuncdata();
             FuncCallSpecs* fc = fd->getCallSpecs(op);
             if (fc == (FuncCallSpecs*)0)
                 throw new LowlevelError("Missing indirect function callspec");

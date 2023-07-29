@@ -280,7 +280,7 @@ namespace Sla.DECCORE
             if (ptrto->getMetatype() == TYPE_UNION)
             {
                 Funcdata* fd = op->getParent()->getFuncdata();
-                const ResolvedUnion* res = fd->getUnionField(this, op, slot);
+                ResolvedUnion res = fd->getUnionField(this, op, slot);
                 if (res != (ResolvedUnion*)0)
                     return res->getDatatype();
                 ScoreUnionFields scoreFields(*fd->getArch()->types,this,op,slot);
@@ -294,8 +294,8 @@ namespace Sla.DECCORE
         {
             if (ptrto->getMetatype() == TYPE_UNION)
             {
-                const Funcdata* fd = op->getParent()->getFuncdata();
-                const ResolvedUnion* res = fd->getUnionField(this, op, slot);
+                Funcdata fd = op->getParent()->getFuncdata();
+                ResolvedUnion res = fd->getUnionField(this, op, slot);
                 if (res != (ResolvedUnion*)0)
                     return res->getDatatype();
             }

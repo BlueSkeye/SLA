@@ -203,7 +203,7 @@ namespace Sla.DECCORE
             if (!vn->isFree())
             {
                 ostringstream s;
-                const Address &addr(op->getAddr());
+                Address addr = op->getAddr();
                 s << "Defining varnode which is not free at " << addr.getShortcut();
                 addr.printRaw(s);
                 throw new LowlevelError(s.str());
@@ -211,7 +211,7 @@ namespace Sla.DECCORE
             if (vn->isConstant())
             {
                 ostringstream s;
-                const Address &addr(op->getAddr());
+                Address addr = op->getAddr();
                 s << "Assignment to constant at " << addr.getShortcut();
                 addr.printRaw(s);
                 throw new LowlevelError(s.str());

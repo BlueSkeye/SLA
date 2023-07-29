@@ -110,7 +110,7 @@ namespace Sla.DECCORE
         public void setValue(string nm,uintb cval)
         {
             // Set a "register" value
-            const VarnodeData &vdata(trans->getRegister(nm));
+            VarnodeData vdata = trans->getRegister(nm);
             setValue(vdata.space, vdata.offset, vdata.size, cval);
         }
 
@@ -124,7 +124,7 @@ namespace Sla.DECCORE
         public uintb getValue(string nm)
         {
             // Get a "register" value
-            const VarnodeData &vdata(trans->getRegister(nm));
+            VarnodeData vdata = trans->getRegister(nm);
             return getValue(vdata.space, vdata.offset, vdata.size);
         }
 

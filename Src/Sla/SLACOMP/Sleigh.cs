@@ -39,8 +39,8 @@ namespace Sla.SLACOMP
                 exit(2);
             }
 
-            const string SLAEXT(".sla");    // Default sla extension
-            const string SLASPECEXT(".slaspec");
+            const string SLAEXT = ".sla";    // Default sla extension
+            const string SLASPECEXT = ".slaspec";
             map<string, string> defines;
             bool unnecessaryPcodeWarning = false;
             bool lenientConflict = true;
@@ -107,7 +107,7 @@ namespace Sla.SLACOMP
                     cerr << "Too many parameters" << endl;
                     exit(1);
                 }
-                const string::size_type slaspecExtLen = SLASPECEXT.length();
+                string::size_type slaspecExtLen = SLASPECEXT.length();
 
                 vector<string> slaspecs;
                 string dirStr = ".";

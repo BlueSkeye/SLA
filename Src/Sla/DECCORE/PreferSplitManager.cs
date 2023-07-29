@@ -100,8 +100,8 @@ namespace Sla.DECCORE
             {
                 if (invn->getSpace()->getType() != IPTR_INTERNAL)
                 {
-                    const PreferSplitRecord* inrec = findRecord(invn);
-                    if (inrec == (const PreferSplitRecord*)0) return false;
+                    PreferSplitRecord inrec = findRecord(invn);
+                    if (inrec == (PreferSplitRecord*)0) return false;
                     if (inrec->splitoffset != inst->splitoffset) return false;
                     if (!invn->isFree()) return false;
                 }
@@ -127,8 +127,8 @@ namespace Sla.DECCORE
             istemp = false;
             if (outvn->getSpace()->getType() != IPTR_INTERNAL)
             {
-                const PreferSplitRecord* outrec = findRecord(outvn);
-                if (outrec == (const PreferSplitRecord*)0) return false;
+                PreferSplitRecord outrec = findRecord(outvn);
+                if (outrec == (PreferSplitRecord*)0) return false;
                 if (outrec->splitoffset != inst->splitoffset) return false;
             }
             else

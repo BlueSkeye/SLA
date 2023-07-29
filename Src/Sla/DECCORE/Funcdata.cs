@@ -2079,7 +2079,7 @@ namespace Sla.DECCORE
                 numspace = spc->numSpacebase();
                 for (i = 0; i < numspace; ++i)
                 {
-                    const VarnodeData &point(spc->getSpacebase(i));
+                    VarnodeData point = spc->getSpacebase(i);
                     // Find input varnode at this size and location
                     Datatype* ct = glb->types->getTypeSpacebase(spc, getAddress());
                     Datatype* ptr = glb->types->getTypePointer(point.size, ct, spc->getWordSize());
@@ -2120,7 +2120,7 @@ namespace Sla.DECCORE
             Varnode* vn;
 
             // Assume that id has a base register (otherwise an exception is thrown)
-            const VarnodeData &point(id->getSpacebase(0));
+            VarnodeData point = id->getSpacebase(0);
             vn = newVarnode(point.size, Address(point.space, point.offset));
             return vn;
         }
@@ -2135,7 +2135,7 @@ namespace Sla.DECCORE
             Varnode* vn;
 
             // Assume that id has a base register (otherwise an exception is thrown)
-            const VarnodeData &point(id->getSpacebase(0));
+            VarnodeData point = id->getSpacebase(0);
             vn = vbank.findInput(point.size, Address(point.space, point.offset));
             return vn;
         }
@@ -2328,7 +2328,7 @@ namespace Sla.DECCORE
         public FuncCallSpecs getCallSpecs(PcodeOp op)
         {
             int4 i;
-            const Varnode* vn;
+            Varnode* vn;
 
             vn = op->getIn(0);
             if (vn->getSpace()->getType() == IPTR_FSPEC)
@@ -2970,7 +2970,7 @@ namespace Sla.DECCORE
                   // Varnode addresses are unreliable for this test because copy propagation may have occurred
                   // So we check the actual ParamTrial which holds the original address
                   //	  if (j == 0) return false;
-                    const ParamTrial &curtrial(fc->getActiveInput()->getTrialForInputVarnode(j));
+                    ParamTrial curtrial = fc->getActiveInput()->getTrialForInputVarnode(j);
                     if (curtrial.getAddress() == trial.getAddress())
                     { // Check for same memory location
                         if (op->getParent() == opmatch->getParent())
@@ -2987,7 +2987,7 @@ namespace Sla.DECCORE
 
             if (fc->isInputActive())
             {
-                const ParamTrial &curtrial(fc->getActiveInput()->getTrialForInputVarnode(j));
+                ParamTrial curtrial = fc->getActiveInput()->getTrialForInputVarnode(j);
                 if (curtrial.isChecked())
                 {
                     if (curtrial.isActive())
@@ -3013,8 +3013,8 @@ namespace Sla.DECCORE
         {
             vector<TraverseNode> varlist;
             list<PcodeOp*>::const_iterator iter;
-            const Varnode* vn,*subvn;
-            const PcodeOp* op;
+            Varnode* vn,*subvn;
+            PcodeOp* op;
             int4 i;
             bool res = true;
 
@@ -3148,7 +3148,7 @@ namespace Sla.DECCORE
                 return onlyOpUse(invn, op, trial, mainFlags); // Test if varnode is only used in op
             }
 
-            const PcodeOp* def = invn->getDef();
+            PcodeOp def = invn->getDef();
             switch (def->code())
             {
                 case CPUI_INDIRECT:
@@ -3194,10 +3194,10 @@ namespace Sla.DECCORE
                         // to be set with the remainder as a side effect
                         if (newOff == 0)
                         {
-                            const Varnode* vn = def->getIn(0);
+                            Varnode vn = def->getIn(0);
                             if (vn->isWritten())
                             {
-                                const PcodeOp* remop = vn->getDef();
+                                PcodeOp remop = vn->getDef();
                                 if ((remop->code() == CPUI_INT_REM) || (remop->code() == CPUI_INT_SREM))
                                     trial.setRemFormed();
                             }
@@ -4829,7 +4829,7 @@ namespace Sla.DECCORE
             iter = unionMap.find(edge);
             if (iter != unionMap.end())
                 return &(*iter).second;
-            return (const ResolvedUnion*)0;
+            return (ResolvedUnion*)0;
         }
 
         /// \brief Associate a union field with the given edge
@@ -4858,7 +4858,7 @@ namespace Sla.DECCORE
             {
                 // Data-type propagation doesn't happen between MULTIEQUAL input slots holding the same Varnode
                 // So if this is a MULTIEQUAL, copy resolution to any other input slots holding the same Varnode
-                const Varnode* vn = op->getIn(slot);        // The Varnode being directly set
+                Varnode vn = op->getIn(slot);        // The Varnode being directly set
                 for (int4 i = 0; i < op->numInput(); ++i)
                 {
                     if (i == slot) continue;
@@ -5697,7 +5697,7 @@ namespace Sla.DECCORE
 
         /// Print before and after strings for PcodeOps modified by given action
         /// \param actionname is the name of the Action being debugged
-        public void debugModPrint(const string &actionname)
+        public void debugModPrint(string actionname)
         {
           if (!opactdbg_active) return;
           opactdbg_active = false;
@@ -5721,7 +5721,7 @@ namespace Sla.DECCORE
         }
 
         /// Has a breakpoint been hit
-        public bool debugBreak(void) const { return opactdbg_on&&opactdbg_breakon; }
+        public bool debugBreak(void) { return opactdbg_on&&opactdbg_breakon; }
         /// Number of code ranges being debug traced
         public int4 debugSize() { return opactdbg_pclow.size(); }
         /// Turn on debugging
@@ -5768,7 +5768,7 @@ namespace Sla.DECCORE
         /// \param pchigh is the end of the range
         /// \param uqlow is an (optional) sequence number to associate with the beginning of the range
         /// \param uqhigh is an (optional) sequence number to associate with the end of the range
-        public void debugSetRange(Address pclow,const Address pchigh,
+        public void debugSetRange(Address pclow, Address pchigh,
                    uintm uqlow = ~((uintm)0), uintm uqhigh = ~((uintm)0))
         {
           opactdbg_on = true;

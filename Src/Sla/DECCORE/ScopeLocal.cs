@@ -169,7 +169,7 @@ namespace Sla.DECCORE
                 // Aliases shouldn't go thru unmapped regions of the local variables
                 while (rangeIter != rangeEndIter)
                 {
-                    const Range &rng(*rangeIter);
+                    Range rng = *rangeIter;
                     if (rng.getSpace() == space)
                     {
                         if (rng.getFirst() > curalias && curoff >= rng.getFirst())
@@ -287,7 +287,7 @@ namespace Sla.DECCORE
                 Address usepoint((AddrSpace*)0,0);
                 if (!entry->getUseLimit().empty())
                 {
-                    const Range* range = entry->getUseLimit().getFirstRange();
+                    Range range = entry->getUseLimit().getFirstRange();
                     usepoint = Address(range->getSpace(), range->getFirst());
                 }
                 nameRecommend.emplace_back(entry->getAddr(), usepoint, entry->getSize(), sym->getName(), sym->getId());
@@ -521,8 +521,8 @@ namespace Sla.DECCORE
 
             if (rangeLocked) return;
 
-            const RangeList &localRange(fd->getFuncProto().getLocalRange());
-            const RangeList &paramrange(fd->getFuncProto().getParamRange());
+            RangeList localRange = fd->getFuncProto().getLocalRange();
+            RangeList paramrange = fd->getFuncProto().getParamRange();
 
             RangeList newrange;
 
@@ -666,8 +666,8 @@ namespace Sla.DECCORE
             list<NameRecommend>::const_iterator iter;
             for (iter = nameRecommend.begin(); iter != nameRecommend.end(); ++iter)
             {
-                const Address &addr((*iter).getAddr());
-                const Address &usepoint((*iter).getUseAddr());
+                Address addr = (*iter).getAddr();
+                Address usepoint = (*iter).getUseAddr();
                 int4 size = (*iter).getSize();
                 Symbol* sym;
                 Varnode* vn = (Varnode*)0;
@@ -714,7 +714,7 @@ namespace Sla.DECCORE
             for (dyniter = dynRecommend.begin(); dyniter != dynRecommend.end(); ++dyniter)
             {
                 dhash.clear();
-                const DynamicRecommend &dynEntry(*dyniter);
+                DynamicRecommend dynEntry = *dyniter;
                 Varnode* vn = dhash.findVarnode(fd, dynEntry.getAddress(), dynEntry.getHash());
                 if (vn == (Varnode*)0) continue;
                 if (vn->isAnnotation()) continue;

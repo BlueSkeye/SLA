@@ -19,7 +19,7 @@ namespace Sla.SLEIGH
         {
             intb lhsmin = lhs->minValue();
             intb lhsmax = lhs->maxValue();
-            vector <const PatternValue*> semval;
+            List<PatternValue> semval = new List<PatternValue>();
             vector<intb> min;
             vector<intb> max;
             vector<intb> cur;

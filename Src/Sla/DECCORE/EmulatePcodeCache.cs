@@ -92,7 +92,7 @@ namespace Sla.DECCORE
         /// Since the full instruction is cached, we can do relative branches properly
         protected override void executeBranch()
         {
-            const Address &destaddr(currentOp->getInput(0)->getAddr());
+            Address destaddr = currentOp->getInput(0)->getAddr();
             if (destaddr.isConstant())
             {
                 uintm id = destaddr.getOffset();

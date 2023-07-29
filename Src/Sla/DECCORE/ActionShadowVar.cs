@@ -24,7 +24,7 @@ namespace Sla.DECCORE
     
         public override int apply(Funcdata data)
         {
-            const BlockGraph &bblocks(data.getBasicBlocks());
+            BlockGraph bblocks = data.getBasicBlocks();
             BlockBasic* bl;
             PcodeOp* op;
             Varnode* vn;

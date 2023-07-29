@@ -62,7 +62,7 @@ namespace Sla.SLEIGH
 
         public override void restoreXml(Element el, Translate trans)
         {
-            const List &list(el->getChildren());
+            List list = el->getChildren();
             List::const_iterator iter;
             iter = list.begin();
             left = PatternExpression::restoreExpression(*iter, trans);

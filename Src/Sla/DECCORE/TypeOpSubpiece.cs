@@ -24,13 +24,13 @@ namespace Sla.DECCORE
 
         public override Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)
         {
-            const Varnode* outvn = op->getOut();
-            const TypeField* field;
+            Varnode outvn = op->getOut();
+            TypeField field;
             Datatype* ct = op->getIn(0)->getHighTypeReadFacing(op);
             int4 offset;
             int4 byteOff = computeByteOffsetForComposite(op);
             field = ct->findTruncation(byteOff, outvn->getSize(), op, 1, offset);   // Use artificial slot
-            if (field != (const TypeField*)0) {
+            if (field != (TypeField*)0) {
                 if (outvn->getSize() == field->type->getSize())
                     return field->type;
             }
@@ -46,7 +46,7 @@ namespace Sla.DECCORE
             if (inslot != 0 || outslot != -1) return (Datatype*)0;  // Propagation must be from in0 to out
             int4 byteOff;
             int4 newoff;
-            const TypeField* field;
+            TypeField field;
             type_metatype meta = alttype->getMetatype();
             if (meta == TYPE_UNION || meta == TYPE_PARTIALUNION)
             {
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
             }
             else
                 return (Datatype*)0;
-            if (field != (const TypeField*)0 && newoff == 0 && field->type->getSize() == outvn->getSize()) {
+            if (field != (TypeField*)0 && newoff == 0 && field->type->getSize() == outvn->getSize()) {
                 return field->type;
             }
             return (Datatype*)0;
@@ -92,7 +92,7 @@ namespace Sla.DECCORE
         {
             int4 outSize = op->getOut()->getSize();
             int4 lsb = (int4)op->getIn(1)->getOffset();
-            const Varnode* vn = op->getIn(0);
+            Varnode vn = op->getIn(0);
             int byteOff;
             if (vn->getSpace()->isBigEndian())
                 byteOff = vn->getSize() - outSize - lsb;

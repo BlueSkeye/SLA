@@ -45,7 +45,7 @@ namespace Sla.EXTRA
                 if (dhash.getHash() == 0)
                 {
                     // We have a duplicate
-                    const PcodeOp* op;
+                    PcodeOp op;
                     if (vn->beginDescend() != vn->endDescend())
                         op = *vn->beginDescend();
                     else
@@ -60,7 +60,7 @@ namespace Sla.EXTRA
                 uint4 total = DynamicHash::getTotalFromHash(dhash.getHash());
                 if (total != 1)
                 {
-                    const PcodeOp* op;
+                    PcodeOp op;
                     if (vn->beginDescend() != vn->endDescend())
                         op = *vn->beginDescend();
                     else

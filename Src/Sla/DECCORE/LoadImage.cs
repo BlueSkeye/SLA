@@ -45,7 +45,7 @@ namespace Sla.DECCORE
         public string getFileName() => filename;
 
         /// Get data from the LoadImage
-        /// \fn void LoadImage::loadFill(uint1 *ptr,int4 size,const Address &addr)
+        /// \fn void LoadImage::loadFill(uint1 *ptr,int4 size, Address addr)
         /// This is the \e core routine of a LoadImage.  Given a particular
         /// address range, this routine retrieves the exact byte values
         /// that are stored at that address when the executable is loaded
@@ -132,7 +132,7 @@ namespace Sla.DECCORE
         }
 
         /// Get a string indicating the architecture type
-        /// \fn string LoadImage::getArchType(void) const
+        /// \fn string LoadImage::getArchType() 
         /// The load image class is intended to be a generic front-end
         /// to the large variety of load formats in use.  This method
         /// should return a string that identifies the particular

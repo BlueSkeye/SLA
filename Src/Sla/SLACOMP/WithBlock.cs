@@ -88,7 +88,7 @@ namespace Sla.SLACOMP
             list<WithBlock>::const_iterator iter;
             for (iter = stack.begin(); iter != stack.end(); ++iter)
             {
-                const vector<ContextChange*> &changelist((*iter).contvec);
+                List<ContextChange> changelist = (*iter).contvec;
                 if (changelist.size() == 0) continue;
                 if (res == (vector<ContextChange*>*)0)
                     res = new vector<ContextChange*>();

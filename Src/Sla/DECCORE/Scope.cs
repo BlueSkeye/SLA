@@ -115,7 +115,7 @@ namespace Sla.DECCORE
         {
             SymbolEntry entry = new SymbolEntry();
             if (addr.isConstant()) return null;
-            while ((scope1 != (const Scope*)0)&& (scope1 != scope2)) {
+            while ((scope1 != (Scope*)0)&& (scope1 != scope2)) {
                 entry = scope1->findAddr(addr, usepoint);
                 if (entry != (SymbolEntry*)0)
                 {
@@ -126,7 +126,7 @@ namespace Sla.DECCORE
                     return scope1;      // Discovery of new variable
                 scope1 = scope1->getParent();
             }
-            return (const Scope*)0;
+            return (Scope*)0;
         }
 
         /// Query for a Symbol containing a given range which is accessed at a given \b usepoint
@@ -145,8 +145,8 @@ namespace Sla.DECCORE
             Address usepoint, out SymbolEntry addrmatch)
         {
             SymbolEntry* entry;
-            if (addr.isConstant()) return (const Scope*)0;
-            while ((scope1 != (const Scope*)0)&& (scope1 != scope2)) {
+            if (addr.isConstant()) return (Scope*)0;
+            while ((scope1 != (Scope*)0)&& (scope1 != scope2)) {
                 entry = scope1->findContainer(addr, size, usepoint);
                 if (entry != (SymbolEntry*)0)
                 {
@@ -157,7 +157,7 @@ namespace Sla.DECCORE
                     return scope1;      // Discovery of new variable
                 scope1 = scope1->getParent();
             }
-            return (const Scope*)0;
+            return (Scope*)0;
         }
 
         /// Query for a Symbol which most closely matches a given range and \b usepoint
@@ -177,8 +177,8 @@ namespace Sla.DECCORE
             Address usepoint, out SymbolEntry addrmatch)
         {
             SymbolEntry* entry;
-            if (addr.isConstant()) return (const Scope*)0;
-            while ((scope1 != (const Scope*)0)&& (scope1 != scope2)) {
+            if (addr.isConstant()) return (Scope*)0;
+            while ((scope1 != (Scope*)0)&& (scope1 != scope2)) {
                 entry = scope1->findClosestFit(addr, size, usepoint);
                 if (entry != (SymbolEntry*)0)
                 {
@@ -189,7 +189,7 @@ namespace Sla.DECCORE
                     return scope1;      // Discovery of new variable
                 scope1 = scope1->getParent();
             }
-            return (const Scope*)0;
+            return (Scope*)0;
         }
 
         /// Query for a function Symbol starting at the given address
@@ -207,8 +207,8 @@ namespace Sla.DECCORE
             out Funcdata addrmatch)
         {
             Funcdata* fd;
-            if (addr.isConstant()) return (const Scope*)0;
-            while ((scope1 != (const Scope*)0)&& (scope1 != scope2)) {
+            if (addr.isConstant()) return (Scope*)0;
+            while ((scope1 != (Scope*)0)&& (scope1 != scope2)) {
                 fd = scope1->findFunction(addr);
                 if (fd != (Funcdata*)0)
                 {
@@ -219,7 +219,7 @@ namespace Sla.DECCORE
                     return scope1;      // Discovery of new variable
                 scope1 = scope1->getParent();
             }
-            return (const Scope*)0;
+            return (Scope*)0;
         }
 
         /// Query for an \e external \e reference Symbol starting at the given address
@@ -237,8 +237,8 @@ namespace Sla.DECCORE
             out ExternRefSymbol addrmatch)
         {
             ExternRefSymbol* sym;
-            if (addr.isConstant()) return (const Scope*)0;
-            while ((scope1 != (const Scope*)0)&& (scope1 != scope2)) {
+            if (addr.isConstant()) return (Scope*)0;
+            while ((scope1 != (Scope*)0)&& (scope1 != scope2)) {
                 sym = scope1->findExternalRef(addr);
                 if (sym != (ExternRefSymbol*)0)
                 {
@@ -252,7 +252,7 @@ namespace Sla.DECCORE
                 //      return scope1;		// Discovery of new variable
                 scope1 = scope1->getParent();
             }
-            return (const Scope*)0;
+            return (Scope*)0;
         }
 
         /// Query for a label Symbol for a given address.
@@ -270,8 +270,8 @@ namespace Sla.DECCORE
             out LabSymbol addrmatch)
         {
             LabSymbol* sym;
-            if (addr.isConstant()) return (const Scope*)0;
-            while ((scope1 != (const Scope*)0)&& (scope1 != scope2)) {
+            if (addr.isConstant()) return (Scope*)0;
+            while ((scope1 != (Scope*)0)&& (scope1 != scope2)) {
                 sym = scope1->findCodeLabel(addr);
                 if (sym != (LabSymbol*)0)
                 {
@@ -282,7 +282,7 @@ namespace Sla.DECCORE
                     return scope1;      // Discovery of new variable
                 scope1 = scope1->getParent();
             }
-            return (const Scope*)0;
+            return (Scope*)0;
         }
 
         /// Access the address ranges owned by \b this Scope
@@ -405,7 +405,7 @@ namespace Sla.DECCORE
                     for (int4 j = 0; j < num; ++j)
                     {
                         int4 i = bigendian ? j : (num - 1 - j); // Take pieces in endian order
-                        const VarnodeData &vdat(rec->getPiece(i));
+                        VarnodeData vdat = rec->getPiece(i);
                         if (i == 0)     // i==0 is most signif
                             exfl = Varnode::precishi;
                         else if (i == num - 1)
@@ -729,8 +729,8 @@ namespace Sla.DECCORE
         public SymbolEntry queryByAddr(Address addr, Address usepoint)
         {
             SymbolEntry* res = (SymbolEntry*)0;
-            const Scope* basescope = glb->symboltab->mapScope(this, addr, usepoint);
-            stackAddr(basescope, (const Scope*)0,addr,usepoint,&res);
+            Scope basescope = glb->symboltab->mapScope(this, addr, usepoint);
+            stackAddr(basescope, (Scope*)0,addr,usepoint,&res);
             return res;
         }
 
@@ -744,8 +744,8 @@ namespace Sla.DECCORE
         public virtual SymbolEntry queryContainer(Address addr, int size, Address usepoint)
         {
             SymbolEntry* res = (SymbolEntry*)0;
-            const Scope* basescope = glb->symboltab->mapScope(this, addr, usepoint);
-            stackContainer(basescope, (const Scope*)0,addr,size,usepoint,&res);
+            Scope basescope = glb->symboltab->mapScope(this, addr, usepoint);
+            stackContainer(basescope, (Scope*)0,addr,size,usepoint,&res);
             return res;
         }
 
@@ -761,8 +761,8 @@ namespace Sla.DECCORE
         public SymbolEntry queryProperties(Address addr, int size, Address usepoint, uint &flags)
         {
             SymbolEntry* res = (SymbolEntry*)0;
-            const Scope* basescope = glb->symboltab->mapScope(this, addr, usepoint);
-            const Scope* finalscope = stackContainer(basescope, (const Scope*)0,addr,size,usepoint,&res);
+            Scope basescope = glb->symboltab->mapScope(this, addr, usepoint);
+            Scope finalscope = stackContainer(basescope, (Scope*)0,addr,size,usepoint,&res);
             if (res != (SymbolEntry*)0) // If we found a symbol
                 flags = res->getAllFlags(); // use its flags
             else if (finalscope != (Scope*)0)
@@ -787,8 +787,8 @@ namespace Sla.DECCORE
         {
             Funcdata* res = (Funcdata*)0;
             // We have no usepoint, so try to map from addr
-            const Scope* basescope = glb->symboltab->mapScope(this, addr, Address());
-            stackFunction(basescope, (const Scope*)0,addr,&res);
+            Scope basescope = glb->symboltab->mapScope(this, addr, Address());
+            stackFunction(basescope, (Scope*)0,addr,&res);
             return res;
         }
 
@@ -803,8 +803,8 @@ namespace Sla.DECCORE
         {
             ExternRefSymbol* sym = (ExternRefSymbol*)0;
             // We have no usepoint, so try to map from addr
-            const Scope* basescope = glb->symboltab->mapScope(this, addr, Address());
-            basescope = stackExternalRef(basescope, (const Scope*)0,addr,&sym);
+            Scope basescope = glb->symboltab->mapScope(this, addr, Address());
+            basescope = stackExternalRef(basescope, (Scope*)0,addr,&sym);
             // Resolve the reference from the same scope we found the reference
             if (sym != (ExternRefSymbol*)0)
                 return basescope->resolveExternalRefFunction(sym);
@@ -820,8 +820,8 @@ namespace Sla.DECCORE
         {
             LabSymbol* res = (LabSymbol*)0;
             // We have no usepoint, so try to map from addr
-            const Scope* basescope = glb->symboltab->mapScope(this, addr, Address());
-            stackCodeLabel(basescope, (const Scope*)0,addr,&res);
+            Scope basescope = glb->symboltab->mapScope(this, addr, Address());
+            stackCodeLabel(basescope, (Scope*)0,addr,&res);
             return res;
         }
 
@@ -947,12 +947,12 @@ namespace Sla.DECCORE
         /// \return \b true if \b this is a sub-scope
         public bool isSubScope(Scope scp)
         {
-            const Scope* tmp = this;
+            Scope tmp = this;
             do
             {
                 if (tmp == scp) return true;
                 tmp = tmp->parent;
-            } while (tmp != (const Scope*)0);
+            } while (tmp != (Scope*)0);
             return false;
         }
 
@@ -976,14 +976,14 @@ namespace Sla.DECCORE
         public void getScopePath(List<Scope> vec)
         {
             int4 count = 0;
-            const Scope* cur = this;
-            while (cur != (const Scope*)0) {    // Count number of elements in path
+            Scope cur = this;
+            while (cur != (Scope*)0) {    // Count number of elements in path
                 count += 1;
                 cur = cur->parent;
             }
             vec.resize(count);
             cur = this;
-            while (cur != (const Scope*)0) {
+            while (cur != (Scope*)0) {
                 count -= 1;
                 vec[count] = cur;
                 cur = cur->parent;
@@ -998,12 +998,12 @@ namespace Sla.DECCORE
         /// \return the first ancestor Scope that is not in common or null
         public Scope findDistinguishingScope(Scope op2)
         {
-            if (this == op2) return (const Scope*)0;    // Quickly check most common cases
+            if (this == op2) return (Scope*)0;    // Quickly check most common cases
             if (parent == op2) return this;
-            if (op2->parent == this) return (const Scope*)0;
+            if (op2->parent == this) return (Scope*)0;
             if (parent == op2->parent) return this;
-            vector <const Scope*> thisPath;
-            vector <const Scope*> op2Path;
+            List<Scope> thisPath = new List<Scope>();
+            List<Scope> op2Path = new List<Scope>();
             getScopePath(thisPath);
             op2->getScopePath(op2Path);
             int4 min = thisPath.size();
@@ -1017,7 +1017,7 @@ namespace Sla.DECCORE
             if (min < thisPath.size())
                 return thisPath[min];   // thisPath matches op2Path but is longer
             if (min < op2Path.size())
-                return (const Scope*)0; // op2Path matches thisPath but is longer
+                return (Scope*)0; // op2Path matches thisPath but is longer
             return this;            // ancestor paths are identical (only base scopes differ)
         }
 

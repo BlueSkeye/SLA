@@ -40,8 +40,8 @@ namespace Sla.DECCORE
             vector<uintb> refs;
             for (int4 i = 1; i < op->numInput(); ++i)
                 refs.push_back(op->getIn(i)->getOffset());
-            const CPoolRecord* rec = data.getArch()->cpool->getRecord(refs);    // Recover the record
-            if (rec != (const CPoolRecord*)0) {
+            CPoolRecord rec = data.getArch()->cpool->getRecord(refs);    // Recover the record
+            if (rec != (CPoolRecord*)0) {
                 if (rec->getTag() == CPoolRecord::instance_of)
                 {
                     data.opMarkCalculatedBool(op);

@@ -114,8 +114,8 @@ namespace Sla.DECCORE
                 {
                     for (int4 i = 0; i < stackspc->numSpacebase(); ++i)
                     {
-                        const VarnodeData &fullReg(stackspc->getSpacebaseFull(i));
-                        const VarnodeData &truncReg(stackspc->getSpacebase(i));
+                        VarnodeData &fullReg(stackspc->getSpacebaseFull(i));
+                        VarnodeData &truncReg(stackspc->getSpacebase(i));
                         Varnode* invn = data.newVarnode(truncReg.size, truncReg.getAddr());
                         invn = data.setInputVarnode(invn);
                         PcodeOp* extop = data.newOp(1, topbl->getStart());

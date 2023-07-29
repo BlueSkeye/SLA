@@ -114,7 +114,7 @@ namespace Sla.SLEIGH
         public void restoreXml(Element el, AddrSpaceManager manage)
         {
             opc = get_opcode(el->getAttributeValue("code"));
-            const List &list(el->getChildren());
+            List list = el->getChildren();
             List::const_iterator iter;
             iter = list.begin();
             if ((*iter)->getName() == "null")

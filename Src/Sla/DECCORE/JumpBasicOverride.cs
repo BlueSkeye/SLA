@@ -141,7 +141,7 @@ namespace Sla.DECCORE
             {
                 for (iter = adset.begin(); iter != adset.end(); ++iter)
                 {
-                    const Address &addr(*iter);
+                    Address addr = *iter;
                     addrtable.push_back(addr);
                 }
             }

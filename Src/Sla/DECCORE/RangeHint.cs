@@ -65,10 +65,10 @@ namespace Sla.DECCORE
         /// \return \b true if the data-type information can be reconciled
         public bool reconcile(RangeHint b)
         {
-            const RangeHint* a = this;
+            RangeHint a = this;
             if (a->type->getSize() < b->type->getSize())
             {
-                const RangeHint* tmp = b;
+                RangeHint tmp = b;
                 b = a;          // Make sure b is smallest
                 a = tmp;
             }

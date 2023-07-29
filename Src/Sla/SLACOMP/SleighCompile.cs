@@ -183,29 +183,29 @@ namespace Sla.SLACOMP
             for (int4 i = 0; i < tables.size(); ++i)
                 tables[i]->buildDecisionTree(props);
 
-            const vector<pair<Constructor*, Constructor*>> &ierrors(props.getIdentErrors());
+            List<pair<Constructor, Constructor>> ierrors = props.getIdentErrors();
             if (ierrors.size() != 0)
             {
                 string identMsg = "Constructor has identical pattern to constructor at ";
                 for (int4 i = 0; i < ierrors.size(); ++i)
                 {
                     errors += 1;
-                    const Location* locA = getLocation(ierrors[i].first);
-                    const Location* locB = getLocation(ierrors[i].second);
+                    Location locA = getLocation(ierrors[i].first);
+                    Location locB = getLocation(ierrors[i].second);
                     reportError(locA, identMsg + locB->format());
                     reportError(locB, identMsg + locA->format());
                 }
             }
 
-            const vector<pair<Constructor*, Constructor*>> &cerrors(props.getConflictErrors());
+            List<pair<Constructor, Constructor>> cerrors = props.getConflictErrors();
             if (!lenientconflicterrors && cerrors.size() != 0)
             {
                 string conflictMsg = "Constructor pattern cannot be distinguished from constructor at ";
                 for (int4 i = 0; i < cerrors.size(); ++i)
                 {
                     errors += 1;
-                    const Location* locA = getLocation(cerrors[i].first);
-                    const Location* locB = getLocation(cerrors[i].second);
+                    Location locA = getLocation(cerrors[i].first);
+                    Location locB = getLocation(cerrors[i].second);
                     reportError(locA, conflictMsg + locB->format());
                     reportError(locB, conflictMsg + locA->format());
                 }
@@ -219,7 +219,7 @@ namespace Sla.SLACOMP
         {
             if (root == 0)
             {
-                reportError((const Location*)0, "No patterns to match.");
+                reportError((Location*)0, "No patterns to match.");
                 return;
             }
             ostringstream msg;
@@ -441,12 +441,12 @@ namespace Sla.SLACOMP
                     ostringstream s;
                     s << "Name collision: " << sym->getName() << " --- ";
                     s << "Duplicate symbol " << oldsym->getName();
-                    const Location* oldLocation = getLocation(oldsym);
+                    Location oldLocation = getLocation(oldsym);
                     if (oldLocation != (Location*)0x0)
                     {
                         s << " defined at " << oldLocation->format();
                     }
-                    const Location* location = getLocation(sym);
+                    Location location = getLocation(sym);
                     reportError(location, s.str());
                 }
             }
@@ -652,7 +652,7 @@ namespace Sla.SLACOMP
         /// \return the matchine local variable or null
         private static VarnodeTpl findSize(ConstTpl offset, ConstructTpl ct)
         {
-            const vector<OpTpl*> &ops(ct->getOpvec());
+            List<OpTpl> ops = ct->getOpvec();
             VarnodeTpl* vn;
             OpTpl* op;
 
@@ -767,7 +767,7 @@ namespace Sla.SLACOMP
             HandleTpl* result = tpl->getResult();
             if (result != (HandleTpl*)0)
                 shiftUniqueHandle(result, sa);
-            const vector<OpTpl*> &vec(tpl->getOpvec());
+            List<OpTpl> vec = tpl->getOpvec();
             for (int4 i = 0; i < vec.size(); ++i)
                 shiftUniqueOp(vec[i], sa);
         }
@@ -1661,7 +1661,7 @@ namespace Sla.SLACOMP
         /// \return \b true if the expression does not use the \b inst_next or \b inst_next2 symbol
         public bool contextMod(List<ContextChange> vec, ContextSymbol sym, PatternExpression pe)
         {
-            vector <const PatternValue*> vallist;
+            List<PatternValue> vallist =new List<PatternValue>();
             pe->listValues(vallist);
             for (uint4 i = 0; i < vallist.size(); ++i)
             {

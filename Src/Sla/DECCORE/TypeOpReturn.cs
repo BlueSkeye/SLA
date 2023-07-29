@@ -44,14 +44,14 @@ namespace Sla.DECCORE
 
         public override Datatype getInputLocal(PcodeOp op, int4 slot)
         {
-            const FuncProto* fp;
+            FuncProto fp;
             Datatype* ct;
 
             if (slot == 0)
                 return TypeOp::getInputLocal(op, slot);
 
             // Get data-types of return input parameters
-            const BlockBasic* bb = op->getParent();
+            BlockBasic bb = op->getParent();
             if (bb == (BlockBasic*)0)
                 return TypeOp::getInputLocal(op, slot);
 

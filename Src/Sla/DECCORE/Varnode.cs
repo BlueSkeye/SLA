@@ -604,14 +604,14 @@ namespace Sla.DECCORE
         public int4 printRawNoMarkup(TextWriter s)
         {
             AddrSpace* spc = loc.getSpace();
-            const Translate* trans = spc->getTrans();
+            Translate trans = spc->getTrans();
             string name;
             int4 expect;
 
             name = trans->getRegisterName(spc, loc.getOffset(), size);
             if (name.size() != 0)
             {
-                const VarnodeData &point(trans->getRegister(name));
+                VarnodeData point = trans->getRegister(name);
                 uintb off = loc.getOffset() - point.offset;
                 s << name;
                 expect = point.size;
@@ -963,7 +963,7 @@ namespace Sla.DECCORE
             else
             {
                 if (op->isConstant()) return -1;
-                const Varnode* vn = this;
+                Varnode vn = this;
                 if (vn->isWritten() && (vn->getDef()->code() == CPUI_INT_MULT))
                     if (vn->getDef()->getIn(1)->isConstant())
                         vn = vn->getDef()->getIn(0);
@@ -1557,7 +1557,7 @@ namespace Sla.DECCORE
         /// \return \b true if the Varnodes are copied from a common ancestor
         public bool copyShadow(Varnode op2)
         {
-            const Varnode* vn;
+            Varnode vn;
 
             if (this == op2) return true;
             // Trace -this- to the source of the copy chain
@@ -1587,7 +1587,7 @@ namespace Sla.DECCORE
         /// \return \b true if \b this and \b whole have the prescribed SUBPIECE relationship
         public bool findSubpieceShadow(int4 leastByte, Varnode whole, int4 recurse)
         {
-            const Varnode* vn = this;
+            Varnode vn = this;
             while (vn->isWritten() && vn->getDef()->code() == CPUI_COPY)
                 vn = vn->getDef()->getIn(0);
             if (!vn->isWritten())
@@ -1606,7 +1606,7 @@ namespace Sla.DECCORE
             OpCode opc = vn->getDef()->code();
             if (opc == CPUI_SUBPIECE)
             {
-                const Varnode* tmpvn = vn->getDef()->getIn(0);
+                Varnode tmpvn = vn->getDef()->getIn(0);
                 int4 off = (int4)vn->getDef()->getIn(1)->getOffset();
                 if (off != leastByte || tmpvn->getSize() != whole->getSize())
                     return false;
@@ -1624,9 +1624,9 @@ namespace Sla.DECCORE
                 while (whole->isWritten() && whole->getDef()->code() == CPUI_COPY)
                     whole = whole->getDef()->getIn(0);
                 if (!whole->isWritten()) return false;
-                const PcodeOp* bigOp = whole->getDef();
+                PcodeOp bigOp = whole->getDef();
                 if (bigOp->code() != CPUI_MULTIEQUAL) return false;
-                const PcodeOp* smallOp = vn->getDef();
+                PcodeOp smallOp = vn->getDef();
                 if (bigOp->getParent() != smallOp->getParent()) return false;
                 // Recurse search through all branches of the two MULTIEQUALs
                 for (int4 i = 0; i < smallOp->numInput(); ++i)
@@ -1648,14 +1648,14 @@ namespace Sla.DECCORE
         /// \return \b true if \b this and \b whole have the prescribed PIECE relationship
         public bool findPieceShadow(int4 leastByte, Varnode piece)
         {
-            const Varnode* vn = this;
+            Varnode vn = this;
             while (vn->isWritten() && vn->getDef()->code() == CPUI_COPY)
                 vn = vn->getDef()->getIn(0);
             if (!vn->isWritten()) return false;
             OpCode opc = vn->getDef()->code();
             if (opc == CPUI_PIECE)
             {
-                const Varnode* tmpvn = vn->getDef()->getIn(1);  // Least significant part
+                Varnode tmpvn = vn->getDef()->getIn(1);  // Least significant part
                 if (leastByte >= tmpvn->getSize())
                 {
                     leastByte -= tmpvn->getSize();
@@ -1693,7 +1693,7 @@ namespace Sla.DECCORE
         /// \return \b true if one Varnode is contained, as a value, in the other
         public bool partialCopyShadow(Varnode op2, int4 relOff)
         {
-            const Varnode* vn;
+            Varnode vn;
 
             if (size < op2->size)
             {

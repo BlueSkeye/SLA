@@ -744,7 +744,7 @@ namespace Sla.SLACOMP
             if (cttpl == (ConstructTpl*)0)
                 return true;        // Nothing to check
             vector<OpTpl*>::const_iterator iter;
-            const vector<OpTpl*> &ops(cttpl->getOpvec());
+            List<OpTpl> ops = cttpl->getOpvec();
             bool testresult = true;
 
             for (iter = ops.begin(); iter != ops.end(); ++iter)
@@ -807,7 +807,7 @@ namespace Sla.SLACOMP
         /// \return \b true if the truncation expression was valid
         private bool checkVarnodeTruncation(Constructor ct, int4 slot, OpTpl op, VarnodeTpl vn, bool isbigendian)
         {
-            const ConstTpl &off(vn->getOffset());
+            ConstTpl off = vn->getOffset();
             if (off.getType() != ConstTpl::handle) return true;
             if (off.getSelect() != ConstTpl::v_offset_plus) return true;
             ConstTpl::const_type sztype = vn->getSize().getType();
@@ -843,7 +843,7 @@ namespace Sla.SLACOMP
         private bool checkSectionTruncations(Constructor ct, ConstructTpl cttpl, bool isbigendian)
         {
             vector<OpTpl*>::const_iterator iter;
-            const vector<OpTpl*> &ops(cttpl->getOpvec());
+            List<OpTpl> ops = cttpl->getOpvec();
             bool testresult = true;
 
             for (iter = ops.begin(); iter != ops.end(); ++iter)
@@ -1061,7 +1061,7 @@ namespace Sla.SLACOMP
         /// \param secnum is the section number containing the operator
         private static void examineVn(Dictionary<uintb, OptimizeRecord> recs, VarnodeTpl vn, uint4 i,int4 inslot, int4 secnum)
         {
-            if (vn == (const VarnodeTpl*)0) return;
+            if (vn == (VarnodeTpl*)0) return;
             if (!vn->getSpace().isUniqueSpace()) return;
             if (vn->getOffset().getType() != ConstTpl::real) return;
 
@@ -1162,8 +1162,8 @@ namespace Sla.SLACOMP
             }
 
             // We always check for writes to -vn-
-            const VarnodeTpl* vn2 = op->getOut();
-            if (vn2 != (const VarnodeTpl*)0) {
+            VarnodeTpl vn2 = op->getOut();
+            if (vn2 != (VarnodeTpl*)0) {
                 if (possibleIntersection(vn, vn2))
                     return true;
             }
@@ -1186,16 +1186,16 @@ namespace Sla.SLACOMP
                 tpl = ct->getNamedTempl(secnum);
             if (tpl == (ConstructTpl*)0)
                 return;
-            const vector<OpTpl*> &ops(tpl->getOpvec());
+            List<OpTpl> ops = tpl->getOpvec();
             for (uint4 i = 0; i < ops.size(); ++i)
             {
-                const OpTpl* op = ops[i];
+                OpTpl op = ops[i];
                 for (uint4 j = 0; j < op->numInput(); ++j)
                 {
-                    const VarnodeTpl* vnin = op->getIn(j);
+                    VarnodeTpl vnin = op->getIn(j);
                     examineVn(recs, vnin, i, j, secnum);
                 }
-                const VarnodeTpl* vn = op->getOut();
+                VarnodeTpl vn = op->getOut();
                 examineVn(recs, vn, i, -1, secnum);
             }
         }
@@ -1269,7 +1269,7 @@ namespace Sla.SLACOMP
             iter = recs.begin();
             while (iter != recs.end())
             {
-                const OptimizeRecord &currec((*iter).second);
+                OptimizeRecord currec = (*iter).second;
                 ++iter;
                 if ((currec.writecount == 1) && (currec.readcount == 1) && (currec.readsection == currec.writesection))
                 {
@@ -1279,15 +1279,15 @@ namespace Sla.SLACOMP
                         tpl = ct->getTempl();
                     else
                         tpl = ct->getNamedTempl(currec.readsection);
-                    const vector<OpTpl*> &ops(tpl->getOpvec());
-                    const OpTpl* op = ops[currec.readop];
+                    List<OpTpl> ops = tpl->getOpvec();
+                    OpTpl op = ops[currec.readop];
                     if (currec.writeop >= currec.readop) // Read must come after write
                         throw SleighError("Read of temporary before write");
                     if (op->getOpcode() == CPUI_COPY)
                     {
                         bool saverecord = true;
                         currec.opttype = 0; // Read op is a COPY
-                        const VarnodeTpl* vn = op->getOut();
+                        VarnodeTpl vn = op->getOut();
                         for (int4 i = currec.writeop + 1; i < currec.readop; ++i)
                         { // Check for interference between write and read
                             if (readWriteInterference(vn, ops[i], true))
@@ -1304,7 +1304,7 @@ namespace Sla.SLACOMP
                     {
                         bool saverecord = true;
                         currec.opttype = 1; // Write op is a COPY
-                        const VarnodeTpl* vn = op->getIn(0);
+                        VarnodeTpl vn = op->getIn(0);
                         for (int4 i = currec.writeop + 1; i < currec.readop; ++i)
                         { // Check for interference between write and read
                             if (readWriteInterference(vn, ops[i], false))
@@ -1318,7 +1318,7 @@ namespace Sla.SLACOMP
                     }
                 }
             }
-            return (const OptimizeRecord*)0;
+            return (OptimizeRecord*)0;
         }
 
         /// \brief Remove an extraneous COPY going through a temporary Varnode
@@ -1371,7 +1371,7 @@ namespace Sla.SLACOMP
             iter = recs.begin();
             while (iter != recs.end())
             {
-                const OptimizeRecord &currec((*iter).second);
+                OptimizeRecord currec = (*iter).second;
                 if (currec.readcount == 0)
                 {
                     if (printdeadwarning)
@@ -1420,7 +1420,7 @@ namespace Sla.SLACOMP
         /// \param ct is the given Constructor
         private void optimize(Constructor ct)
         {
-            const OptimizeRecord* currec;
+            OptimizeRecord currec;
             map<uintb, OptimizeRecord> recs;
             int4 numsections = ct->getNumSections();
             do

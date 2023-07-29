@@ -553,7 +553,7 @@ namespace Sla.DECCORE
             hash = (output->getSize() << 8) | (uintm)code();
             for (int4 i = 0; i < inrefs.size(); ++i)
             {
-                const Varnode* vn = getIn(i);
+                Varnode vn = getIn(i);
                 hash = (hash << 8) | (hash >> (sizeof(uintm) * 8 - 8));
                 if (vn->isConstant())
                     hash ^= (uintm)vn->getOffset();
@@ -578,8 +578,8 @@ namespace Sla.DECCORE
             if (inrefs.size() != op->inrefs.size()) return false;
             for (int4 i = 0; i < inrefs.size(); ++i)
             {
-                const Varnode* vn1 = getIn(i);
-                const Varnode* vn2 = op->getIn(i);
+                Varnode vn1 = getIn(i);
+                Varnode vn2 = op->getIn(i);
                 if (vn1 == vn2) continue;
                 if (vn1->isConstant() && vn2->isConstant() && (vn1->getOffset() == vn2->getOffset()))
                     continue;
@@ -630,7 +630,7 @@ namespace Sla.DECCORE
                     int4 i;
                     for (i = 0; i < numInput(); ++i)
                     {
-                        const Varnode* vn = getIn(i);
+                        Varnode vn = getIn(i);
                         if (vn->isAddrTied() || vn->isPersist())
                             break;
                     }
@@ -638,10 +638,10 @@ namespace Sla.DECCORE
                         crossCalls = true;
                 }
             }
-            vector <const Varnode*> tiedList;
+            List<Varnode> tiedList = new List<Varnode>();
             for (int4 i = 0; i < numInput(); ++i)
             {
-                const Varnode* vn = getIn(i);
+                Varnode vn = getIn(i);
                 if (vn->isAddrTied())
                     tiedList.push_back(vn);
             }
@@ -693,7 +693,7 @@ namespace Sla.DECCORE
                     }
                     for (int4 i = 0; i < tiedList.size(); ++i)
                     {
-                        const Varnode* vn = tiedList[i];
+                        Varnode vn = tiedList[i];
                         if (vn->overlap(*op->output) >= 0)
                             return false;
                         if (op->output->overlap(*vn) >= 0)
@@ -722,8 +722,8 @@ namespace Sla.DECCORE
         /// \return the constant result
         public uintb collapse(bool markedInput)
         {
-            const Varnode* vn0;
-            const Varnode* vn1;
+            Varnode vn0;
+            Varnode vn1;
 
             vn0 = getIn(0);
             if (vn0->getSymbolEntry() != (SymbolEntry*)0)
@@ -754,7 +754,7 @@ namespace Sla.DECCORE
         /// \param newConst is the given output constant
         public void collapseConstantSymbol(Varnode newConst)
         {
-            const Varnode* copyVn = (const Varnode*)0;
+            Varnode copyVn = (Varnode*)0;
             switch (code())
             {
                 case CPUI_SUBPIECE:

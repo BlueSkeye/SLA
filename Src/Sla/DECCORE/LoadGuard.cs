@@ -41,7 +41,7 @@ namespace Sla.DECCORE
         /// \param valueSet is the calculated value set as seen by the LOAD operation
         private void establishRange(ValueSetRead valueSet)
         {
-            const CircleRange &range(valueSet.getRange());
+            CircleRange range = valueSet.getRange();
             uintb rangeSize = range.getSize();
             uintb size;
             if (range.isEmpty())
@@ -98,7 +98,7 @@ namespace Sla.DECCORE
         private void finalizeRange(ValueSetRead valueSet)
         {
             analysisState = 1;      // In all cases the settings determined here are final
-            const CircleRange &range(valueSet.getRange());
+            CircleRange range = valueSet.getRange();
             uintb rangeSize = range.getSize();
             if (rangeSize == 0x100 || rangeSize == 0x10000)
             {

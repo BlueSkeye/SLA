@@ -131,7 +131,7 @@ namespace Sla.DECCORE
         public override void buildLabels(Funcdata fd, List<Address> addresstable,
             List<uintb> label, JumpModel orig)
         {
-            if ((( const JumpAssisted*)orig)->sizeIndices != sizeIndices)
+            if (((JumpAssisted*)orig)->sizeIndices != sizeIndices)
     throw new LowlevelError("JumpAssisted table size changed during recovery");
             if (userop->getIndex2Case() == -1)
             {

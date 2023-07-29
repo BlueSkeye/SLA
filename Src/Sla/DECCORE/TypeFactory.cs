@@ -576,7 +576,7 @@ namespace Sla.DECCORE
                 AddrSpace* spc = glb->getStackSpace();
                 if (spc != (AddrSpace*)0)
                 {
-                    const VarnodeData &spdata(spc->getSpacebase(0));        // Use stack pointer as likely indicator of "int" size
+                    VarnodeData spdata = spc->getSpacebase(0);        // Use stack pointer as likely indicator of "int" size
                     sizeOfInt = spdata.size;
                     if (sizeOfInt > 4)                  // "int" is rarely bigger than 4 bytes
                         sizeOfInt = 4;

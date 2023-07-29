@@ -169,7 +169,7 @@ namespace Sla.DECCORE
         public override Datatype resolveInFlow(PcodeOp op, int4 slot)
         {
             Funcdata* fd = op->getParent()->getFuncdata();
-            const ResolvedUnion* res = fd->getUnionField(this, op, slot);
+            ResolvedUnion res = fd->getUnionField(this, op, slot);
             if (res != (ResolvedUnion*)0)
                 return res->getDatatype();
 
@@ -182,8 +182,8 @@ namespace Sla.DECCORE
 
         public override Datatype findResolve(PcodeOp op, int4 slot)
         {
-            const Funcdata* fd = op->getParent()->getFuncdata();
-            const ResolvedUnion* res = fd->getUnionField(this, op, slot);
+            Funcdata fd = op->getParent()->getFuncdata();
+            ResolvedUnion res = fd->getUnionField(this, op, slot);
             if (res != (ResolvedUnion*)0)
                 return res->getDatatype();
             return arrayof;     // If not calculated before, assume referring to the element
