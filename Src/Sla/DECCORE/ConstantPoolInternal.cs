@@ -94,7 +94,7 @@ namespace Sla.DECCORE
         private override CPoolRecord createRecord(List<ulong> refs)
         {
             CheapSorter sorter(refs);
-            pair<map<CheapSorter, CPoolRecord>::iterator, bool> res;
+            pair<Dictionary<CheapSorter, CPoolRecord>::iterator, bool> res;
             res = cpoolMap.emplace(piecewise_construct, forward_as_tuple(sorter), forward_as_tuple());
             if (res.second == false)
                 throw new LowlevelError("Creating duplicate entry in constant pool: " + (*res.first).second.getToken());
@@ -104,7 +104,7 @@ namespace Sla.DECCORE
         public override CPoolRecord getRecord(List<ulong> refs)
         {
             CheapSorter sorter(refs);
-            map<CheapSorter, CPoolRecord>::const_iterator iter = cpoolMap.find(sorter);
+            Dictionary<CheapSorter, CPoolRecord>::const_iterator iter = cpoolMap.find(sorter);
             if (iter == cpoolMap.end())
                 return (CPoolRecord*)0;
             return &(*iter).second;
@@ -119,7 +119,7 @@ namespace Sla.DECCORE
 
         public override void encode(Encoder encoder)
         {
-            map<CheapSorter, CPoolRecord>::const_iterator iter;
+            Dictionary<CheapSorter, CPoolRecord>::const_iterator iter;
             encoder.openElement(ELEM_CONSTANTPOOL);
             for (iter = cpoolMap.begin(); iter != cpoolMap.end(); ++iter)
             {

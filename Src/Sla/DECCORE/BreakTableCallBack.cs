@@ -77,12 +77,12 @@ namespace Sla.DECCORE
         public override void setEmulate(Emulate emu)
         { // Make sure all callbbacks are aware of new emulator
             emulate = emu;
-            map<Address, BreakCallBack*>::iterator iter1;
+            Dictionary<Address, BreakCallBack*>::iterator iter1;
 
             for (iter1 = addresscallback.begin(); iter1 != addresscallback.end(); ++iter1)
                 (*iter1).second.setEmulate(emu);
 
-            map<ulong, BreakCallBack*>::iterator iter2;
+            Dictionary<ulong, BreakCallBack*>::iterator iter2;
 
 
             for (iter2 = pcodecallback.begin(); iter2 != pcodecallback.end(); ++iter2)
@@ -97,7 +97,7 @@ namespace Sla.DECCORE
         public override bool doPcodeOpBreak(PcodeOpRaw curop)
         {
             ulong val = curop.getInput(0).offset;
-            map<ulong, BreakCallBack*>::const_iterator iter;
+            Dictionary<ulong, BreakCallBack*>::const_iterator iter;
 
             iter = pcodecallback.find(val);
             if (iter == pcodecallback.end()) return false;
@@ -111,7 +111,7 @@ namespace Sla.DECCORE
         /// \return \b true if the breakpoint exists and returns \b true, otherwise return \b false
         public override bool doAddressBreak(Address addr)
         {
-            map<Address, BreakCallBack*>::const_iterator iter;
+            Dictionary<Address, BreakCallBack*>::const_iterator iter;
 
             iter = addresscallback.find(addr);
             if (iter == addresscallback.end()) return false;

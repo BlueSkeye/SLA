@@ -73,7 +73,7 @@ namespace Sla.DECCORE
                 return -1;
             }
             HighVariable* high = vn.getHigh();
-            if ((high != (HighVariable*)0) && (high.numInstances() > 1)) return -1; // Must not be merged at all
+            if ((high != (HighVariable)null) && (high.numInstances() > 1)) return -1; // Must not be merged at all
             if (vn.isAddrTied())
             {       // We need to see addrtied as explicit because pointers may reference it
                 if (def.code() == CPUI_SUBPIECE)
@@ -233,9 +233,9 @@ namespace Sla.DECCORE
             opstack.Add(vn);
             do
             {
-                vncur = opstack.back().vn;
+                vncur = opstack.GetLastItem().vn;
                 bool isaterm = vncur.isExplicit() || (!vncur.isWritten());
-                if (isaterm || (opstack.back().slotback <= opstack.back().slot))
+                if (isaterm || (opstack.GetLastItem().slotback <= opstack.GetLastItem().slot))
                 { // Trimming condition
                     if (isaterm)
                     {
@@ -253,7 +253,7 @@ namespace Sla.DECCORE
                 else
                 {
                     PcodeOp* op = vncur.getDef();
-                    Varnode* newvn = op.getIn(opstack.back().slot++);
+                    Varnode* newvn = op.getIn(opstack.GetLastItem().slot++);
                     if (newvn.isMark())
                     {   // If an ancestor is marked(also possible implied with multiple descendants)
                         vn.setExplicit();  // then automatically consider this to be explicit

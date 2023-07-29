@@ -160,7 +160,7 @@ namespace Sla.EXTRA
                 constraintlist[i].setId(id);
         }
 
-        public override int getBaseIndex() => constraintlist.back().getBaseIndex();
+        public override int getBaseIndex() => constraintlist.GetLastItem().getBaseIndex();
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {

@@ -75,7 +75,7 @@ namespace Sla.DECCORE
             // Since this all a heuristic for recovering parameters, we assume this rule is always true
             // to get an efficient test
             if (addr.getSpace().getType() != IPTR_SPACEBASE)
-                trial.back().markKilledByCall();
+                trial.GetLastItem().markKilledByCall();
             slotbase += 1;
         }
 
@@ -219,18 +219,18 @@ namespace Sla.DECCORE
             for (int j = 0; j < i; ++j)
             {
                 newtrials.Add(trial[j]);
-                int oldslot = newtrials.back().getSlot();
+                int oldslot = newtrials.GetLastItem().getSlot();
                 if (oldslot > slot)
-                    newtrials.back().setSlot(oldslot + 1);
+                    newtrials.GetLastItem().setSlot(oldslot + 1);
             }
             newtrials.Add(trial[i].splitHi(sz));
             newtrials.Add(trial[i].splitLo(trial[i].getSize() - sz));
             for (int j = i + 1; j < trial.size(); ++j)
             {
                 newtrials.Add(trial[j]);
-                int oldslot = newtrials.back().getSlot();
+                int oldslot = newtrials.GetLastItem().getSlot();
                 if (oldslot > slot)
-                    newtrials.back().setSlot(oldslot + 1);
+                    newtrials.GetLastItem().setSlot(oldslot + 1);
             }
             slotbase += 1;
             trial = newtrials;
@@ -257,8 +257,8 @@ namespace Sla.DECCORE
                 {
                     sizecheck += curtrial.getSize();
                     newtrials.Add(ParamTrial(addr, sz, slot));
-                    newtrials.back().markUsed();
-                    newtrials.back().markActive();
+                    newtrials.GetLastItem().markUsed();
+                    newtrials.GetLastItem().markActive();
                 }
                 else if (curslot == slot + 1)
                 { // this slot is thrown out
@@ -267,7 +267,7 @@ namespace Sla.DECCORE
                 else
                 {
                     newtrials.Add(curtrial);
-                    newtrials.back().setSlot(curslot - 1);
+                    newtrials.GetLastItem().setSlot(curslot - 1);
                 }
             }
             if (sizecheck != sz)

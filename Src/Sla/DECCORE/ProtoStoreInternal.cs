@@ -67,7 +67,7 @@ namespace Sla.DECCORE
                 inparam[j - 1] = inparam[j];
                 inparam[j] = (ProtoParameter*)0;
             }
-            while (inparam.back() == (ProtoParameter*)0)
+            while (inparam.GetLastItem() == (ProtoParameter*)0)
                 inparam.pop_back();
         }
 
@@ -179,12 +179,12 @@ namespace Sla.DECCORE
 
             pieces.Add(ParameterPieces()); // Push on placeholder for output pieces
             namelist.Add("ret");
-            pieces.back().type = outparam.getType();
-            pieces.back().flags = 0;
+            pieces.GetLastItem().type = outparam.getType();
+            pieces.GetLastItem().flags = 0;
             if (outparam.isTypeLocked())
-                pieces.back().flags |= ParameterPieces::typelock;
+                pieces.GetLastItem().flags |= ParameterPieces::typelock;
             if (outparam.isIndirectStorage())
-                pieces.back().flags |= ParameterPieces::indirectstorage;
+                pieces.GetLastItem().flags |= ParameterPieces::indirectstorage;
             if (outparam.getAddress().isInvalid())
                 addressesdetermined = false;
 
@@ -230,7 +230,7 @@ namespace Sla.DECCORE
                 if ((flags & ParameterPieces::hiddenretparm) == 0)
                     namelist.Add(name);
                 pieces.emplace_back();
-                ParameterPieces & curparam(pieces.back());
+                ParameterPieces & curparam(pieces.GetLastItem());
                 curparam.addr = Address::decode(decoder);
                 curparam.type = glb.types.decodeType(decoder);
                 curparam.flags = flags;

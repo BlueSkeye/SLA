@@ -102,7 +102,7 @@ namespace Sla.DECCORE
             // this is just part of the label
             if (vn.isConstant())
                 return vn.getOffset();
-            map<Varnode*, ulong>::const_iterator iter;
+            Dictionary<Varnode*, ulong>::const_iterator iter;
             iter = varnodeMap.find(vn);
             if (iter != varnodeMap.end())
                 return (*iter).second;  // We have seen this varnode before

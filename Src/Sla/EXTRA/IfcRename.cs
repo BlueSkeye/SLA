@@ -40,7 +40,7 @@ namespace Sla.EXTRA
             if (sym.getCategory() == Symbol::function_parameter)
                 dcp.fd.getFuncProto().setInputLock(true);
             sym.getScope().renameSymbol(sym, newname);
-            sym.getScope().setAttribute(sym, Varnode::namelock | Varnode::typelock);
+            sym.getScope().setAttribute(sym, Varnode.varnode_flags.namelock | Varnode.varnode_flags.typelock);
         }
     }
 }

@@ -47,7 +47,7 @@ namespace Sla.DECCORE
                 newwhole.setWriteMask();       // Don't let new Varnode cause additional heritage
                 data.opInsertBefore(newop, retop);
                 newparam.pop_back();
-                newparam.back() = newwhole;
+                newparam.GetLastItem() = newwhole;
                 data.opSetAllInput(retop, newparam);
                 data.opSetInput(newop, hivn, 0);
                 data.opSetInput(newop, lovn, 1);

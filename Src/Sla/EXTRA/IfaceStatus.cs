@@ -54,9 +54,9 @@ namespace Sla.EXTRA
             dummy.addWords(input);
             newfirst = lower_bound(first, last, &dummy, compare_ifacecommand);
             dummy.removeWord();
-            string temp(input.back() ); // Make copy of last word
+            string temp(input.GetLastItem() ); // Make copy of last word
             temp[temp.size() - 1] += 1; // temp will now be greater than any word
-                                        // whose first letters match input.back()
+                                        // whose first letters match input.GetLastItem()
             dummy.addWord(temp);
             newlast = upper_bound(first, last, &dummy, compare_ifacecommand);
             first = newfirst;
@@ -140,7 +140,7 @@ namespace Sla.EXTRA
                 if (first == last)      // If subrange is empty, return 0
                     return 0;
                 res = maxmatch(tok, (*first).getCommandWord(pos), (*(last - 1)).getCommandWord(pos));
-                expand.back() = tok;
+                expand.GetLastItem() = tok;
             }
         }
 
@@ -178,7 +178,7 @@ namespace Sla.EXTRA
                 popScript();
             for (int i = 0; i < comlist.size(); ++i)
                 delete comlist[i];
-            map<string, IfaceData*>::const_iterator iter;
+            Dictionary<string, IfaceData*>::const_iterator iter;
             for (iter = datamap.begin(); iter != datamap.end(); ++iter)
                 if ((*iter).second != (IfaceData*)0)
                     delete(*iter).second;
@@ -226,9 +226,9 @@ namespace Sla.EXTRA
         /// along with its command prompt, and processing continues with the previous stream.
         public override void popScript()
         {
-            prompt = promptstack.back();
+            prompt = promptstack.GetLastItem();
             promptstack.pop_back();
-            uint flags = flagstack.back();
+            uint flags = flagstack.GetLastItem();
             flagstack.pop_back();
             errorisdone = ((flags & 1) != 0);
             inerror = false;
@@ -280,7 +280,7 @@ namespace Sla.EXTRA
             sorted = false;
 
             string nm(fptr.getModule()); // Name of module this command belongs to
-            map<string, IfaceData*>::const_iterator iter = datamap.find(nm);
+            Dictionary<string, IfaceData*>::const_iterator iter = datamap.find(nm);
             IfaceData* data;
             if (iter == datamap.end())
             {
@@ -300,7 +300,7 @@ namespace Sla.EXTRA
         /// \return the IfaceData object or null
         public IfaceData getData(string nm)
         {
-            map<string, IfaceData*>::const_iterator iter = datamap.find(nm);
+            Dictionary<string, IfaceData*>::const_iterator iter = datamap.find(nm);
             if (iter == datamap.end())
                 return (IfaceData*)0;
             return (*iter).second;

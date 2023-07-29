@@ -283,7 +283,7 @@ namespace Sla.SLEIGH
             VarnodeTpl* outvn = buildTemporary();
             ExprTree* res = new ExprTree();
             res.ops = createUserOpNoOut(sym, param);
-            res.ops.back().setOutput(outvn);
+            res.ops.GetLastItem().setOutput(outvn);
             res.outvn = new VarnodeTpl(*outvn);
             return res;
         }
@@ -304,7 +304,7 @@ namespace Sla.SLEIGH
             ExprTree* res = new ExprTree();
             OpTpl* op = new OpTpl(opc);
             res.ops = ExprTree::appendParams(op, param);
-            res.ops.back().setOutput(outvn);
+            res.ops.GetLastItem().setOutput(outvn);
             res.outvn = new VarnodeTpl(*outvn);
             return res;
         }

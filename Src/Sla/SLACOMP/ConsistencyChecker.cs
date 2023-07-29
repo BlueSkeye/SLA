@@ -364,7 +364,7 @@ namespace Sla.SLACOMP
             int size, handindex;
             OperandSymbol* opsym;
             SubtableSymbol* tabsym;
-            map<SubtableSymbol*, int>::const_iterator iter;
+            Dictionary<SubtableSymbol*, int>::const_iterator iter;
 
             switch (sizeconst.getType())
             {
@@ -1007,8 +1007,8 @@ namespace Sla.SLACOMP
 
             while (!path.empty())
             {
-                SubtableSymbol* cur = path.back();
-                int ctind = state.back();
+                SubtableSymbol* cur = path.GetLastItem();
+                int ctind = state.GetLastItem();
                 if (ctind >= cur.getNumConstructors())
                 {
                     path.pop_back();        // Table is fully traversed
@@ -1019,20 +1019,20 @@ namespace Sla.SLACOMP
                 else
                 {
                     Constructor* ct = cur.getConstructor(ctind);
-                    int oper = ctstate.back();
+                    int oper = ctstate.GetLastItem();
                     if (oper >= ct.getNumOperands())
                     {
-                        state.back() = ctind + 1; // Constructor fully traversed
-                        ctstate.back() = 0;
+                        state.GetLastItem() = ctind + 1; // Constructor fully traversed
+                        ctstate.GetLastItem() = 0;
                     }
                     else
                     {
-                        ctstate.back() = oper + 1;
+                        ctstate.GetLastItem() = oper + 1;
                         OperandSymbol* opsym = ct.getOperand(oper);
                         SubtableSymbol* subsym = dynamic_cast<SubtableSymbol*>(opsym.getDefiningSymbol());
                         if (subsym != (SubtableSymbol*)0)
                         {
-                            map<SubtableSymbol*, int>::const_iterator iter;
+                            Dictionary<SubtableSymbol*, int>::const_iterator iter;
                             iter = sizemap.find(subsym);
                             if (iter == sizemap.end())
                             { // Not traversed yet
@@ -1064,7 +1064,7 @@ namespace Sla.SLACOMP
             if (!vn.getSpace().isUniqueSpace()) return;
             if (vn.getOffset().getType() != ConstTpl::real) return;
 
-            map<ulong, OptimizeRecord>::iterator iter;
+            Dictionary<ulong, OptimizeRecord>::iterator iter;
             iter = recs.insert(pair<uint, OptimizeRecord>(vn.getOffset().getReal(), OptimizeRecord())).first;
             if (inslot >= 0)
             {
@@ -1222,7 +1222,7 @@ namespace Sla.SLACOMP
             {
                 if (hand.getPtrOffset().getType() == ConstTpl::real)
                 {
-                    pair<map<ulong, OptimizeRecord>::iterator, bool> res;
+                    pair<Dictionary<ulong, OptimizeRecord>::iterator, bool> res;
                     ulong offset = hand.getPtrOffset().getReal();
                     res = recs.insert(pair<ulong, OptimizeRecord>(offset, OptimizeRecord()));
                     (*res.first).second.writeop = 0;
@@ -1238,7 +1238,7 @@ namespace Sla.SLACOMP
                 if ((hand.getPtrSpace().getType() == ConstTpl::real) &&
                 (hand.getPtrOffset().getType() == ConstTpl::real))
                 {
-                    pair<map<ulong, OptimizeRecord>::iterator, bool> res;
+                    pair<Dictionary<ulong, OptimizeRecord>::iterator, bool> res;
                     ulong offset = hand.getPtrOffset().getReal();
                     res = recs.insert(pair<ulong, OptimizeRecord>(offset, OptimizeRecord()));
                     (*res.first).second.writeop = 0;
@@ -1264,7 +1264,7 @@ namespace Sla.SLACOMP
         /// \return a passing OptimizeRecord or null
         private OptimizeRecord findValidRule(Constructor ct, Dictionary<ulong, OptimizeRecord> recs)
         {
-            map<ulong, OptimizeRecord>::const_iterator iter;
+            Dictionary<ulong, OptimizeRecord>::const_iterator iter;
             iter = recs.begin();
             while (iter != recs.end())
             {
@@ -1366,7 +1366,7 @@ namespace Sla.SLACOMP
         /// \param recs is the collection of records associated with each temporary Varnode
         private void checkUnusedTemps(Constructor ct, Dictionary<ulong, OptimizeRecord> recs)
         {
-            map<ulong, OptimizeRecord>::const_iterator iter;
+            Dictionary<ulong, OptimizeRecord>::const_iterator iter;
             iter = recs.begin();
             while (iter != recs.end())
             {
@@ -1420,7 +1420,7 @@ namespace Sla.SLACOMP
         private void optimize(Constructor ct)
         {
             OptimizeRecord currec;
-            map<ulong, OptimizeRecord> recs;
+            Dictionary<ulong, OptimizeRecord> recs;
             int numsections = ct.getNumSections();
             do
             {

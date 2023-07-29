@@ -32,7 +32,7 @@ namespace Sla.EXTRA
     {
         //public:
         ///// Defining the map from split points to value objects
-        //typedef std::map<_linetype, _valuetype> maptype;
+        //typedef std::Dictionary<_linetype, _valuetype> maptype;
         ///// A partmap iterator is an iterator into the map
         //typedef typename maptype::iterator iterator;
         ///// A constant iterator

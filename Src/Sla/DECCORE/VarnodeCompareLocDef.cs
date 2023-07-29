@@ -22,10 +22,10 @@ namespace Sla.DECCORE
 
             if (a.getAddr() != b.getAddr()) return (a.getAddr() < b.getAddr());
             if (a.getSize() != b.getSize()) return (a.getSize() < b.getSize());
-            f1 = a.getFlags() & (Varnode::input | Varnode::written);
-            f2 = b.getFlags() & (Varnode::input | Varnode::written);
+            f1 = a.getFlags() & (Varnode.varnode_flags.input | Varnode.varnode_flags.written);
+            f2 = b.getFlags() & (Varnode.varnode_flags.input | Varnode.varnode_flags.written);
             if (f1 != f2) return ((f1 - 1) < (f2 - 1)); // -1 forces free varnodes to come last
-            if (f1 == Varnode::written)
+            if (f1 == Varnode.varnode_flags.written)
             {
                 if (a.getDef().getSeqNum() != b.getDef().getSeqNum())
                     return (a.getDef().getSeqNum() < b.getDef().getSeqNum());

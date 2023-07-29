@@ -84,7 +84,7 @@ namespace Sla.DECCORE
             if (sub == (Datatype)null) return false;
             if (umod != 0) return false;
             if (sub.getSize() == b.type.getSize()) return true;
-            if ((b.flags & Varnode::typelock) != 0) return false;
+            if ((b.flags & Varnode.varnode_flags.typelock) != 0) return false;
             // If we reach here, component sizes do not match
             // Check for data-types we want to protect more
             type_metatype meta = a.type.getMetatype();
@@ -129,12 +129,12 @@ namespace Sla.DECCORE
             if (start != b.start)
                 return true;        // Something must occupy a.start to b.start
                                     // Prefer the locked type
-            if ((b.flags & Varnode::typelock) != 0)
+            if ((b.flags & Varnode.varnode_flags.typelock) != 0)
             {
-                if ((flags & Varnode::typelock) == 0)
+                if ((flags & Varnode.varnode_flags.typelock) == 0)
                     return false;
             }
-            else if ((flags & Varnode::typelock) != 0)
+            else if ((flags & Varnode.varnode_flags.typelock) != 0)
                 return true;
 
             if (!reconcile)
@@ -192,8 +192,8 @@ namespace Sla.DECCORE
                 else if (aTestType != bTestType)    // If they are both not unknown, they must be the same
                     return false;
             }
-            if ((flags & Varnode::typelock) != 0) return false;
-            if ((b.flags & Varnode::typelock) != 0) return false;
+            if ((flags & Varnode.varnode_flags.typelock) != 0) return false;
+            if ((b.flags & Varnode.varnode_flags.typelock) != 0) return false;
             if (flags != b.flags) return false;
             long diffsz = b.sstart - sstart;
             if ((diffsz % settype.getSize()) != 0) return false;
@@ -251,14 +251,14 @@ namespace Sla.DECCORE
             else
             {
                 didReconcile = false;
-                resType = ((flags & Varnode::typelock) != 0) ? 0 : 2;
+                resType = ((flags & Varnode.varnode_flags.typelock) != 0) ? 0 : 2;
             }
             // Check for really problematic cases
             if (!didReconcile)
             {
-                if ((flags & Varnode::typelock) != 0)
+                if ((flags & Varnode.varnode_flags.typelock) != 0)
                 {
-                    if ((b.flags & Varnode::typelock) != 0)
+                    if ((b.flags & Varnode.varnode_flags.typelock) != 0)
                         throw new LowlevelError("Overlapping forced variable types : " + type.getName() + "   " + b.type.getName());
                     if (start != b.start)
                         return false;       // Discard b entirely
@@ -314,8 +314,8 @@ namespace Sla.DECCORE
                 return (size < op2.size) ? -1 : 1;      // Small sizes come first
             if (rangeType != op2.rangeType)
                 return (rangeType < op2.rangeType) ? -1 : 1;
-            uint thisLock = flags & Varnode::typelock;
-            uint op2Lock = op2.flags & Varnode::typelock;
+            uint thisLock = flags & Varnode.varnode_flags.typelock;
+            uint op2Lock = op2.flags & Varnode.varnode_flags.typelock;
             if (thisLock != op2Lock)
                 return (thisLock < op2Lock) ? -1 : 1;
             if (highind != op2.highind)

@@ -324,7 +324,7 @@ namespace Sla.DECCORE
             List<Datatype> typestack = new List<Datatype>();
             buildTypeStack(ct, typestack);
 
-            ct = typestack.back();  // The base type
+            ct = typestack.GetLastItem();  // The base type
             OpToken* tok;
 
             if (noident && (typestack.size() == 1))
@@ -437,7 +437,7 @@ namespace Sla.DECCORE
             if ((vn != (Varnode)null)&& (!vn.isAnnotation())) {
                 HighVariable* high = vn.getHigh();
                 Symbol* sym = high.getSymbol();
-                if (sym != (Symbol*)0)
+                if (sym != (Symbol)null)
                 {
                     if (sym.isNameLocked() && (sym.getCategory() == Symbol::equate))
                     {
@@ -727,7 +727,7 @@ namespace Sla.DECCORE
         /// \param ct is the enumerated data-type
         protected void emitEnumDefinition(TypeEnum ct)
         {
-            map<ulong, string>::const_iterator iter;
+            Dictionary<ulong, string>::const_iterator iter;
 
             if (ct.getName().size() == 0)
             {
@@ -819,7 +819,7 @@ namespace Sla.DECCORE
                         continue;
                     Symbol* sym = param.getSymbol();
                     printComma = true;
-                    if (sym != (Symbol*)0)
+                    if (sym != (Symbol)null)
                         emitVarDecl(sym);
                     else
                     {
@@ -1034,7 +1034,7 @@ namespace Sla.DECCORE
                 {
                     Scope* symScope = ((BlockBasic*)bb).getFuncdata().getScopeLocal();
                     Symbol* sym = symScope.queryCodeLabel(addr);
-                    if (sym != (Symbol*)0)
+                    if (sym != (Symbol)null)
                     {
                         emit.tagLabel(sym.getDisplayName(), EmitMarkup::no_color, spc, off);
                         return;
@@ -1395,7 +1395,7 @@ namespace Sla.DECCORE
             if ((vn != (Varnode)null)&& (!vn.isAnnotation())) {
                 HighVariable* high = vn.getHigh();
                 Symbol* sym = high.getSymbol();
-                if (sym != (Symbol*)0)
+                if (sym != (Symbol)null)
                 {
                     if (sym.isNameLocked() && (sym.getCategory() == Symbol::equate))
                     {
@@ -1508,13 +1508,13 @@ namespace Sla.DECCORE
             else
             {
                 entry = symScope.queryContainer(vn.getAddr(), 1, op.getAddr());
-                if (entry != (SymbolEntry*)0)
+                if (entry != (SymbolEntry)null)
                     size = entry.getSize();
                 else
                     size = vn.getSize();
             }
 
-            if (entry != (SymbolEntry*)0)
+            if (entry != (SymbolEntry)null)
             {
                 if (entry.getSize() == size)
                     pushSymbol(entry.getSymbol(), vn, op);
@@ -1562,7 +1562,7 @@ namespace Sla.DECCORE
                     ostringstream s;
                     s << sym.getDisplayName();
                     SymbolEntry* entry = high.getSymbolEntry();
-                    if (entry != (SymbolEntry*)0)
+                    if (entry != (SymbolEntry)null)
                     {
                         s << '$' << dec << entry.getSymbol().getMapEntryPosition(entry);
                     }
@@ -1614,7 +1614,7 @@ namespace Sla.DECCORE
                     field = ct.findTruncation(off, sz, op, inslot, off);
                     if (field != (TypeField*)0) {
                         stack.emplace_back();
-                        PartialSymbolEntry entry = new PartialSymbolEntry(stack.back());
+                        PartialSymbolEntry entry = new PartialSymbolEntry(stack.GetLastItem());
                         entry.token = &object_member;
                         entry.field = field;
                         entry.parent = ct;
@@ -1631,7 +1631,7 @@ namespace Sla.DECCORE
                     if (arrayof != (Datatype)null)
                     {
                         stack.emplace_back();
-                        PartialSymbolEntry entry = new PartialSymbolEntry(stack.back());
+                        PartialSymbolEntry entry = new PartialSymbolEntry(stack.GetLastItem());
                         entry.token = &subscript;
                         ostringstream s;
                         s << dec << el;
@@ -1648,7 +1648,7 @@ namespace Sla.DECCORE
                     field = ct.findTruncation(off, sz, op, inslot, off);
                     if (field != (TypeField*)0) {
                         stack.emplace_back();
-                        PartialSymbolEntry entry = new PartialSymbolEntry(stack.back());
+                        PartialSymbolEntry entry = new PartialSymbolEntry(stack.GetLastItem());
                         entry.token = &object_member;
                         entry.field = field;
                         entry.parent = ct;
@@ -1675,7 +1675,7 @@ namespace Sla.DECCORE
                 if (!succeeded)
                 {       // Subtype was not good
                     stack.emplace_back();
-                    PartialSymbolEntry entry = new PartialSymbolEntry(stack.back());
+                    PartialSymbolEntry entry = new PartialSymbolEntry(stack.GetLastItem());
                     entry.token = &object_member;
                     if (sz == 0)
                         sz = ct.getSize() - off;
@@ -1782,7 +1782,7 @@ namespace Sla.DECCORE
             if ((vn != (Varnode)null)&& (!vn.isAnnotation())) {
                 HighVariable* high = vn.getHigh();
                 Symbol* sym = high.getSymbol();
-                if (sym != (Symbol*)0)
+                if (sym != (Symbol)null)
                 {
                     if (sym.isNameLocked() && (sym.getCategory() == Symbol::equate))
                     {
@@ -3498,7 +3498,7 @@ namespace Sla.DECCORE
                     else if (vn.isExplicit() && vn.getHigh().getSymbolOffset() == -1)
                     {   // An explicit, entire, structured object
                         Symbol* sym = vn.getHigh().getSymbol();
-                        if (sym != (Symbol*)0)
+                        if (sym != (Symbol)null)
                         {
                             int sz = op.getOut().getSize();
                             int off = (int)op.getIn(1).getOffset();
@@ -3711,7 +3711,7 @@ namespace Sla.DECCORE
                 HighVariable* high = op.getIn(1).getHigh();
                 Symbol* symbol = high.getSymbol();
                 arrayvalue = false;
-                if (symbol != (Symbol*)0)
+                if (symbol != (Symbol)null)
                 {
                     ct = symbol.getType();
                     // The '&' is dropped if the output type is an array
@@ -3732,7 +3732,7 @@ namespace Sla.DECCORE
                     if (arrayvalue)
                         pushOp(&subscript, op);
                 }
-                if (symbol == (Symbol*)0)
+                if (symbol == (Symbol)null)
                 {
                     TypeSpacebase* sb = (TypeSpacebase*)ct;
                     Address addr = sb.getAddress(in1const, in0.getSize(), op.getAddr());

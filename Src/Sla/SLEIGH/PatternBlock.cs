@@ -60,14 +60,14 @@ namespace Sla.SLEIGH
                         tmp |= (maskvec[i + 1] >> ((sizeof(uint) - suboff) * 8));
                         maskvec[i] = tmp;
                     }
-                    maskvec.back() <<= suboff * 8;
+                    maskvec.GetLastItem() <<= suboff * 8;
                     for (int i = 0; i < valvec.size() - 1; ++i)
                     { // Slide up valvec by suboff bytes
                         tmp = valvec[i] << (suboff * 8);
                         tmp |= (valvec[i + 1] >> ((sizeof(uint) - suboff) * 8));
                         valvec[i] = tmp;
                     }
-                    valvec.back() <<= suboff * 8;
+                    valvec.GetLastItem() <<= suboff * 8;
                 }
 
                 iter1 = maskvec.end();  // Cut zeros from end of mask
@@ -94,7 +94,7 @@ namespace Sla.SLEIGH
                 return;
             }
             nonzerosize = maskvec.size() * sizeof(uint);
-            uint tmp = maskvec.back(); // tmp must be nonzero
+            uint tmp = maskvec.GetLastItem(); // tmp must be nonzero
             while ((tmp & 0xff) == 0)
             {
                 nonzerosize -= 1;

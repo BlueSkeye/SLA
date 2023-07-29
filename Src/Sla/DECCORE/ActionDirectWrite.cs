@@ -121,7 +121,7 @@ namespace Sla.DECCORE
             // Let legalness taint
             while (!worklist.empty())
             {
-                vn = worklist.back();
+                vn = worklist.GetLastItem();
                 worklist.pop_back();
                 for (oiter = vn.beginDescend(); oiter != vn.endDescend(); ++oiter)
                 {

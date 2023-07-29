@@ -45,7 +45,7 @@ namespace Sla.DECCORE
         public override string getOperatorName(PcodeOp op)
         {
             BlockBasic bb = op.getParent();
-            if (bb != (BlockBasic*)0)
+            if (bb != (BlockBasic)null)
             {
                 Architecture* glb = bb.getFuncdata().getArch();
                 int index = op.getIn(0).getOffset();
@@ -72,7 +72,7 @@ namespace Sla.DECCORE
                 int size = op.getIn(2).getSize(); // Size of memory being written
                 uint vflags = 0;
                 SymbolEntry* entry = glb.symboltab.getGlobalScope().queryProperties(addr, size, op.getAddr(), vflags);
-                if (entry != (SymbolEntry*)0)
+                if (entry != (SymbolEntry)null)
                 {
                     Datatype* res = entry.getSizedType(addr, size);
                     if (res != (Datatype)null)
@@ -94,7 +94,7 @@ namespace Sla.DECCORE
                 int size = op.getOut().getSize(); // Size of memory being written
                 uint vflags = 0;
                 SymbolEntry* entry = glb.symboltab.getGlobalScope().queryProperties(addr, size, op.getAddr(), vflags);
-                if (entry != (SymbolEntry*)0)
+                if (entry != (SymbolEntry)null)
                 {
                     Datatype* res = entry.getSizedType(addr, size);
                     if (res != (Datatype)null)

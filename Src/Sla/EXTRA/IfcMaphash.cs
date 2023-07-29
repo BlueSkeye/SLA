@@ -32,7 +32,7 @@ namespace Sla.EXTRA
             ct = parse_type(s, name, dcp.conf); // Parse the required type and name
 
             Symbol* sym = dcp.fd.getScopeLocal().addDynamicSymbol(name, ct, addr, hash);
-            sym.getScope().setAttribute(sym, Varnode::namelock | Varnode::typelock);
+            sym.getScope().setAttribute(sym, Varnode.varnode_flags.namelock | Varnode.varnode_flags.typelock);
         }
     }
 }

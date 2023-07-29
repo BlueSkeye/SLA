@@ -69,9 +69,9 @@ namespace Sla.DECCORE
             if (!vn.isFree())
             {
                 workList.emplace_back();
-                workList.back().lanes = res;
-                workList.back().numLanes = numLanes;
-                workList.back().skipLanes = skipLanes;
+                workList.GetLastItem().lanes = res;
+                workList.GetLastItem().numLanes = numLanes;
+                workList.GetLastItem().skipLanes = skipLanes;
             }
             return res;
         }
@@ -518,9 +518,9 @@ namespace Sla.DECCORE
         /// \return \b true if the lane split for the top Varnode on the work list is propagated through local operators
         private bool processNextWork()
         {
-            TransformVar* rvn = workList.back().lanes;
-            int numLanes = workList.back().numLanes;
-            int skipLanes = workList.back().skipLanes;
+            TransformVar* rvn = workList.GetLastItem().lanes;
+            int numLanes = workList.GetLastItem().numLanes;
+            int skipLanes = workList.GetLastItem().skipLanes;
 
             workList.pop_back();
 

@@ -61,8 +61,8 @@ namespace Sla.DECCORE
 
             while (!opstack.empty())
             {
-                curop = opstack.back();
-                multop = multstack.back();
+                curop = opstack.GetLastItem();
+                multop = multstack.GetLastItem();
                 opstack.pop_back();
                 multstack.pop_back();
                 for (int i = 0; i < curop.numInput(); ++i)

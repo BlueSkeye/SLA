@@ -52,7 +52,7 @@ namespace Sla.DECCORE
 
             // Get data-types of return input parameters
             BlockBasic bb = op.getParent();
-            if (bb == (BlockBasic*)0)
+            if (bb == (BlockBasic)null)
                 return TypeOp::getInputLocal(op, slot);
 
             fp = &bb.getFuncdata().getFuncProto();    // Prototype of function we are in

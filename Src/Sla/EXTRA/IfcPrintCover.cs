@@ -27,7 +27,7 @@ namespace Sla.EXTRA
             if (name.size() == 0)
                 throw new IfaceParseError("Missing variable name");
             high = dcp.fd.findHigh(name);
-            if (high == (HighVariable*)0)
+            if (high == (HighVariable)null)
                 throw new IfaceExecutionError("Unable to find variable: " + name);
 
             high.printCover(*status.optr);

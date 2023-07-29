@@ -19,9 +19,9 @@ namespace Sla.EXTRA
         {
             if (dcp.conf == (Architecture*)0)
                 throw new IfaceExecutionError("No load image present");
-            map<VarnodeData, string> reglist;
+            Dictionary<VarnodeData, string> reglist;
             dcp.conf.translate.getAllRegisters(reglist);
-            map<VarnodeData, string>::const_iterator iter;
+            Dictionary<VarnodeData, string>::const_iterator iter;
             AddrSpace* spc = (AddrSpace)null;
             ulong lastoff = 0;
             Scope* globalscope = dcp.conf.symboltab.getGlobalScope();
@@ -39,7 +39,7 @@ namespace Sla.EXTRA
                 uint flags = 0;
                 // Check if the register location is global
                 globalscope.queryProperties(addr, dat.size, Address(), flags);
-                if ((flags & Varnode::persist) != 0)
+                if ((flags & Varnode.varnode_flags.persist) != 0)
                 {
                     Datatype* ct = dcp.conf.types.getBase(dat.size, TYPE_UINT);
                     globalscope.addSymbol((*iter).second, ct, addr, Address());

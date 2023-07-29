@@ -107,7 +107,7 @@ namespace Sla.DECCORE
                 if (high_in.isAddrTied()) return false;
                 if (high_in.isPersist()) return false;
             }
-            if (high_in.piece != (VariablePiece*)0 && high_out.piece != (VariablePiece*)0)
+            if (high_in.piece != (VariablePiece)null && high_out.piece != (VariablePiece)null)
             {
                 VariableGroup* groupIn = high_in.piece.getGroup();
                 VariableGroup* groupOut = high_out.piece.getGroup();
@@ -120,7 +120,7 @@ namespace Sla.DECCORE
 
             Symbol* symbolIn = high_in.getSymbol();
             Symbol* symbolOut = high_out.getSymbol();
-            if (symbolIn != (Symbol*)0 && symbolOut != (Symbol*)0)
+            if (symbolIn != (Symbol)null && symbolOut != (Symbol)null)
             {
                 if (symbolIn != symbolOut)
                     return false;       // Map to different symbols
@@ -162,16 +162,16 @@ namespace Sla.DECCORE
                 if (vn.isIllegalInput() && (!vn.isIndirectOnly())) return false;
             }
             Symbol* symbol = high_in.getSymbol();
-            if (symbol != (Symbol*)0)
+            if (symbol != (Symbol)null)
                 if (symbol.isIsolated())
                     return false;
             symbol = high_out.getSymbol();
-            if (symbol != (Symbol*)0)
+            if (symbol != (Symbol)null)
                 if (symbol.isIsolated())
                     return false;
 
             // Currently don't allow speculative merging of variables that are in separate overlapping collections
-            if (high_out.piece != (VariablePiece*)0 && high_in.piece != (VariablePiece*)0)
+            if (high_out.piece != (VariablePiece)null && high_in.piece != (VariablePiece)null)
                 return false;
             return true;
         }
@@ -548,7 +548,7 @@ namespace Sla.DECCORE
         {
             list<PcodeOp*> markedop;
             list<PcodeOp*>::const_iterator oiter;
-            map<int, CoverBlock>::const_iterator iter, enditer;
+            Dictionary<int, CoverBlock>::const_iterator iter, enditer;
             Varnode* vn2;
             int boundtype;
             int overlaptype;
@@ -855,7 +855,7 @@ namespace Sla.DECCORE
 
             newop = allocateCopyTrim(invn0, indop.getAddr(), indop);
             SymbolEntry* entry = outvn.getSymbolEntry();
-            if (entry != (SymbolEntry*)0 && entry.getSymbol().getType().needsResolution())
+            if (entry != (SymbolEntry)null && entry.getSymbol().getType().needsResolution())
             {
                 data.inheritResolution(entry.getSymbol().getType(), newop, -1, indop, -1);
             }
@@ -1163,7 +1163,7 @@ namespace Sla.DECCORE
 
             int baseOffset = 0;
             SymbolEntry* entry = vn.getSymbolEntry();
-            if (entry != (SymbolEntry*)0)
+            if (entry != (SymbolEntry)null)
             {
                 baseOffset = entry.getOffset();
             }
@@ -1237,7 +1237,7 @@ namespace Sla.DECCORE
                 }
             }
             VariablePiece* piece = ahigh.piece;
-            if (piece != (VariablePiece*)0)
+            if (piece != (VariablePiece)null)
             {
                 piece.updateIntersections();
                 for (int i = 0; i < piece.numIntersection(); ++i)
@@ -1420,7 +1420,7 @@ namespace Sla.DECCORE
                     bounds.clear();
                     uint flags = data.overlapLoc(startiter, bounds);   // Collect maximally overlapping range of Varnodes
                     int max = bounds.size() - 1;           // Index of last iterator
-                    if ((flags & Varnode::addrtied) != 0)
+                    if ((flags & Varnode.varnode_flags.addrtied) != 0)
                     {
                         unifyAddress(startiter, bounds[max]);
                         for (int i = 0; i < max; i += 2)
@@ -1714,9 +1714,9 @@ namespace Sla.DECCORE
                         p1 = v1.getHigh().piece;
                         p2 = v2.getHigh().piece;
                         p3 = v3.getHigh().piece;
-                        if (p1 == (VariablePiece*)0) break;
-                        if (p2 == (VariablePiece*)0) break;
-                        if (p3 == (VariablePiece*)0) break;
+                        if (p1 == (VariablePiece)null) break;
+                        if (p2 == (VariablePiece)null) break;
+                        if (p3 == (VariablePiece)null) break;
                         if (p1.getGroup() != p2.getGroup()) break;
                         if (p1.getGroup() != p3.getGroup()) break;
                         if (v1.getSpace().isBigEndian())
@@ -1736,8 +1736,8 @@ namespace Sla.DECCORE
                         v2 = op.getIn(0);
                         p1 = v1.getHigh().piece;
                         p2 = v2.getHigh().piece;
-                        if (p1 == (VariablePiece*)0) break;
-                        if (p2 == (VariablePiece*)0) break;
+                        if (p1 == (VariablePiece)null) break;
+                        if (p2 == (VariablePiece)null) break;
                         if (p1.getGroup() != p2.getGroup()) break;
                         val = op.getIn(1).getOffset();
                         if (v1.getSpace().isBigEndian())

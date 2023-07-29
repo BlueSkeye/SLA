@@ -44,7 +44,7 @@ namespace Sla.DECCORE
             int sa = constvn.getSize() * 6;   // 1/4 less than full bitsize
             ulong quarter = (mask >> sa) << sa;
             if ((val & quarter) != quarter) return 0;   // The first quarter of bits must all be 1's
-            if (constvn.getSymbolEntry() != (SymbolEntry*)0)
+            if (constvn.getSymbolEntry() != (SymbolEntry)null)
             {
                 EquateSymbol* sym = dynamic_cast<EquateSymbol*>(constvn.getSymbolEntry().getSymbol());
                 if (sym != (EquateSymbol*)0)

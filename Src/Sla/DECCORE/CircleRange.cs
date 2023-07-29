@@ -1261,7 +1261,7 @@ namespace Sla.DECCORE
                     else
                         return (Varnode)null;
                 }
-                if (constvn.getSymbolEntry() != (SymbolEntry*)0)
+                if (constvn.getSymbolEntry() != (SymbolEntry)null)
                     *constMarkup = constvn;
             }
             else    // Neither unary or binary

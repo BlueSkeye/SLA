@@ -17,7 +17,7 @@ namespace Sla.DECCORE
     internal class LocationMap
     {
         /// Iterator into the main map
-        // typedef map<Address, SizePass>::iterator iterator;
+        // typedef Dictionary<Address, SizePass>::iterator iterator;
         /// Heritaged addresses mapped to range size and pass number
         private Dictionary<Address, SizePass> themap;
 
@@ -97,7 +97,7 @@ namespace Sla.DECCORE
         /// \return the pass number of -1
         public int findPass(Address addr)
         {
-            map<Address, SizePass>::const_iterator iter = themap.upper_bound(addr); // First range after address
+            Dictionary<Address, SizePass>::const_iterator iter = themap.upper_bound(addr); // First range after address
             if (iter == themap.begin()) return -1;
             --iter;         // First range before or equal to address
             if (-1 != addr.overlap(0, (*iter).first, (*iter).second.size))

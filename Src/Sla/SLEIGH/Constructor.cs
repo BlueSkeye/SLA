@@ -195,7 +195,7 @@ namespace Sla.SLEIGH
                 {
                     throw new SleighError(sym.getName() + ": operand is undefined");
                 }
-                TokenPattern & sympat(oppattern.back());
+                TokenPattern & sympat(oppattern.GetLastItem());
                 sym.minimumlength = sympat.getMinimumLength();
                 if (sympat.getLeftEllipsis() || sympat.getRightEllipsis())
                     sym.setVariableLength();
@@ -324,15 +324,15 @@ namespace Sla.SLEIGH
                 firstwhitespace = printpiece.size();
             if (printpiece.empty())
                 printpiece.Add(syntrim);
-            else if (printpiece.back() == " " && syntrim == " ")
+            else if (printpiece.GetLastItem() == " " && syntrim == " ")
             {
                 // Don't add more whitespace
             }
-            else if (printpiece.back()[0] == '\n' || printpiece.back() == " " || syntrim == " ")
+            else if (printpiece.GetLastItem()[0] == '\n' || printpiece.GetLastItem() == " " || syntrim == " ")
                 printpiece.Add(syntrim);
             else
             {
-                printpiece.back() += syntrim;
+                printpiece.GetLastItem() += syntrim;
             }
         }
 
@@ -450,9 +450,9 @@ namespace Sla.SLEIGH
         public void removeTrailingSpace()
         {
             // Allow for user to force extra space at end of printing
-            if ((!printpiece.empty()) && (printpiece.back() == " "))
+            if ((!printpiece.empty()) && (printpiece.GetLastItem() == " "))
                 printpiece.pop_back();
-            //  while((!printpiece.empty())&&(printpiece.back()==" "))
+            //  while((!printpiece.empty())&&(printpiece.GetLastItem()==" "))
             //    printpiece.pop_back();
         }
 

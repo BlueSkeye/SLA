@@ -75,9 +75,9 @@ namespace Sla.DECCORE
             if (isparam)
             {
                 entry.emplace_back();
-                entry.back().origIndex = orig;
-                entry.back().slot = slot;
-                entry.back().size = slotsize;
+                entry.GetLastItem().origIndex = orig;
+                entry.GetLastItem().slot = slot;
+                entry.GetLastItem().size = slotsize;
             }
             else
             {

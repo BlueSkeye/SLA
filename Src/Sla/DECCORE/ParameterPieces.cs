@@ -19,9 +19,9 @@ namespace Sla.DECCORE
             hiddenretparm = 2,
             /// Parameter is indirect pointer to true parameter, mirrors Varnode::indirectstorage
             indirectstorage = 4,
-            /// Parameter's name is locked, mirrors Varnode::namelock
+            /// Parameter's name is locked, mirrors Varnode.varnode_flags.namelock
             namelock = 8,
-            /// Parameter's data-type is locked, mirrors Varnode::typelock
+            /// Parameter's data-type is locked, mirrors Varnode.varnode_flags.typelock
             typelock = 16,
             /// Size of the parameter is locked (but not the data-type)
             sizelock = 32

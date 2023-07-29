@@ -133,7 +133,7 @@ namespace Sla.DECCORE
                     Datatype* curDatatype = curHint.type;
                     if (curDatatype.typeOrder(*startDatatype) < 0) // Take the most specific variant of data-type
                         startDatatype = curDatatype;
-                    if (curHint.compare(*newList.back()) != 0)
+                    if (curHint.compare(*newList.GetLastItem()) != 0)
                         newList.Add(curHint);     // Keep the current hint if it is otherwise different
                     else
                         delete curHint;     // RangeHint is on the heap, so delete if we are not keeping it
@@ -241,11 +241,11 @@ namespace Sla.DECCORE
         {
             list<SymbolEntry>::const_iterator riter;
             Symbol* sym;
-            if (rangemap == (EntryMap*)0) return;
+            if (rangemap == (EntryMap)null) return;
             for (riter = rangemap.begin_list(); riter != rangemap.end_list(); ++riter)
             {
                 sym = (*riter).getSymbol();
-                if (sym == (Symbol*)0) continue;
+                if (sym == (Symbol)null) continue;
                 //    if ((*iter).isPiece()) continue;     // This should probably never happen
                 ulong start = (*riter).getAddr().getOffset();
                 Datatype* ct = sym.getType();
@@ -296,7 +296,7 @@ namespace Sla.DECCORE
             {
                 vn = *riter++;
                 high = vn.getHigh();
-                if (high == (HighVariable*)0) continue;
+                if (high == (HighVariable)null) continue;
                 if (high.isMark()) continue;
                 if (!high.isAddrTied()) continue;
                 vn = high.getTiedVarnode();    // Original vn may not be good representative

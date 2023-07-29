@@ -95,7 +95,7 @@ namespace Sla.DECCORE
             // FIXME: A valid point of context may be necessary in the future
             smallest = scope.queryContainer(addr, 1, nullPoint);
 
-            if (smallest == (SymbolEntry*)0)
+            if (smallest == (SymbolEntry)null)
             {
                 *newoff = 0;
                 return glb.types.getBase(1, TYPE_UNKNOWN);
@@ -116,7 +116,7 @@ namespace Sla.DECCORE
             SymbolEntry* smallest = scope.queryContainer(addr, 1, nullPoint);
             Address nextAddr;
             Datatype* symbolType;
-            if (smallest == (SymbolEntry*)0 || smallest.getOffset() != 0)
+            if (smallest == (SymbolEntry)null || smallest.getOffset() != 0)
                 nextAddr = addr + 32;
             else
             {
@@ -138,7 +138,7 @@ namespace Sla.DECCORE
             if (nextAddr < addr)
                 return (Datatype)null;        // Don't let the address wrap
             smallest = scope.queryContainer(nextAddr, 1, nullPoint);
-            if (smallest == (SymbolEntry*)0 || smallest.getOffset() != 0)
+            if (smallest == (SymbolEntry)null || smallest.getOffset() != 0)
                 return (Datatype)null;
             symbolType = smallest.getSymbol().getType();
             *newoff = addr.getOffset() - smallest.getAddr().getOffset();

@@ -38,8 +38,8 @@ namespace Sla.DECCORE
             if (!data.getFuncProto().isInputLocked())
             {
                 VarnodeDefSet::const_iterator iter, enditer;
-                iter = data.beginDef(Varnode::input);
-                enditer = data.endDef(Varnode::input);
+                iter = data.beginDef(Varnode.varnode_flags.input);
+                enditer = data.endDef(Varnode.varnode_flags.input);
                 while (iter != enditer)
                 {
                     vn = *iter;

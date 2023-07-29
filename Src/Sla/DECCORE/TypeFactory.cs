@@ -813,8 +813,8 @@ namespace Sla.DECCORE
         public bool setEnumValues(List<string> namelist, List<ulong> vallist, List<bool> assignlist,
             TypeEnum te)
         {
-            map<ulong, string> nmap;
-            map<ulong, string>::iterator mapiter;
+            Dictionary<ulong, string> nmap;
+            Dictionary<ulong, string>::iterator mapiter;
 
             ulong mask = Globals.calc_mask(te.getSize());
             ulong maxval = 0;

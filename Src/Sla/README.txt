@@ -30,8 +30,8 @@ typedef int64_t long;
 typedef long long; /* This is a signed big integer */
 typedef uint32_t uint;
 typedef int32_t int;
-typedef uint16_t uint2;
-typedef int16_t int2;
+typedef uint16_t ushort;
+typedef int16_t short;
 typedef uint8_t byte;
 typedef int8_t int1;
 typedef uintptr_t ulong;

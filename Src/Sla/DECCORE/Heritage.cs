@@ -1039,12 +1039,12 @@ namespace Sla.DECCORE
             bool nothingToDo = true;
             if (!loadGuard.empty())
             {
-                if (loadGuard.back().analysisState == 0)    // Check if unanalyzed
+                if (loadGuard.GetLastItem().analysisState == 0)    // Check if unanalyzed
                     nothingToDo = false;
             }
             if (!storeGuard.empty())
             {
-                if (storeGuard.back().analysisState == 0)
+                if (storeGuard.GetLastItem().analysisState == 0)
                     nothingToDo = false;
             }
             if (nothingToDo) return;
@@ -1122,7 +1122,7 @@ namespace Sla.DECCORE
             if (!op.usesSpacebasePtr())
             {
                 loadGuard.emplace_back();
-                loadGuard.back().set(op, spc, node.offset);
+                loadGuard.GetLastItem().set(op, spc, node.offset);
                 fd.opMarkSpacebasePtr(op);
             }
         }
@@ -1139,7 +1139,7 @@ namespace Sla.DECCORE
             if (!op.usesSpacebasePtr())
             {
                 storeGuard.emplace_back();
-                storeGuard.back().set(op, spc, node.offset);
+                storeGuard.GetLastItem().set(op, spc, node.offset);
                 fd.opMarkSpacebasePtr(op);
             }
         }
@@ -1212,7 +1212,7 @@ namespace Sla.DECCORE
                 path.Add(StackNode(spInput, 0, 0));
                 while (!path.empty())
                 {
-                    StackNode & curNode(path.back());
+                    StackNode & curNode(path.GetLastItem());
                     if (curNode.iter == curNode.vn.endDescend())
                     {
                         path.pop_back();
@@ -1611,7 +1611,7 @@ namespace Sla.DECCORE
             PcodeOp* indop;
             uint effecttype;
 
-            bool holdind = ((fl & Varnode::addrtied) != 0);
+            bool holdind = ((fl & Varnode.varnode_flags.addrtied) != 0);
             for (int i = 0; i < fd.numCalls(); ++i)
             {
                 fc = fd.getCallSpecs(i);
@@ -1744,7 +1744,7 @@ namespace Sla.DECCORE
             PcodeOp* copyop;
             list<LoadGuard>::iterator iter;
 
-            if ((fl & Varnode::addrtied) == 0) return;  // If not address tied, don't consider for index alias
+            if ((fl & Varnode.varnode_flags.addrtied) == 0) return;  // If not address tied, don't consider for index alias
             iter = loadGuard.begin();
             while (iter != loadGuard.end())
             {
@@ -1848,7 +1848,7 @@ namespace Sla.DECCORE
                     }
                 }
             }
-            if ((fl & Varnode::persist) == 0) return;
+            if ((fl & Varnode.varnode_flags.persist) == 0) return;
             iterend = fd.endOp(CPUI_RETURN);
             for (iter = fd.beginOp(CPUI_RETURN); iter != iterend; ++iter)
             {
@@ -2245,7 +2245,7 @@ namespace Sla.DECCORE
                             stack.Add(vnnew);
                         }
                         else
-                            vnnew = stack.back();
+                            vnnew = stack.GetLastItem();
                         // INDIRECTs and their op really happen AT SAME TIME
                         if (vnnew.isWritten() && (vnnew.getDef().code() == CPUI_INDIRECT))
                         {
@@ -2293,7 +2293,7 @@ namespace Sla.DECCORE
                             stack.Add(vnnew);
                         }
                         else
-                            vnnew = stack.back();
+                            vnnew = stack.GetLastItem();
                         fd.opSetInput(multiop, vnnew, slot);
                         if (vnin.hasNoDescend())
                             fd.deleteVarnode(vnin);

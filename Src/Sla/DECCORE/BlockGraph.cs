@@ -273,7 +273,7 @@ namespace Sla.DECCORE
 
                     while (0 != state.Count) {
                         FlowBlock curbl = state[state.Count - 1];
-                        if (curbl.sizeOut() <= istate.back()) {
+                        if (curbl.sizeOut() <= istate.GetLastItem()) {
                             // We've visited all children of this node
                             state.RemoveAt(state.Count - 1);
                             istate.RemoveAt(istate.Count - 1);
@@ -1061,7 +1061,7 @@ namespace Sla.DECCORE
                 // Preserve the condition
                 ret.forceFalseEdge(out0);
             }
-            //  if ((ret.OutSize() == 2)&&(nodes.back().Out(0) == nodes.front()))
+            //  if ((ret.OutSize() == 2)&&(nodes.GetLastItem().Out(0) == nodes.front()))
             //    ret.FlowBlock::negateCondition(); // Preserve out ordering of last block
             return ret;
         }

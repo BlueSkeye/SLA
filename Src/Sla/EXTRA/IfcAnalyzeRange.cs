@@ -68,7 +68,7 @@ namespace Sla.EXTRA
                 (*iter).printRaw(*status.optr);
                 *status.optr << endl;
             }
-            map<SeqNum, ValueSetRead>::const_iterator riter;
+            Dictionary<SeqNum, ValueSetRead>::const_iterator riter;
             for (riter = vsSolver.beginValueSetReads(); riter != vsSolver.endValueSetReads(); ++riter)
             {
                 (*riter).second.printRaw(*status.optr);

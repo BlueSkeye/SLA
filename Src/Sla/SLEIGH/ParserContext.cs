@@ -109,7 +109,7 @@ namespace Sla.SLEIGH
         public void addCommit(TripleSymbol sym, int num, uint mask, bool flow, ConstructState point)
         {
             contextcommit.emplace_back();
-            ContextSet & set(contextcommit.back());
+            ContextSet & set(contextcommit.GetLastItem());
 
             set.sym = sym;
             set.point = point;      // This is the current state

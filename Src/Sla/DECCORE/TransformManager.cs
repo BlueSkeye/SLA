@@ -63,7 +63,7 @@ namespace Sla.DECCORE
         /// \param inputList will hold any inputs
         private void createVarnodes(List<TransformVar> inputList)
         {
-            map<int, TransformVar*>::iterator piter;
+            Dictionary<int, TransformVar*>::iterator piter;
             for (piter = pieceMap.begin(); piter != pieceMap.end(); ++piter)
             {
                 TransformVar* vArray = (*piter).second;
@@ -149,7 +149,7 @@ namespace Sla.DECCORE
 
         ~TransformManager()
         {
-            map<int, TransformVar*>::iterator iter;
+            Dictionary<int, TransformVar*>::iterator iter;
             for (iter = pieceMap.begin(); iter != pieceMap.end(); ++iter)
             {
                 delete[](*iter).second;
@@ -179,7 +179,7 @@ namespace Sla.DECCORE
         /// Clear mark for all Varnodes in the map
         public void clearVarnodeMarks()
         {
-            map<int, TransformVar*>::const_iterator iter;
+            Dictionary<int, TransformVar*>::const_iterator iter;
             for (iter = pieceMap.begin(); iter != pieceMap.end(); ++iter)
             {
                 Varnode* vn = (*iter).second.vn;
@@ -209,7 +209,7 @@ namespace Sla.DECCORE
         public TransformVar newUnique(int size)
         {
             newVarnodes.emplace_back();
-            TransformVar* res = &newVarnodes.back();
+            TransformVar* res = &newVarnodes.GetLastItem();
             res.initialize(TransformVar::normal_temp, (Varnode)null, size * 8, size, 0);
             return res;
         }
@@ -224,7 +224,7 @@ namespace Sla.DECCORE
         public TransformVar newConstant(int size, int lsbOffset, ulong val)
         {
             newVarnodes.emplace_back();
-            TransformVar* res = &newVarnodes.back();
+            TransformVar* res = &newVarnodes.GetLastItem();
             res.initialize(TransformVar::constant, (Varnode)null, size * 8, size, (val >> lsbOffset) & Globals.calc_mask(size));
             return res;
         }
@@ -236,7 +236,7 @@ namespace Sla.DECCORE
         public TransformVar newIop(Varnode vn)
         {
             newVarnodes.emplace_back();
-            TransformVar* res = &newVarnodes.back();
+            TransformVar* res = &newVarnodes.GetLastItem();
             res.initialize(TransformVar::constant_iop, (Varnode)null, vn.getSize() * 8, vn.getSize(), vn.getOffset());
             return res;
         }
@@ -329,7 +329,7 @@ namespace Sla.DECCORE
         public TransformOp newOpReplace(int numParams, OpCode opc, PcodeOp replace)
         {
             newOps.emplace_back();
-            TransformOp & rop(newOps.back());
+            TransformOp & rop(newOps.GetLastItem());
             rop.op = replace;
             rop.replacement = (PcodeOp)null;
             rop.opc = opc;
@@ -351,7 +351,7 @@ namespace Sla.DECCORE
         public TransformOp newOp(int numParams, OpCode opc, TransformOp follow)
         {
             newOps.emplace_back();
-            TransformOp & rop(newOps.back());
+            TransformOp & rop(newOps.GetLastItem());
             rop.op = follow.op;
             rop.replacement = (PcodeOp)null;
             rop.opc = opc;
@@ -374,7 +374,7 @@ namespace Sla.DECCORE
         public TransformOp newPreexistingOp(int numParams, OpCode opc, PcodeOp originalOp)
         {
             newOps.emplace_back();
-            TransformOp & rop(newOps.back());
+            TransformOp & rop(newOps.GetLastItem());
             rop.op = originalOp;
             rop.replacement = (PcodeOp)null;
             rop.opc = opc;
@@ -394,7 +394,7 @@ namespace Sla.DECCORE
         {
             if (vn.isConstant())
                 return newConstant(vn.getSize(), 0, vn.getOffset());
-            map<int, TransformVar*>::const_iterator iter;
+            Dictionary<int, TransformVar*>::const_iterator iter;
             iter = pieceMap.find(vn.getCreateIndex());
             if (iter != pieceMap.end())
                 return (*iter).second;
@@ -410,7 +410,7 @@ namespace Sla.DECCORE
         /// \return the found/created placeholder
         public TransformVar getPiece(Varnode vn, int bitSize, int lsbOffset)
         {
-            map<int, TransformVar*>::const_iterator iter;
+            Dictionary<int, TransformVar*>::const_iterator iter;
             iter = pieceMap.find(vn.getCreateIndex());
             if (iter != pieceMap.end())
             {
@@ -431,7 +431,7 @@ namespace Sla.DECCORE
         /// \return an array of the TransformVar placeholders from least to most significant
         public TransformVar getSplit(Varnode vn, LaneDescription description)
         {
-            map<int, TransformVar*>::const_iterator iter;
+            Dictionary<int, TransformVar*>::const_iterator iter;
             iter = pieceMap.find(vn.getCreateIndex());
             if (iter != pieceMap.end())
             {
@@ -451,7 +451,7 @@ namespace Sla.DECCORE
         /// \return an array of the TransformVar placeholders from least to most significant
         public TransformVar getSplit(Varnode vn, LaneDescription description, int numLanes, int startLane)
         {
-            map<int, TransformVar*>::const_iterator iter;
+            Dictionary<int, TransformVar*>::const_iterator iter;
             iter = pieceMap.find(vn.getCreateIndex());
             if (iter != pieceMap.end())
             {

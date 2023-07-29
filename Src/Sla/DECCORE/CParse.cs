@@ -69,7 +69,7 @@ namespace Sla.DECCORE
 
         private int lookupIdentifier(string nm)
         {
-            map<string, uint>::const_iterator iter = keywords.find(nm);
+            Dictionary<string, uint>::const_iterator iter = keywords.find(nm);
             if (iter != keywords.end())
             {
                 switch ((*iter).second)
@@ -220,7 +220,7 @@ namespace Sla.DECCORE
 
         public TypeSpecifiers addFuncSpecifier(TypeSpecifiers spec, string str)
         {
-            map<string, uint>::const_iterator iter;
+            Dictionary<string, uint>::const_iterator iter;
 
             iter = keywords.find(*str);
             if (iter != keywords.end())
@@ -291,7 +291,7 @@ namespace Sla.DECCORE
             bool dotdotdot = false;
             if (!declist.empty())
             {
-                if (declist.back() == (TypeDeclarator*)0)
+                if (declist.GetLastItem() == (TypeDeclarator*)0)
                 {
                     dotdotdot = true;
                     declist.pop_back();
@@ -424,7 +424,7 @@ namespace Sla.DECCORE
 
         public uint convertFlag(string str)
         {
-            map<string, uint>::const_iterator iter;
+            Dictionary<string, uint>::const_iterator iter;
 
             iter = keywords.find(*str);
             if (iter != keywords.end())

@@ -49,9 +49,9 @@ namespace Sla.DECCORE
             {   // Skip the first operand containing the injectid
                 InjectParameter & param(getInput(i));
                 icontext.inputlist.emplace_back();
-                icontext.inputlist.back().space = uniqSpace;
-                icontext.inputlist.back().offset = uniqReserve;
-                icontext.inputlist.back().size = param.getSize();
+                icontext.inputlist.GetLastItem().space = uniqSpace;
+                icontext.inputlist.GetLastItem().offset = uniqReserve;
+                icontext.inputlist.GetLastItem().size = param.getSize();
                 inputList.Add(uniqReserve);
                 uniqReserve += 0x20;
             }
@@ -59,9 +59,9 @@ namespace Sla.DECCORE
             {
                 InjectParameter & param(getOutput(i));
                 icontext.output.emplace_back();
-                icontext.output.back().space = uniqSpace;
-                icontext.output.back().offset = uniqReserve;
-                icontext.output.back().size = param.getSize();
+                icontext.output.GetLastItem().space = uniqSpace;
+                icontext.output.GetLastItem().offset = uniqReserve;
+                icontext.output.GetLastItem().size = param.getSize();
                 outputList.Add(uniqReserve);
                 uniqReserve += 0x20;
             }

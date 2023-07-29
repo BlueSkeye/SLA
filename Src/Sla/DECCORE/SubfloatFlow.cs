@@ -262,7 +262,7 @@ namespace Sla.DECCORE
         /// \return \b true if the trace is successfully pushed
         private bool processNextWork()
         {
-            TransformVar* rvn = worklist.back();
+            TransformVar* rvn = worklist.GetLastItem();
 
             worklist.pop_back();
 

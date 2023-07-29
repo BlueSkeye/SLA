@@ -174,7 +174,7 @@ namespace Sla.DECCORE
 
             do
             {   // Traverse through tree of inputs to final address
-                PcodeOpNode & node(path.back());
+                PcodeOpNode & node(path.GetLastItem());
                 Varnode* curvn = node.op.getIn(node.slot);
                 if (isprune(curvn))
                 {   // Here is a node of the tree
@@ -189,12 +189,12 @@ namespace Sla.DECCORE
                             pathMeld.meld(path);
                     }
 
-                    path.back().slot += 1;
-                    while (path.back().slot >= path.back().op.numInput())
+                    path.GetLastItem().slot += 1;
+                    while (path.GetLastItem().slot >= path.GetLastItem().op.numInput())
                     {
                         path.pop_back();
                         if (path.empty()) break;
-                        path.back().slot += 1;
+                        path.GetLastItem().slot += 1;
                     }
                 }
                 else

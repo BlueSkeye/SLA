@@ -192,7 +192,7 @@ namespace Sla.DECCORE
         public subsorttype getSubsort()
         {
             subsorttype res;        // Minimal subsort
-            if ((symbol.getFlags() & Varnode::addrtied) == 0)
+            if ((symbol.getFlags() & Varnode.varnode_flags.addrtied) == 0)
             {
                 Range range = uselimit.getFirstRange();
                 if (range == null)
@@ -253,7 +253,7 @@ namespace Sla.DECCORE
         /// \return true if the data-type was changed
         public bool updateType(Varnode vn)
         {
-            if ((symbol.getFlags() & Varnode::typelock) != 0)
+            if ((symbol.getFlags() & Varnode.varnode_flags.typelock) != 0)
             { // Type will just get replaced if not locked
                 Datatype* dt = getSizedType(vn.getAddr(), vn.getSize());
                 if (dt != (Datatype)null)

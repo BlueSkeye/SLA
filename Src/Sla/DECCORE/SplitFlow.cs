@@ -282,7 +282,7 @@ namespace Sla.DECCORE
         /// \return \b true if the logical split was successfully pushed through its local operators
         private bool processNextWork()
         {
-            TransformVar* rvn = worklist.back();
+            TransformVar* rvn = worklist.GetLastItem();
 
             worklist.pop_back();
 

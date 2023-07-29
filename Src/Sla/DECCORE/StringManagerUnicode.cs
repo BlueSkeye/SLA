@@ -62,7 +62,7 @@ namespace Sla.DECCORE
 
         public override List<byte> getStringData(Address addr, Datatype charType, bool isTrunc)
         {
-            map<Address, StringData>::iterator iter;
+            Dictionary<Address, StringData>::iterator iter;
             iter = stringMap.find(addr);
             if (iter != stringMap.end())
             {

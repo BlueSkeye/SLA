@@ -29,8 +29,8 @@ namespace Sla.DECCORE
             VarnodeDefSet::const_iterator iter, enditer;
             FuncProto & proto(data.getFuncProto());
 
-            iter = data.beginDef(Varnode::input);
-            enditer = data.endDef(Varnode::input);
+            iter = data.beginDef(Varnode.varnode_flags.input);
+            enditer = data.endDef(Varnode.varnode_flags.input);
 
             while (iter != enditer)
             {
@@ -43,7 +43,7 @@ namespace Sla.DECCORE
                 {
                     newcontainer = false;
                     VarnodeDefSet::const_iterator begiter, iter2;
-                    begiter = data.beginDef(Varnode::input);
+                    begiter = data.beginDef(Varnode.varnode_flags.input);
                     iter2 = iter;
                     bool overlaps = false;
                     while (iter2 != begiter)
@@ -67,8 +67,8 @@ namespace Sla.DECCORE
 
                 data.adjustInputVarnodes(vdata.getAddr(), vdata.size);
                 // Reset iterator because of additions and deletions
-                iter = data.beginDef(Varnode::input, vdata.getAddr());
-                enditer = data.endDef(Varnode::input);
+                iter = data.beginDef(Varnode.varnode_flags.input, vdata.getAddr());
+                enditer = data.endDef(Varnode.varnode_flags.input);
                 count += 1;
             }
             return 0;

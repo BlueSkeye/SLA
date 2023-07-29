@@ -44,7 +44,7 @@ namespace Sla.EXTRA
             *status.optr << "Successfully read in callgraph" << endl;
 
             Scope* gscope = dcp.conf.symboltab.getGlobalScope();
-            map<Address, CallGraphNode>::iterator iter, enditer;
+            Dictionary<Address, CallGraphNode>::iterator iter, enditer;
             iter = dcp.cgraph.begin();
             enditer = dcp.cgraph.end();
 

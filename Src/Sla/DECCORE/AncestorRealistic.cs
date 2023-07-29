@@ -120,7 +120,7 @@ namespace Sla.DECCORE
         /// \return the command indicating the next traversal step: push (enter_node), or pop (pop_success, pop_fail, pop_solid...)
         private int enterNode()
         {
-            State & state(stateStack.back());
+            State & state(stateStack.GetLastItem());
             // If the node has already been visited, we truncate the traversal to prevent cycles.
             // We always return success assuming the proper result will get returned along the first path
             Varnode* stateVn = state.op.getIn(state.slot);
@@ -248,7 +248,7 @@ namespace Sla.DECCORE
         /// \return the command to execute (push or pop) after the current pop
         private int uponPop(int command)
         {
-            State & state(stateStack.back());
+            State & state(stateStack.GetLastItem());
             if (state.op.code() == CPUI_MULTIEQUAL)
             {   // All the interesting action happens for MULTIEQUAL branch points
                 State & prevstate(stateStack[stateStack.size() - 2]);   // State previous the one being popped

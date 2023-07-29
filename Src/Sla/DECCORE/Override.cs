@@ -57,7 +57,7 @@ namespace Sla.DECCORE
         /// Clear the entire set of overrides
         private void clear()
         {
-            map<Address, FuncProto*>::iterator iter;
+            Dictionary<Address, FuncProto*>::iterator iter;
 
             for (iter = protoover.begin(); iter != protoover.end(); ++iter)
                 delete(*iter).second;
@@ -148,7 +148,7 @@ namespace Sla.DECCORE
         /// \param p is the overriding function prototype
         public void insertProtoOverride(Address callpoint, FuncProto p)
         {
-            map<Address, FuncProto*>::iterator iter;
+            Dictionary<Address, FuncProto*>::iterator iter;
 
             iter = protoover.find(callpoint);
             if (iter != protoover.end())    // Check for pre-existing override
@@ -186,7 +186,7 @@ namespace Sla.DECCORE
         {
             if (!protoover.empty())
             {
-                map<Address, FuncProto*>::const_iterator iter = protoover.find(fspecs.getOp().getAddr());
+                Dictionary<Address, FuncProto*>::const_iterator iter = protoover.find(fspecs.getOp().getAddr());
                 if (iter != protoover.end())
                 {
                     fspecs.copy(*(*iter).second);
@@ -204,7 +204,7 @@ namespace Sla.DECCORE
         {
             if (!indirectover.empty())
             {
-                map<Address, Address>::const_iterator iter = indirectover.find(fspecs.getOp().getAddr());
+                Dictionary<Address, Address>::const_iterator iter = indirectover.find(fspecs.getOp().getAddr());
                 if (iter != indirectover.end())
                     fspecs.setAddress((*iter).second);
             }
@@ -245,7 +245,7 @@ namespace Sla.DECCORE
         /// \param data is the function
         public void applyForceGoto(Funcdata data)
         {
-            map<Address, Address>::const_iterator iter;
+            Dictionary<Address, Address>::const_iterator iter;
 
             for (iter = forcegoto.begin(); iter != forcegoto.end(); ++iter)
                 data.forceGoto((*iter).first, (*iter).second);
@@ -260,7 +260,7 @@ namespace Sla.DECCORE
         /// \return the override type
         public uint getFlowOverride(Address addr)
         {
-            map<Address, uint>::const_iterator iter;
+            Dictionary<Address, uint>::const_iterator iter;
             iter = flowoverride.find(addr);
             if (iter == flowoverride.end())
                 return Override::NONE;
@@ -274,7 +274,7 @@ namespace Sla.DECCORE
         /// \param glb is the Architecture
         public void printRaw(TextWriter s, Architecture glb)
         {
-            map<Address, Address>::const_iterator iter;
+            Dictionary<Address, Address>::const_iterator iter;
 
             for (iter = forcegoto.begin(); iter != forcegoto.end(); ++iter)
                 s << "force goto at " << (*iter).first << " jumping to " << (*iter).second << endl;
@@ -289,7 +289,7 @@ namespace Sla.DECCORE
             for (iter = indirectover.begin(); iter != indirectover.end(); ++iter)
                 s << "override indirect at " << (*iter).first << " to call directly to " << (*iter).second << endl;
 
-            map<Address, FuncProto*>::const_iterator fiter;
+            Dictionary<Address, FuncProto*>::const_iterator fiter;
 
             for (fiter = protoover.begin(); fiter != protoover.end(); ++fiter)
             {
@@ -326,7 +326,7 @@ namespace Sla.DECCORE
                 return;
             encoder.openElement(ELEM_OVERRIDE);
 
-            map<Address, Address>::const_iterator iter;
+            Dictionary<Address, Address>::const_iterator iter;
 
             for (iter = forcegoto.begin(); iter != forcegoto.end(); ++iter)
             {
@@ -354,7 +354,7 @@ namespace Sla.DECCORE
                 encoder.closeElement(ELEM_INDIRECTOVERRIDE);
             }
 
-            map<Address, FuncProto*>::const_iterator fiter;
+            Dictionary<Address, FuncProto*>::const_iterator fiter;
 
             for (fiter = protoover.begin(); fiter != protoover.end(); ++fiter)
             {
@@ -371,7 +371,7 @@ namespace Sla.DECCORE
                 encoder.closeElement(ELEM_MULTISTAGEJUMP);
             }
 
-            map<Address, uint>::const_iterator titer;
+            Dictionary<Address, uint>::const_iterator titer;
             for (titer = flowoverride.begin(); titer != flowoverride.end(); ++titer)
             {
                 encoder.openElement(ELEM_FLOW);

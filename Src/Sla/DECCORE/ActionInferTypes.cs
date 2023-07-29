@@ -99,7 +99,7 @@ namespace Sla.DECCORE
                 if ((!vn.isWritten()) && (vn.hasNoDescend())) continue;
                 bool needsBlock = false;
                 SymbolEntry* entry = vn.getSymbolEntry();
-                if (entry != (SymbolEntry*)0 && !vn.isTypeLock() && entry.getSymbol().isTypeLocked())
+                if (entry != (SymbolEntry)null && !vn.isTypeLock() && entry.getSymbol().isTypeLocked())
                 {
                     int curOff = (vn.getAddr().getOffset() - entry.getAddr().getOffset()) + entry.getOffset();
                     ct = typegrp.getExactPiece(entry.getSymbol().getType(), curOff, vn.getSize());
@@ -217,7 +217,7 @@ namespace Sla.DECCORE
 
             while (!state.empty())
             {
-                ptr = &state.back();
+                ptr = &state.GetLastItem();
                 if (!ptr.valid())
                 {   // If we are out of edges to traverse
                     ptr.vn.clearMark();
@@ -272,7 +272,7 @@ namespace Sla.DECCORE
                 if (curvn.isAnnotation()) continue;
                 if ((!curvn.isWritten()) && curvn.hasNoDescend()) continue;
                 if (curvn.isTypeLock()) continue;
-                if (curvn.getSymbolEntry() != (SymbolEntry*)0) continue;
+                if (curvn.getSymbolEntry() != (SymbolEntry)null) continue;
                 ulong curoff = curvn.getOffset() - off;
                 int cursize = curvn.getSize();
                 if (curoff + cursize > ct.getSize()) continue;

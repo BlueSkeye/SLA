@@ -1377,8 +1377,8 @@ namespace Sla.SLACOMP
         //            if (negative_if == -1)
         //            {  // Not in the middle of a false if clause
         //                filebuffers.Add(FileStreamState());   // Save state of current file
-        //                filebuffers.back().lastbuffer = YY_CURRENT_BUFFER;
-        //                filebuffers.back().file = (FILE*)0;
+        //                filebuffers.GetLastItem().lastbuffer = YY_CURRENT_BUFFER;
+        //                filebuffers.GetLastItem().file = (FILE*)0;
         //                s >> ws;
         //                string fname;
         //                preprocess_string(s, fname);
@@ -1388,7 +1388,7 @@ namespace Sla.SLACOMP
         //                sleighin = fopen(fname.c_str(), "r");
         //                if (sleighin == (FILE*)0)
         //                    preproc_error("Could not open included file " + fname);
-        //                filebuffers.back().file = sleighin;
+        //                filebuffers.GetLastItem().file = sleighin;
         //                sleigh_switch_to_buffer(sleigh_create_buffer(sleighin, YY_BUF_SIZE));
         //                check_to_endofline(s);
         //            }
@@ -1456,21 +1456,21 @@ namespace Sla.SLACOMP
         //        {
         //            if (ifstack.empty())
         //                preproc_error("elif without preceding if");
-        //            if ((ifstack.back() & 2) != 0)      // We have already seen an else clause
+        //            if ((ifstack.GetLastItem() & 2) != 0)      // We have already seen an else clause
         //                preproc_error("elif follows else");
-        //            if ((ifstack.back() & 4) != 0)          // We have already seen a true elif clause
-        //                ifstack.back() = 4;               // don't include any other elif clause
-        //            else if ((ifstack.back() & 1) != 0)     // Last clause was a true if
-        //                ifstack.back() = 4;               // don't include this elif
+        //            if ((ifstack.GetLastItem() & 4) != 0)          // We have already seen a true elif clause
+        //                ifstack.GetLastItem() = 4;               // don't include any other elif clause
+        //            else if ((ifstack.GetLastItem() & 1) != 0)     // Last clause was a true if
+        //                ifstack.GetLastItem() = 4;               // don't include this elif
         //            else
         //            {
         //                int truth = preprocess_if(s);
         //                if (!s.eof())
         //                    preproc_error("Unbalanced parentheses");
         //                if (truth == 0)
-        //                    ifstack.back() = 0;
+        //                    ifstack.GetLastItem() = 0;
         //                else
-        //                    ifstack.back() = 5;
+        //                    ifstack.GetLastItem() = 5;
         //            }
         //        }
         //        else if (type == "endif")
@@ -1484,14 +1484,14 @@ namespace Sla.SLACOMP
         //        {
         //            if (ifstack.empty())
         //                preproc_error("preprocessing else without matching if");
-        //            if ((ifstack.back() & 2) != 0)
+        //            if ((ifstack.GetLastItem() & 2) != 0)
         //                preproc_error("second else for one if");
-        //            if ((ifstack.back() & 4) != 0)       // Seen a true elif clause before
-        //                ifstack.back() = 6;
-        //            else if (ifstack.back() == 0)
-        //                ifstack.back() = 3;
+        //            if ((ifstack.GetLastItem() & 4) != 0)       // Seen a true elif clause before
+        //                ifstack.GetLastItem() = 6;
+        //            else if (ifstack.GetLastItem() == 0)
+        //                ifstack.GetLastItem() = 3;
         //            else
-        //                ifstack.back() = 2;
+        //                ifstack.GetLastItem() = 2;
         //            check_to_endofline(s);
         //        }
         //        else
@@ -1505,7 +1505,7 @@ namespace Sla.SLACOMP
         //                negative_if = -1;
         //        }
         //        if (ifstack.empty()) return last_preproc;
-        //        if ((ifstack.back() & 1) == 0)
+        //        if ((ifstack.GetLastItem() & 1) == 0)
         //        {
         //            negative_if = ifstack.size() - 1;
         //            return blank_state;
@@ -1517,8 +1517,8 @@ namespace Sla.SLACOMP
 
         //    {
         //        filebuffers.Add(FileStreamState());
-        //        filebuffers.back().lastbuffer = YY_CURRENT_BUFFER;
-        //        filebuffers.back().file = (FILE*)0;
+        //        filebuffers.GetLastItem().lastbuffer = YY_CURRENT_BUFFER;
+        //        filebuffers.GetLastItem().file = (FILE*)0;
         //        string macro(sleightext);
         //        macro.erase(0, 2);
         //        macro.erase(macro.size() - 1, 1);
@@ -2610,8 +2610,8 @@ namespace Sla.SLACOMP
         //                        sleigh_delete_buffer(YY_CURRENT_BUFFER);
         //                        if (filebuffers.empty())
         //                            yyterminate();
-        //                        sleigh_switch_to_buffer(filebuffers.back().lastbuffer);
-        //                        FILE* curfile = filebuffers.back().file;
+        //                        sleigh_switch_to_buffer(filebuffers.GetLastItem().lastbuffer);
+        //                        FILE* curfile = filebuffers.GetLastItem().file;
         //                        if (curfile != (FILE*)0)
         //                            fclose(curfile);
         //                        filebuffers.pop_back();

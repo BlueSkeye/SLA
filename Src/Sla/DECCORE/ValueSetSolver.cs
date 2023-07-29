@@ -118,7 +118,7 @@ namespace Sla.DECCORE
         private void newValueSet(Varnode vn, int tCode)
         {
             valueNodes.emplace_back();
-            valueNodes.back().setVarnode(vn, tCode);
+            valueNodes.GetLastItem().setVarnode(vn, tCode);
         }
 
         /// Prepend a vertex to a partition
@@ -150,7 +150,7 @@ namespace Sla.DECCORE
         private void partitionSurround(Partition part)
         {
             recordStorage.Add(part);
-            part.startNode.partHead = &recordStorage.back();
+            part.startNode.partHead = &recordStorage.GetLastItem();
         }
 
         /// Generate a partition component given its head
@@ -202,14 +202,14 @@ namespace Sla.DECCORE
             if (head == vertex.count)
             {
                 vertex.count = 0x7fffffff; // Set to "infinity"
-                ValueSet* element = nodeStack.back();
+                ValueSet* element = nodeStack.GetLastItem();
                 nodeStack.pop_back();
                 if (loop)
                 {
                     while (element != vertex)
                     {
                         element.count = 0;
-                        element = nodeStack.back();
+                        element = nodeStack.GetLastItem();
                         nodeStack.pop_back();
                     }
                     Partition compPart;         // empty partition
@@ -820,7 +820,7 @@ namespace Sla.DECCORE
                                 curSet = curSet.next;
                                 break;
                             }
-                            curComponent = componentStack.back();
+                            curComponent = componentStack.GetLastItem();
                             if (curComponent.stopNode != curSet)
                             {
                                 curSet = curSet.next;
@@ -835,7 +835,7 @@ namespace Sla.DECCORE
                     curSet = curSet.next;
                 }
             }
-            map<SeqNum, ValueSetRead>::iterator riter;
+            Dictionary<SeqNum, ValueSetRead>::iterator riter;
             for (riter = readNodes.begin(); riter != readNodes.end(); ++riter)
                 (*riter).second.compute();              // Calculate any follow-on value sets
         }
@@ -863,7 +863,7 @@ namespace Sla.DECCORE
             (*iter).printRaw(s);
             s << endl;
           }
-          map<SeqNum,ValueSetRead>::const_iterator riter;
+          Dictionary<SeqNum,ValueSetRead>::const_iterator riter;
           for(riter=readNodes.begin();riter!=readNodes.end();++riter) {
             (*riter).second.printRaw(s);
             s << endl;

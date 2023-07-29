@@ -27,7 +27,7 @@ namespace Sla.CORE
         /// Make sure every chunk is followed by at least 512 bytes of pad
         private void pad()
         {
-            map<Address, List<byte>>::iterator iter, lastiter;
+            Dictionary<Address, List<byte>>::iterator iter, lastiter;
 
             // Search for completely redundant chunks
             if (chunk.empty()) return;
@@ -116,7 +116,7 @@ namespace Sla.CORE
                 else if (subId == ELEM_BYTECHUNK) {
                     AddrSpace @base = decoder.readSpace(ATTRIB_SPACE);
                     Address addr(@base, @@base.decodeAttributes(decoder, sz));
-                    map<Address, List<byte>>::iterator chnkiter;
+                    Dictionary<Address, List<byte>>::iterator chnkiter;
                     List<byte> & vec(chunk[addr]);
                     vec.clear();
                     decoder.rewindAttributes();
@@ -178,7 +178,7 @@ namespace Sla.CORE
             encoder.openElement(ELEM_BINARYIMAGE);
             encoder.writeString(ATTRIB_ARCH, archtype);
 
-            map<Address, List<byte>>::const_iterator iter1;
+            Dictionary<Address, List<byte>>::const_iterator iter1;
             for (iter1 = chunk.begin(); iter1 != chunk.end(); ++iter1)
             {
                 List<byte> &vec((*iter1).second);
@@ -200,7 +200,7 @@ namespace Sla.CORE
                 encoder.closeElement(ELEM_BYTECHUNK);
             }
 
-            map<Address, string>::const_iterator iter2;
+            Dictionary<Address, string>::const_iterator iter2;
             for (iter2 = addrtosymbol.begin(); iter2 != addrtosymbol.end(); ++iter2)
             {
                 encoder.openElement(ELEM_SYMBOL);
@@ -218,7 +218,7 @@ namespace Sla.CORE
 
         public override void loadFill(byte[] ptr, int size, Address addr)
         {
-            map<Address, List<byte>>::const_iterator iter;
+            Dictionary<Address, List<byte>>::const_iterator iter;
             Address curaddr;
             bool emptyhit = false;
 
@@ -273,7 +273,7 @@ namespace Sla.CORE
 
         public override void getReadonly(RangeList list)
         {
-            map<Address, List<byte>>::const_iterator iter;
+            Dictionary<Address, List<byte>>::const_iterator iter;
 
             // List all the readonly chunks
             for (iter = chunk.begin(); iter != chunk.end(); ++iter)
@@ -292,11 +292,11 @@ namespace Sla.CORE
 
         public override void adjustVma(long adjust)
         {
-            map<Address, List<byte>>::iterator iter1;
-            map<Address, string>::iterator iter2;
+            Dictionary<Address, List<byte>>::iterator iter1;
+            Dictionary<Address, string>::iterator iter2;
 
-            map<Address, List<byte>> newchunk;
-            map<Address, string> newsymbol;
+            Dictionary<Address, List<byte>> newchunk;
+            Dictionary<Address, string> newsymbol;
 
             for (iter1 = chunk.begin(); iter1 != chunk.end(); ++iter1)
             {

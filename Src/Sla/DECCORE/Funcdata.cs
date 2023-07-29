@@ -128,13 +128,13 @@ namespace Sla.DECCORE
                 // One more chance to find entry, now that we know usepoint
                 uint vflags = 0;
                 SymbolEntry* entry = localmap.queryProperties(vn.getAddr(), vn.getSize(), vn.getUsePoint(*this), vflags);
-                if (entry != (SymbolEntry*)0) // Let entry try to force type
+                if (entry != (SymbolEntry)null) // Let entry try to force type
                     vn.setSymbolProperties(entry);
                 else
-                    vn.setFlags(vflags & ~Varnode::typelock); // typelock set by updateType
+                    vn.setFlags(vflags & ~Varnode.varnode_flags.typelock); // typelock set by updateType
             }
 
-            if (vn.cover == (Cover*)0)
+            if (vn.cover == (Cover)null)
             {
                 if (isHighOn())
                     vn.calcCover();
@@ -157,7 +157,7 @@ namespace Sla.DECCORE
                     return new HighVariable(vn);
                 }
             }
-            return (HighVariable*)0;
+            return (HighVariable)null;
         }
 
         /// Handle two variables with matching storage
@@ -177,7 +177,7 @@ namespace Sla.DECCORE
             }
             HighVariable* high = vn.getHigh();
             Varnode* otherVn;
-            HighVariable* otherHigh = (HighVariable*)0;
+            HighVariable* otherHigh = (HighVariable)null;
             // Look for a conflicting HighVariable
             VarnodeLocSet::const_iterator iter = beginLoc(entry.getSize(), entry.getAddr());
             while (iter != endLoc())
@@ -193,7 +193,7 @@ namespace Sla.DECCORE
                 }
                 ++iter;
             }
-            if (otherHigh == (HighVariable*)0)
+            if (otherHigh == (HighVariable)null)
             {
                 vn.setSymbolEntry(entry);
                 return entry.getSymbol();
@@ -230,7 +230,7 @@ namespace Sla.DECCORE
                 Varnode* vnexemplar = *iter;
                 entry = lm.findOverlap(vnexemplar.getAddr(), vnexemplar.getSize());
                 ct = (Datatype)null;
-                if (entry != (SymbolEntry*)0)
+                if (entry != (SymbolEntry)null)
                 {
                     fl = entry.getAllFlags();
                     if (entry.getSize() >= vnexemplar.getSize())
@@ -248,7 +248,7 @@ namespace Sla.DECCORE
                       // getting put in a bigger register
                       // Don't try to figure out type
                       // Don't keep typelock and namelock
-                        fl &= ~((uint)(Varnode::typelock | Varnode::namelock));
+                        fl &= ~((uint)(Varnode.varnode_flags.typelock | Varnode.varnode_flags.namelock));
                         // we do particularly want to keep the nolocalalias
                     }
                 }
@@ -259,7 +259,7 @@ namespace Sla.DECCORE
                     {
                         // This is technically an error, there should be some
                         // kind of symbol, if we are in scope
-                        fl = Varnode::mapped | Varnode::addrtied;
+                        fl = Varnode.varnode_flags.mapped | Varnode.varnode_flags.addrtied;
                     }
                     else if (unmappedAliasCheck)
                     {
@@ -369,11 +369,11 @@ namespace Sla.DECCORE
             newvn = vbank.create(vn.getSize(), vn.getAddr(), vn.getType());
             uint vflags = vn.getFlags();
             // These are the flags we allow to be cloned
-            vflags &= (Varnode::annotation | Varnode::externref |
-                   Varnode::@readonly | Varnode::persist |
-                   Varnode::addrtied | Varnode::addrforce |
-                   Varnode::indirect_creation | Varnode::incidental_copy |
-                   Varnode::volatil | Varnode::mapped);
+            vflags &= (Varnode.varnode_flags.annotation | Varnode::externref |
+                   Varnode::@readonly | Varnode.varnode_flags.persist |
+                   Varnode.varnode_flags.addrtied | Varnode::addrforce |
+                   Varnode.varnode_flags.indirect_creation | Varnode::incidental_copy |
+                   Varnode::volatil | Varnode.varnode_flags.mapped);
             newvn.setFlags(vflags);
             return newvn;
         }
@@ -425,7 +425,7 @@ namespace Sla.DECCORE
                     continue;
                 Address usepoint = vn.getUsePoint(*this);
                 SymbolEntry* overlapEntry = scope.findContainer(vn.getAddr(), vn.getSize(), usepoint);
-                if (overlapEntry == (SymbolEntry*)0)
+                if (overlapEntry == (SymbolEntry)null)
                 {
                     int diff = (int)(vn.getOffset() - entry.getAddr().getOffset());
                     ostringstream s;
@@ -889,10 +889,8 @@ namespace Sla.DECCORE
         /// \param inedge is the index of the indicated \e in edge
         private BlockBasic nodeSplitBlockEdge(BlockBasic b, int inedge)
         {
-            FlowBlock* a = b.getIn(inedge);
-            BlockBasic* bprime;
-
-            bprime = bblocks.newBlockBasic(this);
+            FlowBlock a = b.getIn(inedge);
+            BlockBasic bprime = bblocks.newBlockBasic(this);
             bprime.setFlag(FlowBlock::f_duplicate_block);
             bprime.copyRange(b);
             bblocks.switchEdge(a, b, bprime);
@@ -939,8 +937,8 @@ namespace Sla.DECCORE
             newvn = newVarnodeOut(opvn.getSize(), opvn.getAddr(), newop);
             uint vflags = opvn.getFlags();
             vflags &= (Varnode::externref | Varnode::volatil | Varnode::incidental_copy |
-                   Varnode::@readonly | Varnode::persist |
-                   Varnode::addrtied | Varnode::addrforce);
+                   Varnode::@readonly | Varnode.varnode_flags.persist |
+                   Varnode.varnode_flags.addrtied | Varnode::addrforce);
             newvn.setFlags(vflags);
         }
 
@@ -980,7 +978,7 @@ namespace Sla.DECCORE
             list<PcodeOp*>::iterator biter, piter;
             PcodeOp* bop,*pop;
             Varnode* bvn,*pvn;
-            map<PcodeOp*, PcodeOp*> btop; // Map from b to bprime
+            Dictionary<PcodeOp*, PcodeOp*> btop; // Map from b to bprime
             List<PcodeOp*> pind;  // pop needing b input
             List<PcodeOp*> bind;  // bop giving input
             List<int> pslot;     // slot within pop needing b input
@@ -2101,7 +2099,7 @@ namespace Sla.DECCORE
                         }
                         else
                         {
-                            vn.setFlags(Varnode::spacebase); // Mark all base registers (not just input)
+                            vn.setFlags(Varnode.varnode_flags.spacebase); // Mark all base registers (not just input)
                             if (vn.isInput())  // Only set type on the input spacebase register
                                 vn.updateType(ptr, true, true);
                         }
@@ -2194,7 +2192,7 @@ namespace Sla.DECCORE
             }
             spacebase_vn = newConstant(sz, 0);
             spacebase_vn.updateType(sb_type, true, true);
-            spacebase_vn.setFlags(Varnode::spacebase);
+            spacebase_vn.setFlags(Varnode.varnode_flags.spacebase);
             if (addOp == (PcodeOp)null)
             {
                 addOp = newOp(2, op.getAddr());
@@ -2401,10 +2399,10 @@ namespace Sla.DECCORE
                 checkForLanedRegister(s, m);
             uint vflags = 0;
             SymbolEntry* entry = localmap.queryProperties(m, s, op.getAddr(), vflags);
-            if (entry != (SymbolEntry*)0)
+            if (entry != (SymbolEntry)null)
                 vn.setSymbolProperties(entry);
             else
-                vn.setFlags(vflags & ~Varnode::typelock); // Typelock set by updateType
+                vn.setFlags(vflags & ~Varnode.varnode_flags.typelock); // Typelock set by updateType
 
             return vn;
         }
@@ -2447,10 +2445,10 @@ namespace Sla.DECCORE
                 checkForLanedRegister(s, m);
             uint vflags = 0;
             SymbolEntry* entry = localmap.queryProperties(vn.getAddr(), vn.getSize(), Address(), vflags);
-            if (entry != (SymbolEntry*)0)   // Let entry try to force type
+            if (entry != (SymbolEntry)null)   // Let entry try to force type
                 vn.setSymbolProperties(entry);
             else
-                vn.setFlags(vflags & ~Varnode::typelock); // Typelock set by updateType
+                vn.setFlags(vflags & ~Varnode.varnode_flags.typelock); // Typelock set by updateType
 
             return vn;
         }
@@ -2564,7 +2562,7 @@ namespace Sla.DECCORE
 
             ct = glb.types.getTypeCode();
             vn = vbank.create(1, m, ct);
-            vn.setFlags(Varnode::annotation);
+            vn.setFlags(Varnode.varnode_flags.annotation);
             assignHigh(vn);
             return vn;
         }
@@ -2587,7 +2585,7 @@ namespace Sla.DECCORE
             if (vn.isInput()) return vn;   // Already an input
                                             // First we check if it overlaps any other varnode
             VarnodeDefSet::const_iterator iter;
-            iter = vbank.beginDef(Varnode::input, vn.getAddr() + vn.getSize());
+            iter = vbank.beginDef(Varnode.varnode_flags.input, vn.getAddr() + vn.getSize());
 
             // Iter points at first varnode AFTER vn
             if (iter != vbank.beginDef())
@@ -2631,8 +2629,8 @@ namespace Sla.DECCORE
             Address endaddr = addr + (sz - 1);
             List<Varnode*> inlist;
             VarnodeDefSet::const_iterator iter, enditer;
-            iter = vbank.beginDef(Varnode::input, addr);
-            enditer = vbank.endDef(Varnode::input, endaddr);
+            iter = vbank.beginDef(Varnode.varnode_flags.input, addr);
+            enditer = vbank.endDef(Varnode.varnode_flags.input, endaddr);
             while (iter != enditer)
             {
                 Varnode* vn = *iter;
@@ -2836,13 +2834,13 @@ namespace Sla.DECCORE
         {
             List<Symbol*> symList;
             localmap.queryByName(nm, symList);
-            if (symList.empty()) return (HighVariable*)0;
+            if (symList.empty()) return (HighVariable)null;
             Symbol* sym = symList[0];
             Varnode* vn = findLinkedVarnode(sym.getFirstWholeMap());
             if (vn != (Varnode)null)
                 return vn.getHigh();
 
-            return (HighVariable*)0;
+            return (HighVariable)null;
         }
 
         /// Make sure there is a Symbol entry for all global Varnodes
@@ -2865,7 +2863,7 @@ namespace Sla.DECCORE
                 vn = *iter++;
                 if (vn.isFree()) continue;
                 if (!vn.isPersist()) continue; // Could be a code ref
-                if (vn.getSymbolEntry() != (SymbolEntry*)0) continue;
+                if (vn.getSymbolEntry() != (SymbolEntry)null) continue;
                 maxvn = vn;
                 Address addr = vn.getAddr();
                 Address endaddr = addr + vn.getSize();
@@ -2879,7 +2877,7 @@ namespace Sla.DECCORE
                         // Varnodes at the same base address will get linked to the Symbol at that address
                         // even if the size doesn't match, but we check for internal Varnodes that
                         // do not have an attached Symbol as these won't get linked to anything
-                        if (vn.getAddr() != addr && vn.getSymbolEntry() == (SymbolEntry*)0)
+                        if (vn.getAddr() != addr && vn.getSymbolEntry() == (SymbolEntry)null)
                             uncoveredVarnodes.Add(vn);
                         endaddr = vn.getAddr() + vn.getSize();
                         if (vn.getSize() > maxvn.getSize())
@@ -2899,14 +2897,14 @@ namespace Sla.DECCORE
                 Address usepoint;
                 // Find any entry overlapping base address
                 entry = localmap.queryProperties(addr, 1, usepoint, fl);
-                if (entry == (SymbolEntry*)0)
+                if (entry == (SymbolEntry)null)
                 {
                     Scope* discover = localmap.discoverScope(addr, ct.getSize(), usepoint);
                     if (discover == (Scope)null)
                         throw new LowlevelError("Could not discover scope");
                     int index = 0;
                     string symbolname = discover.buildVariableName(addr, usepoint, ct, index,
-                                            Varnode::addrtied | Varnode::persist);
+                                            Varnode.varnode_flags.addrtied | Varnode.varnode_flags.persist);
                     discover.addSymbol(symbolname, ct, addr, usepoint);
                 }
                 else if ((addr.getOffset() + ct.getSize()) - 1 > (entry.getAddr().getOffset() + entry.getSize()) - 1)
@@ -3396,8 +3394,8 @@ namespace Sla.DECCORE
         {
             VarnodeDefSet::const_iterator iter, enditer;
 
-            iter = beginDef(Varnode::input);
-            enditer = endDef(Varnode::input);
+            iter = beginDef(Varnode.varnode_flags.input);
+            enditer = endDef(Varnode.varnode_flags.input);
             for (; iter != enditer; ++iter)
             {   // Loop over all inputs
                 Varnode* vn = *iter;
@@ -3560,7 +3558,7 @@ namespace Sla.DECCORE
                 do
                 {
                     // Get next edge
-                    PcodeOpNode & node(opstack.back());
+                    PcodeOpNode & node(opstack.GetLastItem());
                     if (node.slot >= node.op.numInput())
                     { // If no edge left
                         Varnode* outvn = node.op.getOut();
@@ -3613,7 +3611,7 @@ namespace Sla.DECCORE
             // Continue to propagate changes along all edges
             while (!worklist.empty())
             {
-                PcodeOp* op = worklist.back();
+                PcodeOp* op = worklist.GetLastItem();
                 worklist.pop_back();
                 Varnode* vn = op.getOut();
                 if (vn == (Varnode)null) continue;
@@ -3670,14 +3668,14 @@ namespace Sla.DECCORE
         public void linkProtoPartial(Varnode vn)
         {
             HighVariable* high = vn.getHigh();
-            if (high.getSymbol() != (Symbol*)0) return;
+            if (high.getSymbol() != (Symbol)null) return;
             Varnode* rootVn = PieceNode::findRoot(vn);
             if (rootVn == vn) return;
 
             HighVariable* rootHigh = rootVn.getHigh();
             Varnode* nameRep = rootHigh.getNameRepresentative();
             Symbol* sym = linkSymbol(nameRep);
-            if (sym == (Symbol*)0) return;
+            if (sym == (Symbol)null) return;
             rootHigh.establishGroupSymbolOffset();
             SymbolEntry* entry = sym.getFirstWholeMap();
             vn.setSymbolEntry(entry);
@@ -3697,12 +3695,12 @@ namespace Sla.DECCORE
             SymbolEntry* entry;
             uint fl = 0;
             Symbol* sym = high.getSymbol();
-            if (sym != (Symbol*)0) return sym; // Symbol already assigned
+            if (sym != (Symbol)null) return sym; // Symbol already assigned
 
             Address usepoint = vn.getUsePoint(*this);
             // Find any entry overlapping base address
             entry = localmap.queryProperties(vn.getAddr(), 1, usepoint, fl);
-            if (entry != (SymbolEntry*)0)
+            if (entry != (SymbolEntry)null)
             {
                 sym = handleSymbolConflict(entry, vn);
             }
@@ -3734,17 +3732,17 @@ namespace Sla.DECCORE
             PcodeOp* op = vn.loneDescend();
             Varnode* in0 = op.getIn(0);
             TypePointer* ptype = (TypePointer*)in0.getHigh().getType();
-            if (ptype.getMetatype() != TYPE_PTR) return (Symbol*)0;
+            if (ptype.getMetatype() != TYPE_PTR) return (Symbol)null;
             TypeSpacebase* sb = (TypeSpacebase*)ptype.getPtrTo();
             if (sb.getMetatype() != TYPE_SPACEBASE)
-                return (Symbol*)0;
+                return (Symbol)null;
             Scope* scope = sb.getMap();
             Address addr = sb.getAddress(vn.getOffset(), in0.getSize(), op.getAddr());
             if (addr.isInvalid())
                 throw new LowlevelError("Unable to generate proper address from spacebase");
             SymbolEntry* entry = scope.queryContainer(addr, 1, Address());
-            if (entry == (SymbolEntry*)0)
-                return (Symbol*)0;
+            if (entry == (SymbolEntry)null)
+                return (Symbol)null;
             int off = (int)(addr.getOffset() - entry.getAddr().getOffset()) + entry.getOffset();
             vn.setSymbolReference(entry, off);
             return entry.getSymbol();
@@ -3833,7 +3831,7 @@ namespace Sla.DECCORE
             if (!isHighOn())
                 throw RecovError("Cannot create dynamic symbols until decompile has completed");
             HighVariable* high = vn.getHigh();
-            if (high.getSymbol() != (Symbol*)0)
+            if (high.getSymbol() != (Symbol)null)
                 return;         // Symbol already exists
             DynamicHash dhash;
 
@@ -3869,7 +3867,7 @@ namespace Sla.DECCORE
             }
             Varnode* vn = dhash.findVarnode(this, entry.getFirstUseAddress(), entry.getHash());
             if (vn == (Varnode)null) return false;
-            if (vn.getSymbolEntry() != (SymbolEntry*)0) return false;  // Varnode is already labeled
+            if (vn.getSymbolEntry() != (SymbolEntry)null) return false;  // Varnode is already labeled
             if (category == Symbol::equate)
             {   // Is this an equate symbol
                 vn.setSymbolEntry(entry);
@@ -3902,7 +3900,7 @@ namespace Sla.DECCORE
             Varnode* vn = dhash.findVarnode(this, entry.getFirstUseAddress(), entry.getHash());
             if (vn == (Varnode)null)
                 return false;
-            if (vn.getSymbolEntry() != (SymbolEntry*)0) return false; // Symbol already applied
+            if (vn.getSymbolEntry() != (SymbolEntry)null) return false; // Symbol already applied
             if (sym.getCategory() == Symbol::equate)
             {   // Equate symbol does not depend on size
                 vn.setSymbolEntry(entry);
@@ -4085,8 +4083,8 @@ namespace Sla.DECCORE
             newop.flags |= PcodeOp::indirect_creation;
             newout = newVarnodeOut(sz, addr, newop);
             if (!possibleout)
-                newin.flags |= Varnode::indirect_creation;
-            newout.flags |= Varnode::indirect_creation;
+                newin.flags |= Varnode.varnode_flags.indirect_creation;
+            newout.flags |= Varnode.varnode_flags.indirect_creation;
             opSetOpcode(newop, CPUI_INDIRECT);
             opSetInput(newop, newin, 0);
             opSetInput(newop, newVarnodeIop(indeffect), 1);
@@ -4110,8 +4108,8 @@ namespace Sla.DECCORE
             if (!in0.isConstant())
                 throw new LowlevelError("Indirect creation not properly formed");
             if (!possibleOutput)
-                in0.flags |= Varnode::indirect_creation;
-            outvn.flags |= Varnode::indirect_creation;
+                in0.flags |= Varnode.varnode_flags.indirect_creation;
+            outvn.flags |= Varnode.varnode_flags.indirect_creation;
         }
 
         /// Find PcodeOp with given sequence number
@@ -4406,7 +4404,7 @@ namespace Sla.DECCORE
             opUnsetOutput(op);
             for (i = 0; i < op.numInput(); ++i)
                 opUnsetInput(op, i);
-            if (op.getParent() != (BlockBasic*)0) // Remove us from basic block
+            if (op.getParent() != (BlockBasic)null) // Remove us from basic block
                 opUninsert(op);
         }
 
@@ -4434,7 +4432,7 @@ namespace Sla.DECCORE
                 if (vn != (Varnode)null)
                     opUnsetInput(op, i);
             }
-            if (op.getParent() != (BlockBasic*)0)
+            if (op.getParent() != (BlockBasic)null)
             {
                 obank.markDead(op);
                 op.getParent().removeOp(op);
@@ -4820,7 +4818,7 @@ namespace Sla.DECCORE
         /// \return the associated field as a ResolvedUnion or null
         public ResolvedUnion getUnionField(Datatype parent, PcodeOp op, int slot)
         {
-            map<ResolveEdge, ResolvedUnion>::const_iterator iter;
+            Dictionary<ResolveEdge, ResolvedUnion>::const_iterator iter;
             ResolveEdge edge(parent, op, slot);
             iter = unionMap.find(edge);
             if (iter != unionMap.end())
@@ -4840,7 +4838,7 @@ namespace Sla.DECCORE
         public bool setUnionField(Datatype parent, PcodeOp op, int slot, ResolvedUnion resolve)
         {
             ResolveEdge edge(parent, op, slot);
-            pair<map<ResolveEdge, ResolvedUnion>::iterator, bool> res;
+            pair<Dictionary<ResolveEdge, ResolvedUnion>::iterator, bool> res;
             res = unionMap.emplace(edge, resolve);
             if (!res.second)
             {
@@ -4901,7 +4899,7 @@ namespace Sla.DECCORE
         /// \param oldSlot is the old slot (-1 for write, >=0 for read)
         public int inheritResolution(Datatype parent, PcodeOp op, int slot, PcodeOp oldOp, int oldSlot)
         {
-            map<ResolveEdge, ResolvedUnion>::const_iterator iter;
+            Dictionary<ResolveEdge, ResolvedUnion>::const_iterator iter;
             ResolveEdge edge(parent, oldOp, oldSlot);
             iter = unionMap.find(edge);
             if (iter == unionMap.end())
@@ -5282,29 +5280,27 @@ namespace Sla.DECCORE
             BlockBasic exita, BlockBasic exitb, bool fora_block1ishigh,
             bool forb_block1ishigh, Address addr)
         {
-            BlockBasic* newblock = bblocks.newBlockBasic(this);
+            BlockBasic newblock = bblocks.newBlockBasic(this);
             newblock.setFlag(FlowBlock::f_joined_block);
             newblock.setInitialRange(addr, addr);
-            FlowBlock* swapa,*swapb;
+            FlowBlock swapa;
+            FlowBlock swapb;
 
             // Delete 2 of the original edges into exita and exitb
-            if (fora_block1ishigh)
-            {       // Remove the edge from block1
+            if (fora_block1ishigh) {
+                // Remove the edge from block1
                 bblocks.removeEdge(block1, exita);
                 swapa = block2;
             }
-            else
-            {
+            else {
                 bblocks.removeEdge(block2, exita);
                 swapa = block1;
             }
-            if (forb_block1ishigh)
-            {
+            if (forb_block1ishigh) {
                 bblocks.removeEdge(block1, exitb);
                 swapb = block2;
             }
-            else
-            {
+            else {
                 bblocks.removeEdge(block2, exitb);
                 swapb = block1;
             }
@@ -5326,7 +5322,8 @@ namespace Sla.DECCORE
         /// \param b is the basic block to be duplicated and split
         /// \param inedge is the index of the input edge to move to the duplicate block
         public void nodeSplit(BlockBasic b, int inedge)
-        { // Split node b along inedge
+        {
+            // Split node b along inedge
             if (b.sizeOut() != 0)
                 throw new LowlevelError("Cannot (currently) nodesplit block with out flow");
             if (b.sizeIn() <= 1)
@@ -5341,7 +5338,7 @@ namespace Sla.DECCORE
                 b.clearMark();
 
             // Create duplicate block
-            BlockBasic* bprime = nodeSplitBlockEdge(b, inedge);
+            BlockBasic bprime = nodeSplitBlockEdge(b, inedge);
             // Make copy of b's ops
             nodeSplitRawDuplicate(b, bprime);
             // Patch up inputs based on split
@@ -5365,18 +5362,18 @@ namespace Sla.DECCORE
         /// \return \b true if a control-flow edge was successfully labeled
         public bool forceGoto(Address pcop, Address pcdest)
         {
-            FlowBlock* bl,*bl2;
-            PcodeOp* op,*op2;
+            FlowBlock bl;
+            FlowBlock bl2;
+            PcodeOp op;
+            PcodeOp op2;
             int i, j;
 
-            for (i = 0; i < bblocks.getSize(); ++i)
-            {
+            for (i = 0; i < bblocks.getSize(); ++i) {
                 bl = bblocks.getBlock(i);
                 op = bl.lastOp();
                 if (op == (PcodeOp)null) continue;
                 if (op.getAddr() != pcop) continue;    // Find op to mark unstructured
-                for (j = 0; j < bl.sizeOut(); ++j)
-                {
+                for (j = 0; j < bl.sizeOut(); ++j) {
                     bl2 = bl.getOut(j);
                     op2 = bl2.lastOp();
                     if (op2 == (PcodeOp)null) continue;
@@ -5424,34 +5421,30 @@ namespace Sla.DECCORE
         /// \param bl is the given basic block
         public void spliceBlockBasic(BlockBasic bl)
         {
-            BlockBasic* outbl = (BlockBasic*)0;
-            if (bl.sizeOut() == 1)
-            {
-                outbl = (BlockBasic*)bl.getOut(0);
+            BlockBasic outbl = (BlockBasic)null;
+            if (bl.sizeOut() == 1) {
+                outbl = (BlockBasic)bl.getOut(0);
                 if (outbl.sizeIn() != 1)
-                    outbl = (BlockBasic*)0;
+                    outbl = (BlockBasic)null;
             }
-            if (outbl == (BlockBasic*)0)
+            if (outbl == (BlockBasic)null)
                 throw new LowlevelError("Cannot splice basic blocks");
             // Remove any jump op at the end of -bl-
-            if (!bl.op.empty())
-            {
-                PcodeOp* jumpop = bl.op.back();
+            if (!bl.op.empty()) {
+                PcodeOp jumpop = bl.op.GetLastItem();
                 if (jumpop.isBranch())
                     opDestroy(jumpop);
             }
-            if (!outbl.op.empty())
-            {
+            if (!outbl.op.empty()) {
                 // Check for MULTIEQUALs
-                PcodeOp* firstop = outbl.op.front();
+                PcodeOp firstop = outbl.op.front();
                 if (firstop.code() == CPUI_MULTIEQUAL)
                     throw new LowlevelError("Splicing block with MULTIEQUAL");
                 firstop.clearFlag(PcodeOp::startbasic);
-                list<PcodeOp*>::iterator iter;
+                IEnumerator<PcodeOp> iter;
                 // Move ops into -bl-
-                for (iter = outbl.beginOp(); iter != outbl.endOp(); ++iter)
-                {
-                    PcodeOp* op = *iter;
+                for (iter = outbl.beginOp(); iter != outbl.endOp(); ++iter) {
+                    PcodeOp op = *iter;
                     op.setParent(bl);  // Reset ops parent to -bl-
                 }
                 // Move all ops from -outbl- to end of -bl-
@@ -5467,12 +5460,12 @@ namespace Sla.DECCORE
         /// Make sure default switch cases are properly labeled
         public void installSwitchDefaults()
         {
-            List<JumpTable*>::iterator iter;
+            IEnumerator<JumpTable> iter;
             for (iter = jumpvec.begin(); iter != jumpvec.end(); ++iter)
             {
-                JumpTable* jt = *iter;
-                PcodeOp* indop = jt.getIndirectOp();
-                BlockBasic* ind = indop.getParent();
+                JumpTable jt = *iter;
+                PcodeOp indop = jt.getIndirectOp();
+                BlockBasic ind = indop.getParent();
                 // Mark any switch blocks default edge
                 if (jt.getDefaultBlock() != -1) // If a default case is present
                     ind.setDefaultSwitch(jt.getDefaultBlock());
@@ -5488,7 +5481,7 @@ namespace Sla.DECCORE
         /// \return true if a valid replacement was performed
         public bool replaceLessequal(PcodeOp op)
         {
-            Varnode* vn;
+            Varnode vn;
             int i;
             long val, diff;
 
@@ -5520,7 +5513,7 @@ namespace Sla.DECCORE
                 opSetOpcode(op, CPUI_INT_LESS);
             }
             ulong res = (val + diff) & Globals.calc_mask(vn.getSize());
-            Varnode* newvn = newConstant(vn.getSize(), res);
+            Varnode newvn = newConstant(vn.getSize(), res);
             newvn.copySymbol(vn);  // Preserve data-type (and any Symbol info)
             opSetInput(op, newvn, i);
             return true;
@@ -5535,10 +5528,11 @@ namespace Sla.DECCORE
         /// \return \b true if the action was performed
         public bool distributeIntMultAdd(PcodeOp op)
         {
-            Varnode* newvn0,*newvn1;
-            PcodeOp* addop = op.getIn(0).getDef();
-            Varnode* vn0 = addop.getIn(0);
-            Varnode* vn1 = addop.getIn(1);
+            Varnode newvn0;
+            Varnode newvn1;
+            PcodeOp addop = op.getIn(0).getDef();
+            Varnode vn0 = addop.getIn(0);
+            Varnode vn1 = addop.getIn(1);
             if ((vn0.isFree()) && (!vn0.isConstant())) return false;
             if ((vn1.isFree()) && (!vn1.isConstant())) return false;
             ulong coeff = op.getIn(1).getOffset();
@@ -5552,11 +5546,11 @@ namespace Sla.DECCORE
             }
             else
             {
-                PcodeOp* newop0 = newOp(2, op.getAddr());
+                PcodeOp newop0 = newOp(2, op.getAddr());
                 opSetOpcode(newop0, CPUI_INT_MULT);
                 newvn0 = newUniqueOut(sz, newop0);
                 opSetInput(newop0, vn0, 0); // To first input of original add
-                Varnode* newcvn = newConstant(sz, coeff);
+                Varnode newcvn = newConstant(sz, coeff);
                 opSetInput(newop0, newcvn, 1);
                 opInsertBefore(newop0, op);
             }
@@ -5569,11 +5563,11 @@ namespace Sla.DECCORE
             }
             else
             {
-                PcodeOp* newop1 = newOp(2, op.getAddr());
+                PcodeOp newop1 = newOp(2, op.getAddr());
                 opSetOpcode(newop1, CPUI_INT_MULT);
                 newvn1 = newUniqueOut(sz, newop1);
                 opSetInput(newop1, vn1, 0); // To second input of original add
-                Varnode* newcvn = newConstant(sz, coeff);
+                Varnode newcvn = newConstant(sz, coeff);
                 opSetInput(newop1, newcvn, 1);
                 opInsertBefore(newop1, op);
             }
@@ -5599,20 +5593,20 @@ namespace Sla.DECCORE
         public bool collapseIntMultMult(Varnode vn)
         {
             if (!vn.isWritten()) return false;
-            PcodeOp* op = vn.getDef();
+            PcodeOp op = vn.getDef();
             if (op.code() != CPUI_INT_MULT) return false;
-            Varnode* constVnFirst = op.getIn(1);
+            Varnode constVnFirst = op.getIn(1);
             if (!constVnFirst.isConstant()) return false;
             if (!op.getIn(0).isWritten()) return false;
-            PcodeOp* otherMultOp = op.getIn(0).getDef();
+            PcodeOp otherMultOp = op.getIn(0).getDef();
             if (otherMultOp.code() != CPUI_INT_MULT) return false;
-            Varnode* constVnSecond = otherMultOp.getIn(1);
+            Varnode constVnSecond = otherMultOp.getIn(1);
             if (!constVnSecond.isConstant()) return false;
-            Varnode* invn = otherMultOp.getIn(0);
+            Varnode invn = otherMultOp.getIn(0);
             if (invn.isFree()) return false;
             int sz = invn.getSize();
             ulong val = (constVnFirst.getOffset() * constVnSecond.getOffset()) & Globals.calc_mask(sz);
-            Varnode* newvn = newConstant(sz, val);
+            Varnode newvn = newConstant(sz, val);
             opSetInput(op, newvn, 1);
             opSetInput(op, invn, 0);
             return true;

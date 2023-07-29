@@ -179,7 +179,7 @@ namespace Sla.DECCORE
             ReplaceVarnode* res;
             if (vn.isMark())
             {       // Already seen before
-                map<Varnode*, ReplaceVarnode>::iterator iter;
+                Dictionary<Varnode*, ReplaceVarnode>::iterator iter;
                 iter = varmap.find(vn);
                 res = &(*iter).second;
                 inworklist = false;
@@ -285,7 +285,7 @@ namespace Sla.DECCORE
             if (outrvn.def != (ReplaceOp*)0)
                 return outrvn.def;
             oplist.emplace_back();
-            ReplaceOp* rop = &oplist.back();
+            ReplaceOp* rop = &oplist.GetLastItem();
             outrvn.def = rop;
             rop.op = outrvn.vn.getDef();
             rop.numparams = numparam;
@@ -306,7 +306,7 @@ namespace Sla.DECCORE
         private ReplaceOp createOpDown(OpCode opc, int numparam, PcodeOp op, ReplaceVarnode inrvn, int slot)
         {
             oplist.emplace_back();
-            ReplaceOp* rop = &oplist.back();
+            ReplaceOp* rop = &oplist.GetLastItem();
             rop.op = op;
             rop.opc = opc;
             rop.numparams = numparam;
@@ -340,10 +340,10 @@ namespace Sla.DECCORE
             if (fc.isInputLocked() && (!fc.isDotdotdot())) return false;
 
             patchlist.emplace_back();
-            patchlist.back().type = PatchRecord::parameter_patch;
-            patchlist.back().patchOp = op;
-            patchlist.back().in1 = rvn;
-            patchlist.back().slot = slot;
+            patchlist.GetLastItem().type = PatchRecord::parameter_patch;
+            patchlist.GetLastItem().patchOp = op;
+            patchlist.GetLastItem().in1 = rvn;
+            patchlist.GetLastItem().slot = slot;
             pullcount += 1;     // A true terminal modification
             return true;
         }
@@ -389,20 +389,20 @@ namespace Sla.DECCORE
                     {
                         // Trace won't revisit this RETURN, so we need to generate patch now
                         patchlist.emplace_back();
-                        patchlist.back().type = PatchRecord::parameter_patch;
-                        patchlist.back().patchOp = retop;
-                        patchlist.back().in1 = rep;
-                        patchlist.back().slot = slot;
+                        patchlist.GetLastItem().type = PatchRecord::parameter_patch;
+                        patchlist.GetLastItem().patchOp = retop;
+                        patchlist.GetLastItem().in1 = rep;
+                        patchlist.GetLastItem().slot = slot;
                         pullcount += 1;
                     }
                 }
                 returnsTraversed = true;
             }
             patchlist.emplace_back();
-            patchlist.back().type = PatchRecord::parameter_patch;
-            patchlist.back().patchOp = op;
-            patchlist.back().in1 = rvn;
-            patchlist.back().slot = slot;
+            patchlist.GetLastItem().type = PatchRecord::parameter_patch;
+            patchlist.GetLastItem().patchOp = op;
+            patchlist.GetLastItem().in1 = rvn;
+            patchlist.GetLastItem().slot = slot;
             pullcount += 1;     // A true terminal modification
             return true;
         }
@@ -446,10 +446,10 @@ namespace Sla.DECCORE
             if ((rvn.vn.getConsume() & ~rvn.mask) != 0)  // If there's something outside the mask being consumed
                 return false;               //  we can't trim
             patchlist.emplace_back();
-            patchlist.back().type = PatchRecord::parameter_patch;
-            patchlist.back().patchOp = op;
-            patchlist.back().in1 = rvn;
-            patchlist.back().slot = 0;
+            patchlist.GetLastItem().type = PatchRecord::parameter_patch;
+            patchlist.GetLastItem().patchOp = op;
+            patchlist.GetLastItem().in1 = rvn;
+            patchlist.GetLastItem().slot = 0;
             pullcount += 1;     // A true terminal modification
             return true;
         }
@@ -1182,9 +1182,9 @@ namespace Sla.DECCORE
         private void addTerminalPatch(PcodeOp pullop, ReplaceVarnode rvn)
         {
             patchlist.emplace_back();
-            patchlist.back().type = PatchRecord::copy_patch;    // Ultimately gets converted to a COPY
-            patchlist.back().patchOp = pullop;  // Operation pulling the variable out
-            patchlist.back().in1 = rvn; // Point in container flow for pull
+            patchlist.GetLastItem().type = PatchRecord::copy_patch;    // Ultimately gets converted to a COPY
+            patchlist.GetLastItem().patchOp = pullop;  // Operation pulling the variable out
+            patchlist.GetLastItem().in1 = rvn; // Point in container flow for pull
             pullcount += 1;     // a true terminal modification
         }
 
@@ -1199,10 +1199,10 @@ namespace Sla.DECCORE
         private void addTerminalPatchSameOp(PcodeOp pullop, ReplaceVarnode rvn, int slot)
         {
             patchlist.emplace_back();
-            patchlist.back().type = PatchRecord::parameter_patch;   // Keep the original op, just change input
-            patchlist.back().patchOp = pullop;  // Operation pulling the variable out
-            patchlist.back().in1 = rvn; // Point in container flow for pull
-            patchlist.back().slot = slot;
+            patchlist.GetLastItem().type = PatchRecord::parameter_patch;   // Keep the original op, just change input
+            patchlist.GetLastItem().patchOp = pullop;  // Operation pulling the variable out
+            patchlist.GetLastItem().in1 = rvn; // Point in container flow for pull
+            patchlist.GetLastItem().slot = slot;
             pullcount += 1;     // a true terminal modification
         }
 
@@ -1216,10 +1216,10 @@ namespace Sla.DECCORE
         private void addBooleanPatch(PcodeOp pullop, ReplaceVarnode rvn, int slot)
         {
             patchlist.emplace_back();
-            patchlist.back().type = PatchRecord::parameter_patch;   // Make no change to the operator, just put in the new input
-            patchlist.back().patchOp = pullop;  // Operation pulling the variable out
-            patchlist.back().in1 = rvn; // Point in container flow for pull
-            patchlist.back().slot = slot;
+            patchlist.GetLastItem().type = PatchRecord::parameter_patch;   // Make no change to the operator, just put in the new input
+            patchlist.GetLastItem().patchOp = pullop;  // Operation pulling the variable out
+            patchlist.GetLastItem().in1 = rvn; // Point in container flow for pull
+            patchlist.GetLastItem().slot = slot;
             // this is not a true modification
         }
 
@@ -1233,12 +1233,12 @@ namespace Sla.DECCORE
         private void addSuggestedPatch(ReplaceVarnode rvn, PcodeOp pushop, int sa)
         {
             patchlist.emplace_back();
-            patchlist.back().type = PatchRecord::extension_patch;
-            patchlist.back().in1 = rvn;
-            patchlist.back().patchOp = pushop;
+            patchlist.GetLastItem().type = PatchRecord::extension_patch;
+            patchlist.GetLastItem().in1 = rvn;
+            patchlist.GetLastItem().patchOp = pushop;
             if (sa == -1)
                 sa = leastsigbit_set(rvn.mask);
-            patchlist.back().slot = sa;
+            patchlist.GetLastItem().slot = sa;
             // This is not a true modification because the output is still the expanded size
         }
 
@@ -1252,10 +1252,10 @@ namespace Sla.DECCORE
         private void addComparePatch(ReplaceVarnode in1, ReplaceVarnode in2, PcodeOp op)
         {
             patchlist.emplace_back();
-            patchlist.back().type = PatchRecord::compare_patch;
-            patchlist.back().patchOp = op;
-            patchlist.back().in1 = in1;
-            patchlist.back().in2 = in2;
+            patchlist.GetLastItem().type = PatchRecord::compare_patch;
+            patchlist.GetLastItem().patchOp = op;
+            patchlist.GetLastItem().in1 = in1;
+            patchlist.GetLastItem().in2 = in2;
             pullcount += 1;
         }
 
@@ -1269,7 +1269,7 @@ namespace Sla.DECCORE
         private ReplaceVarnode addConstant(ReplaceOp rop, ulong mask, uint slot, Varnode constvn)
         {
             newvarlist.emplace_back();
-            ReplaceVarnode* res = &newvarlist.back();
+            ReplaceVarnode* res = &newvarlist.GetLastItem();
             res.vn = constvn;
             res.replacement = (Varnode)null;
             res.mask = mask;
@@ -1297,7 +1297,7 @@ namespace Sla.DECCORE
         private ReplaceVarnode addNewConstant(ReplaceOp rop, uint slot, ulong val)
         {
             newvarlist.emplace_back();
-            ReplaceVarnode* res = &newvarlist.back();
+            ReplaceVarnode* res = &newvarlist.GetLastItem();
             res.vn = (Varnode)null;
             res.replacement = (Varnode)null;
             res.mask = 0;
@@ -1321,7 +1321,7 @@ namespace Sla.DECCORE
         private void createNewOut(ReplaceOp rop, ulong mask)
         {
             newvarlist.emplace_back();
-            ReplaceVarnode* res = &newvarlist.back();
+            ReplaceVarnode* res = &newvarlist.GetLastItem();
             res.vn = (Varnode)null;
             res.replacement = (Varnode)null;
             res.mask = mask;
@@ -1415,7 +1415,7 @@ namespace Sla.DECCORE
         /// \return \b true if the node was successfully processed
         private bool processNextWork()
         {
-            ReplaceVarnode* rvn = worklist.back();
+            ReplaceVarnode* rvn = worklist.GetLastItem();
 
             worklist.pop_back();
 
@@ -1494,7 +1494,7 @@ namespace Sla.DECCORE
             }
 
             // Clear marks
-            map<Varnode*, ReplaceVarnode>::iterator iter;
+            Dictionary<Varnode*, ReplaceVarnode>::iterator iter;
             for (iter = varmap.begin(); iter != varmap.end(); ++iter)
                 (*iter).first.clearMark();
 

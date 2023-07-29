@@ -39,10 +39,10 @@ namespace Sla.EXTRA
             if (scope == (Scope)null) // Variable does not have natural scope
                 scope = dcp.fd.getScopeLocal();   // force it to be in function scope
             Symbol sym = scope.addSymbol(name, ct, loc, pc).getSymbol();
-            scope.setAttribute(sym, Varnode::typelock);
+            scope.setAttribute(sym, Varnode.varnode_flags.typelock);
             sym.setIsolated(true);
             if (name.size() > 0)
-                scope.setAttribute(sym, Varnode::namelock);
+                scope.setAttribute(sym, Varnode.varnode_flags.namelock);
 
             *status.fileoptr << "Successfully added " << sym.getName();
             *status.fileoptr << " to scope " << scope.getFullName() << endl;

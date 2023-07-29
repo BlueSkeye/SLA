@@ -78,16 +78,16 @@ namespace Sla.DECCORE
 
             bool isindirect = (pieces.flags & ParameterPieces::indirectstorage) != 0;
             bool ishidden = (pieces.flags & ParameterPieces::hiddenretparm) != 0;
-            if (res.sym != (Symbol*)0)
+            if (res.sym != (Symbol)null)
             {
                 entry = res.sym.getFirstWholeMap();
                 if ((entry.getAddr() != pieces.addr) || (entry.getSize() != pieces.type.getSize()))
                 {
                     scope.removeSymbol(res.sym);
-                    res.sym = (Symbol*)0;
+                    res.sym = (Symbol)null;
                 }
             }
-            if (res.sym == (Symbol*)0)
+            if (res.sym == (Symbol)null)
             {
                 if (scope.discoverScope(pieces.addr, pieces.type.getSize(), usepoint) == (Scope)null)
                     usepoint = restricted_usepoint;
@@ -128,7 +128,7 @@ namespace Sla.DECCORE
         public override void clearInput(int i)
         {
             Symbol* sym = scope.getCategorySymbol(Symbol::function_parameter, i);
-            if (sym != (Symbol*)0)
+            if (sym != (Symbol)null)
             {
                 scope.setCategory(sym, Symbol::no_category, 0); // Remove it from category list
                 scope.removeSymbol(sym);   // Remove it altogether
@@ -138,7 +138,7 @@ namespace Sla.DECCORE
             for (int j = i + 1; j < sz; ++j)
             {
                 sym = scope.getCategorySymbol(Symbol::function_parameter, j);
-                if (sym != (Symbol*)0)
+                if (sym != (Symbol)null)
                     scope.setCategory(sym, Symbol::function_parameter, j - 1);
             }
         }
@@ -156,7 +156,7 @@ namespace Sla.DECCORE
         public override ProtoParameter getInput(int i)
         {
             Symbol* sym = scope.getCategorySymbol(Symbol::function_parameter, i);
-            if (sym == (Symbol*)0)
+            if (sym == (Symbol)null)
                 return (ProtoParameter*)0;
             ParameterSymbol* res = getSymbolBacked(i);
             res.sym = sym;

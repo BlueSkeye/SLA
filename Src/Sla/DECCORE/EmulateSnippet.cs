@@ -293,7 +293,7 @@ namespace Sla.DECCORE
                 return vn.offset;
             if (spc.getType() == IPTR_INTERNAL)
             {
-                map<ulong, ulong>::const_iterator iter;
+                Dictionary<ulong, ulong>::const_iterator iter;
                 iter = tempValues.find(vn.offset);
                 if (iter != tempValues.end())
                     return (*iter).second;  // We have seen this varnode before
@@ -311,7 +311,7 @@ namespace Sla.DECCORE
         /// \return the calculated value or 0 if the register was never written
         public ulong getTempValue(ulong offset)
         {
-            map<ulong, ulong>::const_iterator iter = tempValues.find(offset);
+            Dictionary<ulong, ulong>::const_iterator iter = tempValues.find(offset);
             if (iter == tempValues.end())
                 return 0;
             return (*iter).second;

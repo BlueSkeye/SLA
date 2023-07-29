@@ -21,7 +21,7 @@ namespace Sla.EXTRA
             if (dcp.conf == (Architecture*)0)
                 throw new IfaceExecutionError("No load image present");
 
-            map<string, ProtoModel*>::const_iterator iter;
+            Dictionary<string, ProtoModel*>::const_iterator iter;
             for (iter = dcp.conf.protoModels.begin(); iter != dcp.conf.protoModels.end(); ++iter)
             {
                 ProtoModel* model = (*iter).second;

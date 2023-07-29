@@ -177,8 +177,8 @@ namespace Sla.EXTRA
             VarnodeDefSet::const_iterator iter, enditer;
 
             s << "Function: " << fd.getName() << endl;
-            iter = fd.beginDef(Varnode::input);
-            enditer = fd.endDef(Varnode::input);
+            iter = fd.beginDef(Varnode.varnode_flags.input);
+            enditer = fd.endDef(Varnode.varnode_flags.input);
             while (iter != enditer)
             {
                 Varnode* vn = *iter;
@@ -187,7 +187,7 @@ namespace Sla.EXTRA
                 if (fd.isHighOn())
                 {
                     Symbol* sym = vn.getHigh().getSymbol();
-                    if (sym != (Symbol*)0)
+                    if (sym != (Symbol)null)
                         s << "    " << sym.getName();
                 }
                 bool findres = findRestore(vn, fd);

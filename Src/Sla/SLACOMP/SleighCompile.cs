@@ -60,7 +60,7 @@ namespace Sla.SLACOMP
         private Location getCurrentLocation()
         {
             // Update the location cache field
-            currentLocCache = Location(filename.back(), lineno.back());
+            currentLocCache = Location(filename.GetLastItem(), lineno.GetLastItem());
             return &currentLocCache;
         }
 
@@ -308,7 +308,7 @@ namespace Sla.SLACOMP
         {
             for (int i = 0; i < locals.size(); ++i)
             {
-                pair<map<ulong, int>::iterator, bool> res;
+                pair<Dictionary<ulong, int>::iterator, bool> res;
                 res = local2Operand.insert(pair<ulong, int>(locals[i], operand));
                 if (!res.second)
                 {
@@ -339,7 +339,7 @@ namespace Sla.SLACOMP
             if (ct.getNumOperands() < 2)
                 return true;        // Collision can only happen with multiple operands
             bool noCollisions = true;
-            map<ulong, int> collect;
+            Dictionary<ulong, int> collect;
             for (int i = 0; i < ct.getNumOperands(); ++i)
             {
                 List<ulong> newCollect;
@@ -421,7 +421,7 @@ namespace Sla.SLACOMP
         private void checkCaseSensitivity()
         {
             if (!failinsensitivedups) return;       // Case insensitive duplicates don't cause error
-            map<string, SleighSymbol*> registerMap;
+            Dictionary<string, SleighSymbol*> registerMap;
             SymbolScope* scope = symtab.getGlobalScope();
             SymbolTree::const_iterator iter;
             for (iter = scope.begin(); iter != scope.end(); ++iter)
@@ -433,7 +433,7 @@ namespace Sla.SLACOMP
                 if (space.getType() != IPTR_PROCESSOR) continue;
                 string nm = sym.getName();
                 transform(nm.begin(), nm.end(), nm.begin(), ::toupper);
-                pair<map<string, SleighSymbol*>::iterator, bool> check;
+                pair<Dictionary<string, SleighSymbol*>::iterator, bool> check;
                 check = registerMap.insert(pair<string, SleighSymbol*>(nm, sym));
                 if (!check.second)
                 {   // Name already existed
@@ -911,7 +911,7 @@ namespace Sla.SLACOMP
         /// \param msg is the error message
         public void reportError(string msg)
         {
-            cerr << filename.back() << ":" << lineno.back() << " - ERROR " << msg << endl;
+            cerr << filename.GetLastItem() << ":" << lineno.GetLastItem() << " - ERROR " << msg << endl;
             errors += 1;
             if (errors > 1000000)
             {
@@ -1068,7 +1068,7 @@ namespace Sla.SLACOMP
         public string grabCurrentFilePath()
         {
             if (relpath.empty()) return "";
-            return (relpath.back() + filename.back());
+            return (relpath.GetLastItem() + filename.GetLastItem());
         }
 
         ///< Push a new source file to the current parse stack
@@ -1087,7 +1087,7 @@ namespace Sla.SLACOMP
                 relpath.Add(path);
             else
             {           // Relative paths from successive includes, combine
-                string totalpath = relpath.back();
+                string totalpath = relpath.GetLastItem();
                 totalpath += path;
                 relpath.Add(totalpath);
             }
@@ -1098,9 +1098,9 @@ namespace Sla.SLACOMP
         /// Indicate to the location finder that parsing is currently in an expanded preprocessor macro
         public void parsePreprocMacro()
         {
-            filename.Add(filename.back() + ":macro");
-            relpath.Add(relpath.back());
-            lineno.Add(lineno.back());
+            filename.Add(filename.GetLastItem() + ":macro");
+            relpath.Add(relpath.GetLastItem());
+            lineno.Add(lineno.GetLastItem());
         }
 
         ///< Mark end of parsing for the current file or macro
@@ -1116,7 +1116,7 @@ namespace Sla.SLACOMP
         ///< Indicate parsing proceeded to the next line of the current file
         public void nextLine()
         {
-            lineno.back() += 1;
+            lineno.GetLastItem() += 1;
         }
 
         ///< Retrieve a given preprocessor variable
@@ -1126,7 +1126,7 @@ namespace Sla.SLACOMP
         /// \return \b true if the variable was defined
         public bool getPreprocValue(string nm, string res)
         {
-            map<string, string>::const_iterator iter = preproc_defines.find(nm);
+            Dictionary<string, string>::const_iterator iter = preproc_defines.find(nm);
             if (iter == preproc_defines.end()) return false;
             res = (*iter).second;
             return true;
@@ -1147,7 +1147,7 @@ namespace Sla.SLACOMP
         /// \return \b true if the variable had a value (was defined) initially
         public bool undefinePreprocValue(string nm)
         {
-            map<string, string>::iterator iter = preproc_defines.find(nm);
+            Dictionary<string, string>::iterator iter = preproc_defines.find(nm);
             if (iter == preproc_defines.end()) return false;
             preproc_defines.erase(iter);
             return true;
@@ -1875,7 +1875,7 @@ namespace Sla.SLACOMP
                 sym = root;
             curmacro = (MacroSymbol*)0; // Not currently defining a macro
             curct = new Constructor(sym);
-            curct.setLineno(lineno.back());
+            curct.setLineno(lineno.GetLastItem());
             ctorLocationMap[curct] = *getCurrentLocation();
             sym.addConstructor(curct);
             symtab.addScope();      // Make a new symbol scope for our constructor
@@ -1903,7 +1903,7 @@ namespace Sla.SLACOMP
         public void pushWith(SubtableSymbol ss, PatternEquation pateq, List<ContextChange> contvec)
         {
             withstack.emplace_back();
-            withstack.back().set(ss, pateq, contvec);
+            withstack.GetLastItem().set(ss, pateq, contvec);
         }
 
         /// \brief Pop the current \b with block from the stack
@@ -2024,7 +2024,7 @@ namespace Sla.SLACOMP
              bool lenientConflict, bool allCollisionWarning, bool allNopWarning, bool deadTempWarning,
              bool enforceLocalKeyWord, bool largeTemporaryWarning, bool caseSensitiveRegisterNames)
         {
-            map<string, string>::const_iterator iter = defines.begin();
+            Dictionary<string, string>::const_iterator iter = defines.begin();
             for (iter = defines.begin(); iter != defines.end(); iter++)
             {
                 setPreprocValue((*iter).first, (*iter).second);

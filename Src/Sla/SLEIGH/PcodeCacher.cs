@@ -111,7 +111,7 @@ namespace Sla.SLEIGH
         public PcodeData allocateInstruction()
         {
             issued.emplace_back();
-            PcodeData* res = &issued.back();
+            PcodeData* res = &issued.GetLastItem();
             res.outvar = (VarnodeData*)0;
             res.invar = (VarnodeData*)0;
             return res;
@@ -124,8 +124,8 @@ namespace Sla.SLEIGH
         public void addLabelRef(VarnodeData ptr)
         {
             label_refs.emplace_back();
-            label_refs.back().dataptr = ptr;
-            label_refs.back().calling_index = issued.size();
+            label_refs.GetLastItem().dataptr = ptr;
+            label_refs.GetLastItem().calling_index = issued.size();
         }
 
         /// Attach a label to the \e next p-code instruction

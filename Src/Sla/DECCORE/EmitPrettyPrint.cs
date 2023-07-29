@@ -148,7 +148,7 @@ namespace Sla.DECCORE
             }
             int newspaceremain;
             if (!indentstack.empty())
-                newspaceremain = indentstack.back();
+                newspaceremain = indentstack.GetLastItem();
             else
                 newspaceremain = maxlinesize;
             if (newspaceremain == spaceremain)
@@ -178,7 +178,7 @@ namespace Sla.DECCORE
                     tok.print(lowlevel);    // Markup or other that doesn't use space
                     break;
                 case TokenSplit::begin_indent:
-                    val = indentstack.back() - tok.getIndentBump();
+                    val = indentstack.GetLastItem() - tok.getIndentBump();
                     indentstack.Add(val);
 #if PRETTY_DEBUG
                     checkid.Add(tok.getCount());
@@ -198,7 +198,7 @@ namespace Sla.DECCORE
                     if (indentstack.empty())
                         throw new LowlevelError("indent error");
 #if PRETTY_DEBUG
-                    if (checkid.empty() || (checkid.back() != tok.getCount()))
+                    if (checkid.empty() || (checkid.GetLastItem() != tok.getCount()))
                         throw new LowlevelError("mismatch1");
                     checkid.pop_back();
                     if (indentstack.empty())
@@ -212,7 +212,7 @@ namespace Sla.DECCORE
                 case TokenSplit::end:
                     tok.print(lowlevel);
 #if PRETTY_DEBUG
-                    if (checkid.empty() || (checkid.back() != tok.getCount()))
+                    if (checkid.empty() || (checkid.GetLastItem() != tok.getCount()))
                         throw new LowlevelError("mismatch2");
                     checkid.pop_back();
                     if (indentstack.empty())
@@ -233,7 +233,7 @@ namespace Sla.DECCORE
                             spaceremain = maxlinesize - tok.getIndentBump();
                         else
                         {           // relative indent
-                            val = indentstack.back() - tok.getIndentBump();
+                            val = indentstack.GetLastItem() - tok.getIndentBump();
                             // If creating a line break doesn't save that much
                             // don't do the line break
                             if ((tok.getNumSpaces() <= spaceremain) &&
@@ -243,7 +243,7 @@ namespace Sla.DECCORE
                                 spaceremain -= tok.getNumSpaces();
                                 return;
                             }
-                            indentstack.back() = val;
+                            indentstack.GetLastItem() = val;
                             spaceremain = val;
                         }
                         lowlevel.tagLine(maxlinesize - spaceremain);

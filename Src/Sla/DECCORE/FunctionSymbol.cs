@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         {
             TypeFactory* types = scope.getArch().types;
             type = types.getTypeCode();
-            flags |= Varnode::namelock | Varnode::typelock;
+            flags |= Varnode.varnode_flags.namelock | Varnode.varnode_flags.typelock;
         }
 
         /// Construct given the name

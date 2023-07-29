@@ -85,7 +85,7 @@ namespace Sla.DECCORE
         {
             int a, b;
 
-            map<int, CoverBlock>::const_iterator iter;
+            Dictionary<int, CoverBlock>::const_iterator iter;
             iter = cover.begin();
             if (iter == cover.end())
                 a = 1000000;
@@ -115,7 +115,7 @@ namespace Sla.DECCORE
         /// \return a reference to the corresponding CoverBlock
         public CoverBlock getCoverBlock(int i)
         {
-            map<int, CoverBlock>::const_iterator iter = cover.find(i);
+            Dictionary<int, CoverBlock>::const_iterator iter = cover.find(i);
             if (iter == cover.end())
                 return emptyBlock;
             return (*iter).second;
@@ -131,7 +131,7 @@ namespace Sla.DECCORE
         /// \return the intersection characterization
         public int intersect(Cover op2)
         {
-            map<int, CoverBlock>::const_iterator iter, iter2;
+            Dictionary<int, CoverBlock>::const_iterator iter, iter2;
             int res, newres;
 
             res = 0;
@@ -171,12 +171,12 @@ namespace Sla.DECCORE
         /// \return the characterization
         public int intersectByBlock(int blk, Cover op2)
         {
-            map<int, CoverBlock>::const_iterator iter;
+            Dictionary<int, CoverBlock>::const_iterator iter;
 
             iter = cover.find(blk);
             if (iter == cover.end()) return 0;
 
-            map<int, CoverBlock>::const_iterator iter2;
+            Dictionary<int, CoverBlock>::const_iterator iter2;
 
             iter2 = op2.cover.find(blk);
             if (iter2 == op2.cover.end()) return 0;
@@ -194,7 +194,7 @@ namespace Sla.DECCORE
         /// \param level is the characterization threshold which must be exceeded
         public void intersectList(List<int> listout, Cover op2, int level)
         {
-            map<int, CoverBlock>::const_iterator iter, iter2;
+            Dictionary<int, CoverBlock>::const_iterator iter, iter2;
             int val;
 
             listout.clear();
@@ -229,7 +229,7 @@ namespace Sla.DECCORE
         /// \return true if there is containment
         public bool contain(PcodeOp op, int max)
         {
-            map<int, CoverBlock>::const_iterator iter;
+            Dictionary<int, CoverBlock>::const_iterator iter;
 
             iter = cover.find(op.getParent().getIndex());
             if (iter == cover.end()) return false;
@@ -266,7 +266,7 @@ namespace Sla.DECCORE
             }
             else
                 blk = op.getParent().getIndex();
-            map<int, CoverBlock>::const_iterator iter = cover.find(blk);
+            Dictionary<int, CoverBlock>::const_iterator iter = cover.find(blk);
             if (iter == cover.end()) return 0;
             if ((*iter).second.contain(op))
             {
@@ -282,7 +282,7 @@ namespace Sla.DECCORE
         /// \param op2 is the other Cover
         public void merge(Cover op2)
         {
-            map<int, CoverBlock>::const_iterator iter;
+            Dictionary<int, CoverBlock>::const_iterator iter;
 
             for (iter = op2.cover.begin(); iter != op2.cover.end(); ++iter)
                 cover[(*iter).first].merge((*iter).second);
@@ -392,7 +392,7 @@ namespace Sla.DECCORE
         /// \param s is the output stream
         public void print(ostream s)
         {
-            map<int, CoverBlock>::const_iterator iter;
+            Dictionary<int, CoverBlock>::const_iterator iter;
 
             for (iter = cover.begin(); iter != cover.end(); ++iter)
             {
@@ -408,6 +408,6 @@ namespace Sla.DECCORE
             return cover.GetEnumerator();
         }
 
-        // map<int, CoverBlock>::const_iterator end(void) { return cover.end(); }		///< Get end of CoverBlocks
+        // Dictionary<int, CoverBlock>::const_iterator end(void) { return cover.end(); }		///< Get end of CoverBlocks
     }
 }

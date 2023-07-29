@@ -117,7 +117,7 @@ namespace Sla.DECCORE
             if (addr.isConstant()) return null;
             while ((scope1 != (Scope)null)&& (scope1 != scope2)) {
                 entry = scope1.findAddr(addr, usepoint);
-                if (entry != (SymbolEntry*)0)
+                if (entry != (SymbolEntry)null)
                 {
                     *addrmatch = entry;
                     return scope1;
@@ -148,7 +148,7 @@ namespace Sla.DECCORE
             if (addr.isConstant()) return (Scope)null;
             while ((scope1 != (Scope)null)&& (scope1 != scope2)) {
                 entry = scope1.findContainer(addr, size, usepoint);
-                if (entry != (SymbolEntry*)0)
+                if (entry != (SymbolEntry)null)
                 {
                     *addrmatch = entry;
                     return scope1;
@@ -180,7 +180,7 @@ namespace Sla.DECCORE
             if (addr.isConstant()) return (Scope)null;
             while ((scope1 != (Scope)null)&& (scope1 != scope2)) {
                 entry = scope1.findClosestFit(addr, size, usepoint);
-                if (entry != (SymbolEntry*)0)
+                if (entry != (SymbolEntry)null)
                 {
                     *addrmatch = entry;
                     return scope1;
@@ -364,9 +364,9 @@ namespace Sla.DECCORE
         protected SymbolEntry addMap(SymbolEntry entry)
         {
             // First set properties of this symbol based on scope
-            //  entry.symbol.flags |= Varnode::mapped;
+            //  entry.symbol.flags |= Varnode.varnode_flags.mapped;
             if (isGlobal())
-                entry.symbol.flags |= Varnode::persist;
+                entry.symbol.flags |= Varnode.varnode_flags.persist;
             else if (!entry.addr.isInvalid())
             {
                 // If this is not a global scope, but the address is in the global discovery range
@@ -375,7 +375,7 @@ namespace Sla.DECCORE
                 Address addr;
                 if (glbScope.inScope(entry.addr, 1, addr))
                 {
-                    entry.symbol.flags |= Varnode::persist;
+                    entry.symbol.flags |= Varnode.varnode_flags.persist;
                     entry.uselimit.clear(); // FIXME: Kludge for incorrectly generated XML
                 }
             }
@@ -383,17 +383,17 @@ namespace Sla.DECCORE
             SymbolEntry* res;
             int consumeSize = entry.symbol.getBytesConsumed();
             if (entry.addr.isInvalid())
-                res = addDynamicMapInternal(entry.symbol, Varnode::mapped, entry.hash, 0, consumeSize, entry.uselimit);
+                res = addDynamicMapInternal(entry.symbol, Varnode.varnode_flags.mapped, entry.hash, 0, consumeSize, entry.uselimit);
             else
             {
                 if (entry.uselimit.empty())
                 {
-                    entry.symbol.flags |= Varnode::addrtied;
+                    entry.symbol.flags |= Varnode.varnode_flags.addrtied;
                     // Global properties (like readonly and volatile)
                     // can only happen if use is not limited
                     entry.symbol.flags |= glb.symboltab.getProperty(entry.addr);
                 }
-                res = addMapInternal(entry.symbol, Varnode::mapped, entry.addr, 0, consumeSize, entry.uselimit);
+                res = addMapInternal(entry.symbol, Varnode.varnode_flags.mapped, entry.addr, 0, consumeSize, entry.uselimit);
                 if (entry.addr.isJoin())
                 {
                     // The address is a join,  we add extra SymbolEntry maps for each of the pieces
@@ -728,7 +728,7 @@ namespace Sla.DECCORE
         /// \return the matching SymbolEntry
         public SymbolEntry queryByAddr(Address addr, Address usepoint)
         {
-            SymbolEntry* res = (SymbolEntry*)0;
+            SymbolEntry* res = (SymbolEntry)null;
             Scope basescope = glb.symboltab.mapScope(this, addr, usepoint);
             stackAddr(basescope, (Scope)null,addr,usepoint,&res);
             return res;
@@ -743,7 +743,7 @@ namespace Sla.DECCORE
         /// \return the matching SymbolEntry or NULL
         public virtual SymbolEntry queryContainer(Address addr, int size, Address usepoint)
         {
-            SymbolEntry* res = (SymbolEntry*)0;
+            SymbolEntry* res = (SymbolEntry)null;
             Scope basescope = glb.symboltab.mapScope(this, addr, usepoint);
             stackContainer(basescope, (Scope)null,addr,size,usepoint,&res);
             return res;
@@ -760,17 +760,17 @@ namespace Sla.DECCORE
         /// \return the smallest SymbolEntry containing the range, or NULL
         public SymbolEntry queryProperties(Address addr, int size, Address usepoint, uint &flags)
         {
-            SymbolEntry* res = (SymbolEntry*)0;
+            SymbolEntry* res = (SymbolEntry)null;
             Scope basescope = glb.symboltab.mapScope(this, addr, usepoint);
             Scope finalscope = stackContainer(basescope, (Scope)null,addr,size,usepoint,&res);
-            if (res != (SymbolEntry*)0) // If we found a symbol
+            if (res != (SymbolEntry)null) // If we found a symbol
                 flags = res.getAllFlags(); // use its flags
             else if (finalscope != (Scope)null)
             { // If we found just a scope
               // set flags just based on scope
-                flags = Varnode::mapped | Varnode::addrtied;
+                flags = Varnode.varnode_flags.mapped | Varnode.varnode_flags.addrtied;
                 if (finalscope.isGlobal())
-                    flags |= Varnode::persist;
+                    flags |= Varnode.varnode_flags.persist;
                 flags |= glb.symboltab.getProperty(addr);
             }
             else
@@ -1101,7 +1101,7 @@ namespace Sla.DECCORE
                     glb.printMessage("WARNING: Throwing out symbol with invalid mapping: " + sym.getName());
                     removeSymbol(sym);
                     decoder.closeElement(elemId);
-                    return (Symbol*)0;
+                    return (Symbol)null;
                 }
                 addMap(entry);
             }
@@ -1121,7 +1121,7 @@ namespace Sla.DECCORE
             FunctionSymbol* sym;
 
             SymbolEntry* overlap = queryContainer(addr, 1, Address());
-            if (overlap != (SymbolEntry*)0)
+            if (overlap != (SymbolEntry)null)
             {
                 string errmsg = "WARNING: Function " + name;
                 errmsg += " overlaps object: " + overlap.getSymbol().getName();
@@ -1169,7 +1169,7 @@ namespace Sla.DECCORE
             LabSymbol* sym;
 
             SymbolEntry* overlap = queryContainer(addr, 1, addr);
-            if (overlap != (SymbolEntry*)0)
+            if (overlap != (SymbolEntry)null)
             {
                 string errmsg = "WARNING: Codelabel " + nm;
                 errmsg += " overlaps object: " + overlap.getSymbol().getName();
@@ -1199,7 +1199,7 @@ namespace Sla.DECCORE
             RangeList rnglist;
             if (!caddr.isInvalid())
                 rnglist.insertRange(caddr.getSpace(), caddr.getOffset(), caddr.getOffset());
-            addDynamicMapInternal(sym, Varnode::mapped, hash, 0, ct.getSize(), rnglist);
+            addDynamicMapInternal(sym, Varnode.varnode_flags.mapped, hash, 0, ct.getSize(), rnglist);
             return sym;
         }
 
@@ -1220,7 +1220,7 @@ namespace Sla.DECCORE
             RangeList rnglist;
             if (!addr.isInvalid())
                 rnglist.insertRange(addr.getSpace(), addr.getOffset(), addr.getOffset());
-            addDynamicMapInternal(sym, Varnode::mapped, hash, 0, 1, rnglist);
+            addDynamicMapInternal(sym, Varnode.varnode_flags.mapped, hash, 0, 1, rnglist);
             return sym;
         }
 
@@ -1243,7 +1243,7 @@ namespace Sla.DECCORE
             RangeList rnglist;
             if (!addr.isInvalid())
                 rnglist.insertRange(addr.getSpace(), addr.getOffset(), addr.getOffset());
-            addDynamicMapInternal(sym, Varnode::mapped, hash, 0, 1, rnglist);
+            addDynamicMapInternal(sym, Varnode.varnode_flags.mapped, hash, 0, 1, rnglist);
             return sym;
         }
 
@@ -1268,7 +1268,7 @@ namespace Sla.DECCORE
                     int index = -1;
                     if (sym.getCategory() == Symbol::function_parameter)
                         index = sym.getCategoryIndex() + 1;
-                    return buildVariableName(vn.getAddr(), usepoint, sym.getType(), index, vn.getFlags() | Varnode::input);
+                    return buildVariableName(vn.getAddr(), usepoint, sym.getType(), index, vn.getFlags() | Varnode.varnode_flags.input);
                 }
                 return buildVariableName(vn.getAddr(), usepoint, sym.getType(), base, vn.getFlags());
             }
@@ -1277,10 +1277,10 @@ namespace Sla.DECCORE
                 SymbolEntry* entry = sym.getMapEntry(0);
                 Address addr = entry.getAddr();
                 Address usepoint = entry.getFirstUseAddress();
-                uint flags = usepoint.isInvalid() ? Varnode::addrtied : 0;
+                uint flags = usepoint.isInvalid() ? Varnode.varnode_flags.addrtied : 0;
                 if (sym.getCategory() == Symbol::function_parameter)
                 {
-                    flags |= Varnode::input;
+                    flags |= Varnode.varnode_flags.input;
                     int index = sym.getCategoryIndex() + 1;
                     return buildVariableName(addr, usepoint, sym.getType(), index, flags);
                 }

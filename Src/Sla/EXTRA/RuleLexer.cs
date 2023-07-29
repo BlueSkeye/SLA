@@ -139,7 +139,7 @@ namespace Sla.EXTRA
 
         private int otherIdentifiers()
         {
-            map<string, int>::const_iterator iter;
+            Dictionary<string, int>::const_iterator iter;
             iter = keywordmap.find(string(identifier));
             if (iter != keywordmap.end())
                 return (*iter).second;

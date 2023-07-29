@@ -26,7 +26,7 @@ namespace Sla.EXTRA
             s >> varname >> ws;
 
             high = dcp.fd.findHigh(varname);
-            if (high == (HighVariable*)0)   // Didn't find this name
+            if (high == (HighVariable)null)   // Didn't find this name
                 throw new IfaceExecutionError("Unknown variable name: " + varname);
 
             high.printInfo(*status.optr);

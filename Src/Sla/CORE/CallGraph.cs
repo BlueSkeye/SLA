@@ -20,7 +20,7 @@ namespace Sla.CORE
         { // Find all functions (that are not already marked) that either have no in edges at all,
           // or have no in edges that haven't been snipped as part of cycles
 
-            map<Address, CallGraphNode>::iterator iter;
+            Dictionary<Address, CallGraphNode>::iterator iter;
             CallGraphNode* lownode = (CallGraphNode*)0;
             bool allcovered = true;
             bool newseeds = false;
@@ -67,8 +67,8 @@ namespace Sla.CORE
 
             while (!stack.empty())
             {
-                CallGraphNode* cur = stack.back().node; // Current node
-                int st = stack.back().outslot; // which out edge we will follow
+                CallGraphNode* cur = stack.GetLastItem().node; // Current node
+                int st = stack.GetLastItem().outslot; // which out edge we will follow
                 if (st >= cur.outedge.size())
                 {
                     cur.flags &= ~((uint)CallGraphNode::currentcycle);
@@ -76,7 +76,7 @@ namespace Sla.CORE
                 }
                 else
                 {
-                    stack.back().outslot += 1;
+                    stack.GetLastItem().outslot += 1;
                     if ((cur.outedge[st].flags & CallGraphEdge::cycle) != 0) continue;
                     next = cur.outedge[st].to;
                     if ((next.flags & CallGraphNode::currentcycle) != 0)
@@ -117,7 +117,7 @@ namespace Sla.CORE
 
         private void clearMarks()
         {
-            map<Address, CallGraphNode>::iterator iter;
+            Dictionary<Address, CallGraphNode>::iterator iter;
 
             for (iter = graph.begin(); iter != graph.end(); ++iter)
                 (*iter).second.clearMark();
@@ -248,7 +248,7 @@ namespace Sla.CORE
 
         public CallGraphNode findNode(Address addr)
         {               // Find function at given address, or return null
-            map<Address, CallGraphNode>::iterator iter;
+            Dictionary<Address, CallGraphNode>::iterator iter;
 
             iter = graph.find(addr);
             if (iter != graph.end())
@@ -270,7 +270,7 @@ namespace Sla.CORE
 
             int toi = to.inedge.size();
             to.inedge.emplace_back();
-            CallGraphEdge & toedge(to.inedge.back());
+            CallGraphEdge & toedge(to.inedge.GetLastItem());
 
             fromedge.from = from;
             fromedge.to = to;
@@ -377,7 +377,7 @@ namespace Sla.CORE
 
         public void encode(Encoder encoder)
         {
-            map<Address, CallGraphNode>::const_iterator iter;
+            Dictionary<Address, CallGraphNode>::const_iterator iter;
 
             encoder.openElement(ELEM_CALLGRAPH);
 

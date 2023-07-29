@@ -41,7 +41,7 @@ namespace Sla.DECCORE
             int ind = op.getIndex();
             if (ind < 0) throw new LowlevelError("UserOp not assigned an index");
 
-            map<string, UserPcodeOp*>::iterator iter;
+            Dictionary<string, UserPcodeOp*>::iterator iter;
             iter = useropmap.find(op.getName());
             if (iter != useropmap.end())
             {
@@ -162,7 +162,7 @@ namespace Sla.DECCORE
         /// \return the matching description object or NULL
         public UserPcodeOp getOp(string nm)
         {
-            map<string, UserPcodeOp*>::const_iterator iter;
+            Dictionary<string, UserPcodeOp*>::const_iterator iter;
             iter = useropmap.find(nm);
             if (iter == useropmap.end()) return (UserPcodeOp*)0;
             return (*iter).second;

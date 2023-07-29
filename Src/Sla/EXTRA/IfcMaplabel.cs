@@ -33,7 +33,7 @@ namespace Sla.EXTRA
                 scope = dcp.conf.symboltab.getGlobalScope();
 
             Symbol* sym = scope.addCodeLabel(addr, name);
-            scope.setAttribute(sym, Varnode::namelock | Varnode::typelock);
+            scope.setAttribute(sym, Varnode.varnode_flags.namelock | Varnode.varnode_flags.typelock);
         }
     }
 }

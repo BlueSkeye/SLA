@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -133,15 +134,15 @@ namespace Sla.DECCORE
         }
 
         /// The collection of boolean attributes for this Varnode
-        private /*mutable*/ uint flags;
+        private /*mutable*/ varnode_flags flags;
         /// Size of the Varnode in bytes
         private int size;
         /// A unique one-up index assigned to Varnode at its creation
         private uint create_index;
         /// Which group of forced merges does this Varnode belong to
-        private int2 mergegroup;
+        private short mergegroup;
         /// Additional flags
-        private uint2 addlflags;
+        private ushort addlflags;
         /// Storage location (or constant value) of the Varnode
         private Address loc;
 
@@ -149,7 +150,7 @@ namespace Sla.DECCORE
         /// The defining operation of this Varnode
         private PcodeOp def;
         /// High-level variable of which this is an instantiation
-        private HighVariable high;
+        private HighVariable? high;
         /// cached SymbolEntry associated with Varnode
         private SymbolEntry mapentry;
         /// Datatype associated with this varnode
@@ -186,11 +187,11 @@ namespace Sla.DECCORE
         /// Merge class which knows when to call it properly
         private void updateCover()
         {
-            if ((flags & Varnode::coverdirty) != 0)
+            if ((flags & Varnode.varnode_flags.coverdirty) != 0)
             {
-                if (hasCover() && (cover != (Cover*)0))
+                if (hasCover() && (cover != (Cover)null))
                     cover.rebuild(this);
-                clearFlags(Varnode::coverdirty);
+                clearFlags(Varnode.varnode_flags.coverdirty);
             }
         }
 
@@ -200,10 +201,10 @@ namespace Sla.DECCORE
         {
             if (hasCover())
             {
-                if (cover != (Cover*)0)
+                if (cover != (Cover)null)
                     delete cover;
                 cover = new Cover;
-                setFlags(Varnode::coverdirty);
+                setFlags(Varnode.varnode_flags.coverdirty);
             }
         }
 
@@ -211,10 +212,10 @@ namespace Sla.DECCORE
         /// Delete the Cover object.  Used for dead Varnodes before full deletion.
         private void clearCover()
         {
-            if (cover != (Cover*)0)
+            if (cover != (Cover)null)
             {
                 delete cover;
-                cover = (Cover*)0;
+                cover = (Cover)null;
             }
         }
 
@@ -224,10 +225,10 @@ namespace Sla.DECCORE
         private void setFlags(uint fl)
         {
             flags |= fl;
-            if (high != (HighVariable*)0)
+            if (high != (HighVariable)null)
             {
                 high.flagsDirty();
-                if ((fl & Varnode::coverdirty) != 0)
+                if ((fl & Varnode.varnode_flags.coverdirty) != 0)
                     high.coverDirty();
             }
         }
@@ -235,13 +236,12 @@ namespace Sla.DECCORE
         /// Internal method for clearing boolean attributes
         /// Clear desired boolean attributes on this Varnode and then set dirty bits if appropriate
         /// \param fl is the mask containing the list of attributes to clear
-        private void clearFlags(uint fl)
+        private void clearFlags(varnode_flags fl)
         {
             flags &= ~fl;
-            if (high != (HighVariable*)0)
-            {
+            if (high != (HighVariable)null) {
                 high.flagsDirty();
-                if ((fl & Varnode::coverdirty) != 0)
+                if ((fl & Varnode.varnode_flags.coverdirty) != 0)
                     high.coverDirty();
             }
         }
@@ -255,9 +255,9 @@ namespace Sla.DECCORE
             for (int i = 0; i < high.numInstances(); ++i)
             {
                 Varnode* vn = high.getInstance(i);
-                foundEntry = foundEntry || (vn.mapentry != (SymbolEntry*)0);
-                vn.mapentry = (SymbolEntry*)0;
-                vn.clearFlags(Varnode::namelock | Varnode::typelock | Varnode::mapped);
+                foundEntry = foundEntry || (vn.mapentry != (SymbolEntry)null);
+                vn.mapentry = (SymbolEntry)null;
+                vn.clearFlags(Varnode.varnode_flags.namelock | Varnode.varnode_flags.typelock | Varnode.varnode_flags.mapped);
             }
             if (foundEntry)
                 high.symbolDirty();
@@ -266,14 +266,14 @@ namespace Sla.DECCORE
         /// Mark Varnode as \e unaffected
         private void setUnaffected()
         {
-            setFlags(Varnode::unaffected);
+            setFlags(Varnode.varnode_flags.unaffected);
         }
 
         // These functions should be only private things used by VarnodeBank
         /// Mark Varnode as \e input
         private void setInput()
         {
-            setFlags(Varnode::input | Varnode::coverdirty);
+            setFlags(Varnode.varnode_flags.input | Varnode.varnode_flags.coverdirty);
         }
 
         /// Set the defining PcodeOp of this Varnode
@@ -284,11 +284,11 @@ namespace Sla.DECCORE
             def = op;
             if (op == (PcodeOp)null)
             {
-                setFlags(Varnode::coverdirty);
-                clearFlags(Varnode::written);
+                setFlags(Varnode.varnode_flags.coverdirty);
+                clearFlags(Varnode.varnode_flags.written);
             }
             else
-                setFlags(Varnode::coverdirty | Varnode::written);
+                setFlags(Varnode.varnode_flags.coverdirty | Varnode.varnode_flags.written);
         }
 
         /// Set properties from the given Symbol to \b this Varnode
@@ -304,12 +304,12 @@ namespace Sla.DECCORE
                 if (mapentry != entry)
                 {
                     mapentry = entry;
-                    if (high != (HighVariable*)0)
+                    if (high != (HighVariable)null)
                         high.setSymbol(this);
                     res = true;
                 }
             }
-            setFlags(entry.getAllFlags() & ~Varnode::typelock);
+            setFlags(entry.getAllFlags() & ~Varnode.varnode_flags.typelock);
             return res;
         }
 
@@ -320,11 +320,11 @@ namespace Sla.DECCORE
         private void setSymbolEntry(SymbolEntry entry)
         {
             mapentry = entry;
-            uint fl = Varnode::mapped; // Flags are generally not changed, but we do mark this as mapped
+            uint fl = Varnode.varnode_flags.mapped; // Flags are generally not changed, but we do mark this as mapped
             if (entry.getSymbol().isNameLocked())
-                fl |= Varnode::namelock;
+                fl |= Varnode.varnode_flags.namelock;
             setFlags(fl);
-            if (high != (HighVariable*)0)
+            if (high != (HighVariable)null)
                 high.setSymbol(this);
         }
 
@@ -336,7 +336,7 @@ namespace Sla.DECCORE
         /// \param off is the byte offset into the Symbol of the reference
         private void setSymbolReference(SymbolEntry entry, int off)
         {
-            if (high != (HighVariable*)0)
+            if (high != (HighVariable)null)
             {
                 high.setSymbolReference(entry.getSymbol(), off);
             }
@@ -354,7 +354,7 @@ namespace Sla.DECCORE
                     throw new LowlevelError("Free varnode has multiple descendants");
             }
             descend.Add(op);
-            setFlags(Varnode::coverdirty);
+            setFlags(Varnode.varnode_flags.coverdirty);
         }
 
         /// Erase a descendant (reading) PcodeOp from this Varnode's list
@@ -368,7 +368,7 @@ namespace Sla.DECCORE
             while (*iter != op)     // Find this op in list of vn's descendants
                 iter++;
             descend.erase(iter);        // Remove it from list
-            setFlags(Varnode::coverdirty);
+            setFlags(Varnode.varnode_flags.coverdirty);
         }
 
         /// Clear all descendant (reading) PcodeOps
@@ -381,7 +381,7 @@ namespace Sla.DECCORE
 
         // only to be used by HighVariable
         /// Set the HighVariable owning this Varnode
-        public void setHigh(HighVariable tv, int2 mg)
+        public void setHigh(HighVariable tv, short mg)
         {
             high = tv;
             mergegroup = mg;
@@ -406,7 +406,7 @@ namespace Sla.DECCORE
         public int getSize() => size;
 
         /// Get the \e forced \e merge group of this Varnode
-        public int2 getMergeGroup() => mergegroup;
+        public short getMergeGroup() => mergegroup;
 
         /// Get the defining PcodeOp of this Varnode
         public PcodeOp getDef() => def;
@@ -424,7 +424,7 @@ namespace Sla.DECCORE
         /// \return the associated HighVariable
         public HighVariable getHigh()
         {
-            if (high == (HighVariable*)0)
+            if (high == (HighVariable)null)
                 throw new LowlevelError("Requesting non-existent high-level");
             return high;
         }
@@ -639,11 +639,11 @@ namespace Sla.DECCORE
 
             if (expect != size)
                 s << ':' << setw(1) << size;
-            if ((flags & Varnode::input) != 0)
+            if ((flags & Varnode.varnode_flags.input) != 0)
                 s << "(i)";
             if (isWritten())
                 s << '(' << def.getSeqNum() << ')';
-            if ((flags & (Varnode::insert | Varnode::constant)) == 0)
+            if ((flags & (Varnode.varnode_flags.insert | Varnode.varnode_flags.constant)) == 0)
             {
                 s << "(free)";
                 return;
@@ -657,9 +657,9 @@ namespace Sla.DECCORE
         /// \param s is the output stream
         public void printCover(TextWriter s)
         {
-            if (cover == (Cover*)0)
+            if (cover == (Cover)null)
                 throw new LowlevelError("No cover to print");
-            if ((flags & Varnode::coverdirty) != 0)
+            if ((flags & Varnode.varnode_flags.coverdirty) != 0)
                 s << "Cover is dirty" << endl;
             else
                 cover.print(s);
@@ -713,10 +713,10 @@ namespace Sla.DECCORE
             size = s;
             def = (PcodeOp)null;      // No defining op yet
             type = dt;
-            high = (HighVariable*)0;
-            mapentry = (SymbolEntry*)0;
+            high = (HighVariable)null;
+            mapentry = (SymbolEntry)null;
             consumed = ~((ulong)0);
-            cover = (Cover*)0;
+            cover = (Cover)null;
             mergegroup = 0;
             addlflags = 0;
             if (m.getSpace() == (AddrSpace)null)
@@ -727,17 +727,17 @@ namespace Sla.DECCORE
             spacetype tp = m.getSpace().getType();
             if (tp == IPTR_CONSTANT)
             {
-                flags = Varnode::constant;
+                flags = Varnode.varnode_flags.constant;
                 nzm = m.getOffset();
             }
             else if ((tp == IPTR_FSPEC) || (tp == IPTR_IOP))
             {
-                flags = Varnode::annotation | Varnode::coverdirty;
+                flags = Varnode.varnode_flags.annotation | Varnode.varnode_flags.coverdirty;
                 nzm = ~((ulong)0);
             }
             else
             {
-                flags = Varnode::coverdirty;
+                flags = Varnode.varnode_flags.coverdirty;
                 nzm = ~((ulong)0);
             }
         }
@@ -758,10 +758,10 @@ namespace Sla.DECCORE
 
             if (loc != op2.loc) return (loc < op2.loc);
             if (size != op2.size) return (size < op2.size);
-            f1 = flags & (Varnode::input | Varnode::written);
-            f2 = op2.flags & (Varnode::input | Varnode::written);
+            f1 = flags & (Varnode.varnode_flags.input | Varnode.varnode_flags.written);
+            f2 = op2.flags & (Varnode.varnode_flags.input | Varnode.varnode_flags.written);
             if (f1 != f2) return ((f1 - 1) < (f2 - 1)); // -1 forces free varnodes to come last
-            if (f1 == Varnode::written)
+            if (f1 == Varnode.varnode_flags.written)
                 if (def.getSeqNum() != op2.def.getSeqNum())
                     return (def.getSeqNum() < op2.def.getSeqNum());
             return false;
@@ -781,10 +781,10 @@ namespace Sla.DECCORE
 
             if (loc != op2.loc) return false;
             if (size != op2.size) return false;
-            f1 = flags & (Varnode::input | Varnode::written);
-            f2 = op2.flags & (Varnode::input | Varnode::written);
+            f1 = flags & (Varnode.varnode_flags.input | Varnode.varnode_flags.written);
+            f2 = op2.flags & (Varnode.varnode_flags.input | Varnode.varnode_flags.written);
             if (f1 != f2) return false;
-            if (f1 == Varnode::written)
+            if (f1 == Varnode.varnode_flags.written)
                 if (def.getSeqNum() != op2.def.getSeqNum()) return false;
 
             return true;
@@ -796,9 +796,9 @@ namespace Sla.DECCORE
         /// Delete the Varnode object. This routine assumes all other cross-references have been removed.
         ~Varnode()
         {
-            if (cover != (Cover*)0)
+            if (cover != (Cover)null)
                 delete cover;
-            if (high != (HighVariable*)0)
+            if (high != (HighVariable)null)
             {
                 high.remove(this);
                 if (high.isUnattached())
@@ -999,11 +999,11 @@ namespace Sla.DECCORE
             else
                 printRaw(s);
 
-            if ((flags & Varnode::input) != 0)
+            if ((flags & Varnode.varnode_flags.input) != 0)
                 s << " Input";
-            if ((flags & Varnode::constant) != 0)
+            if ((flags & Varnode.varnode_flags.constant) != 0)
                 s << " Constant";
-            if ((flags & Varnode::annotation) != 0)
+            if ((flags & Varnode.varnode_flags.annotation) != 0)
                 s << " Code";
 
             if (def != (PcodeOp)null)
@@ -1017,25 +1017,25 @@ namespace Sla.DECCORE
         }
 
         /// Is \b this an annotation?
-        public bool isAnnotation() => ((flags & Varnode::annotation) != 0);
+        public bool isAnnotation() => ((flags & Varnode.varnode_flags.annotation) != 0);
 
         /// Is \b this an implied variable?
-        public bool isImplied() => ((flags & Varnode::implied) != 0);
+        public bool isImplied() => ((flags & Varnode.varnode_flags.implied) != 0);
 
         /// Is \b this an explicitly printed variable?
         public bool isExplicit() => ((flags & Varnode::explict) != 0);
 
         /// Is \b this a constant?
-        public bool isConstant() => ((flags & Varnode::constant) != 0);
+        public bool isConstant() => ((flags & Varnode.varnode_flags.constant) != 0);
 
         /// Is \b this free, not in SSA form?
-        public bool isFree() => ((flags & (Varnode::written | Varnode::input)) == 0);
+        public bool isFree() => ((flags & (Varnode.varnode_flags.written | Varnode.varnode_flags.input)) == 0);
 
         /// Is \b this an SSA input node?
-        public bool isInput() => ((flags & Varnode::input) != 0);
+        public bool isInput() => ((flags & Varnode.varnode_flags.input) != 0);
 
         /// Is \b this an abnormal input to the function?
-        public bool isIllegalInput() => ((flags & (Varnode::input | Varnode::directwrite)) == Varnode::input);
+        public bool isIllegalInput() => ((flags & (Varnode.varnode_flags.input | Varnode::directwrite)) == Varnode.varnode_flags.input);
 
         /// Is \b this read only by INDIRECT operations?
         public bool isIndirectOnly() => ((flags & Varnode::indirectonly) != 0);
@@ -1053,13 +1053,13 @@ namespace Sla.DECCORE
         public bool isVolatile() => ((flags & Varnode::volatil) != 0);
 
         /// Does \b this storage location persist beyond the end of the function?
-        public bool isPersist() => ((flags & Varnode::persist) != 0);
+        public bool isPersist() => ((flags & Varnode.varnode_flags.persist) != 0);
 
         /// Is \b this value affected by a legitimate function input
         public bool isDirectWrite() => ((flags & Varnode::directwrite) != 0);
 
         /// Are all Varnodes at this storage location components of the same high-level variable?
-        public bool isAddrTied() => ((flags & (Varnode::addrtied | Varnode::insert)) == (Varnode::addrtied | Varnode::insert));
+        public bool isAddrTied() => ((flags & (Varnode.varnode_flags.addrtied | Varnode.varnode_flags.insert)) == (Varnode.varnode_flags.addrtied | Varnode.varnode_flags.insert));
 
         /// Is \b this value forced into a particular storage location?
         public bool isAddrForce() => ((flags & Varnode::addrforce) != 0);
@@ -1071,19 +1071,19 @@ namespace Sla.DECCORE
         public bool isAutoLiveHold() => ((flags & Varnode::autolive_hold) != 0);
 
         /// Is there or should be formal symbol information associated with \b this?
-        public bool isMapped() => ((flags & Varnode::mapped) != 0);
+        public bool isMapped() => ((flags & Varnode.varnode_flags.mapped) != 0);
 
         /// Is \b this a value that is supposed to be preserved across the function?
-        public bool isUnaffected() => ((flags & Varnode::unaffected) != 0);
+        public bool isUnaffected() => ((flags & Varnode.varnode_flags.unaffected) != 0);
 
         /// Is this location used to store the base point for a virtual address space?
-        public bool isSpacebase() => ((flags & Varnode::spacebase) != 0);
+        public bool isSpacebase() => ((flags & Varnode.varnode_flags.spacebase) != 0);
 
         /// Is this storage for a calls return address?
         public bool isReturnAddress() => ((flags & Varnode::return_address) != 0);
 
         /// Is \b this getting pieced together into a larger whole
-        public bool isProtoPartial() => ((flags & Varnode::proto_partial) != 0);
+        public bool isProtoPartial() => ((flags & Varnode.varnode_flags.proto_partial) != 0);
 
         /// Has \b this been checked as a constant pointer to a mapped symbol?
         public bool isPtrCheck() => ((addlflags & Varnode::ptrcheck) != 0);
@@ -1098,7 +1098,7 @@ namespace Sla.DECCORE
         public bool hasNoLocalAlias() => ((flags & Varnode::nolocalalias) != 0);
 
         /// Has \b this been visited by the current algorithm?
-        public bool isMark() => ((flags & Varnode::mark) != 0);
+        public bool isMark() => ((flags & Varnode.varnode_flags.mark) != 0);
 
         /// Is \b this currently being traced by the Heritage algorithm?
         public bool isActiveHeritage() => ((addlflags & Varnode::activeheritage) != 0);
@@ -1116,10 +1116,10 @@ namespace Sla.DECCORE
         public bool hasImpliedField() => ((addlflags & Varnode::has_implied_field) != 0);
 
         /// Is \b this just a special placeholder representing INDIRECT creation?
-        public bool isIndirectZero() => ((flags & (Varnode::indirect_creation | Varnode::constant)) == (Varnode::indirect_creation | Varnode::constant));
+        public bool isIndirectZero() => ((flags & (Varnode.varnode_flags.indirect_creation | Varnode.varnode_flags.constant)) == (Varnode.varnode_flags.indirect_creation | Varnode.varnode_flags.constant));
 
         /// Is this Varnode \b created indirectly by a CALL operation?
-        public bool isExtraOut() => ((flags & (Varnode::indirect_creation | Varnode::addrtied)) == Varnode::indirect_creation);
+        public bool isExtraOut() => ((flags & (Varnode.varnode_flags.indirect_creation | Varnode.varnode_flags.addrtied)) == Varnode.varnode_flags.indirect_creation);
 
         /// Is \b this the low portion of a double precision value?
         public bool isPrecisLo() => ((flags & Varnode::precislo) != 0);
@@ -1140,10 +1140,10 @@ namespace Sla.DECCORE
         public bool isLongPrint() => ((addlflags & Varnode::longprint) != 0);
 
         /// Does \b this have a defining write operation?
-        public bool isWritten() => ((flags & Varnode::written) != 0);
+        public bool isWritten() => ((flags & Varnode.varnode_flags.written) != 0);
 
         /// Does \b this have Cover information?
-        public bool hasCover() => ((flags & (Varnode::constant | Varnode::annotation | Varnode::insert)) == Varnode::insert);
+        public bool hasCover() => ((flags & (Varnode.varnode_flags.constant | Varnode.varnode_flags.annotation | Varnode.varnode_flags.insert)) == Varnode.varnode_flags.insert);
 
         /// Return \b true if nothing reads this Varnode
         public bool hasNoDescend() => descend.empty();
@@ -1194,13 +1194,13 @@ namespace Sla.DECCORE
         }
 
         /// Return \b true if this Varnode is linked into the SSA tree
-        public bool isHeritageKnown() => ((flags & (Varnode::insert | Varnode::constant | Varnode::annotation)) != 0);
+        public bool isHeritageKnown() => ((flags & (Varnode.varnode_flags.insert | Varnode.varnode_flags.constant | Varnode.varnode_flags.annotation)) != 0);
 
         /// Does \b this have a locked Datatype?
-        public bool isTypeLock() => ((flags & Varnode::typelock) != 0);
+        public bool isTypeLock() => ((flags & Varnode.varnode_flags.typelock) != 0);
 
         /// Does \b this have a locked name?
-        public bool isNameLock() => ((flags & Varnode::namelock) != 0);
+        public bool isNameLock() => ((flags & Varnode.varnode_flags.namelock) != 0);
 
         /// Mark \b this as currently being linked into the SSA tree
         public void setActiveHeritage()
@@ -1217,13 +1217,13 @@ namespace Sla.DECCORE
         /// Mark this Varnode for breadcrumb algorithms
         public void setMark()
         {
-            flags |= Varnode::mark;
+            flags |= Varnode.varnode_flags.mark;
         }
 
         /// Clear the mark on this Varnode
         public void clearMark() 
         {
-            flags &= ~Varnode::mark;
+            flags &= ~Varnode.varnode_flags.mark;
         }
 
         /// Mark \b this as directly affected by a legal input
@@ -1253,13 +1253,13 @@ namespace Sla.DECCORE
         /// Mark \b this as an \e implied variable in the final C source
         public void setImplied()
         {
-            setFlags(Varnode::implied);
+            setFlags(Varnode.varnode_flags.implied);
         }
 
         /// Clear the \e implied mark on this Varnode
         public void clearImplied()
         {
-            clearFlags(Varnode::implied);
+            clearFlags(Varnode.varnode_flags.implied);
         }
 
         /// Mark \b this as an \e explicit variable in the final C source
@@ -1373,13 +1373,13 @@ namespace Sla.DECCORE
         /// Mark \b this gets pieced into larger structure
         public void setProtoPartial()
         {
-            flags |= Varnode::proto_partial;
+            flags |= Varnode.varnode_flags.proto_partial;
         }
 
         /// Clear mark indicating \b this gets pieced into larger structure
         public void clearProtoPartial()
         {
-            flags &= ~Varnode::proto_partial;
+            flags &= ~Varnode.varnode_flags.proto_partial;
         }
 
         /// Force \b this to be printed as unsigned
@@ -1428,11 +1428,11 @@ namespace Sla.DECCORE
 
             if (isTypeLock() && (!@override)) return false; // Type is locked
             if ((type == ct) && (isTypeLock() == @lock)) return false; // No change
-            flags &= ~Varnode::typelock;
+            flags &= ~Varnode.varnode_flags.typelock;
             if (@lock)
-                flags |= Varnode::typelock;
+                flags |= Varnode.varnode_flags.typelock;
             type = ct;
-            if (high != (HighVariable*)0)
+            if (high != (HighVariable)null)
                 high.typeDirty();
             return true;
         }
@@ -1456,12 +1456,12 @@ namespace Sla.DECCORE
         {
             type = vn.type;        // Copy any type
             mapentry = vn.mapentry;    // Copy any symbol
-            flags &= ~(Varnode::typelock | Varnode::namelock);
-            flags |= (Varnode::typelock | Varnode::namelock) & vn.flags;
-            if (high != (HighVariable*)0)
+            flags &= ~(Varnode.varnode_flags.typelock | Varnode.varnode_flags.namelock);
+            flags |= (Varnode.varnode_flags.typelock | Varnode.varnode_flags.namelock) & vn.flags;
+            if (high != (HighVariable)null)
             {
                 high.typeDirty();
-                if (mapentry != (SymbolEntry*)0)
+                if (mapentry != (SymbolEntry)null)
                     high.setSymbol(this);
             }
         }
@@ -1473,7 +1473,7 @@ namespace Sla.DECCORE
         public void copySymbolIfValid(Varnode vn)
         {
             SymbolEntry* mapEntry = vn.getSymbolEntry();
-            if (mapEntry == (SymbolEntry*)0)
+            if (mapEntry == (SymbolEntry)null)
                 return;
             EquateSymbol* sym = dynamic_cast<EquateSymbol*>(mapEntry.getSymbol());
             if (sym == (EquateSymbol*)0)
@@ -1731,7 +1731,7 @@ namespace Sla.DECCORE
         public Datatype getStructuredType()
         {
             Datatype* ct;
-            if (mapentry != (SymbolEntry*)0)
+            if (mapentry != (SymbolEntry)null)
                 ct = mapentry.getSymbol().getType();
             else
                 ct = type;

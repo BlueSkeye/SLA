@@ -20,7 +20,7 @@ namespace Sla.DECCORE
         
         public ParameterSymbol()
         {
-            sym = (Symbol*)0;
+            sym = (Symbol)null;
         }
 
         public override string getName() => sym.getName();
@@ -48,9 +48,9 @@ namespace Sla.DECCORE
         public override void setTypeLock(bool val)
         {
             Scope* scope = sym.getScope();
-            uint attrs = Varnode::typelock;
+            uint attrs = Varnode.varnode_flags.typelock;
             if (!sym.isNameUndefined())
-                attrs |= Varnode::namelock;
+                attrs |= Varnode.varnode_flags.namelock;
             if (val)
                 scope.setAttribute(sym, attrs);
             else
@@ -61,9 +61,9 @@ namespace Sla.DECCORE
         {
             Scope* scope = sym.getScope();
             if (val)
-                scope.setAttribute(sym, Varnode::namelock);
+                scope.setAttribute(sym, Varnode.varnode_flags.namelock);
             else
-                scope.clearAttribute(sym, Varnode::namelock);
+                scope.clearAttribute(sym, Varnode.varnode_flags.namelock);
         }
 
         public override void setThisPointer(bool val)

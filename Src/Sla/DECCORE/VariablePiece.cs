@@ -35,12 +35,12 @@ namespace Sla.DECCORE
         /// \param h is the given HighVariable to treat as a piece
         /// \param offset is the byte offset of the piece within the whole
         /// \param grp is another HighVariable in the whole, or null if \b this is the first piece
-        public VariablePiece(HighVariable h, int offset, HighVariable grp = (HighVariable*)0)
+        public VariablePiece(HighVariable h, int offset, HighVariable grp = (HighVariable)null)
         {
             high = h;
             groupOffset = offset;
             size = h.getInstance(0).getSize();
-            if (grp != (HighVariable*)0)
+            if (grp != (HighVariable)null)
                 group = grp.piece.getGroup();
             else
                 group = new VariableGroup();
@@ -179,7 +179,7 @@ namespace Sla.DECCORE
                 {
                     mergePairs.Add((*matchiter).high);
                     mergePairs.Add(piece.high);
-                    piece.high.piece = (VariablePiece*)0; // Detach HighVariable from its original VariablePiece
+                    piece.high.piece = (VariablePiece)null; // Detach HighVariable from its original VariablePiece
                     delete piece;
                 }
                 else

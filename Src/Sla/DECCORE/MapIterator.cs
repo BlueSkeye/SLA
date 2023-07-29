@@ -60,7 +60,7 @@ namespace Sla.DECCORE
                 do
                 {
                     ++curmap;
-                } while ((curmap != map.end()) && ((*curmap) == (EntryMap*)0));
+                } while ((curmap != map.end()) && ((*curmap) == (EntryMap)null));
                 if (curmap != map.end())
                     curiter = (*curmap).begin_list();
             }
@@ -80,7 +80,7 @@ namespace Sla.DECCORE
                 do
                 {
                     ++curmap;
-                } while ((curmap != map.end()) && ((*curmap) == (EntryMap*)0));
+                } while ((curmap != map.end()) && ((*curmap) == (EntryMap)null));
                 if (curmap != map.end())
                     curiter = (*curmap).begin_list();
             }

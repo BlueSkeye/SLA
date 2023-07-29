@@ -79,7 +79,7 @@ namespace Sla.DECCORE
 
         ~OptionDatabase()
         {
-            map<uint, ArchOption*>::iterator iter;
+            Dictionary<uint, ArchOption*>::iterator iter;
             for (iter = optionmap.begin(); iter != optionmap.end(); ++iter)
                 delete(*iter).second;
         }
@@ -93,7 +93,7 @@ namespace Sla.DECCORE
         /// \return the confirmation/failure method after trying to apply the option
         public string set(uint nameId, string p1="", string p2="", string p3="")
         {
-            map<uint, ArchOption*>::const_iterator iter;
+            Dictionary<uint, ArchOption*>::const_iterator iter;
             iter = optionmap.find(nameId);
             if (iter == optionmap.end())
                 throw ParseError("Unknown option");

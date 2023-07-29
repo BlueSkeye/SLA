@@ -50,7 +50,7 @@ namespace Sla.DECCORE
         private bool adjustFit(RangeHint a)
         {
             if (a.size == 0) return false;  // Nothing to fit
-            if ((a.flags & Varnode::typelock) != 0) return false; // Already entered
+            if ((a.flags & Varnode.varnode_flags.typelock) != 0) return false; // Already entered
             Address addr(space, a.start);
             ulong maxsize = getRangeTree().longestFit(addr, a.size);
             if (maxsize == 0) return false;
@@ -61,7 +61,7 @@ namespace Sla.DECCORE
             }
             // We want ANY symbol that might be within this range
             SymbolEntry* entry = findOverlap(addr, a.size);
-            if (entry == (SymbolEntry*)0)
+            if (entry == (SymbolEntry)null)
                 return true;
             if (entry.getAddr() <= addr)
             {
@@ -143,7 +143,7 @@ namespace Sla.DECCORE
         private void markUnaliased(List<ulong> alias)
         {
             EntryMap* rangemap = maptable[space.getIndex()];
-            if (rangemap == (EntryMap*)0) return;
+            if (rangemap == (EntryMap)null) return;
             list<SymbolEntry>::iterator iter, enditer;
             set<Range>::const_iterator rangeIter, rangeEndIter;
             rangeIter = getRangeTree().begin();
@@ -211,8 +211,8 @@ namespace Sla.DECCORE
             int lockedinputs = getCategorySize(Symbol::function_parameter);
             VarnodeDefSet::const_iterator iter, enditer;
 
-            iter = fd.beginDef(Varnode::input);
-            enditer = fd.endDef(Varnode::input);
+            iter = fd.beginDef(Varnode.varnode_flags.input);
+            enditer = fd.endDef(Varnode.varnode_flags.input);
 
             while (iter != enditer)
             {
@@ -248,7 +248,7 @@ namespace Sla.DECCORE
                     {
                         uint vflags = 0;
                         SymbolEntry* entry = queryProperties(vn.getAddr(), vn.getSize(), usepoint, vflags);
-                        if (entry != (SymbolEntry*)0)
+                        if (entry != (SymbolEntry)null)
                         {
                             if (entry.getSymbol().getCategory() == Symbol::function_parameter)
                                 continue;       // Found a matching symbol
@@ -277,7 +277,7 @@ namespace Sla.DECCORE
         private void addRecommendName(Symbol sym)
         {
             SymbolEntry* entry = sym.getFirstWholeMap();
-            if (entry == (SymbolEntry*)0) return;
+            if (entry == (SymbolEntry)null) return;
             if (entry.isDynamic())
             {
                 dynRecommend.emplace_back(entry.getFirstUseAddress(), entry.getHash(), sym.getName(), sym.getId());
@@ -431,10 +431,10 @@ namespace Sla.DECCORE
             Address addr(space, first);
             // Remove any symbols under range
             SymbolEntry* overlap = findOverlap(addr, sz);
-            while (overlap != (SymbolEntry*)0)
+            while (overlap != (SymbolEntry)null)
             { // For every overlapping entry
                 Symbol* sym = overlap.getSymbol();
-                if ((sym.getFlags() & Varnode::typelock) != 0)
+                if ((sym.getFlags() & Varnode.varnode_flags.typelock) != 0)
                 {
                     // If the symbol and the use are both as parameters
                     // this is likely the special case of a shared return call sharing the parameter location
@@ -475,7 +475,7 @@ namespace Sla.DECCORE
 
         public override string buildVariableName(Address addr, Address pc, Datatype ct, int index, uint flags)
         {
-            if (((flags & (Varnode::addrtied | Varnode::persist)) == Varnode::addrtied) &&
+            if (((flags & (Varnode.varnode_flags.addrtied | Varnode.varnode_flags.persist)) == Varnode.varnode_flags.addrtied) &&
                 addr.getSpace() == space)
             {
                 if (fd.getFuncProto().getLocalRange().inRange(addr, 1))
@@ -627,7 +627,7 @@ namespace Sla.DECCORE
             RangeList rnglist;
             if (!usepoint.isInvalid())
                 rnglist.insertRange(usepoint.getSpace(), usepoint.getOffset(), usepoint.getOffset());
-            return addMapInternal(sym, Varnode::mapped, addr, 0, size, rnglist);
+            return addMapInternal(sym, Varnode.varnode_flags.mapped, addr, 0, size, rnglist);
         }
 
         /// \brief Make the primary mapping for the given Symbol, dynamic
@@ -651,7 +651,7 @@ namespace Sla.DECCORE
             RangeList rnglist;
             if (!usepoint.isInvalid())
                 rnglist.insertRange(usepoint.getSpace(), usepoint.getOffset(), usepoint.getOffset());
-            return addDynamicMapInternal(sym, Varnode::mapped, hash, 0, size, rnglist);
+            return addDynamicMapInternal(sym, Varnode.varnode_flags.mapped, hash, 0, size, rnglist);
         }
 
         /// \brief Run through name recommendations, checking if any match unnamed symbols
@@ -674,11 +674,11 @@ namespace Sla.DECCORE
                 if (usepoint.isInvalid())
                 {
                     SymbolEntry* entry = findOverlap(addr, size);   // Recover any Symbol regardless of usepoint
-                    if (entry == (SymbolEntry*)0) continue;
+                    if (entry == (SymbolEntry)null) continue;
                     if (entry.getAddr() != addr)       // Make sure Symbol has matching address
                         continue;
                     sym = entry.getSymbol();
-                    if ((sym.getFlags() & Varnode::addrtied) == 0)
+                    if ((sym.getFlags() & Varnode.varnode_flags.addrtied) == 0)
                         continue;               // Symbol must be address tied to match this name recommendation
                     vn = fd.findLinkedVarnode(entry);
                 }
@@ -690,8 +690,8 @@ namespace Sla.DECCORE
                         vn = fd.findVarnodeWritten(size, addr, usepoint);
                     if (vn == (Varnode)null) continue;
                     sym = vn.getHigh().getSymbol();
-                    if (sym == (Symbol*)0) continue;
-                    if ((sym.getFlags() & Varnode::addrtied) != 0)
+                    if (sym == (Symbol)null) continue;
+                    if ((sym.getFlags() & Varnode.varnode_flags.addrtied) != 0)
                         continue;               // Cannot use untied varnode as primary map for address tied symbol
                     SymbolEntry* entry = sym.getFirstWholeMap();
                     // entry.getAddr() does not need to match address of the recommendation
@@ -700,7 +700,7 @@ namespace Sla.DECCORE
                 if (!sym.isNameUndefined()) continue;
                 renameSymbol(sym, makeNameUnique((*iter).getName()));
                 setSymbolId(sym, (*iter).getSymbolId());
-                setAttribute(sym, Varnode::namelock);
+                setAttribute(sym, Varnode.varnode_flags.namelock);
                 if (vn != (Varnode)null)
                 {
                     fd.remapVarnode(vn, sym, usepoint);
@@ -719,11 +719,11 @@ namespace Sla.DECCORE
                 if (vn == (Varnode)null) continue;
                 if (vn.isAnnotation()) continue;
                 Symbol* sym = vn.getHigh().getSymbol();
-                if (sym == (Symbol*)0) continue;
+                if (sym == (Symbol)null) continue;
                 if (sym.getScope() != this) continue;
                 if (!sym.isNameUndefined()) continue;
                 renameSymbol(sym, makeNameUnique(dynEntry.getName()));
-                setAttribute(sym, Varnode::namelock);
+                setAttribute(sym, Varnode.varnode_flags.namelock);
                 setSymbolId(sym, dynEntry.getSymbolId());
                 fd.remapDynamicVarnode(vn, sym, dynEntry.getAddress(), dynEntry.getHash());
             }

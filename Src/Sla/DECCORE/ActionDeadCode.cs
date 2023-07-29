@@ -57,7 +57,7 @@ namespace Sla.DECCORE
         /// \param worklist is the current stack of dirty Varnodes
         private static void propagateConsumed(List<Varnode> worklist)
         {
-            Varnode* vn = worklist.back();
+            Varnode* vn = worklist.GetLastItem();
             worklist.pop_back();
             ulong outc = vn.getConsume();
             vn.clearConsumeList();

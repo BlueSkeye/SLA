@@ -31,7 +31,7 @@ namespace Sla.DECCORE
             VarnodeDefSet::const_iterator iter, enditer;
             HighVariable* high;
 
-            enditer = data.endDef(Varnode::written);
+            enditer = data.endDef(Varnode.varnode_flags.written);
             for (iter = data.beginDef(); iter != enditer; ++iter)
             {
                 high = (*iter).getHigh();

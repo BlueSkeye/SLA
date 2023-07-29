@@ -134,7 +134,7 @@ namespace Sla.DECCORE
             }
             else
             {
-                if (vn.isTypeLock()) return (SymbolEntry*)0; // Locked as NOT a pointer
+                if (vn.isTypeLock()) return (SymbolEntry)null; // Locked as NOT a pointer
                 needexacthit = true;
                 // Check if the constant is involved in a potential pointer expression
                 // as the base
@@ -145,9 +145,9 @@ namespace Sla.DECCORE
                     case CPUI_CALLIND:
                         // A constant parameter or return value could be a pointer
                         if (!glb.infer_pointers)
-                            return (SymbolEntry*)0;
+                            return (SymbolEntry)null;
                         if (slot == 0)
-                            return (SymbolEntry*)0;
+                            return (SymbolEntry)null;
                         break;
                     case CPUI_PIECE:
                     // Pointers get concatenated in structures
@@ -164,36 +164,36 @@ namespace Sla.DECCORE
                         {
                             // Is there another pointer base in this expression
                             if (op.getIn(1 - slot).getTypeReadFacing(op).getMetatype() == TYPE_PTR)
-                                return (SymbolEntry*)0; // If so, we are not a pointer
+                                return (SymbolEntry)null; // If so, we are not a pointer
                                                         // FIXME: need to fully explore additive tree
                             needexacthit = false;
                         }
                         else if (!glb.infer_pointers)
-                            return (SymbolEntry*)0;
+                            return (SymbolEntry)null;
                         break;
                     case CPUI_STORE:
                         if (slot != 2)
-                            return (SymbolEntry*)0;
+                            return (SymbolEntry)null;
                         break;
                     default:
-                        return (SymbolEntry*)0;
+                        return (SymbolEntry)null;
                 }
                 // Make sure the constant is in the expected range for a pointer
                 if (spc.getPointerLowerBound() > vn.getOffset())
-                    return (SymbolEntry*)0;
+                    return (SymbolEntry)null;
                 if (spc.getPointerUpperBound() < vn.getOffset())
-                    return (SymbolEntry*)0;
+                    return (SymbolEntry)null;
                 // Check if the constant looks like a single bit or mask
                 if (bit_transitions(vn.getOffset(), vn.getSize()) < 3)
-                    return (SymbolEntry*)0;
+                    return (SymbolEntry)null;
                 rampoint = glb.resolveConstant(spc, vn.getOffset(), vn.getSize(), op.getAddr(), fullEncoding);
             }
 
-            if (rampoint.isInvalid()) return (SymbolEntry*)0;
+            if (rampoint.isInvalid()) return (SymbolEntry)null;
             // Since we are looking for a global address
             // Assume it is address tied and use empty usepoint
             SymbolEntry* entry = data.getScopeLocal().getParent().queryContainer(rampoint, 1, Address());
-            if (entry != (SymbolEntry*)0)
+            if (entry != (SymbolEntry)null)
             {
                 Datatype* ptrType = entry.getSymbol().getType();
                 if (ptrType.getMetatype() == TYPE_ARRAY)
@@ -205,7 +205,7 @@ namespace Sla.DECCORE
                         needexacthit = false;
                 }
                 if (needexacthit && entry.getAddr() != rampoint)
-                    return (SymbolEntry*)0;
+                    return (SymbolEntry)null;
             }
             return entry;
         }
@@ -269,7 +269,7 @@ namespace Sla.DECCORE
                 ulong fullEncoding;
                 entry = isPointer(rspc, vn, op, slot, rampoint, fullEncoding, data);
                 vn.setPtrCheck();      // Set check flag AFTER searching for symbol
-                if (entry != (SymbolEntry*)0)
+                if (entry != (SymbolEntry)null)
                 {
                     data.spacebaseConstant(op, slot, entry, rampoint, fullEncoding, vn.getSize());
                     if ((opc == CPUI_INT_ADD) && (slot == 1))

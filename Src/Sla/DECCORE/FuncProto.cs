@@ -1634,7 +1634,7 @@ namespace Sla.DECCORE
                     while (decoder.peekElement() != 0)
                     {
                         effectlist.emplace_back();
-                        effectlist.back().decode(EffectRecord::unaffected, decoder);
+                        effectlist.GetLastItem().decode(EffectRecord::unaffected, decoder);
                     }
                     decoder.closeElement(subId);
                 }
@@ -1644,7 +1644,7 @@ namespace Sla.DECCORE
                     while (decoder.peekElement() != 0)
                     {
                         effectlist.emplace_back();
-                        effectlist.back().decode(EffectRecord::killedbycall, decoder);
+                        effectlist.GetLastItem().decode(EffectRecord::killedbycall, decoder);
                     }
                     decoder.closeElement(subId);
                 }
@@ -1654,7 +1654,7 @@ namespace Sla.DECCORE
                     while (decoder.peekElement() != 0)
                     {
                         effectlist.emplace_back();
-                        effectlist.back().decode(EffectRecord::return_address, decoder);
+                        effectlist.GetLastItem().decode(EffectRecord::return_address, decoder);
                     }
                     decoder.closeElement(subId);
                 }
@@ -1664,7 +1664,7 @@ namespace Sla.DECCORE
                     while (decoder.peekElement() != 0)
                     {
                         likelytrash.emplace_back();
-                        likelytrash.back().decode(decoder);
+                        likelytrash.GetLastItem().decode(decoder);
                     }
                     decoder.closeElement(subId);
                 }

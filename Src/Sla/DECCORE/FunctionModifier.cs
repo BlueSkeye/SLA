@@ -71,7 +71,7 @@ namespace Sla.DECCORE
 
             // Varargs is encoded as extra null pointer in paramlist
             bool dotdotdot = false;
-            if ((!paramlist.empty()) && (paramlist.back() == (TypeDeclarator*)0))
+            if ((!paramlist.empty()) && (paramlist.GetLastItem() == (TypeDeclarator*)0))
             {
                 dotdotdot = true;
             }

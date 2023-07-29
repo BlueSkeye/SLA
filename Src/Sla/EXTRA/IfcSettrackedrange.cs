@@ -37,8 +37,8 @@ namespace Sla.EXTRA
             {       // No range indicates default value
                 TrackedSet & track(dcp.conf.context.getTrackedDefault());
                 track.Add(TrackedContext());
-                track.back().loc = dcp.conf.translate.getRegister(name);
-                track.back().val = value;
+                track.GetLastItem().loc = dcp.conf.translate.getRegister(name);
+                track.GetLastItem().val = value;
                 return;
             }
 
@@ -55,8 +55,8 @@ namespace Sla.EXTRA
             TrackedSet & def(dcp.conf.context.getTrackedDefault());
             track = def;            // Start with default as base
             track.Add(TrackedContext());
-            track.back().loc = dcp.conf.translate.getRegister(name);
-            track.back().val = value;
+            track.GetLastItem().loc = dcp.conf.translate.getRegister(name);
+            track.GetLastItem().val = value;
         }
     }
 }

@@ -22,7 +22,7 @@ namespace Sla.EXTRA
             vn = dcp.readVarnode(s);
             if (vn == (Varnode)null)
                 throw new IfaceParseError("Unknown varnode");
-            if (vn.getHigh() != (HighVariable*)0)
+            if (vn.getHigh() != (HighVariable)null)
                 vn.getHigh().printCover(*status.optr);
             else
                 *status.optr << "Unmerged" << endl;

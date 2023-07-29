@@ -129,7 +129,7 @@ namespace Sla.DECCORE
                     if (sym.category > 0)
                         sym.catindex = list.size();
                     while (list.size() <= sym.catindex)
-                        list.Add((Symbol*)0);
+                        list.Add((Symbol)null);
                     list[sym.catindex] = sym;
                 }
             }
@@ -145,7 +145,7 @@ namespace Sla.DECCORE
             // Find or create the appropriate rangemap
             AddrSpace* spc = addr.getSpace();
             EntryMap* rangemap = maptable[spc.getIndex()];
-            if (rangemap == (EntryMap*)0)
+            if (rangemap == (EntryMap)null)
             {
                 rangemap = new EntryMap();
                 maptable[spc.getIndex()] = rangemap;
@@ -186,7 +186,7 @@ namespace Sla.DECCORE
                 if (sym.wholeCount == 2)
                     multiEntrySet.insert(sym);
             }
-            return &dynamicentry.back();
+            return &dynamicentry.GetLastItem();
         }
 
         /// The set of Symbol objects, sorted by name
@@ -210,7 +210,7 @@ namespace Sla.DECCORE
             : base(id, nm, g, this)
         {
             nextUniqueId = 0;
-            maptable.resize(g.numSpaces(), (EntryMap*)0);
+            maptable.resize(g.numSpaces(), (EntryMap)null);
         }
 
         /// Construct as a cache
@@ -218,7 +218,7 @@ namespace Sla.DECCORE
             : base(id, nm, g, own)
         {
             nextUniqueId = 0;
-            maptable.resize(g.numSpaces(), (EntryMap*)0);
+            maptable.resize(g.numSpaces(), (EntryMap)null);
         }
 
         public override void clear()
@@ -247,7 +247,7 @@ namespace Sla.DECCORE
                 for (int j = 0; j < num; ++j)
                 {
                     Symbol* sym = category[i][j];
-                    if (sym == (Symbol*)0)
+                    if (sym == (Symbol)null)
                     {
                         nullsymbol = true;  // There can be no null symbols
                         break;
@@ -261,7 +261,7 @@ namespace Sla.DECCORE
                     for (int j = 0; j < list.size(); ++j)
                     {
                         Symbol* sym = list[j];
-                        if (sym == (Symbol*)0) continue;
+                        if (sym == (Symbol)null) continue;
                         setCategory(sym, Symbol::no_category, 0);
                     }
                 }
@@ -378,7 +378,7 @@ namespace Sla.DECCORE
 
         public override void adjustCaches()
         {
-            maptable.resize(glb.numSpaces(), (EntryMap*)0);
+            maptable.resize(glb.numSpaces(), (EntryMap)null);
         }
 
         ~ScopeInternal()
@@ -386,7 +386,7 @@ namespace Sla.DECCORE
             List<EntryMap*>::iterator iter1;
 
             for (iter1 = maptable.begin(); iter1 != maptable.end(); ++iter1)
-                if ((*iter1) != (EntryMap*)0)
+                if ((*iter1) != (EntryMap)null)
                     delete* iter1;
 
             SymbolNameTree::iterator iter2;
@@ -400,7 +400,7 @@ namespace Sla.DECCORE
             // The symbols are ordered via their mapping address
             List<EntryMap*>::const_iterator iter;
             iter = maptable.begin();
-            while ((iter != maptable.end()) && ((*iter) == (EntryMap*)0))
+            while ((iter != maptable.end()) && ((*iter) == (EntryMap)null))
                 ++iter;
             list<SymbolEntry>::const_iterator curiter;
             if (iter != maptable.end())
@@ -413,20 +413,20 @@ namespace Sla.DECCORE
                         do
                         {
                             ++iter;
-                        } while ((iter != maptable.end()) && ((*iter) == (EntryMap*)0));
+                        } while ((iter != maptable.end()) && ((*iter) == (EntryMap)null));
                         if (iter != maptable.end())
                             curiter = (*iter).begin_list();
                     }
 
                 }
             }
-            return MapIterator(&maptable, iter, curiter);
+            return new MapIterator(&maptable, iter, curiter);
         }
 
         public override MapIterator end()
         {
-            list<SymbolEntry>::const_iterator curiter;
-            return MapIterator(&maptable, maptable.end(), curiter);
+            IEnumerator<SymbolEntry> curiter;
+            return new MapIterator(&maptable, maptable.end(), curiter);
         }
 
         public override IEnumerator<SymbolEntry> beginDynamic()
@@ -476,8 +476,8 @@ namespace Sla.DECCORE
             if (symbol.category >= 0)
             {
                 List<Symbol*> & list(category[symbol.category]);
-                list[symbol.catindex] = (Symbol*)0;
-                while ((!list.empty()) && (list.back() == (Symbol*)0))
+                list[symbol.catindex] = (Symbol)null;
+                while ((!list.empty()) && (list.GetLastItem() == (Symbol)null))
                     list.pop_back();
             }
             removeSymbolMappings(symbol);
@@ -511,7 +511,7 @@ namespace Sla.DECCORE
             }
             else if (sym.mapentry.size() == 1)
             {
-                list<SymbolEntry>::iterator iter = sym.mapentry.back();
+                list<SymbolEntry>::iterator iter = sym.mapentry.GetLastItem();
                 if ((*iter).isAddrTied())
                 {
                     // Save the starting address of map
@@ -536,7 +536,7 @@ namespace Sla.DECCORE
 
         public override void setAttribute(Symbol sym, uint attr)
         {
-            attr &= (Varnode::typelock | Varnode::namelock | Varnode::@readonly | Varnode::incidental_copy |
+            attr &= (Varnode.varnode_flags.typelock | Varnode.varnode_flags.namelock | Varnode::@readonly | Varnode::incidental_copy |
                  Varnode::nolocalalias | Varnode::volatil | Varnode::indirectstorage | Varnode::hiddenretparm);
             sym.flags |= attr;
             sym.checkSizeTypeLock();
@@ -544,7 +544,7 @@ namespace Sla.DECCORE
 
         public override void clearAttribute(Symbol sym, uint attr)
         {
-            attr &= (Varnode::typelock | Varnode::namelock | Varnode::@readonly | Varnode::incidental_copy |
+            attr &= (Varnode.varnode_flags.typelock | Varnode.varnode_flags.namelock | Varnode::@readonly | Varnode::incidental_copy |
                  Varnode::nolocalalias | Varnode::volatil | Varnode::indirectstorage | Varnode::hiddenretparm);
             sym.flags &= ~attr;
             sym.checkSizeTypeLock();
@@ -558,7 +558,7 @@ namespace Sla.DECCORE
         public override SymbolEntry findAddr(Address addr, Address usepoint)
         {
             EntryMap* rangemap = maptable[addr.getSpace().getIndex()];
-            if (rangemap != (EntryMap*)0)
+            if (rangemap != (EntryMap)null)
             {
                 pair<EntryMap::const_iterator, EntryMap::const_iterator> res;
                 if (usepoint.isInvalid())
@@ -580,14 +580,14 @@ namespace Sla.DECCORE
                     }
                 }
             }
-            return (SymbolEntry*)0;
+            return (SymbolEntry)null;
         }
 
         public override SymbolEntry findContainer(Address addr,int size, Address usepoint)
         {
-            SymbolEntry* bestentry = (SymbolEntry*)0;
+            SymbolEntry* bestentry = (SymbolEntry)null;
             EntryMap* rangemap = maptable[addr.getSpace().getIndex()];
-            if (rangemap != (EntryMap*)0)
+            if (rangemap != (EntryMap)null)
             {
                 pair<EntryMap::const_iterator, EntryMap::const_iterator> res;
                 if (usepoint.isInvalid())
@@ -623,9 +623,9 @@ namespace Sla.DECCORE
 
         public override SymbolEntry findClosestFit(Address addr,int size, Address usepoint)
         {
-            SymbolEntry* bestentry = (SymbolEntry*)0;
+            SymbolEntry* bestentry = (SymbolEntry)null;
             EntryMap* rangemap = maptable[addr.getSpace().getIndex()];
-            if (rangemap != (EntryMap*)0)
+            if (rangemap != (EntryMap)null)
             {
                 pair<EntryMap::const_iterator, EntryMap::const_iterator> res;
                 if (usepoint.isInvalid())
@@ -666,7 +666,7 @@ namespace Sla.DECCORE
         {
             FunctionSymbol* sym;
             EntryMap* rangemap = maptable[addr.getSpace().getIndex()];
-            if (rangemap != (EntryMap*)0)
+            if (rangemap != (EntryMap)null)
             {
                 pair<EntryMap::const_iterator, EntryMap::const_iterator> res;
                 res = rangemap.find(addr.getOffset());
@@ -689,7 +689,7 @@ namespace Sla.DECCORE
         {
             ExternRefSymbol* sym = (ExternRefSymbol*)0;
             EntryMap* rangemap = maptable[addr.getSpace().getIndex()];
-            if (rangemap != (EntryMap*)0)
+            if (rangemap != (EntryMap)null)
             {
                 pair<EntryMap::const_iterator, EntryMap::const_iterator> res;
                 res = rangemap.find(addr.getOffset());
@@ -711,7 +711,7 @@ namespace Sla.DECCORE
         {
             LabSymbol* sym = (LabSymbol*)0;
             EntryMap* rangemap = maptable[addr.getSpace().getIndex()];
-            if (rangemap != (EntryMap*)0)
+            if (rangemap != (EntryMap)null)
             {
                 pair<EntryMap::const_iterator, EntryMap::const_iterator> res;
                 res = rangemap.find(addr.getOffset(),
@@ -737,14 +737,14 @@ namespace Sla.DECCORE
         public override SymbolEntry findOverlap(Address addr,int size)
         {
             EntryMap* rangemap = maptable[addr.getSpace().getIndex()];
-            if (rangemap != (EntryMap*)0)
+            if (rangemap != (EntryMap)null)
             {
                 EntryMap::const_iterator iter;
                 iter = rangemap.find_overlap(addr.getOffset(), addr.getOffset() + size - 1);
                 if (iter != rangemap.end())
                     return &(*iter);
             }
-            return (SymbolEntry*)0;
+            return (SymbolEntry)null;
         }
 
         public override void findByName(string nm,List<Symbol> res)
@@ -784,7 +784,7 @@ namespace Sla.DECCORE
             ostringstream s;
             int sz = (ct == (Datatype)null) ? 1 : ct.getSize();
 
-            if ((flags & Varnode::unaffected) != 0)
+            if ((flags & Varnode.varnode_flags.unaffected) != 0)
             {
                 if ((flags & Varnode::return_address) != 0)
                     s << "unaff_retaddr";
@@ -801,7 +801,7 @@ namespace Sla.DECCORE
                         s << "unaff_" << unaffname;
                 }
             }
-            else if ((flags & Varnode::persist) != 0)
+            else if ((flags & Varnode.varnode_flags.persist) != 0)
             {
                 string spacename;
                 spacename = glb.translate.getRegisterName(addr.getSpace(), addr.getOffset(), sz);
@@ -818,7 +818,7 @@ namespace Sla.DECCORE
                     s << AddrSpace::byteToAddress(addr.getOffset(), addr.getSpace().getWordSize());
                 }
             }
-            else if (((flags & Varnode::input) != 0) && (index < 0))
+            else if (((flags & Varnode.varnode_flags.input) != 0) && (index < 0))
             { // Irregular input
                 string regname;
                 regname = glb.translate.getRegisterName(addr.getSpace(), addr.getOffset(), sz);
@@ -830,11 +830,11 @@ namespace Sla.DECCORE
                 else
                     s << "in_" << regname;
             }
-            else if ((flags & Varnode::input) != 0)
+            else if ((flags & Varnode.varnode_flags.input) != 0)
             { // Regular parameter
                 s << "param_" << dec << index;
             }
-            else if ((flags & Varnode::addrtied) != 0)
+            else if ((flags & Varnode.varnode_flags.addrtied) != 0)
             {
                 if (ct != (Datatype)null)
                     ct.printNameBase(s);
@@ -844,7 +844,7 @@ namespace Sla.DECCORE
                 s << hex << setfill('0') << setw(2 * addr.getAddrSize());
                 s << AddrSpace::byteToAddress(addr.getOffset(), addr.getSpace().getWordSize());
             }
-            else if ((flags & Varnode::indirect_creation) != 0)
+            else if ((flags & Varnode.varnode_flags.indirect_creation) != 0)
             {
                 string regname;
                 s << "extraout_";
@@ -1088,7 +1088,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < maptable.size(); ++i)
             {
                 EntryMap* rangemap = maptable[i];
-                if (rangemap == (EntryMap*)0) continue;
+                if (rangemap == (EntryMap)null) continue;
                 list<SymbolEntry>::const_iterator iter, enditer;
                 iter = rangemap.begin_list();
                 enditer = rangemap.end_list();
@@ -1107,9 +1107,9 @@ namespace Sla.DECCORE
         public override Symbol getCategorySymbol(int cat, int ind)
         {
             if ((cat >= category.size()) || (cat < 0))
-                return (Symbol*)0;
+                return (Symbol)null;
             if ((ind < 0) || (ind >= category[cat].size()))
-                return (Symbol*)0;
+                return (Symbol)null;
             return category[cat][ind];
         }
 
@@ -1118,8 +1118,8 @@ namespace Sla.DECCORE
             if (sym.category >= 0)
             {
                 List<Symbol*> & list(category[sym.category]);
-                list[sym.catindex] = (Symbol*)0;
-                while ((!list.empty()) && (list.back() == (Symbol*)0))
+                list[sym.catindex] = (Symbol)null;
+                while ((!list.empty()) && (list.GetLastItem() == (Symbol)null))
                     list.pop_back();
             }
 
@@ -1130,7 +1130,7 @@ namespace Sla.DECCORE
                 category.Add(List<Symbol*>());
             List<Symbol*> & list(category[sym.category]);
             while (list.size() <= sym.catindex)
-                list.Add((Symbol*)0);
+                list.Add((Symbol)null);
             list[sym.catindex] = sym;
         }
 

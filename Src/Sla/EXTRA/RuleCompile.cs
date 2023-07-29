@@ -75,7 +75,7 @@ namespace Sla.EXTRA
         public int findIdentifier(string nm)
         {
             int resid;
-            map<string, int>::const_iterator iter;
+            Dictionary<string, int>::const_iterator iter;
             iter = namemap.find(*nm);
             if (iter == namemap.end())
             {
@@ -453,7 +453,7 @@ namespace Sla.EXTRA
             {
                 char initc;
                 int id = -1;
-                map<string, int>::const_iterator iter;
+                Dictionary<string, int>::const_iterator iter;
                 if (idlist[i].size() != 0)
                 {
                     initc = idlist[i][0];

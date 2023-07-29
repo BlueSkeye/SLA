@@ -81,9 +81,9 @@ namespace Sla.DECCORE
 
                     ulong val = op.getOpcode().evaluateBinary(c[0].getSize(), c[0].getSize(), c[0].getOffset(), c[1].getOffset());
                     newvn = data.newConstant(c[0].getSize(), val);
-                    if (c[0].getSymbolEntry() != (SymbolEntry*)0)
+                    if (c[0].getSymbolEntry() != (SymbolEntry)null)
                         newvn.copySymbolIfValid(c[0]);
-                    else if (c[1].getSymbolEntry() != (SymbolEntry*)0)
+                    else if (c[1].getSymbolEntry() != (SymbolEntry)null)
                         newvn.copySymbolIfValid(c[1]);
                     PcodeOp* newop = data.newOp(2, op.getAddr());
                     data.opSetOpcode(newop, CPUI_INT_ADD);
@@ -102,9 +102,9 @@ namespace Sla.DECCORE
 
             ulong val = op.getOpcode().evaluateBinary(c[0].getSize(), c[0].getSize(), c[0].getOffset(), c[1].getOffset());
             newvn = data.newConstant(c[0].getSize(), val);
-            if (c[0].getSymbolEntry() != (SymbolEntry*)0)
+            if (c[0].getSymbolEntry() != (SymbolEntry)null)
                 newvn.copySymbolIfValid(c[0]);
-            else if (c[1].getSymbolEntry() != (SymbolEntry*)0)
+            else if (c[1].getSymbolEntry() != (SymbolEntry)null)
                 newvn.copySymbolIfValid(c[1]);
             data.opSetInput(op, newvn, 1); // Replace c[0] with c[0]+c[1] or c[0]*c[1]
             data.opSetInput(op, sub2, 0); // Replace sub with sub2

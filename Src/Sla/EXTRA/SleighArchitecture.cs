@@ -58,7 +58,7 @@ namespace Sla.EXTRA
                 if (subId == ELEM_LANGUAGE)
                 {
                     description.emplace_back();
-                    description.back().decode(decoder);
+                    description.GetLastItem().decode(decoder);
                 }
                 else
                 {
@@ -98,7 +98,7 @@ namespace Sla.EXTRA
 
         protected override Translate buildTranslator(DocumentStorage store)
         {               // Build a sleigh translator
-            map<int, Sleigh*>::const_iterator iter;
+            Dictionary<int, Sleigh*>::const_iterator iter;
             Sleigh* sleigh;
             iter = translators.find(languageindex);
             if (iter != translators.end())
@@ -134,11 +134,11 @@ namespace Sla.EXTRA
                 types.setCoreType("void", 1, TYPE_VOID, false);
                 types.setCoreType("bool", 1, TYPE_BOOL, false);
                 types.setCoreType("byte", 1, TYPE_UINT, false);
-                types.setCoreType("uint2", 2, TYPE_UINT, false);
+                types.setCoreType("ushort", 2, TYPE_UINT, false);
                 types.setCoreType("uint", 4, TYPE_UINT, false);
                 types.setCoreType("ulong", 8, TYPE_UINT, false);
                 types.setCoreType("int1", 1, TYPE_INT, false);
-                types.setCoreType("int2", 2, TYPE_INT, false);
+                types.setCoreType("short", 2, TYPE_INT, false);
                 types.setCoreType("int", 4, TYPE_INT, false);
                 types.setCoreType("long", 8, TYPE_INT, false);
                 types.setCoreType("float4", 4, TYPE_FLOAT, false);
@@ -549,7 +549,7 @@ namespace Sla.EXTRA
         public static void shutdown()
         {
             if (translators.empty()) return;    // Already cleared
-            for (map<int, Sleigh*>::const_iterator iter = translators.begin(); iter != translators.end(); ++iter)
+            for (Dictionary<int, Sleigh*>::const_iterator iter = translators.begin(); iter != translators.end(); ++iter)
                 delete(*iter).second;
             translators.clear();
             // description.clear();  // static List is destroyed by the normal exit handler

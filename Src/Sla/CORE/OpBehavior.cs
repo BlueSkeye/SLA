@@ -17,7 +17,7 @@ namespace Sla.CORE
     /// operate on varnodes (address space, offset, size). Classes derived from
     /// this base class encapsulate this basic behavior for each possible opcode.
     /// These classes describe the most basic behaviors and include:
-    ///    * ulong evaluateBinary(int sizeout,int sizein,ulong in1,ulong int2)
+    ///    * ulong evaluateBinary(int sizeout,int sizein,ulong in1,ulong short)
     ///    * ulong evaluateUnary(int sizeout,int sizein,ulong in1)
     ///    * ulong recoverInputBinary(int slo  t,int sizeout,ulong out,int sizein,ulong in)
     ///    * ulong recoverInputUnary(int sizeout,ulong out,int sizein)

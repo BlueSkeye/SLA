@@ -61,7 +61,7 @@ namespace Sla.SLEIGH
             if (outvn.isUnnamed())
             {
                 delete outvn;
-                op = ops.back();
+                op = ops.GetLastItem();
                 op.clearOutput();
                 op.setOutput(newout);
             }

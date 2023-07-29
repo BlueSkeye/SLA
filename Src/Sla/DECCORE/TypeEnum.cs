@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         /// has those two bits set.  Bit-fields must be a contiguous range of bits.
         protected void setNameMap(Dictionary<ulong, string> nmap)
         {
-            map<ulong, string>::const_iterator iter;
+            Dictionary<ulong, string>::const_iterator iter;
             ulong curmask, lastmask;
             int maxbit;
             int curmaxbit;
@@ -81,7 +81,7 @@ namespace Sla.DECCORE
                 if (fieldisempty)
                 {       // If no value hits this bit
                     if (!masklist.empty())
-                        masklist.back() |= curmask; // Include the bit with the previous mask
+                        masklist.GetLastItem() |= curmask; // Include the bit with the previous mask
                     else
                         masklist.Add(curmask);
                 }
@@ -102,7 +102,7 @@ namespace Sla.DECCORE
             //  uint elemId = decoder.openElement();
             decodeBasic(decoder);
             submeta = (metatype == TYPE_INT) ? SUB_INT_ENUM : SUB_UINT_ENUM;
-            map<ulong, string> nmap;
+            Dictionary<ulong, string> nmap;
 
             for (; ; )
             {
@@ -171,7 +171,7 @@ namespace Sla.DECCORE
         /// \return true if the representation needs to be complemented
         public bool getMatches(ulong val, List<string> matchname)
         {
-            map<ulong, string>::const_iterator iter;
+            Dictionary<ulong, string>::const_iterator iter;
             int count;
 
             for (count = 0; count < 2; ++count)
@@ -221,7 +221,7 @@ namespace Sla.DECCORE
             if (res != 0) return res;
 
             TypeEnum te = (TypeEnum*) &op;
-            map<ulong, string>::const_iterator iter1, iter2;
+            Dictionary<ulong, string>::const_iterator iter1, iter2;
 
             if (namemap.size() != te.namemap.size())
             {
@@ -253,7 +253,7 @@ namespace Sla.DECCORE
             encoder.openElement(ELEM_TYPE);
             encodeBasic(metatype, encoder);
             encoder.writeString(ATTRIB_ENUM, "true");
-            map<ulong, string>::const_iterator iter;
+            Dictionary<ulong, string>::const_iterator iter;
             for (iter = namemap.begin(); iter != namemap.end(); ++iter)
             {
                 encoder.openElement(ELEM_VAL);

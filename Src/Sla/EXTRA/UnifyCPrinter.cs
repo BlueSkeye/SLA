@@ -140,7 +140,7 @@ namespace Sla.EXTRA
 
         public void addNames(Dictionary<string, int> nmmap)
         {
-            map<string, int>::const_iterator iter;
+            Dictionary<string, int>::const_iterator iter;
 
             for (iter = nmmap.begin(); iter != nmmap.end(); ++iter)
             {

@@ -79,7 +79,7 @@ namespace Sla.DECCORE
         {
             encoder.openElement(ELEM_STRINGMANAGE);
 
-            map<Address, StringData>::const_iterator iter1;
+            Dictionary<Address, StringData>::const_iterator iter1;
             for (iter1 = stringMap.begin(); iter1 != stringMap.end(); ++iter1)
             {
                 encoder.openElement(ELEM_STRING);

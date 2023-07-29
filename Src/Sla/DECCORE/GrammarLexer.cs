@@ -308,7 +308,7 @@ namespace Sla.DECCORE
             {
                 token.set(val, buffer + bufstart, (bufend - bufstart) - 1);
             }
-            token.setPosition(filestack.back(), curlineno, bufstart);
+            token.setPosition(filestack.GetLastItem(), curlineno, bufstart);
         }
 
         private void setError(string err)
@@ -367,7 +367,7 @@ namespace Sla.DECCORE
                 endoffile = true;
                 return;
             }
-            int filenum = filestack.back();
+            int filenum = filestack.GetLastItem();
             @in = streammap[filenum];  // Get previous stream
         }
 

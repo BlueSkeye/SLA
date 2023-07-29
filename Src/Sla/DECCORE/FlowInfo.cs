@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -172,7 +173,7 @@ namespace Sla.DECCORE
                     return retop;       // Then this is the fall thru
             }
             // Find address of instruction containing this op
-            map<Address, VisitStat>::const_iterator miter;
+            Dictionary<Address, VisitStat>::const_iterator miter;
             miter = visited.upper_bound(op.getAddr());
             if (miter == visited.begin()) return (PcodeOp)null;
             --miter;
@@ -494,25 +495,25 @@ namespace Sla.DECCORE
 
             for (; ; )
             {
-                curaddr = addrlist.back();
+                curaddr = addrlist.GetLastItem();
                 addrlist.pop_back();
                 fallthruflag = processInstruction(curaddr, startbasic);
                 if (!fallthruflag) break;
                 if (addrlist.empty()) break;
-                if (bound <= addrlist.back())
+                if (bound <= addrlist.GetLastItem())
                 {
                     if (bound == eaddr)
                     {
-                        handleOutOfBounds(eaddr, addrlist.back());
-                        unprocessed.Add(addrlist.back());
+                        handleOutOfBounds(eaddr, addrlist.GetLastItem());
+                        unprocessed.Add(addrlist.GetLastItem());
                         addrlist.pop_back();
                         return;
                     }
-                    if (bound == addrlist.back())
+                    if (bound == addrlist.GetLastItem())
                     { // Hit the bound exactly
                         if (startbasic)
                         {
-                            PcodeOp* op = target(addrlist.back());
+                            PcodeOp* op = target(addrlist.GetLastItem());
                             data.opMarkStartBasic(op);
                         }
                         addrlist.pop_back();
@@ -547,7 +548,7 @@ namespace Sla.DECCORE
             if (retop != (PcodeOp)null)
             {
                 // If the PcodeOp exists here then branch was indeed to next instruction
-                map<Address, VisitStat>::const_iterator miter;
+                Dictionary<Address, VisitStat>::const_iterator miter;
                 miter = visited.upper_bound(retop.getAddr());
                 if (miter != visited.begin())
                 {
@@ -714,9 +715,10 @@ namespace Sla.DECCORE
         /// previously marked as \e start of basic block.
         private void splitBasic()
         {
-            PcodeOp* op;
-            BlockBasic* cur;
-            list<PcodeOp*>::const_iterator iter, iterend;
+            PcodeOp op;
+            BlockBasic cur;
+            IEnumerator<PcodeOp> iter;
+            IEnumerator<PcodeOp> iterend;
 
             iter = obank.beginDead();
             iterend = obank.endDead();
@@ -724,7 +726,7 @@ namespace Sla.DECCORE
             op = *iter++;
             if (!op.isBlockStart())
                 throw new LowlevelError("First op not marked as entry point");
-            cur = bblocks.newBlockBasic(&data);
+            cur = bblocks.newBlockBasic(data);
             data.opInsert(op, cur, cur.endOp());
             bblocks.setStartBlock(cur);
             Address start = op.getAddr();
@@ -735,7 +737,7 @@ namespace Sla.DECCORE
                 if (op.isBlockStart())
                 {
                     data.setBasicBlockRange(cur, start, stop);
-                    cur = bblocks.newBlockBasic(&data); // Set up the next basic block
+                    cur = bblocks.newBlockBasic(data); // Set up the next basic block
                     start = op.getSeqNum().getAddr();
                     stop = start;
                 }
@@ -755,9 +757,12 @@ namespace Sla.DECCORE
         /// previously collected p-code op pairs in \b block_edge1 and \b block_edge2
         private void connectBasic()
         {
-            PcodeOp* op,*targ_op;
-            BlockBasic* bs,*targ_bs;
-            list<PcodeOp*>::const_iterator iter, iter2;
+            PcodeOp op;
+            PcodeOp targ_op;
+            BlockBasic bs;
+            BlockBasic targ_bs;
+            IEnumerator<PcodeOp> iter;
+            IEnumerator<PcodeOp> iter2;
 
             iter = block_edge1.begin();
             iter2 = block_edge2.begin();
@@ -779,8 +784,8 @@ namespace Sla.DECCORE
         /// \return \b false if the address has already been visited
         private bool setFallthruBound(Address bound)
         {
-            map<Address, VisitStat>::const_iterator iter;
-            Address addr = addrlist.back();
+            Dictionary<Address, VisitStat>::const_iterator iter;
+            Address addr = addrlist.GetLastItem();
 
             iter = visited.upper_bound(addr); // First range greater than addr
             if (iter != visited.begin())
@@ -860,7 +865,7 @@ namespace Sla.DECCORE
         /// \param addr is the address of a byte previously interpreted as (the interior of) an instruction
         private void reinterpreted(Address addr)
         {
-            map<Address, VisitStat>::const_iterator iter;
+            Dictionary<Address, VisitStat>::const_iterator iter;
 
             iter = visited.upper_bound(addr);
             if (iter == visited.begin()) return; // Should never happen
@@ -1036,7 +1041,7 @@ namespace Sla.DECCORE
                 obank.markIncidentalCopy(firstop, lastop);
             obank.moveSequenceDead(firstop, lastop, op); // Move the injection to right after the call
 
-            map<Address, VisitStat>::iterator viter = visited.find(op.getAddr());
+            Dictionary<Address, VisitStat>::iterator viter = visited.find(op.getAddr());
             if (viter != visited.end())
             {               // Check if -op- is a possible branch target
                 if ((*viter).second.seqnum == op.getSeqNum())  // (if injection op is the first op for its address)
@@ -1061,17 +1066,17 @@ namespace Sla.DECCORE
             {       // Skip the first operand containing the injectid
                 Varnode* vn = op.getIn(i);
                 icontext.inputlist.emplace_back();
-                icontext.inputlist.back().space = vn.getSpace();
-                icontext.inputlist.back().offset = vn.getOffset();
-                icontext.inputlist.back().size = vn.getSize();
+                icontext.inputlist.GetLastItem().space = vn.getSpace();
+                icontext.inputlist.GetLastItem().offset = vn.getOffset();
+                icontext.inputlist.GetLastItem().size = vn.getSize();
             }
             Varnode* outvn = op.getOut();
             if (outvn != (Varnode)null)
             {
                 icontext.output.emplace_back();
-                icontext.output.back().space = outvn.getSpace();
-                icontext.output.back().offset = outvn.getOffset();
-                icontext.output.back().size = outvn.getSize();
+                icontext.output.GetLastItem().space = outvn.getSpace();
+                icontext.output.GetLastItem().offset = outvn.getOffset();
+                icontext.output.GetLastItem().size = outvn.getSize();
             }
             doInjection(payload, icontext, op, (FuncCallSpecs*)0);
         }
@@ -1118,7 +1123,7 @@ namespace Sla.DECCORE
             // If the injection fills in the -paramshift- field of the context
             // pass this information on to the callspec of the injected call, which must be last in the list
             if (payload.getParamShift() != 0)
-                qlst.back().setParamshift(payload.getParamShift());
+                qlst.GetLastItem().setParamshift(payload.getParamShift());
 
             return true;            // Return true to indicate injection happened and callspec should be deleted
         }
@@ -1139,7 +1144,7 @@ namespace Sla.DECCORE
                 if (op.code() != CPUI_CALL) continue;
 
                 Address addr = fc.getEntryAddress();
-                map<Address, VisitStat>::const_iterator miter;
+                Dictionary<Address, VisitStat>::const_iterator miter;
                 miter = visited.upper_bound(addr);
                 if (miter == visited.begin()) continue;
                 --miter;
@@ -1178,9 +1183,8 @@ namespace Sla.DECCORE
         private void checkMultistageJumptables()
         {
             int num = data.numJumpTables();
-            for (int i = 0; i < num; ++i)
-            {
-                JumpTable* jt = data.getJumpTable(i);
+            for (int i = 0; i < num; ++i) {
+                JumpTable jt = data.getJumpTable(i);
                 if (jt.checkForMultistage(&data))
                     tablelist.Add(jt.getIndirectOp());
             }
@@ -1372,7 +1376,7 @@ namespace Sla.DECCORE
         /// \return the targetted p-code op
         public PcodeOp target(Address addr)
         {
-            map<Address, VisitStat>::const_iterator iter;
+            Dictionary<Address, VisitStat>::const_iterator iter;
 
             iter = visited.find(addr);
             while (iter != visited.end())
@@ -1473,12 +1477,12 @@ namespace Sla.DECCORE
             connectBasic();     // Generate edges between basic blocks
             if (bblocks.getSize() != 0)
             {
-                FlowBlock* startblock = bblocks.getBlock(0);
+                FlowBlock startblock = bblocks.getBlock(0);
                 if (startblock.sizeIn() != 0)
                 { // Make sure the entry block has no incoming edges
 
                     // If it does we create a new entry block that flows into the old entry block
-                    BlockBasic* newfront = bblocks.newBlockBasic(&data);
+                    BlockBasic newfront = bblocks.newBlockBasic(data);
                     bblocks.addEdge(newfront, startblock);
                     bblocks.setStartBlock(newfront);
                     data.setBasicBlockRange(newfront, data.getAddress(), data.getAddress());
@@ -1561,48 +1565,41 @@ namespace Sla.DECCORE
             if (inline_head == (Funcdata)null)
             {
                 // This is the top level of inlining
-                inline_head = &data;    // Set up head of inlining
-                inline_recursion = &inline_base;
+                inline_head = data;    // Set up head of inlining
+                inline_recursion = inline_base;
                 inline_recursion.insert(data.getAddress()); // Insert ourselves
                                                              //    inline_head = (Funcdata *)0;
             }
-            else
-            {
+            else {
                 inline_recursion.insert(data.getAddress()); // Insert ourselves
             }
 
-            for (int i = 0; i < injectlist.size(); ++i)
-            {
+            for (int i = 0; i < injectlist.size(); ++i) {
                 PcodeOp* op = injectlist[i];
                 if (op == (PcodeOp)null) continue;
                 injectlist[i] = (PcodeOp)null;    // Nullify entry, so we don't inject more than once
-                if (op.code() == CPUI_CALLOTHER)
-                {
+                if (op.code() == CPUI_CALLOTHER) {
                     injectUserOp(op);
                 }
-                else
-                {   // CPUI_CALL or CPUI_CALLIND
-                    FuncCallSpecs* fc = FuncCallSpecs::getFspecFromConst(op.getIn(0).getAddr());
-                    if (fc.isInline())
-                    {
-                        if (fc.getInjectId() >= 0)
-                        {
-                            if (injectSubFunction(fc))
-                            {
+                else {
+                    // CPUI_CALL or CPUI_CALLIND
+                    FuncCallSpecs fc = FuncCallSpecs::getFspecFromConst(op.getIn(0).getAddr());
+                    if (fc.isInline()) {
+                        if (fc.getInjectId() >= 0) {
+                            if (injectSubFunction(fc)) {
                                 data.warningHeader("Function: " + fc.getName() + " replaced with injection: " +
                                            glb.pcodeinjectlib.getCallFixupName(fc.getInjectId()));
                                 deleteCallSpec(fc);
                             }
                         }
-                        else if (inlineSubFunction(fc))
-                        {
+                        else if (inlineSubFunction(fc)) {
                             data.warningHeader("Inlined function: " + fc.getName());
                             deleteCallSpec(fc);
                         }
                     }
                 }
             }
-            injectlist.clear();
+            injectlist.Clear();
         }
 
         /// Pull in-lining recursion information from another flow
@@ -1625,16 +1622,15 @@ namespace Sla.DECCORE
         /// \param retaddr is the first address after the call site in \b this flow
         public void inlineClone(FlowInfo inlineflow, Address retaddr)
         {
-            list<PcodeOp*>::const_iterator iter;
+            IEnumerator<PcodeOp> iter;
             for (iter = inlineflow.data.beginOpDead(); iter != inlineflow.data.endOpDead(); ++iter)
             {
-                PcodeOp* op = *iter;
-                PcodeOp* cloneop;
-                if ((op.code() == CPUI_RETURN) && (!retaddr.isInvalid()))
-                {
+                PcodeOp op = *iter;
+                PcodeOp cloneop;
+                if ((op.code() == CPUI_RETURN) && (!retaddr.isInvalid())) {
                     cloneop = data.newOp(1, op.getSeqNum());
                     data.opSetOpcode(cloneop, CPUI_BRANCH);
-                    Varnode* vn = data.newCodeRef(retaddr);
+                    Varnode vn = data.newCodeRef(retaddr);
                     data.opSetInput(cloneop, vn, 0);
                 }
                 else
@@ -1660,12 +1656,12 @@ namespace Sla.DECCORE
         /// \param calladdr is the fixed address assigned to the cloned PcodeOps
         public void inlineEZClone(FlowInfo inlineflow, Address calladdr)
         {
-            list<PcodeOp*>::const_iterator iter;
+            IEnumerator<PcodeOp> iter;
             for (iter = inlineflow.data.beginOpDead(); iter != inlineflow.data.endOpDead(); ++iter)
             {
-                PcodeOp* op = *iter;
+                PcodeOp op = *iter;
                 if (op.code() == CPUI_RETURN) break;
-                SeqNum myseq(calladdr, op.getSeqNum().getTime());
+                SeqNum myseq = new SeqNum(calladdr, op.getSeqNum().getTime());
                 data.cloneOp(op, myseq);
             }
             // Because we are processing only straightline code and it is all getting assigned to one

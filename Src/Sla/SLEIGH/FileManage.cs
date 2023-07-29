@@ -74,7 +74,7 @@ namespace Sla.SLEIGH
             {
                 pathlist.Add(path);
                 if (path[path.size() - 1] != separator)
-                    pathlist.back() += separator;
+                    pathlist.GetLastItem() += separator;
             }
         }
 

@@ -37,7 +37,7 @@ namespace Sla.DECCORE
             }
             if (displayName.size() == 0)
                 displayName = name;
-            flags |= Varnode::externref | Varnode::typelock;
+            flags |= Varnode::externref | Varnode.varnode_flags.typelock;
         }
 
         ~ExternRefSymbol()

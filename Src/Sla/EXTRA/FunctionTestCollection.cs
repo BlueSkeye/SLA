@@ -203,7 +203,7 @@ namespace Sla.EXTRA
                 {
                     sawTests = true;
                     testList.emplace_back();
-                    testList.back().restoreXml(subel);
+                    testList.GetLastItem().restoreXml(subel);
                 }
                 else if (subel.getName() == "binaryimage")
                 {

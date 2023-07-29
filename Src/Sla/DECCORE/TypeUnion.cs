@@ -32,7 +32,7 @@ namespace Sla.DECCORE
             for (iter = fd.begin(); iter != fd.end(); ++iter)
             {
                 field.Add(*iter);
-                int end = field.back().type.getSize();
+                int end = field.GetLastItem().type.getSize();
                 if (end > size)
                     size = end;
             }
@@ -47,10 +47,10 @@ namespace Sla.DECCORE
             while (decoder.peekElement() != 0)
             {
                 field.emplace_back(decoder, typegrp);
-                if (field.back().offset + field.back().type.getSize() > size)
+                if (field.GetLastItem().offset + field.GetLastItem().type.getSize() > size)
                 {
                     ostringstream s;
-                    s << "Field " << field.back().name << " does not fit in union " << name;
+                    s << "Field " << field.GetLastItem().name << " does not fit in union " << name;
                     throw new LowlevelError(s.str());
                 }
             }

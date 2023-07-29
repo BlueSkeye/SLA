@@ -36,7 +36,7 @@ namespace Sla.EXTRA
             if (split == -1)
                 throw new IfaceParseError("Bad split offset");
             dcp.conf.splitrecords.emplace_back();
-            PreferSplitRecord & rec(dcp.conf.splitrecords.back());
+            PreferSplitRecord & rec(dcp.conf.splitrecords.GetLastItem());
 
             rec.storage.space = addr.getSpace();
             rec.storage.offset = addr.getOffset();

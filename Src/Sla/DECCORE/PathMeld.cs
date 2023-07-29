@@ -106,7 +106,7 @@ namespace Sla.DECCORE
             List<RootedOp> newMeld;
             int curRoot = -1;
             int meldPos = 0;               // Ops moved from old opMeld into newMeld
-            BlockBasic lastBlock = (BlockBasic*)0;
+            BlockBasic lastBlock = (BlockBasic)null;
             for (int i = 0; i < cutOff; ++i)
             {
                 PcodeOp* op = path[i].op;           // Current op in the new path
@@ -171,7 +171,7 @@ namespace Sla.DECCORE
         {
             while (opMeld.size() > 1)
             {
-                if (opMeld.back().rootVn < cutPoint)    // If we see op using varnode earlier than cut point
+                if (opMeld.GetLastItem().rootVn < cutPoint)    // If we see op using varnode earlier than cut point
                     break;                  // Keep that and all subsequent ops
                 opMeld.pop_back();              // Otherwise cut the op
             }

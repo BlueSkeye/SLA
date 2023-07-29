@@ -93,7 +93,7 @@ namespace Sla.DECCORE
             gatherBlockVarnodes(b, blk, aCover, blist);
             if (testBlockIntersection(a, blk, bCover, 0, blist))
                 return true;
-            if (a.piece != (VariablePiece*)0)
+            if (a.piece != (VariablePiece)null)
             {
                 int baseOff = a.piece.getOffset();
                 for (int i = 0; i < a.piece.numIntersection(); ++i)
@@ -104,7 +104,7 @@ namespace Sla.DECCORE
                         return true;
                 }
             }
-            if (b.piece != (VariablePiece*)0)
+            if (b.piece != (VariablePiece)null)
             {
                 int bBaseOff = b.piece.getOffset();
                 for (int i = 0; i < b.piece.numIntersection(); ++i)
@@ -115,7 +115,7 @@ namespace Sla.DECCORE
                     gatherBlockVarnodes(bPiece.getHigh(), blk, aCover, blist);
                     if (testBlockIntersection(a, blk, bCover, -bOff, blist))
                         return true;
-                    if (a.piece != (VariablePiece*)0)
+                    if (a.piece != (VariablePiece)null)
                     {
                         int baseOff = a.piece.getOffset();
                         for (int j = 0; j < a.piece.numIntersection(); ++j)
@@ -139,12 +139,12 @@ namespace Sla.DECCORE
         /// \param high is the given HighVariable to purge
         private void purgeHigh(HighVariable high)
         {
-            map<HighEdge, bool>::iterator iterfirst = highedgemap.lower_bound(HighEdge(high, (HighVariable*)0));
-            map<HighEdge, bool>::iterator iterlast = highedgemap.lower_bound(HighEdge(high, (HighVariable*)~((ulong)0)));
+            Dictionary<HighEdge, bool>::iterator iterfirst = highedgemap.lower_bound(HighEdge(high, (HighVariable)null));
+            Dictionary<HighEdge, bool>::iterator iterlast = highedgemap.lower_bound(HighEdge(high, (HighVariable*)~((ulong)0)));
 
             if (iterfirst == iterlast) return;
             --iterlast;         // Move back 1 to prevent deleting under the iterator
-            map<HighEdge, bool>::iterator iter;
+            Dictionary<HighEdge, bool>::iterator iter;
             for (iter = iterfirst; iter != iterlast; ++iter)
                 highedgemap.erase(HighEdge((*iter).first.b, (*iter).first.a));
             highedgemap.erase(HighEdge((*iter).first.b, (*iter).first.a));
@@ -163,9 +163,9 @@ namespace Sla.DECCORE
         {
             List<HighVariable*> yesinter;     // Highs that high2 intersects
             List<HighVariable*> nointer;      // Highs that high2 does not intersect
-            map<HighEdge, bool>::iterator iterfirst = highedgemap.lower_bound(HighEdge(high2, (HighVariable*)0));
-            map<HighEdge, bool>::iterator iterlast = highedgemap.lower_bound(HighEdge(high2, (HighVariable*)~((ulong)0)));
-            map<HighEdge, bool>::iterator iter;
+            Dictionary<HighEdge, bool>::iterator iterfirst = highedgemap.lower_bound(HighEdge(high2, (HighVariable)null));
+            Dictionary<HighEdge, bool>::iterator iterlast = highedgemap.lower_bound(HighEdge(high2, (HighVariable*)~((ulong)0)));
+            Dictionary<HighEdge, bool>::iterator iter;
 
             for (iter = iterfirst; iter != iterlast; ++iter)
             {
@@ -191,7 +191,7 @@ namespace Sla.DECCORE
                 highedgemap.erase(iterfirst, iterlast);
             }
 
-            iter = highedgemap.lower_bound(HighEdge(high1, (HighVariable*)0));
+            iter = highedgemap.lower_bound(HighEdge(high1, (HighVariable)null));
             while ((iter != highedgemap.end()) && ((*iter).first.a == high1))
             {
                 if (!(*iter).second)
@@ -246,7 +246,7 @@ namespace Sla.DECCORE
             bool bres = updateHigh(b);
             if (ares && bres)
             {       // If neither high was dirty
-                map<HighEdge, bool>::iterator iter = highedgemap.find(HighEdge(a, b));
+                Dictionary<HighEdge, bool>::iterator iter = highedgemap.find(HighEdge(a, b));
                 if (iter != highedgemap.end()) // If previous test is present
                     return (*iter).second;  // Use it
             }

@@ -491,7 +491,7 @@ namespace Sla.DECCORE
             }
             else if (skip != 0)
             {
-                res = groupSet.back();
+                res = groupSet.GetLastItem();
             }
             return res;
         }

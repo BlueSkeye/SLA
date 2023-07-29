@@ -210,8 +210,8 @@ namespace Sla.DECCORE
                 varstack.Add(vn);
                 do
                 {
-                    vncur = varstack.back().vn;
-                    if (varstack.back().desciter == vncur.endDescend())
+                    vncur = varstack.GetLastItem().vn;
+                    if (varstack.GetLastItem().desciter == vncur.endDescend())
                     {
                         // All descendants are traced first, try to make vncur implied
                         count += 1;     // Will be marked either explicit or implied
@@ -235,7 +235,7 @@ namespace Sla.DECCORE
                     }
                     else
                     {
-                        outvn = (*varstack.back().desciter++).getOut();
+                        outvn = (*varstack.GetLastItem().desciter++).getOut();
                         if (outvn != (Varnode)null)
                         {
                             if ((!outvn.isExplicit()) && (!outvn.isImplied()))

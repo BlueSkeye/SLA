@@ -41,7 +41,7 @@ namespace Sla.SLACOMP
 
             const string SLAEXT = ".sla";    // Default sla extension
             const string SLASPECEXT = ".slaspec";
-            map<string, string> defines;
+            Dictionary<string, string> defines;
             bool unnecessaryPcodeWarning = false;
             bool lenientConflict = true;
             bool allCollisionWarning = false;

@@ -1,11 +1,10 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Sla.DECCORE
@@ -478,9 +477,9 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         public virtual void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_TYPE);
+            encoder.openElement(ElementId.ELEM_TYPE);
             encodeBasic(metatype, encoder);
-            encoder.closeElement(ELEM_TYPE);
+            encoder.closeElement(ElementId.ELEM_TYPE);
         }
 
         /// Is this data-type suitable as input to a CPUI_PTRSUB op

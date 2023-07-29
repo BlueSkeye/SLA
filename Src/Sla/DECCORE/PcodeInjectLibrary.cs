@@ -53,7 +53,7 @@ namespace Sla.DECCORE
         /// \param injectid is the integer id
         protected void registerCallFixup(string fixupName, int injectid/* , List<string> targets */)
         {
-            pair<map<string, int>::iterator, bool> check;
+            pair<Dictionary<string, int>::iterator, bool> check;
             check = callFixupMap.insert(pair<string, int>(fixupName, injectid));
             if (!check.second)      // This symbol is already mapped
                 throw new LowlevelError("Duplicate <callfixup>: " + fixupName);
@@ -68,7 +68,7 @@ namespace Sla.DECCORE
         /// \param injectid is the integer id
         protected void registerCallOtherFixup(string fixupName, int injectid)
         {
-            pair<map<string, int>::iterator, bool> check;
+            pair<Dictionary<string, int>::iterator, bool> check;
             check = callOtherFixupMap.insert(pair<string, int>(fixupName, injectid));
             if (!check.second)      // This symbol is already mapped
                 throw new LowlevelError("Duplicate <callotherfixup>: " + fixupName);
@@ -83,7 +83,7 @@ namespace Sla.DECCORE
         /// \param injectid is the integer id
         protected void registerCallMechanism(string fixupName,int injectid)
         {
-            pair<map<string, int>::iterator, bool> check;
+            pair<Dictionary<string, int>::iterator, bool> check;
             check = callMechFixupMap.insert(pair<string, int>(fixupName, injectid));
             if (!check.second)      // This symbol is already mapped
                 throw new LowlevelError("Duplicate <callmechanism>: " + fixupName);
@@ -98,7 +98,7 @@ namespace Sla.DECCORE
         /// \param injectid is the integer id
         protected void registerExeScript(string scriptName,int injectid)
         {
-            pair<map<string, int>::iterator, bool> check;
+            pair<Dictionary<string, int>::iterator, bool> check;
             check = scriptMap.insert(pair<string, int>(scriptName, injectid));
             if (!check.second)      // This symbol is already mapped
                 throw new LowlevelError("Duplicate <script>: " + scriptName);
@@ -149,7 +149,7 @@ namespace Sla.DECCORE
         /// \return the payload id or -1 if there is no matching payload
         public int getPayloadId(int type, string nm)
         {
-            map<string, int>::const_iterator iter;
+            Dictionary<string, int>::const_iterator iter;
             if (type == InjectPayload::CALLFIXUP_TYPE)
             {
                 iter = callFixupMap.find(nm);

@@ -72,12 +72,12 @@ namespace Sla.EXTRA
                 else if (subId == ELEM_COMPILER)
                 {
                     compilers.emplace_back();
-                    compilers.back().decode(decoder);
+                    compilers.GetLastItem().decode(decoder);
                 }
                 else if (subId == ELEM_TRUNCATE_SPACE)
                 {
                     truncations.emplace_back();
-                    truncations.back().decode(decoder);
+                    truncations.GetLastItem().decode(decoder);
                 }
                 else
                 {   // Ignore other child elements

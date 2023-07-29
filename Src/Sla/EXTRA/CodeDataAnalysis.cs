@@ -46,7 +46,7 @@ namespace Sla.EXTRA
 
         public void pushTaintAddress(Address addr)
         {
-            map<Address, CodeUnit>::iterator iter;
+            Dictionary<Address, CodeUnit>::iterator iter;
 
             iter = codeunit.upper_bound(addr); // First after
             if (iter == codeunit.begin()) return;
@@ -59,7 +59,7 @@ namespace Sla.EXTRA
 
         public void processTaint()
         {
-            map<Address, CodeUnit>::iterator iter = taintlist.back();
+            Dictionary<Address, CodeUnit>::iterator iter = taintlist.GetLastItem();
             taintlist.pop_back();
 
             CodeUnit & cu((*iter).second);
@@ -77,7 +77,7 @@ namespace Sla.EXTRA
                         taintlist.Add(iter);
                 }
             }
-            map<AddrLink, uint>::iterator ftiter, diter, enditer;
+            Dictionary<AddrLink, uint>::iterator ftiter, diter, enditer;
             ftiter = fromto_crossref.lower_bound(AddrLink(startaddr));
             enditer = fromto_crossref.lower_bound(AddrLink(endaddr));
             fromto_crossref.erase(ftiter, enditer); // Erase all cross-references coming out of this block
@@ -102,7 +102,7 @@ namespace Sla.EXTRA
                 codeunit[curaddr] = codevec[i];
                 curaddr = curaddr + codevec[i].size;
             }
-            map<AddrLink, uint>::iterator citer;
+            Dictionary<AddrLink, uint>::iterator citer;
             for (citer = fromto_vec.begin(); citer != fromto_vec.end(); ++citer)
             {
                 AddrLink fromto = (*citer).first;
@@ -115,7 +115,7 @@ namespace Sla.EXTRA
 
         public void clearHitBy()
         { // Clear all the "hit_by" flags from all code units
-            map<Address, CodeUnit>::iterator iter;
+            Dictionary<Address, CodeUnit>::iterator iter;
 
             for (iter = codeunit.begin(); iter != codeunit.end(); ++iter)
             {
@@ -126,7 +126,7 @@ namespace Sla.EXTRA
 
         public void clearCrossRefs(Address addr, Address endaddr)
         { // Clear all crossrefs originating from [addr,endaddr)
-            map<AddrLink, uint>::iterator startiter, iter, enditer, tfiter;
+            Dictionary<AddrLink, uint>::iterator startiter, iter, enditer, tfiter;
 
             startiter = fromto_crossref.lower_bound(AddrLink(addr));
             enditer = fromto_crossref.lower_bound(AddrLink(endaddr));
@@ -142,7 +142,7 @@ namespace Sla.EXTRA
 
         public void clearCodeUnits(Address addr, Address endaddr)
         { // Clear all the code units in [addr,endaddr)
-            map<Address, CodeUnit>::iterator iter, enditer;
+            Dictionary<Address, CodeUnit>::iterator iter, enditer;
 
             iter = codeunit.lower_bound(addr);
             enditer = codeunit.lower_bound(endaddr);
@@ -164,12 +164,12 @@ namespace Sla.EXTRA
         {
             DisassemblyResult disresult;
             List<CodeUnit> codevec;
-            map<AddrLink, uint> fromto_vec;
+            Dictionary<AddrLink, uint> fromto_vec;
             bool flowin = false;
             bool hardend = false;
 
             Address curaddr = addr;
-            map<Address, CodeUnit>::iterator iter;
+            Dictionary<Address, CodeUnit>::iterator iter;
             iter = codeunit.lower_bound(addr);
             Address lastaddr;
             if (iter != codeunit.end())
@@ -192,8 +192,8 @@ namespace Sla.EXTRA
                 codevec.emplace_back();
                 if (!disresult.success)
                 {
-                    codevec.back().flags = CodeUnit::notcode;
-                    codevec.back().size = 1;
+                    codevec.GetLastItem().flags = CodeUnit::notcode;
+                    codevec.GetLastItem().size = 1;
                     curaddr = curaddr + 1;
                     break;
                 }
@@ -201,8 +201,8 @@ namespace Sla.EXTRA
                 {
                     fromto_vec[AddrLink(curaddr, disresult.jumpaddress)] = disresult.flags;
                 }
-                codevec.back().flags = disresult.flags;
-                codevec.back().size = disresult.length;
+                codevec.GetLastItem().flags = disresult.flags;
+                codevec.GetLastItem().size = disresult.length;
                 curaddr = curaddr + disresult.length;
                 while (lastaddr < curaddr)
                 {
@@ -210,7 +210,7 @@ namespace Sla.EXTRA
                     {
                         if ((*iter).second.size == 1)
                         {
-                            map<Address, CodeUnit>::iterator iter2 = iter;
+                            Dictionary<Address, CodeUnit>::iterator iter2 = iter;
                             ++iter;     // We delete the bad disassembly, as it looks like it is unaligned
                             codeunit.erase(iter2);
                             if (iter != codeunit.end())
@@ -297,7 +297,7 @@ namespace Sla.EXTRA
         public void findNotCodeUnits()
         { // Mark any code units that have flow into "notcode" units as "notcode"
           // Remove any references to or from these units
-            map<Address, CodeUnit>::iterator iter;
+            Dictionary<Address, CodeUnit>::iterator iter;
 
             // We spread the "notcode" attribute as a taint
             // We build the initial work list with known "notcode"
@@ -313,7 +313,7 @@ namespace Sla.EXTRA
 
         public void markFallthruHits()
         { // Mark every code unit that has another code unit fall into it
-            map<Address, CodeUnit>::iterator iter;
+            Dictionary<Address, CodeUnit>::iterator iter;
 
             Address fallthruaddr = new Address((AddrSpace)null,0);
             iter = codeunit.begin();
@@ -330,8 +330,8 @@ namespace Sla.EXTRA
 
         public void markCrossHits()
         { // Mark every codeunit hit by a call or jump
-            map<AddrLink, uint>::iterator iter;
-            map<Address, CodeUnit>::iterator fiter;
+            Dictionary<AddrLink, uint>::iterator iter;
+            Dictionary<Address, CodeUnit>::iterator fiter;
 
             for (iter = tofrom_crossref.begin(); iter != tofrom_crossref.end(); ++iter)
             {
@@ -351,7 +351,7 @@ namespace Sla.EXTRA
             Address funcstart = findFunctionStart(codeaddr);
             Address thunkaddr = Address(glb.translate.getDefaultCodeSpace(), targethit);
             uint mask;
-            map<Address, TargetFeature>::const_iterator titer;
+            Dictionary<Address, TargetFeature>::const_iterator titer;
             titer = targets.find(thunkaddr);
             if (titer != targets.end())
                 mask = (*titer).second.featuremask;
@@ -364,7 +364,7 @@ namespace Sla.EXTRA
         { // Code unit make indirect jump to target
           // Assume the address of the jump is another level of thunk
           // Look for direct calls to it and include those as TargetHits
-            map<AddrLink, uint>::iterator iter, enditer;
+            Dictionary<AddrLink, uint>::iterator iter, enditer;
             iter = tofrom_crossref.lower_bound(AddrLink(codeaddr));
             Address endaddr = codeaddr + 1;
             enditer = tofrom_crossref.lower_bound(AddrLink(endaddr));
@@ -379,7 +379,7 @@ namespace Sla.EXTRA
 
         public void findUnlinked()
         { // Find all code units that have no jump/call/fallthru to them
-            map<Address, CodeUnit>::iterator iter;
+            Dictionary<Address, CodeUnit>::iterator iter;
 
             for (iter = codeunit.begin(); iter != codeunit.end(); ++iter)
             {
@@ -428,9 +428,9 @@ namespace Sla.EXTRA
           // trying to get back on cut
             DisassemblyResult disresult;
             List<CodeUnit> codevec;
-            map<AddrLink, uint> fromto_vec;
+            Dictionary<AddrLink, uint> fromto_vec;
             Address curaddr = addr;
-            map<Address, CodeUnit>::iterator iter;
+            Dictionary<Address, CodeUnit>::iterator iter;
             int count = 0;
 
             iter = codeunit.lower_bound(addr);
@@ -452,8 +452,8 @@ namespace Sla.EXTRA
                 {
                     fromto_vec[AddrLink(curaddr, disresult.jumpaddress)] = disresult.flags;
                 }
-                codevec.back().flags = disresult.flags;
-                codevec.back().size = disresult.length;
+                codevec.GetLastItem().flags = disresult.flags;
+                codevec.GetLastItem().size = disresult.length;
                 curaddr = curaddr + disresult.length;
             }
             clearCodeUnits(addr, curaddr);
@@ -463,8 +463,8 @@ namespace Sla.EXTRA
 
         public void findOffCut()
         {
-            map<AddrLink, uint>::iterator iter;
-            map<Address, CodeUnit>::iterator citer;
+            Dictionary<AddrLink, uint>::iterator iter;
+            Dictionary<Address, CodeUnit>::iterator citer;
 
             iter = tofrom_crossref.begin();
             while (iter != tofrom_crossref.end())
@@ -517,7 +517,7 @@ namespace Sla.EXTRA
 
         public Address findFunctionStart(Address addr)
         { // Find the starting address of a function containing the address addr
-            map<AddrLink, uint>::const_iterator iter;
+            Dictionary<AddrLink, uint>::const_iterator iter;
 
             iter = tofrom_crossref.lower_bound(AddrLink(addr));
             while (iter != tofrom_crossref.begin())
@@ -554,7 +554,7 @@ namespace Sla.EXTRA
 
         public void dumpCrossRefs(TextWriter s)
         {
-            map<AddrLink, uint>::const_iterator iter;
+            Dictionary<AddrLink, uint>::const_iterator iter;
 
             for (iter = fromto_crossref.begin(); iter != fromto_crossref.end(); ++iter)
             {
@@ -570,7 +570,7 @@ namespace Sla.EXTRA
 
         public void dumpFunctionStarts(TextWriter s)
         {
-            map<AddrLink, uint>::const_iterator iter;
+            Dictionary<AddrLink, uint>::const_iterator iter;
 
             for (iter = tofrom_crossref.begin(); iter != tofrom_crossref.end(); ++iter)
             {

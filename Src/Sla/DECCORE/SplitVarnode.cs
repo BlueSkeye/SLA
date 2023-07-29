@@ -86,7 +86,7 @@ namespace Sla.DECCORE
             else if (whole.isInput())
             {
                 defpoint = (PcodeOp)null;
-                defblock = (BlockBasic*)0;
+                defblock = (BlockBasic)null;
             }
             return true;
         }
@@ -107,7 +107,7 @@ namespace Sla.DECCORE
             {   // Implied zero extension
                 if (lo.isInput())
                 {
-                    defblock = (BlockBasic*)0;
+                    defblock = (BlockBasic)null;
                     defpoint = (PcodeOp)null;
                 }
                 else if (lo.isWritten())
@@ -143,7 +143,7 @@ namespace Sla.DECCORE
                         curbl = curbl.getImmedDom();
                         if (curbl == otherblock) return true;
                     }
-                    defblock = (BlockBasic*)0;
+                    defblock = (BlockBasic)null;
                     return false;       // Not defined in same basic block
                 }
                 if (lastop2.getSeqNum().getOrder() > lastop.getSeqNum().getOrder())
@@ -154,7 +154,7 @@ namespace Sla.DECCORE
             {
                 if (!lo.isInput())
                     return false;       // Do not allow mixed input/non-input pairs
-                defblock = (BlockBasic*)0;
+                defblock = (BlockBasic)null;
                 defpoint = (PcodeOp)null;
             }
             return true;
@@ -178,7 +178,7 @@ namespace Sla.DECCORE
             if (lo.isWritten())
                 bb = lo.getDef().getParent();
             else if (lo.isInput())
-                bb = (BlockBasic*)0;
+                bb = (BlockBasic)null;
             else
                 throw new LowlevelError("Trying to find whole on free varnode");
             while (iter != enditer)
@@ -187,7 +187,7 @@ namespace Sla.DECCORE
                 ++iter;
                 if (op.code() != CPUI_PIECE) continue;
                 if (op.getIn(0) != hi) continue;
-                if (bb != (BlockBasic*)0)
+                if (bb != (BlockBasic)null)
                 {
                     if (op.getParent() != bb) continue; // Not defined in earliest block
                 }
@@ -231,7 +231,7 @@ namespace Sla.DECCORE
             hi = (Varnode)null;
             whole = (Varnode)null;
             defpoint = (PcodeOp)null;
-            defblock = (BlockBasic*)0;
+            defblock = (BlockBasic)null;
         }
 
         public SplitVarnode(Varnode l, Varnode h)
@@ -251,7 +251,7 @@ namespace Sla.DECCORE
             hi = h;
             whole = w;
             defpoint = (PcodeOp)null;
-            defblock = (BlockBasic*)0;
+            defblock = (BlockBasic)null;
         }
 
         /// (Re)initialize \b this SplitVarnode as a constant
@@ -265,7 +265,7 @@ namespace Sla.DECCORE
             hi = (Varnode)null;
             whole = (Varnode)null;
             defpoint = (PcodeOp)null;
-            defblock = (BlockBasic*)0;
+            defblock = (BlockBasic)null;
         }
 
         /// (Re)initialize \b this SplitVarnode given Varnode pieces
@@ -307,7 +307,7 @@ namespace Sla.DECCORE
             wholesize = sz;
             whole = (Varnode)null;
             defpoint = (PcodeOp)null;
-            defblock = (BlockBasic*)0;
+            defblock = (BlockBasic)null;
         }
 
         /// Try to initialize given just the most significant piece split from whole
@@ -534,7 +534,7 @@ namespace Sla.DECCORE
                         return false;
                 }
             }
-            if (defblock == (BlockBasic*)0) return true;
+            if (defblock == (BlockBasic)null) return true;
             FlowBlock* curbl = existop.getParent();
             if (curbl == defblock)  // If defined in same block as -existop- check PcodeOp ordering
                 return (defpoint.getSeqNum().getOrder() <= existop.getSeqNum().getOrder());
@@ -562,7 +562,7 @@ namespace Sla.DECCORE
                         return false;
                 }
             }
-            if (defblock == (BlockBasic*)0) return true;
+            if (defblock == (BlockBasic)null) return true;
             if (bl == defblock) // If defined in same block
                 return true;
             while (bl != (FlowBlock*)0)
@@ -597,9 +597,9 @@ namespace Sla.DECCORE
             if (whole != (Varnode)null) return; // Already found the whole
             PcodeOp* concatop;
             Address addr;
-            BlockBasic* topblock = (BlockBasic*)0;
+            BlockBasic* topblock = (BlockBasic)null;
 
-            if (defblock != (BlockBasic*)0)
+            if (defblock != (BlockBasic)null)
                 addr = defpoint.getAddr();
             else
             {
@@ -626,7 +626,7 @@ namespace Sla.DECCORE
                 data.opSetInput(concatop, lo, 0);
             }
 
-            if (defblock != (BlockBasic*)0)
+            if (defblock != (BlockBasic)null)
                 data.opInsertAfter(concatop, defpoint);
             else
                 data.opInsertBegin(concatop, topblock);
@@ -872,9 +872,9 @@ namespace Sla.DECCORE
             // Make sure there is no explicit symbol that would prevent the pieces from being joined
             SymbolEntry* entryLo = lo.getSymbolEntry();
             SymbolEntry* entryHi = hi.getSymbolEntry();
-            if (entryLo != (SymbolEntry*)0 || entryHi != (SymbolEntry*)0)
+            if (entryLo != (SymbolEntry)null || entryHi != (SymbolEntry)null)
             {
-                if (entryLo == (SymbolEntry*)0 || entryHi == (SymbolEntry*)0)
+                if (entryLo == (SymbolEntry)null || entryHi == (SymbolEntry)null)
                     return false;       // One is marked with a symbol, the other is not
                 if (entryLo.getSymbol() != entryHi.getSymbol())
                     return false;       // They are part of different symbols

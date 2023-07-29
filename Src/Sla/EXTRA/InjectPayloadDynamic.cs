@@ -23,7 +23,7 @@ namespace Sla.EXTRA
         
         ~InjectPayloadDynamic()
         {
-            map<Address, Document*>::iterator iter;
+            Dictionary<Address, Document*>::iterator iter;
             for (iter = addrMap.begin(); iter != addrMap.end(); ++iter)
                 delete(*iter).second;
         }
@@ -36,7 +36,7 @@ namespace Sla.EXTRA
             try
             {
                 Document* doc = xml_tree(s);
-                map<Address, Document*>::iterator iter = addrMap.find(addr);
+                Dictionary<Address, Document*>::iterator iter = addrMap.find(addr);
                 if (iter != addrMap.end())
                     delete(*iter).second;       // Delete any preexisting document
                 addrMap[addr] = doc;
@@ -49,7 +49,7 @@ namespace Sla.EXTRA
 
         protected override void inject(InjectContext context, PcodeEmit emit)
         {
-            map<Address, Document*>::const_iterator eiter = addrMap.find(context.baseaddr);
+            Dictionary<Address, Document*>::const_iterator eiter = addrMap.find(context.baseaddr);
             if (eiter == addrMap.end())
                 throw new LowlevelError("Missing dynamic inject");
             Element el = (*eiter).second.getRoot();

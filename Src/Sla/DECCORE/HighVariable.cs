@@ -1,10 +1,10 @@
-﻿using Sla.DECCORE;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.Intrinsics;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Sla.DECCORE
@@ -66,7 +66,7 @@ namespace Sla.DECCORE
         /// Dirtiness flags
         private /*mutable*/ uint highflags;
         /// Boolean properties inherited from Varnode members
-        private /*mutable*/ uint flags;
+        private /*mutable*/ Varnode.varnode_flags flags;
         /// The data-type for \b this
         private /*mutable*/ Datatype type;
         /// The storage location used to generate a Symbol name
@@ -74,7 +74,7 @@ namespace Sla.DECCORE
         /// The ranges of code addresses covered by this HighVariable
         private /*mutable*/ Cover internalCover;
         /// Additional info about intersections with other pieces (if non-null)
-        private /*mutable*/ VariablePiece piece;
+        private /*mutable*/ VariablePiece? piece;
         /// The Symbol \b this HighVariable is tied to
         private /*mutable*/ Symbol symbol;
         /// -1=perfect symbol match >=0, offset
@@ -97,7 +97,7 @@ namespace Sla.DECCORE
         /// (Re)derive boolean properties of \b this from the member Varnodes
         /// Only update if flags are marked as \e dirty.
         /// Generally if any member Varnode possesses the property, \b this HighVariable should
-        /// inherit it.  The Varnode::typelock field is not set here, but in updateType().
+        /// inherit it.  The Varnode.varnode_flags.typelock field is not set here, but in updateType().
         private void updateFlags()
         {
             if ((highflags & flagsdirty) == 0) return; // flags are up to date
@@ -109,9 +109,9 @@ namespace Sla.DECCORE
                 fl |= (*iter).getFlags();
 
             // Keep these flags
-            flags &= (Varnode::mark | Varnode::typelock);
+            flags &= (Varnode.varnode_flags.mark | Varnode.varnode_flags.typelock);
             // Update all but these
-            flags |= fl & ~(Varnode::mark | Varnode::directwrite | Varnode::typelock);
+            flags |= fl & ~(Varnode.varnode_flags.mark | Varnode::directwrite | Varnode.varnode_flags.typelock);
             highflags &= ~flagsdirty; // Clear the dirty flag
         }
 
@@ -136,7 +136,7 @@ namespace Sla.DECCORE
         /// This is \b only called by the Merge class which knows when to call it properly.
         private void updateCover()
         {
-            if (piece == (VariablePiece*)0)
+            if (piece == (VariablePiece)null)
                 updateInternalCover();
             else
             {
@@ -162,7 +162,7 @@ namespace Sla.DECCORE
             {
                 if (type.getMetatype() == TYPE_PARTIALUNION)
                 {
-                    if (symbol != (Symbol*)0 && symboloffset != -1)
+                    if (symbol != (Symbol)null && symboloffset != -1)
                     {
                         type_metatype meta = symbol.getType().getMetatype();
                         if (meta != TYPE_STRUCT && meta != TYPE_UNION)  // If partial union does not have a bigger backing symbol
@@ -173,9 +173,9 @@ namespace Sla.DECCORE
                     type = type.getStripped();
             }
             // Update lock flags
-            flags &= ~Varnode::typelock;
+            flags &= ~Varnode.varnode_flags.typelock;
             if (vn.isTypeLock())
-                flags |= Varnode::typelock;
+                flags |= Varnode.varnode_flags.typelock;
         }
 
         /// (Re)derive the Symbol and offset for \b this from member Varnodes
@@ -184,12 +184,12 @@ namespace Sla.DECCORE
             if ((highflags & symboldirty) == 0) return; // flags are up to date
             highflags &= ~((uint)symboldirty);
             List<Varnode*>::const_iterator iter;
-            symbol = (Symbol*)0;
+            symbol = (Symbol)null;
 
             for (iter = inst.begin(); iter != inst.end(); ++iter)
             {
                 Varnode* vn = *iter;
-                if (vn.getSymbolEntry() != (SymbolEntry*)0)
+                if (vn.getSymbolEntry() != (SymbolEntry)null)
                 {
                     setSymbol(vn);
                     return;
@@ -235,9 +235,9 @@ namespace Sla.DECCORE
                 {
                     inst.erase(iter);
                     highflags |= (flagsdirty | namerepdirty | coverdirty | typedirty);
-                    if (vn.getSymbolEntry() != (SymbolEntry*)0)
+                    if (vn.getSymbolEntry() != (SymbolEntry)null)
                         highflags |= symboldirty;
-                    if (piece != (VariablePiece*)0)
+                    if (piece != (VariablePiece)null)
                         piece.markExtendCoverDirty();
                     return;
                 }
@@ -253,7 +253,7 @@ namespace Sla.DECCORE
             int i;
 
             highflags |= (flagsdirty | namerepdirty | typedirty);
-            if (tv2.symbol != (Symbol*)0)
+            if (tv2.symbol != (Symbol)null)
             {       // Check if we inherit a Symbol
                 if ((tv2.highflags & symboldirty) == 0)
                 {
@@ -309,19 +309,19 @@ namespace Sla.DECCORE
 
             if (testCache != (HighIntersectTest*)0)
                 testCache.moveIntersectTests(this, tv2);
-            if (piece == (VariablePiece*)0 && tv2.piece == (VariablePiece*)0)
+            if (piece == (VariablePiece)null && tv2.piece == (VariablePiece)null)
             {
                 mergeInternal(tv2, isspeculative);
                 return;
             }
-            if (tv2.piece == (VariablePiece*)0)
+            if (tv2.piece == (VariablePiece)null)
             {
                 // Keep group that this is already in
                 piece.markExtendCoverDirty();
                 mergeInternal(tv2, isspeculative);
                 return;
             }
-            if (piece == (VariablePiece*)0)
+            if (piece == (VariablePiece)null)
             {
                 // Move ownership of the VariablePiece object from the HighVariable that will be freed
                 transferPiece(tv2);
@@ -350,7 +350,7 @@ namespace Sla.DECCORE
         private void setSymbol(Varnode vn)
         {
             SymbolEntry* entry = vn.getSymbolEntry();
-            if (symbol != (Symbol*)0 && symbol != entry.getSymbol())
+            if (symbol != (Symbol)null && symbol != entry.getSymbol())
             {
                 if ((highflags & symboldirty) == 0)
                 {
@@ -361,7 +361,7 @@ namespace Sla.DECCORE
                 }
             }
             symbol = entry.getSymbol();
-            if (vn.isProtoPartial() && piece != (VariablePiece*)0)
+            if (vn.isProtoPartial() && piece != (VariablePiece)null)
             {
                 symboloffset = piece.getOffset() + piece.getGroup().getSymbolOffset();
             }
@@ -400,14 +400,14 @@ namespace Sla.DECCORE
         private void transferPiece(HighVariable tv2)
         {
             piece = tv2.piece;
-            tv2.piece = (VariablePiece*)0;
+            tv2.piece = (VariablePiece)null;
             piece.setHigh(this);
             highflags |= (tv2.highflags & (intersectdirty | extendcoverdirty));
             tv2.highflags &= ~(uint)(intersectdirty | extendcoverdirty);
         }
 
         /// Mark the boolean properties as \e dirty
-        private void flagsDirty() 
+        internal void flagsDirty() 
         {
             highflags |= flagsdirty | namerepdirty;
         }
@@ -415,10 +415,10 @@ namespace Sla.DECCORE
         /// Mark the cover as \e dirty
         /// The internal cover is marked as dirty. If \b this is a piece of a VariableGroup, it and all the other
         /// HighVariables it intersects with are marked as having a dirty extended cover.
-        private void coverDirty()
+        internal void coverDirty()
         {
             highflags |= coverdirty;
-            if (piece != (VariablePiece*)0)
+            if (piece != (VariablePiece)null)
                 piece.markExtendCoverDirty();
         }
 
@@ -445,7 +445,7 @@ namespace Sla.DECCORE
         /// \return \b true if the cover needs to be recomputed.
         private bool isCoverDirty()
         {
-            return ((highflags & (coverdirty | extendcoverdirty)) != 0);
+            return ((highflags & (Varnode.varnode_flags.coverdirty | extendcoverdirty)) != 0);
         }
 
         /// Construct a HighVariable with a single member Varnode
@@ -457,19 +457,19 @@ namespace Sla.DECCORE
             highflags = flagsdirty | namerepdirty | typedirty | coverdirty;
             flags = 0;
             type = (Datatype)null;
-            piece = (VariablePiece*)0;
-            symbol = (Symbol*)0;
+            piece = (VariablePiece)null;
+            symbol = (Symbol)null;
             nameRepresentative = (Varnode)null;
             symboloffset = -1;
             inst.Add(vn);
             vn.setHigh(this, numMergeClasses - 1);
-            if (vn.getSymbolEntry() != (SymbolEntry*)0)
+            if (vn.getSymbolEntry() != (SymbolEntry)null)
                 setSymbol(vn);
         }
 
         ~HighVariable()
         {
-            if (piece != (VariablePiece*)0)
+            if (piece != (VariablePiece)null)
                 delete piece;
         }
 
@@ -484,12 +484,7 @@ namespace Sla.DECCORE
         /// The returns the internal cover unless \b this is part of a VariableGroup, in which case the
         /// extended cover is returned.
         /// \return the cover associated with \b this variable
-        public Cover getCover()
-        {
-            if (piece == (VariablePiece*)0)
-                return internalCover;
-            return piece.getCover();
-        }
+        public Cover getCover() => (piece == (VariablePiece)null) ? internalCover : piece.getCover();
 
         /// Get the Symbol associated with \b this or null
         public Symbol getSymbol() 
@@ -502,15 +497,14 @@ namespace Sla.DECCORE
         /// Assuming there is a Symbol attached to \b this, run through the Varnode members
         /// until we find one with a SymbolEntry corresponding to the Symbol and return it.
         /// \return the SymbolEntry that mapped the Symbol to \b this or null if no Symbol is attached
-        public SymbolEntry getSymbolEntry()
+        public SymbolEntry? getSymbolEntry()
         {
-            for (int i = 0; i < inst.size(); ++i)
-            {
-                SymbolEntry* entry = inst[i].getSymbolEntry();
-                if (entry != (SymbolEntry*)0 && entry.getSymbol() == symbol)
+            for (int i = 0; i < inst.size(); ++i) {
+                SymbolEntry? entry = inst[i].getSymbolEntry();
+                if (entry != (SymbolEntry)null && entry.getSymbol() == symbol)
                     return entry;
             }
-            return (SymbolEntry*)0;
+            return (SymbolEntry)null;
         }
 
         /// Get the Symbol offset associated with \b this
@@ -529,19 +523,17 @@ namespace Sla.DECCORE
         public void finalizeDatatype(Datatype tp)
         {
             type = tp;
-            if (type.hasStripped())
-            {
-                if (type.getMetatype() == TYPE_PARTIALUNION)
-                {
-                    if (symbol != (Symbol*)0 && symboloffset != -1)
-                    {
+            if (type.hasStripped()) {
+                if (type.getMetatype() == TYPE_PARTIALUNION) {
+                    if (symbol != (Symbol)null && symboloffset != -1) {
                         type_metatype meta = symbol.getType().getMetatype();
                         if (meta != TYPE_STRUCT && meta != TYPE_UNION)  // If partial union does not have a bigger backing symbol
                             type = type.getStripped();         // strip the partial union
                     }
                 }
-                else
+                else {
                     type = type.getStripped();
+                }
             }
             highflags |= type_finalized;
         }
@@ -552,26 +544,22 @@ namespace Sla.DECCORE
         /// \param hi2 is the other HighVariable
         public void groupWith(int off, HighVariable hi2)
         {
-            if (piece == (VariablePiece*)0 && hi2.piece == (VariablePiece*)0)
-            {
+            if (piece == (VariablePiece)null && hi2.piece == (VariablePiece)null) {
                 hi2.piece = new VariablePiece(hi2, 0);
                 piece = new VariablePiece(this, off, hi2);
                 hi2.piece.markIntersectionDirty();
                 return;
             }
-            if (piece == (VariablePiece*)0)
-            {
+            if (piece == (VariablePiece)null) {
                 if ((hi2.highflags & intersectdirty) == 0)
                     hi2.piece.markIntersectionDirty();
                 highflags |= intersectdirty | extendcoverdirty;
                 off += hi2.piece.getOffset();
                 piece = new VariablePiece(this, off, hi2);
             }
-            else if (hi2.piece == (VariablePiece*)0)
-            {
+            else if (hi2.piece == (VariablePiece)null) {
                 int hi2Off = piece.getOffset() - off;
-                if (hi2Off < 0)
-                {
+                if (hi2Off < 0) {
                     piece.getGroup().adjustOffsets(-hi2Off);
                     hi2Off = 0;
                 }
@@ -596,7 +584,7 @@ namespace Sla.DECCORE
         /// to the common VariableGroup object.
         public void establishGroupSymbolOffset()
         {
-            VariableGroup* group = piece.getGroup();
+            VariableGroup group = piece.getGroup();
             int off = symboloffset;
             if (off < 0)
                 off = 0;
@@ -613,7 +601,7 @@ namespace Sla.DECCORE
         {
             if ((highflags&HighVariable::coverdirty)== 0)
                 internalCover.print(s);
-            else s << "Cover dirty";
+            else s.Write("Cover dirty");
         }
 
         /// Print information about \b this HighVariable to stream
@@ -621,27 +609,26 @@ namespace Sla.DECCORE
         /// \param s is the output stream
         public void printInfo(TextWriter s)
         {
-            List<Varnode*>::const_iterator viter;
-            Varnode* vn;
+            List<Varnode>::const_iterator viter;
+            Varnode vn;
 
             updateType();
-            if (symbol == (Symbol*)0)
-            {
-                s << "Variable: UNNAMED" << endl;
+            if (symbol == (Symbol)null) {
+                s.WriteLine("Variable: UNNAMED";
             }
-            else
-            {
-                s << "Variable: " << symbol.getName();
-                if (symboloffset != -1)
-                    s << "(partial)";
-                s << endl;
+            else {
+                s.Write($"Variable: {symbol.getName()}");
+                if (symboloffset != -1) {
+                    s.Write("(partial)");
+                }
+                s.WriteLine();
             }
-            s << "Type: ";
+            s.Write("Type: ");
             type.printRaw(s);
-            s << "\n\n";
+            s.WriteLine();
+            s.WriteLine();
 
-            for (viter = inst.begin(); viter != inst.end(); ++viter)
-            {
+            for (viter = inst.begin(); viter != inst.end(); ++viter) {
                 vn = *viter;
                 s << dec << vn.getMergeGroup() << ": ";
                 vn.printInfo(s);
@@ -656,11 +643,9 @@ namespace Sla.DECCORE
         public bool hasName()
         {
             bool indirectonly = true;
-            for (int i = 0; i < inst.size(); ++i)
-            {
-                Varnode* vn = inst[i];
-                if (!vn.hasCover())
-                {
+            for (int i = 0; i < inst.size(); ++i) {
+                Varnode vn = inst[i];
+                if (!vn.hasCover()) {
                     if (inst.size() > 1)
                         throw new LowlevelError("Non-coverable varnode has been merged");
                     return false;
@@ -678,7 +663,7 @@ namespace Sla.DECCORE
             {
                 if (!isInput()) return false;
                 if (indirectonly) return false;
-                Varnode* vn = getInputVarnode();
+                Varnode vn = getInputVarnode();
                 if (!vn.isIllegalInput())
                 { // A leftover unaff illegal input gets named
                     if (vn.isSpacebase())  // A legal input, unaff, gets named
@@ -725,17 +710,16 @@ namespace Sla.DECCORE
         /// \return the representative member
         public Varnode getTypeRepresentative()
         {
-            List<Varnode*>::const_iterator iter;
-            Varnode* vn,*rep;
+            List<Varnode>::const_iterator iter;
+            Varnode vn;
+            Varnode rep;
 
             iter = inst.begin();
             rep = *iter;
             ++iter;
-            for (; iter != inst.end(); ++iter)
-            {
+            for (; iter != inst.end(); ++iter) {
                 vn = *iter;
-                if (rep.isTypeLock() != vn.isTypeLock())
-                {
+                if (rep.isTypeLock() != vn.isTypeLock()) {
                     if (vn.isTypeLock())
                         rep = vn;
                 }
@@ -754,8 +738,8 @@ namespace Sla.DECCORE
                 return nameRepresentative;      // Name representative is up to date
             highflags &= ~namerepdirty;
 
-            List<Varnode*>::const_iterator iter;
-            Varnode* vn;
+            List<Varnode>::const_iterator iter;
+            Varnode vn;
 
             iter = inst.begin();
             nameRepresentative = *iter;
@@ -776,86 +760,86 @@ namespace Sla.DECCORE
         public bool isMapped() 
         {
             updateFlags();
-            return ((flags & Varnode::mapped) != 0);
+            return ((flags & Varnode.varnode_flags.mapped) != 0);
         }
 
         /// Return \b true if \b this is a global variable
         public bool isPersist() 
         {
             updateFlags();
-            return ((flags & Varnode::persist) != 0);
+            return ((flags & Varnode.varnode_flags.persist) != 0);
         }
 
         /// Return \b true if \b this is \e address \e ties
         public bool isAddrTied() 
         {
             updateFlags();
-            return ((flags & Varnode::addrtied) != 0);
+            return ((flags & Varnode.varnode_flags.addrtied) != 0);
         }
 
         /// Return \b true if \b this is an input variable
         public bool isInput() 
         {
             updateFlags();
-            return ((flags & Varnode::input) != 0);
+            return ((flags & Varnode.varnode_flags.input) != 0);
         }
 
         /// Return \b true if \b this is an implied variable
         public bool isImplied()
         {
             updateFlags();
-            return ((flags & Varnode::implied) != 0);
+            return ((flags & Varnode.varnode_flags.implied) != 0);
         }
 
         /// Return \b true if \b this is a \e spacebase
         public bool isSpacebase() 
         {
             updateFlags();
-            return ((flags & Varnode::spacebase) != 0);
+            return ((flags & Varnode.varnode_flags.spacebase) != 0);
         }
 
         /// Return \b true if \b this is a constant
         public bool isConstant() 
         {
             updateFlags();
-            return ((flags & Varnode::constant) != 0);
+            return ((flags & Varnode.varnode_flags.constant) != 0);
         }
 
         /// Return \b true if \b this is an \e unaffected register
         public bool isUnaffected() 
         {
             updateFlags();
-            return ((flags & Varnode::unaffected) != 0);
+            return ((flags & Varnode.varnode_flags.unaffected) != 0);
         }
 
         /// Return \b true if \b this is an extra output
         public bool isExtraOut()
         {
             updateFlags();
-            return ((flags & (Varnode::indirect_creation | Varnode::addrtied)) == Varnode::indirect_creation);
+            return ((flags & (Varnode.varnode_flags.indirect_creation | Varnode.varnode_flags.addrtied)) == Varnode.varnode_flags.indirect_creation);
         }
 
         /// Return \b true if \b this is a piece concatenated into a larger whole
         public bool isProtoPartial() 
         {
             updateFlags();
-            return ((flags & Varnode::proto_partial) != 0);
+            return ((flags & Varnode.varnode_flags.proto_partial) != 0);
         }
 
         /// Set the mark on this variable
         public void setMark()
         {
-            flags |= Varnode::mark;
+            flags |= Varnode.varnode_flags.mark;
         }
 
         /// Clear the mark on this variable
         public void clearMark()
         {
-            flags &= ~Varnode::mark;
+            flags &= ~Varnode.varnode_flags.mark;
         }
 
         /// Return \b true if \b this is marked
-        public bool isMark() => ((flags&Varnode::mark)!= 0);
+        public bool isMark() => ((flags&Varnode.varnode_flags.mark)!= 0);
 
         /// Return \b true if \b this has merge problems
         public bool isUnmerged() => ((highflags&unmerged)!= 0);
@@ -867,7 +851,7 @@ namespace Sla.DECCORE
         public bool hasCover()
         {
             updateFlags();
-            return ((flags & (Varnode::constant | Varnode::annotation | Varnode::insert)) == Varnode::insert);
+            return ((flags & (Varnode.varnode_flags.constant | Varnode.varnode_flags.annotation | Varnode.varnode_flags.insert)) == Varnode.varnode_flags.insert);
         }
 
         /// Return \b true if \b this has no member Varnode
@@ -877,58 +861,58 @@ namespace Sla.DECCORE
         public bool isTypeLock() 
         {
             updateType();
-            return ((flags & Varnode::typelock) != 0);
+            return ((flags & Varnode.varnode_flags.typelock) != 0);
         }
 
         /// Return \b true if \b this is \e namelocked
         public bool isNameLock()
         {
             updateFlags();
-            return ((flags & Varnode::namelock) != 0);
+            return ((flags & Varnode.varnode_flags.namelock) != 0);
         }
 
         /// Encode \b this variable to stream as a \<high> element
         /// \param encoder is the stream encoder
         public void encode(Encoder encoder)
         {
-            Varnode* vn = getNameRepresentative(); // Get representative varnode
-            encoder.openElement(ELEM_HIGH);
-            encoder.writeUnsignedInteger(ATTRIB_REPREF, vn.getCreateIndex());
+            Varnode vn = getNameRepresentative(); // Get representative varnode
+            encoder.openElement(ElementId.ELEM_HIGH);
+            encoder.writeUnsignedInteger(AttributeId.ATTRIB_REPREF, vn.getCreateIndex());
             if (isSpacebase() || isImplied()) // This is a special variable
-                encoder.writeString(ATTRIB_CLASS, "other");
+                encoder.writeString(AttributeId.ATTRIB_CLASS, "other");
             else if (isPersist() && isAddrTied()) // Global variable
-                encoder.writeString(ATTRIB_CLASS, "global");
+                encoder.writeString(AttributeId.ATTRIB_CLASS, "global");
             else if (isConstant())
-                encoder.writeString(ATTRIB_CLASS, "constant");
-            else if (!isPersist() && (symbol != (Symbol*)0))
+                encoder.writeString(AttributeId.ATTRIB_CLASS, "constant");
+            else if (!isPersist() && (symbol != (Symbol)null))
             {
                 if (symbol.getCategory() == Symbol::function_parameter)
-                    encoder.writeString(ATTRIB_CLASS, "param");
+                    encoder.writeString(AttributeId.ATTRIB_CLASS, "param");
                 else if (symbol.getScope().isGlobal())
-                    encoder.writeString(ATTRIB_CLASS, "global");
+                    encoder.writeString(AttributeId.ATTRIB_CLASS, "global");
                 else
-                    encoder.writeString(ATTRIB_CLASS, "local");
+                    encoder.writeString(AttributeId.ATTRIB_CLASS, "local");
             }
             else
             {
-                encoder.writeString(ATTRIB_CLASS, "other");
+                encoder.writeString(AttributeId.ATTRIB_CLASS, "other");
             }
             if (isTypeLock())
-                encoder.writeBool(ATTRIB_TYPELOCK, true);
-            if (symbol != (Symbol*)0)
+                encoder.writeBool(AttributeId.ATTRIB_TYPELOCK, true);
+            if (symbol != (Symbol)null)
             {
-                encoder.writeUnsignedInteger(ATTRIB_SYMREF, symbol.getId());
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_SYMREF, symbol.getId());
                 if (symboloffset >= 0)
-                    encoder.writeSignedInteger(ATTRIB_OFFSET, symboloffset);
+                    encoder.writeSignedInteger(AttributeId.ATTRIB_OFFSET, symboloffset);
             }
             getType().encode(encoder);
             for (int j = 0; j < inst.size(); ++j)
             {
-                encoder.openElement(ELEM_ADDR);
-                encoder.writeUnsignedInteger(ATTRIB_REF, inst[j].getCreateIndex());
-                encoder.closeElement(ELEM_ADDR);
+                encoder.openElement(ElementId.ELEM_ADDR);
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_REF, inst[j].getCreateIndex());
+                encoder.closeElement(ElementId.ELEM_ADDR);
             }
-            encoder.closeElement(ELEM_HIGH);
+            encoder.closeElement(ElementId.ElementId.ELEM_HIGH);
         }
 
 #if MERGEMULTI_DEBUG
@@ -1040,7 +1024,7 @@ namespace Sla.DECCORE
             path.Add(PcodeOpNode(op, 0));
             while (!path.empty())
             {
-                PcodeOpNode & node(path.back());
+                PcodeOpNode & node(path.GetLastItem());
                 if (node.op.numInput() <= node.slot)
                 {
                     path.pop_back();

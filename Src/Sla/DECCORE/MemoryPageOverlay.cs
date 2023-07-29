@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         protected override void insert(ulong addr, ulong val)
         {
             ulong pageaddr = addr & ~((ulong)(getPageSize() - 1));
-            map<ulong, byte*>::iterator iter;
+            Dictionary<ulong, byte*>::iterator iter;
 
             byte* pageptr;
 
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
         protected override ulong find(ulong addr)
         {
             ulong pageaddr = addr & ~((ulong)(getPageSize() - 1));
-            map<ulong, byte*>::const_iterator iter;
+            Dictionary<ulong, byte*>::const_iterator iter;
 
             iter = page.find(pageaddr);
             if (iter == page.end())
@@ -88,7 +88,7 @@ namespace Sla.DECCORE
         /// \param size is the number of bytes to retrieve
         protected override void getPage(ulong addr, byte[] res, int skip, int size)
         {
-            map<ulong, byte*>::const_iterator iter;
+            Dictionary<ulong, byte*>::const_iterator iter;
 
             iter = page.find(addr);
             if (iter == page.end())
@@ -116,7 +116,7 @@ namespace Sla.DECCORE
         /// \param size is the number of bytes to write
         protected override void setPage(ulong addr, byte[] val, int skip,int size)
         {
-            map<ulong, byte*>::iterator iter;
+            Dictionary<ulong, byte*>::iterator iter;
             byte* pageptr;
 
             iter = page.find(addr);
@@ -156,7 +156,7 @@ namespace Sla.DECCORE
 
         ~MemoryPageOverlay()
         {
-            map<ulong, byte*>::iterator iter;
+            Dictionary<ulong, byte*>::iterator iter;
 
             for (iter = page.begin(); iter != page.end(); ++iter)
                 delete[](*iter).second;

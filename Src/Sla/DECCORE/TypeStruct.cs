@@ -103,13 +103,13 @@ namespace Sla.DECCORE
             while (decoder.peekElement() != 0)
             {
                 field.emplace_back(decoder, typegrp);
-                int trialmax = field.back().offset + field.back().type.getSize();
+                int trialmax = field.GetLastItem().offset + field.GetLastItem().type.getSize();
                 if (trialmax > maxoffset)
                     maxoffset = trialmax;
                 if (maxoffset > size)
                 {
                     ostringstream s;
-                    s << "Field " << field.back().name << " does not fit in structure " + name;
+                    s << "Field " << field.GetLastItem().name << " does not fit in structure " + name;
                     throw new LowlevelError(s.str());
                 }
             }

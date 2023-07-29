@@ -44,7 +44,7 @@ namespace Sla.DECCORE
 
         public Database symboltab;        ///< Memory map of global variables and functions
         public ContextDatabase context;   ///< Map from addresses to context settings
-        map<string, ProtoModel*> protoModels; ///< Parsed forms of possible prototypes
+        Dictionary<string, ProtoModel*> protoModels; ///< Parsed forms of possible prototypes
         public ProtoModel defaultfp;  ///< Parsed form of default prototype
         public VarnodeData defaultReturnAddr;  ///< Default storage location of return address (for current function)
         public ProtoModel evalfp_current; ///< Function proto to use when evaluating current function

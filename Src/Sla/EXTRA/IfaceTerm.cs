@@ -253,7 +253,7 @@ namespace Sla.EXTRA
             while (!inputstack.empty())
             {
                 delete sptr;
-                sptr = inputstack.back();
+                sptr = inputstack.GetLastItem();
                 inputstack.pop_back();
             }
 #if __TERMINAL__
@@ -274,7 +274,7 @@ namespace Sla.EXTRA
         public override void popScript()
         {
             delete sptr;
-            sptr = inputstack.back();
+            sptr = inputstack.GetLastItem();
             inputstack.pop_back();
             IfaceStatus::popScript();
         }

@@ -42,11 +42,11 @@ namespace Sla.EXTRA
             if (sym.getCategory() == Symbol::function_parameter)
                 dcp.fd.getFuncProto().setInputLock(true);
             sym.getScope().retypeSymbol(sym, ct);
-            sym.getScope().setAttribute(sym, Varnode::typelock);
+            sym.getScope().setAttribute(sym, Varnode.varnode_flags.typelock);
             if ((newname.size() != 0) && (newname != name))
             {
                 sym.getScope().renameSymbol(sym, newname);
-                sym.getScope().setAttribute(sym, Varnode::namelock);
+                sym.getScope().setAttribute(sym, Varnode.varnode_flags.namelock);
             }
         }
     }

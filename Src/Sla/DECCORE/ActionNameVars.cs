@@ -53,7 +53,7 @@ namespace Sla.DECCORE
             if (high.isAddrTied()) return; // Don't propagate parameter name to address tied variable
             if (param.getName().compare(0, 6, "param_") == 0) return;
 
-            map<HighVariable*, OpRecommend>::iterator iter = recmap.find(high);
+            Dictionary<HighVariable*, OpRecommend>::iterator iter = recmap.find(high);
             if (iter != recmap.end())
             {   // We have seen this varnode before
                 if (ct == (Datatype)null) return; // Cannot override with null (casted) type
@@ -97,7 +97,7 @@ namespace Sla.DECCORE
                     }
                     if (vn.isFree()) continue;
                     Symbol* sym = vn.getHigh().getSymbol();
-                    if (sym == (Symbol*)0) continue;
+                    if (sym == (Symbol)null) continue;
                     if (sym.isNameLocked()) continue; // Override any unlocked name
                     if (sym.getScope() != localmap) continue; // Only name this in the local scope
                     string newname = "UNRECOVERED_JUMPTABLE";
@@ -118,7 +118,7 @@ namespace Sla.DECCORE
             int numfunc = data.numCalls();
             if (numfunc == 0) return;
 
-            map<HighVariable*, OpRecommend> recmap;
+            Dictionary<HighVariable*, OpRecommend> recmap;
 
             ScopeLocal* localmap = data.getScopeLocal();
             for (int i = 0; i < numfunc; ++i)
@@ -138,7 +138,7 @@ namespace Sla.DECCORE
             }
             if (recmap.empty()) return;
 
-            map<HighVariable*, OpRecommend>::iterator iter;
+            Dictionary<HighVariable*, OpRecommend>::iterator iter;
             for (uint i = 0; i < varlist.size(); ++i)
             {   // Do the actual naming in the original (address based) order
                 Varnode* vn = varlist[i];
@@ -147,7 +147,7 @@ namespace Sla.DECCORE
                 HighVariable* high = vn.getHigh();
                 if (high.getNumMergeClasses() > 1) continue;   // Don't inherit a name if speculatively merged
                 Symbol* sym = high.getSymbol();
-                if (sym == (Symbol*)0) continue;
+                if (sym == (Symbol)null) continue;
                 if (!sym.isNameUndefined()) continue;
                 iter = recmap.find(high);
                 if (iter != recmap.end())
@@ -175,7 +175,7 @@ namespace Sla.DECCORE
                 if (op.code() != CPUI_PTRSUB) continue;
                 Varnode* offVn = op.getIn(1);
                 Symbol* sym = data.linkSymbolReference(offVn);
-                if ((sym != (Symbol*)0) && sym.isNameUndefined())
+                if ((sym != (Symbol)null) && sym.isNameUndefined())
                     namerec.Add(offVn);
             }
         }
@@ -198,7 +198,7 @@ namespace Sla.DECCORE
             for (iter = data.beginLoc(constSpace); iter != enditer; ++iter)
             {
                 Varnode* curvn = *iter;
-                if (curvn.getSymbolEntry() != (SymbolEntry*)0)
+                if (curvn.getSymbolEntry() != (SymbolEntry)null)
                     data.linkSymbol(curvn);     // Special equate symbol
                 else if (curvn.isSpacebase())
                     linkSpacebaseSymbol(curvn, data, namerec);
@@ -224,7 +224,7 @@ namespace Sla.DECCORE
                     HighVariable* high = vn.getHigh();
                     if (!high.hasName()) continue;
                     Symbol* sym = data.linkSymbol(vn);
-                    if (sym != (Symbol*)0)
+                    if (sym != (Symbol)null)
                     {   // Can we associate high with a nameable symbol
                         if (sym.isNameUndefined() && high.getSymbolOffset() < 0)
                             namerec.Add(vn);  // Add if no name, and we have a high representing the whole

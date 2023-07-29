@@ -1,5 +1,5 @@
 ﻿
-namespace ghidra
+namespace Sla
 {
     internal class BugException : Exception
     {

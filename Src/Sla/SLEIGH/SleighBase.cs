@@ -51,7 +51,7 @@ namespace Sla.SLEIGH
                 if (sym.getType() == SleighSymbol::varnode_symbol)
                 {
                     pair<VarnodeData, string> ins(((VarnodeSymbol*) sym).getFixedVarnode(), sym.getName());
-                    pair<map<VarnodeData, string>::iterator, bool> res = varnode_xref.insert(ins);
+                    pair<Dictionary<VarnodeData, string>::iterator, bool> res = varnode_xref.insert(ins);
                     if (!res.second)
                     {
                         errorPairs.Add(sym.getName());
@@ -158,7 +158,7 @@ namespace Sla.SLEIGH
             while ((*iter).getName() == "floatformat")
             {
                 floatformats.emplace_back();
-                floatformats.back().restoreXml(*iter);
+                floatformats.GetLastItem().restoreXml(*iter);
                 ++iter;
             }
             indexer.restoreXml(*iter);
@@ -206,7 +206,7 @@ namespace Sla.SLEIGH
             sym.space = base;
             sym.offset = off;
             sym.size = size;
-            map<VarnodeData, string>::const_iterator iter = varnode_xref.upper_bound(sym); // First point greater than offset
+            Dictionary<VarnodeData, string>::const_iterator iter = varnode_xref.upper_bound(sym); // First point greater than offset
             if (iter == varnode_xref.begin()) return "";
             iter--;
             VarnodeData point = (*iter).first;

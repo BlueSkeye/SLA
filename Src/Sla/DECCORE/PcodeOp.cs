@@ -274,7 +274,7 @@ namespace Sla.DECCORE
         {
             flags = 0;          // Start out life as dead
             addlflags = 0;
-            parent = (BlockBasic*)0; // No parent yet
+            parent = (BlockBasic)null; // No parent yet
 
             output = (Varnode)null;
             opcode = (TypeOp*)0;
@@ -726,7 +726,7 @@ namespace Sla.DECCORE
             Varnode vn1;
 
             vn0 = getIn(0);
-            if (vn0.getSymbolEntry() != (SymbolEntry*)0)
+            if (vn0.getSymbolEntry() != (SymbolEntry)null)
             {
                 markedInput = true;
             }
@@ -736,7 +736,7 @@ namespace Sla.DECCORE
                     return opcode.evaluateUnary(output.getSize(), vn0.getSize(), vn0.getOffset());
                 case PcodeOp::binary:
                     vn1 = getIn(1);
-                    if (vn1.getSymbolEntry() != (SymbolEntry*)0)
+                    if (vn1.getSymbolEntry() != (SymbolEntry)null)
                     {
                         markedInput = true;
                     }
@@ -779,7 +779,7 @@ namespace Sla.DECCORE
                 case CPUI_INT_OR:
                 case CPUI_INT_XOR:
                     copyVn = getIn(0);
-                    if (copyVn.getSymbolEntry() == (SymbolEntry*)0)
+                    if (copyVn.getSymbolEntry() == (SymbolEntry)null)
                     {
                         copyVn = getIn(1);
                     }
@@ -787,7 +787,7 @@ namespace Sla.DECCORE
                 default:
                     return;
             }
-            if (copyVn.getSymbolEntry() == (SymbolEntry*)0)
+            if (copyVn.getSymbolEntry() == (SymbolEntry)null)
                 return;             // The first input must be marked
             newConst.copySymbolIfValid(copyVn);
         }
@@ -1119,7 +1119,7 @@ namespace Sla.DECCORE
         public void printDebug(TextWriter s)
         {
             s << start << ": ";
-            if (isDead() || (parent == (BlockBasic*)0))
+            if (isDead() || (parent == (BlockBasic)null))
                 s << "**";
             else
                 printRaw(s);

@@ -75,7 +75,7 @@ namespace Sla
         }
 
         /// \brief Calculate smallest mask that covers the given value
-        /// Calculcate a mask that covers either the least significant byte, uint2, uint, or ulong,
+        /// Calculcate a mask that covers either the least significant byte, ushort, uint, or ulong,
         /// whatever is smallest.
         /// \param val is the given value
         /// \return the minimal mask

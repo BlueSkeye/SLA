@@ -27,7 +27,7 @@ namespace Sla.DECCORE
                                        param.getType(), ParamMeasure::INPUT));
                     Varnode* vn = fd.findVarnodeInput(param.getSize(), param.getAddress());
                     if (vn != (Varnode)null)
-                        InputParamMeasures.back().calculateRank(true, vn, (PcodeOp)null);
+                        InputParamMeasures.GetLastItem().calculateRank(true, vn, (PcodeOp)null);
                 }
 
                 ProtoParameter* outparam = fproto.getOutput();
@@ -46,7 +46,7 @@ namespace Sla.DECCORE
                             Varnode* ovn = rtn_op.getIn(1);
                             if (ovn != (Varnode)null)
                             {  //Not a void return
-                                OutputParamMeasures.back().calculateRank(true, ovn, rtn_op);
+                                OutputParamMeasures.GetLastItem().calculateRank(true, ovn, rtn_op);
                                 break;
                             }
                         }
@@ -58,15 +58,15 @@ namespace Sla.DECCORE
             {
                 // Need to list input varnodes that are outside of the model
                 VarnodeDefSet::const_iterator iter, enditer;
-                iter = fd.beginDef(Varnode::input);
-                enditer = fd.endDef(Varnode::input);
+                iter = fd.beginDef(Varnode.varnode_flags.input);
+                enditer = fd.endDef(Varnode.varnode_flags.input);
                 while (iter != enditer)
                 {
                     Varnode* invn = *iter;
                     ++iter;
                     InputParamMeasures.Add(ParamMeasure(invn.getAddr(), invn.getSize(),
                                        invn.getType(), ParamMeasure::INPUT));
-                    InputParamMeasures.back().calculateRank(true, invn, (PcodeOp)null);
+                    InputParamMeasures.GetLastItem().calculateRank(true, invn, (PcodeOp)null);
                 }
             }
         }

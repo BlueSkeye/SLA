@@ -175,10 +175,10 @@ namespace Sla.DECCORE
         public ushort getCategoryIndex() => catindex;
 
         /// Is the Symbol type-locked
-        public bool isTypeLocked() => ((flags&Varnode::typelock)!= 0);
+        public bool isTypeLocked() => ((flags&Varnode.varnode_flags.typelock)!= 0);
 
         /// Is the Symbol name-locked
-        public bool isNameLocked() => ((flags&Varnode::namelock)!= 0);
+        public bool isNameLocked() => ((flags&Varnode.varnode_flags.namelock)!= 0);
 
         /// Is the Symbol size type-locked
         public bool isSizeTypeLocked() => ((dispflags & size_typelock)!= 0);
@@ -224,7 +224,7 @@ namespace Sla.DECCORE
             if (val)
             {
                 dispflags |= isolate;
-                flags |= Varnode::typelock;     // Isolated Symbol must be typelocked
+                flags |= Varnode.varnode_flags.typelock;     // Isolated Symbol must be typelocked
                 checkSizeTypeLock();
             }
             else
@@ -343,9 +343,9 @@ namespace Sla.DECCORE
         {
             encoder.writeString(ATTRIB_NAME, name);
             encoder.writeUnsignedInteger(ATTRIB_ID, getId());
-            if ((flags & Varnode::namelock) != 0)
+            if ((flags & Varnode.varnode_flags.namelock) != 0)
                 encoder.writeBool(ATTRIB_NAMELOCK, true);
-            if ((flags & Varnode::typelock) != 0)
+            if ((flags & Varnode.varnode_flags.typelock) != 0)
                 encoder.writeBool(ATTRIB_TYPELOCK, true);
             if ((flags & Varnode::@readonly)!= 0)
                 encoder.writeBool(ATTRIB_READONLY, true);
@@ -410,7 +410,7 @@ namespace Sla.DECCORE
                     if (!decoder.readBool())
                     {
                         dispflags |= isolate;
-                        flags |= Varnode::typelock;
+                        flags |= Varnode.varnode_flags.typelock;
                     }
                 }
                 else if (attribId == ATTRIB_NAME)
@@ -418,7 +418,7 @@ namespace Sla.DECCORE
                 else if (attribId == ATTRIB_NAMELOCK)
                 {
                     if (decoder.readBool())
-                        flags |= Varnode::namelock;
+                        flags |= Varnode.varnode_flags.namelock;
                 }
                 else if (attribId == ATTRIB_READONLY)
                 {
@@ -428,7 +428,7 @@ namespace Sla.DECCORE
                 else if (attribId == ATTRIB_TYPELOCK)
                 {
                     if (decoder.readBool())
-                        flags |= Varnode::typelock;
+                        flags |= Varnode.varnode_flags.typelock;
                 }
                 else if (attribId == ATTRIB_THISPTR)
                 {

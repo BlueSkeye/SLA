@@ -107,10 +107,10 @@ namespace Sla.DECCORE
                 // For truncated spaces we need a zext op, from the truncated stack pointer
                 // into the full stack pointer
                 AddrSpace* stackspc = data.getArch().getStackSpace();
-                BlockBasic* topbl = (BlockBasic*)0;
+                BlockBasic* topbl = (BlockBasic)null;
                 if (data.getBasicBlocks().getSize() > 0)
                     topbl = (BlockBasic*)data.getBasicBlocks().getBlock(0);
-                if ((stackspc != (AddrSpace)null) && (topbl != (BlockBasic*)0))
+                if ((stackspc != (AddrSpace)null) && (topbl != (BlockBasic)null))
                 {
                     for (int i = 0; i < stackspc.numSpacebase(); ++i)
                     {
@@ -137,7 +137,7 @@ namespace Sla.DECCORE
             {
 
                 int ptr_size = spc.isTruncated() ? spc.getAddrSize() : 0; // Check if we need to do pointer trimming
-                BlockBasic* topbl = (BlockBasic*)0;
+                BlockBasic* topbl = (BlockBasic)null;
                 if (data.getBasicBlocks().getSize() > 0)
                     topbl = (BlockBasic*)data.getBasicBlocks().getBlock(0);
 
@@ -148,7 +148,7 @@ namespace Sla.DECCORE
                     Varnode* vn = data.newVarnode(param.getSize(), param.getAddress());
                     vn = data.setInputVarnode(vn);
                     vn.setLockedInput();
-                    if (topbl != (BlockBasic*)0)
+                    if (topbl != (BlockBasic)null)
                         extendInput(data, vn, param, topbl);
                     if (ptr_size > 0)
                     {

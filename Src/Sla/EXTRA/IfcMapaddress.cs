@@ -33,12 +33,12 @@ namespace Sla.EXTRA
             {
                 Symbol* sym;
                 sym = dcp.fd.getScopeLocal().addSymbol(name, ct, addr, Address()).getSymbol();
-                sym.getScope().setAttribute(sym, Varnode::namelock | Varnode::typelock);
+                sym.getScope().setAttribute(sym, Varnode.varnode_flags.namelock | Varnode.varnode_flags.typelock);
             }
             else
             {
                 Symbol* sym;
-                uint flags = Varnode::namelock | Varnode::typelock;
+                uint flags = Varnode.varnode_flags.namelock | Varnode.varnode_flags.typelock;
                 flags |= dcp.conf.symboltab.getProperty(addr); // Inherit existing properties
                 string basename;
                 Scope* scope = dcp.conf.symboltab.findCreateScopeFromSymbolName(name, "::", basename, (Scope)null);
