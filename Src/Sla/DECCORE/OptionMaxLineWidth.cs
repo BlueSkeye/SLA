@@ -26,7 +26,7 @@ namespace Sla.DECCORE
             s >> val;
             if (val == -1)
                 throw ParseError("Must specify integer linewidth");
-            glb->print->setMaxLineSize(val);
+            glb.print.setMaxLineSize(val);
             return "Maximum line width set to " + p1;
         }
     }

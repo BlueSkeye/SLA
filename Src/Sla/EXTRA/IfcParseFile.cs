@@ -17,7 +17,7 @@ namespace Sla.EXTRA
         /// if the symbol already exists, associate the prototype with the symbol.
         public override void execute(TextReader s)
         {
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("No load image present");
 
             string filename;
@@ -33,11 +33,11 @@ namespace Sla.EXTRA
 
             try
             {               // Try to parse the file
-                parse_C(dcp->conf, fs);
+                parse_C(dcp.conf, fs);
             }
             catch (ParseError err)
             {
-                *status->optr << "Error in C syntax: " << err.ToString() << endl;
+                *status.optr << "Error in C syntax: " << err.ToString() << endl;
                 throw IfaceExecutionError("Bad C syntax");
             }
             fs.close();

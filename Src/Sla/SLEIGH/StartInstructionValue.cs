@@ -18,7 +18,7 @@ namespace Sla.SLEIGH
 
         public override intb getValue(ParserWalker walker)
         {
-            return (intb)AddrSpace::byteToAddress(walker.getAddr().getOffset(), walker.getAddr().getSpace()->getWordSize());
+            return (intb)AddrSpace::byteToAddress(walker.getAddr().getOffset(), walker.getAddr().getSpace().getWordSize());
         }
 
         public override TokenPattern genMinPattern(List<TokenPattern> ops) => new TokenPattern();

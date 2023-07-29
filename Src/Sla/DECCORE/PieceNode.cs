@@ -47,7 +47,7 @@ namespace Sla.DECCORE
         public PcodeOp getOp() => pieceOp;
 
         /// Get the Varnode representing \b this piece
-        public Varnode getVarnode() => pieceOp->getIn(slot);
+        public Varnode getVarnode() => pieceOp.getIn(slot);
 
         /// \brief Determine if a Varnode is a leaf within the CONCAT tree rooted at the given Varnode
         ///
@@ -60,19 +60,19 @@ namespace Sla.DECCORE
         /// \return \b true is the test Varnode is a leaf of the tree
         public static bool isLeaf(Varnode rootVn, Varnode vn, int4 typeOffset)
         {
-            if (vn->isMapped() && rootVn->getSymbolEntry() != vn->getSymbolEntry())
+            if (vn.isMapped() && rootVn.getSymbolEntry() != vn.getSymbolEntry())
             {
                 return true;
             }
-            if (!vn->isWritten()) return true;
-            PcodeOp* def = vn->getDef();
-            if (def->code() != CPUI_PIECE) return true;
-            PcodeOp* op = vn->loneDescend();
+            if (!vn.isWritten()) return true;
+            PcodeOp* def = vn.getDef();
+            if (def.code() != CPUI_PIECE) return true;
+            PcodeOp* op = vn.loneDescend();
             if (op == (PcodeOp*)0) return true;
-            if (vn->isAddrTied())
+            if (vn.isAddrTied())
             {
-                Address addr = rootVn->getAddr() + typeOffset;
-                if (vn->getAddr() != addr) return true;
+                Address addr = rootVn.getAddr() + typeOffset;
+                if (vn.getAddr() != addr) return true;
             }
             return false;
         }
@@ -84,25 +84,25 @@ namespace Sla.DECCORE
         /// \return the root of the CONCAT tree
         public static Varnode findRoot(Varnode vn)
         {
-            while (vn->isProtoPartial() || vn->isAddrTied())
+            while (vn.isProtoPartial() || vn.isAddrTied())
             {
-                list<PcodeOp*>::const_iterator iter = vn->beginDescend();
+                list<PcodeOp*>::const_iterator iter = vn.beginDescend();
                 PcodeOp* pieceOp = (PcodeOp*)0;
-                while (iter != vn->endDescend())
+                while (iter != vn.endDescend())
                 {
                     PcodeOp* op = *iter;
                     ++iter;
-                    if (op->code() != CPUI_PIECE) continue;
-                    int4 slot = op->getSlot(vn);
-                    Address addr = op->getOut()->getAddr();
-                    if (addr.getSpace()->isBigEndian() == (slot == 1))
-                        addr = addr + op->getIn(1 - slot)->getSize();
-                    addr.renormalize(vn->getSize());        // Allow for possible join address
-                    if (addr == vn->getAddr())
+                    if (op.code() != CPUI_PIECE) continue;
+                    int4 slot = op.getSlot(vn);
+                    Address addr = op.getOut().getAddr();
+                    if (addr.getSpace().isBigEndian() == (slot == 1))
+                        addr = addr + op.getIn(1 - slot).getSize();
+                    addr.renormalize(vn.getSize());        // Allow for possible join address
+                    if (addr == vn.getAddr())
                     {
                         if (pieceOp != (PcodeOp*)0)
                         {       // If there is more than one valid PIECE
-                            if (op->compareOrder(pieceOp))  // Attach this to earliest one
+                            if (op.compareOrder(pieceOp))  // Attach this to earliest one
                                 pieceOp = op;
                         }
                         else
@@ -111,7 +111,7 @@ namespace Sla.DECCORE
                 }
                 if (pieceOp == (PcodeOp*)0)
                     break;
-                vn = pieceOp->getOut();
+                vn = pieceOp.getOut();
             }
             return vn;
         }
@@ -129,12 +129,12 @@ namespace Sla.DECCORE
         {
             for (int4 i = 0; i < 2; ++i)
             {
-                Varnode* vn = op->getIn(i);
-                int4 offset = (rootVn->getSpace()->isBigEndian() == (i == 1)) ? baseOffset + op->getIn(1 - i)->getSize() : baseOffset;
+                Varnode* vn = op.getIn(i);
+                int4 offset = (rootVn.getSpace().isBigEndian() == (i == 1)) ? baseOffset + op.getIn(1 - i).getSize() : baseOffset;
                 bool res = isLeaf(rootVn, vn, offset);
                 stack.emplace_back(op, i, offset, res);
                 if (!res)
-                    gatherPieces(stack, rootVn, vn->getDef(), offset);
+                    gatherPieces(stack, rootVn, vn.getDef(), offset);
             }
         }
     }

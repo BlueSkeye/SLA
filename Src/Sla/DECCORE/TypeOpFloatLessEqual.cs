@@ -20,7 +20,7 @@ namespace Sla.DECCORE
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opFloatLessEqual(op);
+            lng.opFloatLessEqual(op);
         }
     }
 }

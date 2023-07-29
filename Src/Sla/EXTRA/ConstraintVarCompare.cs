@@ -25,12 +25,12 @@ namespace Sla.EXTRA
         }
         
         public override UnifyConstraint clone()
-            => (new ConstraintVarCompare(var1index, var2index, istrue))->copyid(this);
+            => (new ConstraintVarCompare(var1index, var2index, istrue)).copyid(this);
 
         public override bool step(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            if (!traverse->step()) return false;
+            if (!traverse.step()) return false;
             Varnode* vn1 = state.data(var1index).getVarnode();
             Varnode* vn2 = state.data(var2index).getVarnode();
             return ((vn1 == vn2) == istrue);

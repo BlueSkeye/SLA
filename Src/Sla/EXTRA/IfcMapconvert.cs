@@ -19,7 +19,7 @@ namespace Sla.EXTRA
         /// \e address of the p-code op using the constant plus a dynamic \e hash is also given.
         public override void execute(TextReader s)
         {
-            if (dcp->fd == (Funcdata*)0)
+            if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function loaded");
             string name;
             uintb value;
@@ -42,11 +42,11 @@ namespace Sla.EXTRA
                 throw IfaceParseError("Bad convert format");
 
             s >> ws >> hex >> value;
-            Address addr = parse_machaddr(s, size, *dcp->conf->types); // Read pc address of hash
+            Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read pc address of hash
 
             s >> hex >> hash;       // Parse the hash value
 
-            dcp->fd->getScopeLocal()->addEquateSymbol("", format, value, addr, hash);
+            dcp.fd.getScopeLocal().addEquateSymbol("", format, value, addr, hash);
         }
     }
 }

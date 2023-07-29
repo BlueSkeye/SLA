@@ -694,7 +694,7 @@ namespace ghidra
                     case of YYERROR or YYBACKUP, subsequent parser actions might lead
                     to an incorrect destructor call or verbose syntax error message
                     before the lookahead is translated.  */
-                YY_SYMBOL_PRINT("-> $$ =", yyr1[yyn], pyyval);
+                YY_SYMBOL_PRINT(". $$ =", yyr1[yyn], pyyval);
 
                 YYPOPSTACK(yylen);
                 yylen = 0;

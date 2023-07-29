@@ -37,12 +37,12 @@ namespace Sla.DECCORE
         /// \return \b true if \b this should be ordered before the other edge
         public static bool operator <(ToOpEdge op1, ToOpEdge op2)
         {
-            Address addr1 = op->getSeqNum().getAddr();
-            Address addr2 = op2.op->getSeqNum().getAddr();
+            Address addr1 = op.getSeqNum().getAddr();
+            Address addr2 = op2.op.getSeqNum().getAddr();
             if (addr1 != addr2)
                 return (addr1 < addr2);
-            uintm ord1 = op->getSeqNum().getOrder();
-            uintm ord2 = op2.op->getSeqNum().getOrder();
+            uintm ord1 = op.getSeqNum().getOrder();
+            uintm ord2 = op2.op.getSeqNum().getOrder();
             if (ord1 != ord2)
                 return (ord1 < ord2);
             return (slot < op2.slot);
@@ -61,9 +61,9 @@ namespace Sla.DECCORE
         public uint hash(uint reg)
         {
             reg = crc_update(reg, (uint4)slot);
-            reg = crc_update(reg, DynamicHash::transtable[op->code()]);
-            uintb val = op->getSeqNum().getAddr().getOffset();
-            int4 sz = op->getSeqNum().getAddr().getAddrSize();
+            reg = crc_update(reg, DynamicHash::transtable[op.code()]);
+            uintb val = op.getSeqNum().getAddr().getOffset();
+            int4 sz = op.getSeqNum().getAddr().getAddrSize();
             for (int4 i = 0; i < sz; ++i)
             {
                 reg = crc_update(reg, (uint4)val); // Hash in the address

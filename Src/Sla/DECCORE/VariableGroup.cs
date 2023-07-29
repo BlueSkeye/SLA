@@ -27,9 +27,9 @@ namespace Sla.DECCORE
             /// \return \b true if \b a should be ordered before the \b b
             internal static bool operator/*()*/(VariablePiece a, VariablePiece b)
             {
-              if (a->getOffset() != b->getOffset())
-                return (a->getOffset() < b->getOffset());
-              return (a->getSize() < b->getSize());
+              if (a.getOffset() != b.getOffset())
+                return (a.getOffset() < b.getOffset());
+              return (a.getSize() < b.getSize());
             }
         }
 
@@ -54,10 +54,10 @@ namespace Sla.DECCORE
         /// \param piece is the new piece to add
         public void addPiece(VariablePiece piece)
         {
-            piece->group = this;
+            piece.group = this;
             if (!pieceSet.insert(piece).second)
                 throw new LowlevelError("Duplicate VariablePiece");
-            int4 pieceMax = piece->getOffset() + piece->getSize();
+            int4 pieceMax = piece.getOffset() + piece.getSize();
             if (pieceMax > size)
                 size = pieceMax;
         }
@@ -71,7 +71,7 @@ namespace Sla.DECCORE
 
             for (iter = pieceSet.begin(); iter != pieceSet.end(); ++iter)
             {
-                (*iter)->groupOffset += amt;
+                (*iter).groupOffset += amt;
             }
             size += amt;
         }
@@ -102,14 +102,14 @@ namespace Sla.DECCORE
         /// \param op2 is the given VariableGroup to merge into \b this
         public void combineGroups(VariableGroup op2)
         {
-            set<VariablePiece*, VariableGroup::PieceCompareByOffset>::iterator iter = op2->pieceSet.begin();
-            set<VariablePiece*, VariableGroup::PieceCompareByOffset>::iterator enditer = op2->pieceSet.end();
+            set<VariablePiece*, VariableGroup::PieceCompareByOffset>::iterator iter = op2.pieceSet.begin();
+            set<VariablePiece*, VariableGroup::PieceCompareByOffset>::iterator enditer = op2.pieceSet.end();
 
             while (iter != enditer)
             {
                 VariablePiece* piece = *iter;
                 ++iter;
-                piece->transferGroup(this);
+                piece.transferGroup(this);
             }
         }
     }

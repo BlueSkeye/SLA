@@ -32,8 +32,8 @@ namespace Sla.EXTRA
         public void encode(Encoder encoder)
         {
             encoder.openElement(ELEM_EDGE);
-            from->getAddr().encode(encoder);
-            to->getAddr().encode(encoder);
+            from.getAddr().encode(encoder);
+            to.getAddr().encode(encoder);
             callsiteaddr.encode(encoder);
             encoder.closeElement(ELEM_EDGE);
         }
@@ -50,14 +50,14 @@ namespace Sla.EXTRA
             siteaddr = Address::decode(decoder);
             decoder.closeElement(elemId);
 
-            CallGraphNode* fromnode = graph->findNode(fromaddr);
+            CallGraphNode* fromnode = graph.findNode(fromaddr);
             if (fromnode == (CallGraphNode*)0)
                 throw new LowlevelError("Could not find from node");
-            CallGraphNode* tonode = graph->findNode(toaddr);
+            CallGraphNode* tonode = graph.findNode(toaddr);
             if (tonode == (CallGraphNode*)0)
                 throw new LowlevelError("Could not find to node");
 
-            graph->addEdge(fromnode, tonode, siteaddr);
+            graph.addEdge(fromnode, tonode, siteaddr);
         }
     }
 }

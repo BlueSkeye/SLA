@@ -22,27 +22,27 @@ namespace Sla.EXTRA
         {
             int4 discard;
 
-            if (dcp->fd == (Funcdata*)0)
+            if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");
 
             s >> ws;
-            Address callpoint(parse_machaddr(s, discard,* dcp->conf->types));
+            Address callpoint(parse_machaddr(s, discard,* dcp.conf.types));
             int4 i;
-            for (i = 0; dcp->fd->numCalls(); ++i)
-                if (dcp->fd->getCallSpecs(i)->getOp()->getAddr() == callpoint) break;
-            if (i == dcp->fd->numCalls())
+            for (i = 0; dcp.fd.numCalls(); ++i)
+                if (dcp.fd.getCallSpecs(i).getOp().getAddr() == callpoint) break;
+            if (i == dcp.fd.numCalls())
                 throw IfaceExecutionError("No call is made at this address");
 
             PrototypePieces pieces;
-            parse_protopieces(pieces, s, dcp->conf); // Parse the prototype from stream
+            parse_protopieces(pieces, s, dcp.conf); // Parse the prototype from stream
 
             FuncProto* newproto = new FuncProto();
 
             // Make proto whose storage is internal, not backed by a real scope
-            newproto->setInternal(pieces.model, dcp->conf->types->getTypeVoid());
-            newproto->setPieces(pieces);
-            dcp->fd->getOverride().insertProtoOverride(callpoint, newproto);
-            dcp->fd->clear();       // Clear any analysis (this leaves overrides intact)
+            newproto.setInternal(pieces.model, dcp.conf.types.getTypeVoid());
+            newproto.setPieces(pieces);
+            dcp.fd.getOverride().insertProtoOverride(callpoint, newproto);
+            dcp.fd.clear();       // Clear any analysis (this leaves overrides intact)
         }
     }
 }

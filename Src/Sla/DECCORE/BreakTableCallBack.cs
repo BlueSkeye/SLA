@@ -45,9 +45,9 @@ namespace Sla.DECCORE
         /// \param func is the breakpoint object to associate with the pcode op
         public void registerPcodeCallback(string nm, BreakCallBack func)
         {
-            func->setEmulate(emulate);
+            func.setEmulate(emulate);
             vector<string> userops;
-            trans->getUserOpNames(userops);
+            trans.getUserOpNames(userops);
             for (int4 i = 0; i < userops.size(); ++i)
             {
                 if (userops[i] == name)
@@ -67,7 +67,7 @@ namespace Sla.DECCORE
         /// \param func is the breakpoint being registered
         public void registerAddressCallback(Address addr, BreakCallBack func)
         {
-            func->setEmulate(emulate);
+            func.setEmulate(emulate);
             addresscallback[addr] = func;
         }
 
@@ -80,13 +80,13 @@ namespace Sla.DECCORE
             map<Address, BreakCallBack*>::iterator iter1;
 
             for (iter1 = addresscallback.begin(); iter1 != addresscallback.end(); ++iter1)
-                (*iter1).second->setEmulate(emu);
+                (*iter1).second.setEmulate(emu);
 
             map<uintb, BreakCallBack*>::iterator iter2;
 
 
             for (iter2 = pcodecallback.begin(); iter2 != pcodecallback.end(); ++iter2)
-                (*iter2).second->setEmulate(emu);
+                (*iter2).second.setEmulate(emu);
         }
 
         /// Invoke any breakpoints for the given pcode op
@@ -96,12 +96,12 @@ namespace Sla.DECCORE
         /// \return \b true if the breakpoint exists and returns \b true, otherwise return \b false
         public override bool doPcodeOpBreak(PcodeOpRaw curop)
         {
-            uintb val = curop->getInput(0)->offset;
+            uintb val = curop.getInput(0).offset;
             map<uintb, BreakCallBack*>::const_iterator iter;
 
             iter = pcodecallback.find(val);
             if (iter == pcodecallback.end()) return false;
-            return (*iter).second->pcodeCallback(curop);
+            return (*iter).second.pcodeCallback(curop);
         }
 
         /// Invoke any breakpoints for the given address
@@ -115,7 +115,7 @@ namespace Sla.DECCORE
 
             iter = addresscallback.find(addr);
             if (iter == addresscallback.end()) return false;
-            return (*iter).second->addressCallback(addr);
+            return (*iter).second.addressCallback(addr);
         }
     }
 }

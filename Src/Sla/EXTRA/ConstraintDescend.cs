@@ -23,7 +23,7 @@ namespace Sla.EXTRA
         }
         
         public override UnifyConstraint clone()
-            => (new ConstraintDescend(opindex, varindex))->copyid(this);
+            => (new ConstraintDescend(opindex, varindex)).copyid(this);
 
         public override void buildTraverseState(UnifyState state)
         {
@@ -37,14 +37,14 @@ namespace Sla.EXTRA
         {
             TraverseDescendState* traverse = (TraverseDescendState*)state.getTraverse(uniqid);
             Varnode* vn = state.data(varindex).getVarnode();
-            traverse->initialize(vn);
+            traverse.initialize(vn);
         }
 
         public override bool step(UnifyState state)
         {
             TraverseDescendState* traverse = (TraverseDescendState*)state.getTraverse(uniqid);
-            if (!traverse->step()) return false;
-            PcodeOp* op = traverse->getCurrentOp();
+            if (!traverse.step()) return false;
+            PcodeOp* op = traverse.getCurrentOp();
             state.data(opindex).setOp(op);
             return true;
         }
@@ -62,9 +62,9 @@ namespace Sla.EXTRA
             printstate.printIndent(s);
             s << "list<PcodeOp *>::const_iterator iter" << dec << printstate.getDepth() << ",enditer" << printstate.getDepth() << ';' << endl;
             printstate.printIndent(s);
-            s << "iter" << printstate.getDepth() << " = " << printstate.getName(varindex) << "->beginDescend();" << endl;
+            s << "iter" << printstate.getDepth() << " = " << printstate.getName(varindex) << ".beginDescend();" << endl;
             printstate.printIndent(s);
-            s << "enditer" << printstate.getDepth() << " = " << printstate.getName(varindex) << "->endDescend();" << endl;
+            s << "enditer" << printstate.getDepth() << " = " << printstate.getName(varindex) << ".endDescend();" << endl;
             printstate.printIndent(s);
             s << "while(iter" << printstate.getDepth() << " != enditer" << printstate.getDepth() << ") {" << endl;
             printstate.incDepth();  // permanent increase in depth

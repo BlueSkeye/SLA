@@ -41,8 +41,8 @@ namespace Sla.SLEIGH
 
         public static void release(PatternEquation pateq)
         {
-            pateq->refcount -= 1;
-            if (pateq->refcount <= 0)
+            pateq.refcount -= 1;
+            if (pateq.refcount <= 0)
                 delete pateq;
         }
     }

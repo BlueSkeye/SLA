@@ -31,11 +31,11 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn = op->getOut();
-            Varnode* invn = op->getIn(0);
-            uintb mask = calc_mask(invn->getSize());
+            Varnode* vn = op.getOut();
+            Varnode* invn = op.getIn(0);
+            uintb mask = calc_mask(invn.getSize());
 
-            SubvariableFlow subflow(&data,vn,mask,invn->isPtrFlow(),false,false);
+            SubvariableFlow subflow(&data,vn,mask,invn.isPtrFlow(),false,false);
             if (!subflow.doTrace()) return 0;
             subflow.doReplacement();
             return 1;

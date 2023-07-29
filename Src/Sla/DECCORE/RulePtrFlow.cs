@@ -22,7 +22,7 @@ namespace Sla.DECCORE
         /// \return \b true if ptrflow property is newly set
         private bool trialSetPtrFlow(PcodeOp op)
         {
-            switch (op->code())
+            switch (op.code())
             {
                 case CPUI_COPY:
                 case CPUI_MULTIEQUAL:
@@ -30,9 +30,9 @@ namespace Sla.DECCORE
                 case CPUI_INDIRECT:
                 case CPUI_PTRSUB:
                 case CPUI_PTRADD:
-                    if (!op->isPtrFlow())
+                    if (!op.isPtrFlow())
                     {
-                        op->setPtrFlow();
+                        op.setPtrFlow();
                         return true;
                     }
                     break;
@@ -49,13 +49,13 @@ namespace Sla.DECCORE
         private bool propagateFlowToDef(Varnode vn)
         {
             bool madeChange = false;
-            if (!vn->isPtrFlow())
+            if (!vn.isPtrFlow())
             {
-                vn->setPtrFlow();
+                vn.setPtrFlow();
                 madeChange = true;
             }
-            if (!vn->isWritten()) return madeChange;
-            PcodeOp* op = vn->getDef();
+            if (!vn.isWritten()) return madeChange;
+            PcodeOp* op = vn.getDef();
             if (trialSetPtrFlow(op))
                 madeChange = true;
             return madeChange;
@@ -69,12 +69,12 @@ namespace Sla.DECCORE
         {
             list<PcodeOp*>::const_iterator iter;
             bool madeChange = false;
-            if (!vn->isPtrFlow())
+            if (!vn.isPtrFlow())
             {
-                vn->setPtrFlow();
+                vn.setPtrFlow();
                 madeChange = true;
             }
-            for (iter = vn->beginDescend(); iter != vn->endDescend(); ++iter)
+            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {
                 PcodeOp* op = *iter;
                 if (trialSetPtrFlow(op))
@@ -96,20 +96,20 @@ namespace Sla.DECCORE
         private Varnode truncatePointer(AddrSpace spc, PcodeOp op, Varnode vn, int4 slot, Funcdata data)
         {
             Varnode* newvn;
-            PcodeOp* truncop = data.newOp(2, op->getAddr());
+            PcodeOp* truncop = data.newOp(2, op.getAddr());
             data.opSetOpcode(truncop, CPUI_SUBPIECE);
-            data.opSetInput(truncop, data.newConstant(vn->getSize(), 0), 1);
-            if (vn->getSpace()->getType() == IPTR_INTERNAL)
+            data.opSetInput(truncop, data.newConstant(vn.getSize(), 0), 1);
+            if (vn.getSpace().getType() == IPTR_INTERNAL)
             {
-                newvn = data.newUniqueOut(spc->getAddrSize(), truncop);
+                newvn = data.newUniqueOut(spc.getAddrSize(), truncop);
             }
             else
             {
-                Address addr = vn->getAddr();
+                Address addr = vn.getAddr();
                 if (addr.isBigEndian())
-                    addr = addr + (vn->getSize() - spc->getAddrSize());
-                addr.renormalize(spc->getAddrSize());
-                newvn = data.newVarnodeOut(spc->getAddrSize(), addr, truncop);
+                    addr = addr + (vn.getSize() - spc.getAddrSize());
+                addr.renormalize(spc.getAddrSize());
+                newvn = data.newVarnodeOut(spc.getAddrSize(), addr, truncop);
             }
             data.opSetInput(op, newvn, slot);
             data.opSetInput(truncop, vn, 0);
@@ -127,7 +127,7 @@ namespace Sla.DECCORE
             : base(g, 0, "ptrflow")
         {
             glb = conf;
-            hasTruncations = glb->getDefaultDataSpace()->isTruncated();
+            hasTruncations = glb.getDefaultDataSpace().isTruncated();
         }
 
         private virtual Rule clone(ActionGroupList grouplist)
@@ -157,13 +157,13 @@ namespace Sla.DECCORE
             AddrSpace* spc;
             int4 madeChange = 0;
 
-            switch (op->code())
+            switch (op.code())
             {
                 case CPUI_LOAD:
                 case CPUI_STORE:
-                    vn = op->getIn(1);
-                    spc = op->getIn(0)->getSpaceFromConst();
-                    if (vn->getSize() > spc->getAddrSize())
+                    vn = op.getIn(1);
+                    spc = op.getIn(0).getSpaceFromConst();
+                    if (vn.getSize() > spc.getAddrSize())
                     {
                         vn = truncatePointer(spc, op, vn, 1, data);
                         madeChange = 1;
@@ -173,9 +173,9 @@ namespace Sla.DECCORE
                     break;
                 case CPUI_CALLIND:
                 case CPUI_BRANCHIND:
-                    vn = op->getIn(0);
-                    spc = data.getArch()->getDefaultCodeSpace();
-                    if (vn->getSize() > spc->getAddrSize())
+                    vn = op.getIn(0);
+                    spc = data.getArch().getDefaultCodeSpace();
+                    if (vn.getSize() > spc.getAddrSize())
                     {
                         vn = truncatePointer(spc, op, vn, 0, data);
                         madeChange = 1;
@@ -184,39 +184,39 @@ namespace Sla.DECCORE
                         madeChange = 1;
                     break;
                 case CPUI_NEW:
-                    vn = op->getOut();
+                    vn = op.getOut();
                     if (propagateFlowToReads(vn))
                         madeChange = 1;
                     break;
                 case CPUI_INDIRECT:
-                    if (!op->isPtrFlow()) return 0;
-                    vn = op->getOut();
+                    if (!op.isPtrFlow()) return 0;
+                    vn = op.getOut();
                     if (propagateFlowToReads(vn))
                         madeChange = 1;
-                    vn = op->getIn(0);
+                    vn = op.getIn(0);
                     if (propagateFlowToDef(vn))
                         madeChange = 1;
                     break;
                 case CPUI_COPY:
                 case CPUI_PTRSUB:
                 case CPUI_PTRADD:
-                    if (!op->isPtrFlow()) return 0;
-                    vn = op->getOut();
+                    if (!op.isPtrFlow()) return 0;
+                    vn = op.getOut();
                     if (propagateFlowToReads(vn))
                         madeChange = 1;
-                    vn = op->getIn(0);
+                    vn = op.getIn(0);
                     if (propagateFlowToDef(vn))
                         madeChange = 1;
                     break;
                 case CPUI_MULTIEQUAL:
                 case CPUI_INT_ADD:
-                    if (!op->isPtrFlow()) return 0;
-                    vn = op->getOut();
+                    if (!op.isPtrFlow()) return 0;
+                    vn = op.getOut();
                     if (propagateFlowToReads(vn))
                         madeChange = 1;
-                    for (int4 i = 0; i < op->numInput(); ++i)
+                    for (int4 i = 0; i < op.numInput(); ++i)
                     {
-                        vn = op->getIn(i);
+                        vn = op.getIn(i);
                         if (propagateFlowToDef(vn))
                             madeChange = 1;
                     }

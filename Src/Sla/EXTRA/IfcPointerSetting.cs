@@ -21,7 +21,7 @@ namespace Sla.EXTRA
         void IfcPointerSetting::execute(istream &s)
 
         {
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("No load image present");
             string typeName;
             string baseType;
@@ -44,12 +44,12 @@ namespace Sla.EXTRA
                 s >> off;
                 if (off <= 0)
                     throw IfaceParseError("Missing offset");
-                Datatype* bt = dcp->conf->types->findByName(baseType);
-                if (bt == (Datatype*)0 || bt->getMetatype() != TYPE_STRUCT)
+                Datatype* bt = dcp.conf.types.findByName(baseType);
+                if (bt == (Datatype*)0 || bt.getMetatype() != TYPE_STRUCT)
                     throw IfaceParseError("Base-type must be a structure");
-                Datatype* ptrto = TypePointerRel::getPtrToFromParent(bt, off, *dcp->conf->types);
-                AddrSpace* spc = dcp->conf->getDefaultDataSpace();
-                dcp->conf->types->getTypePointerRel(spc->getAddrSize(), bt, ptrto, spc->getWordSize(), off, typeName);
+                Datatype* ptrto = TypePointerRel::getPtrToFromParent(bt, off, *dcp.conf.types);
+                AddrSpace* spc = dcp.conf.getDefaultDataSpace();
+                dcp.conf.types.getTypePointerRel(spc.getAddrSize(), bt, ptrto, spc.getWordSize(), off, typeName);
             }
             else if (setting == "space")
             {
@@ -57,17 +57,17 @@ namespace Sla.EXTRA
                 s >> spaceName;
                 if (spaceName.length() == 0)
                     throw IfaceParseError("Missing name of address space");
-                Datatype* ptrTo = dcp->conf->types->findByName(baseType);
+                Datatype* ptrTo = dcp.conf.types.findByName(baseType);
                 if (ptrTo == (Datatype*)0)
                     throw IfaceParseError("Unknown base data-type: " + baseType);
-                AddrSpace* spc = dcp->conf->getSpaceByName(spaceName);
+                AddrSpace* spc = dcp.conf.getSpaceByName(spaceName);
                 if (spc == (AddrSpace*)0)
                     throw IfaceParseError("Unknown space: " + spaceName);
-                dcp->conf->types->getTypePointerWithSpace(ptrTo, spc, typeName);
+                dcp.conf.types.getTypePointerWithSpace(ptrTo, spc, typeName);
             }
             else
                 throw IfaceParseError("Unknown pointer setting: " + setting);
-            *status->optr << "Successfully created pointer: " << typeName << endl;
+            *status.optr << "Successfully created pointer: " << typeName << endl;
         }
     }
 }

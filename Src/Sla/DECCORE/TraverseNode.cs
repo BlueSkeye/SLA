@@ -51,10 +51,10 @@ namespace Sla.DECCORE
                 return false;   // Alternate path traversed INDIRECT, main did not
             if ((flags & actionalt) != 0)
                 return true;    // Alternate path traversed a dedicated COPY
-            if (vn->loneDescend() == (PcodeOp*)0) return false;
-            PcodeOp op = vn->getDef();
+            if (vn.loneDescend() == (PcodeOp*)0) return false;
+            PcodeOp op = vn.getDef();
             if (op == (PcodeOp*)0) return true;
-            return !op->isMarker(); // MULTIEQUAL or INDIRECT indicates multiple values
+            return !op.isMarker(); // MULTIEQUAL or INDIRECT indicates multiple values
         }
     }
 }

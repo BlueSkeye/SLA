@@ -19,21 +19,21 @@ namespace Sla.DECCORE
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opIntLeft(op);
+            lng.opIntLeft(op);
         }
 
         public override Datatype getInputLocal(PcodeOp op, int4 slot)
         {
             if (slot == 1)
-                return tlst->getBaseNoChar(op->getIn(1)->getSize(), TYPE_INT);
+                return tlst.getBaseNoChar(op.getIn(1).getSize(), TYPE_INT);
             return TypeOpBinary::getInputLocal(op, slot);
         }
 
         public override Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)
         {
-            Datatype* res1 = op->getIn(0)->getHighTypeReadFacing(op);
-            if (res1->getMetatype() == TYPE_BOOL)
-                res1 = tlst->getBase(res1->getSize(), TYPE_INT);
+            Datatype* res1 = op.getIn(0).getHighTypeReadFacing(op);
+            if (res1.getMetatype() == TYPE_BOOL)
+                res1 = tlst.getBase(res1.getSize(), TYPE_INT);
             return res1;
         }
     }

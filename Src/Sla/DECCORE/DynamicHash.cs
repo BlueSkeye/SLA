@@ -64,10 +64,10 @@ namespace Sla.DECCORE
             PcodeOp* op;
             for (; ; )
             {
-                if (!vn->isWritten()) return;
-                op = vn->getDef();
-                if (transtable[op->code()] != 0) break; // Do not ignore this operation
-                vn = op->getIn(0);
+                if (!vn.isWritten()) return;
+                op = vn.getDef();
+                if (transtable[op.code()] != 0) break; // Do not ignore this operation
+                vn = op.getIn(0);
             }
             opedge.push_back(ToOpEdge(op, -1));
         }
@@ -81,22 +81,22 @@ namespace Sla.DECCORE
             list<PcodeOp*>::const_iterator iter;
             uint4 insize = opedge.size();
 
-            for (iter = vn->beginDescend(); iter != vn->endDescend(); ++iter)
+            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {
                 PcodeOp* op = *iter;
                 Varnode* tmpvn = vn;
-                while (transtable[op->code()] == 0)
+                while (transtable[op.code()] == 0)
                 {
-                    tmpvn = op->getOut();
+                    tmpvn = op.getOut();
                     if (tmpvn == null) {
                         op = null;
                         break;
                     }
-                    op = tmpvn->loneDescend();
+                    op = tmpvn.loneDescend();
                     if (op == null) break;
                 }
                 if (op == null) continue;
-                int4 slot = op->getSlot(tmpvn);
+                int4 slot = op.getSlot(tmpvn);
                 opedge.push_back(ToOpEdge(op, slot));
             }
             if ((uint4)opedge.size() - insize > 1)
@@ -107,9 +107,9 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp thats already in the sub-graph
         private void buildOpUp(PcodeOp op)
         {
-            for (int4 i = 0; i < op->numInput(); ++i)
+            for (int4 i = 0; i < op.numInput(); ++i)
             {
-                Varnode* vn = op->getIn(i);
+                Varnode* vn = op.getIn(i);
                 vnedge.push_back(vn);
             }
         }
@@ -118,7 +118,7 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp thats already in the sub-graph
         private void buildOpDown(PcodeOp op)
         {
-            Varnode* vn = op->getOut();
+            Varnode* vn = op.getOut();
             if (vn == (Varnode*)0) return;
             vnedge.push_back(vn);
         }
@@ -129,9 +129,9 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < vnedge.size(); ++i)
             {
                 Varnode* vn = vnedge[i];
-                if (vn->isMark()) continue;
+                if (vn.isMark()) continue;
                 markvn.push_back(vn);
-                vn->setMark();
+                vn.setMark();
             }
             vnedge.clear();
         }
@@ -142,9 +142,9 @@ namespace Sla.DECCORE
             for (; opedgeproc < opedge.size(); ++opedgeproc)
             {
                 PcodeOp* op = opedge[opedgeproc].getOp();
-                if (op->isMark()) continue;
+                if (op.isMark()) continue;
                 markop.push_back(op);
-                op->setMark();
+                op.setMark();
             }
         }
 
@@ -157,9 +157,9 @@ namespace Sla.DECCORE
         private void pieceTogetherHash(Varnode root, uint method)
         {
             for (uint4 i = 0; i < markvn.size(); ++i) // Clear our marks
-                markvn[i]->clearMark();
+                markvn[i].clearMark();
             for (uint4 i = 0; i < markop.size(); ++i)
-                markop[i]->clearMark();
+                markop[i].clearMark();
 
             if (opedge.size() == 0)
             {
@@ -171,11 +171,11 @@ namespace Sla.DECCORE
             uint4 reg = 0x3ba0fe06; // Calculate the 32-bit hash
 
             // Hash in information about the root
-            reg = crc_update(reg, (uint4)root->getSize());
-            if (root->isConstant())
+            reg = crc_update(reg, (uint4)root.getSize());
+            if (root.isConstant())
             {
-                uintb val = root->getOffset();
-                for (int4 i = 0; i < root->getSize(); ++i)
+                uintb val = root.getOffset();
+                for (int4 i = 0; i < root.getSize(); ++i)
                 {
                     reg = crc_update(reg, (uint4)val);
                     val >>= 8;
@@ -194,8 +194,8 @@ namespace Sla.DECCORE
             { // Find op that is directly attached to -root- i.e. not a skip op
                 op = opedge[ct].getOp();
                 slot = opedge[ct].getSlot();
-                if ((slot < 0) && (op->getOut() == root)) break;
-                if ((slot >= 0) && (op->getIn(slot) == root)) break;
+                if ((slot < 0) && (op.getOut() == root)) break;
+                if ((slot >= 0) && (op.getIn(slot) == root)) break;
             }
             if (ct == opedge.size())
             {   // If everything attached to the root was a skip op
@@ -209,13 +209,13 @@ namespace Sla.DECCORE
             hash <<= 4;
             hash |= method;     // 4-bits
             hash <<= 7;
-            hash |= (uint8)transtable[op->code()];  // 7-bits
+            hash |= (uint8)transtable[op.code()];  // 7-bits
             hash <<= 5;
             hash |= (uint8)(slot & 0x1f);   // 5-bits
 
             hash <<= 32;
             hash |= (uint8)reg;     // 32-bits for the neighborhood hash
-            addrresult = op->getSeqNum().getAddr();
+            addrresult = op.getSeqNum().getAddr();
         }
 
         /// Convert given PcodeOp to a non-skip op by following data-flow
@@ -227,23 +227,23 @@ namespace Sla.DECCORE
         /// \param slot is the slot to modify
         private static void moveOffSkip(PcodeOp op, int4 slot)
         {
-            while (transtable[op->code()] == 0)
+            while (transtable[op.code()] == 0)
             {
                 if (slot >= 0)
                 {
-                    Varnode* vn = op->getOut();
-                    op = vn->loneDescend();
+                    Varnode* vn = op.getOut();
+                    op = vn.loneDescend();
                     if (op == (PcodeOp*)0)
                     {
                         return; // Indicate the end of the data-flow path
                     }
-                    slot = op->getSlot(vn);
+                    slot = op.getSlot(vn);
                 }
                 else
                 {
-                    Varnode* vn = op->getIn(0);
-                    if (!vn->isWritten()) return;   // Indicate the end of the data-flow path
-                    op = vn->getDef();
+                    Varnode* vn = op.getIn(0);
+                    if (!vn.isWritten()) return;   // Indicate the end of the data-flow path
+                    op = vn.getDef();
                 }
             }
         }
@@ -258,14 +258,14 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < varlist.size(); ++i)
             {
                 Varnode* vn = varlist[i];
-                if (!vn->isMark())
+                if (!vn.isMark())
                 {
-                    vn->setMark();
+                    vn.setMark();
                     resList.push_back(vn);
                 }
             }
             for (int4 i = 0; i < resList.size(); ++i)
-                resList[i]->clearMark();
+                resList[i].clearMark();
             varlist.swap(resList);
         }
 
@@ -349,7 +349,7 @@ namespace Sla.DECCORE
             // we need to check that slot indicates a valid Varnode
             if (slot < 0)
             {
-                root = op->getOut();
+                root = op.getOut();
                 if (root == (Varnode*)0) {
                     hash = 0;
                     addrresult = Address();
@@ -358,13 +358,13 @@ namespace Sla.DECCORE
             }
             else
             {
-                if (slot >= op->numInput())
+                if (slot >= op.numInput())
                 {
                     hash = 0;
                     addrresult = Address();
                     return;     // slot does not fit op
                 }
-                root = op->getIn(slot);
+                root = op.getIn(slot);
             }
             vnproc = 0;
             opproc = 0;
@@ -501,7 +501,7 @@ namespace Sla.DECCORE
                 addrresult = Address(); // Hash cannot be calculated
                 return;
             }
-            gatherOpsAtAddress(oplist, fd, op->getAddr());
+            gatherOpsAtAddress(oplist, fd, op.getAddr());
             for (method = 4; method < 7; ++method)
             {
                 clear();
@@ -514,7 +514,7 @@ namespace Sla.DECCORE
                 for (uint4 i = 0; i < oplist.size(); ++i)
                 {
                     PcodeOp* tmpop = oplist[i];
-                    if (slot >= tmpop->numInput()) continue;
+                    if (slot >= tmpop.numInput()) continue;
                     clear();
                     calcHash(tmpop, slot, method);
                     if (getComparable(hash) == getComparable(tmphash))
@@ -612,7 +612,7 @@ namespace Sla.DECCORE
             for (uint4 i = 0; i < oplist.size(); ++i)
             {
                 PcodeOp* tmpop = oplist[i];
-                if (slot >= tmpop->numInput()) continue;
+                if (slot >= tmpop.numInput()) continue;
                 clear();
                 calcHash(tmpop, slot, method);
                 if (getComparable(hash) == getComparable(h))
@@ -644,28 +644,28 @@ namespace Sla.DECCORE
             uint4 opcVal = getOpCodeFromHash(h);
             int4 slot = getSlotFromHash(h);
             bool isnotattached = getIsNotAttached(h);
-            PcodeOpTree::const_iterator iter = fd->beginOp(addr);
-            PcodeOpTree::const_iterator enditer = fd->endOp(addr);
+            PcodeOpTree::const_iterator iter = fd.beginOp(addr);
+            PcodeOpTree::const_iterator enditer = fd.endOp(addr);
 
             while (iter != enditer)
             {
                 PcodeOp* op = (*iter).second;
                 ++iter;
-                if (op->isDead()) continue;
-                if (transtable[op->code()] != opcVal) continue;
+                if (op.isDead()) continue;
+                if (transtable[op.code()] != opcVal) continue;
                 if (slot < 0)
                 {
-                    Varnode* vn = op->getOut();
+                    Varnode* vn = op.getOut();
                     if (vn != (Varnode*)0)
                     {
                         if (isnotattached)
                         {   // If original varnode was not attached to (this) op
-                            op = vn->loneDescend();
+                            op = vn.loneDescend();
                             if (op != (PcodeOp*)0)
                             {
-                                if (transtable[op->code()] == 0)
+                                if (transtable[op.code()] == 0)
                                 { // Check for skipped op
-                                    vn = op->getOut();
+                                    vn = op.getOut();
                                     if (vn == (Varnode*)0) continue;
                                 }
                             }
@@ -673,14 +673,14 @@ namespace Sla.DECCORE
                         varlist.push_back(vn);
                     }
                 }
-                else if (slot < op->numInput())
+                else if (slot < op.numInput())
                 {
-                    Varnode* vn = op->getIn(slot);
+                    Varnode* vn = op.getIn(slot);
                     if (isnotattached)
                     {
-                        op = vn->getDef();
-                        if ((op != (PcodeOp*)0) && (transtable[op->code()] == 0))
-                            vn = op->getIn(0);
+                        op = vn.getDef();
+                        if ((op != (PcodeOp*)0) && (transtable[op.code()] == 0))
+                            vn = op.getIn(0);
                     }
                     varlist.push_back(vn);
                 }
@@ -696,11 +696,11 @@ namespace Sla.DECCORE
         public static void gatherOpsAtAddress(List<PcodeOp> opList, Funcdata fd, Address addr)
         {
             PcodeOpTree::const_iterator iter, enditer;
-            enditer = fd->endOp(addr);
-            for (iter = fd->beginOp(addr); iter != enditer; ++iter)
+            enditer = fd.endOp(addr);
+            for (iter = fd.beginOp(addr); iter != enditer; ++iter)
             {
                 PcodeOp* op = (*iter).second;
-                if (op->isDead()) continue;
+                if (op.isDead()) continue;
                 opList.push_back(op);
             }
         }

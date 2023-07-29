@@ -44,29 +44,29 @@ namespace Sla.DECCORE
             OpCode opc;
             int4 size;
 
-            boolVn1 = op->getIn(0);
-            if (!boolVn1->isBooleanValue(data.isTypeRecoveryOn())) return 0;
+            boolVn1 = op.getIn(0);
+            if (!boolVn1.isBooleanValue(data.isTypeRecoveryOn())) return 0;
 
-            multop1 = op->getOut()->loneDescend();
+            multop1 = op.getOut().loneDescend();
             if (multop1 == (PcodeOp*)0) return 0;
-            if (multop1->code() != CPUI_INT_MULT) return 0;
-            if (!multop1->getIn(1)->isConstant()) return 0;
-            coeff = multop1->getIn(1)->getOffset();
-            if (coeff != calc_mask(multop1->getIn(1)->getSize()))
+            if (multop1.code() != CPUI_INT_MULT) return 0;
+            if (!multop1.getIn(1).isConstant()) return 0;
+            coeff = multop1.getIn(1).getOffset();
+            if (coeff != calc_mask(multop1.getIn(1).getSize()))
                 return 0;
-            size = multop1->getOut()->getSize();
+            size = multop1.getOut().getSize();
 
             // If we reached here, we are Multiplying extended boolean by -1
-            actionop = multop1->getOut()->loneDescend();
+            actionop = multop1.getOut().loneDescend();
             if (actionop == (PcodeOp*)0) return 0;
-            switch (actionop->code())
+            switch (actionop.code())
             {
                 case CPUI_INT_ADD:
-                    if (!actionop->getIn(1)->isConstant()) return 0;
-                    if (actionop->getIn(1)->getOffset() == 1)
+                    if (!actionop.getIn(1).isConstant()) return 0;
+                    if (actionop.getIn(1).getOffset() == 1)
                     {
                         Varnode* vn;
-                        PcodeOp* newop = data.newOp(1, op->getAddr());
+                        PcodeOp* newop = data.newOp(1, op.getAddr());
                         data.opSetOpcode(newop, CPUI_BOOL_NEGATE);  // Negate the boolean
                         vn = data.newUniqueOut(1, newop);
                         data.opSetInput(newop, boolVn1, 0);
@@ -74,16 +74,16 @@ namespace Sla.DECCORE
                         data.opSetInput(op, vn, 0);
                         data.opRemoveInput(actionop, 1); // eliminate the INT_ADD operator
                         data.opSetOpcode(actionop, CPUI_COPY);
-                        data.opSetInput(actionop, op->getOut(), 0); // propagate past the INT_MULT operator
+                        data.opSetInput(actionop, op.getOut(), 0); // propagate past the INT_MULT operator
                         return 1;
                     }
                     return 0;
                 case CPUI_INT_EQUAL:
                 case CPUI_INT_NOTEQUAL:
 
-                    if (actionop->getIn(1)->isConstant())
+                    if (actionop.getIn(1).isConstant())
                     {
-                        val = actionop->getIn(1)->getOffset();
+                        val = actionop.getIn(1).getOffset();
                     }
                     else
                         return 0;
@@ -114,29 +114,29 @@ namespace Sla.DECCORE
             // Apparently doing logical ops with extended boolean
 
             // Check that the other side is also an extended boolean
-            multop2 = (multop1 == actionop->getIn(0)->getDef()) ? actionop->getIn(1)->getDef() : actionop->getIn(0)->getDef();
+            multop2 = (multop1 == actionop.getIn(0).getDef()) ? actionop.getIn(1).getDef() : actionop.getIn(0).getDef();
             if (multop2 == (PcodeOp*)0) return 0;
-            if (multop2->code() != CPUI_INT_MULT) return 0;
-            if (!multop2->getIn(1)->isConstant()) return 0;
-            coeff = multop2->getIn(1)->getOffset();
+            if (multop2.code() != CPUI_INT_MULT) return 0;
+            if (!multop2.getIn(1).isConstant()) return 0;
+            coeff = multop2.getIn(1).getOffset();
             if (coeff != calc_mask(size))
                 return 0;
-            zextop2 = multop2->getIn(0)->getDef();
+            zextop2 = multop2.getIn(0).getDef();
             if (zextop2 == (PcodeOp*)0) return 0;
-            if (zextop2->code() != CPUI_INT_ZEXT) return 0;
-            boolVn2 = zextop2->getIn(0);
-            if (!boolVn2->isBooleanValue(data.isTypeRecoveryOn())) return 0;
+            if (zextop2.code() != CPUI_INT_ZEXT) return 0;
+            boolVn2 = zextop2.getIn(0);
+            if (!boolVn2.isBooleanValue(data.isTypeRecoveryOn())) return 0;
 
             // Do the boolean calculation on unextended boolean values
             // and then extend the result
-            PcodeOp* newop = data.newOp(2, actionop->getAddr());
+            PcodeOp* newop = data.newOp(2, actionop.getAddr());
             Varnode* newres = data.newUniqueOut(1, newop);
             data.opSetOpcode(newop, opc);
             data.opSetInput(newop, boolVn1, 0);
             data.opSetInput(newop, boolVn2, 1);
             data.opInsertBefore(newop, actionop);
 
-            PcodeOp* newzext = data.newOp(1, actionop->getAddr());
+            PcodeOp* newzext = data.newOp(1, actionop.getAddr());
             Varnode* newzout = data.newUniqueOut(size, newzext);
             data.opSetOpcode(newzext, CPUI_INT_ZEXT);
             data.opSetInput(newzext, newres, 0);

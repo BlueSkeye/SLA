@@ -47,13 +47,13 @@ namespace Sla.SLEIGH
             vector<DisjointPattern*>::const_iterator iter;
 
             for (iter = orlist.begin(); iter != orlist.end(); ++iter) // Look for alwaysTrue
-                if ((*iter)->alwaysTrue())
+                if ((*iter).alwaysTrue())
                     return new InstructionPattern(true);
 
             vector<DisjointPattern*> newlist;
             for (iter = orlist.begin(); iter != orlist.end(); ++iter) // Look for alwaysFalse
-                if (!(*iter)->alwaysFalse())
-                    newlist.push_back((DisjointPattern*)(*iter)->simplifyClone());
+                if (!(*iter).alwaysFalse())
+                    newlist.push_back((DisjointPattern*)(*iter).simplifyClone());
 
             if (newlist.empty())
                 return new InstructionPattern(false);
@@ -67,13 +67,13 @@ namespace Sla.SLEIGH
             vector<DisjointPattern*>::iterator iter;
 
             for (iter = orlist.begin(); iter != orlist.end(); ++iter)
-                (*iter)->shiftInstruction(sa);
+                (*iter).shiftInstruction(sa);
         }
 
         public override bool isMatch(ParserWalker walker)
         {
             for (int4 i = 0; i < orlist.size(); ++i)
-                if (orlist[i]->isMatch(walker))
+                if (orlist[i].isMatch(walker))
                     return true;
             return false;
         }
@@ -88,7 +88,7 @@ namespace Sla.SLEIGH
             vector<DisjointPattern*>::const_iterator iter;
 
             for (iter = orlist.begin(); iter != orlist.end(); ++iter)
-                if ((*iter)->alwaysTrue()) return true;
+                if ((*iter).alwaysTrue()) return true;
             return false;
         }
 
@@ -97,7 +97,7 @@ namespace Sla.SLEIGH
             vector<DisjointPattern*>::const_iterator iter;
 
             for (iter = orlist.begin(); iter != orlist.end(); ++iter)
-                if (!(*iter)->alwaysFalse()) return false;
+                if (!(*iter).alwaysFalse()) return false;
             return true;
         }
 
@@ -106,7 +106,7 @@ namespace Sla.SLEIGH
             vector<DisjointPattern*>::const_iterator iter;
 
             for (iter = orlist.begin(); iter != orlist.end(); ++iter)
-                if (!(*iter)->alwaysInstructionTrue()) return false;
+                if (!(*iter).alwaysInstructionTrue()) return false;
             return true;
         }
 
@@ -117,21 +117,21 @@ namespace Sla.SLEIGH
             vector<DisjointPattern*>::const_iterator iter;
 
             for (iter = orlist.begin(); iter != orlist.end(); ++iter)
-                newlist.push_back((DisjointPattern*)(*iter)->simplifyClone());
+                newlist.push_back((DisjointPattern*)(*iter).simplifyClone());
             if (sa < 0)
                 for (iter = orlist.begin(); iter != orlist.end(); ++iter)
-                    (*iter)->shiftInstruction(-sa);
+                    (*iter).shiftInstruction(-sa);
 
             if (b2 == (OrPattern*)0)
-                newlist.push_back((DisjointPattern*)b->simplifyClone());
+                newlist.push_back((DisjointPattern*)b.simplifyClone());
             else
             {
-                for (iter = b2->orlist.begin(); iter != b2->orlist.end(); ++iter)
-                    newlist.push_back((DisjointPattern*)(*iter)->simplifyClone());
+                for (iter = b2.orlist.begin(); iter != b2.orlist.end(); ++iter)
+                    newlist.push_back((DisjointPattern*)(*iter).simplifyClone());
             }
             if (sa > 0)
                 for (int4 i = 0; i < newlist.size(); ++i)
-                    newlist[i]->shiftInstruction(sa);
+                    newlist[i].shiftInstruction(sa);
 
             OrPattern* tmpor = new OrPattern(newlist);
             return tmpor;
@@ -148,16 +148,16 @@ namespace Sla.SLEIGH
             if (b2 == (OrPattern*)0) {
                 for (iter = orlist.begin(); iter != orlist.end(); ++iter)
                 {
-                    tmp = (DisjointPattern*)(*iter)->doAnd(b, sa);
+                    tmp = (DisjointPattern*)(*iter).doAnd(b, sa);
                     newlist.push_back(tmp);
                 }
             }
             else
             {
                 for (iter = orlist.begin(); iter != orlist.end(); ++iter)
-                    for (iter2 = b2->orlist.begin(); iter2 != b2->orlist.end(); ++iter2)
+                    for (iter2 = b2.orlist.begin(); iter2 != b2.orlist.end(); ++iter2)
                     {
-                        tmp = (DisjointPattern*)(*iter)->doAnd(*iter2, sa);
+                        tmp = (DisjointPattern*)(*iter).doAnd(*iter2, sa);
                         newlist.push_back(tmp);
                     }
             }
@@ -171,14 +171,14 @@ namespace Sla.SLEIGH
             Pattern* res,*next;
 
             iter = orlist.begin();
-            res = (*iter)->commonSubPattern(b, sa);
+            res = (*iter).commonSubPattern(b, sa);
             iter++;
 
             if (sa > 0)
                 sa = 0;
             while (iter != orlist.end())
             {
-                next = (*iter)->commonSubPattern(res, sa);
+                next = (*iter).commonSubPattern(res, sa);
                 delete res;
                 res = next;
                 ++iter;
@@ -190,13 +190,13 @@ namespace Sla.SLEIGH
         {
             s << "<or_pat>\n";
             for (int4 i = 0; i < orlist.size(); ++i)
-                orlist[i]->saveXml(s);
+                orlist[i].saveXml(s);
             s << "</or_pat>\n";
         }
 
         public override void restoreXml(Element el)
         {
-            List list = el->getChildren();
+            List list = el.getChildren();
             List::const_iterator iter;
             iter = list.begin();
             while (iter != list.end())

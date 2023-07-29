@@ -75,9 +75,9 @@ namespace Sla.DECCORE
         public override JumpValues clone()
         {
             JumpValuesRange* res = new JumpValuesRange();
-            res->range = range;
-            res->normqvn = normqvn;
-            res->startop = startop;
+            res.range = range;
+            res.normqvn = normqvn;
+            res.startop = startop;
             return res;
         }
     }

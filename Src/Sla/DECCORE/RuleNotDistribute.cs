@@ -31,13 +31,13 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            PcodeOp* compop = op->getIn(0)->getDef();
+            PcodeOp* compop = op.getIn(0).getDef();
             PcodeOp* newneg1,*newneg2;
             Varnode* newout1,*newout2;
             OpCode opc;
 
             if (compop == (PcodeOp*)0) return 0;
-            switch (compop->code())
+            switch (compop.code())
             {
                 case CPUI_BOOL_AND:
                     opc = CPUI_BOOL_OR;
@@ -49,16 +49,16 @@ namespace Sla.DECCORE
                     return 0;
             }
 
-            newneg1 = data.newOp(1, op->getAddr());
+            newneg1 = data.newOp(1, op.getAddr());
             newout1 = data.newUniqueOut(1, newneg1);
             data.opSetOpcode(newneg1, CPUI_BOOL_NEGATE);
-            data.opSetInput(newneg1, compop->getIn(0), 0);
+            data.opSetInput(newneg1, compop.getIn(0), 0);
             data.opInsertBefore(newneg1, op);
 
-            newneg2 = data.newOp(1, op->getAddr());
+            newneg2 = data.newOp(1, op.getAddr());
             newout2 = data.newUniqueOut(1, newneg2);
             data.opSetOpcode(newneg2, CPUI_BOOL_NEGATE);
-            data.opSetInput(newneg2, compop->getIn(1), 0);
+            data.opSetInput(newneg2, compop.getIn(1), 0);
             data.opInsertBefore(newneg2, op);
 
             data.opSetOpcode(op, opc);

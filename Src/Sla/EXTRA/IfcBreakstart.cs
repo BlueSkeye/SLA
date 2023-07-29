@@ -26,10 +26,10 @@ namespace Sla.EXTRA
             if (specify.empty())
                 throw IfaceExecutionError("No action/rule specified");
 
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("Decompile action not loaded");
 
-            res = dcp->conf->allacts.getCurrent()->setBreakPoint(Action::break_start, specify);
+            res = dcp.conf.allacts.getCurrent().setBreakPoint(Action::break_start, specify);
             if (!res)
                 throw IfaceExecutionError("Bad action/rule specifier: " + specify);
         }

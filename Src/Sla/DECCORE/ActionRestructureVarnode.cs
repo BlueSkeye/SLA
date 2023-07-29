@@ -24,38 +24,38 @@ namespace Sla.DECCORE
         private static void protectSwitchPathIndirects(PcodeOp op)
         {
             vector<PcodeOp*> indirects;
-            Varnode* curVn = op->getIn(0);
-            while (curVn->isWritten())
+            Varnode* curVn = op.getIn(0);
+            while (curVn.isWritten())
             {
-                PcodeOp* curOp = curVn->getDef();
-                uint4 evalType = curOp->getEvalType();
+                PcodeOp* curOp = curVn.getDef();
+                uint4 evalType = curOp.getEvalType();
                 if ((evalType & (PcodeOp::binary | PcodeOp::ternary)) != 0)
                 {
-                    if (curOp->numInput() > 1)
+                    if (curOp.numInput() > 1)
                     {
-                        if (!curOp->getIn(1)->isConstant()) return; // Multiple paths
+                        if (!curOp.getIn(1).isConstant()) return; // Multiple paths
                     }
-                    curVn = curOp->getIn(0);
+                    curVn = curOp.getIn(0);
                 }
                 else if ((evalType & PcodeOp::unary) != 0)
-                    curVn = curOp->getIn(0);
-                else if (curOp->code() == CPUI_INDIRECT)
+                    curVn = curOp.getIn(0);
+                else if (curOp.code() == CPUI_INDIRECT)
                 {
                     indirects.push_back(curOp);
-                    curVn = curOp->getIn(0);
+                    curVn = curOp.getIn(0);
                 }
-                else if (curOp->code() == CPUI_LOAD)
+                else if (curOp.code() == CPUI_LOAD)
                 {
-                    curVn = curOp->getIn(1);
+                    curVn = curOp.getIn(1);
                 }
                 else
                     return;
             }
-            if (!curVn->isConstant()) return;
+            if (!curVn.isConstant()) return;
             // If we reach here, there is exactly one path, from a constant to a switch
             for (int4 i = 0; i < indirects.size(); ++i)
             {
-                indirects[i]->setNoIndirectCollapse();
+                indirects[i].setNoIndirectCollapse();
             }
         }
 
@@ -67,9 +67,9 @@ namespace Sla.DECCORE
             BlockGraph bblocks = data.getBasicBlocks();
             for (int4 i = 0; i < bblocks.getSize(); ++i)
             {
-                PcodeOp* op = bblocks.getBlock(i)->lastOp();
+                PcodeOp* op = bblocks.getBlock(i).lastOp();
                 if (op == (PcodeOp*)0) continue;
-                if (op->code() != CPUI_BRANCHIND) continue;
+                if (op.code() != CPUI_BRANCHIND) continue;
                 protectSwitchPathIndirects(op);
             }
         }
@@ -94,7 +94,7 @@ namespace Sla.DECCORE
             ScopeLocal* l1 = data.getScopeLocal();
 
             bool aliasyes = (numpass != 0); // Alias calculations are not reliable on the first pass
-            l1->restructureVarnode(aliasyes);
+            l1.restructureVarnode(aliasyes);
             if (data.syncVarnodesWithSymbols(l1, false, aliasyes))
                 count += 1;
 
@@ -105,8 +105,8 @@ namespace Sla.DECCORE
 #if OPACTION_DEBUG
             if ((flags & rule_debug) == 0) return 0;
             ostringstream s;
-            data.getScopeLocal()->printEntries(s);
-            data.getArch()->printDebug(s.str());
+            data.getScopeLocal().printEntries(s);
+            data.getArch().printDebug(s.str());
 #endif
             return 0;
         }

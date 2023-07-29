@@ -91,29 +91,29 @@ namespace Sla.EXTRA
         public ConstraintGroup newOp(int4 id)
         {
             ConstraintGroup* res = new ConstraintGroup();
-            res->addConstraint(new DummyOpConstraint(id));
+            res.addConstraint(new DummyOpConstraint(id));
             return res;
         }
 
         public ConstraintGroup newVarnode(int4 id)
         {
             ConstraintGroup* res = new ConstraintGroup();
-            res->addConstraint(new DummyVarnodeConstraint(id));
+            res.addConstraint(new DummyVarnodeConstraint(id));
             return res;
         }
 
         public ConstraintGroup newConst(int4 id)
         {
             ConstraintGroup* res = new ConstraintGroup();
-            res->addConstraint(new DummyConstConstraint(id));
+            res.addConstraint(new DummyConstConstraint(id));
             return res;
         }
 
         public ConstraintGroup opCopy(ConstraintGroup @base, int4 opid)
         {
-            int4 opindex = base->getBaseIndex();
+            int4 opindex = base.getBaseIndex();
             UnifyConstraint* newconstraint = new ConstraintOpCopy(opindex, opid);
-            base->addConstraint(newconstraint);
+            base.addConstraint(newconstraint);
             return base;
         }
 
@@ -121,17 +121,17 @@ namespace Sla.EXTRA
         {
             int4 ourslot = (int4) * slot;
             delete slot;
-            int4 opindex = base->getBaseIndex();
+            int4 opindex = base.getBaseIndex();
             UnifyConstraint* newconstraint = new ConstraintOpInput(opindex, varid, ourslot);
-            base->addConstraint(newconstraint);
+            base.addConstraint(newconstraint);
             return base;
         }
 
         public ConstraintGroup opInputAny(ConstraintGroup @base, int4 varid)
         {
-            int4 opindex = base->getBaseIndex();
+            int4 opindex = base.getBaseIndex();
             UnifyConstraint* newconstraint = new ConstraintOpInputAny(opindex, varid);
-            base->addConstraint(newconstraint);
+            base.addConstraint(newconstraint);
             return base;
         }
 
@@ -139,19 +139,19 @@ namespace Sla.EXTRA
         {
             int4 ourslot = (int4) * slot;
             delete slot;
-            int4 opindex = base->getBaseIndex();
+            int4 opindex = base.getBaseIndex();
             UnifyConstraint* newconstraint;
             ConstantAbsolute* myconst = dynamic_cast<ConstantAbsolute*>(val);
             if (myconst != (ConstantAbsolute*)0)
             {
-                newconstraint = new ConstraintParamConstVal(opindex, ourslot, myconst->getVal());
+                newconstraint = new ConstraintParamConstVal(opindex, ourslot, myconst.getVal());
             }
             else
             {
                 ConstantNamed* mynamed = dynamic_cast<ConstantNamed*>(val);
                 if (mynamed != (ConstantNamed*)0)
                 {
-                    newconstraint = new ConstraintParamConst(opindex, ourslot, mynamed->getId());
+                    newconstraint = new ConstraintParamConst(opindex, ourslot, mynamed.getId());
                 }
                 else
                 {
@@ -160,97 +160,97 @@ namespace Sla.EXTRA
                 }
             }
             delete val;
-            base->addConstraint(newconstraint);
+            base.addConstraint(newconstraint);
             return base;
         }
 
         public ConstraintGroup opOutput(ConstraintGroup @base, int4 varid)
         {
-            int4 opindex = base->getBaseIndex();
+            int4 opindex = base.getBaseIndex();
             UnifyConstraint* newconstraint = new ConstraintOpOutput(opindex, varid);
-            base->addConstraint(newconstraint);
+            base.addConstraint(newconstraint);
             return base;
         }
 
         public ConstraintGroup varCopy(ConstraintGroup @base, int4 varid)
         {
-            int4 varindex = base->getBaseIndex();
+            int4 varindex = base.getBaseIndex();
             UnifyConstraint* newconstraint = new ConstraintVarnodeCopy(varid, varindex);
-            base->addConstraint(newconstraint);
+            base.addConstraint(newconstraint);
             return base;
         }
 
         public ConstraintGroup varConst(ConstraintGroup @base, RHSConstant ex, RHSConstant sz)
         {
-            int4 varindex = base->getBaseIndex();
+            int4 varindex = base.getBaseIndex();
             UnifyConstraint* newconstraint = new ConstraintVarConst(varindex, ex, sz);
-            base->addConstraint(newconstraint);
+            base.addConstraint(newconstraint);
             return base;
         }
 
         public ConstraintGroup varDef(ConstraintGroup @base, int4 opid)
         {
-            int4 varindex = base->getBaseIndex();
+            int4 varindex = base.getBaseIndex();
             UnifyConstraint* newconstraint = new ConstraintDef(opid, varindex);
-            base->addConstraint(newconstraint);
+            base.addConstraint(newconstraint);
             return base;
         }
 
         public ConstraintGroup varDescend(ConstraintGroup @base, int4 opid)
         {
-            int4 varindex = base->getBaseIndex();
+            int4 varindex = base.getBaseIndex();
             UnifyConstraint* newconstraint = new ConstraintDescend(opid, varindex);
-            base->addConstraint(newconstraint);
+            base.addConstraint(newconstraint);
             return base;
         }
 
         public ConstraintGroup varUniqueDescend(ConstraintGroup @base, int4 opid)
         {
-            int4 varindex = base->getBaseIndex();
+            int4 varindex = base.getBaseIndex();
             UnifyConstraint* newconstraint = new ConstraintLoneDescend(opid, varindex);
-            base->addConstraint(newconstraint);
+            base.addConstraint(newconstraint);
             return base;
         }
 
         public ConstraintGroup opCodeConstraint(ConstraintGroup @base, List<OpCode> oplist)
         {
-            if (oplist->size() != 1)
+            if (oplist.size() != 1)
                 throw new LowlevelError("Not currently supporting multiple opcode constraints");
-            int4 opindex = base->getBaseIndex();
+            int4 opindex = base.getBaseIndex();
             UnifyConstraint* newconstraint = new ConstraintOpcode(opindex, *oplist);
             delete oplist;
-            base->addConstraint(newconstraint);
+            base.addConstraint(newconstraint);
             return base;
         }
 
         public ConstraintGroup opCompareConstraint(ConstraintGroup @base, int4 opid, OpCode opc)
         {
-            int4 op1index = base->getBaseIndex();
+            int4 op1index = base.getBaseIndex();
             UnifyConstraint* newconstraint = new ConstraintOpCompare(op1index, opid, (opc == CPUI_INT_EQUAL));
-            base->addConstraint(newconstraint);
+            base.addConstraint(newconstraint);
             return base;
         }
 
         public ConstraintGroup varCompareConstraint(ConstraintGroup @base, int4 varid, OpCode opc)
         {
-            int4 var1index = base->getBaseIndex();
+            int4 var1index = base.getBaseIndex();
             UnifyConstraint* newconstraint = new ConstraintVarCompare(var1index, varid, (opc == CPUI_INT_EQUAL));
-            base->addConstraint(newconstraint);
+            base.addConstraint(newconstraint);
             return base;
         }
 
         public ConstraintGroup constCompareConstraint(ConstraintGroup @base, int4 constid, OpCode opc)
         {
-            int4 const1index = base->getBaseIndex();
+            int4 const1index = base.getBaseIndex();
             UnifyConstraint* newconstraint = new ConstraintConstCompare(const1index, constid, opc);
-            base->addConstraint(newconstraint);
+            base.addConstraint(newconstraint);
             return base;
         }
 
         public ConstraintGroup constNamedExpression(int4 id, RHSConstant expr)
         {
             ConstraintGroup* res = new ConstraintGroup();
-            res->addConstraint(new ConstraintNamedExpression(id, expr));
+            res.addConstraint(new ConstraintNamedExpression(id, expr));
             return res;
         }
 
@@ -260,60 +260,60 @@ namespace Sla.EXTRA
 
         public ConstraintGroup mergeGroups(ConstraintGroup a, ConstraintGroup b)
         {
-            a->mergeIn(b);
+            a.mergeIn(b);
             return a;
         }
 
         public ConstraintGroup addOr(ConstraintGroup @base, ConstraintGroup newor)
         {
-            base->addConstraint(newor);
+            base.addConstraint(newor);
             return base;
         }
 
         public ConstraintGroup opCreation(int4 newid, OpCode oc, bool iafter, int4 oldid)
         {
             OpBehavior* behave = inst[oc];
-            int4 numparms = behave->isUnary() ? 1 : 2;
+            int4 numparms = behave.isUnary() ? 1 : 2;
             UnifyConstraint* newconstraint = new ConstraintNewOp(newid, oldid, oc, iafter, numparms);
             ConstraintGroup* res = new ConstraintGroup();
-            res->addConstraint(newconstraint);
+            res.addConstraint(newconstraint);
             return res;
         }
 
         public ConstraintGroup newUniqueOut(ConstraintGroup @base, int4 varid, int4 sz)
         {
-            UnifyConstraint* newconstraint = new ConstraintNewUniqueOut(base->getBaseIndex(), varid, sz);
-            base->addConstraint(newconstraint);
+            UnifyConstraint* newconstraint = new ConstraintNewUniqueOut(base.getBaseIndex(), varid, sz);
+            base.addConstraint(newconstraint);
             return base;
         }
 
         public ConstraintGroup newSetInput(ConstraintGroup @base, RHSConstant slot, int4 varid)
         {
-            UnifyConstraint* newconstraint = new ConstraintSetInput(base->getBaseIndex(), slot, varid);
-            base->addConstraint(newconstraint);
+            UnifyConstraint* newconstraint = new ConstraintSetInput(base.getBaseIndex(), slot, varid);
+            base.addConstraint(newconstraint);
             return base;
         }
 
         public ConstraintGroup newSetInputConstVal(ConstraintGroup @base, RHSConstant slot, RHSConstant val,
             RHSConstant sz)
         {
-            UnifyConstraint* newconstraint = new ConstraintSetInputConstVal(base->getBaseIndex(), slot, val, sz);
-            base->addConstraint(newconstraint);
+            UnifyConstraint* newconstraint = new ConstraintSetInputConstVal(base.getBaseIndex(), slot, val, sz);
+            base.addConstraint(newconstraint);
             return base;
         }
 
         public ConstraintGroup removeInput(ConstraintGroup @base, RHSConstant slot)
         {
-            UnifyConstraint* newconstraint = new ConstraintRemoveInput(base->getBaseIndex(), slot);
-            base->addConstraint(newconstraint);
+            UnifyConstraint* newconstraint = new ConstraintRemoveInput(base.getBaseIndex(), slot);
+            base.addConstraint(newconstraint);
             return base;
         }
 
         public ConstraintGroup newSetOpcode(ConstraintGroup @base, OpCode opc)
         {
-            int4 opid = base->getBaseIndex();
+            int4 opid = base.getBaseIndex();
             UnifyConstraint* newconstraint = new ConstraintSetOpcode(opid, opc);
-            base->addConstraint(newconstraint);
+            base.addConstraint(newconstraint);
             return base;
         }
 
@@ -321,7 +321,7 @@ namespace Sla.EXTRA
         {
             ConstraintGroup * base = new ConstraintGroup();
             UnifyConstraint* newconstraint = new ConstraintBoolean(ist, expr);
-            base->addConstraint(newconstraint);
+            base.addConstraint(newconstraint);
             return base;
         }
 
@@ -421,23 +421,23 @@ namespace Sla.EXTRA
         public void postProcess()
         {
             int4 id = 0;
-            finalrule->removeDummy();
-            finalrule->setId(id);       // Set id for everybody
+            finalrule.removeDummy();
+            finalrule.setId(id);       // Set id for everybody
         }
 
         public int4 postProcessRule(List<OpCode> opcodelist)
         { // Do normal post processing but also remove initial opcode check
-            finalrule->removeDummy();
-            if (finalrule->numConstraints() == 0)
+            finalrule.removeDummy();
+            if (finalrule.numConstraints() == 0)
                 throw new LowlevelError("Cannot postprocess empty rule");
-            ConstraintOpcode* subconst = dynamic_cast<ConstraintOpcode*>(finalrule->getConstraint(0));
+            ConstraintOpcode* subconst = dynamic_cast<ConstraintOpcode*>(finalrule.getConstraint(0));
             if (subconst == (ConstraintOpcode*)0)
                 throw new LowlevelError("Rule does not start with opcode constraint");
-            opcodelist = subconst->getOpCodes();
-            int4 opinit = subconst->getMaxNum();
-            finalrule->deleteConstraint(0);
+            opcodelist = subconst.getOpCodes();
+            int4 opinit = subconst.getMaxNum();
+            finalrule.deleteConstraint(0);
             int4 id = 0;
-            finalrule->setId(id);
+            finalrule.setId(id);
             return opinit;
         }
 

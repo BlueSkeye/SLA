@@ -31,10 +31,10 @@ namespace Sla.EXTRA
     throw IfaceExecutionError("Unable to open rule file: "+filename);
 
   RuleCompile ruler;
-  ruler.setErrorStream(*status->optr);
+  ruler.setErrorStream(*status.optr);
   ruler.run(thefile,debug);
   if (ruler.numErrors() != 0) {
-    *status->optr << "Parsing aborted on error" << endl;
+    *status.optr << "Parsing aborted on error" << endl;
     return;
   }
   int4 opparam;
@@ -43,7 +43,7 @@ namespace Sla.EXTRA
   UnifyCPrinter cprinter;
   cprinter.initializeRuleAction(ruler.getRule(),opparam,opcodelist);
   cprinter.addNames(ruler.getNameMap());
-  cprinter.print(*status->optr);
+  cprinter.print(*status.optr);
 }
     }
 #endif

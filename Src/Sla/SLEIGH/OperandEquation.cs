@@ -25,16 +25,16 @@ namespace Sla.SLEIGH
         public override bool resolveOperandLeft(OperandResolve state)
         {
             OperandSymbol* sym = state.operands[index];
-            if (sym->isOffsetIrrelevant())
+            if (sym.isOffsetIrrelevant())
             {
-                sym->offsetbase = -1;
-                sym->reloffset = 0;
+                sym.offsetbase = -1;
+                sym.reloffset = 0;
                 return true;
             }
             if (state.@base == -2)		// We have no base
                 return false;
-            sym->offsetbase = state.@base;
-            sym->reloffset = state.offset;
+            sym.offsetbase = state.@base;
+            sym.reloffset = state.offset;
             state.cur_rightmost = index;
             state.size = 0;     // Distance from right edge
             return true;
@@ -42,11 +42,11 @@ namespace Sla.SLEIGH
 
         public override void operandOrder(Constructor ct, List<OperandSymbol> order)
         {
-            OperandSymbol* sym = ct->getOperand(index);
-            if (!sym->isMarked())
+            OperandSymbol* sym = ct.getOperand(index);
+            if (!sym.isMarked())
             {
                 order.push_back(sym);
-                sym->setMark();
+                sym.setMark();
             }
         }
     }

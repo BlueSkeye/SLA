@@ -75,25 +75,25 @@ namespace Sla.DECCORE
                 state.depth -= 1;
                 return;
             }
-            list<PcodeOp*>::const_iterator iter = vn->beginDescend();
-            while (rank != state.terminalrank && iter != vn->endDescend())
+            list<PcodeOp*>::const_iterator iter = vn.beginDescend();
+            while (rank != state.terminalrank && iter != vn.endDescend())
             {
                 PcodeOp* op = *iter;
                 if (op != ignoreop)
                 {
-                    OpCode oc = op->getOpcode()->getOpcode();
+                    OpCode oc = op.getOpcode().getOpcode();
                     switch (oc)
                     {
                         case CPUI_BRANCH:
                         case CPUI_BRANCHIND:
-                            if (op->getSlot(vn) == 0) updaterank(DIRECTREAD, state.best);
+                            if (op.getSlot(vn) == 0) updaterank(DIRECTREAD, state.best);
                             break;
                         case CPUI_CBRANCH:
-                            if (op->getSlot(vn) < 2) updaterank(DIRECTREAD, state.best);
+                            if (op.getSlot(vn) < 2) updaterank(DIRECTREAD, state.best);
                             break;
                         case CPUI_CALL:
                         case CPUI_CALLIND:
-                            if (op->getSlot(vn) == 0) updaterank(DIRECTREAD, state.best);
+                            if (op.getSlot(vn) == 0) updaterank(DIRECTREAD, state.best);
                             else
                             {
                                 numcalls++;
@@ -112,7 +112,7 @@ namespace Sla.DECCORE
                         case CPUI_MULTIEQUAL:
                             // The only op for which there can be a loop in the graph is with the MULTIEQUAL (not for CALL, etc.).
                             // Walk forward only if the path is not part of a loop.
-                            if (!op->getParent()->isLoopIn(op->getSlot(vn))) walkforward(state, (PcodeOp*)0, op->getOut());
+                            if (!op.getParent().isLoopIn(op.getSlot(vn))) walkforward(state, (PcodeOp*)0, op.getOut());
                             break;
                         default:
                             updaterank(DIRECTREAD, state.best);
@@ -126,19 +126,19 @@ namespace Sla.DECCORE
 
         private void walkbackward(WalkState state, PcodeOp ignoreop, Varnode vn)
         {
-            if (vn->isInput())
+            if (vn.isInput())
             {
                 updaterank(THISFNPARAM, state.best);
                 return;
             }
-            else if (!vn->isWritten())
+            else if (!vn.isWritten())
             {
                 updaterank(THISFNPARAM, state.best); //TODO: not sure about this.
                 return;
             }
 
-            PcodeOp* op = vn->getDef();
-            OpCode oc = op->getOpcode()->getOpcode();
+            PcodeOp* op = vn.getDef();
+            OpCode oc = op.getOpcode().getOpcode();
             switch (oc)
             {
                 case CPUI_BRANCH:
@@ -148,7 +148,7 @@ namespace Sla.DECCORE
                 case CPUI_CALLIND:
                     break;
                 case CPUI_CALLOTHER:
-                    if (op->getOut() != (Varnode*)0) updaterank(DIRECTREAD, state.best);
+                    if (op.getOut() != (Varnode*)0) updaterank(DIRECTREAD, state.best);
                     break;
                 case CPUI_RETURN:
                     updaterank(SUBFNRETURN, state.best);
@@ -159,15 +159,15 @@ namespace Sla.DECCORE
                 case CPUI_MULTIEQUAL:
                     // The only op for which there can be a loop in the graph is with the MULTIEQUAL (not for CALL, etc.).
                     // Walk backward only if the path is not part of a loop.
-                    for (int4 slot = 0; slot < op->numInput() && rank != state.terminalrank; slot++)
-                        if (!op->getParent()->isLoopIn(slot)) walkbackward(state, op, op->getIn(slot));
+                    for (int4 slot = 0; slot < op.numInput() && rank != state.terminalrank; slot++)
+                        if (!op.getParent().isLoopIn(slot)) walkbackward(state, op, op.getIn(slot));
                     break;
                 default:
                     //Might be DIRECTWRITEWITHOUTREAD, but we do not know yet.
                     //So now try to walk forward to see if there is at least one path
                     // forward (other than the path we took to get here walking backward)
                     // in which there is not a direct read of this write.
-                    ParamMeasure pmfw(vn->getAddr(), vn->getSize(), vn->getType(), INPUT );
+                    ParamMeasure pmfw(vn.getAddr(), vn.getSize(), vn.getType(), INPUT );
                     pmfw.calculateRank(false, vn, ignoreop);
                     if (pmfw.getMeasure() == DIRECTREAD)
                         updaterank(DIRECTWRITEWITHREAD, state.best);
@@ -218,9 +218,9 @@ namespace Sla.DECCORE
         {
             encoder.openElement(tag);
             encoder.openElement(ELEM_ADDR);
-            vndata.space->encodeAttributes(encoder, vndata.offset, vndata.size);
+            vndata.space.encodeAttributes(encoder, vndata.offset, vndata.size);
             encoder.closeElement(ELEM_ADDR);
-            vntype->encode(encoder);
+            vntype.encode(encoder);
             if (moredetail)
             {
                 encoder.openElement(ELEM_RANK);
@@ -232,7 +232,7 @@ namespace Sla.DECCORE
 
         private void savePretty(TextWriter s, bool moredetail)
         {
-            s << "  Space: " << vndata.space->getName() << "\n";
+            s << "  Space: " << vndata.space.getName() << "\n";
             s << "  Addr: " << vndata.offset << "\n";
             s << "  Size: " << vndata.size << "\n";
             s << "  Rank: " << rank << "\n";

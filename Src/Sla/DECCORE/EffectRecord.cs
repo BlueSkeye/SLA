@@ -121,7 +121,7 @@ namespace Sla.DECCORE
         public static bool compareByAddress(EffectRecord op1, EffectRecord op2)
         {
             if (op1.range.space != op2.range.space)
-                return (op1.range.space->getIndex() < op2.range.space->getIndex());
+                return (op1.range.space.getIndex() < op2.range.space.getIndex());
             return (op1.range.offset < op2.range.offset);
         }
     }

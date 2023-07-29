@@ -23,7 +23,7 @@ namespace Sla.EXTRA
                 throw IfaceParseError("filename parameter required for source");
 
             s >> filename;
-            status->pushScript(filename, filename + "> ");
+            status.pushScript(filename, filename + "> ");
         }
     }
 }

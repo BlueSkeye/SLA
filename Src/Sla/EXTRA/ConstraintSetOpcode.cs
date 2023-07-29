@@ -24,17 +24,17 @@ namespace Sla.EXTRA
         }
         
         public override UnifyConstraint clone() 
-            => (new ConstraintSetOpcode(opindex, opc))->copyid(this);
+            => (new ConstraintSetOpcode(opindex, opc)).copyid(this);
 
         public override int4 getBaseIndex() => opindex;
 
         public override bool step(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            if (!traverse->step()) return false;
+            if (!traverse.step()) return false;
             Funcdata* fd = state.getFunction();
             PcodeOp* op = state.data(opindex).getOp();
-            fd->opSetOpcode(op, opc);
+            fd.opSetOpcode(op, opc);
             return true;
         }
 

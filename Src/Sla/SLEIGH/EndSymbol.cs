@@ -24,7 +24,7 @@ namespace Sla.SLEIGH
         {
             const_space = cspc;
             patexp = new EndInstructionValue();
-            patexp->layClaim();
+            patexp.layClaim();
         }
 
         ~EndSymbol()
@@ -48,7 +48,7 @@ namespace Sla.SLEIGH
             hand.space = walker.getCurSpace();
             hand.offset_space = (AddrSpace*)0;
             hand.offset_offset = walker.getNaddr().getOffset(); // Get starting address of next instruction
-            hand.size = hand.space->getAddrSize();
+            hand.size = hand.space.getAddrSize();
         }
 
         public override void print(TextWriter s, ParserWalker walker)
@@ -75,9 +75,9 @@ namespace Sla.SLEIGH
 
         public override void restoreXml(Element el, SleighBase trans)
         {
-            const_space = trans->getConstantSpace();
+            const_space = trans.getConstantSpace();
             patexp = new EndInstructionValue();
-            patexp->layClaim();
+            patexp.layClaim();
         }
     }
 }

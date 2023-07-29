@@ -33,29 +33,29 @@ namespace Sla.DECCORE
             PcodeOp* op;
 
             if (stackspace == (AddrSpace*)0) return 0; // No stack to speak of
-            VarnodeData point = stackspace->getSpacebase(0);
+            VarnodeData point = stackspace.getSpacebase(0);
             Address sb_addr(point.space, point.offset);
             int4 sb_size = point.size;
 
             for (int4 i = 0; i < data.numCalls(); ++i)
             {
                 fc = data.getCallSpecs(i);
-                if (fc->getExtraPop() == 0) continue; // Stack pointer is undisturbed
-                op = data.newOp(2, fc->getOp()->getAddr());
+                if (fc.getExtraPop() == 0) continue; // Stack pointer is undisturbed
+                op = data.newOp(2, fc.getOp().getAddr());
                 data.newVarnodeOut(sb_size, sb_addr, op);
                 data.opSetInput(op, data.newVarnode(sb_size, sb_addr), 0);
-                if (fc->getExtraPop() != ProtoModel::extrapop_unknown)
+                if (fc.getExtraPop() != ProtoModel::extrapop_unknown)
                 { // We know exactly how stack pointer is changed
-                    fc->setEffectiveExtraPop(fc->getExtraPop());
+                    fc.setEffectiveExtraPop(fc.getExtraPop());
                     data.opSetOpcode(op, CPUI_INT_ADD);
-                    data.opSetInput(op, data.newConstant(sb_size, fc->getExtraPop()), 1);
-                    data.opInsertAfter(op, fc->getOp());
+                    data.opSetInput(op, data.newConstant(sb_size, fc.getExtraPop()), 1);
+                    data.opInsertAfter(op, fc.getOp());
                 }
                 else
                 {           // We don't know exactly, so we create INDIRECT
                     data.opSetOpcode(op, CPUI_INDIRECT);
-                    data.opSetInput(op, data.newVarnodeIop(fc->getOp()), 1);
-                    data.opInsertBefore(op, fc->getOp());
+                    data.opSetInput(op, data.newVarnodeIop(fc.getOp()), 1);
+                    data.opInsertBefore(op, fc.getOp());
                 }
             }
             return 0;

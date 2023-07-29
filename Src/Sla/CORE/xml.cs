@@ -519,8 +519,8 @@ namespace Sla.CORE {
     //    do                                                                  \
     //      {                                                                 \
     //        ulong yynewbytes;                                            \
-    //        YYCOPY (&yyptr->Stack_alloc, Stack, yysize);                    \
-    //        Stack = &yyptr->Stack_alloc;                                    \
+    //        YYCOPY (&yyptr.Stack_alloc, Stack, yysize);                    \
+    //        Stack = &yyptr.Stack_alloc;                                    \
     //        yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
     //        yyptr += yynewbytes / sizeof (*yyptr);                          \
     //      }                                                                 \

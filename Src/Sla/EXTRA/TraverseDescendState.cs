@@ -23,8 +23,8 @@ namespace Sla.EXTRA
         public void initialize(Varnode vn)
         {
             onestep = false;
-            iter = vn->beginDescend();
-            enditer = vn->endDescend();
+            iter = vn.beginDescend();
+            enditer = vn.endDescend();
         }
 
         public bool step()

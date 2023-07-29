@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opLzcountOp(op);
+            lng.opLzcountOp(op);
         }
     }
 }

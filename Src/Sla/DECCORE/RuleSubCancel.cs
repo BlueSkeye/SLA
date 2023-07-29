@@ -44,27 +44,27 @@ namespace Sla.DECCORE
             PcodeOp* extop;
             OpCode opc;
 
-            base = op->getIn(0);
-            if (!base->isWritten()) return 0;
-            extop = base->getDef();
-            opc = extop->code();
+            base = op.getIn(0);
+            if (!base.isWritten()) return 0;
+            extop = base.getDef();
+            opc = extop.code();
             if ((opc != CPUI_INT_ZEXT) && (opc != CPUI_INT_SEXT))
                 return 0;
-            offset = op->getIn(1)->getOffset();
-            outsize = op->getOut()->getSize();
-            insize = base->getSize();
-            farinsize = extop->getIn(0)->getSize();
+            offset = op.getIn(1).getOffset();
+            outsize = op.getOut().getSize();
+            insize = base.getSize();
+            farinsize = extop.getIn(0).getSize();
 
             if (offset == 0)
             {       // If SUBPIECE is of least sig part
-                thruvn = extop->getIn(0);   // Something still comes through
-                if (thruvn->isFree())
+                thruvn = extop.getIn(0);   // Something still comes through
+                if (thruvn.isFree())
                 {
-                    if (thruvn->isConstant() && (insize > sizeof(uintb)) && (outsize == farinsize))
+                    if (thruvn.isConstant() && (insize > sizeof(uintb)) && (outsize == farinsize))
                     {
                         // If we have a constant that is too big to represent, and the elimination is total
                         opc = CPUI_COPY;    // go ahead and do elimination
-                        thruvn = data.newConstant(thruvn->getSize(), thruvn->getOffset()); // with new constant varnode
+                        thruvn = data.newConstant(thruvn.getSize(), thruvn.getOffset()); // with new constant varnode
                     }
                     else
                         return 0; // If original is constant or undefined don't proceed
@@ -89,7 +89,7 @@ namespace Sla.DECCORE
             data.opSetInput(op, thruvn, 0);
 
             if (opc == CPUI_SUBPIECE)
-                data.opSetInput(op, data.newConstant(op->getIn(1)->getSize(), offset), 1);
+                data.opSetInput(op, data.newConstant(op.getIn(1).getSize(), offset), 1);
             else
                 data.opRemoveInput(op, 1);  // ZEXT, SEXT, or COPY has only 1 input
             return 1;

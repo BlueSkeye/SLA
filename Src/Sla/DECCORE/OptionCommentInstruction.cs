@@ -21,13 +21,13 @@ namespace Sla.DECCORE
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
             bool toggle = onOrOff(p2);
-            uint4 flags = glb->print->getInstructionComment();
+            uint4 flags = glb.print.getInstructionComment();
             uint4 val = Comment::encodeCommentType(p1);
             if (toggle)
                 flags |= val;
             else
                 flags &= ~val;
-            glb->print->setInstructionComment(flags);
+            glb.print.setInstructionComment(flags);
             string prop;
             prop = toggle ? "on" : "off";
             return "Instruction comment type " + p1 + " turned " + prop;

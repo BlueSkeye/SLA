@@ -31,25 +31,25 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn = op->getIn(0);
-            Varnode* outvn = op->getOut();
-            int4 flowsize = outvn->getSize();
+            Varnode* vn = op.getIn(0);
+            Varnode* outvn = op.getOut();
+            int4 flowsize = outvn.getSize();
             uintb mask = calc_mask(flowsize);
-            mask <<= 8 * ((int4)op->getIn(1)->getOffset());
-            bool aggressive = outvn->isPtrFlow();
+            mask <<= 8 * ((int4)op.getIn(1).getOffset());
+            bool aggressive = outvn.isPtrFlow();
             if (!aggressive)
             {
-                if ((vn->getConsume() & mask) != vn->getConsume()) return 0;
-                if (op->getOut()->hasNoDescend()) return 0;
+                if ((vn.getConsume() & mask) != vn.getConsume()) return 0;
+                if (op.getOut().hasNoDescend()) return 0;
             }
             bool big = false;
-            if (flowsize >= 8 && vn->isInput())
+            if (flowsize >= 8 && vn.isInput())
             {
                 // Vector register inputs getting truncated to what actually gets used
                 // happens occasionally.  We let SubvariableFlow deal with this special case
                 // to avoid overlapping inputs
                 // TODO: ActionLaneDivide should be handling this
-                if (vn->loneDescend() == op)
+                if (vn.loneDescend() == op)
                     big = true;
             }
             SubvariableFlow subflow(&data,vn,mask,aggressive,false,big);

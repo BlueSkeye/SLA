@@ -24,15 +24,15 @@ namespace Sla.DECCORE
         /// \return \b true if the descendant was collapsed
         private bool pushConstFurther(Funcdata data, TypePointer outtype, PcodeOp op, int4 slot, uintb val)
         {
-            if (op->code() != CPUI_PTRADD) return false;        // Must be a PTRADD
+            if (op.code() != CPUI_PTRADD) return false;        // Must be a PTRADD
             if (slot != 0) return false;
-            Varnode* vn = op->getIn(1);
-            if (!vn->isConstant()) return false;            // that is adding a constant
-            uintb addval = vn->getOffset();
-            addval *= op->getIn(2)->getOffset();
+            Varnode* vn = op.getIn(1);
+            if (!vn.isConstant()) return false;            // that is adding a constant
+            uintb addval = vn.getOffset();
+            addval *= op.getIn(2).getOffset();
             val += addval;
-            Varnode* newconst = data.newConstant(vn->getSize(), val);
-            newconst->updateType(outtype, false, false);        // Put the pointer datatype on new constant
+            Varnode* newconst = data.newConstant(vn.getSize(), val);
+            newconst.updateType(outtype, false, false);        // Put the pointer datatype on new constant
             data.opRemoveInput(op, 2);
             data.opRemoveInput(op, 1);
             data.opSetOpcode(op, CPUI_COPY);
@@ -64,39 +64,39 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* sb = op->getIn(0);
-            Datatype* sbType = sb->getTypeReadFacing(op);
-            if (sbType->getMetatype() != TYPE_PTR) return 0;
-            TypeSpacebase* sbtype = (TypeSpacebase*)((TypePointer*)sbType)->getPtrTo();
-            if (sbtype->getMetatype() != TYPE_SPACEBASE) return 0;
-            Varnode* vn1 = op->getIn(1);
-            if (!vn1->isConstant()) return 0;
-            Varnode* outvn = op->getOut();
-            TypePointer* outtype = (TypePointer*)outvn->getTypeDefFacing();
-            if (outtype->getMetatype() != TYPE_PTR) return 0;
-            Datatype* basetype = outtype->getPtrTo();
-            if (!basetype->isCharPrint()) return 0;
-            Address symaddr = sbtype->getAddress(vn1->getOffset(), vn1->getSize(), op->getAddr());
-            Scope* scope = sbtype->getMap();
-            if (!scope->isReadOnly(symaddr, 1, op->getAddr()))
+            Varnode* sb = op.getIn(0);
+            Datatype* sbType = sb.getTypeReadFacing(op);
+            if (sbType.getMetatype() != TYPE_PTR) return 0;
+            TypeSpacebase* sbtype = (TypeSpacebase*)((TypePointer*)sbType).getPtrTo();
+            if (sbtype.getMetatype() != TYPE_SPACEBASE) return 0;
+            Varnode* vn1 = op.getIn(1);
+            if (!vn1.isConstant()) return 0;
+            Varnode* outvn = op.getOut();
+            TypePointer* outtype = (TypePointer*)outvn.getTypeDefFacing();
+            if (outtype.getMetatype() != TYPE_PTR) return 0;
+            Datatype* basetype = outtype.getPtrTo();
+            if (!basetype.isCharPrint()) return 0;
+            Address symaddr = sbtype.getAddress(vn1.getOffset(), vn1.getSize(), op.getAddr());
+            Scope* scope = sbtype.getMap();
+            if (!scope.isReadOnly(symaddr, 1, op.getAddr()))
                 return 0;
             // Check if data at the address looks like a string
-            if (!data.getArch()->stringManager->isString(symaddr, basetype))
+            if (!data.getArch().stringManager.isString(symaddr, basetype))
                 return 0;
 
             // If we reach here, the PTRSUB should be converted to a (COPY of a) pointer constant.
             bool removeCopy = false;
-            if (!outvn->isAddrForce())
+            if (!outvn.isAddrForce())
             {
                 removeCopy = true;      // Assume we can remove, unless we can't propagate to all descendants
                 list<PcodeOp*>::const_iterator iter, enditer;
-                iter = outvn->beginDescend();
-                enditer = outvn->endDescend();
+                iter = outvn.beginDescend();
+                enditer = outvn.endDescend();
                 while (iter != enditer)
                 {
                     PcodeOp* subop = *iter; // Give each descendant of op a chance to further propagate the constant
                     ++iter;
-                    if (!pushConstFurther(data, outtype, subop, subop->getSlot(outvn), vn1->getOffset()))
+                    if (!pushConstFurther(data, outtype, subop, subop.getSlot(outvn), vn1.getOffset()))
                         removeCopy = false; // If the descendant does NOT propagate const, do NOT remove op
                 }
             }
@@ -106,8 +106,8 @@ namespace Sla.DECCORE
             }
             else
             {   // Convert the original PTRSUB to a COPY of the constant
-                Varnode* newvn = data.newConstant(outvn->getSize(), vn1->getOffset());
-                newvn->updateType(outtype, false, false);
+                Varnode* newvn = data.newConstant(outvn.getSize(), vn1.getOffset());
+                newvn.updateType(outtype, false, false);
                 data.opRemoveInput(op, 1);
                 data.opSetInput(op, newvn, 0);
                 data.opSetOpcode(op, CPUI_COPY);

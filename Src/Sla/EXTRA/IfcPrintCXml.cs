@@ -14,13 +14,13 @@ namespace Sla.EXTRA
         /// \brief Print the current function with C syntax and XML markup:`print C xml`
         public override void execute(TextReader s)
         {
-            if (dcp->fd == (Funcdata*)0)
+            if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");
 
-            dcp->conf->print->setOutputStream(status->fileoptr);
-            dcp->conf->print->setMarkup(true);
-            dcp->conf->print->docFunction(dcp->fd);
-            dcp->conf->print->setMarkup(false);
+            dcp.conf.print.setOutputStream(status.fileoptr);
+            dcp.conf.print.setMarkup(true);
+            dcp.conf.print.docFunction(dcp.fd);
+            dcp.conf.print.setMarkup(false);
         }
     }
 }

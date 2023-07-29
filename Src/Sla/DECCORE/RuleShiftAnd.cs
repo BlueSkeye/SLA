@@ -35,34 +35,34 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* cvn = op->getIn(1);
-            if (!cvn->isConstant()) return 0;
-            Varnode* shiftin = op->getIn(0);
-            if (!shiftin->isWritten()) return 0;
-            PcodeOp* andop = shiftin->getDef();
-            if (andop->code() != CPUI_INT_AND) return 0;
-            if (shiftin->loneDescend() != op) return 0;
-            Varnode* maskvn = andop->getIn(1);
-            if (!maskvn->isConstant()) return 0;
-            uintb mask = maskvn->getOffset();
-            Varnode* invn = andop->getIn(0);
-            if (invn->isFree()) return 0;
+            Varnode* cvn = op.getIn(1);
+            if (!cvn.isConstant()) return 0;
+            Varnode* shiftin = op.getIn(0);
+            if (!shiftin.isWritten()) return 0;
+            PcodeOp* andop = shiftin.getDef();
+            if (andop.code() != CPUI_INT_AND) return 0;
+            if (shiftin.loneDescend() != op) return 0;
+            Varnode* maskvn = andop.getIn(1);
+            if (!maskvn.isConstant()) return 0;
+            uintb mask = maskvn.getOffset();
+            Varnode* invn = andop.getIn(0);
+            if (invn.isFree()) return 0;
 
-            OpCode opc = op->code();
+            OpCode opc = op.code();
             int4 sa;
             if ((opc == CPUI_INT_RIGHT) || (opc == CPUI_INT_LEFT))
-                sa = (int4)cvn->getOffset();
+                sa = (int4)cvn.getOffset();
             else
             {
-                sa = leastsigbit_set(cvn->getOffset()); // Make sure the multiply is really a shift
+                sa = leastsigbit_set(cvn.getOffset()); // Make sure the multiply is really a shift
                 if (sa <= 0) return 0;
                 uintb testval = 1;
                 testval <<= sa;
-                if (testval != cvn->getOffset()) return 0;
+                if (testval != cvn.getOffset()) return 0;
                 opc = CPUI_INT_LEFT;    // Treat CPUI_INT_MULT as CPUI_INT_LEFT
             }
-            uintb nzm = invn->getNZMask();
-            uintb fullmask = calc_mask(invn->getSize());
+            uintb nzm = invn.getNZMask();
+            uintb fullmask = calc_mask(invn.getSize());
             if (opc == CPUI_INT_RIGHT)
             {
                 nzm >>= sa;

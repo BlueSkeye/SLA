@@ -34,7 +34,7 @@ namespace Sla.SLEIGH
             if (maskvalue != (PatternBlock*)0) delete maskvalue;
         }
 
-        public override Pattern simplifyClone() => new ContextPattern(maskvalue->clone());
+        public override Pattern simplifyClone() => new ContextPattern(maskvalue.clone());
 
         public override void shiftInstruction(int4 sa)
         {
@@ -44,18 +44,18 @@ namespace Sla.SLEIGH
         {
             ContextPattern* b2 = dynamic_cast <ContextPattern*> (b);
             if (b2 == (ContextPattern*)0)
-                return b->doOr(this, -sa);
+                return b.doOr(this, -sa);
 
-            return new OrPattern((DisjointPattern*)simplifyClone(), (DisjointPattern*)b2->simplifyClone());
+            return new OrPattern((DisjointPattern*)simplifyClone(), (DisjointPattern*)b2.simplifyClone());
         }
 
         public override Pattern doAnd(Pattern b, int4 sa)
         {
             ContextPattern* b2 = dynamic_cast <ContextPattern*> (b);
             if (b2 == (ContextPattern*)0)
-                return b->doAnd(this, -sa);
+                return b.doAnd(this, -sa);
 
-            PatternBlock* resblock = maskvalue->intersect(b2->maskvalue);
+            PatternBlock* resblock = maskvalue.intersect(b2.maskvalue);
             return new ContextPattern(resblock);
         }
 
@@ -63,34 +63,34 @@ namespace Sla.SLEIGH
         {
             ContextPattern* b2 = dynamic_cast <ContextPattern*> (b);
             if (b2 == (ContextPattern*)0)
-                return b->commonSubPattern(this, -sa);
+                return b.commonSubPattern(this, -sa);
 
-            PatternBlock* resblock = maskvalue->commonSubPattern(b2->maskvalue);
+            PatternBlock* resblock = maskvalue.commonSubPattern(b2.maskvalue);
             return new ContextPattern(resblock);
         }
 
-        public override bool isMatch(ParserWalker walker) => maskvalue->isContextMatch(walker);
+        public override bool isMatch(ParserWalker walker) => maskvalue.isContextMatch(walker);
 
-        public override bool alwaysTrue() => maskvalue->alwaysTrue();
+        public override bool alwaysTrue() => maskvalue.alwaysTrue();
 
-        public override bool alwaysFalse() => maskvalue->alwaysFalse();
+        public override bool alwaysFalse() => maskvalue.alwaysFalse();
 
         public override bool alwaysInstructionTrue() => true;
 
         public override void saveXml(TextWriter s)
         {
             s << "<context_pat>\n";
-            maskvalue->saveXml(s);
+            maskvalue.saveXml(s);
             s << "</context_pat>\n";
         }
 
         public override void restoreXml(Element el)
         {
-            List list = el->getChildren();
+            List list = el.getChildren();
             List::const_iterator iter;
             iter = list.begin();
             maskvalue = new PatternBlock(true);
-            maskvalue->restoreXml(*iter);
+            maskvalue.restoreXml(*iter);
         }
     }
 }

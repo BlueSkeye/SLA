@@ -437,8 +437,8 @@ namespace Sla.DECCORE
             //         NOT increment the LoopBody but DO increment a contained loop
             // So when the immediate container a of loop b calls this routine
             //         a has a depth greater than any containing LoopBody that has already run
-            //         =>  therefore b->immed_container->depth < a->depth    and  a claims the immed_container position
-            // Subsequent containers c of a and b, will have c->depth < a->depth because c contains a
+            //         =>  therefore b.immed_container.depth < a.depth    and  a claims the immed_container position
+            // Subsequent containers c of a and b, will have c.depth < a.depth because c contains a
             for (int i = 0; i < containlist.Count; ++i) {
                 // Keep track of the most immediate container
                 LoopBody lb = containlist[i];

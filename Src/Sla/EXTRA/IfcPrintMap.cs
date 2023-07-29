@@ -22,22 +22,22 @@ namespace Sla.EXTRA
 
             s >> name;
 
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("No load image");
-            if (name.size() != 0 || dcp->fd == (Funcdata*)0)
+            if (name.size() != 0 || dcp.fd == (Funcdata*)0)
             {
                 string fullname = name + "::a";     // Add fake variable name
-                scope = dcp->conf->symboltab->resolveScopeFromSymbolName(fullname, "::", fullname, (Scope*)0);
+                scope = dcp.conf.symboltab.resolveScopeFromSymbolName(fullname, "::", fullname, (Scope*)0);
             }
             else
-                scope = dcp->fd->getScopeLocal();
+                scope = dcp.fd.getScopeLocal();
 
             if (scope == (Scope*)0)
                 throw IfaceExecutionError("No map named: " + name);
 
-            *status->fileoptr << scope->getFullName() << endl;
-            scope->printBounds(*status->fileoptr);
-            scope->printEntries(*status->fileoptr);
+            *status.fileoptr << scope.getFullName() << endl;
+            scope.printBounds(*status.fileoptr);
+            scope.printEntries(*status.fileoptr);
         }
     }
 }

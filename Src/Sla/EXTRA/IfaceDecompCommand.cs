@@ -23,11 +23,11 @@ namespace Sla.EXTRA
         /// \param scope is the given scope
         protected void iterateScopesRecursive(Scope scope)
         {
-            if (!scope->isGlobal()) return;
+            if (!scope.isGlobal()) return;
             iterateFunctionsAddrOrder(scope);
             ScopeMap::const_iterator iter, enditer;
-            iter = scope->childrenBegin();
-            enditer = scope->childrenEnd();
+            iter = scope.childrenBegin();
+            enditer = scope.childrenEnd();
             for (; iter != enditer; ++iter)
             {
                 iterateScopesRecursive((*iter).second);
@@ -40,15 +40,15 @@ namespace Sla.EXTRA
         protected void iterateFunctionsAddrOrder(Scope scope)
         {
             MapIterator miter, menditer;
-            miter = scope->begin();
-            menditer = scope->end();
+            miter = scope.begin();
+            menditer = scope.end();
             while (miter != menditer)
             {
-                Symbol* sym = (*miter)->getSymbol();
+                Symbol* sym = (*miter).getSymbol();
                 FunctionSymbol* fsym = dynamic_cast<FunctionSymbol*>(sym);
                 ++miter;
                 if (fsym != (FunctionSymbol*)0)
-                    iterationCallback(fsym->getFunction());
+                    iterationCallback(fsym.getFunction());
             }
         }
 
@@ -74,9 +74,9 @@ namespace Sla.EXTRA
         /// traversed in address order.
         public void iterateFunctionsAddrOrder()
         {
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("No architecture loaded");
-            iterateScopesRecursive(dcp->conf->symboltab->getGlobalScope());
+            iterateScopesRecursive(dcp.conf.symboltab.getGlobalScope());
         }
 
         ///< Iterate command over all functions in a call-graph traversal
@@ -84,21 +84,21 @@ namespace Sla.EXTRA
         /// Child functions are traversed before their parents.
         public void iterateFunctionsLeafOrder()
         {
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("No architecture loaded");
 
-            if (dcp->cgraph == (CallGraph*)0)
+            if (dcp.cgraph == (CallGraph*)0)
                 throw IfaceExecutionError("No callgraph present");
 
             CallGraphNode* node;
-            node = dcp->cgraph->initLeafWalk();
+            node = dcp.cgraph.initLeafWalk();
             while (node != (CallGraphNode*)0)
             {
-                if (node->getName().size() == 0) continue; // Skip if has no name
-                Funcdata* fd = node->getFuncdata();
+                if (node.getName().size() == 0) continue; // Skip if has no name
+                Funcdata* fd = node.getFuncdata();
                 if (fd != (Funcdata*)0)
                     iterationCallback(fd);
-                node = dcp->cgraph->nextLeaf(node);
+                node = dcp.cgraph.nextLeaf(node);
             }
         }
     }

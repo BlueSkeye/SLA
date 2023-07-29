@@ -61,8 +61,8 @@ namespace Sla.EXTRA
         public void abortFunction(TextWriter s)
         {
             if (fd == (Funcdata*)0) return;
-            s << "Unable to proceed with function: " << fd->getName() << endl;
-            conf->clearAnalysis(fd);
+            s << "Unable to proceed with function: " << fd.getName() << endl;
+            conf.clearAnalysis(fd);
             fd = (Funcdata*)0;
         }
 
@@ -87,24 +87,24 @@ namespace Sla.EXTRA
         {
 #if OPACTION_DEBUG
             if (jumptabledebug)
-                fd->enableJTCallback(jump_callback);
+                fd.enableJTCallback(jump_callback);
 #endif
             try
             {
                 if (size == 0)
                 {
-                    Address baddr(fd->getAddress().getSpace(),0);
-                    Address eaddr(fd->getAddress().getSpace(), fd->getAddress().getSpace()->getHighest());
-                    fd->followFlow(baddr, eaddr);
+                    Address baddr(fd.getAddress().getSpace(),0);
+                    Address eaddr(fd.getAddress().getSpace(), fd.getAddress().getSpace().getHighest());
+                    fd.followFlow(baddr, eaddr);
                 }
                 else
-                    fd->followFlow(fd->getAddress(), fd->getAddress() + size);
-                s << "Function " << fd->getName() << ": ";
-                fd->getAddress().printRaw(s);
+                    fd.followFlow(fd.getAddress(), fd.getAddress() + size);
+                s << "Function " << fd.getName() << ": ";
+                fd.getAddress().printRaw(s);
                 s << endl;
             }
             catch (RecovError err) {
-                s << "Function " << fd->getName() << ": " << err.ToString() << endl;
+                s << "Function " << fd.getName() << ": " << err.ToString() << endl;
             }
         }
 
@@ -143,19 +143,19 @@ namespace Sla.EXTRA
                 throw IfaceExecutionError("No function selected");
 
             Address pc;
-            Address loc(parse_varnode(s, defsize, pc, uq,* conf->types));
-            if (loc.getSpace()->getType() == IPTR_CONSTANT)
+            Address loc(parse_varnode(s, defsize, pc, uq,* conf.types));
+            if (loc.getSpace().getType() == IPTR_CONSTANT)
             {
                 if (pc.isInvalid() || (uq == ~((uintm)0)))
                     throw IfaceParseError("Missing p-code sequence number");
                 SeqNum seq(pc, uq);
-                PcodeOp* op = fd->findOp(seq);
+                PcodeOp* op = fd.findOp(seq);
                 if (op != (PcodeOp*)0)
                 {
-                    for (int4 i = 0; i < op->numInput(); ++i)
+                    for (int4 i = 0; i < op.numInput(); ++i)
                     {
-                        Varnode* tmpvn = op->getIn(i);
-                        if (tmpvn->getAddr() == loc)
+                        Varnode* tmpvn = op.getIn(i);
+                        if (tmpvn.getAddr() == loc)
                         {
                             vn = tmpvn;
                             break;
@@ -164,22 +164,22 @@ namespace Sla.EXTRA
                 }
             }
             else if (pc.isInvalid() && (uq == ~((uintm)0)))
-                vn = fd->findVarnodeInput(defsize, loc);
+                vn = fd.findVarnodeInput(defsize, loc);
             else if ((!pc.isInvalid()) && (uq != ~((uintm)0)))
-                vn = fd->findVarnodeWritten(defsize, loc, pc, uq);
+                vn = fd.findVarnodeWritten(defsize, loc, pc, uq);
             else
             {
                 VarnodeLocSet::const_iterator iter, enditer;
-                iter = fd->beginLoc(defsize, loc);
-                enditer = fd->endLoc(defsize, loc);
+                iter = fd.beginLoc(defsize, loc);
+                enditer = fd.endLoc(defsize, loc);
                 while (iter != enditer)
                 {
                     vn = *iter++;
-                    if (vn->isFree()) continue;
-                    if (vn->isWritten())
+                    if (vn.isFree()) continue;
+                    if (vn.isWritten())
                     {
-                        if ((!pc.isInvalid()) && (vn->getDef()->getAddr() == pc)) break;
-                        if ((uq != ~((uintm)0)) && (vn->getDef()->getTime() == uq)) break;
+                        if ((!pc.isInvalid()) && (vn.getDef().getAddr() == pc)) break;
+                        if ((uq != ~((uintm)0)) && (vn.getDef().getTime() == uq)) break;
                     }
                 }
             }
@@ -196,12 +196,12 @@ namespace Sla.EXTRA
         /// \param res will hold any matching symbols
         public void readSymbol(string name, List<Symbol> res)
         {
-            Scope* scope = (fd == (Funcdata*)0) ? conf->symboltab->getGlobalScope() : fd->getScopeLocal();
+            Scope* scope = (fd == (Funcdata*)0) ? conf.symboltab.getGlobalScope() : fd.getScopeLocal();
             string basename;
-            scope = conf->symboltab->resolveScopeFromSymbolName(name, "::", basename, scope);
+            scope = conf.symboltab.resolveScopeFromSymbolName(name, "::", basename, scope);
             if (scope == (Scope*)0)
                 throw IfaceParseError("Bad namespace for symbol: " + name);
-            scope->queryByName(basename, res);
+            scope.queryByName(basename, res);
         }
     }
 }

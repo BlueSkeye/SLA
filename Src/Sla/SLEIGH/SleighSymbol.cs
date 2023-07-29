@@ -54,14 +54,14 @@ namespace Sla.SLEIGH
 
         public void restoreXmlHeader(Element el)
         {
-            name = el->getAttributeValue("name");
+            name = el.getAttributeValue("name");
             {
-                istringstream s(el->getAttributeValue("id"));
+                istringstream s(el.getAttributeValue("id"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> id;
             }
             {
-                istringstream s(el->getAttributeValue("scope"));
+                istringstream s(el.getAttributeValue("scope"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> scopeid;
             }

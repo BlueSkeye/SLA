@@ -32,35 +32,35 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            OpCode opc2 = op->code();
-            Varnode* constVn2 = op->getIn(1);
-            if (!constVn2->isConstant()) return 0;
-            Varnode* vn = op->getIn(0);
-            if (!vn->isWritten()) return 0;
-            PcodeOp* divOp = vn->getDef();
-            OpCode opc1 = divOp->code();
+            OpCode opc2 = op.code();
+            Varnode* constVn2 = op.getIn(1);
+            if (!constVn2.isConstant()) return 0;
+            Varnode* vn = op.getIn(0);
+            if (!vn.isWritten()) return 0;
+            PcodeOp* divOp = vn.getDef();
+            OpCode opc1 = divOp.code();
             if (opc1 != opc2 && (opc2 != CPUI_INT_DIV || opc1 != CPUI_INT_RIGHT))
                 return 0;
-            Varnode* constVn1 = divOp->getIn(1);
-            if (!constVn1->isConstant()) return 0;
+            Varnode* constVn1 = divOp.getIn(1);
+            if (!constVn1.isConstant()) return 0;
             // If the intermediate result is being used elsewhere, don't apply
             // Its likely collapsing the divisions will interfere with the modulo rules
-            if (vn->loneDescend() == (PcodeOp*)0) return 0;
+            if (vn.loneDescend() == (PcodeOp*)0) return 0;
             uintb val1;
             if (opc1 == opc2)
             {
-                val1 = constVn1->getOffset();
+                val1 = constVn1.getOffset();
             }
             else
             {   // Unsigned case with INT_RIGHT
-                int4 sa = constVn1->getOffset();
+                int4 sa = constVn1.getOffset();
                 val1 = 1;
                 val1 <<= sa;
             }
-            Varnode* baseVn = divOp->getIn(0);
-            if (baseVn->isFree()) return 0;
-            int4 sz = vn->getSize();
-            uintb val2 = constVn2->getOffset();
+            Varnode* baseVn = divOp.getIn(0);
+            if (baseVn.isFree()) return 0;
+            int4 sz = vn.getSize();
+            uintb val2 = constVn2.getOffset();
             uintb resval = (val1 * val2) & calc_mask(sz);
             if (resval == 0) return 0;
             if (signbit_negative(val1, sz))

@@ -32,7 +32,7 @@ namespace Sla.DECCORE
             int4 i;
             FuncCallSpecs* fc;
             AliasChecker aliascheck;
-            aliascheck.gather(&data, data.getArch()->getStackSpace(), true);
+            aliascheck.gather(&data, data.getArch().getStackSpace(), true);
 
             for (i = 0; i < data.numCalls(); ++i)
             {
@@ -42,25 +42,25 @@ namespace Sla.DECCORE
                 // there has been a change to deindirect
                 try
                 {
-                    if (fc->isInputActive())
+                    if (fc.isInputActive())
                     {
-                        ParamActive* activeinput = fc->getActiveInput();
-                        bool trimmable = ((activeinput->getNumPasses() > 0) || (fc->getOp()->code() != CPUI_CALLIND));
-                        if (!activeinput->isFullyChecked())
-                            fc->checkInputTrialUse(data, aliascheck);
-                        activeinput->finishPass();
-                        if (activeinput->getNumPasses() > activeinput->getMaxPass())
-                            activeinput->markFullyChecked();
+                        ParamActive* activeinput = fc.getActiveInput();
+                        bool trimmable = ((activeinput.getNumPasses() > 0) || (fc.getOp().code() != CPUI_CALLIND));
+                        if (!activeinput.isFullyChecked())
+                            fc.checkInputTrialUse(data, aliascheck);
+                        activeinput.finishPass();
+                        if (activeinput.getNumPasses() > activeinput.getMaxPass())
+                            activeinput.markFullyChecked();
                         else
                             count += 1;     // Count a change, to indicate we still have work to do
-                        if (trimmable && activeinput->isFullyChecked())
+                        if (trimmable && activeinput.isFullyChecked())
                         {
-                            if (activeinput->needsFinalCheck())
-                                fc->finalInputCheck();
-                            fc->resolveModel(activeinput);
-                            fc->deriveInputMap(activeinput);
-                            fc->buildInputFromTrials(data);
-                            fc->clearActiveInput();
+                            if (activeinput.needsFinalCheck())
+                                fc.finalInputCheck();
+                            fc.resolveModel(activeinput);
+                            fc.deriveInputMap(activeinput);
+                            fc.buildInputFromTrials(data);
+                            fc.clearActiveInput();
                             count += 1;
                         }
                     }
@@ -68,10 +68,10 @@ namespace Sla.DECCORE
                 catch (LowlevelError err)
                 {
                     ostringstream s;
-                    s << "Error processing " << fc->getName();
-                    PcodeOp* op = fc->getOp();
+                    s << "Error processing " << fc.getName();
+                    PcodeOp* op = fc.getOp();
                     if (op != (PcodeOp*)0)
-                        s << " called at " << op->getSeqNum();
+                        s << " called at " << op.getSeqNum();
                     s << ": " << err.ToString();
                     throw new LowlevelError(s.str());
                 }

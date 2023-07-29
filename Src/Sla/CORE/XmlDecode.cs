@@ -169,10 +169,10 @@ namespace Sla.CORE
         {
 #if CPUI_DEBUG
             Element el = elStack.back();
-            if (iterStack.back() != el->getChildren().end())
-                throw DecoderError("Closing element <" + el->getName() + "> with additional children");
-            if (ElementId::find(el->getName()) != id)
-                throw DecoderError("Trying to close <" + el->getName() + "> with mismatching id");
+            if (iterStack.back() != el.getChildren().end())
+                throw DecoderError("Closing element <" + el.getName() + "> with additional children");
+            if (ElementId::find(el.getName()) != id)
+                throw DecoderError("Trying to close <" + el.getName() + "> with mismatching id");
 #endif
             elStack.Pop();
             iterStack.Pop();
@@ -184,8 +184,8 @@ namespace Sla.CORE
         {
 #if CPUI_DEBUG
             Element el = elStack.back();
-            if (ElementId::find(el->getName()) != id)
-                throw DecoderError("Trying to close <" + el->getName() + "> with mismatching id");
+            if (ElementId::find(el.getName()) != id)
+                throw DecoderError("Trying to close <" + el.getName() + "> with mismatching id");
 #endif
             elStack.Pop();
             iterStack.Pop();

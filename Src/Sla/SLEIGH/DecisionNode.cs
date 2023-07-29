@@ -102,9 +102,9 @@ namespace Sla.SLEIGH
 
             for (i = 0; i < list.size(); ++i)
             {
-                mask = list[i].first->getMask(low, size, context);
+                mask = list[i].first.getMask(low, size, context);
                 if ((mask & m) != m) continue;  // Skip if field not fully specified
-                val = list[i].first->getValue(low, size, context);
+                val = list[i].first.getValue(low, size, context);
                 total += 1;
                 count[val] += 1;
             }
@@ -130,7 +130,7 @@ namespace Sla.SLEIGH
 
             for (int4 i = 0; i < list.size(); ++i)
             {
-                mask = list[i].first->getMask(low, size, context);
+                mask = list[i].first.getMask(low, size, context);
                 if ((mask & m) == m)
                     count += 1;
             }
@@ -144,7 +144,7 @@ namespace Sla.SLEIGH
 
             for (i = 0; i < list.size(); ++i)
             {
-                val = list[i].first->getLength(context);
+                val = list[i].first.getLength(context);
                 if (val > max)
                     max = val;
             }
@@ -158,8 +158,8 @@ namespace Sla.SLEIGH
                         // that intersects with this node (startbit,bitsize,context)
             uintm m = (bitsize == 8 * sizeof(uintm)) ? 0 : (((uintm)1) << bitsize);
             m = m - 1;
-            uintm commonMask = m & pat->getMask(startbit, bitsize, contextdecision);
-            uintm commonValue = commonMask & pat->getValue(startbit, bitsize, contextdecision);
+            uintm commonMask = m & pat.getMask(startbit, bitsize, contextdecision);
+            uintm commonValue = commonMask & pat.getValue(startbit, bitsize, contextdecision);
             uintm dontCareMask = m ^ commonMask;
 
             for (uintm i = 0; i <= dontCareMask; ++i)
@@ -198,7 +198,7 @@ namespace Sla.SLEIGH
             {       // The node is terminal
                 vector<pair<DisjointPattern*, Constructor*>>::const_iterator iter;
                 for (iter = list.begin(); iter != list.end(); ++iter)
-                    if ((*iter).first->isMatch(walker))
+                    if ((*iter).first.isMatch(walker))
                         return (*iter).second;
                 ostringstream s;
                 s << walker.getAddr().getShortcut();
@@ -211,12 +211,12 @@ namespace Sla.SLEIGH
                 val = walker.getContextBits(startbit, bitsize);
             else
                 val = walker.getInstructionBits(startbit, bitsize);
-            return children[val]->resolve(walker);
+            return children[val].resolve(walker);
         }
 
         public void addConstructorPair(DisjointPattern pat, Constructor ct)
         {
-            DisjointPattern* clone = (DisjointPattern*)pat->simplifyClone(); // We need to own pattern
+            DisjointPattern* clone = (DisjointPattern*)pat.simplifyClone(); // We need to own pattern
             list.push_back(pair<DisjointPattern*, Constructor*>(clone, ct));
             num += 1;
         }
@@ -235,7 +235,7 @@ namespace Sla.SLEIGH
                 orderPatterns(props);
                 return;
             }
-            if ((parent != (DecisionNode*)0) && (list.size() >= parent->num))
+            if ((parent != (DecisionNode*)0) && (list.size() >= parent.num))
                 throw new LowlevelError("Child has as many Patterns as parent");
 
             int4 numChildren = 1 << bitsize;
@@ -253,13 +253,13 @@ namespace Sla.SLEIGH
                                         // pattern will get put into multiple bins
                 consistentValues(vals, list[i].first);
                 for (int4 j = 0; j < vals.size(); ++j)
-                    children[vals[j]]->addConstructorPair(list[i].first, list[i].second);
+                    children[vals[j]].addConstructorPair(list[i].first, list[i].second);
                 delete list[i].first;   // We no longer need original pattern
             }
             list.clear();
 
             for (int4 i = 0; i < numChildren; ++i)
-                children[i]->split(props);
+                children[i].split(props);
         }
 
         public void orderPatterns(DecisionProperties props)
@@ -295,7 +295,7 @@ namespace Sla.SLEIGH
                 {
                     DisjointPattern* ipat = list[i].first;
                     DisjointPattern* jpat = list[j].first;
-                    if (ipat->identical(jpat))
+                    if (ipat.identical(jpat))
                         props.identicalPattern(list[i].second, list[j].second);
                 }
             }
@@ -307,9 +307,9 @@ namespace Sla.SLEIGH
                 {
                     DisjointPattern* ipat = newlist[i].first;
                     DisjointPattern* jpat = list[j].first;
-                    if (ipat->specializes(jpat))
+                    if (ipat.specializes(jpat))
                         break;
-                    if (!jpat->specializes(ipat))
+                    if (!jpat.specializes(ipat))
                     { // We have a potential conflict
                         Constructor* iconst = newlist[i].second;
                         Constructor* jconst = list[j].second;
@@ -345,7 +345,7 @@ namespace Sla.SLEIGH
                     Constructor* tconst = list[j].second;
                     if ((tpat == pat1) && (tconst == const1)) break; // Ran out of possible specializations
                     if ((tpat == pat2) && (tconst == const2)) break;
-                    if (tpat->resolvesIntersect(pat1, pat2))
+                    if (tpat.resolvesIntersect(pat1, pat2))
                     {
                         resolved = true;
                         break;
@@ -370,12 +370,12 @@ namespace Sla.SLEIGH
             s << ">\n";
             for (int4 i = 0; i < list.size(); ++i)
             {
-                s << "<pair id=\"" << dec << list[i].second->getId() << "\">\n";
-                list[i].first->saveXml(s);
+                s << "<pair id=\"" << dec << list[i].second.getId() << "\">\n";
+                list[i].first.saveXml(s);
                 s << "</pair>\n";
             }
             for (int4 i = 0; i < children.size(); ++i)
-                children[i]->saveXml(s);
+                children[i].saveXml(s);
             s << "</decision>\n";
         }
 
@@ -383,44 +383,44 @@ namespace Sla.SLEIGH
         {
             parent = par;
             {
-                istringstream s(el->getAttributeValue("number"));
+                istringstream s(el.getAttributeValue("number"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> num;
             }
-            contextdecision = xml_readbool(el->getAttributeValue("context"));
+            contextdecision = xml_readbool(el.getAttributeValue("context"));
             {
-                istringstream s(el->getAttributeValue("start"));
+                istringstream s(el.getAttributeValue("start"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> startbit;
             }
             {
-                istringstream s(el->getAttributeValue("size"));
+                istringstream s(el.getAttributeValue("size"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> bitsize;
             }
-            List childlist = el->getChildren();
+            List childlist = el.getChildren();
             List::const_iterator iter;
             iter = childlist.begin();
             while (iter != childlist.end())
             {
-                if ((*iter)->getName() == "pair")
+                if ((*iter).getName() == "pair")
                 {
                     Constructor* ct;
                     DisjointPattern* pat;
                     uintm id;
-                    istringstream s((* iter)->getAttributeValue("id"));
+                    istringstream s((* iter).getAttributeValue("id"));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> id;
-                    ct = sub->getConstructor(id);
-                    pat = DisjointPattern::restoreDisjoint((*iter)->getChildren().front());
+                    ct = sub.getConstructor(id);
+                    pat = DisjointPattern::restoreDisjoint((*iter).getChildren().front());
                     //This increments num      addConstructorPair(pat,ct);
                     list.push_back(pair<DisjointPattern*, Constructor*>(pat, ct));
                     //delete pat;		// addConstructorPair makes its own copy
                 }
-                else if ((*iter)->getName() == "decision")
+                else if ((*iter).getName() == "decision")
                 {
                     DecisionNode* subnode = new DecisionNode();
-                    subnode->restoreXml(*iter, this, sub);
+                    subnode.restoreXml(*iter, this, sub);
                     children.push_back(subnode);
                 }
                 ++iter;

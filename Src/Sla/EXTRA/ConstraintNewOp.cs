@@ -31,22 +31,22 @@ namespace Sla.EXTRA
         }
 
         public override UnifyConstraint clone()
-            => (new ConstraintNewOp(newopindex, oldopindex, opc, insertafter, numparams))->copyid(this);
+            => (new ConstraintNewOp(newopindex, oldopindex, opc, insertafter, numparams)).copyid(this);
 
         public override int4 getBaseIndex() => newopindex;
 
         public override bool step(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            if (!traverse->step()) return false;
+            if (!traverse.step()) return false;
             Funcdata* fd = state.getFunction();
             PcodeOp* op = state.data(oldopindex).getOp();
-            PcodeOp* newop = fd->newOp(numparams, op->getAddr());
-            fd->opSetOpcode(newop, opc);
+            PcodeOp* newop = fd.newOp(numparams, op.getAddr());
+            fd.opSetOpcode(newop, opc);
             if (insertafter)
-                fd->opInsertAfter(newop, op);
+                fd.opInsertAfter(newop, op);
             else
-                fd->opInsertBefore(newop, op);
+                fd.opInsertBefore(newop, op);
             return true;
         }
 
@@ -60,7 +60,7 @@ namespace Sla.EXTRA
         {
             printstate.printIndent(s);
             s << printstate.getName(newopindex) << " = data.newOp(" << dec << numparams;
-            s << ',' << printstate.getName(oldopindex) << "->getAddr());" << endl;
+            s << ',' << printstate.getName(oldopindex) << ".getAddr());" << endl;
             printstate.printIndent(s);
             s << "data.opSetOpcode(" << printstate.getName(newopindex) << ",CPUI_" << get_opname(opc) << ");" << endl;
             s << "data.opInsert";

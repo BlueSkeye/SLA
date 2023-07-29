@@ -30,10 +30,10 @@ namespace Sla.DECCORE
             for (oiter = data.beginOpAlive(); oiter != data.endOpAlive(); ++oiter)
             {
                 op = *oiter;
-                print_varnode_vertex(op->getOut(), s);
+                print_varnode_vertex(op.getOut(), s);
                 start = 0;
-                stop = op->numInput();
-                switch (op->code())
+                stop = op.numInput();
+                switch (op.code())
                 {
                     case CPUI_LOAD:
                     case CPUI_STORE:
@@ -48,16 +48,16 @@ namespace Sla.DECCORE
                         break;
                 }
                 for (i = start; i < stop; ++i)
-                    print_varnode_vertex(op->getIn(i), s);
+                    print_varnode_vertex(op.getIn(i), s);
             }
             s << "*END_COLUMNS\n";
             for (oiter = data.beginOpAlive(); oiter != data.endOpAlive(); ++oiter)
             {
                 op = *oiter;
-                if (op->getOut() != (Varnode*)0)
-                    op->getOut()->clearMark();
-                for (i = 0; i < op->numInput(); ++i)
-                    op->getIn(i)->clearMark();
+                if (op.getOut() != (Varnode*)0)
+                    op.getOut().clearMark();
+                for (i = 0; i < op.numInput(); ++i)
+                    op.getIn(i).clearMark();
             }
         }
 

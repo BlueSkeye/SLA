@@ -50,22 +50,22 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s)
         {
-            container->printRaw(s);
+            container.printRaw(s);
             s << "[off=" << dec << offset << ",sz=" << size << ']';
         }
 
         public override TypeField findTruncation(int4 off, int4 sz, PcodeOp op, int4 slot, int4 newoff)
         {
-            return container->findTruncation(off + offset, sz, op, slot, newoff);
+            return container.findTruncation(off + offset, sz, op, slot, newoff);
         }
 
-        public override int4 numDepend() => container->numDepend();
+        public override int4 numDepend() => container.numDepend();
 
         public override Datatype getDepend(int4 index)
         {
             // Treat dependents as coming from the underlying union
-            Datatype* res = container->getDepend(index);
-            if (res->getSize() != size) // But if the size doesn't match
+            Datatype* res = container.getDepend(index);
+            if (res.getSize() != size) // But if the size doesn't match
                 return stripped;        // Return the stripped data-type
             return res;
         }
@@ -76,22 +76,22 @@ namespace Sla.DECCORE
             if (res != 0) return res;
             // Both must be partial unions
             TypePartialUnion* tp = (TypePartialUnion*)&op;
-            if (offset != tp->offset) return (offset < tp->offset) ? -1 : 1;
+            if (offset != tp.offset) return (offset < tp.offset) ? -1 : 1;
             level -= 1;
             if (level < 0)
             {
                 if (id == op.getId()) return 0;
                 return (id < op.getId()) ? -1 : 1;
             }
-            return container->compare(*tp->container, level); // Compare the underlying union
+            return container.compare(*tp.container, level); // Compare the underlying union
         }
 
         public override int4 compareDependency(Datatype op)
         {
             if (submeta != op.getSubMeta()) return (submeta < op.getSubMeta()) ? -1 : 1;
             TypePartialUnion* tp = (TypePartialUnion*)&op;  // Both must be partial unions
-            if (container != tp->container) return (container < tp->container) ? -1 : 1;    // Compare absolute pointers
-            if (offset != tp->offset) return (offset < tp->offset) ? -1 : 1;
+            if (container != tp.container) return (container < tp.container) ? -1 : 1;    // Compare absolute pointers
+            if (offset != tp.offset) return (offset < tp.offset) ? -1 : 1;
             return (op.getSize() - size);
         }
 
@@ -102,7 +102,7 @@ namespace Sla.DECCORE
             encoder.openElement(ELEM_TYPE);
             encodeBasic(metatype, encoder);
             encoder.writeSignedInteger(ATTRIB_OFFSET, offset);
-            container->encodeRef(encoder);
+            container.encodeRef(encoder);
             encoder.closeElement(ELEM_TYPE);
         }
 
@@ -112,21 +112,21 @@ namespace Sla.DECCORE
         {
             Datatype* curType = container;
             int4 curOff = offset;
-            while (curType != (Datatype*)0 && curType->getSize() > size)
+            while (curType != (Datatype*)0 && curType.getSize() > size)
             {
-                if (curType->getMetatype() == TYPE_UNION)
+                if (curType.getMetatype() == TYPE_UNION)
                 {
-                    TypeField field = curType->resolveTruncation(curOff, op, slot, curOff);
-                    curType = (field == (TypeField*)0) ? (Datatype*)0 : field->type;
+                    TypeField field = curType.resolveTruncation(curOff, op, slot, curOff);
+                    curType = (field == (TypeField*)0) ? (Datatype*)0 : field.type;
                 }
                 else
                 {
                     uintb newOff;
-                    curType = curType->getSubType(curOff, &newOff);
+                    curType = curType.getSubType(curOff, &newOff);
                     curOff = newOff;
                 }
             }
-            if (curType != (Datatype*)0 && curType->getSize() == size)
+            if (curType != (Datatype*)0 && curType.getSize() == size)
                 return curType;
             return stripped;
         }
@@ -135,29 +135,29 @@ namespace Sla.DECCORE
         {
             Datatype* curType = container;
             int4 curOff = offset;
-            while (curType != (Datatype*)0 && curType->getSize() > size)
+            while (curType != (Datatype*)0 && curType.getSize() > size)
             {
-                if (curType->getMetatype() == TYPE_UNION)
+                if (curType.getMetatype() == TYPE_UNION)
                 {
-                    Datatype* newType = curType->findResolve(op, slot);
+                    Datatype* newType = curType.findResolve(op, slot);
                     curType = (newType == curType) ? (Datatype*)0 : newType;
                 }
                 else
                 {
                     uintb newOff;
-                    curType = curType->getSubType(curOff, &newOff);
+                    curType = curType.getSubType(curOff, &newOff);
                     curOff = newOff;
                 }
             }
-            if (curType != (Datatype*)0 && curType->getSize() == size)
+            if (curType != (Datatype*)0 && curType.getSize() == size)
                 return curType;
             return stripped;
         }
 
         public override int4 findCompatibleResolve(Datatype ct)
-            => container->findCompatibleResolve(ct);
+            => container.findCompatibleResolve(ct);
 
         public override TypeField resolveTruncation(int4 off, PcodeOp op, int4 slot, int4 newoff)
-            => container->resolveTruncation(off + offset, op, slot, newoff);
+            => container.resolveTruncation(off + offset, op, slot, newoff);
     }
 }

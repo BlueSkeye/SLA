@@ -31,19 +31,19 @@ namespace Sla.EXTRA
         }
 
         public override UnifyConstraint clone() 
-            => (new ConstraintSetInput(opindex, slot->clone(), varindex))->copyid(this);
+            => (new ConstraintSetInput(opindex, slot.clone(), varindex)).copyid(this);
 
         public override int4 getBaseIndex() => varindex;
 
         public override bool step(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            if (!traverse->step()) return false;
+            if (!traverse.step()) return false;
             Funcdata* fd = state.getFunction();
             PcodeOp* op = state.data(opindex).getOp();
             Varnode* vn = state.data(varindex).getVarnode();
-            int4 slt = (int4)slot->getConstant(state);
-            fd->opSetInput(op, vn, slt);
+            int4 slt = (int4)slot.getConstant(state);
+            fd.opSetInput(op, vn, slt);
             return true;
         }
 
@@ -58,7 +58,7 @@ namespace Sla.EXTRA
             printstate.printIndent(s);
             s << "data.opSetInput(" << printstate.getName(opindex) << ',' << printstate.getName(varindex);
             s << ',';
-            slot->writeExpression(s, printstate);
+            slot.writeExpression(s, printstate);
             s << ");" << endl;
         }
     }

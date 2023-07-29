@@ -33,22 +33,22 @@ namespace Sla.EXTRA
         /// Clear any previous architecture and function
         private void clear()
         {
-            dcp->clearArchitecture();
+            dcp.clearArchitecture();
             commands.clear();
             testList.clear();
-            console->reset();
+            console.reset();
         }
 
         /// Reconstruct commands from an XML tag
         private void restoreXmlCommands(Element el)
         {
-            List list = el->getChildren();
+            List list = el.getChildren();
             List::const_iterator iter;
 
             for (iter = list.begin(); iter != list.end(); ++iter)
             {
                 Element subel = *iter;
-                commands.push_back(subel->getContent());
+                commands.push_back(subel.getContent());
             }
         }
 
@@ -58,13 +58,13 @@ namespace Sla.EXTRA
             ArchitectureCapability* capa = ArchitectureCapability::getCapability("xml");
             if (capa == (ArchitectureCapability*)0)
                 throw IfaceExecutionError("Missing XML architecture capability");
-            dcp->conf = capa->buildArchitecture("test", "", console->optr);
+            dcp.conf = capa.buildArchitecture("test", "", console.optr);
             string errmsg;
             bool iserror = false;
             try
             {
-                dcp->conf->init(docStorage);
-                dcp->conf->readLoaderSymbols("::"); // Read in loader symbols
+                dcp.conf.init(docStorage);
+                dcp.conf.readLoaderSymbols("::"); // Read in loader symbols
             }
             catch (DecoderError err) {
                 errmsg = err.ToString();
@@ -114,12 +114,12 @@ namespace Sla.EXTRA
                 numTestsApplied += 1;
                 if ((*iter).endTest())
                 {
-                    *console->optr << "Success -- " << (*iter).getName() << endl;
+                    *console.optr << "Success -- " << (*iter).getName() << endl;
                     numTestsSucceeded += 1;
                 }
                 else
                 {
-                    *console->optr << "FAIL -- " << (*iter).getName() << endl;
+                    *console.optr << "FAIL -- " << (*iter).getName() << endl;
                     lateStream.push_back((*iter).getName());
                 }
             }
@@ -130,8 +130,8 @@ namespace Sla.EXTRA
         {
             console = new ConsoleCommands(s, commands);
             consoleOwner = true;
-            dcp = (IfaceDecompData*)console->getData("decompile");
-            console->setErrorIsDone(true);
+            dcp = (IfaceDecompData*)console.getData("decompile");
+            console.setErrorIsDone(true);
             numTestsApplied = 0;
             numTestsSucceeded = 0;
         }
@@ -141,7 +141,7 @@ namespace Sla.EXTRA
         {
             console = con;
             consoleOwner = false;
-            dcp = (IfaceDecompData*)console->getData("decompile");
+            dcp = (IfaceDecompData*)console.getData("decompile");
             numTestsApplied = 0;
             numTestsSucceeded = 0;
         }
@@ -173,19 +173,19 @@ namespace Sla.EXTRA
             fileName = filename;
             DocumentStorage docStorage;
             Document* doc = docStorage.openDocument(filename);
-            Element* el = doc->getRoot();
-            if (el->getName() == "decompilertest")
+            Element* el = doc.getRoot();
+            if (el.getName() == "decompilertest")
                 restoreXml(docStorage, el);
-            else if (el->getName() == "binaryimage")
+            else if (el.getName() == "binaryimage")
                 restoreXmlOldForm(docStorage, el);
             else
-                throw IfaceParseError("Test file " + filename + " has unrecognized XML tag: " + el->getName());
+                throw IfaceParseError("Test file " + filename + " has unrecognized XML tag: " + el.getName());
         }
 
         /// Load tests from a \<decompilertest> tag.
         public void restoreXml(DocumentStorage store, Element el)
         {
-            List list = el->getChildren();
+            List list = el.getChildren();
             List::const_iterator iter = list.begin();
             bool sawScript = false;
             bool sawTests = false;
@@ -194,25 +194,25 @@ namespace Sla.EXTRA
             {
                 Element subel = *iter;
                 ++iter;
-                if (subel->getName() == "script")
+                if (subel.getName() == "script")
                 {
                     sawScript = true;
                     restoreXmlCommands(subel);
                 }
-                else if (subel->getName() == "stringmatch")
+                else if (subel.getName() == "stringmatch")
                 {
                     sawTests = true;
                     testList.emplace_back();
                     testList.back().restoreXml(subel);
                 }
-                else if (subel->getName() == "binaryimage")
+                else if (subel.getName() == "binaryimage")
                 {
                     sawProgram = true;
                     store.registerTag(subel);
                     buildProgram(store);
                 }
                 else
-                    throw IfaceParseError("Unknown tag in <decompiletest>: " + subel->getName());
+                    throw IfaceParseError("Unknown tag in <decompiletest>: " + subel.getName());
             }
             if (!sawScript)
                 throw IfaceParseError("Did not see <script> tag in <decompiletest>");
@@ -236,20 +236,20 @@ namespace Sla.EXTRA
         /// \param lateStream collects messages for a final summary
         public void runTests(List<string> lateStream)
         {
-            ostream* origStream = console->optr;
+            ostream* origStream = console.optr;
             numTestsApplied = 0;
             numTestsSucceeded = 0;
             ostringstream midBuffer;        // Collect command console output
-            console->optr = &midBuffer;
+            console.optr = &midBuffer;
             ostringstream bulkout;
-            console->fileoptr = &bulkout;
+            console.fileoptr = &bulkout;
             mainloop(console);
-            console->optr = origStream;
-            console->fileoptr = origStream;
-            if (console->isInError())
+            console.optr = origStream;
+            console.fileoptr = origStream;
+            if (console.isInError())
             {
-                *console->optr << "Error: Did not apply tests in " << fileName << endl;
-                *console->optr << midBuffer.str() << endl;
+                *console.optr << "Error: Did not apply tests in " << fileName << endl;
+                *console.optr << midBuffer.str() << endl;
                 ostringstream fs;
                 fs << "Execution failed for " << fileName;
                 lateStream.push_back(fs.str());

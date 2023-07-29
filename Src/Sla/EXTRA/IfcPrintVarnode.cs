@@ -20,11 +20,11 @@ namespace Sla.EXTRA
         {
             Varnode* vn;
 
-            vn = dcp->readVarnode(s);
-            if (vn->isAnnotation() || (!dcp->fd->isHighOn()))
-                vn->printInfo(*status->optr);
+            vn = dcp.readVarnode(s);
+            if (vn.isAnnotation() || (!dcp.fd.isHighOn()))
+                vn.printInfo(*status.optr);
             else
-                vn->getHigh()->printInfo(*status->optr);
+                vn.getHigh().printInfo(*status.optr);
         }
     }
 }

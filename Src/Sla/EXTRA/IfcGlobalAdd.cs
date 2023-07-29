@@ -17,16 +17,16 @@ namespace Sla.EXTRA
         /// global variables.
         public override void execute(TextReader s)
         {
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("No image loaded");
 
             int4 size;
-            Address addr = parse_machaddr(s, size, *dcp->conf->types);
+            Address addr = parse_machaddr(s, size, *dcp.conf.types);
             uintb first = addr.getOffset();
             uintb last = first + (size - 1);
 
-            Scope* scope = dcp->conf->symboltab->getGlobalScope();
-            dcp->conf->symboltab->addRange(scope, addr.getSpace(), first, last);
+            Scope* scope = dcp.conf.symboltab.getGlobalScope();
+            dcp.conf.symboltab.addRange(scope, addr.getSpace(), first, last);
         }
     }
 }

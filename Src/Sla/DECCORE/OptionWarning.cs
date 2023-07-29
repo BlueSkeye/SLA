@@ -27,7 +27,7 @@ namespace Sla.DECCORE
                 val = true;
             else
                 val = onOrOff(p2);
-            bool res = glb->allacts.getCurrent()->setWarning(val, p1);
+            bool res = glb.allacts.getCurrent().setWarning(val, p1);
             if (!res)
                 throw RecovError("Bad action/rule specifier: " + p1);
             string prop;

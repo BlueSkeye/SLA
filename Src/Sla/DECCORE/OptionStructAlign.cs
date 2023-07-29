@@ -25,7 +25,7 @@ namespace Sla.DECCORE
             if (val == -1)
                 throw ParseError("Missing alignment value");
 
-            glb->types->setStructAlign(val);
+            glb.types.setStructAlign(val);
             return "Structure alignment set";
         }
     }

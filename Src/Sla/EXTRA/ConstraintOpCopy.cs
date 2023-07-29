@@ -22,12 +22,12 @@ namespace Sla.EXTRA
             maxnum = (oldopindex > newopindex) ? oldopindex : newopindex;
         }
         
-        public override UnifyConstraint clone() => (new ConstraintOpCopy(oldopindex, newopindex))->copyid(this);
+        public override UnifyConstraint clone() => (new ConstraintOpCopy(oldopindex, newopindex)).copyid(this);
 
         public override bool step(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            if (!traverse->step()) return false;
+            if (!traverse.step()) return false;
             PcodeOp* op = state.data(oldopindex).getOp();
             state.data(newopindex).setOp(op);
             return true;

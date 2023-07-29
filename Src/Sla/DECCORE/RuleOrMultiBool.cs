@@ -34,21 +34,21 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* outVn = op->getOut();
+            Varnode* outVn = op.getOut();
             list<PcodeOp*>::const_iterator iter;
 
-            if (popcount(outVn->getNZMask()) != 2) return 0;
-            for (iter = outVn->beginDescend(); iter != outVn->endDescend(); ++iter)
+            if (popcount(outVn.getNZMask()) != 2) return 0;
+            for (iter = outVn.beginDescend(); iter != outVn.endDescend(); ++iter)
             {
                 PcodeOp* baseOp = *iter;
-                OpCode opc = baseOp->code();
+                OpCode opc = baseOp.code();
                 // Result of INT_OR must be compared with zero
                 if (opc != CPUI_INT_EQUAL && opc != CPUI_INT_NOTEQUAL) continue;
-                Varnode* zerovn = baseOp->getIn(1);
-                if (!zerovn->isConstant()) continue;
-                if (zerovn->getOffset() != 0) continue;
-                int4 pos0 = leastsigbit_set(outVn->getNZMask());
-                int4 pos1 = mostsigbit_set(outVn->getNZMask());
+                Varnode* zerovn = baseOp.getIn(1);
+                if (!zerovn.isConstant()) continue;
+                if (zerovn.getOffset() != 0) continue;
+                int4 pos0 = leastsigbit_set(outVn.getNZMask());
+                int4 pos1 = mostsigbit_set(outVn.getNZMask());
                 int4 constRes0, constRes1;
                 Varnode* b1 = RulePopcountBoolXor::getBooleanResult(outVn, pos0, constRes0);
                 if (b1 == (Varnode*)0 && constRes0 != 1) continue;
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
                     b2 = data.newConstant(1, 1);
                 if (opc == CPUI_INT_EQUAL)
                 {
-                    PcodeOp* newOp = data.newOp(2, baseOp->getAddr());
+                    PcodeOp* newOp = data.newOp(2, baseOp.getAddr());
                     Varnode* notIn = data.newUniqueOut(1, newOp);
                     data.opSetOpcode(newOp, CPUI_BOOL_OR);
                     data.opSetInput(newOp, b1, 0);

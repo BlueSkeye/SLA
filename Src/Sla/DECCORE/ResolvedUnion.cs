@@ -42,8 +42,8 @@ namespace Sla.DECCORE
         public ResolvedUnion(Datatype parent)
         {
             baseType = parent;
-            if (baseType->getMetatype() == TYPE_PTR)
-                baseType = ((TypePointer*)baseType)->getPtrTo();
+            if (baseType.getMetatype() == TYPE_PTR)
+                baseType = ((TypePointer*)baseType).getPtrTo();
             resolve = parent;
             fieldNum = -1;
             @lock = false;
@@ -56,8 +56,8 @@ namespace Sla.DECCORE
         /// \param typegrp is a TypeFactory used to construct the resolved data-type of the field
         public ResolvedUnion(Datatype parent, int4 fldNum, TypeFactory typegrp)
         {
-            if (parent->getMetatype() == TYPE_PARTIALUNION)
-                parent = ((TypePartialUnion*)parent)->getParentUnion();
+            if (parent.getMetatype() == TYPE_PARTIALUNION)
+                parent = ((TypePartialUnion*)parent).getParentUnion();
             baseType = parent;
             fieldNum = fldNum;
             lock = false;
@@ -65,14 +65,14 @@ namespace Sla.DECCORE
                 resolve = parent;
             else
             {
-                if (parent->getMetatype() == TYPE_PTR)
+                if (parent.getMetatype() == TYPE_PTR)
                 {
                     TypePointer* pointer = (TypePointer*)parent;
-                    Datatype* field = pointer->getPtrTo()->getDepend(fldNum);
-                    resolve = typegrp.getTypePointer(parent->getSize(), field, pointer->getWordSize());
+                    Datatype* field = pointer.getPtrTo().getDepend(fldNum);
+                    resolve = typegrp.getTypePointer(parent.getSize(), field, pointer.getWordSize());
                 }
                 else
-                    resolve = parent->getDepend(fldNum);
+                    resolve = parent.getDepend(fldNum);
             }
         }
 

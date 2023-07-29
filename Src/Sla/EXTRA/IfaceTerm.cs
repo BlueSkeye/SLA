@@ -78,7 +78,7 @@ namespace Sla.EXTRA
                 *optr << endl;
                 for (; first != last; ++first)
                 {
-                    (*first)->commandString(complete); // Get possible completion
+                    (*first).commandString(complete); // Get possible completion
                     *optr << complete << endl;
                 }
             }
@@ -103,8 +103,8 @@ namespace Sla.EXTRA
             {
                 onecharecho = false;
                 lastlen = line.size();
-                val = sptr->get();
-                if (sptr->eof())
+                val = sptr.get();
+                if (sptr.eof())
                     val = '\n';
                 switch (val)
                 {
@@ -174,9 +174,9 @@ namespace Sla.EXTRA
                         cursor = 0;
                         break;
                     case 0x1b:          // Escape character
-                        escval = sptr->get();
+                        escval = sptr.get();
                         escval <<= 8;
-                        escval += sptr->get();
+                        escval += sptr.get();
                         switch (escval)
                         {
                             case 0x4f44:        // left arrow
@@ -201,16 +201,16 @@ namespace Sla.EXTRA
                         break;
                 }
                 if (onecharecho)
-                    optr->put(val);     // Echo most characters
+                    optr.put(val);     // Echo most characters
                 else
                 {
-                    optr->put('\r');        // Ontop of old line
+                    optr.put('\r');        // Ontop of old line
                     writePrompt();
                     *optr << line;      // print new line
                     for (i = line.size(); i < lastlen; ++i)
-                        optr->put(' ');     // Erase any old characters
+                        optr.put(' ');     // Erase any old characters
                     for (i = i - cursor; i > 0; --i)
-                        optr->put('\b');    // Put cursor in the right place
+                        optr.put('\b');    // Put cursor in the right place
                 }
             } while (val != '\n');
         }
@@ -223,7 +223,7 @@ namespace Sla.EXTRA
             struct termios ittypass;
 
             is_terminal = true;
-            //  ifd = fileno( (FILE *)sptr->rdbuf() );
+            //  ifd = fileno( (FILE *)sptr.rdbuf() );
             ifd = 0;			// The above line doesn't work on some systems
 				        // and since ifd will almost always refer to stdin...
   
@@ -282,7 +282,7 @@ namespace Sla.EXTRA
         public override bool isStreamFinished()
         {
             if (done || inerror) return true;
-            return sptr->eof();
+            return sptr.eof();
         }
     }
 }

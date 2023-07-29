@@ -37,35 +37,35 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            if (!op->getIn(1)->isConstant()) return 0;
-            Varnode* vn = op->getIn(0);
-            uintb mask = vn->getNZMask();
+            if (!op.getIn(1).isConstant()) return 0;
+            Varnode* vn = op.getIn(0);
+            uintb mask = vn.getNZMask();
             int4 bitnum = leastsigbit_set(mask);
             if (bitnum == -1) return 0;
             if ((mask >> bitnum) != 1) return 0; // Check if only one bit active
 
             // Check if the active bit is getting tested
-            if ((op->getIn(1)->getOffset() != mask) &&
-                (op->getIn(1)->getOffset() != 0))
+            if ((op.getIn(1).getOffset() != mask) &&
+                (op.getIn(1).getOffset() != 0))
                 return 0;
 
-            if (op->getOut()->hasNoDescend()) return 0;
+            if (op.getOut().hasNoDescend()) return 0;
             // We do a basic check that the stream from which it looks like
             // the bit is getting pulled is not fully consumed
-            if (vn->isWritten())
+            if (vn.isWritten())
             {
-                PcodeOp* andop = vn->getDef();
-                if (andop->numInput() == 0) return 0;
-                Varnode* vn0 = andop->getIn(0);
-                switch (andop->code())
+                PcodeOp* andop = vn.getDef();
+                if (andop.numInput() == 0) return 0;
+                Varnode* vn0 = andop.getIn(0);
+                switch (andop.code())
                 {
                     case CPUI_INT_AND:
                     case CPUI_INT_OR:
                     case CPUI_INT_RIGHT:
                         {
-                            if (vn0->isConstant()) return 0;
-                            uintb mask0 = vn0->getConsume() & vn0->getNZMask();
-                            uintb wholemask = calc_mask(vn0->getSize()) & mask0;
+                            if (vn0.isConstant()) return 0;
+                            uintb mask0 = vn0.getConsume() & vn0.getNZMask();
+                            uintb wholemask = calc_mask(vn0.getSize()) & mask0;
                             // We really need a popcnt here
                             // We want: if the number of bits that are both consumed
                             // and not known to be zero are "big" then don't continue

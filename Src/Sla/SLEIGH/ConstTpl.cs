@@ -127,14 +127,14 @@ namespace Sla.SLEIGH
         public bool isConstSpace()
         {
             if (type == spaceid)
-                return (value.spaceid->getType() == IPTR_CONSTANT);
+                return (value.spaceid.getType() == IPTR_CONSTANT);
             return false;
         }
 
         public bool isUniqueSpace()
         {
             if (type == spaceid)
-                return (value.spaceid->getType() == IPTR_INTERNAL);
+                return (value.spaceid.getType() == IPTR_INTERNAL);
             return false;
         }
 
@@ -208,7 +208,7 @@ namespace Sla.SLEIGH
                 case j_flowdest_size:
                     return walker.getDestAddr().getAddrSize();
                 case j_curspace_size:
-                    return walker.getCurSpace()->getAddrSize();
+                    return walker.getCurSpace().getAddrSize();
                 case j_curspace:
                     return (uintb)(uintp)walker.getCurSpace();
                 case handle:
@@ -294,15 +294,15 @@ namespace Sla.SLEIGH
             switch (select)
             {
                 case v_space:
-                    *this = newhandle->getSpace();
+                    *this = newhandle.getSpace();
                     break;
                 case v_offset:
-                    *this = newhandle->getPtrOffset();
+                    *this = newhandle.getPtrOffset();
                     break;
                 case v_offset_plus:
                     {
                         uintb tmp = value_real;
-                        *this = newhandle->getPtrOffset();
+                        *this = newhandle.getPtrOffset();
                         if (type == real)
                         {
                             value_real += (tmp & 0xffff);
@@ -317,7 +317,7 @@ namespace Sla.SLEIGH
                         break;
                     }
                 case v_size:
-                    *this = newhandle->getSize();
+                    *this = newhandle.getSize();
                     break;
             }
         }
@@ -376,7 +376,7 @@ namespace Sla.SLEIGH
             else
             {
                 hand.offset_space = (AddrSpace*)0;
-                hand.offset_offset = hand.space->wrapOffset(fix(walker));
+                hand.offset_offset = hand.space.wrapOffset(fix(walker));
             }
         }
 
@@ -413,7 +413,7 @@ namespace Sla.SLEIGH
                     s << "curspace_size\"/>";
                     break;
                 case spaceid:
-                    s << "spaceid\" name=\"" << value.spaceid->getName() << "\"/>";
+                    s << "spaceid\" name=\"" << value.spaceid.getName() << "\"/>";
                     break;
                 case j_relative:
                     s << "relative\" val=\"0x" << hex << value_real << "\"/>";
@@ -435,24 +435,24 @@ namespace Sla.SLEIGH
 
         public void restoreXml(Element el, AddrSpaceManager manage)
         {
-            string typestring = el->getAttributeValue("type");
+            string typestring = el.getAttributeValue("type");
             if (typestring == "real")
             {
                 type = real;
-                istringstream s(el->getAttributeValue("val"));
+                istringstream s(el.getAttributeValue("val"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> value_real;
             }
             else if (typestring == "handle")
             {
                 type = handle;
-                istringstream s(el->getAttributeValue("val"));
+                istringstream s(el.getAttributeValue("val"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> value.handle_index;
-                select = readHandleSelector(el->getAttributeValue("s"));
+                select = readHandleSelector(el.getAttributeValue("s"));
                 if (select == v_offset_plus)
                 {
-                    istringstream s2(el->getAttributeValue("plus"));
+                    istringstream s2(el.getAttributeValue("plus"));
                     s2.unsetf(ios::dec | ios::hex | ios::oct);
                     s2 >> value_real;
                 }
@@ -480,12 +480,12 @@ namespace Sla.SLEIGH
             else if (typestring == "spaceid")
             {
                 type = spaceid;
-                value.spaceid = manage->getSpaceByName(el->getAttributeValue("name"));
+                value.spaceid = manage.getSpaceByName(el.getAttributeValue("name"));
             }
             else if (typestring == "relative")
             {
                 type = j_relative;
-                istringstream s(el->getAttributeValue("val"));
+                istringstream s(el.getAttributeValue("val"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> value_real;
             }

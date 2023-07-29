@@ -27,14 +27,14 @@ namespace Sla.SLEIGH
         public TokenField(Token tk, bool s, int4 bstart, int4 bend)
         {
             tok = tk;
-            bigendian = tok->isBigEndian();
+            bigendian = tok.isBigEndian();
             signbit = s;
             bitstart = bstart;
             bitend = bend;
-            if (tk->isBigEndian())
+            if (tk.isBigEndian())
             {
-                byteend = (tk->getSize() * 8 - bitstart - 1) / 8;
-                bytestart = (tk->getSize() * 8 - bitend - 1) / 8;
+                byteend = (tk.getSize() * 8 - bitstart - 1) / 8;
+                bytestart = (tk.getSize() * 8 - bitend - 1) / 8;
             }
             else
             {
@@ -97,30 +97,30 @@ namespace Sla.SLEIGH
         public override void restoreXml(Element el, Translate trans)
         {
             tok = (Token*)0;
-            bigendian = xml_readbool(el->getAttributeValue("bigendian"));
-            signbit = xml_readbool(el->getAttributeValue("signbit"));
+            bigendian = xml_readbool(el.getAttributeValue("bigendian"));
+            signbit = xml_readbool(el.getAttributeValue("signbit"));
             {
-                istringstream s(el->getAttributeValue("bitstart"));
+                istringstream s(el.getAttributeValue("bitstart"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> bitstart;
             }
             {
-                istringstream s(el->getAttributeValue("bitend"));
+                istringstream s(el.getAttributeValue("bitend"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> bitend;
             }
             {
-                istringstream s(el->getAttributeValue("bytestart"));
+                istringstream s(el.getAttributeValue("bytestart"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> bytestart;
             }
             {
-                istringstream s(el->getAttributeValue("byteend"));
+                istringstream s(el.getAttributeValue("byteend"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> byteend;
             }
             {
-                istringstream s(el->getAttributeValue("shift"));
+                istringstream s(el.getAttributeValue("shift"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> shift;
             }

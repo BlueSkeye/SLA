@@ -60,7 +60,7 @@ namespace Sla.SLEIGH
 
         public override void collectLocalValues(List<uintb> results)
         {
-            if (fix.space->getType() == IPTR_INTERNAL)
+            if (fix.space.getType() == IPTR_INTERNAL)
                 results.push_back(fix.offset);
         }
 
@@ -70,7 +70,7 @@ namespace Sla.SLEIGH
         {
             s << "<varnode_sym";
             SleighSymbol::saveXmlHeader(s);
-            s << " space=\"" << fix.space->getName() << "\"";
+            s << " space=\"" << fix.space.getName() << "\"";
             s << " offset=\"0x" << hex << fix.offset << "\"";
             s << " size=\"" << dec << fix.size << "\"";
             s << ">\n";
@@ -87,14 +87,14 @@ namespace Sla.SLEIGH
 
         public override void restoreXml(Element el, SleighBase trans)
         {
-            fix.space = trans->getSpaceByName(el->getAttributeValue("space"));
+            fix.space = trans.getSpaceByName(el.getAttributeValue("space"));
             {
-                istringstream s(el->getAttributeValue("offset"));
+                istringstream s(el.getAttributeValue("offset"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> fix.offset;
             }
             {
-                istringstream s(el->getAttributeValue("size"));
+                istringstream s(el.getAttributeValue("size"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> fix.size;
             }

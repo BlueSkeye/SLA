@@ -37,31 +37,31 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* constvn = op->getIn(1);
-            if (!constvn->isConstant()) return 0;   // Must be a constant shift
-            Varnode* vn = op->getIn(0);
-            if (!vn->isWritten()) return 0;
-            if (vn->getSize() > sizeof(uintb)) return 0;    // FIXME: Can't exceed uintb precision
+            Varnode* constvn = op.getIn(1);
+            if (!constvn.isConstant()) return 0;   // Must be a constant shift
+            Varnode* vn = op.getIn(0);
+            if (!vn.isWritten()) return 0;
+            if (vn.getSize() > sizeof(uintb)) return 0;    // FIXME: Can't exceed uintb precision
             int4 sa;
             bool leftshift;
 
-            switch (op->code())
+            switch (op.code())
             {
                 case CPUI_INT_LEFT:
-                    sa = (int4)constvn->getOffset();
+                    sa = (int4)constvn.getOffset();
                     leftshift = true;
                     break;
                 case CPUI_INT_RIGHT:
-                    sa = (int4)constvn->getOffset();
+                    sa = (int4)constvn.getOffset();
                     leftshift = false;
                     break;
                 case CPUI_SUBPIECE:
-                    sa = (int4)constvn->getOffset();
+                    sa = (int4)constvn.getOffset();
                     sa = sa * 8;
                     leftshift = false;
                     break;
                 case CPUI_INT_MULT:
-                    sa = leastsigbit_set(constvn->getOffset());
+                    sa = leastsigbit_set(constvn.getOffset());
                     if (sa == -1) return 0;
                     leftshift = true;
                     break;
@@ -69,8 +69,8 @@ namespace Sla.DECCORE
                     return 0;           // Never reaches here
             }
 
-            PcodeOp* bitop = vn->getDef();
-            switch (bitop->code())
+            PcodeOp* bitop = vn.getDef();
+            switch (bitop.code())
             {
                 case CPUI_INT_AND:
                 case CPUI_INT_OR:
@@ -85,29 +85,29 @@ namespace Sla.DECCORE
             }
 
             int4 i;
-            for (i = 0; i < bitop->numInput(); ++i)
+            for (i = 0; i < bitop.numInput(); ++i)
             {
-                uintb nzm = bitop->getIn(i)->getNZMask();
-                uintb mask = calc_mask(op->getOut()->getSize());
+                uintb nzm = bitop.getIn(i).getNZMask();
+                uintb mask = calc_mask(op.getOut().getSize());
                 if (leftshift)
                     nzm = pcode_left(nzm, sa);
                 else
                     nzm = pcode_right(nzm, sa);
                 if ((nzm & mask) == (uintb)0) break;
             }
-            if (i == bitop->numInput()) return 0;
-            switch (bitop->code())
+            if (i == bitop.numInput()) return 0;
+            switch (bitop.code())
             {
                 case CPUI_INT_MULT:
                 case CPUI_INT_AND:
-                    vn = data.newConstant(vn->getSize(), 0);
+                    vn = data.newConstant(vn.getSize(), 0);
                     data.opSetInput(op, vn, 0); // Result will be zero
                     break;
                 case CPUI_INT_ADD:
                 case CPUI_INT_XOR:
                 case CPUI_INT_OR:
-                    vn = bitop->getIn(1 - i);
-                    if (!vn->isHeritageKnown()) return 0;
+                    vn = bitop.getIn(1 - i);
+                    if (!vn.isHeritageKnown()) return 0;
                     data.opSetInput(op, vn, 0);
                     break;
                 default:

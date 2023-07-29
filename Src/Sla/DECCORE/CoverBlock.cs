@@ -49,15 +49,15 @@ namespace Sla.DECCORE
                 case 2:         // Special marker for input
                     return (uintm)0;
             }
-            if (op->isMarker())
+            if (op.isMarker())
             {
-                if (op->code() == CPUI_MULTIEQUAL) // MULTIEQUALs are considered very beginning
+                if (op.code() == CPUI_MULTIEQUAL) // MULTIEQUALs are considered very beginning
                     return (uintm)0;
-                else if (op->code() == CPUI_INDIRECT) // INDIRECTs are considered to be at
+                else if (op.code() == CPUI_INDIRECT) // INDIRECTs are considered to be at
                                                       // the location of the op they are indirect for
-                    return PcodeOp::getOpFromConst(op->getIn(1)->getAddr())->getSeqNum().getOrder();
+                    return PcodeOp::getOpFromConst(op.getIn(1).getAddr()).getSeqNum().getOrder();
             }
-            return op->getSeqNum().getOrder();
+            return op.getSeqNum().getOrder();
         }
 
         /// Get the start of the range
@@ -267,7 +267,7 @@ namespace Sla.DECCORE
             else if (ustart == ~((uintm)0))
                 s << "end";
             else
-                s << start->getSeqNum();
+                s << start.getSeqNum();
 
             s << '-';
 
@@ -276,7 +276,7 @@ namespace Sla.DECCORE
             else if (ustop == ~((uintm)0))
                 s << "end";
             else
-                s << stop->getSeqNum();
+                s << stop.getSeqNum();
         }
     }
 }

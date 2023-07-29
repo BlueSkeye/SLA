@@ -49,8 +49,8 @@ namespace Sla.DECCORE
                 string errmsg = "Unable to open raw image file: " + filename;
                 throw new LowlevelError(errmsg);
             }
-            thefile->seekg(0, ios::end);
-            filesize = thefile->tellg();
+            thefile.seekg(0, ios::end);
+            filesize = thefile.tellg();
         }
 
         /// RawLoadImage destructor
@@ -58,7 +58,7 @@ namespace Sla.DECCORE
         {
             if (thefile != (ifstream*)0)
             {
-                thefile->close();
+                thefile.close();
                 delete thefile;
             }
         }
@@ -82,8 +82,8 @@ namespace Sla.DECCORE
                 readsize = size;
                 if (curaddr + readsize > filesize) // Adjust to biggest possible read
                     readsize = filesize - curaddr;
-                thefile->seekg(curaddr);
-                thefile->read((char*)(ptr + offset), readsize);
+                thefile.seekg(curaddr);
+                thefile.read((char*)(ptr + offset), readsize);
                 offset += readsize;
                 size -= readsize;
                 curaddr += readsize;
@@ -101,7 +101,7 @@ namespace Sla.DECCORE
 
         public override void adjustVma(long adjust)
         {
-            adjust = AddrSpace::addressToByte(adjust, spaceid->getWordSize());
+            adjust = AddrSpace::addressToByte(adjust, spaceid.getWordSize());
             vma += adjust;
         }
     }

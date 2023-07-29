@@ -93,33 +93,33 @@ namespace Sla.DECCORE
         {
             if (jmodel != (JumpModel*)0)
             {
-                if (jmodel->isOverride())
+                if (jmodel.isOverride())
                 {   // If preexisting model is override
-                    jmodel->recoverModel(fd, indirect, 0, glb->max_jumptable_size);
+                    jmodel.recoverModel(fd, indirect, 0, glb.max_jumptable_size);
                     return;
                 }
                 delete jmodel;      // Otherwise this is an old attempt we should remove
             }
-            Varnode* vn = indirect->getIn(0);
-            if (vn->isWritten())
+            Varnode* vn = indirect.getIn(0);
+            if (vn.isWritten())
             {
-                PcodeOp* op = vn->getDef();
-                if (op->code() == CPUI_CALLOTHER)
+                PcodeOp* op = vn.getDef();
+                if (op.code() == CPUI_CALLOTHER)
                 {
                     JumpAssisted* jassisted = new JumpAssisted(this);
                     jmodel = jassisted;
-                    if (jmodel->recoverModel(fd, indirect, addresstable.size(), glb->max_jumptable_size))
+                    if (jmodel.recoverModel(fd, indirect, addresstable.size(), glb.max_jumptable_size))
                         return;
                 }
             }
             JumpBasic* jbasic = new JumpBasic(this);
             jmodel = jbasic;
-            if (jmodel->recoverModel(fd, indirect, addresstable.size(), glb->max_jumptable_size))
+            if (jmodel.recoverModel(fd, indirect, addresstable.size(), glb.max_jumptable_size))
                 return;
             jmodel = new JumpBasic2(this);
-            ((JumpBasic2*)jmodel)->initializeStart(jbasic->getPathMeld());
+            ((JumpBasic2*)jmodel).initializeStart(jbasic.getPathMeld());
             delete jbasic;
-            if (jmodel->recoverModel(fd, indirect, addresstable.size(), glb->max_jumptable_size))
+            if (jmodel.recoverModel(fd, indirect, addresstable.size(), glb.max_jumptable_size))
                 return;
             delete jmodel;
             jmodel = (JumpModel*)0;
@@ -133,13 +133,13 @@ namespace Sla.DECCORE
 
             block2addr.clear();
             block2addr.reserve(addresstable.size());
-            parent = indirect->getParent();
+            parent = indirect.getParent();
 
-            if (parent->sizeOut() != addresstable.size())
+            if (parent.sizeOut() != addresstable.size())
                 throw new LowlevelError("Trivial addresstable and switch block size do not match");
-            for (uint4 i = 0; i < parent->sizeOut(); ++i)
+            for (uint4 i = 0; i < parent.sizeOut(); ++i)
                 block2addr.push_back(IndexPair(i, i));  // Addresses corresponds exactly to out-edges of switch block
-            lastBlock = parent->sizeOut() - 1;
+            lastBlock = parent.sizeOut() - 1;
             defaultBlock = -1;      // Trivial case does not have default case
         }
 
@@ -164,7 +164,7 @@ namespace Sla.DECCORE
                     isthunk = true;
                 else
                 {
-                    Address addr2 = indirect->getAddr();
+                    Address addr2 = indirect.getAddr();
                     diff = (addr.getOffset() < addr2.getOffset()) ?
                   (addr2.getOffset() - addr.getOffset()) :
                   (addr.getOffset() - addr2.getOffset());
@@ -176,14 +176,14 @@ namespace Sla.DECCORE
                     throw JumptableThunkError("Likely thunk");
                 }
             }
-            if (!jmodel->sanityCheck(fd, indirect, addresstable))
+            if (!jmodel.sanityCheck(fd, indirect, addresstable))
             {
                 ostringstream err;
                 err << "Jumptable at " << opaddress << " did not pass sanity check.";
                 throw new LowlevelError(err.str());
             }
             if (sz != addresstable.size()) // If address table was resized
-                fd->warning("Sanity check requires truncation of jumptable", opaddress);
+                fd.warning("Sanity check requires truncation of jumptable", opaddress);
         }
 
         /// Convert a basic-block to an out-edge index from the switch.
@@ -198,12 +198,12 @@ namespace Sla.DECCORE
             FlowBlock* parent;
             int4 position;
 
-            parent = indirect->getParent();
-            for (position = 0; position < bl->sizeIn(); ++position)
-                if (bl->getIn(position) == parent) break;
-            if (position == bl->sizeIn())
+            parent = indirect.getParent();
+            for (position = 0; position < bl.sizeIn(); ++position)
+                if (bl.getIn(position) == parent) break;
+            if (position == bl.sizeIn())
                 throw new LowlevelError("Requested block, not in jumptable");
-            return bl->getInRevIndex(position);
+            return bl.getInRevIndex(position);
         }
 
         /// Check if the given PcodeOp still seems reachable in its function
@@ -212,22 +212,22 @@ namespace Sla.DECCORE
         /// \return \b true is the PcodeOp is reachable
         private static bool isReachable(PcodeOp op)
         {
-            BlockBasic* parent = op->getParent();
+            BlockBasic* parent = op.getParent();
 
             for (int4 i = 0; i < 2; ++i)
             {   // Only check two levels
-                if (parent->sizeIn() != 1) return true;
-                BlockBasic* bl = (BlockBasic*)parent->getIn(0);
-                if (bl->sizeOut() != 2) continue; // Check if -bl- looks like it contains a guard
-                PcodeOp* cbranch = bl->lastOp();
-                if ((cbranch == (PcodeOp*)0) || (cbranch->code() != CPUI_CBRANCH))
+                if (parent.sizeIn() != 1) return true;
+                BlockBasic* bl = (BlockBasic*)parent.getIn(0);
+                if (bl.sizeOut() != 2) continue; // Check if -bl- looks like it contains a guard
+                PcodeOp* cbranch = bl.lastOp();
+                if ((cbranch == (PcodeOp*)0) || (cbranch.code() != CPUI_CBRANCH))
                     continue;
-                Varnode* vn = cbranch->getIn(1); // Get the boolean variable
-                if (!vn->isConstant()) continue; // Has the guard collapsed
-                int4 trueslot = cbranch->isBooleanFlip() ? 0 : 1;
-                if (vn->getOffset() == 0)
+                Varnode* vn = cbranch.getIn(1); // Get the boolean variable
+                if (!vn.isConstant()) continue; // Has the guard collapsed
+                int4 trueslot = cbranch.isBooleanFlip() ? 0 : 1;
+                if (vn.getOffset() == 0)
                     trueslot = 1 - trueslot;
-                if (bl->getOut(trueslot) != parent) // If the remaining path does not lead to -op-
+                if (bl.getOut(trueslot) != parent) // If the remaining path does not lead to -op-
                     return false;       // return that op is not reachable
                 parent = bl;
             }
@@ -258,24 +258,24 @@ namespace Sla.DECCORE
         /// \param op2 is the jump-table to clone
         private JumpTable(JumpTable op2)
         {
-            glb = op2->glb;
+            glb = op2.glb;
             jmodel = (JumpModel*)0;
             origmodel = (JumpModel*)0;
             indirect = (PcodeOp*)0;
             switchVarConsume = ~((uintb)0);
             defaultBlock = -1;
-            lastBlock = op2->lastBlock;
-            maxaddsub = op2->maxaddsub;
-            maxleftright = op2->maxleftright;
-            maxext = op2->maxext;
-            recoverystage = op2->recoverystage;
-            collectloads = op2->collectloads;
+            lastBlock = op2.lastBlock;
+            maxaddsub = op2.maxaddsub;
+            maxleftright = op2.maxleftright;
+            maxext = op2.maxext;
+            recoverystage = op2.recoverystage;
+            collectloads = op2.collectloads;
             // We just clone the addresses themselves
-            addresstable = op2->addresstable;
-            loadpoints = op2->loadpoints;
-            opaddress = op2->opaddress;
-            if (op2->jmodel != (JumpModel*)0)
-                jmodel = op2->jmodel->clone(this);
+            addresstable = op2.addresstable;
+            loadpoints = op2.loadpoints;
+            opaddress = op2.opaddress;
+            if (op2.jmodel != (JumpModel*)0)
+                jmodel = op2.jmodel.clone(this);
         }
 
         ~JumpTable()
@@ -297,7 +297,7 @@ namespace Sla.DECCORE
         {
             if (jmodel == (JumpModel*)0)
                 return false;
-            return jmodel->isOverride();
+            return jmodel.isOverride();
         }
 
         /// Return \b true if this could be multi-staged
@@ -323,7 +323,7 @@ namespace Sla.DECCORE
 
         private void setIndirectOp(PcodeOp ind)
         {
-            opaddress = ind->getAddr();
+            opaddress = ind.getAddr();
             indirect = ind;
         }  ///< Set the BRANCHIND PcodeOp
 
@@ -351,9 +351,9 @@ namespace Sla.DECCORE
 
             JumpBasicOverride @override;
             jmodel = @override = new JumpBasicOverride(this);
-            @override->setAddresses(addrtable);
-            @override->setNorm(naddr, h);
-            @override->setStartingValue(sv);
+            @override.setAddresses(addrtable);
+            @override.setNorm(naddr, h);
+            @override.setStartingValue(sv);
         }
 
         /// \brief Return the number of address table entries that target the given basic-block
@@ -421,8 +421,8 @@ namespace Sla.DECCORE
         /// \param lab is the case label for the block
         private void addBlockToSwitch(BlockBasic bl, uintb lab)
         {
-            addresstable.push_back(bl->getStart());
-            lastBlock = indirect->getParent()->sizeOut();       // The block WILL be added to the end of the out-edges
+            addresstable.push_back(bl.getStart());
+            lastBlock = indirect.getParent().sizeOut();       // The block WILL be added to the end of the out-edges
             block2addr.push_back(IndexPair(lastBlock, addresstable.size() - 1));
             label.push_back(lab);
         }
@@ -442,16 +442,16 @@ namespace Sla.DECCORE
 
             block2addr.clear();
             block2addr.reserve(addresstable.size());
-            parent = indirect->getParent();
+            parent = indirect.getParent();
 
             for (int4 i = 0; i < addresstable.size(); ++i)
             {
                 Address addr = addresstable[i];
                 op = flow.target(addr);
-                tmpbl = op->getParent();
-                for (pos = 0; pos < parent->sizeOut(); ++pos)
-                    if (parent->getOut(pos) == tmpbl) break;
-                if (pos == parent->sizeOut())
+                tmpbl = op.getParent();
+                for (pos = 0; pos < parent.sizeOut(); ++pos)
+                    if (parent.getOut(pos) == tmpbl) break;
+                if (pos == parent.sizeOut())
                     throw new LowlevelError("Jumptable destination not linked");
                 block2addr.push_back(IndexPair(pos, i));
             }
@@ -489,20 +489,20 @@ namespace Sla.DECCORE
         /// \param fd is the function containing \b this switch
         private void foldInNormalization(Funcdata fd)
         {
-            Varnode* switchvn = jmodel->foldInNormalization(fd, indirect);
+            Varnode* switchvn = jmodel.foldInNormalization(fd, indirect);
             if (switchvn != (Varnode*)0)
             {
                 // If possible, mark up the switch variable as not fully consumed so that
                 // subvariable flow can truncate it.
-                switchVarConsume = minimalmask(switchvn->getNZMask());
-                if (switchVarConsume >= calc_mask(switchvn->getSize()))
+                switchVarConsume = minimalmask(switchvn.getNZMask());
+                if (switchVarConsume >= calc_mask(switchvn.getSize()))
                 {   // If mask covers everything
-                    if (switchvn->isWritten())
+                    if (switchvn.isWritten())
                     {
-                        PcodeOp* op = switchvn->getDef();
-                        if (op->code() == CPUI_INT_SEXT)
+                        PcodeOp* op = switchvn.getDef();
+                        if (op.code() == CPUI_INT_SEXT)
                         {           // Check for a signed extension
-                            switchVarConsume = calc_mask(op->getIn(0)->getSize());  // Assume the extension is not consumed
+                            switchVarConsume = calc_mask(op.getIn(0).getSize());  // Assume the extension is not consumed
                         }
                     }
                 }
@@ -510,7 +510,7 @@ namespace Sla.DECCORE
         }
 
         /// Hide any guard code for \b this switch
-        private bool foldInGuards(Funcdata fd) => jmodel->foldInGuards(fd, this);
+        private bool foldInGuards(Funcdata fd) => jmodel.foldInGuards(fd, this);
 
         /// Recover the raw jump-table addresses (the address table)
         /// The addresses that the raw BRANCHIND op might branch to itself are recovered,
@@ -534,18 +534,18 @@ namespace Sla.DECCORE
                 err << "Could not recover jumptable at " << opaddress << ". Too many branches";
                 throw new LowlevelError(err.str());
             }
-            if (jmodel->getTableSize() == 0)
+            if (jmodel.getTableSize() == 0)
             {
                 ostringstream err;
                 err << "Impossible to reach jumptable at " << opaddress;
                 throw JumptableNotReachableError(err.str());
             }
             //  if (sz < 2)
-            //    fd->warning("Jumptable has only one branch",opaddress);
+            //    fd.warning("Jumptable has only one branch",opaddress);
             if (collectloads)
-                jmodel->buildAddresses(fd, indirect, addresstable, &loadpoints);
+                jmodel.buildAddresses(fd, indirect, addresstable, &loadpoints);
             else
-                jmodel->buildAddresses(fd, indirect, addresstable, (vector<LoadTable>*)0);
+                jmodel.buildAddresses(fd, indirect, addresstable, (vector<LoadTable>*)0);
             sanityCheck(fd);
         }
 
@@ -572,7 +572,7 @@ namespace Sla.DECCORE
                 jmodel = origmodel;
                 origmodel = (JumpModel*)0;
                 addresstable = oldaddresstable;
-                fd->warning("Second-stage recovery error", indirect->getAddr());
+                fd.warning("Second-stage recovery error", indirect.getAddr());
             }
             catch (LowlevelError err) {
                 if (jmodel != (JumpModel*)0)
@@ -580,7 +580,7 @@ namespace Sla.DECCORE
                 jmodel = origmodel;
                 origmodel = (JumpModel*)0;
                 addresstable = oldaddresstable;
-                fd->warning("Second-stage recovery error", indirect->getAddr());
+                fd.warning("Second-stage recovery error", indirect.getAddr());
             }
             recoverystage = 2;
             if (origmodel != (JumpModel*)0)
@@ -608,43 +608,43 @@ namespace Sla.DECCORE
             {
                 if (origmodel != (JumpModel*)0)
                     delete origmodel;
-                if (!jmodel->isOverride())
+                if (!jmodel.isOverride())
                 {
                     origmodel = jmodel;
                     jmodel = (JumpModel*)0;
                 }
                 else
-                    fd->warning("Switch is manually overridden", opaddress);
+                    fd.warning("Switch is manually overridden", opaddress);
             }
 
             bool multistagerestart = false;
             recoverModel(fd);       // Create a current instance of the model
             if (jmodel != (JumpModel*)0)
             {
-                if (jmodel->getTableSize() != addresstable.size())
+                if (jmodel.getTableSize() != addresstable.size())
                 {
-                    fd->warning("Could not find normalized switch variable to match jumptable", opaddress);
-                    if ((addresstable.size() == 1) && (jmodel->getTableSize() > 1))
+                    fd.warning("Could not find normalized switch variable to match jumptable", opaddress);
+                    if ((addresstable.size() == 1) && (jmodel.getTableSize() > 1))
                         multistagerestart = true;
                 }
-                if ((origmodel == (JumpModel*)0) || (origmodel->getTableSize() == 0))
+                if ((origmodel == (JumpModel*)0) || (origmodel.getTableSize() == 0))
                 {
-                    jmodel->findUnnormalized(maxaddsub, maxleftright, maxext);
-                    jmodel->buildLabels(fd, addresstable, label, jmodel);
+                    jmodel.findUnnormalized(maxaddsub, maxleftright, maxext);
+                    jmodel.buildLabels(fd, addresstable, label, jmodel);
                 }
                 else
                 {
-                    jmodel->findUnnormalized(maxaddsub, maxleftright, maxext);
-                    jmodel->buildLabels(fd, addresstable, label, origmodel);
+                    jmodel.findUnnormalized(maxaddsub, maxleftright, maxext);
+                    jmodel.buildLabels(fd, addresstable, label, origmodel);
                 }
             }
             else
             {
                 jmodel = new JumpModelTrivial(this);
-                jmodel->recoverModel(fd, indirect, addresstable.size(), glb->max_jumptable_size);
-                jmodel->buildAddresses(fd, indirect, addresstable, (vector<LoadTable>*)0);
+                jmodel.recoverModel(fd, indirect, addresstable.size(), glb.max_jumptable_size);
+                jmodel.buildAddresses(fd, indirect, addresstable, (vector<LoadTable>*)0);
                 trivialSwitchOver();
-                jmodel->buildLabels(fd, addresstable, label, origmodel);
+                jmodel.buildLabels(fd, addresstable, label, origmodel);
             }
             if (origmodel != (JumpModel*)0)
             {
@@ -665,7 +665,7 @@ namespace Sla.DECCORE
             if (recoverystage != 0) return false;
             if (indirect == (PcodeOp*)0) return false;
 
-            if (fd->getOverride().queryMultistageJumptable(indirect->getAddr()))
+            if (fd.getOverride().queryMultistageJumptable(indirect.getAddr()))
             {
                 recoverystage = 1;      // Mark that we need additional recovery
                 return true;
@@ -683,8 +683,8 @@ namespace Sla.DECCORE
                 delete origmodel;
                 origmodel = (JumpModel*)0;
             }
-            if (jmodel->isOverride())
-                jmodel->clear();
+            if (jmodel.isOverride())
+                jmodel.clear();
             else
             {
                 delete jmodel;
@@ -719,7 +719,7 @@ namespace Sla.DECCORE
                 AddrSpace* spc = addresstable[i].getSpace();
                 uintb off = addresstable[i].getOffset();
                 if (spc != (AddrSpace*)0)
-                    spc->encodeAttributes(encoder, off);
+                    spc.encodeAttributes(encoder, off);
                 if (i < label.size())
                 {
                     if (label[i] != 0xBAD1ABE1)
@@ -732,8 +732,8 @@ namespace Sla.DECCORE
                 for (int4 i = 0; i < loadpoints.size(); ++i)
                     loadpoints[i].encode(encoder);
             }
-            if ((jmodel != (JumpModel*)0) && (jmodel->isOverride()))
-                jmodel->encode(encoder);
+            if ((jmodel != (JumpModel*)0) && (jmodel.isOverride()))
+                jmodel.encode(encoder);
             encoder.closeElement(ELEM_JUMPTABLE);
         }
 
@@ -782,7 +782,7 @@ namespace Sla.DECCORE
                     if (jmodel != (JumpModel*)0)
                         throw new LowlevelError("Duplicate jumptable override specs");
                     jmodel = new JumpBasicOverride(this);
-                    jmodel->decode(decoder);
+                    jmodel.decode(decoder);
                 }
             }
             decoder.closeElement(elemId);

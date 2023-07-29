@@ -44,18 +44,18 @@ namespace Sla.DECCORE
             if (!guard.isValid(opc)) return;
             int4 step = guard.getStep();
             if (step == 0) return;      // No definitive sign of array access
-            Datatype* ct = guard.getOp()->getIn(1)->getTypeReadFacing(guard.getOp());
-            if (ct->getMetatype() == TYPE_PTR)
+            Datatype* ct = guard.getOp().getIn(1).getTypeReadFacing(guard.getOp());
+            if (ct.getMetatype() == TYPE_PTR)
             {
-                ct = ((TypePointer*)ct)->getPtrTo();
-                while (ct->getMetatype() == TYPE_ARRAY)
-                    ct = ((TypeArray*)ct)->getBase();
+                ct = ((TypePointer*)ct).getPtrTo();
+                while (ct.getMetatype() == TYPE_ARRAY)
+                    ct = ((TypeArray*)ct).getBase();
             }
             int4 outSize;
             if (opc == CPUI_STORE)
-                outSize = guard.getOp()->getIn(2)->getSize();   // The Varnode being stored
+                outSize = guard.getOp().getIn(2).getSize();   // The Varnode being stored
             else
-                outSize = guard.getOp()->getOut()->getSize();   // The Varnode being loaded
+                outSize = guard.getOp().getOut().getSize();   // The Varnode being loaded
             if (outSize != step)
             {
                 // LOAD size doesn't match step:  field in array of structures or something more unusual
@@ -65,11 +65,11 @@ namespace Sla.DECCORE
                 // we pretend we have an array of LOAD's size
                 step = outSize;
             }
-            if (ct->getSize() != step)
+            if (ct.getSize() != step)
             {   // Make sure data-type matches our step size
                 if (step > 8)
                     return;     // Don't manufacture primitives bigger than 8-bytes
-                ct = typeFactory->getBase(step, TYPE_UNKNOWN);
+                ct = typeFactory.getBase(step, TYPE_UNKNOWN);
             }
             if (guard.isRangeLocked())
             {
@@ -90,14 +90,14 @@ namespace Sla.DECCORE
         /// \param hi is the biggest guaranteed index for \e open range hints
         private void addRange(uintb st, Datatype ct, uint4 fl, RangeHint::RangeType rt, int4 hi)
         {
-            if ((ct == (Datatype*)0) || (ct->getSize() == 0)) // Must have a real type
+            if ((ct == (Datatype*)0) || (ct.getSize() == 0)) // Must have a real type
                 ct = defaultType;
-            int4 sz = ct->getSize();
+            int4 sz = ct.getSize();
             if (!range.inRange(Address(spaceid, st), sz))
                 return;
-            intb sst = (intb)AddrSpace::byteToAddress(st, spaceid->getWordSize());
-            sign_extend(sst, spaceid->getAddrSize() * 8 - 1);
-            sst = (intb)AddrSpace::addressToByte(sst, spaceid->getWordSize());
+            intb sst = (intb)AddrSpace::byteToAddress(st, spaceid.getWordSize());
+            sign_extend(sst, spaceid.getAddrSize() * 8 - 1);
+            sst = (intb)AddrSpace::addressToByte(sst, spaceid.getWordSize());
             RangeHint* newRange = new RangeHint(st, sz, sst, ct, fl, rt, hi);
             maplist.push_back(newRange);
 #if OPACTION_DEBUG
@@ -106,9 +106,9 @@ namespace Sla.DECCORE
                 ostringstream s;
                 s << "Add Range: " << hex << st << ":" << dec << sz;
                 s << " ";
-                ct->printRaw(s);
+                ct.printRaw(s);
                 s << endl;
-                glb->printDebug(s.str());
+                glb.printDebug(s.str());
             }
 #endif
         }
@@ -122,18 +122,18 @@ namespace Sla.DECCORE
             newList.reserve(maplist.size());
             int4 startPos = 0;
             RangeHint* startHint = maplist[0];
-            Datatype* startDatatype = startHint->type;
+            Datatype* startDatatype = startHint.type;
             newList.push_back(startHint);
             int4 curPos = 1;
             while (curPos < maplist.size())
             {
                 RangeHint* curHint = maplist[curPos++];
-                if (curHint->start == startHint->start && curHint->size == startHint->size)
+                if (curHint.start == startHint.start && curHint.size == startHint.size)
                 {
-                    Datatype* curDatatype = curHint->type;
-                    if (curDatatype->typeOrder(*startDatatype) < 0) // Take the most specific variant of data-type
+                    Datatype* curDatatype = curHint.type;
+                    if (curDatatype.typeOrder(*startDatatype) < 0) // Take the most specific variant of data-type
                         startDatatype = curDatatype;
-                    if (curHint->compare(*newList.back()) != 0)
+                    if (curHint.compare(*newList.back()) != 0)
                         newList.push_back(curHint);     // Keep the current hint if it is otherwise different
                     else
                         delete curHint;     // RangeHint is on the heap, so delete if we are not keeping it
@@ -142,17 +142,17 @@ namespace Sla.DECCORE
                 {
                     while (startPos < newList.size())
                     {
-                        newList[startPos]->type = startDatatype;
+                        newList[startPos].type = startDatatype;
                         startPos += 1;
                     }
                     startHint = curHint;
-                    startDatatype = startHint->type;
+                    startDatatype = startHint.type;
                     newList.push_back(startHint);
                 }
             }
             while (startPos < newList.size())
             {
-                newList[startPos]->type = startDatatype;
+                newList[startPos].type = startDatatype;
                 startPos += 1;
             }
             maplist.swap(newList);
@@ -210,10 +210,10 @@ namespace Sla.DECCORE
             Range lastrange = range.getLastSignedRange(spaceid);
             if (lastrange == (Range*)0) return false;
             if (maplist.empty()) return false;
-            uintb high = spaceid->wrapOffset(lastrange->getLast() + 1);
-            intb sst = (intb)AddrSpace::byteToAddress(high, spaceid->getWordSize());
-            sign_extend(sst, spaceid->getAddrSize() * 8 - 1);
-            sst = (intb)AddrSpace::addressToByte(sst, spaceid->getWordSize());
+            uintb high = spaceid.wrapOffset(lastrange.getLast() + 1);
+            intb sst = (intb)AddrSpace::byteToAddress(high, spaceid.getWordSize());
+            sign_extend(sst, spaceid.getAddrSize() * 8 - 1);
+            sst = (intb)AddrSpace::addressToByte(sst, spaceid.getWordSize());
             // Add extra range to bound any final open entry
             RangeHint* termRange = new RangeHint(high, 1, sst, defaultType, 0, RangeHint::endpoint, -2);
             maplist.push_back(termRange);
@@ -242,14 +242,14 @@ namespace Sla.DECCORE
             list<SymbolEntry>::const_iterator riter;
             Symbol* sym;
             if (rangemap == (EntryMap*)0) return;
-            for (riter = rangemap->begin_list(); riter != rangemap->end_list(); ++riter)
+            for (riter = rangemap.begin_list(); riter != rangemap.end_list(); ++riter)
             {
                 sym = (*riter).getSymbol();
                 if (sym == (Symbol*)0) continue;
                 //    if ((*iter).isPiece()) continue;     // This should probably never happen
                 uintb start = (*riter).getAddr().getOffset();
-                Datatype* ct = sym->getType();
-                addRange(start, ct, sym->getFlags(), RangeHint::@fixed, -1);
+                Datatype* ct = sym.getType();
+                addRange(start, ct, sym.getFlags(), RangeHint::@fixed, -1);
             }
         }
 
@@ -267,12 +267,12 @@ namespace Sla.DECCORE
             while (riter != iterend)
             {
                 vn = *riter++;
-                if (vn->isFree()) continue;
-                uintb start = vn->getOffset();
-                Datatype* ct = vn->getType();
+                if (vn.isFree()) continue;
+                uintb start = vn.getOffset();
+                Datatype* ct = vn.getType();
                 // Assume parents are present so partials aren't needed
-                if (ct->getMetatype() == TYPE_PARTIALSTRUCT) continue;
-                if (ct->getMetatype() == TYPE_PARTIALUNION) continue;
+                if (ct.getMetatype() == TYPE_PARTIALSTRUCT) continue;
+                if (ct.getMetatype() == TYPE_PARTIALUNION) continue;
                 // Do not force Varnode flags on the entry
                 // as the flags were inherited from the previous
                 // (now obsolete) entry
@@ -295,20 +295,20 @@ namespace Sla.DECCORE
             while (riter != iterend)
             {
                 vn = *riter++;
-                high = vn->getHigh();
+                high = vn.getHigh();
                 if (high == (HighVariable*)0) continue;
-                if (high->isMark()) continue;
-                if (!high->isAddrTied()) continue;
-                vn = high->getTiedVarnode();    // Original vn may not be good representative
-                high->setMark();
+                if (high.isMark()) continue;
+                if (!high.isAddrTied()) continue;
+                vn = high.getTiedVarnode();    // Original vn may not be good representative
+                high.setMark();
                 varvec.push_back(high);
-                uintb start = vn->getOffset();
-                Datatype* ct = high->getType(); // Get type from high
-                if (ct->getMetatype() == TYPE_PARTIALUNION) continue;
+                uintb start = vn.getOffset();
+                Datatype* ct = high.getType(); // Get type from high
+                if (ct.getMetatype() == TYPE_PARTIALUNION) continue;
                 addRange(start, ct, 0, RangeHint::fixed,-1);
             }
             for (int4 i = 0; i < varvec.size(); ++i)
-                varvec[i]->clearMark();
+                varvec[i].clearMark();
         }
 
         /// Add pointer references as hints to the collection
@@ -327,12 +327,12 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < addbase.size(); ++i)
             {
                 offset = alias[i];
-                ct = addbase[i].base->getType();
-                if (ct->getMetatype() == TYPE_PTR)
+                ct = addbase[i].base.getType();
+                if (ct.getMetatype() == TYPE_PTR)
                 {
-                    ct = ((TypePointer*)ct)->getPtrTo();
-                    while (ct->getMetatype() == TYPE_ARRAY)
-                        ct = ((TypeArray*)ct)->getBase();
+                    ct = ((TypePointer*)ct).getPtrTo();
+                    while (ct.getMetatype() == TYPE_ARRAY)
+                        ct = ((TypeArray*)ct).getBase();
                 }
                 else
                     ct = (Datatype*)0;  // Do unknown array
@@ -348,7 +348,7 @@ namespace Sla.DECCORE
                 addRange(offset, ct, 0, RangeHint::open, minItems);
             }
 
-            TypeFactory* typeFactory = fd.getArch()->types;
+            TypeFactory* typeFactory = fd.getArch().types;
             List<LoadGuard> loadGuard = fd.getLoadGuards();
             for (list<LoadGuard>::const_iterator giter = loadGuard.begin(); giter != loadGuard.end(); ++giter)
                 addGuard(*giter, CPUI_LOAD, typeFactory);

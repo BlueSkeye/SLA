@@ -25,16 +25,16 @@ namespace Sla.EXTRA
         }
         
         public override UnifyConstraint clone()
-            => (new ConstraintParamConst(opindex, slot, constindex))->copyid(this);
+            => (new ConstraintParamConst(opindex, slot, constindex)).copyid(this);
 
         public override bool step(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            if (!traverse->step()) return false;
+            if (!traverse.step()) return false;
             PcodeOp* op = state.data(opindex).getOp();
-            Varnode* vn = op->getIn(slot);
-            if (!vn->isConstant()) return false;
-            state.data(constindex).setConstant(vn->getOffset());
+            Varnode* vn = op.getIn(slot);
+            if (!vn.isConstant()) return false;
+            state.data(constindex).setConstant(vn.getOffset());
             return true;
         }
 
@@ -49,11 +49,11 @@ namespace Sla.EXTRA
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << "if (!" << printstate.getName(opindex) << "->getIn(" << dec << slot << ")->isConstant())" << endl;
+            s << "if (!" << printstate.getName(opindex) << ".getIn(" << dec << slot << ").isConstant())" << endl;
             printstate.printAbort(s);
             printstate.printIndent(s);
             s << printstate.getName(constindex) << " = ";
-            s << printstate.getName(opindex) << "->getIn(" << dec << slot << ")->getOffset();" << endl;
+            s << printstate.getName(opindex) << ".getIn(" << dec << slot << ").getOffset();" << endl;
         }
     }
 }

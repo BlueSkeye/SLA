@@ -35,18 +35,18 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* constD = op->getIn(1);
-            if (!constD->isConstant()) return 0;
-            Varnode* shiftin = op->getIn(0);
-            if (!shiftin->isWritten()) return 0;
-            PcodeOp* shift2op = shiftin->getDef();
-            if (shift2op->code() != CPUI_INT_SRIGHT) return 0;
-            Varnode* constC = shift2op->getIn(1);
-            if (!constC->isConstant()) return 0;
-            Varnode* inVn = shift2op->getIn(0);
-            if (inVn->isFree()) return 0;
-            int4 max = op->getOut()->getSize() * 8 - 1; // This is maximum possible shift.
-            int4 sa = (int4)constC->getOffset() + (int4)constD->getOffset();
+            Varnode* constD = op.getIn(1);
+            if (!constD.isConstant()) return 0;
+            Varnode* shiftin = op.getIn(0);
+            if (!shiftin.isWritten()) return 0;
+            PcodeOp* shift2op = shiftin.getDef();
+            if (shift2op.code() != CPUI_INT_SRIGHT) return 0;
+            Varnode* constC = shift2op.getIn(1);
+            if (!constC.isConstant()) return 0;
+            Varnode* inVn = shift2op.getIn(0);
+            if (inVn.isFree()) return 0;
+            int4 max = op.getOut().getSize() * 8 - 1; // This is maximum possible shift.
+            int4 sa = (int4)constC.getOffset() + (int4)constD.getOffset();
             if (sa <= 0) return 0;  // Something is wrong
             if (sa > max)
                 sa = max;           // Shift amount has saturated

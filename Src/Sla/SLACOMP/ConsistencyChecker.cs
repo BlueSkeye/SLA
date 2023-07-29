@@ -79,15 +79,15 @@ namespace Sla.SLACOMP
             int4 handindex;
 
             if (slot == -1)
-                vn = op->getOut();
+                vn = op.getOut();
             else
-                vn = op->getIn(slot);
+                vn = op.getIn(slot);
 
-            switch (vn->getSize().getType())
+            switch (vn.getSize().getType())
             {
                 case ConstTpl::handle:
-                    handindex = vn->getSize().getHandleIndex();
-                    opsym = ct->getOperand(handindex);
+                    handindex = vn.getSize().getHandleIndex();
+                    opsym = ct.getOperand(handindex);
                     break;
                 default:
                     opsym = (OperandSymbol*)0;
@@ -103,7 +103,7 @@ namespace Sla.SLACOMP
         /// \param op is the operator to print
         private void printOpName(TextWriter s, OpTpl op)
         {
-            switch (op->getOpcode())
+            switch (op.getOpcode())
             {
                 case CPUI_COPY:
                     s << "Copy(=)";
@@ -321,7 +321,7 @@ namespace Sla.SLACOMP
         /// \param msg is additional description that is appended to the error message
         private void printOpError(OpTpl op, Constructor ct, int4 err1, int4 err2, string message)
         {
-            SubtableSymbol* sym = ct->getParent();
+            SubtableSymbol* sym = ct.getParent();
             OperandSymbol* op1,*op2;
 
             op1 = getOperandSymbol(err1, op, ct);
@@ -332,20 +332,20 @@ namespace Sla.SLACOMP
 
             ostringstream msgBuilder;
 
-            msgBuilder << "Size restriction error in table '" << sym->getName() << "'" << endl;
+            msgBuilder << "Size restriction error in table '" << sym.getName() << "'" << endl;
             if ((op1 != (OperandSymbol*)0) && (op2 != (OperandSymbol*)0))
-                msgBuilder << "  Problem with operands '" << op1->getName() << "' and '" << op2->getName() << "'";
+                msgBuilder << "  Problem with operands '" << op1.getName() << "' and '" << op2.getName() << "'";
             else if (op1 != (OperandSymbol*)0)
-                msgBuilder << "  Problem with operand 1 '" << op1->getName() << "'";
+                msgBuilder << "  Problem with operand 1 '" << op1.getName() << "'";
             else if (op2 != (OperandSymbol*)0)
-                msgBuilder << "  Problem with operand 2 '" << op2->getName() << "'";
+                msgBuilder << "  Problem with operand 2 '" << op2.getName() << "'";
             else
                 msgBuilder << "  Problem";
             msgBuilder << " in ";
             printOpName(msgBuilder, op);
             msgBuilder << " operator" << endl << "  " << msg;
 
-            compiler->reportError(compiler->getLocation(ct), msgBuilder.str());
+            compiler.reportError(compiler.getLocation(ct), msgBuilder.str());
         }
 
         /// \brief Recover a specific value for the size associated with a Varnode template
@@ -373,11 +373,11 @@ namespace Sla.SLACOMP
                     break;
                 case ConstTpl::handle:
                     handindex = sizeconst.getHandleIndex();
-                    opsym = ct->getOperand(handindex);
-                    size = opsym->getSize();
+                    opsym = ct.getOperand(handindex);
+                    size = opsym.getSize();
                     if (size == -1)
                     {
-                        tabsym = dynamic_cast<SubtableSymbol*>(opsym->getDefiningSymbol());
+                        tabsym = dynamic_cast<SubtableSymbol*>(opsym.getDefiningSymbol());
                         if (tabsym == (SubtableSymbol*)0)
                             throw SleighError("Could not recover varnode template size");
                         iter = sizemap.find(tabsym);
@@ -402,14 +402,14 @@ namespace Sla.SLACOMP
         /// \return \b false if the operator is fatally misused
         private bool checkOpMisuse(OpTplop, Constructor ct)
         {
-            switch (op->getOpcode())
+            switch (op.getOpcode())
             {
                 case CPUI_INT_LESS:
                     {
-                        VarnodeTpl* vn = op->getIn(1);
-                        if (vn->getSpace().isConstSpace() && vn->getOffset().isZero())
+                        VarnodeTpl* vn = op.getIn(1);
+                        if (vn.getSpace().isConstSpace() && vn.getOffset().isZero())
                         {
-                            compiler->reportWarning(compiler->getLocation(ct), "Unsigned comparison with zero is always false");
+                            compiler.reportWarning(compiler.getLocation(ct), "Unsigned comparison with zero is always false");
                         }
                     }
                     break;
@@ -433,7 +433,7 @@ namespace Sla.SLACOMP
             int4 vnout, vn0, vn1;
             AddrSpace* spc;
 
-            switch (op->getOpcode())
+            switch (op.getOpcode())
             {
                 case CPUI_COPY:         // Instructions where all inputs and output are same size
                 case CPUI_INT_2COMP:
@@ -444,13 +444,13 @@ namespace Sla.SLACOMP
                 case CPUI_FLOAT_CEIL:
                 case CPUI_FLOAT_FLOOR:
                 case CPUI_FLOAT_ROUND:
-                    vnout = recoverSize(op->getOut()->getSize(), ct);
+                    vnout = recoverSize(op.getOut().getSize(), ct);
                     if (vnout == -1)
                     {
                         printOpError(op, ct, -1, -1, "Using subtable with exports in expression");
                         return false;
                     }
-                    vn0 = recoverSize(op->getIn(0)->getSize(), ct);
+                    vn0 = recoverSize(op.getIn(0).getSize(), ct);
                     if (vn0 == -1)
                     {
                         printOpError(op, ct, 0, 0, "Using subtable with exports in expression");
@@ -474,19 +474,19 @@ namespace Sla.SLACOMP
                 case CPUI_FLOAT_DIV:
                 case CPUI_FLOAT_MULT:
                 case CPUI_FLOAT_SUB:
-                    vnout = recoverSize(op->getOut()->getSize(), ct);
+                    vnout = recoverSize(op.getOut().getSize(), ct);
                     if (vnout == -1)
                     {
                         printOpError(op, ct, -1, -1, "Using subtable with exports in expression");
                         return false;
                     }
-                    vn0 = recoverSize(op->getIn(0)->getSize(), ct);
+                    vn0 = recoverSize(op.getIn(0).getSize(), ct);
                     if (vn0 == -1)
                     {
                         printOpError(op, ct, 0, 0, "Using subtable with exports in expression");
                         return false;
                     }
-                    vn1 = recoverSize(op->getIn(1)->getSize(), ct);
+                    vn1 = recoverSize(op.getIn(1).getSize(), ct);
                     if (vn1 == -1)
                     {
                         printOpError(op, ct, 1, 1, "Using subtable with exports in expression");
@@ -509,7 +509,7 @@ namespace Sla.SLACOMP
                     }
                     return true;
                 case CPUI_FLOAT_NAN:
-                    vnout = recoverSize(op->getOut()->getSize(), ct);
+                    vnout = recoverSize(op.getOut().getSize(), ct);
                     if (vnout == -1)
                     {
                         printOpError(op, ct, -1, -1, "Using subtable with exports in expression");
@@ -534,7 +534,7 @@ namespace Sla.SLACOMP
                 case CPUI_FLOAT_NOTEQUAL:
                 case CPUI_FLOAT_LESS:
                 case CPUI_FLOAT_LESSEQUAL:
-                    vnout = recoverSize(op->getOut()->getSize(), ct);
+                    vnout = recoverSize(op.getOut().getSize(), ct);
                     if (vnout == -1)
                     {
                         printOpError(op, ct, -1, -1, "Using subtable with exports in expression");
@@ -545,13 +545,13 @@ namespace Sla.SLACOMP
                         printOpError(op, ct, -1, -1, "Output must be a boolean (size 1)");
                         return false;
                     }
-                    vn0 = recoverSize(op->getIn(0)->getSize(), ct);
+                    vn0 = recoverSize(op.getIn(0).getSize(), ct);
                     if (vn0 == -1)
                     {
                         printOpError(op, ct, 0, 0, "Using subtable with exports in expression");
                         return false;
                     }
-                    vn1 = recoverSize(op->getIn(1)->getSize(), ct);
+                    vn1 = recoverSize(op.getIn(1).getSize(), ct);
                     if (vn1 == -1)
                     {
                         printOpError(op, ct, 1, 1, "Using subtable with exports in expression");
@@ -567,7 +567,7 @@ namespace Sla.SLACOMP
                 case CPUI_BOOL_XOR:
                 case CPUI_BOOL_AND:
                 case CPUI_BOOL_OR:
-                    vnout = recoverSize(op->getOut()->getSize(), ct);
+                    vnout = recoverSize(op.getOut().getSize(), ct);
                     if (vnout == -1)
                     {
                         printOpError(op, ct, -1, -1, "Using subtable with exports in expression");
@@ -578,7 +578,7 @@ namespace Sla.SLACOMP
                         printOpError(op, ct, -1, -1, "Output must be a boolean (size 1)");
                         return false;
                     }
-                    vn0 = recoverSize(op->getIn(0)->getSize(), ct);
+                    vn0 = recoverSize(op.getIn(0).getSize(), ct);
                     if (vn0 == -1)
                     {
                         printOpError(op, ct, 0, 0, "Using subtable with exports in expression");
@@ -591,7 +591,7 @@ namespace Sla.SLACOMP
                     }
                     return true;
                 case CPUI_BOOL_NEGATE:
-                    vnout = recoverSize(op->getOut()->getSize(), ct);
+                    vnout = recoverSize(op.getOut().getSize(), ct);
                     if (vnout == -1)
                     {
                         printOpError(op, ct, -1, -1, "Using subtable with exports in expression");
@@ -602,7 +602,7 @@ namespace Sla.SLACOMP
                         printOpError(op, ct, -1, -1, "Output must be a boolean (size 1)");
                         return false;
                     }
-                    vn0 = recoverSize(op->getIn(0)->getSize(), ct);
+                    vn0 = recoverSize(op.getIn(0).getSize(), ct);
                     if (vn0 == -1)
                     {
                         printOpError(op, ct, 0, 0, "Using subtable with exports in expression");
@@ -619,13 +619,13 @@ namespace Sla.SLACOMP
                 case CPUI_INT_LEFT:
                 case CPUI_INT_RIGHT:
                 case CPUI_INT_SRIGHT:
-                    vnout = recoverSize(op->getOut()->getSize(), ct);
+                    vnout = recoverSize(op.getOut().getSize(), ct);
                     if (vnout == -1)
                     {
                         printOpError(op, ct, -1, -1, "Using subtable with exports in expression");
                         return false;
                     }
-                    vn0 = recoverSize(op->getIn(0)->getSize(), ct);
+                    vn0 = recoverSize(op.getIn(0).getSize(), ct);
                     if (vn0 == -1)
                     {
                         printOpError(op, ct, 0, 0, "Using subtable with exports in expression");
@@ -640,13 +640,13 @@ namespace Sla.SLACOMP
                     return true;
                 case CPUI_INT_ZEXT:
                 case CPUI_INT_SEXT:
-                    vnout = recoverSize(op->getOut()->getSize(), ct);
+                    vnout = recoverSize(op.getOut().getSize(), ct);
                     if (vnout == -1)
                     {
                         printOpError(op, ct, -1, -1, "Using subtable with exports in expression");
                         return false;
                     }
-                    vn0 = recoverSize(op->getIn(0)->getSize(), ct);
+                    vn0 = recoverSize(op.getIn(0).getSize(), ct);
                     if (vn0 == -1)
                     {
                         printOpError(op, ct, 0, 0, "Using subtable with exports in expression");
@@ -665,7 +665,7 @@ namespace Sla.SLACOMP
                     }
                     return true;
                 case CPUI_CBRANCH:
-                    vn1 = recoverSize(op->getIn(1)->getSize(), ct);
+                    vn1 = recoverSize(op.getIn(1).getSize(), ct);
                     if (vn1 == -1)
                     {
                         printOpError(op, ct, 1, 1, "Using subtable with exports in expression");
@@ -679,35 +679,35 @@ namespace Sla.SLACOMP
                     return true;
                 case CPUI_LOAD:
                 case CPUI_STORE:
-                    if (op->getIn(0)->getOffset().getType() != ConstTpl::spaceid)
+                    if (op.getIn(0).getOffset().getType() != ConstTpl::spaceid)
                         return true;
-                    spc = op->getIn(0)->getOffset().getSpace();
-                    vn1 = recoverSize(op->getIn(1)->getSize(), ct);
+                    spc = op.getIn(0).getOffset().getSpace();
+                    vn1 = recoverSize(op.getIn(1).getSize(), ct);
                     if (vn1 == -1)
                     {
                         printOpError(op, ct, 1, 1, "Using subtable with exports in expression");
                         return false;
                     }
-                    if ((vn1 != 0) && (vn1 != spc->getAddrSize()))
+                    if ((vn1 != 0) && (vn1 != spc.getAddrSize()))
                     {
                         printOpError(op, ct, 1, 1, "Pointer size must match size of space");
                         return false;
                     }
                     return true;
                 case CPUI_SUBPIECE:
-                    vnout = recoverSize(op->getOut()->getSize(), ct);
+                    vnout = recoverSize(op.getOut().getSize(), ct);
                     if (vnout == -1)
                     {
                         printOpError(op, ct, -1, -1, "Using subtable with exports in expression");
                         return false;
                     }
-                    vn0 = recoverSize(op->getIn(0)->getSize(), ct);
+                    vn0 = recoverSize(op.getIn(0).getSize(), ct);
                     if (vn0 == -1)
                     {
                         printOpError(op, ct, 0, 0, "Using subtable with exports in expression");
                         return false;
                     }
-                    vn1 = op->getIn(1)->getOffset().getReal();
+                    vn1 = op.getIn(1).getOffset().getReal();
                     if ((vnout == 0) || (vn0 == 0)) return true;
                     if ((vnout == vn0) && (vn1 == 0))
                     { // No actual truncation is occuring
@@ -744,7 +744,7 @@ namespace Sla.SLACOMP
             if (cttpl == (ConstructTpl*)0)
                 return true;        // Nothing to check
             vector<OpTpl*>::const_iterator iter;
-            List<OpTpl> ops = cttpl->getOpvec();
+            List<OpTpl> ops = cttpl.getOpvec();
             bool testresult = true;
 
             for (iter = ops.begin(); iter != ops.end(); ++iter)
@@ -765,13 +765,13 @@ namespace Sla.SLACOMP
         /// \return \b true if the operator has a too large temporary parameter
         private bool hasLargeTemporary(OpTpl op)
         {
-            VarnodeTpl *out = op->getOut();
+            VarnodeTpl *out = op.getOut();
             if ((out != (VarnodeTpl*)0x0) && isTemporaryAndTooBig(out)) {
                 return true;
             }
-            for (int4 i = 0; i < op->numInput(); ++i)
+            for (int4 i = 0; i < op.numInput(); ++i)
             {
-                VarnodeTpl *in = op->getIn(i);
+                VarnodeTpl *in = op.getIn(i);
                 if (isTemporaryAndTooBig(in))
                 {
                     return true;
@@ -788,7 +788,7 @@ namespace Sla.SLACOMP
         /// \return \b true if the Varnode is a too large temporary register
         private bool isTemporaryAndTooBig(VarnodeTpl vn)
         {
-            return vn->getSpace().isUniqueSpace() && (vn->getSize().getReal() > SleighBase::MAX_UNIQUE_SIZE);
+            return vn.getSpace().isUniqueSpace() && (vn.getSize().getReal() > SleighBase::MAX_UNIQUE_SIZE);
         }
 
         /// \brief Resolve the offset of the given \b truncated Varnode
@@ -807,10 +807,10 @@ namespace Sla.SLACOMP
         /// \return \b true if the truncation expression was valid
         private bool checkVarnodeTruncation(Constructor ct, int4 slot, OpTpl op, VarnodeTpl vn, bool isbigendian)
         {
-            ConstTpl off = vn->getOffset();
+            ConstTpl off = vn.getOffset();
             if (off.getType() != ConstTpl::handle) return true;
             if (off.getSelect() != ConstTpl::v_offset_plus) return true;
-            ConstTpl::const_type sztype = vn->getSize().getType();
+            ConstTpl::const_type sztype = vn.getSize().getType();
             if ((sztype != ConstTpl::real) && (sztype != ConstTpl::handle))
             {
                 printOpError(op, ct, slot, slot, "Bad truncation expression");
@@ -822,7 +822,7 @@ namespace Sla.SLACOMP
                 printOpError(op, ct, slot, slot, "Could not recover size");
                 return false;
             }
-            bool res = vn->adjustTruncation(sz, isbigendian);
+            bool res = vn.adjustTruncation(sz, isbigendian);
             if (!res)
             {
                 printOpError(op, ct, slot, slot, "Truncation operator out of bounds");
@@ -843,21 +843,21 @@ namespace Sla.SLACOMP
         private bool checkSectionTruncations(Constructor ct, ConstructTpl cttpl, bool isbigendian)
         {
             vector<OpTpl*>::const_iterator iter;
-            List<OpTpl> ops = cttpl->getOpvec();
+            List<OpTpl> ops = cttpl.getOpvec();
             bool testresult = true;
 
             for (iter = ops.begin(); iter != ops.end(); ++iter)
             {
                 OpTpl* op = *iter;
-                VarnodeTpl* outvn = op->getOut();
+                VarnodeTpl* outvn = op.getOut();
                 if (outvn != (VarnodeTpl*)0)
                 {
                     if (!checkVarnodeTruncation(ct, -1, op, outvn, isbigendian))
                         testresult = false;
                 }
-                for (int4 i = 0; i < op->numInput(); ++i)
+                for (int4 i = 0; i < op.numInput(); ++i)
                 {
-                    if (!checkVarnodeTruncation(ct, i, op, op->getIn(i), isbigendian))
+                    if (!checkVarnodeTruncation(ct, i, op, op.getIn(i), isbigendian))
                         testresult = false;
                 }
             }
@@ -874,7 +874,7 @@ namespace Sla.SLACOMP
         private bool checkSubtable(SubtableSymbol sym)
         {
             int4 tablesize = -1;
-            int4 numconstruct = sym->getNumConstructors();
+            int4 numconstruct = sym.getNumConstructors();
             Constructor* ct;
             bool testresult = true;
             bool seenemptyexport = false;
@@ -882,38 +882,38 @@ namespace Sla.SLACOMP
 
             for (int4 i = 0; i < numconstruct; ++i)
             {
-                ct = sym->getConstructor(i);
-                if (!checkConstructorSection(ct, ct->getTempl()))
+                ct = sym.getConstructor(i);
+                if (!checkConstructorSection(ct, ct.getTempl()))
                     testresult = false;
-                int4 numsection = ct->getNumSections();
+                int4 numsection = ct.getNumSections();
                 for (int4 j = 0; j < numsection; ++j)
                 {
-                    if (!checkConstructorSection(ct, ct->getNamedTempl(j)))
+                    if (!checkConstructorSection(ct, ct.getNamedTempl(j)))
                         testresult = false;
                 }
 
-                if (ct->getTempl() == (ConstructTpl*)0) continue;   // Unimplemented
-                HandleTpl* exportres = ct->getTempl()->getResult();
+                if (ct.getTempl() == (ConstructTpl*)0) continue;   // Unimplemented
+                HandleTpl* exportres = ct.getTempl().getResult();
                 if (exportres != (HandleTpl*)0)
                 {
                     if (seenemptyexport && (!seennonemptyexport))
                     {
                         ostringstream msg;
-                        msg << "Table '" << sym->getName() << "' exports inconsistently; ";
-                        msg << "Constructor starting at line " << dec << ct->getLineno() << " is first inconsistency";
-                        compiler->reportError(compiler->getLocation(ct), msg.str());
+                        msg << "Table '" << sym.getName() << "' exports inconsistently; ";
+                        msg << "Constructor starting at line " << dec << ct.getLineno() << " is first inconsistency";
+                        compiler.reportError(compiler.getLocation(ct), msg.str());
                         testresult = false;
                     }
                     seennonemptyexport = true;
-                    int4 exsize = recoverSize(exportres->getSize(), ct);
+                    int4 exsize = recoverSize(exportres.getSize(), ct);
                     if (tablesize == -1)
                         tablesize = exsize;
                     if (exsize != tablesize)
                     {
                         ostringstream msg;
-                        msg << "Table '" << sym->getName() << "' has inconsistent export size; ";
-                        msg << "Constructor starting at line " << dec << ct->getLineno() << " is first conflict";
-                        compiler->reportError(compiler->getLocation(ct), msg.str());
+                        msg << "Table '" << sym.getName() << "' has inconsistent export size; ";
+                        msg << "Constructor starting at line " << dec << ct.getLineno() << " is first conflict";
+                        compiler.reportError(compiler.getLocation(ct), msg.str());
                         testresult = false;
                     }
                 }
@@ -922,9 +922,9 @@ namespace Sla.SLACOMP
                     if (seennonemptyexport && (!seenemptyexport))
                     {
                         ostringstream msg;
-                        msg << "Table '" << sym->getName() << "' exports inconsistently; ";
-                        msg << "Constructor starting at line " << dec << ct->getLineno() << " is first inconsistency";
-                        compiler->reportError(compiler->getLocation(ct), msg.str());
+                        msg << "Table '" << sym.getName() << "' exports inconsistently; ";
+                        msg << "Constructor starting at line " << dec << ct.getLineno() << " is first inconsistency";
+                        compiler.reportError(compiler.getLocation(ct), msg.str());
                         testresult = false;
                     }
                     seenemptyexport = true;
@@ -934,7 +934,7 @@ namespace Sla.SLACOMP
             {
                 if (tablesize == 0)
                 {
-                    compiler->reportWarning(compiler->getLocation(sym), "Table '" + sym->getName() + "' exports size 0");
+                    compiler.reportWarning(compiler.getLocation(sym), "Table '" + sym.getName() + "' exports size 0");
                 }
                 sizemap[sym] = tablesize;   // Remember recovered size
             }
@@ -958,9 +958,9 @@ namespace Sla.SLACOMP
                 ostringstream msg;
                 msg << "Unnecessary ";
                 printOpName(msg, op);
-                compiler->reportWarning(compiler->getLocation(ct), msg.str());
+                compiler.reportWarning(compiler.getLocation(ct), msg.str());
             }
-            op->setOpcode(CPUI_COPY);   // Equivalent to copy
+            op.setOpcode(CPUI_COPY);   // Equivalent to copy
             unnecessarypcode += 1;
         }
 
@@ -978,10 +978,10 @@ namespace Sla.SLACOMP
                 ostringstream msg;
                 msg << "Unnecessary ";
                 printOpName(msg, op);
-                compiler->reportWarning(compiler->getLocation(ct), msg.str());
+                compiler.reportWarning(compiler.getLocation(ct), msg.str());
             }
-            op->setOpcode(CPUI_COPY);   // Equivalent to copy
-            op->removeInput(1);
+            op.setOpcode(CPUI_COPY);   // Equivalent to copy
+            op.removeInput(1);
             unnecessarypcode += 1;
         }
 
@@ -1010,7 +1010,7 @@ namespace Sla.SLACOMP
             {
                 SubtableSymbol* cur = path.back();
                 int4 ctind = state.back();
-                if (ctind >= cur->getNumConstructors())
+                if (ctind >= cur.getNumConstructors())
                 {
                     path.pop_back();        // Table is fully traversed
                     state.pop_back();
@@ -1019,9 +1019,9 @@ namespace Sla.SLACOMP
                 }
                 else
                 {
-                    Constructor* ct = cur->getConstructor(ctind);
+                    Constructor* ct = cur.getConstructor(ctind);
                     int4 oper = ctstate.back();
-                    if (oper >= ct->getNumOperands())
+                    if (oper >= ct.getNumOperands())
                     {
                         state.back() = ctind + 1; // Constructor fully traversed
                         ctstate.back() = 0;
@@ -1029,8 +1029,8 @@ namespace Sla.SLACOMP
                     else
                     {
                         ctstate.back() = oper + 1;
-                        OperandSymbol* opsym = ct->getOperand(oper);
-                        SubtableSymbol* subsym = dynamic_cast<SubtableSymbol*>(opsym->getDefiningSymbol());
+                        OperandSymbol* opsym = ct.getOperand(oper);
+                        SubtableSymbol* subsym = dynamic_cast<SubtableSymbol*>(opsym.getDefiningSymbol());
                         if (subsym != (SubtableSymbol*)0)
                         {
                             map<SubtableSymbol*, int4>::const_iterator iter;
@@ -1062,11 +1062,11 @@ namespace Sla.SLACOMP
         private static void examineVn(Dictionary<uintb, OptimizeRecord> recs, VarnodeTpl vn, uint4 i,int4 inslot, int4 secnum)
         {
             if (vn == (VarnodeTpl*)0) return;
-            if (!vn->getSpace().isUniqueSpace()) return;
-            if (vn->getOffset().getType() != ConstTpl::real) return;
+            if (!vn.getSpace().isUniqueSpace()) return;
+            if (vn.getOffset().getType() != ConstTpl::real) return;
 
             map<uintb, OptimizeRecord>::iterator iter;
-            iter = recs.insert(pair<uint4, OptimizeRecord>(vn->getOffset().getReal(), OptimizeRecord())).first;
+            iter = recs.insert(pair<uint4, OptimizeRecord>(vn.getOffset().getReal(), OptimizeRecord())).first;
             if (inslot >= 0)
             {
                 (*iter).second.readop = i;
@@ -1091,31 +1091,31 @@ namespace Sla.SLACOMP
         /// \return \b true if there is a possible intersection of the Varnodes' storage
         private static bool possibleIntersection(VarnodeTpl vn1, VarnodeTpl vn2)
         { // Conservatively test whether vn1 and vn2 can intersect
-            if (vn1->getSpace().isConstSpace()) return false;
-            if (vn2->getSpace().isConstSpace()) return false;
+            if (vn1.getSpace().isConstSpace()) return false;
+            if (vn2.getSpace().isConstSpace()) return false;
 
-            bool u1 = vn1->getSpace().isUniqueSpace();
-            bool u2 = vn2->getSpace().isUniqueSpace();
+            bool u1 = vn1.getSpace().isUniqueSpace();
+            bool u2 = vn2.getSpace().isUniqueSpace();
 
             if (u1 != u2) return false;
 
-            if (vn1->getSpace().getType() != ConstTpl::spaceid) return true;
-            if (vn2->getSpace().getType() != ConstTpl::spaceid) return true;
-            AddrSpace* spc = vn1->getSpace().getSpace();
-            if (spc != vn2->getSpace().getSpace()) return false;
+            if (vn1.getSpace().getType() != ConstTpl::spaceid) return true;
+            if (vn2.getSpace().getType() != ConstTpl::spaceid) return true;
+            AddrSpace* spc = vn1.getSpace().getSpace();
+            if (spc != vn2.getSpace().getSpace()) return false;
 
 
-            if (vn2->getOffset().getType() != ConstTpl::real) return true;
-            if (vn2->getSize().getType() != ConstTpl::real) return true;
+            if (vn2.getOffset().getType() != ConstTpl::real) return true;
+            if (vn2.getSize().getType() != ConstTpl::real) return true;
 
-            if (vn1->getOffset().getType() != ConstTpl::real) return true;
-            if (vn1->getSize().getType() != ConstTpl::real) return true;
+            if (vn1.getOffset().getType() != ConstTpl::real) return true;
+            if (vn1.getSize().getType() != ConstTpl::real) return true;
 
-            uintb offset = vn1->getOffset().getReal();
-            uintb size = vn1->getSize().getReal();
+            uintb offset = vn1.getOffset().getReal();
+            uintb size = vn1.getSize().getReal();
 
-            uintb off = vn2->getOffset().getReal();
-            if (off + vn2->getSize().getReal() - 1 < offset) return false;
+            uintb off = vn2.getOffset().getReal();
+            if (off + vn2.getSize().getReal() - 1 < offset) return false;
             if (off > (offset + size - 1)) return false;
             return true;
         }
@@ -1132,7 +1132,7 @@ namespace Sla.SLACOMP
         /// \return \b true if there is write (or read) interference
         private bool readWriteInterference(VarnodeTpl vn, OpTpl op,bool checkread)
         {
-            switch (op->getOpcode())
+            switch (op.getOpcode())
             {
                 case BUILD:
                 case CROSSBUILD:
@@ -1155,14 +1155,14 @@ namespace Sla.SLACOMP
 
             if (checkread)
             {
-                int4 numinputs = op->numInput();
+                int4 numinputs = op.numInput();
                 for (int4 i = 0; i < numinputs; ++i)
-                    if (possibleIntersection(vn, op->getIn(i)))
+                    if (possibleIntersection(vn, op.getIn(i)))
                         return true;
             }
 
             // We always check for writes to -vn-
-            VarnodeTpl vn2 = op->getOut();
+            VarnodeTpl vn2 = op.getOut();
             if (vn2 != (VarnodeTpl*)0) {
                 if (possibleIntersection(vn, vn2))
                     return true;
@@ -1181,21 +1181,21 @@ namespace Sla.SLACOMP
         {
             ConstructTpl* tpl;
             if (secnum < 0)
-                tpl = ct->getTempl();
+                tpl = ct.getTempl();
             else
-                tpl = ct->getNamedTempl(secnum);
+                tpl = ct.getNamedTempl(secnum);
             if (tpl == (ConstructTpl*)0)
                 return;
-            List<OpTpl> ops = tpl->getOpvec();
+            List<OpTpl> ops = tpl.getOpvec();
             for (uint4 i = 0; i < ops.size(); ++i)
             {
                 OpTpl op = ops[i];
-                for (uint4 j = 0; j < op->numInput(); ++j)
+                for (uint4 j = 0; j < op.numInput(); ++j)
                 {
-                    VarnodeTpl vnin = op->getIn(j);
+                    VarnodeTpl vnin = op.getIn(j);
                     examineVn(recs, vnin, i, j, secnum);
                 }
-                VarnodeTpl vn = op->getOut();
+                VarnodeTpl vn = op.getOut();
                 examineVn(recs, vn, i, -1, secnum);
             }
         }
@@ -1212,19 +1212,19 @@ namespace Sla.SLACOMP
         {
             ConstructTpl* tpl;
             if (secnum < 0)
-                tpl = ct->getTempl();
+                tpl = ct.getTempl();
             else
-                tpl = ct->getNamedTempl(secnum);
+                tpl = ct.getNamedTempl(secnum);
             if (tpl == (ConstructTpl*)0)
                 return;
-            HandleTpl* hand = tpl->getResult();
+            HandleTpl* hand = tpl.getResult();
             if (hand == (HandleTpl*)0) return;
-            if (hand->getPtrSpace().isUniqueSpace())
+            if (hand.getPtrSpace().isUniqueSpace())
             {
-                if (hand->getPtrOffset().getType() == ConstTpl::real)
+                if (hand.getPtrOffset().getType() == ConstTpl::real)
                 {
                     pair<map<uintb, OptimizeRecord>::iterator, bool> res;
-                    uintb offset = hand->getPtrOffset().getReal();
+                    uintb offset = hand.getPtrOffset().getReal();
                     res = recs.insert(pair<uintb, OptimizeRecord>(offset, OptimizeRecord()));
                     (*res.first).second.writeop = 0;
                     (*res.first).second.readop = 0;
@@ -1234,13 +1234,13 @@ namespace Sla.SLACOMP
                     (*res.first).second.writesection = -2;
                 }
             }
-            if (hand->getSpace().isUniqueSpace())
+            if (hand.getSpace().isUniqueSpace())
             {
-                if ((hand->getPtrSpace().getType() == ConstTpl::real) &&
-                (hand->getPtrOffset().getType() == ConstTpl::real))
+                if ((hand.getPtrSpace().getType() == ConstTpl::real) &&
+                (hand.getPtrOffset().getType() == ConstTpl::real))
                 {
                     pair<map<uintb, OptimizeRecord>::iterator, bool> res;
-                    uintb offset = hand->getPtrOffset().getReal();
+                    uintb offset = hand.getPtrOffset().getReal();
                     res = recs.insert(pair<uintb, OptimizeRecord>(offset, OptimizeRecord()));
                     (*res.first).second.writeop = 0;
                     (*res.first).second.readop = 0;
@@ -1276,18 +1276,18 @@ namespace Sla.SLACOMP
                     // Temporary must be read and written exactly once
                     ConstructTpl* tpl;
                     if (currec.readsection < 0)
-                        tpl = ct->getTempl();
+                        tpl = ct.getTempl();
                     else
-                        tpl = ct->getNamedTempl(currec.readsection);
-                    List<OpTpl> ops = tpl->getOpvec();
+                        tpl = ct.getNamedTempl(currec.readsection);
+                    List<OpTpl> ops = tpl.getOpvec();
                     OpTpl op = ops[currec.readop];
                     if (currec.writeop >= currec.readop) // Read must come after write
                         throw SleighError("Read of temporary before write");
-                    if (op->getOpcode() == CPUI_COPY)
+                    if (op.getOpcode() == CPUI_COPY)
                     {
                         bool saverecord = true;
                         currec.opttype = 0; // Read op is a COPY
-                        VarnodeTpl vn = op->getOut();
+                        VarnodeTpl vn = op.getOut();
                         for (int4 i = currec.writeop + 1; i < currec.readop; ++i)
                         { // Check for interference between write and read
                             if (readWriteInterference(vn, ops[i], true))
@@ -1300,11 +1300,11 @@ namespace Sla.SLACOMP
                             return &currec;
                     }
                     op = ops[currec.writeop];
-                    if (op->getOpcode() == CPUI_COPY)
+                    if (op.getOpcode() == CPUI_COPY)
                     {
                         bool saverecord = true;
                         currec.opttype = 1; // Write op is a COPY
-                        VarnodeTpl vn = op->getIn(0);
+                        VarnodeTpl vn = op.getIn(0);
                         for (int4 i = currec.writeop + 1; i < currec.readop; ++i)
                         { // Check for interference between write and read
                             if (readWriteInterference(vn, ops[i], false))
@@ -1336,27 +1336,27 @@ namespace Sla.SLACOMP
             vector<int4> deleteops;
             ConstructTpl* ctempl;
             if (rec.readsection < 0)
-                ctempl = ct->getTempl();
+                ctempl = ct.getTempl();
             else
-                ctempl = ct->getNamedTempl(rec.readsection);
+                ctempl = ct.getNamedTempl(rec.readsection);
 
             if (rec.opttype == 0)
             { // If read op is COPY
                 int4 readop = rec.readop;
-                OpTpl* op = ctempl->getOpvec()[readop];
-                VarnodeTpl* vnout = new VarnodeTpl(*op->getOut()); // Make COPY output
-                ctempl->setOutput(vnout, rec.writeop); // become write output
+                OpTpl* op = ctempl.getOpvec()[readop];
+                VarnodeTpl* vnout = new VarnodeTpl(*op.getOut()); // Make COPY output
+                ctempl.setOutput(vnout, rec.writeop); // become write output
                 deleteops.push_back(readop); // and then delete the read (COPY)
             }
             else if (rec.opttype == 1)
             { // If write op is COPY
                 int4 writeop = rec.writeop;
-                OpTpl* op = ctempl->getOpvec()[writeop];
-                VarnodeTpl* vnin = new VarnodeTpl(*op->getIn(0));   // Make COPY input
-                ctempl->setInput(vnin, rec.readop, rec.inslot); // become read input
+                OpTpl* op = ctempl.getOpvec()[writeop];
+                VarnodeTpl* vnin = new VarnodeTpl(*op.getIn(0));   // Make COPY input
+                ctempl.setInput(vnin, rec.readop, rec.inslot); // become read input
                 deleteops.push_back(writeop); // and then delete the write (COPY)
             }
-            ctempl->deleteOps(deleteops);
+            ctempl.deleteOps(deleteops);
         }
 
         /// \brief Issue error/warning messages for unused temporary Varnodes
@@ -1375,12 +1375,12 @@ namespace Sla.SLACOMP
                 if (currec.readcount == 0)
                 {
                     if (printdeadwarning)
-                        compiler->reportWarning(compiler->getLocation(ct), "Temporary is written but not read");
+                        compiler.reportWarning(compiler.getLocation(ct), "Temporary is written but not read");
                     writenoread += 1;
                 }
                 else if (currec.writecount == 0)
                 {
-                    compiler->reportError(compiler->getLocation(ct), "Temporary is read but not written");
+                    compiler.reportError(compiler.getLocation(ct), "Temporary is read but not written");
                     readnowrite += 1;
                 }
                 ++iter;
@@ -1396,15 +1396,15 @@ namespace Sla.SLACOMP
         /// \param ctpl is the specific p-code section
         private void checkLargeTemporaries(Constructor ct, ConstructTpl ctpl)
         {
-            vector<OpTpl*> ops = ctpl->getOpvec();
+            vector<OpTpl*> ops = ctpl.getOpvec();
             for (vector<OpTpl*>::iterator iter = ops.begin(); iter != ops.end(); ++iter)
             {
                 if (hasLargeTemporary(*iter))
                 {
                     if (printlargetempwarning)
                     {
-                        compiler->reportWarning(
-                            compiler->getLocation(ct),
+                        compiler.reportWarning(
+                            compiler.getLocation(ct),
                             "Constructor uses temporary varnode larger than " + to_string(SleighBase::MAX_UNIQUE_SIZE) + " bytes.");
                     }
                     largetemp++;
@@ -1422,7 +1422,7 @@ namespace Sla.SLACOMP
         {
             OptimizeRecord currec;
             map<uintb, OptimizeRecord> recs;
-            int4 numsections = ct->getNumSections();
+            int4 numsections = ct.getNumSections();
             do
             {
                 recs.clear();
@@ -1482,24 +1482,24 @@ namespace Sla.SLACOMP
         public bool testTruncations()
         {
             bool testresult = true;
-            bool isbigendian = slgh->isBigEndian();
+            bool isbigendian = slgh.isBigEndian();
             for (int4 i = 0; i < postorder.size(); ++i)
             {
                 SubtableSymbol* sym = postorder[i];
-                int4 numconstruct = sym->getNumConstructors();
+                int4 numconstruct = sym.getNumConstructors();
                 Constructor* ct;
                 for (int4 j = 0; j < numconstruct; ++j)
                 {
-                    ct = sym->getConstructor(j);
+                    ct = sym.getConstructor(j);
 
-                    int4 numsections = ct->getNumSections();
+                    int4 numsections = ct.getNumSections();
                     for (int4 k = -1; k < numsections; ++k)
                     {
                         ConstructTpl* tpl;
                         if (k < 0)
-                            tpl = ct->getTempl();
+                            tpl = ct.getTempl();
                         else
-                            tpl = ct->getNamedTempl(k);
+                            tpl = ct.getNamedTempl(k);
                         if (tpl == (ConstructTpl*)0)
                             continue;
                         if (!checkSectionTruncations(ct, tpl, isbigendian))
@@ -1518,20 +1518,20 @@ namespace Sla.SLACOMP
             for (int4 i = 0; i < postorder.size(); ++i)
             {
                 SubtableSymbol* sym = postorder[i];
-                int4 numconstruct = sym->getNumConstructors();
+                int4 numconstruct = sym.getNumConstructors();
                 Constructor* ct;
                 for (int4 j = 0; j < numconstruct; ++j)
                 {
-                    ct = sym->getConstructor(j);
+                    ct = sym.getConstructor(j);
 
-                    int4 numsections = ct->getNumSections();
+                    int4 numsections = ct.getNumSections();
                     for (int4 k = -1; k < numsections; ++k)
                     {
                         ConstructTpl* tpl;
                         if (k < 0)
-                            tpl = ct->getTempl();
+                            tpl = ct.getTempl();
                         else
-                            tpl = ct->getNamedTempl(k);
+                            tpl = ct.getNamedTempl(k);
                         if (tpl == (ConstructTpl*)0)
                             continue;
                         checkLargeTemporaries(ct, tpl);
@@ -1546,11 +1546,11 @@ namespace Sla.SLACOMP
             for (int4 i = 0; i < postorder.size(); ++i)
             {
                 SubtableSymbol* sym = postorder[i];
-                int4 numconstruct = sym->getNumConstructors();
+                int4 numconstruct = sym.getNumConstructors();
                 Constructor* ct;
                 for (int4 i = 0; i < numconstruct; ++i)
                 {
-                    ct = sym->getConstructor(i);
+                    ct = sym.getConstructor(i);
                     optimize(ct);
                 }
             }

@@ -21,9 +21,9 @@ namespace Sla.SLACOMP
         /// \return \b true if \b this should be sorted before the other field
         internal static bool operator <(FieldContext op2)
         {
-            if (sym->getName() != op2.sym->getName())
-                return (sym->getName() < op2.sym->getName());
-            return (qual->low < op2.qual->low);
+            if (sym.getName() != op2.sym.getName())
+                return (sym.getName() < op2.sym.getName());
+            return (qual.low < op2.qual.low);
         }
 
         internal FieldContext(VarnodeSymbol s, FieldQuality q)

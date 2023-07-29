@@ -39,7 +39,7 @@ namespace Sla.EXTRA
         public static void registerAllCommands(IfaceStatus status)
         {
             for (uint4 i = 0; i < thelist.size(); ++i)
-                thelist[i]->registerCommands(status);
+                thelist[i].registerCommands(status);
         }
     }
 }

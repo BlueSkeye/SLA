@@ -19,7 +19,7 @@ namespace Sla.DECCORE
         /// The first parameter is either "c", "cplusplus", a string starting with "/*", or a string starting with "//"
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            glb->print->setCommentStyle(p1);
+            glb.print.setCommentStyle(p1);
             return "Comment style set to " + p1;
         }
     }

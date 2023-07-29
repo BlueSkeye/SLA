@@ -18,26 +18,26 @@ namespace Sla.DECCORE
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opReturn(op);
+            lng.opReturn(op);
         }
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
             s << name;
-            if (op->numInput() >= 1)
+            if (op.numInput() >= 1)
             {
                 s << '(';
-                Varnode::printRaw(s, op->getIn(0));
+                Varnode::printRaw(s, op.getIn(0));
                 s << ')';
             }
-            if (op->numInput() > 1)
+            if (op.numInput() > 1)
             {
                 s << ' ';
-                Varnode::printRaw(s, op->getIn(1));
-                for (int4 i = 2; i < op->numInput(); ++i)
+                Varnode::printRaw(s, op.getIn(1));
+                for (int4 i = 2; i < op.numInput(); ++i)
                 {
                     s << ',';
-                    Varnode::printRaw(s, op->getIn(i));
+                    Varnode::printRaw(s, op.getIn(i));
                 }
             }
         }
@@ -51,15 +51,15 @@ namespace Sla.DECCORE
                 return TypeOp::getInputLocal(op, slot);
 
             // Get data-types of return input parameters
-            BlockBasic bb = op->getParent();
+            BlockBasic bb = op.getParent();
             if (bb == (BlockBasic*)0)
                 return TypeOp::getInputLocal(op, slot);
 
-            fp = &bb->getFuncdata()->getFuncProto();    // Prototype of function we are in
+            fp = &bb.getFuncdata().getFuncProto();    // Prototype of function we are in
 
-            //  if (!fp->isOutputLocked()) return TypeOp::getInputLocal(op,slot);
-            ct = fp->getOutputType();
-            if (ct->getMetatype() == TYPE_VOID || (ct->getSize() != op->getIn(slot)->getSize()))
+            //  if (!fp.isOutputLocked()) return TypeOp::getInputLocal(op,slot);
+            ct = fp.getOutputType();
+            if (ct.getMetatype() == TYPE_VOID || (ct.getSize() != op.getIn(slot).getSize()))
                 return TypeOp::getInputLocal(op, slot);
             return ct;
         }

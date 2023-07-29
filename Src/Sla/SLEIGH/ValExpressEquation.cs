@@ -19,8 +19,8 @@ namespace Sla.SLEIGH
 
         public ValExpressEquation(PatternValue l, PatternExpression r)
         {
-            (lhs = l)->layClaim();
-            (rhs = r)->layClaim();
+            (lhs = l).layClaim();
+            (rhs = r).layClaim();
         }
 
         public override bool resolveOperandLeft(OperandResolve state)

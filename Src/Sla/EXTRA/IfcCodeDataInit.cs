@@ -11,7 +11,7 @@ namespace Sla.EXTRA
     {
         public override void execute(istream s)
         {
-            codedata->init(dcp->conf);
+            codedata.init(dcp.conf);
         }
     }
 }

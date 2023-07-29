@@ -28,21 +28,21 @@ namespace Sla.DECCORE
             lobase = l;
             hiphi = hphi;
 
-            inslot = hiphi->getSlot(hibase);
+            inslot = hiphi.getSlot(hibase);
 
-            if (hiphi->getOut()->hasNoDescend()) return false;
-            blbase = hiphi->getParent();
+            if (hiphi.getOut().hasNoDescend()) return false;
+            blbase = hiphi.getParent();
 
             list<PcodeOp*>::const_iterator iter, enditer;
-            iter = lobase->beginDescend();
-            enditer = lobase->endDescend();
+            iter = lobase.beginDescend();
+            enditer = lobase.endDescend();
             while (iter != enditer)
             {
                 lophi = *iter;
                 ++iter;
-                if (lophi->code() != CPUI_MULTIEQUAL) continue;
-                if (lophi->getParent() != blbase) continue;
-                if (lophi->getIn(inslot) != lobase) continue;
+                if (lophi.code() != CPUI_MULTIEQUAL) continue;
+                if (lophi.getParent() != blbase) continue;
+                if (lophi.getIn(inslot) != lobase) continue;
                 return true;
             }
             return false;
@@ -57,15 +57,15 @@ namespace Sla.DECCORE
             if (!verify(@in.getHi(), @in.getLo(), hphi))
                 return false;
 
-            int4 numin = hiphi->numInput();
+            int4 numin = hiphi.numInput();
             vector<SplitVarnode> inlist;
             for (int4 j = 0; j < numin; ++j)
             {
-                Varnode* vhi = hiphi->getIn(j);
-                Varnode* vlo = lophi->getIn(j);
+                Varnode* vhi = hiphi.getIn(j);
+                Varnode* vlo = lophi.getIn(j);
                 inlist.push_back(SplitVarnode(vlo, vhi));
             }
-            outvn.initPartial(@in.getSize(), lophi->getOut(), hiphi->getOut());
+            outvn.initPartial(@in.getSize(), lophi.getOut(), hiphi.getOut());
             existop = SplitVarnode::preparePhiOp(outvn, inlist);
             if (existop != (PcodeOp*)0)
             {

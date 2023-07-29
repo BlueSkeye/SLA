@@ -35,8 +35,8 @@ namespace Sla.EXTRA
         {
             constraintlist.push_back(c);
 
-            if (c->getMaxNum() > maxnum)
-                maxnum = c->getMaxNum();
+            if (c.getMaxNum() > maxnum)
+                maxnum = c.getMaxNum();
         }
 
         public int4 numConstraints() => constraintlist.size();
@@ -52,9 +52,9 @@ namespace Sla.EXTRA
 
         public void mergeIn(ConstraintGroup b)
         { // Merge all the subconstraints from -b- into this
-            for (int4 i = 0; i < b->constraintlist.size(); ++i)
-                addConstraint(b->constraintlist[i]);
-            b->constraintlist.clear();  // Constraints are no longer controlled by -b-
+            for (int4 i = 0; i < b.constraintlist.size(); ++i)
+                addConstraint(b.constraintlist[i]);
+            b.constraintlist.clear();  // Constraints are no longer controlled by -b-
             delete b;
         }
 
@@ -63,17 +63,17 @@ namespace Sla.EXTRA
             ConstraintGroup* res = new ConstraintGroup();
             for (int4 i = 0; i < constraintlist.size(); ++i)
             {
-                UnifyConstraint* subconst = constraintlist[i]->clone();
-                res->constraintlist.push_back(subconst);
+                UnifyConstraint* subconst = constraintlist[i].clone();
+                res.constraintlist.push_back(subconst);
             }
-            res->copyid(this);
+            res.copyid(this);
             return res;
         }
 
         public override void initialize(UnifyState state)
         {
             TraverseGroupState* traverse = (TraverseGroupState*)state.getTraverse(uniqid);
-            traverse->setState(-1);
+            traverse.setState(-1);
         }
 
         public override bool step(UnifyState state)
@@ -87,54 +87,54 @@ namespace Sla.EXTRA
             int4 max = constraintlist.size();
             do
             {
-                stateint = traverse->getState();
+                stateint = traverse.getState();
                 if (stateint == 0)
                 {       // Attempt a step at current constraint
-                    subindex = traverse->getCurrentIndex();
-                    subtraverse = traverse->getSubTraverse(subindex);
+                    subindex = traverse.getCurrentIndex();
+                    subtraverse = traverse.getSubTraverse(subindex);
                     subconstraint = constraintlist[subindex];
-                    if (subconstraint->step(state))
+                    if (subconstraint.step(state))
                     {
-                        traverse->setState(1);  // Now try a push
+                        traverse.setState(1);  // Now try a push
                         subindex += 1;
-                        traverse->setCurrentIndex(subindex);
+                        traverse.setCurrentIndex(subindex);
                     }
                     else
                     {
                         subindex -= 1;
                         if (subindex < 0) return false; // Popped off the top
-                        traverse->setCurrentIndex(subindex);
-                        traverse->setState(0);  // Try a step next
+                        traverse.setCurrentIndex(subindex);
+                        traverse.setState(0);  // Try a step next
                     }
                 }
                 else if (stateint == 1)
                 {   // Push
-                    subindex = traverse->getCurrentIndex();
-                    subtraverse = traverse->getSubTraverse(subindex);
+                    subindex = traverse.getCurrentIndex();
+                    subtraverse = traverse.getSubTraverse(subindex);
                     subconstraint = constraintlist[subindex];
-                    subconstraint->initialize(state);
-                    traverse->setState(0);  // Try a step next
+                    subconstraint.initialize(state);
+                    traverse.setState(0);  // Try a step next
                 }
                 else
                 {           // Very first time through
-                    traverse->setCurrentIndex(0);
+                    traverse.setCurrentIndex(0);
                     subindex = 0;
-                    subtraverse = traverse->getSubTraverse(subindex);
+                    subtraverse = traverse.getSubTraverse(subindex);
                     subconstraint = constraintlist[subindex];
-                    subconstraint->initialize(state);   // Initialize the very first subcontraint
-                    traverse->setState(0);  // Now try a step
+                    subconstraint.initialize(state);   // Initialize the very first subcontraint
+                    traverse.setState(0);  // Now try a step
                 }
             } while (subindex < max);
             subindex -= 1;
-            traverse->setCurrentIndex(subindex);
-            traverse->setState(0);  // Have full solution, do step next, to get to next solution
+            traverse.setCurrentIndex(subindex);
+            traverse.setState(0);  // Have full solution, do step next, to get to next solution
             return true;
         }
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
             for (int4 i = 0; i < constraintlist.size(); ++i)
-                constraintlist[i]->collectTypes(typelist);
+                constraintlist[i].collectTypes(typelist);
         }
 
         public override void buildTraverseState(UnifyState state)
@@ -147,9 +147,9 @@ namespace Sla.EXTRA
             for (int4 i = 0; i < constraintlist.size(); ++i)
             {
                 UnifyConstraint* subconstraint = constraintlist[i];
-                subconstraint->buildTraverseState(state);
-                TraverseConstraint* subtraverse = state.getTraverse(subconstraint->getId());
-                basetrav->addTraverse(subtraverse);
+                subconstraint.buildTraverseState(state);
+                TraverseConstraint* subtraverse = state.getTraverse(subconstraint.getId());
+                basetrav.addTraverse(subtraverse);
             }
         }
 
@@ -157,15 +157,15 @@ namespace Sla.EXTRA
         {
             UnifyConstraint::setId(id);
             for (int4 i = 0; i < constraintlist.size(); ++i)
-                constraintlist[i]->setId(id);
+                constraintlist[i].setId(id);
         }
 
-        public override int4 getBaseIndex() => constraintlist.back()->getBaseIndex();
+        public override int4 getBaseIndex() => constraintlist.back().getBaseIndex();
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             for (int4 i = 0; i < constraintlist.size(); ++i)
-                constraintlist[i]->print(s, printstate);
+                constraintlist[i].print(s, printstate);
         }
 
         public override void removeDummy()
@@ -175,13 +175,13 @@ namespace Sla.EXTRA
             for (int4 i = 0; i < constraintlist.size(); ++i)
             {
                 UnifyConstraint* cur = constraintlist[i];
-                if (cur->isDummy())
+                if (cur.isDummy())
                 {
                     delete cur;
                 }
                 else
                 {
-                    cur->removeDummy();
+                    cur.removeDummy();
                     newlist.push_back(cur);
                 }
             }

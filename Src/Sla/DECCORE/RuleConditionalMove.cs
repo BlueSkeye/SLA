@@ -43,17 +43,17 @@ namespace Sla.DECCORE
             /// \return \b true if it is a boolean expression
             public bool initialize(Varnode vn)
             {
-                if (!vn->isWritten()) return false;
-                op = vn->getDef();
-                opc = op->code();
+                if (!vn.isWritten()) return false;
+                op = vn.getDef();
+                opc = op.code();
                 switch (opc)
                 {
                     case CPUI_COPY:
-                        in0 = op->getIn(0);
-                        if (in0->isConstant())
+                        in0 = op.getIn(0);
+                        if (in0.isConstant())
                         {
                             optype = 0;
-                            val = in0->getOffset();
+                            val = in0.getOffset();
                             return ((val & ~((uintb)1)) == 0);
                         }
                         return false;
@@ -74,12 +74,12 @@ namespace Sla.DECCORE
                     case CPUI_FLOAT_LESS:
                     case CPUI_FLOAT_LESSEQUAL:
                     case CPUI_FLOAT_NAN:
-                        in0 = op->getIn(0);
-                        in1 = op->getIn(1);
+                        in0 = op.getIn(0);
+                        in1 = op.getIn(1);
                         optype = 2;
                         break;
                     case CPUI_BOOL_NEGATE:
-                        in0 = op->getIn(0);
+                        in0 = op.getIn(0);
                         optype = 1;
                         break;
                     default:
@@ -99,14 +99,14 @@ namespace Sla.DECCORE
                 mustreconstruct = false;
                 if (optype == 0) return true;   // Constants can always be propagated
                 if (root == branch) return true; // Can always propagate if there is no branch
-                if (op->getParent() != branch) return true; // Can propagate if value formed before branch
+                if (op.getParent() != branch) return true; // Can propagate if value formed before branch
                 mustreconstruct = true; // Final op is performed in branch, so it must be reconstructed
-                if (in0->isFree() && !in0->isConstant()) return false;
-                if (in0->isWritten() && (in0->getDef()->getParent() == branch)) return false;
+                if (in0.isFree() && !in0.isConstant()) return false;
+                if (in0.isWritten() && (in0.getDef().getParent() == branch)) return false;
                 if (optype == 2)
                 {
-                    if (in1->isFree() && !in1->isConstant()) return false;
-                    if (in1->isWritten() && (in1->getDef()->getParent() == branch)) return false;
+                    if (in1.isFree() && !in1.isConstant()) return false;
+                    if (in1.isWritten() && (in1.getDef().getParent() == branch)) return false;
                 }
                 return true;
             }
@@ -123,16 +123,16 @@ namespace Sla.DECCORE
                 Varnode* resvn;
                 if (mustreconstruct)
                 {
-                    PcodeOp* newop = data.newOp(optype, op->getAddr()); // Keep the original address
+                    PcodeOp* newop = data.newOp(optype, op.getAddr()); // Keep the original address
                     data.opSetOpcode(newop, opc);
                     resvn = data.newUniqueOut(1, newop);
-                    if (in0->isConstant())
-                        in0 = data.newConstant(in0->getSize(), in0->getOffset());
+                    if (in0.isConstant())
+                        in0 = data.newConstant(in0.getSize(), in0.getOffset());
                     data.opSetInput(newop, in0, 0);
                     if (optype == 2)
                     {       // Binary op
-                        if (in1->isConstant())
-                            in1 = data.newConstant(in1->getSize(), in1->getOffset());
+                        if (in1.isConstant())
+                            in1 = data.newConstant(in1.getSize(), in1.getOffset());
                         data.opSetInput(newop, in1, 1);
                     }
                     data.opInsertBefore(newop, insertop);
@@ -142,7 +142,7 @@ namespace Sla.DECCORE
                     if (optype == 0)
                         resvn = data.newConstant(1, val);
                     else
-                        resvn = op->getOut();
+                        resvn = op.getOut();
                 }
                 return resvn;
             }
@@ -156,7 +156,7 @@ namespace Sla.DECCORE
         /// \return the output of the new op
         private static Varnode constructNegate(Varnode vn, PcodeOp op, Funcdata data)
         {
-            PcodeOp* negateop = data.newOp(1, op->getAddr());
+            PcodeOp* negateop = data.newOp(1, op.getAddr());
             data.opSetOpcode(negateop, CPUI_BOOL_NEGATE);
             Varnode* resvn = data.newUniqueOut(1, negateop);
             data.opSetInput(negateop, vn, 0);
@@ -211,67 +211,67 @@ namespace Sla.DECCORE
             FlowBlock* inblock0,*inblock1;
             FlowBlock* rootblock0,*rootblock1;
 
-            if (op->numInput() != 2) return 0; // MULTIEQUAL must have exactly 2 inputs
+            if (op.numInput() != 2) return 0; // MULTIEQUAL must have exactly 2 inputs
 
-            if (!bool0.initialize(op->getIn(0))) return 0;
-            if (!bool1.initialize(op->getIn(1))) return 0;
+            if (!bool0.initialize(op.getIn(0))) return 0;
+            if (!bool1.initialize(op.getIn(1))) return 0;
 
             // Look for the situation
             //               inblock0
             //             /         |
-            // rootblock ->            bb
+            // rootblock .            bb
             //             |         /
             //               inblock1
             //
             // Either inblock0 or inblock1 can be empty
-            bb = op->getParent();
-            inblock0 = bb->getIn(0);
-            if (inblock0->sizeOut() == 1)
+            bb = op.getParent();
+            inblock0 = bb.getIn(0);
+            if (inblock0.sizeOut() == 1)
             {
-                if (inblock0->sizeIn() != 1) return 0;
-                rootblock0 = inblock0->getIn(0);
+                if (inblock0.sizeIn() != 1) return 0;
+                rootblock0 = inblock0.getIn(0);
             }
             else
                 rootblock0 = inblock0;
-            inblock1 = bb->getIn(1);
-            if (inblock1->sizeOut() == 1)
+            inblock1 = bb.getIn(1);
+            if (inblock1.sizeOut() == 1)
             {
-                if (inblock1->sizeIn() != 1) return 0;
-                rootblock1 = inblock1->getIn(0);
+                if (inblock1.sizeIn() != 1) return 0;
+                rootblock1 = inblock1.getIn(0);
             }
             else
                 rootblock1 = inblock1;
             if (rootblock0 != rootblock1) return 0;
 
             // rootblock must end in CBRANCH, which gives the boolean for the conditional move
-            PcodeOp* cbranch = rootblock0->lastOp();
+            PcodeOp* cbranch = rootblock0.lastOp();
             if (cbranch == (PcodeOp*)0) return 0;
-            if (cbranch->code() != CPUI_CBRANCH) return 0;
+            if (cbranch.code() != CPUI_CBRANCH) return 0;
 
             if (!bool0.evaluatePropagation(rootblock0, inblock0)) return 0;
             if (!bool1.evaluatePropagation(rootblock0, inblock1)) return 0;
 
             bool path0istrue;
             if (rootblock0 != inblock0)
-                path0istrue = (rootblock0->getTrueOut() == inblock0);
+                path0istrue = (rootblock0.getTrueOut() == inblock0);
             else
-                path0istrue = (rootblock0->getTrueOut() != inblock1);
-            if (cbranch->isBooleanFlip())
+                path0istrue = (rootblock0.getTrueOut() != inblock1);
+            if (cbranch.isBooleanFlip())
                 path0istrue = !path0istrue;
 
             if (!bool0.isConstant() && !bool1.isConstant())
             {
                 if (inblock0 == rootblock0)
                 {
-                    Varnode* boolvn = cbranch->getIn(1);
+                    Varnode* boolvn = cbranch.getIn(1);
                     bool andorselect = path0istrue;
                     // Force 0 branch to either be boolvn OR !boolvn
-                    if (boolvn != op->getIn(0))
+                    if (boolvn != op.getIn(0))
                     {
-                        if (!boolvn->isWritten()) return 0;
-                        PcodeOp* negop = boolvn->getDef();
-                        if (negop->code() != CPUI_BOOL_NEGATE) return 0;
-                        if (negop->getIn(0) != op->getIn(0)) return 0;
+                        if (!boolvn.isWritten()) return 0;
+                        PcodeOp* negop = boolvn.getDef();
+                        if (negop.code() != CPUI_BOOL_NEGATE) return 0;
+                        if (negop.getIn(0) != op.getIn(0)) return 0;
                         andorselect = !andorselect;
                     }
                     OpCode opc = andorselect ? CPUI_BOOL_OR : CPUI_BOOL_AND;
@@ -286,15 +286,15 @@ namespace Sla.DECCORE
                 }
                 else if (inblock1 == rootblock0)
                 {
-                    Varnode* boolvn = cbranch->getIn(1);
+                    Varnode* boolvn = cbranch.getIn(1);
                     bool andorselect = !path0istrue;
                     // Force 1 branch to either be boolvn OR !boolvn
-                    if (boolvn != op->getIn(1))
+                    if (boolvn != op.getIn(1))
                     {
-                        if (!boolvn->isWritten()) return 0;
-                        PcodeOp* negop = boolvn->getDef();
-                        if (negop->code() != CPUI_BOOL_NEGATE) return 0;
-                        if (negop->getIn(0) != op->getIn(1)) return 0;
+                        if (!boolvn.isWritten()) return 0;
+                        PcodeOp* negop = boolvn.getDef();
+                        if (negop.code() != CPUI_BOOL_NEGATE) return 0;
+                        if (negop.getIn(0) != op.getIn(1)) return 0;
                         andorselect = !andorselect;
                     }
                     data.opUninsert(op);
@@ -312,7 +312,7 @@ namespace Sla.DECCORE
 
             // Below here some change is being made
             data.opUninsert(op);    // Changing from MULTIEQUAL, this should be reinserted
-            int4 sz = op->getOut()->getSize();
+            int4 sz = op.getOut().getSize();
             if (bool0.isConstant() && bool1.isConstant())
             {
                 if (bool0.getVal() == bool1.getVal())
@@ -325,7 +325,7 @@ namespace Sla.DECCORE
                 else
                 {
                     data.opRemoveInput(op, 1);
-                    Varnode* boolvn = cbranch->getIn(1);
+                    Varnode* boolvn = cbranch.getIn(1);
                     bool needcomplement = ((bool0.getVal() == 0) == path0istrue);
                     if (sz == 1)
                     {
@@ -352,7 +352,7 @@ namespace Sla.DECCORE
                 OpCode opc = (bool0.getVal() != 0) ? CPUI_BOOL_OR : CPUI_BOOL_AND;
                 data.opSetOpcode(op, opc);
                 data.opInsertBegin(op, bb);
-                Varnode* boolvn = cbranch->getIn(1);
+                Varnode* boolvn = cbranch.getIn(1);
                 if (needcomplement)
                     boolvn = constructNegate(boolvn, op, data);
                 Varnode* body1 = bool1.constructBool(op, data);
@@ -365,7 +365,7 @@ namespace Sla.DECCORE
                 OpCode opc = (bool1.getVal() != 0) ? CPUI_BOOL_OR : CPUI_BOOL_AND;
                 data.opSetOpcode(op, opc);
                 data.opInsertBegin(op, bb);
-                Varnode* boolvn = cbranch->getIn(1);
+                Varnode* boolvn = cbranch.getIn(1);
                 if (needcomplement)
                     boolvn = constructNegate(boolvn, op, data);
                 Varnode* body0 = bool0.constructBool(op, data);

@@ -42,23 +42,23 @@ namespace Sla.DECCORE
             int4 sa, i, size;
 
             orvn = othervn = savn = (Varnode*)0; // Unnecessary initialization
-            size = op->getOut()->getSize();
+            size = op.getOut().getSize();
             if (size > sizeof(uintb)) return 0; // FIXME: uintb should be arbitrary precision
             fullmask = calc_mask(size);
             for (i = 0; i < 2; ++i)
             {
-                shiftvn = op->getIn(i);
-                shiftop = shiftvn->getDef();
+                shiftvn = op.getIn(i);
+                shiftop = shiftvn.getDef();
                 if (shiftop == (PcodeOp*)0) continue;
-                opc = shiftop->code();
+                opc = shiftop.code();
                 if ((opc != CPUI_INT_LEFT) && (opc != CPUI_INT_RIGHT)) continue;
-                savn = shiftop->getIn(1);
-                if (!savn->isConstant()) continue;
-                sa = (int4)savn->getOffset();
+                savn = shiftop.getIn(1);
+                if (!savn.isConstant()) continue;
+                sa = (int4)savn.getOffset();
 
-                othervn = op->getIn(1 - i);
-                if (!othervn->isHeritageKnown()) continue;
-                othermask = othervn->getNZMask();
+                othervn = op.getIn(1 - i);
+                if (!othervn.isHeritageKnown()) continue;
+                othermask = othervn.getNZMask();
                 // Check if AND is only zeroing bits which are already
                 // zeroed by the shift, in which case andmask takes
                 // care of it
@@ -75,38 +75,38 @@ namespace Sla.DECCORE
                 if (othermask == 0) continue; // Handled by andmask
                 if (othermask == fullmask) continue;
 
-                orvn = shiftop->getIn(0);
-                if ((opc == CPUI_INT_LEFT) && (othervn->isConstant()))
+                orvn = shiftop.getIn(0);
+                if ((opc == CPUI_INT_LEFT) && (othervn.isConstant()))
                 {
                     //  (v & #c) << #sa     if preferred to (v << #sa) & #(c << sa)
                     // because the mask is right/least justified, so it makes sense as a normalization
                     // NOTE: if the shift is right(>>) then performing the AND first does NOT give a justified mask
                     // NOTE: if we don't check that AND is masking with a constant, RuleAndCommute causes an infinite
                     //       sequence of transforms
-                    if (shiftvn->loneDescend() == op) break; // If there is no other use of shift, always do the commute
+                    if (shiftvn.loneDescend() == op) break; // If there is no other use of shift, always do the commute
                 }
 
-                if (!orvn->isWritten()) continue;
-                orop = orvn->getDef();
+                if (!orvn.isWritten()) continue;
+                orop = orvn.getDef();
 
-                if (orop->code() == CPUI_INT_OR)
+                if (orop.code() == CPUI_INT_OR)
                 {
-                    ormask1 = orop->getIn(0)->getNZMask();
+                    ormask1 = orop.getIn(0).getNZMask();
                     if ((ormask1 & othermask) == 0) break;
-                    ormask2 = orop->getIn(1)->getNZMask();
+                    ormask2 = orop.getIn(1).getNZMask();
                     if ((ormask2 & othermask) == 0) break;
-                    if (othervn->isConstant())
+                    if (othervn.isConstant())
                     {
                         if ((ormask1 & othermask) == ormask1) break;
                         if ((ormask2 & othermask) == ormask2) break;
                     }
                 }
-                else if (orop->code() == CPUI_PIECE)
+                else if (orop.code() == CPUI_PIECE)
                 {
-                    ormask1 = orop->getIn(1)->getNZMask();  // Low part of piece
+                    ormask1 = orop.getIn(1).getNZMask();  // Low part of piece
                     if ((ormask1 & othermask) == 0) break;
-                    ormask2 = orop->getIn(0)->getNZMask();  // High part
-                    ormask2 <<= orop->getIn(1)->getSize() * 8;
+                    ormask2 = orop.getIn(0).getNZMask();  // High part
+                    ormask2 <<= orop.getIn(1).getSize() * 8;
                     if ((ormask2 & othermask) == 0) break;
                 }
                 else
@@ -114,14 +114,14 @@ namespace Sla.DECCORE
             }
             if (i == 2) return 0;
             // Do the commute
-            newop1 = data.newOp(2, op->getAddr());
+            newop1 = data.newOp(2, op.getAddr());
             newvn1 = data.newUniqueOut(size, newop1);
             data.opSetOpcode(newop1, (opc == CPUI_INT_LEFT) ? CPUI_INT_RIGHT : CPUI_INT_LEFT);
             data.opSetInput(newop1, othervn, 0);
             data.opSetInput(newop1, savn, 1);
             data.opInsertBefore(newop1, op);
 
-            newop2 = data.newOp(2, op->getAddr());
+            newop2 = data.newOp(2, op.getAddr());
             newvn2 = data.newUniqueOut(size, newop2);
             data.opSetOpcode(newop2, CPUI_INT_AND);
             data.opSetInput(newop2, orvn, 0);

@@ -29,17 +29,17 @@ namespace Sla.DECCORE
             for (i = 0; i < graph.getSize(); ++i)
             {
                 bb = (BlockBasic*)graph.getBlock(i);
-                if (bb->isDoNothing())
+                if (bb.isDoNothing())
                 {
-                    if ((bb->sizeOut() == 1) && (bb->getOut(0) == bb))
+                    if ((bb.sizeOut() == 1) && (bb.getOut(0) == bb))
                     { // Infinite loop
-                        if (!bb->isDonothingLoop())
+                        if (!bb.isDonothingLoop())
                         {
-                            bb->setDonothingLoop();
-                            data.warning("Do nothing block with infinite loop", bb->getStart());
+                            bb.setDonothingLoop();
+                            data.warning("Do nothing block with infinite loop", bb.getStart());
                         }
                     }
-                    else if (bb->unblockedMulti(0))
+                    else if (bb.unblockedMulti(0))
                     {
                         data.removeDoNothingBlock(bb);
                         count += 1;

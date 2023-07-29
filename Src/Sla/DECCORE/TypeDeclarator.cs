@@ -49,9 +49,9 @@ namespace Sla.DECCORE
             // Get prototype model
             ProtoModel* protomodel = (ProtoModel*)0;
             if (model.size() != 0)
-                protomodel = glb->getModel(model);
+                protomodel = glb.getModel(model);
             if (protomodel == (ProtoModel*)0)
-                protomodel = glb->defaultfp;
+                protomodel = glb.defaultfp;
             return protomodel;
         }
 
@@ -60,17 +60,17 @@ namespace Sla.DECCORE
             TypeModifier* mod = (TypeModifier*)0;
             if (mods.size() > 0)
                 mod = mods[0];
-            if ((mod == (TypeModifier*)0) || (mod->getType() != TypeModifier::function_mod))
+            if ((mod == (TypeModifier*)0) || (mod.getType() != TypeModifier::function_mod))
                 return false;
             FunctionModifier* fmod = (FunctionModifier*)mod;
 
             pieces.model = getModel(glb);
             pieces.name = ident;
             pieces.intypes.clear();
-            fmod->getInTypes(pieces.intypes, glb);
+            fmod.getInTypes(pieces.intypes, glb);
             pieces.innames.clear();
-            fmod->getInNames(pieces.innames);
-            pieces.dotdotdot = fmod->isDotdotdot();
+            fmod.getInNames(pieces.innames);
+            pieces.dotdotdot = fmod.isDotdotdot();
 
             // Construct the output type
             pieces.outtype = basetype;
@@ -79,7 +79,7 @@ namespace Sla.DECCORE
             --iter;         // At least one modification
             while (iter != mods.begin())
             { // Do not apply function modifier
-                pieces.outtype = (*iter)->modType(pieces.outtype, this, glb);
+                pieces.outtype = (*iter).modType(pieces.outtype, this, glb);
                 --iter;
             }
             return true;
@@ -95,7 +95,7 @@ namespace Sla.DECCORE
             while (iter != mods.begin())
             {
                 --iter;
-                restype = (*iter)->modType(restype, this, glb);
+                restype = (*iter).modType(restype, this, glb);
             }
             return restype;
         }
@@ -131,7 +131,7 @@ namespace Sla.DECCORE
 
             for (uint4 i = 0; i < mods.size(); ++i)
             {
-                if (!mods[i]->isValid())
+                if (!mods[i].isValid())
                     return false;
             }
             return true;

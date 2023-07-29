@@ -208,7 +208,7 @@ namespace Sla.DECCORE
         public bool hasAncestorSolid() => ((flags & ancestor_solid)!= 0);
 
         /// Get position of \b this within its parameter \e group
-        public int slotGroup() => entry->getSlot(addr, size-1);
+        public int slotGroup() => entry.getSlot(addr, size-1);
 
         /// Reset the memory range of \b this trial
         public void setAddress(Address ad, int sz)
@@ -258,7 +258,7 @@ namespace Sla.DECCORE
                 return false;
             if (entry != (ParamEntry*)0) return false;
             //  if (entry != (ParamEntry*)0) {
-            //    int4 res = entry->justifiedContain(newaddr,sz);
+            //    int4 res = entry.justifiedContain(newaddr,sz);
             //    if (res < 0) return false;
             //  }
             return true;
@@ -273,19 +273,19 @@ namespace Sla.DECCORE
         {
             if (entry == (ParamEntry*)0) return false;
             if (b.entry == (ParamEntry*)0) return true;
-            int4 grpa = entry->getGroup();
-            int4 grpb = b.entry->getGroup();
+            int4 grpa = entry.getGroup();
+            int4 grpb = b.entry.getGroup();
             if (grpa != grpb)
                 return (grpa < grpb);
             if (entry != b.entry)       // Compare entry pointers directly
                 return (entry < b.entry);
-            if (entry->isExclusion())
+            if (entry.isExclusion())
             {
                 return (offset < b.offset);
             }
             if (addr != b.addr)
             {
-                if (entry->isReverseStack())
+                if (entry.isReverseStack())
                     return (b.addr < addr);
                 else
                     return (addr < b.addr);

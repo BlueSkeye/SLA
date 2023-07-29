@@ -74,12 +74,12 @@ namespace Sla.DECCORE
         /// be modified due to additional control-flow constraints
         public void compute()
         {
-            Varnode* vn = op->getIn(slot);
-            ValueSet* valueSet = vn->getValueSet();
-            typeCode = valueSet->getTypeCode();
-            range = valueSet->getRange();
-            leftIsStable = valueSet->isLeftStable();
-            rightIsStable = valueSet->isRightStable();
+            Varnode* vn = op.getIn(slot);
+            ValueSet* valueSet = vn.getValueSet();
+            typeCode = valueSet.getTypeCode();
+            range = valueSet.getRange();
+            leftIsStable = valueSet.isLeftStable();
+            rightIsStable = valueSet.isRightStable();
             if (typeCode == equationTypeCode)
             {
                 if (0 != range.intersect(equationConstraint))
@@ -93,8 +93,8 @@ namespace Sla.DECCORE
         /// \param s is the stream to print to
         public void printRaw(TextWriter s)
         {
-            s << "Read: " << get_opname(op->code());
-            s << '(' << op->getSeqNum() << ')';
+            s << "Read: " << get_opname(op.code());
+            s << '(' << op.getSeqNum() << ')';
             if (typeCode == 0)
                 s << " absolute ";
             else

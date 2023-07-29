@@ -33,15 +33,15 @@ namespace Sla.DECCORE
             Varnode* shiftout,*x;
             PcodeOp* shiftop;
 
-            shiftout = op->getIn(0);
-            if (!shiftout->isWritten()) return 0;
-            shiftop = shiftout->getDef();
-            if (shiftop->code() != CPUI_INT_SRIGHT) return 0;
-            if (!shiftop->getIn(1)->isConstant()) return 0;
-            int4 n = shiftop->getIn(1)->getOffset();
-            x = shiftop->getIn(0);
-            if (x != op->getIn(1)) return 0;
-            if (n != 8 * x->getSize() - 1) return 0;
+            shiftout = op.getIn(0);
+            if (!shiftout.isWritten()) return 0;
+            shiftop = shiftout.getDef();
+            if (shiftop.code() != CPUI_INT_SRIGHT) return 0;
+            if (!shiftop.getIn(1).isConstant()) return 0;
+            int4 n = shiftop.getIn(1).getOffset();
+            x = shiftop.getIn(0);
+            if (x != op.getIn(1)) return 0;
+            if (n != 8 * x.getSize() - 1) return 0;
 
             data.opRemoveInput(op, 0);
             data.opSetOpcode(op, CPUI_INT_SEXT);

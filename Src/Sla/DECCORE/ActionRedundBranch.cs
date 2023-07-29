@@ -31,11 +31,11 @@ namespace Sla.DECCORE
             for (i = 0; i < graph.getSize(); ++i)
             {
                 bb = (BlockBasic*)graph.getBlock(i);
-                if (bb->sizeOut() == 0) continue;
-                bl = bb->getOut(0);
-                if (bb->sizeOut() == 1)
+                if (bb.sizeOut() == 0) continue;
+                bl = bb.getOut(0);
+                if (bb.sizeOut() == 1)
                 {
-                    if ((bl->sizeIn() == 1) && (!bl->isEntryPoint()) && (!bb->isSwitchOut()))
+                    if ((bl.sizeIn() == 1) && (!bl.isEntryPoint()) && (!bb.isSwitchOut()))
                     {
                         // Do not splice block coming from single exit switch as this prevents possible second stage recovery
                         data.spliceBlockBasic(bb);
@@ -45,14 +45,14 @@ namespace Sla.DECCORE
                     }
                     continue;
                 }
-                for (j = 1; j < bb->sizeOut(); ++j) // Are all exits to the same block? (bl)
-                    if (bb->getOut(j) != bl) break;
-                if (j != bb->sizeOut()) continue;
+                for (j = 1; j < bb.sizeOut(); ++j) // Are all exits to the same block? (bl)
+                    if (bb.getOut(j) != bl) break;
+                if (j != bb.sizeOut()) continue;
 
                 //    ostringstream s;
                 //    s << "Removing redundant branch out of block ";
-                //    s << "code_" << bb->start.Target().getShortcut();
-                //    bb->start.Target().printRaw(s);
+                //    s << "code_" << bb.start.Target().getShortcut();
+                //    bb.start.Target().printRaw(s);
                 //    data.warningHeader(s.str());
                 data.removeBranch(bb, 1);   // Remove the branch instruction
                 count += 1;

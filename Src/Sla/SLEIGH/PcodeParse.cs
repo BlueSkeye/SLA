@@ -232,8 +232,8 @@ namespace Sla.SLEIGH
         //    do                                                                  \
         //      {                                                                 \
         //        YYSIZE_T yynewbytes;                                            \
-        //        YYCOPY(&yyptr->Stack_alloc, Stack, yysize);                    \
-        //        Stack = &yyptr->Stack_alloc;                                    \
+        //        YYCOPY(&yyptr.Stack_alloc, Stack, yysize);                    \
+        //        Stack = &yyptr.Stack_alloc;                                    \
         //        yynewbytes = yystacksize* sizeof (* Stack) + YYSTACK_GAP_MAXIMUM; \
         //        yyptr += yynewbytes / sizeof (* yyptr);                          \
         //      }                                                                 \
@@ -1400,7 +1400,7 @@ namespace Sla.SLEIGH
 
         //        case 85: /* statement  */
 
-        //            { if (((*yyvaluep).stmt) != (vector<OpTpl*>*)0) { for (int4 i = 0; i < ((*yyvaluep).stmt)->size(); ++i) delete(*((*yyvaluep).stmt))[i]; delete((*yyvaluep).stmt); } }
+        //            { if (((*yyvaluep).stmt) != (vector<OpTpl*>*)0) { for (int4 i = 0; i < ((*yyvaluep).stmt).size(); ++i) delete(*((*yyvaluep).stmt))[i]; delete((*yyvaluep).stmt); } }
 
         //            break;
 
@@ -1442,7 +1442,7 @@ namespace Sla.SLEIGH
 
         //        case 94: /* paramlist  */
 
-        //            { for (int4 i = 0; i < ((*yyvaluep).param)->size(); ++i) delete(*((*yyvaluep).param))[i]; delete((*yyvaluep).param); }
+        //            { for (int4 i = 0; i < ((*yyvaluep).param).size(); ++i) delete(*((*yyvaluep).param))[i]; delete((*yyvaluep).param); }
 
         //            break;
 
@@ -1706,7 +1706,7 @@ namespace Sla.SLEIGH
         //{
         //    case 2:
 
-        //        { pcode->setResult((yyvsp[-1].sem)); }
+        //        { pcode.setResult((yyvsp[-1].sem)); }
 
         //        break;
 
@@ -1718,73 +1718,73 @@ namespace Sla.SLEIGH
 
         //    case 4:
 
-        //        { (yyval.sem) = (yyvsp[-1].sem); if (!(yyval.sem)->addOpList(*(yyvsp[0].stmt))) { delete(yyvsp[0].stmt); yyerror("Multiple delayslot declarations"); YYERROR; } delete(yyvsp[0].stmt); }
+        //        { (yyval.sem) = (yyvsp[-1].sem); if (!(yyval.sem).addOpList(*(yyvsp[0].stmt))) { delete(yyvsp[0].stmt); yyerror("Multiple delayslot declarations"); YYERROR; } delete(yyvsp[0].stmt); }
 
         //        break;
 
         //    case 5:
 
-        //        { (yyval.sem) = (yyvsp[-3].sem); pcode->newLocalDefinition((yyvsp[-1].str)); }
+        //        { (yyval.sem) = (yyvsp[-3].sem); pcode.newLocalDefinition((yyvsp[-1].str)); }
 
         //        break;
 
         //    case 6:
 
-        //        { (yyval.sem) = (yyvsp[-5].sem); pcode->newLocalDefinition((yyvsp[-3].str), *(yyvsp[-1].i)); delete(yyvsp[-1].i); }
+        //        { (yyval.sem) = (yyvsp[-5].sem); pcode.newLocalDefinition((yyvsp[-3].str), *(yyvsp[-1].i)); delete(yyvsp[-1].i); }
 
         //        break;
 
         //    case 7:
 
-        //        { (yyvsp[-1].tree)->setOutput((yyvsp[-3].varnode)); (yyval.stmt) = ExprTree::toVector((yyvsp[-1].tree)); }
+        //        { (yyvsp[-1].tree).setOutput((yyvsp[-3].varnode)); (yyval.stmt) = ExprTree::toVector((yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 8:
 
-        //        { (yyval.stmt) = pcode->newOutput(true, (yyvsp[-1].tree), (yyvsp[-3].str)); }
+        //        { (yyval.stmt) = pcode.newOutput(true, (yyvsp[-1].tree), (yyvsp[-3].str)); }
 
         //        break;
 
         //    case 9:
 
-        //        { (yyval.stmt) = pcode->newOutput(false, (yyvsp[-1].tree), (yyvsp[-3].str)); }
+        //        { (yyval.stmt) = pcode.newOutput(false, (yyvsp[-1].tree), (yyvsp[-3].str)); }
 
         //        break;
 
         //    case 10:
 
-        //        { (yyval.stmt) = pcode->newOutput(true, (yyvsp[-1].tree), (yyvsp[-5].str), *(yyvsp[-3].i)); delete(yyvsp[-3].i); }
+        //        { (yyval.stmt) = pcode.newOutput(true, (yyvsp[-1].tree), (yyvsp[-5].str), *(yyvsp[-3].i)); delete(yyvsp[-3].i); }
 
         //        break;
 
         //    case 11:
 
-        //        { (yyval.stmt) = pcode->newOutput(true, (yyvsp[-1].tree), (yyvsp[-5].str), *(yyvsp[-3].i)); delete(yyvsp[-3].i); }
+        //        { (yyval.stmt) = pcode.newOutput(true, (yyvsp[-1].tree), (yyvsp[-5].str), *(yyvsp[-3].i)); delete(yyvsp[-3].i); }
 
         //        break;
 
         //    case 12:
 
-        //        { (yyval.stmt) = (vector<OpTpl*>*)0; string errmsg = "Redefinition of symbol: " + (yyvsp[-1].specsym)->getName(); yyerror(errmsg.c_str()); YYERROR; }
+        //        { (yyval.stmt) = (vector<OpTpl*>*)0; string errmsg = "Redefinition of symbol: " + (yyvsp[-1].specsym).getName(); yyerror(errmsg.c_str()); YYERROR; }
 
         //        break;
 
         //    case 13:
 
-        //        { (yyval.stmt) = pcode->createStore((yyvsp[-4].starqual), (yyvsp[-3].tree), (yyvsp[-1].tree)); }
+        //        { (yyval.stmt) = pcode.createStore((yyvsp[-4].starqual), (yyvsp[-3].tree), (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 14:
 
-        //        { (yyval.stmt) = pcode->createUserOpNoOut((yyvsp[-4].useropsym), (yyvsp[-2].param)); }
+        //        { (yyval.stmt) = pcode.createUserOpNoOut((yyvsp[-4].useropsym), (yyvsp[-2].param)); }
 
         //        break;
 
         //    case 15:
 
-        //        { (yyval.stmt) = pcode->assignBitRange((yyvsp[-8].varnode), (uint4) * (yyvsp[-6].i), (uint4) * (yyvsp[-4].i), (yyvsp[-1].tree)); delete(yyvsp[-6].i), delete(yyvsp[-4].i); }
+        //        { (yyval.stmt) = pcode.assignBitRange((yyvsp[-8].varnode), (uint4) * (yyvsp[-6].i), (uint4) * (yyvsp[-4].i), (yyvsp[-1].tree)); delete(yyvsp[-6].i), delete(yyvsp[-4].i); }
 
         //        break;
 
@@ -1802,31 +1802,31 @@ namespace Sla.SLEIGH
 
         //    case 18:
 
-        //        { (yyval.stmt) = pcode->createOpNoOut(CPUI_BRANCH, new ExprTree((yyvsp[-1].varnode))); }
+        //        { (yyval.stmt) = pcode.createOpNoOut(CPUI_BRANCH, new ExprTree((yyvsp[-1].varnode))); }
 
         //        break;
 
         //    case 19:
 
-        //        { (yyval.stmt) = pcode->createOpNoOut(CPUI_CBRANCH, new ExprTree((yyvsp[-1].varnode)), (yyvsp[-3].tree)); }
+        //        { (yyval.stmt) = pcode.createOpNoOut(CPUI_CBRANCH, new ExprTree((yyvsp[-1].varnode)), (yyvsp[-3].tree)); }
 
         //        break;
 
         //    case 20:
 
-        //        { (yyval.stmt) = pcode->createOpNoOut(CPUI_BRANCHIND, (yyvsp[-2].tree)); }
+        //        { (yyval.stmt) = pcode.createOpNoOut(CPUI_BRANCHIND, (yyvsp[-2].tree)); }
 
         //        break;
 
         //    case 21:
 
-        //        { (yyval.stmt) = pcode->createOpNoOut(CPUI_CALL, new ExprTree((yyvsp[-1].varnode))); }
+        //        { (yyval.stmt) = pcode.createOpNoOut(CPUI_CALL, new ExprTree((yyvsp[-1].varnode))); }
 
         //        break;
 
         //    case 22:
 
-        //        { (yyval.stmt) = pcode->createOpNoOut(CPUI_CALLIND, (yyvsp[-2].tree)); }
+        //        { (yyval.stmt) = pcode.createOpNoOut(CPUI_CALLIND, (yyvsp[-2].tree)); }
 
         //        break;
 
@@ -1838,13 +1838,13 @@ namespace Sla.SLEIGH
 
         //    case 24:
 
-        //        { (yyval.stmt) = pcode->createOpNoOut(CPUI_RETURN, (yyvsp[-2].tree)); }
+        //        { (yyval.stmt) = pcode.createOpNoOut(CPUI_RETURN, (yyvsp[-2].tree)); }
 
         //        break;
 
         //    case 25:
 
-        //        { (yyval.stmt) = pcode->placeLabel((yyvsp[0].labelsym)); }
+        //        { (yyval.stmt) = pcode.placeLabel((yyvsp[0].labelsym)); }
 
         //        break;
 
@@ -1856,7 +1856,7 @@ namespace Sla.SLEIGH
 
         //    case 27:
 
-        //        { (yyval.tree) = pcode->createLoad((yyvsp[-1].starqual), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createLoad((yyvsp[-1].starqual), (yyvsp[0].tree)); }
 
         //        break;
 
@@ -1868,403 +1868,403 @@ namespace Sla.SLEIGH
 
         //    case 29:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_ADD, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_ADD, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 30:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_SUB, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_SUB, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 31:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_EQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_EQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 32:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_NOTEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_NOTEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 33:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_LESS, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_LESS, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 34:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_LESSEQUAL, (yyvsp[0].tree), (yyvsp[-2].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_LESSEQUAL, (yyvsp[0].tree), (yyvsp[-2].tree)); }
 
         //        break;
 
         //    case 35:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_LESSEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_LESSEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 36:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_LESS, (yyvsp[0].tree), (yyvsp[-2].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_LESS, (yyvsp[0].tree), (yyvsp[-2].tree)); }
 
         //        break;
 
         //    case 37:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_SLESS, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_SLESS, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 38:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_SLESSEQUAL, (yyvsp[0].tree), (yyvsp[-2].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_SLESSEQUAL, (yyvsp[0].tree), (yyvsp[-2].tree)); }
 
         //        break;
 
         //    case 39:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_SLESSEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_SLESSEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 40:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_SLESS, (yyvsp[0].tree), (yyvsp[-2].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_SLESS, (yyvsp[0].tree), (yyvsp[-2].tree)); }
 
         //        break;
 
         //    case 41:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_2COMP, (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_2COMP, (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 42:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_NEGATE, (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_NEGATE, (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 43:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_XOR, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_XOR, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 44:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_AND, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_AND, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 45:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_OR, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_OR, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 46:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_LEFT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_LEFT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 47:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_RIGHT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_RIGHT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 48:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_SRIGHT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_SRIGHT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 49:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_MULT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_MULT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 50:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_DIV, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_DIV, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 51:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_SDIV, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_SDIV, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 52:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_REM, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_REM, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 53:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_SREM, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_SREM, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 54:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_BOOL_NEGATE, (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_BOOL_NEGATE, (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 55:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_BOOL_XOR, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_BOOL_XOR, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 56:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_BOOL_AND, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_BOOL_AND, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 57:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_BOOL_OR, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_BOOL_OR, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 58:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_EQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_EQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 59:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_NOTEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_NOTEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 60:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_LESS, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_LESS, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 61:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_LESS, (yyvsp[0].tree), (yyvsp[-2].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_LESS, (yyvsp[0].tree), (yyvsp[-2].tree)); }
 
         //        break;
 
         //    case 62:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_LESSEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_LESSEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 63:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_LESSEQUAL, (yyvsp[0].tree), (yyvsp[-2].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_LESSEQUAL, (yyvsp[0].tree), (yyvsp[-2].tree)); }
 
         //        break;
 
         //    case 64:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_ADD, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_ADD, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 65:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_SUB, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_SUB, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 66:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_MULT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_MULT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 67:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_DIV, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_DIV, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 68:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_NEG, (yyvsp[0].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_NEG, (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 69:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_ABS, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_ABS, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 70:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_SQRT, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_SQRT, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 71:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_SEXT, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_SEXT, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 72:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_ZEXT, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_ZEXT, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 73:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_CARRY, (yyvsp[-3].tree), (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_CARRY, (yyvsp[-3].tree), (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 74:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_SCARRY, (yyvsp[-3].tree), (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_SCARRY, (yyvsp[-3].tree), (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 75:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_INT_SBORROW, (yyvsp[-3].tree), (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_INT_SBORROW, (yyvsp[-3].tree), (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 76:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_FLOAT2FLOAT, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_FLOAT2FLOAT, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 77:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_INT2FLOAT, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_INT2FLOAT, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 78:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_NAN, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_NAN, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 79:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_TRUNC, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_TRUNC, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 80:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_CEIL, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_CEIL, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 81:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_FLOOR, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_FLOOR, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 82:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_FLOAT_ROUND, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_FLOAT_ROUND, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 83:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_NEW, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_NEW, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 84:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_NEW, (yyvsp[-3].tree), (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_NEW, (yyvsp[-3].tree), (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 85:
 
-        //        { (yyval.tree) = pcode->createOp(CPUI_SUBPIECE, new ExprTree((yyvsp[-3].specsym)->getVarnode()), new ExprTree((yyvsp[-1].varnode))); }
+        //        { (yyval.tree) = pcode.createOp(CPUI_SUBPIECE, new ExprTree((yyvsp[-3].specsym).getVarnode()), new ExprTree((yyvsp[-1].varnode))); }
 
         //        break;
 
         //    case 86:
 
-        //        { (yyval.tree) = pcode->createBitRange((yyvsp[-2].specsym), 0, (uint4)(*(yyvsp[0].i) * 8)); delete(yyvsp[0].i); }
+        //        { (yyval.tree) = pcode.createBitRange((yyvsp[-2].specsym), 0, (uint4)(*(yyvsp[0].i) * 8)); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 87:
 
-        //        { (yyval.tree) = pcode->createBitRange((yyvsp[-5].specsym), (uint4) * (yyvsp[-3].i), (uint4) * (yyvsp[-1].i)); delete(yyvsp[-3].i), delete(yyvsp[-1].i); }
+        //        { (yyval.tree) = pcode.createBitRange((yyvsp[-5].specsym), (uint4) * (yyvsp[-3].i), (uint4) * (yyvsp[-1].i)); delete(yyvsp[-3].i), delete(yyvsp[-1].i); }
 
         //        break;
 
         //    case 88:
 
-        //        { (yyval.tree) = pcode->createUserOp((yyvsp[-3].useropsym), (yyvsp[-1].param)); }
+        //        { (yyval.tree) = pcode.createUserOp((yyvsp[-3].useropsym), (yyvsp[-1].param)); }
 
         //        break;
 
         //    case 89:
 
-        //        { (yyval.starqual) = new StarQuality; (yyval.starqual)->size = *(yyvsp[0].i); delete(yyvsp[0].i); (yyval.starqual)->id = ConstTpl((yyvsp[-3].spacesym)->getSpace()); }
+        //        { (yyval.starqual) = new StarQuality; (yyval.starqual).size = *(yyvsp[0].i); delete(yyvsp[0].i); (yyval.starqual).id = ConstTpl((yyvsp[-3].spacesym).getSpace()); }
 
         //        break;
 
         //    case 90:
 
-        //        { (yyval.starqual) = new StarQuality; (yyval.starqual)->size = 0; (yyval.starqual)->id = ConstTpl((yyvsp[-1].spacesym)->getSpace()); }
+        //        { (yyval.starqual) = new StarQuality; (yyval.starqual).size = 0; (yyval.starqual).id = ConstTpl((yyvsp[-1].spacesym).getSpace()); }
 
         //        break;
 
         //    case 91:
 
-        //        { (yyval.starqual) = new StarQuality; (yyval.starqual)->size = *(yyvsp[0].i); delete(yyvsp[0].i); (yyval.starqual)->id = ConstTpl(pcode->getDefaultSpace()); }
+        //        { (yyval.starqual) = new StarQuality; (yyval.starqual).size = *(yyvsp[0].i); delete(yyvsp[0].i); (yyval.starqual).id = ConstTpl(pcode.getDefaultSpace()); }
 
         //        break;
 
         //    case 92:
 
-        //        { (yyval.starqual) = new StarQuality; (yyval.starqual)->size = 0; (yyval.starqual)->id = ConstTpl(pcode->getDefaultSpace()); }
+        //        { (yyval.starqual) = new StarQuality; (yyval.starqual).size = 0; (yyval.starqual).id = ConstTpl(pcode.getDefaultSpace()); }
 
         //        break;
 
         //    case 93:
 
-        //        { VarnodeTpl* sym = (yyvsp[0].startsym)->getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), sym->getOffset(), ConstTpl(ConstTpl::j_curspace_size)); delete sym; }
+        //        { VarnodeTpl* sym = (yyvsp[0].startsym).getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), sym.getOffset(), ConstTpl(ConstTpl::j_curspace_size)); delete sym; }
 
         //        break;
 
         //    case 94:
 
-        //        { VarnodeTpl* sym = (yyvsp[0].endsym)->getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), sym->getOffset(), ConstTpl(ConstTpl::j_curspace_size)); delete sym; }
+        //        { VarnodeTpl* sym = (yyvsp[0].endsym).getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), sym.getOffset(), ConstTpl(ConstTpl::j_curspace_size)); delete sym; }
 
         //        break;
 
         //    case 95:
 
-        //        { VarnodeTpl* sym = (yyvsp[0].next2sym)->getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), sym->getOffset(), ConstTpl(ConstTpl::j_curspace_size)); delete sym; }
+        //        { VarnodeTpl* sym = (yyvsp[0].next2sym).getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), sym.getOffset(), ConstTpl(ConstTpl::j_curspace_size)); delete sym; }
 
         //        break;
 
@@ -2282,13 +2282,13 @@ namespace Sla.SLEIGH
 
         //    case 98:
 
-        //        { AddrSpace* spc = (yyvsp[-1].spacesym)->getSpace(); (yyval.varnode) = new VarnodeTpl(ConstTpl(spc), ConstTpl(ConstTpl::real, *(yyvsp[-3].i)), ConstTpl(ConstTpl::real, spc->getAddrSize())); delete(yyvsp[-3].i); }
+        //        { AddrSpace* spc = (yyvsp[-1].spacesym).getSpace(); (yyval.varnode) = new VarnodeTpl(ConstTpl(spc), ConstTpl(ConstTpl::real, *(yyvsp[-3].i)), ConstTpl(ConstTpl::real, spc.getAddrSize())); delete(yyvsp[-3].i); }
 
         //        break;
 
         //    case 99:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(pcode->getConstantSpace()), ConstTpl(ConstTpl::j_relative, (yyvsp[0].labelsym)->getIndex()), ConstTpl(ConstTpl::real, sizeof(uintm))); (yyvsp[0].labelsym)->incrementRefCount(); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(pcode.getConstantSpace()), ConstTpl(ConstTpl::j_relative, (yyvsp[0].labelsym).getIndex()), ConstTpl(ConstTpl::real, sizeof(uintm))); (yyvsp[0].labelsym).incrementRefCount(); }
 
         //        break;
 
@@ -2300,7 +2300,7 @@ namespace Sla.SLEIGH
 
         //    case 101:
 
-        //        { (yyval.varnode) = (yyvsp[0].specsym)->getVarnode(); }
+        //        { (yyval.varnode) = (yyvsp[0].specsym).getVarnode(); }
 
         //        break;
 
@@ -2318,37 +2318,37 @@ namespace Sla.SLEIGH
 
         //    case 104:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(pcode->getConstantSpace()), ConstTpl(ConstTpl::real, *(yyvsp[0].i)), ConstTpl(ConstTpl::real, 0)); delete(yyvsp[0].i); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(pcode.getConstantSpace()), ConstTpl(ConstTpl::real, *(yyvsp[0].i)), ConstTpl(ConstTpl::real, 0)); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 105:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(pcode->getConstantSpace()), ConstTpl(ConstTpl::real, 0), ConstTpl(ConstTpl::real, 0)); yyerror("Parsed integer is too big (overflow)"); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(pcode.getConstantSpace()), ConstTpl(ConstTpl::real, 0), ConstTpl(ConstTpl::real, 0)); yyerror("Parsed integer is too big (overflow)"); }
 
         //        break;
 
         //    case 106:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(pcode->getConstantSpace()), ConstTpl(ConstTpl::real, *(yyvsp[-2].i)), ConstTpl(ConstTpl::real, *(yyvsp[0].i))); delete(yyvsp[-2].i); delete(yyvsp[0].i); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(pcode.getConstantSpace()), ConstTpl(ConstTpl::real, *(yyvsp[-2].i)), ConstTpl(ConstTpl::real, *(yyvsp[0].i))); delete(yyvsp[-2].i); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 107:
 
-        //        { (yyval.varnode) = pcode->addressOf((yyvsp[0].varnode), 0); }
+        //        { (yyval.varnode) = pcode.addressOf((yyvsp[0].varnode), 0); }
 
         //        break;
 
         //    case 108:
 
-        //        { (yyval.varnode) = pcode->addressOf((yyvsp[0].varnode), *(yyvsp[-1].i)); delete(yyvsp[-1].i); }
+        //        { (yyval.varnode) = pcode.addressOf((yyvsp[0].varnode), *(yyvsp[-1].i)); delete(yyvsp[-1].i); }
 
         //        break;
 
         //    case 109:
 
-        //        { (yyval.varnode) = (yyvsp[0].specsym)->getVarnode(); }
+        //        { (yyval.varnode) = (yyvsp[0].specsym).getVarnode(); }
 
         //        break;
 
@@ -2366,7 +2366,7 @@ namespace Sla.SLEIGH
 
         //    case 112:
 
-        //        { (yyval.labelsym) = pcode->defineLabel((yyvsp[-1].str)); }
+        //        { (yyval.labelsym) = pcode.defineLabel((yyvsp[-1].str)); }
 
         //        break;
 
@@ -2408,13 +2408,13 @@ namespace Sla.SLEIGH
 
         //    case 119:
 
-        //        { (yyval.param) = new vector<ExprTree*>; (yyval.param)->push_back((yyvsp[0].tree)); }
+        //        { (yyval.param) = new vector<ExprTree*>; (yyval.param).push_back((yyvsp[0].tree)); }
 
         //        break;
 
         //    case 120:
 
-        //        { (yyval.param) = (yyvsp[-2].param); (yyval.param)->push_back((yyvsp[0].tree)); }
+        //        { (yyval.param) = (yyvsp[-2].param); (yyval.param).push_back((yyvsp[0].tree)); }
 
         //        break;
 
@@ -2433,7 +2433,7 @@ namespace Sla.SLEIGH
         //   case of YYERROR or YYBACKUP, subsequent parser actions might lead
         //   to an incorrect destructor call or verbose syntax error message
         //   before the lookahead is translated.  */
-        //YY_SYMBOL_PRINT("-> $$ =", yyr1[yyn], &yyval, &yyloc);
+        //YY_SYMBOL_PRINT(". $$ =", yyr1[yyn], &yyval, &yyloc);
 
         //YYPOPSTACK(yylen);
         //yylen = 0;

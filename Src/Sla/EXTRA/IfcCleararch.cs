@@ -12,7 +12,7 @@ namespace Sla.EXTRA
         /// \brief Clear the current architecture/program: `clear architecture`
         public override void execute(TextReader s)
         {
-            dcp->clearArchitecture();
+            dcp.clearArchitecture();
         }
     }
 }

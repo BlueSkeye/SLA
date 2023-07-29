@@ -45,13 +45,13 @@ namespace Sla.DECCORE
         /// \return \b true if the data-type references a java array object
         private static bool isArrayType(Datatype ct)
         {
-            if (ct->getMetatype() != TYPE_PTR)  // Java arrays are always Ghidra pointer types
+            if (ct.getMetatype() != TYPE_PTR)  // Java arrays are always Ghidra pointer types
                 return false;
-            ct = ((TypePointer*)ct)->getPtrTo();
-            switch (ct->getMetatype())
+            ct = ((TypePointer*)ct).getPtrTo();
+            switch (ct.getMetatype())
             {
                 case TYPE_UINT:     // Pointer to unsigned is placeholder for class reference, not an array
-                    if (ct->isCharPrint())
+                    if (ct.isCharPrint())
                         return true;
                     break;
                 case TYPE_INT:
@@ -72,11 +72,11 @@ namespace Sla.DECCORE
         /// \return \b true if '[0]' syntax is required
         private static bool needZeroArray(Varnode vn)
         {
-            if (!isArrayType(vn->getType()))
+            if (!isArrayType(vn.getType()))
                 return false;
-            if (vn->isExplicit()) return true;
-            if (!vn->isWritten()) return true;
-            OpCode opc = vn->getDef()->code();
+            if (vn.isExplicit()) return true;
+            if (!vn.isWritten()) return true;
+            OpCode opc = vn.getDef().code();
             if ((opc == CPUI_PTRADD) || (opc == CPUI_PTRSUB) || (opc == CPUI_CPOOLREF))
                 return false;
             return true;
@@ -158,7 +158,7 @@ namespace Sla.DECCORE
             if (curscope == (Scope*)0) {
                 singletonFunction = true;
                 // Always assume we are in the scope of the parent class
-                pushScope(fd->getScopeLocal()->getParent());
+                pushScope(fd.getScopeLocal().getParent());
             }
             PrintC::docFunction(fd);
             if (singletonFunction)
@@ -175,17 +175,17 @@ namespace Sla.DECCORE
             int4 arrayCount = 0;
             for (; ; )
             {
-                if (ct->getMetatype() == TYPE_PTR)
+                if (ct.getMetatype() == TYPE_PTR)
                 {
                     if (isArrayType(ct))
                         arrayCount += 1;
-                    ct = ((TypePointer*)ct)->getPtrTo();
+                    ct = ((TypePointer*)ct).getPtrTo();
                 }
-                else if (ct->getName().size() != 0)
+                else if (ct.getName().size() != 0)
                     break;
                 else
                 {
-                    ct = glb->types->getTypeVoid();
+                    ct = glb.types.getTypeVoid();
                     break;
                 }
             }
@@ -200,7 +200,7 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < arrayCount; ++i)
                 pushOp(&subscript, (PcodeOp*)0);
 
-            if (ct->getName().size() == 0)
+            if (ct.getName().size() == 0)
             {   // Check for anonymous type
                 // We could support a struct or enum declaration here
                 string nm = genericTypeName(ct);
@@ -208,7 +208,7 @@ namespace Sla.DECCORE
             }
             else
             {
-                pushAtom(Atom(ct->getDisplayName(), typetoken, EmitMarkup::type_color, ct));
+                pushAtom(Atom(ct.getDisplayName(), typetoken, EmitMarkup::type_color, ct));
             }
             for (int4 i = 0; i < arrayCount; ++i)
                 pushAtom(Atom(EMPTY_STRING, blanktoken, EmitMarkup::no_color));     // Fill in the blank array index
@@ -224,16 +224,16 @@ namespace Sla.DECCORE
         {
             scope.print1 = ".";
             shift_right.print1 = ">>>";
-            TypeOp::selectJavaOperators(glb->inst, true);
+            TypeOp::selectJavaOperators(glb.inst, true);
         }
 
         public override void opLoad(PcodeOp op)
         {
             uint4 m = mods | print_load_value;
-            bool printArrayRef = needZeroArray(op->getIn(1));
+            bool printArrayRef = needZeroArray(op.getIn(1));
             if (printArrayRef)
                 pushOp(&subscript, op);
-            pushVn(op->getIn(1), op, m);
+            pushVn(op.getIn(1), op, m);
             if (printArrayRef)
                 push_integer(0, 4, false, (Varnode*)0, op);
         }
@@ -242,84 +242,84 @@ namespace Sla.DECCORE
         {
             uint4 m = mods | print_store_value; // Inform sub-tree that we are storing
             pushOp(&assignment, op);    // This is an assignment
-            if (needZeroArray(op->getIn(1)))
+            if (needZeroArray(op.getIn(1)))
             {
                 pushOp(&subscript, op);
-                pushVn(op->getIn(1), op, m);
+                pushVn(op.getIn(1), op, m);
                 push_integer(0, 4, false, (Varnode*)0, op);
-                pushVn(op->getIn(2), op, mods);
+                pushVn(op.getIn(2), op, mods);
             }
             else
             {
                 // implied vn's pushed on in reverse order for efficiency
                 // see PrintLanguage::pushVnImplied
-                pushVn(op->getIn(2), op, mods);
-                pushVn(op->getIn(1), op, m);
+                pushVn(op.getIn(2), op, mods);
+                pushVn(op.getIn(1), op, m);
             }
         }
 
         public override void opCallind(PcodeOp op)
         {
             pushOp(&function_call, op);
-            Funcdata fd = op->getParent()->getFuncdata();
-            FuncCallSpecs* fc = fd->getCallSpecs(op);
+            Funcdata fd = op.getParent().getFuncdata();
+            FuncCallSpecs* fc = fd.getCallSpecs(op);
             if (fc == (FuncCallSpecs*)0)
                 throw new LowlevelError("Missing indirect function callspec");
             int4 skip = getHiddenThisSlot(op, fc);
-            int4 count = op->numInput() - 1;
+            int4 count = op.numInput() - 1;
             count -= (skip < 0) ? 0 : 1;
             if (count > 1)
             {   // Multiple parameters
-                pushVn(op->getIn(0), op, mods);
+                pushVn(op.getIn(0), op, mods);
                 for (int4 i = 0; i < count - 1; ++i)
                     pushOp(&comma, op);
                 // implied vn's pushed on in reverse order for efficiency
                 // see PrintLanguage::pushVnImplied
-                for (int4 i = op->numInput() - 1; i >= 1; --i)
+                for (int4 i = op.numInput() - 1; i >= 1; --i)
                 {
                     if (i == skip) continue;
-                    pushVn(op->getIn(i), op, mods);
+                    pushVn(op.getIn(i), op, mods);
                 }
             }
             else if (count == 1)
             {   // One parameter
                 if (skip == 1)
-                    pushVn(op->getIn(2), op, mods);
+                    pushVn(op.getIn(2), op, mods);
                 else
-                    pushVn(op->getIn(1), op, mods);
-                pushVn(op->getIn(0), op, mods);
+                    pushVn(op.getIn(1), op, mods);
+                pushVn(op.getIn(0), op, mods);
             }
             else
             {           // A void function
-                pushVn(op->getIn(0), op, mods);
+                pushVn(op.getIn(0), op, mods);
                 pushAtom(Atom(EMPTY_STRING, blanktoken, EmitMarkup::no_color));
             }
         }
 
         public override void opCpoolRefOp(PcodeOp op)
         {
-            Varnode* outvn = op->getOut();
-            Varnode* vn0 = op->getIn(0);
+            Varnode* outvn = op.getOut();
+            Varnode* vn0 = op.getIn(0);
             vector<uintb> refs;
-            for (int4 i = 1; i < op->numInput(); ++i)
-                refs.push_back(op->getIn(i)->getOffset());
-            CPoolRecord* rec = glb->cpool->getRecord(refs);
+            for (int4 i = 1; i < op.numInput(); ++i)
+                refs.push_back(op.getIn(i).getOffset());
+            CPoolRecord* rec = glb.cpool.getRecord(refs);
             if (rec == (CPoolRecord*)0) {
                 pushAtom(Atom("UNKNOWNREF", syntax, EmitMarkup::const_color, op, outvn));
             }
             else
             {
-                switch (rec->getTag())
+                switch (rec.getTag())
                 {
                     case CPoolRecord::string_literal:
                         {
                             ostringstream str;
-                            int4 len = rec->getByteDataLength();
+                            int4 len = rec.getByteDataLength();
                             if (len > 2048)
                                 len = 2048;
                             str << '\"';
-                            escapeCharacterData(str, rec->getByteData(), len, 1, false);
-                            if (len == rec->getByteDataLength())
+                            escapeCharacterData(str, rec.getByteData(), len, 1, false);
+                            if (len == rec.getByteDataLength())
                                 str << '\"';
                             else
                             {
@@ -329,18 +329,18 @@ namespace Sla.DECCORE
                             break;
                         }
                     case CPoolRecord::class_reference:
-                        pushAtom(Atom(rec->getToken(), vartoken, EmitMarkup::type_color, op, outvn));
+                        pushAtom(Atom(rec.getToken(), vartoken, EmitMarkup::type_color, op, outvn));
                         break;
                     case CPoolRecord::instance_of:
                         {
-                            Datatype* dt = rec->getType();
-                            while (dt->getMetatype() == TYPE_PTR)
+                            Datatype* dt = rec.getType();
+                            while (dt.getMetatype() == TYPE_PTR)
                             {
-                                dt = ((TypePointer*)dt)->getPtrTo();
+                                dt = ((TypePointer*)dt).getPtrTo();
                             }
                             pushOp(&instanceof, op);
                             pushVn(vn0, op, mods);
-                            pushAtom(Atom(dt->getDisplayName(), syntax, EmitMarkup::type_color, op, outvn));
+                            pushAtom(Atom(dt.getDisplayName(), syntax, EmitMarkup::type_color, op, outvn));
                             break;
                         }
                     case CPoolRecord::primitive:        // Should be eliminated
@@ -350,23 +350,23 @@ namespace Sla.DECCORE
                     case CPoolRecord::check_cast:
                     default:
                         {
-                            Datatype* ct = rec->getType();
+                            Datatype* ct = rec.getType();
                             EmitMarkup::syntax_highlight color = EmitMarkup::var_color;
-                            if (ct->getMetatype() == TYPE_PTR)
+                            if (ct.getMetatype() == TYPE_PTR)
                             {
-                                ct = ((TypePointer*)ct)->getPtrTo();
-                                if (ct->getMetatype() == TYPE_CODE)
+                                ct = ((TypePointer*)ct).getPtrTo();
+                                if (ct.getMetatype() == TYPE_CODE)
                                     color = EmitMarkup::funcname_color;
                             }
-                            if (vn0->isConstant())
+                            if (vn0.isConstant())
                             {   // If this is NOT relative to an object reference
-                                pushAtom(Atom(rec->getToken(), vartoken, color, op, outvn));
+                                pushAtom(Atom(rec.getToken(), vartoken, color, op, outvn));
                             }
                             else
                             {
                                 pushOp(&object_member, op);
                                 pushVn(vn0, op, mods);
-                                pushAtom(Atom(rec->getToken(), syntax, color, op, outvn));
+                                pushAtom(Atom(rec.getToken(), syntax, color, op, outvn));
                             }
                         }
                 }

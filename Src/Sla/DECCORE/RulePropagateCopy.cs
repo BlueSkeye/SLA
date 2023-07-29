@@ -29,26 +29,26 @@ namespace Sla.DECCORE
             PcodeOp* copyop;
             Varnode* vn,*invn;
 
-            if (op->stopsCopyPropagation()) return 0;
-            for (i = 0; i < op->numInput(); ++i)
+            if (op.stopsCopyPropagation()) return 0;
+            for (i = 0; i < op.numInput(); ++i)
             {
-                vn = op->getIn(i);
-                if (!vn->isWritten()) continue; // Varnode must be written to
+                vn = op.getIn(i);
+                if (!vn.isWritten()) continue; // Varnode must be written to
 
-                copyop = vn->getDef();
-                if (copyop->code() != CPUI_COPY)
+                copyop = vn.getDef();
+                if (copyop.code() != CPUI_COPY)
                     continue;           // not a propagating instruction
 
-                invn = copyop->getIn(0);
-                if (!invn->isHeritageKnown()) continue; // Don't propagate free's away from their first use
+                invn = copyop.getIn(0);
+                if (!invn.isHeritageKnown()) continue; // Don't propagate free's away from their first use
                 if (invn == vn)
                     throw new LowlevelError("Self-defined varnode");
-                if (op->isMarker())
+                if (op.isMarker())
                 {
-                    if (invn->isConstant()) continue;       // Don't propagate constants into markers
-                    if (vn->isAddrForce()) continue;        // Don't propagate if we are keeping the COPY anyway
-                    if (invn->isAddrTied() && op->getOut()->isAddrTied() &&
-                    (op->getOut()->getAddr() != invn->getAddr()))
+                    if (invn.isConstant()) continue;       // Don't propagate constants into markers
+                    if (vn.isAddrForce()) continue;        // Don't propagate if we are keeping the COPY anyway
+                    if (invn.isAddrTied() && op.getOut().isAddrTied() &&
+                    (op.getOut().getAddr() != invn.getAddr()))
                         continue;       // We must not allow merging of different addrtieds
                 }
                 data.opSetInput(op, invn, i); // otherwise propagate just a single copy

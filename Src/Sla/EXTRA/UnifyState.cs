@@ -20,9 +20,9 @@ namespace Sla.EXTRA
         public UnifyState(ConstraintGroup uni)
         {
             container = uni;
-            storemap.resize(container->getMaxNum() + 1, UnifyDatatype());
-            container->collectTypes(storemap);
-            container->buildTraverseState(*this);
+            storemap.resize(container.getMaxNum() + 1, UnifyDatatype());
+            container.collectTypes(storemap);
+            container.buildTraverseState(*this);
         }
 
         ~UnifyState()
@@ -46,8 +46,8 @@ namespace Sla.EXTRA
 
         public OpBehavior getBehavior(OpCode opc)
         { // Get the behavior associated with a particular opcode
-            Architecture* glb = fd->getArch();
-            return glb->inst[opc]->getBehavior();
+            Architecture* glb = fd.getArch();
+            return glb.inst[opc].getBehavior();
         }
 
         public void setFunction(Funcdata f)

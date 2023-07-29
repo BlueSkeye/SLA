@@ -33,28 +33,28 @@ namespace Sla.DECCORE
             AddrSpace* spc;
             int4 size;
 
-            Varnode* piece0 = op->getIn(0);
-            Varnode* piece1 = op->getIn(1);
-            if (!piece0->isWritten()) return 0;
-            if (!piece1->isWritten()) return 0;
-            if (piece0->getDef()->code() != CPUI_LOAD) return false;
-            if (piece1->getDef()->code() != CPUI_LOAD) return false;
-            if (!SplitVarnode::testContiguousPointers(piece0->getDef(), piece1->getDef(), loadlo, loadhi, spc))
+            Varnode* piece0 = op.getIn(0);
+            Varnode* piece1 = op.getIn(1);
+            if (!piece0.isWritten()) return 0;
+            if (!piece1.isWritten()) return 0;
+            if (piece0.getDef().code() != CPUI_LOAD) return false;
+            if (piece1.getDef().code() != CPUI_LOAD) return false;
+            if (!SplitVarnode::testContiguousPointers(piece0.getDef(), piece1.getDef(), loadlo, loadhi, spc))
                 return 0;
 
-            size = piece0->getSize() + piece1->getSize();
+            size = piece0.getSize() + piece1.getSize();
             PcodeOp* latest = noWriteConflict(loadlo, loadhi, spc, (vector<PcodeOp*>*)0);
             if (latest == (PcodeOp*)0) return 0; // There was a conflict
 
             // Create new load op that combines the two smaller loads
-            PcodeOp* newload = data.newOp(2, latest->getAddr());
+            PcodeOp* newload = data.newOp(2, latest.getAddr());
             Varnode* vnout = data.newUniqueOut(size, newload);
             Varnode* spcvn = data.newVarnodeSpace(spc);
             data.opSetOpcode(newload, CPUI_LOAD);
             data.opSetInput(newload, spcvn, 0);
-            Varnode* addrvn = loadlo->getIn(1);
-            if (addrvn->isConstant())
-                addrvn = data.newConstant(addrvn->getSize(), addrvn->getOffset());
+            Varnode* addrvn = loadlo.getIn(1);
+            if (addrvn.isConstant())
+                addrvn = data.newConstant(addrvn.getSize(), addrvn.getOffset());
             data.opSetInput(newload, addrvn, 1);
             // We need to guarantee that -newload- reads -addrvn- after
             // it has been defined. So insert it after the latest.
@@ -84,29 +84,29 @@ namespace Sla.DECCORE
         public static PcodeOp noWriteConflict(PcodeOp op1, PcodeOp op2, AddrSpace spc,
             List<PcodeOp> indirects)
         {
-            BlockBasic bb = op1->getParent();
+            BlockBasic bb = op1.getParent();
 
             // Force the two ops to be in the same basic block
-            if (bb != op2->getParent()) return (PcodeOp*)0;
-            if (op2->getSeqNum().getOrder() < op1->getSeqNum().getOrder())
+            if (bb != op2.getParent()) return (PcodeOp*)0;
+            if (op2.getSeqNum().getOrder() < op1.getSeqNum().getOrder())
             {
                 PcodeOp* tmp = op2;
                 op2 = op1;
                 op1 = tmp;
             }
             PcodeOp* startop = op1;
-            if (op1->code() == CPUI_STORE)
+            if (op1.code() == CPUI_STORE)
             {
                 // Extend the range of PcodeOps to include any CPUI_INDIRECTs associated with the initial STORE
-                PcodeOp* tmpOp = startop->previousOp();
-                while (tmpOp != (PcodeOp*)0 && tmpOp->code() == CPUI_INDIRECT)
+                PcodeOp* tmpOp = startop.previousOp();
+                while (tmpOp != (PcodeOp*)0 && tmpOp.code() == CPUI_INDIRECT)
                 {
                     startop = tmpOp;
-                    tmpOp = tmpOp->previousOp();
+                    tmpOp = tmpOp.previousOp();
                 }
             }
-            list<PcodeOp*>::iterator iter = startop->getBasicIter();
-            list<PcodeOp*>::iterator enditer = op2->getBasicIter();
+            list<PcodeOp*>::iterator iter = startop.getBasicIter();
+            list<PcodeOp*>::iterator enditer = op2.getBasicIter();
 
             while (iter != enditer)
             {
@@ -115,22 +115,22 @@ namespace Sla.DECCORE
                 PcodeOp* affector;
                 ++iter;
                 if (curop == op1) continue;
-                switch (curop->code())
+                switch (curop.code())
                 {
                     case CPUI_STORE:
-                        if (curop->getIn(0)->getSpaceFromConst() == spc)
+                        if (curop.getIn(0).getSpaceFromConst() == spc)
                             return (PcodeOp*)0; // Don't go any further trying to resolve alias
                         break;
                     case CPUI_INDIRECT:
-                        affector = PcodeOp::getOpFromConst(curop->getIn(1)->getAddr());
+                        affector = PcodeOp::getOpFromConst(curop.getIn(1).getAddr());
                         if (affector == op1 || affector == op2)
                         {
                             if (indirects != (vector<PcodeOp*>*)0)
-                                indirects->push_back(curop);
+                                indirects.push_back(curop);
                         }
                         else
                         {
-                            if (curop->getOut()->getSpace() == spc)
+                            if (curop.getOut().getSpace() == spc)
                                 return (PcodeOp*)0;
                         }
                         break;
@@ -143,10 +143,10 @@ namespace Sla.DECCORE
                     case CPUI_BRANCHIND:
                         return (PcodeOp*)0;
                     default:
-                        outvn = curop->getOut();
+                        outvn = curop.getOut();
                         if (outvn != (Varnode*)0)
                         {
-                            if (outvn->getSpace() == spc)
+                            if (outvn.getSpace() == spc)
                                 return (PcodeOp*)0;
                         }
                         break;

@@ -28,7 +28,7 @@ namespace Sla.DECCORE
                 strategy = PrintLanguage::NO_NAMESPACES;
             else
                 throw ParseError("Must specify a valid strategy");
-            glb->print->setNamespaceStrategy(strategy);
+            glb.print.setNamespaceStrategy(strategy);
             return "Namespace strategy set";
         }
     }

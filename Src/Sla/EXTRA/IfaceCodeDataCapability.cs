@@ -24,14 +24,14 @@ namespace Sla.EXTRA
 
         public virtual void registerCommands(IfaceStatus status)
         {
-            status->registerCom(new IfcCodeDataInit(), "codedata", "init");
-            status->registerCom(new IfcCodeDataTarget(), "codedata", "target");
-            status->registerCom(new IfcCodeDataRun(), "codedata", "run");
-            status->registerCom(new IfcCodeDataDumpModelHits(), "codedata", "dump", "hits");
-            status->registerCom(new IfcCodeDataDumpCrossRefs(), "codedata", "dump", "crossrefs");
-            status->registerCom(new IfcCodeDataDumpStarts(), "codedata", "dump", "starts");
-            status->registerCom(new IfcCodeDataDumpUnlinked(), "codedata", "dump", "unlinked");
-            status->registerCom(new IfcCodeDataDumpTargetHits(), "codedata", "dump", "targethits");
+            status.registerCom(new IfcCodeDataInit(), "codedata", "init");
+            status.registerCom(new IfcCodeDataTarget(), "codedata", "target");
+            status.registerCom(new IfcCodeDataRun(), "codedata", "run");
+            status.registerCom(new IfcCodeDataDumpModelHits(), "codedata", "dump", "hits");
+            status.registerCom(new IfcCodeDataDumpCrossRefs(), "codedata", "dump", "crossrefs");
+            status.registerCom(new IfcCodeDataDumpStarts(), "codedata", "dump", "starts");
+            status.registerCom(new IfcCodeDataDumpUnlinked(), "codedata", "dump", "unlinked");
+            status.registerCom(new IfcCodeDataDumpTargetHits(), "codedata", "dump", "targethits");
         }
     }
 }

@@ -33,19 +33,19 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn = op->getIn(0);
+            Varnode* vn = op.getIn(0);
             list<PcodeOp*>::const_iterator iter;
-            OpCode opc = op->code();
+            OpCode opc = op.code();
             PcodeOp* otherop;
             uintm hash;
             vector<pair<uintm, PcodeOp*>> list;
             vector<Varnode*> vlist;
 
-            for (iter = vn->beginDescend(); iter != vn->endDescend(); ++iter)
+            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {
                 otherop = *iter;
-                if (otherop->code() != opc) continue;
-                hash = otherop->getCseHash();
+                if (otherop.code() != opc) continue;
+                hash = otherop.getCseHash();
                 if (hash == 0) continue;
                 list.push_back(pair<uintm, PcodeOp*>(hash, otherop));
             }

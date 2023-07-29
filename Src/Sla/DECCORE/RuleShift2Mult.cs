@@ -42,32 +42,32 @@ namespace Sla.DECCORE
             int4 val;
 
             flag = 0;
-            vn = op->getOut();
-            constvn = op->getIn(1);
-            if (!constvn->isConstant()) return 0; // Shift amount must be a constant
-            val = constvn->getOffset();
+            vn = op.getOut();
+            constvn = op.getIn(1);
+            if (!constvn.isConstant()) return 0; // Shift amount must be a constant
+            val = constvn.getOffset();
             if (val >= 32)      // FIXME: This is a little arbitrary. Anything
                                 // this big is probably not an arithmetic multiply
                 return 0;
-            arithop = op->getIn(0)->getDef();
-            desc = vn->beginDescend();
+            arithop = op.getIn(0).getDef();
+            desc = vn.beginDescend();
             for (; ; )
             {
                 if (arithop != (PcodeOp*)0)
                 {
-                    opc = arithop->code();
+                    opc = arithop.code();
                     if ((opc == CPUI_INT_ADD) || (opc == CPUI_INT_SUB) || (opc == CPUI_INT_MULT))
                     {
                         flag = 1;
                         break;
                     }
                 }
-                if (desc == vn->endDescend()) break;
+                if (desc == vn.endDescend()) break;
                 arithop = *desc++;
             }
 
             if (flag == 0) return 0;
-            constvn = data.newConstant(vn->getSize(), ((uintb)1) << val);
+            constvn = data.newConstant(vn.getSize(), ((uintb)1) << val);
             data.opSetInput(op, constvn, 1);
             data.opSetOpcode(op, CPUI_INT_MULT);
             return 1;

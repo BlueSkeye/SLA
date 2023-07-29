@@ -51,28 +51,28 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < numcalls; ++i)
             {
                 FuncCallSpecs* fc = data.getCallSpecs(i);
-                Funcdata* fd = fc->getFuncdata();
-                if (fc->hasInputErrors())
+                Funcdata* fd = fc.getFuncdata();
+                if (fc.hasInputErrors())
                 {
                     ostringstream s;
                     s << "Cannot assign parameter location for function ";
                     if (fd != (Funcdata*)0)
-                        s << fd->getName();
+                        s << fd.getName();
                     else
                         s << "<indirect>";
                     s << ": Prototype may be inaccurate";
-                    data.warning(s.str(), fc->getEntryAddress());
+                    data.warning(s.str(), fc.getEntryAddress());
                 }
-                if (fc->hasOutputErrors())
+                if (fc.hasOutputErrors())
                 {
                     ostringstream s;
                     s << "Cannot assign location of return value for function ";
                     if (fd != (Funcdata*)0)
-                        s << fd->getName();
+                        s << fd.getName();
                     else
                         s << "<indirect>";
                     s << ": Return value may be inaccurate";
-                    data.warning(s.str(), fc->getEntryAddress());
+                    data.warning(s.str(), fc.getEntryAddress());
                 }
             }
             return 0;

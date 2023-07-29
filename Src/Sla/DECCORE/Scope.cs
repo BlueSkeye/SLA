@@ -52,8 +52,8 @@ namespace Sla.DECCORE
         /// \param child is the Scope to make a child
         private void attachScope(Scope child)
         {
-            child->parent = this;
-            children[child->uniqueId] = child;  // uniqueId is guaranteed to be unique by Database
+            child.parent = this;
+            children[child.uniqueId] = child;  // uniqueId is guaranteed to be unique by Database
         }
 
         /// Detach a child Scope from \b this
@@ -116,15 +116,15 @@ namespace Sla.DECCORE
             SymbolEntry entry = new SymbolEntry();
             if (addr.isConstant()) return null;
             while ((scope1 != (Scope*)0)&& (scope1 != scope2)) {
-                entry = scope1->findAddr(addr, usepoint);
+                entry = scope1.findAddr(addr, usepoint);
                 if (entry != (SymbolEntry*)0)
                 {
                     *addrmatch = entry;
                     return scope1;
                 }
-                if (scope1->inScope(addr, 1, usepoint))
+                if (scope1.inScope(addr, 1, usepoint))
                     return scope1;      // Discovery of new variable
-                scope1 = scope1->getParent();
+                scope1 = scope1.getParent();
             }
             return (Scope*)0;
         }
@@ -147,15 +147,15 @@ namespace Sla.DECCORE
             SymbolEntry* entry;
             if (addr.isConstant()) return (Scope*)0;
             while ((scope1 != (Scope*)0)&& (scope1 != scope2)) {
-                entry = scope1->findContainer(addr, size, usepoint);
+                entry = scope1.findContainer(addr, size, usepoint);
                 if (entry != (SymbolEntry*)0)
                 {
                     *addrmatch = entry;
                     return scope1;
                 }
-                if (scope1->inScope(addr, size, usepoint))
+                if (scope1.inScope(addr, size, usepoint))
                     return scope1;      // Discovery of new variable
-                scope1 = scope1->getParent();
+                scope1 = scope1.getParent();
             }
             return (Scope*)0;
         }
@@ -179,15 +179,15 @@ namespace Sla.DECCORE
             SymbolEntry* entry;
             if (addr.isConstant()) return (Scope*)0;
             while ((scope1 != (Scope*)0)&& (scope1 != scope2)) {
-                entry = scope1->findClosestFit(addr, size, usepoint);
+                entry = scope1.findClosestFit(addr, size, usepoint);
                 if (entry != (SymbolEntry*)0)
                 {
                     *addrmatch = entry;
                     return scope1;
                 }
-                if (scope1->inScope(addr, size, usepoint))
+                if (scope1.inScope(addr, size, usepoint))
                     return scope1;      // Discovery of new variable
-                scope1 = scope1->getParent();
+                scope1 = scope1.getParent();
             }
             return (Scope*)0;
         }
@@ -209,15 +209,15 @@ namespace Sla.DECCORE
             Funcdata* fd;
             if (addr.isConstant()) return (Scope*)0;
             while ((scope1 != (Scope*)0)&& (scope1 != scope2)) {
-                fd = scope1->findFunction(addr);
+                fd = scope1.findFunction(addr);
                 if (fd != (Funcdata*)0)
                 {
                     *addrmatch = fd;
                     return scope1;
                 }
-                if (scope1->inScope(addr, 1, Address()))
+                if (scope1.inScope(addr, 1, Address()))
                     return scope1;      // Discovery of new variable
-                scope1 = scope1->getParent();
+                scope1 = scope1.getParent();
             }
             return (Scope*)0;
         }
@@ -239,7 +239,7 @@ namespace Sla.DECCORE
             ExternRefSymbol* sym;
             if (addr.isConstant()) return (Scope*)0;
             while ((scope1 != (Scope*)0)&& (scope1 != scope2)) {
-                sym = scope1->findExternalRef(addr);
+                sym = scope1.findExternalRef(addr);
                 if (sym != (ExternRefSymbol*)0)
                 {
                     *addrmatch = sym;
@@ -248,9 +248,9 @@ namespace Sla.DECCORE
                 // When searching for externalref, don't do discovery
                 // As the function in a lower scope may be masking the
                 // external reference symbol that refers to it
-                //    if (scope1->inScope(addr,1,Address()))
+                //    if (scope1.inScope(addr,1,Address()))
                 //      return scope1;		// Discovery of new variable
-                scope1 = scope1->getParent();
+                scope1 = scope1.getParent();
             }
             return (Scope*)0;
         }
@@ -272,15 +272,15 @@ namespace Sla.DECCORE
             LabSymbol* sym;
             if (addr.isConstant()) return (Scope*)0;
             while ((scope1 != (Scope*)0)&& (scope1 != scope2)) {
-                sym = scope1->findCodeLabel(addr);
+                sym = scope1.findCodeLabel(addr);
                 if (sym != (LabSymbol*)0)
                 {
                     *addrmatch = sym;
                     return scope1;
                 }
-                if (scope1->inScope(addr, 1, Address()))
+                if (scope1.inScope(addr, 1, Address()))
                     return scope1;      // Discovery of new variable
-                scope1 = scope1->getParent();
+                scope1 = scope1.getParent();
             }
             return (Scope*)0;
         }
@@ -364,48 +364,48 @@ namespace Sla.DECCORE
         protected SymbolEntry addMap(SymbolEntry entry)
         {
             // First set properties of this symbol based on scope
-            //  entry.symbol->flags |= Varnode::mapped;
+            //  entry.symbol.flags |= Varnode::mapped;
             if (isGlobal())
-                entry.symbol->flags |= Varnode::persist;
+                entry.symbol.flags |= Varnode::persist;
             else if (!entry.addr.isInvalid())
             {
                 // If this is not a global scope, but the address is in the global discovery range
                 // we still mark the symbol as persistent
-                Scope* glbScope = glb->symboltab->getGlobalScope();
+                Scope* glbScope = glb.symboltab.getGlobalScope();
                 Address addr;
-                if (glbScope->inScope(entry.addr, 1, addr))
+                if (glbScope.inScope(entry.addr, 1, addr))
                 {
-                    entry.symbol->flags |= Varnode::persist;
+                    entry.symbol.flags |= Varnode::persist;
                     entry.uselimit.clear(); // FIXME: Kludge for incorrectly generated XML
                 }
             }
 
             SymbolEntry* res;
-            int4 consumeSize = entry.symbol->getBytesConsumed();
+            int4 consumeSize = entry.symbol.getBytesConsumed();
             if (entry.addr.isInvalid())
                 res = addDynamicMapInternal(entry.symbol, Varnode::mapped, entry.hash, 0, consumeSize, entry.uselimit);
             else
             {
                 if (entry.uselimit.empty())
                 {
-                    entry.symbol->flags |= Varnode::addrtied;
+                    entry.symbol.flags |= Varnode::addrtied;
                     // Global properties (like readonly and volatile)
                     // can only happen if use is not limited
-                    entry.symbol->flags |= glb->symboltab->getProperty(entry.addr);
+                    entry.symbol.flags |= glb.symboltab.getProperty(entry.addr);
                 }
                 res = addMapInternal(entry.symbol, Varnode::mapped, entry.addr, 0, consumeSize, entry.uselimit);
                 if (entry.addr.isJoin())
                 {
                     // The address is a join,  we add extra SymbolEntry maps for each of the pieces
-                    JoinRecord* rec = glb->findJoin(entry.addr.getOffset());
+                    JoinRecord* rec = glb.findJoin(entry.addr.getOffset());
                     uint4 exfl;
-                    int4 num = rec->numPieces();
+                    int4 num = rec.numPieces();
                     uintb off = 0;
                     bool bigendian = entry.addr.isBigEndian();
                     for (int4 j = 0; j < num; ++j)
                     {
                         int4 i = bigendian ? j : (num - 1 - j); // Take pieces in endian order
-                        VarnodeData vdat = rec->getPiece(i);
+                        VarnodeData vdat = rec.getPiece(i);
                         if (i == 0)     // i==0 is most signif
                             exfl = Varnode::precishi;
                         else if (i == num - 1)
@@ -664,8 +664,8 @@ namespace Sla.DECCORE
         {
             Symbol* sym;
 
-            if (ct->hasStripped())
-                ct = ct->getStripped();
+            if (ct.hasStripped())
+                ct = ct.getStripped();
             sym = new Symbol(owner, nm, ct);
             addSymbolInternal(sym);
             return addMapPoint(sym, addr, usepoint);
@@ -698,7 +698,7 @@ namespace Sla.DECCORE
             if (!res.empty())
                 return;
             if (parent != (Scope*)0)
-                parent->queryByName(nm, res);
+                parent.queryByName(nm, res);
         }
 
         /// Look-up a function by name
@@ -715,7 +715,7 @@ namespace Sla.DECCORE
                 Symbol* sym = symList[i];
                 FunctionSymbol* funcsym = dynamic_cast<FunctionSymbol*>(sym);
                 if (funcsym != (FunctionSymbol*)0)
-                    return funcsym->getFunction();
+                    return funcsym.getFunction();
             }
             return (Funcdata*)0;
         }
@@ -729,7 +729,7 @@ namespace Sla.DECCORE
         public SymbolEntry queryByAddr(Address addr, Address usepoint)
         {
             SymbolEntry* res = (SymbolEntry*)0;
-            Scope basescope = glb->symboltab->mapScope(this, addr, usepoint);
+            Scope basescope = glb.symboltab.mapScope(this, addr, usepoint);
             stackAddr(basescope, (Scope*)0,addr,usepoint,&res);
             return res;
         }
@@ -744,7 +744,7 @@ namespace Sla.DECCORE
         public virtual SymbolEntry queryContainer(Address addr, int size, Address usepoint)
         {
             SymbolEntry* res = (SymbolEntry*)0;
-            Scope basescope = glb->symboltab->mapScope(this, addr, usepoint);
+            Scope basescope = glb.symboltab.mapScope(this, addr, usepoint);
             stackContainer(basescope, (Scope*)0,addr,size,usepoint,&res);
             return res;
         }
@@ -761,20 +761,20 @@ namespace Sla.DECCORE
         public SymbolEntry queryProperties(Address addr, int size, Address usepoint, uint &flags)
         {
             SymbolEntry* res = (SymbolEntry*)0;
-            Scope basescope = glb->symboltab->mapScope(this, addr, usepoint);
+            Scope basescope = glb.symboltab.mapScope(this, addr, usepoint);
             Scope finalscope = stackContainer(basescope, (Scope*)0,addr,size,usepoint,&res);
             if (res != (SymbolEntry*)0) // If we found a symbol
-                flags = res->getAllFlags(); // use its flags
+                flags = res.getAllFlags(); // use its flags
             else if (finalscope != (Scope*)0)
             { // If we found just a scope
               // set flags just based on scope
                 flags = Varnode::mapped | Varnode::addrtied;
-                if (finalscope->isGlobal())
+                if (finalscope.isGlobal())
                     flags |= Varnode::persist;
-                flags |= glb->symboltab->getProperty(addr);
+                flags |= glb.symboltab.getProperty(addr);
             }
             else
-                flags = glb->symboltab->getProperty(addr);
+                flags = glb.symboltab.getProperty(addr);
             return res;
         }
 
@@ -787,7 +787,7 @@ namespace Sla.DECCORE
         {
             Funcdata* res = (Funcdata*)0;
             // We have no usepoint, so try to map from addr
-            Scope basescope = glb->symboltab->mapScope(this, addr, Address());
+            Scope basescope = glb.symboltab.mapScope(this, addr, Address());
             stackFunction(basescope, (Scope*)0,addr,&res);
             return res;
         }
@@ -803,11 +803,11 @@ namespace Sla.DECCORE
         {
             ExternRefSymbol* sym = (ExternRefSymbol*)0;
             // We have no usepoint, so try to map from addr
-            Scope basescope = glb->symboltab->mapScope(this, addr, Address());
+            Scope basescope = glb.symboltab.mapScope(this, addr, Address());
             basescope = stackExternalRef(basescope, (Scope*)0,addr,&sym);
             // Resolve the reference from the same scope we found the reference
             if (sym != (ExternRefSymbol*)0)
-                return basescope->resolveExternalRefFunction(sym);
+                return basescope.resolveExternalRefFunction(sym);
             return (Funcdata*)0;
         }
 
@@ -820,7 +820,7 @@ namespace Sla.DECCORE
         {
             LabSymbol* res = (LabSymbol*)0;
             // We have no usepoint, so try to map from addr
-            Scope basescope = glb->symboltab->mapScope(this, addr, Address());
+            Scope basescope = glb.symboltab.mapScope(this, addr, Address());
             stackCodeLabel(basescope, (Scope*)0,addr,&res);
             return res;
         }
@@ -838,7 +838,7 @@ namespace Sla.DECCORE
                 ScopeMap::const_iterator iter = children.find(key);
                 if (iter == children.end()) return (Scope*)0;
                 Scope* scope = (*iter).second;
-                if (scope->name == nm)
+                if (scope.name == nm)
                     return scope;
             }
             else if (nm.length() > 0 && nm[0] <= '9' && nm[0] >= '0')
@@ -858,7 +858,7 @@ namespace Sla.DECCORE
                 for (iter = children.begin(); iter != children.end(); ++iter)
                 {
                     Scope* scope = (*iter).second;
-                    if (scope->name == nm)
+                    if (scope.name == nm)
                         return scope;
                 }
             }
@@ -876,12 +876,12 @@ namespace Sla.DECCORE
         {               // Which scope "should" this range belong to
             if (addr.isConstant())
                 return (Scope*)0;
-            Scope* basescope = glb->symboltab->mapScope(this, addr, usepoint);
+            Scope* basescope = glb.symboltab.mapScope(this, addr, usepoint);
             while (basescope != (Scope*)0)
             {
-                if (basescope->inScope(addr, sz, usepoint))
+                if (basescope.inScope(addr, sz, usepoint))
                     return basescope;
-                basescope = basescope->getParent();
+                basescope = basescope.getParent();
             }
             return (Scope*)0;
         }
@@ -903,7 +903,7 @@ namespace Sla.DECCORE
             ScopeMap::const_iterator enditer = children.end();
             for (; iter != enditer; ++iter)
             {
-                (*iter).second->encodeRecursive(encoder, onlyGlobal);
+                (*iter).second.encodeRecursive(encoder, onlyGlobal);
             }
         }
 
@@ -914,11 +914,11 @@ namespace Sla.DECCORE
         /// \param ct is the data-type to change the Symbol to
         public void overrideSizeLockType(Symbol sym, Datatype ct)
         {
-            if (sym->type->getSize() == ct->getSize())
+            if (sym.type.getSize() == ct.getSize())
             {
-                if (!sym->isSizeTypeLocked())
+                if (!sym.isSizeTypeLocked())
                     throw new LowlevelError("Overriding symbol that is not size locked");
-                sym->type = ct;
+                sym.type = ct;
                 return;
             }
             throw new LowlevelError("Overriding symbol with different type size");
@@ -930,15 +930,15 @@ namespace Sla.DECCORE
         /// \param sym is the Symbol to clear
         public void resetSizeLockType(Symbol sym)
         {
-            if (sym->type->getMetatype() == TYPE_UNKNOWN) return;   // Nothing to do
-            int4 size = sym->type->getSize();
-            sym->type = glb->types->getBase(size, TYPE_UNKNOWN);
+            if (sym.type.getMetatype() == TYPE_UNKNOWN) return;   // Nothing to do
+            int4 size = sym.type.getSize();
+            sym.type = glb.types.getBase(size, TYPE_UNKNOWN);
         }
 
         /// Toggle the given Symbol as the "this" pointer
         public void setThisPointer(Symbol sym, bool val)
         {
-            sym->setThisPointer(val);
+            sym.setThisPointer(val);
         }
 
         /// Is this a sub-scope of the given Scope
@@ -951,7 +951,7 @@ namespace Sla.DECCORE
             do
             {
                 if (tmp == scp) return true;
-                tmp = tmp->parent;
+                tmp = tmp.parent;
             } while (tmp != (Scope*)0);
             return false;
         }
@@ -962,10 +962,10 @@ namespace Sla.DECCORE
             if (parent == (Scope*)0) return "";
             string fname = name;
             Scope* scope = parent;
-            while (scope->parent != (Scope*)0)
+            while (scope.parent != (Scope*)0)
             {
-                fname = scope->name + "::" + fname;
-                scope = scope->parent;
+                fname = scope.name + "::" + fname;
+                scope = scope.parent;
             }
             return fname;
         }
@@ -979,14 +979,14 @@ namespace Sla.DECCORE
             Scope cur = this;
             while (cur != (Scope*)0) {    // Count number of elements in path
                 count += 1;
-                cur = cur->parent;
+                cur = cur.parent;
             }
             vec.resize(count);
             cur = this;
             while (cur != (Scope*)0) {
                 count -= 1;
                 vec[count] = cur;
-                cur = cur->parent;
+                cur = cur.parent;
             }
         }
 
@@ -1000,12 +1000,12 @@ namespace Sla.DECCORE
         {
             if (this == op2) return (Scope*)0;    // Quickly check most common cases
             if (parent == op2) return this;
-            if (op2->parent == this) return (Scope*)0;
-            if (parent == op2->parent) return this;
+            if (op2.parent == this) return (Scope*)0;
+            if (parent == op2.parent) return this;
             List<Scope> thisPath = new List<Scope>();
             List<Scope> op2Path = new List<Scope>();
             getScopePath(thisPath);
-            op2->getScopePath(op2Path);
+            op2.getScopePath(op2Path);
             int4 min = thisPath.size();
             if (op2Path.size() < min)
                 min = op2Path.size();
@@ -1072,9 +1072,9 @@ namespace Sla.DECCORE
             else if (subId == ELEM_EQUATESYMBOL)
                 sym = new EquateSymbol(owner);
             else if (subId == ELEM_FUNCTION)
-                sym = new FunctionSymbol(owner, glb->min_funcsymbol_size);
+                sym = new FunctionSymbol(owner, glb.min_funcsymbol_size);
             else if (subId == ELEM_FUNCTIONSHELL)
-                sym = new FunctionSymbol(owner, glb->min_funcsymbol_size);
+                sym = new FunctionSymbol(owner, glb.min_funcsymbol_size);
             else if (subId == ELEM_LABELSYM)
                 sym = new LabSymbol(owner);
             else if (subId == ELEM_EXTERNREFSYMBOL)
@@ -1085,7 +1085,7 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Unknown symbol type");
             try
             {       // Protect against duplicate scope errors
-                sym->decode(decoder);
+                sym.decode(decoder);
             }
             catch (RecovError err) {
                 delete sym;
@@ -1098,7 +1098,7 @@ namespace Sla.DECCORE
                 entry.decode(decoder);
                 if (entry.isInvalid())
                 {
-                    glb->printMessage("WARNING: Throwing out symbol with invalid mapping: " + sym->getName());
+                    glb.printMessage("WARNING: Throwing out symbol with invalid mapping: " + sym.getName());
                     removeSymbol(sym);
                     decoder.closeElement(elemId);
                     return (Symbol*)0;
@@ -1124,10 +1124,10 @@ namespace Sla.DECCORE
             if (overlap != (SymbolEntry*)0)
             {
                 string errmsg = "WARNING: Function " + name;
-                errmsg += " overlaps object: " + overlap->getSymbol()->getName();
-                glb->printMessage(errmsg);
+                errmsg += " overlaps object: " + overlap.getSymbol().getName();
+                glb.printMessage(errmsg);
             }
-            sym = new FunctionSymbol(owner, nm, glb->min_funcsymbol_size);
+            sym = new FunctionSymbol(owner, nm, glb.min_funcsymbol_size);
             addSymbolInternal(sym);
             // Map symbol to base address of function
             // there is no limit on the applicability of this map within scope
@@ -1154,7 +1154,7 @@ namespace Sla.DECCORE
             SymbolEntry* ret = addMapPoint(sym, addr, Address());
             // Even if the external reference is in a readonly region, treat it as not readonly
             // As the value in the image probably isn't valid
-            ret->symbol->flags &= ~((uint4)Varnode::readonly);
+            ret.symbol.flags &= ~((uint4)Varnode::readonly);
             return sym;
         }
 
@@ -1172,8 +1172,8 @@ namespace Sla.DECCORE
             if (overlap != (SymbolEntry*)0)
             {
                 string errmsg = "WARNING: Codelabel " + nm;
-                errmsg += " overlaps object: " + overlap->getSymbol()->getName();
-                glb->printMessage(errmsg);
+                errmsg += " overlaps object: " + overlap.getSymbol().getName();
+                glb.printMessage(errmsg);
             }
             sym = new LabSymbol(owner, nm);
             addSymbolInternal(sym);
@@ -1199,7 +1199,7 @@ namespace Sla.DECCORE
             RangeList rnglist;
             if (!caddr.isInvalid())
                 rnglist.insertRange(caddr.getSpace(), caddr.getOffset(), caddr.getOffset());
-            addDynamicMapInternal(sym, Varnode::mapped, hash, 0, ct->getSize(), rnglist);
+            addDynamicMapInternal(sym, Varnode::mapped, hash, 0, ct.getSize(), rnglist);
             return sym;
         }
 
@@ -1257,37 +1257,37 @@ namespace Sla.DECCORE
         /// \return the default name
         public string buildDefaultName(Symbol sym, int @base, Varnode vn)
         {
-            if (vn != (Varnode*)0 && !vn->isConstant())
+            if (vn != (Varnode*)0 && !vn.isConstant())
             {
                 Address usepoint;
-                if (!vn->isAddrTied() && fd != (Funcdata*)0)
-                    usepoint = vn->getUsePoint(*fd);
-                HighVariable* high = vn->getHigh();
-                if (sym->getCategory() == Symbol::function_parameter || high->isInput())
+                if (!vn.isAddrTied() && fd != (Funcdata*)0)
+                    usepoint = vn.getUsePoint(*fd);
+                HighVariable* high = vn.getHigh();
+                if (sym.getCategory() == Symbol::function_parameter || high.isInput())
                 {
                     int4 index = -1;
-                    if (sym->getCategory() == Symbol::function_parameter)
-                        index = sym->getCategoryIndex() + 1;
-                    return buildVariableName(vn->getAddr(), usepoint, sym->getType(), index, vn->getFlags() | Varnode::input);
+                    if (sym.getCategory() == Symbol::function_parameter)
+                        index = sym.getCategoryIndex() + 1;
+                    return buildVariableName(vn.getAddr(), usepoint, sym.getType(), index, vn.getFlags() | Varnode::input);
                 }
-                return buildVariableName(vn->getAddr(), usepoint, sym->getType(), base, vn->getFlags());
+                return buildVariableName(vn.getAddr(), usepoint, sym.getType(), base, vn.getFlags());
             }
-            if (sym->numEntries() != 0)
+            if (sym.numEntries() != 0)
             {
-                SymbolEntry* entry = sym->getMapEntry(0);
-                Address addr = entry->getAddr();
-                Address usepoint = entry->getFirstUseAddress();
+                SymbolEntry* entry = sym.getMapEntry(0);
+                Address addr = entry.getAddr();
+                Address usepoint = entry.getFirstUseAddress();
                 uint4 flags = usepoint.isInvalid() ? Varnode::addrtied : 0;
-                if (sym->getCategory() == Symbol::function_parameter)
+                if (sym.getCategory() == Symbol::function_parameter)
                 {
                     flags |= Varnode::input;
-                    int4 index = sym->getCategoryIndex() + 1;
-                    return buildVariableName(addr, usepoint, sym->getType(), index, flags);
+                    int4 index = sym.getCategoryIndex() + 1;
+                    return buildVariableName(addr, usepoint, sym.getType(), index, flags);
                 }
-                return buildVariableName(addr, usepoint, sym->getType(), base, flags);
+                return buildVariableName(addr, usepoint, sym.getType(), base, flags);
             }
             // Should never reach here
-            return buildVariableName(Address(), Address(), sym->getType(), base, 0);
+            return buildVariableName(Address(), Address(), sym.getType(), base, 0);
         }
 
         /// \brief Is the given memory range marked as \e read-only

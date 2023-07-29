@@ -43,58 +43,58 @@ namespace Sla.DECCORE
             PcodeOp* subop;
             uintb val;
 
-            subvn = op->getIn(0);
-            if (!subvn->isWritten()) return 0;
-            subop = subvn->getDef();
-            if (subop->code() == CPUI_SUBPIECE)
+            subvn = op.getIn(0);
+            if (!subvn.isWritten()) return 0;
+            subop = subvn.getDef();
+            if (subop.code() == CPUI_SUBPIECE)
             {
-                basevn = subop->getIn(0);
-                if (basevn->isFree()) return 0;
-                if (basevn->getSize() != op->getOut()->getSize()) return 0; // Truncating then extending to same size
-                if (basevn->getSize() > sizeof(uintb))
+                basevn = subop.getIn(0);
+                if (basevn.isFree()) return 0;
+                if (basevn.getSize() != op.getOut().getSize()) return 0; // Truncating then extending to same size
+                if (basevn.getSize() > sizeof(uintb))
                     return 0;
-                if (subop->getIn(1)->getOffset() != 0)
+                if (subop.getIn(1).getOffset() != 0)
                 { // If truncating from middle
-                    if (subvn->loneDescend() != op) return 0; // and there is no other use of the truncated value
-                    Varnode* newvn = data.newUnique(basevn->getSize(), (Datatype*)0);
-                    constvn = subop->getIn(1);
-                    uintb rightVal = constvn->getOffset() * 8;
+                    if (subvn.loneDescend() != op) return 0; // and there is no other use of the truncated value
+                    Varnode* newvn = data.newUnique(basevn.getSize(), (Datatype*)0);
+                    constvn = subop.getIn(1);
+                    uintb rightVal = constvn.getOffset() * 8;
                     data.opSetInput(op, newvn, 0);
                     data.opSetOpcode(subop, CPUI_INT_RIGHT); // Convert the truncation to a shift
-                    data.opSetInput(subop, data.newConstant(constvn->getSize(), rightVal), 1);
+                    data.opSetInput(subop, data.newConstant(constvn.getSize(), rightVal), 1);
                     data.opSetOutput(subop, newvn);
                 }
                 else
                     data.opSetInput(op, basevn, 0); // Otherwise, bypass the truncation entirely
-                val = calc_mask(subvn->getSize());
-                constvn = data.newConstant(basevn->getSize(), val);
+                val = calc_mask(subvn.getSize());
+                constvn = data.newConstant(basevn.getSize(), val);
                 data.opSetOpcode(op, CPUI_INT_AND);
                 data.opInsertInput(op, constvn, 1);
                 return 1;
             }
-            else if (subop->code() == CPUI_INT_RIGHT)
+            else if (subop.code() == CPUI_INT_RIGHT)
             {
                 PcodeOp* shiftop = subop;
-                if (!shiftop->getIn(1)->isConstant()) return 0;
-                Varnode* midvn = shiftop->getIn(0);
-                if (!midvn->isWritten()) return 0;
-                subop = midvn->getDef();
-                if (subop->code() != CPUI_SUBPIECE) return 0;
-                basevn = subop->getIn(0);
-                if (basevn->isFree()) return 0;
-                if (basevn->getSize() != op->getOut()->getSize()) return 0; // Truncating then extending to same size
-                if (midvn->loneDescend() != shiftop) return 0;
-                if (subvn->loneDescend() != op) return 0;
-                val = calc_mask(midvn->getSize()); // Mask based on truncated size
-                uintb sa = shiftop->getIn(1)->getOffset(); // The shift shrinks the mask even further
+                if (!shiftop.getIn(1).isConstant()) return 0;
+                Varnode* midvn = shiftop.getIn(0);
+                if (!midvn.isWritten()) return 0;
+                subop = midvn.getDef();
+                if (subop.code() != CPUI_SUBPIECE) return 0;
+                basevn = subop.getIn(0);
+                if (basevn.isFree()) return 0;
+                if (basevn.getSize() != op.getOut().getSize()) return 0; // Truncating then extending to same size
+                if (midvn.loneDescend() != shiftop) return 0;
+                if (subvn.loneDescend() != op) return 0;
+                val = calc_mask(midvn.getSize()); // Mask based on truncated size
+                uintb sa = shiftop.getIn(1).getOffset(); // The shift shrinks the mask even further
                 val >>= sa;
-                sa += subop->getIn(1)->getOffset() * 8; // The total shift = truncation + small shift
-                Varnode* newvn = data.newUnique(basevn->getSize(), (Datatype*)0);
+                sa += subop.getIn(1).getOffset() * 8; // The total shift = truncation + small shift
+                Varnode* newvn = data.newUnique(basevn.getSize(), (Datatype*)0);
                 data.opSetInput(op, newvn, 0);
                 data.opSetInput(shiftop, basevn, 0); // Shift the full value, instead of the truncated value
-                data.opSetInput(shiftop, data.newConstant(shiftop->getIn(1)->getSize(), sa), 1);    // by the combined amount
+                data.opSetInput(shiftop, data.newConstant(shiftop.getIn(1).getSize(), sa), 1);    // by the combined amount
                 data.opSetOutput(shiftop, newvn);
-                constvn = data.newConstant(basevn->getSize(), val);
+                constvn = data.newConstant(basevn.getSize(), val);
                 data.opSetOpcode(op, CPUI_INT_AND); // Turn the ZEXT into an AND
                 data.opInsertInput(op, constvn, 1); // With the appropriate mask
                 return 1;

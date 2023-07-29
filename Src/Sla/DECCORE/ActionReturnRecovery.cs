@@ -22,13 +22,13 @@ namespace Sla.DECCORE
         {
             vector<Varnode*> newparam;
 
-            newparam.push_back(retop->getIn(0)); // Keep the first param (the return indirect reference)
-            for (int4 i = 0; i < active->getNumTrials(); ++i)
+            newparam.push_back(retop.getIn(0)); // Keep the first param (the return indirect reference)
+            for (int4 i = 0; i < active.getNumTrials(); ++i)
             { // Gather all the used varnodes to this return in proper order
-                ParamTrial & curtrial(active->getTrial(i));
+                ParamTrial & curtrial(active.getTrial(i));
                 if (!curtrial.isUsed()) break;
-                if (curtrial.getSlot() >= retop->numInput()) break;
-                newparam.push_back(retop->getIn(curtrial.getSlot()));
+                if (curtrial.getSlot() >= retop.numInput()) break;
+                newparam.push_back(retop.getIn(curtrial.getSlot()));
             }
             if (newparam.size() <= 2)   // Easy zero or one return varnode case
                 data.opSetAllInput(retop, newparam);
@@ -36,15 +36,15 @@ namespace Sla.DECCORE
             { // Two piece concatenation case
                 Varnode* lovn = newparam[1];
                 Varnode* hivn = newparam[2];
-                ParamTrial & triallo(active->getTrial(0));
-                ParamTrial & trialhi(active->getTrial(1));
-                Address joinaddr = data.getArch()->constructJoinAddress(data.getArch()->translate,
+                ParamTrial & triallo(active.getTrial(0));
+                ParamTrial & trialhi(active.getTrial(1));
+                Address joinaddr = data.getArch().constructJoinAddress(data.getArch().translate,
                                             trialhi.getAddress(), trialhi.getSize(),
                                             triallo.getAddress(), triallo.getSize());
-                PcodeOp* newop = data.newOp(2, retop->getAddr());
+                PcodeOp* newop = data.newOp(2, retop.getAddr());
                 data.opSetOpcode(newop, CPUI_PIECE);
                 Varnode* newwhole = data.newVarnodeOut(trialhi.getSize() + triallo.getSize(), joinaddr, newop);
-                newwhole->setWriteMask();       // Don't let new Varnode cause additional heritage
+                newwhole.setWriteMask();       // Don't let new Varnode cause additional heritage
                 data.opInsertBefore(newop, retop);
                 newparam.pop_back();
                 newparam.back() = newwhole;
@@ -56,31 +56,31 @@ namespace Sla.DECCORE
             { // We may have several varnodes from a single container
               // Concatenate them into a single result
                 newparam.clear();
-                newparam.push_back(retop->getIn(0));
+                newparam.push_back(retop.getIn(0));
                 int4 offmatch = 0;
                 Varnode* preexist = (Varnode*)0;
-                for (int4 i = 0; i < active->getNumTrials(); ++i)
+                for (int4 i = 0; i < active.getNumTrials(); ++i)
                 {
-                    ParamTrial & curtrial(active->getTrial(i));
+                    ParamTrial & curtrial(active.getTrial(i));
                     if (!curtrial.isUsed()) break;
-                    if (curtrial.getSlot() >= retop->numInput()) break;
+                    if (curtrial.getSlot() >= retop.numInput()) break;
                     if (preexist == (Varnode*)0)
                     {
-                        preexist = retop->getIn(curtrial.getSlot());
+                        preexist = retop.getIn(curtrial.getSlot());
                         offmatch = curtrial.getOffset() + curtrial.getSize();
                     }
                     else if (offmatch == curtrial.getOffset())
                     {
                         offmatch += curtrial.getSize();
-                        Varnode* vn = retop->getIn(curtrial.getSlot());
+                        Varnode* vn = retop.getIn(curtrial.getSlot());
                         // Concatenate the preexisting pieces with this new piece
-                        PcodeOp* newop = data.newOp(2, retop->getAddr());
+                        PcodeOp* newop = data.newOp(2, retop.getAddr());
                         data.opSetOpcode(newop, CPUI_PIECE);
-                        Address addr = preexist->getAddr();
-                        if (vn->getAddr() < addr)
-                            addr = vn->getAddr();
-                        Varnode* newout = data.newVarnodeOut(preexist->getSize() + vn->getSize(), addr, newop);
-                        newout->setWriteMask();     // Don't let new Varnode cause additional heritage
+                        Address addr = preexist.getAddr();
+                        if (vn.getAddr() < addr)
+                            addr = vn.getAddr();
+                        Varnode* newout = data.newVarnodeOut(preexist.getSize() + vn.getSize(), addr, newop);
+                        newout.setWriteMask();     // Don't let new Varnode cause additional heritage
                         data.opSetInput(newop, vn, 0);  // Most sig part
                         data.opSetInput(newop, preexist, 1);
                         data.opInsertBefore(newop, retop);
@@ -115,20 +115,20 @@ namespace Sla.DECCORE
                 list<PcodeOp*>::const_iterator iter, iterend;
                 int4 i;
 
-                int4 maxancestor = data.getArch()->trim_recurse_max;
+                int4 maxancestor = data.getArch().trim_recurse_max;
                 iterend = data.endOp(CPUI_RETURN);
                 AncestorRealistic ancestorReal;
                 for (iter = data.beginOp(CPUI_RETURN); iter != iterend; ++iter)
                 {
                     op = *iter;
-                    if (op->isDead()) continue;
-                    if (op->getHaltType() != 0) continue; // Don't evaluate special halts
-                    for (i = 0; i < active->getNumTrials(); ++i)
+                    if (op.isDead()) continue;
+                    if (op.getHaltType() != 0) continue; // Don't evaluate special halts
+                    for (i = 0; i < active.getNumTrials(); ++i)
                     {
-                        ParamTrial & trial(active->getTrial(i));
+                        ParamTrial & trial(active.getTrial(i));
                         if (trial.isChecked()) continue; // Already checked
                         int4 slot = trial.getSlot();
-                        vn = op->getIn(slot);
+                        vn = op.getIn(slot);
                         if (ancestorReal.execute(op, slot, &trial, false))
                             if (data.ancestorOpUse(maxancestor, vn, op, trial, 0, 0))
                                 trial.markActive(); // This varnode sees active use as a parameter
@@ -136,19 +136,19 @@ namespace Sla.DECCORE
                     }
                 }
 
-                active->finishPass();
-                if (active->getNumPasses() > active->getMaxPass())
-                    active->markFullyChecked();
+                active.finishPass();
+                if (active.getNumPasses() > active.getMaxPass())
+                    active.markFullyChecked();
 
-                if (active->isFullyChecked())
+                if (active.isFullyChecked())
                 {
                     data.getFuncProto().deriveOutputMap(active);
                     iterend = data.endOp(CPUI_RETURN);
                     for (iter = data.beginOp(CPUI_RETURN); iter != iterend; ++iter)
                     {
                         op = *iter;
-                        if (op->isDead()) continue;
-                        if (op->getHaltType() != 0) continue;
+                        if (op.isDead()) continue;
+                        if (op.getHaltType() != 0) continue;
                         buildReturnOutput(active, op, data);
                     }
                     data.clearActiveOutput();

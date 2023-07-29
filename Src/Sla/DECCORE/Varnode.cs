@@ -160,7 +160,7 @@ namespace Sla.DECCORE
         private VarnodeDefSet::iterator defiter;
         /// List of every op using this varnode as input
         private List<PcodeOp> descend;
-        /// Addresses covered by the def->use of this Varnode
+        /// Addresses covered by the def.use of this Varnode
         private /*mutable*/ Cover cover;
         private /*mutable*/ struct TempStorage
         {
@@ -189,7 +189,7 @@ namespace Sla.DECCORE
             if ((flags & Varnode::coverdirty) != 0)
             {
                 if (hasCover() && (cover != (Cover*)0))
-                    cover->rebuild(this);
+                    cover.rebuild(this);
                 clearFlags(Varnode::coverdirty);
             }
         }
@@ -226,9 +226,9 @@ namespace Sla.DECCORE
             flags |= fl;
             if (high != (HighVariable*)0)
             {
-                high->flagsDirty();
+                high.flagsDirty();
                 if ((fl & Varnode::coverdirty) != 0)
-                    high->coverDirty();
+                    high.coverDirty();
             }
         }
 
@@ -240,9 +240,9 @@ namespace Sla.DECCORE
             flags &= ~fl;
             if (high != (HighVariable*)0)
             {
-                high->flagsDirty();
+                high.flagsDirty();
                 if ((fl & Varnode::coverdirty) != 0)
-                    high->coverDirty();
+                    high.coverDirty();
             }
         }
 
@@ -252,15 +252,15 @@ namespace Sla.DECCORE
         private void clearSymbolLinks()
         {
             bool foundEntry = false;
-            for (int4 i = 0; i < high->numInstances(); ++i)
+            for (int4 i = 0; i < high.numInstances(); ++i)
             {
-                Varnode* vn = high->getInstance(i);
-                foundEntry = foundEntry || (vn->mapentry != (SymbolEntry*)0);
-                vn->mapentry = (SymbolEntry*)0;
-                vn->clearFlags(Varnode::namelock | Varnode::typelock | Varnode::mapped);
+                Varnode* vn = high.getInstance(i);
+                foundEntry = foundEntry || (vn.mapentry != (SymbolEntry*)0);
+                vn.mapentry = (SymbolEntry*)0;
+                vn.clearFlags(Varnode::namelock | Varnode::typelock | Varnode::mapped);
             }
             if (foundEntry)
-                high->symbolDirty();
+                high.symbolDirty();
         }
 
         /// Mark Varnode as \e unaffected
@@ -298,18 +298,18 @@ namespace Sla.DECCORE
         /// \return \b true if any properties have changed
         private bool setSymbolProperties(SymbolEntry entry)
         {
-            bool res = entry->updateType(this);
-            if (entry->getSymbol()->isTypeLocked())
+            bool res = entry.updateType(this);
+            if (entry.getSymbol().isTypeLocked())
             {
                 if (mapentry != entry)
                 {
                     mapentry = entry;
                     if (high != (HighVariable*)0)
-                        high->setSymbol(this);
+                        high.setSymbol(this);
                     res = true;
                 }
             }
-            setFlags(entry->getAllFlags() & ~Varnode::typelock);
+            setFlags(entry.getAllFlags() & ~Varnode::typelock);
             return res;
         }
 
@@ -321,11 +321,11 @@ namespace Sla.DECCORE
         {
             mapentry = entry;
             uint4 fl = Varnode::mapped; // Flags are generally not changed, but we do mark this as mapped
-            if (entry->getSymbol()->isNameLocked())
+            if (entry.getSymbol().isNameLocked())
                 fl |= Varnode::namelock;
             setFlags(fl);
             if (high != (HighVariable*)0)
-                high->setSymbol(this);
+                high.setSymbol(this);
         }
 
         /// Attach a Symbol reference to \b this
@@ -338,7 +338,7 @@ namespace Sla.DECCORE
         {
             if (high != (HighVariable*)0)
             {
-                high->setSymbolReference(entry->getSymbol(), off);
+                high.setSymbolReference(entry.getSymbol(), off);
             }
         }
 
@@ -445,9 +445,9 @@ namespace Sla.DECCORE
         /// \return the resolved data-type
         public Datatype getTypeDefFacing()
         {
-            if (!type->needsResolution())
+            if (!type.needsResolution())
                 return type;
-            return type->findResolve(def, -1);
+            return type.findResolve(def, -1);
         }
 
         /// Get the data-type of \b this when it is read by the given PcodeOp
@@ -458,9 +458,9 @@ namespace Sla.DECCORE
         /// \return the resolved data-type
         public Datatype getTypeReadFacing(PcodeOp op)
         {
-            if (!type->needsResolution())
+            if (!type.needsResolution())
                 return type;
-            return type->findResolve(op, op->getSlot(this));
+            return type.findResolve(op, op.getSlot(this));
         }
 
         /// Return the data-type of the HighVariable when \b this is written to
@@ -470,10 +470,10 @@ namespace Sla.DECCORE
         /// \return the resolved data-type
         public Datatype getHighTypeDefFacing()
         {
-            Datatype* ct = high->getType();
-            if (!ct->needsResolution())
+            Datatype* ct = high.getType();
+            if (!ct.needsResolution())
                 return ct;
-            return ct->findResolve(def, -1);
+            return ct.findResolve(def, -1);
         }
 
         /// Return data-type of the HighVariable when read by the given PcodeOp
@@ -484,10 +484,10 @@ namespace Sla.DECCORE
         /// \return the resolved data-type
         public Datatype getHighTypeReadFacing(PcodeOp op)
         {
-            Datatype* ct = high->getType();
-            if (!ct->needsResolution())
+            Datatype* ct = high.getType();
+            if (!ct.needsResolution())
                 return ct;
-            return ct->findResolve(op, op->getSlot(this));
+            return ct.findResolve(op, op.getSlot(this));
         }
 
         /// Set the temporary Datatype
@@ -589,9 +589,9 @@ namespace Sla.DECCORE
         public Address getUsePoint(Funcdata fd)
         {
             if (isWritten())
-                return def->getAddr();
+                return def.getAddr();
             return fd.getAddress() + -1;
-            //  return loc.getSpace()->getTrans()->constant(0);
+            //  return loc.getSpace().getTrans().constant(0);
         }
 
         /// Print a simple identifier for the Varnode
@@ -604,14 +604,14 @@ namespace Sla.DECCORE
         public int4 printRawNoMarkup(TextWriter s)
         {
             AddrSpace* spc = loc.getSpace();
-            Translate trans = spc->getTrans();
+            Translate trans = spc.getTrans();
             string name;
             int4 expect;
 
-            name = trans->getRegisterName(spc, loc.getOffset(), size);
+            name = trans.getRegisterName(spc, loc.getOffset(), size);
             if (name.size() != 0)
             {
-                VarnodeData point = trans->getRegister(name);
+                VarnodeData point = trans.getRegister(name);
                 uintb off = loc.getOffset() - point.offset;
                 s << name;
                 expect = point.size;
@@ -621,7 +621,7 @@ namespace Sla.DECCORE
             else
             {
                 s << loc.getShortcut(); // Print type shortcut character
-                expect = trans->getDefaultSize();
+                expect = trans.getDefaultSize();
                 loc.printRaw(s);
             }
             return expect;
@@ -642,7 +642,7 @@ namespace Sla.DECCORE
             if ((flags & Varnode::input) != 0)
                 s << "(i)";
             if (isWritten())
-                s << '(' << def->getSeqNum() << ')';
+                s << '(' << def.getSeqNum() << ')';
             if ((flags & (Varnode::insert | Varnode::constant)) == 0)
             {
                 s << "(free)";
@@ -662,7 +662,7 @@ namespace Sla.DECCORE
             if ((flags & Varnode::coverdirty) != 0)
                 s << "Cover is dirty" << endl;
             else
-                cover->print(s);
+                cover.print(s);
         }
 
         /// Print raw attribute info about the Varnode
@@ -670,7 +670,7 @@ namespace Sla.DECCORE
         /// \param s is the output stream
         public void printInfo(TextWriter s)
         {
-            type->printRaw(s);
+            type.printRaw(s);
             s << " = ";
             printRaw(s);
             if (isAddrTied())
@@ -724,7 +724,7 @@ namespace Sla.DECCORE
                 flags = 0;
                 return;
             }
-            spacetype tp = m.getSpace()->getType();
+            spacetype tp = m.getSpace().getType();
             if (tp == IPTR_CONSTANT)
             {
                 flags = Varnode::constant;
@@ -762,8 +762,8 @@ namespace Sla.DECCORE
             f2 = op2.flags & (Varnode::input | Varnode::written);
             if (f1 != f2) return ((f1 - 1) < (f2 - 1)); // -1 forces free varnodes to come last
             if (f1 == Varnode::written)
-                if (def->getSeqNum() != op2.def->getSeqNum())
-                    return (def->getSeqNum() < op2.def->getSeqNum());
+                if (def.getSeqNum() != op2.def.getSeqNum())
+                    return (def.getSeqNum() < op2.def.getSeqNum());
             return false;
         }
 
@@ -785,7 +785,7 @@ namespace Sla.DECCORE
             f2 = op2.flags & (Varnode::input | Varnode::written);
             if (f1 != f2) return false;
             if (f1 == Varnode::written)
-                if (def->getSeqNum() != op2.def->getSeqNum()) return false;
+                if (def.getSeqNum() != op2.def.getSeqNum()) return false;
 
             return true;
         }
@@ -800,8 +800,8 @@ namespace Sla.DECCORE
                 delete cover;
             if (high != (HighVariable*)0)
             {
-                high->remove(this);
-                if (high->isUnattached())
+                high.remove(this);
+                if (high.isUnattached())
                     delete high;
             }
         }
@@ -813,7 +813,7 @@ namespace Sla.DECCORE
         public bool intersects(Varnode op)
         {
             if (loc.getSpace() != op.loc.getSpace()) return false;
-            if (loc.getSpace()->getType() == IPTR_CONSTANT) return false;
+            if (loc.getSpace().getType() == IPTR_CONSTANT) return false;
             uintb a = loc.getOffset();
             uintb b = op.loc.getOffset();
             if (b < a)
@@ -833,7 +833,7 @@ namespace Sla.DECCORE
         public bool intersects(Address op2loc, int4 op2size)
         {
             if (loc.getSpace() != op2loc.getSpace()) return false;
-            if (loc.getSpace()->getType() == IPTR_CONSTANT) return false;
+            if (loc.getSpace().getType() == IPTR_CONSTANT) return false;
             uintb a = loc.getOffset();
             uintb b = op2loc.getOffset();
             if (b < a)
@@ -858,7 +858,7 @@ namespace Sla.DECCORE
         public int4 contains(Varnode op)
         {
             if (loc.getSpace() != op.loc.getSpace()) return 3;
-            if (loc.getSpace()->getType() == IPTR_CONSTANT) return 3;
+            if (loc.getSpace().getType() == IPTR_CONSTANT) return 3;
             uintb a = loc.getOffset();
             uintb b = op.loc.getOffset();
             if (b < a) return -1;
@@ -958,21 +958,21 @@ namespace Sla.DECCORE
         {
             if (isConstant())
             {
-                if (!op->isConstant()) return 1;
+                if (!op.isConstant()) return 1;
             }
             else
             {
-                if (op->isConstant()) return -1;
+                if (op.isConstant()) return -1;
                 Varnode vn = this;
-                if (vn->isWritten() && (vn->getDef()->code() == CPUI_INT_MULT))
-                    if (vn->getDef()->getIn(1)->isConstant())
-                        vn = vn->getDef()->getIn(0);
-                if (op->isWritten() && (op->getDef()->code() == CPUI_INT_MULT))
-                    if (op->getDef()->getIn(1)->isConstant())
-                        op = op->getDef()->getIn(0);
+                if (vn.isWritten() && (vn.getDef().code() == CPUI_INT_MULT))
+                    if (vn.getDef().getIn(1).isConstant())
+                        vn = vn.getDef().getIn(0);
+                if (op.isWritten() && (op.getDef().code() == CPUI_INT_MULT))
+                    if (op.getDef().getIn(1).isConstant())
+                        op = op.getDef().getIn(0);
 
-                if (vn->getAddr() < op->getAddr()) return -1;
-                if (op->getAddr() < vn->getAddr()) return 1;
+                if (vn.getAddr() < op.getAddr()) return -1;
+                if (op.getAddr() < vn.getAddr()) return 1;
             }
             return 0;
         }
@@ -995,7 +995,7 @@ namespace Sla.DECCORE
             printRaw(s);
             s << ' ';
             if (def != (PcodeOp*)0)
-                def->printRaw(s);
+                def.printRaw(s);
             else
                 printRaw(s);
 
@@ -1008,9 +1008,9 @@ namespace Sla.DECCORE
 
             if (def != (PcodeOp*)0)
             {
-                s << "\t\t" << def->getSeqNum() << endl;
-                for (int4 i = 0; i < def->numInput(); ++i)
-                    def->getIn(i)->printRawHeritage(s, depth + 5);
+                s << "\t\t" << def.getSeqNum() << endl;
+                for (int4 i = 0; i < def.numInput(); ++i)
+                    def.getIn(i).printRawHeritage(s, depth + 5);
             }
             else
                 s << endl;
@@ -1171,22 +1171,22 @@ namespace Sla.DECCORE
                 return 0;
             }
             if (!isWritten()) return -1;
-            OpCode opc = def->code();
+            OpCode opc = def.code();
             if (opc == CPUI_INT_ZEXT)
             {
-                Varnode* vn0 = def->getIn(0);
-                if (vn0->isConstant())
+                Varnode* vn0 = def.getIn(0);
+                if (vn0.isConstant())
                 {
-                    val = vn0->getOffset();
+                    val = vn0.getOffset();
                     return 1;
                 }
             }
             else if (opc == CPUI_INT_SEXT)
             {
-                Varnode* vn0 = def->getIn(0);
-                if (vn0->isConstant())
+                Varnode* vn0 = def.getIn(0);
+                if (vn0.isConstant())
                 {
-                    val = vn0->getOffset();
+                    val = vn0.getOffset();
                     return 2;
                 }
             }
@@ -1423,7 +1423,7 @@ namespace Sla.DECCORE
         /// \return \b true if the Datatype or the lock setting was changed
         public bool updateType(Datatype ct, bool @lock, bool @override)
         {
-            if (ct->getMetatype() == TYPE_UNKNOWN) // Unknown data type is ALWAYS unlocked
+            if (ct.getMetatype() == TYPE_UNKNOWN) // Unknown data type is ALWAYS unlocked
                 lock = false;
 
             if (isTypeLock() && (!@override)) return false; // Type is locked
@@ -1433,7 +1433,7 @@ namespace Sla.DECCORE
                 flags |= Varnode::typelock;
             type = ct;
             if (high != (HighVariable*)0)
-                high->typeDirty();
+                high.typeDirty();
             return true;
         }
 
@@ -1454,15 +1454,15 @@ namespace Sla.DECCORE
         /// \param vn is the Varnode to copy from
         public void copySymbol(Varnode vn)
         {
-            type = vn->type;        // Copy any type
-            mapentry = vn->mapentry;    // Copy any symbol
+            type = vn.type;        // Copy any type
+            mapentry = vn.mapentry;    // Copy any symbol
             flags &= ~(Varnode::typelock | Varnode::namelock);
-            flags |= (Varnode::typelock | Varnode::namelock) & vn->flags;
+            flags |= (Varnode::typelock | Varnode::namelock) & vn.flags;
             if (high != (HighVariable*)0)
             {
-                high->typeDirty();
+                high.typeDirty();
                 if (mapentry != (SymbolEntry*)0)
-                    high->setSymbol(this);
+                    high.setSymbol(this);
             }
         }
 
@@ -1472,13 +1472,13 @@ namespace Sla.DECCORE
         /// \param vn is the given constant Varnode
         public void copySymbolIfValid(Varnode vn)
         {
-            SymbolEntry* mapEntry = vn->getSymbolEntry();
+            SymbolEntry* mapEntry = vn.getSymbolEntry();
             if (mapEntry == (SymbolEntry*)0)
                 return;
-            EquateSymbol* sym = dynamic_cast<EquateSymbol*>(mapEntry->getSymbol());
+            EquateSymbol* sym = dynamic_cast<EquateSymbol*>(mapEntry.getSymbol());
             if (sym == (EquateSymbol*)0)
                 return;
-            if (sym->isValueClose(loc.getOffset(), size))
+            if (sym.isValueClose(loc.getOffset(), size))
             {
                 copySymbol(vn); // Propagate the markup into our new constant
             }
@@ -1501,8 +1501,8 @@ namespace Sla.DECCORE
             ct = (Datatype*)0;
             if (def != (PcodeOp*)0)
             {
-                ct = def->outputTypeLocal();
-                if (def->stopsTypePropagation())
+                ct = def.outputTypeLocal();
+                if (def.stopsTypePropagation())
                 {
                     blockup = true;
                     return ct;
@@ -1515,14 +1515,14 @@ namespace Sla.DECCORE
             for (iter = descend.begin(); iter != descend.end(); ++iter)
             {
                 op = *iter;
-                i = op->getSlot(this);
-                newct = op->inputTypeLocal(i);
+                i = op.getSlot(this);
+                newct = op.inputTypeLocal(i);
 
                 if (ct == (Datatype*)0)
                     ct = newct;
                 else
                 {
-                    if (0 > newct->typeOrder(*ct))
+                    if (0 > newct.typeOrder(*ct))
                         ct = newct;
                 }
             }
@@ -1538,12 +1538,12 @@ namespace Sla.DECCORE
         /// \return \b true if \b this is a formal boolean, \b false otherwise
         public bool isBooleanValue(bool useAnnotation)
         {
-            if (isWritten()) return def->isCalculatedBool();
+            if (isWritten()) return def.isCalculatedBool();
             if (!useAnnotation)
                 return false;
             if ((flags & (input | typelock)) == (input | typelock))
             {
-                if (size == 1 && type->getMetatype() == TYPE_BOOL)
+                if (size == 1 && type.getMetatype() == TYPE_BOOL)
                     return true;
             }
             return false;
@@ -1562,15 +1562,15 @@ namespace Sla.DECCORE
             if (this == op2) return true;
             // Trace -this- to the source of the copy chain
             vn = this;
-            while ((vn->isWritten()) && (vn->getDef()->code() == CPUI_COPY))
+            while ((vn.isWritten()) && (vn.getDef().code() == CPUI_COPY))
             {
-                vn = vn->getDef()->getIn(0);
+                vn = vn.getDef().getIn(0);
                 if (vn == op2) return true; // If we hit op2 then this and op2 must be the same
             }
             // Trace op2 to the source of copy chain
-            while ((op2->isWritten()) && (op2->getDef()->code() == CPUI_COPY))
+            while ((op2.isWritten()) && (op2.getDef().code() == CPUI_COPY))
             {
-                op2 = op2->getDef()->getIn(0);
+                op2 = op2.getDef().getIn(0);
                 if (vn == op2) return true; // If the source is the same then this and op2 are same
             }
             return false;
@@ -1588,32 +1588,32 @@ namespace Sla.DECCORE
         public bool findSubpieceShadow(int4 leastByte, Varnode whole, int4 recurse)
         {
             Varnode vn = this;
-            while (vn->isWritten() && vn->getDef()->code() == CPUI_COPY)
-                vn = vn->getDef()->getIn(0);
-            if (!vn->isWritten())
+            while (vn.isWritten() && vn.getDef().code() == CPUI_COPY)
+                vn = vn.getDef().getIn(0);
+            if (!vn.isWritten())
             {
-                if (vn->isConstant())
+                if (vn.isConstant())
                 {
-                    while (whole->isWritten() && whole->getDef()->code() == CPUI_COPY)
-                        whole = whole->getDef()->getIn(0);
-                    if (!whole->isConstant()) return false;
-                    uintb off = whole->getOffset() >> leastByte * 8;
-                    off &= calc_mask(vn->getSize());
-                    return (off == vn->getOffset());
+                    while (whole.isWritten() && whole.getDef().code() == CPUI_COPY)
+                        whole = whole.getDef().getIn(0);
+                    if (!whole.isConstant()) return false;
+                    uintb off = whole.getOffset() >> leastByte * 8;
+                    off &= calc_mask(vn.getSize());
+                    return (off == vn.getOffset());
                 }
                 return false;
             }
-            OpCode opc = vn->getDef()->code();
+            OpCode opc = vn.getDef().code();
             if (opc == CPUI_SUBPIECE)
             {
-                Varnode tmpvn = vn->getDef()->getIn(0);
-                int4 off = (int4)vn->getDef()->getIn(1)->getOffset();
-                if (off != leastByte || tmpvn->getSize() != whole->getSize())
+                Varnode tmpvn = vn.getDef().getIn(0);
+                int4 off = (int4)vn.getDef().getIn(1).getOffset();
+                if (off != leastByte || tmpvn.getSize() != whole.getSize())
                     return false;
                 if (tmpvn == whole) return true;
-                while (tmpvn->isWritten() && tmpvn->getDef()->code() == CPUI_COPY)
+                while (tmpvn.isWritten() && tmpvn.getDef().code() == CPUI_COPY)
                 {
-                    tmpvn = tmpvn->getDef()->getIn(0);
+                    tmpvn = tmpvn.getDef().getIn(0);
                     if (tmpvn == whole) return true;
                 }
             }
@@ -1621,17 +1621,17 @@ namespace Sla.DECCORE
             {
                 recurse += 1;
                 if (recurse > 1) return false;  // Truncate the recursion at maximum depth
-                while (whole->isWritten() && whole->getDef()->code() == CPUI_COPY)
-                    whole = whole->getDef()->getIn(0);
-                if (!whole->isWritten()) return false;
-                PcodeOp bigOp = whole->getDef();
-                if (bigOp->code() != CPUI_MULTIEQUAL) return false;
-                PcodeOp smallOp = vn->getDef();
-                if (bigOp->getParent() != smallOp->getParent()) return false;
+                while (whole.isWritten() && whole.getDef().code() == CPUI_COPY)
+                    whole = whole.getDef().getIn(0);
+                if (!whole.isWritten()) return false;
+                PcodeOp bigOp = whole.getDef();
+                if (bigOp.code() != CPUI_MULTIEQUAL) return false;
+                PcodeOp smallOp = vn.getDef();
+                if (bigOp.getParent() != smallOp.getParent()) return false;
                 // Recurse search through all branches of the two MULTIEQUALs
-                for (int4 i = 0; i < smallOp->numInput(); ++i)
+                for (int4 i = 0; i < smallOp.numInput(); ++i)
                 {
-                    if (!smallOp->getIn(i)->findSubpieceShadow(leastByte, bigOp->getIn(i), recurse))
+                    if (!smallOp.getIn(i).findSubpieceShadow(leastByte, bigOp.getIn(i), recurse))
                         return false;
                 }
                 return true;    // All branches were copy shadows
@@ -1649,34 +1649,34 @@ namespace Sla.DECCORE
         public bool findPieceShadow(int4 leastByte, Varnode piece)
         {
             Varnode vn = this;
-            while (vn->isWritten() && vn->getDef()->code() == CPUI_COPY)
-                vn = vn->getDef()->getIn(0);
-            if (!vn->isWritten()) return false;
-            OpCode opc = vn->getDef()->code();
+            while (vn.isWritten() && vn.getDef().code() == CPUI_COPY)
+                vn = vn.getDef().getIn(0);
+            if (!vn.isWritten()) return false;
+            OpCode opc = vn.getDef().code();
             if (opc == CPUI_PIECE)
             {
-                Varnode tmpvn = vn->getDef()->getIn(1);  // Least significant part
-                if (leastByte >= tmpvn->getSize())
+                Varnode tmpvn = vn.getDef().getIn(1);  // Least significant part
+                if (leastByte >= tmpvn.getSize())
                 {
-                    leastByte -= tmpvn->getSize();
-                    tmpvn = vn->getDef()->getIn(0);
+                    leastByte -= tmpvn.getSize();
+                    tmpvn = vn.getDef().getIn(0);
                 }
                 else
                 {
-                    if (piece->getSize() + leastByte > tmpvn->getSize()) return false;
+                    if (piece.getSize() + leastByte > tmpvn.getSize()) return false;
                 }
-                if (leastByte == 0 && tmpvn->getSize() == piece->getSize())
+                if (leastByte == 0 && tmpvn.getSize() == piece.getSize())
                 {
                     if (tmpvn == piece) return true;
-                    while (tmpvn->isWritten() && tmpvn->getDef()->code() == CPUI_COPY)
+                    while (tmpvn.isWritten() && tmpvn.getDef().code() == CPUI_COPY)
                     {
-                        tmpvn = tmpvn->getDef()->getIn(0);
+                        tmpvn = tmpvn.getDef().getIn(0);
                         if (tmpvn == piece) return true;
                     }
                     return false;
                 }
                 // CPUI_PIECE input is too big, recursively search for another CPUI_PIECE
-                return tmpvn->findPieceShadow(leastByte, piece);
+                return tmpvn.findPieceShadow(leastByte, piece);
             }
             return false;
         }
@@ -1695,11 +1695,11 @@ namespace Sla.DECCORE
         {
             Varnode vn;
 
-            if (size < op2->size)
+            if (size < op2.size)
             {
                 vn = this;
             }
-            else if (size > op2->size)
+            else if (size > op2.size)
             {
                 vn = op2;
                 op2 = this;
@@ -1709,15 +1709,15 @@ namespace Sla.DECCORE
                 return false;
             if (relOff < 0)
                 return false;       // Not proper containment
-            if (relOff + vn->getSize() > op2->getSize())
+            if (relOff + vn.getSize() > op2.getSize())
                 return false;       // Not proper containment
 
-            bool bigEndian = getSpace()->isBigEndian();
-            int4 leastByte = bigEndian ? (op2->getSize() - vn->getSize()) - relOff : relOff;
-            if (vn->findSubpieceShadow(leastByte, op2, 0))
+            bool bigEndian = getSpace().isBigEndian();
+            int4 leastByte = bigEndian ? (op2.getSize() - vn.getSize()) - relOff : relOff;
+            if (vn.findSubpieceShadow(leastByte, op2, 0))
                 return true;
 
-            if (op2->findPieceShadow(leastByte, vn))
+            if (op2.findPieceShadow(leastByte, vn))
                 return true;
 
             return false;
@@ -1732,10 +1732,10 @@ namespace Sla.DECCORE
         {
             Datatype* ct;
             if (mapentry != (SymbolEntry*)0)
-                ct = mapentry->getSymbol()->getType();
+                ct = mapentry.getSymbol().getType();
             else
                 ct = type;
-            if (ct->isPieceStructured())
+            if (ct.isPieceStructured())
                 return ct;
             return (Datatype*)0;
         }
@@ -1751,7 +1751,7 @@ namespace Sla.DECCORE
         public void encode(Encoder encoder)
         {
             encoder.openElement(ELEM_ADDR);
-            loc.getSpace()->encodeAttributes(encoder, loc.getOffset(), size);
+            loc.getSpace().encodeAttributes(encoder, loc.getOffset(), size);
             encoder.writeUnsignedInteger(ATTRIB_REF, getCreateIndex());
             if (mergegroup != 0)
                 encoder.writeSignedInteger(ATTRIB_GRP, getMergeGroup());
@@ -1785,7 +1785,7 @@ namespace Sla.DECCORE
                 s << "<null>";
                 return;
             }
-            vn->printRaw(s);
+            vn.printRaw(s);
         }
     }
 }

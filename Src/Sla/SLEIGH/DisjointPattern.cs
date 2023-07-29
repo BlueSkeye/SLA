@@ -21,7 +21,7 @@ namespace Sla.SLEIGH
         {
             PatternBlock* block = getBlock(context);
             if (block != (PatternBlock*)0)
-                return block->getMask(startbit, size);
+                return block.getMask(startbit, size);
             return 0;
         }
 
@@ -29,7 +29,7 @@ namespace Sla.SLEIGH
         {
             PatternBlock* block = getBlock(context);
             if (block != (PatternBlock*)0)
-                return block->getValue(startbit, size);
+                return block.getValue(startbit, size);
             return 0;
         }
 
@@ -37,7 +37,7 @@ namespace Sla.SLEIGH
         {
             PatternBlock* block = getBlock(context);
             if (block != (PatternBlock*)0)
-                return block->getLength();
+                return block.getLength();
             return 0;
         }
 
@@ -47,18 +47,18 @@ namespace Sla.SLEIGH
             PatternBlock* a,*b;
 
             a = getBlock(false);
-            b = op2->getBlock(false);
-            if ((b != (PatternBlock*)0) && (!b->alwaysTrue()))
+            b = op2.getBlock(false);
+            if ((b != (PatternBlock*)0) && (!b.alwaysTrue()))
             {   // a must match existing block
                 if (a == (PatternBlock*)0) return false;
-                if (!a->specializes(b)) return false;
+                if (!a.specializes(b)) return false;
             }
             a = getBlock(true);
-            b = op2->getBlock(true);
-            if ((b != (PatternBlock*)0) && (!b->alwaysTrue()))
+            b = op2.getBlock(true);
+            if ((b != (PatternBlock*)0) && (!b.alwaysTrue()))
             {   // a must match existing block
                 if (a == (PatternBlock*)0) return false;
-                if (!a->specializes(b)) return false;
+                if (!a.specializes(b)) return false;
             }
             return true;
         }
@@ -68,37 +68,37 @@ namespace Sla.SLEIGH
             PatternBlock* a,*b;
 
             a = getBlock(false);
-            b = op2->getBlock(false);
+            b = op2.getBlock(false);
             if (b != (PatternBlock*)0)
             {   // a must match existing block
                 if (a == (PatternBlock*)0)
                 {
-                    if (!b->alwaysTrue())
+                    if (!b.alwaysTrue())
                         return false;
                 }
-                else if (!a->identical(b))
+                else if (!a.identical(b))
                     return false;
             }
             else
             {
-                if ((a != (PatternBlock*)0) && (!a->alwaysTrue()))
+                if ((a != (PatternBlock*)0) && (!a.alwaysTrue()))
                     return false;
             }
             a = getBlock(true);
-            b = op2->getBlock(true);
+            b = op2.getBlock(true);
             if (b != (PatternBlock*)0)
             {   // a must match existing block
                 if (a == (PatternBlock*)0)
                 {
-                    if (!b->alwaysTrue())
+                    if (!b.alwaysTrue())
                         return false;
                 }
-                else if (!a->identical(b))
+                else if (!a.identical(b))
                     return false;
             }
             else
             {
-                if ((a != (PatternBlock*)0) && (!a->alwaysTrue()))
+                if ((a != (PatternBlock*)0) && (!a.alwaysTrue()))
                     return false;
             }
             return true;
@@ -106,21 +106,21 @@ namespace Sla.SLEIGH
 
         public bool resolvesIntersect(DisjointPattern op1, DisjointPattern op2)
         { // Is this pattern equal to the intersection of -op1- and -op2-
-            if (!resolveIntersectBlock(op1->getBlock(false), op2->getBlock(false), getBlock(false)))
+            if (!resolveIntersectBlock(op1.getBlock(false), op2.getBlock(false), getBlock(false)))
                 return false;
-            return resolveIntersectBlock(op1->getBlock(true), op2->getBlock(true), getBlock(true));
+            return resolveIntersectBlock(op1.getBlock(true), op2.getBlock(true), getBlock(true));
         }
 
         public static DisjointPattern restoreDisjoint(Element el)
         {               // DisjointPattern factory
             DisjointPattern* res;
-            if (el->getName() == "instruct_pat")
+            if (el.getName() == "instruct_pat")
                 res = new InstructionPattern();
-            else if (el->getName() == "context_pat")
+            else if (el.getName() == "context_pat")
                 res = new ContextPattern();
             else
                 res = new CombinePattern();
-            res->restoreXml(el);
+            res.restoreXml(el);
             return res;
         }
 
@@ -138,7 +138,7 @@ namespace Sla.SLEIGH
             else
             {
                 allocated = true;
-                inter = bl1->intersect(bl2);
+                inter = bl1.intersect(bl2);
             }
             if (inter == (PatternBlock*)0)
             {
@@ -148,7 +148,7 @@ namespace Sla.SLEIGH
             else if (thisblock == (PatternBlock*)0)
                 res = false;
             else
-                res = thisblock->identical(inter);
+                res = thisblock.identical(inter);
             if (allocated)
                 delete inter;
             return res;

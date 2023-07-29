@@ -38,11 +38,11 @@ namespace Sla.DECCORE
         private void build()
         {
             if (built) return;
-            InjectContext & icontext(glb->pcodeinjectlib->getCachedContext());
+            InjectContext & icontext(glb.pcodeinjectlib.getCachedContext());
             icontext.clear();
             uintb uniqReserve = 0x10;           // Temporary register space reserved for inputs and output
-            AddrSpace* codeSpace = glb->getDefaultCodeSpace();
-            AddrSpace* uniqSpace = glb->getUniqueSpace();
+            AddrSpace* codeSpace = glb.getDefaultCodeSpace();
+            AddrSpace* uniqSpace = glb.getUniqueSpace();
             icontext.baseaddr = Address(codeSpace, 0x1000); // Fake address
             icontext.nextaddr = icontext.baseaddr;
             for (int4 i = 0; i < sizeInput(); ++i)
@@ -65,7 +65,7 @@ namespace Sla.DECCORE
                 outputList.push_back(uniqReserve);
                 uniqReserve += 0x20;
             }
-            emitter = emulator.buildEmitter(glb->pcodeinjectlib->getBehaviors(), uniqReserve);
+            emitter = emulator.buildEmitter(glb.pcodeinjectlib.getBehaviors(), uniqReserve);
             inject(icontext, *emitter);
             delete emitter;
             emitter = (PcodeEmit*)0;

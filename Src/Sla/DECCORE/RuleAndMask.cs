@@ -32,31 +32,31 @@ namespace Sla.DECCORE
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
             uintb mask1, mask2, andmask;
-            int4 size = op->getOut()->getSize();
+            int4 size = op.getOut().getSize();
             Varnode* vn;
 
             if (size > sizeof(uintb)) return 0; // FIXME: uintb should be arbitrary precision
-            mask1 = op->getIn(0)->getNZMask();
+            mask1 = op.getIn(0).getNZMask();
             if (mask1 == 0)
                 andmask = 0;
             else
             {
-                mask2 = op->getIn(1)->getNZMask();
+                mask2 = op.getIn(1).getNZMask();
                 andmask = mask1 & mask2;
             }
 
             if (andmask == 0)       // Result of AND is always zero
                 vn = data.newConstant(size, 0);
-            else if ((andmask & op->getOut()->getConsume()) == 0)
+            else if ((andmask & op.getOut().getConsume()) == 0)
                 vn = data.newConstant(size, 0);
             else if (andmask == mask1)
             {
-                if (!op->getIn(1)->isConstant()) return 0;
-                vn = op->getIn(0);      // Result of AND is equal to input(0)
+                if (!op.getIn(1).isConstant()) return 0;
+                vn = op.getIn(0);      // Result of AND is equal to input(0)
             }
             else
                 return 0;
-            if (!vn->isHeritageKnown()) return 0;
+            if (!vn.isHeritageKnown()) return 0;
 
             data.opSetOpcode(op, CPUI_COPY);
             data.opRemoveInput(op, 1);

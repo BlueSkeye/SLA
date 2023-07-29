@@ -19,7 +19,7 @@ namespace Sla.DECCORE
         public TypeOpCpoolref(TypeFactory t)
             : base(t, CPUI_CPOOLREF, "cpoolref")
         {
-            cpool = t->getArch()->cpool;
+            cpool = t.getArch().cpool;
             opflags = PcodeOp::special | PcodeOp::nocollapse;
             behave = new OpBehavior(CPUI_CPOOLREF, false, true); // Dummy behavior
         }
@@ -28,14 +28,14 @@ namespace Sla.DECCORE
         public override Datatype getOutputLocal(PcodeOp op)
         {
             vector<uintb> refs;
-            for (int4 i = 1; i < op->numInput(); ++i)
-                refs.push_back(op->getIn(i)->getOffset());
-            CPoolRecord* rec = cpool->getRecord(refs);
+            for (int4 i = 1; i < op.numInput(); ++i)
+                refs.push_back(op.getIn(i).getOffset());
+            CPoolRecord* rec = cpool.getRecord(refs);
             if (rec == (CPoolRecord*)0)
                 return TypeOp::getOutputLocal(op);
-            if (rec->getTag() == CPoolRecord::instance_of)
-                return tlst->getBase(1, TYPE_BOOL);
-            return rec->getType();
+            if (rec.getTag() == CPoolRecord::instance_of)
+                return tlst.getBase(1, TYPE_BOOL);
+            return rec.getType();
         }
 
         public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
@@ -45,34 +45,34 @@ namespace Sla.DECCORE
 
         public override Datatype getInputLocal(PcodeOp op, int4 slot)
         {
-            return tlst->getBase(op->getIn(slot)->getSize(), TYPE_INT);
+            return tlst.getBase(op.getIn(slot).getSize(), TYPE_INT);
         }
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opCpoolRefOp(op);
+            lng.opCpoolRefOp(op);
         }
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            if (op->getOut() != (Varnode*)0)
+            if (op.getOut() != (Varnode*)0)
             {
-                Varnode::printRaw(s, op->getOut());
+                Varnode::printRaw(s, op.getOut());
                 s << " = ";
             }
             s << getOperatorName(op);
             vector<uintb> refs;
-            for (int4 i = 1; i < op->numInput(); ++i)
-                refs.push_back(op->getIn(i)->getOffset());
-            CPoolRecord* rec = cpool->getRecord(refs);
+            for (int4 i = 1; i < op.numInput(); ++i)
+                refs.push_back(op.getIn(i).getOffset());
+            CPoolRecord* rec = cpool.getRecord(refs);
             if (rec != (CPoolRecord*)0)
-                s << '_' << rec->getToken();
+                s << '_' << rec.getToken();
             s << '(';
-            Varnode::printRaw(s, op->getIn(0));
-            for (int4 i = 2; i < op->numInput(); ++i)
+            Varnode::printRaw(s, op.getIn(0));
+            for (int4 i = 2; i < op.numInput(); ++i)
             {
                 s << ',';
-                Varnode::printRaw(s, op->getIn(i));
+                Varnode::printRaw(s, op.getIn(i));
             }
             s << ')';
         }

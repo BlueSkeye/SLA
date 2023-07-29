@@ -20,15 +20,15 @@ namespace Sla.DECCORE
         /// \return \b true if the indicated slot holds the preferred pointer
         private static bool verifyPreferredPointer(PcodeOp op, int4 slot)
         {
-            Varnode* vn = op->getIn(slot);
-            if (!vn->isWritten()) return true;
-            PcodeOp* preOp = vn->getDef();
-            if (preOp->code() != CPUI_INT_ADD) return true;
+            Varnode* vn = op.getIn(slot);
+            if (!vn.isWritten()) return true;
+            PcodeOp* preOp = vn.getDef();
+            if (preOp.code() != CPUI_INT_ADD) return true;
             int preslot = 0;
-            if (preOp->getIn(preslot)->getTypeReadFacing(preOp)->getMetatype() != TYPE_PTR)
+            if (preOp.getIn(preslot).getTypeReadFacing(preOp).getMetatype() != TYPE_PTR)
             {
                 preslot = 1;
-                if (preOp->getIn(preslot)->getTypeReadFacing(preOp)->getMetatype() != TYPE_PTR)
+                if (preOp.getIn(preslot).getTypeReadFacing(preOp).getMetatype() != TYPE_PTR)
                     return true;
             }
             return (1 != evaluatePointerExpression(preOp, preslot));    // Does earlier varnode look like the base pointer
@@ -76,12 +76,12 @@ namespace Sla.DECCORE
 
             if (!data.hasTypeRecoveryStarted()) return 0;
 
-            for (slot = 0; slot < op->numInput(); ++slot)
+            for (slot = 0; slot < op.numInput(); ++slot)
             { // Search for pointer type
-                ct = op->getIn(slot)->getTypeReadFacing(op);
-                if (ct->getMetatype() == TYPE_PTR) break;
+                ct = op.getIn(slot).getTypeReadFacing(op);
+                if (ct.getMetatype() == TYPE_PTR) break;
             }
-            if (slot == op->numInput()) return 0;
+            if (slot == op.numInput()) return 0;
             if (evaluatePointerExpression(op, slot) != 2) return 0;
             if (!verifyPreferredPointer(op, slot)) return 0;
 
@@ -110,30 +110,30 @@ namespace Sla.DECCORE
         {
             int4 res = 1;       // Assume we are going to push
             int4 count = 0; // Count descendants
-            Varnode* ptrBase = op->getIn(slot);
-            if (ptrBase->isFree() && !ptrBase->isConstant())
+            Varnode* ptrBase = op.getIn(slot);
+            if (ptrBase.isFree() && !ptrBase.isConstant())
                 return 0;
-            if (op->getIn(1 - slot)->getTypeReadFacing(op)->getMetatype() == TYPE_PTR)
+            if (op.getIn(1 - slot).getTypeReadFacing(op).getMetatype() == TYPE_PTR)
                 res = 2;
-            Varnode* outVn = op->getOut();
+            Varnode* outVn = op.getOut();
             list<PcodeOp*>::const_iterator iter;
-            for (iter = outVn->beginDescend(); iter != outVn->endDescend(); ++iter)
+            for (iter = outVn.beginDescend(); iter != outVn.endDescend(); ++iter)
             {
                 PcodeOp* decOp = *iter;
                 count += 1;
-                OpCode opc = decOp->code();
+                OpCode opc = decOp.code();
                 if (opc == CPUI_INT_ADD)
                 {
-                    Varnode* otherVn = decOp->getIn(1 - decOp->getSlot(outVn));
-                    if (otherVn->isFree() && !otherVn->isConstant())
+                    Varnode* otherVn = decOp.getIn(1 - decOp.getSlot(outVn));
+                    if (otherVn.isFree() && !otherVn.isConstant())
                         return 0;   // No action if the data-flow isn't fully linked
-                    if (otherVn->getTypeReadFacing(decOp)->getMetatype() == TYPE_PTR)
+                    if (otherVn.getTypeReadFacing(decOp).getMetatype() == TYPE_PTR)
                         res = 2;    // Do not push in the presence of other pointers
                 }
-                else if ((opc == CPUI_LOAD || opc == CPUI_STORE) && decOp->getIn(1) == outVn)
+                else if ((opc == CPUI_LOAD || opc == CPUI_STORE) && decOp.getIn(1) == outVn)
                 {   // If use is as pointer for LOAD or STORE
-                    if (ptrBase->isSpacebase() && (ptrBase->isInput() || (ptrBase->isConstant())) &&
-                        (op->getIn(1 - slot)->isConstant()))
+                    if (ptrBase.isSpacebase() && (ptrBase.isInput() || (ptrBase.isConstant())) &&
+                        (op.getIn(1 - slot).isConstant()))
                         return 0;
                     res = 2;
                 }
@@ -146,7 +146,7 @@ namespace Sla.DECCORE
                 return 0;
             if (count > 1)
             {
-                if (outVn->isSpacebase())
+                if (outVn.isSpacebase())
                     return 0;       // For the RESULT to be a spacebase pointer it must have only 1 descendent
                                     //    res = 2;		// Uncommenting this line will not let pointers get pushed to multiple descendants
             }

@@ -35,14 +35,14 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn = op->getIn(0);
-            if (vn->getSize() != 1) return 0;
-            if (!op->getIn(1)->isConstant()) return 0;
-            int4 sa = (int4)op->getIn(1)->getOffset();
-            uintb mask = vn->getNZMask();
+            Varnode* vn = op.getIn(0);
+            if (vn.getSize() != 1) return 0;
+            if (!op.getIn(1).isConstant()) return 0;
+            int4 sa = (int4)op.getIn(1).getOffset();
+            uintb mask = vn.getNZMask();
             if ((mask >> sa) != (uintb)1) return 0; // Pulling out a single bit
             mask = (mask >> sa) << sa;
-            if (op->getOut()->hasNoDescend()) return 0;
+            if (op.getOut().hasNoDescend()) return 0;
 
             SubvariableFlow subflow(&data,vn,mask,false,false,false);
             if (!subflow.doTrace()) return 0;

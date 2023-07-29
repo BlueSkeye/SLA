@@ -34,13 +34,13 @@ namespace Sla.DECCORE
             PcodeOp* newop;
             Varnode* vn,*newvn;
 
-            vn = op->getIn(1);      // Parameter being subtracted
-            newop = data.newOp(2, op->getAddr());
+            vn = op.getIn(1);      // Parameter being subtracted
+            newop = data.newOp(2, op.getAddr());
             data.opSetOpcode(newop, CPUI_INT_MULT);
-            newvn = data.newUniqueOut(vn->getSize(), newop);
+            newvn = data.newUniqueOut(vn.getSize(), newop);
             data.opSetInput(op, newvn, 1); // Replace vn's reference first
             data.opSetInput(newop, vn, 0);
-            data.opSetInput(newop, data.newConstant(vn->getSize(), calc_mask(vn->getSize())), 1);
+            data.opSetInput(newop, data.newConstant(vn.getSize(), calc_mask(vn.getSize())), 1);
             data.opSetOpcode(op, CPUI_INT_ADD);
             data.opInsertBefore(newop, op);
             return 1;

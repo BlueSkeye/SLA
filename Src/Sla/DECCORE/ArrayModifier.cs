@@ -24,7 +24,7 @@ namespace Sla.DECCORE
 
         public override Datatype modType(Datatype @base, TypeDeclarator decl, Architecture glb)
         {
-            Datatype* restype = glb->types->getTypeArray(arraysize, base);
+            Datatype* restype = glb.types.getTypeArray(arraysize, base);
             return restype;
         }
     }

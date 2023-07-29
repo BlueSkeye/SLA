@@ -63,7 +63,7 @@ namespace Sla.CORE
                 }
                 ++iter;
                 int4 maxsize = 512;
-                uintb room = endaddr.getSpace()->getHighest() - endaddr.getOffset() + 1;
+                uintb room = endaddr.getSpace().getHighest() - endaddr.getOffset() + 1;
                 if ((uintb)maxsize > room)
                     maxsize = (int4)room;
                 if ((iter != chunk.end()) && ((*iter).first.getSpace() == endaddr.getSpace()))
@@ -87,9 +87,9 @@ namespace Sla.CORE
             rootel = el;
 
             // Extract architecture information
-            if (rootel->getName() != "binaryimage")
+            if (rootel.getName() != "binaryimage")
                 throw new LowlevelError("Missing binaryimage tag in " + filename);
-            archtype = el->getAttributeValue("arch");
+            archtype = el.getAttributeValue("arch");
         }
 
         /// Read XML tags into the containers
@@ -109,13 +109,13 @@ namespace Sla.CORE
                 if (subId == ELEM_SYMBOL)
                 {
                     AddrSpace @base = decoder.readSpace(ATTRIB_SPACE);
-                    Address addr(@base, @base->decodeAttributes(decoder, sz));
+                    Address addr(@base, @base.decodeAttributes(decoder, sz));
                     string nm = decoder.readString(ATTRIB_NAME);
                     addrtosymbol[addr] = nm;
                 }
                 else if (subId == ELEM_BYTECHUNK) {
                     AddrSpace @base = decoder.readSpace(ATTRIB_SPACE);
-                    Address addr(@base, @base->decodeAttributes(decoder, sz));
+                    Address addr(@base, @base.decodeAttributes(decoder, sz));
                     map<Address, vector<uint1>>::iterator chnkiter;
                     vector<uint1> & vec(chunk[addr]);
                     vec.clear();
@@ -184,7 +184,7 @@ namespace Sla.CORE
                 vector<uint1> &vec((*iter1).second);
                 if (vec.size() == 0) continue;
                 encoder.openElement(ELEM_BYTECHUNK);
-                (*iter1).first.getSpace()->encodeAttributes(encoder, (*iter1).first.getOffset());
+                (*iter1).first.getSpace().encodeAttributes(encoder, (*iter1).first.getOffset());
                 if (readonlyset.find((*iter1).first) != readonlyset.end())
                     encoder.writeBool(ATTRIB_READONLY, "true");
                 ostringstream s;
@@ -204,7 +204,7 @@ namespace Sla.CORE
             for (iter2 = addrtosymbol.begin(); iter2 != addrtosymbol.end(); ++iter2)
             {
                 encoder.openElement(ELEM_SYMBOL);
-                (*iter2).first.getSpace()->encodeAttributes(encoder, (*iter2).first.getOffset());
+                (*iter2).first.getSpace().encodeAttributes(encoder, (*iter2).first.getOffset());
                 encoder.writeString(ATTRIB_NAME, (*iter2).second);
                 encoder.closeElement(ELEM_SYMBOL);
             }
@@ -301,7 +301,7 @@ namespace Sla.CORE
             for (iter1 = chunk.begin(); iter1 != chunk.end(); ++iter1)
             {
                 AddrSpace* spc = (*iter1).first.getSpace();
-                int4 off = AddrSpace::addressToByte(adjust, spc->getWordSize());
+                int4 off = AddrSpace::addressToByte(adjust, spc.getWordSize());
                 Address newaddr = (*iter1).first + off;
                 newchunk[newaddr] = (*iter1).second;
             }
@@ -309,7 +309,7 @@ namespace Sla.CORE
             for (iter2 = addrtosymbol.begin(); iter2 != addrtosymbol.end(); ++iter2)
             {
                 AddrSpace* spc = (*iter2).first.getSpace();
-                int4 off = AddrSpace::addressToByte(adjust, spc->getWordSize());
+                int4 off = AddrSpace::addressToByte(adjust, spc.getWordSize());
                 Address newaddr = (*iter2).first + off;
                 newsymbol[newaddr] = (*iter2).second;
             }

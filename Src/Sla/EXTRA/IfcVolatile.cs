@@ -18,16 +18,16 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             int4 size = 0;
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("No load image present");
-            Address addr = parse_machaddr(s, size, *dcp->conf->types); // Read required address
+            Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read required address
 
             if (size == 0)
                 throw IfaceExecutionError("Must specify a size");
             Range range(addr.getSpace(), addr.getOffset(), addr.getOffset() +(size - 1));
-            dcp->conf->symboltab->setPropertyRange(Varnode::volatil, range);
+            dcp.conf.symboltab.setPropertyRange(Varnode::volatil, range);
 
-            *status->optr << "Successfully marked range as volatile" << endl;
+            *status.optr << "Successfully marked range as volatile" << endl;
         }
     }
 }

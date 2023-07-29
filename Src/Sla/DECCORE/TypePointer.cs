@@ -47,7 +47,7 @@ namespace Sla.DECCORE
             ptrto = typegrp.decodeType(decoder);
             calcSubmeta();
             if (name.size() == 0)       // Inherit only if no name
-                flags |= ptrto->getInheritable();
+                flags |= ptrto.getInheritable();
             //  decoder.closeElement(elemId);
         }
 
@@ -55,10 +55,10 @@ namespace Sla.DECCORE
         /// Pointers to structures may require a specific \b submeta
         protected void calcSubmeta()
         {
-            type_metatype ptrtoMeta = ptrto->getMetatype();
+            type_metatype ptrtoMeta = ptrto.getMetatype();
             if (ptrtoMeta == TYPE_STRUCT)
             {
-                if (ptrto->numDepend() > 1 || ptrto->isIncomplete())
+                if (ptrto.numDepend() > 1 || ptrto.isIncomplete())
                     submeta = SUB_PTR_STRUCT;
                 else
                     submeta = SUB_PTR;
@@ -67,7 +67,7 @@ namespace Sla.DECCORE
             {
                 submeta = SUB_PTR_STRUCT;
             }
-            if (ptrto->needsResolution() && ptrtoMeta != TYPE_PTR)
+            if (ptrto.needsResolution() && ptrtoMeta != TYPE_PTR)
                 flags |= needs_resolution;      // Inherit needs_resolution, but only if not a pointer
         }
 
@@ -94,7 +94,7 @@ namespace Sla.DECCORE
             : base(s, TYPE_PTR)
         {
             ptrto = pt;
-            flags = ptrto->getInheritable();
+            flags = ptrto.getInheritable();
             wordsize = ws;
             spaceid = (AddrSpace*)0;
             calcSubmeta();
@@ -102,12 +102,12 @@ namespace Sla.DECCORE
 
         /// Construct from a pointed-to type and an address space attribute
         public TypePointer(Datatype pt, AddrSpace spc)
-            : base(spc->getAddrSize(), TYPE_PTR)
+            : base(spc.getAddrSize(), TYPE_PTR)
         {
             ptrto = pt;
-            flags = ptrto->getInheritable();
+            flags = ptrto.getInheritable();
             spaceid = spc;
-            wordsize = spc->getWordSize();
+            wordsize = spc.getWordSize();
             calcSubmeta();
         }
 
@@ -122,11 +122,11 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s)
         {
-            ptrto->printRaw(s);
+            ptrto.printRaw(s);
             s << " *";
             if (spaceid != (AddrSpace*)0)
             {
-                s << '(' << spaceid->getName() << ')';
+                s << '(' << spaceid.getName() << ')';
             }
         }
 
@@ -137,7 +137,7 @@ namespace Sla.DECCORE
         public override void printNameBase(TextWriter s) 
         {
             s << 'p';
-            ptrto->printNameBase(s);
+            ptrto.printNameBase(s);
         }
 
         public override int4 compare(Datatype op, int4 level)
@@ -146,12 +146,12 @@ namespace Sla.DECCORE
             if (res != 0) return res;
             // Both must be pointers
             TypePointer* tp = (TypePointer*)&op;
-            if (wordsize != tp->wordsize) return (wordsize < tp->wordsize) ? -1 : 1;
-            if (spaceid != tp->spaceid)
+            if (wordsize != tp.wordsize) return (wordsize < tp.wordsize) ? -1 : 1;
+            if (spaceid != tp.spaceid)
             {
                 if (spaceid == (AddrSpace*)0) return 1; // Pointers with address space come earlier
-                if (tp->spaceid == (AddrSpace*)0) return -1;
-                return (spaceid->getIndex() < tp->spaceid->getIndex()) ? -1 : 1;
+                if (tp.spaceid == (AddrSpace*)0) return -1;
+                return (spaceid.getIndex() < tp.spaceid.getIndex()) ? -1 : 1;
             }
             level -= 1;
             if (level < 0)
@@ -159,20 +159,20 @@ namespace Sla.DECCORE
                 if (id == op.getId()) return 0;
                 return (id < op.getId()) ? -1 : 1;
             }
-            return ptrto->compare(*tp->ptrto, level); // Compare whats pointed to
+            return ptrto.compare(*tp.ptrto, level); // Compare whats pointed to
         }
 
         public override int4 compareDependency(Datatype op)
         {
             if (submeta != op.getSubMeta()) return (submeta < op.getSubMeta()) ? -1 : 1;
             TypePointer* tp = (TypePointer*)&op;    // Both must be pointers
-            if (ptrto != tp->ptrto) return (ptrto < tp->ptrto) ? -1 : 1;    // Compare absolute pointers
-            if (wordsize != tp->wordsize) return (wordsize < tp->wordsize) ? -1 : 1;
-            if (spaceid != tp->spaceid)
+            if (ptrto != tp.ptrto) return (ptrto < tp.ptrto) ? -1 : 1;    // Compare absolute pointers
+            if (wordsize != tp.wordsize) return (wordsize < tp.wordsize) ? -1 : 1;
+            if (spaceid != tp.spaceid)
             {
                 if (spaceid == (AddrSpace*)0) return 1; // Pointers with address space come earlier
-                if (tp->spaceid == (AddrSpace*)0) return -1;
-                return (spaceid->getIndex() < tp->spaceid->getIndex()) ? -1 : 1;
+                if (tp.spaceid == (AddrSpace*)0) return -1;
+                return (spaceid.getIndex() < tp.spaceid.getIndex()) ? -1 : 1;
             }
             return (op.getSize() - size);
         }
@@ -192,7 +192,7 @@ namespace Sla.DECCORE
                 encoder.writeUnsignedInteger(ATTRIB_WORDSIZE, wordsize);
             if (spaceid != (AddrSpace*)0)
                 encoder.writeSpace(ATTRIB_SPACE, spaceid);
-            ptrto->encodeRef(encoder);
+            ptrto.encodeRef(encoder);
             encoder.closeElement(ELEM_TYPE);
         }
 
@@ -214,10 +214,10 @@ namespace Sla.DECCORE
         public override TypePointer downChain(uintb off, TypePointer par, uintb parOff, bool allowArrayWrap,
             TypeFactory typegrp)
         {
-            int4 ptrtoSize = ptrto->getSize();
+            int4 ptrtoSize = ptrto.getSize();
             if (off >= ptrtoSize)
             {   // Check if we are wrapping
-                if (ptrtoSize != 0 && !ptrto->isVariableLength())
+                if (ptrtoSize != 0 && !ptrto.isVariableLength())
                 {   // Check if pointed-to is wrappable
                     if (!allowArrayWrap)
                         return (TypePointer*)0;
@@ -232,7 +232,7 @@ namespace Sla.DECCORE
                 }
             }
 
-            type_metatype meta = ptrto->getMetatype();
+            type_metatype meta = ptrto.getMetatype();
             bool isArray = (meta == TYPE_ARRAY);
             if (isArray || meta == TYPE_STRUCT)
             {
@@ -240,7 +240,7 @@ namespace Sla.DECCORE
                 parOff = off;
             }
 
-            Datatype* pt = ptrto->getSubType(off, &off);
+            Datatype* pt = ptrto.getSubType(off, &off);
             if (pt == (Datatype*)0)
                 return (TypePointer*)0;
             if (!isArray)
@@ -250,21 +250,21 @@ namespace Sla.DECCORE
 
         public override bool isPtrsubMatching(uintb off)
         {
-            if (ptrto->getMetatype() == TYPE_SPACEBASE)
+            if (ptrto.getMetatype() == TYPE_SPACEBASE)
             {
                 uintb newoff = AddrSpace::addressToByte(off, wordsize);
-                ptrto->getSubType(newoff, &newoff);
+                ptrto.getSubType(newoff, &newoff);
                 if (newoff != 0)
                     return false;
             }
-            else if (ptrto->getMetatype() == TYPE_ARRAY || ptrto->getMetatype() == TYPE_STRUCT)
+            else if (ptrto.getMetatype() == TYPE_ARRAY || ptrto.getMetatype() == TYPE_STRUCT)
             {
                 int4 sz = off;
-                int4 typesize = ptrto->getSize();
+                int4 typesize = ptrto.getSize();
                 if ((typesize <= AddrSpace::addressToByteInt(sz, wordsize)) && (typesize != 0))
                     return false;
             }
-            else if (ptrto->getMetatype() == TYPE_UNION)
+            else if (ptrto.getMetatype() == TYPE_UNION)
             {
                 // A PTRSUB reaching here cannot be used for a union field resolution
                 // These are created by ActionSetCasts::resolveUnion
@@ -277,14 +277,14 @@ namespace Sla.DECCORE
 
         public override Datatype resolveInFlow(PcodeOp op, int4 slot)
         {
-            if (ptrto->getMetatype() == TYPE_UNION)
+            if (ptrto.getMetatype() == TYPE_UNION)
             {
-                Funcdata* fd = op->getParent()->getFuncdata();
-                ResolvedUnion res = fd->getUnionField(this, op, slot);
+                Funcdata* fd = op.getParent().getFuncdata();
+                ResolvedUnion res = fd.getUnionField(this, op, slot);
                 if (res != (ResolvedUnion*)0)
-                    return res->getDatatype();
-                ScoreUnionFields scoreFields(*fd->getArch()->types,this,op,slot);
-                fd->setUnionField(this, op, slot, scoreFields.getResult());
+                    return res.getDatatype();
+                ScoreUnionFields scoreFields(*fd.getArch().types,this,op,slot);
+                fd.setUnionField(this, op, slot, scoreFields.getResult());
                 return scoreFields.getResult().getDatatype();
             }
             return this;
@@ -292,12 +292,12 @@ namespace Sla.DECCORE
 
         public override Datatype findResolve(PcodeOp op, int4 slot)
         {
-            if (ptrto->getMetatype() == TYPE_UNION)
+            if (ptrto.getMetatype() == TYPE_UNION)
             {
-                Funcdata fd = op->getParent()->getFuncdata();
-                ResolvedUnion res = fd->getUnionField(this, op, slot);
+                Funcdata fd = op.getParent().getFuncdata();
+                ResolvedUnion res = fd.getUnionField(this, op, slot);
                 if (res != (ResolvedUnion*)0)
-                    return res->getDatatype();
+                    return res.getDatatype();
             }
             return this;
         }

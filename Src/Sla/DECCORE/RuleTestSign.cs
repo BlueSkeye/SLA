@@ -21,15 +21,15 @@ namespace Sla.DECCORE
         private void findComparisons(Varnode vn, List<PcodeOp> res)
         {
             list<PcodeOp*>::const_iterator iter1;
-            iter1 = vn->beginDescend();
-            while (iter1 != vn->endDescend())
+            iter1 = vn.beginDescend();
+            while (iter1 != vn.endDescend())
             {
                 PcodeOp* op = *iter1;
                 ++iter1;
-                OpCode opc = op->code();
+                OpCode opc = op.code();
                 if (opc == CPUI_INT_EQUAL || opc == CPUI_INT_NOTEQUAL)
                 {
-                    if (op->getIn(1)->isConstant())
+                    if (op.getIn(1).isConstant())
                         res.push_back(op);
                 }
             }
@@ -56,24 +56,24 @@ namespace Sla.DECCORE
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
             uintb val;
-            Varnode* constVn = op->getIn(1);
-            if (!constVn->isConstant()) return 0;
-            val = constVn->getOffset();
-            Varnode* inVn = op->getIn(0);
-            if (val != 8 * inVn->getSize() - 1) return 0;
-            Varnode* outVn = op->getOut();
+            Varnode* constVn = op.getIn(1);
+            if (!constVn.isConstant()) return 0;
+            val = constVn.getOffset();
+            Varnode* inVn = op.getIn(0);
+            if (val != 8 * inVn.getSize() - 1) return 0;
+            Varnode* outVn = op.getOut();
 
-            if (inVn->isFree()) return 0;
+            if (inVn.isFree()) return 0;
             vector<PcodeOp*> compareOps;
             findComparisons(outVn, compareOps);
             int4 resultCode = 0;
             for (int4 i = 0; i < compareOps.size(); ++i)
             {
                 PcodeOp* compareOp = compareOps[i];
-                Varnode* compVn = compareOp->getIn(0);
-                int4 compSize = compVn->getSize();
+                Varnode* compVn = compareOp.getIn(0);
+                int4 compSize = compVn.getSize();
 
-                uintb offset = compareOp->getIn(1)->getOffset();
+                uintb offset = compareOp.getIn(1).getOffset();
                 int4 sgn;
                 if (offset == 0)
                     sgn = 1;
@@ -81,10 +81,10 @@ namespace Sla.DECCORE
                     sgn = -1;
                 else
                     continue;
-                if (compareOp->code() == CPUI_INT_NOTEQUAL)
+                if (compareOp.code() == CPUI_INT_NOTEQUAL)
                     sgn = -sgn; // Complement the domain
 
-                Varnode* zeroVn = data.newConstant(inVn->getSize(), 0);
+                Varnode* zeroVn = data.newConstant(inVn.getSize(), 0);
                 if (sgn == 1)
                 {
                     data.opSetInput(compareOp, inVn, 1);

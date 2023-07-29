@@ -13,7 +13,7 @@ namespace Sla.SLEIGH
         private AddrSpace space;
         
         public SpaceSymbol(AddrSpace spc)
-            : base(spc->getName())
+            : base(spc.getName())
         {
             space = spc;
         }

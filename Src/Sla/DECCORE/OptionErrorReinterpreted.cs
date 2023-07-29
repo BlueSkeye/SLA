@@ -26,12 +26,12 @@ namespace Sla.DECCORE
             if (val)
             {
                 res = "Instruction reinterpretation is now a fatal error";
-                glb->flowoptions |= FlowInfo::error_reinterpreted;
+                glb.flowoptions |= FlowInfo::error_reinterpreted;
             }
             else
             {
                 res = "Instruction reinterpretation is now NOT a fatal error";
-                glb->flowoptions &= ~((uint4)FlowInfo::error_reinterpreted);
+                glb.flowoptions &= ~((uint4)FlowInfo::error_reinterpreted);
             }
 
             return res;

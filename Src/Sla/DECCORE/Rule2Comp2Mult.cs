@@ -32,7 +32,7 @@ namespace Sla.DECCORE
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
             data.opSetOpcode(op, CPUI_INT_MULT);
-            int4 size = op->getIn(0)->getSize();
+            int4 size = op.getIn(0).getSize();
             Varnode* negone = data.newConstant(size, calc_mask(size));
             data.opInsertInput(op, negone, 1);
             return 1;

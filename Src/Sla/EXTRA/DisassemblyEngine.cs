@@ -70,7 +70,7 @@ namespace Sla.EXTRA
             res.flags = 0;
             try
             {
-                res.length = trans->oneInstruction(*this, addr);
+                res.length = trans.oneInstruction(*this, addr);
             }
             catch (BadDataError &err) {
                 res.success = false;

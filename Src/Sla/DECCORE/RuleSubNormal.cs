@@ -35,20 +35,20 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* shiftout = op->getIn(0);
-            if (!shiftout->isWritten()) return 0;
-            PcodeOp* shiftop = shiftout->getDef();
-            OpCode opc = shiftop->code();
+            Varnode* shiftout = op.getIn(0);
+            if (!shiftout.isWritten()) return 0;
+            PcodeOp* shiftop = shiftout.getDef();
+            OpCode opc = shiftop.code();
             if ((opc != CPUI_INT_RIGHT) && (opc != CPUI_INT_SRIGHT))
                 return 0;
-            if (!shiftop->getIn(1)->isConstant()) return 0;
-            Varnode* a = shiftop->getIn(0);
-            if (a->isFree()) return 0;
-            int4 n = shiftop->getIn(1)->getOffset();
-            int4 c = op->getIn(1)->getOffset();
+            if (!shiftop.getIn(1).isConstant()) return 0;
+            Varnode* a = shiftop.getIn(0);
+            if (a.isFree()) return 0;
+            int4 n = shiftop.getIn(1).getOffset();
+            int4 c = op.getIn(1).getOffset();
             int4 k = (n / 8);
-            int4 insize = a->getSize();
-            int4 outsize = op->getOut()->getSize();
+            int4 insize = a.getSize();
+            int4 outsize = op.getOut().getSize();
 
             // Total shift + outsize must be greater equal to size of input
             if ((n + 8 * c + 8 * outsize < 8 * insize) && (n != k * 8)) return 0;
@@ -61,7 +61,7 @@ namespace Sla.DECCORE
                 {
                     // We need an additional extension
                     c += k;
-                    PcodeOp* newop = data.newOp(2, op->getAddr());
+                    PcodeOp* newop = data.newOp(2, op.getAddr());
                     opc = (opc == CPUI_INT_SRIGHT) ? CPUI_INT_SEXT : CPUI_INT_ZEXT;
                     data.opSetOpcode(newop, CPUI_SUBPIECE);
                     data.newUniqueOut(truncSize, newop);
@@ -69,7 +69,7 @@ namespace Sla.DECCORE
                     data.opSetInput(newop, data.newConstant(4, c), 1);
                     data.opInsertBefore(newop, op);
 
-                    data.opSetInput(op, newop->getOut(), 0);
+                    data.opSetInput(op, newop.getOut(), 0);
                     data.opRemoveInput(op, 1);
                     data.opSetOpcode(op, opc);
                     return 1;
@@ -94,14 +94,14 @@ namespace Sla.DECCORE
                     n -= 1;
             }
 
-            PcodeOp* newop = data.newOp(2, op->getAddr());
+            PcodeOp* newop = data.newOp(2, op.getAddr());
             data.opSetOpcode(newop, CPUI_SUBPIECE);
             data.newUniqueOut(outsize, newop);
             data.opSetInput(newop, a, 0);
             data.opSetInput(newop, data.newConstant(4, c), 1);
             data.opInsertBefore(newop, op);
 
-            data.opSetInput(op, newop->getOut(), 0);
+            data.opSetInput(op, newop.getOut(), 0);
             data.opSetInput(op, data.newConstant(4, n), 1);
             data.opSetOpcode(op, opc);
             return 1;

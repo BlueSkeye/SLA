@@ -55,14 +55,14 @@ namespace Sla.DECCORE
         internal static MapIterator operator ++()
         {
             ++curiter;
-            while ((curmap != map->end()) && (curiter == (*curmap)->end_list()))
+            while ((curmap != map.end()) && (curiter == (*curmap).end_list()))
             {
                 do
                 {
                     ++curmap;
-                } while ((curmap != map->end()) && ((*curmap) == (EntryMap*)0));
-                if (curmap != map->end())
-                    curiter = (*curmap)->begin_list();
+                } while ((curmap != map.end()) && ((*curmap) == (EntryMap*)0));
+                if (curmap != map.end())
+                    curiter = (*curmap).begin_list();
             }
             return *this;
         }
@@ -75,14 +75,14 @@ namespace Sla.DECCORE
         {
             MapIterator tmp(*this);
             ++curiter;
-            while ((curmap != map->end()) && (curiter == (*curmap)->end_list()))
+            while ((curmap != map.end()) && (curiter == (*curmap).end_list()))
             {
                 do
                 {
                     ++curmap;
-                } while ((curmap != map->end()) && ((*curmap) == (EntryMap*)0));
-                if (curmap != map->end())
-                    curiter = (*curmap)->begin_list();
+                } while ((curmap != map.end()) && ((*curmap) == (EntryMap*)0));
+                if (curmap != map.end())
+                    curiter = (*curmap).begin_list();
             }
             return tmp;
         }
@@ -100,7 +100,7 @@ namespace Sla.DECCORE
         internal bool operator ==(MapIterator op2)
         {
             if (curmap != op2.curmap) return false;
-            if (curmap == map->end()) return true;
+            if (curmap == map.end()) return true;
             return (curiter == op2.curiter);
         }
 
@@ -108,7 +108,7 @@ namespace Sla.DECCORE
         internal bool operator !=(MapIterator op2)
         {
             if (curmap != op2.curmap) return true;
-            if (curmap == map->end()) return false;
+            if (curmap == map.end()) return false;
             return (curiter != op2.curiter);
         }
     }

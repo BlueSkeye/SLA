@@ -37,46 +37,46 @@ namespace Sla.DECCORE
             Varnode* div,*x,*outvn,*outvn2,*div2;
             list<PcodeOp*>::const_iterator iter1, iter2;
 
-            x = op->getIn(0);
-            div = op->getIn(1);
-            outvn = op->getOut();
-            for (iter1 = outvn->beginDescend(); iter1 != outvn->endDescend(); ++iter1)
+            x = op.getIn(0);
+            div = op.getIn(1);
+            outvn = op.getOut();
+            for (iter1 = outvn.beginDescend(); iter1 != outvn.endDescend(); ++iter1)
             {
                 multop = *iter1;
-                if (multop->code() != CPUI_INT_MULT) continue;
-                div2 = multop->getIn(1);
+                if (multop.code() != CPUI_INT_MULT) continue;
+                div2 = multop.getIn(1);
                 if (div2 == outvn)
-                    div2 = multop->getIn(0);
+                    div2 = multop.getIn(0);
                 // Check that div is 2's complement of div2
-                if (div2->isConstant())
+                if (div2.isConstant())
                 {
-                    if (!div->isConstant()) continue;
-                    uintb mask = calc_mask(div2->getSize());
-                    if ((((div2->getOffset() ^ mask) + 1) & mask) != div->getOffset())
+                    if (!div.isConstant()) continue;
+                    uintb mask = calc_mask(div2.getSize());
+                    if ((((div2.getOffset() ^ mask) + 1) & mask) != div.getOffset())
                         continue;
                 }
                 else
                 {
-                    if (!div2->isWritten()) continue;
-                    if (div2->getDef()->code() != CPUI_INT_2COMP) continue;
-                    if (div2->getDef()->getIn(0) != div) continue;
+                    if (!div2.isWritten()) continue;
+                    if (div2.getDef().code() != CPUI_INT_2COMP) continue;
+                    if (div2.getDef().getIn(0) != div) continue;
                 }
-                outvn2 = multop->getOut();
-                for (iter2 = outvn2->beginDescend(); iter2 != outvn2->endDescend(); ++iter2)
+                outvn2 = multop.getOut();
+                for (iter2 = outvn2.beginDescend(); iter2 != outvn2.endDescend(); ++iter2)
                 {
                     addop = *iter2;
-                    if (addop->code() != CPUI_INT_ADD) continue;
+                    if (addop.code() != CPUI_INT_ADD) continue;
                     Varnode* lvn;
-                    lvn = addop->getIn(0);
+                    lvn = addop.getIn(0);
                     if (lvn == outvn2)
-                        lvn = addop->getIn(1);
+                        lvn = addop.getIn(1);
                     if (lvn != x) continue;
                     data.opSetInput(addop, x, 0);
-                    if (div->isConstant())
-                        data.opSetInput(addop, data.newConstant(div->getSize(), div->getOffset()), 1);
+                    if (div.isConstant())
+                        data.opSetInput(addop, data.newConstant(div.getSize(), div.getOffset()), 1);
                     else
                         data.opSetInput(addop, div, 1);
-                    if (op->code() == CPUI_INT_DIV) // Remainder of proper signedness
+                    if (op.code() == CPUI_INT_DIV) // Remainder of proper signedness
                         data.opSetOpcode(addop, CPUI_INT_REM);
                     else
                         data.opSetOpcode(addop, CPUI_INT_SREM);

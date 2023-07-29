@@ -19,16 +19,16 @@ namespace Sla.DECCORE
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opIntLess(op);
+            lng.opIntLess(op);
         }
 
         public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
         {
-            Datatype* reqtype = op->inputTypeLocal(slot);
-            if (castStrategy->checkIntPromotionForCompare(op, slot))
+            Datatype* reqtype = op.inputTypeLocal(slot);
+            if (castStrategy.checkIntPromotionForCompare(op, slot))
                 return reqtype;
-            Datatype* curtype = op->getIn(slot)->getHighTypeReadFacing(op);
-            return castStrategy->castStandard(reqtype, curtype, true, false);
+            Datatype* curtype = op.getIn(slot).getHighTypeReadFacing(op);
+            return castStrategy.castStandard(reqtype, curtype, true, false);
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,

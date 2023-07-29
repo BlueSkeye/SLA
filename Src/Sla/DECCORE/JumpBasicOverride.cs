@@ -41,21 +41,21 @@ namespace Sla.DECCORE
         private int4 findStartOp(Varnode vn)
         {
             list<PcodeOp*>::const_iterator iter, enditer;
-            iter = vn->beginDescend();
-            enditer = vn->endDescend();
+            iter = vn.beginDescend();
+            enditer = vn.endDescend();
             for (; iter != enditer; ++iter)
-                (*iter)->setMark();
+                (*iter).setMark();
             int4 res = -1;
             for (int4 i = 0; i < pathMeld.numOps(); ++i)
             {
-                if (pathMeld.getOp(i)->isMark())
+                if (pathMeld.getOp(i).isMark())
                 {
                     res = i;
                     break;
                 }
             }
-            for (iter = vn->beginDescend(); iter != enditer; ++iter)
-                (*iter)->clearMark();
+            for (iter = vn.beginDescend(); iter != enditer; ++iter)
+                (*iter).clearMark();
             return res;
         }
 
@@ -84,7 +84,7 @@ namespace Sla.DECCORE
             //  if (loadpoints != (vector<LoadTable> *)0)
             //    emul.setLoadCollect(true);
 
-            AddrSpace* spc = startop->getAddr().getSpace();
+            AddrSpace* spc = startop.getAddr().getSpace();
             uintb val = startingvalue;
             uintb addr;
             uint4 total = 0;
@@ -100,7 +100,7 @@ namespace Sla.DECCORE
                     addr = 0;
                     miss = tolerance;       // Terminate early
                 }
-                addr = AddrSpace::addressToByte(addr, spc->getWordSize());
+                addr = AddrSpace::addressToByte(addr, spc.getWordSize());
                 Address newaddr(spc, addr);
                 if (adset.find(newaddr) != adset.end())
                 {
@@ -168,7 +168,7 @@ namespace Sla.DECCORE
             for (i = 0; i < pathMeld.numOps(); ++i)
             { // Look for last LOAD
                 op = pathMeld.getOp(i);
-                if (op->code() == CPUI_LOAD)
+                if (op.code() == CPUI_LOAD)
                 {
                     res = pathMeld.getOpParent(i);
                     break;
@@ -179,7 +179,7 @@ namespace Sla.DECCORE
             while (i < pathMeld.numOps())
             { // Look for preceding ADD
                 op = pathMeld.getOp(i);
-                if (op->code() == CPUI_INT_ADD)
+                if (op.code() == CPUI_INT_ADD)
                 {
                     res = pathMeld.getOpParent(i);
                     break;
@@ -190,7 +190,7 @@ namespace Sla.DECCORE
             while (i < pathMeld.numOps())
             { // Look for preceding MULT
                 op = pathMeld.getOp(i);
-                if (op->code() == CPUI_INT_MULT)
+                if (op.code() == CPUI_INT_MULT)
                 {
                     res = pathMeld.getOpParent(i);
                     break;
@@ -299,7 +299,7 @@ namespace Sla.DECCORE
             }
 
             while (label.size() < addresstable.size()) {
-                fd->warning("Bad switch case", addresstable[label.size()]); // This should never happen
+                fd.warning("Bad switch case", addresstable[label.size()]); // This should never happen
                 label.push_back(0xBAD1ABE1);
             }
         }
@@ -313,12 +313,12 @@ namespace Sla.DECCORE
         public override JumpModel clone(JumpTable jt)
         {
             JumpBasicOverride* res = new JumpBasicOverride(jt);
-            res->adset = adset;
-            res->values = values;
-            res->addrtable = addrtable;
-            res->startingvalue = startingvalue;
-            res->normaddress = normaddress;
-            res->hash = hash;
+            res.adset = adset;
+            res.values = values;
+            res.addrtable = addrtable;
+            res.startingvalue = startingvalue;
+            res.normaddress = normaddress;
+            res.hash = hash;
             return res;
         }
 
@@ -343,13 +343,13 @@ namespace Sla.DECCORE
                 encoder.openElement(ELEM_DEST);
                 AddrSpace* spc = (*iter).getSpace();
                 uintb off = (*iter).getOffset();
-                spc->encodeAttributes(encoder, off);
+                spc.encodeAttributes(encoder, off);
                 encoder.closeElement(ELEM_DEST);
             }
             if (hash != 0)
             {
                 encoder.openElement(ELEM_NORMADDR);
-                normaddress.getSpace()->encodeAttributes(encoder, normaddress.getOffset());
+                normaddress.getSpace().encodeAttributes(encoder, normaddress.getOffset());
                 encoder.closeElement(ELEM_NORMADDR);
                 encoder.openElement(ELEM_NORMHASH);
                 encoder.writeUnsignedInteger(ATTRIB_CONTENT, hash);

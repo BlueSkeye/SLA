@@ -78,44 +78,44 @@ namespace Sla.DECCORE
         {
             vector<Varnode*> testList;
             testList.push_back(firstVn);
-            if (firstVn->isWritten())
+            if (firstVn.isWritten())
             {
-                PcodeOp* op = firstVn->getDef();
-                if (op->code() == CPUI_INT_SRIGHT)
+                PcodeOp* op = firstVn.getDef();
+                if (op.code() == CPUI_INT_SRIGHT)
                 {
                     // Same sign bit could be extracted from previous shifted version
-                    testList.push_back(op->getIn(0));
+                    testList.push_back(op.getIn(0));
                 }
             }
             for (int4 i = 0; i < testList.size(); ++i)
             {
                 Varnode* vn = testList[i];
-                list<PcodeOp*>::const_iterator iter = vn->beginDescend();
-                while (iter != vn->endDescend())
+                list<PcodeOp*>::const_iterator iter = vn.beginDescend();
+                while (iter != vn.endDescend())
                 {
                     PcodeOp* op = *iter;
                     ++iter;     // Increment before modifying the op
-                    OpCode opc = op->code();
+                    OpCode opc = op.code();
                     if (opc == CPUI_INT_RIGHT || opc == CPUI_INT_SRIGHT)
                     {
-                        Varnode* constVn = op->getIn(1);
-                        if (constVn->isWritten())
+                        Varnode* constVn = op.getIn(1);
+                        if (constVn.isWritten())
                         {
-                            PcodeOp* constOp = constVn->getDef();
-                            if (constOp->code() == CPUI_COPY)
-                                constVn = constOp->getIn(0);
-                            else if (constOp->code() == CPUI_INT_AND)
+                            PcodeOp* constOp = constVn.getDef();
+                            if (constOp.code() == CPUI_COPY)
+                                constVn = constOp.getIn(0);
+                            else if (constOp.code() == CPUI_INT_AND)
                             {
-                                constVn = constOp->getIn(0);
-                                Varnode* otherVn = constOp->getIn(1);
-                                if (!otherVn->isConstant()) continue;
-                                if (constVn->getOffset() != (constVn->getOffset() & otherVn->getOffset())) continue;
+                                constVn = constOp.getIn(0);
+                                Varnode* otherVn = constOp.getIn(1);
+                                if (!otherVn.isConstant()) continue;
+                                if (constVn.getOffset() != (constVn.getOffset() & otherVn.getOffset())) continue;
                             }
                         }
-                        if (constVn->isConstant())
+                        if (constVn.isConstant())
                         {
-                            int4 sa = firstVn->getSize() * 8 - 1;
-                            if (sa == (int4)constVn->getOffset())
+                            int4 sa = firstVn.getSize() * 8 - 1;
+                            if (sa == (int4)constVn.getOffset())
                             {
                                 data.opSetInput(op, replaceVn, 0);
                             }
@@ -123,7 +123,7 @@ namespace Sla.DECCORE
                     }
                     else if (opc == CPUI_COPY)
                     {
-                        testList.push_back(op->getOut());
+                        testList.push_back(op.getOut());
                     }
                 }
             }
@@ -136,16 +136,16 @@ namespace Sla.DECCORE
         /// \return \b true if it is (possibly) contained in a superseding form
         private static bool checkFormOverlap(PcodeOp op)
         {
-            if (op->code() != CPUI_SUBPIECE) return false;
-            Varnode* vn = op->getOut();
+            if (op.code() != CPUI_SUBPIECE) return false;
+            Varnode* vn = op.getOut();
             list<PcodeOp*>::const_iterator iter;
-            for (iter = vn->beginDescend(); iter != vn->endDescend(); ++iter)
+            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {
                 PcodeOp* superOp = *iter;
-                OpCode opc = superOp->code();
+                OpCode opc = superOp.code();
                 if (opc != CPUI_INT_RIGHT && opc != CPUI_INT_SRIGHT) continue;
-                Varnode* cvn = superOp->getIn(1);
-                if (!cvn->isConstant()) return true;    // Might be a form where constant has propagated yet
+                Varnode* cvn = superOp.getIn(1);
+                if (!cvn.isConstant()) return true;    // Might be a form where constant has propagated yet
                 int4 n, xsize;
                 uintb y;
                 OpCode extopc;
@@ -191,28 +191,28 @@ namespace Sla.DECCORE
                 xsize -= 1;     // one less bit for signed, because of signbit
             uintb divisor = calcDivisor(n, y, xsize);
             if (divisor == 0) return 0;
-            int4 outSize = op->getOut()->getSize();
+            int4 outSize = op.getOut().getSize();
 
-            if (inVn->getSize() < outSize)
+            if (inVn.getSize() < outSize)
             {   // Do we need an extension to get to final size
-                PcodeOp* inExt = data.newOp(1, op->getAddr());
+                PcodeOp* inExt = data.newOp(1, op.getAddr());
                 data.opSetOpcode(inExt, extOpc);
                 Varnode* extOut = data.newUniqueOut(outSize, inExt);
                 data.opSetInput(inExt, inVn, 0);
                 inVn = extOut;
                 data.opInsertBefore(inExt, op);
             }
-            else if (inVn->getSize() > outSize)
+            else if (inVn.getSize() > outSize)
             {   // Do we need a truncation to get to final size
-                PcodeOp* newop = data.newOp(2, op->getAddr());  // Create new op to hold the INT_DIV or INT_SDIV:INT_ADD
+                PcodeOp* newop = data.newOp(2, op.getAddr());  // Create new op to hold the INT_DIV or INT_SDIV:INT_ADD
                 data.opSetOpcode(newop, CPUI_INT_ADD);      // This gets changed immediately, but need it for opInsert
-                Varnode* resVn = data.newUniqueOut(inVn->getSize(), newop);
+                Varnode* resVn = data.newUniqueOut(inVn.getSize(), newop);
                 data.opInsertBefore(newop, op);
                 data.opSetOpcode(op, CPUI_SUBPIECE);    // Original op becomes a truncation
                 data.opSetInput(op, resVn, 0);
                 data.opSetInput(op, data.newConstant(4, 0), 1);
                 op = newop;                 // Main transform now changes newop
-                outSize = inVn->getSize();
+                outSize = inVn.getSize();
             }
             if (extOpc == CPUI_INT_ZEXT)
             { // Unsigned division
@@ -222,15 +222,15 @@ namespace Sla.DECCORE
             }
             else
             {           // Sign division
-                moveSignBitExtraction(op->getOut(), inVn, data);
-                PcodeOp* divop = data.newOp(2, op->getAddr());
+                moveSignBitExtraction(op.getOut(), inVn, data);
+                PcodeOp* divop = data.newOp(2, op.getAddr());
                 data.opSetOpcode(divop, CPUI_INT_SDIV);
                 Varnode* newout = data.newUniqueOut(outSize, divop);
                 data.opSetInput(divop, inVn, 0);
                 data.opSetInput(divop, data.newConstant(outSize, divisor), 1);
                 data.opInsertBefore(divop, op);
                 // Build the sign value correction
-                PcodeOp* sgnop = data.newOp(2, op->getAddr());
+                PcodeOp* sgnop = data.newOp(2, op.getAddr());
                 data.opSetOpcode(sgnop, CPUI_INT_SRIGHT);
                 Varnode* sgnvn = data.newUniqueOut(outSize, sgnop);
                 data.opSetInput(sgnop, inVn, 0);
@@ -268,15 +268,15 @@ namespace Sla.DECCORE
         public static Varnode findForm(PcodeOp op, int4 n, uintb y, int4 xsize, OpCode extopc)
         {
             PcodeOp* curOp = op;
-            OpCode shiftopc = curOp->code();
+            OpCode shiftopc = curOp.code();
             if (shiftopc == CPUI_INT_RIGHT || shiftopc == CPUI_INT_SRIGHT)
             {
-                Varnode* vn = curOp->getIn(0);
-                if (!vn->isWritten()) return (Varnode*)0;
-                Varnode* cvn = curOp->getIn(1);
-                if (!cvn->isConstant()) return (Varnode*)0;
-                n = cvn->getOffset();
-                curOp = vn->getDef();
+                Varnode* vn = curOp.getIn(0);
+                if (!vn.isWritten()) return (Varnode*)0;
+                Varnode* cvn = curOp.getIn(1);
+                if (!cvn.isConstant()) return (Varnode*)0;
+                n = cvn.getOffset();
+                curOp = vn.getDef();
             }
             else
             {
@@ -284,45 +284,45 @@ namespace Sla.DECCORE
                 if (shiftopc != CPUI_SUBPIECE) return (Varnode*)0;  // In this case SUBPIECE is not optional
                 shiftopc = CPUI_MAX;
             }
-            if (curOp->code() == CPUI_SUBPIECE)
+            if (curOp.code() == CPUI_SUBPIECE)
             {       // Optional SUBPIECE
-                int4 c = curOp->getIn(1)->getOffset();
-                Varnode* inVn = curOp->getIn(0);
-                if (!inVn->isWritten()) return (Varnode*)0;
-                if (curOp->getOut()->getSize() + c != inVn->getSize())
+                int4 c = curOp.getIn(1).getOffset();
+                Varnode* inVn = curOp.getIn(0);
+                if (!inVn.isWritten()) return (Varnode*)0;
+                if (curOp.getOut().getSize() + c != inVn.getSize())
                     return (Varnode*)0;         // Must keep high bits
                 n += 8 * c;
-                curOp = inVn->getDef();
+                curOp = inVn.getDef();
             }
-            if (curOp->code() != CPUI_INT_MULT) return (Varnode*)0; // There MUST be an INT_MULT
-            Varnode* inVn = curOp->getIn(0);
-            if (!inVn->isWritten()) return (Varnode*)0;
-            if (inVn->isConstantExtended(y) >= 0)
+            if (curOp.code() != CPUI_INT_MULT) return (Varnode*)0; // There MUST be an INT_MULT
+            Varnode* inVn = curOp.getIn(0);
+            if (!inVn.isWritten()) return (Varnode*)0;
+            if (inVn.isConstantExtended(y) >= 0)
             {
-                inVn = curOp->getIn(1);
-                if (!inVn->isWritten()) return (Varnode*)0;
+                inVn = curOp.getIn(1);
+                if (!inVn.isWritten()) return (Varnode*)0;
             }
-            else if (curOp->getIn(1)->isConstantExtended(y) < 0)
+            else if (curOp.getIn(1).isConstantExtended(y) < 0)
                 return (Varnode*)0; // There MUST be a constant
 
             Varnode* resVn;
-            PcodeOp* extOp = inVn->getDef();
-            extopc = extOp->code();
+            PcodeOp* extOp = inVn.getDef();
+            extopc = extOp.code();
             if (extopc != CPUI_INT_SEXT)
             {
-                uintb nzMask = inVn->getNZMask();
+                uintb nzMask = inVn.getNZMask();
                 xsize = 8 * sizeof(uintb) - count_leading_zeros(nzMask);
                 if (xsize == 0) return (Varnode*)0;
-                if (xsize > 4 * inVn->getSize()) return (Varnode*)0;
+                if (xsize > 4 * inVn.getSize()) return (Varnode*)0;
             }
             else
-                xsize = extOp->getIn(0)->getSize() * 8;
+                xsize = extOp.getIn(0).getSize() * 8;
 
             if (extopc == CPUI_INT_ZEXT || extopc == CPUI_INT_SEXT)
             {
-                Varnode* extVn = extOp->getIn(0);
-                if (extVn->isFree()) return (Varnode*)0;
-                if (inVn->getSize() == op->getOut()->getSize())
+                Varnode* extVn = extOp.getIn(0);
+                if (extVn.isFree()) return (Varnode*)0;
+                if (inVn.getSize() == op.getOut().getSize())
                     resVn = inVn;
                 else
                     resVn = extVn;
@@ -336,7 +336,7 @@ namespace Sla.DECCORE
             if (((extopc == CPUI_INT_ZEXT) && (shiftopc == CPUI_INT_SRIGHT)) ||
                 ((extopc == CPUI_INT_SEXT) && (shiftopc == CPUI_INT_RIGHT)))
             {
-                if (8 * op->getOut()->getSize() - n != xsize)
+                if (8 * op.getOut().getSize() - n != xsize)
                     return (Varnode*)0;
                 // op's signedness does not matter because all the extension
                 // bits are truncated

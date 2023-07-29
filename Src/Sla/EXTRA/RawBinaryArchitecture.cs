@@ -22,9 +22,9 @@ namespace Sla.EXTRA
 
             collectSpecFiles(*errorstream);
             ldr = new RawLoadImage(getFilename());
-            ldr->open();
+            ldr.open();
             if (adjustvma != 0)
-                ldr->adjustVma(adjustvma);
+                ldr.adjustVma(adjustvma);
             loader = ldr;
         }
 
@@ -37,7 +37,7 @@ namespace Sla.EXTRA
         protected override void postSpecFile()
         {
             Architecture::postSpecFile();
-            ((RawLoadImage*)loader)->attachToSpace(getDefaultCodeSpace());   // Attach default space to loader
+            ((RawLoadImage*)loader).attachToSpace(getDefaultCodeSpace());   // Attach default space to loader
         }
 
         public override void encode(Encoder encoder)
@@ -45,7 +45,7 @@ namespace Sla.EXTRA
             encoder.openElement(ELEM_RAW_SAVEFILE);
             encodeHeader(encoder);
             encoder.writeUnsignedInteger(ATTRIB_ADJUSTVMA, adjustvma);
-            types->encodeCoreTypes(encoder);
+            types.encodeCoreTypes(encoder);
             SleighArchitecture::encode(encoder);
             encoder.closeElement(ELEM_RAW_SAVEFILE);
         }
@@ -58,17 +58,17 @@ namespace Sla.EXTRA
 
             restoreXmlHeader(el);
             {
-                istringstream s(el->getAttributeValue("adjustvma"));
+                istringstream s(el.getAttributeValue("adjustvma"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> adjustvma;
             }
-            List list = el->getChildren();
+            List list = el.getChildren();
             List::const_iterator iter;
 
             iter = list.begin();
             if (iter != list.end())
             {
-                if ((*iter)->getName() == "coretypes")
+                if ((*iter).getName() == "coretypes")
                 {
                     store.registerTag(*iter);
                     ++iter;

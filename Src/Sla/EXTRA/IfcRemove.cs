@@ -25,13 +25,13 @@ namespace Sla.EXTRA
                 throw IfaceParseError("Missing symbol name");
 
             vector<Symbol*> symList;
-            dcp->readSymbol(name, symList);
+            dcp.readSymbol(name, symList);
 
             if (symList.empty())
                 throw IfaceExecutionError("No symbol named: " + name);
             if (symList.size() > 1)
                 throw IfaceExecutionError("More than one symbol named: " + name);
-            symList[0]->getScope()->removeSymbol(symList[0]);
+            symList[0].getScope().removeSymbol(symList[0]);
         }
     }
 }

@@ -55,12 +55,12 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < commonVn.size(); ++i)
             {
                 Varnode* vn = commonVn[i];
-                if (vn->isMark())
+                if (vn.isMark())
                 {       // Look for previously marked varnode, so we know it is in both lists
                     lastIntersect = newVn.size();
                     parentMap.push_back(lastIntersect);
                     newVn.push_back(vn);
-                    vn->clearMark();
+                    vn.clearMark();
                 }
                 else
                     parentMap.push_back(-1);
@@ -119,14 +119,14 @@ namespace Sla.DECCORE
                         meldPos += 1;
                         continue;
                     }
-                    if (trialOp->getParent() != op->getParent())
+                    if (trialOp.getParent() != op.getParent())
                     {
-                        if (op->getParent() == lastBlock)
+                        if (op.getParent() == lastBlock)
                         {
                             curOp = (PcodeOp*)0;        // op comes AFTER trialOp
                             break;
                         }
-                        else if (trialOp->getParent() != lastBlock)
+                        else if (trialOp.getParent() != lastBlock)
                         {
                             // Both trialOp and op come from different blocks that are not the lastBlock
                             int4 res = opMeld[meldPos].rootVn;      // Force truncatePath at (and above) this op
@@ -136,12 +136,12 @@ namespace Sla.DECCORE
                             return res;                 // return the new cutpoint
                         }
                     }
-                    else if (trialOp->getSeqNum().getOrder() <= op->getSeqNum().getOrder())
+                    else if (trialOp.getSeqNum().getOrder() <= op.getSeqNum().getOrder())
                     {
                         curOp = trialOp;        // op is equal to or comes later than trialOp
                         break;
                     }
-                    lastBlock = trialOp->getParent();
+                    lastBlock = trialOp.getParent();
                     newMeld.push_back(opMeld[meldPos]); // Current old op moved into newMeld
                     curRoot = opMeld[meldPos].rootVn;
                     meldPos += 1;
@@ -156,7 +156,7 @@ namespace Sla.DECCORE
                 {
                     newMeld.push_back(RootedOp(op, curRoot));
                 }
-                lastBlock = op->getParent();
+                lastBlock = op.getParent();
             }
             opMeld = newMeld;
             return -1;
@@ -194,7 +194,7 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < path.size(); ++i)
             {
                 PcodeOpNode node = path[i];
-                Varnode* vn = node.op->getIn(node.slot);
+                Varnode* vn = node.op.getIn(node.slot);
                 opMeld.push_back(RootedOp(node.op, i));
                 commonVn.push_back(vn);
             }
@@ -243,22 +243,22 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < path.size(); ++i)
             {
                 PcodeOpNode & node(path[i]);
-                node.op->getIn(node.slot)->setMark();   // Mark varnodes in the new path, so its easy to see intersection
+                node.op.getIn(node.slot).setMark();   // Mark varnodes in the new path, so its easy to see intersection
             }
-            internalIntersect(parentMap);   // Calculate varnode intersection, and map from old intersection -> new
+            internalIntersect(parentMap);   // Calculate varnode intersection, and map from old intersection . new
             int4 cutOff = -1;
 
             // Calculate where the cutoff point is in the new path
             for (int4 i = 0; i < path.size(); ++i)
             {
                 PcodeOpNode & node(path[i]);
-                Varnode* vn = node.op->getIn(node.slot);
-                if (!vn->isMark())
+                Varnode* vn = node.op.getIn(node.slot);
+                if (!vn.isMark())
                 {   // If mark already cleared, we know it is in intersection
                     cutOff = i + 1;     // Cut-off must at least be past this -vn-
                 }
                 else
-                    vn->clearMark();
+                    vn.clearMark();
             }
             int4 newCutoff = meldOps(path, cutOff, parentMap);  // Given cutoff point, meld in new ops
             if (newCutoff >= 0)                 // If not all ops could be ordered
@@ -283,12 +283,12 @@ namespace Sla.DECCORE
             if (val)
             {
                 for (int4 i = 0; i <= startOp; ++i)
-                    opMeld[i].op->setMark();
+                    opMeld[i].op.setMark();
             }
             else
             {
                 for (int4 i = 0; i <= startOp; ++i)
-                    opMeld[i].op->clearMark();
+                    opMeld[i].op.clearMark();
             }
         }
 

@@ -19,41 +19,41 @@ namespace Sla.EXTRA
 
             VarnodeLocSet::const_iterator iter, enditer;
             pair<set<uint8>::iterator, bool> res;
-            iter = fd->beginLoc();
-            enditer = fd->endLoc();
+            iter = fd.beginLoc();
+            enditer = fd.endLoc();
             while (iter != enditer)
             {
                 Varnode* vn = *iter;
                 ++iter;
-                if (vn->isAnnotation()) continue;
-                if (vn->isConstant())
+                if (vn.isAnnotation()) continue;
+                if (vn.isConstant())
                 {
-                    PcodeOp* op = vn->loneDescend();
-                    int4 slot = op->getSlot(vn);
+                    PcodeOp* op = vn.loneDescend();
+                    int4 slot = op.getSlot(vn);
                     if (slot == 0)
                     {
-                        if (op->code() == CPUI_LOAD) continue;
-                        if (op->code() == CPUI_STORE) continue;
-                        if (op->code() == CPUI_RETURN) continue;
+                        if (op.code() == CPUI_LOAD) continue;
+                        if (op.code() == CPUI_STORE) continue;
+                        if (op.code() == CPUI_RETURN) continue;
                     }
                 }
-                else if (vn->getSpace()->getType() != IPTR_INTERNAL)
+                else if (vn.getSpace().getType() != IPTR_INTERNAL)
                     continue;
-                else if (vn->isImplied())
+                else if (vn.isImplied())
                     continue;
                 dhash.uniqueHash(vn, fd);
                 if (dhash.getHash() == 0)
                 {
                     // We have a duplicate
                     PcodeOp op;
-                    if (vn->beginDescend() != vn->endDescend())
-                        op = *vn->beginDescend();
+                    if (vn.beginDescend() != vn.endDescend())
+                        op = *vn.beginDescend();
                     else
-                        op = vn->getDef();
+                        op = vn.getDef();
                     s << "Could not get unique hash for : ";
-                    vn->printRaw(s);
+                    vn.printRaw(s);
                     s << " : ";
-                    op->printRaw(s);
+                    op.printRaw(s);
                     s << endl;
                     return;
                 }
@@ -61,15 +61,15 @@ namespace Sla.EXTRA
                 if (total != 1)
                 {
                     PcodeOp op;
-                    if (vn->beginDescend() != vn->endDescend())
-                        op = *vn->beginDescend();
+                    if (vn.beginDescend() != vn.endDescend())
+                        op = *vn.beginDescend();
                     else
-                        op = vn->getDef();
+                        op = vn.getDef();
                     s << "Duplicate : ";
                     s << dec << DynamicHash::getPositionFromHash(dhash.getHash()) << " out of " << total << " : ";
-                    vn->printRaw(s);
+                    vn.printRaw(s);
                     s << " : ";
-                    op->printRaw(s);
+                    op.printRaw(s);
                     s << endl;
                 }
             }
@@ -90,30 +90,30 @@ namespace Sla.EXTRA
             clock_t start_time, end_time;
             float duration;
 
-            if (fd->hasNoCode())
+            if (fd.hasNoCode())
             {
-                *status->optr << "No code for " << fd->getName() << endl;
+                *status.optr << "No code for " << fd.getName() << endl;
                 return;
             }
             try
             {
-                dcp->conf->clearAnalysis(fd); // Clear any old analysis
-                dcp->conf->allacts.getCurrent()->reset(*fd);
+                dcp.conf.clearAnalysis(fd); // Clear any old analysis
+                dcp.conf.allacts.getCurrent().reset(*fd);
                 start_time = clock();
-                dcp->conf->allacts.getCurrent()->perform(*fd);
+                dcp.conf.allacts.getCurrent().perform(*fd);
                 end_time = clock();
-                *status->optr << "Decompiled " << fd->getName();
-                //	  *status->optr << ": " << hex << fd->getAddress().getOffset();
-                *status->optr << '(' << dec << fd->getSize() << ')';
+                *status.optr << "Decompiled " << fd.getName();
+                //	  *status.optr << ": " << hex << fd.getAddress().getOffset();
+                *status.optr << '(' << dec << fd.getSize() << ')';
                 duration = ((float)(end_time - start_time)) / CLOCKS_PER_SEC;
                 duration *= 1000.0;
-                *status->optr << " time=" << fixed << setprecision(0) << duration << " ms" << endl;
-                check(fd, *status->optr);
+                *status.optr << " time=" << fixed << setprecision(0) << duration << " ms" << endl;
+                check(fd, *status.optr);
             }
             catch (LowlevelError err) {
-                *status->optr << "Skipping " << fd->getName() << ": " << err.ToString() << endl;
+                *status.optr << "Skipping " << fd.getName() << ": " << err.ToString() << endl;
             }
-            dcp->conf->clearAnalysis(fd);
+            dcp.conf.clearAnalysis(fd);
         }
     }
 }

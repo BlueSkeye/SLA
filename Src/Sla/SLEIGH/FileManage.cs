@@ -203,7 +203,7 @@ namespace Sla.SLEIGH
             if (dir == (DIR*)0) return;
             entry = readdir(dir);
             while (entry != (dirent*)0) {
-                string fullname(entry->d_name);
+                string fullname(entry.d_name);
                 if (match.size() <= fullname.size())
                 {
                     if (allowdot || (fullname[0] != '.'))
@@ -263,9 +263,9 @@ namespace Sla.SLEIGH
             if (dir == (DIR*)0) return;
             entry = readdir(dir);
             while (entry != (dirent*)0) {
-                if (entry->d_type == DT_DIR)
+                if (entry.d_type == DT_DIR)
                 {
-                    string fullname(entry->d_name);
+                    string fullname(entry.d_name);
                     if ((fullname != ".") && (fullname != ".."))
                     {
                         if (allowdot || (fullname[0] != '.'))

@@ -117,7 +117,7 @@ namespace Sla.EXTRA
         /// \param b is a pointer to the second command
         /// \return \b true if the first pointer is ordered before the second
         internal static bool compare_ifacecommand(IfaceCommand a, IfaceCommand b) {
-            return (0 > a->compare(*b));
+            return (0 > a.compare(*b));
         }
     }
 }

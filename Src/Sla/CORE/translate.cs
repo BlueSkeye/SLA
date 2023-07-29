@@ -508,9 +508,9 @@ namespace Sla.CORE {
         private List<AddrSpace> baselist;
         /// Special constant resolvers
         private List<AddressResolver?> resolvelist;
-        /// Map from name -> space
+        /// Map from name . space
         private SortedDictionary<string, AddrSpace> name2Space;
-        /// Map from shortcut -> space
+        /// Map from shortcut . space
         private SortedDictionary<int, AddrSpace> shortcut2Space;
         /// Quick reference to constant space
         private AddrSpace constantspace;

@@ -24,19 +24,19 @@ namespace Sla.DECCORE
         public override int apply(Funcdata data)
         {
             ProtoParameter* outparam = data.getFuncProto().getOutput();
-            if ((!outparam->isTypeLocked()) || outparam->isSizeTypeLocked())
+            if ((!outparam.isTypeLocked()) || outparam.isSizeTypeLocked())
             {
                 PcodeOp* op = data.getFirstReturnOp();
                 vector<Varnode*> vnlist;
                 if (op != (PcodeOp*)0)
                 {
-                    for (int4 i = 1; i < op->numInput(); ++i)
-                        vnlist.push_back(op->getIn(i));
+                    for (int4 i = 1; i < op.numInput(); ++i)
+                        vnlist.push_back(op.getIn(i));
                 }
                 if (data.isHighOn())
                     data.getFuncProto().updateOutputTypes(vnlist);
                 else
-                    data.getFuncProto().updateOutputNoTypes(vnlist, data.getArch()->types);
+                    data.getFuncProto().updateOutputNoTypes(vnlist, data.getArch().types);
             }
             return 0;
         }

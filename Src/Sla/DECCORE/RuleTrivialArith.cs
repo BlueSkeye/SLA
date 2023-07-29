@@ -49,16 +49,16 @@ namespace Sla.DECCORE
             Varnode* vn;
             Varnode* in0,*in1;
 
-            if (op->numInput() != 2) return 0;
-            in0 = op->getIn(0);
-            in1 = op->getIn(1);
+            if (op.numInput() != 2) return 0;
+            in0 = op.getIn(0);
+            in1 = op.getIn(1);
             if (in0 != in1)
             {       // Inputs must be identical
-                if (!in0->isWritten()) return 0;
-                if (!in1->isWritten()) return 0;
-                if (!in0->getDef()->isCseMatch(in1->getDef())) return 0; // or constructed identically
+                if (!in0.isWritten()) return 0;
+                if (!in1.isWritten()) return 0;
+                if (!in0.getDef().isCseMatch(in1.getDef())) return 0; // or constructed identically
             }
-            switch (op->code())
+            switch (op.code())
             {
 
                 case CPUI_INT_NOTEQUAL: // Boolean 0
@@ -78,7 +78,7 @@ namespace Sla.DECCORE
                     break;
                 case CPUI_INT_XOR:      // Same size 0
                                         //  case CPUI_INT_SUB:
-                    vn = data.newConstant(op->getOut()->getSize(), 0);
+                    vn = data.newConstant(op.getOut().getSize(), 0);
                     break;
                 case CPUI_BOOL_AND:     // Identity
                 case CPUI_BOOL_OR:

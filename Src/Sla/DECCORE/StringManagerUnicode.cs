@@ -31,7 +31,7 @@ namespace Sla.DECCORE
         private int4 checkCharacters(uint1[] buf, int4 size,int4 charsize)
         {
             if (buf == (uint1*)0) return -1;
-            bool bigend = glb->translate->isBigEndian();
+            bool bigend = glb.translate.isBigEndian();
             int4 i = 0;
             int4 count = 0;
             int4 skip = charsize;
@@ -74,11 +74,11 @@ namespace Sla.DECCORE
             stringData.isTruncated = false;
             isTrunc = false;
 
-            if (charType->isOpaqueString())     // Cannot currently test for an opaque encoding
+            if (charType.isOpaqueString())     // Cannot currently test for an opaque encoding
                 return stringData.byteData;         // Return the empty buffer
 
             int4 curBufferSize = 0;
-            int4 charsize = charType->getSize();
+            int4 charsize = charType.getSize();
             bool foundTerminator = false;
 
             try
@@ -96,7 +96,7 @@ namespace Sla.DECCORE
                             return stringData.byteData;     // Could not find terminator
                         }
                     }
-                    glb->loader->loadFill(testBuffer + curBufferSize, amount,
+                    glb.loader.loadFill(testBuffer + curBufferSize, amount,
                               addr + curBufferSize);
                     foundTerminator = hasCharTerminator(testBuffer + curBufferSize, amount,
                                     charsize);
@@ -143,7 +143,7 @@ namespace Sla.DECCORE
         /// \return \b true if the byte array contains valid unicode
         public bool writeUnicode(TextWriter s, uint1[] buffer, int4 size, int4 charsize)
         {
-            bool bigend = glb->translate->isBigEndian();
+            bool bigend = glb.translate.isBigEndian();
             int4 i = 0;
             int4 count = 0;
             int4 skip = charsize;

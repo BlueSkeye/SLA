@@ -21,15 +21,15 @@ namespace Sla.SLEIGH
         
         public override intb getValue(ParserWalker walker)
         {
-            intb leftval = getLeft()->getValue(walker);
-            intb rightval = getRight()->getValue(walker);
+            intb leftval = getLeft().getValue(walker);
+            intb rightval = getRight().getValue(walker);
             return leftval / rightval;
         }
 
         public override intb getSubValue(List<intb> replace,int4 listpos)
         {
-            intb leftval = getLeft()->getSubValue(replace, listpos); // Must be left first
-            intb rightval = getRight()->getSubValue(replace, listpos);
+            intb leftval = getLeft().getSubValue(replace, listpos); // Must be left first
+            intb rightval = getRight().getSubValue(replace, listpos);
             return leftval / rightval;
         }
 

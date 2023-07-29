@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         public override int apply(Funcdata data)
         {
             Architecture* glb = data.getArch();
-            bool cachereadonly = glb->readonlypropagate;
+            bool cachereadonly = glb.readonlypropagate;
             int4 pass = data.getHeritagePass();
             VarnodeLocSet::const_iterator iter;
             Varnode* vn;
@@ -38,66 +38,66 @@ namespace Sla.DECCORE
             while (iter != data.endLoc())
             {
                 vn = *iter++;       // Advance iterator in case vn is deleted
-                if (vn->isAnnotation()) continue;
-                int4 vnSize = vn->getSize();
-                if (vn->isAutoLiveHold())
+                if (vn.isAnnotation()) continue;
+                int4 vnSize = vn.getSize();
+                if (vn.isAutoLiveHold())
                 {
                     if (pass > 0)
                     {
-                        if (vn->isWritten())
+                        if (vn.isWritten())
                         {
-                            PcodeOp* loadOp = vn->getDef();
-                            if (loadOp->code() == CPUI_LOAD)
+                            PcodeOp* loadOp = vn.getDef();
+                            if (loadOp.code() == CPUI_LOAD)
                             {
-                                Varnode* ptr = loadOp->getIn(1);
-                                if (ptr->isConstant() || ptr->isReadOnly())
+                                Varnode* ptr = loadOp.getIn(1);
+                                if (ptr.isConstant() || ptr.isReadOnly())
                                     continue;
-                                if (ptr->isWritten())
+                                if (ptr.isWritten())
                                 {
-                                    PcodeOp* copyOp = ptr->getDef();
-                                    if (copyOp->code() == CPUI_COPY)
+                                    PcodeOp* copyOp = ptr.getDef();
+                                    if (copyOp.code() == CPUI_COPY)
                                     {
-                                        ptr = copyOp->getIn(0);
-                                        if (ptr->isConstant() || ptr->isReadOnly())
+                                        ptr = copyOp.getIn(0);
+                                        if (ptr.isConstant() || ptr.isReadOnly())
                                             continue;
                                     }
                                 }
                             }
                         }
-                        vn->clearAutoLiveHold();
+                        vn.clearAutoLiveHold();
                         count += 1;
                     }
                 }
-                else if (vn->hasActionProperty())
+                else if (vn.hasActionProperty())
                 {
-                    if (cachereadonly && vn->isReadOnly())
+                    if (cachereadonly && vn.isReadOnly())
                     {
                         if (data.fillinReadOnly(vn)) // Try to replace vn with its lookup in LoadImage
                             count += 1;
                     }
-                    else if (vn->isVolatile())
+                    else if (vn.isVolatile())
                         if (data.replaceVolatile(vn))
                             count += 1;     // Try to replace vn with pcode op
                 }
-                else if (((vn->getNZMask() & vn->getConsume()) == 0) && (vnSize <= sizeof(uintb)))
+                else if (((vn.getNZMask() & vn.getConsume()) == 0) && (vnSize <= sizeof(uintb)))
                 {
                     // FIXME: uintb should be arbitrary precision
-                    if (vn->isConstant()) continue; // Don't replace a constant
-                    if (vn->isWritten())
+                    if (vn.isConstant()) continue; // Don't replace a constant
+                    if (vn.isWritten())
                     {
-                        if (vn->getDef()->code() == CPUI_COPY)
+                        if (vn.getDef().code() == CPUI_COPY)
                         {
-                            if (vn->getDef()->getIn(0)->isConstant())
+                            if (vn.getDef().getIn(0).isConstant())
                             {
                                 // Don't replace a COPY 0, with a zero, let
                                 // constant propagation do that. This prevents
                                 // an infinite recursion
-                                if (vn->getDef()->getIn(0)->getOffset() == 0)
+                                if (vn.getDef().getIn(0).getOffset() == 0)
                                     continue;
                             }
                         }
                     }
-                    if (!vn->hasNoDescend())
+                    if (!vn.hasNoDescend())
                     {
                         data.totalReplaceConstant(vn, 0);
                         count += 1;

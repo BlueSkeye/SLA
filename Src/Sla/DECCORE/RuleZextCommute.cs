@@ -31,19 +31,19 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* zextvn = op->getIn(0);
-            if (!zextvn->isWritten()) return 0;
-            PcodeOp* zextop = zextvn->getDef();
-            if (zextop->code() != CPUI_INT_ZEXT) return 0;
-            Varnode* zextin = zextop->getIn(0);
-            if (zextin->isFree()) return 0;
-            Varnode* savn = op->getIn(1);
-            if ((!savn->isConstant()) && (savn->isFree()))
+            Varnode* zextvn = op.getIn(0);
+            if (!zextvn.isWritten()) return 0;
+            PcodeOp* zextop = zextvn.getDef();
+            if (zextop.code() != CPUI_INT_ZEXT) return 0;
+            Varnode* zextin = zextop.getIn(0);
+            if (zextin.isFree()) return 0;
+            Varnode* savn = op.getIn(1);
+            if ((!savn.isConstant()) && (savn.isFree()))
                 return 0;
 
-            PcodeOp* newop = data.newOp(2, op->getAddr());
+            PcodeOp* newop = data.newOp(2, op.getAddr());
             data.opSetOpcode(newop, CPUI_INT_RIGHT);
-            Varnode* newout = data.newUniqueOut(zextin->getSize(), newop);
+            Varnode* newout = data.newUniqueOut(zextin.getSize(), newop);
             data.opRemoveInput(op, 1);
             data.opSetInput(op, newout, 0);
             data.opSetOpcode(op, CPUI_INT_ZEXT);

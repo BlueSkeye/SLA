@@ -35,21 +35,21 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* constVn = op->getIn(1);
-            if (!constVn->isConstant()) return 0;
-            Varnode* inVn = op->getIn(0);
-            if (!inVn->isWritten()) return 0;
-            PcodeOp* andOp = inVn->getDef();
-            if (andOp->code() != CPUI_INT_AND) return 0;
-            Varnode* maskVn = andOp->getIn(1);
-            if (!maskVn->isConstant()) return 0;
+            Varnode* constVn = op.getIn(1);
+            if (!constVn.isConstant()) return 0;
+            Varnode* inVn = op.getIn(0);
+            if (!inVn.isWritten()) return 0;
+            PcodeOp* andOp = inVn.getDef();
+            if (andOp.code() != CPUI_INT_AND) return 0;
+            Varnode* maskVn = andOp.getIn(1);
+            if (!maskVn.isConstant()) return 0;
 
-            int4 sa = (int4)constVn->getOffset();
-            uintb mask = maskVn->getOffset() >> sa;
-            Varnode* rootVn = andOp->getIn(0);
-            uintb full = calc_mask(rootVn->getSize()) >> sa;
+            int4 sa = (int4)constVn.getOffset();
+            uintb mask = maskVn.getOffset() >> sa;
+            Varnode* rootVn = andOp.getIn(0);
+            uintb full = calc_mask(rootVn.getSize()) >> sa;
             if (full != mask) return 0;
-            if (rootVn->isFree()) return 0;
+            if (rootVn.isFree()) return 0;
             data.opSetInput(op, rootVn, 0); // Bypass the INT_AND
             return 1;
         }

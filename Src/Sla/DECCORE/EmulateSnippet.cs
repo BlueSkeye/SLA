@@ -42,14 +42,14 @@ namespace Sla.DECCORE
         /// \return indicated bytes arranged as a constant value
         private uintb getLoadImageValue(AddrSpace spc, uintb offset, int4 sz)
         {
-            LoadImage* loadimage = glb->loader;
+            LoadImage* loadimage = glb.loader;
             uintb res;
 
-            loadimage->loadFill((uint1*)&res, sizeof(uintb), Address(spc, off));
+            loadimage.loadFill((uint1*)&res, sizeof(uintb), Address(spc, off));
 
-            if ((HOST_ENDIAN == 1) != spc->isBigEndian())
+            if ((HOST_ENDIAN == 1) != spc.isBigEndian())
                 res = byte_swap(res, sizeof(uintb));
-            if (spc->isBigEndian() && (sz < sizeof(uintb)))
+            if (spc.isBigEndian() && (sz < sizeof(uintb)))
                 res >>= (sizeof(uintb) - sz) * 8;
             else
                 res &= calc_mask(sz);
@@ -58,43 +58,43 @@ namespace Sla.DECCORE
 
         protected override void executeUnary()
         {
-            uintb in1 = getVarnodeValue(currentOp->getInput(0));
-            uintb out = currentBehave->evaluateUnary(currentOp->getOutput()->size,
-                                 currentOp->getInput(0)->size, in1);
-            setVarnodeValue(currentOp->getOutput()->offset, out);
+            uintb in1 = getVarnodeValue(currentOp.getInput(0));
+            uintb out = currentBehave.evaluateUnary(currentOp.getOutput().size,
+                                 currentOp.getInput(0).size, in1);
+            setVarnodeValue(currentOp.getOutput().offset, out);
         }
 
         protected override void executeBinary()
         {
-            uintb in1 = getVarnodeValue(currentOp->getInput(0));
-            uintb in2 = getVarnodeValue(currentOp->getInput(1));
-            uintb out = currentBehave->evaluateBinary(currentOp->getOutput()->size,
-                                  currentOp->getInput(0)->size, in1, in2);
-            setVarnodeValue(currentOp->getOutput()->offset, out);
+            uintb in1 = getVarnodeValue(currentOp.getInput(0));
+            uintb in2 = getVarnodeValue(currentOp.getInput(1));
+            uintb out = currentBehave.evaluateBinary(currentOp.getOutput().size,
+                                  currentOp.getInput(0).size, in1, in2);
+            setVarnodeValue(currentOp.getOutput().offset, out);
         }
 
         protected override void executeLoad()
         {
             // op will be null, use current_op
-            uintb off = getVarnodeValue(currentOp->getInput(1));
-            AddrSpace* spc = currentOp->getInput(0)->getSpaceFromConst();
-            off = AddrSpace::addressToByte(off, spc->getWordSize());
-            int4 sz = currentOp->getOutput()->size;
+            uintb off = getVarnodeValue(currentOp.getInput(1));
+            AddrSpace* spc = currentOp.getInput(0).getSpaceFromConst();
+            off = AddrSpace::addressToByte(off, spc.getWordSize());
+            int4 sz = currentOp.getOutput().size;
             uintb res = getLoadImageValue(spc, off, sz);
-            setVarnodeValue(currentOp->getOutput()->offset, res);
+            setVarnodeValue(currentOp.getOutput().offset, res);
         }
 
         protected override void executeStore()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
         }
 
         protected override void executeBranch()
         {
-            VarnodeData* vn = currentOp->getInput(0);
-            if (vn->space->getType() != IPTR_CONSTANT)
+            VarnodeData* vn = currentOp.getInput(0);
+            if (vn.space.getType() != IPTR_CONSTANT)
                 throw new LowlevelError("Tried to emulate absolute branch in snippet code");
-            int4 rel = (int4)vn->offset;
+            int4 rel = (int4)vn.offset;
             pos += rel;
             if ((pos < 0) || (pos > opList.size()))
                 throw new LowlevelError("Relative branch out of bounds in snippet code");
@@ -109,54 +109,54 @@ namespace Sla.DECCORE
         protected override bool executeCbranch()
         {
             // op will be null, use current_op
-            uintb cond = getVarnodeValue(currentOp->getInput(1));
+            uintb cond = getVarnodeValue(currentOp.getInput(1));
             // We must take into account the booleanflip bit with pcode from the syntax tree
             return (cond != 0);
         }
 
         protected override void executeBranchind()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
         }
 
         protected override void executeCall()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
         }
 
         protected override void executeCallind()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
         }
 
         protected override void executeCallother()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
         }
 
         protected override void executeMultiequal()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
         }
 
         protected override void executeIndirect()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
         }
 
         protected override void executeSegmentOp()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
         }
 
         protected override void executeCpoolRef()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
         }
 
         protected override void executeNew()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
         }
 
         protected override void fallthruOp()
@@ -190,7 +190,7 @@ namespace Sla.DECCORE
             setCurrentOp(0);
         }
 
-        public override Address getExecuteAddress() => currentOp->getAddr();
+        public override Address getExecuteAddress() => currentOp.getAddr();
 
         /// Get the underlying Architecture
         public Architecture getArch() => glb;
@@ -232,27 +232,27 @@ namespace Sla.DECCORE
             {
                 PcodeOpRaw* op = opList[i];
                 VarnodeData* vn;
-                OpCode opc = op->getOpcode();
+                OpCode opc = op.getOpcode();
                 if (opc == CPUI_BRANCHIND || opc == CPUI_CALL || opc == CPUI_CALLIND || opc == CPUI_CALLOTHER ||
                 opc == CPUI_STORE || opc == CPUI_SEGMENTOP || opc == CPUI_CPOOLREF ||
                 opc == CPUI_NEW || opc == CPUI_MULTIEQUAL || opc == CPUI_INDIRECT)
                     return false;
                 if (opc == CPUI_BRANCH)
                 {
-                    vn = op->getInput(0);
-                    if (vn->space->getType() != IPTR_CONSTANT)  // Only relative branching allowed
+                    vn = op.getInput(0);
+                    if (vn.space.getType() != IPTR_CONSTANT)  // Only relative branching allowed
                         return false;
                 }
-                vn = op->getOutput();
+                vn = op.getOutput();
                 if (vn != (VarnodeData*)0)
                 {
-                    if (vn->space->getType() != IPTR_INTERNAL)
+                    if (vn.space.getType() != IPTR_INTERNAL)
                         return false;                   // Can only write to temporaries
                 }
-                for (int4 j = 0; j < op->numInput(); ++j)
+                for (int4 j = 0; j < op.numInput(); ++j)
                 {
-                    vn = op->getInput(j);
-                    if (vn->space->getType() == IPTR_PROCESSOR)
+                    vn = op.getInput(j);
+                    if (vn.space.getType() == IPTR_PROCESSOR)
                         return false;                   // Cannot read from normal registers
                 }
             }
@@ -266,7 +266,7 @@ namespace Sla.DECCORE
         {
             pos = i;
             currentOp = opList[i];
-            currentBehave = currentOp->getBehavior();
+            currentBehave = currentOp.getBehavior();
         }
 
         /// \brief Set a temporary register value in the machine state
@@ -288,19 +288,19 @@ namespace Sla.DECCORE
         /// \return the retrieved value
         public uintb getVarnodeValue(VarnodeData vn)
         {
-            AddrSpace* spc = vn->space;
-            if (spc->getType() == IPTR_CONSTANT)
-                return vn->offset;
-            if (spc->getType() == IPTR_INTERNAL)
+            AddrSpace* spc = vn.space;
+            if (spc.getType() == IPTR_CONSTANT)
+                return vn.offset;
+            if (spc.getType() == IPTR_INTERNAL)
             {
                 map<uintb, uintb>::const_iterator iter;
-                iter = tempValues.find(vn->offset);
+                iter = tempValues.find(vn.offset);
                 if (iter != tempValues.end())
                     return (*iter).second;  // We have seen this varnode before
                 throw new LowlevelError("Read before write in snippet emulation");
             }
 
-            return getLoadImageValue(vn->space, vn->offset, vn->size);
+            return getLoadImageValue(vn.space, vn.offset, vn.size);
         }
 
         /// \brief Retrieve a temporary register value directly

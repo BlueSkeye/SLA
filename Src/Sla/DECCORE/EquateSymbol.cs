@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         {
             value = val;
             category = equate;
-            type = sc->getArch()->types->getBase(1, TYPE_UNKNOWN);
+            type = sc.getArch().types.getBase(1, TYPE_UNKNOWN);
             dispflags |= format;
         }
 
@@ -88,8 +88,8 @@ namespace Sla.DECCORE
             value = decoder.readUnsignedInteger(ATTRIB_CONTENT);
             decoder.closeElement(subId);
 
-            TypeFactory* types = scope->getArch()->types;
-            type = types->getBase(1, TYPE_UNKNOWN);
+            TypeFactory* types = scope.getArch().types;
+            type = types.getBase(1, TYPE_UNKNOWN);
             decoder.closeElement(elemId);
         }
     }

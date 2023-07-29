@@ -45,8 +45,8 @@ namespace Sla.DECCORE
         /// \param bank is a pointer to the MemoryBank to be registered
         public void setMemoryBank(MemoryBank bank)
         {
-            AddrSpace spc = bank->getSpace();
-            int4 index = spc->getIndex();
+            AddrSpace spc = bank.getSpace();
+            int4 index = spc.getIndex();
 
             while (index >= memspace.size())
                 memspace.push_back((MemoryBank*)0);
@@ -61,7 +61,7 @@ namespace Sla.DECCORE
         /// \return a pointer to the MemoryBank or \b null if no bank is associated with \e spc.
         public MemoryBank getMemoryBank(AddrSpace spc)
         {
-            int4 index = spc->getIndex();
+            int4 index = spc.getIndex();
             if (index >= memspace.size())
                 return (MemoryBank*)0;
             return memspace[index];
@@ -79,8 +79,8 @@ namespace Sla.DECCORE
         {
             MemoryBank* mspace = getMemoryBank(spc);
             if (mspace == (MemoryBank*)0)
-                throw new LowlevelError("Setting value for unmapped memory space: " + spc->getName());
-            mspace->setValue(off, size, cval);
+                throw new LowlevelError("Setting value for unmapped memory space: " + spc.getName());
+            mspace.setValue(off, size, cval);
         }
 
         /// Retrieve a memory value from the memory state
@@ -93,11 +93,11 @@ namespace Sla.DECCORE
         /// \return the queried value
         public uintb getValue(AddrSpace spc, uintb off, int4 size)
         {
-            if (spc->getType() == IPTR_CONSTANT) return off;
+            if (spc.getType() == IPTR_CONSTANT) return off;
             MemoryBank* mspace = getMemoryBank(spc);
             if (mspace == (MemoryBank*)0)
-                throw new LowlevelError("Getting value from unmapped memory space: " + spc->getName());
-            return mspace->getValue(off, size);
+                throw new LowlevelError("Getting value from unmapped memory space: " + spc.getName());
+            return mspace.getValue(off, size);
         }
 
         /// Set a value on a named register in the memory state
@@ -110,7 +110,7 @@ namespace Sla.DECCORE
         public void setValue(string nm,uintb cval)
         {
             // Set a "register" value
-            VarnodeData vdata = trans->getRegister(nm);
+            VarnodeData vdata = trans.getRegister(nm);
             setValue(vdata.space, vdata.offset, vdata.size, cval);
         }
 
@@ -124,7 +124,7 @@ namespace Sla.DECCORE
         public uintb getValue(string nm)
         {
             // Get a "register" value
-            VarnodeData vdata = trans->getRegister(nm);
+            VarnodeData vdata = trans.getRegister(nm);
             return getValue(vdata.space, vdata.offset, vdata.size);
         }
 
@@ -135,7 +135,7 @@ namespace Sla.DECCORE
         /// \param cval is the value to write into the varnode
         public void setValue(VarnodeData vn, uintb cval)
         {
-            setValue(vn->space, vn->offset, vn->size, cval);
+            setValue(vn.space, vn.offset, vn.size, cval);
         }
 
         /// Get a value from a \b varnode
@@ -143,7 +143,7 @@ namespace Sla.DECCORE
         /// than querying for the offset and space
         /// \param vn is a pointer to the varnode to be read
         /// \return the value read from the varnode
-        public uintb getValue(VarnodeData vn) => getValue(vn->space, vn->offset, vn->size);
+        public uintb getValue(VarnodeData vn) => getValue(vn.space, vn.offset, vn.size);
 
         /// Get a chunk of data from memory state
         /// This is the main interface for reading a range of bytes from the MemorySate.
@@ -158,8 +158,8 @@ namespace Sla.DECCORE
         {
             MemoryBank* mspace = getMemoryBank(spc);
             if (mspace == (MemoryBank*)0)
-                throw new LowlevelError("Getting chunk from unmapped memory space: " + spc->getName());
-            mspace->getChunk(off, size, res);
+                throw new LowlevelError("Getting chunk from unmapped memory space: " + spc.getName());
+            mspace.getChunk(off, size, res);
         }
 
         /// Set a chunk of data from memory state
@@ -175,8 +175,8 @@ namespace Sla.DECCORE
         {
             MemoryBank* mspace = getMemoryBank(spc);
             if (mspace == (MemoryBank*)0)
-                throw new LowlevelError("Setting chunk of unmapped memory space: " + spc->getName());
-            mspace->setChunk(off, size, val);
+                throw new LowlevelError("Setting chunk of unmapped memory space: " + spc.getName());
+            mspace.setChunk(off, size, val);
         }
     }
 }

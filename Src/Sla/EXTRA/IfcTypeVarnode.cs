@@ -26,26 +26,26 @@ namespace Sla.EXTRA
             Datatype* ct;
             string name;
 
-            if (dcp->fd == (Funcdata*)0)
+            if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");
 
             Address pc;
-            Address loc(parse_varnode(s, size, pc, uq,* dcp->conf->types)); // Get specified varnode
-            ct = parse_type(s, name, dcp->conf);
+            Address loc(parse_varnode(s, size, pc, uq,* dcp.conf.types)); // Get specified varnode
+            ct = parse_type(s, name, dcp.conf);
 
-            dcp->conf->clearAnalysis(dcp->fd); // Make sure varnodes are cleared
+            dcp.conf.clearAnalysis(dcp.fd); // Make sure varnodes are cleared
 
-            Scope* scope = dcp->fd->getScopeLocal()->discoverScope(loc, size, pc);
+            Scope* scope = dcp.fd.getScopeLocal().discoverScope(loc, size, pc);
             if (scope == (Scope*)0) // Variable does not have natural scope
-                scope = dcp->fd->getScopeLocal();   // force it to be in function scope
-            Symbol* sym = scope->addSymbol(name, ct, loc, pc)->getSymbol();
-            scope->setAttribute(sym, Varnode::typelock);
-            sym->setIsolated(true);
+                scope = dcp.fd.getScopeLocal();   // force it to be in function scope
+            Symbol* sym = scope.addSymbol(name, ct, loc, pc).getSymbol();
+            scope.setAttribute(sym, Varnode::typelock);
+            sym.setIsolated(true);
             if (name.size() > 0)
-                scope->setAttribute(sym, Varnode::namelock);
+                scope.setAttribute(sym, Varnode::namelock);
 
-            *status->fileoptr << "Successfully added " << sym->getName();
-            *status->fileoptr << " to scope " << scope->getFullName() << endl;
+            *status.fileoptr << "Successfully added " << sym.getName();
+            *status.fileoptr << " to scope " << scope.getFullName() << endl;
         }
     }
 }

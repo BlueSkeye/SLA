@@ -23,7 +23,7 @@ namespace Sla.SLEIGH
         public ValueSymbol(string nm,PatternValue pv)
             : base(nm)
         {
-            (patval = pv)->layClaim();
+            (patval = pv).layClaim();
         }
 
         ~ValueSymbol()
@@ -40,13 +40,13 @@ namespace Sla.SLEIGH
         {
             hand.space = walker.getConstSpace();
             hand.offset_space = (AddrSpace*)0;
-            hand.offset_offset = (uintb)patval->getValue(walker);
+            hand.offset_offset = (uintb)patval.getValue(walker);
             hand.size = 0;      // Cannot provide size
         }
 
         public override void print(TextWriter s, ParserWalker walker)
         {
-            intb val = patval->getValue(walker);
+            intb val = patval.getValue(walker);
             if (val >= 0)
                 s << "0x" << hex << val;
             else
@@ -60,7 +60,7 @@ namespace Sla.SLEIGH
             s << "<value_sym";
             SleighSymbol::saveXmlHeader(s);
             s << ">\n";
-            patval->saveXml(s);
+            patval.saveXml(s);
             s << "</value_sym>\n";
         }
 
@@ -73,11 +73,11 @@ namespace Sla.SLEIGH
 
         public override void restoreXml(Element el, SleighBase trans)
         {
-            List list = el->getChildren();
+            List list = el.getChildren();
             List::const_iterator iter;
             iter = list.begin();
             patval = (PatternValue*)PatternExpression::restoreExpression(*iter, trans);
-            patval->layClaim();
+            patval.layClaim();
         }
     }
 }

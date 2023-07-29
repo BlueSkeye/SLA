@@ -31,22 +31,22 @@ namespace Sla.EXTRA
             asection* p;
             uintb start, stop;
 
-            for (p = thebfd->sections; p != (asection*)NULL; p = p->next)
+            for (p = thebfd.sections; p != (asection*)NULL; p = p.next)
             {
-                start = p->vma;
-                secsize = (p->size != 0) ? p->size : p->rawsize;
+                start = p.vma;
+                secsize = (p.size != 0) ? p.size : p.rawsize;
                 stop = start + secsize;
                 if ((offset >= start) && (offset < stop))
                     return p;
             }
             asection* champ = (asection*)0;
-            for (p = thebfd->sections; p != (asection*)NULL; p = p->next)
+            for (p = thebfd.sections; p != (asection*)NULL; p = p.next)
             {
-                if (p->vma > offset)
+                if (p.vma > offset)
                 {
                     if (champ == (asection*)0)
                         champ = p;
-                    else if (p->vma < champ->vma)
+                    else if (p.vma < champ.vma)
                         champ = p;
                 }
             }
@@ -58,9 +58,9 @@ namespace Sla.EXTRA
             while (cursymbol < number_of_symbols)
             {
                 asymbol a = symbol_table[cursymbol];
-                if ((a->flags & BSF_FUNCTION) != 0)
+                if ((a.flags & BSF_FUNCTION) != 0)
                 {
-                    if (a->name != null)
+                    if (a.name != null)
                         return;
                 }
                 cursymbol += 1;
@@ -141,7 +141,7 @@ namespace Sla.EXTRA
             int4 cursize;
 
             if (addr.getSpace() != spaceid)
-                throw DataUnavailError("Trying to get loadimage bytes from space: " + addr.getSpace()->getName());
+                throw DataUnavailError("Trying to get loadimage bytes from space: " + addr.getSpace().getName());
             curaddr = addr.getOffset();
             if ((curaddr >= bufoffset) && (curaddr + size < bufoffset + bufsize))
             {   // Requested bytes were previously buffered
@@ -164,11 +164,11 @@ namespace Sla.EXTRA
                     memcpy(ptr, buffer, size);
                     return;
                 }
-                if (p->vma > curaddr)
+                if (p.vma > curaddr)
                 {   // No section matches
                     if (offset == 0)        // Initial address not mapped
                         break;
-                    readsize = p->vma - curaddr;
+                    readsize = p.vma - curaddr;
                     if (readsize > cursize)
                         readsize = cursize;
                     memset(buffer + offset, 0, readsize); // Fill in with zeroes to next section
@@ -176,9 +176,9 @@ namespace Sla.EXTRA
                 else
                 {
                     readsize = cursize;
-                    if (curaddr + readsize > p->vma + secsize)  // Adjust to biggest possible read
-                        readsize = (bfd_size_type)(p->vma + secsize - curaddr);
-                    bfd_get_section_contents(thebfd, p, buffer + offset, (file_ptr)(curaddr - p->vma), readsize);
+                    if (curaddr + readsize > p.vma + secsize)  // Adjust to biggest possible read
+                        readsize = (bfd_size_type)(p.vma + secsize - curaddr);
+                    bfd_get_section_contents(thebfd, p, buffer + offset, (file_ptr)(curaddr - p.vma), readsize);
                 }
                 offset += readsize;
                 cursize -= readsize;
@@ -246,7 +246,7 @@ namespace Sla.EXTRA
             asymbol a = symbol_table[cursymbol];
             cursymbol += 1;
             advanceToNextSymbol();
-            record.name = a->name;
+            record.name = a.name;
             uintb val = bfd_asymbol_value(a);
             record.address = Address(spaceid, val);
             return true;
@@ -254,7 +254,7 @@ namespace Sla.EXTRA
 
         public override void openSectionInfo()
         {
-            secinfoptr = thebfd->sections;
+            secinfoptr = thebfd.sections;
         }
 
         public override void closeSectionInfo()
@@ -267,20 +267,20 @@ namespace Sla.EXTRA
             if (secinfoptr == (asection*)0)
                 return false;
 
-            record.address = Address(spaceid, secinfoptr->vma);
-            record.size = (secinfoptr->size != 0) ? secinfoptr->size : secinfoptr->rawsize;
+            record.address = Address(spaceid, secinfoptr.vma);
+            record.size = (secinfoptr.size != 0) ? secinfoptr.size : secinfoptr.rawsize;
             record.flags = 0;
-            if ((secinfoptr->flags & SEC_ALLOC) == 0)
+            if ((secinfoptr.flags & SEC_ALLOC) == 0)
                 record.flags |= LoadImageSection::unalloc;
-            if ((secinfoptr->flags & SEC_LOAD) == 0)
+            if ((secinfoptr.flags & SEC_LOAD) == 0)
                 record.flags |= LoadImageSection::noload;
-            if ((secinfoptr->flags & SEC_READONLY) != 0)
+            if ((secinfoptr.flags & SEC_READONLY) != 0)
                 record.flags |= LoadImageSection::readonly;
-            if ((secinfoptr->flags & SEC_CODE) != 0)
+            if ((secinfoptr.flags & SEC_CODE) != 0)
                 record.flags |= LoadImageSection::code;
-            if ((secinfoptr->flags & SEC_DATA) != 0)
+            if ((secinfoptr.flags & SEC_DATA) != 0)
                 record.flags |= LoadImageSection::data;
-            secinfoptr = secinfoptr->next;
+            secinfoptr = secinfoptr.next;
             return (secinfoptr != (asection*)0);
         }
 
@@ -289,12 +289,12 @@ namespace Sla.EXTRA
             uintb start, stop, secsize;
             asection* p;
 
-            for (p = thebfd->sections; p != (asection*)NULL; p = p->next)
+            for (p = thebfd.sections; p != (asection*)NULL; p = p.next)
             {
-                if ((p->flags & SEC_READONLY) != 0)
+                if ((p.flags & SEC_READONLY) != 0)
                 {
-                    start = p->vma;
-                    secsize = (p->size != 0) ? p->size : p->rawsize;
+                    start = p.vma;
+                    secsize = (p.size != 0) ? p.size : p.rawsize;
                     if (secsize == 0) continue;
                     stop = start + secsize - 1;
                     list.insertRange(spaceid, start, stop);
@@ -308,7 +308,7 @@ namespace Sla.EXTRA
             string targ;
             type = bfd_printable_name(thebfd);
             type += ':';
-            targ = thebfd->xvec->name;
+            targ = thebfd.xvec.name;
             type += targ;
             return type;
         }
@@ -316,11 +316,11 @@ namespace Sla.EXTRA
         public override void adjustVma(long adjust)
         {
             asection* s;
-            adjust = AddrSpace::addressToByte(adjust, spaceid->getWordSize());
-            for (s = thebfd->sections; s != (asection*)NULL; s = s->next)
+            adjust = AddrSpace::addressToByte(adjust, spaceid.getWordSize());
+            for (s = thebfd.sections; s != (asection*)NULL; s = s.next)
             {
-                s->vma += adjust;
-                s->lma += adjust;
+                s.vma += adjust;
+                s.lma += adjust;
             }
         }
     }

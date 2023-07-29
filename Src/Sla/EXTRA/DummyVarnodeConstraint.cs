@@ -18,7 +18,7 @@ namespace Sla.EXTRA
             maxnum = varindex = ind;
         }
         
-        public override UnifyConstraint clone() => (new DummyVarnodeConstraint(varindex))->copyid(this);
+        public override UnifyConstraint clone() => (new DummyVarnodeConstraint(varindex)).copyid(this);
 
         public override bool step(UnifyState state) => true;
 

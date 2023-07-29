@@ -26,12 +26,12 @@ namespace Sla.DECCORE
             if (val)
             {
                 res = "Unimplemented instructions are now ignored (treated as nop)";
-                glb->flowoptions |= FlowInfo::ignore_unimplemented;
+                glb.flowoptions |= FlowInfo::ignore_unimplemented;
             }
             else
             {
                 res = "Unimplemented instructions now generate warnings";
-                glb->flowoptions &= ~((uint4)FlowInfo::ignore_unimplemented);
+                glb.flowoptions &= ~((uint4)FlowInfo::ignore_unimplemented);
             }
 
             return res;

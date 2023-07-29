@@ -37,19 +37,19 @@ namespace Sla.DECCORE
         {
             Varnode* boolVn;
 
-            boolVn = op->getIn(0);
-            if (!boolVn->isBooleanValue(data.isTypeRecoveryOn())) return 0;
-            Varnode* in1 = op->getIn(1);
-            if (in1->isConstant())
+            boolVn = op.getIn(0);
+            if (!boolVn.isBooleanValue(data.isTypeRecoveryOn())) return 0;
+            Varnode* in1 = op.getIn(1);
+            if (in1.isConstant())
             {
-                if (in1->getOffset() > (uintb)1) // If one side is a constant 0 or 1, this is boolean
+                if (in1.getOffset() > (uintb)1) // If one side is a constant 0 or 1, this is boolean
                     return 0;
             }
-            else if (!in1->isBooleanValue(data.isTypeRecoveryOn()))
+            else if (!in1.isBooleanValue(data.isTypeRecoveryOn()))
             {
                 return 0;
             }
-            switch (op->code())
+            switch (op.code())
             {
                 case CPUI_INT_AND:
                     data.opSetOpcode(op, CPUI_BOOL_AND);

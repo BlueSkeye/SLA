@@ -28,7 +28,7 @@ namespace Sla.DECCORE
             s1 >> newMax;
             if (newMax < 0)
                 throw ParseError("Bad maxinstruction parameter");
-            glb->max_instructions = newMax;
+            glb.max_instructions = newMax;
             return "Maximum instructions per function set";
         }
     }

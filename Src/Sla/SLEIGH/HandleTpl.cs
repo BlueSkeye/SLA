@@ -27,10 +27,10 @@ namespace Sla.SLEIGH
         
         public HandleTpl(VarnodeTpl vn)
         {               // Build handle which indicates given varnode
-            space = vn->getSpace();
-            size = vn->getSize();
+            space = vn.getSpace();
+            size = vn.getSize();
             ptrspace = ConstTpl(ConstTpl::real, 0);
-            ptroffset = vn->getOffset();
+            ptroffset = vn.getOffset();
         }
 
         public HandleTpl(ConstTpl spc, ConstTpl sz, VarnodeTpl vn, AddrSpace t_space,uintb t_offset)
@@ -38,9 +38,9 @@ namespace Sla.SLEIGH
             // Build handle to thing being pointed at by -vn-
             space = new ConstTpl(spc);
             size = new ConstTpl(sz);
-            ptrspace = new ConstTpl(vn->getSpace());
-            ptroffset = new ConstTpl(vn->getOffset());
-            ptrsize = new ConstTpl(vn->getSize());
+            ptrspace = new ConstTpl(vn.getSpace());
+            ptroffset = new ConstTpl(vn.getOffset());
+            ptrsize = new ConstTpl(vn.getSize());
             temp_space = new ConstTpl(t_space);
             temp_offset = new ConstTpl(ConstTpl::real, t_offset);
         }
@@ -95,12 +95,12 @@ namespace Sla.SLEIGH
                 hand.size = size.fix(walker);
                 hand.offset_offset = ptroffset.fix(walker);
                 hand.offset_space = ptrspace.fixSpace(walker);
-                if (hand.offset_space->getType() == IPTR_CONSTANT)
+                if (hand.offset_space.getType() == IPTR_CONSTANT)
                 {
                     // Handle could have been dynamic but wasn't
                     hand.offset_space = (AddrSpace*)0;
-                    hand.offset_offset = AddrSpace::addressToByte(hand.offset_offset, hand.space->getWordSize());
-                    hand.offset_offset = hand.space->wrapOffset(hand.offset_offset);
+                    hand.offset_offset = AddrSpace::addressToByte(hand.offset_offset, hand.space.getWordSize());
+                    hand.offset_offset = hand.space.wrapOffset(hand.offset_offset);
                 }
                 else
                 {
@@ -137,7 +137,7 @@ namespace Sla.SLEIGH
 
         public void restoreXml(Element el, AddrSpaceManager manage)
         {
-            List list = el->getChildren();
+            List list = el.getChildren();
             List::const_iterator iter;
             iter = list.begin();
             space.restoreXml(*iter, manage);

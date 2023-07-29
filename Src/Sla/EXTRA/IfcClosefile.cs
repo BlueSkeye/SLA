@@ -15,11 +15,11 @@ namespace Sla.EXTRA
         /// Subsequent bulk output is redirected to the basic interface output stream
         public override void execute(TextReader s)
         {
-            if (status->optr == status->fileoptr)
+            if (status.optr == status.fileoptr)
                 throw IfaceExecutionError("No file open");
-            ((ofstream*)status->fileoptr)->close();
-            delete status->fileoptr;
-            status->fileoptr = status->optr;
+            ((ofstream*)status.fileoptr).close();
+            delete status.fileoptr;
+            status.fileoptr = status.optr;
         }
     }
 }

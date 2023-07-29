@@ -35,25 +35,25 @@ namespace Sla.DECCORE
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
             uintb val;
-            Varnode* constVn = op->getIn(1);
-            if (!constVn->isConstant()) return 0;
-            val = constVn->getOffset();
-            Varnode* inVn = op->getIn(0);
-            if (val != 8 * inVn->getSize() - 1) return 0;
-            if (inVn->isFree()) return 0;
+            Varnode* constVn = op.getIn(1);
+            if (!constVn.isConstant()) return 0;
+            val = constVn.getOffset();
+            Varnode* inVn = op.getIn(0);
+            if (val != 8 * inVn.getSize() - 1) return 0;
+            if (inVn.isFree()) return 0;
 
             bool doConversion = false;
-            Varnode* outVn = op->getOut();
-            list<PcodeOp*>::const_iterator iter = outVn->beginDescend();
-            while (iter != outVn->endDescend())
+            Varnode* outVn = op.getOut();
+            list<PcodeOp*>::const_iterator iter = outVn.beginDescend();
+            while (iter != outVn.endDescend())
             {
                 PcodeOp* arithOp = *iter;
                 ++iter;
-                switch (arithOp->code())
+                switch (arithOp.code())
                 {
                     case CPUI_INT_EQUAL:
                     case CPUI_INT_NOTEQUAL:
-                        if (arithOp->getIn(1)->isConstant())
+                        if (arithOp.getIn(1).isConstant())
                             doConversion = true;
                         break;
                     case CPUI_INT_ADD:
@@ -68,11 +68,11 @@ namespace Sla.DECCORE
             }
             if (!doConversion)
                 return 0;
-            PcodeOp* shiftOp = data.newOp(2, op->getAddr());
+            PcodeOp* shiftOp = data.newOp(2, op.getAddr());
             data.opSetOpcode(shiftOp, CPUI_INT_SRIGHT);
-            Varnode* uniqueVn = data.newUniqueOut(inVn->getSize(), shiftOp);
+            Varnode* uniqueVn = data.newUniqueOut(inVn.getSize(), shiftOp);
             data.opSetInput(op, uniqueVn, 0);
-            data.opSetInput(op, data.newConstant(inVn->getSize(), calc_mask(inVn->getSize())), 1);
+            data.opSetInput(op, data.newConstant(inVn.getSize(), calc_mask(inVn.getSize())), 1);
             data.opSetOpcode(op, CPUI_INT_MULT);
             data.opSetInput(shiftOp, inVn, 0);
             data.opSetInput(shiftOp, constVn, 1);

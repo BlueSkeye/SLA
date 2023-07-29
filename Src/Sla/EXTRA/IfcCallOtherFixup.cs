@@ -25,9 +25,9 @@ namespace Sla.EXTRA
             vector<string> inname;
 
             IfcCallFixup::readPcodeSnippet(s, useropname, outname, inname, pcodestring);
-            dcp->conf->userops.manualCallOtherFixup(useropname, outname, inname, pcodestring, dcp->conf);
+            dcp.conf.userops.manualCallOtherFixup(useropname, outname, inname, pcodestring, dcp.conf);
 
-            *status->optr << "Successfully registered callotherfixup" << endl;
+            *status.optr << "Successfully registered callotherfixup" << endl;
         }
     }
 }

@@ -30,22 +30,22 @@ namespace Sla.DECCORE
         private TransformVar setReplacement(Varnode vn)
         {
             TransformVar* res;
-            if (vn->isMark())
+            if (vn.isMark())
             {       // Already seen before
                 res = getSplit(vn, laneDescription);
                 return res;
             }
 
-            if (vn->isTypeLock() && vn->getType()->getMetatype() != TYPE_PARTIALSTRUCT)
+            if (vn.isTypeLock() && vn.getType().getMetatype() != TYPE_PARTIALSTRUCT)
                 return (TransformVar*)0;
-            if (vn->isInput())
+            if (vn.isInput())
                 return (TransformVar*)0;        // Right now we can't split inputs
-            if (vn->isFree() && (!vn->isConstant()))
+            if (vn.isFree() && (!vn.isConstant()))
                 return (TransformVar*)0;        // Abort
 
             res = newSplit(vn, laneDescription);    // Create new ReplaceVarnode and put it in map
-            vn->setMark();
-            if (!vn->isConstant())
+            vn.setMark();
+            if (!vn.isConstant())
                 worklist.push_back(res);
 
             return res;
@@ -67,21 +67,21 @@ namespace Sla.DECCORE
                 outvn = rvn;
             else
             {
-                outvn = setReplacement(op->getOut());
+                outvn = setReplacement(op.getOut());
                 if (outvn == (TransformVar*)0)
                     return false;
             }
 
-            if (outvn->getDef() != (TransformOp*)0)
+            if (outvn.getDef() != (TransformOp*)0)
                 return true;    // Already traversed
 
-            TransformOp* loOp = newOpReplace(op->numInput(), op->code(), op);
-            TransformOp* hiOp = newOpReplace(op->numInput(), op->code(), op);
-            int4 numParam = op->numInput();
-            if (op->code() == CPUI_INDIRECT)
+            TransformOp* loOp = newOpReplace(op.numInput(), op.code(), op);
+            TransformOp* hiOp = newOpReplace(op.numInput(), op.code(), op);
+            int4 numParam = op.numInput();
+            if (op.code() == CPUI_INDIRECT)
             {
-                opSetInput(loOp, newIop(op->getIn(1)), 1);
-                opSetInput(hiOp, newIop(op->getIn(1)), 1);
+                opSetInput(loOp, newIop(op.getIn(1)), 1);
+                opSetInput(hiOp, newIop(op.getIn(1)), 1);
                 numParam = 1;
             }
             for (int4 i = 0; i < numParam; ++i)
@@ -91,7 +91,7 @@ namespace Sla.DECCORE
                     invn = rvn;
                 else
                 {
-                    invn = setReplacement(op->getIn(i));
+                    invn = setReplacement(op.getIn(i));
                     if (invn == (TransformVar*)0)
                         return false;
                 }
@@ -110,17 +110,17 @@ namespace Sla.DECCORE
         /// \return \b true if logical pieces can be naturally traced, \b false otherwise
         private bool traceForward(TransformVar rvn)
         {
-            Varnode* origvn = rvn->getOriginal();
+            Varnode* origvn = rvn.getOriginal();
             list<PcodeOp*>::const_iterator iter, enditer;
-            iter = origvn->beginDescend();
-            enditer = origvn->endDescend();
+            iter = origvn.beginDescend();
+            enditer = origvn.endDescend();
             while (iter != enditer)
             {
                 PcodeOp* op = *iter++;
-                Varnode* outvn = op->getOut();
-                if ((outvn != (Varnode*)0) && (outvn->isMark()))
+                Varnode* outvn = op.getOut();
+                if ((outvn != (Varnode*)0) && (outvn.isMark()))
                     continue;
-                switch (op->code())
+                switch (op.code())
                 {
                     case CPUI_COPY:
                     case CPUI_MULTIEQUAL:
@@ -129,20 +129,20 @@ namespace Sla.DECCORE
                     case CPUI_INT_OR:
                     case CPUI_INT_XOR:
                         //  case CPUI_INT_NEGATE:
-                        if (!addOp(op, rvn, op->getSlot(origvn)))
+                        if (!addOp(op, rvn, op.getSlot(origvn)))
                             return false;
                         break;
                     case CPUI_SUBPIECE:
                         {
-                            if (outvn->isPrecisLo() || outvn->isPrecisHi())
+                            if (outvn.isPrecisLo() || outvn.isPrecisHi())
                                 return false;       // Do not split if we know value comes from double precision pieces
-                            uintb val = op->getIn(1)->getOffset();
-                            if ((val == 0) && (outvn->getSize() == laneDescription.getSize(0)))
+                            uintb val = op.getIn(1).getOffset();
+                            if ((val == 0) && (outvn.getSize() == laneDescription.getSize(0)))
                             {
                                 TransformOp* rop = newPreexistingOp(1, CPUI_COPY, op);  // Grabs the low piece
                                 opSetInput(rop, rvn, 0);
                             }
-                            else if ((val == laneDescription.getSize(0)) && (outvn->getSize() == laneDescription.getSize(1)))
+                            else if ((val == laneDescription.getSize(0)) && (outvn.getSize() == laneDescription.getSize(1)))
                             {
                                 TransformOp* rop = newPreexistingOp(1, CPUI_COPY, op);  // Grabs the high piece
                                 opSetInput(rop, rvn + 1, 0);
@@ -153,30 +153,30 @@ namespace Sla.DECCORE
                         }
                     case CPUI_INT_LEFT:
                         {
-                            Varnode* tmpvn = op->getIn(1);
-                            if (!tmpvn->isConstant())
+                            Varnode* tmpvn = op.getIn(1);
+                            if (!tmpvn.isConstant())
                                 return false;
-                            uintb val = tmpvn->getOffset();
+                            uintb val = tmpvn.getOffset();
                             if (val < laneDescription.getSize(1) * 8)
                                 return false;           // Must obliterate all high bits
                             TransformOp* rop = newPreexistingOp(2, CPUI_INT_LEFT, op);      // Keep original shift
                             TransformOp* zextrop = newOp(1, CPUI_INT_ZEXT, rop);
                             opSetInput(zextrop, rvn, 0);        // Input is just the low piece
                             opSetOutput(zextrop, newUnique(laneDescription.getWholeSize()));
-                            opSetInput(rop, zextrop->getOut(), 0);
-                            opSetInput(rop, newConstant(op->getIn(1)->getSize(), 0, op->getIn(1)->getOffset()), 1); // Original shift amount
+                            opSetInput(rop, zextrop.getOut(), 0);
+                            opSetInput(rop, newConstant(op.getIn(1).getSize(), 0, op.getIn(1).getOffset()), 1); // Original shift amount
                             break;
                         }
                     case CPUI_INT_SRIGHT:
                     case CPUI_INT_RIGHT:
                         {
-                            Varnode* tmpvn = op->getIn(1);
-                            if (!tmpvn->isConstant())
+                            Varnode* tmpvn = op.getIn(1);
+                            if (!tmpvn.isConstant())
                                 return false;
-                            uintb val = tmpvn->getOffset();
+                            uintb val = tmpvn.getOffset();
                             if (val < laneDescription.getSize(0) * 8)
                                 return false;
-                            OpCode extOpCode = (op->code() == CPUI_INT_RIGHT) ? CPUI_INT_ZEXT : CPUI_INT_SEXT;
+                            OpCode extOpCode = (op.code() == CPUI_INT_RIGHT) ? CPUI_INT_ZEXT : CPUI_INT_SEXT;
                             if (val == laneDescription.getSize(0) * 8)
                             {   // Shift of exactly loSize bytes
                                 TransformOp* rop = newPreexistingOp(1, extOpCode, op);
@@ -185,12 +185,12 @@ namespace Sla.DECCORE
                             else
                             {
                                 uintb remainShift = val - laneDescription.getSize(0) * 8;
-                                TransformOp* rop = newPreexistingOp(2, op->code(), op);
+                                TransformOp* rop = newPreexistingOp(2, op.code(), op);
                                 TransformOp* extrop = newOp(1, extOpCode, rop);
                                 opSetInput(extrop, rvn + 1, 0); // Input is the high piece
                                 opSetOutput(extrop, newUnique(laneDescription.getWholeSize()));
-                                opSetInput(rop, extrop->getOut(), 0);
-                                opSetInput(rop, newConstant(op->getIn(1)->getSize(), 0, remainShift), 1);   // Shift any remaining bits
+                                opSetInput(rop, extrop.getOut(), 0);
+                                opSetInput(rop, newConstant(op.getIn(1).getSize(), 0, remainShift), 1);   // Shift any remaining bits
                             }
                             break;
                         }
@@ -208,10 +208,10 @@ namespace Sla.DECCORE
         /// \return \b false if the trace is not possible
         private bool traceBackward(TransformVar rvn)
         {
-            PcodeOp* op = rvn->getOriginal()->getDef();
+            PcodeOp* op = rvn.getOriginal().getDef();
             if (op == (PcodeOp*)0) return true; // If vn is input
 
-            switch (op->code())
+            switch (op.code())
             {
                 case CPUI_COPY:
                 case CPUI_MULTIEQUAL:
@@ -225,50 +225,50 @@ namespace Sla.DECCORE
                     break;
                 case CPUI_PIECE:
                     {
-                        if (op->getIn(0)->getSize() != laneDescription.getSize(1))
+                        if (op.getIn(0).getSize() != laneDescription.getSize(1))
                             return false;
-                        if (op->getIn(1)->getSize() != laneDescription.getSize(0))
+                        if (op.getIn(1).getSize() != laneDescription.getSize(0))
                             return false;
                         TransformOp* loOp = newOpReplace(1, CPUI_COPY, op);
                         TransformOp* hiOp = newOpReplace(1, CPUI_COPY, op);
-                        opSetInput(loOp, getPreexistingVarnode(op->getIn(1)), 0);
-                        opSetOutput(loOp, rvn); // Least sig -> low
-                        opSetInput(hiOp, getPreexistingVarnode(op->getIn(0)), 0);
-                        opSetOutput(hiOp, rvn + 1); // Most sig -> high
+                        opSetInput(loOp, getPreexistingVarnode(op.getIn(1)), 0);
+                        opSetOutput(loOp, rvn); // Least sig . low
+                        opSetInput(hiOp, getPreexistingVarnode(op.getIn(0)), 0);
+                        opSetOutput(hiOp, rvn + 1); // Most sig . high
                         break;
                     }
                 case CPUI_INT_ZEXT:
                     {
-                        if (op->getIn(0)->getSize() != laneDescription.getSize(0))
+                        if (op.getIn(0).getSize() != laneDescription.getSize(0))
                             return false;
-                        if (op->getOut()->getSize() != laneDescription.getWholeSize())
+                        if (op.getOut().getSize() != laneDescription.getWholeSize())
                             return false;
                         TransformOp* loOp = newOpReplace(1, CPUI_COPY, op);
                         TransformOp* hiOp = newOpReplace(1, CPUI_COPY, op);
-                        opSetInput(loOp, getPreexistingVarnode(op->getIn(0)), 0);
-                        opSetOutput(loOp, rvn); // ZEXT input -> low
+                        opSetInput(loOp, getPreexistingVarnode(op.getIn(0)), 0);
+                        opSetOutput(loOp, rvn); // ZEXT input . low
                         opSetInput(hiOp, newConstant(laneDescription.getSize(1), 0, 0), 0);
-                        opSetOutput(hiOp, rvn + 1); // zero -> high
+                        opSetOutput(hiOp, rvn + 1); // zero . high
                         break;
                     }
                 case CPUI_INT_LEFT:
                     {
-                        Varnode* cvn = op->getIn(1);
-                        if (!cvn->isConstant()) return false;
-                        if (cvn->getOffset() != laneDescription.getSize(0) * 8) return false;
-                        Varnode* invn = op->getIn(0);
-                        if (!invn->isWritten()) return false;
-                        PcodeOp* zextOp = invn->getDef();
-                        if (zextOp->code() != CPUI_INT_ZEXT) return false;
-                        invn = zextOp->getIn(0);
-                        if (invn->getSize() != laneDescription.getSize(1)) return false;
-                        if (invn->isFree()) return false;
+                        Varnode* cvn = op.getIn(1);
+                        if (!cvn.isConstant()) return false;
+                        if (cvn.getOffset() != laneDescription.getSize(0) * 8) return false;
+                        Varnode* invn = op.getIn(0);
+                        if (!invn.isWritten()) return false;
+                        PcodeOp* zextOp = invn.getDef();
+                        if (zextOp.code() != CPUI_INT_ZEXT) return false;
+                        invn = zextOp.getIn(0);
+                        if (invn.getSize() != laneDescription.getSize(1)) return false;
+                        if (invn.isFree()) return false;
                         TransformOp* loOp = newOpReplace(1, CPUI_COPY, op);
                         TransformOp* hiOp = newOpReplace(1, CPUI_COPY, op);
                         opSetInput(loOp, newConstant(laneDescription.getSize(0), 0, 0), 0);
-                        opSetOutput(loOp, rvn); // zero -> low
+                        opSetOutput(loOp, rvn); // zero . low
                         opSetInput(hiOp, getPreexistingVarnode(invn), 0);
-                        opSetOutput(hiOp, rvn + 1); // invn -> high
+                        opSetOutput(hiOp, rvn + 1); // invn . high
                         break;
                     }
                 //  case CPUI_LOAD:		// We could split into two different loads
@@ -294,7 +294,7 @@ namespace Sla.DECCORE
             : base(f)
 
         {
-            laneDescription = new LaneDescription(root->getSize(), lowSize, root->getSize() - lowSize);
+            laneDescription = new LaneDescription(root.getSize(), lowSize, root.getSize() - lowSize);
             setReplacement(root);
         }
 

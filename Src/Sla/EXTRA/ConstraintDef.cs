@@ -23,15 +23,15 @@ namespace Sla.EXTRA
         }
         
         public override UnifyConstraint clone() 
-            => (new ConstraintDef(opindex, varindex))->copyid(this);
+            => (new ConstraintDef(opindex, varindex)).copyid(this);
 
         public override bool step(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            if (!traverse->step()) return false;
+            if (!traverse.step()) return false;
             Varnode* vn = state.data(varindex).getVarnode();
-            if (!vn->isWritten()) return false;
-            PcodeOp* op = vn->getDef();
+            if (!vn.isWritten()) return false;
+            PcodeOp* op = vn.getDef();
             state.data(opindex).setOp(op);
             return true;
         }
@@ -47,10 +47,10 @@ namespace Sla.EXTRA
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << "if (!" << printstate.getName(varindex) << "->isWritten())" << endl;
+            s << "if (!" << printstate.getName(varindex) << ".isWritten())" << endl;
             printstate.printAbort(s);
             printstate.printIndent(s);
-            s << printstate.getName(opindex) << " = " << printstate.getName(varindex) << "->getDef();" << endl;
+            s << printstate.getName(opindex) << " = " << printstate.getName(varindex) << ".getDef();" << endl;
         }
     }
 }

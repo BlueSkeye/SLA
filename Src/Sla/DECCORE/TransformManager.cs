@@ -31,9 +31,9 @@ namespace Sla.DECCORE
         private void specialHandling(TransformOp rop)
         {
             if ((rop.special & TransformOp::indirect_creation) != 0)
-                fd->markIndirectCreation(rop.replacement, false);
+                fd.markIndirectCreation(rop.replacement, false);
             else if ((rop.special & TransformOp::indirect_creation_possible_out) != 0)
-                fd->markIndirectCreation(rop.replacement, true);
+                fd.markIndirectCreation(rop.replacement, true);
         }
 
         /// Create a new op for each placeholder
@@ -70,20 +70,20 @@ namespace Sla.DECCORE
                 for (int4 i = 0; ; ++i)
                 {
                     TransformVar* rvn = vArray + i;
-                    if (rvn->type == TransformVar::piece)
+                    if (rvn.type == TransformVar::piece)
                     {
-                        Varnode* vn = rvn->vn;
-                        if (vn->isInput())
+                        Varnode* vn = rvn.vn;
+                        if (vn.isInput())
                         {
                             inputList.push_back(rvn);
-                            if (vn->isMark())
-                                rvn->flags |= TransformVar::input_duplicate;
+                            if (vn.isMark())
+                                rvn.flags |= TransformVar::input_duplicate;
                             else
-                                vn->setMark();
+                                vn.setMark();
                         }
                     }
-                    rvn->createReplacement(fd);
-                    if ((rvn->flags & TransformVar::split_terminator) != 0)
+                    rvn.createReplacement(fd);
+                    if ((rvn.flags & TransformVar::split_terminator) != 0)
                         break;
                 }
             }
@@ -103,8 +103,8 @@ namespace Sla.DECCORE
                 TransformOp & rop(*iter);
                 if ((rop.special & TransformOp::op_replacement) != 0)
                 {
-                    if (!rop.op->isDead())
-                        fd->opDestroy(rop.op);  // Destroy old op (and its output Varnode)
+                    if (!rop.op.isDead())
+                        fd.opDestroy(rop.op);  // Destroy old op (and its output Varnode)
                 }
             }
         }
@@ -118,9 +118,9 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < inputList.size(); ++i)
             {
                 TransformVar* rvn = inputList[i];
-                if ((rvn->flags & TransformVar::input_duplicate) == 0)
-                    fd->deleteVarnode(rvn->vn);
-                rvn->replacement = fd->setInputVarnode(rvn->replacement);
+                if ((rvn.flags & TransformVar::input_duplicate) == 0)
+                    fd.deleteVarnode(rvn.vn);
+                rvn.replacement = fd.setInputVarnode(rvn.replacement);
             }
         }
 
@@ -135,8 +135,8 @@ namespace Sla.DECCORE
                 for (int4 i = 0; i < rop.input.size(); ++i)
                 {
                     TransformVar* rvn = rop.input[i];
-                    Varnode* vn = rvn->replacement;
-                    fd->opSetInput(op, vn, i);
+                    Varnode* vn = rvn.replacement;
+                    fd.opSetInput(op, vn, i);
                 }
                 specialHandling(rop);
             }
@@ -169,7 +169,7 @@ namespace Sla.DECCORE
         public virtual bool preserveAddress(Varnode vn, int4 bitSize, int4 lsbOffset)
         {
             if ((lsbOffset & 7) != 0) return false; // Logical value not aligned
-            if (vn->getSpace()->getType() == IPTR_INTERNAL) return false;
+            if (vn.getSpace().getType() == IPTR_INTERNAL) return false;
             return true;
         }
 
@@ -182,10 +182,10 @@ namespace Sla.DECCORE
             map<int4, TransformVar*>::const_iterator iter;
             for (iter = pieceMap.begin(); iter != pieceMap.end(); ++iter)
             {
-                Varnode* vn = (*iter).second->vn;
+                Varnode* vn = (*iter).second.vn;
                 if (vn == (Varnode*)0)
                     continue;
-                vn->clearMark();
+                vn.clearMark();
             }
         }
 
@@ -195,11 +195,11 @@ namespace Sla.DECCORE
         public TransformVar newPreexistingVarnode(Varnode vn)
         {
             TransformVar* res = new TransformVar[1];
-            pieceMap[vn->getCreateIndex()] = res;   // Enter preexisting Varnode into map, so we don't make another placeholder
+            pieceMap[vn.getCreateIndex()] = res;   // Enter preexisting Varnode into map, so we don't make another placeholder
 
             // value of 0 treats this as "piece" of itself at offset 0, allows getPiece() to find it
-            res->initialize(TransformVar::preexisting, vn, vn->getSize() * 8, vn->getSize(), 0);
-            res->flags = TransformVar::split_terminator;
+            res.initialize(TransformVar::preexisting, vn, vn.getSize() * 8, vn.getSize(), 0);
+            res.flags = TransformVar::split_terminator;
             return res;
         }
 
@@ -210,7 +210,7 @@ namespace Sla.DECCORE
         {
             newVarnodes.emplace_back();
             TransformVar* res = &newVarnodes.back();
-            res->initialize(TransformVar::normal_temp, (Varnode*)0, size * 8, size, 0);
+            res.initialize(TransformVar::normal_temp, (Varnode*)0, size * 8, size, 0);
             return res;
         }
 
@@ -225,7 +225,7 @@ namespace Sla.DECCORE
         {
             newVarnodes.emplace_back();
             TransformVar* res = &newVarnodes.back();
-            res->initialize(TransformVar::constant, (Varnode*)0, size * 8, size, (val >> lsbOffset) & calc_mask(size));
+            res.initialize(TransformVar::constant, (Varnode*)0, size * 8, size, (val >> lsbOffset) & calc_mask(size));
             return res;
         }
 
@@ -237,7 +237,7 @@ namespace Sla.DECCORE
         {
             newVarnodes.emplace_back();
             TransformVar* res = &newVarnodes.back();
-            res->initialize(TransformVar::constant_iop, (Varnode*)0, vn->getSize() * 8, vn->getSize(), vn->getOffset());
+            res.initialize(TransformVar::constant_iop, (Varnode*)0, vn.getSize() * 8, vn.getSize(), vn.getOffset());
             return res;
         }
 
@@ -251,11 +251,11 @@ namespace Sla.DECCORE
         public TransformVar newPiece(Varnode vn, int4 bitSize, int4 lsbOffset)
         {
             TransformVar* res = new TransformVar[1];
-            pieceMap[vn->getCreateIndex()] = res;
+            pieceMap[vn.getCreateIndex()] = res;
             int4 byteSize = (bitSize + 7) / 8;
             uint4 type = preserveAddress(vn, bitSize, lsbOffset) ? TransformVar::piece : TransformVar::piece_temp;
-            res->initialize(type, vn, bitSize, byteSize, lsbOffset);
-            res->flags = TransformVar::split_terminator;
+            res.initialize(type, vn, bitSize, byteSize, lsbOffset);
+            res.flags = TransformVar::split_terminator;
             return res;
         }
 
@@ -270,18 +270,18 @@ namespace Sla.DECCORE
         {
             int4 num = description.getNumLanes();
             TransformVar* res = new TransformVar[num];
-            pieceMap[vn->getCreateIndex()] = res;
+            pieceMap[vn.getCreateIndex()] = res;
             for (int4 i = 0; i < num; ++i)
             {
                 int4 bitpos = description.getPosition(i) * 8;
                 TransformVar* newVar = &res[i];
                 int4 byteSize = description.getSize(i);
-                if (vn->isConstant())
-                    newVar->initialize(TransformVar::constant, vn, byteSize * 8, byteSize, (vn->getOffset() >> bitpos) & calc_mask(byteSize));
+                if (vn.isConstant())
+                    newVar.initialize(TransformVar::constant, vn, byteSize * 8, byteSize, (vn.getOffset() >> bitpos) & calc_mask(byteSize));
                 else
                 {
                     uint4 type = preserveAddress(vn, byteSize * 8, bitpos) ? TransformVar::piece : TransformVar::piece_temp;
-                    newVar->initialize(type, vn, byteSize * 8, byteSize, bitpos);
+                    newVar.initialize(type, vn, byteSize * 8, byteSize, bitpos);
                 }
             }
             res[num - 1].flags = TransformVar::split_terminator;
@@ -300,19 +300,19 @@ namespace Sla.DECCORE
         public TransformVar newSplit(Varnode vn, LaneDescription description, int4 numLanes, int4 startLane)
         {
             TransformVar* res = new TransformVar[numLanes];
-            pieceMap[vn->getCreateIndex()] = res;
+            pieceMap[vn.getCreateIndex()] = res;
             int4 baseBitPos = description.getPosition(startLane) * 8;
             for (int4 i = 0; i < numLanes; ++i)
             {
                 int4 bitpos = description.getPosition(startLane + i) * 8 - baseBitPos;
                 int4 byteSize = description.getSize(startLane + i);
                 TransformVar* newVar = &res[i];
-                if (vn->isConstant())
-                    newVar->initialize(TransformVar::constant, vn, byteSize * 8, byteSize, (vn->getOffset() >> bitpos) & calc_mask(byteSize));
+                if (vn.isConstant())
+                    newVar.initialize(TransformVar::constant, vn, byteSize * 8, byteSize, (vn.getOffset() >> bitpos) & calc_mask(byteSize));
                 else
                 {
                     uint4 type = preserveAddress(vn, byteSize * 8, bitpos) ? TransformVar::piece : TransformVar::piece_temp;
-                    newVar->initialize(type, vn, byteSize * 8, byteSize, bitpos);
+                    newVar.initialize(type, vn, byteSize * 8, byteSize, bitpos);
                 }
             }
             res[numLanes - 1].flags = TransformVar::split_terminator;
@@ -352,7 +352,7 @@ namespace Sla.DECCORE
         {
             newOps.emplace_back();
             TransformOp & rop(newOps.back());
-            rop.op = follow->op;
+            rop.op = follow.op;
             rop.replacement = (PcodeOp*)0;
             rop.opc = opc;
             rop.special = 0;
@@ -392,10 +392,10 @@ namespace Sla.DECCORE
         /// \return the placeholder node
         public TransformVar getPreexistingVarnode(Varnode vn)
         {
-            if (vn->isConstant())
-                return newConstant(vn->getSize(), 0, vn->getOffset());
+            if (vn.isConstant())
+                return newConstant(vn.getSize(), 0, vn.getOffset());
             map<int4, TransformVar*>::const_iterator iter;
-            iter = pieceMap.find(vn->getCreateIndex());
+            iter = pieceMap.find(vn.getCreateIndex());
             if (iter != pieceMap.end())
                 return (*iter).second;
             return newPreexistingVarnode(vn);
@@ -411,11 +411,11 @@ namespace Sla.DECCORE
         public TransformVar getPiece(Varnode vn, int4 bitSize, int4 lsbOffset)
         {
             map<int4, TransformVar*>::const_iterator iter;
-            iter = pieceMap.find(vn->getCreateIndex());
+            iter = pieceMap.find(vn.getCreateIndex());
             if (iter != pieceMap.end())
             {
                 TransformVar* res = (*iter).second;
-                if (res->bitSize != bitSize || res->val != lsbOffset)
+                if (res.bitSize != bitSize || res.val != lsbOffset)
                     throw new LowlevelError("Cannot create multiple pieces for one Varnode through getPiece");
                 return res;
             }
@@ -432,7 +432,7 @@ namespace Sla.DECCORE
         public TransformVar getSplit(Varnode vn, LaneDescription description)
         {
             map<int4, TransformVar*>::const_iterator iter;
-            iter = pieceMap.find(vn->getCreateIndex());
+            iter = pieceMap.find(vn.getCreateIndex());
             if (iter != pieceMap.end())
             {
                 return (*iter).second;
@@ -452,7 +452,7 @@ namespace Sla.DECCORE
         public TransformVar getSplit(Varnode vn, LaneDescription description, int4 numLanes, int4 startLane)
         {
             map<int4, TransformVar*>::const_iterator iter;
-            iter = pieceMap.find(vn->getCreateIndex());
+            iter = pieceMap.find(vn.getCreateIndex());
             if (iter != pieceMap.end())
             {
                 return (*iter).second;
@@ -466,7 +466,7 @@ namespace Sla.DECCORE
         /// \param slot is the input position to set
         public void opSetInput(TransformOp rop, TransformVar rvn, int4 slot)
         {
-            rop->input[slot] = rvn;
+            rop.input[slot] = rvn;
         }
 
         /// Mark given variable as output of given op
@@ -476,8 +476,8 @@ namespace Sla.DECCORE
         /// \param rvn is the given variable
         public void opSetOutput(TransformOp rop, TransformVar rvn)
         {
-            rop->output = rvn;
-            rvn->def = rop;
+            rop.output = rvn;
+            rvn.def = rop;
         }
 
         /// Should newPreexistingOp be called
@@ -494,7 +494,7 @@ namespace Sla.DECCORE
         public static bool preexistingGuard(int4 slot, TransformVar rvn)
         {
             if (slot == 0) return true; // If we came in on the first slot, build the TransformOp
-            if (rvn->type == TransformVar::piece || rvn->type == TransformVar::piece_temp)
+            if (rvn.type == TransformVar::piece || rvn.type == TransformVar::piece_temp)
                 return false;       // The op was/will be visited on slot 0, don't create TransformOp now
             return true;            // The op was not (will not be) visited on slot 0, build now
         }

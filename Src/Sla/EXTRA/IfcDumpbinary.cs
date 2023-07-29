@@ -19,7 +19,7 @@ namespace Sla.EXTRA
         {
             int4 size;
             uint1* buffer;
-            Address offset = parse_machaddr(s, size, *dcp->conf->types);
+            Address offset = parse_machaddr(s, size, *dcp.conf.types);
             string filename;
 
             s >> ws;
@@ -31,7 +31,7 @@ namespace Sla.EXTRA
             if (!os)
                 throw IfaceExecutionError("Unable to open file " + filename);
 
-            buffer = dcp->conf->loader->load(size, offset);
+            buffer = dcp.conf.loader.load(size, offset);
             os.write((char*)buffer,size);
             delete[] buffer;
             os.close();

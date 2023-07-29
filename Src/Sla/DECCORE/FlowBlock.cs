@@ -186,7 +186,7 @@ namespace Sla.DECCORE
                 // Slide the edge entry over
                 edge = intothis[slot + 1];
                 // Correct the index coming the other way
-                BlockEdge edger = edge.point->outofthis[edge.reverse_index];
+                BlockEdge edger = edge.point.outofthis[edge.reverse_index];
                 edger.reverse_index -= 1;
                 slot += 1;
             }
@@ -768,7 +768,7 @@ namespace Sla.DECCORE
             }
             // Mark that there is a goto out of this block
             flags |= f_interior_gotoout;
-            outofthis[i].point->flags |= f_interior_gotoin;
+            outofthis[i].point.flags |= f_interior_gotoin;
         }
 
         /// Mark an edge as the switch default

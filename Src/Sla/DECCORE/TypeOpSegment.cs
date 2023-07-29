@@ -36,42 +36,42 @@ namespace Sla.DECCORE
 
         public override Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)
         {
-            return op->getIn(2)->getHighTypeReadFacing(op); // Assume type of ptr portion
+            return op.getIn(2).getHighTypeReadFacing(op); // Assume type of ptr portion
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
             int4 inslot, int4 outslot)
         {
-            // Must propagate  slot2 <-> output
+            // Must propagate  slot2 <. output
             if ((inslot == 0) || (inslot == 1)) return (Datatype*)0;
             if ((outslot == 0) || (outslot == 1)) return (Datatype*)0;
-            if (invn->isSpacebase()) return (Datatype*)0;
-            type_metatype metain = alttype->getMetatype();
+            if (invn.isSpacebase()) return (Datatype*)0;
+            type_metatype metain = alttype.getMetatype();
             if (metain != TYPE_PTR) return (Datatype*)0;
-            AddrSpace* spc = tlst->getArch()->getDefaultDataSpace();
-            Datatype* btype = ((TypePointer*)alttype)->getPtrTo();
-            return tlst->getTypePointer(outvn->getSize(), btype, spc->getWordSize());
+            AddrSpace* spc = tlst.getArch().getDefaultDataSpace();
+            Datatype* btype = ((TypePointer*)alttype).getPtrTo();
+            return tlst.getTypePointer(outvn.getSize(), btype, spc.getWordSize());
         }
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opSegmentOp(op);
+            lng.opSegmentOp(op);
         }
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            if (op->getOut() != (Varnode*)0)
+            if (op.getOut() != (Varnode*)0)
             {
-                Varnode::printRaw(s, op->getOut());
+                Varnode::printRaw(s, op.getOut());
                 s << " = ";
             }
             s << getOperatorName(op);
             s << '(';
-            AddrSpace* spc = op->getIn(0)->getSpaceFromConst();
-            s << spc->getName() << ',';
-            Varnode::printRaw(s, op->getIn(1));
+            AddrSpace* spc = op.getIn(0).getSpaceFromConst();
+            s << spc.getName() << ',';
+            Varnode::printRaw(s, op.getIn(1));
             s << ',';
-            Varnode::printRaw(s, op->getIn(2));
+            Varnode::printRaw(s, op.getIn(2));
             s << ')';
         }
     }

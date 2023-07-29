@@ -27,8 +27,8 @@ namespace Sla.DECCORE
         /// Build the data-type associated with \b this Symbol
         private void buildType()
         {
-            TypeFactory* types = scope->getArch()->types;
-            type = types->getTypeCode();
+            TypeFactory* types = scope.getArch().types;
+            type = types.getTypeCode();
             flags |= Varnode::namelock | Varnode::typelock;
         }
 
@@ -69,14 +69,14 @@ namespace Sla.DECCORE
         {
             if (fd != (Funcdata*)0) return fd;
             SymbolEntry* entry = getFirstWholeMap();
-            fd = new Funcdata(name, displayName, scope, entry->getAddr(), this);
+            fd = new Funcdata(name, displayName, scope, entry.getAddr(), this);
             return fd;
         }
 
         public override void encode(Encoder encoder)
         {
             if (fd != (Funcdata*)0)
-                fd->encode(encoder, symbolId, false);   // Save the function itself
+                fd.encode(encoder, symbolId, false);   // Save the function itself
             else
             {
                 encoder.openElement(ELEM_FUNCTIONSHELL);
@@ -93,18 +93,18 @@ namespace Sla.DECCORE
             if (elemId == ElementId.ELEM_FUNCTION) {
                 fd = new Funcdata("", "", scope, new Address(), this);
                 try {
-                    symbolId = fd->decode(decoder);
+                    symbolId = fd.decode(decoder);
                 }
                 catch (RecovError err) {
                     // Caused by a duplicate scope name. Preserve the address so we can find the original symbol
-                    throw new DuplicateFunctionError(fd->getAddress(), fd->getName());
+                    throw new DuplicateFunctionError(fd.getAddress(), fd.getName());
                 }
-                name = fd->getName();
-                displayName = fd->getDisplayName();
-                if (consumeSize < fd->getSize())
+                name = fd.getName();
+                displayName = fd.getDisplayName();
+                if (consumeSize < fd.getSize())
                 {
-                    if ((fd->getSize() > 1) && (fd->getSize() <= 8))
-                        consumeSize = fd->getSize();
+                    if ((fd.getSize() > 1) && (fd.getSize() <= 8))
+                        consumeSize = fd.getSize();
                 }
             }
             else

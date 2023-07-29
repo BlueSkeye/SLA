@@ -39,7 +39,7 @@ namespace Sla.DECCORE
             flags |= has_stripped;
             // An ephemeral relative pointer that points to something unknown, propagates slightly
             // differently than a formal relative pointer
-            if (ptrto->getMetatype() == TYPE_UNKNOWN)
+            if (ptrto.getMetatype() == TYPE_UNKNOWN)
                 submeta = SUB_PTRREL_UNK;
         }
 
@@ -123,10 +123,10 @@ namespace Sla.DECCORE
         public bool evaluateThruParent(uintb addrOff)
         {
             uintb byteOff = AddrSpace::addressToByte(addrOff, wordsize);
-            if (ptrto->getMetatype() == TYPE_STRUCT && byteOff < ptrto->getSize())
+            if (ptrto.getMetatype() == TYPE_STRUCT && byteOff < ptrto.getSize())
                 return false;
             byteOff = (byteOff + offset) & calc_mask(size);
-            return (byteOff < parent->getSize());
+            return (byteOff < parent.getSize());
         }
 
         /// \brief Get offset of \b this pointer relative to start of the containing data-type
@@ -136,11 +136,11 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s)
         {
-            ptrto->printRaw(s);
+            ptrto.printRaw(s);
             s << " *+";
             s << dec << offset;
             s << '[';
-            parent->printRaw(s);
+            parent.printRaw(s);
             s << ']';
         }
 
@@ -154,12 +154,12 @@ namespace Sla.DECCORE
             // In which case, we prefer the formal version.
             if (stripped == (TypePointer*)0)
             {
-                if (tp->stripped != (TypePointer*)0)
+                if (tp.stripped != (TypePointer*)0)
                     return -1;
             }
             else
             {
-                if (tp->stripped == (TypePointer*)0)
+                if (tp.stripped == (TypePointer*)0)
                     return 1;
             }
             return 0;
@@ -169,11 +169,11 @@ namespace Sla.DECCORE
         {
             if (submeta != op.getSubMeta()) return (submeta < op.getSubMeta()) ? -1 : 1;
             TypePointerRel tp = (TypePointerRel*)&op;  // Both must be TypePointerRel
-            if (ptrto != tp->ptrto) return (ptrto < tp->ptrto) ? -1 : 1;    // Compare absolute pointers
-            if (offset != tp->offset) return (offset < tp->offset) ? -1 : 1;
-            if (parent != tp->parent) return (parent < tp->parent) ? -1 : 1;
+            if (ptrto != tp.ptrto) return (ptrto < tp.ptrto) ? -1 : 1;    // Compare absolute pointers
+            if (offset != tp.offset) return (offset < tp.offset) ? -1 : 1;
+            if (parent != tp.parent) return (parent < tp.parent) ? -1 : 1;
 
-            if (wordsize != tp->wordsize) return (wordsize < tp->wordsize) ? -1 : 1;
+            if (wordsize != tp.wordsize) return (wordsize < tp.wordsize) ? -1 : 1;
             return (op.getSize() - size);
         }
 
@@ -185,8 +185,8 @@ namespace Sla.DECCORE
             encodeBasic(TYPE_PTRREL, encoder);  // Override the metatype for XML
             if (wordsize != 1)
                 encoder.writeUnsignedInteger(ATTRIB_WORDSIZE, wordsize);
-            ptrto->encode(encoder);
-            parent->encodeRef(encoder);
+            ptrto.encode(encoder);
+            parent.encodeRef(encoder);
             encoder.openElement(ELEM_OFF);
             encoder.writeSignedInteger(ATTRIB_CONTENT, offset);
             encoder.closeElement(ELEM_OFF);
@@ -196,20 +196,20 @@ namespace Sla.DECCORE
         public override TypePointer downChain(uintb off, TypePointer par, uintb parOff, bool allowArrayWrap,
             TypeFactory typegrp)
         {
-            type_metatype ptrtoMeta = ptrto->getMetatype();
-            if (off < ptrto->getSize() && (ptrtoMeta == TYPE_STRUCT || ptrtoMeta == TYPE_ARRAY))
+            type_metatype ptrtoMeta = ptrto.getMetatype();
+            if (off < ptrto.getSize() && (ptrtoMeta == TYPE_STRUCT || ptrtoMeta == TYPE_ARRAY))
             {
                 return TypePointer::downChain(off, par, parOff, allowArrayWrap, typegrp);
             }
             uintb relOff = (off + offset) & calc_mask(size);        // Convert off to be relative to the parent container
-            if (relOff >= parent->getSize())
+            if (relOff >= parent.getSize())
                 return (TypePointer*)0;         // Don't let pointer shift beyond original container
 
             TypePointer* origPointer = typegrp.getTypePointer(size, parent, wordsize);
             off = relOff;
             if (relOff == 0 && offset != 0) // Recovering the start of the parent is still downchaining, even though the parent may be the container
                 return origPointer; // So we return the pointer to the parent and don't drill down to field at offset 0
-            return origPointer->downChain(off, par, parOff, allowArrayWrap, typegrp);
+            return origPointer.downChain(off, par, parOff, allowArrayWrap, typegrp);
         }
 
         public override bool isPtrsubMatching(uintb off)
@@ -218,7 +218,7 @@ namespace Sla.DECCORE
                 return TypePointer::isPtrsubMatching(off);
             int4 iOff = AddrSpace::addressToByteInt((int4)off, wordsize);
             iOff += offset;
-            return (iOff >= 0 && iOff <= parent->getSize());
+            return (iOff >= 0 && iOff <= parent.getSize());
         }
 
         /// Get the plain form of the pointer
@@ -239,7 +239,7 @@ namespace Sla.DECCORE
                 uintb curoff = off;
                 do
                 {
-                    @base = @base->getSubType(curoff, &curoff);
+                    @base = @base.getSubType(curoff, &curoff);
                 } while (curoff != 0 && @base != (Datatype*)0);
                 if (@base == (Datatype*)0)
                     @base = typegrp.getBase(1, TYPE_UNKNOWN);

@@ -46,31 +46,31 @@ namespace Sla.DECCORE
 
             // vn1 equals ZEXTed input
             // vn2 = other input
-            vn1 = op->getIn(0);
-            vn2 = op->getIn(1);
+            vn1 = op.getIn(0);
+            vn2 = op.getIn(1);
             zextslot = 0;
             otherslot = 1;
-            if ((vn2->isWritten()) && (vn2->getDef()->code() == CPUI_INT_ZEXT))
+            if ((vn2.isWritten()) && (vn2.getDef().code() == CPUI_INT_ZEXT))
             {
                 vn1 = vn2;
-                vn2 = op->getIn(0);
+                vn2 = op.getIn(0);
                 zextslot = 1;
                 otherslot = 0;
             }
-            else if ((!vn1->isWritten()) || (vn1->getDef()->code() != CPUI_INT_ZEXT))
+            else if ((!vn1.isWritten()) || (vn1.getDef().code() != CPUI_INT_ZEXT))
                 return 0;
 
-            if (!vn2->isConstant()) return 0;
-            zext = vn1->getDef();
-            if (!zext->getIn(0)->isHeritageKnown()) return 0;
-            if (vn1->loneDescend() != op) return 0; // Make sure extension is not used for anything else
-            smallsize = zext->getIn(0)->getSize();
-            val = vn2->getOffset();
+            if (!vn2.isConstant()) return 0;
+            zext = vn1.getDef();
+            if (!zext.getIn(0).isHeritageKnown()) return 0;
+            if (vn1.loneDescend() != op) return 0; // Make sure extension is not used for anything else
+            smallsize = zext.getIn(0).getSize();
+            val = vn2.getOffset();
             if ((val >> (8 * smallsize)) == 0)
             { // Is zero extension unnecessary
                 newvn = data.newConstant(smallsize, val);
-                newvn->copySymbolIfValid(vn2);
-                data.opSetInput(op, zext->getIn(0), zextslot);
+                newvn.copySymbolIfValid(vn2);
+                data.opSetInput(op, zext.getIn(0), zextslot);
                 data.opSetInput(op, newvn, otherslot);
                 return 1;
             }

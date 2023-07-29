@@ -56,7 +56,7 @@ namespace Sla.DECCORE
                 rl.count_tests += 1;
                 int res = rl.applyOp(op, data);
 #if OPACTION_DEBUG
-                data.debugModPrint(rl->getName());
+                data.debugModPrint(rl.getName());
 #endif
                 if (res > 0) {
                     rl.count_apply += 1;
@@ -267,7 +267,7 @@ namespace Sla.DECCORE
                 return true;
             }
             foreach (Rule iter in allrules) {
-                if ((*iter)->turnOffDebug(nm)) {
+                if ((*iter).turnOffDebug(nm)) {
                     return true;
                 }
             }

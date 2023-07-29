@@ -233,8 +233,8 @@ namespace Sla.CORE
             for (int i = 0; i < thelist.Count; ++i) {
                 AttributeId attrib = thelist[i];
 #if CPUI_DEBUG
-                if (lookupAttributeId.find(attrib->name) != lookupAttributeId.end()) {
-                    throw DecoderError(attrib->name + " attribute registered more than once");
+                if (lookupAttributeId.find(attrib.name) != lookupAttributeId.end()) {
+                    throw DecoderError(attrib.name + " attribute registered more than once");
                 }
 #endif
                 lookupAttributeId[attrib.name] = attrib.id;

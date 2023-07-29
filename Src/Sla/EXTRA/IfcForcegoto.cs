@@ -22,14 +22,14 @@ namespace Sla.EXTRA
         {
             int4 discard;
 
-            if (dcp->fd == (Funcdata*)0)
+            if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");
 
             s >> ws;
-            Address target(parse_machaddr(s, discard,* dcp->conf->types));
+            Address target(parse_machaddr(s, discard,* dcp.conf.types));
             s >> ws;
-            Address dest(parse_machaddr(s, discard,* dcp->conf->types));
-            dcp->fd->getOverride().insertForceGoto(target, dest);
+            Address dest(parse_machaddr(s, discard,* dcp.conf.types));
+            dcp.fd.getOverride().insertForceGoto(target, dest);
         }
     }
 }

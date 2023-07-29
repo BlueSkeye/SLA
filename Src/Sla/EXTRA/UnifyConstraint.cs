@@ -20,8 +20,8 @@ namespace Sla.EXTRA
 
         protected UnifyConstraint copyid(UnifyConstraint op)
         {
-            uniqid = op->uniqid;
-            maxnum = op->maxnum;
+            uniqid = op.uniqid;
+            maxnum = op.maxnum;
             return this;
         }
 
@@ -39,14 +39,14 @@ namespace Sla.EXTRA
         {
             // Default initialization (with only 1 state)
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            traverse->initialize(1);    // Initialize with only one state
+            traverse.initialize(1);    // Initialize with only one state
         }
 
         public abstract bool step(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            if (!traverse->step()) return false;
-            uintb ourconst = expr->getConstant(state);
+            if (!traverse.step()) return false;
+            uintb ourconst = expr.getConstant(state);
             if (istrue)
                 return (ourconst != 0);
             return (ourconst == 0);

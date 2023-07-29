@@ -32,13 +32,13 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            int4 size = op->getOut()->getSize();
+            int4 size = op.getOut().getSize();
             if (size > sizeof(uintb)) return 0; // FIXME: uintb should be arbitrary precision
             Varnode* constvn;
 
-            constvn = op->getIn(1);
-            if (!constvn->isConstant()) return 0;
-            uintb val = constvn->getOffset();
+            constvn = op.getIn(1);
+            if (!constvn.isConstant()) return 0;
+            uintb val = constvn.getOffset();
             uintb mask = calc_mask(size);
             if ((val & mask) != mask) return 0;
             data.opSetOpcode(op, CPUI_COPY);

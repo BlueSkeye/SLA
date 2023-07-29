@@ -48,42 +48,42 @@ namespace Sla.DECCORE
             {
                 if (hi == (Varnode*)0) return false;
                 if (lo == (Varnode*)0) return false;
-                if (!hi->isWritten()) return false;
-                PcodeOp* subhi = hi->getDef();
-                if (subhi->code() == CPUI_COPY)
+                if (!hi.isWritten()) return false;
+                PcodeOp* subhi = hi.getDef();
+                if (subhi.code() == CPUI_COPY)
                 { // Go thru one level of copy, if the piece is addrtied
-                    Varnode* otherhi = subhi->getIn(0);
-                    if (!otherhi->isWritten()) return false;
-                    subhi = otherhi->getDef();
+                    Varnode* otherhi = subhi.getIn(0);
+                    if (!otherhi.isWritten()) return false;
+                    subhi = otherhi.getDef();
                 }
-                if (subhi->code() != CPUI_SUBPIECE) return false;
-                if (subhi->getIn(1)->getOffset() != wholesize - hi->getSize()) return false;
-                whole = subhi->getIn(0);
-                if (!lo->isWritten()) return false;
-                PcodeOp* sublo = lo->getDef();
-                if (sublo->code() == CPUI_COPY)
+                if (subhi.code() != CPUI_SUBPIECE) return false;
+                if (subhi.getIn(1).getOffset() != wholesize - hi.getSize()) return false;
+                whole = subhi.getIn(0);
+                if (!lo.isWritten()) return false;
+                PcodeOp* sublo = lo.getDef();
+                if (sublo.code() == CPUI_COPY)
                 { // Go thru one level of copy, if the piece is addrtied
-                    Varnode* otherlo = sublo->getIn(0);
-                    if (!otherlo->isWritten()) return false;
-                    sublo = otherlo->getDef();
+                    Varnode* otherlo = sublo.getIn(0);
+                    if (!otherlo.isWritten()) return false;
+                    sublo = otherlo.getDef();
                 }
-                if (sublo->code() != CPUI_SUBPIECE) return false;
-                Varnode* res = sublo->getIn(0);
+                if (sublo.code() != CPUI_SUBPIECE) return false;
+                Varnode* res = sublo.getIn(0);
                 if (whole == (Varnode*)0)
                     whole = res;
                 else if (whole != res)
                     return false;       // Doesn't match between pieces
-                if (sublo->getIn(1)->getOffset() != 0)
+                if (sublo.getIn(1).getOffset() != 0)
                     return false;
                 if (whole == (Varnode*)0) return false;
             }
 
-            if (whole->isWritten())
+            if (whole.isWritten())
             {
-                defpoint = whole->getDef();
-                defblock = defpoint->getParent();
+                defpoint = whole.getDef();
+                defblock = defpoint.getParent();
             }
-            else if (whole->isInput())
+            else if (whole.isInput())
             {
                 defpoint = (PcodeOp*)0;
                 defblock = (BlockBasic*)0;
@@ -101,58 +101,58 @@ namespace Sla.DECCORE
         private bool findDefinitionPoint()
         {
             PcodeOp* lastop;
-            if (hi != (Varnode*)0 && hi->isConstant()) return false; // If one but not both is constant
-            if (lo->isConstant()) return false;
+            if (hi != (Varnode*)0 && hi.isConstant()) return false; // If one but not both is constant
+            if (lo.isConstant()) return false;
             if (hi == (Varnode*)0)
             {   // Implied zero extension
-                if (lo->isInput())
+                if (lo.isInput())
                 {
                     defblock = (BlockBasic*)0;
                     defpoint = (PcodeOp*)0;
                 }
-                else if (lo->isWritten())
+                else if (lo.isWritten())
                 {
-                    defpoint = lo->getDef();
-                    defblock = defpoint->getParent();
+                    defpoint = lo.getDef();
+                    defblock = defpoint.getParent();
                 }
                 else
                     return false;
             }
-            else if (hi->isWritten())
+            else if (hi.isWritten())
             {
-                if (!lo->isWritten()) return false;     // Do not allow mixed input/non-input pairs
-                lastop = hi->getDef();
-                defblock = lastop->getParent();
-                PcodeOp* lastop2 = lo->getDef();
-                BlockBasic* otherblock = lastop2->getParent();
+                if (!lo.isWritten()) return false;     // Do not allow mixed input/non-input pairs
+                lastop = hi.getDef();
+                defblock = lastop.getParent();
+                PcodeOp* lastop2 = lo.getDef();
+                BlockBasic* otherblock = lastop2.getParent();
                 if (defblock != otherblock)
                 {
                     defpoint = lastop;
                     FlowBlock* curbl = defblock;
                     while (curbl != (FlowBlock*)0)
                     { // Make sure defblock dominated by otherblock
-                        curbl = curbl->getImmedDom();
+                        curbl = curbl.getImmedDom();
                         if (curbl == otherblock) return true;
                     }
                     defblock = otherblock;      // Try lo as final defining location
-                    otherblock = lastop->getParent();
+                    otherblock = lastop.getParent();
                     defpoint = lastop2;
                     curbl = defblock;
                     while (curbl != (FlowBlock*)0)
                     {
-                        curbl = curbl->getImmedDom();
+                        curbl = curbl.getImmedDom();
                         if (curbl == otherblock) return true;
                     }
                     defblock = (BlockBasic*)0;
                     return false;       // Not defined in same basic block
                 }
-                if (lastop2->getSeqNum().getOrder() > lastop->getSeqNum().getOrder())
+                if (lastop2.getSeqNum().getOrder() > lastop.getSeqNum().getOrder())
                     lastop = lastop2;
                 defpoint = lastop;
             }
-            else if (hi->isInput())
+            else if (hi.isInput())
             {
-                if (!lo->isInput())
+                if (!lo.isInput())
                     return false;       // Do not allow mixed input/non-input pairs
                 defblock = (BlockBasic*)0;
                 defpoint = (PcodeOp*)0;
@@ -171,13 +171,13 @@ namespace Sla.DECCORE
             if (hi == (Varnode*)0) return false;
             if (lo == (Varnode*)0) return false;
             list<PcodeOp*>::const_iterator iter, enditer;
-            iter = lo->beginDescend();
-            enditer = lo->endDescend();
+            iter = lo.beginDescend();
+            enditer = lo.endDescend();
             PcodeOp* res = (PcodeOp*)0;
             BlockBasic* bb;
-            if (lo->isWritten())
-                bb = lo->getDef()->getParent();
-            else if (lo->isInput())
+            if (lo.isWritten())
+                bb = lo.getDef().getParent();
+            else if (lo.isInput())
                 bb = (BlockBasic*)0;
             else
                 throw new LowlevelError("Trying to find whole on free varnode");
@@ -185,19 +185,19 @@ namespace Sla.DECCORE
             {
                 PcodeOp* op = *iter;
                 ++iter;
-                if (op->code() != CPUI_PIECE) continue;
-                if (op->getIn(0) != hi) continue;
+                if (op.code() != CPUI_PIECE) continue;
+                if (op.getIn(0) != hi) continue;
                 if (bb != (BlockBasic*)0)
                 {
-                    if (op->getParent() != bb) continue; // Not defined in earliest block
+                    if (op.getParent() != bb) continue; // Not defined in earliest block
                 }
-                else if (!op->getParent()->isEntryPoint())
+                else if (!op.getParent().isEntryPoint())
                     continue;
                 if (res == (PcodeOp*)0)
                     res = op;
                 else
                 {
-                    if (op->getSeqNum().getOrder() < res->getSeqNum().getOrder()) // Find "earliest" whole
+                    if (op.getSeqNum().getOrder() < res.getSeqNum().getOrder()) // Find "earliest" whole
                         res = op;
                 }
             }
@@ -207,8 +207,8 @@ namespace Sla.DECCORE
             else
             {
                 defpoint = res;
-                defblock = defpoint->getParent();
-                whole = res->getOut();
+                defblock = defpoint.getParent();
+                whole = res.getOut();
             }
             return (whole != (Varnode*)0);
         }
@@ -236,7 +236,7 @@ namespace Sla.DECCORE
 
         public SplitVarnode(Varnode l, Varnode h)
         {
-            initPartial(l->getSize() + h->getSize(), l, h);
+            initPartial(l.getSize() + h.getSize(), l, h);
         }    ///< Construct from \b lo and \b hi piece
 
         /// Construct given Varnode pieces and a known \b whole Varnode
@@ -246,7 +246,7 @@ namespace Sla.DECCORE
         /// \param h is the given (most significant) Varnode piece
         public void initAll(Varnode w, Varnode l, Varnode h)
         {
-            wholesize = w->getSize();
+            wholesize = w.getSize();
             lo = l;
             hi = h;
             whole = w;
@@ -280,9 +280,9 @@ namespace Sla.DECCORE
             if (h == (Varnode*)0)
             {   // hi is an implied zero
                 hi = (Varnode*)0;
-                if (l->isConstant())
+                if (l.isConstant())
                 {
-                    val = l->getOffset();   // Assume l is a constant
+                    val = l.getOffset();   // Assume l is a constant
                     lo = (Varnode*)0;
                 }
                 else
@@ -290,11 +290,11 @@ namespace Sla.DECCORE
             }
             else
             {
-                if (l->isConstant() && h->isConstant())
+                if (l.isConstant() && h.isConstant())
                 {
-                    val = h->getOffset();
-                    val <<= (l->getSize() * 8);
-                    val |= l->getOffset();
+                    val = h.getOffset();
+                    val <<= (l.getSize() * 8);
+                    val |= l.getOffset();
                     lo = (Varnode*)0;
                     hi = (Varnode*)0;
                 }
@@ -317,28 +317,28 @@ namespace Sla.DECCORE
         /// \return \b true if the matching \b whole and least significant piece is found
         public bool inHandHi(Varnode h)
         {
-            if (!h->isPrecisHi()) return false; // Check for mark, in order to have quick -false- in most cases
+            if (!h.isPrecisHi()) return false; // Check for mark, in order to have quick -false- in most cases
                                                 // Search for the companion
-            if (h->isWritten())
+            if (h.isWritten())
             {
-                PcodeOp* op = h->getDef();
+                PcodeOp* op = h.getDef();
                 // We could check for double loads here
-                if (op->code() == CPUI_SUBPIECE)
+                if (op.code() == CPUI_SUBPIECE)
                 {
-                    Varnode* w = op->getIn(0);
-                    if (op->getIn(1)->getOffset() != (uintb)(w->getSize() - h->getSize())) return false;
+                    Varnode* w = op.getIn(0);
+                    if (op.getIn(1).getOffset() != (uintb)(w.getSize() - h.getSize())) return false;
                     list<PcodeOp*>::const_iterator iter, enditer;
-                    iter = w->beginDescend();
-                    enditer = w->endDescend();
+                    iter = w.beginDescend();
+                    enditer = w.endDescend();
                     while (iter != enditer)
                     {
                         PcodeOp* tmpop = *iter;
                         ++iter;
-                        if (tmpop->code() != CPUI_SUBPIECE) continue;
-                        Varnode* tmplo = tmpop->getOut();
-                        if (!tmplo->isPrecisLo()) continue;
-                        if (tmplo->getSize() + h->getSize() != w->getSize()) continue;
-                        if (tmpop->getIn(1)->getOffset() != 0) continue;
+                        if (tmpop.code() != CPUI_SUBPIECE) continue;
+                        Varnode* tmplo = tmpop.getOut();
+                        if (!tmplo.isPrecisLo()) continue;
+                        if (tmplo.getSize() + h.getSize() != w.getSize()) continue;
+                        if (tmpop.getIn(1).getOffset() != 0) continue;
                         // There could conceivably be more than one, but this shouldn't happen with CSE
                         initAll(w, tmplo, h);
                         return true;
@@ -355,28 +355,28 @@ namespace Sla.DECCORE
         /// \return \b true if the matching \b whole and most significant piece is found
         public bool inHandLo(Varnode l)
         {
-            if (!l->isPrecisLo()) return false; // Check for mark, in order to have quick -false- in most cases
+            if (!l.isPrecisLo()) return false; // Check for mark, in order to have quick -false- in most cases
                                                 // Search for the companion
-            if (l->isWritten())
+            if (l.isWritten())
             {
-                PcodeOp* op = l->getDef();
+                PcodeOp* op = l.getDef();
                 // We could check for double loads here
-                if (op->code() == CPUI_SUBPIECE)
+                if (op.code() == CPUI_SUBPIECE)
                 {
-                    Varnode* w = op->getIn(0);
-                    if (op->getIn(1)->getOffset() != 0) return false;
+                    Varnode* w = op.getIn(0);
+                    if (op.getIn(1).getOffset() != 0) return false;
                     list<PcodeOp*>::const_iterator iter, enditer;
-                    iter = w->beginDescend();
-                    enditer = w->endDescend();
+                    iter = w.beginDescend();
+                    enditer = w.endDescend();
                     while (iter != enditer)
                     {
                         PcodeOp* tmpop = *iter;
                         ++iter;
-                        if (tmpop->code() != CPUI_SUBPIECE) continue;
-                        Varnode* tmphi = tmpop->getOut();
-                        if (!tmphi->isPrecisHi()) continue;
-                        if (tmphi->getSize() + l->getSize() != w->getSize()) continue;
-                        if (tmpop->getIn(1)->getOffset() != (uintb)l->getSize()) continue;
+                        if (tmpop.code() != CPUI_SUBPIECE) continue;
+                        Varnode* tmphi = tmpop.getOut();
+                        if (!tmphi.isPrecisHi()) continue;
+                        if (tmphi.getSize() + l.getSize() != w.getSize()) continue;
+                        if (tmpop.getIn(1).getOffset() != (uintb)l.getSize()) continue;
                         // There could conceivably be more than one, but this shouldn't happen with CSE
                         initAll(w, l, tmphi);
                         return true;
@@ -395,25 +395,25 @@ namespace Sla.DECCORE
         /// \return \b true if the SplitVarnode is successfully initialized
         public bool inHandLoNoHi(Varnode l)
         {
-            if (!l->isPrecisLo()) return false;
-            if (!l->isWritten()) return false;
-            PcodeOp* op = l->getDef();
-            if (op->code() != CPUI_SUBPIECE) return false;
-            if (op->getIn(1)->getOffset() != 0) return false;
-            Varnode* w = op->getIn(0);
+            if (!l.isPrecisLo()) return false;
+            if (!l.isWritten()) return false;
+            PcodeOp* op = l.getDef();
+            if (op.code() != CPUI_SUBPIECE) return false;
+            if (op.getIn(1).getOffset() != 0) return false;
+            Varnode* w = op.getIn(0);
 
             list<PcodeOp*>::const_iterator iter, enditer;
-            iter = w->beginDescend();
-            enditer = w->endDescend();
+            iter = w.beginDescend();
+            enditer = w.endDescend();
             while (iter != enditer)
             {
                 PcodeOp* tmpop = *iter;
                 ++iter;
-                if (tmpop->code() != CPUI_SUBPIECE) continue;
-                Varnode* tmphi = tmpop->getOut();
-                if (!tmphi->isPrecisHi()) continue;
-                if (tmphi->getSize() + l->getSize() != w->getSize()) continue;
-                if (tmpop->getIn(1)->getOffset() != (uintb)l->getSize()) continue;
+                if (tmpop.code() != CPUI_SUBPIECE) continue;
+                Varnode* tmphi = tmpop.getOut();
+                if (!tmphi.isPrecisHi()) continue;
+                if (tmphi.getSize() + l.getSize() != w.getSize()) continue;
+                if (tmpop.getIn(1).getOffset() != (uintb)l.getSize()) continue;
                 // There could conceivably be more than one, but this shouldn't happen with CSE
                 initAll(w, l, tmphi);
                 return true;
@@ -431,21 +431,21 @@ namespace Sla.DECCORE
         public bool inHandHiOut(Varnode h)
         {
             list<PcodeOp*>::const_iterator iter, enditer;
-            iter = h->beginDescend();
-            enditer = h->endDescend();
+            iter = h.beginDescend();
+            enditer = h.endDescend();
             Varnode* loTmp = (Varnode*)0;
             Varnode* outvn = (Varnode*)0;
             while (iter != enditer)
             {
                 PcodeOp* pieceop = *iter;
                 ++iter;
-                if (pieceop->code() != CPUI_PIECE) continue;
-                if (pieceop->getIn(0) != h) continue;
-                Varnode* l = pieceop->getIn(1);
-                if (!l->isPrecisLo()) continue;
+                if (pieceop.code() != CPUI_PIECE) continue;
+                if (pieceop.getIn(0) != h) continue;
+                Varnode* l = pieceop.getIn(1);
+                if (!l.isPrecisLo()) continue;
                 if (loTmp != (Varnode*)0) return false; // Whole is not unique
                 loTmp = l;
-                outvn = pieceop->getOut();
+                outvn = pieceop.getOut();
             }
             if (loTmp != (Varnode*)0)
             {
@@ -464,21 +464,21 @@ namespace Sla.DECCORE
         public bool inHandLoOut(Varnode l)
         {
             list<PcodeOp*>::const_iterator iter, enditer;
-            iter = l->beginDescend();
-            enditer = l->endDescend();
+            iter = l.beginDescend();
+            enditer = l.endDescend();
             Varnode* hiTmp = (Varnode*)0;
             Varnode* outvn = (Varnode*)0;
             while (iter != enditer)
             {
                 PcodeOp* pieceop = *iter;
                 ++iter;
-                if (pieceop->code() != CPUI_PIECE) continue;
-                if (pieceop->getIn(1) != l) continue;
-                Varnode* h = pieceop->getIn(0);
-                if (!h->isPrecisHi()) continue;
+                if (pieceop.code() != CPUI_PIECE) continue;
+                if (pieceop.getIn(1) != l) continue;
+                Varnode* h = pieceop.getIn(0);
+                if (!h.isPrecisHi()) continue;
                 if (hiTmp != (Varnode*)0) return false; // Whole is not unique
                 hiTmp = h;
-                outvn = pieceop->getOut();
+                outvn = pieceop.getOut();
             }
             if (hiTmp != (Varnode*)0)
             {
@@ -525,7 +525,7 @@ namespace Sla.DECCORE
         {
             if (isConstant()) return true;
             if ((lo != (Varnode*)0) && (hi != (Varnode*)0))
-                if (lo->isConstant() != hi->isConstant()) return false; // Mixed constant/non-constant
+                if (lo.isConstant() != hi.isConstant()) return false; // Mixed constant/non-constant
             if (!findWholeSplitToPieces())
             {
                 if (!findWholeBuiltFromPieces())
@@ -535,12 +535,12 @@ namespace Sla.DECCORE
                 }
             }
             if (defblock == (BlockBasic*)0) return true;
-            FlowBlock* curbl = existop->getParent();
+            FlowBlock* curbl = existop.getParent();
             if (curbl == defblock)  // If defined in same block as -existop- check PcodeOp ordering
-                return (defpoint->getSeqNum().getOrder() <= existop->getSeqNum().getOrder());
+                return (defpoint.getSeqNum().getOrder() <= existop.getSeqNum().getOrder());
             while (curbl != (FlowBlock*)0)
             { // Make sure defbock dominates block containing -existop-
-                curbl = curbl->getImmedDom();
+                curbl = curbl.getImmedDom();
                 if (curbl == defblock) return true;
             }
             return false;
@@ -567,7 +567,7 @@ namespace Sla.DECCORE
                 return true;
             while (bl != (FlowBlock*)0)
             { // Make sure defblock dominates block containing -existop-
-                bl = bl->getImmedDom();
+                bl = bl.getImmedDom();
                 if (bl == defblock) return true;
             }
             return false;
@@ -589,9 +589,9 @@ namespace Sla.DECCORE
             else
             {
                 if (lo != (Varnode*)0)
-                    lo->setPrecisLo();      // Mark the pieces
+                    lo.setPrecisLo();      // Mark the pieces
                 if (hi != (Varnode*)0)
-                    hi->setPrecisHi();
+                    hi.setPrecisHi();
             }
 
             if (whole != (Varnode*)0) return; // Already found the whole
@@ -600,11 +600,11 @@ namespace Sla.DECCORE
             BlockBasic* topblock = (BlockBasic*)0;
 
             if (defblock != (BlockBasic*)0)
-                addr = defpoint->getAddr();
+                addr = defpoint.getAddr();
             else
             {
                 topblock = (BlockBasic*)data.getBasicBlocks().getStartBlock();
-                addr = topblock->getStart();
+                addr = topblock.getStart();
             }
 
             if (hi != (Varnode*)0)
@@ -632,7 +632,7 @@ namespace Sla.DECCORE
                 data.opInsertBegin(concatop, topblock);
 
             defpoint = concatop;
-            defblock = concatop->getParent();
+            defblock = concatop.getParent();
         }
 
         /// Create a \b whole Varnode that will be a PcodeOp output
@@ -641,8 +641,8 @@ namespace Sla.DECCORE
         /// \param data is the function owning the Varnode pieces
         public void findCreateOutputWhole(Funcdata data)
         { // Create the actual -whole- varnode
-            lo->setPrecisLo();      // Mark the pieces
-            hi->setPrecisHi();
+            lo.setPrecisLo();      // Mark the pieces
+            hi.setPrecisHi();
             if (whole != (Varnode*)0) return;
             whole = data.newUnique(wholesize);
         }
@@ -653,17 +653,17 @@ namespace Sla.DECCORE
         /// \param data is the function owning the pieces
         public void createJoinedWhole(Funcdata data)
         {
-            lo->setPrecisLo();
-            hi->setPrecisHi();
+            lo.setPrecisLo();
+            hi.setPrecisHi();
             if (whole != (Varnode*)0) return;
             Address newaddr;
             if (!isAddrTiedContiguous(lo, hi, newaddr))
             {
-                newaddr = data.getArch()->constructJoinAddress(data.getArch()->translate, hi->getAddr(), hi->getSize(),
-                                                    lo->getAddr(), lo->getSize());
+                newaddr = data.getArch().constructJoinAddress(data.getArch().translate, hi.getAddr(), hi.getSize(),
+                                                    lo.getAddr(), lo.getSize());
             }
             whole = data.newVarnode(wholesize, newaddr);
-            whole->setWriteMask();
+            whole.setWriteMask();
         }
 
         /// Rebuild the least significant piece as a CPUI_SUBPIECE of the \b whole
@@ -672,32 +672,32 @@ namespace Sla.DECCORE
         /// The method findCreateOutputWhole() must already have been called on \b this.
         public void buildLoFromWhole(Funcdata data)
         {
-            PcodeOp* loop = lo->getDef();
+            PcodeOp* loop = lo.getDef();
             if (loop == (PcodeOp*)0)
                 throw new LowlevelError("Building low piece that was originally undefined");
 
             vector<Varnode*> inlist;
             inlist.push_back(whole);
             inlist.push_back(data.newConstant(4, 0));
-            if (loop->code() == CPUI_MULTIEQUAL)
+            if (loop.code() == CPUI_MULTIEQUAL)
             {
                 // When converting the MULTIEQUAL to a SUBPIECE, we need to reinsert the op so that we don't
                 // get a break in the sequence of MULTIEQUALs at the beginning of the block
-                BlockBasic* bl = loop->getParent();
+                BlockBasic* bl = loop.getParent();
                 data.opUninsert(loop);
                 data.opSetOpcode(loop, CPUI_SUBPIECE);
                 data.opSetAllInput(loop, inlist);
                 data.opInsertBegin(loop, bl);
             }
-            else if (loop->code() == CPUI_INDIRECT)
+            else if (loop.code() == CPUI_INDIRECT)
             {
                 // When converting an INDIRECT to a SUBPIECE, we need to reinsert the op AFTER the affector
-                PcodeOp* affector = PcodeOp::getOpFromConst(loop->getIn(1)->getAddr());
-                if (!affector->isDead())
+                PcodeOp* affector = PcodeOp::getOpFromConst(loop.getIn(1).getAddr());
+                if (!affector.isDead())
                     data.opUninsert(loop);
                 data.opSetOpcode(loop, CPUI_SUBPIECE);
                 data.opSetAllInput(loop, inlist);
-                if (!affector->isDead())
+                if (!affector.isDead())
                     data.opInsertAfter(loop, affector);
             }
             else
@@ -713,32 +713,32 @@ namespace Sla.DECCORE
         /// The method findCreateOutputWhole() must already have been called on \b this.
         public void buildHiFromWhole(Funcdata data)
         {
-            PcodeOp* hiop = hi->getDef();
+            PcodeOp* hiop = hi.getDef();
             if (hiop == (PcodeOp*)0)
                 throw new LowlevelError("Building low piece that was originally undefined");
 
             vector<Varnode*> inlist;
             inlist.push_back(whole);
-            inlist.push_back(data.newConstant(4, lo->getSize()));
-            if (hiop->code() == CPUI_MULTIEQUAL)
+            inlist.push_back(data.newConstant(4, lo.getSize()));
+            if (hiop.code() == CPUI_MULTIEQUAL)
             {
                 // When converting the MULTIEQUAL to a SUBPIECE, we need to reinsert the op so that we don't
                 // get a break in the sequence of MULTIEQUALs at the beginning of the block
-                BlockBasic* bl = hiop->getParent();
+                BlockBasic* bl = hiop.getParent();
                 data.opUninsert(hiop);
                 data.opSetOpcode(hiop, CPUI_SUBPIECE);
                 data.opSetAllInput(hiop, inlist);
                 data.opInsertBegin(hiop, bl);
             }
-            else if (hiop->code() == CPUI_INDIRECT)
+            else if (hiop.code() == CPUI_INDIRECT)
             {
                 // When converting the INDIRECT to a SUBPIECE, we need to reinsert AFTER the affector
-                PcodeOp* affector = PcodeOp::getOpFromConst(hiop->getIn(1)->getAddr());
-                if (!affector->isDead())
+                PcodeOp* affector = PcodeOp::getOpFromConst(hiop.getIn(1).getAddr());
+                if (!affector.isDead())
                     data.opUninsert(hiop);
                 data.opSetOpcode(hiop, CPUI_SUBPIECE);
                 data.opSetAllInput(hiop, inlist);
-                if (!affector->isDead())
+                if (!affector.isDead())
                     data.opInsertAfter(hiop, affector);
             }
             else
@@ -754,13 +754,13 @@ namespace Sla.DECCORE
         /// \return the earlier of the two defining PcodeOps or null
         public PcodeOp findEarliestSplitPoint()
         {
-            if (!hi->isWritten()) return (PcodeOp*)0;
-            if (!lo->isWritten()) return (PcodeOp*)0;
-            PcodeOp* hiop = hi->getDef();
-            PcodeOp* loop = lo->getDef();
-            if (loop->getParent() != hiop->getParent())
+            if (!hi.isWritten()) return (PcodeOp*)0;
+            if (!lo.isWritten()) return (PcodeOp*)0;
+            PcodeOp* hiop = hi.getDef();
+            PcodeOp* loop = lo.getDef();
+            if (loop.getParent() != hiop.getParent())
                 return (PcodeOp*)0;
-            return (loop->getSeqNum().getOrder() < hiop->getSeqNum().getOrder()) ? loop : hiop;
+            return (loop.getSeqNum().getOrder() < hiop.getSeqNum().getOrder()) ? loop : hiop;
         }
 
         /// Find the point at which the output \b whole must exist
@@ -788,28 +788,28 @@ namespace Sla.DECCORE
         /// \return \b true if the values in \b vn1 and \b vn2 are related by the given size
         public static bool adjacentOffsets(Varnode vn1, Varnode vn2, uintb size1)
         {
-            if (vn1->isConstant())
+            if (vn1.isConstant())
             {
-                if (!vn2->isConstant()) return false;
-                return ((vn1->getOffset() + size1) == vn2->getOffset());
+                if (!vn2.isConstant()) return false;
+                return ((vn1.getOffset() + size1) == vn2.getOffset());
             }
 
-            if (!vn2->isWritten()) return false;
-            PcodeOp* op2 = vn2->getDef();
-            if (op2->code() != CPUI_INT_ADD) return false;
-            if (!op2->getIn(1)->isConstant()) return false;
-            uintb c2 = op2->getIn(1)->getOffset();
+            if (!vn2.isWritten()) return false;
+            PcodeOp* op2 = vn2.getDef();
+            if (op2.code() != CPUI_INT_ADD) return false;
+            if (!op2.getIn(1).isConstant()) return false;
+            uintb c2 = op2.getIn(1).getOffset();
 
-            if (op2->getIn(0) == vn1)
+            if (op2.getIn(0) == vn1)
                 return (size1 == c2);
 
-            if (!vn1->isWritten()) return false;
-            PcodeOp* op1 = vn1->getDef();
-            if (op1->code() != CPUI_INT_ADD) return false;
-            if (!op1->getIn(1)->isConstant()) return false;
-            uintb c1 = op1->getIn(1)->getOffset();
+            if (!vn1.isWritten()) return false;
+            PcodeOp* op1 = vn1.getDef();
+            if (op1.code() != CPUI_INT_ADD) return false;
+            if (!op1.getIn(1).isConstant()) return false;
+            uintb c1 = op1.getIn(1).getOffset();
 
-            if (op1->getIn(0) != op2->getIn(0)) return false;
+            if (op1.getIn(0) != op2.getIn(0)) return false;
             return ((c1 + size1) == c2);
         }
 
@@ -831,10 +831,10 @@ namespace Sla.DECCORE
         public static bool testContiguousPointers(PcodeOp most, PcodeOp least, out PcodeOp first,
             out PcodeOp second, out AddrSpace spc)
         {
-            spc = least->getIn(0)->getSpaceFromConst();
-            if (most->getIn(0)->getSpaceFromConst() != spc) return false;
+            spc = least.getIn(0).getSpaceFromConst();
+            if (most.getIn(0).getSpaceFromConst() != spc) return false;
 
-            if (spc->isBigEndian())
+            if (spc.isBigEndian())
             {   // Convert significance order to address order
                 first = most;
                 second = least;
@@ -844,16 +844,16 @@ namespace Sla.DECCORE
                 first = least;
                 second = most;
             }
-            Varnode* firstptr = first->getIn(1);
-            if (firstptr->isFree()) return false;
+            Varnode* firstptr = first.getIn(1);
+            if (firstptr.isFree()) return false;
             int4 sizeres;
-            if (first->code() == CPUI_LOAD)
-                sizeres = first->getOut()->getSize(); // # of bytes read by lowest address load
+            if (first.code() == CPUI_LOAD)
+                sizeres = first.getOut().getSize(); // # of bytes read by lowest address load
             else        // CPUI_STORE
-                sizeres = first->getIn(2)->getSize();
+                sizeres = first.getIn(2).getSize();
 
             // Check if the loads are adjacent to each other
-            return adjacentOffsets(first->getIn(1), second->getIn(1), (uintb)sizeres);
+            return adjacentOffsets(first.getIn(1), second.getIn(1), (uintb)sizeres);
         }
 
         /// \brief Return \b true if the given pieces can be melded into a contiguous storage location
@@ -866,34 +866,34 @@ namespace Sla.DECCORE
         /// \return \b true if the pieces are address tied and form a contiguous range
         public static bool isAddrTiedContiguous(Varnode lo, Varnode hi, Address res)
         {
-            if (!lo->isAddrTied()) return false;
-            if (!hi->isAddrTied()) return false;
+            if (!lo.isAddrTied()) return false;
+            if (!hi.isAddrTied()) return false;
 
             // Make sure there is no explicit symbol that would prevent the pieces from being joined
-            SymbolEntry* entryLo = lo->getSymbolEntry();
-            SymbolEntry* entryHi = hi->getSymbolEntry();
+            SymbolEntry* entryLo = lo.getSymbolEntry();
+            SymbolEntry* entryHi = hi.getSymbolEntry();
             if (entryLo != (SymbolEntry*)0 || entryHi != (SymbolEntry*)0)
             {
                 if (entryLo == (SymbolEntry*)0 || entryHi == (SymbolEntry*)0)
                     return false;       // One is marked with a symbol, the other is not
-                if (entryLo->getSymbol() != entryHi->getSymbol())
+                if (entryLo.getSymbol() != entryHi.getSymbol())
                     return false;       // They are part of different symbols
             }
-            AddrSpace* spc = lo->getSpace();
-            if (spc != hi->getSpace()) return false;
-            uintb looffset = lo->getOffset();
-            uintb hioffset = hi->getOffset();
-            if (spc->isBigEndian())
+            AddrSpace* spc = lo.getSpace();
+            if (spc != hi.getSpace()) return false;
+            uintb looffset = lo.getOffset();
+            uintb hioffset = hi.getOffset();
+            if (spc.isBigEndian())
             {
                 if (hioffset >= looffset) return false;
-                if (hioffset + hi->getSize() != looffset) return false;
-                res = hi->getAddr();
+                if (hioffset + hi.getSize() != looffset) return false;
+                res = hi.getAddr();
             }
             else
             {
                 if (looffset >= hioffset) return false;
-                if (looffset + lo->getSize() != hioffset) return false;
-                res = lo->getAddr();
+                if (looffset + lo.getSize() != hioffset) return false;
+                res = lo.getAddr();
             }
             return true;
         }
@@ -912,33 +912,33 @@ namespace Sla.DECCORE
             basic.whole = w;
             basic.hi = (Varnode*)0;
             basic.lo = (Varnode*)0;
-            basic.wholesize = w->getSize();
+            basic.wholesize = w.getSize();
             list<PcodeOp*>::const_iterator iter, enditer;
 
-            iter = basic.whole->beginDescend();
-            enditer = basic.whole->endDescend();
+            iter = basic.whole.beginDescend();
+            enditer = basic.whole.endDescend();
             int4 res = 0;
             while (iter != enditer)
             {
                 PcodeOp* subop = *iter;
                 ++iter;
-                if (subop->code() != CPUI_SUBPIECE) continue;
-                Varnode* vn = subop->getOut();
-                if (vn->isPrecisHi())
+                if (subop.code() != CPUI_SUBPIECE) continue;
+                Varnode* vn = subop.getOut();
+                if (vn.isPrecisHi())
                 {
-                    if (subop->getIn(1)->getOffset() != basic.wholesize - vn->getSize()) continue;
+                    if (subop.getIn(1).getOffset() != basic.wholesize - vn.getSize()) continue;
                     basic.hi = vn;
                     res |= 2;
                 }
-                else if (vn->isPrecisLo())
+                else if (vn.isPrecisLo())
                 {
-                    if (subop->getIn(1)->getOffset() != 0) continue;
+                    if (subop.getIn(1).getOffset() != 0) continue;
                     basic.lo = vn;
                     res |= 1;
                 }
             }
             if (res == 0) return;
-            if (res == 3 && (basic.lo->getSize() + basic.hi->getSize() != basic.wholesize))
+            if (res == 3 && (basic.lo.getSize() + basic.hi.getSize() != basic.wholesize))
                 return;
 
             splitvec.push_back(basic);
@@ -957,30 +957,30 @@ namespace Sla.DECCORE
             if (!@in.hasBothPieces()) return;
             list<PcodeOp*>::const_iterator iter, enditer;
 
-            iter = @in.getLo()->beginDescend();
-            enditer = @in.getLo()->endDescend();
+            iter = @in.getLo().beginDescend();
+            enditer = @in.getLo().endDescend();
             while (iter != enditer)
             {
                 PcodeOp* loop = *iter;
                 ++iter;
-                if (loop->code() != CPUI_COPY) continue;
-                Varnode* locpy = loop->getOut();
-                Address addr = locpy->getAddr(); // Calculate address of hi part
+                if (loop.code() != CPUI_COPY) continue;
+                Varnode* locpy = loop.getOut();
+                Address addr = locpy.getAddr(); // Calculate address of hi part
                 if (addr.isBigEndian())
-                    addr = addr - (@in.getHi()->getSize());
+                    addr = addr - (@in.getHi().getSize());
                 else
-                    addr = addr + locpy->getSize();
+                    addr = addr + locpy.getSize();
                 list<PcodeOp*>::const_iterator iter2, enditer2;
-                iter2 = @in.getHi()->beginDescend();
-                enditer2 = @in.getHi()->endDescend();
+                iter2 = @in.getHi().beginDescend();
+                enditer2 = @in.getHi().endDescend();
                 while (iter2 != enditer2)
                 {
                     PcodeOp* hiop = *iter2;
                     ++iter2;
-                    if (hiop->code() != CPUI_COPY) continue;
-                    Varnode* hicpy = hiop->getOut();
-                    if (hicpy->getAddr() != addr) continue;
-                    if (hiop->getParent() != loop->getParent()) continue;
+                    if (hiop.code() != CPUI_COPY) continue;
+                    Varnode* hicpy = hiop.getOut();
+                    if (hicpy.getAddr() != addr) continue;
+                    if (hiop.getParent() != loop.getParent()) continue;
                     SplitVarnode newsplit;
                     newsplit.initAll(@in.getWhole(), locpy, hicpy);
                     splitvec.push_back(newsplit);
@@ -999,10 +999,10 @@ namespace Sla.DECCORE
         public static void getTrueFalse(PcodeOp boolop, bool flip, out BlockBasic trueout,
             out BlockBasic falseout)
         {
-            BlockBasic* parent = boolop->getParent();
-            BlockBasic* trueblock = (BlockBasic*)parent->getTrueOut();
-            BlockBasic* falseblock = (BlockBasic*)parent->getFalseOut();
-            if (boolop->isBooleanFlip() != flip)
+            BlockBasic* parent = boolop.getParent();
+            BlockBasic* trueblock = (BlockBasic*)parent.getTrueOut();
+            BlockBasic* falseblock = (BlockBasic*)parent.getFalseOut();
+            if (boolop.isBooleanFlip() != flip)
             {
                 trueout = falseblock;
                 falseout = trueblock;
@@ -1022,15 +1022,15 @@ namespace Sla.DECCORE
         /// \return \b true if the parent basic block performs only the branch operation
         public static bool otherwiseEmpty(PcodeOp branchop)
         {
-            BlockBasic* bl = branchop->getParent();
-            if (bl->sizeIn() != 1) return false;
+            BlockBasic* bl = branchop.getParent();
+            if (bl.sizeIn() != 1) return false;
             PcodeOp* otherop = (PcodeOp*)0;
-            Varnode* vn = branchop->getIn(1);
-            if (vn->isWritten())
-                otherop = vn->getDef();
+            Varnode* vn = branchop.getIn(1);
+            if (vn.isWritten())
+                otherop = vn.getDef();
             list<PcodeOp*>::const_iterator iter, enditer;
-            iter = bl->beginOp();
-            enditer = bl->endOp();
+            iter = bl.beginOp();
+            enditer = bl.endOp();
             while (iter != enditer)
             {
                 PcodeOp* op = *iter;
@@ -1049,10 +1049,10 @@ namespace Sla.DECCORE
         /// \return \b true if the PcodeOp is a multiple by -1
         public static bool verifyMultNegOne(PcodeOp op)
         {
-            if (op->code() != CPUI_INT_MULT) return false;
-            Varnode* in1 = op->getIn(1);
-            if (!in1->isConstant()) return false;
-            if (in1->getOffset() != calc_mask(in1->getSize())) return false;
+            if (op.code() != CPUI_INT_MULT) return false;
+            Varnode* in1 = op.getIn(1);
+            if (!in1.isConstant()) return false;
+            if (in1.getOffset() != calc_mask(in1.getSize())) return false;
             return true;
         }
 
@@ -1092,9 +1092,9 @@ namespace Sla.DECCORE
             @out.findCreateOutputWhole(data);
             in1.findCreateWhole(data);
             in2.findCreateWhole(data);
-            if (existop->code() != CPUI_PIECE)
+            if (existop.code() != CPUI_PIECE)
             { // If the output whole didn't previously exist
-                PcodeOp* newop = data.newOp(2, existop->getAddr()); // new op which creates the output whole
+                PcodeOp* newop = data.newOp(2, existop.getAddr()); // new op which creates the output whole
                 data.opSetOpcode(newop, opc);
                 data.opSetOutput(newop, @out.getWhole());
                 data.opSetInput(newop, in1.getWhole(), 0);
@@ -1144,11 +1144,11 @@ namespace Sla.DECCORE
         {
             @out.findCreateOutputWhole(data);
             @in.findCreateWhole(data);
-            if (sa->isConstant())
-                sa = data.newConstant(sa->getSize(), sa->getOffset());
-            if (existop->code() != CPUI_PIECE)
+            if (sa.isConstant())
+                sa = data.newConstant(sa.getSize(), sa.getOffset());
+            if (existop.code() != CPUI_PIECE)
             { // If the output whole didn't previously exist
-                PcodeOp* newop = data.newOp(2, existop->getAddr());
+                PcodeOp* newop = data.newOp(2, existop.getAddr());
                 data.opSetOpcode(newop, opc);
                 data.opSetOutput(newop, @out.getWhole());
                 data.opSetInput(newop, @in.getWhole(), 0);
@@ -1211,12 +1211,12 @@ namespace Sla.DECCORE
             SplitVarnode in2, OpCode opc)
         {
             PcodeOp* addrop = cbranch;
-            Varnode* boolvn = cbranch->getIn(1);
-            if (boolvn->isWritten())
-                addrop = boolvn->getDef();  // Use the address of the comparison operator
+            Varnode* boolvn = cbranch.getIn(1);
+            if (boolvn.isWritten())
+                addrop = boolvn.getDef();  // Use the address of the comparison operator
             in1.findCreateWhole(data);
             in2.findCreateWhole(data);
-            PcodeOp* newop = data.newOp(2, addrop->getAddr());
+            PcodeOp* newop = data.newOp(2, addrop.getAddr());
             data.opSetOpcode(newop, opc);
             Varnode* newbool = data.newUniqueOut(1, newop);
             data.opSetInput(newop, in1.getWhole(), 0);
@@ -1238,12 +1238,12 @@ namespace Sla.DECCORE
             PcodeOp* existop = @out.findEarliestSplitPoint(); // Point where output whole needs to exist
             if (existop == (PcodeOp*)0) return existop;
             // existop should always be a MULTIEQUAL defining one of the pieces
-            if (existop->code() != CPUI_MULTIEQUAL)
+            if (existop.code() != CPUI_MULTIEQUAL)
                 throw new LowlevelError("Trying to create phi-node double precision op with phi-node pieces");
-            BlockBasic* bl = existop->getParent();
+            BlockBasic* bl = existop.getParent();
             int4 numin = inlist.size();
             for (int4 i = 0; i < numin; ++i)
-                if (!inlist[i].isWholePhiFeasible(bl->getIn(i)))
+                if (!inlist[i].isWholePhiFeasible(bl.getIn(i)))
                     return (PcodeOp*)0;
             return existop;
         }
@@ -1267,7 +1267,7 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < numin; ++i)
                 inlist[i].findCreateWhole(data);
 
-            PcodeOp* newop = data.newOp(numin, existop->getAddr());
+            PcodeOp* newop = data.newOp(numin, existop.getAddr());
             data.opSetOpcode(newop, CPUI_MULTIEQUAL);
             data.opSetOutput(newop, @out.getWhole());
             for (int4 i = 0; i < numin; ++i)
@@ -1304,7 +1304,7 @@ namespace Sla.DECCORE
             @out.createJoinedWhole(data);
 
             @in.findCreateWhole(data);
-            PcodeOp* newop = data.newOp(2, affector->getAddr());
+            PcodeOp* newop = data.newOp(2, affector.getAddr());
             data.opSetOpcode(newop, CPUI_INDIRECT);
             data.opSetOutput(newop, @out.getWhole());
             data.opSetInput(newop, @in.getWhole(), 0);
@@ -1330,13 +1330,13 @@ namespace Sla.DECCORE
                 if (vn == (Varnode*)0) continue;
                 bool workishi = (i == 0);
                 list<PcodeOp*>::const_iterator iter, enditer;
-                iter = vn->beginDescend();
-                enditer = vn->endDescend();
+                iter = vn.beginDescend();
+                enditer = vn.endDescend();
                 while (iter != enditer)
                 {
                     PcodeOp* workop = *iter;
                     ++iter;
-                    switch (workop->code())
+                    switch (workop.code())
                     {
                         case CPUI_INT_ADD:
                             {

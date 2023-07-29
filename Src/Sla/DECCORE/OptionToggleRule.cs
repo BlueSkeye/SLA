@@ -26,13 +26,13 @@ namespace Sla.DECCORE
                 throw ParseError("Must specify on/off");
             bool val = onOrOff(p2);
 
-            Action* root = glb->allacts.getCurrent();
+            Action* root = glb.allacts.getCurrent();
             if (root == (Action*)0)
                 throw new LowlevelError("Missing current action");
             string res;
             if (!val)
             {
-                if (root->disableRule(p1))
+                if (root.disableRule(p1))
                     res = "Successfully disabled";
                 else
                     res = "Failed to disable";
@@ -40,7 +40,7 @@ namespace Sla.DECCORE
             }
             else
             {
-                if (root->enableRule(p1))
+                if (root.enableRule(p1))
                     res = "Successfully enabled";
                 else
                     res = "Failed to enable";

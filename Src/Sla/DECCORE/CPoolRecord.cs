@@ -158,7 +158,7 @@ namespace Sla.DECCORE
                 encoder.writeString(ATTRIB_CONTENT, token);
                 encoder.closeElement(ELEM_TOKEN);
             }
-            type->encode(encoder);
+            type.encode(encoder);
             encoder.closeElement(ELEM_CPOOLREC);
         }
 

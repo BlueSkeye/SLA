@@ -24,24 +24,24 @@ namespace Sla.DECCORE
 
         private bool checkLoForm()
         { // Assuming we have equal <- or <- xor <- hi1, verify if we have the full equal form
-            Varnode* orvnin = orop->getIn(1 - orhislot);
+            Varnode* orvnin = orop.getIn(1 - orhislot);
             if (orvnin == lo1)
             {       // lo2 is an implied 0
                 loxor = (PcodeOp*)0;
                 lo2 = (Varnode*)0;
                 return true;
             }
-            if (!orvnin->isWritten()) return false;
-            loxor = orvnin->getDef();
-            if (loxor->code() != CPUI_INT_XOR) return false;
-            if (loxor->getIn(0) == lo1)
+            if (!orvnin.isWritten()) return false;
+            loxor = orvnin.getDef();
+            if (loxor.code() != CPUI_INT_XOR) return false;
+            if (loxor.getIn(0) == lo1)
             {
-                lo2 = loxor->getIn(1);
+                lo2 = loxor.getIn(1);
                 return true;
             }
-            else if (loxor->getIn(1) == lo1)
+            else if (loxor.getIn(1) == lo1)
             {
-                lo2 = loxor->getIn(0);
+                lo2 = loxor.getIn(0);
                 return true;
             }
             return false;
@@ -50,17 +50,17 @@ namespace Sla.DECCORE
         private bool fillOutFromOr(Funcdata data)
         { // We have filled in either or <- xor <- hi1,  OR,  or <- hi1
           // Now try to fill in the rest of the form
-            Varnode* outvn = orop->getOut();
+            Varnode* outvn = orop.getOut();
             list<PcodeOp*>::const_iterator iter, enditer;
-            iter = outvn->beginDescend();
-            enditer = outvn->endDescend();
+            iter = outvn.beginDescend();
+            enditer = outvn.endDescend();
             while (iter != enditer)
             {
                 equalop = *iter;
                 ++iter;
-                if ((equalop->code() != CPUI_INT_EQUAL) && (equalop->code() != CPUI_INT_NOTEQUAL)) continue;
-                if (!equalop->getIn(1)->isConstant()) continue;
-                if (equalop->getIn(1)->getOffset() != 0) continue;
+                if ((equalop.code() != CPUI_INT_EQUAL) && (equalop.code() != CPUI_INT_NOTEQUAL)) continue;
+                if (!equalop.getIn(1).isConstant()) continue;
+                if (equalop.getIn(1).getOffset() != 0) continue;
 
                 if (!checkLoForm()) continue;
                 if (!replace(data)) continue;
@@ -76,14 +76,14 @@ namespace Sla.DECCORE
                 param2.initPartial(in.getSize(), 0); // Double precis zero constant
                 return SplitVarnode::prepareBoolOp(in, param2, equalop);
             }
-            if ((hi2 == (Varnode*)0) && (lo2->isConstant()))
+            if ((hi2 == (Varnode*)0) && (lo2.isConstant()))
             {
-                param2.initPartial(in.getSize(), lo2->getOffset());
+                param2.initPartial(in.getSize(), lo2.getOffset());
                 return SplitVarnode::prepareBoolOp(in, param2, equalop);
             }
-            if ((lo2 == (Varnode*)0) && (hi2->isConstant()))
+            if ((lo2 == (Varnode*)0) && (hi2.isConstant()))
             {
-                param2.initPartial(in.getSize(), hi2->getOffset() << 8 * lo1->getSize());
+                param2.initPartial(in.getSize(), hi2.getOffset() << 8 * lo1.getSize());
                 return SplitVarnode::prepareBoolOp(in, param2, equalop);
             }
             if (lo2 == (Varnode*)0)
@@ -96,15 +96,15 @@ namespace Sla.DECCORE
                 // Equal to a zero extended var
                 return false;
             }
-            if (hi2->isConstant() && lo2->isConstant())
+            if (hi2.isConstant() && lo2.isConstant())
             {
-                uintb val = hi2->getOffset();
-                val <<= 8 * lo1->getSize();
-                val |= lo2->getOffset();
+                uintb val = hi2.getOffset();
+                val <<= 8 * lo1.getSize();
+                val |= lo2.getOffset();
                 param2.initPartial(in.getSize(), val);
                 return SplitVarnode::prepareBoolOp(in, param2, equalop);
             }
-            if (hi2->isConstant() || lo2->isConstant())
+            if (hi2.isConstant() || lo2.isConstant())
             {
                 // Some kind of mixed form
                 return false;
@@ -127,36 +127,36 @@ namespace Sla.DECCORE
             hi1 = in.getHi();
             lo1 = in.getLo();
 
-            if (op->code() == CPUI_INT_OR)
+            if (op.code() == CPUI_INT_OR)
             {
                 orop = op;
-                orhislot = op->getSlot(hi1);
+                orhislot = op.getSlot(hi1);
                 hixor = (PcodeOp*)0;
                 hi2 = (Varnode*)0;
                 if (fillOutFromOr(data))
                 {
-                    SplitVarnode::replaceBoolOp(data, equalop, in, param2, equalop->code());
+                    SplitVarnode::replaceBoolOp(data, equalop, in, param2, equalop.code());
                     return true;
                 }
             }
             else
             {           // We see an XOR
                 hixor = op;
-                xorhislot = hixor->getSlot(hi1);
-                hi2 = hixor->getIn(1 - xorhislot);
-                Varnode* vn = op->getOut();
+                xorhislot = hixor.getSlot(hi1);
+                hi2 = hixor.getIn(1 - xorhislot);
+                Varnode* vn = op.getOut();
                 list<PcodeOp*>::const_iterator iter, enditer;
-                iter = vn->beginDescend();
-                enditer = vn->endDescend();
+                iter = vn.beginDescend();
+                enditer = vn.endDescend();
                 while (iter != enditer)
                 {
                     orop = *iter;
                     ++iter;
-                    if (orop->code() != CPUI_INT_OR) continue;
-                    orhislot = orop->getSlot(vn);
+                    if (orop.code() != CPUI_INT_OR) continue;
+                    orhislot = orop.getSlot(vn);
                     if (fillOutFromOr(data))
                     {
-                        SplitVarnode::replaceBoolOp(data, equalop, in, param2, equalop->code());
+                        SplitVarnode::replaceBoolOp(data, equalop, in, param2, equalop.code());
                         return true;
                     }
                 }

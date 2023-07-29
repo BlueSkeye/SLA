@@ -39,10 +39,10 @@ namespace Sla.DECCORE
             PcodeOp* newop;
             Varnode* vn,*outvn;
 
-            if (!op->isBooleanFlip()) return 0;
+            if (!op.isBooleanFlip()) return 0;
 
-            vn = op->getIn(1);
-            newop = data.newOp(1, op->getAddr());
+            vn = op.getIn(1);
+            newop = data.newOp(1, op.getAddr());
             data.opSetOpcode(newop, CPUI_BOOL_NEGATE);
             outvn = data.newUniqueOut(1, newop); // Flipped version of varnode
             data.opSetInput(newop, vn, 0);

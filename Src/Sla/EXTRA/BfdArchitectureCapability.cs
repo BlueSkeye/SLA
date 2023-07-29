@@ -53,7 +53,7 @@ namespace Sla.EXTRA
 
         public override bool isXmlMatch(Document doc)
         {
-            return (doc->getRoot()->getName() == "bfd_savefile");
+            return (doc.getRoot().getName() == "bfd_savefile");
         }
     }
 }

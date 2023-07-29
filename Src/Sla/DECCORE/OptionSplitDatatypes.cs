@@ -44,24 +44,24 @@ namespace Sla.DECCORE
 
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            uint4 oldConfig = glb->split_datatype_config;
-            glb->split_datatype_config = getOptionBit(p1);
-            glb->split_datatype_config |= getOptionBit(p2);
-            glb->split_datatype_config |= getOptionBit(p3);
+            uint4 oldConfig = glb.split_datatype_config;
+            glb.split_datatype_config = getOptionBit(p1);
+            glb.split_datatype_config |= getOptionBit(p2);
+            glb.split_datatype_config |= getOptionBit(p3);
 
-            if ((glb->split_datatype_config & (option_struct | option_array)) == 0)
+            if ((glb.split_datatype_config & (option_struct | option_array)) == 0)
             {
-                glb->allacts.toggleAction(glb->allacts.getCurrentName(), "splitcopy", false);
-                glb->allacts.toggleAction(glb->allacts.getCurrentName(), "splitpointer", false);
+                glb.allacts.toggleAction(glb.allacts.getCurrentName(), "splitcopy", false);
+                glb.allacts.toggleAction(glb.allacts.getCurrentName(), "splitpointer", false);
             }
             else
             {
-                bool pointers = (glb->split_datatype_config & option_pointer) != 0;
-                glb->allacts.toggleAction(glb->allacts.getCurrentName(), "splitcopy", true);
-                glb->allacts.toggleAction(glb->allacts.getCurrentName(), "splitpointer", pointers);
+                bool pointers = (glb.split_datatype_config & option_pointer) != 0;
+                glb.allacts.toggleAction(glb.allacts.getCurrentName(), "splitcopy", true);
+                glb.allacts.toggleAction(glb.allacts.getCurrentName(), "splitpointer", pointers);
             }
 
-            if (oldConfig == glb->split_datatype_config)
+            if (oldConfig == glb.split_datatype_config)
                 return "Split data-type configuration unchanged";
             return "Split data-type configuration set";
         }

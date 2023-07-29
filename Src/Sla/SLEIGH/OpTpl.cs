@@ -49,9 +49,9 @@ namespace Sla.SLEIGH
             vector<VarnodeTpl*>::const_iterator iter;
 
             if (output != (VarnodeTpl*)0)
-                if (output->isZeroSize()) return true;
+                if (output.isZeroSize()) return true;
             for (iter = input.begin(); iter != input.end(); ++iter)
-                if ((*iter)->isZeroSize()) return true;
+                if ((*iter).isZeroSize()) return true;
             return false;
         }
 
@@ -92,11 +92,11 @@ namespace Sla.SLEIGH
         public void changeHandleIndex(List<int4> handmap)
         {
             if (output != (VarnodeTpl*)0)
-                output->changeHandleIndex(handmap);
+                output.changeHandleIndex(handmap);
             vector<VarnodeTpl*>::const_iterator iter;
 
             for (iter = input.begin(); iter != input.end(); ++iter)
-                (*iter)->changeHandleIndex(handmap);
+                (*iter).changeHandleIndex(handmap);
         }
 
         public void saveXml(TextWriter s)
@@ -105,30 +105,30 @@ namespace Sla.SLEIGH
             if (output == (VarnodeTpl*)0)
                 s << "<null/>\n";
             else
-                output->saveXml(s);
+                output.saveXml(s);
             for (int4 i = 0; i < input.size(); ++i)
-                input[i]->saveXml(s);
+                input[i].saveXml(s);
             s << "</op_tpl>\n";
         }
 
         public void restoreXml(Element el, AddrSpaceManager manage)
         {
-            opc = get_opcode(el->getAttributeValue("code"));
-            List list = el->getChildren();
+            opc = get_opcode(el.getAttributeValue("code"));
+            List list = el.getChildren();
             List::const_iterator iter;
             iter = list.begin();
-            if ((*iter)->getName() == "null")
+            if ((*iter).getName() == "null")
                 output = (VarnodeTpl*)0;
             else
             {
                 output = new VarnodeTpl();
-                output->restoreXml(*iter, manage);
+                output.restoreXml(*iter, manage);
             }
             ++iter;
             while (iter != list.end())
             {
                 VarnodeTpl* vn = new VarnodeTpl();
-                vn->restoreXml(*iter, manage);
+                vn.restoreXml(*iter, manage);
                 input.push_back(vn);
                 ++iter;
             }

@@ -26,11 +26,11 @@ namespace Sla.EXTRA
             s >> ws >> name;
             if (name.size() == 0)
                 throw IfaceParseError("Must specify name of symbol");
-            ct = parse_type(s, newname, dcp->conf);
+            ct = parse_type(s, newname, dcp.conf);
 
             Symbol* sym;
             vector<Symbol*> symList;
-            dcp->readSymbol(name, symList);
+            dcp.readSymbol(name, symList);
 
             if (symList.empty())
                 throw IfaceExecutionError("No symbol named: " + name);
@@ -39,14 +39,14 @@ namespace Sla.EXTRA
             else
                 sym = symList[0];
 
-            if (sym->getCategory() == Symbol::function_parameter)
-                dcp->fd->getFuncProto().setInputLock(true);
-            sym->getScope()->retypeSymbol(sym, ct);
-            sym->getScope()->setAttribute(sym, Varnode::typelock);
+            if (sym.getCategory() == Symbol::function_parameter)
+                dcp.fd.getFuncProto().setInputLock(true);
+            sym.getScope().retypeSymbol(sym, ct);
+            sym.getScope().setAttribute(sym, Varnode::typelock);
             if ((newname.size() != 0) && (newname != name))
             {
-                sym->getScope()->renameSymbol(sym, newname);
-                sym->getScope()->setAttribute(sym, Varnode::namelock);
+                sym.getScope().renameSymbol(sym, newname);
+                sym.getScope().setAttribute(sym, Varnode::namelock);
             }
         }
     }

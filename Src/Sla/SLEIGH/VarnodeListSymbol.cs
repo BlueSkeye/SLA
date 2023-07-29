@@ -16,8 +16,8 @@ namespace Sla.SLEIGH
 
         private void checkTableFill()
         {
-            intb min = patval->minValue();
-            intb max = patval->maxValue();
+            intb min = patval.minValue();
+            intb max = patval.maxValue();
             tableisfilled = (min >= 0) && (max < varnode_table.size());
             for (uint4 i = 0; i < varnode_table.size(); ++i)
             {
@@ -42,7 +42,7 @@ namespace Sla.SLEIGH
         {
             if (!tableisfilled)
             {
-                intb ind = patval->getValue(walker);
+                intb ind = patval.getValue(walker);
                 if ((ind < 0) || (ind >= varnode_table.size()) || (varnode_table[ind] == (VarnodeSymbol*)0))
                 {
                     ostringstream s;
@@ -57,9 +57,9 @@ namespace Sla.SLEIGH
 
         public override void getFixedHandle(FixedHandle hand, ParserWalker walker)
         {
-            uint4 ind = (uint4)patval->getValue(walker);
+            uint4 ind = (uint4)patval.getValue(walker);
             // The resolve routine has checked that -ind- must be a valid index
-            VarnodeData fix = varnode_table[ind]->getFixedVarnode();
+            VarnodeData fix = varnode_table[ind].getFixedVarnode();
             hand.space = fix.space;
             hand.offset_space = (AddrSpace*)0; // Not a dynamic value
             hand.offset_offset = fix.offset;
@@ -72,17 +72,17 @@ namespace Sla.SLEIGH
             {
                 VarnodeSymbol* vnsym = varnode_table[i]; // Assume all are same size
                 if (vnsym != (VarnodeSymbol*)0)
-                    return vnsym->getSize();
+                    return vnsym.getSize();
             }
             throw SleighError("No register attached to: " + getName());
         }
 
         public override void print(TextWriter s, ParserWalker walker)
         {
-            uint4 ind = (uint4)patval->getValue(walker);
+            uint4 ind = (uint4)patval.getValue(walker);
             if (ind >= varnode_table.size())
                 throw SleighError("Value out of range for varnode table");
-            s << varnode_table[ind]->getName();
+            s << varnode_table[ind].getName();
         }
 
         public override symbol_type getType() => varnodelist_symbol;
@@ -92,13 +92,13 @@ namespace Sla.SLEIGH
             s << "<varlist_sym";
             SleighSymbol::saveXmlHeader(s);
             s << ">\n";
-            patval->saveXml(s);
+            patval.saveXml(s);
             for (int4 i = 0; i < varnode_table.size(); ++i)
             {
                 if (varnode_table[i] == (VarnodeSymbol*)0)
                     s << "<null/>\n";
                 else
-                    s << "<var id=\"0x" << hex << varnode_table[i]->getId() << "\"/>\n";
+                    s << "<var id=\"0x" << hex << varnode_table[i].getId() << "\"/>\n";
             }
             s << "</varlist_sym>\n";
         }
@@ -112,22 +112,22 @@ namespace Sla.SLEIGH
 
         public override void restoreXml(Element el, SleighBase trans)
         {
-            List list = el->getChildren();
+            List list = el.getChildren();
             List::const_iterator iter;
             iter = list.begin();
             patval = (PatternValue*)PatternExpression::restoreExpression(*iter, trans);
-            patval->layClaim();
+            patval.layClaim();
             ++iter;
             while (iter != list.end())
             {
                 Element subel = *iter;
-                if (subel->getName() == "var")
+                if (subel.getName() == "var")
                 {
                     uintm id;
-                    istringstream s(subel->getAttributeValue("id"));
+                    istringstream s(subel.getAttributeValue("id"));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> id;
-                    varnode_table.push_back((VarnodeSymbol*)trans->findSymbol(id));
+                    varnode_table.push_back((VarnodeSymbol*)trans.findSymbol(id));
                 }
                 else
                     varnode_table.push_back((VarnodeSymbol*)0);

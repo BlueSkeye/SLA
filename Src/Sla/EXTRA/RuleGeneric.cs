@@ -40,7 +40,7 @@ namespace Sla.EXTRA
         {
             if (!grouplist.contains(getGroup())) return (Rule*)0;
             return new RuleGeneric(getGroup(), getName(), starterops, opinit,
-                (ConstraintGroup*)constraint->clone());
+                (ConstraintGroup*)constraint.clone());
         }
 
         public override void getOpList(List<uint4> oplist)
@@ -53,8 +53,8 @@ namespace Sla.EXTRA
         {
             state.setFunction(&data);
             state.initialize(opinit, op);
-            constraint->initialize(state);
-            return constraint->step(state);
+            constraint.initialize(state);
+            return constraint.step(state);
         }
 
         public static RuleGeneric build(string nm, string gp, string content)

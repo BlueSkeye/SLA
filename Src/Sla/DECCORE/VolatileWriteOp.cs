@@ -23,13 +23,13 @@ namespace Sla.DECCORE
 
         public override string getOperatorName(PcodeOp op)
         {
-            if (op->numInput() < 3) return name;
-            return appendSize(name, op->getIn(2)->getSize());
+            if (op.numInput() < 3) return name;
+            return appendSize(name, op.getIn(2).getSize());
         }
 
         public override int4 extractAnnotationSize(Varnode vn, PcodeOp op)
         {
-            return op->getIn(2)->getSize(); // Get size from the 3rd parameter of write function
+            return op.getIn(2).getSize(); // Get size from the 3rd parameter of write function
         }
     }
 }

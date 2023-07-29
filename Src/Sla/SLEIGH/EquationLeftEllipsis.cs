@@ -19,13 +19,13 @@ namespace Sla.SLEIGH
 
         public EquationLeftEllipsis(PatternEquation e)
         {
-            (eq = e)->layClaim();
+            (eq = e).layClaim();
         }
     
         public override void genPattern(List<TokenPattern> ops)
         {
-            eq->genPattern(ops);
-            resultpattern = eq->getTokenPattern();
+            eq.genPattern(ops);
+            resultpattern = eq.getTokenPattern();
             resultpattern.setLeftEllipsis(true);
         }
 
@@ -33,7 +33,7 @@ namespace Sla.SLEIGH
         {
             int4 cur_base = state.base;
             state.base = -2;
-            bool res = eq->resolveOperandLeft(state);
+            bool res = eq.resolveOperandLeft(state);
             if (!res) return false;
             state.base = cur_base;
 
@@ -42,7 +42,7 @@ namespace Sla.SLEIGH
 
         public override void operandOrder(Constructor ct, List<OperandSymbol> order)
         {
-            eq->operandOrder(ct, order);    // List operands
+            eq.operandOrder(ct, order);    // List operands
         }
     }
 }

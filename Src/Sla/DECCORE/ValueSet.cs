@@ -92,7 +92,7 @@ namespace Sla.DECCORE
         /// Mark value set as possibly containing any value
         private void setFull()
         {
-            range.setFull(vn->getSize());
+            range.setFull(vn.getSize());
             typeCode = 0;
         }
 
@@ -108,34 +108,34 @@ namespace Sla.DECCORE
         {
             typeCode = tCode;
             vn = v;
-            vn->setValueSet(this);
+            vn.setValueSet(this);
             if (typeCode != 0)
             {
                 opCode = CPUI_MAX;
                 numParams = 0;
-                range.setRange(0, vn->getSize());   // Treat as offset of 0 relative to special value
+                range.setRange(0, vn.getSize());   // Treat as offset of 0 relative to special value
                 leftIsStable = true;
                 rightIsStable = true;
             }
-            else if (vn->isWritten())
+            else if (vn.isWritten())
             {
-                PcodeOp* op = vn->getDef();
-                opCode = op->code();
+                PcodeOp* op = vn.getDef();
+                opCode = op.code();
                 if (opCode == CPUI_INDIRECT)
                 {   // Treat CPUI_INDIRECT as CPUI_COPY
                     numParams = 1;
                     opCode = CPUI_COPY;
                 }
                 else
-                    numParams = op->numInput();
+                    numParams = op.numInput();
                 leftIsStable = false;
                 rightIsStable = false;
             }
-            else if (vn->isConstant())
+            else if (vn.isConstant())
             {
                 opCode = CPUI_MAX;
                 numParams = 0;
-                range.setRange(vn->getOffset(), vn->getSize());
+                range.setRange(vn.getOffset(), vn.getSize());
                 leftIsStable = true;
                 rightIsStable = true;
             }
@@ -144,7 +144,7 @@ namespace Sla.DECCORE
                 opCode = CPUI_MAX;
                 numParams = 0;
                 typeCode = 0;
-                range.setFull(vn->getSize());
+                range.setFull(vn.getSize());
                 leftIsStable = false;
                 rightIsStable = false;
             }
@@ -184,14 +184,14 @@ namespace Sla.DECCORE
         {
             int4 relCount = 0;
             int4 lastTypeCode = 0;
-            PcodeOp* op = vn->getDef();
+            PcodeOp* op = vn.getDef();
             for (int4 i = 0; i < numParams; ++i)
             {
-                ValueSet* valueSet = op->getIn(i)->getValueSet();
-                if (valueSet->typeCode != 0)
+                ValueSet* valueSet = op.getIn(i).getValueSet();
+                if (valueSet.typeCode != 0)
                 {
                     relCount += 1;
-                    lastTypeCode = valueSet->typeCode;
+                    lastTypeCode = valueSet.typeCode;
                 }
             }
             if (relCount == 0)
@@ -230,7 +230,7 @@ namespace Sla.DECCORE
         /// \return \b true if there was a change to \b this value set
         private bool iterate(Widener widener)
         {
-            if (!vn->isWritten()) return false;
+            if (!vn.isWritten()) return false;
             if (widener.checkFreeze(*this)) return false;
             if (count == 0)
             {
@@ -242,17 +242,17 @@ namespace Sla.DECCORE
             }
             count += 1;     // Count this iteration
             CircleRange res;
-            PcodeOp* op = vn->getDef();
+            PcodeOp* op = vn.getDef();
             int4 eqPos = 0;
             if (opCode == CPUI_MULTIEQUAL)
             {
                 int4 pieces = 0;
                 for (int4 i = 0; i < numParams; ++i)
                 {
-                    ValueSet* inSet = op->getIn(i)->getValueSet();
+                    ValueSet* inSet = op.getIn(i).getValueSet();
                     if (doesEquationApply(eqPos, i))
                     {
-                        CircleRange rangeCopy(inSet->range);
+                        CircleRange rangeCopy(inSet.range);
                         if (0 != rangeCopy.intersect(equations[eqPos].range))
                         {
                             rangeCopy = equations[eqPos].range;
@@ -262,11 +262,11 @@ namespace Sla.DECCORE
                     }
                     else
                     {
-                        pieces = res.circleUnion(inSet->range);
+                        pieces = res.circleUnion(inSet.range);
                     }
                     if (pieces == 2)
                     {
-                        if (res.minimalContainer(inSet->range, MAX_STEP))   // Could not get clean union, force it
+                        if (res.minimalContainer(inSet.range, MAX_STEP))   // Could not get clean union, force it
                             break;
                     }
                 }
@@ -282,36 +282,36 @@ namespace Sla.DECCORE
             }
             else if (numParams == 1)
             {
-                ValueSet* inSet1 = op->getIn(0)->getValueSet();
+                ValueSet* inSet1 = op.getIn(0).getValueSet();
                 if (doesEquationApply(eqPos, 0))
                 {
-                    CircleRange rangeCopy(inSet1->range);
+                    CircleRange rangeCopy(inSet1.range);
                     if (0 != rangeCopy.intersect(equations[eqPos].range))
                     {
                         rangeCopy = equations[eqPos].range;
                     }
-                    if (!res.pushForwardUnary(opCode, rangeCopy, inSet1->vn->getSize(), vn->getSize()))
+                    if (!res.pushForwardUnary(opCode, rangeCopy, inSet1.vn.getSize(), vn.getSize()))
                     {
                         setFull();
                         return true;
                     }
                     eqPos += 1;
                 }
-                else if (!res.pushForwardUnary(opCode, inSet1->range, inSet1->vn->getSize(), vn->getSize()))
+                else if (!res.pushForwardUnary(opCode, inSet1.range, inSet1.vn.getSize(), vn.getSize()))
                 {
                     setFull();
                     return true;
                 }
-                leftIsStable = inSet1->leftIsStable;
-                rightIsStable = inSet1->rightIsStable;
+                leftIsStable = inSet1.leftIsStable;
+                rightIsStable = inSet1.rightIsStable;
             }
             else if (numParams == 2)
             {
-                ValueSet* inSet1 = op->getIn(0)->getValueSet();
-                ValueSet* inSet2 = op->getIn(1)->getValueSet();
+                ValueSet* inSet1 = op.getIn(0).getValueSet();
+                ValueSet* inSet2 = op.getIn(1).getValueSet();
                 if (equations.size() == 0)
                 {
-                    if (!res.pushForwardBinary(opCode, inSet1->range, inSet2->range, inSet1->vn->getSize(), vn->getSize(), MAX_STEP))
+                    if (!res.pushForwardBinary(opCode, inSet1.range, inSet2.range, inSet1.vn.getSize(), vn.getSize(), MAX_STEP))
                     {
                         setFull();
                         return true;
@@ -319,8 +319,8 @@ namespace Sla.DECCORE
                 }
                 else
                 {
-                    CircleRange range1 = inSet1->range;
-                    CircleRange range2 = inSet2->range;
+                    CircleRange range1 = inSet1.range;
+                    CircleRange range2 = inSet2.range;
                     if (doesEquationApply(eqPos, 0))
                     {
                         if (0 != range1.intersect(equations[eqPos].range))
@@ -332,22 +332,22 @@ namespace Sla.DECCORE
                         if (0 != range2.intersect(equations[eqPos].range))
                             range2 = equations[eqPos].range;
                     }
-                    if (!res.pushForwardBinary(opCode, range1, range2, inSet1->vn->getSize(), vn->getSize(), MAX_STEP))
+                    if (!res.pushForwardBinary(opCode, range1, range2, inSet1.vn.getSize(), vn.getSize(), MAX_STEP))
                     {
                         setFull();
                         return true;
                     }
                 }
-                leftIsStable = inSet1->leftIsStable && inSet2->leftIsStable;
-                rightIsStable = inSet1->rightIsStable && inSet2->rightIsStable;
+                leftIsStable = inSet1.leftIsStable && inSet2.leftIsStable;
+                rightIsStable = inSet1.rightIsStable && inSet2.rightIsStable;
             }
             else if (numParams == 3)
             {
-                ValueSet* inSet1 = op->getIn(0)->getValueSet();
-                ValueSet* inSet2 = op->getIn(1)->getValueSet();
-                ValueSet* inSet3 = op->getIn(2)->getValueSet();
-                CircleRange range1 = inSet1->range;
-                CircleRange range2 = inSet2->range;
+                ValueSet* inSet1 = op.getIn(0).getValueSet();
+                ValueSet* inSet2 = op.getIn(1).getValueSet();
+                ValueSet* inSet3 = op.getIn(2).getValueSet();
+                CircleRange range1 = inSet1.range;
+                CircleRange range2 = inSet2.range;
                 if (doesEquationApply(eqPos, 0))
                 {
                     if (0 != range1.intersect(equations[eqPos].range))
@@ -359,13 +359,13 @@ namespace Sla.DECCORE
                     if (0 != range2.intersect(equations[eqPos].range))
                         range2 = equations[eqPos].range;
                 }
-                if (!res.pushForwardTrinary(opCode, range1, range2, inSet3->range, inSet1->vn->getSize(), vn->getSize(), MAX_STEP))
+                if (!res.pushForwardTrinary(opCode, range1, range2, inSet3.range, inSet1.vn.getSize(), vn.getSize(), MAX_STEP))
                 {
                     setFull();
                     return true;
                 }
-                leftIsStable = inSet1->leftIsStable && inSet2->leftIsStable;
-                rightIsStable = inSet1->rightIsStable && inSet2->rightIsStable;
+                leftIsStable = inSet1.leftIsStable && inSet2.leftIsStable;
+                rightIsStable = inSet1.rightIsStable && inSet2.rightIsStable;
             }
             else
                 return false;       // No way to change this value set
@@ -424,14 +424,14 @@ namespace Sla.DECCORE
             if (vn == (Varnode*)0)
                 s << "root";
             else
-                vn->printRaw(s);
+                vn.printRaw(s);
             if (typeCode == 0)
                 s << " absolute";
             else
                 s << " stackptr";
             if (opCode == CPUI_MAX)
             {
-                if (vn->isConstant())
+                if (vn.isConstant())
                     s << " const";
                 else
                     s << " input";

@@ -24,24 +24,24 @@ namespace Sla.DECCORE
 
             if (slot == 0)
                 return TypeOp::getInputLocal(op, slot);
-            ct = tlst->getTypeCode();
-            PcodeOp* iop = PcodeOp::getOpFromConst(op->getIn(1)->getAddr());
-            AddrSpace* spc = iop->getAddr().getSpace();
-            return tlst->getTypePointer(op->getIn(0)->getSize(), ct, spc->getWordSize()); // Second parameter is code pointer
+            ct = tlst.getTypeCode();
+            PcodeOp* iop = PcodeOp::getOpFromConst(op.getIn(1).getAddr());
+            AddrSpace* spc = iop.getAddr().getSpace();
+            return tlst.getTypePointer(op.getIn(0).getSize(), ct, spc.getWordSize()); // Second parameter is code pointer
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
             int4 inslot, int4 outslot)
         {
-            if (op->isIndirectCreation()) return (Datatype*)0;
+            if (op.isIndirectCreation()) return (Datatype*)0;
             if ((inslot == 1) || (outslot == 1)) return (Datatype*)0;
-            if ((inslot != -1) && (outslot != -1)) return (Datatype*)0; // Must propagate input <-> output
+            if ((inslot != -1) && (outslot != -1)) return (Datatype*)0; // Must propagate input <. output
 
             Datatype* newtype;
-            if (invn->isSpacebase())
+            if (invn.isSpacebase())
             {
-                AddrSpace* spc = tlst->getArch()->getDefaultDataSpace();
-                newtype = tlst->getTypePointer(alttype->getSize(), tlst->getBase(1, TYPE_UNKNOWN), spc->getWordSize());
+                AddrSpace* spc = tlst.getArch().getDefaultDataSpace();
+                newtype = tlst.getTypePointer(alttype.getSize(), tlst.getBase(1, TYPE_UNKNOWN), spc.getWordSize());
             }
             else
                 newtype = alttype;
@@ -50,23 +50,23 @@ namespace Sla.DECCORE
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opIndirect(op);
+            lng.opIndirect(op);
         }
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            Varnode::printRaw(s, op->getOut());
+            Varnode::printRaw(s, op.getOut());
             s << " = ";
-            if (op->isIndirectCreation())
+            if (op.isIndirectCreation())
             {
                 s << "[create] ";
             }
             else
             {
-                Varnode::printRaw(s, op->getIn(0));
+                Varnode::printRaw(s, op.getIn(0));
                 s << ' ' << getOperatorName(op) << ' ';
             }
-            Varnode::printRaw(s, op->getIn(1));
+            Varnode::printRaw(s, op.getIn(1));
         }
     }
 }

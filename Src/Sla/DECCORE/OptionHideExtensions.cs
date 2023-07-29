@@ -18,10 +18,10 @@ namespace Sla.DECCORE
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
             bool val = onOrOff(p1);
-            PrintC* lng = dynamic_cast<PrintC*>(glb->print);
+            PrintC* lng = dynamic_cast<PrintC*>(glb.print);
             if (lng == (PrintC*)0)
                 return "Can only toggle extension hiding for C language";
-            lng->setHideImpliedExts(val);
+            lng.setHideImpliedExts(val);
             string prop;
             prop = val ? "on" : "off";
             return "Implied extension hiding turned " + prop;

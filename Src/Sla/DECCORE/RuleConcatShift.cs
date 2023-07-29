@@ -36,20 +36,20 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            if (!op->getIn(1)->isConstant()) return 0;
+            if (!op.getIn(1).isConstant()) return 0;
 
-            Varnode* shiftin = op->getIn(0);
-            if (!shiftin->isWritten()) return 0;
-            PcodeOp* concat = shiftin->getDef();
-            if (concat->code() != CPUI_PIECE) return 0;
+            Varnode* shiftin = op.getIn(0);
+            if (!shiftin.isWritten()) return 0;
+            PcodeOp* concat = shiftin.getDef();
+            if (concat.code() != CPUI_PIECE) return 0;
 
-            int4 sa = op->getIn(1)->getOffset();
-            int4 leastsize = concat->getIn(1)->getSize() * 8;
+            int4 sa = op.getIn(1).getOffset();
+            int4 leastsize = concat.getIn(1).getSize() * 8;
             if (sa < leastsize) return 0;   // Does shift throw away least sig part
-            Varnode* mainin = concat->getIn(0);
-            if (mainin->isFree()) return 0;
+            Varnode* mainin = concat.getIn(0);
+            if (mainin.isFree()) return 0;
             sa -= leastsize;
-            OpCode extcode = (op->code() == CPUI_INT_RIGHT) ? CPUI_INT_ZEXT : CPUI_INT_SEXT;
+            OpCode extcode = (op.code() == CPUI_INT_RIGHT) ? CPUI_INT_ZEXT : CPUI_INT_SEXT;
             if (sa == 0)
             {       // Exact cancelation
                 data.opRemoveInput(op, 1);  // Remove thrown away least
@@ -59,14 +59,14 @@ namespace Sla.DECCORE
             else
             {
                 // Create a new extension op
-                PcodeOp* extop = data.newOp(1, op->getAddr());
+                PcodeOp* extop = data.newOp(1, op.getAddr());
                 data.opSetOpcode(extop, extcode);
-                Varnode* newvn = data.newUniqueOut(shiftin->getSize(), extop);
+                Varnode* newvn = data.newUniqueOut(shiftin.getSize(), extop);
                 data.opSetInput(extop, mainin, 0);
 
                 // Adjust the shift amount
                 data.opSetInput(op, newvn, 0);
-                data.opSetInput(op, data.newConstant(op->getIn(1)->getSize(), sa), 1);
+                data.opSetInput(op, data.newConstant(op.getIn(1).getSize(), sa), 1);
                 data.opInsertBefore(extop, op);
             }
             return 1;

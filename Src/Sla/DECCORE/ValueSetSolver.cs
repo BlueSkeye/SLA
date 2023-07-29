@@ -49,7 +49,7 @@ namespace Sla.DECCORE
             /// \param roots is the list of input ValueSets to use for the simulated root
             public ValueSetEdge(ValueSet node, List<ValueSet> roots)
             {
-                vn = node->getVarnode();
+                vn = node.getVarnode();
                 if (vn == (Varnode*)0)
                 {       // Assume this is the simulated root
                     rootEdges = &roots;         // Set up for simulated edges
@@ -58,7 +58,7 @@ namespace Sla.DECCORE
                 else
                 {
                     rootEdges = (List<ValueSet>*)0;
-                    iter = vn->beginDescend();
+                    iter = vn.beginDescend();
                 }
             }
 
@@ -70,7 +70,7 @@ namespace Sla.DECCORE
             {
                 if (vn == (Varnode*)0)
                 {
-                    if (rootPos < rootEdges->size())
+                    if (rootPos < rootEdges.size())
                     {
                         ValueSet* res = (*rootEdges)[rootPos];
                         rootPos += 1;
@@ -78,14 +78,14 @@ namespace Sla.DECCORE
                     }
                     return (ValueSet*)0;
                 }
-                while (iter != vn->endDescend())
+                while (iter != vn.endDescend())
                 {
                     PcodeOp* op = *iter;
                     ++iter;
-                    Varnode* outVn = op->getOut();
-                    if (outVn != (Varnode*)0 && outVn->isMark())
+                    Varnode* outVn = op.getOut();
+                    if (outVn != (Varnode*)0 && outVn.isMark())
                     {
-                        return outVn->getValueSet();
+                        return outVn.getValueSet();
                     }
                 }
                 return (ValueSet*)0;
@@ -126,7 +126,7 @@ namespace Sla.DECCORE
         /// \param part is the Partition being modified
         private static void partitionPrepend(ValueSet vertex, Partition part)
         {
-            vertex->next = part.startNode;  // Attach new vertex to beginning of list
+            vertex.next = part.startNode;  // Attach new vertex to beginning of list
             part.startNode = vertex;        // Change the first value set to be the new vertex
             if (part.stopNode == (ValueSet*)0)
                 part.stopNode = vertex;
@@ -137,7 +137,7 @@ namespace Sla.DECCORE
         /// \param part is the given partition being modified (prepended to)
         private static void partitionPrepend(Partition head,Partition part)
         {
-            head.stopNode->next = part.startNode;
+            head.stopNode.next = part.startNode;
             part.startNode = head.startNode;
             if (part.stopNode == (ValueSet*)0)
                 part.stopNode = head.stopNode;
@@ -150,7 +150,7 @@ namespace Sla.DECCORE
         private void partitionSurround(Partition part)
         {
             recordStorage.push_back(part);
-            part.startNode->partHead = &recordStorage.back();
+            part.startNode.partHead = &recordStorage.back();
         }
 
         /// Generate a partition component given its head
@@ -164,7 +164,7 @@ namespace Sla.DECCORE
             ValueSet* succ = edgeIterator.getNext();
             while (succ != (ValueSet*)0)
             {
-                if (succ->count == 0)
+                if (succ.count == 0)
                     visit(succ, part);
                 succ = edgeIterator.getNext();
             }
@@ -180,7 +180,7 @@ namespace Sla.DECCORE
         {
             nodeStack.push_back(vertex);
             depthFirstIndex += 1;
-            vertex->count = depthFirstIndex;
+            vertex.count = depthFirstIndex;
             int4 head = depthFirstIndex;
             bool loop = false;
             ValueSetEdge edgeIterator(vertex, rootNodes);
@@ -188,10 +188,10 @@ namespace Sla.DECCORE
             while (succ != (ValueSet*)0)
             {
                 int4 min;
-                if (succ->count == 0)
+                if (succ.count == 0)
                     min = visit(succ, part);
                 else
-                    min = succ->count;
+                    min = succ.count;
                 if (min <= head)
                 {
                     head = min;
@@ -199,16 +199,16 @@ namespace Sla.DECCORE
                 }
                 succ = edgeIterator.getNext();
             }
-            if (head == vertex->count)
+            if (head == vertex.count)
             {
-                vertex->count = 0x7fffffff; // Set to "infinity"
+                vertex.count = 0x7fffffff; // Set to "infinity"
                 ValueSet* element = nodeStack.back();
                 nodeStack.pop_back();
                 if (loop)
                 {
                     while (element != vertex)
                     {
-                        element->count = 0;
+                        element.count = 0;
                         element = nodeStack.back();
                         nodeStack.pop_back();
                     }
@@ -245,7 +245,7 @@ namespace Sla.DECCORE
             rootNode.vn = (Varnode*)0;
             depthFirstIndex = 0;
             visit(&rootNode, orderPartition);
-            orderPartition.startNode = orderPartition.startNode->next;  // Remove simulated root
+            orderPartition.startNode = orderPartition.startNode.next;  // Remove simulated root
         }
 
         /// \brief Generate an equation given a \b true constraint and the input/output Varnodes it affects
@@ -260,9 +260,9 @@ namespace Sla.DECCORE
         private void generateTrueEquation(Varnode vn, PcodeOp op, int4 slot, int4 type, CircleRange range)
         {
             if (vn != (Varnode*)0)
-                vn->getValueSet()->addEquation(slot, type, range);
+                vn.getValueSet().addEquation(slot, type, range);
             else
-                readNodes[op->getSeqNum()].addEquation(slot, type, range);// Special read site
+                readNodes[op.getSeqNum()].addEquation(slot, type, range);// Special read site
         }
 
         /// \brief Generate the complementary equation given a \b true constraint and the input/output Varnodes it affects
@@ -279,9 +279,9 @@ namespace Sla.DECCORE
             CircleRange falseRange(range);
             falseRange.invert();
             if (vn != (Varnode*)0)
-                vn->getValueSet()->addEquation(slot, type, falseRange);
+                vn.getValueSet().addEquation(slot, type, falseRange);
             else
-                readNodes[op->getSeqNum()].addEquation(slot, type, falseRange);// Special read site
+                readNodes[op.getSeqNum()].addEquation(slot, type, falseRange);// Special read site
         }
 
         /// \brief Look for PcodeOps where the given constraint range applies and instantiate an equation
@@ -296,50 +296,50 @@ namespace Sla.DECCORE
         /// \param cbranch is conditional branch creating the constraint
         private void applyConstraints(Varnode vn, int4 type, CircleRange range,PcodeOp cbranch)
         {
-            FlowBlock* splitPoint = cbranch->getParent();
+            FlowBlock* splitPoint = cbranch.getParent();
             FlowBlock* trueBlock,*falseBlock;
-            if (cbranch->isBooleanFlip())
+            if (cbranch.isBooleanFlip())
             {
-                trueBlock = splitPoint->getFalseOut();
-                falseBlock = splitPoint->getTrueOut();
+                trueBlock = splitPoint.getFalseOut();
+                falseBlock = splitPoint.getTrueOut();
             }
             else
             {
-                trueBlock = splitPoint->getTrueOut();
-                falseBlock = splitPoint->getFalseOut();
+                trueBlock = splitPoint.getTrueOut();
+                falseBlock = splitPoint.getFalseOut();
             }
             // Check if the only path to trueBlock or falseBlock is via a splitPoint out-edge induced by the condition
-            bool trueIsRestricted = trueBlock->restrictedByConditional(splitPoint);
-            bool falseIsRestricted = falseBlock->restrictedByConditional(splitPoint);
+            bool trueIsRestricted = trueBlock.restrictedByConditional(splitPoint);
+            bool falseIsRestricted = falseBlock.restrictedByConditional(splitPoint);
 
             list<PcodeOp*>::const_iterator iter;
-            if (vn->isWritten())
+            if (vn.isWritten())
             {
-                ValueSet* vSet = vn->getValueSet();
-                if (vSet->opCode == CPUI_MULTIEQUAL)
+                ValueSet* vSet = vn.getValueSet();
+                if (vSet.opCode == CPUI_MULTIEQUAL)
                 {
-                    vSet->addLandmark(type, range);     // Leave landmark for widening
+                    vSet.addLandmark(type, range);     // Leave landmark for widening
                 }
             }
-            for (iter = vn->beginDescend(); iter != vn->endDescend(); ++iter)
+            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {
                 PcodeOp* op = *iter;
                 Varnode* outVn = (Varnode*)0;
-                if (!op->isMark())
+                if (!op.isMark())
                 {   // If this is not a special read site
-                    outVn = op->getOut();   // Make sure there is a Varnode in the system
+                    outVn = op.getOut();   // Make sure there is a Varnode in the system
                     if (outVn == (Varnode*)0) continue;
-                    if (!outVn->isMark()) continue;
+                    if (!outVn.isMark()) continue;
                 }
-                FlowBlock* curBlock = op->getParent();
-                int4 slot = op->getSlot(vn);
-                if (op->code() == CPUI_MULTIEQUAL)
+                FlowBlock* curBlock = op.getParent();
+                int4 slot = op.getSlot(vn);
+                if (op.code() == CPUI_MULTIEQUAL)
                 {
                     if (curBlock == trueBlock)
                     {
                         // If its possible that both the true and false edges can reach trueBlock
                         // then the only input we can restrict is a MULTIEQUAL input along the exact true edge
-                        if (trueIsRestricted || trueBlock->getIn(slot) == splitPoint)
+                        if (trueIsRestricted || trueBlock.getIn(slot) == splitPoint)
                             generateTrueEquation(outVn, op, slot, type, range);
                         continue;
                     }
@@ -347,12 +347,12 @@ namespace Sla.DECCORE
                     {
                         // If its possible that both the true and false edges can reach falseBlock
                         // then the only input we can restrict is a MULTIEQUAL input along the exact false edge
-                        if (falseIsRestricted || falseBlock->getIn(slot) == splitPoint)
+                        if (falseIsRestricted || falseBlock.getIn(slot) == splitPoint)
                             generateFalseEquation(outVn, op, slot, type, range);
                         continue;
                     }
                     else
-                        curBlock = curBlock->getIn(slot);   // MULTIEQUAL input is really only from one in-block
+                        curBlock = curBlock.getIn(slot);   // MULTIEQUAL input is really only from one in-block
                 }
                 for (; ; )
                 {
@@ -370,7 +370,7 @@ namespace Sla.DECCORE
                     }
                     else if (curBlock == splitPoint || curBlock == (FlowBlock*)0)
                         break;
-                    curBlock = curBlock->getImmedDom();
+                    curBlock = curBlock.getImmedDom();
                 }
             }
         }
@@ -391,19 +391,19 @@ namespace Sla.DECCORE
             while (startVn != endVn)
             {
                 Varnode* constVn;
-                startVn = lift.pullBack(startVn->getDef(), &constVn, false);
+                startVn = lift.pullBack(startVn.getDef(), &constVn, false);
                 if (startVn == (Varnode*)0) return; // Couldn't pull all the way back to our value set
             }
             for (; ; )
             {
                 Varnode* constVn;
                 applyConstraints(endVn, type, lift, cbranch);
-                if (!endVn->isWritten()) break;
-                PcodeOp* op = endVn->getDef();
-                if (op->isCall() || op->isMarker()) break;
+                if (!endVn.isWritten()) break;
+                PcodeOp* op = endVn.getDef();
+                if (op.isCall() || op.isMarker()) break;
                 endVn = lift.pullBack(op, &constVn, false);
                 if (endVn == (Varnode*)0) break;
-                if (!endVn->isMark()) break;
+                if (!endVn.isMark()) break;
             }
         }
 
@@ -415,21 +415,21 @@ namespace Sla.DECCORE
         /// \param cbranch is the given condition branch
         private void constraintsFromCBranch(PcodeOp cbranch)
         {
-            Varnode* vn = cbranch->getIn(1); // Get Varnode deciding the condition
-            while (!vn->isMark())
+            Varnode* vn = cbranch.getIn(1); // Get Varnode deciding the condition
+            while (!vn.isMark())
             {
-                if (!vn->isWritten()) break;
-                PcodeOp* op = vn->getDef();
-                if (op->isCall() || op->isMarker())
+                if (!vn.isWritten()) break;
+                PcodeOp* op = vn.getDef();
+                if (op.isCall() || op.isMarker())
                     break;
-                int4 num = op->numInput();
+                int4 num = op.numInput();
                 if (num == 0 || num > 2) break;
-                vn = op->getIn(0);
+                vn = op.getIn(0);
                 if (num == 2)
                 {
-                    if (vn->isConstant())
-                        vn = op->getIn(1);
-                    else if (!op->getIn(1)->isConstant())
+                    if (vn.isConstant())
+                        vn = op.getIn(1);
+                    else if (!op.getIn(1).isConstant())
                     {
                         // If we reach here, both inputs are non-constant
                         generateRelativeConstraint(op, cbranch);
@@ -438,10 +438,10 @@ namespace Sla.DECCORE
                     // If we reach here, vn is non-constant, other input is constant
                 }
             }
-            if (vn->isMark())
+            if (vn.isMark())
             {
                 CircleRange lift(true);
-                Varnode* startVn = cbranch->getIn(1);
+                Varnode* startVn = cbranch.getIn(1);
                 constraintsFromPath(0, lift, startVn, vn, cbranch);
             }
         }
@@ -461,20 +461,20 @@ namespace Sla.DECCORE
             // Collect all blocks that contain a system op (input) or dominate a container
             for (int4 i = 0; i < worklist.size(); ++i)
             {
-                PcodeOp* op = worklist[i]->getDef();
+                PcodeOp* op = worklist[i].getDef();
                 if (op == (PcodeOp*)0) continue;
-                FlowBlock* bl = op->getParent();
-                if (op->code() == CPUI_MULTIEQUAL)
+                FlowBlock* bl = op.getParent();
+                if (op.code() == CPUI_MULTIEQUAL)
                 {
-                    for (int4 j = 0; j < bl->sizeIn(); ++j)
+                    for (int4 j = 0; j < bl.sizeIn(); ++j)
                     {
-                        FlowBlock* curBl = bl->getIn(j);
+                        FlowBlock* curBl = bl.getIn(j);
                         do
                         {
-                            if (curBl->isMark()) break;
-                            curBl->setMark();
+                            if (curBl.isMark()) break;
+                            curBl.setMark();
                             blockList.push_back(curBl);
-                            curBl = curBl->getImmedDom();
+                            curBl = curBl.getImmedDom();
                         } while (curBl != (FlowBlock*)0);
                     }
                 }
@@ -482,48 +482,48 @@ namespace Sla.DECCORE
                 {
                     do
                     {
-                        if (bl->isMark()) break;
-                        bl->setMark();
+                        if (bl.isMark()) break;
+                        bl.setMark();
                         blockList.push_back(bl);
-                        bl = bl->getImmedDom();
+                        bl = bl.getImmedDom();
                     } while (bl != (FlowBlock*)0);
                 }
             }
             for (int4 i = 0; i < reads.size(); ++i)
             {
-                FlowBlock* bl = reads[i]->getParent();
+                FlowBlock* bl = reads[i].getParent();
                 do
                 {
-                    if (bl->isMark()) break;
-                    bl->setMark();
+                    if (bl.isMark()) break;
+                    bl.setMark();
                     blockList.push_back(bl);
-                    bl = bl->getImmedDom();
+                    bl = bl.getImmedDom();
                 } while (bl != (FlowBlock*)0);
             }
             for (int4 i = 0; i < blockList.size(); ++i)
-                blockList[i]->clearMark();
+                blockList[i].clearMark();
 
             vector<FlowBlock*> finalList;
             // Now go through input blocks to the previously calculated blocks
             for (int4 i = 0; i < blockList.size(); ++i)
             {
                 FlowBlock* bl = blockList[i];
-                for (int4 j = 0; j < bl->sizeIn(); ++j)
+                for (int4 j = 0; j < bl.sizeIn(); ++j)
                 {
-                    BlockBasic* splitPoint = (BlockBasic*)bl->getIn(j);
-                    if (splitPoint->isMark()) continue;
-                    if (splitPoint->sizeOut() != 2) continue;
-                    PcodeOp* lastOp = splitPoint->lastOp();
-                    if (lastOp != (PcodeOp*)0 && lastOp->code() == CPUI_CBRANCH)
+                    BlockBasic* splitPoint = (BlockBasic*)bl.getIn(j);
+                    if (splitPoint.isMark()) continue;
+                    if (splitPoint.sizeOut() != 2) continue;
+                    PcodeOp* lastOp = splitPoint.lastOp();
+                    if (lastOp != (PcodeOp*)0 && lastOp.code() == CPUI_CBRANCH)
                     {
-                        splitPoint->setMark();
+                        splitPoint.setMark();
                         finalList.push_back(splitPoint);
                         constraintsFromCBranch(lastOp);     // Try to generate constraints from this splitPoint
                     }
                 }
             }
             for (int4 i = 0; i < finalList.size(); ++i)
-                finalList[i]->clearMark();
+                finalList[i].clearMark();
         }
 
         /// Check if the given Varnode is a \e relative constant
@@ -539,27 +539,27 @@ namespace Sla.DECCORE
             value = 0;
             for (; ; )
             {
-                if (vn->isMark())
+                if (vn.isMark())
                 {
-                    ValueSet* valueSet = vn->getValueSet();
-                    if (valueSet->typeCode != 0)
+                    ValueSet* valueSet = vn.getValueSet();
+                    if (valueSet.typeCode != 0)
                     {
-                        typeCode = valueSet->typeCode;
+                        typeCode = valueSet.typeCode;
                         break;
                     }
                 }
-                if (!vn->isWritten()) return false;
-                PcodeOp* op = vn->getDef();
-                OpCode opc = op->code();
+                if (!vn.isWritten()) return false;
+                PcodeOp* op = vn.getDef();
+                OpCode opc = op.code();
                 if (opc == CPUI_COPY || opc == CPUI_INDIRECT)
-                    vn = op->getIn(0);
+                    vn = op.getIn(0);
                 else if (opc == CPUI_INT_ADD || opc == CPUI_PTRSUB)
                 {
-                    Varnode* constVn = op->getIn(1);
-                    if (!constVn->isConstant())
+                    Varnode* constVn = op.getIn(1);
+                    if (!constVn.isConstant())
                         return false;
-                    value = (value + constVn->getOffset()) & calc_mask(constVn->getSize());
-                    vn = op->getIn(0);
+                    value = (value + constVn.getOffset()) & calc_mask(constVn.getSize());
+                    vn = op.getIn(0);
                 }
                 else
                     return false;
@@ -575,7 +575,7 @@ namespace Sla.DECCORE
         /// \param cbranch is the conditional branch
         private void generateRelativeConstraint(PcodeOp compOp, PcodeOp cbranch)
         {
-            OpCode opc = compOp->code();
+            OpCode opc = compOp.code();
             switch (opc)
             {
                 case CPUI_INT_LESS:
@@ -595,39 +595,39 @@ namespace Sla.DECCORE
             int4 typeCode;
             uintb value;
             Varnode* vn;
-            Varnode* inVn0 = compOp->getIn(0);
-            Varnode* inVn1 = compOp->getIn(1);
+            Varnode* inVn0 = compOp.getIn(0);
+            Varnode* inVn1 = compOp.getIn(1);
             CircleRange lift(true);
             if (checkRelativeConstant(inVn0, typeCode, value))
             {
                 vn = inVn1;
-                if (!lift.pullBackBinary(opc, value, 1, vn->getSize(), 1))
+                if (!lift.pullBackBinary(opc, value, 1, vn.getSize(), 1))
                     return;
             }
             else if (checkRelativeConstant(inVn1, typeCode, value))
             {
                 vn = inVn0;
-                if (!lift.pullBackBinary(opc, value, 0, vn->getSize(), 1))
+                if (!lift.pullBackBinary(opc, value, 0, vn.getSize(), 1))
                     return;
             }
             else
                 return;     // Neither side looks like a relative constant
 
             Varnode* endVn = vn;
-            while (!endVn->isMark())
+            while (!endVn.isMark())
             {
-                if (!endVn->isWritten()) return;
-                PcodeOp* op = endVn->getDef();
-                opc = op->code();
+                if (!endVn.isWritten()) return;
+                PcodeOp* op = endVn.getDef();
+                opc = op.code();
                 if (opc == CPUI_COPY || opc == CPUI_PTRSUB)
                 {
-                    endVn = op->getIn(0);
+                    endVn = op.getIn(0);
                 }
                 else if (opc == CPUI_INT_ADD)
                 {   // Can pull-back through INT_ADD
-                    if (!op->getIn(1)->isConstant())    // if second param is constant
+                    if (!op.getIn(1).isConstant())    // if second param is constant
                         return;
-                    endVn = op->getIn(0);
+                    endVn = op.getIn(0);
                 }
                 else
                     return;
@@ -651,54 +651,54 @@ namespace Sla.DECCORE
             if (stackReg != (Varnode*)0)
             {
                 newValueSet(stackReg, 1);       // Establish stack pointer as special
-                stackReg->setMark();
+                stackReg.setMark();
                 worklist.push_back(stackReg);
                 workPos += 1;
-                rootNodes.push_back(stackReg->getValueSet());
+                rootNodes.push_back(stackReg.getValueSet());
             }
             for (int4 i = 0; i < sinks.size(); ++i)
             {
                 Varnode* vn = sinks[i];
                 newValueSet(vn, 0);
-                vn->setMark();
+                vn.setMark();
                 worklist.push_back(vn);
             }
             while (workPos < worklist.size())
             {
                 Varnode* vn = worklist[workPos];
                 workPos += 1;
-                if (!vn->isWritten())
+                if (!vn.isWritten())
                 {
-                    if (vn->isConstant())
+                    if (vn.isConstant())
                     {
                         // Constant inputs to binary ops should not be treated as root nodes as they
                         // get picked up during iteration by the other input, except in the case of a
                         // a PTRSUB from a spacebase constant.
-                        if (vn->isSpacebase() || vn->loneDescend()->numInput() == 1)
-                            rootNodes.push_back(vn->getValueSet());
+                        if (vn.isSpacebase() || vn.loneDescend().numInput() == 1)
+                            rootNodes.push_back(vn.getValueSet());
                     }
                     else
-                        rootNodes.push_back(vn->getValueSet());
+                        rootNodes.push_back(vn.getValueSet());
                     continue;
                 }
-                PcodeOp* op = vn->getDef();
-                switch (op->code())
+                PcodeOp* op = vn.getDef();
+                switch (op.code())
                 {   // Distinguish ops where we can never predict an integer range
                     case CPUI_INDIRECT:
-                        if (indirectAsCopy || op->isIndirectStore())
+                        if (indirectAsCopy || op.isIndirectStore())
                         {
-                            Varnode* inVn = op->getIn(0);
-                            if (!inVn->isMark())
+                            Varnode* inVn = op.getIn(0);
+                            if (!inVn.isMark())
                             {
                                 newValueSet(inVn, 0);
-                                inVn->setMark();
+                                inVn.setMark();
                                 worklist.push_back(inVn);
                             }
                         }
                         else
                         {
-                            vn->getValueSet()->setFull();
-                            rootNodes.push_back(vn->getValueSet());
+                            vn.getValueSet().setFull();
+                            rootNodes.push_back(vn.getValueSet());
                         }
                         break;
                     case CPUI_CALL:
@@ -721,16 +721,16 @@ namespace Sla.DECCORE
                     case CPUI_FLOAT_CEIL:
                     case CPUI_FLOAT_FLOOR:
                     case CPUI_FLOAT_ROUND:
-                        vn->getValueSet()->setFull();
-                        rootNodes.push_back(vn->getValueSet());
+                        vn.getValueSet().setFull();
+                        rootNodes.push_back(vn.getValueSet());
                         break;
                     default:
-                        for (int4 i = 0; i < op->numInput(); ++i)
+                        for (int4 i = 0; i < op.numInput(); ++i)
                         {
-                            Varnode* inVn = op->getIn(i);
-                            if (inVn->isMark() || inVn->isAnnotation()) continue;
+                            Varnode* inVn = op.getIn(i);
+                            if (inVn.isMark() || inVn.isAnnotation()) continue;
                             newValueSet(inVn, 0);
-                            inVn->setMark();
+                            inVn.setMark();
                             worklist.push_back(inVn);
                         }
                         break;
@@ -739,24 +739,24 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < reads.size(); ++i)
             {
                 PcodeOp* op = reads[i];
-                for (int4 slot = 0; slot < op->numInput(); ++slot)
+                for (int4 slot = 0; slot < op.numInput(); ++slot)
                 {
-                    Varnode* vn = op->getIn(slot);
-                    if (vn->isMark())
+                    Varnode* vn = op.getIn(slot);
+                    if (vn.isMark())
                     {
-                        readNodes[op->getSeqNum()].setPcodeOp(op, slot);
-                        op->setMark();          // Mark read ops for equation generation stage
+                        readNodes[op.getSeqNum()].setPcodeOp(op, slot);
+                        op.setMark();          // Mark read ops for equation generation stage
                         break;          // Only 1 read allowed
                     }
                 }
             }
             generateConstraints(worklist, reads);
             for (int4 i = 0; i < reads.size(); ++i)
-                reads[i]->clearMark();      // Clear marks on read ops
+                reads[i].clearMark();      // Clear marks on read ops
 
             establishTopologicalOrder();
             for (int4 i = 0; i < worklist.size(); ++i)
-                worklist[i]->clearMark();
+                worklist[i].clearMark();
         }
 
         /// Get the current number of iterations
@@ -782,33 +782,33 @@ namespace Sla.DECCORE
             {
                 numIterations += 1;
                 if (numIterations > maxIterations) break;   // Quit if max iterations exceeded
-                if (curSet->partHead != (Partition*)0 && curSet->partHead != curComponent)
+                if (curSet.partHead != (Partition*)0 && curSet.partHead != curComponent)
                 {
-                    componentStack.push_back(curSet->partHead);
-                    curComponent = curSet->partHead;
-                    curComponent->isDirty = false;
+                    componentStack.push_back(curSet.partHead);
+                    curComponent = curSet.partHead;
+                    curComponent.isDirty = false;
                     // Reset component counter upon entry
-                    curComponent->startNode->count = widener.determineIterationReset(*curComponent->startNode);
+                    curComponent.startNode.count = widener.determineIterationReset(*curComponent.startNode);
                 }
                 if (curComponent != (Partition*)0)
                 {
-                    if (curSet->iterate(widener))
-                        curComponent->isDirty = true;
-                    if (curComponent->stopNode != curSet)
+                    if (curSet.iterate(widener))
+                        curComponent.isDirty = true;
+                    if (curComponent.stopNode != curSet)
                     {
-                        curSet = curSet->next;
+                        curSet = curSet.next;
                     }
                     else
                     {
                         for (; ; )
                         {
-                            if (curComponent->isDirty)
+                            if (curComponent.isDirty)
                             {
-                                curComponent->isDirty = false;
-                                curSet = curComponent->startNode;
+                                curComponent.isDirty = false;
+                                curSet = curComponent.startNode;
                                 if (componentStack.size() > 1)
                                 {   // Mark parent as dirty if we are restarting dirty child
-                                    componentStack[componentStack.size() - 2]->isDirty = true;
+                                    componentStack[componentStack.size() - 2].isDirty = true;
                                 }
                                 break;
                             }
@@ -817,13 +817,13 @@ namespace Sla.DECCORE
                             if (componentStack.empty())
                             {
                                 curComponent = (Partition*)0;
-                                curSet = curSet->next;
+                                curSet = curSet.next;
                                 break;
                             }
                             curComponent = componentStack.back();
-                            if (curComponent->stopNode != curSet)
+                            if (curComponent.stopNode != curSet)
                             {
-                                curSet = curSet->next;
+                                curSet = curSet.next;
                                 break;
                             }
                         }
@@ -831,8 +831,8 @@ namespace Sla.DECCORE
                 }
                 else
                 {
-                    curSet->iterate(widener);
-                    curSet = curSet->next;
+                    curSet.iterate(widener);
+                    curSet = curSet.next;
                 }
             }
             map<SeqNum, ValueSetRead>::iterator riter;

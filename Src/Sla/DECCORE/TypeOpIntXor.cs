@@ -19,18 +19,18 @@ namespace Sla.DECCORE
 
         public override Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)
         {
-            return castStrategy->arithmeticOutputStandard(op);
+            return castStrategy.arithmeticOutputStandard(op);
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
             int4 inslot, int4 outslot)
         {
-            if (!alttype->isPowerOfTwo()) return (Datatype*)0; // Only propagate flag enums
+            if (!alttype.isPowerOfTwo()) return (Datatype*)0; // Only propagate flag enums
             Datatype* newtype;
-            if (invn->isSpacebase())
+            if (invn.isSpacebase())
             {
-                AddrSpace* spc = tlst->getArch()->getDefaultDataSpace();
-                newtype = tlst->getTypePointer(alttype->getSize(), tlst->getBase(1, TYPE_UNKNOWN), spc->getWordSize());
+                AddrSpace* spc = tlst.getArch().getDefaultDataSpace();
+                newtype = tlst.getTypePointer(alttype.getSize(), tlst.getBase(1, TYPE_UNKNOWN), spc.getWordSize());
             }
             else
                 newtype = alttype;
@@ -39,7 +39,7 @@ namespace Sla.DECCORE
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opIntXor(op);
+            lng.opIntXor(op);
         }
     }
 }

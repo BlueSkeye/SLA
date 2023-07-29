@@ -43,16 +43,16 @@ namespace Sla.DECCORE
             Varnode* constvn;
             uintb val;
 
-            constvn = op->getIn(1);
-            if (!constvn->isConstant()) return 0;
-            val = constvn->getOffset();
-            if ((val == 0) && (op->code() != CPUI_INT_MULT))
+            constvn = op.getIn(1);
+            if (!constvn.isConstant()) return 0;
+            val = constvn.getOffset();
+            if ((val == 0) && (op.code() != CPUI_INT_MULT))
             {
                 data.opSetOpcode(op, CPUI_COPY);
                 data.opRemoveInput(op, 1); // Remove identity from operation
                 return 1;
             }
-            if (op->code() != CPUI_INT_MULT) return 0;
+            if (op.code() != CPUI_INT_MULT) return 0;
             if (val == 1)
             {
                 data.opSetOpcode(op, CPUI_COPY);

@@ -24,63 +24,63 @@ namespace Sla.SLEIGH
             VarnodeData* loadvars;
             VarnodeData* storevars;
             VarnodeTpl* vn,*outvn;
-            int4 isize = op->numInput();
+            int4 isize = op.numInput();
             // First build all the inputs
-            invars = cache->allocateVarnodes(isize);
+            invars = cache.allocateVarnodes(isize);
             for (int4 i = 0; i < isize; ++i)
             {
-                vn = op->getIn(i);
-                if (vn->isDynamic(*walker))
+                vn = op.getIn(i);
+                if (vn.isDynamic(*walker))
                 {
                     generateLocation(vn, invars[i]); // Input of -op- is really temporary storage
-                    PcodeData* load_op = cache->allocateInstruction();
-                    load_op->opc = CPUI_LOAD;
-                    load_op->outvar = invars + i;
-                    load_op->isize = 2;
-                    loadvars = load_op->invar = cache->allocateVarnodes(2);
+                    PcodeData* load_op = cache.allocateInstruction();
+                    load_op.opc = CPUI_LOAD;
+                    load_op.outvar = invars + i;
+                    load_op.isize = 2;
+                    loadvars = load_op.invar = cache.allocateVarnodes(2);
                     AddrSpace* spc = generatePointer(vn, loadvars[1]);
                     loadvars[0].space = const_space;
                     loadvars[0].offset = (uintb)(uintp)spc;
                     loadvars[0].size = sizeof(spc);
-                    if (vn->getOffset().getSelect() == ConstTpl::v_offset_plus)
+                    if (vn.getOffset().getSelect() == ConstTpl::v_offset_plus)
                         generatePointerAdd(load_op, vn);
                 }
                 else
                     generateLocation(vn, invars[i]);
             }
-            if ((isize > 0) && (op->getIn(0)->isRelative()))
+            if ((isize > 0) && (op.getIn(0).isRelative()))
             {
-                invars->offset += getLabelBase();
-                cache->addLabelRef(invars);
+                invars.offset += getLabelBase();
+                cache.addLabelRef(invars);
             }
-            thisop = cache->allocateInstruction();
-            thisop->opc = op->getOpcode();
-            thisop->invar = invars;
-            thisop->isize = isize;
-            outvn = op->getOut();
+            thisop = cache.allocateInstruction();
+            thisop.opc = op.getOpcode();
+            thisop.invar = invars;
+            thisop.isize = isize;
+            outvn = op.getOut();
             if (outvn != (VarnodeTpl*)0)
             {
-                if (outvn->isDynamic(*walker))
+                if (outvn.isDynamic(*walker))
                 {
-                    storevars = cache->allocateVarnodes(3);
+                    storevars = cache.allocateVarnodes(3);
                     generateLocation(outvn, storevars[2]); // Output of -op- is really temporary storage
-                    thisop->outvar = storevars + 2;
-                    PcodeData* store_op = cache->allocateInstruction();
-                    store_op->opc = CPUI_STORE;
-                    store_op->isize = 3;
-                    // store_op->outvar = (VarnodeData *)0;
-                    store_op->invar = storevars;
+                    thisop.outvar = storevars + 2;
+                    PcodeData* store_op = cache.allocateInstruction();
+                    store_op.opc = CPUI_STORE;
+                    store_op.isize = 3;
+                    // store_op.outvar = (VarnodeData *)0;
+                    store_op.invar = storevars;
                     AddrSpace* spc = generatePointer(outvn, storevars[1]); // pointer
                     storevars[0].space = const_space;
                     storevars[0].offset = (uintb)(uintp)spc; // space in which to store
                     storevars[0].size = sizeof(spc);
-                    if (outvn->getOffset().getSelect() == ConstTpl::v_offset_plus)
+                    if (outvn.getOffset().getSelect() == ConstTpl::v_offset_plus)
                         generatePointerAdd(store_op, outvn);
                 }
                 else
                 {
-                    thisop->outvar = cache->allocateVarnodes(1);
-                    generateLocation(outvn, *thisop->outvar);
+                    thisop.outvar = cache.allocateVarnodes(1);
+                    generateLocation(outvn, *thisop.outvar);
                 }
             }
         }
@@ -102,21 +102,21 @@ namespace Sla.SLEIGH
         /// \param secnum is the particular \e named section number to build
         private void buildEmpty(Constructor ct, int4 secnum)
         {
-            int4 numops = ct->getNumOperands();
+            int4 numops = ct.getNumOperands();
 
             for (int4 i = 0; i < numops; ++i)
             {
-                SubtableSymbol* sym = (SubtableSymbol*)ct->getOperand(i)->getDefiningSymbol();
+                SubtableSymbol* sym = (SubtableSymbol*)ct.getOperand(i).getDefiningSymbol();
                 if (sym == (SubtableSymbol*)0) continue;
-                if (sym->getType() != SleighSymbol::subtable_symbol) continue;
+                if (sym.getType() != SleighSymbol::subtable_symbol) continue;
 
-                walker->pushOperand(i);
-                ConstructTpl* construct = walker->getConstructor()->getNamedTempl(secnum);
+                walker.pushOperand(i);
+                ConstructTpl* construct = walker.getConstructor().getNamedTempl(secnum);
                 if (construct == (ConstructTpl*)0)
-                    buildEmpty(walker->getConstructor(), secnum);
+                    buildEmpty(walker.getConstructor(), secnum);
                 else
                     build(construct, secnum);
-                walker->popOperand();
+                walker.popOperand();
             }
         }
 
@@ -126,17 +126,17 @@ namespace Sla.SLEIGH
         /// \param vn is the object to fill in with concrete values
         private void generateLocation(VarnodeTpl vntpl, VarnodeData vn)
         {
-            vn.space = vntpl->getSpace().fixSpace(*walker);
-            vn.size = vntpl->getSize().fix(*walker);
+            vn.space = vntpl.getSpace().fixSpace(*walker);
+            vn.size = vntpl.getSize().fix(*walker);
             if (vn.space == const_space)
-                vn.offset = vntpl->getOffset().fix(*walker) & calc_mask(vn.size);
+                vn.offset = vntpl.getOffset().fix(*walker) & calc_mask(vn.size);
             else if (vn.space == uniq_space)
             {
-                vn.offset = vntpl->getOffset().fix(*walker);
+                vn.offset = vntpl.getOffset().fix(*walker);
                 vn.offset |= uniqueoffset;
             }
             else
-                vn.offset = vn.space->wrapOffset(vntpl->getOffset().fix(*walker));
+                vn.offset = vn.space.wrapOffset(vntpl.getOffset().fix(*walker));
         }
 
         /// \brief Generate a pointer VarnodeData from a dynamic template (VarnodeTpl)
@@ -150,7 +150,7 @@ namespace Sla.SLEIGH
         /// \return the address space being pointed to
         private AddrSpace generatePointer(VarnodeTpl vntpl, VarnodeData vn)
         {
-            FixedHandle hand = walker->getFixedHandle(vntpl->getOffset().getHandleIndex());
+            FixedHandle hand = walker.getFixedHandle(vntpl.getOffset().getHandleIndex());
             vn.space = hand.offset_space;
             vn.size = hand.offset_size;
             if (vn.space == const_space)
@@ -158,32 +158,32 @@ namespace Sla.SLEIGH
             else if (vn.space == uniq_space)
                 vn.offset = hand.offset_offset | uniqueoffset;
             else
-                vn.offset = vn.space->wrapOffset(hand.offset_offset);
+                vn.offset = vn.space.wrapOffset(hand.offset_offset);
             return hand.space;
         }
 
         private void generatePointerAdd(PcodeData op, VarnodeTpl vntpl)
         {
-            uintb offsetPlus = vntpl->getOffset().getReal() & 0xffff;
+            uintb offsetPlus = vntpl.getOffset().getReal() & 0xffff;
             if (offsetPlus == 0)
             {
                 return;
             }
-            PcodeData* nextop = cache->allocateInstruction();
-            nextop->opc = op->opc;
-            nextop->invar = op->invar;
-            nextop->isize = op->isize;
-            nextop->outvar = op->outvar;
-            op->isize = 2;
-            op->opc = CPUI_INT_ADD;
-            VarnodeData* newparams = op->invar = cache->allocateVarnodes(2);
-            newparams[0] = nextop->invar[1];
+            PcodeData* nextop = cache.allocateInstruction();
+            nextop.opc = op.opc;
+            nextop.invar = op.invar;
+            nextop.isize = op.isize;
+            nextop.outvar = op.outvar;
+            op.isize = 2;
+            op.opc = CPUI_INT_ADD;
+            VarnodeData* newparams = op.invar = cache.allocateVarnodes(2);
+            newparams[0] = nextop.invar[1];
             newparams[1].space = const_space;   // Add in V_OFFSET_PLUS
             newparams[1].offset = offsetPlus;
             newparams[1].size = newparams[0].size;
-            op->outvar = nextop->invar + 1; // Output of ADD is input to original op
-            op->outvar->space = uniq_space;     // Result of INT_ADD in special runtime temp
-            op->outvar->offset = uniq_space->getTrans()->getUniqueStart(Translate::RUNTIME_BITRANGE_EA);
+            op.outvar = nextop.invar + 1; // Output of ADD is input to original op
+            op.outvar.space = uniq_space;     // Result of INT_ADD in special runtime temp
+            op.outvar.offset = uniq_space.getTrans().getUniqueStart(Translate::RUNTIME_BITRANGE_EA);
         }
 
         /// Set uniquifying bits for the current instruction
@@ -212,22 +212,22 @@ namespace Sla.SLEIGH
             const_space = cspc;
             uniq_space = uspc;
             uniquemask = umask;
-            uniqueoffset = (walker->getAddr().getOffset() & uniquemask) << 4;
+            uniqueoffset = (walker.getAddr().getOffset() & uniquemask) << 4;
         }
 
         private override void appendBuild(OpTpl bld, int4 secnum)
         {
             // Append p-code for a particular build statement
-            int4 index = bld->getIn(0)->getOffset().getReal(); // Recover operand index from build statement
+            int4 index = bld.getIn(0).getOffset().getReal(); // Recover operand index from build statement
                                                                // Check if operand is a subtable
-            SubtableSymbol* sym = (SubtableSymbol*)walker->getConstructor()->getOperand(index)->getDefiningSymbol();
-            if ((sym == (SubtableSymbol*)0) || (sym->getType() != SleighSymbol::subtable_symbol)) return;
+            SubtableSymbol* sym = (SubtableSymbol*)walker.getConstructor().getOperand(index).getDefiningSymbol();
+            if ((sym == (SubtableSymbol*)0) || (sym.getType() != SleighSymbol::subtable_symbol)) return;
 
-            walker->pushOperand(index);
-            Constructor* ct = walker->getConstructor();
+            walker.pushOperand(index);
+            Constructor* ct = walker.getConstructor();
             if (secnum >= 0)
             {
-                ConstructTpl* construct = ct->getNamedTempl(secnum);
+                ConstructTpl* construct = ct.getNamedTempl(secnum);
                 if (construct == (ConstructTpl*)0)
                     buildEmpty(ct, secnum);
                 else
@@ -235,10 +235,10 @@ namespace Sla.SLEIGH
             }
             else
             {
-                ConstructTpl* construct = ct->getTempl();
+                ConstructTpl* construct = ct.getTempl();
                 build(construct, -1);
             }
-            walker->popOperand();
+            walker.popOperand();
         }
 
         private override void delaySlot(OpTpl op)
@@ -248,23 +248,23 @@ namespace Sla.SLEIGH
             ParserWalker* tmp = walker;
             uintb olduniqueoffset = uniqueoffset;
 
-            Address baseaddr = tmp->getAddr();
-            int4 fallOffset = tmp->getLength();
-            int4 delaySlotByteCnt = tmp->getParserContext()->getDelaySlot();
+            Address baseaddr = tmp.getAddr();
+            int4 fallOffset = tmp.getLength();
+            int4 delaySlotByteCnt = tmp.getParserContext().getDelaySlot();
             int4 bytecount = 0;
             do
             {
                 Address newaddr = baseaddr + fallOffset;
                 setUniqueOffset(newaddr);
-                ParserContext pos = discache->getParserContext(newaddr);
-                if (pos->getParserState() != ParserContext::pcode)
+                ParserContext pos = discache.getParserContext(newaddr);
+                if (pos.getParserState() != ParserContext::pcode)
                     throw new LowlevelError("Could not obtain cached delay slot instruction");
-                int4 len = pos->getLength();
+                int4 len = pos.getLength();
 
                 ParserWalker newwalker(pos );
                 walker = &newwalker;
-                walker->baseState();
-                build(walker->getConstructor()->getTempl(), -1); // Build the whole delay slot
+                walker.baseState();
+                build(walker.getConstructor().getTempl(), -1); // Build the whole delay slot
                 fallOffset += len;
                 bytecount += len;
             } while (bytecount < delaySlotByteCnt);
@@ -274,7 +274,7 @@ namespace Sla.SLEIGH
 
         private override void setLabel(OpTpl op)
         {
-            cache->addLabel(op->getIn(0)->getOffset().getReal() + getLabelBase());
+            cache.addLabel(op.getIn(0).getOffset().getReal() + getLabelBase());
         }
 
         private override void appendCrossBuild(OpTpl bld, int4 secnum)
@@ -284,26 +284,26 @@ namespace Sla.SLEIGH
             // bld-param(1) contains the section number
             if (secnum >= 0)
                 throw new LowlevelError("CROSSBUILD directive within a named section");
-            secnum = bld->getIn(1)->getOffset().getReal();
-            VarnodeTpl* vn = bld->getIn(0);
-            AddrSpace* spc = vn->getSpace().fixSpace(*walker);
-            uintb addr = spc->wrapOffset(vn->getOffset().fix(*walker));
+            secnum = bld.getIn(1).getOffset().getReal();
+            VarnodeTpl* vn = bld.getIn(0);
+            AddrSpace* spc = vn.getSpace().fixSpace(*walker);
+            uintb addr = spc.wrapOffset(vn.getOffset().fix(*walker));
 
             ParserWalker* tmp = walker;
             uintb olduniqueoffset = uniqueoffset;
 
             Address newaddr(spc, addr);
             setUniqueOffset(newaddr);
-            ParserContext pos = discache->getParserContext(newaddr);
-            if (pos->getParserState() != ParserContext::pcode)
+            ParserContext pos = discache.getParserContext(newaddr);
+            if (pos.getParserState() != ParserContext::pcode)
                 throw new LowlevelError("Could not obtain cached crossbuild instruction");
 
-            ParserWalker newwalker(pos, tmp->getParserContext() );
+            ParserWalker newwalker(pos, tmp.getParserContext() );
             walker = &newwalker;
 
-            walker->baseState();
-            Constructor* ct = walker->getConstructor();
-            ConstructTpl* construct = ct->getNamedTempl(secnum);
+            walker.baseState();
+            Constructor* ct = walker.getConstructor();
+            ConstructTpl* construct = ct.getNamedTempl(secnum);
             if (construct == (ConstructTpl*)0)
                 buildEmpty(ct, secnum);
             else

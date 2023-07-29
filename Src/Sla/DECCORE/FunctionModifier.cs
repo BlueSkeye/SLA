@@ -20,10 +20,10 @@ namespace Sla.DECCORE
             if (paramlist.size() == 1)
             {
                 TypeDeclarator* decl = paramlist[0];
-                if (decl->numModifiers() == 0)
+                if (decl.numModifiers() == 0)
                 { // Check for void as an inputtype
-                    Datatype* ct = decl->getBaseType();
-                    if ((ct != (Datatype*)0) && (ct->getMetatype() == TYPE_VOID))
+                    Datatype* ct = decl.getBaseType();
+                    if ((ct != (Datatype*)0) && (ct.getMetatype() == TYPE_VOID))
                         paramlist.clear();
                 }
             }
@@ -34,7 +34,7 @@ namespace Sla.DECCORE
         {
             for (uint4 i = 0; i < paramlist.size(); ++i)
             {
-                Datatype* ct = paramlist[i]->buildType(glb);
+                Datatype* ct = paramlist[i].buildType(glb);
                 intypes.push_back(ct);
             }
         }
@@ -42,7 +42,7 @@ namespace Sla.DECCORE
         public void getInNames(List<string> innames)
         {
             for (uint4 i = 0; i < paramlist.size(); ++i)
-                innames.push_back(paramlist[i]->getIdentifier());
+                innames.push_back(paramlist[i].getIdentifier());
         }
 
         public bool isDotdotdot() => dotdotdot;
@@ -54,11 +54,11 @@ namespace Sla.DECCORE
             for (uint4 i = 0; i < paramlist.size(); ++i)
             {
                 TypeDeclarator* decl = paramlist[i];
-                if (!decl->isValid()) return false;
-                if (decl->numModifiers() == 0)
+                if (!decl.isValid()) return false;
+                if (decl.numModifiers() == 0)
                 {
-                    Datatype* ct = decl->getBaseType();
-                    if ((ct != (Datatype*)0) && (ct->getMetatype() == TYPE_VOID))
+                    Datatype* ct = decl.getBaseType();
+                    if ((ct != (Datatype*)0) && (ct.getMetatype() == TYPE_VOID))
                         return false;       // Extra void type
                 }
             }
@@ -78,8 +78,8 @@ namespace Sla.DECCORE
 
             getInTypes(intypes, glb);
 
-            ProtoModel* protomodel = decl->getModel(glb);
-            return glb->types->getTypeCode(protomodel, base, intypes, dotdotdot);
+            ProtoModel* protomodel = decl.getModel(glb);
+            return glb.types.getTypeCode(protomodel, base, intypes, dotdotdot);
         }
     }
 }

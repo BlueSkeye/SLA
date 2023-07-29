@@ -16,12 +16,12 @@ namespace Sla.EXTRA
         /// read in and attached to the appropriate address.
         public override void execute(TextReader s)
         {
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("No load image present");
-            if (dcp->conf->loader == (LoadImage*)0)
+            if (dcp.conf.loader == (LoadImage*)0)
                 throw IfaceExecutionError("No binary loaded");
 
-            dcp->conf->readLoaderSymbols("::");
+            dcp.conf.readLoaderSymbols("::");
         }
     }
 }

@@ -28,10 +28,10 @@ namespace Sla.EXTRA
             storemap.clear();
             opparam = -1;
             opcodelist.clear();
-            int4 maxop = g->getMaxNum();
+            int4 maxop = g.getMaxNum();
             storemap.resize(maxop + 1, UnifyDatatype());
 
-            g->collectTypes(storemap);
+            g.collectTypes(storemap);
 
             for (int4 i = 0; i <= maxop; ++i)
             {
@@ -170,7 +170,7 @@ namespace Sla.EXTRA
                 s << endl;
                 printRuleHeader(s);
                 printVarDecls(s);
-                grp->print(s, *this);
+                grp.print(s, *this);
                 printIndent(s);
                 s << "return 1;" << endl;   // Found a complete match
                 if (depth != 0)
@@ -184,7 +184,7 @@ namespace Sla.EXTRA
             else if (printingtype == 1)
             {
                 printVarDecls(s);
-                grp->print(s, *this);
+                grp.print(s, *this);
                 printIndent(s);
                 s << "return true;" << endl;
                 if (depth != 0)

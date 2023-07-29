@@ -16,10 +16,10 @@ namespace Sla.EXTRA
         /// Information about every Varnode in the data-flow graph for the function is displayed.
         public override void execute(TextReader s)
         {
-            if (dcp->fd == (Funcdata*)0)
+            if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");
 
-            dcp->fd->printVarnodeTree(*status->fileoptr);
+            dcp.fd.printVarnodeTree(*status.fileoptr);
         }
     }
 }

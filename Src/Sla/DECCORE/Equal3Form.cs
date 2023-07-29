@@ -18,20 +18,20 @@ namespace Sla.DECCORE
         
         public bool verify(Varnode h, Varnode l, PcodeOp aop)
         {
-            if (aop->code() != CPUI_INT_AND) return false;
+            if (aop.code() != CPUI_INT_AND) return false;
             hi = h;
             lo = l;
             andop = aop;
-            int4 hislot = andop->getSlot(hi);
-            if (andop->getIn(1 - hislot) != lo) return false;   // hi and lo must be ANDed together
-            compareop = andop->getOut()->loneDescend();
+            int4 hislot = andop.getSlot(hi);
+            if (andop.getIn(1 - hislot) != lo) return false;   // hi and lo must be ANDed together
+            compareop = andop.getOut().loneDescend();
             if (compareop == (PcodeOp*)0) return false;
-            if ((compareop->code() != CPUI_INT_EQUAL) && (compareop->code() != CPUI_INT_NOTEQUAL))
+            if ((compareop.code() != CPUI_INT_EQUAL) && (compareop.code() != CPUI_INT_NOTEQUAL))
                 return false;
-            uintb allonesval = calc_mask(lo->getSize());
-            smallc = compareop->getIn(1);
-            if (!smallc->isConstant()) return false;
-            if (smallc->getOffset() != allonesval) return false;
+            uintb allonesval = calc_mask(lo.getSize());
+            smallc = compareop.getIn(1);
+            if (!smallc.isConstant()) return false;
+            if (smallc.getOffset() != allonesval) return false;
             return true;
         }
 
@@ -50,7 +50,7 @@ namespace Sla.DECCORE
 
             SplitVarnode in2(@in.getSize(), Globals.calc_mask(@in.getSize()));    // Create the -1 value
             if (!SplitVarnode::prepareBoolOp(@in, in2, compareop)) return false;
-            SplitVarnode::replaceBoolOp(data, compareop, @in, in2, compareop->code());
+            SplitVarnode::replaceBoolOp(data, compareop, @in, in2, compareop.code());
             return true;
         }
     }

@@ -23,12 +23,12 @@ namespace Sla.EXTRA
         public override uintb getConstant(UnifyState state)
         {
             Varnode* vn = state.data(varindex).getVarnode();
-            return (uintb)(vn->isHeritageKnown() ? 1 : 0);
+            return (uintb)(vn.isHeritageKnown() ? 1 : 0);
         }
 
         public override void writeExpression(TextWriter s, UnifyCPrinter printstate)
         {
-            s << "(uintb)" << printstate.getName(varindex) << "->isHeritageKnown()";
+            s << "(uintb)" << printstate.getName(varindex) << ".isHeritageKnown()";
         }
     }
 }

@@ -163,7 +163,7 @@ namespace Sla.DECCORE
                    PcodeOp::unary | PcodeOp::binary | PcodeOp::ternary | PcodeOp::special |
                    PcodeOp::has_callspec | PcodeOp::no_copy_propagation);
             opcode = t_op;
-            flags |= t_op->getFlags();
+            flags |= t_op.getFlags();
         }
 
         /// Set the output Varnode of this op
@@ -342,7 +342,7 @@ namespace Sla.DECCORE
         public int4 getRepeatSlot(Varnode vn, int4 firstSlot, IEnumerator<PcodeOp> iter)
         {
             int4 count = 1;
-            for (list<PcodeOp*>::const_iterator oiter = vn->beginDescend(); oiter != iter; ++oiter)
+            for (list<PcodeOp*>::const_iterator oiter = vn.beginDescend(); oiter != iter; ++oiter)
             {
                 if ((*oiter) == this)
                     count += 1;
@@ -481,8 +481,8 @@ namespace Sla.DECCORE
             if (!isAssignment()) return false;
             if (inrefs.size() == 0) return false;
             for (int4 i = 0; i < inrefs.size(); ++i)
-                if (!getIn(i)->isConstant()) return false;
-            if (getOut()->getSize() > sizeof(uintb)) return false;
+                if (!getIn(i).isConstant()) return false;
+            if (getOut().getSize() > sizeof(uintb)) return false;
             return true;
         }
 
@@ -550,15 +550,15 @@ namespace Sla.DECCORE
             if ((getEvalType() & (PcodeOp::unary | PcodeOp::binary)) == 0) return ((uintm)0);
             if (code() == CPUI_COPY) return ((uintm)0); // Let copy propagation deal with this
 
-            hash = (output->getSize() << 8) | (uintm)code();
+            hash = (output.getSize() << 8) | (uintm)code();
             for (int4 i = 0; i < inrefs.size(); ++i)
             {
                 Varnode vn = getIn(i);
                 hash = (hash << 8) | (hash >> (sizeof(uintm) * 8 - 8));
-                if (vn->isConstant())
-                    hash ^= (uintm)vn->getOffset();
+                if (vn.isConstant())
+                    hash ^= (uintm)vn.getOffset();
                 else
-                    hash ^= (uintm)vn->getCreateIndex(); // Hash in pointer itself as unique id
+                    hash ^= (uintm)vn.getCreateIndex(); // Hash in pointer itself as unique id
             }
             return hash;
         }
@@ -571,17 +571,17 @@ namespace Sla.DECCORE
         public bool isCseMatch(PcodeOp op)
         {
             if ((getEvalType() & (PcodeOp::unary | PcodeOp::binary)) == 0) return false;
-            if ((op->getEvalType() & (PcodeOp::unary | PcodeOp::binary)) == 0) return false;
-            if (output->getSize() != op->output->getSize()) return false;
-            if (code() != op->code()) return false;
+            if ((op.getEvalType() & (PcodeOp::unary | PcodeOp::binary)) == 0) return false;
+            if (output.getSize() != op.output.getSize()) return false;
+            if (code() != op.code()) return false;
             if (code() == CPUI_COPY) return false; // Let copy propagation deal with this
-            if (inrefs.size() != op->inrefs.size()) return false;
+            if (inrefs.size() != op.inrefs.size()) return false;
             for (int4 i = 0; i < inrefs.size(); ++i)
             {
                 Varnode vn1 = getIn(i);
-                Varnode vn2 = op->getIn(i);
+                Varnode vn2 = op.getIn(i);
                 if (vn1 == vn2) continue;
-                if (vn1->isConstant() && vn2->isConstant() && (vn1->getOffset() == vn2->getOffset()))
+                if (vn1.isConstant() && vn2.isConstant() && (vn1.getOffset() == vn2.getOffset()))
                     continue;
                 return false;
             }
@@ -605,18 +605,18 @@ namespace Sla.DECCORE
                 else
                     return false;   // Don't move special ops
             }
-            if (parent != point->parent) return false;  // Not in the same block
+            if (parent != point.parent) return false;  // Not in the same block
             if (output != (Varnode*)0)
             {
                 // Output cannot be moved past an op that reads it
-                list<PcodeOp*>::const_iterator iter = output->beginDescend();
-                list<PcodeOp*>::const_iterator enditer = output->endDescend();
+                list<PcodeOp*>::const_iterator iter = output.beginDescend();
+                list<PcodeOp*>::const_iterator enditer = output.endDescend();
                 while (iter != enditer)
                 {
                     PcodeOp* readOp = *iter;
                     ++iter;
-                    if (readOp->parent != parent) continue;
-                    if (readOp->start.getOrder() <= point->start.getOrder())
+                    if (readOp.parent != parent) continue;
+                    if (readOp.start.getOrder() <= point.start.getOrder())
                         return false;       // Is in the block and is read before (or at) -point-
                 }
             }
@@ -625,13 +625,13 @@ namespace Sla.DECCORE
             if (getEvalType() != PcodeOp::special)
             {
                 // Check for a normal op where all inputs and output are not address tied
-                if (output != (Varnode*)0 && !output->isAddrTied() && !output->isPersist())
+                if (output != (Varnode*)0 && !output.isAddrTied() && !output.isPersist())
                 {
                     int4 i;
                     for (i = 0; i < numInput(); ++i)
                     {
                         Varnode vn = getIn(i);
-                        if (vn->isAddrTied() || vn->isPersist())
+                        if (vn.isAddrTied() || vn.isPersist())
                             break;
                     }
                     if (i == numInput())
@@ -642,7 +642,7 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < numInput(); ++i)
             {
                 Varnode vn = getIn(i);
-                if (vn->isAddrTied())
+                if (vn.isAddrTied())
                     tiedList.push_back(vn);
             }
             list<PcodeOp*>::iterator biter = basiciter;
@@ -650,14 +650,14 @@ namespace Sla.DECCORE
             {
                 ++biter;
                 PcodeOp* op = *biter;
-                if (op->getEvalType() == PcodeOp::special)
+                if (op.getEvalType() == PcodeOp::special)
                 {
-                    switch (op->code())
+                    switch (op.code())
                     {
                         case CPUI_LOAD:
                             if (output != (Varnode*)0)
                             {
-                                if (output->isAddrTied()) return false;
+                                if (output.isAddrTied()) return false;
                             }
                             break;
                         case CPUI_STORE:
@@ -668,7 +668,7 @@ namespace Sla.DECCORE
                                 if (!tiedList.empty()) return false;
                                 if (output != (Varnode*)0)
                                 {
-                                    if (output->isAddrTied()) return false;
+                                    if (output.isAddrTied()) return false;
                                 }
                             }
                             break;
@@ -685,22 +685,22 @@ namespace Sla.DECCORE
                             return false;
                     }
                 }
-                if (op->output != (Varnode*)0)
+                if (op.output != (Varnode*)0)
                 {
                     if (movingLoad)
                     {
-                        if (op->output->isAddrTied()) return false;
+                        if (op.output.isAddrTied()) return false;
                     }
                     for (int4 i = 0; i < tiedList.size(); ++i)
                     {
                         Varnode vn = tiedList[i];
-                        if (vn->overlap(*op->output) >= 0)
+                        if (vn.overlap(*op.output) >= 0)
                             return false;
-                        if (op->output->overlap(*vn) >= 0)
+                        if (op.output.overlap(*vn) >= 0)
                             return false;
                     }
                 }
-            } while (biter != point->basiciter);
+            } while (biter != point.basiciter);
             return true;
         }
 
@@ -708,7 +708,7 @@ namespace Sla.DECCORE
         public TypeOp getOpcode() => opcode;
 
         /// Get the opcode id (enum) for this op
-        public OpCode code() => opcode->getOpcode();
+        public OpCode code() => opcode.getOpcode();
 
         /// Return \b true if inputs commute
         public bool isCommutative() => ((flags & PcodeOp::commutative)!= 0);
@@ -726,22 +726,22 @@ namespace Sla.DECCORE
             Varnode vn1;
 
             vn0 = getIn(0);
-            if (vn0->getSymbolEntry() != (SymbolEntry*)0)
+            if (vn0.getSymbolEntry() != (SymbolEntry*)0)
             {
                 markedInput = true;
             }
             switch (getEvalType())
             {
                 case PcodeOp::unary:
-                    return opcode->evaluateUnary(output->getSize(), vn0->getSize(), vn0->getOffset());
+                    return opcode.evaluateUnary(output.getSize(), vn0.getSize(), vn0.getOffset());
                 case PcodeOp::binary:
                     vn1 = getIn(1);
-                    if (vn1->getSymbolEntry() != (SymbolEntry*)0)
+                    if (vn1.getSymbolEntry() != (SymbolEntry*)0)
                     {
                         markedInput = true;
                     }
-                    return opcode->evaluateBinary(output->getSize(), vn0->getSize(),
-                                  vn0->getOffset(), vn1->getOffset());
+                    return opcode.evaluateBinary(output.getSize(), vn0.getSize(),
+                                  vn0.getOffset(), vn1.getOffset());
                 default:
                     break;
             }
@@ -758,7 +758,7 @@ namespace Sla.DECCORE
             switch (code())
             {
                 case CPUI_SUBPIECE:
-                    if (getIn(1)->getOffset() != 0)
+                    if (getIn(1).getOffset() != 0)
                         return;             // Must be truncating high bytes
                     copyVn = getIn(0);
                     break;
@@ -779,7 +779,7 @@ namespace Sla.DECCORE
                 case CPUI_INT_OR:
                 case CPUI_INT_XOR:
                     copyVn = getIn(0);
-                    if (copyVn->getSymbolEntry() == (SymbolEntry*)0)
+                    if (copyVn.getSymbolEntry() == (SymbolEntry*)0)
                     {
                         copyVn = getIn(1);
                     }
@@ -787,9 +787,9 @@ namespace Sla.DECCORE
                 default:
                     return;
             }
-            if (copyVn->getSymbolEntry() == (SymbolEntry*)0)
+            if (copyVn.getSymbolEntry() == (SymbolEntry*)0)
                 return;             // The first input must be marked
-            newConst->copySymbolIfValid(copyVn);
+            newConst.copySymbolIfValid(copyVn);
         }
 
         /// Return the next op in the control-flow from this or \e null
@@ -805,11 +805,11 @@ namespace Sla.DECCORE
             iter = basiciter;       // Current iterator
 
             iter++;
-            while (iter == p->endOp())
+            while (iter == p.endOp())
             {
-                if ((p->sizeOut() != 1) && (p->sizeOut() != 2)) return (PcodeOp*)0;
-                p = (BlockBasic*)p->getOut(0);
-                iter = p->beginOp();
+                if ((p.sizeOut() != 1) && (p.sizeOut() != 2)) return (PcodeOp*)0;
+                p = (BlockBasic*)p.getOut(0);
+                iter = p.beginOp();
             }
             return *iter;
         }
@@ -822,7 +822,7 @@ namespace Sla.DECCORE
         {
             list<PcodeOp*>::iterator iter;
 
-            if (basiciter == parent->beginOp()) return (PcodeOp*)0;
+            if (basiciter == parent.beginOp()) return (PcodeOp*)0;
             iter = basiciter;
             iter--;
             return *iter;
@@ -840,7 +840,7 @@ namespace Sla.DECCORE
             list<PcodeOp*>::iterator iter;
             iter = isDead() ? insertiter : basiciter;
             retop = *iter;
-            while ((retop->flags & PcodeOp::startmark) == 0)
+            while ((retop.flags & PcodeOp::startmark) == 0)
             {
                 --iter;
                 retop = *iter;
@@ -859,10 +859,10 @@ namespace Sla.DECCORE
             int4 sa, sz1, sz2, size;
             uintb resmask, val;
 
-            size = output->getSize();
+            size = output.getSize();
             uintb fullmask = calc_mask(size);
 
-            switch (opcode->getOpcode())
+            switch (opcode.getOpcode())
             {
                 case CPUI_INT_EQUAL:
                 case CPUI_INT_NOTEQUAL:
@@ -886,40 +886,40 @@ namespace Sla.DECCORE
                     break;
                 case CPUI_COPY:
                 case CPUI_INT_ZEXT:
-                    resmask = getIn(0)->getNZMask();
+                    resmask = getIn(0).getNZMask();
                     break;
                 case CPUI_INT_SEXT:
-                    resmask = sign_extend(getIn(0)->getNZMask(), getIn(0)->getSize(), size);
+                    resmask = sign_extend(getIn(0).getNZMask(), getIn(0).getSize(), size);
                     break;
                 case CPUI_INT_XOR:
                 case CPUI_INT_OR:
-                    resmask = getIn(0)->getNZMask();
+                    resmask = getIn(0).getNZMask();
                     if (resmask != fullmask)
-                        resmask |= getIn(1)->getNZMask();
+                        resmask |= getIn(1).getNZMask();
                     break;
                 case CPUI_INT_AND:
-                    resmask = getIn(0)->getNZMask();
+                    resmask = getIn(0).getNZMask();
                     if (resmask != 0)
-                        resmask &= getIn(1)->getNZMask();
+                        resmask &= getIn(1).getNZMask();
                     break;
                 case CPUI_INT_LEFT:
-                    if (!getIn(1)->isConstant())
+                    if (!getIn(1).isConstant())
                         resmask = fullmask;
                     else
                     {
-                        sa = getIn(1)->getOffset(); // Get shift amount
-                        resmask = getIn(0)->getNZMask();
+                        sa = getIn(1).getOffset(); // Get shift amount
+                        resmask = getIn(0).getNZMask();
                         resmask = pcode_left(resmask, sa) & fullmask;
                     }
                     break;
                 case CPUI_INT_RIGHT:
-                    if (!getIn(1)->isConstant())
+                    if (!getIn(1).isConstant())
                         resmask = fullmask;
                     else
                     {
-                        sz1 = getIn(0)->getSize();
-                        sa = getIn(1)->getOffset(); // Get shift amount
-                        resmask = getIn(0)->getNZMask();
+                        sz1 = getIn(0).getSize();
+                        sa = getIn(1).getOffset(); // Get shift amount
+                        resmask = getIn(0).getNZMask();
                         resmask = pcode_right(resmask, sa);
                         if (sz1 > sizeof(uintb))
                         {
@@ -946,12 +946,12 @@ namespace Sla.DECCORE
                     }
                     break;
                 case CPUI_INT_SRIGHT:
-                    if ((!getIn(1)->isConstant()) || (size > sizeof(uintb)))
+                    if ((!getIn(1).isConstant()) || (size > sizeof(uintb)))
                         resmask = fullmask;
                     else
                     {
-                        sa = getIn(1)->getOffset(); // Get shift amount
-                        resmask = getIn(0)->getNZMask();
+                        sa = getIn(1).getOffset(); // Get shift amount
+                        resmask = getIn(0).getNZMask();
                         if ((resmask & (fullmask ^ (fullmask >> 1))) == 0)
                         {   // If we know sign bit is zero
                             resmask = pcode_right(resmask, sa);         // Same as CPUI_INT_RIGHT
@@ -964,35 +964,35 @@ namespace Sla.DECCORE
                     }
                     break;
                 case CPUI_INT_DIV:
-                    val = getIn(0)->getNZMask();
+                    val = getIn(0).getNZMask();
                     resmask = coveringmask(val);
-                    if (getIn(1)->isConstant())
+                    if (getIn(1).isConstant())
                     {
                         // Dividing by power of 2 is equiv to right shift
                         // if the denom is bigger than a power of 2, then
                         // the result still has at least that many highsig zerobits
-                        sa = mostsigbit_set(getIn(1)->getNZMask());
+                        sa = mostsigbit_set(getIn(1).getNZMask());
                         if (sa != -1)
                             resmask >>= sa;     // Add sa additional zerobits
                     }
                     break;
                 case CPUI_INT_REM:
-                    val = (getIn(1)->getNZMask() - 1); // Result is less than modulus
+                    val = (getIn(1).getNZMask() - 1); // Result is less than modulus
                     resmask = coveringmask(val);
                     break;
                 case CPUI_POPCOUNT:
-                    sz1 = popcount(getIn(0)->getNZMask());
+                    sz1 = popcount(getIn(0).getNZMask());
                     resmask = coveringmask((uintb)sz1);
                     resmask &= fullmask;
                     break;
                 case CPUI_LZCOUNT:
-                    resmask = coveringmask(getIn(0)->getSize() * 8);
+                    resmask = coveringmask(getIn(0).getSize() * 8);
                     resmask &= fullmask;
                     break;
                 case CPUI_SUBPIECE:
-                    resmask = getIn(0)->getNZMask();
-                    sz1 = (int4)getIn(1)->getOffset();
-                    if ((int4)getIn(0)->getSize() <= sizeof(uintb))
+                    resmask = getIn(0).getNZMask();
+                    sz1 = (int4)getIn(1).getOffset();
+                    if ((int4)getIn(0).getSize() <= sizeof(uintb))
                     {
                         if (sz1 < sizeof(uintb))
                             resmask >>= 8 * sz1;
@@ -1013,13 +1013,13 @@ namespace Sla.DECCORE
                     resmask &= fullmask;
                     break;
                 case CPUI_PIECE:
-                    resmask = getIn(0)->getNZMask();
-                    resmask <<= 8 * getIn(1)->getSize();
-                    resmask |= getIn(1)->getNZMask();
+                    resmask = getIn(0).getNZMask();
+                    resmask <<= 8 * getIn(1).getSize();
+                    resmask |= getIn(1).getNZMask();
                     break;
                 case CPUI_INT_MULT:
-                    val = getIn(0)->getNZMask();
-                    resmask = getIn(1)->getNZMask();
+                    val = getIn(0).getNZMask();
+                    resmask = getIn(1).getNZMask();
                     sz1 = (size > sizeof(uintb)) ? 8 * size - 1 : mostsigbit_set(val);
                     if (sz1 == -1)
                         resmask = 0;
@@ -1040,10 +1040,10 @@ namespace Sla.DECCORE
                     }
                     break;
                 case CPUI_INT_ADD:
-                    resmask = getIn(0)->getNZMask();
+                    resmask = getIn(0).getNZMask();
                     if (resmask != fullmask)
                     {
-                        resmask |= getIn(1)->getNZMask();
+                        resmask |= getIn(1).getNZMask();
                         resmask |= (resmask << 1);  // Account for possible carries
                         resmask &= fullmask;
                     }
@@ -1059,14 +1059,14 @@ namespace Sla.DECCORE
                         {
                             for (; i < inrefs.size(); ++i)
                             {
-                                if (parent->isLoopIn(i)) continue;
-                                resmask |= getIn(i)->getNZMask();
+                                if (parent.isLoopIn(i)) continue;
+                                resmask |= getIn(i).getNZMask();
                             }
                         }
                         else
                         {
                             for (; i < inrefs.size(); ++i)
-                                resmask |= getIn(i)->getNZMask();
+                                resmask |= getIn(i).getNZMask();
                         }
                     }
                     break;
@@ -1093,13 +1093,13 @@ namespace Sla.DECCORE
         /// \return -1, 0, or 1, depending on the comparison
         public int4 compareOrder(PcodeOp bop)
         {
-            if (parent == bop->parent)
-                return (start.getOrder() < bop->start.getOrder()) ? -1 : 1;
+            if (parent == bop.parent)
+                return (start.getOrder() < bop.start.getOrder()) ? -1 : 1;
 
-            FlowBlock* common = FlowBlock::findCommonBlock(parent, bop->parent);
+            FlowBlock* common = FlowBlock::findCommonBlock(parent, bop.parent);
             if (common == parent)
                 return -1;
-            if (common == bop->parent)
+            if (common == bop.parent)
                 return 1;
             return 0;
         }
@@ -1107,11 +1107,11 @@ namespace Sla.DECCORE
         /// Print raw info about this op to stream
         public void printRaw(TextWriter s)
         {
-            opcode->printRaw(s,this);
+            opcode.printRaw(s,this);
         }
 
         /// Return the name of this op
-        public string getOpName() => opcode->getName();
+        public string getOpName() => opcode.getName();
 
         /// Print debug description of this op to stream
         /// Print an address and a raw representation of this op to the stream, suitable for console debugging apps
@@ -1142,7 +1142,7 @@ namespace Sla.DECCORE
             else
             {
                 encoder.openElement(ELEM_ADDR);
-                encoder.writeUnsignedInteger(ATTRIB_REF, output->getCreateIndex());
+                encoder.writeUnsignedInteger(ATTRIB_REF, output.getCreateIndex());
                 encoder.closeElement(ELEM_ADDR);
             }
             for (int4 i = 0; i < inrefs.size(); ++i)
@@ -1152,13 +1152,13 @@ namespace Sla.DECCORE
                     encoder.openElement(ELEM_VOID);
                     encoder.closeElement(ELEM_VOID);
                 }
-                else if (vn->getSpace()->getType() == IPTR_IOP)
+                else if (vn.getSpace().getType() == IPTR_IOP)
                 {
                     if ((i == 1) && (code() == CPUI_INDIRECT))
                     {
-                        PcodeOp* indop = PcodeOp::getOpFromConst(vn->getAddr());
+                        PcodeOp* indop = PcodeOp::getOpFromConst(vn.getAddr());
                         encoder.openElement(ELEM_IOP);
-                        encoder.writeUnsignedInteger(ATTRIB_VALUE, indop->getSeqNum().getTime());
+                        encoder.writeUnsignedInteger(ATTRIB_VALUE, indop.getSeqNum().getTime());
                         encoder.closeElement(ELEM_IOP);
                     }
                     else
@@ -1167,11 +1167,11 @@ namespace Sla.DECCORE
                         encoder.closeElement(ELEM_VOID);
                     }
                 }
-                else if (vn->getSpace()->getType() == IPTR_CONSTANT)
+                else if (vn.getSpace().getType() == IPTR_CONSTANT)
                 {
                     if ((i == 0) && ((code() == CPUI_STORE) || (code() == CPUI_LOAD)))
                     {
-                        AddrSpace* spc = vn->getSpaceFromConst();
+                        AddrSpace* spc = vn.getSpaceFromConst();
                         encoder.openElement(ELEM_SPACEID);
                         encoder.writeSpace(ATTRIB_NAME, spc);
                         encoder.closeElement(ELEM_SPACEID);
@@ -1179,14 +1179,14 @@ namespace Sla.DECCORE
                     else
                     {
                         encoder.openElement(ELEM_ADDR);
-                        encoder.writeUnsignedInteger(ATTRIB_REF, vn->getCreateIndex());
+                        encoder.writeUnsignedInteger(ATTRIB_REF, vn.getCreateIndex());
                         encoder.closeElement(ELEM_ADDR);
                     }
                 }
                 else
                 {
                     encoder.openElement(ELEM_ADDR);
-                    encoder.writeUnsignedInteger(ATTRIB_REF, vn->getCreateIndex());
+                    encoder.writeUnsignedInteger(ATTRIB_REF, vn.getCreateIndex());
                     encoder.closeElement(ELEM_ADDR);
                 }
             }
@@ -1197,9 +1197,9 @@ namespace Sla.DECCORE
         public static PcodeOp getOpFromConst(Address addr) => (PcodeOp)(uintp)addr.getOffset();
 
         /// Calculate the local output type
-        public Datatype outputTypeLocal() => opcode->getOutputLocal(this);
+        public Datatype outputTypeLocal() => opcode.getOutputLocal(this);
 
         /// Calculate the local input type
-        public Datatype inputTypeLocal(int4 slot) => opcode->getInputLocal(this, slot);
+        public Datatype inputTypeLocal(int4 slot) => opcode.getInputLocal(this, slot);
     }
 }

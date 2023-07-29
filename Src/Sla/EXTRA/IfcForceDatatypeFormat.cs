@@ -19,14 +19,14 @@ namespace Sla.EXTRA
 
             string typeName;
             s >> ws >> typeName;
-            dt = dcp->conf->types->findByName(typeName);
+            dt = dcp.conf.types.findByName(typeName);
             if (dt == (Datatype*)0)
                 throw IfaceExecutionError("Unknown data-type: " + typeName);
             string formatString;
             s >> ws >> formatString;
             uint4 format = Datatype::encodeIntegerFormat(formatString);
-            dcp->conf->types->setDisplayFormat(dt, format);
-            *status->optr << "Successfully forced data-type display" << endl;
+            dcp.conf.types.setDisplayFormat(dt, format);
+            *status.optr << "Successfully forced data-type display" << endl;
         }
     }
 }

@@ -17,11 +17,11 @@ namespace Sla.EXTRA
         /// of direct call may not be discovered.
         public override void execute(TextReader s)
         {
-            dcp->allocateCallGraph();
-            dcp->cgraph->buildAllNodes();   // Build a node in the graph for existing symbols
+            dcp.allocateCallGraph();
+            dcp.cgraph.buildAllNodes();   // Build a node in the graph for existing symbols
             quick = true;
             iterateFunctionsAddrOrder();
-            *status->optr << "Successfully built callgraph" << endl;
+            *status.optr << "Successfully built callgraph" << endl;
         }
     }
 }

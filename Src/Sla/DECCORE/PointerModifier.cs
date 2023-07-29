@@ -22,10 +22,10 @@ namespace Sla.DECCORE
 
         public override Datatype modType(Datatype @base, TypeDeclarator decl, Architecture glb)
         {
-            int4 addrsize = glb->getDefaultDataSpace()->getAddrSize();
+            int4 addrsize = glb.getDefaultDataSpace().getAddrSize();
             Datatype* restype;
-            restype = glb->types->getTypePointer(addrsize, @base,
-                glb->getDefaultDataSpace()->getWordSize());
+            restype = glb.types.getTypePointer(addrsize, @base,
+                glb.getDefaultDataSpace().getWordSize());
             return restype;
         }
     }

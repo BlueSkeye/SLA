@@ -23,25 +23,25 @@ namespace Sla.DECCORE
 
         public override Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)
         {
-            Varnode vn = op->getOut();
-            Datatype* dt = vn->getHighTypeDefFacing();
-            type_metatype meta = dt->getMetatype();
+            Varnode vn = op.getOut();
+            Datatype* dt = vn.getHighTypeDefFacing();
+            type_metatype meta = dt.getMetatype();
             if ((meta == TYPE_INT) || (meta == TYPE_UINT))      // PIECE casts to uint or int, based on output
                 return dt;
-            return tlst->getBase(vn->getSize(), TYPE_UINT); // If output is unknown or pointer, treat as cast to uint
+            return tlst.getBase(vn.getSize(), TYPE_UINT); // If output is unknown or pointer, treat as cast to uint
         }
 
         public override string getOperatorName(PcodeOp op)
         {
             ostringstream s;
 
-            s << name << dec << op->getIn(0)->getSize() << op->getIn(1)->getSize();
+            s << name << dec << op.getIn(0).getSize() << op.getIn(1).getSize();
             return s.str();
         }
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opPiece(op);
+            lng.opPiece(op);
         }
     }
 }

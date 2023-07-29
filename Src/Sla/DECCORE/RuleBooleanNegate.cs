@@ -41,18 +41,18 @@ namespace Sla.DECCORE
             bool negate;
             uintb val;
 
-            opc = op->code();
-            constvn = op->getIn(1);
-            subbool = op->getIn(0);
-            if (!constvn->isConstant()) return 0;
-            val = constvn->getOffset();
+            opc = op.code();
+            constvn = op.getIn(1);
+            subbool = op.getIn(0);
+            if (!constvn.isConstant()) return 0;
+            val = constvn.getOffset();
             if ((val != 0) && (val != 1))
                 return 0;
             negate = (opc == CPUI_INT_NOTEQUAL);
             if (val == 0)
                 negate = !negate;
 
-            if (!subbool->isBooleanValue(data.isTypeRecoveryOn())) return 0;
+            if (!subbool.isBooleanValue(data.isTypeRecoveryOn())) return 0;
 
             data.opRemoveInput(op, 1);  // Remove second parameter
             data.opSetInput(op, subbool, 0); // Keep original boolean parameter

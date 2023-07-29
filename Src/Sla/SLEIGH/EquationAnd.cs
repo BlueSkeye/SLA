@@ -21,29 +21,29 @@ namespace Sla.SLEIGH
 
         public EquationAnd(PatternEquation l, PatternEquation r)
         {
-            (left = l)->layClaim();
-            (right = r)->layClaim();
+            (left = l).layClaim();
+            (right = r).layClaim();
         }
 
         public override void genPattern(List<TokenPattern> ops)
         {
-            left->genPattern(ops);
-            right->genPattern(ops);
-            resultpattern = left->getTokenPattern().doAnd(right->getTokenPattern());
+            left.genPattern(ops);
+            right.genPattern(ops);
+            resultpattern = left.getTokenPattern().doAnd(right.getTokenPattern());
         }
 
         public override bool resolveOperandLeft(OperandResolve state)
         {
             int4 cur_rightmost = -1;    // Initially we don't know our rightmost
             int4 cur_size = -1;     //   or size traversed since rightmost
-            bool res = right->resolveOperandLeft(state);
+            bool res = right.resolveOperandLeft(state);
             if (!res) return false;
             if ((state.cur_rightmost != -1) && (state.size != -1))
             {
                 cur_rightmost = state.cur_rightmost;
                 cur_size = state.size;
             }
-            res = left->resolveOperandLeft(state);
+            res = left.resolveOperandLeft(state);
             if (!res) return false;
             if ((state.cur_rightmost == -1) || (state.size == -1))
             {
@@ -55,8 +55,8 @@ namespace Sla.SLEIGH
 
         public override void operandOrder(Constructor ct, List<OperandSymbol> order)
         {
-            left->operandOrder(ct, order);  // List operands left
-            right->operandOrder(ct, order); //  to right
+            left.operandOrder(ct, order);  // List operands left
+            right.operandOrder(ct, order); //  to right
         }
     }
 }

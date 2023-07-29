@@ -29,7 +29,7 @@ namespace Sla.DECCORE
                 seen_kill = 4
             }
             private PcodeOp op;        ///< Operation along the path to the Varnode
-            private int4 slot;          ///< vn = op->getIn(slot)
+            private int4 slot;          ///< vn = op.getIn(slot)
             private uint4 flags;        ///< Boolean properties of the node
             private int4 offset;        ///< Offset of the (eventual) trial value, within a possibly larger register
 
@@ -55,7 +55,7 @@ namespace Sla.DECCORE
                 op = o;
                 slot = 0;
                 flags = 0;
-                offset = oldState.offset + (int4)op->getIn(1)->getOffset();
+                offset = oldState.offset + (int4)op.getIn(1).getOffset();
             }
 
             /// Get slot associated with \e solid movement
@@ -112,7 +112,7 @@ namespace Sla.DECCORE
         private void mark(Varnode vn)
         {
             markedVn.push_back(vn);
-            vn->setMark();
+            vn.setMark();
         }
 
         /// Traverse into a new Varnode
@@ -123,43 +123,43 @@ namespace Sla.DECCORE
             State & state(stateStack.back());
             // If the node has already been visited, we truncate the traversal to prevent cycles.
             // We always return success assuming the proper result will get returned along the first path
-            Varnode* stateVn = state.op->getIn(state.slot);
-            if (stateVn->isMark()) return pop_success;
-            if (!stateVn->isWritten())
+            Varnode* stateVn = state.op.getIn(state.slot);
+            if (stateVn.isMark()) return pop_success;
+            if (!stateVn.isWritten())
             {
-                if (stateVn->isInput())
+                if (stateVn.isInput())
                 {
-                    if (stateVn->isUnaffected()) return pop_fail;
-                    if (stateVn->isPersist()) return pop_success;   // A global input, not active movement, but a valid possibility
-                    if (!stateVn->isDirectWrite()) return pop_fail;
+                    if (stateVn.isUnaffected()) return pop_fail;
+                    if (stateVn.isPersist()) return pop_success;   // A global input, not active movement, but a valid possibility
+                    if (!stateVn.isDirectWrite()) return pop_fail;
                 }
                 return pop_success;     // Probably a normal parameter, not active movement, but valid
             }
             mark(stateVn);      // Mark that the varnode has now been visited
-            PcodeOp* op = stateVn->getDef();
-            switch (op->code())
+            PcodeOp* op = stateVn.getDef();
+            switch (op.code())
             {
                 case CPUI_INDIRECT:
-                    if (op->isIndirectCreation())
+                    if (op.isIndirectCreation())
                     {   // Backtracking is stopped by a call
-                        trial->setIndCreateFormed();
-                        if (op->getIn(0)->isIndirectZero()) // True only if not a possible output
+                        trial.setIndCreateFormed();
+                        if (op.getIn(0).isIndirectZero()) // True only if not a possible output
                             return pop_failkill;        // Truncate this path, indicating killedbycall
                         return pop_success;     // otherwise it could be valid
                     }
-                    if (!op->isIndirectStore())
+                    if (!op.isIndirectStore())
                     {   // If flow goes THROUGH a call
-                        if (op->getOut()->isReturnAddress()) return pop_fail;   // Storage address location is completely invalid
-                        if (trial->isKilledByCall()) return pop_fail;       // "Likely" killedbycall is invalid
+                        if (op.getOut().isReturnAddress()) return pop_fail;   // Storage address location is completely invalid
+                        if (trial.isKilledByCall()) return pop_fail;       // "Likely" killedbycall is invalid
                     }
                     stateStack.push_back(State(op, 0));
                     return enter_node;          // Enter the new node
                 case CPUI_SUBPIECE:
                     // Extracting to a temporary, or to the same storage location, or otherwise incidental
                     // are viewed as just another node on the path to traverse
-                    if (op->getOut()->getSpace()->getType() == IPTR_INTERNAL
-                    || op->isIncidentalCopy() || op->getIn(0)->isIncidentalCopy()
-                    || (op->getOut()->overlap(*op->getIn(0)) == (int4)op->getIn(1)->getOffset()))
+                    if (op.getOut().getSpace().getType() == IPTR_INTERNAL
+                    || op.isIncidentalCopy() || op.getIn(0).isIncidentalCopy()
+                    || (op.getOut().overlap(*op.getIn(0)) == (int4)op.getIn(1).getOffset()))
                     {
                         stateStack.push_back(State(op, state));
                         return enter_node;      // Push into the new node
@@ -168,43 +168,43 @@ namespace Sla.DECCORE
                     // but otherwise treat it as valid, active, movement into the parameter
                     do
                     {
-                        Varnode* vn = op->getIn(0);
-                        if ((!vn->isMark()) && (vn->isInput()))
+                        Varnode* vn = op.getIn(0);
+                        if ((!vn.isMark()) && (vn.isInput()))
                         {
-                            if (vn->isUnaffected() || (!vn->isDirectWrite()))
+                            if (vn.isUnaffected() || (!vn.isDirectWrite()))
                                 return pop_fail;
                         }
-                        op = vn->getDef();
-                    } while ((op != (PcodeOp*)0) && ((op->code() == CPUI_COPY) || (op->code() == CPUI_SUBPIECE)));
+                        op = vn.getDef();
+                    } while ((op != (PcodeOp*)0) && ((op.code() == CPUI_COPY) || (op.code() == CPUI_SUBPIECE)));
                     return pop_solid;   // treat the COPY as a solid movement
                 case CPUI_COPY:
                     {
                         // Copies to a temporary, or between varnodes with same storage location, or otherwise incidental
                         // are viewed as just another node on the path to traverse
-                        if (op->getOut()->getSpace()->getType() == IPTR_INTERNAL
-                        || op->isIncidentalCopy() || op->getIn(0)->isIncidentalCopy()
-                        || (op->getOut()->getAddr() == op->getIn(0)->getAddr()))
+                        if (op.getOut().getSpace().getType() == IPTR_INTERNAL
+                        || op.isIncidentalCopy() || op.getIn(0).isIncidentalCopy()
+                        || (op.getOut().getAddr() == op.getIn(0).getAddr()))
                         {
                             stateStack.push_back(State(op, 0));
                             return enter_node;      // Push into the new node
                         }
                         // For other COPIES, do a minimal traversal to rule out unaffected or other invalid inputs,
                         // but otherwise treat it as valid, active, movement into the parameter
-                        Varnode* vn = op->getIn(0);
+                        Varnode* vn = op.getIn(0);
                         for (; ; )
                         {
-                            if ((!vn->isMark()) && (vn->isInput()))
+                            if ((!vn.isMark()) && (vn.isInput()))
                             {
-                                if (!vn->isDirectWrite())
+                                if (!vn.isDirectWrite())
                                     return pop_fail;
                             }
-                            op = vn->getDef();
+                            op = vn.getDef();
                             if (op == (PcodeOp*)0) break;
-                            OpCode opc = op->code();
+                            OpCode opc = op.code();
                             if (opc == CPUI_COPY || opc == CPUI_SUBPIECE)
-                                vn = op->getIn(0);
+                                vn = op.getIn(0);
                             else if (opc == CPUI_PIECE)
-                                vn = op->getIn(1);      // Follow least significant piece
+                                vn = op.getIn(1);      // Follow least significant piece
                             else
                                 break;
                         }
@@ -215,23 +215,23 @@ namespace Sla.DECCORE
                     stateStack.push_back(State(op, 0));
                     return enter_node;              // Nothing to check, start traversing inputs of MULTIEQUAL
                 case CPUI_PIECE:
-                    if (stateVn->getSize() > trial->getSize())
+                    if (stateVn.getSize() > trial.getSize())
                     {   // Did we already pull-back from a SUBPIECE?
                         // If the trial is getting pieced together and then truncated in a register,
                         // this is evidence of artificial data-flow.
-                        if (state.offset == 0 && op->getIn(1)->getSize() <= trial->getSize())
+                        if (state.offset == 0 && op.getIn(1).getSize() <= trial.getSize())
                         {
                             // Truncation corresponds to least significant piece, follow slot=1
                             stateStack.push_back(State(op, 1));
                             return enter_node;
                         }
-                        else if (state.offset == op->getIn(1)->getSize() && op->getIn(0)->getSize() <= trial->getSize())
+                        else if (state.offset == op.getIn(1).getSize() && op.getIn(0).getSize() <= trial.getSize())
                         {
                             // Truncation corresponds to most significant piece, follow slot=0
                             stateStack.push_back(State(op, 0));
                             return enter_node;
                         }
-                        if (stateVn->getSpace()->getType() != IPTR_SPACEBASE)
+                        if (stateVn.getSpace().getType() != IPTR_SPACEBASE)
                         {
                             return pop_fail;
                         }
@@ -249,7 +249,7 @@ namespace Sla.DECCORE
         private int4 uponPop(int4 command)
         {
             State & state(stateStack.back());
-            if (state.op->code() == CPUI_MULTIEQUAL)
+            if (state.op.code() == CPUI_MULTIEQUAL)
             {   // All the interesting action happens for MULTIEQUAL branch points
                 State & prevstate(stateStack[stateStack.size() - 2]);   // State previous the one being popped
                 if (pop_command == pop_fail)
@@ -258,12 +258,12 @@ namespace Sla.DECCORE
                     stateStack.pop_back();
                     return pop_command;
                 }
-                else if ((pop_command == pop_solid) && (multiDepth == 1) && (state.op->numInput() == 2))
+                else if ((pop_command == pop_solid) && (multiDepth == 1) && (state.op.numInput() == 2))
                     prevstate.markSolid(state.slot);    // Indicate we have seen a "solid" that could override a "failkill"
                 else if (pop_command == pop_failkill)
                     prevstate.markKill();       // Indicate we have seen a "failkill" along at least one path of MULTIEQUAL
                 state.slot += 1;                // Move to the next sibling
-                if (state.slot == state.op->numInput())
+                if (state.slot == state.op.numInput())
                 {       // If we have traversed all siblings
                     if (prevstate.seenSolid())
                     {           // If we have seen an overriding "solid" along at least one path
@@ -275,7 +275,7 @@ namespace Sla.DECCORE
                                 if (!checkConditionalExe(state))        // that can NOT be attributed to conditional execution
                                     pop_command = pop_fail;         // in which case we fail despite having solid movement
                                 else
-                                    trial->setCondExeEffect();          // Slate this trial for additional testing
+                                    trial.setCondExeEffect();          // Slate this trial for additional testing
                             }
                             else
                                 pop_command = pop_fail;
@@ -302,23 +302,23 @@ namespace Sla.DECCORE
         /// \return \b true if there are two input flows, one of which is a normal \e solid flow
         private bool checkConditionalExe(State state)
         {
-            BlockBasic* bl = state.op->getParent();
-            if (bl->sizeIn() != 2)
+            BlockBasic* bl = state.op.getParent();
+            if (bl.sizeIn() != 2)
                 return false;
-            FlowBlock* solidBlock = bl->getIn(state.getSolidSlot());
-            if (solidBlock->sizeOut() != 1)
+            FlowBlock* solidBlock = bl.getIn(state.getSolidSlot());
+            if (solidBlock.sizeOut() != 1)
                 return false;
-            //  BlockBasic *callbl = stateStack[0].op->getParent();
+            //  BlockBasic *callbl = stateStack[0].op.getParent();
             //  if (callbl != bl) {
             //    bool dominates = false;
-            //    FlowBlock *dombl = callbl->getImmedDom();
+            //    FlowBlock *dombl = callbl.getImmedDom();
             //    for(int4 i=0;i<2;++i) {
             //      if (dombl == bl) {
             //	dominates = true;
             //	break;
             //      }
             //      if (dombl == (FlowBlock *)0) break;
-            //      dombl = dombl->getImmedDom();
+            //      dombl = dombl.getImmedDom();
             //    }
             //    if (!dominates)
             //      return false;
@@ -343,9 +343,9 @@ namespace Sla.DECCORE
             // If the parameter itself is an input, we don't consider this realistic, we expect to see active
             // movement into the parameter. There are some cases where this doesn't happen, but they are rare and
             // failure here doesn't necessarily mean further analysis won't still declare this a parameter
-            if (op->getIn(slot)->isInput())
+            if (op.getIn(slot).isInput())
             {
-                if (!trial->hasCondExeEffect()) // Make sure we are not retesting
+                if (!trial.hasCondExeEffect()) // Make sure we are not retesting
                     return false;
             }
             // Run the depth first traversal
@@ -367,16 +367,16 @@ namespace Sla.DECCORE
                 }
             }
             for (int4 i = 0; i < markedVn.size(); ++i)      // Clean up marks we left along the way
-                markedVn[i]->clearMark();
+                markedVn[i].clearMark();
             if (command == pop_success)
             {
-                trial->setAncestorRealistic();
+                trial.setAncestorRealistic();
                 return true;
             }
             else if (command == pop_solid)
             {
-                trial->setAncestorRealistic();
-                trial->setAncestorSolid();
+                trial.setAncestorRealistic();
+                trial.setAncestorSolid();
                 return true;
             }
             return false;

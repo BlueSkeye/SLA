@@ -19,7 +19,7 @@ int_least64_t
 Max sized
 intmax_t
 
-intptr_t -> signed integer type capable of holding a pointer to void
+intptr_t . signed integer type capable of holding a pointer to void
 
 TYPEDEFED
 typedef uint32_t uintm;
@@ -42,21 +42,21 @@ typedef unsigned short int yytype_uint16;
 typedef short int yytype_int16;
 
 CONVERSION RESULT
-uintp -> ulong
-uintm -> uint
-uintb -> ulong
-intb -> long
-uint8 -> ulong
-int8 -> long
-uint4 -> uint
-int4 -> int
-uint1 -> byte
-ostream -> StreamWriter
-YYSTYPE -> XMLSTYPE
-yytype_uint8 -> byte
-yytype_int8 -> sbyte
-yytype_uint16 -> ushort
-yytype_int16 -> short
+uintp . ulong
+uintm . uint
+uintb . ulong
+intb . long
+uint8 . ulong
+int8 . long
+uint4 . uint
+int4 . int
+uint1 . byte
+ostream . StreamWriter
+YYSTYPE . XMLSTYPE
+yytype_uint8 . byte
+yytype_int8 . sbyte
+yytype_uint16 . ushort
+yytype_int16 . short
 
 Returning references from functions and references to array element
 https://www.danielcrabtree.com/blog/128/c-sharp-7-ref-returns-ref-locals-and-how-to-use-them#:~:text=To%20return%20by%20reference%2C%20add,to%20be%20returned%20by%20reference.

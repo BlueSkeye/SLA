@@ -471,7 +471,7 @@ namespace Sla.DECCORE
             }
             // NOTE: complex behavior can happen in the first block because we (may) only
             // print the branch
-            //  if (bl->isComplex()) return false; // Control flow too complicated for condition
+            //  if (bl.isComplex()) return false; // Control flow too complicated for condition
             for (i = 0; i < 2; ++i) {
                 orblock = bl.getOut(i);    // False out is other part of OR
                 if (orblock == bl) {
@@ -525,8 +525,8 @@ namespace Sla.DECCORE
                     continue;
                 }
                 // Do we need to check that
-                //   bl->isBackEdgeOut(i)  =>  orblock->isBackEdgeOut(j)
-                //   bl->isLoopExitOut(i)  =>  orblock->isLoopExitOut(j)
+                //   bl.isBackEdgeOut(i)  =>  orblock.isBackEdgeOut(j)
+                //   bl.isLoopExitOut(i)  =>  orblock.isLoopExitOut(j)
                 if (i == 1) {
                     // orblock needs to be false out of bl
                     if (bl.negateCondition(true)) {
@@ -734,8 +734,8 @@ namespace Sla.DECCORE
                 if (!bl.isDecisionOut(i)) {
                     continue;
                 }
-                //    if (clauseblock->isInteriorGotoTarget()) {
-                //      bl->setGotoBranch(i);
+                //    if (clauseblock.isInteriorGotoTarget()) {
+                //      bl.setGotoBranch(i);
                 //      return true;
                 //    }
 
@@ -872,7 +872,7 @@ namespace Sla.DECCORE
             // If the single out edge is from a switch (BRANCHIND) and also forms an infinite
             // loop, the ruleBlockSwitch method will not hit because the switch won't have a
             // proper exit block.  So we let this method collapse it by NOT checking for switch.
-            //  if (bl->isSwitchOut()) return false;
+            //  if (bl.isSwitchOut()) return false;
 
             if (bl.isGotoOut(0)) {
                 return false;

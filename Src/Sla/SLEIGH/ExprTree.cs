@@ -32,9 +32,9 @@ namespace Sla.SLEIGH
         public ExprTree(OpTpl op)
         {
             ops = new vector<OpTpl*>;
-            ops->push_back(op);
-            if (op->getOut() != (VarnodeTpl*)0)
-                outvn = new VarnodeTpl(*op->getOut());
+            ops.push_back(op);
+            if (op.getOut() != (VarnodeTpl*)0)
+                outvn = new VarnodeTpl(*op.getOut());
             else
                 outvn = (VarnodeTpl*)0;
         }
@@ -45,7 +45,7 @@ namespace Sla.SLEIGH
                 delete outvn;
             if (ops != (vector<OpTpl*>*)0)
             {
-                for (int4 i = 0; i < ops->size(); ++i)
+                for (int4 i = 0; i < ops.size(); ++i)
                     delete(*ops)[i];
                 delete ops;
             }
@@ -58,49 +58,49 @@ namespace Sla.SLEIGH
             OpTpl* op;
             if (outvn == (VarnodeTpl*)0)
                 throw SleighError("Expression has no output");
-            if (outvn->isUnnamed())
+            if (outvn.isUnnamed())
             {
                 delete outvn;
-                op = ops->back();
-                op->clearOutput();
-                op->setOutput(newout);
+                op = ops.back();
+                op.clearOutput();
+                op.setOutput(newout);
             }
             else
             {
                 op = new OpTpl(CPUI_COPY);
-                op->addInput(outvn);
-                op->setOutput(newout);
-                ops->push_back(op);
+                op.addInput(outvn);
+                op.setOutput(newout);
+                ops.push_back(op);
             }
             outvn = new VarnodeTpl(*newout);
         }
 
         public VarnodeTpl getOut() => outvn;
 
-        public ConstTpl getSize() => outvn->getSize();
+        public ConstTpl getSize() => outvn.getSize();
 
         public static List<OpTpl> appendParams(OpTpl op, List<ExprTree> param)
         {               // Create op expression with entire list of expression
                         // inputs
             vector<OpTpl*>* res = new vector<OpTpl*>;
 
-            for (int4 i = 0; i < param->size(); ++i)
+            for (int4 i = 0; i < param.size(); ++i)
             {
-                res->insert(res->end(), (*param)[i]->ops->begin(), (*param)[i]->ops->end());
-                (*param)[i]->ops->clear();
-                op->addInput((*param)[i]->outvn);
-                (*param)[i]->outvn = (VarnodeTpl*)0;
+                res.insert(res.end(), (*param)[i].ops.begin(), (*param)[i].ops.end());
+                (*param)[i].ops.clear();
+                op.addInput((*param)[i].outvn);
+                (*param)[i].outvn = (VarnodeTpl*)0;
                 delete(*param)[i];
             }
-            res->push_back(op);
+            res.push_back(op);
             delete param;
             return res;
         }
 
         public static List<OpTpl> toVector(ExprTree expr)
         {               // Grab the op vector and delete the output expression
-            vector<OpTpl*>* res = expr->ops;
-            expr->ops = (vector<OpTpl*>*)0;
+            vector<OpTpl*>* res = expr.ops;
+            expr.ops = (vector<OpTpl*>*)0;
             delete expr;
             return res;
         }

@@ -52,32 +52,32 @@ namespace Sla.DECCORE
             uint4 maxtablesize)
         {
             // Look for the special "jumpassist" pseudo-op
-            Varnode* addrVn = indop->getIn(0);
-            if (!addrVn->isWritten()) return false;
-            assistOp = addrVn->getDef();
+            Varnode* addrVn = indop.getIn(0);
+            if (!addrVn.isWritten()) return false;
+            assistOp = addrVn.getDef();
             if (assistOp == (PcodeOp*)0) return false;
-            if (assistOp->code() != CPUI_CALLOTHER) return false;
-            if (assistOp->numInput() < 3) return false;
-            int4 index = assistOp->getIn(0)->getOffset();
-            userop = dynamic_cast<JumpAssistOp*>(fd->getArch()->userops.getOp(index));
+            if (assistOp.code() != CPUI_CALLOTHER) return false;
+            if (assistOp.numInput() < 3) return false;
+            int4 index = assistOp.getIn(0).getOffset();
+            userop = dynamic_cast<JumpAssistOp*>(fd.getArch().userops.getOp(index));
             if (userop == (JumpAssistOp*)0) return false;
 
-            switchvn = assistOp->getIn(1);      // The switch variable
-            for (int4 i = 2; i < assistOp->numInput(); ++i)
-                if (!assistOp->getIn(i)->isConstant())
+            switchvn = assistOp.getIn(1);      // The switch variable
+            for (int4 i = 2; i < assistOp.numInput(); ++i)
+                if (!assistOp.getIn(i).isConstant())
                     return false;               // All remaining params must be constant
-            if (userop->getCalcSize() == -1)        // If no size script, first param after switch var is size
-                sizeIndices = assistOp->getIn(2)->getOffset();
+            if (userop.getCalcSize() == -1)        // If no size script, first param after switch var is size
+                sizeIndices = assistOp.getIn(2).getOffset();
             else
             {
-                ExecutablePcode* pcodeScript = (ExecutablePcode*)fd->getArch()->pcodeinjectlib->getPayload(userop->getCalcSize());
+                ExecutablePcode* pcodeScript = (ExecutablePcode*)fd.getArch().pcodeinjectlib.getPayload(userop.getCalcSize());
                 vector<uintb> inputs;
-                int4 numInputs = assistOp->numInput() - 1;  // How many remaining varnodes after useropid
-                if (pcodeScript->sizeInput() != numInputs)
-                    throw new LowlevelError(userop->getName() + ": <size_pcode> has wrong number of parameters");
+                int4 numInputs = assistOp.numInput() - 1;  // How many remaining varnodes after useropid
+                if (pcodeScript.sizeInput() != numInputs)
+                    throw new LowlevelError(userop.getName() + ": <size_pcode> has wrong number of parameters");
                 for (int4 i = 0; i < numInputs; ++i)
-                    inputs.push_back(assistOp->getIn(i + 1)->getOffset());
-                sizeIndices = pcodeScript->evaluate(inputs);
+                    inputs.push_back(assistOp.getIn(i + 1).getOffset());
+                sizeIndices = pcodeScript.evaluate(inputs);
             }
             if (matchsize != 0 && matchsize - 1 != sizeIndices) // matchsize has 1 added to it for the default case
                 return false;           // Not matching the size we saw previously
@@ -90,21 +90,21 @@ namespace Sla.DECCORE
         public override void buildAddresses(Funcdata fd, PcodeOp indop, List<Address> addresstable,
             List<LoadTable> loadpoints)
         {
-            if (userop->getIndex2Addr() == -1)
+            if (userop.getIndex2Addr() == -1)
                 throw new LowlevelError("Final index2addr calculation outside of jumpassist");
-            ExecutablePcode* pcodeScript = (ExecutablePcode*)fd->getArch()->pcodeinjectlib->getPayload(userop->getIndex2Addr());
+            ExecutablePcode* pcodeScript = (ExecutablePcode*)fd.getArch().pcodeinjectlib.getPayload(userop.getIndex2Addr());
             addresstable.clear();
 
-            AddrSpace* spc = indop->getAddr().getSpace();
+            AddrSpace* spc = indop.getAddr().getSpace();
             vector<uintb> inputs;
-            int4 numInputs = assistOp->numInput() - 1;  // How many remaining varnodes after useropid
-            if (pcodeScript->sizeInput() != numInputs)
-                throw new LowlevelError(userop->getName() + ": <addr_pcode> has wrong number of parameters");
+            int4 numInputs = assistOp.numInput() - 1;  // How many remaining varnodes after useropid
+            if (pcodeScript.sizeInput() != numInputs)
+                throw new LowlevelError(userop.getName() + ": <addr_pcode> has wrong number of parameters");
             for (int4 i = 0; i < numInputs; ++i)
-                inputs.push_back(assistOp->getIn(i + 1)->getOffset());
+                inputs.push_back(assistOp.getIn(i + 1).getOffset());
 
             uintb mask = ~((uintb)0);
-            int4 bit = fd->getArch()->funcptr_align;
+            int4 bit = fd.getArch().funcptr_align;
             if (bit != 0)
             {
                 mask = (mask >> bit) << bit;
@@ -112,15 +112,15 @@ namespace Sla.DECCORE
             for (int4 index = 0; index < sizeIndices; ++index)
             {
                 inputs[0] = index;
-                uintb output = pcodeScript->evaluate(inputs);
+                uintb output = pcodeScript.evaluate(inputs);
                 output &= mask;
                 addresstable.push_back(Address(spc, output));
             }
-            ExecutablePcode* defaultScript = (ExecutablePcode*)fd->getArch()->pcodeinjectlib->getPayload(userop->getDefaultAddr());
-            if (defaultScript->sizeInput() != numInputs)
-                throw new LowlevelError(userop->getName() + ": <default_pcode> has wrong number of parameters");
+            ExecutablePcode* defaultScript = (ExecutablePcode*)fd.getArch().pcodeinjectlib.getPayload(userop.getDefaultAddr());
+            if (defaultScript.sizeInput() != numInputs)
+                throw new LowlevelError(userop.getName() + ": <default_pcode> has wrong number of parameters");
             inputs[0] = 0;
-            uintb defaultAddress = defaultScript->evaluate(inputs);
+            uintb defaultAddress = defaultScript.evaluate(inputs);
             addresstable.push_back(Address(spc, defaultAddress));       // Add default location to end of addresstable
         }
 
@@ -131,27 +131,27 @@ namespace Sla.DECCORE
         public override void buildLabels(Funcdata fd, List<Address> addresstable,
             List<uintb> label, JumpModel orig)
         {
-            if (((JumpAssisted*)orig)->sizeIndices != sizeIndices)
+            if (((JumpAssisted*)orig).sizeIndices != sizeIndices)
     throw new LowlevelError("JumpAssisted table size changed during recovery");
-            if (userop->getIndex2Case() == -1)
+            if (userop.getIndex2Case() == -1)
             {
                 for (int4 i = 0; i < sizeIndices; ++i)
                     label.push_back(i);     // The index is the label
             }
             else
             {
-                ExecutablePcode* pcodeScript = (ExecutablePcode*)fd->getArch()->pcodeinjectlib->getPayload(userop->getIndex2Case());
+                ExecutablePcode* pcodeScript = (ExecutablePcode*)fd.getArch().pcodeinjectlib.getPayload(userop.getIndex2Case());
                 vector<uintb> inputs;
-                int4 numInputs = assistOp->numInput() - 1;  // How many remaining varnodes after useropid
-                if (numInputs != pcodeScript->sizeInput())
-                    throw new LowlevelError(userop->getName() + ": <case_pcode> has wrong number of parameters");
+                int4 numInputs = assistOp.numInput() - 1;  // How many remaining varnodes after useropid
+                if (numInputs != pcodeScript.sizeInput())
+                    throw new LowlevelError(userop.getName() + ": <case_pcode> has wrong number of parameters");
                 for (int4 i = 0; i < numInputs; ++i)
-                    inputs.push_back(assistOp->getIn(i + 1)->getOffset());
+                    inputs.push_back(assistOp.getIn(i + 1).getOffset());
 
                 for (int4 index = 0; index < sizeIndices; ++index)
                 {
                     inputs[0] = index;
-                    uintb output = pcodeScript->evaluate(inputs);
+                    uintb output = pcodeScript.evaluate(inputs);
                     label.push_back(output);
                 }
             }
@@ -161,23 +161,23 @@ namespace Sla.DECCORE
         public override Varnode foldInNormalization(Funcdata fd, PcodeOp indop)
         {
             // Replace all outputs of jumpassist op with switchvn (including BRANCHIND)
-            Varnode* outvn = assistOp->getOut();
-            list<PcodeOp*>::const_iterator iter = outvn->beginDescend();
-            while (iter != outvn->endDescend())
+            Varnode* outvn = assistOp.getOut();
+            list<PcodeOp*>::const_iterator iter = outvn.beginDescend();
+            while (iter != outvn.endDescend())
             {
                 PcodeOp* op = *iter;
                 ++iter;
-                fd->opSetInput(op, switchvn, 0);
+                fd.opSetInput(op, switchvn, 0);
             }
-            fd->opDestroy(assistOp);        // Get rid of the assist op (it has served its purpose)
+            fd.opDestroy(assistOp);        // Get rid of the assist op (it has served its purpose)
             return switchvn;
         }
 
         public override bool foldInGuards(Funcdata fd, JumpTable jump)
         {
-            int4 origVal = jump->getDefaultBlock();
-            jump->setLastAsMostCommon();            // Default case is always the last block
-            return (origVal != jump->getDefaultBlock());
+            int4 origVal = jump.getDefaultBlock();
+            jump.setLastAsMostCommon();            // Default case is always the last block
+            return (origVal != jump.getDefaultBlock());
         }
 
         public override bool sanityCheck(Funcdata fd, PcodeOp indop, List<Address> addresstable)
@@ -186,8 +186,8 @@ namespace Sla.DECCORE
         public override JumpModel clone(JumpTable jt)
         {
             JumpAssisted* clone = new JumpAssisted(jt);
-            clone->userop = userop;
-            clone->sizeIndices = sizeIndices;
+            clone.userop = userop;
+            clone.sizeIndices = sizeIndices;
             return clone;
         }
 

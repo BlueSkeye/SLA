@@ -44,11 +44,11 @@ namespace Sla.DECCORE
         private void clearResolve(Scope scope)
         {
             if (scope == globalscope) return;       // Does not apply to the global scope
-            if (scope->fd != (Funcdata*)0) return;  // Does not apply to functional scopes
+            if (scope.fd != (Funcdata*)0) return;  // Does not apply to functional scopes
 
             set<Range>::const_iterator iter;
 
-            for (iter = scope->rangetree.begin(); iter != scope->rangetree.end(); ++iter)
+            for (iter = scope.rangetree.begin(); iter != scope.rangetree.end(); ++iter)
             {
                 Range rng = *iter;
                 pair<ScopeResolve::const_iterator, ScopeResolve::const_iterator> res;
@@ -69,14 +69,14 @@ namespace Sla.DECCORE
         /// \param scope is the given Scope to clear
         private void clearReferences(Scope scope)
         {
-            ScopeMap::const_iterator iter = scope->children.begin();
-            ScopeMap::const_iterator enditer = scope->children.end();
+            ScopeMap::const_iterator iter = scope.children.begin();
+            ScopeMap::const_iterator enditer = scope.children.end();
             while (iter != enditer)
             {
                 clearReferences((*iter).second);
                 ++iter;
             }
-            idmap.erase(scope->uniqueId);
+            idmap.erase(scope.uniqueId);
             clearResolve(scope);
         }
 
@@ -86,10 +86,10 @@ namespace Sla.DECCORE
         private void fillResolve(Scope scope)
         {
             if (scope == globalscope) return;       // Does not apply to the global scope
-            if (scope->fd != (Funcdata*)0) return;  // Does not apply to functional scopes
+            if (scope.fd != (Funcdata*)0) return;  // Does not apply to functional scopes
 
             set<Range>::const_iterator iter;
-            for (iter = scope->rangetree.begin(); iter != scope->rangetree.end(); ++iter)
+            for (iter = scope.rangetree.begin(); iter != scope.rangetree.end(); ++iter)
             {
                 Range rng = *iter;
                 resolvemap.insert(scope, rng.getFirstAddr(), rng.getLastAddr());
@@ -142,7 +142,7 @@ namespace Sla.DECCORE
             ScopeMap::iterator iter;
             for (iter = idmap.begin(); iter != idmap.end(); ++iter)
             {
-                (*iter).second->adjustCaches();
+                (*iter).second.adjustCaches();
             }
         }
 
@@ -159,26 +159,26 @@ namespace Sla.DECCORE
             {
                 if (globalscope != (Scope*)0)
                     throw new LowlevelError("Multiple global scopes");
-                if (newscope->name.size() != 0)
+                if (newscope.name.size() != 0)
                     throw new LowlevelError("Global scope does not have empty name");
                 globalscope = newscope;
-                idmap[globalscope->uniqueId] = globalscope;
+                idmap[globalscope.uniqueId] = globalscope;
                 return;
             }
-            if (newscope->name.size() == 0)
+            if (newscope.name.size() == 0)
                 throw new LowlevelError("Non-global scope has empty name");
-            pair<uint8, Scope*> value(newscope->uniqueId, newscope);
+            pair<uint8, Scope*> value(newscope.uniqueId, newscope);
             pair<ScopeMap::iterator, bool> res;
             res = idmap.insert(value);
             if (res.second == false)
             {
                 ostringstream s;
                 s << "Duplicate scope id: ";
-                s << newscope->getFullName();
+                s << newscope.getFullName();
                 delete newscope;
                 throw RecovError(s.str());
             }
-            parent->attachScope(newscope);
+            parent.attachScope(newscope);
         }
 
         /// Delete the given Scope and all its sub-scopes
@@ -193,10 +193,10 @@ namespace Sla.DECCORE
             }
             else
             {
-                ScopeMap::iterator iter = scope->parent->children.find(scope->uniqueId);
-                if (iter == scope->parent->children.end())
-                    throw new LowlevelError("Could not remove parent reference to: " + scope->name);
-                scope->parent->detachScope(iter);
+                ScopeMap::iterator iter = scope.parent.children.find(scope.uniqueId);
+                if (iter == scope.parent.children.end())
+                    throw new LowlevelError("Could not remove parent reference to: " + scope.name);
+                scope.parent.detachScope(iter);
             }
         }
 
@@ -205,15 +205,15 @@ namespace Sla.DECCORE
         /// \param scope is the given Scope
         public void deleteSubScopes(Scope scope)
         {
-            ScopeMap::iterator iter = scope->children.begin();
-            ScopeMap::iterator enditer = scope->children.end();
+            ScopeMap::iterator iter = scope.children.begin();
+            ScopeMap::iterator enditer = scope.children.end();
             ScopeMap::iterator curiter;
             while (iter != enditer)
             {
                 curiter = iter;
                 ++iter;
                 clearReferences((*curiter).second);
-                scope->detachScope(curiter);
+                scope.detachScope(curiter);
             }
         }
 
@@ -223,15 +223,15 @@ namespace Sla.DECCORE
         /// \param scope is the given Scope
         public void clearUnlocked(Scope scope)
         {
-            ScopeMap::iterator iter = scope->children.begin();
-            ScopeMap::iterator enditer = scope->children.end();
+            ScopeMap::iterator iter = scope.children.begin();
+            ScopeMap::iterator enditer = scope.children.end();
             while (iter != enditer)
             {
                 Scope* subscope = (*iter).second;
                 clearUnlocked(subscope);
                 ++iter;
             }
-            scope->clearUnlocked();
+            scope.clearUnlocked();
         }
 
         /// Set the \e ownership range for a Scope
@@ -241,7 +241,7 @@ namespace Sla.DECCORE
         public void setRange(Scope scope, RangeList rlist)
         {
             clearResolve(scope);
-            scope->rangetree = rlist;   // Overwrite whole tree
+            scope.rangetree = rlist;   // Overwrite whole tree
             fillResolve(scope);
         }
 
@@ -255,7 +255,7 @@ namespace Sla.DECCORE
         public void addRange(Scope scope, AddrSpace spc, uintb first, uintb last)
         {
             clearResolve(scope);
-            scope->addRange(spc, first, last);
+            scope.addRange(spc, first, last);
             fillResolve(scope);
         }
 
@@ -269,7 +269,7 @@ namespace Sla.DECCORE
         public void removeRange(Scope scope, AddrSpace spc, uintb first, uintb last)
         {
             clearResolve(scope);
-            scope->removeRange(spc, first, last);
+            scope.removeRange(spc, first, last);
             fillResolve(scope);
         }
 
@@ -319,7 +319,7 @@ namespace Sla.DECCORE
                 else
                 {
                     string scopename = fullname.substr(mark, endmark - mark);
-                    start = start->resolveScope(scopename, idByNameHash);
+                    start = start.resolveScope(scopename, idByNameHash);
                     if (start == (Scope*)0) // Was the scope name bad
                         return start;
                 }
@@ -341,7 +341,7 @@ namespace Sla.DECCORE
             Scope* res = resolveScope(id);
             if (res != (Scope*)0)
                 return res;
-            res = globalscope->buildSubScope(id, nm);
+            res = globalscope.buildSubScope(id, nm);
             attachScope(res, parent);
             return res;
         }
@@ -373,7 +373,7 @@ namespace Sla.DECCORE
                 if (!idByNameHash)
                     throw new LowlevelError("Scope name hashes not allowed");
                 string scopename = fullname.substr(mark, endmark - mark);
-                uint8 nameId = Scope::hashScopeName(start->uniqueId, scopename);
+                uint8 nameId = Scope::hashScopeName(start.uniqueId, scopename);
                 start = findCreateScope(nameId, scopename, start);
                 mark = endmark + delim.size();
             }
@@ -508,13 +508,13 @@ namespace Sla.DECCORE
                 Address addr = (*piter).first;
                 uint4 val = (*piter).second;
                 encoder.openElement(ELEM_PROPERTY_CHANGEPOINT);
-                addr.getSpace()->encodeAttributes(encoder, addr.getOffset());
+                addr.getSpace().encodeAttributes(encoder, addr.getOffset());
                 encoder.writeUnsignedInteger(ATTRIB_VAL, val);
                 encoder.closeElement(ELEM_PROPERTY_CHANGEPOINT);
             }
 
             if (globalscope != (Scope*)0)
-                globalscope->encodeRecursive(encoder, true);        // Save the global scopes
+                globalscope.encodeRecursive(encoder, true);        // Save the global scopes
             encoder.closeElement(ELEM_DB);
         }
 
@@ -577,8 +577,8 @@ namespace Sla.DECCORE
                 }
                 Scope* newScope = findCreateScope(id, name, parentScope);
                 if (!displayName.empty())
-                    newScope->setDisplayName(displayName);
-                newScope->decode(decoder);
+                    newScope.setDisplayName(displayName);
+                newScope.decode(decoder);
                 decoder.closeElement(subId);
             }
             decoder.closeElement(elemId);
@@ -599,15 +599,15 @@ namespace Sla.DECCORE
             {
                 Scope* parentScope = parseParentTag(decoder);
                 attachScope(newScope, parentScope);
-                newScope->decode(decoder);
+                newScope.decode(decoder);
             }
             else
             {
-                newScope->decodeWrappingAttributes(decoder);
+                newScope.decodeWrappingAttributes(decoder);
                 uint4 subId = decoder.openElement(ELEM_SCOPE);
                 Scope* parentScope = parseParentTag(decoder);
                 attachScope(newScope, parentScope);
-                newScope->decode(decoder);
+                newScope.decode(decoder);
                 decoder.closeElement(subId);
             }
             decoder.closeElement(elemId);
@@ -643,7 +643,7 @@ namespace Sla.DECCORE
                     throw DecoderError("Missing name and id in scope");
                 curscope = findCreateScope(scopeId, name, curscope);
                 if (!displayName.empty())
-                    curscope->setDisplayName(displayName);
+                    curscope.setDisplayName(displayName);
                 decoder.closeElement(subId);
             }
             decoder.closeElement(elemId);

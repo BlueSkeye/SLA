@@ -18,26 +18,26 @@ namespace Sla.DECCORE
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opCall(op);
+            lng.opCall(op);
         }
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            if (op->getOut() != (Varnode*)0)
+            if (op.getOut() != (Varnode*)0)
             {
-                Varnode::printRaw(s, op->getOut());
+                Varnode::printRaw(s, op.getOut());
                 s << " = ";
             }
             s << name << ' ';
-            Varnode::printRaw(s, op->getIn(0));
-            if (op->numInput() > 1)
+            Varnode::printRaw(s, op.getIn(0));
+            if (op.numInput() > 1)
             {
                 s << '(';
-                Varnode::printRaw(s, op->getIn(1));
-                for (int4 i = 2; i < op->numInput(); ++i)
+                Varnode::printRaw(s, op.getIn(1));
+                for (int4 i = 2; i < op.numInput(); ++i)
                 {
                     s << ',';
-                    Varnode::printRaw(s, op->getIn(i));
+                    Varnode::printRaw(s, op.getIn(i));
                 }
                 s << ')';
             }
@@ -49,29 +49,29 @@ namespace Sla.DECCORE
             Varnode vn;
             Datatype* ct;
 
-            vn = op->getIn(0);
-            if ((slot == 0) || (vn->getSpace()->getType() != IPTR_FSPEC))// Do we have a prototype to look at
+            vn = op.getIn(0);
+            if ((slot == 0) || (vn.getSpace().getType() != IPTR_FSPEC))// Do we have a prototype to look at
                 return TypeOp::getInputLocal(op, slot);
 
             // Get types of call input parameters
-            fc = FuncCallSpecs::getFspecFromConst(vn->getAddr());
+            fc = FuncCallSpecs::getFspecFromConst(vn.getAddr());
             // Its false to assume that the parameter symbol corresponds
             // to the varnode in the same slot, but this is easiest until
             // we get giant sized parameters working properly
-            ProtoParameter* param = fc->getParam(slot - 1);
+            ProtoParameter* param = fc.getParam(slot - 1);
             if (param != (ProtoParameter*)0)
             {
-                if (param->isTypeLocked())
+                if (param.isTypeLocked())
                 {
-                    ct = param->getType();
-                    if ((ct->getMetatype() != TYPE_VOID) && (ct->getSize() <= op->getIn(slot)->getSize())) // parameter may not match varnode
+                    ct = param.getType();
+                    if ((ct.getMetatype() != TYPE_VOID) && (ct.getSize() <= op.getIn(slot).getSize())) // parameter may not match varnode
                         return ct;
                 }
-                else if (param->isThisPointer())
+                else if (param.isThisPointer())
                 {
                     // Known "this" pointer is effectively typelocked even if the prototype as a whole isn't
-                    ct = param->getType();
-                    if (ct->getMetatype() == TYPE_PTR && ((TypePointer*)ct)->getPtrTo()->getMetatype() == TYPE_STRUCT)
+                    ct = param.getType();
+                    if (ct.getMetatype() == TYPE_PTR && ((TypePointer*)ct).getPtrTo().getMetatype() == TYPE_STRUCT)
                         return ct;
                 }
             }
@@ -84,14 +84,14 @@ namespace Sla.DECCORE
             Varnode vn;
             Datatype* ct;
 
-            vn = op->getIn(0);      // Varnode containing pointer to fspec
-            if (vn->getSpace()->getType() != IPTR_FSPEC) // Do we have a prototype to look at
+            vn = op.getIn(0);      // Varnode containing pointer to fspec
+            if (vn.getSpace().getType() != IPTR_FSPEC) // Do we have a prototype to look at
                 return TypeOp::getOutputLocal(op);
 
-            fc = FuncCallSpecs::getFspecFromConst(vn->getAddr());
-            if (!fc->isOutputLocked()) return TypeOp::getOutputLocal(op);
-            ct = fc->getOutputType();
-            if (ct->getMetatype() == TYPE_VOID) return TypeOp::getOutputLocal(op);
+            fc = FuncCallSpecs::getFspecFromConst(vn.getAddr());
+            if (!fc.isOutputLocked()) return TypeOp::getOutputLocal(op);
+            ct = fc.getOutputType();
+            if (ct.getMetatype() == TYPE_VOID) return TypeOp::getOutputLocal(op);
             return ct;
         }
     }

@@ -11,12 +11,12 @@ namespace Sla.EXTRA
     {
         public override void execute(TextReader s)
 {
-  dcp->jumptabledebug = true;
+  dcp.jumptabledebug = true;
   dcp_callback = dcp;
   status_callback = status;
-  *status->optr << "Jumptable debugging enabled" << endl;
-  if (dcp->fd != (Funcdata *)0)
-    dcp->fd->enableJTCallback(jump_callback);
+  *status.optr << "Jumptable debugging enabled" << endl;
+  if (dcp.fd != (Funcdata *)0)
+    dcp.fd.enableJTCallback(jump_callback);
 }
     }
 #endif

@@ -36,7 +36,7 @@ namespace Sla.DECCORE
             public LanedIterator(LanedRegister lanedR)
             {
                 size = 0;
-                mask = lanedR->sizeBitMask;
+                mask = lanedR.sizeBitMask;
                 normalize();
             }
 

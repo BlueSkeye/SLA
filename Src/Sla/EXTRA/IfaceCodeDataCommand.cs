@@ -16,7 +16,7 @@ namespace Sla.EXTRA
         {
             status = root;
             codedata = (CodeDataAnalysis*)data;
-            dcp = (IfaceDecompData*)status->getData("decompile");
+            dcp = (IfaceDecompData*)status.getData("decompile");
         }
 
         public override string getModule() => "codedata";

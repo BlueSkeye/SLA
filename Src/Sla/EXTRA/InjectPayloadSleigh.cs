@@ -53,16 +53,16 @@ namespace Sla.EXTRA
 
             con.cacher.clear();
 
-            con.pos->setAddr(con.baseaddr);
-            con.pos->setNaddr(con.nextaddr);
-            con.pos->setCalladdr(con.calladdr);
+            con.pos.setAddr(con.baseaddr);
+            con.pos.setNaddr(con.nextaddr);
+            con.pos.setCalladdr(con.calladdr);
 
             ParserWalkerChange walker(con.pos);
-            con.pos->deallocateState(walker);
+            con.pos.deallocateState(walker);
             setupParameters(con, walker, inputlist, output, source);
             // delayslot and crossbuild directives are not allowed in snippets, so we don't need the DisassemblyCache
             // and we don't need a unique allocation mask
-            SleighBuilder builder(&walker,(DisassemblyCache*)0,&con.cacher,con.glb->getConstantSpace(),con.glb->getUniqueSpace(),0);
+            SleighBuilder builder(&walker,(DisassemblyCache*)0,&con.cacher,con.glb.getConstantSpace(),con.glb.getUniqueSpace(),0);
             builder.build(tpl, -1);
             con.cacher.resolveRelatives();
             con.cacher.emit(con.baseaddr, &emit);
@@ -80,7 +80,7 @@ namespace Sla.EXTRA
 
         public override void printTemplate(TextWriter s)
         {
-            tpl->saveXml(s, -1);
+            tpl.saveXml(s, -1);
         }
 
         public override string getSource() => source;
@@ -113,7 +113,7 @@ namespace Sla.EXTRA
             ParserContext* pos = walker.getParserContext();
             for (int4 i = 0; i < inputlist.size(); ++i)
             {
-                pos->allocateOperand(inputlist[i].getIndex(), walker);
+                pos.allocateOperand(inputlist[i].getIndex(), walker);
                 VarnodeData & data(con.inputlist[i]);
                 FixedHandle & hand(walker.getParentHandle());
                 hand.space = data.space;
@@ -124,7 +124,7 @@ namespace Sla.EXTRA
             }
             for (int4 i = 0; i < output.size(); ++i)
             {
-                pos->allocateOperand(output[i].getIndex(), walker);
+                pos.allocateOperand(output[i].getIndex(), walker);
                 VarnodeData & data(con.output[i]);
                 FixedHandle & hand(walker.getParentHandle());
                 hand.space = data.space;

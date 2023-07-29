@@ -54,18 +54,18 @@ namespace Sla.DECCORE
             BlockBasic* bl;
             PcodeOp* op = (PcodeOp*)(uintp)offset; // Treat offset as op
 
-            if (!op->isBranch())
+            if (!op.isBranch())
             {   // op parameter for CPUI_INDIRECT
-                s << op->getSeqNum();
+                s << op.getSeqNum();
                 return;
             }
-            bs = op->getParent();
-            if (bs->sizeOut() == 2)     // We print the non-fallthru condition
-                bl = (BlockBasic*)(op->isFallthruTrue() ? bs->getOut(0) : bs->getOut(1));
+            bs = op.getParent();
+            if (bs.sizeOut() == 2)     // We print the non-fallthru condition
+                bl = (BlockBasic*)(op.isFallthruTrue() ? bs.getOut(0) : bs.getOut(1));
             else
-                bl = (BlockBasic*)bs->getOut(0);
-            s << "code_" << bl->getStart().getShortcut();
-            bl->getStart().printRaw(s);
+                bl = (BlockBasic*)bs.getOut(0);
+            s << "code_" << bl.getStart().getShortcut();
+            bl.getStart().printRaw(s);
         }
 
         public override void saveXml(TextWriter s)

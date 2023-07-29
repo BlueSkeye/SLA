@@ -24,9 +24,9 @@ namespace Sla.DECCORE
         /// Build name, type, and flags based on the placeholder address
         private void buildNameType()
         {
-            TypeFactory* typegrp = scope->getArch()->types;
-            type = typegrp->getTypeCode();
-            type = typegrp->getTypePointer(refaddr.getAddrSize(), type, refaddr.getSpace()->getWordSize());
+            TypeFactory* typegrp = scope.getArch().types;
+            type = typegrp.getTypeCode();
+            type = typegrp.getTypePointer(refaddr.getAddrSize(), type, refaddr.getSpace().getWordSize());
             if (name.size() == 0)
             {   // If a name was not already provided
                 ostringstream s;        // Give the reference a unique name

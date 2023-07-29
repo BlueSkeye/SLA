@@ -30,29 +30,29 @@ namespace Sla.EXTRA
 
         public override RHSConstant clone()
         {
-            RHSConstant* ecopy1 = expr1->clone();
+            RHSConstant* ecopy1 = expr1.clone();
             RHSConstant* ecopy2 = (RHSConstant*)0;
             if (expr2 != (RHSConstant*)0)
-                ecopy2 = expr2->clone();
+                ecopy2 = expr2.clone();
             return new ConstantExpression(ecopy1, ecopy2, opc);
         }
 
         public override uintb getConstant(UnifyState state)
         {
             OpBehavior* behavior = state.getBehavior(opc);
-            if (behavior->isSpecial())
+            if (behavior.isSpecial())
                 throw new LowlevelError("Cannot evaluate special operator in constant expression");
             uintb res;
-            if (behavior->isUnary())
+            if (behavior.isUnary())
             {
-                uintb ourconst1 = expr1->getConstant(state);
-                res = behavior->evaluateUnary(sizeof(uintb), sizeof(uintb), ourconst1);
+                uintb ourconst1 = expr1.getConstant(state);
+                res = behavior.evaluateUnary(sizeof(uintb), sizeof(uintb), ourconst1);
             }
             else
             {
-                uintb ourconst1 = expr1->getConstant(state);
-                uintb ourconst2 = expr2->getConstant(state);
-                res = behavior->evaluateBinary(sizeof(uintb), sizeof(uintb), ourconst1, ourconst2);
+                uintb ourconst1 = expr1.getConstant(state);
+                uintb ourconst2 = expr2.getConstant(state);
+                res = behavior.evaluateBinary(sizeof(uintb), sizeof(uintb), ourconst1, ourconst2);
             }
             return res;
         }
@@ -129,27 +129,27 @@ namespace Sla.EXTRA
             if (type == 0)
             {
                 s << '(';
-                expr1->writeExpression(s, printstate);
+                expr1.writeExpression(s, printstate);
                 s << name;
-                expr2->writeExpression(s, printstate);
+                expr2.writeExpression(s, printstate);
                 s << ')';
             }
             else if (type == 1)
             {
                 s << '(' << name;
-                expr1->writeExpression(s, printstate);
+                expr1.writeExpression(s, printstate);
                 s << ')';
             }
             else if (type == 2)
             {
                 s << '(';
-                expr1->writeExpression(s, printstate);
+                expr1.writeExpression(s, printstate);
                 s << name << ')';
             }
             else
             {
                 s << name << '(';
-                expr1->writeExpression(s, printstate);
+                expr1.writeExpression(s, printstate);
                 s << ')';
             }
         }

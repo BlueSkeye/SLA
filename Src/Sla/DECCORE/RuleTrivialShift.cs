@@ -33,15 +33,15 @@ namespace Sla.DECCORE
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
             uintb val;
-            Varnode* constvn = op->getIn(1);
-            if (!constvn->isConstant()) return 0;   // Must shift by a constant
-            val = constvn->getOffset();
+            Varnode* constvn = op.getIn(1);
+            if (!constvn.isConstant()) return 0;   // Must shift by a constant
+            val = constvn.getOffset();
             if (val != 0)
             {
                 Varnode* replace;
-                if (val < 8 * op->getIn(0)->getSize()) return 0;    // Non-trivial
-                if (op->code() == CPUI_INT_SRIGHT) return 0; // Cant predict signbit
-                replace = data.newConstant(op->getIn(0)->getSize(), 0);
+                if (val < 8 * op.getIn(0).getSize()) return 0;    // Non-trivial
+                if (op.code() == CPUI_INT_SRIGHT) return 0; // Cant predict signbit
+                replace = data.newConstant(op.getIn(0).getSize(), 0);
                 data.opSetInput(op, replace, 0);
             }
             data.opRemoveInput(op, 1);

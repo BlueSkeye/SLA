@@ -57,7 +57,7 @@ namespace Sla.DECCORE
                 if (landmark != (CircleRange*)0) {
                     bool leftIsStable = range.getMin() == newRange.getMin();
                     range = newRange;   // Preserve any new step information
-                    if (landmark->contains(range))
+                    if (landmark.contains(range))
                     {
                         range.widen(*landmark, leftIsStable);
                         return true;

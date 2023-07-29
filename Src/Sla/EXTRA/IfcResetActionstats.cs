@@ -15,12 +15,12 @@ namespace Sla.EXTRA
         /// Counts for each Action and Rule are reset to zero.
         public override void execute(TextReader s)
         {
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("Image not loaded");
-            if (dcp->conf->allacts.getCurrent() == (Action*)0)
+            if (dcp.conf.allacts.getCurrent() == (Action*)0)
                 throw IfaceExecutionError("No action set");
 
-            dcp->conf->allacts.getCurrent()->resetStats();
+            dcp.conf.allacts.getCurrent().resetStats();
         }
     }
 }

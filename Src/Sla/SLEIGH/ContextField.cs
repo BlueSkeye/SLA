@@ -84,29 +84,29 @@ namespace Sla.SLEIGH
 
         public override void restoreXml(Element el, Translate trans)
         {
-            signbit = xml_readbool(el->getAttributeValue("signbit"));
+            signbit = xml_readbool(el.getAttributeValue("signbit"));
             {
-                istringstream s(el->getAttributeValue("startbit"));
+                istringstream s(el.getAttributeValue("startbit"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> startbit;
             }
             {
-                istringstream s(el->getAttributeValue("endbit"));
+                istringstream s(el.getAttributeValue("endbit"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> endbit;
             }
             {
-                istringstream s(el->getAttributeValue("startbyte"));
+                istringstream s(el.getAttributeValue("startbyte"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> startbyte;
             }
             {
-                istringstream s(el->getAttributeValue("endbyte"));
+                istringstream s(el.getAttributeValue("endbyte"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> endbyte;
             }
             {
-                istringstream s(el->getAttributeValue("shift"));
+                istringstream s(el.getAttributeValue("shift"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> shift;
             }

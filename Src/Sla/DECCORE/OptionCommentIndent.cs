@@ -26,7 +26,7 @@ namespace Sla.DECCORE
             s >> val;
             if (val == -1)
                 throw ParseError("Must specify integer comment indent");
-            glb->print->setLineCommentIndent(val);
+            glb.print.setLineCommentIndent(val);
             return "Comment indent set to " + p1;
         }
     }

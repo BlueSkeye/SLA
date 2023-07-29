@@ -12,9 +12,9 @@ namespace Sla.DECCORE
         /// Comparison operator
         internal static bool operator()(Datatype a, Datatype b)
         {
-            int4 res = a->getName().compare(b->getName());
+            int4 res = a.getName().compare(b.getName());
             if (res != 0) return (res< 0);
-            return a->getId() < b->getId();
+            return a.getId() < b.getId();
         }
     }
 }

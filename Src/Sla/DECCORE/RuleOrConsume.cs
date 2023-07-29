@@ -32,17 +32,17 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* outvn = op->getOut();
-            int4 size = outvn->getSize();
+            Varnode* outvn = op.getOut();
+            int4 size = outvn.getSize();
             if (size > sizeof(uintb)) return 0; // FIXME: uintb should be arbitrary precision
-            uintb consume = outvn->getConsume();
-            if ((consume & op->getIn(0)->getNZMask()) == 0)
+            uintb consume = outvn.getConsume();
+            if ((consume & op.getIn(0).getNZMask()) == 0)
             {
                 data.opRemoveInput(op, 0);
                 data.opSetOpcode(op, CPUI_COPY);
                 return 1;
             }
-            else if ((consume & op->getIn(1)->getNZMask()) == 0)
+            else if ((consume & op.getIn(1).getNZMask()) == 0)
             {
                 data.opRemoveInput(op, 1);
                 data.opSetOpcode(op, CPUI_COPY);

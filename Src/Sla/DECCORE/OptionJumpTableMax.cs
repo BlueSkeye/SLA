@@ -28,7 +28,7 @@ namespace Sla.DECCORE
             s >> val;
             if (val == 0)
                 throw ParseError("Must specify integer maximum");
-            glb->max_jumptable_size = val;
+            glb.max_jumptable_size = val;
             return "Maximum jumptable size set to " + p1;
         }
     }

@@ -67,15 +67,15 @@ namespace Sla.EXTRA
             int4 id = -1;
             try
             {
-                id = dcp->conf->pcodeinjectlib->manualCallFixup(name, pcodestring);
+                id = dcp.conf.pcodeinjectlib.manualCallFixup(name, pcodestring);
             }
             catch (LowlevelError err)
             {
-                *status->optr << "Error compiling pcode: " << err.ToString() << endl;
+                *status.optr << "Error compiling pcode: " << err.ToString() << endl;
                 return;
             }
-            InjectPayload* payload = dcp->conf->pcodeinjectlib->getPayload(id);
-            payload->printTemplate(*status->optr);
+            InjectPayload* payload = dcp.conf.pcodeinjectlib.getPayload(id);
+            payload.printTemplate(*status.optr);
         }
     }
 }

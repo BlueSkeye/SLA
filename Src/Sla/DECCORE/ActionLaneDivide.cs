@@ -25,9 +25,9 @@ namespace Sla.DECCORE
         private void collectLaneSizes(Varnode vn, LanedRegister allowedLanes,
             LanedRegister checkLanes)
         {
-            list<PcodeOp*>::const_iterator iter = vn->beginDescend();
+            list<PcodeOp*>::const_iterator iter = vn.beginDescend();
             int4 step = 0;      // 0 = descendants, 1 = def, 2 = done
-            if (iter == vn->endDescend())
+            if (iter == vn.endDescend())
             {
                 step = 1;
             }
@@ -38,19 +38,19 @@ namespace Sla.DECCORE
                 {
                     PcodeOp* op = *iter;
                     ++iter;
-                    if (iter == vn->endDescend())
+                    if (iter == vn.endDescend())
                         step = 1;
-                    if (op->code() != CPUI_SUBPIECE) continue;  // Is the big register split into pieces
-                    curSize = op->getOut()->getSize();
+                    if (op.code() != CPUI_SUBPIECE) continue;  // Is the big register split into pieces
+                    curSize = op.getOut().getSize();
                 }
                 else
                 {
                     step = 2;
-                    if (!vn->isWritten()) continue;
-                    PcodeOp* op = vn->getDef();
-                    if (op->code() != CPUI_PIECE) continue;     // Is the big register formed from smaller pieces
-                    curSize = op->getIn(0)->getSize();
-                    int4 tmpSize = op->getIn(1)->getSize();
+                    if (!vn.isWritten()) continue;
+                    PcodeOp* op = vn.getDef();
+                    if (op.code() != CPUI_PIECE) continue;     // Is the big register formed from smaller pieces
+                    curSize = op.getIn(0).getSize();
+                    int4 tmpSize = op.getIn(1).getSize();
                     if (tmpSize < curSize)
                         curSize = tmpSize;
                 }

@@ -16,7 +16,7 @@ namespace Sla.EXTRA
             if (!s.eof())
                 throw IfaceParseError("Too many parameters to quit");
 
-            status->done = true;        // Set flag to drop out of mainloop
+            status.done = true;        // Set flag to drop out of mainloop
         }
     }
 }

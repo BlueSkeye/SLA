@@ -74,7 +74,7 @@ namespace Sla.SLEIGH
             VarnodeTpl* res = new VarnodeTpl(ConstTpl(uniqspace),
                              ConstTpl(ConstTpl::real, allocateTemp()),
                              ConstTpl(ConstTpl::real, 0));
-            res->setUnnamed(true);
+            res.setUnnamed(true);
             return res;
         }
 
@@ -88,18 +88,18 @@ namespace Sla.SLEIGH
 
         public List<OpTpl> placeLabel(LabelSymbol sym)
         { // Create placeholder OpTpl for a label
-            if (labsym->isPlaced())
+            if (labsym.isPlaced())
             {
-                reportError(getLocation(labsym), "Label '" + labsym->getName() + "' is placed more than once");
+                reportError(getLocation(labsym), "Label '" + labsym.getName() + "' is placed more than once");
             }
-            labsym->setPlaced();
+            labsym.setPlaced();
             vector<OpTpl*>* res = new vector<OpTpl*>;
             OpTpl* op = new OpTpl(LABELBUILD);
             VarnodeTpl* idvn = new VarnodeTpl(ConstTpl(constantspace),
-                                ConstTpl(ConstTpl::real, labsym->getIndex()),
+                                ConstTpl(ConstTpl::real, labsym.getIndex()),
                                 ConstTpl(ConstTpl::real, 4));
-            op->addInput(idvn);
-            res->push_back(op);
+            op.addInput(idvn);
+            res.push_back(op);
             return res;
         }
 
@@ -108,13 +108,13 @@ namespace Sla.SLEIGH
             VarnodeSymbol* sym;
             VarnodeTpl* tmpvn = buildTemporary();
             if (size != 0)
-                tmpvn->setSize(ConstTpl(ConstTpl::real, size)); // Size was explicitly specified
-            else if ((rhs->getSize().getType() == ConstTpl::real) && (rhs->getSize().getReal() != 0))
-                tmpvn->setSize(rhs->getSize()); // Inherit size from unnamed expression result
+                tmpvn.setSize(ConstTpl(ConstTpl::real, size)); // Size was explicitly specified
+            else if ((rhs.getSize().getType() == ConstTpl::real) && (rhs.getSize().getReal() != 0))
+                tmpvn.setSize(rhs.getSize()); // Inherit size from unnamed expression result
                                                 // Only inherit if the size is real, otherwise we
                                                 // cannot build the VarnodeSymbol with a placeholder constant
-            rhs->setOutput(tmpvn);
-            sym = new VarnodeSymbol(*varname, tmpvn->getSpace().getSpace(), tmpvn->getOffset().getReal(), tmpvn->getSize().getReal()); // Create new symbol regardless
+            rhs.setOutput(tmpvn);
+            sym = new VarnodeSymbol(*varname, tmpvn.getSpace().getSpace(), tmpvn.getOffset().getReal(), tmpvn.getSize().getReal()); // Create new symbol regardless
             addSymbol(sym);
             if ((!usesLocalKey) && enforceLocalKey)
                 reportError(getLocation(sym), "Must use 'local' keyword to define symbol '" + *varname + "'");
@@ -136,10 +136,10 @@ namespace Sla.SLEIGH
                         // Free input expression
             VarnodeTpl* outvn = buildTemporary();
             OpTpl* op = new OpTpl(opc);
-            op->addInput(vn->outvn);
-            op->setOutput(outvn);
-            vn->ops->push_back(op);
-            vn->outvn = new VarnodeTpl(*outvn);
+            op.addInput(vn.outvn);
+            op.setOutput(outvn);
+            vn.ops.push_back(op);
+            vn.outvn = new VarnodeTpl(*outvn);
             return vn;
         }
 
@@ -148,30 +148,30 @@ namespace Sla.SLEIGH
                         // built by performing -opc- on inputs vn1 and vn2.
                         // Free input expressions
             VarnodeTpl* outvn = buildTemporary();
-            vn1->ops->insert(vn1->ops->end(), vn2->ops->begin(), vn2->ops->end());
-            vn2->ops->clear();
+            vn1.ops.insert(vn1.ops.end(), vn2.ops.begin(), vn2.ops.end());
+            vn2.ops.clear();
             OpTpl* op = new OpTpl(opc);
-            op->addInput(vn1->outvn);
-            op->addInput(vn2->outvn);
-            vn2->outvn = (VarnodeTpl*)0;
-            op->setOutput(outvn);
-            vn1->ops->push_back(op);
-            vn1->outvn = new VarnodeTpl(*outvn);
+            op.addInput(vn1.outvn);
+            op.addInput(vn2.outvn);
+            vn2.outvn = (VarnodeTpl*)0;
+            op.setOutput(outvn);
+            vn1.ops.push_back(op);
+            vn1.outvn = new VarnodeTpl(*outvn);
             delete vn2;
             return vn1;
         }
 
         public ExprTree createOpOut(VarnodeTpl outvn, OpCode opc, ExprTree vn1, ExprTree vn2)
         { // Create an op with explicit output and two inputs
-            vn1->ops->insert(vn1->ops->end(), vn2->ops->begin(), vn2->ops->end());
-            vn2->ops->clear();
+            vn1.ops.insert(vn1.ops.end(), vn2.ops.begin(), vn2.ops.end());
+            vn2.ops.clear();
             OpTpl* op = new OpTpl(opc);
-            op->addInput(vn1->outvn);
-            op->addInput(vn2->outvn);
-            vn2->outvn = (VarnodeTpl*)0;
-            op->setOutput(outvn);
-            vn1->ops->push_back(op);
-            vn1->outvn = new VarnodeTpl(*outvn);
+            op.addInput(vn1.outvn);
+            op.addInput(vn2.outvn);
+            vn2.outvn = (VarnodeTpl*)0;
+            op.setOutput(outvn);
+            vn1.ops.push_back(op);
+            vn1.outvn = new VarnodeTpl(*outvn);
             delete vn2;
             return vn1;
         }
@@ -179,10 +179,10 @@ namespace Sla.SLEIGH
         public ExprTree createOpOutUnary(VarnodeTpl outvn, OpCode opc, ExprTree vn)
         { // Create an op with explicit output and 1 input
             OpTpl* op = new OpTpl(opc);
-            op->addInput(vn->outvn);
-            op->setOutput(outvn);
-            vn->ops->push_back(op);
-            vn->outvn = new VarnodeTpl(*outvn);
+            op.addInput(vn.outvn);
+            op.setOutput(outvn);
+            vn.ops.push_back(op);
+            vn.outvn = new VarnodeTpl(*outvn);
             return vn;
         }
 
@@ -190,28 +190,28 @@ namespace Sla.SLEIGH
         {               // Create new expression by creating op with given -opc-
                         // and single input vn.   Free the input expression
             OpTpl* op = new OpTpl(opc);
-            op->addInput(vn->outvn);
-            vn->outvn = (VarnodeTpl*)0; // There is no longer an output to this expression
-            vector<OpTpl*>* res = vn->ops;
-            vn->ops = (vector<OpTpl*>*)0;
+            op.addInput(vn.outvn);
+            vn.outvn = (VarnodeTpl*)0; // There is no longer an output to this expression
+            vector<OpTpl*>* res = vn.ops;
+            vn.ops = (vector<OpTpl*>*)0;
             delete vn;
-            res->push_back(op);
+            res.push_back(op);
             return res;
         }
 
         public List<OpTpl> createOpNoOut(OpCode opc, ExprTree vn1, ExprTree vn2)
         {               // Create new expression by creating op with given -opc-
                         // and inputs vn1 and vn2. Free the input expressions
-            vector<OpTpl*>* res = vn1->ops;
-            vn1->ops = (vector<OpTpl*>*)0;
-            res->insert(res->end(), vn2->ops->begin(), vn2->ops->end());
-            vn2->ops->clear();
+            vector<OpTpl*>* res = vn1.ops;
+            vn1.ops = (vector<OpTpl*>*)0;
+            res.insert(res.end(), vn2.ops.begin(), vn2.ops.end());
+            vn2.ops.clear();
             OpTpl* op = new OpTpl(opc);
-            op->addInput(vn1->outvn);
-            vn1->outvn = (VarnodeTpl*)0;
-            op->addInput(vn2->outvn);
-            vn2->outvn = (VarnodeTpl*)0;
-            res->push_back(op);
+            op.addInput(vn1.outvn);
+            vn1.outvn = (VarnodeTpl*)0;
+            op.addInput(vn2.outvn);
+            vn2.outvn = (VarnodeTpl*)0;
+            res.push_back(op);
             delete vn1;
             delete vn2;
             return res;
@@ -224,8 +224,8 @@ namespace Sla.SLEIGH
                               ConstTpl(ConstTpl::real, 4));
             vector<OpTpl*>* res = new vector<OpTpl*>;
             OpTpl* op = new OpTpl(opc);
-            op->addInput(vn);
-            res->push_back(op);
+            op.addInput(vn);
+            res.push_back(op);
             return res;
         }
 
@@ -238,40 +238,40 @@ namespace Sla.SLEIGH
             // isn't platform independent. So officially, we assume that the constant reference will be the
             // AddrSpace index.  We can safely assume this always has size 4.
             VarnodeTpl* spcvn = new VarnodeTpl(ConstTpl(constantspace),
-                               qual->id,
+                               qual.id,
                                ConstTpl(ConstTpl::real, 8));
-            op->addInput(spcvn);
-            op->addInput(ptr->outvn);
-            op->setOutput(outvn);
-            ptr->ops->push_back(op);
-            if (qual->size > 0)
-                force_size(outvn, ConstTpl(ConstTpl::real, qual->size), *ptr->ops);
-            ptr->outvn = new VarnodeTpl(*outvn);
+            op.addInput(spcvn);
+            op.addInput(ptr.outvn);
+            op.setOutput(outvn);
+            ptr.ops.push_back(op);
+            if (qual.size > 0)
+                force_size(outvn, ConstTpl(ConstTpl::real, qual.size), *ptr.ops);
+            ptr.outvn = new VarnodeTpl(*outvn);
             delete qual;
             return ptr;
         }
 
         public List<OpTpl> createStore(StarQuality qual, ExprTree ptr, ExprTree val)
         {
-            vector<OpTpl*>* res = ptr->ops;
-            ptr->ops = (vector<OpTpl*>*)0;
-            res->insert(res->end(), val->ops->begin(), val->ops->end());
-            val->ops->clear();
+            vector<OpTpl*>* res = ptr.ops;
+            ptr.ops = (vector<OpTpl*>*)0;
+            res.insert(res.end(), val.ops.begin(), val.ops.end());
+            val.ops.clear();
             OpTpl* op = new OpTpl(CPUI_STORE);
             // The first varnode input to the store is a constant reference to the AddrSpace being loaded
             // from.  Internally, we really store the pointer to the AddrSpace as the reference, but this
             // isn't platform independent. So officially, we assume that the constant reference will be the
             // AddrSpace index.  We can safely assume this always has size 4.
             VarnodeTpl* spcvn = new VarnodeTpl(ConstTpl(constantspace),
-                               qual->id,
+                               qual.id,
                                ConstTpl(ConstTpl::real, 8));
-            op->addInput(spcvn);
-            op->addInput(ptr->outvn);
-            op->addInput(val->outvn);
-            res->push_back(op);
-            force_size(val->outvn, ConstTpl(ConstTpl::real, qual->size), *res);
-            ptr->outvn = (VarnodeTpl*)0;
-            val->outvn = (VarnodeTpl*)0;
+            op.addInput(spcvn);
+            op.addInput(ptr.outvn);
+            op.addInput(val.outvn);
+            res.push_back(op);
+            force_size(val.outvn, ConstTpl(ConstTpl::real, qual.size), *res);
+            ptr.outvn = (VarnodeTpl*)0;
+            val.outvn = (VarnodeTpl*)0;
             delete ptr;
             delete val;
             delete qual;
@@ -282,9 +282,9 @@ namespace Sla.SLEIGH
         { // Create userdefined pcode op, given symbol and parameters
             VarnodeTpl* outvn = buildTemporary();
             ExprTree* res = new ExprTree();
-            res->ops = createUserOpNoOut(sym, param);
-            res->ops->back()->setOutput(outvn);
-            res->outvn = new VarnodeTpl(*outvn);
+            res.ops = createUserOpNoOut(sym, param);
+            res.ops.back().setOutput(outvn);
+            res.outvn = new VarnodeTpl(*outvn);
             return res;
         }
 
@@ -292,9 +292,9 @@ namespace Sla.SLEIGH
         {
             OpTpl* op = new OpTpl(CPUI_CALLOTHER);
             VarnodeTpl* vn = new VarnodeTpl(ConstTpl(constantspace),
-                              ConstTpl(ConstTpl::real, sym->getIndex()),
+                              ConstTpl(ConstTpl::real, sym.getIndex()),
                               ConstTpl(ConstTpl::real, 4));
-            op->addInput(vn);
+            op.addInput(vn);
             return ExprTree::appendParams(op, param);
         }
 
@@ -303,9 +303,9 @@ namespace Sla.SLEIGH
             VarnodeTpl* outvn = buildTemporary();
             ExprTree* res = new ExprTree();
             OpTpl* op = new OpTpl(opc);
-            res->ops = ExprTree::appendParams(op, param);
-            res->ops->back()->setOutput(outvn);
-            res->outvn = new VarnodeTpl(*outvn);
+            res.ops = ExprTree::appendParams(op, param);
+            res.ops.back().setOutput(outvn);
+            res.outvn = new VarnodeTpl(*outvn);
             return res;
         }
 
@@ -317,11 +317,11 @@ namespace Sla.SLEIGH
                                ConstTpl(ConstTpl::real, constval),
                                ConstTpl(ConstTpl::real, constsz));
             VarnodeTpl* outvn = buildTemporary();
-            op->addInput(res->outvn);
-            op->addInput(constvn);
-            op->setOutput(outvn);
-            res->ops->push_back(op);
-            res->outvn = new VarnodeTpl(*outvn);
+            op.addInput(res.outvn);
+            op.addInput(constvn);
+            op.setOutput(outvn);
+            res.ops.push_back(op);
+            res.outvn = new VarnodeTpl(*outvn);
         }
 
         public VarnodeTpl buildTruncatedVarnode(VarnodeTpl basevn, uint4 bitoffset, uint4 numbits)
@@ -330,10 +330,10 @@ namespace Sla.SLEIGH
             uint4 byteoffset = bitoffset / 8; // Convert to byte units
             uint4 numbytes = numbits / 8;
             uintb fullsz = 0;
-            if (basevn->getSize().getType() == ConstTpl::real)
+            if (basevn.getSize().getType() == ConstTpl::real)
             {
                 // If we know the size of base, make sure the bit range is in bounds
-                fullsz = basevn->getSize().getReal();
+                fullsz = basevn.getSize().getReal();
                 if (fullsz == 0) return (VarnodeTpl*)0;
                 if (byteoffset + numbytes > fullsz)
                     throw SleighError("Requested bit range out of bounds");
@@ -342,10 +342,10 @@ namespace Sla.SLEIGH
             if ((bitoffset % 8) != 0) return (VarnodeTpl*)0;
             if ((numbits % 8) != 0) return (VarnodeTpl*)0;
 
-            if (basevn->getSpace().isUniqueSpace()) // Do we really want to prevent truncated uniques??
+            if (basevn.getSpace().isUniqueSpace()) // Do we really want to prevent truncated uniques??
                 return (VarnodeTpl*)0;
 
-            ConstTpl::const_type offset_type = basevn->getOffset().getType();
+            ConstTpl::const_type offset_type = basevn.getOffset().getType();
             if ((offset_type != ConstTpl::real) && (offset_type != ConstTpl::handle))
                 return (VarnodeTpl*)0;
 
@@ -355,21 +355,21 @@ namespace Sla.SLEIGH
                 // We put in the correct adjustment to offset assuming things are little endian
                 // We defer the correct big endian calculation until after the consistency check
                 // because we need to know the subtable export sizes
-                specialoff = ConstTpl(ConstTpl::handle, basevn->getOffset().getHandleIndex(),
+                specialoff = ConstTpl(ConstTpl::handle, basevn.getOffset().getHandleIndex(),
                           ConstTpl::v_offset_plus, byteoffset);
             }
             else
             {
-                if (basevn->getSize().getType() != ConstTpl::real)
+                if (basevn.getSize().getType() != ConstTpl::real)
                     throw SleighError("Could not construct requested bit range");
                 uintb plus;
-                if (defaultspace->isBigEndian())
+                if (defaultspace.isBigEndian())
                     plus = fullsz - (byteoffset + numbytes);
                 else
                     plus = byteoffset;
-                specialoff = ConstTpl(ConstTpl::real, basevn->getOffset().getReal() + plus);
+                specialoff = ConstTpl(ConstTpl::real, basevn.getOffset().getReal() + plus);
             }
-            VarnodeTpl* res = new VarnodeTpl(basevn->getSpace(), specialoff, ConstTpl(ConstTpl::real, numbytes));
+            VarnodeTpl* res = new VarnodeTpl(basevn.getSpace(), specialoff, ConstTpl(ConstTpl::real, numbytes));
             return res;
         }
 
@@ -384,11 +384,11 @@ namespace Sla.SLEIGH
             uintb mask = (uintb)2;
             mask = ~(((mask << (numbits - 1)) - 1) << bitoffset);
 
-            if (vn->getSize().getType() == ConstTpl::real)
+            if (vn.getSize().getType() == ConstTpl::real)
             {
                 // If we know the size of the bitranged varnode, we can
                 // do some immediate checks, and possibly simplify things
-                uint4 symsize = vn->getSize().getReal();
+                uint4 symsize = vn.getSize().getReal();
                 if (symsize > 0)
                     zextneeded = (symsize > smallsize);
                 symsize *= 8;       // Convert to number of bits
@@ -402,14 +402,14 @@ namespace Sla.SLEIGH
             {   // Was there an error condition
                 reportError((Location*)0, errmsg);    // Report the error
                 delete vn;          // Clean up
-                vector<OpTpl*>* resops = rhs->ops; // Passthru old expression
-                rhs->ops = (vector<OpTpl*>*)0;
+                vector<OpTpl*>* resops = rhs.ops; // Passthru old expression
+                rhs.ops = (vector<OpTpl*>*)0;
                 delete rhs;
                 return resops;
             }
 
             // We know what the size of the input has to be
-            force_size(rhs->outvn, ConstTpl(ConstTpl::real, smallsize), *rhs->ops);
+            force_size(rhs.outvn, ConstTpl(ConstTpl::real, smallsize), *rhs.ops);
 
             ExprTree* res;
             VarnodeTpl* finalout = buildTruncatedVarnode(vn, bitoffset, numbits);
@@ -434,8 +434,8 @@ namespace Sla.SLEIGH
             }
             if (errmsg.size() > 0)
                 reportError((Location*)0, errmsg);
-            vector<OpTpl*>* resops = res->ops;
-            res->ops = (vector<OpTpl*>*)0;
+            vector<OpTpl*>* resops = res.ops;
+            res.ops = (vector<OpTpl*>*)0;
             delete res;
             return resops;
         }
@@ -448,7 +448,7 @@ namespace Sla.SLEIGH
             string errmsg;
             if (numbits == 0)
                 errmsg = "Size of bitrange is zero";
-            VarnodeTpl* vn = sym->getVarnode();
+            VarnodeTpl* vn = sym.getVarnode();
             uint4 finalsize = (numbits + 7) / 8; // Round up to neareast byte size
             uint4 truncshift = 0;
             bool maskneeded = ((numbits % 8) != 0);
@@ -458,9 +458,9 @@ namespace Sla.SLEIGH
             // a truncation operator
             if ((errmsg.size() == 0) && (bitoffset == 0) && (!maskneeded))
             {
-                if ((vn->getSpace().getType() == ConstTpl::handle) && vn->isZeroSize())
+                if ((vn.getSpace().getType() == ConstTpl::handle) && vn.isZeroSize())
                 {
-                    vn->setSize(ConstTpl(ConstTpl::real, finalsize));
+                    vn.setSize(ConstTpl(ConstTpl::real, finalsize));
                     ExprTree* res = new ExprTree(vn);
                     //      VarnodeTpl *cruft = buildTemporary();
                     //      delete cruft;
@@ -479,11 +479,11 @@ namespace Sla.SLEIGH
                 }
             }
 
-            if (vn->getSize().getType() == ConstTpl::real)
+            if (vn.getSize().getType() == ConstTpl::real)
             {
                 // If we know the size of the input varnode, we can
                 // do some immediate checks, and possibly simplify things
-                uint4 insize = vn->getSize().getReal();
+                uint4 insize = vn.getSize().getReal();
                 if (insize > 0)
                 {
                     truncneeded = (finalsize < insize);
@@ -508,7 +508,7 @@ namespace Sla.SLEIGH
                 errmsg = "Superfluous bitrange";
 
             if (maskneeded && (finalsize > 8))
-                errmsg = "Illegal masked bitrange producing varnode larger than 64 bits: " + sym->getName();
+                errmsg = "Illegal masked bitrange producing varnode larger than 64 bits: " + sym.getName();
 
             ExprTree* res = new ExprTree(vn);
 
@@ -524,7 +524,7 @@ namespace Sla.SLEIGH
                 appendOp(CPUI_SUBPIECE, res, truncshift, 4);
             if (maskneeded)
                 appendOp(CPUI_INT_AND, res, mask, finalsize);
-            force_size(res->outvn, ConstTpl(ConstTpl::real, finalsize), *res->ops);
+            force_size(res.outvn, ConstTpl(ConstTpl::real, finalsize), *res.ops);
             return res;
         }
 
@@ -533,34 +533,34 @@ namespace Sla.SLEIGH
                         // portion of varnode -var-
             if (size == 0)
             {       // If no size specified
-                if (var->getSpace().getType() == ConstTpl::spaceid)
+                if (var.getSpace().getType() == ConstTpl::spaceid)
                 {
-                    AddrSpace* spc = var->getSpace().getSpace();    // Look to the particular space
-                    size = spc->getAddrSize(); // to see if it has a standard address size
+                    AddrSpace* spc = var.getSpace().getSpace();    // Look to the particular space
+                    size = spc.getAddrSize(); // to see if it has a standard address size
                 }
             }
             VarnodeTpl* res;
-            if ((var->getOffset().getType() == ConstTpl::real) && (var->getSpace().getType() == ConstTpl::spaceid))
+            if ((var.getOffset().getType() == ConstTpl::real) && (var.getSpace().getType() == ConstTpl::spaceid))
             {
-                AddrSpace* spc = var->getSpace().getSpace();
-                uintb off = AddrSpace::byteToAddress(var->getOffset().getReal(), spc->getWordSize());
+                AddrSpace* spc = var.getSpace().getSpace();
+                uintb off = AddrSpace::byteToAddress(var.getOffset().getReal(), spc.getWordSize());
                 res = new VarnodeTpl(ConstTpl(constantspace),
                           ConstTpl(ConstTpl::real, off),
                           ConstTpl(ConstTpl::real, size));
             }
             else
-                res = new VarnodeTpl(ConstTpl(constantspace), var->getOffset(), ConstTpl(ConstTpl::real, size));
+                res = new VarnodeTpl(ConstTpl(constantspace), var.getOffset(), ConstTpl(ConstTpl::real, size));
             delete var;
             return res;
         }
 
         public static void force_size(VarnodeTpl vt, ConstTpl size, List<OpTpl> ops)
         {
-            if ((vt->getSize().getType() != ConstTpl::real) || (vt->getSize().getReal() != 0))
+            if ((vt.getSize().getType() != ConstTpl::real) || (vt.getSize().getReal() != 0))
                 return;         // Size already exists
 
-            vt->setSize(size);
-            if (!vt->isLocalTemp()) return;
+            vt.setSize(size);
+            if (!vt.isLocalTemp()) return;
             // If the variable is a local temporary
             // The size may need to be propagated to the various
             // uses of the variable
@@ -570,26 +570,26 @@ namespace Sla.SLEIGH
             for (int4 i = 0; i < ops.size(); ++i)
             {
                 op = ops[i];
-                vn = op->getOut();
-                if ((vn != (VarnodeTpl*)0) && (vn->isLocalTemp()))
+                vn = op.getOut();
+                if ((vn != (VarnodeTpl*)0) && (vn.isLocalTemp()))
                 {
-                    if (vn->getOffset() == vt->getOffset())
+                    if (vn.getOffset() == vt.getOffset())
                     {
-                        if ((size.getType() == ConstTpl::real) && (vn->getSize().getType() == ConstTpl::real) &&
-                            (vn->getSize().getReal() != 0) && (vn->getSize().getReal() != size.getReal()))
+                        if ((size.getType() == ConstTpl::real) && (vn.getSize().getType() == ConstTpl::real) &&
+                            (vn.getSize().getReal() != 0) && (vn.getSize().getReal() != size.getReal()))
                             throw SleighError("Localtemp size mismatch");
-                        vn->setSize(size);
+                        vn.setSize(size);
                     }
                 }
-                for (int4 j = 0; j < op->numInput(); ++j)
+                for (int4 j = 0; j < op.numInput(); ++j)
                 {
-                    vn = op->getIn(j);
-                    if (vn->isLocalTemp() && (vn->getOffset() == vt->getOffset()))
+                    vn = op.getIn(j);
+                    if (vn.isLocalTemp() && (vn.getOffset() == vt.getOffset()))
                     {
-                        if ((size.getType() == ConstTpl::real) && (vn->getSize().getType() == ConstTpl::real) &&
-                            (vn->getSize().getReal() != 0) && (vn->getSize().getReal() != size.getReal()))
+                        if ((size.getType() == ConstTpl::real) && (vn.getSize().getType() == ConstTpl::real) &&
+                            (vn.getSize().getReal() != 0) && (vn.getSize().getReal() != size.getReal()))
                             throw SleighError("Localtemp size mismatch");
-                        vn->setSize(size);
+                        vn.setSize(size);
                     }
                 }
             }
@@ -603,22 +603,22 @@ namespace Sla.SLEIGH
             VarnodeTpl* vt;
             int4 i, inputsize;
 
-            vt = (j == -1) ? op->getOut() : op->getIn(j);
+            vt = (j == -1) ? op.getOut() : op.getIn(j);
             if (!inputonly)
             {
-                if (op->getOut() != (VarnodeTpl*)0)
-                    if (!op->getOut()->isZeroSize())
-                        match = op->getOut();
+                if (op.getOut() != (VarnodeTpl*)0)
+                    if (!op.getOut().isZeroSize())
+                        match = op.getOut();
             }
-            inputsize = op->numInput();
+            inputsize = op.numInput();
             for (i = 0; i < inputsize; ++i)
             {
                 if (match != (VarnodeTpl*)0) break;
-                if (op->getIn(i)->isZeroSize()) continue;
-                match = op->getIn(i);
+                if (op.getIn(i).isZeroSize()) continue;
+                match = op.getIn(i);
             }
             if (match != (VarnodeTpl*)0)
-                force_size(vt, match->getSize(), ops);
+                force_size(vt, match.getSize(), ops);
         }
 
         public static void fillinZero(OpTpl op, List<OpTpl> ops)
@@ -628,7 +628,7 @@ namespace Sla.SLEIGH
 
             int4 inputsize, i;
 
-            switch (op->getOpcode())
+            switch (op.getOpcode())
             {
                 case CPUI_COPY:         // Instructions where all inputs and output are same size
                 case CPUI_INT_ADD:
@@ -653,11 +653,11 @@ namespace Sla.SLEIGH
                 case CPUI_FLOAT_CEIL:
                 case CPUI_FLOAT_FLOOR:
                 case CPUI_FLOAT_ROUND:
-                    if ((op->getOut() != (VarnodeTpl*)0) && (op->getOut()->isZeroSize()))
+                    if ((op.getOut() != (VarnodeTpl*)0) && (op.getOut().isZeroSize()))
                         matchSize(-1, op, false, ops);
-                    inputsize = op->numInput();
+                    inputsize = op.numInput();
                     for (i = 0; i < inputsize; ++i)
-                        if (op->getIn(i)->isZeroSize())
+                        if (op.getIn(i).isZeroSize())
                             matchSize(i, op, false, ops);
                     break;
                 case CPUI_INT_EQUAL:        // Instructions with bool output
@@ -678,11 +678,11 @@ namespace Sla.SLEIGH
                 case CPUI_BOOL_XOR:
                 case CPUI_BOOL_AND:
                 case CPUI_BOOL_OR:
-                    if (op->getOut()->isZeroSize())
-                        force_size(op->getOut(), ConstTpl(ConstTpl::real, 1), ops);
-                    inputsize = op->numInput();
+                    if (op.getOut().isZeroSize())
+                        force_size(op.getOut(), ConstTpl(ConstTpl::real, 1), ops);
+                    inputsize = op.numInput();
                     for (i = 0; i < inputsize; ++i)
-                        if (op->getIn(i)->isZeroSize())
+                        if (op.getIn(i).isZeroSize())
                             matchSize(i, op, true, ops);
                     break;
                 // The shift amount does not necessarily have to be the same size
@@ -690,27 +690,27 @@ namespace Sla.SLEIGH
                 case CPUI_INT_LEFT:
                 case CPUI_INT_RIGHT:
                 case CPUI_INT_SRIGHT:
-                    if (op->getOut()->isZeroSize())
+                    if (op.getOut().isZeroSize())
                     {
-                        if (!op->getIn(0)->isZeroSize())
-                            force_size(op->getOut(), op->getIn(0)->getSize(), ops);
+                        if (!op.getIn(0).isZeroSize())
+                            force_size(op.getOut(), op.getIn(0).getSize(), ops);
                     }
-                    else if (op->getIn(0)->isZeroSize())
-                        force_size(op->getIn(0), op->getOut()->getSize(), ops);
+                    else if (op.getIn(0).isZeroSize())
+                        force_size(op.getIn(0), op.getOut().getSize(), ops);
                 // fallthru to subpiece constant check
                 case CPUI_SUBPIECE:
-                    if (op->getIn(1)->isZeroSize())
-                        force_size(op->getIn(1), ConstTpl(ConstTpl::real, 4), ops);
+                    if (op.getIn(1).isZeroSize())
+                        force_size(op.getIn(1), ConstTpl(ConstTpl::real, 4), ops);
                     break;
                 case CPUI_CPOOLREF:
-                    if (op->getOut()->isZeroSize() && (!op->getIn(0)->isZeroSize()))
-                        force_size(op->getOut(), op->getIn(0)->getSize(), ops);
-                    if (op->getIn(0)->isZeroSize() && (!op->getOut()->isZeroSize()))
-                        force_size(op->getIn(0), op->getOut()->getSize(), ops);
-                    for (i = 1; i < op->numInput(); ++i)
+                    if (op.getOut().isZeroSize() && (!op.getIn(0).isZeroSize()))
+                        force_size(op.getOut(), op.getIn(0).getSize(), ops);
+                    if (op.getIn(0).isZeroSize() && (!op.getOut().isZeroSize()))
+                        force_size(op.getIn(0), op.getOut().getSize(), ops);
+                    for (i = 1; i < op.numInput(); ++i)
                     {
-                        if (op->getIn(i)->isZeroSize())
-                            force_size(op->getIn(i), ConstTpl(ConstTpl::real, sizeof(uintb)), ops);
+                        if (op.getIn(i).isZeroSize())
+                            force_size(op.getIn(i), ConstTpl(ConstTpl::real, sizeof(uintb)), ops);
                     }
                     break;
                 default:
@@ -726,11 +726,11 @@ namespace Sla.SLEIGH
             vector<OpTpl*>::const_iterator iter;
             int4 lastsize;
 
-            for (iter = ct->getOpvec().begin(); iter != ct->getOpvec().end(); ++iter)
-                if ((*iter)->isZeroSize())
+            for (iter = ct.getOpvec().begin(); iter != ct.getOpvec().end(); ++iter)
+                if ((*iter).isZeroSize())
                 {
-                    fillinZero(*iter, ct->getOpvec());
-                    if ((*iter)->isZeroSize())
+                    fillinZero(*iter, ct.getOpvec());
+                    if ((*iter).isZeroSize())
                         zerovec.push_back(*iter);
                 }
             lastsize = zerovec.size() + 1;
@@ -740,8 +740,8 @@ namespace Sla.SLEIGH
                 zerovec2.clear();
                 for (iter = zerovec.begin(); iter != zerovec.end(); ++iter)
                 {
-                    fillinZero(*iter, ct->getOpvec());
-                    if ((*iter)->isZeroSize())
+                    fillinZero(*iter, ct.getOpvec());
+                    if ((*iter).isZeroSize())
                         zerovec2.push_back(*iter);
                 }
                 zerovec = zerovec2;

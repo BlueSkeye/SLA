@@ -68,7 +68,7 @@ namespace Sla.DECCORE
                     continue;
                 }
                 if ((opc == CPUI_COPY) || (opc == CPUI_RETURN)) {
-                    for (int i = 0; i < op->numInput(); ++i) {
+                    for (int i = 0; i < op.numInput(); ++i) {
                         if (op.getIn(i).isConstant()) {
                             continue;
                         }
@@ -118,7 +118,7 @@ namespace Sla.DECCORE
                 if (op.isDead()) {
                     continue;
                 }
-                parent = op->getParent();
+                parent = op.getParent();
                 if (parent.sizeIn() <= 1) {
                     continue;
                 }

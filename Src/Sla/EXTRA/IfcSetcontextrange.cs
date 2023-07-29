@@ -18,7 +18,7 @@ namespace Sla.EXTRA
         /// otherwise the value is set as a default.
         public override void execute(TextReader s)
         {
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("No load image present");
 
             string name;
@@ -37,21 +37,21 @@ namespace Sla.EXTRA
 
             if (s.eof())
             {       // No range indicates default value
-                dcp->conf->context->setVariableDefault(name, value);
+                dcp.conf.context.setVariableDefault(name, value);
                 return;
             }
 
             // Otherwise parse the range
             int4 size1, size2;
-            Address addr1 = parse_machaddr(s, size1, *dcp->conf->types); // Read begin address
-            Address addr2 = parse_machaddr(s, size2, *dcp->conf->types); // Read end address
+            Address addr1 = parse_machaddr(s, size1, *dcp.conf.types); // Read begin address
+            Address addr2 = parse_machaddr(s, size2, *dcp.conf.types); // Read end address
 
             if (addr1.isInvalid() || addr2.isInvalid())
                 throw IfaceParseError("Invalid address range");
             if (addr2 <= addr1)
                 throw IfaceParseError("Bad address range");
 
-            dcp->conf->context->setVariableRegion(name, addr1, addr2, value);
+            dcp.conf.context.setVariableRegion(name, addr1, addr2, value);
         }
     }
 }

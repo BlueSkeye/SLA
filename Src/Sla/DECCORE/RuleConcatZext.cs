@@ -34,19 +34,19 @@ namespace Sla.DECCORE
             PcodeOp* zextop;
             Varnode* hi,*lo;
 
-            hi = op->getIn(0);
-            if (!hi->isWritten()) return 0;
-            zextop = hi->getDef();
-            if (zextop->code() != CPUI_INT_ZEXT) return 0;
-            hi = zextop->getIn(0);
-            lo = op->getIn(1);
-            if (hi->isFree()) return 0;
-            if (lo->isFree()) return 0;
+            hi = op.getIn(0);
+            if (!hi.isWritten()) return 0;
+            zextop = hi.getDef();
+            if (zextop.code() != CPUI_INT_ZEXT) return 0;
+            hi = zextop.getIn(0);
+            lo = op.getIn(1);
+            if (hi.isFree()) return 0;
+            if (lo.isFree()) return 0;
 
             // Create new (earlier) concat out of hi and lo
-            PcodeOp* newconcat = data.newOp(2, op->getAddr());
+            PcodeOp* newconcat = data.newOp(2, op.getAddr());
             data.opSetOpcode(newconcat, CPUI_PIECE);
-            Varnode* newvn = data.newUniqueOut(hi->getSize() + lo->getSize(), newconcat);
+            Varnode* newvn = data.newUniqueOut(hi.getSize() + lo.getSize(), newconcat);
             data.opSetInput(newconcat, hi, 0);
             data.opSetInput(newconcat, lo, 1);
             data.opInsertBefore(newconcat, op);

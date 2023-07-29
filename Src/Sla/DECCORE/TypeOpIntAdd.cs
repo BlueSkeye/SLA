@@ -19,32 +19,32 @@ namespace Sla.DECCORE
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opIntAdd(op);
+            lng.opIntAdd(op);
         }
 
         public override Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)
         {
-            return castStrategy->arithmeticOutputStandard(op);  // Use arithmetic typing rules
+            return castStrategy.arithmeticOutputStandard(op);  // Use arithmetic typing rules
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
             int4 inslot, int4 outslot)
         {
-            type_metatype invnMeta = alttype->getMetatype();
+            type_metatype invnMeta = alttype.getMetatype();
             if (invnMeta != TYPE_PTR)
             {
                 if (invnMeta != TYPE_INT && invnMeta != TYPE_UINT)
                     return (Datatype*)0;
-                if (outslot != 1 || !op->getIn(1)->isConstant())
+                if (outslot != 1 || !op.getIn(1).isConstant())
                     return (Datatype*)0;
             }
             else if ((inslot != -1) && (outslot != -1))
-                return (Datatype*)0;    // Must propagate input <-> output for pointers
+                return (Datatype*)0;    // Must propagate input <. output for pointers
             Datatype* newtype;
-            if (outvn->isConstant() && (alttype->getMetatype() != TYPE_PTR))
+            if (outvn.isConstant() && (alttype.getMetatype() != TYPE_PTR))
                 newtype = alttype;
             else if (inslot == -1)      // Propagating output to input
-                newtype = op->getIn(outslot)->getTempType();    // Don't propagate pointer types this direction
+                newtype = op.getIn(outslot).getTempType();    // Don't propagate pointer types this direction
             else
                 newtype = propagateAddIn2Out(alttype, tlst, op, inslot);
             return newtype;
@@ -67,17 +67,17 @@ namespace Sla.DECCORE
         {
             TypePointer* pointer = (TypePointer*)alttype;
             uintb uoffset;
-            int4 command = propagateAddPointer(uoffset, op, inslot, pointer->getPtrTo()->getSize());
-            if (command == 2) return op->getOut()->getTempType(); // Doesn't look like a good pointer add
+            int4 command = propagateAddPointer(uoffset, op, inslot, pointer.getPtrTo().getSize());
+            if (command == 2) return op.getOut().getTempType(); // Doesn't look like a good pointer add
             TypePointer* parent = (TypePointer*)0;
             uintb parentOff;
             if (command != 3)
             {
-                uoffset = AddrSpace::addressToByte(uoffset, pointer->getWordSize());
-                bool allowWrap = (op->code() != CPUI_PTRSUB);
+                uoffset = AddrSpace::addressToByte(uoffset, pointer.getWordSize());
+                bool allowWrap = (op.code() != CPUI_PTRSUB);
                 do
                 {
-                    pointer = pointer->downChain(uoffset, parent, parentOff, allowWrap, *typegrp);
+                    pointer = pointer.downChain(uoffset, parent, parentOff, allowWrap, *typegrp);
                     if (pointer == (TypePointer*)0)
                         break;
                 } while (uoffset != 0);
@@ -88,21 +88,21 @@ namespace Sla.DECCORE
                 // preserve info about this container
                 Datatype* pt;
                 if (pointer == (TypePointer*)0)
-                    pt = typegrp->getBase(1, TYPE_UNKNOWN); // Offset does not point at a proper sub-type
+                    pt = typegrp.getBase(1, TYPE_UNKNOWN); // Offset does not point at a proper sub-type
                 else
-                    pt = pointer->getPtrTo();   // The sub-type being directly pointed at
-                pointer = typegrp->getTypePointerRel(parent, pt, parentOff);
+                    pt = pointer.getPtrTo();   // The sub-type being directly pointed at
+                pointer = typegrp.getTypePointerRel(parent, pt, parentOff);
             }
             if (pointer == (TypePointer*)0)
             {
                 if (command == 0)
                     return alttype;
-                return op->getOut()->getTempType();
+                return op.getOut().getTempType();
             }
-            if (op->getIn(inslot)->isSpacebase())
+            if (op.getIn(inslot).isSpacebase())
             {
-                if (pointer->getPtrTo()->getMetatype() == TYPE_SPACEBASE)
-                    pointer = typegrp->getTypePointer(pointer->getSize(), typegrp->getBase(1, TYPE_UNKNOWN), pointer->getWordSize());
+                if (pointer.getPtrTo().getMetatype() == TYPE_SPACEBASE)
+                    pointer = typegrp.getTypePointer(pointer.getSize(), typegrp.getBase(1, TYPE_UNKNOWN), pointer.getWordSize());
             }
             return pointer;
         }
@@ -122,42 +122,42 @@ namespace Sla.DECCORE
         /// \return a command indicating how the op should be treated
         public static int4 propagateAddPointer(uintb off, PcodeOp op, int4 slot, int4 sz)
         {
-            if (op->code() == CPUI_PTRADD)
+            if (op.code() == CPUI_PTRADD)
             {
                 if (slot != 0) return 2;
-                Varnode* constvn = op->getIn(1);
-                uintb mult = op->getIn(2)->getOffset();
-                if (constvn->isConstant())
+                Varnode* constvn = op.getIn(1);
+                uintb mult = op.getIn(2).getOffset();
+                if (constvn.isConstant())
                 {
-                    off = (constvn->getOffset() * mult) & calc_mask(constvn->getSize());
+                    off = (constvn.getOffset() * mult) & calc_mask(constvn.getSize());
                     return (off == 0) ? 0 : 1;
                 }
                 if (sz != 0 && (mult % sz) != 0)
                     return 2;
                 return 3;
             }
-            if (op->code() == CPUI_PTRSUB)
+            if (op.code() == CPUI_PTRSUB)
             {
                 if (slot != 0) return 2;
-                off = op->getIn(1)->getOffset();
+                off = op.getIn(1).getOffset();
                 return (off == 0) ? 0 : 1;
             }
-            if (op->code() == CPUI_INT_ADD)
+            if (op.code() == CPUI_INT_ADD)
             {
-                Varnode* othervn = op->getIn(1 - slot);
+                Varnode* othervn = op.getIn(1 - slot);
                 // Check if othervn is an offset
-                if (!othervn->isConstant())
+                if (!othervn.isConstant())
                 {
-                    if (othervn->isWritten())
+                    if (othervn.isWritten())
                     {
-                        PcodeOp* multop = othervn->getDef();
-                        if (multop->code() == CPUI_INT_MULT)
+                        PcodeOp* multop = othervn.getDef();
+                        if (multop.code() == CPUI_INT_MULT)
                         {
-                            Varnode* constvn = multop->getIn(1);
-                            if (constvn->isConstant())
+                            Varnode* constvn = multop.getIn(1);
+                            if (constvn.isConstant())
                             {
-                                uintb mult = constvn->getOffset();
-                                if (mult == calc_mask(constvn->getSize()))  // If multiplying by -1
+                                uintb mult = constvn.getOffset();
+                                if (mult == calc_mask(constvn.getSize()))  // If multiplying by -1
                                     return 2;       // Assume this is a pointer difference and don't propagate
                                 if (sz != 0 && (mult % sz) != 0)
                                     return 2;
@@ -169,9 +169,9 @@ namespace Sla.DECCORE
                         return 3;
                     return 2;
                 }
-                if (othervn->getTempType()->getMetatype() == TYPE_PTR) // Check if othervn marked as ptr
+                if (othervn.getTempType().getMetatype() == TYPE_PTR) // Check if othervn marked as ptr
                     return 2;
-                off = othervn->getOffset();
+                off = othervn.getOffset();
                 return (off == 0) ? 0 : 1;
             }
             return 2;

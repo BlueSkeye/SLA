@@ -32,19 +32,19 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn1 = op->getIn(0);
-            if (!vn1->isWritten()) return 0;
-            PcodeOp* castop = vn1->getDef();
-            OpCode opc2 = castop->code();
+            Varnode* vn1 = op.getIn(0);
+            if (!vn1.isWritten()) return 0;
+            PcodeOp* castop = vn1.getDef();
+            OpCode opc2 = castop.code();
             if ((opc2 != CPUI_FLOAT_FLOAT2FLOAT) && (opc2 != CPUI_FLOAT_INT2FLOAT))
                 return 0;
-            OpCode opc1 = op->code();
-            Varnode* vn2 = castop->getIn(0);
-            int4 insize1 = vn1->getSize();
-            int4 insize2 = vn2->getSize();
-            int4 outsize = op->getOut()->getSize();
+            OpCode opc1 = op.code();
+            Varnode* vn2 = castop.getIn(0);
+            int4 insize1 = vn1.getSize();
+            int4 insize2 = vn2.getSize();
+            int4 outsize = op.getOut().getSize();
 
-            if (vn2->isFree()) return 0;    // Don't propagate free
+            if (vn2.isFree()) return 0;    // Don't propagate free
 
             if ((opc2 == CPUI_FLOAT_FLOAT2FLOAT) && (opc1 == CPUI_FLOAT_FLOAT2FLOAT))
             {
@@ -56,7 +56,7 @@ namespace Sla.DECCORE
                     return 1;
                 }
                 else if (insize2 < insize1)
-                { // Convert two increases -> one combined increase
+                { // Convert two increases . one combined increase
                     data.opSetInput(op, vn2, 0);
                     return 1;
                 }

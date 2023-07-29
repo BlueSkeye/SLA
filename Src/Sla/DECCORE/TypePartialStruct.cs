@@ -34,7 +34,7 @@ namespace Sla.DECCORE
             : base(sz, TYPE_PARTIALSTRUCT)
         {
 #if CPUI_DEBUG
-            if (contain->getMetatype() != TYPE_STRUCT && contain->getMetatype() != TYPE_ARRAY)
+            if (contain.getMetatype() != TYPE_STRUCT && contain.getMetatype() != TYPE_ARRAY)
                 throw new LowlevelError("Parent of partial struct is not a struture or array");
 #endif
             flags |= has_stripped;
@@ -48,7 +48,7 @@ namespace Sla.DECCORE
 
         private override void printRaw(TextWriter s)
         {
-            container->printRaw(s);
+            container.printRaw(s);
             s << "[off=" << dec << offset << ",sz=" << size << ']';
         }
 
@@ -59,12 +59,12 @@ namespace Sla.DECCORE
             Datatype* ct = container;
             do
             {
-                ct = ct->getSubType(off, newoff);
+                ct = ct.getSubType(off, newoff);
                 if (ct == (Datatype*)0)
                     break;
                 off = *newoff;
                 // Component can extend beyond range of this partial, in which case we go down another level
-            } while (ct->getSize() - (int4)off > sizeLeft);
+            } while (ct.getSize() - (int4)off > sizeLeft);
             return ct;
         }
 
@@ -72,7 +72,7 @@ namespace Sla.DECCORE
         {
             int4 sizeLeft = size - off;
             off += offset;
-            int4 res = container->getHoleSize(off);
+            int4 res = container.getHoleSize(off);
             if (res > sizeLeft)
                 res = sizeLeft;
             return res;
@@ -84,22 +84,22 @@ namespace Sla.DECCORE
             if (res != 0) return res;
             // Both must be partial
             TypePartialStruct* tp = (TypePartialStruct*)&op;
-            if (offset != tp->offset) return (offset < tp->offset) ? -1 : 1;
+            if (offset != tp.offset) return (offset < tp.offset) ? -1 : 1;
             level -= 1;
             if (level < 0)
             {
                 if (id == op.getId()) return 0;
                 return (id < op.getId()) ? -1 : 1;
             }
-            return container->compare(*tp->container, level); // Compare the underlying union
+            return container.compare(*tp.container, level); // Compare the underlying union
         }
 
         private override int4 compareDependency(Datatype op)
         {
             if (submeta != op.getSubMeta()) return (submeta < op.getSubMeta()) ? -1 : 1;
             TypePartialStruct* tp = (TypePartialStruct*)&op;    // Both must be partial
-            if (container != tp->container) return (container < tp->container) ? -1 : 1;    // Compare absolute pointers
-            if (offset != tp->offset) return (offset < tp->offset) ? -1 : 1;
+            if (container != tp.container) return (container < tp.container) ? -1 : 1;    // Compare absolute pointers
+            if (offset != tp.offset) return (offset < tp.offset) ? -1 : 1;
             return (op.getSize() - size);
         }
 

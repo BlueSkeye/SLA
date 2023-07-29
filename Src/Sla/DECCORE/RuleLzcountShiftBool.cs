@@ -37,9 +37,9 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* outVn = op->getOut();
+            Varnode* outVn = op.getOut();
             list<PcodeOp*>::const_iterator iter, iter2;
-            uintb max_return = 8 * op->getIn(0)->getSize();
+            uintb max_return = 8 * op.getIn(0).getSize();
             if (popcount(max_return) != 1)
             {
                 // This rule only makes sense with sizes that are powers of 2; if the maximum value
@@ -49,20 +49,20 @@ namespace Sla.DECCORE
                 return 0;
             }
 
-            for (iter = outVn->beginDescend(); iter != outVn->endDescend(); ++iter)
+            for (iter = outVn.beginDescend(); iter != outVn.endDescend(); ++iter)
             {
                 PcodeOp* baseOp = *iter;
-                if (baseOp->code() != CPUI_INT_RIGHT && baseOp->code() != CPUI_INT_SRIGHT) continue;
-                Varnode* vn1 = baseOp->getIn(1);
-                if (!vn1->isConstant()) continue;
-                uintb shift = vn1->getOffset();
+                if (baseOp.code() != CPUI_INT_RIGHT && baseOp.code() != CPUI_INT_SRIGHT) continue;
+                Varnode* vn1 = baseOp.getIn(1);
+                if (!vn1.isConstant()) continue;
+                uintb shift = vn1.getOffset();
                 if ((max_return >> shift) == 1)
                 {
                     // Becomes a comparison with zero
-                    PcodeOp* newOp = data.newOp(2, baseOp->getAddr());
+                    PcodeOp* newOp = data.newOp(2, baseOp.getAddr());
                     data.opSetOpcode(newOp, CPUI_INT_EQUAL);
-                    Varnode* b = data.newConstant(op->getIn(0)->getSize(), 0);
-                    data.opSetInput(newOp, op->getIn(0), 0);
+                    Varnode* b = data.newConstant(op.getIn(0).getSize(), 0);
+                    data.opSetInput(newOp, op.getIn(0), 0);
                     data.opSetInput(newOp, b, 1);
 
                     // CPUI_INT_EQUAL must produce a 1-byte boolean result
@@ -70,11 +70,11 @@ namespace Sla.DECCORE
 
                     data.opInsertBefore(newOp, baseOp);
 
-                    // Because the old output had size op->getIn(0)->getSize(),
+                    // Because the old output had size op.getIn(0).getSize(),
                     // we have to guarantee that a Varnode of this size gets outputted
                     // to the descending PcodeOps. This is handled here with CPUI_INT_ZEXT.
                     data.opRemoveInput(baseOp, 1);
-                    if (baseOp->getOut()->getSize() == 1)
+                    if (baseOp.getOut().getSize() == 1)
                         data.opSetOpcode(baseOp, CPUI_COPY);
                     else
                         data.opSetOpcode(baseOp, CPUI_INT_ZEXT);

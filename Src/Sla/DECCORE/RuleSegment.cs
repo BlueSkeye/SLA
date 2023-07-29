@@ -32,32 +32,32 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            SegmentOp* segdef = data.getArch()->userops.getSegmentOp(op->getIn(0)->getSpaceFromConst()->getIndex());
+            SegmentOp* segdef = data.getArch().userops.getSegmentOp(op.getIn(0).getSpaceFromConst().getIndex());
             if (segdef == (SegmentOp*)0)
                 throw new LowlevelError("Segment operand missing definition");
 
-            Varnode* vn1 = op->getIn(1);
-            Varnode* vn2 = op->getIn(2);
+            Varnode* vn1 = op.getIn(1);
+            Varnode* vn2 = op.getIn(2);
 
-            if (vn1->isConstant() && vn2->isConstant())
+            if (vn1.isConstant() && vn2.isConstant())
             {
                 vector<uintb> bindlist;
-                bindlist.push_back(vn1->getOffset());
-                bindlist.push_back(vn2->getOffset());
-                uintb val = segdef->execute(bindlist);
+                bindlist.push_back(vn1.getOffset());
+                bindlist.push_back(vn2.getOffset());
+                uintb val = segdef.execute(bindlist);
                 data.opRemoveInput(op, 2);
                 data.opRemoveInput(op, 1);
-                data.opSetInput(op, data.newConstant(op->getOut()->getSize(), val), 0);
+                data.opSetInput(op, data.newConstant(op.getOut().getSize(), val), 0);
                 data.opSetOpcode(op, CPUI_COPY);
                 return 1;
             }
-            else if (segdef->hasFarPointerSupport())
+            else if (segdef.hasFarPointerSupport())
             {
                 // If the hi and lo pieces come from a contigouous source
                 if (!contiguous_test(vn1, vn2)) return 0;
                 Varnode* whole = findContiguousWhole(data, vn1, vn2);
                 if (whole == (Varnode*)0) return 0;
-                if (whole->isFree()) return 0;
+                if (whole.isFree()) return 0;
                 // Use the contiguous source as the whole pointer
                 data.opRemoveInput(op, 2);
                 data.opRemoveInput(op, 1);

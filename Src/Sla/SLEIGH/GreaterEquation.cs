@@ -17,22 +17,22 @@ namespace Sla.SLEIGH
         
         public override void genPattern(List<TokenPattern> ops)
         {
-            intb lhsmin = lhs->minValue();
-            intb lhsmax = lhs->maxValue();
+            intb lhsmin = lhs.minValue();
+            intb lhsmax = lhs.maxValue();
             List<PatternValue> semval = new List<PatternValue>();
             vector<intb> min;
             vector<intb> max;
             vector<intb> cur;
             int4 count = 0;
 
-            rhs->listValues(semval);
-            rhs->getMinMax(min, max);
+            rhs.listValues(semval);
+            rhs.getMinMax(min, max);
             cur = min;
 
             do
             {
                 intb lhsval;
-                intb val = rhs->getSubValue(cur);
+                intb val = rhs.getSubValue(cur);
                 for (lhsval = lhsmin; lhsval <= lhsmax; ++lhsval)
                 {
                     if (lhsval <= val) continue;

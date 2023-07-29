@@ -51,7 +51,7 @@ namespace Sla.SLEIGH
             flags = 0;
             hand = index;
             localexp = new OperandValue(index, ct);
-            localexp->layClaim();
+            localexp.layClaim();
             defexp = (PatternExpression*)0;
             triple = (TripleSymbol*)0;
         }
@@ -73,7 +73,7 @@ namespace Sla.SLEIGH
             if ((defexp != (PatternExpression*)0) || (triple != (TripleSymbol*)0))
                 throw SleighError("Redefining operand");
             defexp = pe;
-            defexp->layClaim();
+            defexp.layClaim();
         }
 
         public void defineOperand(TripleSymbol tri)
@@ -125,9 +125,9 @@ namespace Sla.SLEIGH
             {
                 SpecificSymbol* specsym = dynamic_cast<SpecificSymbol*>(triple);
                 if (specsym != (SpecificSymbol*)0)
-                    res = specsym->getVarnode();
+                    res = specsym.getVarnode();
                 else if ((triple != (TripleSymbol*)0) &&
-                     ((triple->getType() == valuemap_symbol) || (triple->getType() == name_symbol)))
+                     ((triple.getType() == valuemap_symbol) || (triple.getType() == name_symbol)))
                     res = new VarnodeTpl(hand, true); // Zero-size symbols
                 else
                     res = new VarnodeTpl(hand, false); // Possible dynamic handle
@@ -145,7 +145,7 @@ namespace Sla.SLEIGH
         public override int4 getSize()
         {
             if (triple != (TripleSymbol*)0)
-                return triple->getSize();
+                return triple.getSize();
             return 0;
         }
 
@@ -154,14 +154,14 @@ namespace Sla.SLEIGH
             walker.pushOperand(getIndex());
             if (triple != (TripleSymbol*)0)
             {
-                if (triple->getType() == SleighSymbol::subtable_symbol)
-                    walker.getConstructor()->print(s, walker);
+                if (triple.getType() == SleighSymbol::subtable_symbol)
+                    walker.getConstructor().print(s, walker);
                 else
-                    triple->print(s, walker);
+                    triple.print(s, walker);
             }
             else
             {
-                intb val = defexp->getValue(walker);
+                intb val = defexp.getValue(walker);
                 if (val >= 0)
                     s << "0x" << hex << val;
                 else
@@ -173,7 +173,7 @@ namespace Sla.SLEIGH
         public override void collectLocalValues(List<uintb> results)
         {
             if (triple != (TripleSymbol*)0)
-                triple->collectLocalValues(results);
+                triple.collectLocalValues(results);
         }
 
         public override symbol_type getType() => operand_symbol;
@@ -183,16 +183,16 @@ namespace Sla.SLEIGH
             s << "<operand_sym";
             SleighSymbol::saveXmlHeader(s);
             if (triple != (TripleSymbol*)0)
-                s << " subsym=\"0x" << hex << triple->getId() << "\"";
+                s << " subsym=\"0x" << hex << triple.getId() << "\"";
             s << " off=\"" << dec << reloffset << "\"";
             s << " base=\"" << offsetbase << "\"";
             s << " minlen=\"" << minimumlength << "\"";
             if (isCodeAddress())
                 s << " code=\"true\"";
             s << " index=\"" << dec << hand << "\">\n";
-            localexp->saveXml(s);
+            localexp.saveXml(s);
             if (defexp != (PatternExpression*)0)
-                defexp->saveXml(s);
+                defexp.saveXml(s);
             s << "</operand_sym>\n";
         }
 
@@ -209,51 +209,51 @@ namespace Sla.SLEIGH
             triple = (TripleSymbol*)0;
             flags = 0;
             {
-                istringstream s(el->getAttributeValue("index"));
+                istringstream s(el.getAttributeValue("index"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> hand;
             }
             {
-                istringstream s(el->getAttributeValue("off"));
+                istringstream s(el.getAttributeValue("off"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> reloffset;
             }
             {
-                istringstream s(el->getAttributeValue("base"));
+                istringstream s(el.getAttributeValue("base"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> offsetbase;
             }
             {
-                istringstream s(el->getAttributeValue("minlen"));
+                istringstream s(el.getAttributeValue("minlen"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> minimumlength;
             }
-            for (int4 i = 0; i < el->getNumAttributes(); ++i)
+            for (int4 i = 0; i < el.getNumAttributes(); ++i)
             {
-                if (el->getAttributeName(i) == "subsym")
+                if (el.getAttributeName(i) == "subsym")
                 {
                     uintm id;
-                    istringstream s(el->getAttributeValue(i));
+                    istringstream s(el.getAttributeValue(i));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> id;
-                    triple = (TripleSymbol*)trans->findSymbol(id);
+                    triple = (TripleSymbol*)trans.findSymbol(id);
                 }
-                else if (el->getAttributeName(i) == "code")
+                else if (el.getAttributeName(i) == "code")
                 {
-                    if (xml_readbool(el->getAttributeValue(i)))
+                    if (xml_readbool(el.getAttributeValue(i)))
                         flags |= code_address;
                 }
             }
-            List list = el->getChildren();
+            List list = el.getChildren();
             List::const_iterator iter;
             iter = list.begin();
             localexp = (OperandValue*)PatternExpression::restoreExpression(*iter, trans);
-            localexp->layClaim();
+            localexp.layClaim();
             ++iter;
             if (iter != list.end())
             {
                 defexp = PatternExpression::restoreExpression(*iter, trans);
-                defexp->layClaim();
+                defexp.layClaim();
             }
         }
     }

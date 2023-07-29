@@ -27,12 +27,12 @@ namespace Sla.DECCORE
             if (val)
             {
                 res = "Too many instructions are now a fatal error";
-                glb->flowoptions |= FlowInfo::error_toomanyinstructions;
+                glb.flowoptions |= FlowInfo::error_toomanyinstructions;
             }
             else
             {
                 res = "Too many instructions are now NOT a fatal error";
-                glb->flowoptions &= ~((uint4)FlowInfo::error_toomanyinstructions);
+                glb.flowoptions &= ~((uint4)FlowInfo::error_toomanyinstructions);
             }
 
             return res;

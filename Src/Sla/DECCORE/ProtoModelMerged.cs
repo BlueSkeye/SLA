@@ -105,38 +105,38 @@ namespace Sla.DECCORE
         /// \param model is the new prototype model to add to the merge
         public void foldIn(ProtoModel model)
         {
-            if (model->glb != glb) throw new LowlevelError("Mismatched architecture");
-            if ((model->input->getType() != ParamList::p_standard) &&
-                (model->input->getType() != ParamList::p_register))
+            if (model.glb != glb) throw new LowlevelError("Mismatched architecture");
+            if ((model.input.getType() != ParamList::p_standard) &&
+                (model.input.getType() != ParamList::p_register))
                 throw new LowlevelError("Can only resolve between standard prototype models");
             if (input == (ParamList*)0)
             { // First fold in
                 input = new ParamListMerged();
-                output = new ParamListStandardOut(*(ParamListStandardOut*)model->output);
-                ((ParamListMerged*)input)->foldIn(*(ParamListStandard*)model->input); // Fold in the parameter lists
-                extrapop = model->extrapop;
-                effectlist = model->effectlist;
-                injectUponEntry = model->injectUponEntry;
-                injectUponReturn = model->injectUponReturn;
-                likelytrash = model->likelytrash;
-                localrange = model->localrange;
-                paramrange = model->paramrange;
+                output = new ParamListStandardOut(*(ParamListStandardOut*)model.output);
+                ((ParamListMerged*)input).foldIn(*(ParamListStandard*)model.input); // Fold in the parameter lists
+                extrapop = model.extrapop;
+                effectlist = model.effectlist;
+                injectUponEntry = model.injectUponEntry;
+                injectUponReturn = model.injectUponReturn;
+                likelytrash = model.likelytrash;
+                localrange = model.localrange;
+                paramrange = model.paramrange;
             }
             else
             {
-                ((ParamListMerged*)input)->foldIn(*(ParamListStandard*)model->input);
+                ((ParamListMerged*)input).foldIn(*(ParamListStandard*)model.input);
                 // We assume here that the output models are the same, but we don't check
-                if (extrapop != model->extrapop)
+                if (extrapop != model.extrapop)
                     extrapop = ProtoModel::extrapop_unknown;
-                if ((injectUponEntry != model->injectUponEntry) || (injectUponReturn != model->injectUponReturn))
+                if ((injectUponEntry != model.injectUponEntry) || (injectUponReturn != model.injectUponReturn))
                     throw new LowlevelError("Cannot merge prototype models with different inject ids");
-                intersectEffects(model->effectlist);
-                intersectLikelyTrash(model->likelytrash);
+                intersectEffects(model.effectlist);
+                intersectLikelyTrash(model.likelytrash);
                 // Take the union of the localrange and paramrange
                 set<Range>::const_iterator iter;
-                for (iter = model->localrange.begin(); iter != model->localrange.end(); ++iter)
+                for (iter = model.localrange.begin(); iter != model.localrange.end(); ++iter)
                     localrange.insertRange((*iter).getSpace(), (*iter).getFirst(), (*iter).getLast());
-                for (iter = model->paramrange.begin(); iter != model->paramrange.end(); ++iter)
+                for (iter = model.paramrange.begin(); iter != model.paramrange.end(); ++iter)
                     paramrange.insertRange((*iter).getSpace(), (*iter).getFirst(), (*iter).getLast());
             }
         }
@@ -153,11 +153,11 @@ namespace Sla.DECCORE
             int4 bestindex = -1;
             for (int4 i = 0; i < modellist.size(); ++i)
             {
-                int4 numtrials = active->getNumTrials();
+                int4 numtrials = active.getNumTrials();
                 ScoreProtoModel scoremodel = new ScoreProtoModel(true, modellist[i], numtrials);
                 for (int4 j = 0; j < numtrials; ++j)
                 {
-                    ParamTrial trial = new ParamTrial(active->getTrial(j));
+                    ParamTrial trial = new ParamTrial(active.getTrial(j));
                     if (trial.isActive())
                         scoremodel.addParameter(trial.getAddress(), trial.getSize());
                 }
@@ -187,7 +187,7 @@ namespace Sla.DECCORE
                 uint4 subId = decoder.openElement();
                 if (subId != ELEM_MODEL) break;
                 string modelName = decoder.readString(ATTRIB_NAME);
-                ProtoModel* mymodel = glb->getModel(modelName);
+                ProtoModel* mymodel = glb.getModel(modelName);
                 if (mymodel == (ProtoModel*)0)
                     throw new LowlevelError("Missing prototype model: " + modelName);
                 decoder.closeElement(subId);
@@ -195,8 +195,8 @@ namespace Sla.DECCORE
                 modellist.push_back(mymodel);
             }
             decoder.closeElement(elemId);
-            ((ParamListMerged*)input)->finalize();
-            ((ParamListMerged*)output)->finalize();
+            ((ParamListMerged*)input).finalize();
+            ((ParamListMerged*)output).finalize();
         }
     }
 }

@@ -30,11 +30,11 @@ namespace Sla.DECCORE
             for (i = 0; i < graph.getSize(); ++i)
             {
                 bb = (BlockBasic*)graph.getBlock(i);
-                cbranch = bb->lastOp();
-                if ((cbranch == (PcodeOp*)0) || (cbranch->code() != CPUI_CBRANCH)) continue;
-                if (!cbranch->getIn(1)->isConstant()) continue;
-                uintb val = cbranch->getIn(1)->getOffset();
-                int4 num = ((val != 0) != cbranch->isBooleanFlip()) ? 0 : 1;
+                cbranch = bb.lastOp();
+                if ((cbranch == (PcodeOp*)0) || (cbranch.code() != CPUI_CBRANCH)) continue;
+                if (!cbranch.getIn(1).isConstant()) continue;
+                uintb val = cbranch.getIn(1).getOffset();
+                int4 num = ((val != 0) != cbranch.isBooleanFlip()) ? 0 : 1;
                 data.removeBranch(bb, num);
                 count += 1;
             }

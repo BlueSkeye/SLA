@@ -35,13 +35,13 @@ namespace Sla.DECCORE
             {
                 uint1* ptr = (uint1*)&res;
                 ptr += (HOST_ENDIAN == 1) ? (sizeof(uintb) - getWordSize()) : 0;
-                loader->loadFill(ptr, getWordSize(), Address(spc, addr));
+                loader.loadFill(ptr, getWordSize(), Address(spc, addr));
             }
             catch (DataUnavailError &err) {
                 // Pages not mapped in the load image, are assumed to be zero
                 res = 0;
             }
-            if ((HOST_ENDIAN == 1) != spc->isBigEndian())
+            if ((HOST_ENDIAN == 1) != spc.isBigEndian())
                 res = byte_swap(res, getWordSize());
             return res;
             }
@@ -56,7 +56,7 @@ namespace Sla.DECCORE
 
             try
             {
-                loader->loadFill(res, size, Address(spc, addr + skip));
+                loader.loadFill(res, size, Address(spc, addr + skip));
             }
             catch (DataUnavailError err) {
                 // Pages not mapped in the load image, are assumed to be zero

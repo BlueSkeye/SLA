@@ -68,7 +68,7 @@ namespace Sla.DECCORE
             while (count >= 0) {
                 PcodeOp curOp = path[count].op;
                 int ind = path[count].slot++;
-                if (ind >= curOp->numInput()) {
+                if (ind >= curOp.numInput()) {
                     count -= 1;
                     continue;
                 }
@@ -227,7 +227,7 @@ namespace Sla.DECCORE
             path.Add(new PcodeOpNode(op, 0));
             while (0 != path.Count) {
                 PcodeOpNode node = path[path.Count - 1];
-                if (node.op->numInput() <= node.slot) {
+                if (node.op.numInput() <= node.slot) {
                     path.RemoveAt(path.Count - 1);
                     continue;
                 }

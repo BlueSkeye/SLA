@@ -110,19 +110,19 @@
     bool PutsCallBack::addressCallback(Address &addr)
 
     {
-      MemoryState *mem = emulate->getMemoryState();
+      MemoryState *mem = emulate.getMemoryState();
       uint1 buffer[256];
-      uint4 esp = mem->getValue("ESP");
-      AddrSpace *ram = mem->getTranslate()->getSpaceByName("ram");
+      uint4 esp = mem.getValue("ESP");
+      AddrSpace *ram = mem.getTranslate().getSpaceByName("ram");
 
-      uint4 param1 = mem->getValue(ram,esp+4,4);
-      mem->getChunk(buffer,ram,param1,255);
+      uint4 param1 = mem.getValue(ram,esp+4,4);
+      mem.getChunk(buffer,ram,param1,255);
 
       cout << (char *)&buffer << endl;
 
-      uint4 returnaddr = mem->getValue(ram,esp,4);
-      mem->setValue("ESP",esp+8);
-      emulate->setExecuteAddress(Address(ram,returnaddr));
+      uint4 returnaddr = mem.getValue(ram,esp,4);
+      mem.setValue("ESP",esp+8);
+      emulate.setExecuteAddress(Address(ram,returnaddr));
   
       return true;			// This replaces the indicated instruction
     }

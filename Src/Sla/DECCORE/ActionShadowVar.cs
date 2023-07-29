@@ -39,40 +39,40 @@ namespace Sla.DECCORE
                 // We have to check all ops in the first address
                 // We cannot stop at first non-MULTIEQUAL because
                 // other ops creep in because of multi_collapse
-                startoffset = bl->getStart().getOffset();
-                list<PcodeOp*>::iterator iter = bl->beginOp();
-                while (iter != bl->endOp())
+                startoffset = bl.getStart().getOffset();
+                list<PcodeOp*>::iterator iter = bl.beginOp();
+                while (iter != bl.endOp())
                 {
                     op = *iter++;
-                    if (op->getAddr().getOffset() != startoffset) break;
-                    if (op->code() != CPUI_MULTIEQUAL) continue;
-                    vn = op->getIn(0);
-                    if (vn->isMark())
+                    if (op.getAddr().getOffset() != startoffset) break;
+                    if (op.code() != CPUI_MULTIEQUAL) continue;
+                    vn = op.getIn(0);
+                    if (vn.isMark())
                         oplist.push_back(op);
                     else
                     {
-                        vn->setMark();
+                        vn.setMark();
                         vnlist.push_back(vn);
                     }
                 }
                 for (int4 j = 0; j < vnlist.size(); ++j)
-                    vnlist[j]->clearMark();
+                    vnlist[j].clearMark();
             }
             list<PcodeOp*>::iterator oiter;
             for (oiter = oplist.begin(); oiter != oplist.end(); ++oiter)
             {
                 op = *oiter;
                 PcodeOp* op2;
-                for (op2 = op->previousOp(); op2 != (PcodeOp*)0; op2 = op2->previousOp())
+                for (op2 = op.previousOp(); op2 != (PcodeOp*)0; op2 = op2.previousOp())
                 {
-                    if (op2->code() != CPUI_MULTIEQUAL) continue;
+                    if (op2.code() != CPUI_MULTIEQUAL) continue;
                     int4 i;
-                    for (i = 0; i < op->numInput(); ++i) // Check for match in each branch
-                        if (op->getIn(i) != op2->getIn(i)) break;
-                    if (i != op->numInput()) continue; // All branches did not match
+                    for (i = 0; i < op.numInput(); ++i) // Check for match in each branch
+                        if (op.getIn(i) != op2.getIn(i)) break;
+                    if (i != op.numInput()) continue; // All branches did not match
 
                     vector<Varnode*> plist;
-                    plist.push_back(op2->getOut());
+                    plist.push_back(op2.getOut());
                     data.opSetOpcode(op, CPUI_COPY);
                     data.opSetAllInput(op, plist);
                     count += 1;

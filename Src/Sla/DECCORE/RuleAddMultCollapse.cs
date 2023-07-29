@@ -43,17 +43,17 @@ namespace Sla.DECCORE
             PcodeOp* subop;
             OpCode opc;
 
-            opc = op->code();
+            opc = op.code();
             // Constant is in c[0], other is in sub
-            c[0] = op->getIn(1);
-            if (!c[0]->isConstant()) return 0; // Neither input is a constant
-            sub = op->getIn(0);
+            c[0] = op.getIn(1);
+            if (!c[0].isConstant()) return 0; // Neither input is a constant
+            sub = op.getIn(0);
             // Find other constant one level down
-            if (!sub->isWritten()) return 0;
-            subop = sub->getDef();
-            if (subop->code() != opc) return 0; // Must be same exact operation
-            c[1] = subop->getIn(1);
-            if (!c[1]->isConstant())
+            if (!sub.isWritten()) return 0;
+            subop = sub.getDef();
+            if (subop.code() != opc) return 0; // Must be same exact operation
+            c[1] = subop.getIn(1);
+            if (!c[1].isConstant())
             {
                 // a = ((stackbase + c[1]) + othervn) + c[0]  =>       (stackbase + c[0] + c[1]) + othervn
                 // This lets two constant offsets get added together even in the case where there is:
@@ -64,28 +64,28 @@ namespace Sla.DECCORE
                 PcodeOp* baseop;
                 for (int4 i = 0; i < 2; ++i)
                 {
-                    othervn = subop->getIn(i);
-                    if (othervn->isConstant()) continue;
-                    if (othervn->isFree()) continue;
-                    sub2 = subop->getIn(1 - i);
-                    if (!sub2->isWritten()) continue;
-                    baseop = sub2->getDef();
-                    if (baseop->code() != CPUI_INT_ADD) continue;
-                    c[1] = baseop->getIn(1);
-                    if (!c[1]->isConstant()) continue;
-                    basevn = baseop->getIn(0);
-                    if (!basevn->isSpacebase()) continue; // Only apply this particular case if we are adding to a base pointer
-                    if (!basevn->isInput()) continue;   // because this adds a new add operation
+                    othervn = subop.getIn(i);
+                    if (othervn.isConstant()) continue;
+                    if (othervn.isFree()) continue;
+                    sub2 = subop.getIn(1 - i);
+                    if (!sub2.isWritten()) continue;
+                    baseop = sub2.getDef();
+                    if (baseop.code() != CPUI_INT_ADD) continue;
+                    c[1] = baseop.getIn(1);
+                    if (!c[1].isConstant()) continue;
+                    basevn = baseop.getIn(0);
+                    if (!basevn.isSpacebase()) continue; // Only apply this particular case if we are adding to a base pointer
+                    if (!basevn.isInput()) continue;   // because this adds a new add operation
 
-                    uintb val = op->getOpcode()->evaluateBinary(c[0]->getSize(), c[0]->getSize(), c[0]->getOffset(), c[1]->getOffset());
-                    newvn = data.newConstant(c[0]->getSize(), val);
-                    if (c[0]->getSymbolEntry() != (SymbolEntry*)0)
-                        newvn->copySymbolIfValid(c[0]);
-                    else if (c[1]->getSymbolEntry() != (SymbolEntry*)0)
-                        newvn->copySymbolIfValid(c[1]);
-                    PcodeOp* newop = data.newOp(2, op->getAddr());
+                    uintb val = op.getOpcode().evaluateBinary(c[0].getSize(), c[0].getSize(), c[0].getOffset(), c[1].getOffset());
+                    newvn = data.newConstant(c[0].getSize(), val);
+                    if (c[0].getSymbolEntry() != (SymbolEntry*)0)
+                        newvn.copySymbolIfValid(c[0]);
+                    else if (c[1].getSymbolEntry() != (SymbolEntry*)0)
+                        newvn.copySymbolIfValid(c[1]);
+                    PcodeOp* newop = data.newOp(2, op.getAddr());
                     data.opSetOpcode(newop, CPUI_INT_ADD);
-                    Varnode* newout = data.newUniqueOut(c[0]->getSize(), newop);
+                    Varnode* newout = data.newUniqueOut(c[0].getSize(), newop);
                     data.opSetInput(newop, basevn, 0);
                     data.opSetInput(newop, newvn, 1);
                     data.opInsertBefore(newop, op);
@@ -95,15 +95,15 @@ namespace Sla.DECCORE
                 }
                 return 0;
             }
-            sub2 = subop->getIn(0);
-            if (sub2->isFree()) return 0;
+            sub2 = subop.getIn(0);
+            if (sub2.isFree()) return 0;
 
-            uintb val = op->getOpcode()->evaluateBinary(c[0]->getSize(), c[0]->getSize(), c[0]->getOffset(), c[1]->getOffset());
-            newvn = data.newConstant(c[0]->getSize(), val);
-            if (c[0]->getSymbolEntry() != (SymbolEntry*)0)
-                newvn->copySymbolIfValid(c[0]);
-            else if (c[1]->getSymbolEntry() != (SymbolEntry*)0)
-                newvn->copySymbolIfValid(c[1]);
+            uintb val = op.getOpcode().evaluateBinary(c[0].getSize(), c[0].getSize(), c[0].getOffset(), c[1].getOffset());
+            newvn = data.newConstant(c[0].getSize(), val);
+            if (c[0].getSymbolEntry() != (SymbolEntry*)0)
+                newvn.copySymbolIfValid(c[0]);
+            else if (c[1].getSymbolEntry() != (SymbolEntry*)0)
+                newvn.copySymbolIfValid(c[1]);
             data.opSetInput(op, newvn, 1); // Replace c[0] with c[0]+c[1] or c[0]*c[1]
             data.opSetInput(op, sub2, 0); // Replace sub with sub2
             return 1;

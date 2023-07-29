@@ -34,16 +34,16 @@ namespace Sla.DECCORE
             enditer = data.endDef(Varnode::written);
             for (iter = data.beginDef(); iter != enditer; ++iter)
             {
-                high = (*iter)->getHigh();
-                if (high->isMark()) continue;
+                high = (*iter).getHigh();
+                if (high.isMark()) continue;
                 if (data.getMerge().hideShadows(high))
                     count += 1;
-                high->setMark();
+                high.setMark();
             }
             for (iter = data.beginDef(); iter != enditer; ++iter)
             {
-                high = (*iter)->getHigh();
-                high->clearMark();
+                high = (*iter).getHigh();
+                high.clearMark();
             }
             return 0;
         }

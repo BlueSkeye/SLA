@@ -325,7 +325,7 @@ namespace ghidra
         }
 
         /// Treat \b val as a constant of size \b sz.
-        /// Scanning across the bits of \b val return the number of transitions (from 0->1 or 1->0)
+        /// Scanning across the bits of \b val return the number of transitions (from 0.1 or 1.0)
         /// If there are 2 or less transitions, this is an indication of a bit flag or a mask
         /// \param val is the given value
         /// \param sz is the size to treat the value as
@@ -646,23 +646,23 @@ namespace ghidra
         /// \return \b true if they are pieces of a whole
         internal static bool contiguous_test(Varnode vn1, Varnode vn2)
         {
-            if (vn1->isInput() || vn2->isInput())
+            if (vn1.isInput() || vn2.isInput())
             {
                 return false;
             }
-            if ((!vn1->isWritten()) || (!vn2->isWritten())) return false;
-            PcodeOp* op1 = vn1->getDef();
-            PcodeOp* op2 = vn2->getDef();
+            if ((!vn1.isWritten()) || (!vn2.isWritten())) return false;
+            PcodeOp* op1 = vn1.getDef();
+            PcodeOp* op2 = vn2.getDef();
             Varnode* vnwhole;
-            switch (op1->code())
+            switch (op1.code())
             {
                 case CPUI_SUBPIECE:
-                    if (op2->code() != CPUI_SUBPIECE) return false;
-                    vnwhole = op1->getIn(0);
-                    if (op2->getIn(0) != vnwhole) return false;
-                    if (op2->getIn(1)->getOffset() != 0)
+                    if (op2.code() != CPUI_SUBPIECE) return false;
+                    vnwhole = op1.getIn(0);
+                    if (op2.getIn(0) != vnwhole) return false;
+                    if (op2.getIn(1).getOffset() != 0)
                         return false;       // Must be least sig
-                    if (op1->getIn(1)->getOffset() != vn2->getSize())
+                    if (op1.getIn(1).getOffset() != vn2.getSize())
                         return false;       // Must be contiguous
                     return true;
                 default:
@@ -678,9 +678,9 @@ namespace ghidra
         /// \return the whole Varnode
         internal static Varnode findContiguousWhole(Funcdata data, Varnode vn1, Varnode vn2)
         {
-            if (vn1->isWritten())
-                if (vn1->getDef()->code() == CPUI_SUBPIECE)
-                    return vn1->getDef()->getIn(0);
+            if (vn1.isWritten())
+                if (vn1.getDef().code() == CPUI_SUBPIECE)
+                    return vn1.getDef().getIn(0);
             return (Varnode*)0;
         }
 
@@ -702,31 +702,31 @@ namespace ghidra
             }
             s.close();
 
-            Element* el = doc->getRoot();
+            Element* el = doc.getRoot();
             for (; ; )
             {
-                List & list(el->getChildren());
+                List & list(el.getChildren());
                 List::const_iterator iter;
                 for (iter = list.begin(); iter != list.end(); ++iter)
                 {
                     el = *iter;
-                    if (el->getName() == "processorfile")
+                    if (el.getName() == "processorfile")
                     {
-                        specfileout = el->getContent();
-                        int4 num = el->getNumAttributes();
+                        specfileout = el.getContent();
+                        int4 num = el.getNumAttributes();
                         for (int4 i = 0; i < num; ++i)
                         {
-                            if (el->getAttributeName(i) == "slaspec")
-                                specfilein = el->getAttributeValue(i);
+                            if (el.getAttributeName(i) == "slaspec")
+                                specfilein = el.getAttributeValue(i);
                             else
                             {
-                                compiler.setPreprocValue(el->getAttributeName(i), el->getAttributeValue(i));
+                                compiler.setPreprocValue(el.getAttributeName(i), el.getAttributeValue(i));
                             }
                         }
                     }
-                    else if (el->getName() == "language_spec")
+                    else if (el.getName() == "language_spec")
                         break;
-                    else if (el->getName() == "language_description")
+                    else if (el.getName() == "language_description")
                         break;
                 }
                 if (iter == list.end()) break;
@@ -766,12 +766,12 @@ namespace ghidra
 
         int pcodelex()
         {
-            return pcode->lex();
+            return pcode.lex();
         }
 
         int pcodeerror(string s)
         {
-            pcode->reportError((Location*)0, s);
+            pcode.reportError((Location*)0, s);
             return 0;
         }
     }

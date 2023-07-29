@@ -163,7 +163,7 @@ namespace Sla.DECCORE
             if (!opcode.inheritsSign()) {
                 return false;
             }
-            bool inheritsFirstParamOnly = opcode->inheritsSignFirstParamOnly();
+            bool inheritsFirstParamOnly = opcode.inheritsSignFirstParamOnly();
             if ((slot == 1) && inheritsFirstParamOnly) {
                 return false;
             }

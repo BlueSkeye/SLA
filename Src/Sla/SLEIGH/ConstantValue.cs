@@ -40,7 +40,7 @@ namespace Sla.SLEIGH
 
         public override void restoreXml(Element el, Translate trans)
         {
-            istringstream s(el->getAttributeValue("val"));
+            istringstream s(el.getAttributeValue("val"));
             s.unsetf(ios::dec | ios::hex | ios::oct);
             s >> val;
         }

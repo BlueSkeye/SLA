@@ -23,13 +23,13 @@ namespace Sla.DECCORE
         {
             if ((inslot != -1) && (outslot != -1))
             {
-                return (Datatype*)0; // Must propagate input <-> output
+                return (Datatype*)0; // Must propagate input <. output
             }
             Datatype* newtype;
-            if (invn->isSpacebase())
+            if (invn.isSpacebase())
             {
-                AddrSpace* spc = tlst->getArch()->getDefaultDataSpace();
-                newtype = tlst->getTypePointer(alttype->getSize(), tlst->getBase(1, TYPE_UNKNOWN), spc->getWordSize());
+                AddrSpace* spc = tlst.getArch().getDefaultDataSpace();
+                newtype = tlst.getTypePointer(alttype.getSize(), tlst.getBase(1, TYPE_UNKNOWN), spc.getWordSize());
             }
             else
                 newtype = alttype;
@@ -38,24 +38,24 @@ namespace Sla.DECCORE
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opMultiequal(op);
+            lng.opMultiequal(op);
         }
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            Varnode::printRaw(s, op->getOut());
+            Varnode::printRaw(s, op.getOut());
             s << " = ";
-            Varnode::printRaw(s, op->getIn(0));
-            //  if (op->Input(0)->isWritten())
-            //    s << '(' << op->Input(0)->Def()->Start() << ')';
-            if (op->numInput() == 1)
+            Varnode::printRaw(s, op.getIn(0));
+            //  if (op.Input(0).isWritten())
+            //    s << '(' << op.Input(0).Def().Start() << ')';
+            if (op.numInput() == 1)
                 s << ' ' << getOperatorName(op);
-            for (int4 i = 1; i < op->numInput(); ++i)
+            for (int4 i = 1; i < op.numInput(); ++i)
             {
                 s << ' ' << getOperatorName(op) << ' ';
-                Varnode::printRaw(s, op->getIn(i));
-                //    if (op->Input(i)->isWritten())
-                //      s << '(' << op->Input(i)->Def()->Start() << ')';
+                Varnode::printRaw(s, op.getIn(i));
+                //    if (op.Input(i).isWritten())
+                //      s << '(' << op.Input(i).Def().Start() << ')';
             }
         }
     }

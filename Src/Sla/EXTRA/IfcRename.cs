@@ -28,7 +28,7 @@ namespace Sla.EXTRA
 
             Symbol* sym;
             vector<Symbol*> symList;
-            dcp->readSymbol(oldname, symList);
+            dcp.readSymbol(oldname, symList);
 
             if (symList.empty())
                 throw IfaceExecutionError("No symbol named: " + oldname);
@@ -37,10 +37,10 @@ namespace Sla.EXTRA
             else
                 throw IfaceExecutionError("More than one symbol named: " + oldname);
 
-            if (sym->getCategory() == Symbol::function_parameter)
-                dcp->fd->getFuncProto().setInputLock(true);
-            sym->getScope()->renameSymbol(sym, newname);
-            sym->getScope()->setAttribute(sym, Varnode::namelock | Varnode::typelock);
+            if (sym.getCategory() == Symbol::function_parameter)
+                dcp.fd.getFuncProto().setInputLock(true);
+            sym.getScope().renameSymbol(sym, newname);
+            sym.getScope().setAttribute(sym, Varnode::namelock | Varnode::typelock);
         }
     }
 }

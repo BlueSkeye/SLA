@@ -20,7 +20,7 @@ namespace Sla.DECCORE
 
         public void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opFloatAbs(op);
+            lng.opFloatAbs(op);
         }
     }
 }

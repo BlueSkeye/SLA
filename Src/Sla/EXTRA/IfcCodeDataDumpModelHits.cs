@@ -11,7 +11,7 @@ namespace Sla.EXTRA
     {
         public override void execute(istream s)
         {
-            codedata->dumpModelHits(*status->fileoptr);
+            codedata.dumpModelHits(*status.fileoptr);
         }
     }
 }

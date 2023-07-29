@@ -25,7 +25,7 @@ namespace Sla.EXTRA
 
             ofstream os;
             os.open(name.c_str());
-            dcp->conf->print->setOutputStream(&os);
+            dcp.conf.print.setOutputStream(&os);
 
             iterateFunctionsAddrOrder();
 
@@ -37,30 +37,30 @@ namespace Sla.EXTRA
             clock_t start_time, end_time;
             float duration;
 
-            if (fd->hasNoCode())
+            if (fd.hasNoCode())
             {
-                *status->optr << "No code for " << fd->getName() << endl;
+                *status.optr << "No code for " << fd.getName() << endl;
                 return;
             }
             try
             {
-                dcp->conf->clearAnalysis(fd); // Clear any old analysis
-                dcp->conf->allacts.getCurrent()->reset(*fd);
+                dcp.conf.clearAnalysis(fd); // Clear any old analysis
+                dcp.conf.allacts.getCurrent().reset(*fd);
                 start_time = clock();
-                dcp->conf->allacts.getCurrent()->perform(*fd);
+                dcp.conf.allacts.getCurrent().perform(*fd);
                 end_time = clock();
-                *status->optr << "Decompiled " << fd->getName();
-                //	  *status->optr << ": " << hex << fd->getAddress().getOffset();
-                *status->optr << '(' << dec << fd->getSize() << ')';
+                *status.optr << "Decompiled " << fd.getName();
+                //	  *status.optr << ": " << hex << fd.getAddress().getOffset();
+                *status.optr << '(' << dec << fd.getSize() << ')';
                 duration = ((float)(end_time - start_time)) / CLOCKS_PER_SEC;
                 duration *= 1000.0;
-                *status->optr << " time=" << fixed << setprecision(0) << duration << " ms" << endl;
-                dcp->conf->print->docFunction(fd);
+                *status.optr << " time=" << fixed << setprecision(0) << duration << " ms" << endl;
+                dcp.conf.print.docFunction(fd);
             }
             catch (LowlevelError err) {
-                *status->optr << "Skipping " << fd->getName() << ": " << err.ToString() << endl;
+                *status.optr << "Skipping " << fd.getName() << ": " << err.ToString() << endl;
             }
-            dcp->conf->clearAnalysis(fd);
+            dcp.conf.clearAnalysis(fd);
         }
     }
 }

@@ -104,7 +104,7 @@ namespace Sla.EXTRA
             if (iter != translators.end())
             {
                 sleigh = (*iter).second;
-                sleigh->reset(loader, context);
+                sleigh.reset(loader, context);
                 return sleigh;
             }
             sleigh = new Sleigh(loader, context);
@@ -126,34 +126,34 @@ namespace Sla.EXTRA
             types = new TypeFactory(this); // Initialize the object
             if (el != (Element*)0) {
                 XmlDecode decoder = new XmlDecode(this, el);
-                types->decodeCoreTypes(decoder);
+                types.decodeCoreTypes(decoder);
             }
             else
             {
                 // Put in the core types
-                types->setCoreType("void", 1, TYPE_VOID, false);
-                types->setCoreType("bool", 1, TYPE_BOOL, false);
-                types->setCoreType("uint1", 1, TYPE_UINT, false);
-                types->setCoreType("uint2", 2, TYPE_UINT, false);
-                types->setCoreType("uint4", 4, TYPE_UINT, false);
-                types->setCoreType("uint8", 8, TYPE_UINT, false);
-                types->setCoreType("int1", 1, TYPE_INT, false);
-                types->setCoreType("int2", 2, TYPE_INT, false);
-                types->setCoreType("int4", 4, TYPE_INT, false);
-                types->setCoreType("int8", 8, TYPE_INT, false);
-                types->setCoreType("float4", 4, TYPE_FLOAT, false);
-                types->setCoreType("float8", 8, TYPE_FLOAT, false);
-                types->setCoreType("float10", 10, TYPE_FLOAT, false);
-                types->setCoreType("float16", 16, TYPE_FLOAT, false);
-                types->setCoreType("xunknown1", 1, TYPE_UNKNOWN, false);
-                types->setCoreType("xunknown2", 2, TYPE_UNKNOWN, false);
-                types->setCoreType("xunknown4", 4, TYPE_UNKNOWN, false);
-                types->setCoreType("xunknown8", 8, TYPE_UNKNOWN, false);
-                types->setCoreType("code", 1, TYPE_CODE, false);
-                types->setCoreType("char", 1, TYPE_INT, true);
-                types->setCoreType("wchar2", 2, TYPE_INT, true);
-                types->setCoreType("wchar4", 4, TYPE_INT, true);
-                types->cacheCoreTypes();
+                types.setCoreType("void", 1, TYPE_VOID, false);
+                types.setCoreType("bool", 1, TYPE_BOOL, false);
+                types.setCoreType("uint1", 1, TYPE_UINT, false);
+                types.setCoreType("uint2", 2, TYPE_UINT, false);
+                types.setCoreType("uint4", 4, TYPE_UINT, false);
+                types.setCoreType("uint8", 8, TYPE_UINT, false);
+                types.setCoreType("int1", 1, TYPE_INT, false);
+                types.setCoreType("int2", 2, TYPE_INT, false);
+                types.setCoreType("int4", 4, TYPE_INT, false);
+                types.setCoreType("int8", 8, TYPE_INT, false);
+                types.setCoreType("float4", 4, TYPE_FLOAT, false);
+                types.setCoreType("float8", 8, TYPE_FLOAT, false);
+                types.setCoreType("float10", 10, TYPE_FLOAT, false);
+                types.setCoreType("float16", 16, TYPE_FLOAT, false);
+                types.setCoreType("xunknown1", 1, TYPE_UNKNOWN, false);
+                types.setCoreType("xunknown2", 2, TYPE_UNKNOWN, false);
+                types.setCoreType("xunknown4", 4, TYPE_UNKNOWN, false);
+                types.setCoreType("xunknown8", 8, TYPE_UNKNOWN, false);
+                types.setCoreType("code", 1, TYPE_CODE, false);
+                types.setCoreType("char", 1, TYPE_INT, true);
+                types.setCoreType("wchar2", 2, TYPE_INT, true);
+                types.setCoreType("wchar4", 4, TYPE_INT, true);
+                types.cacheCoreTypes();
             }
         }
 
@@ -213,18 +213,18 @@ namespace Sla.EXTRA
                 if (addr.isInvalid())
                     throw new LowlevelError("Missing address attribute in <symbol> element");
                 if (size == 0)
-                    size = addr.getSpace()->getWordSize();
+                    size = addr.getSpace().getWordSize();
                 if (volatileState >= 0)
                 {
                     Sla.CORE.Range range(addr.getSpace(), addr.getOffset(), addr.getOffset() +(size - 1));
                     if (volatileState == 0)
-                        symboltab->clearPropertyRange(Varnode::volatil, range);
+                        symboltab.clearPropertyRange(Varnode::volatil, range);
                     else
-                        symboltab->setPropertyRange(Varnode::volatil, range);
+                        symboltab.setPropertyRange(Varnode::volatil, range);
                 }
-                Datatype* ct = types->getBase(size, TYPE_UNKNOWN);
+                Datatype* ct = types.getBase(size, TYPE_UNKNOWN);
                 Address usepoint;
-                symboltab->getGlobalScope()->addSymbol(name, ct, addr, usepoint);
+                symboltab.getGlobalScope().addSymbol(name, ct, addr, usepoint);
             }
             decoder.closeElement(el);
         }
@@ -248,7 +248,7 @@ namespace Sla.EXTRA
             try
             {
                 Document* doc = store.openDocument(processorfile);
-                store.registerTag(doc->getRoot());
+                store.registerTag(doc.getRoot());
             }
             catch (DecoderError err) {
                 ostringstream serr;
@@ -266,7 +266,7 @@ namespace Sla.EXTRA
             try
             {
                 Document* doc = store.openDocument(compilerfile);
-                store.registerTag(doc->getRoot());
+                store.registerTag(doc.getRoot());
             }
             catch (DecoderError err) {
                 ostringstream serr;
@@ -286,7 +286,7 @@ namespace Sla.EXTRA
                 try
                 {
                     Document* doc = store.openDocument(slafile);
-                    store.registerTag(doc->getRoot());
+                    store.registerTag(doc.getRoot());
                 }
                 catch (DecoderError err) {
                     ostringstream serr;
@@ -308,7 +308,7 @@ namespace Sla.EXTRA
             LanguageDescription language = description[languageindex];
             for (int4 i = 0; i < language.numTruncations(); ++i)
             {
-                trans->truncateSpace(language.getTruncation(i));
+                trans.truncateSpace(language.getTruncation(i));
             }
         }
 
@@ -317,7 +317,7 @@ namespace Sla.EXTRA
             if (archid.Length == 0)
             {
                 if ((target.Length == 0) || (target == "default"))
-                    archid = loader->getArchType();
+                    archid = loader.getArchType();
                 else
                     archid = target;
             }
@@ -378,8 +378,8 @@ namespace Sla.EXTRA
         /// \param el is the root XML element
         public void restoreXmlHeader(Element el)
         {
-            filename = el->getAttributeValue("name");
-            target = el->getAttributeValue("target");
+            filename = el.getAttributeValue("name");
+            target = el.getAttributeValue("target");
         }
 
         public override void printMessage(string message)

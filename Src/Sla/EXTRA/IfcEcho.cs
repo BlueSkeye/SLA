@@ -16,8 +16,8 @@ namespace Sla.EXTRA
             char c;
 
             while (s.get(c))
-                status->fileoptr->put(c);
-            *status->fileoptr << endl;
+                status.fileoptr.put(c);
+            *status.fileoptr << endl;
         }
     }
 }

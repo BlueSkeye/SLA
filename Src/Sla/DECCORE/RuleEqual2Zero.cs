@@ -38,43 +38,43 @@ namespace Sla.DECCORE
             Varnode* posvn,*negvn,*unnegvn;
             PcodeOp* addop;
 
-            vn = op->getIn(0);
-            if ((vn->isConstant()) && (vn->getOffset() == 0))
-                addvn = op->getIn(1);
+            vn = op.getIn(0);
+            if ((vn.isConstant()) && (vn.getOffset() == 0))
+                addvn = op.getIn(1);
             else
             {
                 addvn = vn;
-                vn = op->getIn(1);
-                if ((!vn->isConstant()) || (vn->getOffset() != 0))
+                vn = op.getIn(1);
+                if ((!vn.isConstant()) || (vn.getOffset() != 0))
                     return 0;
             }
-            for (list<PcodeOp*>::const_iterator iter = addvn->beginDescend(); iter != addvn->endDescend(); ++iter)
+            for (list<PcodeOp*>::const_iterator iter = addvn.beginDescend(); iter != addvn.endDescend(); ++iter)
             {
                 // make sure the sum is only used in comparisons
                 PcodeOp* boolop = *iter;
-                if (!boolop->isBoolOutput()) return 0;
+                if (!boolop.isBoolOutput()) return 0;
             }
-            //  if (addvn->lone_descendant() != op) return 0;
-            addop = addvn->getDef();
+            //  if (addvn.lone_descendant() != op) return 0;
+            addop = addvn.getDef();
             if (addop == (PcodeOp*)0) return 0;
-            if (addop->code() != CPUI_INT_ADD) return 0;
-            vn = addop->getIn(0);
-            vn2 = addop->getIn(1);
-            if (vn2->isConstant())
+            if (addop.code() != CPUI_INT_ADD) return 0;
+            vn = addop.getIn(0);
+            vn2 = addop.getIn(1);
+            if (vn2.isConstant())
             {
-                Address val(vn2->getSpace(), uintb_negate(vn2->getOffset()-1,vn2->getSize()));
-                unnegvn = data.newVarnode(vn2->getSize(), val);
-                unnegvn->copySymbolIfValid(vn2);    // Propagate any markup
+                Address val(vn2.getSpace(), uintb_negate(vn2.getOffset()-1,vn2.getSize()));
+                unnegvn = data.newVarnode(vn2.getSize(), val);
+                unnegvn.copySymbolIfValid(vn2);    // Propagate any markup
                 posvn = vn;
             }
             else
             {
-                if ((vn->isWritten()) && (vn->getDef()->code() == CPUI_INT_MULT))
+                if ((vn.isWritten()) && (vn.getDef().code() == CPUI_INT_MULT))
                 {
                     negvn = vn;
                     posvn = vn2;
                 }
-                else if ((vn2->isWritten()) && (vn2->getDef()->code() == CPUI_INT_MULT))
+                else if ((vn2.isWritten()) && (vn2.getDef().code() == CPUI_INT_MULT))
                 {
                     negvn = vn2;
                     posvn = vn;
@@ -82,13 +82,13 @@ namespace Sla.DECCORE
                 else
                     return 0;
                 uintb multiplier;
-                if (!negvn->getDef()->getIn(1)->isConstant()) return 0;
-                unnegvn = negvn->getDef()->getIn(0);
-                multiplier = negvn->getDef()->getIn(1)->getOffset();
-                if (multiplier != calc_mask(unnegvn->getSize())) return 0;
+                if (!negvn.getDef().getIn(1).isConstant()) return 0;
+                unnegvn = negvn.getDef().getIn(0);
+                multiplier = negvn.getDef().getIn(1).getOffset();
+                if (multiplier != calc_mask(unnegvn.getSize())) return 0;
             }
-            if (!posvn->isHeritageKnown()) return 0;
-            if (!unnegvn->isHeritageKnown()) return 0;
+            if (!posvn.isHeritageKnown()) return 0;
+            if (!unnegvn.isHeritageKnown()) return 0;
 
             data.opSetInput(op, posvn, 0);
             data.opSetInput(op, unnegvn, 1);

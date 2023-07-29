@@ -13,11 +13,11 @@ namespace Sla.EXTRA
         /// \brief List all the script commands in the current test: `list test commands`
         public override void execute(TextReader s)
         {
-            if (dcp->testCollection == (FunctionTestCollection*)0)
+            if (dcp.testCollection == (FunctionTestCollection*)0)
                 throw IfaceExecutionError("No test file is loaded");
-            for (int4 i = 0; i < dcp->testCollection->numCommands(); ++i)
+            for (int4 i = 0; i < dcp.testCollection.numCommands(); ++i)
             {
-                *status->optr << ' ' << dec << i + 1 << ": " << dcp->testCollection->getCommand(i) << endl;
+                *status.optr << ' ' << dec << i + 1 << ": " << dcp.testCollection.getCommand(i) << endl;
             }
         }
     }

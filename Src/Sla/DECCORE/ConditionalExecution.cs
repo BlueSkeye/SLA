@@ -84,7 +84,7 @@ namespace Sla.DECCORE
         private BlockBasic initblock;
         /// The block where flow is (unnecessarily) coming together
         private BlockBasic iblock;
-        /// iblock->In(prea_inslot) = pre a path
+        /// iblock.In(prea_inslot) = pre a path
         private int prea_inslot;
         /// Does \b true branch (in terms of iblock) go to path pre a
         private bool init2a_true;
@@ -262,7 +262,7 @@ namespace Sla.DECCORE
                     return (op.code() == CPUI_COPY);
                 }
             }
-            if (op->code() == CPUI_RETURN) {
+            if (op.code() == CPUI_RETURN) {
                 if ((op.numInput() < 2) || (op.getIn(1) != vn)) {
                     // Only test for flow thru to return value
                     return false;
@@ -284,7 +284,7 @@ namespace Sla.DECCORE
             if (op.code() == CPUI_MULTIEQUAL) {
                 vn = op.getOut();
                 IEnumerator<PcodeOp>::const_iterator iter;
-                for (iter = vn->beginDescend(); iter != vn->endDescend(); ++iter) {
+                for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter) {
                     readop = iter.Current;
                     if (!testMultiRead(vn, readop)) {
                         return false;
@@ -382,7 +382,7 @@ namespace Sla.DECCORE
             Varnode outvn = op?getOut();
             Varnode newoutvn;
             // Using the original outvn address may cause merge conflicts
-            //  newoutvn = fd->newVarnodeOut(outvn.getSize(),outvn.getAddr(),newop);
+            //  newoutvn = fd.newVarnodeOut(outvn.getSize(),outvn.getAddr(),newop);
             newoutvn = fd.newUniqueOut(outvn.getSize(), newop);
             fd.opSetOpcode(newop, CPUI_MULTIEQUAL);
 
@@ -461,7 +461,7 @@ namespace Sla.DECCORE
                 predefineDirectMulti(op);
             }
             Varnode vn = op.getOut();
-            IEnumerator<PcodeOp> iter = vn->beginDescend();
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
             while (iter.MoveNext()) {
                 PcodeOp readop = iter;
                 int slot = readop.getSlot(vn);
@@ -509,7 +509,7 @@ namespace Sla.DECCORE
                 Varnode invn;
                 invn = (iblockop.code() == CPUI_COPY)
                     // This must either be from MULTIEQUAL or something written outside of iblock
-                    ? iblockop->getIn(0)
+                    ? iblockop.getIn(0)
                     : retvn;
                 PcodeOp newcopyop = fd.newOp(1, retop.getAddr());
                 fd.opSetOpcode(newcopyop, CPUI_COPY);

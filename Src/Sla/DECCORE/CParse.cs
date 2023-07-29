@@ -96,13 +96,13 @@ namespace Sla.DECCORE
                         break;
                 }
             }
-            Datatype* tp = glb->types->findByName(nm);
+            Datatype* tp = glb.types.findByName(nm);
             if (tp != (Datatype*)0)
             {
                 yylval.type = tp;
                 return TYPE_NAME;
             }
-            if (glb->hasModel(nm))
+            if (glb.hasModel(nm))
                 return FUNCTION_SPECIFIER;
             return IDENTIFIER;      // Unknown identifier
         }
@@ -175,46 +175,46 @@ namespace Sla.DECCORE
             vecdec_alloc.push_back(declist);
             TypeDeclarator* dec = new TypeDeclarator();
             typedec_alloc.push_back(dec);
-            declist->push_back(dec);
+            declist.push_back(dec);
             return mergeSpecDecVec(spec, declist);
         }
 
         public List<TypeDeclarator> mergeSpecDecVec(TypeSpecifiers spec,
             List<TypeDeclarator> declist)
         {
-            for (uint4 i = 0; i < declist->size(); ++i)
+            for (uint4 i = 0; i < declist.size(); ++i)
                 mergeSpecDec(spec, (*declist)[i]);
             return declist;
         }
 
         public TypeDeclarator mergeSpecDec(TypeSpecifiers spec)
         {
-            dec->basetype = spec->type_specifier;
-            dec->model = spec->function_specifier;
-            dec->flags |= spec->flags;
+            dec.basetype = spec.type_specifier;
+            dec.model = spec.function_specifier;
+            dec.flags |= spec.flags;
             return dec;
         }
 
         public TypeDeclarator mergeSpecDec(TypeSpecifiers spec, TypeDeclarator dec)
         {
-            dec->basetype = spec->type_specifier;
-            dec->model = spec->function_specifier;
-            dec->flags |= spec->flags;
+            dec.basetype = spec.type_specifier;
+            dec.model = spec.function_specifier;
+            dec.flags |= spec.flags;
             return dec;
         }
 
         public TypeSpecifiers addSpecifier(TypeSpecifiers spec, string str)
         {
             uint4 flag = convertFlag(str);
-            spec->flags |= flag;
+            spec.flags |= flag;
             return spec;
         }
 
         public TypeSpecifiers addTypeSpecifier(TypeSpecifiers spec, Datatype tp)
         {
-            if (spec->type_specifier != (Datatype*)0)
+            if (spec.type_specifier != (Datatype*)0)
                 setError("Multiple type specifiers");
-            spec->type_specifier = tp;
+            spec.type_specifier = tp;
             return spec;
         }
 
@@ -224,22 +224,22 @@ namespace Sla.DECCORE
 
             iter = keywords.find(*str);
             if (iter != keywords.end())
-                spec->flags |= (*iter).second; // A reserved specifier
+                spec.flags |= (*iter).second; // A reserved specifier
             else
             {
-                if (spec->function_specifier.size() != 0)
+                if (spec.function_specifier.size() != 0)
                     setError("Multiple parameter models");
-                spec->function_specifier = *str;
+                spec.function_specifier = *str;
             }
             return spec;
         }
 
         public TypeDeclarator mergePointer(List<uint4> ptr, TypeDeclarator dec)
         {
-            for (uint4 i = 0; i < ptr->size(); ++i)
+            for (uint4 i = 0; i < ptr.size(); ++i)
             {
                 PointerModifier* newmod = new PointerModifier((*ptr)[i]);
-                dec->mods.push_back(newmod);
+                dec.mods.push_back(newmod);
             }
             return dec;
         }
@@ -282,48 +282,48 @@ namespace Sla.DECCORE
         public TypeDeclarator newArray(TypeDeclarator dec, uint4 flags, uintb num)
         {
             ArrayModifier* newmod = new ArrayModifier(flags, (int4) * num);
-            dec->mods.push_back(newmod);
+            dec.mods.push_back(newmod);
             return dec;
         }
 
         public TypeDeclarator newFunc(TypeDeclarator dec, List<TypeDeclarator> declist)
         {
             bool dotdotdot = false;
-            if (!declist->empty())
+            if (!declist.empty())
             {
-                if (declist->back() == (TypeDeclarator*)0)
+                if (declist.back() == (TypeDeclarator*)0)
                 {
                     dotdotdot = true;
-                    declist->pop_back();
+                    declist.pop_back();
                 }
             }
             FunctionModifier* newmod = new FunctionModifier(declist, dotdotdot);
-            dec->mods.push_back(newmod);
+            dec.mods.push_back(newmod);
             return dec;
         }
 
         public Datatype newStruct(string ident, List<TypeDeclarator> declist)
         { // Build a new structure
-            TypeStruct* res = glb->types->getTypeStruct(ident); // Create stub (for recursion)
+            TypeStruct* res = glb.types.getTypeStruct(ident); // Create stub (for recursion)
             vector<TypeField> sublist;
 
-            for (uint4 i = 0; i < declist->size(); ++i)
+            for (uint4 i = 0; i < declist.size(); ++i)
             {
                 TypeDeclarator* decl = (*declist)[i];
-                if (!decl->isValid())
+                if (!decl.isValid())
                 {
                     setError("Invalid structure declarator");
-                    glb->types->destroyType(res);
+                    glb.types.destroyType(res);
                     return (Datatype*)0;
                 }
-                sublist.emplace_back(0, -1, decl->getIdentifier(), decl->buildType(glb));
+                sublist.emplace_back(0, -1, decl.getIdentifier(), decl.buildType(glb));
             }
 
-            TypeStruct::assignFieldOffsets(sublist, glb->types->getStructAlign());
-            if (!glb->types->setFields(sublist, res, -1, 0))
+            TypeStruct::assignFieldOffsets(sublist, glb.types.getStructAlign());
+            if (!glb.types.setFields(sublist, res, -1, 0))
             {
                 setError("Bad structure definition");
-                glb->types->destroyType(res);
+                glb.types.destroyType(res);
                 return (Datatype*)0;
             }
             return res;
@@ -331,33 +331,33 @@ namespace Sla.DECCORE
 
         public Datatype oldStruct(string ident)
         {
-            Datatype* res = glb->types->findByName(ident);
-            if ((res == (Datatype*)0) || (res->getMetatype() != TYPE_STRUCT))
+            Datatype* res = glb.types.findByName(ident);
+            if ((res == (Datatype*)0) || (res.getMetatype() != TYPE_STRUCT))
                 setError("Identifier does not represent a struct as required");
             return res;
         }
 
         public Datatype newUnion(string ident, List<TypeDeclarator> declist)
         {
-            TypeUnion* res = glb->types->getTypeUnion(ident); // Create stub (for recursion)
+            TypeUnion* res = glb.types.getTypeUnion(ident); // Create stub (for recursion)
             vector<TypeField> sublist;
 
-            for (uint4 i = 0; i < declist->size(); ++i)
+            for (uint4 i = 0; i < declist.size(); ++i)
             {
                 TypeDeclarator* decl = (*declist)[i];
-                if (!decl->isValid())
+                if (!decl.isValid())
                 {
                     setError("Invalid union declarator");
-                    glb->types->destroyType(res);
+                    glb.types.destroyType(res);
                     return (Datatype*)0;
                 }
-                sublist.emplace_back(i, 0, decl->getIdentifier(), decl->buildType(glb));
+                sublist.emplace_back(i, 0, decl.getIdentifier(), decl.buildType(glb));
             }
 
-            if (!glb->types->setFields(sublist, res, -1, 0))
+            if (!glb.types.setFields(sublist, res, -1, 0))
             {
                 setError("Bad union definition");
-                glb->types->destroyType(res);
+                glb.types.destroyType(res);
                 return (Datatype*)0;
             }
             return res;
@@ -365,8 +365,8 @@ namespace Sla.DECCORE
 
         public Datatype oldUnion(string ident)
         {
-            Datatype* res = glb->types->findByName(ident);
-            if ((res == (Datatype*)0) || (res->getMetatype() != TYPE_UNION))
+            Datatype* res = glb.types.findByName(ident);
+            if ((res == (Datatype*)0) || (res.getMetatype() != TYPE_UNION))
                 setError("Identifier does not represent a union as required");
             return res;
         }
@@ -394,21 +394,21 @@ namespace Sla.DECCORE
 
         public Datatype newEnum(string ident, List<Enumerator> vecenum)
         {
-            TypeEnum* res = glb->types->getTypeEnum(ident);
+            TypeEnum* res = glb.types.getTypeEnum(ident);
             vector<string> namelist;
             vector<uintb> vallist;
             vector<bool> assignlist;
-            for (uint4 i = 0; i < vecenum->size(); ++i)
+            for (uint4 i = 0; i < vecenum.size(); ++i)
             {
                 Enumerator* enumer = (*vecenum)[i];
-                namelist.push_back(enumer->enumconstant);
-                vallist.push_back(enumer->value);
-                assignlist.push_back(enumer->constantassigned);
+                namelist.push_back(enumer.enumconstant);
+                vallist.push_back(enumer.value);
+                assignlist.push_back(enumer.constantassigned);
             }
-            if (!glb->types->setEnumValues(namelist, vallist, assignlist, res))
+            if (!glb.types.setEnumValues(namelist, vallist, assignlist, res))
             {
                 setError("Bad enumeration values");
-                glb->types->destroyType(res);
+                glb.types.destroyType(res);
                 return (Datatype*)0;
             }
             return res;
@@ -416,8 +416,8 @@ namespace Sla.DECCORE
 
         public Datatype oldEnum(string ident)
         {
-            Datatype* res = glb->types->findByName(ident);
-            if ((res == (Datatype*)0) || (!res->isEnumType()))
+            Datatype* res = glb.types.findByName(ident);
+            if ((res == (Datatype*)0) || (!res.isEnumType()))
                 setError("Identifier does not represent an enum as required");
             return res;
         }

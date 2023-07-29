@@ -37,12 +37,12 @@ namespace Sla.SLEIGH
         {
             s << "<context_sym";
             SleighSymbol::saveXmlHeader(s);
-            s << " varnode=\"0x" << hex << vn->getId() << "\"";
+            s << " varnode=\"0x" << hex << vn.getId() << "\"";
             s << " low=\"" << dec << low << "\"";
             s << " high=\"" << high << "\"";
             a_v_b(s, "flow", flow);
             s << ">\n";
-            patval->saveXml(s);
+            patval.saveXml(s);
             s << "</context_sym>\n";
         }
 
@@ -58,27 +58,27 @@ namespace Sla.SLEIGH
             ValueSymbol::restoreXml(el, trans);
             {
                 uintm id;
-                istringstream s(el->getAttributeValue("varnode"));
+                istringstream s(el.getAttributeValue("varnode"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> id;
-                vn = (VarnodeSymbol*)trans->findSymbol(id);
+                vn = (VarnodeSymbol*)trans.findSymbol(id);
             }
             {
-                istringstream s(el->getAttributeValue("low"));
+                istringstream s(el.getAttributeValue("low"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> low;
             }
             {
-                istringstream s(el->getAttributeValue("high"));
+                istringstream s(el.getAttributeValue("high"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> high;
             }
             flow = true;
-            for (int4 i = el->getNumAttributes() - 1; i >= 0; --i)
+            for (int4 i = el.getNumAttributes() - 1; i >= 0; --i)
             {
-                if (el->getAttributeName(i) == "flow")
+                if (el.getAttributeName(i) == "flow")
                 {
-                    flow = xml_readbool(el->getAttributeValue(i));
+                    flow = xml_readbool(el.getAttributeValue(i));
                     break;
                 }
             }

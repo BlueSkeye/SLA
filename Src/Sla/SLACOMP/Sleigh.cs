@@ -183,7 +183,7 @@ namespace Sla.SLACOMP
                 {
                     // First determine whether or not to use Run_XML...
                     if (autoExtInSet || extIsSLASPECEXT)
-                    {   // Assumed format of at least "sleigh file" -> "sleigh file.slaspec file.sla"
+                    {   // Assumed format of at least "sleigh file" . "sleigh file.slaspec file.sla"
                         string fileoutSTR = fileinPreExt;
                         fileoutSTR.append(SLAEXT);
                         retval = compiler.run_compilation(fileinExamine, fileoutSTR);

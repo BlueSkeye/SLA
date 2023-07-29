@@ -33,7 +33,7 @@ namespace Sla.DECCORE
             // Clear any unlocked local variables because these are
             // getting cleared anyway in the restructure and may be
             // using symbol names that we want
-            data.getScopeLocal()->clearUnlockedCategory(-1);
+            data.getScopeLocal().clearUnlockedCategory(-1);
             data.getFuncProto().clearUnlockedInput();
             if (!data.getFuncProto().isInputLocked())
             {
@@ -44,11 +44,11 @@ namespace Sla.DECCORE
                 {
                     vn = *iter;
                     ++iter;
-                    if (data.getFuncProto().possibleInputParam(vn->getAddr(), vn->getSize()))
+                    if (data.getFuncProto().possibleInputParam(vn.getAddr(), vn.getSize()))
                     {
                         int4 slot = active.getNumTrials();
-                        active.registerTrial(vn->getAddr(), vn->getSize());
-                        if (!vn->hasNoDescend())
+                        active.registerTrial(vn.getAddr(), vn.getSize());
+                        if (!vn.hasNoDescend())
                             active.getTrial(slot).markActive(); // Mark as active if it has descendants
                         triallist.push_back(vn);
                     }
@@ -77,8 +77,8 @@ namespace Sla.DECCORE
 #if OPACTION_DEBUG
             if ((flags & rule_debug) == 0) return 0;
             ostringstream s;
-            data.getScopeLocal()->printEntries(s);
-            data.getArch()->printDebug(s.str());
+            data.getScopeLocal().printEntries(s);
+            data.getArch().printDebug(s.str());
 #endif
             return 0;
         }

@@ -20,19 +20,19 @@ namespace Sla.DECCORE
         {
             uint4 f1, f2;
 
-            if (a->getAddr() != b->getAddr()) return (a->getAddr() < b->getAddr());
-            if (a->getSize() != b->getSize()) return (a->getSize() < b->getSize());
-            f1 = a->getFlags() & (Varnode::input | Varnode::written);
-            f2 = b->getFlags() & (Varnode::input | Varnode::written);
+            if (a.getAddr() != b.getAddr()) return (a.getAddr() < b.getAddr());
+            if (a.getSize() != b.getSize()) return (a.getSize() < b.getSize());
+            f1 = a.getFlags() & (Varnode::input | Varnode::written);
+            f2 = b.getFlags() & (Varnode::input | Varnode::written);
             if (f1 != f2) return ((f1 - 1) < (f2 - 1)); // -1 forces free varnodes to come last
             if (f1 == Varnode::written)
             {
-                if (a->getDef()->getSeqNum() != b->getDef()->getSeqNum())
-                    return (a->getDef()->getSeqNum() < b->getDef()->getSeqNum());
+                if (a.getDef().getSeqNum() != b.getDef().getSeqNum())
+                    return (a.getDef().getSeqNum() < b.getDef().getSeqNum());
             }
             else if (f1 == 0)       // both are free
                                     //    return (a < b);		// compare pointers
-                return (a->getCreateIndex() < b->getCreateIndex());
+                return (a.getCreateIndex() < b.getCreateIndex());
 
             return false;
         }

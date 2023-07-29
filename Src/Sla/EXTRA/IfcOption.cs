@@ -20,7 +20,7 @@ namespace Sla.EXTRA
             string optname;
             string p1, p2, p3;
 
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("No load image present");
             s >> ws >> optname >> ws;
             if (optname.size() == 0)
@@ -42,17 +42,17 @@ namespace Sla.EXTRA
 
             try
             {
-                string res = dcp->conf->options->set(ElementId::find(optname), p1, p2, p3);
-                *status->optr << res << endl;
+                string res = dcp.conf.options.set(ElementId::find(optname), p1, p2, p3);
+                *status.optr << res << endl;
             }
             catch (ParseError err)
             {
-                *status->optr << err.ToString() << endl;
+                *status.optr << err.ToString() << endl;
                 throw IfaceParseError("Bad option");
             }
             catch (RecovError err)
             {
-                *status->optr << err.ToString() << endl;
+                *status.optr << err.ToString() << endl;
                 throw IfaceExecutionError("Bad option");
             }
         }

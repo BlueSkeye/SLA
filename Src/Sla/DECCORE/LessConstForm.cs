@@ -30,23 +30,23 @@ namespace Sla.DECCORE
             if (i.getHi() == (Varnode*)0) return false; // We don't necessarily need the lo part
             @in = i;
             vn = @in.getHi();
-            inslot = op->getSlot(vn);
-            cvn = op->getIn(1 - inslot);
-            int4 losize = @in.getSize() - vn->getSize();
+            inslot = op.getSlot(vn);
+            cvn = op.getIn(1 - inslot);
+            int4 losize = @in.getSize() - vn.getSize();
 
-            if (!cvn->isConstant()) return false;
+            if (!cvn.isConstant()) return false;
 
-            signcompare = ((op->code() == CPUI_INT_SLESSEQUAL) || (op->code() == CPUI_INT_SLESS));
-            hilessequalform = ((op->code() == CPUI_INT_SLESSEQUAL) || (op->code() == CPUI_INT_LESSEQUAL));
+            signcompare = ((op.code() == CPUI_INT_SLESSEQUAL) || (op.code() == CPUI_INT_SLESS));
+            hilessequalform = ((op.code() == CPUI_INT_SLESSEQUAL) || (op.code() == CPUI_INT_LESSEQUAL));
 
-            uintb val = cvn->getOffset() << 8 * losize;
+            uintb val = cvn.getOffset() << 8 * losize;
             if (hilessequalform != (inslot == 1))
                 val |= calc_mask(losize);
 
             // This rule can apply and mess up less,equal rules, so we only apply it if it directly affects a branch
-            PcodeOp* desc = op->getOut()->loneDescend();
+            PcodeOp* desc = op.getOut().loneDescend();
             if (desc == (PcodeOp*)0) return false;
-            if (desc->code() != CPUI_CBRANCH) return false;
+            if (desc.code() != CPUI_CBRANCH) return false;
 
             constin.initPartial(in.getSize(), val);
 
@@ -54,7 +54,7 @@ namespace Sla.DECCORE
             {
                 if (SplitVarnode::prepareBoolOp(@in, constin, op))
                 {
-                    SplitVarnode::replaceBoolOp(data, op, @in, constin, op->code());
+                    SplitVarnode::replaceBoolOp(data, op, @in, constin, op.code());
                     return true;
                 }
             }
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
             {
                 if (SplitVarnode::prepareBoolOp(constin, @in, op))
                 {
-                    SplitVarnode::replaceBoolOp(data, op, constin, @in, op->code());
+                    SplitVarnode::replaceBoolOp(data, op, constin, @in, op.code());
                     return true;
                 }
             }

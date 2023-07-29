@@ -382,7 +382,7 @@ namespace Sla.DECCORE
                     }
                     // Add FIND(y) to reachunder
                     reachunder.Add(y.copymap);
-                    y.copymap->setMark();
+                    y.copymap.setMark();
                 }
                 int q = 0;
                 while (q < reachunder.Count) {
@@ -697,13 +697,13 @@ namespace Sla.DECCORE
         public void addLoopEdge(FlowBlock begin, int outindex)
         {
 #if BLOCKCONSISTENT_DEBUG
-            //if ((begin->parent != this)||(end->parent != this))
+            //if ((begin.parent != this)||(end.parent != this))
             if ((begin.parent != this)) {
                 throw new LowlevelError("Bad loopedge create");
             }
 #endif
             //  int4 i;
-            //  i = begin->OutIndex(end);
+            //  i = begin.OutIndex(end);
             // using OutIndex did not necessarily get the right edge
             // if there were multiple outedges to the same block
             begin.setOutEdgeFlag(outindex, f_loop_edge);
@@ -830,12 +830,12 @@ namespace Sla.DECCORE
         /// Remove FlowBlock splitting flow between input and output edges
         /// Remove the given FlowBlock from the flow of the graph. It must have
         /// 2 inputs, and 2 outputs.  The edges will be remapped so that
-        ///   - In(0) -> Out(0) and
-        ///   - In(1) -> Out(1)
+        ///   - In(0) . Out(0) and
+        ///   - In(1) . Out(1)
         ///
         /// Or if \b flipflow is true:
-        ///   - In(0) -> Out(1)
-        ///   - In(1) -> Out(0)
+        ///   - In(0) . Out(1)
+        ///   - In(1) . Out(0)
         /// \param bl is the given FlowBlock
         /// \param flipflow indicates how the edges are remapped
         public void removeFromFlowSplit(FlowBlock bl, bool flipflow)
@@ -849,11 +849,11 @@ namespace Sla.DECCORE
             }
 #endif
             if (flipflow) {
-                // Replace edge slot from 0 -> 1
+                // Replace edge slot from 0 . 1
                 bl.replaceEdgesThru(0, 1);
             }
             else {
-                // Replace edge slot from 1 -> 1
+                // Replace edge slot from 1 . 1
                 bl.replaceEdgesThru(1, 1);
             }
             // Removing the first edge
@@ -976,7 +976,7 @@ namespace Sla.DECCORE
                 index = bl.index
             };
             // visitcount needs to be initialized to zero via FlowBlock constructure
-            //  ret->visitcount = bl->visitcount;
+            //  ret.visitcount = bl.visitcount;
             ret.numdesc = bl.numdesc;
             ret.flags |= bl.flags;
             if (ret.outofthis.size() > 2) {
@@ -1061,8 +1061,8 @@ namespace Sla.DECCORE
                 // Preserve the condition
                 ret.forceFalseEdge(out0);
             }
-            //  if ((ret->OutSize() == 2)&&(nodes.back()->Out(0) == nodes.front()))
-            //    ret->FlowBlock::negateCondition(); // Preserve out ordering of last block
+            //  if ((ret.OutSize() == 2)&&(nodes.back().Out(0) == nodes.front()))
+            //    ret.FlowBlock::negateCondition(); // Preserve out ordering of last block
             return ret;
         }
 
@@ -1242,7 +1242,7 @@ namespace Sla.DECCORE
 
             foreach (FlowBlock iter in graph.list) {
                 copyblock = newBlockCopy(iter);
-                // Store map basic->copy
+                // Store map basic.copy
                 iter.copymap = copyblock;
             }
             foreach (FlowBlock iter in list) {
@@ -1612,18 +1612,18 @@ namespace Sla.DECCORE
                         return false;
                     }
                 }
-                for(j=0;j<bl1->sizeOut();++j) {
+                for(j=0;j<bl1.sizeOut();++j) {
                     // Similarly for each out edge
-                    bl2 = bl1->getOut(j);
+                    bl2 = bl1.getOut(j);
                     count1 = 0;
-                    for(k=0;k<bl1->sizeOut();++k) {
-                        if (bl1->getOut(k)==bl2) { 
+                    for(k=0;k<bl1.sizeOut();++k) {
+                        if (bl1.getOut(k)==bl2) { 
                             count1 += 1;
                         }
                     }
                     count2 = 0;
-                    for(k=0;k<bl2->sizeIn();++k) {
-                        if (bl2->getIn(k)==bl1) {
+                    for(k=0;k<bl2.sizeIn();++k) {
+                        if (bl2.getIn(k)==bl1) {
                             count2 += 1;
                         }
                     }

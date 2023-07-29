@@ -56,21 +56,21 @@ namespace Sla.DECCORE
             if (maxsize == 0) return false;
             if (maxsize < a.size)
             {   // Suggested range doesn't fit
-                if (maxsize < a.type->getSize()) return false; // Can't shrink that match
+                if (maxsize < a.type.getSize()) return false; // Can't shrink that match
                 a.size = (int4)maxsize;
             }
             // We want ANY symbol that might be within this range
             SymbolEntry* entry = findOverlap(addr, a.size);
             if (entry == (SymbolEntry*)0)
                 return true;
-            if (entry->getAddr() <= addr)
+            if (entry.getAddr() <= addr)
             {
                 // < generally shouldn't be possible
                 // == we might want to check for anything in -a- after -entry-
                 return false;
             }
-            maxsize = entry->getAddr().getOffset() - a.start;
-            if (maxsize < a.type->getSize()) return false;  // Can't shrink for this type
+            maxsize = entry.getAddr().getOffset() - a.start;
+            if (maxsize < a.type.getSize()) return false;  // Can't shrink for this type
             a.size = maxsize;
             return true;
         }
@@ -83,10 +83,10 @@ namespace Sla.DECCORE
         {
             Address addr(space, a.start);
             Address usepoint;
-            Datatype* ct = glb->types->concretize(a.type);
-            int4 num = a.size / ct->getSize();
+            Datatype* ct = glb.types.concretize(a.type);
+            int4 num = a.size / ct.getSize();
             if (num > 1)
-                ct = glb->types->getTypeArray(num, ct);
+                ct = glb.types.getTypeArray(num, ct);
 
             addSymbol("", ct, addr, usepoint);
         }
@@ -112,9 +112,9 @@ namespace Sla.DECCORE
             while (state.getNext())
             {
                 next = state.next();
-                if (next->sstart < cur.sstart + cur.size)
+                if (next.sstart < cur.sstart + cur.size)
                 {   // Do the ranges intersect
-                    if (cur.merge(next, space, glb->types)) // Union them
+                    if (cur.merge(next, space, glb.types)) // Union them
                         overlapProblems = true;
                 }
                 else
@@ -122,7 +122,7 @@ namespace Sla.DECCORE
                     if (!cur.attemptJoin(next))
                     {
                         if (cur.rangeType == RangeHint::open)
-                            cur.size = next->sstart - cur.sstart;
+                            cur.size = next.sstart - cur.sstart;
                         if (adjustFit(cur))
                             createEntry(cur);
                         cur = *next;
@@ -142,20 +142,20 @@ namespace Sla.DECCORE
         /// \param alias is the given set of alias starting offsets
         private void markUnaliased(List<uintb> alias)
         {
-            EntryMap* rangemap = maptable[space->getIndex()];
+            EntryMap* rangemap = maptable[space.getIndex()];
             if (rangemap == (EntryMap*)0) return;
             list<SymbolEntry>::iterator iter, enditer;
             set<Range>::const_iterator rangeIter, rangeEndIter;
             rangeIter = getRangeTree().begin();
             rangeEndIter = getRangeTree().end();
 
-            int4 alias_block_level = glb->alias_block_level;
+            int4 alias_block_level = glb.alias_block_level;
             bool aliason = false;
             uintb curalias = 0;
             int4 i = 0;
 
-            iter = rangemap->begin_list();
-            enditer = rangemap->end_list();
+            iter = rangemap.begin_list();
+            enditer = rangemap.end_list();
 
             while (iter != enditer)
             {
@@ -186,14 +186,14 @@ namespace Sla.DECCORE
                 // NOTE: this is primarily to reset aliasing between
                 // stack parameters and stack locals
                 if (aliason && (curoff - curalias > 0xffff)) aliason = false;
-                if (!aliason) symbol->getScope()->setAttribute(symbol, Varnode::nolocalalias);
-                if (symbol->isTypeLocked() && alias_block_level != 0)
+                if (!aliason) symbol.getScope().setAttribute(symbol, Varnode::nolocalalias);
+                if (symbol.isTypeLocked() && alias_block_level != 0)
                 {
                     if (alias_block_level == 3)
                         aliason = false;        // For this level, all locked data-types block aliases
                     else
                     {
-                        type_metatype meta = symbol->getType()->getMetatype();
+                        type_metatype meta = symbol.getType().getMetatype();
                         if (meta == TYPE_STRUCT)
                             aliason = false;        // Only structures block aliases
                         else if (meta == TYPE_ARRAY && alias_block_level > 1) aliason = false;// Only arrays (and structures) block aliases
@@ -211,35 +211,35 @@ namespace Sla.DECCORE
             int4 lockedinputs = getCategorySize(Symbol::function_parameter);
             VarnodeDefSet::const_iterator iter, enditer;
 
-            iter = fd->beginDef(Varnode::input);
-            enditer = fd->endDef(Varnode::input);
+            iter = fd.beginDef(Varnode::input);
+            enditer = fd.endDef(Varnode::input);
 
             while (iter != enditer)
             {
                 Varnode* vn = *iter++;
-                bool locked = vn->isTypeLock();
-                Address addr = vn->getAddr();
+                bool locked = vn.isTypeLock();
+                Address addr = vn.getAddr();
                 if (addr.getSpace() != space) continue;
                 // Only allow offsets which can be parameters
-                if (!fd->getFuncProto().getParamRange().inRange(addr, 1)) continue;
-                uintb endpoint = addr.getOffset() + vn->getSize() - 1;
+                if (!fd.getFuncProto().getParamRange().inRange(addr, 1)) continue;
+                uintb endpoint = addr.getOffset() + vn.getSize() - 1;
                 while (iter != enditer)
                 {
                     vn = *iter;
-                    if (vn->getSpace() != space) break;
-                    if (endpoint < vn->getOffset()) break;
-                    uintb newendpoint = vn->getOffset() + vn->getSize() - 1;
+                    if (vn.getSpace() != space) break;
+                    if (endpoint < vn.getOffset()) break;
+                    uintb newendpoint = vn.getOffset() + vn.getSize() - 1;
                     if (endpoint < newendpoint)
                         endpoint = newendpoint;
-                    if (vn->isTypeLock())
+                    if (vn.isTypeLock())
                         locked = true;
                     ++iter;
                 }
                 if (!locked)
                 {
                     Address usepoint;
-                    //      if (!vn->addrtied())
-                    // 	usepoint = vn->getUsePoint(*fd);
+                    //      if (!vn.addrtied())
+                    // 	usepoint = vn.getUsePoint(*fd);
                     // Double check to make sure vn doesn't already have a
                     // representative symbol.  If the input prototype is locked
                     // but one of the types is TYPE_UNKNOWN, then the 
@@ -247,22 +247,22 @@ namespace Sla.DECCORE
                     if (lockedinputs != 0)
                     {
                         uint4 vflags = 0;
-                        SymbolEntry* entry = queryProperties(vn->getAddr(), vn->getSize(), usepoint, vflags);
+                        SymbolEntry* entry = queryProperties(vn.getAddr(), vn.getSize(), usepoint, vflags);
                         if (entry != (SymbolEntry*)0)
                         {
-                            if (entry->getSymbol()->getCategory() == Symbol::function_parameter)
+                            if (entry.getSymbol().getCategory() == Symbol::function_parameter)
                                 continue;       // Found a matching symbol
                         }
                     }
 
                     int4 size = (endpoint - addr.getOffset()) + 1;
-                    Datatype* ct = fd->getArch()->types->getBase(size, TYPE_UNKNOWN);
+                    Datatype* ct = fd.getArch().types.getBase(size, TYPE_UNKNOWN);
                     try
                     {
-                        addSymbol("", ct, addr, usepoint)->getSymbol();
+                        addSymbol("", ct, addr, usepoint).getSymbol();
                     }
                     catch (LowlevelError err) {
-                        fd->warningHeader(err.ToString());
+                        fd.warningHeader(err.ToString());
                     }
                     //      setCategory(sym,0,index);
                 }
@@ -276,23 +276,23 @@ namespace Sla.DECCORE
         /// \param sym is the given Symbol to treat as a name recommendation
         private void addRecommendName(Symbol sym)
         {
-            SymbolEntry* entry = sym->getFirstWholeMap();
+            SymbolEntry* entry = sym.getFirstWholeMap();
             if (entry == (SymbolEntry*)0) return;
-            if (entry->isDynamic())
+            if (entry.isDynamic())
             {
-                dynRecommend.emplace_back(entry->getFirstUseAddress(), entry->getHash(), sym->getName(), sym->getId());
+                dynRecommend.emplace_back(entry.getFirstUseAddress(), entry.getHash(), sym.getName(), sym.getId());
             }
             else
             {
                 Address usepoint((AddrSpace*)0,0);
-                if (!entry->getUseLimit().empty())
+                if (!entry.getUseLimit().empty())
                 {
-                    Range range = entry->getUseLimit().getFirstRange();
-                    usepoint = Address(range->getSpace(), range->getFirst());
+                    Range range = entry.getUseLimit().getFirstRange();
+                    usepoint = Address(range.getSpace(), range.getFirst());
                 }
-                nameRecommend.emplace_back(entry->getAddr(), usepoint, entry->getSize(), sym->getName(), sym->getId());
+                nameRecommend.emplace_back(entry.getAddr(), usepoint, entry.getSize(), sym.getName(), sym.getId());
             }
-            if (sym->getCategory() < 0)
+            if (sym.getCategory() < 0)
                 removeSymbol(sym);
         }
 
@@ -310,19 +310,19 @@ namespace Sla.DECCORE
             while (iter != nametree.end())
             {
                 Symbol* sym = *iter++;
-                if (sym->isNameLocked() && (!sym->isTypeLocked()))
+                if (sym.isNameLocked() && (!sym.isTypeLocked()))
                 {
-                    if (sym->isThisPointer())
+                    if (sym.isThisPointer())
                     {       // If there is a "this" pointer
-                        Datatype* dt = sym->getType();
-                        if (dt->getMetatype() == TYPE_PTR)
+                        Datatype* dt = sym.getType();
+                        if (dt.getMetatype() == TYPE_PTR)
                         {
-                            if (((TypePointer*)dt)->getPtrTo()->getMetatype() == TYPE_STRUCT)
+                            if (((TypePointer*)dt).getPtrTo().getMetatype() == TYPE_STRUCT)
                             {
                                 // If the "this" pointer points to a class, try to preserve the data-type
                                 // even though the symbol is not preserved.
-                                SymbolEntry* entry = sym->getFirstWholeMap();
-                                addTypeRecommendation(entry->getAddr(), dt);
+                                SymbolEntry* entry = sym.getFirstWholeMap();
+                                addTypeRecommendation(entry.getAddr(), dt);
                             }
                         }
                     }
@@ -337,16 +337,16 @@ namespace Sla.DECCORE
         /// spacebase placeholder, PTRSUB(sp,#0), so that the data-type system can treat it as a reference.
         private void annotateRawStackPtr()
         {
-            if (!fd->hasTypeRecoveryStarted()) return;
-            Varnode* spVn = fd->findSpacebaseInput(space);
+            if (!fd.hasTypeRecoveryStarted()) return;
+            Varnode* spVn = fd.findSpacebaseInput(space);
             if (spVn == (Varnode*)0) return;
             list<PcodeOp*>::const_iterator iter;
             vector<PcodeOp*> refOps;
-            for (iter = spVn->beginDescend(); iter != spVn->endDescend(); ++iter)
+            for (iter = spVn.beginDescend(); iter != spVn.endDescend(); ++iter)
             {
                 PcodeOp* op = *iter;
-                if (op->getEvalType() == PcodeOp::special && !op->isCall()) continue;
-                OpCode opc = op->code();
+                if (op.getEvalType() == PcodeOp::special && !op.isCall()) continue;
+                OpCode opc = op.code();
                 if (opc == CPUI_INT_ADD || opc == CPUI_PTRSUB || opc == CPUI_PTRADD)
                     continue;
                 refOps.push_back(op);
@@ -354,9 +354,9 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < refOps.size(); ++i)
             {
                 PcodeOp* op = refOps[i];
-                int4 slot = op->getSlot(spVn);
-                PcodeOp* ptrsub = fd->newOpBefore(op, CPUI_PTRSUB, spVn, fd->newConstant(spVn->getSize(), 0));
-                fd->opSetInput(op, ptrsub->getOut(), slot);
+                int4 slot = op.getSlot(spVn);
+                PcodeOp* ptrsub = fd.newOpBefore(op, CPUI_PTRSUB, spVn, fd.newConstant(spVn.getSize(), 0));
+                fd.opSetInput(op, ptrsub.getOut(), slot);
             }
         }
 
@@ -366,7 +366,7 @@ namespace Sla.DECCORE
         /// \param fd is the function associated with these local variables
         /// \param g is the Architecture
         public ScopeLocal(uint8 id, AddrSpace spc, Funcdata fd, Architecture g)
-            : base(id, fd->getName(), g)
+            : base(id, fd.getName(), g)
         {
             space = spc;
             minParamOffset = ~((uintb)0);
@@ -387,7 +387,7 @@ namespace Sla.DECCORE
         ///
         /// \param vn is the Varnode storing an \e unaffected register
         /// \return \b true is the Varnode can be used as unaffected storage
-        public bool isUnaffectedStorage(Varnode vn) => (vn->getSpace() == space);
+        public bool isUnaffectedStorage(Varnode vn) => (vn.getSpace() == space);
 
         /// Check if a given unmapped Varnode should be treated as unaliased.
         /// Currently we treat all unmapped Varnodes as not having an alias, unless the Varnode is on the stack
@@ -398,9 +398,9 @@ namespace Sla.DECCORE
         /// \return \b true if there are no aliases
         public bool isUnmappedUnaliased(Varnode vn)
         {
-            if (vn->getSpace() != space) return false;  // Must be in mapped local (stack) space
+            if (vn.getSpace() != space) return false;  // Must be in mapped local (stack) space
             if (maxParamOffset < minParamOffset) return false;  // If no min/max, then we have no know stack parameters
-            if (vn->getOffset() < minParamOffset || vn->getOffset() > maxParamOffset)
+            if (vn.getOffset() < minParamOffset || vn.getOffset() > maxParamOffset)
                 return true;
             return false;
         }
@@ -418,9 +418,9 @@ namespace Sla.DECCORE
             uintb last = first + sz - 1;
             // Do not allow the range to cover the split point between "negative" and "positive" stack offsets
             if (last < first)       // Check for possible wrap around
-                last = spc->getHighest();
-            else if (last > spc->getHighest())
-                last = spc->getHighest();
+                last = spc.getHighest();
+            else if (last > spc.getHighest())
+                last = spc.getHighest();
             if (parameter)
             {       // Everything above parameter
                 if (first < minParamOffset)
@@ -433,20 +433,20 @@ namespace Sla.DECCORE
             SymbolEntry* overlap = findOverlap(addr, sz);
             while (overlap != (SymbolEntry*)0)
             { // For every overlapping entry
-                Symbol* sym = overlap->getSymbol();
-                if ((sym->getFlags() & Varnode::typelock) != 0)
+                Symbol* sym = overlap.getSymbol();
+                if ((sym.getFlags() & Varnode::typelock) != 0)
                 {
                     // If the symbol and the use are both as parameters
                     // this is likely the special case of a shared return call sharing the parameter location
                     // of the original function in which case we don't print a warning
-                    if ((!parameter) || (sym->getCategory() != Symbol::function_parameter))
-                        fd->warningHeader("Variable defined which should be unmapped: " + sym->getName());
+                    if ((!parameter) || (sym.getCategory() != Symbol::function_parameter))
+                        fd.warningHeader("Variable defined which should be unmapped: " + sym.getName());
                     return;
                 }
                 removeSymbol(sym);
                 overlap = findOverlap(addr, sz);
             }
-            glb->symboltab->removeRange(this, space, first, last);
+            glb.symboltab.removeRange(this, space, first, last);
         }
 
         // Routines that are specific to one address space
@@ -478,16 +478,16 @@ namespace Sla.DECCORE
             if (((flags & (Varnode::addrtied | Varnode::persist)) == Varnode::addrtied) &&
                 addr.getSpace() == space)
             {
-                if (fd->getFuncProto().getLocalRange().inRange(addr, 1))
+                if (fd.getFuncProto().getLocalRange().inRange(addr, 1))
                 {
-                    intb start = (intb)AddrSpace::byteToAddress(addr.getOffset(), space->getWordSize());
+                    intb start = (intb)AddrSpace::byteToAddress(addr.getOffset(), space.getWordSize());
                     sign_extend(start, addr.getAddrSize() * 8 - 1);
                     if (stackGrowsNegative)
                         start = -start;
                     ostringstream s;
                     if (ct != (Datatype*)0)
-                        ct->printNameBase(s);
-                    string spacename = addr.getSpace()->getName();
+                        ct.printNameBase(s);
+                    string spacename = addr.getSpace().getName();
                     spacename[0] = toupper(spacename[0]);
                     s << spacename;
                     if (start <= 0)
@@ -515,14 +515,14 @@ namespace Sla.DECCORE
         /// Any analysis removing specific ranges from the mapped set (via markNotMapped()) is cleared.
         public void resetLocalWindow()
         {
-            stackGrowsNegative = fd->getFuncProto().isStackGrowsNegative();
+            stackGrowsNegative = fd.getFuncProto().isStackGrowsNegative();
             minParamOffset = ~(uintb)0;
             maxParamOffset = 0;
 
             if (rangeLocked) return;
 
-            RangeList localRange = fd->getFuncProto().getLocalRange();
-            RangeList paramrange = fd->getFuncProto().getParamRange();
+            RangeList localRange = fd.getFuncProto().getLocalRange();
+            RangeList paramrange = fd.getFuncProto().getParamRange();
 
             RangeList newrange;
 
@@ -541,7 +541,7 @@ namespace Sla.DECCORE
                 uintb last = (*iter).getLast();
                 newrange.insertRange(spc, first, last);
             }
-            glb->symboltab->setRange(this, newrange);
+            glb.symboltab.setRange(this, newrange);
         }
 
         /// Layout mapped symbols based on Varnode information
@@ -553,8 +553,8 @@ namespace Sla.DECCORE
         public void restructureVarnode(bool aliasyes)
         {
             clearUnlockedCategory(-1);  // Clear out any unlocked entries
-            MapState state(space, getRangeTree(), fd->getFuncProto().getParamRange(),
-                    glb->types->getBase(1,TYPE_UNKNOWN)); // Organize list of ranges to insert
+            MapState state(space, getRangeTree(), fd.getFuncProto().getParamRange(),
+                    glb.types.getBase(1,TYPE_UNKNOWN)); // Organize list of ranges to insert
 
 #if OPACTION_DEBUG
             if (debugon)
@@ -562,7 +562,7 @@ namespace Sla.DECCORE
 #endif
             state.gatherVarnodes(*fd); // Gather stack type information from varnodes
             state.gatherOpen(*fd);
-            state.gatherSymbols(maptable[space->getIndex()]);
+            state.gatherSymbols(maptable[space.getIndex()]);
             restructure(state);
 
             // At some point, processing mapped input symbols may be folded
@@ -586,8 +586,8 @@ namespace Sla.DECCORE
         public void restructureHigh()
         {               // Define stack mapping based on highs
             clearUnlockedCategory(-1);  // Clear out any unlocked entries
-            MapState state(space, getRangeTree(), fd->getFuncProto().getParamRange(),
-                    glb->types->getBase(1,TYPE_UNKNOWN)); // Organize list of ranges to insert
+            MapState state(space, getRangeTree(), fd.getFuncProto().getParamRange(),
+                    glb.types.getBase(1,TYPE_UNKNOWN)); // Organize list of ranges to insert
 
 #if OPACTION_DEBUG
             if (debugon)
@@ -595,11 +595,11 @@ namespace Sla.DECCORE
 #endif
             state.gatherHighs(*fd); // Gather stack type information from highs
             state.gatherOpen(*fd);
-            state.gatherSymbols(maptable[space->getIndex()]);
+            state.gatherSymbols(maptable[space.getIndex()]);
             bool overlapProblems = restructure(state);
 
             if (overlapProblems)
-                fd->warningHeader("Could not reconcile some variable overlaps");
+                fd.warningHeader("Could not reconcile some variable overlaps");
         }
 
         /// \brief Change the primary mapping for the given Symbol to be a specific storage address and use point
@@ -611,15 +611,15 @@ namespace Sla.DECCORE
         /// \return the new mapping
         public SymbolEntry remapSymbol(Symbol sym, Address addr, Address usepoint)
         {
-            SymbolEntry* entry = sym->getFirstWholeMap();
-            int4 size = entry->getSize();
-            if (!entry->isDynamic())
+            SymbolEntry* entry = sym.getFirstWholeMap();
+            int4 size = entry.getSize();
+            if (!entry.isDynamic())
             {
-                if (entry->getAddr() == addr)
+                if (entry.getAddr() == addr)
                 {
-                    if (usepoint.isInvalid() && entry->getFirstUseAddress().isInvalid())
+                    if (usepoint.isInvalid() && entry.getFirstUseAddress().isInvalid())
                         return entry;
-                    if (entry->getFirstUseAddress() == usepoint)
+                    if (entry.getFirstUseAddress() == usepoint)
                         return entry;
                 }
             }
@@ -640,11 +640,11 @@ namespace Sla.DECCORE
         /// \return the new dynamic mapping
         public SymbolEntry remapSymbolDynamic(Symbol sym, uint8 hash, Address usepoint)
         {
-            SymbolEntry* entry = sym->getFirstWholeMap();
-            int4 size = entry->getSize();
-            if (entry->isDynamic())
+            SymbolEntry* entry = sym.getFirstWholeMap();
+            int4 size = entry.getSize();
+            if (entry.isDynamic())
             {
-                if (entry->getHash() == hash && entry->getFirstUseAddress() == usepoint)
+                if (entry.getHash() == hash && entry.getFirstUseAddress() == usepoint)
                     return entry;
             }
             removeSymbolMappings(sym);
@@ -662,7 +662,7 @@ namespace Sla.DECCORE
         /// unnamed Symbol.
         public void recoverNameRecommendationsForSymbols()
         {
-            Address param_usepoint = fd->getAddress() - 1;
+            Address param_usepoint = fd.getAddress() - 1;
             list<NameRecommend>::const_iterator iter;
             for (iter = nameRecommend.begin(); iter != nameRecommend.end(); ++iter)
             {
@@ -675,35 +675,35 @@ namespace Sla.DECCORE
                 {
                     SymbolEntry* entry = findOverlap(addr, size);   // Recover any Symbol regardless of usepoint
                     if (entry == (SymbolEntry*)0) continue;
-                    if (entry->getAddr() != addr)       // Make sure Symbol has matching address
+                    if (entry.getAddr() != addr)       // Make sure Symbol has matching address
                         continue;
-                    sym = entry->getSymbol();
-                    if ((sym->getFlags() & Varnode::addrtied) == 0)
+                    sym = entry.getSymbol();
+                    if ((sym.getFlags() & Varnode::addrtied) == 0)
                         continue;               // Symbol must be address tied to match this name recommendation
-                    vn = fd->findLinkedVarnode(entry);
+                    vn = fd.findLinkedVarnode(entry);
                 }
                 else
                 {
                     if (usepoint == param_usepoint)
-                        vn = fd->findVarnodeInput(size, addr);
+                        vn = fd.findVarnodeInput(size, addr);
                     else
-                        vn = fd->findVarnodeWritten(size, addr, usepoint);
+                        vn = fd.findVarnodeWritten(size, addr, usepoint);
                     if (vn == (Varnode*)0) continue;
-                    sym = vn->getHigh()->getSymbol();
+                    sym = vn.getHigh().getSymbol();
                     if (sym == (Symbol*)0) continue;
-                    if ((sym->getFlags() & Varnode::addrtied) != 0)
+                    if ((sym.getFlags() & Varnode::addrtied) != 0)
                         continue;               // Cannot use untied varnode as primary map for address tied symbol
-                    SymbolEntry* entry = sym->getFirstWholeMap();
-                    // entry->getAddr() does not need to match address of the recommendation
-                    if (entry->getSize() != size) continue;
+                    SymbolEntry* entry = sym.getFirstWholeMap();
+                    // entry.getAddr() does not need to match address of the recommendation
+                    if (entry.getSize() != size) continue;
                 }
-                if (!sym->isNameUndefined()) continue;
+                if (!sym.isNameUndefined()) continue;
                 renameSymbol(sym, makeNameUnique((*iter).getName()));
                 setSymbolId(sym, (*iter).getSymbolId());
                 setAttribute(sym, Varnode::namelock);
                 if (vn != (Varnode*)0)
                 {
-                    fd->remapVarnode(vn, sym, usepoint);
+                    fd.remapVarnode(vn, sym, usepoint);
                 }
             }
 
@@ -717,15 +717,15 @@ namespace Sla.DECCORE
                 DynamicRecommend dynEntry = *dyniter;
                 Varnode* vn = dhash.findVarnode(fd, dynEntry.getAddress(), dynEntry.getHash());
                 if (vn == (Varnode*)0) continue;
-                if (vn->isAnnotation()) continue;
-                Symbol* sym = vn->getHigh()->getSymbol();
+                if (vn.isAnnotation()) continue;
+                Symbol* sym = vn.getHigh().getSymbol();
                 if (sym == (Symbol*)0) continue;
-                if (sym->getScope() != this) continue;
-                if (!sym->isNameUndefined()) continue;
+                if (sym.getScope() != this) continue;
+                if (!sym.isNameUndefined()) continue;
                 renameSymbol(sym, makeNameUnique(dynEntry.getName()));
                 setAttribute(sym, Varnode::namelock);
                 setSymbolId(sym, dynEntry.getSymbolId());
-                fd->remapDynamicVarnode(vn, sym, dynEntry.getAddress(), dynEntry.getHash());
+                fd.remapDynamicVarnode(vn, sym, dynEntry.getAddress(), dynEntry.getHash());
             }
         }
 
@@ -738,9 +738,9 @@ namespace Sla.DECCORE
             for (iter = typeRecommend.begin(); iter != typeRecommend.end(); ++iter)
             {
                 Datatype* dt = (*iter).getType();
-                Varnode* vn = fd->findVarnodeInput(dt->getSize(), (*iter).getAddress());
+                Varnode* vn = fd.findVarnodeInput(dt.getSize(), (*iter).getAddress());
                 if (vn != (Varnode*)0)
-                    vn->updateType(dt, true, false);
+                    vn.updateType(dt, true, false);
             }
         }
 

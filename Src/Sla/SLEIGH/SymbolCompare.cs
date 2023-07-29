@@ -10,7 +10,7 @@ namespace Sla.SLEIGH
     {
         internal bool operator/*()*/(SleighSymbol a, SleighSymbol b)
         {
-            return (a->getName() < b->getName());
+            return (a.getName() < b.getName());
         }
     }
 }

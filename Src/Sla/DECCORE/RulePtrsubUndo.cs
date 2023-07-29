@@ -38,12 +38,12 @@ namespace Sla.DECCORE
         {
             if (!data.hasTypeRecoveryStarted()) return 0;
 
-            Varnode* basevn = op->getIn(0);
-            if (basevn->getTypeReadFacing(op)->isPtrsubMatching(op->getIn(1)->getOffset()))
+            Varnode* basevn = op.getIn(0);
+            if (basevn.getTypeReadFacing(op).isPtrsubMatching(op.getIn(1).getOffset()))
                 return 0;
 
             data.opSetOpcode(op, CPUI_INT_ADD);
-            op->clearStopTypePropagation();
+            op.clearStopTypePropagation();
             return 1;
         }
     }

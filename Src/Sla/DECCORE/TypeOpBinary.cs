@@ -34,18 +34,18 @@ namespace Sla.DECCORE
             metain = min;
         }
 
-        public override Datatype getOutputLocal(PcodeOp op) => tlst->getBase(op->getOut()->getSize(), metaout);
+        public override Datatype getOutputLocal(PcodeOp op) => tlst.getBase(op.getOut().getSize(), metaout);
 
         public override Datatype getInputLocal(PcodeOp op, int4 slot)
-            => tlst->getBase(op->getIn(slot)->getSize(), metain);
+            => tlst.getBase(op.getIn(slot).getSize(), metain);
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            Varnode::printRaw(s, op->getOut());
+            Varnode::printRaw(s, op.getOut());
             s << " = ";
-            Varnode::printRaw(s, op->getIn(0));
+            Varnode::printRaw(s, op.getIn(0));
             s << ' ' << getOperatorName(op) << ' ';
-            Varnode::printRaw(s, op->getIn(1));
+            Varnode::printRaw(s, op.getIn(1));
         }
     }
 }

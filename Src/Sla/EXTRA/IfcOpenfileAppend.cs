@@ -15,18 +15,18 @@ namespace Sla.EXTRA
         {
             string filename;
 
-            if (status->optr != status->fileoptr)
+            if (status.optr != status.fileoptr)
                 throw IfaceExecutionError("Output file already opened");
             s >> filename;
             if (filename.empty())
                 throw IfaceParseError("No filename specified");
 
-            status->fileoptr = new ofstream;
-            ((ofstream*)status->fileoptr)->open(filename.c_str(), ios_base::app); // Open for appending
-            if (!*status->fileoptr)
+            status.fileoptr = new ofstream;
+            ((ofstream*)status.fileoptr).open(filename.c_str(), ios_base::app); // Open for appending
+            if (!*status.fileoptr)
             {
-                delete status->fileoptr;
-                status->fileoptr = status->optr;
+                delete status.fileoptr;
+                status.fileoptr = status.optr;
                 throw IfaceExecutionError("Unable to open file: " + filename);
             }
         }

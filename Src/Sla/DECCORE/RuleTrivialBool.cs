@@ -39,24 +39,24 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vnconst = op->getIn(1);
+            Varnode* vnconst = op.getIn(1);
             Varnode* vn;
             uintb val;
             OpCode opc;
 
-            if (!vnconst->isConstant()) return 0;
-            val = vnconst->getOffset();
+            if (!vnconst.isConstant()) return 0;
+            val = vnconst.getOffset();
 
-            switch (op->code())
+            switch (op.code())
             {
                 case CPUI_BOOL_XOR:
-                    vn = op->getIn(0);
+                    vn = op.getIn(0);
                     opc = (val == 1) ? CPUI_BOOL_NEGATE : CPUI_COPY;
                     break;
                 case CPUI_BOOL_AND:
                     opc = CPUI_COPY;
                     if (val == 1)
-                        vn = op->getIn(0);
+                        vn = op.getIn(0);
                     else
                         vn = data.newConstant(1, 0); // Copy false
                     break;
@@ -65,7 +65,7 @@ namespace Sla.DECCORE
                     if (val == 1)
                         vn = data.newConstant(1, 1);
                     else
-                        vn = op->getIn(0);
+                        vn = op.getIn(0);
                     break;
                 default:
                     return 0;

@@ -110,17 +110,17 @@ namespace Sla.DECCORE
         public override ProtoStore clone()
         {
             ProtoStoreInternal* res = new ProtoStoreInternal(voidtype);
-            delete res->outparam;
+            delete res.outparam;
             if (outparam != (ProtoParameter*)0)
-                res->outparam = outparam->clone();
+                res.outparam = outparam.clone();
             else
-                res->outparam = (ProtoParameter*)0;
+                res.outparam = (ProtoParameter*)0;
             for (int4 i = 0; i < inparam.size(); ++i)
             {
                 ProtoParameter* param = inparam[i];
                 if (param != (ProtoParameter*)0)
-                    param = param->clone();
-                res->inparam.push_back(param);
+                    param = param.clone();
+                res.inparam.push_back(param);
             }
             return res;
         }
@@ -131,10 +131,10 @@ namespace Sla.DECCORE
             if (outparam != (ProtoParameter*)0)
             {
                 encoder.openElement(ELEM_RETPARAM);
-                if (outparam->isTypeLocked())
+                if (outparam.isTypeLocked())
                     encoder.writeBool(ATTRIB_TYPELOCK, true);
-                outparam->getAddress().encode(encoder);
-                outparam->getType()->encode(encoder);
+                outparam.getAddress().encode(encoder);
+                outparam.getType().encode(encoder);
                 encoder.closeElement(ELEM_RETPARAM);
             }
             else
@@ -151,20 +151,20 @@ namespace Sla.DECCORE
             {
                 ProtoParameter* param = inparam[i];
                 encoder.openElement(ELEM_PARAM);
-                if (param->getName().size() != 0)
-                    encoder.writeString(ATTRIB_NAME, param->getName());
-                if (param->isTypeLocked())
+                if (param.getName().size() != 0)
+                    encoder.writeString(ATTRIB_NAME, param.getName());
+                if (param.isTypeLocked())
                     encoder.writeBool(ATTRIB_TYPELOCK, true);
-                if (param->isNameLocked())
+                if (param.isNameLocked())
                     encoder.writeBool(ATTRIB_NAMELOCK, true);
-                if (param->isThisPointer())
+                if (param.isThisPointer())
                     encoder.writeBool(ATTRIB_THISPTR, true);
-                if (param->isIndirectStorage())
+                if (param.isIndirectStorage())
                     encoder.writeBool(ATTRIB_INDIRECTSTORAGE, true);
-                if (param->isHiddenReturn())
+                if (param.isHiddenReturn())
                     encoder.writeBool(ATTRIB_HIDDENRETPARM, true);
-                param->getAddress().encode(encoder);
-                param->getType()->encode(encoder);
+                param.getAddress().encode(encoder);
+                param.getType().encode(encoder);
                 encoder.closeElement(ELEM_PARAM);
             }
             encoder.closeElement(ELEM_INTERNALLIST);
@@ -172,20 +172,20 @@ namespace Sla.DECCORE
 
         public override void decode(Decoder decoder, ProtoModel model)
         {
-            Architecture* glb = model->getArch();
+            Architecture* glb = model.getArch();
             vector<ParameterPieces> pieces;
             vector<string> namelist;
             bool addressesdetermined = true;
 
             pieces.push_back(ParameterPieces()); // Push on placeholder for output pieces
             namelist.push_back("ret");
-            pieces.back().type = outparam->getType();
+            pieces.back().type = outparam.getType();
             pieces.back().flags = 0;
-            if (outparam->isTypeLocked())
+            if (outparam.isTypeLocked())
                 pieces.back().flags |= ParameterPieces::typelock;
-            if (outparam->isIndirectStorage())
+            if (outparam.isIndirectStorage())
                 pieces.back().flags |= ParameterPieces::indirectstorage;
-            if (outparam->getAddress().isInvalid())
+            if (outparam.getAddress().isInvalid())
                 addressesdetermined = false;
 
             uint4 elemId = decoder.openElement(ELEM_INTERNALLIST);
@@ -232,7 +232,7 @@ namespace Sla.DECCORE
                 pieces.emplace_back();
                 ParameterPieces & curparam(pieces.back());
                 curparam.addr = Address::decode(decoder);
-                curparam.type = glb->types->decodeType(decoder);
+                curparam.type = glb.types.decodeType(decoder);
                 curparam.flags = flags;
                 if (curparam.addr.isInvalid())
                     addressesdetermined = false;
@@ -248,7 +248,7 @@ namespace Sla.DECCORE
                 for (int4 i = 0; i < pieces.size(); ++i) // Save off the decoded types
                     typelist.push_back(pieces[i].type);
                 vector<ParameterPieces> addrPieces;
-                model->assignParameterStorage(typelist, addrPieces, true);
+                model.assignParameterStorage(typelist, addrPieces, true);
                 addrPieces.swap(pieces);
                 uint4 k = 0;
                 for (uint4 i = 0; i < pieces.size(); ++i)
@@ -263,7 +263,7 @@ namespace Sla.DECCORE
                     pieces[0].flags &= ~((uint4)ParameterPieces::typelock);     // Treat as unlocked void
                 }
                 curparam = setOutput(pieces[0]);
-                curparam->setTypeLock((pieces[0].flags & ParameterPieces::typelock) != 0);
+                curparam.setTypeLock((pieces[0].flags & ParameterPieces::typelock) != 0);
             }
             uint4 j = 1;
             for (uint4 i = 1; i < pieces.size(); ++i)
@@ -271,12 +271,12 @@ namespace Sla.DECCORE
                 if ((pieces[i].flags & ParameterPieces::hiddenretparm) != 0)
                 {
                     curparam = setInput(i - 1, "rethidden", pieces[i]);
-                    curparam->setTypeLock((pieces[0].flags & ParameterPieces::typelock) != 0);   // Has output's typelock
+                    curparam.setTypeLock((pieces[0].flags & ParameterPieces::typelock) != 0);   // Has output's typelock
                     continue;    // increment i but not j
                 }
                 curparam = setInput(i - 1, namelist[j], pieces[i]);
-                curparam->setTypeLock((pieces[i].flags & ParameterPieces::typelock) != 0);
-                curparam->setNameLock((pieces[i].flags & ParameterPieces::namelock) != 0);
+                curparam.setTypeLock((pieces[i].flags & ParameterPieces::typelock) != 0);
+                curparam.setNameLock((pieces[i].flags & ParameterPieces::namelock) != 0);
                 j = j + 1;
             }
         }

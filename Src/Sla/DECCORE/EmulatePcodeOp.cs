@@ -38,14 +38,14 @@ namespace Sla.DECCORE
         /// \return indicated bytes arranged as a constant value
         protected override uintb getLoadImageValue(AddrSpace spc, uintb offset, int4 sz)
         {
-            LoadImage* loadimage = glb->loader;
+            LoadImage* loadimage = glb.loader;
             uintb res;
 
-            loadimage->loadFill((uint1*)&res, sizeof(uintb), Address(spc, off));
+            loadimage.loadFill((uint1*)&res, sizeof(uintb), Address(spc, off));
 
-            if ((HOST_ENDIAN == 1) != spc->isBigEndian())
+            if ((HOST_ENDIAN == 1) != spc.isBigEndian())
                 res = byte_swap(res, sizeof(uintb));
-            if (spc->isBigEndian() && (sz < sizeof(uintb)))
+            if (spc.isBigEndian() && (sz < sizeof(uintb)))
                 res >>= (sizeof(uintb) - sz) * 8;
             else
                 res &= calc_mask(sz);
@@ -54,47 +54,47 @@ namespace Sla.DECCORE
 
         protected override void executeUnary()
         {
-            uintb in1 = getVarnodeValue(currentOp->getIn(0));
-            uintb out = currentBehave->evaluateUnary(currentOp->getOut()->getSize(),
-                                 currentOp->getIn(0)->getSize(), in1);
-            setVarnodeValue(currentOp->getOut(), out);
+            uintb in1 = getVarnodeValue(currentOp.getIn(0));
+            uintb out = currentBehave.evaluateUnary(currentOp.getOut().getSize(),
+                                 currentOp.getIn(0).getSize(), in1);
+            setVarnodeValue(currentOp.getOut(), out);
         }
 
         protected override void executeBinary()
         {
-            uintb in1 = getVarnodeValue(currentOp->getIn(0));
-            uintb in2 = getVarnodeValue(currentOp->getIn(1));
-            uintb out = currentBehave->evaluateBinary(currentOp->getOut()->getSize(),
-                                  currentOp->getIn(0)->getSize(), in1, in2);
-            setVarnodeValue(currentOp->getOut(), out);
+            uintb in1 = getVarnodeValue(currentOp.getIn(0));
+            uintb in2 = getVarnodeValue(currentOp.getIn(1));
+            uintb out = currentBehave.evaluateBinary(currentOp.getOut().getSize(),
+                                  currentOp.getIn(0).getSize(), in1, in2);
+            setVarnodeValue(currentOp.getOut(), out);
         }
 
         protected override void executeLoad()
         {
             // op will be null, use current_op
-            uintb off = getVarnodeValue(currentOp->getIn(1));
-            AddrSpace* spc = currentOp->getIn(0)->getSpaceFromConst();
-            off = AddrSpace::addressToByte(off, spc->getWordSize());
-            int4 sz = currentOp->getOut()->getSize();
+            uintb off = getVarnodeValue(currentOp.getIn(1));
+            AddrSpace* spc = currentOp.getIn(0).getSpaceFromConst();
+            off = AddrSpace::addressToByte(off, spc.getWordSize());
+            int4 sz = currentOp.getOut().getSize();
             uintb res = getLoadImageValue(spc, off, sz);
-            setVarnodeValue(currentOp->getOut(), res);
+            setVarnodeValue(currentOp.getOut(), res);
         }
 
         protected override void executeStore()
         {
             // There is currently nowhere to store anything since the memstate is null
-            //  uintb val = getVarnodeValue(current_op->getIn(2)); // Value being stored
-            //  uintb off = getVarnodeValue(current_op->getIn(1));
-            //  AddrSpace *spc = current_op->getIn(0)->getSpaceFromConst();
+            //  uintb val = getVarnodeValue(current_op.getIn(2)); // Value being stored
+            //  uintb off = getVarnodeValue(current_op.getIn(1));
+            //  AddrSpace *spc = current_op.getIn(0).getSpaceFromConst();
         }
 
         //  virtual void executeBranch(void)=0;
         protected override bool executeCbranch()
         {
             // op will be null, use current_op
-            uintb cond = getVarnodeValue(currentOp->getIn(1));
+            uintb cond = getVarnodeValue(currentOp.getIn(1));
             // We must take into account the booleanflip bit with pcode from the syntax tree
-            return ((cond != 0) != currentOp->isBooleanFlip());
+            return ((cond != 0) != currentOp.isBooleanFlip());
         }
 
         //  virtual void executeBranchind(void)=0;
@@ -106,15 +106,15 @@ namespace Sla.DECCORE
         {
             // op will be null, use current_op
             int4 i;
-            FlowBlock* bl = currentOp->getParent();
-            FlowBlock* last_bl = lastOp->getParent();
+            FlowBlock* bl = currentOp.getParent();
+            FlowBlock* last_bl = lastOp.getParent();
 
-            for (i = 0; i < bl->sizeIn(); ++i)
-                if (bl->getIn(i) == last_bl) break;
-            if (i == bl->sizeIn())
+            for (i = 0; i < bl.sizeIn(); ++i)
+                if (bl.getIn(i) == last_bl) break;
+            if (i == bl.sizeIn())
                 throw new LowlevelError("Could not execute MULTIEQUAL");
-            uintb val = getVarnodeValue(currentOp->getIn(i));
-            setVarnodeValue(currentOp->getOut(), val);
+            uintb val = getVarnodeValue(currentOp.getIn(i));
+            setVarnodeValue(currentOp.getOut(), val);
         }
 
         protected override void executeIndirect()
@@ -122,23 +122,23 @@ namespace Sla.DECCORE
             // We could probably safely ignore this in the
             // context we are using it (jumptable recovery)
             // But we go ahead and assume it is equivalent to copy
-            uintb val = getVarnodeValue(currentOp->getIn(0));
-            setVarnodeValue(currentOp->getOut(), val);
+            uintb val = getVarnodeValue(currentOp.getIn(0));
+            setVarnodeValue(currentOp.getOut(), val);
         }
 
         protected override void executeSegmentOp()
         {
-            SegmentOp* segdef = glb->userops.getSegmentOp(currentOp->getIn(0)->getSpaceFromConst()->getIndex());
+            SegmentOp* segdef = glb.userops.getSegmentOp(currentOp.getIn(0).getSpaceFromConst().getIndex());
             if (segdef == (SegmentOp*)0)
                 throw new LowlevelError("Segment operand missing definition");
 
-            uintb in1 = getVarnodeValue(currentOp->getIn(1));
-            uintb in2 = getVarnodeValue(currentOp->getIn(2));
+            uintb in1 = getVarnodeValue(currentOp.getIn(1));
+            uintb in2 = getVarnodeValue(currentOp.getIn(2));
             vector<uintb> bindlist;
             bindlist.push_back(in1);
             bindlist.push_back(in2);
-            uintb res = segdef->execute(bindlist);
-            setVarnodeValue(currentOp->getOut(), res);
+            uintb res = segdef.execute(bindlist);
+            setVarnodeValue(currentOp.getOut(), res);
         }
 
         protected override void executeCpoolRef()
@@ -166,10 +166,10 @@ namespace Sla.DECCORE
         public void setCurrentOp(PcodeOp op)
         {
             currentOp = op;
-            currentBehave = op->getOpcode()->getBehavior();
+            currentBehave = op.getOpcode().getBehavior();
         }
 
-        public override Address getExecuteAddress() => currentOp->getAddr();
+        public override Address getExecuteAddress() => currentOp.getAddr();
 
         /// \brief Given a specific Varnode, set the given value for it in the current machine state
         /// This is the placeholder internal operation for setting a Varnode value during emulation.

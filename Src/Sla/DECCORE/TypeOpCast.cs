@@ -21,14 +21,14 @@ namespace Sla.DECCORE
         // So no input and output requirements
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opCast(op);
+            lng.opCast(op);
         }
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            Varnode::printRaw(s, op->getOut());
+            Varnode::printRaw(s, op.getOut());
             s << " = " << name << ' ';
-            Varnode::printRaw(s, op->getIn(0));
+            Varnode::printRaw(s, op.getIn(0));
         }
     }
 }

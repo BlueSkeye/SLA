@@ -34,23 +34,23 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* outVn = op->getOut();
+            Varnode* outVn = op.getOut();
             list<PcodeOp*>::const_iterator iter;
 
-            for (iter = outVn->beginDescend(); iter != outVn->endDescend(); ++iter)
+            for (iter = outVn.beginDescend(); iter != outVn.endDescend(); ++iter)
             {
                 PcodeOp* baseOp = *iter;
-                if (baseOp->code() != CPUI_INT_AND) continue;
-                Varnode* tmpVn = baseOp->getIn(1);
-                if (!tmpVn->isConstant()) continue;
-                if (tmpVn->getOffset() != 1) continue;  // Masking 1 bit means we are checking parity of POPCOUNT input
-                if (tmpVn->getSize() != 1) continue;    // Must be boolean sized output
-                Varnode* inVn = op->getIn(0);
-                if (!inVn->isWritten()) return 0;
-                int4 count = popcount(inVn->getNZMask());
+                if (baseOp.code() != CPUI_INT_AND) continue;
+                Varnode* tmpVn = baseOp.getIn(1);
+                if (!tmpVn.isConstant()) continue;
+                if (tmpVn.getOffset() != 1) continue;  // Masking 1 bit means we are checking parity of POPCOUNT input
+                if (tmpVn.getSize() != 1) continue;    // Must be boolean sized output
+                Varnode* inVn = op.getIn(0);
+                if (!inVn.isWritten()) return 0;
+                int4 count = popcount(inVn.getNZMask());
                 if (count == 1)
                 {
-                    int4 leastPos = leastsigbit_set(inVn->getNZMask());
+                    int4 leastPos = leastsigbit_set(inVn.getNZMask());
                     int4 constRes;
                     Varnode* b1 = getBooleanResult(inVn, leastPos, constRes);
                     if (b1 == (Varnode*)0) continue;
@@ -61,8 +61,8 @@ namespace Sla.DECCORE
                 }
                 if (count == 2)
                 {
-                    int4 pos0 = leastsigbit_set(inVn->getNZMask());
-                    int4 pos1 = mostsigbit_set(inVn->getNZMask());
+                    int4 pos0 = leastsigbit_set(inVn.getNZMask());
+                    int4 pos1 = mostsigbit_set(inVn.getNZMask());
                     int4 constRes0, constRes1;
                     Varnode* b1 = getBooleanResult(inVn, pos0, constRes0);
                     if (b1 == (Varnode*)0 && constRes0 != 1) continue;
@@ -103,32 +103,32 @@ namespace Sla.DECCORE
             int4 sa;
             for (; ; )
             {
-                if (vn->isConstant())
+                if (vn.isConstant())
                 {
-                    constRes = (vn->getOffset() >> bitPos) & 1;
+                    constRes = (vn.getOffset() >> bitPos) & 1;
                     return (Varnode*)0;
                 }
-                if (!vn->isWritten()) return (Varnode*)0;
-                if (bitPos == 0 && vn->getSize() == 1 && vn->getNZMask() == mask)
+                if (!vn.isWritten()) return (Varnode*)0;
+                if (bitPos == 0 && vn.getSize() == 1 && vn.getNZMask() == mask)
                     return vn;
-                PcodeOp* op = vn->getDef();
-                switch (op->code())
+                PcodeOp* op = vn.getDef();
+                switch (op.code())
                 {
                     case CPUI_INT_AND:
-                        if (!op->getIn(1)->isConstant()) return (Varnode*)0;
-                        vn = op->getIn(0);
+                        if (!op.getIn(1).isConstant()) return (Varnode*)0;
+                        vn = op.getIn(0);
                         break;
                     case CPUI_INT_XOR:
                     case CPUI_INT_OR:
-                        vn0 = op->getIn(0);
-                        vn1 = op->getIn(1);
-                        if ((vn0->getNZMask() & mask) != 0)
+                        vn0 = op.getIn(0);
+                        vn1 = op.getIn(1);
+                        if ((vn0.getNZMask() & mask) != 0)
                         {
-                            if ((vn1->getNZMask() & mask) != 0)
+                            if ((vn1.getNZMask() & mask) != 0)
                                 return (Varnode*)0;     // Don't have a unique path
                             vn = vn0;
                         }
-                        else if ((vn1->getNZMask() & mask) != 0)
+                        else if ((vn1.getNZMask() & mask) != 0)
                         {
                             vn = vn1;
                         }
@@ -137,19 +137,19 @@ namespace Sla.DECCORE
                         break;
                     case CPUI_INT_ZEXT:
                     case CPUI_INT_SEXT:
-                        vn = op->getIn(0);
-                        if (bitPos >= vn->getSize() * 8) return (Varnode*)0;
+                        vn = op.getIn(0);
+                        if (bitPos >= vn.getSize() * 8) return (Varnode*)0;
                         break;
                     case CPUI_SUBPIECE:
-                        sa = (int4)op->getIn(1)->getOffset() * 8;
+                        sa = (int4)op.getIn(1).getOffset() * 8;
                         bitPos += sa;
                         mask <<= sa;
-                        vn = op->getIn(0);
+                        vn = op.getIn(0);
                         break;
                     case CPUI_PIECE:
-                        vn0 = op->getIn(0);
-                        vn1 = op->getIn(1);
-                        sa = (int4)vn1->getSize() * 8;
+                        vn0 = op.getIn(0);
+                        vn1 = op.getIn(1);
+                        sa = (int4)vn1.getSize() * 8;
                         if (bitPos >= sa)
                         {
                             vn = vn0;
@@ -162,22 +162,22 @@ namespace Sla.DECCORE
                         }
                         break;
                     case CPUI_INT_LEFT:
-                        vn1 = op->getIn(1);
-                        if (!vn1->isConstant()) return (Varnode*)0;
-                        sa = (int4)vn1->getOffset();
+                        vn1 = op.getIn(1);
+                        if (!vn1.isConstant()) return (Varnode*)0;
+                        sa = (int4)vn1.getOffset();
                         if (sa > bitPos) return (Varnode*)0;
                         bitPos -= sa;
                         mask >>= sa;
-                        vn = op->getIn(0);
+                        vn = op.getIn(0);
                         break;
                     case CPUI_INT_RIGHT:
                     case CPUI_INT_SRIGHT:
-                        vn1 = op->getIn(1);
-                        if (!vn1->isConstant()) return (Varnode*)0;
-                        sa = (int4)vn1->getOffset();
-                        vn = op->getIn(0);
+                        vn1 = op.getIn(1);
+                        if (!vn1.isConstant()) return (Varnode*)0;
+                        sa = (int4)vn1.getOffset();
+                        vn = op.getIn(0);
                         bitPos += sa;
-                        if (bitPos >= vn->getSize() * 8) return (Varnode*)0;
+                        if (bitPos >= vn.getSize() * 8) return (Varnode*)0;
                         mask <<= sa;
                         break;
                     default:

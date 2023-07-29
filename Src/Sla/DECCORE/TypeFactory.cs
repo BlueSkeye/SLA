@@ -64,15 +64,15 @@ namespace Sla.DECCORE
             if (!insres.second)
             {
                 ostringstream s;
-                s << "Shared type id: " << hex << newtype->getId() << endl;
+                s << "Shared type id: " << hex << newtype.getId() << endl;
                 s << "  ";
-                newtype->printRaw(s);
+                newtype.printRaw(s);
                 s << " : ";
-                (*insres.first)->printRaw(s);
+                (*insres.first).printRaw(s);
                 delete newtype;
                 throw new LowlevelError(s.str());
             }
-            if (newtype->id != 0)
+            if (newtype.id != 0)
                 nametree.insert(newtype);
         }
 
@@ -92,7 +92,7 @@ namespace Sla.DECCORE
                 res = findByIdLocal(ct.name, ct.id); // Lookup type by it
                 if (res != (Datatype*)0)
                 { // If a type has this name
-                    if (0 != res->compareDependency(ct)) // Check if it is the same type
+                    if (0 != res.compareDependency(ct)) // Check if it is the same type
                         throw new LowlevelError("Trying to alter definition of type: " + ct.name);
                     return res;
                 }
@@ -118,11 +118,11 @@ namespace Sla.DECCORE
         {               // Make sure dependants of ct are in order, then add ct
             pair<DatatypeSet::iterator, bool> res = mark.insert(ct);
             if (!res.second) return;    // Already inserted before
-            if (ct->typedefImm != (Datatype*)0)
-                orderRecurse(deporder, mark, ct->typedefImm);
-            int4 size = ct->numDepend();
+            if (ct.typedefImm != (Datatype*)0)
+                orderRecurse(deporder, mark, ct.typedefImm);
+            int4 size = ct.numDepend();
             for (int4 i = 0; i < size; ++i)
-                orderRecurse(deporder, mark, ct->getDepend(i));
+                orderRecurse(deporder, mark, ct.getDepend(i));
             deporder.push_back(ct);
         }
 
@@ -160,30 +160,30 @@ namespace Sla.DECCORE
             }
             Datatype* defedType = decodeType(decoder);
             //  decoder.closeElement(elemId);
-            if (defedType->isVariableLength())
-                id = Datatype::hashSize(id, defedType->size);
-            if (defedType->getMetatype() == TYPE_STRUCT || defedType->getMetatype() == TYPE_UNION)
+            if (defedType.isVariableLength())
+                id = Datatype::hashSize(id, defedType.size);
+            if (defedType.getMetatype() == TYPE_STRUCT || defedType.getMetatype() == TYPE_UNION)
             {
                 // Its possible that a typedef of a struct/union is recursively defined, in which case
                 // an incomplete version may already be in the container
                 Datatype* prev = findByIdLocal(nm, id);
                 if (prev != (Datatype*)0)
                 {
-                    if (defedType != prev->getTypedef())
-                        throw new LowlevelError("Trying to create typedef of existing type: " + prev->name);
-                    if (prev->getMetatype() == TYPE_STRUCT)
+                    if (defedType != prev.getTypedef())
+                        throw new LowlevelError("Trying to create typedef of existing type: " + prev.name);
+                    if (prev.getMetatype() == TYPE_STRUCT)
                     {
                         TypeStruct* prevStruct = (TypeStruct*)prev;
                         TypeStruct* defedStruct = (TypeStruct*)defedType;
-                        if (prevStruct->field.size() != defedStruct->field.size())
-                            setFields(defedStruct->field, prevStruct, defedStruct->size, defedStruct->flags);
+                        if (prevStruct.field.size() != defedStruct.field.size())
+                            setFields(defedStruct.field, prevStruct, defedStruct.size, defedStruct.flags);
                     }
                     else
                     {
                         TypeUnion* prevUnion = (TypeUnion*)prev;
                         TypeUnion* defedUnion = (TypeUnion*)defedType;
-                        if (prevUnion->field.size() != defedUnion->field.size())
-                            setFields(defedUnion->field, prevUnion, defedUnion->size, defedUnion->flags);
+                        if (prevUnion.field.size() != defedUnion.field.size())
+                            setFields(defedUnion.field, prevUnion, defedUnion.size, defedUnion.flags);
                     }
                     return prev;
                 }
@@ -208,12 +208,12 @@ namespace Sla.DECCORE
             {
                 ct = findAdd(ts);   // Create stub to allow recursive definitions
             }
-            else if (ct->getMetatype() != TYPE_STRUCT)
+            else if (ct.getMetatype() != TYPE_STRUCT)
                 throw new LowlevelError("Trying to redefine type: " + ts.name);
             ts.decodeFields(decoder, *this);
-            if (!ct->isIncomplete())
+            if (!ct.isIncomplete())
             {   // Structure of this name was already present
-                if (0 != ct->compareDependency(ts))
+                if (0 != ct.compareDependency(ts))
                     throw new LowlevelError("Redefinition of structure: " + ts.name);
             }
             else
@@ -242,12 +242,12 @@ namespace Sla.DECCORE
             {
                 ct = findAdd(tu);   // Create stub to allow recursive definitions
             }
-            else if (ct->getMetatype() != TYPE_UNION)
+            else if (ct.getMetatype() != TYPE_UNION)
                 throw new LowlevelError("Trying to redefine type: " + tu.name);
             tu.decodeFields(decoder, *this);
-            if (!ct->isIncomplete())
+            if (!ct.isIncomplete())
             {   // Structure of this name was already present
-                if (0 != ct->compareDependency(tu))
+                if (0 != ct.compareDependency(tu))
                     throw new LowlevelError("Redefinition of union: " + tu.name);
             }
             else
@@ -282,12 +282,12 @@ namespace Sla.DECCORE
             {
                 ct = findAdd(tc);   // Create stub to allow recursive definitions
             }
-            else if (ct->getMetatype() != TYPE_CODE)
+            else if (ct.getMetatype() != TYPE_CODE)
                 throw new LowlevelError("Trying to redefine type: " + tc.name);
             tc.decodePrototype(decoder, isConstructor, isDestructor, *this);
-            if (!ct->isIncomplete())
+            if (!ct.isIncomplete())
             {   // Code data-type of this name was already present
-                if (0 != ct->compareDependency(tc))
+                if (0 != ct.compareDependency(tc))
                     throw new LowlevelError("Redefinition of code data-type: " + tc.name);
             }
             else
@@ -493,13 +493,13 @@ namespace Sla.DECCORE
             while (iter != tree.end())
             {
                 TypePointer* ptr = (TypePointer*)*iter;
-                if (ptr->getMetatype() != TYPE_PTR) break;
-                if (ptr->ptrto != base) break;
+                if (ptr.getMetatype() != TYPE_PTR) break;
+                if (ptr.ptrto != base) break;
                 ++iter;
-                if (ptr->submeta == sub)
+                if (ptr.submeta == sub)
                 {
                     tree.erase(ptr);
-                    ptr->submeta = curSub;      // Change to correct submeta
+                    ptr.submeta = curSub;      // Change to correct submeta
                     tree.insert(ptr);           // Reinsert
                 }
             }
@@ -529,7 +529,7 @@ namespace Sla.DECCORE
                 ct.id = 0;
                 iter = nametree.lower_bound((Datatype*)&ct);
                 if (iter == nametree.end()) return (Datatype*)0; // Didn't find it
-                if ((*iter)->getName() != n) return (Datatype*)0; // Found at least one datatype with this name
+                if ((*iter).getName() != n) return (Datatype*)0; // Found at least one datatype with this name
             }
             return *iter;
         }
@@ -573,10 +573,10 @@ namespace Sla.DECCORE
             if (sizeOfInt == 0)
             {
                 sizeOfInt = 1;          // Default if we can't find a better value
-                AddrSpace* spc = glb->getStackSpace();
+                AddrSpace* spc = glb.getStackSpace();
                 if (spc != (AddrSpace*)0)
                 {
-                    VarnodeData spdata = spc->getSpacebase(0);        // Use stack pointer as likely indicator of "int" size
+                    VarnodeData spdata = spc.getSpacebase(0);        // Use stack pointer as likely indicator of "int" size
                     sizeOfInt = spdata.size;
                     if (sizeOfInt > 4)                  // "int" is rarely bigger than 4 bytes
                         sizeOfInt = 4;
@@ -587,7 +587,7 @@ namespace Sla.DECCORE
                 sizeOfLong = (sizeOfInt == 4) ? 8 : sizeOfInt;
             }
             if (align == 0)
-                align = glb->getDefaultSize();
+                align = glb.getDefaultSize();
             if (enumsize == 0)
             {
                 enumsize = align;
@@ -619,7 +619,7 @@ namespace Sla.DECCORE
             while (iter != tree.end())
             {
                 ct = *iter;
-                if (ct->isCoreType())
+                if (ct.isCoreType())
                 {
                     ++iter;
                     continue;
@@ -669,13 +669,13 @@ namespace Sla.DECCORE
         /// \return the renamed Datatype object
         public Datatype setName(Datatype ct, string n)
         {
-            if (ct->id != 0)
+            if (ct.id != 0)
                 nametree.erase(ct); // Erase any name reference
             tree.erase(ct);     // Remove new type completely from trees
-            ct->name = n;           // Change the name
-            ct->displayName = n;
-            if (ct->id == 0)
-                ct->id = Datatype::hashName(n);
+            ct.name = n;           // Change the name
+            ct.displayName = n;
+            if (ct.id == 0)
+                ct.id = Datatype::hashName(n);
             // Insert type with new name
             tree.insert(ct);
             nametree.insert(ct);    // Re-insert name reference
@@ -690,7 +690,7 @@ namespace Sla.DECCORE
         /// \param format is the given format
         public void setDisplayFormat(Datatype ct, uint4 format)
         {
-            ct->setDisplayFormat(format);
+            ct.setDisplayFormat(format);
         }
 
         /// Set fields on a TypeStruct
@@ -704,7 +704,7 @@ namespace Sla.DECCORE
         /// \return true if modification was successful
         public bool setFields(List<TypeField> fd, TypeStruct ot, int4 fixedsize, uint4 flags)
         {
-            if (!ot->isIncomplete())
+            if (!ot.isIncomplete())
                 throw new LowlevelError("Can only set fields on an incomplete structure");
             int4 offset = 0;
             vector<TypeField>::iterator iter;
@@ -714,12 +714,12 @@ namespace Sla.DECCORE
             {
                 Datatype* ct = (*iter).type;
                 // Do some sanity checks on the field
-                if (ct->getMetatype() == TYPE_VOID) return false;
+                if (ct.getMetatype() == TYPE_VOID) return false;
                 if ((*iter).name.size() == 0) return false;
 
                 if ((*iter).offset != -1)
                 {
-                    int4 end = (*iter).offset + ct->getSize();
+                    int4 end = (*iter).offset + ct.getSize();
                     if (end > offset)
                         offset = end;
                 }
@@ -730,15 +730,15 @@ namespace Sla.DECCORE
             // We could check field overlapping here
 
             tree.erase(ot);
-            ot->setFields(fd);
-            ot->flags &= ~(uint4)Datatype::type_incomplete;
-            ot->flags |= (flags & (Datatype::opaque_string | Datatype::variable_length | Datatype::type_incomplete));
+            ot.setFields(fd);
+            ot.flags &= ~(uint4)Datatype::type_incomplete;
+            ot.flags |= (flags & (Datatype::opaque_string | Datatype::variable_length | Datatype::type_incomplete));
             if (fixedsize > 0)
             {       // If the caller is trying to force a size
-                if (fixedsize > ot->size)   // If the forced size is bigger than the size required for fields
-                    ot->size = fixedsize;   //     Force the bigger size
-                else if (fixedsize < ot->size) // If the forced size is smaller, this is an error
-                    throw new LowlevelError("Trying to force too small a size on " + ot->getName());
+                if (fixedsize > ot.size)   // If the forced size is bigger than the size required for fields
+                    ot.size = fixedsize;   //     Force the bigger size
+                else if (fixedsize < ot.size) // If the forced size is smaller, this is an error
+                    throw new LowlevelError("Trying to force too small a size on " + ot.getName());
             }
             tree.insert(ot);
             recalcPointerSubmeta(ot, SUB_PTR);
@@ -756,7 +756,7 @@ namespace Sla.DECCORE
         /// \return true if modification was successful
         public bool setFields(List<TypeField> fd, TypeUnion ot, int4 fixedsize, uint4 flags)
         {
-            if (!ot->isIncomplete())
+            if (!ot.isIncomplete())
                 throw new LowlevelError("Can only set fields on an incomplete union");
             vector<TypeField>::iterator iter;
 
@@ -764,21 +764,21 @@ namespace Sla.DECCORE
             {
                 Datatype* ct = (*iter).type;
                 // Do some sanity checks on the field
-                if (ct->getMetatype() == TYPE_VOID) return false;
+                if (ct.getMetatype() == TYPE_VOID) return false;
                 if ((*iter).offset != 0) return false;
                 if ((*iter).name.size() == 0) return false;
             }
 
             tree.erase(ot);
-            ot->setFields(fd);
-            ot->flags &= ~(uint4)Datatype::type_incomplete;
-            ot->flags |= (flags & (Datatype::variable_length | Datatype::type_incomplete));
+            ot.setFields(fd);
+            ot.flags &= ~(uint4)Datatype::type_incomplete;
+            ot.flags |= (flags & (Datatype::variable_length | Datatype::type_incomplete));
             if (fixedsize > 0)
             {       // If the caller is trying to force a size
-                if (fixedsize > ot->size)   // If the forced size is bigger than the size required for fields
-                    ot->size = fixedsize;   //     Force the bigger size
-                else if (fixedsize < ot->size) // If the forced size is smaller, this is an error
-                    throw new LowlevelError("Trying to force too small a size on " + ot->getName());
+                if (fixedsize > ot.size)   // If the forced size is bigger than the size required for fields
+                    ot.size = fixedsize;   //     Force the bigger size
+                else if (fixedsize < ot.size) // If the forced size is smaller, this is an error
+                    throw new LowlevelError("Trying to force too small a size on " + ot.getName());
             }
             tree.insert(ot);
             return true;
@@ -792,12 +792,12 @@ namespace Sla.DECCORE
         /// \param flags are additional flags to transfer into the code data-type
         public void setPrototype(FuncProto fp, TypeCode newCode, uint4 flags)
         {
-            if (!newCode->isIncomplete())
+            if (!newCode.isIncomplete())
                 throw new LowlevelError("Can only set prototype on incomplete data-type");
             tree.erase(newCode);
-            newCode->setPrototype(this, fp);
-            newCode->flags &= ~(uint4)Datatype::type_incomplete;
-            newCode->flags |= (flags & (Datatype::variable_length | Datatype::type_incomplete));
+            newCode.setPrototype(this, fp);
+            newCode.flags &= ~(uint4)Datatype::type_incomplete;
+            newCode.flags |= (flags & (Datatype::variable_length | Datatype::type_incomplete));
             tree.insert(newCode);
         }
 
@@ -816,7 +816,7 @@ namespace Sla.DECCORE
             map<uintb, string> nmap;
             map<uintb, string>::iterator mapiter;
 
-            uintb mask = calc_mask(te->getSize());
+            uintb mask = calc_mask(te.getSize());
             uintb maxval = 0;
             for (uint4 i = 0; i < namelist.size(); ++i)
             {
@@ -847,7 +847,7 @@ namespace Sla.DECCORE
             }
 
             tree.erase(te);
-            te->setNameMap(nmap);
+            te.setNameMap(nmap);
             tree.insert(te);
             return true;
         }
@@ -976,7 +976,7 @@ namespace Sla.DECCORE
                 if (ct != (Datatype*)0)
                     return ct;
             }
-            if (s > glb->max_basetype_size)
+            if (s > glb.max_basetype_size)
             {
                 // Create array of unknown bytes to match size
                 ct = typecache[1][TYPE_UNKNOWN - TYPE_FLOAT];
@@ -1024,10 +1024,10 @@ namespace Sla.DECCORE
         /// \return the TypePointer object
         public TypePointer getTypePointerStripArray(int4 s, Datatype pt, uint4 ws)
         {
-            if (pt->hasStripped())
-                pt = pt->getStripped();
-            if (pt->getMetatype() == TYPE_ARRAY)
-                pt = ((TypeArray*)pt)->getBase();       // Strip the first ARRAY type
+            if (pt.hasStripped())
+                pt = pt.getStripped();
+            if (pt.getMetatype() == TYPE_ARRAY)
+                pt = ((TypeArray*)pt).getBase();       // Strip the first ARRAY type
             TypePointer tmp(s, pt, ws);
             return (TypePointer*)findAdd(tmp);
         }
@@ -1040,8 +1040,8 @@ namespace Sla.DECCORE
         /// \return the TypePointer object
         public TypePointer getTypePointer(int4 s, Datatype pt, uint4 ws)
         {
-            if (pt->hasStripped())
-                pt = pt->getStripped();
+            if (pt.hasStripped())
+                pt = pt.getStripped();
             TypePointer tmp(s, pt, ws);
             return (TypePointer*)findAdd(tmp);
         }
@@ -1056,8 +1056,8 @@ namespace Sla.DECCORE
         /// \return the TypePointer object
         public TypePointer getTypePointer(int4 s, Datatype pt, uint4 ws, string n)
         {
-            if (pt->hasStripped())
-                pt = pt->getStripped();
+            if (pt.hasStripped())
+                pt = pt.getStripped();
             TypePointer tmp(s, pt, ws);
             tmp.name = n;
             tmp.displayName = n;
@@ -1066,25 +1066,25 @@ namespace Sla.DECCORE
         }
 
         /// Construct a depth limited pointer data-type
-        // Don't create more than a depth of 2, i.e. ptr->ptr->ptr->...
+        // Don't create more than a depth of 2, i.e. ptr.ptr.ptr....
         /// \param s is the size of the pointer
         /// \param pt is the pointed-to data-type
         /// \param ws is the wordsize associated with the pointer
         /// \return the TypePointer object
         public TypePointer getTypePointerNoDepth(int4 s, Datatypept, uint4 ws)
         {
-            if (pt->getMetatype() == TYPE_PTR)
+            if (pt.getMetatype() == TYPE_PTR)
             {
-                Datatype* basetype = ((TypePointer*)pt)->getPtrTo();
-                type_metatype meta = basetype->getMetatype();
+                Datatype* basetype = ((TypePointer*)pt).getPtrTo();
+                type_metatype meta = basetype.getMetatype();
                 // Make sure that at least we return a pointer to something the size of -pt-
                 if (meta == TYPE_PTR)
-                    pt = getBase(pt->getSize(), TYPE_UNKNOWN);      // Pass back unknown *
+                    pt = getBase(pt.getSize(), TYPE_UNKNOWN);      // Pass back unknown *
                 else if (meta == TYPE_UNKNOWN)
                 {
-                    if (basetype->getSize() == pt->getSize())   // If -pt- is pointer to UNKNOWN of the size of a pointer
+                    if (basetype.getSize() == pt.getSize())   // If -pt- is pointer to UNKNOWN of the size of a pointer
                         return (TypePointer*)pt; // Just return pt, don't add another pointer
-                    pt = getBase(pt->getSize(), TYPE_UNKNOWN);  // Otherwise construct pointer to UNKNOWN of size of pointer
+                    pt = getBase(pt.getSize(), TYPE_UNKNOWN);  // Otherwise construct pointer to UNKNOWN of size of pointer
                 }
             }
             return getTypePointer(s, pt, ws);
@@ -1096,8 +1096,8 @@ namespace Sla.DECCORE
         /// \return the TypeArray object
         public TypeArray getTypeArray(int4 @as, Datatype ao)
         {
-            if (ao->hasStripped())
-                ao = ao->getStripped();
+            if (ao.hasStripped())
+                ao = ao.getStripped();
             TypeArray tmp(as,ao);
             return (TypeArray*)findAdd(tmp);
         }
@@ -1198,17 +1198,17 @@ namespace Sla.DECCORE
             Datatype* res = findByIdLocal(name, id);
             if (res != (Datatype*)0)
             {
-                if (ct != res->getTypedef())
+                if (ct != res.getTypedef())
                     throw new LowlevelError("Trying to create typedef of existing type: " + name);
                 return res;
             }
-            res = ct->clone();      // Clone everything
-            res->name = name;       // But a new name
-            res->displayName = name;
-            res->id = id;           // and new id
-            res->flags &= ~((uint4)Datatype::coretype); // Not a core type
-            res->typedefImm = ct;
-            res->setDisplayFormat(format);
+            res = ct.clone();      // Clone everything
+            res.name = name;       // But a new name
+            res.displayName = name;
+            res.id = id;           // and new id
+            res.flags &= ~((uint4)Datatype::coretype); // Not a core type
+            res.typedefImm = ct;
+            res.setDisplayFormat(format);
             insert(res);
             return res;
         }
@@ -1222,7 +1222,7 @@ namespace Sla.DECCORE
         /// \return the new/matching pointer
         public TypePointerRel getTypePointerRel(TypePointer parentPtr, Datatype ptrTo, int4 off)
         {
-            TypePointerRel tp(parentPtr->size, ptrTo, parentPtr->wordsize, parentPtr->ptrto, off);
+            TypePointerRel tp(parentPtr.size, ptrTo, parentPtr.wordsize, parentPtr.ptrto, off);
             tp.markEphemeral(*this);        // Mark as ephemeral
             TypePointerRel* res = (TypePointerRel*)findAdd(tp);
             return res;
@@ -1280,29 +1280,29 @@ namespace Sla.DECCORE
         /// \return the data-type of the piece or null
         public Datatype getExactPiece(Datatype ct, int4 offset, int4 size)
         {
-            if (offset + size > ct->getSize())
+            if (offset + size > ct.getSize())
                 return (Datatype*)0;
             Datatype* lastType = (Datatype*)0;
             uintb lastOff = 0;
             uintb curOff = offset;
             do
             {
-                if (ct->getSize() <= size)
+                if (ct.getSize() <= size)
                 {
-                    if (ct->getSize() == size)
+                    if (ct.getSize() == size)
                         return ct;          // Perfect size match
                     break;
                 }
-                else if (ct->getMetatype() == TYPE_UNION)
+                else if (ct.getMetatype() == TYPE_UNION)
                 {
                     return getTypePartialUnion((TypeUnion*)ct, curOff, size);
                 }
                 lastType = ct;
                 lastOff = curOff;
-                ct = ct->getSubType(curOff, &curOff);
+                ct = ct.getSubType(curOff, &curOff);
             } while (ct != (Datatype*)0);
             // If we reach here, lastType is bigger than size
-            if (lastType->getMetatype() == TYPE_STRUCT || lastType->getMetatype() == TYPE_ARRAY)
+            if (lastType.getMetatype() == TYPE_STRUCT || lastType.getMetatype() == TYPE_ARRAY)
                 return getTypePartialStruct(lastType, lastOff, size);
             return (Datatype*)0;
         }
@@ -1313,7 +1313,7 @@ namespace Sla.DECCORE
         /// \param ct is the data-type to destroy
         public void destroyType(Datatype ct)
         {
-            if (ct->isCoreType())
+            if (ct.isCoreType())
                 throw new LowlevelError("Cannot destroy core type");
             nametree.erase(ct);
             tree.erase(ct);
@@ -1329,10 +1329,10 @@ namespace Sla.DECCORE
         /// \return the concrete data-type
         public Datatype concretize(Datatype ct)
         {
-            type_metatype metatype = ct->getMetatype();
+            type_metatype metatype = ct.getMetatype();
             if (metatype == TYPE_CODE)
             {
-                if (ct->getSize() != 1)
+                if (ct.getSize() != 1)
                     throw new LowlevelError("Primitive code data-type that is not size 1");
                 ct = getBase(1, TYPE_UNKNOWN);
             }
@@ -1370,15 +1370,15 @@ namespace Sla.DECCORE
             encoder.writeBool(ATTRIB_ENUMSIGNED, (enumtype == TYPE_INT));
             for (iter = deporder.begin(); iter != deporder.end(); ++iter)
             {
-                if ((*iter)->getName().size() == 0) continue;   // Don't save anonymous types
-                if ((*iter)->isCoreType())
+                if ((*iter).getName().size() == 0) continue;   // Don't save anonymous types
+                if ((*iter).isCoreType())
                 { // If this would be saved as a coretype
-                    type_metatype meta = (*iter)->getMetatype();
+                    type_metatype meta = (*iter).getMetatype();
                     if ((meta != TYPE_PTR) && (meta != TYPE_ARRAY) &&
                     (meta != TYPE_STRUCT) && (meta != TYPE_UNION))
                         continue;       // Don't save it here
                 }
-              (*iter)->encode(encoder);
+              (*iter).encode(encoder);
             }
             encoder.closeElement(ELEM_TYPEGRP);
         }
@@ -1396,12 +1396,12 @@ namespace Sla.DECCORE
             for (iter = tree.begin(); iter != tree.end(); ++iter)
             {
                 ct = *iter;
-                if (!ct->isCoreType()) continue;
-                type_metatype meta = ct->getMetatype();
+                if (!ct.isCoreType()) continue;
+                type_metatype meta = ct.getMetatype();
                 if ((meta == TYPE_PTR) || (meta == TYPE_ARRAY) ||
                 (meta == TYPE_STRUCT) || (meta == TYPE_UNION))
                     continue;
-                ct->encode(encoder);
+                ct.encode(encoder);
             }
             encoder.closeElement(ELEM_CORETYPES);
         }
@@ -1451,7 +1451,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decodeDataOrganization(Decoder decoder)
         {
-            uint4 defaultSize = glb->getDefaultSize();
+            uint4 defaultSize = glb.getDefaultSize();
             align = 0;
             uint4 elemId = decoder.openElement(ELEM_DATA_ORGANIZATION);
             for (; ; )
@@ -1528,7 +1528,7 @@ namespace Sla.DECCORE
                 ct = getTypeVoid();
             else
                 ct = getBase(size, meta, name);
-            ct->flags |= Datatype::coretype;
+            ct.flags |= Datatype::coretype;
         }
 
         /// Cache common types
@@ -1543,41 +1543,41 @@ namespace Sla.DECCORE
             {
                 Datatype* ct = *iter;
                 Datatype* testct;
-                if (!ct->isCoreType()) continue;
-                if (ct->getSize() > 8)
+                if (!ct.isCoreType()) continue;
+                if (ct.getSize() > 8)
                 {
-                    if (ct->getMetatype() == TYPE_FLOAT)
+                    if (ct.getMetatype() == TYPE_FLOAT)
                     {
-                        if (ct->getSize() == 10)
+                        if (ct.getSize() == 10)
                             typecache10 = ct;
-                        else if (ct->getSize() == 16)
+                        else if (ct.getSize() == 16)
                             typecache16 = ct;
                     }
                     continue;
                 }
-                switch (ct->getMetatype())
+                switch (ct.getMetatype())
                 {
                     case TYPE_INT:
-                        if ((ct->getSize() == 1) && (!ct->isASCII()))
+                        if ((ct.getSize() == 1) && (!ct.isASCII()))
                             type_nochar = ct;
                     // fallthru
                     case TYPE_UINT:
-                        if (ct->isEnumType()) break; // Conceivably an enumeration
-                        if (ct->isASCII())
+                        if (ct.isEnumType()) break; // Conceivably an enumeration
+                        if (ct.isASCII())
                         {   // Char is preferred over other int types
-                            typecache[ct->getSize()][ct->getMetatype() - TYPE_FLOAT] = ct;
+                            typecache[ct.getSize()][ct.getMetatype() - TYPE_FLOAT] = ct;
                             break;
                         }
-                        if (ct->isCharPrint()) break; // Other character types (UTF16,UTF32) are not preferred
+                        if (ct.isCharPrint()) break; // Other character types (UTF16,UTF32) are not preferred
                                                       // fallthru
                     case TYPE_VOID:
                     case TYPE_UNKNOWN:
                     case TYPE_BOOL:
                     case TYPE_CODE:
                     case TYPE_FLOAT:
-                        testct = typecache[ct->getSize()][ct->getMetatype() - TYPE_FLOAT];
+                        testct = typecache[ct.getSize()][ct.getMetatype() - TYPE_FLOAT];
                         if (testct == (Datatype*)0)
-                            typecache[ct->getSize()][ct->getMetatype() - TYPE_FLOAT] = ct;
+                            typecache[ct.getSize()][ct.getMetatype() - TYPE_FLOAT] = ct;
                         break;
                     default:
                         break;

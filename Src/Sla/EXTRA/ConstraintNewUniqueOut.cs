@@ -28,14 +28,14 @@ namespace Sla.EXTRA
         }
 
         public override UnifyConstraint clone()
-            => (new ConstraintNewUniqueOut(opindex, newvarindex, sizevarindex))->copyid(this);
+            => (new ConstraintNewUniqueOut(opindex, newvarindex, sizevarindex)).copyid(this);
 
         public override int4 getBaseIndex() => newvarindex;
 
         public override bool step(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            if (!traverse->step()) return false;
+            if (!traverse.step()) return false;
             Funcdata* fd = state.getFunction();
             PcodeOp* op = state.data(opindex).getOp();
             int4 sz;
@@ -44,9 +44,9 @@ namespace Sla.EXTRA
             else
             {
                 Varnode* sizevn = state.data(sizevarindex).getVarnode();
-                sz = sizevn->getSize();
+                sz = sizevn.getSize();
             }
-            Varnode* newvn = fd->newUniqueOut(sz, op);
+            Varnode* newvn = fd.newUniqueOut(sz, op);
             state.data(newvarindex).setVarnode(newvn);
             return true;
         }
@@ -66,7 +66,7 @@ namespace Sla.EXTRA
             if (sizevarindex < 0)
                 s << dec << -sizevarindex;
             else
-                s << printstate.getName(sizevarindex) << "->getSize()";
+                s << printstate.getName(sizevarindex) << ".getSize()";
             s << ',' << printstate.getName(opindex) << ");" << endl;
         }
     }

@@ -122,11 +122,11 @@ namespace Sla.SLEIGH
 
         public PatternBlock(PatternBlock a, PatternBlock b)
         {               // Construct PatternBlock by ANDing two others together
-            PatternBlock* res = a->intersect(b);
-            offset = res->offset;
-            nonzerosize = res->nonzerosize;
-            maskvec = res->maskvec;
-            valvec = res->valvec;
+            PatternBlock* res = a.intersect(b);
+            offset = res.offset;
+            nonzerosize = res.nonzerosize;
+            maskvec = res.maskvec;
+            valvec = res.valvec;
             delete res;
         }
 
@@ -143,14 +143,14 @@ namespace Sla.SLEIGH
             res = list[0];
             for (int4 i = 1; i < list.size(); ++i)
             {
-                next = res->intersect(list[i]);
+                next = res.intersect(list[i]);
                 delete res;
                 res = next;
             }
-            offset = res->offset;
-            nonzerosize = res->nonzerosize;
-            maskvec = res->maskvec;
-            valvec = res->valvec;
+            offset = res.offset;
+            nonzerosize = res.nonzerosize;
+            maskvec = res.maskvec;
+            valvec = res.valvec;
             delete res;
         }
 
@@ -159,9 +159,9 @@ namespace Sla.SLEIGH
                         // only if the two pieces have a 1-bit and the
                         // values agree
             PatternBlock* res = new PatternBlock(true);
-            int4 maxlength = (getLength() > b->getLength()) ? getLength() : b->getLength();
+            int4 maxlength = (getLength() > b.getLength()) ? getLength() : b.getLength();
 
-            res->offset = 0;
+            res.offset = 0;
             int4 offset = 0;
             uintm mask1, val1, mask2, val2;
             uintm resmask, resval;
@@ -169,27 +169,27 @@ namespace Sla.SLEIGH
             {
                 mask1 = getMask(offset * 8, sizeof(uintm) * 8);
                 val1 = getValue(offset * 8, sizeof(uintm) * 8);
-                mask2 = b->getMask(offset * 8, sizeof(uintm) * 8);
-                val2 = b->getValue(offset * 8, sizeof(uintm) * 8);
+                mask2 = b.getMask(offset * 8, sizeof(uintm) * 8);
+                val2 = b.getValue(offset * 8, sizeof(uintm) * 8);
                 resmask = mask1 & mask2 & ~(val1 ^ val2);
                 resval = val1 & val2 & resmask;
-                res->maskvec.push_back(resmask);
-                res->valvec.push_back(resval);
+                res.maskvec.push_back(resmask);
+                res.valvec.push_back(resval);
                 offset += sizeof(uintm);
             }
-            res->nonzerosize = maxlength;
-            res->normalize();
+            res.nonzerosize = maxlength;
+            res.normalize();
             return res;
         }
 
         public PatternBlock intersect(PatternBlock b)
         { // Construct the intersecting pattern
-            if (alwaysFalse() || b->alwaysFalse())
+            if (alwaysFalse() || b.alwaysFalse())
                 return new PatternBlock(false);
             PatternBlock* res = new PatternBlock(true);
-            int4 maxlength = (getLength() > b->getLength()) ? getLength() : b->getLength();
+            int4 maxlength = (getLength() > b.getLength()) ? getLength() : b.getLength();
 
-            res->offset = 0;
+            res.offset = 0;
             int4 offset = 0;
             uintm mask1, val1, mask2, val2, commonmask;
             uintm resmask, resval;
@@ -197,30 +197,30 @@ namespace Sla.SLEIGH
             {
                 mask1 = getMask(offset * 8, sizeof(uintm) * 8);
                 val1 = getValue(offset * 8, sizeof(uintm) * 8);
-                mask2 = b->getMask(offset * 8, sizeof(uintm) * 8);
-                val2 = b->getValue(offset * 8, sizeof(uintm) * 8);
+                mask2 = b.getMask(offset * 8, sizeof(uintm) * 8);
+                val2 = b.getValue(offset * 8, sizeof(uintm) * 8);
                 commonmask = mask1 & mask2; // Bits in mask shared by both patterns
                 if ((commonmask & val1) != (commonmask & val2))
                 {
-                    res->nonzerosize = -1;  // Impossible pattern
-                    res->normalize();
+                    res.nonzerosize = -1;  // Impossible pattern
+                    res.normalize();
                     return res;
                 }
                 resmask = mask1 | mask2;
                 resval = (mask1 & val1) | (mask2 & val2);
-                res->maskvec.push_back(resmask);
-                res->valvec.push_back(resval);
+                res.maskvec.push_back(resmask);
+                res.valvec.push_back(resval);
                 offset += sizeof(uintm);
             }
-            res->nonzerosize = maxlength;
-            res->normalize();
+            res.nonzerosize = maxlength;
+            res.normalize();
             return res;
         }
 
         public bool specializes(PatternBlock op2)
         {               // does every masked bit in -this- match the corresponding
                         // masked bit in -op2-
-            int4 length = 8 * op2->getLength();
+            int4 length = 8 * op2.getLength();
             int4 tmplength;
             uintm mask1, mask2, value1, value2;
             int4 sbit = 0;
@@ -231,8 +231,8 @@ namespace Sla.SLEIGH
                     tmplength = 8 * sizeof(uintm);
                 mask1 = getMask(sbit, tmplength);
                 value1 = getValue(sbit, tmplength);
-                mask2 = op2->getMask(sbit, tmplength);
-                value2 = op2->getValue(sbit, tmplength);
+                mask2 = op2.getMask(sbit, tmplength);
+                value2 = op2.getValue(sbit, tmplength);
                 if ((mask1 & mask2) != mask2) return false;
                 if ((value1 & mask2) != (value2 & mask2)) return false;
                 sbit += tmplength;
@@ -243,7 +243,7 @@ namespace Sla.SLEIGH
         public bool identical(PatternBlock op2)
         {               // Do the mask and value match exactly
             int4 tmplength;
-            int4 length = 8 * op2->getLength();
+            int4 length = 8 * op2.getLength();
             tmplength = 8 * getLength();
             if (tmplength > length)
                 length = tmplength;     // Maximum of two lengths
@@ -256,8 +256,8 @@ namespace Sla.SLEIGH
                     tmplength = 8 * sizeof(uintm);
                 mask1 = getMask(sbit, tmplength);
                 value1 = getValue(sbit, tmplength);
-                mask2 = op2->getMask(sbit, tmplength);
-                value2 = op2->getValue(sbit, tmplength);
+                mask2 = op2.getMask(sbit, tmplength);
+                value2 = op2.getValue(sbit, tmplength);
                 if (mask1 != mask2) return false;
                 if ((mask1 & value1) != (mask2 & value2)) return false;
                 sbit += tmplength;
@@ -269,10 +269,10 @@ namespace Sla.SLEIGH
         {
             PatternBlock* res = new PatternBlock(true);
 
-            res->offset = offset;
-            res->nonzerosize = nonzerosize;
-            res->maskvec = maskvec;
-            res->valvec = valvec;
+            res.offset = offset;
+            res.nonzerosize = nonzerosize;
+            res.maskvec = maskvec;
+            res.valvec = valvec;
             return res;
         }
 
@@ -390,16 +390,16 @@ namespace Sla.SLEIGH
         public void restoreXml(Element el)
         {
             {
-                istringstream s(el->getAttributeValue("offset"));
+                istringstream s(el.getAttributeValue("offset"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> offset;
             }
             {
-                istringstream s(el->getAttributeValue("nonzero"));
+                istringstream s(el.getAttributeValue("nonzero"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> nonzerosize;
             }
-            List list = el->getChildren();
+            List list = el.getChildren();
             List::const_iterator iter;
             iter = list.begin();
             uintm mask, val;
@@ -407,12 +407,12 @@ namespace Sla.SLEIGH
             {
                 Element* subel = *iter;
                 {
-                    istringstream s(subel->getAttributeValue("mask"));
+                    istringstream s(subel.getAttributeValue("mask"));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> mask;
                 }
                 {
-                    istringstream s(subel->getAttributeValue("val"));
+                    istringstream s(subel.getAttributeValue("val"));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> val;
                 }

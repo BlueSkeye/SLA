@@ -23,72 +23,72 @@ namespace Sla.EXTRA
             s >> ws >> name;
             if (name.size() == 0)
             {
-                if (dcp->fd != (Funcdata*)0)
+                if (dcp.fd != (Funcdata*)0)
                 {
-                    int4 num = dcp->fd->numCalls();
+                    int4 num = dcp.fd.numCalls();
                     for (int4 i = 0; i < num; ++i)
                     {
-                        FuncCallSpecs* fc = dcp->fd->getCallSpecs(i);
-                        *status->optr << "ExtraPop for " << fc->getName() << '(';
-                        *status->optr << fc->getOp()->getAddr() << ')';
-                        int4 expop = fc->getEffectiveExtraPop();
-                        *status->optr << " ";
+                        FuncCallSpecs* fc = dcp.fd.getCallSpecs(i);
+                        *status.optr << "ExtraPop for " << fc.getName() << '(';
+                        *status.optr << fc.getOp().getAddr() << ')';
+                        int4 expop = fc.getEffectiveExtraPop();
+                        *status.optr << " ";
                         if (expop == ProtoModel::extrapop_unknown)
-                            *status->optr << "unknown";
+                            *status.optr << "unknown";
                         else
-                            *status->optr << dec << expop;
-                        *status->optr << '(';
-                        expop = fc->getExtraPop();
+                            *status.optr << dec << expop;
+                        *status.optr << '(';
+                        expop = fc.getExtraPop();
                         if (expop == ProtoModel::extrapop_unknown)
-                            *status->optr << "unknown";
+                            *status.optr << "unknown";
                         else
-                            *status->optr << dec << expop;
-                        *status->optr << ')' << endl;
+                            *status.optr << dec << expop;
+                        *status.optr << ')' << endl;
                     }
                 }
                 else
                 {
-                    int4 expop = dcp->conf->defaultfp->getExtraPop();
-                    *status->optr << "Default extra pop = ";
+                    int4 expop = dcp.conf.defaultfp.getExtraPop();
+                    *status.optr << "Default extra pop = ";
                     if (expop == ProtoModel::extrapop_unknown)
-                        *status->optr << "unknown" << endl;
+                        *status.optr << "unknown" << endl;
                     else
-                        *status->optr << dec << expop << endl;
+                        *status.optr << dec << expop << endl;
                 }
             }
             else
             {
                 Funcdata* fd;
-                fd = dcp->conf->symboltab->getGlobalScope()->queryFunction(name);
+                fd = dcp.conf.symboltab.getGlobalScope().queryFunction(name);
                 if (fd == (Funcdata*)0)
                     throw IfaceExecutionError("Unknown function: " + name);
-                int4 expop = fd->getFuncProto().getExtraPop();
-                *status->optr << "ExtraPop for function " << name << " is ";
+                int4 expop = fd.getFuncProto().getExtraPop();
+                *status.optr << "ExtraPop for function " << name << " is ";
                 if (expop == ProtoModel::extrapop_unknown)
-                    *status->optr << "unknown" << endl;
+                    *status.optr << "unknown" << endl;
                 else
-                    *status->optr << dec << expop << endl;
-                if (dcp->fd != (Funcdata*)0)
+                    *status.optr << dec << expop << endl;
+                if (dcp.fd != (Funcdata*)0)
                 {
-                    int4 num = dcp->fd->numCalls();
+                    int4 num = dcp.fd.numCalls();
                     for (int4 i = 0; i < num; ++i)
                     {
-                        FuncCallSpecs* fc = dcp->fd->getCallSpecs(i);
-                        if (fc->getName() == fd->getName())
+                        FuncCallSpecs* fc = dcp.fd.getCallSpecs(i);
+                        if (fc.getName() == fd.getName())
                         {
-                            expop = fc->getEffectiveExtraPop();
-                            *status->optr << "For this function, extrapop = ";
+                            expop = fc.getEffectiveExtraPop();
+                            *status.optr << "For this function, extrapop = ";
                             if (expop == ProtoModel::extrapop_unknown)
-                                *status->optr << "unknown";
+                                *status.optr << "unknown";
                             else
-                                *status->optr << dec << expop;
-                            *status->optr << '(';
-                            expop = fc->getExtraPop();
+                                *status.optr << dec << expop;
+                            *status.optr << '(';
+                            expop = fc.getExtraPop();
                             if (expop == ProtoModel::extrapop_unknown)
-                                *status->optr << "unknown";
+                                *status.optr << "unknown";
                             else
-                                *status->optr << dec << expop;
-                            *status->optr << ')' << endl;
+                                *status.optr << dec << expop;
+                            *status.optr << ')' << endl;
                         }
                     }
                 }

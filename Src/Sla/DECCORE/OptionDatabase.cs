@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// \param option is the new ArchOption instance
         private void registerOption(ArchOption option)
         {
-            uint4 id = ElementId::find(option->getName());  // Option name must match a known element name
+            uint4 id = ElementId::find(option.getName());  // Option name must match a known element name
             optionmap[id] = option;
         }
 
@@ -98,7 +98,7 @@ namespace Sla.DECCORE
             if (iter == optionmap.end())
                 throw ParseError("Unknown option");
             ArchOption* opt = (*iter).second;
-            return opt->apply(glb, p1, p2, p3);
+            return opt.apply(glb, p1, p2, p3);
         }
 
         ///< Parse and execute a single option element

@@ -18,14 +18,14 @@ namespace Sla.SLEIGH
                         // the ConstantValue because it is not stored
                         // or restored via xml
             patexp = new ConstantValue((intb)0);
-            patexp->layClaim();
+            patexp.layClaim();
         }
 
         public PatternlessSymbol(string nm)
             : base(nm)
         {
             patexp = new ConstantValue((intb)0);
-            patexp->layClaim();
+            patexp.layClaim();
         }
 
         ~PatternlessSymbol()

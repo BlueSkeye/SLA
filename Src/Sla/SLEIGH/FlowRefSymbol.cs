@@ -71,7 +71,7 @@ namespace Sla.SLEIGH
 
         public override void restoreXml(Element el, SleighBase trans)
         {
-            const_space = trans->getConstantSpace();
+            const_space = trans.getConstantSpace();
         }
     }
 }

@@ -41,54 +41,54 @@ namespace Sla.DECCORE
             OpCode opc;
             uintb val;
 
-            int4 outsz = op->getOut()->getSize();
+            int4 outsz = op.getOut().getSize();
             if (outsz > sizeof(uintb))
                 return 0;           // FIXME:  precision problem for constants
             for (int4 i = 0; i < 2; ++i)
             {
-                vn = op->getIn(i);
-                if (!vn->isWritten()) continue;
-                logicop = vn->getDef();
-                opc = logicop->code();
+                vn = op.getIn(i);
+                if (!vn.isWritten()) continue;
+                logicop = vn.getDef();
+                opc = logicop.code();
                 if ((opc == CPUI_INT_OR) || (opc == CPUI_INT_XOR))
                 {
-                    if (!logicop->getIn(1)->isConstant()) continue;
-                    val = logicop->getIn(1)->getOffset();
+                    if (!logicop.getIn(1).isConstant()) continue;
+                    val = logicop.getIn(1).getOffset();
                     if (i == 0)
                     {
-                        hi = logicop->getIn(0);
-                        lo = op->getIn(1);
-                        val <<= 8 * lo->getSize();
+                        hi = logicop.getIn(0);
+                        lo = op.getIn(1);
+                        val <<= 8 * lo.getSize();
                     }
                     else
                     {
-                        hi = op->getIn(0);
-                        lo = logicop->getIn(0);
+                        hi = op.getIn(0);
+                        lo = logicop.getIn(0);
                     }
                 }
                 else if (opc == CPUI_INT_AND)
                 {
-                    if (!logicop->getIn(1)->isConstant()) continue;
-                    val = logicop->getIn(1)->getOffset();
+                    if (!logicop.getIn(1).isConstant()) continue;
+                    val = logicop.getIn(1).getOffset();
                     if (i == 0)
                     {
-                        hi = logicop->getIn(0);
-                        lo = op->getIn(1);
-                        val <<= 8 * lo->getSize();
-                        val |= calc_mask(lo->getSize());
+                        hi = logicop.getIn(0);
+                        lo = op.getIn(1);
+                        val <<= 8 * lo.getSize();
+                        val |= calc_mask(lo.getSize());
                     }
                     else
                     {
-                        hi = op->getIn(0);
-                        lo = logicop->getIn(0);
-                        val |= (calc_mask(hi->getSize()) << 8 * lo->getSize());
+                        hi = op.getIn(0);
+                        lo = logicop.getIn(0);
+                        val |= (calc_mask(hi.getSize()) << 8 * lo.getSize());
                     }
                 }
                 else
                     continue;
-                if (hi->isFree()) continue;
-                if (lo->isFree()) continue;
-                newconcat = data.newOp(2, op->getAddr());
+                if (hi.isFree()) continue;
+                if (lo.isFree()) continue;
+                newconcat = data.newOp(2, op.getAddr());
                 data.opSetOpcode(newconcat, CPUI_PIECE);
                 newvn = data.newUniqueOut(outsz, newconcat);
                 data.opSetInput(newconcat, hi, 0);
@@ -96,7 +96,7 @@ namespace Sla.DECCORE
                 data.opInsertBefore(newconcat, op);
                 data.opSetOpcode(op, opc);
                 data.opSetInput(op, newvn, 0);
-                data.opSetInput(op, data.newConstant(newvn->getSize(), val), 1);
+                data.opSetInput(op, data.newConstant(newvn.getSize(), val), 1);
                 return 1;
             }
             return 0;

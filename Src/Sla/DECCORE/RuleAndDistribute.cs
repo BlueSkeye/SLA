@@ -37,27 +37,27 @@ namespace Sla.DECCORE
             uintb ormask1, ormask2, othermask, fullmask;
             int4 i, size;
 
-            size = op->getOut()->getSize();
+            size = op.getOut().getSize();
             if (size > sizeof(uintb)) return 0; // FIXME: uintb should be arbitrary precision
             fullmask = calc_mask(size);
             for (i = 0; i < 2; ++i)
             {
-                othervn = op->getIn(1 - i);
-                if (!othervn->isHeritageKnown()) continue;
-                orvn = op->getIn(i);
-                orop = orvn->getDef();
+                othervn = op.getIn(1 - i);
+                if (!othervn.isHeritageKnown()) continue;
+                orvn = op.getIn(i);
+                orop = orvn.getDef();
                 if (orop == (PcodeOp*)0) continue;
-                if (orop->code() != CPUI_INT_OR) continue;
-                if (!orop->getIn(0)->isHeritageKnown()) continue;
-                if (!orop->getIn(1)->isHeritageKnown()) continue;
-                othermask = othervn->getNZMask();
+                if (orop.code() != CPUI_INT_OR) continue;
+                if (!orop.getIn(0).isHeritageKnown()) continue;
+                if (!orop.getIn(1).isHeritageKnown()) continue;
+                othermask = othervn.getNZMask();
                 if (othermask == 0) continue; // This case picked up by andmask
                 if (othermask == fullmask) continue; // Nothing useful from distributing
-                ormask1 = orop->getIn(0)->getNZMask();
+                ormask1 = orop.getIn(0).getNZMask();
                 if ((ormask1 & othermask) == 0) break; // AND would cancel if distributed
-                ormask2 = orop->getIn(1)->getNZMask();
+                ormask2 = orop.getIn(1).getNZMask();
                 if ((ormask2 & othermask) == 0) break; // AND would cancel if distributed
-                if (othervn->isConstant())
+                if (othervn.isConstant())
                 {
                     if ((ormask1 & othermask) == ormask1) break; // AND is trivial if distributed
                     if ((ormask2 & othermask) == ormask2) break;
@@ -65,17 +65,17 @@ namespace Sla.DECCORE
             }
             if (i == 2) return 0;
             // Do distribution
-            newop1 = data.newOp(2, op->getAddr()); // Distribute AND
+            newop1 = data.newOp(2, op.getAddr()); // Distribute AND
             newvn1 = data.newUniqueOut(size, newop1);
             data.opSetOpcode(newop1, CPUI_INT_AND);
-            data.opSetInput(newop1, orop->getIn(0), 0); // To first input of original OR
+            data.opSetInput(newop1, orop.getIn(0), 0); // To first input of original OR
             data.opSetInput(newop1, othervn, 1);
             data.opInsertBefore(newop1, op);
 
-            newop2 = data.newOp(2, op->getAddr()); // Distribute AND
+            newop2 = data.newOp(2, op.getAddr()); // Distribute AND
             newvn2 = data.newUniqueOut(size, newop2);
             data.opSetOpcode(newop2, CPUI_INT_AND);
-            data.opSetInput(newop2, orop->getIn(1), 0); // To second input of original OR
+            data.opSetInput(newop2, orop.getIn(1), 0); // To second input of original OR
             data.opSetInput(newop2, othervn, 1);
             data.opInsertBefore(newop2, op);
 

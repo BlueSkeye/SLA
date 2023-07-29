@@ -28,16 +28,16 @@ namespace Sla.DECCORE
     
         public override void decode(Decoder decoder)
         {
-            injectid = glb->pcodeinjectlib->decodeInject("userop", "", InjectPayload::CALLOTHERFIXUP_TYPE, decoder);
-            name = glb->pcodeinjectlib->getCallOtherTarget(injectid);
-            UserPcodeOp * base = glb->userops.getOp(name);
+            injectid = glb.pcodeinjectlib.decodeInject("userop", "", InjectPayload::CALLOTHERFIXUP_TYPE, decoder);
+            name = glb.pcodeinjectlib.getCallOtherTarget(injectid);
+            UserPcodeOp * base = glb.userops.getOp(name);
             // This tag overrides the base functionality of a userop
             // so the core userop name and index may already be defined
             if (base == (UserPcodeOp*)0)
                 throw new LowlevelError("Unknown userop name in <callotherfixup>: " + name);
             if (dynamic_cast<UnspecializedPcodeOp*>(base) == (UnspecializedPcodeOp*)0)  // Make sure the userop isn't used for some other purpose
                 throw new LowlevelError("<callotherfixup> overloads userop with another purpose: " + name);
-            useropindex = base->getIndex(); // Get the index from the core userop
+            useropindex = base.getIndex(); // Get the index from the core userop
         }
     }
 }

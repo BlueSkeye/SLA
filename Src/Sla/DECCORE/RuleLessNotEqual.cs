@@ -37,30 +37,30 @@ namespace Sla.DECCORE
             PcodeOp* op_less,*op_equal;
             OpCode opc;
 
-            vnout1 = op->getIn(0);
-            if (!vnout1->isWritten()) return 0;
-            vnout2 = op->getIn(1);
-            if (!vnout2->isWritten()) return 0;
-            op_less = vnout1->getDef();
-            opc = op_less->code();
+            vnout1 = op.getIn(0);
+            if (!vnout1.isWritten()) return 0;
+            vnout2 = op.getIn(1);
+            if (!vnout2.isWritten()) return 0;
+            op_less = vnout1.getDef();
+            opc = op_less.code();
             if ((opc != CPUI_INT_LESSEQUAL) && (opc != CPUI_INT_SLESSEQUAL))
             {
                 op_equal = op_less;
-                op_less = vnout2->getDef();
-                opc = op_less->code();
+                op_less = vnout2.getDef();
+                opc = op_less.code();
                 if ((opc != CPUI_INT_LESSEQUAL) && (opc != CPUI_INT_SLESSEQUAL))
                     return 0;
             }
             else
-                op_equal = vnout2->getDef();
-            if (op_equal->code() != CPUI_INT_NOTEQUAL) return 0;
+                op_equal = vnout2.getDef();
+            if (op_equal.code() != CPUI_INT_NOTEQUAL) return 0;
 
-            compvn1 = op_less->getIn(0);
-            compvn2 = op_less->getIn(1);
-            if (!compvn1->isHeritageKnown()) return 0;
-            if (!compvn2->isHeritageKnown()) return 0;
-            if (((*compvn1 != *op_equal->getIn(0)) || (*compvn2 != *op_equal->getIn(1))) &&
-                ((*compvn1 != *op_equal->getIn(1)) || (*compvn2 != *op_equal->getIn(0))))
+            compvn1 = op_less.getIn(0);
+            compvn2 = op_less.getIn(1);
+            if (!compvn1.isHeritageKnown()) return 0;
+            if (!compvn2.isHeritageKnown()) return 0;
+            if (((*compvn1 != *op_equal.getIn(0)) || (*compvn2 != *op_equal.getIn(1))) &&
+                ((*compvn1 != *op_equal.getIn(1)) || (*compvn2 != *op_equal.getIn(0))))
                 return 0;
 
             data.opSetInput(op, compvn1, 0);

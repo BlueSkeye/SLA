@@ -28,13 +28,13 @@ namespace Sla.DECCORE
             int4 i;
             Varnode* vn;
 
-            if (!op->isCollapsible()) return 0; // Expression must be collapsible
+            if (!op.isCollapsible()) return 0; // Expression must be collapsible
 
             Address newval;
             bool markedInput = false;
             try
             {
-                newval = data.getArch()->getConstant(op->collapse(markedInput));
+                newval = data.getArch().getConstant(op.collapse(markedInput));
             }
             catch (LowlevelError err)
             {
@@ -42,12 +42,12 @@ namespace Sla.DECCORE
                 return 0;
             }
 
-            vn = data.newVarnode(op->getOut()->getSize(), newval); // Create new collapsed constant
+            vn = data.newVarnode(op.getOut().getSize(), newval); // Create new collapsed constant
             if (markedInput)
             {
-                op->collapseConstantSymbol(vn);
+                op.collapseConstantSymbol(vn);
             }
-            for (i = op->numInput() - 1; i > 0; --i)
+            for (i = op.numInput() - 1; i > 0; --i)
                 data.opRemoveInput(op, i);  // unlink old constants
             data.opSetInput(op, vn, 0); // Link in new collapsed constant
             data.opSetOpcode(op, CPUI_COPY); // Change ourselves to a copy

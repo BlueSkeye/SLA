@@ -21,13 +21,13 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             int4 size1, size2;
-            Address addr1 = parse_machaddr(s, size1, *dcp->conf->types); // Read externalref address
-            Address addr2 = parse_machaddr(s, size2, *dcp->conf->types); // Read referred to address
+            Address addr1 = parse_machaddr(s, size1, *dcp.conf.types); // Read externalref address
+            Address addr2 = parse_machaddr(s, size2, *dcp.conf.types); // Read referred to address
             string name;
 
             s >> name;          // Read optional name
 
-            dcp->conf->symboltab->getGlobalScope()->addExternalRef(addr1, addr2, name);
+            dcp.conf.symboltab.getGlobalScope().addExternalRef(addr1, addr2, name);
         }
     }
 }

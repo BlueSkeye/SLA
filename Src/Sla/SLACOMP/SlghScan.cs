@@ -574,7 +574,7 @@ namespace Sla.SLACOMP
         //		YY_CURRENT_BUFFER_LVALUE =    \
         //            yy_create_buffer(yyin, YY_BUF_SIZE ); \
         //	} \
-        //	YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
+        //	YY_CURRENT_BUFFER_LVALUE.yy_is_interactive = is_interactive; \
         //	}
         //#define yy_set_bol(at_bol) \
         //	{ \
@@ -584,9 +584,9 @@ namespace Sla.SLACOMP
         //		YY_CURRENT_BUFFER_LVALUE =    \
         //            yy_create_buffer(yyin, YY_BUF_SIZE); \
         //	} \
-        //	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
+        //	YY_CURRENT_BUFFER_LVALUE.yy_at_bol = at_bol; \
         //	}
-        //#define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE->yy_at_bol)
+        //#define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE.yy_at_bol)
 
         //typedef flex_uint8_t YY_CHAR;
 
@@ -1164,7 +1164,7 @@ namespace Sla.SLACOMP
         //    void preproc_error(string &err)
 
         //    {
-        //        slgh->reportError((Location*)0, err);
+        //        slgh.reportError((Location*)0, err);
         //        cerr << "Terminating due to error in preprocessing" << endl;
         //        exit(1);
         //    }
@@ -1229,7 +1229,7 @@ namespace Sla.SLACOMP
         //        if (tok != '(')
         //            preproc_error("Badly formed \"defined\" operator");
         //        macroname = read_identifier(s);
-        //        int4 res = slgh->getPreprocValue(macroname, macroname) ? 1 : 0;
+        //        int4 res = slgh.getPreprocValue(macroname, macroname) ? 1 : 0;
         //        s >> ws >> tok;
         //        if (tok != ')')
         //            preproc_error("Badly formed \"defined\" operator");
@@ -1261,7 +1261,7 @@ namespace Sla.SLACOMP
         //            lhs = read_identifier(s);
         //            if (lhs == "defined")
         //                return read_defined_operator(s);
-        //            if (!slgh->getPreprocValue(lhs, lhs))
+        //            if (!slgh.getPreprocValue(lhs, lhs))
         //                preproc_error("Could not find preprocessor macro " + lhs);
         //        }
 
@@ -1277,7 +1277,7 @@ namespace Sla.SLACOMP
         //        else
         //        {
         //            rhs = read_identifier(s);
-        //            if (!slgh->getPreprocValue(rhs, rhs))
+        //            if (!slgh.getPreprocValue(rhs, rhs))
         //                preproc_error("Could not find preprocessor macro " + rhs);
         //        }
 
@@ -1345,7 +1345,7 @@ namespace Sla.SLACOMP
         //                }
         //                string macro = str.substr(pos + 2, endpos - (pos + 2));
         //                string value;
-        //                if (!slgh->getPreprocValue(macro, value))
+        //                if (!slgh.getPreprocValue(macro, value))
         //                {
         //                    preproc_error("Unknown preprocessing macro " + macro);
         //                    break;
@@ -1383,8 +1383,8 @@ namespace Sla.SLACOMP
         //                string fname;
         //                preprocess_string(s, fname);
         //                expand_preprocmacros(fname);
-        //                slgh->parseFromNewFile(fname);
-        //                fname = slgh->grabCurrentFilePath();
+        //                slgh.parseFromNewFile(fname);
+        //                fname = slgh.grabCurrentFilePath();
         //                sleighin = fopen(fname.c_str(), "r");
         //                if (sleighin == (FILE*)0)
         //                    preproc_error("Could not open included file " + fname);
@@ -1407,7 +1407,7 @@ namespace Sla.SLACOMP
         //                    value = read_identifier(s);
         //                if (varname.size() == 0)
         //                    preproc_error("Error in preprocessor definition");
-        //                slgh->setPreprocValue(varname, value);
+        //                slgh.setPreprocValue(varname, value);
         //                check_to_endofline(s);
         //            }
         //        }
@@ -1419,7 +1419,7 @@ namespace Sla.SLACOMP
         //                varname = read_identifier(s);       // Name of variable to undefine
         //                if (varname.size() == 0)
         //                    preproc_error("Error in preprocessor undef");
-        //                slgh->undefinePreprocValue(varname);
+        //                slgh.undefinePreprocValue(varname);
         //                check_to_endofline(s);
         //            }
         //        }
@@ -1430,7 +1430,7 @@ namespace Sla.SLACOMP
         //            if (varname.size() == 0)
         //                preproc_error("Error in preprocessor ifdef");
         //            string value;
-        //            int4 truth = (slgh->getPreprocValue(varname, value)) ? 1 : 0;
+        //            int4 truth = (slgh.getPreprocValue(varname, value)) ? 1 : 0;
         //            ifstack.push_back(truth);
         //            check_to_endofline(s);
         //        }
@@ -1441,7 +1441,7 @@ namespace Sla.SLACOMP
         //            if (varname.size() == 0)
         //                preproc_error("Error in preprocessor ifndef");
         //            string value;
-        //            int4 truth = (slgh->getPreprocValue(varname, value)) ? 0 : 1;   // flipped from ifdef
+        //            int4 truth = (slgh.getPreprocValue(varname, value)) ? 0 : 1;   // flipped from ifdef
         //            ifstack.push_back(truth);
         //            check_to_endofline(s);
         //        }
@@ -1523,23 +1523,23 @@ namespace Sla.SLACOMP
         //        macro.erase(0, 2);
         //        macro.erase(macro.size() - 1, 1);
         //        string value;
-        //        if (!slgh->getPreprocValue(macro, value))
+        //        if (!slgh.getPreprocValue(macro, value))
         //            preproc_error("Unknown preprocessing macro " + macro);
         //        sleigh_switch_to_buffer(sleigh_scan_string(value.c_str()));
-        //        slgh->parsePreprocMacro();
+        //        slgh.parsePreprocMacro();
         //    }
 
         //    int4 find_symbol(void)
         //    {
         //        string* newstring = new string(sleightext);
-        //        SleighSymbol* sym = slgh->findSymbol(*newstring);
+        //        SleighSymbol* sym = slgh.findSymbol(*newstring);
         //        if (sym == (SleighSymbol*)0)
         //        {
         //            sleighlval.str = newstring;
         //            return STRING;
         //        }
         //        delete newstring;
-        //        switch (sym->getType())
+        //        switch (sym.getType())
         //        {
         //            case SleighSymbol::section_symbol:
         //                sleighlval.sectionsym = (SectionSymbol*)sym;
@@ -1632,10 +1632,10 @@ namespace Sla.SLACOMP
         //        }
         //        if (signednum)
         //        {
-        //            lval->big = new intb(val);
+        //            lval.big = new intb(val);
         //            return INTB;
         //        }
-        //        lval->i = new uintb(val);
+        //        lval.i = new uintb(val);
         //        return INTEGER;
         //    }
 
@@ -1752,7 +1752,7 @@ namespace Sla.SLACOMP
         // */
         //#ifndef YY_INPUT
         //#define YY_INPUT(buf,result,max_size) \
-        //	if (YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
+        //	if (YY_CURRENT_BUFFER_LVALUE.yy_is_interactive ) \
         //		{ \
         //		int c = '*'; \
         //		int n; \
@@ -1830,7 +1830,7 @@ namespace Sla.SLACOMP
 
         //#define YY_RULE_SETUP \
         //if (yyleng > 0) \
-        //		YY_CURRENT_BUFFER_LVALUE->yy_at_bol = \
+        //		YY_CURRENT_BUFFER_LVALUE.yy_at_bol = \
         //				(yytext[yyleng - 1] == '\n'); \
         //	YY_USER_ACTION
 
@@ -1932,7 +1932,7 @@ namespace Sla.SLACOMP
         //                case 1:
         //                    /* rule 1 can match eol */
         //                    YY_RULE_SETUP
-        //                { slgh->nextLine(); BEGIN(preprocess(INITIAL, preproc)); }
+        //                { slgh.nextLine(); BEGIN(preprocess(INITIAL, preproc)); }
         //                    YY_BREAK
         //    case 2:
         //                    YY_RULE_SETUP
@@ -1944,7 +1944,7 @@ namespace Sla.SLACOMP
         //                    YY_BREAK
         //    case 4:
         //                    YY_RULE_SETUP
-        //    { BEGIN(print); slgh->calcContextLayout(); sleighlval.ch = sleightext[0]; return sleightext[0]; }
+        //    { BEGIN(print); slgh.calcContextLayout(); sleighlval.ch = sleightext[0]; return sleightext[0]; }
         //                    YY_BREAK
         //    case 5:
         //                    YY_RULE_SETUP
@@ -1961,7 +1961,7 @@ namespace Sla.SLACOMP
         //    case 8:
         //                    /* rule 8 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh->nextLine(); }
+        //    { slgh.nextLine(); }
         //                    YY_BREAK
         //    case 9:
         //                    YY_RULE_SETUP
@@ -1973,11 +1973,11 @@ namespace Sla.SLACOMP
         //                    YY_BREAK
         //    case 11:
         //                    YY_RULE_SETUP
-        //    { BEGIN(defblock); slgh->calcContextLayout(); return ATTACH_KEY; }
+        //    { BEGIN(defblock); slgh.calcContextLayout(); return ATTACH_KEY; }
         //                    YY_BREAK
         //    case 12:
         //                    YY_RULE_SETUP
-        //    { BEGIN(pattern); withsection = 1; slgh->calcContextLayout(); return WITH_KEY; }
+        //    { BEGIN(pattern); withsection = 1; slgh.calcContextLayout(); return WITH_KEY; }
         //                    YY_BREAK
         //    case 13:
         //                    YY_RULE_SETUP
@@ -1990,7 +1990,7 @@ namespace Sla.SLACOMP
         //    case 15:
         //                    /* rule 15 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh->nextLine(); BEGIN(preprocess(macroblock, preproc)); }
+        //    { slgh.nextLine(); BEGIN(preprocess(macroblock, preproc)); }
         //                    YY_BREAK
         //    case 16:
         //                    YY_RULE_SETUP
@@ -2015,7 +2015,7 @@ namespace Sla.SLACOMP
         //    case 21:
         //                    /* rule 21 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh->nextLine(); }
+        //    { slgh.nextLine(); }
         //                    YY_BREAK
         //    case 22:
         //                    YY_RULE_SETUP
@@ -2024,7 +2024,7 @@ namespace Sla.SLACOMP
         //    case 23:
         //                    /* rule 23 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh->nextLine(); BEGIN(preprocess(defblock, preproc)); }
+        //    { slgh.nextLine(); BEGIN(preprocess(defblock, preproc)); }
         //                    YY_BREAK
         //    case 24:
         //                    YY_RULE_SETUP
@@ -2161,7 +2161,7 @@ namespace Sla.SLACOMP
         //    case 57:
         //                    /* rule 57 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh->nextLine(); }
+        //    { slgh.nextLine(); }
         //                    YY_BREAK
         //    case 58:
         //                    YY_RULE_SETUP
@@ -2170,7 +2170,7 @@ namespace Sla.SLACOMP
         //    case 59:
         //                    /* rule 59 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh->nextLine(); BEGIN(preprocess(print, preproc)); }
+        //    { slgh.nextLine(); BEGIN(preprocess(print, preproc)); }
         //                    YY_BREAK
         //    case 60:
         //                    YY_RULE_SETUP
@@ -2203,7 +2203,7 @@ namespace Sla.SLACOMP
         //    case 67:
         //                    /* rule 67 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh->nextLine(); return ' '; }
+        //    { slgh.nextLine(); return ' '; }
         //                    YY_BREAK
         //    case 68:
         //                    YY_RULE_SETUP
@@ -2212,7 +2212,7 @@ namespace Sla.SLACOMP
         //    case 69:
         //                    /* rule 69 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh->nextLine(); BEGIN(preprocess(pattern, preproc)); }
+        //    { slgh.nextLine(); BEGIN(preprocess(pattern, preproc)); }
         //                    YY_BREAK
         //    case 70:
         //                    YY_RULE_SETUP
@@ -2317,7 +2317,7 @@ namespace Sla.SLACOMP
         //    case 95:
         //                    /* rule 95 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh->nextLine(); }
+        //    { slgh.nextLine(); }
         //                    YY_BREAK
         //    case 96:
         //                    YY_RULE_SETUP
@@ -2326,7 +2326,7 @@ namespace Sla.SLACOMP
         //    case 97:
         //                    /* rule 97 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh->nextLine(); BEGIN(preprocess(sem, preproc)); }
+        //    { slgh.nextLine(); BEGIN(preprocess(sem, preproc)); }
         //                    YY_BREAK
         //    case 98:
         //                    YY_RULE_SETUP
@@ -2583,7 +2583,7 @@ namespace Sla.SLACOMP
         //    case 161:
         //                    /* rule 161 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh->nextLine(); }
+        //    { slgh.nextLine(); }
         //                    YY_BREAK
         //    case 162:
         //                    YY_RULE_SETUP
@@ -2592,12 +2592,12 @@ namespace Sla.SLACOMP
         //    case 163:
         //                    /* rule 163 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh->nextLine(); BEGIN(preprocess(preproc, preproc)); }
+        //    { slgh.nextLine(); BEGIN(preprocess(preproc, preproc)); }
         //                    YY_BREAK
         //    case 164:
         //                    /* rule 164 can match eol */
         //                    YY_RULE_SETUP
-        //    { slgh->nextLine(); }
+        //    { slgh.nextLine(); }
         //                    YY_BREAK
         //    case YY_STATE_EOF(INITIAL):
         //                case YY_STATE_EOF(defblock):
@@ -2615,7 +2615,7 @@ namespace Sla.SLACOMP
         //                        if (curfile != (FILE*)0)
         //                            fclose(curfile);
         //                        filebuffers.pop_back();
-        //                        slgh->parseFileFinished();
+        //                        slgh.parseFileFinished();
         //                    }
         //                    YY_BREAK
         //    case 165:
@@ -2634,7 +2634,7 @@ namespace Sla.SLACOMP
         //                        YY_RESTORE_YY_MORE_OFFSET
 
 
-        //        if (YY_CURRENT_BUFFER_LVALUE->yy_buffer_status == YY_BUFFER_NEW)
+        //        if (YY_CURRENT_BUFFER_LVALUE.yy_buffer_status == YY_BUFFER_NEW)
         //                        {
         //                            /* We're scanning a new file or input source.  It's
         //                             * possible that this happened because the user
@@ -2645,9 +2645,9 @@ namespace Sla.SLACOMP
         //                             * this is the first action (other than possibly a
         //                             * back-up) that will match for the new input source.
         //                             */
-        //                            (yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
-        //                            YY_CURRENT_BUFFER_LVALUE->yy_input_file = yyin;
-        //                            YY_CURRENT_BUFFER_LVALUE->yy_buffer_status = YY_BUFFER_NORMAL;
+        //                            (yy_n_chars) = YY_CURRENT_BUFFER_LVALUE.yy_n_chars;
+        //                            YY_CURRENT_BUFFER_LVALUE.yy_input_file = yyin;
+        //                            YY_CURRENT_BUFFER_LVALUE.yy_buffer_status = YY_BUFFER_NORMAL;
         //                        }
 
         //                        /* Note that here we test for yy_c_buf_p "<=" to the position
@@ -2657,7 +2657,7 @@ namespace Sla.SLACOMP
         //                         * end-of-buffer state).  Contrast this with the test
         //                         * in input().
         //                         */
-        //                        if ((yy_c_buf_p) <= &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars)])
+        //                        if ((yy_c_buf_p) <= &YY_CURRENT_BUFFER_LVALUE.yy_ch_buf[(yy_n_chars)])
         //                        { /* This was really a NUL. */
         //                            yy_state_type yy_next_state;
 
@@ -2736,7 +2736,7 @@ namespace Sla.SLACOMP
 
         //                                case EOB_ACT_LAST_MATCH:
         //                                    (yy_c_buf_p) =
-        //                                    &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars)];
+        //                                    &YY_CURRENT_BUFFER_LVALUE.yy_ch_buf[(yy_n_chars)];
 
         //                                    yy_current_state = yy_get_previous_state();
 
@@ -2764,16 +2764,16 @@ namespace Sla.SLACOMP
         // */
         //static int yy_get_next_buffer(void)
         //{
-        //    char* dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
+        //    char* dest = YY_CURRENT_BUFFER_LVALUE.yy_ch_buf;
         //    char* source = (yytext_ptr);
         //    int number_to_move, i;
         //    int ret_val;
 
-        //    if ((yy_c_buf_p) > &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars) + 1])
+        //    if ((yy_c_buf_p) > &YY_CURRENT_BUFFER_LVALUE.yy_ch_buf[(yy_n_chars) + 1])
         //        YY_FATAL_ERROR(
         //        "fatal flex scanner internal error--end of buffer missed");
 
-        //    if (YY_CURRENT_BUFFER_LVALUE->yy_fill_buffer == 0)
+        //    if (YY_CURRENT_BUFFER_LVALUE.yy_fill_buffer == 0)
         //    { /* Don't try to fill the buffer, so this is an EOF. */
         //        if ((yy_c_buf_p) - (yytext_ptr) - YY_MORE_ADJ == 1)
         //        {
@@ -2800,16 +2800,16 @@ namespace Sla.SLACOMP
         //    for (i = 0; i < number_to_move; ++i)
         //        *(dest++) = *(source++);
 
-        //    if (YY_CURRENT_BUFFER_LVALUE->yy_buffer_status == YY_BUFFER_EOF_PENDING)
+        //    if (YY_CURRENT_BUFFER_LVALUE.yy_buffer_status == YY_BUFFER_EOF_PENDING)
         //        /* don't do the read, it's not guaranteed to return an EOF,
         //		 * just force an EOF
         //		 */
-        //        YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars) = 0;
+        //        YY_CURRENT_BUFFER_LVALUE.yy_n_chars = (yy_n_chars) = 0;
 
         //    else
         //    {
         //        int num_to_read =
-        //        YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
+        //        YY_CURRENT_BUFFER_LVALUE.yy_buf_size - number_to_move - 1;
 
         //        while (num_to_read <= 0)
         //        { /* Not enough room in the buffer - grow it. */
@@ -2818,33 +2818,33 @@ namespace Sla.SLACOMP
         //            YY_BUFFER_STATE b = YY_CURRENT_BUFFER_LVALUE;
 
         //            int yy_c_buf_p_offset =
-        //                (int)((yy_c_buf_p) - b->yy_ch_buf);
+        //                (int)((yy_c_buf_p) - b.yy_ch_buf);
 
-        //            if (b->yy_is_our_buffer)
+        //            if (b.yy_is_our_buffer)
         //            {
-        //                int new_size = b->yy_buf_size * 2;
+        //                int new_size = b.yy_buf_size * 2;
 
         //                if (new_size <= 0)
-        //                    b->yy_buf_size += b->yy_buf_size / 8;
+        //                    b.yy_buf_size += b.yy_buf_size / 8;
         //                else
-        //                    b->yy_buf_size *= 2;
+        //                    b.yy_buf_size *= 2;
 
-        //                b->yy_ch_buf = (char*)
+        //                b.yy_ch_buf = (char*)
         //                    /* Include room in for 2 EOB chars. */
-        //                    yyrealloc((void*)b->yy_ch_buf,
-        //                             (yy_size_t)(b->yy_buf_size + 2));
+        //                    yyrealloc((void*)b.yy_ch_buf,
+        //                             (yy_size_t)(b.yy_buf_size + 2));
         //            }
         //            else
         //                /* Can't grow it, we don't own it. */
-        //                b->yy_ch_buf = NULL;
+        //                b.yy_ch_buf = NULL;
 
-        //            if (!b->yy_ch_buf)
+        //            if (!b.yy_ch_buf)
         //                YY_FATAL_ERROR(
         //                "fatal error - scanner input buffer overflow");
 
-        //            (yy_c_buf_p) = &b->yy_ch_buf[yy_c_buf_p_offset];
+        //            (yy_c_buf_p) = &b.yy_ch_buf[yy_c_buf_p_offset];
 
-        //            num_to_read = YY_CURRENT_BUFFER_LVALUE->yy_buf_size -
+        //            num_to_read = YY_CURRENT_BUFFER_LVALUE.yy_buf_size -
         //                        number_to_move - 1;
 
         //        }
@@ -2853,10 +2853,10 @@ namespace Sla.SLACOMP
         //            num_to_read = YY_READ_BUF_SIZE;
 
         //        /* Read in more data. */
-        //        YY_INPUT((&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
+        //        YY_INPUT((&YY_CURRENT_BUFFER_LVALUE.yy_ch_buf[number_to_move]),
         //            (yy_n_chars), num_to_read);
 
-        //        YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
+        //        YY_CURRENT_BUFFER_LVALUE.yy_n_chars = (yy_n_chars);
         //    }
 
         //    if ((yy_n_chars) == 0)
@@ -2870,7 +2870,7 @@ namespace Sla.SLACOMP
         //        else
         //        {
         //            ret_val = EOB_ACT_LAST_MATCH;
-        //            YY_CURRENT_BUFFER_LVALUE->yy_buffer_status =
+        //            YY_CURRENT_BUFFER_LVALUE.yy_buffer_status =
         //                YY_BUFFER_EOF_PENDING;
         //        }
         //    }
@@ -2878,23 +2878,23 @@ namespace Sla.SLACOMP
         //    else
         //        ret_val = EOB_ACT_CONTINUE_SCAN;
 
-        //    if (((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size)
+        //    if (((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE.yy_buf_size)
         //    {
         //        /* Extend the array by 50%, plus the number we really need. */
         //        int new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
-        //        YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char*)yyrealloc(
-        //            (void*)YY_CURRENT_BUFFER_LVALUE->yy_ch_buf, (yy_size_t)new_size);
-        //        if (!YY_CURRENT_BUFFER_LVALUE->yy_ch_buf)
+        //        YY_CURRENT_BUFFER_LVALUE.yy_ch_buf = (char*)yyrealloc(
+        //            (void*)YY_CURRENT_BUFFER_LVALUE.yy_ch_buf, (yy_size_t)new_size);
+        //        if (!YY_CURRENT_BUFFER_LVALUE.yy_ch_buf)
         //            YY_FATAL_ERROR("out of dynamic memory in yy_get_next_buffer()");
         //        /* "- 2" to take care of EOB's */
-        //        YY_CURRENT_BUFFER_LVALUE->yy_buf_size = (int)(new_size - 2);
+        //        YY_CURRENT_BUFFER_LVALUE.yy_buf_size = (int)(new_size - 2);
         //    }
 
         //    (yy_n_chars) += number_to_move;
-        //    YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars)] = YY_END_OF_BUFFER_CHAR;
-        //    YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars) + 1] = YY_END_OF_BUFFER_CHAR;
+        //    YY_CURRENT_BUFFER_LVALUE.yy_ch_buf[(yy_n_chars)] = YY_END_OF_BUFFER_CHAR;
+        //    YY_CURRENT_BUFFER_LVALUE.yy_ch_buf[(yy_n_chars) + 1] = YY_END_OF_BUFFER_CHAR;
 
-        //    (yytext_ptr) = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[0];
+        //    (yytext_ptr) = &YY_CURRENT_BUFFER_LVALUE.yy_ch_buf[0];
 
         //    return ret_val;
         //}
@@ -2968,24 +2968,24 @@ namespace Sla.SLACOMP
         //    /* undo effects of setting up yytext */
         //    *yy_cp = (yy_hold_char);
 
-        //    if (yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2)
+        //    if (yy_cp < YY_CURRENT_BUFFER_LVALUE.yy_ch_buf + 2)
         //    { /* need to shift things up to make room */
         //        /* +2 for EOB chars. */
         //        int number_to_move = (yy_n_chars) + 2;
-        //        char* dest = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[
-        //                    YY_CURRENT_BUFFER_LVALUE->yy_buf_size + 2];
+        //        char* dest = &YY_CURRENT_BUFFER_LVALUE.yy_ch_buf[
+        //                    YY_CURRENT_BUFFER_LVALUE.yy_buf_size + 2];
         //        char* source =
-        //                &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move];
+        //                &YY_CURRENT_BUFFER_LVALUE.yy_ch_buf[number_to_move];
 
-        //        while (source > YY_CURRENT_BUFFER_LVALUE->yy_ch_buf)
+        //        while (source > YY_CURRENT_BUFFER_LVALUE.yy_ch_buf)
         //            *--dest = *--source;
 
         //        yy_cp += (int)(dest - source);
         //        yy_bp += (int)(dest - source);
-        //        YY_CURRENT_BUFFER_LVALUE->yy_n_chars =
-        //            (yy_n_chars) = (int)YY_CURRENT_BUFFER_LVALUE->yy_buf_size;
+        //        YY_CURRENT_BUFFER_LVALUE.yy_n_chars =
+        //            (yy_n_chars) = (int)YY_CURRENT_BUFFER_LVALUE.yy_buf_size;
 
-        //        if (yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2)
+        //        if (yy_cp < YY_CURRENT_BUFFER_LVALUE.yy_ch_buf + 2)
         //            YY_FATAL_ERROR("flex scanner push-back overflow");
         //    }
 
@@ -3016,7 +3016,7 @@ namespace Sla.SLACOMP
         //		 * If this occurs *before* the EOB characters, then it's a
         //		 * valid NUL; if not, then we've hit the end of the buffer.
         //		 */
-        //        if ((yy_c_buf_p) < &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars)])
+        //        if ((yy_c_buf_p) < &YY_CURRENT_BUFFER_LVALUE.yy_ch_buf[(yy_n_chars)])
         //            /* This was really a NUL. */
         //            *(yy_c_buf_p) = '\0';
 
@@ -3068,7 +3068,7 @@ namespace Sla.SLACOMP
         //*(yy_c_buf_p) = '\0';   /* preserve yytext */
         //(yy_hold_char) = *++(yy_c_buf_p);
 
-        //YY_CURRENT_BUFFER_LVALUE->yy_at_bol = (c == '\n');
+        //YY_CURRENT_BUFFER_LVALUE.yy_at_bol = (c == '\n');
 
         //return c;
         //}
@@ -3113,8 +3113,8 @@ namespace Sla.SLACOMP
         //    {
         //        /* Flush out information for old buffer. */
         //        *(yy_c_buf_p) = (yy_hold_char);
-        //        YY_CURRENT_BUFFER_LVALUE->yy_buf_pos = (yy_c_buf_p);
-        //        YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
+        //        YY_CURRENT_BUFFER_LVALUE.yy_buf_pos = (yy_c_buf_p);
+        //        YY_CURRENT_BUFFER_LVALUE.yy_n_chars = (yy_n_chars);
         //    }
 
         //    YY_CURRENT_BUFFER_LVALUE = new_buffer;
@@ -3130,9 +3130,9 @@ namespace Sla.SLACOMP
 
         //static void yy_load_buffer_state(void)
         //{
-        //    (yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
-        //    (yytext_ptr) = (yy_c_buf_p) = YY_CURRENT_BUFFER_LVALUE->yy_buf_pos;
-        //    yyin = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
+        //    (yy_n_chars) = YY_CURRENT_BUFFER_LVALUE.yy_n_chars;
+        //    (yytext_ptr) = (yy_c_buf_p) = YY_CURRENT_BUFFER_LVALUE.yy_buf_pos;
+        //    yyin = YY_CURRENT_BUFFER_LVALUE.yy_input_file;
         //    (yy_hold_char) = *(yy_c_buf_p);
         //}
 
@@ -3150,16 +3150,16 @@ namespace Sla.SLACOMP
         //if (!b)
         //    YY_FATAL_ERROR("out of dynamic memory in yy_create_buffer()");
 
-        //b->yy_buf_size = size;
+        //b.yy_buf_size = size;
 
         ///* yy_ch_buf has to be 2 characters longer than the size given because
         // * we need to put in 2 end-of-buffer characters.
         // */
-        //b->yy_ch_buf = (char*)yyalloc((yy_size_t)(b->yy_buf_size + 2));
-        //if (!b->yy_ch_buf)
+        //b.yy_ch_buf = (char*)yyalloc((yy_size_t)(b.yy_buf_size + 2));
+        //if (!b.yy_ch_buf)
         //    YY_FATAL_ERROR("out of dynamic memory in yy_create_buffer()");
 
-        //b->yy_is_our_buffer = 1;
+        //b.yy_is_our_buffer = 1;
 
         //yy_init_buffer(b, file);
 
@@ -3179,8 +3179,8 @@ namespace Sla.SLACOMP
         //    if (b == YY_CURRENT_BUFFER) /* Not sure if we should pop here. */
         //        YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE)0;
 
-        //    if (b->yy_is_our_buffer)
-        //        yyfree((void*)b->yy_ch_buf);
+        //    if (b.yy_is_our_buffer)
+        //        yyfree((void*)b.yy_ch_buf);
 
         //    yyfree((void*)b);
         //}
@@ -3196,8 +3196,8 @@ namespace Sla.SLACOMP
 
         //    yy_flush_buffer(b);
 
-        //    b->yy_input_file = file;
-        //    b->yy_fill_buffer = 1;
+        //    b.yy_input_file = file;
+        //    b.yy_fill_buffer = 1;
 
         //    /* If b is the current buffer, then yy_init_buffer was _probably_
         //     * called from yyrestart() or through yy_get_next_buffer.
@@ -3205,11 +3205,11 @@ namespace Sla.SLACOMP
         //     */
         //    if (b != YY_CURRENT_BUFFER)
         //    {
-        //        b->yy_bs_lineno = 1;
-        //        b->yy_bs_column = 0;
+        //        b.yy_bs_lineno = 1;
+        //        b.yy_bs_column = 0;
         //    }
 
-        //    b->yy_is_interactive = file ? (isatty(fileno(file)) > 0) : 0;
+        //    b.yy_is_interactive = file ? (isatty(fileno(file)) > 0) : 0;
 
         //    errno = oerrno;
         //}
@@ -3223,19 +3223,19 @@ namespace Sla.SLACOMP
         //    if (!b)
         //        return;
 
-        //    b->yy_n_chars = 0;
+        //    b.yy_n_chars = 0;
 
         //    /* We always need two end-of-buffer characters.  The first causes
         //	 * a transition to the end-of-buffer state.  The second causes
         //	 * a jam in that state.
         //	 */
-        //    b->yy_ch_buf[0] = YY_END_OF_BUFFER_CHAR;
-        //    b->yy_ch_buf[1] = YY_END_OF_BUFFER_CHAR;
+        //    b.yy_ch_buf[0] = YY_END_OF_BUFFER_CHAR;
+        //    b.yy_ch_buf[1] = YY_END_OF_BUFFER_CHAR;
 
-        //    b->yy_buf_pos = &b->yy_ch_buf[0];
+        //    b.yy_buf_pos = &b.yy_ch_buf[0];
 
-        //    b->yy_at_bol = 1;
-        //    b->yy_buffer_status = YY_BUFFER_NEW;
+        //    b.yy_at_bol = 1;
+        //    b.yy_buffer_status = YY_BUFFER_NEW;
 
         //    if (b == YY_CURRENT_BUFFER)
         //        yy_load_buffer_state();
@@ -3259,8 +3259,8 @@ namespace Sla.SLACOMP
         //    {
         //        /* Flush out information for old buffer. */
         //        *(yy_c_buf_p) = (yy_hold_char);
-        //        YY_CURRENT_BUFFER_LVALUE->yy_buf_pos = (yy_c_buf_p);
-        //        YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
+        //        YY_CURRENT_BUFFER_LVALUE.yy_buf_pos = (yy_c_buf_p);
+        //        YY_CURRENT_BUFFER_LVALUE.yy_n_chars = (yy_n_chars);
         //    }
 
         //    /* Only push if top exists. Otherwise, replace top. */
@@ -3362,15 +3362,15 @@ namespace Sla.SLACOMP
         //if (!b)
         //    YY_FATAL_ERROR("out of dynamic memory in yy_scan_buffer()");
 
-        //b->yy_buf_size = (int)(size - 2);   /* "- 2" to take care of EOB's */
-        //b->yy_buf_pos = b->yy_ch_buf = base;
-        //b->yy_is_our_buffer = 0;
-        //b->yy_input_file = NULL;
-        //b->yy_n_chars = b->yy_buf_size;
-        //b->yy_is_interactive = 0;
-        //b->yy_at_bol = 1;
-        //b->yy_fill_buffer = 0;
-        //b->yy_buffer_status = YY_BUFFER_NEW;
+        //b.yy_buf_size = (int)(size - 2);   /* "- 2" to take care of EOB's */
+        //b.yy_buf_pos = b.yy_ch_buf = base;
+        //b.yy_is_our_buffer = 0;
+        //b.yy_input_file = NULL;
+        //b.yy_n_chars = b.yy_buf_size;
+        //b.yy_is_interactive = 0;
+        //b.yy_at_bol = 1;
+        //b.yy_fill_buffer = 0;
+        //b.yy_buffer_status = YY_BUFFER_NEW;
 
         //yy_switch_to_buffer(b);
 
@@ -3423,7 +3423,7 @@ namespace Sla.SLACOMP
         //    /* It's okay to grow etc. this buffer, and we should throw it
         //	 * away when we're done.
         //	 */
-        //    b->yy_is_our_buffer = 1;
+        //    b.yy_is_our_buffer = 1;
 
         //    return b;
         //}

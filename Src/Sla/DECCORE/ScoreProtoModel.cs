@@ -69,9 +69,9 @@ namespace Sla.DECCORE
             int4 slot, slotsize;
             bool isparam;
             if (isinputscore)
-                isparam = model->possibleInputParamWithSlot(addr, sz, slot, slotsize);
+                isparam = model.possibleInputParamWithSlot(addr, sz, slot, slotsize);
             else
-                isparam = model->possibleOutputParamWithSlot(addr, sz, slot, slotsize);
+                isparam = model.possibleOutputParamWithSlot(addr, sz, slot, slotsize);
             if (isparam)
             {
                 entry.emplace_back();

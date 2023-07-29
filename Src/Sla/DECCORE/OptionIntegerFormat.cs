@@ -19,7 +19,7 @@ namespace Sla.DECCORE
         /// The first parameter is the strategy name: "hex", "dec", or "best"
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            glb->print->setIntegerFormat(p1);
+            glb.print.setIntegerFormat(p1);
             return "Integer format set to " + p1;
         }
     }

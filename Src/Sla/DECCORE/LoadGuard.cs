@@ -79,7 +79,7 @@ namespace Sla.DECCORE
                 else
                     minimumOffset = pointerBase;
             }
-            uintb max = spc->getHighest();
+            uintb max = spc.getHighest();
             if (minimumOffset > max)
             {
                 minimumOffset = max;
@@ -115,14 +115,14 @@ namespace Sla.DECCORE
                 maximumOffset = (range.getEnd() - 1) & range.getMask(); // NOTE: Don't subtract a whole step
                 if (maximumOffset < minimumOffset)
                 {   // Values extend into what is usually stack parameters
-                    maximumOffset = spc->getHighest();
+                    maximumOffset = spc.getHighest();
                     analysisState = 1;  // Remove the lock as we have likely overflowed
                 }
             }
-            if (minimumOffset > spc->getHighest())
-                minimumOffset = spc->getHighest();
-            if (maximumOffset > spc->getHighest())
-                maximumOffset = spc->getHighest();
+            if (minimumOffset > spc.getHighest())
+                minimumOffset = spc.getHighest();
+            if (maximumOffset > spc.getHighest())
+                maximumOffset = spc.getHighest();
         }
 
         /// \brief Set a new unanalyzed LOAD guard that initially guards everything
@@ -136,7 +136,7 @@ namespace Sla.DECCORE
             spc = s;
             pointerBase = off;
             minimumOffset = 0;
-            maximumOffset = s->getHighest();
+            maximumOffset = s.getHighest();
             step = 0;
             analysisState = 0;
         }
@@ -169,6 +169,6 @@ namespace Sla.DECCORE
         public bool isRangeLocked() => (analysisState == 2);
 
         /// Return \b true if the record still describes an active LOAD
-        public bool isValid(OpCode opc) => (!op->isDead() && op->code() == opc);
+        public bool isValid(OpCode opc) => (!op.isDead() && op.code() == opc);
     }
 }

@@ -21,7 +21,7 @@ namespace Sla.DECCORE
     /// Internally this is implemented as a map from basic block to their non-empty CoverBlock
     internal class Cover
     {
-        /// block index -> CoverBlock
+        /// block index . CoverBlock
         private Dictionary<int, CoverBlock> cover;
         
         /// Global empty CoverBlock for blocks not covered by \b this
@@ -36,14 +36,14 @@ namespace Sla.DECCORE
             int4 j;
             uintm ustart, ustop;
 
-            CoverBlock & block(cover[bl->getIndex()]);
+            CoverBlock & block(cover[bl.getIndex()]);
             if (block.empty())
             {
                 block.setAll();     // No cover encountered, fill in entire block
-                                    //    if (bl->InSize()==0)
+                                    //    if (bl.InSize()==0)
                                     //      throw new LowlevelError("Ref point is not in flow of defpoint");
-                for (j = 0; j < bl->sizeIn(); ++j)  // Recurse to all blocks that fall into bl
-                    addRefRecurse(bl->getIn(j));
+                for (j = 0; j < bl.sizeIn(); ++j)  // Recurse to all blocks that fall into bl
+                    addRefRecurse(bl.getIn(j));
             }
             else
             {
@@ -55,12 +55,12 @@ namespace Sla.DECCORE
 
 
                 if ((ustop == (uintm)0) && (block.getStart() == (PcodeOp*)0)) {
-                    if ((op != (PcodeOp*)0)&& (op->code() == CPUI_MULTIEQUAL)) {
+                    if ((op != (PcodeOp*)0)&& (op.code() == CPUI_MULTIEQUAL)) {
                         // This block contains only an infinitesimal tip
                         // of cover through one branch of a MULTIEQUAL
                         // we still need to traverse through branches
-                        for (j = 0; j < bl->sizeIn(); ++j)
-                            addRefRecurse(bl->getIn(j));
+                        for (j = 0; j < bl.sizeIn(); ++j)
+                            addRefRecurse(bl.getIn(j));
                     }
                 }
 
@@ -231,7 +231,7 @@ namespace Sla.DECCORE
         {
             map<int4, CoverBlock>::const_iterator iter;
 
-            iter = cover.find(op->getParent()->getIndex());
+            iter = cover.find(op.getParent().getIndex());
             if (iter == cover.end()) return false;
             if ((*iter).second.contain(op))
             {
@@ -257,7 +257,7 @@ namespace Sla.DECCORE
         /// \return the containment characterization
         public int containVarnodeDef(Varnode vn)
         {
-            PcodeOp? op = vn->getDef();
+            PcodeOp? op = vn.getDef();
             int4 blk;
 
             if (op == null) {
@@ -265,7 +265,7 @@ namespace Sla.DECCORE
                 blk = 0;
             }
             else
-                blk = op->getParent()->getIndex();
+                blk = op.getParent().getIndex();
             map<int4, CoverBlock>::const_iterator iter = cover.find(blk);
             if (iter == cover.end()) return 0;
             if ((*iter).second.contain(op))
@@ -297,7 +297,7 @@ namespace Sla.DECCORE
             list<PcodeOp*>::const_iterator iter;
 
             addDefPoint(vn);
-            for (iter = vn->beginDescend(); iter != vn->endDescend(); ++iter)
+            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
                 addRefPoint(*iter, vn);
         }
 
@@ -311,13 +311,13 @@ namespace Sla.DECCORE
 
             cover.clear();
 
-            def = vn->getDef();
+            def = vn.getDef();
             if (def != null) {
-                CoverBlock & block(cover[def->getParent()->getIndex()]);
+                CoverBlock & block(cover[def.getParent().getIndex()]);
                 block.setBegin(def);    // Set the point topology
                 block.setEnd(def);
             }
-            else if (vn->isInput())
+            else if (vn.isInput())
             {
                 CoverBlock & block(cover[0]);
                 block.setBegin((PcodeOp*)2 ); // Special mark for input
@@ -337,8 +337,8 @@ namespace Sla.DECCORE
             FlowBlock* bl;
             uintm ustop;
 
-            bl = @ref->getParent();
-            CoverBlock & block(cover[bl->getIndex()]);
+            bl = @ref.getParent();
+            CoverBlock & block(cover[bl.getIndex()]);
             if (block.empty())
             {
                 block.setEnd(@ref);
@@ -347,7 +347,7 @@ namespace Sla.DECCORE
             {
                 if (block.contain(@ref))
                 {
-                    if (@ref->code() != CPUI_MULTIEQUAL) return;
+                    if (@ref.code() != CPUI_MULTIEQUAL) return;
                     // Even if MULTIEQUAL ref is contained
                     // we may be adding new cover because we are
                     // looking at a different branch. So don't return
@@ -361,28 +361,28 @@ namespace Sla.DECCORE
                     if (ustop >= CoverBlock::getUIndex(startop))
                     {
                         if ((op != (PcodeOp*)0)&& (op != (PcodeOp*)2)&&
-                            (op->code() == CPUI_MULTIEQUAL) && (startop == (PcodeOp*)0)) {
+                            (op.code() == CPUI_MULTIEQUAL) && (startop == (PcodeOp*)0)) {
                             // This block contains only an infinitesimal tip
                             // of cover through one branch of a MULTIEQUAL
                             // we still need to traverse through branches
-                            for (j = 0; j < bl->sizeIn(); ++j)
-                                addRefRecurse(bl->getIn(j));
+                            for (j = 0; j < bl.sizeIn(); ++j)
+                                addRefRecurse(bl.getIn(j));
                         }
                         return;
                     }
                 }
             }
-            //  if (bl->InSize()==0)
+            //  if (bl.InSize()==0)
             //    throw new LowlevelError("Ref point is not in flow of defpoint");
-            if (ref->code() == CPUI_MULTIEQUAL)
+            if (ref.code() == CPUI_MULTIEQUAL)
             {
-                for (j = 0; j < ref->numInput(); ++j)
-                    if (ref->getIn(j) == vn)
-                        addRefRecurse(bl->getIn(j));
+                for (j = 0; j < ref.numInput(); ++j)
+                    if (ref.getIn(j) == vn)
+                        addRefRecurse(bl.getIn(j));
             }
             else
-                for (j = 0; j < bl->sizeIn(); ++j)
-                    addRefRecurse(bl->getIn(j));
+                for (j = 0; j < bl.sizeIn(); ++j)
+                    addRefRecurse(bl.getIn(j));
         }
 
         //  void remove_refpoint(PcodeOp *ref,const Varnode *vn) {

@@ -85,30 +85,30 @@ namespace Sla.DECCORE
             // so there isn't much to follow. The OpFollow arrays are no
             // longer needed for unification but are needed to provide
             // a definition for the userop
-            if (op->code() != CPUI_CALLOTHER) return false;
-            if (op->getIn(0)->getOffset() != useropindex) return false;
-            if (op->numInput() != 3) return false;
-            innervn = op->getIn(1);
+            if (op.code() != CPUI_CALLOTHER) return false;
+            if (op.getIn(0).getOffset() != useropindex) return false;
+            if (op.numInput() != 3) return false;
+            innervn = op.getIn(1);
             if (baseinsize != 0)
             {
-                basevn = op->getIn(1);
-                innervn = op->getIn(2);
-                if (basevn->isConstant())
-                    basevn = data.newConstant(baseinsize, basevn->getOffset());
+                basevn = op.getIn(1);
+                innervn = op.getIn(2);
+                if (basevn.isConstant())
+                    basevn = data.newConstant(baseinsize, basevn.getOffset());
                 bindlist[0] = basevn;
             }
             else
                 bindlist[0] = (Varnode*)0;
-            if (innervn->isConstant())
-                innervn = data.newConstant(innerinsize, innervn->getOffset());
+            if (innervn.isConstant())
+                innervn = data.newConstant(innerinsize, innervn.getOffset());
             bindlist[1] = innervn;
             return true;
         }
 
         public override uintb execute(List<uintb> input)
         {
-            ExecutablePcode* pcodeScript = (ExecutablePcode*)glb->pcodeinjectlib->getPayload(injectId);
-            return pcodeScript->evaluate(input);
+            ExecutablePcode* pcodeScript = (ExecutablePcode*)glb.pcodeinjectlib.getPayload(injectId);
+            return pcodeScript.evaluate(input);
         }
 
         public override void decode(Decoder decoder)
@@ -135,10 +135,10 @@ namespace Sla.DECCORE
             }
             if (spc == (AddrSpace*)0)
                 throw new LowlevelError("<segmentop> expecting space attribute");
-            UserPcodeOp* otherop = glb->userops.getOp(name);
+            UserPcodeOp* otherop = glb.userops.getOp(name);
             if (otherop == (UserPcodeOp*)0)
                 throw new LowlevelError("<segmentop> unknown userop " + name);
-            useropindex = otherop->getIndex();
+            useropindex = otherop.getIndex();
             if (dynamic_cast<UnspecializedPcodeOp*>(otherop) == (UnspecializedPcodeOp*)0)
                 throw new LowlevelError("Redefining userop " + name);
 
@@ -163,23 +163,23 @@ namespace Sla.DECCORE
                 {
                     string nm = name + "_pcode";
                     string source = "cspec";
-                    injectId = glb->pcodeinjectlib->decodeInject(source, nm, InjectPayload::EXECUTABLEPCODE_TYPE, decoder);
+                    injectId = glb.pcodeinjectlib.decodeInject(source, nm, InjectPayload::EXECUTABLEPCODE_TYPE, decoder);
                 }
             }
             decoder.closeElement(elemId);
             if (injectId < 0)
                 throw new LowlevelError("Missing <pcode> child in <segmentop> tag");
-            InjectPayload* payload = glb->pcodeinjectlib->getPayload(injectId);
-            if (payload->sizeOutput() != 1)
+            InjectPayload* payload = glb.pcodeinjectlib.getPayload(injectId);
+            if (payload.sizeOutput() != 1)
                 throw new LowlevelError("<pcode> child of <segmentop> tag must declare one <output>");
-            if (payload->sizeInput() == 1)
+            if (payload.sizeInput() == 1)
             {
-                innerinsize = payload->getInput(0).getSize();
+                innerinsize = payload.getInput(0).getSize();
             }
-            else if (payload->sizeInput() == 2)
+            else if (payload.sizeInput() == 2)
             {
-                baseinsize = payload->getInput(0).getSize();
-                innerinsize = payload->getInput(1).getSize();
+                baseinsize = payload.getInput(0).getSize();
+                innerinsize = payload.getInput(1).getSize();
             }
             else
                 throw new LowlevelError("<pcode> child of <segmentop> tag must declare one or two <input> tags");

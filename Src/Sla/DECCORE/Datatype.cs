@@ -181,7 +181,7 @@ namespace Sla.DECCORE
             uint4 format = getDisplayFormat();
             if (format != 0)
                 encoder.writeString(ATTRIB_FORMAT, Datatype::decodeIntegerFormat(format));
-            typedefImm->encodeRef(encoder);
+            typedefImm.encodeRef(encoder);
             encoder.closeElement(ELEM_DEF);
         }
 
@@ -301,9 +301,9 @@ namespace Sla.DECCORE
         public bool hasSameVariableBase(Datatype ct)
         {
             if (!isVariableLength()) return false;
-            if (!ct->isVariableLength()) return false;
+            if (!ct.isVariableLength()) return false;
             uint8 thisId = hashSize(id, size);
-            uint8 themId = hashSize(ct->id, ct->size);
+            uint8 themId = hashSize(ct.id, ct.size);
             return (thisId == themId);
         }
 

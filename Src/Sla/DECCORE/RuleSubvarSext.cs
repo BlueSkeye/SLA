@@ -35,9 +35,9 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn = op->getOut();
-            Varnode* invn = op->getIn(0);
-            uintb mask = calc_mask(invn->getSize());
+            Varnode* vn = op.getOut();
+            Varnode* invn = op.getIn(0);
+            uintb mask = calc_mask(invn.getSize());
 
             SubvariableFlow subflow(&data,vn,mask,isaggressive,true,false);
             if (!subflow.doTrace()) return 0;
@@ -47,7 +47,7 @@ namespace Sla.DECCORE
 
         public override void reset(Funcdata data)
         {
-            isaggressive = data.getArch()->aggressive_ext_trim;
+            isaggressive = data.getArch().aggressive_ext_trim;
         }
     }
 }

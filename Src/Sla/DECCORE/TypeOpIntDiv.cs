@@ -19,18 +19,18 @@ namespace Sla.DECCORE
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opIntDiv(op);
+            lng.opIntDiv(op);
         }
 
         public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
         {
-            Varnode vn = op->getIn(slot);
-            Datatype* reqtype = op->inputTypeLocal(slot);
-            Datatype* curtype = vn->getHighTypeReadFacing(op);
-            int4 promoType = castStrategy->intPromotionType(vn);
+            Varnode vn = op.getIn(slot);
+            Datatype* reqtype = op.inputTypeLocal(slot);
+            Datatype* curtype = vn.getHighTypeReadFacing(op);
+            int4 promoType = castStrategy.intPromotionType(vn);
             if (promoType != CastStrategy::NO_PROMOTION && ((promoType & CastStrategy::UNSIGNED_EXTENSION) == 0))
                 return reqtype;
-            return castStrategy->castStandard(reqtype, curtype, true, true);
+            return castStrategy.castStandard(reqtype, curtype, true, true);
         }
     }
 }

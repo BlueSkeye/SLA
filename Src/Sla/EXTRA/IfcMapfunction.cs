@@ -23,22 +23,22 @@ namespace Sla.EXTRA
         {
             string name;
             int4 size;
-            if ((dcp->conf == (Architecture*)0) || (dcp->conf->loader == (LoadImage*)0))
+            if ((dcp.conf == (Architecture*)0) || (dcp.conf.loader == (LoadImage*)0))
                 throw IfaceExecutionError("No binary loaded");
 
-            Address addr = parse_machaddr(s, size, *dcp->conf->types); // Read required address;
+            Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read required address;
 
             s >> name;          // Read optional name
             if (name.empty())
-                dcp->conf->nameFunction(addr, name); // Pick default name if necessary
+                dcp.conf.nameFunction(addr, name); // Pick default name if necessary
             string basename;
-            Scope* scope = dcp->conf->symboltab->findCreateScopeFromSymbolName(name, "::", basename, (Scope*)0);
-            dcp->fd = scope->addFunction(addr, name)->getFunction();
+            Scope* scope = dcp.conf.symboltab.findCreateScopeFromSymbolName(name, "::", basename, (Scope*)0);
+            dcp.fd = scope.addFunction(addr, name).getFunction();
 
             string nocode;
             s >> ws >> nocode;
             if (nocode == "nocode")
-                dcp->fd->setNoCode(true);
+                dcp.fd.setNoCode(true);
         }
     }
 }

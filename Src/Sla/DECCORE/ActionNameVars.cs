@@ -36,22 +36,22 @@ namespace Sla.DECCORE
         private static void makeRec(ProtoParameter param, Varnode vn,
             Dictionary<HighVariable, OpRecommend> recmap)
         {
-            if (!param->isNameLocked()) return;
-            if (param->isNameUndefined()) return;
-            if (vn->getSize() != param->getSize()) return;
-            Datatype* ct = param->getType();
-            if (vn->isImplied() && vn->isWritten())
+            if (!param.isNameLocked()) return;
+            if (param.isNameUndefined()) return;
+            if (vn.getSize() != param.getSize()) return;
+            Datatype* ct = param.getType();
+            if (vn.isImplied() && vn.isWritten())
             { // Skip any cast into the function
-                PcodeOp* castop = vn->getDef();
-                if (castop->code() == CPUI_CAST)
+                PcodeOp* castop = vn.getDef();
+                if (castop.code() == CPUI_CAST)
                 {
-                    vn = castop->getIn(0);
+                    vn = castop.getIn(0);
                     ct = (Datatype*)0;  // Indicate that this is a less preferred name
                 }
             }
-            HighVariable* high = vn->getHigh();
-            if (high->isAddrTied()) return; // Don't propagate parameter name to address tied variable
-            if (param->getName().compare(0, 6, "param_") == 0) return;
+            HighVariable* high = vn.getHigh();
+            if (high.isAddrTied()) return; // Don't propagate parameter name to address tied variable
+            if (param.getName().compare(0, 6, "param_") == 0) return;
 
             map<HighVariable*, OpRecommend>::iterator iter = recmap.find(high);
             if (iter != recmap.end())
@@ -60,16 +60,16 @@ namespace Sla.DECCORE
                 Datatype* oldtype = (*iter).second.ct;
                 if (oldtype != (Datatype*)0)
                 {
-                    if (oldtype->typeOrder(*ct) <= 0) return; // oldtype is more specified
+                    if (oldtype.typeOrder(*ct) <= 0) return; // oldtype is more specified
                 }
               (*iter).second.ct = ct;
-                (*iter).second.namerec = param->getName();
+                (*iter).second.namerec = param.getName();
             }
             else
             {
                 OpRecommend oprec;
                 oprec.ct = ct;
-                oprec.namerec = param->getName();
+                oprec.namerec = param.getName();
                 recmap[high] = oprec;
             }
         }
@@ -85,23 +85,23 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < numfunc; ++i)
             {
                 FuncCallSpecs* fc = data.getCallSpecs(i);
-                if (fc->isBadJumpTable())
+                if (fc.isBadJumpTable())
                 {
-                    PcodeOp* op = fc->getOp();
-                    Varnode* vn = op->getIn(0);
-                    if (vn->isImplied() && vn->isWritten())
+                    PcodeOp* op = fc.getOp();
+                    Varnode* vn = op.getIn(0);
+                    if (vn.isImplied() && vn.isWritten())
                     { // Skip any cast into the function
-                        PcodeOp* castop = vn->getDef();
-                        if (castop->code() == CPUI_CAST)
-                            vn = castop->getIn(0);
+                        PcodeOp* castop = vn.getDef();
+                        if (castop.code() == CPUI_CAST)
+                            vn = castop.getIn(0);
                     }
-                    if (vn->isFree()) continue;
-                    Symbol* sym = vn->getHigh()->getSymbol();
+                    if (vn.isFree()) continue;
+                    Symbol* sym = vn.getHigh().getSymbol();
                     if (sym == (Symbol*)0) continue;
-                    if (sym->isNameLocked()) continue; // Override any unlocked name
-                    if (sym->getScope() != localmap) continue; // Only name this in the local scope
+                    if (sym.isNameLocked()) continue; // Override any unlocked name
+                    if (sym.getScope() != localmap) continue; // Only name this in the local scope
                     string newname = "UNRECOVERED_JUMPTABLE";
-                    sym->getScope()->renameSymbol(sym, localmap->makeNameUnique(newname));
+                    sym.getScope().renameSymbol(sym, localmap.makeNameUnique(newname));
                 }
             }
         }
@@ -124,15 +124,15 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < numfunc; ++i)
             {   // Run through all calls to functions
                 FuncCallSpecs* fc = data.getCallSpecs(i);
-                if (!fc->isInputLocked()) continue;
-                PcodeOp* op = fc->getOp();
-                int4 numparam = fc->numParams();
-                if (numparam >= op->numInput())
-                    numparam = op->numInput() - 1;
+                if (!fc.isInputLocked()) continue;
+                PcodeOp* op = fc.getOp();
+                int4 numparam = fc.numParams();
+                if (numparam >= op.numInput())
+                    numparam = op.numInput() - 1;
                 for (int4 j = 0; j < numparam; ++j)
                 {
-                    ProtoParameter* param = fc->getParam(j); // Looking for a parameter
-                    Varnode* vn = op->getIn(j + 1);
+                    ProtoParameter* param = fc.getParam(j); // Looking for a parameter
+                    Varnode* vn = op.getIn(j + 1);
                     makeRec(param, vn, recmap);
                 }
             }
@@ -142,17 +142,17 @@ namespace Sla.DECCORE
             for (uint4 i = 0; i < varlist.size(); ++i)
             {   // Do the actual naming in the original (address based) order
                 Varnode* vn = varlist[i];
-                if (vn->isFree()) continue;
-                if (vn->isInput()) continue;    // Don't override unaffected or input naming strategy
-                HighVariable* high = vn->getHigh();
-                if (high->getNumMergeClasses() > 1) continue;   // Don't inherit a name if speculatively merged
-                Symbol* sym = high->getSymbol();
+                if (vn.isFree()) continue;
+                if (vn.isInput()) continue;    // Don't override unaffected or input naming strategy
+                HighVariable* high = vn.getHigh();
+                if (high.getNumMergeClasses() > 1) continue;   // Don't inherit a name if speculatively merged
+                Symbol* sym = high.getSymbol();
                 if (sym == (Symbol*)0) continue;
-                if (!sym->isNameUndefined()) continue;
+                if (!sym.isNameUndefined()) continue;
                 iter = recmap.find(high);
                 if (iter != recmap.end())
                 {
-                    sym->getScope()->renameSymbol(sym, localmap->makeNameUnique((*iter).second.namerec));
+                    sym.getScope().renameSymbol(sym, localmap.makeNameUnique((*iter).second.namerec));
                 }
             }
         }
@@ -167,15 +167,15 @@ namespace Sla.DECCORE
         /// \param namerec is used to store any recovered Symbol without a name
         private static void linkSpacebaseSymbol(Varnode vn, Funcdata data, List<Varnode> namerec)
         {
-            if (!vn->isConstant() && !vn->isInput()) return;
+            if (!vn.isConstant() && !vn.isInput()) return;
             list<PcodeOp*>::const_iterator iter;
-            for (iter = vn->beginDescend(); iter != vn->endDescend(); ++iter)
+            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {
                 PcodeOp* op = *iter;
-                if (op->code() != CPUI_PTRSUB) continue;
-                Varnode* offVn = op->getIn(1);
+                if (op.code() != CPUI_PTRSUB) continue;
+                Varnode* offVn = op.getIn(1);
                 Symbol* sym = data.linkSymbolReference(offVn);
-                if ((sym != (Symbol*)0) && sym->isNameUndefined())
+                if ((sym != (Symbol*)0) && sym.isNameUndefined())
                     namerec.push_back(offVn);
             }
         }
@@ -193,45 +193,45 @@ namespace Sla.DECCORE
             AddrSpaceManager* manage = data.getArch();
             VarnodeLocSet::const_iterator iter, enditer;
             AddrSpace* spc;
-            AddrSpace* constSpace = manage->getConstantSpace();
+            AddrSpace* constSpace = manage.getConstantSpace();
             enditer = data.endLoc(constSpace);
             for (iter = data.beginLoc(constSpace); iter != enditer; ++iter)
             {
                 Varnode* curvn = *iter;
-                if (curvn->getSymbolEntry() != (SymbolEntry*)0)
+                if (curvn.getSymbolEntry() != (SymbolEntry*)0)
                     data.linkSymbol(curvn);     // Special equate symbol
-                else if (curvn->isSpacebase())
+                else if (curvn.isSpacebase())
                     linkSpacebaseSymbol(curvn, data, namerec);
             }
 
-            for (int4 i = 0; i < manage->numSpaces(); ++i)
+            for (int4 i = 0; i < manage.numSpaces(); ++i)
             { // Build a list of nameable highs
-                spc = manage->getSpace(i);
+                spc = manage.getSpace(i);
                 if (spc == (AddrSpace*)0) continue;
                 if (spc == constSpace) continue;
                 enditer = data.endLoc(spc);
                 for (iter = data.beginLoc(spc); iter != enditer; ++iter)
                 {
                     Varnode* curvn = *iter;
-                    if (curvn->isFree())
+                    if (curvn.isFree())
                     {
                         continue;
                     }
-                    if (curvn->isSpacebase())
+                    if (curvn.isSpacebase())
                         linkSpacebaseSymbol(curvn, data, namerec);
-                    Varnode* vn = curvn->getHigh()->getNameRepresentative();
+                    Varnode* vn = curvn.getHigh().getNameRepresentative();
                     if (vn != curvn) continue; // Hit each high only once
-                    HighVariable* high = vn->getHigh();
-                    if (!high->hasName()) continue;
+                    HighVariable* high = vn.getHigh();
+                    if (!high.hasName()) continue;
                     Symbol* sym = data.linkSymbol(vn);
                     if (sym != (Symbol*)0)
                     {   // Can we associate high with a nameable symbol
-                        if (sym->isNameUndefined() && high->getSymbolOffset() < 0)
+                        if (sym.isNameUndefined() && high.getSymbolOffset() < 0)
                             namerec.push_back(vn);  // Add if no name, and we have a high representing the whole
-                        if (sym->isSizeTypeLocked())
+                        if (sym.isSizeTypeLocked())
                         {
-                            if (vn->getSize() == sym->getType()->getSize())
-                                sym->getScope()->overrideSizeLockType(sym, high->getType());
+                            if (vn.getSize() == sym.getType().getSize())
+                                sym.getScope().overrideSizeLockType(sym, high.getType());
                         }
                     }
                 }
@@ -253,7 +253,7 @@ namespace Sla.DECCORE
             vector<Varnode*> namerec;
 
             linkSymbols(data, namerec);
-            data.getScopeLocal()->recoverNameRecommendationsForSymbols(); // Make sure recommended names hit before subfunc
+            data.getScopeLocal().recoverNameRecommendationsForSymbols(); // Make sure recommended names hit before subfunc
             lookForBadJumpTables(data);
             lookForFuncParamNames(data, namerec);
 
@@ -261,15 +261,15 @@ namespace Sla.DECCORE
             for (uint4 i = 0; i < namerec.size(); ++i)
             {
                 Varnode* vn = namerec[i];
-                Symbol* sym = vn->getHigh()->getSymbol();
-                if (sym->isNameUndefined())
+                Symbol* sym = vn.getHigh().getSymbol();
+                if (sym.isNameUndefined())
                 {
-                    Scope* scope = sym->getScope();
-                    string newname = scope->buildDefaultName(sym, base, vn);
-                    scope->renameSymbol(sym, newname);
+                    Scope* scope = sym.getScope();
+                    string newname = scope.buildDefaultName(sym, base, vn);
+                    scope.renameSymbol(sym, newname);
                 }
             }
-            data.getScopeLocal()->assignDefaultNames(base);
+            data.getScopeLocal().assignDefaultNames(base);
             return 0;
         }
     }

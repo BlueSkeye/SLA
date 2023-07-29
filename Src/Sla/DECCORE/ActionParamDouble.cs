@@ -33,30 +33,30 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < data.numCalls(); ++i)
             {
                 FuncCallSpecs* fc = data.getCallSpecs(i);
-                PcodeOp* op = fc->getOp();
-                if (fc->isInputActive())
+                PcodeOp* op = fc.getOp();
+                if (fc.isInputActive())
                 {
-                    ParamActive* active = fc->getActiveInput();
-                    for (int4 j = 0; j < active->getNumTrials(); ++j)
+                    ParamActive* active = fc.getActiveInput();
+                    for (int4 j = 0; j < active.getNumTrials(); ++j)
                     {
-                        ParamTrial paramtrial = active->getTrial(j);
+                        ParamTrial paramtrial = active.getTrial(j);
                         if (paramtrial.isChecked()) continue;
                         if (paramtrial.isUnref()) continue;
                         AddrSpace* spc = paramtrial.getAddress().getSpace();
-                        if (spc->getType() != IPTR_SPACEBASE) continue;
+                        if (spc.getType() != IPTR_SPACEBASE) continue;
                         int4 slot = paramtrial.getSlot();
-                        Varnode* vn = op->getIn(slot);
-                        if (!vn->isWritten()) continue;
-                        PcodeOp* concatop = vn->getDef();
-                        if (concatop->code() != CPUI_PIECE) continue;
-                        if (!fc->hasModel()) continue;
-                        Varnode* mostvn = concatop->getIn(0);
-                        Varnode* leastvn = concatop->getIn(1);
-                        int4 splitsize = spc->isBigEndian() ? mostvn->getSize() : leastvn->getSize();
-                        if (fc->checkInputSplit(paramtrial.getAddress(), paramtrial.getSize(), splitsize))
+                        Varnode* vn = op.getIn(slot);
+                        if (!vn.isWritten()) continue;
+                        PcodeOp* concatop = vn.getDef();
+                        if (concatop.code() != CPUI_PIECE) continue;
+                        if (!fc.hasModel()) continue;
+                        Varnode* mostvn = concatop.getIn(0);
+                        Varnode* leastvn = concatop.getIn(1);
+                        int4 splitsize = spc.isBigEndian() ? mostvn.getSize() : leastvn.getSize();
+                        if (fc.checkInputSplit(paramtrial.getAddress(), paramtrial.getSize(), splitsize))
                         {
-                            active->splitTrial(j, splitsize);
-                            if (spc->isBigEndian())
+                            active.splitTrial(j, splitsize);
+                            if (spc.isBigEndian())
                             {
                                 data.opInsertInput(op, mostvn, slot);
                                 data.opSetInput(op, leastvn, slot + 1);
@@ -72,15 +72,15 @@ namespace Sla.DECCORE
                         }
                     }
                 }
-                else if ((!fc->isInputLocked()) && (data.isDoublePrecisOn()))
+                else if ((!fc.isInputLocked()) && (data.isDoublePrecisOn()))
                 {
                     // Search for double precision objects that might become params
-                    int4 max = op->numInput() - 1;
+                    int4 max = op.numInput() - 1;
                     // Look for adjacent slots that form pieces of a double precision whole
                     for (int4 j = 1; j < max; ++j)
                     {
-                        Varnode* vn1 = op->getIn(j);
-                        Varnode* vn2 = op->getIn(j + 1);
+                        Varnode* vn1 = op.getIn(j);
+                        Varnode* vn2 = op.getIn(j + 1);
                         SplitVarnode whole;
                         bool isslothi;
                         if (whole.inHandHi(vn1))
@@ -95,12 +95,12 @@ namespace Sla.DECCORE
                         }
                         else
                             continue;
-                        if (fc->checkInputJoin(j, isslothi, vn1, vn2))
+                        if (fc.checkInputJoin(j, isslothi, vn1, vn2))
                         {
                             data.opSetInput(op, whole.getWhole(), j);
                             data.opRemoveInput(op, j + 1);
-                            fc->doInputJoin(j, isslothi);
-                            max = op->numInput() - 1;
+                            fc.doInputJoin(j, isslothi);
+                            max = op.numInput() - 1;
                             count += 1;
                         }
                     }
@@ -114,34 +114,34 @@ namespace Sla.DECCORE
                 // Search for locked parameters that are being split into hi and lo components
                 vector<Varnode*> lovec;
                 vector<Varnode*> hivec;
-                int4 minDoubleSize = data.getArch()->getDefaultSize();  // Minimum size to consider
+                int4 minDoubleSize = data.getArch().getDefaultSize();  // Minimum size to consider
                 int4 numparams = fp.numParams();
                 for (int4 i = 0; i < numparams; ++i)
                 {
                     ProtoParameter* param = fp.getParam(i);
-                    Datatype* tp = param->getType();
-                    type_metatype mt = tp->getMetatype();
+                    Datatype* tp = param.getType();
+                    type_metatype mt = tp.getMetatype();
                     if ((mt == TYPE_ARRAY) || (mt == TYPE_STRUCT)) continue; // Not double precision objects
-                    Varnode* vn = data.findVarnodeInput(tp->getSize(), param->getAddress());
+                    Varnode* vn = data.findVarnodeInput(tp.getSize(), param.getAddress());
                     if (vn == (Varnode*)0) continue;
-                    if (vn->getSize() < minDoubleSize) continue;
-                    int4 halfSize = vn->getSize() / 2;
+                    if (vn.getSize() < minDoubleSize) continue;
+                    int4 halfSize = vn.getSize() / 2;
                     lovec.clear();
                     hivec.clear();
                     bool otherUse = false;      // Have we seen use other than splitting into hi and lo
                     list<PcodeOp*>::const_iterator iter, enditer;
-                    iter = vn->beginDescend();
-                    enditer = vn->endDescend();
+                    iter = vn.beginDescend();
+                    enditer = vn.endDescend();
                     while (iter != enditer)
                     {
                         PcodeOp* subop = *iter;
                         ++iter;
-                        if (subop->code() != CPUI_SUBPIECE) continue;
-                        Varnode* outvn = subop->getOut();
-                        if (outvn->getSize() != halfSize) continue;
-                        if (subop->getIn(1)->getOffset() == 0)  // Possible lo precision piece
+                        if (subop.code() != CPUI_SUBPIECE) continue;
+                        Varnode* outvn = subop.getOut();
+                        if (outvn.getSize() != halfSize) continue;
+                        if (subop.getIn(1).getOffset() == 0)  // Possible lo precision piece
                             lovec.push_back(outvn);
-                        else if (subop->getIn(1)->getOffset() == halfSize)  // Possible hi precision piece
+                        else if (subop.getIn(1).getOffset() == halfSize)  // Possible hi precision piece
                             hivec.push_back(outvn);
                         else
                         {
@@ -154,18 +154,18 @@ namespace Sla.DECCORE
                         for (int4 j = 0; j < lovec.size(); ++j)
                         {
                             Varnode* piecevn = lovec[j];
-                            if (!piecevn->isPrecisLo())
+                            if (!piecevn.isPrecisLo())
                             {
-                                piecevn->setPrecisLo();
+                                piecevn.setPrecisLo();
                                 count += 1;     // Indicate we made change
                             }
                         }
                         for (int4 j = 0; j < hivec.size(); ++j)
                         {
                             Varnode* piecevn = hivec[j];
-                            if (!piecevn->isPrecisHi())
+                            if (!piecevn.isPrecisHi())
                             {
-                                piecevn->setPrecisHi();
+                                piecevn.setPrecisHi();
                                 count += 1;
                             }
                         }

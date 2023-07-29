@@ -21,27 +21,27 @@ namespace Sla.SLEIGH
 
         public EquationCat(PatternEquation l, PatternEquation r)
         {
-            (left = l)->layClaim();
-            (right = r)->layClaim();
+            (left = l).layClaim();
+            (right = r).layClaim();
         }
 
         public override void genPattern(List<TokenPattern> ops)
         {
-            left->genPattern(ops);
-            right->genPattern(ops);
-            resultpattern = left->getTokenPattern().doCat(right->getTokenPattern());
+            left.genPattern(ops);
+            right.genPattern(ops);
+            resultpattern = left.getTokenPattern().doCat(right.getTokenPattern());
         }
 
         public override bool resolveOperandLeft(OperandResolve state)
         {
-            bool res = left->resolveOperandLeft(state);
+            bool res = left.resolveOperandLeft(state);
             if (!res) return false;
             int4 cur_base = state.base;
             int4 cur_offset = state.offset;
-            if ((!left->getTokenPattern().getLeftEllipsis()) && (!left->getTokenPattern().getRightEllipsis()))
+            if ((!left.getTokenPattern().getLeftEllipsis()) && (!left.getTokenPattern().getRightEllipsis()))
             {
                 // Keep the same base
-                state.offset += left->getTokenPattern().getMinimumLength(); // But add to its size
+                state.offset += left.getTokenPattern().getMinimumLength(); // But add to its size
             }
             else if (state.cur_rightmost != -1)
             {
@@ -58,7 +58,7 @@ namespace Sla.SLEIGH
             }
             int4 cur_rightmost = state.cur_rightmost;
             int4 cur_size = state.size;
-            res = right->resolveOperandLeft(state);
+            res = right.resolveOperandLeft(state);
             if (!res) return false;
             state.base = cur_base;  // Restore base and offset
             state.offset = cur_offset;
@@ -75,8 +75,8 @@ namespace Sla.SLEIGH
 
         public override void operandOrder(Constructor ct, List<OperandSymbol> order)
         {
-            left->operandOrder(ct, order);  // List operands left
-            right->operandOrder(ct, order); //  to right
+            left.operandOrder(ct, order);  // List operands left
+            right.operandOrder(ct, order); //  to right
         }
     }
 }

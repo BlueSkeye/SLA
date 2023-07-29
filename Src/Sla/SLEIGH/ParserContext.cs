@@ -38,7 +38,7 @@ namespace Sla.SLEIGH
             translate = trans;
             if (ccache != (ContextCache*)0)
             {
-                contextsize = ccache->getDatabase()->getContextSize();
+                contextsize = ccache.getDatabase().getContextSize();
                 context = new uintm[contextsize];
             }
             else
@@ -82,9 +82,9 @@ namespace Sla.SLEIGH
         public void allocateOperand(int4 i, ParserWalkerChange walker)
         {
             ConstructState* opstate = &state[alloc++];
-            opstate->parent = walker.point;
-            opstate->ct = (Constructor*)0;
-            walker.point->resolve[i] = opstate;
+            opstate.parent = walker.point;
+            opstate.ct = (Constructor*)0;
+            walker.point.resolve[i] = opstate;
             walker.breadcrumb[walker.depth++] += 1;
             walker.point = opstate;
             walker.breadcrumb[walker.depth] = 0;
@@ -136,19 +136,19 @@ namespace Sla.SLEIGH
             {
                 TripleSymbol* sym = (*iter).sym;
                 Address commitaddr;
-                if (sym->getType() == SleighSymbol::operand_symbol)
+                if (sym.getType() == SleighSymbol::operand_symbol)
                 {
                     // The value for an OperandSymbol is probabably already
                     // calculated, we just need to find the right
                     // tree node of the state
-                    int4 i = ((OperandSymbol*)sym)->getIndex();
-                    FixedHandle & h((*iter).point->resolve[i]->hand);
+                    int4 i = ((OperandSymbol*)sym).getIndex();
+                    FixedHandle & h((*iter).point.resolve[i].hand);
                     commitaddr = Address(h.space, h.offset_offset);
                 }
                 else
                 {
                     FixedHandle hand;
-                    sym->getFixedHandle(hand, walker);
+                    sym.getFixedHandle(hand, walker);
                     commitaddr = Address(hand.space, hand.offset_offset);
                 }
                 if (commitaddr.isConstant())
@@ -156,20 +156,20 @@ namespace Sla.SLEIGH
                     // If the symbol handed to globalset was a computed value, the getFixedHandle calculation
                     // will return a value in the constant space. If this is a case, we explicitly convert the
                     // offset into the current address space
-                    uintb newoff = AddrSpace::addressToByte(commitaddr.getOffset(), addr.getSpace()->getWordSize());
+                    uintb newoff = AddrSpace::addressToByte(commitaddr.getOffset(), addr.getSpace().getWordSize());
                     commitaddr = Address(addr.getSpace(), newoff);
                 }
 
                 // Commit context change
                 if ((*iter).flow)       // The context flows
-                    contcache->setContext(commitaddr, (*iter).num, (*iter).mask, (*iter).value);
+                    contcache.setContext(commitaddr, (*iter).num, (*iter).mask, (*iter).value);
                 else
                 {  // Set the context so that is doesn't flow
                     Address nextaddr = commitaddr + 1;
                     if (nextaddr.getOffset() < commitaddr.getOffset())
-                        contcache->setContext(commitaddr, (*iter).num, (*iter).mask, (*iter).value);
+                        contcache.setContext(commitaddr, (*iter).num, (*iter).mask, (*iter).value);
                     else
-                        contcache->setContext(commitaddr, nextaddr, (*iter).num, (*iter).mask, (*iter).value);
+                        contcache.setContext(commitaddr, nextaddr, (*iter).num, (*iter).mask, (*iter).value);
                 }
             }
         }
@@ -184,7 +184,7 @@ namespace Sla.SLEIGH
             {
                 if (translate == (Translate*)0 || parsestate == uninitialized)
                     throw new LowlevelError("inst_next2 not available in this context");
-                int4 length = translate->instructionLength(naddr);
+                int4 length = translate.instructionLength(naddr);
                 n2addr = naddr + length;
             }
             return n2addr;
@@ -278,10 +278,10 @@ namespace Sla.SLEIGH
 
         public void loadContext()
         {
-            contcache->getContext(addr, context);
+            contcache.getContext(addr, context);
         }
 
-        public int4 getLength() => base_state->length;
+        public int4 getLength() => base_state.length;
 
         public void setDelaySlot(int4 val)
         {

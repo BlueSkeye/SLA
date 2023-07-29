@@ -38,7 +38,7 @@ namespace Sla.DECCORE
             if (proto != (FuncProto*)0)
                 delete proto;
             proto = new FuncProto();
-            proto->setInternal(model, voidtype);
+            proto.setInternal(model, voidtype);
             vector<Datatype*> typelist;
             vector<string> blanknames(intypes.size()+1);
             if (outtype == (Datatype*)0)
@@ -48,9 +48,9 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < intypes.size(); ++i)
                 typelist.push_back(intypes[i]);
 
-            proto->updateAllTypes(blanknames, typelist, dotdotdot);
-            proto->setInputLock(true);
-            proto->setOutputLock(true);
+            proto.updateAllTypes(blanknames, typelist, dotdotdot);
+            proto.setInputLock(true);
+            proto.setOutputLock(true);
         }
 
         /// Set a particular function prototype on \b this
@@ -68,7 +68,7 @@ namespace Sla.DECCORE
             if (fp != (FuncProto*)0) {
                 factory = typegrp;
                 proto = new FuncProto();
-                proto->copy(*fp);
+                proto.copy(*fp);
             }
         }
 
@@ -98,10 +98,10 @@ namespace Sla.DECCORE
                 Architecture* glb = typegrp.getArch();
                 factory = &typegrp;
                 proto = new FuncProto();
-                proto->setInternal(glb->defaultfp, typegrp.getTypeVoid());
-                proto->decode(decoder, glb);
-                proto->setConstructor(isConstructor);
-                proto->setDestructor(isDestructor);
+                proto.setInternal(glb.defaultfp, typegrp.getTypeVoid());
+                proto.decode(decoder, glb);
+                proto.setConstructor(isConstructor);
+                proto.setDestructor(isDestructor);
             }
             markComplete();
         }
@@ -115,7 +115,7 @@ namespace Sla.DECCORE
             if (op.proto != (FuncProto*)0)
             {
                 proto = new FuncProto();
-                proto->copy(*op.proto);
+                proto.copy(*op.proto);
             }
         }
 
@@ -139,30 +139,30 @@ namespace Sla.DECCORE
         {
             if (proto == (FuncProto*)0)
             {
-                if (op->proto == (FuncProto*)0) return 0;
+                if (op.proto == (FuncProto*)0) return 0;
                 return 1;
             }
-            if (op->proto == (FuncProto*)0)
+            if (op.proto == (FuncProto*)0)
                 return -1;
 
-            if (!proto->hasModel())
+            if (!proto.hasModel())
             {
-                if (op->proto->hasModel()) return 1;
+                if (op.proto.hasModel()) return 1;
             }
             else
             {
-                if (!op->proto->hasModel()) return -1;
-                string model1 = proto->getModelName());
-                string model2 = op->proto->getModelName());
+                if (!op.proto.hasModel()) return -1;
+                string model1 = proto.getModelName());
+                string model2 = op.proto.getModelName());
                 if (model1 != model2)
                     return (model1 < model2) ? -1 : 1;
             }
-            int4 nump = proto->numParams();
-            int4 opnump = op->proto->numParams();
+            int4 nump = proto.numParams();
+            int4 opnump = op.proto.numParams();
             if (nump != opnump)
                 return (opnump < nump) ? -1 : 1;
-            uint4 myflags = proto->getComparableFlags();
-            uint4 opflags = op->proto->getComparableFlags();
+            uint4 myflags = proto.getComparableFlags();
+            uint4 opflags = op.proto.getComparableFlags();
             if (myflags != opflags)
                 return (myflags < opflags) ? -1 : 1;
 
@@ -191,7 +191,7 @@ namespace Sla.DECCORE
         {
             if (factory == (TypeFactory*)0) return (Datatype*)0;
             *newoff = 0;
-            return factory->getBase(1, TYPE_CODE);  // Return code byte unattached to function prototype
+            return factory.getBase(1, TYPE_CODE);  // Return code byte unattached to function prototype
         }
 
         public override int4 compare(Datatype op, int4 level)
@@ -208,24 +208,24 @@ namespace Sla.DECCORE
                 if (id == op.getId()) return 0;
                 return (id < op.getId()) ? -1 : 1;
             }
-            int4 nump = proto->numParams();
+            int4 nump = proto.numParams();
             for (int4 i = 0; i < nump; ++i)
             {
-                Datatype* param = proto->getParam(i)->getType();
-                Datatype* opparam = tc->proto->getParam(i)->getType();
-                int4 c = param->compare(*opparam, level);
+                Datatype* param = proto.getParam(i).getType();
+                Datatype* opparam = tc.proto.getParam(i).getType();
+                int4 c = param.compare(*opparam, level);
                 if (c != 0)
                     return c;
             }
-            Datatype* otype = proto->getOutputType();
-            Datatype* opotype = tc->proto->getOutputType();
+            Datatype* otype = proto.getOutputType();
+            Datatype* opotype = tc.proto.getOutputType();
             if (otype == (Datatype*)0)
             {
                 if (opotype == (Datatype*)0) return 0;
                 return 1;
             }
             if (opotype == (Datatype*)0) return -1;
-            return otype->compare(*opotype, level);
+            return otype.compare(*opotype, level);
         }
 
         public override int4 compareDependency(Datatype op)
@@ -236,16 +236,16 @@ namespace Sla.DECCORE
             res = compareBasic(tc);
             if (res != 2) return res;
 
-            int4 nump = proto->numParams();
+            int4 nump = proto.numParams();
             for (int4 i = 0; i < nump; ++i)
             {
-                Datatype* param = proto->getParam(i)->getType();
-                Datatype* opparam = tc->proto->getParam(i)->getType();
+                Datatype* param = proto.getParam(i).getType();
+                Datatype* opparam = tc.proto.getParam(i).getType();
                 if (param != opparam)
                     return (param < opparam) ? -1 : 1; // Compare pointers directly
             }
-            Datatype* otype = proto->getOutputType();
-            Datatype* opotype = tc->proto->getOutputType();
+            Datatype* otype = proto.getOutputType();
+            Datatype* opotype = tc.proto.getOutputType();
             if (otype == (Datatype*)0)
             {
                 if (opotype == (Datatype*)0) return 0;
@@ -269,7 +269,7 @@ namespace Sla.DECCORE
             encoder.openElement(ELEM_TYPE);
             encodeBasic(metatype, encoder);
             if (proto != (FuncProto*)0)
-                proto->encode(encoder);
+                proto.encode(encoder);
             encoder.closeElement(ELEM_TYPE);
         }
     }

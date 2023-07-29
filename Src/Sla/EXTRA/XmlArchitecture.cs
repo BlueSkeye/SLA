@@ -19,7 +19,7 @@ namespace Sla.EXTRA
             Element* el = store.getTag("binaryimage");
             if (el == (Element*)0) {
                 Document* doc = store.openDocument(getFilename());
-                store.registerTag(doc->getRoot());
+                store.registerTag(doc.getRoot());
                 el = store.getTag("binaryimage");
             }
             if (el == (Element*)0)
@@ -33,9 +33,9 @@ namespace Sla.EXTRA
         protected override void postSpecFile()
         {
             Architecture::postSpecFile();
-            ((LoadImageXml*)loader)->open(translate);
+            ((LoadImageXml*)loader).open(translate);
             if (adjustvma != 0)
-                loader->adjustVma(adjustvma);
+                loader.adjustVma(adjustvma);
         }
 
         /// Prepend extra stuff to specify binary file and spec
@@ -45,8 +45,8 @@ namespace Sla.EXTRA
             encoder.openElement(ELEM_XML_SAVEFILE);
             encodeHeader(encoder);
             encoder.writeUnsignedInteger(ATTRIB_ADJUSTVMA, adjustvma);
-            ((LoadImageXml*)loader)->encode(encoder); // Save the LoadImage
-            types->encodeCoreTypes(encoder);
+            ((LoadImageXml*)loader).encode(encoder); // Save the LoadImage
+            types.encodeCoreTypes(encoder);
             SleighArchitecture::encode(encoder); // Save the rest of the state
             encoder.closeElement(ELEM_XML_SAVEFILE);
         }
@@ -59,17 +59,17 @@ namespace Sla.EXTRA
 
             restoreXmlHeader(el);
             {
-                istringstream s(el->getAttributeValue("adjustvma"));
+                istringstream s(el.getAttributeValue("adjustvma"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> adjustvma;
             }
-            List list = el->getChildren();
+            List list = el.getChildren();
             List::const_iterator iter;
 
             iter = list.begin();
             if (iter != list.end())
             {
-                if ((*iter)->getName() == "binaryimage")
+                if ((*iter).getName() == "binaryimage")
                 {
                     store.registerTag(*iter);
                     ++iter;
@@ -77,7 +77,7 @@ namespace Sla.EXTRA
             }
             if (iter != list.end())
             {
-                if ((*iter)->getName() == "specextensions")
+                if ((*iter).getName() == "specextensions")
                 {
                     store.registerTag(*iter);
                     ++iter;
@@ -85,7 +85,7 @@ namespace Sla.EXTRA
             }
             if (iter != list.end())
             {
-                if ((*iter)->getName() == "coretypes")
+                if ((*iter).getName() == "coretypes")
                 {
                     store.registerTag(*iter);
                     ++iter;

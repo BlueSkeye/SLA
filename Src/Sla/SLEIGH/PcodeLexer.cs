@@ -425,14 +425,14 @@ namespace Sla.SLEIGH
             endofstreamsent = false;
             lookahead1 = 0;
             lookahead2 = 0;
-            s->get(lookahead1);     // Buffer the first two characters
+            s.get(lookahead1);     // Buffer the first two characters
             if (!(*s))
             {
                 endofstream = true;
                 lookahead1 = 0;
                 return;
             }
-            s->get(lookahead2);
+            s.get(lookahead2);
             if (!(*s))
             {
                 endofstream = true;
@@ -453,7 +453,7 @@ namespace Sla.SLEIGH
                     lookahead2 = '\0';
                 else
                 {
-                    s->get(lookahead2);
+                    s.get(lookahead2);
                     if (!(*s))
                     {
                         endofstream = true;

@@ -34,42 +34,42 @@ namespace Sla.DECCORE
             Varnode* addout,*multout,*shiftout,*a;
             PcodeOp* addop,*multop,*shiftop;
 
-            if (!op->getIn(1)->isConstant()) return 0;
-            if (op->getIn(1)->getOffset() != 1) return 0;
-            addout = op->getIn(0);
-            if (!addout->isWritten()) return 0;
-            addop = addout->getDef();
-            if (addop->code() != CPUI_INT_ADD) return 0;
+            if (!op.getIn(1).isConstant()) return 0;
+            if (op.getIn(1).getOffset() != 1) return 0;
+            addout = op.getIn(0);
+            if (!addout.isWritten()) return 0;
+            addop = addout.getDef();
+            if (addop.code() != CPUI_INT_ADD) return 0;
             int4 i;
             a = (Varnode*)0;
             for (i = 0; i < 2; ++i)
             {
-                multout = addop->getIn(i);
-                if (!multout->isWritten()) continue;
-                multop = multout->getDef();
-                if (multop->code() != CPUI_INT_MULT)
+                multout = addop.getIn(i);
+                if (!multout.isWritten()) continue;
+                multop = multout.getDef();
+                if (multop.code() != CPUI_INT_MULT)
                     continue;
-                if (!multop->getIn(1)->isConstant()) continue;
-                if (multop->getIn(1)->getOffset() !=
-                calc_mask(multop->getIn(1)->getSize()))
+                if (!multop.getIn(1).isConstant()) continue;
+                if (multop.getIn(1).getOffset() !=
+                calc_mask(multop.getIn(1).getSize()))
                     continue;
-                shiftout = multop->getIn(0);
-                if (!shiftout->isWritten()) continue;
-                shiftop = shiftout->getDef();
-                if (shiftop->code() != CPUI_INT_SRIGHT)
+                shiftout = multop.getIn(0);
+                if (!shiftout.isWritten()) continue;
+                shiftop = shiftout.getDef();
+                if (shiftop.code() != CPUI_INT_SRIGHT)
                     continue;
-                if (!shiftop->getIn(1)->isConstant()) continue;
-                int4 n = shiftop->getIn(1)->getOffset();
-                a = shiftop->getIn(0);
-                if (a != addop->getIn(1 - i)) continue;
-                if (n != 8 * a->getSize() - 1) continue;
-                if (a->isFree()) continue;
+                if (!shiftop.getIn(1).isConstant()) continue;
+                int4 n = shiftop.getIn(1).getOffset();
+                a = shiftop.getIn(0);
+                if (a != addop.getIn(1 - i)) continue;
+                if (n != 8 * a.getSize() - 1) continue;
+                if (a.isFree()) continue;
                 break;
             }
             if (i == 2) return 0;
 
             data.opSetInput(op, a, 0);
-            data.opSetInput(op, data.newConstant(a->getSize(), 2), 1);
+            data.opSetInput(op, data.newConstant(a.getSize(), 2), 1);
             data.opSetOpcode(op, CPUI_INT_SDIV);
             return 1;
         }

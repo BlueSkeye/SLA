@@ -11,11 +11,11 @@ namespace Sla.EXTRA
     {
         public override void execute(TextReader s)
 {				// Turn off trace
-  if (dcp->fd == (Funcdata *)0)
+  if (dcp.fd == (Funcdata *)0)
     throw IfaceExecutionError("No function selected");
 
-  dcp->fd->debugDisable();
-  *status->optr << "OK\n";
+  dcp.fd.debugDisable();
+  *status.optr << "OK\n";
 }
     }
 #endif

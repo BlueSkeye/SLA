@@ -20,11 +20,11 @@ namespace Sla.EXTRA
         ///   - Indirect prototype overrides
         public override void execute(TextReader s)
         {
-            if (dcp->fd == (Funcdata*)0)
+            if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");
 
-            *status->optr << "Function: " << dcp->fd->getName() << endl;
-            dcp->fd->getOverride().printRaw(*status->optr, dcp->conf);
+            *status.optr << "Function: " << dcp.fd.getName() << endl;
+            dcp.fd.getOverride().printRaw(*status.optr, dcp.conf);
         }
     }
 }

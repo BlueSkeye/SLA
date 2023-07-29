@@ -39,14 +39,14 @@ namespace Sla.DECCORE
             TypePointer* tp;
 
             if (!data.hasTypeRecoveryStarted()) return 0;
-            int4 size = (int4)op->getIn(2)->getOffset(); // Size the PTRADD thinks we are pointing
-            basevn = op->getIn(0);
-            tp = (TypePointer*)basevn->getTypeReadFacing(op);
-            if (tp->getMetatype() == TYPE_PTR)                              // Make sure we are still a pointer
-                if (tp->getPtrTo()->getSize() == AddrSpace::addressToByteInt(size, tp->getWordSize()))
+            int4 size = (int4)op.getIn(2).getOffset(); // Size the PTRADD thinks we are pointing
+            basevn = op.getIn(0);
+            tp = (TypePointer*)basevn.getTypeReadFacing(op);
+            if (tp.getMetatype() == TYPE_PTR)                              // Make sure we are still a pointer
+                if (tp.getPtrTo().getSize() == AddrSpace::addressToByteInt(size, tp.getWordSize()))
                 {   // of the correct size
-                    Varnode* indVn = op->getIn(1);
-                    if ((!indVn->isConstant()) || (indVn->getOffset() != 0))                    // and that index isn't zero
+                    Varnode* indVn = op.getIn(1);
+                    if ((!indVn.isConstant()) || (indVn.getOffset() != 0))                    // and that index isn't zero
                         return 0;
                 }
 

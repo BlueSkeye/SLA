@@ -57,9 +57,9 @@ namespace Sla.DECCORE
                 return othervn;
             }
             // Otherwise a new insertion
-            vn->lociter = check.first;
-            vn->setFlags(Varnode::insert);
-            vn->defiter = def_tree.insert(vn).first; // Insertion should also be new in def_tree
+            vn.lociter = check.first;
+            vn.setFlags(Varnode::insert);
+            vn.defiter = def_tree.insert(vn).first; // Insertion should also be new in def_tree
 
             return vn;
         }
@@ -71,8 +71,8 @@ namespace Sla.DECCORE
             searchvn = new Varnode(0, new Address(Address::m_minimal), (Datatype*)0);
             manage = m;
             searchvn.flags = Varnode::input; // searchvn is always an input varnode of size 0
-            uniq_space = m->getUniqueSpace();
-            uniqbase = uniq_space->getTrans()->getUniqueStart(Translate::ANALYSIS);
+            uniq_space = m.getUniqueSpace();
+            uniqbase = uniq_space.getTrans().getUniqueStart(Translate::ANALYSIS);
             uniqid = uniqbase;
             create_index = 0;
         }
@@ -110,9 +110,9 @@ namespace Sla.DECCORE
         {
             Varnode* vn = new Varnode(s, m, ct);
 
-            vn->create_index = create_index++;
-            vn->lociter = loc_tree.insert(vn).first; // Frees can always be inserted without duplication
-            vn->defiter = def_tree.insert(vn).first;
+            vn.create_index = create_index++;
+            vn.lociter = loc_tree.insert(vn).first; // Frees can always be inserted without duplication
+            vn.defiter = def_tree.insert(vn).first;
             return vn;
         }
 
@@ -126,8 +126,8 @@ namespace Sla.DECCORE
         public Varnode createDef(int4 s, Address m, Datatype ct, PcodeOp op)
         {
             Varnode* vn = new Varnode(s, m, ct);
-            vn->create_index = create_index++;
-            vn->setDef(op);
+            vn.create_index = create_index++;
+            vn.setDef(op);
             return xref(vn);
         }
 
@@ -163,11 +163,11 @@ namespace Sla.DECCORE
         /// \param vn is the Varnode to remove
         public void destroy(Varnode vn)
         {
-            if ((vn->getDef() != (PcodeOp*)0) || (!vn->hasNoDescend()))
+            if ((vn.getDef() != (PcodeOp*)0) || (!vn.hasNoDescend()))
                 throw new LowlevelError("Deleting integrated varnode");
 
-            loc_tree.erase(vn->lociter);
-            def_tree.erase(vn->defiter);
+            loc_tree.erase(vn.lociter);
+            def_tree.erase(vn.defiter);
             delete vn;
         }
 
@@ -178,15 +178,15 @@ namespace Sla.DECCORE
         /// \return the modified Varnode, which be a different object than the original
         public Varnode setInput(Varnode vn)
         {
-            if (!vn->isFree())
+            if (!vn.isFree())
                 throw new LowlevelError("Making input out of varnode which is not free");
-            if (vn->isConstant())
+            if (vn.isConstant())
                 throw new LowlevelError("Making input out of constant varnode");
 
-            loc_tree.erase(vn->lociter);    // Erase the free version of varnode
-            def_tree.erase(vn->defiter);
+            loc_tree.erase(vn.lociter);    // Erase the free version of varnode
+            def_tree.erase(vn.defiter);
 
-            vn->setInput();     // Set the input flag
+            vn.setInput();     // Set the input flag
             return xref(vn);
         }
 
@@ -200,27 +200,27 @@ namespace Sla.DECCORE
         /// \return the modified Varnode, which may be a different object than the original
         public Varnode setDef(Varnode vn, PcodeOp op)
         {
-            if (!vn->isFree())
+            if (!vn.isFree())
             {
                 ostringstream s;
-                Address addr = op->getAddr();
+                Address addr = op.getAddr();
                 s << "Defining varnode which is not free at " << addr.getShortcut();
                 addr.printRaw(s);
                 throw new LowlevelError(s.str());
             }
-            if (vn->isConstant())
+            if (vn.isConstant())
             {
                 ostringstream s;
-                Address addr = op->getAddr();
+                Address addr = op.getAddr();
                 s << "Assignment to constant at " << addr.getShortcut();
                 addr.printRaw(s);
                 throw new LowlevelError(s.str());
             }
 
-            loc_tree.erase(vn->lociter);
-            def_tree.erase(vn->defiter);
+            loc_tree.erase(vn.lociter);
+            def_tree.erase(vn.defiter);
 
-            vn->setDef(op);     // Change the varnode to be defined
+            vn.setDef(op);     // Change the varnode to be defined
             return xref(vn);
         }
 
@@ -231,14 +231,14 @@ namespace Sla.DECCORE
         /// \param vn is the Varnode to modify
         public void makeFree(Varnode vn)
         {
-            loc_tree.erase(vn->lociter);
-            def_tree.erase(vn->defiter);
+            loc_tree.erase(vn.lociter);
+            def_tree.erase(vn.defiter);
 
-            vn->setDef((PcodeOp*)0);    // Clear things that make vn non-free
-            vn->clearFlags(Varnode::insert | Varnode::input | Varnode::indirect_creation);
+            vn.setDef((PcodeOp*)0);    // Clear things that make vn non-free
+            vn.clearFlags(Varnode::insert | Varnode::input | Varnode::indirect_creation);
 
-            vn->lociter = loc_tree.insert(vn).first; // Re-insert as free varnode
-            vn->defiter = def_tree.insert(vn).first;
+            vn.lociter = loc_tree.insert(vn).first; // Re-insert as free varnode
+            vn.defiter = def_tree.insert(vn).first;
         }
 
         /// Replace every read of one Varnode with another
@@ -251,20 +251,20 @@ namespace Sla.DECCORE
             PcodeOp* op;
             int4 i;
 
-            iter = oldvn->descend.begin();
-            while (iter != oldvn->descend.end())
+            iter = oldvn.descend.begin();
+            while (iter != oldvn.descend.end())
             {
                 op = *iter;
                 tmpiter = iter++;
-                if (op->output == newvn) continue; // Cannot be input to your own definition
-                i = op->getSlot(oldvn);
-                oldvn->descend.erase(tmpiter);  // Sever the link fully
-                op->clearInput(i); // Before attempting to build the new link
-                newvn->addDescend(op);
-                op->setInput(newvn, i); // This must be called AFTER descend is updated
+                if (op.output == newvn) continue; // Cannot be input to your own definition
+                i = op.getSlot(oldvn);
+                oldvn.descend.erase(tmpiter);  // Sever the link fully
+                op.clearInput(i); // Before attempting to build the new link
+                newvn.addDescend(op);
+                op.setInput(newvn, i); // This must be called AFTER descend is updated
             }
-            oldvn->setFlags(Varnode::coverdirty);
-            newvn->setFlags(Varnode::coverdirty);
+            oldvn.setFlags(Varnode::coverdirty);
+            newvn.setFlags(Varnode::coverdirty);
         }
 
         /// Find a Varnode
@@ -284,12 +284,12 @@ namespace Sla.DECCORE
             while (iter != loc_tree.end())
             {
                 vn = *iter;
-                if (vn->getSize() != s) break;
-                if (vn->getAddr() != loc) break;
-                op = vn->getDef();
-                if ((op != (PcodeOp*)0) && (op->getAddr() == pc))
+                if (vn.getSize() != s) break;
+                if (vn.getAddr() != loc) break;
+                op = vn.getDef();
+                if ((op != (PcodeOp*)0) && (op.getAddr() == pc))
                 {
-                    if ((uniq == ~((uintm)0)) || (op->getTime() == uniq)) return vn;
+                    if ((uniq == ~((uintm)0)) || (op.getTime() == uniq)) return vn;
                 }
                 ++iter;
             }
@@ -310,7 +310,7 @@ namespace Sla.DECCORE
             if (iter != loc_tree.end())
             {   // There is only one possible varnode matching this
                 vn = *iter;
-                if (vn->isInput() && (vn->getSize() == s) && (vn->getAddr() == loc))
+                if (vn.isInput() && (vn.getSize() == s) && (vn.getAddr() == loc))
                     return vn;
             }
             return (Varnode*)0;
@@ -326,7 +326,7 @@ namespace Sla.DECCORE
         {
             VarnodeDefSet::const_iterator iter, enditer;
             Varnode* vn;
-            uintb highest = loc.getSpace()->getHighest();
+            uintb highest = loc.getSpace().getHighest();
             uintb end = loc.getOffset() + s - 1;
 
             iter = beginDef(Varnode::input, loc);
@@ -340,8 +340,8 @@ namespace Sla.DECCORE
 
             while (iter != enditer)
             {
-                vn = *iter++;       // we know vn is input with vn->Loc in (loc,loc+s)
-                if (vn->getOffset() + vn->getSize() - 1 <= end) // vn is completely contained
+                vn = *iter++;       // we know vn is input with vn.Loc in (loc,loc+s)
+                if (vn.getOffset() + vn.getSize() - 1 <= end) // vn is completely contained
                     return vn;
             }
             return (Varnode*)0;
@@ -360,14 +360,14 @@ namespace Sla.DECCORE
             if (iter != def_tree.end())
             {
                 vn = *iter;
-                if ((vn->getAddr() != loc) && (iter != def_tree.begin()))
+                if ((vn.getAddr() != loc) && (iter != def_tree.begin()))
                 {
                     --iter;
                     vn = *iter;
                 }
-                if (vn->isInput() && (vn->getSpace() == loc.getSpace()) &&
-                (vn->getOffset() <= loc.getOffset()) &&
-                (vn->getOffset() + vn->getSize() - 1 >= loc.getOffset() + s - 1))
+                if (vn.isInput() && (vn.getSpace() == loc.getSpace()) &&
+                (vn.getOffset() <= loc.getOffset()) &&
+                (vn.getOffset() + vn.getSize() - 1 >= loc.getOffset() + s - 1))
                     return vn;
             }
             return (Varnode*)0;
@@ -398,7 +398,7 @@ namespace Sla.DECCORE
         /// \return the ending iterator
         public VarnodeLocSet::const_iterator endLoc(AddrSpace spaceid)
         {
-            searchvn.loc = Address(manage->getNextSpaceInOrder(spaceid), 0);
+            searchvn.loc = Address(manage.getNextSpaceInOrder(spaceid), 0);
             return loc_tree.lower_bound(&searchvn);
         }
 
@@ -418,10 +418,10 @@ namespace Sla.DECCORE
         /// \return the ending iterator
         public VarnodeLocSet::const_iterator endLoc(Address addr)
         {
-            if (addr.getOffset() == addr.getSpace()->getHighest())
+            if (addr.getOffset() == addr.getSpace().getHighest())
             {
                 AddrSpace* space = addr.getSpace();
-                searchvn.loc = Address(manage->getNextSpaceInOrder(space), 0);
+                searchvn.loc = Address(manage.getNextSpaceInOrder(space), 0);
             }
             else
                 searchvn.loc = addr + 1;
@@ -613,29 +613,29 @@ namespace Sla.DECCORE
         public uint4 overlapLoc(VarnodeLocSet::const_iterator iter, List<VarnodeLocSet::const_iterator> bounds)
         {
             Varnode* vn = *iter;
-            AddrSpace* spc = vn->getSpace();
-            uintb off = vn->getOffset();
-            uintb maxOff = off + (vn->getSize() - 1);
-            uint4 flags = vn->getFlags();
+            AddrSpace* spc = vn.getSpace();
+            uintb off = vn.getOffset();
+            uintb maxOff = off + (vn.getSize() - 1);
+            uint4 flags = vn.getFlags();
             bounds.push_back(iter);
-            iter = endLoc(vn->getSize(), vn->getAddr(), Varnode::written);
+            iter = endLoc(vn.getSize(), vn.getAddr(), Varnode::written);
             bounds.push_back(iter);
             while (iter != loc_tree.end())
             {
                 vn = *iter;
-                if (vn->getSpace() != spc || vn->getOffset() > maxOff)
+                if (vn.getSpace() != spc || vn.getOffset() > maxOff)
                     break;
-                if (vn->isFree())
+                if (vn.isFree())
                 {
-                    iter = endLoc(vn->getSize(), vn->getAddr(), 0);
+                    iter = endLoc(vn.getSize(), vn.getAddr(), 0);
                     continue;
                 }
-                uintb endOff = vn->getOffset() + (vn->getSize() - 1);
+                uintb endOff = vn.getOffset() + (vn.getSize() - 1);
                 if (endOff > maxOff)
                     maxOff = endOff;
-                flags |= vn->getFlags();
+                flags |= vn.getFlags();
                 bounds.push_back(iter);
-                iter = endLoc(vn->getSize(), vn->getAddr(), Varnode::written);
+                iter = endLoc(vn.getSize(), vn.getAddr(), Varnode::written);
                 bounds.push_back(iter);
             }
             bounds.push_back(iter);

@@ -26,11 +26,11 @@ namespace Sla.EXTRA
             uint4 type;
             string token;
 
-            if (dcp->fd == (Funcdata*)0)
+            if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");
 
             s >> ws;
-            Address addr(parse_machaddr(s, discard,* dcp->conf->types));
+            Address addr(parse_machaddr(s, discard,* dcp.conf.types));
             s >> token;
             if (token.size() == 0)
                 throw IfaceParseError("Missing override type");
@@ -38,8 +38,8 @@ namespace Sla.EXTRA
             if (type == Override::NONE)
                 throw IfaceParseError("Bad override type");
 
-            dcp->fd->getOverride().insertFlowOverride(addr, type);
-            *status->optr << "Successfully added override" << endl;
+            dcp.fd.getOverride().insertFlowOverride(addr, type);
+            *status.optr << "Successfully added override" << endl;
         }
     }
 }

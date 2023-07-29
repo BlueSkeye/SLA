@@ -64,7 +64,7 @@ namespace Sla.DECCORE
                 if (tmp.code() == CPUI_BOOL_NEGATE) {
                     boolvn = tmp.getIn(0);
                     curvn = boolvn;
-                    curvn->setMark();
+                    curvn.setMark();
                 }
             }
             if (curvn.isWritten()) {
@@ -112,7 +112,7 @@ namespace Sla.DECCORE
         private Varnode findMatch(PcodeOp op)
         {
             PcodeOp curop;
-            //  FlowBlock *bl = op->getParent();
+            //  FlowBlock *bl = op.getParent();
             state = 0;
             Varnode curvn = op.getIn(1);
             multion = false;
@@ -135,13 +135,13 @@ namespace Sla.DECCORE
                         }
                         popstate = false;
                     }
-                    //       else if (curop->code() == CPUI_MULTIEQUAL) {
-                    // 	if ((curop->getParent()==bl)&&(!multion)) {
+                    //       else if (curop.code() == CPUI_MULTIEQUAL) {
+                    // 	if ((curop.getParent()==bl)&&(!multion)) {
                     // 	  opstate[state] = curop;
                     // 	  slotstate[state] = 0;
                     // 	  flipstate[state] = matchflip;
                     // 	  state += 1;
-                    // 	  curvn = curop->Input(0);
+                    // 	  curvn = curop.Input(0);
                     // 	  multion = true;
                     // 	  popstate = false;
                     // 	}
@@ -205,7 +205,7 @@ namespace Sla.DECCORE
                 if (!bin2op.getIn(1 - constslot).isConstant()) {
                     return false;
                 }
-                if (!varnodeSame(bin1op->getIn(1 - constslot), bin2op->getIn(constslot))) {
+                if (!varnodeSame(bin1op.getIn(1 - constslot), bin2op.getIn(constslot))) {
                     return false;
                 }
                 ulong val1 = bin1op.getIn(constslot).getOffset();
@@ -385,7 +385,7 @@ namespace Sla.DECCORE
             }
             else {
                 for (int i = 0; i < state; ++i) {
-                    if (opstate[i]->code() == CPUI_MULTIEQUAL) {
+                    if (opstate[i].code() == CPUI_MULTIEQUAL) {
                         multislot = slotstate[i];
                         break;
                     }

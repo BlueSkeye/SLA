@@ -70,7 +70,7 @@ namespace Sla.EXTRA
         public bool isSocketOpen()
         {
             if (!isOpen) return false;
-            if (inStream->eof()) {
+            if (inStream.eof()) {
                 close();
                 return false;
             }

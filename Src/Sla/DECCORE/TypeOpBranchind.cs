@@ -18,13 +18,13 @@ namespace Sla.DECCORE
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opBranchind(op);
+            lng.opBranchind(op);
         }
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
             s << name << ' ';
-            Varnode::printRaw(s, op->getIn(0));
+            Varnode::printRaw(s, op.getIn(0));
         }
     }
 }

@@ -262,8 +262,8 @@ namespace Sla.SLACOMP
         //    do                                                                  \
         //      {                                                                 \
         //        YYSIZE_T yynewbytes;                                            \
-        //        YYCOPY(&yyptr->Stack_alloc, Stack, yysize);                    \
-        //        Stack = &yyptr->Stack_alloc;                                    \
+        //        YYCOPY(&yyptr.Stack_alloc, Stack, yysize);                    \
+        //        Stack = &yyptr.Stack_alloc;                                    \
         //        yynewbytes = yystacksize* sizeof (* Stack) + YYSTACK_GAP_MAXIMUM; \
         //        yyptr += yynewbytes / sizeof (* yyptr);                          \
         //      }                                                                 \
@@ -2043,25 +2043,25 @@ namespace Sla.SLACOMP
         //{
         //    case 19:
 
-        //        { slgh->resetConstructors(); }
+        //        { slgh.resetConstructors(); }
 
         //        break;
 
         //    case 20:
 
-        //        { slgh->setEndian(1); }
+        //        { slgh.setEndian(1); }
 
         //        break;
 
         //    case 21:
 
-        //        { slgh->setEndian(0); }
+        //        { slgh.setEndian(0); }
 
         //        break;
 
         //    case 22:
 
-        //        { slgh->setAlignment(*(yyvsp[-1].i)); delete(yyvsp[-1].i); }
+        //        { slgh.setAlignment(*(yyvsp[-1].i)); delete(yyvsp[-1].i); }
 
         //        break;
 
@@ -2073,31 +2073,31 @@ namespace Sla.SLACOMP
 
         //    case 24:
 
-        //        { (yyval.tokensym) = slgh->defineToken((yyvsp[-3].str), (yyvsp[-1].i), 0); }
+        //        { (yyval.tokensym) = slgh.defineToken((yyvsp[-3].str), (yyvsp[-1].i), 0); }
 
         //        break;
 
         //    case 25:
 
-        //        { (yyval.tokensym) = slgh->defineToken((yyvsp[-6].str), (yyvsp[-4].i), -1); }
+        //        { (yyval.tokensym) = slgh.defineToken((yyvsp[-6].str), (yyvsp[-4].i), -1); }
 
         //        break;
 
         //    case 26:
 
-        //        { (yyval.tokensym) = slgh->defineToken((yyvsp[-6].str), (yyvsp[-4].i), 1); }
+        //        { (yyval.tokensym) = slgh.defineToken((yyvsp[-6].str), (yyvsp[-4].i), 1); }
 
         //        break;
 
         //    case 27:
 
-        //        { (yyval.tokensym) = (yyvsp[-1].tokensym); slgh->addTokenField((yyvsp[-1].tokensym), (yyvsp[0].fieldqual)); }
+        //        { (yyval.tokensym) = (yyvsp[-1].tokensym); slgh.addTokenField((yyvsp[-1].tokensym), (yyvsp[0].fieldqual)); }
 
         //        break;
 
         //    case 28:
 
-        //        { string errmsg = (yyvsp[0].anysym)->getName() + ": redefined as a token"; slgh->reportError(errmsg); YYERROR; }
+        //        { string errmsg = (yyvsp[0].anysym).getName() + ": redefined as a token"; slgh.reportError(errmsg); YYERROR; }
 
         //        break;
 
@@ -2116,8 +2116,8 @@ namespace Sla.SLACOMP
         //    case 31:
 
         //        {
-        //            (yyval.varsym) = (yyvsp[-1].varsym); if (!slgh->addContextField((yyvsp[-1].varsym), (yyvsp[0].fieldqual)))
-        //            { slgh->reportError("All context definitions must come before constructors"); YYERROR; }
+        //            (yyval.varsym) = (yyvsp[-1].varsym); if (!slgh.addContextField((yyvsp[-1].varsym), (yyvsp[0].fieldqual)))
+        //            { slgh.reportError("All context definitions must come before constructors"); YYERROR; }
         //        }
 
         //        break;
@@ -2130,25 +2130,25 @@ namespace Sla.SLACOMP
 
         //    case 33:
 
-        //        { delete(yyvsp[-3].i); delete(yyvsp[-1].i); string errmsg = (yyvsp[-6].anysym)->getName() + ": redefined as field"; slgh->reportError(errmsg); YYERROR; }
+        //        { delete(yyvsp[-3].i); delete(yyvsp[-1].i); string errmsg = (yyvsp[-6].anysym).getName() + ": redefined as field"; slgh.reportError(errmsg); YYERROR; }
 
         //        break;
 
         //    case 34:
 
-        //        { (yyval.fieldqual) = (yyvsp[-1].fieldqual); (yyval.fieldqual)->signext = true; }
+        //        { (yyval.fieldqual) = (yyvsp[-1].fieldqual); (yyval.fieldqual).signext = true; }
 
         //        break;
 
         //    case 35:
 
-        //        { (yyval.fieldqual) = (yyvsp[-1].fieldqual); (yyval.fieldqual)->hex = true; }
+        //        { (yyval.fieldqual) = (yyvsp[-1].fieldqual); (yyval.fieldqual).hex = true; }
 
         //        break;
 
         //    case 36:
 
-        //        { (yyval.fieldqual) = (yyvsp[-1].fieldqual); (yyval.fieldqual)->hex = false; }
+        //        { (yyval.fieldqual) = (yyvsp[-1].fieldqual); (yyval.fieldqual).hex = false; }
 
         //        break;
 
@@ -2160,37 +2160,37 @@ namespace Sla.SLACOMP
 
         //    case 38:
 
-        //        { delete(yyvsp[-3].i); delete(yyvsp[-1].i); string errmsg = (yyvsp[-6].anysym)->getName() + ": redefined as field"; slgh->reportError(errmsg); YYERROR; }
+        //        { delete(yyvsp[-3].i); delete(yyvsp[-1].i); string errmsg = (yyvsp[-6].anysym).getName() + ": redefined as field"; slgh.reportError(errmsg); YYERROR; }
 
         //        break;
 
         //    case 39:
 
-        //        { (yyval.fieldqual) = (yyvsp[-1].fieldqual); (yyval.fieldqual)->signext = true; }
+        //        { (yyval.fieldqual) = (yyvsp[-1].fieldqual); (yyval.fieldqual).signext = true; }
 
         //        break;
 
         //    case 40:
 
-        //        { (yyval.fieldqual) = (yyvsp[-1].fieldqual); (yyval.fieldqual)->flow = false; }
+        //        { (yyval.fieldqual) = (yyvsp[-1].fieldqual); (yyval.fieldqual).flow = false; }
 
         //        break;
 
         //    case 41:
 
-        //        { (yyval.fieldqual) = (yyvsp[-1].fieldqual); (yyval.fieldqual)->hex = true; }
+        //        { (yyval.fieldqual) = (yyvsp[-1].fieldqual); (yyval.fieldqual).hex = true; }
 
         //        break;
 
         //    case 42:
 
-        //        { (yyval.fieldqual) = (yyvsp[-1].fieldqual); (yyval.fieldqual)->hex = false; }
+        //        { (yyval.fieldqual) = (yyvsp[-1].fieldqual); (yyval.fieldqual).hex = false; }
 
         //        break;
 
         //    case 43:
 
-        //        { slgh->newSpace((yyvsp[-1].spacequal)); }
+        //        { slgh.newSpace((yyvsp[-1].spacequal)); }
 
         //        break;
 
@@ -2202,101 +2202,101 @@ namespace Sla.SLACOMP
 
         //    case 45:
 
-        //        { string errmsg = (yyvsp[0].anysym)->getName() + ": redefined as space"; slgh->reportError(errmsg); YYERROR; }
+        //        { string errmsg = (yyvsp[0].anysym).getName() + ": redefined as space"; slgh.reportError(errmsg); YYERROR; }
 
         //        break;
 
         //    case 46:
 
-        //        { (yyval.spacequal) = (yyvsp[-3].spacequal); (yyval.spacequal)->type = SpaceQuality::ramtype; }
+        //        { (yyval.spacequal) = (yyvsp[-3].spacequal); (yyval.spacequal).type = SpaceQuality::ramtype; }
 
         //        break;
 
         //    case 47:
 
-        //        { (yyval.spacequal) = (yyvsp[-3].spacequal); (yyval.spacequal)->type = SpaceQuality::registertype; }
+        //        { (yyval.spacequal) = (yyvsp[-3].spacequal); (yyval.spacequal).type = SpaceQuality::registertype; }
 
         //        break;
 
         //    case 48:
 
-        //        { (yyval.spacequal) = (yyvsp[-3].spacequal); (yyval.spacequal)->size = *(yyvsp[0].i); delete(yyvsp[0].i); }
+        //        { (yyval.spacequal) = (yyvsp[-3].spacequal); (yyval.spacequal).size = *(yyvsp[0].i); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 49:
 
-        //        { (yyval.spacequal) = (yyvsp[-3].spacequal); (yyval.spacequal)->wordsize = *(yyvsp[0].i); delete(yyvsp[0].i); }
+        //        { (yyval.spacequal) = (yyvsp[-3].spacequal); (yyval.spacequal).wordsize = *(yyvsp[0].i); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 50:
 
-        //        { (yyval.spacequal) = (yyvsp[-1].spacequal); (yyval.spacequal)->isdefault = true; }
+        //        { (yyval.spacequal) = (yyvsp[-1].spacequal); (yyval.spacequal).isdefault = true; }
 
         //        break;
 
         //    case 51:
 
         //        {
-        //            slgh->defineVarnodes((yyvsp[-8].spacesym), (yyvsp[-5].i), (yyvsp[-2].i), (yyvsp[-1].strlist));
+        //            slgh.defineVarnodes((yyvsp[-8].spacesym), (yyvsp[-5].i), (yyvsp[-2].i), (yyvsp[-1].strlist));
         //        }
 
         //        break;
 
         //    case 52:
 
-        //        { slgh->reportError("Parsed integer is too big (overflow)"); YYERROR; }
+        //        { slgh.reportError("Parsed integer is too big (overflow)"); YYERROR; }
 
         //        break;
 
         //    case 56:
 
         //        {
-        //            slgh->defineBitrange((yyvsp[-7].str), (yyvsp[-5].varsym), (uint4) * (yyvsp[-3].i), (uint4) * (yyvsp[-1].i)); delete(yyvsp[-3].i); delete(yyvsp[-1].i);
+        //            slgh.defineBitrange((yyvsp[-7].str), (yyvsp[-5].varsym), (uint4) * (yyvsp[-3].i), (uint4) * (yyvsp[-1].i)); delete(yyvsp[-3].i); delete(yyvsp[-1].i);
         //        }
 
         //        break;
 
         //    case 57:
 
-        //        { slgh->addUserOp((yyvsp[-1].strlist)); }
+        //        { slgh.addUserOp((yyvsp[-1].strlist)); }
 
         //        break;
 
         //    case 58:
 
-        //        { slgh->attachValues((yyvsp[-2].symlist), (yyvsp[-1].biglist)); }
+        //        { slgh.attachValues((yyvsp[-2].symlist), (yyvsp[-1].biglist)); }
 
         //        break;
 
         //    case 59:
 
-        //        { slgh->attachNames((yyvsp[-2].symlist), (yyvsp[-1].strlist)); }
+        //        { slgh.attachNames((yyvsp[-2].symlist), (yyvsp[-1].strlist)); }
 
         //        break;
 
         //    case 60:
 
-        //        { slgh->attachVarnodes((yyvsp[-2].symlist), (yyvsp[-1].symlist)); }
+        //        { slgh.attachVarnodes((yyvsp[-2].symlist), (yyvsp[-1].symlist)); }
 
         //        break;
 
         //    case 61:
 
-        //        { slgh->buildMacro((yyvsp[-3].macrosym), (yyvsp[-1].sem)); }
+        //        { slgh.buildMacro((yyvsp[-3].macrosym), (yyvsp[-1].sem)); }
 
         //        break;
 
         //    case 62:
 
-        //        { slgh->pushWith((yyvsp[-4].subtablesym), (yyvsp[-2].pateq), (yyvsp[-1].contop)); }
+        //        { slgh.pushWith((yyvsp[-4].subtablesym), (yyvsp[-2].pateq), (yyvsp[-1].contop)); }
 
         //        break;
 
         //    case 66:
 
-        //        { slgh->popWith(); }
+        //        { slgh.popWith(); }
 
         //        break;
 
@@ -2314,7 +2314,7 @@ namespace Sla.SLACOMP
 
         //    case 69:
 
-        //        { (yyval.subtablesym) = slgh->newTable((yyvsp[0].str)); }
+        //        { (yyval.subtablesym) = slgh.newTable((yyvsp[0].str)); }
 
         //        break;
 
@@ -2332,19 +2332,19 @@ namespace Sla.SLACOMP
 
         //    case 72:
 
-        //        { (yyval.macrosym) = slgh->createMacro((yyvsp[-3].str), (yyvsp[-1].strlist)); }
+        //        { (yyval.macrosym) = slgh.createMacro((yyvsp[-3].str), (yyvsp[-1].strlist)); }
 
         //        break;
 
         //    case 73:
 
-        //        { (yyval.sectionstart) = slgh->standaloneSection((yyvsp[-1].sem)); }
+        //        { (yyval.sectionstart) = slgh.standaloneSection((yyvsp[-1].sem)); }
 
         //        break;
 
         //    case 74:
 
-        //        { (yyval.sectionstart) = slgh->finalNamedSection((yyvsp[-2].sectionstart), (yyvsp[-1].sem)); }
+        //        { (yyval.sectionstart) = slgh.finalNamedSection((yyvsp[-2].sectionstart), (yyvsp[-1].sem)); }
 
         //        break;
 
@@ -2356,37 +2356,37 @@ namespace Sla.SLACOMP
 
         //    case 76:
 
-        //        { slgh->buildConstructor((yyvsp[-4].construct), (yyvsp[-2].pateq), (yyvsp[-1].contop), (yyvsp[0].sectionstart)); }
+        //        { slgh.buildConstructor((yyvsp[-4].construct), (yyvsp[-2].pateq), (yyvsp[-1].contop), (yyvsp[0].sectionstart)); }
 
         //        break;
 
         //    case 77:
 
-        //        { slgh->buildConstructor((yyvsp[-4].construct), (yyvsp[-2].pateq), (yyvsp[-1].contop), (yyvsp[0].sectionstart)); }
+        //        { slgh.buildConstructor((yyvsp[-4].construct), (yyvsp[-2].pateq), (yyvsp[-1].contop), (yyvsp[0].sectionstart)); }
 
         //        break;
 
         //    case 78:
 
-        //        { (yyval.construct) = (yyvsp[-1].construct); (yyval.construct)->addSyntax(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.construct) = (yyvsp[-1].construct); (yyval.construct).addSyntax(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
         //    case 79:
 
-        //        { (yyval.construct) = (yyvsp[-1].construct); (yyval.construct)->addSyntax(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.construct) = (yyvsp[-1].construct); (yyval.construct).addSyntax(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
         //    case 80:
 
-        //        { (yyval.construct) = (yyvsp[-1].construct); if (slgh->isInRoot((yyvsp[-1].construct))) { (yyval.construct)->addSyntax(*(yyvsp[0].str)); delete(yyvsp[0].str); } else slgh->newOperand((yyvsp[-1].construct), (yyvsp[0].str)); }
+        //        { (yyval.construct) = (yyvsp[-1].construct); if (slgh.isInRoot((yyvsp[-1].construct))) { (yyval.construct).addSyntax(*(yyvsp[0].str)); delete(yyvsp[0].str); } else slgh.newOperand((yyvsp[-1].construct), (yyvsp[0].str)); }
 
         //        break;
 
         //    case 81:
 
-        //        { (yyval.construct) = (yyvsp[-1].construct); if (!slgh->isInRoot((yyvsp[-1].construct))) { slgh->reportError("Unexpected '^' at start of print pieces"); YYERROR; } }
+        //        { (yyval.construct) = (yyvsp[-1].construct); if (!slgh.isInRoot((yyvsp[-1].construct))) { slgh.reportError("Unexpected '^' at start of print pieces"); YYERROR; } }
 
         //        break;
 
@@ -2398,43 +2398,43 @@ namespace Sla.SLACOMP
 
         //    case 83:
 
-        //        { (yyval.construct) = (yyvsp[-1].construct); (yyval.construct)->addSyntax(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.construct) = (yyvsp[-1].construct); (yyval.construct).addSyntax(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
         //    case 84:
 
-        //        { (yyval.construct) = (yyvsp[-1].construct); (yyval.construct)->addSyntax(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.construct) = (yyvsp[-1].construct); (yyval.construct).addSyntax(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
         //    case 85:
 
-        //        { (yyval.construct) = (yyvsp[-1].construct); (yyval.construct)->addSyntax(string(" ")); }
+        //        { (yyval.construct) = (yyvsp[-1].construct); (yyval.construct).addSyntax(string(" ")); }
 
         //        break;
 
         //    case 86:
 
-        //        { (yyval.construct) = (yyvsp[-1].construct); slgh->newOperand((yyvsp[-1].construct), (yyvsp[0].str)); }
+        //        { (yyval.construct) = (yyvsp[-1].construct); slgh.newOperand((yyvsp[-1].construct), (yyvsp[0].str)); }
 
         //        break;
 
         //    case 87:
 
-        //        { (yyval.construct) = slgh->createConstructor((yyvsp[-1].subtablesym)); }
+        //        { (yyval.construct) = slgh.createConstructor((yyvsp[-1].subtablesym)); }
 
         //        break;
 
         //    case 88:
 
-        //        { SubtableSymbol* sym = slgh->newTable((yyvsp[-1].str)); (yyval.construct) = slgh->createConstructor(sym); }
+        //        { SubtableSymbol* sym = slgh.newTable((yyvsp[-1].str)); (yyval.construct) = slgh.createConstructor(sym); }
 
         //        break;
 
         //    case 89:
 
-        //        { (yyval.construct) = slgh->createConstructor((SubtableSymbol*)0); }
+        //        { (yyval.construct) = slgh.createConstructor((SubtableSymbol*)0); }
 
         //        break;
 
@@ -2453,15 +2453,15 @@ namespace Sla.SLACOMP
         //    case 92:
 
         //        {
-        //            if ((actionon == 1) && ((yyvsp[0].famsym)->getType() != SleighSymbol::context_symbol))
-        //            { string errmsg = "Global symbol " + (yyvsp[0].famsym)->getName(); errmsg += " is not allowed in action expression"; slgh->reportError(errmsg); } (yyval.patexp) = (yyvsp[0].famsym)->getPatternValue();
+        //            if ((actionon == 1) && ((yyvsp[0].famsym).getType() != SleighSymbol::context_symbol))
+        //            { string errmsg = "Global symbol " + (yyvsp[0].famsym).getName(); errmsg += " is not allowed in action expression"; slgh.reportError(errmsg); } (yyval.patexp) = (yyvsp[0].famsym).getPatternValue();
         //        }
 
         //        break;
 
         //    case 93:
 
-        //        { (yyval.patexp) = (yyvsp[0].specsym)->getPatternExpression(); }
+        //        { (yyval.patexp) = (yyvsp[0].specsym).getPatternExpression(); }
 
         //        break;
 
@@ -2575,71 +2575,71 @@ namespace Sla.SLACOMP
 
         //    case 116:
 
-        //        { (yyval.pateq) = new EqualEquation((yyvsp[-2].famsym)->getPatternValue(), (yyvsp[0].patexp)); }
+        //        { (yyval.pateq) = new EqualEquation((yyvsp[-2].famsym).getPatternValue(), (yyvsp[0].patexp)); }
 
         //        break;
 
         //    case 117:
 
-        //        { (yyval.pateq) = new NotEqualEquation((yyvsp[-2].famsym)->getPatternValue(), (yyvsp[0].patexp)); }
+        //        { (yyval.pateq) = new NotEqualEquation((yyvsp[-2].famsym).getPatternValue(), (yyvsp[0].patexp)); }
 
         //        break;
 
         //    case 118:
 
-        //        { (yyval.pateq) = new LessEquation((yyvsp[-2].famsym)->getPatternValue(), (yyvsp[0].patexp)); }
+        //        { (yyval.pateq) = new LessEquation((yyvsp[-2].famsym).getPatternValue(), (yyvsp[0].patexp)); }
 
         //        break;
 
         //    case 119:
 
-        //        { (yyval.pateq) = new LessEqualEquation((yyvsp[-2].famsym)->getPatternValue(), (yyvsp[0].patexp)); }
+        //        { (yyval.pateq) = new LessEqualEquation((yyvsp[-2].famsym).getPatternValue(), (yyvsp[0].patexp)); }
 
         //        break;
 
         //    case 120:
 
-        //        { (yyval.pateq) = new GreaterEquation((yyvsp[-2].famsym)->getPatternValue(), (yyvsp[0].patexp)); }
+        //        { (yyval.pateq) = new GreaterEquation((yyvsp[-2].famsym).getPatternValue(), (yyvsp[0].patexp)); }
 
         //        break;
 
         //    case 121:
 
-        //        { (yyval.pateq) = new GreaterEqualEquation((yyvsp[-2].famsym)->getPatternValue(), (yyvsp[0].patexp)); }
+        //        { (yyval.pateq) = new GreaterEqualEquation((yyvsp[-2].famsym).getPatternValue(), (yyvsp[0].patexp)); }
 
         //        break;
 
         //    case 122:
 
         //        {
-        //            (yyval.pateq) = slgh->constrainOperand((yyvsp[-2].operandsym), (yyvsp[0].patexp));
+        //            (yyval.pateq) = slgh.constrainOperand((yyvsp[-2].operandsym), (yyvsp[0].patexp));
         //            if ((yyval.pateq) == (PatternEquation*)0)
-        //            { string errmsg = "Constraining currently undefined operand " + (yyvsp[-2].operandsym)->getName(); slgh->reportError(errmsg); }
+        //            { string errmsg = "Constraining currently undefined operand " + (yyvsp[-2].operandsym).getName(); slgh.reportError(errmsg); }
         //        }
 
         //        break;
 
         //    case 123:
 
-        //        { (yyval.pateq) = new OperandEquation((yyvsp[0].operandsym)->getIndex()); slgh->selfDefine((yyvsp[0].operandsym)); }
+        //        { (yyval.pateq) = new OperandEquation((yyvsp[0].operandsym).getIndex()); slgh.selfDefine((yyvsp[0].operandsym)); }
 
         //        break;
 
         //    case 124:
 
-        //        { (yyval.pateq) = new UnconstrainedEquation((yyvsp[0].specsym)->getPatternExpression()); }
+        //        { (yyval.pateq) = new UnconstrainedEquation((yyvsp[0].specsym).getPatternExpression()); }
 
         //        break;
 
         //    case 125:
 
-        //        { (yyval.pateq) = slgh->defineInvisibleOperand((yyvsp[0].famsym)); }
+        //        { (yyval.pateq) = slgh.defineInvisibleOperand((yyvsp[0].famsym)); }
 
         //        break;
 
         //    case 126:
 
-        //        { (yyval.pateq) = slgh->defineInvisibleOperand((yyvsp[0].subtablesym)); }
+        //        { (yyval.pateq) = slgh.defineInvisibleOperand((yyvsp[0].subtablesym)); }
 
         //        break;
 
@@ -2663,37 +2663,37 @@ namespace Sla.SLACOMP
 
         //    case 130:
 
-        //        { (yyval.contop) = (yyvsp[-4].contop); if (!slgh->contextMod((yyvsp[-4].contop), (yyvsp[-3].contextsym), (yyvsp[-1].patexp))) { string errmsg = "Cannot use 'inst_next' or 'inst_next2' to set context variable: " + (yyvsp[-3].contextsym)->getName(); slgh->reportError(errmsg); YYERROR; } }
+        //        { (yyval.contop) = (yyvsp[-4].contop); if (!slgh.contextMod((yyvsp[-4].contop), (yyvsp[-3].contextsym), (yyvsp[-1].patexp))) { string errmsg = "Cannot use 'inst_next' or 'inst_next2' to set context variable: " + (yyvsp[-3].contextsym).getName(); slgh.reportError(errmsg); YYERROR; } }
 
         //        break;
 
         //    case 131:
 
-        //        { (yyval.contop) = (yyvsp[-7].contop); slgh->contextSet((yyvsp[-7].contop), (yyvsp[-4].famsym), (yyvsp[-2].contextsym)); }
+        //        { (yyval.contop) = (yyvsp[-7].contop); slgh.contextSet((yyvsp[-7].contop), (yyvsp[-4].famsym), (yyvsp[-2].contextsym)); }
 
         //        break;
 
         //    case 132:
 
-        //        { (yyval.contop) = (yyvsp[-7].contop); slgh->contextSet((yyvsp[-7].contop), (yyvsp[-4].specsym), (yyvsp[-2].contextsym)); }
+        //        { (yyval.contop) = (yyvsp[-7].contop); slgh.contextSet((yyvsp[-7].contop), (yyvsp[-4].specsym), (yyvsp[-2].contextsym)); }
 
         //        break;
 
         //    case 133:
 
-        //        { (yyval.contop) = (yyvsp[-4].contop); slgh->defineOperand((yyvsp[-3].operandsym), (yyvsp[-1].patexp)); }
+        //        { (yyval.contop) = (yyvsp[-4].contop); slgh.defineOperand((yyvsp[-3].operandsym), (yyvsp[-1].patexp)); }
 
         //        break;
 
         //    case 134:
 
-        //        { string errmsg = "Expecting context symbol, not " + *(yyvsp[0].str); delete(yyvsp[0].str); slgh->reportError(errmsg); YYERROR; }
+        //        { string errmsg = "Expecting context symbol, not " + *(yyvsp[0].str); delete(yyvsp[0].str); slgh.reportError(errmsg); YYERROR; }
 
         //        break;
 
         //    case 135:
 
-        //        { (yyval.sectionsym) = slgh->newSectionSymbol(*(yyvsp[-1].str)); delete(yyvsp[-1].str); }
+        //        { (yyval.sectionsym) = slgh.newSectionSymbol(*(yyvsp[-1].str)); delete(yyvsp[-1].str); }
 
         //        break;
 
@@ -2705,7 +2705,7 @@ namespace Sla.SLACOMP
 
         //    case 137:
 
-        //        { (yyval.sectionstart) = slgh->firstNamedSection((yyvsp[-1].sem), (yyvsp[0].sectionsym)); }
+        //        { (yyval.sectionstart) = slgh.firstNamedSection((yyvsp[-1].sem), (yyvsp[0].sectionsym)); }
 
         //        break;
 
@@ -2717,37 +2717,37 @@ namespace Sla.SLACOMP
 
         //    case 139:
 
-        //        { (yyval.sectionstart) = slgh->nextNamedSection((yyvsp[-2].sectionstart), (yyvsp[-1].sem), (yyvsp[0].sectionsym)); }
+        //        { (yyval.sectionstart) = slgh.nextNamedSection((yyvsp[-2].sectionstart), (yyvsp[-1].sem), (yyvsp[0].sectionsym)); }
 
         //        break;
 
         //    case 140:
 
-        //        { (yyval.sem) = (yyvsp[0].sem); if ((yyval.sem)->getOpvec().empty() && ((yyval.sem)->getResult() == (HandleTpl*)0)) slgh->recordNop(); }
+        //        { (yyval.sem) = (yyvsp[0].sem); if ((yyval.sem).getOpvec().empty() && ((yyval.sem).getResult() == (HandleTpl*)0)) slgh.recordNop(); }
 
         //        break;
 
         //    case 141:
 
-        //        { (yyval.sem) = slgh->setResultVarnode((yyvsp[-3].sem), (yyvsp[-1].varnode)); }
+        //        { (yyval.sem) = slgh.setResultVarnode((yyvsp[-3].sem), (yyvsp[-1].varnode)); }
 
         //        break;
 
         //    case 142:
 
-        //        { (yyval.sem) = slgh->setResultStarVarnode((yyvsp[-4].sem), (yyvsp[-2].starqual), (yyvsp[-1].varnode)); }
+        //        { (yyval.sem) = slgh.setResultStarVarnode((yyvsp[-4].sem), (yyvsp[-2].starqual), (yyvsp[-1].varnode)); }
 
         //        break;
 
         //    case 143:
 
-        //        { string errmsg = "Unknown export varnode: " + *(yyvsp[0].str); delete(yyvsp[0].str); slgh->reportError(errmsg); YYERROR; }
+        //        { string errmsg = "Unknown export varnode: " + *(yyvsp[0].str); delete(yyvsp[0].str); slgh.reportError(errmsg); YYERROR; }
 
         //        break;
 
         //    case 144:
 
-        //        { string errmsg = "Unknown pointer varnode: " + *(yyvsp[0].str); delete(yyvsp[-1].starqual); delete(yyvsp[0].str); slgh->reportError(errmsg); YYERROR; }
+        //        { string errmsg = "Unknown pointer varnode: " + *(yyvsp[0].str); delete(yyvsp[-1].starqual); delete(yyvsp[0].str); slgh.reportError(errmsg); YYERROR; }
 
         //        break;
 
@@ -2759,169 +2759,169 @@ namespace Sla.SLACOMP
 
         //    case 146:
 
-        //        { (yyval.sem) = (yyvsp[-1].sem); if (!(yyval.sem)->addOpList(*(yyvsp[0].stmt))) { delete(yyvsp[0].stmt); slgh->reportError("Multiple delayslot declarations"); YYERROR; } delete(yyvsp[0].stmt); }
+        //        { (yyval.sem) = (yyvsp[-1].sem); if (!(yyval.sem).addOpList(*(yyvsp[0].stmt))) { delete(yyvsp[0].stmt); slgh.reportError("Multiple delayslot declarations"); YYERROR; } delete(yyvsp[0].stmt); }
 
         //        break;
 
         //    case 147:
 
-        //        { (yyval.sem) = (yyvsp[-3].sem); slgh->pcode.newLocalDefinition((yyvsp[-1].str)); }
+        //        { (yyval.sem) = (yyvsp[-3].sem); slgh.pcode.newLocalDefinition((yyvsp[-1].str)); }
 
         //        break;
 
         //    case 148:
 
-        //        { (yyval.sem) = (yyvsp[-5].sem); slgh->pcode.newLocalDefinition((yyvsp[-3].str), *(yyvsp[-1].i)); delete(yyvsp[-1].i); }
+        //        { (yyval.sem) = (yyvsp[-5].sem); slgh.pcode.newLocalDefinition((yyvsp[-3].str), *(yyvsp[-1].i)); delete(yyvsp[-1].i); }
 
         //        break;
 
         //    case 149:
 
-        //        { (yyvsp[-1].tree)->setOutput((yyvsp[-3].varnode)); (yyval.stmt) = ExprTree::toVector((yyvsp[-1].tree)); }
+        //        { (yyvsp[-1].tree).setOutput((yyvsp[-3].varnode)); (yyval.stmt) = ExprTree::toVector((yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 150:
 
-        //        { (yyval.stmt) = slgh->pcode.newOutput(true, (yyvsp[-1].tree), (yyvsp[-3].str)); }
+        //        { (yyval.stmt) = slgh.pcode.newOutput(true, (yyvsp[-1].tree), (yyvsp[-3].str)); }
 
         //        break;
 
         //    case 151:
 
-        //        { (yyval.stmt) = slgh->pcode.newOutput(false, (yyvsp[-1].tree), (yyvsp[-3].str)); }
+        //        { (yyval.stmt) = slgh.pcode.newOutput(false, (yyvsp[-1].tree), (yyvsp[-3].str)); }
 
         //        break;
 
         //    case 152:
 
-        //        { (yyval.stmt) = slgh->pcode.newOutput(true, (yyvsp[-1].tree), (yyvsp[-5].str), *(yyvsp[-3].i)); delete(yyvsp[-3].i); }
+        //        { (yyval.stmt) = slgh.pcode.newOutput(true, (yyvsp[-1].tree), (yyvsp[-5].str), *(yyvsp[-3].i)); delete(yyvsp[-3].i); }
 
         //        break;
 
         //    case 153:
 
-        //        { (yyval.stmt) = slgh->pcode.newOutput(true, (yyvsp[-1].tree), (yyvsp[-5].str), *(yyvsp[-3].i)); delete(yyvsp[-3].i); }
+        //        { (yyval.stmt) = slgh.pcode.newOutput(true, (yyvsp[-1].tree), (yyvsp[-5].str), *(yyvsp[-3].i)); delete(yyvsp[-3].i); }
 
         //        break;
 
         //    case 154:
 
-        //        { (yyval.stmt) = (vector<OpTpl*>*)0; string errmsg = "Redefinition of symbol: " + (yyvsp[-1].specsym)->getName(); slgh->reportError(errmsg); YYERROR; }
+        //        { (yyval.stmt) = (vector<OpTpl*>*)0; string errmsg = "Redefinition of symbol: " + (yyvsp[-1].specsym).getName(); slgh.reportError(errmsg); YYERROR; }
 
         //        break;
 
         //    case 155:
 
-        //        { (yyval.stmt) = slgh->pcode.createStore((yyvsp[-4].starqual), (yyvsp[-3].tree), (yyvsp[-1].tree)); }
+        //        { (yyval.stmt) = slgh.pcode.createStore((yyvsp[-4].starqual), (yyvsp[-3].tree), (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 156:
 
-        //        { (yyval.stmt) = slgh->pcode.createUserOpNoOut((yyvsp[-4].useropsym), (yyvsp[-2].param)); }
+        //        { (yyval.stmt) = slgh.pcode.createUserOpNoOut((yyvsp[-4].useropsym), (yyvsp[-2].param)); }
 
         //        break;
 
         //    case 157:
 
-        //        { (yyval.stmt) = slgh->pcode.assignBitRange((yyvsp[-8].varnode), (uint4) * (yyvsp[-6].i), (uint4) * (yyvsp[-4].i), (yyvsp[-1].tree)); delete(yyvsp[-6].i), delete(yyvsp[-4].i); }
+        //        { (yyval.stmt) = slgh.pcode.assignBitRange((yyvsp[-8].varnode), (uint4) * (yyvsp[-6].i), (uint4) * (yyvsp[-4].i), (yyvsp[-1].tree)); delete(yyvsp[-6].i), delete(yyvsp[-4].i); }
 
         //        break;
 
         //    case 158:
 
-        //        { (yyval.stmt) = slgh->pcode.assignBitRange((yyvsp[-3].bitsym)->getParentSymbol()->getVarnode(), (yyvsp[-3].bitsym)->getBitOffset(), (yyvsp[-3].bitsym)->numBits(), (yyvsp[-1].tree)); }
+        //        { (yyval.stmt) = slgh.pcode.assignBitRange((yyvsp[-3].bitsym).getParentSymbol().getVarnode(), (yyvsp[-3].bitsym).getBitOffset(), (yyvsp[-3].bitsym).numBits(), (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 159:
 
-        //        { delete(yyvsp[-3].varnode); delete(yyvsp[-1].i); slgh->reportError("Illegal truncation on left-hand side of assignment"); YYERROR; }
+        //        { delete(yyvsp[-3].varnode); delete(yyvsp[-1].i); slgh.reportError("Illegal truncation on left-hand side of assignment"); YYERROR; }
 
         //        break;
 
         //    case 160:
 
-        //        { delete(yyvsp[-3].varnode); delete(yyvsp[-1].i); slgh->reportError("Illegal subpiece on left-hand side of assignment"); YYERROR; }
+        //        { delete(yyvsp[-3].varnode); delete(yyvsp[-1].i); slgh.reportError("Illegal subpiece on left-hand side of assignment"); YYERROR; }
 
         //        break;
 
         //    case 161:
 
-        //        { (yyval.stmt) = slgh->pcode.createOpConst(BUILD, (yyvsp[-1].operandsym)->getIndex()); }
+        //        { (yyval.stmt) = slgh.pcode.createOpConst(BUILD, (yyvsp[-1].operandsym).getIndex()); }
 
         //        break;
 
         //    case 162:
 
-        //        { (yyval.stmt) = slgh->createCrossBuild((yyvsp[-3].varnode), (yyvsp[-1].sectionsym)); }
+        //        { (yyval.stmt) = slgh.createCrossBuild((yyvsp[-3].varnode), (yyvsp[-1].sectionsym)); }
 
         //        break;
 
         //    case 163:
 
-        //        { (yyval.stmt) = slgh->createCrossBuild((yyvsp[-3].varnode), slgh->newSectionSymbol(*(yyvsp[-1].str))); delete(yyvsp[-1].str); }
+        //        { (yyval.stmt) = slgh.createCrossBuild((yyvsp[-3].varnode), slgh.newSectionSymbol(*(yyvsp[-1].str))); delete(yyvsp[-1].str); }
 
         //        break;
 
         //    case 164:
 
-        //        { (yyval.stmt) = slgh->pcode.createOpConst(DELAY_SLOT, *(yyvsp[-2].i)); delete(yyvsp[-2].i); }
+        //        { (yyval.stmt) = slgh.pcode.createOpConst(DELAY_SLOT, *(yyvsp[-2].i)); delete(yyvsp[-2].i); }
 
         //        break;
 
         //    case 165:
 
-        //        { (yyval.stmt) = slgh->pcode.createOpNoOut(CPUI_BRANCH, new ExprTree((yyvsp[-1].varnode))); }
+        //        { (yyval.stmt) = slgh.pcode.createOpNoOut(CPUI_BRANCH, new ExprTree((yyvsp[-1].varnode))); }
 
         //        break;
 
         //    case 166:
 
-        //        { (yyval.stmt) = slgh->pcode.createOpNoOut(CPUI_CBRANCH, new ExprTree((yyvsp[-1].varnode)), (yyvsp[-3].tree)); }
+        //        { (yyval.stmt) = slgh.pcode.createOpNoOut(CPUI_CBRANCH, new ExprTree((yyvsp[-1].varnode)), (yyvsp[-3].tree)); }
 
         //        break;
 
         //    case 167:
 
-        //        { (yyval.stmt) = slgh->pcode.createOpNoOut(CPUI_BRANCHIND, (yyvsp[-2].tree)); }
+        //        { (yyval.stmt) = slgh.pcode.createOpNoOut(CPUI_BRANCHIND, (yyvsp[-2].tree)); }
 
         //        break;
 
         //    case 168:
 
-        //        { (yyval.stmt) = slgh->pcode.createOpNoOut(CPUI_CALL, new ExprTree((yyvsp[-1].varnode))); }
+        //        { (yyval.stmt) = slgh.pcode.createOpNoOut(CPUI_CALL, new ExprTree((yyvsp[-1].varnode))); }
 
         //        break;
 
         //    case 169:
 
-        //        { (yyval.stmt) = slgh->pcode.createOpNoOut(CPUI_CALLIND, (yyvsp[-2].tree)); }
+        //        { (yyval.stmt) = slgh.pcode.createOpNoOut(CPUI_CALLIND, (yyvsp[-2].tree)); }
 
         //        break;
 
         //    case 170:
 
-        //        { slgh->reportError("Must specify an indirect parameter for return"); YYERROR; }
+        //        { slgh.reportError("Must specify an indirect parameter for return"); YYERROR; }
 
         //        break;
 
         //    case 171:
 
-        //        { (yyval.stmt) = slgh->pcode.createOpNoOut(CPUI_RETURN, (yyvsp[-2].tree)); }
+        //        { (yyval.stmt) = slgh.pcode.createOpNoOut(CPUI_RETURN, (yyvsp[-2].tree)); }
 
         //        break;
 
         //    case 172:
 
-        //        { (yyval.stmt) = slgh->createMacroUse((yyvsp[-4].macrosym), (yyvsp[-2].param)); }
+        //        { (yyval.stmt) = slgh.createMacroUse((yyvsp[-4].macrosym), (yyvsp[-2].param)); }
 
         //        break;
 
         //    case 173:
 
-        //        { (yyval.stmt) = slgh->pcode.placeLabel((yyvsp[0].labelsym)); }
+        //        { (yyval.stmt) = slgh.pcode.placeLabel((yyvsp[0].labelsym)); }
 
         //        break;
 
@@ -2933,7 +2933,7 @@ namespace Sla.SLACOMP
 
         //    case 175:
 
-        //        { (yyval.tree) = slgh->pcode.createLoad((yyvsp[-1].starqual), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createLoad((yyvsp[-1].starqual), (yyvsp[0].tree)); }
 
         //        break;
 
@@ -2945,427 +2945,427 @@ namespace Sla.SLACOMP
 
         //    case 177:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_ADD, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_ADD, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 178:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_SUB, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_SUB, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 179:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_EQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_EQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 180:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_NOTEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_NOTEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 181:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_LESS, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_LESS, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 182:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_LESSEQUAL, (yyvsp[0].tree), (yyvsp[-2].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_LESSEQUAL, (yyvsp[0].tree), (yyvsp[-2].tree)); }
 
         //        break;
 
         //    case 183:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_LESSEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_LESSEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 184:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_LESS, (yyvsp[0].tree), (yyvsp[-2].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_LESS, (yyvsp[0].tree), (yyvsp[-2].tree)); }
 
         //        break;
 
         //    case 185:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_SLESS, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_SLESS, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 186:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_SLESSEQUAL, (yyvsp[0].tree), (yyvsp[-2].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_SLESSEQUAL, (yyvsp[0].tree), (yyvsp[-2].tree)); }
 
         //        break;
 
         //    case 187:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_SLESSEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_SLESSEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 188:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_SLESS, (yyvsp[0].tree), (yyvsp[-2].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_SLESS, (yyvsp[0].tree), (yyvsp[-2].tree)); }
 
         //        break;
 
         //    case 189:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_2COMP, (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_2COMP, (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 190:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_NEGATE, (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_NEGATE, (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 191:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_XOR, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_XOR, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 192:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_AND, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_AND, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 193:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_OR, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_OR, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 194:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_LEFT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_LEFT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 195:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_RIGHT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_RIGHT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 196:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_SRIGHT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_SRIGHT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 197:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_MULT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_MULT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 198:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_DIV, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_DIV, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 199:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_SDIV, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_SDIV, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 200:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_REM, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_REM, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 201:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_SREM, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_SREM, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 202:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_BOOL_NEGATE, (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_BOOL_NEGATE, (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 203:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_BOOL_XOR, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_BOOL_XOR, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 204:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_BOOL_AND, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_BOOL_AND, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 205:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_BOOL_OR, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_BOOL_OR, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 206:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_EQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_EQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 207:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_NOTEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_NOTEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 208:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_LESS, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_LESS, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 209:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_LESS, (yyvsp[0].tree), (yyvsp[-2].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_LESS, (yyvsp[0].tree), (yyvsp[-2].tree)); }
 
         //        break;
 
         //    case 210:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_LESSEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_LESSEQUAL, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 211:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_LESSEQUAL, (yyvsp[0].tree), (yyvsp[-2].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_LESSEQUAL, (yyvsp[0].tree), (yyvsp[-2].tree)); }
 
         //        break;
 
         //    case 212:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_ADD, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_ADD, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 213:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_SUB, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_SUB, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 214:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_MULT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_MULT, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 215:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_DIV, (yyvsp[-2].tree), (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_DIV, (yyvsp[-2].tree), (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 216:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_NEG, (yyvsp[0].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_NEG, (yyvsp[0].tree)); }
 
         //        break;
 
         //    case 217:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_ABS, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_ABS, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 218:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_SQRT, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_SQRT, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 219:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_SEXT, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_SEXT, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 220:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_ZEXT, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_ZEXT, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 221:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_CARRY, (yyvsp[-3].tree), (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_CARRY, (yyvsp[-3].tree), (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 222:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_SCARRY, (yyvsp[-3].tree), (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_SCARRY, (yyvsp[-3].tree), (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 223:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_INT_SBORROW, (yyvsp[-3].tree), (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_INT_SBORROW, (yyvsp[-3].tree), (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 224:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_FLOAT2FLOAT, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_FLOAT2FLOAT, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 225:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_INT2FLOAT, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_INT2FLOAT, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 226:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_NAN, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_NAN, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 227:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_TRUNC, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_TRUNC, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 228:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_CEIL, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_CEIL, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 229:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_FLOOR, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_FLOOR, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 230:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_FLOAT_ROUND, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_FLOAT_ROUND, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 231:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_NEW, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_NEW, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 232:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_NEW, (yyvsp[-3].tree), (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_NEW, (yyvsp[-3].tree), (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 233:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_POPCOUNT, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_POPCOUNT, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 234:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_LZCOUNT, (yyvsp[-1].tree)); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_LZCOUNT, (yyvsp[-1].tree)); }
 
         //        break;
 
         //    case 235:
 
-        //        { (yyval.tree) = slgh->pcode.createOp(CPUI_SUBPIECE, new ExprTree((yyvsp[-3].specsym)->getVarnode()), new ExprTree((yyvsp[-1].varnode))); }
+        //        { (yyval.tree) = slgh.pcode.createOp(CPUI_SUBPIECE, new ExprTree((yyvsp[-3].specsym).getVarnode()), new ExprTree((yyvsp[-1].varnode))); }
 
         //        break;
 
         //    case 236:
 
-        //        { (yyval.tree) = slgh->pcode.createBitRange((yyvsp[-2].specsym), 0, (uint4)(*(yyvsp[0].i) * 8)); delete(yyvsp[0].i); }
+        //        { (yyval.tree) = slgh.pcode.createBitRange((yyvsp[-2].specsym), 0, (uint4)(*(yyvsp[0].i) * 8)); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 237:
 
-        //        { (yyval.tree) = slgh->pcode.createBitRange((yyvsp[-5].specsym), (uint4) * (yyvsp[-3].i), (uint4) * (yyvsp[-1].i)); delete(yyvsp[-3].i), delete(yyvsp[-1].i); }
+        //        { (yyval.tree) = slgh.pcode.createBitRange((yyvsp[-5].specsym), (uint4) * (yyvsp[-3].i), (uint4) * (yyvsp[-1].i)); delete(yyvsp[-3].i), delete(yyvsp[-1].i); }
 
         //        break;
 
         //    case 238:
 
-        //        { (yyval.tree) = slgh->pcode.createBitRange((yyvsp[0].bitsym)->getParentSymbol(), (yyvsp[0].bitsym)->getBitOffset(), (yyvsp[0].bitsym)->numBits()); }
+        //        { (yyval.tree) = slgh.pcode.createBitRange((yyvsp[0].bitsym).getParentSymbol(), (yyvsp[0].bitsym).getBitOffset(), (yyvsp[0].bitsym).numBits()); }
 
         //        break;
 
         //    case 239:
 
-        //        { (yyval.tree) = slgh->pcode.createUserOp((yyvsp[-3].useropsym), (yyvsp[-1].param)); }
+        //        { (yyval.tree) = slgh.pcode.createUserOp((yyvsp[-3].useropsym), (yyvsp[-1].param)); }
 
         //        break;
 
         //    case 240:
 
-        //        { if ((*(yyvsp[-1].param)).size() < 2) { string errmsg = "Must at least two inputs to cpool"; slgh->reportError(errmsg); YYERROR; } (yyval.tree) = slgh->pcode.createVariadic(CPUI_CPOOLREF, (yyvsp[-1].param)); }
+        //        { if ((*(yyvsp[-1].param)).size() < 2) { string errmsg = "Must at least two inputs to cpool"; slgh.reportError(errmsg); YYERROR; } (yyval.tree) = slgh.pcode.createVariadic(CPUI_CPOOLREF, (yyvsp[-1].param)); }
 
         //        break;
 
         //    case 241:
 
-        //        { (yyval.starqual) = new StarQuality; (yyval.starqual)->size = *(yyvsp[0].i); delete(yyvsp[0].i); (yyval.starqual)->id = ConstTpl((yyvsp[-3].spacesym)->getSpace()); }
+        //        { (yyval.starqual) = new StarQuality; (yyval.starqual).size = *(yyvsp[0].i); delete(yyvsp[0].i); (yyval.starqual).id = ConstTpl((yyvsp[-3].spacesym).getSpace()); }
 
         //        break;
 
         //    case 242:
 
-        //        { (yyval.starqual) = new StarQuality; (yyval.starqual)->size = 0; (yyval.starqual)->id = ConstTpl((yyvsp[-1].spacesym)->getSpace()); }
+        //        { (yyval.starqual) = new StarQuality; (yyval.starqual).size = 0; (yyval.starqual).id = ConstTpl((yyvsp[-1].spacesym).getSpace()); }
 
         //        break;
 
         //    case 243:
 
-        //        { (yyval.starqual) = new StarQuality; (yyval.starqual)->size = *(yyvsp[0].i); delete(yyvsp[0].i); (yyval.starqual)->id = ConstTpl(slgh->getDefaultCodeSpace()); }
+        //        { (yyval.starqual) = new StarQuality; (yyval.starqual).size = *(yyvsp[0].i); delete(yyvsp[0].i); (yyval.starqual).id = ConstTpl(slgh.getDefaultCodeSpace()); }
 
         //        break;
 
         //    case 244:
 
-        //        { (yyval.starqual) = new StarQuality; (yyval.starqual)->size = 0; (yyval.starqual)->id = ConstTpl(slgh->getDefaultCodeSpace()); }
+        //        { (yyval.starqual) = new StarQuality; (yyval.starqual).size = 0; (yyval.starqual).id = ConstTpl(slgh.getDefaultCodeSpace()); }
 
         //        break;
 
         //    case 245:
 
-        //        { VarnodeTpl* sym = (yyvsp[0].startsym)->getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), sym->getOffset(), ConstTpl(ConstTpl::j_curspace_size)); delete sym; }
+        //        { VarnodeTpl* sym = (yyvsp[0].startsym).getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), sym.getOffset(), ConstTpl(ConstTpl::j_curspace_size)); delete sym; }
 
         //        break;
 
         //    case 246:
 
-        //        { VarnodeTpl* sym = (yyvsp[0].endsym)->getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), sym->getOffset(), ConstTpl(ConstTpl::j_curspace_size)); delete sym; }
+        //        { VarnodeTpl* sym = (yyvsp[0].endsym).getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), sym.getOffset(), ConstTpl(ConstTpl::j_curspace_size)); delete sym; }
 
         //        break;
 
         //    case 247:
 
-        //        { VarnodeTpl* sym = (yyvsp[0].next2sym)->getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), sym->getOffset(), ConstTpl(ConstTpl::j_curspace_size)); delete sym; }
+        //        { VarnodeTpl* sym = (yyvsp[0].next2sym).getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), sym.getOffset(), ConstTpl(ConstTpl::j_curspace_size)); delete sym; }
 
         //        break;
 
@@ -3377,37 +3377,37 @@ namespace Sla.SLACOMP
 
         //    case 249:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), ConstTpl(ConstTpl::real, 0), ConstTpl(ConstTpl::j_curspace_size)); slgh->reportError("Parsed integer is too big (overflow)"); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), ConstTpl(ConstTpl::real, 0), ConstTpl(ConstTpl::j_curspace_size)); slgh.reportError("Parsed integer is too big (overflow)"); }
 
         //        break;
 
         //    case 250:
 
-        //        { (yyval.varnode) = (yyvsp[0].operandsym)->getVarnode(); (yyvsp[0].operandsym)->setCodeAddress(); }
+        //        { (yyval.varnode) = (yyvsp[0].operandsym).getVarnode(); (yyvsp[0].operandsym).setCodeAddress(); }
 
         //        break;
 
         //    case 251:
 
-        //        { AddrSpace* spc = (yyvsp[-1].spacesym)->getSpace(); (yyval.varnode) = new VarnodeTpl(ConstTpl(spc), ConstTpl(ConstTpl::real, *(yyvsp[-3].i)), ConstTpl(ConstTpl::real, spc->getAddrSize())); delete(yyvsp[-3].i); }
+        //        { AddrSpace* spc = (yyvsp[-1].spacesym).getSpace(); (yyval.varnode) = new VarnodeTpl(ConstTpl(spc), ConstTpl(ConstTpl::real, *(yyvsp[-3].i)), ConstTpl(ConstTpl::real, spc.getAddrSize())); delete(yyvsp[-3].i); }
 
         //        break;
 
         //    case 252:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh->getConstantSpace()), ConstTpl(ConstTpl::j_relative, (yyvsp[0].labelsym)->getIndex()), ConstTpl(ConstTpl::real, sizeof(uintm))); (yyvsp[0].labelsym)->incrementRefCount(); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl::j_relative, (yyvsp[0].labelsym).getIndex()), ConstTpl(ConstTpl::real, sizeof(uintm))); (yyvsp[0].labelsym).incrementRefCount(); }
 
         //        break;
 
         //    case 253:
 
-        //        { string errmsg = "Unknown jump destination: " + *(yyvsp[0].str); delete(yyvsp[0].str); slgh->reportError(errmsg); YYERROR; }
+        //        { string errmsg = "Unknown jump destination: " + *(yyvsp[0].str); delete(yyvsp[0].str); slgh.reportError(errmsg); YYERROR; }
 
         //        break;
 
         //    case 254:
 
-        //        { (yyval.varnode) = (yyvsp[0].specsym)->getVarnode(); }
+        //        { (yyval.varnode) = (yyvsp[0].specsym).getVarnode(); }
 
         //        break;
 
@@ -3419,61 +3419,61 @@ namespace Sla.SLACOMP
 
         //    case 256:
 
-        //        { string errmsg = "Unknown varnode parameter: " + *(yyvsp[0].str); delete(yyvsp[0].str); slgh->reportError(errmsg); YYERROR; }
+        //        { string errmsg = "Unknown varnode parameter: " + *(yyvsp[0].str); delete(yyvsp[0].str); slgh.reportError(errmsg); YYERROR; }
 
         //        break;
 
         //    case 257:
 
-        //        { string errmsg = "Subtable not attached to operand: " + (yyvsp[0].subtablesym)->getName(); slgh->reportError(errmsg); YYERROR; }
+        //        { string errmsg = "Subtable not attached to operand: " + (yyvsp[0].subtablesym).getName(); slgh.reportError(errmsg); YYERROR; }
 
         //        break;
 
         //    case 258:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh->getConstantSpace()), ConstTpl(ConstTpl::real, *(yyvsp[0].i)), ConstTpl(ConstTpl::real, 0)); delete(yyvsp[0].i); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl::real, *(yyvsp[0].i)), ConstTpl(ConstTpl::real, 0)); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 259:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh->getConstantSpace()), ConstTpl(ConstTpl::real, 0), ConstTpl(ConstTpl::real, 0)); slgh->reportError("Parsed integer is too big (overflow)"); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl::real, 0), ConstTpl(ConstTpl::real, 0)); slgh.reportError("Parsed integer is too big (overflow)"); }
 
         //        break;
 
         //    case 260:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh->getConstantSpace()), ConstTpl(ConstTpl::real, *(yyvsp[-2].i)), ConstTpl(ConstTpl::real, *(yyvsp[0].i))); delete(yyvsp[-2].i); delete(yyvsp[0].i); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl::real, *(yyvsp[-2].i)), ConstTpl(ConstTpl::real, *(yyvsp[0].i))); delete(yyvsp[-2].i); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 261:
 
-        //        { (yyval.varnode) = slgh->pcode.addressOf((yyvsp[0].varnode), 0); }
+        //        { (yyval.varnode) = slgh.pcode.addressOf((yyvsp[0].varnode), 0); }
 
         //        break;
 
         //    case 262:
 
-        //        { (yyval.varnode) = slgh->pcode.addressOf((yyvsp[0].varnode), *(yyvsp[-1].i)); delete(yyvsp[-1].i); }
+        //        { (yyval.varnode) = slgh.pcode.addressOf((yyvsp[0].varnode), *(yyvsp[-1].i)); delete(yyvsp[-1].i); }
 
         //        break;
 
         //    case 263:
 
-        //        { (yyval.varnode) = (yyvsp[0].specsym)->getVarnode(); }
+        //        { (yyval.varnode) = (yyvsp[0].specsym).getVarnode(); }
 
         //        break;
 
         //    case 264:
 
-        //        { string errmsg = "Unknown assignment varnode: " + *(yyvsp[0].str); delete(yyvsp[0].str); slgh->reportError(errmsg); YYERROR; }
+        //        { string errmsg = "Unknown assignment varnode: " + *(yyvsp[0].str); delete(yyvsp[0].str); slgh.reportError(errmsg); YYERROR; }
 
         //        break;
 
         //    case 265:
 
-        //        { string errmsg = "Subtable not attached to operand: " + (yyvsp[0].subtablesym)->getName(); slgh->reportError(errmsg); YYERROR; }
+        //        { string errmsg = "Subtable not attached to operand: " + (yyvsp[0].subtablesym).getName(); slgh.reportError(errmsg); YYERROR; }
 
         //        break;
 
@@ -3485,43 +3485,43 @@ namespace Sla.SLACOMP
 
         //    case 267:
 
-        //        { (yyval.labelsym) = slgh->pcode.defineLabel((yyvsp[-1].str)); }
+        //        { (yyval.labelsym) = slgh.pcode.defineLabel((yyvsp[-1].str)); }
 
         //        break;
 
         //    case 268:
 
-        //        { (yyval.varnode) = (yyvsp[0].specsym)->getVarnode(); }
+        //        { (yyval.varnode) = (yyvsp[0].specsym).getVarnode(); }
 
         //        break;
 
         //    case 269:
 
-        //        { (yyval.varnode) = slgh->pcode.addressOf((yyvsp[0].varnode), 0); }
+        //        { (yyval.varnode) = slgh.pcode.addressOf((yyvsp[0].varnode), 0); }
 
         //        break;
 
         //    case 270:
 
-        //        { (yyval.varnode) = slgh->pcode.addressOf((yyvsp[0].varnode), *(yyvsp[-1].i)); delete(yyvsp[-1].i); }
+        //        { (yyval.varnode) = slgh.pcode.addressOf((yyvsp[0].varnode), *(yyvsp[-1].i)); delete(yyvsp[-1].i); }
 
         //        break;
 
         //    case 271:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh->getConstantSpace()), ConstTpl(ConstTpl::real, *(yyvsp[-2].i)), ConstTpl(ConstTpl::real, *(yyvsp[0].i))); delete(yyvsp[-2].i); delete(yyvsp[0].i); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl::real, *(yyvsp[-2].i)), ConstTpl(ConstTpl::real, *(yyvsp[0].i))); delete(yyvsp[-2].i); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 272:
 
-        //        { string errmsg = "Unknown export varnode: " + *(yyvsp[0].str); delete(yyvsp[0].str); slgh->reportError(errmsg); YYERROR; }
+        //        { string errmsg = "Unknown export varnode: " + *(yyvsp[0].str); delete(yyvsp[0].str); slgh.reportError(errmsg); YYERROR; }
 
         //        break;
 
         //    case 273:
 
-        //        { string errmsg = "Subtable not attached to operand: " + (yyvsp[0].subtablesym)->getName(); slgh->reportError(errmsg); YYERROR; }
+        //        { string errmsg = "Subtable not attached to operand: " + (yyvsp[0].subtablesym).getName(); slgh.reportError(errmsg); YYERROR; }
 
         //        break;
 
@@ -3611,54 +3611,54 @@ namespace Sla.SLACOMP
 
         //    case 288:
 
-        //        { (yyval.biglist) = new vector<intb>; (yyval.biglist)->push_back(intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
+        //        { (yyval.biglist) = new vector<intb>; (yyval.biglist).push_back(intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 289:
 
-        //        { (yyval.biglist) = new vector<intb>; (yyval.biglist)->push_back(-intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
+        //        { (yyval.biglist) = new vector<intb>; (yyval.biglist).push_back(-intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 290:
 
-        //        { (yyval.biglist) = new vector<intb>; (yyval.biglist)->push_back(intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
+        //        { (yyval.biglist) = new vector<intb>; (yyval.biglist).push_back(intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 291:
 
-        //        { (yyval.biglist) = new vector<intb>; (yyval.biglist)->push_back(-intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
+        //        { (yyval.biglist) = new vector<intb>; (yyval.biglist).push_back(-intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 292:
 
         //        {
-        //            if (*(yyvsp[0].str) != "_") { string errmsg = "Expecting integer but saw: " + *(yyvsp[0].str); delete(yyvsp[0].str); slgh->reportError(errmsg); YYERROR; }
-        //                                    (yyval.biglist) = new vector<intb>; (yyval.biglist)->push_back((intb)0xBADBEEF); delete(yyvsp[0].str);
+        //            if (*(yyvsp[0].str) != "_") { string errmsg = "Expecting integer but saw: " + *(yyvsp[0].str); delete(yyvsp[0].str); slgh.reportError(errmsg); YYERROR; }
+        //                                    (yyval.biglist) = new vector<intb>; (yyval.biglist).push_back((intb)0xBADBEEF); delete(yyvsp[0].str);
         //        }
 
         //        break;
 
         //    case 293:
 
-        //        { (yyval.biglist) = (yyvsp[-1].biglist); (yyval.biglist)->push_back(intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
+        //        { (yyval.biglist) = (yyvsp[-1].biglist); (yyval.biglist).push_back(intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 294:
 
-        //        { (yyval.biglist) = (yyvsp[-2].biglist); (yyval.biglist)->push_back(-intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
+        //        { (yyval.biglist) = (yyvsp[-2].biglist); (yyval.biglist).push_back(-intb(*(yyvsp[0].i))); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 295:
 
         //        {
-        //            if (*(yyvsp[0].str) != "_") { string errmsg = "Expecting integer but saw: " + *(yyvsp[0].str); delete(yyvsp[0].str); slgh->reportError(errmsg); YYERROR; }
-        //                                    (yyval.biglist) = (yyvsp[-1].biglist); (yyval.biglist)->push_back((intb)0xBADBEEF); delete(yyvsp[0].str);
+        //            if (*(yyvsp[0].str) != "_") { string errmsg = "Expecting integer but saw: " + *(yyvsp[0].str); delete(yyvsp[0].str); slgh.reportError(errmsg); YYERROR; }
+        //                                    (yyval.biglist) = (yyvsp[-1].biglist); (yyval.biglist).push_back((intb)0xBADBEEF); delete(yyvsp[0].str);
         //        }
 
         //        break;
@@ -3671,25 +3671,25 @@ namespace Sla.SLACOMP
 
         //    case 297:
 
-        //        { (yyval.strlist) = new vector<string>; (yyval.strlist)->push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.strlist) = new vector<string>; (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
         //    case 298:
 
-        //        { (yyval.strlist) = new vector<string>; (yyval.strlist)->push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.strlist) = new vector<string>; (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
         //    case 299:
 
-        //        { (yyval.strlist) = (yyvsp[-1].strlist); (yyval.strlist)->push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.strlist) = (yyvsp[-1].strlist); (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
         //    case 300:
 
-        //        { string errmsg = (yyvsp[0].anysym)->getName() + ": redefined"; slgh->reportError(errmsg); YYERROR; }
+        //        { string errmsg = (yyvsp[0].anysym).getName() + ": redefined"; slgh.reportError(errmsg); YYERROR; }
 
         //        break;
 
@@ -3701,25 +3701,25 @@ namespace Sla.SLACOMP
 
         //    case 302:
 
-        //        { (yyval.strlist) = new vector<string>; (yyval.strlist)->push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.strlist) = new vector<string>; (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
         //    case 303:
 
-        //        { (yyval.strlist) = new vector<string>; (yyval.strlist)->push_back((yyvsp[0].anysym)->getName()); }
+        //        { (yyval.strlist) = new vector<string>; (yyval.strlist).push_back((yyvsp[0].anysym).getName()); }
 
         //        break;
 
         //    case 304:
 
-        //        { (yyval.strlist) = (yyvsp[-1].strlist); (yyval.strlist)->push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.strlist) = (yyvsp[-1].strlist); (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
         //    case 305:
 
-        //        { (yyval.strlist) = (yyvsp[-1].strlist); (yyval.strlist)->push_back((yyvsp[0].anysym)->getName()); }
+        //        { (yyval.strlist) = (yyvsp[-1].strlist); (yyval.strlist).push_back((yyvsp[0].anysym).getName()); }
 
         //        break;
 
@@ -3731,43 +3731,43 @@ namespace Sla.SLACOMP
 
         //    case 307:
 
-        //        { (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist)->push_back((yyvsp[0].valuesym)); }
+        //        { (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].valuesym)); }
 
         //        break;
 
         //    case 308:
 
-        //        { (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist)->push_back((yyvsp[0].contextsym)); }
+        //        { (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].contextsym)); }
 
         //        break;
 
         //    case 309:
 
-        //        { (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist)->push_back((yyvsp[0].valuesym)); }
+        //        { (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].valuesym)); }
 
         //        break;
 
         //    case 310:
 
-        //        { (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist)->push_back((yyvsp[0].contextsym)); }
+        //        { (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].contextsym)); }
 
         //        break;
 
         //    case 311:
 
-        //        { (yyval.symlist) = (yyvsp[-1].symlist); (yyval.symlist)->push_back((yyvsp[0].valuesym)); }
+        //        { (yyval.symlist) = (yyvsp[-1].symlist); (yyval.symlist).push_back((yyvsp[0].valuesym)); }
 
         //        break;
 
         //    case 312:
 
-        //        { (yyval.symlist) = (yyvsp[-1].symlist); (yyval.symlist)->push_back((yyvsp[0].contextsym)); }
+        //        { (yyval.symlist) = (yyvsp[-1].symlist); (yyval.symlist).push_back((yyvsp[0].contextsym)); }
 
         //        break;
 
         //    case 313:
 
-        //        { string errmsg = *(yyvsp[0].str) + ": is not a value pattern"; delete(yyvsp[0].str); slgh->reportError(errmsg); YYERROR; }
+        //        { string errmsg = *(yyvsp[0].str) + ": is not a value pattern"; delete(yyvsp[0].str); slgh.reportError(errmsg); YYERROR; }
 
         //        break;
 
@@ -3779,36 +3779,36 @@ namespace Sla.SLACOMP
 
         //    case 315:
 
-        //        { (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist)->push_back((yyvsp[0].varsym)); }
+        //        { (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].varsym)); }
 
         //        break;
 
         //    case 316:
 
-        //        { (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist)->push_back((yyvsp[0].varsym)); }
+        //        { (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].varsym)); }
 
         //        break;
 
         //    case 317:
 
         //        {
-        //            if (*(yyvsp[0].str) != "_") { string errmsg = *(yyvsp[0].str) + ": is not a varnode symbol"; delete(yyvsp[0].str); slgh->reportError(errmsg); YYERROR; }
-        //                    (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist)->push_back((SleighSymbol*)0); delete(yyvsp[0].str);
+        //            if (*(yyvsp[0].str) != "_") { string errmsg = *(yyvsp[0].str) + ": is not a varnode symbol"; delete(yyvsp[0].str); slgh.reportError(errmsg); YYERROR; }
+        //                    (yyval.symlist) = new vector<SleighSymbol*>; (yyval.symlist).push_back((SleighSymbol*)0); delete(yyvsp[0].str);
         //        }
 
         //        break;
 
         //    case 318:
 
-        //        { (yyval.symlist) = (yyvsp[-1].symlist); (yyval.symlist)->push_back((yyvsp[0].varsym)); }
+        //        { (yyval.symlist) = (yyvsp[-1].symlist); (yyval.symlist).push_back((yyvsp[0].varsym)); }
 
         //        break;
 
         //    case 319:
 
         //        {
-        //            if (*(yyvsp[0].str) != "_") { string errmsg = *(yyvsp[0].str) + ": is not a varnode symbol"; delete(yyvsp[0].str); slgh->reportError(errmsg); YYERROR; }
-        //                                    (yyval.symlist) = (yyvsp[-1].symlist); (yyval.symlist)->push_back((SleighSymbol*)0); delete(yyvsp[0].str);
+        //            if (*(yyvsp[0].str) != "_") { string errmsg = *(yyvsp[0].str) + ": is not a varnode symbol"; delete(yyvsp[0].str); slgh.reportError(errmsg); YYERROR; }
+        //                                    (yyval.symlist) = (yyvsp[-1].symlist); (yyval.symlist).push_back((SleighSymbol*)0); delete(yyvsp[0].str);
         //        }
 
         //        break;
@@ -3821,13 +3821,13 @@ namespace Sla.SLACOMP
 
         //    case 321:
 
-        //        { (yyval.param) = new vector<ExprTree*>; (yyval.param)->push_back((yyvsp[0].tree)); }
+        //        { (yyval.param) = new vector<ExprTree*>; (yyval.param).push_back((yyvsp[0].tree)); }
 
         //        break;
 
         //    case 322:
 
-        //        { (yyval.param) = (yyvsp[-2].param); (yyval.param)->push_back((yyvsp[0].tree)); }
+        //        { (yyval.param) = (yyvsp[-2].param); (yyval.param).push_back((yyvsp[0].tree)); }
 
         //        break;
 
@@ -3839,13 +3839,13 @@ namespace Sla.SLACOMP
 
         //    case 324:
 
-        //        { (yyval.strlist) = new vector<string>; (yyval.strlist)->push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.strlist) = new vector<string>; (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
         //    case 325:
 
-        //        { (yyval.strlist) = (yyvsp[-2].strlist); (yyval.strlist)->push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.strlist) = (yyvsp[-2].strlist); (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
@@ -3966,7 +3966,7 @@ namespace Sla.SLACOMP
         //   case of YYERROR or YYBACKUP, subsequent parser actions might lead
         //   to an incorrect destructor call or verbose syntax error message
         //   before the lookahead is translated.  */
-        //YY_SYMBOL_PRINT("-> $$ =", yyr1[yyn], &yyval, &yyloc);
+        //YY_SYMBOL_PRINT(". $$ =", yyr1[yyn], &yyval, &yyloc);
 
         //YYPOPSTACK(yylen);
         //yylen = 0;
@@ -4186,7 +4186,7 @@ namespace Sla.SLACOMP
         //int sleigherror(char* s)
 
         //{
-        //    slgh->reportError(s);
+        //    slgh.reportError(s);
         //    return 0;
         //}
 

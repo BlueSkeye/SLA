@@ -84,12 +84,12 @@ namespace Sla.DECCORE
         public override JumpValues clone()
         {
             JumpValuesRangeDefault res = new JumpValuesRangeDefault();
-            res->range = range;
-            res->normqvn = normqvn;
-            res->startop = startop;
-            res->extravalue = extravalue;
-            res->extravn = extravn;
-            res->extraop = extraop;
+            res.range = range;
+            res.normqvn = normqvn;
+            res.startop = startop;
+            res.extravalue = extravalue;
+            res.extravn = extravn;
+            res.extraop = extraop;
             return res;
         }
     }

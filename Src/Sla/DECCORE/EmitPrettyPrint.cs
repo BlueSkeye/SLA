@@ -156,10 +156,10 @@ namespace Sla.DECCORE
             if (commentmode && (newspaceremain == spaceremain + commentfill.size()))
                 return;     // Line breaking doesn't give us any additional space
             spaceremain = newspaceremain;
-            lowlevel->tagLine(maxlinesize - spaceremain);
+            lowlevel.tagLine(maxlinesize - spaceremain);
             if (commentmode && (commentfill.size() != 0))
             {
-                lowlevel->print(commentfill, EmitMarkup::comment_color);
+                lowlevel.print(commentfill, EmitMarkup::comment_color);
                 spaceremain -= commentfill.size();
             }
         }
@@ -239,23 +239,23 @@ namespace Sla.DECCORE
                             if ((tok.getNumSpaces() <= spaceremain) &&
                                 (val - spaceremain < 10))
                             {
-                                lowlevel->spaces(tok.getNumSpaces());
+                                lowlevel.spaces(tok.getNumSpaces());
                                 spaceremain -= tok.getNumSpaces();
                                 return;
                             }
                             indentstack.back() = val;
                             spaceremain = val;
                         }
-                        lowlevel->tagLine(maxlinesize - spaceremain);
+                        lowlevel.tagLine(maxlinesize - spaceremain);
                         if (commentmode && (commentfill.size() != 0))
                         {
-                            lowlevel->print(commentfill, EmitMarkup::comment_color);
+                            lowlevel.print(commentfill, EmitMarkup::comment_color);
                             spaceremain -= commentfill.size();
                         }
                     }
                     else
                     {
-                        lowlevel->spaces(tok.getNumSpaces());
+                        lowlevel.spaces(tok.getNumSpaces());
                         spaceremain -= tok.getNumSpaces();
                     }
                     break;
@@ -640,7 +640,7 @@ namespace Sla.DECCORE
         private override void clear()
         {
             Emit::clear();
-            lowlevel->clear();
+            lowlevel.clear();
             indentstack.clear();
             scanqueue.clear();
             tokqueue.clear();
@@ -653,10 +653,10 @@ namespace Sla.DECCORE
 
         private override void setOutputStream(TextWriter t)
         {
-            lowlevel->setOutputStream(t);
+            lowlevel.setOutputStream(t);
         }
 
-        private override TextWriter getOutputStream() => lowlevel->getOutputStream();
+        private override TextWriter getOutputStream() => lowlevel.getOutputStream();
 
         private override void spaces(int4 num, int4 bump = 0)
         {
@@ -714,7 +714,7 @@ namespace Sla.DECCORE
             if (!indentstack.empty())
                 throw new LowlevelError("prettyprint indentstack did not flush");
 #endif
-            lowlevel->flush();
+            lowlevel.flush();
         }
 
         private override void setMaxLineSize(int4 val)
@@ -735,11 +735,11 @@ namespace Sla.DECCORE
             commentfill = fill;
         }
 
-        private override bool emitsMarkup() => lowlevel->emitsMarkup();
+        private override bool emitsMarkup() => lowlevel.emitsMarkup();
 
         private override void resetDefaults()
         {
-            lowlevel->resetDefaults();
+            lowlevel.resetDefaults();
             resetDefaultsInternal();
             resetDefaultsPrettyPrint();
         }
@@ -750,13 +750,13 @@ namespace Sla.DECCORE
         /// \param val is \b true if markup is desired
         private override void setMarkup(bool val)
         {
-            ostream* t = lowlevel->getOutputStream();
+            ostream* t = lowlevel.getOutputStream();
             delete lowlevel;
             if (val)
                 lowlevel = new EmitMarkup;
             else
                 lowlevel = new EmitNoMarkup;
-            lowlevel->setOutputStream(t);
+            lowlevel.setOutputStream(t);
         }
     }
 }

@@ -44,7 +44,7 @@ namespace Sla.DECCORE
 
         public override Address getAddress() => addr;
 
-        public override int4 getSize() => type->getSize();
+        public override int4 getSize() => type.getSize();
 
         public override bool isTypeLocked() => ((flags&ParameterPieces::typelock)!= 0);
 
@@ -65,7 +65,7 @@ namespace Sla.DECCORE
             if (val)
             {
                 flags |= ParameterPieces::typelock;
-                if (type->getMetatype() == TYPE_UNKNOWN) // Check if we are locking TYPE_UNKNOWN
+                if (type.getMetatype() == TYPE_UNKNOWN) // Check if we are locking TYPE_UNKNOWN
                     flags |= ParameterPieces::sizelock;
             }
             else
@@ -90,7 +90,7 @@ namespace Sla.DECCORE
 
         public override void overrideSizeLockType(Datatype ct)
         {
-            if (type->getSize() == ct->getSize())
+            if (type.getSize() == ct.getSize())
             {
                 if (!isSizeTypeLocked())
                     throw new LowlevelError("Overriding parameter that is not size locked");
@@ -102,9 +102,9 @@ namespace Sla.DECCORE
 
         public override void resetSizeLockType(TypeFactory factory)
         {
-            if (type->getMetatype() == TYPE_UNKNOWN) return; // Nothing to do
-            int4 size = type->getSize();
-            type = factory->getBase(size, TYPE_UNKNOWN);
+            if (type.getMetatype() == TYPE_UNKNOWN) return; // Nothing to do
+            int4 size = type.getSize();
+            type = factory.getBase(size, TYPE_UNKNOWN);
         }
 
         public override ProtoParameter clone()

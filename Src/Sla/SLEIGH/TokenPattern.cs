@@ -58,7 +58,7 @@ namespace Sla.SLEIGH
                     block = tmpblock;
                 else
                 {
-                    PatternBlock* newblock = block->intersect(tmpblock);
+                    PatternBlock* newblock = block.intersect(tmpblock);
                     delete block;
                     delete tmpblock;
                     block = newblock;
@@ -80,7 +80,7 @@ namespace Sla.SLEIGH
             // we need to convert a bit range specified on a little endian token where the
             // bit indices label the least sig bit as 0 into a bit range on big endian bytes
             // where the indices label the most sig bit as 0.  The reversal due to
-            // little->big endian cancels part of the reversal due to least->most sig bit
+            // little.big endian cancels part of the reversal due to least.most sig bit
             // labelling, but not on the lower 3 bits.  So the transform becomes
             // leave the upper bits the same, but transform the lower 3-bit value x into 7-x.
 
@@ -107,7 +107,7 @@ namespace Sla.SLEIGH
                         block = tmpblock;
                     else
                     {
-                        PatternBlock* newblock = block->intersect(tmpblock);
+                        PatternBlock* newblock = block.intersect(tmpblock);
                         delete block;
                         delete tmpblock;
                         block = newblock;
@@ -120,7 +120,7 @@ namespace Sla.SLEIGH
                     block = tmpblock;
                 else
                 {
-                    PatternBlock* newblock = block->intersect(tmpblock);
+                    PatternBlock* newblock = block.intersect(tmpblock);
                     delete block;
                     delete tmpblock;
                     block = newblock;
@@ -252,10 +252,10 @@ namespace Sla.SLEIGH
                     }
                 if (tok1.toklist.size() <= tok2.toklist.size())
                     for (int4 i = minsize; i < tok2.toklist.size(); ++i)
-                        ressa += tok2.toklist[tok2.toklist.size() - 1 - i]->getSize();
+                        ressa += tok2.toklist[tok2.toklist.size() - 1 - i].getSize();
                 else
                     for (int4 i = minsize; i < tok1.toklist.size(); ++i)
-                        ressa += tok1.toklist[tok1.toklist.size() - 1 - i]->getSize();
+                        ressa += tok1.toklist[tok1.toklist.size() - 1 - i].getSize();
                 if (tok1.toklist.size() < tok2.toklist.size())
                     ressa = -ressa;
             }
@@ -320,10 +320,10 @@ namespace Sla.SLEIGH
             rightellipsis = false;
             PatternBlock* block;
 
-            if (tok->isBigEndian())
-                block = buildBigBlock(tok->getSize(), bitstart, bitend, value);
+            if (tok.isBigEndian())
+                block = buildBigBlock(tok.getSize(), bitstart, bitend, value);
             else
-                block = buildLittleBlock(tok->getSize(), bitstart, bitend, value);
+                block = buildLittleBlock(tok.getSize(), bitstart, bitend, value);
             pattern = new InstructionPattern(block);
         }
 
@@ -340,7 +340,7 @@ namespace Sla.SLEIGH
 
         public TokenPattern(TokenPattern tokpat)
         {
-            pattern = tokpat.pattern->simplifyClone();
+            pattern = tokpat.pattern.simplifyClone();
             toklist = tokpat.toklist;
             leftellipsis = tokpat.leftellipsis;
             rightellipsis = tokpat.rightellipsis;
@@ -355,7 +355,7 @@ namespace Sla.SLEIGH
         {
             delete pattern;
 
-            pattern = tokpat.pattern->simplifyClone();
+            pattern = tokpat.pattern.simplifyClone();
             toklist = tokpat.toklist;
             leftellipsis = tokpat.leftellipsis;
             rightellipsis = tokpat.rightellipsis;
@@ -381,7 +381,7 @@ namespace Sla.SLEIGH
             TokenPattern res((Pattern*)0);
             int4 sa = res.resolveTokens(*this, tokpat);
 
-            res.pattern = pattern->doAnd(tokpat.pattern, sa);
+            res.pattern = pattern.doAnd(tokpat.pattern, sa);
             return res;
         }
 
@@ -390,7 +390,7 @@ namespace Sla.SLEIGH
             TokenPattern res((Pattern*)0);
             int4 sa = res.resolveTokens(*this, tokpat);
 
-            res.pattern = pattern->doOr(tokpat.pattern, sa);
+            res.pattern = pattern.doOr(tokpat.pattern, sa);
             return res;
         }
 
@@ -423,7 +423,7 @@ namespace Sla.SLEIGH
                 vector<Token*>::const_iterator iter;
 
                 for (iter = toklist.begin(); iter != toklist.end(); ++iter)
-                    sa += (*iter)->getSize();
+                    sa += (*iter).getSize();
                 for (iter = tokpat.toklist.begin(); iter != tokpat.toklist.end(); ++iter)
                     res.toklist.push_back(*iter);
                 res.rightellipsis = tokpat.rightellipsis;
@@ -431,9 +431,9 @@ namespace Sla.SLEIGH
             if (res.rightellipsis && res.leftellipsis)
                 throw SleighError("Double ellipsis in pattern");
             if (sa < 0)
-                res.pattern = pattern->doAnd(tokpat.pattern, 0);
+                res.pattern = pattern.doAnd(tokpat.pattern, 0);
             else
-                res.pattern = pattern->doAnd(tokpat.pattern, sa);
+                res.pattern = pattern.doAnd(tokpat.pattern, sa);
             return res;
         }
 
@@ -489,7 +489,7 @@ namespace Sla.SLEIGH
                     patres.rightellipsis = true;
             }
 
-            patres.pattern = pattern->commonSubPattern(tokpat.pattern, 0);
+            patres.pattern = pattern.commonSubPattern(tokpat.pattern, 0);
             return patres;
         }
 
@@ -499,14 +499,14 @@ namespace Sla.SLEIGH
         {               // Add up length of concatenated tokens
             int4 length = 0;
             for (int4 i = 0; i < toklist.size(); ++i)
-                length += toklist[i]->getSize();
+                length += toklist[i].getSize();
             return length;
         }
 
-        public bool alwaysTrue() => pattern->alwaysTrue();
+        public bool alwaysTrue() => pattern.alwaysTrue();
 
-        public bool alwaysFalse() => pattern->alwaysFalse();
+        public bool alwaysFalse() => pattern.alwaysFalse();
 
-        public bool alwaysInstructionTrue() => pattern->alwaysInstructionTrue();
+        public bool alwaysInstructionTrue() => pattern.alwaysInstructionTrue();
     }
 }

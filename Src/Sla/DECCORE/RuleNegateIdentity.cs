@@ -23,7 +23,7 @@ namespace Sla.DECCORE
         }
 
         /// \class RuleNegateIdentity
-        /// \brief Apply INT_NEGATE identities:  `V & ~V  => #0,  V | ~V  ->  #-1`
+        /// \brief Apply INT_NEGATE identities:  `V & ~V  => #0,  V | ~V  .  #-1`
         public override void getOpList(List<uint4> oplist)
         {
             oplist.push_back(CPUI_INT_NEGATE);
@@ -31,21 +31,21 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn = op->getIn(0);
-            Varnode* outVn = op->getOut();
+            Varnode* vn = op.getIn(0);
+            Varnode* outVn = op.getOut();
             list<PcodeOp*>::const_iterator iter;
-            for (iter = outVn->beginDescend(); iter != outVn->endDescend(); ++iter)
+            for (iter = outVn.beginDescend(); iter != outVn.endDescend(); ++iter)
             {
                 PcodeOp* logicOp = *iter;
-                OpCode opc = logicOp->code();
+                OpCode opc = logicOp.code();
                 if (opc != CPUI_INT_AND && opc != CPUI_INT_OR && opc != CPUI_INT_XOR)
                     continue;
-                int4 slot = logicOp->getSlot(outVn);
-                if (logicOp->getIn(1 - slot) != vn) continue;
+                int4 slot = logicOp.getSlot(outVn);
+                if (logicOp.getIn(1 - slot) != vn) continue;
                 uintb value = 0;
                 if (opc != CPUI_INT_AND)
-                    value = calc_mask(vn->getSize());
-                data.opSetInput(logicOp, data.newConstant(vn->getSize(), value), 0);
+                    value = calc_mask(vn.getSize());
+                data.opSetInput(logicOp, data.newConstant(vn.getSize(), value), 0);
                 data.opRemoveInput(logicOp, 1);
                 data.opSetOpcode(logicOp, CPUI_COPY);
                 return 1;

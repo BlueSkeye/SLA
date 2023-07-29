@@ -21,7 +21,7 @@ namespace Sla.SLEIGH
         {
             calc_maskword(startbit, endbit, out num, out shift, out mask);
             patexp = pe;
-            patexp->layClaim();
+            patexp.layClaim();
         }
 
         public ContextOp()
@@ -37,7 +37,7 @@ namespace Sla.SLEIGH
         { // Throw an exception if the PatternExpression is not valid
             vector<PatternValue*> values;
 
-            patexp->listValues(values); // Get all the expression tokens
+            patexp.listValues(values); // Get all the expression tokens
             for (int4 i = 0; i < values.size(); ++i)
             {
                 OperandValue* val = dynamic_cast<OperandValue*>(values[i]);
@@ -46,8 +46,8 @@ namespace Sla.SLEIGH
                 // because these are evaluated BEFORE the operand offset
                 // has been recovered. If the offset is not relative to
                 // the base constructor, then we throw an error
-                if (!val->isConstructorRelative())
-                    throw SleighError(val->getName() + ": cannot be used in context expression");
+                if (!val.isConstructorRelative())
+                    throw SleighError(val.getName() + ": cannot be used in context expression");
             }
         }
 
@@ -57,48 +57,48 @@ namespace Sla.SLEIGH
             s << " i=\"" << dec << num << "\"";
             s << " shift=\"" << shift << "\"";
             s << " mask=\"0x" << hex << mask << "\" >\n";
-            patexp->saveXml(s);
+            patexp.saveXml(s);
             s << "</context_op>\n";
         }
 
         public override void restoreXml(Element el, SleighBase trans)
         {
             {
-                istringstream s(el->getAttributeValue("i"));
+                istringstream s(el.getAttributeValue("i"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> num;
             }
             {
-                istringstream s(el->getAttributeValue("shift"));
+                istringstream s(el.getAttributeValue("shift"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> shift;
             }
             {
-                istringstream s(el->getAttributeValue("mask"));
+                istringstream s(el.getAttributeValue("mask"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> mask;
             }
-            const List &list(el->getChildren());
+            const List &list(el.getChildren());
             List::const_iterator iter;
             iter = list.begin();
             patexp = (PatternValue*)PatternExpression::restoreExpression(*iter, trans);
-            patexp->layClaim();
+            patexp.layClaim();
         }
 
         public override void apply(ParserWalkerChange walker)
         {
-            uintm val = patexp->getValue(walker); // Get our value based on context
+            uintm val = patexp.getValue(walker); // Get our value based on context
             val <<= shift;
-            walker.getParserContext()->setContextWord(num, val, mask);
+            walker.getParserContext().setContextWord(num, val, mask);
         }
 
         public override ContextChange clone()
         {
             ContextOp* res = new ContextOp();
-            (res->patexp = patexp)->layClaim();
-            res->mask = mask;
-            res->num = num;
-            res->shift = shift;
+            (res.patexp = patexp).layClaim();
+            res.mask = mask;
+            res.num = num;
+            res.shift = shift;
             return res;
         }
     }

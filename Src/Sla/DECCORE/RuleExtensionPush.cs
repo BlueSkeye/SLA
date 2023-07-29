@@ -35,20 +35,20 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* inVn = op->getIn(0);
-            if (inVn->isConstant()) return 0;
-            if (inVn->isAddrForce()) return 0;
-            if (inVn->isAddrTied()) return 0;
-            Varnode* outVn = op->getOut();
-            if (outVn->isTypeLock() || outVn->isNameLock()) return 0;
-            if (outVn->isAddrForce() || outVn->isAddrTied()) return 0;
+            Varnode* inVn = op.getIn(0);
+            if (inVn.isConstant()) return 0;
+            if (inVn.isAddrForce()) return 0;
+            if (inVn.isAddrTied()) return 0;
+            Varnode* outVn = op.getOut();
+            if (outVn.isTypeLock() || outVn.isNameLock()) return 0;
+            if (outVn.isAddrForce() || outVn.isAddrTied()) return 0;
             list<PcodeOp*>::const_iterator iter;
             int4 addcount = 0;      // Number of INT_ADD descendants
             int4 ptrcount = 0;      // Number of PTRADD descendants
-            for (iter = outVn->beginDescend(); iter != outVn->endDescend(); ++iter)
+            for (iter = outVn.beginDescend(); iter != outVn.endDescend(); ++iter)
             {
                 PcodeOp* decOp = *iter;
-                OpCode opc = decOp->code();
+                OpCode opc = decOp.code();
                 if (opc == CPUI_PTRADD)
                 {
                     // This extension will likely be hidden
@@ -56,8 +56,8 @@ namespace Sla.DECCORE
                 }
                 else if (opc == CPUI_INT_ADD)
                 {
-                    PcodeOp* subOp = decOp->getOut()->loneDescend();
-                    if (subOp == (PcodeOp*)0 || subOp->code() != CPUI_PTRADD)
+                    PcodeOp* subOp = decOp.getOut().loneDescend();
+                    if (subOp == (PcodeOp*)0 || subOp.code() != CPUI_PTRADD)
                         return 0;
                     addcount += 1;
                 }
@@ -69,7 +69,7 @@ namespace Sla.DECCORE
             if ((addcount + ptrcount) <= 1) return 0;
             if (addcount > 0)
             {
-                if (op->getIn(0)->loneDescend() != (PcodeOp*)0) return 0;
+                if (op.getIn(0).loneDescend() != (PcodeOp*)0) return 0;
             }
             RulePushPtr::duplicateNeed(op, data);       // Duplicate the extension to all result descendants
             return 1;

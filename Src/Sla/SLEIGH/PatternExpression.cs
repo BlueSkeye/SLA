@@ -52,15 +52,15 @@ namespace Sla.SLEIGH
     
         public static void release(PatternExpression p)
         {
-            p->refcount -= 1;
-            if (p->refcount <= 0)
+            p.refcount -= 1;
+            if (p.refcount <= 0)
                 delete p;
         }
 
         public static PatternExpression restoreExpression(Element el, Translate trans)
         {
             PatternExpression* res;
-            string nm = el->getName();
+            string nm = el.getName();
 
             if (nm == "tokenfield")
                 res = new TokenField();
@@ -99,7 +99,7 @@ namespace Sla.SLEIGH
             else
                 return (PatternExpression*)0;
 
-            res->restoreXml(el, trans);
+            res.restoreXml(el, trans);
             return res;
         }
     }

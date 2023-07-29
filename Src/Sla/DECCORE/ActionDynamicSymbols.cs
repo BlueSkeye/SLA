@@ -24,8 +24,8 @@ namespace Sla.DECCORE
         {
             ScopeLocal* localmap = data.getScopeLocal();
             list<SymbolEntry>::iterator iter, enditer;
-            iter = localmap->beginDynamic();
-            enditer = localmap->endDynamic();
+            iter = localmap.beginDynamic();
+            enditer = localmap.endDynamic();
             DynamicHash dhash;
             while (iter != enditer)
             {

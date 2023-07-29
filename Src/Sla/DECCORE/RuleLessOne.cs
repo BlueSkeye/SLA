@@ -32,16 +32,16 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* constvn = op->getIn(1);
+            Varnode* constvn = op.getIn(1);
 
-            if (!constvn->isConstant()) return 0;
-            uintb val = constvn->getOffset();
-            if ((op->code() == CPUI_INT_LESS) && (val != 1)) return 0;
-            if ((op->code() == CPUI_INT_LESSEQUAL) && (val != 0)) return 0;
+            if (!constvn.isConstant()) return 0;
+            uintb val = constvn.getOffset();
+            if ((op.code() == CPUI_INT_LESS) && (val != 1)) return 0;
+            if ((op.code() == CPUI_INT_LESSEQUAL) && (val != 0)) return 0;
 
             data.opSetOpcode(op, CPUI_INT_EQUAL);
             if (val != 0)
-                data.opSetInput(op, data.newConstant(constvn->getSize(), 0), 1);
+                data.opSetInput(op, data.newConstant(constvn.getSize(), 0), 1);
             return 1;
         }
     }

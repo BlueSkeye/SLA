@@ -24,8 +24,8 @@ namespace Sla.DECCORE
         
         public override void callback(Emit emit)
         {
-            emit->print(PrintC::OPEN_CURLY);
-            indentId = emit->startIndent();
+            emit.print(PrintC::OPEN_CURLY);
+            indentId = emit.startIndent();
         }
     }
 }

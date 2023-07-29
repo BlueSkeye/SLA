@@ -24,7 +24,7 @@ namespace Sla.DECCORE
         /// Masks for each bitfield within the enum
         protected List<uintb> masklist;
 
-        /// Establish the value -> name map
+        /// Establish the value . name map
         /// Set the map. Calculate the independent bit-fields within the named values of the enumeration
         /// Two bits are in the same bit-field if there is a name in the map whose value
         /// has those two bits set.  Bit-fields must be a contiguous range of bits.
@@ -223,12 +223,12 @@ namespace Sla.DECCORE
             TypeEnum te = (TypeEnum*) &op;
             map<uintb, string>::const_iterator iter1, iter2;
 
-            if (namemap.size() != te->namemap.size())
+            if (namemap.size() != te.namemap.size())
             {
-                return (namemap.size() < te->namemap.size()) ? -1 : 1;
+                return (namemap.size() < te.namemap.size()) ? -1 : 1;
             }
             iter1 = namemap.begin();
-            iter2 = te->namemap.begin();
+            iter2 = te.namemap.begin();
             while (iter1 != namemap.end())
             {
                 if ((*iter1).first != (*iter2).first)

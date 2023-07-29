@@ -69,14 +69,14 @@ namespace Sla.DECCORE
                     replacement = vn;
                     break;
                 case TransformVar::constant:
-                    replacement = fd->newConstant(byteSize, val);
+                    replacement = fd.newConstant(byteSize, val);
                     break;
                 case TransformVar::normal_temp:
                 case TransformVar::piece_temp:
                     if (def == (TransformOp*)0)
-                        replacement = fd->newUnique(byteSize);
+                        replacement = fd.newUnique(byteSize);
                     else
-                        replacement = fd->newUniqueOut(byteSize, def->replacement);
+                        replacement = fd.newUniqueOut(byteSize, def.replacement);
                     break;
                 case TransformVar::piece:
                     {
@@ -84,21 +84,21 @@ namespace Sla.DECCORE
                         if ((bytePos & 7) != 0)
                             throw new LowlevelError("Varnode piece is not byte aligned");
                         bytePos >>= 3;
-                        if (vn->getSpace()->isBigEndian())
-                            bytePos = vn->getSize() - bytePos - byteSize;
-                        Address addr = vn->getAddr() + bytePos;
+                        if (vn.getSpace().isBigEndian())
+                            bytePos = vn.getSize() - bytePos - byteSize;
+                        Address addr = vn.getAddr() + bytePos;
                         addr.renormalize(byteSize);
                         if (def == (TransformOp*)0)
-                            replacement = fd->newVarnode(byteSize, addr);
+                            replacement = fd.newVarnode(byteSize, addr);
                         else
-                            replacement = fd->newVarnodeOut(byteSize, addr, def->replacement);
-                        fd->transferVarnodeProperties(vn, replacement, bytePos);
+                            replacement = fd.newVarnodeOut(byteSize, addr, def.replacement);
+                        fd.transferVarnodeProperties(vn, replacement, bytePos);
                         break;
                     }
                 case TransformVar::constant_iop:
                     {
-                        PcodeOp* indeffect = PcodeOp::getOpFromConst(Address(fd->getArch()->getIopSpace(), val));
-                        replacement = fd->newVarnodeIop(indeffect);
+                        PcodeOp* indeffect = PcodeOp::getOpFromConst(Address(fd.getArch().getIopSpace(), val));
+                        replacement = fd.newVarnodeIop(indeffect);
                         break;
                     }
                 default:

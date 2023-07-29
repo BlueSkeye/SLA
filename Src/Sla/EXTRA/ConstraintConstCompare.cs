@@ -23,17 +23,17 @@ namespace Sla.EXTRA
         }
 
         public override UnifyConstraint clone() 
-            => (new ConstraintConstCompare(const1index, const2index, opc))->copyid(this);
+            => (new ConstraintConstCompare(const1index, const2index, opc)).copyid(this);
 
         public override bool step(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            if (!traverse->step()) return false;
+            if (!traverse.step()) return false;
             uintb c1 = state.data(const1index).getConstant();
             uintb c2 = state.data(const2index).getConstant();
             // This only does operations with boolean result
             OpBehavior* behavior = state.getBehavior(opc);
-            uintb res = behavior->evaluateBinary(1, sizeof(uintb), c1, c2);
+            uintb res = behavior.evaluateBinary(1, sizeof(uintb), c1, c2);
             return (res != 0);
         }
 

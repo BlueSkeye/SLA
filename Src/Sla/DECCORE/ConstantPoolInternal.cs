@@ -139,7 +139,7 @@ namespace Sla.DECCORE
                 vector<uintb> refs;
                 sorter.apply(refs);
                 CPoolRecord* newrec = createRecord(refs);
-                newrec->decode(decoder, typegrp);
+                newrec.decode(decoder, typegrp);
             }
             decoder.closeElement(elemId);
         }

@@ -68,18 +68,18 @@ namespace Sla.DECCORE
         /// \param sym is the Symbol to insert
         private void insertNameTree(Symbol sym)
         {
-            sym->nameDedup = 0;
+            sym.nameDedup = 0;
             pair<SymbolNameTree::iterator, bool> nameres;
             nameres = nametree.insert(sym);
             if (!nameres.second)
             {
-                sym->nameDedup = 0xffffffff;
+                sym.nameDedup = 0xffffffff;
                 SymbolNameTree::iterator iter = nametree.upper_bound(sym);
                 --iter; // Last symbol with this name
-                sym->nameDedup = (*iter)->nameDedup + 1;        // increment the dedup counter
+                sym.nameDedup = (*iter).nameDedup + 1;        // increment the dedup counter
                 nameres = nametree.insert(sym);
                 if (!nameres.second)
-                    throw new LowlevelError("Could  not deduplicate symbol: " + sym->name);
+                    throw new LowlevelError("Could  not deduplicate symbol: " + sym.name);
             }
         }
 
@@ -91,7 +91,7 @@ namespace Sla.DECCORE
             Symbol sym((Scope*)0,nm,(Datatype*)0);
             SymbolNameTree::const_iterator iter = nametree.lower_bound(&sym);
             if (iter == nametree.end()) return iter;
-            if ((*iter)->getName() != nm)
+            if ((*iter).getName() != nm)
                 return nametree.end();
             return iter;
         }
@@ -104,33 +104,33 @@ namespace Sla.DECCORE
 
         protected override void addSymbolInternal(Symbol sym)
         {
-            if (sym->symbolId == 0)
+            if (sym.symbolId == 0)
             {
-                sym->symbolId = Symbol::ID_BASE + ((uniqueId & 0xffff) << 40) + nextUniqueId;
+                sym.symbolId = Symbol::ID_BASE + ((uniqueId & 0xffff) << 40) + nextUniqueId;
                 nextUniqueId += 1;
             }
             try
             {
-                if (sym->name.size() == 0)
+                if (sym.name.size() == 0)
                 {
-                    sym->name = buildUndefinedName();
-                    sym->displayName = sym->name;
+                    sym.name = buildUndefinedName();
+                    sym.displayName = sym.name;
                 }
-                if (sym->getType() == (Datatype*)0)
-                    throw new LowlevelError(sym->getName() + " symbol created with no type");
-                if (sym->getType()->getSize() < 1)
-                    throw new LowlevelError(sym->getName() + " symbol created with zero size type");
+                if (sym.getType() == (Datatype*)0)
+                    throw new LowlevelError(sym.getName() + " symbol created with no type");
+                if (sym.getType().getSize() < 1)
+                    throw new LowlevelError(sym.getName() + " symbol created with zero size type");
                 insertNameTree(sym);
-                if (sym->category >= 0)
+                if (sym.category >= 0)
                 {
-                    while (category.size() <= sym->category)
+                    while (category.size() <= sym.category)
                         category.push_back(vector<Symbol*>());
-                    vector<Symbol*> & list(category[sym->category]);
-                    if (sym->category > 0)
-                        sym->catindex = list.size();
-                    while (list.size() <= sym->catindex)
+                    vector<Symbol*> & list(category[sym.category]);
+                    if (sym.category > 0)
+                        sym.catindex = list.size();
+                    while (list.size() <= sym.catindex)
                         list.push_back((Symbol*)0);
-                    list[sym->catindex] = sym;
+                    list[sym.catindex] = sym;
                 }
             }
             catch (LowlevelError err) {
@@ -144,11 +144,11 @@ namespace Sla.DECCORE
         {
             // Find or create the appropriate rangemap
             AddrSpace* spc = addr.getSpace();
-            EntryMap* rangemap = maptable[spc->getIndex()];
+            EntryMap* rangemap = maptable[spc.getIndex()];
             if (rangemap == (EntryMap*)0)
             {
                 rangemap = new EntryMap();
-                maptable[spc->getIndex()] = rangemap;
+                maptable[spc.getIndex()] = rangemap;
             }
             // Insert the new map
             SymbolEntry::inittype initdata(sym, exfl, addr.getSpace(), off, uselim);
@@ -156,18 +156,18 @@ namespace Sla.DECCORE
             if (lastaddress.getOffset() < addr.getOffset())
             {
                 string msg = "Symbol ";
-                msg += sym->getName();
+                msg += sym.getName();
                 msg += " extends beyond the end of the address space";
                 throw new LowlevelError(msg);
             }
 
-            list<SymbolEntry>::iterator iter = rangemap->insert(initdata, addr.getOffset(), lastaddress.getOffset());
+            list<SymbolEntry>::iterator iter = rangemap.insert(initdata, addr.getOffset(), lastaddress.getOffset());
             // Store reference to map in symbol
-            sym->mapentry.push_back(iter);
-            if (sz == sym->type->getSize())
+            sym.mapentry.push_back(iter);
+            if (sz == sym.type.getSize())
             {
-                sym->wholeCount += 1;
-                if (sym->wholeCount == 2)
+                sym.wholeCount += 1;
+                if (sym.wholeCount == 2)
                     multiEntrySet.insert(sym);
             }
             return &(*iter);
@@ -179,11 +179,11 @@ namespace Sla.DECCORE
             dynamicentry.push_back(SymbolEntry(sym, exfl, hash, off, sz, uselim));
             list<SymbolEntry>::iterator iter = dynamicentry.end();
             --iter;
-            sym->mapentry.push_back(iter); // Store reference to map entry in symbol
-            if (sz == sym->type->getSize())
+            sym.mapentry.push_back(iter); // Store reference to map entry in symbol
+            if (sz == sym.type.getSize())
             {
-                sym->wholeCount += 1;
-                if (sym->wholeCount == 2)
+                sym.wholeCount += 1;
+                if (sym.wholeCount == 2)
                     multiEntrySet.insert(sym);
             }
             return &dynamicentry.back();
@@ -210,7 +210,7 @@ namespace Sla.DECCORE
             : base(id, nm, g, this)
         {
             nextUniqueId = 0;
-            maptable.resize(g->numSpaces(), (EntryMap*)0);
+            maptable.resize(g.numSpaces(), (EntryMap*)0);
         }
 
         /// Construct as a cache
@@ -218,7 +218,7 @@ namespace Sla.DECCORE
             : base(id, nm, g, own)
         {
             nextUniqueId = 0;
-            maptable.resize(g->numSpaces(), (EntryMap*)0);
+            maptable.resize(g.numSpaces(), (EntryMap*)0);
         }
 
         public override void clear()
@@ -288,7 +288,7 @@ namespace Sla.DECCORE
                 while (iter != nametree.end())
                 {
                     Symbol* sym = *iter++;
-                    if (sym->getCategory() >= 0) continue;
+                    if (sym.getCategory() >= 0) continue;
                     removeSymbol(sym);
                 }
             }
@@ -302,20 +302,20 @@ namespace Sla.DECCORE
             while (iter != nametree.end())
             {
                 Symbol* sym = *iter++;
-                if (sym->isTypeLocked())
+                if (sym.isTypeLocked())
                 {   // Only hold if TYPE locked
-                    if (!sym->isNameLocked())
+                    if (!sym.isNameLocked())
                     { // Clear an unlocked name
-                        if (!sym->isNameUndefined())
+                        if (!sym.isNameUndefined())
                         {
                             renameSymbol(sym, buildUndefinedName());
                         }
                     }
                     clearAttribute(sym, Varnode::nolocalalias); // Clear any calculated attributes
-                    if (sym->isSizeTypeLocked())
+                    if (sym.isSizeTypeLocked())
                         resetSizeLockType(sym);
                 }
-                else if (sym->getCategory() == Symbol::equate)
+                else if (sym.getCategory() == Symbol::equate)
                 {
                     // Note we treat EquateSymbols as locked for purposes of this method
                     // as a typelock (which traditionally prevents a symbol from being cleared)
@@ -336,16 +336,16 @@ namespace Sla.DECCORE
                 for (int4 i = 0; i < sz; ++i)
                 {
                     Symbol* sym = category[cat][i];
-                    if (sym->isTypeLocked())
+                    if (sym.isTypeLocked())
                     { // Only hold if TYPE locked
-                        if (!sym->isNameLocked())
+                        if (!sym.isNameLocked())
                         { // Clear an unlocked name
-                            if (!sym->isNameUndefined())
+                            if (!sym.isNameUndefined())
                             {
                                 renameSymbol(sym, buildUndefinedName());
                             }
                         }
-                        if (sym->isSizeTypeLocked())
+                        if (sym.isSizeTypeLocked())
                             resetSizeLockType(sym);
                     }
                     else
@@ -359,12 +359,12 @@ namespace Sla.DECCORE
                 while (iter != nametree.end())
                 {
                     Symbol* sym = *iter++;
-                    if (sym->getCategory() >= 0) continue;
-                    if (sym->isTypeLocked())
+                    if (sym.getCategory() >= 0) continue;
+                    if (sym.isTypeLocked())
                     {
-                        if (!sym->isNameLocked())
+                        if (!sym.isNameLocked())
                         { // Clear an unlocked name
-                            if (!sym->isNameUndefined())
+                            if (!sym.isNameUndefined())
                             {
                                 renameSymbol(sym, buildUndefinedName());
                             }
@@ -378,7 +378,7 @@ namespace Sla.DECCORE
 
         public override void adjustCaches()
         {
-            maptable.resize(glb->numSpaces(), (EntryMap*)0);
+            maptable.resize(glb.numSpaces(), (EntryMap*)0);
         }
 
         ~ScopeInternal()
@@ -405,17 +405,17 @@ namespace Sla.DECCORE
             list<SymbolEntry>::const_iterator curiter;
             if (iter != maptable.end())
             {
-                curiter = (*iter)->begin_list();
-                if (curiter == (*iter)->end_list())
+                curiter = (*iter).begin_list();
+                if (curiter == (*iter).end_list())
                 {
-                    while ((iter != maptable.end()) && (curiter == (*iter)->end_list()))
+                    while ((iter != maptable.end()) && (curiter == (*iter).end_list()))
                     {
                         do
                         {
                             ++iter;
                         } while ((iter != maptable.end()) && ((*iter) == (EntryMap*)0));
                         if (iter != maptable.end())
-                            curiter = (*iter)->begin_list();
+                            curiter = (*iter).begin_list();
                     }
 
                 }
@@ -453,30 +453,30 @@ namespace Sla.DECCORE
         {
             vector<list<SymbolEntry>::iterator>::iterator iter;
 
-            if (symbol->wholeCount > 1)
+            if (symbol.wholeCount > 1)
                 multiEntrySet.erase(symbol);
             // Remove each mapping of the symbol
-            for (iter = symbol->mapentry.begin(); iter != symbol->mapentry.end(); ++iter)
+            for (iter = symbol.mapentry.begin(); iter != symbol.mapentry.end(); ++iter)
             {
                 AddrSpace* spc = (*(*iter)).getAddr().getSpace();
                 if (spc == (AddrSpace*)0) // A null address indicates a dynamic mapping
                     dynamicentry.erase(*iter);
                 else
                 {
-                    EntryMap* rangemap = maptable[spc->getIndex()];
-                    rangemap->erase(*iter);
+                    EntryMap* rangemap = maptable[spc.getIndex()];
+                    rangemap.erase(*iter);
                 }
             }
-            symbol->wholeCount = 0;
-            symbol->mapentry.clear();
+            symbol.wholeCount = 0;
+            symbol.mapentry.clear();
         }
 
         public override void removeSymbol(Symbol symbol)
         {
-            if (symbol->category >= 0)
+            if (symbol.category >= 0)
             {
-                vector<Symbol*> & list(category[symbol->category]);
-                list[symbol->catindex] = (Symbol*)0;
+                vector<Symbol*> & list(category[symbol.category]);
+                list[symbol.catindex] = (Symbol*)0;
                 while ((!list.empty()) && (list.back() == (Symbol*)0))
                     list.pop_back();
             }
@@ -488,94 +488,94 @@ namespace Sla.DECCORE
         public override void renameSymbol(Symbol sym, string newname)
         {
             nametree.erase(sym);        // Erase under old name
-            if (sym->wholeCount > 1)
+            if (sym.wholeCount > 1)
                 multiEntrySet.erase(sym);   // The multi-entry set is sorted by name, remove
-            string oldname = sym->name;
-            sym->name = newname;
-            sym->displayName = newname;
+            string oldname = sym.name;
+            sym.name = newname;
+            sym.displayName = newname;
             insertNameTree(sym);
-            if (sym->wholeCount > 1)
+            if (sym.wholeCount > 1)
                 multiEntrySet.insert(sym);  // Reenter into the multi-entry set now that name is changed
         }
 
         public override void retypeSymbol(Symbol sym, Datatype ct)
         {
-            if (ct->hasStripped())
-                ct = ct->getStripped();
-            if ((sym->type->getSize() == ct->getSize()) || (sym->mapentry.empty()))
+            if (ct.hasStripped())
+                ct = ct.getStripped();
+            if ((sym.type.getSize() == ct.getSize()) || (sym.mapentry.empty()))
             {
                 // If size is the same, or no mappings nothing special to do
-                sym->type = ct;
-                sym->checkSizeTypeLock();
+                sym.type = ct;
+                sym.checkSizeTypeLock();
                 return;
             }
-            else if (sym->mapentry.size() == 1)
+            else if (sym.mapentry.size() == 1)
             {
-                list<SymbolEntry>::iterator iter = sym->mapentry.back();
+                list<SymbolEntry>::iterator iter = sym.mapentry.back();
                 if ((*iter).isAddrTied())
                 {
                     // Save the starting address of map
                     Address addr((* iter).getAddr());
 
                     // Find the correct rangemap
-                    EntryMap* rangemap = maptable[(*iter).getAddr().getSpace()->getIndex()];
+                    EntryMap* rangemap = maptable[(*iter).getAddr().getSpace().getIndex()];
                     // Remove the map entry
-                    rangemap->erase(iter);
-                    sym->mapentry.pop_back();   // Remove reference to map entry
-                    sym->wholeCount = 0;
+                    rangemap.erase(iter);
+                    sym.mapentry.pop_back();   // Remove reference to map entry
+                    sym.wholeCount = 0;
 
                     // Now we are ready to change the type
-                    sym->type = ct;
-                    sym->checkSizeTypeLock();
+                    sym.type = ct;
+                    sym.checkSizeTypeLock();
                     addMapPoint(sym, addr, Address()); // Re-add map with new size
                     return;
                 }
             }
-            throw RecovError("Unable to retype symbol: " + sym->name);
+            throw RecovError("Unable to retype symbol: " + sym.name);
         }
 
         public override void setAttribute(Symbol sym, uint4 attr)
         {
             attr &= (Varnode::typelock | Varnode::namelock | Varnode::readonly | Varnode::incidental_copy |
                  Varnode::nolocalalias | Varnode::volatil | Varnode::indirectstorage | Varnode::hiddenretparm);
-            sym->flags |= attr;
-            sym->checkSizeTypeLock();
+            sym.flags |= attr;
+            sym.checkSizeTypeLock();
         }
 
         public override void clearAttribute(Symbol sym, uint4 attr)
         {
             attr &= (Varnode::typelock | Varnode::namelock | Varnode::readonly | Varnode::incidental_copy |
                  Varnode::nolocalalias | Varnode::volatil | Varnode::indirectstorage | Varnode::hiddenretparm);
-            sym->flags &= ~attr;
-            sym->checkSizeTypeLock();
+            sym.flags &= ~attr;
+            sym.checkSizeTypeLock();
         }
 
         public override void setDisplayFormat(Symbol sym, uint4 attr)
         {
-            sym->setDisplayFormat(attr);
+            sym.setDisplayFormat(attr);
         }
 
         public override SymbolEntry findAddr(Address addr, Address usepoint)
         {
-            EntryMap* rangemap = maptable[addr.getSpace()->getIndex()];
+            EntryMap* rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap*)0)
             {
                 pair<EntryMap::const_iterator, EntryMap::const_iterator> res;
                 if (usepoint.isInvalid())
-                    res = rangemap->find(addr.getOffset(),
+                    res = rangemap.find(addr.getOffset(),
                              EntryMap::subsorttype(false),
                              EntryMap::subsorttype(true));
                 else
-                    res = rangemap->find(addr.getOffset(),
+                    res = rangemap.find(addr.getOffset(),
                              EntryMap::subsorttype(false),
                              EntryMap::subsorttype(usepoint));
                 while (res.first != res.second)
                 {
                     --res.second;
                     SymbolEntry* entry = &(*res.second);
-                    if (entry->getAddr().getOffset() == addr.getOffset())
+                    if (entry.getAddr().getOffset() == addr.getOffset())
                     {
-                        if (entry->inUse(usepoint))
+                        if (entry.inUse(usepoint))
                             return entry;
                     }
                 }
@@ -586,16 +586,16 @@ namespace Sla.DECCORE
         public override SymbolEntry findContainer(Address addr,int4 size, Address usepoint)
         {
             SymbolEntry* bestentry = (SymbolEntry*)0;
-            EntryMap* rangemap = maptable[addr.getSpace()->getIndex()];
+            EntryMap* rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap*)0)
             {
                 pair<EntryMap::const_iterator, EntryMap::const_iterator> res;
                 if (usepoint.isInvalid())
-                    res = rangemap->find(addr.getOffset(),
+                    res = rangemap.find(addr.getOffset(),
                              EntryMap::subsorttype(false),
                              EntryMap::subsorttype(true));
                 else
-                    res = rangemap->find(addr.getOffset(),
+                    res = rangemap.find(addr.getOffset(),
                              EntryMap::subsorttype(false),
                              EntryMap::subsorttype(usepoint));
                 int4 oldsize = -1;
@@ -604,15 +604,15 @@ namespace Sla.DECCORE
                 {
                     --res.second;
                     SymbolEntry* entry = &(*res.second);
-                    if (entry->getLast() >= end)
+                    if (entry.getLast() >= end)
                     { // We contain the range
-                        if ((entry->getSize() < oldsize) || (oldsize == -1))
+                        if ((entry.getSize() < oldsize) || (oldsize == -1))
                         {
-                            if (entry->inUse(usepoint))
+                            if (entry.inUse(usepoint))
                             {
                                 bestentry = entry;
-                                if (entry->getSize() == size) break;
-                                oldsize = entry->getSize();
+                                if (entry.getSize() == size) break;
+                                oldsize = entry.getSize();
                             }
                         }
                     }
@@ -624,16 +624,16 @@ namespace Sla.DECCORE
         public override SymbolEntry findClosestFit(Address addr,int4 size, Address usepoint)
         {
             SymbolEntry* bestentry = (SymbolEntry*)0;
-            EntryMap* rangemap = maptable[addr.getSpace()->getIndex()];
+            EntryMap* rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap*)0)
             {
                 pair<EntryMap::const_iterator, EntryMap::const_iterator> res;
                 if (usepoint.isInvalid())
-                    res = rangemap->find(addr.getOffset(),
+                    res = rangemap.find(addr.getOffset(),
                              EntryMap::subsorttype(false),
                              EntryMap::subsorttype(true));
                 else
-                    res = rangemap->find(addr.getOffset(),
+                    res = rangemap.find(addr.getOffset(),
                              EntryMap::subsorttype(false),
                              EntryMap::subsorttype(usepoint));
                 int4 olddiff = -10000;
@@ -643,13 +643,13 @@ namespace Sla.DECCORE
                 {
                     --res.second;
                     SymbolEntry* entry = &(*res.second);
-                    if (entry->getLast() >= addr.getOffset())
+                    if (entry.getLast() >= addr.getOffset())
                     { // We contain start
-                        newdiff = entry->getSize() - size;
+                        newdiff = entry.getSize() - size;
                         if (((olddiff < 0) && (newdiff > olddiff)) ||
                             ((olddiff >= 0) && (newdiff >= 0) && (newdiff < olddiff)))
                         {
-                            if (entry->inUse(usepoint))
+                            if (entry.inUse(usepoint))
                             {
                                 bestentry = entry;
                                 if (newdiff == 0) break;
@@ -665,19 +665,19 @@ namespace Sla.DECCORE
         public override Funcdata findFunction(Address addr)
         {
             FunctionSymbol* sym;
-            EntryMap* rangemap = maptable[addr.getSpace()->getIndex()];
+            EntryMap* rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap*)0)
             {
                 pair<EntryMap::const_iterator, EntryMap::const_iterator> res;
-                res = rangemap->find(addr.getOffset());
+                res = rangemap.find(addr.getOffset());
                 while (res.first != res.second)
                 {
                     SymbolEntry* entry = &(*res.first);
-                    if (entry->getAddr().getOffset() == addr.getOffset())
+                    if (entry.getAddr().getOffset() == addr.getOffset())
                     {
-                        sym = dynamic_cast<FunctionSymbol*>(entry->getSymbol());
+                        sym = dynamic_cast<FunctionSymbol*>(entry.getSymbol());
                         if (sym != (FunctionSymbol*)0)
-                            return sym->getFunction();
+                            return sym.getFunction();
                     }
                     ++res.first;
                 }
@@ -688,17 +688,17 @@ namespace Sla.DECCORE
         public override ExternRefSymbol findExternalRef(Address addr)
         {
             ExternRefSymbol* sym = (ExternRefSymbol*)0;
-            EntryMap* rangemap = maptable[addr.getSpace()->getIndex()];
+            EntryMap* rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap*)0)
             {
                 pair<EntryMap::const_iterator, EntryMap::const_iterator> res;
-                res = rangemap->find(addr.getOffset());
+                res = rangemap.find(addr.getOffset());
                 while (res.first != res.second)
                 {
                     SymbolEntry* entry = &(*res.first);
-                    if (entry->getAddr().getOffset() == addr.getOffset())
+                    if (entry.getAddr().getOffset() == addr.getOffset())
                     {
-                        sym = dynamic_cast<ExternRefSymbol*>(entry->getSymbol());
+                        sym = dynamic_cast<ExternRefSymbol*>(entry.getSymbol());
                         break;
                     }
                     ++res.first;
@@ -710,22 +710,22 @@ namespace Sla.DECCORE
         public override LabSymbol findCodeLabel(Address addr)
         {
             LabSymbol* sym = (LabSymbol*)0;
-            EntryMap* rangemap = maptable[addr.getSpace()->getIndex()];
+            EntryMap* rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap*)0)
             {
                 pair<EntryMap::const_iterator, EntryMap::const_iterator> res;
-                res = rangemap->find(addr.getOffset(),
+                res = rangemap.find(addr.getOffset(),
                          EntryMap::subsorttype(false),
                          EntryMap::subsorttype(addr));
                 while (res.first != res.second)
                 {
                     --res.second;
                     SymbolEntry* entry = &(*res.second);
-                    if (entry->getAddr().getOffset() == addr.getOffset())
+                    if (entry.getAddr().getOffset() == addr.getOffset())
                     {
-                        if (entry->inUse(addr))
+                        if (entry.inUse(addr))
                         {
-                            sym = dynamic_cast<LabSymbol*>(entry->getSymbol());
+                            sym = dynamic_cast<LabSymbol*>(entry.getSymbol());
                             break;
                         }
                     }
@@ -736,12 +736,12 @@ namespace Sla.DECCORE
 
         public override SymbolEntry findOverlap(Address addr,int4 size)
         {
-            EntryMap* rangemap = maptable[addr.getSpace()->getIndex()];
+            EntryMap* rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap*)0)
             {
                 EntryMap::const_iterator iter;
-                iter = rangemap->find_overlap(addr.getOffset(), addr.getOffset() + size - 1);
-                if (iter != rangemap->end())
+                iter = rangemap.find_overlap(addr.getOffset(), addr.getOffset() + size - 1);
+                if (iter != rangemap.end())
                     return &(*iter);
             }
             return (SymbolEntry*)0;
@@ -753,7 +753,7 @@ namespace Sla.DECCORE
             while (iter != nametree.end())
             {
                 Symbol* sym = *iter;
-                if (sym->name != nm) break;
+                if (sym.name != nm) break;
                 res.push_back(sym);
                 ++iter;
             }
@@ -765,15 +765,15 @@ namespace Sla.DECCORE
             SymbolNameTree::const_iterator iter = nametree.lower_bound(&sym);
             if (iter != nametree.end())
             {
-                if ((*iter)->getName() == nm)
+                if ((*iter).getName() == nm)
                     return true;
             }
             Scope* par = getParent();
             if (par == (Scope*)0 || par == op2)
                 return false;
-            if (par->getParent() == (Scope*)0)  // Never recurse into global scope
+            if (par.getParent() == (Scope*)0)  // Never recurse into global scope
                 return false;
-            return par->isNameUsed(nm, op2);
+            return par.isNameUsed(nm, op2);
         }
 
         public override Funcdata resolveExternalRefFunction(ExternRefSymbol sym);
@@ -782,7 +782,7 @@ namespace Sla.DECCORE
             int4 index, uint4 flags)
         {
             ostringstream s;
-            int4 sz = (ct == (Datatype*)0) ? 1 : ct->getSize();
+            int4 sz = (ct == (Datatype*)0) ? 1 : ct.getSize();
 
             if ((flags & Varnode::unaffected) != 0)
             {
@@ -791,7 +791,7 @@ namespace Sla.DECCORE
                 else
                 {
                     string unaffname;
-                    unaffname = glb->translate->getRegisterName(addr.getSpace(), addr.getOffset(), sz);
+                    unaffname = glb.translate.getRegisterName(addr.getSpace(), addr.getOffset(), sz);
                     if (unaffname.empty())
                     {
                         s << "unaff_";
@@ -804,27 +804,27 @@ namespace Sla.DECCORE
             else if ((flags & Varnode::persist) != 0)
             {
                 string spacename;
-                spacename = glb->translate->getRegisterName(addr.getSpace(), addr.getOffset(), sz);
+                spacename = glb.translate.getRegisterName(addr.getSpace(), addr.getOffset(), sz);
                 if (!spacename.empty())
                     s << spacename;
                 else
                 {
                     if (ct != (Datatype*)0)
-                        ct->printNameBase(s);
-                    spacename = addr.getSpace()->getName();
+                        ct.printNameBase(s);
+                    spacename = addr.getSpace().getName();
                     spacename[0] = toupper(spacename[0]); // Capitalize space
                     s << spacename;
                     s << hex << setfill('0') << setw(2 * addr.getAddrSize());
-                    s << AddrSpace::byteToAddress(addr.getOffset(), addr.getSpace()->getWordSize());
+                    s << AddrSpace::byteToAddress(addr.getOffset(), addr.getSpace().getWordSize());
                 }
             }
             else if (((flags & Varnode::input) != 0) && (index < 0))
             { // Irregular input
                 string regname;
-                regname = glb->translate->getRegisterName(addr.getSpace(), addr.getOffset(), sz);
+                regname = glb.translate.getRegisterName(addr.getSpace(), addr.getOffset(), sz);
                 if (regname.empty())
                 {
-                    s << "in_" << addr.getSpace()->getName() << '_';
+                    s << "in_" << addr.getSpace().getName() << '_';
                     s << setw(8) << setfill('0') << hex << addr.getOffset();
                 }
                 else
@@ -837,18 +837,18 @@ namespace Sla.DECCORE
             else if ((flags & Varnode::addrtied) != 0)
             {
                 if (ct != (Datatype*)0)
-                    ct->printNameBase(s);
-                string spacename = addr.getSpace()->getName();
+                    ct.printNameBase(s);
+                string spacename = addr.getSpace().getName();
                 spacename[0] = toupper(spacename[0]); // Capitalize space
                 s << spacename;
                 s << hex << setfill('0') << setw(2 * addr.getAddrSize());
-                s << AddrSpace::byteToAddress(addr.getOffset(), addr.getSpace()->getWordSize());
+                s << AddrSpace::byteToAddress(addr.getOffset(), addr.getSpace().getWordSize());
             }
             else if ((flags & Varnode::indirect_creation) != 0)
             {
                 string regname;
                 s << "extraout_";
-                regname = glb->translate->getRegisterName(addr.getSpace(), addr.getOffset(), sz);
+                regname = glb.translate.getRegisterName(addr.getSpace(), addr.getOffset(), sz);
                 if (!regname.empty())
                     s << regname;
                 else
@@ -857,7 +857,7 @@ namespace Sla.DECCORE
             else
             {           // Some sort of local variable
                 if (ct != (Datatype*)0)
-                    ct->printNameBase(s);
+                    ct.printNameBase(s);
                 s << "Var" << dec << index++;
                 if (findFirstByName(s.str()) != nametree.end())
                 {   // If the name already exists
@@ -865,7 +865,7 @@ namespace Sla.DECCORE
                     {   // Try bumping up the index a few times before calling makeNameUnique
                         ostringstream s2;
                         if (ct != (Datatype*)0)
-                            ct->printNameBase(s2);
+                            ct.printNameBase(s2);
                         s2 << "Var" << dec << index++;
                         if (findFirstByName(s2.str()) == nametree.end())
                         {
@@ -894,7 +894,7 @@ namespace Sla.DECCORE
                 --iter;
             if (iter != nametree.end())
             {
-                string symname = (*iter)->getName();
+                string symname = (*iter).getName();
                 if ((symname.size() == 15) && (0 == symname.compare(0, 7, "$$undef")))
                 {
                     istringstream s(symname.substr(7,8) );
@@ -926,7 +926,7 @@ namespace Sla.DECCORE
                 --iter2;            // Last symbol whose name starts with nm
                 if (iter == iter2) break;
                 Symbol* bsym = *iter2;
-                string bname = bsym->getName();
+                string bname = bsym.getName();
                 bool isXForm = false;
                 int4 digCount = 0;
                 if ((bname.size() >= (nm.size() + 3)) && (bname[nm.size()] == '_'))
@@ -987,7 +987,7 @@ namespace Sla.DECCORE
             encoder.writeUnsignedInteger(ATTRIB_ID, uniqueId);
             if (getParent() != (Scope*)0) {
                 encoder.openElement(ELEM_PARENT);
-                encoder.writeUnsignedInteger(ATTRIB_ID, getParent()->getId());
+                encoder.writeUnsignedInteger(ATTRIB_ID, getParent().getId());
                 encoder.closeElement(ELEM_PARENT);
             }
             getRangeTree().encode(encoder);
@@ -1000,14 +1000,14 @@ namespace Sla.DECCORE
                 {
                     Symbol* sym = *iter;
                     int4 symbolType = 0;
-                    if (!sym->mapentry.empty())
+                    if (!sym.mapentry.empty())
                     {
-                        SymbolEntry entry = *sym->mapentry.front();
+                        SymbolEntry entry = *sym.mapentry.front();
                         if (entry.isDynamic())
                         {
-                            if (sym->getCategory() == Symbol::union_facet)
+                            if (sym.getCategory() == Symbol::union_facet)
                                 continue;       // Don't save override
-                            symbolType = (sym->getCategory() == Symbol::equate) ? 2 : 1;
+                            symbolType = (sym.getCategory() == Symbol::equate) ? 2 : 1;
                         }
                     }
                     encoder.openElement(ELEM_MAPSYM);
@@ -1015,9 +1015,9 @@ namespace Sla.DECCORE
                         encoder.writeString(ATTRIB_TYPE, "dynamic");
                     else if (symbolType == 2)
                         encoder.writeString(ATTRIB_TYPE, "equate");
-                    sym->encode(encoder);
+                    sym.encode(encoder);
                     vector<list<SymbolEntry>::iterator>::const_iterator miter;
-                    for (miter = sym->mapentry.begin(); miter != sym->mapentry.end(); ++miter)
+                    for (miter = sym.mapentry.begin(); miter != sym.mapentry.end(); ++miter)
                     {
                         SymbolEntry entry = (*(*miter));
                         entry.encode(encoder);
@@ -1032,7 +1032,7 @@ namespace Sla.DECCORE
         public override void decode(Decoder decoder)
         {
             //  uint4 elemId = decoder.openElement(ELEM_SCOPE);
-            //  name = el->getAttributeValue("name");	// Name must already be set in the constructor
+            //  name = el.getAttributeValue("name");	// Name must already be set in the constructor
             bool rangeequalssymbols = false;
 
             uint4 subId = decoder.peekElement();
@@ -1045,7 +1045,7 @@ namespace Sla.DECCORE
             {
                 RangeList newrangetree;
                 newrangetree.decode(decoder);
-                glb->symboltab->setRange(this, newrangetree);
+                glb.symboltab.setRange(this, newrangetree);
             }
             else if (subId == ELEM_RANGEEQUALSSYMBOLS)
             {
@@ -1065,8 +1065,8 @@ namespace Sla.DECCORE
                         Symbol* sym = addMapSym(decoder);
                         if (rangeequalssymbols)
                         {
-                            SymbolEntry* e = sym->getFirstWholeMap();
-                            glb->symboltab->addRange(this, e->getAddr().getSpace(), e->getFirst(), e->getLast());
+                            SymbolEntry* e = sym.getFirstWholeMap();
+                            glb.symboltab.addRange(this, e.getAddr().getSpace(), e.getFirst(), e.getLast());
                         }
                     }
                     else if (symId == ELEM_HOLE)
@@ -1090,8 +1090,8 @@ namespace Sla.DECCORE
                 EntryMap* rangemap = maptable[i];
                 if (rangemap == (EntryMap*)0) continue;
                 list<SymbolEntry>::const_iterator iter, enditer;
-                iter = rangemap->begin_list();
-                enditer = rangemap->end_list();
+                iter = rangemap.begin_list();
+                enditer = rangemap.end_list();
                 for (; iter != enditer; ++iter)
                     (*iter).printEntry(s);
             }
@@ -1115,23 +1115,23 @@ namespace Sla.DECCORE
 
         public override void setCategory(Symbol sym, int4 cat, int4 ind)
         {
-            if (sym->category >= 0)
+            if (sym.category >= 0)
             {
-                vector<Symbol*> & list(category[sym->category]);
-                list[sym->catindex] = (Symbol*)0;
+                vector<Symbol*> & list(category[sym.category]);
+                list[sym.catindex] = (Symbol*)0;
                 while ((!list.empty()) && (list.back() == (Symbol*)0))
                     list.pop_back();
             }
 
-            sym->category = cat;
-            sym->catindex = ind;
+            sym.category = cat;
+            sym.catindex = ind;
             if (cat < 0) return;
-            while (category.size() <= sym->category)
+            while (category.size() <= sym.category)
                 category.push_back(vector<Symbol*>());
-            vector<Symbol*> & list(category[sym->category]);
-            while (list.size() <= sym->catindex)
+            vector<Symbol*> & list(category[sym.category]);
+            while (list.size() <= sym.catindex)
                 list.push_back((Symbol*)0);
-            list[sym->catindex] = sym;
+            list[sym.catindex] = sym;
         }
 
         /// Assign a default name (via buildVariableName) to any unnamed symbol
@@ -1148,7 +1148,7 @@ namespace Sla.DECCORE
             while (iter != nametree.end())
             {
                 Symbol* sym = *iter;
-                if (!sym->isNameUndefined()) break;
+                if (!sym.isNameUndefined()) break;
                 ++iter;     // Advance before renaming
                 string nm = buildDefaultName(sym, base, (Varnode*)0);
                 renameSymbol(sym, nm);

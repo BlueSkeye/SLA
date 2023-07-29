@@ -18,7 +18,7 @@ namespace Sla.EXTRA
             maxnum = opindex = ind;
         }
         
-        public override UnifyConstraint clone() => (new DummyOpConstraint(opindex))->copyid(this);
+        public override UnifyConstraint clone() => (new DummyOpConstraint(opindex)).copyid(this);
 
         public override bool step(UnifyState state) => true;
 

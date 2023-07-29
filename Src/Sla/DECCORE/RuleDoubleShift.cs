@@ -45,43 +45,43 @@ namespace Sla.DECCORE
             int4 sa1, sa2, size;
             uintb mask;
 
-            if (!op->getIn(1)->isConstant()) return 0;
-            secvn = op->getIn(0);
-            if (!secvn->isWritten()) return 0;
-            secop = secvn->getDef();
-            opc2 = secop->code();
+            if (!op.getIn(1).isConstant()) return 0;
+            secvn = op.getIn(0);
+            if (!secvn.isWritten()) return 0;
+            secop = secvn.getDef();
+            opc2 = secop.code();
             if ((opc2 != CPUI_INT_LEFT) && (opc2 != CPUI_INT_RIGHT) && (opc2 != CPUI_INT_MULT))
                 return 0;
-            if (!secop->getIn(1)->isConstant()) return 0;
-            opc1 = op->code();
-            size = secvn->getSize();
-            if (!secop->getIn(0)->isHeritageKnown()) return 0;
+            if (!secop.getIn(1).isConstant()) return 0;
+            opc1 = op.code();
+            size = secvn.getSize();
+            if (!secop.getIn(0).isHeritageKnown()) return 0;
 
             if (opc1 == CPUI_INT_MULT)
             {
-                uintb val = op->getIn(1)->getOffset();
+                uintb val = op.getIn(1).getOffset();
                 sa1 = leastsigbit_set(val);
                 if ((val >> sa1) != (uintb)1) return 0; // Not multiplying by a power of 2
                 opc1 = CPUI_INT_LEFT;
             }
             else
-                sa1 = op->getIn(1)->getOffset();
+                sa1 = op.getIn(1).getOffset();
             if (opc2 == CPUI_INT_MULT)
             {
-                uintb val = secop->getIn(1)->getOffset();
+                uintb val = secop.getIn(1).getOffset();
                 sa2 = leastsigbit_set(val);
                 if ((val >> sa2) != (uintb)1) return 0; // Not multiplying by a power of 2
                 opc2 = CPUI_INT_LEFT;
             }
             else
-                sa2 = secop->getIn(1)->getOffset();
+                sa2 = secop.getIn(1).getOffset();
             if (opc1 == opc2)
             {
                 if (sa1 + sa2 < 8 * size)
                 {
                     newvn = data.newConstant(4, sa1 + sa2);
                     data.opSetOpcode(op, opc1);
-                    data.opSetInput(op, secop->getIn(0), 0);
+                    data.opSetInput(op, secop.getIn(0), 0);
                     data.opSetInput(op, newvn, 1);
                 }
                 else
@@ -101,7 +101,7 @@ namespace Sla.DECCORE
                     mask = (mask >> sa1) & mask;
                 newvn = data.newConstant(size, mask);
                 data.opSetOpcode(op, CPUI_INT_AND);
-                data.opSetInput(op, secop->getIn(0), 0);
+                data.opSetInput(op, secop.getIn(0), 0);
                 data.opSetInput(op, newvn, 1);
             }
             else

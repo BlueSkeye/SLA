@@ -25,22 +25,22 @@ namespace Sla.EXTRA
             int4 size;
             uint8 hash;
 
-            if (dcp->fd == (Funcdata*)0)
+            if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function loaded");
             s >> ws >> unionName;
-            ct = dcp->conf->types->findByName(unionName);
-            if (ct == (Datatype*)0 || ct->getMetatype() != TYPE_UNION)
+            ct = dcp.conf.types.findByName(unionName);
+            if (ct == (Datatype*)0 || ct.getMetatype() != TYPE_UNION)
                 throw IfaceParseError("Bad union data-type: " + unionName);
             s >> ws >> dec >> fieldNum;
-            if (fieldNum < -1 || fieldNum >= ct->numDepend())
+            if (fieldNum < -1 || fieldNum >= ct.numDepend())
                 throw IfaceParseError("Bad field index");
-            Address addr = parse_machaddr(s, size, *dcp->conf->types); // Read pc address of hash
+            Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read pc address of hash
 
             s >> hex >> hash;       // Parse the hash value
             ostringstream s2;
             s2 << "unionfacet" << dec << (fieldNum + 1) << '_' << hex << addr.getOffset();
-            Symbol* sym = dcp->fd->getScopeLocal()->addUnionFacetSymbol(s2.str(), ct, fieldNum, addr, hash);
-            dcp->fd->getScopeLocal()->setAttribute(sym, Varnode::typelock | Varnode::namelock);
+            Symbol* sym = dcp.fd.getScopeLocal().addUnionFacetSymbol(s2.str(), ct, fieldNum, addr, hash);
+            dcp.fd.getScopeLocal().setAttribute(sym, Varnode::typelock | Varnode::namelock);
         }
     }
 }

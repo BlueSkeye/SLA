@@ -42,29 +42,29 @@ namespace Sla.DECCORE
             PcodeOp* pieceop;
             int4 offset, outsize;
 
-            base = op->getIn(0);
-            if (!base->isWritten()) return 0;
-            pieceop = base->getDef();
-            if (pieceop->code() != CPUI_PIECE) return 0;
-            offset = op->getIn(1)->getOffset();
-            outsize = op->getOut()->getSize();
+            base = op.getIn(0);
+            if (!base.isWritten()) return 0;
+            pieceop = base.getDef();
+            if (pieceop.code() != CPUI_PIECE) return 0;
+            offset = op.getIn(1).getOffset();
+            outsize = op.getOut().getSize();
 
-            vn1 = pieceop->getIn(0);
-            vn2 = pieceop->getIn(1);
+            vn1 = pieceop.getIn(0);
+            vn2 = pieceop.getIn(1);
 
-            if (offset < vn2->getSize())
+            if (offset < vn2.getSize())
             {   // Sub draws from vn2
-                if (offset + outsize > vn2->getSize()) return 0;    // Also from vn1
+                if (offset + outsize > vn2.getSize()) return 0;    // Also from vn1
                 vn = vn2;
             }
             else
             {           // Sub draws from vn1
                 vn = vn1;
-                offset -= vn2->getSize();   // offset relative to vn1
+                offset -= vn2.getSize();   // offset relative to vn1
             }
 
-            if (vn->isFree() && (!vn->isConstant())) return 0;
-            if ((offset == 0) && (outsize == vn->getSize()))
+            if (vn.isFree() && (!vn.isConstant())) return 0;
+            if ((offset == 0) && (outsize == vn.getSize()))
             {
                 // Eliminate SUB and CONCAT altogether
                 data.opSetOpcode(op, CPUI_COPY);

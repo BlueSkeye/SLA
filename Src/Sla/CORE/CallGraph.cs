@@ -44,7 +44,7 @@ namespace Sla.CORE
                         lownode = &node;
                     else
                     {
-                        if (node.numInEdge() < lownode->numInEdge())
+                        if (node.numInEdge() < lownode.numInEdge())
                             lownode = &node;
                     }
                 }
@@ -52,7 +52,7 @@ namespace Sla.CORE
             if ((!newseeds) && (!allcovered))
             {
                 seeds.push_back(lownode);
-                lownode->flags |= CallGraphNode::mark | CallGraphNode::entrynode;
+                lownode.flags |= CallGraphNode::mark | CallGraphNode::entrynode;
             }
             return allcovered;
         }
@@ -62,35 +62,35 @@ namespace Sla.CORE
             CallGraphNode* next;
             vector<LeafIterator> stack;
 
-            node->flags |= CallGraphNode::currentcycle;
+            node.flags |= CallGraphNode::currentcycle;
             stack.push_back(LeafIterator(node));
 
             while (!stack.empty())
             {
                 CallGraphNode* cur = stack.back().node; // Current node
                 int4 st = stack.back().outslot; // which out edge we will follow
-                if (st >= cur->outedge.size())
+                if (st >= cur.outedge.size())
                 {
-                    cur->flags &= ~((uint4)CallGraphNode::currentcycle);
+                    cur.flags &= ~((uint4)CallGraphNode::currentcycle);
                     stack.pop_back();
                 }
                 else
                 {
                     stack.back().outslot += 1;
-                    if ((cur->outedge[st].flags & CallGraphEdge::cycle) != 0) continue;
-                    next = cur->outedge[st].to;
-                    if ((next->flags & CallGraphNode::currentcycle) != 0)
+                    if ((cur.outedge[st].flags & CallGraphEdge::cycle) != 0) continue;
+                    next = cur.outedge[st].to;
+                    if ((next.flags & CallGraphNode::currentcycle) != 0)
                     { // Found a cycle
                         snipEdge(cur, st);
                         continue;
                     }
-                    else if ((next->flags & CallGraphNode::mark) != 0)
+                    else if ((next.flags & CallGraphNode::mark) != 0)
                     {   // Already traced before
-                        cur->outedge[st].flags |= CallGraphEdge::dontfollow;
+                        cur.outedge[st].flags |= CallGraphEdge::dontfollow;
                         continue;
                     }
-                    next->parentedge = cur->outedge[st].complement;
-                    next->flags |= (CallGraphNode::currentcycle | CallGraphNode::mark);
+                    next.parentedge = cur.outedge[st].complement;
+                    next.flags |= (CallGraphNode::currentcycle | CallGraphNode::mark);
                     stack.push_back(LeafIterator(next));
                 }
             }
@@ -98,21 +98,21 @@ namespace Sla.CORE
 
         private void snipEdge(CallGraphNode node, int4 i)
         {
-            node->outedge[i].flags |= CallGraphEdge::cycle | CallGraphEdge::dontfollow;
-            int4 toi = node->outedge[i].complement;
-            CallGraphNode* to = node->outedge[i].to;
-            to->inedge[toi].flags |= CallGraphEdge::cycle;
+            node.outedge[i].flags |= CallGraphEdge::cycle | CallGraphEdge::dontfollow;
+            int4 toi = node.outedge[i].complement;
+            CallGraphNode* to = node.outedge[i].to;
+            to.inedge[toi].flags |= CallGraphEdge::cycle;
             bool onlycycle = true;
-            for (uint4 j = 0; j < to->inedge.size(); ++j)
+            for (uint4 j = 0; j < to.inedge.size(); ++j)
             {
-                if ((to->inedge[j].flags & CallGraphEdge::cycle) == 0)
+                if ((to.inedge[j].flags & CallGraphEdge::cycle) == 0)
                 {
                     onlycycle = false;
                     break;
                 }
             }
             if (onlycycle)
-                to->flags |= CallGraphNode::onlycyclein;
+                to.flags |= CallGraphNode::onlycyclein;
         }
 
         private void clearMarks()
@@ -136,7 +136,7 @@ namespace Sla.CORE
                 while (walked < seeds.size())
                 {
                     CallGraphNode* rootnode = seeds[walked];
-                    rootnode->parentedge = walked;
+                    rootnode.parentedge = walked;
                     snipCycles(rootnode);
                     walked += 1;
                 }
@@ -146,13 +146,13 @@ namespace Sla.CORE
 
         private CallGraphNode popPossible(CallGraphNode node, int4 outslot)
         {
-            if ((node->flags & CallGraphNode::entrynode) != 0)
+            if ((node.flags & CallGraphNode::entrynode) != 0)
             {
-                outslot = node->parentedge;
+                outslot = node.parentedge;
                 return (CallGraphNode*)0;
             }
-            outslot = node->inedge[node->parentedge].complement;
-            return node->inedge[node->parentedge].from;
+            outslot = node.inedge[node.parentedge].complement;
+            return node.inedge[node.parentedge].from;
         }
 
         private CallGraphNode pushPossible(CallGraphNode node, int4 outslot)
@@ -163,40 +163,40 @@ namespace Sla.CORE
                     return (CallGraphNode*)0;
                 return seeds[outslot];
             }
-            while (outslot < node->outedge.size())
+            while (outslot < node.outedge.size())
             {
-                if ((node->outedge[outslot].flags & CallGraphEdge::dontfollow) != 0)
+                if ((node.outedge[outslot].flags & CallGraphEdge::dontfollow) != 0)
                     outslot += 1;
                 else
-                    return node->outedge[outslot].to;
+                    return node.outedge[outslot].to;
             }
             return (CallGraphNode*)0;
         }
 
         private CallGraphEdge insertBlankEdge(CallGraphNode node, int4 slot)
         {
-            node->outedge.emplace_back();
-            if (node->outedge.size() > 1)
+            node.outedge.emplace_back();
+            if (node.outedge.size() > 1)
             {
-                for (int4 i = node->outedge.size() - 2; i >= slot; --i)
+                for (int4 i = node.outedge.size() - 2; i >= slot; --i)
                 {
                     int4 newi = i + 1;
-                    CallGraphEdge & edge(node->outedge[newi]);
-                    edge = node->outedge[i];
+                    CallGraphEdge & edge(node.outedge[newi]);
+                    edge = node.outedge[i];
                     CallGraphNode* nodeout = edge.to;
-                    nodeout->inedge[edge.complement].complement += 1;
+                    nodeout.inedge[edge.complement].complement += 1;
                 }
             }
-            return node->outedge[slot];
+            return node.outedge[slot];
         }
 
         private void iterateScopesRecursive(Scope scope)
         {
-            if (!scope->isGlobal()) return;
+            if (!scope.isGlobal()) return;
             iterateFunctionsAddrOrder(scope);
             ScopeMap::const_iterator iter, enditer;
-            iter = scope->childrenBegin();
-            enditer = scope->childrenEnd();
+            iter = scope.childrenBegin();
+            enditer = scope.childrenEnd();
             for (; iter != enditer; ++iter)
             {
                 iterateScopesRecursive((*iter).second);
@@ -206,15 +206,15 @@ namespace Sla.CORE
         private void iterateFunctionsAddrOrder(Scope scope)
         {
             MapIterator miter, menditer;
-            miter = scope->begin();
-            menditer = scope->end();
+            miter = scope.begin();
+            menditer = scope.end();
             while (miter != menditer)
             {
-                Symbol* sym = (*miter)->getSymbol();
+                Symbol* sym = (*miter).getSymbol();
                 FunctionSymbol* fsym = dynamic_cast<FunctionSymbol*>(sym);
                 ++miter;
                 if (fsym != (FunctionSymbol*)0)
-                    addNode(fsym->getFunction());
+                    addNode(fsym.getFunction());
             }
         }
 
@@ -225,13 +225,13 @@ namespace Sla.CORE
 
         public CallGraphNode addNode(Funcdata f)
         { // Add a node, based on an existing function -f-
-            CallGraphNode & node(graph[f->getAddress()]);
+            CallGraphNode & node(graph[f.getAddress()]);
 
             if ((node.getFuncdata() != (Funcdata*)0) && (node.getFuncdata() != f))
-                throw new LowlevelError("Functions with duplicate entry points: " + f->getName() + " " + node.getFuncdata()->getName());
+                throw new LowlevelError("Functions with duplicate entry points: " + f.getName() + " " + node.getFuncdata().getName());
 
-            node.entryaddr = f->getAddress();
-            node.name = f->getDisplayName();
+            node.entryaddr = f.getAddress();
+            node.name = f.getDisplayName();
             node.fd = f;
             return &node;
         }
@@ -259,18 +259,18 @@ namespace Sla.CORE
         public void addEdge(CallGraphNode from, CallGraphNode to, Address addr)
         {
             int4 i;
-            for (i = 0; i < from->outedge.size(); ++i)
+            for (i = 0; i < from.outedge.size(); ++i)
             {
-                CallGraphNode* outnode = from->outedge[i].to;
+                CallGraphNode* outnode = from.outedge[i].to;
                 if (outnode == to) return;  // Already have an out edge
-                if (to->entryaddr < outnode->entryaddr) break;
+                if (to.entryaddr < outnode.entryaddr) break;
             }
 
             CallGraphEdge & fromedge(insertBlankEdge(from, i));
 
-            int4 toi = to->inedge.size();
-            to->inedge.emplace_back();
-            CallGraphEdge & toedge(to->inedge.back());
+            int4 toi = to.inedge.size();
+            to.inedge.emplace_back();
+            CallGraphEdge & toedge(to.inedge.back());
 
             fromedge.from = from;
             fromedge.to = to;
@@ -285,26 +285,26 @@ namespace Sla.CORE
 
         public void deleteInEdge(CallGraphNode node, int4 i)
         {
-            int4 tosize = node->inedge.size();
-            int4 fromi = node->inedge[i].complement;
-            CallGraphNode* from = node->inedge[i].from;
-            int4 fromsize = from->outedge.size();
+            int4 tosize = node.inedge.size();
+            int4 fromi = node.inedge[i].complement;
+            CallGraphNode* from = node.inedge[i].from;
+            int4 fromsize = from.outedge.size();
 
             for (int4 j = i + 1; j < tosize; ++j)
             {
-                node->inedge[j - 1] = node->inedge[j];
-                if (node->inedge[j - 1].complement >= fromi)
-                    node->inedge[j - 1].complement -= 1;
+                node.inedge[j - 1] = node.inedge[j];
+                if (node.inedge[j - 1].complement >= fromi)
+                    node.inedge[j - 1].complement -= 1;
             }
-            node->inedge.pop_back();
+            node.inedge.pop_back();
 
             for (int4 j = fromi + 1; j < fromsize; ++j)
             {
-                from->outedge[j - 1] = from->outedge[j];
-                if (from->outedge[j - 1].complement >= i)
-                    from->outedge[j - 1].complement -= 1;
+                from.outedge[j - 1] = from.outedge[j];
+                if (from.outedge[j - 1].complement >= i)
+                    from.outedge[j - 1].complement -= 1;
             }
-            from->outedge.pop_back();
+            from.outedge.pop_back();
         }
 
         public CallGraphNode initLeafWalk()
@@ -344,33 +344,33 @@ namespace Sla.CORE
 
         public void buildAllNodes()
         {               // Make every function symbol into a node
-            iterateScopesRecursive(glb->symboltab->getGlobalScope());
+            iterateScopesRecursive(glb.symboltab.getGlobalScope());
         }
 
         public void buildEdges(Funcdata fd)
         {               // Build edges from a disassembled (decompiled) function
-            CallGraphNode* fdnode = findNode(fd->getAddress());
+            CallGraphNode* fdnode = findNode(fd.getAddress());
             CallGraphNode* tonode;
             if (fdnode == (CallGraphNode*)0)
                 throw new LowlevelError("Function is missing from callgraph");
-            if (fd->getFuncProto().getModelExtraPop() == ProtoModel::extrapop_unknown)
-                fd->fillinExtrapop();
+            if (fd.getFuncProto().getModelExtraPop() == ProtoModel::extrapop_unknown)
+                fd.fillinExtrapop();
 
-            int4 numcalls = fd->numCalls();
+            int4 numcalls = fd.numCalls();
             for (int4 i = 0; i < numcalls; ++i)
             {
-                FuncCallSpecs* fs = fd->getCallSpecs(i);
-                Address addr = fs->getEntryAddress();
+                FuncCallSpecs* fs = fd.getCallSpecs(i);
+                Address addr = fs.getEntryAddress();
                 if (!addr.isInvalid())
                 {
                     tonode = findNode(addr);
                     if (tonode == (CallGraphNode*)0)
                     {
                         string name;
-                        glb->nameFunction(addr, name);
+                        glb.nameFunction(addr, name);
                         tonode = addNode(addr, name);
                     }
-                    addEdge(fdnode, tonode, fs->getOp()->getAddr());
+                    addEdge(fdnode, tonode, fs.getOp().getAddr());
                 }
             }
         }

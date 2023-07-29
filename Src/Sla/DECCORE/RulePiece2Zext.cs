@@ -33,9 +33,9 @@ namespace Sla.DECCORE
         {
             Varnode* constvn;
 
-            constvn = op->getIn(0); // Constant must be most significant bits
-            if (!constvn->isConstant()) return 0;   // Must append with constant
-            if (constvn->getOffset() != 0) return 0; // of value 0
+            constvn = op.getIn(0); // Constant must be most significant bits
+            if (!constvn.isConstant()) return 0;   // Must append with constant
+            if (constvn.getOffset() != 0) return 0; // of value 0
             data.opRemoveInput(op, 0);  // Remove the constant
             data.opSetOpcode(op, CPUI_INT_ZEXT);
             return 1;

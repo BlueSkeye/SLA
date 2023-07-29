@@ -60,7 +60,7 @@ namespace Sla.DECCORE
                 List<ulong> seginput = new List<ulong>();
                 seginput.Add(@base);
                 seginput.Add(val);
-                val = segop->execute(seginput);
+                val = segop.execute(seginput);
                 return new Address(spc, AddrSpace.addressToByte(val, spc.getWordSize()));
             }
             // Return invalid address

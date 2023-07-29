@@ -18,7 +18,7 @@ namespace Sla.DECCORE
         private static void clearMarks(List<PcodeOp> opList)
         {
             for (int4 i = 0; i < opList.size(); ++i)
-                opList[i]->clearMark();
+                opList[i].clearMark();
         }
 
         /// \brief Collect COPY, INDIRECT, and MULTIEQUAL ops reachable from the given Varnode, without going thru excised edges
@@ -33,43 +33,43 @@ namespace Sla.DECCORE
         {
             sort(phiNodeEdges.begin(), phiNodeEdges.end());
             int4 count = 0;
-            if (vn->isWritten())
+            if (vn.isWritten())
             {
-                PcodeOp* op = vn->getDef();
-                if (op->code() == CPUI_MULTIEQUAL)
+                PcodeOp* op = vn.getDef();
+                if (op.code() == CPUI_MULTIEQUAL)
                 {
                     // Consider defining MULTIEQUAL to be "reachable" This allows flowToAlternatePath to discover
                     // a loop back to vn from the constBlock, even if no other non-constant path survives
-                    op->setMark();
+                    op.setMark();
                     reachable.push_back(op);
                 }
             }
             for (; ; )
             {
                 list<PcodeOp*>::const_iterator iter;
-                for (iter = vn->beginDescend(); iter != vn->endDescend(); ++iter)
+                for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
                 {
                     PcodeOp* op = *iter;
-                    if (op->isMark()) continue;
-                    OpCode opc = op->code();
+                    if (op.isMark()) continue;
+                    OpCode opc = op.code();
                     if (opc == CPUI_MULTIEQUAL)
                     {
                         PcodeOpNode tmpOp = new PcodeOpNode(op, 0);
-                        for (tmpOp.slot = 0; tmpOp.slot < op->numInput(); ++tmpOp.slot)
+                        for (tmpOp.slot = 0; tmpOp.slot < op.numInput(); ++tmpOp.slot)
                         {
-                            if (op->getIn(tmpOp.slot) != vn) continue;      // Find incoming slot for current Varnode
+                            if (op.getIn(tmpOp.slot) != vn) continue;      // Find incoming slot for current Varnode
                                                                             // Don't count as flow if coming thru excised edge
                             if (!binary_search(phiNodeEdges.begin(), phiNodeEdges.end(), tmpOp)) break;
                         }
-                        if (tmpOp.slot == op->numInput()) continue;     // Was the MULTIEQUAL reached
+                        if (tmpOp.slot == op.numInput()) continue;     // Was the MULTIEQUAL reached
                     }
                     else if (opc != CPUI_COPY && opc != CPUI_INDIRECT)
                         continue;
                     reachable.push_back(op);
-                    op->setMark();
+                    op.setMark();
                 }
                 if (count >= reachable.size()) break;
-                vn = reachable[count]->getOut();
+                vn = reachable[count].getOut();
                 count += 1;
             }
         }
@@ -82,11 +82,11 @@ namespace Sla.DECCORE
         /// \return \b true is there is an alternate path
         private static bool flowToAlternatePath(PcodeOp op)
         {
-            if (op->isMark()) return true;
+            if (op.isMark()) return true;
             vector<Varnode*> markSet;
-            Varnode* vn = op->getOut();
+            Varnode* vn = op.getOut();
             markSet.push_back(vn);
-            vn->setMark();
+            vn.setMark();
             int4 count = 0;
             bool foundPath = false;
             while (count < markSet.size())
@@ -94,13 +94,13 @@ namespace Sla.DECCORE
                 vn = markSet[count];
                 count += 1;
                 list<PcodeOp*>::const_iterator iter;
-                for (iter = vn->beginDescend(); iter != vn->endDescend(); ++iter)
+                for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
                 {
                     PcodeOp* nextOp = *iter;
-                    OpCode opc = nextOp->code();
+                    OpCode opc = nextOp.code();
                     if (opc == CPUI_MULTIEQUAL)
                     {
-                        if (nextOp->isMark())
+                        if (nextOp.isMark())
                         {
                             foundPath = true;
                             break;
@@ -108,15 +108,15 @@ namespace Sla.DECCORE
                     }
                     else if (opc != CPUI_COPY && opc != CPUI_INDIRECT)
                         continue;
-                    Varnode* outVn = nextOp->getOut();
-                    if (outVn->isMark()) continue;
-                    outVn->setMark();
+                    Varnode* outVn = nextOp.getOut();
+                    if (outVn.isMark()) continue;
+                    outVn.setMark();
                     markSet.push_back(outVn);
                 }
                 if (foundPath) break;
             }
             for (int4 i = 0; i < markSet.size(); ++i)
-                markSet[i]->clearMark();
+                markSet[i].clearMark();
             return foundPath;
         }
 
@@ -132,13 +132,13 @@ namespace Sla.DECCORE
         {
             vector<PcodeOp*> reachable;
             vector<PcodeOpNode> excise; // No edge excised
-            collectReachable(edges[i].op->getOut(), excise, reachable);
+            collectReachable(edges[i].op.getOut(), excise, reachable);
             bool res = false;
             for (int4 j = 0; j < edges.size(); ++j)
             {
                 if (i == j) continue;
                 if (result[j] == 0) continue;   // Check for disconnected path
-                if (edges[j].op->isMark())
+                if (edges[j].op.isMark())
                 {
                     result[i] = 2;          // Disconnected paths, which flow together
                     result[j] = 2;
@@ -158,27 +158,27 @@ namespace Sla.DECCORE
         /// \return the new output Varnode of the COPY
         private static Varnode placeCopy(PcodeOp op, BlockBasic bl, Varnode constVn, Funcdata data)
         {
-            PcodeOp* lastOp = bl->lastOp();
+            PcodeOp* lastOp = bl.lastOp();
             list<PcodeOp*>::iterator iter;
             Address addr;
             if (lastOp == (PcodeOp*)0)
             {
-                iter = bl->endOp();
-                addr = op->getAddr();
+                iter = bl.endOp();
+                addr = op.getAddr();
             }
-            else if (lastOp->isBranch())
+            else if (lastOp.isBranch())
             {
-                iter = lastOp->getBasicIter();  // Insert before any branch
-                addr = lastOp->getAddr();
+                iter = lastOp.getBasicIter();  // Insert before any branch
+                addr = lastOp.getAddr();
             }
             else
             {
-                iter = bl->endOp();
-                addr = lastOp->getAddr();
+                iter = bl.endOp();
+                addr = lastOp.getAddr();
             }
             PcodeOp* copyOp = data.newOp(1, addr);
             data.opSetOpcode(copyOp, CPUI_COPY);
-            Varnode* outVn = data.newUniqueOut(constVn->getSize(), copyOp);
+            Varnode* outVn = data.newUniqueOut(constVn.getSize(), copyOp);
             data.opSetInput(copyOp, constVn, 0);
             data.opInsert(copyOp, bl, iter);
             return outVn;
@@ -202,8 +202,8 @@ namespace Sla.DECCORE
             {
                 if (marks[i] != 2) continue;    // Check that the MULTIQUAL is marked as flowing together
                 op = phiNodeEdges[i].op;
-                FlowBlock* bl = op->getParent();
-                bl = bl->getIn(phiNodeEdges[i].slot);
+                FlowBlock* bl = op.getParent();
+                bl = bl.getIn(phiNodeEdges[i].slot);
                 blocks.push_back(bl);
             }
             BlockBasic* rootBlock = (BlockBasic*)FlowBlock::findCommonBlock(blocks);
@@ -258,7 +258,7 @@ namespace Sla.DECCORE
                 if (results[i] != 1) continue;      // Check for disconnected path that does not flow into another path
                 PcodeOp* op = phiNodeEdges[i].op;
                 int4 slot = phiNodeEdges[i].slot;
-                BlockBasic* bl = (BlockBasic*)op->getParent()->getIn(slot);
+                BlockBasic* bl = (BlockBasic*)op.getParent().getIn(slot);
                 Varnode* outVn = placeCopy(op, bl, constVn, data);
                 data.opSetInput(op, outVn, slot);
                 count += 1;
@@ -284,28 +284,28 @@ namespace Sla.DECCORE
         {
             vector<PcodeOpNode> phiNodeEdges;
             list<PcodeOp*>::const_iterator iter, enditer;
-            iter = varVn->beginDescend();
-            enditer = varVn->endDescend();
+            iter = varVn.beginDescend();
+            enditer = varVn.endDescend();
             while (iter != enditer)
             {
                 PcodeOp* op = *iter;
                 while (iter != enditer && *iter == op)
                     ++iter;             // Advance iterator off of current op, as this descendant may be erased
-                OpCode opc = op->code();
+                OpCode opc = op.code();
                 if (opc == CPUI_INDIRECT)           // Don't propagate constant into these
                     continue;
                 else if (opc == CPUI_MULTIEQUAL)
                 {
                     if (!useMultiequal)
                         continue;
-                    if (varVn->isAddrTied() && varVn->getAddr() == op->getOut()->getAddr())
+                    if (varVn.isAddrTied() && varVn.getAddr() == op.getOut().getAddr())
                         continue;
-                    FlowBlock* bl = op->getParent();
-                    for (int4 slot = 0; slot < op->numInput(); ++slot)
+                    FlowBlock* bl = op.getParent();
+                    for (int4 slot = 0; slot < op.numInput(); ++slot)
                     {
-                        if (op->getIn(slot) == varVn)
+                        if (op.getIn(slot) == varVn)
                         {
-                            if (constBlock->dominates(bl->getIn(slot)))
+                            if (constBlock.dominates(bl.getIn(slot)))
                             {
                                 phiNodeEdges.emplace_back(op, slot);
                             }
@@ -315,15 +315,15 @@ namespace Sla.DECCORE
                 }
                 else if (opc == CPUI_COPY)
                 {       // Don't propagate into COPY unless...
-                    PcodeOp* followOp = op->getOut()->loneDescend();
+                    PcodeOp* followOp = op.getOut().loneDescend();
                     if (followOp == (PcodeOp*)0) continue;
-                    if (followOp->isMarker()) continue;
-                    if (followOp->code() == CPUI_COPY) continue;
+                    if (followOp.isMarker()) continue;
+                    if (followOp.code() == CPUI_COPY) continue;
                     // ...unless COPY is into something more interesting
                 }
-                if (constBlock->dominates(op->getParent()))
+                if (constBlock.dominates(op.getParent()))
                 {
-                    int4 slot = op->getSlot(varVn);
+                    int4 slot = op.getSlot(varVn);
                     data.opSetInput(op, constVn, slot); // Replace ref with constant!
                     count += 1;         // We made a change
                 }
@@ -345,7 +345,7 @@ namespace Sla.DECCORE
         public override int apply(Funcdata data)
         {
             bool useMultiequal = true;
-            AddrSpace* stackSpace = data.getArch()->getStackSpace();
+            AddrSpace* stackSpace = data.getArch().getStackSpace();
             if (stackSpace != (AddrSpace*)0)
             {
                 // Determining if conditional constants should apply to MULTIEQUAL operations may require
@@ -358,20 +358,20 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < blockGraph.getSize(); ++i)
             {
                 FlowBlock* bl = blockGraph.getBlock(i);
-                PcodeOp* cBranch = bl->lastOp();
-                if (cBranch == (PcodeOp*)0 || cBranch->code() != CPUI_CBRANCH) continue;
-                Varnode* boolVn = cBranch->getIn(1);
-                if (!boolVn->isWritten()) continue;
-                PcodeOp* compOp = boolVn->getDef();
-                OpCode opc = compOp->code();
-                bool flipEdge = cBranch->isBooleanFlip();
+                PcodeOp* cBranch = bl.lastOp();
+                if (cBranch == (PcodeOp*)0 || cBranch.code() != CPUI_CBRANCH) continue;
+                Varnode* boolVn = cBranch.getIn(1);
+                if (!boolVn.isWritten()) continue;
+                PcodeOp* compOp = boolVn.getDef();
+                OpCode opc = compOp.code();
+                bool flipEdge = cBranch.isBooleanFlip();
                 if (opc == CPUI_BOOL_NEGATE)
                 {
                     flipEdge = !flipEdge;
-                    boolVn = compOp->getIn(0);
-                    if (!boolVn->isWritten()) continue;
-                    compOp = boolVn->getDef();
-                    opc = compOp->code();
+                    boolVn = compOp.getIn(0);
+                    if (!boolVn.isWritten()) continue;
+                    compOp = boolVn.getDef();
+                    opc = compOp.code();
                 }
                 int4 constEdge;         // Out edge where value is constant
                 if (opc == CPUI_INT_EQUAL)
@@ -381,11 +381,11 @@ namespace Sla.DECCORE
                 else
                     continue;
                 // Find the variable and verify that it is compared to a constant
-                Varnode* varVn = compOp->getIn(0);
-                Varnode* constVn = compOp->getIn(1);
-                if (!constVn->isConstant())
+                Varnode* varVn = compOp.getIn(0);
+                Varnode* constVn = compOp.getIn(1);
+                if (!constVn.isConstant())
                 {
-                    if (!varVn->isConstant())
+                    if (!varVn.isConstant())
                         continue;
                     Varnode* tmp = constVn;
                     constVn = varVn;
@@ -393,8 +393,8 @@ namespace Sla.DECCORE
                 }
                 if (flipEdge)
                     constEdge = 1 - constEdge;
-                FlowBlock* constBlock = bl->getOut(constEdge);
-                if (!constBlock->restrictedByConditional(bl)) continue; // Make sure condition holds
+                FlowBlock* constBlock = bl.getOut(constEdge);
+                if (!constBlock.restrictedByConditional(bl)) continue; // Make sure condition holds
                 propagateConstant(varVn, constVn, constBlock, useMultiequal, data);
             }
             return 0;

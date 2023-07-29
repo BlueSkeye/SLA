@@ -36,11 +36,11 @@ namespace Sla.DECCORE
         {
             Varnode* vn1,*vn2;
 
-            vn2 = op->getIn(1);
-            if (!vn2->isConstant()) return 0;
-            vn1 = op->getIn(0);
-            if (vn1->isFree()) return 0;
-            uintb off = vn2->getOffset();
+            vn2 = op.getIn(1);
+            if (!vn2.isConstant()) return 0;
+            vn1 = op.getIn(0);
+            if (vn1.isFree()) return 0;
+            uintb off = vn2.getOffset();
             if (off == 0)
             {       // Trivial case
                 data.opRemoveInput(op, 1);  // Go down to 1 input
@@ -48,11 +48,11 @@ namespace Sla.DECCORE
                 data.opSetOpcode(op, CPUI_COPY);
                 return 1;
             }
-            off = (-off) & calc_mask(vn2->getSize()); // Take twos-complement of constant
+            off = (-off) & calc_mask(vn2.getSize()); // Take twos-complement of constant
 
             data.opSetOpcode(op, CPUI_INT_LESSEQUAL);
             data.opSetInput(op, vn1, 1);    // Move other input to second position
-            data.opSetInput(op, data.newConstant(vn1->getSize(), off), 0); // Put the new constant in first position
+            data.opSetInput(op, data.newConstant(vn1.getSize(), off), 0); // Put the new constant in first position
             return 1;
         }
     }

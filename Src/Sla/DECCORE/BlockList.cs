@@ -24,7 +24,7 @@ namespace Sla.DECCORE
 
         public override void emit(PrintLanguage lng)
         {
-            lng->emitBlockLs(this);
+            lng.emitBlockLs(this);
         }
 
         public override FlowBlock? getExitLeaf()

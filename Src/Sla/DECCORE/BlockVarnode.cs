@@ -27,12 +27,12 @@ namespace Sla.DECCORE
         public void set(Varnode v)
         {
             vn = v;
-            PcodeOp* op = vn->getDef();
+            PcodeOp* op = vn.getDef();
 
             if (op == (PcodeOp*)0)
                 index = 0;
             else
-                index = op->getParent()->getIndex();
+                index = op.getParent().getIndex();
         }
 
         public static bool operator <(BlockVarnode op1, BlockVarnode op2)

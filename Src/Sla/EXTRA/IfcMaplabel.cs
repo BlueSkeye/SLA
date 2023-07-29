@@ -24,16 +24,16 @@ namespace Sla.EXTRA
             if (name.size() == 0)
                 throw IfaceParseError("Need label name and address");
             int4 size;
-            Address addr = parse_machaddr(s, size, *dcp->conf->types); // Read address
+            Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read address
 
             Scope* scope;
-            if (dcp->fd != (Funcdata*)0)
-                scope = dcp->fd->getScopeLocal();
+            if (dcp.fd != (Funcdata*)0)
+                scope = dcp.fd.getScopeLocal();
             else
-                scope = dcp->conf->symboltab->getGlobalScope();
+                scope = dcp.conf.symboltab.getGlobalScope();
 
-            Symbol* sym = scope->addCodeLabel(addr, name);
-            scope->setAttribute(sym, Varnode::namelock | Varnode::typelock);
+            Symbol* sym = scope.addCodeLabel(addr, name);
+            scope.setAttribute(sym, Varnode::namelock | Varnode::typelock);
         }
     }
 }

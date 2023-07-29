@@ -32,7 +32,7 @@ namespace Sla.DECCORE
         /// \return \b true if the first term is less than the second
         private static bool additiveCompare(AdditiveEdge op1, AdditiveEdge op2)
         {
-            return (-1 == op1->getVarnode()->termOrder(op2->getVarnode()));
+            return (-1 == op1.getVarnode().termOrder(op2.getVarnode()));
         }
 
     /// Construct given root PcodeOp
@@ -45,7 +45,7 @@ namespace Sla.DECCORE
         public int getSize() => terms.size();
 
         /// Collect all the terms in the expression
-        /// Assuming root->getOut() is the root of an expression formed with the
+        /// Assuming root.getOut() is the root of an expression formed with the
         /// CPUI_INT_ADD op, collect all the Varnode \e terms of the expression.
         public void collect()
         {
@@ -65,28 +65,28 @@ namespace Sla.DECCORE
                 multop = multstack.back();
                 opstack.pop_back();
                 multstack.pop_back();
-                for (int4 i = 0; i < curop->numInput(); ++i)
+                for (int4 i = 0; i < curop.numInput(); ++i)
                 {
-                    curvn = curop->getIn(i);    // curvn is a node of the subtree IF
-                    if (!curvn->isWritten())
+                    curvn = curop.getIn(i);    // curvn is a node of the subtree IF
+                    if (!curvn.isWritten())
                     { // curvn is not defined by another operation
                         terms.push_back(AdditiveEdge(curop, i, multop));
                         continue;
                     }
-                    if (curvn->loneDescend() == (PcodeOp*)0)
+                    if (curvn.loneDescend() == (PcodeOp*)0)
                     { // curvn has more then one use
                         terms.push_back(AdditiveEdge(curop, i, multop));
                         continue;
                     }
-                    subop = curvn->getDef();
-                    if (subop->code() != CPUI_INT_ADD)
+                    subop = curvn.getDef();
+                    if (subop.code() != CPUI_INT_ADD)
                     { // or if curvn is defined with some other type of op
-                        if ((subop->code() == CPUI_INT_MULT) && (subop->getIn(1)->isConstant()))
+                        if ((subop.code() == CPUI_INT_MULT) && (subop.getIn(1).isConstant()))
                         {
-                            PcodeOp* addop = subop->getIn(0)->getDef();
-                            if ((addop != (PcodeOp*)0) && (addop->code() == CPUI_INT_ADD))
+                            PcodeOp* addop = subop.getIn(0).getDef();
+                            if ((addop != (PcodeOp*)0) && (addop.code() == CPUI_INT_ADD))
                             {
-                                if (addop->getOut()->loneDescend() != (PcodeOp*)0)
+                                if (addop.getOut().loneDescend() != (PcodeOp*)0)
                                 {
                                     opstack.push_back(addop);
                                     multstack.push_back(subop);

@@ -30,10 +30,10 @@ namespace Sla.DECCORE
         /// \param res will hold the resulting intersecting Varnodes
         private static void gatherBlockVarnodes(HighVariable a, int4 blk, Cover cover, List<Varnode> res)
         {
-            for (int4 i = 0; i < a->numInstances(); ++i)
+            for (int4 i = 0; i < a.numInstances(); ++i)
             {
-                Varnode* vn = a->getInstance(i);
-                if (1 < vn->getCover()->intersectByBlock(blk, cover))
+                Varnode* vn = a.getInstance(i);
+                if (1 < vn.getCover().intersectByBlock(blk, cover))
                     res.push_back(vn);
             }
         }
@@ -52,23 +52,23 @@ namespace Sla.DECCORE
         private static bool testBlockIntersection(HighVariable a, int4 blk, Cover cover,int4 relOff,
             List<Varnode> blist)
         {
-            for (int4 i = 0; i < a->numInstances(); ++i)
+            for (int4 i = 0; i < a.numInstances(); ++i)
             {
-                Varnode* vn = a->getInstance(i);
-                if (2 > vn->getCover()->intersectByBlock(blk, cover)) continue;
+                Varnode* vn = a.getInstance(i);
+                if (2 > vn.getCover().intersectByBlock(blk, cover)) continue;
                 for (int4 j = 0; j < blist.size(); ++j)
                 {
                     Varnode* vn2 = blist[j];
-                    if (1 < vn2->getCover()->intersectByBlock(blk, *vn->getCover()))
+                    if (1 < vn2.getCover().intersectByBlock(blk, *vn.getCover()))
                     {
-                        if (vn->getSize() == vn2->getSize())
+                        if (vn.getSize() == vn2.getSize())
                         {
-                            if (!vn->copyShadow(vn2))
+                            if (!vn.copyShadow(vn2))
                                 return true;
                         }
                         else
                         {
-                            if (!vn->partialCopyShadow(vn2, relOff))
+                            if (!vn.partialCopyShadow(vn2, relOff))
                                 return true;
                         }
                     }
@@ -88,43 +88,43 @@ namespace Sla.DECCORE
         {
             vector<Varnode*> blist;
 
-            Cover aCover = a->getCover();
-            Cover bCover = b->getCover();
+            Cover aCover = a.getCover();
+            Cover bCover = b.getCover();
             gatherBlockVarnodes(b, blk, aCover, blist);
             if (testBlockIntersection(a, blk, bCover, 0, blist))
                 return true;
-            if (a->piece != (VariablePiece*)0)
+            if (a.piece != (VariablePiece*)0)
             {
-                int4 baseOff = a->piece->getOffset();
-                for (int4 i = 0; i < a->piece->numIntersection(); ++i)
+                int4 baseOff = a.piece.getOffset();
+                for (int4 i = 0; i < a.piece.numIntersection(); ++i)
                 {
-                    VariablePiece interPiece = a->piece->getIntersection(i);
-                    int4 off = interPiece->getOffset() - baseOff;
-                    if (testBlockIntersection(interPiece->getHigh(), blk, bCover, off, blist))
+                    VariablePiece interPiece = a.piece.getIntersection(i);
+                    int4 off = interPiece.getOffset() - baseOff;
+                    if (testBlockIntersection(interPiece.getHigh(), blk, bCover, off, blist))
                         return true;
                 }
             }
-            if (b->piece != (VariablePiece*)0)
+            if (b.piece != (VariablePiece*)0)
             {
-                int4 bBaseOff = b->piece->getOffset();
-                for (int4 i = 0; i < b->piece->numIntersection(); ++i)
+                int4 bBaseOff = b.piece.getOffset();
+                for (int4 i = 0; i < b.piece.numIntersection(); ++i)
                 {
                     blist.clear();
-                    VariablePiece bPiece = b->piece->getIntersection(i);
-                    int4 bOff = bPiece->getOffset() - bBaseOff;
-                    gatherBlockVarnodes(bPiece->getHigh(), blk, aCover, blist);
+                    VariablePiece bPiece = b.piece.getIntersection(i);
+                    int4 bOff = bPiece.getOffset() - bBaseOff;
+                    gatherBlockVarnodes(bPiece.getHigh(), blk, aCover, blist);
                     if (testBlockIntersection(a, blk, bCover, -bOff, blist))
                         return true;
-                    if (a->piece != (VariablePiece*)0)
+                    if (a.piece != (VariablePiece*)0)
                     {
-                        int4 baseOff = a->piece->getOffset();
-                        for (int4 j = 0; j < a->piece->numIntersection(); ++j)
+                        int4 baseOff = a.piece.getOffset();
+                        for (int4 j = 0; j < a.piece.numIntersection(); ++j)
                         {
-                            VariablePiece interPiece = a->piece->getIntersection(j);
-                            int4 off = (interPiece->getOffset() - baseOff) - bOff;
-                            if (off > 0 && off >= bPiece->getSize()) continue;      // Do a piece and b piece intersect at all
-                            if (off < 0 && -off >= interPiece->getSize()) continue;
-                            if (testBlockIntersection(interPiece->getHigh(), blk, bCover, off, blist))
+                            VariablePiece interPiece = a.piece.getIntersection(j);
+                            int4 off = (interPiece.getOffset() - baseOff) - bOff;
+                            if (off > 0 && off >= bPiece.getSize()) continue;      // Do a piece and b piece intersect at all
+                            if (off < 0 && -off >= interPiece.getSize()) continue;
+                            if (testBlockIntersection(interPiece.getHigh(), blk, bCover, off, blist))
                                 return true;
                         }
                     }
@@ -176,7 +176,7 @@ namespace Sla.DECCORE
                 else
                 {
                     nointer.push_back(b);
-                    b->setMark();       // Mark that high2 did not intersect
+                    b.setMark();       // Mark that high2 did not intersect
                 }
             }
             // Do a purge of all high2's tests
@@ -196,7 +196,7 @@ namespace Sla.DECCORE
             {
                 if (!(*iter).second)
                 {   // If test is intersection==false
-                    if (!(*iter).first.b->isMark()) // and there was no test with high2
+                    if (!(*iter).first.b.isMark()) // and there was no test with high2
                         highedgemap.erase(iter++); // Delete the test
                     else
                         ++iter;
@@ -206,7 +206,7 @@ namespace Sla.DECCORE
             }
             vector<HighVariable*>::iterator titer;
             for (titer = nointer.begin(); titer != nointer.end(); ++titer)
-                (*titer)->clearMark();
+                (*titer).clearMark();
 
             // Reinsert high2's intersection==true tests for high1 now
             for (titer = yesinter.begin(); titer != yesinter.end(); ++titer)
@@ -224,9 +224,9 @@ namespace Sla.DECCORE
         /// \return \b true if the HighVariable was not originally dirty
         public bool updateHigh(HighVariable a)
         {
-            if (!a->isCoverDirty()) return true;
+            if (!a.isCoverDirty()) return true;
 
-            a->updateCover();
+            a.updateCover();
             purgeHigh(a);
             return false;
         }
@@ -254,7 +254,7 @@ namespace Sla.DECCORE
             bool res = false;
             int4 blk;
             vector<int4> blockisect;
-            a->getCover().intersectList(blockisect, b->getCover(), 2);
+            a.getCover().intersectList(blockisect, b.getCover(), 2);
             for (blk = 0; blk < blockisect.size(); ++blk)
             {
                 if (blockIntersection(a, b, blockisect[blk]))

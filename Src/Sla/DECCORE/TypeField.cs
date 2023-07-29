@@ -78,7 +78,7 @@ namespace Sla.DECCORE
             encoder.writeSignedInteger(ATTRIB_OFFSET, offset);
             if (ident != offset)
                 encoder.writeSignedInteger(ATTRIB_ID, ident);
-            type->encodeRef(encoder);
+            type.encodeRef(encoder);
             encoder.closeElement(ELEM_FIELD);
         }
     }

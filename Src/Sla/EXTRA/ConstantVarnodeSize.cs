@@ -23,12 +23,12 @@ namespace Sla.EXTRA
         public override uintb getConstant(UnifyState state)
         {
             Varnode* vn = state.data(varindex).getVarnode();
-            return (uintb)vn->getSize();    // The size is the actual value
+            return (uintb)vn.getSize();    // The size is the actual value
         }
 
         public override void writeExpression(TextWriter s, UnifyCPrinter printstate)
         {
-            s << "(uintb)" << printstate.getName(varindex) << "->getSize()";
+            s << "(uintb)" << printstate.getName(varindex) << ".getSize()";
         }
     }
 }

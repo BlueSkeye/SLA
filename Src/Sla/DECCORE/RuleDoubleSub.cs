@@ -35,14 +35,14 @@ namespace Sla.DECCORE
             Varnode* vn;
             int4 offset1, offset2;
 
-            vn = op->getIn(0);
-            if (!vn->isWritten()) return 0;
-            op2 = vn->getDef();
-            if (op2->code() != CPUI_SUBPIECE) return 0;
-            offset1 = op->getIn(1)->getOffset();
-            offset2 = op2->getIn(1)->getOffset();
+            vn = op.getIn(0);
+            if (!vn.isWritten()) return 0;
+            op2 = vn.getDef();
+            if (op2.code() != CPUI_SUBPIECE) return 0;
+            offset1 = op.getIn(1).getOffset();
+            offset2 = op2.getIn(1).getOffset();
 
-            data.opSetInput(op, op2->getIn(0), 0);  // Skip middleman
+            data.opSetInput(op, op2.getIn(0), 0);  // Skip middleman
             data.opSetInput(op, data.newConstant(4, offset1 + offset2), 1);
             return 1;
         }

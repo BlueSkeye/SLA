@@ -20,7 +20,7 @@ namespace Sla.EXTRA
         /// result is written out to a separate XML file.
         public override void execute(TextReader s)
         {
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("No load image present");
 
             string infile, outfile;
@@ -44,7 +44,7 @@ namespace Sla.EXTRA
             try
             {
                 BlockGraph ingraph;
-                XmlDecode decoder(dcp->conf, doc->getRoot());
+                XmlDecode decoder(dcp.conf, doc.getRoot());
                 ingraph.decode(decoder);
 
                 BlockGraph resultgraph;
@@ -66,7 +66,7 @@ namespace Sla.EXTRA
                 sout.close();
             }
             catch (LowlevelError err) {
-                *status->optr << err.ToString() << endl;
+                *status.optr << err.ToString() << endl;
             }
         }
     }

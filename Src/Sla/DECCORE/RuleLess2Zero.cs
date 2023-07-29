@@ -38,17 +38,17 @@ namespace Sla.DECCORE
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* lvn,*rvn;
-            lvn = op->getIn(0);
-            rvn = op->getIn(1);
+            lvn = op.getIn(0);
+            rvn = op.getIn(1);
 
-            if (lvn->isConstant())
+            if (lvn.isConstant())
             {
-                if (lvn->getOffset() == 0)
+                if (lvn.getOffset() == 0)
                 {
-                    data.opSetOpcode(op, CPUI_INT_NOTEQUAL); // All values except 0 are true   ->  NOT_EQUAL
+                    data.opSetOpcode(op, CPUI_INT_NOTEQUAL); // All values except 0 are true   .  NOT_EQUAL
                     return 1;
                 }
-                else if (lvn->getOffset() == calc_mask(lvn->getSize()))
+                else if (lvn.getOffset() == calc_mask(lvn.getSize()))
                 {
                     data.opSetOpcode(op, CPUI_COPY); // Always false
                     data.opRemoveInput(op, 1);
@@ -56,17 +56,17 @@ namespace Sla.DECCORE
                     return 1;
                 }
             }
-            else if (rvn->isConstant())
+            else if (rvn.isConstant())
             {
-                if (rvn->getOffset() == 0)
+                if (rvn.getOffset() == 0)
                 {
                     data.opSetOpcode(op, CPUI_COPY); // Always false
                     data.opRemoveInput(op, 1);
                     data.opSetInput(op, data.newConstant(1, 0), 0);
                     return 1;
                 }
-                else if (rvn->getOffset() == calc_mask(rvn->getSize()))
-                { // All values except -1 are true -> NOT_EQUAL
+                else if (rvn.getOffset() == calc_mask(rvn.getSize()))
+                { // All values except -1 are true . NOT_EQUAL
                     data.opSetOpcode(op, CPUI_INT_NOTEQUAL);
                     return 1;
                 }

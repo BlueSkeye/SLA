@@ -11,13 +11,13 @@ namespace Sla.EXTRA
     {
         public override void execute(TextReader s)
 {
-  if (dcp->fd == (Funcdata *)0)
+  if (dcp.fd == (Funcdata *)0)
     throw IfaceExecutionError("No function selected");
   string actionname;
   s >> ws >> actionname;
   if (actionname.empty())
     throw IfaceParseError("Missing name of action to debug");
-  if (!dcp->conf->allacts.getCurrent()->turnOnDebug(actionname))
+  if (!dcp.conf.allacts.getCurrent().turnOnDebug(actionname))
     throw IfaceParseError("Unable to find action "+actionname);
 }
     }

@@ -38,32 +38,32 @@ namespace Sla.DECCORE
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* lvn,*rvn;
-            lvn = op->getIn(0);
-            rvn = op->getIn(1);
+            lvn = op.getIn(0);
+            rvn = op.getIn(1);
 
-            if (lvn->isConstant())
+            if (lvn.isConstant())
             {
-                if (lvn->getOffset() == 0)
+                if (lvn.getOffset() == 0)
                 {
                     data.opSetOpcode(op, CPUI_COPY); // All values => true
                     data.opRemoveInput(op, 1);
                     data.opSetInput(op, data.newConstant(1, 1), 0);
                     return 1;
                 }
-                else if (lvn->getOffset() == calc_mask(lvn->getSize()))
+                else if (lvn.getOffset() == calc_mask(lvn.getSize()))
                 {
                     data.opSetOpcode(op, CPUI_INT_EQUAL); // No value is true except -1
                     return 1;
                 }
             }
-            else if (rvn->isConstant())
+            else if (rvn.isConstant())
             {
-                if (rvn->getOffset() == 0)
+                if (rvn.getOffset() == 0)
                 {
                     data.opSetOpcode(op, CPUI_INT_EQUAL); // No value is true except 0
                     return 1;
                 }
-                else if (rvn->getOffset() == calc_mask(rvn->getSize()))
+                else if (rvn.getOffset() == calc_mask(rvn.getSize()))
                 {
                     data.opSetOpcode(op, CPUI_COPY); // All values => true
                     data.opRemoveInput(op, 1);

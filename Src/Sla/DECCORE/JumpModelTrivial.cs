@@ -33,7 +33,7 @@ namespace Sla.DECCORE
         public override bool recoverModel(Funcdata fd, PcodeOp indop, uint4 matchsize,
             uint4 maxtablesize)
         {
-            size = indop->getParent()->sizeOut();
+            size = indop.getParent().sizeOut();
             return ((size != 0) && (size <= matchsize));
         }
 
@@ -41,11 +41,11 @@ namespace Sla.DECCORE
             List<LoadTable> loadpoints)
         {
             addresstable.clear();
-            BlockBasic* bl = indop->getParent();
-            for (int4 i = 0; i < bl->sizeOut(); ++i)
+            BlockBasic* bl = indop.getParent();
+            for (int4 i = 0; i < bl.sizeOut(); ++i)
             {
-                BlockBasic outbl = (BlockBasic)bl->getOut(i);
-                addresstable.push_back(outbl->getStart());
+                BlockBasic outbl = (BlockBasic)bl.getOut(i);
+                addresstable.push_back(outbl.getStart());
             }
         }
 

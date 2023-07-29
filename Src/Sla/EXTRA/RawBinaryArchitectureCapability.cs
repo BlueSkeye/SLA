@@ -36,6 +36,6 @@ namespace Sla.EXTRA
         // File can always be opened as raw binary
         public override bool isFileMatch(string filename) => true;
 
-        public override bool isXmlMatch(Document doc) => doc->getRoot()->getName() == "raw_savefile";
+        public override bool isXmlMatch(Document doc) => doc.getRoot().getName() == "raw_savefile";
     }
 }

@@ -38,34 +38,34 @@ namespace Sla.DECCORE
         /// \param op is the new description object
         private void registerOp(UserPcodeOp op)
         {
-            int4 ind = op->getIndex();
+            int4 ind = op.getIndex();
             if (ind < 0) throw new LowlevelError("UserOp not assigned an index");
 
             map<string, UserPcodeOp*>::iterator iter;
-            iter = useropmap.find(op->getName());
+            iter = useropmap.find(op.getName());
             if (iter != useropmap.end())
             {
                 UserPcodeOp* other = (*iter).second;
-                if (other->getIndex() != ind)
-                    throw new LowlevelError("Conflicting indices for userop name " + op->getName());
+                if (other.getIndex() != ind)
+                    throw new LowlevelError("Conflicting indices for userop name " + op.getName());
             }
 
             while (useroplist.size() <= ind)
                 useroplist.push_back((UserPcodeOp*)0);
             if (useroplist[ind] != (UserPcodeOp*)0)
             {
-                if (useroplist[ind]->getName() != op->getName())
-                    throw new LowlevelError("User op " + op->getName() + " has same index as " + useroplist[ind]->getName());
+                if (useroplist[ind].getName() != op.getName())
+                    throw new LowlevelError("User op " + op.getName() + " has same index as " + useroplist[ind].getName());
                 // We assume this registration customizes an existing userop
                 delete useroplist[ind];     // Delete the old spec
             }
             useroplist[ind] = op;       // Index crossref
-            useropmap[op->getName()] = op; // Name crossref
+            useropmap[op.getName()] = op; // Name crossref
 
             SegmentOp* s_op = dynamic_cast<SegmentOp*>(op);
             if (s_op != (SegmentOp*)0)
             {
-                int4 index = s_op->getSpace()->getIndex();
+                int4 index = s_op.getSpace().getIndex();
 
                 while (segmentop.size() <= index)
                     segmentop.push_back((SegmentOp*)0);
@@ -118,7 +118,7 @@ namespace Sla.DECCORE
         public void initialize(Architecture glb)
         {
             vector<string> basicops;
-            glb->translate->getUserOpNames(basicops);
+            glb.translate.getUserOpNames(basicops);
             for (uint4 i = 0; i < basicops.size(); ++i)
             {
                 if (basicops[i].size() == 0) continue;
@@ -194,7 +194,7 @@ namespace Sla.DECCORE
             s_op = new SegmentOp(glb, "", useroplist.size());
             try
             {
-                s_op->decode(decoder);
+                s_op.decode(decoder);
                 registerOp(s_op);
             }
             catch (LowlevelError err) {
@@ -264,7 +264,7 @@ namespace Sla.DECCORE
             InjectedUserOp* op = new InjectedUserOp(glb, "", 0, 0);
             try
             {
-                op->decode(decoder);
+                op.decode(decoder);
                 registerOp(op);
             }
             catch (LowlevelError err) {
@@ -283,7 +283,7 @@ namespace Sla.DECCORE
             JumpAssistOp* op = new JumpAssistOp(glb);
             try
             {
-                op->decode(decoder);
+                op.decode(decoder);
                 registerOp(op);
             }
             catch (LowlevelError err) {
@@ -310,8 +310,8 @@ namespace Sla.DECCORE
             if (dynamic_cast<UnspecializedPcodeOp*>(userop) == (UnspecializedPcodeOp*)0)
                 throw new LowlevelError("Cannot fixup userop: " + useropname);
 
-            int4 injectid = glb->pcodeinjectlib->manualCallOtherFixup(useropname, outname, inname, snippet);
-            InjectedUserOp* op = new InjectedUserOp(glb, useropname, userop->getIndex(), injectid);
+            int4 injectid = glb.pcodeinjectlib.manualCallOtherFixup(useropname, outname, inname, snippet);
+            InjectedUserOp* op = new InjectedUserOp(glb, useropname, userop.getIndex(), injectid);
             try
             {
                 registerOp(op);

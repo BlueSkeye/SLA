@@ -77,15 +77,15 @@ namespace Sla.DECCORE
                 return false;
             }
             cbranch2 = block2.lastOp();
-            if (cbranch2->code() != CPUI_CBRANCH) {
+            if (cbranch2.code() != CPUI_CBRANCH) {
                 return false;
             }
 
-            if (cbranch1->isBooleanFlip()) {
+            if (cbranch1.isBooleanFlip()) {
                 // flip hasn't propagated through yet
                 return false;
             }
-            if (cbranch2->isBooleanFlip()) {
+            if (cbranch2.isBooleanFlip()) {
                 return false;
             }
 
@@ -97,16 +97,16 @@ namespace Sla.DECCORE
             }
 
             // Parallel RulePushMulti,  so we know it will apply if we do the join
-            if (!vn1->isWritten()) {
+            if (!vn1.isWritten()) {
                 return false;
             }
-            if (!vn2->isWritten()) {
+            if (!vn2.isWritten()) {
                 return false;
             }
-            if (vn1->isSpacebase()) {
+            if (vn1.isSpacebase()) {
                 return false;
             }
-            if (vn2->isSpacebase()) {
+            if (vn2.isSpacebase()) {
                 return false;
             }
             Varnode[] buf1 = new Varnode[2];
@@ -118,7 +118,7 @@ namespace Sla.DECCORE
             if (res > 1) {
                 return false;
             }
-            PcodeOp op1 = vn1->getDef();
+            PcodeOp op1 = vn1.getDef();
             if (op1.code() == CPUI_SUBPIECE) {
                 return false;
             }
@@ -191,7 +191,7 @@ namespace Sla.DECCORE
                         data.opRemoveInput(op, hi);
                         data.opSetInput(op, subvn, lo);
                     }
-                    if (op->numInput() == 1) {
+                    if (op.numInput() == 1) {
                         data.opUninsert(op);
                         data.opSetOpcode(op, CPUI_COPY);
                         data.opInsertBegin(op, exit);

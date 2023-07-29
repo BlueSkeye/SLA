@@ -49,7 +49,7 @@ namespace Sla.EXTRA
 
         public override bool isXmlMatch(Document doc)
         {
-            return (doc->getRoot()->getName() == "xml_savefile");
+            return (doc.getRoot().getName() == "xml_savefile");
         }
     }
 }

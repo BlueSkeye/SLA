@@ -37,14 +37,14 @@ namespace Sla.SLEIGH
             vector<OperandSymbol*> newops; // New order of the operands
             int4 lastsize;
 
-            pateq->operandOrder(this, patternorder);
+            pateq.operandOrder(this, patternorder);
             for (int4 i = 0; i < operands.size(); ++i)
             { // Make sure patternorder contains all operands
                 sym = operands[i];
-                if (!sym->isMarked())
+                if (!sym.isMarked())
                 {
                     patternorder.push_back(sym);
-                    sym->setMark();     // Make sure all operands are marked
+                    sym.setMark();     // Make sure all operands are marked
                 }
             }
             do
@@ -53,22 +53,22 @@ namespace Sla.SLEIGH
                 for (int4 i = 0; i < patternorder.size(); ++i)
                 {
                     sym = patternorder[i];
-                    if (!sym->isMarked()) continue; // "unmarked" means it is already in newops
-                    if (sym->isOffsetIrrelevant()) continue; // expression Operands come last
-                    if ((sym->offsetbase == -1) || (!operands[sym->offsetbase]->isMarked()))
+                    if (!sym.isMarked()) continue; // "unmarked" means it is already in newops
+                    if (sym.isOffsetIrrelevant()) continue; // expression Operands come last
+                    if ((sym.offsetbase == -1) || (!operands[sym.offsetbase].isMarked()))
                     {
                         newops.push_back(sym);
-                        sym->clearMark();
+                        sym.clearMark();
                     }
                 }
             } while (newops.size() != lastsize);
             for (int4 i = 0; i < patternorder.size(); ++i)
             { // Tack on expression Operands
                 sym = patternorder[i];
-                if (sym->isOffsetIrrelevant())
+                if (sym.isOffsetIrrelevant())
                 {
                     newops.push_back(sym);
-                    sym->clearMark();
+                    sym.clearMark();
                 }
             }
 
@@ -78,28 +78,28 @@ namespace Sla.SLEIGH
 
             for (int4 i = 0; i < newops.size(); ++i)
             { // Fix up operand indices
-                newops[i]->hand = i;
-                newops[i]->localexp->changeIndex(i);
+                newops[i].hand = i;
+                newops[i].localexp.changeIndex(i);
             }
             vector<int4> handmap;       // Create index translation map
             for (int4 i = 0; i < operands.size(); ++i)
-                handmap.push_back(operands[i]->hand);
+                handmap.push_back(operands[i].hand);
 
             // Fix up offsetbase
             for (int4 i = 0; i < newops.size(); ++i)
             {
                 sym = newops[i];
-                if (sym->offsetbase == -1) continue;
-                sym->offsetbase = handmap[sym->offsetbase];
+                if (sym.offsetbase == -1) continue;
+                sym.offsetbase = handmap[sym.offsetbase];
             }
 
             if (templ != (ConstructTpl*)0) // Fix up templates
-                templ->changeHandleIndex(handmap);
+                templ.changeHandleIndex(handmap);
             for (int4 i = 0; i < namedtempl.size(); ++i)
             {
                 ConstructTpl* ntempl = namedtempl[i];
                 if (ntempl != (ConstructTpl*)0)
-                    ntempl->changeHandleIndex(handmap);
+                    ntempl.changeHandleIndex(handmap);
             }
 
             // Fix up printpiece operand refs
@@ -166,14 +166,14 @@ namespace Sla.SLEIGH
             for (int4 i = 0; i < operands.size(); ++i)
             {
                 OperandSymbol* sym = operands[i];
-                TripleSymbol* triple = sym->getDefiningSymbol();
-                PatternExpression* defexp = sym->getDefiningExpression();
+                TripleSymbol* triple = sym.getDefiningSymbol();
+                PatternExpression* defexp = sym.getDefiningExpression();
                 if (triple != (TripleSymbol*)0)
                 {
                     SubtableSymbol* subsym = dynamic_cast<SubtableSymbol*>(triple);
                     if (subsym != (SubtableSymbol*)0)
                     {
-                        if (subsym->isBeingBuilt())
+                        if (subsym.isBeingBuilt())
                         { // Detected recursion
                             if (recursion)
                             {
@@ -184,70 +184,70 @@ namespace Sla.SLEIGH
                             oppattern.emplace_back();
                         }
                         else
-                            oppattern.push_back(*subsym->buildPattern(s));
+                            oppattern.push_back(*subsym.buildPattern(s));
                     }
                     else
-                        oppattern.push_back(triple->getPatternExpression()->genMinPattern(oppattern));
+                        oppattern.push_back(triple.getPatternExpression().genMinPattern(oppattern));
                 }
                 else if (defexp != (PatternExpression*)0)
-                    oppattern.push_back(defexp->genMinPattern(oppattern));
+                    oppattern.push_back(defexp.genMinPattern(oppattern));
                 else
                 {
-                    throw SleighError(sym->getName() + ": operand is undefined");
+                    throw SleighError(sym.getName() + ": operand is undefined");
                 }
                 TokenPattern & sympat(oppattern.back());
-                sym->minimumlength = sympat.getMinimumLength();
+                sym.minimumlength = sympat.getMinimumLength();
                 if (sympat.getLeftEllipsis() || sympat.getRightEllipsis())
-                    sym->setVariableLength();
+                    sym.setVariableLength();
             }
 
             if (pateq == (PatternEquation*)0)
                 throw SleighError("Missing equation");
 
             // Build the entire pattern
-            pateq->genPattern(oppattern);
-            *pattern = pateq->getTokenPattern();
-            if (pattern->alwaysFalse())
+            pateq.genPattern(oppattern);
+            *pattern = pateq.getTokenPattern();
+            if (pattern.alwaysFalse())
                 throw SleighError("Impossible pattern");
             if (recursion)
-                pattern->setRightEllipsis(true);
-            minimumlength = pattern->getMinimumLength(); // Get length of the pattern in bytes
+                pattern.setRightEllipsis(true);
+            minimumlength = pattern.getMinimumLength(); // Get length of the pattern in bytes
 
             // Resolve offsets of the operands
             OperandResolve resolve(operands);
-            if (!pateq->resolveOperandLeft(resolve))
+            if (!pateq.resolveOperandLeft(resolve))
                 throw SleighError("Unable to resolve operand offsets");
 
             for (int4 i = 0; i < operands.size(); ++i)
             { // Unravel relative offsets to absolute (if possible)
                 int4 base,offset;
                 OperandSymbol* sym = operands[i];
-                if (sym->isOffsetIrrelevant())
+                if (sym.isOffsetIrrelevant())
                 {
-                    sym->offsetbase = -1;
-                    sym->reloffset = 0;
+                    sym.offsetbase = -1;
+                    sym.reloffset = 0;
                     continue;
                 }
-                base = sym->offsetbase;
-                offset = sym->reloffset;
+                base = sym.offsetbase;
+                offset = sym.reloffset;
                 while (base >= 0)
                 {
                     sym = operands[base];
-                    if (sym->isVariableLength()) break; // Cannot resolve to absolute
-                    base = sym->offsetbase;
-                    offset += sym->getMinimumLength();
-                    offset += sym->reloffset;
+                    if (sym.isVariableLength()) break; // Cannot resolve to absolute
+                    base = sym.offsetbase;
+                    offset += sym.getMinimumLength();
+                    offset += sym.reloffset;
                     if (base < 0)
                     {
-                        operands[i]->offsetbase = base;
-                        operands[i]->reloffset = offset;
+                        operands[i].offsetbase = base;
+                        operands[i].reloffset = offset;
                     }
                 }
             }
 
             // Make sure context expressions are valid
             for (int4 i = 0; i < context.size(); ++i)
-                context[i]->validate();
+                context[i].validate();
 
             orderOperands();        // Order the operands based on offset dependency
             return pattern;
@@ -337,7 +337,7 @@ namespace Sla.SLEIGH
 
         public void addEquation(PatternEquation pe)
         {
-            (pateq = pe)->layClaim();
+            (pateq = pe).layClaim();
         }
 
         public void setMainSection(ConstructTpl tpl)
@@ -374,7 +374,7 @@ namespace Sla.SLEIGH
         public void printInfo(TextWriter s)
         {               // Print identifying information about constructor
                         // for use in error messages
-            s << "table \"" << parent->getName();
+            s << "table \"" << parent.getName();
             s << "\" constructor starting at line " << dec << lineno;
         }
 
@@ -387,7 +387,7 @@ namespace Sla.SLEIGH
                 if ((*piter)[0] == '\n')
                 {
                     int4 index = (*piter)[1] - 'A';
-                    operands[index]->print(s, walker);
+                    operands[index].print(s, walker);
                 }
                 else
                     s << *piter;
@@ -398,11 +398,11 @@ namespace Sla.SLEIGH
         {
             if (flowthruindex != -1)
             {
-                SubtableSymbol* sym = dynamic_cast<SubtableSymbol*>(operands[flowthruindex]->getDefiningSymbol());
+                SubtableSymbol* sym = dynamic_cast<SubtableSymbol*>(operands[flowthruindex].getDefiningSymbol());
                 if (sym != (SubtableSymbol*)0)
                 {
                     walker.pushOperand(flowthruindex);
-                    walker.getConstructor()->printMnemonic(s, walker);
+                    walker.getConstructor().printMnemonic(s, walker);
                     walker.popOperand();
                     return;
                 }
@@ -413,7 +413,7 @@ namespace Sla.SLEIGH
                 if (printpiece[i][0] == '\n')
                 {
                     int4 index = printpiece[i][1] - 'A';
-                    operands[index]->print(s, walker);
+                    operands[index].print(s, walker);
                 }
                 else
                     s << printpiece[i];
@@ -424,11 +424,11 @@ namespace Sla.SLEIGH
         {
             if (flowthruindex != -1)
             {
-                SubtableSymbol* sym = dynamic_cast<SubtableSymbol*>(operands[flowthruindex]->getDefiningSymbol());
+                SubtableSymbol* sym = dynamic_cast<SubtableSymbol*>(operands[flowthruindex].getDefiningSymbol());
                 if (sym != (SubtableSymbol*)0)
                 {
                     walker.pushOperand(flowthruindex);
-                    walker.getConstructor()->printBody(s, walker);
+                    walker.getConstructor().printBody(s, walker);
                     walker.popOperand();
                     return;
                 }
@@ -439,7 +439,7 @@ namespace Sla.SLEIGH
                 if (printpiece[i][0] == '\n')
                 {
                     int4 index = printpiece[i][1] - 'A';
-                    operands[index]->print(s, walker);
+                    operands[index].print(s, walker);
                 }
                 else
                     s << printpiece[i];
@@ -459,7 +459,7 @@ namespace Sla.SLEIGH
         {
             List<ContextChange*>::const_iterator iter;
             for (iter = context.begin(); iter != context.end(); ++iter)
-                (*iter)->apply(walker);
+                (*iter).apply(walker);
         }
 
         public void markSubtableOperands(List<int4> check)
@@ -467,8 +467,8 @@ namespace Sla.SLEIGH
             check.resize(operands.size());
             for (int4 i = 0; i < operands.size(); ++i)
             {
-                TripleSymbol* sym = operands[i]->getDefiningSymbol();
-                if ((sym != (TripleSymbol*)0) && (sym->getType() == SleighSymbol::subtable_symbol))
+                TripleSymbol* sym = operands[i].getDefiningSymbol();
+                if ((sym != (TripleSymbol*)0) && (sym.getType() == SleighSymbol::subtable_symbol))
                     check[i] = 0;
                 else
                     check[i] = 2;
@@ -478,25 +478,25 @@ namespace Sla.SLEIGH
         public void collectLocalExports(List<uintb> results)
         {
             if (templ == (ConstructTpl*)0) return;
-            HandleTpl* handle = templ->getResult();
+            HandleTpl* handle = templ.getResult();
             if (handle == (HandleTpl*)0) return;
-            if (handle->getSpace().isConstSpace()) return;  // Even if the value is dynamic, the pointed to value won't get used
-            if (handle->getPtrSpace().getType() != ConstTpl::real)
+            if (handle.getSpace().isConstSpace()) return;  // Even if the value is dynamic, the pointed to value won't get used
+            if (handle.getPtrSpace().getType() != ConstTpl::real)
             {
-                if (handle->getTempSpace().isUniqueSpace())
-                    results.push_back(handle->getTempOffset().getReal());
+                if (handle.getTempSpace().isUniqueSpace())
+                    results.push_back(handle.getTempOffset().getReal());
                 return;
             }
-            if (handle->getSpace().isUniqueSpace())
+            if (handle.getSpace().isUniqueSpace())
             {
-                results.push_back(handle->getPtrOffset().getReal());
+                results.push_back(handle.getPtrOffset().getReal());
                 return;
             }
-            if (handle->getSpace().getType() == ConstTpl::handle)
+            if (handle.getSpace().getType() == ConstTpl::handle)
             {
-                int4 handleIndex = handle->getSpace().getHandleIndex();
+                int4 handleIndex = handle.getSpace().getHandleIndex();
                 OperandSymbol* opSym = getOperand(handleIndex);
-                opSym->collectLocalValues(results);
+                opSym.collectLocalValues(results);
             }
         }
 
@@ -511,7 +511,7 @@ namespace Sla.SLEIGH
         { // Does this constructor cause recursion with its table
             for (int4 i = 0; i < operands.size(); ++i)
             {
-                TripleSymbol* sym = operands[i]->getDefiningSymbol();
+                TripleSymbol* sym = operands[i].getDefiningSymbol();
                 if (sym == parent) return true;
             }
             return false;
@@ -520,12 +520,12 @@ namespace Sla.SLEIGH
         public void saveXml(TextWriter s)
         {
             s << "<constructor";
-            s << " parent=\"0x" << hex << parent->getId() << "\"";
+            s << " parent=\"0x" << hex << parent.getId() << "\"";
             s << " first=\"" << dec << firstwhitespace << "\"";
             s << " length=\"" << minimumlength << "\"";
             s << " line=\"" << src_index << ":" << lineno << "\">\n";
             for (int4 i = 0; i < operands.size(); ++i)
-                s << "<oper id=\"0x" << hex << operands[i]->getId() << "\"/>\n";
+                s << "<oper id=\"0x" << hex << operands[i].getId() << "\"/>\n";
             for (int4 i = 0; i < printpiece.size(); ++i)
             {
                 if (printpiece[i][0] == '\n')
@@ -541,14 +541,14 @@ namespace Sla.SLEIGH
                 }
             }
             for (int4 i = 0; i < context.size(); ++i)
-                context[i]->saveXml(s);
+                context[i].saveXml(s);
             if (templ != (ConstructTpl*)0)
-                templ->saveXml(s, -1);
+                templ.saveXml(s, -1);
             for (int4 i = 0; i < namedtempl.size(); ++i)
             {
                 if (namedtempl[i] == (ConstructTpl*)0) // Some sections may be NULL
                     continue;
-                namedtempl[i]->saveXml(s, i);
+                namedtempl[i].saveXml(s, i);
             }
             s << "</constructor>\n";
         }
@@ -557,71 +557,71 @@ namespace Sla.SLEIGH
         {
             uintm id;
             {
-                istringstream s(el->getAttributeValue("parent"));
+                istringstream s(el.getAttributeValue("parent"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> id;
-                parent = (SubtableSymbol*)trans->findSymbol(id);
+                parent = (SubtableSymbol*)trans.findSymbol(id);
             }
             {
-                istringstream s(el->getAttributeValue("first"));
+                istringstream s(el.getAttributeValue("first"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> firstwhitespace;
             }
             {
-                istringstream s(el->getAttributeValue("length"));
+                istringstream s(el.getAttributeValue("length"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> minimumlength;
             }
             {
-                string src_and_line = el->getAttributeValue("line");
+                string src_and_line = el.getAttributeValue("line");
                 size_t pos = src_and_line.find(":");
                 src_index = stoi(src_and_line.substr(0, pos), NULL, 10);
                 lineno = stoi(src_and_line.substr(pos + 1, src_and_line.length()), NULL, 10);
             }
-            List list = el->getChildren();
+            List list = el.getChildren();
             List::const_iterator iter;
             iter = list.begin();
             while (iter != list.end())
             {
-                if ((*iter)->getName() == "oper")
+                if ((*iter).getName() == "oper")
                 {
                     uintm id;
                     {
-                        istringstream s((* iter)->getAttributeValue("id"));
+                        istringstream s((* iter).getAttributeValue("id"));
                         s.unsetf(ios::dec | ios::hex | ios::oct);
                         s >> id;
                     }
-                    OperandSymbol* sym = (OperandSymbol*)trans->findSymbol(id);
+                    OperandSymbol* sym = (OperandSymbol*)trans.findSymbol(id);
                     operands.push_back(sym);
                 }
-                else if ((*iter)->getName() == "print")
-                    printpiece.push_back((*iter)->getAttributeValue("piece"));
-                else if ((*iter)->getName() == "opprint")
+                else if ((*iter).getName() == "print")
+                    printpiece.push_back((*iter).getAttributeValue("piece"));
+                else if ((*iter).getName() == "opprint")
                 {
                     int4 index;
-                    istringstream s((* iter)->getAttributeValue("id"));
+                    istringstream s((* iter).getAttributeValue("id"));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> index;
                     string operstring = "\n ";
                     operstring[1] = ('A' + index);
                     printpiece.push_back(operstring);
                 }
-                else if ((*iter)->getName() == "context_op")
+                else if ((*iter).getName() == "context_op")
                 {
                     ContextOp* c_op = new ContextOp();
-                    c_op->restoreXml(*iter, trans);
+                    c_op.restoreXml(*iter, trans);
                     context.push_back(c_op);
                 }
-                else if ((*iter)->getName() == "commit")
+                else if ((*iter).getName() == "commit")
                 {
                     ContextCommit* c_op = new ContextCommit();
-                    c_op->restoreXml(*iter, trans);
+                    c_op.restoreXml(*iter, trans);
                     context.push_back(c_op);
                 }
                 else
                 {
                     ConstructTpl* cur = new ConstructTpl();
-                    int4 sectionid = cur->restoreXml(*iter, trans);
+                    int4 sectionid = cur.restoreXml(*iter, trans);
                     if (sectionid < 0)
                     {
                         if (templ != (ConstructTpl*)0)

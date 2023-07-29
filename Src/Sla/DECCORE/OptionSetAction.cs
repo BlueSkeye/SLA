@@ -27,11 +27,11 @@ namespace Sla.DECCORE
 
             if (p2.size() != 0)
             {
-                glb->allacts.cloneGroup(p1, p2);
-                glb->allacts.setCurrent(p2);
+                glb.allacts.cloneGroup(p1, p2);
+                glb.allacts.setCurrent(p2);
                 return "Created " + p2 + " by cloning " + p1 + " and made it current";
             }
-            glb->allacts.setCurrent(p1);
+            glb.allacts.setCurrent(p1);
             return "Set current action to " + p1;
         }
     }

@@ -59,27 +59,27 @@ namespace Sla.DECCORE
         { // Assuming -lobl- is the block containing the low precision test of a double precision lessthan
           // Map out all the blocks if possible, otherwise return false
             lolessbl = lobl;
-            if (lolessbl->sizeIn() != 1) return false;
-            if (lolessbl->sizeOut() != 2) return false;
-            hieqbl = (BlockBasic*)lolessbl->getIn(0);
-            if (hieqbl->sizeIn() != 1) return false;
-            if (hieqbl->sizeOut() != 2) return false;
-            hilessbl = (BlockBasic*)hieqbl->getIn(0);
-            if (hilessbl->sizeOut() != 2) return false;
+            if (lolessbl.sizeIn() != 1) return false;
+            if (lolessbl.sizeOut() != 2) return false;
+            hieqbl = (BlockBasic*)lolessbl.getIn(0);
+            if (hieqbl.sizeIn() != 1) return false;
+            if (hieqbl.sizeOut() != 2) return false;
+            hilessbl = (BlockBasic*)hieqbl.getIn(0);
+            if (hilessbl.sizeOut() != 2) return false;
             return true;
         }
 
         private bool mapOpsFromBlocks()
         {
-            lolessbool = lolessbl->lastOp();
+            lolessbool = lolessbl.lastOp();
             if (lolessbool == (PcodeOp*)0) return false;
-            if (lolessbool->code() != CPUI_CBRANCH) return false;
-            hieqbool = hieqbl->lastOp();
+            if (lolessbool.code() != CPUI_CBRANCH) return false;
+            hieqbool = hieqbl.lastOp();
             if (hieqbool == (PcodeOp*)0) return false;
-            if (hieqbool->code() != CPUI_CBRANCH) return false;
-            hilessbool = hilessbl->lastOp();
+            if (hieqbool.code() != CPUI_CBRANCH) return false;
+            hilessbool = hilessbl.lastOp();
             if (hilessbool == (PcodeOp*)0) return false;
-            if (hilessbool->code() != CPUI_CBRANCH) return false;
+            if (hilessbool.code() != CPUI_CBRANCH) return false;
 
             Varnode* vn;
 
@@ -89,10 +89,10 @@ namespace Sla.DECCORE
             midlessform = false;
             lolessiszerocomp = false;
 
-            vn = hieqbool->getIn(1);
-            if (!vn->isWritten()) return false;
-            hiequal = vn->getDef();
-            switch (hiequal->code())
+            vn = hieqbool.getIn(1);
+            if (!vn.isWritten()) return false;
+            hiequal = vn.getDef();
+            switch (hiequal.code())
             {
                 case CPUI_INT_EQUAL:
                     midlessform = false;
@@ -124,10 +124,10 @@ namespace Sla.DECCORE
                     return false;
             }
 
-            vn = lolessbool->getIn(1);
-            if (!vn->isWritten()) return false;
-            loless = vn->getDef();
-            switch (loless->code())
+            vn = lolessbool.getIn(1);
+            if (!vn.isWritten()) return false;
+            loless = vn.getDef();
+            switch (loless.code())
             {   // Only unsigned forms
                 case CPUI_INT_LESS:
                     lolessequalform = false;
@@ -136,14 +136,14 @@ namespace Sla.DECCORE
                     lolessequalform = true;
                     break;
                 case CPUI_INT_EQUAL:
-                    if (!loless->getIn(1)->isConstant()) return false;
-                    if (loless->getIn(1)->getOffset() != 0) return false;
+                    if (!loless.getIn(1).isConstant()) return false;
+                    if (loless.getIn(1).getOffset() != 0) return false;
                     lolessiszerocomp = true;
                     lolessequalform = true;
                     break;
                 case CPUI_INT_NOTEQUAL:
-                    if (!loless->getIn(1)->isConstant()) return false;
-                    if (loless->getIn(1)->getOffset() != 0) return false;
+                    if (!loless.getIn(1).isConstant()) return false;
+                    if (loless.getIn(1).getOffset() != 0) return false;
                     lolessiszerocomp = true;
                     lolessequalform = false;
                     break;
@@ -151,10 +151,10 @@ namespace Sla.DECCORE
                     return false;
             }
 
-            vn = hilessbool->getIn(1);
-            if (!vn->isWritten()) return false;
-            hiless = vn->getDef();
-            switch (hiless->code())
+            vn = hilessbool.getIn(1);
+            if (!vn.isWritten()) return false;
+            hiless = vn.getDef();
+            switch (hiless.code())
             {
                 case CPUI_INT_LESS:
                     hilessequalform = false;
@@ -190,9 +190,9 @@ namespace Sla.DECCORE
         private bool normalizeHi()
         {
             Varnode* tmpvn;
-            vnhil1 = hiless->getIn(0);
-            vnhil2 = hiless->getIn(1);
-            if (vnhil1->isConstant())
+            vnhil1 = hiless.getIn(0);
+            vnhil2 = hiless.getIn(1);
+            if (vnhil1.isConstant())
             {   // Start with constant on the right
                 hiflip = !hiflip;
                 hilessequalform = !hilessequalform;
@@ -201,10 +201,10 @@ namespace Sla.DECCORE
                 vnhil2 = tmpvn;
             }
             hiconstform = false;
-            if (vnhil2->isConstant())
+            if (vnhil2.isConstant())
             {
                 hiconstform = true;
-                hival = vnhil2->getOffset();
+                hival = vnhil2.getOffset();
                 SplitVarnode::getTrueFalse(hilessbool, hiflip, hilesstrue, hilessfalse);
                 int4 inc = 1;
                 if (hilessfalse != hieqbl)
@@ -222,7 +222,7 @@ namespace Sla.DECCORE
                     hival &= calc_mask(in.getSize());
                     hilessequalform = false;
                 }
-                hival >>= in.getLo()->getSize() * 8;
+                hival >>= in.getLo().getSize() * 8;
             }
             else
             {
@@ -241,9 +241,9 @@ namespace Sla.DECCORE
         private bool normalizeMid()
         {
             Varnode* tmpvn;
-            vnhie1 = hiequal->getIn(0);
-            vnhie2 = hiequal->getIn(1);
-            if (vnhie1->isConstant())
+            vnhie1 = hiequal.getIn(0);
+            vnhie2 = hiequal.getIn(1);
+            if (vnhie1.isConstant())
             {   // Make sure constant is on the right
                 tmpvn = vnhie1;
                 vnhie1 = vnhie2;
@@ -255,20 +255,20 @@ namespace Sla.DECCORE
                 }
             }
             midconstform = false;
-            if (vnhie2->isConstant())
+            if (vnhie2.isConstant())
             {
                 if (!hiconstform) return false; // If mid is constant, both mid and hi must be constant
                 midconstform = true;
-                midval = vnhie2->getOffset();
-                if (vnhie2->getSize() == @in.getSize()) {
+                midval = vnhie2.getOffset();
+                if (vnhie2.getSize() == @in.getSize()) {
                     // Convert to comparison on high part
-                    uintb lopart = midval & calc_mask(@in.getLo()->getSize());
-                    midval >>= @in.getLo()->getSize() * 8;
+                    uintb lopart = midval & calc_mask(@in.getLo().getSize());
+                    midval >>= @in.getLo().getSize() * 8;
                     if (midlessform)
                     {
                         if (midlessequal)
                         {
-                            if (lopart != calc_mask(@in.getLo()->getSize())) return false;
+                            if (lopart != calc_mask(@in.getLo().getSize())) return false;
                         }
                         else
                         {
@@ -282,7 +282,7 @@ namespace Sla.DECCORE
                 {   // If the mid and hi don't match
                     if (!midlessform) return false;
                     midval += (midlessequal) ? 1 : -1; // We may just be one off
-                    midval &= calc_mask(@in.getLo()->getSize());
+                    midval &= calc_mask(@in.getLo().getSize());
                     midlessequal = !midlessequal;
                     if (midval != hival) return false; // Last chance
                 }
@@ -297,7 +297,7 @@ namespace Sla.DECCORE
             }
             else
             {
-                if (hiequal->code() == CPUI_INT_NOTEQUAL)
+                if (hiequal.code() == CPUI_INT_NOTEQUAL)
                 {
                     equalflip = !equalflip;
                 }
@@ -308,8 +308,8 @@ namespace Sla.DECCORE
         private bool normalizeLo()
         { // This is basically identical to normalizeHi
             Varnode* tmpvn;
-            vnlo1 = loless->getIn(0);
-            vnlo2 = loless->getIn(1);
+            vnlo1 = loless.getIn(0);
+            vnlo2 = loless.getIn(1);
             if (lolessiszerocomp)
             {
                 loconstform = true;
@@ -325,7 +325,7 @@ namespace Sla.DECCORE
                 }
                 return true;
             }
-            if (vnlo1->isConstant())
+            if (vnlo1.isConstant())
             {   // Make sure constant is on the right
                 loflip = !loflip;
                 lolessequalform = !lolessequalform;
@@ -334,14 +334,14 @@ namespace Sla.DECCORE
                 vnlo2 = tmpvn;
             }
             loconstform = false;
-            if (vnlo2->isConstant())
+            if (vnlo2.isConstant())
             {   // Make sure normalize lessequal to less
                 loconstform = true;
-                loval = vnlo2->getOffset();
+                loval = vnlo2.getOffset();
                 if (lolessequalform)
                 {
                     loval += 1;
-                    loval &= calc_mask(vnlo2->getSize());
+                    loval &= calc_mask(vnlo2.getSize());
                     lolessequalform = false;
                 }
             }
@@ -390,7 +390,7 @@ namespace Sla.DECCORE
             if (midconstform)
             {
                 if (!hiconstform) return false;
-                if (vnhie2->getSize() == @in.getSize()) {
+                if (vnhie2.getSize() == @in.getSize()) {
                     if ((vnhie1 != vnhil1) && (vnhie1 != vnhil2)) return false;
                 }
                 else
@@ -450,7 +450,7 @@ namespace Sla.DECCORE
                 {
                     loflip = !loflip;
                     loval -= 1;
-                    loval &= calc_mask(lo->getSize());
+                    loval &= calc_mask(lo.getSize());
                     if (vnlo1 != lo) return false;
                 }
                 hislot = 1;
@@ -492,9 +492,9 @@ namespace Sla.DECCORE
         private bool mapFromLow(PcodeOp op)
         { // Given the less than comparison for the lo piece and an input varnode explicitly marked as isPrecisLo
           // try to map out the threeway lessthan form
-            PcodeOp* loop = op->getOut()->loneDescend();
+            PcodeOp* loop = op.getOut().loneDescend();
             if (loop == (PcodeOp*)0) return false;
-            if (!mapBlocksFromLow(loop->getParent())) return false;
+            if (!mapBlocksFromLow(loop.getParent())) return false;
             if (!mapOpsFromBlocks()) return false;
             if (!checkSignedness()) return false;
             if (!normalizeHi()) return false;
@@ -510,7 +510,7 @@ namespace Sla.DECCORE
             setOpCode();
             if (hiconstform)
             {
-                in2.initPartial(@in.getSize(), (hival << (8 *@in.getLo()->getSize()))| loval);
+                in2.initPartial(@in.getSize(), (hival << (8 *@in.getLo().getSize()))| loval);
                 if (!setBoolOp()) return false;
             }
             else

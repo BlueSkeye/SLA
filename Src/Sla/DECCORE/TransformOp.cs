@@ -48,26 +48,26 @@ namespace Sla.DECCORE
             if ((special & TransformOp::op_preexisting) != 0)
             {
                 replacement = op;
-                fd->opSetOpcode(op, opc);
-                while (input.size() < op->numInput())
-                    fd->opRemoveInput(op, op->numInput() - 1);
-                for (int4 i = 0; i < op->numInput(); ++i)
-                    fd->opUnsetInput(op, i);            // Clear any remaining inputs
-                while (op->numInput() < input.size())
-                    fd->opInsertInput(op, (Varnode*)0, op->numInput() - 1);
+                fd.opSetOpcode(op, opc);
+                while (input.size() < op.numInput())
+                    fd.opRemoveInput(op, op.numInput() - 1);
+                for (int4 i = 0; i < op.numInput(); ++i)
+                    fd.opUnsetInput(op, i);            // Clear any remaining inputs
+                while (op.numInput() < input.size())
+                    fd.opInsertInput(op, (Varnode*)0, op.numInput() - 1);
             }
             else
             {
-                replacement = fd->newOp(input.size(), op->getAddr());
-                fd->opSetOpcode(replacement, opc);
+                replacement = fd.newOp(input.size(), op.getAddr());
+                fd.opSetOpcode(replacement, opc);
                 if (output != (TransformVar*)0)
-                    output->createReplacement(fd);
+                    output.createReplacement(fd);
                 if (follow == (TransformOp*)0)
                 {       // Can be inserted immediately
                     if (opc == CPUI_MULTIEQUAL)
-                        fd->opInsertBegin(replacement, op->getParent());
+                        fd.opInsertBegin(replacement, op.getParent());
                     else
-                        fd->opInsertBefore(replacement, op);
+                        fd.opInsertBefore(replacement, op);
                 }
             }
         }
@@ -79,12 +79,12 @@ namespace Sla.DECCORE
         {
             if (follow != (TransformOp*)0)
             {
-                if (follow->follow == (TransformOp*)0)
+                if (follow.follow == (TransformOp*)0)
                 {   // Check if the follow is inserted
                     if (opc == CPUI_MULTIEQUAL)
-                        fd->opInsertBegin(replacement, follow->replacement->getParent());
+                        fd.opInsertBegin(replacement, follow.replacement.getParent());
                     else
-                        fd->opInsertBefore(replacement, follow->replacement);
+                        fd.opInsertBefore(replacement, follow.replacement);
                     follow = (TransformOp*)0;   // Mark that this has been inserted
                     return true;
                 }

@@ -17,11 +17,11 @@ namespace Sla.EXTRA
         /// decompilation.  Both input parameters and the return value are locked.
         public override void execute(TextReader s)
         {
-            if (dcp->fd == (Funcdata*)0)
+            if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");
 
-            dcp->fd->getFuncProto().setInputLock(true);
-            dcp->fd->getFuncProto().setOutputLock(true);
+            dcp.fd.getFuncProto().setInputLock(true);
+            dcp.fd.getFuncProto().setOutputLock(true);
         }
     }
 }

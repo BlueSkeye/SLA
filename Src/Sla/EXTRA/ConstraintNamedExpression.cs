@@ -27,13 +27,13 @@ namespace Sla.EXTRA
         }
 
         public override UnifyConstraint clone()
-            => (new ConstraintNamedExpression(constindex, expr->clone()))->copyid(this);
+            => (new ConstraintNamedExpression(constindex, expr.clone())).copyid(this);
 
         public override bool step(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            if (!traverse->step()) return false;
-            uintb ourconst = expr->getConstant(state);
+            if (!traverse.step()) return false;
+            uintb ourconst = expr.getConstant(state);
             state.data(constindex).setConstant(ourconst);
             return true;
         }
@@ -49,7 +49,7 @@ namespace Sla.EXTRA
         {
             printstate.printIndent(s);
             s << printstate.getName(constindex) << " = ";
-            expr->writeExpression(s, printstate);
+            expr.writeExpression(s, printstate);
             s << ';' << endl;
         }
     }

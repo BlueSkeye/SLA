@@ -122,7 +122,7 @@ namespace Sla.CORE {
 
         CPUI_CAST = 64,     ///< Cast from one data-type to another
         CPUI_PTRADD = 65,       ///< Index into an array ([])
-        CPUI_PTRSUB = 66,       ///< Drill down to a sub-field  (->)
+        CPUI_PTRSUB = 66,       ///< Drill down to a sub-field  (.)
         CPUI_SEGMENTOP = 67,        ///< Look-up a \e segmented address
         CPUI_CPOOLREF = 68,     ///< Recover a value from the \e constant \e pool
         CPUI_NEW = 69,      ///< Allocate a new object (new)

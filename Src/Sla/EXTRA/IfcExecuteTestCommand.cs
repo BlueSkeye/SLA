@@ -13,7 +13,7 @@ namespace Sla.EXTRA
         /// \brief Execute a specified range of the test script: `execute test command <#>-<#>
         public override void execute(TextReader s)
         {
-            if (dcp->testCollection == (FunctionTestCollection*)0)
+            if (dcp.testCollection == (FunctionTestCollection*)0)
                 throw IfaceExecutionError("No test file is loaded");
             int4 first = -1;
             int4 last = -1;
@@ -21,7 +21,7 @@ namespace Sla.EXTRA
 
             s >> ws >> dec >> first;
             first -= 1;
-            if (first < 0 || first > dcp->testCollection->numCommands())
+            if (first < 0 || first > dcp.testCollection.numCommands())
                 throw IfaceExecutionError("Command index out of bounds");
             s >> ws;
             if (!s.eof())
@@ -31,7 +31,7 @@ namespace Sla.EXTRA
                     throw IfaceExecutionError("Missing hyphenated command range");
                 s >> ws >> last;
                 last -= 1;
-                if (last < 0 || last < first || last > dcp->testCollection->numCommands())
+                if (last < 0 || last < first || last > dcp.testCollection.numCommands())
                     throw IfaceExecutionError("Command index out of bounds");
             }
             else
@@ -41,10 +41,10 @@ namespace Sla.EXTRA
             ostringstream s1;
             for (int4 i = first; i <= last; ++i)
             {
-                s1 << dcp->testCollection->getCommand(i) << endl;
+                s1 << dcp.testCollection.getCommand(i) << endl;
             }
             istringstream* s2 = new istringstream(s1.str());
-            status->pushScript(s2, "test> ");
+            status.pushScript(s2, "test> ");
         }
     }
 }

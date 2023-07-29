@@ -75,7 +75,7 @@ namespace Sla.DECCORE
         protected void checkSizeTypeLock()
         {
             dispflags &= ~((uint4)size_typelock);
-            if (isTypeLocked() && (type->getMetatype() == TYPE_UNKNOWN))
+            if (isTypeLocked() && (type.getMetatype() == TYPE_UNKNOWN))
                 dispflags |= size_typelock;
         }
 
@@ -253,11 +253,11 @@ namespace Sla.DECCORE
             SymbolEntry* res;
             for (int4 i = 0; i < mapentry.size(); ++i) {
                 res = &(*mapentry[i]);
-                Address entryaddr = res->getAddr();
+                Address entryaddr = res.getAddr();
                 if (addr.getSpace() != entryaddr.getSpace()) continue;
                 if (addr.getOffset() < entryaddr.getOffset()) continue;
                 int4 diff = (int4)(addr.getOffset() - entryaddr.getOffset());
-                if (diff >= res->getSize()) continue;
+                if (diff >= res.getSize()) continue;
                 return res;
             }
             //  throw new LowlevelError("No mapping at desired address for symbol: "+name);
@@ -283,7 +283,7 @@ namespace Sla.DECCORE
                 SymbolEntry tmp = &(*mapentry[i]);
                 if (tmp == entry)
                     return pos;
-                if (entry->getSize() == type->getSize())
+                if (entry.getSize() == type.getSize())
                     pos += 1;
             }
             return -1;
@@ -306,14 +306,14 @@ namespace Sla.DECCORE
                 int4 count = 0;
                 while (point != null) {
                     count += 1;
-                    point = point->getParent();
+                    point = point.getParent();
                 }
                 return count - 1;   // Don't print global scope
             }
             if (depthScope == useScope)
                 return depthResolution;
             depthScope = useScope;
-            Scope distinguishScope = scope->findDistinguishingScope(useScope);
+            Scope distinguishScope = scope.findDistinguishingScope(useScope);
             depthResolution = 0;
             string distinguishName;
             Scope terminatingScope;
@@ -322,17 +322,17 @@ namespace Sla.DECCORE
                 terminatingScope = scope;
             }
             else {
-                distinguishName = distinguishScope->getName();
+                distinguishName = distinguishScope.getName();
                 Scope currentScope = scope;
                 while (currentScope != distinguishScope)
                 {   // For any scope up to the distinguishing scope
                     depthResolution += 1;           // Print its name
-                    currentScope = currentScope->getParent();
+                    currentScope = currentScope.getParent();
                 }
                 depthResolution += 1;       // Also print the distinguishing scope name
-                terminatingScope = distinguishScope->getParent();
+                terminatingScope = distinguishScope.getParent();
             }
-            if (useScope->isNameUsed(distinguishName, terminatingScope))
+            if (useScope.isNameUsed(distinguishName, terminatingScope))
                 depthResolution += 1;       // Name was overridden, we need one more distinguishing name
             return depthResolution;
         }
@@ -460,14 +460,14 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         public void encodeBody(Encoder encoder)
         {
-            type->encodeRef(encoder);
+            type.encodeRef(encoder);
         }
 
         /// Decode details of the Symbol from a \<symbol> element
         /// \param decoder is the stream decoder
         public void decodeBody(Decoder decoder)
         {
-            type = scope->getArch()->types->decodeType(decoder);
+            type = scope.getArch().types.decodeType(decoder);
             checkSizeTypeLock();
         }
 
@@ -493,7 +493,7 @@ namespace Sla.DECCORE
             decoder.closeElement(elemId);
         }
 
-        ///< Get number of bytes consumed within the address->symbol map
+        ///< Get number of bytes consumed within the address.symbol map
         /// Get the number of bytes consumed by a SymbolEntry representing \b this Symbol.
         /// By default, this is the number of bytes consumed by the Symbol's data-type.
         /// This gives the amount of leeway a search has when the address queried does not match
@@ -502,7 +502,7 @@ namespace Sla.DECCORE
         /// \return the number of bytes in a default SymbolEntry
         public override int getBytesConsumed()
         {
-            return type->getSize();
+            return type.getSize();
         }
     }
 }

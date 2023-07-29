@@ -35,10 +35,10 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Datatype* inType = op->getIn(0)->getTypeReadFacing(op);
-            Datatype* outType = op->getOut()->getTypeDefFacing();
-            type_metatype metain = inType->getMetatype();
-            type_metatype metaout = outType->getMetatype();
+            Datatype* inType = op.getIn(0).getTypeReadFacing(op);
+            Datatype* outType = op.getOut().getTypeDefFacing();
+            type_metatype metain = inType.getMetatype();
+            type_metatype metaout = outType.getMetatype();
             if (metain != TYPE_PARTIALSTRUCT && metaout != TYPE_PARTIALSTRUCT &&
                 metain != TYPE_ARRAY && metaout != TYPE_ARRAY &&
                 metain != TYPE_STRUCT && metaout != TYPE_STRUCT)

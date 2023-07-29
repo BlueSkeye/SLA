@@ -35,14 +35,14 @@ namespace Sla.DECCORE
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
             uintb val, mask;
-            int4 size = op->getOut()->getSize();
+            int4 size = op.getOut().getSize();
             Varnode* vn;
 
-            vn = op->getIn(1);
-            if (!vn->isConstant()) return 0;
+            vn = op.getIn(1);
+            if (!vn.isConstant()) return 0;
             if (size > sizeof(uintb)) return 0; // FIXME: uintb should be arbitrary precision
-            mask = op->getIn(0)->getNZMask();
-            val = vn->getOffset();
+            mask = op.getIn(0).getNZMask();
+            val = vn.getOffset();
             if ((mask | val) != val) return 0; // first param may turn on other bits
 
             data.opSetOpcode(op, CPUI_COPY);

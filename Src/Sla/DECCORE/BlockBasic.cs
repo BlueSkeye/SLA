@@ -66,13 +66,13 @@ namespace Sla.DECCORE
                     ordafter = ~((uintm)0);
             }
             else {
-                ordafter = (*iter)->getSeqNum().getOrder();
+                ordafter = (*iter).getSeqNum().getOrder();
             }
             if (ordafter - ordbefore <= 1) {
                 setOrder();
             }
             else {
-                inst->setOrder(ordafter / 2 + ordbefore / 2); // Beware overflow
+                inst.setOrder(ordafter / 2 + ordbefore / 2); // Beware overflow
             }
 
             if (inst.isBranch()) {
@@ -308,7 +308,7 @@ namespace Sla.DECCORE
                     else {
                         int totalref = 0;
 
-                        for (iter2 = vn->beginDescend(); iter2 != vn->endDescend(); ++iter2) {
+                        for (iter2 = vn.beginDescend(); iter2 != vn.endDescend(); ++iter2) {
                             d_op = *iter2;
                             if (d_op.isMarker() || (d_op.getParent() != this)) {
                                 // Variable used outside of block
@@ -496,7 +496,7 @@ namespace Sla.DECCORE
                     break;
                 }
                 ++iter;
-                if (iter == vn->endDescend()) {
+                if (iter == vn.endDescend()) {
                     return null;
                 }
             }

@@ -103,7 +103,7 @@ namespace Sla.DECCORE
         /// \param in1 is the input value
         /// \return the output value
         public uintb evaluateUnary(int4 sizeout, int4 sizein, uintb in1) 
-            => behave->evaluateUnary(sizeout, sizein, in1);
+            => behave.evaluateUnary(sizeout, sizein, in1);
 
         /// \brief Emulate the binary op-code on an input value
         ///
@@ -113,7 +113,7 @@ namespace Sla.DECCORE
         /// \param in2 is the second input value
         /// \return the output value
         public uintb evaluateBinary(int4 sizeout, int4 sizein, uintb in1, uintb in2)
-                    => behave->evaluateBinary(sizeout, sizein, in1, in2);
+                    => behave.evaluateBinary(sizeout, sizein, in1, in2);
 
         /// \brief Reverse the binary op-code operation, recovering a constant input value
         /// If the output value and one of the input values is known, recover the value
@@ -125,7 +125,7 @@ namespace Sla.DECCORE
         /// \param in is the known input value
         /// \return the input value corresponding to the \b slot
         public uintb recoverInputBinary(int4 slot, int4 sizeout, uintb @out, int4 sizein, uintb @in)
-            => behave->recoverInputBinary(slot, sizeout, @out, sizein, @in);
+            => behave.recoverInputBinary(slot, sizeout, @out, sizein, @in);
 
         /// \brief Reverse the unary op-code operation, recovering a constant input value
         ///
@@ -135,7 +135,7 @@ namespace Sla.DECCORE
         /// \param sizein is the size of the input in bytes
         /// \return the input value
         public uintb recoverInputUnary(int4 sizeout, uintb @out, int4 sizein) 
-            => behave->recoverInputUnary(sizeout,out, sizein);
+            => behave.recoverInputUnary(sizeout,out, sizein);
 
         /// Return \b true if this op-code is commutative
         /// \return \b true if the ordering of the inputs does not affect the output
@@ -169,7 +169,7 @@ namespace Sla.DECCORE
         public virtual Datatype getOutputLocal(PcodeOp op)
         {
             // Default type lookup
-            return tlst->getBase(op->getOut()->getSize(), TYPE_UNKNOWN);
+            return tlst.getBase(op.getOut().getSize(), TYPE_UNKNOWN);
         }
 
         /// \brief Find the minimal (or suggested) data-type of an input to \b this op-code
@@ -179,7 +179,7 @@ namespace Sla.DECCORE
         /// \return the data-type
         public virtual Datatype getInputLocal(PcodeOp op, int4 slot)
         {               // Default type lookup
-            return tlst->getBase(op->getIn(slot)->getSize(), TYPE_UNKNOWN);
+            return tlst.getBase(op.getIn(slot).getSize(), TYPE_UNKNOWN);
         }
 
         /// \brief Find the data-type of the output that would be assigned by a compiler
@@ -190,7 +190,7 @@ namespace Sla.DECCORE
         /// \return the data-type
         public virtual Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)
         {
-            return op->outputTypeLocal();
+            return op.outputTypeLocal();
         }
 
         /// \brief Find the data-type of the input to a specific PcodeOp
@@ -203,11 +203,11 @@ namespace Sla.DECCORE
         /// \return the data-type
         public virtual Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
         {
-            Varnode vn = op->getIn(slot);
-            if (vn->isAnnotation()) return (Datatype*)0;
-            Datatype* reqtype = op->inputTypeLocal(slot);
-            Datatype* curtype = vn->getHighTypeReadFacing(op);
-            return castStrategy->castStandard(reqtype, curtype, false, true);
+            Varnode vn = op.getIn(slot);
+            if (vn.isAnnotation()) return (Datatype*)0;
+            Datatype* reqtype = op.inputTypeLocal(slot);
+            Datatype* curtype = vn.getHighTypeReadFacing(op);
+            return castStrategy.castStandard(reqtype, curtype, false, true);
         }
 
         /// \brief Propagate an incoming data-type across a specific PcodeOp
@@ -348,35 +348,35 @@ namespace Sla.DECCORE
         {
             if (val)
             {
-                inst[CPUI_INT_ZEXT]->setMetatypeIn(TYPE_UNKNOWN);
-                inst[CPUI_INT_ZEXT]->setMetatypeOut(TYPE_INT);
-                inst[CPUI_INT_NEGATE]->setMetatypeIn(TYPE_INT);
-                inst[CPUI_INT_NEGATE]->setMetatypeOut(TYPE_INT);
-                inst[CPUI_INT_XOR]->setMetatypeIn(TYPE_INT);
-                inst[CPUI_INT_XOR]->setMetatypeOut(TYPE_INT);
-                inst[CPUI_INT_OR]->setMetatypeIn(TYPE_INT);
-                inst[CPUI_INT_OR]->setMetatypeOut(TYPE_INT);
-                inst[CPUI_INT_AND]->setMetatypeIn(TYPE_INT);
-                inst[CPUI_INT_AND]->setMetatypeOut(TYPE_INT);
-                inst[CPUI_INT_RIGHT]->setMetatypeIn(TYPE_INT);
-                inst[CPUI_INT_RIGHT]->setMetatypeOut(TYPE_INT);
-                inst[CPUI_INT_RIGHT]->setSymbol(">>>");
+                inst[CPUI_INT_ZEXT].setMetatypeIn(TYPE_UNKNOWN);
+                inst[CPUI_INT_ZEXT].setMetatypeOut(TYPE_INT);
+                inst[CPUI_INT_NEGATE].setMetatypeIn(TYPE_INT);
+                inst[CPUI_INT_NEGATE].setMetatypeOut(TYPE_INT);
+                inst[CPUI_INT_XOR].setMetatypeIn(TYPE_INT);
+                inst[CPUI_INT_XOR].setMetatypeOut(TYPE_INT);
+                inst[CPUI_INT_OR].setMetatypeIn(TYPE_INT);
+                inst[CPUI_INT_OR].setMetatypeOut(TYPE_INT);
+                inst[CPUI_INT_AND].setMetatypeIn(TYPE_INT);
+                inst[CPUI_INT_AND].setMetatypeOut(TYPE_INT);
+                inst[CPUI_INT_RIGHT].setMetatypeIn(TYPE_INT);
+                inst[CPUI_INT_RIGHT].setMetatypeOut(TYPE_INT);
+                inst[CPUI_INT_RIGHT].setSymbol(">>>");
             }
             else
             {
-                inst[CPUI_INT_ZEXT]->setMetatypeIn(TYPE_UINT);
-                inst[CPUI_INT_ZEXT]->setMetatypeOut(TYPE_UINT);
-                inst[CPUI_INT_NEGATE]->setMetatypeIn(TYPE_UINT);
-                inst[CPUI_INT_NEGATE]->setMetatypeOut(TYPE_UINT);
-                inst[CPUI_INT_XOR]->setMetatypeIn(TYPE_UINT);
-                inst[CPUI_INT_XOR]->setMetatypeOut(TYPE_UINT);
-                inst[CPUI_INT_OR]->setMetatypeIn(TYPE_UINT);
-                inst[CPUI_INT_OR]->setMetatypeOut(TYPE_UINT);
-                inst[CPUI_INT_AND]->setMetatypeIn(TYPE_UINT);
-                inst[CPUI_INT_AND]->setMetatypeOut(TYPE_UINT);
-                inst[CPUI_INT_RIGHT]->setMetatypeIn(TYPE_UINT);
-                inst[CPUI_INT_RIGHT]->setMetatypeOut(TYPE_UINT);
-                inst[CPUI_INT_RIGHT]->setSymbol(">>");
+                inst[CPUI_INT_ZEXT].setMetatypeIn(TYPE_UINT);
+                inst[CPUI_INT_ZEXT].setMetatypeOut(TYPE_UINT);
+                inst[CPUI_INT_NEGATE].setMetatypeIn(TYPE_UINT);
+                inst[CPUI_INT_NEGATE].setMetatypeOut(TYPE_UINT);
+                inst[CPUI_INT_XOR].setMetatypeIn(TYPE_UINT);
+                inst[CPUI_INT_XOR].setMetatypeOut(TYPE_UINT);
+                inst[CPUI_INT_OR].setMetatypeIn(TYPE_UINT);
+                inst[CPUI_INT_OR].setMetatypeOut(TYPE_UINT);
+                inst[CPUI_INT_AND].setMetatypeIn(TYPE_UINT);
+                inst[CPUI_INT_AND].setMetatypeOut(TYPE_UINT);
+                inst[CPUI_INT_RIGHT].setMetatypeIn(TYPE_UINT);
+                inst[CPUI_INT_RIGHT].setMetatypeOut(TYPE_UINT);
+                inst[CPUI_INT_RIGHT].setSymbol(">>");
             }
         }
     }

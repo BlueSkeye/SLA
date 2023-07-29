@@ -21,19 +21,19 @@ namespace Sla.EXTRA
         {
             int4 size;
             string name;
-            Address offset = parse_machaddr(s, size, *dcp->conf->types); // Read required address
+            Address offset = parse_machaddr(s, size, *dcp.conf.types); // Read required address
 
             s >> ws;
             if (size <= offset.getAddrSize()) // Was a real size specified
                 size = 0;
-            if (dcp->conf->loader == (LoadImage*)0)
+            if (dcp.conf.loader == (LoadImage*)0)
                 throw IfaceExecutionError("No binary loaded");
 
             s >> name;          // Read optional name
             if (name.empty())
-                dcp->conf->nameFunction(offset, name); // Pick default name if necessary
-            dcp->fd = dcp->conf->symboltab->getGlobalScope()->addFunction(offset, name)->getFunction();
-            dcp->followFlow(*status->optr, size);
+                dcp.conf.nameFunction(offset, name); // Pick default name if necessary
+            dcp.fd = dcp.conf.symboltab.getGlobalScope().addFunction(offset, name).getFunction();
+            dcp.followFlow(*status.optr, size);
         }
     }
 }

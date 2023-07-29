@@ -28,22 +28,22 @@ namespace Sla.DECCORE
         /// \param subpieceOp is the SUBPIECE PcodeOp producing the Varnode
         private int attemptMarking(Funcdata data, Varnode vn, PcodeOp subpieceOp)
         {
-            Varnode* whole = subpieceOp->getIn(0);
-            int4 offset = (int4)subpieceOp->getIn(1)->getOffset();
-            if (offset != vn->getSize()) return 0;
-            if (offset * 2 != whole->getSize()) return 0;       // Truncate exactly half
-            if (whole->isInput())
+            Varnode* whole = subpieceOp.getIn(0);
+            int4 offset = (int4)subpieceOp.getIn(1).getOffset();
+            if (offset != vn.getSize()) return 0;
+            if (offset * 2 != whole.getSize()) return 0;       // Truncate exactly half
+            if (whole.isInput())
             {
-                if (!whole->isTypeLock()) return 0;
+                if (!whole.isTypeLock()) return 0;
             }
-            else if (!whole->isWritten())
+            else if (!whole.isWritten())
             {
                 return 0;
             }
             else
             {
                 // Categorize opcodes as "producing a logical whole"
-                switch (whole->getDef()->code())
+                switch (whole.getDef().code())
                 {
                     case CPUI_INT_ADD:
                     // Its hard to tell if the bit operators are really being used to act on the "logical whole"
@@ -77,20 +77,20 @@ namespace Sla.DECCORE
             }
             Varnode* vnLo = (Varnode*)0;
             list<PcodeOp*>::const_iterator iter;
-            for (iter = whole->beginDescend(); iter != whole->endDescend(); ++iter)
+            for (iter = whole.beginDescend(); iter != whole.endDescend(); ++iter)
             {
                 PcodeOp* op = *iter;
-                if (op->code() != CPUI_SUBPIECE) continue;
-                if (op->getIn(1)->getOffset() != 0) continue;
-                if (op->getOut()->getSize() == vn->getSize())
+                if (op.code() != CPUI_SUBPIECE) continue;
+                if (op.getIn(1).getOffset() != 0) continue;
+                if (op.getOut().getSize() == vn.getSize())
                 {
-                    vnLo = op->getOut();
+                    vnLo = op.getOut();
                     break;
                 }
             }
             if (vnLo == (Varnode*)0) return 0;
-            vnLo->setPrecisLo();
-            vn->setPrecisHi();
+            vnLo.setPrecisLo();
+            vn.setPrecisHi();
             return 1;
         }
 
@@ -116,16 +116,16 @@ namespace Sla.DECCORE
 
         public override int applyOp(PcodeOp op, Funcdata data)
         { // Try to push double precision object "down" one level from input
-            Varnode* outvn = op->getOut();
-            if (!outvn->isPrecisLo())
+            Varnode* outvn = op.getOut();
+            if (!outvn.isPrecisLo())
             {
-                if (outvn->isPrecisHi()) return 0;
+                if (outvn.isPrecisHi()) return 0;
                 return attemptMarking(data, outvn, op);
             }
             if (data.hasUnreachableBlocks()) return 0;
 
             vector<SplitVarnode> splitvec;
-            SplitVarnode::wholeList(op->getIn(0), splitvec);
+            SplitVarnode::wholeList(op.getIn(0), splitvec);
             if (splitvec.empty()) return 0;
             for (int4 i = 0; i < splitvec.size(); ++i)
             {

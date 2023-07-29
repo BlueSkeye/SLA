@@ -19,20 +19,20 @@ namespace Sla.EXTRA
         /// specified by a code address and hash of the local data-flow structure.
         public override void execute(TextReader s)
         {
-            if (dcp->fd == (Funcdata*)0)
+            if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function loaded");
             Datatype* ct;
             string name;
             uint8 hash;
             int4 size;
-            Address addr = parse_machaddr(s, size, *dcp->conf->types); // Read pc address of hash
+            Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read pc address of hash
 
             s >> hex >> hash;       // Parse the hash value
             s >> ws;
-            ct = parse_type(s, name, dcp->conf); // Parse the required type and name
+            ct = parse_type(s, name, dcp.conf); // Parse the required type and name
 
-            Symbol* sym = dcp->fd->getScopeLocal()->addDynamicSymbol(name, ct, addr, hash);
-            sym->getScope()->setAttribute(sym, Varnode::namelock | Varnode::typelock);
+            Symbol* sym = dcp.fd.getScopeLocal().addDynamicSymbol(name, ct, addr, hash);
+            sym.getScope().setAttribute(sym, Varnode::namelock | Varnode::typelock);
         }
     }
 }

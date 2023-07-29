@@ -112,8 +112,8 @@ namespace Sla.SLEIGH
         {
             issued.emplace_back();
             PcodeData* res = &issued.back();
-            res->outvar = (VarnodeData*)0;
-            res->invar = (VarnodeData*)0;
+            res.outvar = (VarnodeData*)0;
+            res.invar = (VarnodeData*)0;
             return res;
         }
 
@@ -156,13 +156,13 @@ namespace Sla.SLEIGH
             for (iter = label_refs.begin(); iter != label_refs.end(); ++iter)
             {
                 VarnodeData* ptr = (*iter).dataptr;
-                uint4 id = ptr->offset;
+                uint4 id = ptr.offset;
                 if ((id >= labels.size()) || (labels[id] == 0xbadbeef))
                     throw new LowlevelError("Reference to non-existant sleigh label");
                 // Calculate the relative index given the two absolute indices
                 uintb res = labels[id] - (*iter).calling_index;
-                res &= calc_mask(ptr->size);
-                ptr->offset = res;
+                res &= calc_mask(ptr.size);
+                ptr.offset = res;
             }
         }
 
@@ -175,7 +175,7 @@ namespace Sla.SLEIGH
             vector<PcodeData>::const_iterator iter;
 
             for (iter = issued.begin(); iter != issued.end(); ++iter)
-                emt->dump(addr, (*iter).opc, (*iter).outvar, (*iter).invar, (*iter).isize);
+                emt.dump(addr, (*iter).opc, (*iter).outvar, (*iter).invar, (*iter).isize);
         }
     }
 }

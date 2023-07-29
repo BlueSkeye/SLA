@@ -50,7 +50,7 @@ namespace Sla.SLEIGH
 
         public override void restoreXml(Element el, SleighBase trans)
         {
-            istringstream s(el->getAttributeValue("index"));
+            istringstream s(el.getAttributeValue("index"));
             s.unsetf(ios::dec | ios::hex | ios::oct);
             s >> index;
         }

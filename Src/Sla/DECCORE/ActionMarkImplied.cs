@@ -20,7 +20,7 @@ namespace Sla.DECCORE
             private List<PcodeOp>::const_iterator desciter;
             internal DescTreeElement(Varnode v)
             {
-                vn = v; desciter = v->beginDescend();
+                vn = v; desciter = v.beginDescend();
             }
         }
 
@@ -38,12 +38,12 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < 2; ++i)
             {
                 Varnode* vncur = var[i];
-                if (!vncur->isWritten()) continue;
-                PcodeOp* op = vncur->getDef();
-                OpCode opc = op->code();
+                if (!vncur.isWritten()) continue;
+                PcodeOp* op = vncur.getDef();
+                OpCode opc = op.code();
                 if ((opc != CPUI_INT_ADD) && (opc != CPUI_PTRSUB) && (opc != CPUI_PTRADD) && (opc != CPUI_INT_XOR)) continue;
-                if (var[1 - i] != op->getIn(0)) continue;
-                if (op->getIn(1)->isConstant()) return false;
+                if (var[1 - i] != op.getIn(0)) continue;
+                if (op.getIn(1).isConstant()) return false;
             }
             return true;
         }
@@ -57,20 +57,20 @@ namespace Sla.DECCORE
         private static bool isPossibleAlias(Varnode vn1, Varnode vn2, int depth)
         {
             if (vn1 == vn2) return true;    // Definite alias
-            if ((!vn1->isWritten()) || (!vn2->isWritten()))
+            if ((!vn1.isWritten()) || (!vn2.isWritten()))
             {
-                if (vn1->isConstant() && vn2->isConstant())
-                    return (vn1->getOffset() == vn2->getOffset()); // FIXME: these could be NEAR each other and still have an alias
+                if (vn1.isConstant() && vn2.isConstant())
+                    return (vn1.getOffset() == vn2.getOffset()); // FIXME: these could be NEAR each other and still have an alias
                 return isPossibleAliasStep(vn1, vn2);
             }
 
             if (!isPossibleAliasStep(vn1, vn2))
                 return false;
             Varnode* cvn1,*cvn2;
-            PcodeOp* op1 = vn1->getDef();
-            PcodeOp* op2 = vn2->getDef();
-            OpCode opc1 = op1->code();
-            OpCode opc2 = op2->code();
+            PcodeOp* op1 = vn1.getDef();
+            PcodeOp* op2 = vn2.getDef();
+            OpCode opc1 = op1.code();
+            OpCode opc2 = op2.code();
             int4 mult1 = 1;
             int4 mult2 = 1;
             if (opc1 == CPUI_PTRSUB)
@@ -78,14 +78,14 @@ namespace Sla.DECCORE
             else if (opc1 == CPUI_PTRADD)
             {
                 opc1 = CPUI_INT_ADD;
-                mult1 = (int4)op1->getIn(2)->getOffset();
+                mult1 = (int4)op1.getIn(2).getOffset();
             }
             if (opc2 == CPUI_PTRSUB)
                 opc2 = CPUI_INT_ADD;
             else if (opc2 == CPUI_PTRADD)
             {
                 opc2 = CPUI_INT_ADD;
-                mult2 = (int4)op2->getIn(2)->getOffset();
+                mult2 = (int4)op2.getIn(2).getOffset();
             }
             if (opc1 != opc2) return true;
             if (depth == 0) return true;    // Couldn't find absolute difference
@@ -97,27 +97,27 @@ namespace Sla.DECCORE
                 case CPUI_INT_SEXT:
                 case CPUI_INT_2COMP:
                 case CPUI_INT_NEGATE:
-                    return isPossibleAlias(op1->getIn(0), op2->getIn(0), depth);
+                    return isPossibleAlias(op1.getIn(0), op2.getIn(0), depth);
                 case CPUI_INT_ADD:
-                    cvn1 = op1->getIn(1);
-                    cvn2 = op2->getIn(1);
-                    if (cvn1->isConstant() && cvn2->isConstant())
+                    cvn1 = op1.getIn(1);
+                    cvn2 = op2.getIn(1);
+                    if (cvn1.isConstant() && cvn2.isConstant())
                     {
-                        uintb val1 = mult1 * cvn1->getOffset();
-                        uintb val2 = mult2 * cvn2->getOffset();
+                        uintb val1 = mult1 * cvn1.getOffset();
+                        uintb val2 = mult2 * cvn2.getOffset();
                         if (val1 == val2)
-                            return isPossibleAlias(op1->getIn(0), op2->getIn(0), depth);
-                        return !functionalEquality(op1->getIn(0), op2->getIn(0));
+                            return isPossibleAlias(op1.getIn(0), op2.getIn(0), depth);
+                        return !functionalEquality(op1.getIn(0), op2.getIn(0));
                     }
                     if (mult1 != mult2) return true;
-                    if (functionalEquality(op1->getIn(0), op2->getIn(0)))
-                        return isPossibleAlias(op1->getIn(1), op2->getIn(1), depth);
-                    if (functionalEquality(op1->getIn(1), op2->getIn(1)))
-                        return isPossibleAlias(op1->getIn(0), op2->getIn(0), depth);
-                    if (functionalEquality(op1->getIn(0), op2->getIn(1)))
-                        return isPossibleAlias(op1->getIn(1), op2->getIn(0), depth);
-                    if (functionalEquality(op1->getIn(1), op2->getIn(0)))
-                        return isPossibleAlias(op1->getIn(0), op2->getIn(1), depth);
+                    if (functionalEquality(op1.getIn(0), op2.getIn(0)))
+                        return isPossibleAlias(op1.getIn(1), op2.getIn(1), depth);
+                    if (functionalEquality(op1.getIn(1), op2.getIn(1)))
+                        return isPossibleAlias(op1.getIn(0), op2.getIn(0), depth);
+                    if (functionalEquality(op1.getIn(0), op2.getIn(1)))
+                        return isPossibleAlias(op1.getIn(1), op2.getIn(0), depth);
+                    if (functionalEquality(op1.getIn(1), op2.getIn(0)))
+                        return isPossibleAlias(op1.getIn(0), op2.getIn(1), depth);
                     break;
                 default:
                     break;
@@ -138,41 +138,41 @@ namespace Sla.DECCORE
             Varnode* defvn;
             int4 i;
 
-            op = vn->getDef();
-            if (op->code() == CPUI_LOAD)
+            op = vn.getDef();
+            if (op.code() == CPUI_LOAD)
             { // Check for loads crossing stores
                 list<PcodeOp*>::const_iterator oiter, iterend;
                 iterend = data.endOp(CPUI_STORE);
                 for (oiter = data.beginOp(CPUI_STORE); oiter != iterend; ++oiter)
                 {
                     storeop = *oiter;
-                    if (storeop->isDead()) continue;
-                    if (vn->getCover()->contain(storeop, 2))
+                    if (storeop.isDead()) continue;
+                    if (vn.getCover().contain(storeop, 2))
                     {
                         // The LOAD crosses a STORE. We are cavalier
                         // and let it through unless we can verify
                         // that the pointers are actually the same
-                        if (storeop->getIn(0)->getOffset() == op->getIn(0)->getOffset())
+                        if (storeop.getIn(0).getOffset() == op.getIn(0).getOffset())
                         {
-                            //	  if (!functionalDifference(storeop->getIn(1),op->getIn(1),2)) return false;
-                            if (isPossibleAlias(storeop->getIn(1), op->getIn(1), 2)) return false;
+                            //	  if (!functionalDifference(storeop.getIn(1),op.getIn(1),2)) return false;
+                            if (isPossibleAlias(storeop.getIn(1), op.getIn(1), 2)) return false;
                         }
                     }
                 }
             }
-            if (op->isCall() || (op->code() == CPUI_LOAD))
+            if (op.isCall() || (op.code() == CPUI_LOAD))
             { // loads crossing calls
                 for (i = 0; i < data.numCalls(); ++i)
                 {
-                    callop = data.getCallSpecs(i)->getOp();
-                    if (vn->getCover()->contain(callop, 2)) return false;
+                    callop = data.getCallSpecs(i).getOp();
+                    if (vn.getCover().contain(callop, 2)) return false;
                 }
             }
-            for (i = 0; i < op->numInput(); ++i)
+            for (i = 0; i < op.numInput(); ++i)
             {
-                defvn = op->getIn(i);
-                if (defvn->isConstant()) continue;
-                if (data.getMerge().inflateTest(defvn, vn->getHigh()))  // Test for intersection
+                defvn = op.getIn(i);
+                if (defvn.isConstant()) continue;
+                if (data.getMerge().inflateTest(defvn, vn.getHigh()))  // Test for intersection
                     return false;
             }
             return true;
@@ -199,41 +199,41 @@ namespace Sla.DECCORE
             for (viter = data.beginLoc(); viter != data.endLoc(); ++viter)
             {
                 vn = *viter;
-                if (vn->isFree()) continue;
-                if (vn->isExplicit()) continue;
-                if (vn->isImplied()) continue;
+                if (vn.isFree()) continue;
+                if (vn.isExplicit()) continue;
+                if (vn.isImplied()) continue;
                 varstack.push_back(vn);
                 do
                 {
                     vncur = varstack.back().vn;
-                    if (varstack.back().desciter == vncur->endDescend())
+                    if (varstack.back().desciter == vncur.endDescend())
                     {
                         // All descendants are traced first, try to make vncur implied
                         count += 1;     // Will be marked either explicit or implied
                         if (!checkImpliedCover(data, vncur)) // Can this variable be implied
-                            vncur->setExplicit();   // if not, mark explicit
+                            vncur.setExplicit();   // if not, mark explicit
                         else
                         {
-                            vncur->setImplied();    // Mark as implied
-                            op = vncur->getDef();
+                            vncur.setImplied();    // Mark as implied
+                            op = vncur.getDef();
                             // setting the implied type is now taken care of by ActionSetCasts
-                            //    vn->updatetype(op->outputtype_token(),false,false); // implied must have parsed type
+                            //    vn.updatetype(op.outputtype_token(),false,false); // implied must have parsed type
                             // Back propagate varnode's cover to inputs of defining op
-                            for (int4 i = 0; i < op->numInput(); ++i)
+                            for (int4 i = 0; i < op.numInput(); ++i)
                             {
-                                defvn = op->getIn(i);
-                                if (!defvn->hasCover()) continue;
-                                data.getMerge().inflate(defvn, vncur->getHigh());
+                                defvn = op.getIn(i);
+                                if (!defvn.hasCover()) continue;
+                                data.getMerge().inflate(defvn, vncur.getHigh());
                             }
                         }
                         varstack.pop_back();
                     }
                     else
                     {
-                        outvn = (*varstack.back().desciter++)->getOut();
+                        outvn = (*varstack.back().desciter++).getOut();
                         if (outvn != (Varnode*)0)
                         {
-                            if ((!outvn->isExplicit()) && (!outvn->isImplied()))
+                            if ((!outvn.isExplicit()) && (!outvn.isImplied()))
                                 varstack.push_back(outvn);
                         }
                     }

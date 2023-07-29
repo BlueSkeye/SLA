@@ -25,7 +25,7 @@ namespace Sla.EXTRA
             delete expr;
         }
 
-        public override UnifyConstraint clone() => (new ConstraintBoolean(istrue, expr->clone()))->copyid(this);
+        public override UnifyConstraint clone() => (new ConstraintBoolean(istrue, expr.clone())).copyid(this);
 
         public override bool step(UnifyState state);
 
@@ -33,7 +33,7 @@ namespace Sla.EXTRA
         {
             printstate.printIndent(s);
             s << "if (";
-            expr->writeExpression(s, printstate);
+            expr.writeExpression(s, printstate);
             if (istrue)
                 s << "== 0)";       // If false abort
             else

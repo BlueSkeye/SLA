@@ -41,28 +41,28 @@ namespace Sla.DECCORE
         /// \param data is the function containing the PcodeOp
         private static void checkPointerIssues(PcodeOp op, Varnode vn, Funcdata data)
         {
-            Datatype* ptrtype = op->getIn(1)->getHighTypeReadFacing(op);
-            int4 valsize = vn->getSize();
-            if ((ptrtype->getMetatype() != TYPE_PTR) || (((TypePointer*)ptrtype)->getPtrTo()->getSize() != valsize))
+            Datatype* ptrtype = op.getIn(1).getHighTypeReadFacing(op);
+            int4 valsize = vn.getSize();
+            if ((ptrtype.getMetatype() != TYPE_PTR) || (((TypePointer*)ptrtype).getPtrTo().getSize() != valsize))
             {
-                string name = op->getOpcode()->getName();
+                string name = op.getOpcode().getName();
                 name[0] = toupper(name[0]);
-                data.warning(name + " size is inaccurate", op->getAddr());
+                data.warning(name + " size is inaccurate", op.getAddr());
             }
-            if (ptrtype->getMetatype() == TYPE_PTR)
+            if (ptrtype.getMetatype() == TYPE_PTR)
             {
-                AddrSpace* spc = ((TypePointer*)ptrtype)->getSpace();
+                AddrSpace* spc = ((TypePointer*)ptrtype).getSpace();
                 if (spc != (AddrSpace*)0)
                 {
-                    AddrSpace* opSpc = op->getIn(0)->getSpaceFromConst();
-                    if (opSpc != spc && spc->getContain() != opSpc)
+                    AddrSpace* opSpc = op.getIn(0).getSpaceFromConst();
+                    if (opSpc != spc && spc.getContain() != opSpc)
                     {
-                        string name = op->getOpcode()->getName();
+                        string name = op.getOpcode().getName();
                         name[0] = toupper(name[0]);
                         ostringstream s;
-                        s << name << " refers to '" << opSpc->getName() << "' but pointer attribute is '";
-                        s << spc->getName() << '\'';
-                        data.warning(s.str(), op->getAddr());
+                        s << name << " refers to '" << opSpc.getName() << "' but pointer attribute is '";
+                        s << spc.getName() << '\'';
+                        data.warning(s.str(), op.getAddr());
                     }
                 }
             }
@@ -81,22 +81,22 @@ namespace Sla.DECCORE
         private static bool testStructOffset0(Varnode vn, PcodeOp op, Datatype ct,
             CastStrategy castStrategy)
         {
-            if (ct->getMetatype() != TYPE_PTR) return false;
-            Datatype* highType = vn->getHighTypeReadFacing(op);
-            if (highType->getMetatype() != TYPE_PTR) return false;
-            Datatype* highPtrTo = ((TypePointer*)highType)->getPtrTo();
-            if (highPtrTo->getMetatype() != TYPE_STRUCT) return false;
+            if (ct.getMetatype() != TYPE_PTR) return false;
+            Datatype* highType = vn.getHighTypeReadFacing(op);
+            if (highType.getMetatype() != TYPE_PTR) return false;
+            Datatype* highPtrTo = ((TypePointer*)highType).getPtrTo();
+            if (highPtrTo.getMetatype() != TYPE_STRUCT) return false;
             TypeStruct* highStruct = (TypeStruct*)highPtrTo;
-            if (highStruct->numDepend() == 0) return false;
-            vector<TypeField>::const_iterator iter = highStruct->beginField();
+            if (highStruct.numDepend() == 0) return false;
+            vector<TypeField>::const_iterator iter = highStruct.beginField();
             if ((*iter).offset != 0) return false;
-            Datatype* reqtype = ((TypePointer*)ct)->getPtrTo();
+            Datatype* reqtype = ((TypePointer*)ct).getPtrTo();
             Datatype* curtype = (*iter).type;
-            if (reqtype->getMetatype() == TYPE_ARRAY)
-                reqtype = ((TypeArray*)reqtype)->getBase();
-            if (curtype->getMetatype() == TYPE_ARRAY)
-                curtype = ((TypeArray*)curtype)->getBase();
-            return (castStrategy->castStandard(reqtype, curtype, true, true) == (Datatype*)0);
+            if (reqtype.getMetatype() == TYPE_ARRAY)
+                reqtype = ((TypeArray*)reqtype).getBase();
+            if (curtype.getMetatype() == TYPE_ARRAY)
+                curtype = ((TypeArray*)curtype).getBase();
+            return (castStrategy.castStandard(reqtype, curtype, true, true) == (Datatype*)0);
         }
 
         /// \brief Try to adjust the input and output Varnodes to eliminate a CAST
@@ -110,36 +110,36 @@ namespace Sla.DECCORE
         /// \return \b true if an adjustment is made so that a CAST is no longer needed
         private static bool tryResolutionAdjustment(PcodeOp op, int slot, Funcdata data)
         {
-            Varnode* outvn = op->getOut();
+            Varnode* outvn = op.getOut();
             if (outvn == (Varnode*)0)
                 return false;
-            Datatype* outType = outvn->getHigh()->getType();
-            Datatype* inType = op->getIn(slot)->getHigh()->getType();
-            if (!inType->needsResolution() && !outType->needsResolution()) return false;
+            Datatype* outType = outvn.getHigh().getType();
+            Datatype* inType = op.getIn(slot).getHigh().getType();
+            if (!inType.needsResolution() && !outType.needsResolution()) return false;
             int4 inResolve = -1;
             int4 outResolve = -1;
-            if (inType->needsResolution())
+            if (inType.needsResolution())
             {
-                inResolve = inType->findCompatibleResolve(outType);
+                inResolve = inType.findCompatibleResolve(outType);
                 if (inResolve < 0) return false;
             }
-            if (outType->needsResolution())
+            if (outType.needsResolution())
             {
                 if (inResolve >= 0)
-                    outResolve = outType->findCompatibleResolve(inType->getDepend(inResolve));
+                    outResolve = outType.findCompatibleResolve(inType.getDepend(inResolve));
                 else
-                    outResolve = outType->findCompatibleResolve(inType);
+                    outResolve = outType.findCompatibleResolve(inType);
                 if (outResolve < 0) return false;
             }
 
-            TypeFactory* typegrp = data.getArch()->types;
-            if (inType->needsResolution())
+            TypeFactory* typegrp = data.getArch().types;
+            if (inType.needsResolution())
             {
                 ResolvedUnion resolve(inType, inResolve,* typegrp);
                 if (!data.setUnionField(inType, op, slot, resolve))
                     return false;
             }
-            if (outType->needsResolution())
+            if (outType.needsResolution())
             {
                 ResolvedUnion resolve(outType, outResolve,* typegrp);
                 if (!data.setUnionField(outType, op, -1, resolve))
@@ -158,15 +158,15 @@ namespace Sla.DECCORE
         /// \param ct2 is the second data-type
         private static bool isOpIdentical(Datatype ct1, Datatype ct2)
         {
-            while ((ct1->getMetatype() == TYPE_PTR) && (ct2->getMetatype() == TYPE_PTR))
+            while ((ct1.getMetatype() == TYPE_PTR) && (ct2.getMetatype() == TYPE_PTR))
             {
-                ct1 = ((TypePointer)ct1)->getPtrTo();
-                ct2 = ((TypePointer)ct2)->getPtrTo();
+                ct1 = ((TypePointer)ct1).getPtrTo();
+                ct2 = ((TypePointer)ct2).getPtrTo();
             }
-            while (ct1->getTypedef() != (Datatype*)0)
-                ct1 = ct1->getTypedef();
-            while (ct2->getTypedef() != (Datatype*)0)
-                ct2 = ct2->getTypedef();
+            while (ct1.getTypedef() != (Datatype*)0)
+                ct1 = ct1.getTypedef();
+            while (ct2.getTypedef() != (Datatype*)0)
+                ct2 = ct2.getTypedef();
             return (ct1 == ct2);
         }
 
@@ -178,33 +178,33 @@ namespace Sla.DECCORE
         /// \return 1 if a PTRSUB is inserted, 0 otherwise
         private static int4 resolveUnion(PcodeOp op, int slot, Funcdata data)
         {
-            Varnode* vn = op->getIn(slot);
-            if (vn->isAnnotation()) return 0;
-            Datatype* dt = vn->getHigh()->getType();
-            if (!dt->needsResolution())
+            Varnode* vn = op.getIn(slot);
+            if (vn.isAnnotation()) return 0;
+            Datatype* dt = vn.getHigh().getType();
+            if (!dt.needsResolution())
                 return 0;
-            if (dt != vn->getType())
-                dt->resolveInFlow(op, slot);    // Last chance to resolve data-type based on flow
+            if (dt != vn.getType())
+                dt.resolveInFlow(op, slot);    // Last chance to resolve data-type based on flow
             ResolvedUnion resUnion = data.getUnionField(dt, op, slot);
-            if (resUnion != (ResolvedUnion*)0 && resUnion->getFieldNum() >= 0)
+            if (resUnion != (ResolvedUnion*)0 && resUnion.getFieldNum() >= 0)
             {
                 // Insert specific placeholder indicating which field is accessed
-                if (dt->getMetatype() == TYPE_PTR)
+                if (dt.getMetatype() == TYPE_PTR)
                 {
-                    PcodeOp* ptrsub = insertPtrsubZero(op, slot, resUnion->getDatatype(), data);
+                    PcodeOp* ptrsub = insertPtrsubZero(op, slot, resUnion.getDatatype(), data);
                     data.setUnionField(dt, ptrsub, -1, *resUnion);          // Attach the resolution to the PTRSUB
                 }
-                else if (vn->isImplied())
+                else if (vn.isImplied())
                 {
-                    if (vn->isWritten())
+                    if (vn.isWritten())
                     {
                         // If the writefacing and readfacing resolutions for vn (an implied variable) are the same,
                         // the resolutions are unnecessary and we treat the vn as if it had the field data-type
-                        ResolvedUnion* writeRes = data.getUnionField(dt, vn->getDef(), -1);
-                        if (writeRes != (ResolvedUnion)0 && writeRes->getFieldNum() == resUnion->getFieldNum())
+                        ResolvedUnion* writeRes = data.getUnionField(dt, vn.getDef(), -1);
+                        if (writeRes != (ResolvedUnion)0 && writeRes.getFieldNum() == resUnion.getFieldNum())
                             return 0; // Don't print implied fields for vn
                     }
-                    vn->setImpliedField();
+                    vn.setImpliedField();
                 }
                 return 1;
             }
@@ -225,12 +225,12 @@ namespace Sla.DECCORE
             Datatype* outHighType;
             bool force = false;
 
-            tokenct = op->getOpcode()->getOutputToken(op, castStrategy);
-            outvn = op->getOut();
-            outHighType = outvn->getHigh()->getType();
+            tokenct = op.getOpcode().getOutputToken(op, castStrategy);
+            outvn = op.getOut();
+            outHighType = outvn.getHigh().getType();
             if (tokenct == outHighType)
             {
-                if (tokenct->needsResolution())
+                if (tokenct.needsResolution())
                 {
                     // operation copies directly to outvn AS a union
                     ResolvedUnion resolve(tokenct); // Force the varnode to resolve to the parent data-type
@@ -240,64 +240,64 @@ namespace Sla.DECCORE
                 return 0;
             }
             Datatype* outHighResolve = outHighType;
-            if (outHighType->needsResolution())
+            if (outHighType.needsResolution())
             {
-                if (outHighType != outvn->getType())
-                    outHighType->resolveInFlow(op, -1);     // Last chance to resolve data-type based on flow
-                outHighResolve = outHighType->findResolve(op, -1);  // Finish fetching DefFacing data-type
+                if (outHighType != outvn.getType())
+                    outHighType.resolveInFlow(op, -1);     // Last chance to resolve data-type based on flow
+                outHighResolve = outHighType.findResolve(op, -1);  // Finish fetching DefFacing data-type
             }
-            if (outvn->isImplied())
+            if (outvn.isImplied())
             {
                 // implied varnode must have parse type
-                if (outvn->isTypeLock())
+                if (outvn.isTypeLock())
                 {
-                    PcodeOp* outOp = outvn->loneDescend();
+                    PcodeOp* outOp = outvn.loneDescend();
                     // The Varnode input to a CPUI_RETURN is marked as implied but
                     // casting should act as if it were explicit
-                    if (outOp == (PcodeOp*)0 || outOp->code() != CPUI_RETURN)
+                    if (outOp == (PcodeOp*)0 || outOp.code() != CPUI_RETURN)
                     {
                         force = !isOpIdentical(outHighResolve, tokenct);
                     }
                 }
-                else if (outHighResolve->getMetatype() != TYPE_PTR)
+                else if (outHighResolve.getMetatype() != TYPE_PTR)
                 {   // If implied varnode has an atomic (non-pointer) type
-                    outvn->updateType(tokenct, false, false); // Ignore it in favor of the token type
-                    outHighResolve = outvn->getHighTypeDefFacing();
+                    outvn.updateType(tokenct, false, false); // Ignore it in favor of the token type
+                    outHighResolve = outvn.getHighTypeDefFacing();
                 }
-                else if (tokenct->getMetatype() == TYPE_PTR)
+                else if (tokenct.getMetatype() == TYPE_PTR)
                 { // If the token is a pointer AND implied varnode is pointer
-                    outct = ((TypePointer*)outHighResolve)->getPtrTo();
-                    type_metatype meta = outct->getMetatype();
+                    outct = ((TypePointer*)outHighResolve).getPtrTo();
+                    type_metatype meta = outct.getMetatype();
                     // Preserve implied pointer if it points to a composite
                     if ((meta != TYPE_ARRAY) && (meta != TYPE_STRUCT) && (meta != TYPE_UNION))
                     {
-                        outvn->updateType(tokenct, false, false); // Otherwise ignore it in favor of the token type
-                        outHighResolve = outvn->getHighTypeDefFacing();
+                        outvn.updateType(tokenct, false, false); // Otherwise ignore it in favor of the token type
+                        outHighResolve = outvn.getHighTypeDefFacing();
                     }
                 }
             }
             if (!force)
             {
                 outct = outHighResolve; // Type of result
-                ct = castStrategy->castStandard(outct, tokenct, false, true);
+                ct = castStrategy.castStandard(outct, tokenct, false, true);
                 if (ct == (Datatype*)0) return 0;
             }
             // Generate the cast op
-            vn = data.newUnique(outvn->getSize());
-            vn->updateType(tokenct, false, false);
-            vn->setImplied();
-            newop = data.newOp(1, op->getAddr());
+            vn = data.newUnique(outvn.getSize());
+            vn.updateType(tokenct, false, false);
+            vn.setImplied();
+            newop = data.newOp(1, op.getAddr());
 #if CPUI_STATISTICS
-            data.getArch()->stats->countCast();
+            data.getArch().stats.countCast();
 #endif
             data.opSetOpcode(newop, CPUI_CAST);
             data.opSetOutput(newop, outvn);
             data.opSetInput(newop, vn, 0);
             data.opSetOutput(op, vn);
             data.opInsertAfter(newop, op); // Cast comes AFTER this operation
-            if (tokenct->needsResolution())
+            if (tokenct.needsResolution())
                 data.forceFacingType(tokenct, -1, newop, 0);
-            if (outHighType->needsResolution())
+            if (outHighType.needsResolution())
                 data.inheritResolution(outHighType, newop, -1, op, -1); // Inherit write resolution
 
             return 1;
@@ -318,63 +318,63 @@ namespace Sla.DECCORE
             Varnode* vn,*vnout;
             PcodeOp* newop;
 
-            ct = op->getOpcode()->getInputCast(op, slot, castStrategy); // Input type expected by this operation
+            ct = op.getOpcode().getInputCast(op, slot, castStrategy); // Input type expected by this operation
             if (ct == (Datatype*)0)
             {
-                bool resUnsigned = castStrategy->markExplicitUnsigned(op, slot);
-                bool resSized = castStrategy->markExplicitLongSize(op, slot);
+                bool resUnsigned = castStrategy.markExplicitUnsigned(op, slot);
+                bool resSized = castStrategy.markExplicitLongSize(op, slot);
                 if (resUnsigned || resSized)
                     return 1;
                 return 0;
             }
 
-            vn = op->getIn(slot);
+            vn = op.getIn(slot);
             // Check to make sure we don't have a double cast
-            if (vn->isWritten() && (vn->getDef()->code() == CPUI_CAST))
+            if (vn.isWritten() && (vn.getDef().code() == CPUI_CAST))
             {
-                if (vn->isImplied() && (vn->loneDescend() == op))
+                if (vn.isImplied() && (vn.loneDescend() == op))
                 {
-                    vn->updateType(ct, false, false);
-                    if (vn->getType() == ct)
+                    vn.updateType(ct, false, false);
+                    if (vn.getType() == ct)
                         return 1;
                 }
             }
-            else if (vn->isConstant())
+            else if (vn.isConstant())
             {
-                vn->updateType(ct, false, false);
-                if (vn->getType() == ct)
+                vn.updateType(ct, false, false);
+                if (vn.getType() == ct)
                     return 1;
             }
             else if (testStructOffset0(vn, op, ct, castStrategy))
             {
                 // Insert a PTRSUB(vn,#0) instead of a CAST
                 newop = insertPtrsubZero(op, slot, ct, data);
-                if (vn->getHigh()->getType()->needsResolution())
-                    data.inheritResolution(vn->getHigh()->getType(), newop, 0, op, slot);
+                if (vn.getHigh().getType().needsResolution())
+                    data.inheritResolution(vn.getHigh().getType(), newop, 0, op, slot);
                 return 1;
             }
             else if (tryResolutionAdjustment(op, slot, data))
             {
                 return 1;
             }
-            newop = data.newOp(1, op->getAddr());
-            vnout = data.newUniqueOut(vn->getSize(), newop);
-            vnout->updateType(ct, false, false);
-            vnout->setImplied();
+            newop = data.newOp(1, op.getAddr());
+            vnout = data.newUniqueOut(vn.getSize(), newop);
+            vnout.updateType(ct, false, false);
+            vnout.setImplied();
 #if CPUI_STATISTICS
-            data.getArch()->stats->countCast();
+            data.getArch().stats.countCast();
 #endif
             data.opSetOpcode(newop, CPUI_CAST);
             data.opSetInput(newop, vn, 0);
             data.opSetInput(op, vnout, slot);
             data.opInsertBefore(newop, op); // Cast comes AFTER operation
-            if (ct->needsResolution())
+            if (ct.needsResolution())
             {
                 data.forceFacingType(ct, -1, newop, -1);
             }
-            if (vn->getHigh()->getType()->needsResolution())
+            if (vn.getHigh().getType().needsResolution())
             {
-                data.inheritResolution(vn->getHigh()->getType(), newop, 0, op, slot);
+                data.inheritResolution(vn.getHigh().getType(), newop, 0, op, slot);
             }
             return 1;
         }
@@ -392,11 +392,11 @@ namespace Sla.DECCORE
         /// \return the new PTRSUB op
         private static PcodeOp insertPtrsubZero(PcodeOp op, int slot, Datatype ct, Funcdata data)
         {
-            Varnode* vn = op->getIn(slot);
-            PcodeOp* newop = data.newOp(2, op->getAddr());
-            Varnode* vnout = data.newUniqueOut(vn->getSize(), newop);
-            vnout->updateType(ct, false, false);
-            vnout->setImplied();
+            Varnode* vn = op.getIn(slot);
+            PcodeOp* newop = data.newOp(2, op.getAddr());
+            Varnode* vnout = data.newUniqueOut(vn.getSize(), newop);
+            vnout.updateType(ct, false, false);
+            vnout.setImplied();
             data.opSetOpcode(newop, CPUI_PTRSUB);
             data.opSetInput(newop, vn, 0);
             data.opSetInput(newop, data.newConstant(4, 0), 1);
@@ -421,31 +421,31 @@ namespace Sla.DECCORE
             PcodeOp* op;
 
             data.startCastPhase();
-            CastStrategy* castStrategy = data.getArch()->print->getCastStrategy();
+            CastStrategy* castStrategy = data.getArch().print.getCastStrategy();
             // We follow data flow, doing basic blocks in dominance order
             // Doing operations in basic block order
             BlockGraph basicblocks = data.getBasicBlocks();
             for (int4 j = 0; j < basicblocks.getSize(); ++j)
             {
                 BlockBasic* bb = (BlockBasic*)basicblocks.getBlock(j);
-                for (iter = bb->beginOp(); iter != bb->endOp(); ++iter)
+                for (iter = bb.beginOp(); iter != bb.endOp(); ++iter)
                 {
                     op = *iter;
-                    if (op->notPrinted()) continue;
-                    OpCode opc = op->code();
+                    if (op.notPrinted()) continue;
+                    OpCode opc = op.code();
                     if (opc == CPUI_CAST) continue;
                     if (opc == CPUI_PTRADD)
                     {   // Check for PTRADD that no longer fits its pointer
-                        int4 sz = (int4)op->getIn(2)->getOffset();
-                        TypePointer* ct = (TypePointer*)op->getIn(0)->getHighTypeReadFacing(op);
-                        if ((ct->getMetatype() != TYPE_PTR) || (ct->getPtrTo()->getSize() != AddrSpace::addressToByteInt(sz, ct->getWordSize())))
+                        int4 sz = (int4)op.getIn(2).getOffset();
+                        TypePointer* ct = (TypePointer*)op.getIn(0).getHighTypeReadFacing(op);
+                        if ((ct.getMetatype() != TYPE_PTR) || (ct.getPtrTo().getSize() != AddrSpace::addressToByteInt(sz, ct.getWordSize())))
                             data.opUndoPtradd(op, true);
                     }
                     else if (opc == CPUI_PTRSUB)
                     {   // Check for PTRSUB that no longer fits pointer
-                        if (!op->getIn(0)->getHighTypeReadFacing(op)->isPtrsubMatching(op->getIn(1)->getOffset()))
+                        if (!op.getIn(0).getHighTypeReadFacing(op).isPtrsubMatching(op.getIn(1).getOffset()))
                         {
-                            if (op->getIn(1)->getOffset() == 0)
+                            if (op.getIn(1).getOffset() == 0)
                             {
                                 data.opRemoveInput(op, 1);
                                 data.opSetOpcode(op, CPUI_COPY);
@@ -455,20 +455,20 @@ namespace Sla.DECCORE
                         }
                     }
                     // Do input casts first, as output may depend on input
-                    for (int4 i = 0; i < op->numInput(); ++i)
+                    for (int4 i = 0; i < op.numInput(); ++i)
                     {
                         count += resolveUnion(op, i, data);
                         count += castInput(op, i, data, castStrategy);
                     }
                     if (opc == CPUI_LOAD)
                     {
-                        checkPointerIssues(op, op->getOut(), data);
+                        checkPointerIssues(op, op.getOut(), data);
                     }
                     else if (opc == CPUI_STORE)
                     {
-                        checkPointerIssues(op, op->getIn(2), data);
+                        checkPointerIssues(op, op.getIn(2), data);
                     }
-                    Varnode* vn = op->getOut();
+                    Varnode* vn = op.getOut();
                     if (vn == (Varnode*)0) continue;
                     count += castOutput(op, data, castStrategy);
                 }

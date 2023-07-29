@@ -27,41 +27,41 @@ namespace Sla.DECCORE
         {
             for (int4 i = 0; i < 3; ++i)
             {
-                Datatype* dt = vn->getType();
-                if (dt->getMetatype() == TYPE_PTR)
+                Datatype* dt = vn.getType();
+                if (dt.getMetatype() == TYPE_PTR)
                 {
-                    AddrSpace* spc = ((TypePointer*)dt)->getSpace();
-                    if (spc != (AddrSpace*)0 && spc->getAddrSize() == vn->getSize())    // If provided a pointer with space attribute
+                    AddrSpace* spc = ((TypePointer*)dt).getSpace();
+                    if (spc != (AddrSpace*)0 && spc.getAddrSize() == vn.getSize())    // If provided a pointer with space attribute
                         return spc;     // use that
                 }
-                switch (op->code())
+                switch (op.code())
                 {
                     case CPUI_INT_ADD:
                     case CPUI_COPY:
                     case CPUI_INDIRECT:
                     case CPUI_MULTIEQUAL:
-                        vn = op->getOut();
-                        op = vn->loneDescend();
+                        vn = op.getOut();
+                        op = vn.loneDescend();
                         break;
                     case CPUI_LOAD:
-                        return op->getIn(0)->getSpaceFromConst();
+                        return op.getIn(0).getSpaceFromConst();
                     case CPUI_STORE:
-                        if (op->getIn(1) == vn)
-                            return op->getIn(0)->getSpaceFromConst();
+                        if (op.getIn(1) == vn)
+                            return op.getIn(0).getSpaceFromConst();
                         return (AddrSpace*)0;
                     default:
                         return (AddrSpace*)0;
                 }
                 if (op == (PcodeOp*)0) break;
             }
-            for (list<PcodeOp*>::const_iterator iter = vn->beginDescend(); iter != vn->endDescend(); ++iter)
+            for (list<PcodeOp*>::const_iterator iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {
                 op = *iter;
-                OpCode opc = op->code();
+                OpCode opc = op.code();
                 if (opc == CPUI_LOAD)
-                    return op->getIn(0)->getSpaceFromConst();
-                else if (opc == CPUI_STORE && op->getIn(1) == vn)
-                    return op->getIn(0)->getSpaceFromConst();
+                    return op.getIn(0).getSpaceFromConst();
+                else if (opc == CPUI_STORE && op.getIn(1) == vn)
+                    return op.getIn(0).getSpaceFromConst();
             }
             return (AddrSpace*)0;
         }
@@ -78,22 +78,22 @@ namespace Sla.DECCORE
             vector<AddrSpace*> &spaceList)
         {
             AddrSpace* resSpace = (AddrSpace*)0;
-            if (vn->getType()->getMetatype() == TYPE_PTR)
+            if (vn.getType().getMetatype() == TYPE_PTR)
             {
-                AddrSpace* spc = ((TypePointer*)vn->getType())->getSpace();
-                if (spc != (AddrSpace*)0 && spc->getAddrSize() == vn->getSize())
+                AddrSpace* spc = ((TypePointer*)vn.getType()).getSpace();
+                if (spc != (AddrSpace*)0 && spc.getAddrSize() == vn.getSize())
                     return spc;
             }
             for (int4 i = 0; i < spaceList.size(); ++i)
             {
                 AddrSpace* spc = spaceList[i];
-                int4 minSize = spc->getMinimumPtrSize();
+                int4 minSize = spc.getMinimumPtrSize();
                 if (minSize == 0)
                 {
-                    if (vn->getSize() != spc->getAddrSize())
+                    if (vn.getSize() != spc.getAddrSize())
                         continue;
                 }
-                else if (vn->getSize() < minSize)
+                else if (vn.getSize() < minSize)
                     continue;
                 if (resSpace != (AddrSpace*)0)
                 {
@@ -127,24 +127,24 @@ namespace Sla.DECCORE
             bool needexacthit;
             Architecture* glb = data.getArch();
             Varnode* outvn;
-            if (vn->getTypeReadFacing(op)->getMetatype() == TYPE_PTR)
+            if (vn.getTypeReadFacing(op).getMetatype() == TYPE_PTR)
             { // Are we explicitly marked as a pointer
-                rampoint = glb->resolveConstant(spc, vn->getOffset(), vn->getSize(), op->getAddr(), fullEncoding);
+                rampoint = glb.resolveConstant(spc, vn.getOffset(), vn.getSize(), op.getAddr(), fullEncoding);
                 needexacthit = false;
             }
             else
             {
-                if (vn->isTypeLock()) return (SymbolEntry*)0; // Locked as NOT a pointer
+                if (vn.isTypeLock()) return (SymbolEntry*)0; // Locked as NOT a pointer
                 needexacthit = true;
                 // Check if the constant is involved in a potential pointer expression
                 // as the base
-                switch (op->code())
+                switch (op.code())
                 {
                     case CPUI_RETURN:
                     case CPUI_CALL:
                     case CPUI_CALLIND:
                         // A constant parameter or return value could be a pointer
-                        if (!glb->infer_pointers)
+                        if (!glb.infer_pointers)
                             return (SymbolEntry*)0;
                         if (slot == 0)
                             return (SymbolEntry*)0;
@@ -159,16 +159,16 @@ namespace Sla.DECCORE
                         // A comparison with a constant could be a pointer
                         break;
                     case CPUI_INT_ADD:
-                        outvn = op->getOut();
-                        if (outvn->getTypeDefFacing()->getMetatype() == TYPE_PTR)
+                        outvn = op.getOut();
+                        if (outvn.getTypeDefFacing().getMetatype() == TYPE_PTR)
                         {
                             // Is there another pointer base in this expression
-                            if (op->getIn(1 - slot)->getTypeReadFacing(op)->getMetatype() == TYPE_PTR)
+                            if (op.getIn(1 - slot).getTypeReadFacing(op).getMetatype() == TYPE_PTR)
                                 return (SymbolEntry*)0; // If so, we are not a pointer
                                                         // FIXME: need to fully explore additive tree
                             needexacthit = false;
                         }
-                        else if (!glb->infer_pointers)
+                        else if (!glb.infer_pointers)
                             return (SymbolEntry*)0;
                         break;
                     case CPUI_STORE:
@@ -179,32 +179,32 @@ namespace Sla.DECCORE
                         return (SymbolEntry*)0;
                 }
                 // Make sure the constant is in the expected range for a pointer
-                if (spc->getPointerLowerBound() > vn->getOffset())
+                if (spc.getPointerLowerBound() > vn.getOffset())
                     return (SymbolEntry*)0;
-                if (spc->getPointerUpperBound() < vn->getOffset())
+                if (spc.getPointerUpperBound() < vn.getOffset())
                     return (SymbolEntry*)0;
                 // Check if the constant looks like a single bit or mask
-                if (bit_transitions(vn->getOffset(), vn->getSize()) < 3)
+                if (bit_transitions(vn.getOffset(), vn.getSize()) < 3)
                     return (SymbolEntry*)0;
-                rampoint = glb->resolveConstant(spc, vn->getOffset(), vn->getSize(), op->getAddr(), fullEncoding);
+                rampoint = glb.resolveConstant(spc, vn.getOffset(), vn.getSize(), op.getAddr(), fullEncoding);
             }
 
             if (rampoint.isInvalid()) return (SymbolEntry*)0;
             // Since we are looking for a global address
             // Assume it is address tied and use empty usepoint
-            SymbolEntry* entry = data.getScopeLocal()->getParent()->queryContainer(rampoint, 1, Address());
+            SymbolEntry* entry = data.getScopeLocal().getParent().queryContainer(rampoint, 1, Address());
             if (entry != (SymbolEntry*)0)
             {
-                Datatype* ptrType = entry->getSymbol()->getType();
-                if (ptrType->getMetatype() == TYPE_ARRAY)
+                Datatype* ptrType = entry.getSymbol().getType();
+                if (ptrType.getMetatype() == TYPE_ARRAY)
                 {
-                    Datatype* ct = ((TypeArray*)ptrType)->getBase();
+                    Datatype* ct = ((TypeArray*)ptrType).getBase();
                     // In the special case of strings (character arrays) we allow the constant pointer to
                     // refer to the middle of the string
-                    if (ct->isCharPrint())
+                    if (ct.isCharPrint())
                         needexacthit = false;
                 }
-                if (needexacthit && entry->getAddr() != rampoint)
+                if (needexacthit && entry.getAddr() != rampoint)
                     return (SymbolEntry*)0;
             }
             return entry;
@@ -236,7 +236,7 @@ namespace Sla.DECCORE
 
             VarnodeLocSet::const_iterator begiter, enditer;
             Architecture* glb = data.getArch();
-            AddrSpace* cspc = glb->getConstantSpace();
+            AddrSpace* cspc = glb.getConstantSpace();
             SymbolEntry* entry;
             Varnode* vn;
 
@@ -246,32 +246,32 @@ namespace Sla.DECCORE
             while (begiter != enditer)
             {
                 vn = *begiter++;
-                if (!vn->isConstant()) break; // New varnodes may get inserted between begiter and enditer
-                if (vn->getOffset() == 0) continue; // Never make constant 0 into spacebase
-                if (vn->isPtrCheck()) continue; // Have we checked this variable before
-                if (vn->hasNoDescend()) continue;
-                if (vn->isSpacebase()) continue; // Don't use constant 0 which is already spacebase
-                                                 //    if (vn->getSize() != rspc->getAddrSize()) continue; // Must be size of pointer
+                if (!vn.isConstant()) break; // New varnodes may get inserted between begiter and enditer
+                if (vn.getOffset() == 0) continue; // Never make constant 0 into spacebase
+                if (vn.isPtrCheck()) continue; // Have we checked this variable before
+                if (vn.hasNoDescend()) continue;
+                if (vn.isSpacebase()) continue; // Don't use constant 0 which is already spacebase
+                                                 //    if (vn.getSize() != rspc.getAddrSize()) continue; // Must be size of pointer
 
-                PcodeOp* op = vn->loneDescend();
+                PcodeOp* op = vn.loneDescend();
                 if (op == (PcodeOp*)0) continue;
-                AddrSpace* rspc = selectInferSpace(vn, op, glb->inferPtrSpaces);
+                AddrSpace* rspc = selectInferSpace(vn, op, glb.inferPtrSpaces);
                 if (rspc == (AddrSpace*)0) continue;
-                int4 slot = op->getSlot(vn);
-                OpCode opc = op->code();
+                int4 slot = op.getSlot(vn);
+                OpCode opc = op.code();
                 if (opc == CPUI_INT_ADD)
                 {
-                    if (op->getIn(1 - slot)->isSpacebase()) continue; // Make sure other side is not a spacebase already
+                    if (op.getIn(1 - slot).isSpacebase()) continue; // Make sure other side is not a spacebase already
                 }
                 else if ((opc == CPUI_PTRSUB) || (opc == CPUI_PTRADD))
                     continue;
                 Address rampoint;
                 uintb fullEncoding;
                 entry = isPointer(rspc, vn, op, slot, rampoint, fullEncoding, data);
-                vn->setPtrCheck();      // Set check flag AFTER searching for symbol
+                vn.setPtrCheck();      // Set check flag AFTER searching for symbol
                 if (entry != (SymbolEntry*)0)
                 {
-                    data.spacebaseConstant(op, slot, entry, rampoint, fullEncoding, vn->getSize());
+                    data.spacebaseConstant(op, slot, entry, rampoint, fullEncoding, vn.getSize());
                     if ((opc == CPUI_INT_ADD) && (slot == 1))
                         data.opSwapInput(op, 0, 1);
                     count += 1;

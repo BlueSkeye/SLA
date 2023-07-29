@@ -36,18 +36,18 @@ namespace Sla.DECCORE
             for (i = 0; i < data.numCalls(); ++i)
             {
                 fc = data.getCallSpecs(i);
-                op = fc->getOp();
+                op = fc.getOp();
 
-                if (!fc->isInputLocked()) continue;
-                if (fc->getSpacebaseOffset() == FuncCallSpecs::offset_unknown) continue;
-                int4 numparam = fc->numParams();
+                if (!fc.isInputLocked()) continue;
+                if (fc.getSpacebaseOffset() == FuncCallSpecs::offset_unknown) continue;
+                int4 numparam = fc.numParams();
                 for (int4 j = 0; j < numparam; ++j)
                 {
-                    ProtoParameter* param = fc->getParam(j);
-                    Address addr = param->getAddress();
-                    if (addr.getSpace()->getType() != IPTR_SPACEBASE) continue;
-                    uintb off = addr.getSpace()->wrapOffset(fc->getSpacebaseOffset() + addr.getOffset());
-                    data.getScopeLocal()->markNotMapped(addr.getSpace(), off, param->getSize(), true);
+                    ProtoParameter* param = fc.getParam(j);
+                    Address addr = param.getAddress();
+                    if (addr.getSpace().getType() != IPTR_SPACEBASE) continue;
+                    uintb off = addr.getSpace().wrapOffset(fc.getSpacebaseOffset() + addr.getOffset());
+                    data.getScopeLocal().markNotMapped(addr.getSpace(), off, param.getSize(), true);
                 }
             }
 
@@ -57,18 +57,18 @@ namespace Sla.DECCORE
             { // Iterate through saved registers
                 if ((*eiter).getType() == EffectRecord::killedbycall) continue;  // Not saved
                 vn = data.findVarnodeInput((*eiter).getSize(), (*eiter).getAddress());
-                if ((vn != (Varnode*)0) && (vn->isUnaffected()))
+                if ((vn != (Varnode*)0) && (vn.isUnaffected()))
                 {
                     // Mark storage locations for saved registers as not mapped
                     // This should pickup unaffected, reload, and return_address effecttypes
-                    for (iter = vn->beginDescend(); iter != vn->endDescend(); ++iter)
+                    for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
                     {
                         op = *iter;
-                        if (op->code() != CPUI_COPY) continue;
-                        Varnode* outvn = op->getOut();
-                        if (!data.getScopeLocal()->isUnaffectedStorage(outvn))  // Is this where unaffected values get saved
+                        if (op.code() != CPUI_COPY) continue;
+                        Varnode* outvn = op.getOut();
+                        if (!data.getScopeLocal().isUnaffectedStorage(outvn))  // Is this where unaffected values get saved
                             continue;
-                        data.getScopeLocal()->markNotMapped(outvn->getSpace(), outvn->getOffset(), outvn->getSize(), false);
+                        data.getScopeLocal().markNotMapped(outvn.getSpace(), outvn.getOffset(), outvn.getSize(), false);
                     }
                 }
             }

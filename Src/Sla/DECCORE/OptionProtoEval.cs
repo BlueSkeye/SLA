@@ -28,15 +28,15 @@ namespace Sla.DECCORE
                 throw ParseError("Must specify prototype model");
 
             if (p1 == "default")
-                model = glb->defaultfp;
+                model = glb.defaultfp;
             else
             {
-                model = glb->getModel(p1);
+                model = glb.getModel(p1);
                 if (model == (ProtoModel*)0)
                     throw ParseError("Unknown prototype model: " + p1);
             }
             string res = "Set current evaluation to " + p1;
-            glb->evalfp_current = model;
+            glb.evalfp_current = model;
             return res;
         }
     }

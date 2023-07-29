@@ -32,7 +32,7 @@ namespace Sla.DECCORE
         internal static bool operator <(PcodeOpNode op1, PcodeOpNode op2)
         {
             if (op != op2.op)
-                return (op->getSeqNum().getTime() < op2.op->getSeqNum().getTime());
+                return (op.getSeqNum().getTime() < op2.op.getSeqNum().getTime());
             if (slot != op2.slot)
                 return (slot < op2.slot);
             return false;

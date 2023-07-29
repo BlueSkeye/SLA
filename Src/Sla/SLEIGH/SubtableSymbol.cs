@@ -51,7 +51,7 @@ namespace Sla.SLEIGH
 
         public void addConstructor(Constructor ct)
         {
-            ct->setId(construct.size());
+            ct.setId(construct.size());
             construct.push_back(ct);
         }
 
@@ -62,14 +62,14 @@ namespace Sla.SLEIGH
             decisiontree = new DecisionNode((DecisionNode*)0);
             for (int4 i = 0; i < construct.size(); ++i)
             {
-                pat = construct[i]->getPattern()->getPattern();
-                if (pat->numDisjoint() == 0)
-                    decisiontree->addConstructorPair((DisjointPattern*)pat, construct[i]);
+                pat = construct[i].getPattern().getPattern();
+                if (pat.numDisjoint() == 0)
+                    decisiontree.addConstructorPair((DisjointPattern*)pat, construct[i]);
                 else
-                    for (int4 j = 0; j < pat->numDisjoint(); ++j)
-                        decisiontree->addConstructorPair(pat->getDisjoint(j), construct[i]);
+                    for (int4 j = 0; j < pat.numDisjoint(); ++j)
+                        decisiontree.addConstructorPair(pat.getDisjoint(j), construct[i]);
             }
-            decisiontree->split(props); // Create the decision strategy
+            decisiontree.split(props); // Create the decision strategy
         }
 
         public TokenPattern buildPattern(TextWriter s)
@@ -87,28 +87,28 @@ namespace Sla.SLEIGH
             }
             try
             {
-                construct.front()->buildPattern(s);
+                construct.front().buildPattern(s);
             }
             catch (SleighError err) {
                 s << "Error: " << err.ToString() << ": for ";
-                construct.front()->printInfo(s);
+                construct.front().printInfo(s);
                 s << endl;
                 errors = true;
             }
-            *pattern = *construct.front()->getPattern();
+            *pattern = *construct.front().getPattern();
             for (int4 i = 1; i < construct.size(); ++i)
             {
                 try
                 {
-                    construct[i]->buildPattern(s);
+                    construct[i].buildPattern(s);
                 }
                 catch (SleighError err) {
                     s << "Error: " << err.ToString() << ": for ";
-                    construct[i]->printInfo(s);
+                    construct[i].printInfo(s);
                     s << endl;
                     errors = true;
                 }
-                *pattern = construct[i]->getPattern()->commonSubPattern(*pattern);
+                *pattern = construct[i].getPattern().commonSubPattern(*pattern);
             }
             beingbuilt = false;
             return pattern;
@@ -120,7 +120,7 @@ namespace Sla.SLEIGH
 
         public Constructor getConstructor(uintm id) => construct[id];
 
-        public override Constructor resolve(ParserWalker walker) => decisiontree->resolve(walker);
+        public override Constructor resolve(ParserWalker walker) => decisiontree.resolve(walker);
 
         public override PatternExpression getPatternExpression()
         {
@@ -142,7 +142,7 @@ namespace Sla.SLEIGH
         public override void collectLocalValues(List<uintb> results)
         {
             for (int4 i = 0; i < construct.size(); ++i)
-                construct[i]->collectLocalExports(results);
+                construct[i].collectLocalExports(results);
         }
 
         public override symbol_type getType() => subtable_symbol;
@@ -154,8 +154,8 @@ namespace Sla.SLEIGH
             SleighSymbol::saveXmlHeader(s);
             s << " numct=\"" << dec << construct.size() << "\">\n";
             for (int4 i = 0; i < construct.size(); ++i)
-                construct[i]->saveXml(s);
-            decisiontree->saveXml(s);
+                construct[i].saveXml(s);
+            decisiontree.saveXml(s);
             s << "</subtable_sym>\n";
         }
 
@@ -170,26 +170,26 @@ namespace Sla.SLEIGH
         {
             {
                 int4 numct;
-                istringstream s(el->getAttributeValue("numct"));
+                istringstream s(el.getAttributeValue("numct"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> numct;
                 construct.reserve(numct);
             }
-            List list = el->getChildren();
+            List list = el.getChildren();
             List::const_iterator iter;
             iter = list.begin();
             while (iter != list.end())
             {
-                if ((*iter)->getName() == "constructor")
+                if ((*iter).getName() == "constructor")
                 {
                     Constructor* ct = new Constructor();
                     addConstructor(ct);
-                    ct->restoreXml(*iter, trans);
+                    ct.restoreXml(*iter, trans);
                 }
-                else if ((*iter)->getName() == "decision")
+                else if ((*iter).getName() == "decision")
                 {
                     decisiontree = new DecisionNode();
-                    decisiontree->restoreXml(*iter, (DecisionNode*)0, this);
+                    decisiontree.restoreXml(*iter, (DecisionNode*)0, this);
                 }
                 ++iter;
             }

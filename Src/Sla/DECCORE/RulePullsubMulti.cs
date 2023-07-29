@@ -36,37 +36,37 @@ namespace Sla.DECCORE
         {
             int4 maxByte, minByte, newSize;
 
-            Varnode* vn = op->getIn(0);
-            if (!vn->isWritten()) return 0;
-            PcodeOp* mult = vn->getDef();
-            if (mult->code() != CPUI_MULTIEQUAL) return 0;
+            Varnode* vn = op.getIn(0);
+            if (!vn.isWritten()) return 0;
+            PcodeOp* mult = vn.getDef();
+            if (mult.code() != CPUI_MULTIEQUAL) return 0;
             // We only pull up, do not pull "down" to bottom of loop
-            if (mult->getParent()->hasLoopIn()) return 0;
+            if (mult.getParent().hasLoopIn()) return 0;
             minMaxUse(vn, maxByte, minByte);        // Figure out what part of -vn- is used
             newSize = maxByte - minByte + 1;
-            if (maxByte < minByte || (newSize >= vn->getSize()))
+            if (maxByte < minByte || (newSize >= vn.getSize()))
                 return 0;   // If all or none is getting used, nothing to do
             if (!acceptableSize(newSize)) return 0;
-            Varnode* outvn = op->getOut();
-            if (outvn->isPrecisLo() || outvn->isPrecisHi()) return 0; // Don't pull apart a double precision object
+            Varnode* outvn = op.getOut();
+            if (outvn.isPrecisLo() || outvn.isPrecisHi()) return 0; // Don't pull apart a double precision object
 
             // Make sure we don't new add SUBPIECE ops that aren't going to cancel in some way
-            int4 branches = mult->numInput();
+            int4 branches = mult.numInput();
             uintb consume = calc_mask(newSize) << 8 * minByte;
             consume = ~consume;         // Check for use of bits outside of what gets truncated later
             for (int4 i = 0; i < branches; ++i)
             {
-                Varnode* inVn = mult->getIn(i);
-                if ((consume & inVn->getConsume()) != 0)
+                Varnode* inVn = mult.getIn(i);
+                if ((consume & inVn.getConsume()) != 0)
                 {   // Check if bits not truncated are still used
                     // Check if there's an extension that matches the truncation
-                    if (minByte == 0 && inVn->isWritten())
+                    if (minByte == 0 && inVn.isWritten())
                     {
-                        PcodeOp* defOp = inVn->getDef();
-                        OpCode opc = defOp->code();
+                        PcodeOp* defOp = inVn.getDef();
+                        OpCode opc = defOp.code();
                         if (opc == CPUI_INT_ZEXT || opc == CPUI_INT_SEXT)
                         {
-                            if (newSize == defOp->getIn(0)->getSize())
+                            if (newSize == defOp.getIn(0).getSize())
                                 continue;       // We have matching extension, so new SUBPIECE will cancel anyway
                         }
                     }
@@ -75,16 +75,16 @@ namespace Sla.DECCORE
             }
 
             Address smalladdr2;
-            if (!vn->getSpace()->isBigEndian())
-                smalladdr2 = vn->getAddr() + minByte;
+            if (!vn.getSpace().isBigEndian())
+                smalladdr2 = vn.getAddr() + minByte;
             else
-                smalladdr2 = vn->getAddr() + (vn->getSize() - maxByte - 1);
+                smalladdr2 = vn.getAddr() + (vn.getSize() - maxByte - 1);
 
             vector < Varnode *> @params;
 
             for (int4 i = 0; i < branches; ++i)
             {
-                Varnode* vn_piece = mult->getIn(i);
+                Varnode* vn_piece = mult.getIn(i);
                 // We have to be wary of exponential splittings here, do not pull the SUBPIECE
                 // up the MULTIEQUAL if another related SUBPIECE has already been pulled
                 // Search for a previous SUBPIECE
@@ -94,12 +94,12 @@ namespace Sla.DECCORE
                     @params.push_back(vn_sub);
             }
             // Build new multiequal near original multiequal
-            PcodeOp* new_multi = data.newOp (@params.size(), mult->getAddr());
+            PcodeOp* new_multi = data.newOp (@params.size(), mult.getAddr());
             smalladdr2.renormalize(newSize);
             Varnode* new_vn = data.newVarnodeOut(newSize, smalladdr2, new_multi);
             data.opSetOpcode(new_multi, CPUI_MULTIEQUAL);
             data.opSetAllInput(new_multi,@params);
-            data.opInsertBegin(new_multi, mult->getParent());
+            data.opInsertBegin(new_multi, mult.getParent());
 
             replaceDescendants(vn, new_vn, maxByte, minByte, data);
             return 1;
@@ -115,19 +115,19 @@ namespace Sla.DECCORE
         public static void minMaxUse(Varnode vn, int4 maxByte, int4 minByte)
         {
             list<PcodeOp*>::const_iterator iter, enditer;
-            enditer = vn->endDescend();
+            enditer = vn.endDescend();
 
-            int4 inSize = vn->getSize();
+            int4 inSize = vn.getSize();
             maxByte = -1;
             minByte = inSize;
-            for (iter = vn->beginDescend(); iter != enditer; ++iter)
+            for (iter = vn.beginDescend(); iter != enditer; ++iter)
             {
                 PcodeOp* op = *iter;
-                OpCode opc = op->code();
+                OpCode opc = op.code();
                 if (opc == CPUI_SUBPIECE)
                 {
-                    int4 min = (int4)op->getIn(1)->getOffset();
-                    int4 max = min + op->getOut()->getSize() - 1;
+                    int4 min = (int4)op.getIn(1).getOffset();
+                    int4 max = min + op.getOut().getSize() - 1;
                     if (min < minByte)
                         minByte = min;
                     if (max > maxByte)
@@ -154,25 +154,25 @@ namespace Sla.DECCORE
             Funcdata data)
         {
             list<PcodeOp*>::const_iterator iter, enditer;
-            iter = origVn->beginDescend();
-            enditer = origVn->endDescend();
+            iter = origVn.beginDescend();
+            enditer = origVn.endDescend();
             while (iter != enditer)
             {
                 PcodeOp* op = *iter;
                 ++iter;
-                if (op->code() == CPUI_SUBPIECE)
+                if (op.code() == CPUI_SUBPIECE)
                 {
-                    int4 truncAmount = (int4)op->getIn(1)->getOffset();
-                    int4 outSize = op->getOut()->getSize();
+                    int4 truncAmount = (int4)op.getIn(1).getOffset();
+                    int4 outSize = op.getOut().getSize();
                     data.opSetInput(op, newVn, 0);
-                    if (newVn->getSize() == outSize)
+                    if (newVn.getSize() == outSize)
                     {
                         if (truncAmount != minByte)
                             throw new LowlevelError("Could not perform -replaceDescendants-");
                         data.opSetOpcode(op, CPUI_COPY);
                         data.opRemoveInput(op, 1);
                     }
-                    else if (newVn->getSize() > outSize)
+                    else if (newVn.getSize() > outSize)
                     {
                         int4 newTrunc = truncAmount - minByte;
                         if (newTrunc < 0)
@@ -217,28 +217,28 @@ namespace Sla.DECCORE
             PcodeOp* new_op;
             Varnode* outvn;
 
-            if (basevn->isInput())
+            if (basevn.isInput())
             {
                 BlockBasic* bb = (BlockBasic*)data.getBasicBlocks().getBlock(0);
-                newaddr = bb->getStart();
+                newaddr = bb.getStart();
             }
             else
             {
-                if (!basevn->isWritten()) throw new LowlevelError("Undefined pullsub");
-                newaddr = basevn->getDef()->getAddr();
+                if (!basevn.isWritten()) throw new LowlevelError("Undefined pullsub");
+                newaddr = basevn.getDef().getAddr();
             }
             Address smalladdr1;
             bool usetmp = false;
-            if (basevn->getAddr().isJoin())
+            if (basevn.getAddr().isJoin())
             {
                 usetmp = true;
-                JoinRecord* joinrec = data.getArch()->findJoin(basevn->getOffset());
-                if (joinrec->numPieces() > 1)
+                JoinRecord* joinrec = data.getArch().findJoin(basevn.getOffset());
+                if (joinrec.numPieces() > 1)
                 { // If only 1 piece (float extension) automatically use unique
                     uint4 skipleft = shift;
-                    for (int4 i = joinrec->numPieces() - 1; i >= 0; --i)
+                    for (int4 i = joinrec.numPieces() - 1; i >= 0; --i)
                     { // Move from least significant to most
-                        VarnodeData vdata = joinrec->getPiece(i);
+                        VarnodeData vdata = joinrec.getPiece(i);
                         if (skipleft >= vdata.size)
                         {
                             skipleft -= vdata.size;
@@ -247,7 +247,7 @@ namespace Sla.DECCORE
                         {
                             if (skipleft + outsize > vdata.size)
                                 break;
-                            if (vdata.space->isBigEndian())
+                            if (vdata.space.isBigEndian())
                                 smalladdr1 = vdata.getAddr() + (vdata.size - (outsize + skipleft));
                             else
                                 smalladdr1 = vdata.getAddr() + skipleft;
@@ -259,10 +259,10 @@ namespace Sla.DECCORE
             }
             else
             {
-                if (!basevn->getSpace()->isBigEndian())
-                    smalladdr1 = basevn->getAddr() + shift;
+                if (!basevn.getSpace().isBigEndian())
+                    smalladdr1 = basevn.getAddr() + shift;
                 else
-                    smalladdr1 = basevn->getAddr() + (basevn->getSize() - (shift + outsize));
+                    smalladdr1 = basevn.getAddr() + (basevn.getSize() - (shift + outsize));
             }
             // Build new subpiece near definition of basevn
             new_op = data.newOp(2, newaddr);
@@ -277,10 +277,10 @@ namespace Sla.DECCORE
             data.opSetInput(new_op, basevn, 0);
             data.opSetInput(new_op, data.newConstant(4, shift), 1);
 
-            if (basevn->isInput())
+            if (basevn.isInput())
                 data.opInsertBegin(new_op, (BlockBasic*)data.getBasicBlocks().getBlock(0));
             else
-                data.opInsertAfter(new_op, basevn->getDef());
+                data.opInsertAfter(new_op, basevn.getDef());
             return outvn;
         }
 
@@ -297,20 +297,20 @@ namespace Sla.DECCORE
             list<PcodeOp*>::const_iterator iter;
             PcodeOp* prevop;
 
-            for (iter = basevn->beginDescend(); iter != basevn->endDescend(); ++iter)
+            for (iter = basevn.beginDescend(); iter != basevn.endDescend(); ++iter)
             {
                 prevop = *iter;
-                if (prevop->code() != CPUI_SUBPIECE) continue; // Find previous SUBPIECE
+                if (prevop.code() != CPUI_SUBPIECE) continue; // Find previous SUBPIECE
                                                                // Make sure output is defined in same block as vn_piece
-                if (basevn->isInput() && (prevop->getParent()->getIndex() != 0)) continue;
-                if (!basevn->isWritten()) continue;
-                if (basevn->getDef()->getParent() != prevop->getParent()) continue;
+                if (basevn.isInput() && (prevop.getParent().getIndex() != 0)) continue;
+                if (!basevn.isWritten()) continue;
+                if (basevn.getDef().getParent() != prevop.getParent()) continue;
                 // Make sure subpiece matches form
-                if ((prevop->getIn(0) == basevn) &&
-                (prevop->getOut()->getSize() == outsize) &&
-                (prevop->getIn(1)->getOffset() == shift))
+                if ((prevop.getIn(0) == basevn) &&
+                (prevop.getOut().getSize() == outsize) &&
+                (prevop.getIn(1).getOffset() == shift))
                 {
-                    return prevop->getOut();
+                    return prevop.getOut();
                 }
             }
             return (Varnode*)0;

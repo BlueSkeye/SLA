@@ -51,7 +51,7 @@ namespace Sla.DECCORE
         private Dictionary<Address, FuncProto> protoover;
         /// Addresses of indirect jumps that need multistage recovery
         private List<Address> multistagejump;
-        /// Override the CALL <-> BRANCH
+        /// Override the CALL <. BRANCH
         private Dictionary<Address, uint4> flowoverride;
 
         /// Clear the entire set of overrides
@@ -78,8 +78,8 @@ namespace Sla.DECCORE
         /// \return the generated message
         private static string generateDeadcodeDelayMessage(int4 index, Architecture glb)
         {
-            AddrSpace* spc = glb->getSpace(index);
-            string res = "Restarted to delay deadcode elimination for space: " + spc->getName();
+            AddrSpace* spc = glb.getSpace(index);
+            string res = "Restarted to delay deadcode elimination for space: " + spc.getName();
             return res;
         }
 
@@ -109,10 +109,10 @@ namespace Sla.DECCORE
         /// \param delay is the size of the delay (in passes)
         public void insertDeadcodeDelay(AddrSpace spc, int4 delay)
         {
-            while (deadcodedelay.size() <= spc->getIndex())
+            while (deadcodedelay.size() <= spc.getIndex())
                 deadcodedelay.push_back(-1);
 
-            deadcodedelay[spc->getIndex()] = delay;
+            deadcodedelay[spc.getIndex()] = delay;
         }
 
         /// \brief Check if a delay override is already installed for an address space
@@ -121,12 +121,12 @@ namespace Sla.DECCORE
         /// \return \b true if an override has already been installed
         public bool hasDeadcodeDelay(AddrSpace spc)
         {
-            int4 index = spc->getIndex();
+            int4 index = spc.getIndex();
             if (index >= deadcodedelay.size())
                 return false;
             int4 val = deadcodedelay[index];
             if (val == -1) return false;
-            return (val != spc->getDeadcodeDelay());
+            return (val != spc.getDeadcodeDelay());
         }
 
         /// \brief Override an indirect call turning it into a direct call
@@ -154,7 +154,7 @@ namespace Sla.DECCORE
             if (iter != protoover.end())    // Check for pre-existing override
                 delete(*iter).second;   // and delete it
 
-            p->setOverride(true);       // Mark this as an override
+            p.setOverride(true);       // Mark this as an override
             protoover[callpoint] = p;   // Take ownership of the object
         }
 
@@ -186,7 +186,7 @@ namespace Sla.DECCORE
         {
             if (!protoover.empty())
             {
-                map<Address, FuncProto*>::const_iterator iter = protoover.find(fspecs.getOp()->getAddr());
+                map<Address, FuncProto*>::const_iterator iter = protoover.find(fspecs.getOp().getAddr());
                 if (iter != protoover.end())
                 {
                     fspecs.copy(*(*iter).second);
@@ -204,7 +204,7 @@ namespace Sla.DECCORE
         {
             if (!indirectover.empty())
             {
-                map<Address, Address>::const_iterator iter = indirectover.find(fspecs.getOp()->getAddr());
+                map<Address, Address>::const_iterator iter = indirectover.find(fspecs.getOp().getAddr());
                 if (iter != indirectover.end())
                     fspecs.setAddress((*iter).second);
             }
@@ -235,7 +235,7 @@ namespace Sla.DECCORE
             {
                 int4 delay = deadcodedelay[i];
                 if (delay < 0) continue;
-                AddrSpace* spc = glb->getSpace(i);
+                AddrSpace* spc = glb.getSpace(i);
                 data.setDeadCodeDelay(spc, delay);
             }
         }
@@ -282,8 +282,8 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < deadcodedelay.size(); ++i)
             {
                 if (deadcodedelay[i] < 0) continue;
-                AddrSpace* spc = glb->getSpace(i);
-                s << "dead code delay on " << spc->getName() << " set to " << dec << deadcodedelay[i] << endl;
+                AddrSpace* spc = glb.getSpace(i);
+                s << "dead code delay on " << spc.getName() << " set to " << dec << deadcodedelay[i] << endl;
             }
 
             for (iter = indirectover.begin(); iter != indirectover.end(); ++iter)
@@ -294,7 +294,7 @@ namespace Sla.DECCORE
             for (fiter = protoover.begin(); fiter != protoover.end(); ++fiter)
             {
                 s << "override prototype at " << (*fiter).first << " to ";
-                (*fiter).second->printRaw("func", s);
+                (*fiter).second.printRaw("func", s);
                 s << endl;
             }
         }
@@ -339,7 +339,7 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < deadcodedelay.size(); ++i)
             {
                 if (deadcodedelay[i] < 0) continue;
-                AddrSpace* spc = glb->getSpace(i);
+                AddrSpace* spc = glb.getSpace(i);
                 encoder.openElement(ELEM_DEADCODEDELAY);
                 encoder.writeSpace(ATTRIB_SPACE, spc);
                 encoder.writeSignedInteger(ATTRIB_DELAY, deadcodedelay[i]);
@@ -360,7 +360,7 @@ namespace Sla.DECCORE
             {
                 encoder.openElement(ELEM_PROTOOVERRIDE);
                 (*fiter).first.encode(encoder);
-                (*fiter).second->encode(encoder);
+                (*fiter).second.encode(encoder);
                 encoder.closeElement(ELEM_PROTOOVERRIDE);
             }
 
@@ -403,8 +403,8 @@ namespace Sla.DECCORE
                 {
                     Address callpoint = Address::decode(decoder);
                     FuncProto* fp = new FuncProto();
-                    fp->setInternal(glb->defaultfp, glb->types->getTypeVoid());
-                    fp->decode(decoder, glb);
+                    fp.setInternal(glb.defaultfp, glb.types.getTypeVoid());
+                    fp.decode(decoder, glb);
                     insertProtoOverride(callpoint, fp);
                 }
                 else if (subId == ELEM_FORCEGOTO)

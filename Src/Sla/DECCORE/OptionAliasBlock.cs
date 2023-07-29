@@ -27,18 +27,18 @@ namespace Sla.DECCORE
         {
             if (p1.size() == 0)
                 throw ParseError("Must specify alias block level");
-            int4 oldVal = glb->alias_block_level;
+            int4 oldVal = glb.alias_block_level;
             if (p1 == "none")
-                glb->alias_block_level = 0;
+                glb.alias_block_level = 0;
             else if (p1 == "struct")
-                glb->alias_block_level = 1;
+                glb.alias_block_level = 1;
             else if (p1 == "array")
-                glb->alias_block_level = 2;     // The default. Let structs and arrays block aliases
+                glb.alias_block_level = 2;     // The default. Let structs and arrays block aliases
             else if (p1 == "all")
-                glb->alias_block_level = 3;
+                glb.alias_block_level = 3;
             else
                 throw ParseError("Unknown alias block level: " + p1);
-            if (oldVal == glb->alias_block_level)
+            if (oldVal == glb.alias_block_level)
                 return "Alias block level unchanged";
             return "Alias block level set to " + p1;
         }

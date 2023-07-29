@@ -85,7 +85,7 @@ namespace Sla.DECCORE
             private uintb useoffset;            ///< Offset into the sub-sorting address space
 
             public EntrySubsort(Address addr) {
-                useindex = addr.getSpace()->getIndex();
+                useindex = addr.getSpace().getIndex();
                 useoffset = addr.getOffset();
             }
             ///< Construct given a sub-sorting address
@@ -192,13 +192,13 @@ namespace Sla.DECCORE
         public subsorttype getSubsort()
         {
             subsorttype res;        // Minimal subsort
-            if ((symbol->getFlags() & Varnode::addrtied) == 0)
+            if ((symbol.getFlags() & Varnode::addrtied) == 0)
             {
                 Range range = uselimit.getFirstRange();
                 if (range == null)
                     throw new LowlevelError("Map entry with empty uselimit");
-                res.useindex = range->getSpace()->getIndex();
-                res.useoffset = range->getFirst();
+                res.useindex = range.getSpace().getIndex();
+                res.useoffset = range.getFirst();
             }
             return res;
         }
@@ -235,7 +235,7 @@ namespace Sla.DECCORE
             Range rng = uselimit.getFirstRange();
             if (rng == null)
                 return new Address();
-            return rng->getFirstAddr();
+            return rng.getFirstAddr();
         }
 
         /// Set the range of code addresses where \b this is valid
@@ -253,11 +253,11 @@ namespace Sla.DECCORE
         /// \return true if the data-type was changed
         public bool updateType(Varnode vn)
         {
-            if ((symbol->getFlags() & Varnode::typelock) != 0)
+            if ((symbol.getFlags() & Varnode::typelock) != 0)
             { // Type will just get replaced if not locked
-                Datatype* dt = getSizedType(vn->getAddr(), vn->getSize());
+                Datatype* dt = getSizedType(vn.getAddr(), vn.getSize());
                 if (dt != (Datatype*)0)
-                    return vn->updateType(dt, true, true);
+                    return vn.updateType(dt, true, true);
             }
             return false;
         }
@@ -276,8 +276,8 @@ namespace Sla.DECCORE
                 off = offset;
             else
                 off = (int4)(inaddr.getOffset() - addr.getOffset()) + offset;
-            Datatype* cur = symbol->getType();
-            return symbol->getScope()->getArch()->types->getExactPiece(cur, off, sz);
+            Datatype* cur = symbol.getType();
+            return symbol.getScope().getArch().types.getExactPiece(cur, off, sz);
         }
 
         /// Dump a description of \b this to a stream
@@ -285,7 +285,7 @@ namespace Sla.DECCORE
         /// \param s is the output stream
         public void printEntry(TextWriter s)
         {
-            s << symbol->getName() << " : ";
+            s << symbol.getName() << " : ";
             if (addr.isInvalid())
                 s << "<dynamic>";
             else
@@ -293,9 +293,9 @@ namespace Sla.DECCORE
                 s << addr.getShortcut();
                 addr.printRaw(s);
             }
-            s << ':' << dec << (uint4)symbol->getType()->getSize();
+            s << ':' << dec << (uint4)symbol.getType().getSize();
             s << ' ';
-            symbol->getType()->printRaw(s);
+            symbol.getType().printRaw(s);
             s << " : ";
             uselimit.printBounds(s);
         }

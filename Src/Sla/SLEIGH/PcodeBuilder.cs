@@ -38,16 +38,16 @@ namespace Sla.SLEIGH
 
             uint4 oldbase = labelbase;  // Recursively store old labelbase
             labelbase = labelcount; // Set the newbase
-            labelcount += construct->numLabels();   // Add labels from this template
+            labelcount += construct.numLabels();   // Add labels from this template
 
             vector<OpTpl*>::const_iterator iter;
             OpTpl* op;
-            List<OpTpl> ops = construct->getOpvec();
+            List<OpTpl> ops = construct.getOpvec();
 
             for (iter = ops.begin(); iter != ops.end(); ++iter)
             {
                 op = *iter;
-                switch (op->getOpcode())
+                switch (op.getOpcode())
                 {
                     case BUILD:
                         appendBuild(op, secnum);

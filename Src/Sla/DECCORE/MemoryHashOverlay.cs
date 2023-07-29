@@ -73,7 +73,7 @@ namespace Sla.DECCORE
             // We didn't find the address in the hashtable
             if (underlie == (MemoryBank*)0)
                 return (uintb)0;
-            return underlie->find(addr);
+            return underlie.find(addr);
         }
 
         /// Constructor for hash overlay

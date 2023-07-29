@@ -41,19 +41,19 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp
         private void addToCodeList(PcodeOp op)
         {
-            switch (op->code())
+            switch (op.code())
             {
                 case CPUI_STORE:
-                    op->codeiter = storelist.insert(storelist.end(), op);
+                    op.codeiter = storelist.insert(storelist.end(), op);
                     break;
                 case CPUI_LOAD:
-                    op->codeiter = loadlist.insert(loadlist.end(), op);
+                    op.codeiter = loadlist.insert(loadlist.end(), op);
                     break;
                 case CPUI_RETURN:
-                    op->codeiter = returnlist.insert(returnlist.end(), op);
+                    op.codeiter = returnlist.insert(returnlist.end(), op);
                     break;
                 case CPUI_CALLOTHER:
-                    op->codeiter = useroplist.insert(useroplist.end(), op);
+                    op.codeiter = useroplist.insert(useroplist.end(), op);
                     break;
                 default:
                     break;
@@ -66,19 +66,19 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp
         private void removeFromCodeList(PcodeOp op)
         {
-            switch (op->code())
+            switch (op.code())
             {
                 case CPUI_STORE:
-                    storelist.erase(op->codeiter);
+                    storelist.erase(op.codeiter);
                     break;
                 case CPUI_LOAD:
-                    loadlist.erase(op->codeiter);
+                    loadlist.erase(op.codeiter);
                     break;
                 case CPUI_RETURN:
-                    returnlist.erase(op->codeiter);
+                    returnlist.erase(op.codeiter);
                     break;
                 case CPUI_CALLOTHER:
-                    useroplist.erase(op->codeiter);
+                    useroplist.erase(op.codeiter);
                     break;
                 default:
                     break;
@@ -143,9 +143,9 @@ namespace Sla.DECCORE
         public PcodeOp create(int4 inputs, Address pc)
         {
             PcodeOp* op = new PcodeOp(inputs, SeqNum(pc, uniqid++));
-            optree[op->getSeqNum()] = op;
-            op->setFlag(PcodeOp::dead);     // Start out life as dead
-            op->insertiter = deadlist.insert(deadlist.end(), op);
+            optree[op.getSeqNum()] = op;
+            op.setFlag(PcodeOp::dead);     // Start out life as dead
+            op.insertiter = deadlist.insert(deadlist.end(), op);
             return op;
         }
 
@@ -162,9 +162,9 @@ namespace Sla.DECCORE
             if (sq.getTime() >= uniqid)
                 uniqid = sq.getTime() + 1;
 
-            optree[op->getSeqNum()] = op;
-            op->setFlag(PcodeOp::dead);     // Start out life as dead
-            op->insertiter = deadlist.insert(deadlist.end(), op);
+            optree[op.getSeqNum()] = op;
+            op.setFlag(PcodeOp::dead);     // Start out life as dead
+            op.insertiter = deadlist.insert(deadlist.end(), op);
             return op;
         }
 
@@ -176,11 +176,11 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp to destroy
         public void destroy(PcodeOp op)
         {
-            if (!op->isDead())
+            if (!op.isDead())
                 throw new LowlevelError("Deleting integrated op");
 
-            optree.erase(op->getSeqNum());
-            deadlist.erase(op->insertiter);
+            optree.erase(op.getSeqNum());
+            deadlist.erase(op.insertiter);
             removeFromCodeList(op);
             deadandgone.push_back(op);
         }
@@ -206,9 +206,9 @@ namespace Sla.DECCORE
         /// \param newopc is the new op-code object
         public void changeOpcode(PcodeOp op, TypeOp newopc)
         {
-            if (op->opcode != (TypeOp*)0)
+            if (op.opcode != (TypeOp*)0)
                 removeFromCodeList(op);
-            op->setOpcode(newopc);
+            op.setOpcode(newopc);
             addToCodeList(op);
         }
 
@@ -218,9 +218,9 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp to mark
         public void markAlive(PcodeOp op)
         {
-            deadlist.erase(op->insertiter);
-            op->clearFlag(PcodeOp::dead);
-            op->insertiter = alivelist.insert(alivelist.end(), op);
+            deadlist.erase(op.insertiter);
+            op.clearFlag(PcodeOp::dead);
+            op.insertiter = alivelist.insert(alivelist.end(), op);
         }
 
         /// Mark the given PcodeOp as \e dead
@@ -229,9 +229,9 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp to mark
         public void markDead(PcodeOp op)
         {
-            alivelist.erase(op->insertiter);
-            op->setFlag(PcodeOp::dead);
-            op->insertiter = deadlist.insert(deadlist.end(), op);
+            alivelist.erase(op.insertiter);
+            op.setFlag(PcodeOp::dead);
+            op.insertiter = deadlist.insert(deadlist.end(), op);
         }
 
         /// Insert the given PcodeOp after a point in the \e dead list
@@ -240,12 +240,12 @@ namespace Sla.DECCORE
         /// \param prev is the specified op in the \e dead list
         public void insertAfterDead(PcodeOp op, PcodeOp prev)
         {
-            if ((!op->isDead()) || (!prev->isDead()))
+            if ((!op.isDead()) || (!prev.isDead()))
                 throw new LowlevelError("Dead move called on ops which aren't dead");
-            deadlist.erase(op->insertiter);
-            list<PcodeOp*>::iterator iter = prev->insertiter;
+            deadlist.erase(op.insertiter);
+            list<PcodeOp*>::iterator iter = prev.insertiter;
             ++iter;
-            op->insertiter = deadlist.insert(iter, op);
+            op.insertiter = deadlist.insert(iter, op);
         }
 
         /// \brief Move a sequence of PcodeOps to a point in the \e dead list.
@@ -256,12 +256,12 @@ namespace Sla.DECCORE
         /// \param prev is the provided point to move to
         public void moveSequenceDead(PcodeOp firstop, PcodeOp lastop, PcodeOp prev)
         {
-            list<PcodeOp*>::iterator enditer = lastop->insertiter;
+            list<PcodeOp*>::iterator enditer = lastop.insertiter;
             ++enditer;
-            list<PcodeOp*>::iterator previter = prev->insertiter;
+            list<PcodeOp*>::iterator previter = prev.insertiter;
             ++previter;
-            if (previter != firstop->insertiter) // Check for degenerate move
-                deadlist.splice(previter, deadlist, firstop->insertiter, enditer);
+            if (previter != firstop.insertiter) // Check for degenerate move
+                deadlist.splice(previter, deadlist, firstop.insertiter, enditer);
         }
 
         /// Mark any COPY ops in the given range as \e incidental
@@ -271,15 +271,15 @@ namespace Sla.DECCORE
         /// \param lastop is the end of the range of incidental COPY ops
         public void markIncidentalCopy(PcodeOp firstop, PcodeOp lastop)
         {
-            list<PcodeOp*>::iterator iter = firstop->insertiter;
-            list<PcodeOp*>::iterator enditer = lastop->insertiter;
+            list<PcodeOp*>::iterator iter = firstop.insertiter;
+            list<PcodeOp*>::iterator enditer = lastop.insertiter;
             ++enditer;
             while (iter != enditer)
             {
                 PcodeOp* op = *iter;
                 ++iter;
-                if (op->code() == CPUI_COPY)
-                    op->setAdditionalFlag(PcodeOp::incidental_copy);
+                if (op.code() == CPUI_COPY)
+                    op.setAdditionalFlag(PcodeOp::incidental_copy);
             }
         }
 
@@ -295,7 +295,7 @@ namespace Sla.DECCORE
         {
             PcodeOpTree::const_iterator iter = optree.lower_bound(SeqNum(addr, 0));
             if (iter == optree.end()) return (PcodeOp*)0;
-            return (*iter).second->target();
+            return (*iter).second.target();
         }
 
         /// Find a PcodeOp by sequence number
@@ -315,21 +315,21 @@ namespace Sla.DECCORE
         public PcodeOp fallthru(PcodeOp op)
         {
             PcodeOp* retop;
-            if (op->isDead())
+            if (op.isDead())
             {
                 // In this case we know an instruction is contiguous
                 // in the dead list
-                list<PcodeOp*>::const_iterator iter = op->insertiter;
+                list<PcodeOp*>::const_iterator iter = op.insertiter;
                 ++iter;
                 if (iter != deadlist.end())
                 {
                     retop = *iter;
-                    if (!retop->isInstructionStart()) // If the next in dead list is not marked
+                    if (!retop.isInstructionStart()) // If the next in dead list is not marked
                         return retop;       // It is in the same instruction, and is the fallthru
                 }
                 --iter;
-                SeqNum max = op->getSeqNum();
-                while (!(*iter)->isInstructionStart()) // Find start of instruction
+                SeqNum max = op.getSeqNum();
+                while (!(*iter).isInstructionStart()) // Find start of instruction
                     --iter;
                 // Find biggest sequence number in this instruction
                 // This is probably -op- itself because it is the
@@ -337,8 +337,8 @@ namespace Sla.DECCORE
                 // because of delay slot reordering
                 while ((iter != deadlist.end()) && (*iter != op))
                 {
-                    if (max < (*iter)->getSeqNum())
-                        max = (*iter)->getSeqNum();
+                    if (max < (*iter).getSeqNum())
+                        max = (*iter).getSeqNum();
                     ++iter;
                 }
                 PcodeOpTree::const_iterator nextiter = optree.upper_bound(max);
@@ -347,7 +347,7 @@ namespace Sla.DECCORE
                 return retop;
             }
             else
-                return op->nextOp();
+                return op.nextOp();
         }
 
         /// \brief Start of all PcodeOps in sequence number order
@@ -436,33 +436,33 @@ namespace Sla.DECCORE
         {
             int4 testval = functionalEqualityLevel0(vn1, vn2);
             if (testval != 1) return testval;
-            PcodeOp* op1 = vn1->getDef();
-            PcodeOp* op2 = vn2->getDef();
-            OpCode opc = op1->code();
+            PcodeOp* op1 = vn1.getDef();
+            PcodeOp* op2 = vn2.getDef();
+            OpCode opc = op1.code();
 
-            if (opc != op2->code()) return -1;
+            if (opc != op2.code()) return -1;
 
-            int4 num = op1->numInput();
-            if (num != op2->numInput()) return -1;
-            if (op1->isMarker()) return -1;
-            if (op2->isCall()) return -1;
+            int4 num = op1.numInput();
+            if (num != op2.numInput()) return -1;
+            if (op1.isMarker()) return -1;
+            if (op2.isCall()) return -1;
             if (opc == CPUI_LOAD)
             {
                 // FIXME: We assume two loads produce the same
                 // result if the address is the same and the loads
                 // occur in the same instruction
-                if (op1->getAddr() != op2->getAddr()) return -1;
+                if (op1.getAddr() != op2.getAddr()) return -1;
             }
             if (num >= 3)
             {
                 if (opc != CPUI_PTRADD) return -1; // If this is a PTRADD
-                if (op1->getIn(2)->getOffset() != op2->getIn(2)->getOffset()) return -1; // Make sure the elsize constant is equal
+                if (op1.getIn(2).getOffset() != op2.getIn(2).getOffset()) return -1; // Make sure the elsize constant is equal
                 num = 2;            // Otherwise treat as having 2 inputs
             }
             for (int4 i = 0; i < num; ++i)
             {
-                res1[i] = op1->getIn(i);
-                res2[i] = op2->getIn(i);
+                res1[i] = op1.getIn(i);
+                res2[i] = op2.getIn(i);
             }
 
             testval = functionalEqualityLevel0(res1[0], res2[0]);
@@ -488,7 +488,7 @@ namespace Sla.DECCORE
             else
                 unmatchsize = -1;
 
-            if (!op1->isCommutative()) return unmatchsize;
+            if (!op1.isCommutative()) return unmatchsize;
             // unmatchsize must be 2 or -1 here on a commutative operator,
             // try flipping
             int4 comm1 = functionalEqualityLevel0(res1[0], res2[1]);
@@ -543,23 +543,23 @@ namespace Sla.DECCORE
             int4 i, num;
 
             if (vn1 == vn2) return false;
-            if ((!vn1->isWritten()) || (!vn2->isWritten()))
+            if ((!vn1.isWritten()) || (!vn2.isWritten()))
             {
-                if (vn1->isConstant() && vn2->isConstant())
-                    return !(vn1->getAddr() == vn2->getAddr());
-                if (vn1->isInput() && vn2->isInput()) return false; // Might be the same
-                if (vn1->isFree() || vn2->isFree()) return false; // Might be the same
+                if (vn1.isConstant() && vn2.isConstant())
+                    return !(vn1.getAddr() == vn2.getAddr());
+                if (vn1.isInput() && vn2.isInput()) return false; // Might be the same
+                if (vn1.isFree() || vn2.isFree()) return false; // Might be the same
                 return true;
             }
-            op1 = vn1->getDef();
-            op2 = vn2->getDef();
-            if (op1->code() != op2->code()) return true;
-            num = op1->numInput();
-            if (num != op2->numInput()) return true;
+            op1 = vn1.getDef();
+            op2 = vn2.getDef();
+            if (op1.code() != op2.code()) return true;
+            num = op1.numInput();
+            if (num != op2.numInput()) return true;
             if (depth == 0) return true;    // Different as far as we can tell
             depth -= 1;
             for (i = 0; i < num; ++i)
-                if (functionalDifference(op1->getIn(i), op2->getIn(i), depth))
+                if (functionalDifference(op1.getIn(i), op2.getIn(i), depth))
                     return true;
             return false;
         }

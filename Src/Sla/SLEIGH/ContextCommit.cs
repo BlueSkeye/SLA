@@ -35,7 +35,7 @@ namespace Sla.SLEIGH
         public override void saveXml(TextWriter s)
         {
             s << "<commit";
-            a_v_u(s, "id", sym->getId());
+            a_v_u(s, "id", sym.getId());
             a_v_i(s, "num", num);
             a_v_u(s, "mask", mask);
             a_v_b(s, "flow", flow);
@@ -46,39 +46,39 @@ namespace Sla.SLEIGH
         {
             uintm id;
             {
-                istringstream s(el->getAttributeValue("id"));
+                istringstream s(el.getAttributeValue("id"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> id;
-                sym = (TripleSymbol*)trans->findSymbol(id);
+                sym = (TripleSymbol*)trans.findSymbol(id);
             }
             {
-                istringstream s(el->getAttributeValue("num"));
+                istringstream s(el.getAttributeValue("num"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> num;
             }
             {
-                istringstream s(el->getAttributeValue("mask"));
+                istringstream s(el.getAttributeValue("mask"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> mask;
             }
-            if (el->getNumAttributes() == 4)
-                flow = xml_readbool(el->getAttributeValue("flow"));
+            if (el.getNumAttributes() == 4)
+                flow = xml_readbool(el.getAttributeValue("flow"));
             else
                 flow = true;        // Default is to flow.  flow=true
         }
 
         public override void apply(ParserWalkerChange walker)
         {
-            walker.getParserContext()->addCommit(sym, num, mask, flow, walker.getPoint());
+            walker.getParserContext().addCommit(sym, num, mask, flow, walker.getPoint());
         }
 
         public override ContextChange clone()
         {
             ContextCommit* res = new ContextCommit();
-            res->sym = sym;
-            res->flow = flow;
-            res->mask = mask;
-            res->num = num;
+            res.sym = sym;
+            res.flow = flow;
+            res.mask = mask;
+            res.num = num;
             return res;
         }
     }

@@ -35,10 +35,10 @@ namespace Sla.SLACOMP
             ss = s;
             pateq = pq;
             if (pateq != (PatternEquation*)0)
-                pateq->layClaim();
+                pateq.layClaim();
             if (cvec != (vector<ContextChange*>*)0)
             {
-                for (int4 i = 0; i < cvec->size(); ++i)
+                for (int4 i = 0; i < cvec.size(); ++i)
                     contvec.push_back((*cvec)[i]);  // Lay claim to -cvec-s pointers, we don't clone
                 delete cvec;
             }
@@ -94,17 +94,17 @@ namespace Sla.SLACOMP
                     res = new vector<ContextChange*>();
                 for (int4 i = 0; i < changelist.size(); ++i)
                 {
-                    res->push_back(changelist[i]->clone());
+                    res.push_back(changelist[i].clone());
                 }
             }
             if (contvec != (vector<ContextChange*>*)0)
             {
-                if (contvec->size() != 0)
+                if (contvec.size() != 0)
                 {
                     if (res == (vector<ContextChange*>*)0)
                         res = new vector<ContextChange*>();
-                    for (int4 i = 0; i < contvec->size(); ++i)
-                        res->push_back((*contvec)[i]);      // lay claim to contvecs pointer
+                    for (int4 i = 0; i < contvec.size(); ++i)
+                        res.push_back((*contvec)[i]);      // lay claim to contvecs pointer
                 }
                 delete contvec;
             }

@@ -24,7 +24,7 @@ namespace Sla.DECCORE
         ///
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            glb->analyze_for_loops = onOrOff(p1);
+            glb.analyze_for_loops = onOrOff(p1);
 
             string res = "Recovery of for-loops is " + p1;
             return res;

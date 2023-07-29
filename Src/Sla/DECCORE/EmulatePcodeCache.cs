@@ -55,7 +55,7 @@ namespace Sla.DECCORE
         {
             clearCache();
             PcodeEmitCache emit(opcache, varcache, inst,0);
-            instruction_length = trans->oneInstruction(emit, addr);
+            instruction_length = trans.oneInstruction(emit, addr);
             current_op = 0;
             instruction_start = true;
         }
@@ -66,7 +66,7 @@ namespace Sla.DECCORE
             if (current_op < opcache.size())
             {
                 currentOp = opcache[current_op];
-                currentBehave = currentOp->getBehavior();
+                currentBehave = currentOp.getBehavior();
                 return;
             }
             currentOp = (PcodeOpRaw*)0;
@@ -92,7 +92,7 @@ namespace Sla.DECCORE
         /// Since the full instruction is cached, we can do relative branches properly
         protected override void executeBranch()
         {
-            Address destaddr = currentOp->getInput(0)->getAddr();
+            Address destaddr = currentOp.getInput(0).getAddr();
             if (destaddr.isConstant())
             {
                 uintm id = destaddr.getOffset();
@@ -112,7 +112,7 @@ namespace Sla.DECCORE
         /// If it doesn't exist, or doesn't replace the action, throw an exception
         protected override void executeCallother()
         {
-            if (!breaktable->doPcodeOpBreak(currentOp))
+            if (!breaktable.doPcodeOpBreak(currentOp))
                 throw new LowlevelError("Userop not hooked");
             fallthruOp();
         }
@@ -127,7 +127,7 @@ namespace Sla.DECCORE
             trans = t;
             OpBehavior::registerInstructions(inst, t);
             breaktable = b;
-            breaktable->setEmulate(this);
+            breaktable.setEmulate(this);
         }
 
         ~EmulatePcodeCache()
@@ -208,7 +208,7 @@ namespace Sla.DECCORE
         {
             if (instruction_start)
             {
-                if (breaktable->doAddressBreak(current_address))
+                if (breaktable.doAddressBreak(current_address))
                     return;
             }
             do

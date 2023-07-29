@@ -117,9 +117,9 @@ namespace Sla.EXTRA
                 if (first == (last - 1))
                 {   // If subrange is unique
                     if (s.eof())        // If no more input
-                        for (; pos < (*first)->numWords(); ++pos) // Automatically provide missing words
-                            expand.push_back((*first)->getCommandWord(pos));
-                    if ((*first)->numWords() == pos) // If all words are matched
+                        for (; pos < (*first).numWords(); ++pos) // Automatically provide missing words
+                            expand.push_back((*first).getCommandWord(pos));
+                    if ((*first).numWords() == pos) // If all words are matched
                         return 1;       // Finished
                 }
                 if (!res)
@@ -139,7 +139,7 @@ namespace Sla.EXTRA
                 restrictCom(first, last, expand);
                 if (first == last)      // If subrange is empty, return 0
                     return 0;
-                res = maxmatch(tok, (*first)->getCommandWord(pos), (*(last - 1))->getCommandWord(pos));
+                res = maxmatch(tok, (*first).getCommandWord(pos), (*(last - 1)).getCommandWord(pos));
                 expand.back() = tok;
             }
         }
@@ -171,7 +171,7 @@ namespace Sla.EXTRA
         {
             if (optr != fileoptr)
             {
-                ((ofstream*)fileoptr)->close();
+                ((ofstream*)fileoptr).close();
                 delete fileoptr;
             }
             while (!promptstack.empty())
@@ -266,30 +266,30 @@ namespace Sla.EXTRA
         public void registerCom(IfaceCommand fptr, string nm1, string nm2 = null, string nm3 = null,
             string nm4 = null, string nm5 = null)
         {
-            fptr->addWord(nm1);
+            fptr.addWord(nm1);
             if (nm2 != (char*)0)
-                fptr->addWord(nm2);
+                fptr.addWord(nm2);
             if (nm3 != (char*)0)
-                fptr->addWord(nm3);
+                fptr.addWord(nm3);
             if (nm4 != (char*)0)
-                fptr->addWord(nm4);
+                fptr.addWord(nm4);
             if (nm5 != (char*)0)
-                fptr->addWord(nm5);
+                fptr.addWord(nm5);
 
             comlist.push_back(fptr);    // Enter new command
             sorted = false;
 
-            string nm(fptr->getModule()); // Name of module this command belongs to
+            string nm(fptr.getModule()); // Name of module this command belongs to
             map<string, IfaceData*>::const_iterator iter = datamap.find(nm);
             IfaceData* data;
             if (iter == datamap.end())
             {
-                data = fptr->createData();
+                data = fptr.createData();
                 datamap[nm] = data;
             }
             else
                 data = (*iter).second;
-            fptr->setData(this, data);  // Inform command of its data
+            fptr.setData(this, data);  // Inform command of its data
         }
 
         /// Get data associated with a IfaceCommand module
@@ -340,7 +340,7 @@ namespace Sla.EXTRA
                 return false;
             else if (match > 1)
             {
-                if ((*first)->numWords() != fullcommand.size())
+                if ((*first).numWords() != fullcommand.size())
                 { // Check for complete but not unique
                     *optr << "ERROR: Incomplete command" << endl;
                     return false;
@@ -349,7 +349,7 @@ namespace Sla.EXTRA
             else if (match < 0)
                 *optr << "ERROR: Incomplete command" << endl;
 
-            (*first)->execute(is);  // Try to execute the (first) command
+            (*first).execute(is);  // Try to execute the (first) command
             return true;            // Indicate a command was executed
         }
 

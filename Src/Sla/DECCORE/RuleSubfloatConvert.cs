@@ -31,10 +31,10 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* invn = op->getIn(0);
-            Varnode* outvn = op->getOut();
-            int4 insize = invn->getSize();
-            int4 outsize = outvn->getSize();
+            Varnode* invn = op.getIn(0);
+            Varnode* outvn = op.getOut();
+            int4 insize = invn.getSize();
+            int4 outsize = outvn.getSize();
             if (outsize > insize)
             {
                 SubfloatFlow subflow(&data,outvn,insize);

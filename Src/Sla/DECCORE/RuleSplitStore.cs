@@ -35,10 +35,10 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Datatype* outType = SplitDatatype::getValueDatatype(op, op->getIn(2)->getSize(), data.getArch()->types);
+            Datatype* outType = SplitDatatype::getValueDatatype(op, op.getIn(2).getSize(), data.getArch().types);
             if (outType == (Datatype*)0)
                 return 0;
-            type_metatype metain = outType->getMetatype();
+            type_metatype metain = outType.getMetatype();
             if (metain != TYPE_STRUCT && metain != TYPE_ARRAY && metain != TYPE_PARTIALSTRUCT)
                 return 0;
             SplitDatatype splitter(data);

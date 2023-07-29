@@ -42,12 +42,12 @@ namespace Sla.EXTRA
         /// Reconstruct the property from an XML tag
         public void restoreXml(Element el)
         {
-            name = el->getAttributeValue("name");
-            istringstream s1(el->getAttributeValue("min"));
+            name = el.getAttributeValue("name");
+            istringstream s1(el.getAttributeValue("min"));
             s1 >> minimumMatch;
-            istringstream s2(el->getAttributeValue("max"));
+            istringstream s2(el.getAttributeValue("max"));
             s2 >> maximumMatch;
-            pattern = std::regex(el->getContent());
+            pattern = std::regex(el.getContent());
         }
     }
 }

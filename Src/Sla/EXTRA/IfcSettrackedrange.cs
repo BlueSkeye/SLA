@@ -18,7 +18,7 @@ namespace Sla.EXTRA
         /// treated as a default.
         public override void execute(TextReader s)
         {
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("No load image present");
 
             string name;
@@ -35,27 +35,27 @@ namespace Sla.EXTRA
             s >> ws;
             if (s.eof())
             {       // No range indicates default value
-                TrackedSet & track(dcp->conf->context->getTrackedDefault());
+                TrackedSet & track(dcp.conf.context.getTrackedDefault());
                 track.push_back(TrackedContext());
-                track.back().loc = dcp->conf->translate->getRegister(name);
+                track.back().loc = dcp.conf.translate.getRegister(name);
                 track.back().val = value;
                 return;
             }
 
             int4 size1, size2;
-            Address addr1 = parse_machaddr(s, size1, *dcp->conf->types);
-            Address addr2 = parse_machaddr(s, size2, *dcp->conf->types);
+            Address addr1 = parse_machaddr(s, size1, *dcp.conf.types);
+            Address addr2 = parse_machaddr(s, size2, *dcp.conf.types);
 
             if (addr1.isInvalid() || addr2.isInvalid())
                 throw IfaceParseError("Invalid address range");
             if (addr2 <= addr1)
                 throw IfaceParseError("Bad address range");
 
-            TrackedSet & track(dcp->conf->context->createSet(addr1, addr2));
-            TrackedSet & def(dcp->conf->context->getTrackedDefault());
+            TrackedSet & track(dcp.conf.context.createSet(addr1, addr2));
+            TrackedSet & def(dcp.conf.context.getTrackedDefault());
             track = def;            // Start with default as base
             track.push_back(TrackedContext());
-            track.back().loc = dcp->conf->translate->getRegister(name);
+            track.back().loc = dcp.conf.translate.getRegister(name);
             track.back().val = value;
         }
     }

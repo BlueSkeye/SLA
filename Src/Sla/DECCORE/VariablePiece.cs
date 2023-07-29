@@ -39,18 +39,18 @@ namespace Sla.DECCORE
         {
             high = h;
             groupOffset = offset;
-            size = h->getInstance(0)->getSize();
+            size = h.getInstance(0).getSize();
             if (grp != (HighVariable*)0)
-                group = grp->piece->getGroup();
+                group = grp.piece.getGroup();
             else
                 group = new VariableGroup();
-            group->addPiece(this);
+            group.addPiece(this);
         }
 
         ~VariablePiece()
         {
-            group->removePiece(this);
-            if (group->empty())
+            group.removePiece(this);
+            if (group.empty())
                 delete group;
             else
                 markIntersectionDirty();
@@ -82,57 +82,57 @@ namespace Sla.DECCORE
         {
             set<VariablePiece*, VariableGroup::PieceCompareByOffset>::const_iterator iter;
 
-            for (iter = group->pieceSet.begin(); iter != group->pieceSet.end(); ++iter)
-                (*iter)->high->highflags |= (HighVariable::intersectdirty | HighVariable::extendcoverdirty);
+            for (iter = group.pieceSet.begin(); iter != group.pieceSet.end(); ++iter)
+                (*iter).high.highflags |= (HighVariable::intersectdirty | HighVariable::extendcoverdirty);
         }
 
         /// Mark all intersecting pieces as having a dirty extended cover
         public void markExtendCoverDirty()
         {
-            if ((high->highflags & HighVariable::intersectdirty) != 0)
+            if ((high.highflags & HighVariable::intersectdirty) != 0)
                 return; // intersection list itself is dirty, extended covers will be recomputed anyway
             for (int4 i = 0; i < intersection.size(); ++i)
             {
-                intersection[i]->high->highflags |= HighVariable::extendcoverdirty;
+                intersection[i].high.highflags |= HighVariable::extendcoverdirty;
             }
-            high->highflags |= HighVariable::extendcoverdirty;
+            high.highflags |= HighVariable::extendcoverdirty;
         }
 
         /// Calculate intersections with other pieces in the group
         /// Compute list of exactly the HighVariable pieces that intersect with \b this.
         public void updateIntersections()
         {
-            if ((high->highflags & HighVariable::intersectdirty) == 0) return;
+            if ((high.highflags & HighVariable::intersectdirty) == 0) return;
             set<VariablePiece*, VariableGroup::PieceCompareByOffset>::const_iterator iter;
 
             int4 endOffset = groupOffset + size;
             intersection.clear();
-            for (iter = group->pieceSet.begin(); iter != group->pieceSet.end(); ++iter)
+            for (iter = group.pieceSet.begin(); iter != group.pieceSet.end(); ++iter)
             {
                 VariablePiece* otherPiece = *iter;
                 if (otherPiece == this) continue;
-                if (endOffset <= otherPiece->groupOffset) continue;
-                int4 otherEndOffset = otherPiece->groupOffset + otherPiece->size;
+                if (endOffset <= otherPiece.groupOffset) continue;
+                int4 otherEndOffset = otherPiece.groupOffset + otherPiece.size;
                 if (groupOffset >= otherEndOffset) continue;
                 intersection.push_back(otherPiece);
             }
-            high->highflags &= ~(uint4)HighVariable::intersectdirty;
+            high.highflags &= ~(uint4)HighVariable::intersectdirty;
         }
 
         /// Calculate extended cover based on intersections
         /// Union internal covers of all pieces intersecting with \b this.
         public void updateCover()
         {
-            if ((high->highflags & (HighVariable::coverdirty | HighVariable::extendcoverdirty)) == 0) return;
-            high->updateInternalCover();
-            cover = high->internalCover;
+            if ((high.highflags & (HighVariable::coverdirty | HighVariable::extendcoverdirty)) == 0) return;
+            high.updateInternalCover();
+            cover = high.internalCover;
             for (int4 i = 0; i < intersection.size(); ++i)
             {
-                HighVariable high = intersection[i]->high;
-                high->updateInternalCover();
-                cover.merge(high->internalCover);
+                HighVariable high = intersection[i].high;
+                high.updateInternalCover();
+                cover.merge(high.internalCover);
             }
-            high->highflags &= ~(uint4)HighVariable::extendcoverdirty;
+            high.highflags &= ~(uint4)HighVariable::extendcoverdirty;
         }
 
         /// Transfer \b this piece to another VariableGroup
@@ -140,10 +140,10 @@ namespace Sla.DECCORE
         /// \param newGroup is the new VariableGroup to transfer \b this to
         public void transferGroup(VariableGroup newGroup)
         {
-            group->removePiece(this);
-            if (group->empty())
+            group.removePiece(this);
+            if (group.empty())
                 delete group;
-            newGroup->addPiece(this);
+            newGroup.addPiece(this);
         }
 
         /// Move ownership of \b this to another HighVariable
@@ -163,27 +163,27 @@ namespace Sla.DECCORE
         /// \param mergePairs passes back the collection of HighVariable pairs that must be merged
         public void mergeGroups(VariablePiece op2, List<HighVariable> mergePairs)
         {
-            int4 diff = groupOffset - op2->groupOffset; // Add to op2, or subtract from this
+            int4 diff = groupOffset - op2.groupOffset; // Add to op2, or subtract from this
             if (diff > 0)
-                op2->group->adjustOffsets(diff);
+                op2.group.adjustOffsets(diff);
             else if (diff < 0)
-                group->adjustOffsets(-diff);
-            set<VariablePiece*, VariableGroup::PieceCompareByOffset>::iterator iter = op2->group->pieceSet.begin();
-            set<VariablePiece*, VariableGroup::PieceCompareByOffset>::iterator enditer = op2->group->pieceSet.end();
+                group.adjustOffsets(-diff);
+            set<VariablePiece*, VariableGroup::PieceCompareByOffset>::iterator iter = op2.group.pieceSet.begin();
+            set<VariablePiece*, VariableGroup::PieceCompareByOffset>::iterator enditer = op2.group.pieceSet.end();
             while (iter != enditer)
             {
                 VariablePiece* piece = *iter;
                 ++iter;
-                set<VariablePiece*, VariableGroup::PieceCompareByOffset>::iterator matchiter = group->pieceSet.find(piece);
-                if (matchiter != group->pieceSet.end())
+                set<VariablePiece*, VariableGroup::PieceCompareByOffset>::iterator matchiter = group.pieceSet.find(piece);
+                if (matchiter != group.pieceSet.end())
                 {
-                    mergePairs.push_back((*matchiter)->high);
-                    mergePairs.push_back(piece->high);
-                    piece->high->piece = (VariablePiece*)0; // Detach HighVariable from its original VariablePiece
+                    mergePairs.push_back((*matchiter).high);
+                    mergePairs.push_back(piece.high);
+                    piece.high.piece = (VariablePiece*)0; // Detach HighVariable from its original VariablePiece
                     delete piece;
                 }
                 else
-                    piece->transferGroup(group);
+                    piece.transferGroup(group);
             }
         }
     }

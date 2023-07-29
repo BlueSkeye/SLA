@@ -40,39 +40,39 @@ namespace Sla.DECCORE
             PcodeOp* op_less,*op_equal;
             OpCode opc, equalopc;
 
-            vnout1 = op->getIn(0);
-            if (!vnout1->isWritten()) return 0;
-            vnout2 = op->getIn(1);
-            if (!vnout2->isWritten()) return 0;
-            op_less = vnout1->getDef();
-            opc = op_less->code();
+            vnout1 = op.getIn(0);
+            if (!vnout1.isWritten()) return 0;
+            vnout2 = op.getIn(1);
+            if (!vnout2.isWritten()) return 0;
+            op_less = vnout1.getDef();
+            opc = op_less.code();
             if ((opc != CPUI_INT_LESS) && (opc != CPUI_INT_SLESS))
             {
                 op_equal = op_less;
-                op_less = vnout2->getDef();
-                opc = op_less->code();
+                op_less = vnout2.getDef();
+                opc = op_less.code();
                 if ((opc != CPUI_INT_LESS) && (opc != CPUI_INT_SLESS))
                     return 0;
             }
             else
-                op_equal = vnout2->getDef();
-            equalopc = op_equal->code();
+                op_equal = vnout2.getDef();
+            equalopc = op_equal.code();
             if ((equalopc != CPUI_INT_EQUAL) && (equalopc != CPUI_INT_NOTEQUAL))
                 return 0;
 
-            compvn1 = op_less->getIn(0);
-            compvn2 = op_less->getIn(1);
-            if (!compvn1->isHeritageKnown()) return 0;
-            if (!compvn2->isHeritageKnown()) return 0;
-            if (((*compvn1 != *op_equal->getIn(0)) || (*compvn2 != *op_equal->getIn(1))) &&
-                ((*compvn1 != *op_equal->getIn(1)) || (*compvn2 != *op_equal->getIn(0))))
+            compvn1 = op_less.getIn(0);
+            compvn2 = op_less.getIn(1);
+            if (!compvn1.isHeritageKnown()) return 0;
+            if (!compvn2.isHeritageKnown()) return 0;
+            if (((*compvn1 != *op_equal.getIn(0)) || (*compvn2 != *op_equal.getIn(1))) &&
+                ((*compvn1 != *op_equal.getIn(1)) || (*compvn2 != *op_equal.getIn(0))))
                 return 0;
 
             if (equalopc == CPUI_INT_NOTEQUAL)
             { // op_less is redundant
                 data.opSetOpcode(op, CPUI_COPY); // Convert OR to COPY
                 data.opRemoveInput(op, 1);
-                data.opSetInput(op, op_equal->getOut(), 0); // Taking the NOTEQUAL output
+                data.opSetInput(op, op_equal.getOut(), 0); // Taking the NOTEQUAL output
             }
             else
             {

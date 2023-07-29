@@ -16,40 +16,40 @@ namespace Sla.EXTRA
             ConstraintOr* res = new ConstraintOr();
             for (int4 i = 0; i < constraintlist.size(); ++i)
             {
-                UnifyConstraint* subconst = constraintlist[i]->clone();
-                res->constraintlist.push_back(subconst);
+                UnifyConstraint* subconst = constraintlist[i].clone();
+                res.constraintlist.push_back(subconst);
             }
-            res->copyid(this);
+            res.copyid(this);
             return res;
         }
 
         public override void initialize(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            traverse->initialize(constraintlist.size());
+            traverse.initialize(constraintlist.size());
         }
 
         public override bool step(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            int4 stateind = traverse->getState();
+            int4 stateind = traverse.getState();
             UnifyConstraint* cur;
             if (stateind == -1)
             { // First time through
-                if (!traverse->step()) return false;
-                stateind = traverse->getState();
+                if (!traverse.step()) return false;
+                stateind = traverse.getState();
                 cur = getConstraint(stateind);
-                cur->initialize(state);
+                cur.initialize(state);
             }
             else
                 cur = getConstraint(stateind);
             for (; ; )
             {
-                if (cur->step(state)) return true;
-                if (!traverse->step()) break;
-                stateind = traverse->getState();
+                if (cur.step(state)) return true;
+                if (!traverse.step()) break;
+                stateind = traverse.getState();
                 cur = getConstraint(stateind);
-                cur->initialize(state);
+                cur.initialize(state);
             }
             return false;
         }
@@ -64,7 +64,7 @@ namespace Sla.EXTRA
             for (int4 i = 0; i < constraintlist.size(); ++i)
             {
                 UnifyConstraint* subconstraint = constraintlist[i];
-                subconstraint->buildTraverseState(state);
+                subconstraint.buildTraverseState(state);
             }
         }
 
@@ -87,7 +87,7 @@ namespace Sla.EXTRA
                 s << '{' << endl;
                 int4 olddepth = printstate.getDepth();
                 printstate.incDepth();
-                constraintlist[i]->print(s, printstate);
+                constraintlist[i].print(s, printstate);
                 printstate.popDepth(s, olddepth);
             }
         }

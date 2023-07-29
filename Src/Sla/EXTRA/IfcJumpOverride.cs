@@ -30,12 +30,12 @@ namespace Sla.EXTRA
         {
             int4 discard;
 
-            if (dcp->fd == (Funcdata*)0)
+            if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");
 
             s >> ws;
-            Address jmpaddr(parse_machaddr(s, discard,* dcp->conf->types));
-            JumpTable* jt = dcp->fd->installJumpTable(jmpaddr);
+            Address jmpaddr(parse_machaddr(s, discard,* dcp.conf.types));
+            JumpTable* jt = dcp.fd.installJumpTable(jmpaddr);
             vector<Address> adtable;
             Address naddr;
             uintb h = 0;
@@ -43,7 +43,7 @@ namespace Sla.EXTRA
             string token;
             s >> token;
             //   if (token == "norm") {
-            //     naddr = parse_machaddr(s,discard,*dcp->conf->types);
+            //     naddr = parse_machaddr(s,discard,*dcp.conf.types);
             //     s >> ws;
             //     s >> h;
             //     s >> token;
@@ -59,14 +59,14 @@ namespace Sla.EXTRA
                 s >> ws;
                 while (!s.eof())
                 {
-                    Address addr(parse_machaddr(s, discard,* dcp->conf->types));
+                    Address addr(parse_machaddr(s, discard,* dcp.conf.types));
                     adtable.push_back(addr);
                 }
             }
             if (adtable.empty())
                 throw IfaceExecutionError("Missing jumptable address entries");
-            jt->setOverride(adtable, naddr, h, sv);
-            *status->optr << "Successfully installed jumptable override" << endl;
+            jt.setOverride(adtable, naddr, h, sv);
+            *status.optr << "Successfully installed jumptable override" << endl;
         }
     }
 }

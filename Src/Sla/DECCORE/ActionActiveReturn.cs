@@ -31,14 +31,14 @@ namespace Sla.DECCORE
             for (i = 0; i < data.numCalls(); ++i)
             {
                 fc = data.getCallSpecs(i);
-                if (fc->isOutputActive())
+                if (fc.isOutputActive())
                 {
-                    ParamActive* activeoutput = fc->getActiveOutput();
+                    ParamActive* activeoutput = fc.getActiveOutput();
                     vector<Varnode*> trialvn;
-                    fc->checkOutputTrialUse(data, trialvn);
-                    fc->deriveOutputMap(activeoutput);
-                    fc->buildOutputFromTrials(data, trialvn);
-                    fc->clearActiveOutput();
+                    fc.checkOutputTrialUse(data, trialvn);
+                    fc.deriveOutputMap(activeoutput);
+                    fc.buildOutputFromTrials(data, trialvn);
+                    fc.clearActiveOutput();
                     count += 1;
                 }
             }

@@ -70,10 +70,10 @@ namespace Sla.DECCORE
                 Range local = localrange.getFirstRange();
                 Range param = paramrange.getLastRange();
                 if ((local != (Range*)0)&& (param != (Range*)0)) {
-                    localBoundary = param->getLast();
+                    localBoundary = param.getLast();
                     if (direction == -1)
                     {
-                        localBoundary = paramrange.getFirstRange()->getFirst();
+                        localBoundary = paramrange.getFirstRange().getFirst();
                         localExtreme = localBoundary;
                     }
                 }
@@ -88,14 +88,14 @@ namespace Sla.DECCORE
         {
             calculated = true;
             aliasBoundary = localExtreme;
-            Varnode* spacebase = fd->findSpacebaseInput(space);
+            Varnode* spacebase = fd.findSpacebaseInput(space);
             if (spacebase == (Varnode*)0) return; // No possible alias
 
             gatherAdditiveBase(spacebase, addBase);
             for (vector<AddBase>::iterator iter = addBase.begin(); iter != addBase.end(); ++iter)
             {
                 uintb offset = gatherOffset((*iter).base);
-                offset = AddrSpace::addressToByte(offset, space->getWordSize()); // Convert to byte offset
+                offset = AddrSpace::addressToByte(offset, space.getWordSize()); // Convert to byte offset
                 alias.push_back(offset);
                 if (direction == 1)
                 {
@@ -133,8 +133,8 @@ namespace Sla.DECCORE
             calculated = false;     // Defer calculation
             addBase.clear();
             alias.clear();
-            direction = space->stackGrowsNegative() ? 1 : -1;       // direction == 1 for normal negative stack growth
-            deriveBoundaries(fd->getFuncProto());
+            direction = space.stackGrowsNegative() ? 1 : -1;       // direction == 1 for normal negative stack growth
+            deriveBoundaries(fd.getFuncProto());
             if (!defer)
                 gatherInternal();
         }
@@ -150,13 +150,13 @@ namespace Sla.DECCORE
             if (vn == (Varnode*)0) return false;
             if (!calculated)
                 gatherInternal();
-            if (vn->getSpace() != space) return false;
+            if (vn.getSpace() != space) return false;
             // For positive stack growth, this is not a good test because values being queued on the
             // stack to be passed to a subfunction always have offsets a little bit bigger than ALL
             // local variables on the stack
             if (direction == -1)
                 return false;
-            return (vn->getOffset() >= aliasBoundary);
+            return (vn.getOffset() >= aliasBoundary);
         }
 
         /// Sort the alias starting offsets
@@ -190,57 +190,57 @@ namespace Sla.DECCORE
             int4 i = 0;
 
             vn = startvn;
-            vn->setMark();
+            vn.setMark();
             vnqueue.push_back(AddBase(vn, (Varnode*)0));
             while (i < vnqueue.size())
             {
                 vn = vnqueue[i].base;
                 indexvn = vnqueue[i++].index;
                 nonadduse = false;
-                for (iter = vn->beginDescend(); iter != vn->endDescend(); ++iter)
+                for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
                 {
                     op = *iter;
-                    switch (op->code())
+                    switch (op.code())
                     {
                         case CPUI_COPY:
                             nonadduse = true;   // Treat COPY as both non-add use and part of ADD expression
-                            subvn = op->getOut();
-                            if (!subvn->isMark())
+                            subvn = op.getOut();
+                            if (!subvn.isMark())
                             {
-                                subvn->setMark();
+                                subvn.setMark();
                                 vnqueue.push_back(AddBase(subvn, indexvn));
                             }
                             break;
                         case CPUI_INT_SUB:
-                            if (vn == op->getIn(1))
+                            if (vn == op.getIn(1))
                             {   // Subtracting the pointer
                                 nonadduse = true;
                                 break;
                             }
-                            othervn = op->getIn(1);
-                            if (!othervn->isConstant())
+                            othervn = op.getIn(1);
+                            if (!othervn.isConstant())
                                 indexvn = othervn;
-                            subvn = op->getOut();
-                            if (!subvn->isMark())
+                            subvn = op.getOut();
+                            if (!subvn.isMark())
                             {
-                                subvn->setMark();
+                                subvn.setMark();
                                 vnqueue.push_back(AddBase(subvn, indexvn));
                             }
                             break;
                         case CPUI_INT_ADD:
                         case CPUI_PTRADD:
-                            othervn = op->getIn(1); // Check if something else is being added in besides a constant
+                            othervn = op.getIn(1); // Check if something else is being added in besides a constant
                             if (othervn == vn)
-                                othervn = op->getIn(0);
-                            if (!othervn->isConstant())
+                                othervn = op.getIn(0);
+                            if (!othervn.isConstant())
                                 indexvn = othervn;
                         // fallthru
                         case CPUI_PTRSUB:
                         case CPUI_SEGMENTOP:
-                            subvn = op->getOut();
-                            if (!subvn->isMark())
+                            subvn = op.getOut();
+                            if (!subvn.isMark())
                             {
-                                subvn->setMark();
+                                subvn.setMark();
                                 vnqueue.push_back(AddBase(subvn, indexvn));
                             }
                             break;
@@ -252,7 +252,7 @@ namespace Sla.DECCORE
                     addbase.push_back(AddBase(vn, indexvn));
             }
             for (i = 0; i < vnqueue.size(); ++i)
-                vnqueue[i].base->clearMark();
+                vnqueue[i].base.clearMark();
         }
 
         /// \brief If the given Varnode is a sum result, return the constant portion of this sum.
@@ -267,39 +267,39 @@ namespace Sla.DECCORE
             uintb retval;
             Varnode* othervn;
 
-            if (vn->isConstant()) return vn->getOffset();
-            PcodeOp* def = vn->getDef();
+            if (vn.isConstant()) return vn.getOffset();
+            PcodeOp* def = vn.getDef();
             if (def == (PcodeOp*)0) return 0;
-            switch (def->code())
+            switch (def.code())
             {
                 case CPUI_COPY:
-                    retval = gatherOffset(def->getIn(0));
+                    retval = gatherOffset(def.getIn(0));
                     break;
                 case CPUI_PTRSUB:
                 case CPUI_INT_ADD:
-                    retval = gatherOffset(def->getIn(0));
-                    retval += gatherOffset(def->getIn(1));
+                    retval = gatherOffset(def.getIn(0));
+                    retval += gatherOffset(def.getIn(1));
                     break;
                 case CPUI_INT_SUB:
-                    retval = gatherOffset(def->getIn(0));
-                    retval -= gatherOffset(def->getIn(1));
+                    retval = gatherOffset(def.getIn(0));
+                    retval -= gatherOffset(def.getIn(1));
                     break;
                 case CPUI_PTRADD:
-                    othervn = def->getIn(2);
-                    retval = gatherOffset(def->getIn(0));
+                    othervn = def.getIn(2);
+                    retval = gatherOffset(def.getIn(0));
                     // We need to treat PTRADD exactly as if it were encoded as an ADD and MULT
                     // Because a plain MULT truncates the ADD tree
                     // We only follow getIn(1) if the PTRADD multiply is by 1
-                    if (othervn->isConstant() && (othervn->getOffset() == 1))
-                        retval = retval + gatherOffset(def->getIn(1));
+                    if (othervn.isConstant() && (othervn.getOffset() == 1))
+                        retval = retval + gatherOffset(def.getIn(1));
                     break;
                 case CPUI_SEGMENTOP:
-                    retval = gatherOffset(def->getIn(2));
+                    retval = gatherOffset(def.getIn(2));
                     break;
                 default:
                     retval = 0;
             }
-            return retval & calc_mask(vn->getSize());
+            return retval & calc_mask(vn.getSize());
         }
     }
 }

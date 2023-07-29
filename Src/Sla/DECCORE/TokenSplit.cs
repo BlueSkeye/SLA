@@ -578,83 +578,83 @@ namespace Sla.DECCORE
             switch (tagtype)
             {
                 case docu_b:    // beginDocument
-                    emit->beginDocument();
+                    emit.beginDocument();
                     break;
                 case docu_e:    // endDocument
-                    emit->endDocument(count);
+                    emit.endDocument(count);
                     break;
                 case func_b:    // beginFunction
-                    emit->beginFunction(ptr_second.fd);
+                    emit.beginFunction(ptr_second.fd);
                     break;
                 case func_e:    // endFunction
-                    emit->endFunction(count);
+                    emit.endFunction(count);
                     break;
                 case bloc_b:    // beginBlock
-                    emit->beginBlock(ptr_second.bl);
+                    emit.beginBlock(ptr_second.bl);
                     break;
                 case bloc_e:    // endBlock
-                    emit->endBlock(count);
+                    emit.endBlock(count);
                     break;
                 case rtyp_b:    // beginReturnType
-                    emit->beginReturnType(ptr_second.vn);
+                    emit.beginReturnType(ptr_second.vn);
                     break;
                 case rtyp_e:    // endReturnType
-                    emit->endReturnType(count);
+                    emit.endReturnType(count);
                     break;
                 case vard_b:    // beginVarDecl
-                    emit->beginVarDecl(ptr_second.symbol);
+                    emit.beginVarDecl(ptr_second.symbol);
                     break;
                 case vard_e:    // endVarDecl
-                    emit->endVarDecl(count);
+                    emit.endVarDecl(count);
                     break;
                 case stat_b:    // beginStatement
-                    emit->beginStatement(op);
+                    emit.beginStatement(op);
                     break;
                 case stat_e:    // endStatement
-                    emit->endStatement(count);
+                    emit.endStatement(count);
                     break;
                 case prot_b:    // beginFuncProto
-                    emit->beginFuncProto();
+                    emit.beginFuncProto();
                     break;
                 case prot_e:    // endFuncProto
-                    emit->endFuncProto(count);
+                    emit.endFuncProto(count);
                     break;
                 case vari_t:    // tagVariable
-                    emit->tagVariable(tok, hl, ptr_second.vn, op);
+                    emit.tagVariable(tok, hl, ptr_second.vn, op);
                     break;
                 case op_t:      // tagOp
-                    emit->tagOp(tok, hl, op);
+                    emit.tagOp(tok, hl, op);
                     break;
                 case fnam_t:    // tagFuncName
-                    emit->tagFuncName(tok, hl, ptr_second.fd, op);
+                    emit.tagFuncName(tok, hl, ptr_second.fd, op);
                     break;
                 case type_t:    // tagType
-                    emit->tagType(tok, hl, ptr_second.ct);
+                    emit.tagType(tok, hl, ptr_second.ct);
                     break;
                 case field_t: // tagField
-                    emit->tagField(tok, hl, ptr_second.ct, (int4)off, op);
+                    emit.tagField(tok, hl, ptr_second.ct, (int4)off, op);
                     break;
                 case comm_t:    // tagComment
-                    emit->tagComment(tok, hl, ptr_second.spc, off);
+                    emit.tagComment(tok, hl, ptr_second.spc, off);
                     break;
                 case label_t:   // tagLabel
-                    emit->tagLabel(tok, hl, ptr_second.spc, off);
+                    emit.tagLabel(tok, hl, ptr_second.spc, off);
                     break;
                 case synt_t:    // print
-                    emit->print(tok, hl);
+                    emit.print(tok, hl);
                     break;
                 case opar_t:    // openParen
-                    emit->openParen(tok, count);
+                    emit.openParen(tok, count);
                     break;
                 case cpar_t:    // closeParen
-                    emit->closeParen(tok, count);
+                    emit.closeParen(tok, count);
                     break;
                 case oinv_t:    // Invisible open
                     break;
                 case cinv_t:    // Invisible close
                     break;
                 case spac_t:    // Spaces
-                    emit->spaces(numspaces);
+                    emit.spaces(numspaces);
                     break;
                 case line_t:    // tagLine
                 case bump_t:

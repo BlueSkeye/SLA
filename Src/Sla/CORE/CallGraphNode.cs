@@ -67,7 +67,7 @@ namespace Sla.CORE
             if ((fd != (Funcdata*)0) && (fd != f))
                 throw new LowlevelError("Multiple functions at one address in callgraph");
 
-            if (f->getAddress() != entryaddr)
+            if (f.getAddress() != entryaddr)
                 throw new LowlevelError("Setting function data at wrong address in callgraph");
             fd = f;
         }
@@ -94,7 +94,7 @@ namespace Sla.CORE
             }
             Address addr = Address::decode(decoder);
             decoder.closeElement(elemId);
-            graph->addNode(addr, name);
+            graph.addNode(addr, name);
         }
     }
 }

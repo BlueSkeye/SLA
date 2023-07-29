@@ -37,28 +37,28 @@ namespace Sla.DECCORE
         {
             uintb coeff1, coeff2;
 
-            if (!op->getIn(1)->isConstant()) return 0;
-            PcodeOp* xorop = op->getIn(0)->getDef();
+            if (!op.getIn(1).isConstant()) return 0;
+            PcodeOp* xorop = op.getIn(0).getDef();
             if (xorop == (PcodeOp*)0) return 0;
-            if (xorop->code() != CPUI_INT_XOR) return 0;
-            if (op->getIn(0)->loneDescend() == (PcodeOp*)0) return 0;
-            coeff1 = op->getIn(1)->getOffset();
-            Varnode* xorvn = xorop->getIn(1);
-            if (xorop->getIn(0)->isFree()) return 0; // This will be propagated
-            if (!xorvn->isConstant())
+            if (xorop.code() != CPUI_INT_XOR) return 0;
+            if (op.getIn(0).loneDescend() == (PcodeOp*)0) return 0;
+            coeff1 = op.getIn(1).getOffset();
+            Varnode* xorvn = xorop.getIn(1);
+            if (xorop.getIn(0).isFree()) return 0; // This will be propagated
+            if (!xorvn.isConstant())
             {
                 if (coeff1 != 0) return 0;
-                if (xorvn->isFree()) return 0;
+                if (xorvn.isFree()) return 0;
                 data.opSetInput(op, xorvn, 1); // Move term to other side
-                data.opSetInput(op, xorop->getIn(0), 0);
+                data.opSetInput(op, xorop.getIn(0), 0);
                 return 1;
             }
-            coeff2 = xorvn->getOffset();
+            coeff2 = xorvn.getOffset();
             if (coeff2 == 0) return 0;
-            Varnode* constvn = data.newConstant(op->getIn(1)->getSize(), coeff1 ^ coeff2);
-            constvn->copySymbolIfValid(xorvn);
+            Varnode* constvn = data.newConstant(op.getIn(1).getSize(), coeff1 ^ coeff2);
+            constvn.copySymbolIfValid(xorvn);
             data.opSetInput(op, constvn, 1);
-            data.opSetInput(op, xorop->getIn(0), 0);
+            data.opSetInput(op, xorop.getIn(0), 0);
             return 1;
         }
     }

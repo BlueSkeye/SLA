@@ -17,22 +17,22 @@ namespace Sla.EXTRA
         /// to print in one of the formats: \b hex, \b dec, \b oct, \b bin, \b char.
         public override void execute(TextReader s)
         {
-            Varnode* vn = dcp->readVarnode(s);
-            if (!vn->isConstant())
+            Varnode* vn = dcp.readVarnode(s);
+            if (!vn.isConstant())
                 throw IfaceExecutionError("Can only force format on a constant");
-            type_metatype mt = vn->getType()->getMetatype();
+            type_metatype mt = vn.getType().getMetatype();
             if ((mt != TYPE_INT) && (mt != TYPE_UINT) && (mt != TYPE_UNKNOWN))
                 throw IfaceExecutionError("Can only force format on integer type constant");
-            dcp->fd->buildDynamicSymbol(vn);
-            Symbol* sym = vn->getHigh()->getSymbol();
+            dcp.fd.buildDynamicSymbol(vn);
+            Symbol* sym = vn.getHigh().getSymbol();
             if (sym == (Symbol*)0)
                 throw IfaceExecutionError("Unable to create symbol");
             string formatString;
             s >> ws >> formatString;
             uint4 format = Datatype::encodeIntegerFormat(formatString);
-            sym->getScope()->setDisplayFormat(sym, format);
-            sym->getScope()->setAttribute(sym, Varnode::typelock);
-            *status->optr << "Successfully forced format display" << endl;
+            sym.getScope().setDisplayFormat(sym, format);
+            sym.getScope().setAttribute(sym, Varnode::typelock);
+            *status.optr << "Successfully forced format display" << endl;
         }
     }
 }

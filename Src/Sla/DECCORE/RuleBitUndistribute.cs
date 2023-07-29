@@ -37,62 +37,62 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn1 = op->getIn(0);
-            Varnode* vn2 = op->getIn(1);
+            Varnode* vn1 = op.getIn(0);
+            Varnode* vn2 = op.getIn(1);
             Varnode* in1,*in2,*vnextra;
             OpCode opc;
 
-            if (!vn1->isWritten()) return 0;
-            if (!vn2->isWritten()) return 0;
+            if (!vn1.isWritten()) return 0;
+            if (!vn2.isWritten()) return 0;
 
-            opc = vn1->getDef()->code();
-            if (vn2->getDef()->code() != opc) return 0;
+            opc = vn1.getDef().code();
+            if (vn2.getDef().code() != opc) return 0;
             switch (opc)
             {
                 case CPUI_INT_ZEXT:
                 case CPUI_INT_SEXT:
                     // Test for full equality of extension operation
-                    in1 = vn1->getDef()->getIn(0);
-                    if (in1->isFree()) return 0;
-                    in2 = vn2->getDef()->getIn(0);
-                    if (in2->isFree()) return 0;
-                    if (in1->getSize() != in2->getSize()) return 0;
+                    in1 = vn1.getDef().getIn(0);
+                    if (in1.isFree()) return 0;
+                    in2 = vn2.getDef().getIn(0);
+                    if (in2.isFree()) return 0;
+                    if (in1.getSize() != in2.getSize()) return 0;
                     data.opRemoveInput(op, 1);
                     break;
                 case CPUI_INT_LEFT:
                 case CPUI_INT_RIGHT:
                 case CPUI_INT_SRIGHT:
                     // Test for full equality of shift operation
-                    in1 = vn1->getDef()->getIn(1);
-                    in2 = vn2->getDef()->getIn(1);
-                    if (in1->isConstant() && in2->isConstant())
+                    in1 = vn1.getDef().getIn(1);
+                    in2 = vn2.getDef().getIn(1);
+                    if (in1.isConstant() && in2.isConstant())
                     {
-                        if (in1->getOffset() != in2->getOffset())
+                        if (in1.getOffset() != in2.getOffset())
                             return 0;
-                        vnextra = data.newConstant(in1->getSize(), in1->getOffset());
+                        vnextra = data.newConstant(in1.getSize(), in1.getOffset());
                     }
                     else if (in1 != in2)
                         return 0;
                     else
                     {
-                        if (in1->isFree()) return 0;
+                        if (in1.isFree()) return 0;
                         vnextra = in1;
                     }
-                    in1 = vn1->getDef()->getIn(0);
-                    if (in1->isFree()) return 0;
-                    in2 = vn2->getDef()->getIn(0);
-                    if (in2->isFree()) return 0;
+                    in1 = vn1.getDef().getIn(0);
+                    if (in1.isFree()) return 0;
+                    in2 = vn2.getDef().getIn(0);
+                    if (in2.isFree()) return 0;
                     data.opSetInput(op, vnextra, 1);
                     break;
                 default:
                     return 0;
             }
 
-            PcodeOp* newext = data.newOp(2, op->getAddr());
-            Varnode* smalllogic = data.newUniqueOut(in1->getSize(), newext);
+            PcodeOp* newext = data.newOp(2, op.getAddr());
+            Varnode* smalllogic = data.newUniqueOut(in1.getSize(), newext);
             data.opSetInput(newext, in1, 0);
             data.opSetInput(newext, in2, 1);
-            data.opSetOpcode(newext, op->code());
+            data.opSetOpcode(newext, op.code());
 
             data.opSetOpcode(op, opc);
             data.opSetInput(op, smalllogic, 0);

@@ -41,19 +41,19 @@ namespace Sla.DECCORE
             if (p2.size() != 0)
             {
                 Funcdata* fd;
-                fd = glb->symboltab->getGlobalScope()->queryFunction(p2);
+                fd = glb.symboltab.getGlobalScope().queryFunction(p2);
                 if (fd == (Funcdata*)0)
                     throw RecovError("Unknown function name: " + p2);
-                fd->getFuncProto().setExtraPop(expop);
+                fd.getFuncProto().setExtraPop(expop);
                 res = "ExtraPop set for function " + p2;
             }
             else
             {
-                glb->defaultfp->setExtraPop(expop);
-                if (glb->evalfp_current != (ProtoModel*)0)
-                    glb->evalfp_current->setExtraPop(expop);
-                if (glb->evalfp_called != (ProtoModel*)0)
-                    glb->evalfp_called->setExtraPop(expop);
+                glb.defaultfp.setExtraPop(expop);
+                if (glb.evalfp_current != (ProtoModel*)0)
+                    glb.evalfp_current.setExtraPop(expop);
+                if (glb.evalfp_called != (ProtoModel*)0)
+                    glb.evalfp_called.setExtraPop(expop);
                 res = "Global extrapop set";
             }
             return res;

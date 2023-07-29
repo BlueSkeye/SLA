@@ -27,17 +27,17 @@ namespace Sla.DECCORE
         /// \param slot is the slot (>=0 for input, -1 for output) accessing the \b parent
         public ResolveEdge(Datatype parent, PcodeOp op, int4 slot)
         {
-            opTime = op->getTime();
+            opTime = op.getTime();
             encoding = slot;
-            if (parent->getMetatype() == TYPE_PTR)
+            if (parent.getMetatype() == TYPE_PTR)
             {
-                typeId = ((TypePointer*)parent)->getPtrTo()->getId();   // Strip pointer
+                typeId = ((TypePointer*)parent).getPtrTo().getId();   // Strip pointer
                 encoding += 0x1000;     // Encode the fact that a pointer is getting accessed
             }
-            else if (parent->getMetatype() == TYPE_PARTIALUNION)
-                typeId = ((TypePartialUnion*)parent)->getParentUnion()->getId();
+            else if (parent.getMetatype() == TYPE_PARTIALUNION)
+                typeId = ((TypePartialUnion*)parent).getParentUnion().getId();
             else
-                typeId = parent->getId();
+                typeId = parent.getId();
         }
 
         /// Compare two edges

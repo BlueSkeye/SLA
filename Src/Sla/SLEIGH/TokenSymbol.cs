@@ -12,7 +12,7 @@ namespace Sla.SLEIGH
         private Token tok;
         
         public TokenSymbol(Token t)
-            : base(t->getName())
+            : base(t.getName())
         {
             tok = t;
         }

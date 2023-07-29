@@ -26,12 +26,12 @@ namespace Sla.DECCORE
             if (val)
             {
                 res = "Jumptable analysis will record loads required to calculate jump address";
-                glb->flowoptions |= FlowInfo::record_jumploads;
+                glb.flowoptions |= FlowInfo::record_jumploads;
             }
             else
             {
                 res = "Jumptable analysis will NOT record loads";
-                glb->flowoptions &= ~((uint4)FlowInfo::record_jumploads);
+                glb.flowoptions &= ~((uint4)FlowInfo::record_jumploads);
             }
             return res;
         }

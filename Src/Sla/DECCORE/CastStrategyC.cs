@@ -25,7 +25,7 @@ namespace Sla.DECCORE
             else {
                 return UNKNOWN_PROMOTION;
             }
-            if (vn->isConstant()) {
+            if (vn.isConstant()) {
                 if (!signbit_negative(vn.getOffset(), vn.getSize())) {
                     // If the high-bit is zero
                     // Can be viewed as either extension
@@ -44,7 +44,7 @@ namespace Sla.DECCORE
                 return EITHER_EXTENSION;
             }
             OpCode opc = defOp.code();
-            if ((opc == CPUI_CAST) || (opc == CPUI_LOAD) || defOp->isCall()) {
+            if ((opc == CPUI_CAST) || (opc == CPUI_LOAD) || defOp.isCall()) {
                 return natural;
             }
             if (opc == CPUI_INT_AND) {
@@ -66,7 +66,7 @@ namespace Sla.DECCORE
                 return NO_PROMOTION;
             }
             if (vn.isConstant()) {
-                return localExtensionType(vn, vn->loneDescend());
+                return localExtensionType(vn, vn.loneDescend());
             }
             if (vn.isExplicit()) {
                 return NO_PROMOTION;
@@ -283,7 +283,7 @@ namespace Sla.DECCORE
                 care_uint_int = true;
                 isptr = true;
             }
-            while (reqbase->getTypedef() != null) {
+            while (reqbase.getTypedef() != null) {
                 reqbase = reqbase.getTypedef();
             }
             while (curbase.getTypedef() != null) {
@@ -327,7 +327,7 @@ namespace Sla.DECCORE
                             return null;
                         }
                     }
-                    if ((!care_ptr_uint) && (curbase->getMetatype() == TYPE_PTR)) {
+                    if ((!care_ptr_uint) && (curbase.getMetatype() == TYPE_PTR)) {
                         return null;
                     }
                     break;
@@ -431,7 +431,7 @@ namespace Sla.DECCORE
         {
             uint tmpoff = offset;
             if (isbigend) {
-                tmpoff = intype->getSize() - 1 - offset;
+                tmpoff = intype.getSize() - 1 - offset;
             }
             return isSubpieceCast(outtype, intype, tmpoff);
         }

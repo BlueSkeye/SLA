@@ -18,24 +18,24 @@ namespace Sla.DECCORE
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opIntSext(op, readOp);
+            lng.opIntSext(op, readOp);
         }
 
         public override string getOperatorName(PcodeOp op)
         {
             ostringstream s;
 
-            s << name << dec << op->getIn(0)->getSize() << op->getOut()->getSize();
+            s << name << dec << op.getIn(0).getSize() << op.getOut().getSize();
             return s.str();
         }
 
         public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
         {
-            Datatype* reqtype = op->inputTypeLocal(slot);
-            if (castStrategy->checkIntPromotionForExtension(op))
+            Datatype* reqtype = op.inputTypeLocal(slot);
+            if (castStrategy.checkIntPromotionForExtension(op))
                 return reqtype;
-            Datatype* curtype = op->getIn(slot)->getHighTypeReadFacing(op);
-            return castStrategy->castStandard(reqtype, curtype, true, false);
+            Datatype* curtype = op.getIn(slot).getHighTypeReadFacing(op);
+            return castStrategy.castStandard(reqtype, curtype, true, false);
         }
     }
 }

@@ -37,43 +37,43 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            if (op->doesSpecialPrinting())
+            if (op.doesSpecialPrinting())
                 return 0;
-            if (op->getIn(0)->getTypeReadFacing(op)->isPieceStructured())
+            if (op.getIn(0).getTypeReadFacing(op).isPieceStructured())
             {
                 data.opMarkSpecialPrint(op);    // Print this as a field extraction
                 return 0;
             }
 
-            int4 c = op->getIn(1)->getOffset();
+            int4 c = op.getIn(1).getOffset();
             if (c == 0) return 0;       // SUBPIECE is not least sig
-            Varnode* a = op->getIn(0);
-            Varnode* outvn = op->getOut();
-            if (outvn->isAddrTied() && a->isAddrTied())
+            Varnode* a = op.getIn(0);
+            Varnode* outvn = op.getOut();
+            if (outvn.isAddrTied() && a.isAddrTied())
             {
-                if (outvn->overlap(*a) == c) // This SUBPIECE should get converted to a marker by ActionCopyMarker
+                if (outvn.overlap(*a) == c) // This SUBPIECE should get converted to a marker by ActionCopyMarker
                     return 0;           // So don't convert it
             }
             OpCode opc = CPUI_INT_RIGHT; // Default shift type
             int4 d = c * 8;         // Convert to bit shift
                                     // Search for lone right shift descendant
-            PcodeOp* lone = outvn->loneDescend();
+            PcodeOp* lone = outvn.loneDescend();
             if (lone != (PcodeOp*)0)
             {
-                OpCode opc2 = lone->code();
+                OpCode opc2 = lone.code();
                 if ((opc2 == CPUI_INT_RIGHT) || (opc2 == CPUI_INT_SRIGHT))
                 {
-                    if (lone->getIn(1)->isConstant())
+                    if (lone.getIn(1).isConstant())
                     { // Shift by constant
-                        if (outvn->getSize() + c == a->getSize())
+                        if (outvn.getSize() + c == a.getSize())
                         {
                             // If SUB is "hi" lump the SUB and shift together
-                            d += lone->getIn(1)->getOffset();
-                            if (d >= a->getSize() * 8)
+                            d += lone.getIn(1).getOffset();
+                            if (d >= a.getSize() * 8)
                             {
                                 if (opc2 == CPUI_INT_RIGHT)
                                     return 0;       // Result should have been 0
-                                d = a->getSize() * 8 - 1;   // sign extraction
+                                d = a.getSize() * 8 - 1;   // sign extraction
                             }
                             data.opUnlink(op);
                             op = lone;
@@ -86,12 +86,12 @@ namespace Sla.DECCORE
             // Create shift BEFORE the SUBPIECE happens
             Datatype* ct;
             if (opc == CPUI_INT_RIGHT)
-                ct = data.getArch()->types->getBase(a->getSize(), TYPE_UINT);
+                ct = data.getArch().types.getBase(a.getSize(), TYPE_UINT);
             else
-                ct = data.getArch()->types->getBase(a->getSize(), TYPE_INT);
-            PcodeOp* shiftop = data.newOp(2, op->getAddr());
+                ct = data.getArch().types.getBase(a.getSize(), TYPE_INT);
+            PcodeOp* shiftop = data.newOp(2, op.getAddr());
             data.opSetOpcode(shiftop, opc);
-            Varnode* newout = data.newUnique(a->getSize(), ct);
+            Varnode* newout = data.newUnique(a.getSize(), ct);
             data.opSetOutput(shiftop, newout);
             data.opSetInput(shiftop, a, 0);
             data.opSetInput(shiftop, data.newConstant(4, d), 1);

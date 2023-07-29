@@ -34,7 +34,7 @@ namespace Sla.EXTRA
         private InjectPayloadDynamic forceDebugDynamic(int4 injectid)
         {
             InjectPayload* oldPayload = injection[injectid];
-            InjectPayloadDynamic* newPayload = new InjectPayloadDynamic(glb, oldPayload->getName(), oldPayload->getType());
+            InjectPayloadDynamic* newPayload = new InjectPayloadDynamic(glb, oldPayload.getName(), oldPayload.getType());
             delete oldPayload;
             injection[injectid] = newPayload;
             return newPayload;
@@ -42,50 +42,50 @@ namespace Sla.EXTRA
 
         private void parseInject(InjectPayload payload)
         {
-            if (payload->isDynamic())
+            if (payload.isDynamic())
                 return;
             if (slgh == (SleighBase*)0) { // Make sure we have the sleigh AddrSpaceManager
-                slgh = (SleighBase*)glb->translate;
+                slgh = (SleighBase*)glb.translate;
                 if (slgh == (SleighBase*)0)
                     throw new LowlevelError("Registering pcode snippet before language is instantiated");
             }
             if (contextCache.pos == (ParserContext*)0)
             {   // Make sure we have a context
                 contextCache.pos = new ParserContext((ContextCache*)0, (Translate*)0);
-                contextCache.pos->initialize(8, 8, slgh->getConstantSpace());
+                contextCache.pos.initialize(8, 8, slgh.getConstantSpace());
             }
             PcodeSnippet compiler(slgh);
             //  compiler.clear();			// Not necessary unless we reuse
-            for (int4 i = 0; i < payload->sizeInput(); ++i)
+            for (int4 i = 0; i < payload.sizeInput(); ++i)
             {
-                InjectParameter & param(payload->getInput(i));
+                InjectParameter & param(payload.getInput(i));
                 compiler.addOperand(param.getName(), param.getIndex());
             }
-            for (int4 i = 0; i < payload->sizeOutput(); ++i)
+            for (int4 i = 0; i < payload.sizeOutput(); ++i)
             {
-                InjectParameter & param(payload->getOutput(i));
+                InjectParameter & param(payload.getOutput(i));
                 compiler.addOperand(param.getName(), param.getIndex());
             }
-            if (payload->getType() == InjectPayload::EXECUTABLEPCODE_TYPE)
+            if (payload.getType() == InjectPayload::EXECUTABLEPCODE_TYPE)
             {
                 compiler.setUniqueBase(0x2000); // Don't need to deconflict with anything other injects
                 ExecutablePcodeSleigh* sleighpayload = (ExecutablePcodeSleigh*)payload;
-                istringstream s(sleighpayload->parsestring);
+                istringstream s(sleighpayload.parsestring);
                 if (!compiler.parseStream(s))
-                    throw new LowlevelError(payload->getSource() + ": Unable to compile pcode: " + compiler.getErrorMessage());
-                sleighpayload->tpl = compiler.releaseResult();
-                sleighpayload->parsestring = "";        // No longer need the memory
+                    throw new LowlevelError(payload.getSource() + ": Unable to compile pcode: " + compiler.getErrorMessage());
+                sleighpayload.tpl = compiler.releaseResult();
+                sleighpayload.parsestring = "";        // No longer need the memory
             }
             else
             {
                 compiler.setUniqueBase(tempbase);
                 InjectPayloadSleigh* sleighpayload = (InjectPayloadSleigh*)payload;
-                istringstream s(sleighpayload->parsestring);
+                istringstream s(sleighpayload.parsestring);
                 if (!compiler.parseStream(s))
-                    throw new LowlevelError(payload->getSource() + ": Unable to compile pcode: " + compiler.getErrorMessage());
+                    throw new LowlevelError(payload.getSource() + ": Unable to compile pcode: " + compiler.getErrorMessage());
                 tempbase = compiler.getUniqueBase();
-                sleighpayload->tpl = compiler.releaseResult();
-                sleighpayload->parsestring = "";        // No longer need the memory
+                sleighpayload.tpl = compiler.releaseResult();
+                sleighpayload.parsestring = "";        // No longer need the memory
             }
         }
 
@@ -106,29 +106,29 @@ namespace Sla.EXTRA
         protected override void registerInject(int4 injectid)
         {
             InjectPayload* payload = injection[injectid];
-            if (payload->isDynamic())
+            if (payload.isDynamic())
             {
-                InjectPayload* sub = new InjectPayloadDynamic(glb, payload->getName(), payload->getType());
+                InjectPayload* sub = new InjectPayloadDynamic(glb, payload.getName(), payload.getType());
                 delete payload;
                 payload = sub;
                 injection[injectid] = payload;
             }
-            switch (payload->getType())
+            switch (payload.getType())
             {
                 case InjectPayload::CALLFIXUP_TYPE:
-                    registerCallFixup(payload->getName(), injectid);
+                    registerCallFixup(payload.getName(), injectid);
                     parseInject(payload);
                     break;
                 case InjectPayload::CALLOTHERFIXUP_TYPE:
-                    registerCallOtherFixup(payload->getName(), injectid);
+                    registerCallOtherFixup(payload.getName(), injectid);
                     parseInject(payload);
                     break;
                 case InjectPayload::CALLMECHANISM_TYPE:
-                    registerCallMechanism(payload->getName(), injectid);
+                    registerCallMechanism(payload.getName(), injectid);
                     parseInject(payload);
                     break;
                 case InjectPayload::EXECUTABLEPCODE_TYPE:
-                    registerExeScript(payload->getName(), injectid);
+                    registerExeScript(payload.getName(), injectid);
                     parseInject(payload);
                     break;
                 default:
@@ -137,9 +137,9 @@ namespace Sla.EXTRA
         }
 
         public PcodeInjectLibrarySleigh(Architecture g)
-            : base(g, g->translate->getUniqueStart(Translate::INJECT))
+            : base(g, g.translate.getUniqueStart(Translate::INJECT))
         {
-            slgh = (SleighBase*)g->translate;
+            slgh = (SleighBase*)g.translate;
             contextCache.glb = g;
         }
 
@@ -158,7 +158,7 @@ namespace Sla.EXTRA
                 {
                     payload = forceDebugDynamic(id);
                 }
-                payload->decodeEntry(decoder);
+                payload.decodeEntry(decoder);
                 decoder.closeElement(subId);
             }
             decoder.closeElement(elemId);
@@ -169,7 +169,7 @@ namespace Sla.EXTRA
             string sourceName = "(manual callfixup name=\"" + name + "\")";
             int4 injectid = allocateInject(sourceName, name, InjectPayload::CALLFIXUP_TYPE);
             InjectPayloadSleigh* payload = (InjectPayloadSleigh*)getPayload(injectid);
-            payload->parsestring = snippetstring;
+            payload.parsestring = snippetstring;
             registerInject(injectid);
             return injectid;
         }
@@ -181,11 +181,11 @@ namespace Sla.EXTRA
             int4 injectid = allocateInject(sourceName, name, InjectPayload::CALLOTHERFIXUP_TYPE);
             InjectPayloadSleigh* payload = (InjectPayloadSleigh*)getPayload(injectid);
             for (int4 i = 0; i < inname.size(); ++i)
-                payload->inputlist.push_back(InjectParameter(inname[i], 0));
+                payload.inputlist.push_back(InjectParameter(inname[i], 0));
             if (outname.size() != 0)
-                payload->output.push_back(InjectParameter(outname, 0));
-            payload->orderParameters();
-            payload->parsestring = snippet;
+                payload.output.push_back(InjectParameter(outname, 0));
+            payload.orderParameters();
+            payload.parsestring = snippet;
             registerInject(injectid);
             return injectid;
         }
@@ -195,7 +195,7 @@ namespace Sla.EXTRA
         protected override List<OpBehavior> getBehaviors()
         {
             if (inst.empty())
-                glb->collectBehaviors(inst);
+                glb.collectBehaviors(inst);
             return inst;
         }
     }

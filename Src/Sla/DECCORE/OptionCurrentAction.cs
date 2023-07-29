@@ -30,16 +30,16 @@ namespace Sla.DECCORE
 
             if (p3.size() != 0)
             {
-                glb->allacts.setCurrent(p1);
+                glb.allacts.setCurrent(p1);
                 val = onOrOff(p3);
-                glb->allacts.toggleAction(p1, p2, val);
+                glb.allacts.toggleAction(p1, p2, val);
                 res += p2 + " in action " + p1;
             }
             else
             {
                 val = onOrOff(p2);
-                glb->allacts.toggleAction(glb->allacts.getCurrentName(), p1, val);
-                res += p1 + " in action " + glb->allacts.getCurrentName();
+                glb.allacts.toggleAction(glb.allacts.getCurrentName(), p1, val);
+                res += p1 + " in action " + glb.allacts.getCurrentName();
             }
 
             return res;

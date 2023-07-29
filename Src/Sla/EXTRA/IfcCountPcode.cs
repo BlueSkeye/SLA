@@ -17,22 +17,22 @@ namespace Sla.EXTRA
         /// the current function, which may vary depending on the state of it transformation.
         public override void execute(TextReader s)
         {
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("Image not loaded");
 
-            if (dcp->fd == (Funcdata*)0)
+            if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");
 
             uint4 count = 0;
             list<PcodeOp*>::const_iterator iter, enditer;
-            iter = dcp->fd->beginOpAlive();
-            enditer = dcp->fd->endOpAlive();
+            iter = dcp.fd.beginOpAlive();
+            enditer = dcp.fd.endOpAlive();
             while (iter != enditer)
             {
                 count += 1;
                 ++iter;
             }
-            *status->optr << "Count - pcode = " << dec << count << endl;
+            *status.optr << "Count - pcode = " << dec << count << endl;
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Sla.DECCORE
         {
             string res;
 
-            glb->setPrintLanguage(p1);
+            glb.setPrintLanguage(p1);
             res = "Decompiler produces " + p1;
             return res;
         }

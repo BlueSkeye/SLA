@@ -30,13 +30,13 @@ namespace Sla.DECCORE
             for (iter = fd.begin(); iter != fd.end(); ++iter)
             {
                 field.push_back(*iter);
-                end = (*iter).offset + (*iter).type->getSize();
+                end = (*iter).offset + (*iter).type.getSize();
                 if (end > size)
                     size = end;
             }
             if (field.size() == 1)
             {           // A single field
-                if (field[0].type->getSize() == size)   // that fills the whole structure
+                if (field[0].type.getSize() == size)   // that fills the whole structure
                     flags |= needs_resolution;      // needs special attention
             }
         }
@@ -59,7 +59,7 @@ namespace Sla.DECCORE
                     max = mid - 1;
                 else
                 {           // curfield.offset <= off
-                    if ((curfield.offset + curfield.type->getSize()) > off)
+                    if ((curfield.offset + curfield.type.getSize()) > off)
                         return mid;
                     min = mid + 1;
                 }
@@ -103,7 +103,7 @@ namespace Sla.DECCORE
             while (decoder.peekElement() != 0)
             {
                 field.emplace_back(decoder, typegrp);
-                int4 trialmax = field.back().offset + field.back().type->getSize();
+                int4 trialmax = field.back().offset + field.back().type.getSize();
                 if (trialmax > maxoffset)
                     maxoffset = trialmax;
                 if (maxoffset > size)
@@ -119,7 +119,7 @@ namespace Sla.DECCORE
                 markComplete();     // Otherwise the structure is complete
             if (field.size() == 1)
             {           // A single field
-                if (field[0].type->getSize() == size)   // that fills the whole structure
+                if (field[0].type.getSize() == size)   // that fills the whole structure
                     flags |= needs_resolution;      // needs special resolution
             }
         }
@@ -154,7 +154,7 @@ namespace Sla.DECCORE
             if (i < 0) return (TypeField*)0;
             TypeField curfield  = field[i];
             noff = off - curfield.offset;
-            if (noff + sz > curfield.type->getSize()) // Requested piece spans more than one field
+            if (noff + sz > curfield.type.getSize()) // Requested piece spans more than one field
                 return (TypeField*)0;
             newoff = noff;
             return &curfield;
@@ -181,16 +181,16 @@ namespace Sla.DECCORE
                 int4 diff = subfield.offset - off;
                 if (diff > 128) break;
                 Datatype* subtype = subfield.type;
-                if (subtype->getMetatype() == TYPE_ARRAY)
+                if (subtype.getMetatype() == TYPE_ARRAY)
                 {
                     *newoff = (intb) - diff;
-                    *elSize = ((TypeArray*)subtype)->getBase()->getSize();
+                    *elSize = ((TypeArray*)subtype).getBase().getSize();
                     return subtype;
                 }
                 else
                 {
                     uintb suboff;
-                    Datatype* res = subtype->nearestArrayedComponentForward(0, &suboff, elSize);
+                    Datatype* res = subtype.nearestArrayedComponentForward(0, &suboff, elSize);
                     if (res != (Datatype*)0)
                     {
                         *newoff = (intb) - diff;
@@ -211,16 +211,16 @@ namespace Sla.DECCORE
                 int4 diff = (int4)off - subfield.offset;
                 if (diff > 128) break;
                 Datatype* subtype = subfield.type;
-                if (subtype->getMetatype() == TYPE_ARRAY)
+                if (subtype.getMetatype() == TYPE_ARRAY)
                 {
                     *newoff = (intb)diff;
-                    *elSize = ((TypeArray*)subtype)->getBase()->getSize();
+                    *elSize = ((TypeArray*)subtype).getBase().getSize();
                     return subtype;
                 }
                 else
                 {
                     uintb suboff;
-                    Datatype* res = subtype->nearestArrayedComponentBackward(subtype->getSize(), &suboff, elSize);
+                    Datatype* res = subtype.nearestArrayedComponentBackward(subtype.getSize(), &suboff, elSize);
                     if (res != (Datatype*)0)
                     {
                         *newoff = (intb)diff;
@@ -239,8 +239,8 @@ namespace Sla.DECCORE
             {
                 TypeField curfield = field[i];
                 int4 newOff = off - curfield.offset;
-                if (newOff < curfield.type->getSize())
-                    return curfield.type->getHoleSize(newOff);
+                if (newOff < curfield.type.getSize())
+                    return curfield.type.getHoleSize(newOff);
             }
             i += 1;             // advance to first field following off
             if (i < field.size())
@@ -262,9 +262,9 @@ namespace Sla.DECCORE
             TypeStruct ts = (TypeStruct*)&op;
             vector<TypeField>::const_iterator iter1, iter2;
 
-            if (field.size() != ts->field.size()) return (ts->field.size() - field.size());
+            if (field.size() != ts.field.size()) return (ts.field.size() - field.size());
             iter1 = field.begin();
-            iter2 = ts->field.begin();
+            iter2 = ts.field.begin();
             // Test only the name and first level metatype first
             while (iter1 != field.end())
             {
@@ -272,8 +272,8 @@ namespace Sla.DECCORE
                     return ((*iter1).offset < (*iter2).offset) ? -1 : 1;
                 if ((*iter1).name != (*iter2).name)
                     return ((*iter1).name < (*iter2).name) ? -1 : 1;
-                if ((*iter1).type->getMetatype() != (*iter2).type->getMetatype())
-                    return ((*iter1).type->getMetatype() < (*iter2).type->getMetatype()) ? -1 : 1;
+                if ((*iter1).type.getMetatype() != (*iter2).type.getMetatype())
+                    return ((*iter1).type.getMetatype() < (*iter2).type.getMetatype()) ? -1 : 1;
                 ++iter1;
                 ++iter2;
             }
@@ -285,12 +285,12 @@ namespace Sla.DECCORE
             }
             // If we are still equal, now go down deep into each field type
             iter1 = field.begin();
-            iter2 = ts->field.begin();
+            iter2 = ts.field.begin();
             while (iter1 != field.end())
             {
                 if ((*iter1).type != (*iter2).type)
                 { // Short circuit recursive loops
-                    int4 c = (*iter1).type->compare(*(*iter2).type, level);
+                    int4 c = (*iter1).type.compare(*(*iter2).type, level);
                     if (c != 0) return c;
                 }
                 ++iter1;
@@ -307,9 +307,9 @@ namespace Sla.DECCORE
             TypeStruct ts = (TypeStruct*)&op;
             vector<TypeField>::const_iterator iter1, iter2;
 
-            if (field.size() != ts->field.size()) return (ts->field.size() - field.size());
+            if (field.size() != ts.field.size()) return (ts.field.size() - field.size());
             iter1 = field.begin();
-            iter2 = ts->field.begin();
+            iter2 = ts.field.begin();
             // Test only the name and first level metatype first
             while (iter1 != field.end())
             {
@@ -348,33 +348,33 @@ namespace Sla.DECCORE
 
         public override Datatype resolveInFlow(PcodeOp op, int4 slot)
         {
-            Funcdata* fd = op->getParent()->getFuncdata();
-            ResolvedUnion res = fd->getUnionField(this, op, slot);
+            Funcdata* fd = op.getParent().getFuncdata();
+            ResolvedUnion res = fd.getUnionField(this, op, slot);
             if (res != (ResolvedUnion*)0)
-                return res->getDatatype();
+                return res.getDatatype();
 
             int4 fieldNum = scoreSingleComponent(this, op, slot);
 
-            ResolvedUnion compFill(this, fieldNum,* fd->getArch()->types);
-            fd->setUnionField(this, op, slot, compFill);
+            ResolvedUnion compFill(this, fieldNum,* fd.getArch().types);
+            fd.setUnionField(this, op, slot, compFill);
             return compFill.getDatatype();
         }
 
         public override Datatype findResolve(PcodeOp op, int4 slot)
         {
-            Funcdata fd = op->getParent()->getFuncdata();
-            ResolvedUnion res = fd->getUnionField(this, op, slot);
+            Funcdata fd = op.getParent().getFuncdata();
+            ResolvedUnion res = fd.getUnionField(this, op, slot);
             if (res != (ResolvedUnion*)0)
-                return res->getDatatype();
+                return res.getDatatype();
             return field[0].type;       // If not calculated before, assume referring to field
         }
 
         public override int4 findCompatibleResolve(Datatype ct)
         {
             Datatype* fieldType = field[0].type;
-            if (ct->needsResolution() && !fieldType->needsResolution())
+            if (ct.needsResolution() && !fieldType.needsResolution())
             {
-                if (ct->findCompatibleResolve(fieldType) >= 0)
+                if (ct.findCompatibleResolve(fieldType) >= 0)
                     return 0;
             }
             if (fieldType == ct)
@@ -393,7 +393,7 @@ namespace Sla.DECCORE
             for (iter = list.begin(); iter != list.end(); ++iter)
             {
                 if ((*iter).offset != -1) continue;
-                int4 cursize = (*iter).type->getSize();
+                int4 cursize = (*iter).type.getSize();
                 int4 curalign = 0;
                 if (align > 1)
                 {
@@ -421,38 +421,38 @@ namespace Sla.DECCORE
         /// \return either 0 to indicate the field or -1 to indicate the structure
         public override int4 scoreSingleComponent(Datatype parent, PcodeOp op, int4 slot)
         {
-            if (op->code() == CPUI_COPY || op->code() == CPUI_INDIRECT)
+            if (op.code() == CPUI_COPY || op.code() == CPUI_INDIRECT)
             {
                 Varnode* vn;
                 if (slot == 0)
-                    vn = op->getOut();
+                    vn = op.getOut();
                 else
-                    vn = op->getIn(0);
-                if (vn->isTypeLock() && vn->getType() == parent)
+                    vn = op.getIn(0);
+                if (vn.isTypeLock() && vn.getType() == parent)
                     return -1;  // COPY of the structure directly, use whole structure
             }
-            else if ((op->code() == CPUI_LOAD && slot == -1) || (op->code() == CPUI_STORE && slot == 2))
+            else if ((op.code() == CPUI_LOAD && slot == -1) || (op.code() == CPUI_STORE && slot == 2))
             {
-                Varnode* vn = op->getIn(1);
-                if (vn->isTypeLock())
+                Varnode* vn = op.getIn(1);
+                if (vn.isTypeLock())
                 {
-                    Datatype* ct = vn->getTypeReadFacing(op);
-                    if (ct->getMetatype() == TYPE_PTR && ((TypePointer*)ct)->getPtrTo() == parent)
+                    Datatype* ct = vn.getTypeReadFacing(op);
+                    if (ct.getMetatype() == TYPE_PTR && ((TypePointer*)ct).getPtrTo() == parent)
                         return -1;  // LOAD or STORE of the structure directly, use whole structure
                 }
             }
-            else if (op->isCall())
+            else if (op.isCall())
             {
-                Funcdata* fd = op->getParent()->getFuncdata();
-                FuncCallSpecs* fc = fd->getCallSpecs(op);
+                Funcdata* fd = op.getParent().getFuncdata();
+                FuncCallSpecs* fc = fd.getCallSpecs(op);
                 if (fc != (FuncCallSpecs*)0)
                 {
                     ProtoParameter* param = (ProtoParameter*)0;
-                    if (slot >= 1 && fc->isInputLocked())
-                        param = fc->getParam(slot - 1);
-                    else if (slot < 0 && fc->isOutputLocked())
-                        param = fc->getOutput();
-                    if (param != (ProtoParameter*)0 && param->getType() == parent)
+                    if (slot >= 1 && fc.isInputLocked())
+                        param = fc.getParam(slot - 1);
+                    else if (slot < 0 && fc.isOutputLocked())
+                        param = fc.getOutput();
+                    if (param != (ProtoParameter*)0 && param.getType() == parent)
                         return -1;  // Function signature refers to parent directly, resolve to parent
                 }
             }

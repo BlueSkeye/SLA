@@ -23,9 +23,9 @@ namespace Sla.EXTRA
         /// full or partial widening.
         public override void execute(TextReader s)
         {
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("Image not loaded");
-            if (dcp->fd == (Funcdata*)0)
+            if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");
 
             bool useFullWidener;
@@ -39,17 +39,17 @@ namespace Sla.EXTRA
             }
             else
                 throw IfaceParseError("Must specify \"full\" or \"partial\" widening");
-            Varnode* vn = dcp->readVarnode(s);
+            Varnode* vn = dcp.readVarnode(s);
             vector<Varnode*> sinks;
             vector<PcodeOp*> reads;
             sinks.push_back(vn);
-            for (list<PcodeOp*>::const_iterator iter = vn->beginDescend(); iter != vn->endDescend(); ++iter)
+            for (list<PcodeOp*>::const_iterator iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {
                 PcodeOp* op = *iter;
-                if (op->code() == CPUI_LOAD || op->code() == CPUI_STORE)
+                if (op.code() == CPUI_LOAD || op.code() == CPUI_STORE)
                     reads.push_back(op);
             }
-            Varnode* stackReg = dcp->fd->findSpacebaseInput(dcp->conf->getStackSpace());
+            Varnode* stackReg = dcp.fd.findSpacebaseInput(dcp.conf.getStackSpace());
             ValueSetSolver vsSolver;
             vsSolver.establishValueSets(sinks, reads, stackReg, false);
             if (useFullWidener)
@@ -65,14 +65,14 @@ namespace Sla.EXTRA
             list<ValueSet>::const_iterator iter;
             for (iter = vsSolver.beginValueSets(); iter != vsSolver.endValueSets(); ++iter)
             {
-                (*iter).printRaw(*status->optr);
-                *status->optr << endl;
+                (*iter).printRaw(*status.optr);
+                *status.optr << endl;
             }
             map<SeqNum, ValueSetRead>::const_iterator riter;
             for (riter = vsSolver.beginValueSetReads(); riter != vsSolver.endValueSetReads(); ++riter)
             {
-                (*riter).second.printRaw(*status->optr);
-                *status->optr << endl;
+                (*riter).second.printRaw(*status.optr);
+                *status.optr << endl;
             }
         }
     }

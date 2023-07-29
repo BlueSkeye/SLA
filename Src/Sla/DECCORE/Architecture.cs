@@ -603,7 +603,7 @@ namespace Sla.DECCORE
                         decodeFlowOverride(decoder);
                         break;
                     case ELEM_INJECTDEBUG:
-                        pcodeinjectlib->decodeDebug(decoder);
+                        pcodeinjectlib.decodeDebug(decoder);
                         break;
                     default:
                         throw new LowlevelError("XML error restoring architecture");
@@ -1042,10 +1042,10 @@ namespace Sla.DECCORE
                         decodeAggressiveTrim(decoder);
                         break;
                     case ELEM_DATA_ORGANIZATION:
-                        types->decodeDataOrganization(decoder);
+                        types.decodeDataOrganization(decoder);
                         break;
                     case ELEM_ENUM:
-                        types->parseEnumConfig(decoder);
+                        types.parseEnumConfig(decoder);
                         break;
                     case ELEM_GLOBAL:
                         decodeGlobal(decoder, globalRanges);
@@ -1057,7 +1057,7 @@ namespace Sla.DECCORE
                         decodeReadOnly(decoder);
                         break;
                     case ELEM_CONTEXT_DATA:
-                        context->decodeFromSpec(decoder);
+                        context.decodeFromSpec(decoder);
                         break;
                     case ELEM_RESOLVEPROTOTYPE:
                         decodeProto(decoder);
@@ -1069,7 +1069,7 @@ namespace Sla.DECCORE
                         decodeProtoEval(decoder);
                         break;
                     case ELEM_CALLFIXUP:
-                        pcodeinjectlib->decodeInject(archid + " : compiler spec", "", InjectPayload::CALLFIXUP_TYPE, decoder);
+                        pcodeinjectlib.decodeInject(archid + " : compiler spec", "", InjectPayload::CALLFIXUP_TYPE, decoder);
                         break;
                     case ELEM_CALLOTHERFIXUP:
                         userops.decodeCallOtherFixup(decoder, this);
@@ -1144,7 +1144,7 @@ namespace Sla.DECCORE
             // We must have a __thiscall calling convention
             if (!protoModels.ContainsKey("__thiscall")) {
                 // If __thiscall doesn't exist we clone it off of the default
-                createModelAlias("__thiscall", defaultfp->getName());
+                createModelAlias("__thiscall", defaultfp.getName());
             }
             userops.setDefaults(this);
             initializeSegments();

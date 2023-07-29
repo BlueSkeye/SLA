@@ -46,11 +46,11 @@ namespace Sla.DECCORE
                         pageptr[i] = 0;
                 }
                 else
-                    underlie->getPage(pageaddr, pageptr, 0, getPageSize());
+                    underlie.getPage(pageaddr, pageptr, 0, getPageSize());
             }
 
             uintb pageoffset = addr & ((uintb)(getPageSize() - 1));
-            deconstructValue(pageptr + pageoffset, val, getWordSize(), getSpace()->isBigEndian());
+            deconstructValue(pageptr + pageoffset, val, getWordSize(), getSpace().isBigEndian());
         }
 
         /// Overridden aligned word find
@@ -69,13 +69,13 @@ namespace Sla.DECCORE
             {
                 if (underlie == (MemoryBank*)0)
                     return (uintb)0;
-                return underlie->find(addr);
+                return underlie.find(addr);
             }
 
             uint1* pageptr = (*iter).second;
 
             uintb pageoffset = addr & ((uintb)(getPageSize() - 1));
-            return constructValue(pageptr + pageoffset, getWordSize(), getSpace()->isBigEndian());
+            return constructValue(pageptr + pageoffset, getWordSize(), getSpace().isBigEndian());
         }
 
         /// Overridden getPage
@@ -99,7 +99,7 @@ namespace Sla.DECCORE
                         res[i] = 0;
                     return;
                 }
-                underlie->getPage(addr, res, skip, size);
+                underlie.getPage(addr, res, skip, size);
                 return;
             }
             uint1* pageptr = (*iter).second;
@@ -132,7 +132,7 @@ namespace Sla.DECCORE
                             pageptr[i] = 0;
                     }
                     else
-                        underlie->getPage(addr, pageptr, 0, getPageSize());
+                        underlie.getPage(addr, pageptr, 0, getPageSize());
                 }
             }
             else

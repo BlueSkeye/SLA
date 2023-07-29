@@ -14,18 +14,18 @@ namespace Sla.EXTRA
   uintm uqlow,uqhigh;
   int4 discard;
 
-  if (dcp->fd == (Funcdata *)0)
+  if (dcp.fd == (Funcdata *)0)
     throw IfaceExecutionError("No function selected");
 
   Address pclow,pchigh;
   s >> ws;
   if (!s.eof()) {
-    pclow = parse_machaddr(s,discard,*dcp->conf->types);
+    pclow = parse_machaddr(s,discard,*dcp.conf.types);
     s >> ws;
   }
   pchigh = pclow;
   if (!s.eof()) {
-    pchigh = parse_machaddr(s,discard,*dcp->conf->types);
+    pchigh = parse_machaddr(s,discard,*dcp.conf.types);
     s >> ws;
   }
   uqhigh = uqlow = ~((uintm)0);
@@ -33,8 +33,8 @@ namespace Sla.EXTRA
     s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
     s >> uqlow >> uqhigh >> ws;
   }
-  dcp->fd->debugSetRange(pclow,pchigh,uqlow,uqhigh);
-  *status->optr << "OK (" << dec << dcp->fd->debugSize() << " ranges)\n";
+  dcp.fd.debugSetRange(pclow,pchigh,uqlow,uqhigh);
+  *status.optr << "OK (" << dec << dcp.fd.debugSize() << " ranges)\n";
 }
     }
 #endif

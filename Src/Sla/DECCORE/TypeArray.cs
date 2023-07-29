@@ -38,8 +38,8 @@ namespace Sla.DECCORE
                 }
             }
             arrayof = typegrp.decodeType(decoder);
-            if ((arraysize <= 0) || (arraysize * arrayof->getSize() != size))
-                throw new LowlevelError("Bad size for array of type " + arrayof->getName());
+            if ((arraysize <= 0) || (arraysize * arrayof.getSize() != size))
+                throw new LowlevelError("Bad size for array of type " + arrayof.getName());
             if (arraysize == 1)
                 flags |= needs_resolution;      // Array of size 1 needs special treatment
                                                 //  decoder.closeElement(elemId);
@@ -88,9 +88,9 @@ namespace Sla.DECCORE
         /// \return the element data-type or NULL if the piece overlaps more than one
         public Datatype getSubEntry(int4 off, int4 sz, int4 newoff, int4 el)
         {
-            int4 noff = off % arrayof->getSize();
-            int4 nel = off / arrayof->getSize();
-            if (noff + sz > arrayof->getSize()) // Requesting parts of more then one element
+            int4 noff = off % arrayof.getSize();
+            int4 nel = off / arrayof.getSize();
+            if (noff + sz > arrayof.getSize()) // Requesting parts of more then one element
                 return (Datatype*)0;
             *newoff = noff;
             *el = nel;
@@ -99,21 +99,21 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s)
         {
-            arrayof->printRaw(s);
+            arrayof.printRaw(s);
             s << " [" << dec << arraysize << ']';
         }
 
         public override Datatype getSubType(uintb off, uintb newoff)
         {
             // Go down exactly one level, to type of element
-            *newoff = off % arrayof->getSize();
+            *newoff = off % arrayof.getSize();
             return arrayof;
         }
 
         public override int4 getHoleSize(int4 off)
         {
-            int4 newOff = off % arrayof->getSize();
-            return arrayof->getHoleSize(newOff);
+            int4 newOff = off % arrayof.getSize();
+            return arrayof.getHoleSize(newOff);
         }
 
         public override int4 numDepend() => 1;
@@ -123,7 +123,7 @@ namespace Sla.DECCORE
         public override void printNameBase(TextWriter s) 
         {
             s << 'a';
-            arrayof->printNameBase(s);
+            arrayof.printNameBase(s);
         }
 
         // For tree structure
@@ -138,7 +138,7 @@ namespace Sla.DECCORE
                 return (id < op.getId()) ? -1 : 1;
             }
             TypeArray* ta = (TypeArray*)&op;    // Both must be arrays
-            return arrayof->compare(*ta->arrayof, level); // Compare array elements
+            return arrayof.compare(*ta.arrayof, level); // Compare array elements
         }
 
         // For tree structure
@@ -146,7 +146,7 @@ namespace Sla.DECCORE
         {
             if (submeta != op.getSubMeta()) return (submeta < op.getSubMeta()) ? -1 : 1;
             TypeArray* ta = (TypeArray*)&op;    // Both must be arrays
-            if (arrayof != ta->arrayof) return (arrayof < ta->arrayof) ? -1 : 1;    // Compare absolute pointers
+            if (arrayof != ta.arrayof) return (arrayof < ta.arrayof) ? -1 : 1;    // Compare absolute pointers
             return (op.getSize() - size);
         }
 
@@ -162,38 +162,38 @@ namespace Sla.DECCORE
             encoder.openElement(ELEM_TYPE);
             encodeBasic(metatype, encoder);
             encoder.writeSignedInteger(ATTRIB_ARRAYSIZE, arraysize);
-            arrayof->encodeRef(encoder);
+            arrayof.encodeRef(encoder);
             encoder.closeElement(ELEM_TYPE);
         }
 
         public override Datatype resolveInFlow(PcodeOp op, int4 slot)
         {
-            Funcdata* fd = op->getParent()->getFuncdata();
-            ResolvedUnion res = fd->getUnionField(this, op, slot);
+            Funcdata* fd = op.getParent().getFuncdata();
+            ResolvedUnion res = fd.getUnionField(this, op, slot);
             if (res != (ResolvedUnion*)0)
-                return res->getDatatype();
+                return res.getDatatype();
 
             int4 fieldNum = TypeStruct::scoreSingleComponent(this, op, slot);
 
-            ResolvedUnion compFill(this, fieldNum,* fd->getArch()->types);
-            fd->setUnionField(this, op, slot, compFill);
+            ResolvedUnion compFill(this, fieldNum,* fd.getArch().types);
+            fd.setUnionField(this, op, slot, compFill);
             return compFill.getDatatype();
         }
 
         public override Datatype findResolve(PcodeOp op, int4 slot)
         {
-            Funcdata fd = op->getParent()->getFuncdata();
-            ResolvedUnion res = fd->getUnionField(this, op, slot);
+            Funcdata fd = op.getParent().getFuncdata();
+            ResolvedUnion res = fd.getUnionField(this, op, slot);
             if (res != (ResolvedUnion*)0)
-                return res->getDatatype();
+                return res.getDatatype();
             return arrayof;     // If not calculated before, assume referring to the element
         }
 
         public override int4 findCompatibleResolve(Datatype ct)
         {
-            if (ct->needsResolution() && !arrayof->needsResolution())
+            if (ct.needsResolution() && !arrayof.needsResolution())
             {
-                if (ct->findCompatibleResolve(arrayof) >= 0)
+                if (ct.findCompatibleResolve(arrayof) >= 0)
                     return 0;
             }
             if (arrayof == ct)

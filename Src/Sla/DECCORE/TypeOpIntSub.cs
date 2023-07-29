@@ -19,12 +19,12 @@ namespace Sla.DECCORE
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opIntSub(op);
+            lng.opIntSub(op);
         }
 
         public override Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)
         {
-            return castStrategy->arithmeticOutputStandard(op);  // Use arithmetic typing rules
+            return castStrategy.arithmeticOutputStandard(op);  // Use arithmetic typing rules
         }
     }
 }

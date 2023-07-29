@@ -37,26 +37,26 @@ namespace Sla.EXTRA
         {
             RHSConstant* newexprsz = (RHSConstant*)0;
             if (exprsz != (RHSConstant*)0)
-                newexprsz = exprsz->clone();
+                newexprsz = exprsz.clone();
             UnifyConstraint* res;
-            res = (new ConstraintSetInputConstVal(opindex, slot->clone(), val->clone(), newexprsz))->copyid(this);
+            res = (new ConstraintSetInputConstVal(opindex, slot.clone(), val.clone(), newexprsz)).copyid(this);
             return res;
         }
 
         public override bool step(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            if (!traverse->step()) return false;
+            if (!traverse.step()) return false;
             Funcdata* fd = state.getFunction();
             PcodeOp* op = state.data(opindex).getOp();
-            uintb ourconst = val->getConstant(state);
+            uintb ourconst = val.getConstant(state);
             int4 sz;
             if (exprsz != (RHSConstant*)0)
-                sz = (int4)exprsz->getConstant(state);
+                sz = (int4)exprsz.getConstant(state);
             else
                 sz = (int4)sizeof(uintb);
-            int4 slt = (int4)slot->getConstant(state);
-            fd->opSetInput(op, fd->newConstant(sz, ourconst & calc_mask(sz)), slt);
+            int4 slt = (int4)slot.getConstant(state);
+            fd.opSetInput(op, fd.newConstant(sz, ourconst & calc_mask(sz)), slt);
             return true;
         }
 
@@ -71,18 +71,18 @@ namespace Sla.EXTRA
             printstate.printIndent(s);
             s << "data.opSetInput(" << printstate.getName(opindex) << ",data.newConstant(";
             if (exprsz != (RHSConstant*)0)
-                exprsz->writeExpression(s, printstate);
+                exprsz.writeExpression(s, printstate);
             else
                 s << dec << (int4)sizeof(uintb);
             s << ",calc_mask(";
             if (exprsz != (RHSConstant*)0)
-                exprsz->writeExpression(s, printstate);
+                exprsz.writeExpression(s, printstate);
             else
                 s << dec << (int4)sizeof(uintb);
             s << ")&";
-            val->writeExpression(s, printstate);
+            val.writeExpression(s, printstate);
             s << "),";
-            slot->writeExpression(s, printstate);
+            slot.writeExpression(s, printstate);
             s << ");" << endl;
         }
     }

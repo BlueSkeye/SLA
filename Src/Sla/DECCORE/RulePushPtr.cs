@@ -21,9 +21,9 @@ namespace Sla.DECCORE
         /// \return the duplicate Varnode
         private static Varnode buildVarnodeOut(Varnode vn, PcodeOp op, Funcdata data)
         {
-            if (vn->isAddrTied() || vn->getSpace()->getType() == IPTR_INTERNAL)
-                return data.newUniqueOut(vn->getSize(), op);
-            return data.newVarnodeOut(vn->getSize(), vn->getAddr(), op);
+            if (vn.isAddrTied() || vn.getSpace().getType() == IPTR_INTERNAL)
+                return data.newUniqueOut(vn.getSize(), op);
+            return data.newVarnodeOut(vn.getSize(), vn.getAddr(), op);
         }
 
         /// \brief Generate list of PcodeOps that need to be duplicated as part of pushing the pointer
@@ -37,21 +37,21 @@ namespace Sla.DECCORE
         {
             for (; ; )
             {
-                if (!vn->isWritten()) return;
-                if (vn->isAutoLive()) return;
-                if (vn->loneDescend() == (PcodeOp*)0) return;   // Already has multiple descendants
-                PcodeOp* op = vn->getDef();
-                OpCode opc = op->code();
+                if (!vn.isWritten()) return;
+                if (vn.isAutoLive()) return;
+                if (vn.loneDescend() == (PcodeOp*)0) return;   // Already has multiple descendants
+                PcodeOp* op = vn.getDef();
+                OpCode opc = op.code();
                 if (opc == CPUI_INT_ZEXT || opc == CPUI_INT_SEXT || opc == CPUI_INT_2COMP)
                     reslist.push_back(op);
                 else if (opc == CPUI_INT_MULT)
                 {
-                    if (op->getIn(1)->isConstant())
+                    if (op.getIn(1).isConstant())
                         reslist.push_back(op);
                 }
                 else
                     return;
-                vn = op->getIn(0);
+                vn = op.getIn(0);
             }
         }
 
@@ -82,36 +82,36 @@ namespace Sla.DECCORE
             Varnode* vni = (Varnode*)0;
 
             if (!data.hasTypeRecoveryStarted()) return 0;
-            for (slot = 0; slot < op->numInput(); ++slot)
+            for (slot = 0; slot < op.numInput(); ++slot)
             { // Search for pointer type
-                vni = op->getIn(slot);
-                if (vni->getTypeReadFacing(op)->getMetatype() == TYPE_PTR) break;
+                vni = op.getIn(slot);
+                if (vni.getTypeReadFacing(op).getMetatype() == TYPE_PTR) break;
             }
-            if (slot == op->numInput()) return 0;
+            if (slot == op.numInput()) return 0;
 
             if (RulePtrArith::evaluatePointerExpression(op, slot) != 1) return 0;
-            Varnode* vn = op->getOut();
-            Varnode* vnadd2 = op->getIn(1 - slot);
+            Varnode* vn = op.getOut();
+            Varnode* vnadd2 = op.getIn(1 - slot);
             vector<PcodeOp*> duplicateList;
-            if (vn->loneDescend() == (PcodeOp*)0)
+            if (vn.loneDescend() == (PcodeOp*)0)
                 collectDuplicateNeeds(duplicateList, vnadd2);
 
             for (; ; )
             {
-                list<PcodeOp*>::const_iterator iter = vn->beginDescend();
-                if (iter == vn->endDescend()) break;
+                list<PcodeOp*>::const_iterator iter = vn.beginDescend();
+                if (iter == vn.endDescend()) break;
                 PcodeOp* decop = *iter;
-                int4 j = decop->getSlot(vn);
+                int4 j = decop.getSlot(vn);
 
-                Varnode* vnadd1 = decop->getIn(1 - j);
+                Varnode* vnadd1 = decop.getIn(1 - j);
                 Varnode* newout;
 
                 // Create new INT_ADD for the intermediate result that didn't exist in original code.
                 // We don't associate it with the address of the original INT_ADD
                 // We don't preserve the Varnode address of the original INT_ADD
-                PcodeOp* newop = data.newOp(2, decop->getAddr());       // Use the later address
+                PcodeOp* newop = data.newOp(2, decop.getAddr());       // Use the later address
                 data.opSetOpcode(newop, CPUI_INT_ADD);
-                newout = data.newUniqueOut(vnadd1->getSize(), newop);   // Use a temporary storage address
+                newout = data.newUniqueOut(vnadd1.getSize(), newop);   // Use a temporary storage address
 
                 data.opSetInput(decop, vni, 0);
                 data.opSetInput(decop, newout, 1);
@@ -121,7 +121,7 @@ namespace Sla.DECCORE
 
                 data.opInsertBefore(newop, decop);
             }
-            if (!vn->isAutoLive())
+            if (!vn.isAutoLive())
                 data.opDestroy(op);
             for (int4 i = 0; i < duplicateList.size(); ++i)
                 duplicateNeed(duplicateList[i], data);
@@ -139,26 +139,26 @@ namespace Sla.DECCORE
         /// \param data is function to build duplicates in
         public static void duplicateNeed(PcodeOp op, Funcdata data)
         {
-            Varnode* outVn = op->getOut();
-            Varnode* inVn = op->getIn(0);
-            int num = op->numInput();
-            OpCode opc = op->code();
-            list<PcodeOp*>::const_iterator iter = outVn->beginDescend();
+            Varnode* outVn = op.getOut();
+            Varnode* inVn = op.getIn(0);
+            int num = op.numInput();
+            OpCode opc = op.code();
+            list<PcodeOp*>::const_iterator iter = outVn.beginDescend();
             do
             {
                 PcodeOp* decOp = *iter;
-                int4 slot = decOp->getSlot(outVn);
-                PcodeOp* newOp = data.newOp(num, op->getAddr());    // Duplicate op associated with original address
+                int4 slot = decOp.getSlot(outVn);
+                PcodeOp* newOp = data.newOp(num, op.getAddr());    // Duplicate op associated with original address
                 Varnode* newOut = buildVarnodeOut(outVn, newOp, data);  // Result contained in original storage
-                newOut->updateType(outVn->getType(), false, false);
+                newOut.updateType(outVn.getType(), false, false);
                 data.opSetOpcode(newOp, opc);
                 data.opSetInput(newOp, inVn, 0);
                 if (num > 1)
-                    data.opSetInput(newOp, op->getIn(1), 1);
+                    data.opSetInput(newOp, op.getIn(1), 1);
                 data.opSetInput(decOp, newOut, slot);
                 data.opInsertBefore(newOp, decOp);
-                iter = outVn->beginDescend();
-            } while (iter != outVn->endDescend());
+                iter = outVn.beginDescend();
+            } while (iter != outVn.endDescend());
             data.opDestroy(op);
         }
     }

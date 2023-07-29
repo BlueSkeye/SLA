@@ -19,13 +19,13 @@ namespace Sla.DECCORE
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opIntSborrow(op);
+            lng.opIntSborrow(op);
         }
 
         public override string getOperatorName(PcodeOp op)
         {
             ostringstream s;
-            s << name << dec << op->getIn(0)->getSize();
+            s << name << dec << op.getIn(0).getSize();
             return s.str();
         }
     }

@@ -38,7 +38,7 @@ namespace Sla.SLACOMP
         private bool transferOp(OpTpl op, List<HandleTpl> @params)
         { // Fix handle details of a macro generated OpTpl relative to its specific invocation
           // and transfer it into the output stream
-            VarnodeTpl* outvn = op->getOut();
+            VarnodeTpl* outvn = op.getOut();
             int4 handleIndex = 0;
             int4 plus;
             bool hasrealsize = false;
@@ -46,23 +46,23 @@ namespace Sla.SLACOMP
 
             if (outvn != (VarnodeTpl*)0)
             {
-                plus = outvn->transfer(@params);
+                plus = outvn.transfer(@params);
                 if (plus >= 0)
                 {
                     reportError((Location*)0, "Cannot currently assign to bitrange of macro parameter that is a temporary");
                     return false;
                 }
             }
-            for (int4 i = 0; i < op->numInput(); ++i)
+            for (int4 i = 0; i < op.numInput(); ++i)
             {
-                VarnodeTpl* vn = op->getIn(i);
-                if (vn->getOffset().getType() == ConstTpl::handle)
+                VarnodeTpl* vn = op.getIn(i);
+                if (vn.getOffset().getType() == ConstTpl::handle)
                 {
-                    handleIndex = vn->getOffset().getHandleIndex();
-                    hasrealsize = (vn->getSize().getType() == ConstTpl::real);
-                    realsize = vn->getSize().getReal();
+                    handleIndex = vn.getOffset().getHandleIndex();
+                    hasrealsize = (vn.getSize().getType() == ConstTpl::real);
+                    realsize = vn.getSize().getReal();
                 }
-                plus = vn->transfer(@params);
+                plus = vn.transfer(@params);
                 if (plus >= 0)
                 {
                     if (!hasrealsize)
@@ -70,23 +70,23 @@ namespace Sla.SLACOMP
                         reportError((Location*)0, "Problem with bit range operator in macro");
                         return false;
                     }
-                    uintb newtemp = slgh->getUniqueAddr(); // Generate a new temporary location
+                    uintb newtemp = slgh.getUniqueAddr(); // Generate a new temporary location
 
                     // Generate a SUBPIECE op that implements the offset_plus
                     OpTpl* subpieceop = new OpTpl(CPUI_SUBPIECE);
-                    VarnodeTpl* newvn = new VarnodeTpl(ConstTpl(slgh->getUniqueSpace()), ConstTpl(ConstTpl::real, newtemp),
+                    VarnodeTpl* newvn = new VarnodeTpl(ConstTpl(slgh.getUniqueSpace()), ConstTpl(ConstTpl::real, newtemp),
                                    ConstTpl(ConstTpl::real, realsize));
-                    subpieceop->setOutput(newvn);
+                    subpieceop.setOutput(newvn);
                     HandleTpl* hand = @params[handleIndex];
-                    VarnodeTpl* origvn = new VarnodeTpl(hand->getSpace(), hand->getPtrOffset(), hand->getSize());
-                    subpieceop->addInput(origvn);
-                    VarnodeTpl* plusvn = new VarnodeTpl(ConstTpl(slgh->getConstantSpace()), ConstTpl(ConstTpl::real, plus),
+                    VarnodeTpl* origvn = new VarnodeTpl(hand.getSpace(), hand.getPtrOffset(), hand.getSize());
+                    subpieceop.addInput(origvn);
+                    VarnodeTpl* plusvn = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl::real, plus),
                                      ConstTpl(ConstTpl::real, 4));
-                    subpieceop->addInput(plusvn);
+                    subpieceop.addInput(plusvn);
                     outvec.push_back(subpieceop);
 
                     delete vn;        // Replace original varnode
-                    op->setInput(new VarnodeTpl(*newvn), i); // with output of subpiece
+                    op.setInput(new VarnodeTpl(*newvn), i); // with output of subpiece
                 }
             }
             outvec.push_back(op);
@@ -98,24 +98,24 @@ namespace Sla.SLACOMP
             OpTpl* clone;
             VarnodeTpl* v_clone,*vn;
 
-            clone = new OpTpl(op->getOpcode());
-            vn = op->getOut();
+            clone = new OpTpl(op.getOpcode());
+            vn = op.getOut();
             if (vn != (VarnodeTpl*)0)
             {
                 v_clone = new VarnodeTpl(*vn);
-                clone->setOutput(v_clone);
+                clone.setOutput(v_clone);
             }
-            for (int4 i = 0; i < op->numInput(); ++i)
+            for (int4 i = 0; i < op.numInput(); ++i)
             {
-                vn = op->getIn(i);
+                vn = op.getIn(i);
                 v_clone = new VarnodeTpl(*vn);
-                if (v_clone->isRelative())
+                if (v_clone.isRelative())
                 {
                     // Adjust relative index, depending on the labelbase
-                    uintb val = v_clone->getOffset().getReal() + getLabelBase();
-                    v_clone->setRelative(val);
+                    uintb val = v_clone.getOffset().getReal() + getLabelBase();
+                    v_clone.setRelative(val);
                 }
-                clone->addInput(v_clone);
+                clone.addInput(v_clone);
             }
             if (!transferOp(clone,params))
                 delete clone;
@@ -139,7 +139,7 @@ namespace Sla.SLACOMP
         /// \param val is the error message
         private void reportError(Location loc, string val)
         {
-            slgh->reportError(loc, val);
+            slgh.reportError(loc, val);
             haserror = true;
         }
 
@@ -156,9 +156,9 @@ namespace Sla.SLACOMP
             VarnodeTpl* vn;
             HandleTpl* hand;
             free();
-            for (int4 i = 1; i < macroop->numInput(); ++i)
+            for (int4 i = 1; i < macroop.numInput(); ++i)
             {
-                vn = macroop->getIn(i);
+                vn = macroop.getIn(i);
                 hand = new HandleTpl(vn);
                 @params.push_back(hand);
             }
@@ -189,12 +189,12 @@ namespace Sla.SLACOMP
             OpTpl* clone;
             VarnodeTpl* v_clone;
 
-            clone = new OpTpl(op->getOpcode());
-            v_clone = new VarnodeTpl(*op->getIn(0)); // Clone the label index
+            clone = new OpTpl(op.getOpcode());
+            v_clone = new VarnodeTpl(*op.getIn(0)); // Clone the label index
                                                      // Make adjustment to macro local value so that it is parent local
-            uintb val = v_clone->getOffset().getReal() + getLabelBase();
-            v_clone->setOffset(val);
-            clone->addInput(v_clone);
+            uintb val = v_clone.getOffset().getReal() + getLabelBase();
+            v_clone.setOffset(val);
+            clone.addInput(v_clone);
             outvec.push_back(clone);
         }
 

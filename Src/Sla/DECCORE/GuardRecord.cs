@@ -89,36 +89,36 @@ namespace Sla.DECCORE
             {   // Are the same number of bits being copied
                 if (baseVn == baseVn2)          // Are bits being copied from same varnode
                     return 1;                   // If so, values are the same
-                loadOp = baseVn->getDef();          // Otherwise check if different base varnodes hold same value
-                loadOp2 = baseVn2->getDef();
+                loadOp = baseVn.getDef();          // Otherwise check if different base varnodes hold same value
+                loadOp2 = baseVn2.getDef();
             }
             else
             {
-                loadOp = vn->getDef();          // Check if different varnodes hold same value
-                loadOp2 = vn2->getDef();
+                loadOp = vn.getDef();          // Check if different varnodes hold same value
+                loadOp2 = vn2.getDef();
             }
             if (loadOp == (PcodeOp*)0) return 0;
             if (loadOp2 == (PcodeOp*)0) return 0;
             if (oneOffMatch(loadOp, loadOp2) == 1)      // Check for simple duplicate calculations
                 return 1;
-            if (loadOp->code() != CPUI_LOAD) return 0;
-            if (loadOp2->code() != CPUI_LOAD) return 0;
-            if (loadOp->getIn(0)->getOffset() != loadOp2->getIn(0)->getOffset()) return 0;
-            Varnode* ptr = loadOp->getIn(1);
-            Varnode* ptr2 = loadOp2->getIn(1);
+            if (loadOp.code() != CPUI_LOAD) return 0;
+            if (loadOp2.code() != CPUI_LOAD) return 0;
+            if (loadOp.getIn(0).getOffset() != loadOp2.getIn(0).getOffset()) return 0;
+            Varnode* ptr = loadOp.getIn(1);
+            Varnode* ptr2 = loadOp2.getIn(1);
             if (ptr == ptr2) return 2;
-            if (!ptr->isWritten()) return 0;
-            if (!ptr2->isWritten()) return 0;
-            PcodeOp* addop = ptr->getDef();
-            if (addop->code() != CPUI_INT_ADD) return 0;
-            Varnode* constvn = addop->getIn(1);
-            if (!constvn->isConstant()) return 0;
-            PcodeOp* addop2 = ptr2->getDef();
-            if (addop2->code() != CPUI_INT_ADD) return 0;
-            Varnode* constvn2 = addop2->getIn(1);
-            if (!constvn2->isConstant()) return 0;
-            if (addop->getIn(0) != addop2->getIn(0)) return 0;
-            if (constvn->getOffset() != constvn2->getOffset()) return 0;
+            if (!ptr.isWritten()) return 0;
+            if (!ptr2.isWritten()) return 0;
+            PcodeOp* addop = ptr.getDef();
+            if (addop.code() != CPUI_INT_ADD) return 0;
+            Varnode* constvn = addop.getIn(1);
+            if (!constvn.isConstant()) return 0;
+            PcodeOp* addop2 = ptr2.getDef();
+            if (addop2.code() != CPUI_INT_ADD) return 0;
+            Varnode* constvn2 = addop2.getIn(1);
+            if (!constvn2.isConstant()) return 0;
+            if (addop.getIn(0) != addop2.getIn(0)) return 0;
+            if (constvn.getOffset() != constvn2.getOffset()) return 0;
             return 2;
         }
 
@@ -131,9 +131,9 @@ namespace Sla.DECCORE
         /// \return 1 if the same value is produced, 0 otherwise
         public static int4 oneOffMatch(PcodeOp op1, PcodeOp op2)
         {
-            if (op1->code() != op2->code())
+            if (op1.code() != op2.code())
                 return 0;
-            switch (op1->code())
+            switch (op1.code())
             {
                 case CPUI_INT_AND:
                 case CPUI_INT_ADD:
@@ -144,8 +144,8 @@ namespace Sla.DECCORE
                 case CPUI_INT_SRIGHT:
                 case CPUI_INT_MULT:
                 case CPUI_SUBPIECE:
-                    if (op2->getIn(0) != op1->getIn(0)) return 0;
-                    if (matching_constants(op2->getIn(1), op1->getIn(1)))
+                    if (op2.getIn(0) != op1.getIn(0)) return 0;
+                    if (matching_constants(op2.getIn(1), op1.getIn(1)))
                         return 1;
                     break;
                 default:
@@ -166,66 +166,66 @@ namespace Sla.DECCORE
         /// \return the earliest source of the quasi-copy, which may just be the given Varnode
         public static Varnode quasiCopy(Varnode vn, int4 bitsPreserved)
         {
-            bitsPreserved = mostsigbit_set(vn->getNZMask()) + 1;
+            bitsPreserved = mostsigbit_set(vn.getNZMask()) + 1;
             if (bitsPreserved == 0) return vn;
             uintb mask = 1;
             mask <<= bitsPreserved;
             mask -= 1;
-            PcodeOp* op = vn->getDef();
+            PcodeOp* op = vn.getDef();
             Varnode* constVn;
             while (op != (PcodeOp*)0)
             {
-                switch (op->code())
+                switch (op.code())
                 {
                     case CPUI_COPY:
-                        vn = op->getIn(0);
-                        op = vn->getDef();
+                        vn = op.getIn(0);
+                        op = vn.getDef();
                         break;
                     case CPUI_INT_AND:
-                        constVn = op->getIn(1);
-                        if (constVn->isConstant() && constVn->getOffset() == mask)
+                        constVn = op.getIn(1);
+                        if (constVn.isConstant() && constVn.getOffset() == mask)
                         {
-                            vn = op->getIn(0);
-                            op = vn->getDef();
+                            vn = op.getIn(0);
+                            op = vn.getDef();
                         }
                         else
                             op = (PcodeOp*)0;
                         break;
                     case CPUI_INT_OR:
-                        constVn = op->getIn(1);
-                        if (constVn->isConstant() && ((constVn->getOffset() | mask) == (constVn->getOffset() ^ mask)))
+                        constVn = op.getIn(1);
+                        if (constVn.isConstant() && ((constVn.getOffset() | mask) == (constVn.getOffset() ^ mask)))
                         {
-                            vn = op->getIn(0);
-                            op = vn->getDef();
+                            vn = op.getIn(0);
+                            op = vn.getDef();
                         }
                         else
                             op = (PcodeOp*)0;
                         break;
                     case CPUI_INT_SEXT:
                     case CPUI_INT_ZEXT:
-                        if (op->getIn(0)->getSize() * 8 >= bitsPreserved)
+                        if (op.getIn(0).getSize() * 8 >= bitsPreserved)
                         {
-                            vn = op->getIn(0);
-                            op = vn->getDef();
+                            vn = op.getIn(0);
+                            op = vn.getDef();
                         }
                         else
                             op = (PcodeOp*)0;
                         break;
                     case CPUI_PIECE:
-                        if (op->getIn(1)->getSize() * 8 >= bitsPreserved)
+                        if (op.getIn(1).getSize() * 8 >= bitsPreserved)
                         {
-                            vn = op->getIn(1);
-                            op = vn->getDef();
+                            vn = op.getIn(1);
+                            op = vn.getDef();
                         }
                         else
                             op = (PcodeOp*)0;
                         break;
                     case CPUI_SUBPIECE:
-                        constVn = op->getIn(1);
-                        if (constVn->isConstant() && constVn->getOffset() == 0)
+                        constVn = op.getIn(1);
+                        if (constVn.isConstant() && constVn.getOffset() == 0)
                         {
-                            vn = op->getIn(0);
-                            op = vn->getDef();
+                            vn = op.getIn(0);
+                            op = vn.getDef();
                         }
                         else
                             op = (PcodeOp*)0;

@@ -17,7 +17,7 @@ namespace Sla.EXTRA
         /// XML document.
         public override void execute(TextReader s)
         {
-            if (dcp->cgraph == (CallGraph*)0)
+            if (dcp.cgraph == (CallGraph*)0)
                 throw IfaceExecutionError("No callgraph has been built");
 
             string name;
@@ -31,9 +31,9 @@ namespace Sla.EXTRA
                 throw IfaceExecutionError("Unable to open file " + name);
 
             XmlEncode encoder(os);
-            dcp->cgraph->encode(encoder);
+            dcp.cgraph.encode(encoder);
             os.close();
-            *status->optr << "Successfully saved callgraph to " << name << endl;
+            *status.optr << "Successfully saved callgraph to " << name << endl;
         }
     }
 }

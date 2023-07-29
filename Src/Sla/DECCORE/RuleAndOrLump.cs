@@ -37,18 +37,18 @@ namespace Sla.DECCORE
             Varnode* vn1,*basevn;
             PcodeOp* op2;
 
-            opc = op->code();
-            if (!op->getIn(1)->isConstant()) return 0;
-            vn1 = op->getIn(0);
-            if (!vn1->isWritten()) return 0;
-            op2 = vn1->getDef();
-            if (op2->code() != opc) return 0; // Must be same op
-            if (!op2->getIn(1)->isConstant()) return 0;
-            basevn = op2->getIn(0);
-            if (basevn->isFree()) return 0;
+            opc = op.code();
+            if (!op.getIn(1).isConstant()) return 0;
+            vn1 = op.getIn(0);
+            if (!vn1.isWritten()) return 0;
+            op2 = vn1.getDef();
+            if (op2.code() != opc) return 0; // Must be same op
+            if (!op2.getIn(1).isConstant()) return 0;
+            basevn = op2.getIn(0);
+            if (basevn.isFree()) return 0;
 
-            uintb val = op->getIn(1)->getOffset();
-            uintb val2 = op2->getIn(1)->getOffset();
+            uintb val = op.getIn(1).getOffset();
+            uintb val2 = op2.getIn(1).getOffset();
             if (opc == CPUI_INT_AND)
                 val &= val2;
             else if (opc == CPUI_INT_OR)
@@ -57,7 +57,7 @@ namespace Sla.DECCORE
                 val ^= val2;
 
             data.opSetInput(op, basevn, 0);
-            data.opSetInput(op, data.newConstant(basevn->getSize(), val), 1);
+            data.opSetInput(op, data.newConstant(basevn.getSize(), val), 1);
             return 1;
         }
     }

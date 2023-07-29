@@ -19,10 +19,10 @@ namespace Sla.DECCORE
         /// The first parameter must give the name of a registered prototype model.
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            ProtoModel* model = glb->getModel(p1);
+            ProtoModel* model = glb.getModel(p1);
             if (model == (ProtoModel*)0)
                 throw new LowlevelError("Unknown prototype model :" + p1);
-            glb->setDefaultModel(model);
+            glb.setDefaultModel(model);
             return "Set default prototype to " + p1;
         }
     }

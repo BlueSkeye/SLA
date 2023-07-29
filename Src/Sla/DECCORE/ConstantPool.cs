@@ -44,9 +44,9 @@ namespace Sla.DECCORE
         public void putRecord(List<uintb> refs, uint tag, string tok, Datatype ct)
         {
             CPoolRecord newrec = createRecord(refs);
-            newrec->tag = tag;
-            newrec->token = tok;
-            newrec->type = ct;
+            newrec.tag = tag;
+            newrec.token = tok;
+            newrec.type = ct;
         }
 
         /// \brief Restore a CPoolRecord given a \e reference and a stream decoder
@@ -59,7 +59,7 @@ namespace Sla.DECCORE
         public CPoolRecord decodeRecord(List<uintb> refs, Decoder decoder, TypeFactory typegrp)
         {
             CPoolRecord* newrec = createRecord(refs);
-            newrec->decode(decoder, typegrp);
+            newrec.decode(decoder, typegrp);
             return newrec;
         }
 

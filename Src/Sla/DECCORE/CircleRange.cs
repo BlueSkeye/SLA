@@ -447,7 +447,7 @@ namespace Sla.DECCORE
                 return true;
             return false;
 
-            // Missing one case where op2.step > this->step, and the boundaries don't show containment,
+            // Missing one case where op2.step > this.step, and the boundaries don't show containment,
             // but there is containment because the lower step size UP TO right still contains the edge points
         }
 
@@ -1213,46 +1213,46 @@ namespace Sla.DECCORE
         {
             Varnode* res;
 
-            if (op->numInput() == 1)
+            if (op.numInput() == 1)
             {
-                res = op->getIn(0);
-                if (res->isConstant()) return (Varnode*)0;
-                if (!pullBackUnary(op->code(), res->getSize(), op->getOut()->getSize()))
+                res = op.getIn(0);
+                if (res.isConstant()) return (Varnode*)0;
+                if (!pullBackUnary(op.code(), res.getSize(), op.getOut().getSize()))
                     return (Varnode*)0;
             }
-            else if (op->numInput() == 2)
+            else if (op.numInput() == 2)
             {
                 Varnode* constvn;
                 uintb val;
                 // Find non-constant varnode input, and slot
                 // Make sure second input is constant
                 int4 slot = 0;
-                res = op->getIn(slot);
-                constvn = op->getIn(1 - slot);
-                if (res->isConstant())
+                res = op.getIn(slot);
+                constvn = op.getIn(1 - slot);
+                if (res.isConstant())
                 {
                     slot = 1;
                     constvn = res;
-                    res = op->getIn(slot);
-                    if (res->isConstant())
+                    res = op.getIn(slot);
+                    if (res.isConstant())
                         return (Varnode*)0;
                 }
-                else if (!constvn->isConstant())
+                else if (!constvn.isConstant())
                     return (Varnode*)0;
-                val = constvn->getOffset();
-                OpCode opc = op->code();
-                if (!pullBackBinary(opc, val, slot, res->getSize(), op->getOut()->getSize()))
+                val = constvn.getOffset();
+                OpCode opc = op.code();
+                if (!pullBackBinary(opc, val, slot, res.getSize(), op.getOut().getSize()))
                 {
                     if (usenzmask && opc == CPUI_SUBPIECE && val == 0)
                     {
                         // If everything we are truncating is known to be zero, we may still have a range
-                        int4 msbset = mostsigbit_set(res->getNZMask());
+                        int4 msbset = mostsigbit_set(res.getNZMask());
                         msbset = (msbset + 8) / 8;
-                        if (op->getOut()->getSize() < msbset) // Some bytes we are chopping off might not be zero
+                        if (op.getOut().getSize() < msbset) // Some bytes we are chopping off might not be zero
                             return (Varnode*)0;
                         else
                         {
-                            mask = calc_mask(res->getSize()); // Keep the range but make the mask bigger
+                            mask = calc_mask(res.getSize()); // Keep the range but make the mask bigger
                                                               // If the range wraps (left>right) then, increasing the mask adds all the new space into
                                                               // the range, and it would be an inaccurate pullback by itself, but with the nzmask intersection
                                                               // all the new space will get intersected away again.
@@ -1261,7 +1261,7 @@ namespace Sla.DECCORE
                     else
                         return (Varnode*)0;
                 }
-                if (constvn->getSymbolEntry() != (SymbolEntry*)0)
+                if (constvn.getSymbolEntry() != (SymbolEntry*)0)
                     *constMarkup = constvn;
             }
             else    // Neither unary or binary
@@ -1270,7 +1270,7 @@ namespace Sla.DECCORE
             if (usenzmask)
             {
                 CircleRange nzrange;
-                if (!nzrange.setNZMask(res->getNZMask(), res->getSize()))
+                if (!nzrange.setNZMask(res.getNZMask(), res.getSize()))
                     return res;
                 intersect(nzrange);
                 // If the intersect does not succeed (i.e. produces 2 pieces) the original range is

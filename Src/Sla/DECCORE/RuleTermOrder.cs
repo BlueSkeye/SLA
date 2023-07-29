@@ -41,10 +41,10 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn1 = op->getIn(0);
-            Varnode* vn2 = op->getIn(1);
+            Varnode* vn1 = op.getIn(0);
+            Varnode* vn2 = op.getIn(1);
 
-            if (vn1->isConstant() && (!vn2->isConstant()))
+            if (vn1.isConstant() && (!vn2.isConstant()))
             {
                 data.opSwapInput(op, 0, 1); // Reverse the order of the terms
                 return 1;

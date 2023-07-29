@@ -25,36 +25,36 @@ namespace Sla.DECCORE
             bool res = false;
             for (; ; )
             {
-                if (vn->isInput() && !vn->isPersist())
+                if (vn.isInput() && !vn.isPersist())
                 {
                     res = true;
                     break;
                 }
-                PcodeOp* op = vn->getDef();
+                PcodeOp* op = vn.getDef();
                 while (!res && op != (PcodeOp*)0)
                 {
-                    switch (op->code())
+                    switch (op.code())
                     {
                         case CPUI_COPY:
-                            vn = op->getIn(0);
-                            op = vn->getDef();
+                            vn = op.getIn(0);
+                            op = vn.getDef();
                             break;
                         case CPUI_MULTIEQUAL:
-                            if (!op->isMark())
+                            if (!op.isMark())
                             {
-                                op->setMark();
+                                op.setMark();
                                 worklist.push_back(op);
                             }
                             op = (PcodeOp*)0;
                             break;
                         case CPUI_INDIRECT:
-                            if (op->getIn(1)->getSpace()->getType() == IPTR_IOP)
+                            if (op.getIn(1).getSpace().getType() == IPTR_IOP)
                             {
-                                PcodeOp* callOp = PcodeOp::getOpFromConst(op->getIn(1)->getAddr());
-                                if (callOp->isCall())
+                                PcodeOp* callOp = PcodeOp::getOpFromConst(op.getIn(1).getAddr());
+                                if (callOp.isCall())
                                 {
                                     FuncCallSpecs* fspec = data.getCallSpecs(callOp);
-                                    if (fspec != (FuncCallSpecs*)0 && !fspec->isOutputActive())
+                                    if (fspec != (FuncCallSpecs*)0 && !fspec.isOutputActive())
                                     {
                                         res = true;
                                     }
@@ -66,7 +66,7 @@ namespace Sla.DECCORE
                         case CPUI_CALLIND:
                             {
                                 FuncCallSpecs* fspec = data.getCallSpecs(op);
-                                if (fspec != (FuncCallSpecs*)0 && !fspec->isOutputActive())
+                                if (fspec != (FuncCallSpecs*)0 && !fspec.isOutputActive())
                                 {
                                     res = true;
                                 }
@@ -80,21 +80,21 @@ namespace Sla.DECCORE
                 if (res) break;
                 if (pos >= worklist.size()) break;
                 op = worklist[pos];
-                if (slot < op->numInput())
+                if (slot < op.numInput())
                 {
-                    vn = op->getIn(slot);
+                    vn = op.getIn(slot);
                     slot += 1;
                 }
                 else
                 {
                     pos += 1;
                     if (pos >= worklist.size()) break;
-                    vn = worklist[pos]->getIn(0);
+                    vn = worklist[pos].getIn(0);
                     slot = 1;
                 }
             }
             for (int4 i = 0; i < worklist.size(); ++i)
-                worklist[i]->clearMark();
+                worklist[i].clearMark();
             return res;
         }
 
@@ -112,40 +112,40 @@ namespace Sla.DECCORE
             FuncCallSpecs fProto;
             List<PcodeOp> worklist = new List<PcodeOp>();
             int4 pos = 0;
-            op->setMark();
+            op.setMark();
             worklist.push_back(op);
             while (pos < worklist.size())
             {
                 PcodeOp* curOp = worklist[pos];
                 pos += 1;
-                Varnode* outVn = curOp->getOut();
+                Varnode* outVn = curOp.getOut();
                 list<PcodeOp*>::const_iterator iter;
-                list<PcodeOp*>::const_iterator enditer = outVn->endDescend();
-                for (iter = outVn->beginDescend(); iter != enditer; ++iter)
+                list<PcodeOp*>::const_iterator enditer = outVn.endDescend();
+                for (iter = outVn.beginDescend(); iter != enditer; ++iter)
                 {
                     curOp = *iter;
-                    switch (curOp->code())
+                    switch (curOp.code())
                     {
                         case CPUI_COPY:
                         case CPUI_INDIRECT:
                         case CPUI_MULTIEQUAL:
-                            if (!curOp->isMark())
+                            if (!curOp.isMark())
                             {
-                                curOp->setMark();
+                                curOp.setMark();
                                 worklist.push_back(curOp);
                             }
                             break;
                         case CPUI_CALL:
                         case CPUI_CALLIND:
                             fProto = data.getCallSpecs(curOp);
-                            if (fProto != (FuncProto*)0 && !fProto->isInputActive() && !fProto->isInputLocked())
+                            if (fProto != (FuncProto*)0 && !fProto.isInputActive() && !fProto.isInputLocked())
                             {
-                                int4 bytesConsumed = op->getIn(1)->getSize();
-                                for (int4 i = 1; i < curOp->numInput(); ++i)
+                                int4 bytesConsumed = op.getIn(1).getSize();
+                                for (int4 i = 1; i < curOp.numInput(); ++i)
                                 {
-                                    if (curOp->getIn(i) == outVn)
+                                    if (curOp.getIn(i) == outVn)
                                     {
-                                        if (fProto->setInputBytesConsumed(i, bytesConsumed))
+                                        if (fProto.setInputBytesConsumed(i, bytesConsumed))
                                             count += 1;
                                     }
                                 }
@@ -154,7 +154,7 @@ namespace Sla.DECCORE
                         case CPUI_RETURN:
                             if (!data.getFuncProto().isOutputLocked())
                             {
-                                if (data.getFuncProto().setReturnBytesConsumed(op->getIn(1)->getSize()))
+                                if (data.getFuncProto().setReturnBytesConsumed(op.getIn(1).getSize()))
                                     count += 1;
                             }
                             break;
@@ -164,7 +164,7 @@ namespace Sla.DECCORE
                 }
             }
             for (int4 i = 0; i < worklist.size(); ++i)
-                worklist[i]->clearMark();
+                worklist[i].clearMark();
             return count;
         }
 
@@ -197,36 +197,36 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn = op->getIn(0);
-            if (!vn->isWritten()) return 0;
-            PcodeOp* subOp = vn->getDef();
+            Varnode* vn = op.getIn(0);
+            if (!vn.isWritten()) return 0;
+            PcodeOp* subOp = vn.getDef();
 
             // Make sure we are concatenating the most significant bytes of a truncation
-            OpCode opc = subOp->code();
+            OpCode opc = subOp.code();
             if (opc == CPUI_SUBPIECE)
             {
-                if (subOp->getIn(1)->getOffset() == 0) return 0;
-                if (!isPathology(subOp->getIn(0), data)) return 0;
+                if (subOp.getIn(1).getOffset() == 0) return 0;
+                if (!isPathology(subOp.getIn(0), data)) return 0;
             }
             else if (opc == CPUI_INDIRECT)
             {
-                if (!subOp->isIndirectCreation()) return 0;                 // Indirect concatenation
-                Varnode* lsbVn = op->getIn(1);
-                if (!lsbVn->isWritten()) return 0;
-                PcodeOp* lsbOp = lsbVn->getDef();
-                if ((lsbOp->getEvalType() & (PcodeOp::binary | PcodeOp::unary)) == 0)
+                if (!subOp.isIndirectCreation()) return 0;                 // Indirect concatenation
+                Varnode* lsbVn = op.getIn(1);
+                if (!lsbVn.isWritten()) return 0;
+                PcodeOp* lsbOp = lsbVn.getDef();
+                if ((lsbOp.getEvalType() & (PcodeOp::binary | PcodeOp::unary)) == 0)
                 {   // from either a unary/binary operation
-                    if (!lsbOp->isCall()) return 0;                     // or a CALL
+                    if (!lsbOp.isCall()) return 0;                     // or a CALL
                     FuncCallSpecs* fc = data.getCallSpecs(lsbOp);
                     if (fc == (FuncCallSpecs*)0) return 0;
-                    if (!fc->isOutputLocked()) return 0;                    // with a locked output
+                    if (!fc.isOutputLocked()) return 0;                    // with a locked output
                 }
-                Address addr = lsbVn->getAddr();
-                if (addr.getSpace()->isBigEndian())
-                    addr = addr - vn->getSize();
+                Address addr = lsbVn.getAddr();
+                if (addr.getSpace().isBigEndian())
+                    addr = addr - vn.getSize();
                 else
-                    addr = addr + lsbVn->getSize();
-                if (addr != vn->getAddr()) return 0;                    // into a contiguous register
+                    addr = addr + lsbVn.getSize();
+                if (addr != vn.getAddr()) return 0;                    // into a contiguous register
             }
             else
                 return 0;

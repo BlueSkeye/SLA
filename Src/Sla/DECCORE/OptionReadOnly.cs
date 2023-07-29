@@ -22,8 +22,8 @@ namespace Sla.DECCORE
         {
             if (p1.size() == 0)
                 throw ParseError("Read-only option must be set \"on\" or \"off\"");
-            glb->readonlypropagate = onOrOff(p1);
-            if (glb->readonlypropagate)
+            glb.readonlypropagate = onOrOff(p1);
+            if (glb.readonlypropagate)
                 return "Read-only memory locations now propagate as constants";
             return "Read-only memory locations now do not propagate";
         }

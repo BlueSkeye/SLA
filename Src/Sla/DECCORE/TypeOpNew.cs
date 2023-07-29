@@ -28,31 +28,31 @@ namespace Sla.DECCORE
             int4 inslot, int4 outslot)
         {
             if ((inslot != 0) || (outslot != -1)) return (Datatype*)0;
-            Varnode* vn0 = op->getIn(0);
-            if (!vn0->isWritten()) return (Datatype*)0;     // Don't propagate
-            if (vn0->getDef()->code() != CPUI_CPOOLREF) return (Datatype*)0;
+            Varnode* vn0 = op.getIn(0);
+            if (!vn0.isWritten()) return (Datatype*)0;     // Don't propagate
+            if (vn0.getDef().code() != CPUI_CPOOLREF) return (Datatype*)0;
             return alttype;     // Propagate cpool result as result of new operator
         }
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opNewOp(op);
+            lng.opNewOp(op);
         }
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            if (op->getOut() != (Varnode*)0)
+            if (op.getOut() != (Varnode*)0)
             {
-                Varnode::printRaw(s, op->getOut());
+                Varnode::printRaw(s, op.getOut());
                 s << " = ";
             }
             s << getOperatorName(op);
             s << '(';
-            Varnode::printRaw(s, op->getIn(0));
-            for (int4 i = 1; i < op->numInput(); ++i)
+            Varnode::printRaw(s, op.getIn(0));
+            for (int4 i = 1; i < op.numInput(); ++i)
             {
                 s << ',';
-                Varnode::printRaw(s, op->getIn(i));
+                Varnode::printRaw(s, op.getIn(i));
             }
             s << ')';
         }

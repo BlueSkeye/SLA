@@ -36,7 +36,7 @@ namespace Sla.SLEIGH
             auto it = fileToIndex.find(filename);
             if (fileToIndex.end() != it)
             {
-                return it->second;
+                return it.second;
             }
             fileToIndex[filename] = leastUnusedIndex;
             indexToFile[leastUnusedIndex] = filename;
@@ -58,12 +58,12 @@ namespace Sla.SLEIGH
         /// read a stored index mapping from an XML file
         public void restoreXml(Element el)
         {
-            List sourceFiles = el->getChildren();
+            List sourceFiles = el.getChildren();
             List::const_iterator iter = sourceFiles.begin();
             for (; iter != sourceFiles.end(); ++iter)
             {
-                string filename = (*iter)->getAttributeValue("name");
-                int4 index = stoi((*iter)->getAttributeValue("index"), NULL, 10);
+                string filename = (*iter).getAttributeValue("name");
+                int4 index = stoi((*iter).getAttributeValue("index"), NULL, 10);
                 fileToIndex[filename] = index;
                 indexToFile[index] = filename;
             }

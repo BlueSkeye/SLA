@@ -27,19 +27,19 @@ namespace Sla.DECCORE
         public PropagationState(Varnode v)
         {
             vn = v;
-            iter = vn->beginDescend();
-            if (iter != vn->endDescend())
+            iter = vn.beginDescend();
+            if (iter != vn.endDescend())
             {
                 op = *iter++;
-                if (op->getOut() != (Varnode*)0)
+                if (op.getOut() != (Varnode*)0)
                     slot = -1;
                 else
                     slot = 0;
-                inslot = op->getSlot(vn);
+                inslot = op.getSlot(vn);
             }
             else
             {
-                op = vn->getDef();
+                op = vn.getDef();
                 inslot = -1;
                 slot = 0;
             }
@@ -53,22 +53,22 @@ namespace Sla.DECCORE
         public void step()
         {
             slot += 1;
-            if (slot < op->numInput())
+            if (slot < op.numInput())
                 return;
-            if (iter != vn->endDescend())
+            if (iter != vn.endDescend())
             {
                 op = *iter++;
-                if (op->getOut() != (Varnode*)0)
+                if (op.getOut() != (Varnode*)0)
                     slot = -1;
                 else
                     slot = 0;
-                inslot = op->getSlot(vn);
+                inslot = op.getSlot(vn);
                 return;
             }
             if (inslot == -1)
                 op = (PcodeOp*)0;
             else
-                op = vn->getDef();
+                op = vn.getDef();
             inslot = -1;
             slot = 0;
         }

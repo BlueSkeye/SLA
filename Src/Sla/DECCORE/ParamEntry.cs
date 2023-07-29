@@ -103,18 +103,18 @@ namespace Sla.DECCORE
         /// \param curList is the current list of ParamEntry
         private void resolveJoin(List<ParamEntry> curList)
         {
-            if (spaceid->getType() != IPTR_JOIN)
+            if (spaceid.getType() != IPTR_JOIN)
             {
                 joinrec = (JoinRecord*)0;
                 return;
             }
-            joinrec = spaceid->getManager()->findJoin(addressbase);
+            joinrec = spaceid.getManager().findJoin(addressbase);
             groupSet.clear();
-            for (int4 i = 0; i < joinrec->numPieces(); ++i)
+            for (int4 i = 0; i < joinrec.numPieces(); ++i)
             {
-                ParamEntry entry = findEntryByStorage(curList, joinrec->getPiece(i));
+                ParamEntry entry = findEntryByStorage(curList, joinrec.getPiece(i));
                 if (entry != (ParamEntry*)0) {
-                    groupSet.insert(groupSet.end(), entry->groupSet.begin(), entry->groupSet.end());
+                    groupSet.insert(groupSet.end(), entry.groupSet.begin(), entry.groupSet.end());
                     // For output <pentry>, if the most signifigant part overlaps with an earlier <pentry>
                     // the least signifigant part is marked for extra checks, and vice versa.
                     flags |= (i == 0) ? extracheck_low : extracheck_high;
@@ -151,9 +151,9 @@ namespace Sla.DECCORE
                     // For output <pentry>, if the most signifigant part overlaps with an earlier <pentry>
                     // the least signifigant part is marked for extra checks, and vice versa.
                     if (addressbase == entry.addressbase)
-                        flags |= spaceid->isBigEndian() ? extracheck_low : extracheck_high;
+                        flags |= spaceid.isBigEndian() ? extracheck_low : extracheck_high;
                     else
-                        flags |= spaceid->isBigEndian() ? extracheck_high : extracheck_low;
+                        flags |= spaceid.isBigEndian() ? extracheck_high : extracheck_low;
                 }
                 else
                     throw new LowlevelError("Illegal overlap of <pentry> in compiler spec");
@@ -167,7 +167,7 @@ namespace Sla.DECCORE
 
         /// \brief Is the logical value left-justified within its container
         private bool isLeftJustified()
-            => (((flags&force_left_justify)!=0)||(!spaceid->isBigEndian()));
+            => (((flags&force_left_justify)!=0)||(!spaceid.isBigEndian()));
 
         /// Constructor for use with decode
         public ParamEntry(int grp)
@@ -277,9 +277,9 @@ namespace Sla.DECCORE
             if (joinrec != (JoinRecord*)0)
             {
                 rangeend = addr.getOffset() + sz - 1;
-                for (int4 i = 0; i < joinrec->numPieces(); ++i)
+                for (int4 i = 0; i < joinrec.numPieces(); ++i)
                 {
-                    VarnodeData vdata = joinrec->getPiece(i);
+                    VarnodeData vdata = joinrec.getPiece(i);
                     if (addr.getSpace() != vdata.space) continue;
                     uintb vdataend = vdata.offset + vdata.size - 1;
                     if (addr.getOffset() < vdata.offset && rangeend < vdataend)
@@ -312,9 +312,9 @@ namespace Sla.DECCORE
             if (joinrec != (JoinRecord*)0)
             {
                 int4 res = 0;
-                for (int4 i = joinrec->numPieces() - 1; i >= 0; --i)
+                for (int4 i = joinrec.numPieces() - 1; i >= 0; --i)
                 { // Move from least significant to most
-                    VarnodeData vdata = joinrec->getPiece(i);
+                    VarnodeData vdata = joinrec.getPiece(i);
                     int4 cur = vdata.getAddr().justifiedContain(vdata.size, addr, sz, false);
                     if (cur < 0)
                         res += vdata.size;  // We skipped this many less significant bytes
@@ -363,9 +363,9 @@ namespace Sla.DECCORE
             Address endaddr = addr + (sz - 1);
             if (joinrec != (JoinRecord*)0)
             {
-                for (int4 i = joinrec->numPieces() - 1; i >= 0; --i)
+                for (int4 i = joinrec.numPieces() - 1; i >= 0; --i)
                 { // Move from least significant to most
-                    VarnodeData vdata = joinrec->getPiece(i);
+                    VarnodeData vdata = joinrec.getPiece(i);
                     if ((addr.overlap(0, vdata.getAddr(), vdata.size) >= 0) &&
                     (endaddr.overlap(0, vdata.getAddr(), vdata.size) >= 0))
                     {
@@ -410,9 +410,9 @@ namespace Sla.DECCORE
                 Address addr(spaceid, addressbase);
                 return op2.containedBy(addr, size);
             }
-            for (int4 i = 0; i < joinrec->numPieces(); ++i)
+            for (int4 i = 0; i < joinrec.numPieces(); ++i)
             {
-                VarnodeData vdata = joinrec->getPiece(i);
+                VarnodeData vdata = joinrec.getPiece(i);
                 Address addr = vdata.getAddr();
                 if (op2.containedBy(addr, vdata.size))
                     return true;
@@ -523,8 +523,8 @@ namespace Sla.DECCORE
                 spaceused = size;
                 if (((flags & smallsize_floatext) != 0) && (sz != size))
                 { // Do we have an implied floating-point extension
-                    AddrSpaceManager* manager = spaceid->getManager();
-                    res = manager->constructFloatExtensionAddress(res, size, sz);
+                    AddrSpaceManager* manager = spaceid.getManager();
+                    res = manager.constructFloatExtensionAddress(res, size, sz);
                     return res;
                 }
             }
@@ -623,9 +623,9 @@ namespace Sla.DECCORE
                 //      throw new LowlevelError("Stack <pentry> address must match alignment");
                 numslots = size / alignment;
             }
-            if (spaceid->isReverseJustified())
+            if (spaceid.isReverseJustified())
             {
-                if (spaceid->isBigEndian())
+                if (spaceid.isBigEndian())
                     flags |= force_left_justify;
                 else
                     throw new LowlevelError("No support for right justification in little endian encoding");

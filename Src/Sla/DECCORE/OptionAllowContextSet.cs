@@ -23,7 +23,7 @@ namespace Sla.DECCORE
 
             string prop = val ? "on" : "off";
             string res = "Toggled allowcontextset to " + prop;
-            glb->translate->allowContextSet(val);
+            glb.translate.allowContextSet(val);
 
             return res;
         }

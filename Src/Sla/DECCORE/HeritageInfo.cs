@@ -40,7 +40,7 @@ namespace Sla.DECCORE
             // Leave any override intact: deadcodedelay = delay;
             deadremoved = 0;
             if (space != (AddrSpace*)0)
-                hasCallPlaceholders = (space->getType() == IPTR_SPACEBASE);
+                hasCallPlaceholders = (space.getType() == IPTR_SPACEBASE);
             warningissued = false;
             loadGuardSearch = false;
         }
@@ -56,19 +56,19 @@ namespace Sla.DECCORE
                 deadcodedelay = 0;
                 hasCallPlaceholders = false;
             }
-            else if (!spc->isHeritaged())
+            else if (!spc.isHeritaged())
             {
                 space = (AddrSpace*)0;
-                delay = spc->getDelay();
-                deadcodedelay = spc->getDeadcodeDelay();
+                delay = spc.getDelay();
+                deadcodedelay = spc.getDeadcodeDelay();
                 hasCallPlaceholders = false;
             }
             else
             {
                 space = spc;
-                delay = spc->getDelay();
-                deadcodedelay = spc->getDeadcodeDelay();
-                hasCallPlaceholders = (spc->getType() == IPTR_SPACEBASE);
+                delay = spc.getDelay();
+                deadcodedelay = spc.getDeadcodeDelay();
+                hasCallPlaceholders = (spc.getType() == IPTR_SPACEBASE);
             }
             deadremoved = 0;
             warningissued = false;

@@ -25,30 +25,30 @@ namespace Sla.DECCORE
 
             if (outvar != (VarnodeData*)0)
             {
-                Address oaddr(outvar->space, outvar->offset);
-                op = fd->newOp(isize, addr);
-                fd->newVarnodeOut(outvar->size, oaddr, op);
+                Address oaddr(outvar.space, outvar.offset);
+                op = fd.newOp(isize, addr);
+                fd.newVarnodeOut(outvar.size, oaddr, op);
             }
             else
-                op = fd->newOp(isize, addr);
-            fd->opSetOpcode(op, opc);
+                op = fd.newOp(isize, addr);
+            fd.opSetOpcode(op, opc);
             int4 i = 0;
-            if (op->isCodeRef())
+            if (op.isCodeRef())
             { // Is the first input parameter a code reference
                 Address addrcode(vars[0].space, vars[0].offset);
                 // addrcode.toPhysical()  // For backward compatibility with SLED
-                fd->opSetInput(op, fd->newCodeRef(addrcode), 0);
+                fd.opSetInput(op, fd.newCodeRef(addrcode), 0);
                 i += 1;
                 // This is handled by FlowInfo
-                //    if ((opc==CPUI_CALL)&&(addrcode==pos->getNaddr())) {
+                //    if ((opc==CPUI_CALL)&&(addrcode==pos.getNaddr())) {
                 // This is probably PIC code and the call is really a jump
-                //      fd->op_setopcode(op,CPUI_BRANCH);
+                //      fd.op_setopcode(op,CPUI_BRANCH);
                 //    }
             }
             for (; i < isize; ++i)
             {
-                vn = fd->newVarnode(vars[i].size, vars[i].space, vars[i].offset);
-                fd->opSetInput(op, vn, i);
+                vn = fd.newVarnode(vars[i].size, vars[i].space, vars[i].offset);
+                fd.opSetInput(op, vn, i);
             }
         }
 

@@ -26,14 +26,14 @@ namespace Sla.EXTRA
         }
         
         public override UnifyConstraint clone()
-            => (new ConstraintOpInput(opindex, varnodeindex, slot))->copyid(this);
+            => (new ConstraintOpInput(opindex, varnodeindex, slot)).copyid(this);
 
         public override bool step(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            if (!traverse->step()) return false;
+            if (!traverse.step()) return false;
             PcodeOp* op = state.data(opindex).getOp();
-            Varnode* vn = op->getIn(slot);
+            Varnode* vn = op.getIn(slot);
             state.data(varnodeindex).setVarnode(vn);
             return true;
         }
@@ -50,7 +50,7 @@ namespace Sla.EXTRA
         {
             printstate.printIndent(s);
             s << printstate.getName(varnodeindex) << " = " << printstate.getName(opindex);
-            s << "->getIn(" << dec << slot << ");" << endl;
+            s << ".getIn(" << dec << slot << ");" << endl;
         }
     }
 }

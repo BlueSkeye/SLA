@@ -14,7 +14,7 @@ namespace Sla.DECCORE
     /// perform are:
     ///   - possibleParam() Quick test if a Varnode could ever be a parameter with this prototype
     ///   - fillinMap()   Select trials completing prototype, given analysis info
-    ///   - assignMap()   Derive slot->address map, given a list of types
+    ///   - assignMap()   Derive slot.address map, given a list of types
     ///   - checkJoin()   Can two parameters be considered/converted into a single logical parameter
     internal abstract class ParamList
     {

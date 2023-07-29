@@ -29,82 +29,82 @@ namespace Sla.DECCORE
 
         private bool verifyShiftAmount()
         { // Make sure all the shift amount varnodes are consistent
-            if (!salo->isConstant()) return false;
-            if (!samid->isConstant()) return false;
-            if (!sahi->isConstant()) return false;
-            uintb val = salo->getOffset();
-            if (val != sahi->getOffset()) return false;
-            if (val >= 8 * lo->getSize()) return false; // If shift amount is so big, we would not use this form
-            val = 8 * lo->getSize() - val;
-            if (samid->getOffset() != val) return false;
+            if (!salo.isConstant()) return false;
+            if (!samid.isConstant()) return false;
+            if (!sahi.isConstant()) return false;
+            uintb val = salo.getOffset();
+            if (val != sahi.getOffset()) return false;
+            if (val >= 8 * lo.getSize()) return false; // If shift amount is so big, we would not use this form
+            val = 8 * lo.getSize() - val;
+            if (samid.getOffset() != val) return false;
             return true;
         }
 
         private bool mapLeft()
         { // Assume reshi, reslo are filled in, fill in other ops and varnodes
-            if (!reslo->isWritten()) return false;
-            if (!reshi->isWritten()) return false;
-            loshift = reslo->getDef();
-            opc = loshift->code();
+            if (!reslo.isWritten()) return false;
+            if (!reshi.isWritten()) return false;
+            loshift = reslo.getDef();
+            opc = loshift.code();
             if (opc != CPUI_INT_LEFT) return false;
-            orop = reshi->getDef();
-            if ((orop->code() != CPUI_INT_OR) && (orop->code() != CPUI_INT_XOR) && (orop->code() != CPUI_INT_ADD))
+            orop = reshi.getDef();
+            if ((orop.code() != CPUI_INT_OR) && (orop.code() != CPUI_INT_XOR) && (orop.code() != CPUI_INT_ADD))
                 return false;
-            midlo = orop->getIn(0);
-            midhi = orop->getIn(1);
-            if (!midlo->isWritten()) return false;
-            if (!midhi->isWritten()) return false;
-            if (midhi->getDef()->code() != CPUI_INT_LEFT)
+            midlo = orop.getIn(0);
+            midhi = orop.getIn(1);
+            if (!midlo.isWritten()) return false;
+            if (!midhi.isWritten()) return false;
+            if (midhi.getDef().code() != CPUI_INT_LEFT)
             {
                 Varnode* tmpvn = midhi;
                 midhi = midlo;
                 midlo = tmpvn;
             }
-            midshift = midlo->getDef();
-            if (midshift->code() != CPUI_INT_RIGHT) return false;   // Must be unsigned RIGHT
-            hishift = midhi->getDef();
-            if (hishift->code() != CPUI_INT_LEFT) return false;
+            midshift = midlo.getDef();
+            if (midshift.code() != CPUI_INT_RIGHT) return false;   // Must be unsigned RIGHT
+            hishift = midhi.getDef();
+            if (hishift.code() != CPUI_INT_LEFT) return false;
 
-            if (lo != loshift->getIn(0)) return false;
-            if (hi != hishift->getIn(0)) return false;
-            if (lo != midshift->getIn(0)) return false;
-            salo = loshift->getIn(1);
-            sahi = hishift->getIn(1);
-            samid = midshift->getIn(1);
+            if (lo != loshift.getIn(0)) return false;
+            if (hi != hishift.getIn(0)) return false;
+            if (lo != midshift.getIn(0)) return false;
+            salo = loshift.getIn(1);
+            sahi = hishift.getIn(1);
+            samid = midshift.getIn(1);
             return true;
         }
 
         private bool mapRight()
         { // Assume reshi, reslo are filled in, fill in other ops and varnodes
-            if (!reslo->isWritten()) return false;
-            if (!reshi->isWritten()) return false;
-            hishift = reshi->getDef();
-            opc = hishift->code();
+            if (!reslo.isWritten()) return false;
+            if (!reshi.isWritten()) return false;
+            hishift = reshi.getDef();
+            opc = hishift.code();
             if ((opc != CPUI_INT_RIGHT) && (opc != CPUI_INT_SRIGHT)) return false;
-            orop = reslo->getDef();
-            if ((orop->code() != CPUI_INT_OR) && (orop->code() != CPUI_INT_XOR) && (orop->code() != CPUI_INT_ADD))
+            orop = reslo.getDef();
+            if ((orop.code() != CPUI_INT_OR) && (orop.code() != CPUI_INT_XOR) && (orop.code() != CPUI_INT_ADD))
                 return false;
-            midlo = orop->getIn(0);
-            midhi = orop->getIn(1);
-            if (!midlo->isWritten()) return false;
-            if (!midhi->isWritten()) return false;
-            if (midlo->getDef()->code() != CPUI_INT_RIGHT)
+            midlo = orop.getIn(0);
+            midhi = orop.getIn(1);
+            if (!midlo.isWritten()) return false;
+            if (!midhi.isWritten()) return false;
+            if (midlo.getDef().code() != CPUI_INT_RIGHT)
             { // Must be unsigned RIGHT
                 Varnode* tmpvn = midhi;
                 midhi = midlo;
                 midlo = tmpvn;
             }
-            midshift = midhi->getDef();
-            if (midshift->code() != CPUI_INT_LEFT) return false;
-            loshift = midlo->getDef();
-            if (loshift->code() != CPUI_INT_RIGHT) return false; // Must be unsigned RIGHT
+            midshift = midhi.getDef();
+            if (midshift.code() != CPUI_INT_LEFT) return false;
+            loshift = midlo.getDef();
+            if (loshift.code() != CPUI_INT_RIGHT) return false; // Must be unsigned RIGHT
 
-            if (lo != loshift->getIn(0)) return false;
-            if (hi != hishift->getIn(0)) return false;
-            if (hi != midshift->getIn(0)) return false;
-            salo = loshift->getIn(1);
-            sahi = hishift->getIn(1);
-            samid = midshift->getIn(1);
+            if (lo != loshift.getIn(0)) return false;
+            if (hi != hishift.getIn(0)) return false;
+            if (hi != midshift.getIn(0)) return false;
+            salo = loshift.getIn(1);
+            sahi = hishift.getIn(1);
+            samid = midshift.getIn(1);
             return true;
         }
 
@@ -114,25 +114,25 @@ namespace Sla.DECCORE
             lo = l;
 
             loshift = loop;
-            reslo = loshift->getOut();
+            reslo = loshift.getOut();
 
             list<PcodeOp*>::const_iterator iter, enditer;
-            iter = hi->beginDescend();
-            enditer = hi->endDescend();
+            iter = hi.beginDescend();
+            enditer = hi.endDescend();
             while (iter != enditer)
             {
                 hishift = *iter;
                 ++iter;
-                if (hishift->code() != CPUI_INT_LEFT) continue;
-                Varnode* outvn = hishift->getOut();
+                if (hishift.code() != CPUI_INT_LEFT) continue;
+                Varnode* outvn = hishift.getOut();
                 list<PcodeOp*>::const_iterator iter2, enditer2;
-                iter2 = outvn->beginDescend();
-                enditer2 = outvn->endDescend();
+                iter2 = outvn.beginDescend();
+                enditer2 = outvn.endDescend();
                 while (iter2 != enditer2)
                 {
                     midshift = *iter2;
                     ++iter2;
-                    Varnode* tmpvn = midshift->getOut();
+                    Varnode* tmpvn = midshift.getOut();
                     if (tmpvn == (Varnode*)0) continue;
                     reshi = tmpvn;
                     if (!mapLeft()) continue;
@@ -148,25 +148,25 @@ namespace Sla.DECCORE
             hi = h;
             lo = l;
             hishift = hiop;
-            reshi = hiop->getOut();
+            reshi = hiop.getOut();
 
             list<PcodeOp*>::const_iterator iter, enditer;
-            iter = lo->beginDescend();
-            enditer = lo->endDescend();
+            iter = lo.beginDescend();
+            enditer = lo.endDescend();
             while (iter != enditer)
             {
                 loshift = *iter;
                 ++iter;
-                if (loshift->code() != CPUI_INT_RIGHT) continue;
-                Varnode* outvn = loshift->getOut();
+                if (loshift.code() != CPUI_INT_RIGHT) continue;
+                Varnode* outvn = loshift.getOut();
                 list<PcodeOp*>::const_iterator iter2, enditer2;
-                iter2 = outvn->beginDescend();
-                enditer2 = outvn->endDescend();
+                iter2 = outvn.beginDescend();
+                enditer2 = outvn.endDescend();
                 while (iter2 != enditer2)
                 {
                     midshift = *iter2;
                     ++iter2;
-                    Varnode* tmpvn = midshift->getOut();
+                    Varnode* tmpvn = midshift.getOut();
                     if (tmpvn == (Varnode*)0) continue;
                     reslo = tmpvn;
                     if (!mapRight()) continue;

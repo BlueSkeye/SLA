@@ -18,26 +18,26 @@ namespace Sla.DECCORE
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opCallind(op);
+            lng.opCallind(op);
         }
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            if (op->getOut() != (Varnode*)0)
+            if (op.getOut() != (Varnode*)0)
             {
-                Varnode::printRaw(s, op->getOut());
+                Varnode::printRaw(s, op.getOut());
                 s << " = ";
             }
             s << name;
-            Varnode::printRaw(s, op->getIn(0));
-            if (op->numInput() > 1)
+            Varnode::printRaw(s, op.getIn(0));
+            if (op.numInput() > 1)
             {
                 s << '(';
-                Varnode::printRaw(s, op->getIn(1));
-                for (int4 i = 2; i < op->numInput(); ++i)
+                Varnode::printRaw(s, op.getIn(1));
+                for (int4 i = 2; i < op.numInput(); ++i)
                 {
                     s << ',';
-                    Varnode::printRaw(s, op->getIn(i));
+                    Varnode::printRaw(s, op.getIn(i));
                 }
                 s << ')';
             }
@@ -51,26 +51,26 @@ namespace Sla.DECCORE
 
             if (slot == 0)
             {
-                td = tlst->getTypeCode();
-                AddrSpace* spc = op->getAddr().getSpace();
-                return tlst->getTypePointer(op->getIn(0)->getSize(), td, spc->getWordSize()); // First parameter is code pointer
+                td = tlst.getTypeCode();
+                AddrSpace* spc = op.getAddr().getSpace();
+                return tlst.getTypePointer(op.getIn(0).getSize(), td, spc.getWordSize()); // First parameter is code pointer
             }
-            fc = op->getParent()->getFuncdata()->getCallSpecs(op);
+            fc = op.getParent().getFuncdata().getCallSpecs(op);
             if (fc == (FuncCallSpecs*)0)
                 return TypeOp::getInputLocal(op, slot);
-            ProtoParameter* param = fc->getParam(slot - 1);
+            ProtoParameter* param = fc.getParam(slot - 1);
             if (param != (ProtoParameter*)0)
             {
-                if (param->isTypeLocked())
+                if (param.isTypeLocked())
                 {
-                    ct = param->getType();
-                    if (ct->getMetatype() != TYPE_VOID)
+                    ct = param.getType();
+                    if (ct.getMetatype() != TYPE_VOID)
                         return ct;
                 }
-                else if (param->isThisPointer())
+                else if (param.isThisPointer())
                 {
-                    ct = param->getType();
-                    if (ct->getMetatype() == TYPE_PTR && ((TypePointer*)ct)->getPtrTo()->getMetatype() == TYPE_STRUCT)
+                    ct = param.getType();
+                    if (ct.getMetatype() == TYPE_PTR && ((TypePointer*)ct).getPtrTo().getMetatype() == TYPE_STRUCT)
                         return ct;
                 }
             }
@@ -82,12 +82,12 @@ namespace Sla.DECCORE
             FuncCallSpecs* fc;
             Datatype* ct;
 
-            fc = op->getParent()->getFuncdata()->getCallSpecs(op);
+            fc = op.getParent().getFuncdata().getCallSpecs(op);
             if (fc == (FuncCallSpecs*)0)
                 return TypeOp::getOutputLocal(op);
-            if (!fc->isOutputLocked()) return TypeOp::getOutputLocal(op);
-            ct = fc->getOutputType();
-            if (ct->getMetatype() == TYPE_VOID) return TypeOp::getOutputLocal(op);
+            if (!fc.isOutputLocked()) return TypeOp::getOutputLocal(op);
+            ct = fc.getOutputType();
+            if (ct.getMetatype() == TYPE_VOID) return TypeOp::getOutputLocal(op);
             return ct;
         }
     }

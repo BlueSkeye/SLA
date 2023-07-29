@@ -19,18 +19,18 @@ namespace Sla.DECCORE
         /// \return the Varnode holding the high bit
         private static Varnode getHiBit(PcodeOp op)
         {
-            OpCode opc = op->code();
+            OpCode opc = op.code();
             if ((opc != CPUI_INT_ADD) && (opc != CPUI_INT_OR) && (opc != CPUI_INT_XOR))
                 return (Varnode*)0;
 
-            Varnode* vn1 = op->getIn(0);
-            Varnode* vn2 = op->getIn(1);
-            uintb mask = calc_mask(vn1->getSize());
+            Varnode* vn1 = op.getIn(0);
+            Varnode* vn2 = op.getIn(1);
+            uintb mask = calc_mask(vn1.getSize());
             mask = (mask ^ (mask >> 1));    // Only high-bit is set
-            uintb nzmask1 = vn1->getNZMask();
+            uintb nzmask1 = vn1.getNZMask();
             if ((nzmask1 != mask) && ((nzmask1 & mask) != 0)) // If high-bit is set AND some other bit
                 return (Varnode*)0;
-            uintb nzmask2 = vn2->getNZMask();
+            uintb nzmask2 = vn2.getNZMask();
             if ((nzmask2 != mask) && ((nzmask2 & mask) != 0))
                 return (Varnode*)0;
 
@@ -83,77 +83,77 @@ namespace Sla.DECCORE
             Varnode* lvn,*rvn,*coeff,*avn;
             PcodeOp* feedOp;
             OpCode feedOpCode;
-            lvn = op->getIn(0);
-            rvn = op->getIn(1);
+            lvn = op.getIn(0);
+            rvn = op.getIn(1);
 
-            if (lvn->isConstant())
+            if (lvn.isConstant())
             {
-                if (!rvn->isWritten()) return 0;
-                if (lvn->getOffset() == 0)
+                if (!rvn.isWritten()) return 0;
+                if (lvn.getOffset() == 0)
                 {
-                    feedOp = rvn->getDef();
-                    feedOpCode = feedOp->code();
+                    feedOp = rvn.getDef();
+                    feedOpCode = feedOp.code();
                     if (feedOpCode == CPUI_INT_MULT)
                     {
-                        coeff = feedOp->getIn(1);
-                        if (!coeff->isConstant()) return 0;
-                        if (coeff->getOffset() != calc_mask(coeff->getSize())) return 0;
-                        avn = feedOp->getIn(0);
-                        if (avn->isFree()) return 0;
+                        coeff = feedOp.getIn(1);
+                        if (!coeff.isConstant()) return 0;
+                        if (coeff.getOffset() != calc_mask(coeff.getSize())) return 0;
+                        avn = feedOp.getIn(0);
+                        if (avn.isFree()) return 0;
                         data.opSetInput(op, avn, 0);
                         data.opSetInput(op, lvn, 1);
                         return 1;
                     }
                 }
-                else if (lvn->getOffset() == calc_mask(lvn->getSize()))
+                else if (lvn.getOffset() == calc_mask(lvn.getSize()))
                 {
-                    feedOp = rvn->getDef();
-                    feedOpCode = feedOp->code();
+                    feedOp = rvn.getDef();
+                    feedOpCode = feedOp.code();
                     Varnode* hibit = getHiBit(feedOp);
                     if (hibit != (Varnode*)0)
                     { // Test for -1 s<  (hi ^ lo)
-                        if (hibit->isConstant())
-                            data.opSetInput(op, data.newConstant(hibit->getSize(), hibit->getOffset()), 1);
+                        if (hibit.isConstant())
+                            data.opSetInput(op, data.newConstant(hibit.getSize(), hibit.getOffset()), 1);
                         else
                             data.opSetInput(op, hibit, 1);
                         data.opSetOpcode(op, CPUI_INT_EQUAL);
-                        data.opSetInput(op, data.newConstant(hibit->getSize(), 0), 0);
+                        data.opSetInput(op, data.newConstant(hibit.getSize(), 0), 0);
                         return 1;
                     }
                     else if (feedOpCode == CPUI_SUBPIECE)
                     {
-                        avn = feedOp->getIn(0);
-                        if (avn->isFree() || avn->getSize() > 8)    // Don't create comparison bigger than 8 bytes
+                        avn = feedOp.getIn(0);
+                        if (avn.isFree() || avn.getSize() > 8)    // Don't create comparison bigger than 8 bytes
                             return 0;
-                        if (rvn->getSize() + (int4)feedOp->getIn(1)->getOffset() == avn->getSize())
+                        if (rvn.getSize() + (int4)feedOp.getIn(1).getOffset() == avn.getSize())
                         {
                             // We have -1 s< SUB( avn, #hi )
                             data.opSetInput(op, avn, 1);
-                            data.opSetInput(op, data.newConstant(avn->getSize(), calc_mask(avn->getSize())), 0);
+                            data.opSetInput(op, data.newConstant(avn.getSize(), calc_mask(avn.getSize())), 0);
                             return 1;
                         }
                     }
                     else if (feedOpCode == CPUI_INT_NEGATE)
                     {
                         // We have -1 s< ~avn
-                        avn = feedOp->getIn(0);
-                        if (avn->isFree())
+                        avn = feedOp.getIn(0);
+                        if (avn.isFree())
                             return 0;
                         data.opSetInput(op, avn, 0);
-                        data.opSetInput(op, data.newConstant(avn->getSize(), 0), 1);
+                        data.opSetInput(op, data.newConstant(avn.getSize(), 0), 1);
                         return 1;
                     }
                     else if (feedOpCode == CPUI_INT_AND)
                     {
-                        avn = feedOp->getIn(0);
-                        if (avn->isFree() || rvn->loneDescend() == (PcodeOp*)0)
+                        avn = feedOp.getIn(0);
+                        if (avn.isFree() || rvn.loneDescend() == (PcodeOp*)0)
                             return 0;
 
-                        Varnode* maskVn = feedOp->getIn(1);
-                        if (maskVn->isConstant())
+                        Varnode* maskVn = feedOp.getIn(1);
+                        if (maskVn.isConstant())
                         {
-                            uintb mask = maskVn->getOffset();
-                            mask >>= (8 * avn->getSize() - 1);  // Fetch sign-bit
+                            uintb mask = maskVn.getOffset();
+                            mask >>= (8 * avn.getSize() - 1);  // Fetch sign-bit
                             if ((mask & 1) != 0)
                             {
                                 // We have -1 s< avn & 0x8...
@@ -165,29 +165,29 @@ namespace Sla.DECCORE
                     else if (feedOpCode == CPUI_PIECE)
                     {
                         // We have -1 s< CONCAT(V,W)
-                        avn = feedOp->getIn(0);     // Most significant piece
-                        if (avn->isFree())
+                        avn = feedOp.getIn(0);     // Most significant piece
+                        if (avn.isFree())
                             return 0;
                         data.opSetInput(op, avn, 1);
-                        data.opSetInput(op, data.newConstant(avn->getSize(), calc_mask(avn->getSize())), 0);
+                        data.opSetInput(op, data.newConstant(avn.getSize(), calc_mask(avn.getSize())), 0);
                         return 1;
                     }
                 }
             }
-            else if (rvn->isConstant())
+            else if (rvn.isConstant())
             {
-                if (!lvn->isWritten()) return 0;
-                if (rvn->getOffset() == 0)
+                if (!lvn.isWritten()) return 0;
+                if (rvn.getOffset() == 0)
                 {
-                    feedOp = lvn->getDef();
-                    feedOpCode = feedOp->code();
+                    feedOp = lvn.getDef();
+                    feedOpCode = feedOp.code();
                     if (feedOpCode == CPUI_INT_MULT)
                     {
-                        coeff = feedOp->getIn(1);
-                        if (!coeff->isConstant()) return 0;
-                        if (coeff->getOffset() != calc_mask(coeff->getSize())) return 0;
-                        avn = feedOp->getIn(0);
-                        if (avn->isFree()) return 0;
+                        coeff = feedOp.getIn(1);
+                        if (!coeff.isConstant()) return 0;
+                        if (coeff.getOffset() != calc_mask(coeff.getSize())) return 0;
+                        avn = feedOp.getIn(0);
+                        if (avn.isFree()) return 0;
                         data.opSetInput(op, avn, 1);
                         data.opSetInput(op, rvn, 0);
                         return 1;
@@ -197,8 +197,8 @@ namespace Sla.DECCORE
                         Varnode* hibit = getHiBit(feedOp);
                         if (hibit != (Varnode*)0)
                         { // Test for (hi ^ lo) s< 0
-                            if (hibit->isConstant())
-                                data.opSetInput(op, data.newConstant(hibit->getSize(), hibit->getOffset()), 0);
+                            if (hibit.isConstant())
+                                data.opSetInput(op, data.newConstant(hibit.getSize(), hibit.getOffset()), 0);
                             else
                                 data.opSetInput(op, hibit, 0);
                             data.opSetOpcode(op, CPUI_INT_NOTEQUAL);
@@ -206,36 +206,36 @@ namespace Sla.DECCORE
                         }
                         else if (feedOpCode == CPUI_SUBPIECE)
                         {
-                            avn = feedOp->getIn(0);
-                            if (avn->isFree() || avn->getSize() > 8)    // Don't create comparison greater than 8 bytes
+                            avn = feedOp.getIn(0);
+                            if (avn.isFree() || avn.getSize() > 8)    // Don't create comparison greater than 8 bytes
                                 return 0;
-                            if (lvn->getSize() + (int4)feedOp->getIn(1)->getOffset() == avn->getSize())
+                            if (lvn.getSize() + (int4)feedOp.getIn(1).getOffset() == avn.getSize())
                             {
                                 // We have SUB( avn, #hi ) s< 0
                                 data.opSetInput(op, avn, 0);
-                                data.opSetInput(op, data.newConstant(avn->getSize(), 0), 1);
+                                data.opSetInput(op, data.newConstant(avn.getSize(), 0), 1);
                                 return 1;
                             }
                         }
                         else if (feedOpCode == CPUI_INT_NEGATE)
                         {
                             // We have ~avn s< 0
-                            avn = feedOp->getIn(0);
-                            if (avn->isFree()) return 0;
+                            avn = feedOp.getIn(0);
+                            if (avn.isFree()) return 0;
                             data.opSetInput(op, avn, 1);
-                            data.opSetInput(op, data.newConstant(avn->getSize(), calc_mask(avn->getSize())), 0);
+                            data.opSetInput(op, data.newConstant(avn.getSize(), calc_mask(avn.getSize())), 0);
                             return 1;
                         }
                         else if (feedOpCode == CPUI_INT_AND)
                         {
-                            avn = feedOp->getIn(0);
-                            if (avn->isFree() || lvn->loneDescend() == (PcodeOp*)0)
+                            avn = feedOp.getIn(0);
+                            if (avn.isFree() || lvn.loneDescend() == (PcodeOp*)0)
                                 return 0;
-                            Varnode* maskVn = feedOp->getIn(1);
-                            if (maskVn->isConstant())
+                            Varnode* maskVn = feedOp.getIn(1);
+                            if (maskVn.isConstant())
                             {
-                                uintb mask = maskVn->getOffset();
-                                mask >>= (8 * avn->getSize() - 1);  // Fetch sign-bit
+                                uintb mask = maskVn.getOffset();
+                                mask >>= (8 * avn.getSize() - 1);  // Fetch sign-bit
                                 if ((mask & 1) != 0)
                                 {
                                     // We have avn & 0x8... s< 0
@@ -247,11 +247,11 @@ namespace Sla.DECCORE
                         else if (feedOpCode == CPUI_PIECE)
                         {
                             // We have CONCAT(V,W) s< 0
-                            avn = feedOp->getIn(0);     // Most significant piece
-                            if (avn->isFree())
+                            avn = feedOp.getIn(0);     // Most significant piece
+                            if (avn.isFree())
                                 return 0;
                             data.opSetInput(op, avn, 0);
-                            data.opSetInput(op, data.newConstant(avn->getSize(), 0), 1);
+                            data.opSetInput(op, data.newConstant(avn.getSize(), 0), 1);
                             return 1;
                         }
                     }

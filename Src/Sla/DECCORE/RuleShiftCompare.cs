@@ -44,91 +44,91 @@ namespace Sla.DECCORE
             OpCode opc;
             bool isleft;
 
-            shiftvn = op->getIn(0);
-            constvn = op->getIn(1);
-            if (!constvn->isConstant()) return 0;
-            if (!shiftvn->isWritten()) return 0;
-            shiftop = shiftvn->getDef();
-            opc = shiftop->code();
+            shiftvn = op.getIn(0);
+            constvn = op.getIn(1);
+            if (!constvn.isConstant()) return 0;
+            if (!shiftvn.isWritten()) return 0;
+            shiftop = shiftvn.getDef();
+            opc = shiftop.code();
             if (opc == CPUI_INT_LEFT)
             {
                 isleft = true;
-                savn = shiftop->getIn(1);
-                if (!savn->isConstant()) return 0;
-                sa = savn->getOffset();
+                savn = shiftop.getIn(1);
+                if (!savn.isConstant()) return 0;
+                sa = savn.getOffset();
             }
             else if (opc == CPUI_INT_RIGHT)
             {
                 isleft = false;
-                savn = shiftop->getIn(1);
-                if (!savn->isConstant()) return 0;
-                sa = savn->getOffset();
+                savn = shiftop.getIn(1);
+                if (!savn.isConstant()) return 0;
+                sa = savn.getOffset();
                 // There are definitely some situations where you don't want this rule to apply, like jump
                 // table analysis where the switch variable is a bit field.
                 // When shifting to the right, this is a likely shift out of a bitfield, which we would want to keep
                 // We only apply when we know we will eliminate a variable
-                if (shiftvn->loneDescend() != op) return 0;
+                if (shiftvn.loneDescend() != op) return 0;
             }
             else if (opc == CPUI_INT_MULT)
             {
                 isleft = true;
-                savn = shiftop->getIn(1);
-                if (!savn->isConstant()) return 0;
-                uintb val = savn->getOffset();
+                savn = shiftop.getIn(1);
+                if (!savn.isConstant()) return 0;
+                uintb val = savn.getOffset();
                 sa = leastsigbit_set(val);
                 if ((val >> sa) != (uintb)1) return 0; // Not multiplying by a power of 2
             }
             else if (opc == CPUI_INT_DIV)
             {
                 isleft = false;
-                savn = shiftop->getIn(1);
-                if (!savn->isConstant()) return 0;
-                uintb val = savn->getOffset();
+                savn = shiftop.getIn(1);
+                if (!savn.isConstant()) return 0;
+                uintb val = savn.getOffset();
                 sa = leastsigbit_set(val);
                 if ((val >> sa) != (uintb)1) return 0; // Not dividing by a power of 2
-                if (shiftvn->loneDescend() != op) return 0;
+                if (shiftvn.loneDescend() != op) return 0;
             }
             else
                 return 0;
 
             if (sa == 0) return 0;
-            mainvn = shiftop->getIn(0);
-            if (mainvn->isFree()) return 0;
-            if (mainvn->getSize() > sizeof(uintb)) return 0;    // FIXME: uintb should be arbitrary precision
+            mainvn = shiftop.getIn(0);
+            if (mainvn.isFree()) return 0;
+            if (mainvn.getSize() > sizeof(uintb)) return 0;    // FIXME: uintb should be arbitrary precision
 
-            constval = constvn->getOffset();
-            nzmask = mainvn->getNZMask();
+            constval = constvn.getOffset();
+            nzmask = mainvn.getNZMask();
             if (isleft)
             {
                 newconst = constval >> sa;
                 if ((newconst << sa) != constval) return 0; // Information lost in constval
-                uintb tmp = (nzmask << sa) & calc_mask(shiftvn->getSize());
+                uintb tmp = (nzmask << sa) & calc_mask(shiftvn.getSize());
                 if ((tmp >> sa) != nzmask)
                 {   // Information is lost in main
                     // We replace the LEFT with and AND mask
                     // This must be the lone use of the shift
-                    if (shiftvn->loneDescend() != op) return 0;
-                    sa = 8 * shiftvn->getSize() - sa;
+                    if (shiftvn.loneDescend() != op) return 0;
+                    sa = 8 * shiftvn.getSize() - sa;
                     tmp = (((uintb)1) << sa) - 1;
-                    Varnode* newmask = data.newConstant(constvn->getSize(), tmp);
-                    PcodeOp* newop = data.newOp(2, op->getAddr());
+                    Varnode* newmask = data.newConstant(constvn.getSize(), tmp);
+                    PcodeOp* newop = data.newOp(2, op.getAddr());
                     data.opSetOpcode(newop, CPUI_INT_AND);
-                    Varnode* newtmpvn = data.newUniqueOut(constvn->getSize(), newop);
+                    Varnode* newtmpvn = data.newUniqueOut(constvn.getSize(), newop);
                     data.opSetInput(newop, mainvn, 0);
                     data.opSetInput(newop, newmask, 1);
                     data.opInsertBefore(newop, shiftop);
                     data.opSetInput(op, newtmpvn, 0);
-                    data.opSetInput(op, data.newConstant(constvn->getSize(), newconst), 1);
+                    data.opSetInput(op, data.newConstant(constvn.getSize(), newconst), 1);
                     return 1;
                 }
             }
             else
             {
                 if (((nzmask >> sa) << sa) != nzmask) return 0; // Information is lost
-                newconst = (constval << sa) & calc_mask(shiftvn->getSize());
+                newconst = (constval << sa) & calc_mask(shiftvn.getSize());
                 if ((newconst >> sa) != constval) return 0; // Information is lost in constval
             }
-            Varnode* newconstvn = data.newConstant(constvn->getSize(), newconst);
+            Varnode* newconstvn = data.newConstant(constvn.getSize(), newconst);
             data.opSetInput(op, mainvn, 0);
             data.opSetInput(op, newconstvn, 1);
             return 1;

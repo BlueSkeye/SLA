@@ -22,14 +22,14 @@ namespace Sla.EXTRA
             maxnum = (opindex > varindex) ? opindex : varindex;
         }
         
-        public override UnifyConstraint clone() => (new ConstraintLoneDescend(opindex, varindex))->copyid(this);
+        public override UnifyConstraint clone() => (new ConstraintLoneDescend(opindex, varindex)).copyid(this);
 
         public override bool step(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            if (!traverse->step()) return false;
+            if (!traverse.step()) return false;
             Varnode* vn = state.data(varindex).getVarnode();
-            PcodeOp* res = vn->loneDescend();
+            PcodeOp* res = vn.loneDescend();
             if (res == (PcodeOp*)0) return false;
             state.data(opindex).setOp(res);
             return true;
@@ -46,7 +46,7 @@ namespace Sla.EXTRA
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << printstate.getName(opindex) << " = " << printstate.getName(varindex) << "->loneDescend();" << endl;
+            s << printstate.getName(opindex) << " = " << printstate.getName(varindex) << ".loneDescend();" << endl;
             printstate.printIndent(s);
             s << "if (" << printstate.getName(opindex) << " == (PcodeOp *)0)" << endl;
             printstate.printAbort(s);

@@ -88,7 +88,7 @@ namespace Sla.SLEIGH
             {
                 if (isLocalTemp())
                     return plus;        // A positive number indicates truncation of a local temp
-                if (@params[handleIndex]->getSize().isZero())
+                if (@params[handleIndex].getSize().isZero())
                     return plus;      //    or a zerosize object
             }
             return -1;
@@ -129,7 +129,7 @@ namespace Sla.SLEIGH
         public bool isLocalTemp()
         {
             if (space.getType() != ConstTpl::spaceid) return false;
-            if (space.getSpace()->getType() != IPTR_INTERNAL) return false;
+            if (space.getSpace().getType() != IPTR_INTERNAL) return false;
             return true;
         }
 
@@ -146,7 +146,7 @@ namespace Sla.SLEIGH
         }
 
         public bool adjustTruncation(int4 sz, bool isbigendian)
-        { // We know this->offset is an offset_plus, check that the truncation is in bounds (given -sz-)
+        { // We know this.offset is an offset_plus, check that the truncation is in bounds (given -sz-)
           // adjust plus for endianness if necessary
           // return true if truncation is in bounds
             if (size.getType() != ConstTpl::real)
@@ -183,7 +183,7 @@ namespace Sla.SLEIGH
 
         public void restoreXml(Element el, AddrSpaceManager manage)
         {
-            List list = el->getChildren();
+            List list = el.getChildren();
             List::const_iterator iter;
             iter = list.begin();
             space.restoreXml(*iter, manage);

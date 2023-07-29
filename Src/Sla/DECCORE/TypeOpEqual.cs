@@ -19,19 +19,19 @@ namespace Sla.DECCORE
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opIntEqual(op);
+            lng.opIntEqual(op);
         }
 
         public override Datatype getInputCast(PcodeOp op, int4 slot, CastStrategy castStrategy)
         {
-            Datatype* reqtype = op->getIn(0)->getHighTypeReadFacing(op);    // Input arguments should be the same type
-            Datatype* othertype = op->getIn(1)->getHighTypeReadFacing(op);
-            if (0 > othertype->typeOrder(*reqtype))
+            Datatype* reqtype = op.getIn(0).getHighTypeReadFacing(op);    // Input arguments should be the same type
+            Datatype* othertype = op.getIn(1).getHighTypeReadFacing(op);
+            if (0 > othertype.typeOrder(*reqtype))
                 reqtype = othertype;
-            if (castStrategy->checkIntPromotionForCompare(op, slot))
+            if (castStrategy.checkIntPromotionForCompare(op, slot))
                 return reqtype;
-            othertype = op->getIn(slot)->getHighTypeReadFacing(op);
-            return castStrategy->castStandard(reqtype, othertype, false, false);
+            othertype = op.getIn(slot).getHighTypeReadFacing(op);
+            return castStrategy.castStandard(reqtype, othertype, false, false);
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
@@ -57,20 +57,20 @@ namespace Sla.DECCORE
         {
             if (inslot == -1 || outslot == -1) return (Datatype*)0;
             Datatype* newtype;
-            if (invn->isSpacebase())
+            if (invn.isSpacebase())
             {
-                AddrSpace* spc = typegrp->getArch()->getDefaultDataSpace();
-                newtype = typegrp->getTypePointer(alttype->getSize(), typegrp->getBase(1, TYPE_UNKNOWN), spc->getWordSize());
+                AddrSpace* spc = typegrp.getArch().getDefaultDataSpace();
+                newtype = typegrp.getTypePointer(alttype.getSize(), typegrp.getBase(1, TYPE_UNKNOWN), spc.getWordSize());
             }
-            else if (alttype->isPointerRel() && !outvn->isConstant())
+            else if (alttype.isPointerRel() && !outvn.isConstant())
             {
                 TypePointerRel* relPtr = (TypePointerRel*)alttype;
-                if (relPtr->getParent()->getMetatype() == TYPE_STRUCT && relPtr->getPointerOffset() >= 0)
+                if (relPtr.getParent().getMetatype() == TYPE_STRUCT && relPtr.getPointerOffset() >= 0)
                 {
                     // If we know the pointer is in the middle of a structure, don't propagate across comparison operators
                     // as the two sides of the operator are likely to be different types , and the other side can also
                     // get data-type information from the structure pointer
-                    newtype = typegrp->getTypePointer(relPtr->getSize(), typegrp->getBase(1, TYPE_UNKNOWN), relPtr->getWordSize());
+                    newtype = typegrp.getTypePointer(relPtr.getSize(), typegrp.getBase(1, TYPE_UNKNOWN), relPtr.getWordSize());
                 }
                 else
                     newtype = alttype;

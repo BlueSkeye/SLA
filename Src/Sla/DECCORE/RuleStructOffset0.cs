@@ -42,53 +42,53 @@ namespace Sla.DECCORE
             int4 movesize;          // Number of bytes being moved by load or store
 
             if (!data.hasTypeRecoveryStarted()) return 0;
-            if (op->code() == CPUI_LOAD)
+            if (op.code() == CPUI_LOAD)
             {
-                movesize = op->getOut()->getSize();
+                movesize = op.getOut().getSize();
             }
-            else if (op->code() == CPUI_STORE)
+            else if (op.code() == CPUI_STORE)
             {
-                movesize = op->getIn(2)->getSize();
+                movesize = op.getIn(2).getSize();
             }
             else
                 return 0;
 
-            Varnode* ptrVn = op->getIn(1);
-            Datatype* ct = ptrVn->getTypeReadFacing(op);
-            if (ct->getMetatype() != TYPE_PTR) return 0;
-            Datatype* baseType = ((TypePointer*)ct)->getPtrTo();
+            Varnode* ptrVn = op.getIn(1);
+            Datatype* ct = ptrVn.getTypeReadFacing(op);
+            if (ct.getMetatype() != TYPE_PTR) return 0;
+            Datatype* baseType = ((TypePointer*)ct).getPtrTo();
             uintb offset = 0;
-            if (ct->isFormalPointerRel() && ((TypePointerRel*)ct)->evaluateThruParent(0))
+            if (ct.isFormalPointerRel() && ((TypePointerRel*)ct).evaluateThruParent(0))
             {
                 TypePointerRel* ptRel = (TypePointerRel*)ct;
-                baseType = ptRel->getParent();
-                if (baseType->getMetatype() != TYPE_STRUCT)
+                baseType = ptRel.getParent();
+                if (baseType.getMetatype() != TYPE_STRUCT)
                     return 0;
-                int4 iOff = ptRel->getPointerOffset();
-                iOff = AddrSpace::addressToByteInt(iOff, ptRel->getWordSize());
-                if (iOff >= baseType->getSize())
+                int4 iOff = ptRel.getPointerOffset();
+                iOff = AddrSpace::addressToByteInt(iOff, ptRel.getWordSize());
+                if (iOff >= baseType.getSize())
                     return 0;
                 offset = iOff;
             }
-            if (baseType->getMetatype() == TYPE_STRUCT)
+            if (baseType.getMetatype() == TYPE_STRUCT)
             {
-                if (baseType->getSize() < movesize)
+                if (baseType.getSize() < movesize)
                     return 0;               // Moving something bigger than entire structure
-                Datatype* subType = baseType->getSubType(offset, &offset); // Get field at pointer's offset
+                Datatype* subType = baseType.getSubType(offset, &offset); // Get field at pointer's offset
                 if (subType == (Datatype*)0) return 0;
-                if (subType->getSize() < movesize) return 0;    // Subtype is too small to handle LOAD/STORE
-                                                                //    if (baseType->getSize() == movesize) {
+                if (subType.getSize() < movesize) return 0;    // Subtype is too small to handle LOAD/STORE
+                                                                //    if (baseType.getSize() == movesize) {
                                                                 // If we reach here, move is same size as the structure, which is the same size as
                                                                 // the first element.
                                                                 //    }
             }
-            else if (baseType->getMetatype() == TYPE_ARRAY)
+            else if (baseType.getMetatype() == TYPE_ARRAY)
             {
-                if (baseType->getSize() < movesize)
+                if (baseType.getSize() < movesize)
                     return 0;               // Moving something bigger than entire array
-                if (baseType->getSize() == movesize)
+                if (baseType.getSize() == movesize)
                 {   // Moving something the size of entire array
-                    if (((TypeArray*)baseType)->numElements() != 1)
+                    if (((TypeArray*)baseType).numElements() != 1)
                         return 0;
                     // If we reach here, moving something size of single element. Assume this is normal access.
                 }
@@ -96,11 +96,11 @@ namespace Sla.DECCORE
             else
                 return 0;
 
-            PcodeOp* newop = data.newOpBefore(op, CPUI_PTRSUB, ptrVn, data.newConstant(ptrVn->getSize(), 0));
-            if (ptrVn->getType()->needsResolution())
-                data.inheritResolution(ptrVn->getType(), newop, 0, op, 1);
-            newop->setStopTypePropagation();
-            data.opSetInput(op, newop->getOut(), 1);
+            PcodeOp* newop = data.newOpBefore(op, CPUI_PTRSUB, ptrVn, data.newConstant(ptrVn.getSize(), 0));
+            if (ptrVn.getType().needsResolution())
+                data.inheritResolution(ptrVn.getType(), newop, 0, op, 1);
+            newop.setStopTypePropagation();
+            data.opSetInput(op, newop.getOut(), 1);
             return 1;
         }
     }

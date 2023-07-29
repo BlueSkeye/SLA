@@ -25,13 +25,13 @@ namespace Sla.EXTRA
             else
                 num = 10;           // Default number of history lines
 
-            if (num > status->getHistorySize())
-                num = status->getHistorySize();
+            if (num > status.getHistorySize())
+                num = status.getHistorySize();
 
             for (int4 i = num - 1; i >= 0; --i)
             {   // List oldest to newest
-                status->getHistory(historyline, i);
-                *status->optr << historyline << endl;
+                status.getHistory(historyline, i);
+                *status.optr << historyline << endl;
             }
         }
     }

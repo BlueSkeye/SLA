@@ -16,10 +16,10 @@ namespace Sla.EXTRA
         /// \brief Print info about the current function's input Varnodes: `print inputs`
         public override void execute(TextReader s)
         {
-            if (dcp->fd == (Funcdata*)0)
+            if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");
 
-            print(dcp->fd, *status->fileoptr);
+            print(dcp.fd, *status.fileoptr);
         }
 
         /// Check for non-trivial use of given Varnode
@@ -38,18 +38,18 @@ namespace Sla.EXTRA
                 Varnode* tmpvn = vnlist[proc];
                 proc += 1;
                 list<PcodeOp*>::const_iterator iter;
-                for (iter = tmpvn->beginDescend(); iter != tmpvn->endDescend(); ++iter)
+                for (iter = tmpvn.beginDescend(); iter != tmpvn.endDescend(); ++iter)
                 {
                     PcodeOp* op = *iter;
-                    if ((op->code() == CPUI_COPY) ||
-                    (op->code() == CPUI_CAST) ||
-                    (op->code() == CPUI_INDIRECT) ||
-                    (op->code() == CPUI_MULTIEQUAL))
+                    if ((op.code() == CPUI_COPY) ||
+                    (op.code() == CPUI_CAST) ||
+                    (op.code() == CPUI_INDIRECT) ||
+                    (op.code() == CPUI_MULTIEQUAL))
                     {
-                        Varnode* outvn = op->getOut();
-                        if (!outvn->isMark())
+                        Varnode* outvn = op.getOut();
+                        if (!outvn.isMark())
                         {
-                            outvn->setMark();
+                            outvn.setMark();
                             vnlist.push_back(outvn);
                         }
                     }
@@ -61,7 +61,7 @@ namespace Sla.EXTRA
                 }
             }
             for (int4 i = 0; i < vnlist.size(); ++i)
-                vnlist[i]->clearMark();
+                vnlist[i].clearMark();
             return res;
         }
 
@@ -81,49 +81,49 @@ namespace Sla.EXTRA
             {
                 Varnode* tmpvn = vnlist[proc];
                 proc += 1;
-                if (tmpvn->isInput())
+                if (tmpvn.isInput())
                 {
-                    if ((tmpvn->getSize() != vn->getSize()) ||
-                    (tmpvn->getAddr() != vn->getAddr()))
+                    if ((tmpvn.getSize() != vn.getSize()) ||
+                    (tmpvn.getAddr() != vn.getAddr()))
                     {
                         res = 1;
                         break;
                     }
                 }
-                else if (!tmpvn->isWritten())
+                else if (!tmpvn.isWritten())
                 {
                     res = 1;
                     break;
                 }
                 else
                 {
-                    PcodeOp* op = tmpvn->getDef();
-                    if ((op->code() == CPUI_COPY) || (op->code() == CPUI_CAST))
+                    PcodeOp* op = tmpvn.getDef();
+                    if ((op.code() == CPUI_COPY) || (op.code() == CPUI_CAST))
                     {
-                        tmpvn = op->getIn(0);
-                        if (!tmpvn->isMark())
+                        tmpvn = op.getIn(0);
+                        if (!tmpvn.isMark())
                         {
-                            tmpvn->setMark();
+                            tmpvn.setMark();
                             vnlist.push_back(tmpvn);
                         }
                     }
-                    else if (op->code() == CPUI_INDIRECT)
+                    else if (op.code() == CPUI_INDIRECT)
                     {
-                        tmpvn = op->getIn(0);
-                        if (!tmpvn->isMark())
+                        tmpvn = op.getIn(0);
+                        if (!tmpvn.isMark())
                         {
-                            tmpvn->setMark();
+                            tmpvn.setMark();
                             vnlist.push_back(tmpvn);
                         }
                     }
-                    else if (op->code() == CPUI_MULTIEQUAL)
+                    else if (op.code() == CPUI_MULTIEQUAL)
                     {
-                        for (int4 i = 0; i < op->numInput(); ++i)
+                        for (int4 i = 0; i < op.numInput(); ++i)
                         {
-                            tmpvn = op->getIn(i);
-                            if (!tmpvn->isMark())
+                            tmpvn = op.getIn(i);
+                            if (!tmpvn.isMark())
                             {
-                                tmpvn->setMark();
+                                tmpvn.setMark();
                                 vnlist.push_back(tmpvn);
                             }
                         }
@@ -136,7 +136,7 @@ namespace Sla.EXTRA
                 }
             }
             for (int4 i = 0; i < vnlist.size(); ++i)
-                vnlist[i]->clearMark();
+                vnlist[i].clearMark();
             return res;
         }
 
@@ -149,17 +149,17 @@ namespace Sla.EXTRA
         {
             VarnodeLocSet::const_iterator iter, enditer;
 
-            iter = fd->beginLoc(vn->getAddr());
-            enditer = fd->endLoc(vn->getAddr());
+            iter = fd.beginLoc(vn.getAddr());
+            enditer = fd.endLoc(vn.getAddr());
             int4 count = 0;
             while (iter != enditer)
             {
                 Varnode* vn = *iter;
                 ++iter;
-                if (!vn->hasNoDescend()) continue;
-                if (!vn->isWritten()) continue;
-                PcodeOp* op = vn->getDef();
-                if (op->code() == CPUI_INDIRECT) continue; // Not a global return address force
+                if (!vn.hasNoDescend()) continue;
+                if (!vn.isWritten()) continue;
+                PcodeOp* op = vn.getDef();
+                if (op.code() == CPUI_INDIRECT) continue; // Not a global return address force
                 int4 res = checkRestore(vn);
                 if (res != 0) return false;
                 count += 1;
@@ -176,19 +176,19 @@ namespace Sla.EXTRA
         {
             VarnodeDefSet::const_iterator iter, enditer;
 
-            s << "Function: " << fd->getName() << endl;
-            iter = fd->beginDef(Varnode::input);
-            enditer = fd->endDef(Varnode::input);
+            s << "Function: " << fd.getName() << endl;
+            iter = fd.beginDef(Varnode::input);
+            enditer = fd.endDef(Varnode::input);
             while (iter != enditer)
             {
                 Varnode* vn = *iter;
                 ++iter;
-                vn->printRaw(s);
-                if (fd->isHighOn())
+                vn.printRaw(s);
+                if (fd.isHighOn())
                 {
-                    Symbol* sym = vn->getHigh()->getSymbol();
+                    Symbol* sym = vn.getHigh().getSymbol();
                     if (sym != (Symbol*)0)
-                        s << "    " << sym->getName();
+                        s << "    " << sym.getName();
                 }
                 bool findres = findRestore(vn, fd);
                 bool nontriv = nonTrivialUse(vn);

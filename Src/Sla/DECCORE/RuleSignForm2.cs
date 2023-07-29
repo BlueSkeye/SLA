@@ -34,45 +34,45 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* constVn = op->getIn(1);
-            if (!constVn->isConstant()) return 0;
-            Varnode* inVn = op->getIn(0);
-            int4 sizeout = inVn->getSize();
-            if ((int4)constVn->getOffset() != sizeout * 8 - 1) return 0;
-            if (!inVn->isWritten()) return 0;
-            PcodeOp* subOp = inVn->getDef();
-            if (subOp->code() != CPUI_SUBPIECE) return 0;
-            int4 c = subOp->getIn(1)->getOffset();
-            Varnode* multOut = subOp->getIn(0);
-            int4 multSize = multOut->getSize();
+            Varnode* constVn = op.getIn(1);
+            if (!constVn.isConstant()) return 0;
+            Varnode* inVn = op.getIn(0);
+            int4 sizeout = inVn.getSize();
+            if ((int4)constVn.getOffset() != sizeout * 8 - 1) return 0;
+            if (!inVn.isWritten()) return 0;
+            PcodeOp* subOp = inVn.getDef();
+            if (subOp.code() != CPUI_SUBPIECE) return 0;
+            int4 c = subOp.getIn(1).getOffset();
+            Varnode* multOut = subOp.getIn(0);
+            int4 multSize = multOut.getSize();
             if (c + sizeout != multSize) return 0;  // Must be extracting high part
-            if (!multOut->isWritten()) return 0;
-            PcodeOp* multOp = multOut->getDef();
-            if (multOp->code() != CPUI_INT_MULT) return 0;
+            if (!multOut.isWritten()) return 0;
+            PcodeOp* multOp = multOut.getDef();
+            if (multOp.code() != CPUI_INT_MULT) return 0;
             int4 slot;
             PcodeOp* sextOp;
             for (slot = 0; slot < 2; ++slot)
             {           // Search for the INT_SEXT
-                Varnode* vn = multOp->getIn(slot);
-                if (!vn->isWritten()) continue;
-                sextOp = vn->getDef();
-                if (sextOp->code() == CPUI_INT_SEXT) break;
+                Varnode* vn = multOp.getIn(slot);
+                if (!vn.isWritten()) continue;
+                sextOp = vn.getDef();
+                if (sextOp.code() == CPUI_INT_SEXT) break;
             }
             if (slot > 1) return 0;
-            Varnode* a = sextOp->getIn(0);
-            if (a->isFree() || a->getSize() != sizeout) return 0;
-            Varnode* otherVn = multOp->getIn(1 - slot);
+            Varnode* a = sextOp.getIn(0);
+            if (a.isFree() || a.getSize() != sizeout) return 0;
+            Varnode* otherVn = multOp.getIn(1 - slot);
             // otherVn must be a positive integer and small enough so the INT_MULT can't overflow into the sign-bit
-            if (otherVn->isConstant())
+            if (otherVn.isConstant())
             {
-                if (otherVn->getOffset() > calc_mask(sizeout)) return 0;
+                if (otherVn.getOffset() > calc_mask(sizeout)) return 0;
                 if (2 * sizeout > multSize) return 0;
             }
-            else if (otherVn->isWritten())
+            else if (otherVn.isWritten())
             {
-                PcodeOp* zextOp = otherVn->getDef();
-                if (zextOp->code() != CPUI_INT_ZEXT) return 0;
-                if (zextOp->getIn(0)->getSize() + sizeout > multSize) return 0;
+                PcodeOp* zextOp = otherVn.getDef();
+                if (zextOp.code() != CPUI_INT_ZEXT) return 0;
+                if (zextOp.getIn(0).getSize() + sizeout > multSize) return 0;
             }
             else
                 return 0;

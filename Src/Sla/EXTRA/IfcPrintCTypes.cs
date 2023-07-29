@@ -14,13 +14,13 @@ namespace Sla.EXTRA
         /// \brief Print any known type definitions: `print C types`
         public override void execute(TextReader s)
         {
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("No load image present");
 
-            if (dcp->conf->types != (TypeFactory*)0)
+            if (dcp.conf.types != (TypeFactory*)0)
             {
-                dcp->conf->print->setOutputStream(status->fileoptr);
-                dcp->conf->print->docTypeDefinitions(dcp->conf->types);
+                dcp.conf.print.setOutputStream(status.fileoptr);
+                dcp.conf.print.docTypeDefinitions(dcp.conf.types);
             }
         }
     }

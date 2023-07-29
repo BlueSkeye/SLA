@@ -31,40 +31,40 @@ namespace Sla.DECCORE
         /// \return the placeholder or null if the Varnode is not suitable for replacement
         private TransformVar setReplacement(Varnode vn)
         {
-            if (vn->isMark())       // Already seen before
+            if (vn.isMark())       // Already seen before
                 return getPiece(vn, precision * 8, 0);
 
-            if (vn->isConstant())
+            if (vn.isConstant())
             {
-                FloatFormat form2 = getFunction()->getArch()->translate->getFloatFormat(vn->getSize());
+                FloatFormat form2 = getFunction().getArch().translate.getFloatFormat(vn.getSize());
                 if (form2 == (FloatFormat*)0)
                     return (TransformVar*)0;  // Unsupported constant format
                                 // Return the converted form of the constant
-                return newConstant(precision, 0, format->convertEncoding(vn->getOffset(), form2));
+                return newConstant(precision, 0, format.convertEncoding(vn.getOffset(), form2));
             }
 
-            if (vn->isFree())
+            if (vn.isFree())
                 return (TransformVar*)0; // Abort
 
-            if (vn->isAddrForce() && (vn->getSize() != precision))
+            if (vn.isAddrForce() && (vn.getSize() != precision))
                 return (TransformVar*)0;
 
-            if (vn->isTypeLock() && vn->getType()->getMetatype() != TYPE_PARTIALSTRUCT)
+            if (vn.isTypeLock() && vn.getType().getMetatype() != TYPE_PARTIALSTRUCT)
             {
-                int4 sz = vn->getType()->getSize();
+                int4 sz = vn.getType().getSize();
                 if (sz != precision)
                     return (TransformVar*)0;
             }
 
-            if (vn->isInput())
+            if (vn.isInput())
             {       // Must be careful with inputs
-                if (vn->getSize() != precision) return (TransformVar*)0;
+                if (vn.getSize() != precision) return (TransformVar*)0;
             }
 
-            vn->setMark();
+            vn.setMark();
             TransformVar* res;
             // Check if vn already represents the logical variable being traced
-            if (vn->getSize() == precision)
+            if (vn.getSize() == precision)
                 res = newPreexistingVarnode(vn);
             else
             {
@@ -84,16 +84,16 @@ namespace Sla.DECCORE
         private bool traceForward(TransformVar rvn)
         {
             list<PcodeOp*>::const_iterator iter, enditer;
-            Varnode* vn = rvn->getOriginal();
-            iter = vn->beginDescend();
-            enditer = vn->endDescend();
+            Varnode* vn = rvn.getOriginal();
+            iter = vn.beginDescend();
+            enditer = vn.endDescend();
             while (iter != enditer)
             {
                 PcodeOp* op = *iter++;
-                Varnode* outvn = op->getOut();
-                if ((outvn != (Varnode*)0) && (outvn->isMark()))
+                Varnode* outvn = op.getOut();
+                if ((outvn != (Varnode*)0) && (outvn.isMark()))
                     continue;
-                switch (op->code())
+                switch (op.code())
                 {
                     case CPUI_COPY:
                     case CPUI_FLOAT_CEIL:
@@ -108,18 +108,18 @@ namespace Sla.DECCORE
                     case CPUI_FLOAT_DIV:
                     case CPUI_MULTIEQUAL:
                         {
-                            TransformOp* rop = newOpReplace(op->numInput(), op->code(), op);
+                            TransformOp* rop = newOpReplace(op.numInput(), op.code(), op);
                             TransformVar* outrvn = setReplacement(outvn);
                             if (outrvn == (TransformVar*)0) return false;
-                            opSetInput(rop, rvn, op->getSlot(vn));
+                            opSetInput(rop, rvn, op.getSlot(vn));
                             opSetOutput(rop, outrvn);
                             break;
                         }
                     case CPUI_FLOAT_FLOAT2FLOAT:
                         {
-                            if (outvn->getSize() < precision)
+                            if (outvn.getSize() < precision)
                                 return false;
-                            TransformOp* rop = newPreexistingOp(1, (outvn->getSize() == precision) ? CPUI_COPY : CPUI_FLOAT_FLOAT2FLOAT, op);
+                            TransformOp* rop = newPreexistingOp(1, (outvn.getSize() == precision) ? CPUI_COPY : CPUI_FLOAT_FLOAT2FLOAT, op);
                             opSetInput(rop, rvn, 0);
                             terminatorCount += 1;
                             break;
@@ -129,18 +129,18 @@ namespace Sla.DECCORE
                     case CPUI_FLOAT_LESS:
                     case CPUI_FLOAT_LESSEQUAL:
                         {
-                            int4 slot = op->getSlot(vn);
-                            TransformVar* rvn2 = setReplacement(op->getIn(1 - slot));
+                            int4 slot = op.getSlot(vn);
+                            TransformVar* rvn2 = setReplacement(op.getIn(1 - slot));
                             if (rvn2 == (TransformVar*)0) return false;
                             if (rvn == rvn2)
                             {
                                 list<PcodeOp*>::const_iterator ourIter = iter;
                                 --ourIter;  // Back up one to our original iterator
-                                slot = op->getRepeatSlot(vn, slot, ourIter);
+                                slot = op.getRepeatSlot(vn, slot, ourIter);
                             }
                             if (preexistingGuard(slot, rvn2))
                             {
-                                TransformOp* rop = newPreexistingOp(2, op->code(), op);
+                                TransformOp* rop = newPreexistingOp(2, op.code(), op);
                                 opSetInput(rop, rvn, 0);
                                 opSetInput(rop, rvn2, 1);
                                 terminatorCount += 1;
@@ -150,7 +150,7 @@ namespace Sla.DECCORE
                     case CPUI_FLOAT_TRUNC:
                     case CPUI_FLOAT_NAN:
                         {
-                            TransformOp* rop = newPreexistingOp(1, op->code(), op);
+                            TransformOp* rop = newPreexistingOp(1, op.code(), op);
                             opSetInput(rop, rvn, 0);
                             terminatorCount += 1;
                             break;
@@ -171,10 +171,10 @@ namespace Sla.DECCORE
         /// \return \b true if the logical value can be traced properly
         private bool traceBackward(TransformVar rvn)
         {
-            PcodeOp* op = rvn->getOriginal()->getDef();
+            PcodeOp* op = rvn.getOriginal().getDef();
             if (op == (PcodeOp*)0) return true; // If vn is input
 
-            switch (op->code())
+            switch (op.code())
             {
                 case CPUI_COPY:
                 case CPUI_FLOAT_CEIL:
@@ -189,18 +189,18 @@ namespace Sla.DECCORE
                 case CPUI_FLOAT_DIV:
                 case CPUI_MULTIEQUAL:
                     {
-                        TransformOp* rop = rvn->getDef();
+                        TransformOp* rop = rvn.getDef();
                         if (rop == (TransformOp*)0)
                         {
-                            rop = newOpReplace(op->numInput(), op->code(), op);
+                            rop = newOpReplace(op.numInput(), op.code(), op);
                             opSetOutput(rop, rvn);
                         }
-                        for (int4 i = 0; i < op->numInput(); ++i)
+                        for (int4 i = 0; i < op.numInput(); ++i)
                         {
-                            TransformVar* newvar = rop->getIn(i);
+                            TransformVar* newvar = rop.getIn(i);
                             if (newvar == (TransformVar*)0)
                             {
-                                newvar = setReplacement(op->getIn(i));
+                                newvar = setReplacement(op.getIn(i));
                                 if (newvar == (TransformVar*)0)
                                     return false;
                                 opSetInput(rop, newvar, i);
@@ -210,8 +210,8 @@ namespace Sla.DECCORE
                     }
                 case CPUI_FLOAT_INT2FLOAT:
                     {
-                        Varnode* vn = op->getIn(0);
-                        if (!vn->isConstant() && vn->isFree())
+                        Varnode* vn = op.getIn(0);
+                        if (!vn.isConstant() && vn.isFree())
                             return false;
                         TransformOp* rop = newOpReplace(1, CPUI_FLOAT_INT2FLOAT, op);
                         opSetOutput(rop, rvn);
@@ -221,14 +221,14 @@ namespace Sla.DECCORE
                     }
                 case CPUI_FLOAT_FLOAT2FLOAT:
                     {
-                        Varnode* vn = op->getIn(0);
+                        Varnode* vn = op.getIn(0);
                         TransformVar* newvar;
                         OpCode opc;
-                        if (vn->isConstant())
+                        if (vn.isConstant())
                         {
                             opc = CPUI_COPY;
-                            if (vn->getSize() == precision)
-                                newvar = newConstant(precision, 0, vn->getOffset());
+                            if (vn.getSize() == precision)
+                                newvar = newConstant(precision, 0, vn.getOffset());
                             else
                             {
                                 newvar = setReplacement(vn);    // Convert constant to precision size
@@ -238,8 +238,8 @@ namespace Sla.DECCORE
                         }
                         else
                         {
-                            if (vn->isFree()) return false;
-                            opc = (vn->getSize() == precision) ? CPUI_COPY : CPUI_FLOAT_FLOAT2FLOAT;
+                            if (vn.isFree()) return false;
+                            opc = (vn.getSize() == precision) ? CPUI_COPY : CPUI_FLOAT_FLOAT2FLOAT;
                             newvar = getPreexistingVarnode(vn);
                         }
                         TransformOp* rop = newOpReplace(1, opc, op);
@@ -277,7 +277,7 @@ namespace Sla.DECCORE
             : base(f)
         {
             precision = prec;
-            format = f->getArch()->translate->getFloatFormat(precision);
+            format = f.getArch().translate.getFloatFormat(precision);
             if (format == (FloatFormat*)0)
                 return;
             setReplacement(root);
@@ -285,7 +285,7 @@ namespace Sla.DECCORE
 
         public override bool preserveAddress(Varnode vn, int4 bitSize, int4 lsbOffset)
         {
-            return vn->isInput();       // Only try to preserve address for input varnodes
+            return vn.isInput();       // Only try to preserve address for input varnodes
         }
 
         /// Trace logical value as far as possible

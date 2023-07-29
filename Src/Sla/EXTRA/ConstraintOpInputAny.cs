@@ -24,21 +24,21 @@ namespace Sla.EXTRA
         }
         
         public override UnifyConstraint clone()
-            => (new ConstraintOpInputAny(opindex, varnodeindex))->copyid(this);
+            => (new ConstraintOpInputAny(opindex, varnodeindex)).copyid(this);
 
         public override void initialize(UnifyState state)
         {               // Default initialization (with only 1 state)
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
             PcodeOp* op = state.data(opindex).getOp();
-            traverse->initialize(op->numInput());   // Initialize total number of inputs
+            traverse.initialize(op.numInput());   // Initialize total number of inputs
         }
 
         public override bool step(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            if (!traverse->step()) return false;
+            if (!traverse.step()) return false;
             PcodeOp* op = state.data(opindex).getOp();
-            Varnode* vn = op->getIn(traverse->getState());
+            Varnode* vn = op.getIn(traverse.getState());
             state.data(varnodeindex).setVarnode(vn);
             return true;
         }
@@ -55,10 +55,10 @@ namespace Sla.EXTRA
         {
             printstate.printIndent(s);
             s << "for(int4 i" << dec << printstate.getDepth() << "=0;i" << printstate.getDepth() << '<';
-            s << printstate.getName(opindex) << "->numInput();++i" << printstate.getDepth() << ") {" << endl;
+            s << printstate.getName(opindex) << ".numInput();++i" << printstate.getDepth() << ") {" << endl;
             printstate.incDepth();  // A permanent increase in depth
             printstate.printIndent(s);
-            s << printstate.getName(varnodeindex) << " = " << printstate.getName(opindex) << "->getIn(i";
+            s << printstate.getName(varnodeindex) << " = " << printstate.getName(opindex) << ".getIn(i";
             s << (printstate.getDepth() - 1) << ");" << endl;
         }
     }

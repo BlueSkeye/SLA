@@ -35,16 +35,16 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            int4 align = data.getArch()->funcptr_align;
+            int4 align = data.getArch().funcptr_align;
             if (align == 0) return 0;
-            Varnode* vn = op->getIn(0);
-            if (!vn->isWritten()) return 0;
-            PcodeOp* andop = vn->getDef();
-            if (andop->code() != CPUI_INT_AND) return 0;
-            Varnode* maskvn = andop->getIn(1);
-            if (!maskvn->isConstant()) return 0;
-            uintb val = maskvn->getOffset();
-            uintb testmask = calc_mask(maskvn->getSize());
+            Varnode* vn = op.getIn(0);
+            if (!vn.isWritten()) return 0;
+            PcodeOp* andop = vn.getDef();
+            if (andop.code() != CPUI_INT_AND) return 0;
+            Varnode* maskvn = andop.getIn(1);
+            if (!maskvn.isConstant()) return 0;
+            uintb val = maskvn.getOffset();
+            uintb testmask = calc_mask(maskvn.getSize());
             uintb slide = ~((uintb)0);
             slide <<= align;
             if ((testmask & slide) == val)

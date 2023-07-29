@@ -14,10 +14,10 @@ namespace Sla.SLEIGH
         
         public void identicalPattern(Constructor a, Constructor b)
         { // Note that -a- and -b- have identical patterns
-            if ((!a->isError()) && (!b->isError()))
+            if ((!a.isError()) && (!b.isError()))
             {
-                a->setError(true);
-                b->setError(true);
+                a.setError(true);
+                b.setError(true);
 
                 identerrors.push_back(make_pair(a, b));
             }
@@ -25,10 +25,10 @@ namespace Sla.SLEIGH
 
         public void conflictingPattern(Constructor a, Constructor b)
         { // Note that -a- and -b- have (potentially) conflicting patterns
-            if ((!a->isError()) && (!b->isError()))
+            if ((!a.isError()) && (!b.isError()))
             {
-                a->setError(true);
-                b->setError(true);
+                a.setError(true);
+                b.setError(true);
 
                 conflicterrors.push_back(make_pair(a, b));
             }

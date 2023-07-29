@@ -109,7 +109,7 @@ namespace Sla.DECCORE
 
             // Try to find block containing comment
             // Find op at lowest address greater or equal to comment's address
-            PcodeOpTree::const_iterator opiter = fd->beginOp(comm->getAddr());
+            PcodeOpTree::const_iterator opiter = fd.beginOp(comm.getAddr());
             PcodeOp? backupOp = null;
             if (opiter != fd.endOpAll()) {
                 // If there is an op at or after the comment
@@ -124,7 +124,7 @@ namespace Sla.DECCORE
                     subsort.setBlock(block.getIndex(), (uint)op.getSeqNum().getOrder());
                     return true;
                 }
-                if (comm.getAddr() == op->getAddr()) {
+                if (comm.getAddr() == op.getAddr()) {
                     backupOp = op;
                 }
             }

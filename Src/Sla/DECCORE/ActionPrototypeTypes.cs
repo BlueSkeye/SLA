@@ -27,16 +27,16 @@ namespace Sla.DECCORE
         public void extendInput(Funcdata data, Varnode invn, ProtoParameter param, BlockBasic topbl)
         {
             VarnodeData vdata;
-            OpCode res = data.getFuncProto().assumedInputExtension(invn->getAddr(), invn->getSize(), vdata);
+            OpCode res = data.getFuncProto().assumedInputExtension(invn.getAddr(), invn.getSize(), vdata);
             if (res == CPUI_COPY) return;       // no extension
             if (res == CPUI_PIECE)
             {   // Do an extension based on type of parameter
-                if (param->getType()->getMetatype() == TYPE_INT)
+                if (param.getType().getMetatype() == TYPE_INT)
                     res = CPUI_INT_SEXT;
                 else
                     res = CPUI_INT_ZEXT;
             }
-            PcodeOp* op = data.newOp(1, topbl->getStart());
+            PcodeOp* op = data.newOp(1, topbl.getStart());
             data.newVarnodeOut(vdata.size, vdata.getAddr(), op);
             data.opSetOpcode(op, res);
             data.opSetInput(op, invn, 0);
@@ -58,9 +58,9 @@ namespace Sla.DECCORE
             list<PcodeOp*>::const_iterator iter, iterend;
 
             // Set the evaluation prototype if we are not already locked
-            ProtoModel* evalfp = data.getArch()->evalfp_current;
+            ProtoModel* evalfp = data.getArch().evalfp_current;
             if (evalfp == (ProtoModel*)0)
-                evalfp = data.getArch()->defaultfp;
+                evalfp = data.getArch().defaultfp;
             if ((!data.getFuncProto().isModelLocked()) && !data.getFuncProto().hasMatchingModel(evalfp))
                 data.getFuncProto().setModel(evalfp);
             if (data.getFuncProto().hasThisPointer())
@@ -74,10 +74,10 @@ namespace Sla.DECCORE
             for (iter = data.beginOp(CPUI_RETURN); iter != iterend; ++iter)
             {
                 PcodeOp* op = *iter;
-                if (op->isDead()) continue;
-                if (!op->getIn(0)->isConstant())
+                if (op.isDead()) continue;
+                if (!op.getIn(0).isConstant())
                 {
-                    Varnode* vn = data.newConstant(op->getIn(0)->getSize(), 0);
+                    Varnode* vn = data.newConstant(op.getIn(0).getSize(), 0);
                     data.opSetInput(op, vn, 0);
                 }
             }
@@ -85,40 +85,40 @@ namespace Sla.DECCORE
             if (data.getFuncProto().isOutputLocked())
             {
                 ProtoParameter* outparam = data.getFuncProto().getOutput();
-                if (outparam->getType()->getMetatype() != TYPE_VOID)
+                if (outparam.getType().getMetatype() != TYPE_VOID)
                 {
                     for (iter = data.beginOp(CPUI_RETURN); iter != iterend; ++iter)
                     {
                         PcodeOp* op = *iter;
-                        if (op->isDead()) continue;
-                        if (op->getHaltType() != 0) continue;
-                        Varnode* vn = data.newVarnode(outparam->getSize(), outparam->getAddress());
-                        data.opInsertInput(op, vn, op->numInput());
-                        vn->updateType(outparam->getType(), true, true);
+                        if (op.isDead()) continue;
+                        if (op.getHaltType() != 0) continue;
+                        Varnode* vn = data.newVarnode(outparam.getSize(), outparam.getAddress());
+                        data.opInsertInput(op, vn, op.numInput());
+                        vn.updateType(outparam.getType(), true, true);
                     }
                 }
             }
             else
                 data.initActiveOutput(); // Initiate gathering potential return values
 
-            AddrSpace* spc = data.getArch()->getDefaultCodeSpace();
-            if (spc->isTruncated())
+            AddrSpace* spc = data.getArch().getDefaultCodeSpace();
+            if (spc.isTruncated())
             {
                 // For truncated spaces we need a zext op, from the truncated stack pointer
                 // into the full stack pointer
-                AddrSpace* stackspc = data.getArch()->getStackSpace();
+                AddrSpace* stackspc = data.getArch().getStackSpace();
                 BlockBasic* topbl = (BlockBasic*)0;
                 if (data.getBasicBlocks().getSize() > 0)
                     topbl = (BlockBasic*)data.getBasicBlocks().getBlock(0);
                 if ((stackspc != (AddrSpace*)0) && (topbl != (BlockBasic*)0))
                 {
-                    for (int4 i = 0; i < stackspc->numSpacebase(); ++i)
+                    for (int4 i = 0; i < stackspc.numSpacebase(); ++i)
                     {
-                        VarnodeData &fullReg(stackspc->getSpacebaseFull(i));
-                        VarnodeData &truncReg(stackspc->getSpacebase(i));
+                        VarnodeData &fullReg(stackspc.getSpacebaseFull(i));
+                        VarnodeData &truncReg(stackspc.getSpacebase(i));
                         Varnode* invn = data.newVarnode(truncReg.size, truncReg.getAddr());
                         invn = data.setInputVarnode(invn);
-                        PcodeOp* extop = data.newOp(1, topbl->getStart());
+                        PcodeOp* extop = data.newOp(1, topbl.getStart());
                         data.newVarnodeOut(fullReg.size, fullReg.getAddr(), extop);
                         data.opSetOpcode(extop, CPUI_INT_ZEXT);
                         data.opSetInput(extop, invn, 0);
@@ -136,7 +136,7 @@ namespace Sla.DECCORE
             if (data.getFuncProto().isInputLocked())
             {
 
-                int4 ptr_size = spc->isTruncated() ? spc->getAddrSize() : 0; // Check if we need to do pointer trimming
+                int4 ptr_size = spc.isTruncated() ? spc.getAddrSize() : 0; // Check if we need to do pointer trimming
                 BlockBasic* topbl = (BlockBasic*)0;
                 if (data.getBasicBlocks().getSize() > 0)
                     topbl = (BlockBasic*)data.getBasicBlocks().getBlock(0);
@@ -145,16 +145,16 @@ namespace Sla.DECCORE
                 for (int4 i = 0; i < numparams; ++i)
                 {
                     ProtoParameter* param = data.getFuncProto().getParam(i);
-                    Varnode* vn = data.newVarnode(param->getSize(), param->getAddress());
+                    Varnode* vn = data.newVarnode(param.getSize(), param.getAddress());
                     vn = data.setInputVarnode(vn);
-                    vn->setLockedInput();
+                    vn.setLockedInput();
                     if (topbl != (BlockBasic*)0)
                         extendInput(data, vn, param, topbl);
                     if (ptr_size > 0)
                     {
-                        Datatype* ct = param->getType();
-                        if ((ct->getMetatype() == TYPE_PTR) && (ct->getSize() == ptr_size))
-                            vn->setPtrFlow();
+                        Datatype* ct = param.getType();
+                        if ((ct.getMetatype() == TYPE_PTR) && (ct.getSize() == ptr_size))
+                            vn.setPtrFlow();
                     }
                 }
             }

@@ -33,7 +33,7 @@ namespace Sla.SLEIGH
             res = tree.insert(sym);
             if (!res.second)
             {
-                reportError((Location*)0,"Duplicate symbol name: " + sym->getName());
+                reportError((Location*)0,"Duplicate symbol name: " + sym.getName());
                 delete sym;     // Symbol is unattached to anything else
             }
         }
@@ -44,19 +44,19 @@ namespace Sla.SLEIGH
             tempbase = 0;
             errorcount = 0;
             result = (ConstructTpl*)0;
-            setDefaultSpace(slgh->getDefaultCodeSpace());
-            setConstantSpace(slgh->getConstantSpace());
-            setUniqueSpace(slgh->getUniqueSpace());
-            int4 num = slgh->numSpaces();
+            setDefaultSpace(slgh.getDefaultCodeSpace());
+            setConstantSpace(slgh.getConstantSpace());
+            setUniqueSpace(slgh.getUniqueSpace());
+            int4 num = slgh.numSpaces();
             for (int4 i = 0; i < num; ++i)
             {
-                AddrSpace* spc = slgh->getSpace(i);
-                spacetype type = spc->getType();
+                AddrSpace* spc = slgh.getSpace(i);
+                spacetype type = spc.getType();
                 if ((type == IPTR_CONSTANT) || (type == IPTR_PROCESSOR) || (type == IPTR_SPACEBASE) || (type == IPTR_INTERNAL))
                     tree.insert(new SpaceSymbol(spc));
             }
-            addSymbol(new FlowDestSymbol("inst_dest", slgh->getConstantSpace()));
-            addSymbol(new FlowRefSymbol("inst_ref", slgh->getConstantSpace()));
+            addSymbol(new FlowDestSymbol("inst_dest", slgh.getConstantSpace()));
+            addSymbol(new FlowRefSymbol("inst_ref", slgh.getConstantSpace()));
         }
 
         public void setResult(ConstructTpl res)
@@ -116,7 +116,7 @@ namespace Sla.SLEIGH
                 SleighSymbol* sym = *iter;
                 tmpiter = iter;
                 ++iter;         // Increment now, as node may be deleted
-                if (sym->getType() != SleighSymbol::space_symbol)
+                if (sym.getType() != SleighSymbol::space_symbol)
                 {
                     delete sym;     // Free any old local symbols
                     tree.erase(tmpiter);
@@ -144,10 +144,10 @@ namespace Sla.SLEIGH
                 if (iter != tree.end())
                     sym = *iter;        // Found a local symbol
                 else
-                    sym = sleigh->findSymbol(lexer.getIdentifier());
+                    sym = sleigh.findSymbol(lexer.getIdentifier());
                 if (sym != (SleighSymbol*)0)
                 {
-                    switch (sym->getType())
+                    switch (sym.getType())
                     {
                         case SleighSymbol::space_symbol:
                             yylval.spacesym = (SpaceSymbol*)sym;

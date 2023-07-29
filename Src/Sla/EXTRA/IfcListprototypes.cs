@@ -18,21 +18,21 @@ namespace Sla.EXTRA
         /// the evaluation model for called functions.
         public override void execute(TextReader s)
         {
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("No load image present");
 
             map<string, ProtoModel*>::const_iterator iter;
-            for (iter = dcp->conf->protoModels.begin(); iter != dcp->conf->protoModels.end(); ++iter)
+            for (iter = dcp.conf.protoModels.begin(); iter != dcp.conf.protoModels.end(); ++iter)
             {
                 ProtoModel* model = (*iter).second;
-                *status->optr << model->getName();
-                if (model == dcp->conf->defaultfp)
-                    *status->optr << " default";
-                else if (model == dcp->conf->evalfp_called)
-                    *status->optr << " eval called";
-                else if (model == dcp->conf->evalfp_current)
-                    *status->optr << " eval current";
-                *status->optr << endl;
+                *status.optr << model.getName();
+                if (model == dcp.conf.defaultfp)
+                    *status.optr << " default";
+                else if (model == dcp.conf.evalfp_called)
+                    *status.optr << " eval called";
+                else if (model == dcp.conf.evalfp_current)
+                    *status.optr << " eval current";
+                *status.optr << endl;
             }
         }
     }

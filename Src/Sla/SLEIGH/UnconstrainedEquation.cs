@@ -19,12 +19,12 @@ namespace Sla.SLEIGH
 
         public UnconstrainedEquation(PatternExpression p)
         {
-            (patex = p)->layClaim();
+            (patex = p).layClaim();
         }
 
         public override void genPattern(List<TokenPattern> ops)
         {
-            resultpattern = patex->genMinPattern(ops);
+            resultpattern = patex.genMinPattern(ops);
         }
 
         public override bool resolveOperandLeft(OperandResolve state)

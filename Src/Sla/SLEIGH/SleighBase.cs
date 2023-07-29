@@ -45,33 +45,33 @@ namespace Sla.SLEIGH
             SleighSymbol* sym;
             ostringstream s;
 
-            for (iter = glb->begin(); iter != glb->end(); ++iter)
+            for (iter = glb.begin(); iter != glb.end(); ++iter)
             {
                 sym = *iter;
-                if (sym->getType() == SleighSymbol::varnode_symbol)
+                if (sym.getType() == SleighSymbol::varnode_symbol)
                 {
-                    pair<VarnodeData, string> ins(((VarnodeSymbol*) sym)->getFixedVarnode(), sym->getName());
+                    pair<VarnodeData, string> ins(((VarnodeSymbol*) sym).getFixedVarnode(), sym.getName());
                     pair<map<VarnodeData, string>::iterator, bool> res = varnode_xref.insert(ins);
                     if (!res.second)
                     {
-                        errorPairs.push_back(sym->getName());
+                        errorPairs.push_back(sym.getName());
                         errorPairs.push_back((*(res.first)).second);
                     }
                 }
-                else if (sym->getType() == SleighSymbol::userop_symbol)
+                else if (sym.getType() == SleighSymbol::userop_symbol)
                 {
-                    int4 index = ((UserOpSymbol*)sym)->getIndex();
+                    int4 index = ((UserOpSymbol*)sym).getIndex();
                     while (userop.size() <= index)
                         userop.push_back("");
-                    userop[index] = sym->getName();
+                    userop[index] = sym.getName();
                 }
-                else if (sym->getType() == SleighSymbol::context_symbol)
+                else if (sym.getType() == SleighSymbol::context_symbol)
                 {
                     ContextSymbol* csym = (ContextSymbol*)sym;
-                    ContextField* field = (ContextField*)csym->getPatternValue();
-                    int4 startbit = field->getStartBit();
-                    int4 endbit = field->getEndBit();
-                    registerContext(csym->getName(), startbit, endbit);
+                    ContextField* field = (ContextField*)csym.getPatternValue();
+                    int4 startbit = field.getStartBit();
+                    int4 endbit = field.getEndBit();
+                    registerContext(csym.getName(), startbit, endbit);
                 }
             }
         }
@@ -84,16 +84,16 @@ namespace Sla.SLEIGH
             SymbolScope* glb = symtab.getGlobalScope();
             SymbolTree::const_iterator iter;
             SleighSymbol* sym;
-            for (iter = glb->begin(); iter != glb->end(); ++iter)
+            for (iter = glb.begin(); iter != glb.end(); ++iter)
             {
                 sym = *iter;
-                if (sym->getType() == SleighSymbol::context_symbol)
+                if (sym.getType() == SleighSymbol::context_symbol)
                 {
                     ContextSymbol* csym = (ContextSymbol*)sym;
-                    ContextField* field = (ContextField*)csym->getPatternValue();
-                    int4 startbit = field->getStartBit();
-                    int4 endbit = field->getEndBit();
-                    registerContext(csym->getName(), startbit, endbit);
+                    ContextField* field = (ContextField*)csym.getPatternValue();
+                    int4 startbit = field.getStartBit();
+                    int4 endbit = field.getEndBit();
+                    registerContext(csym.getName(), startbit, endbit);
                 }
             }
         }
@@ -108,54 +108,54 @@ namespace Sla.SLEIGH
             unique_allocatemask = 0;
             numSections = 0;
             int4 version = 0;
-            setBigEndian(xml_readbool(el->getAttributeValue("bigendian")));
+            setBigEndian(xml_readbool(el.getAttributeValue("bigendian")));
             {
-                istringstream s(el->getAttributeValue("align"));
+                istringstream s(el.getAttributeValue("align"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> alignment;
             }
             {
-                istringstream s(el->getAttributeValue("uniqbase"));
+                istringstream s(el.getAttributeValue("uniqbase"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 uintm ubase;
                 s >> ubase;
                 setUniqueBase(ubase);
             }
-            int4 numattr = el->getNumAttributes();
+            int4 numattr = el.getNumAttributes();
             for (int4 i = 0; i < numattr; ++i)
             {
-                string attrname = el->getAttributeName(i);
+                string attrname = el.getAttributeName(i);
                 if (attrname == "maxdelay")
                 {
-                    istringstream s1(el->getAttributeValue(i));
+                    istringstream s1(el.getAttributeValue(i));
                     s1.unsetf(ios::dec | ios::hex | ios::oct);
                     s1 >> maxdelayslotbytes;
                 }
                 else if (attrname == "uniqmask")
                 {
-                    istringstream s2(el->getAttributeValue(i));
+                    istringstream s2(el.getAttributeValue(i));
                     s2.unsetf(ios::dec | ios::hex | ios::oct);
                     s2 >> unique_allocatemask;
                 }
                 else if (attrname == "numsections")
                 {
-                    istringstream s3(el->getAttributeValue(i));
+                    istringstream s3(el.getAttributeValue(i));
                     s3.unsetf(ios::dec | ios::hex | ios::oct);
                     s3 >> numSections;
                 }
                 else if (attrname == "version")
                 {
-                    istringstream s(el->getAttributeValue(i));
+                    istringstream s(el.getAttributeValue(i));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> version;
                 }
             }
             if (version != SLA_FORMAT_VERSION)
                 throw new LowlevelError(".sla file has wrong format");
-            List list = el->getChildren();
+            List list = el.getChildren();
             List::const_iterator iter;
             iter = list.begin();
-            while ((*iter)->getName() == "floatformat")
+            while ((*iter).getName() == "floatformat")
             {
                 floatformats.emplace_back();
                 floatformats.back().restoreXml(*iter);
@@ -167,7 +167,7 @@ namespace Sla.SLEIGH
             decodeSpaces(decoder, this);
             iter++;
             symtab.restoreXml(*iter, this);
-            root = (SubtableSymbol*)symtab.getGlobalScope()->findSymbol("instruction");
+            root = (SubtableSymbol*)symtab.getGlobalScope().findSymbol("instruction");
             vector<string> errorPairs;
             buildXrefs(errorPairs);
             if (!errorPairs.empty())
@@ -195,9 +195,9 @@ namespace Sla.SLEIGH
             VarnodeSymbol* sym = (VarnodeSymbol*)findSymbol(nm);
             if (sym == (VarnodeSymbol*)0)
                 throw SleighError("Unknown register name: " + nm);
-            if (sym->getType() != SleighSymbol::varnode_symbol)
+            if (sym.getType() != SleighSymbol::varnode_symbol)
                 throw SleighError("Symbol is not a register: " + nm);
-            return sym->getFixedVarnode();
+            return sym.getFixedVarnode();
         }
 
         public override string getRegisterName(AddrSpace @base, uintb off, int4 size)
@@ -264,18 +264,18 @@ namespace Sla.SLEIGH
             s << ">\n";
             indexer.saveXml(s);
             s << "<spaces";
-            a_v(s, "defaultspace", getDefaultCodeSpace()->getName());
+            a_v(s, "defaultspace", getDefaultCodeSpace().getName());
             s << ">\n";
             for (int4 i = 0; i < numSpaces(); ++i)
             {
                 AddrSpace* spc = getSpace(i);
                 if (spc == (AddrSpace*)0) continue;
-                if ((spc->getType() == IPTR_CONSTANT) ||
-                (spc->getType() == IPTR_FSPEC) ||
-                (spc->getType() == IPTR_IOP) ||
-                (spc->getType() == IPTR_JOIN))
+                if ((spc.getType() == IPTR_CONSTANT) ||
+                (spc.getType() == IPTR_FSPEC) ||
+                (spc.getType() == IPTR_IOP) ||
+                (spc.getType() == IPTR_JOIN))
                     continue;
-                spc->saveXml(s);
+                spc.saveXml(s);
             }
             s << "</spaces>\n";
             symtab.saveXml(s);

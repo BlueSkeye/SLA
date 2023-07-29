@@ -24,9 +24,9 @@ namespace Sla.CORE
                 ldr = new LoadImageBfd(getFilename(), "default");
             else
                 ldr = new LoadImageBfd(getFilename(), getTarget());
-            ldr->open();
+            ldr.open();
             if (adjustvma != 0)
-                ldr->adjustVma(adjustvma);
+                ldr.adjustVma(adjustvma);
             loader = ldr;
         }
 
@@ -35,7 +35,7 @@ namespace Sla.CORE
             archid = getTarget();
             if (archid.find(':') == string::npos)
             {
-                archid = loader->getArchType();
+                archid = loader.getArchType();
                 // kludge to distinguish windows binaries from linux/gcc
                 if (archid.find("efi-app-ia32") != string::npos)
                     archid = "x86:LE:32:default:windows";
@@ -62,7 +62,7 @@ namespace Sla.CORE
         protected void postSpecFile()
         { // Attach default space to loader
             Architecture::postSpecFile();
-            ((LoadImageBfd*)loader)->attachToSpace(getDefaultCodeSpace());
+            ((LoadImageBfd*)loader).attachToSpace(getDefaultCodeSpace());
         }
 
         public override void encode(Encoder encoder)
@@ -70,7 +70,7 @@ namespace Sla.CORE
             encoder.openElement(ELEM_BFD_SAVEFILE);
             encodeHeader(encoder);
             encoder.writeUnsignedInteger(ATTRIB_ADJUSTVMA, adjustvma);
-            types->encodeCoreTypes(encoder);
+            types.encodeCoreTypes(encoder);
             SleighArchitecture::encode(encoder); // Save the rest of the state
             encoder.closeElement(ELEM_BFD_SAVEFILE);
         }
@@ -83,18 +83,18 @@ namespace Sla.CORE
 
             restoreXmlHeader(el);
             {
-                istringstream s(el->getAttributeValue("adjustvma"));
+                istringstream s(el.getAttributeValue("adjustvma"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> adjustvma;
             }
-            List &list(el->getChildren());
+            List &list(el.getChildren());
             List::const_iterator iter;
 
             iter = list.begin();
 
             if (iter != list.end())
             {
-                if ((*iter)->getName() == "coretypes")
+                if ((*iter).getName() == "coretypes")
                 {
                     store.registerTag(*iter);
                     ++iter;

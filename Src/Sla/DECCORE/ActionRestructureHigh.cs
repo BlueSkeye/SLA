@@ -29,19 +29,19 @@ namespace Sla.DECCORE
 
 #if OPACTION_DEBUG
             if ((flags & rule_debug) != 0)
-                l1->turnOnDebug();
+                l1.turnOnDebug();
 #endif
 
-            l1->restructureHigh();
+            l1.restructureHigh();
             if (data.syncVarnodesWithSymbols(l1, true, true))
                 count += 1;
 
 #if OPACTION_DEBUG
             if ((flags & rule_debug) == 0) return 0;
-            l1->turnOffDebug();
+            l1.turnOffDebug();
             ostringstream s;
-            data.getScopeLocal()->printEntries(s);
-            data.getArch()->printDebug(s.str());
+            data.getScopeLocal().printEntries(s);
+            data.getArch().printDebug(s.str());
 #endif
             return 0;
         }

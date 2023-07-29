@@ -23,12 +23,12 @@ namespace Sla.EXTRA
         public override uintb getConstant(UnifyState state)
         {
             Varnode* vn = state.data(varindex).getVarnode();
-            return vn->getNZMask();
+            return vn.getNZMask();
         }
 
         public override void writeExpression(TextWriter s, UnifyCPrinter printstate)
         {
-            s << printstate.getName(varindex) << "->getNZMask()";
+            s << printstate.getName(varindex) << ".getNZMask()";
         }
     }
 }

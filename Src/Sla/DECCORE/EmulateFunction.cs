@@ -28,10 +28,10 @@ namespace Sla.DECCORE
         {
             if (collectloads)
             {
-                uintb off = getVarnodeValue(currentOp->getIn(1));
-                AddrSpace* spc = currentOp->getIn(0)->getSpaceFromConst();
-                off = AddrSpace::addressToByte(off, spc->getWordSize());
-                int4 sz = currentOp->getOut()->getSize();
+                uintb off = getVarnodeValue(currentOp.getIn(1));
+                AddrSpace* spc = currentOp.getIn(0).getSpaceFromConst();
+                off = AddrSpace::addressToByte(off, spc.getWordSize());
+                int4 sz = currentOp.getOut().getSize();
                 loadpoints.push_back(LoadTable(Address(spc, off), sz));
             }
             EmulatePcodeOp::executeLoad();
@@ -73,7 +73,7 @@ namespace Sla.DECCORE
 
         /// \param f is the function to emulate within
         public EmulateFunction(Funcdata f)
-            : base(f->getArch())
+            : base(f.getArch())
         {
             fd = f;
             collectloads = false;
@@ -86,13 +86,13 @@ namespace Sla.DECCORE
 
         public override void setExecuteAddress(Address addr)
         {
-            if (!addr.getSpace()->hasPhysical())
+            if (!addr.getSpace().hasPhysical())
                 throw new LowlevelError("Bad execute address");
 
-            currentOp = fd->target(addr);
+            currentOp = fd.target(addr);
             if (currentOp == (PcodeOp*)0)
                 throw new LowlevelError("Could not set execute address");
-            currentBehave = currentOp->getOpcode()->getBehavior();
+            currentBehave = currentOp.getOpcode().getBehavior();
         }
 
         public override uintb getVarnodeValue(Varnode vn)
@@ -100,14 +100,14 @@ namespace Sla.DECCORE
             // Get the value of a Varnode which is in a syntax tree
             // We can't just use the memory location as, within the tree,
             // this is just part of the label
-            if (vn->isConstant())
-                return vn->getOffset();
+            if (vn.isConstant())
+                return vn.getOffset();
             map<Varnode*, uintb>::const_iterator iter;
             iter = varnodeMap.find(vn);
             if (iter != varnodeMap.end())
                 return (*iter).second;  // We have seen this varnode before
 
-            return getLoadImageValue(vn->getSpace(), vn->getOffset(), vn->getSize());
+            return getLoadImageValue(vn.getSpace(), vn.getOffset(), vn.getSize());
         }
 
         public override void setVarnodeValue(Varnode vn, uintb val)
@@ -129,24 +129,24 @@ namespace Sla.DECCORE
             uint4 i;
             for (i = 0; i < pathMeld.numOps(); ++i)
                 if (pathMeld.getOp(i) == startop) break;
-            if (startop->code() == CPUI_MULTIEQUAL)
+            if (startop.code() == CPUI_MULTIEQUAL)
             { // If we start on a MULTIEQUAL
                 int4 j;
-                for (j = 0; j < startop->numInput(); ++j)
+                for (j = 0; j < startop.numInput(); ++j)
                 { // Is our startvn one of the branches
-                    if (startop->getIn(j) == startvn)
+                    if (startop.getIn(j) == startvn)
                         break;
                 }
-                if ((j == startop->numInput()) || (i == 0)) // If not, we can't continue;
+                if ((j == startop.numInput()) || (i == 0)) // If not, we can't continue;
                     throw new LowlevelError("Cannot start jumptable emulation with unresolved MULTIEQUAL");
                 // If the startvn was a branch of the MULTIEQUAL, emulate as if we just came from that branch
-                startvn = startop->getOut(); // So the output of the MULTIEQUAL is the new startvn (as if a COPY from old startvn)
+                startvn = startop.getOut(); // So the output of the MULTIEQUAL is the new startvn (as if a COPY from old startvn)
                 i -= 1;         // Move to the next instruction to be executed
                 startop = pathMeld.getOp(i);
             }
             if (i == pathMeld.numOps())
                 throw new LowlevelError("Bad jumptable emulation");
-            if (!startvn->isConstant())
+            if (!startvn.isConstant())
                 setVarnodeValue(startvn, val);
             while (i > 0)
             {
@@ -159,11 +159,11 @@ namespace Sla.DECCORE
                 }
                 catch (DataUnavailError err) {
                     ostringstream msg;
-                    msg << "Could not emulate address calculation at " << curop->getAddr();
+                    msg << "Could not emulate address calculation at " << curop.getAddr();
                     throw new LowlevelError(msg.str());
                 }
             }
-            Varnode* invn = pathMeld.getOp(0)->getIn(0);
+            Varnode* invn = pathMeld.getOp(0).getIn(0);
             return getVarnodeValue(invn);
         }
 

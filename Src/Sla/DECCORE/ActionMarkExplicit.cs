@@ -37,9 +37,9 @@ namespace Sla.DECCORE
                 vn = v;
                 slot = 0;
                 slotback = 0;
-                if (v->isWritten())
+                if (v.isWritten())
                 {
-                    OpCode opc = v->getDef()->code();
+                    OpCode opc = v.getDef().code();
                     if (opc == CPUI_LOAD)
                     {
                         slot = 1;
@@ -48,7 +48,7 @@ namespace Sla.DECCORE
                     else if (opc == CPUI_PTRADD)
                         slotback = 1;           // Don't traverse the multiplier slot
                     else
-                        slotback = v->getDef()->numInput();
+                        slotback = v.getDef().numInput();
                 }
             }
         }
@@ -63,55 +63,55 @@ namespace Sla.DECCORE
         {
             list<PcodeOp*>::const_iterator iter;
 
-            PcodeOp* def = vn->getDef();
+            PcodeOp* def = vn.getDef();
             if (def == (PcodeOp*)0) return -1;
-            if (def->isMarker()) return -1;
-            if (def->isCall())
+            if (def.isMarker()) return -1;
+            if (def.isCall())
             {
-                if ((def->code() == CPUI_NEW) && (def->numInput() == 1))
+                if ((def.code() == CPUI_NEW) && (def.numInput() == 1))
                     return -2;      // Explicit, but may need special printing
                 return -1;
             }
-            HighVariable* high = vn->getHigh();
-            if ((high != (HighVariable*)0) && (high->numInstances() > 1)) return -1; // Must not be merged at all
-            if (vn->isAddrTied())
+            HighVariable* high = vn.getHigh();
+            if ((high != (HighVariable*)0) && (high.numInstances() > 1)) return -1; // Must not be merged at all
+            if (vn.isAddrTied())
             {       // We need to see addrtied as explicit because pointers may reference it
-                if (def->code() == CPUI_SUBPIECE)
+                if (def.code() == CPUI_SUBPIECE)
                 {
-                    Varnode* vin = def->getIn(0);
-                    if (vin->isAddrTied())
+                    Varnode* vin = def.getIn(0);
+                    if (vin.isAddrTied())
                     {
-                        if (vn->overlapJoin(*vin) == def->getIn(1)->getOffset())
+                        if (vn.overlapJoin(*vin) == def.getIn(1).getOffset())
                             return -1;      // Should be explicit, will be a copymarker and not printed
                     }
                 }
-                PcodeOp* useOp = vn->loneDescend();
+                PcodeOp* useOp = vn.loneDescend();
                 if (useOp == (PcodeOp*)0) return -1;
-                if (useOp->code() == CPUI_INT_ZEXT)
+                if (useOp.code() == CPUI_INT_ZEXT)
                 {
-                    Varnode* vnout = useOp->getOut();
-                    if ((!vnout->isAddrTied()) || (0 != vnout->contains(*vn)))
+                    Varnode* vnout = useOp.getOut();
+                    if ((!vnout.isAddrTied()) || (0 != vnout.contains(*vn)))
                         return -1;
                 }
-                else if (useOp->code() == CPUI_PIECE)
+                else if (useOp.code() == CPUI_PIECE)
                 {
                     Varnode* rootVn = PieceNode::findRoot(vn);
                     if (vn == rootVn) return -1;
-                    if (rootVn->getDef()->isPartialRoot())
+                    if (rootVn.getDef().isPartialRoot())
                     {
                         // Getting PIECEd into a structured thing.  Unless vn is a leaf, it should be implicit
-                        if (def->code() != CPUI_PIECE) return -1;
-                        if (vn->loneDescend() == (PcodeOp*)0) return -1;
-                        Varnode* vn0 = def->getIn(0);
-                        Varnode* vn1 = def->getIn(1);
-                        Address addr = vn->getAddr();
-                        if (!addr.getSpace()->isBigEndian())
-                            addr = addr + vn1->getSize();
-                        if (addr != vn0->getAddr()) return -1;
-                        addr = vn->getAddr();
-                        if (addr.getSpace()->isBigEndian())
-                            addr = addr + vn0->getSize();
-                        if (addr != vn1->getAddr()) return -1;
+                        if (def.code() != CPUI_PIECE) return -1;
+                        if (vn.loneDescend() == (PcodeOp*)0) return -1;
+                        Varnode* vn0 = def.getIn(0);
+                        Varnode* vn1 = def.getIn(1);
+                        Address addr = vn.getAddr();
+                        if (!addr.getSpace().isBigEndian())
+                            addr = addr + vn1.getSize();
+                        if (addr != vn0.getAddr()) return -1;
+                        addr = vn.getAddr();
+                        if (addr.getSpace().isBigEndian())
+                            addr = addr + vn0.getSize();
+                        if (addr != vn1.getAddr()) return -1;
                         // If we reach here vn is a non-leaf in a CONCAT tree and should be implicit
                     }
                 }
@@ -120,38 +120,38 @@ namespace Sla.DECCORE
                     return -1;
                 }
             }
-            else if (vn->isMapped())
+            else if (vn.isMapped())
             {
                 // If NOT addrtied but is still mapped, there must be either a first use (register) mapping
                 // or a dynamic mapping causing the bit to be set. In either case, it should probably be explicit
                 return -1;
             }
-            else if (vn->isProtoPartial() && def->code() != CPUI_PIECE)
+            else if (vn.isProtoPartial() && def.code() != CPUI_PIECE)
             {
                 // Varnode is part of structure. Write to structure should be an explicit statement
                 return -1;
             }
-            else if (def->code() == CPUI_PIECE && def->getIn(0)->isProtoPartial() && !vn->isProtoPartial())
+            else if (def.code() == CPUI_PIECE && def.getIn(0).isProtoPartial() && !vn.isProtoPartial())
             {
                 // The base of PIECE operations building a structure
                 return -1;
             }
-            if (vn->hasNoDescend()) return -1;  // Must have at least one descendant
+            if (vn.hasNoDescend()) return -1;  // Must have at least one descendant
 
-            if (def->code() == CPUI_PTRSUB)
+            if (def.code() == CPUI_PTRSUB)
             { // A dereference
-                Varnode* basevn = def->getIn(0);
-                if (basevn->isSpacebase())
+                Varnode* basevn = def.getIn(0);
+                if (basevn.isSpacebase())
                 { // of a spacebase
-                    if (basevn->isConstant() || basevn->isInput())
+                    if (basevn.isConstant() || basevn.isInput())
                         maxref = 1000000;   // Should always be implicit, so remove limit on max references
                 }
             }
             int4 desccount = 0;
-            for (iter = vn->beginDescend(); iter != vn->endDescend(); ++iter)
+            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {
                 PcodeOp* op = *iter;
-                if (op->isMarker()) return -1;
+                if (op.isMarker()) return -1;
                 desccount += 1;
                 if (desccount > maxref) return -1; // Must not exceed max descendants
             }
@@ -174,25 +174,25 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < multlist.size(); ++i)
             {
                 Varnode* vn = multlist[i];  // All elements in this list should have a defining op
-                PcodeOp* op = vn->getDef();
-                OpCode opc = op->code();
-                if (op->isBoolOutput() || (opc == CPUI_INT_ZEXT) || (opc == CPUI_INT_SEXT) || (opc == CPUI_PTRADD))
+                PcodeOp* op = vn.getDef();
+                OpCode opc = op.code();
+                if (op.isBoolOutput() || (opc == CPUI_INT_ZEXT) || (opc == CPUI_INT_SEXT) || (opc == CPUI_PTRADD))
                 {
                     int4 maxparam = 2;
-                    if (op->numInput() < maxparam)
-                        maxparam = op->numInput();
+                    if (op.numInput() < maxparam)
+                        maxparam = op.numInput();
                     Varnode* topvn = (Varnode*)0;
                     for (int4 j = 0; j < maxparam; ++j)
                     {
-                        topvn = op->getIn(j);
-                        if (topvn->isMark())
+                        topvn = op.getIn(j);
+                        if (topvn.isMark())
                         {   // We have a "multiple" interaction between -topvn- and -vn-
                             OpCode topopc = CPUI_COPY;
-                            if (topvn->isWritten())
+                            if (topvn.isWritten())
                             {
-                                if (topvn->getDef()->isBoolOutput())
+                                if (topvn.getDef().isBoolOutput())
                                     continue;       // Try not to make boolean outputs explicit
-                                topopc = topvn->getDef()->code();
+                                topopc = topvn.getDef().code();
                             }
                             if (opc == CPUI_PTRADD)
                             {
@@ -209,9 +209,9 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < purgelist.size(); ++i)
             {
                 Varnode* vn = purgelist[i];
-                vn->setExplicit();
-                vn->clearImplied();
-                vn->clearMark();
+                vn.setExplicit();
+                vn.clearImplied();
+                vn.clearMark();
             }
             return purgelist.size();
         }
@@ -234,30 +234,30 @@ namespace Sla.DECCORE
             do
             {
                 vncur = opstack.back().vn;
-                bool isaterm = vncur->isExplicit() || (!vncur->isWritten());
+                bool isaterm = vncur.isExplicit() || (!vncur.isWritten());
                 if (isaterm || (opstack.back().slotback <= opstack.back().slot))
                 { // Trimming condition
                     if (isaterm)
                     {
-                        if (!vncur->isSpacebase()) // Don't count space base
+                        if (!vncur.isSpacebase()) // Don't count space base
                             finalcount += 1;
                     }
                     if (finalcount > max)
                     {
-                        vn->setExplicit();  // Make this variable explicit
-                        vn->clearImplied();
+                        vn.setExplicit();  // Make this variable explicit
+                        vn.clearImplied();
                         return;
                     }
                     opstack.pop_back();
                 }
                 else
                 {
-                    PcodeOp* op = vncur->getDef();
-                    Varnode* newvn = op->getIn(opstack.back().slot++);
-                    if (newvn->isMark())
+                    PcodeOp* op = vncur.getDef();
+                    Varnode* newvn = op.getIn(opstack.back().slot++);
+                    if (newvn.isMark())
                     {   // If an ancestor is marked(also possible implied with multiple descendants)
-                        vn->setExplicit();  // then automatically consider this to be explicit
-                        vn->clearImplied();
+                        vn.setExplicit();  // then automatically consider this to be explicit
+                        vn.clearImplied();
                     }
                     opstack.push_back(newvn);
                 }
@@ -271,35 +271,35 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode
         private static void checkNewToConstructor(Funcdata data, Varnode vn)
         {
-            PcodeOp* op = vn->getDef();
-            BlockBasic* bb = op->getParent();
+            PcodeOp* op = vn.getDef();
+            BlockBasic* bb = op.getParent();
             PcodeOp* firstuse = (PcodeOp*)0;
             list<PcodeOp*>::const_iterator iter;
-            for (iter = vn->beginDescend(); iter != vn->endDescend(); ++iter)
+            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {
                 PcodeOp* curop = *iter;
-                if (curop->getParent() != bb) continue;
+                if (curop.getParent() != bb) continue;
                 if (firstuse == (PcodeOp*)0)
                     firstuse = curop;
-                else if (curop->getSeqNum().getOrder() < firstuse->getSeqNum().getOrder())
+                else if (curop.getSeqNum().getOrder() < firstuse.getSeqNum().getOrder())
                     firstuse = curop;
-                else if (curop->code() == CPUI_CALLIND)
+                else if (curop.code() == CPUI_CALLIND)
                 {
-                    Varnode* ptr = curop->getIn(0);
-                    if (ptr->isWritten())
+                    Varnode* ptr = curop.getIn(0);
+                    if (ptr.isWritten())
                     {
-                        if (ptr->getDef() == firstuse)
+                        if (ptr.getDef() == firstuse)
                             firstuse = curop;
                     }
                 }
             }
             if (firstuse == (PcodeOp*)0) return;
 
-            if (!firstuse->isCall()) return;
-            if (firstuse->getOut() != (Varnode*)0) return;
-            if (firstuse->numInput() < 2) return;       // Must have at least 1 parameter (plus destination varnode)
-            if (firstuse->getIn(1) != vn) return;       // First parameter must result of new
-                                                        //  if (!fc->isConstructor()) return;		// Function must be a constructor
+            if (!firstuse.isCall()) return;
+            if (firstuse.getOut() != (Varnode*)0) return;
+            if (firstuse.numInput() < 2) return;       // Must have at least 1 parameter (plus destination varnode)
+            if (firstuse.getIn(1) != vn) return;       // First parameter must result of new
+                                                        //  if (!fc.isConstructor()) return;		// Function must be a constructor
             data.opMarkSpecialPrint(firstuse);      // Mark call to print the new operator as well
             data.opMarkNonPrinting(op);         // Don't print the new operator as stand-alone operation
         }
@@ -320,7 +320,7 @@ namespace Sla.DECCORE
             vector<Varnode*> multlist;      // implied varnodes with >1 descendants
             int4 maxref;
 
-            maxref = data.getArch()->max_implied_ref;
+            maxref = data.getArch().max_implied_ref;
             enditer = data.beginDef(0); // Cut out free varnodes
             for (viter = data.beginDef(); viter != enditer; ++viter)
             {
@@ -329,28 +329,28 @@ namespace Sla.DECCORE
                 int4 desccount = baseExplicit(vn, maxref);
                 if (desccount < 0)
                 {
-                    vn->setExplicit();
+                    vn.setExplicit();
                     count += 1;
                     if (desccount < -1)
                         checkNewToConstructor(data, vn);
                 }
                 else if (desccount > 1)
                 {   // Keep track of possible implieds with more than one descendant
-                    vn->setMark();
+                    vn.setMark();
                     multlist.push_back(vn);
                 }
             }
 
             count += multipleInteraction(multlist);
-            int4 maxdup = data.getArch()->max_term_duplication;
+            int4 maxdup = data.getArch().max_term_duplication;
             for (int4 i = 0; i < multlist.size(); ++i)
             {
                 Varnode* vn = multlist[i];
-                if (vn->isMark())       // Mark may have been cleared by multipleInteraction
+                if (vn.isMark())       // Mark may have been cleared by multipleInteraction
                     processMultiplier(vn, maxdup);
             }
             for (int4 i = 0; i < multlist.size(); ++i)
-                multlist[i]->clearMark();
+                multlist[i].clearMark();
             return 0;
         }
     }

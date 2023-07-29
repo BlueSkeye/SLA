@@ -18,10 +18,10 @@ namespace Sla.EXTRA
         {
             Varnode* vn;
 
-            vn = dcp->readVarnode(s);
+            vn = dcp.readVarnode(s);
             if (vn == (Varnode*)0)
                 throw IfaceParseError("Unknown varnode");
-            vn->printCover(*status->optr);
+            vn.printCover(*status.optr);
         }
     }
 }

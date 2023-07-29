@@ -31,13 +31,13 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            if (!op->getIn(1)->isConstant()) return 0;
-            if (op->getIn(1)->getOffset() != 0) return 0;
+            if (!op.getIn(1).isConstant()) return 0;
+            if (op.getIn(1).getOffset() != 0) return 0;
 
-            int4 sa = 8 * op->getIn(1)->getSize();
-            Varnode* highvn = op->getIn(0);
-            PcodeOp* newop = data.newOp(1, op->getAddr());
-            Varnode* outvn = data.newUniqueOut(op->getOut()->getSize(), newop);
+            int4 sa = 8 * op.getIn(1).getSize();
+            Varnode* highvn = op.getIn(0);
+            PcodeOp* newop = data.newOp(1, op.getAddr());
+            Varnode* outvn = data.newUniqueOut(op.getOut().getSize(), newop);
             data.opSetOpcode(newop, CPUI_INT_ZEXT);
             data.opSetOpcode(op, CPUI_INT_LEFT);
             data.opSetInput(op, outvn, 0);

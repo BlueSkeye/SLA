@@ -17,33 +17,33 @@ namespace Sla.EXTRA
         /// to the console.
         public override void execute(TextReader s)
         {
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("No load image present");
 
-            AddrSpaceManager manage = dcp->conf;
-            int4 num = manage->numSpaces();
+            AddrSpaceManager manage = dcp.conf;
+            int4 num = manage.numSpaces();
             for (int4 i = 0; i < num; ++i)
             {
-                AddrSpace* spc = manage->getSpace(i);
+                AddrSpace* spc = manage.getSpace(i);
                 if (spc == (AddrSpace*)0) continue;
-                *status->fileoptr << dec << spc->getIndex() << " : '" << spc->getShortcut() << "' " << spc->getName();
-                if (spc->getType() == IPTR_CONSTANT)
-                    *status->fileoptr << " constant ";
-                else if (spc->getType() == IPTR_PROCESSOR)
-                    *status->fileoptr << " processor";
-                else if (spc->getType() == IPTR_SPACEBASE)
-                    *status->fileoptr << " spacebase";
-                else if (spc->getType() == IPTR_INTERNAL)
-                    *status->fileoptr << " internal ";
+                *status.fileoptr << dec << spc.getIndex() << " : '" << spc.getShortcut() << "' " << spc.getName();
+                if (spc.getType() == IPTR_CONSTANT)
+                    *status.fileoptr << " constant ";
+                else if (spc.getType() == IPTR_PROCESSOR)
+                    *status.fileoptr << " processor";
+                else if (spc.getType() == IPTR_SPACEBASE)
+                    *status.fileoptr << " spacebase";
+                else if (spc.getType() == IPTR_INTERNAL)
+                    *status.fileoptr << " internal ";
                 else
-                    *status->fileoptr << " special  ";
-                if (spc->isBigEndian())
-                    *status->fileoptr << " big  ";
+                    *status.fileoptr << " special  ";
+                if (spc.isBigEndian())
+                    *status.fileoptr << " big  ";
                 else
-                    *status->fileoptr << " small";
-                *status->fileoptr << " addrsize=" << spc->getAddrSize() << " wordsize=" << spc->getWordSize();
-                *status->fileoptr << " delay=" << spc->getDelay();
-                *status->fileoptr << endl;
+                    *status.fileoptr << " small";
+                *status.fileoptr << " addrsize=" << spc.getAddrSize() << " wordsize=" << spc.getWordSize();
+                *status.fileoptr << " delay=" << spc.getDelay();
+                *status.fileoptr << endl;
             }
         }
     }

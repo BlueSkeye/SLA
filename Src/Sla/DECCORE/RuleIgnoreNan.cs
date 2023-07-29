@@ -34,7 +34,7 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            if (op->numInput() == 2)
+            if (op.numInput() == 2)
                 data.opRemoveInput(op, 1);
 
             // Treat these operations as always returning false (0)

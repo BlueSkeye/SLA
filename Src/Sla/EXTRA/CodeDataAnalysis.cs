@@ -32,8 +32,8 @@ namespace Sla.EXTRA
         public void init(Architecture g)
         {
             glb = g;
-            disengine.init(glb->translate);
-            alignment = glb->translate->getAlignment();
+            disengine.init(glb.translate);
+            alignment = glb.translate.getAlignment();
             modelhits.clear();
             codeunit.clear();
             fromto_crossref.clear();
@@ -349,7 +349,7 @@ namespace Sla.EXTRA
         public void addTargetHit(Address codeaddr, uintb targethit)
         {
             Address funcstart = findFunctionStart(codeaddr);
-            Address thunkaddr = Address(glb->translate->getDefaultCodeSpace(), targethit);
+            Address thunkaddr = Address(glb.translate.getDefaultCodeSpace(), targethit);
             uint4 mask;
             map<Address, TargetFeature>::const_iterator titer;
             titer = targets.find(thunkaddr);
@@ -561,7 +561,7 @@ namespace Sla.EXTRA
                 AddrLink addrlink = (*iter).first;
                 uint4 flags = (*iter).second;
 
-                s << hex << "0x" << addrlink.a.getOffset() << " -> 0x" << addrlink.b.getOffset();
+                s << hex << "0x" << addrlink.a.getOffset() << " . 0x" << addrlink.b.getOffset();
                 if ((flags & CodeUnit::call) != 0)
                     s << " call";
                 s << endl;
@@ -611,14 +611,14 @@ namespace Sla.EXTRA
 
         public void runModel()
         {
-            LoadImage* loadimage = glb->loader;
+            LoadImage* loadimage = glb.loader;
             LoadImageSection secinfo;
             bool moresections;
-            loadimage->openSectionInfo();
+            loadimage.openSectionInfo();
             Address lastaddr;
             do
             {
-                moresections = loadimage->getNextSection(secinfo);
+                moresections = loadimage.getNextSection(secinfo);
                 Address endaddr = secinfo.address + secinfo.size;
                 if (secinfo.size == 0) continue;
                 if (lastaddr.isInvalid())
@@ -632,7 +632,7 @@ namespace Sla.EXTRA
                               secinfo.address.getOffset(), endaddr.getOffset());
                 }
             } while (moresections);
-            loadimage->closeSectionInfo();
+            loadimage.closeSectionInfo();
             CodeUnit & cu(codeunit[lastaddr]);
             cu.size = 100;
             cu.flags = CodeUnit::notcode;

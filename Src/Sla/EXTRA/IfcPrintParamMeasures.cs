@@ -15,12 +15,12 @@ namespace Sla.EXTRA
         /// \brief Perform parameter-id analysis on the \e current function: `print parammeasures`
         public override void execute(TextReader s)
         {
-            if (dcp->fd == (Funcdata*)0)
+            if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");
 
-            ParamIDAnalysis pidanalysis(dcp->fd, false );
-            pidanalysis.savePretty(*status->fileoptr, true);
-            *status->fileoptr << "\n";
+            ParamIDAnalysis pidanalysis(dcp.fd, false );
+            pidanalysis.savePretty(*status.fileoptr, true);
+            *status.fileoptr << "\n";
         }
     }
 }

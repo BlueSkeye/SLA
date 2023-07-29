@@ -13,7 +13,7 @@ namespace Sla.EXTRA
 {				// Set a opactdbg trace break point
   int4 count;
   
-  if (dcp->fd == (Funcdata *)0)
+  if (dcp.fd == (Funcdata *)0)
     throw IfaceExecutionError("No function selected");
 
   s >> ws;
@@ -23,7 +23,7 @@ namespace Sla.EXTRA
   if (count == -1)
     throw IfaceParseError("Missing trace count");
 
-  dcp->fd->debugSetBreak(count);
+  dcp.fd.debugSetBreak(count);
 }
     }
 #endif

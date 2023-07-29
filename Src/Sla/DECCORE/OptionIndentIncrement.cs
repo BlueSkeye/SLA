@@ -25,7 +25,7 @@ namespace Sla.DECCORE
             s >> val;
             if (val == -1)
                 throw ParseError("Must specify integer increment");
-            glb->print->setIndentIncrement(val);
+            glb.print.setIndentIncrement(val);
             return "Characters per indent level set to " + p1;
         }
     }

@@ -23,14 +23,14 @@ namespace Sla.EXTRA
 
             Symbol* sym;
             vector<Symbol*> symList;
-            dcp->readSymbol(symbolName, symList);
+            dcp.readSymbol(symbolName, symList);
             if (symList.empty())
                 throw IfaceExecutionError("No symbol named: " + symbolName);
             if (symList.size() == 1)
                 sym = symList[0];
             else
                 throw IfaceExecutionError("More than one symbol named: " + symbolName);
-            sym->setIsolated(true);
+            sym.setIsolated(true);
         }
     }
 }

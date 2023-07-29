@@ -20,7 +20,7 @@ namespace Sla.DECCORE
         /// is "true" to enable the \e noreturn property, "false" to disable.
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            Funcdata* infd = glb->symboltab->getGlobalScope()->queryFunction(p1);
+            Funcdata* infd = glb.symboltab.getGlobalScope().queryFunction(p1);
             if (infd == (Funcdata*)0)
                 throw RecovError("Unknown function name: " + p1);
             bool val;
@@ -28,7 +28,7 @@ namespace Sla.DECCORE
                 val = true;
             else
                 val = (p2 == "true");
-            infd->getFuncProto().setNoReturn(val);
+            infd.getFuncProto().setNoReturn(val);
             string prop;
             if (val)
                 prop = "true";

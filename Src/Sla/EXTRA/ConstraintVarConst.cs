@@ -37,24 +37,24 @@ namespace Sla.EXTRA
             UnifyConstraint* res;
             RHSConstant* newexprsz = (RHSConstant*)0;
             if (exprsz != (RHSConstant*)0)
-                newexprsz = exprsz->clone();
-            res = (new ConstraintVarConst(varindex, expr->clone(), newexprsz))->copyid(this);
+                newexprsz = exprsz.clone();
+            res = (new ConstraintVarConst(varindex, expr.clone(), newexprsz)).copyid(this);
             return res;
         }
 
         public override bool step(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            if (!traverse->step()) return false;
-            uintb ourconst = expr->getConstant(state);
+            if (!traverse.step()) return false;
+            uintb ourconst = expr.getConstant(state);
             Funcdata* fd = state.getFunction();
             int4 sz;
             if (exprsz != (RHSConstant*)0)
-                sz = (int4)exprsz->getConstant(state);
+                sz = (int4)exprsz.getConstant(state);
             else
                 sz = (int4)sizeof(uintb);
             ourconst &= calc_mask(sz);
-            Varnode* vn = fd->newConstant(sz, ourconst);
+            Varnode* vn = fd.newConstant(sz, ourconst);
             state.data(varindex).setVarnode(vn);
             return true;
         }
@@ -71,13 +71,13 @@ namespace Sla.EXTRA
             printstate.printIndent(s);
             s << printstate.getName(varindex) << " = data.newConstant(";
             if (exprsz != (RHSConstant*)0)
-                exprsz->writeExpression(s, printstate);
+                exprsz.writeExpression(s, printstate);
             else
                 s << dec << (int4)sizeof(uintb);
             s << ',';
-            expr->writeExpression(s, printstate);
+            expr.writeExpression(s, printstate);
             s << " & calc_mask(";
-            exprsz->writeExpression(s, printstate);
+            exprsz.writeExpression(s, printstate);
             s << "));" << endl;
         }
     }

@@ -33,16 +33,16 @@ namespace Sla.EXTRA
 
             con.cacher.clear();
 
-            con.pos->setAddr(con.baseaddr);
-            con.pos->setNaddr(con.nextaddr);
-            con.pos->setCalladdr(con.calladdr);
+            con.pos.setAddr(con.baseaddr);
+            con.pos.setNaddr(con.nextaddr);
+            con.pos.setCalladdr(con.calladdr);
 
             ParserWalkerChange walker(con.pos);
-            con.pos->deallocateState(walker);
+            con.pos.deallocateState(walker);
             InjectPayloadSleigh::setupParameters(con, walker, inputlist, output, getSource());
             // delayslot and crossbuild directives are not allowed in snippets, so we don't need the DisassemblyCache
             // and we don't need a unique allocation mask
-            SleighBuilder builder(&walker,(DisassemblyCache*)0,&con.cacher,con.glb->getConstantSpace(),con.glb->getUniqueSpace(),0);
+            SleighBuilder builder(&walker,(DisassemblyCache*)0,&con.cacher,con.glb.getConstantSpace(),con.glb.getUniqueSpace(),0);
             builder.build(tpl, -1);
             con.cacher.resolveRelatives();
             con.cacher.emit(con.baseaddr, &emit);
@@ -64,7 +64,7 @@ namespace Sla.EXTRA
 
         public override void printTemplate(TextWriter s)
         {
-            tpl->saveXml(s, -1);
+            tpl.saveXml(s, -1);
         }
     }
 }

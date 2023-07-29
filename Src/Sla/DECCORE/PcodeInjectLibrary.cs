@@ -223,7 +223,7 @@ namespace Sla.DECCORE
         public int4 decodeInject(string src, string suffix, int4 tp, Decoder decoder)
         {
             int4 injectid = allocateInject(src, nm, tp);
-            getPayload(injectid)->decode(decoder);
+            getPayload(injectid).decode(decoder);
             registerInject(injectid);
             return injectid;
         }

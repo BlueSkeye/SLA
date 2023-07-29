@@ -55,7 +55,7 @@ namespace Sla.DECCORE
                 endalign += wordsize;
 
             uintb curval;
-            bool bswap = ((HOST_ENDIAN == 1) != space->isBigEndian());
+            bool bswap = ((HOST_ENDIAN == 1) != space.isBigEndian());
             uint1* ptr;
             do
             {
@@ -100,7 +100,7 @@ namespace Sla.DECCORE
                 endalign += wordsize;
 
             uintb curval;
-            bool bswap = ((HOST_ENDIAN == 1) != space->isBigEndian());
+            bool bswap = ((HOST_ENDIAN == 1) != space.isBigEndian());
             uint1* ptr;
             do
             {
@@ -205,7 +205,7 @@ namespace Sla.DECCORE
 
             skip = skip * 8;        // Convert from byte skip to bit skip
             gap = gap * 8;      // Convert from byte to bits
-            if (space->isBigEndian())
+            if (space.isBigEndian())
             {
                 if (size2 == 0)
                 {
@@ -280,7 +280,7 @@ namespace Sla.DECCORE
                 size2 = 0;
             }
 
-            if (space->isBigEndian())
+            if (space.isBigEndian())
             {
                 if (size2 == 0)
                     res = val1 >> (8 * gap);

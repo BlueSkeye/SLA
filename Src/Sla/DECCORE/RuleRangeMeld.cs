@@ -44,15 +44,15 @@ namespace Sla.DECCORE
             Varnode* A1,*A2;
             int4 restype;
 
-            vn1 = op->getIn(0);
-            if (!vn1->isWritten()) return 0;
-            vn2 = op->getIn(1);
-            if (!vn2->isWritten()) return 0;
-            sub1 = vn1->getDef();
-            if (!sub1->isBoolOutput())
+            vn1 = op.getIn(0);
+            if (!vn1.isWritten()) return 0;
+            vn2 = op.getIn(1);
+            if (!vn2.isWritten()) return 0;
+            sub1 = vn1.getDef();
+            if (!sub1.isBoolOutput())
                 return 0;
-            sub2 = vn2->getDef();
-            if (!sub2->isBoolOutput())
+            sub2 = vn2.getDef();
+            if (!sub2.isBoolOutput())
                 return 0;
 
             CircleRange range1(true);
@@ -62,30 +62,30 @@ namespace Sla.DECCORE
             CircleRange range2(true);
             A2 = range2.pullBack(sub2, &markup, false);
             if (A2 == (Varnode*)0) return 0;
-            if (sub1->code() == CPUI_BOOL_NEGATE)
+            if (sub1.code() == CPUI_BOOL_NEGATE)
             { // Do an extra pull back, if the last step is a '!'
-                if (!A1->isWritten()) return 0;
-                A1 = range1.pullBack(A1->getDef(), &markup, false);
+                if (!A1.isWritten()) return 0;
+                A1 = range1.pullBack(A1.getDef(), &markup, false);
                 if (A1 == (Varnode*)0) return 0;
             }
-            if (sub2->code() == CPUI_BOOL_NEGATE)
+            if (sub2.code() == CPUI_BOOL_NEGATE)
             { // Do an extra pull back, if the last step is a '!'
-                if (!A2->isWritten()) return 0;
-                A2 = range2.pullBack(A2->getDef(), &markup, false);
+                if (!A2.isWritten()) return 0;
+                A2 = range2.pullBack(A2.getDef(), &markup, false);
                 if (A2 == (Varnode*)0) return 0;
             }
             if (!functionalEquality(A1, A2))
             {
-                if (A2->getSize() == A1->getSize()) return 0;
-                if ((A1->getSize() < A2->getSize()) && (A2->isWritten()))
-                    A2 = range2.pullBack(A2->getDef(), &markup, false);
-                else if (A1->isWritten())
-                    A1 = range1.pullBack(A1->getDef(), &markup, false);
+                if (A2.getSize() == A1.getSize()) return 0;
+                if ((A1.getSize() < A2.getSize()) && (A2.isWritten()))
+                    A2 = range2.pullBack(A2.getDef(), &markup, false);
+                else if (A1.isWritten())
+                    A1 = range1.pullBack(A1.getDef(), &markup, false);
                 if (A1 != A2) return 0;
             }
-            if (!A1->isHeritageKnown()) return 0;
+            if (!A1.isHeritageKnown()) return 0;
 
-            if (op->code() == CPUI_BOOL_AND)
+            if (op.code() == CPUI_BOOL_AND)
                 restype = range1.intersect(range2);
             else
                 restype = range1.circleUnion(range2);
@@ -98,10 +98,10 @@ namespace Sla.DECCORE
                 restype = range1.translate2Op(opc, resc, resslot);
                 if (restype == 0)
                 {
-                    Varnode* newConst = data.newConstant(A1->getSize(), resc);
+                    Varnode* newConst = data.newConstant(A1.getSize(), resc);
                     if (markup != (Varnode*)0)
                     {       // We have potential constant markup
-                        newConst->copySymbolIfValid(markup);    // Propagate the markup into our new constant
+                        newConst.copySymbolIfValid(markup);    // Propagate the markup into our new constant
                     }
                     data.opSetOpcode(op, opc);
                     data.opSetInput(op, A1, 1 - resslot);

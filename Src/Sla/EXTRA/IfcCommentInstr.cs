@@ -20,14 +20,14 @@ namespace Sla.EXTRA
         /// the text of the comment.
         public override void execute(TextReader s)
         { // Comment on a particular address within current function
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("Decompile action not loaded");
 
-            if (dcp->fd == (Funcdata*)0)
+            if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");
 
             int4 size;
-            Address addr = parse_machaddr(s, size, *dcp->conf->types);
+            Address addr = parse_machaddr(s, size, *dcp.conf.types);
             s >> ws;
             string comment;
             char tok;
@@ -37,9 +37,9 @@ namespace Sla.EXTRA
                 comment += tok;
                 s.get(tok);
             }
-            uint4 type = dcp->conf->print->getInstructionComment();
-            dcp->conf->commentdb->addComment(type,
-                            dcp->fd->getAddress(), addr, comment);
+            uint4 type = dcp.conf.print.getInstructionComment();
+            dcp.conf.commentdb.addComment(type,
+                            dcp.fd.getAddress(), addr, comment);
         }
     }
 }

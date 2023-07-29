@@ -31,12 +31,12 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            PcodeOp* addop = op->getOut()->loneDescend();
+            PcodeOp* addop = op.getOut().loneDescend();
             if (addop == (PcodeOp*)0) return 0;
-            if (addop->code() != CPUI_INT_ADD) return 0;
-            if (addop->getIn(0) == op->getOut())
-                data.opSetInput(addop, addop->getIn(1), 0);
-            data.opSetInput(addop, op->getIn(0), 1);
+            if (addop.code() != CPUI_INT_ADD) return 0;
+            if (addop.getIn(0) == op.getOut())
+                data.opSetInput(addop, addop.getIn(1), 0);
+            data.opSetInput(addop, op.getIn(0), 1);
             data.opSetOpcode(addop, CPUI_INT_SUB);
             data.opDestroy(op);     // Completely remove 2COMP
             return 1;

@@ -21,15 +21,15 @@ namespace Sla.DECCORE
 
         public override string getOperatorName(PcodeOp op)
         {
-            if (op->getOut() == (Varnode*)0) return name;
-            return appendSize(name, op->getOut()->getSize());
+            if (op.getOut() == (Varnode*)0) return name;
+            return appendSize(name, op.getOut().getSize());
         }
 
         public override int4 extractAnnotationSize(Varnode vn, PcodeOp op)
         {
-            Varnode outvn = op->getOut();
+            Varnode outvn = op.getOut();
             if (outvn != (Varnode*)0)
-                return op->getOut()->getSize(); // Get size from output of read function
+                return op.getOut().getSize(); // Get size from output of read function
             return 1;
         }
     }

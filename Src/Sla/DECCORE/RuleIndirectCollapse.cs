@@ -34,17 +34,17 @@ namespace Sla.DECCORE
         {
             PcodeOp* indop;
 
-            if (op->getIn(1)->getSpace()->getType() != IPTR_IOP) return 0;
-            indop = PcodeOp::getOpFromConst(op->getIn(1)->getAddr());
+            if (op.getIn(1).getSpace().getType() != IPTR_IOP) return 0;
+            indop = PcodeOp::getOpFromConst(op.getIn(1).getAddr());
 
             // Is the indirect effect gone?
-            if (!indop->isDead())
+            if (!indop.isDead())
             {
-                if (indop->code() == CPUI_COPY)
+                if (indop.code() == CPUI_COPY)
                 { // STORE resolved to a COPY
-                    Varnode* vn1 = indop->getOut();
-                    Varnode* vn2 = op->getOut();
-                    int4 res = vn1->characterizeOverlap(*vn2);
+                    Varnode* vn1 = indop.getOut();
+                    Varnode* vn2 = op.getOut();
+                    int4 res = vn1.characterizeOverlap(*vn2);
                     if (res > 0)
                     { // Copy has an effect of some sort
                         if (res == 2)
@@ -57,14 +57,14 @@ namespace Sla.DECCORE
                             data.opInsertAfter(op, indop);
                             return 1;
                         }
-                        if (vn1->contains(*vn2) == 0)
+                        if (vn1.contains(*vn2) == 0)
                         {   // INDIRECT output is properly contained in COPY output
                             // Convert INDIRECT to a SUBPIECE
                             uintb trunc;
-                            if (vn1->getSpace()->isBigEndian())
-                                trunc = vn1->getOffset() + vn1->getSize() - (vn2->getOffset() + vn2->getSize());
+                            if (vn1.getSpace().isBigEndian())
+                                trunc = vn1.getOffset() + vn1.getSize() - (vn2.getOffset() + vn2.getSize());
                             else
-                                trunc = vn2->getOffset() - vn1->getOffset();
+                                trunc = vn2.getOffset() - vn1.getOffset();
                             data.opUninsert(op);
                             data.opSetInput(op, vn1, 0);
                             data.opSetInput(op, data.newConstant(4, trunc), 1);
@@ -72,25 +72,25 @@ namespace Sla.DECCORE
                             data.opInsertAfter(op, indop);
                             return 1;
                         }
-                        data.warning("Ignoring partial resolution of indirect", indop->getAddr());
+                        data.warning("Ignoring partial resolution of indirect", indop.getAddr());
                         return 0;       // Partial overlap, not sure what to do
                     }
                 }
-                else if (indop->isCall())
+                else if (indop.isCall())
                 {
-                    if (op->isIndirectCreation() || op->noIndirectCollapse())
+                    if (op.isIndirectCreation() || op.noIndirectCollapse())
                         return 0;
                     // If there are no aliases to a local variable, collapse
-                    if (!op->getOut()->hasNoLocalAlias())
+                    if (!op.getOut().hasNoLocalAlias())
                         return 0;
                 }
-                else if (indop->usesSpacebasePtr())
+                else if (indop.usesSpacebasePtr())
                 {
-                    if (indop->code() == CPUI_STORE)
+                    if (indop.code() == CPUI_STORE)
                     {
                         LoadGuard* guard = data.getStoreGuard(indop);
                         if (guard != (LoadGuard*)0) {
-                            if (guard->isGuarded(op->getOut()->getAddr()))
+                            if (guard.isGuarded(op.getOut().getAddr()))
                                 return 0;
                         }
                         else
@@ -105,7 +105,7 @@ namespace Sla.DECCORE
                     return 0;
             }
 
-            data.totalReplace(op->getOut(), op->getIn(0));
+            data.totalReplace(op.getOut(), op.getIn(0));
             data.opDestroy(op);     // Get rid of the INDIRECT
             return 1;
         }

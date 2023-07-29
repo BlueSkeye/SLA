@@ -43,36 +43,36 @@ namespace Sla.DECCORE
             hiop = hop;
             hi1 = in1.getHi();
             lo1 = in1.getLo();
-            hi1slot = hiop->getSlot(hi1);
-            hi2 = hiop->getIn(1 - hi1slot);
-            notequalformhi = (hiop->code() == CPUI_INT_NOTEQUAL);
+            hi1slot = hiop.getSlot(hi1);
+            hi2 = hiop.getIn(1 - hi1slot);
+            notequalformhi = (hiop.code() == CPUI_INT_NOTEQUAL);
 
             list<PcodeOp*>::const_iterator iter, enditer;
             list<PcodeOp*>::const_iterator iter2, enditer2;
             list<PcodeOp*>::const_iterator iter3, enditer3;
-            iter = lo1->beginDescend();
-            enditer = lo1->endDescend();
+            iter = lo1.beginDescend();
+            enditer = lo1.endDescend();
             while (iter != enditer)
             {
                 loop = *iter;
                 ++iter;
-                if (loop->code() == CPUI_INT_EQUAL)
+                if (loop.code() == CPUI_INT_EQUAL)
                     notequalformlo = false;
-                else if (loop->code() == CPUI_INT_NOTEQUAL)
+                else if (loop.code() == CPUI_INT_NOTEQUAL)
                     notequalformlo = true;
                 else
                     continue;
-                lo1slot = loop->getSlot(lo1);
-                lo2 = loop->getIn(1 - lo1slot);
+                lo1slot = loop.getSlot(lo1);
+                lo2 = loop.getIn(1 - lo1slot);
 
-                iter2 = hiop->getOut()->beginDescend();
-                enditer2 = hiop->getOut()->endDescend();
+                iter2 = hiop.getOut().beginDescend();
+                enditer2 = hiop.getOut().endDescend();
                 while (iter2 != enditer2)
                 {
                     hibool = *iter2;
                     ++iter2;
-                    iter3 = loop->getOut()->beginDescend();
-                    enditer3 = loop->getOut()->endDescend();
+                    iter3 = loop.getOut().beginDescend();
+                    enditer3 = loop.getOut().endDescend();
                     while (iter3 != enditer3)
                     {
                         lobool = *iter3;
@@ -80,7 +80,7 @@ namespace Sla.DECCORE
 
                         in2.initPartial(in1.getSize(), lo2, hi2);
 
-                        if ((hibool->code() == CPUI_CBRANCH) && (lobool->code() == CPUI_CBRANCH))
+                        if ((hibool.code() == CPUI_CBRANCH) && (lobool.code() == CPUI_CBRANCH))
                         {
                             // Branching form of the equal operation
                             BlockBasic* hibooltrue,*hiboolfalse;
@@ -88,7 +88,7 @@ namespace Sla.DECCORE
                             SplitVarnode::getTrueFalse(hibool, notequalformhi, hibooltrue, hiboolfalse);
                             SplitVarnode::getTrueFalse(lobool, notequalformlo, lobooltrue, loboolfalse);
 
-                            if ((hibooltrue == lobool->getParent()) &&  // hi is checked first then lo
+                            if ((hibooltrue == lobool.getParent()) &&  // hi is checked first then lo
                                 (hiboolfalse == loboolfalse) &&
                                 SplitVarnode::otherwiseEmpty(lobool))
                             {
@@ -101,7 +101,7 @@ namespace Sla.DECCORE
                                     return true;
                                 }
                             }
-                            else if ((lobooltrue == hibool->getParent()) && // lo is checked first then hi
+                            else if ((lobooltrue == hibool.getParent()) && // lo is checked first then hi
                                  (hiboolfalse == loboolfalse) &&
                                  SplitVarnode::otherwiseEmpty(hibool))
                             {

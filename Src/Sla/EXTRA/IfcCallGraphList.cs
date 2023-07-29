@@ -18,7 +18,7 @@ namespace Sla.EXTRA
         /// Child functions are displayed before their parents.
         public override void execute(TextReader s)
         {
-            if (dcp->cgraph == (CallGraph*)0)
+            if (dcp.cgraph == (CallGraph*)0)
                 throw IfaceExecutionError("Callgraph not generated");
 
             iterateFunctionsLeafOrder();
@@ -26,7 +26,7 @@ namespace Sla.EXTRA
 
         public override void iterationCallback(Funcdata fd)
         {
-            *status->optr << fd->getName() << endl;
+            *status.optr << fd.getName() << endl;
         }
     }
 }

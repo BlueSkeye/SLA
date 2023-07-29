@@ -19,13 +19,13 @@ namespace Sla.DECCORE
         public override Datatype getInputLocal(PcodeOp op, int4 slot)
         {
             if (slot == 0)
-                return tlst->getBase(op->getIn(slot)->getSize(), TYPE_UNKNOWN);
+                return tlst.getBase(op.getIn(slot).getSize(), TYPE_UNKNOWN);
             return TypeOpFunc::getInputLocal(op, slot);
         }
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)
         {
-            lng->opExtractOp(op);
+            lng.opExtractOp(op);
         }
     }
 }

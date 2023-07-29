@@ -30,11 +30,11 @@ namespace Sla.DECCORE
         }
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
-        {               // a * -1 -> -a
-            Varnode* constvn = op->getIn(1);
+        {               // a * -1 . -a
+            Varnode* constvn = op.getIn(1);
 
-            if (!constvn->isConstant()) return 0;
-            if (constvn->getOffset() != calc_mask(constvn->getSize())) return 0;
+            if (!constvn.isConstant()) return 0;
+            if (constvn.getOffset() != calc_mask(constvn.getSize())) return 0;
 
             data.opSetOpcode(op, CPUI_INT_2COMP);
             data.opRemoveInput(op, 1);

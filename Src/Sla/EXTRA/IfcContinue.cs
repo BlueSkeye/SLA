@@ -18,30 +18,30 @@ namespace Sla.EXTRA
         {
             int4 res;
 
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("Decompile action not loaded");
 
-            if (dcp->fd == (Funcdata*)0)
+            if (dcp.fd == (Funcdata*)0)
                 throw IfaceExecutionError("No function selected");
 
-            if (dcp->conf->allacts.getCurrent()->getStatus() == Action::status_start)
+            if (dcp.conf.allacts.getCurrent().getStatus() == Action::status_start)
                 throw IfaceExecutionError("Decompilation has not been started");
-            if (dcp->conf->allacts.getCurrent()->getStatus() == Action::status_end)
+            if (dcp.conf.allacts.getCurrent().getStatus() == Action::status_end)
                 throw IfaceExecutionError("Decompilation is already complete");
 
-            res = dcp->conf->allacts.getCurrent()->perform(*dcp->fd); // Try to continue decompilation
+            res = dcp.conf.allacts.getCurrent().perform(*dcp.fd); // Try to continue decompilation
             if (res < 0)
             {
-                *status->optr << "Break at ";
-                dcp->conf->allacts.getCurrent()->printState(*status->optr);
+                *status.optr << "Break at ";
+                dcp.conf.allacts.getCurrent().printState(*status.optr);
             }
             else
             {
-                *status->optr << "Decompilation complete";
+                *status.optr << "Decompilation complete";
                 if (res == 0)
-                    *status->optr << " (no change)";
+                    *status.optr << " (no change)";
             }
-            *status->optr << endl;
+            *status.optr << endl;
         }
     }
 }

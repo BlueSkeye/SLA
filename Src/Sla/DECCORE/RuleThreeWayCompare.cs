@@ -46,26 +46,26 @@ namespace Sla.DECCORE
         {
             int4 constSlot = 0;
             int4 form;
-            Varnode* tmpvn = op->getIn(constSlot);
-            if (!tmpvn->isConstant())
+            Varnode* tmpvn = op.getIn(constSlot);
+            if (!tmpvn.isConstant())
             {       // One of the two inputs must be a constant
                 constSlot = 1;
-                tmpvn = op->getIn(constSlot);
-                if (!tmpvn->isConstant()) return 0;
+                tmpvn = op.getIn(constSlot);
+                if (!tmpvn.isConstant()) return 0;
             }
-            uintb val = tmpvn->getOffset(); // Encode const value (-1, 0, 1, 2) as highest 3 bits of form (000, 001, 010, 011)
+            uintb val = tmpvn.getOffset(); // Encode const value (-1, 0, 1, 2) as highest 3 bits of form (000, 001, 010, 011)
             if (val <= 2)
                 form = (int)val + 1;
-            else if (val == calc_mask(tmpvn->getSize()))
+            else if (val == calc_mask(tmpvn.getSize()))
                 form = 0;
             else
                 return 0;
 
-            tmpvn = op->getIn(1 - constSlot);
-            if (!tmpvn->isWritten()) return 0;
-            if (tmpvn->getDef()->code() != CPUI_INT_ADD) return 0;
+            tmpvn = op.getIn(1 - constSlot);
+            if (!tmpvn.isWritten()) return 0;
+            if (tmpvn.getDef().code() != CPUI_INT_ADD) return 0;
             bool isPartial = false;
-            PcodeOp* lessop = detectThreeWay(tmpvn->getDef(), isPartial);
+            PcodeOp* lessop = detectThreeWay(tmpvn.getDef(), isPartial);
             if (lessop == (PcodeOp*)0)
                 return 0;
             if (isPartial)
@@ -77,20 +77,20 @@ namespace Sla.DECCORE
             form <<= 1;
             if (constSlot == 1)         // Encode const position (0 or 1) as next bit
                 form += 1;
-            OpCode lessform = lessop->code();   // Either INT_LESS, INT_SLESS, or FLOAT_LESS
+            OpCode lessform = lessop.code();   // Either INT_LESS, INT_SLESS, or FLOAT_LESS
             form <<= 2;
-            if (op->code() == CPUI_INT_SLESSEQUAL)
+            if (op.code() == CPUI_INT_SLESSEQUAL)
                 form += 1;
-            else if (op->code() == CPUI_INT_EQUAL)
+            else if (op.code() == CPUI_INT_EQUAL)
                 form += 2;
-            else if (op->code() == CPUI_INT_NOTEQUAL)
+            else if (op.code() == CPUI_INT_NOTEQUAL)
                 form += 3;
             // Encode base op (SLESS, SLESSEQUAL, EQUAL, NOTEQUAL) as final 2 bits
 
-            Varnode* bvn = lessop->getIn(0);    // First parameter to LESSTHAN is second parameter to cmp3way function
-            Varnode* avn = lessop->getIn(1);    // Second parameter to LESSTHAN is first parameter to cmp3way function
-            if ((!avn->isConstant()) && (avn->isFree())) return 0;
-            if ((!bvn->isConstant()) && (bvn->isFree())) return 0;
+            Varnode* bvn = lessop.getIn(0);    // First parameter to LESSTHAN is second parameter to cmp3way function
+            Varnode* avn = lessop.getIn(1);    // Second parameter to LESSTHAN is first parameter to cmp3way function
+            if ((!avn.isConstant()) && (avn.isFree())) return 0;
+            if ((!bvn.isConstant()) && (bvn.isFree())) return 0;
             switch (form)
             {
                 case 1: // -1  s<= threeway   =>   always true
@@ -178,80 +178,80 @@ namespace Sla.DECCORE
             PcodeOp* zext1, *zext2;
             PcodeOp* addop, *lessop, *lessequalop;
             uintb mask;
-            vn2 = op->getIn(1);
-            if (vn2->isConstant())
+            vn2 = op.getIn(1);
+            if (vn2.isConstant())
             {       // Form 1 :  (z + z) - 1
-                mask = calc_mask(vn2->getSize());
-                if (mask != vn2->getOffset()) return (PcodeOp*)0;       // Match the -1
-                vn1 = op->getIn(0);
-                if (!vn1->isWritten()) return (PcodeOp*)0;
-                addop = vn1->getDef();
-                if (addop->code() != CPUI_INT_ADD) return (PcodeOp*)0;  // Match the add
-                tmpvn = addop->getIn(0);
-                if (!tmpvn->isWritten()) return (PcodeOp*)0;
-                zext1 = tmpvn->getDef();
-                if (zext1->code() != CPUI_INT_ZEXT) return (PcodeOp*)0; // Match the first zext
-                tmpvn = addop->getIn(1);
-                if (!tmpvn->isWritten()) return (PcodeOp*)0;
-                zext2 = tmpvn->getDef();
-                if (zext2->code() != CPUI_INT_ZEXT) return (PcodeOp*)0; // Match the second zext
+                mask = calc_mask(vn2.getSize());
+                if (mask != vn2.getOffset()) return (PcodeOp*)0;       // Match the -1
+                vn1 = op.getIn(0);
+                if (!vn1.isWritten()) return (PcodeOp*)0;
+                addop = vn1.getDef();
+                if (addop.code() != CPUI_INT_ADD) return (PcodeOp*)0;  // Match the add
+                tmpvn = addop.getIn(0);
+                if (!tmpvn.isWritten()) return (PcodeOp*)0;
+                zext1 = tmpvn.getDef();
+                if (zext1.code() != CPUI_INT_ZEXT) return (PcodeOp*)0; // Match the first zext
+                tmpvn = addop.getIn(1);
+                if (!tmpvn.isWritten()) return (PcodeOp*)0;
+                zext2 = tmpvn.getDef();
+                if (zext2.code() != CPUI_INT_ZEXT) return (PcodeOp*)0; // Match the second zext
             }
-            else if (vn2->isWritten())
+            else if (vn2.isWritten())
             {
-                PcodeOp* tmpop = vn2->getDef();
-                if (tmpop->code() == CPUI_INT_ZEXT)
+                PcodeOp* tmpop = vn2.getDef();
+                if (tmpop.code() == CPUI_INT_ZEXT)
                 {   // Form 2 : (z - 1) + z
                     zext2 = tmpop;                  // Second zext is already matched
-                    vn1 = op->getIn(0);
-                    if (!vn1->isWritten()) return (PcodeOp*)0;
-                    addop = vn1->getDef();
-                    if (addop->code() != CPUI_INT_ADD)
+                    vn1 = op.getIn(0);
+                    if (!vn1.isWritten()) return (PcodeOp*)0;
+                    addop = vn1.getDef();
+                    if (addop.code() != CPUI_INT_ADD)
                     {   // Partial form:  (z + z)
                         zext1 = addop;
-                        if (zext1->code() != CPUI_INT_ZEXT)
+                        if (zext1.code() != CPUI_INT_ZEXT)
                             return (PcodeOp*)0;         // Match the first zext
                         isPartial = true;
                     }
                     else
                     {
-                        tmpvn = addop->getIn(1);
-                        if (!tmpvn->isConstant()) return (PcodeOp*)0;
-                        mask = calc_mask(tmpvn->getSize());
-                        if (mask != tmpvn->getOffset()) return (PcodeOp*)0; // Match the -1
-                        tmpvn = addop->getIn(0);
-                        if (!tmpvn->isWritten()) return (PcodeOp*)0;
-                        zext1 = tmpvn->getDef();
-                        if (zext1->code() != CPUI_INT_ZEXT) return (PcodeOp*)0; // Match the first zext
+                        tmpvn = addop.getIn(1);
+                        if (!tmpvn.isConstant()) return (PcodeOp*)0;
+                        mask = calc_mask(tmpvn.getSize());
+                        if (mask != tmpvn.getOffset()) return (PcodeOp*)0; // Match the -1
+                        tmpvn = addop.getIn(0);
+                        if (!tmpvn.isWritten()) return (PcodeOp*)0;
+                        zext1 = tmpvn.getDef();
+                        if (zext1.code() != CPUI_INT_ZEXT) return (PcodeOp*)0; // Match the first zext
                     }
                 }
-                else if (tmpop->code() == CPUI_INT_ADD)
+                else if (tmpop.code() == CPUI_INT_ADD)
                 {   // Form 3 : z + (z - 1)
                     addop = tmpop;              // Matched the add
-                    vn1 = op->getIn(0);
-                    if (!vn1->isWritten()) return (PcodeOp*)0;
-                    zext1 = vn1->getDef();
-                    if (zext1->code() != CPUI_INT_ZEXT) return (PcodeOp*)0; // Match the first zext
-                    tmpvn = addop->getIn(1);
-                    if (!tmpvn->isConstant()) return (PcodeOp*)0;
-                    mask = calc_mask(tmpvn->getSize());
-                    if (mask != tmpvn->getOffset()) return (PcodeOp*)0; // Match the -1
-                    tmpvn = addop->getIn(0);
-                    if (!tmpvn->isWritten()) return (PcodeOp*)0;
-                    zext2 = tmpvn->getDef();
-                    if (zext2->code() != CPUI_INT_ZEXT) return (PcodeOp*)0; // Match the second zext
+                    vn1 = op.getIn(0);
+                    if (!vn1.isWritten()) return (PcodeOp*)0;
+                    zext1 = vn1.getDef();
+                    if (zext1.code() != CPUI_INT_ZEXT) return (PcodeOp*)0; // Match the first zext
+                    tmpvn = addop.getIn(1);
+                    if (!tmpvn.isConstant()) return (PcodeOp*)0;
+                    mask = calc_mask(tmpvn.getSize());
+                    if (mask != tmpvn.getOffset()) return (PcodeOp*)0; // Match the -1
+                    tmpvn = addop.getIn(0);
+                    if (!tmpvn.isWritten()) return (PcodeOp*)0;
+                    zext2 = tmpvn.getDef();
+                    if (zext2.code() != CPUI_INT_ZEXT) return (PcodeOp*)0; // Match the second zext
                 }
                 else
                     return (PcodeOp*)0;
             }
             else
                 return (PcodeOp*)0;
-            vn1 = zext1->getIn(0);
-            if (!vn1->isWritten()) return (PcodeOp*)0;
-            vn2 = zext2->getIn(0);
-            if (!vn2->isWritten()) return (PcodeOp*)0;
-            lessop = vn1->getDef();
-            lessequalop = vn2->getDef();
-            OpCode opc = lessop->code();
+            vn1 = zext1.getIn(0);
+            if (!vn1.isWritten()) return (PcodeOp*)0;
+            vn2 = zext2.getIn(0);
+            if (!vn2.isWritten()) return (PcodeOp*)0;
+            lessop = vn1.getDef();
+            lessequalop = vn2.getDef();
+            OpCode opc = lessop.code();
             if ((opc != CPUI_INT_LESS) && (opc != CPUI_INT_SLESS) && (opc != CPUI_FLOAT_LESS))
             {   // Make sure first zext is less
                 PcodeOp* tmpop = lessop;
@@ -284,48 +284,48 @@ namespace Sla.DECCORE
         public static int4 testCompareEquivalence(PcodeOp lessop, PcodeOp lessequalop)
         {
             bool twoLessThan;
-            if (lessop->code() == CPUI_INT_LESS)
+            if (lessop.code() == CPUI_INT_LESS)
             {   // Make sure second zext is matching lessequal
-                if (lessequalop->code() == CPUI_INT_LESSEQUAL)
+                if (lessequalop.code() == CPUI_INT_LESSEQUAL)
                     twoLessThan = false;
-                else if (lessequalop->code() == CPUI_INT_LESS)
+                else if (lessequalop.code() == CPUI_INT_LESS)
                     twoLessThan = true;
                 else
                     return -1;
             }
-            else if (lessop->code() == CPUI_INT_SLESS)
+            else if (lessop.code() == CPUI_INT_SLESS)
             {
-                if (lessequalop->code() == CPUI_INT_SLESSEQUAL)
+                if (lessequalop.code() == CPUI_INT_SLESSEQUAL)
                     twoLessThan = false;
-                else if (lessequalop->code() == CPUI_INT_SLESS)
+                else if (lessequalop.code() == CPUI_INT_SLESS)
                     twoLessThan = true;
                 else
                     return -1;
             }
-            else if (lessop->code() == CPUI_FLOAT_LESS)
+            else if (lessop.code() == CPUI_FLOAT_LESS)
             {
-                if (lessequalop->code() == CPUI_FLOAT_LESSEQUAL)
+                if (lessequalop.code() == CPUI_FLOAT_LESSEQUAL)
                     twoLessThan = false;
                 else
                     return -1;              // No partial form for floating-point comparison
             }
             else
                 return -1;
-            Varnode* a1 = lessop->getIn(0);
-            Varnode* a2 = lessequalop->getIn(0);
-            Varnode* b1 = lessop->getIn(1);
-            Varnode* b2 = lessequalop->getIn(1);
+            Varnode* a1 = lessop.getIn(0);
+            Varnode* a2 = lessequalop.getIn(0);
+            Varnode* b1 = lessop.getIn(1);
+            Varnode* b2 = lessequalop.getIn(1);
             int4 res = 0;
             if (a1 != a2)
             {   // Make sure a1 and a2 are equivalent
-                if ((!a1->isConstant()) || (!a2->isConstant())) return -1;
-                if ((a1->getOffset() != a2->getOffset()) && twoLessThan)
+                if ((!a1.isConstant()) || (!a2.isConstant())) return -1;
+                if ((a1.getOffset() != a2.getOffset()) && twoLessThan)
                 {
-                    if (a2->getOffset() + 1 == a1->getOffset())
+                    if (a2.getOffset() + 1 == a1.getOffset())
                     {
                         twoLessThan = false;        // -lessequalop- is LESSTHAN, equivalent to LESSEQUAL
                     }
-                    else if (a1->getOffset() + 1 == a2->getOffset())
+                    else if (a1.getOffset() + 1 == a2.getOffset())
                     {
                         twoLessThan = false;        // -lessop- is LESSTHAN, equivalent to LESSEQUAL
                         res = 1;            // we need to swap
@@ -336,14 +336,14 @@ namespace Sla.DECCORE
             }
             if (b1 != b2)
             {   // Make sure b1 and b2 are equivalent
-                if ((!b1->isConstant()) || (!b2->isConstant())) return -1;
-                if ((b1->getOffset() != b2->getOffset()) && twoLessThan)
+                if ((!b1.isConstant()) || (!b2.isConstant())) return -1;
+                if ((b1.getOffset() != b2.getOffset()) && twoLessThan)
                 {
-                    if (b1->getOffset() + 1 == b2->getOffset())
+                    if (b1.getOffset() + 1 == b2.getOffset())
                     {
                         twoLessThan = false;
                     }
-                    else if (b2->getOffset() + 1 == b1->getOffset())
+                    else if (b2.getOffset() + 1 == b1.getOffset())
                     {
                         twoLessThan = false;
                         res = 1;            // we need to swap

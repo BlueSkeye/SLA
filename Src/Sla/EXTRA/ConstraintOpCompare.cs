@@ -25,12 +25,12 @@ namespace Sla.EXTRA
         }
         
         public override UnifyConstraint clone()
-            => (new ConstraintOpCompare(op1index, op2index, istrue))->copyid(this);
+            => (new ConstraintOpCompare(op1index, op2index, istrue)).copyid(this);
 
         public override bool step(UnifyState state)
         {
             TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
-            if (!traverse->step()) return false;
+            if (!traverse.step()) return false;
             PcodeOp* op1 = state.data(op1index).getOp();
             PcodeOp* op2 = state.data(op2index).getOp();
             return ((op1 == op2) == istrue);

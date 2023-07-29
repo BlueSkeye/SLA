@@ -32,7 +32,7 @@ namespace Sla.DECCORE
             for (iter = fd.begin(); iter != fd.end(); ++iter)
             {
                 field.push_back(*iter);
-                int4 end = field.back().type->getSize();
+                int4 end = field.back().type.getSize();
                 if (end > size)
                     size = end;
             }
@@ -47,7 +47,7 @@ namespace Sla.DECCORE
             while (decoder.peekElement() != 0)
             {
                 field.emplace_back(decoder, typegrp);
-                if (field.back().offset + field.back().type->getSize() > size)
+                if (field.back().offset + field.back().type.getSize() > size)
                 {
                     ostringstream s;
                     s << "Field " << field.back().name << " does not fit in union " << name;
@@ -86,13 +86,13 @@ namespace Sla.DECCORE
         public override TypeField findTruncation(int4 offset, int4 sz, PcodeOp op, int4 slot, int4 newoff)
         {
             // No new scoring is done, but if a cached result is available, return it.
-            Funcdata fd = op->getParent()->getFuncdata();
-            ResolvedUnion res = fd->getUnionField(this, op, slot);
-            if (res != (ResolvedUnion*)0 && res->getFieldNum() >= 0)
+            Funcdata fd = op.getParent().getFuncdata();
+            ResolvedUnion res = fd.getUnionField(this, op, slot);
+            if (res != (ResolvedUnion*)0 && res.getFieldNum() >= 0)
             {
-                TypeField field = getField(res->getFieldNum());
-                newoff = offset - field->offset;
-                if (newoff + sz > field->type->getSize())
+                TypeField field = getField(res.getFieldNum());
+                newoff = offset - field.offset;
+                if (newoff + sz > field.type.getSize())
                     return (TypeField*)0; // Truncation spans more than one field
                 return field;
             }
@@ -113,16 +113,16 @@ namespace Sla.DECCORE
             TypeUnion tu = (TypeUnion*)&op;
             vector<TypeField>::const_iterator iter1, iter2;
 
-            if (field.size() != tu->field.size()) return (tu->field.size() - field.size());
+            if (field.size() != tu.field.size()) return (tu.field.size() - field.size());
             iter1 = field.begin();
-            iter2 = tu->field.begin();
+            iter2 = tu.field.begin();
             // Test only the name and first level metatype first
             while (iter1 != field.end())
             {
                 if ((*iter1).name != (*iter2).name)
                     return ((*iter1).name < (*iter2).name) ? -1 : 1;
-                if ((*iter1).type->getMetatype() != (*iter2).type->getMetatype())
-                    return ((*iter1).type->getMetatype() < (*iter2).type->getMetatype()) ? -1 : 1;
+                if ((*iter1).type.getMetatype() != (*iter2).type.getMetatype())
+                    return ((*iter1).type.getMetatype() < (*iter2).type.getMetatype()) ? -1 : 1;
                 ++iter1;
                 ++iter2;
             }
@@ -134,12 +134,12 @@ namespace Sla.DECCORE
             }
             // If we are still equal, now go down deep into each field type
             iter1 = field.begin();
-            iter2 = tu->field.begin();
+            iter2 = tu.field.begin();
             while (iter1 != field.end())
             {
                 if ((*iter1).type != (*iter2).type)
                 { // Short circuit recursive loops
-                    int4 c = (*iter1).type->compare(*(*iter2).type, level);
+                    int4 c = (*iter1).type.compare(*(*iter2).type, level);
                     if (c != 0) return c;
                 }
                 ++iter1;
@@ -156,9 +156,9 @@ namespace Sla.DECCORE
             TypeUnion* tu = (TypeUnion*)&op;
             vector<TypeField>::const_iterator iter1, iter2;
 
-            if (field.size() != tu->field.size()) return (tu->field.size() - field.size());
+            if (field.size() != tu.field.size()) return (tu.field.size() - field.size());
             iter1 = field.begin();
-            iter2 = tu->field.begin();
+            iter2 = tu.field.begin();
             // Test only the name and first level metatype first
             while (iter1 != field.end())
             {
@@ -195,27 +195,27 @@ namespace Sla.DECCORE
 
         public override Datatype resolveInFlow(PcodeOp op, int4 slot)
         {
-            Funcdata* fd = op->getParent()->getFuncdata();
-            ResolvedUnion* res = fd->getUnionField(this, op, slot);
+            Funcdata* fd = op.getParent().getFuncdata();
+            ResolvedUnion* res = fd.getUnionField(this, op, slot);
             if (res != (ResolvedUnion*)0)
-                return res->getDatatype();
-            ScoreUnionFields scoreFields(*fd->getArch()->types,this,op,slot);
-            fd->setUnionField(this, op, slot, scoreFields.getResult());
+                return res.getDatatype();
+            ScoreUnionFields scoreFields(*fd.getArch().types,this,op,slot);
+            fd.setUnionField(this, op, slot, scoreFields.getResult());
             return scoreFields.getResult().getDatatype();
         }
 
         public override Datatype findResolve(PcodeOp op, int4 slot)
         {
-            Funcdata fd = op->getParent()->getFuncdata();
-            ResolvedUnion res = fd->getUnionField(this, op, slot);
+            Funcdata fd = op.getParent().getFuncdata();
+            ResolvedUnion res = fd.getUnionField(this, op, slot);
             if (res != (ResolvedUnion*)0)
-                return res->getDatatype();
+                return res.getDatatype();
             return this;
         }
 
         public override int4 findCompatibleResolve(Datatype ct)
         {
-            if (!ct->needsResolution())
+            if (!ct.needsResolution())
             {
                 for (int4 i = 0; i < field.size(); ++i)
                 {
@@ -229,9 +229,9 @@ namespace Sla.DECCORE
                 {
                     if (field[i].offset != 0) continue;
                     Datatype* fieldType = field[i].type;
-                    if (fieldType->getSize() != ct->getSize()) continue;
-                    if (fieldType->needsResolution()) continue;
-                    if (ct->findCompatibleResolve(fieldType) >= 0)
+                    if (fieldType.getSize() != ct.getSize()) continue;
+                    if (fieldType.needsResolution()) continue;
+                    if (ct.findCompatibleResolve(fieldType) >= 0)
                         return i;
                 }
             }
@@ -240,21 +240,21 @@ namespace Sla.DECCORE
 
         public override TypeField resolveTruncation(int4 offset, PcodeOp op, int4 slot, int4 newoff)
         {
-            Funcdata* fd = op->getParent()->getFuncdata();
-            ResolvedUnion res = fd->getUnionField(this, op, slot);
+            Funcdata* fd = op.getParent().getFuncdata();
+            ResolvedUnion res = fd.getUnionField(this, op, slot);
             if (res != (ResolvedUnion*)0)
             {
-                if (res->getFieldNum() >= 0)
+                if (res.getFieldNum() >= 0)
                 {
-                    TypeField field = getField(res->getFieldNum());
-                    newoff = offset - field->offset;
+                    TypeField field = getField(res.getFieldNum());
+                    newoff = offset - field.offset;
                     return field;
                 }
             }
-            else if (op->code() == CPUI_SUBPIECE && slot == 1)
+            else if (op.code() == CPUI_SUBPIECE && slot == 1)
             {   // The slot is artificial in this case
-                ScoreUnionFields scoreFields(*fd->getArch()->types,this,offset,op);
-                fd->setUnionField(this, op, slot, scoreFields.getResult());
+                ScoreUnionFields scoreFields(*fd.getArch().types,this,offset,op);
+                fd.setUnionField(this, op, slot, scoreFields.getResult());
                 if (scoreFields.getResult().getFieldNum() >= 0)
                 {
                     newoff = 0;
@@ -263,12 +263,12 @@ namespace Sla.DECCORE
             }
             else
             {
-                ScoreUnionFields scoreFields(*fd->getArch()->types,this,offset,op,slot);
-                fd->setUnionField(this, op, slot, scoreFields.getResult());
+                ScoreUnionFields scoreFields(*fd.getArch().types,this,offset,op,slot);
+                fd.setUnionField(this, op, slot, scoreFields.getResult());
                 if (scoreFields.getResult().getFieldNum() >= 0)
                 {
                     TypeField field = getField(scoreFields.getResult().getFieldNum());
-                    newoff = offset - field->offset;
+                    newoff = offset - field.offset;
                     return field;
                 }
             }

@@ -59,22 +59,22 @@ namespace Sla.DECCORE
         {
           ostringstream s;
 
-          vn->printRaw(s);
+          vn.printRaw(s);
           s << " : ";
-          newtype->printRaw(s);
+          newtype.printRaw(s);
           if ((op == (PcodeOp *)0)&&(ptralias == (Varnode *)0)) {
             s << " init";
           }
           else if (ptralias != (Varnode *)0) {
             s << " alias ";
-            ptralias->printRaw(s);
+            ptralias.printRaw(s);
           }
           else {
             s << " from ";
-            op->printRaw(s);
+            op.printRaw(s);
             s << " slot=" << dec << slot;
           }
-          glb->printDebug(s.str());
+          glb.printDebug(s.str());
         }
 #endif
 
@@ -90,30 +90,30 @@ namespace Sla.DECCORE
             Datatype* ct;
             Varnode* vn;
             VarnodeLocSet::const_iterator iter;
-            TypeFactory* typegrp = data.getArch()->types;
+            TypeFactory* typegrp = data.getArch().types;
 
             for (iter = data.beginLoc(); iter != data.endLoc(); ++iter)
             {
                 vn = *iter;
-                if (vn->isAnnotation()) continue;
-                if ((!vn->isWritten()) && (vn->hasNoDescend())) continue;
+                if (vn.isAnnotation()) continue;
+                if ((!vn.isWritten()) && (vn.hasNoDescend())) continue;
                 bool needsBlock = false;
-                SymbolEntry* entry = vn->getSymbolEntry();
-                if (entry != (SymbolEntry*)0 && !vn->isTypeLock() && entry->getSymbol()->isTypeLocked())
+                SymbolEntry* entry = vn.getSymbolEntry();
+                if (entry != (SymbolEntry*)0 && !vn.isTypeLock() && entry.getSymbol().isTypeLocked())
                 {
-                    int4 curOff = (vn->getAddr().getOffset() - entry->getAddr().getOffset()) + entry->getOffset();
-                    ct = typegrp->getExactPiece(entry->getSymbol()->getType(), curOff, vn->getSize());
-                    if (ct == (Datatype*)0 || ct->getMetatype() == TYPE_UNKNOWN)    // If we can't resolve, or resolve to UNKNOWN
-                        ct = vn->getLocalType(needsBlock);      // Let data-type float, even though parent symbol is type-locked
+                    int4 curOff = (vn.getAddr().getOffset() - entry.getAddr().getOffset()) + entry.getOffset();
+                    ct = typegrp.getExactPiece(entry.getSymbol().getType(), curOff, vn.getSize());
+                    if (ct == (Datatype*)0 || ct.getMetatype() == TYPE_UNKNOWN)    // If we can't resolve, or resolve to UNKNOWN
+                        ct = vn.getLocalType(needsBlock);      // Let data-type float, even though parent symbol is type-locked
                 }
                 else
-                    ct = vn->getLocalType(needsBlock);
+                    ct = vn.getLocalType(needsBlock);
                 if (needsBlock)
-                    vn->setStopUpPropagation();
+                    vn.setStopUpPropagation();
 #if TYPEPROP_DEBUG
                 propagationDebug(data.getArch(), vn, ct, (PcodeOp*)0, 0, (Varnode*)0);
 #endif
-                vn->setTempType(ct);
+                vn.setTempType(ct);
             }
         }
 
@@ -132,10 +132,10 @@ namespace Sla.DECCORE
             for (iter = data.beginLoc(); iter != data.endLoc(); ++iter)
             {
                 vn = *iter;
-                if (vn->isAnnotation()) continue;
-                if ((!vn->isWritten()) && (vn->hasNoDescend())) continue;
-                ct = vn->getTempType();
-                if (vn->updateType(ct, false, false))
+                if (vn.isAnnotation()) continue;
+                if ((!vn.isWritten()) && (vn.hasNoDescend())) continue;
+                ct = vn.getTempType();
+                if (vn.updateType(ct, false, false))
                     change = true;
             }
             return change;
@@ -158,41 +158,41 @@ namespace Sla.DECCORE
         {
             Varnode* invn,*outvn;
 
-            invn = (inslot == -1) ? op->getOut() : op->getIn(inslot);
-            Datatype* alttype = invn->getTempType();
-            if (alttype->needsResolution())
+            invn = (inslot == -1) ? op.getOut() : op.getIn(inslot);
+            Datatype* alttype = invn.getTempType();
+            if (alttype.needsResolution())
             {
                 // Always give incoming data-type a chance to resolve, even if it would not otherwise propagate
-                alttype = alttype->resolveInFlow(op, inslot);
+                alttype = alttype.resolveInFlow(op, inslot);
             }
             if (inslot == outslot) return false; // don't backtrack
             if (outslot < 0)
-                outvn = op->getOut();
+                outvn = op.getOut();
             else
             {
-                outvn = op->getIn(outslot);
-                if (outvn->isAnnotation()) return false;
+                outvn = op.getIn(outslot);
+                if (outvn.isAnnotation()) return false;
             }
-            if (outvn->isTypeLock()) return false; // Can't propagate through typelock
-            if (outvn->stopsUpPropagation() && outslot >= 0) return false;  // Propagation is blocked
+            if (outvn.isTypeLock()) return false; // Can't propagate through typelock
+            if (outvn.stopsUpPropagation() && outslot >= 0) return false;  // Propagation is blocked
 
-            if (alttype->getMetatype() == TYPE_BOOL)
+            if (alttype.getMetatype() == TYPE_BOOL)
             {   // Only propagate boolean
-                if (outvn->getNZMask() > 1)         // If we know output can only take boolean values
+                if (outvn.getNZMask() > 1)         // If we know output can only take boolean values
                     return false;
             }
 
-            Datatype* newtype = op->getOpcode()->propagateType(alttype, op, invn, outvn, inslot, outslot);
+            Datatype* newtype = op.getOpcode().propagateType(alttype, op, invn, outvn, inslot, outslot);
             if (newtype == (Datatype*)0)
                 return false;
 
-            if (0 > newtype->typeOrder(*outvn->getTempType()))
+            if (0 > newtype.typeOrder(*outvn.getTempType()))
             {
 #if TYPEPROP_DEBUG
-                propagationDebug(typegrp->getArch(), outvn, newtype, op, inslot, (Varnode*)0);
+                propagationDebug(typegrp.getArch(), outvn, newtype, op, inslot, (Varnode*)0);
 #endif
-                outvn->setTempType(newtype);
-                return !outvn->isMark();
+                outvn.setTempType(newtype);
+                return !outvn.isMark();
             }
             return false;
         }
@@ -213,27 +213,27 @@ namespace Sla.DECCORE
             vector<PropagationState> state;
 
             state.emplace_back(vn);
-            vn->setMark();
+            vn.setMark();
 
             while (!state.empty())
             {
                 ptr = &state.back();
-                if (!ptr->valid())
+                if (!ptr.valid())
                 {   // If we are out of edges to traverse
-                    ptr->vn->clearMark();
+                    ptr.vn.clearMark();
                     state.pop_back();
                 }
                 else
                 {
-                    if (propagateTypeEdge(typegrp, ptr->op, ptr->inslot, ptr->slot))
+                    if (propagateTypeEdge(typegrp, ptr.op, ptr.inslot, ptr.slot))
                     {
-                        vn = (ptr->slot == -1) ? ptr->op->getOut() : ptr->op->getIn(ptr->slot);
-                        ptr->step();        // Make sure to step before push_back
+                        vn = (ptr.slot == -1) ? ptr.op.getOut() : ptr.op.getIn(ptr.slot);
+                        ptr.step();        // Make sure to step before push_back
                         state.emplace_back(vn);
-                        vn->setMark();
+                        vn.setMark();
                     }
                     else
-                        ptr->step();
+                        ptr.step();
                 }
             }
         }
@@ -248,49 +248,49 @@ namespace Sla.DECCORE
         /// \param addr is the aliased address
         private static void propagateRef(Funcdata data, Varnode vn, Address addr)
         {
-            Datatype* ct = vn->getTempType();
-            if (ct->getMetatype() != TYPE_PTR) return;
-            ct = ((TypePointer*)ct)->getPtrTo();
-            if (ct->getMetatype() == TYPE_SPACEBASE) return;
-            if (ct->getMetatype() == TYPE_UNKNOWN) return; // Don't bother propagating this
+            Datatype* ct = vn.getTempType();
+            if (ct.getMetatype() != TYPE_PTR) return;
+            ct = ((TypePointer*)ct).getPtrTo();
+            if (ct.getMetatype() == TYPE_SPACEBASE) return;
+            if (ct.getMetatype() == TYPE_UNKNOWN) return; // Don't bother propagating this
             VarnodeLocSet::const_iterator iter, enditer;
             uintb off = addr.getOffset();
-            TypeFactory* typegrp = data.getArch()->types;
-            Address endaddr = addr + ct->getSize();
+            TypeFactory* typegrp = data.getArch().types;
+            Address endaddr = addr + ct.getSize();
             if (endaddr.getOffset() < off) // If the address wrapped
                 enditer = data.endLoc(addr.getSpace()); // Go to end of space
             else
                 enditer = data.endLoc(endaddr);
             iter = data.beginLoc(addr);
             uintb lastoff = 0;
-            int4 lastsize = ct->getSize();
+            int4 lastsize = ct.getSize();
             Datatype* lastct = ct;
             while (iter != enditer)
             {
                 Varnode* curvn = *iter;
                 ++iter;
-                if (curvn->isAnnotation()) continue;
-                if ((!curvn->isWritten()) && curvn->hasNoDescend()) continue;
-                if (curvn->isTypeLock()) continue;
-                if (curvn->getSymbolEntry() != (SymbolEntry*)0) continue;
-                uintb curoff = curvn->getOffset() - off;
-                int4 cursize = curvn->getSize();
-                if (curoff + cursize > ct->getSize()) continue;
+                if (curvn.isAnnotation()) continue;
+                if ((!curvn.isWritten()) && curvn.hasNoDescend()) continue;
+                if (curvn.isTypeLock()) continue;
+                if (curvn.getSymbolEntry() != (SymbolEntry*)0) continue;
+                uintb curoff = curvn.getOffset() - off;
+                int4 cursize = curvn.getSize();
+                if (curoff + cursize > ct.getSize()) continue;
                 if ((cursize != lastsize) || (curoff != lastoff))
                 {
                     lastoff = curoff;
                     lastsize = cursize;
-                    lastct = typegrp->getExactPiece(ct, curoff, cursize);
+                    lastct = typegrp.getExactPiece(ct, curoff, cursize);
                 }
                 if (lastct == (Datatype*)0) continue;
 
                 // Try to propagate the reference type into a varnode that is pointed to by that reference
-                if (0 > lastct->typeOrder(*curvn->getTempType()))
+                if (0 > lastct.typeOrder(*curvn.getTempType()))
                 {
 #if TYPEPROP_DEBUG
                     propagationDebug(data.getArch(), curvn, lastct, (PcodeOp*)0, 0, vn);
 #endif
-                    curvn->setTempType(lastct);
+                    curvn.setTempType(lastct);
                     propagateOneType(typegrp, curvn); // Try to propagate the new type as far as possible
                 }
             }
@@ -307,41 +307,41 @@ namespace Sla.DECCORE
         /// \param spcvn is the spacebase register
         private static void propagateSpacebaseRef(Funcdata data, Varnode spcvn)
         {
-            Datatype* spctype = spcvn->getType();   // This is an absolute property of the varnode, so not temptype
-            if (spctype->getMetatype() != TYPE_PTR) return;
-            spctype = ((TypePointer*)spctype)->getPtrTo();
-            if (spctype->getMetatype() != TYPE_SPACEBASE) return;
+            Datatype* spctype = spcvn.getType();   // This is an absolute property of the varnode, so not temptype
+            if (spctype.getMetatype() != TYPE_PTR) return;
+            spctype = ((TypePointer*)spctype).getPtrTo();
+            if (spctype.getMetatype() != TYPE_SPACEBASE) return;
             TypeSpacebase* sbtype = (TypeSpacebase*)spctype;
             list<PcodeOp*>::const_iterator iter;
             Address addr;
 
-            for (iter = spcvn->beginDescend(); iter != spcvn->endDescend(); ++iter)
+            for (iter = spcvn.beginDescend(); iter != spcvn.endDescend(); ++iter)
             {
                 PcodeOp* op = *iter;
                 Varnode* vn;
-                switch (op->code())
+                switch (op.code())
                 {
                     case CPUI_COPY:
-                        vn = op->getIn(0);
-                        addr = sbtype->getAddress(0, vn->getSize(), op->getAddr());
-                        propagateRef(data, op->getOut(), addr);
+                        vn = op.getIn(0);
+                        addr = sbtype.getAddress(0, vn.getSize(), op.getAddr());
+                        propagateRef(data, op.getOut(), addr);
                         break;
                     case CPUI_INT_ADD:
                     case CPUI_PTRSUB:
-                        vn = op->getIn(1);
-                        if (vn->isConstant())
+                        vn = op.getIn(1);
+                        if (vn.isConstant())
                         {
-                            addr = sbtype->getAddress(vn->getOffset(), vn->getSize(), op->getAddr());
-                            propagateRef(data, op->getOut(), addr);
+                            addr = sbtype.getAddress(vn.getOffset(), vn.getSize(), op.getAddr());
+                            propagateRef(data, op.getOut(), addr);
                         }
                         break;
                     case CPUI_PTRADD:
-                        vn = op->getIn(1);
-                        if (vn->isConstant())
+                        vn = op.getIn(1);
+                        if (vn.isConstant())
                         {
-                            uintb off = vn->getOffset() * op->getIn(2)->getOffset();
-                            addr = sbtype->getAddress(off, vn->getSize(), op->getAddr());
-                            propagateRef(data, op->getOut(), addr);
+                            uintb off = vn.getOffset() * op.getIn(2).getOffset();
+                            addr = sbtype.getAddress(off, vn.getSize(), op.getAddr());
+                            propagateRef(data, op.getOut(), addr);
                         }
                         break;
                     default:
@@ -363,18 +363,18 @@ namespace Sla.DECCORE
             for (iter = data.beginOp(CPUI_RETURN); iter != iterend; ++iter)
             {
                 PcodeOp* retop = *iter;
-                if (retop->isDead()) continue;
-                if (retop->getHaltType() != 0) continue;
-                if (retop->numInput() > 1)
+                if (retop.isDead()) continue;
+                if (retop.getHaltType() != 0) continue;
+                if (retop.numInput() > 1)
                 {
-                    Varnode* vn = retop->getIn(1);
-                    Datatype* ct = vn->getTempType();
+                    Varnode* vn = retop.getIn(1);
+                    Datatype* ct = vn.getTempType();
                     if (bestdt == (Datatype*)0)
                     {
                         res = retop;
                         bestdt = ct;
                     }
-                    else if (ct->typeOrder(*bestdt) < 0)
+                    else if (ct.typeOrder(*bestdt) < 0)
                     {
                         res = retop;
                         bestdt = ct;
@@ -393,28 +393,28 @@ namespace Sla.DECCORE
             if (data.getFuncProto().isOutputLocked()) return;
             PcodeOp* op = canonicalReturnOp(data);
             if (op == (PcodeOp*)0) return;
-            TypeFactory* typegrp = data.getArch()->types;
-            Varnode* baseVn = op->getIn(1);
-            Datatype* ct = baseVn->getTempType();
-            int4 baseSize = baseVn->getSize();
-            bool isBool = ct->getMetatype() == TYPE_BOOL;
+            TypeFactory* typegrp = data.getArch().types;
+            Varnode* baseVn = op.getIn(1);
+            Datatype* ct = baseVn.getTempType();
+            int4 baseSize = baseVn.getSize();
+            bool isBool = ct.getMetatype() == TYPE_BOOL;
             list<PcodeOp*>::const_iterator iter, iterend;
             iterend = data.endOp(CPUI_RETURN);
             for (iter = data.beginOp(CPUI_RETURN); iter != iterend; ++iter)
             {
                 PcodeOp* retop = *iter;
                 if (retop == op) continue;
-                if (retop->isDead()) continue;
-                if (retop->getHaltType() != 0) continue;
-                if (retop->numInput() > 1)
+                if (retop.isDead()) continue;
+                if (retop.getHaltType() != 0) continue;
+                if (retop.numInput() > 1)
                 {
-                    Varnode* vn = retop->getIn(1);
-                    if (vn->getSize() != baseSize) continue;
-                    if (isBool && vn->getNZMask() > 1) continue;    // Don't propagate bool if value is not necessarily 0 or 1
-                    if (vn->getTempType() == ct) continue;      // Already propagated
-                    vn->setTempType(ct);
+                    Varnode* vn = retop.getIn(1);
+                    if (vn.getSize() != baseSize) continue;
+                    if (isBool && vn.getNZMask() > 1) continue;    // Don't propagate bool if value is not necessarily 0 or 1
+                    if (vn.getTempType() == ct) continue;      // Already propagated
+                    vn.setTempType(ct);
 #if TYPEPROP_DEBUG
-                    propagationDebug(typegrp->getArch(), vn, ct, op, 1, (Varnode*)0);
+                    propagationDebug(typegrp.getArch(), vn, ct, op, 1, (Varnode*)0);
 #endif
                     propagateOneType(typegrp, vn);
                 }
@@ -440,14 +440,14 @@ namespace Sla.DECCORE
         {
             // Make sure spacebase is accurate or bases could get typed and then ptrarithed
             if (!data.hasTypeRecoveryStarted()) return 0;
-            TypeFactory* typegrp = data.getArch()->types;
+            TypeFactory* typegrp = data.getArch().types;
             Varnode* vn;
             VarnodeLocSet::const_iterator iter;
 
 #if TYPEPROP_DEBUG
             ostringstream s;
             s << "Type propagation pass - " << dec << localcount;
-            data.getArch()->printDebug(s.str());
+            data.getArch().printDebug(s.str());
 #endif
             if (localcount >= 7)
             {       // This constant arrived at empirically
@@ -458,17 +458,17 @@ namespace Sla.DECCORE
                 }
                 return 0;
             }
-            data.getScopeLocal()->applyTypeRecommendations();
+            data.getScopeLocal().applyTypeRecommendations();
             buildLocaltypes(data);  // Set up initial types (based on local info)
             for (iter = data.beginLoc(); iter != data.endLoc(); ++iter)
             {
                 vn = *iter;
-                if (vn->isAnnotation()) continue;
-                if ((!vn->isWritten()) && (vn->hasNoDescend())) continue;
+                if (vn.isAnnotation()) continue;
+                if ((!vn.isWritten()) && (vn.hasNoDescend())) continue;
                 propagateOneType(typegrp, vn);
             }
             propagateAcrossReturns(data);
-            AddrSpace* spcid = data.getScopeLocal()->getSpaceId();
+            AddrSpace* spcid = data.getScopeLocal().getSpaceId();
             Varnode* spcvn = data.findSpacebaseInput(spcid);
             if (spcvn != (Varnode*)0)
                 propagateSpacebaseRef(data, spcvn);

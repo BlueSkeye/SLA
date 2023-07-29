@@ -17,15 +17,15 @@ namespace Sla.EXTRA
         {
             string filename;
 
-            if (dcp->conf != (Architecture*)0)
+            if (dcp.conf != (Architecture*)0)
                 throw IfaceExecutionError("Load image already present");
             s >> filename;
-            dcp->testCollection = new FunctionTestCollection(status);
-            dcp->testCollection->loadTest(filename);
+            dcp.testCollection = new FunctionTestCollection(status);
+            dcp.testCollection.loadTest(filename);
 #if OPACTION_DEBUG
-            dcp->conf->setDebugStream(status->fileoptr);
+            dcp.conf.setDebugStream(status.fileoptr);
 #endif
-            *status->optr << filename << " test successfully loaded: " << dcp->conf->getDescription() << endl;
+            *status.optr << filename << " test successfully loaded: " << dcp.conf.getDescription() << endl;
         }
     }
 }

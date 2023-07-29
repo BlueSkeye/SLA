@@ -26,12 +26,12 @@ namespace Sla.DECCORE
             if (val)
             {
                 res = "Constant pointers are now inferred";
-                glb->infer_pointers = true;
+                glb.infer_pointers = true;
             }
             else
             {
                 res = "Constant pointers must now be set explicitly";
-                glb->infer_pointers = false;
+                glb.infer_pointers = false;
             }
             return res;
         }

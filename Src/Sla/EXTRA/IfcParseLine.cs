@@ -20,7 +20,7 @@ namespace Sla.EXTRA
         /// must already exist.
         public override void execute(TextReader s)
         {
-            if (dcp->conf == (Architecture*)0)
+            if (dcp.conf == (Architecture*)0)
                 throw IfaceExecutionError("No load image present");
 
             s >> ws;
@@ -29,11 +29,11 @@ namespace Sla.EXTRA
 
             try
             {               // Try to parse the line
-                parse_C(dcp->conf, s);
+                parse_C(dcp.conf, s);
             }
             catch (ParseError err)
             {
-                *status->optr << "Error in C syntax: " << err.ToString() << endl;
+                *status.optr << "Error in C syntax: " << err.ToString() << endl;
                 throw IfaceExecutionError("Bad C syntax");
             }
         }

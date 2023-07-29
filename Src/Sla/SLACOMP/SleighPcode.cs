@@ -15,15 +15,15 @@ namespace Sla.SLACOMP
     {
         private SleighCompile compiler;            ///< The main SLEIGH parser
         
-        protected virtual uint4 allocateTemp() => compiler->getUniqueAddr();
+        protected virtual uint4 allocateTemp() => compiler.getUniqueAddr();
 
-        protected virtual Location getLocation(SleighSymbol sym) => compiler->getLocation(sym);
+        protected virtual Location getLocation(SleighSymbol sym) => compiler.getLocation(sym);
 
-        protected virtual void reportError(Location loc, string msg) => compiler->reportError(loc, msg);
+        protected virtual void reportError(Location loc, string msg) => compiler.reportError(loc, msg);
 
-        protected virtual void reportWarning(Location loc, string msg) => compiler->reportWarning(loc, msg);
+        protected virtual void reportWarning(Location loc, string msg) => compiler.reportWarning(loc, msg);
 
-        protected virtual void addSymbol(SleighSymbol sym) => compiler->addSymbol(sym);
+        protected virtual void addSymbol(SleighSymbol sym) => compiler.addSymbol(sym);
 
         public SleighPcode()
             : base()

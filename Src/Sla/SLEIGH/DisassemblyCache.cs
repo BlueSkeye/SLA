@@ -40,7 +40,7 @@ namespace Sla.SLEIGH
             for (int4 i = 0; i < minimumreuse; ++i)
             {
                 ParserContext* pos = new ParserContext(contextcache, translate);
-                pos->initialize(75, 20, constspace);
+                pos.initialize(75, 20, constspace);
                 list[i] = pos;
             }
             ParserContext* pos = list[0];
@@ -88,14 +88,14 @@ namespace Sla.SLEIGH
         {
             int4 hashindex = ((int4)addr.getOffset()) & mask;
             ParserContext* res = hashtable[hashindex];
-            if (res->getAddr() == addr)
+            if (res.getAddr() == addr)
                 return res;
             res = list[nextfree];
             nextfree += 1;      // Advance the circular index
             if (nextfree >= minimumreuse)
                 nextfree = 0;
-            res->setAddr(addr);
-            res->setParserState(ParserContext::uninitialized);  // Need to start over with parsing
+            res.setAddr(addr);
+            res.setParserState(ParserContext::uninitialized);  // Need to start over with parsing
             hashtable[hashindex] = res; // Stick it into the hashtable
             return res;
         }

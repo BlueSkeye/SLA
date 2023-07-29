@@ -22,12 +22,12 @@ namespace Sla.DECCORE
         /// \return the associated space or NULL if the Varnode is not of the correct form
         private static AddrSpace correctSpacebase(Architecture glb, Varnode vn, AddrSpace spc)
         {
-            if (!vn->isSpacebase()) return (AddrSpace*)0;
-            if (vn->isConstant())       // We have a global pseudo spacebase
+            if (!vn.isSpacebase()) return (AddrSpace*)0;
+            if (vn.isConstant())       // We have a global pseudo spacebase
                 return spc;         // Associate with load/stored space
-            if (!vn->isInput()) return (AddrSpace*)0;
-            AddrSpace* assoc = glb->getSpaceBySpacebase(vn->getAddr(), vn->getSize());
-            if (assoc->getContain() != spc) // Loading off right space?
+            if (!vn.isInput()) return (AddrSpace*)0;
+            AddrSpace* assoc = glb.getSpaceBySpacebase(vn.getAddr(), vn.getSize());
+            if (assoc.getContain() != spc) // Loading off right space?
                 return (AddrSpace*)0;
             return assoc;
         }
@@ -52,17 +52,17 @@ namespace Sla.DECCORE
                 val = 0;
                 return retspace;
             }
-            if (!vn->isWritten()) return (AddrSpace*)0;
-            op = vn->getDef();
-            if (op->code() != CPUI_INT_ADD) return (AddrSpace*)0;
-            vn1 = op->getIn(0);
-            vn2 = op->getIn(1);
+            if (!vn.isWritten()) return (AddrSpace*)0;
+            op = vn.getDef();
+            if (op.code() != CPUI_INT_ADD) return (AddrSpace*)0;
+            vn1 = op.getIn(0);
+            vn2 = op.getIn(1);
             retspace = correctSpacebase(glb, vn1, spc);
             if (retspace != (AddrSpace*)0)
             {
-                if (vn2->isConstant())
+                if (vn2.isConstant())
                 {
-                    val = vn2->getOffset();
+                    val = vn2.getOffset();
                     return retspace;
                 }
                 return (AddrSpace*)0;
@@ -70,9 +70,9 @@ namespace Sla.DECCORE
             retspace = correctSpacebase(glb, vn2, spc);
             if (retspace != (AddrSpace*)0)
             {
-                if (vn1->isConstant())
+                if (vn1.isConstant())
                 {
-                    val = vn1->getOffset();
+                    val = vn1.getOffset();
                     return retspace;
                 }
             }
@@ -91,12 +91,12 @@ namespace Sla.DECCORE
             Varnode* offvn;
             AddrSpace* loadspace;
 
-            offvn = op->getIn(1);       // Address offset
-            loadspace = op->getIn(0)->getSpaceFromConst(); // Space being loaded/stored
+            offvn = op.getIn(1);       // Address offset
+            loadspace = op.getIn(0).getSpaceFromConst(); // Space being loaded/stored
                                                            // Treat segmentop as part of load/store
-            if (offvn->isWritten() && (offvn->getDef()->code() == CPUI_SEGMENTOP))
+            if (offvn.isWritten() && (offvn.getDef().code() == CPUI_SEGMENTOP))
             {
-                offvn = offvn->getDef()->getIn(2);
+                offvn = offvn.getDef().getIn(2);
                 // If we are looking for a spacebase (i.e. stackpointer)
                 // Then currently we COMPLETELY IGNORE the base part of the
                 // segment. We assume it is all correct.
@@ -105,12 +105,12 @@ namespace Sla.DECCORE
                 // base is also constant, we let RuleSegmentOp reduce
                 // the whole segmentop to a constant.  If the base
                 // is not constant, we are not ready for a fixed address.
-                if (offvn->isConstant())
+                if (offvn.isConstant())
                     return (AddrSpace*)0;
             }
-            else if (offvn->isConstant())
+            else if (offvn.isConstant())
             { // Check for constant
-                offoff = offvn->getOffset();
+                offoff = offvn.getOffset();
                 return loadspace;
             }
             return vnSpacebase(glb, offvn, offoff, loadspace);
@@ -148,22 +148,22 @@ namespace Sla.DECCORE
             baseoff = checkSpacebase(data.getArch(), op, offoff);
             if (baseoff == (AddrSpace*)0) return 0;
 
-            size = op->getOut()->getSize();
-            offoff = AddrSpace::addressToByte(offoff, baseoff->getWordSize());
+            size = op.getOut().getSize();
+            offoff = AddrSpace::addressToByte(offoff, baseoff.getWordSize());
             newvn = data.newVarnode(size, baseoff, offoff);
             data.opSetInput(op, newvn, 0);
             data.opRemoveInput(op, 1);
             data.opSetOpcode(op, CPUI_COPY);
-            Varnode* refvn = op->getOut();
-            if (refvn->isSpacebasePlaceholder())
+            Varnode* refvn = op.getOut();
+            if (refvn.isSpacebasePlaceholder())
             {
-                refvn->clearSpacebasePlaceholder(); // Clear the trigger
-                PcodeOp* placeOp = refvn->loneDescend();
+                refvn.clearSpacebasePlaceholder(); // Clear the trigger
+                PcodeOp* placeOp = refvn.loneDescend();
                 if (placeOp != (PcodeOp*)0)
                 {
                     FuncCallSpecs* fc = data.getCallSpecs(placeOp);
                     if (fc != (FuncCallSpecs*)0)
-                        fc->resolveSpacebaseRelative(data, refvn);
+                        fc.resolveSpacebaseRelative(data, refvn);
                 }
             }
             return 1;

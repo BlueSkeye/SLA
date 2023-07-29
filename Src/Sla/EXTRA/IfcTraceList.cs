@@ -13,17 +13,17 @@ namespace Sla.EXTRA
 {				// List debug trace ranges
   int4 size,i;
 
-  if (dcp->fd == (Funcdata *)0)
+  if (dcp.fd == (Funcdata *)0)
     throw IfaceExecutionError("No function selected");
 
-  size = dcp->fd->debugSize();
-  if (dcp->fd->opactdbg_on)
-    *status->optr << "Trace enabled (";
+  size = dcp.fd.debugSize();
+  if (dcp.fd.opactdbg_on)
+    *status.optr << "Trace enabled (";
   else
-    *status->optr << "Trace disabled (";
-  *status->optr << dec << size << " total ranges)\n";
+    *status.optr << "Trace disabled (";
+  *status.optr << dec << size << " total ranges)\n";
   for(i=0;i<size;++i)
-    dcp->fd->debugPrintRange(i);
+    dcp.fd.debugPrintRange(i);
 }
     }
 #endif

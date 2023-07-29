@@ -37,29 +37,29 @@ namespace Sla.DECCORE
 
         public override int4 applyOp(PcodeOp op, Funcdata data)
         {
-            if (!op->getIn(1)->isConstant()) return 0;
-            if (op->getIn(1)->getOffset() != 1) return 0;
-            if (!op->getIn(0)->isWritten()) return 0;
-            PcodeOp* subop = op->getIn(0)->getDef();
-            if (subop->code() != CPUI_INT_ADD) return 0;
+            if (!op.getIn(1).isConstant()) return 0;
+            if (op.getIn(1).getOffset() != 1) return 0;
+            if (!op.getIn(0).isWritten()) return 0;
+            PcodeOp* subop = op.getIn(0).getDef();
+            if (subop.code() != CPUI_INT_ADD) return 0;
             Varnode* x = (Varnode*)0;
             Varnode* compvn;
             PcodeOp* compop;
             int4 i;
             for (i = 0; i < 2; ++i)
             {
-                compvn = subop->getIn(i);
-                if (compvn->isWritten())
+                compvn = subop.getIn(i);
+                if (compvn.isWritten())
                 {
-                    compop = compvn->getDef();
-                    if (compop->code() == CPUI_INT_MULT)
+                    compop = compvn.getDef();
+                    if (compop.code() == CPUI_INT_MULT)
                     {
-                        Varnode* invn = compop->getIn(1);
-                        if (invn->isConstant())
+                        Varnode* invn = compop.getIn(1);
+                        if (invn.isConstant())
                         {
-                            if (invn->getOffset() == calc_mask(invn->getSize()))
+                            if (invn.getOffset() == calc_mask(invn.getSize()))
                             {
-                                x = subop->getIn(1 - i);
+                                x = subop.getIn(1 - i);
                                 break;
                             }
                         }
@@ -67,43 +67,43 @@ namespace Sla.DECCORE
                 }
             }
             if (i == 2) return 0;
-            Varnode* z = compvn->getDef()->getIn(0);
-            if (!z->isWritten()) return 0;
-            PcodeOp* subpieceop = z->getDef();
-            if (subpieceop->code() != CPUI_SUBPIECE) return 0;
-            int4 n = subpieceop->getIn(1)->getOffset() * 8;
-            if (n != 8 * (subpieceop->getIn(0)->getSize() - z->getSize())) return 0;
-            Varnode* multvn = subpieceop->getIn(0);
-            if (!multvn->isWritten()) return 0;
-            PcodeOp* multop = multvn->getDef();
-            if (multop->code() != CPUI_INT_MULT) return 0;
-            if (!multop->getIn(1)->isConstant()) return 0;
-            Varnode* zextvn = multop->getIn(0);
-            if (!zextvn->isWritten()) return 0;
-            PcodeOp* zextop = zextvn->getDef();
-            if (zextop->code() != CPUI_INT_ZEXT) return 0;
-            if (zextop->getIn(0) != x) return 0;
+            Varnode* z = compvn.getDef().getIn(0);
+            if (!z.isWritten()) return 0;
+            PcodeOp* subpieceop = z.getDef();
+            if (subpieceop.code() != CPUI_SUBPIECE) return 0;
+            int4 n = subpieceop.getIn(1).getOffset() * 8;
+            if (n != 8 * (subpieceop.getIn(0).getSize() - z.getSize())) return 0;
+            Varnode* multvn = subpieceop.getIn(0);
+            if (!multvn.isWritten()) return 0;
+            PcodeOp* multop = multvn.getDef();
+            if (multop.code() != CPUI_INT_MULT) return 0;
+            if (!multop.getIn(1).isConstant()) return 0;
+            Varnode* zextvn = multop.getIn(0);
+            if (!zextvn.isWritten()) return 0;
+            PcodeOp* zextop = zextvn.getDef();
+            if (zextop.code() != CPUI_INT_ZEXT) return 0;
+            if (zextop.getIn(0) != x) return 0;
 
             list<PcodeOp*>::const_iterator iter;
-            for (iter = op->getOut()->beginDescend(); iter != op->getOut()->endDescend(); ++iter)
+            for (iter = op.getOut().beginDescend(); iter != op.getOut().endDescend(); ++iter)
             {
                 PcodeOp* addop = *iter;
-                if (addop->code() != CPUI_INT_ADD) continue;
-                if ((addop->getIn(0) != z) && (addop->getIn(1) != z)) continue;
+                if (addop.code() != CPUI_INT_ADD) continue;
+                if ((addop.getIn(0) != z) && (addop.getIn(1) != z)) continue;
 
                 uintb pow = 1;
                 pow <<= n;          // Calculate 2^n
-                uintb newc = multop->getIn(1)->getOffset() + pow;
-                PcodeOp* newmultop = data.newOp(2, op->getAddr());
+                uintb newc = multop.getIn(1).getOffset() + pow;
+                PcodeOp* newmultop = data.newOp(2, op.getAddr());
                 data.opSetOpcode(newmultop, CPUI_INT_MULT);
-                Varnode* newmultvn = data.newUniqueOut(zextvn->getSize(), newmultop);
+                Varnode* newmultvn = data.newUniqueOut(zextvn.getSize(), newmultop);
                 data.opSetInput(newmultop, zextvn, 0);
-                data.opSetInput(newmultop, data.newConstant(zextvn->getSize(), newc), 1);
+                data.opSetInput(newmultop, data.newConstant(zextvn.getSize(), newc), 1);
                 data.opInsertBefore(newmultop, op);
 
-                PcodeOp* newshiftop = data.newOp(2, op->getAddr());
+                PcodeOp* newshiftop = data.newOp(2, op.getAddr());
                 data.opSetOpcode(newshiftop, CPUI_INT_RIGHT);
-                Varnode* newshiftvn = data.newUniqueOut(zextvn->getSize(), newshiftop);
+                Varnode* newshiftvn = data.newUniqueOut(zextvn.getSize(), newshiftop);
                 data.opSetInput(newshiftop, newmultvn, 0);
                 data.opSetInput(newshiftop, data.newConstant(4, n + 1), 1);
                 data.opInsertBefore(newshiftop, op);
