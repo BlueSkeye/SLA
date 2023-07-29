@@ -108,7 +108,7 @@ namespace Sla.DECCORE
             uint8 id = decoder.readUnsignedInteger(ATTRIB_ID);
             Scope* res = resolveScope(id);
             if (res == (Scope*)0)
-                throw LowlevelError("Could not find scope matching id");
+                throw new LowlevelError("Could not find scope matching id");
             decoder.closeElement(elemId);
             return res;
         }
@@ -158,15 +158,15 @@ namespace Sla.DECCORE
             if (parent == (Scope*)0)
             {
                 if (globalscope != (Scope*)0)
-                    throw LowlevelError("Multiple global scopes");
+                    throw new LowlevelError("Multiple global scopes");
                 if (newscope->name.size() != 0)
-                    throw LowlevelError("Global scope does not have empty name");
+                    throw new LowlevelError("Global scope does not have empty name");
                 globalscope = newscope;
                 idmap[globalscope->uniqueId] = globalscope;
                 return;
             }
             if (newscope->name.size() == 0)
-                throw LowlevelError("Non-global scope has empty name");
+                throw new LowlevelError("Non-global scope has empty name");
             pair<uint8, Scope*> value(newscope->uniqueId, newscope);
             pair<ScopeMap::iterator, bool> res;
             res = idmap.insert(value);
@@ -195,7 +195,7 @@ namespace Sla.DECCORE
             {
                 ScopeMap::iterator iter = scope->parent->children.find(scope->uniqueId);
                 if (iter == scope->parent->children.end())
-                    throw LowlevelError("Could not remove parent reference to: " + scope->name);
+                    throw new LowlevelError("Could not remove parent reference to: " + scope->name);
                 scope->parent->detachScope(iter);
             }
         }
@@ -371,7 +371,7 @@ namespace Sla.DECCORE
                 endmark = fullname.find(delim, mark);
                 if (endmark == string::npos) break;
                 if (!idByNameHash)
-                    throw LowlevelError("Scope name hashes not allowed");
+                    throw new LowlevelError("Scope name hashes not allowed");
                 string scopename = fullname.substr(mark, endmark - mark);
                 uint8 nameId = Scope::hashScopeName(start->uniqueId, scopename);
                 start = findCreateScope(nameId, scopename, start);

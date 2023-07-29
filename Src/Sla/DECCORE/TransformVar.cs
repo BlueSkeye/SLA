@@ -82,7 +82,7 @@ namespace Sla.DECCORE
                     {
                         int4 bytePos = (int4)val;
                         if ((bytePos & 7) != 0)
-                            throw LowlevelError("Varnode piece is not byte aligned");
+                            throw new LowlevelError("Varnode piece is not byte aligned");
                         bytePos >>= 3;
                         if (vn->getSpace()->isBigEndian())
                             bytePos = vn->getSize() - bytePos - byteSize;
@@ -102,7 +102,7 @@ namespace Sla.DECCORE
                         break;
                     }
                 default:
-                    throw LowlevelError("Bad TransformVar type");
+                    throw new LowlevelError("Bad TransformVar type");
             }
         }
 

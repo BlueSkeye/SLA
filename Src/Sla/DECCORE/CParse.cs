@@ -118,7 +118,7 @@ namespace Sla.DECCORE
                     firsttoken = PARAM_RESULT;
                     break;
                 default:
-                    throw LowlevelError("Bad document type");
+                    throw new LowlevelError("Bad document type");
             }
             parse = this;           // Setup global object for yyparse
             int4 res = yyparse();
@@ -526,7 +526,7 @@ namespace Sla.DECCORE
 
             ifstream s(nm.c_str()); // open file
             if (!s)
-                throw LowlevelError("Unable to open file for parsing: " + nm);
+                throw new LowlevelError("Unable to open file for parsing: " + nm);
 
             lexer.pushFile(nm, &s);     // Inform lexer of filename and stream
             bool res = runParse(doctype);

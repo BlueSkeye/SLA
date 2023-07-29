@@ -180,7 +180,7 @@ namespace Sla.DECCORE
             else if (lo->isInput())
                 bb = (BlockBasic*)0;
             else
-                throw LowlevelError("Trying to find whole on free varnode");
+                throw new LowlevelError("Trying to find whole on free varnode");
             while (iter != enditer)
             {
                 PcodeOp* op = *iter;
@@ -674,7 +674,7 @@ namespace Sla.DECCORE
         {
             PcodeOp* loop = lo->getDef();
             if (loop == (PcodeOp*)0)
-                throw LowlevelError("Building low piece that was originally undefined");
+                throw new LowlevelError("Building low piece that was originally undefined");
 
             vector<Varnode*> inlist;
             inlist.push_back(whole);
@@ -715,7 +715,7 @@ namespace Sla.DECCORE
         {
             PcodeOp* hiop = hi->getDef();
             if (hiop == (PcodeOp*)0)
-                throw LowlevelError("Building low piece that was originally undefined");
+                throw new LowlevelError("Building low piece that was originally undefined");
 
             vector<Varnode*> inlist;
             inlist.push_back(whole);
@@ -954,11 +954,11 @@ namespace Sla.DECCORE
         /// \param splitvec is the container for holding SplitVarnode copies
         public static void findCopies(SplitVarnode @in, List<SplitVarnode> splitvec)
         {
-            if (!in.hasBothPieces()) return;
+            if (!@in.hasBothPieces()) return;
             list<PcodeOp*>::const_iterator iter, enditer;
 
-            iter = in.getLo()->beginDescend();
-            enditer = in.getLo()->endDescend();
+            iter = @in.getLo()->beginDescend();
+            enditer = @in.getLo()->endDescend();
             while (iter != enditer)
             {
                 PcodeOp* loop = *iter;
@@ -967,12 +967,12 @@ namespace Sla.DECCORE
                 Varnode* locpy = loop->getOut();
                 Address addr = locpy->getAddr(); // Calculate address of hi part
                 if (addr.isBigEndian())
-                    addr = addr - (in.getHi()->getSize());
-    else
+                    addr = addr - (@in.getHi()->getSize());
+                else
                     addr = addr + locpy->getSize();
                 list<PcodeOp*>::const_iterator iter2, enditer2;
-                iter2 = in.getHi()->beginDescend();
-                enditer2 = in.getHi()->endDescend();
+                iter2 = @in.getHi()->beginDescend();
+                enditer2 = @in.getHi()->endDescend();
                 while (iter2 != enditer2)
                 {
                     PcodeOp* hiop = *iter2;
@@ -982,7 +982,7 @@ namespace Sla.DECCORE
                     if (hicpy->getAddr() != addr) continue;
                     if (hiop->getParent() != loop->getParent()) continue;
                     SplitVarnode newsplit;
-                    newsplit.initAll(in.getWhole(), locpy, hicpy);
+                    newsplit.initAll(@in.getWhole(), locpy, hicpy);
                     splitvec.push_back(newsplit);
                 }
             }
@@ -1239,7 +1239,7 @@ namespace Sla.DECCORE
             if (existop == (PcodeOp*)0) return existop;
             // existop should always be a MULTIEQUAL defining one of the pieces
             if (existop->code() != CPUI_MULTIEQUAL)
-                throw LowlevelError("Trying to create phi-node double precision op with phi-node pieces");
+                throw new LowlevelError("Trying to create phi-node double precision op with phi-node pieces");
             BlockBasic* bl = existop->getParent();
             int4 numin = inlist.size();
             for (int4 i = 0; i < numin; ++i)

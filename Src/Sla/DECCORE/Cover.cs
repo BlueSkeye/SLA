@@ -41,21 +41,21 @@ namespace Sla.DECCORE
             {
                 block.setAll();     // No cover encountered, fill in entire block
                                     //    if (bl->InSize()==0)
-                                    //      throw LowlevelError("Ref point is not in flow of defpoint");
+                                    //      throw new LowlevelError("Ref point is not in flow of defpoint");
                 for (j = 0; j < bl->sizeIn(); ++j)  // Recurse to all blocks that fall into bl
                     addRefRecurse(bl->getIn(j));
             }
             else
             {
-                const PcodeOp* op = block.getStop();
+                PcodeOp* op = block.getStop();
                 ustart = CoverBlock::getUIndex(block.getStart());
                 ustop = CoverBlock::getUIndex(op);
                 if ((ustop != ~((uintm)0)) && (ustop >= ustart))
-                    block.setEnd((const PcodeOp*)1); // Fill in to the bottom
+                    block.setEnd((PcodeOp*)1); // Fill in to the bottom
 
 
-                if ((ustop == (uintm)0) && (block.getStart() == (const PcodeOp*)0)) {
-                    if ((op != (const PcodeOp*)0)&& (op->code() == CPUI_MULTIEQUAL)) {
+                if ((ustop == (uintm)0) && (block.getStart() == (PcodeOp*)0)) {
+                    if ((op != (PcodeOp*)0)&& (op->code() == CPUI_MULTIEQUAL)) {
                         // This block contains only an infinitesimal tip
                         // of cover through one branch of a MULTIEQUAL
                         // we still need to traverse through branches
@@ -320,8 +320,8 @@ namespace Sla.DECCORE
             else if (vn->isInput())
             {
                 CoverBlock & block(cover[0]);
-                block.setBegin((const PcodeOp*)2 ); // Special mark for input
-                block.setEnd((const PcodeOp*)2 );
+                block.setBegin((PcodeOp*)2 ); // Special mark for input
+                block.setEnd((PcodeOp*)2 );
             }
         }
 
@@ -373,7 +373,7 @@ namespace Sla.DECCORE
                 }
             }
             //  if (bl->InSize()==0)
-            //    throw LowlevelError("Ref point is not in flow of defpoint");
+            //    throw new LowlevelError("Ref point is not in flow of defpoint");
             if (ref->code() == CPUI_MULTIEQUAL)
             {
                 for (j = 0; j < ref->numInput(); ++j)

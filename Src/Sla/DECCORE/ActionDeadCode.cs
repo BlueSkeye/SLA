@@ -489,7 +489,7 @@ namespace Sla.DECCORE
             uintb returnConsume;
             vector<Varnode*> worklist;
             VarnodeLocSet::const_iterator viter, endviter;
-            const AddrSpaceManager* manage = data.getArch();
+            AddrSpaceManager manage = data.getArch();
             AddrSpace* spc;
 
             // Clear consume flags

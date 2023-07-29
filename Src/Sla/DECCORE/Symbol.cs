@@ -260,7 +260,7 @@ namespace Sla.DECCORE
                 if (diff >= res->getSize()) continue;
                 return res;
             }
-            //  throw LowlevelError("No mapping at desired address for symbol: "+name);
+            //  throw new LowlevelError("No mapping at desired address for symbol: "+name);
             return null;
         }
 

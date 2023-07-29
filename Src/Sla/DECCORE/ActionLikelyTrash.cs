@@ -196,7 +196,7 @@ namespace Sla.DECCORE
             enditer = data.getFuncProto().trashEnd();
             for (; iter != enditer; ++iter)
             {
-                const VarnodeData &vdata(*iter);
+                VarnodeData vdata = *iter;
                 Varnode* vn = data.findCoveredInput(vdata.size, vdata.getAddr());
                 if (vn == (Varnode*)0) continue;
                 if (vn->isTypeLock() || vn->isNameLock()) continue;

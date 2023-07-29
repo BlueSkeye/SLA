@@ -259,7 +259,7 @@ namespace Sla.DECCORE
                 if ((flags & Varnode::typelock) != 0)
                 {
                     if ((b->flags & Varnode::typelock) != 0)
-                        throw LowlevelError("Overlapping forced variable types : " + type->getName() + "   " + b->type->getName());
+                        throw new LowlevelError("Overlapping forced variable types : " + type->getName() + "   " + b->type->getName());
                     if (start != b->start)
                         return false;       // Discard b entirely
                 }

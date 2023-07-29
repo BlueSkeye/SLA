@@ -105,10 +105,10 @@ namespace Sla.DECCORE
         /// \param model is the new prototype model to add to the merge
         public void foldIn(ProtoModel model)
         {
-            if (model->glb != glb) throw LowlevelError("Mismatched architecture");
+            if (model->glb != glb) throw new LowlevelError("Mismatched architecture");
             if ((model->input->getType() != ParamList::p_standard) &&
                 (model->input->getType() != ParamList::p_register))
-                throw LowlevelError("Can only resolve between standard prototype models");
+                throw new LowlevelError("Can only resolve between standard prototype models");
             if (input == (ParamList*)0)
             { // First fold in
                 input = new ParamListMerged();
@@ -129,7 +129,7 @@ namespace Sla.DECCORE
                 if (extrapop != model->extrapop)
                     extrapop = ProtoModel::extrapop_unknown;
                 if ((injectUponEntry != model->injectUponEntry) || (injectUponReturn != model->injectUponReturn))
-                    throw LowlevelError("Cannot merge prototype models with different inject ids");
+                    throw new LowlevelError("Cannot merge prototype models with different inject ids");
                 intersectEffects(model->effectlist);
                 intersectLikelyTrash(model->likelytrash);
                 // Take the union of the localrange and paramrange
@@ -173,7 +173,7 @@ namespace Sla.DECCORE
             }
             if (bestindex >= 0)
                 return modellist[bestindex];
-            throw LowlevelError("No model matches : missing default");
+            throw new LowlevelError("No model matches : missing default");
         }
 
         public override bool isMerged() => true;
@@ -189,7 +189,7 @@ namespace Sla.DECCORE
                 string modelName = decoder.readString(ATTRIB_NAME);
                 ProtoModel* mymodel = glb->getModel(modelName);
                 if (mymodel == (ProtoModel*)0)
-                    throw LowlevelError("Missing prototype model: " + modelName);
+                    throw new LowlevelError("Missing prototype model: " + modelName);
                 decoder.closeElement(subId);
                 foldIn(mymodel);
                 modellist.push_back(mymodel);

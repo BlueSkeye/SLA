@@ -123,7 +123,7 @@ namespace Sla.DECCORE
                         nm = decoder.readString();
                 }
                 if (nm.size() == 0)
-                    throw LowlevelError(name + ": TypeEnum field missing name attribute");
+                    throw new LowlevelError(name + ": TypeEnum field missing name attribute");
                 nmap[val] = nm;
                 decoder.closeElement(childId);
             }

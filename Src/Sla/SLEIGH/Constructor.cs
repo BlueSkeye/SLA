@@ -625,7 +625,7 @@ namespace Sla.SLEIGH
                     if (sectionid < 0)
                     {
                         if (templ != (ConstructTpl*)0)
-                            throw LowlevelError("Duplicate main section");
+                            throw new LowlevelError("Duplicate main section");
                         templ = cur;
                     }
                     else
@@ -633,7 +633,7 @@ namespace Sla.SLEIGH
                         while (namedtempl.size() <= sectionid)
                             namedtempl.push_back((ConstructTpl*)0);
                         if (namedtempl[sectionid] != (ConstructTpl*)0)
-                            throw LowlevelError("Duplicate named section");
+                            throw new LowlevelError("Duplicate named section");
                         namedtempl[sectionid] = cur;
                     }
                 }

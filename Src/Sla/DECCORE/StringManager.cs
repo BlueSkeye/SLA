@@ -205,7 +205,7 @@ namespace Sla.DECCORE
             int4 size;
 
             if (codepoint < 0)
-                throw LowlevelError("Negative unicode codepoint");
+                throw new LowlevelError("Negative unicode codepoint");
             if (codepoint < 128)
             {
                 s.put((uint1)codepoint);
@@ -213,7 +213,7 @@ namespace Sla.DECCORE
             }
             int4 bits = mostsigbit_set(codepoint) + 1;
             if (bits > 21)
-                throw LowlevelError("Bad unicode codepoint");
+                throw new LowlevelError("Bad unicode codepoint");
             if (bits < 12)
             {   // Encode with two bytes
                 bytes[0] = 0xc0 ^ ((codepoint >> 6) & 0x1f);

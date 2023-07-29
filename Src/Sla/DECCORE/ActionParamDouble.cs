@@ -39,7 +39,7 @@ namespace Sla.DECCORE
                     ParamActive* active = fc->getActiveInput();
                     for (int4 j = 0; j < active->getNumTrials(); ++j)
                     {
-                        const ParamTrial &paramtrial(active->getTrial(j));
+                        ParamTrial paramtrial = active->getTrial(j);
                         if (paramtrial.isChecked()) continue;
                         if (paramtrial.isUnref()) continue;
                         AddrSpace* spc = paramtrial.getAddress().getSpace();
@@ -108,7 +108,7 @@ namespace Sla.DECCORE
             }
 
 
-            const FuncProto &fp(data.getFuncProto());
+            FuncProto fp = data.getFuncProto();
             if (fp.isInputLocked() && data.isDoublePrecisOn())
             {
                 // Search for locked parameters that are being split into hi and lo components

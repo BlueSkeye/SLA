@@ -149,7 +149,7 @@ namespace Sla.DECCORE
                 output = new ParamListRegisterOut();
             }
             else
-                throw LowlevelError("Unknown strategy type: " + strategy);
+                throw new LowlevelError("Unknown strategy type: " + strategy);
         }
 
         public enum ExtraPop
@@ -612,12 +612,12 @@ namespace Sla.DECCORE
                     isConstruct = decoder.readBool();
                 }
                 else
-                    throw LowlevelError("Unknown prototype attribute");
+                    throw new LowlevelError("Unknown prototype attribute");
             }
             if (name == "__thiscall")
                 hasThis = true;
             if (extrapop == -300)
-                throw LowlevelError("Missing prototype attributes");
+                throw new LowlevelError("Missing prototype attributes");
 
             buildParamList(strategystring); // Allocate input and output ParamLists
             for (; ; )
@@ -714,7 +714,7 @@ namespace Sla.DECCORE
                         injectUponReturn = injectId;
                 }
                 else
-                    throw LowlevelError("Unknown element in prototype");
+                    throw new LowlevelError("Unknown element in prototype");
             }
             decoder.closeElement(elemId);
             if ((!sawretaddr) && (glb->defaultReturnAddr.space != (AddrSpace*)0))

@@ -64,9 +64,9 @@ namespace Sla.DECCORE
             if (testType->getMetatype() == TYPE_PTR)
                 testType = ((TypePointer*)testType)->getPtrTo();
             if (testType->getMetatype() != TYPE_UNION)
-                throw LowlevelError("<unionfacetsymbol> does not have a union type");
+                throw new LowlevelError("<unionfacetsymbol> does not have a union type");
             if (fieldNum < -1 || fieldNum >= testType->numDepend())
-                throw LowlevelError("<unionfacetsymbol> field attribute is out of bounds");
+                throw new LowlevelError("<unionfacetsymbol> field attribute is out of bounds");
         }
     }
 }

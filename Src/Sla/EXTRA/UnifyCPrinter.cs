@@ -146,7 +146,7 @@ namespace Sla.EXTRA
             {
                 int4 slot = (*iter).second;
                 if (namemap.size() <= slot)
-                    throw LowlevelError("Name indices do not match constraint");
+                    throw new LowlevelError("Name indices do not match constraint");
                 namemap[slot] = (*iter).first;
             }
         }

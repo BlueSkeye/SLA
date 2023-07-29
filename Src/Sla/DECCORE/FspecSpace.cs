@@ -83,12 +83,12 @@ namespace Sla.DECCORE
 
         public override void saveXml(StreamWriter s)
         {
-            throw LowlevelError("Should never encode fspec space to stream");
+            throw new LowlevelError("Should never encode fspec space to stream");
         }
 
         public override void decode(Decoder decoder)
         {
-            throw LowlevelError("Should never decode fspec space from stream");
+            throw new LowlevelError("Should never decode fspec space from stream");
         }
     }
 }

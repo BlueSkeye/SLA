@@ -395,7 +395,7 @@ namespace Sla.DECCORE
             }
             decoder.closeElement(elemId);
             if (adset.empty())
-                throw LowlevelError("Empty jumptable override");
+                throw new LowlevelError("Empty jumptable override");
         }
     }
 }

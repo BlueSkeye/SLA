@@ -262,7 +262,7 @@ namespace Sla.DECCORE
                         addSymbol("", ct, addr, usepoint)->getSymbol();
                     }
                     catch (LowlevelError err) {
-                        fd->warningHeader(err.explain);
+                        fd->warningHeader(err.ToString());
                     }
                     //      setCategory(sym,0,index);
                 }

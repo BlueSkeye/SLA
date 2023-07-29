@@ -69,7 +69,7 @@ namespace Sla.DECCORE
             }
             decoder.closeElement(elemId);
             if (name.size() == 0)
-                throw LowlevelError("Missing inject parameter name");
+                throw new LowlevelError("Missing inject parameter name");
         }
 
         /// Assign an index to parameters

@@ -70,12 +70,12 @@ namespace Sla.DECCORE
 
         public override void saveXml(TextWriter s)
         {
-            throw LowlevelError("Should never encode iop space to stream");
+            throw new LowlevelError("Should never encode iop space to stream");
         }
 
         public override void decode(Decoder decoder)
         {
-            throw LowlevelError("Should never decode iop space from stream");
+            throw new LowlevelError("Should never decode iop space from stream");
         }
     }
 }

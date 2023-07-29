@@ -168,7 +168,7 @@ namespace Sla.CORE
         public override void closeElement(uint id)
         {
 #if CPUI_DEBUG
-            const Element* el = elStack.back();
+            Element el = elStack.back();
             if (iterStack.back() != el->getChildren().end())
                 throw DecoderError("Closing element <" + el->getName() + "> with additional children");
             if (ElementId::find(el->getName()) != id)
@@ -183,7 +183,7 @@ namespace Sla.CORE
         public override void closeElementSkipping(uint id)
         {
 #if CPUI_DEBUG
-            const Element* el = elStack.back();
+            Element el = elStack.back();
             if (ElementId::find(el->getName()) != id)
                 throw DecoderError("Trying to close <" + el->getName() + "> with mismatching id");
 #endif

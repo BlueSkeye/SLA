@@ -86,7 +86,7 @@ namespace Sla.DECCORE
                     s << "CALL op at ";
                     callop->getAddr().printRaw(s);
                     s << " has an unexpected output varnode";
-                    throw LowlevelError(s.str());
+                    throw new LowlevelError(s.str());
                 }
                 // Otherwise just remove the Varnode and assume return recovery will reintroduce it if necessary
                 data.opUnsetOutput(callop);

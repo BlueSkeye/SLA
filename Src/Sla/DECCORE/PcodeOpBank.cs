@@ -177,7 +177,7 @@ namespace Sla.DECCORE
         public void destroy(PcodeOp op)
         {
             if (!op->isDead())
-                throw LowlevelError("Deleting integrated op");
+                throw new LowlevelError("Deleting integrated op");
 
             optree.erase(op->getSeqNum());
             deadlist.erase(op->insertiter);
@@ -241,7 +241,7 @@ namespace Sla.DECCORE
         public void insertAfterDead(PcodeOp op, PcodeOp prev)
         {
             if ((!op->isDead()) || (!prev->isDead()))
-                throw LowlevelError("Dead move called on ops which aren't dead");
+                throw new LowlevelError("Dead move called on ops which aren't dead");
             deadlist.erase(op->insertiter);
             list<PcodeOp*>::iterator iter = prev->insertiter;
             ++iter;

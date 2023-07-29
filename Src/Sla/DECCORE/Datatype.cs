@@ -123,7 +123,7 @@ namespace Sla.DECCORE
                 }
             }
             if (size < 0)
-                throw LowlevelError("Bad size for type " + name);
+                throw new LowlevelError("Bad size for type " + name);
             submeta = base2sub[metatype];
             if ((id == 0) && (name.size() > 0)) // If there is a type name
                 id = hashName(name);    // There must be some kind of id
@@ -631,7 +631,7 @@ namespace Sla.DECCORE
                 return 4;
             else if (val == "char")
                 return 5;
-            throw LowlevelError("Unrecognized integer format: " + val);
+            throw new LowlevelError("Unrecognized integer format: " + val);
         }
 
         /// \brief Decode the given format value into an XML attribute string
@@ -651,7 +651,7 @@ namespace Sla.DECCORE
                 return "bin";
             else if (val == 5)
                 return "char";
-            throw LowlevelError("Unrecognized integer format encoding");
+            throw new LowlevelError("Unrecognized integer format encoding");
         }
     }
 }

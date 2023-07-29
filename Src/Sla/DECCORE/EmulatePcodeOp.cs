@@ -112,7 +112,7 @@ namespace Sla.DECCORE
             for (i = 0; i < bl->sizeIn(); ++i)
                 if (bl->getIn(i) == last_bl) break;
             if (i == bl->sizeIn())
-                throw LowlevelError("Could not execute MULTIEQUAL");
+                throw new LowlevelError("Could not execute MULTIEQUAL");
             uintb val = getVarnodeValue(currentOp->getIn(i));
             setVarnodeValue(currentOp->getOut(), val);
         }
@@ -130,7 +130,7 @@ namespace Sla.DECCORE
         {
             SegmentOp* segdef = glb->userops.getSegmentOp(currentOp->getIn(0)->getSpaceFromConst()->getIndex());
             if (segdef == (SegmentOp*)0)
-                throw LowlevelError("Segment operand missing definition");
+                throw new LowlevelError("Segment operand missing definition");
 
             uintb in1 = getVarnodeValue(currentOp->getIn(1));
             uintb in2 = getVarnodeValue(currentOp->getIn(2));

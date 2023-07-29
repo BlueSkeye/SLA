@@ -47,7 +47,7 @@ namespace Sla.EXTRA
             if (slgh == (SleighBase*)0) { // Make sure we have the sleigh AddrSpaceManager
                 slgh = (SleighBase*)glb->translate;
                 if (slgh == (SleighBase*)0)
-                    throw LowlevelError("Registering pcode snippet before language is instantiated");
+                    throw new LowlevelError("Registering pcode snippet before language is instantiated");
             }
             if (contextCache.pos == (ParserContext*)0)
             {   // Make sure we have a context
@@ -72,7 +72,7 @@ namespace Sla.EXTRA
                 ExecutablePcodeSleigh* sleighpayload = (ExecutablePcodeSleigh*)payload;
                 istringstream s(sleighpayload->parsestring);
                 if (!compiler.parseStream(s))
-                    throw LowlevelError(payload->getSource() + ": Unable to compile pcode: " + compiler.getErrorMessage());
+                    throw new LowlevelError(payload->getSource() + ": Unable to compile pcode: " + compiler.getErrorMessage());
                 sleighpayload->tpl = compiler.releaseResult();
                 sleighpayload->parsestring = "";        // No longer need the memory
             }
@@ -82,7 +82,7 @@ namespace Sla.EXTRA
                 InjectPayloadSleigh* sleighpayload = (InjectPayloadSleigh*)payload;
                 istringstream s(sleighpayload->parsestring);
                 if (!compiler.parseStream(s))
-                    throw LowlevelError(payload->getSource() + ": Unable to compile pcode: " + compiler.getErrorMessage());
+                    throw new LowlevelError(payload->getSource() + ": Unable to compile pcode: " + compiler.getErrorMessage());
                 tempbase = compiler.getUniqueBase();
                 sleighpayload->tpl = compiler.releaseResult();
                 sleighpayload->parsestring = "";        // No longer need the memory
@@ -132,7 +132,7 @@ namespace Sla.EXTRA
                     parseInject(payload);
                     break;
                 default:
-                    throw LowlevelError("Unknown p-code inject type");
+                    throw new LowlevelError("Unknown p-code inject type");
             }
         }
 

@@ -66,7 +66,7 @@ namespace Sla.EXTRA
                 sout.close();
             }
             catch (LowlevelError err) {
-                *status->optr << err.explain << endl;
+                *status->optr << err.ToString() << endl;
             }
         }
     }

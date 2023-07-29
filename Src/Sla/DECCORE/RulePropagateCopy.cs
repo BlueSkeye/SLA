@@ -42,7 +42,7 @@ namespace Sla.DECCORE
                 invn = copyop->getIn(0);
                 if (!invn->isHeritageKnown()) continue; // Don't propagate free's away from their first use
                 if (invn == vn)
-                    throw LowlevelError("Self-defined varnode");
+                    throw new LowlevelError("Self-defined varnode");
                 if (op->isMarker())
                 {
                     if (invn->isConstant()) continue;       // Don't propagate constants into markers

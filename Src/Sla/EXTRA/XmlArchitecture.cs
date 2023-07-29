@@ -23,7 +23,7 @@ namespace Sla.EXTRA
                 el = store.getTag("binaryimage");
             }
             if (el == (Element*)0)
-                throw LowlevelError("Could not find binaryimage tag");
+                throw new LowlevelError("Could not find binaryimage tag");
             loader = new LoadImageXml(getFilename(), el);
         }
 
@@ -55,7 +55,7 @@ namespace Sla.EXTRA
         {
             const Element* el = store.getTag("xml_savefile");
             if (el == (const Element*)0)
-    throw LowlevelError("Could not find xml_savefile tag");
+    throw new LowlevelError("Could not find xml_savefile tag");
 
             restoreXmlHeader(el);
             {

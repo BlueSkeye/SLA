@@ -354,7 +354,7 @@ namespace Sla.DECCORE
                 if (numPasses <= 0)     // If the stack hasn't been heritaged yet
                     useMultiequal = false;  // Don't propagate into MULTIEQUAL
             }
-            const BlockGraph &blockGraph(data.getBasicBlocks());
+            BlockGraph blockGraph = data.getBasicBlocks();
             for (int4 i = 0; i < blockGraph.getSize(); ++i)
             {
                 FlowBlock* bl = blockGraph.getBlock(i);

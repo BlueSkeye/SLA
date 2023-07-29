@@ -34,9 +34,9 @@ namespace Sla.DECCORE
             // This tag overrides the base functionality of a userop
             // so the core userop name and index may already be defined
             if (base == (UserPcodeOp*)0)
-                throw LowlevelError("Unknown userop name in <callotherfixup>: " + name);
+                throw new LowlevelError("Unknown userop name in <callotherfixup>: " + name);
             if (dynamic_cast<UnspecializedPcodeOp*>(base) == (UnspecializedPcodeOp*)0)  // Make sure the userop isn't used for some other purpose
-                throw LowlevelError("<callotherfixup> overloads userop with another purpose: " + name);
+                throw new LowlevelError("<callotherfixup> overloads userop with another purpose: " + name);
             useropindex = base->getIndex(); // Get the index from the core userop
         }
     }

@@ -140,7 +140,7 @@ namespace Sla.EXTRA
         public override void buildTraverseState(UnifyState state)
         {
             if (uniqid != state.numTraverse())
-                throw LowlevelError("Traverse id does not match index");
+                throw new LowlevelError("Traverse id does not match index");
             TraverseGroupState* basetrav = new TraverseGroupState(uniqid);
             state.registerTraverseConstraint(basetrav);
 

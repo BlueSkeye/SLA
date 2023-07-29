@@ -47,12 +47,12 @@ namespace Sla.EXTRA
             }
             catch (ParseError err)
             {
-                *status->optr << err.explain << endl;
+                *status->optr << err.ToString() << endl;
                 throw IfaceParseError("Bad option");
             }
             catch (RecovError err)
             {
-                *status->optr << err.explain << endl;
+                *status->optr << err.ToString() << endl;
                 throw IfaceExecutionError("Bad option");
             }
         }

@@ -77,7 +77,7 @@ namespace Sla.DECCORE
         /// \param op is the specific PcodeOp instance of \b this userop
         public virtual int4 extractAnnotationSize(Varnode vn, PcodeOp op)
         {
-            throw LowlevelError("Unexpected annotation input for CALLOTHER " + name);
+            throw new LowlevelError("Unexpected annotation input for CALLOTHER " + name);
         }
 
         /// \brief Restore the detailed description from a stream element

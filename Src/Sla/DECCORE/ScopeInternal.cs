@@ -79,7 +79,7 @@ namespace Sla.DECCORE
                 sym->nameDedup = (*iter)->nameDedup + 1;        // increment the dedup counter
                 nameres = nametree.insert(sym);
                 if (!nameres.second)
-                    throw LowlevelError("Could  not deduplicate symbol: " + sym->name);
+                    throw new LowlevelError("Could  not deduplicate symbol: " + sym->name);
             }
         }
 
@@ -117,9 +117,9 @@ namespace Sla.DECCORE
                     sym->displayName = sym->name;
                 }
                 if (sym->getType() == (Datatype*)0)
-                    throw LowlevelError(sym->getName() + " symbol created with no type");
+                    throw new LowlevelError(sym->getName() + " symbol created with no type");
                 if (sym->getType()->getSize() < 1)
-                    throw LowlevelError(sym->getName() + " symbol created with zero size type");
+                    throw new LowlevelError(sym->getName() + " symbol created with zero size type");
                 insertNameTree(sym);
                 if (sym->category >= 0)
                 {
@@ -158,7 +158,7 @@ namespace Sla.DECCORE
                 string msg = "Symbol ";
                 msg += sym->getName();
                 msg += " extends beyond the end of the address space";
-                throw LowlevelError(msg);
+                throw new LowlevelError(msg);
             }
 
             list<SymbolEntry>::iterator iter = rangemap->insert(initdata, addr.getOffset(), lastaddress.getOffset());
@@ -901,7 +901,7 @@ namespace Sla.DECCORE
                     uint4 uniq = ~((uint4)0);
                     s >> hex >> uniq;
                     if (uniq == ~((uint4)0))
-                        throw LowlevelError("Error creating undefined name");
+                        throw new LowlevelError("Error creating undefined name");
                     uniq += 1;
                     ostringstream s2;
                     s2 << "$$undef" << hex << setw(8) << setfill('0') << uniq;
@@ -976,7 +976,7 @@ namespace Sla.DECCORE
                 resString = s.str();
             }
             if (findFirstByName(resString) != nametree.end())
-                throw LowlevelError("Unable to uniquify name: " + resString);
+                throw new LowlevelError("Unable to uniquify name: " + resString);
             return resString;
         }
 
@@ -1074,7 +1074,7 @@ namespace Sla.DECCORE
                     else if (symId == ELEM_COLLISION)
                         decodeCollision(decoder);
                     else
-                        throw LowlevelError("Unknown symbollist tag");
+                        throw new LowlevelError("Unknown symbollist tag");
                 }
                 decoder.closeElement(subId);
             }

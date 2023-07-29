@@ -156,7 +156,7 @@ namespace Sla.DECCORE
                         flags |= spaceid->isBigEndian() ? extracheck_high : extracheck_low;
                 }
                 else
-                    throw LowlevelError("Illegal overlap of <pentry> in compiler spec");
+                    throw new LowlevelError("Illegal overlap of <pentry> in compiler spec");
             }
 
             if (overlapSet.empty()) return;     // No overlaps
@@ -603,13 +603,13 @@ namespace Sla.DECCORE
                     else if (ext == "float")
                         flags |= smallsize_floatext;
                     else if (ext != "none")
-                        throw LowlevelError("Bad extension attribute");
+                        throw new LowlevelError("Bad extension attribute");
                 }
                 else
-                    throw LowlevelError("Unknown <pentry> attribute");
+                    throw new LowlevelError("Unknown <pentry> attribute");
             }
             if ((size == -1) || (minsize == -1))
-                throw LowlevelError("ParamEntry not fully specified");
+                throw new LowlevelError("ParamEntry not fully specified");
             if (alignment == size)
                 alignment = 0;
             Address addr;
@@ -620,7 +620,7 @@ namespace Sla.DECCORE
             if (alignment != 0)
             {
                 //    if ((addressbase % alignment) != 0)
-                //      throw LowlevelError("Stack <pentry> address must match alignment");
+                //      throw new LowlevelError("Stack <pentry> address must match alignment");
                 numslots = size / alignment;
             }
             if (spaceid->isReverseJustified())
@@ -628,7 +628,7 @@ namespace Sla.DECCORE
                 if (spaceid->isBigEndian())
                     flags |= force_left_justify;
                 else
-                    throw LowlevelError("No support for right justification in little endian encoding");
+                    throw new LowlevelError("No support for right justification in little endian encoding");
             }
             if (!normalstack)
             {
@@ -636,7 +636,7 @@ namespace Sla.DECCORE
                 if (alignment != 0)
                 {
                     if ((size % alignment) != 0)
-                        throw LowlevelError("For positive stack growth, <pentry> size must match alignment");
+                        throw new LowlevelError("For positive stack growth, <pentry> size must match alignment");
                 }
             }
             if (grouped)
@@ -664,11 +664,11 @@ namespace Sla.DECCORE
             {
                 if (entry1.type == TYPE_UNKNOWN)
                 {
-                    throw LowlevelError("<pentry> tags with a specific type must come before the general type");
+                    throw new LowlevelError("<pentry> tags with a specific type must come before the general type");
                 }
                 return;
             }
-            throw LowlevelError("<pentry> tags within a group must be distinguished by size or type");
+            throw new LowlevelError("<pentry> tags within a group must be distinguished by size or type");
         }
     }
 }

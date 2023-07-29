@@ -65,10 +65,10 @@ namespace Sla.CORE
         public void setFuncdata(Funcdata f)
         {
             if ((fd != (Funcdata*)0) && (fd != f))
-                throw LowlevelError("Multiple functions at one address in callgraph");
+                throw new LowlevelError("Multiple functions at one address in callgraph");
 
             if (f->getAddress() != entryaddr)
-                throw LowlevelError("Setting function data at wrong address in callgraph");
+                throw new LowlevelError("Setting function data at wrong address in callgraph");
             fd = f;
         }
 

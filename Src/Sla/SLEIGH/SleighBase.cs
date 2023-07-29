@@ -151,7 +151,7 @@ namespace Sla.SLEIGH
                 }
             }
             if (version != SLA_FORMAT_VERSION)
-                throw LowlevelError(".sla file has wrong format");
+                throw new LowlevelError(".sla file has wrong format");
             const List &list(el->getChildren());
             List::const_iterator iter;
             iter = list.begin();

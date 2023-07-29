@@ -65,28 +65,28 @@ namespace Sla.DECCORE
                 if (subId == ELEM_CASE_PCODE)
                 {
                     if (index2case != -1)
-                        throw LowlevelError("Too many <case_pcode> tags");
+                        throw new LowlevelError("Too many <case_pcode> tags");
                     index2case = glb->pcodeinjectlib->decodeInject("jumpassistop", name + "_index2case",
                                            InjectPayload::EXECUTABLEPCODE_TYPE, decoder);
                 }
                 else if (subId == ELEM_ADDR_PCODE)
                 {
                     if (index2addr != -1)
-                        throw LowlevelError("Too many <addr_pcode> tags");
+                        throw new LowlevelError("Too many <addr_pcode> tags");
                     index2addr = glb->pcodeinjectlib->decodeInject("jumpassistop", name + "_index2addr",
                                            InjectPayload::EXECUTABLEPCODE_TYPE, decoder);
                 }
                 else if (subId == ELEM_DEFAULT_PCODE)
                 {
                     if (defaultaddr != -1)
-                        throw LowlevelError("Too many <default_pcode> tags");
+                        throw new LowlevelError("Too many <default_pcode> tags");
                     defaultaddr = glb->pcodeinjectlib->decodeInject("jumpassistop", name + "_defaultaddr",
                                             InjectPayload::EXECUTABLEPCODE_TYPE, decoder);
                 }
                 else if (subId == ELEM_SIZE_PCODE)
                 {
                     if (calcsize != -1)
-                        throw LowlevelError("Too many <size_pcode> tags");
+                        throw new LowlevelError("Too many <size_pcode> tags");
                     calcsize = glb->pcodeinjectlib->decodeInject("jumpassistop", name + "_calcsize",
                                          InjectPayload::EXECUTABLEPCODE_TYPE, decoder);
                 }
@@ -94,16 +94,16 @@ namespace Sla.DECCORE
             decoder.closeElement(elemId);
 
             if (index2addr == -1)
-                throw LowlevelError("userop: " + name + " is missing <addr_pcode>");
+                throw new LowlevelError("userop: " + name + " is missing <addr_pcode>");
             if (defaultaddr == -1)
-                throw LowlevelError("userop: " + name + " is missing <default_pcode>");
+                throw new LowlevelError("userop: " + name + " is missing <default_pcode>");
             UserPcodeOp * base = glb->userops.getOp(name);
             // This tag overrides the base functionality of a userop
             // so the core userop name and index may already be defined
             if (base == (UserPcodeOp*)0)
-                throw LowlevelError("Unknown userop name in <jumpassist>: " + name);
+                throw new LowlevelError("Unknown userop name in <jumpassist>: " + name);
             if (dynamic_cast<UnspecializedPcodeOp*>(base) == (UnspecializedPcodeOp*)0)  // Make sure the userop isn't used for some other purpose
-                throw LowlevelError("<jumpassist> overloads userop with another purpose: " + name);
+                throw new LowlevelError("<jumpassist> overloads userop with another purpose: " + name);
             useropindex = base->getIndex(); // Get the index from the core userop
         }
     }

@@ -356,7 +356,7 @@ namespace Sla.EXTRA
             if (titer != targets.end())
                 mask = (*titer).second.featuremask;
             else
-                throw LowlevelError("Found thunk without a feature mask");
+                throw new LowlevelError("Found thunk without a feature mask");
             targethits.emplace_back(funcstart, codeaddr, thunkaddr, mask);
         }
 

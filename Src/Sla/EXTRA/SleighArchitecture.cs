@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.Intrinsics;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -38,10 +37,10 @@ namespace Sla.EXTRA
         /// \param errs is an output stream for printing error messages
         private static void loadLanguageDescription(string specfile, TextWriter errs)
         {
-            ifstream s(specfile.c_str());
+            ifstream s = new ifstream(specfile.c_str());
             if (!s) return;
 
-            XmlDecode decoder((const AddrSpaceManager*)0);
+            XmlDecode decoder = new XmlDecode((AddrSpaceManager*)0);
             try
             {
                 decoder.ingestStream(s);
@@ -123,13 +122,13 @@ namespace Sla.EXTRA
 
         protected override void buildTypegrp(DocumentStorage store)
         {
-            const Element* el = store.getTag("coretypes");
+            Element* el = store.getTag("coretypes");
             types = new TypeFactory(this); // Initialize the object
-            if (el != (const Element*)0) {
-                XmlDecode decoder(this, el);
+            if (el != (Element*)0) {
+                XmlDecode decoder = new XmlDecode(this, el);
                 types->decodeCoreTypes(decoder);
             }
-  else
+            else
             {
                 // Put in the core types
                 types->setCoreType("void", 1, TYPE_VOID, false);
@@ -209,15 +208,15 @@ namespace Sla.EXTRA
                         size = decoder.readSignedInteger();
                 }
                 decoder.closeElement(subel);
-                if (name.size() == 0)
-                    throw LowlevelError("Missing name attribute in <symbol> element");
+                if (name.Length == 0)
+                    throw new LowlevelError("Missing name attribute in <symbol> element");
                 if (addr.isInvalid())
-                    throw LowlevelError("Missing address attribute in <symbol> element");
+                    throw new LowlevelError("Missing address attribute in <symbol> element");
                 if (size == 0)
                     size = addr.getSpace()->getWordSize();
                 if (volatileState >= 0)
                 {
-                    Range range(addr.getSpace(), addr.getOffset(), addr.getOffset() +(size - 1));
+                    Sla.CORE.Range range(addr.getSpace(), addr.getOffset(), addr.getOffset() +(size - 1));
                     if (volatileState == 0)
                         symboltab->clearPropertyRange(Varnode::volatil, range);
                     else
@@ -254,13 +253,13 @@ namespace Sla.EXTRA
             catch (DecoderError err) {
                 ostringstream serr;
                 serr << "XML error parsing processor specification: " << processorfile;
-                serr << "\n " << err.explain;
+                serr << "\n " << err.ToString();
                 throw SleighError(serr.str());
             }
             catch (LowlevelError err) {
                 ostringstream serr;
                 serr << "Error reading processor specification: " << processorfile;
-                serr << "\n " << err.explain;
+                serr << "\n " << err.ToString();
                 throw SleighError(serr.str());
             }
 
@@ -272,13 +271,13 @@ namespace Sla.EXTRA
             catch (DecoderError err) {
                 ostringstream serr;
                 serr << "XML error parsing compiler specification: " << compilerfile;
-                serr << "\n " << err.explain;
+                serr << "\n " << err.ToString();
                 throw SleighError(serr.str());
             }
             catch (LowlevelError err) {
                 ostringstream serr;
                 serr << "Error reading compiler specification: " << compilerfile;
-                serr << "\n " << err.explain;
+                serr << "\n " << err.ToString();
                 throw SleighError(serr.str());
             }
 
@@ -292,13 +291,13 @@ namespace Sla.EXTRA
                 catch (DecoderError err) {
                     ostringstream serr;
                     serr << "XML error parsing SLEIGH file: " << slafile;
-                    serr << "\n " << err.explain;
+                    serr << "\n " << err.ToString();
                     throw SleighError(serr.str());
                 }
                 catch (LowlevelError err) {
                     ostringstream serr;
                     serr << "Error reading SLEIGH file: " << slafile;
-                    serr << "\n " << err.explain;
+                    serr << "\n " << err.ToString();
                     throw SleighError(serr.str());
                 }
             }
@@ -315,9 +314,9 @@ namespace Sla.EXTRA
 
         protected override void resolveArchitecture()
         { // Find best architecture
-            if (archid.size() == 0)
+            if (archid.Length == 0)
             {
-                if ((target.size() == 0) || (target == "default"))
+                if ((target.Length == 0) || (target == "default"))
                     archid = loader->getArchType();
                 else
                     archid = target;
@@ -343,7 +342,7 @@ namespace Sla.EXTRA
             }
 
             if (languageindex == -1)
-                throw LowlevelError("No sleigh specification for " + baseid);
+                throw new LowlevelError("No sleigh specification for " + baseid);
         }
 
         /// Construct given executable file
@@ -464,7 +463,7 @@ namespace Sla.EXTRA
                 pos[i] = curpos;
             }
             if ((i != 3) && (i != 4))
-                throw LowlevelError("Architecture string does not look like sleigh id: " + nm);
+                throw new LowlevelError("Architecture string does not look like sleigh id: " + nm);
             processor = nm.substr(0, pos[0]);
             endian = nm.substr(pos[0] + 1, pos[1] - pos[0] - 1);
             size = nm.substr(pos[1] + 1, pos[2] - pos[1] - 1);
@@ -542,7 +541,7 @@ namespace Sla.EXTRA
             ostringstream s;
             collectSpecFiles(s);
             if (!s.str().empty())
-                throw LowlevelError(s.str());
+                throw new LowlevelError(s.str());
             return description;
         }
 

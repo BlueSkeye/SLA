@@ -19,7 +19,7 @@ namespace Sla.DECCORE
         /// Exception is thrown for write attempts
         protected override void insert(uintb addr, uintb val)
         {
-            throw LowlevelError("Writing to read-only MemoryBank");
+            throw new LowlevelError("Writing to read-only MemoryBank");
         }
 
         /// Overridden find method

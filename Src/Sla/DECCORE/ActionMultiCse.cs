@@ -181,7 +181,7 @@ namespace Sla.DECCORE
     
         public override int apply(Funcdata data)
         {
-            const BlockGraph &bblocks(data.getBasicBlocks());
+            BlockGraph bblocks = data.getBasicBlocks();
             int4 sz = bblocks.getSize();
             for (int4 i = 0; i < sz; ++i)
             {

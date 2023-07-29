@@ -183,7 +183,7 @@ namespace Sla.SLEIGH
             if (n2addr.isInvalid())
             {
                 if (translate == (Translate*)0 || parsestate == uninitialized)
-                    throw LowlevelError("inst_next2 not available in this context");
+                    throw new LowlevelError("inst_next2 not available in this context");
                 int4 length = translate->instructionLength(naddr);
                 n2addr = naddr + length;
             }

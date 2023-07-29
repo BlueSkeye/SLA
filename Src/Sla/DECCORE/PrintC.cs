@@ -219,9 +219,9 @@ namespace Sla.DECCORE
             else
             {
                 for (int4 i = 0; i < sz - 1; ++i)
-                    pushOp(&comma, (const PcodeOp*)0); // Print a comma for each parameter (above 1)
+                    pushOp(&comma, (PcodeOp*)0); // Print a comma for each parameter (above 1)
                 if (proto->isDotdotdot() && (sz != 0)) // Print comma for dotdotdot (if it is not by itself)
-                    pushOp(&comma, (const PcodeOp*)0);
+                    pushOp(&comma, (PcodeOp*)0);
                 for (int4 i = 0; i < sz; ++i)
                 {
                     ProtoParameter* param = proto->getParam(i);
@@ -257,14 +257,14 @@ namespace Sla.DECCORE
                 if (symbol->getScope() == curscope)
                     scopedepth = 0;
                 else
-                    scopedepth = symbol->getResolutionDepth((const Scope*)0);
+                    scopedepth = symbol->getResolutionDepth((Scope*)0);
             }
             else
                 scopedepth = 0;
             if (scopedepth != 0)
             {
-                vector <const Scope*> scopeList;
-                const Scope* point = symbol->getScope();
+                vector <Scope*> scopeList;
+                Scope* point = symbol->getScope();
                 for (int4 i = 0; i < scopedepth; ++i)
                 {
                     scopeList.push_back(point);
@@ -292,14 +292,14 @@ namespace Sla.DECCORE
                 if (symbol->getScope() == curscope)
                     scopedepth = 0;
                 else
-                    scopedepth = symbol->getResolutionDepth((const Scope*)0);
+                    scopedepth = symbol->getResolutionDepth((Scope*)0);
             }
             else
                 scopedepth = 0;
             if (scopedepth != 0)
             {
-                vector <const Scope*> scopeList;
-                const Scope* point = symbol->getScope();
+                vector <Scope*> scopeList;
+                Scope* point = symbol->getScope();
                 for (int4 i = 0; i < scopedepth; ++i)
                 {
                     scopeList.push_back(point);
@@ -336,7 +336,7 @@ namespace Sla.DECCORE
             {   // Check for anonymous type
                 // We could support a struct or enum declaration here
                 string nm = genericTypeName(ct);
-                pushOp(tok, (const PcodeOp*)0);
+                pushOp(tok, (PcodeOp*)0);
                 pushAtom(Atom(nm, typetoken, EmitMarkup::type_color, ct));
             }
             else
@@ -356,7 +356,7 @@ namespace Sla.DECCORE
                 else
                 {
                     clear();
-                    throw LowlevelError("Bad type expression");
+                    throw new LowlevelError("Bad type expression");
                 }
             }
         }
@@ -434,7 +434,7 @@ namespace Sla.DECCORE
         {
             uint4 displayFormat = 0;
             bool isSigned = (ct->getMetatype() == TYPE_INT);
-            if ((vn != (const Varnode*)0)&& (!vn->isAnnotation())) {
+            if ((vn != (Varnode*)0)&& (!vn->isAnnotation())) {
                 HighVariable* high = vn->getHigh();
                 Symbol* sym = high->getSymbol();
                 if (sym != (Symbol*)0)
@@ -512,11 +512,11 @@ namespace Sla.DECCORE
                     push_integer(val, ct->getSize(), false, vn, op);
                     return;
                 case TYPE_BOOL:
-                    pushBoolConstant(val, (const TypeBase*)ct,vn,op);
+                    pushBoolConstant(val, (TypeBase*)ct,vn,op);
                     return;
                 case TYPE_VOID:
                     clear();
-                    throw LowlevelError("Cannot have a constant of type void");
+                    throw new LowlevelError("Cannot have a constant of type void");
                 case TYPE_PTR:
                 case TYPE_PTRREL:
                     if (option_NULL && (val == 0))
@@ -527,13 +527,13 @@ namespace Sla.DECCORE
                     subtype = ((TypePointer*)ct)->getPtrTo();
                     if (subtype->isCharPrint())
                     {
-                        if (pushPtrCharConstant(val, (const TypePointer*)ct,vn,op))
-	return;
+                        if (pushPtrCharConstant(val, (TypePointer*)ct,vn,op))
+                            return;
                     }
                     else if (subtype->getMetatype() == TYPE_CODE)
                     {
-                        if (pushPtrCodeConstant(val, (const TypePointer*)ct,vn,op))
-	return;
+                        if (pushPtrCodeConstant(val, (TypePointer*)ct,vn,op))
+                            return;
                     }
                     break;
                 case TYPE_FLOAT:
@@ -692,7 +692,7 @@ namespace Sla.DECCORE
             if (ct->getName().size() == 0)
             {
                 clear();
-                throw LowlevelError("Trying to save unnamed structure");
+                throw new LowlevelError("Trying to save unnamed structure");
             }
 
             emit->tagLine();
@@ -732,7 +732,7 @@ namespace Sla.DECCORE
             if (ct->getName().size() == 0)
             {
                 clear();
-                throw LowlevelError("Trying to save unnamed enumeration");
+                throw new LowlevelError("Trying to save unnamed enumeration");
             }
 
             pushMod();
@@ -1026,13 +1026,13 @@ namespace Sla.DECCORE
             if (bl == (FlowBlock*)0) return;
             BlockBasic* bb = (BlockBasic*)bl->subBlock(0);
             Address addr = bb->getEntryAddr();
-            const AddrSpace* spc = addr.getSpace();
+            AddrSpace* spc = addr.getSpace();
             uintb off = addr.getOffset();
             if (!bb->hasSpecialLabel())
             {
                 if (bb->getType() == FlowBlock::t_basic)
                 {
-                    const Scope* symScope = ((const BlockBasic*)bb)->getFuncdata()->getScopeLocal();
+                    Scope* symScope = ((BlockBasic*)bb)->getFuncdata()->getScopeLocal();
                     Symbol* sym = symScope->queryCodeLabel(addr);
                     if (sym != (Symbol*)0)
                     {
@@ -1111,7 +1111,7 @@ namespace Sla.DECCORE
         /// \param bl is the root of the control-flow subtree
         protected void emitCommentBlockTree(FlowBlock bl)
         {
-            if (bl == (const FlowBlock*)0) return;
+            if (bl == (FlowBlock*)0) return;
             FlowBlock::block_type btype = bl->getType();
             if (btype == FlowBlock::t_copy)
             {
@@ -1121,7 +1121,7 @@ namespace Sla.DECCORE
             if (btype == FlowBlock::t_plain) return;
             if (bl->getType() != FlowBlock::t_basic)
             {
-                const BlockGraph* rootbl = (const BlockGraph*)bl;
+                BlockGraph* rootbl = (BlockGraph*)bl;
                 int4 size = rootbl->getSize();
                 for (int4 i = 0; i < size; ++i)
                 {
@@ -1130,7 +1130,7 @@ namespace Sla.DECCORE
                 return;
             }
             commsorter.setupBlockList(bl);
-            emitCommentGroup((const PcodeOp*)0);    // Emit any comments for the block
+            emitCommentGroup((PcodeOp*)0);    // Emit any comments for the block
         }
 
         /// Emit comments in the given function's header
@@ -1161,7 +1161,7 @@ namespace Sla.DECCORE
                     if (comm->isEmitted()) continue;
                     if (!extralinebreak)
                     {
-                        Comment label(Comment::warningheader, fd->getAddress(), fd->getAddress(),0,
+                        Comment label = new Comment(Comment::warningheader, fd->getAddress(), fd->getAddress(),0,
 		      "Comments that could not be placed in the function body:");
                         emitLineComment(0, &label);
                         extralinebreak = true;
@@ -1173,7 +1173,7 @@ namespace Sla.DECCORE
             {
                 if (extralinebreak)
                     emit->tagLine();
-                Comment comm(Comment::warningheader, fd->getAddress(), fd->getAddress(),0,
+                Comment comm = new Comment = new Comment(Comment::warningheader, fd->getAddress(), fd->getAddress(),0,
 		 "DISPLAY WARNING: Type casts are NOT being printed");
                 emitLineComment(0, &comm);
                 extralinebreak = true;
@@ -1392,7 +1392,7 @@ namespace Sla.DECCORE
         {
             uint4 displayFormat = 0;
             bool isSigned = (ct->getMetatype() == TYPE_INT);
-            if ((vn != (const Varnode*)0)&& (!vn->isAnnotation())) {
+            if ((vn != (Varnode*)0)&& (!vn->isAnnotation())) {
                 HighVariable* high = vn->getHigh();
                 Symbol* sym = high->getSymbol();
                 if (sym != (Symbol*)0)
@@ -1463,31 +1463,31 @@ namespace Sla.DECCORE
             modval = (~baseval) & mask;
             if (modval == val)
             {       // Negation
-                pushOp(&bitwise_not, (const PcodeOp*)0);
+                pushOp(&bitwise_not, (PcodeOp*)0);
                 pushSymbol(sym, vn, op);
                 return true;
             }
             modval = (-baseval) & mask;
             if (modval == val)
             {       // twos complement
-                pushOp(&unary_minus, (const PcodeOp*)0);
+                pushOp(&unary_minus, (PcodeOp*)0);
                 pushSymbol(sym, vn, op);
                 return true;
             }
             modval = (baseval + 1) & mask;
             if (modval == val)
             {
-                pushOp(&binary_plus, (const PcodeOp*)0);
+                pushOp(&binary_plus, (PcodeOp*)0);
                 pushSymbol(sym, vn, op);
-                push_integer(1, sz, false, (const Varnode*)0, (const PcodeOp*)0);
+                push_integer(1, sz, false, (Varnode*)0, (PcodeOp*)0);
                 return true;
             }
             modval = (baseval - 1) & mask;
             if (modval == val)
             {
-                pushOp(&binary_minus, (const PcodeOp*)0);
+                pushOp(&binary_minus, (PcodeOp*)0);
                 pushSymbol(sym, vn, op);
-                push_integer(1, sz, false, (const Varnode*)0, (const PcodeOp*)0);
+                push_integer(1, sz, false, (Varnode*)0, (PcodeOp*)0);
                 return true;
             }
             return false;
@@ -1610,11 +1610,11 @@ namespace Sla.DECCORE
                         if (outtype == ct)
                             break;  // Turns out we don't resolve to the field
                     }
-                    const TypeField* field;
+                    TypeField* field;
                     field = ct->findTruncation(off, sz, op, inslot, off);
-                    if (field != (const TypeField*)0) {
+                    if (field != (TypeField*)0) {
                         stack.emplace_back();
-                        PartialSymbolEntry & entry(stack.back());
+                        PartialSymbolEntry entry = new PartialSymbolEntry(stack.back());
                         entry.token = &object_member;
                         entry.field = field;
                         entry.parent = ct;
@@ -1631,12 +1631,12 @@ namespace Sla.DECCORE
                     if (arrayof != (Datatype*)0)
                     {
                         stack.emplace_back();
-                        PartialSymbolEntry & entry(stack.back());
+                        PartialSymbolEntry entry = new PartialSymbolEntry(stack.back());
                         entry.token = &subscript;
                         ostringstream s;
                         s << dec << el;
                         entry.fieldname = s.str();
-                        entry.field = (const TypeField*)0;
+                        entry.field = (TypeField*)0;
                         entry.hilite = EmitMarkup::const_color;
                         ct = arrayof;
                         succeeded = true;
@@ -1644,11 +1644,11 @@ namespace Sla.DECCORE
                 }
                 else if (ct->getMetatype() == TYPE_UNION)
                 {
-                    const TypeField* field;
+                    TypeField* field;
                     field = ct->findTruncation(off, sz, op, inslot, off);
-                    if (field != (const TypeField*)0) {
+                    if (field != (TypeField*)0) {
                         stack.emplace_back();
-                        PartialSymbolEntry & entry(stack.back());
+                        PartialSymbolEntry entry = new PartialSymbolEntry(stack.back());
                         entry.token = &object_member;
                         entry.field = field;
                         entry.parent = ct;
@@ -1657,7 +1657,7 @@ namespace Sla.DECCORE
                         ct = field->type;
                         succeeded = true;
                     }
-      else if (ct->getSize() == sz)
+                    else if (ct->getSize() == sz)
                         break;      // Turns out we don't need to resolve the field
                 }
                 else if (inslot >= 0)
@@ -1675,12 +1675,12 @@ namespace Sla.DECCORE
                 if (!succeeded)
                 {       // Subtype was not good
                     stack.emplace_back();
-                    PartialSymbolEntry & entry(stack.back());
+                    PartialSymbolEntry entry = new PartialSymbolEntry(stack.back());
                     entry.token = &object_member;
                     if (sz == 0)
                         sz = ct->getSize() - off;
                     entry.fieldname = unnamedField(off, sz);    // If nothing else works, generate artificial field name
-                    entry.field = (const TypeField*)0;
+                    entry.field = (TypeField*)0;
                     entry.hilite = EmitMarkup::no_color;
                     ct = (Datatype*)0;
                 }
@@ -1727,13 +1727,13 @@ namespace Sla.DECCORE
         {
             bool proceed = false;
             Datatype* parent = vn->getHigh()->getType();
-            const TypeField* field;
+            TypeField* field;
             if (parent->needsResolution() && parent->getMetatype() != TYPE_PTR)
             {
                 const Funcdata* fd = op->getParent()->getFuncdata();
                 int4 slot = op->getSlot(vn);
-                const ResolvedUnion* res = fd->getUnionField(parent, op, slot);
-                if (res != (const ResolvedUnion*)0 && res->getFieldNum() >= 0) {
+                ResolvedUnion* res = fd->getUnionField(parent, op, slot);
+                if (res != (ResolvedUnion*)0 && res->getFieldNum() >= 0) {
                     if (parent->getMetatype() == TYPE_STRUCT && res->getFieldNum() == 0)
                     {
                         field = &(*((TypeStruct*)parent)->beginField());
@@ -1747,7 +1747,7 @@ namespace Sla.DECCORE
                 }
             }
 
-            const PcodeOp* defOp = vn->getDef();
+            PcodeOp* defOp = vn->getDef();
             if (!proceed)
             {
                 // Just push original op
@@ -1779,7 +1779,7 @@ namespace Sla.DECCORE
 
             force_unsigned_token = false;
             force_sized_token = false;
-            if ((vn != (const Varnode*)0)&& (!vn->isAnnotation())) {
+            if ((vn != (Varnode*)0)&& (!vn->isAnnotation())) {
                 HighVariable* high = vn->getHigh();
                 Symbol* sym = high->getSymbol();
                 if (sym != (Symbol*)0)
@@ -1877,11 +1877,11 @@ namespace Sla.DECCORE
         {
             string token;
 
-            const FloatFormat* format = glb->translate->getFloatFormat(sz);
-            if (format == (const FloatFormat*)0) {
+            FloatFormat* format = glb->translate->getFloatFormat(sz);
+            if (format == (FloatFormat*)0) {
                 token = "FLOAT_UNKNOWN";
             }
-  else
+            else
             {
                 FloatFormat::floatclass type;
                 double floatval = format->getHostFloat(val, &type);
@@ -1917,7 +1917,7 @@ namespace Sla.DECCORE
                         t << floatval;
                         token = t.str();
                         bool looksLikeFloat = false;
-                        for (int4 i = 0; i < token.size(); ++i)
+                        for (int4 i = 0; i < token.Length; ++i)
                         {
                             char c = token[i];
                             if (c == '.' || c == 'e')
@@ -2098,7 +2098,7 @@ namespace Sla.DECCORE
                 {
                     Symbol* sym = symScope->getCategorySymbol(cat, i);
                     // Slightly different handling for categorized symbols (cat=1 is dynamic symbols)
-                    if (sym->getName().size() == 0) continue;
+                    if (sym->getName().Length == 0) continue;
                     if (sym->isNameUndefined()) continue;
                     notempty = true;
                     emitVarDeclStatement(sym);
@@ -2113,7 +2113,7 @@ namespace Sla.DECCORE
                 if (entry->isPiece()) continue; // Don't do a partial entry
                 Symbol* sym = entry->getSymbol();
                 if (sym->getCategory() != cat) continue;
-                if (sym->getName().size() == 0) continue;
+                if (sym->getName().Length == 0) continue;
                 if (dynamic_cast<FunctionSymbol*>(sym) != (FunctionSymbol*)0)
                     continue;
                 if (dynamic_cast<LabSymbol*>(sym) != (LabSymbol*)0)
@@ -2134,7 +2134,7 @@ namespace Sla.DECCORE
                 if (entry->isPiece()) continue; // Don't do a partial entry
                 Symbol* sym = (*iter_d).getSymbol();
                 if (sym->getCategory() != cat) continue;
-                if (sym->getName().size() == 0) continue;
+                if (sym->getName().Length == 0) continue;
                 if (dynamic_cast<FunctionSymbol*>(sym) != (FunctionSymbol*)0)
                     continue;
                 if (dynamic_cast<LabSymbol*>(sym) != (LabSymbol*)0)
@@ -2193,7 +2193,7 @@ namespace Sla.DECCORE
             if (!isStackEmpty())
             {
                 clear();
-                throw LowlevelError("Expression stack not empty at beginning of emit");
+                throw new LowlevelError("Expression stack not empty at beginning of emit");
             }
 #endif
             if (ct->getMetatype() == TYPE_STRUCT)
@@ -2203,7 +2203,7 @@ namespace Sla.DECCORE
             else
             {
                 clear();
-                throw LowlevelError("Unsupported typedef");
+                throw new LowlevelError("Unsupported typedef");
             }
         }
 
@@ -2325,13 +2325,13 @@ namespace Sla.DECCORE
         public virtual void setCommentStyle(string nm)
         {
             if ((nm == "c") ||
-                ((nm.size() >= 2) && (nm[0] == '/') && (nm[1] == '*')))
+                ((nm.Length >= 2) && (nm[0] == '/') && (nm[1] == '*')))
                 setCStyleComments();
             else if ((nm == "cplusplus") ||
-                 ((nm.size() >= 2) && (nm[0] == '/') && (nm[1] == '/')))
+                 ((nm.Length >= 2) && (nm[0] == '/') && (nm[1] == '/')))
                 setCPlusPlusStyleComments();
             else
-                throw LowlevelError("Unknown comment style. Use \"c\" or \"cplusplus\"");
+                throw new LowlevelError("Unknown comment style. Use \"c\" or \"cplusplus\"");
         }
 
         public virtual void docTypeDefinitions(TypeFactory typegrp)
@@ -2746,7 +2746,7 @@ namespace Sla.DECCORE
                 condBlock->emit(this);
                 popMod();
                 emit->spaces(1);
-                emitGotoStatement(condBlock, (const FlowBlock*)0,FlowBlock::f_break_goto);
+                emitGotoStatement(condBlock, (FlowBlock*)0,FlowBlock::f_break_goto);
             }
             else
             {
@@ -3001,28 +3001,28 @@ namespace Sla.DECCORE
         public virtual void opCall(PcodeOp op)
         {
             pushOp(&function_call, op);
-            const Varnode* callpoint = op->getIn(0);
+            Varnode* callpoint = op->getIn(0);
             FuncCallSpecs* fc;
             if (callpoint->getSpace()->getType() == IPTR_FSPEC)
             {
                 fc = FuncCallSpecs::getFspecFromConst(callpoint->getAddr());
-                if (fc->getName().size() == 0)
+                if (fc->getName().Length == 0)
                 {
                     string nm = genericFunctionName(fc->getEntryAddress());
-                    pushAtom(Atom(nm, functoken, EmitMarkup::funcname_color, op, (const Funcdata*)0));
+                    pushAtom(Atom(nm, functoken, EmitMarkup::funcname_color, op, (Funcdata*)0));
                 }
                 else
                 {
                     Funcdata* fd = fc->getFuncdata();
                     if (fd != (Funcdata*)0)
                         pushSymbolScope(fd->getSymbol());
-                    pushAtom(Atom(fc->getName(), functoken, EmitMarkup::funcname_color, op, (const Funcdata*)0));
+                    pushAtom(Atom(fc->getName(), functoken, EmitMarkup::funcname_color, op, (Funcdata*)0));
                 }
             }
             else
             {
                 clear();
-                throw LowlevelError("Missing function callspec");
+                throw new LowlevelError("Missing function callspec");
             }
             // TODO: Cannot hide "this" on a direct call until we print the whole
             // thing with the proper C++ method invocation format. Otherwise the output
@@ -3054,7 +3054,7 @@ namespace Sla.DECCORE
             const Funcdata* fd = op->getParent()->getFuncdata();
             FuncCallSpecs* fc = fd->getCallSpecs(op);
             if (fc == (FuncCallSpecs*)0)
-                throw LowlevelError("Missing indirect function callspec");
+                throw new LowlevelError("Missing indirect function callspec");
             int4 skip = getHiddenThisSlot(op, fc);
             int4 count = op->numInput() - 1;
             count -= (skip < 0) ? 0 : 1;
@@ -3482,20 +3482,20 @@ namespace Sla.DECCORE
         {
             if (op->doesSpecialPrinting())
             {       // Special printing means it is a field extraction
-                const Varnode* vn = op->getIn(0);
+                Varnode* vn = op->getIn(0);
                 Datatype* ct = vn->getHighTypeReadFacing(op);
                 if (ct->isPieceStructured())
                 {
                     int4 offset;
                     int4 byteOff = TypeOpSubpiece::computeByteOffsetForComposite(op);
-                    const TypeField* field = ct->findTruncation(byteOff, op->getOut()->getSize(), op, 1, offset);   // Use artificial slot
-                    if (field != (const TypeField*)0 && offset == 0) {      // A formal structure field
+                    TypeField* field = ct->findTruncation(byteOff, op->getOut()->getSize(), op, 1, offset);   // Use artificial slot
+                    if (field != (TypeField*)0 && offset == 0) {      // A formal structure field
                         pushOp(&object_member, op);
                         pushVn(vn, op, mods);
                         pushAtom(Atom(field->name, fieldtoken, EmitMarkup::no_color, ct, field->ident, op));
                         return;
                     }
-      else if (vn->isExplicit() && vn->getHigh()->getSymbolOffset() == -1)
+                    else if (vn->isExplicit() && vn->getHigh()->getSymbolOffset() == -1)
                     {   // An explicit, entire, structured object
                         Symbol* sym = vn->getHigh()->getSymbol();
                         if (sym != (Symbol*)0)
@@ -3567,7 +3567,7 @@ namespace Sla.DECCORE
             TypePointer* ptype;
             TypePointerRel* ptrel;
             Datatype* ct;
-            const Varnode* in0;
+            Varnode* in0;
             uintb in1const;
             bool valueon, flex, arrayvalue;
             uint4 m;
@@ -3578,7 +3578,7 @@ namespace Sla.DECCORE
             if (ptype->getMetatype() != TYPE_PTR)
             {
                 clear();
-                throw LowlevelError("PTRSUB off of non-pointer type");
+                throw new LowlevelError("PTRSUB off of non-pointer type");
             }
             if (ptype->isFormalPointerRel() && ((TypePointerRel*)ptype)->evaluateThruParent(in1const))
             {
@@ -3620,24 +3620,24 @@ namespace Sla.DECCORE
                 if (ct->getMetatype() == TYPE_UNION)
                 {
                     if (suboff != 0)
-                        throw LowlevelError("PTRSUB accesses union with non-zero offset");
-                    const Funcdata* fd = op->getParent()->getFuncdata();
-                    const ResolvedUnion* resUnion = fd->getUnionField(ptype, op, -1);
-                    if (resUnion == (const ResolvedUnion*)0 || resUnion->getFieldNum() < 0)
-	throw LowlevelError("PTRSUB for union that does not resolve to a field");
-                    const TypeField* fld = ((TypeUnion*)ct)->getField(resUnion->getFieldNum());
+                        throw new LowlevelError("PTRSUB accesses union with non-zero offset");
+                    Funcdata* fd = op->getParent()->getFuncdata();
+                    ResolvedUnion* resUnion = fd->getUnionField(ptype, op, -1);
+                    if (resUnion == (ResolvedUnion*)0 || resUnion->getFieldNum() < 0)
+                        throw new LowlevelError("PTRSUB for union that does not resolve to a field");
+                    TypeField* fld = ((TypeUnion*)ct)->getField(resUnion->getFieldNum());
                     fieldid = fld->ident;
                     fieldname = fld->name;
                     fieldtype = fld->type;
                 }
                 else
                 {   // TYPE_STRUCT
-                    const TypeField* fld = ct->findTruncation((int4)suboff, 0, op, 0, newoff);
-                    if (fld == (const TypeField*)0) {
+                    TypeField* fld = ct->findTruncation((int4)suboff, 0, op, 0, newoff);
+                    if (fld == (TypeField*)0) {
                         if (ct->getSize() <= suboff)
                         {
                             clear();
-                            throw LowlevelError("PTRSUB out of bounds into struct");
+                            throw new LowlevelError("PTRSUB out of bounds into struct");
                         }
                         // Try to match the Ghidra's default field name from DataTypeComponent.getDefaultFieldName
                         ostringstream s;
@@ -3646,7 +3646,7 @@ namespace Sla.DECCORE
                         fieldtype = (Datatype*)0;
                         fieldid = suboff;
                     }
-      else
+                    else
                     {
                         fieldname = fld->name;
                         fieldtype = fld->type;
@@ -3760,7 +3760,7 @@ namespace Sla.DECCORE
                 if (in1const != 0)
                 {
                     clear();
-                    throw LowlevelError("PTRSUB with non-zero offset into array type");
+                    throw new LowlevelError("PTRSUB with non-zero offset into array type");
                 }
                 // We are treating array as a structure
                 // and this PTRSUB(*,0) represents changing
@@ -3807,7 +3807,7 @@ namespace Sla.DECCORE
             else
             {
                 clear();
-                throw LowlevelError("PTRSUB off of non structured pointer type");
+                throw new LowlevelError("PTRSUB off of non structured pointer type");
             }
         }
 
@@ -3823,16 +3823,16 @@ namespace Sla.DECCORE
 
         public virtual void opCpoolRefOp(PcodeOp op)
         {
-            const Varnode* outvn = op->getOut();
-            const Varnode* vn0 = op->getIn(0);
+            Varnode* outvn = op->getOut();
+            Varnode* vn0 = op->getIn(0);
             vector<uintb> refs;
             for (int4 i = 1; i < op->numInput(); ++i)
                 refs.push_back(op->getIn(i)->getOffset());
-            const CPoolRecord* rec = glb->cpool->getRecord(refs);
-            if (rec == (const CPoolRecord*)0) {
+            CPoolRecord* rec = glb->cpool->getRecord(refs);
+            if (rec == (CPoolRecord*)0) {
                 pushAtom(Atom("UNKNOWNREF", syntax, EmitMarkup::const_color, op, outvn));
             }
-  else
+            else
             {
                 switch (rec->getTag())
                 {
@@ -3865,7 +3865,7 @@ namespace Sla.DECCORE
                             }
                             pushOp(&function_call, op);
                             pushAtom(Atom(rec->getToken(), functoken, EmitMarkup::funcname_color, op, outvn));
-                            pushOp(&comma, (const PcodeOp*)0);
+                            pushOp(&comma, (PcodeOp*)0);
                             pushVn(vn0, op, mods);
                             pushAtom(Atom(dt->getDisplayName(), syntax, EmitMarkup::type_color, op, outvn));
                             break;
@@ -3903,8 +3903,8 @@ namespace Sla.DECCORE
 
         public virtual void opNewOp(PcodeOp op)
         {
-            const Varnode* outvn = op->getOut();
-            const Varnode* vn0 = op->getIn(0);
+            Varnode* outvn = op->getOut();
+            Varnode* vn0 = op->getIn(0);
             if (op->numInput() == 2)
             {
                 const Varnode* vn1 = op->getIn(1);
@@ -3914,10 +3914,10 @@ namespace Sla.DECCORE
                     pushOp(&new_op, op);
                     pushAtom(Atom(KEYWORD_NEW, optoken, EmitMarkup::keyword_color, op, outvn));
                     string nm;
-                    if (outvn == (const Varnode*)0) {   // Its technically possible, for new result to be unused
+                    if (outvn == (Varnode*)0) {   // Its technically possible, for new result to be unused
                         nm = "<unused>";
                     }
-      else
+                    else
                     {
                         Datatype* dt = outvn->getTypeDefFacing();
                         while (dt->getMetatype() == TYPE_PTR)

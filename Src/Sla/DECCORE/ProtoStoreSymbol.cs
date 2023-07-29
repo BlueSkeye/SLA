@@ -203,7 +203,7 @@ namespace Sla.DECCORE
 
         public override void decode(Decoder decoder, ProtoModel model)
         {
-            throw LowlevelError("Do not decode symbol-backed prototype through this interface");
+            throw new LowlevelError("Do not decode symbol-backed prototype through this interface");
         }
     }
 }

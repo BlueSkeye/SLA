@@ -70,7 +70,7 @@ namespace Sla.DECCORE
                 s << " : ";
                 (*insres.first)->printRaw(s);
                 delete newtype;
-                throw LowlevelError(s.str());
+                throw new LowlevelError(s.str());
             }
             if (newtype->id != 0)
                 nametree.insert(newtype);
@@ -88,12 +88,12 @@ namespace Sla.DECCORE
             if (ct.name.size() != 0)
             {   // If there is a name
                 if (ct.id == 0)     // There must be an id
-                    throw LowlevelError("Datatype must have a valid id");
+                    throw new LowlevelError("Datatype must have a valid id");
                 res = findByIdLocal(ct.name, ct.id); // Lookup type by it
                 if (res != (Datatype*)0)
                 { // If a type has this name
                     if (0 != res->compareDependency(ct)) // Check if it is the same type
-                        throw LowlevelError("Trying to alter definition of type: " + ct.name);
+                        throw new LowlevelError("Trying to alter definition of type: " + ct.name);
                     return res;
                 }
             }
@@ -170,7 +170,7 @@ namespace Sla.DECCORE
                 if (prev != (Datatype*)0)
                 {
                     if (defedType != prev->getTypedef())
-                        throw LowlevelError("Trying to create typedef of existing type: " + prev->name);
+                        throw new LowlevelError("Trying to create typedef of existing type: " + prev->name);
                     if (prev->getMetatype() == TYPE_STRUCT)
                     {
                         TypeStruct* prevStruct = (TypeStruct*)prev;
@@ -209,17 +209,17 @@ namespace Sla.DECCORE
                 ct = findAdd(ts);   // Create stub to allow recursive definitions
             }
             else if (ct->getMetatype() != TYPE_STRUCT)
-                throw LowlevelError("Trying to redefine type: " + ts.name);
+                throw new LowlevelError("Trying to redefine type: " + ts.name);
             ts.decodeFields(decoder, *this);
             if (!ct->isIncomplete())
             {   // Structure of this name was already present
                 if (0 != ct->compareDependency(ts))
-                    throw LowlevelError("Redefinition of structure: " + ts.name);
+                    throw new LowlevelError("Redefinition of structure: " + ts.name);
             }
             else
             {       // If structure is a placeholder stub
                 if (!setFields(ts.field, (TypeStruct*)ct, ts.size, ts.flags)) // Define structure now by copying fields
-                    throw LowlevelError("Bad structure definition");
+                    throw new LowlevelError("Bad structure definition");
             }
             //  decoder.closeElement(elemId);
             return ct;
@@ -243,17 +243,17 @@ namespace Sla.DECCORE
                 ct = findAdd(tu);   // Create stub to allow recursive definitions
             }
             else if (ct->getMetatype() != TYPE_UNION)
-                throw LowlevelError("Trying to redefine type: " + tu.name);
+                throw new LowlevelError("Trying to redefine type: " + tu.name);
             tu.decodeFields(decoder, *this);
             if (!ct->isIncomplete())
             {   // Structure of this name was already present
                 if (0 != ct->compareDependency(tu))
-                    throw LowlevelError("Redefinition of union: " + tu.name);
+                    throw new LowlevelError("Redefinition of union: " + tu.name);
             }
             else
             {       // If structure is a placeholder stub
                 if (!setFields(tu.field, (TypeUnion*)ct, tu.size, tu.flags)) // Define structure now by copying fields
-                    throw LowlevelError("Bad union definition");
+                    throw new LowlevelError("Bad union definition");
             }
             //  decoder.closeElement(elemId);
             return ct;
@@ -273,7 +273,7 @@ namespace Sla.DECCORE
             tc.decodeStub(decoder);
             if (tc.getMetatype() != TYPE_CODE)
             {
-                throw LowlevelError("Expecting metatype=\"code\"");
+                throw new LowlevelError("Expecting metatype=\"code\"");
             }
             if (forcecore)
                 tc.flags |= Datatype::coretype;
@@ -283,12 +283,12 @@ namespace Sla.DECCORE
                 ct = findAdd(tc);   // Create stub to allow recursive definitions
             }
             else if (ct->getMetatype() != TYPE_CODE)
-                throw LowlevelError("Trying to redefine type: " + tc.name);
+                throw new LowlevelError("Trying to redefine type: " + tc.name);
             tc.decodePrototype(decoder, isConstructor, isDestructor, *this);
             if (!ct->isIncomplete())
             {   // Code data-type of this name was already present
                 if (0 != ct->compareDependency(tc))
-                    throw LowlevelError("Redefinition of code data-type: " + tc.name);
+                    throw new LowlevelError("Redefinition of code data-type: " + tc.name);
             }
             else
             {   // If there was a placeholder stub
@@ -705,7 +705,7 @@ namespace Sla.DECCORE
         public bool setFields(List<TypeField> fd, TypeStruct ot, int4 fixedsize, uint4 flags)
         {
             if (!ot->isIncomplete())
-                throw LowlevelError("Can only set fields on an incomplete structure");
+                throw new LowlevelError("Can only set fields on an incomplete structure");
             int4 offset = 0;
             vector<TypeField>::iterator iter;
 
@@ -738,7 +738,7 @@ namespace Sla.DECCORE
                 if (fixedsize > ot->size)   // If the forced size is bigger than the size required for fields
                     ot->size = fixedsize;   //     Force the bigger size
                 else if (fixedsize < ot->size) // If the forced size is smaller, this is an error
-                    throw LowlevelError("Trying to force too small a size on " + ot->getName());
+                    throw new LowlevelError("Trying to force too small a size on " + ot->getName());
             }
             tree.insert(ot);
             recalcPointerSubmeta(ot, SUB_PTR);
@@ -757,7 +757,7 @@ namespace Sla.DECCORE
         public bool setFields(List<TypeField> fd, TypeUnion ot, int4 fixedsize, uint4 flags)
         {
             if (!ot->isIncomplete())
-                throw LowlevelError("Can only set fields on an incomplete union");
+                throw new LowlevelError("Can only set fields on an incomplete union");
             vector<TypeField>::iterator iter;
 
             for (iter = fd.begin(); iter != fd.end(); ++iter)
@@ -778,7 +778,7 @@ namespace Sla.DECCORE
                 if (fixedsize > ot->size)   // If the forced size is bigger than the size required for fields
                     ot->size = fixedsize;   //     Force the bigger size
                 else if (fixedsize < ot->size) // If the forced size is smaller, this is an error
-                    throw LowlevelError("Trying to force too small a size on " + ot->getName());
+                    throw new LowlevelError("Trying to force too small a size on " + ot->getName());
             }
             tree.insert(ot);
             return true;
@@ -793,7 +793,7 @@ namespace Sla.DECCORE
         public void setPrototype(FuncProto fp, TypeCode newCode, uint4 flags)
         {
             if (!newCode->isIncomplete())
-                throw LowlevelError("Can only set prototype on incomplete data-type");
+                throw new LowlevelError("Can only set prototype on incomplete data-type");
             tree.erase(newCode);
             newCode->setPrototype(this, fp);
             newCode->flags &= ~(uint4)Datatype::type_incomplete;
@@ -883,7 +883,7 @@ namespace Sla.DECCORE
                     newid = Datatype::hashName(newname);
                 ct = findById(newname, newid, size);
                 if (ct == (Datatype*)0)
-                    throw LowlevelError("Unable to resolve type: " + newname);
+                    throw new LowlevelError("Unable to resolve type: " + newname);
                 decoder.closeElement(elemId);
                 return ct;
             }
@@ -903,7 +903,7 @@ namespace Sla.DECCORE
             uint4 elemId = decoder.openElement();
             tp.decodeBasic(decoder);
             if (tp.getMetatype() != TYPE_PTR)
-                throw LowlevelError("Special type decode does not see pointer");
+                throw new LowlevelError("Special type decode does not see pointer");
             for (; ; )
             {
                 uint4 attribId = decoder.getNextAttributeId();
@@ -1199,7 +1199,7 @@ namespace Sla.DECCORE
             if (res != (Datatype*)0)
             {
                 if (ct != res->getTypedef())
-                    throw LowlevelError("Trying to create typedef of existing type: " + name);
+                    throw new LowlevelError("Trying to create typedef of existing type: " + name);
                 return res;
             }
             res = ct->clone();      // Clone everything
@@ -1314,7 +1314,7 @@ namespace Sla.DECCORE
         public void destroyType(Datatype ct)
         {
             if (ct->isCoreType())
-                throw LowlevelError("Cannot destroy core type");
+                throw new LowlevelError("Cannot destroy core type");
             nametree.erase(ct);
             tree.erase(ct);
             delete ct;
@@ -1333,7 +1333,7 @@ namespace Sla.DECCORE
             if (metatype == TYPE_CODE)
             {
                 if (ct->getSize() != 1)
-                    throw LowlevelError("Primitive code data-type that is not size 1");
+                    throw new LowlevelError("Primitive code data-type that is not size 1");
                 ct = getBase(1, TYPE_UNKNOWN);
             }
             return ct;

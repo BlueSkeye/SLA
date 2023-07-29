@@ -93,11 +93,11 @@ namespace Sla.DECCORE
             if (type->getSize() == ct->getSize())
             {
                 if (!isSizeTypeLocked())
-                    throw LowlevelError("Overriding parameter that is not size locked");
+                    throw new LowlevelError("Overriding parameter that is not size locked");
                 type = ct;
                 return;
             }
-            throw LowlevelError("Overriding parameter with different type size");
+            throw new LowlevelError("Overriding parameter with different type size");
         }
 
         public override void resetSizeLockType(TypeFactory factory)

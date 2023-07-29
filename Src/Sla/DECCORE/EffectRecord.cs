@@ -100,7 +100,7 @@ namespace Sla.DECCORE
             if ((type == unaffected) || (type == killedbycall) || (type == return_address))
                 addr.encode(encoder, range.size);
             else
-                throw LowlevelError("Bad EffectRecord type");
+                throw new LowlevelError("Bad EffectRecord type");
         }
 
         /// Decode the record from a stream

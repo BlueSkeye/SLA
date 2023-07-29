@@ -228,7 +228,7 @@ namespace Sla.CORE
             CallGraphNode & node(graph[f->getAddress()]);
 
             if ((node.getFuncdata() != (Funcdata*)0) && (node.getFuncdata() != f))
-                throw LowlevelError("Functions with duplicate entry points: " + f->getName() + " " + node.getFuncdata()->getName());
+                throw new LowlevelError("Functions with duplicate entry points: " + f->getName() + " " + node.getFuncdata()->getName());
 
             node.entryaddr = f->getAddress();
             node.name = f->getDisplayName();
@@ -352,7 +352,7 @@ namespace Sla.CORE
             CallGraphNode* fdnode = findNode(fd->getAddress());
             CallGraphNode* tonode;
             if (fdnode == (CallGraphNode*)0)
-                throw LowlevelError("Function is missing from callgraph");
+                throw new LowlevelError("Function is missing from callgraph");
             if (fd->getFuncProto().getModelExtraPop() == ProtoModel::extrapop_unknown)
                 fd->fillinExtrapop();
 
@@ -387,7 +387,7 @@ namespace Sla.CORE
             // Dump all the "in" edges
             for (iter = graph.begin(); iter != graph.end(); ++iter)
             {
-                const CallGraphNode &node((*iter).second);
+                CallGraphNode node = (*iter).second;
 
                 for (uint4 i = 0; i < node.inedge.size(); ++i)
                     node.inedge[i].encode(encoder);

@@ -63,7 +63,7 @@ namespace Sla.EXTRA
             istringstream s(content);
             compiler.run(s, false);
             if (compiler.numErrors() != 0)
-                throw LowlevelError("Unable to parse dynamic rule: " + nm);
+                throw new LowlevelError("Unable to parse dynamic rule: " + nm);
 
             vector<OpCode> opcodelist;
             int4 opinit = compiler.postProcessRule(opcodelist);

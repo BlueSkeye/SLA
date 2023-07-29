@@ -35,7 +35,7 @@ namespace Sla.DECCORE
         {
 #if CPUI_DEBUG
             if (contain->getMetatype() != TYPE_STRUCT && contain->getMetatype() != TYPE_ARRAY)
-                throw LowlevelError("Parent of partial struct is not a struture or array");
+                throw new LowlevelError("Parent of partial struct is not a struture or array");
 #endif
             flags |= has_stripped;
             stripped = strip;

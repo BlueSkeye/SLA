@@ -176,7 +176,7 @@ namespace Sla.DECCORE
         {
             uint1[] buf = new uint1[size];
             if (buf == (uint1*)0)
-                throw LowlevelError("Out of memory");
+                throw new LowlevelError("Out of memory");
             loadFill(buf, size, addr);
             return buf;
         }

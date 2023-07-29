@@ -39,12 +39,12 @@ namespace Sla.DECCORE
 
         protected override void executeBranch()
         {
-            throw LowlevelError("Branch encountered emulating jumptable calculation");
+            throw new LowlevelError("Branch encountered emulating jumptable calculation");
         }
 
         protected override void executeBranchind()
         {
-            throw LowlevelError("Indirect branch encountered emulating jumptable calculation");
+            throw new LowlevelError("Indirect branch encountered emulating jumptable calculation");
         }
 
         protected override void executeCall()
@@ -87,11 +87,11 @@ namespace Sla.DECCORE
         public override void setExecuteAddress(Address addr)
         {
             if (!addr.getSpace()->hasPhysical())
-                throw LowlevelError("Bad execute address");
+                throw new LowlevelError("Bad execute address");
 
             currentOp = fd->target(addr);
             if (currentOp == (PcodeOp*)0)
-                throw LowlevelError("Could not set execute address");
+                throw new LowlevelError("Could not set execute address");
             currentBehave = currentOp->getOpcode()->getBehavior();
         }
 
@@ -138,14 +138,14 @@ namespace Sla.DECCORE
                         break;
                 }
                 if ((j == startop->numInput()) || (i == 0)) // If not, we can't continue;
-                    throw LowlevelError("Cannot start jumptable emulation with unresolved MULTIEQUAL");
+                    throw new LowlevelError("Cannot start jumptable emulation with unresolved MULTIEQUAL");
                 // If the startvn was a branch of the MULTIEQUAL, emulate as if we just came from that branch
                 startvn = startop->getOut(); // So the output of the MULTIEQUAL is the new startvn (as if a COPY from old startvn)
                 i -= 1;         // Move to the next instruction to be executed
                 startop = pathMeld.getOp(i);
             }
             if (i == pathMeld.numOps())
-                throw LowlevelError("Bad jumptable emulation");
+                throw new LowlevelError("Bad jumptable emulation");
             if (!startvn->isConstant())
                 setVarnodeValue(startvn, val);
             while (i > 0)
@@ -160,7 +160,7 @@ namespace Sla.DECCORE
                 catch (DataUnavailError err) {
                     ostringstream msg;
                     msg << "Could not emulate address calculation at " << curop->getAddr();
-                    throw LowlevelError(msg.str());
+                    throw new LowlevelError(msg.str());
                 }
             }
             Varnode* invn = pathMeld.getOp(0)->getIn(0);

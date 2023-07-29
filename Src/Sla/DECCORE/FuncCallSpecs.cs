@@ -414,7 +414,7 @@ namespace Sla.DECCORE
         private void collectOutputTrialVarnodes(List<Varnode> trialvn)
         {
             if (op->getOut() != (Varnode*)0)
-                throw LowlevelError("Output of call was determined prematurely");
+                throw new LowlevelError("Output of call was determined prematurely");
             while (trialvn.size() < activeoutput.getNumTrials()) // Size of array should match number of trials
                 trialvn.push_back((Varnode*)0);
             PcodeOp* indop = op->previousOp();
@@ -500,7 +500,7 @@ namespace Sla.DECCORE
         public void setFuncdata(Funcdata f)
         {
             if (fd != (Funcdata*)0)
-                throw LowlevelError("Setting call spec function multiple times");
+                throw new LowlevelError("Setting call spec function multiple times");
             fd = f;
             if (fd != (Funcdata*)0)
             {
@@ -644,7 +644,7 @@ namespace Sla.DECCORE
         public void doInputJoin(int4 slot1, bool ishislot)
         {
             if (isInputLocked())
-                throw LowlevelError("Trying to join parameters on locked function prototype");
+                throw new LowlevelError("Trying to join parameters on locked function prototype");
 
             const ParamTrial &trial1(activeinput.getTrialForInputVarnode(slot1));
             const ParamTrial &trial2(activeinput.getTrialForInputVarnode(slot1 + 1));
@@ -848,19 +848,19 @@ namespace Sla.DECCORE
                 // rather than from a placeholder
                 int4 slot = op->getSlot(phvn) - 1;
                 if (slot >= numParams())
-                    throw LowlevelError("Stack placeholder does not line up with locked parameter");
+                    throw new LowlevelError("Stack placeholder does not line up with locked parameter");
                 ProtoParameter* param = getParam(slot);
                 Address addr = param->getAddress();
                 if (addr.getSpace() != spacebase)
                 {
                     if (spacebase->getType() == IPTR_SPACEBASE)
-                        throw LowlevelError("Stack placeholder does not match locked space");
+                        throw new LowlevelError("Stack placeholder does not match locked space");
                 }
                 stackoffset -= addr.getOffset();
                 stackoffset = spacebase->wrapOffset(stackoffset);
                 return;
             }
-            throw LowlevelError("Unresolved stack placeholder");
+            throw new LowlevelError("Unresolved stack placeholder");
         }
 
         /// \brief Abort the attempt to recover the relative stack offset for \b this function
@@ -909,7 +909,7 @@ namespace Sla.DECCORE
         public void checkInputTrialUse(Funcdata data, AliasChecker aliascheck)
         {
             if (op->isDead())
-                throw LowlevelError("Function call in dead code");
+                throw new LowlevelError("Function call in dead code");
 
             int4 maxancestor = data.getArch()->trim_recurse_max;
             bool callee_pop = false;
@@ -1000,7 +1000,7 @@ namespace Sla.DECCORE
             {
                 ParamTrial & curtrial(activeoutput.getTrial(i));
                 if (curtrial.isChecked())
-                    throw LowlevelError("Output trial has been checked prematurely");
+                    throw new LowlevelError("Output trial has been checked prematurely");
                 if (trialvn[i] != (Varnode*)0)
                     curtrial.markActive();
                 else
@@ -1226,7 +1226,7 @@ namespace Sla.DECCORE
             if (isParamshiftApplied()) return false;
             setParamshiftApplied(true);
             if (op->numInput() < paramshift + 1)
-                throw LowlevelError("Paramshift mechanism is confused");
+                throw new LowlevelError("Paramshift mechanism is confused");
             for (int4 i = 0; i < paramshift; ++i)
             {
                 // ProtoStore should have been converted to ProtoStoreInternal by paramshiftModifyStart

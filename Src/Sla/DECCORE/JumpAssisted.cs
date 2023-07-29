@@ -74,7 +74,7 @@ namespace Sla.DECCORE
                 vector<uintb> inputs;
                 int4 numInputs = assistOp->numInput() - 1;  // How many remaining varnodes after useropid
                 if (pcodeScript->sizeInput() != numInputs)
-                    throw LowlevelError(userop->getName() + ": <size_pcode> has wrong number of parameters");
+                    throw new LowlevelError(userop->getName() + ": <size_pcode> has wrong number of parameters");
                 for (int4 i = 0; i < numInputs; ++i)
                     inputs.push_back(assistOp->getIn(i + 1)->getOffset());
                 sizeIndices = pcodeScript->evaluate(inputs);
@@ -91,7 +91,7 @@ namespace Sla.DECCORE
             List<LoadTable> loadpoints)
         {
             if (userop->getIndex2Addr() == -1)
-                throw LowlevelError("Final index2addr calculation outside of jumpassist");
+                throw new LowlevelError("Final index2addr calculation outside of jumpassist");
             ExecutablePcode* pcodeScript = (ExecutablePcode*)fd->getArch()->pcodeinjectlib->getPayload(userop->getIndex2Addr());
             addresstable.clear();
 
@@ -99,7 +99,7 @@ namespace Sla.DECCORE
             vector<uintb> inputs;
             int4 numInputs = assistOp->numInput() - 1;  // How many remaining varnodes after useropid
             if (pcodeScript->sizeInput() != numInputs)
-                throw LowlevelError(userop->getName() + ": <addr_pcode> has wrong number of parameters");
+                throw new LowlevelError(userop->getName() + ": <addr_pcode> has wrong number of parameters");
             for (int4 i = 0; i < numInputs; ++i)
                 inputs.push_back(assistOp->getIn(i + 1)->getOffset());
 
@@ -118,7 +118,7 @@ namespace Sla.DECCORE
             }
             ExecutablePcode* defaultScript = (ExecutablePcode*)fd->getArch()->pcodeinjectlib->getPayload(userop->getDefaultAddr());
             if (defaultScript->sizeInput() != numInputs)
-                throw LowlevelError(userop->getName() + ": <default_pcode> has wrong number of parameters");
+                throw new LowlevelError(userop->getName() + ": <default_pcode> has wrong number of parameters");
             inputs[0] = 0;
             uintb defaultAddress = defaultScript->evaluate(inputs);
             addresstable.push_back(Address(spc, defaultAddress));       // Add default location to end of addresstable
@@ -132,7 +132,7 @@ namespace Sla.DECCORE
             List<uintb> label, JumpModel orig)
         {
             if ((( const JumpAssisted*)orig)->sizeIndices != sizeIndices)
-    throw LowlevelError("JumpAssisted table size changed during recovery");
+    throw new LowlevelError("JumpAssisted table size changed during recovery");
             if (userop->getIndex2Case() == -1)
             {
                 for (int4 i = 0; i < sizeIndices; ++i)
@@ -144,7 +144,7 @@ namespace Sla.DECCORE
                 vector<uintb> inputs;
                 int4 numInputs = assistOp->numInput() - 1;  // How many remaining varnodes after useropid
                 if (numInputs != pcodeScript->sizeInput())
-                    throw LowlevelError(userop->getName() + ": <case_pcode> has wrong number of parameters");
+                    throw new LowlevelError(userop->getName() + ": <case_pcode> has wrong number of parameters");
                 for (int4 i = 0; i < numInputs; ++i)
                     inputs.push_back(assistOp->getIn(i + 1)->getOffset());
 

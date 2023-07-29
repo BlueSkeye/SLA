@@ -110,7 +110,7 @@ namespace Sla.DECCORE
                 {
                     ostringstream s;
                     s << "Field " << field.back().name << " does not fit in structure " + name;
-                    throw LowlevelError(s.str());
+                    throw new LowlevelError(s.str());
                 }
             }
             if (size == 0)      // We can decode an incomplete structure, indicated by 0 size

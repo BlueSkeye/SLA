@@ -104,7 +104,7 @@ namespace Sla.EXTRA
                 s << endl;
             }
             catch (RecovError err) {
-                s << "Function " << fd->getName() << ": " << err.explain << endl;
+                s << "Function " << fd->getName() << ": " << err.ToString() << endl;
             }
         }
 

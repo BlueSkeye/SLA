@@ -74,7 +74,7 @@ namespace Sla.DECCORE
             offset = decoder.readSignedInteger(ATTRIB_CONTENT);
             decoder.closeElement(subId);
             if (offset == 0)
-                throw LowlevelError("For metatype=\"ptrstruct\", <off> tag must not be zero");
+                throw new LowlevelError("For metatype=\"ptrstruct\", <off> tag must not be zero");
             submeta = SUB_PTRREL;
             if (name.size() == 0)       // If the data-type is not named
                 markEphemeral(typegrp); // it is considered ephemeral

@@ -150,7 +150,7 @@ namespace Sla.DECCORE
                 normalvn = switchvn;    // No value difference between normalized and unnormalized
             }
             else
-                throw LowlevelError("Backward normalization not implemented");
+                throw new LowlevelError("Backward normalization not implemented");
         }
 
         public override JumpModel clone(JumpTable jt)

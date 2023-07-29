@@ -39,7 +39,7 @@ namespace Sla.DECCORE
         private void registerOp(UserPcodeOp op)
         {
             int4 ind = op->getIndex();
-            if (ind < 0) throw LowlevelError("UserOp not assigned an index");
+            if (ind < 0) throw new LowlevelError("UserOp not assigned an index");
 
             map<string, UserPcodeOp*>::iterator iter;
             iter = useropmap.find(op->getName());
@@ -47,7 +47,7 @@ namespace Sla.DECCORE
             {
                 UserPcodeOp* other = (*iter).second;
                 if (other->getIndex() != ind)
-                    throw LowlevelError("Conflicting indices for userop name " + op->getName());
+                    throw new LowlevelError("Conflicting indices for userop name " + op->getName());
             }
 
             while (useroplist.size() <= ind)
@@ -55,7 +55,7 @@ namespace Sla.DECCORE
             if (useroplist[ind] != (UserPcodeOp*)0)
             {
                 if (useroplist[ind]->getName() != op->getName())
-                    throw LowlevelError("User op " + op->getName() + " has same index as " + useroplist[ind]->getName());
+                    throw new LowlevelError("User op " + op->getName() + " has same index as " + useroplist[ind]->getName());
                 // We assume this registration customizes an existing userop
                 delete useroplist[ind];     // Delete the old spec
             }
@@ -71,7 +71,7 @@ namespace Sla.DECCORE
                     segmentop.push_back((SegmentOp*)0);
 
                 if (segmentop[index] != (SegmentOp*)0)
-                    throw LowlevelError("Multiple segmentops defined for same space");
+                    throw new LowlevelError("Multiple segmentops defined for same space");
                 segmentop[index] = s_op;
                 return;
             }
@@ -79,7 +79,7 @@ namespace Sla.DECCORE
             if (tmpVolRead != (VolatileReadOp*)0)
             {
                 if (vol_read != (VolatileReadOp*)0)
-                    throw LowlevelError("Multiple volatile reads registered");
+                    throw new LowlevelError("Multiple volatile reads registered");
                 vol_read = tmpVolRead;
                 return;
             }
@@ -87,7 +87,7 @@ namespace Sla.DECCORE
             if (tmpVolWrite != (VolatileWriteOp*)0)
             {
                 if (vol_write != (VolatileWriteOp*)0)
-                    throw LowlevelError("Multiple volatile writes registered");
+                    throw new LowlevelError("Multiple volatile writes registered");
                 vol_write = tmpVolWrite;
             }
         }
@@ -233,7 +233,7 @@ namespace Sla.DECCORE
                 }
             }
             if (readOpName.size() == 0 || writeOpName.size() == 0)
-                throw LowlevelError("Missing inputop/outputop attributes in <volatile> element");
+                throw new LowlevelError("Missing inputop/outputop attributes in <volatile> element");
             VolatileReadOp* vr_op = new VolatileReadOp(glb, readOpName, useroplist.size(), functionalDisplay);
             try
             {
@@ -306,9 +306,9 @@ namespace Sla.DECCORE
         {
             UserPcodeOp* userop = getOp(useropname);
             if (userop == (UserPcodeOp*)0)
-                throw LowlevelError("Unknown userop: " + useropname);
+                throw new LowlevelError("Unknown userop: " + useropname);
             if (dynamic_cast<UnspecializedPcodeOp*>(userop) == (UnspecializedPcodeOp*)0)
-                throw LowlevelError("Cannot fixup userop: " + useropname);
+                throw new LowlevelError("Cannot fixup userop: " + useropname);
 
             int4 injectid = glb->pcodeinjectlib->manualCallOtherFixup(useropname, outname, inname, snippet);
             InjectedUserOp* op = new InjectedUserOp(glb, useropname, userop->getIndex(), injectid);

@@ -21,7 +21,7 @@ namespace Sla.DECCORE
         {
             ProtoModel* model = glb->getModel(p1);
             if (model == (ProtoModel*)0)
-                throw LowlevelError("Unknown prototype model :" + p1);
+                throw new LowlevelError("Unknown prototype model :" + p1);
             glb->setDefaultModel(model);
             return "Set default prototype to " + p1;
         }

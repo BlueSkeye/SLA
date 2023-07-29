@@ -86,18 +86,18 @@ namespace Sla.DECCORE
 
         protected override void executeStore()
         {
-            throw LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
         }
 
         protected override void executeBranch()
         {
             VarnodeData* vn = currentOp->getInput(0);
             if (vn->space->getType() != IPTR_CONSTANT)
-                throw LowlevelError("Tried to emulate absolute branch in snippet code");
+                throw new LowlevelError("Tried to emulate absolute branch in snippet code");
             int4 rel = (int4)vn->offset;
             pos += rel;
             if ((pos < 0) || (pos > opList.size()))
-                throw LowlevelError("Relative branch out of bounds in snippet code");
+                throw new LowlevelError("Relative branch out of bounds in snippet code");
             if (pos == opList.size())
             {
                 emu_halted = true;
@@ -116,47 +116,47 @@ namespace Sla.DECCORE
 
         protected override void executeBranchind()
         {
-            throw LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
         }
 
         protected override void executeCall()
         {
-            throw LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
         }
 
         protected override void executeCallind()
         {
-            throw LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
         }
 
         protected override void executeCallother()
         {
-            throw LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
         }
 
         protected override void executeMultiequal()
         {
-            throw LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
         }
 
         protected override void executeIndirect()
         {
-            throw LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
         }
 
         protected override void executeSegmentOp()
         {
-            throw LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
         }
 
         protected override void executeCpoolRef()
         {
-            throw LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
         }
 
         protected override void executeNew()
         {
-            throw LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
+            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp->getOpcode()));
         }
 
         protected override void fallthruOp()
@@ -297,7 +297,7 @@ namespace Sla.DECCORE
                 iter = tempValues.find(vn->offset);
                 if (iter != tempValues.end())
                     return (*iter).second;  // We have seen this varnode before
-                throw LowlevelError("Read before write in snippet emulation");
+                throw new LowlevelError("Read before write in snippet emulation");
             }
 
             return getLoadImageValue(vn->space, vn->offset, vn->size);

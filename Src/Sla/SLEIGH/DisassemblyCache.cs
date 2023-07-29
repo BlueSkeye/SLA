@@ -33,7 +33,7 @@ namespace Sla.SLEIGH
             mask = hashsize - 1;
             uintb masktest = coveringmask((uintb)mask);
             if (masktest != (uintb)mask)    // -hashsize- must be a power of 2
-                throw LowlevelError("Bad windowsize for disassembly cache");
+                throw new LowlevelError("Bad windowsize for disassembly cache");
             list = new ParserContext*[minimumreuse];
             nextfree = 0;
             hashtable = new ParserContext*[hashsize];

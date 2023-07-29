@@ -136,7 +136,7 @@ namespace Sla.DECCORE
             parent = indirect->getParent();
 
             if (parent->sizeOut() != addresstable.size())
-                throw LowlevelError("Trivial addresstable and switch block size do not match");
+                throw new LowlevelError("Trivial addresstable and switch block size do not match");
             for (uint4 i = 0; i < parent->sizeOut(); ++i)
                 block2addr.push_back(IndexPair(i, i));  // Addresses corresponds exactly to out-edges of switch block
             lastBlock = parent->sizeOut() - 1;
@@ -180,7 +180,7 @@ namespace Sla.DECCORE
             {
                 ostringstream err;
                 err << "Jumptable at " << opaddress << " did not pass sanity check.";
-                throw LowlevelError(err.str());
+                throw new LowlevelError(err.str());
             }
             if (sz != addresstable.size()) // If address table was resized
                 fd->warning("Sanity check requires truncation of jumptable", opaddress);
@@ -202,7 +202,7 @@ namespace Sla.DECCORE
             for (position = 0; position < bl->sizeIn(); ++position)
                 if (bl->getIn(position) == parent) break;
             if (position == bl->sizeIn())
-                throw LowlevelError("Requested block, not in jumptable");
+                throw new LowlevelError("Requested block, not in jumptable");
             return bl->getInRevIndex(position);
         }
 
@@ -389,7 +389,7 @@ namespace Sla.DECCORE
                 }
                 ++iter;
             }
-            throw LowlevelError("Could not get jumptable index for block");
+            throw new LowlevelError("Could not get jumptable index for block");
         }
 
         /// Get the i-th address table entry
@@ -452,7 +452,7 @@ namespace Sla.DECCORE
                 for (pos = 0; pos < parent->sizeOut(); ++pos)
                     if (parent->getOut(pos) == tmpbl) break;
                 if (pos == parent->sizeOut())
-                    throw LowlevelError("Jumptable destination not linked");
+                    throw new LowlevelError("Jumptable destination not linked");
                 block2addr.push_back(IndexPair(pos, i));
             }
             lastBlock = block2addr.back().blockPosition;    // Out-edge of last address in table
@@ -532,7 +532,7 @@ namespace Sla.DECCORE
             {
                 ostringstream err;
                 err << "Could not recover jumptable at " << opaddress << ". Too many branches";
-                throw LowlevelError(err.str());
+                throw new LowlevelError(err.str());
             }
             if (jmodel->getTableSize() == 0)
             {
@@ -601,7 +601,7 @@ namespace Sla.DECCORE
         private bool recoverLabels(Funcdata fd)
         {
             if (!isRecovered())
-                throw LowlevelError("Trying to recover jumptable labels without addresses");
+                throw new LowlevelError("Trying to recover jumptable labels without addresses");
 
             // Unless the model is an override, move model (created on a flow copy) so we can create a current instance
             if (jmodel != (JumpModel*)0)
@@ -709,7 +709,7 @@ namespace Sla.DECCORE
         private void encode(Encoder encoder)
         {
             if (!isRecovered())
-                throw LowlevelError("Trying to save unrecovered jumptable");
+                throw new LowlevelError("Trying to save unrecovered jumptable");
 
             encoder.openElement(ELEM_JUMPTABLE);
             opaddress.encode(encoder);
@@ -761,7 +761,7 @@ namespace Sla.DECCORE
                         if (attribId == ATTRIB_LABEL)
                         {
                             if (missedlabel)
-                                throw LowlevelError("Jumptable entries are missing labels");
+                                throw new LowlevelError("Jumptable entries are missing labels");
                             uintb lab = decoder.readUnsignedInteger();
                             label.push_back(lab);
                             foundlabel = true;
@@ -780,7 +780,7 @@ namespace Sla.DECCORE
                 else if (subId == ELEM_BASICOVERRIDE)
                 {
                     if (jmodel != (JumpModel*)0)
-                        throw LowlevelError("Duplicate jumptable override specs");
+                        throw new LowlevelError("Duplicate jumptable override specs");
                     jmodel = new JumpBasicOverride(this);
                     jmodel->decode(decoder);
                 }

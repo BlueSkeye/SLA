@@ -229,7 +229,7 @@ namespace Sla.DECCORE
             }
             decoder.closeElement(subId);
             if (tag == string_literal && (byteData == (uint1*)0))
-                throw LowlevelError("Bad constant pool record: missing <data>");
+                throw new LowlevelError("Bad constant pool record: missing <data>");
             if (flags != 0)
             {
                 bool isConstructor = ((flags & is_constructor) != 0);

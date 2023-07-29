@@ -158,7 +158,7 @@ namespace Sla.SLEIGH
                 VarnodeData* ptr = (*iter).dataptr;
                 uint4 id = ptr->offset;
                 if ((id >= labels.size()) || (labels[id] == 0xbadbeef))
-                    throw LowlevelError("Reference to non-existant sleigh label");
+                    throw new LowlevelError("Reference to non-existant sleigh label");
                 // Calculate the relative index given the two absolute indices
                 uintb res = labels[id] - (*iter).calling_index;
                 res &= calc_mask(ptr->size);

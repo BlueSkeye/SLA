@@ -70,7 +70,7 @@ namespace Sla.DECCORE
             delete emitter;
             emitter = (PcodeEmit*)0;
             if (!emulator.checkForLegalCode())
-                throw LowlevelError("Illegal p-code in executable snippet");
+                throw new LowlevelError("Illegal p-code in executable snippet");
             built = true;
         }
 
@@ -106,9 +106,9 @@ namespace Sla.DECCORE
             build();        // Build the PcodeOpRaws (if we haven't before)
             emulator.resetMemory();
             if (input.size() != inputList.size())
-                throw LowlevelError("Wrong number of input parameters to executable snippet");
+                throw new LowlevelError("Wrong number of input parameters to executable snippet");
             if (outputList.size() == 0)
-                throw LowlevelError("No registered outputs to executable snippet");
+                throw new LowlevelError("No registered outputs to executable snippet");
             for (int4 i = 0; i < input.size(); ++i)
                 emulator.setVarnodeValue(inputList[i], input[i]);
             while (!emulator.getHalt())

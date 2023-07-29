@@ -23,7 +23,7 @@ namespace Sla.DECCORE
         public override int4 apply(Funcdata data)
         {
             int4 i;
-            const BlockGraph &graph(data.getBasicBlocks());
+            BlockGraph graph = data.getBasicBlocks();
             BlockBasic* bb;
             PcodeOp* cbranch;
 

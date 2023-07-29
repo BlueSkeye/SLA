@@ -190,7 +190,7 @@ namespace Sla.DECCORE
         /// \param namerec is the container for collecting Symbols with a name
         private static void linkSymbols(Funcdata data, List<Varnode> namerec)
         {
-            const AddrSpaceManager* manage = data.getArch();
+            AddrSpaceManager* manage = data.getArch();
             VarnodeLocSet::const_iterator iter, enditer;
             AddrSpace* spc;
             AddrSpace* constSpace = manage->getConstantSpace();

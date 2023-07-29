@@ -90,7 +90,7 @@ namespace Sla.SLEIGH
                 construct.front()->buildPattern(s);
             }
             catch (SleighError err) {
-                s << "Error: " << err.explain << ": for ";
+                s << "Error: " << err.ToString() << ": for ";
                 construct.front()->printInfo(s);
                 s << endl;
                 errors = true;
@@ -103,7 +103,7 @@ namespace Sla.SLEIGH
                     construct[i]->buildPattern(s);
                 }
                 catch (SleighError err) {
-                    s << "Error: " << err.explain << ": for ";
+                    s << "Error: " << err.ToString() << ": for ";
                     construct[i]->printInfo(s);
                     s << endl;
                     errors = true;

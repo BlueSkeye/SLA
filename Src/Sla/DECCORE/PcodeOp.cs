@@ -745,7 +745,7 @@ namespace Sla.DECCORE
                 default:
                     break;
             }
-            throw LowlevelError("Invalid constant collapse");
+            throw new LowlevelError("Invalid constant collapse");
         }
 
         /// Propagate constant symbol from inputs to given output

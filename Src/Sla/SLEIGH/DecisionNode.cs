@@ -236,7 +236,7 @@ namespace Sla.SLEIGH
                 return;
             }
             if ((parent != (DecisionNode*)0) && (list.size() >= parent->num))
-                throw LowlevelError("Child has as many Patterns as parent");
+                throw new LowlevelError("Child has as many Patterns as parent");
 
             int4 numChildren = 1 << bitsize;
 

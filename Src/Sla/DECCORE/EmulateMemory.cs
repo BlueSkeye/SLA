@@ -91,32 +91,32 @@ namespace Sla.DECCORE
 
         protected override void executeCallother()
         {
-            throw LowlevelError("CALLOTHER emulation not currently supported");
+            throw new LowlevelError("CALLOTHER emulation not currently supported");
         }
 
         protected override void executeMultiequal()
         {
-            throw LowlevelError("MULTIEQUAL appearing in unheritaged code?");
+            throw new LowlevelError("MULTIEQUAL appearing in unheritaged code?");
         }
 
         protected override void executeIndirect()
         {
-            throw LowlevelError("INDIRECT appearing in unheritaged code?");
+            throw new LowlevelError("INDIRECT appearing in unheritaged code?");
         }
 
         protected override void executeSegmentOp()
         {
-            throw LowlevelError("SEGMENTOP emulation not currently supported");
+            throw new LowlevelError("SEGMENTOP emulation not currently supported");
         }
 
         protected override void executeCpoolRef()
         {
-            throw LowlevelError("Cannot currently emulate cpool operator");
+            throw new LowlevelError("Cannot currently emulate cpool operator");
         }
 
         protected override void executeNew()
         {
-            throw LowlevelError("Cannot currently emulate new operator");
+            throw new LowlevelError("Cannot currently emulate new operator");
         }
 
         /// Construct given a memory state

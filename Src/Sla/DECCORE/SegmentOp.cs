@@ -134,13 +134,13 @@ namespace Sla.DECCORE
                 }
             }
             if (spc == (AddrSpace*)0)
-                throw LowlevelError("<segmentop> expecting space attribute");
+                throw new LowlevelError("<segmentop> expecting space attribute");
             UserPcodeOp* otherop = glb->userops.getOp(name);
             if (otherop == (UserPcodeOp*)0)
-                throw LowlevelError("<segmentop> unknown userop " + name);
+                throw new LowlevelError("<segmentop> unknown userop " + name);
             useropindex = otherop->getIndex();
             if (dynamic_cast<UnspecializedPcodeOp*>(otherop) == (UnspecializedPcodeOp*)0)
-                throw LowlevelError("Redefining userop " + name);
+                throw new LowlevelError("Redefining userop " + name);
 
             for (; ; )
             {
@@ -168,10 +168,10 @@ namespace Sla.DECCORE
             }
             decoder.closeElement(elemId);
             if (injectId < 0)
-                throw LowlevelError("Missing <pcode> child in <segmentop> tag");
+                throw new LowlevelError("Missing <pcode> child in <segmentop> tag");
             InjectPayload* payload = glb->pcodeinjectlib->getPayload(injectId);
             if (payload->sizeOutput() != 1)
-                throw LowlevelError("<pcode> child of <segmentop> tag must declare one <output>");
+                throw new LowlevelError("<pcode> child of <segmentop> tag must declare one <output>");
             if (payload->sizeInput() == 1)
             {
                 innerinsize = payload->getInput(0).getSize();
@@ -182,7 +182,7 @@ namespace Sla.DECCORE
                 innerinsize = payload->getInput(1).getSize();
             }
             else
-                throw LowlevelError("<pcode> child of <segmentop> tag must declare one or two <input> tags");
+                throw new LowlevelError("<pcode> child of <segmentop> tag must declare one or two <input> tags");
         }
     }
 }

@@ -101,7 +101,7 @@ namespace Sla.DECCORE
                 if (current_op == opcache.size())
                     fallthruOp();
                 else if ((current_op < 0) || (current_op >= opcache.size()))
-                    throw LowlevelError("Bad intra-instruction branch");
+                    throw new LowlevelError("Bad intra-instruction branch");
             }
             else
                 setExecuteAddress(destaddr);
@@ -113,7 +113,7 @@ namespace Sla.DECCORE
         protected override void executeCallother()
         {
             if (!breaktable->doPcodeOpBreak(currentOp))
-                throw LowlevelError("Userop not hooked");
+                throw new LowlevelError("Userop not hooked");
             fallthruOp();
         }
 

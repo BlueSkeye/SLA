@@ -1493,7 +1493,7 @@ namespace Sla.DECCORE
                         // We found a cycle!
                         // Technically we should never reach here if the reducibility algorithms work
                         addLoopEdge(bl, i);
-                        //	throw LowlevelError("Found a new loop despite irreducibility");
+                        //	throw new LowlevelError("Found a new loop despite irreducibility");
                     }
                     else if ((nextbl.flags & f_mark) == 0) {
                         // Fresh node

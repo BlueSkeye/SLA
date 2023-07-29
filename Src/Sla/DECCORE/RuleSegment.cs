@@ -34,7 +34,7 @@ namespace Sla.DECCORE
         {
             SegmentOp* segdef = data.getArch()->userops.getSegmentOp(op->getIn(0)->getSpaceFromConst()->getIndex());
             if (segdef == (SegmentOp*)0)
-                throw LowlevelError("Segment operand missing definition");
+                throw new LowlevelError("Segment operand missing definition");
 
             Varnode* vn1 = op->getIn(1);
             Varnode* vn2 = op->getIn(2);

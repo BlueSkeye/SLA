@@ -560,7 +560,7 @@ namespace Sla.SLEIGH
             {   // Initialize the base if not already
                 Element* el = store.getTag("sleigh");
                 if (el == (Element*)0)
-                    throw LowlevelError("Could not find sleigh tag");
+                    throw new LowlevelError("Could not find sleigh tag");
                 restoreXml(el);
             }
             else
@@ -648,7 +648,7 @@ namespace Sla.SLEIGH
                 ct->printMnemonic(s, *cur);
                 s << "  ";
                 ct->printBody(s, *cur);
-                err.explain = s.str();
+                err.ToString() = s.str();
                 err.instruction_length = fallOffset;
                 throw err;
             }

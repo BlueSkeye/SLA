@@ -658,7 +658,7 @@ namespace Sla.DECCORE
                     break;
                 case line_t:    // tagLine
                 case bump_t:
-                    throw LowlevelError("Should never get called");
+                    throw new LowlevelError("Should never get called");
                     break;
             }
         }

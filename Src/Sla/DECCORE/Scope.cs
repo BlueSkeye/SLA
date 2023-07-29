@@ -917,11 +917,11 @@ namespace Sla.DECCORE
             if (sym->type->getSize() == ct->getSize())
             {
                 if (!sym->isSizeTypeLocked())
-                    throw LowlevelError("Overriding symbol that is not size locked");
+                    throw new LowlevelError("Overriding symbol that is not size locked");
                 sym->type = ct;
                 return;
             }
-            throw LowlevelError("Overriding symbol with different type size");
+            throw new LowlevelError("Overriding symbol with different type size");
         }
 
         /// Clear a Symbol's \e size-locked data-type
@@ -1082,7 +1082,7 @@ namespace Sla.DECCORE
             else if (subId == ELEM_FACETSYMBOL)
                 sym = new UnionFacetSymbol(owner);
             else
-                throw LowlevelError("Unknown symbol type");
+                throw new LowlevelError("Unknown symbol type");
             try
             {       // Protect against duplicate scope errors
                 sym->decode(decoder);

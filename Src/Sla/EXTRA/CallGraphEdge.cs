@@ -52,10 +52,10 @@ namespace Sla.EXTRA
 
             CallGraphNode* fromnode = graph->findNode(fromaddr);
             if (fromnode == (CallGraphNode*)0)
-                throw LowlevelError("Could not find from node");
+                throw new LowlevelError("Could not find from node");
             CallGraphNode* tonode = graph->findNode(toaddr);
             if (tonode == (CallGraphNode*)0)
-                throw LowlevelError("Could not find to node");
+                throw new LowlevelError("Could not find to node");
 
             graph->addEdge(fromnode, tonode, siteaddr);
         }

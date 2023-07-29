@@ -67,10 +67,10 @@ namespace Sla.EXTRA
                 dcp->conf->readLoaderSymbols("::"); // Read in loader symbols
             }
             catch (DecoderError err) {
-                errmsg = err.explain;
+                errmsg = err.ToString();
                 iserror = true;
             } catch (LowlevelError err) {
-                errmsg = err.explain;
+                errmsg = err.ToString();
                 iserror = true;
             }
             if (iserror)
@@ -303,12 +303,12 @@ namespace Sla.EXTRA
                 }
                 catch (IfaceParseError err) {
                     ostringstream fs;
-                    fs << "Error parsing " << testFiles[i] << ": " << err.explain;
+                    fs << "Error parsing " << testFiles[i] << ": " << err.ToString();
                     s << fs.str() << endl;
                     failures.push_back(fs.str());
                 } catch (IfaceExecutionError err) {
                     ostringstream fs;
-                    fs << "Error executing " << testFiles[i] << ": " << err.explain;
+                    fs << "Error executing " << testFiles[i] << ": " << err.ToString();
                     s << fs.str() << endl;
                     failures.push_back(fs.str());
                 }

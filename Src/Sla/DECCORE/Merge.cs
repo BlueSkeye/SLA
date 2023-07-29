@@ -207,7 +207,7 @@ namespace Sla.DECCORE
         {
             if (vn->hasCover() && !vn->isImplied())
                 return;
-            throw LowlevelError("Cannot force merge of range");
+            throw new LowlevelError("Cannot force merge of range");
         }
 
         /// \brief Test if the given Varnode can ever be merged.
@@ -515,7 +515,7 @@ namespace Sla.DECCORE
             // This should not be possible as that vn would have
             // to intersect with indop->output, which it is merged with.
             if (!collectCorrectable(problemvn, correctable, correctslot, op))
-                throw LowlevelError("Unable to force indirect merge");
+                throw new LowlevelError("Unable to force indirect merge");
 
             if (correctable.empty()) return;
             Varnode* refvn = correctable.front()->getIn(correctslot[0]);
@@ -756,7 +756,7 @@ namespace Sla.DECCORE
                 if (vn->getHigh() == high) continue;
                 mergeTestMust(vn);
                 if (!merge(high, vn->getHigh(), false))
-                    throw LowlevelError("Forced merge caused intersection");
+                    throw new LowlevelError("Forced merge caused intersection");
             }
         }
 
@@ -816,12 +816,12 @@ namespace Sla.DECCORE
             for (i = 0; i < max; ++i)
             {       // Try to merge everything for real now
                 if (!mergeTestRequired(op->getOut()->getHigh(), op->getIn(i)->getHigh()))
-                    throw LowlevelError("Non-cover related merge restriction violated, despite trims");
+                    throw new LowlevelError("Non-cover related merge restriction violated, despite trims");
                 if (!merge(op->getOut()->getHigh(), op->getIn(i)->getHigh(), false))
                 {
                     ostringstream errstr;
                     errstr << "Unable to force merge of op at " << op->getSeqNum();
-                    throw LowlevelError(errstr.str());
+                    throw new LowlevelError(errstr.str());
                 }
             }
         }
@@ -864,7 +864,7 @@ namespace Sla.DECCORE
             if (!mergeTestRequired(outvn->getHigh(), indop->getIn(0)->getHigh()) ||
                 (!merge(indop->getIn(0)->getHigh(), outvn->getHigh(), false))) // Try merge again
                                                                                //  if (!merge(indop->Input(0)->High(),outvn->High()))
-                throw LowlevelError("Unable to merge address forced indirect");
+                throw new LowlevelError("Unable to merge address forced indirect");
         }
 
         /// \brief Speculatively merge all HighVariables in the given list as well as possible

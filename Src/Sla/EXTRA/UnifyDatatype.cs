@@ -48,7 +48,7 @@ namespace Sla.EXTRA
                     storespot.cn = new uintb;
                     break;
                 default:
-                    throw LowlevelError("Bad unify datatype");
+                    throw new LowlevelError("Bad unify datatype");
             }
         }
 
@@ -65,7 +65,7 @@ namespace Sla.EXTRA
                     storespot.cn = new uintb; // Copy needs its own memory
                     break;
                 default:
-                    throw LowlevelError("Bad unify datatype");
+                    throw new LowlevelError("Bad unify datatype");
             }
         }
 
@@ -81,7 +81,7 @@ namespace Sla.EXTRA
                     delete storespot.cn;
                     break;
                 default:
-                    throw LowlevelError("Bad unify datatype");
+                    throw new LowlevelError("Bad unify datatype");
             }
             type = op2.type;
             switch (type)
@@ -94,7 +94,7 @@ namespace Sla.EXTRA
                     storespot.cn = new uintb; // Copy needs its own memory
                     break;
                 default:
-                    throw LowlevelError("Bad unify datatype");
+                    throw new LowlevelError("Bad unify datatype");
             }
             return *this;
         }
@@ -163,7 +163,7 @@ namespace Sla.EXTRA
                     s << "uintb " << cprinter.getName(id) << ';' << endl;
                     break;
                 default:
-                    throw LowlevelError("Bad unify datatype");
+                    throw new LowlevelError("Bad unify datatype");
             }
         }
 
@@ -180,7 +180,7 @@ namespace Sla.EXTRA
                 case const_type:
                     return "cn";
                 default:
-                    throw LowlevelError("Bad unify datatype");
+                    throw new LowlevelError("Bad unify datatype");
             }
         }
     }

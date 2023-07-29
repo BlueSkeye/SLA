@@ -275,7 +275,7 @@ namespace Sla.DECCORE
             else
             {
                 if ((numMergeClasses != 1) || (tv2->numMergeClasses != 1))
-                    throw LowlevelError("Making a non-speculative merge after speculative merges have occurred");
+                    throw new LowlevelError("Making a non-speculative merge after speculative merges have occurred");
                 for (i = 0; i < tv2->inst.size(); ++i)
                 {
                     Varnode* vn = tv2->inst[i];
@@ -331,7 +331,7 @@ namespace Sla.DECCORE
             }
             // Reaching here both HighVariables are part of a group
             if (isspeculative)
-                throw LowlevelError("Trying speculatively merge variables in separate groups");
+                throw new LowlevelError("Trying speculatively merge variables in separate groups");
             vector<HighVariable*> mergePairs;
             piece->mergeGroups(tv2->piece, mergePairs);
             for (int4 i = 0; i < mergePairs.size(); i += 2)
@@ -357,7 +357,7 @@ namespace Sla.DECCORE
                     ostringstream s;
                     s << "Symbols \"" << symbol->getName() << "\" and \"" << entry->getSymbol()->getName();
                     s << "\" assigned to the same variable";
-                    throw LowlevelError(s.str());
+                    throw new LowlevelError(s.str());
                 }
             }
             symbol = entry->getSymbol();
@@ -602,7 +602,7 @@ namespace Sla.DECCORE
                 off = 0;
             off -= piece->getOffset();
             if (off < 0)
-                throw LowlevelError("Symbol offset is incompatible with VariableGroup");
+                throw new LowlevelError("Symbol offset is incompatible with VariableGroup");
             group->setSymbolOffset(off);
         }
 
@@ -662,13 +662,13 @@ namespace Sla.DECCORE
                 if (!vn->hasCover())
                 {
                     if (inst.size() > 1)
-                        throw LowlevelError("Non-coverable varnode has been merged");
+                        throw new LowlevelError("Non-coverable varnode has been merged");
                     return false;
                 }
                 if (vn->isImplied())
                 {
                     if (inst.size() > 1)
-                        throw LowlevelError("Implied varnode has been merged");
+                        throw new LowlevelError("Implied varnode has been merged");
                     return false;
                 }
                 if (!vn->isIndirectOnly())
@@ -700,7 +700,7 @@ namespace Sla.DECCORE
                 if (inst[i]->isAddrTied())
                     return inst[i];
 
-            throw LowlevelError("Could not find address-tied varnode");
+            throw new LowlevelError("Could not find address-tied varnode");
         }
 
         /// Find (the) input member Varnode
@@ -712,7 +712,7 @@ namespace Sla.DECCORE
             for (int4 i = 0; i < inst.size(); ++i)
                 if (inst[i]->isInput())
                     return inst[i];
-            throw LowlevelError("Could not find input varnode");
+            throw new LowlevelError("Could not find input varnode");
         }
 
         /// Get a member Varnode with the strongest data-type
@@ -947,7 +947,7 @@ namespace Sla.DECCORE
 	        Varnode *otherVn = inst[j];
 	        if (otherVn->getCover()->intersect(*vn->getCover())==2) {
 	          if (!otherVn->copyShadow(vn))
-	            throw LowlevelError("HighVariable has internal intersection");
+	            throw new LowlevelError("HighVariable has internal intersection");
 	        }
               }
             }

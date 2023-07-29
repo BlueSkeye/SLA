@@ -109,7 +109,7 @@ namespace Sla.DECCORE
                     curvn = op->getIn(slot);
                 }
                 else
-                    throw LowlevelError("Bad switch normalization op");
+                    throw new LowlevelError("Bad switch normalization op");
             }
             return output;
         }

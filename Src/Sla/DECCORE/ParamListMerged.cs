@@ -44,12 +44,12 @@ namespace Sla.DECCORE
         public override void assignMap(List<Datatype> proto, TypeFactory typefactory,
             List<ParameterPieces> res)
         {
-            throw LowlevelError("Cannot assign prototype before model has been resolved");
+            throw new LowlevelError("Cannot assign prototype before model has been resolved");
         }
 
         public override void fillinMap(ParamActive active)
         {
-            throw LowlevelError("Cannot determine prototype before model has been resolved");
+            throw new LowlevelError("Cannot determine prototype before model has been resolved");
         }
 
         public override ParamList clone();

@@ -378,7 +378,7 @@ namespace Sla.DECCORE
             if (insn_count >= insn_max)
             {
                 if ((flags & error_toomanyinstructions) != 0)
-                    throw LowlevelError("Flow exceeded maximum allowable instructions");
+                    throw new LowlevelError("Flow exceeded maximum allowable instructions");
                 else
                 {
                     step = 1;
@@ -562,7 +562,7 @@ namespace Sla.DECCORE
             errmsg << op->getAddr().getSpace()->getName() << ',';
             op->getAddr().printRaw(errmsg);
             errmsg << ')';
-            throw LowlevelError(errmsg.str());
+            throw new LowlevelError(errmsg.str());
         }
 
         /// Add any remaining un-followed addresses to the \b unprocessed list
@@ -723,7 +723,7 @@ namespace Sla.DECCORE
             if (iter == iterend) return;
             op = *iter++;
             if (!op->isBlockStart())
-                throw LowlevelError("First op not marked as entry point");
+                throw new LowlevelError("First op not marked as entry point");
             cur = bblocks.newBlockBasic(&data);
             data.opInsert(op, cur, cur->endOp());
             bblocks.setStartBlock(cur);
@@ -829,7 +829,7 @@ namespace Sla.DECCORE
                     }
                 }
                 else
-                    throw LowlevelError(errmsg.str());
+                    throw new LowlevelError(errmsg.str());
             }
         }
 
@@ -874,7 +874,7 @@ namespace Sla.DECCORE
             addr2.printRaw(s);
             s << ')' << endl;
             if ((flags & error_reinterpreted) != 0)
-                throw LowlevelError(s.str());
+                throw new LowlevelError(s.str());
 
             if ((flags & reinterpreted_present) == 0)
             {
@@ -1019,7 +1019,7 @@ namespace Sla.DECCORE
             bool startbasic = op->isBlockStart();
             ++iter;         // Now points to first op in the injection
             if (iter == obank.endDead())
-                throw LowlevelError("Empty injection: " + payload->getName());
+                throw new LowlevelError("Empty injection: " + payload->getName());
             PcodeOp* firstop = *iter;
             bool isfallthru = true;
             PcodeOp* lastop = xrefControlFlow(iter, startbasic, isfallthru, fc);
@@ -1234,7 +1234,7 @@ namespace Sla.DECCORE
                 if (qlst[i] == fc) break;
 
             if (i == qlst.size())
-                throw LowlevelError("Misplaced callspec");
+                throw new LowlevelError("Misplaced callspec");
 
             delete fc;
             qlst.erase(qlst.begin() + i);
@@ -1392,7 +1392,7 @@ namespace Sla.DECCORE
             errmsg << addr.getSpace()->getName() << ',';
             addr.printRaw(errmsg);
             errmsg << ')';
-            throw LowlevelError(errmsg.str());
+            throw new LowlevelError(errmsg.str());
         }
 
         /// Find the target referred to by a given BRANCH or CBRANCH

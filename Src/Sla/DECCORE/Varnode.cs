@@ -351,7 +351,7 @@ namespace Sla.DECCORE
             if (isFree() && (!isSpacebase()))
             {
                 if (!descend.empty())
-                    throw LowlevelError("Free varnode has multiple descendants");
+                    throw new LowlevelError("Free varnode has multiple descendants");
             }
             descend.push_back(op);
             setFlags(Varnode::coverdirty);
@@ -425,7 +425,7 @@ namespace Sla.DECCORE
         public HighVariable getHigh()
         {
             if (high == (HighVariable*)0)
-                throw LowlevelError("Requesting non-existent high-level");
+                throw new LowlevelError("Requesting non-existent high-level");
             return high;
         }
 
@@ -658,7 +658,7 @@ namespace Sla.DECCORE
         public void printCover(TextWriter s)
         {
             if (cover == (Cover*)0)
-                throw LowlevelError("No cover to print");
+                throw new LowlevelError("No cover to print");
             if ((flags & Varnode::coverdirty) != 0)
                 s << "Cover is dirty" << endl;
             else
@@ -1527,7 +1527,7 @@ namespace Sla.DECCORE
                 }
             }
             if (ct == (Datatype*)0)
-                throw LowlevelError("NULL local type");
+                throw new LowlevelError("NULL local type");
             return ct;
         }
 

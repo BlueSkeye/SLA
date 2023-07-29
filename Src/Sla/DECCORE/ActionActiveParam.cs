@@ -72,7 +72,7 @@ namespace Sla.DECCORE
                     PcodeOp* op = fc->getOp();
                     if (op != (PcodeOp*)0)
                         s << " called at " << op->getSeqNum();
-                    s << ": " << err.explain;
+                    s << ": " << err.ToString();
                     throw new LowlevelError(s.str());
                 }
             }

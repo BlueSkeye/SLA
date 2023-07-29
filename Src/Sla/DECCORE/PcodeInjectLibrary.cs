@@ -56,7 +56,7 @@ namespace Sla.DECCORE
             pair<map<string, int4>::iterator, bool> check;
             check = callFixupMap.insert(pair<string, int4>(fixupName, injectid));
             if (!check.second)      // This symbol is already mapped
-                throw LowlevelError("Duplicate <callfixup>: " + fixupName);
+                throw new LowlevelError("Duplicate <callfixup>: " + fixupName);
             while (callFixupNames.size() <= injectid)
                 callFixupNames.push_back("");
             callFixupNames[injectid] = fixupName;
@@ -71,7 +71,7 @@ namespace Sla.DECCORE
             pair<map<string, int4>::iterator, bool> check;
             check = callOtherFixupMap.insert(pair<string, int4>(fixupName, injectid));
             if (!check.second)      // This symbol is already mapped
-                throw LowlevelError("Duplicate <callotherfixup>: " + fixupName);
+                throw new LowlevelError("Duplicate <callotherfixup>: " + fixupName);
             while (callOtherTarget.size() <= injectid)
                 callOtherTarget.push_back("");
             callOtherTarget[injectid] = fixupName;
@@ -86,7 +86,7 @@ namespace Sla.DECCORE
             pair<map<string, int4>::iterator, bool> check;
             check = callMechFixupMap.insert(pair<string, int4>(fixupName, injectid));
             if (!check.second)      // This symbol is already mapped
-                throw LowlevelError("Duplicate <callmechanism>: " + fixupName);
+                throw new LowlevelError("Duplicate <callmechanism>: " + fixupName);
             while (callMechTarget.size() <= injectid)
                 callMechTarget.push_back("");
             callMechTarget[injectid] = fixupName;
@@ -101,7 +101,7 @@ namespace Sla.DECCORE
             pair<map<string, int4>::iterator, bool> check;
             check = scriptMap.insert(pair<string, int4>(scriptName, injectid));
             if (!check.second)      // This symbol is already mapped
-                throw LowlevelError("Duplicate <script>: " + scriptName);
+                throw new LowlevelError("Duplicate <script>: " + scriptName);
             while (scriptNames.size() <= injectid)
                 scriptNames.push_back("");
             scriptNames[injectid] = scriptName;

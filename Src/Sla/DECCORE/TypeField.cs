@@ -45,9 +45,9 @@ namespace Sla.DECCORE
             }
             type = typegrp.decodeType(decoder);
             if (name.size() == 0)
-                throw LowlevelError("name attribute must not be empty in <field> tag");
+                throw new LowlevelError("name attribute must not be empty in <field> tag");
             if (offset < 0)
-                throw LowlevelError("offset attribute invalid for <field> tag");
+                throw new LowlevelError("offset attribute invalid for <field> tag");
             if (ident < 0)
                 ident = offset; // By default the id is the offset
             decoder.closeElement(elemId);

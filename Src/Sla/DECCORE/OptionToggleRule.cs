@@ -28,7 +28,7 @@ namespace Sla.DECCORE
 
             Action* root = glb->allacts.getCurrent();
             if (root == (Action*)0)
-                throw LowlevelError("Missing current action");
+                throw new LowlevelError("Missing current action");
             string res;
             if (!val)
             {

@@ -19,7 +19,7 @@ namespace Sla.EXTRA
             name = decoder.readString(ATTRIB_TARGETOP);
             uint4 subId = decoder.openElement();
             if (subId != ELEM_PCODE)
-                throw LowlevelError("<callotherfixup> does not contain a <pcode> tag");
+                throw new LowlevelError("<callotherfixup> does not contain a <pcode> tag");
             decodePayloadAttributes(decoder);
             decodePayloadParams(decoder);
             decodeBody(decoder);

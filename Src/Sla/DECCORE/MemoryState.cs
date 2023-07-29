@@ -79,7 +79,7 @@ namespace Sla.DECCORE
         {
             MemoryBank* mspace = getMemoryBank(spc);
             if (mspace == (MemoryBank*)0)
-                throw LowlevelError("Setting value for unmapped memory space: " + spc->getName());
+                throw new LowlevelError("Setting value for unmapped memory space: " + spc->getName());
             mspace->setValue(off, size, cval);
         }
 
@@ -96,7 +96,7 @@ namespace Sla.DECCORE
             if (spc->getType() == IPTR_CONSTANT) return off;
             MemoryBank* mspace = getMemoryBank(spc);
             if (mspace == (MemoryBank*)0)
-                throw LowlevelError("Getting value from unmapped memory space: " + spc->getName());
+                throw new LowlevelError("Getting value from unmapped memory space: " + spc->getName());
             return mspace->getValue(off, size);
         }
 
@@ -158,7 +158,7 @@ namespace Sla.DECCORE
         {
             MemoryBank* mspace = getMemoryBank(spc);
             if (mspace == (MemoryBank*)0)
-                throw LowlevelError("Getting chunk from unmapped memory space: " + spc->getName());
+                throw new LowlevelError("Getting chunk from unmapped memory space: " + spc->getName());
             mspace->getChunk(off, size, res);
         }
 
@@ -175,7 +175,7 @@ namespace Sla.DECCORE
         {
             MemoryBank* mspace = getMemoryBank(spc);
             if (mspace == (MemoryBank*)0)
-                throw LowlevelError("Setting chunk of unmapped memory space: " + spc->getName());
+                throw new LowlevelError("Setting chunk of unmapped memory space: " + spc->getName());
             mspace->setChunk(off, size, val);
         }
     }

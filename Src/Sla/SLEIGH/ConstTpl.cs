@@ -72,7 +72,7 @@ namespace Sla.SLEIGH
                 return v_size;
             if (name == "offset_plus")
                 return v_offset_plus;
-            throw LowlevelError("Bad handle selector");
+            throw new LowlevelError("Bad handle selector");
         }
 
         public ConstTpl()
@@ -283,7 +283,7 @@ namespace Sla.SLEIGH
                 default:
                     break;
             }
-            throw LowlevelError("ConstTpl is not a spaceid as expected");
+            throw new LowlevelError("ConstTpl is not a spaceid as expected");
         }
 
         public void transfer(List<HandleTpl*> @params)
@@ -313,7 +313,7 @@ namespace Sla.SLEIGH
                             value_real = tmp;
                         }
                         else
-                            throw LowlevelError("Cannot truncate macro input in this way");
+                            throw new LowlevelError("Cannot truncate macro input in this way");
                         break;
                     }
                 case v_size:
@@ -356,7 +356,7 @@ namespace Sla.SLEIGH
                 default:
                     break;
             }
-            throw LowlevelError("ConstTpl is not a spaceid as expected");
+            throw new LowlevelError("ConstTpl is not a spaceid as expected");
         }
 
         public void fillinOffset(FixedHandle hand, ParserWalker walker)
@@ -506,7 +506,7 @@ namespace Sla.SLEIGH
                 type = j_flowdest_size;
             }
             else
-                throw LowlevelError("Bad constant type");
+                throw new LowlevelError("Bad constant type");
         }
     }
 }

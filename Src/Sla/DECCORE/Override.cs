@@ -418,7 +418,7 @@ namespace Sla.DECCORE
                     int4 delay = decoder.readSignedInteger(ATTRIB_DELAY);
                     AddrSpace* spc = decoder.readSpace(ATTRIB_SPACE);
                     if (delay < 0)
-                        throw LowlevelError("Bad deadcodedelay tag");
+                        throw new LowlevelError("Bad deadcodedelay tag");
                     insertDeadcodeDelay(spc, delay);
                 }
                 else if (subId == ELEM_MULTISTAGEJUMP)
@@ -431,7 +431,7 @@ namespace Sla.DECCORE
                     uint4 type = stringToType(decoder.readString(ATTRIB_TYPE));
                     Address addr = Address::decode(decoder);
                     if ((type == Override::NONE) || (addr.isInvalid()))
-                        throw LowlevelError("Bad flowoverride tag");
+                        throw new LowlevelError("Bad flowoverride tag");
                     insertFlowOverride(addr, type);
                 }
                 decoder.closeElement(subId);

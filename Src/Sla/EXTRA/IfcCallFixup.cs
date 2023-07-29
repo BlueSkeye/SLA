@@ -71,7 +71,7 @@ namespace Sla.EXTRA
             }
             catch (LowlevelError err)
             {
-                *status->optr << "Error compiling pcode: " << err.explain << endl;
+                *status->optr << "Error compiling pcode: " << err.ToString() << endl;
                 return;
             }
             InjectPayload* payload = dcp->conf->pcodeinjectlib->getPayload(id);

@@ -555,7 +555,7 @@ namespace Sla.DECCORE
                         }
                     }
                     if (descendantsOutside(deadvn)) // If any descendants outside of bb
-                        throw LowlevelError("Deleting op with descendants\n");
+                        throw new LowlevelError("Deleting op with descendants\n");
                 }
                 if (op->isCall())
                     deleteCallSpecs(op);
@@ -775,14 +775,14 @@ namespace Sla.DECCORE
                 }
                 catch (LowlevelError err) {
                     glb->allacts.setCurrent(oldactname);
-                    warning(err.explain, op->getAddr());
+                    warning(err.ToString(), op->getAddr());
                     return 1;
                 }
             }
             PcodeOp* partop = partial.findOp(op->getSeqNum());
 
             if (partop == (PcodeOp*)0 || partop->code() != CPUI_BRANCHIND || partop->getAddr() != op->getAddr())
-                throw LowlevelError("Error recovering jumptable: Bad partial clone");
+                throw new LowlevelError("Error recovering jumptable: Bad partial clone");
             if (partop->isDead())   // Indirectop we were trying to recover was eliminated as dead code (unreachable)
                 return 0;           // Return jumptable as
 
@@ -802,7 +802,7 @@ namespace Sla.DECCORE
                 return 2;
             }
             catch (LowlevelError err) {
-                warning(err.explain, op->getAddr());
+                warning(err.ToString(), op->getAddr());
                 return 1;
             }
             return 0;
@@ -913,7 +913,7 @@ namespace Sla.DECCORE
             if (op->isBranch())
             {
                 if (op->code() != CPUI_BRANCH)
-                    throw LowlevelError("Cannot duplicate 2-way or n-way branch in nodeplit");
+                    throw new LowlevelError("Cannot duplicate 2-way or n-way branch in nodeplit");
                 return (PcodeOp*)0;
             }
             dup = newOp(op->numInput(), op->getAddr());
@@ -1004,11 +1004,11 @@ namespace Sla.DECCORE
                 }
                 else if (bop->code() == CPUI_INDIRECT)
                 {
-                    throw LowlevelError("Can't handle INDIRECTs in nodesplit");
+                    throw new LowlevelError("Can't handle INDIRECTs in nodesplit");
                 }
                 else if (bop->isCall())
                 {
-                    throw LowlevelError("Can't handle CALLs in nodesplit");
+                    throw new LowlevelError("Can't handle CALLs in nodesplit");
                 }
                 else
                 {
@@ -1020,7 +1020,7 @@ namespace Sla.DECCORE
                         else if (bvn->isAnnotation())
                             pvn = newCodeRef(bvn->getAddr());
                         else if (bvn->isFree())
-                            throw LowlevelError("Can't handle free varnode in nodesplit");
+                            throw new LowlevelError("Can't handle free varnode in nodesplit");
                         else
                         {
                             if (bvn->isWritten())
@@ -1406,7 +1406,7 @@ namespace Sla.DECCORE
         public void startProcessing()
         {
             if ((flags & processing_started) != 0)
-                throw LowlevelError("Function processing already started");
+                throw new LowlevelError("Function processing already started");
             flags |= processing_started;
 
             if (funcp.isInline())
@@ -1478,7 +1478,7 @@ namespace Sla.DECCORE
             if (!obank.empty())
             {
                 if ((flags & blocks_generated) == 0)
-                    throw LowlevelError("Function loaded for inlining");
+                    throw new LowlevelError("Function loaded for inlining");
                 return; // Already translated
             }
 
@@ -1512,7 +1512,7 @@ namespace Sla.DECCORE
         public void truncatedFlow(Funcdata fd, FlowInfo flow)
         {
             if (!obank.empty())
-                throw LowlevelError("Trying to do truncated flow on pre-existing pcode");
+                throw new LowlevelError("Trying to do truncated flow on pre-existing pcode");
 
             list<PcodeOp*>::const_iterator oiter; // Clone the raw pcode
             for (oiter = fd->obank.beginDead(); oiter != fd->obank.endDead(); ++oiter)
@@ -1543,7 +1543,7 @@ namespace Sla.DECCORE
                     continue;           // that has not been reached by the flow yet, so we ignore/truncate it
                 PcodeOp* newop = findOp(indop->getSeqNum());
                 if (newop == (PcodeOp*)0)
-                    throw LowlevelError("Could not trace jumptable across partial clone");
+                    throw new LowlevelError("Could not trace jumptable across partial clone");
                 JumpTable* jtclone = new JumpTable(*jiter);
                 jtclone->setIndirectOp(newop);
                 jumpvec.push_back(jtclone);
@@ -1657,7 +1657,7 @@ namespace Sla.DECCORE
                 op = findPrimaryBranch(iter, enditer, true, true, false);
 
             if ((op == (PcodeOp*)0) || (!op->isDead()))
-                throw LowlevelError("Could not apply flowoverride");
+                throw new LowlevelError("Could not apply flowoverride");
 
             OpCode opc = op->code();
             if (type == Override::BRANCH)
@@ -1676,7 +1676,7 @@ namespace Sla.DECCORE
                 else if (opc == CPUI_BRANCHIND)
                     opSetOpcode(op, CPUI_CALLIND);
                 else if (opc == CPUI_CBRANCH)
-                    throw LowlevelError("Do not currently support CBRANCH overrides");
+                    throw new LowlevelError("Do not currently support CBRANCH overrides");
                 else if (opc == CPUI_RETURN)
                     opSetOpcode(op, CPUI_CALLIND);
                 if (type == Override::CALL_RETURN)
@@ -1690,7 +1690,7 @@ namespace Sla.DECCORE
             else if (type == Override::RETURN)
             {
                 if ((opc == CPUI_BRANCH) || (opc == CPUI_CBRANCH) || (opc == CPUI_CALL))
-                    throw LowlevelError("Do not currently support complex overrides");
+                    throw new LowlevelError("Do not currently support complex overrides");
                 else if (opc == CPUI_BRANCHIND)
                     opSetOpcode(op, CPUI_RETURN);
                 else if (opc == CPUI_CALLIND)
@@ -1731,7 +1731,7 @@ namespace Sla.DECCORE
                 PcodeOp* op = *deaditer;
                 ++deaditer;
                 if (op->isCallOrBranch())
-                    throw LowlevelError("Illegal branching injection");
+                    throw new LowlevelError("Illegal branching injection");
                 opInsert(op, bl, iter);
             }
         }
@@ -1881,11 +1881,11 @@ namespace Sla.DECCORE
                     displayName = decoder.readString();
             }
             if (name.size() == 0)
-                throw LowlevelError("Missing function name");
+                throw new LowlevelError("Missing function name");
             if (displayName.size() == 0)
                 displayName = name;
             if (size == -1)
-                throw LowlevelError("Missing function size");
+                throw new LowlevelError("Missing function size");
             baseaddr = Address::decode(decoder);
             for (; ; )
             {
@@ -1894,7 +1894,7 @@ namespace Sla.DECCORE
                 if (subId == ELEM_LOCALDB)
                 {
                     if (localmap != (ScopeLocal*)0)
-                        throw LowlevelError("Pre-existing local scope when restoring: " + name);
+                        throw new LowlevelError("Pre-existing local scope when restoring: " + name);
                     ScopeLocal* newMap = new ScopeLocal(id, stackid, this, glb);
                     glb->symboltab->decodeScope(decoder, newMap);   // May delete newMap and throw
                     localmap = newMap;
@@ -2598,7 +2598,7 @@ namespace Sla.DECCORE
                     {
                         if ((vn->getSize() == invn->getSize()) && (vn->getAddr() == invn->getAddr()))
                             return invn;
-                        throw LowlevelError("Overlapping input varnodes");
+                        throw new LowlevelError("Overlapping input varnodes");
                     }
                 }
             }
@@ -2636,7 +2636,7 @@ namespace Sla.DECCORE
                 Varnode* vn = *iter;
                 ++iter;
                 if (vn->getOffset() + (vn->getSize() - 1) > endaddr.getOffset())
-                    throw LowlevelError("Cannot properly adjust input varnodes");
+                    throw new LowlevelError("Cannot properly adjust input varnodes");
                 inlist.push_back(vn);
             }
 
@@ -2645,7 +2645,7 @@ namespace Sla.DECCORE
                 Varnode* vn = inlist[i];
                 int4 sa = addr.justifiedContain(sz, vn->getAddr(), vn->getSize(), false);
                 if ((!vn->isInput()) || (sa < 0) || (sz <= vn->getSize()))
-                    throw LowlevelError("Bad adjustment to input varnode");
+                    throw new LowlevelError("Bad adjustment to input varnode");
                 PcodeOp* subop = newOp(2, getAddress());
                 opSetOpcode(subop, CPUI_SUBPIECE);
                 opSetInput(subop, newConstant(4, sa), 1);
@@ -2901,7 +2901,7 @@ namespace Sla.DECCORE
                 {
                     Scope* discover = localmap->discoverScope(addr, ct->getSize(), usepoint);
                     if (discover == (Scope*)0)
-                        throw LowlevelError("Could not discover scope");
+                        throw new LowlevelError("Could not discover scope");
                     int4 index = 0;
                     string symbolname = discover->buildVariableName(addr, usepoint, ct, index,
                                             Varnode::addrtied | Varnode::persist);
@@ -3343,7 +3343,7 @@ namespace Sla.DECCORE
             if (vn->isWritten())
             {   // A written value
                 VolatileWriteOp* vw_op = glb->userops.getVolatileWrite();
-                if (!vn->hasNoDescend()) throw LowlevelError("Volatile memory was propagated");
+                if (!vn->hasNoDescend()) throw new LowlevelError("Volatile memory was propagated");
                 PcodeOp* defop = vn->getDef();
                 newop = newOp(3, defop->getAddr());
                 opSetOpcode(newop, CPUI_CALLOTHER);
@@ -3366,7 +3366,7 @@ namespace Sla.DECCORE
                 if (vn->hasNoDescend()) return false; // Dead
                 PcodeOp* readop = vn->loneDescend();
                 if (readop == (PcodeOp*)0)
-                    throw LowlevelError("Volatile memory value used more than once");
+                    throw new LowlevelError("Volatile memory value used more than once");
                 newop = newOp(2, readop->getAddr());
                 opSetOpcode(newop, CPUI_CALLOTHER);
                 // Create a temp to replace the volatile variable
@@ -3745,7 +3745,7 @@ namespace Sla.DECCORE
             Scope* scope = sb->getMap();
             Address addr = sb->getAddress(vn->getOffset(), in0->getSize(), op->getAddr());
             if (addr.isInvalid())
-                throw LowlevelError("Unable to generate proper address from spacebase");
+                throw new LowlevelError("Unable to generate proper address from spacebase");
             SymbolEntry* entry = scope->queryContainer(addr, 1, Address());
             if (entry == (SymbolEntry*)0)
                 return (Symbol*)0;
@@ -3864,7 +3864,7 @@ namespace Sla.DECCORE
         {
             Symbol* sym = entry->getSymbol();
             if (sym->getScope() != localmap)
-                throw LowlevelError("Cannot currently have a dynamic symbol outside the local scope");
+                throw new LowlevelError("Cannot currently have a dynamic symbol outside the local scope");
             dhash.clear();
             int4 category = sym->getCategory();
             if (category == Symbol::union_facet)
@@ -4112,7 +4112,7 @@ namespace Sla.DECCORE
 
             indop->flags |= PcodeOp::indirect_creation;
             if (!in0->isConstant())
-                throw LowlevelError("Indirect creation not properly formed");
+                throw new LowlevelError("Indirect creation not properly formed");
             if (!possibleOutput)
                 in0->flags |= Varnode::indirect_creation;
             outvn->flags |= Varnode::indirect_creation;
@@ -4273,12 +4273,12 @@ namespace Sla.DECCORE
         public void opMarkHalt(PcodeOp op, uint4 flag)
         {
             if (op->code() != CPUI_RETURN)
-                throw LowlevelError("Only RETURN pcode ops can be marked as halt");
+                throw new LowlevelError("Only RETURN pcode ops can be marked as halt");
             flag &= (PcodeOp::halt | PcodeOp::badinstruction |
                  PcodeOp::unimplemented | PcodeOp::noreturn |
                  PcodeOp::missing);
             if (flag == 0)
-                throw LowlevelError("Bad halt flag");
+                throw new LowlevelError("Bad halt flag");
             op->setFlag(flag);
         }
 
@@ -4963,12 +4963,12 @@ namespace Sla.DECCORE
         public JumpTable installJumpTable(Address addr)
         {
             if (isProcStarted())
-                throw LowlevelError("Cannot install jumptable if flow is already traced");
+                throw new LowlevelError("Cannot install jumptable if flow is already traced");
             for (int4 i = 0; i < jumpvec.size(); ++i)
             {
                 JumpTable* jt = jumpvec[i];
                 if (jt->getOpAddress() == addr)
-                    throw LowlevelError("Trying to install over existing jumptable");
+                    throw new LowlevelError("Trying to install over existing jumptable");
             }
             JumpTable* newjt = new JumpTable(glb, addr);
             jumpvec.push_back(newjt);
@@ -5163,7 +5163,7 @@ namespace Sla.DECCORE
         public void removeDoNothingBlock(BlockBasic bb)
         {
             if (bb->sizeOut() > 1)
-                throw LowlevelError("Cannot delete a reachable block unless it has 1 out or less");
+                throw new LowlevelError("Cannot delete a reachable block unless it has 1 out or less");
 
             bb->setDead();
             blockRemoveInternal(bb, false);
@@ -5244,10 +5244,10 @@ namespace Sla.DECCORE
         {
             PcodeOp* cbranch = bb->lastOp();
             if ((cbranch->code() != CPUI_CBRANCH) || (bb->sizeOut() != 2))
-                throw LowlevelError("Cannot push non-conditional edge");
+                throw new LowlevelError("Cannot push non-conditional edge");
             PcodeOp* indop = bbnew->lastOp();
             if (indop->code() != CPUI_BRANCHIND)
-                throw LowlevelError("Can only push branch into indirect jump");
+                throw new LowlevelError("Can only push branch into indirect jump");
 
             // Turn the conditional branch into a branch
             opRemoveInput(cbranch, 1);  // Remove the conditional variable
@@ -5332,13 +5332,13 @@ namespace Sla.DECCORE
         public void nodeSplit(BlockBasic b, int4 inedge)
         { // Split node b along inedge
             if (b->sizeOut() != 0)
-                throw LowlevelError("Cannot (currently) nodesplit block with out flow");
+                throw new LowlevelError("Cannot (currently) nodesplit block with out flow");
             if (b->sizeIn() <= 1)
-                throw LowlevelError("Cannot nodesplit block with only 1 in edge");
+                throw new LowlevelError("Cannot nodesplit block with only 1 in edge");
             for (int4 i = 0; i < b->sizeIn(); ++i)
             {
                 if (b->getIn(i)->isMark())
-                    throw LowlevelError("Cannot nodesplit block with redundant in edges");
+                    throw new LowlevelError("Cannot nodesplit block with redundant in edges");
                 b->setMark();
             }
             for (int4 i = 0; i < b->sizeIn(); ++i)
@@ -5403,7 +5403,7 @@ namespace Sla.DECCORE
         public void removeFromFlowSplit(BlockBasic bl, bool swap)
         {
             if (!bl->emptyOp())
-                throw LowlevelError("Can only split the flow for an empty block");
+                throw new LowlevelError("Can only split the flow for an empty block");
             bblocks.removeFromFlowSplit(bl, swap);
             bblocks.removeBlock(bl);
             structureReset();
@@ -5436,7 +5436,7 @@ namespace Sla.DECCORE
                     outbl = (BlockBasic*)0;
             }
             if (outbl == (BlockBasic*)0)
-                throw LowlevelError("Cannot splice basic blocks");
+                throw new LowlevelError("Cannot splice basic blocks");
             // Remove any jump op at the end of -bl-
             if (!bl->op.empty())
             {
@@ -5449,7 +5449,7 @@ namespace Sla.DECCORE
                 // Check for MULTIEQUALs
                 PcodeOp* firstop = outbl->op.front();
                 if (firstop->code() == CPUI_MULTIEQUAL)
-                    throw LowlevelError("Splicing block with MULTIEQUAL");
+                    throw new LowlevelError("Splicing block with MULTIEQUAL");
                 firstop->clearFlag(PcodeOp::startbasic);
                 list<PcodeOp*>::iterator iter;
                 // Move ops into -bl-
@@ -5895,7 +5895,7 @@ namespace Sla.DECCORE
                     else if (op->code() == CPUI_BOOL_OR)
                         data.opSetOpcode(op, CPUI_BOOL_AND);
                     else
-                        throw LowlevelError("Bad flipInPlace op");
+                        throw new LowlevelError("Bad flipInPlace op");
                 }
                 else
                 {

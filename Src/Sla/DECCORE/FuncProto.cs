@@ -183,7 +183,7 @@ namespace Sla.DECCORE
                 const EffectRecord &curRecord(*iter);
                 int4 off = ProtoModel::lookupRecord(effectlist, listSize, curRecord.getAddress(), curRecord.getSize());
                 if (off == -2)
-                    throw LowlevelError("Partial overlap of prototype override with existing effects");
+                    throw new LowlevelError("Partial overlap of prototype override with existing effects");
                 else if (off >= 0)
                 {
                     // Found matching record, change its type
@@ -229,7 +229,7 @@ namespace Sla.DECCORE
         protected void paramShift(int4 paramshift)
         {
             if ((model == (ProtoModel*)0) || (store == (ProtoStore*)0))
-                throw LowlevelError("Cannot parameter shift without a model");
+                throw new LowlevelError("Cannot parameter shift without a model");
 
             vector<string> nmlist;
             vector<Datatype*> typelist;
@@ -1509,7 +1509,7 @@ namespace Sla.DECCORE
         {
             // Model must be set first
             if (store == (ProtoStore*)0)
-                throw LowlevelError("Prototype storage must be set before restoring FuncProto");
+                throw new LowlevelError("Prototype storage must be set before restoring FuncProto");
             ProtoModel* mod = (ProtoModel*)0;
             bool seenextrapop = false;
             int4 readextrapop;
@@ -1613,13 +1613,13 @@ namespace Sla.DECCORE
                     outpieces.flags = 0;
                 }
                 else
-                    throw LowlevelError("Missing <returnsym> tag");
+                    throw new LowlevelError("Missing <returnsym> tag");
 
                 store->setOutput(outpieces); // output may be missing storage at this point but ProtoStore should fillin
                 store->getOutput()->setTypeLock(outputlock);
             }
             else
-                throw LowlevelError("Missing <returnsym> tag");
+                throw new LowlevelError("Missing <returnsym> tag");
 
             if (((flags & voidinputlock) != 0) || (isOutputLocked()))
                 flags |= modellock;
@@ -1695,7 +1695,7 @@ namespace Sla.DECCORE
             ProtoParameter* outparam = store->getOutput();
             if ((outparam->getType()->getMetatype() != TYPE_VOID) && outparam->getAddress().isInvalid())
             {
-                throw LowlevelError("<returnsym> tag must include a valid storage address");
+                throw new LowlevelError("<returnsym> tag must include a valid storage address");
             }
             updateThisPointer();
         }

@@ -49,7 +49,7 @@ namespace Sla.DECCORE
                 }
                 offset = (offset + collideskip) % size;
             }
-            throw LowlevelError("Memory state hash_table is full");
+            throw new LowlevelError("Memory state hash_table is full");
         }
 
         /// Overridden aligned word find

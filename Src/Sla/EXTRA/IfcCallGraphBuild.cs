@@ -61,7 +61,7 @@ namespace Sla.EXTRA
                     *status->optr << " time=" << fixed << setprecision(0) << duration << " ms" << endl;
                 }
                 catch (LowlevelError err) {
-                    *status->optr << "Skipping " << fd->getName() << ": " << err.explain << endl;
+                    *status->optr << "Skipping " << fd->getName() << ": " << err.ToString() << endl;
                 }
             }
             dcp->cgraph->buildEdges(fd);

@@ -90,7 +90,7 @@ namespace Sla.DECCORE
             mods |= hide_thisparam;     // turn on hiding of 'this' parameter
         }
 
-        private override void printUnicode(TextWriter s, int4 onechar)
+        protected override void printUnicode(TextWriter s, int4 onechar)
         {
             if (unicodeNeedsEscape(onechar))
             {
@@ -155,7 +155,7 @@ namespace Sla.DECCORE
         public override void docFunction(Funcdata fd)
         {
             bool singletonFunction = false;
-            if (curscope == (const Scope*)0) {
+            if (curscope == (Scope*)0) {
                 singletonFunction = true;
                 // Always assume we are in the scope of the parent class
                 pushScope(fd->getScopeLocal()->getParent());
@@ -170,7 +170,7 @@ namespace Sla.DECCORE
         /// and the count number of wrapping arrays.
         /// \param ct is the given data-type
         /// \param noident is \b true if no identifier will be pushed with this declaration
-        public override void pushTypeStart(Datatype ct,bool noident)
+        protected override void pushTypeStart(Datatype ct,bool noident)
         {
             int4 arrayCount = 0;
             for (; ; )
@@ -196,9 +196,9 @@ namespace Sla.DECCORE
             else
                 tok = &type_expr_space;
 
-            pushOp(tok, (const PcodeOp*)0);
+            pushOp(tok, (PcodeOp*)0);
             for (int4 i = 0; i < arrayCount; ++i)
-                pushOp(&subscript, (const PcodeOp*)0);
+                pushOp(&subscript, (PcodeOp*)0);
 
             if (ct->getName().size() == 0)
             {   // Check for anonymous type
@@ -214,11 +214,11 @@ namespace Sla.DECCORE
                 pushAtom(Atom(EMPTY_STRING, blanktoken, EmitMarkup::no_color));     // Fill in the blank array index
         }
 
-        public override void pushTypeEnd(Datatype ct)
+        protected override void pushTypeEnd(Datatype ct)
         { // This routine doesn't have to do anything
         }
 
-        public override bool doEmitWideCharPrefix() => false;
+        protected override bool doEmitWideCharPrefix() => false;
 
         public override void adjustTypeOperators()
         {
@@ -264,7 +264,7 @@ namespace Sla.DECCORE
             const Funcdata* fd = op->getParent()->getFuncdata();
             FuncCallSpecs* fc = fd->getCallSpecs(op);
             if (fc == (FuncCallSpecs*)0)
-                throw LowlevelError("Missing indirect function callspec");
+                throw new LowlevelError("Missing indirect function callspec");
             int4 skip = getHiddenThisSlot(op, fc);
             int4 count = op->numInput() - 1;
             count -= (skip < 0) ? 0 : 1;
@@ -298,16 +298,16 @@ namespace Sla.DECCORE
 
         public override void opCpoolRefOp(PcodeOp op)
         {
-            const Varnode* outvn = op->getOut();
-            const Varnode* vn0 = op->getIn(0);
+            Varnode* outvn = op->getOut();
+            Varnode* vn0 = op->getIn(0);
             vector<uintb> refs;
             for (int4 i = 1; i < op->numInput(); ++i)
                 refs.push_back(op->getIn(i)->getOffset());
-            const CPoolRecord* rec = glb->cpool->getRecord(refs);
-            if (rec == (const CPoolRecord*)0) {
+            CPoolRecord* rec = glb->cpool->getRecord(refs);
+            if (rec == (CPoolRecord*)0) {
                 pushAtom(Atom("UNKNOWNREF", syntax, EmitMarkup::const_color, op, outvn));
             }
-  else
+            else
             {
                 switch (rec->getTag())
                 {

@@ -38,7 +38,7 @@ namespace Sla.DECCORE
                 solver.build(data, stackspace, spcbase);
             }
             catch (LowlevelError err) {
-                data.warningHeader($"Stack frame is not setup normally: {err.explain}");
+                data.warningHeader($"Stack frame is not setup normally: {err.ToString()}");
                 return;
             }
             if (solver.getNumVariables() == 0) {

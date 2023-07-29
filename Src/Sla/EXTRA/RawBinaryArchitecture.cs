@@ -54,7 +54,7 @@ namespace Sla.EXTRA
         {
             const Element* el = store.getTag("raw_savefile");
             if (el == (const Element*)0)
-    throw LowlevelError("Could not find raw_savefile tag");
+    throw new LowlevelError("Could not find raw_savefile tag");
 
             restoreXmlHeader(el);
             {

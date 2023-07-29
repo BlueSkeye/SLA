@@ -18,7 +18,7 @@ namespace Sla.EXTRA
         }
         public override VarnodeData getRegister(string nm) 
         {
-            throw LowlevelError("Cannot add register to DummyTranslate");
+            throw new LowlevelError("Cannot add register to DummyTranslate");
         }
 
         public override string getRegisterName(AddrSpace @base, uintb off, int4 size) => "";

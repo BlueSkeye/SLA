@@ -56,7 +56,7 @@ namespace Sla.DECCORE
         {
             piece->group = this;
             if (!pieceSet.insert(piece).second)
-                throw LowlevelError("Duplicate VariablePiece");
+                throw new LowlevelError("Duplicate VariablePiece");
             int4 pieceMax = piece->getOffset() + piece->getSize();
             if (pieceMax > size)
                 size = pieceMax;

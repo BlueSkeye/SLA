@@ -33,7 +33,7 @@ namespace Sla.DECCORE
             PcodeOp* op;
 
             if (stackspace == (AddrSpace*)0) return 0; // No stack to speak of
-            const VarnodeData &point(stackspace->getSpacebase(0));
+            VarnodeData point = stackspace->getSpacebase(0);
             Address sb_addr(point.space, point.offset);
             int4 sb_size = point.size;
 

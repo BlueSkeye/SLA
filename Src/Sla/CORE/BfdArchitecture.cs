@@ -54,7 +54,7 @@ namespace Sla.CORE
                 else if (archid.find("mach-o") != string::npos)
                     archid = "PowerPC:BE:32:default:macosx";
                 else
-                    throw LowlevelError("Cannot convert bfd target to sleigh target: " + archid);
+                    throw new LowlevelError("Cannot convert bfd target to sleigh target: " + archid);
             }
             SleighArchitecture::resolveArchitecture();
         }
@@ -79,7 +79,7 @@ namespace Sla.CORE
         {
             Element* el = store.getTag("bfd_savefile");
             if (el == (Element*)0)
-                throw LowlevelError("Could not find bfd_savefile tag");
+                throw new LowlevelError("Could not find bfd_savefile tag");
 
             restoreXmlHeader(el);
             {

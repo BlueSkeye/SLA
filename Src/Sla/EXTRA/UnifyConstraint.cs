@@ -56,7 +56,7 @@ namespace Sla.EXTRA
         {
             // Build the default boolean traversal state
             if (uniqid != state.numTraverse())
-                throw LowlevelError("Traverse id does not match index");
+                throw new LowlevelError("Traverse id does not match index");
             TraverseConstraint* newt = new TraverseCountState(uniqid);
             state.registerTraverseConstraint(newt);
         }

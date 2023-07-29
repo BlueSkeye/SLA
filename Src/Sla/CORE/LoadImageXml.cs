@@ -83,12 +83,12 @@ namespace Sla.CORE
         /// \param el is the parsed form of the file
         public LoadImageXml(string f, Element el)
         {
-            manage = (const AddrSpaceManager*)0;
+            manage = (AddrSpaceManager*)0;
             rootel = el;
 
             // Extract architecture information
             if (rootel->getName() != "binaryimage")
-                throw LowlevelError("Missing binaryimage tag in " + filename);
+                throw new LowlevelError("Missing binaryimage tag in " + filename);
             archtype = el->getAttributeValue("arch");
         }
 
@@ -154,7 +154,7 @@ namespace Sla.CORE
                     }
                 }
                 else
-                    throw LowlevelError("Unknown LoadImageXml tag");
+                    throw new LowlevelError("Unknown LoadImageXml tag");
                 decoder.closeElement(subId);
             }
             decoder.closeElement(elemId);
@@ -165,7 +165,7 @@ namespace Sla.CORE
         public void clear()
         {
             archtype.clear();
-            manage = (const AddrSpaceManager*)0;
+            manage = (AddrSpaceManager*)0;
             chunk.clear();
             addrtosymbol.clear();
         }
@@ -181,7 +181,7 @@ namespace Sla.CORE
             map<Address, vector<uint1>>::const_iterator iter1;
             for (iter1 = chunk.begin(); iter1 != chunk.end(); ++iter1)
             {
-                const vector<uint1> &vec((*iter1).second);
+                vector<uint1> &vec((*iter1).second);
                 if (vec.size() == 0) continue;
                 encoder.openElement(ELEM_BYTECHUNK);
                 (*iter1).first.getSpace()->encodeAttributes(encoder, (*iter1).first.getOffset());
@@ -228,7 +228,7 @@ namespace Sla.CORE
                 --iter;         // Last one less or equal
             while ((size > 0) && (iter != chunk.end()))
             {
-                const vector<uint1> &chnk((*iter).second);
+                vector<uint1> &chnk((*iter).second);
                 int4 chnksize = chnk.size();
                 int4 over = curaddr.overlap(0, (*iter).first, chnksize);
                 if (over != -1)
@@ -280,7 +280,7 @@ namespace Sla.CORE
             {
                 if (readonlyset.find((*iter).first) != readonlyset.end())
                 {
-                    const vector<uint1> &chnk((*iter).second);
+                    vector<uint1> &chnk((*iter).second);
                     uintb start = (*iter).first.getOffset();
                     uintb stop = start + chnk.size() - 1;
                     list.insertRange((*iter).first.getSpace(), start, stop);

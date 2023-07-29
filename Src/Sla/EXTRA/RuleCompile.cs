@@ -215,7 +215,7 @@ namespace Sla.EXTRA
         public ConstraintGroup opCodeConstraint(ConstraintGroup @base, List<OpCode> oplist)
         {
             if (oplist->size() != 1)
-                throw LowlevelError("Not currently supporting multiple opcode constraints");
+                throw new LowlevelError("Not currently supporting multiple opcode constraints");
             int4 opindex = base->getBaseIndex();
             UnifyConstraint* newconstraint = new ConstraintOpcode(opindex, *oplist);
             delete oplist;
@@ -429,10 +429,10 @@ namespace Sla.EXTRA
         { // Do normal post processing but also remove initial opcode check
             finalrule->removeDummy();
             if (finalrule->numConstraints() == 0)
-                throw LowlevelError("Cannot postprocess empty rule");
+                throw new LowlevelError("Cannot postprocess empty rule");
             ConstraintOpcode* subconst = dynamic_cast<ConstraintOpcode*>(finalrule->getConstraint(0));
             if (subconst == (ConstraintOpcode*)0)
-                throw LowlevelError("Rule does not start with opcode constraint");
+                throw new LowlevelError("Rule does not start with opcode constraint");
             opcodelist = subconst->getOpCodes();
             int4 opinit = subconst->getMaxNum();
             finalrule->deleteConstraint(0);
@@ -447,7 +447,7 @@ namespace Sla.EXTRA
             istringstream s(rule);
             ruler.run(s, false);
             if (ruler.numErrors() != 0)
-                throw LowlevelError("Could not build rule");
+                throw new LowlevelError("Could not build rule");
             ConstraintGroup* resconst = ruler.releaseRule();
             for (int4 i = 0; i < idlist.size(); ++i)
             {
@@ -465,7 +465,7 @@ namespace Sla.EXTRA
                     }
                 }
                 if (id == -1)
-                    throw LowlevelError("Bad initializer name: " + idlist[i]);
+                    throw new LowlevelError("Bad initializer name: " + idlist[i]);
                 res.push_back(id);
             }
             return resconst;

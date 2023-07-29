@@ -33,7 +33,7 @@ namespace Sla.EXTRA
             }
             catch (ParseError err)
             {
-                *status->optr << "Error in C syntax: " << err.explain << endl;
+                *status->optr << "Error in C syntax: " << err.ToString() << endl;
                 throw IfaceExecutionError("Bad C syntax");
             }
         }

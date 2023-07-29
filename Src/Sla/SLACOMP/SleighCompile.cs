@@ -488,7 +488,7 @@ namespace Sla.SLACOMP
                 symbolLocationMap[sym] = *getCurrentLocation();
             }
             catch (SleighError err) {
-                reportError(err.explain);
+                reportError(err.ToString());
             }
         }
 
@@ -1277,7 +1277,7 @@ namespace Sla.SLACOMP
                 symtab.addGlobalSymbol(sym);
             }
             catch (SleighError err) {
-                reportError(getCurrentLocation(), err.explain);
+                reportError(getCurrentLocation(), err.ToString());
             }
             sections.push_back(sym);
             numSections = sections.size();
@@ -1552,7 +1552,7 @@ namespace Sla.SLACOMP
                                             // the operand's offset is irrelevant
             }
             catch (SleighError err) {
-                reportError(getCurrentLocation(), err.explain);
+                reportError(getCurrentLocation(), err.ToString());
                 PatternExpression::release(patexp);
             }
         }
@@ -1584,7 +1584,7 @@ namespace Sla.SLACOMP
                 }
             }
             catch (SleighError err) {
-                reportError(getCurrentLocation(), err.explain);
+                reportError(getCurrentLocation(), err.ToString());
             }
             return res;
         }
@@ -1613,7 +1613,7 @@ namespace Sla.SLACOMP
                     sym->defineOperand(glob);
             }
             catch (SleighError err) {
-                reportError(getCurrentLocation(), err.explain);
+                reportError(getCurrentLocation(), err.ToString());
             }
         }
 
@@ -1796,7 +1796,7 @@ namespace Sla.SLACOMP
             SymbolScope* curscope = symtab.getCurrentScope(); // This should be a Constructor scope
             SymbolScope* parscope = curscope->getParent();
             if (parscope != symtab.getGlobalScope())
-                throw LowlevelError("firstNamedSection called when not in Constructor scope"); // Unrecoverable error
+                throw new LowlevelError("firstNamedSection called when not in Constructor scope"); // Unrecoverable error
             symtab.addScope();      // Add new scope under the Constructor scope
             SectionVector* res = new SectionVector(main, curscope);
             res->setNextIndex(sym->getTemplateId());
@@ -1819,7 +1819,7 @@ namespace Sla.SLACOMP
             symtab.popScope();      // Pop the scope of the last named section
             SymbolScope* parscope = symtab.getCurrentScope()->getParent();
             if (parscope != symtab.getGlobalScope())
-                throw LowlevelError("nextNamedSection called when not in section scope"); // Unrecoverable
+                throw new LowlevelError("nextNamedSection called when not in section scope"); // Unrecoverable
             symtab.addScope();      // Add new scope under the Constructor scope (not the last section scope)
             vec->append(section, curscope); // Associate finished section
             vec->setNextIndex(sym->getTemplateId()); // Set index for the NEXT section (not been fully parsed yet)
@@ -2083,7 +2083,7 @@ namespace Sla.SLACOMP
                 sleighlex_destroy(); // Make sure lexer is reset so we can parse multiple files
             }
             catch (LowlevelError err) {
-                cerr << "Unrecoverable error: " << err.explain << endl;
+                cerr << "Unrecoverable error: " << err.ToString() << endl;
                 return 2;
             }
             return 0;

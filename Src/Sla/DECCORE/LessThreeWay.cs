@@ -260,15 +260,15 @@ namespace Sla.DECCORE
                 if (!hiconstform) return false; // If mid is constant, both mid and hi must be constant
                 midconstform = true;
                 midval = vnhie2->getOffset();
-                if (vnhie2->getSize() == in.getSize()) {
+                if (vnhie2->getSize() == @in.getSize()) {
                     // Convert to comparison on high part
-                    uintb lopart = midval & calc_mask(in.getLo()->getSize());
-                    midval >>= in.getLo()->getSize() * 8;
+                    uintb lopart = midval & calc_mask(@in.getLo()->getSize());
+                    midval >>= @in.getLo()->getSize() * 8;
                     if (midlessform)
                     {
                         if (midlessequal)
                         {
-                            if (lopart != calc_mask(in.getLo()->getSize())) return false;
+                            if (lopart != calc_mask(@in.getLo()->getSize())) return false;
                         }
                         else
                         {
@@ -282,7 +282,7 @@ namespace Sla.DECCORE
                 {   // If the mid and hi don't match
                     if (!midlessform) return false;
                     midval += (midlessequal) ? 1 : -1; // We may just be one off
-                    midval &= calc_mask(in.getLo()->getSize());
+                    midval &= calc_mask(@in.getLo()->getSize());
                     midlessequal = !midlessequal;
                     if (midval != hival) return false; // Last chance
                 }
@@ -384,18 +384,18 @@ namespace Sla.DECCORE
 
         private bool checkOpForm()
         {
-            lo = in.getLo();
-            hi = in.getHi();
+            lo = @in.getLo();
+            hi = @in.getHi();
 
             if (midconstform)
             {
                 if (!hiconstform) return false;
-                if (vnhie2->getSize() == in.getSize()) {
+                if (vnhie2->getSize() == @in.getSize()) {
                     if ((vnhie1 != vnhil1) && (vnhie1 != vnhil2)) return false;
                 }
-    else
+                else
                 {
-                    if (vnhie1 !=in.getHi()) return false;
+                    if (vnhie1 !=@in.getHi()) return false;
                 }
                 // normalizeMid checks that midval == hival
             }
@@ -510,12 +510,12 @@ namespace Sla.DECCORE
             setOpCode();
             if (hiconstform)
             {
-                in2.initPartial(in.getSize(), (hival << (8 *in.getLo()->getSize()))| loval);
+                in2.initPartial(@in.getSize(), (hival << (8 *@in.getLo()->getSize()))| loval);
                 if (!setBoolOp()) return false;
             }
             else
             {
-                in2.initPartial(in.getSize(), lo2, hi2);
+                in2.initPartial(@in.getSize(), lo2, hi2);
                 if (!setBoolOp()) return false;
             }
             return true;

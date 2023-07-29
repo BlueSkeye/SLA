@@ -39,7 +39,7 @@ namespace Sla.DECCORE
             }
             arrayof = typegrp.decodeType(decoder);
             if ((arraysize <= 0) || (arraysize * arrayof->getSize() != size))
-                throw LowlevelError("Bad size for array of type " + arrayof->getName());
+                throw new LowlevelError("Bad size for array of type " + arrayof->getName());
             if (arraysize == 1)
                 flags |= needs_resolution;      // Array of size 1 needs special treatment
                                                 //  decoder.closeElement(elemId);

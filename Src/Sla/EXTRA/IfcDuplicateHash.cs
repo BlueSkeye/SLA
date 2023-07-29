@@ -111,7 +111,7 @@ namespace Sla.EXTRA
                 check(fd, *status->optr);
             }
             catch (LowlevelError err) {
-                *status->optr << "Skipping " << fd->getName() << ": " << err.explain << endl;
+                *status->optr << "Skipping " << fd->getName() << ": " << err.ToString() << endl;
             }
             dcp->conf->clearAnalysis(fd);
         }

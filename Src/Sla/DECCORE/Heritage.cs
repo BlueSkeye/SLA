@@ -394,7 +394,7 @@ namespace Sla.DECCORE
                 AddrSpace* piecespace = joinrec->getPiece(0).space;
 
                 if (joinrec->getUnified().size != vn->getSize())
-                    throw LowlevelError("Joined varnode does not match size of record");
+                    throw new LowlevelError("Joined varnode does not match size of record");
                 if (vn->isFree())
                 {
                     if (joinrec->isFloatExtension())
@@ -651,7 +651,7 @@ namespace Sla.DECCORE
             list<PcodeOp*>::const_iterator oiter = vn->beginDescend();
             op = *oiter++;
             if (oiter != vn->endDescend())
-                throw LowlevelError("Free varnode with multiple reads");
+                throw new LowlevelError("Free varnode with multiple reads");
             newop = fd->newOp(2, op->getAddr());
             fd->opSetOpcode(newop, CPUI_SUBPIECE);
             vn1 = fd->newVarnode(size, addr);
@@ -1952,7 +1952,7 @@ namespace Sla.DECCORE
             if (vn->hasNoDescend())
                 fd->deleteVarnode(vn);
             else
-                throw LowlevelError("Refining non-free varnode");
+                throw new LowlevelError("Refining non-free varnode");
         }
 
         /// \brief Split up an output Varnode based on the given refinement
@@ -2423,7 +2423,7 @@ namespace Sla.DECCORE
         {
             const HeritageInfo* info = getInfo(spc);
             if (!info->isHeritaged())
-                throw LowlevelError("Trying to calculate passes for non-heritaged space");
+                throw new LowlevelError("Trying to calculate passes for non-heritaged space");
             return (pass - info->delay);
         }
 
@@ -2458,7 +2458,7 @@ namespace Sla.DECCORE
         {
             HeritageInfo* info = getInfo(spc);
             if (delay < info->delay)
-                throw LowlevelError("Illegal deadcode delay setting");
+                throw new LowlevelError("Illegal deadcode delay setting");
             info->deadcodedelay = delay;
         }
 

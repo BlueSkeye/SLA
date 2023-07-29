@@ -168,7 +168,7 @@ namespace Sla.DECCORE
                     if (newVn->getSize() == outSize)
                     {
                         if (truncAmount != minByte)
-                            throw LowlevelError("Could not perform -replaceDescendants-");
+                            throw new LowlevelError("Could not perform -replaceDescendants-");
                         data.opSetOpcode(op, CPUI_COPY);
                         data.opRemoveInput(op, 1);
                     }
@@ -176,17 +176,17 @@ namespace Sla.DECCORE
                     {
                         int4 newTrunc = truncAmount - minByte;
                         if (newTrunc < 0)
-                            throw LowlevelError("Could not perform -replaceDescendants-");
+                            throw new LowlevelError("Could not perform -replaceDescendants-");
                         if (newTrunc != truncAmount)
                         {
                             data.opSetInput(op, data.newConstant(4, (uintb)newTrunc), 1);
                         }
                     }
                     else
-                        throw LowlevelError("Could not perform -replaceDescendants-");
+                        throw new LowlevelError("Could not perform -replaceDescendants-");
                 }
                 else
-                    throw LowlevelError("Could not perform -replaceDescendants-");
+                    throw new LowlevelError("Could not perform -replaceDescendants-");
             }
         }
 
@@ -224,7 +224,7 @@ namespace Sla.DECCORE
             }
             else
             {
-                if (!basevn->isWritten()) throw LowlevelError("Undefined pullsub");
+                if (!basevn->isWritten()) throw new LowlevelError("Undefined pullsub");
                 newaddr = basevn->getDef()->getAddr();
             }
             Address smalladdr1;

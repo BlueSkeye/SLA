@@ -42,12 +42,12 @@ namespace Sla.DECCORE
         /// The file is opened and its size immediately recovered.
         public void open()
         {
-            if (thefile != (ifstream*)0) throw LowlevelError("loadimage is already open");
+            if (thefile != (ifstream*)0) throw new LowlevelError("loadimage is already open");
             thefile = new ifstream(filename.c_str());
             if (!(*thefile))
             {
                 string errmsg = "Unable to open raw image file: " + filename;
-                throw LowlevelError(errmsg);
+                throw new LowlevelError(errmsg);
             }
             thefile->seekg(0, ios::end);
             filesize = thefile->tellg();

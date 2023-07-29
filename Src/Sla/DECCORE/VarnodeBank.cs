@@ -164,7 +164,7 @@ namespace Sla.DECCORE
         public void destroy(Varnode vn)
         {
             if ((vn->getDef() != (PcodeOp*)0) || (!vn->hasNoDescend()))
-                throw LowlevelError("Deleting integrated varnode");
+                throw new LowlevelError("Deleting integrated varnode");
 
             loc_tree.erase(vn->lociter);
             def_tree.erase(vn->defiter);
@@ -179,9 +179,9 @@ namespace Sla.DECCORE
         public Varnode setInput(Varnode vn)
         {
             if (!vn->isFree())
-                throw LowlevelError("Making input out of varnode which is not free");
+                throw new LowlevelError("Making input out of varnode which is not free");
             if (vn->isConstant())
-                throw LowlevelError("Making input out of constant varnode");
+                throw new LowlevelError("Making input out of constant varnode");
 
             loc_tree.erase(vn->lociter);    // Erase the free version of varnode
             def_tree.erase(vn->defiter);
@@ -206,7 +206,7 @@ namespace Sla.DECCORE
                 const Address &addr(op->getAddr());
                 s << "Defining varnode which is not free at " << addr.getShortcut();
                 addr.printRaw(s);
-                throw LowlevelError(s.str());
+                throw new LowlevelError(s.str());
             }
             if (vn->isConstant())
             {
@@ -214,7 +214,7 @@ namespace Sla.DECCORE
                 const Address &addr(op->getAddr());
                 s << "Assignment to constant at " << addr.getShortcut();
                 addr.printRaw(s);
-                throw LowlevelError(s.str());
+                throw new LowlevelError(s.str());
             }
 
             loc_tree.erase(vn->lociter);
@@ -740,7 +740,7 @@ namespace Sla.DECCORE
             VarnodeDefSet::const_iterator iter;
 
             if (fl == Varnode::written)
-                throw LowlevelError("Cannot get contiguous written AND addressed");
+                throw new LowlevelError("Cannot get contiguous written AND addressed");
             else if (fl == Varnode::input)
             {
                 searchvn.loc = addr;
@@ -774,7 +774,7 @@ namespace Sla.DECCORE
             VarnodeDefSet::const_iterator iter;
 
             if (fl == Varnode::written)
-                throw LowlevelError("Cannot get contiguous written AND addressed");
+                throw new LowlevelError("Cannot get contiguous written AND addressed");
             else if (fl == Varnode::input)
             {
                 searchvn.loc = addr;
@@ -808,13 +808,13 @@ namespace Sla.DECCORE
           iter = loc_tree.begin();
           lastvn = *iter++;
           if (def_tree.end() == def_tree.find(lastvn))
-            throw LowlevelError("Varbank first loc missing in def");
+            throw new LowlevelError("Varbank first loc missing in def");
           for(;iter!=loc_tree.end();++iter) {
             vn = *iter;
             if (def_tree.end() == def_tree.find(vn))
-              throw LowlevelError("Varbank loc missing in def");
+              throw new LowlevelError("Varbank loc missing in def");
             if (*vn < *lastvn)
-              throw LowlevelError("Varbank locdef integrity test failed");
+              throw new LowlevelError("Varbank locdef integrity test failed");
             lastvn = vn;
           }
 
@@ -824,13 +824,13 @@ namespace Sla.DECCORE
           diter = def_tree.begin();
           lastvn = *diter++;
           if (loc_tree.end() == loc_tree.find(lastvn))
-            throw LowlevelError("Varbank first def missing in loc");
+            throw new LowlevelError("Varbank first def missing in loc");
           for(;diter!=def_tree.end();++diter) {
             vn = *diter;
             if (loc_tree.end() == loc_tree.find(vn))
-              throw LowlevelError("Varbank def missing in loc");
+              throw new LowlevelError("Varbank def missing in loc");
             if (cmp(vn,lastvn))
-              throw LowlevelError("Varbank defloc integrity test failed");
+              throw new LowlevelError("Varbank defloc integrity test failed");
             lastvn = vn;
           }
         }

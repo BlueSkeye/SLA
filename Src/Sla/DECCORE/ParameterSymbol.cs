@@ -84,7 +84,7 @@ namespace Sla.DECCORE
 
         public override ProtoParameter clone()
         {
-            throw LowlevelError("Should not be cloning ParameterSymbol");
+            throw new LowlevelError("Should not be cloning ParameterSymbol");
         }
 
         public override Symbol getSymbol() => sym;

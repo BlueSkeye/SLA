@@ -258,7 +258,7 @@ namespace Sla.SLEIGH
                 setUniqueOffset(newaddr);
                 const ParserContext* pos = discache->getParserContext(newaddr);
                 if (pos->getParserState() != ParserContext::pcode)
-                    throw LowlevelError("Could not obtain cached delay slot instruction");
+                    throw new LowlevelError("Could not obtain cached delay slot instruction");
                 int4 len = pos->getLength();
 
                 ParserWalker newwalker(pos );
@@ -283,7 +283,7 @@ namespace Sla.SLEIGH
             // bld-param(0) contains the address of the instruction
             // bld-param(1) contains the section number
             if (secnum >= 0)
-                throw LowlevelError("CROSSBUILD directive within a named section");
+                throw new LowlevelError("CROSSBUILD directive within a named section");
             secnum = bld->getIn(1)->getOffset().getReal();
             VarnodeTpl* vn = bld->getIn(0);
             AddrSpace* spc = vn->getSpace().fixSpace(*walker);
@@ -296,7 +296,7 @@ namespace Sla.SLEIGH
             setUniqueOffset(newaddr);
             const ParserContext* pos = discache->getParserContext(newaddr);
             if (pos->getParserState() != ParserContext::pcode)
-                throw LowlevelError("Could not obtain cached crossbuild instruction");
+                throw new LowlevelError("Could not obtain cached crossbuild instruction");
 
             ParserWalker newwalker(pos, tmp->getParserContext() );
             walker = &newwalker;

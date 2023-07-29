@@ -196,13 +196,13 @@ namespace Sla.DECCORE
                     break;
                 case TokenSplit::end_indent:
                     if (indentstack.empty())
-                        throw LowlevelError("indent error");
+                        throw new LowlevelError("indent error");
 #if PRETTY_DEBUG
                     if (checkid.empty() || (checkid.back() != tok.getCount()))
-                        throw LowlevelError("mismatch1");
+                        throw new LowlevelError("mismatch1");
                     checkid.pop_back();
                     if (indentstack.empty())
-                        throw LowlevelError("Empty indent stack");
+                        throw new LowlevelError("Empty indent stack");
 #endif
                     indentstack.pop_back();
                     break;
@@ -213,10 +213,10 @@ namespace Sla.DECCORE
                     tok.print(lowlevel);
 #if PRETTY_DEBUG
                     if (checkid.empty() || (checkid.back() != tok.getCount()))
-                        throw LowlevelError("mismatch2");
+                        throw new LowlevelError("mismatch2");
                     checkid.pop_back();
                     if (indentstack.empty())
-                        throw LowlevelError("indent error");
+                        throw new LowlevelError("indent error");
 #endif
                     indentstack.pop_back();
                     break;
@@ -419,7 +419,7 @@ namespace Sla.DECCORE
         {
 #if PRETTY_DEBUG
             if (!tokqueue.empty())
-                throw LowlevelError("Starting with non-empty token queue");
+                throw new LowlevelError("Starting with non-empty token queue");
 #endif
             checkstart();
             TokenSplit & tok(tokqueue.push());
@@ -704,15 +704,15 @@ namespace Sla.DECCORE
             {
                 TokenSplit & tok(tokqueue.popbottom());
                 if (tok.getSize() < 0)
-                    throw LowlevelError("Cannot flush pretty printer. Missing group end");
+                    throw new LowlevelError("Cannot flush pretty printer. Missing group end");
                 print(tok);
             }
             needbreak = false;
 #if PRETTY_DEBUG
             if (!scanqueue.empty())
-                throw LowlevelError("prettyprint scanqueue did not flush");
+                throw new LowlevelError("prettyprint scanqueue did not flush");
             if (!indentstack.empty())
-                throw LowlevelError("prettyprint indentstack did not flush");
+                throw new LowlevelError("prettyprint indentstack did not flush");
 #endif
             lowlevel->flush();
         }
@@ -720,7 +720,7 @@ namespace Sla.DECCORE
         private override void setMaxLineSize(int4 val)
         {
             if ((val < 20) || (val > 10000))
-                throw LowlevelError("Bad maximum line size");
+                throw new LowlevelError("Bad maximum line size");
             maxlinesize = val;
             scanqueue.setMax(3 * val);
             tokqueue.setMax(3 * val);

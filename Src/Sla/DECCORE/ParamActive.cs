@@ -212,7 +212,7 @@ namespace Sla.DECCORE
         public void splitTrial(int i, int sz)
         {
             if (stackplaceholder >= 0)
-                throw LowlevelError("Cannot split parameter when the placeholder has not been recovered");
+                throw new LowlevelError("Cannot split parameter when the placeholder has not been recovered");
             vector<ParamTrial> newtrials;
             int4 slot = trial[i].getSlot();
 
@@ -244,7 +244,7 @@ namespace Sla.DECCORE
         public void joinTrial(int slot, Address addr, int sz)
         {
             if (stackplaceholder >= 0)
-                throw LowlevelError("Cannot join parameters when the placeholder has not been removed");
+                throw new LowlevelError("Cannot join parameters when the placeholder has not been removed");
             vector<ParamTrial> newtrials;
             int4 sizecheck = 0;
             for (int4 i = 0; i < trial.size(); ++i)
@@ -271,7 +271,7 @@ namespace Sla.DECCORE
                 }
             }
             if (sizecheck != sz)
-                throw LowlevelError("Size mismatch when joining parameters");
+                throw new LowlevelError("Size mismatch when joining parameters");
             slotbase -= 1;
             trial = newtrials;
         }

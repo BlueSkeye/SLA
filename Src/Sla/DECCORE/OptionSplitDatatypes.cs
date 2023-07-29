@@ -34,7 +34,7 @@ namespace Sla.DECCORE
             if (val == "struct") return option_struct;
             if (val == "array") return option_array;
             if (val == "pointer") return option_pointer;
-            throw LowlevelError("Unknown data-type split option: " + val);
+            throw new LowlevelError("Unknown data-type split option: " + val);
         }
 
         public OptionSplitDatatypes()

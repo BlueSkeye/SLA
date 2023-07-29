@@ -416,7 +416,7 @@ namespace Sla.DECCORE
             {
                 TransformVar* res = (*iter).second;
                 if (res->bitSize != bitSize || res->val != lsbOffset)
-                    throw LowlevelError("Cannot create multiple pieces for one Varnode through getPiece");
+                    throw new LowlevelError("Cannot create multiple pieces for one Varnode through getPiece");
                 return res;
             }
             return newPiece(vn, bitSize, lsbOffset);
