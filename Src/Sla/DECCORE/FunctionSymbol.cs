@@ -19,7 +19,7 @@ namespace Sla.DECCORE
         
         ~FunctionSymbol()
         {
-            if (fd != (Funcdata*)0)
+            if (fd != (Funcdata)null)
                 delete fd;
         }
 
@@ -59,7 +59,7 @@ namespace Sla.DECCORE
         public FunctionSymbol(Scope sc, int size)
             : base(sc)
         {
-            fd = (Funcdata*)0;
+            fd = (Funcdata)null;
             consumeSize = size;
             buildType();
         }
@@ -67,7 +67,7 @@ namespace Sla.DECCORE
         /// Get the underlying Funcdata object
         public Funcdata getFunction()
         {
-            if (fd != (Funcdata*)0) return fd;
+            if (fd != (Funcdata)null) return fd;
             SymbolEntry* entry = getFirstWholeMap();
             fd = new Funcdata(name, displayName, scope, entry.getAddr(), this);
             return fd;
@@ -75,7 +75,7 @@ namespace Sla.DECCORE
 
         public override void encode(Encoder encoder)
         {
-            if (fd != (Funcdata*)0)
+            if (fd != (Funcdata)null)
                 fd.encode(encoder, symbolId, false);   // Save the function itself
             else
             {

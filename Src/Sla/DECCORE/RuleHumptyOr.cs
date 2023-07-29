@@ -29,14 +29,19 @@ namespace Sla.DECCORE
         ///  - `(V & W) | (V & X)  =>  V & (W|X)`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_OR);
+            oplist.Add(CPUI_INT_OR);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn1,*vn2;
-            Varnode* a, *b, *c, *d;
-            PcodeOp* and1,*and2;
+            Varnode vn1;
+            Varnode vn2;
+            Varnode a;
+            Varnode b;
+            Varnode c;
+            Varnode d;
+            PcodeOp and1;
+            PcodeOp and2;
 
             vn1 = op.getIn(0);
             if (!vn1.isWritten()) return 0;
@@ -75,7 +80,7 @@ namespace Sla.DECCORE
             if (b.isConstant() && c.isConstant())
             {
                 ulong totalbits = b.getOffset() | c.getOffset();
-                if (totalbits == calc_mask(a.getSize()))
+                if (totalbits == Globals.calc_mask(a.getSize()))
                 {
                     // Between the two sides, we get all bits of a. Convert to COPY
                     data.opSetOpcode(op, CPUI_COPY);

@@ -117,7 +117,7 @@ namespace Sla.CORE
         /// \param i is the varnode to be added as input
         public void addInput(VarnodeData i)
         {
-            @in.Add(i);
+            @@in.Add(i);
         }
 
         /// Remove all input varnodes to this op
@@ -125,14 +125,14 @@ namespace Sla.CORE
         /// inputs so new ones can be added.
         public void clearInputs()
         {
-            @in.Clear();
+            @@in.Clear();
         }
 
         /// Get the number of input varnodes to this op
         /// \return the number of inputs
         public int numInput()
         {
-            return @in.Count;
+            return @@in.Count;
         }
 
         /// Get the i-th input varnode for this op

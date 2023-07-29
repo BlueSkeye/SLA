@@ -78,10 +78,10 @@ namespace Sla.DECCORE
 
             Datatype* sub = a.type;
             ulong umod = mod;
-            while ((sub != (Datatype*)0) && (sub.getSize() > b.type.getSize()))
+            while ((sub != (Datatype)null) && (sub.getSize() > b.type.getSize()))
                 sub = sub.getSubType(umod, &umod);
 
-            if (sub == (Datatype*)0) return false;
+            if (sub == (Datatype)null) return false;
             if (umod != 0) return false;
             if (sub.getSize() == b.type.getSize()) return true;
             if ((b.flags & Varnode::typelock) != 0) return false;

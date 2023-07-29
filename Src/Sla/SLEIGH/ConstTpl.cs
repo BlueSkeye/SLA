@@ -217,11 +217,11 @@ namespace Sla.SLEIGH
                         switch (select)
                         {
                             case v_space:
-                                if (hand.offset_space == (AddrSpace*)0)
+                                if (hand.offset_space == (AddrSpace)null)
                                     return (ulong)(ulong)hand.space;
                                 return (ulong)(ulong)hand.temp_space;
                             case v_offset:
-                                if (hand.offset_space == (AddrSpace*)0)
+                                if (hand.offset_space == (AddrSpace)null)
                                     return hand.offset_offset;
                                 return hand.temp_offset;
                             case v_size:
@@ -229,14 +229,14 @@ namespace Sla.SLEIGH
                             case v_offset_plus:
                                 if (hand.space != walker.getConstSpace())
                                 { // If we are not a constant
-                                    if (hand.offset_space == (AddrSpace*)0)
+                                    if (hand.offset_space == (AddrSpace)null)
                                         return hand.offset_offset + (value_real & 0xffff); // Adjust offset by truncation amount
                                     return hand.temp_offset + (value_real & 0xffff);
                                 }
                                 else
                                 {           // If we are a constant, we want to return a shifted value
                                     ulong val;
-                                    if (hand.offset_space == (AddrSpace*)0)
+                                    if (hand.offset_space == (AddrSpace)null)
                                         val = hand.offset_offset;
                                     else
                                         val = hand.temp_offset;
@@ -268,7 +268,7 @@ namespace Sla.SLEIGH
                         switch (select)
                         {
                             case v_space:
-                                if (hand.offset_space == (AddrSpace*)0)
+                                if (hand.offset_space == (AddrSpace)null)
                                     return hand.space;
                                 return hand.temp_space;
                             default:
@@ -375,7 +375,7 @@ namespace Sla.SLEIGH
             }
             else
             {
-                hand.offset_space = (AddrSpace*)0;
+                hand.offset_space = (AddrSpace)null;
                 hand.offset_offset = hand.space.wrapOffset(fix(walker));
             }
         }
@@ -439,20 +439,20 @@ namespace Sla.SLEIGH
             if (typestring == "real")
             {
                 type = real;
-                istringstream s(el.getAttributeValue("val"));
+                istringstream s = new istringstream(el.getAttributeValue("val"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> value_real;
             }
             else if (typestring == "handle")
             {
                 type = handle;
-                istringstream s(el.getAttributeValue("val"));
+                istringstream s = new istringstream(el.getAttributeValue("val"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> value.handle_index;
                 select = readHandleSelector(el.getAttributeValue("s"));
                 if (select == v_offset_plus)
                 {
-                    istringstream s2(el.getAttributeValue("plus"));
+                    istringstream s2 = new istringstream(el.getAttributeValue("plus"));
                     s2.unsetf(ios::dec | ios::hex | ios::oct);
                     s2 >> value_real;
                 }
@@ -485,7 +485,7 @@ namespace Sla.SLEIGH
             else if (typestring == "relative")
             {
                 type = j_relative;
-                istringstream s(el.getAttributeValue("val"));
+                istringstream s = new istringstream(el.getAttributeValue("val"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> value_real;
             }

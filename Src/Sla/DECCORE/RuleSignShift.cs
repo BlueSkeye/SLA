@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// in an arithmetic expression or a comparison.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_RIGHT);
+            oplist.Add(CPUI_INT_RIGHT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -72,7 +72,7 @@ namespace Sla.DECCORE
             data.opSetOpcode(shiftOp, CPUI_INT_SRIGHT);
             Varnode* uniqueVn = data.newUniqueOut(inVn.getSize(), shiftOp);
             data.opSetInput(op, uniqueVn, 0);
-            data.opSetInput(op, data.newConstant(inVn.getSize(), calc_mask(inVn.getSize())), 1);
+            data.opSetInput(op, data.newConstant(inVn.getSize(), Globals.calc_mask(inVn.getSize())), 1);
             data.opSetOpcode(op, CPUI_INT_MULT);
             data.opSetInput(shiftOp, inVn, 0);
             data.opSetInput(shiftOp, constVn, 1);

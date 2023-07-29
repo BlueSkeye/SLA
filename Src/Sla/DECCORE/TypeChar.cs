@@ -43,7 +43,7 @@ namespace Sla.DECCORE
 
         public override void encode(Encoder encoder)
         {
-            if (typedefImm != (Datatype*)0)
+            if (typedefImm != (Datatype)null)
             {
                 encodeTypedef(encoder);
                 return;

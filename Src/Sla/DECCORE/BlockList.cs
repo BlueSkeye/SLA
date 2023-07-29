@@ -19,7 +19,7 @@ namespace Sla.DECCORE
         public override void printHeader(TextWriter s)
         {
             s.Write("List block ");
-            base.printHeader(s);
+            @base.printHeader(s);
         }
 
         public override void emit(PrintLanguage lng)
@@ -44,7 +44,7 @@ namespace Sla.DECCORE
             // Negate condition of last block
             bool res = bl.negateCondition(false);
             // Flip order of outgoing edges
-            base.negateCondition(toporbottom);
+            @base.negateCondition(toporbottom);
             return res;
         }
 

@@ -55,12 +55,12 @@ namespace Sla.DECCORE
                     if (vn.isPersist() || vn.isSpacebase())
                     {
                         vn.setDirectWrite();
-                        worklist.push_back(vn);
+                        worklist.Add(vn);
                     }
                     else if (data.getFuncProto().possibleInputParam(vn.getAddr(), vn.getSize()))
                     {
                         vn.setDirectWrite();
-                        worklist.push_back(vn);
+                        worklist.Add(vn);
                     }
                 }
                 else if (vn.isWritten())
@@ -72,7 +72,7 @@ namespace Sla.DECCORE
                         {
                             // Anything that writes to a global variable (in a real way) is considered a direct write
                             vn.setDirectWrite();
-                            worklist.push_back(vn);
+                            worklist.Add(vn);
                         }
                         else if (op.code() == CPUI_COPY)
                         {   // For most COPYs, do not consider it a direct write
@@ -88,7 +88,7 @@ namespace Sla.DECCORE
                                 if (invn.isWritten() && invn.getDef().isMarker())
                                 {   // if source is from an INDIRECT
                                     vn.setDirectWrite();                   // then treat this as a direct write
-                                    worklist.push_back(vn);
+                                    worklist.Add(vn);
                                 }
                             }
                         }
@@ -96,7 +96,7 @@ namespace Sla.DECCORE
                         {
                             // Anything that writes to a variable in a way that isn't some form of COPY is a direct write
                             vn.setDirectWrite();
-                            worklist.push_back(vn);
+                            worklist.Add(vn);
                         }
                     }
                     else if (!propagateIndirect && op.code() == CPUI_INDIRECT)
@@ -114,7 +114,7 @@ namespace Sla.DECCORE
                     if (!vn.isIndirectZero())
                     {
                         vn.setDirectWrite();
-                        worklist.push_back(vn);
+                        worklist.Add(vn);
                     }
                 }
             }
@@ -133,7 +133,7 @@ namespace Sla.DECCORE
                         dvn.setDirectWrite();
                         // For call based INDIRECTs, output is marked, but does not propagate depending on setting
                         if (propagateIndirect || op.code() != CPUI_INDIRECT || op.isIndirectStore())
-                            worklist.push_back(dvn);
+                            worklist.Add(dvn);
                     }
                 }
             }

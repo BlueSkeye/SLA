@@ -107,7 +107,7 @@ namespace Sla.EXTRA
 
         private int scanNumber()
         {
-            istringstream s(identifier);
+            istringstream s = new istringstream(identifier);
             s.unsetf(ios::dec | ios::hex | ios::oct);
             ulong val;
             s >> val;

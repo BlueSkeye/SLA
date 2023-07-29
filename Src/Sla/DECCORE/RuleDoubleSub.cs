@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Simplify chained SUBPIECE:  `sub( sub(V,c), d)  =>  sub(V, c+d)`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_SUBPIECE);
+            oplist.Add(CPUI_SUBPIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

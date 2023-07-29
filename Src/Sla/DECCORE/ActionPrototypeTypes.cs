@@ -110,7 +110,7 @@ namespace Sla.DECCORE
                 BlockBasic* topbl = (BlockBasic*)0;
                 if (data.getBasicBlocks().getSize() > 0)
                     topbl = (BlockBasic*)data.getBasicBlocks().getBlock(0);
-                if ((stackspc != (AddrSpace*)0) && (topbl != (BlockBasic*)0))
+                if ((stackspc != (AddrSpace)null) && (topbl != (BlockBasic*)0))
                 {
                     for (int i = 0; i < stackspc.numSpacebase(); ++i)
                     {

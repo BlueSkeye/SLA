@@ -33,9 +33,9 @@ namespace Sla.DECCORE
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
             int inslot, int outslot)
         {
-            if (op.isIndirectCreation()) return (Datatype*)0;
-            if ((inslot == 1) || (outslot == 1)) return (Datatype*)0;
-            if ((inslot != -1) && (outslot != -1)) return (Datatype*)0; // Must propagate input <. output
+            if (op.isIndirectCreation()) return (Datatype)null;
+            if ((inslot == 1) || (outslot == 1)) return (Datatype)null;
+            if ((inslot != -1) && (outslot != -1)) return (Datatype)null; // Must propagate input <. output
 
             Datatype* newtype;
             if (invn.isSpacebase())

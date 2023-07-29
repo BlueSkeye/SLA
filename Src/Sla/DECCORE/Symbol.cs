@@ -139,14 +139,14 @@ namespace Sla.DECCORE
         {
             scope = sc;
             nameDedup = 0;
-            type = (Datatype*)0;
+            type = (Datatype)null;
             flags = 0;
             dispflags = 0;
             category = no_category;
             catindex = 0;
             symbolId = 0;
             wholeCount = 0;
-            depthScope = (Scope*)0;
+            depthScope = (Scope)null;
             depthResolution = 0;
         }
 
@@ -347,7 +347,7 @@ namespace Sla.DECCORE
                 encoder.writeBool(ATTRIB_NAMELOCK, true);
             if ((flags & Varnode::typelock) != 0)
                 encoder.writeBool(ATTRIB_TYPELOCK, true);
-            if ((flags & Varnode::readonly)!= 0)
+            if ((flags & Varnode::@readonly)!= 0)
                 encoder.writeBool(ATTRIB_READONLY, true);
             if ((flags & Varnode::volatil) != 0)
                 encoder.writeBool(ATTRIB_VOLATILE, true);
@@ -423,7 +423,7 @@ namespace Sla.DECCORE
                 else if (attribId == ATTRIB_READONLY)
                 {
                     if (decoder.readBool())
-                        flags |= Varnode::readonly;
+                        flags |= Varnode::@readonly;
                 }
                 else if (attribId == ATTRIB_TYPELOCK)
                 {

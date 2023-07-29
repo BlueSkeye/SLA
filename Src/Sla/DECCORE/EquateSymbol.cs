@@ -53,7 +53,7 @@ namespace Sla.DECCORE
         public bool isValueClose(ulong op2Value, int size)
         {
             if (value == op2Value) return true;
-            ulong mask = calc_mask(size);
+            ulong mask = Globals.calc_mask(size);
             ulong maskValue = value & mask;
             if (maskValue != value)
             {       // If '1' bits are getting masked off

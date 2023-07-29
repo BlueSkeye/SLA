@@ -110,7 +110,7 @@ namespace Sla.DECCORE
         public void insertDeadcodeDelay(AddrSpace spc, int delay)
         {
             while (deadcodedelay.size() <= spc.getIndex())
-                deadcodedelay.push_back(-1);
+                deadcodedelay.Add(-1);
 
             deadcodedelay[spc.getIndex()] = delay;
         }
@@ -163,7 +163,7 @@ namespace Sla.DECCORE
         /// \param addr is the address of the indirect jump
         public void insertMultistageJump(Address addr)
         {
-            multistagejump.push_back(addr);
+            multistagejump.Add(addr);
         }
 
         /// \brief Mark a branch instruction with a different flow type
@@ -310,7 +310,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < deadcodedelay.size(); ++i)
             {
                 if (deadcodedelay[i] >= 0)
-                    messagelist.push_back(generateDeadcodeDelayMessage(i, glb));
+                    messagelist.Add(generateDeadcodeDelayMessage(i, glb));
             }
         }
 

@@ -19,24 +19,24 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("No load image present");
+                throw new IfaceExecutionError("No load image present");
 
             string name;
             s >> name >> ws;
             if (name.size() == 0)
-                throw IfaceParseError("Missing tracked register name");
+                throw new IfaceParseError("Missing tracked register name");
 
             s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
             ulong value = 0xbadbeef;
             s >> value;
             if (value == 0xbadbeef)
-                throw IfaceParseError("Missing context value");
+                throw new IfaceParseError("Missing context value");
 
             s >> ws;
             if (s.eof())
             {       // No range indicates default value
                 TrackedSet & track(dcp.conf.context.getTrackedDefault());
-                track.push_back(TrackedContext());
+                track.Add(TrackedContext());
                 track.back().loc = dcp.conf.translate.getRegister(name);
                 track.back().val = value;
                 return;
@@ -47,14 +47,14 @@ namespace Sla.EXTRA
             Address addr2 = parse_machaddr(s, size2, *dcp.conf.types);
 
             if (addr1.isInvalid() || addr2.isInvalid())
-                throw IfaceParseError("Invalid address range");
+                throw new IfaceParseError("Invalid address range");
             if (addr2 <= addr1)
-                throw IfaceParseError("Bad address range");
+                throw new IfaceParseError("Bad address range");
 
             TrackedSet & track(dcp.conf.context.createSet(addr1, addr2));
             TrackedSet & def(dcp.conf.context.getTrackedDefault());
             track = def;            // Start with default as base
-            track.push_back(TrackedContext());
+            track.Add(TrackedContext());
             track.back().loc = dcp.conf.translate.getRegister(name);
             track.back().val = value;
         }

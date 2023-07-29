@@ -258,7 +258,7 @@ private class AddrRange
             if ((iter1 == tree.end()) || (point < (*iter1).first))
                 return std::pair<PartIterator, PartIterator>(PartIterator(iter1), PartIterator(iter1));
 
-            AddrRange addrend((* iter1).last, subsorttype(true));
+            AddrRange addrend = new AddrRange((* iter1).last, subsorttype(true));
             iter2 = tree.upper_bound(addrend);
 
             return std::pair<PartIterator, PartIterator>(PartIterator(iter1), PartIterator(iter2));
@@ -302,7 +302,7 @@ private class AddrRange
         /// \return iterator to first sub-range after that does not intersect the boundary point
         public const_iterator find_end(linetype point)
         {
-            AddrRange addrend(point, subsorttype(true));
+            AddrRange addrend = new AddrRange(point, subsorttype(true));
             typename std::multiset<AddrRange>::const_iterator iter;
 
             iter = tree.upper_bound(addrend);
@@ -312,7 +312,7 @@ private class AddrRange
             // If we reach here, (*iter).last is bigger than point (as per upper_bound) but
             // point >= than (*iter).first, i.e. point is contained in the sub-range.
             // So we have to do one more search for first sub-range after the containing sub-range.
-            AddrRange addrbeyond((* iter).last, subsorttype(true));
+            AddrRange addrbeyond = new AddrRange((* iter).last, subsorttype(true));
             return tree.upper_bound(addrbeyond);
         }
 

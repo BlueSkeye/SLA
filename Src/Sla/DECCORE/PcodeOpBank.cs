@@ -182,7 +182,7 @@ namespace Sla.DECCORE
             optree.erase(op.getSeqNum());
             deadlist.erase(op.insertiter);
             removeFromCodeList(op);
-            deadandgone.push_back(op);
+            deadandgone.Add(op);
         }
 
         /// Destroy/retire all PcodeOps in the \e dead list
@@ -294,7 +294,7 @@ namespace Sla.DECCORE
         public PcodeOp target(Address addr)
         {
             PcodeOpTree::const_iterator iter = optree.lower_bound(SeqNum(addr, 0));
-            if (iter == optree.end()) return (PcodeOp*)0;
+            if (iter == optree.end()) return (PcodeOp)null;
             return (*iter).second.target();
         }
 
@@ -304,7 +304,7 @@ namespace Sla.DECCORE
         public PcodeOp findOp(SeqNum num)
         {
             PcodeOpTree::const_iterator iter = optree.find(num);
-            if (iter == optree.end()) return (PcodeOp*)0;
+            if (iter == optree.end()) return (PcodeOp)null;
             return (*iter).second;
         }
 
@@ -342,7 +342,7 @@ namespace Sla.DECCORE
                     ++iter;
                 }
                 PcodeOpTree::const_iterator nextiter = optree.upper_bound(max);
-                if (nextiter == optree.end()) return (PcodeOp*)0;
+                if (nextiter == optree.end()) return (PcodeOp)null;
                 retop = (*nextiter).second;
                 return retop;
             }
@@ -365,7 +365,7 @@ namespace Sla.DECCORE
         /// \brief End of all PcodeOps at one Address
         public PcodeOpTree::const_iterator end(Address addr)
         {
-            return optree.upper_bound(SeqNum(addr, ~((uint)0)));
+            return optree.upper_bound(SeqNum(addr, uint.MaxValue));
         }
 
         /// \brief Start of all PcodeOps marked as \e alive

@@ -94,7 +94,7 @@ namespace Sla.DECCORE
                     ulong otherval;
                     if (!addr.isConstant())
                     {
-                        MemoryImage mem(addr.getSpace(),4,1024,fd.getArch().loader);
+                        MemoryImage mem = new MemoryImage(addr.getSpace(),4,1024,fd.getArch().loader);
                         otherval = mem.getValue(addr.getOffset(), op.getIn(1 - slot).getSize());
                     }
                     else
@@ -131,7 +131,7 @@ namespace Sla.DECCORE
                 if (constvn.isConstant())
                 {
                     maxValue = coveringmask(constvn.getOffset());
-                    maxValue = (maxValue + 1) & calc_mask(vn.getSize());
+                    maxValue = (maxValue + 1) & Globals.calc_mask(vn.getSize());
                 }
             }
             else if (op.code() == CPUI_MULTIEQUAL)
@@ -151,7 +151,7 @@ namespace Sla.DECCORE
                 if (i == op.numInput())
                 {
                     maxValue = coveringmask(maxValue);
-                    maxValue = (maxValue + 1) & calc_mask(vn.getSize());
+                    maxValue = (maxValue + 1) & Globals.calc_mask(vn.getSize());
                 }
                 else
                     maxValue = 0;
@@ -170,7 +170,7 @@ namespace Sla.DECCORE
             List<PcodeOpNode> path;
             bool firstpoint = false;    // Have not seen likely switch variable yet
 
-            path.push_back(PcodeOpNode(op, slot));
+            path.Add(PcodeOpNode(op, slot));
 
             do
             {   // Traverse through tree of inputs to final address
@@ -199,7 +199,7 @@ namespace Sla.DECCORE
                 }
                 else
                 {           // This varnode is not pruned
-                    path.push_back(PcodeOpNode(curvn.getDef(), 0));
+                    path.Add(PcodeOpNode(curvn.getDef(), 0));
                 }
             } while (path.size() > 1);
             if (pathMeld.empty())
@@ -262,14 +262,14 @@ namespace Sla.DECCORE
                     indpath = bl.getInRevIndex(0);
                 }
                 PcodeOp* cbranch = prevbl.lastOp();
-                if ((cbranch == (PcodeOp*)0) || (cbranch.code() != CPUI_CBRANCH))
+                if ((cbranch == (PcodeOp)null) || (cbranch.code() != CPUI_CBRANCH))
                     break;
                 if (i != 0)
                 {
                     // Check that this CBRANCH isn't protecting some other switch
                     BlockBasic* otherbl = (BlockBasic*)prevbl.getOut(1 - indpath);
                     PcodeOp* otherop = otherbl.lastOp();
-                    if (otherop != (PcodeOp*)0 && otherop.code() == CPUI_BRANCHIND)
+                    if (otherop != (PcodeOp)null && otherop.code() == CPUI_BRANCHIND)
                     {
                         if (otherop != jumptable.getIndirectOp())
                             break;
@@ -284,16 +284,16 @@ namespace Sla.DECCORE
 
                 // The boolean variable could conceivably be the switch variable
                 int indpathstore = prevbl.getFlipPath() ? 1 - indpath : indpath;
-                selectguards.push_back(GuardRecord(cbranch, cbranch, indpathstore, rng, vn));
+                selectguards.Add(GuardRecord(cbranch, cbranch, indpathstore, rng, vn));
                 for (j = 0; j < maxpullback; ++j)
                 {
                     Varnode* markup;        // Throw away markup information
                     if (!vn.isWritten()) break;
                     PcodeOp* readOp = vn.getDef();
                     vn = rng.pullBack(readOp, &markup, usenzmask);
-                    if (vn == (Varnode*)0) break;
+                    if (vn == (Varnode)null) break;
                     if (rng.isEmpty()) break;
-                    selectguards.push_back(GuardRecord(cbranch, readOp, indpathstore, rng, vn));
+                    selectguards.Add(GuardRecord(cbranch, readOp, indpathstore, rng, vn));
                 }
             }
         }
@@ -337,7 +337,7 @@ namespace Sla.DECCORE
             // size is too big, we try only positive values
             if (rng.getSize() > 0x10000)
             {
-                CircleRange positive(0,(rng.getMask() >> 1) + 1,vn.getSize(),stride);
+                CircleRange positive = new CircleRange(0,(rng.getMask() >> 1) + 1,vn.getSize(),stride);
                 positive.intersect(rng);
                 if (!positive.isEmpty())
                     rng = positive;
@@ -411,14 +411,14 @@ namespace Sla.DECCORE
                 // as it very common to have semi-dynamic vectors that are
                 // set up by the system. But the original LoadImage values
                 // are likely incorrect. So for 1 branch, we insist on readonly
-                Architecture* glb = fd.getArch();
-                Varnode* vn = pathMeld.getVarnode(0);
+                Architecture glb = fd.getArch();
+                Varnode vn = pathMeld.getVarnode(0);
                 if (vn.isReadOnly())
                 {
-                    MemoryImage mem(vn.getSpace(),4,16,glb.loader);
+                    MemoryImage mem = new MemoryImage(vn.getSpace(),4,16,glb.loader);
                     ulong val = mem.getValue(vn.getOffset(), vn.getSize());
                     varnodeIndex = 0;
-                    jrange.setRange(CircleRange(val, vn.getSize()));
+                    jrange.setRange(new CircleRange(val, vn.getSize()));
                     jrange.setStartVn(vn);
                     jrange.setStartOp(pathMeld.getOp(0));
                 }
@@ -452,7 +452,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < selectguards.size(); ++i)
             {
                 PcodeOp* op = selectguards[i].getBranch();
-                if (op == (PcodeOp*)0) continue;
+                if (op == (PcodeOp)null) continue;
                 PcodeOp* readOp = selectguards[i].getReadOp();
                 if (val)
                     readOp.setMark();
@@ -491,22 +491,22 @@ namespace Sla.DECCORE
         {
             BlockBasic* curBlock = (BlockBasic*)bl.getIn(0);
             PcodeOp* op = curBlock.lastOp();
-            if (op == (PcodeOp*)0 || op.code() != CPUI_CBRANCH)
+            if (op == (PcodeOp)null || op.code() != CPUI_CBRANCH)
                 return false;
             int outslot = bl.getInRevIndex(0);
             bool isOpFlip = op.isBooleanFlip();
-            varArray.push_back(op.getIn(1));   // Pass back boolean input to CBRANCH
+            varArray.Add(op.getIn(1));   // Pass back boolean input to CBRANCH
             for (int i = 1; i < bl.sizeIn(); ++i)
             {
                 curBlock = (BlockBasic*)bl.getIn(i);
                 op = curBlock.lastOp();
-                if (op == (PcodeOp*)0 || op.code() != CPUI_CBRANCH)
+                if (op == (PcodeOp)null || op.code() != CPUI_CBRANCH)
                     return false;               // All blocks must end with CBRANCH
                 if (op.isBooleanFlip() != isOpFlip)
                     return false;
                 if (outslot != bl.getInRevIndex(i))
                     return false;               // Boolean value must have some meaning
-                varArray.push_back(op.getIn(1));       // Pass back boolean input to CBRANCH
+                varArray.Add(op.getIn(1));       // Pass back boolean input to CBRANCH
             }
             return true;
         }
@@ -536,16 +536,16 @@ namespace Sla.DECCORE
             for (int j = 0; j < maxpullback; ++j)
             {
                 PcodeOp* multiOp = bl.findMultiequal(varArray);
-                if (multiOp != (PcodeOp*)0)
+                if (multiOp != (PcodeOp)null)
                 {
-                    selectguards.push_back(GuardRecord(cbranch, readOp, indpathstore, rng, multiOp.getOut(), true));
+                    selectguards.Add(GuardRecord(cbranch, readOp, indpathstore, rng, multiOp.getOut(), true));
                 }
                 Varnode* markup;        // Throw away markup information
                 Varnode* vn = varArray[0];
                 if (!vn.isWritten()) break;
                 PcodeOp* readOp = vn.getDef();
                 vn = rng.pullBack(readOp, &markup, usenzmask);
-                if (vn == (Varnode*)0) break;
+                if (vn == (Varnode)null) break;
                 if (rng.isEmpty()) break;
                 if (!BlockBasic::liftVerifyUnroll(varArray, readOp.getSlot(vn))) break;
             }
@@ -666,7 +666,7 @@ namespace Sla.DECCORE
                 addr = emul.emulatePath(val, pathMeld, jrange.getStartOp(), jrange.getStartVarnode());
                 addr = AddrSpace::addressToByte(addr, spc.getWordSize());
                 addr &= mask;
-                addresstable.push_back(Address(spc, addr));
+                addresstable.Add(Address(spc, addr));
                 notdone = jrange.next();
             }
             if (loadpoints != (List<LoadTable>*)0)
@@ -684,7 +684,7 @@ namespace Sla.DECCORE
 
             int countaddsub = 0;
             int countext = 0;
-            PcodeOp* normop = (PcodeOp*)0;
+            PcodeOp* normop = (PcodeOp)null;
             while (i < pathMeld.numCommonVarnode())
             {
                 if (!flowsOnlyToModel(switchvn, normop)) break; // Switch variable should only flow into model
@@ -748,7 +748,7 @@ namespace Sla.DECCORE
                     fd.warning("This code block may not be properly labeled as switch case", addresstable[label.size()]);
                 else if (needswarning == 2)
                     fd.warning("Calculation of case label failed", addresstable[label.size()]);
-                label.push_back(switchval);
+                label.Add(switchval);
 
                 // Take into account the fact that the address table may have
                 // been truncated (via the sanity check)
@@ -759,7 +759,7 @@ namespace Sla.DECCORE
             while (label.size() < addresstable.size())
             {
                 fd.warning("Bad switch case", addresstable[label.size()]);
-                label.push_back(0xBAD1ABE1);
+                label.Add(0xBAD1ABE1);
             }
         }
 
@@ -777,7 +777,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < selectguards.size(); ++i)
             {
                 PcodeOp* cbranch = selectguards[i].getBranch();
-                if (cbranch == (PcodeOp*)0) continue; // Already normalized
+                if (cbranch == (PcodeOp)null) continue; // Already normalized
                 if (cbranch.isDead())
                 {
                     selectguards[i].clear();
@@ -847,8 +847,8 @@ namespace Sla.DECCORE
             }
             pathMeld.clear();
             selectguards.clear();
-            normalvn = (Varnode*)0;
-            switchvn = (Varnode*)0;
+            normalvn = (Varnode)null;
+            switchvn = (Varnode)null;
         }
     }
 }

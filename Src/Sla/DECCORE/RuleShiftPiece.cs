@@ -34,15 +34,18 @@ namespace Sla.DECCORE
         ///  - `(zext(W s>> 0x1f) << 0x20) + X        =>  sext(W) where W = sub(X,0)`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_OR);
-            oplist.push_back(CPUI_INT_XOR);
-            oplist.push_back(CPUI_INT_ADD);
+            oplist.Add(CPUI_INT_OR);
+            oplist.Add(CPUI_INT_XOR);
+            oplist.Add(CPUI_INT_ADD);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            PcodeOp* shiftop,*zextloop,*zexthiop;
-            Varnode* vn1,*vn2;
+            PcodeOp shiftop;
+            PcodeOp zextloop;
+            PcodeOp zexthiop;
+            Varnode vn1;
+            Varnode vn2;
 
             vn1 = op.getIn(0);
             if (!vn1.isWritten()) return 0;

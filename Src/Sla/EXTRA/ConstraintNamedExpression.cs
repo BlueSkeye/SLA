@@ -17,7 +17,8 @@ namespace Sla.EXTRA
         
         public ConstraintNamedExpression(int ind, RHSConstant ex)
         {
-            constindex = ind, expr = ex;
+            constindex = ind;
+            expr = ex;
             maxnum = constindex;
         }
 

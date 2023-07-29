@@ -26,9 +26,9 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            List<Varnode*> triallist;
-            ParamActive active(false);
-            Varnode* vn;
+            List<Varnode> triallist = new List<Varnode>();
+            ParamActive active = new ParamActive(false);
+            Varnode vn;
 
             // Clear any unlocked local variables because these are
             // getting cleared anyway in the restructure and may be
@@ -50,7 +50,7 @@ namespace Sla.DECCORE
                         active.registerTrial(vn.getAddr(), vn.getSize());
                         if (!vn.hasNoDescend())
                             active.getTrial(slot).markActive(); // Mark as active if it has descendants
-                        triallist.push_back(vn);
+                        triallist.Add(vn);
                     }
                 }
                 data.getFuncProto().resolveModel(&active);
@@ -64,7 +64,7 @@ namespace Sla.DECCORE
                         vn = data.newVarnode(paramtrial.getSize(), paramtrial.getAddress());
                         vn = data.setInputVarnode(vn);
                         int slot = triallist.size();
-                        triallist.push_back(vn);
+                        triallist.Add(vn);
                         paramtrial.setSlot(slot + 1);
                     }
                 }

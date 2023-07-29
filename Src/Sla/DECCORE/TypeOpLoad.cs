@@ -20,7 +20,7 @@ namespace Sla.DECCORE
         //  virtual Datatype *getInputLocal(const PcodeOp *op,int slot);
         public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
-            if (slot != 1) return (Datatype*)0;
+            if (slot != 1) return (Datatype)null;
             Datatype* reqtype = op.getOut().getHighTypeDefFacing();   // Cast load pointer to match output
             Varnode invn = op.getIn(1);
             Datatype* curtype = invn.getHighTypeReadFacing(op);
@@ -40,14 +40,14 @@ namespace Sla.DECCORE
                 {
                     // if the input is a pointer to a primitive type
                     if ((!invn.isImplied()) || (!invn.isWritten()) || (invn.getDef().code() != CPUI_CAST))
-                        return (Datatype*)0;    // Postpone cast to output
+                        return (Datatype)null;    // Postpone cast to output
                                                 // If we reach here, the input is a CAST to the wrong type
                                                 // We fallthru (returning the proper input case) so that the bad cast can either be
                                                 // adjusted or we recast
                 }
             }
             reqtype = castStrategy.castStandard(reqtype, curtype, false, true);
-            if (reqtype == (Datatype*)0) return reqtype;
+            if (reqtype == (Datatype)null) return reqtype;
             return tlst.getTypePointer(invn.getSize(), reqtype, spc.getWordSize());
         }
 
@@ -68,8 +68,8 @@ namespace Sla.DECCORE
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
             int inslot, int outslot)
         {
-            if ((inslot == 0) || (outslot == 0)) return (Datatype*)0; // Don't propagate along this edge
-            if (invn.isSpacebase()) return (Datatype*)0;
+            if ((inslot == 0) || (outslot == 0)) return (Datatype)null; // Don't propagate along this edge
+            if (invn.isSpacebase()) return (Datatype)null;
             Datatype* newtype;
             if (inslot == -1)
             {    // Propagating output to input (value to ptr)

@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Distribute BOOL_NEGATE:  `!(V && W)  =>  !V || !W`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_BOOL_NEGATE);
+            oplist.Add(CPUI_BOOL_NEGATE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -36,7 +36,7 @@ namespace Sla.DECCORE
             Varnode* newout1,*newout2;
             OpCode opc;
 
-            if (compop == (PcodeOp*)0) return 0;
+            if (compop == (PcodeOp)null) return 0;
             switch (compop.code())
             {
                 case CPUI_BOOL_AND:

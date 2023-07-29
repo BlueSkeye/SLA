@@ -15,7 +15,7 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("No load image present");
+                throw new IfaceExecutionError("No load image present");
 
             if (dcp.conf.types != (TypeFactory*)0)
             {

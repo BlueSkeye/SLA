@@ -26,13 +26,18 @@ namespace Sla.DECCORE
         /// \brief Convert INT_SRIGHT form into INT_SDIV:  `(V + -1*(V s>> 31)) s>> 1  =>  V s/ 2`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_SRIGHT);
+            oplist.Add(CPUI_INT_SRIGHT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* addout,*multout,*shiftout,*a;
-            PcodeOp* addop,*multop,*shiftop;
+            Varnode addout;
+            Varnode multout;
+            Varnode shiftout;
+            Varnode a;
+            PcodeOp addop;
+            PcodeOp multop;
+            PcodeOp shiftop;
 
             if (!op.getIn(1).isConstant()) return 0;
             if (op.getIn(1).getOffset() != 1) return 0;
@@ -41,7 +46,7 @@ namespace Sla.DECCORE
             addop = addout.getDef();
             if (addop.code() != CPUI_INT_ADD) return 0;
             int i;
-            a = (Varnode*)0;
+            a = (Varnode)null;
             for (i = 0; i < 2; ++i)
             {
                 multout = addop.getIn(i);
@@ -51,7 +56,7 @@ namespace Sla.DECCORE
                     continue;
                 if (!multop.getIn(1).isConstant()) continue;
                 if (multop.getIn(1).getOffset() !=
-                calc_mask(multop.getIn(1).getSize()))
+                Globals.calc_mask(multop.getIn(1).getSize()))
                     continue;
                 shiftout = multop.getIn(0);
                 if (!shiftout.isWritten()) continue;

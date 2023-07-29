@@ -29,8 +29,8 @@ namespace Sla.DECCORE
         /// We use the non-zero mask to verify the sign bit is zero.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_SLESS);
-            oplist.push_back(CPUI_INT_SLESSEQUAL);
+            oplist.Add(CPUI_INT_SLESS);
+            oplist.Add(CPUI_INT_SLESSEQUAL);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

@@ -54,7 +54,7 @@ namespace Sla.EXTRA
             CodeUnit & cu((*iter).second);
             if ((*iter).first.getOffset() + cu.size - 1 < addr.getOffset()) return;
             if ((cu.flags & CodeUnit::notcode) != 0) return; // Already visited
-            taintlist.push_back(iter);
+            taintlist.Add(iter);
         }
 
         public void processTaint()
@@ -74,7 +74,7 @@ namespace Sla.EXTRA
                 { // not "notcode" and fallthru
                     Address addr2 = (*iter).first + cu.size;
                     if (addr2 == startaddr)
-                        taintlist.push_back(iter);
+                        taintlist.Add(iter);
                 }
             }
             map<AddrLink, uint>::iterator ftiter, diter, enditer;
@@ -304,7 +304,7 @@ namespace Sla.EXTRA
             for (iter = codeunit.begin(); iter != codeunit.end(); ++iter)
             {
                 if (((*iter).second.flags & CodeUnit::notcode) != 0)
-                    taintlist.push_back(iter);
+                    taintlist.Add(iter);
             }
 
             while (!taintlist.empty())  // Propagate taint along fallthru and crossref edges
@@ -315,11 +315,11 @@ namespace Sla.EXTRA
         { // Mark every code unit that has another code unit fall into it
             map<Address, CodeUnit>::iterator iter;
 
-            Address fallthruaddr((AddrSpace*)0,0);
+            Address fallthruaddr = new Address((AddrSpace)null,0);
             iter = codeunit.begin();
             for (iter = codeunit.begin(); iter != codeunit.end(); ++iter)
             {
-                CodeUnit & cu((*iter).second);
+                CodeUnit cu = new CodeUnit((*iter).second);
                 if ((cu.flags & CodeUnit::notcode) != 0) continue;
                 if (fallthruaddr == (*iter).first)
                     cu.flags |= CodeUnit::hit_by_fallthru;
@@ -387,7 +387,7 @@ namespace Sla.EXTRA
                 if ((cu.flags & (CodeUnit::hit_by_fallthru | CodeUnit::hit_by_jump |
                          CodeUnit::hit_by_call | CodeUnit::notcode |
                          CodeUnit::errantstart)) == 0)
-                    unlinkedstarts.push_back((*iter).first);
+                    unlinkedstarts.Add((*iter).first);
                 if ((cu.flags & (CodeUnit::targethit | CodeUnit::notcode)) == CodeUnit::targethit)
                 {
                     Address codeaddr = (*iter).first;

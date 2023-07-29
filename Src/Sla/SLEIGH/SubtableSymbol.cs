@@ -21,7 +21,7 @@ namespace Sla.SLEIGH
 
         public SubtableSymbol()
         {
-            pattern = (TokenPattern*)0;
+            pattern = (TokenPattern)null;
             decisiontree = (DecisionNode*)0;
         }
 
@@ -29,14 +29,14 @@ namespace Sla.SLEIGH
             : base(nm)
         {
             beingbuilt = false;
-            pattern = (TokenPattern*)0;
+            pattern = (TokenPattern)null;
             decisiontree = (DecisionNode*)0;
             errors = 0;
         }
 
         ~SubtableSymbol()
         {
-            if (pattern != (TokenPattern*)0)
+            if (pattern != (TokenPattern)null)
                 delete pattern;
             if (decisiontree != (DecisionNode*)0)
                 delete decisiontree;
@@ -52,12 +52,12 @@ namespace Sla.SLEIGH
         public void addConstructor(Constructor ct)
         {
             ct.setId(construct.size());
-            construct.push_back(ct);
+            construct.Add(ct);
         }
 
         public void buildDecisionTree(DecisionProperties props)
         {               // Associate pattern disjoints to constructors
-            if (pattern == (TokenPattern*)0) return; // Pattern not fully formed
+            if (pattern == (TokenPattern)null) return; // Pattern not fully formed
             Pattern* pat;
             decisiontree = new DecisionNode((DecisionNode*)0);
             for (int i = 0; i < construct.size(); ++i)
@@ -74,7 +74,7 @@ namespace Sla.SLEIGH
 
         public TokenPattern buildPattern(TextWriter s)
         {
-            if (pattern != (TokenPattern*)0) return pattern; // Already built
+            if (pattern != (TokenPattern)null) return pattern; // Already built
 
             errors = false;
             beingbuilt = true;
@@ -124,19 +124,19 @@ namespace Sla.SLEIGH
 
         public override PatternExpression getPatternExpression()
         {
-            throw SleighError("Cannot use subtable in expression");
+            throw new SleighError("Cannot use subtable in expression");
         }
 
         public override void getFixedHandle(ref FixedHandle hand, ParserWalker walker)
         {
-            throw SleighError("Cannot use subtable in expression");
+            throw new SleighError("Cannot use subtable in expression");
         }
 
         public override int getSize() => -1;
 
         public override void print(TextWriter s, ParserWalker walker)
         {
-            throw SleighError("Cannot use subtable in expression");
+            throw new SleighError("Cannot use subtable in expression");
         }
 
         public override void collectLocalValues(List<ulong> results)
@@ -170,7 +170,7 @@ namespace Sla.SLEIGH
         {
             {
                 int numct;
-                istringstream s(el.getAttributeValue("numct"));
+                istringstream s = new istringstream(el.getAttributeValue("numct"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> numct;
                 construct.reserve(numct);
@@ -193,7 +193,7 @@ namespace Sla.SLEIGH
                 }
                 ++iter;
             }
-            pattern = (TokenPattern*)0;
+            pattern = (TokenPattern)null;
             beingbuilt = false;
             errors = 0;
         }

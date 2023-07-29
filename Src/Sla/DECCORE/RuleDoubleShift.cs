@@ -32,9 +32,9 @@ namespace Sla.DECCORE
         ///    - `(V << c) >> c` =>  V & 0xff`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_LEFT);
-            oplist.push_back(CPUI_INT_RIGHT);
-            oplist.push_back(CPUI_INT_MULT);
+            oplist.Add(CPUI_INT_LEFT);
+            oplist.Add(CPUI_INT_RIGHT);
+            oplist.Add(CPUI_INT_MULT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -94,7 +94,7 @@ namespace Sla.DECCORE
             }
             else if (sa1 == sa2 && size <= sizeof(ulong))
             {   // FIXME:  precision
-                mask = calc_mask(size);
+                mask = Globals.calc_mask(size);
                 if (opc1 == CPUI_INT_LEFT)
                     mask = (mask << sa1) & mask;
                 else

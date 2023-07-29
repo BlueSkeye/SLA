@@ -25,7 +25,7 @@ namespace Sla.DECCORE
 
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_PIECE);
+            oplist.Add(CPUI_PIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

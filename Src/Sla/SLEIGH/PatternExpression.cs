@@ -97,7 +97,7 @@ namespace Sla.SLEIGH
             else if (nm == "not_exp")
                 res = new NotExpression();
             else
-                return (PatternExpression*)0;
+                return (PatternExpression)null;
 
             res.restoreXml(el, trans);
             return res;

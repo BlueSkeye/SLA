@@ -52,7 +52,7 @@ namespace Sla.DECCORE
                 icontext.inputlist.back().space = uniqSpace;
                 icontext.inputlist.back().offset = uniqReserve;
                 icontext.inputlist.back().size = param.getSize();
-                inputList.push_back(uniqReserve);
+                inputList.Add(uniqReserve);
                 uniqReserve += 0x20;
             }
             for (int i = 0; i < sizeOutput(); ++i)
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
                 icontext.output.back().space = uniqSpace;
                 icontext.output.back().offset = uniqReserve;
                 icontext.output.back().size = param.getSize();
-                outputList.push_back(uniqReserve);
+                outputList.Add(uniqReserve);
                 uniqReserve += 0x20;
             }
             emitter = emulator.buildEmitter(glb.pcodeinjectlib.getBehaviors(), uniqReserve);

@@ -19,17 +19,17 @@ namespace Sla.EXTRA
 
             s >> ws >> symbolName;
             if (symbolName.size() == 0)
-                throw IfaceParseError("Missing symbol name");
+                throw new IfaceParseError("Missing symbol name");
 
             Symbol* sym;
             List<Symbol*> symList;
             dcp.readSymbol(symbolName, symList);
             if (symList.empty())
-                throw IfaceExecutionError("No symbol named: " + symbolName);
+                throw new IfaceExecutionError("No symbol named: " + symbolName);
             if (symList.size() == 1)
                 sym = symList[0];
             else
-                throw IfaceExecutionError("More than one symbol named: " + symbolName);
+                throw new IfaceExecutionError("More than one symbol named: " + symbolName);
             sym.setIsolated(true);
         }
     }

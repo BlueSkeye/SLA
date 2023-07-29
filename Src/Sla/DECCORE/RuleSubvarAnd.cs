@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Perform SubVariableFlow analysis triggered by INT_AND
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_AND);
+            oplist.Add(CPUI_INT_AND);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -42,7 +42,7 @@ namespace Sla.DECCORE
                 cmask = (ulong)1;
             else
             {
-                cmask = calc_mask(vn.getSize());
+                cmask = Globals.calc_mask(vn.getSize());
                 cmask >>= 8;
                 while (cmask != 0)
                 {
@@ -55,7 +55,7 @@ namespace Sla.DECCORE
             //  if ((vn.getConsume() & 0xff)==0xff) return 0;
             //  if (op.getIn(1).getOffset() != (ulong)1) return 0;
             if (op.getOut().hasNoDescend()) return 0;
-            SubvariableFlow subflow(&data,vn,cmask,false,false,false);
+            SubvariableFlow subflow = new SubvariableFlow(&data,vn,cmask,false,false,false);
             if (!subflow.doTrace()) return 0;
             subflow.doReplacement();
             return 1;

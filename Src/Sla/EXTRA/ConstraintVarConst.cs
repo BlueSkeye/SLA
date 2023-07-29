@@ -53,7 +53,7 @@ namespace Sla.EXTRA
                 sz = (int)exprsz.getConstant(state);
             else
                 sz = (int)sizeof(ulong);
-            ourconst &= calc_mask(sz);
+            ourconst &= Globals.calc_mask(sz);
             Varnode* vn = fd.newConstant(sz, ourconst);
             state.data(varindex).setVarnode(vn);
             return true;
@@ -76,7 +76,7 @@ namespace Sla.EXTRA
                 s << dec << (int)sizeof(ulong);
             s << ',';
             expr.writeExpression(s, printstate);
-            s << " & calc_mask(";
+            s << " & Globals.calc_mask(";
             exprsz.writeExpression(s, printstate);
             s << "));" << endl;
         }

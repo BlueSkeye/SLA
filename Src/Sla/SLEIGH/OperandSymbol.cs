@@ -52,8 +52,8 @@ namespace Sla.SLEIGH
             hand = index;
             localexp = new OperandValue(index, ct);
             localexp.layClaim();
-            defexp = (PatternExpression*)0;
-            triple = (TripleSymbol*)0;
+            defexp = (PatternExpression)null;
+            triple = (TripleSymbol)null;
         }
 
         public uint getRelativeOffset() => reloffset;
@@ -70,16 +70,16 @@ namespace Sla.SLEIGH
 
         public void defineOperand(PatternExpression pe)
         {
-            if ((defexp != (PatternExpression*)0) || (triple != (TripleSymbol*)0))
-                throw SleighError("Redefining operand");
+            if ((defexp != (PatternExpression)null) || (triple != (TripleSymbol)null))
+                throw new SleighError("Redefining operand");
             defexp = pe;
             defexp.layClaim();
         }
 
         public void defineOperand(TripleSymbol tri)
         {
-            if ((defexp != (PatternExpression*)0) || (triple != (TripleSymbol*)0))
-                throw SleighError("Redefining operand");
+            if ((defexp != (PatternExpression)null) || (triple != (TripleSymbol)null))
+                throw new SleighError("Redefining operand");
             triple = tri;
         }
 
@@ -112,21 +112,21 @@ namespace Sla.SLEIGH
         ~OperandSymbol()
         {
             PatternExpression::release(localexp);
-            if (defexp != (PatternExpression*)0)
+            if (defexp != (PatternExpression)null)
                 PatternExpression::release(defexp);
         }
 
         public override VarnodeTpl getVarnode()
         {
             VarnodeTpl* res;
-            if (defexp != (PatternExpression*)0)
+            if (defexp != (PatternExpression)null)
                 res = new VarnodeTpl(hand, true); // Definite constant handle
             else
             {
                 SpecificSymbol* specsym = dynamic_cast<SpecificSymbol*>(triple);
                 if (specsym != (SpecificSymbol*)0)
                     res = specsym.getVarnode();
-                else if ((triple != (TripleSymbol*)0) &&
+                else if ((triple != (TripleSymbol)null) &&
                      ((triple.getType() == valuemap_symbol) || (triple.getType() == name_symbol)))
                     res = new VarnodeTpl(hand, true); // Zero-size symbols
                 else
@@ -144,7 +144,7 @@ namespace Sla.SLEIGH
 
         public override int getSize()
         {
-            if (triple != (TripleSymbol*)0)
+            if (triple != (TripleSymbol)null)
                 return triple.getSize();
             return 0;
         }
@@ -152,7 +152,7 @@ namespace Sla.SLEIGH
         public override void print(TextWriter s, ParserWalker walker)
         {
             walker.pushOperand(getIndex());
-            if (triple != (TripleSymbol*)0)
+            if (triple != (TripleSymbol)null)
             {
                 if (triple.getType() == SleighSymbol::subtable_symbol)
                     walker.getConstructor().print(s, walker);
@@ -172,7 +172,7 @@ namespace Sla.SLEIGH
 
         public override void collectLocalValues(List<ulong> results)
         {
-            if (triple != (TripleSymbol*)0)
+            if (triple != (TripleSymbol)null)
                 triple.collectLocalValues(results);
         }
 
@@ -182,7 +182,7 @@ namespace Sla.SLEIGH
         {
             s << "<operand_sym";
             SleighSymbol::saveXmlHeader(s);
-            if (triple != (TripleSymbol*)0)
+            if (triple != (TripleSymbol)null)
                 s << " subsym=\"0x" << hex << triple.getId() << "\"";
             s << " off=\"" << dec << reloffset << "\"";
             s << " base=\"" << offsetbase << "\"";
@@ -191,7 +191,7 @@ namespace Sla.SLEIGH
                 s << " code=\"true\"";
             s << " index=\"" << dec << hand << "\">\n";
             localexp.saveXml(s);
-            if (defexp != (PatternExpression*)0)
+            if (defexp != (PatternExpression)null)
                 defexp.saveXml(s);
             s << "</operand_sym>\n";
         }
@@ -205,26 +205,26 @@ namespace Sla.SLEIGH
 
         public override void restoreXml(Element el, SleighBase trans)
         {
-            defexp = (PatternExpression*)0;
-            triple = (TripleSymbol*)0;
+            defexp = (PatternExpression)null;
+            triple = (TripleSymbol)null;
             flags = 0;
             {
-                istringstream s(el.getAttributeValue("index"));
+                istringstream s = new istringstream(el.getAttributeValue("index"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> hand;
             }
             {
-                istringstream s(el.getAttributeValue("off"));
+                istringstream s = new istringstream(el.getAttributeValue("off"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> reloffset;
             }
             {
-                istringstream s(el.getAttributeValue("base"));
+                istringstream s = new istringstream(el.getAttributeValue("base"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> offsetbase;
             }
             {
-                istringstream s(el.getAttributeValue("minlen"));
+                istringstream s = new istringstream(el.getAttributeValue("minlen"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> minimumlength;
             }
@@ -233,10 +233,10 @@ namespace Sla.SLEIGH
                 if (el.getAttributeName(i) == "subsym")
                 {
                     uint id;
-                    istringstream s(el.getAttributeValue(i));
+                    istringstream s = new istringstream(el.getAttributeValue(i));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> id;
-                    triple = (TripleSymbol*)trans.findSymbol(id);
+                    triple = (TripleSymbol)trans.findSymbol(id);
                 }
                 else if (el.getAttributeName(i) == "code")
                 {
@@ -247,7 +247,7 @@ namespace Sla.SLEIGH
             List list = el.getChildren();
             List::const_iterator iter;
             iter = list.begin();
-            localexp = (OperandValue*)PatternExpression::restoreExpression(*iter, trans);
+            localexp = (OperandValue)PatternExpression::restoreExpression(*iter, trans);
             localexp.layClaim();
             ++iter;
             if (iter != list.end())

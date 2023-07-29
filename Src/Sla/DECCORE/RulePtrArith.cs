@@ -66,13 +66,13 @@ namespace Sla.DECCORE
         /// so we need to convert between space units and bytes.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_ADD);
+            oplist.Add(CPUI_INT_ADD);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
             int slot;
-            Datatype ct = (Datatype*)0; // Unnecessary initialization
+            Datatype ct = (Datatype)null; // Unnecessary initialization
 
             if (!data.hasTypeRecoveryStarted()) return 0;
 

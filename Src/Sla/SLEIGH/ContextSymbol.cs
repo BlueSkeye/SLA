@@ -58,18 +58,18 @@ namespace Sla.SLEIGH
             ValueSymbol::restoreXml(el, trans);
             {
                 uint id;
-                istringstream s(el.getAttributeValue("varnode"));
+                istringstream s = new istringstream(el.getAttributeValue("varnode"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> id;
                 vn = (VarnodeSymbol*)trans.findSymbol(id);
             }
             {
-                istringstream s(el.getAttributeValue("low"));
+                istringstream s = new istringstream(el.getAttributeValue("low"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> low;
             }
             {
-                istringstream s(el.getAttributeValue("high"));
+                istringstream s = new istringstream(el.getAttributeValue("high"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> high;
             }

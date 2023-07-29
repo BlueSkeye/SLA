@@ -84,7 +84,7 @@ namespace Sla.DECCORE
                 case CPUI_BOOL_OR:
                 case CPUI_INT_AND:
                 case CPUI_INT_OR:
-                    vn = (Varnode*)0;
+                    vn = (Varnode)null;
                     break;
                 default:
                     return 0;
@@ -92,7 +92,7 @@ namespace Sla.DECCORE
 
             data.opRemoveInput(op, 1);
             data.opSetOpcode(op, CPUI_COPY);
-            if (vn != (Varnode*)0)
+            if (vn != (Varnode)null)
                 data.opSetInput(op, vn, 0);
 
             return 1;

@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         /// rewrite the COPY operator as multiple COPYs.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_COPY);
+            oplist.Add(CPUI_COPY);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

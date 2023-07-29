@@ -14,7 +14,7 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.testCollection == (FunctionTestCollection*)0)
-                throw IfaceExecutionError("No test file is loaded");
+                throw new IfaceExecutionError("No test file is loaded");
             int first = -1;
             int last = -1;
             char hyphen;
@@ -22,17 +22,17 @@ namespace Sla.EXTRA
             s >> ws >> dec >> first;
             first -= 1;
             if (first < 0 || first > dcp.testCollection.numCommands())
-                throw IfaceExecutionError("Command index out of bounds");
+                throw new IfaceExecutionError("Command index out of bounds");
             s >> ws;
             if (!s.eof())
             {
                 s >> ws >> hyphen;
                 if (hyphen != '-')
-                    throw IfaceExecutionError("Missing hyphenated command range");
+                    throw new IfaceExecutionError("Missing hyphenated command range");
                 s >> ws >> last;
                 last -= 1;
                 if (last < 0 || last < first || last > dcp.testCollection.numCommands())
-                    throw IfaceExecutionError("Command index out of bounds");
+                    throw new IfaceExecutionError("Command index out of bounds");
             }
             else
             {

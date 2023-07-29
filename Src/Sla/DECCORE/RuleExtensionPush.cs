@@ -29,8 +29,8 @@ namespace Sla.DECCORE
         /// we can frequently eliminate an explicit variable that would just hold the extension.
         public override void getOpList(List<uint> &oplist)
         {
-            oplist.push_back(CPUI_INT_ZEXT);
-            oplist.push_back(CPUI_INT_SEXT);
+            oplist.Add(CPUI_INT_ZEXT);
+            oplist.Add(CPUI_INT_SEXT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -57,7 +57,7 @@ namespace Sla.DECCORE
                 else if (opc == CPUI_INT_ADD)
                 {
                     PcodeOp* subOp = decOp.getOut().loneDescend();
-                    if (subOp == (PcodeOp*)0 || subOp.code() != CPUI_PTRADD)
+                    if (subOp == (PcodeOp)null || subOp.code() != CPUI_PTRADD)
                         return 0;
                     addcount += 1;
                 }
@@ -69,7 +69,7 @@ namespace Sla.DECCORE
             if ((addcount + ptrcount) <= 1) return 0;
             if (addcount > 0)
             {
-                if (op.getIn(0).loneDescend() != (PcodeOp*)0) return 0;
+                if (op.getIn(0).loneDescend() != (PcodeOp)null) return 0;
             }
             RulePushPtr::duplicateNeed(op, data);       // Duplicate the extension to all result descendants
             return 1;

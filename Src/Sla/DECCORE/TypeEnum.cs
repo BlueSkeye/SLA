@@ -83,10 +83,10 @@ namespace Sla.DECCORE
                     if (!masklist.empty())
                         masklist.back() |= curmask; // Include the bit with the previous mask
                     else
-                        masklist.push_back(curmask);
+                        masklist.Add(curmask);
                 }
                 else
-                    masklist.push_back(curmask);
+                    masklist.Add(curmask);
                 curmaxbit += 1;
             }
             if (masklist.size() > 1)
@@ -117,7 +117,7 @@ namespace Sla.DECCORE
                     if (attrib == ATTRIB_VALUE)
                     {
                         long valsign = decoder.readSignedInteger(); // Value might be negative
-                        val = (ulong)valsign & calc_mask(size);
+                        val = (ulong)valsign & Globals.calc_mask(size);
                     }
                     else if (attrib == ATTRIB_NAME)
                         nm = decoder.readString();
@@ -181,7 +181,7 @@ namespace Sla.DECCORE
                 {   // Zero handled specially, it crosses all masks
                     iter = namemap.find(val);
                     if (iter != namemap.end())
-                        valnames.push_back((*iter).second);
+                        valnames.Add((*iter).second);
                     else
                         allmatch = false;
                 }
@@ -194,7 +194,7 @@ namespace Sla.DECCORE
                             continue;       // print nothing
                         iter = namemap.find(maskedval);
                         if (iter != namemap.end())
-                            valnames.push_back((*iter).second); // Found name for this component
+                            valnames.Add((*iter).second); // Found name for this component
                         else
                         {                   // If no name for this component
                             allmatch = false;           // Give up on representation
@@ -204,7 +204,7 @@ namespace Sla.DECCORE
                 }
                 if (allmatch)           // If we have a complete representation
                     return (count == 1);        // Return whether we represented original value or complement
-                val = val ^ calc_mask(size);    // Switch value we are trying to represent (to complement)
+                val = val ^ Globals.calc_mask(size);    // Switch value we are trying to represent (to complement)
                 valnames.clear();           // Clear out old attempt
             }
             return false;   // If we reach here, no representation was possible, -valnames- is empty
@@ -245,7 +245,7 @@ namespace Sla.DECCORE
 
         public override void encode(Encoder encoder)
         {
-            if (typedefImm != (Datatype*)0)
+            if (typedefImm != (Datatype)null)
             {
                 encodeTypedef(encoder);
                 return;

@@ -32,7 +32,7 @@ namespace Sla.DECCORE
             FuncCallSpecs* fc;
             PcodeOp* op;
 
-            if (stackspace == (AddrSpace*)0) return 0; // No stack to speak of
+            if (stackspace == (AddrSpace)null) return 0; // No stack to speak of
             VarnodeData point = stackspace.getSpacebase(0);
             Address sb_addr(point.space, point.offset);
             int sb_size = point.size;

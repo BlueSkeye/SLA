@@ -15,12 +15,12 @@ namespace Sla.SLEIGH
 
         public override void listValues(List<PatternValue> list)
         {
-            list.push_back(this);
+            list.Add(this);
         }
 
         public override void getMinMax(List<long> minlist, List<long> maxlist)
         {
-            minlist.push_back(minValue()); maxlist.push_back(maxValue());
+            minlist.Add(minValue()); maxlist.Add(maxValue());
         }
 
         public override long getSubValue(List<long> replace, int listpos) => replace[listpos++];

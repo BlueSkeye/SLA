@@ -33,7 +33,7 @@ namespace Sla.DECCORE
         private ParameterSymbol getSymbolBacked(int i)
         {
             while (inparam.size() <= i)
-                inparam.push_back((ProtoParameter*)0);
+                inparam.Add((ProtoParameter*)0);
             ParameterSymbol* res = dynamic_cast<ParameterSymbol*>(inparam[i]);
             if (res != (ParameterSymbol*)0)
                 return res;
@@ -89,7 +89,7 @@ namespace Sla.DECCORE
             }
             if (res.sym == (Symbol*)0)
             {
-                if (scope.discoverScope(pieces.addr, pieces.type.getSize(), usepoint) == (Scope*)0)
+                if (scope.discoverScope(pieces.addr, pieces.type.getSize(), usepoint) == (Scope)null)
                     usepoint = restricted_usepoint;
                 res.sym = scope.addSymbol(nm, pieces.type, pieces.addr, usepoint).getSymbol();
                 scope.setCategory(res.sym, Symbol::function_parameter, i);

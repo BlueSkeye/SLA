@@ -59,7 +59,7 @@ namespace Sla.EXTRA
 
             restoreXmlHeader(el);
             {
-                istringstream s(el.getAttributeValue("adjustvma"));
+                istringstream s = new istringstream(el.getAttributeValue("adjustvma"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> adjustvma;
             }

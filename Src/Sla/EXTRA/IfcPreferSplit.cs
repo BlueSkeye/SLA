@@ -23,18 +23,18 @@ namespace Sla.EXTRA
         {
             int size = 0;
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("No load image present");
+                throw new IfaceExecutionError("No load image present");
             Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read storage location
             if (size == 0)
-                throw IfaceExecutionError("Must specify a size");
+                throw new IfaceExecutionError("Must specify a size");
             int split = -1;
 
             s >> ws;
             if (s.eof())
-                throw IfaceParseError("Missing split offset");
+                throw new IfaceParseError("Missing split offset");
             s >> dec >> split;
             if (split == -1)
-                throw IfaceParseError("Bad split offset");
+                throw new IfaceParseError("Bad split offset");
             dcp.conf.splitrecords.emplace_back();
             PreferSplitRecord & rec(dcp.conf.splitrecords.back());
 

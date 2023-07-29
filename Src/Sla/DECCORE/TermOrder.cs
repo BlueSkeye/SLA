@@ -56,8 +56,8 @@ namespace Sla.DECCORE
             List<PcodeOp*> opstack;   // Depth first traversal path
             List<PcodeOp*> multstack;
 
-            opstack.push_back(root);
-            multstack.push_back((PcodeOp*)0);
+            opstack.Add(root);
+            multstack.Add((PcodeOp)null);
 
             while (!opstack.empty())
             {
@@ -70,12 +70,12 @@ namespace Sla.DECCORE
                     curvn = curop.getIn(i);    // curvn is a node of the subtree IF
                     if (!curvn.isWritten())
                     { // curvn is not defined by another operation
-                        terms.push_back(AdditiveEdge(curop, i, multop));
+                        terms.Add(AdditiveEdge(curop, i, multop));
                         continue;
                     }
-                    if (curvn.loneDescend() == (PcodeOp*)0)
+                    if (curvn.loneDescend() == (PcodeOp)null)
                     { // curvn has more then one use
-                        terms.push_back(AdditiveEdge(curop, i, multop));
+                        terms.Add(AdditiveEdge(curop, i, multop));
                         continue;
                     }
                     subop = curvn.getDef();
@@ -84,21 +84,21 @@ namespace Sla.DECCORE
                         if ((subop.code() == CPUI_INT_MULT) && (subop.getIn(1).isConstant()))
                         {
                             PcodeOp* addop = subop.getIn(0).getDef();
-                            if ((addop != (PcodeOp*)0) && (addop.code() == CPUI_INT_ADD))
+                            if ((addop != (PcodeOp)null) && (addop.code() == CPUI_INT_ADD))
                             {
-                                if (addop.getOut().loneDescend() != (PcodeOp*)0)
+                                if (addop.getOut().loneDescend() != (PcodeOp)null)
                                 {
-                                    opstack.push_back(addop);
-                                    multstack.push_back(subop);
+                                    opstack.Add(addop);
+                                    multstack.Add(subop);
                                     continue;
                                 }
                             }
                         }
-                        terms.push_back(AdditiveEdge(curop, i, multop));
+                        terms.Add(AdditiveEdge(curop, i, multop));
                         continue;
                     }
-                    opstack.push_back(subop);
-                    multstack.push_back(multop);
+                    opstack.Add(subop);
+                    multstack.Add(multop);
                 }
             }
         }
@@ -107,7 +107,7 @@ namespace Sla.DECCORE
         public void sortTerms()
         {
             for (List<AdditiveEdge>::iterator iter = terms.begin(); iter != terms.end(); ++iter)
-                sorter.push_back(&(*iter));
+                sorter.Add(&(*iter));
 
             sort(sorter.begin(), sorter.end(), additiveCompare);
         }

@@ -27,8 +27,8 @@ namespace Sla.DECCORE
         /// \brief Look for common sub-expressions (built out of a restricted set of ops)
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_SUBPIECE);
-            oplist.push_back(CPUI_INT_SRIGHT); // For division optimization corrections
+            oplist.Add(CPUI_SUBPIECE);
+            oplist.Add(CPUI_INT_SRIGHT); // For division optimization corrections
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -47,7 +47,7 @@ namespace Sla.DECCORE
                 if (otherop.code() != opc) continue;
                 hash = otherop.getCseHash();
                 if (hash == 0) continue;
-                list.push_back(pair<uint, PcodeOp*>(hash, otherop));
+                list.Add(pair<uint, PcodeOp*>(hash, otherop));
             }
             if (list.size() <= 1) return 0;
             cseEliminateList(data, list, vlist);

@@ -39,7 +39,7 @@ namespace Sla.DECCORE
                 if (vn.isPersist() && vn.isExternalRef())
                 { // Check for possible external reference
                     Funcdata* newfd = data.getScopeLocal().getParent().queryExternalRefFunction(vn.getAddr());
-                    if (newfd != (Funcdata*)0)
+                    if (newfd != (Funcdata)null)
                     {
                         fc.deindirect(data, newfd);
                         count += 1;
@@ -59,7 +59,7 @@ namespace Sla.DECCORE
                     }
                     Address codeaddr(sp, offset);
                     Funcdata* newfd = data.getScopeLocal().getParent().queryFunction(codeaddr);
-                    if (newfd != (Funcdata*)0)
+                    if (newfd != (Funcdata)null)
                     {
                         fc.deindirect(data, newfd);
                         count += 1;
@@ -75,7 +75,7 @@ namespace Sla.DECCORE
                     {
                         TypeCode* tc = (TypeCode*)((TypePointer*)ct).getPtrTo();
                         FuncProto* fp = tc.getPrototype();
-                        if (fp != (FuncProto*)0)
+                        if (fp != (FuncProto)null)
                         {
                             if (!fc.isInputLocked())
                             {

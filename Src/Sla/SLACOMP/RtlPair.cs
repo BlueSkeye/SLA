@@ -24,7 +24,7 @@ namespace Sla.SLACOMP
         ///< Construct on empty pair
         internal RtlPair()
         {
-            section = (ConstructTpl*)0;
+            section = (ConstructTpl)null;
             scope = (SymbolScope*)0;
         }
 

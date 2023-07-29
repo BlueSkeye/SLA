@@ -34,7 +34,7 @@ namespace Sla.EXTRA
                     pcodeSubtag = true;
                 }
                 else if (subId == ELEM_TARGET)
-                    targetSymbolNames.push_back(decoder.readString(ATTRIB_NAME));
+                    targetSymbolNames.Add(decoder.readString(ATTRIB_NAME));
                 decoder.closeElement(subId);
             }
             decoder.closeElement(elemId);

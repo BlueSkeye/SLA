@@ -194,7 +194,7 @@ namespace Sla.CORE {
         /// Read attributes for \b this space from an open XML element
         /// Walk attributes of the current element and recover all the properties defining
         /// this space.  The processor translator, \e trans, and the
-        /// \e type must already be filled in.
+        /// \e type must already be filled @in.
         /// \param decoder is the stream decoder
         internal void decodeBasicAttributes(Decoder decoder)
         {
@@ -662,7 +662,7 @@ namespace Sla.CORE {
         ///< Encode an address and size attributes to a stream
         /// Write the main attributes of an address with \b this space
         /// and a size. The caller provides the \e offset and \e size,
-        /// and other details about this particular space are filled in.
+        /// and other details about this particular space are filled @in.
         /// \param encoder is the stream encoder
         /// \param offset is the offset of the address
         /// \param size is the size of the memory location

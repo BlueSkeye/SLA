@@ -24,8 +24,8 @@ namespace Sla.DECCORE
             {
                 vn = v;
                 splitoffset = off;
-                hi = (Varnode*)0;
-                lo = (Varnode*)0;
+                hi = (Varnode)null;
+                lo = (Varnode)null;
             }
         }
         
@@ -47,27 +47,27 @@ namespace Sla.DECCORE
             {
                 ulong origval = vn.getOffset();
 
-                ulong loval = origval & calc_mask(losize);// Split the constant into two pieces
-                ulong hival = (origval >> 8 * losize) & calc_mask(hisize);
-                if (setlo && (inst.lo == (Varnode*)0))
+                ulong loval = origval & Globals.calc_mask(losize);// Split the constant into two pieces
+                ulong hival = (origval >> 8 * losize) & Globals.calc_mask(hisize);
+                if (setlo && (inst.lo == (Varnode)null))
                     inst.lo = data.newConstant(losize, loval);
-                if (sethi && (inst.hi == (Varnode*)0))
+                if (sethi && (inst.hi == (Varnode)null))
                     inst.hi = data.newConstant(hisize, hival);
             }
             else
             {
                 if (bigendian)
                 {
-                    if (setlo && (inst.lo == (Varnode*)0))
+                    if (setlo && (inst.lo == (Varnode)null))
                         inst.lo = data.newVarnode(losize, vn.getAddr() + inst.splitoffset);
-                    if (sethi && (inst.hi == (Varnode*)0))
+                    if (sethi && (inst.hi == (Varnode)null))
                         inst.hi = data.newVarnode(hisize, vn.getAddr());
                 }
                 else
                 {
-                    if (setlo && (inst.lo == (Varnode*)0))
+                    if (setlo && (inst.lo == (Varnode)null))
                         inst.lo = data.newVarnode(losize, vn.getAddr());
-                    if (sethi && (inst.hi == (Varnode*)0))
+                    if (sethi && (inst.hi == (Varnode)null))
                         inst.hi = data.newVarnode(hisize, vn.getAddr() + inst.splitoffset);
                 }
             }
@@ -88,8 +88,8 @@ namespace Sla.DECCORE
             data.opSetOutput(loop, outinst.lo);
             data.opSetInput(hiop, ininst.hi, 0);
             data.opSetInput(loop, ininst.lo, 0);
-            tempsplits.push_back(hiop);
-            tempsplits.push_back(loop);
+            tempsplits.Add(hiop);
+            tempsplits.Add(loop);
         }
 
         private bool testDefiningCopy(SplitInstance inst, PcodeOp def, bool istemp)
@@ -163,7 +163,7 @@ namespace Sla.DECCORE
 
         private void splitZext(SplitInstance inst, PcodeOp op)
         {
-            SplitInstance ininst(op.getIn(0),inst.splitoffset);
+            SplitInstance ininst = new SplitInstance(op.getIn(0),inst.splitoffset);
             int losize, hisize;
             bool bigendian = inst.vn.getSpace().isBigEndian();
             if (bigendian)
@@ -179,8 +179,8 @@ namespace Sla.DECCORE
             if (ininst.vn.isConstant())
             {
                 ulong origval = ininst.vn.getOffset();
-                ulong loval = origval & calc_mask(losize);// Split the constant into two pieces
-                ulong hival = (origval >> 8 * losize) & calc_mask(hisize);
+                ulong loval = origval & Globals.calc_mask(losize);// Split the constant into two pieces
+                ulong hival = (origval >> 8 * losize) & Globals.calc_mask(hisize);
                 ininst.lo = data.newConstant(losize, loval);
                 ininst.hi = data.newConstant(hisize, hival);
             }
@@ -410,7 +410,7 @@ namespace Sla.DECCORE
             {
                 if (!vn.isFree()) return false;    // Make sure vn is not already a marked input
                 PcodeOp* op = vn.loneDescend();
-                if (op == (PcodeOp*)0)  // vn must be read exactly once
+                if (op == (PcodeOp)null)  // vn must be read exactly once
                     return false;
                 switch (op.code())
                 {
@@ -442,15 +442,15 @@ namespace Sla.DECCORE
             Address addr = rec.storage.getAddr();
             VarnodeLocSet::const_iterator iter, enditer;
 
-            SplitInstance inst((Varnode*)0,rec.splitoffset);
+            SplitInstance inst = new SplitInstance((Varnode)null,rec.splitoffset);
             iter = data.beginLoc(rec.storage.size, addr);
             enditer = data.endLoc(rec.storage.size, addr);
             while (iter != enditer)
             {
                 inst.vn = *iter;
                 ++iter;
-                inst.lo = (Varnode*)0;
-                inst.hi = (Varnode*)0;
+                inst.lo = (Varnode)null;
+                inst.hi = (Varnode)null;
                 if (splitVarnode(&inst))
                 {   // If we found something, regenerate iterators, as they may be stale
                     iter = data.beginLoc(rec.storage.size, addr);
@@ -588,7 +588,7 @@ namespace Sla.DECCORE
                     { // SUBPIECEs flowing into the COPY
                         Varnode* invn = defop.getIn(0);
                         if (invn.getSpace().getType() == IPTR_INTERNAL) // Might be from a temporary that needs further splitting
-                            defops.push_back(defop);
+                            defops.Add(defop);
                     }
                 }
                 list<PcodeOp*>::const_iterator iter, enditer;
@@ -602,7 +602,7 @@ namespace Sla.DECCORE
                     { // COPY flowing into PIECEs
                         Varnode* outvn = defop.getOut();
                         if (outvn.getSpace().getType() == IPTR_INTERNAL) // Might be to a temporary that needs further splitting
-                            defops.push_back(defop);
+                            defops.Add(defop);
                     }
                 }
             }

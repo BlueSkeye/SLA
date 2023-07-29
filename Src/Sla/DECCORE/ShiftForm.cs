@@ -133,7 +133,7 @@ namespace Sla.DECCORE
                     midshift = *iter2;
                     ++iter2;
                     Varnode* tmpvn = midshift.getOut();
-                    if (tmpvn == (Varnode*)0) continue;
+                    if (tmpvn == (Varnode)null) continue;
                     reshi = tmpvn;
                     if (!mapLeft()) continue;
                     if (!verifyShiftAmount()) continue;
@@ -167,7 +167,7 @@ namespace Sla.DECCORE
                     midshift = *iter2;
                     ++iter2;
                     Varnode* tmpvn = midshift.getOut();
-                    if (tmpvn == (Varnode*)0) continue;
+                    if (tmpvn == (Varnode)null) continue;
                     reslo = tmpvn;
                     if (!mapRight()) continue;
                     if (!verifyShiftAmount()) continue;
@@ -183,12 +183,12 @@ namespace Sla.DECCORE
             if (!i.hasBothPieces()) return false;
             @in = i;
 
-            if (!verifyLeft(@in.getHi(), @in.getLo(), loop))
+            if (!verifyLeft(@@in.getHi(), @@in.getLo(), loop))
                 return false;
 
-            @out.initPartial(@in.getSize(), reslo, reshi);
+            @out.initPartial(@@in.getSize(), reslo, reshi);
             existop = SplitVarnode::prepareShiftOp(@out, @in);
-            if (existop == (PcodeOp*)0)
+            if (existop == (PcodeOp)null)
                 return false;
             SplitVarnode::createShiftOp(data, @out, @in, salo, existop, opc);
             return true;
@@ -200,12 +200,12 @@ namespace Sla.DECCORE
             if (!i.hasBothPieces()) return false;
             @in = i;
 
-            if (!verifyRight(@in.getHi(), @in.getLo(), hiop))
+            if (!verifyRight(@@in.getHi(), @@in.getLo(), hiop))
                 return false;
 
-            @out.initPartial(@in.getSize(), reslo, reshi);
+            @out.initPartial(@@in.getSize(), reslo, reshi);
             existop = SplitVarnode::prepareShiftOp(@out, @in);
-            if (existop == (PcodeOp*)0)
+            if (existop == (PcodeOp)null)
                 return false;
             SplitVarnode::createShiftOp(data, @out, @in, salo, existop, opc);
             return true;

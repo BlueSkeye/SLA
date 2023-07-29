@@ -29,7 +29,7 @@ namespace Sla.DECCORE
             vn = v;
             PcodeOp* op = vn.getDef();
 
-            if (op == (PcodeOp*)0)
+            if (op == (PcodeOp)null)
                 index = 0;
             else
                 index = op.getParent().getIndex();

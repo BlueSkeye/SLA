@@ -36,10 +36,10 @@ namespace Sla.DECCORE
         ///  - `V <= W`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_SLESS);
-            oplist.push_back(CPUI_INT_SLESSEQUAL);
-            oplist.push_back(CPUI_INT_EQUAL);
-            oplist.push_back(CPUI_INT_NOTEQUAL);
+            oplist.Add(CPUI_INT_SLESS);
+            oplist.Add(CPUI_INT_SLESSEQUAL);
+            oplist.Add(CPUI_INT_EQUAL);
+            oplist.Add(CPUI_INT_NOTEQUAL);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -56,7 +56,7 @@ namespace Sla.DECCORE
             ulong val = tmpvn.getOffset(); // Encode const value (-1, 0, 1, 2) as highest 3 bits of form (000, 001, 010, 011)
             if (val <= 2)
                 form = (int)val + 1;
-            else if (val == calc_mask(tmpvn.getSize()))
+            else if (val == Globals.calc_mask(tmpvn.getSize()))
                 form = 0;
             else
                 return 0;
@@ -66,7 +66,7 @@ namespace Sla.DECCORE
             if (tmpvn.getDef().code() != CPUI_INT_ADD) return 0;
             bool isPartial = false;
             PcodeOp* lessop = detectThreeWay(tmpvn.getDef(), isPartial);
-            if (lessop == (PcodeOp*)0)
+            if (lessop == (PcodeOp)null)
                 return 0;
             if (isPartial)
             {   // Only found a partial three-way
@@ -174,27 +174,32 @@ namespace Sla.DECCORE
         /// \return the less-than op or NULL if no three-way was detected
         public static PcodeOp detectThreeWay(PcodeOp op, bool isPartial)
         {
-            Varnode* vn1, *vn2, *tmpvn;
-            PcodeOp* zext1, *zext2;
-            PcodeOp* addop, *lessop, *lessequalop;
+            Varnode vn1;
+            Varnode vn2;
+            Varnode tmpvn;
+            PcodeOp zext1;
+            PcodeOp zext2;
+            PcodeOp addop;
+            PcodeOp lessop;
+            PcodeOp lessequalop;
             ulong mask;
             vn2 = op.getIn(1);
             if (vn2.isConstant())
             {       // Form 1 :  (z + z) - 1
-                mask = calc_mask(vn2.getSize());
-                if (mask != vn2.getOffset()) return (PcodeOp*)0;       // Match the -1
+                mask = Globals.calc_mask(vn2.getSize());
+                if (mask != vn2.getOffset()) return (PcodeOp)null;       // Match the -1
                 vn1 = op.getIn(0);
-                if (!vn1.isWritten()) return (PcodeOp*)0;
+                if (!vn1.isWritten()) return (PcodeOp)null;
                 addop = vn1.getDef();
-                if (addop.code() != CPUI_INT_ADD) return (PcodeOp*)0;  // Match the add
+                if (addop.code() != CPUI_INT_ADD) return (PcodeOp)null;  // Match the add
                 tmpvn = addop.getIn(0);
-                if (!tmpvn.isWritten()) return (PcodeOp*)0;
+                if (!tmpvn.isWritten()) return (PcodeOp)null;
                 zext1 = tmpvn.getDef();
-                if (zext1.code() != CPUI_INT_ZEXT) return (PcodeOp*)0; // Match the first zext
+                if (zext1.code() != CPUI_INT_ZEXT) return (PcodeOp)null; // Match the first zext
                 tmpvn = addop.getIn(1);
-                if (!tmpvn.isWritten()) return (PcodeOp*)0;
+                if (!tmpvn.isWritten()) return (PcodeOp)null;
                 zext2 = tmpvn.getDef();
-                if (zext2.code() != CPUI_INT_ZEXT) return (PcodeOp*)0; // Match the second zext
+                if (zext2.code() != CPUI_INT_ZEXT) return (PcodeOp)null; // Match the second zext
             }
             else if (vn2.isWritten())
             {
@@ -203,52 +208,52 @@ namespace Sla.DECCORE
                 {   // Form 2 : (z - 1) + z
                     zext2 = tmpop;                  // Second zext is already matched
                     vn1 = op.getIn(0);
-                    if (!vn1.isWritten()) return (PcodeOp*)0;
+                    if (!vn1.isWritten()) return (PcodeOp)null;
                     addop = vn1.getDef();
                     if (addop.code() != CPUI_INT_ADD)
                     {   // Partial form:  (z + z)
                         zext1 = addop;
                         if (zext1.code() != CPUI_INT_ZEXT)
-                            return (PcodeOp*)0;         // Match the first zext
+                            return (PcodeOp)null;         // Match the first zext
                         isPartial = true;
                     }
                     else
                     {
                         tmpvn = addop.getIn(1);
-                        if (!tmpvn.isConstant()) return (PcodeOp*)0;
-                        mask = calc_mask(tmpvn.getSize());
-                        if (mask != tmpvn.getOffset()) return (PcodeOp*)0; // Match the -1
+                        if (!tmpvn.isConstant()) return (PcodeOp)null;
+                        mask = Globals.calc_mask(tmpvn.getSize());
+                        if (mask != tmpvn.getOffset()) return (PcodeOp)null; // Match the -1
                         tmpvn = addop.getIn(0);
-                        if (!tmpvn.isWritten()) return (PcodeOp*)0;
+                        if (!tmpvn.isWritten()) return (PcodeOp)null;
                         zext1 = tmpvn.getDef();
-                        if (zext1.code() != CPUI_INT_ZEXT) return (PcodeOp*)0; // Match the first zext
+                        if (zext1.code() != CPUI_INT_ZEXT) return (PcodeOp)null; // Match the first zext
                     }
                 }
                 else if (tmpop.code() == CPUI_INT_ADD)
                 {   // Form 3 : z + (z - 1)
                     addop = tmpop;              // Matched the add
                     vn1 = op.getIn(0);
-                    if (!vn1.isWritten()) return (PcodeOp*)0;
+                    if (!vn1.isWritten()) return (PcodeOp)null;
                     zext1 = vn1.getDef();
-                    if (zext1.code() != CPUI_INT_ZEXT) return (PcodeOp*)0; // Match the first zext
+                    if (zext1.code() != CPUI_INT_ZEXT) return (PcodeOp)null; // Match the first zext
                     tmpvn = addop.getIn(1);
-                    if (!tmpvn.isConstant()) return (PcodeOp*)0;
-                    mask = calc_mask(tmpvn.getSize());
-                    if (mask != tmpvn.getOffset()) return (PcodeOp*)0; // Match the -1
+                    if (!tmpvn.isConstant()) return (PcodeOp)null;
+                    mask = Globals.calc_mask(tmpvn.getSize());
+                    if (mask != tmpvn.getOffset()) return (PcodeOp)null; // Match the -1
                     tmpvn = addop.getIn(0);
-                    if (!tmpvn.isWritten()) return (PcodeOp*)0;
+                    if (!tmpvn.isWritten()) return (PcodeOp)null;
                     zext2 = tmpvn.getDef();
-                    if (zext2.code() != CPUI_INT_ZEXT) return (PcodeOp*)0; // Match the second zext
+                    if (zext2.code() != CPUI_INT_ZEXT) return (PcodeOp)null; // Match the second zext
                 }
                 else
-                    return (PcodeOp*)0;
+                    return (PcodeOp)null;
             }
             else
-                return (PcodeOp*)0;
+                return (PcodeOp)null;
             vn1 = zext1.getIn(0);
-            if (!vn1.isWritten()) return (PcodeOp*)0;
+            if (!vn1.isWritten()) return (PcodeOp)null;
             vn2 = zext2.getIn(0);
-            if (!vn2.isWritten()) return (PcodeOp*)0;
+            if (!vn2.isWritten()) return (PcodeOp)null;
             lessop = vn1.getDef();
             lessequalop = vn2.getDef();
             OpCode opc = lessop.code();
@@ -260,7 +265,7 @@ namespace Sla.DECCORE
             }
             int form = testCompareEquivalence(lessop, lessequalop);
             if (form < 0)
-                return (PcodeOp*)0;
+                return (PcodeOp)null;
             if (form == 1)
             {
                 PcodeOp* tmpop = lessop;

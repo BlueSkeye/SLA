@@ -23,31 +23,27 @@ namespace Sla.DECCORE
         private int findHiMatch()
         { // Look for the op computing the most significant part of the result for which -loop- computes
           // the least significant part,  look for a known double precis out, then look for known double
-          // precis in.  If the other input is constant, look for a unique op that might be computing the high,
+          // precis @in.  If the other input is constant, look for a unique op that might be computing the high,
           // Return 0 if we found an op, return -1, if we can't find an op, return -2 if no op exists
-            Varnode* lo1Tmp = in.getLo();
-            Varnode* vn2 = loop.getIn(1 - loop.getSlot(lo1Tmp));
+            Varnode lo1Tmp = @@in.getLo();
+            Varnode vn2 = loop.getIn(1 - loop.getSlot(lo1Tmp));
 
-            SplitVarnode out;
-            if (out.inHandLoOut(lo1Tmp)) {  // If we already know what the double precision output looks like
-                Varnode* hi = out.getHi();
-                if (hi.isWritten())
-                {   // Just look at construction of hi precisi
-                    PcodeOp* maybeop = hi.getDef();
-                    if (maybeop.code() == loop.code())
-                    {
-                        if (maybeop.getIn(0) == hi1)
-                        {
-                            if (maybeop.getIn(1).isConstant() == vn2.isConstant())
-                            {
+            SplitVarnode @out = new SplitVarnode();
+            if (@out.inHandLoOut(lo1Tmp)) {
+                // If we already know what the double precision output looks like
+                Varnode hi = @out.getHi();
+                if (hi.isWritten()) {
+                    // Just look at construction of hi precisi
+                    PcodeOp maybeop = hi.getDef();
+                    if (maybeop.code() == loop.code()) {
+                        if (maybeop.getIn(0) == hi1) {
+                            if (maybeop.getIn(1).isConstant() == vn2.isConstant()) {
                                 hiop = maybeop;
                                 return 0;
                             }
                         }
-                        else if (maybeop.getIn(1) == hi1)
-                        {
-                            if (maybeop.getIn(0).isConstant() == vn2.isConstant())
-                            {
+                        else if (maybeop.getIn(1) == hi1) {
+                            if (maybeop.getIn(0).isConstant() == vn2.isConstant()) {
                                 hiop = maybeop;
                                 return 0;
                             }
@@ -56,12 +52,12 @@ namespace Sla.DECCORE
                 }
             }
 
-            if (!vn2.isConstant())
-            {
-                SplitVarnode in2;
-                if (in2.inHandLo(vn2))
-                {   // If we already know what the other double precision input looks like
-                    list<PcodeOp*>::const_iterator iter, enditer;
+            if (!vn2.isConstant()) {
+                SplitVarnode in2 = new SplitVarnode();
+                if (in2.inHandLo(vn2)) {
+                    // If we already know what the other double precision input looks like
+                    IEnumerator<PcodeOp> iter;
+                    IEnumerator<PcodeOp> enditer;
                     iter = in2.getHi().beginDescend();
                     enditer = in2.getHi().endDescend();
                     while (iter != enditer)
@@ -86,7 +82,7 @@ namespace Sla.DECCORE
                 iter = hi1.beginDescend();
                 enditer = hi1.endDescend();
                 int count = 0;
-                PcodeOp* lastop = (PcodeOp*)0;
+                PcodeOp* lastop = (PcodeOp)null;
                 while (iter != enditer)
                 {
                     PcodeOp* maybeop = *iter;
@@ -142,13 +138,13 @@ namespace Sla.DECCORE
             if (!i.hasBothPieces()) return false;
             @in = i;
 
-            if (!verify(@in.getHi(), @in.getLo(), lop))
+            if (!verify(@@in.getHi(), @@in.getLo(), lop))
                 return false;
 
-            outdoub.initPartial(@in.getSize(), loop.getOut(), hiop.getOut());
-            indoub.initPartial(@in.getSize(), lo2, hi2);
+            outdoub.initPartial(@@in.getSize(), loop.getOut(), hiop.getOut());
+            indoub.initPartial(@@in.getSize(), lo2, hi2);
             existop = SplitVarnode::prepareBinaryOp(outdoub, @in, indoub);
-            if (existop == (PcodeOp*)0)
+            if (existop == (PcodeOp)null)
                 return false;
 
             SplitVarnode::createBinaryOp(data, outdoub, @in, indoub, existop, loop.code());

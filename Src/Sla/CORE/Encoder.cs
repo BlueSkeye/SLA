@@ -60,7 +60,7 @@ namespace Sla.CORE
         /// \brief Write an annotated string, using an indexed attribute, into the encoding
         /// Multiple attributes with a shared name can be written to the same element by calling this method
         /// multiple times with a different \b index value. The encoding will use attribute ids up to the base id
-        /// plus the maximum index passed in.  Implementors must be careful to not use other attributes with ids
+        /// plus the maximum index passed @in.  Implementors must be careful to not use other attributes with ids
         /// bigger than the base id within the element taking the indexed attribute.
         /// \param attribId is the shared AttributeId
         /// \param index is the unique index to associated with the string

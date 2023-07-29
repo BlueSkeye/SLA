@@ -35,7 +35,7 @@ namespace Sla.EXTRA
 
         public void registerTraverseConstraint(TraverseConstraint t)
         {
-            traverselist.push_back(t);
+            traverselist.Add(t);
         }
 
         public UnifyDatatype data(int slot) => storemap[slot];

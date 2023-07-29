@@ -24,12 +24,12 @@ namespace Sla.EXTRA
 
             s >> ws;
             if (s.eof())
-                throw IfaceParseError("Missing file name for binary dump");
+                throw new IfaceParseError("Missing file name for binary dump");
             s >> filename;
             ofstream os;
             os.open(filename.c_str());
             if (!os)
-                throw IfaceExecutionError("Unable to open file " + filename);
+                throw new IfaceExecutionError("Unable to open file " + filename);
 
             buffer = dcp.conf.loader.load(size, offset);
             os.write((char*)buffer,size);

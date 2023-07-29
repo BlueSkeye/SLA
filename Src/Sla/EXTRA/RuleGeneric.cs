@@ -46,7 +46,7 @@ namespace Sla.EXTRA
         public override void getOpList(List<uint> oplist)
         {
             for (int i = 0; i < starterops.size(); ++i)
-                oplist.push_back((uint)starterops[i]);
+                oplist.Add((uint)starterops[i]);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -60,7 +60,7 @@ namespace Sla.EXTRA
         public static RuleGeneric build(string nm, string gp, string content)
         {
             RuleCompile compiler;
-            istringstream s(content);
+            istringstream s = new istringstream(content);
             compiler.run(s, false);
             if (compiler.numErrors() != 0)
                 throw new LowlevelError("Unable to parse dynamic rule: " + nm);

@@ -112,7 +112,7 @@ namespace Sla.CORE
         /// Decode a SeqNum from a stream
         internal static SeqNum decode(ref Decoder decoder)
         {
-            uint uniq = ~((uint)0);
+            uint uniq = uint.MaxValue;
             uint elemId = decoder.openElement(ElementId.ELEM_SEQNUM);
             Address pc = Address.decode(decoder); // Recover address
             for (; ; )

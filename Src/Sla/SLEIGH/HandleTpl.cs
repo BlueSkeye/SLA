@@ -98,7 +98,7 @@ namespace Sla.SLEIGH
                 if (hand.offset_space.getType() == IPTR_CONSTANT)
                 {
                     // Handle could have been dynamic but wasn't
-                    hand.offset_space = (AddrSpace*)0;
+                    hand.offset_space = (AddrSpace)null;
                     hand.offset_offset = AddrSpace::addressToByte(hand.offset_offset, hand.space.getWordSize());
                     hand.offset_offset = hand.space.wrapOffset(hand.offset_offset);
                 }

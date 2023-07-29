@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         /// \brief Collapse MULTIEQUAL whose inputs all trace to the same value
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_MULTIEQUAL);
+            oplist.Add(CPUI_MULTIEQUAL);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -44,10 +44,10 @@ namespace Sla.DECCORE
 
             func_eq = false;        // Start assuming absolute equality of branches
             nofunc = false;     // Functional equalities are initially allowed
-            defcopyr = (Varnode*)0;
+            defcopyr = (Varnode)null;
             j = 0;
             for (int i = 0; i < op.numInput(); ++i)
-                matchlist.push_back(op.getIn(i));
+                matchlist.Add(op.getIn(i));
             for (int i = 0; i < op.numInput(); ++i)
             { // Find base branch to match
                 copyr = matchlist[i];
@@ -60,7 +60,7 @@ namespace Sla.DECCORE
 
             bool success = true;
             op.getOut().setMark();
-            skiplist.push_back(op.getOut());
+            skiplist.Add(op.getOut());
             while (j < matchlist.size())
             {
                 copyr = matchlist[j++];
@@ -69,7 +69,7 @@ namespace Sla.DECCORE
                                                // value is recurring in the loop without change
                                                // so we treat this as equal to all other branches
                                                // I.e. skip this varnode
-                if (defcopyr == (Varnode*)0)
+                if (defcopyr == (Varnode)null)
                 { // This is now the defining branch
                     defcopyr = copyr;       // all other branches must match
                     if (defcopyr.isWritten())
@@ -92,10 +92,10 @@ namespace Sla.DECCORE
                 {
                     // If the non-matching branch is a MULTIEQUAL
                     newop = copyr.getDef();
-                    skiplist.push_back(copyr); // We give the branch one last chance and
+                    skiplist.Add(copyr); // We give the branch one last chance and
                     copyr.setMark();
                     for (int i = 0; i < newop.numInput(); ++i) // add its inputs to list of things to match
-                        matchlist.push_back(newop.getIn(i));
+                        matchlist.Add(newop.getIn(i));
                 }
                 else
                 {           // A non-matching branch
@@ -114,7 +114,7 @@ namespace Sla.DECCORE
                     {       // We have only functional equality
                         PcodeOp* earliest = earliestUseInBlock(op.getOut(), op.getParent());
                         newop = defcopyr.getDef(); // We must copy newop (defcopyr)
-                        PcodeOp* substitute = (PcodeOp*)0;
+                        PcodeOp* substitute = (PcodeOp)null;
                         for (int i = 0; i < newop.numInput(); ++i)
                         {
                             Varnode* invn = newop.getIn(i);
@@ -124,7 +124,7 @@ namespace Sla.DECCORE
                                 break;
                             }
                         }
-                        if (substitute != (PcodeOp*)0)
+                        if (substitute != (PcodeOp)null)
                         { // If it has already been copied,
                             data.totalReplace(copyr, substitute.getOut()); // just use copy's output as substitute for op
                             data.opDestroy(op);
@@ -134,7 +134,7 @@ namespace Sla.DECCORE
                             bool needsreinsert = (op.code() == CPUI_MULTIEQUAL);
                             List<Varnode*> parms;
                             for (int i = 0; i < newop.numInput(); ++i)
-                                parms.push_back(newop.getIn(i)); // Copy parameters
+                                parms.Add(newop.getIn(i)); // Copy parameters
                             data.opSetAllInput(op, parms);
                             data.opSetOpcode(op, newop.code()); // Copy opcode
                             if (needsreinsert)

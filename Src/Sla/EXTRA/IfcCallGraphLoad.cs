@@ -21,19 +21,19 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("Decompile action not loaded");
+                throw new IfaceExecutionError("Decompile action not loaded");
             if (dcp.cgraph != (CallGraph*)0)
-                throw IfaceExecutionError("Callgraph already loaded");
+                throw new IfaceExecutionError("Callgraph already loaded");
 
             string name;
 
             s >> ws >> name;
             if (name.size() == 0)
-                throw IfaceExecutionError("Need name of file to read callgraph from");
+                throw new IfaceExecutionError("Need name of file to read callgraph from");
 
             ifstream is (name.c_str());
             if (!is)
-                throw IfaceExecutionError("Unable to open callgraph file " + name);
+                throw new IfaceExecutionError("Unable to open callgraph file " + name);
 
             DocumentStorage store;
             Document* doc = store.parseDocument(is);
@@ -53,8 +53,8 @@ namespace Sla.EXTRA
                 CallGraphNode* node = &(*iter).second;
                 Funcdata* fd;
                 fd = gscope.queryFunction(node.getName());
-                if (fd == (Funcdata*)0)
-                    throw IfaceExecutionError("Function:" + node.getName() + " in callgraph has not been loaded");
+                if (fd == (Funcdata)null)
+                    throw new IfaceExecutionError("Function:" + node.getName() + " in callgraph has not been loaded");
                 node.setFuncdata(fd);
             }
 

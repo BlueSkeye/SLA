@@ -21,7 +21,7 @@ namespace Sla.DECCORE
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
             Funcdata* infd = glb.symboltab.getGlobalScope().queryFunction(p1);
-            if (infd == (Funcdata*)0)
+            if (infd == (Funcdata)null)
                 throw RecovError("Unknown function name: " + p1);
             bool val;
             if (p2.size() == 0)

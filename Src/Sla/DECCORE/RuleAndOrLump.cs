@@ -26,9 +26,9 @@ namespace Sla.DECCORE
         /// \brief Collapse constants in logical expressions:  `(V & c) & d  =>  V & (c & d)`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_AND);
-            oplist.push_back(CPUI_INT_OR);
-            oplist.push_back(CPUI_INT_XOR);
+            oplist.Add(CPUI_INT_AND);
+            oplist.Add(CPUI_INT_OR);
+            oplist.Add(CPUI_INT_XOR);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

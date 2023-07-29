@@ -23,7 +23,7 @@ namespace Sla.DECCORE
         {
             if ((inslot != -1) && (outslot != -1))
             {
-                return (Datatype*)0; // Must propagate input <. output
+                return (Datatype)null; // Must propagate input <. output
             }
             Datatype* newtype;
             if (invn.isSpacebase())

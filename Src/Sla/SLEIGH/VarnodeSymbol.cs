@@ -46,7 +46,7 @@ namespace Sla.SLEIGH
         public override void getFixedHandle(FixedHandle hand, ParserWalker walker)
         {
             hand.space = fix.space;
-            hand.offset_space = (AddrSpace*)0; // Not a dynamic symbol
+            hand.offset_space = (AddrSpace)null; // Not a dynamic symbol
             hand.offset_offset = fix.offset;
             hand.size = fix.size;
         }
@@ -61,7 +61,7 @@ namespace Sla.SLEIGH
         public override void collectLocalValues(List<ulong> results)
         {
             if (fix.space.getType() == IPTR_INTERNAL)
-                results.push_back(fix.offset);
+                results.Add(fix.offset);
         }
 
         public override symbol_type getType() => varnode_symbol;
@@ -89,12 +89,12 @@ namespace Sla.SLEIGH
         {
             fix.space = trans.getSpaceByName(el.getAttributeValue("space"));
             {
-                istringstream s(el.getAttributeValue("offset"));
+                istringstream s = new istringstream(el.getAttributeValue("offset"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> fix.offset;
             }
             {
-                istringstream s(el.getAttributeValue("size"));
+                istringstream s = new istringstream(el.getAttributeValue("size"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> fix.size;
             }

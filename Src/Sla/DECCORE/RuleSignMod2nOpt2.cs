@@ -18,7 +18,7 @@ namespace Sla.DECCORE
         /// \return the Varnode V in the form, or null if the form doesn't match
         private static Varnode checkMultiequalForm(PcodeOp op, ulong npow)
         {
-            if (op.numInput() != 2) return (Varnode*)0;
+            if (op.numInput() != 2) return (Varnode)null;
             npow -= 1;      // 2^n - 1
             int slot;
             Varnode * base;
@@ -36,7 +36,7 @@ namespace Sla.DECCORE
                 if (otherBase == base)
                     break;
             }
-            if (slot > 1) return (Varnode*)0;
+            if (slot > 1) return (Varnode)null;
             BlockBasic* bl = op.getParent();
             int innerSlot = 0;
             BlockBasic* inner = (BlockBasic*)bl.getIn(innerSlot);
@@ -45,21 +45,21 @@ namespace Sla.DECCORE
                 innerSlot = 1;
                 inner = (BlockBasic*)bl.getIn(innerSlot);
                 if (inner.sizeOut() != 1 || inner.sizeIn() != 1)
-                    return (Varnode*)0;
+                    return (Varnode)null;
             }
             BlockBasic* decision = (BlockBasic*)inner.getIn(0);
-            if (bl.getIn(1 - innerSlot) != decision) return (Varnode*)0;
+            if (bl.getIn(1 - innerSlot) != decision) return (Varnode)null;
             PcodeOp* cbranch = decision.lastOp();
-            if (cbranch == (PcodeOp*)0 || cbranch.code() != CPUI_CBRANCH) return (Varnode*)0;
+            if (cbranch == (PcodeOp)null || cbranch.code() != CPUI_CBRANCH) return (Varnode)null;
             Varnode* boolVn = cbranch.getIn(1);
-            if (!boolVn.isWritten()) return (Varnode*)0;
+            if (!boolVn.isWritten()) return (Varnode)null;
             PcodeOp* lessOp = boolVn.getDef();
-            if (lessOp.code() != CPUI_INT_SLESS) return (Varnode*)0;
-            if (!lessOp.getIn(1).isConstant()) return (Varnode*)0;
-            if (lessOp.getIn(1).getOffset() != 0) return (Varnode*)0;
+            if (lessOp.code() != CPUI_INT_SLESS) return (Varnode)null;
+            if (!lessOp.getIn(1).isConstant()) return (Varnode)null;
+            if (lessOp.getIn(1).getOffset() != 0) return (Varnode)null;
             FlowBlock* negBlock = cbranch.isBooleanFlip() ? decision.getFalseOut() : decision.getTrueOut();
             int negSlot = (negBlock == inner) ? innerSlot : (1 - innerSlot);
-            if (negSlot != slot) return (Varnode*)0;
+            if (negSlot != slot) return (Varnode)null;
             return base;
         }
 
@@ -78,7 +78,7 @@ namespace Sla.DECCORE
                 if (multOp.code() != CPUI_INT_MULT) continue;
                 Varnode* constVn = multOp.getIn(1);
                 if (!constVn.isConstant()) continue;
-                if (constVn.getOffset() != calc_mask(constVn.getSize())) continue;
+                if (constVn.getOffset() != Globals.calc_mask(constVn.getSize())) continue;
                 Varnode * base = op.getIn(1 - slot);
                 Varnode* signExt = multOp.getIn(0);
                 if (!signExt.isWritten()) continue;
@@ -87,10 +87,10 @@ namespace Sla.DECCORE
                 if (shiftOp.getIn(0) != base) continue;
                 constVn = shiftOp.getIn(1);
                 if (!constVn.isConstant()) continue;
-                if ((int)constVn.getOffset() != 8 * base.getSize() - 1) continue;
+                if ((int)constVn.getOffset() != 8 * @base.getSize() - 1) continue;
                 return base;
             }
-            return (Varnode*)0;
+            return (Varnode)null;
         }
 
         public RuleSignMod2nOpt2(string g)
@@ -110,14 +110,14 @@ namespace Sla.DECCORE
         /// Note: `Vadj = (V<0) ? V + 2^n-1 : V`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_MULT);
+            oplist.Add(CPUI_INT_MULT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode* constVn = op.getIn(1);
             if (!constVn.isConstant()) return 0;
-            ulong mask = calc_mask(constVn.getSize());
+            ulong mask = Globals.calc_mask(constVn.getSize());
             if (constVn.getOffset() != mask) return 0; // Must be INT_MULT by -1
             Varnode* andOut = op.getIn(0);
             if (!andOut.isWritten()) return 0;
@@ -143,8 +143,8 @@ namespace Sla.DECCORE
             }
             else
                 return 0;
-            if (base == (Varnode*)0) return 0;
-            if (base.isFree()) return 0;
+            if (base == (Varnode)null) return 0;
+            if (@base.isFree()) return 0;
             Varnode* multOut = op.getOut();
             list<PcodeOp*>::const_iterator iter;
             for (iter = multOut.beginDescend(); iter != multOut.endDescend(); ++iter)
@@ -155,7 +155,7 @@ namespace Sla.DECCORE
                 if (rootOp.getIn(1 - slot) != base) continue;
                 if (slot == 0)
                     data.opSetInput(rootOp, base, 0);
-                data.opSetInput(rootOp, data.newConstant(base.getSize(), npow), 1);
+                data.opSetInput(rootOp, data.newConstant(@base.getSize(), npow), 1);
                 data.opSetOpcode(rootOp, CPUI_INT_SREM);
                 return 1;
             }

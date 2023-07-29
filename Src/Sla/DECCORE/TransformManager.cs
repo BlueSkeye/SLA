@@ -75,7 +75,7 @@ namespace Sla.DECCORE
                         Varnode* vn = rvn.vn;
                         if (vn.isInput())
                         {
-                            inputList.push_back(rvn);
+                            inputList.Add(rvn);
                             if (vn.isMark())
                                 rvn.flags |= TransformVar::input_duplicate;
                             else
@@ -183,7 +183,7 @@ namespace Sla.DECCORE
             for (iter = pieceMap.begin(); iter != pieceMap.end(); ++iter)
             {
                 Varnode* vn = (*iter).second.vn;
-                if (vn == (Varnode*)0)
+                if (vn == (Varnode)null)
                     continue;
                 vn.clearMark();
             }
@@ -210,7 +210,7 @@ namespace Sla.DECCORE
         {
             newVarnodes.emplace_back();
             TransformVar* res = &newVarnodes.back();
-            res.initialize(TransformVar::normal_temp, (Varnode*)0, size * 8, size, 0);
+            res.initialize(TransformVar::normal_temp, (Varnode)null, size * 8, size, 0);
             return res;
         }
 
@@ -225,7 +225,7 @@ namespace Sla.DECCORE
         {
             newVarnodes.emplace_back();
             TransformVar* res = &newVarnodes.back();
-            res.initialize(TransformVar::constant, (Varnode*)0, size * 8, size, (val >> lsbOffset) & calc_mask(size));
+            res.initialize(TransformVar::constant, (Varnode)null, size * 8, size, (val >> lsbOffset) & Globals.calc_mask(size));
             return res;
         }
 
@@ -237,7 +237,7 @@ namespace Sla.DECCORE
         {
             newVarnodes.emplace_back();
             TransformVar* res = &newVarnodes.back();
-            res.initialize(TransformVar::constant_iop, (Varnode*)0, vn.getSize() * 8, vn.getSize(), vn.getOffset());
+            res.initialize(TransformVar::constant_iop, (Varnode)null, vn.getSize() * 8, vn.getSize(), vn.getOffset());
             return res;
         }
 
@@ -277,7 +277,7 @@ namespace Sla.DECCORE
                 TransformVar* newVar = &res[i];
                 int byteSize = description.getSize(i);
                 if (vn.isConstant())
-                    newVar.initialize(TransformVar::constant, vn, byteSize * 8, byteSize, (vn.getOffset() >> bitpos) & calc_mask(byteSize));
+                    newVar.initialize(TransformVar::constant, vn, byteSize * 8, byteSize, (vn.getOffset() >> bitpos) & Globals.calc_mask(byteSize));
                 else
                 {
                     uint type = preserveAddress(vn, byteSize * 8, bitpos) ? TransformVar::piece : TransformVar::piece_temp;
@@ -308,7 +308,7 @@ namespace Sla.DECCORE
                 int byteSize = description.getSize(startLane + i);
                 TransformVar* newVar = &res[i];
                 if (vn.isConstant())
-                    newVar.initialize(TransformVar::constant, vn, byteSize * 8, byteSize, (vn.getOffset() >> bitpos) & calc_mask(byteSize));
+                    newVar.initialize(TransformVar::constant, vn, byteSize * 8, byteSize, (vn.getOffset() >> bitpos) & Globals.calc_mask(byteSize));
                 else
                 {
                     uint type = preserveAddress(vn, byteSize * 8, bitpos) ? TransformVar::piece : TransformVar::piece_temp;
@@ -331,7 +331,7 @@ namespace Sla.DECCORE
             newOps.emplace_back();
             TransformOp & rop(newOps.back());
             rop.op = replace;
-            rop.replacement = (PcodeOp*)0;
+            rop.replacement = (PcodeOp)null;
             rop.opc = opc;
             rop.special = TransformOp::op_replacement;
             rop.output = (TransformVar*)0;
@@ -353,7 +353,7 @@ namespace Sla.DECCORE
             newOps.emplace_back();
             TransformOp & rop(newOps.back());
             rop.op = follow.op;
-            rop.replacement = (PcodeOp*)0;
+            rop.replacement = (PcodeOp)null;
             rop.opc = opc;
             rop.special = 0;
             rop.output = (TransformVar*)0;
@@ -376,7 +376,7 @@ namespace Sla.DECCORE
             newOps.emplace_back();
             TransformOp & rop(newOps.back());
             rop.op = originalOp;
-            rop.replacement = (PcodeOp*)0;
+            rop.replacement = (PcodeOp)null;
             rop.opc = opc;
             rop.special = TransformOp::op_preexisting;
             rop.output = (TransformVar*)0;

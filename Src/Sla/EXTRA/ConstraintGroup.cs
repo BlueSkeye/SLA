@@ -33,7 +33,7 @@ namespace Sla.EXTRA
 
         public void addConstraint(UnifyConstraint a)
         {
-            constraintlist.push_back(c);
+            constraintlist.Add(c);
 
             if (c.getMaxNum() > maxnum)
                 maxnum = c.getMaxNum();
@@ -64,7 +64,7 @@ namespace Sla.EXTRA
             for (int i = 0; i < constraintlist.size(); ++i)
             {
                 UnifyConstraint* subconst = constraintlist[i].clone();
-                res.constraintlist.push_back(subconst);
+                res.constraintlist.Add(subconst);
             }
             res.copyid(this);
             return res;
@@ -182,7 +182,7 @@ namespace Sla.EXTRA
                 else
                 {
                     cur.removeDummy();
-                    newlist.push_back(cur);
+                    newlist.Add(cur);
                 }
             }
             constraintlist = newlist;

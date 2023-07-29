@@ -75,9 +75,9 @@ namespace Sla.DECCORE
         protected TypePointer()
             : base(0, TYPE_PTR)
         {
-            ptrto = (Datatype*)0;
+            ptrto = (Datatype)null;
             wordsize = 1;
-            spaceid = (AddrSpace*)0;
+            spaceid = (AddrSpace)null;
         }
         
         /// Construct from another TypePointer
@@ -96,7 +96,7 @@ namespace Sla.DECCORE
             ptrto = pt;
             flags = ptrto.getInheritable();
             wordsize = ws;
-            spaceid = (AddrSpace*)0;
+            spaceid = (AddrSpace)null;
             calcSubmeta();
         }
 
@@ -124,7 +124,7 @@ namespace Sla.DECCORE
         {
             ptrto.printRaw(s);
             s << " *";
-            if (spaceid != (AddrSpace*)0)
+            if (spaceid != (AddrSpace)null)
             {
                 s << '(' << spaceid.getName() << ')';
             }
@@ -149,8 +149,8 @@ namespace Sla.DECCORE
             if (wordsize != tp.wordsize) return (wordsize < tp.wordsize) ? -1 : 1;
             if (spaceid != tp.spaceid)
             {
-                if (spaceid == (AddrSpace*)0) return 1; // Pointers with address space come earlier
-                if (tp.spaceid == (AddrSpace*)0) return -1;
+                if (spaceid == (AddrSpace)null) return 1; // Pointers with address space come earlier
+                if (tp.spaceid == (AddrSpace)null) return -1;
                 return (spaceid.getIndex() < tp.spaceid.getIndex()) ? -1 : 1;
             }
             level -= 1;
@@ -170,8 +170,8 @@ namespace Sla.DECCORE
             if (wordsize != tp.wordsize) return (wordsize < tp.wordsize) ? -1 : 1;
             if (spaceid != tp.spaceid)
             {
-                if (spaceid == (AddrSpace*)0) return 1; // Pointers with address space come earlier
-                if (tp.spaceid == (AddrSpace*)0) return -1;
+                if (spaceid == (AddrSpace)null) return 1; // Pointers with address space come earlier
+                if (tp.spaceid == (AddrSpace)null) return -1;
                 return (spaceid.getIndex() < tp.spaceid.getIndex()) ? -1 : 1;
             }
             return (op.getSize() - size);
@@ -181,7 +181,7 @@ namespace Sla.DECCORE
 
         public override void encode(Encoder encoder)
         {
-            if (typedefImm != (Datatype*)0)
+            if (typedefImm != (Datatype)null)
             {
                 encodeTypedef(encoder);
                 return;
@@ -190,7 +190,7 @@ namespace Sla.DECCORE
             encodeBasic(metatype, encoder);
             if (wordsize != 1)
                 encoder.writeUnsignedInteger(ATTRIB_WORDSIZE, wordsize);
-            if (spaceid != (AddrSpace*)0)
+            if (spaceid != (AddrSpace)null)
                 encoder.writeSpace(ATTRIB_SPACE, spaceid);
             ptrto.encodeRef(encoder);
             encoder.closeElement(ELEM_TYPE);
@@ -241,7 +241,7 @@ namespace Sla.DECCORE
             }
 
             Datatype* pt = ptrto.getSubType(off, &off);
-            if (pt == (Datatype*)0)
+            if (pt == (Datatype)null)
                 return (TypePointer*)0;
             if (!isArray)
                 return typegrp.getTypePointerStripArray(size, pt, wordsize);
@@ -281,9 +281,9 @@ namespace Sla.DECCORE
             {
                 Funcdata* fd = op.getParent().getFuncdata();
                 ResolvedUnion res = fd.getUnionField(this, op, slot);
-                if (res != (ResolvedUnion*)0)
+                if (res != (ResolvedUnion)null)
                     return res.getDatatype();
-                ScoreUnionFields scoreFields(*fd.getArch().types,this,op,slot);
+                ScoreUnionFields scoreFields = new ScoreUnionFields(*fd.getArch().types,this,op,slot);
                 fd.setUnionField(this, op, slot, scoreFields.getResult());
                 return scoreFields.getResult().getDatatype();
             }
@@ -296,7 +296,7 @@ namespace Sla.DECCORE
             {
                 Funcdata fd = op.getParent().getFuncdata();
                 ResolvedUnion res = fd.getUnionField(this, op, slot);
-                if (res != (ResolvedUnion*)0)
+                if (res != (ResolvedUnion)null)
                     return res.getDatatype();
             }
             return this;

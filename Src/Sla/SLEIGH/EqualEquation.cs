@@ -42,7 +42,7 @@ namespace Sla.SLEIGH
                 }
             } while (advance_combo(cur, min, max));
             if (count == 0)
-                throw SleighError("Equal constraint is impossible to match");
+                throw new SleighError("Equal constraint is impossible to match");
         }
     }
 }

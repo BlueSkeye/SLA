@@ -25,7 +25,7 @@ namespace Sla.DECCORE
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
             int inslot, int outslot)
         {
-            if (!alttype.isPowerOfTwo()) return (Datatype*)0; // Only propagate flag enums
+            if (!alttype.isPowerOfTwo()) return (Datatype)null; // Only propagate flag enums
             Datatype* newtype;
             if (invn.isSpacebase())
             {

@@ -14,7 +14,7 @@ namespace Sla.EXTRA
   int size,i;
 
   if (dcp.fd == (Funcdata *)0)
-    throw IfaceExecutionError("No function selected");
+    throw new IfaceExecutionError("No function selected");
 
   size = dcp.fd.debugSize();
   if (dcp.fd.opactdbg_on)

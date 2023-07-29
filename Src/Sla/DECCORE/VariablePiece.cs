@@ -114,7 +114,7 @@ namespace Sla.DECCORE
                 if (endOffset <= otherPiece.groupOffset) continue;
                 int otherEndOffset = otherPiece.groupOffset + otherPiece.size;
                 if (groupOffset >= otherEndOffset) continue;
-                intersection.push_back(otherPiece);
+                intersection.Add(otherPiece);
             }
             high.highflags &= ~(uint)HighVariable::intersectdirty;
         }
@@ -177,8 +177,8 @@ namespace Sla.DECCORE
                 set<VariablePiece*, VariableGroup::PieceCompareByOffset>::iterator matchiter = group.pieceSet.find(piece);
                 if (matchiter != group.pieceSet.end())
                 {
-                    mergePairs.push_back((*matchiter).high);
-                    mergePairs.push_back(piece.high);
+                    mergePairs.Add((*matchiter).high);
+                    mergePairs.Add(piece.high);
                     piece.high.piece = (VariablePiece*)0; // Detach HighVariable from its original VariablePiece
                     delete piece;
                 }

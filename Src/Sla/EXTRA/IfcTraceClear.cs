@@ -12,7 +12,7 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
 {				// Clear existing debug trace ranges
   if (dcp.fd == (Funcdata *)0)
-    throw IfaceExecutionError("No function selected");
+    throw new IfaceExecutionError("No function selected");
 
   *status.optr << dec << dcp.fd.debugSize() << " ranges cleared\n";
   dcp.fd.debugDisable();

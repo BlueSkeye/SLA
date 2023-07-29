@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         {
             List<ulong> refs;
             for (int i = 1; i < op.numInput(); ++i)
-                refs.push_back(op.getIn(i).getOffset());
+                refs.Add(op.getIn(i).getOffset());
             CPoolRecord* rec = cpool.getRecord(refs);
             if (rec == (CPoolRecord*)0)
                 return TypeOp::getOutputLocal(op);
@@ -40,7 +40,7 @@ namespace Sla.DECCORE
 
         public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
-            return (Datatype*)0;
+            return (Datatype)null;
         }
 
         public override Datatype getInputLocal(PcodeOp op, int slot)
@@ -55,7 +55,7 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            if (op.getOut() != (Varnode*)0)
+            if (op.getOut() != (Varnode)null)
             {
                 Varnode::printRaw(s, op.getOut());
                 s << " = ";
@@ -63,7 +63,7 @@ namespace Sla.DECCORE
             s << getOperatorName(op);
             List<ulong> refs;
             for (int i = 1; i < op.numInput(); ++i)
-                refs.push_back(op.getIn(i).getOffset());
+                refs.Add(op.getIn(i).getOffset());
             CPoolRecord* rec = cpool.getRecord(refs);
             if (rec != (CPoolRecord*)0)
                 s << '_' << rec.getToken();

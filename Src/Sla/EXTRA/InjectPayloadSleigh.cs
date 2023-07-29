@@ -37,19 +37,19 @@ namespace Sla.EXTRA
             : base(nm, tp)
         {
             source = src;
-            tpl = (ConstructTpl*)0;
+            tpl = (ConstructTpl)null;
             paramshift = 0;
         }
 
         ~InjectPayloadSleigh()
         {
-            if (tpl != (ConstructTpl*)0)
+            if (tpl != (ConstructTpl)null)
                 delete tpl;
         }
 
         public override void inject(InjectContext context, PcodeEmit emit)
         {
-            InjectContextSleigh & con((InjectContextSleigh &)context);
+            InjectContextSleigh con = new InjectContextSleigh((InjectContextSleigh &)context);
 
             con.cacher.clear();
 
@@ -57,12 +57,12 @@ namespace Sla.EXTRA
             con.pos.setNaddr(con.nextaddr);
             con.pos.setCalladdr(con.calladdr);
 
-            ParserWalkerChange walker(con.pos);
+            ParserWalkerChange walker = new ParserWalkerChange(con.pos);
             con.pos.deallocateState(walker);
             setupParameters(con, walker, inputlist, output, source);
             // delayslot and crossbuild directives are not allowed in snippets, so we don't need the DisassemblyCache
             // and we don't need a unique allocation mask
-            SleighBuilder builder(&walker,(DisassemblyCache*)0,&con.cacher,con.glb.getConstantSpace(),con.glb.getUniqueSpace(),0);
+            SleighBuilder builder = new SleighBuilder(&walker,(DisassemblyCache)null,&con.cacher,con.glb.getConstantSpace(),con.glb.getUniqueSpace(),0);
             builder.build(tpl, -1);
             con.cacher.resolveRelatives();
             con.cacher.emit(con.baseaddr, &emit);
@@ -119,7 +119,7 @@ namespace Sla.EXTRA
                 hand.space = data.space;
                 hand.offset_offset = data.offset;
                 hand.size = data.size;
-                hand.offset_space = (AddrSpace*)0;
+                hand.offset_space = (AddrSpace)null;
                 walker.popOperand();
             }
             for (int i = 0; i < output.size(); ++i)
@@ -130,7 +130,7 @@ namespace Sla.EXTRA
                 hand.space = data.space;
                 hand.offset_offset = data.offset;
                 hand.size = data.size;
-                hand.offset_space = (AddrSpace*)0;
+                hand.offset_space = (AddrSpace)null;
                 walker.popOperand();
             }
         }

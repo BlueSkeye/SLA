@@ -50,20 +50,20 @@ namespace Sla.DECCORE
                     int sz = param.getSize();
                     if (spc.getType() == IPTR_SPACEBASE)
                     { // Param is stack relative
-                        Varnode* loadval = data.opStackLoad(spc, off, sz, op, (Varnode*)0, false);
+                        Varnode* loadval = data.opStackLoad(spc, off, sz, op, (Varnode)null, false);
                         data.opInsertInput(op, loadval, op.numInput());
                         if (!setplaceholder)
                         {
                             setplaceholder = true;
                             loadval.setSpacebasePlaceholder();
-                            spacebase = (AddrSpace*)0;  // With a locked stack parameter, we don't need a stackplaceholder
+                            spacebase = (AddrSpace)null;  // With a locked stack parameter, we don't need a stackplaceholder
                         }
                     }
                     else
                         data.opInsertInput(op, data.newVarnode(param.getSize(), param.getAddress()), op.numInput());
                 }
             }
-            if (spacebase != (AddrSpace*)0) // If we need it, create the stackplaceholder
+            if (spacebase != (AddrSpace)null) // If we need it, create the stackplaceholder
                 fc.createPlaceholder(data, spacebase);
         }
 
@@ -76,7 +76,7 @@ namespace Sla.DECCORE
         private static void funcLinkOutput(FuncCallSpecs fc, Funcdata data)
         {
             PcodeOp* callop = fc.getOp();
-            if (callop.getOut() != (Varnode*)0)
+            if (callop.getOut() != (Varnode)null)
             {
                 // CALL ops are expected to have no output, but its possible an override has produced one
                 if (callop.getOut().getSpace().getType() == IPTR_INTERNAL)

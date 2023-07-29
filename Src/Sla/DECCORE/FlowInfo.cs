@@ -174,10 +174,10 @@ namespace Sla.DECCORE
             // Find address of instruction containing this op
             map<Address, VisitStat>::const_iterator miter;
             miter = visited.upper_bound(op.getAddr());
-            if (miter == visited.begin()) return (PcodeOp*)0;
+            if (miter == visited.begin()) return (PcodeOp)null;
             --miter;
             if ((*miter).first + (*miter).second.size <= op.getAddr())
-                return (PcodeOp*)0;
+                return (PcodeOp)null;
             return target((*miter).first + (*miter).second.size);
         }
 
@@ -192,7 +192,7 @@ namespace Sla.DECCORE
             if ((to < baddr) || (eaddr < to))
             {
                 handleOutOfBounds(from.getAddr(), to);
-                unprocessed.push_back(to);
+                unprocessed.Add(to);
                 return;
             }
 
@@ -202,7 +202,7 @@ namespace Sla.DECCORE
                 data.opMarkStartBasic(op);
                 return;
             }
-            addrlist.push_back(to);
+            addrlist.Add(to);
         }
 
         /// \brief Delete any remaining ops at the end of the instruction
@@ -236,7 +236,7 @@ namespace Sla.DECCORE
         private PcodeOp xrefControlFlow(IEnumerator<PcodeOp> oiter, bool startbasic,
             bool isfallthru, FuncCallSpecs fc)
         {
-            PcodeOp* op = (PcodeOp*)0;
+            PcodeOp* op = (PcodeOp)null;
             isfallthru = false;
             uint maxtime = 0;  // Deepest internal relative branch
             while (oiter != obank.endDead())
@@ -256,7 +256,7 @@ namespace Sla.DECCORE
                             {
                                 Address fallThruAddr;
                                 PcodeOp* destop = findRelTarget(op, fallThruAddr);
-                                if (destop != (PcodeOp*)0)
+                                if (destop != (PcodeOp)null)
                                 {
                                     data.opMarkStartBasic(destop);  // Make sure the target op is a basic block start
                                     uint newtime = destop.getTime();
@@ -278,7 +278,7 @@ namespace Sla.DECCORE
                             {
                                 Address fallThruAddr;
                                 PcodeOp* destop = findRelTarget(op, fallThruAddr);
-                                if (destop != (PcodeOp*)0)
+                                if (destop != (PcodeOp)null)
                                 {
                                     data.opMarkStartBasic(destop);  // Make sure the target op is a basic block start
                                     uint newtime = destop.getTime();
@@ -299,7 +299,7 @@ namespace Sla.DECCORE
                         }
                         break;
                     case CPUI_BRANCHIND:
-                        tablelist.push_back(op);    // Put off trying to recover the table
+                        tablelist.Add(op);    // Put off trying to recover the table
                         if (op.getTime() >= maxtime)
                         {
                             deleteRemainingOps(oiter);
@@ -327,7 +327,7 @@ namespace Sla.DECCORE
                         {
                             InjectedUserOp* userop = dynamic_cast<InjectedUserOp*>(glb.userops.getOp(op.getIn(0).getOffset()));
                             if (userop != (InjectedUserOp*)0)
-                                injectlist.push_back(op);
+                                injectlist.Add(op);
                             break;
                         }
                     default:
@@ -338,7 +338,7 @@ namespace Sla.DECCORE
                 startbasic = true;      // So we know next instruction starts a basicblock
             else
             {           // If we haven't seen a relative branch, calculate fallthru by looking at last op
-                if (op == (PcodeOp*)0)
+                if (op == (PcodeOp)null)
                     isfallthru = true;  // No ops at all, mean a fallthru
                 else
                 {
@@ -410,7 +410,7 @@ namespace Sla.DECCORE
             {
                 step = glb.translate.oneInstruction(emitter, curaddr); // Generate ops for instruction
             }
-            catch (UnimplError &err) {  // Instruction is unimplemented
+            catch (UnimplError rr) {  // Instruction is unimplemented
                 if ((flags & ignore_unimplemented) != 0)
                 {
                     step = err.instruction_length;
@@ -474,7 +474,7 @@ namespace Sla.DECCORE
             }
 
             if (isfallthru)
-                addrlist.push_back(curaddr + step);
+                addrlist.Add(curaddr + step);
             return isfallthru;
         }
 
@@ -504,7 +504,7 @@ namespace Sla.DECCORE
                     if (bound == eaddr)
                     {
                         handleOutOfBounds(eaddr, addrlist.back());
-                        unprocessed.push_back(addrlist.back());
+                        unprocessed.Add(addrlist.back());
                         addrlist.pop_back();
                         return;
                     }
@@ -538,13 +538,13 @@ namespace Sla.DECCORE
             uint id = op.getTime() + addr.getOffset();
             SeqNum seqnum(op.getAddr(), id);
             PcodeOp* retop = obank.findOp(seqnum);
-            if (retop != (PcodeOp*)0)   // Is this a "properly" internal branch
+            if (retop != (PcodeOp)null)   // Is this a "properly" internal branch
                 return retop;
 
             // Now we check if the relative branch is really to the next instruction
-            SeqNum seqnum1(op.getAddr(), id-1);
+            SeqNum seqnum1 = new SeqNum(op.getAddr(), id-1);
             retop = obank.findOp(seqnum1); // We go back one sequence number
-            if (retop != (PcodeOp*)0)
+            if (retop != (PcodeOp)null)
             {
                 // If the PcodeOp exists here then branch was indeed to next instruction
                 map<Address, VisitStat>::const_iterator miter;
@@ -554,7 +554,7 @@ namespace Sla.DECCORE
                     --miter;
                     res = (*miter).first + (*miter).second.size;
                     if (op.getAddr() < res)
-                        return (PcodeOp*)0; // Indicate that res has the fallthru address
+                        return (PcodeOp)null; // Indicate that res has the fallthru address
                 }
             }
             ostringstream errmsg;
@@ -581,7 +581,7 @@ namespace Sla.DECCORE
                     data.opMarkStartBasic(op);
                 }
                 else
-                    unprocessed.push_back(*iter);
+                    unprocessed.Add(*iter);
             }
         }
 
@@ -654,9 +654,9 @@ namespace Sla.DECCORE
                 {
                     case CPUI_BRANCH:
                         targ_op = branchTarget(op);
-                        block_edge1.push_back(op);
-                        //      block_edge2.push_back(op.Input(0).getAddr().Iop());
-                        block_edge2.push_back(targ_op);
+                        block_edge1.Add(op);
+                        //      block_edge2.Add(op.Input(0).getAddr().Iop());
+                        block_edge2.Add(targ_op);
                         break;
                     case CPUI_BRANCHIND:
                         jt = data.findJumpTable(op);
@@ -670,8 +670,8 @@ namespace Sla.DECCORE
                             targ_op = target(jt.getAddressByIndex(i));
                             if (targ_op.isMark()) continue; // Already a link between these blocks
                             targ_op.setMark();
-                            block_edge1.push_back(op);
-                            block_edge2.push_back(targ_op);
+                            block_edge1.Add(op);
+                            block_edge2.Add(targ_op);
                         }
                         iter1 = block_edge1.end(); // Clean up our marks
                         iter2 = block_edge2.end();
@@ -689,18 +689,18 @@ namespace Sla.DECCORE
                         break;
                     case CPUI_CBRANCH:
                         targ_op = fallthruOp(op); // Put in fallthru edge
-                        block_edge1.push_back(op);
-                        block_edge2.push_back(targ_op);
+                        block_edge1.Add(op);
+                        block_edge2.Add(targ_op);
                         targ_op = branchTarget(op);
-                        block_edge1.push_back(op);
-                        block_edge2.push_back(targ_op);
+                        block_edge1.Add(op);
+                        block_edge2.Add(targ_op);
                         break;
                     default:
                         if (nextstart)
                         {       // Put in fallthru edge if new basic block
                             targ_op = fallthruOp(op);
-                            block_edge1.push_back(op);
-                            block_edge2.push_back(targ_op);
+                            block_edge1.Add(op);
+                            block_edge2.Add(targ_op);
                         }
                         break;
                 }
@@ -891,7 +891,7 @@ namespace Sla.DECCORE
         private bool checkForFlowModification(FuncCallSpecs fspecs)
         {
             if (fspecs.isInline())
-                injectlist.push_back(fspecs.getOp());
+                injectlist.Add(fspecs.getOp());
             if (fspecs.isNoReturn())
             {
                 PcodeOp* op = fspecs.getOp();
@@ -914,7 +914,7 @@ namespace Sla.DECCORE
             if (!fspecs.getEntryAddress().isInvalid())
             { // If this is a direct call
                 Funcdata* otherfunc = data.getScopeLocal().getParent().queryFunction(fspecs.getEntryAddress());
-                if (otherfunc != (Funcdata*)0)
+                if (otherfunc != (Funcdata)null)
                 {
                     fspecs.setFuncdata(otherfunc); // Associate the symbol with the callsite
                     if (!fspecs.hasModel() || otherfunc.getFuncProto().isInline())
@@ -941,7 +941,7 @@ namespace Sla.DECCORE
             FuncCallSpecs* res;
             res = new FuncCallSpecs(op);
             data.opSetInput(op, data.newVarnodeCallSpecs(res), 0);
-            qlst.push_back(res);
+            qlst.Add(res);
 
             data.getOverride().applyPrototype(data, *res);
             queryCall(*res);
@@ -964,7 +964,7 @@ namespace Sla.DECCORE
         {
             FuncCallSpecs* res;
             res = new FuncCallSpecs(op);
-            qlst.push_back(res);
+            qlst.Add(res);
 
             data.getOverride().applyIndirect(data, *res);
             if (fc != (FuncCallSpecs*)0 && fc.getEntryAddress() == res.getEntryAddress())
@@ -995,7 +995,7 @@ namespace Sla.DECCORE
             {
                 JumpTable* jt = data.linkJumpTable(op);
                 if (jt == (JumpTable*)0)
-                    tablelist.push_back(op); // Didn't recover a jumptable
+                    tablelist.Add(op); // Didn't recover a jumptable
             }
         }
 
@@ -1066,7 +1066,7 @@ namespace Sla.DECCORE
                 icontext.inputlist.back().size = vn.getSize();
             }
             Varnode* outvn = op.getOut();
-            if (outvn != (Varnode*)0)
+            if (outvn != (Varnode)null)
             {
                 icontext.output.emplace_back();
                 icontext.output.back().space = outvn.getSpace();
@@ -1084,7 +1084,7 @@ namespace Sla.DECCORE
         private bool inlineSubFunction(FuncCallSpecs fc)
         {
             Funcdata* fd = fc.getFuncdata();
-            if (fd == (Funcdata*)0) return false;
+            if (fd == (Funcdata)null) return false;
             PcodeOp* op = fc.getOp();
             Address retaddr;
 
@@ -1134,7 +1134,7 @@ namespace Sla.DECCORE
             {
                 FuncCallSpecs* fc = *iter;
                 Funcdata* fd = fc.getFuncdata();
-                if (fd != (Funcdata*)0) continue;
+                if (fd != (Funcdata)null) continue;
                 PcodeOp* op = fc.getOp();
                 if (op.code() != CPUI_CALL) continue;
 
@@ -1182,7 +1182,7 @@ namespace Sla.DECCORE
             {
                 JumpTable* jt = data.getJumpTable(i);
                 if (jt.checkForMultistage(&data))
-                    tablelist.push_back(jt.getIndirectOp());
+                    tablelist.Add(jt.getIndirectOp());
             }
         }
 
@@ -1203,7 +1203,8 @@ namespace Sla.DECCORE
 
             string nm = s1.str();
             // Prepare partial Funcdata object for analysis if necessary
-            Funcdata partial(nm, nm, data.getScopeLocal().getParent(), data.getAddress(), (FunctionSymbol*)0);
+            Funcdata partial = new Funcdata(nm, nm, data.getScopeLocal().getParent(), data.getAddress(),
+                (FunctionSymbol*)0);
 
             for (int i = 0; i < tablelist.size(); ++i)
             {
@@ -1216,12 +1217,12 @@ namespace Sla.DECCORE
                     {
                         // If the indirect op was not reachable with current flow AND there is more flow to generate,
                         //     AND we haven't tried to recover this table before
-                        notreached.push_back(op); // Save this op so we can try to recovery table again later
+                        notreached.Add(op); // Save this op so we can try to recovery table again later
                     }
                     else if (!isFlowForInline())    // Unless this flow is being inlined for something else
                         truncateIndirectJump(op, failuremode); // Treat the indirect jump as a call
                 }
-                newTables.push_back(jt);
+                newTables.Add(jt);
             }
         }
 
@@ -1290,10 +1291,10 @@ namespace Sla.DECCORE
             glb = data.getArch();
             flags = 0;
             emitter.setFuncdata(&d);
-            inline_head = (Funcdata*)0;
+            inline_head = (Funcdata)null;
             inline_recursion = (set<Address>*)0;
             insn_count = 0;
-            insn_max = ~((uint)0);
+            insn_max = uint.MaxValue;
             flowoverride_present = data.getOverride().hasFlowOverride();
         }
 
@@ -1325,7 +1326,7 @@ namespace Sla.DECCORE
             addrlist = op2.addrlist;
             visited = op2.visited;
             inline_head = op2.inline_head;
-            if (inline_head != (Funcdata*)0)
+            if (inline_head != (Funcdata)null)
             {
                 inline_base = op2.inline_base;
                 inline_recursion = &inline_base;
@@ -1380,7 +1381,7 @@ namespace Sla.DECCORE
                 if (!seq.getAddr().isInvalid())
                 {
                     PcodeOp* retop = obank.findOp(seq);
-                    if (retop != (PcodeOp*)0)
+                    if (retop != (PcodeOp)null)
                         return retop;
                     break;
                 }
@@ -1409,7 +1410,7 @@ namespace Sla.DECCORE
             {   // This is a relative sequence number
                 Address res;
                 PcodeOp* retop = findRelTarget(op, res);
-                if (retop != (PcodeOp*)0)
+                if (retop != (PcodeOp)null)
                     return retop;
                 return target(res);
             }
@@ -1422,7 +1423,7 @@ namespace Sla.DECCORE
             List<PcodeOp*> notreached;    // indirect ops that are not reachable
             int notreachcnt = 0;
             clearProperties();
-            addrlist.push_back(data.getAddress());
+            addrlist.Add(data.getAddress());
             while (!addrlist.empty())   // Recovering as much as possible except jumptables
                 fallthru();
             if (hasInject())
@@ -1455,7 +1456,7 @@ namespace Sla.DECCORE
                     checkMultistageJumptables();
                 while (notreachcnt < notreached.size())
                 {
-                    tablelist.push_back(notreached[notreachcnt]);
+                    tablelist.Add(notreached[notreachcnt]);
                     notreachcnt += 1;
                 }
                 if (hasInject())
@@ -1557,7 +1558,7 @@ namespace Sla.DECCORE
         /// allow a sub-function to be in-lined more than once.
         public void injectPcode()
         {
-            if (inline_head == (Funcdata*)0)
+            if (inline_head == (Funcdata)null)
             {
                 // This is the top level of inlining
                 inline_head = &data;    // Set up head of inlining
@@ -1573,8 +1574,8 @@ namespace Sla.DECCORE
             for (int i = 0; i < injectlist.size(); ++i)
             {
                 PcodeOp* op = injectlist[i];
-                if (op == (PcodeOp*)0) continue;
-                injectlist[i] = (PcodeOp*)0;    // Nullify entry, so we don't inject more than once
+                if (op == (PcodeOp)null) continue;
+                injectlist[i] = (PcodeOp)null;    // Nullify entry, so we don't inject more than once
                 if (op.code() == CPUI_CALLOTHER)
                 {
                     injectUserOp(op);

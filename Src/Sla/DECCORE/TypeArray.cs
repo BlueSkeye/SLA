@@ -50,7 +50,7 @@ namespace Sla.DECCORE
             : base(0, TYPE_ARRAY)
         {
             arraysize = 0;
-            arrayof = (Datatype*)0;
+            arrayof = (Datatype)null;
         }
 
         /// Construct from another TypeArray
@@ -91,7 +91,7 @@ namespace Sla.DECCORE
             int noff = off % arrayof.getSize();
             int nel = off / arrayof.getSize();
             if (noff + sz > arrayof.getSize()) // Requesting parts of more then one element
-                return (Datatype*)0;
+                return (Datatype)null;
             *newoff = noff;
             *el = nel;
             return arrayof;
@@ -154,7 +154,7 @@ namespace Sla.DECCORE
 
         public override void encode(Encoder encoder)
         {
-            if (typedefImm != (Datatype*)0)
+            if (typedefImm != (Datatype)null)
             {
                 encodeTypedef(encoder);
                 return;
@@ -170,7 +170,7 @@ namespace Sla.DECCORE
         {
             Funcdata* fd = op.getParent().getFuncdata();
             ResolvedUnion res = fd.getUnionField(this, op, slot);
-            if (res != (ResolvedUnion*)0)
+            if (res != (ResolvedUnion)null)
                 return res.getDatatype();
 
             int fieldNum = TypeStruct::scoreSingleComponent(this, op, slot);
@@ -184,7 +184,7 @@ namespace Sla.DECCORE
         {
             Funcdata fd = op.getParent().getFuncdata();
             ResolvedUnion res = fd.getUnionField(this, op, slot);
-            if (res != (ResolvedUnion*)0)
+            if (res != (ResolvedUnion)null)
                 return res.getDatatype();
             return arrayof;     // If not calculated before, assume referring to the element
         }

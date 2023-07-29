@@ -194,7 +194,7 @@ namespace Sla.DECCORE
             {
                 TransformVar* inVn = setReplacement(op.getIn(i), numLanes, skipLanes);
                 if (inVn == (TransformVar*)0) return false;
-                inVarSets.push_back(inVn);
+                inVarSets.Add(inVn);
             }
             for (int i = 0; i < numLanes; ++i)
             {
@@ -364,7 +364,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* op = *iter++;
                 Varnode* outvn = op.getOut();
-                if ((outvn != (Varnode*)0) && (outvn.isMark()))
+                if ((outvn != (Varnode)null) && (outvn.isMark()))
                     continue;
                 switch (op.code())
                 {
@@ -457,7 +457,7 @@ namespace Sla.DECCORE
         private bool traceBackward(TransformVar rvn, int numLanes, int skipLanes)
         {
             PcodeOp* op = rvn.getOriginal().getDef();
-            if (op == (PcodeOp*)0) return true; // If vn is input
+            if (op == (PcodeOp)null) return true; // If vn is input
 
             switch (op.code())
             {

@@ -18,7 +18,7 @@ namespace Sla.EXTRA
             string filename;
 
             if (dcp.conf != (Architecture*)0)
-                throw IfaceExecutionError("Load image already present");
+                throw new IfaceExecutionError("Load image already present");
             s >> filename;
             dcp.testCollection = new FunctionTestCollection(status);
             dcp.testCollection.loadTest(filename);

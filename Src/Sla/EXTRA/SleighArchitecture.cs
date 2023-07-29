@@ -216,13 +216,13 @@ namespace Sla.EXTRA
                     size = addr.getSpace().getWordSize();
                 if (volatileState >= 0)
                 {
-                    Sla.CORE.Range range(addr.getSpace(), addr.getOffset(), addr.getOffset() +(size - 1));
+                    CORE.Range range = new CORE.Range(addr.getSpace(), addr.getOffset(), addr.getOffset() +(size - 1));
                     if (volatileState == 0)
                         symboltab.clearPropertyRange(Varnode::volatil, range);
                     else
                         symboltab.setPropertyRange(Varnode::volatil, range);
                 }
-                Datatype* ct = types.getBase(size, TYPE_UNKNOWN);
+                Datatype ct = types.getBase(size, TYPE_UNKNOWN);
                 Address usepoint;
                 symboltab.getGlobalScope().addSymbol(name, ct, addr, usepoint);
             }
@@ -254,13 +254,13 @@ namespace Sla.EXTRA
                 ostringstream serr;
                 serr << "XML error parsing processor specification: " << processorfile;
                 serr << "\n " << err.ToString();
-                throw SleighError(serr.str());
+                throw new SleighError(serr.str());
             }
             catch (LowlevelError err) {
                 ostringstream serr;
                 serr << "Error reading processor specification: " << processorfile;
                 serr << "\n " << err.ToString();
-                throw SleighError(serr.str());
+                throw new SleighError(serr.str());
             }
 
             try
@@ -272,13 +272,13 @@ namespace Sla.EXTRA
                 ostringstream serr;
                 serr << "XML error parsing compiler specification: " << compilerfile;
                 serr << "\n " << err.ToString();
-                throw SleighError(serr.str());
+                throw new SleighError(serr.str());
             }
             catch (LowlevelError err) {
                 ostringstream serr;
                 serr << "Error reading compiler specification: " << compilerfile;
                 serr << "\n " << err.ToString();
-                throw SleighError(serr.str());
+                throw new SleighError(serr.str());
             }
 
             if (!language_reuse)
@@ -292,13 +292,13 @@ namespace Sla.EXTRA
                     ostringstream serr;
                     serr << "XML error parsing SLEIGH file: " << slafile;
                     serr << "\n " << err.ToString();
-                    throw SleighError(serr.str());
+                    throw new SleighError(serr.str());
                 }
                 catch (LowlevelError err) {
                     ostringstream serr;
                     serr << "Error reading SLEIGH file: " << slafile;
                     serr << "\n " << err.ToString();
-                    throw SleighError(serr.str());
+                    throw new SleighError(serr.str());
                 }
             }
         }
@@ -517,7 +517,7 @@ namespace Sla.EXTRA
                     FileManage::scanDirectoryRecursive(languagedirs, "languages", datadirs[i], 1);
 
                 for (uint i = 0; i < languagedirs.size(); ++i)
-                    languagesubdirs.push_back(languagedirs[i]);
+                    languagesubdirs.Add(languagedirs[i]);
 
                 // In the old version we have to go down one more level to get to the ldefs
                 for (uint i = 0; i < languagedirs.size(); ++i)
@@ -526,7 +526,7 @@ namespace Sla.EXTRA
             // If we haven't matched this directory structure, just use the rootpath as the directory containing
             // the ldef
             if (languagesubdirs.size() == 0)
-                languagesubdirs.push_back(rootpath);
+                languagesubdirs.Add(rootpath);
 
             for (uint i = 0; i < languagesubdirs.size(); ++i)
                 specpaths.addDir2Path(languagesubdirs[i]);

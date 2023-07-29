@@ -24,8 +24,8 @@ namespace Sla.DECCORE
 
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_BOOL_OR);
-            oplist.push_back(CPUI_BOOL_AND);
+            oplist.Add(CPUI_BOOL_OR);
+            oplist.Add(CPUI_BOOL_AND);
         }
 
         /// \class RuleRangeMeld
@@ -55,24 +55,24 @@ namespace Sla.DECCORE
             if (!sub2.isBoolOutput())
                 return 0;
 
-            CircleRange range1(true);
-            Varnode* markup = (Varnode*)0;
+            CircleRange range1 = new CircleRange(true);
+            Varnode markup = (Varnode)null;
             A1 = range1.pullBack(sub1, &markup, false);
-            if (A1 == (Varnode*)0) return 0;
-            CircleRange range2(true);
+            if (A1 == (Varnode)null) return 0;
+            CircleRange range2 = new CircleRange(true);
             A2 = range2.pullBack(sub2, &markup, false);
-            if (A2 == (Varnode*)0) return 0;
+            if (A2 == (Varnode)null) return 0;
             if (sub1.code() == CPUI_BOOL_NEGATE)
             { // Do an extra pull back, if the last step is a '!'
                 if (!A1.isWritten()) return 0;
                 A1 = range1.pullBack(A1.getDef(), &markup, false);
-                if (A1 == (Varnode*)0) return 0;
+                if (A1 == (Varnode)null) return 0;
             }
             if (sub2.code() == CPUI_BOOL_NEGATE)
             { // Do an extra pull back, if the last step is a '!'
                 if (!A2.isWritten()) return 0;
                 A2 = range2.pullBack(A2.getDef(), &markup, false);
-                if (A2 == (Varnode*)0) return 0;
+                if (A2 == (Varnode)null) return 0;
             }
             if (!functionalEquality(A1, A2))
             {
@@ -99,7 +99,7 @@ namespace Sla.DECCORE
                 if (restype == 0)
                 {
                     Varnode* newConst = data.newConstant(A1.getSize(), resc);
-                    if (markup != (Varnode*)0)
+                    if (markup != (Varnode)null)
                     {       // We have potential constant markup
                         newConst.copySymbolIfValid(markup);    // Propagate the markup into our new constant
                     }

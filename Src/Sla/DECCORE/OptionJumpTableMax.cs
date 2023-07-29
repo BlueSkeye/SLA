@@ -22,7 +22,7 @@ namespace Sla.DECCORE
         /// to follow from a single indirect jump.
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            istringstream s(p1);
+            istringstream s = new istringstream(p1);
             s.unsetf(ios::dec | ios::hex | ios::oct);
             uint val = 0;
             s >> val;

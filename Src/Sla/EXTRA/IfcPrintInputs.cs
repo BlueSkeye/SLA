@@ -16,8 +16,8 @@ namespace Sla.EXTRA
         /// \brief Print info about the current function's input Varnodes: `print inputs`
         public override void execute(TextReader s)
         {
-            if (dcp.fd == (Funcdata*)0)
-                throw IfaceExecutionError("No function selected");
+            if (dcp.fd == (Funcdata)null)
+                throw new IfaceExecutionError("No function selected");
 
             print(dcp.fd, *status.fileoptr);
         }
@@ -31,7 +31,7 @@ namespace Sla.EXTRA
         {
             List<Varnode*> vnlist;
             bool res = false;
-            vnlist.push_back(vn);
+            vnlist.Add(vn);
             uint proc = 0;
             while (proc < vnlist.size())
             {
@@ -50,7 +50,7 @@ namespace Sla.EXTRA
                         if (!outvn.isMark())
                         {
                             outvn.setMark();
-                            vnlist.push_back(outvn);
+                            vnlist.Add(outvn);
                         }
                     }
                     else
@@ -75,7 +75,7 @@ namespace Sla.EXTRA
         {
             List<Varnode*> vnlist;
             int res = 0;
-            vnlist.push_back(vn);
+            vnlist.Add(vn);
             uint proc = 0;
             while (proc < vnlist.size())
             {
@@ -104,7 +104,7 @@ namespace Sla.EXTRA
                         if (!tmpvn.isMark())
                         {
                             tmpvn.setMark();
-                            vnlist.push_back(tmpvn);
+                            vnlist.Add(tmpvn);
                         }
                     }
                     else if (op.code() == CPUI_INDIRECT)
@@ -113,7 +113,7 @@ namespace Sla.EXTRA
                         if (!tmpvn.isMark())
                         {
                             tmpvn.setMark();
-                            vnlist.push_back(tmpvn);
+                            vnlist.Add(tmpvn);
                         }
                     }
                     else if (op.code() == CPUI_MULTIEQUAL)
@@ -124,7 +124,7 @@ namespace Sla.EXTRA
                             if (!tmpvn.isMark())
                             {
                                 tmpvn.setMark();
-                                vnlist.push_back(tmpvn);
+                                vnlist.Add(tmpvn);
                             }
                         }
                     }

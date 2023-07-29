@@ -39,7 +39,7 @@ namespace Sla.SLEIGH
         public override void getFixedHandle(FixedHandle hand, ParserWalker walker)
         {
             hand.space = walker.getConstSpace();
-            hand.offset_space = (AddrSpace*)0;
+            hand.offset_space = (AddrSpace)null;
             hand.offset_offset = (ulong)patval.getValue(walker);
             hand.size = 0;      // Cannot provide size
         }

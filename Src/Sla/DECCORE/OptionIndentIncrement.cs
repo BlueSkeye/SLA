@@ -19,7 +19,7 @@ namespace Sla.DECCORE
         /// The first parameter is the integer value specifying how many characters to indent.
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            istringstream s(p1);
+            istringstream s = new istringstream(p1);
             s.unsetf(ios::dec | ios::hex | ios::oct);
             int val = -1;
             s >> val;

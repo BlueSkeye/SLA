@@ -14,7 +14,7 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("No load image present");
+                throw new IfaceExecutionError("No load image present");
 
             dcp.conf.print.setOutputStream(status.fileoptr);
             dcp.conf.print.docAllGlobals();

@@ -21,16 +21,16 @@ namespace Sla.DECCORE
         // Never needs casting
         public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
-            return (Datatype*)0;
+            return (Datatype)null;
         }
 
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
             int inslot, int outslot)
         {
-            if ((inslot != 0) || (outslot != -1)) return (Datatype*)0;
+            if ((inslot != 0) || (outslot != -1)) return (Datatype)null;
             Varnode* vn0 = op.getIn(0);
-            if (!vn0.isWritten()) return (Datatype*)0;     // Don't propagate
-            if (vn0.getDef().code() != CPUI_CPOOLREF) return (Datatype*)0;
+            if (!vn0.isWritten()) return (Datatype)null;     // Don't propagate
+            if (vn0.getDef().code() != CPUI_CPOOLREF) return (Datatype)null;
             return alttype;     // Propagate cpool result as result of new operator
         }
 
@@ -41,7 +41,7 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            if (op.getOut() != (Varnode*)0)
+            if (op.getOut() != (Varnode)null)
             {
                 Varnode::printRaw(s, op.getOut());
                 s << " = ";

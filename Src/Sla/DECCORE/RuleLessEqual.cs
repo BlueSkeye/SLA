@@ -31,13 +31,17 @@ namespace Sla.DECCORE
         /// Handle INT_SLESS variants as well.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_BOOL_OR);
+            oplist.Add(CPUI_BOOL_OR);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* compvn1,*compvn2,*vnout1,*vnout2;
-            PcodeOp* op_less,*op_equal;
+            Varnode compvn1;
+            Varnode compvn2;
+            Varnode vnout1;
+            Varnode vnout2;
+            PcodeOp op_less;
+            PcodeOp op_equal;
             OpCode opc, equalopc;
 
             vnout1 = op.getIn(0);

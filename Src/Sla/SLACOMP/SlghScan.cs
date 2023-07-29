@@ -1364,7 +1364,7 @@ namespace Sla.SLACOMP
         //        string::size_type pos = str.find('#');
         //        if (pos != string::npos)
         //            str.erase(pos);
-        //        istringstream s(str);
+        //        istringstream s = new istringstream(str);
         //        string type;
 
         //        if (cur_state != blank_state)
@@ -1376,7 +1376,7 @@ namespace Sla.SLACOMP
         //        {
         //            if (negative_if == -1)
         //            {  // Not in the middle of a false if clause
-        //                filebuffers.push_back(FileStreamState());   // Save state of current file
+        //                filebuffers.Add(FileStreamState());   // Save state of current file
         //                filebuffers.back().lastbuffer = YY_CURRENT_BUFFER;
         //                filebuffers.back().file = (FILE*)0;
         //                s >> ws;
@@ -1431,7 +1431,7 @@ namespace Sla.SLACOMP
         //                preproc_error("Error in preprocessor ifdef");
         //            string value;
         //            int truth = (slgh.getPreprocValue(varname, value)) ? 1 : 0;
-        //            ifstack.push_back(truth);
+        //            ifstack.Add(truth);
         //            check_to_endofline(s);
         //        }
         //        else if (type == "ifndef")
@@ -1442,7 +1442,7 @@ namespace Sla.SLACOMP
         //                preproc_error("Error in preprocessor ifndef");
         //            string value;
         //            int truth = (slgh.getPreprocValue(varname, value)) ? 0 : 1;   // flipped from ifdef
-        //            ifstack.push_back(truth);
+        //            ifstack.Add(truth);
         //            check_to_endofline(s);
         //        }
         //        else if (type == "if")
@@ -1450,7 +1450,7 @@ namespace Sla.SLACOMP
         //            int truth = preprocess_if(s);
         //            if (!s.eof())
         //                preproc_error("Unbalanced parentheses");
-        //            ifstack.push_back(truth);
+        //            ifstack.Add(truth);
         //        }
         //        else if (type == "elif")
         //        {
@@ -1516,7 +1516,7 @@ namespace Sla.SLACOMP
         //    void preproc_macroexpand(void)
 
         //    {
-        //        filebuffers.push_back(FileStreamState());
+        //        filebuffers.Add(FileStreamState());
         //        filebuffers.back().lastbuffer = YY_CURRENT_BUFFER;
         //        filebuffers.back().file = (FILE*)0;
         //        string macro(sleightext);
@@ -1533,7 +1533,7 @@ namespace Sla.SLACOMP
         //    {
         //        string* newstring = new string(sleightext);
         //        SleighSymbol* sym = slgh.findSymbol(*newstring);
-        //        if (sym == (SleighSymbol*)0)
+        //        if (sym == (SleighSymbol)null)
         //        {
         //            sleighlval.str = newstring;
         //            return STRING;
@@ -1624,7 +1624,7 @@ namespace Sla.SLACOMP
         //        }
         //        else
         //        {
-        //            istringstream s(numtext);
+        //            istringstream s = new istringstream(numtext);
         //            s.unsetf(ios::dec | ios::hex | ios::oct);
         //            s >> val;
         //            if (!s)

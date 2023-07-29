@@ -73,7 +73,7 @@ namespace Sla.DECCORE
         /// \return a copy of the iterator before it was advanced
         internal static MapIterator operator ++(int i)
         {
-            MapIterator tmp(*this);
+            MapIterator tmp = new MapIterator(*this);
             ++curiter;
             while ((curmap != map.end()) && (curiter == (*curmap).end_list()))
             {

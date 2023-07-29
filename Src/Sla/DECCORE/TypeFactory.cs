@@ -48,7 +48,7 @@ namespace Sla.DECCORE
         private Datatype findNoName(Datatype ct)
         {
             DatatypeSet::const_iterator iter;
-            Datatype* res = (Datatype*)0;
+            Datatype* res = (Datatype)null;
             iter = tree.find(&ct);
             if (iter != tree.end())
                 res = *iter;
@@ -90,7 +90,7 @@ namespace Sla.DECCORE
                 if (ct.id == 0)     // There must be an id
                     throw new LowlevelError("Datatype must have a valid id");
                 res = findByIdLocal(ct.name, ct.id); // Lookup type by it
-                if (res != (Datatype*)0)
+                if (res != (Datatype)null)
                 { // If a type has this name
                     if (0 != res.compareDependency(ct)) // Check if it is the same type
                         throw new LowlevelError("Trying to alter definition of type: " + ct.name);
@@ -100,7 +100,7 @@ namespace Sla.DECCORE
             else
             {
                 res = findNoName(ct);
-                if (res != (Datatype*)0) return res; // Found it
+                if (res != (Datatype)null) return res; // Found it
             }
 
             newtype = ct.clone();       // Add the new type to trees
@@ -118,12 +118,12 @@ namespace Sla.DECCORE
         {               // Make sure dependants of ct are in order, then add ct
             pair<DatatypeSet::iterator, bool> res = mark.insert(ct);
             if (!res.second) return;    // Already inserted before
-            if (ct.typedefImm != (Datatype*)0)
+            if (ct.typedefImm != (Datatype)null)
                 orderRecurse(deporder, mark, ct.typedefImm);
             int size = ct.numDepend();
             for (int i = 0; i < size; ++i)
                 orderRecurse(deporder, mark, ct.getDepend(i));
-            deporder.push_back(ct);
+            deporder.Add(ct);
         }
 
         /// Restore a \<def> element describing a typedef
@@ -167,7 +167,7 @@ namespace Sla.DECCORE
                 // Its possible that a typedef of a struct/union is recursively defined, in which case
                 // an incomplete version may already be in the container
                 Datatype* prev = findByIdLocal(nm, id);
-                if (prev != (Datatype*)0)
+                if (prev != (Datatype)null)
                 {
                     if (defedType != prev.getTypedef())
                         throw new LowlevelError("Trying to create typedef of existing type: " + prev.name);
@@ -204,7 +204,7 @@ namespace Sla.DECCORE
             if (forcecore)
                 ts.flags |= Datatype::coretype;
             Datatype* ct = findByIdLocal(ts.name, ts.id);
-            if (ct == (Datatype*)0)
+            if (ct == (Datatype)null)
             {
                 ct = findAdd(ts);   // Create stub to allow recursive definitions
             }
@@ -238,7 +238,7 @@ namespace Sla.DECCORE
             if (forcecore)
                 tu.flags |= Datatype::coretype;
             Datatype* ct = findByIdLocal(tu.name, tu.id);
-            if (ct == (Datatype*)0)
+            if (ct == (Datatype)null)
             {
                 ct = findAdd(tu);   // Create stub to allow recursive definitions
             }
@@ -278,7 +278,7 @@ namespace Sla.DECCORE
             if (forcecore)
                 tc.flags |= Datatype::coretype;
             Datatype* ct = findByIdLocal(tc.name, tc.id);
-            if (ct == (Datatype*)0)
+            if (ct == (Datatype)null)
             {
                 ct = findAdd(tc);   // Create stub to allow recursive definitions
             }
@@ -360,7 +360,7 @@ namespace Sla.DECCORE
                     break;
                 case TYPE_SPACEBASE:
                     {
-                        TypeSpacebase tsb((AddrSpace*)0,Address(),glb);
+                        TypeSpacebase tsb = new TypeSpacebase((AddrSpace)null,Address(),glb);
                         tsb.decode(decoder, *this);
                         if (forcecore)
                             tsb.flags |= Datatype::coretype;
@@ -411,7 +411,7 @@ namespace Sla.DECCORE
                     }
                     {
                         decoder.rewindAttributes();
-                        TypeBase tb(0, TYPE_UNKNOWN);
+                        TypeBase tb = new TypeBase(0, TYPE_UNKNOWN);
                         tb.decodeBasic(decoder);
                         if (forcecore)
                             tb.flags |= Datatype::coretype;
@@ -430,10 +430,10 @@ namespace Sla.DECCORE
             int i, j;
             for (i = 0; i < 9; ++i)
                 for (j = 0; j < 8; ++j)
-                    typecache[i][j] = (Datatype*)0;
-            typecache10 = (Datatype*)0;
-            typecache16 = (Datatype*)0;
-            type_nochar = (Datatype*)0;
+                    typecache[i][j] = (Datatype)null;
+            typecache10 = (Datatype)null;
+            typecache16 = (Datatype)null;
+            type_nochar = (Datatype)null;
         }
 
         /// Create a default "char" type
@@ -485,7 +485,7 @@ namespace Sla.DECCORE
         private void recalcPointerSubmeta(Datatype @base, sub_metatype sub)
         {
             DatatypeSet::const_iterator iter;
-            TypePointer top(1,base,0);      // This will calculate the current proper sub-meta for pointers to base
+            TypePointer top = new TypePointer(1,@base,0);      // This will calculate the current proper sub-meta for pointers to base
             sub_metatype curSub = top.submeta;
             if (curSub == sub) return;      // Don't need to search for pointers with correct submeta
             top.submeta = sub;          // Search on the incorrect submeta
@@ -517,19 +517,19 @@ namespace Sla.DECCORE
         {               // Get type of given name
             DatatypeNameSet::const_iterator iter;
 
-            TypeBase ct(1,TYPE_UNKNOWN,n);
+            TypeBase ct = new TypeBase(1,TYPE_UNKNOWN,n);
             if (id != 0)
             {       // Search for an exact type
                 ct.id = id;
                 iter = nametree.find((Datatype*)&ct);
-                if (iter == nametree.end()) return (Datatype*)0; // Didn't find it
+                if (iter == nametree.end()) return (Datatype)null; // Didn't find it
             }
             else
             {           // Allow for the fact that the name may not be unique
                 ct.id = 0;
                 iter = nametree.lower_bound((Datatype*)&ct);
-                if (iter == nametree.end()) return (Datatype*)0; // Didn't find it
-                if ((*iter).getName() != n) return (Datatype*)0; // Found at least one datatype with this name
+                if (iter == nametree.end()) return (Datatype)null; // Didn't find it
+                if ((*iter).getName() != n) return (Datatype)null; // Found at least one datatype with this name
             }
             return *iter;
         }
@@ -574,7 +574,7 @@ namespace Sla.DECCORE
             {
                 sizeOfInt = 1;          // Default if we can't find a better value
                 AddrSpace* spc = glb.getStackSpace();
-                if (spc != (AddrSpace*)0)
+                if (spc != (AddrSpace)null)
                 {
                     VarnodeData spdata = spc.getSpacebase(0);        // Use stack pointer as likely indicator of "int" size
                     sizeOfInt = spdata.size;
@@ -816,7 +816,7 @@ namespace Sla.DECCORE
             map<ulong, string> nmap;
             map<ulong, string>::iterator mapiter;
 
-            ulong mask = calc_mask(te.getSize());
+            ulong mask = Globals.calc_mask(te.getSize());
             ulong maxval = 0;
             for (uint i = 0; i < namelist.size(); ++i)
             {
@@ -882,7 +882,7 @@ namespace Sla.DECCORE
                 if (newid == 0)     // If there was no id, use the name hash
                     newid = Datatype::hashName(newname);
                 ct = findById(newname, newid, size);
-                if (ct == (Datatype*)0)
+                if (ct == (Datatype)null)
                     throw new LowlevelError("Unable to resolve type: " + newname);
                 decoder.closeElement(elemId);
                 return ct;
@@ -943,7 +943,7 @@ namespace Sla.DECCORE
         /// \return the Datatype object
         public Datatype getBaseNoChar(int s, type_metatype m)
         {
-            if ((s == 1) && (m == TYPE_INT) && (type_nochar != (Datatype*)0)) // Jump in and return
+            if ((s == 1) && (m == TYPE_INT) && (type_nochar != (Datatype)null)) // Jump in and return
                 return type_nochar;     // the non character based type (as the main getBase would return char)
             return getBase(s, m);       // otherwise do the main getBase
         }
@@ -961,7 +961,7 @@ namespace Sla.DECCORE
                 if (m >= TYPE_FLOAT)
                 {
                     ct = typecache[s][m - TYPE_FLOAT];
-                    if (ct != (Datatype*)0)
+                    if (ct != (Datatype)null)
                         return ct;
                 }
             }
@@ -972,8 +972,8 @@ namespace Sla.DECCORE
                 else if (s == 16)
                     ct = typecache16;
                 else
-                    ct = (Datatype*)0;
-                if (ct != (Datatype*)0)
+                    ct = (Datatype)null;
+                if (ct != (Datatype)null)
                     return ct;
             }
             if (s > glb.max_basetype_size)
@@ -1007,7 +1007,7 @@ namespace Sla.DECCORE
         public TypeCode getTypeCode()
         {
             Datatype* ct = typecache[1][TYPE_CODE - TYPE_FLOAT];
-            if (ct != (Datatype*)0)
+            if (ct != (Datatype)null)
                 return (TypeCode*)ct;
             TypeCode tmp;       // A generic code object
             tmp.markComplete(); // which is considered complete
@@ -1098,7 +1098,7 @@ namespace Sla.DECCORE
         {
             if (ao.hasStripped())
                 ao = ao.getStripped();
-            TypeArray tmp(as,ao);
+            TypeArray tmp(@as,ao);
             return (TypeArray*)findAdd(tmp);
         }
 
@@ -1196,7 +1196,7 @@ namespace Sla.DECCORE
             if (id == 0)
                 id = Datatype::hashName(name);
             Datatype* res = findByIdLocal(name, id);
-            if (res != (Datatype*)0)
+            if (res != (Datatype)null)
             {
                 if (ct != res.getTypedef())
                     throw new LowlevelError("Trying to create typedef of existing type: " + name);
@@ -1281,8 +1281,8 @@ namespace Sla.DECCORE
         public Datatype getExactPiece(Datatype ct, int offset, int size)
         {
             if (offset + size > ct.getSize())
-                return (Datatype*)0;
-            Datatype* lastType = (Datatype*)0;
+                return (Datatype)null;
+            Datatype* lastType = (Datatype)null;
             ulong lastOff = 0;
             ulong curOff = offset;
             do
@@ -1300,11 +1300,11 @@ namespace Sla.DECCORE
                 lastType = ct;
                 lastOff = curOff;
                 ct = ct.getSubType(curOff, &curOff);
-            } while (ct != (Datatype*)0);
+            } while (ct != (Datatype)null);
             // If we reach here, lastType is bigger than size
             if (lastType.getMetatype() == TYPE_STRUCT || lastType.getMetatype() == TYPE_ARRAY)
                 return getTypePartialStruct(lastType, lastOff, size);
-            return (Datatype*)0;
+            return (Datatype)null;
         }
 
         /// Remove a data-type from \b this
@@ -1576,7 +1576,7 @@ namespace Sla.DECCORE
                     case TYPE_CODE:
                     case TYPE_FLOAT:
                         testct = typecache[ct.getSize()][ct.getMetatype() - TYPE_FLOAT];
-                        if (testct == (Datatype*)0)
+                        if (testct == (Datatype)null)
                             typecache[ct.getSize()][ct.getMetatype() - TYPE_FLOAT] = ct;
                         break;
                     default:

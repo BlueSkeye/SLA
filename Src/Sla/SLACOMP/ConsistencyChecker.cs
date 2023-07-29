@@ -379,15 +379,15 @@ namespace Sla.SLACOMP
                     {
                         tabsym = dynamic_cast<SubtableSymbol*>(opsym.getDefiningSymbol());
                         if (tabsym == (SubtableSymbol*)0)
-                            throw SleighError("Could not recover varnode template size");
+                            throw new SleighError("Could not recover varnode template size");
                         iter = sizemap.find(tabsym);
                         if (iter == sizemap.end())
-                            throw SleighError("Subtable out of order");
+                            throw new SleighError("Subtable out of order");
                         size = (*iter).second;
                     }
                     break;
                 default:
-                    throw SleighError("Bad constant type as varnode template size");
+                    throw new SleighError("Bad constant type as varnode template size");
             }
             return size;
         }
@@ -741,7 +741,7 @@ namespace Sla.SLACOMP
         /// \return \b true if there are no fatal errors in the section
         private bool checkConstructorSection(Constructor ct, ConstructTpl cttpl)
         {
-            if (cttpl == (ConstructTpl*)0)
+            if (cttpl == (ConstructTpl)null)
                 return true;        // Nothing to check
             List<OpTpl*>::const_iterator iter;
             List<OpTpl> ops = cttpl.getOpvec();
@@ -765,15 +765,14 @@ namespace Sla.SLACOMP
         /// \return \b true if the operator has a too large temporary parameter
         private bool hasLargeTemporary(OpTpl op)
         {
-            VarnodeTpl *out = op.getOut();
-            if ((out != (VarnodeTpl*)0x0) && isTemporaryAndTooBig(out)) {
+            VarnodeTpl @out = op.getOut();
+            if ((@out != (VarnodeTpl)null) && isTemporaryAndTooBig(@out)) {
                 return true;
             }
             for (int i = 0; i < op.numInput(); ++i)
             {
-                VarnodeTpl *in = op.getIn(i);
-                if (isTemporaryAndTooBig(in))
-                {
+                VarnodeTpl @in = op.getIn(i);
+                if (isTemporaryAndTooBig(@in)) {
                     return true;
                 }
             }
@@ -892,9 +891,9 @@ namespace Sla.SLACOMP
                         testresult = false;
                 }
 
-                if (ct.getTempl() == (ConstructTpl*)0) continue;   // Unimplemented
+                if (ct.getTempl() == (ConstructTpl)null) continue;   // Unimplemented
                 HandleTpl* exportres = ct.getTempl().getResult();
-                if (exportres != (HandleTpl*)0)
+                if (exportres != (HandleTpl)null)
                 {
                     if (seenemptyexport && (!seennonemptyexport))
                     {
@@ -1002,9 +1001,9 @@ namespace Sla.SLACOMP
             List<int> ctstate;
 
             sizemap[root] = -1;     // Mark root as traversed
-            path.push_back(root);
-            state.push_back(0);
-            ctstate.push_back(0);
+            path.Add(root);
+            state.Add(0);
+            ctstate.Add(0);
 
             while (!path.empty())
             {
@@ -1015,7 +1014,7 @@ namespace Sla.SLACOMP
                     path.pop_back();        // Table is fully traversed
                     state.pop_back();
                     ctstate.pop_back();
-                    postorder.push_back(cur);   // Post the traversed table
+                    postorder.Add(cur);   // Post the traversed table
                 }
                 else
                 {
@@ -1038,9 +1037,9 @@ namespace Sla.SLACOMP
                             if (iter == sizemap.end())
                             { // Not traversed yet
                                 sizemap[subsym] = -1; // Mark table as traversed
-                                path.push_back(subsym); // Recurse
-                                state.push_back(0);
-                                ctstate.push_back(0);
+                                path.Add(subsym); // Recurse
+                                state.Add(0);
+                                ctstate.Add(0);
                             }
                         }
                     }
@@ -1184,7 +1183,7 @@ namespace Sla.SLACOMP
                 tpl = ct.getTempl();
             else
                 tpl = ct.getNamedTempl(secnum);
-            if (tpl == (ConstructTpl*)0)
+            if (tpl == (ConstructTpl)null)
                 return;
             List<OpTpl> ops = tpl.getOpvec();
             for (uint i = 0; i < ops.size(); ++i)
@@ -1215,10 +1214,10 @@ namespace Sla.SLACOMP
                 tpl = ct.getTempl();
             else
                 tpl = ct.getNamedTempl(secnum);
-            if (tpl == (ConstructTpl*)0)
+            if (tpl == (ConstructTpl)null)
                 return;
             HandleTpl* hand = tpl.getResult();
-            if (hand == (HandleTpl*)0) return;
+            if (hand == (HandleTpl)null) return;
             if (hand.getPtrSpace().isUniqueSpace())
             {
                 if (hand.getPtrOffset().getType() == ConstTpl::real)
@@ -1282,7 +1281,7 @@ namespace Sla.SLACOMP
                     List<OpTpl> ops = tpl.getOpvec();
                     OpTpl op = ops[currec.readop];
                     if (currec.writeop >= currec.readop) // Read must come after write
-                        throw SleighError("Read of temporary before write");
+                        throw new SleighError("Read of temporary before write");
                     if (op.getOpcode() == CPUI_COPY)
                     {
                         bool saverecord = true;
@@ -1346,7 +1345,7 @@ namespace Sla.SLACOMP
                 OpTpl* op = ctempl.getOpvec()[readop];
                 VarnodeTpl* vnout = new VarnodeTpl(*op.getOut()); // Make COPY output
                 ctempl.setOutput(vnout, rec.writeop); // become write output
-                deleteops.push_back(readop); // and then delete the read (COPY)
+                deleteops.Add(readop); // and then delete the read (COPY)
             }
             else if (rec.opttype == 1)
             { // If write op is COPY
@@ -1354,7 +1353,7 @@ namespace Sla.SLACOMP
                 OpTpl* op = ctempl.getOpvec()[writeop];
                 VarnodeTpl* vnin = new VarnodeTpl(*op.getIn(0));   // Make COPY input
                 ctempl.setInput(vnin, rec.readop, rec.inslot); // become read input
-                deleteops.push_back(writeop); // and then delete the write (COPY)
+                deleteops.Add(writeop); // and then delete the write (COPY)
             }
             ctempl.deleteOps(deleteops);
         }
@@ -1500,7 +1499,7 @@ namespace Sla.SLACOMP
                             tpl = ct.getTempl();
                         else
                             tpl = ct.getNamedTempl(k);
-                        if (tpl == (ConstructTpl*)0)
+                        if (tpl == (ConstructTpl)null)
                             continue;
                         if (!checkSectionTruncations(ct, tpl, isbigendian))
                             testresult = false;
@@ -1532,7 +1531,7 @@ namespace Sla.SLACOMP
                             tpl = ct.getTempl();
                         else
                             tpl = ct.getNamedTempl(k);
-                        if (tpl == (ConstructTpl*)0)
+                        if (tpl == (ConstructTpl)null)
                             continue;
                         checkLargeTemporaries(ct, tpl);
                     }

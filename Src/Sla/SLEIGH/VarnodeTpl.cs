@@ -67,7 +67,7 @@ namespace Sla.SLEIGH
             // ConstTpls for dynamic handles, but in all cases
             // if there is any dynamic piece then the offset is
             FixedHandle hand = walker.getFixedHandle(offset.getHandleIndex());
-            return (hand.offset_space != (AddrSpace*)0);
+            return (hand.offset_space != (AddrSpace)null);
         }
 
         public int transfer(List<HandleTpl> @params)

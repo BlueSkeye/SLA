@@ -61,7 +61,7 @@ namespace Sla.SLACOMP
                     compileAll = true;
                 else if (argv[i][1] == 'D')
                 {
-                    string preproc(argv[i]+2);
+                    string preproc = argv[i].Substring(2);
                     string::size_type pos = preproc.find('=');
                     if (pos == string::npos)
                     {

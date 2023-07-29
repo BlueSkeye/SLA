@@ -139,16 +139,16 @@ namespace Sla.DECCORE
         private void getOpList(List<uint> oplist)
         {
             if (!hasTruncations) return;    // Only stick ourselves into pool if aggresiveness is turned on
-            oplist.push_back(CPUI_STORE);
-            oplist.push_back(CPUI_LOAD);
-            oplist.push_back(CPUI_COPY);
-            oplist.push_back(CPUI_MULTIEQUAL);
-            oplist.push_back(CPUI_INDIRECT);
-            oplist.push_back(CPUI_INT_ADD);
-            oplist.push_back(CPUI_CALLIND);
-            oplist.push_back(CPUI_BRANCHIND);
-            oplist.push_back(CPUI_PTRSUB);
-            oplist.push_back(CPUI_PTRADD);
+            oplist.Add(CPUI_STORE);
+            oplist.Add(CPUI_LOAD);
+            oplist.Add(CPUI_COPY);
+            oplist.Add(CPUI_MULTIEQUAL);
+            oplist.Add(CPUI_INDIRECT);
+            oplist.Add(CPUI_INT_ADD);
+            oplist.Add(CPUI_CALLIND);
+            oplist.Add(CPUI_BRANCHIND);
+            oplist.Add(CPUI_PTRSUB);
+            oplist.Add(CPUI_PTRADD);
         }
 
         private int applyOp(PcodeOp op, Funcdata data)

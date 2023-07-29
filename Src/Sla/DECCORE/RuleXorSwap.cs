@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// `V = a ^ (b ^ a) => V = b`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_XOR);
+            oplist.Add(CPUI_INT_XOR);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

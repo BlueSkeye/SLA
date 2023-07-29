@@ -22,13 +22,13 @@ namespace Sla.DECCORE
         {
             List<Varnode*> newparam;
 
-            newparam.push_back(retop.getIn(0)); // Keep the first param (the return indirect reference)
+            newparam.Add(retop.getIn(0)); // Keep the first param (the return indirect reference)
             for (int i = 0; i < active.getNumTrials(); ++i)
             { // Gather all the used varnodes to this return in proper order
                 ParamTrial & curtrial(active.getTrial(i));
                 if (!curtrial.isUsed()) break;
                 if (curtrial.getSlot() >= retop.numInput()) break;
-                newparam.push_back(retop.getIn(curtrial.getSlot()));
+                newparam.Add(retop.getIn(curtrial.getSlot()));
             }
             if (newparam.size() <= 2)   // Easy zero or one return varnode case
                 data.opSetAllInput(retop, newparam);
@@ -56,15 +56,15 @@ namespace Sla.DECCORE
             { // We may have several varnodes from a single container
               // Concatenate them into a single result
                 newparam.clear();
-                newparam.push_back(retop.getIn(0));
+                newparam.Add(retop.getIn(0));
                 int offmatch = 0;
-                Varnode* preexist = (Varnode*)0;
+                Varnode* preexist = (Varnode)null;
                 for (int i = 0; i < active.getNumTrials(); ++i)
                 {
                     ParamTrial & curtrial(active.getTrial(i));
                     if (!curtrial.isUsed()) break;
                     if (curtrial.getSlot() >= retop.numInput()) break;
-                    if (preexist == (Varnode*)0)
+                    if (preexist == (Varnode)null)
                     {
                         preexist = retop.getIn(curtrial.getSlot());
                         offmatch = curtrial.getOffset() + curtrial.getSize();
@@ -89,8 +89,8 @@ namespace Sla.DECCORE
                     else
                         break;
                 }
-                if (preexist != (Varnode*)0)
-                    newparam.push_back(preexist);
+                if (preexist != (Varnode)null)
+                    newparam.Add(preexist);
                 data.opSetAllInput(retop, newparam);
             }
         }

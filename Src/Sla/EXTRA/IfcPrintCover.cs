@@ -20,15 +20,15 @@ namespace Sla.EXTRA
             HighVariable* high;
             string name;
 
-            if (dcp.fd == (Funcdata*)0)
-                throw IfaceExecutionError("No function selected");
+            if (dcp.fd == (Funcdata)null)
+                throw new IfaceExecutionError("No function selected");
 
             s >> ws >> name;
             if (name.size() == 0)
-                throw IfaceParseError("Missing variable name");
+                throw new IfaceParseError("Missing variable name");
             high = dcp.fd.findHigh(name);
             if (high == (HighVariable*)0)
-                throw IfaceExecutionError("Unable to find variable: " + name);
+                throw new IfaceExecutionError("Unable to find variable: " + name);
 
             high.printCover(*status.optr);
         }

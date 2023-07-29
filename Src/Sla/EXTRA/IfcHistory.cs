@@ -20,7 +20,7 @@ namespace Sla.EXTRA
             {
                 s >> num >> ws;
                 if (!s.eof())
-                    throw IfaceParseError("Too many parameters to history");
+                    throw new IfaceParseError("Too many parameters to history");
             }
             else
                 num = 10;           // Default number of history lines

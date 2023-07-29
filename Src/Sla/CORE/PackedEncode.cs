@@ -34,7 +34,7 @@ namespace Sla.CORE
 
         ///< Write an integer value to the stream
         /// The value is either an unsigned integer, an address space index, or (the absolute value of) a signed integer.
-        /// A type header is passed in with the particular type code for the value already filled in.
+        /// A type header is passed in with the particular type code for the value already filled @in.
         /// This method then fills in the length code, outputs the full type header and the encoded bytes of the integer.
         /// \param typeByte is the type header
         /// \param val is the integer value

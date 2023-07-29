@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
-            return (Datatype*)0;        // Never need a cast into a PIECE
+            return (Datatype)null;        // Never need a cast into a PIECE
         }
 
         public override Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)

@@ -17,7 +17,7 @@ namespace Sla.SLEIGH
         
         public StartSymbol()
         {
-            patexp = (PatternExpression*)0;
+            patexp = (PatternExpression)null;
         }
 
         public StartSymbol(string nm,AddrSpace cspc)
@@ -29,7 +29,7 @@ namespace Sla.SLEIGH
 
         ~StartSymbol()
         {
-            if (patexp != (PatternExpression*)0)
+            if (patexp != (PatternExpression)null)
                 PatternExpression::release(patexp);
         }
 
@@ -46,7 +46,7 @@ namespace Sla.SLEIGH
         public override void getFixedHandle(ref FixedHandle hand, ParserWalker walker)
         {
             hand.space = walker.getCurSpace();
-            hand.offset_space = (AddrSpace*)0;
+            hand.offset_space = (AddrSpace)null;
             hand.offset_offset = walker.getAddr().getOffset(); // Get starting address of instruction
             hand.size = hand.space.getAddrSize();
         }

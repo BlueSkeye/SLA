@@ -54,7 +54,7 @@ namespace Sla.SLEIGH
                     throw BadDataError(s.str());
                 }
             }
-            return (Constructor*)0;
+            return (Constructor)null;
         }
 
         public override void print(TextWriter s, ParserWalker walker)
@@ -101,9 +101,9 @@ namespace Sla.SLEIGH
             {
                 Element subel = *iter;
                 if (subel.getNumAttributes() >= 1)
-                    nametable.push_back(subel.getAttributeValue("name"));
+                    nametable.Add(subel.getAttributeValue("name"));
                 else
-                    nametable.push_back("\t");      // TAB indicates an illegal index
+                    nametable.Add("\t");      // TAB indicates an illegal index
                 ++iter;
             }
             checkTableFill();

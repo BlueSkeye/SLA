@@ -29,8 +29,8 @@ namespace Sla.DECCORE
         /// are zero, then convert to the unsigned form of the operation.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_SDIV);
-            oplist.push_back(CPUI_INT_SREM);
+            oplist.Add(CPUI_INT_SDIV);
+            oplist.Add(CPUI_INT_SREM);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

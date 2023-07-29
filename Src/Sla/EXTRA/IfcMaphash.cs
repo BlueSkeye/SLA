@@ -19,8 +19,8 @@ namespace Sla.EXTRA
         /// specified by a code address and hash of the local data-flow structure.
         public override void execute(TextReader s)
         {
-            if (dcp.fd == (Funcdata*)0)
-                throw IfaceExecutionError("No function loaded");
+            if (dcp.fd == (Funcdata)null)
+                throw new IfaceExecutionError("No function loaded");
             Datatype* ct;
             string name;
             ulong hash;

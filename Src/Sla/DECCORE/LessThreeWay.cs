@@ -72,13 +72,13 @@ namespace Sla.DECCORE
         private bool mapOpsFromBlocks()
         {
             lolessbool = lolessbl.lastOp();
-            if (lolessbool == (PcodeOp*)0) return false;
+            if (lolessbool == (PcodeOp)null) return false;
             if (lolessbool.code() != CPUI_CBRANCH) return false;
             hieqbool = hieqbl.lastOp();
-            if (hieqbool == (PcodeOp*)0) return false;
+            if (hieqbool == (PcodeOp)null) return false;
             if (hieqbool.code() != CPUI_CBRANCH) return false;
             hilessbool = hilessbl.lastOp();
-            if (hilessbool == (PcodeOp*)0) return false;
+            if (hilessbool == (PcodeOp)null) return false;
             if (hilessbool.code() != CPUI_CBRANCH) return false;
 
             Varnode* vn;
@@ -219,10 +219,10 @@ namespace Sla.DECCORE
                 if (hilessequalform)
                 {   // Make sure to normalize lessequal to less
                     hival += inc;
-                    hival &= calc_mask(in.getSize());
+                    hival &= Globals.calc_mask(@@in.getSize());
                     hilessequalform = false;
                 }
-                hival >>= in.getLo().getSize() * 8;
+                hival >>= @@in.getLo().getSize() * 8;
             }
             else
             {
@@ -260,15 +260,15 @@ namespace Sla.DECCORE
                 if (!hiconstform) return false; // If mid is constant, both mid and hi must be constant
                 midconstform = true;
                 midval = vnhie2.getOffset();
-                if (vnhie2.getSize() == @in.getSize()) {
+                if (vnhie2.getSize() == @@in.getSize()) {
                     // Convert to comparison on high part
-                    ulong lopart = midval & calc_mask(@in.getLo().getSize());
-                    midval >>= @in.getLo().getSize() * 8;
+                    ulong lopart = midval & Globals.calc_mask(@@in.getLo().getSize());
+                    midval >>= @@in.getLo().getSize() * 8;
                     if (midlessform)
                     {
                         if (midlessequal)
                         {
-                            if (lopart != calc_mask(@in.getLo().getSize())) return false;
+                            if (lopart != Globals.calc_mask(@@in.getLo().getSize())) return false;
                         }
                         else
                         {
@@ -282,7 +282,7 @@ namespace Sla.DECCORE
                 {   // If the mid and hi don't match
                     if (!midlessform) return false;
                     midval += (midlessequal) ? 1 : -1; // We may just be one off
-                    midval &= calc_mask(@in.getLo().getSize());
+                    midval &= Globals.calc_mask(@@in.getLo().getSize());
                     midlessequal = !midlessequal;
                     if (midval != hival) return false; // Last chance
                 }
@@ -341,7 +341,7 @@ namespace Sla.DECCORE
                 if (lolessequalform)
                 {
                     loval += 1;
-                    loval &= calc_mask(vnlo2.getSize());
+                    loval &= Globals.calc_mask(vnlo2.getSize());
                     lolessequalform = false;
                 }
             }
@@ -384,18 +384,18 @@ namespace Sla.DECCORE
 
         private bool checkOpForm()
         {
-            lo = @in.getLo();
-            hi = @in.getHi();
+            lo = @@in.getLo();
+            hi = @@in.getHi();
 
             if (midconstform)
             {
                 if (!hiconstform) return false;
-                if (vnhie2.getSize() == @in.getSize()) {
+                if (vnhie2.getSize() == @@in.getSize()) {
                     if ((vnhie1 != vnhil1) && (vnhie1 != vnhil2)) return false;
                 }
                 else
                 {
-                    if (vnhie1 !=@in.getHi()) return false;
+                    if (vnhie1 !=@@in.getHi()) return false;
                 }
                 // normalizeMid checks that midval == hival
             }
@@ -405,7 +405,7 @@ namespace Sla.DECCORE
                 if ((vnhil1 != vnhie1) && (vnhil1 != vnhie2)) return false;
                 if ((vnhil2 != vnhie1) && (vnhil2 != vnhie2)) return false;
             }
-            if ((hi != (Varnode*)0) && (hi == vnhil1))
+            if ((hi != (Varnode)null) && (hi == vnhil1))
             {
                 if (hiconstform) return false;
                 hislot = 0;
@@ -421,7 +421,7 @@ namespace Sla.DECCORE
                 }
                 lo2 = vnlo2;
             }
-            else if ((hi != (Varnode*)0) && (hi == vnhil2))
+            else if ((hi != (Varnode)null) && (hi == vnhil2))
             {
                 if (hiconstform) return false;
                 hislot = 1;
@@ -437,20 +437,20 @@ namespace Sla.DECCORE
                 }
                 lo2 = vnlo1;
             }
-            else if (@in.getWhole() == vnhil1) {
+            else if (@@in.getWhole() == vnhil1) {
                 if (!hiconstform) return false;
                 if (!loconstform) return false;
                 if (vnlo1 != lo) return false;
                 hislot = 0;
             }
-            else if (@in.getWhole() == vnhil2) { // Whole constant appears on the left
+            else if (@@in.getWhole() == vnhil2) { // Whole constant appears on the left
                 if (!hiconstform) return false;
                 if (!loconstform) return false;
                 if (vnlo2 != lo)
                 {
                     loflip = !loflip;
                     loval -= 1;
-                    loval &= calc_mask(lo.getSize());
+                    loval &= Globals.calc_mask(lo.getSize());
                     if (vnlo1 != lo) return false;
                 }
                 hislot = 1;
@@ -493,7 +493,7 @@ namespace Sla.DECCORE
         { // Given the less than comparison for the lo piece and an input varnode explicitly marked as isPrecisLo
           // try to map out the threeway lessthan form
             PcodeOp* loop = op.getOut().loneDescend();
-            if (loop == (PcodeOp*)0) return false;
+            if (loop == (PcodeOp)null) return false;
             if (!mapBlocksFromLow(loop.getParent())) return false;
             if (!mapOpsFromBlocks()) return false;
             if (!checkSignedness()) return false;
@@ -510,12 +510,12 @@ namespace Sla.DECCORE
             setOpCode();
             if (hiconstform)
             {
-                in2.initPartial(@in.getSize(), (hival << (8 *@in.getLo().getSize()))| loval);
+                in2.initPartial(@@in.getSize(), (hival << (8 *@@in.getLo().getSize()))| loval);
                 if (!setBoolOp()) return false;
             }
             else
             {
-                in2.initPartial(@in.getSize(), lo2, hi2);
+                in2.initPartial(@@in.getSize(), lo2, hi2);
                 if (!setBoolOp()) return false;
             }
             return true;
@@ -538,7 +538,7 @@ namespace Sla.DECCORE
         public bool applyRule(SplitVarnode i, PcodeOp loop, bool workishi, Funcdata data)
         {
             if (workishi) return false;
-            if (i.getLo() == (Varnode*)0) return false; // Doesn't necessarily need the hi
+            if (i.getLo() == (Varnode)null) return false; // Doesn't necessarily need the hi
             @in = i;
             if (!mapFromLow(loop)) return false;
             bool res = testReplace();

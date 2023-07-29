@@ -20,14 +20,14 @@ namespace Sla.EXTRA
             string varname;
             HighVariable* high;
 
-            if (dcp.fd == (Funcdata*)0)
-                throw IfaceExecutionError("No function selected");
+            if (dcp.fd == (Funcdata)null)
+                throw new IfaceExecutionError("No function selected");
 
             s >> varname >> ws;
 
             high = dcp.fd.findHigh(varname);
             if (high == (HighVariable*)0)   // Didn't find this name
-                throw IfaceExecutionError("Unknown variable name: " + varname);
+                throw new IfaceExecutionError("Unknown variable name: " + varname);
 
             high.printInfo(*status.optr);
         }

@@ -30,19 +30,25 @@ namespace Sla.DECCORE
         /// Similarly if the lower part is zero:  `V & concat(W,X)  =>  V & concat(#0,X)`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_AND);
+            oplist.Add(CPUI_INT_AND);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* piecevn,*othervn,*highvn,*lowvn,*newvn,*newvn2;
-            PcodeOp* pieceop,*newop;
+            Varnode piecevn;
+            Varnode othervn;
+            Varnode highvn;
+            Varnode lowvn;
+            Varnode newvn;
+            Varnode newvn2;
+            PcodeOp pieceop;
+            PcodeOp newop;
             ulong othermask, maskhigh, masklow;
             OpCode opc = CPUI_PIECE;    // Unnecessary initialization
             int i, size;
 
             size = op.getOut().getSize();
-            highvn = lowvn = (Varnode*)0; // Unnecessary initialization
+            highvn = lowvn = (Varnode)null; // Unnecessary initialization
             for (i = 0; i < 2; ++i)
             {
                 piecevn = op.getIn(i);
@@ -51,7 +57,7 @@ namespace Sla.DECCORE
                 if (pieceop.code() != CPUI_PIECE) continue;
                 othervn = op.getIn(1 - i);
                 othermask = othervn.getNZMask();
-                if (othermask == calc_mask(size)) continue;
+                if (othermask == Globals.calc_mask(size)) continue;
                 if (othermask == 0) continue; // Handled by andmask
                 highvn = pieceop.getIn(0);
                 if (!highvn.isHeritageKnown()) continue;

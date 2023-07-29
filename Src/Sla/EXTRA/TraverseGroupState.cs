@@ -20,7 +20,7 @@ namespace Sla.EXTRA
         
         public void addTraverse(TraverseConstraint tc)
         {
-            traverselist.push_back(tc);
+            traverselist.Add(tc);
         }
 
         public TraverseConstraint getSubTraverse(int slot) => traverselist[slot];

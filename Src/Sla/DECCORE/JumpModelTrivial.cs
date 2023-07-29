@@ -45,7 +45,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < bl.sizeOut(); ++i)
             {
                 BlockBasic outbl = (BlockBasic)bl.getOut(i);
-                addresstable.push_back(outbl.getStart());
+                addresstable.Add(outbl.getStart());
             }
         }
 
@@ -57,7 +57,7 @@ namespace Sla.DECCORE
             List<ulong> label, JumpModel orig)
         {
             for (int i = 0; i < addresstable.size(); ++i)
-                label.push_back(addresstable[i].getOffset()); // Address itself is the label
+                label.Add(addresstable[i].getOffset()); // Address itself is the label
         }
 
         public override Varnode foldInNormalization(Funcdata fd, PcodeOp indop) => null;

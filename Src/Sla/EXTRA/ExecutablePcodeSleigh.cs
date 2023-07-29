@@ -18,12 +18,12 @@ namespace Sla.EXTRA
         public ExecutablePcodeSleigh(Architecture g, string src, string nm)
             : base(g, src, nm)
         {
-            tpl = (ConstructTpl*)0;
+            tpl = (ConstructTpl)null;
         }
 
         ~ExecutablePcodeSleigh()
         {
-            if (tpl != (ConstructTpl*)0)
+            if (tpl != (ConstructTpl)null)
                 delete tpl;
         }
 
@@ -42,7 +42,7 @@ namespace Sla.EXTRA
             InjectPayloadSleigh::setupParameters(con, walker, inputlist, output, getSource());
             // delayslot and crossbuild directives are not allowed in snippets, so we don't need the DisassemblyCache
             // and we don't need a unique allocation mask
-            SleighBuilder builder(&walker,(DisassemblyCache*)0,&con.cacher,con.glb.getConstantSpace(),con.glb.getUniqueSpace(),0);
+            SleighBuilder builder = new SleighBuilder(&walker,(DisassemblyCache)null,&con.cacher,con.glb.getConstantSpace(),con.glb.getUniqueSpace(),0);
             builder.build(tpl, -1);
             con.cacher.resolveRelatives();
             con.cacher.emit(con.baseaddr, &emit);

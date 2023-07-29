@@ -25,7 +25,7 @@ namespace Sla.EXTRA
 
             s >> ws >> name;
             if (name.size() == 0)
-                throw IfaceParseError("Must specify name of symbol");
+                throw new IfaceParseError("Must specify name of symbol");
             ct = parse_type(s, newname, dcp.conf);
 
             Symbol* sym;
@@ -33,9 +33,9 @@ namespace Sla.EXTRA
             dcp.readSymbol(name, symList);
 
             if (symList.empty())
-                throw IfaceExecutionError("No symbol named: " + name);
+                throw new IfaceExecutionError("No symbol named: " + name);
             if (symList.size() > 1)
-                throw IfaceExecutionError("More than one symbol named : " + name);
+                throw new IfaceExecutionError("More than one symbol named : " + name);
             else
                 sym = symList[0];
 

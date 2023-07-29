@@ -55,7 +55,7 @@ namespace Sla.DECCORE
         public static Datatype propagateAcrossCompare(Datatype alttype, TypeFactory typegrp, Varnode invn,
             Varnode outvn, int inslot, int outslot)
         {
-            if (inslot == -1 || outslot == -1) return (Datatype*)0;
+            if (inslot == -1 || outslot == -1) return (Datatype)null;
             Datatype* newtype;
             if (invn.isSpacebase())
             {

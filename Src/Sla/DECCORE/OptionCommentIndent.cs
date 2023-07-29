@@ -20,7 +20,7 @@ namespace Sla.DECCORE
         /// of the associated code's nesting depth.
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            istringstream s(p1);
+            istringstream s = new istringstream(p1);
             s.unsetf(ios::dec | ios::hex | ios::oct);
             int val = -1;
             s >> val;

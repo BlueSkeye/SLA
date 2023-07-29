@@ -26,8 +26,8 @@ namespace Sla.SLEIGH
 
         public PcodeCompile()
         {
-            defaultspace = (AddrSpace*)0; constantspace = (AddrSpace*)0;
-            uniqspace = (AddrSpace*)0; local_labelcount = 0; enforceLocalKey = false;
+            defaultspace = (AddrSpace)null; constantspace = (AddrSpace)null;
+            uniqspace = (AddrSpace)null; local_labelcount = 0; enforceLocalKey = false;
         }
         
         ~PcodeCompile()
@@ -99,7 +99,7 @@ namespace Sla.SLEIGH
                                 ConstTpl(ConstTpl::real, labsym.getIndex()),
                                 ConstTpl(ConstTpl::real, 4));
             op.addInput(idvn);
-            res.push_back(op);
+            res.Add(op);
             return res;
         }
 
@@ -138,7 +138,7 @@ namespace Sla.SLEIGH
             OpTpl* op = new OpTpl(opc);
             op.addInput(vn.outvn);
             op.setOutput(outvn);
-            vn.ops.push_back(op);
+            vn.ops.Add(op);
             vn.outvn = new VarnodeTpl(*outvn);
             return vn;
         }
@@ -155,7 +155,7 @@ namespace Sla.SLEIGH
             op.addInput(vn2.outvn);
             vn2.outvn = (VarnodeTpl*)0;
             op.setOutput(outvn);
-            vn1.ops.push_back(op);
+            vn1.ops.Add(op);
             vn1.outvn = new VarnodeTpl(*outvn);
             delete vn2;
             return vn1;
@@ -170,7 +170,7 @@ namespace Sla.SLEIGH
             op.addInput(vn2.outvn);
             vn2.outvn = (VarnodeTpl*)0;
             op.setOutput(outvn);
-            vn1.ops.push_back(op);
+            vn1.ops.Add(op);
             vn1.outvn = new VarnodeTpl(*outvn);
             delete vn2;
             return vn1;
@@ -181,7 +181,7 @@ namespace Sla.SLEIGH
             OpTpl* op = new OpTpl(opc);
             op.addInput(vn.outvn);
             op.setOutput(outvn);
-            vn.ops.push_back(op);
+            vn.ops.Add(op);
             vn.outvn = new VarnodeTpl(*outvn);
             return vn;
         }
@@ -195,7 +195,7 @@ namespace Sla.SLEIGH
             List<OpTpl*>* res = vn.ops;
             vn.ops = (List<OpTpl*>*)0;
             delete vn;
-            res.push_back(op);
+            res.Add(op);
             return res;
         }
 
@@ -211,7 +211,7 @@ namespace Sla.SLEIGH
             vn1.outvn = (VarnodeTpl*)0;
             op.addInput(vn2.outvn);
             vn2.outvn = (VarnodeTpl*)0;
-            res.push_back(op);
+            res.Add(op);
             delete vn1;
             delete vn2;
             return res;
@@ -225,7 +225,7 @@ namespace Sla.SLEIGH
             List<OpTpl*>* res = new List<OpTpl*>;
             OpTpl* op = new OpTpl(opc);
             op.addInput(vn);
-            res.push_back(op);
+            res.Add(op);
             return res;
         }
 
@@ -243,7 +243,7 @@ namespace Sla.SLEIGH
             op.addInput(spcvn);
             op.addInput(ptr.outvn);
             op.setOutput(outvn);
-            ptr.ops.push_back(op);
+            ptr.ops.Add(op);
             if (qual.size > 0)
                 force_size(outvn, ConstTpl(ConstTpl::real, qual.size), *ptr.ops);
             ptr.outvn = new VarnodeTpl(*outvn);
@@ -268,7 +268,7 @@ namespace Sla.SLEIGH
             op.addInput(spcvn);
             op.addInput(ptr.outvn);
             op.addInput(val.outvn);
-            res.push_back(op);
+            res.Add(op);
             force_size(val.outvn, ConstTpl(ConstTpl::real, qual.size), *res);
             ptr.outvn = (VarnodeTpl*)0;
             val.outvn = (VarnodeTpl*)0;
@@ -320,7 +320,7 @@ namespace Sla.SLEIGH
             op.addInput(res.outvn);
             op.addInput(constvn);
             op.setOutput(outvn);
-            res.ops.push_back(op);
+            res.ops.Add(op);
             res.outvn = new VarnodeTpl(*outvn);
         }
 
@@ -336,7 +336,7 @@ namespace Sla.SLEIGH
                 fullsz = basevn.getSize().getReal();
                 if (fullsz == 0) return (VarnodeTpl*)0;
                 if (byteoffset + numbytes > fullsz)
-                    throw SleighError("Requested bit range out of bounds");
+                    throw new SleighError("Requested bit range out of bounds");
             }
 
             if ((bitoffset % 8) != 0) return (VarnodeTpl*)0;
@@ -361,7 +361,7 @@ namespace Sla.SLEIGH
             else
             {
                 if (basevn.getSize().getType() != ConstTpl::real)
-                    throw SleighError("Could not construct requested bit range");
+                    throw new SleighError("Could not construct requested bit range");
                 ulong plus;
                 if (defaultspace.isBigEndian())
                     plus = fullsz - (byteoffset + numbytes);
@@ -577,7 +577,7 @@ namespace Sla.SLEIGH
                     {
                         if ((size.getType() == ConstTpl::real) && (vn.getSize().getType() == ConstTpl::real) &&
                             (vn.getSize().getReal() != 0) && (vn.getSize().getReal() != size.getReal()))
-                            throw SleighError("Localtemp size mismatch");
+                            throw new SleighError("Localtemp size mismatch");
                         vn.setSize(size);
                     }
                 }
@@ -588,7 +588,7 @@ namespace Sla.SLEIGH
                     {
                         if ((size.getType() == ConstTpl::real) && (vn.getSize().getType() == ConstTpl::real) &&
                             (vn.getSize().getReal() != 0) && (vn.getSize().getReal() != size.getReal()))
-                            throw SleighError("Localtemp size mismatch");
+                            throw new SleighError("Localtemp size mismatch");
                         vn.setSize(size);
                     }
                 }
@@ -731,7 +731,7 @@ namespace Sla.SLEIGH
                 {
                     fillinZero(*iter, ct.getOpvec());
                     if ((*iter).isZeroSize())
-                        zerovec.push_back(*iter);
+                        zerovec.Add(*iter);
                 }
             lastsize = zerovec.size() + 1;
             while (zerovec.size() < lastsize)
@@ -742,7 +742,7 @@ namespace Sla.SLEIGH
                 {
                     fillinZero(*iter, ct.getOpvec());
                     if ((*iter).isZeroSize())
-                        zerovec2.push_back(*iter);
+                        zerovec2.Add(*iter);
                 }
                 zerovec = zerovec2;
             }

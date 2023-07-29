@@ -66,12 +66,12 @@ namespace Sla.DECCORE
         /// \return the stack-pointer Varnode
         private Varnode getSpacebaseRelative()
         {
-            if (stackPlaceholderSlot < 0) return (Varnode*)0;
+            if (stackPlaceholderSlot < 0) return (Varnode)null;
             Varnode* tmpvn = op.getIn(stackPlaceholderSlot);
-            if (!tmpvn.isSpacebasePlaceholder()) return (Varnode*)0;
-            if (!tmpvn.isWritten()) return (Varnode*)0;
+            if (!tmpvn.isSpacebasePlaceholder()) return (Varnode)null;
+            if (!tmpvn.isWritten()) return (Varnode)null;
             PcodeOp* loadop = tmpvn.getDef();
-            if (loadop.code() != CPUI_LOAD) return (Varnode*)0;
+            if (loadop.code() != CPUI_LOAD) return (Varnode)null;
             return loadop.getIn(1);    // The load input (ptr) is the reference we want
         }
 
@@ -89,7 +89,7 @@ namespace Sla.DECCORE
         private Varnode buildParam(Funcdata data, Varnode vn, ProtoParameter param,
             Varnode stackref)
         {
-            if (vn == (Varnode*)0)
+            if (vn == (Varnode)null)
             {   // Need to build a spacebase relative varnode
                 AddrSpace* spc = param.getAddress().getSpace();
                 ulong off = param.getAddress().getOffset();
@@ -152,16 +152,16 @@ namespace Sla.DECCORE
         private PcodeOp transferLockedOutputParam(ProtoParameter param)
         {
             Varnode* vn = op.getOut();
-            if (vn != (Varnode*)0)
+            if (vn != (Varnode)null)
             {
                 if (param.getAddress().justifiedContain(param.getSize(), vn.getAddr(), vn.getSize(), false) == 0)
                     return op;
                 if (vn.getAddr().justifiedContain(vn.getSize(), param.getAddress(), param.getSize(), false) == 0)
                     return op;
-                return (PcodeOp*)0;
+                return (PcodeOp)null;
             }
             PcodeOp* indop = op.previousOp();
-            while ((indop != (PcodeOp*)0) && (indop.code() == CPUI_INDIRECT))
+            while ((indop != (PcodeOp)null) && (indop.code() == CPUI_INDIRECT))
             {
                 if (indop.isIndirectCreation())
                 {
@@ -173,7 +173,7 @@ namespace Sla.DECCORE
                 }
                 indop = indop.previousOp();
             }
-            return (PcodeOp*)0;
+            return (PcodeOp)null;
         }
 
         /// \brief List and/or create a Varnode for each input parameter of matching a source prototype
@@ -187,22 +187,22 @@ namespace Sla.DECCORE
         /// \return \b false only if the list needs to indicate stack variables and there is no stack-pointer placeholder
         private bool transferLockedInput(List<Varnode> newinput, FuncProto source)
         {
-            newinput.push_back(op.getIn(0)); // Always keep the call destination address
+            newinput.Add(op.getIn(0)); // Always keep the call destination address
             int numparams = source.numParams();
-            Varnode* stackref = (Varnode*)0;
+            Varnode* stackref = (Varnode)null;
             for (int i = 0; i < numparams; ++i)
             {
                 int reuse = transferLockedInputParam(source.getParam(i));
                 if (reuse == 0) return false;
                 if (reuse > 0)
-                    newinput.push_back(op.getIn(reuse));
+                    newinput.Add(op.getIn(reuse));
                 else
                 {
-                    if (stackref == (Varnode*)0)
+                    if (stackref == (Varnode)null)
                         stackref = getSpacebaseRelative();
-                    if (stackref == (Varnode*)0)
+                    if (stackref == (Varnode)null)
                         return false;
-                    newinput.push_back((Varnode*)0);
+                    newinput.Add((Varnode)null);
                 }
             }
             return true;
@@ -221,12 +221,12 @@ namespace Sla.DECCORE
             ProtoParameter* param = source.getOutput();
             if (param.getType().getMetatype() == TYPE_VOID)
             {
-                newoutput = (Varnode*)0;
+                newoutput = (Varnode)null;
                 return true;
             }
             PcodeOp* outop = transferLockedOutputParam(param);
-            if (outop == (PcodeOp*)0)
-                newoutput = (Varnode*)0;
+            if (outop == (PcodeOp)null)
+                newoutput = (Varnode)null;
             else
                 newoutput = outop.getOut();
             return true;
@@ -245,7 +245,7 @@ namespace Sla.DECCORE
         {
             if (!isInputLocked()) return;
             Varnode* stackref = getSpacebaseRelative();
-            Varnode* placeholder = (Varnode*)0;
+            Varnode* placeholder = (Varnode)null;
             if (stackPlaceholderSlot >= 0)
                 placeholder = op.getIn(stackPlaceholderSlot);
             bool noplacehold = true;
@@ -268,12 +268,12 @@ namespace Sla.DECCORE
                     // We have a locked stack parameter, use it to recover the stack offset
                     vn.setSpacebasePlaceholder();
                     noplacehold = false;    // Only set this on the first parameter
-                    placeholder = (Varnode*)0;  // With a locked stack param, we don't need a placeholder
+                    placeholder = (Varnode)null;  // With a locked stack param, we don't need a placeholder
                 }
             }
-            if (placeholder != (Varnode*)0)
+            if (placeholder != (Varnode)null)
             {       // If we still need a placeholder
-                newinput.push_back(placeholder);        // Add it at end of parameters
+                newinput.Add(placeholder);        // Add it at end of parameters
                 setStackPlaceholderSlot(newinput.size() - 1);
             }
             data.opSetAllInput(op, newinput);
@@ -301,7 +301,7 @@ namespace Sla.DECCORE
             if (!isOutputLocked()) return;
             activeoutput.clear();
 
-            if (newout != (Varnode*)0)
+            if (newout != (Varnode)null)
             {
                 ProtoParameter* param = getOutput();
                 // We could conceivably truncate the output to the correct size to match the parameter
@@ -413,12 +413,12 @@ namespace Sla.DECCORE
         /// \param trialvn holds the resulting list of Varnodes
         private void collectOutputTrialVarnodes(List<Varnode> trialvn)
         {
-            if (op.getOut() != (Varnode*)0)
+            if (op.getOut() != (Varnode)null)
                 throw new LowlevelError("Output of call was determined prematurely");
             while (trialvn.size() < activeoutput.getNumTrials()) // Size of array should match number of trials
-                trialvn.push_back((Varnode*)0);
+                trialvn.Add((Varnode)null);
             PcodeOp* indop = op.previousOp();
-            while (indop != (PcodeOp*)0)
+            while (indop != (PcodeOp)null)
             {
                 if (indop.code() != CPUI_INDIRECT) break;
                 if (indop.isIndirectCreation())
@@ -466,7 +466,7 @@ namespace Sla.DECCORE
             stackPlaceholderSlot = -1;
             paramshift = 0;
             op = call_op;
-            fd = (Funcdata*)0;
+            fd = (Funcdata)null;
             if (call_op.code() == CPUI_CALL)
             {
                 entryaddress = call_op.getIn(0).getAddr();
@@ -499,10 +499,10 @@ namespace Sla.DECCORE
         /// Set the Funcdata object associated with the called function
         public void setFuncdata(Funcdata f)
         {
-            if (fd != (Funcdata*)0)
+            if (fd != (Funcdata)null)
                 throw new LowlevelError("Setting call spec function multiple times");
             fd = f;
-            if (fd != (Funcdata*)0)
+            if (fd != (Funcdata)null)
             {
                 entryaddress = fd.getAddress();
                 if (fd.getDisplayName().size() != 0)
@@ -806,7 +806,7 @@ namespace Sla.DECCORE
         public void createPlaceholder(Funcdata data, AddrSpace spacebase)
         {
             int slot = op.numInput();
-            Varnode* loadval = data.opStackLoad(spacebase, 0, 1, op, (Varnode*)0, false);
+            Varnode* loadval = data.opStackLoad(spacebase, 0, 1, op, (Varnode)null, false);
             data.opInsertInput(op, loadval, slot);
             setStackPlaceholderSlot(slot);
             loadval.setSpacebasePlaceholder();
@@ -1001,7 +1001,7 @@ namespace Sla.DECCORE
                 ParamTrial & curtrial(activeoutput.getTrial(i));
                 if (curtrial.isChecked())
                     throw new LowlevelError("Output trial has been checked prematurely");
-                if (trialvn[i] != (Varnode*)0)
+                if (trialvn[i] != (Varnode)null)
                     curtrial.markActive();
                 else
                     curtrial.markInactive(); // don't call markNoUse, the value may be returned but not used
@@ -1011,7 +1011,7 @@ namespace Sla.DECCORE
         /// \brief Set the final input Varnodes to \b this CALL based on ParamActive analysis
         ///
         /// Varnodes that don't look like parameters are removed. Parameters that are unreferenced
-        /// are filled in. Other Varnode inputs may be truncated or extended.  This prototype
+        /// are filled @in. Other Varnode inputs may be truncated or extended.  This prototype
         /// itself is unchanged.
         /// \param data is the calling function
         public void buildInputFromTrials(Funcdata data)
@@ -1023,7 +1023,7 @@ namespace Sla.DECCORE
             Varnode* vn;
             List<Varnode*> newparam;
 
-            newparam.push_back(op.getIn(0)); // Preserve the fspec parameter
+            newparam.Add(op.getIn(0)); // Preserve the fspec parameter
 
             if (isDotdotdot() && isInputLocked())
             {
@@ -1068,7 +1068,7 @@ namespace Sla.DECCORE
                         vn = outvn;
                     }
                 }
-                newparam.push_back(vn);
+                newparam.Add(vn);
                 // Mark the stack range used to pass this parameter as unmapped
                 if (isspacebase)
                     data.getScopeLocal().markNotMapped(spc, off, sz, true);
@@ -1095,7 +1095,7 @@ namespace Sla.DECCORE
                 ParamTrial & curtrial(activeoutput.getTrial(i));
                 if (!curtrial.isUsed()) break;
                 Varnode* vn = trialvn[curtrial.getSlot() - 1];
-                finalvn.push_back(vn);
+                finalvn.Add(vn);
             }
             activeoutput.deleteUnusedTrials(); // This deletes unused, and renumbers used  (matches finalvn)
             if (activeoutput.getNumTrials() == 0) return; // Nothing is a formal output
@@ -1119,7 +1119,7 @@ namespace Sla.DECCORE
                 // 	return;
                 //       }
                 //     }
-                deletedops.push_back(indop);
+                deletedops.Add(indop);
                 data.opSetOutput(op, finaloutvn); // Move varnode to its new position as output of call
             }
             else if (activeoutput.getNumTrials() == 2)
@@ -1131,10 +1131,10 @@ namespace Sla.DECCORE
                     lovn.setPrecisLo();    // Mark that these varnodes are part of a larger precision whole
                     hivn.setPrecisHi();
                 }
-                deletedops.push_back(hivn.getDef());
-                deletedops.push_back(lovn.getDef());
+                deletedops.Add(hivn.getDef());
+                deletedops.Add(lovn.getDef());
                 finaloutvn = findPreexistingWhole(hivn, lovn);
-                if (finaloutvn == (Varnode*)0)
+                if (finaloutvn == (Varnode)null)
                 {
                     Address joinaddr = data.getArch().constructJoinAddress(data.getArch().translate,
                                                 hivn.getAddr(), hivn.getSize(),
@@ -1156,7 +1156,7 @@ namespace Sla.DECCORE
                 }
                 else
                 {           // Preexisting whole
-                    deletedops.push_back(finaloutvn.getDef()); // Its inputs are used only in this op
+                    deletedops.Add(finaloutvn.getDef()); // Its inputs are used only in this op
                     data.opSetOutput(op, finaloutvn);
                 }
             }
@@ -1169,9 +1169,9 @@ namespace Sla.DECCORE
                 Varnode* in0 = dop.getIn(0);
                 Varnode* in1 = dop.getIn(1);
                 data.opDestroy(dop);
-                if (in0 != (Varnode*)0)
+                if (in0 != (Varnode)null)
                     data.deleteVarnode(in0);
-                if (in1 != (Varnode*)0)
+                if (in1 != (Varnode)null)
                     data.deleteVarnode(in1);
             }
         }
@@ -1203,7 +1203,7 @@ namespace Sla.DECCORE
         public bool setInputBytesConsumed(int slot, int val)
         {
             while (inputConsume.size() <= slot)
-                inputConsume.push_back(0);
+                inputConsume.Add(0);
             int oldVal = inputConsume[slot];
             if (oldVal == 0 || val < oldVal)
                 inputConsume[slot] = val;
@@ -1263,11 +1263,11 @@ namespace Sla.DECCORE
         public static Varnode findPreexistingWhole(Varnode vn1, Varnode vn2)
         {
             PcodeOp* op1 = vn1.loneDescend();
-            if (op1 == (PcodeOp*)0) return (Varnode*)0;
+            if (op1 == (PcodeOp)null) return (Varnode)null;
             PcodeOp* op2 = vn2.loneDescend();
-            if (op2 == (PcodeOp*)0) return (Varnode*)0;
-            if (op1 != op2) return (Varnode*)0;
-            if (op1.code() != CPUI_PIECE) return (Varnode*)0;
+            if (op2 == (PcodeOp)null) return (Varnode)null;
+            if (op1 != op2) return (Varnode)null;
+            if (op1.code() != CPUI_PIECE) return (Varnode)null;
             return op1.getOut();
         }
 

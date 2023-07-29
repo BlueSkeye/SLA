@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         /// The shift amounts add up to the point where the sign bit has saturated the entire result.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_SRIGHT);
+            oplist.Add(CPUI_INT_SRIGHT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

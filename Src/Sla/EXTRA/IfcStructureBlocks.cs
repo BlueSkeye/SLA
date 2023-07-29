@@ -21,21 +21,21 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("No load image present");
+                throw new IfaceExecutionError("No load image present");
 
             string infile, outfile;
             s >> infile;
             s >> outfile;
 
             if (infile.empty())
-                throw IfaceParseError("Missing input file");
+                throw new IfaceParseError("Missing input file");
             if (outfile.empty())
-                throw IfaceParseError("Missing output file");
+                throw new IfaceParseError("Missing output file");
 
             ifstream fs;
             fs.open(infile.c_str());
             if (!fs)
-                throw IfaceExecutionError("Unable to open file: " + infile);
+                throw new IfaceExecutionError("Unable to open file: " + infile);
 
             DocumentStorage store;
             Document* doc = store.parseDocument(fs);
@@ -60,7 +60,7 @@ namespace Sla.EXTRA
                 ofstream sout;
                 sout.open(outfile.c_str());
                 if (!sout)
-                    throw IfaceExecutionError("Unable to open output file: " + outfile);
+                    throw new IfaceExecutionError("Unable to open output file: " + outfile);
                 XmlEncode encoder(sout);
                 resultgraph.encode(encoder);
                 sout.close();

@@ -27,8 +27,8 @@ namespace Sla.DECCORE
             Varnode* orvnin = orop.getIn(1 - orhislot);
             if (orvnin == lo1)
             {       // lo2 is an implied 0
-                loxor = (PcodeOp*)0;
-                lo2 = (Varnode*)0;
+                loxor = (PcodeOp)null;
+                lo2 = (Varnode)null;
                 return true;
             }
             if (!orvnin.isWritten()) return false;
@@ -71,27 +71,27 @@ namespace Sla.DECCORE
 
         private bool replace(Funcdata data)
         {
-            if ((hi2 == (Varnode*)0) && (lo2 == (Varnode*)0))
+            if ((hi2 == (Varnode)null) && (lo2 == (Varnode)null))
             {
-                param2.initPartial(in.getSize(), 0); // Double precis zero constant
+                param2.initPartial(@in.getSize(), 0); // Double precis zero constant
                 return SplitVarnode::prepareBoolOp(in, param2, equalop);
             }
-            if ((hi2 == (Varnode*)0) && (lo2.isConstant()))
+            if ((hi2 == (Varnode)null) && (lo2.isConstant()))
             {
-                param2.initPartial(in.getSize(), lo2.getOffset());
+                param2.initPartial(@in.getSize(), lo2.getOffset());
                 return SplitVarnode::prepareBoolOp(in, param2, equalop);
             }
-            if ((lo2 == (Varnode*)0) && (hi2.isConstant()))
+            if ((lo2 == (Varnode)null) && (hi2.isConstant()))
             {
-                param2.initPartial(in.getSize(), hi2.getOffset() << 8 * lo1.getSize());
+                param2.initPartial(@in.getSize(), hi2.getOffset() << 8 * lo1.getSize());
                 return SplitVarnode::prepareBoolOp(in, param2, equalop);
             }
-            if (lo2 == (Varnode*)0)
+            if (lo2 == (Varnode)null)
             {
                 // Equal to a zero extended and shifted var
                 return false;
             }
-            if (hi2 == (Varnode*)0)
+            if (hi2 == (Varnode)null)
             {
                 // Equal to a zero extended var
                 return false;
@@ -101,7 +101,7 @@ namespace Sla.DECCORE
                 ulong val = hi2.getOffset();
                 val <<= 8 * lo1.getSize();
                 val |= lo2.getOffset();
-                param2.initPartial(in.getSize(), val);
+                param2.initPartial(@in.getSize(), val);
                 return SplitVarnode::prepareBoolOp(in, param2, equalop);
             }
             if (hi2.isConstant() || lo2.isConstant())
@@ -109,7 +109,7 @@ namespace Sla.DECCORE
                 // Some kind of mixed form
                 return false;
             }
-            param2.initPartial(in.getSize(), lo2, hi2);
+            param2.initPartial(@in.getSize(), lo2, hi2);
             return SplitVarnode::prepareBoolOp(in, param2, equalop);
         }
 
@@ -123,16 +123,16 @@ namespace Sla.DECCORE
         {
             if (!workishi) return false;
             if (!i.hasBothPieces()) return false;
-  in = i;
-            hi1 = in.getHi();
-            lo1 = in.getLo();
+            @in = i;
+            hi1 = @@in.getHi();
+            lo1 = @@in.getLo();
 
             if (op.code() == CPUI_INT_OR)
             {
                 orop = op;
                 orhislot = op.getSlot(hi1);
-                hixor = (PcodeOp*)0;
-                hi2 = (Varnode*)0;
+                hixor = (PcodeOp)null;
+                hi2 = (Varnode)null;
                 if (fillOutFromOr(data))
                 {
                     SplitVarnode::replaceBoolOp(data, equalop, in, param2, equalop.code());

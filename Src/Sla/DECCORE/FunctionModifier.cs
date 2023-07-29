@@ -23,7 +23,7 @@ namespace Sla.DECCORE
                 if (decl.numModifiers() == 0)
                 { // Check for void as an inputtype
                     Datatype* ct = decl.getBaseType();
-                    if ((ct != (Datatype*)0) && (ct.getMetatype() == TYPE_VOID))
+                    if ((ct != (Datatype)null) && (ct.getMetatype() == TYPE_VOID))
                         paramlist.clear();
                 }
             }
@@ -35,14 +35,14 @@ namespace Sla.DECCORE
             for (uint i = 0; i < paramlist.size(); ++i)
             {
                 Datatype* ct = paramlist[i].buildType(glb);
-                intypes.push_back(ct);
+                intypes.Add(ct);
             }
         }
 
         public void getInNames(List<string> innames)
         {
             for (uint i = 0; i < paramlist.size(); ++i)
-                innames.push_back(paramlist[i].getIdentifier());
+                innames.Add(paramlist[i].getIdentifier());
         }
 
         public bool isDotdotdot() => dotdotdot;
@@ -58,7 +58,7 @@ namespace Sla.DECCORE
                 if (decl.numModifiers() == 0)
                 {
                     Datatype* ct = decl.getBaseType();
-                    if ((ct != (Datatype*)0) && (ct.getMetatype() == TYPE_VOID))
+                    if ((ct != (Datatype)null) && (ct.getMetatype() == TYPE_VOID))
                         return false;       // Extra void type
                 }
             }

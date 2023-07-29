@@ -26,7 +26,7 @@ namespace Sla.EXTRA
     
         public override void initialize()
         {
-            thelist.push_back(this);
+            thelist.Add(this);
         }
 
         public abstract void registerCommands(IfaceStatus status);

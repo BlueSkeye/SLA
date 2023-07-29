@@ -34,7 +34,7 @@ namespace Sla.DECCORE
         }
 
         /// Encode \b this edge to a stream
-        /// The edge is saved assuming we already know what block we are in.
+        /// The edge is saved assuming we already know what block we are @in.
         /// \param encoder is the stream encoder
         internal void encode(Encoder encoder)
         {

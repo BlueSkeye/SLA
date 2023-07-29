@@ -46,7 +46,7 @@ namespace Sla.DECCORE
             res = newSplit(vn, laneDescription);    // Create new ReplaceVarnode and put it in map
             vn.setMark();
             if (!vn.isConstant())
-                worklist.push_back(res);
+                worklist.Add(res);
 
             return res;
         }
@@ -118,7 +118,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* op = *iter++;
                 Varnode* outvn = op.getOut();
-                if ((outvn != (Varnode*)0) && (outvn.isMark()))
+                if ((outvn != (Varnode)null) && (outvn.isMark()))
                     continue;
                 switch (op.code())
                 {
@@ -209,7 +209,7 @@ namespace Sla.DECCORE
         private bool traceBackward(TransformVar rvn)
         {
             PcodeOp* op = rvn.getOriginal().getDef();
-            if (op == (PcodeOp*)0) return true; // If vn is input
+            if (op == (PcodeOp)null) return true; // If vn is input
 
             switch (op.code())
             {

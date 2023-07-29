@@ -256,7 +256,7 @@ namespace Sla.DECCORE
             if ((symbol.getFlags() & Varnode::typelock) != 0)
             { // Type will just get replaced if not locked
                 Datatype* dt = getSizedType(vn.getAddr(), vn.getSize());
-                if (dt != (Datatype*)0)
+                if (dt != (Datatype)null)
                     return vn.updateType(dt, true, true);
             }
             return false;

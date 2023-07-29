@@ -19,14 +19,14 @@ namespace Sla.EXTRA
         {
             Varnode* vn = dcp.readVarnode(s);
             if (!vn.isConstant())
-                throw IfaceExecutionError("Can only force format on a constant");
+                throw new IfaceExecutionError("Can only force format on a constant");
             type_metatype mt = vn.getType().getMetatype();
             if ((mt != TYPE_INT) && (mt != TYPE_UINT) && (mt != TYPE_UNKNOWN))
-                throw IfaceExecutionError("Can only force format on integer type constant");
+                throw new IfaceExecutionError("Can only force format on integer type constant");
             dcp.fd.buildDynamicSymbol(vn);
             Symbol* sym = vn.getHigh().getSymbol();
             if (sym == (Symbol*)0)
-                throw IfaceExecutionError("Unable to create symbol");
+                throw new IfaceExecutionError("Unable to create symbol");
             string formatString;
             s >> ws >> formatString;
             uint format = Datatype::encodeIntegerFormat(formatString);

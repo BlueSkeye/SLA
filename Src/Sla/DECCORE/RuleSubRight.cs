@@ -32,7 +32,7 @@ namespace Sla.DECCORE
         /// we lump that into the shift as well.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_SUBPIECE);
+            oplist.Add(CPUI_SUBPIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -58,7 +58,7 @@ namespace Sla.DECCORE
             int d = c * 8;         // Convert to bit shift
                                     // Search for lone right shift descendant
             PcodeOp* lone = outvn.loneDescend();
-            if (lone != (PcodeOp*)0)
+            if (lone != (PcodeOp)null)
             {
                 OpCode opc2 = lone.code();
                 if ((opc2 == CPUI_INT_RIGHT) || (opc2 == CPUI_INT_SRIGHT))

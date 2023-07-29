@@ -32,7 +32,7 @@ namespace Sla.DECCORE
         ///  - `lzcount(a - 3) >> 5  =>  a - 3 == 0  =>  a == 3` (by RuleEqual2Zero)
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_LZCOUNT);
+            oplist.Add(CPUI_LZCOUNT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

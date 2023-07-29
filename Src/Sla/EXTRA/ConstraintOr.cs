@@ -17,7 +17,7 @@ namespace Sla.EXTRA
             for (int i = 0; i < constraintlist.size(); ++i)
             {
                 UnifyConstraint* subconst = constraintlist[i].clone();
-                res.constraintlist.push_back(subconst);
+                res.constraintlist.Add(subconst);
             }
             res.copyid(this);
             return res;

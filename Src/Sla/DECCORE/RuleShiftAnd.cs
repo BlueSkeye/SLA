@@ -28,9 +28,9 @@ namespace Sla.DECCORE
         /// This also allows for bits that aren't discarded but are already zero.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_RIGHT);
-            oplist.push_back(CPUI_INT_LEFT);
-            oplist.push_back(CPUI_INT_MULT);
+            oplist.Add(CPUI_INT_RIGHT);
+            oplist.Add(CPUI_INT_LEFT);
+            oplist.Add(CPUI_INT_MULT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
                 opc = CPUI_INT_LEFT;    // Treat CPUI_INT_MULT as CPUI_INT_LEFT
             }
             ulong nzm = invn.getNZMask();
-            ulong fullmask = calc_mask(invn.getSize());
+            ulong fullmask = Globals.calc_mask(invn.getSize());
             if (opc == CPUI_INT_RIGHT)
             {
                 nzm >>= sa;

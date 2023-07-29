@@ -175,7 +175,7 @@ namespace Sla.DECCORE
         /// Clear a specific input Varnode to \e null
         private void clearInput(int slot)
         {
-            inrefs[slot] = (Varnode*)0;
+            inrefs[slot] = (Varnode)null;
         }
 
         /// Set a specific input Varnode
@@ -222,7 +222,7 @@ namespace Sla.DECCORE
         {
             inrefs.resize(num);
             for (int i = 0; i < num; ++i)
-                inrefs[i] = (Varnode*)0;
+                inrefs[i] = (Varnode)null;
         }
 
         /// Eliminate a specific input Varnode
@@ -241,10 +241,10 @@ namespace Sla.DECCORE
         /// \param slot is index of the slot where the new space is inserted
         private void insertInput(int slot)
         {
-            inrefs.push_back((Varnode*)0);
+            inrefs.Add((Varnode)null);
             for (int i = inrefs.size() - 1; i > slot; --i)
                 inrefs[i] = inrefs[i - 1];
-            inrefs[slot] = (Varnode*)0;
+            inrefs[slot] = (Varnode)null;
         }
 
         /// Order this op within the ops for a single instruction
@@ -276,10 +276,10 @@ namespace Sla.DECCORE
             addlflags = 0;
             parent = (BlockBasic*)0; // No parent yet
 
-            output = (Varnode*)0;
+            output = (Varnode)null;
             opcode = (TypeOp*)0;
             for (int i = 0; i < inrefs.size(); ++i)
-                inrefs[i] = (Varnode*)0;
+                inrefs[i] = (Varnode)null;
         }
 
         ~PcodeOp()
@@ -606,7 +606,7 @@ namespace Sla.DECCORE
                     return false;   // Don't move special ops
             }
             if (parent != point.parent) return false;  // Not in the same block
-            if (output != (Varnode*)0)
+            if (output != (Varnode)null)
             {
                 // Output cannot be moved past an op that reads it
                 list<PcodeOp*>::const_iterator iter = output.beginDescend();
@@ -625,7 +625,7 @@ namespace Sla.DECCORE
             if (getEvalType() != PcodeOp::special)
             {
                 // Check for a normal op where all inputs and output are not address tied
-                if (output != (Varnode*)0 && !output.isAddrTied() && !output.isPersist())
+                if (output != (Varnode)null && !output.isAddrTied() && !output.isPersist())
                 {
                     int i;
                     for (i = 0; i < numInput(); ++i)
@@ -643,7 +643,7 @@ namespace Sla.DECCORE
             {
                 Varnode vn = getIn(i);
                 if (vn.isAddrTied())
-                    tiedList.push_back(vn);
+                    tiedList.Add(vn);
             }
             list<PcodeOp*>::iterator biter = basiciter;
             do
@@ -655,7 +655,7 @@ namespace Sla.DECCORE
                     switch (op.code())
                     {
                         case CPUI_LOAD:
-                            if (output != (Varnode*)0)
+                            if (output != (Varnode)null)
                             {
                                 if (output.isAddrTied()) return false;
                             }
@@ -666,7 +666,7 @@ namespace Sla.DECCORE
                             else
                             {
                                 if (!tiedList.empty()) return false;
-                                if (output != (Varnode*)0)
+                                if (output != (Varnode)null)
                                 {
                                     if (output.isAddrTied()) return false;
                                 }
@@ -685,7 +685,7 @@ namespace Sla.DECCORE
                             return false;
                     }
                 }
-                if (op.output != (Varnode*)0)
+                if (op.output != (Varnode)null)
                 {
                     if (movingLoad)
                     {
@@ -754,7 +754,7 @@ namespace Sla.DECCORE
         /// \param newConst is the given output constant
         public void collapseConstantSymbol(Varnode newConst)
         {
-            Varnode copyVn = (Varnode*)0;
+            Varnode copyVn = (Varnode)null;
             switch (code())
             {
                 case CPUI_SUBPIECE:
@@ -807,7 +807,7 @@ namespace Sla.DECCORE
             iter++;
             while (iter == p.endOp())
             {
-                if ((p.sizeOut() != 1) && (p.sizeOut() != 2)) return (PcodeOp*)0;
+                if ((p.sizeOut() != 1) && (p.sizeOut() != 2)) return (PcodeOp)null;
                 p = (BlockBasic*)p.getOut(0);
                 iter = p.beginOp();
             }
@@ -822,7 +822,7 @@ namespace Sla.DECCORE
         {
             list<PcodeOp*>::iterator iter;
 
-            if (basiciter == parent.beginOp()) return (PcodeOp*)0;
+            if (basiciter == parent.beginOp()) return (PcodeOp)null;
             iter = basiciter;
             iter--;
             return *iter;
@@ -860,7 +860,7 @@ namespace Sla.DECCORE
             ulong resmask, val;
 
             size = output.getSize();
-            ulong fullmask = calc_mask(size);
+            ulong fullmask = Globals.calc_mask(size);
 
             switch (opcode.getOpcode())
             {
@@ -929,7 +929,7 @@ namespace Sla.DECCORE
                             else if (sa >= 8 * sizeof(ulong))
                             {
                                 // Full mask shifted over 8*sizeof(ulong)
-                                resmask = calc_mask(sz1 - sizeof(ulong));
+                                resmask = Globals.calc_mask(sz1 - sizeof(ulong));
                                 // Shift over remaining portion of sa
                                 resmask >>= (sa - 8 * sizeof(ulong));
                             }
@@ -1134,7 +1134,7 @@ namespace Sla.DECCORE
             encoder.openElement(ELEM_OP);
             encoder.writeSignedInteger(ATTRIB_CODE, (int)code());
             start.encode(encoder);
-            if (output == (Varnode*)0)
+            if (output == (Varnode)null)
             {
                 encoder.openElement(ELEM_VOID);
                 encoder.closeElement(ELEM_VOID);
@@ -1148,7 +1148,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < inrefs.size(); ++i)
             {
                 Varnode* vn = getIn(i);
-                if (vn == (Varnode*)0) {
+                if (vn == (Varnode)null) {
                     encoder.openElement(ELEM_VOID);
                     encoder.closeElement(ELEM_VOID);
                 }

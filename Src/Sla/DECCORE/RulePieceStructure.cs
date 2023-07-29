@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         private static Datatype determineDatatype(Varnode vn, int baseOffset)
         {
             Datatype* ct = vn.getStructuredType();
-            if (ct == (Datatype*)0)
+            if (ct == (Datatype)null)
                 return ct;
 
             if (ct.getSize() != vn.getSize())
@@ -34,20 +34,20 @@ namespace Sla.DECCORE
                 SymbolEntry* entry = vn.getSymbolEntry();
                 baseOffset = vn.getAddr().overlap(0, entry.getAddr(), ct.getSize());
                 if (baseOffset < 0)
-                    return (Datatype*)0;
+                    return (Datatype)null;
                 baseOffset += entry.getOffset();
                 // Find concrete sub-type that matches the size of the Varnode
                 Datatype* subType = ct;
                 ulong subOffset = baseOffset;
-                while (subType != (Datatype*)0 && subType.getSize() > vn.getSize())
+                while (subType != (Datatype)null && subType.getSize() > vn.getSize())
                 {
                     subType = subType.getSubType(subOffset, &subOffset);
                 }
-                if (subType != (Datatype*)0 && subType.getSize() == vn.getSize() && subOffset == 0)
+                if (subType != (Datatype)null && subType.getSize() == vn.getSize() && subOffset == 0)
                 {
                     // If there is a concrete sub-type
                     if (!subType.isPieceStructured())  // and the concrete sub-type is not a structured type itself
-                        return (Datatype*)0;    // don't split out CONCAT forming the sub-type
+                        return (Datatype)null;    // don't split out CONCAT forming the sub-type
                 }
             }
             else
@@ -71,7 +71,7 @@ namespace Sla.DECCORE
             for (; ; )
             {
                 ct = ct.getSubType(newOff, &newOff);
-                if (ct == (Datatype*)0) return true;    // Don't know what it spans, assume multiple
+                if (ct == (Datatype)null) return true;    // Don't know what it spans, assume multiple
                 if ((int)newOff + size > ct.getSize()) return true;   // Spans more than 1
                 if (!ct.isPieceStructured()) break;
             }
@@ -98,12 +98,12 @@ namespace Sla.DECCORE
             if (sz > sizeof(ulong)) return false;
             offset += outvn.getSpace().isBigEndian() ? 0 : invn.getSize();
             ulong newOff = offset;
-            while (ct != (Datatype*)0 && ct.getSize() > sz)
+            while (ct != (Datatype)null && ct.getSize() > sz)
             {
                 ct = ct.getSubType(newOff, &newOff);
             }
             Varnode* zerovn = data.newConstant(sz, 0);
-            if (ct != (Datatype*)0 && ct.getSize() == sz)
+            if (ct != (Datatype)null && ct.getSize() == sz)
                 zerovn.updateType(ct, false, false);
             data.opSetOpcode(zext, CPUI_PIECE);
             data.opInsertInput(zext, zerovn, 0);
@@ -176,8 +176,8 @@ namespace Sla.DECCORE
         /// rendered as a sequence of separate write statements. `v.field1 = v1; v.field2 = v2; v.field3 = v3; v.field4 = v4;`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_PIECE);
-            oplist.push_back(CPUI_INT_ZEXT);
+            oplist.Add(CPUI_PIECE);
+            oplist.Add(CPUI_INT_ZEXT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -186,7 +186,7 @@ namespace Sla.DECCORE
             Varnode* outvn = op.getOut();
             int baseOffset;
             Datatype* ct = determineDatatype(outvn, baseOffset);
-            if (ct == (Datatype*)0) return 0;
+            if (ct == (Datatype)null) return 0;
 
             if (op.code() == CPUI_INT_ZEXT)
             {
@@ -196,7 +196,7 @@ namespace Sla.DECCORE
             }
             // Check if outvn is really the root of the tree
             PcodeOp* zext = outvn.loneDescend();
-            if (zext != (PcodeOp*)0)
+            if (zext != (PcodeOp)null)
             {
                 if (zext.code() == CPUI_PIECE)
                     return 0;       // More PIECEs below us, not a root
@@ -247,7 +247,7 @@ namespace Sla.DECCORE
                     Varnode* newVn = data.newVarnodeOut(vn.getSize(), addr, copyOp);
                     anyAddrTied = anyAddrTied || newVn.isAddrTied();   // Its possible newVn is addrtied, even if vn isn't
                     Datatype* newType = data.getArch().types.getExactPiece(ct, node.getTypeOffset(), vn.getSize());
-                    if (newType == (Datatype*)0)
+                    if (newType == (Datatype)null)
                         newType = vn.getType();
                     newVn.updateType(newType, false, false);
                     data.opSetOpcode(copyOp, CPUI_COPY);

@@ -26,8 +26,8 @@ namespace Sla.DECCORE
         /// \brief Collapse two consecutive divisions:  `(x / c1) / c2  =>  x / (c1*c2)`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_DIV);
-            oplist.push_back(CPUI_INT_SDIV);
+            oplist.Add(CPUI_INT_DIV);
+            oplist.Add(CPUI_INT_SDIV);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -45,7 +45,7 @@ namespace Sla.DECCORE
             if (!constVn1.isConstant()) return 0;
             // If the intermediate result is being used elsewhere, don't apply
             // Its likely collapsing the divisions will interfere with the modulo rules
-            if (vn.loneDescend() == (PcodeOp*)0) return 0;
+            if (vn.loneDescend() == (PcodeOp)null) return 0;
             ulong val1;
             if (opc1 == opc2)
             {
@@ -61,12 +61,12 @@ namespace Sla.DECCORE
             if (baseVn.isFree()) return 0;
             int sz = vn.getSize();
             ulong val2 = constVn2.getOffset();
-            ulong resval = (val1 * val2) & calc_mask(sz);
+            ulong resval = (val1 * val2) & Globals.calc_mask(sz);
             if (resval == 0) return 0;
             if (signbit_negative(val1, sz))
-                val1 = (~val1 + 1) & calc_mask(sz);
+                val1 = (~val1 + 1) & Globals.calc_mask(sz);
             if (signbit_negative(val2, sz))
-                val2 = (~val2 + 1) & calc_mask(sz);
+                val2 = (~val2 + 1) & Globals.calc_mask(sz);
             int bitcount = mostsigbit_set(val1) + mostsigbit_set(val2) + 2;
             if (opc2 == CPUI_INT_DIV && bitcount > sz * 8) return 0;    // Unsigned overflow
             if (opc2 == CPUI_INT_SDIV && bitcount > sz * 8 - 2) return 0;   // Signed overflow

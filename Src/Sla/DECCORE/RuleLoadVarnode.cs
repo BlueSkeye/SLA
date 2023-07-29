@@ -22,13 +22,13 @@ namespace Sla.DECCORE
         /// \return the associated space or NULL if the Varnode is not of the correct form
         private static AddrSpace correctSpacebase(Architecture glb, Varnode vn, AddrSpace spc)
         {
-            if (!vn.isSpacebase()) return (AddrSpace*)0;
+            if (!vn.isSpacebase()) return (AddrSpace)null;
             if (vn.isConstant())       // We have a global pseudo spacebase
                 return spc;         // Associate with load/stored space
-            if (!vn.isInput()) return (AddrSpace*)0;
+            if (!vn.isInput()) return (AddrSpace)null;
             AddrSpace* assoc = glb.getSpaceBySpacebase(vn.getAddr(), vn.getSize());
             if (assoc.getContain() != spc) // Loading off right space?
-                return (AddrSpace*)0;
+                return (AddrSpace)null;
             return assoc;
         }
 
@@ -47,28 +47,28 @@ namespace Sla.DECCORE
             AddrSpace* retspace;
 
             retspace = correctSpacebase(glb, vn, spc);
-            if (retspace != (AddrSpace*)0)
+            if (retspace != (AddrSpace)null)
             {
                 val = 0;
                 return retspace;
             }
-            if (!vn.isWritten()) return (AddrSpace*)0;
+            if (!vn.isWritten()) return (AddrSpace)null;
             op = vn.getDef();
-            if (op.code() != CPUI_INT_ADD) return (AddrSpace*)0;
+            if (op.code() != CPUI_INT_ADD) return (AddrSpace)null;
             vn1 = op.getIn(0);
             vn2 = op.getIn(1);
             retspace = correctSpacebase(glb, vn1, spc);
-            if (retspace != (AddrSpace*)0)
+            if (retspace != (AddrSpace)null)
             {
                 if (vn2.isConstant())
                 {
                     val = vn2.getOffset();
                     return retspace;
                 }
-                return (AddrSpace*)0;
+                return (AddrSpace)null;
             }
             retspace = correctSpacebase(glb, vn2, spc);
-            if (retspace != (AddrSpace*)0)
+            if (retspace != (AddrSpace)null)
             {
                 if (vn1.isConstant())
                 {
@@ -76,7 +76,7 @@ namespace Sla.DECCORE
                     return retspace;
                 }
             }
-            return (AddrSpace*)0;
+            return (AddrSpace)null;
         }
 
         /// \brief Check if STORE or LOAD is off of a spacebase + constant
@@ -101,12 +101,12 @@ namespace Sla.DECCORE
                 // Then currently we COMPLETELY IGNORE the base part of the
                 // segment. We assume it is all correct.
                 // If the segmentop inner is constant, we are NOT looking
-                // for a spacebase, and we do not igore the base. If the
+                // for a spacebase, and we do not igore the @base. If the
                 // base is also constant, we let RuleSegmentOp reduce
                 // the whole segmentop to a constant.  If the base
                 // is not constant, we are not ready for a fixed address.
                 if (offvn.isConstant())
-                    return (AddrSpace*)0;
+                    return (AddrSpace)null;
             }
             else if (offvn.isConstant())
             { // Check for constant
@@ -135,7 +135,7 @@ namespace Sla.DECCORE
         /// the \e spacebase register's address space.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_LOAD);
+            oplist.Add(CPUI_LOAD);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -146,7 +146,7 @@ namespace Sla.DECCORE
             ulong offoff;
 
             baseoff = checkSpacebase(data.getArch(), op, offoff);
-            if (baseoff == (AddrSpace*)0) return 0;
+            if (baseoff == (AddrSpace)null) return 0;
 
             size = op.getOut().getSize();
             offoff = AddrSpace::addressToByte(offoff, baseoff.getWordSize());
@@ -159,7 +159,7 @@ namespace Sla.DECCORE
             {
                 refvn.clearSpacebasePlaceholder(); // Clear the trigger
                 PcodeOp* placeOp = refvn.loneDescend();
-                if (placeOp != (PcodeOp*)0)
+                if (placeOp != (PcodeOp)null)
                 {
                     FuncCallSpecs* fc = data.getCallSpecs(placeOp);
                     if (fc != (FuncCallSpecs*)0)

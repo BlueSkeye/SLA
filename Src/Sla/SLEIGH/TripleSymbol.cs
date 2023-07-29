@@ -20,7 +20,7 @@ namespace Sla.SLEIGH
         {
         }
         
-        public override Constructor resolve(ParserWalker walker) => (Constructor*)0;
+        public override Constructor resolve(ParserWalker walker) => (Constructor)null;
 
         public abstract PatternExpression getPatternExpression();
 

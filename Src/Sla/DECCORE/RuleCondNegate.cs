@@ -31,7 +31,7 @@ namespace Sla.DECCORE
         /// This Rule introduces a BOOL_NEGATE op as necessary to get the meanings to align.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_CBRANCH);
+            oplist.Add(CPUI_CBRANCH);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

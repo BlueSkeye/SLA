@@ -32,9 +32,9 @@ namespace Sla.DECCORE
         /// matches the extension signedness.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_SUBPIECE);
-            oplist.push_back(CPUI_INT_RIGHT); // added
-            oplist.push_back(CPUI_INT_SRIGHT); // added
+            oplist.Add(CPUI_SUBPIECE);
+            oplist.Add(CPUI_INT_RIGHT); // added
+            oplist.Add(CPUI_INT_SRIGHT); // added
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -42,7 +42,7 @@ namespace Sla.DECCORE
             int n;
             OpCode shiftopc;
             PcodeOp* subop = findSubshift(op, n, shiftopc);
-            if (subop == (PcodeOp*)0) return 0;
+            if (subop == (PcodeOp)null) return 0;
             // TODO: Cannot currently support 128-bit arithmetic, except in special case of 2^64
             if (n > 64) return 0;
 
@@ -151,10 +151,10 @@ namespace Sla.DECCORE
             if (shiftopc != CPUI_SUBPIECE)
             { // Must be right shift
                 Varnode* vn = op.getIn(0);
-                if (!vn.isWritten()) return (PcodeOp*)0;
+                if (!vn.isWritten()) return (PcodeOp)null;
                 subop = vn.getDef();
-                if (subop.code() != CPUI_SUBPIECE) return (PcodeOp*)0;
-                if (!op.getIn(1).isConstant()) return (PcodeOp*)0;
+                if (subop.code() != CPUI_SUBPIECE) return (PcodeOp)null;
+                if (!op.getIn(1).isConstant()) return (PcodeOp)null;
                 n = op.getIn(1).getOffset();
             }
             else
@@ -165,7 +165,7 @@ namespace Sla.DECCORE
             }
             int c = subop.getIn(1).getOffset();
             if (subop.getOut().getSize() + c != subop.getIn(0).getSize())
-                return (PcodeOp*)0; // SUB is not high
+                return (PcodeOp)null; // SUB is not high
             n += 8 * c;
 
             return subop;

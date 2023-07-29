@@ -18,14 +18,14 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("No load image present");
+                throw new IfaceExecutionError("No load image present");
 
             AddrSpaceManager manage = dcp.conf;
             int num = manage.numSpaces();
             for (int i = 0; i < num; ++i)
             {
                 AddrSpace* spc = manage.getSpace(i);
-                if (spc == (AddrSpace*)0) continue;
+                if (spc == (AddrSpace)null) continue;
                 *status.fileoptr << dec << spc.getIndex() << " : '" << spc.getShortcut() << "' " << spc.getName();
                 if (spc.getType() == IPTR_CONSTANT)
                     *status.fileoptr << " constant ";

@@ -30,12 +30,12 @@ namespace Sla.EXTRA
         {
             int discard;
 
-            if (dcp.fd == (Funcdata*)0)
-                throw IfaceExecutionError("No function selected");
+            if (dcp.fd == (Funcdata)null)
+                throw new IfaceExecutionError("No function selected");
 
             s >> ws;
-            Address jmpaddr(parse_machaddr(s, discard,* dcp.conf.types));
-            JumpTable* jt = dcp.fd.installJumpTable(jmpaddr);
+            Address jmpaddr = new Address(parse_machaddr(s, discard,* dcp.conf.types));
+            JumpTable jt = dcp.fd.installJumpTable(jmpaddr);
             List<Address> adtable;
             Address naddr;
             ulong h = 0;
@@ -57,14 +57,13 @@ namespace Sla.EXTRA
             if (token == "table")
             {
                 s >> ws;
-                while (!s.eof())
-                {
-                    Address addr(parse_machaddr(s, discard,* dcp.conf.types));
-                    adtable.push_back(addr);
+                while (!s.eof()) {
+                    Address addr = new Address(parse_machaddr(s, discard,* dcp.conf.types));
+                    adtable.Add(addr);
                 }
             }
             if (adtable.empty())
-                throw IfaceExecutionError("Missing jumptable address entries");
+                throw new IfaceExecutionError("Missing jumptable address entries");
             jt.setOverride(adtable, naddr, h, sv);
             *status.optr << "Successfully installed jumptable override" << endl;
         }

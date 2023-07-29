@@ -30,8 +30,8 @@ namespace Sla.DECCORE
         /// Similarly:  `sub(V,c) & d == 0  =>  V & (d & mask) == 0`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_EQUAL);
-            oplist.push_back(CPUI_INT_NOTEQUAL);
+            oplist.Add(CPUI_INT_EQUAL);
+            oplist.Add(CPUI_INT_NOTEQUAL);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -39,8 +39,12 @@ namespace Sla.DECCORE
             if (!op.getIn(1).isConstant()) return 0;
             if (op.getIn(1).getOffset() != 0) return 0;
 
-            Varnode* andvn,*subvn,*basevn,*constvn;
-            PcodeOp* andop,*subop;
+            Varnode andvn;
+            Varnode subvn;
+            Varnode basevn;
+            Varnode constvn;
+            PcodeOp andop;
+            PcodeOp subop;
             ulong andconst, baseconst;
 
             andvn = op.getIn(0);
@@ -61,13 +65,13 @@ namespace Sla.DECCORE
                 case CPUI_INT_ZEXT:
                     basevn = subop.getIn(0);
                     baseconst = andop.getIn(1).getOffset();
-                    andconst = baseconst & calc_mask(basevn.getSize());
+                    andconst = baseconst & Globals.calc_mask(basevn.getSize());
                     break;
                 default:
                     return 0;
             }
 
-            if (baseconst == calc_mask(andvn.getSize())) return 0; // Degenerate AND
+            if (baseconst == Globals.calc_mask(andvn.getSize())) return 0; // Degenerate AND
             if (basevn.isFree()) return 0;
 
             constvn = data.newConstant(basevn.getSize(), andconst);

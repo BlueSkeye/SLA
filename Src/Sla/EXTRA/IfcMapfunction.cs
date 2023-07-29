@@ -24,7 +24,7 @@ namespace Sla.EXTRA
             string name;
             int size;
             if ((dcp.conf == (Architecture*)0) || (dcp.conf.loader == (LoadImage*)0))
-                throw IfaceExecutionError("No binary loaded");
+                throw new IfaceExecutionError("No binary loaded");
 
             Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read required address;
 
@@ -32,7 +32,7 @@ namespace Sla.EXTRA
             if (name.empty())
                 dcp.conf.nameFunction(addr, name); // Pick default name if necessary
             string basename;
-            Scope* scope = dcp.conf.symboltab.findCreateScopeFromSymbolName(name, "::", basename, (Scope*)0);
+            Scope* scope = dcp.conf.symboltab.findCreateScopeFromSymbolName(name, "::", basename, (Scope)null);
             dcp.fd = scope.addFunction(addr, name).getFunction();
 
             string nocode;

@@ -70,7 +70,7 @@ namespace Sla.DECCORE
                     ostringstream s;
                     s << "Error processing " << fc.getName();
                     PcodeOp* op = fc.getOp();
-                    if (op != (PcodeOp*)0)
+                    if (op != (PcodeOp)null)
                         s << " called at " << op.getSeqNum();
                     s << ": " << err.ToString();
                     throw new LowlevelError(s.str());

@@ -235,7 +235,7 @@ namespace Sla.DECCORE
         public ParamTrial splitLo(int sz)
         {
             Address newaddr = addr + (size - sz);
-            ParamTrial res(newaddr, sz, slot+1);
+            ParamTrial res = new ParamTrial(newaddr, sz, slot+1);
             res.flags = flags;
             return res;
         }

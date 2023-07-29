@@ -15,7 +15,7 @@ namespace Sla.EXTRA
   int discard;
 
   if (dcp.fd == (Funcdata *)0)
-    throw IfaceExecutionError("No function selected");
+    throw new IfaceExecutionError("No function selected");
 
   Address pclow,pchigh;
   s >> ws;
@@ -28,7 +28,7 @@ namespace Sla.EXTRA
     pchigh = parse_machaddr(s,discard,*dcp.conf.types);
     s >> ws;
   }
-  uqhigh = uqlow = ~((uint)0);
+  uqhigh = uqlow = uint.MaxValue;
   if (!s.eof()) {
     s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
     s >> uqlow >> uqhigh >> ws;

@@ -20,7 +20,7 @@ namespace Sla.EXTRA
 
             s >> ws;
             if (s.eof())
-                throw IfaceParseError("filename parameter required for source");
+                throw new IfaceParseError("filename parameter required for source");
 
             s >> filename;
             status.pushScript(filename, filename + "> ");

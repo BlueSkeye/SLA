@@ -20,7 +20,7 @@ namespace Sla.DECCORE
 
         public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
-            if (slot == 0) return (Datatype*)0;
+            if (slot == 0) return (Datatype)null;
             Varnode pointerVn = op.getIn(1);
             Datatype* pointerType = pointerVn.getHighTypeReadFacing(op);
             Datatype* pointedToType = pointerType;
@@ -39,7 +39,7 @@ namespace Sla.DECCORE
                 if (slot == 1)
                     return tlst.getTypePointer(pointerVn.getSize(), valueType, spc.getWordSize());
                 else
-                    return (Datatype*)0;
+                    return (Datatype)null;
             }
             if (slot == 1)
             {
@@ -53,7 +53,7 @@ namespace Sla.DECCORE
                             return newType;
                     }
                 }
-                return (Datatype*)0;
+                return (Datatype)null;
             }
             // If we reach here, cast the value, not the pointer
             return castStrategy.castStandard(pointedToType, valueType, false, true);
@@ -62,8 +62,8 @@ namespace Sla.DECCORE
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
             int inslot, int outslot)
         {
-            if ((inslot == 0) || (outslot == 0)) return (Datatype*)0; // Don't propagate along this edge
-            if (invn.isSpacebase()) return (Datatype*)0;
+            if ((inslot == 0) || (outslot == 0)) return (Datatype)null; // Don't propagate along this edge
+            if (invn.isSpacebase()) return (Datatype)null;
             Datatype* newtype;
             if (inslot == 2)
             {       // Propagating value to ptr

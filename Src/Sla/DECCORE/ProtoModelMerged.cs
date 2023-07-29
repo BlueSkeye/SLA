@@ -49,7 +49,7 @@ namespace Sla.DECCORE
                 else
                 {
                     if (eff1 == eff2)
-                        newlist.push_back(eff1);
+                        newlist.Add(eff1);
                     i += 1;
                     j += 1;
                 }
@@ -78,7 +78,7 @@ namespace Sla.DECCORE
                     j += 1;
                 else
                 {
-                    newlist.push_back(trs1);
+                    newlist.Add(trs1);
                     i += 1;
                     j += 1;
                 }
@@ -192,7 +192,7 @@ namespace Sla.DECCORE
                     throw new LowlevelError("Missing prototype model: " + modelName);
                 decoder.closeElement(subId);
                 foldIn(mymodel);
-                modellist.push_back(mymodel);
+                modellist.Add(mymodel);
             }
             decoder.closeElement(elemId);
             ((ParamListMerged*)input).finalize();

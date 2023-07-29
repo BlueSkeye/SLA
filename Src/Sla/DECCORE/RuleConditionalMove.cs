@@ -200,7 +200,7 @@ namespace Sla.DECCORE
         /// which gets simplified to `res = boolcond || differentcond`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_MULTIEQUAL);
+            oplist.Add(CPUI_MULTIEQUAL);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -245,7 +245,7 @@ namespace Sla.DECCORE
 
             // rootblock must end in CBRANCH, which gives the boolean for the conditional move
             PcodeOp* cbranch = rootblock0.lastOp();
-            if (cbranch == (PcodeOp*)0) return 0;
+            if (cbranch == (PcodeOp)null) return 0;
             if (cbranch.code() != CPUI_CBRANCH) return 0;
 
             if (!bool0.evaluatePropagation(rootblock0, inblock0)) return 0;

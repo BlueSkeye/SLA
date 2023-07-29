@@ -73,7 +73,7 @@ namespace Sla.EXTRA
         private void saveHistory(string line)
         {
             if (history.size() < maxhistory)
-                history.push_back(line);
+                history.Add(line);
             else
                 history[curhistory] = line;
             curhistory += 1;
@@ -118,7 +118,7 @@ namespace Sla.EXTRA
                 {   // If subrange is unique
                     if (s.eof())        // If no more input
                         for (; pos < (*first).numWords(); ++pos) // Automatically provide missing words
-                            expand.push_back((*first).getCommandWord(pos));
+                            expand.Add((*first).getCommandWord(pos));
                     if ((*first).numWords() == pos) // If all words are matched
                         return 1;       // Finished
                 }
@@ -135,7 +135,7 @@ namespace Sla.EXTRA
                     return (last - first);  // return number of matches
                 }
                 s >> tok;           // Get next token
-                expand.push_back(tok);
+                expand.Add(tok);
                 restrictCom(first, last, expand);
                 if (first == last)      // If subrange is empty, return 0
                     return 0;
@@ -199,7 +199,7 @@ namespace Sla.EXTRA
         {
             ifstream* s = new ifstream(filename.c_str());
             if (!*s)
-                throw IfaceParseError("Unable to open script file: " + filename);
+                throw new IfaceParseError("Unable to open script file: " + filename);
             pushScript(s, newprompt);
         }
 
@@ -211,11 +211,11 @@ namespace Sla.EXTRA
         /// \param newprompt is the command line prompt to associate with the new stream
         public override void pushScript(TextReader iptr, string newprompt)
         {
-            promptstack.push_back(prompt);
+            promptstack.Add(prompt);
             uint flags = 0;
             if (errorisdone)
                 flags |= 1;
-            flagstack.push_back(flags);
+            flagstack.Add(flags);
             errorisdone = true;     // Abort on first exception in a script
             prompt = newprompt;
         }
@@ -276,7 +276,7 @@ namespace Sla.EXTRA
             if (nm5 != (char*)0)
                 fptr.addWord(nm5);
 
-            comlist.push_back(fptr);    // Enter new command
+            comlist.Add(fptr);    // Enter new command
             sorted = false;
 
             string nm(fptr.getModule()); // Name of module this command belongs to

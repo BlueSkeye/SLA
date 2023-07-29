@@ -98,7 +98,7 @@ namespace Sla.DECCORE
             symboltab = null;
             context = null;
             print = PrintLanguageCapability::getDefault().buildLanguage(this);
-            printlist.push_back(print);
+            printlist.Add(print);
             options = new OptionDatabase(this);
             loadersymbols_parsed = false;
 #if CPUI_STATISTICS
@@ -474,7 +474,7 @@ namespace Sla.DECCORE
             if (printMarkup) {
                 print.setMarkup(true);
             }
-            printlist.push_back(print);
+            printlist.Add(print);
             print.adjustTypeOperators();
             return;
         }
@@ -1005,7 +1005,7 @@ namespace Sla.DECCORE
             List<RangeProperties> globalRanges = new List<RangeProperties>();
             Element? el = store.getTag("compiler_spec");
             if (null == el) {
-                throw ,ew LowlevelError("No compiler configuration tag found");
+                throw new LowlevelError("No compiler configuration tag found");
             }
             XmlDecode decoder = new XmlDecode(this, el);
 

@@ -96,7 +96,7 @@ namespace Sla.DECCORE
                         return op;
                 }
             }
-            return (PcodeOp*)0;
+            return (PcodeOp)null;
         }
 
         /// Search a block for equivalent CPUI_MULTIEQUAL
@@ -108,7 +108,7 @@ namespace Sla.DECCORE
         private bool processBlock(Funcdata data, BlockBasic bl)
         {
             List<Varnode*> vnlist;
-            PcodeOp* targetop = (PcodeOp*)0;
+            PcodeOp* targetop = (PcodeOp)null;
             PcodeOp* pairop;
             list<PcodeOp*>::iterator iter = bl.beginOp();
             list<PcodeOp*>::iterator enditer = bl.endOp();
@@ -127,11 +127,11 @@ namespace Sla.DECCORE
                     Varnode* vn = op.getIn(i);
                     if (vn.isWritten() && (vn.getDef().code() == CPUI_COPY)) // Some copies may not propagate into MULTIEQUAL
                         vn = vn.getDef().getIn(0);                    // Allow for differences in copy propagation
-                    vnlist.push_back(vn);
+                    vnlist.Add(vn);
                     if (vn.isMark())
                     {       // If we've seen this varnode before
                         pairop = findMatch(bl, op, vn);
-                        if (pairop != (PcodeOp*)0)
+                        if (pairop != (PcodeOp)null)
                             break;
                     }
                 }
@@ -148,7 +148,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < vnlist.size(); ++i)
                 vnlist[i].clearMark();
 
-            if (targetop != (PcodeOp*)0)
+            if (targetop != (PcodeOp)null)
             {
                 Varnode* out1 = pairop.getOut();
                 Varnode* out2 = targetop.getOut();

@@ -26,7 +26,7 @@ namespace Sla.EXTRA
         public IfaceDecompData()
         {
             conf = (Architecture*)0;
-            fd = (Funcdata*)0;
+            fd = (Funcdata)null;
             cgraph = (CallGraph*)0;
             testCollection = (FunctionTestCollection*)0;
 #if OPACTION_DEBUG
@@ -60,10 +60,10 @@ namespace Sla.EXTRA
         /// \param s is the stream to write the warning to
         public void abortFunction(TextWriter s)
         {
-            if (fd == (Funcdata*)0) return;
+            if (fd == (Funcdata)null) return;
             s << "Unable to proceed with function: " << fd.getName() << endl;
             conf.clearAnalysis(fd);
-            fd = (Funcdata*)0;
+            fd = (Funcdata)null;
         }
 
         /// Free all resources for the current architecture/program
@@ -72,7 +72,7 @@ namespace Sla.EXTRA
             if (conf != (Architecture*)0)
                 delete conf;
             conf = (Architecture*)0;
-            fd = (Funcdata*)0;
+            fd = (Funcdata)null;
         }
 
         /// \brief Generate raw p-code for the current function
@@ -93,8 +93,8 @@ namespace Sla.EXTRA
             {
                 if (size == 0)
                 {
-                    Address baddr(fd.getAddress().getSpace(),0);
-                    Address eaddr(fd.getAddress().getSpace(), fd.getAddress().getSpace().getHighest());
+                    Address baddr = new Address(fd.getAddress().getSpace(),0);
+                    Address eaddr = new Address(fd.getAddress().getSpace(), fd.getAddress().getSpace().getHighest());
                     fd.followFlow(baddr, eaddr);
                 }
                 else
@@ -137,24 +137,24 @@ namespace Sla.EXTRA
         {
             uint uq;
             int defsize;
-            Varnode* vn = (Varnode*)0;
+            Varnode vn = (Varnode)null;
 
-            if (fd == (Funcdata*)0)
-                throw IfaceExecutionError("No function selected");
+            if (fd == (Funcdata)null)
+                throw new IfaceExecutionError("No function selected");
 
             Address pc;
-            Address loc(parse_varnode(s, defsize, pc, uq,* conf.types));
+            Address loc = new Address(parse_varnode(s, defsize, pc, uq,* conf.types));
             if (loc.getSpace().getType() == IPTR_CONSTANT)
             {
-                if (pc.isInvalid() || (uq == ~((uint)0)))
-                    throw IfaceParseError("Missing p-code sequence number");
-                SeqNum seq(pc, uq);
-                PcodeOp* op = fd.findOp(seq);
-                if (op != (PcodeOp*)0)
+                if (pc.isInvalid() || (uq == uint.MaxValue))
+                    throw new IfaceParseError("Missing p-code sequence number");
+                SeqNum seq = new SeqNum(pc, uq);
+                PcodeOp op = fd.findOp(seq);
+                if (op != (PcodeOp)null)
                 {
                     for (int i = 0; i < op.numInput(); ++i)
                     {
-                        Varnode* tmpvn = op.getIn(i);
+                        Varnode tmpvn = op.getIn(i);
                         if (tmpvn.getAddr() == loc)
                         {
                             vn = tmpvn;
@@ -163,9 +163,9 @@ namespace Sla.EXTRA
                     }
                 }
             }
-            else if (pc.isInvalid() && (uq == ~((uint)0)))
+            else if (pc.isInvalid() && (uq == uint.MaxValue))
                 vn = fd.findVarnodeInput(defsize, loc);
-            else if ((!pc.isInvalid()) && (uq != ~((uint)0)))
+            else if ((!pc.isInvalid()) && (uq != uint.MaxValue))
                 vn = fd.findVarnodeWritten(defsize, loc, pc, uq);
             else
             {
@@ -179,13 +179,13 @@ namespace Sla.EXTRA
                     if (vn.isWritten())
                     {
                         if ((!pc.isInvalid()) && (vn.getDef().getAddr() == pc)) break;
-                        if ((uq != ~((uint)0)) && (vn.getDef().getTime() == uq)) break;
+                        if ((uq != uint.MaxValue) && (vn.getDef().getTime() == uq)) break;
                     }
                 }
             }
 
-            if (vn == (Varnode*)0)
-                throw IfaceExecutionError("Requested varnode does not exist");
+            if (vn == (Varnode)null)
+                throw new IfaceExecutionError("Requested varnode does not exist");
             return vn;
         }
 
@@ -196,11 +196,11 @@ namespace Sla.EXTRA
         /// \param res will hold any matching symbols
         public void readSymbol(string name, List<Symbol> res)
         {
-            Scope* scope = (fd == (Funcdata*)0) ? conf.symboltab.getGlobalScope() : fd.getScopeLocal();
+            Scope scope = (fd == (Funcdata)null) ? conf.symboltab.getGlobalScope() : fd.getScopeLocal();
             string basename;
             scope = conf.symboltab.resolveScopeFromSymbolName(name, "::", basename, scope);
-            if (scope == (Scope*)0)
-                throw IfaceParseError("Bad namespace for symbol: " + name);
+            if (scope == (Scope)null)
+                throw new IfaceParseError("Bad namespace for symbol: " + name);
             scope.queryByName(basename, res);
         }
     }

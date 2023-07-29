@@ -30,14 +30,17 @@ namespace Sla.DECCORE
         ///   - `concat( V, W | c)  =>  concat(V,W) | c`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_PIECE);
+            oplist.Add(CPUI_PIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn;
-            Varnode* hi,*lo,*newvn;
-            PcodeOp* logicop,*newconcat;
+            Varnode vn;
+            Varnode hi;
+            Varnode lo;
+            Varnode newvn;
+            PcodeOp logicop;
+            PcodeOp newconcat;
             OpCode opc;
             ulong val;
 
@@ -75,7 +78,7 @@ namespace Sla.DECCORE
                         hi = logicop.getIn(0);
                         lo = op.getIn(1);
                         val <<= 8 * lo.getSize();
-                        val |= calc_mask(lo.getSize());
+                        val |= Globals.calc_mask(lo.getSize());
                     }
                     else
                     {

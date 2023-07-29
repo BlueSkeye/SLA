@@ -17,8 +17,8 @@ namespace Sla.EXTRA
         /// with the address of its original instruction and any output and input varnodes.
         public override void execute(TextReader s)
         {
-            if (dcp.fd == (Funcdata*)0)
-                throw IfaceExecutionError("No function selected");
+            if (dcp.fd == (Funcdata)null)
+                throw new IfaceExecutionError("No function selected");
 
             dcp.fd.printRaw(*status.fileoptr);
         }

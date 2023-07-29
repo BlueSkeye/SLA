@@ -37,9 +37,11 @@ namespace Sla.DECCORE
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* vn1 = op.getIn(0);
-            Varnode* vn2 = op.getIn(1);
-            Varnode* in1,*in2,*vnextra;
+            Varnode vn1 = op.getIn(0);
+            Varnode vn2 = op.getIn(1);
+            Varnode in1;
+            Varnode in2;
+            Varnode vnextra;
             OpCode opc;
 
             if (!vn1.isWritten()) return 0;

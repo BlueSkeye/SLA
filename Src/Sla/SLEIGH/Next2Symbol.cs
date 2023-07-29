@@ -17,7 +17,7 @@ namespace Sla.SLEIGH
         
         public Next2Symbol()
         {
-            patexp = (PatternExpression*)0;
+            patexp = (PatternExpression)null;
         }
 
         public Next2Symbol(string nm,AddrSpace cspc)
@@ -29,7 +29,7 @@ namespace Sla.SLEIGH
 
         ~Next2Symbol()
         {
-            if (patexp != (PatternExpression*)0)
+            if (patexp != (PatternExpression)null)
                 PatternExpression::release(patexp);
         }
 
@@ -46,7 +46,7 @@ namespace Sla.SLEIGH
         public override void getFixedHandle(FixedHandle hand, ParserWalker walker)
         {
             hand.space = walker.getCurSpace();
-            hand.offset_space = (AddrSpace*)0;
+            hand.offset_space = (AddrSpace)null;
             hand.offset_offset = walker.getN2addr().getOffset(); // Get instruction address after next instruction
             hand.size = hand.space.getAddrSize();
         }

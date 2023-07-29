@@ -43,7 +43,7 @@ namespace Sla.SLEIGH
             sleigh = slgh;
             tempbase = 0;
             errorcount = 0;
-            result = (ConstructTpl*)0;
+            result = (ConstructTpl)null;
             setDefaultSpace(slgh.getDefaultCodeSpace());
             setConstantSpace(slgh.getConstantSpace());
             setUniqueSpace(slgh.getUniqueSpace());
@@ -67,7 +67,7 @@ namespace Sla.SLEIGH
         public ConstructTpl releaseResult()
         {
             ConstructTpl res = result;
-            result = (ConstructTpl*)0;
+            result = (ConstructTpl)null;
             return res;
         }
         
@@ -76,10 +76,10 @@ namespace Sla.SLEIGH
             SymbolTree::iterator iter;
             for (iter = tree.begin(); iter != tree.end(); ++iter)
                 delete* iter;       // Free ALL temporary symbols
-            if (result != (ConstructTpl*)0)
+            if (result != (ConstructTpl)null)
             {
                 delete result;
-                result = (ConstructTpl*)0;
+                result = (ConstructTpl)null;
             }
         }
 
@@ -122,10 +122,10 @@ namespace Sla.SLEIGH
                     tree.erase(tmpiter);
                 }
             }
-            if (result != (ConstructTpl*)0)
+            if (result != (ConstructTpl)null)
             {
                 delete result;
-                result = (ConstructTpl*)0;
+                result = (ConstructTpl)null;
             }
             // tempbase = 0;
             errorcount = 0;
@@ -145,7 +145,7 @@ namespace Sla.SLEIGH
                     sym = *iter;        // Found a local symbol
                 else
                     sym = sleigh.findSymbol(lexer.getIdentifier());
-                if (sym != (SleighSymbol*)0)
+                if (sym != (SleighSymbol)null)
                 {
                     switch (sym.getType())
                     {
@@ -211,7 +211,7 @@ namespace Sla.SLEIGH
 
         public void addOperand(string name, int index)
         { // Add an operand symbol for this snippet
-            OperandSymbol* sym = new OperandSymbol(name, index, (Constructor*)0);
+            OperandSymbol* sym = new OperandSymbol(name, index, (Constructor)null);
             addSymbol(sym);
         }
     }

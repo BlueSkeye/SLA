@@ -20,8 +20,8 @@ namespace Sla.EXTRA
             string typeName;
             s >> ws >> typeName;
             dt = dcp.conf.types.findByName(typeName);
-            if (dt == (Datatype*)0)
-                throw IfaceExecutionError("Unknown data-type: " + typeName);
+            if (dt == (Datatype)null)
+                throw new IfaceExecutionError("Unknown data-type: " + typeName);
             string formatString;
             s >> ws >> formatString;
             uint format = Datatype::encodeIntegerFormat(formatString);

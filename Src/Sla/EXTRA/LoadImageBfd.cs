@@ -77,7 +77,7 @@ namespace Sla.EXTRA
                 bfd_init();
             }
             thebfd = (bfd*)0;
-            spaceid = (AddrSpace*)0;
+            spaceid = (AddrSpace)null;
             symbol_table = (asymbol**)0;
 
             bufsize = 512;      // Default buffer size

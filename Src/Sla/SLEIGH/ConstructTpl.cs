@@ -35,7 +35,7 @@ namespace Sla.SLEIGH
         {
             delayslot = 0;
             numlabels = 0;
-            result = (HandleTpl*)0;
+            result = (HandleTpl)null;
         }
         
         ~ConstructTpl()
@@ -43,7 +43,7 @@ namespace Sla.SLEIGH
             List<OpTpl*>::iterator oiter;
             for (oiter = vec.begin(); oiter != vec.end(); ++oiter)
                 delete* oiter;
-            if (result != (HandleTpl*)0)
+            if (result != (HandleTpl)null)
                 delete result;
         }
 
@@ -65,7 +65,7 @@ namespace Sla.SLEIGH
             }
             else if (ot.getOpcode() == LABELBUILD)
                 numlabels += 1;     // Count labels
-            vec.push_back(ot);
+            vec.Add(ot);
             return true;
         }
 
@@ -145,7 +145,7 @@ namespace Sla.SLEIGH
                 else
                     op.changeHandleIndex(handmap);
             }
-            if (result != (HandleTpl*)0)
+            if (result != (HandleTpl)null)
                 result.changeHandleIndex(handmap);
         }
 
@@ -200,7 +200,7 @@ namespace Sla.SLEIGH
             if (numlabels != 0)
                 s << " labels=\"" << dec << numlabels << "\"";
             s << ">\n";
-            if (result != (HandleTpl*)0)
+            if (result != (HandleTpl)null)
                 result.saveXml(s);
             else
                 s << "<null/>";
@@ -216,19 +216,19 @@ namespace Sla.SLEIGH
             {
                 if (el.getAttributeName(i) == "delay")
                 {
-                    istringstream s(el.getAttributeValue(i));
+                    istringstream s = new istringstream(el.getAttributeValue(i));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> delayslot;
                 }
                 else if (el.getAttributeName(i) == "labels")
                 {
-                    istringstream s(el.getAttributeValue(i));
+                    istringstream s = new istringstream(el.getAttributeValue(i));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> numlabels;
                 }
                 else if (el.getAttributeName(i) == "section")
                 {
-                    istringstream s(el.getAttributeValue(i));
+                    istringstream s = new istringstream(el.getAttributeValue(i));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> sectionid;
                 }
@@ -237,7 +237,7 @@ namespace Sla.SLEIGH
             List::const_iterator iter;
             iter = list.begin();
             if ((*iter).getName() == "null")
-                result = (HandleTpl*)0;
+                result = (HandleTpl)null;
             else
             {
                 result = new HandleTpl();
@@ -248,7 +248,7 @@ namespace Sla.SLEIGH
             {
                 OpTpl* op = new OpTpl();
                 op.restoreXml(*iter, manage);
-                vec.push_back(op);
+                vec.Add(op);
                 ++iter;
             }
             return sectionid;

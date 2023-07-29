@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Convert BRANCHIND with only one computed destination to a BRANCH
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_BRANCHIND);
+            oplist.Add(CPUI_BRANCHIND);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

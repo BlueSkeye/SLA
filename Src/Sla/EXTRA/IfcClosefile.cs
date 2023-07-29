@@ -16,7 +16,7 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (status.optr == status.fileoptr)
-                throw IfaceExecutionError("No file open");
+                throw new IfaceExecutionError("No file open");
             ((ofstream*)status.fileoptr).close();
             delete status.fileoptr;
             status.fileoptr = status.optr;

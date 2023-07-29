@@ -45,7 +45,7 @@ namespace Sla.DECCORE
             if (op.code() == CPUI_INT_AND)
             {
                 if (!op.getIn(1).isConstant()) return false;
-                if (op.getIn(1).getOffset() != calc_mask(small.getSize())) return false;
+                if (op.getIn(1).getOffset() != Globals.calc_mask(small.getSize())) return false;
                 Varnode* whole = op.getIn(0);
                 if (!small.isWritten()) return false;
                 PcodeOp* sub = small.getDef();
@@ -61,7 +61,9 @@ namespace Sla.DECCORE
             if (!reshi.isWritten()) return false;
             add1 = reshi.getDef();
             if (add1.code() != CPUI_INT_ADD) return false;
-            Varnode* ad1,*ad2,*ad3;
+            Varnode ad1;
+            Varnode ad2;
+            Varnode ad3;
             ad1 = add1.getIn(0);
             ad2 = add1.getIn(1);
             if (!ad1.isWritten()) return false;
@@ -191,7 +193,7 @@ namespace Sla.DECCORE
             else
                 return false;
             if (!lo2.isConstant()) return false;
-            hi2 = (Varnode*)0;      // hi2 is an implied zero in this case
+            hi2 = (Varnode)null;      // hi2 is an implied zero in this case
             return true;
         }
 
@@ -271,10 +273,10 @@ namespace Sla.DECCORE
 
         private bool replace(Funcdata data)
         { // We have matched a double precision multiply, now transform to logical variables
-            outdoub.initPartial(in.getSize(), reslo, reshi);
-            in2.initPartial(in.getSize(), lo2, hi2);
+            outdoub.initPartial(@in.getSize(), reslo, reshi);
+            in2.initPartial(@in.getSize(), lo2, hi2);
             existop = SplitVarnode::prepareBinaryOp(outdoub, in, in2);
-            if (existop == (PcodeOp*)0)
+            if (existop == (PcodeOp)null)
                 return false;
             SplitVarnode::createBinaryOp(data, outdoub, in, in2, existop, CPUI_INT_MULT);
             return true;
@@ -317,7 +319,7 @@ namespace Sla.DECCORE
             if (!i.hasBothPieces()) return false;
             @in = i;
 
-            if (!verify(@in.getHi(), @in.getLo(), hop))
+            if (!verify(@@in.getHi(), @@in.getLo(), hop))
                 return false;
 
             if (replace(data)) return true;

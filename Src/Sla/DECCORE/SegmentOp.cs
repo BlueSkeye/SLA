@@ -52,7 +52,7 @@ namespace Sla.DECCORE
         public SegmentOp(Architecture g, string nm,int ind)
             : base(g, nm, ind)
         {
-            constresolve.space = (AddrSpace*)0;
+            constresolve.space = (AddrSpace)null;
         }
 
         /// Get the address space being pointed to
@@ -98,7 +98,7 @@ namespace Sla.DECCORE
                 bindlist[0] = basevn;
             }
             else
-                bindlist[0] = (Varnode*)0;
+                bindlist[0] = (Varnode)null;
             if (innervn.isConstant())
                 innervn = data.newConstant(innerinsize, innervn.getOffset());
             bindlist[1] = innervn;
@@ -114,7 +114,7 @@ namespace Sla.DECCORE
         public override void decode(Decoder decoder)
         {
             uint elemId = decoder.openElement(ELEM_SEGMENTOP);
-            spc = (AddrSpace*)0;
+            spc = (AddrSpace)null;
             injectId = -1;
             baseinsize = 0;
             innerinsize = 0;
@@ -133,7 +133,7 @@ namespace Sla.DECCORE
                     name = decoder.readString();
                 }
             }
-            if (spc == (AddrSpace*)0)
+            if (spc == (AddrSpace)null)
                 throw new LowlevelError("<segmentop> expecting space attribute");
             UserPcodeOp* otherop = glb.userops.getOp(name);
             if (otherop == (UserPcodeOp*)0)

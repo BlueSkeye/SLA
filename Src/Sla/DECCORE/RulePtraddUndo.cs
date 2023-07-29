@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         /// Once the correct type is found, the PTRADD must be converted back to an INT_ADD.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_PTRADD);
+            oplist.Add(CPUI_PTRADD);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

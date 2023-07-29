@@ -21,14 +21,14 @@ namespace Sla.DECCORE
         
         public TypeDeclarator()
         {
-            basetype = (Datatype*)0;
+            basetype = (Datatype)null;
             flags = 0;
         }
 
         private TypeDeclarator(string nm)
         {
             ident=nm;
-            basetype=(Datatype*)0;
+            basetype=(Datatype)null;
             flags=0;
         }
     
@@ -102,7 +102,7 @@ namespace Sla.DECCORE
 
         private bool isValid()
         {
-            if (basetype == (Datatype*)0)
+            if (basetype == (Datatype)null)
                 return false;       // No basetype
 
             int count = 0;

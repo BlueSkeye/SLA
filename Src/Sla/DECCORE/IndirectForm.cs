@@ -61,10 +61,10 @@ namespace Sla.DECCORE
             if (!workishi) return false;
             if (!i.hasBothPieces()) return false;
             @in = i;
-            if (!verify(@in.getHi(), @in.getLo(), ind))
+            if (!verify(@@in.getHi(), @@in.getLo(), ind))
                 return false;
 
-            outvn.initPartial(@in.getSize(), reslo, reshi);
+            outvn.initPartial(@@in.getSize(), reslo, reshi);
 
             if (!SplitVarnode::prepareIndirectOp(@in, affector))
                 return false;

@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// The SUBPIECE must be extracting the high part of the INT_MULT.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_SRIGHT);
+            oplist.Add(CPUI_INT_SRIGHT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -65,7 +65,7 @@ namespace Sla.DECCORE
             // otherVn must be a positive integer and small enough so the INT_MULT can't overflow into the sign-bit
             if (otherVn.isConstant())
             {
-                if (otherVn.getOffset() > calc_mask(sizeout)) return 0;
+                if (otherVn.getOffset() > Globals.calc_mask(sizeout)) return 0;
                 if (2 * sizeout > multSize) return 0;
             }
             else if (otherVn.isWritten())

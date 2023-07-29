@@ -48,11 +48,11 @@ namespace Sla.DECCORE
                     if (op.code() != CPUI_MULTIEQUAL) continue;
                     vn = op.getIn(0);
                     if (vn.isMark())
-                        oplist.push_back(op);
+                        oplist.Add(op);
                     else
                     {
                         vn.setMark();
-                        vnlist.push_back(vn);
+                        vnlist.Add(vn);
                     }
                 }
                 for (int j = 0; j < vnlist.size(); ++j)
@@ -63,7 +63,7 @@ namespace Sla.DECCORE
             {
                 op = *oiter;
                 PcodeOp* op2;
-                for (op2 = op.previousOp(); op2 != (PcodeOp*)0; op2 = op2.previousOp())
+                for (op2 = op.previousOp(); op2 != (PcodeOp)null; op2 = op2.previousOp())
                 {
                     if (op2.code() != CPUI_MULTIEQUAL) continue;
                     int i;
@@ -72,7 +72,7 @@ namespace Sla.DECCORE
                     if (i != op.numInput()) continue; // All branches did not match
 
                     List<Varnode*> plist;
-                    plist.push_back(op2.getOut());
+                    plist.Add(op2.getOut());
                     data.opSetOpcode(op, CPUI_COPY);
                     data.opSetAllInput(op, plist);
                     count += 1;

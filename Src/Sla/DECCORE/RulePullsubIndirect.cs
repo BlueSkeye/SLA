@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Pull-back SUBPIECE through INDIRECT
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_SUBPIECE);
+            oplist.Add(CPUI_SUBPIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -50,7 +50,7 @@ namespace Sla.DECCORE
             Varnode* outvn = op.getOut();
             if (outvn.isPrecisLo() || outvn.isPrecisHi()) return 0; // Don't pull apart double precision object
 
-            ulong consume = calc_mask(newSize) << 8 * minByte;
+            ulong consume = Globals.calc_mask(newSize) << 8 * minByte;
             consume = ~consume;
             if ((consume & indir.getIn(0).getConsume()) != 0) return 0;
 
@@ -73,7 +73,7 @@ namespace Sla.DECCORE
             {
                 Varnode* basevn = indir.getIn(0);
                 Varnode* small1 = RulePullsubMulti::findSubpiece(basevn, newSize, op.getIn(1).getOffset());
-                if (small1 == (Varnode*)0)
+                if (small1 == (Varnode)null)
                     small1 = RulePullsubMulti::buildSubpiece(basevn, newSize, op.getIn(1).getOffset(), data);
                 // Create new indirect near original indirect
                 new_ind = data.newOp(2, indir.getAddr());

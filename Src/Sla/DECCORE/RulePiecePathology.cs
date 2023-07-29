@@ -31,7 +31,7 @@ namespace Sla.DECCORE
                     break;
                 }
                 PcodeOp* op = vn.getDef();
-                while (!res && op != (PcodeOp*)0)
+                while (!res && op != (PcodeOp)null)
                 {
                     switch (op.code())
                     {
@@ -43,9 +43,9 @@ namespace Sla.DECCORE
                             if (!op.isMark())
                             {
                                 op.setMark();
-                                worklist.push_back(op);
+                                worklist.Add(op);
                             }
-                            op = (PcodeOp*)0;
+                            op = (PcodeOp)null;
                             break;
                         case CPUI_INDIRECT:
                             if (op.getIn(1).getSpace().getType() == IPTR_IOP)
@@ -60,7 +60,7 @@ namespace Sla.DECCORE
                                     }
                                 }
                             }
-                            op = (PcodeOp*)0;
+                            op = (PcodeOp)null;
                             break;
                         case CPUI_CALL:
                         case CPUI_CALLIND:
@@ -73,7 +73,7 @@ namespace Sla.DECCORE
                                 break;
                             }
                         default:
-                            op = (PcodeOp*)0;
+                            op = (PcodeOp)null;
                             break;
                     }
                 }
@@ -113,7 +113,7 @@ namespace Sla.DECCORE
             List<PcodeOp> worklist = new List<PcodeOp>();
             int pos = 0;
             op.setMark();
-            worklist.push_back(op);
+            worklist.Add(op);
             while (pos < worklist.size())
             {
                 PcodeOp* curOp = worklist[pos];
@@ -132,13 +132,13 @@ namespace Sla.DECCORE
                             if (!curOp.isMark())
                             {
                                 curOp.setMark();
-                                worklist.push_back(curOp);
+                                worklist.Add(curOp);
                             }
                             break;
                         case CPUI_CALL:
                         case CPUI_CALLIND:
                             fProto = data.getCallSpecs(curOp);
-                            if (fProto != (FuncProto*)0 && !fProto.isInputActive() && !fProto.isInputLocked())
+                            if (fProto != (FuncProto)null && !fProto.isInputActive() && !fProto.isInputLocked())
                             {
                                 int bytesConsumed = op.getIn(1).getSize();
                                 for (int i = 1; i < curOp.numInput(); ++i)
@@ -192,7 +192,7 @@ namespace Sla.DECCORE
         /// \endcode
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_PIECE);
+            oplist.Add(CPUI_PIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

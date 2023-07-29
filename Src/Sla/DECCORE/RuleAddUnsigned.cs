@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         /// \brief Cleanup:  Convert INT_ADD of constants to INT_SUB:  `V + 0xff...  =>  V - 0x00...`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_ADD);
+            oplist.Add(CPUI_INT_ADD);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -40,7 +40,7 @@ namespace Sla.DECCORE
             if (dt.isCharPrint()) return 0;    // Only change integer forms
             if (dt.isEnumType()) return 0;
             ulong val = constvn.getOffset();
-            ulong mask = calc_mask(constvn.getSize());
+            ulong mask = Globals.calc_mask(constvn.getSize());
             int sa = constvn.getSize() * 6;   // 1/4 less than full bitsize
             ulong quarter = (mask >> sa) << sa;
             if ((val & quarter) != quarter) return 0;   // The first quarter of bits must all be 1's

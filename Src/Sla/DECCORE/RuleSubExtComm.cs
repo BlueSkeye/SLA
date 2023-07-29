@@ -35,14 +35,14 @@ namespace Sla.DECCORE
         /// This rule also works with INT_SEXT.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_SUBPIECE);
+            oplist.Add(CPUI_SUBPIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
             Varnode * base = op.getIn(0);
-            if (!base.isWritten()) return 0;
-            PcodeOp* extop = base.getDef();
+            if (!@base.isWritten()) return 0;
+            PcodeOp* extop = @base.getDef();
             if ((extop.code() != CPUI_INT_ZEXT) && (extop.code() != CPUI_INT_SEXT))
                 return 0;
             Varnode* invn = extop.getIn(0);

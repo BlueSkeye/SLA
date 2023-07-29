@@ -133,14 +133,14 @@ namespace Sla.DECCORE
                     string paramName;
                     uint size;
                     decodeParameter(decoder, paramName, size);
-                    inputlist.push_back(InjectParameter(paramName, size));
+                    inputlist.Add(InjectParameter(paramName, size));
                 }
                 else if (subId == ELEM_OUTPUT)
                 {
                     string paramName;
                     uint size;
                     decodeParameter(decoder, paramName, size);
-                    output.push_back(InjectParameter(paramName, size));
+                    output.Add(InjectParameter(paramName, size));
                 }
                 else
                     break;

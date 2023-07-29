@@ -75,7 +75,7 @@ namespace Sla.EXTRA
         public void iterateFunctionsAddrOrder()
         {
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("No architecture loaded");
+                throw new IfaceExecutionError("No architecture loaded");
             iterateScopesRecursive(dcp.conf.symboltab.getGlobalScope());
         }
 
@@ -85,10 +85,10 @@ namespace Sla.EXTRA
         public void iterateFunctionsLeafOrder()
         {
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("No architecture loaded");
+                throw new IfaceExecutionError("No architecture loaded");
 
             if (dcp.cgraph == (CallGraph*)0)
-                throw IfaceExecutionError("No callgraph present");
+                throw new IfaceExecutionError("No callgraph present");
 
             CallGraphNode* node;
             node = dcp.cgraph.initLeafWalk();
@@ -96,7 +96,7 @@ namespace Sla.EXTRA
             {
                 if (node.getName().size() == 0) continue; // Skip if has no name
                 Funcdata* fd = node.getFuncdata();
-                if (fd != (Funcdata*)0)
+                if (fd != (Funcdata)null)
                     iterationCallback(fd);
                 node = dcp.cgraph.nextLeaf(node);
             }

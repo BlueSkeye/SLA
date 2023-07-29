@@ -31,7 +31,7 @@ namespace Sla.SLEIGH
                 startbit -= 8;
                 endbit -= 8;
             }
-            mask = (~((uint)0)) << (sizeof(uint) * 8 - size);
+            mask = (uint.MaxValue) << (sizeof(uint) * 8 - size);
             byteval = (byteval << (sizeof(uint) * 8 - size)) & mask;
             mask >>= startbit;
             byteval >>= startbit;
@@ -165,7 +165,7 @@ namespace Sla.SLEIGH
             {
                 reversedirection = true;
                 if (tok2.rightellipsis)
-                    throw SleighError("Right/left ellipsis");
+                    throw new SleighError("Right/left ellipsis");
                 else if (tok2.leftellipsis)
                     leftellipsis = true;
                 else if (tok1.toklist.size() != minsize)
@@ -174,15 +174,15 @@ namespace Sla.SLEIGH
                     msg << "Mismatched pattern sizes -- " << dec << tok1.toklist.size()
                     << " != "
                     << dec << minsize;
-                    throw SleighError(msg.str());
+                    throw new SleighError(msg.str());
                 }
                 else if (tok1.toklist.size() == tok2.toklist.size())
-                    throw SleighError("Pattern size cannot vary (missing '...'?)");
+                    throw new SleighError("Pattern size cannot vary (missing '...'?)");
             }
             else if (tok1.rightellipsis)
             {
                 if (tok2.leftellipsis)
-                    throw SleighError("Left/right ellipsis");
+                    throw new SleighError("Left/right ellipsis");
                 else if (tok2.rightellipsis)
                     rightellipsis = true;
                 else if (tok1.toklist.size() != minsize)
@@ -191,10 +191,10 @@ namespace Sla.SLEIGH
                     msg << "Mismatched pattern sizes -- " << dec << tok1.toklist.size()
                     << " != "
                     << dec << minsize;
-                    throw SleighError(msg.str());
+                    throw new SleighError(msg.str());
                 }
                 else if (tok1.toklist.size() == tok2.toklist.size())
-                    throw SleighError("Pattern size cannot vary (missing '...'?)");
+                    throw new SleighError("Pattern size cannot vary (missing '...'?)");
             }
             else
             {
@@ -207,10 +207,10 @@ namespace Sla.SLEIGH
                         msg << "Mismatched pattern sizes -- " << dec << tok2.toklist.size()
                             << " != "
                             << dec << minsize;
-                        throw SleighError(msg.str());
+                        throw new SleighError(msg.str());
                     }
                     else if (tok1.toklist.size() == tok2.toklist.size())
-                        throw SleighError("Pattern size cannot vary (missing '...'?)");
+                        throw new SleighError("Pattern size cannot vary (missing '...'?)");
                 }
                 else if (tok2.rightellipsis)
                 {
@@ -220,10 +220,10 @@ namespace Sla.SLEIGH
                         msg << "Mismatched pattern sizes -- " << dec << tok2.toklist.size()
                             << " != "
                             << dec << minsize;
-                        throw SleighError(msg.str());
+                        throw new SleighError(msg.str());
                     }
                     else if (tok1.toklist.size() == tok2.toklist.size())
-                        throw SleighError("Pattern size cannot vary (missing '...'?)");
+                        throw new SleighError("Pattern size cannot vary (missing '...'?)");
                 }
                 else
                 {
@@ -233,7 +233,7 @@ namespace Sla.SLEIGH
                         msg << "Mismatched pattern sizes -- " << dec << tok2.toklist.size()
                             << " != "
                             << dec << tok1.toklist.size();
-                        throw SleighError(msg.str());
+                        throw new SleighError(msg.str());
                     }
                 }
             }
@@ -248,7 +248,7 @@ namespace Sla.SLEIGH
                             << dec << tok1.toklist[tok1.toklist.size() - 1 - i]
                             << " != "
                             << dec << tok2.toklist[tok2.toklist.size() - 1 - i];
-                        throw SleighError(msg.str());
+                        throw new SleighError(msg.str());
                     }
                 if (tok1.toklist.size() <= tok2.toklist.size())
                     for (int i = minsize; i < tok2.toklist.size(); ++i)
@@ -269,7 +269,7 @@ namespace Sla.SLEIGH
                             << dec << tok1.toklist[i]
                             << " != "
                             << dec << tok2.toklist[i];
-                        throw SleighError(msg.str());
+                        throw new SleighError(msg.str());
                     }
             }
             // Save the results into -this-
@@ -309,13 +309,13 @@ namespace Sla.SLEIGH
             leftellipsis = false;
             rightellipsis = false;
             pattern = new InstructionPattern(true);
-            toklist.push_back(tok);
+            toklist.Add(tok);
         }
 
         public TokenPattern(Token tok, long value, int bitstart, int bitend)
         {               // A basic instruction pattern
 
-            toklist.push_back(tok);
+            toklist.Add(tok);
             leftellipsis = false;
             rightellipsis = false;
             PatternBlock* block;
@@ -377,8 +377,9 @@ namespace Sla.SLEIGH
         public bool getRightEllipsis() => rightellipsis;
 
         public TokenPattern doAnd(TokenPattern tokpat)
-        {               // Return -this- AND tokpat
-            TokenPattern res((Pattern*)0);
+        {
+            // Return -this- AND tokpat
+            TokenPattern res = new TokenPattern((Pattern)null);
             int sa = res.resolveTokens(*this, tokpat);
 
             res.pattern = pattern.doAnd(tokpat.pattern, sa);
@@ -387,7 +388,7 @@ namespace Sla.SLEIGH
 
         public TokenPattern doOr(TokenPattern tokpat)
         {               // Return -this- OR tokpat
-            TokenPattern res((Pattern*)0);
+            TokenPattern res = new TokenPattern((Pattern)null);
             int sa = res.resolveTokens(*this, tokpat);
 
             res.pattern = pattern.doOr(tokpat.pattern, sa);
@@ -395,8 +396,9 @@ namespace Sla.SLEIGH
         }
 
         public TokenPattern doCat(TokenPattern tokpat)
-        {               // Return Concatenation of -this- and -tokpat-
-            TokenPattern res((Pattern*)0);
+        {
+            // Return Concatenation of -this- and -tokpat-
+            TokenPattern res = new TokenPattern((Pattern)null);
             int sa;
 
             res.leftellipsis = leftellipsis;
@@ -407,12 +409,12 @@ namespace Sla.SLEIGH
                 if (rightellipsis)
                 {
                     if (!tokpat.alwaysInstructionTrue())
-                        throw SleighError("Interior ellipsis in pattern");
+                        throw new SleighError("Interior ellipsis in pattern");
                 }
                 if (tokpat.leftellipsis)
                 {
                     if (!alwaysInstructionTrue())
-                        throw SleighError("Interior ellipsis in pattern");
+                        throw new SleighError("Interior ellipsis in pattern");
                     res.leftellipsis = true;
                 }
                 sa = -1;
@@ -425,11 +427,11 @@ namespace Sla.SLEIGH
                 for (iter = toklist.begin(); iter != toklist.end(); ++iter)
                     sa += (*iter).getSize();
                 for (iter = tokpat.toklist.begin(); iter != tokpat.toklist.end(); ++iter)
-                    res.toklist.push_back(*iter);
+                    res.toklist.Add(*iter);
                 res.rightellipsis = tokpat.rightellipsis;
             }
             if (res.rightellipsis && res.leftellipsis)
-                throw SleighError("Double ellipsis in pattern");
+                throw new SleighError("Double ellipsis in pattern");
             if (sa < 0)
                 res.pattern = pattern.doAnd(tokpat.pattern, 0);
             else
@@ -440,14 +442,14 @@ namespace Sla.SLEIGH
         public TokenPattern commonSubPattern(TokenPattern tokpat)
         {               // Construct pattern that matches anything
                         // that matches either -this- or -tokpat-
-            TokenPattern patres((Pattern*)0); // Empty shell
+            TokenPattern patres = new TokenPattern((Pattern)null); // Empty shell
             int i;
             bool reversedirection = false;
 
             if (leftellipsis || tokpat.leftellipsis)
             {
                 if (rightellipsis || tokpat.rightellipsis)
-                    throw SleighError("Right/left ellipsis in commonSubPattern");
+                    throw new SleighError("Right/left ellipsis in commonSubPattern");
                 reversedirection = true;
             }
 
@@ -481,7 +483,7 @@ namespace Sla.SLEIGH
                 {
                     Token* tok = toklist[i];
                     if (tok == tokpat.toklist[i])
-                        patres.toklist.push_back(tok);
+                        patres.toklist.Add(tok);
                     else
                         break;
                 }

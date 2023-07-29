@@ -26,8 +26,8 @@ namespace Sla.DECCORE
         /// \brief Transform INT_LESS of 0 or 1:  `V < 1  =>  V == 0,  V <= 0  =>  V == 0`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_LESS);
-            oplist.push_back(CPUI_INT_LESSEQUAL);
+            oplist.Add(CPUI_INT_LESS);
+            oplist.Add(CPUI_INT_LESSEQUAL);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

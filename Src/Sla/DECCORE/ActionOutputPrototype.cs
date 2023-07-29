@@ -28,10 +28,10 @@ namespace Sla.DECCORE
             {
                 PcodeOp* op = data.getFirstReturnOp();
                 List<Varnode*> vnlist;
-                if (op != (PcodeOp*)0)
+                if (op != (PcodeOp)null)
                 {
                     for (int i = 1; i < op.numInput(); ++i)
-                        vnlist.push_back(op.getIn(i));
+                        vnlist.Add(op.getIn(i));
                 }
                 if (data.isHighOn())
                     data.getFuncProto().updateOutputTypes(vnlist);

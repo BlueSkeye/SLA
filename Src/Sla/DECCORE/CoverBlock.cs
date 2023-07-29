@@ -45,7 +45,7 @@ namespace Sla.DECCORE
                 case 0:         // Special marker for very beginning of block
                     return (uint)0;
                 case 1:         // Special marker for very end of block
-                    return ~((uint)0);
+                    return uint.MaxValue;
                 case 2:         // Special marker for input
                     return (uint)0;
             }
@@ -264,7 +264,7 @@ namespace Sla.DECCORE
             ustop = getUIndex(stop);
             if (ustart == (uint)0)
                 s << "begin";
-            else if (ustart == ~((uint)0))
+            else if (ustart == uint.MaxValue)
                 s << "end";
             else
                 s << start.getSeqNum();
@@ -273,7 +273,7 @@ namespace Sla.DECCORE
 
             if (ustop == (uint)0)
                 s << "begin";
-            else if (ustop == ~((uint)0))
+            else if (ustop == uint.MaxValue)
                 s << "end";
             else
                 s << stop.getSeqNum();

@@ -31,7 +31,7 @@ namespace Sla.CORE
                 if (node.isMark()) continue;
                 if ((node.inedge.size() == 0) || ((node.flags & CallGraphNode::onlycyclein) != 0))
                 {
-                    seeds.push_back(&node);
+                    seeds.Add(&node);
                     node.flags |= CallGraphNode::mark | CallGraphNode::entrynode;
                     newseeds = true;
                 }
@@ -51,7 +51,7 @@ namespace Sla.CORE
             }
             if ((!newseeds) && (!allcovered))
             {
-                seeds.push_back(lownode);
+                seeds.Add(lownode);
                 lownode.flags |= CallGraphNode::mark | CallGraphNode::entrynode;
             }
             return allcovered;
@@ -63,7 +63,7 @@ namespace Sla.CORE
             List<LeafIterator> stack;
 
             node.flags |= CallGraphNode::currentcycle;
-            stack.push_back(LeafIterator(node));
+            stack.Add(LeafIterator(node));
 
             while (!stack.empty())
             {
@@ -91,7 +91,7 @@ namespace Sla.CORE
                     }
                     next.parentedge = cur.outedge[st].complement;
                     next.flags |= (CallGraphNode::currentcycle | CallGraphNode::mark);
-                    stack.push_back(LeafIterator(next));
+                    stack.Add(LeafIterator(next));
                 }
             }
         }
@@ -227,7 +227,7 @@ namespace Sla.CORE
         { // Add a node, based on an existing function -f-
             CallGraphNode & node(graph[f.getAddress()]);
 
-            if ((node.getFuncdata() != (Funcdata*)0) && (node.getFuncdata() != f))
+            if ((node.getFuncdata() != (Funcdata)null) && (node.getFuncdata() != f))
                 throw new LowlevelError("Functions with duplicate entry points: " + f.getName() + " " + node.getFuncdata().getName());
 
             node.entryaddr = f.getAddress();

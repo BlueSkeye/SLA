@@ -23,17 +23,17 @@ namespace Sla.DECCORE
                 for (int i = 0; i < num; ++i)
                 {
                     ProtoParameter* param = fproto.getParam(i);
-                    InputParamMeasures.push_back(ParamMeasure(param.getAddress(), param.getSize(),
+                    InputParamMeasures.Add(ParamMeasure(param.getAddress(), param.getSize(),
                                        param.getType(), ParamMeasure::INPUT));
                     Varnode* vn = fd.findVarnodeInput(param.getSize(), param.getAddress());
-                    if (vn != (Varnode*)0)
-                        InputParamMeasures.back().calculateRank(true, vn, (PcodeOp*)0);
+                    if (vn != (Varnode)null)
+                        InputParamMeasures.back().calculateRank(true, vn, (PcodeOp)null);
                 }
 
                 ProtoParameter* outparam = fproto.getOutput();
                 if (!outparam.getAddress().isInvalid())
                 { // If we don't have a void type
-                    OutputParamMeasures.push_back(ParamMeasure(outparam.getAddress(), outparam.getSize(),
+                    OutputParamMeasures.Add(ParamMeasure(outparam.getAddress(), outparam.getSize(),
                                          outparam.getType(), ParamMeasure::OUTPUT));
                     list<PcodeOp*>::const_iterator rtn_iter = fd.beginOp(CPUI_RETURN);
                     while (rtn_iter != fd.endOp(CPUI_RETURN))
@@ -44,7 +44,7 @@ namespace Sla.DECCORE
                         if (rtn_op.numInput() == 2)
                         {
                             Varnode* ovn = rtn_op.getIn(1);
-                            if (ovn != (Varnode*)0)
+                            if (ovn != (Varnode)null)
                             {  //Not a void return
                                 OutputParamMeasures.back().calculateRank(true, ovn, rtn_op);
                                 break;
@@ -64,9 +64,9 @@ namespace Sla.DECCORE
                 {
                     Varnode* invn = *iter;
                     ++iter;
-                    InputParamMeasures.push_back(ParamMeasure(invn.getAddr(), invn.getSize(),
+                    InputParamMeasures.Add(ParamMeasure(invn.getAddr(), invn.getSize(),
                                        invn.getType(), ParamMeasure::INPUT));
-                    InputParamMeasures.back().calculateRank(true, invn, (PcodeOp*)0);
+                    InputParamMeasures.back().calculateRank(true, invn, (PcodeOp)null);
                 }
             }
         }

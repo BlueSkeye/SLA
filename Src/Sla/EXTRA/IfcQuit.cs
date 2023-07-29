@@ -14,7 +14,7 @@ namespace Sla.EXTRA
         public override void execute(TextWriter s)
         {               // Generic quit call back
             if (!s.eof())
-                throw IfaceParseError("Too many parameters to quit");
+                throw new IfaceParseError("Too many parameters to quit");
 
             status.done = true;        // Set flag to drop out of mainloop
         }

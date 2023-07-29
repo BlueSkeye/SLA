@@ -18,9 +18,9 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("No load image");
+                throw new IfaceExecutionError("No load image");
             if (dcp.cgraph == (CallGraph*)0)
-                throw IfaceExecutionError("Callgraph has not been built");
+                throw new IfaceExecutionError("Callgraph has not been built");
             if (dcp.conf.evalfp_current == (ProtoModel*)0)
             {
                 *status.optr << "Always using default prototype" << endl;

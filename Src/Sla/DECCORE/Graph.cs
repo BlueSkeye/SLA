@@ -54,7 +54,7 @@ namespace Sla.DECCORE
             for (oiter = data.beginOpAlive(); oiter != data.endOpAlive(); ++oiter)
             {
                 op = *oiter;
-                if (op.getOut() != (Varnode*)0)
+                if (op.getOut() != (Varnode)null)
                     op.getOut().clearMark();
                 for (i = 0; i < op.numInput(); ++i)
                     op.getIn(i).clearMark();

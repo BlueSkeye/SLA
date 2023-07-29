@@ -64,7 +64,7 @@ namespace Sla.DECCORE
             list<PcodeOp*>::const_iterator iter;
 
             PcodeOp* def = vn.getDef();
-            if (def == (PcodeOp*)0) return -1;
+            if (def == (PcodeOp)null) return -1;
             if (def.isMarker()) return -1;
             if (def.isCall())
             {
@@ -86,7 +86,7 @@ namespace Sla.DECCORE
                     }
                 }
                 PcodeOp* useOp = vn.loneDescend();
-                if (useOp == (PcodeOp*)0) return -1;
+                if (useOp == (PcodeOp)null) return -1;
                 if (useOp.code() == CPUI_INT_ZEXT)
                 {
                     Varnode* vnout = useOp.getOut();
@@ -101,7 +101,7 @@ namespace Sla.DECCORE
                     {
                         // Getting PIECEd into a structured thing.  Unless vn is a leaf, it should be implicit
                         if (def.code() != CPUI_PIECE) return -1;
-                        if (vn.loneDescend() == (PcodeOp*)0) return -1;
+                        if (vn.loneDescend() == (PcodeOp)null) return -1;
                         Varnode* vn0 = def.getIn(0);
                         Varnode* vn1 = def.getIn(1);
                         Address addr = vn.getAddr();
@@ -181,7 +181,7 @@ namespace Sla.DECCORE
                     int maxparam = 2;
                     if (op.numInput() < maxparam)
                         maxparam = op.numInput();
-                    Varnode* topvn = (Varnode*)0;
+                    Varnode* topvn = (Varnode)null;
                     for (int j = 0; j < maxparam; ++j)
                     {
                         topvn = op.getIn(j);
@@ -197,10 +197,10 @@ namespace Sla.DECCORE
                             if (opc == CPUI_PTRADD)
                             {
                                 if (topopc == CPUI_PTRADD)
-                                    purgelist.push_back(topvn);
+                                    purgelist.Add(topvn);
                             }
                             else
-                                purgelist.push_back(topvn);
+                                purgelist.Add(topvn);
                         }
                     }
                 }
@@ -230,7 +230,7 @@ namespace Sla.DECCORE
             Varnode* vncur;
             int finalcount = 0;
 
-            opstack.push_back(vn);
+            opstack.Add(vn);
             do
             {
                 vncur = opstack.back().vn;
@@ -259,7 +259,7 @@ namespace Sla.DECCORE
                         vn.setExplicit();  // then automatically consider this to be explicit
                         vn.clearImplied();
                     }
-                    opstack.push_back(newvn);
+                    opstack.Add(newvn);
                 }
             } while (!opstack.empty());
         }
@@ -273,13 +273,13 @@ namespace Sla.DECCORE
         {
             PcodeOp* op = vn.getDef();
             BlockBasic* bb = op.getParent();
-            PcodeOp* firstuse = (PcodeOp*)0;
+            PcodeOp* firstuse = (PcodeOp)null;
             list<PcodeOp*>::const_iterator iter;
             for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {
                 PcodeOp* curop = *iter;
                 if (curop.getParent() != bb) continue;
-                if (firstuse == (PcodeOp*)0)
+                if (firstuse == (PcodeOp)null)
                     firstuse = curop;
                 else if (curop.getSeqNum().getOrder() < firstuse.getSeqNum().getOrder())
                     firstuse = curop;
@@ -293,10 +293,10 @@ namespace Sla.DECCORE
                     }
                 }
             }
-            if (firstuse == (PcodeOp*)0) return;
+            if (firstuse == (PcodeOp)null) return;
 
             if (!firstuse.isCall()) return;
-            if (firstuse.getOut() != (Varnode*)0) return;
+            if (firstuse.getOut() != (Varnode)null) return;
             if (firstuse.numInput() < 2) return;       // Must have at least 1 parameter (plus destination varnode)
             if (firstuse.getIn(1) != vn) return;       // First parameter must result of new
                                                         //  if (!fc.isConstructor()) return;		// Function must be a constructor
@@ -337,7 +337,7 @@ namespace Sla.DECCORE
                 else if (desccount > 1)
                 {   // Keep track of possible implieds with more than one descendant
                     vn.setMark();
-                    multlist.push_back(vn);
+                    multlist.Add(vn);
                 }
             }
 

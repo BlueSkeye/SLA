@@ -516,7 +516,7 @@ namespace Sla.DECCORE
         public override void markLabelBumpUp(bool bump)
         {
             // Mark ourselves if true
-            base.markLabelBumpUp(bump);
+            @base.markLabelBumpUp(bump);
             if (0 == list.Count) {
                 return;
             }
@@ -548,7 +548,7 @@ namespace Sla.DECCORE
 
         public override void printTree(TextWriter s, int level)
         {
-            base.printTree(s, level);
+            @base.printTree(s, level);
             foreach (FlowBlock iter in list) {
                 iter.printTree(s, level + 1);
             }
@@ -609,7 +609,7 @@ namespace Sla.DECCORE
 
         public virtual void encodeBody(Encoder encoder)
         {
-            base.encodeBody(encoder);
+            @base.encodeBody(encoder);
             for (int i = 0; i < list.Count; ++i) {
                 FlowBlock bl = list[i];
                 encoder.openElement(ElementId.ELEM_BHEAD);
@@ -674,7 +674,7 @@ namespace Sla.DECCORE
         public void decode(Decoder decoder)
         {
             BlockMap resolver;
-            base.decode(decoder, resolver);
+            @base.decode(decoder, resolver);
             // Restore goto references here
         }
 
@@ -738,9 +738,9 @@ namespace Sla.DECCORE
         /// \param outafter is the new output FlowBlock
         public void switchEdge(FlowBlock @in, FlowBlock outbefore, FlowBlock outafter)
         {
-            for (int i = 0; i < @in.outofthis.Count; ++i) {
-                if (@in.outofthis[i].point == outbefore) {
-                    @in.replaceOutEdge(i, outafter);
+            for (int i = 0; i < @@in.outofthis.Count; ++i) {
+                if (@@in.outofthis[i].point == outbefore) {
+                    @@in.replaceOutEdge(i, outafter);
                 }
             }
         }

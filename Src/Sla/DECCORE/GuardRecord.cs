@@ -66,7 +66,7 @@ namespace Sla.DECCORE
         /// Mark \b this guard as unused
         public void clear()
         {
-            cbranch = (PcodeOp*)0;
+            cbranch = (PcodeOp)null;
         }
 
         /// \brief Determine if \b this guard applies to the given Varnode
@@ -97,8 +97,8 @@ namespace Sla.DECCORE
                 loadOp = vn.getDef();          // Check if different varnodes hold same value
                 loadOp2 = vn2.getDef();
             }
-            if (loadOp == (PcodeOp*)0) return 0;
-            if (loadOp2 == (PcodeOp*)0) return 0;
+            if (loadOp == (PcodeOp)null) return 0;
+            if (loadOp2 == (PcodeOp)null) return 0;
             if (oneOffMatch(loadOp, loadOp2) == 1)      // Check for simple duplicate calculations
                 return 1;
             if (loadOp.code() != CPUI_LOAD) return 0;
@@ -173,7 +173,7 @@ namespace Sla.DECCORE
             mask -= 1;
             PcodeOp* op = vn.getDef();
             Varnode* constVn;
-            while (op != (PcodeOp*)0)
+            while (op != (PcodeOp)null)
             {
                 switch (op.code())
                 {
@@ -189,7 +189,7 @@ namespace Sla.DECCORE
                             op = vn.getDef();
                         }
                         else
-                            op = (PcodeOp*)0;
+                            op = (PcodeOp)null;
                         break;
                     case CPUI_INT_OR:
                         constVn = op.getIn(1);
@@ -199,7 +199,7 @@ namespace Sla.DECCORE
                             op = vn.getDef();
                         }
                         else
-                            op = (PcodeOp*)0;
+                            op = (PcodeOp)null;
                         break;
                     case CPUI_INT_SEXT:
                     case CPUI_INT_ZEXT:
@@ -209,7 +209,7 @@ namespace Sla.DECCORE
                             op = vn.getDef();
                         }
                         else
-                            op = (PcodeOp*)0;
+                            op = (PcodeOp)null;
                         break;
                     case CPUI_PIECE:
                         if (op.getIn(1).getSize() * 8 >= bitsPreserved)
@@ -218,7 +218,7 @@ namespace Sla.DECCORE
                             op = vn.getDef();
                         }
                         else
-                            op = (PcodeOp*)0;
+                            op = (PcodeOp)null;
                         break;
                     case CPUI_SUBPIECE:
                         constVn = op.getIn(1);
@@ -228,10 +228,10 @@ namespace Sla.DECCORE
                             op = vn.getDef();
                         }
                         else
-                            op = (PcodeOp*)0;
+                            op = (PcodeOp)null;
                         break;
                     default:
-                        op = (PcodeOp*)0;
+                        op = (PcodeOp)null;
                         break;
                 }
             }

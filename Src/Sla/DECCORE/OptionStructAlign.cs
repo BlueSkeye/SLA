@@ -20,7 +20,7 @@ namespace Sla.DECCORE
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
             int val = -1;
-            istringstream s(p1);
+            istringstream s = new istringstream(p1);
             s >> dec >> val;
             if (val == -1)
                 throw ParseError("Missing alignment value");

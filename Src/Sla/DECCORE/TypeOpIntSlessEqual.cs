@@ -28,8 +28,8 @@ namespace Sla.DECCORE
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
             int inslot, int outslot)
         {
-            if ((inslot == -1) || (outslot == -1)) return (Datatype*)0; // Must propagate input <. input
-            if (alttype.getMetatype() != TYPE_INT) return (Datatype*)0;    // Only propagate signed things
+            if ((inslot == -1) || (outslot == -1)) return (Datatype)null; // Must propagate input <. input
+            if (alttype.getMetatype() != TYPE_INT) return (Datatype)null;    // Only propagate signed things
             return alttype;
         }
 

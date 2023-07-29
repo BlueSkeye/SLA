@@ -115,7 +115,7 @@ namespace Sla.DECCORE
         {
             SymbolEntry entry = new SymbolEntry();
             if (addr.isConstant()) return null;
-            while ((scope1 != (Scope*)0)&& (scope1 != scope2)) {
+            while ((scope1 != (Scope)null)&& (scope1 != scope2)) {
                 entry = scope1.findAddr(addr, usepoint);
                 if (entry != (SymbolEntry*)0)
                 {
@@ -126,7 +126,7 @@ namespace Sla.DECCORE
                     return scope1;      // Discovery of new variable
                 scope1 = scope1.getParent();
             }
-            return (Scope*)0;
+            return (Scope)null;
         }
 
         /// Query for a Symbol containing a given range which is accessed at a given \b usepoint
@@ -145,8 +145,8 @@ namespace Sla.DECCORE
             Address usepoint, out SymbolEntry addrmatch)
         {
             SymbolEntry* entry;
-            if (addr.isConstant()) return (Scope*)0;
-            while ((scope1 != (Scope*)0)&& (scope1 != scope2)) {
+            if (addr.isConstant()) return (Scope)null;
+            while ((scope1 != (Scope)null)&& (scope1 != scope2)) {
                 entry = scope1.findContainer(addr, size, usepoint);
                 if (entry != (SymbolEntry*)0)
                 {
@@ -157,7 +157,7 @@ namespace Sla.DECCORE
                     return scope1;      // Discovery of new variable
                 scope1 = scope1.getParent();
             }
-            return (Scope*)0;
+            return (Scope)null;
         }
 
         /// Query for a Symbol which most closely matches a given range and \b usepoint
@@ -177,8 +177,8 @@ namespace Sla.DECCORE
             Address usepoint, out SymbolEntry addrmatch)
         {
             SymbolEntry* entry;
-            if (addr.isConstant()) return (Scope*)0;
-            while ((scope1 != (Scope*)0)&& (scope1 != scope2)) {
+            if (addr.isConstant()) return (Scope)null;
+            while ((scope1 != (Scope)null)&& (scope1 != scope2)) {
                 entry = scope1.findClosestFit(addr, size, usepoint);
                 if (entry != (SymbolEntry*)0)
                 {
@@ -189,7 +189,7 @@ namespace Sla.DECCORE
                     return scope1;      // Discovery of new variable
                 scope1 = scope1.getParent();
             }
-            return (Scope*)0;
+            return (Scope)null;
         }
 
         /// Query for a function Symbol starting at the given address
@@ -207,10 +207,10 @@ namespace Sla.DECCORE
             out Funcdata addrmatch)
         {
             Funcdata* fd;
-            if (addr.isConstant()) return (Scope*)0;
-            while ((scope1 != (Scope*)0)&& (scope1 != scope2)) {
+            if (addr.isConstant()) return (Scope)null;
+            while ((scope1 != (Scope)null)&& (scope1 != scope2)) {
                 fd = scope1.findFunction(addr);
-                if (fd != (Funcdata*)0)
+                if (fd != (Funcdata)null)
                 {
                     *addrmatch = fd;
                     return scope1;
@@ -219,7 +219,7 @@ namespace Sla.DECCORE
                     return scope1;      // Discovery of new variable
                 scope1 = scope1.getParent();
             }
-            return (Scope*)0;
+            return (Scope)null;
         }
 
         /// Query for an \e external \e reference Symbol starting at the given address
@@ -237,8 +237,8 @@ namespace Sla.DECCORE
             out ExternRefSymbol addrmatch)
         {
             ExternRefSymbol* sym;
-            if (addr.isConstant()) return (Scope*)0;
-            while ((scope1 != (Scope*)0)&& (scope1 != scope2)) {
+            if (addr.isConstant()) return (Scope)null;
+            while ((scope1 != (Scope)null)&& (scope1 != scope2)) {
                 sym = scope1.findExternalRef(addr);
                 if (sym != (ExternRefSymbol*)0)
                 {
@@ -252,7 +252,7 @@ namespace Sla.DECCORE
                 //      return scope1;		// Discovery of new variable
                 scope1 = scope1.getParent();
             }
-            return (Scope*)0;
+            return (Scope)null;
         }
 
         /// Query for a label Symbol for a given address.
@@ -270,8 +270,8 @@ namespace Sla.DECCORE
             out LabSymbol addrmatch)
         {
             LabSymbol* sym;
-            if (addr.isConstant()) return (Scope*)0;
-            while ((scope1 != (Scope*)0)&& (scope1 != scope2)) {
+            if (addr.isConstant()) return (Scope)null;
+            while ((scope1 != (Scope)null)&& (scope1 != scope2)) {
                 sym = scope1.findCodeLabel(addr);
                 if (sym != (LabSymbol*)0)
                 {
@@ -282,7 +282,7 @@ namespace Sla.DECCORE
                     return scope1;      // Discovery of new variable
                 scope1 = scope1.getParent();
             }
-            return (Scope*)0;
+            return (Scope)null;
         }
 
         /// Access the address ranges owned by \b this Scope
@@ -697,7 +697,7 @@ namespace Sla.DECCORE
             findByName(nm, res);
             if (!res.empty())
                 return;
-            if (parent != (Scope*)0)
+            if (parent != (Scope)null)
                 parent.queryByName(nm, res);
         }
 
@@ -717,7 +717,7 @@ namespace Sla.DECCORE
                 if (funcsym != (FunctionSymbol*)0)
                     return funcsym.getFunction();
             }
-            return (Funcdata*)0;
+            return (Funcdata)null;
         }
 
         /// Get Symbol with matching address
@@ -730,7 +730,7 @@ namespace Sla.DECCORE
         {
             SymbolEntry* res = (SymbolEntry*)0;
             Scope basescope = glb.symboltab.mapScope(this, addr, usepoint);
-            stackAddr(basescope, (Scope*)0,addr,usepoint,&res);
+            stackAddr(basescope, (Scope)null,addr,usepoint,&res);
             return res;
         }
 
@@ -745,7 +745,7 @@ namespace Sla.DECCORE
         {
             SymbolEntry* res = (SymbolEntry*)0;
             Scope basescope = glb.symboltab.mapScope(this, addr, usepoint);
-            stackContainer(basescope, (Scope*)0,addr,size,usepoint,&res);
+            stackContainer(basescope, (Scope)null,addr,size,usepoint,&res);
             return res;
         }
 
@@ -762,10 +762,10 @@ namespace Sla.DECCORE
         {
             SymbolEntry* res = (SymbolEntry*)0;
             Scope basescope = glb.symboltab.mapScope(this, addr, usepoint);
-            Scope finalscope = stackContainer(basescope, (Scope*)0,addr,size,usepoint,&res);
+            Scope finalscope = stackContainer(basescope, (Scope)null,addr,size,usepoint,&res);
             if (res != (SymbolEntry*)0) // If we found a symbol
                 flags = res.getAllFlags(); // use its flags
-            else if (finalscope != (Scope*)0)
+            else if (finalscope != (Scope)null)
             { // If we found just a scope
               // set flags just based on scope
                 flags = Varnode::mapped | Varnode::addrtied;
@@ -785,10 +785,10 @@ namespace Sla.DECCORE
         /// \return the Funcdata object of the matching function, or NULL if it doesn't exist
         public Funcdata queryFunction(Address addr)
         {
-            Funcdata* res = (Funcdata*)0;
+            Funcdata* res = (Funcdata)null;
             // We have no usepoint, so try to map from addr
             Scope basescope = glb.symboltab.mapScope(this, addr, Address());
-            stackFunction(basescope, (Scope*)0,addr,&res);
+            stackFunction(basescope, (Scope)null,addr,&res);
             return res;
         }
 
@@ -804,11 +804,11 @@ namespace Sla.DECCORE
             ExternRefSymbol* sym = (ExternRefSymbol*)0;
             // We have no usepoint, so try to map from addr
             Scope basescope = glb.symboltab.mapScope(this, addr, Address());
-            basescope = stackExternalRef(basescope, (Scope*)0,addr,&sym);
+            basescope = stackExternalRef(basescope, (Scope)null,addr,&sym);
             // Resolve the reference from the same scope we found the reference
             if (sym != (ExternRefSymbol*)0)
                 return basescope.resolveExternalRefFunction(sym);
-            return (Funcdata*)0;
+            return (Funcdata)null;
         }
 
         /// Look-up a code label by address
@@ -821,7 +821,7 @@ namespace Sla.DECCORE
             LabSymbol* res = (LabSymbol*)0;
             // We have no usepoint, so try to map from addr
             Scope basescope = glb.symboltab.mapScope(this, addr, Address());
-            stackCodeLabel(basescope, (Scope*)0,addr,&res);
+            stackCodeLabel(basescope, (Scope)null,addr,&res);
             return res;
         }
 
@@ -836,7 +836,7 @@ namespace Sla.DECCORE
             {
                 ulong key = hashScopeName(uniqueId, nm);
                 ScopeMap::const_iterator iter = children.find(key);
-                if (iter == children.end()) return (Scope*)0;
+                if (iter == children.end()) return (Scope)null;
                 Scope* scope = (*iter).second;
                 if (scope.name == nm)
                     return scope;
@@ -844,12 +844,12 @@ namespace Sla.DECCORE
             else if (nm.length() > 0 && nm[0] <= '9' && nm[0] >= '0')
             {
                 // Allow the string to directly specify the id
-                istringstream s(nm);
+                istringstream s = new istringstream(nm);
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 ulong key;
                 s >> key;
                 ScopeMap::const_iterator iter = children.find(key);
-                if (iter == children.end()) return (Scope*)0;
+                if (iter == children.end()) return (Scope)null;
                 return (*iter).second;
             }
             else
@@ -862,7 +862,7 @@ namespace Sla.DECCORE
                         return scope;
                 }
             }
-            return (Scope*)0;
+            return (Scope)null;
         }
 
         /// Find the owning Scope of a given memory range
@@ -875,15 +875,15 @@ namespace Sla.DECCORE
         public Scope discoverScope(Address addr, int sz, Address usepoint)
         {               // Which scope "should" this range belong to
             if (addr.isConstant())
-                return (Scope*)0;
+                return (Scope)null;
             Scope* basescope = glb.symboltab.mapScope(this, addr, usepoint);
-            while (basescope != (Scope*)0)
+            while (basescope != (Scope)null)
             {
                 if (basescope.inScope(addr, sz, usepoint))
                     return basescope;
                 basescope = basescope.getParent();
             }
-            return (Scope*)0;
+            return (Scope)null;
         }
 
         public ScopeMap::const_iterator childrenBegin() => children.begin(); ///< Beginning iterator of child scopes
@@ -952,17 +952,17 @@ namespace Sla.DECCORE
             {
                 if (tmp == scp) return true;
                 tmp = tmp.parent;
-            } while (tmp != (Scope*)0);
+            } while (tmp != (Scope)null);
             return false;
         }
 
         /// Get the full name of \b this Scope
         public string getFullName()
         {
-            if (parent == (Scope*)0) return "";
+            if (parent == (Scope)null) return "";
             string fname = name;
             Scope* scope = parent;
-            while (scope.parent != (Scope*)0)
+            while (scope.parent != (Scope)null)
             {
                 fname = scope.name + "::" + fname;
                 scope = scope.parent;
@@ -977,13 +977,13 @@ namespace Sla.DECCORE
         {
             int count = 0;
             Scope cur = this;
-            while (cur != (Scope*)0) {    // Count number of elements in path
+            while (cur != (Scope)null) {    // Count number of elements in path
                 count += 1;
                 cur = cur.parent;
             }
             vec.resize(count);
             cur = this;
-            while (cur != (Scope*)0) {
+            while (cur != (Scope)null) {
                 count -= 1;
                 vec[count] = cur;
                 cur = cur.parent;
@@ -998,9 +998,9 @@ namespace Sla.DECCORE
         /// \return the first ancestor Scope that is not in common or null
         public Scope findDistinguishingScope(Scope op2)
         {
-            if (this == op2) return (Scope*)0;    // Quickly check most common cases
+            if (this == op2) return (Scope)null;    // Quickly check most common cases
             if (parent == op2) return this;
-            if (op2.parent == this) return (Scope*)0;
+            if (op2.parent == this) return (Scope)null;
             if (parent == op2.parent) return this;
             List<Scope> thisPath = new List<Scope>();
             List<Scope> op2Path = new List<Scope>();
@@ -1017,7 +1017,7 @@ namespace Sla.DECCORE
             if (min < thisPath.size())
                 return thisPath[min];   // thisPath matches op2Path but is longer
             if (min < op2Path.size())
-                return (Scope*)0; // op2Path matches thisPath but is longer
+                return (Scope)null; // op2Path matches thisPath but is longer
             return this;            // ancestor paths are identical (only base scopes differ)
         }
 
@@ -1154,7 +1154,7 @@ namespace Sla.DECCORE
             SymbolEntry* ret = addMapPoint(sym, addr, Address());
             // Even if the external reference is in a readonly region, treat it as not readonly
             // As the value in the image probably isn't valid
-            ret.symbol.flags &= ~((uint)Varnode::readonly);
+            ret.symbol.flags &= ~((uint)Varnode::@readonly);
             return sym;
         }
 
@@ -1257,10 +1257,10 @@ namespace Sla.DECCORE
         /// \return the default name
         public string buildDefaultName(Symbol sym, int @base, Varnode vn)
         {
-            if (vn != (Varnode*)0 && !vn.isConstant())
+            if (vn != (Varnode)null && !vn.isConstant())
             {
                 Address usepoint;
-                if (!vn.isAddrTied() && fd != (Funcdata*)0)
+                if (!vn.isAddrTied() && fd != (Funcdata)null)
                     usepoint = vn.getUsePoint(*fd);
                 HighVariable* high = vn.getHigh();
                 if (sym.getCategory() == Symbol::function_parameter || high.isInput())
@@ -1302,7 +1302,7 @@ namespace Sla.DECCORE
         {
             uint flags;
             queryProperties(addr, size, usepoint, flags);
-            return ((flags & Varnode::readonly)!= 0);
+            return ((flags & Varnode::@readonly)!= 0);
         }
 
         /// Print a description of \b this Scope's \e owned memory ranges

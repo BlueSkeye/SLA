@@ -283,7 +283,7 @@ namespace Sla.DECCORE
         public override void markLabelBumpUp(bool bump)
         {
             // whiledos steal lower blocks labels
-            base.markLabelBumpUp(true);
+            @base.markLabelBumpUp(true);
             if (!bump) {
                 clearFlag(f_label_bumpup);
             }
@@ -304,7 +304,7 @@ namespace Sla.DECCORE
             if (hasOverflowSyntax()) {
                 s.Write("(overflow) ");
             }
-            base.printHeader(s);
+            @base.printHeader(s);
         }
 
         public override void emit(PrintLanguage lng)
@@ -332,7 +332,7 @@ namespace Sla.DECCORE
         /// \param data is the function containing \b this loop
         public override void finalTransform(Funcdata data)
         {
-            base.finalTransform(data);
+            @base.finalTransform(data);
             if (!data.getArch().analyze_for_loops) {
                 return;
             }
@@ -404,7 +404,7 @@ namespace Sla.DECCORE
         public override void finalizePrinting(Funcdata data)
         {
             // Continue recursing
-            base.finalizePrinting(data);
+            @base.finalizePrinting(data);
             if (iterateOp == null) {
                 // For-loop printing not enabled
                 return;

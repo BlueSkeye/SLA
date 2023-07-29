@@ -97,7 +97,7 @@ namespace Sla.DECCORE
                 }
             }
             Datatype* tp = glb.types.findByName(nm);
-            if (tp != (Datatype*)0)
+            if (tp != (Datatype)null)
             {
                 yylval.type = tp;
                 return TYPE_NAME;
@@ -172,10 +172,10 @@ namespace Sla.DECCORE
         {
             List<TypeDeclarator*>* declist;
             declist = new List<TypeDeclarator*>();
-            vecdec_alloc.push_back(declist);
+            vecdec_alloc.Add(declist);
             TypeDeclarator* dec = new TypeDeclarator();
-            typedec_alloc.push_back(dec);
-            declist.push_back(dec);
+            typedec_alloc.Add(dec);
+            declist.Add(dec);
             return mergeSpecDecVec(spec, declist);
         }
 
@@ -212,7 +212,7 @@ namespace Sla.DECCORE
 
         public TypeSpecifiers addTypeSpecifier(TypeSpecifiers spec, Datatype tp)
         {
-            if (spec.type_specifier != (Datatype*)0)
+            if (spec.type_specifier != (Datatype)null)
                 setError("Multiple type specifiers");
             spec.type_specifier = tp;
             return spec;
@@ -239,7 +239,7 @@ namespace Sla.DECCORE
             for (uint i = 0; i < ptr.size(); ++i)
             {
                 PointerModifier* newmod = new PointerModifier((*ptr)[i]);
-                dec.mods.push_back(newmod);
+                dec.mods.Add(newmod);
             }
             return dec;
         }
@@ -247,42 +247,42 @@ namespace Sla.DECCORE
         public TypeDeclarator newDeclarator(string str)
         {
             TypeDeclarator* res = new TypeDeclarator(*str);
-            typedec_alloc.push_back(res);
+            typedec_alloc.Add(res);
             return res;
         }
 
         public TypeDeclarator newDeclarator()
         {
             TypeDeclarator* res = new TypeDeclarator();
-            typedec_alloc.push_back(res);
+            typedec_alloc.Add(res);
             return res;
         }
 
         public TypeSpecifiers newSpecifier()
         {
             TypeSpecifiers* spec = new TypeSpecifiers();
-            typespec_alloc.push_back(spec);
+            typespec_alloc.Add(spec);
             return spec;
         }
 
         public List<TypeDeclarator> newVecDeclarator()
         {
             List<TypeDeclarator*>* res = new List<TypeDeclarator*>();
-            vecdec_alloc.push_back(res);
+            vecdec_alloc.Add(res);
             return res;
         }
 
         public List<uint> newPointer()
         {
             List<uint>* res = new List<uint>();
-            vecuint4_alloc.push_back(res);
+            vecuint4_alloc.Add(res);
             return res;
         }
 
         public TypeDeclarator newArray(TypeDeclarator dec, uint flags, ulong num)
         {
             ArrayModifier* newmod = new ArrayModifier(flags, (int) * num);
-            dec.mods.push_back(newmod);
+            dec.mods.Add(newmod);
             return dec;
         }
 
@@ -298,7 +298,7 @@ namespace Sla.DECCORE
                 }
             }
             FunctionModifier* newmod = new FunctionModifier(declist, dotdotdot);
-            dec.mods.push_back(newmod);
+            dec.mods.Add(newmod);
             return dec;
         }
 
@@ -314,7 +314,7 @@ namespace Sla.DECCORE
                 {
                     setError("Invalid structure declarator");
                     glb.types.destroyType(res);
-                    return (Datatype*)0;
+                    return (Datatype)null;
                 }
                 sublist.emplace_back(0, -1, decl.getIdentifier(), decl.buildType(glb));
             }
@@ -324,7 +324,7 @@ namespace Sla.DECCORE
             {
                 setError("Bad structure definition");
                 glb.types.destroyType(res);
-                return (Datatype*)0;
+                return (Datatype)null;
             }
             return res;
         }
@@ -332,7 +332,7 @@ namespace Sla.DECCORE
         public Datatype oldStruct(string ident)
         {
             Datatype* res = glb.types.findByName(ident);
-            if ((res == (Datatype*)0) || (res.getMetatype() != TYPE_STRUCT))
+            if ((res == (Datatype)null) || (res.getMetatype() != TYPE_STRUCT))
                 setError("Identifier does not represent a struct as required");
             return res;
         }
@@ -349,7 +349,7 @@ namespace Sla.DECCORE
                 {
                     setError("Invalid union declarator");
                     glb.types.destroyType(res);
-                    return (Datatype*)0;
+                    return (Datatype)null;
                 }
                 sublist.emplace_back(i, 0, decl.getIdentifier(), decl.buildType(glb));
             }
@@ -358,7 +358,7 @@ namespace Sla.DECCORE
             {
                 setError("Bad union definition");
                 glb.types.destroyType(res);
-                return (Datatype*)0;
+                return (Datatype)null;
             }
             return res;
         }
@@ -366,7 +366,7 @@ namespace Sla.DECCORE
         public Datatype oldUnion(string ident)
         {
             Datatype* res = glb.types.findByName(ident);
-            if ((res == (Datatype*)0) || (res.getMetatype() != TYPE_UNION))
+            if ((res == (Datatype)null) || (res.getMetatype() != TYPE_UNION))
                 setError("Identifier does not represent a union as required");
             return res;
         }
@@ -374,21 +374,21 @@ namespace Sla.DECCORE
         public Enumerator newEnumerator(string ident)
         {
             Enumerator* res = new Enumerator(ident);
-            enum_alloc.push_back(res);
+            enum_alloc.Add(res);
             return res;
         }
 
         public Enumerator newEnumerator(string ident,ulong val)
         {
             Enumerator* res = new Enumerator(ident, val);
-            enum_alloc.push_back(res);
+            enum_alloc.Add(res);
             return res;
         }
 
         public List<Enumerator> newVecEnumerator()
         {
             List<Enumerator*>* res = new List<Enumerator*>();
-            vecenum_alloc.push_back(res);
+            vecenum_alloc.Add(res);
             return res;
         }
 
@@ -401,15 +401,15 @@ namespace Sla.DECCORE
             for (uint i = 0; i < vecenum.size(); ++i)
             {
                 Enumerator* enumer = (*vecenum)[i];
-                namelist.push_back(enumer.enumconstant);
-                vallist.push_back(enumer.value);
-                assignlist.push_back(enumer.constantassigned);
+                namelist.Add(enumer.enumconstant);
+                vallist.Add(enumer.value);
+                assignlist.Add(enumer.constantassigned);
             }
             if (!glb.types.setEnumValues(namelist, vallist, assignlist, res))
             {
                 setError("Bad enumeration values");
                 glb.types.destroyType(res);
-                return (Datatype*)0;
+                return (Datatype)null;
             }
             return res;
         }
@@ -417,7 +417,7 @@ namespace Sla.DECCORE
         public Datatype oldEnum(string ident)
         {
             Datatype* res = glb.types.findByName(ident);
-            if ((res == (Datatype*)0) || (!res.isEnumType()))
+            if ((res == (Datatype)null) || (!res.isEnumType()))
                 setError("Identifier does not represent an enum as required");
             return res;
         }
@@ -498,11 +498,11 @@ namespace Sla.DECCORE
                 case GrammarToken::integer:
                 case GrammarToken::charconstant:
                     yylval.i = new ulong(tok.getInteger());
-                    num_alloc.push_back(yylval.i);
+                    num_alloc.Add(yylval.i);
                     return NUMBER;
                 case GrammarToken::identifier:
                     yylval.str = tok.getString();
-                    string_alloc.push_back(yylval.str);
+                    string_alloc.Add(yylval.str);
                     return lookupIdentifier(*yylval.str);
                 case GrammarToken::stringval:
                     delete tok.getString();

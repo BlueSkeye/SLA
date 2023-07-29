@@ -33,18 +33,18 @@ namespace Sla.EXTRA
             if (outname == "void")
                 outname = "";
             if (bracket != '(')
-                throw IfaceParseError("Missing '('");
+                throw new IfaceParseError("Missing '('");
             while (bracket != ')')
             {
                 string param;
                 parse_toseparator(s, param);
                 s >> bracket;
                 if (param.size() != 0)
-                    inname.push_back(param);
+                    inname.Add(param);
             }
             s >> ws >> bracket;
             if (bracket != '{')
-                throw IfaceParseError("Missing '{'");
+                throw new IfaceParseError("Missing '{'");
             getline(s, pcodestring, '}');
         }
 

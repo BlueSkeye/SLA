@@ -52,7 +52,7 @@ namespace Sla.DECCORE
             if (ptrtype.getMetatype() == TYPE_PTR)
             {
                 AddrSpace* spc = ((TypePointer*)ptrtype).getSpace();
-                if (spc != (AddrSpace*)0)
+                if (spc != (AddrSpace)null)
                 {
                     AddrSpace* opSpc = op.getIn(0).getSpaceFromConst();
                     if (opSpc != spc && spc.getContain() != opSpc)
@@ -96,7 +96,7 @@ namespace Sla.DECCORE
                 reqtype = ((TypeArray*)reqtype).getBase();
             if (curtype.getMetatype() == TYPE_ARRAY)
                 curtype = ((TypeArray*)curtype).getBase();
-            return (castStrategy.castStandard(reqtype, curtype, true, true) == (Datatype*)0);
+            return (castStrategy.castStandard(reqtype, curtype, true, true) == (Datatype)null);
         }
 
         /// \brief Try to adjust the input and output Varnodes to eliminate a CAST
@@ -111,7 +111,7 @@ namespace Sla.DECCORE
         private static bool tryResolutionAdjustment(PcodeOp op, int slot, Funcdata data)
         {
             Varnode* outvn = op.getOut();
-            if (outvn == (Varnode*)0)
+            if (outvn == (Varnode)null)
                 return false;
             Datatype* outType = outvn.getHigh().getType();
             Datatype* inType = op.getIn(slot).getHigh().getType();
@@ -153,7 +153,7 @@ namespace Sla.DECCORE
         /// If, at a source code level, a variable with data-type \b ct1 can be
         /// legally substituted for another variable with data-type \b ct2, return \b true.
         /// The substitution must be allowed for all possible operations the variable
-        /// may be involved in.
+        /// may be involved @in.
         /// \param ct1 is the first data-type
         /// \param ct2 is the second data-type
         private static bool isOpIdentical(Datatype ct1, Datatype ct2)
@@ -163,9 +163,9 @@ namespace Sla.DECCORE
                 ct1 = ((TypePointer)ct1).getPtrTo();
                 ct2 = ((TypePointer)ct2).getPtrTo();
             }
-            while (ct1.getTypedef() != (Datatype*)0)
+            while (ct1.getTypedef() != (Datatype)null)
                 ct1 = ct1.getTypedef();
-            while (ct2.getTypedef() != (Datatype*)0)
+            while (ct2.getTypedef() != (Datatype)null)
                 ct2 = ct2.getTypedef();
             return (ct1 == ct2);
         }
@@ -186,7 +186,7 @@ namespace Sla.DECCORE
             if (dt != vn.getType())
                 dt.resolveInFlow(op, slot);    // Last chance to resolve data-type based on flow
             ResolvedUnion resUnion = data.getUnionField(dt, op, slot);
-            if (resUnion != (ResolvedUnion*)0 && resUnion.getFieldNum() >= 0)
+            if (resUnion != (ResolvedUnion)null && resUnion.getFieldNum() >= 0)
             {
                 // Insert specific placeholder indicating which field is accessed
                 if (dt.getMetatype() == TYPE_PTR)
@@ -219,10 +219,13 @@ namespace Sla.DECCORE
         /// \return 1 if a cast inserted, 0 otherwise
         private static int castOutput(PcodeOp op, Funcdata data, CastStrategy castStrategy)
         {
-            Datatype* outct,*ct,*tokenct;
-            Varnode* vn,*outvn;
-            PcodeOp* newop;
-            Datatype* outHighType;
+            Datatype outct;
+            Datatype ct;
+            Datatype tokenct;
+            Varnode vn;
+            Varnode outvn;
+            PcodeOp newop;
+            Datatype outHighType;
             bool force = false;
 
             tokenct = op.getOpcode().getOutputToken(op, castStrategy);
@@ -254,7 +257,7 @@ namespace Sla.DECCORE
                     PcodeOp* outOp = outvn.loneDescend();
                     // The Varnode input to a CPUI_RETURN is marked as implied but
                     // casting should act as if it were explicit
-                    if (outOp == (PcodeOp*)0 || outOp.code() != CPUI_RETURN)
+                    if (outOp == (PcodeOp)null || outOp.code() != CPUI_RETURN)
                     {
                         force = !isOpIdentical(outHighResolve, tokenct);
                     }
@@ -280,7 +283,7 @@ namespace Sla.DECCORE
             {
                 outct = outHighResolve; // Type of result
                 ct = castStrategy.castStandard(outct, tokenct, false, true);
-                if (ct == (Datatype*)0) return 0;
+                if (ct == (Datatype)null) return 0;
             }
             // Generate the cast op
             vn = data.newUnique(outvn.getSize());
@@ -319,7 +322,7 @@ namespace Sla.DECCORE
             PcodeOp* newop;
 
             ct = op.getOpcode().getInputCast(op, slot, castStrategy); // Input type expected by this operation
-            if (ct == (Datatype*)0)
+            if (ct == (Datatype)null)
             {
                 bool resUnsigned = castStrategy.markExplicitUnsigned(op, slot);
                 bool resSized = castStrategy.markExplicitLongSize(op, slot);
@@ -469,7 +472,7 @@ namespace Sla.DECCORE
                         checkPointerIssues(op, op.getIn(2), data);
                     }
                     Varnode* vn = op.getOut();
-                    if (vn == (Varnode*)0) continue;
+                    if (vn == (Varnode)null) continue;
                     count += castOutput(op, data, castStrategy);
                 }
             }

@@ -31,7 +31,7 @@ namespace Sla.DECCORE
         /// when the mistake is discovered.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_PTRSUB);
+            oplist.Add(CPUI_PTRSUB);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

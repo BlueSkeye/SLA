@@ -30,26 +30,34 @@ namespace Sla.DECCORE
         /// with a specific INT_OR or PIECE
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_AND);
+            oplist.Add(CPUI_INT_AND);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* orvn,*shiftvn,*othervn,*newvn1,*newvn2,*savn;
-            PcodeOp* orop,*shiftop,*newop1,*newop2;
+            Varnode orvn;
+            Varnode shiftvn;
+            Varnode othervn;
+            Varnode newvn1;
+            Varnode newvn2;
+            Varnode savn;
+            PcodeOp orop;
+            PcodeOp shiftop;
+            PcodeOp newop1;
+            PcodeOp newop2;
             ulong ormask1, ormask2, othermask, fullmask;
             OpCode opc = CPUI_INT_OR; // Unnecessary initialization
             int sa, i, size;
 
-            orvn = othervn = savn = (Varnode*)0; // Unnecessary initialization
+            orvn = othervn = savn = (Varnode)null; // Unnecessary initialization
             size = op.getOut().getSize();
             if (size > sizeof(ulong)) return 0; // FIXME: ulong should be arbitrary precision
-            fullmask = calc_mask(size);
+            fullmask = Globals.calc_mask(size);
             for (i = 0; i < 2; ++i)
             {
                 shiftvn = op.getIn(i);
                 shiftop = shiftvn.getDef();
-                if (shiftop == (PcodeOp*)0) continue;
+                if (shiftop == (PcodeOp)null) continue;
                 opc = shiftop.code();
                 if ((opc != CPUI_INT_LEFT) && (opc != CPUI_INT_RIGHT)) continue;
                 savn = shiftop.getIn(1);

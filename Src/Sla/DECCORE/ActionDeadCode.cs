@@ -37,14 +37,14 @@ namespace Sla.DECCORE
         /// \param worklist is the current work-list
         private static void pushConsumed(ulong val, Varnode vn, List<Varnode> worklist)
         {
-            ulong newval = (val | vn.getConsume()) & calc_mask(vn.getSize());
+            ulong newval = (val | vn.getConsume()) & Globals.calc_mask(vn.getSize());
             if ((newval == vn.getConsume()) && vn.isConsumeVacuous()) return;
             vn.setConsumeVacuous();
             if (!vn.isConsumeList())
             { // Check if already in list
                 vn.setConsumeList();   // Mark as in the list
                 if (vn.isWritten())
-                    worklist.push_back(vn); // add to list
+                    worklist.Add(vn); // add to list
             }
             vn.setConsume(newval);
         }
@@ -76,7 +76,7 @@ namespace Sla.DECCORE
                         int leastSet = leastsigbit_set(op.getIn(1).getOffset());
                         if (leastSet >= 0)
                         {
-                            a = calc_mask(vn.getSize()) >> leastSet;
+                            a = Globals.calc_mask(vn.getSize()) >> leastSet;
                             a &= b;
                         }
                         else
@@ -185,7 +185,7 @@ namespace Sla.DECCORE
                     pushConsumed(outc, op.getIn(0), worklist);
                     break;
                 case CPUI_INT_SEXT:
-                    b = calc_mask(op.getIn(0).getSize());
+                    b = Globals.calc_mask(op.getIn(0).getSize());
                     a = outc & b;
                     if (outc > b)
                         a |= (b ^ (b >> 1));    // Make sure signbit is marked used
@@ -352,7 +352,7 @@ namespace Sla.DECCORE
                     consumeVal = minimalmask(vn.getNZMask());
                 int bytesConsumed = fc.getInputBytesConsumed(i);
                 if (bytesConsumed != 0)
-                    consumeVal &= calc_mask(bytesConsumed);
+                    consumeVal &= Globals.calc_mask(bytesConsumed);
                 pushConsumed(consumeVal, vn, worklist);
             }
         }
@@ -384,7 +384,7 @@ namespace Sla.DECCORE
             int val = data.getFuncProto().getReturnBytesConsumed();
             if (val != 0)
             {
-                consumeVal &= calc_mask(val);
+                consumeVal &= Globals.calc_mask(val);
             }
             return consumeVal;
         }
@@ -505,7 +505,7 @@ namespace Sla.DECCORE
             // Set pre-live registers
             for (i = 0; i < manage.numSpaces(); ++i) {
                 spc = manage.getSpace(i);
-                if (spc == (AddrSpace*)0 || !spc.doesDeadcode()) continue;
+                if (spc == (AddrSpace)null || !spc.doesDeadcode()) continue;
                 if (data.deadRemovalAllowed(spc)) continue; // Mark consumed if we have NOT heritaged
                 viter = data.beginLoc(spc);
                 endviter = data.endLoc(spc);
@@ -592,7 +592,7 @@ namespace Sla.DECCORE
             for (i = 0; i < manage.numSpaces(); ++i)
             {
                 spc = manage.getSpace(i);
-                if (spc == (AddrSpace*)0 || !spc.doesDeadcode()) continue;
+                if (spc == (AddrSpace)null || !spc.doesDeadcode()) continue;
                 if (!data.deadRemovalAllowed(spc)) continue; // Don't eliminate if we haven't heritaged
                 viter = data.beginLoc(spc);
                 endviter = data.endLoc(spc);

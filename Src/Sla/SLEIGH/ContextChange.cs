@@ -30,12 +30,12 @@ namespace Sla.SLEIGH
         {
             num = sbit / (8 * sizeof(uint));
             if (num != ebit / (8 * sizeof(uint)))
-                throw SleighError("Context field not contained within one machine int");
+                throw new SleighError("Context field not contained within one machine int");
             sbit -= num * 8 * sizeof(uint);
             ebit -= num * 8 * sizeof(uint);
 
             shift = 8 * sizeof(uint) - ebit - 1;
-            mask = (~((uint)0)) >> (sbit + shift);
+            mask = (uint.MaxValue) >> (sbit + shift);
             mask <<= shift;
         }
     }

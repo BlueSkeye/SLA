@@ -63,7 +63,7 @@ namespace Sla.DECCORE
         public override void printHeader(TextWriter s)
         {
             s.Write("Multi goto block ");
-            base.printHeader(s);
+            @base.printHeader(s);
         }
         
         public override void printRaw(TextWriter s)
@@ -88,7 +88,7 @@ namespace Sla.DECCORE
 
         public override void encodeBody(Encoder encoder)
         {
-            base.encodeBody(encoder);
+            @base.encodeBody(encoder);
             for (int i = 0; i < gotoedges.Count; ++i) {
                 FlowBlock gototarget = gotoedges[i];
                 FlowBlock? leaf = gototarget.getFrontLeaf();

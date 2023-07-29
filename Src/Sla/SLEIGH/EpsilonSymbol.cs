@@ -26,7 +26,7 @@ namespace Sla.SLEIGH
         public override void getFixedHandle(FixedHandle hand, ParserWalker walker)
         {
             hand.space = const_space;
-            hand.offset_space = (AddrSpace*)0; // Not a dynamic value
+            hand.offset_space = (AddrSpace)null; // Not a dynamic value
             hand.offset_offset = 0;
             hand.size = 0;      // Cannot provide size
         }

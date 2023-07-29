@@ -23,7 +23,7 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            if (op.getOut() != (Varnode*)0)
+            if (op.getOut() != (Varnode)null)
             {
                 Varnode::printRaw(s, op.getOut());
                 s << " = ";

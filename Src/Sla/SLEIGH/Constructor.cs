@@ -43,7 +43,7 @@ namespace Sla.SLEIGH
                 sym = operands[i];
                 if (!sym.isMarked())
                 {
-                    patternorder.push_back(sym);
+                    patternorder.Add(sym);
                     sym.setMark();     // Make sure all operands are marked
                 }
             }
@@ -57,7 +57,7 @@ namespace Sla.SLEIGH
                     if (sym.isOffsetIrrelevant()) continue; // expression Operands come last
                     if ((sym.offsetbase == -1) || (!operands[sym.offsetbase].isMarked()))
                     {
-                        newops.push_back(sym);
+                        newops.Add(sym);
                         sym.clearMark();
                     }
                 }
@@ -67,13 +67,13 @@ namespace Sla.SLEIGH
                 sym = patternorder[i];
                 if (sym.isOffsetIrrelevant())
                 {
-                    newops.push_back(sym);
+                    newops.Add(sym);
                     sym.clearMark();
                 }
             }
 
             if (newops.size() != operands.size())
-                throw SleighError("Circular offset dependency between operands");
+                throw new SleighError("Circular offset dependency between operands");
 
 
             for (int i = 0; i < newops.size(); ++i)
@@ -83,7 +83,7 @@ namespace Sla.SLEIGH
             }
             List<int> handmap;       // Create index translation map
             for (int i = 0; i < operands.size(); ++i)
-                handmap.push_back(operands[i].hand);
+                handmap.Add(operands[i].hand);
 
             // Fix up offsetbase
             for (int i = 0; i < newops.size(); ++i)
@@ -93,12 +93,12 @@ namespace Sla.SLEIGH
                 sym.offsetbase = handmap[sym.offsetbase];
             }
 
-            if (templ != (ConstructTpl*)0) // Fix up templates
+            if (templ != (ConstructTpl)null) // Fix up templates
                 templ.changeHandleIndex(handmap);
             for (int i = 0; i < namedtempl.size(); ++i)
             {
                 ConstructTpl* ntempl = namedtempl[i];
-                if (ntempl != (ConstructTpl*)0)
+                if (ntempl != (ConstructTpl)null)
                     ntempl.changeHandleIndex(handmap);
             }
 
@@ -117,10 +117,10 @@ namespace Sla.SLEIGH
 
         public Constructor()
         {
-            pattern = (TokenPattern*)0;
+            pattern = (TokenPattern)null;
             parent = (SubtableSymbol*)0;
             pateq = (PatternEquation*)0;
-            templ = (ConstructTpl*)0;
+            templ = (ConstructTpl)null;
             firstwhitespace = -1;
             flowthruindex = -1;
             inerror = false;
@@ -128,26 +128,26 @@ namespace Sla.SLEIGH
 
         public Constructor(SubtableSymbol p)
         {
-            pattern = (TokenPattern*)0;
+            pattern = (TokenPattern)null;
             parent = p;
             pateq = (PatternEquation*)0;
-            templ = (ConstructTpl*)0;
+            templ = (ConstructTpl)null;
             firstwhitespace = -1;
             inerror = false;
         }
 
         ~Constructor()
         {
-            if (pattern != (TokenPattern*)0)
+            if (pattern != (TokenPattern)null)
                 delete pattern;
             if (pateq != (PatternEquation*)0)
                 PatternEquation::release(pateq);
-            if (templ != (ConstructTpl*)0)
+            if (templ != (ConstructTpl)null)
                 delete templ;
             for (int i = 0; i < namedtempl.size(); ++i)
             {
                 ConstructTpl* ntpl = namedtempl[i];
-                if (ntpl != (ConstructTpl*)0)
+                if (ntpl != (ConstructTpl)null)
                     delete ntpl;
             }
             List<ContextChange*>::iterator iter;
@@ -157,7 +157,7 @@ namespace Sla.SLEIGH
 
         public TokenPattern buildPattern(TextWriter s)
         {
-            if (pattern != (TokenPattern*)0) return pattern; // Already built
+            if (pattern != (TokenPattern)null) return pattern; // Already built
 
             pattern = new TokenPattern();
             List<TokenPattern> oppattern;
@@ -168,7 +168,7 @@ namespace Sla.SLEIGH
                 OperandSymbol* sym = operands[i];
                 TripleSymbol* triple = sym.getDefiningSymbol();
                 PatternExpression* defexp = sym.getDefiningExpression();
-                if (triple != (TripleSymbol*)0)
+                if (triple != (TripleSymbol)null)
                 {
                     SubtableSymbol* subsym = dynamic_cast<SubtableSymbol*>(triple);
                     if (subsym != (SubtableSymbol*)0)
@@ -177,23 +177,23 @@ namespace Sla.SLEIGH
                         { // Detected recursion
                             if (recursion)
                             {
-                                throw SleighError("Illegal recursion");
+                                throw new SleighError("Illegal recursion");
                             }
                             // We should also check that recursion is rightmost extreme
                             recursion = true;
                             oppattern.emplace_back();
                         }
                         else
-                            oppattern.push_back(*subsym.buildPattern(s));
+                            oppattern.Add(*subsym.buildPattern(s));
                     }
                     else
-                        oppattern.push_back(triple.getPatternExpression().genMinPattern(oppattern));
+                        oppattern.Add(triple.getPatternExpression().genMinPattern(oppattern));
                 }
-                else if (defexp != (PatternExpression*)0)
-                    oppattern.push_back(defexp.genMinPattern(oppattern));
+                else if (defexp != (PatternExpression)null)
+                    oppattern.Add(defexp.genMinPattern(oppattern));
                 else
                 {
-                    throw SleighError(sym.getName() + ": operand is undefined");
+                    throw new SleighError(sym.getName() + ": operand is undefined");
                 }
                 TokenPattern & sympat(oppattern.back());
                 sym.minimumlength = sympat.getMinimumLength();
@@ -202,13 +202,13 @@ namespace Sla.SLEIGH
             }
 
             if (pateq == (PatternEquation*)0)
-                throw SleighError("Missing equation");
+                throw new SleighError("Missing equation");
 
             // Build the entire pattern
             pateq.genPattern(oppattern);
             *pattern = pateq.getTokenPattern();
             if (pattern.alwaysFalse())
-                throw SleighError("Impossible pattern");
+                throw new SleighError("Impossible pattern");
             if (recursion)
                 pattern.setRightEllipsis(true);
             minimumlength = pattern.getMinimumLength(); // Get length of the pattern in bytes
@@ -216,30 +216,31 @@ namespace Sla.SLEIGH
             // Resolve offsets of the operands
             OperandResolve resolve(operands);
             if (!pateq.resolveOperandLeft(resolve))
-                throw SleighError("Unable to resolve operand offsets");
+                throw new SleighError("Unable to resolve operand offsets");
 
             for (int i = 0; i < operands.size(); ++i)
             { // Unravel relative offsets to absolute (if possible)
-                int base,offset;
-                OperandSymbol* sym = operands[i];
+                int @base;
+                int offset;
+                OperandSymbol sym = operands[i];
                 if (sym.isOffsetIrrelevant())
                 {
                     sym.offsetbase = -1;
                     sym.reloffset = 0;
                     continue;
                 }
-                base = sym.offsetbase;
+                @base = sym.offsetbase;
                 offset = sym.reloffset;
-                while (base >= 0)
+                while (@base >= 0)
                 {
-                    sym = operands[base];
+                    sym = operands[@base];
                     if (sym.isVariableLength()) break; // Cannot resolve to absolute
-                    base = sym.offsetbase;
+                    @base = sym.offsetbase;
                     offset += sym.getMinimumLength();
                     offset += sym.reloffset;
-                    if (base < 0)
+                    if (@base < 0)
                     {
-                        operands[i].offsetbase = base;
+                        operands[i].offsetbase = @base;
                         operands[i].reloffset = offset;
                     }
                 }
@@ -292,13 +293,13 @@ namespace Sla.SLEIGH
         {
             string operstring = "\n ";  // Indicater character for operand
             operstring[1] = ('A' + operands.size()); // Encode index of operand
-            operands.push_back(sym);
-            printpiece.push_back(operstring); // Placeholder for operand's string
+            operands.Add(sym);
+            printpiece.Add(operstring); // Placeholder for operand's string
         }
 
         public void addInvisibleOperand(OperandSymbol sym)
         {
-            operands.push_back(sym);
+            operands.Add(sym);
         }
 
         public void addSyntax(string syn)
@@ -322,13 +323,13 @@ namespace Sla.SLEIGH
             if ((firstwhitespace == -1) && (syntrim == " "))
                 firstwhitespace = printpiece.size();
             if (printpiece.empty())
-                printpiece.push_back(syntrim);
+                printpiece.Add(syntrim);
             else if (printpiece.back() == " " && syntrim == " ")
             {
                 // Don't add more whitespace
             }
             else if (printpiece.back()[0] == '\n' || printpiece.back() == " " || syntrim == " ")
-                printpiece.push_back(syntrim);
+                printpiece.Add(syntrim);
             else
             {
                 printpiece.back() += syntrim;
@@ -348,7 +349,7 @@ namespace Sla.SLEIGH
         public void setNamedSection(ConstructTpl tpl, int id)
         {               // Add a named section to the constructor
             while (namedtempl.size() <= id)
-                namedtempl.push_back((ConstructTpl*)0);
+                namedtempl.Add((ConstructTpl)null);
             namedtempl[id] = tpl;
         }
 
@@ -366,7 +367,7 @@ namespace Sla.SLEIGH
         {
             if (secnum < namedtempl.size())
                 return namedtempl[secnum];
-            return (ConstructTpl*)0;
+            return (ConstructTpl)null;
         }
 
         public int getNumSections() => namedtempl.size();
@@ -468,7 +469,7 @@ namespace Sla.SLEIGH
             for (int i = 0; i < operands.size(); ++i)
             {
                 TripleSymbol* sym = operands[i].getDefiningSymbol();
-                if ((sym != (TripleSymbol*)0) && (sym.getType() == SleighSymbol::subtable_symbol))
+                if ((sym != (TripleSymbol)null) && (sym.getType() == SleighSymbol::subtable_symbol))
                     check[i] = 0;
                 else
                     check[i] = 2;
@@ -477,19 +478,19 @@ namespace Sla.SLEIGH
 
         public void collectLocalExports(List<ulong> results)
         {
-            if (templ == (ConstructTpl*)0) return;
+            if (templ == (ConstructTpl)null) return;
             HandleTpl* handle = templ.getResult();
-            if (handle == (HandleTpl*)0) return;
+            if (handle == (HandleTpl)null) return;
             if (handle.getSpace().isConstSpace()) return;  // Even if the value is dynamic, the pointed to value won't get used
             if (handle.getPtrSpace().getType() != ConstTpl::real)
             {
                 if (handle.getTempSpace().isUniqueSpace())
-                    results.push_back(handle.getTempOffset().getReal());
+                    results.Add(handle.getTempOffset().getReal());
                 return;
             }
             if (handle.getSpace().isUniqueSpace())
             {
-                results.push_back(handle.getPtrOffset().getReal());
+                results.Add(handle.getPtrOffset().getReal());
                 return;
             }
             if (handle.getSpace().getType() == ConstTpl::handle)
@@ -542,11 +543,11 @@ namespace Sla.SLEIGH
             }
             for (int i = 0; i < context.size(); ++i)
                 context[i].saveXml(s);
-            if (templ != (ConstructTpl*)0)
+            if (templ != (ConstructTpl)null)
                 templ.saveXml(s, -1);
             for (int i = 0; i < namedtempl.size(); ++i)
             {
-                if (namedtempl[i] == (ConstructTpl*)0) // Some sections may be NULL
+                if (namedtempl[i] == (ConstructTpl)null) // Some sections may be NULL
                     continue;
                 namedtempl[i].saveXml(s, i);
             }
@@ -557,18 +558,18 @@ namespace Sla.SLEIGH
         {
             uint id;
             {
-                istringstream s(el.getAttributeValue("parent"));
+                istringstream s = new istringstream(el.getAttributeValue("parent"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> id;
-                parent = (SubtableSymbol*)trans.findSymbol(id);
+                parent = (SubtableSymbol)trans.findSymbol(id);
             }
             {
-                istringstream s(el.getAttributeValue("first"));
+                istringstream s = new istringstream(el.getAttributeValue("first"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> firstwhitespace;
             }
             {
-                istringstream s(el.getAttributeValue("length"));
+                istringstream s = new istringstream(el.getAttributeValue("length"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> minimumlength;
             }
@@ -587,59 +588,59 @@ namespace Sla.SLEIGH
                 {
                     uint id;
                     {
-                        istringstream s((* iter).getAttributeValue("id"));
+                        istringstream s = new istringstream((* iter).getAttributeValue("id"));
                         s.unsetf(ios::dec | ios::hex | ios::oct);
                         s >> id;
                     }
-                    OperandSymbol* sym = (OperandSymbol*)trans.findSymbol(id);
-                    operands.push_back(sym);
+                    OperandSymbol sym = (OperandSymbol)trans.findSymbol(id);
+                    operands.Add(sym);
                 }
                 else if ((*iter).getName() == "print")
-                    printpiece.push_back((*iter).getAttributeValue("piece"));
+                    printpiece.Add((*iter).getAttributeValue("piece"));
                 else if ((*iter).getName() == "opprint")
                 {
                     int index;
-                    istringstream s((* iter).getAttributeValue("id"));
+                    istringstream s = new istringstream((* iter).getAttributeValue("id"));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> index;
                     string operstring = "\n ";
                     operstring[1] = ('A' + index);
-                    printpiece.push_back(operstring);
+                    printpiece.Add(operstring);
                 }
                 else if ((*iter).getName() == "context_op")
                 {
-                    ContextOp* c_op = new ContextOp();
+                    ContextOp c_op = new ContextOp();
                     c_op.restoreXml(*iter, trans);
-                    context.push_back(c_op);
+                    context.Add(c_op);
                 }
                 else if ((*iter).getName() == "commit")
                 {
-                    ContextCommit* c_op = new ContextCommit();
+                    ContextCommit c_op = new ContextCommit();
                     c_op.restoreXml(*iter, trans);
-                    context.push_back(c_op);
+                    context.Add(c_op);
                 }
                 else
                 {
-                    ConstructTpl* cur = new ConstructTpl();
+                    ConstructTpl cur = new ConstructTpl();
                     int sectionid = cur.restoreXml(*iter, trans);
                     if (sectionid < 0)
                     {
-                        if (templ != (ConstructTpl*)0)
+                        if (templ != (ConstructTpl)null)
                             throw new LowlevelError("Duplicate main section");
                         templ = cur;
                     }
                     else
                     {
                         while (namedtempl.size() <= sectionid)
-                            namedtempl.push_back((ConstructTpl*)0);
-                        if (namedtempl[sectionid] != (ConstructTpl*)0)
+                            namedtempl.Add((ConstructTpl)null);
+                        if (namedtempl[sectionid] != (ConstructTpl)null)
                             throw new LowlevelError("Duplicate named section");
                         namedtempl[sectionid] = cur;
                     }
                 }
                 ++iter;
             }
-            pattern = (TokenPattern*)0;
+            pattern = (TokenPattern)null;
             if ((printpiece.size() == 1) && (printpiece[0][0] == '\n'))
                 flowthruindex = printpiece[0][1] - 'A';
             else

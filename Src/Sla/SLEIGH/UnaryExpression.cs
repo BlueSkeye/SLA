@@ -17,13 +17,13 @@ namespace Sla.SLEIGH
         
         ~UnaryExpression()
         {               // Delete only non-pattern values
-            if (unary != (PatternExpression*)0)
+            if (unary != (PatternExpression)null)
                 PatternExpression::release(unary);
         }
 
         public UnaryExpression()
         {
-            unary = (PatternExpression*)0;
+            unary = (PatternExpression)null;
         }
 
         public UnaryExpression(PatternExpression u)

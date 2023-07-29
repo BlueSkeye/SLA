@@ -36,7 +36,7 @@ namespace Sla.DECCORE
         public override void printHeader(TextWriter s)
         {
             s.Write("Basic(copy) block ");
-            base.printHeader(s);
+            @base.printHeader(s);
         }
 
         public override void printTree(TextWriter s, int level)
@@ -61,7 +61,7 @@ namespace Sla.DECCORE
         public override bool negateCondition(bool toporbottom)
         {
             bool res = copy.negateCondition(true);
-            base.negateCondition(toporbottom);
+            @base.negateCondition(toporbottom);
             return res;
         }
 
@@ -71,7 +71,7 @@ namespace Sla.DECCORE
 
         public override void encodeHeader(Encoder encoder)
         {
-            base.encodeHeader(encoder);
+            @base.encodeHeader(encoder);
             int altindex = copy.getIndex();
             encoder.writeSignedInteger(AttributeId.ATTRIB_ALTINDEX, altindex);
         }

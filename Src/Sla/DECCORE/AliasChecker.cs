@@ -89,14 +89,14 @@ namespace Sla.DECCORE
             calculated = true;
             aliasBoundary = localExtreme;
             Varnode* spacebase = fd.findSpacebaseInput(space);
-            if (spacebase == (Varnode*)0) return; // No possible alias
+            if (spacebase == (Varnode)null) return; // No possible alias
 
             gatherAdditiveBase(spacebase, addBase);
             for (List<AddBase>::iterator iter = addBase.begin(); iter != addBase.end(); ++iter)
             {
                 ulong offset = gatherOffset((*iter).base);
                 offset = AddrSpace::addressToByte(offset, space.getWordSize()); // Convert to byte offset
-                alias.push_back(offset);
+                alias.Add(offset);
                 if (direction == 1)
                 {
                     if (offset < localBoundary) continue; // Parameter ref
@@ -114,8 +114,8 @@ namespace Sla.DECCORE
 
         public AliasChecker()
         {
-            fd = (Funcdata*)0;
-            space = (AddrSpace*)0;
+            fd = (Funcdata)null;
+            space = (AddrSpace)null;
             calculated = false;
         }
 
@@ -147,7 +147,7 @@ namespace Sla.DECCORE
         /// \return \b true if the Varnode might have a pointer alias
         public bool hasLocalAlias(Varnode vn)
         {
-            if (vn == (Varnode*)0) return false;
+            if (vn == (Varnode)null) return false;
             if (!calculated)
                 gatherInternal();
             if (vn.getSpace() != space) return false;
@@ -183,15 +183,18 @@ namespace Sla.DECCORE
         public static void gatherAdditiveBase(Varnode startvn, List<AddBase> addbase)
         {
             List<AddBase> vnqueue;        // varnodes involved in addition with original vn
-            Varnode* vn,*subvn,*indexvn,*othervn;
+            Varnode vn;
+            Varnode subvn;
+            Varnode indexvn;
+            Varnode othervn;
             list<PcodeOp*>::const_iterator iter;
-            PcodeOp* op;
+            PcodeOp op;
             bool nonadduse;
             int i = 0;
 
             vn = startvn;
             vn.setMark();
-            vnqueue.push_back(AddBase(vn, (Varnode*)0));
+            vnqueue.Add(AddBase(vn, (Varnode)null));
             while (i < vnqueue.size())
             {
                 vn = vnqueue[i].base;
@@ -208,7 +211,7 @@ namespace Sla.DECCORE
                             if (!subvn.isMark())
                             {
                                 subvn.setMark();
-                                vnqueue.push_back(AddBase(subvn, indexvn));
+                                vnqueue.Add(AddBase(subvn, indexvn));
                             }
                             break;
                         case CPUI_INT_SUB:
@@ -224,7 +227,7 @@ namespace Sla.DECCORE
                             if (!subvn.isMark())
                             {
                                 subvn.setMark();
-                                vnqueue.push_back(AddBase(subvn, indexvn));
+                                vnqueue.Add(AddBase(subvn, indexvn));
                             }
                             break;
                         case CPUI_INT_ADD:
@@ -241,7 +244,7 @@ namespace Sla.DECCORE
                             if (!subvn.isMark())
                             {
                                 subvn.setMark();
-                                vnqueue.push_back(AddBase(subvn, indexvn));
+                                vnqueue.Add(AddBase(subvn, indexvn));
                             }
                             break;
                         default:
@@ -249,10 +252,10 @@ namespace Sla.DECCORE
                     }
                 }
                 if (nonadduse)
-                    addbase.push_back(AddBase(vn, indexvn));
+                    addbase.Add(AddBase(vn, indexvn));
             }
             for (i = 0; i < vnqueue.size(); ++i)
-                vnqueue[i].base.clearMark();
+                vnqueue[i].@base.clearMark();
         }
 
         /// \brief If the given Varnode is a sum result, return the constant portion of this sum.
@@ -269,7 +272,7 @@ namespace Sla.DECCORE
 
             if (vn.isConstant()) return vn.getOffset();
             PcodeOp* def = vn.getDef();
-            if (def == (PcodeOp*)0) return 0;
+            if (def == (PcodeOp)null) return 0;
             switch (def.code())
             {
                 case CPUI_COPY:
@@ -299,7 +302,7 @@ namespace Sla.DECCORE
                 default:
                     retval = 0;
             }
-            return retval & calc_mask(vn.getSize());
+            return retval & Globals.calc_mask(vn.getSize());
         }
     }
 }

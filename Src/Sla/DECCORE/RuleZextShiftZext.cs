@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Simplify multiple INT_ZEXT operations: `zext( zext(V) << c )  => zext(V) << c`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_ZEXT);
+            oplist.Add(CPUI_INT_ZEXT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

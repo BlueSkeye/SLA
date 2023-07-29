@@ -31,7 +31,7 @@ namespace Sla.DECCORE
             if (iter != vn.endDescend())
             {
                 op = *iter++;
-                if (op.getOut() != (Varnode*)0)
+                if (op.getOut() != (Varnode)null)
                     slot = -1;
                 else
                     slot = 0;
@@ -58,7 +58,7 @@ namespace Sla.DECCORE
             if (iter != vn.endDescend())
             {
                 op = *iter++;
-                if (op.getOut() != (Varnode*)0)
+                if (op.getOut() != (Varnode)null)
                     slot = -1;
                 else
                     slot = 0;
@@ -66,7 +66,7 @@ namespace Sla.DECCORE
                 return;
             }
             if (inslot == -1)
-                op = (PcodeOp*)0;
+                op = (PcodeOp)null;
             else
                 op = vn.getDef();
             inslot = -1;

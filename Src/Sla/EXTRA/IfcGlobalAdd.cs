@@ -18,7 +18,7 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("No image loaded");
+                throw new IfaceExecutionError("No image loaded");
 
             int size;
             Address addr = parse_machaddr(s, size, *dcp.conf.types);

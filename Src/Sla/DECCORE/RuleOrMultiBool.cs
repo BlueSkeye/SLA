@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         ///  - `(b1 << 6) | (b2 << 2)  != 0  =>  b1 || b2
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_OR);
+            oplist.Add(CPUI_INT_OR);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -51,14 +51,14 @@ namespace Sla.DECCORE
                 int pos1 = mostsigbit_set(outVn.getNZMask());
                 int constRes0, constRes1;
                 Varnode* b1 = RulePopcountBoolXor::getBooleanResult(outVn, pos0, constRes0);
-                if (b1 == (Varnode*)0 && constRes0 != 1) continue;
+                if (b1 == (Varnode)null && constRes0 != 1) continue;
                 Varnode* b2 = RulePopcountBoolXor::getBooleanResult(outVn, pos1, constRes1);
-                if (b2 == (Varnode*)0 && constRes1 != 1) continue;
-                if (b1 == (Varnode*)0 && b2 == (Varnode*)0) continue;
+                if (b2 == (Varnode)null && constRes1 != 1) continue;
+                if (b1 == (Varnode)null && b2 == (Varnode)null) continue;
 
-                if (b1 == (Varnode*)0)
+                if (b1 == (Varnode)null)
                     b1 = data.newConstant(1, 1);
-                if (b2 == (Varnode*)0)
+                if (b2 == (Varnode)null)
                     b2 = data.newConstant(1, 1);
                 if (opc == CPUI_INT_EQUAL)
                 {

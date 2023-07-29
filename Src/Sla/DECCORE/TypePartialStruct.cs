@@ -60,7 +60,7 @@ namespace Sla.DECCORE
             do
             {
                 ct = ct.getSubType(off, newoff);
-                if (ct == (Datatype*)0)
+                if (ct == (Datatype)null)
                     break;
                 off = *newoff;
                 // Component can extend beyond range of this partial, in which case we go down another level

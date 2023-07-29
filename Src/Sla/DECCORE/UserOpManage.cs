@@ -51,7 +51,7 @@ namespace Sla.DECCORE
             }
 
             while (useroplist.size() <= ind)
-                useroplist.push_back((UserPcodeOp*)0);
+                useroplist.Add((UserPcodeOp*)0);
             if (useroplist[ind] != (UserPcodeOp*)0)
             {
                 if (useroplist[ind].getName() != op.getName())
@@ -68,7 +68,7 @@ namespace Sla.DECCORE
                 int index = s_op.getSpace().getIndex();
 
                 while (segmentop.size() <= index)
-                    segmentop.push_back((SegmentOp*)0);
+                    segmentop.Add((SegmentOp*)0);
 
                 if (segmentop[index] != (SegmentOp*)0)
                     throw new LowlevelError("Multiple segmentops defined for same space");

@@ -87,8 +87,8 @@ namespace Sla.DECCORE
             for (int i = firstLane; i < lastLane; ++i)
             {
                 int sz = laneSize[i];
-                lanePosition.push_back(newPosition);
-                newLaneSize.push_back(sz);
+                lanePosition.Add(newPosition);
+                newLaneSize.Add(sz);
                 newPosition += sz;
             }
             wholeSize = size;

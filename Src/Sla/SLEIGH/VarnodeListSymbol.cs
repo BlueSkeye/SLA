@@ -34,7 +34,7 @@ namespace Sla.SLEIGH
             : base(nm, pv)
         {
             for (int i = 0; i < vt.size(); ++i)
-                varnode_table.push_back((VarnodeSymbol*)vt[i]);
+                varnode_table.Add((VarnodeSymbol*)vt[i]);
             checkTableFill();
         }
 
@@ -52,7 +52,7 @@ namespace Sla.SLEIGH
                     throw BadDataError(s.str());
                 }
             }
-            return (Constructor*)0;
+            return (Constructor)null;
         }
 
         public override void getFixedHandle(FixedHandle hand, ParserWalker walker)
@@ -61,7 +61,7 @@ namespace Sla.SLEIGH
             // The resolve routine has checked that -ind- must be a valid index
             VarnodeData fix = varnode_table[ind].getFixedVarnode();
             hand.space = fix.space;
-            hand.offset_space = (AddrSpace*)0; // Not a dynamic value
+            hand.offset_space = (AddrSpace)null; // Not a dynamic value
             hand.offset_offset = fix.offset;
             hand.size = fix.size;
         }
@@ -74,14 +74,14 @@ namespace Sla.SLEIGH
                 if (vnsym != (VarnodeSymbol*)0)
                     return vnsym.getSize();
             }
-            throw SleighError("No register attached to: " + getName());
+            throw new SleighError("No register attached to: " + getName());
         }
 
         public override void print(TextWriter s, ParserWalker walker)
         {
             uint ind = (uint)patval.getValue(walker);
             if (ind >= varnode_table.size())
-                throw SleighError("Value out of range for varnode table");
+                throw new SleighError("Value out of range for varnode table");
             s << varnode_table[ind].getName();
         }
 
@@ -124,13 +124,13 @@ namespace Sla.SLEIGH
                 if (subel.getName() == "var")
                 {
                     uint id;
-                    istringstream s(subel.getAttributeValue("id"));
+                    istringstream s = new istringstream(subel.getAttributeValue("id"));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> id;
-                    varnode_table.push_back((VarnodeSymbol*)trans.findSymbol(id));
+                    varnode_table.Add((VarnodeSymbol*)trans.findSymbol(id));
                 }
                 else
-                    varnode_table.push_back((VarnodeSymbol*)0);
+                    varnode_table.Add((VarnodeSymbol*)0);
                 ++iter;
             }
             checkTableFill();

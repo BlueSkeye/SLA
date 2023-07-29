@@ -35,14 +35,14 @@ namespace Sla.SLEIGH
 
         public override PatternExpression getPatternExpression()
         {
-            throw SleighError("Cannot use symbol in pattern");
+            throw new SleighError("Cannot use symbol in pattern");
         }
 
         public override void getFixedHandle(ref FixedHandle hand, ParserWalker walker)
         {
             Address refAddr = walker.getRefAddr();
             hand.space = const_space;
-            hand.offset_space = (AddrSpace*)0;
+            hand.offset_space = (AddrSpace)null;
             hand.offset_offset = refAddr.getOffset();
             hand.size = refAddr.getAddrSize();
         }

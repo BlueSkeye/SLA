@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Simplify concatenation with zero:  `concat(V,0)  =>  zext(V) << c`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_PIECE);
+            oplist.Add(CPUI_PIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

@@ -43,9 +43,9 @@ namespace Sla.EXTRA
         public void restoreXml(Element el)
         {
             name = el.getAttributeValue("name");
-            istringstream s1(el.getAttributeValue("min"));
+            istringstream s1 = new istringstream(el.getAttributeValue("min"));
             s1 >> minimumMatch;
-            istringstream s2(el.getAttributeValue("max"));
+            istringstream s2 = new istringstream(el.getAttributeValue("max"));
             s2 >> maximumMatch;
             pattern = std::regex(el.getContent());
         }

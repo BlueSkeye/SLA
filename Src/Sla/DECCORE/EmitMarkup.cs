@@ -97,7 +97,7 @@ namespace Sla.DECCORE
         public override int beginReturnType(Varnode vn)
         {
             encoder.openElement(ELEM_RETURN_TYPE);
-            if (vn != (Varnode*)0)
+            if (vn != (Varnode)null)
                 encoder.writeUnsignedInteger(ATTRIB_VARREF, vn.getCreateIndex());
             return 0;
         }
@@ -122,7 +122,7 @@ namespace Sla.DECCORE
         public override int beginStatement(PcodeOp op)
         {
             encoder.openElement(ELEM_STATEMENT);
-            if (op != (PcodeOp*)0)
+            if (op != (PcodeOp)null)
                 encoder.writeUnsignedInteger(ATTRIB_OPREF, op.getTime());
             return 0;
         }
@@ -148,9 +148,9 @@ namespace Sla.DECCORE
             encoder.openElement(ELEM_VARIABLE);
             if (hl != no_color)
                 encoder.writeUnsignedInteger(ATTRIB_COLOR, hl);
-            if (vn != (Varnode*)0)
+            if (vn != (Varnode)null)
                 encoder.writeUnsignedInteger(ATTRIB_VARREF, vn.getCreateIndex());
-            if (op != (PcodeOp*)0)
+            if (op != (PcodeOp)null)
                 encoder.writeUnsignedInteger(ATTRIB_OPREF, op.getTime());
             encoder.writeString(ATTRIB_CONTENT, name);
             encoder.closeElement(ELEM_VARIABLE);
@@ -161,7 +161,7 @@ namespace Sla.DECCORE
             encoder.openElement(ELEM_OP);
             if (hl != no_color)
                 encoder.writeUnsignedInteger(ATTRIB_COLOR, hl);
-            if (op != (PcodeOp*)0)
+            if (op != (PcodeOp)null)
                 encoder.writeUnsignedInteger(ATTRIB_OPREF, op.getTime());
             encoder.writeString(ATTRIB_CONTENT, name);
             encoder.closeElement(ELEM_OP);
@@ -172,7 +172,7 @@ namespace Sla.DECCORE
             encoder.openElement(ELEM_FUNCNAME);
             if (hl != no_color)
                 encoder.writeUnsignedInteger(ATTRIB_COLOR, hl);
-            if (op != (PcodeOp*)0)
+            if (op != (PcodeOp)null)
                 encoder.writeUnsignedInteger(ATTRIB_OPREF, op.getTime());
             encoder.writeString(ATTRIB_CONTENT, name);
             encoder.closeElement(ELEM_FUNCNAME);
@@ -196,14 +196,14 @@ namespace Sla.DECCORE
             encoder.openElement(ELEM_FIELD);
             if (hl != no_color)
                 encoder.writeUnsignedInteger(ATTRIB_COLOR, hl);
-            if (ct != (Datatype*)0) {
+            if (ct != (Datatype)null) {
                 encoder.writeString(ATTRIB_NAME, ct.getName());
                 if (ct.getId() != 0)
                 {
                     encoder.writeUnsignedInteger(ATTRIB_ID, ct.getId());
                 }
                 encoder.writeSignedInteger(ATTRIB_OFF, o);
-                if (op != (PcodeOp*)0)
+                if (op != (PcodeOp)null)
                     encoder.writeUnsignedInteger(ATTRIB_OPREF, op.getTime());
             }
             encoder.writeString(ATTRIB_CONTENT, name);

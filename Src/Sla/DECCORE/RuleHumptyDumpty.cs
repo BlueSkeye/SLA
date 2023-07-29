@@ -29,15 +29,18 @@ namespace Sla.DECCORE
         ///  - `concat( sub(V,c), sub(V,d) )  => sub(V,d)`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_PIECE);
+            oplist.Add(CPUI_PIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
             ulong pos1, pos2;
             int size1, size2;
-            Varnode* vn1,*vn2,*root;
-            PcodeOp* sub1,*sub2;
+            Varnode vn1;
+            Varnode vn2;
+            Varnode root;
+            PcodeOp sub1;
+            PcodeOp sub2;
             // op is something "put together"
             vn1 = op.getIn(0);
             if (!vn1.isWritten()) return 0;

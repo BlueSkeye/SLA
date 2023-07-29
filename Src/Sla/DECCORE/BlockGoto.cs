@@ -54,7 +54,7 @@ namespace Sla.DECCORE
         public override void markUnstructured()
         {
             // Recurse
-            base.markUnstructured();
+            @base.markUnstructured();
             if (gototype == f_goto_goto) {
                 if (gotoPrints()) {
                     markCopyBlock(gototarget, f_unstructured_targ);
@@ -77,7 +77,7 @@ namespace Sla.DECCORE
         public override void printHeader(TextWriter s)
         {
             s.Write("Plain goto block ");
-            base.printHeader(s);
+            @base.printHeader(s);
         }
 
         public override void printRaw(TextWriter s) => getBlock(0).printRaw(s);
@@ -99,7 +99,7 @@ namespace Sla.DECCORE
 
         public override void encodeBody(Encoder encoder)
         {
-            base.encodeBody(encoder);
+            @base.encodeBody(encoder);
             encoder.openElement(ElementId.ELEM_TARGET);
             FlowBlock leaf = gototarget.getFrontLeaf();
             int depth = gototarget.calcDepth(leaf);

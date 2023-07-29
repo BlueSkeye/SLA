@@ -156,7 +156,7 @@ namespace Sla.CORE
 
         /// \brief Create a tracked register set that is valid over the given range
         /// This really should be an internal routine.  The created set is empty, old values are blown
-        /// away.  If old/default values are to be preserved, they must be copied back in.
+        /// away.  If old/default values are to be preserved, they must be copied back @in.
         /// \param addr1 is the starting address of the given range
         /// \param addr2 is (1 past) the ending address of the given range
         /// \return the empty set of tracked register values

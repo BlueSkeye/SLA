@@ -24,7 +24,7 @@ namespace Sla.DECCORE
         }
         public virtual void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_PIECE);
+            oplist.Add(CPUI_PIECE);
         }
 
         public virtual int applyOp(PcodeOp op, Funcdata data)
@@ -44,7 +44,7 @@ namespace Sla.DECCORE
 
             size = piece0.getSize() + piece1.getSize();
             PcodeOp* latest = noWriteConflict(loadlo, loadhi, spc, (List<PcodeOp*>*)0);
-            if (latest == (PcodeOp*)0) return 0; // There was a conflict
+            if (latest == (PcodeOp)null) return 0; // There was a conflict
 
             // Create new load op that combines the two smaller loads
             PcodeOp* newload = data.newOp(2, latest.getAddr());
@@ -75,7 +75,7 @@ namespace Sla.DECCORE
         /// combining isn't possible.  If the LOADs and STOREs can be combined, the later of the two PcodeOps
         /// is returned, otherwise null is returned.
         ///
-        /// In the case of STORE ops, an extra container for INDIRECT PcodeOps is passed in.  INDIRECTs that
+        /// In the case of STORE ops, an extra container for INDIRECT PcodeOps is passed @in.  INDIRECTs that
         /// are caused by the STORE ops themselves are collected in the container.
         /// \param op1 is a given LOAD or STORE
         /// \param op2 is the other given LOAD or STORE
@@ -87,7 +87,7 @@ namespace Sla.DECCORE
             BlockBasic bb = op1.getParent();
 
             // Force the two ops to be in the same basic block
-            if (bb != op2.getParent()) return (PcodeOp*)0;
+            if (bb != op2.getParent()) return (PcodeOp)null;
             if (op2.getSeqNum().getOrder() < op1.getSeqNum().getOrder())
             {
                 PcodeOp* tmp = op2;
@@ -99,7 +99,7 @@ namespace Sla.DECCORE
             {
                 // Extend the range of PcodeOps to include any CPUI_INDIRECTs associated with the initial STORE
                 PcodeOp* tmpOp = startop.previousOp();
-                while (tmpOp != (PcodeOp*)0 && tmpOp.code() == CPUI_INDIRECT)
+                while (tmpOp != (PcodeOp)null && tmpOp.code() == CPUI_INDIRECT)
                 {
                     startop = tmpOp;
                     tmpOp = tmpOp.previousOp();
@@ -119,19 +119,19 @@ namespace Sla.DECCORE
                 {
                     case CPUI_STORE:
                         if (curop.getIn(0).getSpaceFromConst() == spc)
-                            return (PcodeOp*)0; // Don't go any further trying to resolve alias
+                            return (PcodeOp)null; // Don't go any further trying to resolve alias
                         break;
                     case CPUI_INDIRECT:
                         affector = PcodeOp::getOpFromConst(curop.getIn(1).getAddr());
                         if (affector == op1 || affector == op2)
                         {
                             if (indirects != (List<PcodeOp*>*)0)
-                                indirects.push_back(curop);
+                                indirects.Add(curop);
                         }
                         else
                         {
                             if (curop.getOut().getSpace() == spc)
-                                return (PcodeOp*)0;
+                                return (PcodeOp)null;
                         }
                         break;
                     case CPUI_CALL:
@@ -141,13 +141,13 @@ namespace Sla.DECCORE
                     case CPUI_BRANCH:
                     case CPUI_CBRANCH:
                     case CPUI_BRANCHIND:
-                        return (PcodeOp*)0;
+                        return (PcodeOp)null;
                     default:
                         outvn = curop.getOut();
-                        if (outvn != (Varnode*)0)
+                        if (outvn != (Varnode)null)
                         {
                             if (outvn.getSpace() == spc)
-                                return (PcodeOp*)0;
+                                return (PcodeOp)null;
                         }
                         break;
                 }

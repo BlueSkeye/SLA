@@ -26,8 +26,8 @@ namespace Sla.EXTRA
             s >> ws;
             if (s.eof())
             {
-                if (dcp.fd == (Funcdata*)0)
-                    throw IfaceExecutionError("No function selected");
+                if (dcp.fd == (Funcdata)null)
+                    throw new IfaceExecutionError("No function selected");
                 *status.fileoptr << "Assembly listing for " << dcp.fd.getName() << endl;
                 addr = dcp.fd.getAddress();
                 size = dcp.fd.getSize();
@@ -41,7 +41,7 @@ namespace Sla.EXTRA
                 size = offset2.getOffset() - addr.getOffset();
                 glb = dcp.conf;
             }
-            IfaceAssemblyEmit assem(status.fileoptr,10);
+            IfaceAssemblyEmit assem = new IfaceAssemblyEmit(status.fileoptr,10);
             while (size > 0)
             {
                 int sz;

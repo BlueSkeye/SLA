@@ -284,7 +284,7 @@ namespace Sla.DECCORE
             }
             else
             {
-                Address usepoint((AddrSpace*)0,0);
+                Address usepoint = new Address((AddrSpace)null,0);
                 if (!entry.getUseLimit().empty())
                 {
                     Range range = entry.getUseLimit().getFirstRange();
@@ -339,7 +339,7 @@ namespace Sla.DECCORE
         {
             if (!fd.hasTypeRecoveryStarted()) return;
             Varnode* spVn = fd.findSpacebaseInput(space);
-            if (spVn == (Varnode*)0) return;
+            if (spVn == (Varnode)null) return;
             list<PcodeOp*>::const_iterator iter;
             List<PcodeOp*> refOps;
             for (iter = spVn.beginDescend(); iter != spVn.endDescend(); ++iter)
@@ -349,7 +349,7 @@ namespace Sla.DECCORE
                 OpCode opc = op.code();
                 if (opc == CPUI_INT_ADD || opc == CPUI_PTRSUB || opc == CPUI_PTRADD)
                     continue;
-                refOps.push_back(op);
+                refOps.Add(op);
             }
             for (int i = 0; i < refOps.size(); ++i)
             {
@@ -485,7 +485,7 @@ namespace Sla.DECCORE
                     if (stackGrowsNegative)
                         start = -start;
                     ostringstream s;
-                    if (ct != (Datatype*)0)
+                    if (ct != (Datatype)null)
                         ct.printNameBase(s);
                     string spacename = addr.getSpace().getName();
                     spacename[0] = toupper(spacename[0]);
@@ -553,7 +553,7 @@ namespace Sla.DECCORE
         public void restructureVarnode(bool aliasyes)
         {
             clearUnlockedCategory(-1);  // Clear out any unlocked entries
-            MapState state(space, getRangeTree(), fd.getFuncProto().getParamRange(),
+            MapState state = new MapState(space, getRangeTree(), fd.getFuncProto().getParamRange(),
                     glb.types.getBase(1,TYPE_UNKNOWN)); // Organize list of ranges to insert
 
 #if OPACTION_DEBUG
@@ -586,7 +586,7 @@ namespace Sla.DECCORE
         public void restructureHigh()
         {               // Define stack mapping based on highs
             clearUnlockedCategory(-1);  // Clear out any unlocked entries
-            MapState state(space, getRangeTree(), fd.getFuncProto().getParamRange(),
+            MapState state = new MapState(space, getRangeTree(), fd.getFuncProto().getParamRange(),
                     glb.types.getBase(1,TYPE_UNKNOWN)); // Organize list of ranges to insert
 
 #if OPACTION_DEBUG
@@ -670,7 +670,7 @@ namespace Sla.DECCORE
                 Address usepoint = (*iter).getUseAddr();
                 int size = (*iter).getSize();
                 Symbol* sym;
-                Varnode* vn = (Varnode*)0;
+                Varnode* vn = (Varnode)null;
                 if (usepoint.isInvalid())
                 {
                     SymbolEntry* entry = findOverlap(addr, size);   // Recover any Symbol regardless of usepoint
@@ -688,7 +688,7 @@ namespace Sla.DECCORE
                         vn = fd.findVarnodeInput(size, addr);
                     else
                         vn = fd.findVarnodeWritten(size, addr, usepoint);
-                    if (vn == (Varnode*)0) continue;
+                    if (vn == (Varnode)null) continue;
                     sym = vn.getHigh().getSymbol();
                     if (sym == (Symbol*)0) continue;
                     if ((sym.getFlags() & Varnode::addrtied) != 0)
@@ -701,7 +701,7 @@ namespace Sla.DECCORE
                 renameSymbol(sym, makeNameUnique((*iter).getName()));
                 setSymbolId(sym, (*iter).getSymbolId());
                 setAttribute(sym, Varnode::namelock);
-                if (vn != (Varnode*)0)
+                if (vn != (Varnode)null)
                 {
                     fd.remapVarnode(vn, sym, usepoint);
                 }
@@ -716,7 +716,7 @@ namespace Sla.DECCORE
                 dhash.clear();
                 DynamicRecommend dynEntry = *dyniter;
                 Varnode* vn = dhash.findVarnode(fd, dynEntry.getAddress(), dynEntry.getHash());
-                if (vn == (Varnode*)0) continue;
+                if (vn == (Varnode)null) continue;
                 if (vn.isAnnotation()) continue;
                 Symbol* sym = vn.getHigh().getSymbol();
                 if (sym == (Symbol*)0) continue;
@@ -739,7 +739,7 @@ namespace Sla.DECCORE
             {
                 Datatype* dt = (*iter).getType();
                 Varnode* vn = fd.findVarnodeInput(dt.getSize(), (*iter).getAddress());
-                if (vn != (Varnode*)0)
+                if (vn != (Varnode)null)
                     vn.updateType(dt, true, false);
             }
         }
@@ -754,7 +754,7 @@ namespace Sla.DECCORE
         /// \param dt is the given data-type
         public void addTypeRecommendation(Address addr, Datatype dt)
         {
-            typeRecommend.push_back(TypeRecommend(addr, dt));
+            typeRecommend.Add(TypeRecommend(addr, dt));
         }
     }
 }

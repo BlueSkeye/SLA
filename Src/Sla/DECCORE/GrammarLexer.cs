@@ -354,7 +354,7 @@ namespace Sla.DECCORE
             int filenum = filenamemap.size();
             filenamemap[filenum] = filename;
             streammap[filenum] = i;
-            filestack.push_back(filenum);
+            filestack.Add(filenum);
             @in = i;
             endoffile = false;
         }
@@ -392,8 +392,8 @@ namespace Sla.DECCORE
                         tok = GrammarToken::badtoken;
                         break;
                     }
-      in.get(nextchar);
-                    if (!(*in)) {
+                    @@in.get(nextchar);
+                    if (!(*@in)) {
                         endoffile = true;
                         break;
                     }

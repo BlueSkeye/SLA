@@ -23,7 +23,7 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            if (op.getOut() != (Varnode*)0)
+            if (op.getOut() != (Varnode)null)
             {
                 Varnode::printRaw(s, op.getOut());
                 s << " = ";
@@ -75,7 +75,7 @@ namespace Sla.DECCORE
                 if (entry != (SymbolEntry*)0)
                 {
                     Datatype* res = entry.getSizedType(addr, size);
-                    if (res != (Datatype*)0)
+                    if (res != (Datatype)null)
                         return res;
                 }
             }
@@ -97,7 +97,7 @@ namespace Sla.DECCORE
                 if (entry != (SymbolEntry*)0)
                 {
                     Datatype* res = entry.getSizedType(addr, size);
-                    if (res != (Datatype*)0)
+                    if (res != (Datatype)null)
                         return res;
                 }
             }

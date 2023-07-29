@@ -204,7 +204,7 @@ namespace Sla.DECCORE
         public virtual Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
             Varnode vn = op.getIn(slot);
-            if (vn.isAnnotation()) return (Datatype*)0;
+            if (vn.isAnnotation()) return (Datatype)null;
             Datatype* reqtype = op.inputTypeLocal(slot);
             Datatype* curtype = vn.getHighTypeReadFacing(op);
             return castStrategy.castStandard(reqtype, curtype, false, true);
@@ -226,7 +226,7 @@ namespace Sla.DECCORE
         public virtual Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
                 int inslot, int outslot)
         {
-            return (Datatype*)0;        // Don't propagate by default
+            return (Datatype)null;        // Don't propagate by default
         }
 
         /// \brief Push the specific PcodeOp to the emitter's RPN stack

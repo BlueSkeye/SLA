@@ -14,10 +14,10 @@ namespace Sla.EXTRA
   string filename;
 
   if (dcp.conf != (Architecture *)0)
-    throw IfaceExecutionError("Experimental rules must be registered before loading architecture");
+    throw new IfaceExecutionError("Experimental rules must be registered before loading architecture");
   s >> filename;
   if (filename.size() == 0)
-    throw IfaceParseError("Missing name of file containing experimental rules");
+    throw new IfaceParseError("Missing name of file containing experimental rules");
   dcp.experimental_file = filename;
   *status.optr << "Successfully registered experimental file " << filename << endl;
 }

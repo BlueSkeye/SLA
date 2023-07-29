@@ -24,24 +24,24 @@ namespace Sla.EXTRA
             int size;
             uint uq;
 
-            if (dcp.fd == (Funcdata*)0)
-                throw IfaceExecutionError("No function selected");
+            if (dcp.fd == (Funcdata)null)
+                throw new IfaceExecutionError("No function selected");
 
             Address pc;
-            Address loc(parse_varnode(s, size, pc, uq,* dcp.conf.types)); // Get specified varnode
+            Address loc = new Address(parse_varnode(s, size, pc, uq,* dcp.conf.types)); // Get specified varnode
 
             s >> ws >> token;       // Get the new name of the varnode
             if (token.size() == 0)
-                throw IfaceParseError("Must specify name");
+                throw new IfaceParseError("Must specify name");
 
-            Datatype* ct = dcp.conf.types.getBase(size, TYPE_UNKNOWN);
+            Datatype ct = dcp.conf.types.getBase(size, TYPE_UNKNOWN);
 
             dcp.conf.clearAnalysis(dcp.fd); // Make sure varnodes are cleared
 
-            Scope* scope = dcp.fd.getScopeLocal().discoverScope(loc, size, pc);
-            if (scope == (Scope*)0) // Variable does not have natural scope
+            Scope scope = dcp.fd.getScopeLocal().discoverScope(loc, size, pc);
+            if (scope == (Scope)null) // Variable does not have natural scope
                 scope = dcp.fd.getScopeLocal();   // force it to be in function scope
-            Symbol* sym = scope.addSymbol(token, ct, loc, pc).getSymbol();
+            Symbol sym = scope.addSymbol(token, ct, loc, pc).getSymbol();
             scope.setAttribute(sym, Varnode::namelock);
 
             *status.fileoptr << "Successfully added " << token;

@@ -29,10 +29,10 @@ namespace Sla.DECCORE
         /// `( V + 0xf000 ) << 4   =>    V << 4`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_LEFT);
-            oplist.push_back(CPUI_INT_RIGHT);
-            oplist.push_back(CPUI_SUBPIECE);
-            oplist.push_back(CPUI_INT_MULT);
+            oplist.Add(CPUI_INT_LEFT);
+            oplist.Add(CPUI_INT_RIGHT);
+            oplist.Add(CPUI_SUBPIECE);
+            oplist.Add(CPUI_INT_MULT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -88,7 +88,7 @@ namespace Sla.DECCORE
             for (i = 0; i < bitop.numInput(); ++i)
             {
                 ulong nzm = bitop.getIn(i).getNZMask();
-                ulong mask = calc_mask(op.getOut().getSize());
+                ulong mask = Globals.calc_mask(op.getOut().getSize());
                 if (leftshift)
                     nzm = pcode_left(nzm, sa);
                 else

@@ -53,14 +53,14 @@ namespace Sla.DECCORE
         /// \brief Collect terms in a sum: `V * c + V * d   =>  V * (c + d)`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_ADD);
+            oplist.Add(CPUI_INT_ADD);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
             PcodeOp* nextop = op.getOut().loneDescend();
             // Do we have the root of an ADD tree
-            if ((nextop != (PcodeOp*)0) && (nextop.code() == CPUI_INT_ADD)) return 0;
+            if ((nextop != (PcodeOp)null) && (nextop.code() == CPUI_INT_ADD)) return 0;
 
             TermOrder termorder(op);
             termorder.collect();        // Collect additive terms in the expression
@@ -81,11 +81,11 @@ namespace Sla.DECCORE
                     vn2 = getMultCoeff(vn2, coef2);
                     if (vn1 == vn2)
                     {       // Terms that can be combined
-                        if (order[i - 1].getMultiplier() != (PcodeOp*)0)
+                        if (order[i - 1].getMultiplier() != (PcodeOp)null)
                             return data.distributeIntMultAdd(order[i - 1].getMultiplier()) ? 1 : 0;
-                        if (order[i].getMultiplier() != (PcodeOp*)0)
+                        if (order[i].getMultiplier() != (PcodeOp)null)
                             return data.distributeIntMultAdd(order[i].getMultiplier()) ? 1 : 0;
-                        coef1 = (coef1 + coef2) & calc_mask(vn1.getSize()); // The new coefficient
+                        coef1 = (coef1 + coef2) & Globals.calc_mask(vn1.getSize()); // The new coefficient
                         Varnode* newcoeff = data.newConstant(vn1.getSize(), coef1);
                         Varnode* zerocoeff = data.newConstant(vn1.getSize(), 0);
                         data.opSetInput(order[i - 1].getOp(), zerocoeff, order[i - 1].getSlot());
@@ -110,7 +110,7 @@ namespace Sla.DECCORE
             int lastconst = 0;
             for (int j = order.size() - 1; j >= i; --j)
             {
-                if (order[j].getMultiplier() != (PcodeOp*)0) continue;
+                if (order[j].getMultiplier() != (PcodeOp)null) continue;
                 vn1 = order[j].getVarnode();
                 ulong val = vn1.getOffset();
                 if (val != 0)
@@ -122,10 +122,10 @@ namespace Sla.DECCORE
             }
             if (nonzerocount <= 1) return 0; // Must sum at least two things
             vn1 = order[lastconst].getVarnode();
-            coef1 &= calc_mask(vn1.getSize());
+            coef1 &= Globals.calc_mask(vn1.getSize());
             // Lump all the non-zero constants into one varnode
             for (int j = lastconst + 1; j < order.size(); ++j)
-                if (order[j].getMultiplier() == (PcodeOp*)0)
+                if (order[j].getMultiplier() == (PcodeOp)null)
                     data.opSetInput(order[j].getOp(), data.newConstant(vn1.getSize(), 0), order[j].getSlot());
             data.opSetInput(order[lastconst].getOp(), data.newConstant(vn1.getSize(), coef1), order[lastconst].getSlot());
 

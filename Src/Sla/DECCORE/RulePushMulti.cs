@@ -36,10 +36,10 @@ namespace Sla.DECCORE
                 if (op.getIn(1) != in2) continue;
                 return op;
             }
-            if (in1 == in2) return (PcodeOp*)0;
+            if (in1 == in2) return (PcodeOp)null;
             Varnode* buf1[2];
             Varnode* buf2[2];
-            if (0 != functionalEqualityLevel(in1, in2, buf1, buf2)) return (PcodeOp*)0;
+            if (0 != functionalEqualityLevel(in1, in2, buf1, buf2)) return (PcodeOp)null;
             PcodeOp* op1 = in1.getDef();   // in1 and in2 must be written to not be equal and pass functional equality test
             PcodeOp* op2 = in2.getDef();
             for (int i = 0; i < op1.numInput(); ++i)
@@ -50,7 +50,7 @@ namespace Sla.DECCORE
                     return cseFindInBlock(op1, vn, bb, earliest); // search for cse of op1 in bb
             }
 
-            return (PcodeOp*)0;
+            return (PcodeOp)null;
         }
 
         public RulePushMulti(string g)
@@ -72,7 +72,7 @@ namespace Sla.DECCORE
         /// and move the other into the merge block.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_MULTIEQUAL);
+            oplist.Add(CPUI_MULTIEQUAL);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -100,7 +100,7 @@ namespace Sla.DECCORE
             { // Special case of MERGE of 2 shadowing varnodes
                 if (res == 0) return 0;
                 PcodeOp* substitute = findSubstitute(buf1[0], buf2[0], bl, earliest);
-                if (substitute == (PcodeOp*)0) return 0;
+                if (substitute == (PcodeOp)null) return 0;
                 // Eliminate this op in favor of the shadowed merge
                 data.totalReplace(op.getOut(), substitute.getOut());
                 data.opDestroy(op);
@@ -118,7 +118,7 @@ namespace Sla.DECCORE
             {
                 int slot1 = op1.getSlot(buf1[0]);
                 PcodeOp* substitute = findSubstitute(buf1[0], buf2[0], bl, earliest);
-                if (substitute == (PcodeOp*)0)
+                if (substitute == (PcodeOp)null)
                 {
                     substitute = data.newOp(2, op.getAddr());
                     data.opSetOpcode(substitute, CPUI_MULTIEQUAL);

@@ -31,14 +31,17 @@ namespace Sla.DECCORE
         /// The rule works on both INT_EQUAL and INT_NOTEQUAL.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_EQUAL);
-            oplist.push_back(CPUI_INT_NOTEQUAL);
+            oplist.Add(CPUI_INT_EQUAL);
+            oplist.Add(CPUI_INT_NOTEQUAL);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* shiftvn,*constvn,*savn,*mainvn;
-            PcodeOp* shiftop;
+            Varnode shiftvn;
+            Varnode constvn;
+            Varnode savn;
+            Varnode mainvn;
+            PcodeOp shiftop;
             int sa;
             ulong constval, nzmask, newconst;
             OpCode opc;
@@ -102,7 +105,7 @@ namespace Sla.DECCORE
             {
                 newconst = constval >> sa;
                 if ((newconst << sa) != constval) return 0; // Information lost in constval
-                ulong tmp = (nzmask << sa) & calc_mask(shiftvn.getSize());
+                ulong tmp = (nzmask << sa) & Globals.calc_mask(shiftvn.getSize());
                 if ((tmp >> sa) != nzmask)
                 {   // Information is lost in main
                     // We replace the LEFT with and AND mask
@@ -125,7 +128,7 @@ namespace Sla.DECCORE
             else
             {
                 if (((nzmask >> sa) << sa) != nzmask) return 0; // Information is lost
-                newconst = (constval << sa) & calc_mask(shiftvn.getSize());
+                newconst = (constval << sa) & Globals.calc_mask(shiftvn.getSize());
                 if ((newconst >> sa) != constval) return 0; // Information is lost in constval
             }
             Varnode* newconstvn = data.newConstant(constvn.getSize(), newconst);

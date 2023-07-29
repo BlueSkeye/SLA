@@ -32,14 +32,14 @@ namespace Sla.DECCORE
         private bool hasCallPlaceholders;
 
         /// Return \b true if heritage is performed on this space
-        private bool isHeritaged() => (space != (AddrSpace*)0);
+        private bool isHeritaged() => (space != (AddrSpace)null);
 
         /// Reset the state
         private void reset()
         {
             // Leave any override intact: deadcodedelay = delay;
             deadremoved = 0;
-            if (space != (AddrSpace*)0)
+            if (space != (AddrSpace)null)
                 hasCallPlaceholders = (space.getType() == IPTR_SPACEBASE);
             warningissued = false;
             loadGuardSearch = false;
@@ -49,16 +49,16 @@ namespace Sla.DECCORE
         /// \param spc is the address space
         public HeritageInfo(AddrSpace spc)
         {
-            if (spc == (AddrSpace*)0)
+            if (spc == (AddrSpace)null)
             {
-                space = (AddrSpace*)0;
+                space = (AddrSpace)null;
                 delay = 0;
                 deadcodedelay = 0;
                 hasCallPlaceholders = false;
             }
             else if (!spc.isHeritaged())
             {
-                space = (AddrSpace*)0;
+                space = (AddrSpace)null;
                 delay = spc.getDelay();
                 deadcodedelay = spc.getDeadcodeDelay();
                 hasCallPlaceholders = false;

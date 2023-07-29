@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         /// Note: `sign = V s>> 63`  The INT_AND may be performed on a truncated result and then reextended.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_RIGHT);
+            oplist.Add(CPUI_INT_RIGHT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -36,7 +36,7 @@ namespace Sla.DECCORE
             if (!op.getIn(1).isConstant()) return 0;
             int shiftAmt = op.getIn(1).getOffset();
             Varnode* a = checkSignExtraction(op.getIn(0));
-            if (a == (Varnode*)0 || a.isFree()) return 0;
+            if (a == (Varnode)null || a.isFree()) return 0;
             Varnode* correctVn = op.getOut();
             int n = a.getSize() * 8 - shiftAmt;
             ulong mask = 1;
@@ -48,9 +48,9 @@ namespace Sla.DECCORE
                 if (multop.code() != CPUI_INT_MULT) continue;
                 Varnode* negone = multop.getIn(1);
                 if (!negone.isConstant()) continue;
-                if (negone.getOffset() != calc_mask(correctVn.getSize())) continue;
+                if (negone.getOffset() != Globals.calc_mask(correctVn.getSize())) continue;
                 PcodeOp* baseOp = multop.getOut().loneDescend();
-                if (baseOp == (PcodeOp*)0) continue;
+                if (baseOp == (PcodeOp)null) continue;
                 if (baseOp.code() != CPUI_INT_ADD) continue;
                 int slot = 1 - baseOp.getSlot(multop.getOut());
                 Varnode* andOut = baseOp.getIn(slot);
@@ -104,7 +104,7 @@ namespace Sla.DECCORE
                 if (shiftval != shiftAmt) continue;
                 // Verify that the input to INT_RIGHT is a sign extraction of "a"
                 extVn = checkSignExtraction(shiftOp.getIn(0));
-                if (extVn == (Varnode*)0) continue;
+                if (extVn == (Varnode)null) continue;
                 if (truncSize >= 0)
                 {
                     if (!extVn.isWritten()) continue;
@@ -133,15 +133,15 @@ namespace Sla.DECCORE
             if (!outVn.isWritten()) return 0;
             PcodeOp* signOp = outVn.getDef();
             if (signOp.code() != CPUI_INT_SRIGHT)
-                return (Varnode*)0;
+                return (Varnode)null;
             Varnode* constVn = signOp.getIn(1);
             if (!constVn.isConstant())
-                return (Varnode*)0;
+                return (Varnode)null;
             int val = constVn.getOffset();
             Varnode* resVn = signOp.getIn(0);
             int insize = resVn.getSize();
             if (val != insize * 8 - 1)
-                return (Varnode*)0;
+                return (Varnode)null;
             return resVn;
         }
     }

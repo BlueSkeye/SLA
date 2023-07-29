@@ -99,7 +99,7 @@
   BreakCallBack::pcodeCallback().  Here is an example of a breakpoint that implements a
   standard C library \e puts call an the x86 architecture.  When the breakpoint is invoked,
   a call to \e puts has just been made, so the stack pointer is pointing to the return address
-  and the next 4 bytes on the stack are a pointer to the string being passed in.
+  and the next 4 bytes on the stack are a pointer to the string being passed @in.
 
   \code
     class PutsCallBack : public BreakCallBack {

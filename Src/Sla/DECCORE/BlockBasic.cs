@@ -63,7 +63,7 @@ namespace Sla.DECCORE
             if (iter == op.end()) {
                 ordafter = ordbefore + 0x1000000;
                 if (ordafter <= ordbefore)
-                    ordafter = ~((uint)0);
+                    ordafter = uint.MaxValue;
             }
             else {
                 ordafter = (*iter).getSeqNum().getOrder();
@@ -201,7 +201,7 @@ namespace Sla.DECCORE
         public override void printHeader(TextWriter s)
         {
             s.Write("Basic Block ");
-            base.printHeader(s);
+            @base.printHeader(s);
         }
 
         public override void printRaw(TextWriter s)
@@ -233,7 +233,7 @@ namespace Sla.DECCORE
             // Flip whether fall-thru block is true/false
             lastop.flipFlag(PcodeOp.fallthru_true);
             // Flip the order of outgoing edges
-            base.negateCondition(true);
+            @base.negateCondition(true);
             // Return -true- to indicate a change was made to data-flow
             return true;
         }
@@ -257,7 +257,7 @@ namespace Sla.DECCORE
             // Flip whether the fallthru block is true/false
             lastop.flipFlag(PcodeOp::fallthru_true);
             // Flip the order of outof this
-            base.negateCondition(true);
+            @base.negateCondition(true);
         }
 
         public override bool isComplex()

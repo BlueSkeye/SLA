@@ -19,7 +19,7 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("No load image present");
+                throw new IfaceExecutionError("No load image present");
 
             map<string, ProtoModel*>::const_iterator iter;
             for (iter = dcp.conf.protoModels.begin(); iter != dcp.conf.protoModels.end(); ++iter)

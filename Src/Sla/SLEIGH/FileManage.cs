@@ -72,7 +72,7 @@ namespace Sla.SLEIGH
         {
             if (path.size() > 0)
             {
-                pathlist.push_back(path);
+                pathlist.Add(path);
                 if (path[path.size() - 1] != separator)
                     pathlist.back() += separator;
             }
@@ -180,11 +180,11 @@ namespace Sla.SLEIGH
               if (allowdot||(fullname[0] != '.')) {
 	        if (isSuffix) {
 	          if (0==fullname.compare(fullname.size()-match.size(),match.size(),match))
-	            res.push_back(dirfinal + fullname);
+	            res.Add(dirfinal + fullname);
 	        }
 	        else {
 	          if (0==fullname.compare(0,match.size(),match))
-	            res.push_back(dirfinal + fullname);
+	            res.Add(dirfinal + fullname);
 	        }
               }
             }
@@ -211,12 +211,12 @@ namespace Sla.SLEIGH
                         if (isSuffix)
                         {
                             if (0 == fullname.compare(fullname.size() - match.size(), match.size(), match))
-                                res.push_back(dirfinal + fullname);
+                                res.Add(dirfinal + fullname);
                         }
                         else
                         {
                             if (0 == fullname.compare(0, match.size(), match))
-                                res.push_back(dirfinal + fullname);
+                                res.Add(dirfinal + fullname);
                         }
                     }
                 }
@@ -244,7 +244,7 @@ namespace Sla.SLEIGH
             if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY ) {
               string fullname(FindFileData.cFileName);
               if (allowdot || (fullname[0] != '.'))
-	        res.push_back(dirfinal + fullname);
+	        res.Add(dirfinal + fullname);
             }
         } while (0 != FindNextFileA(hFind, &FindFileData)) ;
         FindClose(hFind);
@@ -269,7 +269,7 @@ namespace Sla.SLEIGH
                     if ((fullname != ".") && (fullname != ".."))
                     {
                         if (allowdot || (fullname[0] != '.'))
-                            res.push_back(dirfinal + fullname);
+                            res.Add(dirfinal + fullname);
                     }
                 }
                 entry = readdir(dir);
@@ -293,7 +293,7 @@ namespace Sla.SLEIGH
                 else
                     pos = pos + 1;
                 if (curpath.compare(pos, string::npos, matchname) == 0)
-                    res.push_back(curpath);
+                    res.Add(curpath);
                 else
                     scanDirectoryRecursive(res, matchname, curpath, maxdepth - 1); // Recurse
             }
@@ -345,7 +345,7 @@ namespace Sla.SLEIGH
                 if (skiplevel > 0)
                     skiplevel -= 1;
                 else
-                    pathels.push_back(base);
+                    pathels.Add(base);
             }
             if (!isAbs)
             {
@@ -357,7 +357,7 @@ namespace Sla.SLEIGH
                     int sizebefore = cur.size();
                     splitPath(cur, cur, base);
                     if (cur.size() == sizebefore) break;
-                    pathels.push_back(base);
+                    pathels.Add(base);
                 }
             }
 

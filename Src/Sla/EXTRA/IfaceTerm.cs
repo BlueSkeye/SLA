@@ -37,7 +37,7 @@ namespace Sla.EXTRA
         private int doCompletion(string &line, int cursor)
         {
             List<string> fullcommand;
-            istringstream s(line);
+            istringstream s = new istringstream(line);
             string tok;
             List<IfaceCommand*>::const_iterator first, last;
             int oldsize, match;
@@ -266,7 +266,7 @@ namespace Sla.EXTRA
 
         public override void pushScript(TextReader iptr, string newprompt)
         {
-            inputstack.push_back(sptr);
+            inputstack.Add(sptr);
             sptr = iptr;
             IfaceStatus::pushScript(iptr, newprompt);
         }

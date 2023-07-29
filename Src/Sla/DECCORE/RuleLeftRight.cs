@@ -31,8 +31,8 @@ namespace Sla.DECCORE
         /// `(V << c) s>> c  =>  sext( sub(V, #0) )`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_RIGHT);
-            oplist.push_back(CPUI_INT_SRIGHT);
+            oplist.Add(CPUI_INT_RIGHT);
+            oplist.Add(CPUI_INT_SRIGHT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

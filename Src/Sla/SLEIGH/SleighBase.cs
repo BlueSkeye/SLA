@@ -54,15 +54,15 @@ namespace Sla.SLEIGH
                     pair<map<VarnodeData, string>::iterator, bool> res = varnode_xref.insert(ins);
                     if (!res.second)
                     {
-                        errorPairs.push_back(sym.getName());
-                        errorPairs.push_back((*(res.first)).second);
+                        errorPairs.Add(sym.getName());
+                        errorPairs.Add((*(res.first)).second);
                     }
                 }
                 else if (sym.getType() == SleighSymbol::userop_symbol)
                 {
                     int index = ((UserOpSymbol*)sym).getIndex();
                     while (userop.size() <= index)
-                        userop.push_back("");
+                        userop.Add("");
                     userop[index] = sym.getName();
                 }
                 else if (sym.getType() == SleighSymbol::context_symbol)
@@ -110,12 +110,12 @@ namespace Sla.SLEIGH
             int version = 0;
             setBigEndian(xml_readbool(el.getAttributeValue("bigendian")));
             {
-                istringstream s(el.getAttributeValue("align"));
+                istringstream s = new istringstream(el.getAttributeValue("align"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> alignment;
             }
             {
-                istringstream s(el.getAttributeValue("uniqbase"));
+                istringstream s = new istringstream(el.getAttributeValue("uniqbase"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 uint ubase;
                 s >> ubase;
@@ -145,7 +145,7 @@ namespace Sla.SLEIGH
                 }
                 else if (attrname == "version")
                 {
-                    istringstream s(el.getAttributeValue(i));
+                    istringstream s = new istringstream(el.getAttributeValue(i));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> version;
                 }
@@ -171,7 +171,7 @@ namespace Sla.SLEIGH
             List<string> errorPairs;
             buildXrefs(errorPairs);
             if (!errorPairs.empty())
-                throw SleighError("Duplicate register pairs");
+                throw new SleighError("Duplicate register pairs");
         }
 
         /// Construct an uninitialized translator
@@ -194,9 +194,9 @@ namespace Sla.SLEIGH
         {
             VarnodeSymbol* sym = (VarnodeSymbol*)findSymbol(nm);
             if (sym == (VarnodeSymbol*)0)
-                throw SleighError("Unknown register name: " + nm);
+                throw new SleighError("Unknown register name: " + nm);
             if (sym.getType() != SleighSymbol::varnode_symbol)
-                throw SleighError("Symbol is not a register: " + nm);
+                throw new SleighError("Symbol is not a register: " + nm);
             return sym.getFixedVarnode();
         }
 
@@ -269,7 +269,7 @@ namespace Sla.SLEIGH
             for (int i = 0; i < numSpaces(); ++i)
             {
                 AddrSpace* spc = getSpace(i);
-                if (spc == (AddrSpace*)0) continue;
+                if (spc == (AddrSpace)null) continue;
                 if ((spc.getType() == IPTR_CONSTANT) ||
                 (spc.getType() == IPTR_FSPEC) ||
                 (spc.getType() == IPTR_IOP) ||

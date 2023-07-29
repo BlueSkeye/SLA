@@ -29,11 +29,11 @@ namespace Sla.EXTRA
             s >> delay;
 
             spc = dcp.conf.getSpaceByName(name);
-            if (spc == (AddrSpace*)0)
-                throw IfaceParseError("Bad space: " + name);
+            if (spc == (AddrSpace)null)
+                throw new IfaceParseError("Bad space: " + name);
             if (delay == -1)
-                throw IfaceParseError("Need delay integer");
-            if (dcp.fd != (Funcdata*)0)
+                throw new IfaceParseError("Need delay integer");
+            if (dcp.fd != (Funcdata)null)
             {
                 dcp.fd.getOverride().insertDeadcodeDelay(spc, delay);
                 *status.optr << "Successfully overrided deadcode delay for single function" << endl;

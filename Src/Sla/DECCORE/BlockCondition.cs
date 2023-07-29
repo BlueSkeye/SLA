@@ -46,7 +46,7 @@ namespace Sla.DECCORE
             s.Write("Condition block(");
             s.Write((opc == CPUI_BOOL_AND) ? "&&" : "||");
             s.Write(") ");
-            base.printHeader(s);
+            @base.printHeader(s);
         }
 
         public override void emit(PrintLanguage lng)
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
             bool res2 = getBlock(1).negateCondition(false);
             opc = (opc == CPUI_BOOL_AND) ? CPUI_BOOL_OR : CPUI_BOOL_AND;
             // Flip order of outofthis
-            base.negateCondition(toporbottom);
+            @base.negateCondition(toporbottom);
             return (res1 || res2);
         }
 
@@ -113,7 +113,7 @@ namespace Sla.DECCORE
 
         public override void encodeHeader(Encoder encoder)
         {
-            base.encodeHeader(encoder);
+            @base.encodeHeader(encoder);
             string nm = get_opname(opc);
             encoder.writeString(AttributeId.ATTRIB_OPCODE, nm);
         }

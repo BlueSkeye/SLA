@@ -58,7 +58,7 @@ namespace Sla.DECCORE
             if (!localframe.isInvalid())
             { // If this spacebase is for a localframe
                 Funcdata* fd = res.queryFunction(localframe);
-                if (fd != (Funcdata*)0)
+                if (fd != (Funcdata)null)
                     res = fd.getScopeLocal();
             }
             return res;
@@ -126,7 +126,7 @@ namespace Sla.DECCORE
                     ulong structOff = addr.getOffset() - smallest.getAddr().getOffset();
                     ulong dummyOff;
                     Datatype* res = symbolType.nearestArrayedComponentForward(structOff, &dummyOff, elSize);
-                    if (res != (Datatype*)0)
+                    if (res != (Datatype)null)
                     {
                         *newoff = structOff;
                         return symbolType;
@@ -136,10 +136,10 @@ namespace Sla.DECCORE
                 nextAddr = smallest.getAddr() + sz;
             }
             if (nextAddr < addr)
-                return (Datatype*)0;        // Don't let the address wrap
+                return (Datatype)null;        // Don't let the address wrap
             smallest = scope.queryContainer(nextAddr, 1, nullPoint);
             if (smallest == (SymbolEntry*)0 || smallest.getOffset() != 0)
-                return (Datatype*)0;
+                return (Datatype)null;
             symbolType = smallest.getSymbol().getType();
             *newoff = addr.getOffset() - smallest.getAddr().getOffset();
             if (symbolType.getMetatype() == TYPE_ARRAY)
@@ -151,17 +151,17 @@ namespace Sla.DECCORE
             {
                 ulong dummyOff;
                 Datatype* res = symbolType.nearestArrayedComponentForward(0, &dummyOff, elSize);
-                if (res != (Datatype*)0)
+                if (res != (Datatype)null)
                     return symbolType;
             }
-            return (Datatype*)0;
+            return (Datatype)null;
         }
 
         public override Datatype nearestArrayedComponentBackward(ulong off, ulong newoff, int elSize)
         {
             Datatype* subType = getSubType(off, newoff);
-            if (subType == (Datatype*)0)
-                return (Datatype*)0;
+            if (subType == (Datatype)null)
+                return (Datatype)null;
             if (subType.getMetatype() == TYPE_ARRAY)
             {
                 *elSize = ((TypeArray*)subType).getBase().getSize();
@@ -171,10 +171,10 @@ namespace Sla.DECCORE
             {
                 ulong dummyOff;
                 Datatype* res = subType.nearestArrayedComponentBackward(*newoff, &dummyOff, elSize);
-                if (res != (Datatype*)0)
+                if (res != (Datatype)null)
                     return subType;
             }
-            return (Datatype*)0;
+            return (Datatype)null;
         }
 
         public override int compare(Datatype op,int level) => compareDependency(op);
@@ -195,7 +195,7 @@ namespace Sla.DECCORE
 
         public override void encode(Encoder encoder)
         {
-            if (typedefImm != (Datatype*)0)
+            if (typedefImm != (Datatype)null)
             {
                 encodeTypedef(encoder);
                 return;

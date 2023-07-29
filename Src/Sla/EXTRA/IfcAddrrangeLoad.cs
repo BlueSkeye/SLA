@@ -27,7 +27,7 @@ namespace Sla.EXTRA
             if (size <= offset.getAddrSize()) // Was a real size specified
                 size = 0;
             if (dcp.conf.loader == (LoadImage*)0)
-                throw IfaceExecutionError("No binary loaded");
+                throw new IfaceExecutionError("No binary loaded");
 
             s >> name;          // Read optional name
             if (name.empty())

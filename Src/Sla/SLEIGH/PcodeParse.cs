@@ -2408,13 +2408,13 @@ namespace Sla.SLEIGH
 
         //    case 119:
 
-        //        { (yyval.param) = new List<ExprTree*>; (yyval.param).push_back((yyvsp[0].tree)); }
+        //        { (yyval.param) = new List<ExprTree*>; (yyval.param).Add((yyvsp[0].tree)); }
 
         //        break;
 
         //    case 120:
 
-        //        { (yyval.param) = (yyvsp[-2].param); (yyval.param).push_back((yyvsp[0].tree)); }
+        //        { (yyval.param) = (yyvsp[-2].param); (yyval.param).Add((yyvsp[0].tree)); }
 
         //        break;
 

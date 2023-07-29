@@ -18,10 +18,10 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("Image not loaded");
+                throw new IfaceExecutionError("Image not loaded");
 
-            if (dcp.fd == (Funcdata*)0)
-                throw IfaceExecutionError("No function selected");
+            if (dcp.fd == (Funcdata)null)
+                throw new IfaceExecutionError("No function selected");
 
             uint count = 0;
             list<PcodeOp*>::const_iterator iter, enditer;

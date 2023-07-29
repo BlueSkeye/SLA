@@ -21,11 +21,11 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("No load image present");
+                throw new IfaceExecutionError("No load image present");
 
             s >> ws;
             if (s.eof())
-                throw IfaceParseError("No input");
+                throw new IfaceParseError("No input");
 
             try
             {               // Try to parse the line
@@ -34,7 +34,7 @@ namespace Sla.EXTRA
             catch (ParseError err)
             {
                 *status.optr << "Error in C syntax: " << err.ToString() << endl;
-                throw IfaceExecutionError("Bad C syntax");
+                throw new IfaceExecutionError("Bad C syntax");
             }
         }
     }

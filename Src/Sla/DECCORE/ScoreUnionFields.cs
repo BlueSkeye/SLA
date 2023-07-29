@@ -80,7 +80,7 @@ namespace Sla.DECCORE
             public Trial(Varnode v, Datatype ct, int index, bool isArray)
             {
                 vn = v;
-                op = (PcodeOp*)0;
+                op = (PcodeOp)null;
                 inslot = -1;
                 direction = fit_up;
                 fitType = ct;
@@ -296,17 +296,17 @@ namespace Sla.DECCORE
         /// \return the data-type of the value or null
         private Datatype derefPointer(Datatype ct, Varnode vn, int score)
         {
-            Datatype* resType = (Datatype*)0;
+            Datatype* resType = (Datatype)null;
             score = 0;
             if (ct.getMetatype() == TYPE_PTR)
             {
                 Datatype* ptrto = ((TypePointer*)ct).getPtrTo();
-                while (ptrto != (Datatype*)0 && ptrto.getSize() > vn.getSize())
+                while (ptrto != (Datatype)null && ptrto.getSize() > vn.getSize())
                 {
                     ulong newoff;
                     ptrto = ptrto.getSubType(0, &newoff);
                 }
-                if (ptrto != (Datatype*)0 && ptrto.getSize() == vn.getSize())
+                if (ptrto != (Datatype)null && ptrto.getSize() == vn.getSize())
                 {
                     score = 10;
                     resType = ptrto;
@@ -383,7 +383,7 @@ namespace Sla.DECCORE
         {
             if (trial.direction == Trial::fit_up)
                 return;             // Trial doesn't push in this direction
-            Datatype* resType = (Datatype*)0;   // Assume by default we don't propagate
+            Datatype* resType = (Datatype)null;   // Assume by default we don't propagate
             type_metatype meta = trial.fitType.getMetatype();
             int score = 0;
             switch (trial.op.code())
@@ -400,7 +400,7 @@ namespace Sla.DECCORE
                     if (trial.inslot == 1)
                     {
                         Datatype* ptrto = derefPointer(trial.fitType, trial.op.getIn(2), score);
-                        if (ptrto != (Datatype*)0)
+                        if (ptrto != (Datatype)null)
                         {
                             if (!lastLevel)
                                 newTrials(trial.op, 2, ptrto, trial.scoreIndex, trial.array);   // Propagate to value being STOREd
@@ -521,7 +521,7 @@ namespace Sla.DECCORE
                                 ulong parOff;
                                 TypePointer* par;
                                 resType = baseType.downChain(off, par, parOff, trial.array, typegrp);
-                                if (resType != (Datatype*)0)
+                                if (resType != (Datatype)null)
                                     score = 5;
                             }
                             else
@@ -738,7 +738,7 @@ namespace Sla.DECCORE
                     break;
             }
             scores[trial.scoreIndex] += score;
-            if (resType != (Datatype*)0 && !lastLevel)
+            if (resType != (Datatype)null && !lastLevel)
                 newTrialsDown(trial.op.getOut(), resType, trial.scoreIndex, trial.array);
         }
 
@@ -754,7 +754,7 @@ namespace Sla.DECCORE
                     scoreConstantFit(trial);
                 return;     // Nothing to propagate up through
             }
-            Datatype* resType = (Datatype*)0;   // Assume by default we don't propagate
+            Datatype* resType = (Datatype)null;   // Assume by default we don't propagate
             int newslot = 0;
             type_metatype meta = trial.fitType.getMetatype();
             PcodeOp* def = trial.vn.getDef();
@@ -935,7 +935,7 @@ namespace Sla.DECCORE
                     break;
             }
             scores[trial.scoreIndex] += score;
-            if (resType != (Datatype*)0 && !lastLevel)
+            if (resType != (Datatype)null && !lastLevel)
             {
                 newTrials(def, newslot, resType, trial.scoreIndex, trial.array);
             }
@@ -956,7 +956,7 @@ namespace Sla.DECCORE
             if (ct.getMetatype() == TYPE_UNION)
             {
                 TypeUnion* unionDt = (TypeUnion*)ct;
-                ct = (Datatype*)0;          // Don't recurse a data-type from truncation of a union
+                ct = (Datatype)null;          // Don't recurse a data-type from truncation of a union
                 score = -10;            // Negative score if the union has no field matching the size
                 int num = unionDt.numDepend();
                 for (int i = 0; i < num; ++i)
@@ -975,7 +975,7 @@ namespace Sla.DECCORE
             {
                 ulong off = offset;
                 score = 10;     // If we can find a size match for the truncation
-                while (ct != (Datatype*)0 && (off != 0 || ct.getSize() != vn.getSize()))
+                while (ct != (Datatype)null && (off != 0 || ct.getSize() != vn.getSize()))
                 {
                     if (ct.getMetatype() == TYPE_INT || ct.getMetatype() == TYPE_UINT)
                     {
@@ -987,7 +987,7 @@ namespace Sla.DECCORE
                     }
                     ct = ct.getSubType(off, &off);
                 }
-                if (ct == (Datatype*)0)
+                if (ct == (Datatype)null)
                     score = -10;
             }
             scores[scoreIndex] += score;
@@ -1126,7 +1126,7 @@ namespace Sla.DECCORE
             int wordSize = (parentType.getMetatype() == TYPE_PTR) ? ((TypePointer*)parentType).getWordSize() : 0;
             int numFields = result.baseType.numDepend();
             scores.resize(numFields + 1, 0);
-            fields.resize(numFields + 1, (Datatype*)0);
+            fields.resize(numFields + 1, (Datatype)null);
             Varnode* vn;
             if (slot < 0)
             {
@@ -1191,7 +1191,7 @@ namespace Sla.DECCORE
             Varnode* vn = op.getOut();
             int numFields = unionType.numDepend();
             scores.resize(numFields + 1, 0);
-            fields.resize(numFields + 1, (Datatype*)0);
+            fields.resize(numFields + 1, (Datatype)null);
             fields[0] = unionType;
             scores[0] = -10;
             for (int i = 0; i < numFields; ++i)
@@ -1227,7 +1227,7 @@ namespace Sla.DECCORE
             Varnode* vn = (slot < 0) ? op.getOut() : op.getIn(slot);
             int numFields = unionType.numDepend();
             scores.resize(numFields + 1, 0);
-            fields.resize(numFields + 1, (Datatype*)0);
+            fields.resize(numFields + 1, (Datatype)null);
             fields[0] = unionType;
             scores[0] = -10;        // Assume the untruncated entire union is not a good fit
             for (int i = 0; i < numFields; ++i)
@@ -1236,7 +1236,7 @@ namespace Sla.DECCORE
                 fields[i + 1] = unionField.type;
                 // Score the implied truncation
                 Datatype* ct = scoreTruncation(unionField.type, vn, offset - unionField.offset, i + 1);
-                if (ct != (Datatype*)0)
+                if (ct != (Datatype)null)
                 {
                     if (slot < 0)
                         trialCurrent.emplace_back(vn, ct, i + 1, false);        // Try to flow backward

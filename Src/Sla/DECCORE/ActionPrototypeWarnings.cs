@@ -56,7 +56,7 @@ namespace Sla.DECCORE
                 {
                     ostringstream s;
                     s << "Cannot assign parameter location for function ";
-                    if (fd != (Funcdata*)0)
+                    if (fd != (Funcdata)null)
                         s << fd.getName();
                     else
                         s << "<indirect>";
@@ -67,7 +67,7 @@ namespace Sla.DECCORE
                 {
                     ostringstream s;
                     s << "Cannot assign location of return value for function ";
-                    if (fd != (Funcdata*)0)
+                    if (fd != (Funcdata)null)
                         s << fd.getName();
                     else
                         s << "<indirect>";

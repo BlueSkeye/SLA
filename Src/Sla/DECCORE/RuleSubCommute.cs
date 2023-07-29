@@ -31,22 +31,27 @@ namespace Sla.DECCORE
         /// constant, a INT_SEXT, or a INT_ZEXT, canceling out
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_SUBPIECE);
+            oplist.Add(CPUI_SUBPIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode * base,*vn,*newvn,*outvn;
-            PcodeOp* longform,*newsub,*prevop;
+            Varnode @base;
+            Varnode vn;
+            Varnode newvn;
+            Varnode outvn;
+            PcodeOp longform;
+            PcodeOp newsub;
+            PcodeOp prevop;
             int i, j, offset, insize;
 
-            base = op.getIn(0);
-            if (!base.isWritten()) return 0;
+            @base = op.getIn(0);
+            if (!@@base.isWritten()) return 0;
             offset = op.getIn(1).getOffset();
             outvn = op.getOut();
             if (outvn.isPrecisLo() || outvn.isPrecisHi()) return 0;
-            insize = base.getSize();
-            longform = base.getDef();
+            insize = @@base.getSize();
+            longform = @@base.getDef();
             j = -1;
             switch (longform.code())
             {   // Determine if this op commutes with SUBPIECE
@@ -92,7 +97,7 @@ namespace Sla.DECCORE
                         else if (longform.getIn(1).isConstant() && (zext0In.getSize() <= outvn.getSize()))
                         {
                             ulong val = longform.getIn(1).getOffset();
-                            ulong smallval = val & calc_mask(outvn.getSize());
+                            ulong smallval = val & Globals.calc_mask(outvn.getSize());
                             if (val != smallval)
                                 return 0;
                         }
@@ -127,7 +132,7 @@ namespace Sla.DECCORE
                         else if (longform.getIn(1).isConstant() && (sext0In.getSize() <= outvn.getSize()))
                         {
                             ulong val = longform.getIn(1).getOffset();
-                            ulong smallval = val & calc_mask(outvn.getSize());
+                            ulong smallval = val & Globals.calc_mask(outvn.getSize());
                             smallval = sign_extend(smallval, outvn.getSize(), insize);
                             if (val != smallval)
                                 return 0;
@@ -154,12 +159,12 @@ namespace Sla.DECCORE
             }
 
             // Make sure no other piece of base is getting used
-            if (base.loneDescend() != op) return 0;
+            if (@base.loneDescend() != op) return 0;
 
             if (offset == 0)
             {       // Look for overlap with RuleSubZext
                 PcodeOp* nextop = outvn.loneDescend();
-                if ((nextop != (PcodeOp*)0) && (nextop.code() == CPUI_INT_ZEXT))
+                if ((nextop != (PcodeOp)null) && (nextop.code() == CPUI_INT_ZEXT))
                 {
                     if (nextop.getOut().getSize() == insize)
                         return 0;

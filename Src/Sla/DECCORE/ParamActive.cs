@@ -67,7 +67,7 @@ namespace Sla.DECCORE
         /// \param sz is the number of bytes in the range
         public void registerTrial(Address addr,int sz)
         {
-            trial.push_back(ParamTrial(addr, sz, slotbase));
+            trial.Add(ParamTrial(addr, sz, slotbase));
             // It would require too much work to calculate whether a specific data location is changed
             // by a subfunction, but a fairly strong assumption is that (unless it is explicitly saved) a
             // register may change and is thus unlikely to be used as a location for passing parameters.
@@ -199,7 +199,7 @@ namespace Sla.DECCORE
                 {
                     curtrial.setSlot(slot);
                     slot += 1;
-                    newtrials.push_back(curtrial);
+                    newtrials.Add(curtrial);
                 }
             }
             trial = newtrials;
@@ -218,16 +218,16 @@ namespace Sla.DECCORE
 
             for (int j = 0; j < i; ++j)
             {
-                newtrials.push_back(trial[j]);
+                newtrials.Add(trial[j]);
                 int oldslot = newtrials.back().getSlot();
                 if (oldslot > slot)
                     newtrials.back().setSlot(oldslot + 1);
             }
-            newtrials.push_back(trial[i].splitHi(sz));
-            newtrials.push_back(trial[i].splitLo(trial[i].getSize() - sz));
+            newtrials.Add(trial[i].splitHi(sz));
+            newtrials.Add(trial[i].splitLo(trial[i].getSize() - sz));
             for (int j = i + 1; j < trial.size(); ++j)
             {
-                newtrials.push_back(trial[j]);
+                newtrials.Add(trial[j]);
                 int oldslot = newtrials.back().getSlot();
                 if (oldslot > slot)
                     newtrials.back().setSlot(oldslot + 1);
@@ -252,11 +252,11 @@ namespace Sla.DECCORE
                 ParamTrial & curtrial(trial[i]);
                 int curslot = curtrial.getSlot();
                 if (curslot < slot)
-                    newtrials.push_back(curtrial);
+                    newtrials.Add(curtrial);
                 else if (curslot == slot)
                 {
                     sizecheck += curtrial.getSize();
-                    newtrials.push_back(ParamTrial(addr, sz, slot));
+                    newtrials.Add(ParamTrial(addr, sz, slot));
                     newtrials.back().markUsed();
                     newtrials.back().markActive();
                 }
@@ -266,7 +266,7 @@ namespace Sla.DECCORE
                 }
                 else
                 {
-                    newtrials.push_back(curtrial);
+                    newtrials.Add(curtrial);
                     newtrials.back().setSlot(curslot - 1);
                 }
             }

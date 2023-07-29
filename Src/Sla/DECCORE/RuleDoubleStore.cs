@@ -24,7 +24,7 @@ namespace Sla.DECCORE
 
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_STORE);
+            oplist.Add(CPUI_STORE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -61,7 +61,7 @@ namespace Sla.DECCORE
                     {
                         List<PcodeOp*> indirects;
                         PcodeOp* latest = RuleDoubleLoad::noWriteConflict(storelo, storehi, spc, &indirects);
-                        if (latest == (PcodeOp*)0) continue;    // There was a conflict
+                        if (latest == (PcodeOp)null) continue;    // There was a conflict
                         if (!testIndirectUse(storelo, storehi, indirects)) continue;
                         // Create new STORE op that combines the two smaller STOREs
                         PcodeOp* newstore = data.newOp(3, latest.getAddr());

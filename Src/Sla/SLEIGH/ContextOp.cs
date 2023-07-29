@@ -47,7 +47,7 @@ namespace Sla.SLEIGH
                 // has been recovered. If the offset is not relative to
                 // the base constructor, then we throw an error
                 if (!val.isConstructorRelative())
-                    throw SleighError(val.getName() + ": cannot be used in context expression");
+                    throw new SleighError(val.getName() + ": cannot be used in context expression");
             }
         }
 
@@ -64,17 +64,17 @@ namespace Sla.SLEIGH
         public override void restoreXml(Element el, SleighBase trans)
         {
             {
-                istringstream s(el.getAttributeValue("i"));
+                istringstream s = new istringstream(el.getAttributeValue("i"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> num;
             }
             {
-                istringstream s(el.getAttributeValue("shift"));
+                istringstream s = new istringstream(el.getAttributeValue("shift"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> shift;
             }
             {
-                istringstream s(el.getAttributeValue("mask"));
+                istringstream s = new istringstream(el.getAttributeValue("mask"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> mask;
             }

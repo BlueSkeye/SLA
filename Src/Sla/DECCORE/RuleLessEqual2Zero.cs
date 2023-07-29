@@ -32,7 +32,7 @@ namespace Sla.DECCORE
         ///  - `V <= ffff` =>  true`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_LESSEQUAL);
+            oplist.Add(CPUI_INT_LESSEQUAL);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -50,7 +50,7 @@ namespace Sla.DECCORE
                     data.opSetInput(op, data.newConstant(1, 1), 0);
                     return 1;
                 }
-                else if (lvn.getOffset() == calc_mask(lvn.getSize()))
+                else if (lvn.getOffset() == Globals.calc_mask(lvn.getSize()))
                 {
                     data.opSetOpcode(op, CPUI_INT_EQUAL); // No value is true except -1
                     return 1;
@@ -63,7 +63,7 @@ namespace Sla.DECCORE
                     data.opSetOpcode(op, CPUI_INT_EQUAL); // No value is true except 0
                     return 1;
                 }
-                else if (rvn.getOffset() == calc_mask(rvn.getSize()))
+                else if (rvn.getOffset() == Globals.calc_mask(rvn.getSize()))
                 {
                     data.opSetOpcode(op, CPUI_COPY); // All values => true
                     data.opRemoveInput(op, 1);

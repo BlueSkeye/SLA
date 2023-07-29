@@ -52,7 +52,7 @@ namespace Sla.DECCORE
             foreach (Action action in list) {
                 action.clearBreakPoints();
             }
-            base.clearBreakPoints();
+            @base.clearBreakPoints();
         }
 
         public override Action? clone(ActionGroupList grouplist)
@@ -72,7 +72,7 @@ namespace Sla.DECCORE
 
         public override void reset(Funcdata data)
         {
-            base.reset(data);
+            @base.reset(data);
             foreach (Action action in list) {
                 // Reset each subrule
                 action.reset(data);
@@ -81,7 +81,7 @@ namespace Sla.DECCORE
 
         public virtual void resetStats()
         {
-            base.resetStats(data);
+            @base.resetStats(data);
             foreach (Action action in list) {
                 // Reset each subrule
                 action.resetStats(data);
@@ -119,7 +119,7 @@ namespace Sla.DECCORE
 
         public override int print(TextWriter s, int num, int depth)
         {
-            num = base.print(s, num, depth);
+            num = @base.print(s, num, depth);
             s.WriteLine();
             foreach (Action action in list) {
                 num = action.print(s, num, depth + 1);
@@ -135,7 +135,7 @@ namespace Sla.DECCORE
         {
             Action subact;
 
-            base.printState(s);
+            @base.printState(s);
             if (status == statusflags.status_mid) {
                 subact = state.Current;
                 subact.printState(s);
@@ -233,7 +233,7 @@ namespace Sla.DECCORE
 #endif
         public override void printStatistics(TextWriter s)
         {
-            base.printStatistics(s);
+            @base.printStatistics(s);
             foreach (Action iter in list) {
                 iter.printStatistics(s);
             }

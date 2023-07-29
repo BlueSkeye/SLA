@@ -41,7 +41,7 @@ namespace Sla.DECCORE
                     // Consider defining MULTIEQUAL to be "reachable" This allows flowToAlternatePath to discover
                     // a loop back to vn from the constBlock, even if no other non-constant path survives
                     op.setMark();
-                    reachable.push_back(op);
+                    reachable.Add(op);
                 }
             }
             for (; ; )
@@ -65,7 +65,7 @@ namespace Sla.DECCORE
                     }
                     else if (opc != CPUI_COPY && opc != CPUI_INDIRECT)
                         continue;
-                    reachable.push_back(op);
+                    reachable.Add(op);
                     op.setMark();
                 }
                 if (count >= reachable.size()) break;
@@ -85,7 +85,7 @@ namespace Sla.DECCORE
             if (op.isMark()) return true;
             List<Varnode*> markSet;
             Varnode* vn = op.getOut();
-            markSet.push_back(vn);
+            markSet.Add(vn);
             vn.setMark();
             int count = 0;
             bool foundPath = false;
@@ -111,7 +111,7 @@ namespace Sla.DECCORE
                     Varnode* outVn = nextOp.getOut();
                     if (outVn.isMark()) continue;
                     outVn.setMark();
-                    markSet.push_back(outVn);
+                    markSet.Add(outVn);
                 }
                 if (foundPath) break;
             }
@@ -161,7 +161,7 @@ namespace Sla.DECCORE
             PcodeOp* lastOp = bl.lastOp();
             list<PcodeOp*>::iterator iter;
             Address addr;
-            if (lastOp == (PcodeOp*)0)
+            if (lastOp == (PcodeOp)null)
             {
                 iter = bl.endOp();
                 addr = op.getAddr();
@@ -197,14 +197,14 @@ namespace Sla.DECCORE
             List<int> marks, Varnode constVn, Funcdata data)
         {
             List<FlowBlock*> blocks;
-            PcodeOp* op = (PcodeOp*)0;
+            PcodeOp* op = (PcodeOp)null;
             for (int i = 0; i < phiNodeEdges.size(); ++i)
             {
                 if (marks[i] != 2) continue;    // Check that the MULTIQUAL is marked as flowing together
                 op = phiNodeEdges[i].op;
                 FlowBlock* bl = op.getParent();
                 bl = bl.getIn(phiNodeEdges[i].slot);
-                blocks.push_back(bl);
+                blocks.Add(bl);
             }
             BlockBasic* rootBlock = (BlockBasic*)FlowBlock::findCommonBlock(blocks);
             Varnode* outVn = placeCopy(op, rootBlock, constVn, data);
@@ -273,7 +273,7 @@ namespace Sla.DECCORE
         /// \brief Replace reads of a given Varnode with a constant.
         ///
         /// For each read op, check that is in or dominated by a specific block we known
-        /// the Varnode is constant in.
+        /// the Varnode is constant @in.
         /// \param varVn is the given Varnode
         /// \param constVn is the constant Varnode to replace with
         /// \param constBlock is the block which dominates ops reading the constant value
@@ -316,7 +316,7 @@ namespace Sla.DECCORE
                 else if (opc == CPUI_COPY)
                 {       // Don't propagate into COPY unless...
                     PcodeOp* followOp = op.getOut().loneDescend();
-                    if (followOp == (PcodeOp*)0) continue;
+                    if (followOp == (PcodeOp)null) continue;
                     if (followOp.isMarker()) continue;
                     if (followOp.code() == CPUI_COPY) continue;
                     // ...unless COPY is into something more interesting
@@ -346,7 +346,7 @@ namespace Sla.DECCORE
         {
             bool useMultiequal = true;
             AddrSpace* stackSpace = data.getArch().getStackSpace();
-            if (stackSpace != (AddrSpace*)0)
+            if (stackSpace != (AddrSpace)null)
             {
                 // Determining if conditional constants should apply to MULTIEQUAL operations may require
                 // flow calculations.
@@ -359,7 +359,7 @@ namespace Sla.DECCORE
             {
                 FlowBlock* bl = blockGraph.getBlock(i);
                 PcodeOp* cBranch = bl.lastOp();
-                if (cBranch == (PcodeOp*)0 || cBranch.code() != CPUI_CBRANCH) continue;
+                if (cBranch == (PcodeOp)null || cBranch.code() != CPUI_CBRANCH) continue;
                 Varnode* boolVn = cBranch.getIn(1);
                 if (!boolVn.isWritten()) continue;
                 PcodeOp* compOp = boolVn.getDef();

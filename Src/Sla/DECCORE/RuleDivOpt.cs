@@ -77,14 +77,14 @@ namespace Sla.DECCORE
         private static void moveSignBitExtraction(Varnode firstVn, Varnode replaceVn, Funcdata data)
         {
             List<Varnode*> testList;
-            testList.push_back(firstVn);
+            testList.Add(firstVn);
             if (firstVn.isWritten())
             {
                 PcodeOp* op = firstVn.getDef();
                 if (op.code() == CPUI_INT_SRIGHT)
                 {
                     // Same sign bit could be extracted from previous shifted version
-                    testList.push_back(op.getIn(0));
+                    testList.Add(op.getIn(0));
                 }
             }
             for (int i = 0; i < testList.size(); ++i)
@@ -123,7 +123,7 @@ namespace Sla.DECCORE
                     }
                     else if (opc == CPUI_COPY)
                     {
-                        testList.push_back(op.getOut());
+                        testList.Add(op.getOut());
                     }
                 }
             }
@@ -150,7 +150,7 @@ namespace Sla.DECCORE
                 ulong y;
                 OpCode extopc;
                 Varnode* inVn = findForm(superOp, n, y, xsize, extopc);
-                if (inVn != (Varnode*)0) return true;
+                if (inVn != (Varnode)null) return true;
             }
             return false;
         }
@@ -174,9 +174,9 @@ namespace Sla.DECCORE
         ///   - `sub( (sext(V)*c)s>>n, 0)  =>  V s/ (2^n/(c-1))`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_SUBPIECE);
-            oplist.push_back(CPUI_INT_RIGHT);
-            oplist.push_back(CPUI_INT_SRIGHT);
+            oplist.Add(CPUI_SUBPIECE);
+            oplist.Add(CPUI_INT_RIGHT);
+            oplist.Add(CPUI_INT_SRIGHT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -185,7 +185,7 @@ namespace Sla.DECCORE
             ulong y;
             OpCode extOpc;
             Varnode* inVn = findForm(op, n, y, xsize, extOpc);
-            if (inVn == (Varnode*)0) return 0;
+            if (inVn == (Varnode)null) return 0;
             if (checkFormOverlap(op)) return 0;
             if (extOpc == CPUI_INT_SEXT)
                 xsize -= 1;     // one less bit for signed, because of signbit
@@ -272,38 +272,38 @@ namespace Sla.DECCORE
             if (shiftopc == CPUI_INT_RIGHT || shiftopc == CPUI_INT_SRIGHT)
             {
                 Varnode* vn = curOp.getIn(0);
-                if (!vn.isWritten()) return (Varnode*)0;
+                if (!vn.isWritten()) return (Varnode)null;
                 Varnode* cvn = curOp.getIn(1);
-                if (!cvn.isConstant()) return (Varnode*)0;
+                if (!cvn.isConstant()) return (Varnode)null;
                 n = cvn.getOffset();
                 curOp = vn.getDef();
             }
             else
             {
                 n = 0;  // No initial shift
-                if (shiftopc != CPUI_SUBPIECE) return (Varnode*)0;  // In this case SUBPIECE is not optional
+                if (shiftopc != CPUI_SUBPIECE) return (Varnode)null;  // In this case SUBPIECE is not optional
                 shiftopc = CPUI_MAX;
             }
             if (curOp.code() == CPUI_SUBPIECE)
             {       // Optional SUBPIECE
                 int c = curOp.getIn(1).getOffset();
                 Varnode* inVn = curOp.getIn(0);
-                if (!inVn.isWritten()) return (Varnode*)0;
+                if (!inVn.isWritten()) return (Varnode)null;
                 if (curOp.getOut().getSize() + c != inVn.getSize())
-                    return (Varnode*)0;         // Must keep high bits
+                    return (Varnode)null;         // Must keep high bits
                 n += 8 * c;
                 curOp = inVn.getDef();
             }
-            if (curOp.code() != CPUI_INT_MULT) return (Varnode*)0; // There MUST be an INT_MULT
+            if (curOp.code() != CPUI_INT_MULT) return (Varnode)null; // There MUST be an INT_MULT
             Varnode* inVn = curOp.getIn(0);
-            if (!inVn.isWritten()) return (Varnode*)0;
+            if (!inVn.isWritten()) return (Varnode)null;
             if (inVn.isConstantExtended(y) >= 0)
             {
                 inVn = curOp.getIn(1);
-                if (!inVn.isWritten()) return (Varnode*)0;
+                if (!inVn.isWritten()) return (Varnode)null;
             }
             else if (curOp.getIn(1).isConstantExtended(y) < 0)
-                return (Varnode*)0; // There MUST be a constant
+                return (Varnode)null; // There MUST be a constant
 
             Varnode* resVn;
             PcodeOp* extOp = inVn.getDef();
@@ -312,8 +312,8 @@ namespace Sla.DECCORE
             {
                 ulong nzMask = inVn.getNZMask();
                 xsize = 8 * sizeof(ulong) - count_leading_zeros(nzMask);
-                if (xsize == 0) return (Varnode*)0;
-                if (xsize > 4 * inVn.getSize()) return (Varnode*)0;
+                if (xsize == 0) return (Varnode)null;
+                if (xsize > 4 * inVn.getSize()) return (Varnode)null;
             }
             else
                 xsize = extOp.getIn(0).getSize() * 8;
@@ -321,7 +321,7 @@ namespace Sla.DECCORE
             if (extopc == CPUI_INT_ZEXT || extopc == CPUI_INT_SEXT)
             {
                 Varnode* extVn = extOp.getIn(0);
-                if (extVn.isFree()) return (Varnode*)0;
+                if (extVn.isFree()) return (Varnode)null;
                 if (inVn.getSize() == op.getOut().getSize())
                     resVn = inVn;
                 else
@@ -337,7 +337,7 @@ namespace Sla.DECCORE
                 ((extopc == CPUI_INT_SEXT) && (shiftopc == CPUI_INT_RIGHT)))
             {
                 if (8 * op.getOut().getSize() - n != xsize)
-                    return (Varnode*)0;
+                    return (Varnode)null;
                 // op's signedness does not matter because all the extension
                 // bits are truncated
             }

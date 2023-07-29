@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// \brief Pull SUBPIECE back through MULTIEQUAL
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_SUBPIECE);
+            oplist.Add(CPUI_SUBPIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -52,7 +52,7 @@ namespace Sla.DECCORE
 
             // Make sure we don't new add SUBPIECE ops that aren't going to cancel in some way
             int branches = mult.numInput();
-            ulong consume = calc_mask(newSize) << 8 * minByte;
+            ulong consume = Globals.calc_mask(newSize) << 8 * minByte;
             consume = ~consume;         // Check for use of bits outside of what gets truncated later
             for (int i = 0; i < branches; ++i)
             {
@@ -89,9 +89,9 @@ namespace Sla.DECCORE
                 // up the MULTIEQUAL if another related SUBPIECE has already been pulled
                 // Search for a previous SUBPIECE
                 Varnode* vn_sub = findSubpiece(vn_piece, newSize, minByte);
-                if (vn_sub == (Varnode*)0) // Couldn't find previous subpieceing
+                if (vn_sub == (Varnode)null) // Couldn't find previous subpieceing
                     vn_sub = buildSubpiece(vn_piece, newSize, minByte, data);
-                    @params.push_back(vn_sub);
+                    @params.Add(vn_sub);
             }
             // Build new multiequal near original multiequal
             PcodeOp* new_multi = data.newOp (@params.size(), mult.getAddr());
@@ -313,7 +313,7 @@ namespace Sla.DECCORE
                     return prevop.getOut();
                 }
             }
-            return (Varnode*)0;
+            return (Varnode)null;
         }
     }
 }

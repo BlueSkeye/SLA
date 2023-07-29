@@ -32,7 +32,7 @@ namespace Sla.DECCORE
         /// n must be equal to the size of SUBPIECE's truncation.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_RIGHT);
+            oplist.Add(CPUI_INT_RIGHT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -42,7 +42,7 @@ namespace Sla.DECCORE
             if (!op.getIn(0).isWritten()) return 0;
             PcodeOp* subop = op.getIn(0).getDef();
             if (subop.code() != CPUI_INT_ADD) return 0;
-            Varnode* x = (Varnode*)0;
+            Varnode* x = (Varnode)null;
             Varnode* compvn;
             PcodeOp* compop;
             int i;
@@ -57,7 +57,7 @@ namespace Sla.DECCORE
                         Varnode* invn = compop.getIn(1);
                         if (invn.isConstant())
                         {
-                            if (invn.getOffset() == calc_mask(invn.getSize()))
+                            if (invn.getOffset() == Globals.calc_mask(invn.getSize()))
                             {
                                 x = subop.getIn(1 - i);
                                 break;

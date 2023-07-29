@@ -110,9 +110,9 @@ namespace Sla.DECCORE
                 uint type = model.hasEffect(curRecord.getAddress(), curRecord.getSize());
                 if (type == curRecord.getType()) continue;
                 if (curRecord.getType() == EffectRecord::unaffected)
-                    unaffectedList.push_back(&curRecord);
+                    unaffectedList.Add(&curRecord);
                 else if (curRecord.getType() == EffectRecord::killedbycall)
-                    killedByCallList.push_back(&curRecord);
+                    killedByCallList.Add(&curRecord);
                 else if (curRecord.getType() == EffectRecord::return_address)
                     retAddr = &curRecord;
             }
@@ -174,7 +174,7 @@ namespace Sla.DECCORE
             tmpList.swap(effectlist);
             for (List<EffectRecord>::const_iterator iter = model.effectBegin(); iter != model.effectEnd(); ++iter)
             {
-                effectlist.push_back(*iter);
+                effectlist.Add(*iter);
             }
             bool hasNew = false;
             int listSize = effectlist.size();
@@ -191,7 +191,7 @@ namespace Sla.DECCORE
                 }
                 else
                 {
-                    effectlist.push_back(curRecord);
+                    effectlist.Add(curRecord);
                     hasNew = true;
                 }
             }
@@ -212,11 +212,11 @@ namespace Sla.DECCORE
             iter1 = model.trashBegin();
             iter2 = model.trashEnd();
             for (List<VarnodeData>::const_iterator iter = iter1; iter != iter2; ++iter)
-                likelytrash.push_back(*iter);
+                likelytrash.Add(*iter);
             for (List<VarnodeData>::const_iterator iter = tmpList.begin(); iter != tmpList.end(); ++iter)
             {
                 if (!binary_search(iter1, iter2, *iter))
-                    likelytrash.push_back(*iter);       // Add in the new register
+                    likelytrash.Add(*iter);       // Add in the new register
             }
             sort(likelytrash.begin(), likelytrash.end());
         }
@@ -237,16 +237,16 @@ namespace Sla.DECCORE
             TypeFactory* typefactory = model.getArch().types;
 
             if (isOutputLocked())
-                typelist.push_back(getOutputType());
+                typelist.Add(getOutputType());
             else
-                typelist.push_back(typefactory.getTypeVoid());
-            nmlist.push_back("");
+                typelist.Add(typefactory.getTypeVoid());
+            nmlist.Add("");
 
             Datatype* extra = typefactory.getBase(4, TYPE_UNKNOWN); // The extra parameters have this type
             for (int i = 0; i < paramshift; ++i)
             {
-                nmlist.push_back("");
-                typelist.push_back(extra);
+                nmlist.Add("");
+                typelist.Add(extra);
             }
 
             if (isInputLocked())
@@ -255,8 +255,8 @@ namespace Sla.DECCORE
                 for (int i = 0; i < num; ++i)
                 {
                     ProtoParameter* param = getParam(i);
-                    nmlist.push_back(param.getName());
-                    typelist.push_back(param.getType());
+                    nmlist.Add(param.getName());
+                    typelist.Add(param.getType());
                 }
             }
             else
@@ -353,8 +353,8 @@ namespace Sla.DECCORE
             for (int i = 0; i < num; ++i)
             {
                 ProtoParameter* param = store.getInput(i);
-                pieces.intypes.push_back(param.getType());
-                pieces.innames.push_back(param.getName());
+                pieces.intypes.Add(param.getType());
+                pieces.innames.Add(param.getName());
             }
             pieces.dotdotdot = isDotdotdot();
         }
@@ -369,12 +369,12 @@ namespace Sla.DECCORE
                 setModel(pieces.model);
             List<Datatype*> typelist;
             List<string> nmlist;
-            typelist.push_back(pieces.outtype);
-            nmlist.push_back("");
+            typelist.Add(pieces.outtype);
+            nmlist.Add("");
             for (int i = 0; i < pieces.intypes.size(); ++i)
             {
-                typelist.push_back(pieces.intypes[i]);
-                nmlist.push_back(pieces.innames[i]);
+                typelist.Add(pieces.intypes[i]);
+                nmlist.Add(pieces.innames[i]);
             }
             updateAllTypes(nmlist, typelist, pieces.dotdotdot);
             setInputLock(true);
@@ -1353,8 +1353,8 @@ namespace Sla.DECCORE
             if (!model.hasThisPointer())
                 return Address();
             List<Datatype*> typelist;
-            typelist.push_back(getOutputType());
-            typelist.push_back(dt);
+            typelist.Add(getOutputType());
+            typelist.Add(dt);
             List<ParameterPieces> res;
             model.assignParameterStorage(typelist, res, true);
             for (int i = 1; i < res.size(); ++i)

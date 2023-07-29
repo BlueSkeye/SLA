@@ -31,8 +31,8 @@ namespace Sla.DECCORE
         /// the full SubvariableFlow analysis.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_NOTEQUAL);
-            oplist.push_back(CPUI_INT_EQUAL);
+            oplist.Add(CPUI_INT_NOTEQUAL);
+            oplist.Add(CPUI_INT_EQUAL);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -65,7 +65,7 @@ namespace Sla.DECCORE
                         {
                             if (vn0.isConstant()) return 0;
                             ulong mask0 = vn0.getConsume() & vn0.getNZMask();
-                            ulong wholemask = calc_mask(vn0.getSize()) & mask0;
+                            ulong wholemask = Globals.calc_mask(vn0.getSize()) & mask0;
                             // We really need a popcnt here
                             // We want: if the number of bits that are both consumed
                             // and not known to be zero are "big" then don't continue
@@ -80,7 +80,7 @@ namespace Sla.DECCORE
                 }
             }
 
-            SubvariableFlow subflow(&data,vn,mask,false,false,false);
+            SubvariableFlow subflow = new SubvariableFlow(&data,vn,mask,false,false,false);
             if (!subflow.doTrace())
             {
                 return 0;

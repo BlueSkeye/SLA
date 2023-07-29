@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         /// the \e spacebase register's address space.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_STORE);
+            oplist.Add(CPUI_STORE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -40,7 +40,7 @@ namespace Sla.DECCORE
             ulong offoff;
 
             baseoff = RuleLoadVarnode::checkSpacebase(data.getArch(), op, offoff);
-            if (baseoff == (AddrSpace*)0) return 0;
+            if (baseoff == (AddrSpace)null) return 0;
 
             size = op.getIn(2).getSize();
             offoff = AddrSpace::addressToByte(offoff, baseoff.getWordSize());

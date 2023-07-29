@@ -22,20 +22,20 @@ namespace Sla.EXTRA
 
             s >> ws >> oldname >> ws >> newname >> ws;
             if (oldname.size() == 0)
-                throw IfaceParseError("Missing old symbol name");
+                throw new IfaceParseError("Missing old symbol name");
             if (newname.size() == 0)
-                throw IfaceParseError("Missing new name");
+                throw new IfaceParseError("Missing new name");
 
             Symbol* sym;
             List<Symbol*> symList;
             dcp.readSymbol(oldname, symList);
 
             if (symList.empty())
-                throw IfaceExecutionError("No symbol named: " + oldname);
+                throw new IfaceExecutionError("No symbol named: " + oldname);
             if (symList.size() == 1)
                 sym = symList[0];
             else
-                throw IfaceExecutionError("More than one symbol named: " + oldname);
+                throw new IfaceExecutionError("More than one symbol named: " + oldname);
 
             if (sym.getCategory() == Symbol::function_parameter)
                 dcp.fd.getFuncProto().setInputLock(true);

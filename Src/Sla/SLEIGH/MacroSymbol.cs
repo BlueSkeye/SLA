@@ -22,7 +22,7 @@ namespace Sla.SLEIGH
             : base(nm)
         {
             index = i;
-            construct = (ConstructTpl*)0;
+            construct = (ConstructTpl)null;
         }
         
         public int getIndex() => index;
@@ -36,7 +36,7 @@ namespace Sla.SLEIGH
 
         public void addOperand(OperandSymbol sym)
         {
-            operands.push_back(sym);
+            operands.Add(sym);
         }
 
         public int getNumOperands() => operands.size();
@@ -45,7 +45,7 @@ namespace Sla.SLEIGH
 
         ~MacroSymbol()
         {
-            if (construct != (ConstructTpl*)0) delete construct;
+            if (construct != (ConstructTpl)null) delete construct;
         }
 
         public override symbol_type getType() => macro_symbol;

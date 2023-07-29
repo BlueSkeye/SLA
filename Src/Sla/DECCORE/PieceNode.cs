@@ -68,7 +68,7 @@ namespace Sla.DECCORE
             PcodeOp* def = vn.getDef();
             if (def.code() != CPUI_PIECE) return true;
             PcodeOp* op = vn.loneDescend();
-            if (op == (PcodeOp*)0) return true;
+            if (op == (PcodeOp)null) return true;
             if (vn.isAddrTied())
             {
                 Address addr = rootVn.getAddr() + typeOffset;
@@ -87,7 +87,7 @@ namespace Sla.DECCORE
             while (vn.isProtoPartial() || vn.isAddrTied())
             {
                 list<PcodeOp*>::const_iterator iter = vn.beginDescend();
-                PcodeOp* pieceOp = (PcodeOp*)0;
+                PcodeOp* pieceOp = (PcodeOp)null;
                 while (iter != vn.endDescend())
                 {
                     PcodeOp* op = *iter;
@@ -100,7 +100,7 @@ namespace Sla.DECCORE
                     addr.renormalize(vn.getSize());        // Allow for possible join address
                     if (addr == vn.getAddr())
                     {
-                        if (pieceOp != (PcodeOp*)0)
+                        if (pieceOp != (PcodeOp)null)
                         {       // If there is more than one valid PIECE
                             if (op.compareOrder(pieceOp))  // Attach this to earliest one
                                 pieceOp = op;
@@ -109,7 +109,7 @@ namespace Sla.DECCORE
                             pieceOp = op;
                     }
                 }
-                if (pieceOp == (PcodeOp*)0)
+                if (pieceOp == (PcodeOp)null)
                     break;
                 vn = pieceOp.getOut();
             }

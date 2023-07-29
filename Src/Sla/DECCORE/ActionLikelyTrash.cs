@@ -80,7 +80,7 @@ namespace Sla.DECCORE
             ulong val;
             uint traced = 0;
             vn.setMark();
-            markedlist.push_back(vn);
+            markedlist.Add(vn);
             bool istrash = true;
 
             while (traced < markedlist.size())
@@ -102,11 +102,11 @@ namespace Sla.DECCORE
                                 if (!outvn.isMark())
                                 {
                                     outvn.setMark();
-                                    markedlist.push_back(outvn);
+                                    markedlist.Add(outvn);
                                 }
                             }
                             else
-                                indlist.push_back(op);
+                                indlist.Add(op);
                             break;
                         case CPUI_SUBPIECE:
                             if (outvn.isPersist())
@@ -116,7 +116,7 @@ namespace Sla.DECCORE
                                 if (!outvn.isMark())
                                 {
                                     outvn.setMark();
-                                    markedlist.push_back(outvn);
+                                    markedlist.Add(outvn);
                                 }
                             }
                             break;
@@ -129,7 +129,7 @@ namespace Sla.DECCORE
                                 if (!op.isMark())
                                 {
                                     op.setMark();
-                                    allroutes.push_back(op);
+                                    allroutes.Add(op);
                                 }
                                 uint nummark = countMarks(op);
                                 if (nummark == op.numInput())
@@ -137,7 +137,7 @@ namespace Sla.DECCORE
                                     if (!outvn.isMark())
                                     {
                                         outvn.setMark();
-                                        markedlist.push_back(outvn);
+                                        markedlist.Add(outvn);
                                     }
                                 }
                             }
@@ -147,10 +147,10 @@ namespace Sla.DECCORE
                             if (op.getIn(1).isConstant())
                             {
                                 val = op.getIn(1).getOffset();
-                                ulong mask = calc_mask(op.getIn(1).getSize());
+                                ulong mask = Globals.calc_mask(op.getIn(1).getSize());
                                 if ((val == ((mask << 8) & mask)) || (val == ((mask << 16) & mask)) || (val == ((mask << 32) & mask)))
                                 {
-                                    indlist.push_back(op);
+                                    indlist.Add(op);
                                     break;
                                 }
                             }
@@ -198,7 +198,7 @@ namespace Sla.DECCORE
             {
                 VarnodeData vdata = *iter;
                 Varnode* vn = data.findCoveredInput(vdata.size, vdata.getAddr());
-                if (vn == (Varnode*)0) continue;
+                if (vn == (Varnode)null) continue;
                 if (vn.isTypeLock() || vn.isNameLock()) continue;
                 indlist.clear();
                 if (!traceTrash(vn, indlist)) continue;

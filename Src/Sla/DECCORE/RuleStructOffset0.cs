@@ -75,7 +75,7 @@ namespace Sla.DECCORE
                 if (baseType.getSize() < movesize)
                     return 0;               // Moving something bigger than entire structure
                 Datatype* subType = baseType.getSubType(offset, &offset); // Get field at pointer's offset
-                if (subType == (Datatype*)0) return 0;
+                if (subType == (Datatype)null) return 0;
                 if (subType.getSize() < movesize) return 0;    // Subtype is too small to handle LOAD/STORE
                                                                 //    if (baseType.getSize() == movesize) {
                                                                 // If we reach here, move is same size as the structure, which is the same size as

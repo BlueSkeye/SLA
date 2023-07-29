@@ -24,9 +24,9 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("Image not loaded");
-            if (dcp.fd == (Funcdata*)0)
-                throw IfaceExecutionError("No function selected");
+                throw new IfaceExecutionError("Image not loaded");
+            if (dcp.fd == (Funcdata)null)
+                throw new IfaceExecutionError("No function selected");
 
             bool useFullWidener;
             string token;
@@ -38,16 +38,16 @@ namespace Sla.EXTRA
                 useFullWidener = false;
             }
             else
-                throw IfaceParseError("Must specify \"full\" or \"partial\" widening");
+                throw new IfaceParseError("Must specify \"full\" or \"partial\" widening");
             Varnode* vn = dcp.readVarnode(s);
             List<Varnode*> sinks;
             List<PcodeOp*> reads;
-            sinks.push_back(vn);
+            sinks.Add(vn);
             for (list<PcodeOp*>::const_iterator iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {
                 PcodeOp* op = *iter;
                 if (op.code() == CPUI_LOAD || op.code() == CPUI_STORE)
-                    reads.push_back(op);
+                    reads.Add(op);
             }
             Varnode* stackReg = dcp.fd.findSpacebaseInput(dcp.conf.getStackSpace());
             ValueSetSolver vsSolver;

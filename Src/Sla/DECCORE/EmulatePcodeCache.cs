@@ -54,7 +54,7 @@ namespace Sla.DECCORE
         private void createInstruction(Address addr)
         {
             clearCache();
-            PcodeEmitCache emit(opcache, varcache, inst,0);
+            PcodeEmitCache emit = new PcodeEmitCache(opcache, varcache, inst,0);
             instruction_length = trans.oneInstruction(emit, addr);
             current_op = 0;
             instruction_start = true;

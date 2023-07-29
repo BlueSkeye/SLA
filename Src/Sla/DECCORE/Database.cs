@@ -44,7 +44,7 @@ namespace Sla.DECCORE
         private void clearResolve(Scope scope)
         {
             if (scope == globalscope) return;       // Does not apply to the global scope
-            if (scope.fd != (Funcdata*)0) return;  // Does not apply to functional scopes
+            if (scope.fd != (Funcdata)null) return;  // Does not apply to functional scopes
 
             set<Range>::const_iterator iter;
 
@@ -86,7 +86,7 @@ namespace Sla.DECCORE
         private void fillResolve(Scope scope)
         {
             if (scope == globalscope) return;       // Does not apply to the global scope
-            if (scope.fd != (Funcdata*)0) return;  // Does not apply to functional scopes
+            if (scope.fd != (Funcdata)null) return;  // Does not apply to functional scopes
 
             set<Range>::const_iterator iter;
             for (iter = scope.rangetree.begin(); iter != scope.rangetree.end(); ++iter)
@@ -107,7 +107,7 @@ namespace Sla.DECCORE
             uint elemId = decoder.openElement(ELEM_PARENT);
             ulong id = decoder.readUnsignedInteger(ATTRIB_ID);
             Scope* res = resolveScope(id);
-            if (res == (Scope*)0)
+            if (res == (Scope)null)
                 throw new LowlevelError("Could not find scope matching id");
             decoder.closeElement(elemId);
             return res;
@@ -120,14 +120,14 @@ namespace Sla.DECCORE
         public Database(Architecture g, bool idByName)
         {
             glb = g;
-            globalscope = (Scope*)0;
+            globalscope = (Scope)null;
             flagbase.defaultValue() = 0;
             idByNameHash = idByName;
         }
 
         ~Database()
         {
-            if (globalscope != (Scope*)0)
+            if (globalscope != (Scope)null)
                 deleteScope(globalscope);
         }
 
@@ -155,9 +155,9 @@ namespace Sla.DECCORE
         /// \param parent is the parent Scope or NULL
         public void attachScope(Scope newscope, Scope parent)
         {
-            if (parent == (Scope*)0)
+            if (parent == (Scope)null)
             {
-                if (globalscope != (Scope*)0)
+                if (globalscope != (Scope)null)
                     throw new LowlevelError("Multiple global scopes");
                 if (newscope.name.size() != 0)
                     throw new LowlevelError("Global scope does not have empty name");
@@ -188,7 +188,7 @@ namespace Sla.DECCORE
             clearReferences(scope);
             if (globalscope == scope)
             {
-                globalscope = (Scope*)0;
+                globalscope = (Scope)null;
                 delete scope;
             }
             else
@@ -285,12 +285,12 @@ namespace Sla.DECCORE
             ScopeMap::const_iterator iter = idmap.find(id);
             if (iter != idmap.end())
                 return (*iter).second;
-            return (Scope*)0;
+            return (Scope)null;
         }
 
         /// \brief Get the Scope (and base name) associated with a qualified Symbol name
         ///
-        /// The name is parsed using a \b delimiter that is passed in. The name can
+        /// The name is parsed using a \b delimiter that is passed @in. The name can
         /// be only partially qualified by passing in a starting Scope, which the
         /// name is assumed to be relative to. If the starting scope is \b null, or the name
         /// starts with the delimiter, the name is assumed to be relative to the global Scope.
@@ -303,7 +303,7 @@ namespace Sla.DECCORE
         public Scope resolveScopeFromSymbolName(string fullname, string delim, string basename,
             Scope start)
         {
-            if (start == (Scope*)0)
+            if (start == (Scope)null)
                 start = globalscope;
 
             string::size_type mark = 0;
@@ -320,7 +320,7 @@ namespace Sla.DECCORE
                 {
                     string scopename = fullname.substr(mark, endmark - mark);
                     start = start.resolveScope(scopename, idByNameHash);
-                    if (start == (Scope*)0) // Was the scope name bad
+                    if (start == (Scope)null) // Was the scope name bad
                         return start;
                 }
                 mark = endmark + delim.size();
@@ -339,7 +339,7 @@ namespace Sla.DECCORE
         public Scope findCreateScope(ulong, string nm, Scope parent)
         {
             Scope* res = resolveScope(id);
-            if (res != (Scope*)0)
+            if (res != (Scope)null)
                 return res;
             res = globalscope.buildSubScope(id, nm);
             attachScope(res, parent);
@@ -348,7 +348,7 @@ namespace Sla.DECCORE
 
         /// \brief Find and/or create Scopes associated with a qualified Symbol name
         ///
-        /// The name is parsed using a \b delimiter that is passed in. The name can
+        /// The name is parsed using a \b delimiter that is passed @in. The name can
         /// be only partially qualified by passing in a starting Scope, which the
         /// name is assumed to be relative to. Otherwise the name is assumed to be
         /// relative to the global Scope.  The unqualified (base) name of the Symbol
@@ -361,7 +361,7 @@ namespace Sla.DECCORE
         public Scope findCreateScopeFromSymbolName(string fullname, string delim, string basename,
             Scope start)
         {
-            if (start == (Scope*)0)
+            if (start == (Scope)null)
                 start = globalscope;
 
             string::size_type mark = 0;
@@ -513,7 +513,7 @@ namespace Sla.DECCORE
                 encoder.closeElement(ELEM_PROPERTY_CHANGEPOINT);
             }
 
-            if (globalscope != (Scope*)0)
+            if (globalscope != (Scope)null)
                 globalscope.encodeRecursive(encoder, true);        // Save the global scopes
             encoder.closeElement(ELEM_DB);
         }
@@ -569,7 +569,7 @@ namespace Sla.DECCORE
                 }
                 if (name.empty() || !seenId)
                     throw DecoderError("Missing name and id attributes in scope");
-                Scope* parentScope = (Scope*)0;
+                Scope* parentScope = (Scope)null;
                 uint parentId = decoder.peekElement();
                 if (parentId == ELEM_PARENT)
                 {

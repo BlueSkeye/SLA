@@ -25,10 +25,10 @@ namespace Sla.DECCORE
             int hislot = andop.getSlot(hi);
             if (andop.getIn(1 - hislot) != lo) return false;   // hi and lo must be ANDed together
             compareop = andop.getOut().loneDescend();
-            if (compareop == (PcodeOp*)0) return false;
+            if (compareop == (PcodeOp)null) return false;
             if ((compareop.code() != CPUI_INT_EQUAL) && (compareop.code() != CPUI_INT_NOTEQUAL))
                 return false;
-            ulong allonesval = calc_mask(lo.getSize());
+            ulong allonesval = Globals.calc_mask(lo.getSize());
             smallc = compareop.getIn(1);
             if (!smallc.isConstant()) return false;
             if (smallc.getOffset() != allonesval) return false;
@@ -45,10 +45,10 @@ namespace Sla.DECCORE
             if (!workishi) return false;
             if (!i.hasBothPieces()) return false;
             @in = i;
-            if (!verify(@in.getHi(), @in.getLo(), op))
+            if (!verify(@@in.getHi(), @@in.getLo(), op))
                 return false;
 
-            SplitVarnode in2(@in.getSize(), Globals.calc_mask(@in.getSize()));    // Create the -1 value
+            SplitVarnode in2 = new SplitVarnode(@@in.getSize(), Globals.calc_mask(@@in.getSize()));    // Create the -1 value
             if (!SplitVarnode::prepareBoolOp(@in, in2, compareop)) return false;
             SplitVarnode::replaceBoolOp(data, compareop, @in, in2, compareop.code());
             return true;

@@ -45,7 +45,7 @@ namespace Sla.SLEIGH
             OperandSymbol* sym = ct.getOperand(index);
             if (!sym.isMarked())
             {
-                order.push_back(sym);
+                order.Add(sym);
                 sym.setMark();
             }
         }

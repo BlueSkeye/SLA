@@ -104,7 +104,7 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Unknown userop name in <jumpassist>: " + name);
             if (dynamic_cast<UnspecializedPcodeOp*>(base) == (UnspecializedPcodeOp*)0)  // Make sure the userop isn't used for some other purpose
                 throw new LowlevelError("<jumpassist> overloads userop with another purpose: " + name);
-            useropindex = base.getIndex(); // Get the index from the core userop
+            useropindex = @base.getIndex(); // Get the index from the core userop
         }
     }
 }

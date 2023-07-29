@@ -48,7 +48,7 @@ namespace Sla.DECCORE
         public override ProtoParameter setInput(int i, string nm, ParameterPieces pieces)
         {
             while (inparam.size() <= i)
-                inparam.push_back((ProtoParameter*)0);
+                inparam.Add((ProtoParameter*)0);
             if (inparam[i] != (ProtoParameter*)0)
                 delete inparam[i];
             inparam[i] = new ParameterBasic(nm, pieces.addr, pieces.type, pieces.flags);
@@ -120,7 +120,7 @@ namespace Sla.DECCORE
                 ProtoParameter* param = inparam[i];
                 if (param != (ProtoParameter*)0)
                     param = param.clone();
-                res.inparam.push_back(param);
+                res.inparam.Add(param);
             }
             return res;
         }
@@ -177,8 +177,8 @@ namespace Sla.DECCORE
             List<string> namelist;
             bool addressesdetermined = true;
 
-            pieces.push_back(ParameterPieces()); // Push on placeholder for output pieces
-            namelist.push_back("ret");
+            pieces.Add(ParameterPieces()); // Push on placeholder for output pieces
+            namelist.Add("ret");
             pieces.back().type = outparam.getType();
             pieces.back().flags = 0;
             if (outparam.isTypeLocked())
@@ -228,7 +228,7 @@ namespace Sla.DECCORE
                     }
                 }
                 if ((flags & ParameterPieces::hiddenretparm) == 0)
-                    namelist.push_back(name);
+                    namelist.Add(name);
                 pieces.emplace_back();
                 ParameterPieces & curparam(pieces.back());
                 curparam.addr = Address::decode(decoder);
@@ -246,7 +246,7 @@ namespace Sla.DECCORE
                 // the model to derive them from type info
                 List<Datatype*> typelist;
                 for (int i = 0; i < pieces.size(); ++i) // Save off the decoded types
-                    typelist.push_back(pieces[i].type);
+                    typelist.Add(pieces[i].type);
                 List<ParameterPieces> addrPieces;
                 model.assignParameterStorage(typelist, addrPieces, true);
                 addrPieces.swap(pieces);

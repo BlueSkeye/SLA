@@ -128,7 +128,7 @@ namespace Sla.DECCORE
             foreach (Rule iter in allrules) {
                 iter.clearBreakPoints();
             }
-            base.clearBreakPoints();
+            @base.clearBreakPoints();
         }
 
         public override Action? clone(ActionGroupList grouplist)
@@ -148,7 +148,7 @@ namespace Sla.DECCORE
 
         public override void reset(Funcdata data)
         {
-            base.reset(data);
+            @base.reset(data);
             foreach (Rule iter in allrules) {
                 iter.reset(data);
             }
@@ -156,7 +156,7 @@ namespace Sla.DECCORE
 
         public override void resetStats()
         {
-            base.resetStats();
+            @base.resetStats();
             foreach (Rule iter in allrules) {
                 iter.resetStats();
             }
@@ -180,7 +180,7 @@ namespace Sla.DECCORE
 
         public override int print(TextWriter s, int num, int depth)
         {
-            num = base.print(s, num, depth);
+            num = @base.print(s, num, depth);
             s.WriteLine();
             depth += 1;
             foreach (Rule iter in allrules) {
@@ -199,7 +199,7 @@ namespace Sla.DECCORE
 
         public override void printState(TextWriter s)
         {
-            base.printState(s);
+            @base.printState(s);
             if (status == statusflags.status_mid) {
                 PcodeOp op = (*op_state).second;
                 s.Write($" {op.getSeqNum()}");
@@ -239,7 +239,7 @@ namespace Sla.DECCORE
 
         public override void printStatistics(TextWriter s)
         {
-            base.printStatistics(s);
+            @base.printStatistics(s);
             foreach (Rule iter in allrules) {
                 iter.printStatistics(s);
             }
@@ -248,7 +248,7 @@ namespace Sla.DECCORE
 #if OPACTION_DEBUG
         public override bool turnOnDebug(string nm)
         {
-            if (base.turnOnDebug(nm)) {
+            if (@base.turnOnDebug(nm)) {
                 return true;
             }
             foreach (Rule iter in allrules) {
@@ -263,7 +263,7 @@ namespace Sla.DECCORE
         {
             List<Rule *>::iterator iter;
 
-            if (base.turnOffDebug(nm)) {
+            if (@base.turnOffDebug(nm)) {
                 return true;
             }
             foreach (Rule iter in allrules) {

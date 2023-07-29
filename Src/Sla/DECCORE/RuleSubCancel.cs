@@ -34,25 +34,26 @@ namespace Sla.DECCORE
         ///  - `sub(zext(V),c)  =>  0  when c is big enough`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_SUBPIECE);
+            oplist.Add(CPUI_SUBPIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {               // A SUBPIECE of an extension may cancel
-            Varnode * base,*thruvn;
+            Varnode @base;
+            Varnode thruvn;
             int offset, outsize, insize, farinsize;
-            PcodeOp* extop;
+            PcodeOp extop;
             OpCode opc;
 
-            base = op.getIn(0);
-            if (!base.isWritten()) return 0;
-            extop = base.getDef();
+            @base = op.getIn(0);
+            if (!@@base.isWritten()) return 0;
+            extop = @@base.getDef();
             opc = extop.code();
             if ((opc != CPUI_INT_ZEXT) && (opc != CPUI_INT_SEXT))
                 return 0;
             offset = op.getIn(1).getOffset();
             outsize = op.getOut().getSize();
-            insize = base.getSize();
+            insize = @@base.getSize();
             farinsize = extop.getIn(0).getSize();
 
             if (offset == 0)

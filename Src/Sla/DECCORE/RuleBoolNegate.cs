@@ -35,7 +35,7 @@ namespace Sla.DECCORE
         /// This supports signed and floating-point variants as well
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_BOOL_NEGATE);
+            oplist.Add(CPUI_BOOL_NEGATE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

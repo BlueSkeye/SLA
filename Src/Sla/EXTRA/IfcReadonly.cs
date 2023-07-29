@@ -20,13 +20,13 @@ namespace Sla.EXTRA
         {
             int size = 0;
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("No load image present");
+                throw new IfaceExecutionError("No load image present");
             Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read required address
 
             if (size == 0)
-                throw IfaceExecutionError("Must specify a size");
-            Range range(addr.getSpace(), addr.getOffset(), addr.getOffset() +(size - 1));
-            dcp.conf.symboltab.setPropertyRange(Varnode::readonly, range);
+                throw new IfaceExecutionError("Must specify a size");
+            CORE.Range range = new CORE.Range(addr.getSpace(), addr.getOffset(), addr.getOffset() +(size - 1));
+            dcp.conf.symboltab.setPropertyRange(Varnode::@readonly, range);
 
             *status.optr << "Successfully marked range as readonly" << endl;
         }

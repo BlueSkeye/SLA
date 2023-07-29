@@ -14,8 +14,8 @@ namespace Sla.EXTRA
         /// \brief Print the current function using C syntax:`print C`
         public override void execute(TextReader s)
         {
-            if (dcp.fd == (Funcdata*)0)
-                throw IfaceExecutionError("No function selected");
+            if (dcp.fd == (Funcdata)null)
+                throw new IfaceExecutionError("No function selected");
 
             dcp.conf.print.setOutputStream(status.fileoptr);
             dcp.conf.print.docFunction(dcp.fd);

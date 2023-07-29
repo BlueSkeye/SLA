@@ -33,7 +33,7 @@ namespace Sla.EXTRA
             PcodeOp* op = state.data(opindex).getOp();
             Varnode* vn = op.getIn(slot);
             if (!vn.isConstant()) return false;
-            if (vn.getOffset() != (val & calc_mask(vn.getSize()))) return false;
+            if (vn.getOffset() != (val & Globals.calc_mask(vn.getSize()))) return false;
             return true;
         }
 
@@ -49,7 +49,7 @@ namespace Sla.EXTRA
             printstate.printAbort(s);
             printstate.printIndent(s);
             s << "if (" << printstate.getName(opindex) << ".getIn(" << dec << slot << ").getOffset() != 0x";
-            s << hex << val << " & calc_mask(" << printstate.getName(opindex) << ".getIn(" << dec;
+            s << hex << val << " & Globals.calc_mask(" << printstate.getName(opindex) << ".getIn(" << dec;
             s << slot << ").getSize()))" << endl;
             printstate.printAbort(s);
         }

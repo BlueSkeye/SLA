@@ -26,8 +26,8 @@ namespace Sla.DECCORE
         /// \brief Replace (casttosmall)(casttobig)V with identity or with single cast
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_FLOAT_FLOAT2FLOAT);
-            oplist.push_back(CPUI_FLOAT_TRUNC);
+            oplist.Add(CPUI_FLOAT_FLOAT2FLOAT);
+            oplist.Add(CPUI_FLOAT_TRUNC);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

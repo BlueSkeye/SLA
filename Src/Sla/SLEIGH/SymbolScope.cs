@@ -40,7 +40,7 @@ namespace Sla.SLEIGH
             iter = tree.find(&dummy);
             if (iter != tree.end())
                 return *iter;
-            return (SleighSymbol*)0;
+            return (SleighSymbol)null;
         }
 
         public SymbolTree::const_iterator begin() => tree.begin();

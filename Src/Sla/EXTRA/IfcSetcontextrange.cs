@@ -19,19 +19,19 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("No load image present");
+                throw new IfaceExecutionError("No load image present");
 
             string name;
             s >> name >> ws;
 
             if (name.size() == 0)
-                throw IfaceParseError("Missing context variable name");
+                throw new IfaceParseError("Missing context variable name");
 
             s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
             uint value = 0xbadbeef;
             s >> value;
             if (value == 0xbadbeef)
-                throw IfaceParseError("Missing context value");
+                throw new IfaceParseError("Missing context value");
 
             s >> ws;
 
@@ -47,9 +47,9 @@ namespace Sla.EXTRA
             Address addr2 = parse_machaddr(s, size2, *dcp.conf.types); // Read end address
 
             if (addr1.isInvalid() || addr2.isInvalid())
-                throw IfaceParseError("Invalid address range");
+                throw new IfaceParseError("Invalid address range");
             if (addr2 <= addr1)
-                throw IfaceParseError("Bad address range");
+                throw new IfaceParseError("Bad address range");
 
             dcp.conf.context.setVariableRegion(name, addr1, addr2, value);
         }

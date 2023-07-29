@@ -48,7 +48,7 @@ namespace Sla.EXTRA
             for (iter = list.begin(); iter != list.end(); ++iter)
             {
                 Element subel = *iter;
-                commands.push_back(subel.getContent());
+                commands.Add(subel.getContent());
             }
         }
 
@@ -57,7 +57,7 @@ namespace Sla.EXTRA
         {
             ArchitectureCapability* capa = ArchitectureCapability::getCapability("xml");
             if (capa == (ArchitectureCapability*)0)
-                throw IfaceExecutionError("Missing XML architecture capability");
+                throw new IfaceExecutionError("Missing XML architecture capability");
             dcp.conf = capa.buildArchitecture("test", "", console.optr);
             string errmsg;
             bool iserror = false;
@@ -74,7 +74,7 @@ namespace Sla.EXTRA
                 iserror = true;
             }
             if (iserror)
-                throw IfaceExecutionError("Error during architecture initialization: " + errmsg);
+                throw new IfaceExecutionError("Error during architecture initialization: " + errmsg);
         }
 
         /// Initialize each FunctionTestProperty
@@ -120,7 +120,7 @@ namespace Sla.EXTRA
                 else
                 {
                     *console.optr << "FAIL -- " << (*iter).getName() << endl;
-                    lateStream.push_back((*iter).getName());
+                    lateStream.Add((*iter).getName());
                 }
             }
         }
@@ -179,7 +179,7 @@ namespace Sla.EXTRA
             else if (el.getName() == "binaryimage")
                 restoreXmlOldForm(docStorage, el);
             else
-                throw IfaceParseError("Test file " + filename + " has unrecognized XML tag: " + el.getName());
+                throw new IfaceParseError("Test file " + filename + " has unrecognized XML tag: " + el.getName());
         }
 
         /// Load tests from a \<decompilertest> tag.
@@ -212,21 +212,21 @@ namespace Sla.EXTRA
                     buildProgram(store);
                 }
                 else
-                    throw IfaceParseError("Unknown tag in <decompiletest>: " + subel.getName());
+                    throw new IfaceParseError("Unknown tag in <decompiletest>: " + subel.getName());
             }
             if (!sawScript)
-                throw IfaceParseError("Did not see <script> tag in <decompiletest>");
+                throw new IfaceParseError("Did not see <script> tag in <decompiletest>");
             if (!sawTests)
-                throw IfaceParseError("Did not see any <stringmatch> tags in <decompiletest>");
+                throw new IfaceParseError("Did not see any <stringmatch> tags in <decompiletest>");
             if (!sawProgram)
-                throw IfaceParseError("No <binaryimage> tag in <decompiletest>");
+                throw new IfaceParseError("No <binaryimage> tag in <decompiletest>");
         }
 
         /// Load tests from \<binaryimage> tag.
         /// Pull the script and tests from a comment in \<binaryimage>
         public void restoreXmlOldForm(DocumentStorage store, Element el)
         {
-            throw IfaceParseError("Old format test not supported");
+            throw new IfaceParseError("Old format test not supported");
         }
 
         /// Run the script and perform the tests
@@ -252,7 +252,7 @@ namespace Sla.EXTRA
                 *console.optr << midBuffer.str() << endl;
                 ostringstream fs;
                 fs << "Execution failed for " << fileName;
-                lateStream.push_back(fs.str());
+                lateStream.Add(fs.str());
                 return;
             }
             string result = bulkout.str();
@@ -260,7 +260,7 @@ namespace Sla.EXTRA
             {
                 ostringstream fs;
                 fs << "No output for " << fileName;
-                lateStream.push_back(fs.str());
+                lateStream.Add(fs.str());
                 return;
             }
             startTests();
@@ -305,12 +305,12 @@ namespace Sla.EXTRA
                     ostringstream fs;
                     fs << "Error parsing " << testFiles[i] << ": " << err.ToString();
                     s << fs.str() << endl;
-                    failures.push_back(fs.str());
+                    failures.Add(fs.str());
                 } catch (IfaceExecutionError err) {
                     ostringstream fs;
                     fs << "Error executing " << testFiles[i] << ": " << err.ToString();
                     s << fs.str() << endl;
-                    failures.push_back(fs.str());
+                    failures.Add(fs.str());
                 }
             }
 

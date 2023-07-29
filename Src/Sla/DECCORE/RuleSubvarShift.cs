@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         /// trigger the full SubvariableFlow analysis.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_RIGHT);
+            oplist.Add(CPUI_INT_RIGHT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -44,7 +44,7 @@ namespace Sla.DECCORE
             mask = (mask >> sa) << sa;
             if (op.getOut().hasNoDescend()) return 0;
 
-            SubvariableFlow subflow(&data,vn,mask,false,false,false);
+            SubvariableFlow subflow = new SubvariableFlow(&data,vn,mask,false,false,false);
             if (!subflow.doTrace()) return 0;
             subflow.doReplacement();
             return 1;

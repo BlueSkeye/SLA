@@ -70,7 +70,7 @@ namespace Sla.DECCORE
         {
             if (pMeld.empty())
             {
-                extravn = (Varnode*)0;
+                extravn = (Varnode)null;
                 return;
             }
             // Initialize at point where the JumpBasic model failed
@@ -88,11 +88,11 @@ namespace Sla.DECCORE
           // calculation to the BRANCHIND
 
             // We piggy back on the partial calculation from the basic model to see if we have the MULTIEQUAL
-            Varnode* othervn = (Varnode*)0;
-            PcodeOp* copyop = (PcodeOp*)0;
+            Varnode* othervn = (Varnode)null;
+            PcodeOp* copyop = (PcodeOp)null;
             ulong extravalue = 0;
             Varnode* joinvn = extravn;  // extravn should be set to as far back as model 1 could trace
-            if (joinvn == (Varnode*)0) return false;
+            if (joinvn == (Varnode)null) return false;
             if (!joinvn.isWritten()) return false;
             PcodeOp* multiop = joinvn.getDef();
             if (multiop.code() != CPUI_MULTIEQUAL) return false;
@@ -162,7 +162,7 @@ namespace Sla.DECCORE
 
         public override void clear()
         {
-            extravn = (Varnode*)0;
+            extravn = (Varnode)null;
             origPathMeld.clear();
             JumpBasic::clear();
         }

@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         ///   - `carry(V,0)  => false`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_CARRY);
+            oplist.Add(CPUI_INT_CARRY);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -48,7 +48,7 @@ namespace Sla.DECCORE
                 data.opSetOpcode(op, CPUI_COPY);
                 return 1;
             }
-            off = (-off) & calc_mask(vn2.getSize()); // Take twos-complement of constant
+            off = (-off) & Globals.calc_mask(vn2.getSize()); // Take twos-complement of constant
 
             data.opSetOpcode(op, CPUI_INT_LESSEQUAL);
             data.opSetInput(op, vn1, 1);    // Move other input to second position

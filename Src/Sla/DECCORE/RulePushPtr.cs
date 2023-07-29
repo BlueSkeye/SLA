@@ -39,15 +39,15 @@ namespace Sla.DECCORE
             {
                 if (!vn.isWritten()) return;
                 if (vn.isAutoLive()) return;
-                if (vn.loneDescend() == (PcodeOp*)0) return;   // Already has multiple descendants
+                if (vn.loneDescend() == (PcodeOp)null) return;   // Already has multiple descendants
                 PcodeOp* op = vn.getDef();
                 OpCode opc = op.code();
                 if (opc == CPUI_INT_ZEXT || opc == CPUI_INT_SEXT || opc == CPUI_INT_2COMP)
-                    reslist.push_back(op);
+                    reslist.Add(op);
                 else if (opc == CPUI_INT_MULT)
                 {
                     if (op.getIn(1).isConstant())
-                        reslist.push_back(op);
+                        reslist.Add(op);
                 }
                 else
                     return;
@@ -73,13 +73,13 @@ namespace Sla.DECCORE
         /// onto the expression calculating the offset into its data-type.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_ADD);
+            oplist.Add(CPUI_INT_ADD);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
             int slot;
-            Varnode* vni = (Varnode*)0;
+            Varnode* vni = (Varnode)null;
 
             if (!data.hasTypeRecoveryStarted()) return 0;
             for (slot = 0; slot < op.numInput(); ++slot)
@@ -93,7 +93,7 @@ namespace Sla.DECCORE
             Varnode* vn = op.getOut();
             Varnode* vnadd2 = op.getIn(1 - slot);
             List<PcodeOp*> duplicateList;
-            if (vn.loneDescend() == (PcodeOp*)0)
+            if (vn.loneDescend() == (PcodeOp)null)
                 collectDuplicateNeeds(duplicateList, vnadd2);
 
             for (; ; )

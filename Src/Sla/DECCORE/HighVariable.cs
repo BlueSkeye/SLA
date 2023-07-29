@@ -283,7 +283,7 @@ namespace Sla.DECCORE
                 }
             }
             List<Varnode*> instcopy(inst);
-            inst.resize(inst.size() + tv2.inst.size(), (Varnode*)0);
+            inst.resize(inst.size() + tv2.inst.size(), (Varnode)null);
             std::merge(instcopy.begin(), instcopy.end(), tv2.inst.begin(), tv2.inst.end(), inst.begin(), compareJustLoc);
             tv2.inst.clear();
 
@@ -377,7 +377,7 @@ namespace Sla.DECCORE
                 symboloffset = vn.getAddr().overlapJoin(0, entry.getAddr(), symbol.getType().getSize()) + entry.getOffset();
             }
 
-            if (type != (Datatype*)0 && type.getMetatype() == TYPE_PARTIALUNION)
+            if (type != (Datatype)null && type.getMetatype() == TYPE_PARTIALUNION)
                 highflags |= typedirty;
             highflags &= ~((uint)symboldirty);     // We are no longer dirty
         }
@@ -456,12 +456,12 @@ namespace Sla.DECCORE
             numMergeClasses = 1;
             highflags = flagsdirty | namerepdirty | typedirty | coverdirty;
             flags = 0;
-            type = (Datatype*)0;
+            type = (Datatype)null;
             piece = (VariablePiece*)0;
             symbol = (Symbol*)0;
-            nameRepresentative = (Varnode*)0;
+            nameRepresentative = (Varnode)null;
             symboloffset = -1;
-            inst.push_back(vn);
+            inst.Add(vn);
             vn.setHigh(this, numMergeClasses - 1);
             if (vn.getSymbolEntry() != (SymbolEntry*)0)
                 setSymbol(vn);
@@ -1027,7 +1027,7 @@ namespace Sla.DECCORE
         {
             HighVariable* high = vn.getHigh();
             high.setMark();
-            highList.push_back(high);
+            highList.Add(high);
             int retVal = 0;
             if (!vn.isWritten()) return retVal;
 
@@ -1037,7 +1037,7 @@ namespace Sla.DECCORE
                 retVal |= 1;
             if (op.code() == CPUI_LOAD)
                 retVal |= 2;
-            path.push_back(PcodeOpNode(op, 0));
+            path.Add(PcodeOpNode(op, 0));
             while (!path.empty())
             {
                 PcodeOpNode & node(path.back());
@@ -1054,7 +1054,7 @@ namespace Sla.DECCORE
                     high = curVn.getHigh();
                     if (high.isMark()) continue;   // Already in the list
                     high.setMark();
-                    highList.push_back(high);
+                    highList.Add(high);
                     continue;               // Truncate at explicit
                 }
                 if (!curVn.isWritten()) continue;
@@ -1063,7 +1063,7 @@ namespace Sla.DECCORE
                     retVal |= 1;
                 if (op.code() == CPUI_LOAD)
                     retVal |= 2;
-                path.push_back(PcodeOpNode(curVn.getDef(), 0));
+                path.Add(PcodeOpNode(curVn.getDef(), 0));
             }
             return retVal;
         }

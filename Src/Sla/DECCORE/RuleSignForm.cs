@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Normalize sign extraction:  `sub(sext(V),c)  =>  V s>> 31`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_SUBPIECE);
+            oplist.Add(CPUI_SUBPIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

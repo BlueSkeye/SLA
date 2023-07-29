@@ -54,7 +54,7 @@ namespace Sla.EXTRA
         /// \param temp is the new token to add
         public void addWord(string temp)
         {
-            com.push_back(temp);
+            com.Add(temp);
         }
 
         /// Remove the last token from the associated command line string
@@ -72,7 +72,7 @@ namespace Sla.EXTRA
             List<string>::const_iterator iter;
 
             for (iter = wordlist.begin(); iter != wordlist.end(); ++iter)
-                com.push_back(*iter);
+                com.Add(*iter);
         }
 
         public int numWords() => com.size();   ///< Return the number of tokens in the command line string

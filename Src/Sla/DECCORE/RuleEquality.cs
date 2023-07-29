@@ -29,8 +29,8 @@ namespace Sla.DECCORE
         /// the op can be collapsed to a COPY of a \b true or \b false.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_EQUAL);
-            oplist.push_back(CPUI_INT_NOTEQUAL);
+            oplist.Add(CPUI_INT_EQUAL);
+            oplist.Add(CPUI_INT_NOTEQUAL);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

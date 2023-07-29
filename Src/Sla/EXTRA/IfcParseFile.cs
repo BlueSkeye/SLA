@@ -18,18 +18,18 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("No load image present");
+                throw new IfaceExecutionError("No load image present");
 
             string filename;
             ifstream fs;
 
             s >> ws >> filename;
             if (filename.empty())
-                throw IfaceParseError("Missing filename");
+                throw new IfaceParseError("Missing filename");
 
             fs.open(filename.c_str());
             if (!fs)
-                throw IfaceExecutionError("Unable to open file: " + filename);
+                throw new IfaceExecutionError("Unable to open file: " + filename);
 
             try
             {               // Try to parse the file
@@ -38,7 +38,7 @@ namespace Sla.EXTRA
             catch (ParseError err)
             {
                 *status.optr << "Error in C syntax: " << err.ToString() << endl;
-                throw IfaceExecutionError("Bad C syntax");
+                throw new IfaceExecutionError("Bad C syntax");
             }
             fs.close();
         }

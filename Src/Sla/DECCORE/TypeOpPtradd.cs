@@ -49,10 +49,10 @@ namespace Sla.DECCORE
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
             int inslot, int outslot)
         {
-            if ((inslot == 2) || (outslot == 2)) return (Datatype*)0; // Don't propagate along this edge
-            if ((inslot != -1) && (outslot != -1)) return (Datatype*)0; // Must propagate input <. output
+            if ((inslot == 2) || (outslot == 2)) return (Datatype)null; // Don't propagate along this edge
+            if ((inslot != -1) && (outslot != -1)) return (Datatype)null; // Must propagate input <. output
             type_metatype metain = alttype.getMetatype();
-            if (metain != TYPE_PTR) return (Datatype*)0;
+            if (metain != TYPE_PTR) return (Datatype)null;
             Datatype* newtype;
             if (inslot == -1)       // Propagating output to input
                 newtype = op.getIn(outslot).getTempType();    // Don't propagate pointer types this direction

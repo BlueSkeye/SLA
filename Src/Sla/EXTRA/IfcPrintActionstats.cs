@@ -18,9 +18,9 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("Image not loaded");
+                throw new IfaceExecutionError("Image not loaded");
             if (dcp.conf.allacts.getCurrent() == (Action*)0)
-                throw IfaceExecutionError("No action set");
+                throw new IfaceExecutionError("No action set");
 
             dcp.conf.allacts.getCurrent().printStatistics(*status.fileoptr);
         }

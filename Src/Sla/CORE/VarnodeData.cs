@@ -86,7 +86,7 @@ namespace Sla.CORE
 
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return @base.GetHashCode();
         }
 
         /// Get the location of the varnode as an address

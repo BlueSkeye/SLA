@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         internal PcodeOpNode()
         {
-            op = (PcodeOp*)0;
+            op = (PcodeOp)null;
             slot = 0;
         }   ///< Unused constructor
 

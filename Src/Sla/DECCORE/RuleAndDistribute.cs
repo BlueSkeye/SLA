@@ -26,27 +26,30 @@ namespace Sla.DECCORE
         /// \brief Distribute INT_AND through INT_OR if result is simpler
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_AND);
+            oplist.Add(CPUI_INT_AND);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* orvn,*othervn,*newvn1,*newvn2;
-            PcodeOp* orop = (PcodeOp*)0;
-            PcodeOp* newop1,*newop2;
+            Varnode orvn;
+            Varnode othervn;
+            Varnode newvn1;
+            Varnode newvn2;
+            PcodeOp orop = (PcodeOp)null;
+            PcodeOp newop1,*newop2;
             ulong ormask1, ormask2, othermask, fullmask;
             int i, size;
 
             size = op.getOut().getSize();
             if (size > sizeof(ulong)) return 0; // FIXME: ulong should be arbitrary precision
-            fullmask = calc_mask(size);
+            fullmask = Globals.calc_mask(size);
             for (i = 0; i < 2; ++i)
             {
                 othervn = op.getIn(1 - i);
                 if (!othervn.isHeritageKnown()) continue;
                 orvn = op.getIn(i);
                 orop = orvn.getDef();
-                if (orop == (PcodeOp*)0) continue;
+                if (orop == (PcodeOp)null) continue;
                 if (orop.code() != CPUI_INT_OR) continue;
                 if (!orop.getIn(0).isHeritageKnown()) continue;
                 if (!orop.getIn(1).isHeritageKnown()) continue;

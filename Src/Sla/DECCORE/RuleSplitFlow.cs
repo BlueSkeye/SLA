@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         /// If so:  split the pieces into independent data-flows
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_SUBPIECE);
+            oplist.Add(CPUI_SUBPIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -45,7 +45,7 @@ namespace Sla.DECCORE
                 return 0;
             if (op.getOut().getSize() + loSize != vn.getSize())
                 return 0;               // Make sure SUBPIECE is taking most significant part
-            PcodeOp* concatOp = (PcodeOp*)0;
+            PcodeOp* concatOp = (PcodeOp)null;
             PcodeOp* multiOp = vn.getDef();
             while (multiOp.code() == CPUI_INDIRECT)
             {   // PIECE may come through INDIRECT
@@ -72,11 +72,11 @@ namespace Sla.DECCORE
                     }
                 }
             }
-            if (concatOp == (PcodeOp*)0)            // Didn't find the concatenate
+            if (concatOp == (PcodeOp)null)            // Didn't find the concatenate
                 return 0;
             if (concatOp.getIn(1).getSize() != loSize)
                 return 0;
-            SplitFlow splitFlow(&data,vn,loSize);
+            SplitFlow splitFlow = new SplitFlow(&data,vn,loSize);
             if (!splitFlow.doTrace()) return 0;
             splitFlow.apply();
             return 1;

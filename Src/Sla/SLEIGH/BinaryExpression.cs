@@ -18,16 +18,16 @@ namespace Sla.SLEIGH
 
         ~BinaryExpression()
         {               // Delete only non-pattern values
-            if (left != (PatternExpression*)0)
+            if (left != (PatternExpression)null)
                 PatternExpression::release(left);
-            if (right != (PatternExpression*)0)
+            if (right != (PatternExpression)null)
                 PatternExpression::release(right);
         }
 
         public BinaryExpression()
         {
-            left = (PatternExpression*)0;
-            right = (PatternExpression*)0;
+            left = (PatternExpression)null;
+            right = (PatternExpression)null;
         }
 
         public BinaryExpression(PatternExpression l, PatternExpression r)

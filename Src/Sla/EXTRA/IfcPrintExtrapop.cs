@@ -23,7 +23,7 @@ namespace Sla.EXTRA
             s >> ws >> name;
             if (name.size() == 0)
             {
-                if (dcp.fd != (Funcdata*)0)
+                if (dcp.fd != (Funcdata)null)
                 {
                     int num = dcp.fd.numCalls();
                     for (int i = 0; i < num; ++i)
@@ -60,15 +60,15 @@ namespace Sla.EXTRA
             {
                 Funcdata* fd;
                 fd = dcp.conf.symboltab.getGlobalScope().queryFunction(name);
-                if (fd == (Funcdata*)0)
-                    throw IfaceExecutionError("Unknown function: " + name);
+                if (fd == (Funcdata)null)
+                    throw new IfaceExecutionError("Unknown function: " + name);
                 int expop = fd.getFuncProto().getExtraPop();
                 *status.optr << "ExtraPop for function " << name << " is ";
                 if (expop == ProtoModel::extrapop_unknown)
                     *status.optr << "unknown" << endl;
                 else
                     *status.optr << dec << expop << endl;
-                if (dcp.fd != (Funcdata*)0)
+                if (dcp.fd != (Funcdata)null)
                 {
                     int num = dcp.fd.numCalls();
                     for (int i = 0; i < num; ++i)

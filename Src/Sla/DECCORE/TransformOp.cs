@@ -54,7 +54,7 @@ namespace Sla.DECCORE
                 for (int i = 0; i < op.numInput(); ++i)
                     fd.opUnsetInput(op, i);            // Clear any remaining inputs
                 while (op.numInput() < input.size())
-                    fd.opInsertInput(op, (Varnode*)0, op.numInput() - 1);
+                    fd.opInsertInput(op, (Varnode)null, op.numInput() - 1);
             }
             else
             {

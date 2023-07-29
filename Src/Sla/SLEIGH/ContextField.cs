@@ -86,27 +86,27 @@ namespace Sla.SLEIGH
         {
             signbit = xml_readbool(el.getAttributeValue("signbit"));
             {
-                istringstream s(el.getAttributeValue("startbit"));
+                istringstream s = new istringstream(el.getAttributeValue("startbit"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> startbit;
             }
             {
-                istringstream s(el.getAttributeValue("endbit"));
+                istringstream s = new istringstream(el.getAttributeValue("endbit"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> endbit;
             }
             {
-                istringstream s(el.getAttributeValue("startbyte"));
+                istringstream s = new istringstream(el.getAttributeValue("startbyte"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> startbyte;
             }
             {
-                istringstream s(el.getAttributeValue("endbyte"));
+                istringstream s = new istringstream(el.getAttributeValue("endbyte"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> endbyte;
             }
             {
-                istringstream s(el.getAttributeValue("shift"));
+                istringstream s = new istringstream(el.getAttributeValue("shift"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> shift;
             }

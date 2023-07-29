@@ -29,8 +29,8 @@ namespace Sla.DECCORE
         ///   - `(V ^ c) == d  => V == (c^d)`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_EQUAL);
-            oplist.push_back(CPUI_INT_NOTEQUAL);
+            oplist.Add(CPUI_INT_EQUAL);
+            oplist.Add(CPUI_INT_NOTEQUAL);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -39,9 +39,9 @@ namespace Sla.DECCORE
 
             if (!op.getIn(1).isConstant()) return 0;
             PcodeOp* xorop = op.getIn(0).getDef();
-            if (xorop == (PcodeOp*)0) return 0;
+            if (xorop == (PcodeOp)null) return 0;
             if (xorop.code() != CPUI_INT_XOR) return 0;
-            if (op.getIn(0).loneDescend() == (PcodeOp*)0) return 0;
+            if (op.getIn(0).loneDescend() == (PcodeOp)null) return 0;
             coeff1 = op.getIn(1).getOffset();
             Varnode* xorvn = xorop.getIn(1);
             if (xorop.getIn(0).isFree()) return 0; // This will be propagated

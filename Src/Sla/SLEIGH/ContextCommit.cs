@@ -46,18 +46,18 @@ namespace Sla.SLEIGH
         {
             uint id;
             {
-                istringstream s(el.getAttributeValue("id"));
+                istringstream s = new istringstream(el.getAttributeValue("id"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> id;
-                sym = (TripleSymbol*)trans.findSymbol(id);
+                sym = (TripleSymbol)trans.findSymbol(id);
             }
             {
-                istringstream s(el.getAttributeValue("num"));
+                istringstream s = new istringstream(el.getAttributeValue("num"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> num;
             }
             {
-                istringstream s(el.getAttributeValue("mask"));
+                istringstream s = new istringstream(el.getAttributeValue("mask"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> mask;
             }
@@ -74,7 +74,7 @@ namespace Sla.SLEIGH
 
         public override ContextChange clone()
         {
-            ContextCommit* res = new ContextCommit();
+            ContextCommit res = new ContextCommit();
             res.sym = sym;
             res.flow = flow;
             res.mask = mask;

@@ -61,7 +61,7 @@ namespace Sla.DECCORE
         /// \param fd is the function in which to create the replacement
         private void createReplacement(Funcdata fd)
         {
-            if (replacement != (Varnode*)0)
+            if (replacement != (Varnode)null)
                 return;         // Replacement already created
             switch (type)
             {
@@ -122,7 +122,7 @@ namespace Sla.DECCORE
             byteSize = bytes;
             flags = 0;
             def = (TransformOp*)0;
-            replacement = (Varnode*)0;
+            replacement = (Varnode)null;
         }
 
         /// Get the original Varnode \b this placeholder models

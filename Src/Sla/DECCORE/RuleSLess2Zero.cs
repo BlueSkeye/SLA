@@ -21,24 +21,24 @@ namespace Sla.DECCORE
         {
             OpCode opc = op.code();
             if ((opc != CPUI_INT_ADD) && (opc != CPUI_INT_OR) && (opc != CPUI_INT_XOR))
-                return (Varnode*)0;
+                return (Varnode)null;
 
             Varnode* vn1 = op.getIn(0);
             Varnode* vn2 = op.getIn(1);
-            ulong mask = calc_mask(vn1.getSize());
+            ulong mask = Globals.calc_mask(vn1.getSize());
             mask = (mask ^ (mask >> 1));    // Only high-bit is set
             ulong nzmask1 = vn1.getNZMask();
             if ((nzmask1 != mask) && ((nzmask1 & mask) != 0)) // If high-bit is set AND some other bit
-                return (Varnode*)0;
+                return (Varnode)null;
             ulong nzmask2 = vn2.getNZMask();
             if ((nzmask2 != mask) && ((nzmask2 & mask) != 0))
-                return (Varnode*)0;
+                return (Varnode)null;
 
             if (nzmask1 == mask)
                 return vn1;
             if (nzmask2 == mask)
                 return vn2;
-            return (Varnode*)0;
+            return (Varnode)null;
         }
 
         public RuleSLess2Zero(string g)
@@ -75,13 +75,16 @@ namespace Sla.DECCORE
         ///
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_SLESS);
+            oplist.Add(CPUI_INT_SLESS);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* lvn,*rvn,*coeff,*avn;
-            PcodeOp* feedOp;
+            Varnode lvn;
+            Varnode rvn;
+            Varnode coeff;
+            Varnode avn;
+            PcodeOp feedOp;
             OpCode feedOpCode;
             lvn = op.getIn(0);
             rvn = op.getIn(1);
@@ -97,7 +100,7 @@ namespace Sla.DECCORE
                     {
                         coeff = feedOp.getIn(1);
                         if (!coeff.isConstant()) return 0;
-                        if (coeff.getOffset() != calc_mask(coeff.getSize())) return 0;
+                        if (coeff.getOffset() != Globals.calc_mask(coeff.getSize())) return 0;
                         avn = feedOp.getIn(0);
                         if (avn.isFree()) return 0;
                         data.opSetInput(op, avn, 0);
@@ -105,12 +108,12 @@ namespace Sla.DECCORE
                         return 1;
                     }
                 }
-                else if (lvn.getOffset() == calc_mask(lvn.getSize()))
+                else if (lvn.getOffset() == Globals.calc_mask(lvn.getSize()))
                 {
                     feedOp = rvn.getDef();
                     feedOpCode = feedOp.code();
                     Varnode* hibit = getHiBit(feedOp);
-                    if (hibit != (Varnode*)0)
+                    if (hibit != (Varnode)null)
                     { // Test for -1 s<  (hi ^ lo)
                         if (hibit.isConstant())
                             data.opSetInput(op, data.newConstant(hibit.getSize(), hibit.getOffset()), 1);
@@ -129,7 +132,7 @@ namespace Sla.DECCORE
                         {
                             // We have -1 s< SUB( avn, #hi )
                             data.opSetInput(op, avn, 1);
-                            data.opSetInput(op, data.newConstant(avn.getSize(), calc_mask(avn.getSize())), 0);
+                            data.opSetInput(op, data.newConstant(avn.getSize(), Globals.calc_mask(avn.getSize())), 0);
                             return 1;
                         }
                     }
@@ -146,7 +149,7 @@ namespace Sla.DECCORE
                     else if (feedOpCode == CPUI_INT_AND)
                     {
                         avn = feedOp.getIn(0);
-                        if (avn.isFree() || rvn.loneDescend() == (PcodeOp*)0)
+                        if (avn.isFree() || rvn.loneDescend() == (PcodeOp)null)
                             return 0;
 
                         Varnode* maskVn = feedOp.getIn(1);
@@ -169,7 +172,7 @@ namespace Sla.DECCORE
                         if (avn.isFree())
                             return 0;
                         data.opSetInput(op, avn, 1);
-                        data.opSetInput(op, data.newConstant(avn.getSize(), calc_mask(avn.getSize())), 0);
+                        data.opSetInput(op, data.newConstant(avn.getSize(), Globals.calc_mask(avn.getSize())), 0);
                         return 1;
                     }
                 }
@@ -185,7 +188,7 @@ namespace Sla.DECCORE
                     {
                         coeff = feedOp.getIn(1);
                         if (!coeff.isConstant()) return 0;
-                        if (coeff.getOffset() != calc_mask(coeff.getSize())) return 0;
+                        if (coeff.getOffset() != Globals.calc_mask(coeff.getSize())) return 0;
                         avn = feedOp.getIn(0);
                         if (avn.isFree()) return 0;
                         data.opSetInput(op, avn, 1);
@@ -195,7 +198,7 @@ namespace Sla.DECCORE
                     else
                     {
                         Varnode* hibit = getHiBit(feedOp);
-                        if (hibit != (Varnode*)0)
+                        if (hibit != (Varnode)null)
                         { // Test for (hi ^ lo) s< 0
                             if (hibit.isConstant())
                                 data.opSetInput(op, data.newConstant(hibit.getSize(), hibit.getOffset()), 0);
@@ -223,13 +226,13 @@ namespace Sla.DECCORE
                             avn = feedOp.getIn(0);
                             if (avn.isFree()) return 0;
                             data.opSetInput(op, avn, 1);
-                            data.opSetInput(op, data.newConstant(avn.getSize(), calc_mask(avn.getSize())), 0);
+                            data.opSetInput(op, data.newConstant(avn.getSize(), Globals.calc_mask(avn.getSize())), 0);
                             return 1;
                         }
                         else if (feedOpCode == CPUI_INT_AND)
                         {
                             avn = feedOp.getIn(0);
-                            if (avn.isFree() || lvn.loneDescend() == (PcodeOp*)0)
+                            if (avn.isFree() || lvn.loneDescend() == (PcodeOp)null)
                                 return 0;
                             Varnode* maskVn = feedOp.getIn(1);
                             if (maskVn.isConstant())

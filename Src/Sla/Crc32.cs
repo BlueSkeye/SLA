@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sla.DECCORE
+namespace Sla
 {
     internal partial class Globals
     {

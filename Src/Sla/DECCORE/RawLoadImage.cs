@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         {
             vma = 0;
             thefile = (ifstream*)0;
-            spaceid = (AddrSpace*)0;
+            spaceid = (AddrSpace)null;
             filesize = 0;
         }
 

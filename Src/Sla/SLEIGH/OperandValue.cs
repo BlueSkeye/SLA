@@ -50,12 +50,12 @@ namespace Sla.SLEIGH
                         // an expression. 
             OperandSymbol* sym = ct.getOperand(index);
             PatternExpression* patexp = sym.getDefiningExpression();
-            if (patexp == (PatternExpression*)0)
+            if (patexp == (PatternExpression)null)
             {
                 TripleSymbol* defsym = sym.getDefiningSymbol();
-                if (defsym != (TripleSymbol*)0)
+                if (defsym != (TripleSymbol)null)
                     patexp = defsym.getPatternExpression();
-                if (patexp == (PatternExpression*)0)
+                if (patexp == (PatternExpression)null)
                     return 0;
             }
             ConstructState tempstate;
@@ -73,12 +73,12 @@ namespace Sla.SLEIGH
 
         public override long minValue()
         {
-            throw SleighError("Operand used in pattern expression");
+            throw new SleighError("Operand used in pattern expression");
         }
 
         public override long maxValue()
         {
-            throw SleighError("Operand used in pattern expression");
+            throw new SleighError("Operand used in pattern expression");
         }
 
         public override void saveXml(TextWriter s)
@@ -93,17 +93,17 @@ namespace Sla.SLEIGH
         {
             uint ctid, tabid;
             {
-                istringstream s(el.getAttributeValue("index"));
+                istringstream s = new istringstream(el.getAttributeValue("index"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> index;
             }
             {
-                istringstream s(el.getAttributeValue("table"));
+                istringstream s = new istringstream(el.getAttributeValue("table"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> tabid;
             }
             {
-                istringstream s(el.getAttributeValue("ct"));
+                istringstream s = new istringstream(el.getAttributeValue("ct"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> ctid;
             }

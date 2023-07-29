@@ -106,8 +106,8 @@ namespace Sla.DECCORE
                 {
                     if (alreadyseen.insert(newaddr).second) // If this is the first time we've seen this address
                         total += 1;     // Count it
-                    values.push_back(val);
-                    addrtable.push_back(newaddr);
+                    values.Add(val);
+                    addrtable.Add(newaddr);
                     // We may be seeing the same (valid) address over and over, without seeing others in -adset-
                     // Terminate if things get too large
                     if (values.size() > adset.size() + 100) break;
@@ -142,12 +142,12 @@ namespace Sla.DECCORE
                 for (iter = adset.begin(); iter != adset.end(); ++iter)
                 {
                     Address addr = *iter;
-                    addrtable.push_back(addr);
+                    addrtable.Add(addr);
                 }
             }
             values.clear();
             for (int i = 0; i < addrtable.size(); ++i)
-                values.push_back(addrtable[i].getOffset());
+                values.Add(addrtable[i].getOffset());
             varnodeIndex = 0;
             normalvn = pathMeld.getVarnode(0);
             istrivial = true;
@@ -161,7 +161,7 @@ namespace Sla.DECCORE
         /// \return the potential normalized switch variable or null
         private Varnode findLikelyNorm()
         {
-            Varnode* res = (Varnode*)0;
+            Varnode* res = (Varnode)null;
             PcodeOp* op;
             uint i;
 
@@ -174,7 +174,7 @@ namespace Sla.DECCORE
                     break;
                 }
             }
-            if (res == (Varnode*)0) return res;
+            if (res == (Varnode)null) return res;
             i += 1;
             while (i < pathMeld.numOps())
             { // Look for preceding ADD
@@ -205,8 +205,8 @@ namespace Sla.DECCORE
         {
             selectguards.clear();
             pathMeld.clear();
-            normalvn = (Varnode*)0;
-            switchvn = (Varnode*)0;
+            normalvn = (Varnode)null;
+            switchvn = (Varnode)null;
         }
 
         /// \param jt is the parent JumpTable
@@ -248,17 +248,17 @@ namespace Sla.DECCORE
             findDeterminingVarnodes(indop, 0);
             if (!istrivial)
             {       // If we haven't previously decided to use trivial model
-                Varnode* trialvn = (Varnode*)0;
+                Varnode* trialvn = (Varnode)null;
                 if (hash != 0)
                 {
                     DynamicHash dyn;
                     trialvn = dyn.findVarnode(fd, normaddress, hash);
                 }
                 // If there was never a specified norm, or the specified norm was never recovered
-                if ((trialvn == (Varnode*)0) && (values.empty() || (hash == 0)))
+                if ((trialvn == (Varnode)null) && (values.empty() || (hash == 0)))
                     trialvn = findLikelyNorm();
 
-                if (trialvn != (Varnode*)0)
+                if (trialvn != (Varnode)null)
                 {
                     int opi = trialNorm(fd, trialvn, 10);
                     if (opi >= 0)
@@ -294,13 +294,13 @@ namespace Sla.DECCORE
                 catch (EvaluationError err) {
                     addr = 0xBAD1ABE1;
                 }
-                label.push_back(addr);
+                label.Add(addr);
                 if (label.size() >= addresstable.size()) break; // This should never happen
             }
 
             while (label.size() < addresstable.size()) {
                 fd.warning("Bad switch case", addresstable[label.size()]); // This should never happen
-                label.push_back(0xBAD1ABE1);
+                label.Add(0xBAD1ABE1);
             }
         }
 

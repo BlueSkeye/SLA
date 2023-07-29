@@ -35,18 +35,18 @@ namespace Sla.DECCORE
         {
             factory = tfact;
             flags |= variable_length;
-            if (proto != (FuncProto*)0)
+            if (proto != (FuncProto)null)
                 delete proto;
             proto = new FuncProto();
             proto.setInternal(model, voidtype);
-            List<Datatype*> typelist;
-            List<string> blanknames(intypes.size()+1);
-            if (outtype == (Datatype*)0)
-                typelist.push_back(voidtype);
+            List<Datatype> typelist;
+            List<string> blanknames = new List<string>(intypes.size()+1);
+            if (outtype == (Datatype)null)
+                typelist.Add(voidtype);
             else
-                typelist.push_back(outtype);
+                typelist.Add(outtype);
             for (int i = 0; i < intypes.size(); ++i)
-                typelist.push_back(intypes[i]);
+                typelist.Add(intypes[i]);
 
             proto.updateAllTypes(blanknames, typelist, dotdotdot);
             proto.setInputLock(true);
@@ -54,18 +54,18 @@ namespace Sla.DECCORE
         }
 
         /// Set a particular function prototype on \b this
-        /// The prototype is copied in.
+        /// The prototype is copied @in.
         /// \param typegrp is the factory owning \b this
         /// \param fp is the prototype to set (may be null)
         protected void setPrototype(TypeFactory typegrp,FuncProto fp)
         {
-            if (proto != (FuncProto*)0)
+            if (proto != (FuncProto)null)
             {
                 delete proto;
-                proto = (FuncProto*)0;
+                proto = (FuncProto)null;
                 factory = (TypeFactory*)0;
             }
-            if (fp != (FuncProto*)0) {
+            if (fp != (FuncProto)null) {
                 factory = typegrp;
                 proto = new FuncProto();
                 proto.copy(*fp);
@@ -110,9 +110,9 @@ namespace Sla.DECCORE
         public TypeCode(TypeCode op)
             : base(op)
         {
-            proto = (FuncProto*)0;
+            proto = (FuncProto)null;
             factory = op.factory;
-            if (op.proto != (FuncProto*)0)
+            if (op.proto != (FuncProto)null)
             {
                 proto = new FuncProto();
                 proto.copy(*op.proto);
@@ -123,7 +123,7 @@ namespace Sla.DECCORE
         public TypeCode()
             : base(1, TYPE_CODE)
         {
-            proto = (FuncProto*)0;
+            proto = (FuncProto)null;
             factory = (TypeFactory*)0;
             flags |= type_incomplete;
         }
@@ -137,12 +137,12 @@ namespace Sla.DECCORE
         /// \return the comparison value
         public int compareBasic(TypeCode op)
         {
-            if (proto == (FuncProto*)0)
+            if (proto == (FuncProto)null)
             {
-                if (op.proto == (FuncProto*)0) return 0;
+                if (op.proto == (FuncProto)null) return 0;
                 return 1;
             }
-            if (op.proto == (FuncProto*)0)
+            if (op.proto == (FuncProto)null)
                 return -1;
 
             if (!proto.hasModel())
@@ -152,8 +152,8 @@ namespace Sla.DECCORE
             else
             {
                 if (!op.proto.hasModel()) return -1;
-                string model1 = proto.getModelName());
-                string model2 = op.proto.getModelName());
+                string model1 = proto.getModelName();
+                string model2 = op.proto.getModelName();
                 if (model1 != model2)
                     return (model1 < model2) ? -1 : 1;
             }
@@ -174,7 +174,7 @@ namespace Sla.DECCORE
 
         ~TypeCode()
         {
-            if (proto != (FuncProto*)0)
+            if (proto != (FuncProto)null)
                 delete proto;
         }
 
@@ -189,7 +189,7 @@ namespace Sla.DECCORE
 
         public override Datatype getSubType(ulong off, ulong newoff)
         {
-            if (factory == (TypeFactory*)0) return (Datatype*)0;
+            if (factory == (TypeFactory*)0) return (Datatype)null;
             *newoff = 0;
             return factory.getBase(1, TYPE_CODE);  // Return code byte unattached to function prototype
         }
@@ -219,12 +219,12 @@ namespace Sla.DECCORE
             }
             Datatype* otype = proto.getOutputType();
             Datatype* opotype = tc.proto.getOutputType();
-            if (otype == (Datatype*)0)
+            if (otype == (Datatype)null)
             {
-                if (opotype == (Datatype*)0) return 0;
+                if (opotype == (Datatype)null) return 0;
                 return 1;
             }
-            if (opotype == (Datatype*)0) return -1;
+            if (opotype == (Datatype)null) return -1;
             return otype.compare(*opotype, level);
         }
 
@@ -246,12 +246,12 @@ namespace Sla.DECCORE
             }
             Datatype* otype = proto.getOutputType();
             Datatype* opotype = tc.proto.getOutputType();
-            if (otype == (Datatype*)0)
+            if (otype == (Datatype)null)
             {
-                if (opotype == (Datatype*)0) return 0;
+                if (opotype == (Datatype)null) return 0;
                 return 1;
             }
-            if (opotype == (Datatype*)0) return -1;
+            if (opotype == (Datatype)null) return -1;
             if (otype != opotype)
                 return (otype < opotype) ? -1 : 1;
             return 0;
@@ -261,14 +261,14 @@ namespace Sla.DECCORE
 
         public override void encode(Encoder encoder)
         {
-            if (typedefImm != (Datatype*)0)
+            if (typedefImm != (Datatype)null)
             {
                 encodeTypedef(encoder);
                 return;
             }
             encoder.openElement(ELEM_TYPE);
             encodeBasic(metatype, encoder);
-            if (proto != (FuncProto*)0)
+            if (proto != (FuncProto)null)
                 proto.encode(encoder);
             encoder.closeElement(ELEM_TYPE);
         }

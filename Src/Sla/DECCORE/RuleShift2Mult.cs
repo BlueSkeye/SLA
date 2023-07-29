@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// This only applies if the result is involved in an arithmetic expression.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_LEFT);
+            oplist.Add(CPUI_INT_LEFT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -53,7 +53,7 @@ namespace Sla.DECCORE
             desc = vn.beginDescend();
             for (; ; )
             {
-                if (arithop != (PcodeOp*)0)
+                if (arithop != (PcodeOp)null)
                 {
                     opc = arithop.code();
                     if ((opc == CPUI_INT_ADD) || (opc == CPUI_INT_SUB) || (opc == CPUI_INT_MULT))

@@ -19,7 +19,7 @@ namespace Sla.SLEIGH
                 a.setError(true);
                 b.setError(true);
 
-                identerrors.push_back(make_pair(a, b));
+                identerrors.Add(make_pair(a, b));
             }
         }
 
@@ -30,7 +30,7 @@ namespace Sla.SLEIGH
                 a.setError(true);
                 b.setError(true);
 
-                conflicterrors.push_back(make_pair(a, b));
+                conflicterrors.Add(make_pair(a, b));
             }
         }
 

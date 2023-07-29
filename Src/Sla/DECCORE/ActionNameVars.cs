@@ -46,7 +46,7 @@ namespace Sla.DECCORE
                 if (castop.code() == CPUI_CAST)
                 {
                     vn = castop.getIn(0);
-                    ct = (Datatype*)0;  // Indicate that this is a less preferred name
+                    ct = (Datatype)null;  // Indicate that this is a less preferred name
                 }
             }
             HighVariable* high = vn.getHigh();
@@ -56,9 +56,9 @@ namespace Sla.DECCORE
             map<HighVariable*, OpRecommend>::iterator iter = recmap.find(high);
             if (iter != recmap.end())
             {   // We have seen this varnode before
-                if (ct == (Datatype*)0) return; // Cannot override with null (casted) type
+                if (ct == (Datatype)null) return; // Cannot override with null (casted) type
                 Datatype* oldtype = (*iter).second.ct;
-                if (oldtype != (Datatype*)0)
+                if (oldtype != (Datatype)null)
                 {
                     if (oldtype.typeOrder(*ct) <= 0) return; // oldtype is more specified
                 }
@@ -176,7 +176,7 @@ namespace Sla.DECCORE
                 Varnode* offVn = op.getIn(1);
                 Symbol* sym = data.linkSymbolReference(offVn);
                 if ((sym != (Symbol*)0) && sym.isNameUndefined())
-                    namerec.push_back(offVn);
+                    namerec.Add(offVn);
             }
         }
 
@@ -207,7 +207,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < manage.numSpaces(); ++i)
             { // Build a list of nameable highs
                 spc = manage.getSpace(i);
-                if (spc == (AddrSpace*)0) continue;
+                if (spc == (AddrSpace)null) continue;
                 if (spc == constSpace) continue;
                 enditer = data.endLoc(spc);
                 for (iter = data.beginLoc(spc); iter != enditer; ++iter)
@@ -227,7 +227,7 @@ namespace Sla.DECCORE
                     if (sym != (Symbol*)0)
                     {   // Can we associate high with a nameable symbol
                         if (sym.isNameUndefined() && high.getSymbolOffset() < 0)
-                            namerec.push_back(vn);  // Add if no name, and we have a high representing the whole
+                            namerec.Add(vn);  // Add if no name, and we have a high representing the whole
                         if (sym.isSizeTypeLocked())
                         {
                             if (vn.getSize() == sym.getType().getSize())

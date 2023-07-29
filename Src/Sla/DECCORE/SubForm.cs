@@ -47,7 +47,7 @@ namespace Sla.DECCORE
                 if (i == 0)
                 {       // Assume we have to descend one more add
                     add2 = op.getOut().loneDescend();
-                    if (add2 == (PcodeOp*)0) continue;
+                    if (add2 == (PcodeOp)null) continue;
                     if (add2.code() != CPUI_INT_ADD) continue;
                     reshi = add2.getOut();
                     hineg1 = op.getIn(1 - slot1);
@@ -115,13 +115,13 @@ namespace Sla.DECCORE
             if (!i.hasBothPieces()) return false;
             @in = i;
 
-            if (!verify(@in.getHi(), @in.getLo(), op))
+            if (!verify(@@in.getHi(), @@in.getLo(), op))
                 return false;
 
-            indoub.initPartial(@in.getSize(), lo2, hi2);
-            outdoub.initPartial(@in.getSize(), reslo, reshi);
+            indoub.initPartial(@@in.getSize(), lo2, hi2);
+            outdoub.initPartial(@@in.getSize(), reslo, reshi);
             existop = SplitVarnode::prepareBinaryOp(outdoub, @in, indoub);
-            if (existop == (PcodeOp*)0)
+            if (existop == (PcodeOp)null)
                 return false;
             SplitVarnode::createBinaryOp(data, outdoub, @in, indoub, existop, CPUI_INT_SUB);
             return true;

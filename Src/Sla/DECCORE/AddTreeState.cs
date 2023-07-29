@@ -19,7 +19,7 @@ namespace Sla.DECCORE
     ///   - An remaining terms
     ///
     /// The \e multiple terms are rewritten using a CPUI_PTRADD. The constant offset
-    /// is rewritten using a CPUI_PTRSUB.  Other terms are added back in.  Analysis may cause
+    /// is rewritten using a CPUI_PTRSUB.  Other terms are added back @in.  Analysis may cause
     /// multiplication (CPUI_INT_MULT) by a constant to be distributed to its CPUI_INT_ADD input.
     internal class AddTreeState
     {
@@ -119,12 +119,12 @@ namespace Sla.DECCORE
         private bool hasMatchingSubType(ulong off, uint arrayHint, ulong newoff)
         {
             if (arrayHint == 0)
-                return (baseType.getSubType(off, newoff) != (Datatype*)0);
+                return (baseType.getSubType(off, newoff) != (Datatype)null);
 
             int elSizeBefore;
             ulong offBefore;
             Datatype* typeBefore = baseType.nearestArrayedComponentBackward(off, &offBefore, &elSizeBefore);
-            if (typeBefore != (Datatype*)0)
+            if (typeBefore != (Datatype)null)
             {
                 if (arrayHint == 1 || elSizeBefore == arrayHint)
                 {
@@ -140,14 +140,14 @@ namespace Sla.DECCORE
             int elSizeAfter;
             ulong offAfter;
             Datatype* typeAfter = baseType.nearestArrayedComponentForward(off, &offAfter, &elSizeAfter);
-            if (typeBefore == (Datatype*)0 && typeAfter == (Datatype*)0)
-                return (baseType.getSubType(off, newoff) != (Datatype*)0);
-            if (typeBefore == (Datatype*)0)
+            if (typeBefore == (Datatype)null && typeAfter == (Datatype)null)
+                return (baseType.getSubType(off, newoff) != (Datatype)null);
+            if (typeBefore == (Datatype)null)
             {
                 *newoff = offAfter;
                 return true;
             }
-            if (typeAfter == (Datatype*)0)
+            if (typeAfter == (Datatype)null)
             {
                 *newoff = offBefore;
                 return true;
@@ -204,7 +204,7 @@ namespace Sla.DECCORE
                     {
                         if (vnterm.isWritten() && vnterm.getDef().code() == CPUI_INT_ADD)
                         {
-                            if (distributeOp == (PcodeOp*)0)
+                            if (distributeOp == (PcodeOp)null)
                                 distributeOp = op;
                             return spanAddTree(vnterm.getDef(), val);
                         }
@@ -215,8 +215,8 @@ namespace Sla.DECCORE
                 {
                     if (treeCoeff != 1)
                         isDistributeUsed = true;
-                    multiple.push_back(vnterm);
-                    coeff.push_back(sval);
+                    multiple.Add(vnterm);
+                    coeff.Add(sval);
                     return false;
                 }
             }
@@ -310,9 +310,9 @@ namespace Sla.DECCORE
             }
             if (one_is_non && two_is_non) return true;
             if (one_is_non)
-                nonmult.push_back(op.getIn(0));
+                nonmult.Add(op.getIn(0));
             if (two_is_non)
-                nonmult.push_back(op.getIn(1));
+                nonmult.Add(op.getIn(1));
             return false;       // At least one of the sides contains multiples
         }
 
@@ -427,7 +427,7 @@ namespace Sla.DECCORE
             sign_extend(smultsum, ptrsize * 8 - 1);
             ulong constCoeff = (size == 0) ? (ulong)0 : (smultsum / size) & ptrmask;
             if (constCoeff == 0)
-                resNode = (Varnode*)0;
+                resNode = (Varnode)null;
             else
                 resNode = data.newConstant(ptrsize, constCoeff);
             for (int i = 0; i < multiple.size(); ++i)
@@ -439,7 +439,7 @@ namespace Sla.DECCORE
                     PcodeOp* op = data.newOpBefore(baseOp, CPUI_INT_MULT, vn, data.newConstant(ptrsize, finalCoeff));
                     vn = op.getOut();
                 }
-                if (resNode == (Varnode*)0)
+                if (resNode == (Varnode)null)
                     resNode = vn;
                 else
                 {
@@ -458,7 +458,7 @@ namespace Sla.DECCORE
         private Varnode buildExtra()
         {
             correct = correct + offset; // Total correction that needs to be made
-            Varnode* resNode = (Varnode*)0;
+            Varnode* resNode = (Varnode)null;
             for (int i = 0; i < nonmult.size(); ++i)
             {
                 Varnode* vn = nonmult[i];
@@ -467,7 +467,7 @@ namespace Sla.DECCORE
                     correct -= vn.getOffset();
                     continue;
                 }
-                if (resNode == (Varnode*)0)
+                if (resNode == (Varnode)null)
                     resNode = vn;
                 else
                 {
@@ -479,7 +479,7 @@ namespace Sla.DECCORE
             if (correct != 0)
             {
                 Varnode* vn = data.newConstant(ptrsize, uintb_negate(correct - 1, ptrsize));
-                if (resNode == (Varnode*)0)
+                if (resNode == (Varnode)null)
                     resNode = vn;
                 else
                 {
@@ -504,9 +504,9 @@ namespace Sla.DECCORE
                 return false;
             List<Varnode*> newparams;
             int slot = baseOp.getSlot(ptr);
-            newparams.push_back(ptr);
-            newparams.push_back(baseOp.getIn(1 - slot));
-            newparams.push_back(data.newConstant(ct.getSize(), 1));
+            newparams.Add(ptr);
+            newparams.Add(baseOp.getIn(1 - slot));
+            newparams.Add(data.newConstant(ct.getSize(), 1));
             data.opSetAllInput(baseOp, newparams);
             data.opSetOpcode(baseOp, CPUI_PTRADD);
             return true;
@@ -526,10 +526,10 @@ namespace Sla.DECCORE
             }
             Varnode* multNode = buildMultiples();
             Varnode* extraNode = buildExtra();
-            PcodeOp* newop = (PcodeOp*)0;
+            PcodeOp* newop = (PcodeOp)null;
 
             // Create PTRADD portion of operation
-            if (multNode != (Varnode*)0)
+            if (multNode != (Varnode)null)
             {
                 newop = data.newOpBefore(baseOp, CPUI_PTRADD, ptr, multNode, data.newConstant(ptrsize, size));
                 if (ptr.getType().needsResolution())
@@ -551,10 +551,10 @@ namespace Sla.DECCORE
             }
 
             // Add back in any remaining terms
-            if (extraNode != (Varnode*)0)
+            if (extraNode != (Varnode)null)
                 newop = data.newOpBefore(baseOp, CPUI_INT_ADD, multNode, extraNode);
 
-            if (newop == (PcodeOp*)0)
+            if (newop == (PcodeOp)null)
             {
                 // This should never happen
                 data.warning("ptrarith problems", baseOp.getAddr());
@@ -581,7 +581,7 @@ namespace Sla.DECCORE
             valid = true;
             isDistributeUsed = false;
             isSubtype = false;
-            distributeOp = (PcodeOp*)0;
+            distributeOp = (PcodeOp)null;
         }
 
         /// Construct given root of ADD tree and pointer
@@ -593,7 +593,7 @@ namespace Sla.DECCORE
             ptr = op.getIn(slot);
             ct = (TypePointer*)ptr.getTypeReadFacing(op);
             ptrsize = ptr.getSize();
-            ptrmask = calc_mask(ptrsize);
+            ptrmask = Globals.calc_mask(ptrsize);
             baseType = ct.getPtrTo();
             multsum = 0;        // Sums start out as zero
             nonmultsum = 0;
@@ -615,7 +615,7 @@ namespace Sla.DECCORE
             preventDistribution = false;
             isDistributeUsed = false;
             isSubtype = false;
-            distributeOp = (PcodeOp*)0;
+            distributeOp = (PcodeOp)null;
             int unitsize = AddrSpace::addressToByteInt(1, ct.getWordSize());
             isDegenerate = (baseType.getSize() <= unitsize && baseType.getSize() > 0);
         }
@@ -628,7 +628,7 @@ namespace Sla.DECCORE
                 return buildDegenerate();
             spanAddTree(baseOp, 1);
             if (!valid) return false;       // Were there any show stoppers
-            if (distributeOp != (PcodeOp*)0 && !isDistributeUsed)
+            if (distributeOp != (PcodeOp)null && !isDistributeUsed)
             {
                 clear();
                 preventDistribution = true;
@@ -636,7 +636,7 @@ namespace Sla.DECCORE
             }
             calcSubtype();
             if (!valid) return false;
-            while (valid && distributeOp != (PcodeOp*)0)
+            while (valid && distributeOp != (PcodeOp)null)
             {
                 if (!data.distributeIntMultAdd(distributeOp))
                 {
@@ -648,7 +648,7 @@ namespace Sla.DECCORE
                 data.collapseIntMultMult(distributeOp.getIn(1));
                 clear();
                 spanAddTree(baseOp, 1);
-                if (distributeOp != (PcodeOp*)0 && !isDistributeUsed)
+                if (distributeOp != (PcodeOp)null && !isDistributeUsed)
                 {
                     clear();
                     preventDistribution = true;

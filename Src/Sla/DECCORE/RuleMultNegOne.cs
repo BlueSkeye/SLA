@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Cleanup: Convert INT_2COMP from INT_MULT:  `V * -1  =>  -V`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_MULT);
+            oplist.Add(CPUI_INT_MULT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -34,7 +34,7 @@ namespace Sla.DECCORE
             Varnode* constvn = op.getIn(1);
 
             if (!constvn.isConstant()) return 0;
-            if (constvn.getOffset() != calc_mask(constvn.getSize())) return 0;
+            if (constvn.getOffset() != Globals.calc_mask(constvn.getSize())) return 0;
 
             data.opSetOpcode(op, CPUI_INT_2COMP);
             data.opRemoveInput(op, 1);

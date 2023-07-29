@@ -19,8 +19,8 @@ namespace Sla.EXTRA
             Varnode* vn;
 
             vn = dcp.readVarnode(s);
-            if (vn == (Varnode*)0)
-                throw IfaceParseError("Unknown varnode");
+            if (vn == (Varnode)null)
+                throw new IfaceParseError("Unknown varnode");
             vn.printCover(*status.optr);
         }
     }

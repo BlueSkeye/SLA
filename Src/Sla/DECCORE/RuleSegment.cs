@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         /// \brief Propagate constants through a SEGMENTOP
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_SEGMENTOP);
+            oplist.Add(CPUI_SEGMENTOP);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -42,8 +42,8 @@ namespace Sla.DECCORE
             if (vn1.isConstant() && vn2.isConstant())
             {
                 List<ulong> bindlist;
-                bindlist.push_back(vn1.getOffset());
-                bindlist.push_back(vn2.getOffset());
+                bindlist.Add(vn1.getOffset());
+                bindlist.Add(vn2.getOffset());
                 ulong val = segdef.execute(bindlist);
                 data.opRemoveInput(op, 2);
                 data.opRemoveInput(op, 1);
@@ -56,7 +56,7 @@ namespace Sla.DECCORE
                 // If the hi and lo pieces come from a contigouous source
                 if (!contiguous_test(vn1, vn2)) return 0;
                 Varnode* whole = findContiguousWhole(data, vn1, vn2);
-                if (whole == (Varnode*)0) return 0;
+                if (whole == (Varnode)null) return 0;
                 if (whole.isFree()) return 0;
                 // Use the contiguous source as the whole pointer
                 data.opRemoveInput(op, 2);

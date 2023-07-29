@@ -26,24 +26,24 @@ namespace Sla.DECCORE
         /// \brief Perform SubfloatFlow analysis triggered by FLOAT_FLOAT2FLOAT
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_FLOAT_FLOAT2FLOAT);
+            oplist.Add(CPUI_FLOAT_FLOAT2FLOAT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* invn = op.getIn(0);
-            Varnode* outvn = op.getOut();
+            Varnode invn = op.getIn(0);
+            Varnode outvn = op.getOut();
             int insize = invn.getSize();
             int outsize = outvn.getSize();
             if (outsize > insize)
             {
-                SubfloatFlow subflow(&data,outvn,insize);
+                SubfloatFlow subflow = new SubfloatFlow(&data,outvn,insize);
                 if (!subflow.doTrace()) return 0;
                 subflow.apply();
             }
             else
             {
-                SubfloatFlow subflow(&data,invn,outsize);
+                SubfloatFlow subflow = new SubfloatFlow(&data,invn,outsize);
                 if (!subflow.doTrace()) return 0;
                 subflow.apply();
             }

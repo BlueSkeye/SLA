@@ -32,7 +32,7 @@ namespace Sla.DECCORE
         ///   - `(zext(V) * -1) | (zext(W) * -1)  =>  zext(V || W) * -1`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_ZEXT);
+            oplist.Add(CPUI_INT_ZEXT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -48,17 +48,17 @@ namespace Sla.DECCORE
             if (!boolVn1.isBooleanValue(data.isTypeRecoveryOn())) return 0;
 
             multop1 = op.getOut().loneDescend();
-            if (multop1 == (PcodeOp*)0) return 0;
+            if (multop1 == (PcodeOp)null) return 0;
             if (multop1.code() != CPUI_INT_MULT) return 0;
             if (!multop1.getIn(1).isConstant()) return 0;
             coeff = multop1.getIn(1).getOffset();
-            if (coeff != calc_mask(multop1.getIn(1).getSize()))
+            if (coeff != Globals.calc_mask(multop1.getIn(1).getSize()))
                 return 0;
             size = multop1.getOut().getSize();
 
             // If we reached here, we are Multiplying extended boolean by -1
             actionop = multop1.getOut().loneDescend();
-            if (actionop == (PcodeOp*)0) return 0;
+            if (actionop == (PcodeOp)null) return 0;
             switch (actionop.code())
             {
                 case CPUI_INT_ADD:
@@ -115,14 +115,14 @@ namespace Sla.DECCORE
 
             // Check that the other side is also an extended boolean
             multop2 = (multop1 == actionop.getIn(0).getDef()) ? actionop.getIn(1).getDef() : actionop.getIn(0).getDef();
-            if (multop2 == (PcodeOp*)0) return 0;
+            if (multop2 == (PcodeOp)null) return 0;
             if (multop2.code() != CPUI_INT_MULT) return 0;
             if (!multop2.getIn(1).isConstant()) return 0;
             coeff = multop2.getIn(1).getOffset();
-            if (coeff != calc_mask(size))
+            if (coeff != Globals.calc_mask(size))
                 return 0;
             zextop2 = multop2.getIn(0).getDef();
-            if (zextop2 == (PcodeOp*)0) return 0;
+            if (zextop2 == (PcodeOp)null) return 0;
             if (zextop2.code() != CPUI_INT_ZEXT) return 0;
             boolVn2 = zextop2.getIn(0);
             if (!boolVn2.isBooleanValue(data.isTypeRecoveryOn())) return 0;

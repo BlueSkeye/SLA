@@ -43,7 +43,7 @@ namespace Sla.DECCORE
         /// \param depth is the priority to associate with the block
         public void insert(FlowBlock bl, int depth)
         {
-            queue[depth].push_back(bl);
+            queue[depth].Add(bl);
             if (depth > curdepth)
                 curdepth = depth;
         }

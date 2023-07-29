@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         /// \brief Remove a CPUI_INDIRECT if its blocking PcodeOp is dead
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INDIRECT);
+            oplist.Add(CPUI_INDIRECT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

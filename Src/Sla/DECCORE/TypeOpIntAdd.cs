@@ -34,12 +34,12 @@ namespace Sla.DECCORE
             if (invnMeta != TYPE_PTR)
             {
                 if (invnMeta != TYPE_INT && invnMeta != TYPE_UINT)
-                    return (Datatype*)0;
+                    return (Datatype)null;
                 if (outslot != 1 || !op.getIn(1).isConstant())
-                    return (Datatype*)0;
+                    return (Datatype)null;
             }
             else if ((inslot != -1) && (outslot != -1))
-                return (Datatype*)0;    // Must propagate input <. output for pointers
+                return (Datatype)null;    // Must propagate input <. output for pointers
             Datatype* newtype;
             if (outvn.isConstant() && (alttype.getMetatype() != TYPE_PTR))
                 newtype = alttype;
@@ -129,7 +129,7 @@ namespace Sla.DECCORE
                 ulong mult = op.getIn(2).getOffset();
                 if (constvn.isConstant())
                 {
-                    off = (constvn.getOffset() * mult) & calc_mask(constvn.getSize());
+                    off = (constvn.getOffset() * mult) & Globals.calc_mask(constvn.getSize());
                     return (off == 0) ? 0 : 1;
                 }
                 if (sz != 0 && (mult % sz) != 0)
@@ -157,7 +157,7 @@ namespace Sla.DECCORE
                             if (constvn.isConstant())
                             {
                                 ulong mult = constvn.getOffset();
-                                if (mult == calc_mask(constvn.getSize()))  // If multiplying by -1
+                                if (mult == Globals.calc_mask(constvn.getSize()))  // If multiplying by -1
                                     return 2;       // Assume this is a pointer difference and don't propagate
                                 if (sz != 0 && (mult % sz) != 0)
                                     return 2;

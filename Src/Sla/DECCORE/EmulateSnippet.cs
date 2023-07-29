@@ -52,16 +52,16 @@ namespace Sla.DECCORE
             if (spc.isBigEndian() && (sz < sizeof(ulong)))
                 res >>= (sizeof(ulong) - sz) * 8;
             else
-                res &= calc_mask(sz);
+                res &= Globals.calc_mask(sz);
             return res;
         }
 
         protected override void executeUnary()
         {
             ulong in1 = getVarnodeValue(currentOp.getInput(0));
-            ulong out = currentBehave.evaluateUnary(currentOp.getOutput().size,
+            ulong @out = currentBehave.evaluateUnary(currentOp.getOutput().size,
                                  currentOp.getInput(0).size, in1);
-            setVarnodeValue(currentOp.getOutput().offset, out);
+            setVarnodeValue(currentOp.getOutput().offset, @out);
         }
 
         protected override void executeBinary()

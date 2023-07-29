@@ -21,10 +21,10 @@ namespace Sla.EXTRA
             string p1, p2, p3;
 
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("No load image present");
+                throw new IfaceExecutionError("No load image present");
             s >> ws >> optname >> ws;
             if (optname.size() == 0)
-                throw IfaceParseError("Missing option name");
+                throw new IfaceParseError("Missing option name");
             if (!s.eof())
             {
                 s >> p1 >> ws;
@@ -35,7 +35,7 @@ namespace Sla.EXTRA
                     {
                         s >> p3 >> ws;
                         if (!s.eof())
-                            throw IfaceParseError("Too many option parameters");
+                            throw new IfaceParseError("Too many option parameters");
                     }
                 }
             }
@@ -48,12 +48,12 @@ namespace Sla.EXTRA
             catch (ParseError err)
             {
                 *status.optr << err.ToString() << endl;
-                throw IfaceParseError("Bad option");
+                throw new IfaceParseError("Bad option");
             }
             catch (RecovError err)
             {
                 *status.optr << err.ToString() << endl;
-                throw IfaceExecutionError("Bad option");
+                throw new IfaceExecutionError("Bad option");
             }
         }
     }

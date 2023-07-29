@@ -2723,7 +2723,7 @@ namespace Sla.SLACOMP
 
         //    case 140:
 
-        //        { (yyval.sem) = (yyvsp[0].sem); if ((yyval.sem).getOpvec().empty() && ((yyval.sem).getResult() == (HandleTpl*)0)) slgh.recordNop(); }
+        //        { (yyval.sem) = (yyvsp[0].sem); if ((yyval.sem).getOpvec().empty() && ((yyval.sem).getResult() == (HandleTpl)null)) slgh.recordNop(); }
 
         //        break;
 
@@ -3611,25 +3611,25 @@ namespace Sla.SLACOMP
 
         //    case 288:
 
-        //        { (yyval.biglist) = new List<long>; (yyval.biglist).push_back(long(*(yyvsp[0].i))); delete(yyvsp[0].i); }
+        //        { (yyval.biglist) = new List<long>; (yyval.biglist).Add(long(*(yyvsp[0].i))); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 289:
 
-        //        { (yyval.biglist) = new List<long>; (yyval.biglist).push_back(-long(*(yyvsp[0].i))); delete(yyvsp[0].i); }
+        //        { (yyval.biglist) = new List<long>; (yyval.biglist).Add(-long(*(yyvsp[0].i))); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 290:
 
-        //        { (yyval.biglist) = new List<long>; (yyval.biglist).push_back(long(*(yyvsp[0].i))); delete(yyvsp[0].i); }
+        //        { (yyval.biglist) = new List<long>; (yyval.biglist).Add(long(*(yyvsp[0].i))); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 291:
 
-        //        { (yyval.biglist) = new List<long>; (yyval.biglist).push_back(-long(*(yyvsp[0].i))); delete(yyvsp[0].i); }
+        //        { (yyval.biglist) = new List<long>; (yyval.biglist).Add(-long(*(yyvsp[0].i))); delete(yyvsp[0].i); }
 
         //        break;
 
@@ -3637,20 +3637,20 @@ namespace Sla.SLACOMP
 
         //        {
         //            if (*(yyvsp[0].str) != "_") { string errmsg = "Expecting integer but saw: " + *(yyvsp[0].str); delete(yyvsp[0].str); slgh.reportError(errmsg); YYERROR; }
-        //                                    (yyval.biglist) = new List<long>; (yyval.biglist).push_back((long)0xBADBEEF); delete(yyvsp[0].str);
+        //                                    (yyval.biglist) = new List<long>; (yyval.biglist).Add((long)0xBADBEEF); delete(yyvsp[0].str);
         //        }
 
         //        break;
 
         //    case 293:
 
-        //        { (yyval.biglist) = (yyvsp[-1].biglist); (yyval.biglist).push_back(long(*(yyvsp[0].i))); delete(yyvsp[0].i); }
+        //        { (yyval.biglist) = (yyvsp[-1].biglist); (yyval.biglist).Add(long(*(yyvsp[0].i))); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 294:
 
-        //        { (yyval.biglist) = (yyvsp[-2].biglist); (yyval.biglist).push_back(-long(*(yyvsp[0].i))); delete(yyvsp[0].i); }
+        //        { (yyval.biglist) = (yyvsp[-2].biglist); (yyval.biglist).Add(-long(*(yyvsp[0].i))); delete(yyvsp[0].i); }
 
         //        break;
 
@@ -3658,7 +3658,7 @@ namespace Sla.SLACOMP
 
         //        {
         //            if (*(yyvsp[0].str) != "_") { string errmsg = "Expecting integer but saw: " + *(yyvsp[0].str); delete(yyvsp[0].str); slgh.reportError(errmsg); YYERROR; }
-        //                                    (yyval.biglist) = (yyvsp[-1].biglist); (yyval.biglist).push_back((long)0xBADBEEF); delete(yyvsp[0].str);
+        //                                    (yyval.biglist) = (yyvsp[-1].biglist); (yyval.biglist).Add((long)0xBADBEEF); delete(yyvsp[0].str);
         //        }
 
         //        break;
@@ -3671,19 +3671,19 @@ namespace Sla.SLACOMP
 
         //    case 297:
 
-        //        { (yyval.strlist) = new List<string>; (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.strlist) = new List<string>; (yyval.strlist).Add(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
         //    case 298:
 
-        //        { (yyval.strlist) = new List<string>; (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.strlist) = new List<string>; (yyval.strlist).Add(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
         //    case 299:
 
-        //        { (yyval.strlist) = (yyvsp[-1].strlist); (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.strlist) = (yyvsp[-1].strlist); (yyval.strlist).Add(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
@@ -3701,25 +3701,25 @@ namespace Sla.SLACOMP
 
         //    case 302:
 
-        //        { (yyval.strlist) = new List<string>; (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.strlist) = new List<string>; (yyval.strlist).Add(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
         //    case 303:
 
-        //        { (yyval.strlist) = new List<string>; (yyval.strlist).push_back((yyvsp[0].anysym).getName()); }
+        //        { (yyval.strlist) = new List<string>; (yyval.strlist).Add((yyvsp[0].anysym).getName()); }
 
         //        break;
 
         //    case 304:
 
-        //        { (yyval.strlist) = (yyvsp[-1].strlist); (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.strlist) = (yyvsp[-1].strlist); (yyval.strlist).Add(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
         //    case 305:
 
-        //        { (yyval.strlist) = (yyvsp[-1].strlist); (yyval.strlist).push_back((yyvsp[0].anysym).getName()); }
+        //        { (yyval.strlist) = (yyvsp[-1].strlist); (yyval.strlist).Add((yyvsp[0].anysym).getName()); }
 
         //        break;
 
@@ -3731,37 +3731,37 @@ namespace Sla.SLACOMP
 
         //    case 307:
 
-        //        { (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].valuesym)); }
+        //        { (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).Add((yyvsp[0].valuesym)); }
 
         //        break;
 
         //    case 308:
 
-        //        { (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].contextsym)); }
+        //        { (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).Add((yyvsp[0].contextsym)); }
 
         //        break;
 
         //    case 309:
 
-        //        { (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].valuesym)); }
+        //        { (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).Add((yyvsp[0].valuesym)); }
 
         //        break;
 
         //    case 310:
 
-        //        { (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].contextsym)); }
+        //        { (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).Add((yyvsp[0].contextsym)); }
 
         //        break;
 
         //    case 311:
 
-        //        { (yyval.symlist) = (yyvsp[-1].symlist); (yyval.symlist).push_back((yyvsp[0].valuesym)); }
+        //        { (yyval.symlist) = (yyvsp[-1].symlist); (yyval.symlist).Add((yyvsp[0].valuesym)); }
 
         //        break;
 
         //    case 312:
 
-        //        { (yyval.symlist) = (yyvsp[-1].symlist); (yyval.symlist).push_back((yyvsp[0].contextsym)); }
+        //        { (yyval.symlist) = (yyvsp[-1].symlist); (yyval.symlist).Add((yyvsp[0].contextsym)); }
 
         //        break;
 
@@ -3779,13 +3779,13 @@ namespace Sla.SLACOMP
 
         //    case 315:
 
-        //        { (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].varsym)); }
+        //        { (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).Add((yyvsp[0].varsym)); }
 
         //        break;
 
         //    case 316:
 
-        //        { (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).push_back((yyvsp[0].varsym)); }
+        //        { (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).Add((yyvsp[0].varsym)); }
 
         //        break;
 
@@ -3793,14 +3793,14 @@ namespace Sla.SLACOMP
 
         //        {
         //            if (*(yyvsp[0].str) != "_") { string errmsg = *(yyvsp[0].str) + ": is not a varnode symbol"; delete(yyvsp[0].str); slgh.reportError(errmsg); YYERROR; }
-        //                    (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).push_back((SleighSymbol*)0); delete(yyvsp[0].str);
+        //                    (yyval.symlist) = new List<SleighSymbol*>; (yyval.symlist).Add((SleighSymbol)null); delete(yyvsp[0].str);
         //        }
 
         //        break;
 
         //    case 318:
 
-        //        { (yyval.symlist) = (yyvsp[-1].symlist); (yyval.symlist).push_back((yyvsp[0].varsym)); }
+        //        { (yyval.symlist) = (yyvsp[-1].symlist); (yyval.symlist).Add((yyvsp[0].varsym)); }
 
         //        break;
 
@@ -3808,7 +3808,7 @@ namespace Sla.SLACOMP
 
         //        {
         //            if (*(yyvsp[0].str) != "_") { string errmsg = *(yyvsp[0].str) + ": is not a varnode symbol"; delete(yyvsp[0].str); slgh.reportError(errmsg); YYERROR; }
-        //                                    (yyval.symlist) = (yyvsp[-1].symlist); (yyval.symlist).push_back((SleighSymbol*)0); delete(yyvsp[0].str);
+        //                                    (yyval.symlist) = (yyvsp[-1].symlist); (yyval.symlist).Add((SleighSymbol)null); delete(yyvsp[0].str);
         //        }
 
         //        break;
@@ -3821,13 +3821,13 @@ namespace Sla.SLACOMP
 
         //    case 321:
 
-        //        { (yyval.param) = new List<ExprTree*>; (yyval.param).push_back((yyvsp[0].tree)); }
+        //        { (yyval.param) = new List<ExprTree*>; (yyval.param).Add((yyvsp[0].tree)); }
 
         //        break;
 
         //    case 322:
 
-        //        { (yyval.param) = (yyvsp[-2].param); (yyval.param).push_back((yyvsp[0].tree)); }
+        //        { (yyval.param) = (yyvsp[-2].param); (yyval.param).Add((yyvsp[0].tree)); }
 
         //        break;
 
@@ -3839,13 +3839,13 @@ namespace Sla.SLACOMP
 
         //    case 324:
 
-        //        { (yyval.strlist) = new List<string>; (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.strlist) = new List<string>; (yyval.strlist).Add(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 
         //    case 325:
 
-        //        { (yyval.strlist) = (yyvsp[-2].strlist); (yyval.strlist).push_back(*(yyvsp[0].str)); delete(yyvsp[0].str); }
+        //        { (yyval.strlist) = (yyvsp[-2].strlist); (yyval.strlist).Add(*(yyvsp[0].str)); delete(yyvsp[0].str); }
 
         //        break;
 

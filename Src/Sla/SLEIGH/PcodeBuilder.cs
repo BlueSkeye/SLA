@@ -33,7 +33,7 @@ namespace Sla.SLEIGH
 
         public void build(ConstructTpl construct, int secnum)
         {
-            if (construct == (ConstructTpl*)0)
+            if (construct == (ConstructTpl)null)
                 throw UnimplError("", 0);   // Pcode is not implemented for this constructor
 
             uint oldbase = labelbase;  // Recursively store old labelbase

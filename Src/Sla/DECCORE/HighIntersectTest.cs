@@ -34,7 +34,7 @@ namespace Sla.DECCORE
             {
                 Varnode* vn = a.getInstance(i);
                 if (1 < vn.getCover().intersectByBlock(blk, cover))
-                    res.push_back(vn);
+                    res.Add(vn);
             }
         }
 
@@ -172,10 +172,10 @@ namespace Sla.DECCORE
                 HighVariable* b = (*iter).first.b;
                 if (b == high1) continue;
                 if ((*iter).second)     // Save all high2's intersections
-                    yesinter.push_back(b);  // as they are still valid for the merge
+                    yesinter.Add(b);  // as they are still valid for the merge
                 else
                 {
-                    nointer.push_back(b);
+                    nointer.Add(b);
                     b.setMark();       // Mark that high2 did not intersect
                 }
             }

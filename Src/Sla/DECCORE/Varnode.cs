@@ -282,7 +282,7 @@ namespace Sla.DECCORE
         private void setDef(PcodeOp op)
         {               // Set the defining op
             def = op;
-            if (op == (PcodeOp*)0)
+            if (op == (PcodeOp)null)
             {
                 setFlags(Varnode::coverdirty);
                 clearFlags(Varnode::written);
@@ -353,7 +353,7 @@ namespace Sla.DECCORE
                 if (!descend.empty())
                     throw new LowlevelError("Free varnode has multiple descendants");
             }
-            descend.push_back(op);
+            descend.Add(op);
             setFlags(Varnode::coverdirty);
         }
 
@@ -570,13 +570,13 @@ namespace Sla.DECCORE
         {
             PcodeOp* op;
 
-            if (descend.empty()) return (PcodeOp*)0; // No descendants
+            if (descend.empty()) return (PcodeOp)null; // No descendants
 
             list<PcodeOp*>::const_iterator iter;
 
             iter = descend.begin();
             op = *iter++;           // First descendant
-            if (iter != descend.end()) return (PcodeOp*)0; // More than 1 descendant
+            if (iter != descend.end()) return (PcodeOp)null; // More than 1 descendant
             return op;
         }
 
@@ -711,7 +711,7 @@ namespace Sla.DECCORE
             // Construct a varnode
             loc = m;
             size = s;
-            def = (PcodeOp*)0;      // No defining op yet
+            def = (PcodeOp)null;      // No defining op yet
             type = dt;
             high = (HighVariable*)0;
             mapentry = (SymbolEntry*)0;
@@ -719,7 +719,7 @@ namespace Sla.DECCORE
             cover = (Cover*)0;
             mergegroup = 0;
             addlflags = 0;
-            if (m.getSpace() == (AddrSpace*)0)
+            if (m.getSpace() == (AddrSpace)null)
             {
                 flags = 0;
                 return;
@@ -994,7 +994,7 @@ namespace Sla.DECCORE
             }
             printRaw(s);
             s << ' ';
-            if (def != (PcodeOp*)0)
+            if (def != (PcodeOp)null)
                 def.printRaw(s);
             else
                 printRaw(s);
@@ -1006,7 +1006,7 @@ namespace Sla.DECCORE
             if ((flags & Varnode::annotation) != 0)
                 s << " Code";
 
-            if (def != (PcodeOp*)0)
+            if (def != (PcodeOp)null)
             {
                 s << "\t\t" << def.getSeqNum() << endl;
                 for (int i = 0; i < def.numInput(); ++i)
@@ -1498,8 +1498,8 @@ namespace Sla.DECCORE
             if (isTypeLock())           // Our type is locked, don't change
                 return type;        // Not a partial lock, return the locked type
 
-            ct = (Datatype*)0;
-            if (def != (PcodeOp*)0)
+            ct = (Datatype)null;
+            if (def != (PcodeOp)null)
             {
                 ct = def.outputTypeLocal();
                 if (def.stopsTypePropagation())
@@ -1518,7 +1518,7 @@ namespace Sla.DECCORE
                 i = op.getSlot(this);
                 newct = op.inputTypeLocal(i);
 
-                if (ct == (Datatype*)0)
+                if (ct == (Datatype)null)
                     ct = newct;
                 else
                 {
@@ -1526,7 +1526,7 @@ namespace Sla.DECCORE
                         ct = newct;
                 }
             }
-            if (ct == (Datatype*)0)
+            if (ct == (Datatype)null)
                 throw new LowlevelError("NULL local type");
             return ct;
         }
@@ -1598,7 +1598,7 @@ namespace Sla.DECCORE
                         whole = whole.getDef().getIn(0);
                     if (!whole.isConstant()) return false;
                     ulong off = whole.getOffset() >> leastByte * 8;
-                    off &= calc_mask(vn.getSize());
+                    off &= Globals.calc_mask(vn.getSize());
                     return (off == vn.getOffset());
                 }
                 return false;
@@ -1737,7 +1737,7 @@ namespace Sla.DECCORE
                 ct = type;
             if (ct.isPieceStructured())
                 return ct;
-            return (Datatype*)0;
+            return (Datatype)null;
         }
 
         /// Encode a description of \b this to a stream
@@ -1781,7 +1781,7 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode pointer (may be null)
         public static void printRaw(TextWriter s, Varnode vn)
         {
-            if (vn == (Varnode*)0) {
+            if (vn == (Varnode)null) {
                 s << "<null>";
                 return;
             }

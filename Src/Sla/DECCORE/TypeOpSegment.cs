@@ -31,7 +31,7 @@ namespace Sla.DECCORE
 
         public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
-            return (Datatype*)0;        // Never need a cast for inputs
+            return (Datatype)null;        // Never need a cast for inputs
         }
 
         public override Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)
@@ -43,11 +43,11 @@ namespace Sla.DECCORE
             int inslot, int outslot)
         {
             // Must propagate  slot2 <. output
-            if ((inslot == 0) || (inslot == 1)) return (Datatype*)0;
-            if ((outslot == 0) || (outslot == 1)) return (Datatype*)0;
-            if (invn.isSpacebase()) return (Datatype*)0;
+            if ((inslot == 0) || (inslot == 1)) return (Datatype)null;
+            if ((outslot == 0) || (outslot == 1)) return (Datatype)null;
+            if (invn.isSpacebase()) return (Datatype)null;
             type_metatype metain = alttype.getMetatype();
-            if (metain != TYPE_PTR) return (Datatype*)0;
+            if (metain != TYPE_PTR) return (Datatype)null;
             AddrSpace* spc = tlst.getArch().getDefaultDataSpace();
             Datatype* btype = ((TypePointer*)alttype).getPtrTo();
             return tlst.getTypePointer(outvn.getSize(), btype, spc.getWordSize());
@@ -60,7 +60,7 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            if (op.getOut() != (Varnode*)0)
+            if (op.getOut() != (Varnode)null)
             {
                 Varnode::printRaw(s, op.getOut());
                 s << " = ";

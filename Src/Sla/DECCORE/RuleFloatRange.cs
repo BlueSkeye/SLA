@@ -28,8 +28,8 @@ namespace Sla.DECCORE
         /// Convert `(V f< W)||(V f== W)   =>   V f<= W` (and similar variants)
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_BOOL_OR);
-            oplist.push_back(CPUI_BOOL_AND);
+            oplist.Add(CPUI_BOOL_OR);
+            oplist.Add(CPUI_BOOL_AND);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

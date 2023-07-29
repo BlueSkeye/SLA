@@ -32,7 +32,7 @@ namespace Sla.EXTRA
         {
             Address addr = Address::decode(decoder);
             uint subId = decoder.openElement(ELEM_PAYLOAD);
-            istringstream s(decoder.readString(ATTRIB_CONTENT));
+            istringstream s = new istringstream(decoder.readString(ATTRIB_CONTENT));
             try
             {
                 Document* doc = xml_tree(s);

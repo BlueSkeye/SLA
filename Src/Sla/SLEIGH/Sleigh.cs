@@ -328,7 +328,7 @@ namespace Sla.SLEIGH
      This provides the basic functionality required and will work
      for different architectures.  What you may need to do is
      set values for certain variables, depending on the processor
-     and the environment it is running in.  For instance, for
+     and the environment it is running @in.  For instance, for
      the x86 platform, you need to set the \e addrsize and \e opsize
      bits, to indicate the processor would be running in 32-bit
      mode.  The context variables specific to a particular processor
@@ -372,7 +372,7 @@ namespace Sla.SLEIGH
         private void clearForDelete()
         {
             delete cache;
-            if (discache != (DisassemblyCache*)0)
+            if (discache != (DisassemblyCache)null)
                 delete discache;
         }
 
@@ -408,9 +408,10 @@ namespace Sla.SLEIGH
         private void resolve(ParserContext pos)
         {
             loader.loadFill(pos.getBuffer(), 16, pos.getAddr());
-            ParserWalkerChange walker(&pos);
+            ParserWalkerChange walker = new ParserWalkerChange(&pos);
             pos.deallocateState(walker);    // Clear the previous resolve and initialize the walker
-            Constructor* ct,*subct;
+            Constructor ct;
+            Constructor subct;
             uint off;
             int oper, numoper;
 
@@ -428,15 +429,15 @@ namespace Sla.SLEIGH
                 numoper = ct.getNumOperands();
                 while (oper < numoper)
                 {
-                    OperandSymbol* sym = ct.getOperand(oper);
+                    OperandSymbol sym = ct.getOperand(oper);
                     off = walker.getOffset(sym.getOffsetBase()) + sym.getRelativeOffset();
                     pos.allocateOperand(oper, walker); // Descend into new operand and reserve space
                     walker.setOffset(off);
-                    TripleSymbol* tsym = sym.getDefiningSymbol();
-                    if (tsym != (TripleSymbol*)0)
+                    TripleSymbol tsym = sym.getDefiningSymbol();
+                    if (tsym != (TripleSymbol)null)
                     {
                         subct = tsym.resolve(walker);
-                        if (subct != (Constructor*)0)
+                        if (subct != (Constructor)null)
                         {
                             walker.setConstructor(subct);
                             subct.applyContext(walker);
@@ -452,8 +453,8 @@ namespace Sla.SLEIGH
                     walker.calcCurrentLength(ct.getMinimumLength(), numoper);
                     walker.popOperand();
                     // Check for use of delayslot
-                    ConstructTpl* templ = ct.getTempl();
-                    if ((templ != (ConstructTpl*)0) && (templ.delaySlot() > 0))
+                    ConstructTpl templ = ct.getTempl();
+                    if ((templ != (ConstructTpl)null) && (templ.delaySlot() > 0))
                         pos.setDelaySlot(templ.delaySlot());
                 }
             }
@@ -467,11 +468,11 @@ namespace Sla.SLEIGH
         /// \param pos is the given parse tree
         private void resolveHandles(ParserContext pos)
         {
-            TripleSymbol* triple;
-            Constructor* ct;
+            TripleSymbol triple;
+            Constructor ct;
             int oper, numoper;
 
-            ParserWalker walker(&pos);
+            ParserWalker walker = new ParserWalker(&pos);
             walker.baseState();
             while (walker.isState())
             {
@@ -480,10 +481,10 @@ namespace Sla.SLEIGH
                 numoper = ct.getNumOperands();
                 while (oper < numoper)
                 {
-                    OperandSymbol* sym = ct.getOperand(oper);
+                    OperandSymbol sym = ct.getOperand(oper);
                     walker.pushOperand(oper);   // Descend into node
                     triple = sym.getDefiningSymbol();
-                    if (triple != (TripleSymbol*)0)
+                    if (triple != (TripleSymbol)null)
                     {
                         if (triple.getType() == SleighSymbol::subtable_symbol)
                             break;
@@ -492,11 +493,11 @@ namespace Sla.SLEIGH
                     }
                     else
                     {           // Must be an expression
-                        PatternExpression* patexp = sym.getDefiningExpression();
+                        PatternExpression patexp = sym.getDefiningExpression();
                         long res = patexp.getValue(walker);
-                        FixedHandle & hand(walker.getParentHandle());
+                        FixedHandle hand = new FixedHandle(walker.getParentHandle());
                         hand.space = pos.getConstSpace(); // Result of expression is a constant
-                        hand.offset_space = (AddrSpace*)0;
+                        hand.offset_space = (AddrSpace)null;
                         hand.offset_offset = (ulong)res;
                         hand.size = 0;      // This size should not get used
                     }
@@ -506,10 +507,10 @@ namespace Sla.SLEIGH
                 if (oper >= numoper)
                 {   // Finished processing constructor
                     ConstructTpl* templ = ct.getTempl();
-                    if (templ != (ConstructTpl*)0)
+                    if (templ != (ConstructTpl)null)
                     {
-                        HandleTpl* res = templ.getResult();
-                        if (res != (HandleTpl*)0)   // Pop up handle to containing operand
+                        HandleTpl res = templ.getResult();
+                        if (res != (HandleTpl)null)   // Pop up handle to containing operand
                             res.fix(walker.getParentHandle(), walker);
                         // If we need an indicator that the constructor exports nothing try
                         // else
@@ -529,7 +530,7 @@ namespace Sla.SLEIGH
             loader = ld;
             context_db = c_db;
             cache = new ContextCache(c_db);
-            discache = (DisassemblyCache*)0;
+            discache = (DisassemblyCache)null;
         }
 
         ~Sleigh()
@@ -549,7 +550,7 @@ namespace Sla.SLEIGH
             loader = ld;
             context_db = c_db;
             cache = new ContextCache(c_db);
-            discache = (DisassemblyCache*)0;
+            discache = (DisassemblyCache)null;
         }
 
         /// The .sla file from the document store is loaded and cache objects are prepared
@@ -627,17 +628,17 @@ namespace Sla.SLEIGH
                 } while (bytecount < pos.getDelaySlot());
                 pos.setNaddr(pos.getAddr() + fallOffset);
             }
-            ParserWalker walker(pos);
+            ParserWalker walker = new ParserWalker(pos);
             walker.baseState();
             pcode_cache.clear();
-            SleighBuilder builder(&walker,discache,&pcode_cache,getConstantSpace(),getUniqueSpace(),unique_allocatemask);
+            SleighBuilder builder = new SleighBuilder(&walker, discache, &pcode_cache, getConstantSpace(), getUniqueSpace(), unique_allocatemask);
             try
             {
                 builder.build(walker.getConstructor().getTempl(), -1);
                 pcode_cache.resolveRelatives();
                 pcode_cache.emit(baseaddr, &emit);
             }
-            catch (UnimplError &err) {
+            catch (UnimplError err) {
                 ostringstream s;
                 s << "Instruction not implemented in pcode:\n ";
                 ParserWalker* cur = builder.getCurrentWalker();
@@ -653,17 +654,17 @@ namespace Sla.SLEIGH
                 throw err;
             }
             return fallOffset;
-            }
+        }
 
         public override int printAssembly(AssemblyEmit emit, Address baseaddr)
         {
             int sz;
 
-            ParserContext* pos = obtainContext(baseaddr, ParserContext::disassembly);
-            ParserWalker walker(pos);
+            ParserContext pos = obtainContext(baseaddr, ParserContext::disassembly);
+            ParserWalker walker = new ParserWalker(pos);
             walker.baseState();
 
-            Constructor* ct = walker.getConstructor();
+            Constructor ct = walker.getConstructor();
             ostringstream mons;
             ct.printMnemonic(mons, walker);
             ostringstream body;

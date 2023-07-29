@@ -58,7 +58,7 @@ namespace Sla.DECCORE
         
         public override void markUnstructured()
         {
-            base.markUnstructured(); // Recurse
+            @base.markUnstructured(); // Recurse
             if ((gototarget != null) && (gototype == f_goto_goto)) {
                 markCopyBlock(gototarget, f_unstructured_targ);
             }
@@ -79,7 +79,7 @@ namespace Sla.DECCORE
         public override void printHeader(TextWriter s)
         {
             s.Write("If block ");
-            base.printHeader(s);
+            @base.printHeader(s);
         }
 
         public override void emit(PrintLanguage lng) 
@@ -137,7 +137,7 @@ namespace Sla.DECCORE
 
         public override void encodeBody(Encoder encoder)
         {
-            base.encodeBody(encoder);
+            @base.encodeBody(encoder);
             if (getSize() == 1) {
                 if (null == gototarget) {
                     throw new InvalidOperationException();

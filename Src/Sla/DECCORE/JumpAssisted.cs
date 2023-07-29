@@ -37,8 +37,8 @@ namespace Sla.DECCORE
         public JumpAssisted(JumpTable jt)
             : base(jt)
         {
-            assistOp = (PcodeOp*)0;
-            switchvn = (Varnode*)0;
+            assistOp = (PcodeOp)null;
+            switchvn = (Varnode)null;
             sizeIndices = 0;
         }
 
@@ -55,7 +55,7 @@ namespace Sla.DECCORE
             Varnode* addrVn = indop.getIn(0);
             if (!addrVn.isWritten()) return false;
             assistOp = addrVn.getDef();
-            if (assistOp == (PcodeOp*)0) return false;
+            if (assistOp == (PcodeOp)null) return false;
             if (assistOp.code() != CPUI_CALLOTHER) return false;
             if (assistOp.numInput() < 3) return false;
             int index = assistOp.getIn(0).getOffset();
@@ -76,7 +76,7 @@ namespace Sla.DECCORE
                 if (pcodeScript.sizeInput() != numInputs)
                     throw new LowlevelError(userop.getName() + ": <size_pcode> has wrong number of parameters");
                 for (int i = 0; i < numInputs; ++i)
-                    inputs.push_back(assistOp.getIn(i + 1).getOffset());
+                    inputs.Add(assistOp.getIn(i + 1).getOffset());
                 sizeIndices = pcodeScript.evaluate(inputs);
             }
             if (matchsize != 0 && matchsize - 1 != sizeIndices) // matchsize has 1 added to it for the default case
@@ -101,7 +101,7 @@ namespace Sla.DECCORE
             if (pcodeScript.sizeInput() != numInputs)
                 throw new LowlevelError(userop.getName() + ": <addr_pcode> has wrong number of parameters");
             for (int i = 0; i < numInputs; ++i)
-                inputs.push_back(assistOp.getIn(i + 1).getOffset());
+                inputs.Add(assistOp.getIn(i + 1).getOffset());
 
             ulong mask = ~((ulong)0);
             int bit = fd.getArch().funcptr_align;
@@ -114,14 +114,14 @@ namespace Sla.DECCORE
                 inputs[0] = index;
                 ulong output = pcodeScript.evaluate(inputs);
                 output &= mask;
-                addresstable.push_back(Address(spc, output));
+                addresstable.Add(Address(spc, output));
             }
             ExecutablePcode* defaultScript = (ExecutablePcode*)fd.getArch().pcodeinjectlib.getPayload(userop.getDefaultAddr());
             if (defaultScript.sizeInput() != numInputs)
                 throw new LowlevelError(userop.getName() + ": <default_pcode> has wrong number of parameters");
             inputs[0] = 0;
             ulong defaultAddress = defaultScript.evaluate(inputs);
-            addresstable.push_back(Address(spc, defaultAddress));       // Add default location to end of addresstable
+            addresstable.Add(Address(spc, defaultAddress));       // Add default location to end of addresstable
         }
 
         public override void findUnnormalized(uint maxaddsub, uint maxleftright, uint maxext)
@@ -136,7 +136,7 @@ namespace Sla.DECCORE
             if (userop.getIndex2Case() == -1)
             {
                 for (int i = 0; i < sizeIndices; ++i)
-                    label.push_back(i);     // The index is the label
+                    label.Add(i);     // The index is the label
             }
             else
             {
@@ -146,16 +146,16 @@ namespace Sla.DECCORE
                 if (numInputs != pcodeScript.sizeInput())
                     throw new LowlevelError(userop.getName() + ": <case_pcode> has wrong number of parameters");
                 for (int i = 0; i < numInputs; ++i)
-                    inputs.push_back(assistOp.getIn(i + 1).getOffset());
+                    inputs.Add(assistOp.getIn(i + 1).getOffset());
 
                 for (int index = 0; index < sizeIndices; ++index)
                 {
                     inputs[0] = index;
                     ulong output = pcodeScript.evaluate(inputs);
-                    label.push_back(output);
+                    label.Add(output);
                 }
             }
-            label.push_back(0xBAD1ABE1);        // Add fake label to match the defaultAddress
+            label.Add(0xBAD1ABE1);        // Add fake label to match the defaultAddress
         }
 
         public override Varnode foldInNormalization(Funcdata fd, PcodeOp indop)
@@ -193,8 +193,8 @@ namespace Sla.DECCORE
 
         public override void clear()
         {
-            assistOp = (PcodeOp*)0;
-            switchvn = (Varnode*)0;
+            assistOp = (PcodeOp)null;
+            switchvn = (Varnode)null;
         }
     }
 }

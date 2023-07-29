@@ -14,7 +14,7 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("Decompile action not loaded");
+                throw new IfaceExecutionError("Decompile action not loaded");
             dcp.conf.allacts.getCurrent().print(*status.fileoptr, 0, 0);
         }
     }

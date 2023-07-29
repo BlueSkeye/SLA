@@ -105,8 +105,8 @@ namespace Sla.SLEIGH
         public PatternBlock(int off, uint msk, uint val)
         {               // Define mask and value pattern, confined to one uint
             offset = off;
-            maskvec.push_back(msk);
-            valvec.push_back(val);
+            maskvec.Add(msk);
+            valvec.Add(val);
             nonzerosize = sizeof(uint);    // Assume all non-zero bytes before normalization
             normalize();
         }
@@ -173,8 +173,8 @@ namespace Sla.SLEIGH
                 val2 = b.getValue(offset * 8, sizeof(uint) * 8);
                 resmask = mask1 & mask2 & ~(val1 ^ val2);
                 resval = val1 & val2 & resmask;
-                res.maskvec.push_back(resmask);
-                res.valvec.push_back(resval);
+                res.maskvec.Add(resmask);
+                res.valvec.Add(resval);
                 offset += sizeof(uint);
             }
             res.nonzerosize = maxlength;
@@ -208,8 +208,8 @@ namespace Sla.SLEIGH
                 }
                 resmask = mask1 | mask2;
                 resval = (mask1 & val1) | (mask2 & val2);
-                res.maskvec.push_back(resmask);
-                res.valvec.push_back(resval);
+                res.maskvec.Add(resmask);
+                res.valvec.Add(resval);
                 offset += sizeof(uint);
             }
             res.nonzerosize = maxlength;
@@ -390,12 +390,12 @@ namespace Sla.SLEIGH
         public void restoreXml(Element el)
         {
             {
-                istringstream s(el.getAttributeValue("offset"));
+                istringstream s = new istringstream(el.getAttributeValue("offset"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> offset;
             }
             {
-                istringstream s(el.getAttributeValue("nonzero"));
+                istringstream s = new istringstream(el.getAttributeValue("nonzero"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> nonzerosize;
             }
@@ -405,19 +405,19 @@ namespace Sla.SLEIGH
             uint mask, val;
             while (iter != list.end())
             {
-                Element* subel = *iter;
+                Element subel = *iter;
                 {
-                    istringstream s(subel.getAttributeValue("mask"));
+                    istringstream s = new istringstream(subel.getAttributeValue("mask"));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> mask;
                 }
                 {
-                    istringstream s(subel.getAttributeValue("val"));
+                    istringstream s = new istringstream(subel.getAttributeValue("val"));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> val;
                 }
-                maskvec.push_back(mask);
-                valvec.push_back(val);
+                maskvec.Add(mask);
+                valvec.Add(val);
                 ++iter;
             }
             normalize();

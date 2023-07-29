@@ -31,7 +31,7 @@ namespace Sla.DECCORE
                 if (dt.getMetatype() == TYPE_PTR)
                 {
                     AddrSpace* spc = ((TypePointer*)dt).getSpace();
-                    if (spc != (AddrSpace*)0 && spc.getAddrSize() == vn.getSize())    // If provided a pointer with space attribute
+                    if (spc != (AddrSpace)null && spc.getAddrSize() == vn.getSize())    // If provided a pointer with space attribute
                         return spc;     // use that
                 }
                 switch (op.code())
@@ -48,11 +48,11 @@ namespace Sla.DECCORE
                     case CPUI_STORE:
                         if (op.getIn(1) == vn)
                             return op.getIn(0).getSpaceFromConst();
-                        return (AddrSpace*)0;
+                        return (AddrSpace)null;
                     default:
-                        return (AddrSpace*)0;
+                        return (AddrSpace)null;
                 }
-                if (op == (PcodeOp*)0) break;
+                if (op == (PcodeOp)null) break;
             }
             for (list<PcodeOp*>::const_iterator iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {
@@ -63,7 +63,7 @@ namespace Sla.DECCORE
                 else if (opc == CPUI_STORE && op.getIn(1) == vn)
                     return op.getIn(0).getSpaceFromConst();
             }
-            return (AddrSpace*)0;
+            return (AddrSpace)null;
         }
 
         /// \brief Select the AddrSpace in which we infer with the given constant is a pointer
@@ -77,11 +77,11 @@ namespace Sla.DECCORE
         private static AddrSpace selectInferSpace(Varnode* vn, PcodeOp* op,
             List<AddrSpace*> &spaceList)
         {
-            AddrSpace* resSpace = (AddrSpace*)0;
+            AddrSpace* resSpace = (AddrSpace)null;
             if (vn.getType().getMetatype() == TYPE_PTR)
             {
                 AddrSpace* spc = ((TypePointer*)vn.getType()).getSpace();
-                if (spc != (AddrSpace*)0 && spc.getAddrSize() == vn.getSize())
+                if (spc != (AddrSpace)null && spc.getAddrSize() == vn.getSize())
                     return spc;
             }
             for (int i = 0; i < spaceList.size(); ++i)
@@ -95,10 +95,10 @@ namespace Sla.DECCORE
                 }
                 else if (vn.getSize() < minSize)
                     continue;
-                if (resSpace != (AddrSpace*)0)
+                if (resSpace != (AddrSpace)null)
                 {
                     AddrSpace* searchSpc = searchForSpaceAttribute(vn, op);
-                    if (searchSpc != (AddrSpace*)0)
+                    if (searchSpc != (AddrSpace)null)
                         resSpace = searchSpc;
                     break;
                 }
@@ -254,9 +254,9 @@ namespace Sla.DECCORE
                                                  //    if (vn.getSize() != rspc.getAddrSize()) continue; // Must be size of pointer
 
                 PcodeOp* op = vn.loneDescend();
-                if (op == (PcodeOp*)0) continue;
+                if (op == (PcodeOp)null) continue;
                 AddrSpace* rspc = selectInferSpace(vn, op, glb.inferPtrSpaces);
-                if (rspc == (AddrSpace*)0) continue;
+                if (rspc == (AddrSpace)null) continue;
                 int slot = op.getSlot(vn);
                 OpCode opc = op.code();
                 if (opc == CPUI_INT_ADD)

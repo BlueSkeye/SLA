@@ -86,7 +86,7 @@ namespace Sla.DECCORE
             : base()
         {
             offset = 0;
-            parent = (Datatype*)0;
+            parent = (Datatype)null;
             stripped = (TypePointer*)0;
             submeta = SUB_PTRREL;
         }
@@ -125,7 +125,7 @@ namespace Sla.DECCORE
             ulong byteOff = AddrSpace::addressToByte(addrOff, wordsize);
             if (ptrto.getMetatype() == TYPE_STRUCT && byteOff < ptrto.getSize())
                 return false;
-            byteOff = (byteOff + offset) & calc_mask(size);
+            byteOff = (byteOff + offset) & Globals.calc_mask(size);
             return (byteOff < parent.getSize());
         }
 
@@ -201,7 +201,7 @@ namespace Sla.DECCORE
             {
                 return TypePointer::downChain(off, par, parOff, allowArrayWrap, typegrp);
             }
-            ulong relOff = (off + offset) & calc_mask(size);        // Convert off to be relative to the parent container
+            ulong relOff = (off + offset) & Globals.calc_mask(size);        // Convert off to be relative to the parent container
             if (relOff >= parent.getSize())
                 return (TypePointer*)0;         // Don't let pointer shift beyond original container
 
@@ -239,9 +239,9 @@ namespace Sla.DECCORE
                 ulong curoff = off;
                 do
                 {
-                    @base = @base.getSubType(curoff, &curoff);
-                } while (curoff != 0 && @base != (Datatype*)0);
-                if (@base == (Datatype*)0)
+                    @base = @@base.getSubType(curoff, &curoff);
+                } while (curoff != 0 && @base != (Datatype)null);
+                if (@base == (Datatype)null)
                     @base = typegrp.getBase(1, TYPE_UNKNOWN);
             }
             else

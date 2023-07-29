@@ -218,7 +218,7 @@ namespace Sla.DECCORE
         /// \return \b true if the Varnode is not forbidden from ever merging
         private static bool mergeTestBasic(Varnode vn)
         {
-            if (vn == (Varnode*)0) return false;
+            if (vn == (Varnode)null) return false;
             if (!vn.hasCover()) return false;
             if (vn.isImplied()) return false;
             if (vn.isProtoPartial()) return false;
@@ -245,7 +245,7 @@ namespace Sla.DECCORE
                 op = vn.getDef();
                 if (op.code() != CPUI_COPY) continue; // vn must be defineed by copy
                 if (op.getIn(0).getHigh() == high) continue;  // From something NOT in same high
-                singlelist.push_back(vn);
+                singlelist.Add(vn);
             }
         }
 
@@ -272,11 +272,11 @@ namespace Sla.DECCORE
                 {
                     PcodeOp* def1 = v1.getDef();
                     PcodeOp* def2 = v2.getDef();
-                    if (def1 == (PcodeOp*)0)
+                    if (def1 == (PcodeOp)null)
                     {
-                        return def2 != (PcodeOp*)0;
+                        return def2 != (PcodeOp)null;
                     }
-                    else if (def2 == (PcodeOp*)0)
+                    else if (def2 == (PcodeOp)null)
                     {
                         return false;
                     }
@@ -346,7 +346,7 @@ namespace Sla.DECCORE
                 if (op.code() != CPUI_COPY) continue;
                 if (op.getIn(0).getHigh() == high) continue;
                 if (filterTemps && op.getOut().getSpace().getType() != IPTR_INTERNAL) continue;
-                copyIns.push_back(op);
+                copyIns.Add(op);
             }
             // Group COPYs based on the incoming Varnode then block order
             sort(copyIns.begin(), copyIns.end(), compareCopyByInVarnode);
@@ -366,7 +366,7 @@ namespace Sla.DECCORE
             {
                 Varnode* vn = high.getInstance(i);
                 if (vn.getCover().getCoverBlock(blk).contain(op))
-                    vlist.push_back(vn);
+                    vlist.Add(vn);
             }
         }
 
@@ -401,9 +401,9 @@ namespace Sla.DECCORE
                     edgeop = *oiter;
                     if (CoverBlock::getUIndex(edgeop) == opuindex)
                     { // Correctable
-                        oplist.push_back(edgeop);
+                        oplist.Add(edgeop);
                         slot = edgeop.getSlot(vn);
-                        slotlist.push_back(slot);
+                        slotlist.Add(slot);
                     }
                 }
             }
@@ -434,14 +434,14 @@ namespace Sla.DECCORE
                 {
                     int slot = trimOp.getSlot(inVn);
                     ResolvedUnion resUnion = data.getUnionField(ct, trimOp, slot);
-                    int fieldNum = (resUnion == (ResolvedUnion*)0) ? -1 : resUnion.getFieldNum();
+                    int fieldNum = (resUnion == (ResolvedUnion)null) ? -1 : resUnion.getFieldNum();
                     data.forceFacingType(ct, fieldNum, copyOp, 0);
                 }
             }
             Varnode* outVn = data.newUnique(inVn.getSize(), ct);
             data.opSetOutput(copyOp, outVn);
             data.opSetInput(copyOp, inVn, 0);
-            copyTrims.push_back(copyOp);
+            copyTrims.Add(copyOp);
             return copyOp;
         }
 
@@ -466,7 +466,7 @@ namespace Sla.DECCORE
             {
                 bl = (BlockBasic*)data.getBasicBlocks().getBlock(0);
                 pc = bl.getStart();
-                afterop = (PcodeOp*)0;
+                afterop = (PcodeOp)null;
             }
             else
             {
@@ -479,7 +479,7 @@ namespace Sla.DECCORE
                     afterop = vn.getDef();
             }
             copyop = allocateCopyTrim(vn, pc, markedop.front());
-            if (afterop == (PcodeOp*)0)
+            if (afterop == (PcodeOp)null)
                 data.opInsertBegin(copyop, bl);
             else
                 data.opInsertAfter(copyop, afterop);
@@ -588,9 +588,9 @@ namespace Sla.DECCORE
                         }
                         if (boundtype == 2)
                         {   // We have to resolve things defined at same place
-                            if (vn2.getDef() == (PcodeOp*)0)
+                            if (vn2.getDef() == (PcodeOp)null)
                             {
-                                if (vn.getDef() == (PcodeOp*)0)
+                                if (vn.getDef() == (PcodeOp)null)
                                 {
                                     if (vn < vn2) continue; // Choose an arbitrary order if both are inputs
                                 }
@@ -599,7 +599,7 @@ namespace Sla.DECCORE
                             }
                             else
                             {
-                                if (vn.getDef() != (PcodeOp*)0)
+                                if (vn.getDef() != (PcodeOp)null)
                                 {
                                     if (vn2.getDef().getSeqNum().getOrder() < vn.getDef().getSeqNum().getOrder())
                                         continue;
@@ -635,7 +635,7 @@ namespace Sla.DECCORE
                     if (insertop) break;    // No need to continue iterating through blocks
                 }
                 if (insertop)
-                    markedop.push_back(op);
+                    markedop.Add(op);
             }
             snipReads(vn, markedop);
         }
@@ -659,7 +659,7 @@ namespace Sla.DECCORE
             {
                 vn = *iter;
                 if (vn.isFree()) continue;
-                isectlist.push_back(vn);
+                isectlist.Add(vn);
             }
             blocksort.resize(isectlist.size());
             for (int i = 0; i < isectlist.size(); ++i)
@@ -892,7 +892,7 @@ namespace Sla.DECCORE
                         if (merge(*outiter, high, true)) break;
                 }
                 if (outiter == highstack.end())
-                    highstack.push_back(high);
+                    highstack.Add(high);
             }
         }
 
@@ -962,7 +962,7 @@ namespace Sla.DECCORE
         {
             List<FlowBlock*> blockSet;
             for (int i = 0; i < size; ++i)
-                blockSet.push_back(copy[pos + i].getParent());
+                blockSet.Add(copy[pos + i].getParent());
             BlockBasic* domBl = (BlockBasic*)FlowBlock::findCommonBlock(blockSet);
             PcodeOp* domCopy = copy[pos];
             Varnode* rootVn = domCopy.getIn(0);
@@ -982,7 +982,7 @@ namespace Sla.DECCORE
                 if (ct.needsResolution())
                 {
                     ResolvedUnion resUnion = data.getUnionField(ct, oldCopy, 0);
-                    int fieldNum = (resUnion == (ResolvedUnion*)0) ? -1 : resUnion.getFieldNum();
+                    int fieldNum = (resUnion == (ResolvedUnion)null) ? -1 : resUnion.getFieldNum();
                     data.forceFacingType(ct, fieldNum, domCopy, 0);
                     data.forceFacingType(ct, fieldNum, domCopy, -1);
                     if (ct.getMetatype() == TYPE_PARTIALUNION)
@@ -1295,7 +1295,7 @@ namespace Sla.DECCORE
                 if (testCache.intersection(a, high))
                     return false;
             }
-            tmplist.push_back(high);
+            tmplist.Add(high);
             return true;
         }
 
@@ -1351,7 +1351,7 @@ namespace Sla.DECCORE
             VarnodeLocSet::const_iterator iter;
             Varnode* vn;
             HighVariable* high;
-            Datatype* ct = (Datatype*)0;
+            Datatype* ct = (Datatype)null;
 
             for (iter = startiter; iter != enditer; ++iter)
             { // Gather all the highs
@@ -1361,7 +1361,7 @@ namespace Sla.DECCORE
                 if (high.isMark()) continue;   // dedup
                 if (!mergeTestBasic(vn)) continue;
                 high.setMark();
-                highlist.push_back(high);
+                highlist.Add(high);
             }
             for (hiter = highlist.begin(); hiter != highlist.end(); ++hiter)
                 (*hiter).clearMark();
@@ -1372,14 +1372,14 @@ namespace Sla.DECCORE
                 hiter = highlist.begin();
                 high = *hiter;
                 ct = high.getType();
-                highvec.push_back(high);
+                highvec.Add(high);
                 highlist.erase(hiter++);
                 while (hiter != highlist.end())
                 {
                     high = *hiter;
                     if (ct == high.getType())
                     {   // Check for exact same type
-                        highvec.push_back(high);
+                        highvec.Add(high);
                         highlist.erase(hiter++);
                     }
                     else
@@ -1504,7 +1504,7 @@ namespace Sla.DECCORE
                     vn2 = op.getIn(i);
                     if (!mergeTestBasic(vn2)) continue;
                     if (vn1.getSize() != vn2.getSize()) continue;
-                    if ((vn2.getDef() == (PcodeOp*)0) && (!vn2.isInput())) continue;
+                    if ((vn2.getDef() == (PcodeOp)null) && (!vn2.isInput())) continue;
                     high_in = vn2.getHigh();
                     if (!mergeTestAdjacent(high_out, high_in)) continue;
 
@@ -1603,11 +1603,11 @@ namespace Sla.DECCORE
             for (i = 0; i < singlelist.size() - 1; ++i)
             {
                 vn1 = singlelist[i];
-                if (vn1 == (Varnode*)0) continue;
+                if (vn1 == (Varnode)null) continue;
                 for (j = i + 1; j < singlelist.size(); ++j)
                 {
                     vn2 = singlelist[j];
-                    if (vn2 == (Varnode*)0) continue;
+                    if (vn2 == (Varnode)null) continue;
                     if (!vn1.copyShadow(vn2)) continue;
                     if (vn2.getCover().containVarnodeDef(vn1) == 1)
                     {
@@ -1618,7 +1618,7 @@ namespace Sla.DECCORE
                     else if (vn1.getCover().containVarnodeDef(vn2) == 1)
                     {
                         data.opSetInput(vn2.getDef(), vn1, 0);
-                        singlelist[j] = (Varnode*)0;
+                        singlelist[j] = (Varnode)null;
                         res = true;
                     }
                 }
@@ -1641,7 +1641,7 @@ namespace Sla.DECCORE
                 HighVariable* high = copyTrims[i].getOut().getHigh();
                 if (!high.hasCopyIn1())
                 {
-                    multiCopy.push_back(high);
+                    multiCopy.Add(high);
                     high.setCopyIn1();
                 }
                 else
@@ -1665,12 +1665,16 @@ namespace Sla.DECCORE
         /// These, as a result, are not printed in the final source code representation.
         public void markInternalCopies()
         {
-            List<HighVariable*> multiCopy;
-            list<PcodeOp*>::const_iterator iter;
-            PcodeOp* op;
-            HighVariable* h1;
-            Varnode* v1,*v2,*v3;
-            VariablePiece* p1,*p2,*p3;
+            List<HighVariable> multiCopy;
+            IEnumerator<PcodeOp> iter;
+            PcodeOp op;
+            HighVariable h1;
+            Varnode v1;
+            Varnode v2;
+            Varnode v3;
+            VariablePiece p1;
+            VariablePiece p2;
+            VariablePiece p3;
             int val;
 
             for (iter = data.beginOpAlive(); iter != data.endOpAlive(); ++iter)
@@ -1690,7 +1694,7 @@ namespace Sla.DECCORE
                             if (!h1.hasCopyIn1())
                             {   // If this is the first COPY we've seen for this high
                                 h1.setCopyIn1();       // Mark it
-                                multiCopy.push_back(h1);
+                                multiCopy.Add(h1);
                             }
                             else
                                 h1.setCopyIn2();       // This is at least the second COPY we've seen
@@ -1769,7 +1773,7 @@ namespace Sla.DECCORE
         /// \param vn is the given root Varnode
         public void registerProtoPartialRoot(Varnode vn)
         {
-            protoPartial.push_back(vn.getDef());
+            protoPartial.Add(vn.getDef());
         }
 
 #if MERGEMULTI_DEBUG

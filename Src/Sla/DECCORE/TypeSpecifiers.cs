@@ -15,7 +15,7 @@ namespace Sla.DECCORE
 
         internal TypeSpecifiers()
         {
-            type_specifier = (Datatype*)0;
+            type_specifier = (Datatype)null;
             flags = 0;
         }
     }

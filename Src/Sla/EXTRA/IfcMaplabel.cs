@@ -22,12 +22,12 @@ namespace Sla.EXTRA
             string name;
             s >> name;
             if (name.size() == 0)
-                throw IfaceParseError("Need label name and address");
+                throw new IfaceParseError("Need label name and address");
             int size;
             Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read address
 
             Scope* scope;
-            if (dcp.fd != (Funcdata*)0)
+            if (dcp.fd != (Funcdata)null)
                 scope = dcp.fd.getScopeLocal();
             else
                 scope = dcp.conf.symboltab.getGlobalScope();

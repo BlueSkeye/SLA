@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Eliminate INT_SUB:  `V - W  =>  V + W * -1`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_SUB);
+            oplist.Add(CPUI_INT_SUB);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -40,7 +40,7 @@ namespace Sla.DECCORE
             newvn = data.newUniqueOut(vn.getSize(), newop);
             data.opSetInput(op, newvn, 1); // Replace vn's reference first
             data.opSetInput(newop, vn, 0);
-            data.opSetInput(newop, data.newConstant(vn.getSize(), calc_mask(vn.getSize())), 1);
+            data.opSetInput(newop, data.newConstant(vn.getSize(), Globals.calc_mask(vn.getSize())), 1);
             data.opSetOpcode(op, CPUI_INT_ADD);
             data.opInsertBefore(newop, op);
             return 1;

@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         /// Similarly `concat(Y,X) & 0xffff  =>  zext(X)`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_AND);
+            oplist.Add(CPUI_INT_AND);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -45,7 +45,7 @@ namespace Sla.DECCORE
                 rootvn = otherop.getIn(1);
             else
                 return 0;
-            ulong mask = calc_mask(rootvn.getSize());
+            ulong mask = Globals.calc_mask(rootvn.getSize());
             if (mask != cvn1.getOffset())
                 return 0;
             if (rootvn.isFree())

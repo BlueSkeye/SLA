@@ -111,7 +111,7 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode
         private void mark(Varnode vn)
         {
-            markedVn.push_back(vn);
+            markedVn.Add(vn);
             vn.setMark();
         }
 
@@ -152,7 +152,7 @@ namespace Sla.DECCORE
                         if (op.getOut().isReturnAddress()) return pop_fail;   // Storage address location is completely invalid
                         if (trial.isKilledByCall()) return pop_fail;       // "Likely" killedbycall is invalid
                     }
-                    stateStack.push_back(State(op, 0));
+                    stateStack.Add(State(op, 0));
                     return enter_node;          // Enter the new node
                 case CPUI_SUBPIECE:
                     // Extracting to a temporary, or to the same storage location, or otherwise incidental
@@ -161,7 +161,7 @@ namespace Sla.DECCORE
                     || op.isIncidentalCopy() || op.getIn(0).isIncidentalCopy()
                     || (op.getOut().overlap(*op.getIn(0)) == (int)op.getIn(1).getOffset()))
                     {
-                        stateStack.push_back(State(op, state));
+                        stateStack.Add(State(op, state));
                         return enter_node;      // Push into the new node
                     }
                     // For other SUBPIECES, do a minimal traversal to rule out unaffected or other invalid inputs,
@@ -175,7 +175,7 @@ namespace Sla.DECCORE
                                 return pop_fail;
                         }
                         op = vn.getDef();
-                    } while ((op != (PcodeOp*)0) && ((op.code() == CPUI_COPY) || (op.code() == CPUI_SUBPIECE)));
+                    } while ((op != (PcodeOp)null) && ((op.code() == CPUI_COPY) || (op.code() == CPUI_SUBPIECE)));
                     return pop_solid;   // treat the COPY as a solid movement
                 case CPUI_COPY:
                     {
@@ -185,7 +185,7 @@ namespace Sla.DECCORE
                         || op.isIncidentalCopy() || op.getIn(0).isIncidentalCopy()
                         || (op.getOut().getAddr() == op.getIn(0).getAddr()))
                         {
-                            stateStack.push_back(State(op, 0));
+                            stateStack.Add(State(op, 0));
                             return enter_node;      // Push into the new node
                         }
                         // For other COPIES, do a minimal traversal to rule out unaffected or other invalid inputs,
@@ -199,7 +199,7 @@ namespace Sla.DECCORE
                                     return pop_fail;
                             }
                             op = vn.getDef();
-                            if (op == (PcodeOp*)0) break;
+                            if (op == (PcodeOp)null) break;
                             OpCode opc = op.code();
                             if (opc == CPUI_COPY || opc == CPUI_SUBPIECE)
                                 vn = op.getIn(0);
@@ -212,7 +212,7 @@ namespace Sla.DECCORE
                     }
                 case CPUI_MULTIEQUAL:
                     multiDepth += 1;
-                    stateStack.push_back(State(op, 0));
+                    stateStack.Add(State(op, 0));
                     return enter_node;              // Nothing to check, start traversing inputs of MULTIEQUAL
                 case CPUI_PIECE:
                     if (stateVn.getSize() > trial.getSize())
@@ -222,13 +222,13 @@ namespace Sla.DECCORE
                         if (state.offset == 0 && op.getIn(1).getSize() <= trial.getSize())
                         {
                             // Truncation corresponds to least significant piece, follow slot=1
-                            stateStack.push_back(State(op, 1));
+                            stateStack.Add(State(op, 1));
                             return enter_node;
                         }
                         else if (state.offset == op.getIn(1).getSize() && op.getIn(0).getSize() <= trial.getSize())
                         {
                             // Truncation corresponds to most significant piece, follow slot=0
-                            stateStack.push_back(State(op, 0));
+                            stateStack.Add(State(op, 0));
                             return enter_node;
                         }
                         if (stateVn.getSpace().getType() != IPTR_SPACEBASE)
@@ -350,7 +350,7 @@ namespace Sla.DECCORE
             }
             // Run the depth first traversal
             int command = enter_node;
-            stateStack.push_back(State(op, slot));      // Start by entering the initial node
+            stateStack.Add(State(op, slot));      // Start by entering the initial node
             while (!stateStack.empty())
             {           // Continue until all paths have been exhausted
                 switch (command)

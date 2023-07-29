@@ -18,29 +18,29 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("No load image present");
+                throw new IfaceExecutionError("No load image present");
 
             string fixupName, funcName;
 
             s >> ws;
             if (s.eof())
-                throw IfaceParseError("Missing fixup name");
+                throw new IfaceParseError("Missing fixup name");
             s >> fixupName >> ws;
             if (s.eof())
-                throw IfaceParseError("Missing function name");
+                throw new IfaceParseError("Missing function name");
             s >> funcName;
 
             int injectid = dcp.conf.pcodeinjectlib.getPayloadId(InjectPayload::CALLFIXUP_TYPE, fixupName);
             if (injectid < 0)
-                throw IfaceExecutionError("Unknown fixup: " + fixupName);
+                throw new IfaceExecutionError("Unknown fixup: " + fixupName);
 
             string basename;
-            Scope* funcscope = dcp.conf.symboltab.resolveScopeFromSymbolName(funcName, "::", basename, (Scope*)0);
-            if (funcscope == (Scope*)0)
-                throw IfaceExecutionError("Bad namespace: " + funcName);
+            Scope* funcscope = dcp.conf.symboltab.resolveScopeFromSymbolName(funcName, "::", basename, (Scope)null);
+            if (funcscope == (Scope)null)
+                throw new IfaceExecutionError("Bad namespace: " + funcName);
             Funcdata* fd = funcscope.queryFunction(basename); // Is function already in database
-            if (fd == (Funcdata*)0)
-                throw IfaceExecutionError("Unknown function name: " + funcName);
+            if (fd == (Funcdata)null)
+                throw new IfaceExecutionError("Unknown function name: " + funcName);
 
             fd.getFuncProto().setInjectId(injectid);
             *status.optr << "Successfully applied callfixup" << endl;

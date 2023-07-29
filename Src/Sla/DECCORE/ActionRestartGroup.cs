@@ -43,7 +43,7 @@ namespace Sla.DECCORE
         public override void reset(Funcdata data)
         {
             curstart = 0;
-            base.reset(data);
+            @base.reset(data);
         }
 
         public override int apply(Funcdata data)
@@ -55,7 +55,7 @@ namespace Sla.DECCORE
                 return 0;
             }
             while(true) {
-                res = base.apply(data);
+                res = @base.apply(data);
                 if (res != 0) {
                     return res;
                 }

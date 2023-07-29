@@ -138,7 +138,7 @@ namespace Sla.DECCORE
             if (parent.sizeOut() != addresstable.size())
                 throw new LowlevelError("Trivial addresstable and switch block size do not match");
             for (uint i = 0; i < parent.sizeOut(); ++i)
-                block2addr.push_back(IndexPair(i, i));  // Addresses corresponds exactly to out-edges of switch block
+                block2addr.Add(IndexPair(i, i));  // Addresses corresponds exactly to out-edges of switch block
             lastBlock = parent.sizeOut() - 1;
             defaultBlock = -1;      // Trivial case does not have default case
         }
@@ -220,7 +220,7 @@ namespace Sla.DECCORE
                 BlockBasic* bl = (BlockBasic*)parent.getIn(0);
                 if (bl.sizeOut() != 2) continue; // Check if -bl- looks like it contains a guard
                 PcodeOp* cbranch = bl.lastOp();
-                if ((cbranch == (PcodeOp*)0) || (cbranch.code() != CPUI_CBRANCH))
+                if ((cbranch == (PcodeOp)null) || (cbranch.code() != CPUI_CBRANCH))
                     continue;
                 Varnode* vn = cbranch.getIn(1); // Get the boolean variable
                 if (!vn.isConstant()) continue; // Has the guard collapsed
@@ -242,7 +242,7 @@ namespace Sla.DECCORE
             glb = g;
             jmodel = (JumpModel*)0;
             origmodel = (JumpModel*)0;
-            indirect = (PcodeOp*)0;
+            indirect = (PcodeOp)null;
             switchVarConsume = ~((ulong)0);
             defaultBlock = -1;
             lastBlock = -1;
@@ -261,7 +261,7 @@ namespace Sla.DECCORE
             glb = op2.glb;
             jmodel = (JumpModel*)0;
             origmodel = (JumpModel*)0;
-            indirect = (PcodeOp*)0;
+            indirect = (PcodeOp)null;
             switchVarConsume = ~((ulong)0);
             defaultBlock = -1;
             lastBlock = op2.lastBlock;
@@ -303,7 +303,7 @@ namespace Sla.DECCORE
         /// Return \b true if this could be multi-staged
         private bool isPossibleMultistage() => (addresstable.size()== 1);
 
-        /// Return what stage of recovery this jump-table is in.
+        /// Return what stage of recovery this jump-table is @in.
         private int getStage() => recoverystage;
 
         /// Return the size of the address table for \b this jump-table
@@ -362,7 +362,7 @@ namespace Sla.DECCORE
         /// \return the count of entries
         private int numIndicesByBlock(FlowBlock bl)
         {
-            IndexPair val(block2Position(bl),0);
+            IndexPair val = new IndexPair(block2Position(bl),0);
             pair<List<IndexPair>::const_iterator, List<IndexPair>::const_iterator> range;
             range = equal_range(block2addr.begin(), block2addr.end(), val, IndexPair::compareByPosition);
             return range.second - range.first;
@@ -376,9 +376,9 @@ namespace Sla.DECCORE
         /// \return the address table index
         private int getIndexByBlock(FlowBlock bl, int i)
         {
-            IndexPair val(block2Position(bl),0);
+            IndexPair val = new IndexPair(block2Position(bl),0);
             int count = 0;
-            List<IndexPair>::const_iterator iter = lower_bound(block2addr.begin(), block2addr.end(), val, IndexPair::compareByPosition);
+            IEnumerator<IndexPair> iter = lower_bound(block2addr.begin(), block2addr.end(), val, IndexPair::compareByPosition);
             while (iter != block2addr.end())
             {
                 if ((*iter).blockPosition == val.blockPosition)
@@ -421,10 +421,10 @@ namespace Sla.DECCORE
         /// \param lab is the case label for the block
         private void addBlockToSwitch(BlockBasic bl, ulong lab)
         {
-            addresstable.push_back(bl.getStart());
+            addresstable.Add(bl.getStart());
             lastBlock = indirect.getParent().sizeOut();       // The block WILL be added to the end of the out-edges
-            block2addr.push_back(IndexPair(lastBlock, addresstable.size() - 1));
-            label.push_back(lab);
+            block2addr.Add(IndexPair(lastBlock, addresstable.size() - 1));
+            label.Add(lab);
         }
 
         /// Convert absolute addresses to block indices
@@ -453,7 +453,7 @@ namespace Sla.DECCORE
                     if (parent.getOut(pos) == tmpbl) break;
                 if (pos == parent.sizeOut())
                     throw new LowlevelError("Jumptable destination not linked");
-                block2addr.push_back(IndexPair(pos, i));
+                block2addr.Add(IndexPair(pos, i));
             }
             lastBlock = block2addr.back().blockPosition;    // Out-edge of last address in table
             sort(block2addr.begin(), block2addr.end());
@@ -490,19 +490,19 @@ namespace Sla.DECCORE
         private void foldInNormalization(Funcdata fd)
         {
             Varnode* switchvn = jmodel.foldInNormalization(fd, indirect);
-            if (switchvn != (Varnode*)0)
+            if (switchvn != (Varnode)null)
             {
                 // If possible, mark up the switch variable as not fully consumed so that
                 // subvariable flow can truncate it.
                 switchVarConsume = minimalmask(switchvn.getNZMask());
-                if (switchVarConsume >= calc_mask(switchvn.getSize()))
+                if (switchVarConsume >= Globals.calc_mask(switchvn.getSize()))
                 {   // If mask covers everything
                     if (switchvn.isWritten())
                     {
                         PcodeOp* op = switchvn.getDef();
                         if (op.code() == CPUI_INT_SEXT)
                         {           // Check for a signed extension
-                            switchVarConsume = calc_mask(op.getIn(0).getSize());  // Assume the extension is not consumed
+                            switchVarConsume = Globals.calc_mask(op.getIn(0).getSize());  // Assume the extension is not consumed
                         }
                     }
                 }
@@ -663,7 +663,7 @@ namespace Sla.DECCORE
         {
             if (addresstable.size() != 1) return false;
             if (recoverystage != 0) return false;
-            if (indirect == (PcodeOp*)0) return false;
+            if (indirect == (PcodeOp)null) return false;
 
             if (fd.getOverride().queryMultistageJumptable(indirect.getAddr()))
             {
@@ -695,7 +695,7 @@ namespace Sla.DECCORE
             lastBlock = -1;
             label.clear();
             loadpoints.clear();
-            indirect = (PcodeOp*)0;
+            indirect = (PcodeOp)null;
             switchVarConsume = ~((ulong)0);
             defaultBlock = -1;
             recoverystage = 0;
@@ -718,7 +718,7 @@ namespace Sla.DECCORE
                 encoder.openElement(ELEM_DEST);
                 AddrSpace* spc = addresstable[i].getSpace();
                 ulong off = addresstable[i].getOffset();
-                if (spc != (AddrSpace*)0)
+                if (spc != (AddrSpace)null)
                     spc.encodeAttributes(encoder, off);
                 if (i < label.size())
                 {
@@ -763,14 +763,14 @@ namespace Sla.DECCORE
                             if (missedlabel)
                                 throw new LowlevelError("Jumptable entries are missing labels");
                             ulong lab = decoder.readUnsignedInteger();
-                            label.push_back(lab);
+                            label.Add(lab);
                             foundlabel = true;
                             break;
                         }
                     }
                     if (!foundlabel)        // No label attribute
                         missedlabel = true; // No following entries are allowed to have a label attribute
-                    addresstable.push_back(Address::decode(decoder));
+                    addresstable.Add(Address::decode(decoder));
                 }
                 else if (subId == ELEM_LOADTABLE)
                 {
@@ -790,7 +790,7 @@ namespace Sla.DECCORE
             if (label.size() != 0)
             {
                 while (label.size() < addresstable.size())
-                    label.push_back(0xBAD1ABE1);
+                    label.Add(0xBAD1ABE1);
             }
         }
     }

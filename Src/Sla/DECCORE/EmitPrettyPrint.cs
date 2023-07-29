@@ -66,7 +66,7 @@ namespace Sla.DECCORE
             // Expanding puts the leftmost element at reference 0
             // So we need to adjust references
             for (int i = 0; i < max; ++i)
-                scanqueue.ref (i) = (scanqueue.ref (i) +max - left) % max;
+                scanqueue.@ref(i) = (scanqueue.@ref(i) +max - left) % max;
             // The number of elements in scanqueue is always less than
             // or equal to the number of elements in tokqueue, so
             // if we keep scanqueue and tokqueue with the same max
@@ -179,9 +179,9 @@ namespace Sla.DECCORE
                     break;
                 case TokenSplit::begin_indent:
                     val = indentstack.back() - tok.getIndentBump();
-                    indentstack.push_back(val);
+                    indentstack.Add(val);
 #if PRETTY_DEBUG
-                    checkid.push_back(tok.getCount());
+                    checkid.Add(tok.getCount());
 #endif
                     break;
                 case TokenSplit::begin_comment:
@@ -189,9 +189,9 @@ namespace Sla.DECCORE
                 // fallthru, treat as a group begin
                 case TokenSplit::begin:
                     tok.print(lowlevel);
-                    indentstack.push_back(spaceremain);
+                    indentstack.Add(spaceremain);
 #if PRETTY_DEBUG
-                    checkid.push_back(tok.getCount());
+                    checkid.Add(tok.getCount());
 #endif
                     break;
                 case TokenSplit::end_indent:
@@ -325,11 +325,11 @@ namespace Sla.DECCORE
                     tok.setSize(0);
                     if (!scanqueue.empty())
                     {
-                        TokenSplit & ref (tokqueue.ref (scanqueue.pop() ) );
-                        ref.setSize(ref.getSize() + rightotal);
+                        TokenSplit @ref = new TokenSplit(tokqueue.@ref (scanqueue.pop() ) );
+                        @ref.setSize(@ref.getSize() + rightotal);
                         if ((ref.getClass() == TokenSplit::tokenbreak) && (!scanqueue.empty()))
                         {
-                            TokenSplit & ref2(tokqueue.ref (scanqueue.pop()));
+                            TokenSplit ref2 = new TokenSplit(tokqueue.@ref (scanqueue.pop()));
                             ref2.setSize(ref2.getSize() + rightotal);
                         }
                         if (scanqueue.empty())
@@ -343,11 +343,11 @@ namespace Sla.DECCORE
                     }
                     else
                     {
-                        TokenSplit & ref (tokqueue.ref (scanqueue.top() ) );
-                        if (ref.getClass() == TokenSplit::tokenbreak)
+                        TokenSplit @ref = new TokenSplit(tokqueue.@ref (scanqueue.top() ) );
+                        if (@ref.getClass() == TokenSplit::tokenbreak)
                         {
                             scanqueue.pop();
-                            ref.setSize(ref.getSize() + rightotal);
+                            @ref.setSize(@ref.getSize() + rightotal);
                         }
                     }
                     tok.setSize(-rightotal);
@@ -365,8 +365,8 @@ namespace Sla.DECCORE
                         rightotal += tok.getSize();
                         while (rightotal - leftotal > spaceremain)
                         {
-                            TokenSplit & ref (tokqueue.ref (scanqueue.popbottom() ) );
-                            ref.setSize(999999);
+                            TokenSplit @ref = new TokenSplit(tokqueue.@ref (scanqueue.popbottom() ) );
+                            @ref.setSize(999999);
                             advanceleft();
                             if (scanqueue.empty()) break;
                         }

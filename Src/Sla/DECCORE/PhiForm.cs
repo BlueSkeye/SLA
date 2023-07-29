@@ -54,7 +54,7 @@ namespace Sla.DECCORE
             if (!i.hasBothPieces()) return false;
             @in = i;
 
-            if (!verify(@in.getHi(), @in.getLo(), hphi))
+            if (!verify(@@in.getHi(), @@in.getLo(), hphi))
                 return false;
 
             int numin = hiphi.numInput();
@@ -63,11 +63,11 @@ namespace Sla.DECCORE
             {
                 Varnode* vhi = hiphi.getIn(j);
                 Varnode* vlo = lophi.getIn(j);
-                inlist.push_back(SplitVarnode(vlo, vhi));
+                inlist.Add(SplitVarnode(vlo, vhi));
             }
-            outvn.initPartial(@in.getSize(), lophi.getOut(), hiphi.getOut());
+            outvn.initPartial(@@in.getSize(), lophi.getOut(), hiphi.getOut());
             existop = SplitVarnode::preparePhiOp(outvn, inlist);
-            if (existop != (PcodeOp*)0)
+            if (existop != (PcodeOp)null)
             {
                 SplitVarnode::createPhiOp(data, outvn, inlist, existop);
                 return true;

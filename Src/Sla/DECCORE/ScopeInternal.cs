@@ -88,7 +88,7 @@ namespace Sla.DECCORE
         /// \return iterator pointing to the first Symbol or nametree.end() if there is no matching Symbol
         private SymbolNameTree::const_iterator findFirstByName(string nm)
         {
-            Symbol sym((Scope*)0,nm,(Datatype*)0);
+            Symbol sym = new Symbol((Scope)null,nm,(Datatype)null);
             SymbolNameTree::const_iterator iter = nametree.lower_bound(&sym);
             if (iter == nametree.end()) return iter;
             if ((*iter).getName() != nm)
@@ -116,7 +116,7 @@ namespace Sla.DECCORE
                     sym.name = buildUndefinedName();
                     sym.displayName = sym.name;
                 }
-                if (sym.getType() == (Datatype*)0)
+                if (sym.getType() == (Datatype)null)
                     throw new LowlevelError(sym.getName() + " symbol created with no type");
                 if (sym.getType().getSize() < 1)
                     throw new LowlevelError(sym.getName() + " symbol created with zero size type");
@@ -124,12 +124,12 @@ namespace Sla.DECCORE
                 if (sym.category >= 0)
                 {
                     while (category.size() <= sym.category)
-                        category.push_back(List<Symbol*>());
+                        category.Add(List<Symbol*>());
                     List<Symbol*> & list(category[sym.category]);
                     if (sym.category > 0)
                         sym.catindex = list.size();
                     while (list.size() <= sym.catindex)
-                        list.push_back((Symbol*)0);
+                        list.Add((Symbol*)0);
                     list[sym.catindex] = sym;
                 }
             }
@@ -163,7 +163,7 @@ namespace Sla.DECCORE
 
             list<SymbolEntry>::iterator iter = rangemap.insert(initdata, addr.getOffset(), lastaddress.getOffset());
             // Store reference to map in symbol
-            sym.mapentry.push_back(iter);
+            sym.mapentry.Add(iter);
             if (sz == sym.type.getSize())
             {
                 sym.wholeCount += 1;
@@ -176,10 +176,10 @@ namespace Sla.DECCORE
         protected override SymbolEntry addDynamicMapInternal(Symbol sym, uint exfl, ulong hash,
             int off, int sz, RangeList uselim)
         {
-            dynamicentry.push_back(SymbolEntry(sym, exfl, hash, off, sz, uselim));
+            dynamicentry.Add(SymbolEntry(sym, exfl, hash, off, sz, uselim));
             list<SymbolEntry>::iterator iter = dynamicentry.end();
             --iter;
-            sym.mapentry.push_back(iter); // Store reference to map entry in symbol
+            sym.mapentry.Add(iter); // Store reference to map entry in symbol
             if (sz == sym.type.getSize())
             {
                 sym.wholeCount += 1;
@@ -257,7 +257,7 @@ namespace Sla.DECCORE
                 {       // Clear entire category
                     List<Symbol*> list;
                     for (int j = 0; j < num; ++j)
-                        list.push_back(category[i][j]);
+                        list.Add(category[i][j]);
                     for (int j = 0; j < list.size(); ++j)
                     {
                         Symbol* sym = list[j];
@@ -459,7 +459,7 @@ namespace Sla.DECCORE
             for (iter = symbol.mapentry.begin(); iter != symbol.mapentry.end(); ++iter)
             {
                 AddrSpace* spc = (*(*iter)).getAddr().getSpace();
-                if (spc == (AddrSpace*)0) // A null address indicates a dynamic mapping
+                if (spc == (AddrSpace)null) // A null address indicates a dynamic mapping
                     dynamicentry.erase(*iter);
                 else
                 {
@@ -536,7 +536,7 @@ namespace Sla.DECCORE
 
         public override void setAttribute(Symbol sym, uint attr)
         {
-            attr &= (Varnode::typelock | Varnode::namelock | Varnode::readonly | Varnode::incidental_copy |
+            attr &= (Varnode::typelock | Varnode::namelock | Varnode::@readonly | Varnode::incidental_copy |
                  Varnode::nolocalalias | Varnode::volatil | Varnode::indirectstorage | Varnode::hiddenretparm);
             sym.flags |= attr;
             sym.checkSizeTypeLock();
@@ -544,7 +544,7 @@ namespace Sla.DECCORE
 
         public override void clearAttribute(Symbol sym, uint attr)
         {
-            attr &= (Varnode::typelock | Varnode::namelock | Varnode::readonly | Varnode::incidental_copy |
+            attr &= (Varnode::typelock | Varnode::namelock | Varnode::@readonly | Varnode::incidental_copy |
                  Varnode::nolocalalias | Varnode::volatil | Varnode::indirectstorage | Varnode::hiddenretparm);
             sym.flags &= ~attr;
             sym.checkSizeTypeLock();
@@ -682,7 +682,7 @@ namespace Sla.DECCORE
                     ++res.first;
                 }
             }
-            return (Funcdata*)0;
+            return (Funcdata)null;
         }
 
         public override ExternRefSymbol findExternalRef(Address addr)
@@ -754,14 +754,14 @@ namespace Sla.DECCORE
             {
                 Symbol* sym = *iter;
                 if (sym.name != nm) break;
-                res.push_back(sym);
+                res.Add(sym);
                 ++iter;
             }
         }
 
         public override bool isNameUsed(string nm, Scope op2)
         {
-            Symbol sym((Scope*)0,nm,(Datatype*)0);
+            Symbol sym = new Symbol((Scope)null,nm,(Datatype)null);
             SymbolNameTree::const_iterator iter = nametree.lower_bound(&sym);
             if (iter != nametree.end())
             {
@@ -769,9 +769,9 @@ namespace Sla.DECCORE
                     return true;
             }
             Scope* par = getParent();
-            if (par == (Scope*)0 || par == op2)
+            if (par == (Scope)null || par == op2)
                 return false;
-            if (par.getParent() == (Scope*)0)  // Never recurse into global scope
+            if (par.getParent() == (Scope)null)  // Never recurse into global scope
                 return false;
             return par.isNameUsed(nm, op2);
         }
@@ -782,7 +782,7 @@ namespace Sla.DECCORE
             int index, uint flags)
         {
             ostringstream s;
-            int sz = (ct == (Datatype*)0) ? 1 : ct.getSize();
+            int sz = (ct == (Datatype)null) ? 1 : ct.getSize();
 
             if ((flags & Varnode::unaffected) != 0)
             {
@@ -809,7 +809,7 @@ namespace Sla.DECCORE
                     s << spacename;
                 else
                 {
-                    if (ct != (Datatype*)0)
+                    if (ct != (Datatype)null)
                         ct.printNameBase(s);
                     spacename = addr.getSpace().getName();
                     spacename[0] = toupper(spacename[0]); // Capitalize space
@@ -836,7 +836,7 @@ namespace Sla.DECCORE
             }
             else if ((flags & Varnode::addrtied) != 0)
             {
-                if (ct != (Datatype*)0)
+                if (ct != (Datatype)null)
                     ct.printNameBase(s);
                 string spacename = addr.getSpace().getName();
                 spacename[0] = toupper(spacename[0]); // Capitalize space
@@ -856,7 +856,7 @@ namespace Sla.DECCORE
             }
             else
             {           // Some sort of local variable
-                if (ct != (Datatype*)0)
+                if (ct != (Datatype)null)
                     ct.printNameBase(s);
                 s << "Var" << dec << index++;
                 if (findFirstByName(s.str()) != nametree.end())
@@ -864,7 +864,7 @@ namespace Sla.DECCORE
                     for (int i = 0; i < 10; ++i)
                     {   // Try bumping up the index a few times before calling makeNameUnique
                         ostringstream s2;
-                        if (ct != (Datatype*)0)
+                        if (ct != (Datatype)null)
                             ct.printNameBase(s2);
                         s2 << "Var" << dec << index++;
                         if (findFirstByName(s2.str()) == nametree.end())
@@ -887,7 +887,7 @@ namespace Sla.DECCORE
           // characters are hex digits which make the name unique
             SymbolNameTree::const_iterator iter;
 
-            Symbol testsym((Scope*)0,"$$undefz",(Datatype*)0);
+            Symbol testsym = new Symbol((Scope)null,"$$undefz",(Datatype)null);
 
             iter = nametree.lower_bound(&testsym);
             if (iter != nametree.begin())
@@ -897,10 +897,10 @@ namespace Sla.DECCORE
                 string symname = (*iter).getName();
                 if ((symname.size() == 15) && (0 == symname.compare(0, 7, "$$undef")))
                 {
-                    istringstream s(symname.substr(7,8) );
-                    uint uniq = ~((uint)0);
+                    istringstream s = new istringstream(symname.substr(7,8) );
+                    uint uniq = uint.MaxValue;
                     s >> hex >> uniq;
-                    if (uniq == ~((uint)0))
+                    if (uniq == uint.MaxValue)
                         throw new LowlevelError("Error creating undefined name");
                     uniq += 1;
                     ostringstream s2;
@@ -916,7 +916,7 @@ namespace Sla.DECCORE
             SymbolNameTree::const_iterator iter = findFirstByName(nm);
             if (iter == nametree.end()) return nm; // nm is already unique
 
-            Symbol boundsym((Scope*)0,nm + "_x99999",(Datatype*)0);
+            Symbol boundsym = new Symbol((Scope)null,nm + "_x99999",(Datatype)null);
             boundsym.nameDedup = 0xffffffff;
             SymbolNameTree::const_iterator iter2 = nametree.lower_bound(&boundsym);
             uint uniqid;
@@ -985,7 +985,7 @@ namespace Sla.DECCORE
             encoder.openElement(ELEM_SCOPE);
             encoder.writeString(ATTRIB_NAME, name);
             encoder.writeUnsignedInteger(ATTRIB_ID, uniqueId);
-            if (getParent() != (Scope*)0) {
+            if (getParent() != (Scope)null) {
                 encoder.openElement(ELEM_PARENT);
                 encoder.writeUnsignedInteger(ATTRIB_ID, getParent().getId());
                 encoder.closeElement(ELEM_PARENT);
@@ -1127,10 +1127,10 @@ namespace Sla.DECCORE
             sym.catindex = ind;
             if (cat < 0) return;
             while (category.size() <= sym.category)
-                category.push_back(List<Symbol*>());
+                category.Add(List<Symbol*>());
             List<Symbol*> & list(category[sym.category]);
             while (list.size() <= sym.catindex)
-                list.push_back((Symbol*)0);
+                list.Add((Symbol*)0);
             list[sym.catindex] = sym;
         }
 
@@ -1142,7 +1142,7 @@ namespace Sla.DECCORE
         {
             SymbolNameTree::const_iterator iter;
 
-            Symbol testsym((Scope*)0,"$$undef",(Datatype*)0);
+            Symbol testsym = new Symbol((Scope)null,"$$undef",(Datatype)null);
 
             iter = nametree.upper_bound(&testsym);
             while (iter != nametree.end())
@@ -1150,7 +1150,7 @@ namespace Sla.DECCORE
                 Symbol* sym = *iter;
                 if (!sym.isNameUndefined()) break;
                 ++iter;     // Advance before renaming
-                string nm = buildDefaultName(sym, base, (Varnode*)0);
+                string nm = buildDefaultName(sym, base, (Varnode)null);
                 renameSymbol(sym, nm);
             }
         }

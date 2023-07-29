@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Simplify INT_NEGATE chains:  `~~V  =>  V`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_NEGATE);
+            oplist.Add(CPUI_INT_NEGATE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

@@ -83,7 +83,7 @@ namespace Sla.SLEIGH
         {
             ConstructState* opstate = &state[alloc++];
             opstate.parent = walker.point;
-            opstate.ct = (Constructor*)0;
+            opstate.ct = (Constructor)null;
             walker.point.resolve[i] = opstate;
             walker.breadcrumb[walker.depth++] += 1;
             walker.point = opstate;

@@ -18,17 +18,17 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.cgraph == (CallGraph*)0)
-                throw IfaceExecutionError("No callgraph has been built");
+                throw new IfaceExecutionError("No callgraph has been built");
 
             string name;
             s >> ws >> name;
             if (name.size() == 0)
-                throw IfaceParseError("Need file name to write callgraph to");
+                throw new IfaceParseError("Need file name to write callgraph to");
 
             ofstream os;
             os.open(name.c_str());
             if (!os)
-                throw IfaceExecutionError("Unable to open file " + name);
+                throw new IfaceExecutionError("Unable to open file " + name);
 
             XmlEncode encoder(os);
             dcp.cgraph.encode(encoder);

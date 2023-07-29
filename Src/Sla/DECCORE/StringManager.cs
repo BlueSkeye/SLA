@@ -137,7 +137,7 @@ namespace Sla.DECCORE
                     else
                         c2 = c2 + 10 - 'a';
                     val = c1 * 16 + c2;
-                    stringData.byteData.push_back((byte)val);
+                    stringData.byteData.Add((byte)val);
                     @is >> ws;
                     c1 = @is.get();
                     c2 = @is.get();

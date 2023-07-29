@@ -25,15 +25,15 @@ namespace Sla.EXTRA
             s >> funcname;
 
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("No image loaded");
+                throw new IfaceExecutionError("No image loaded");
 
             string basename;
-            Scope* funcscope = dcp.conf.symboltab.resolveScopeFromSymbolName(funcname, "::", basename, (Scope*)0);
-            if (funcscope == (Scope*)0)
-                throw IfaceExecutionError("Bad namespace: " + funcname);
+            Scope* funcscope = dcp.conf.symboltab.resolveScopeFromSymbolName(funcname, "::", basename, (Scope)null);
+            if (funcscope == (Scope)null)
+                throw new IfaceExecutionError("Bad namespace: " + funcname);
             dcp.fd = funcscope.queryFunction(basename); // Is function already in database
-            if (dcp.fd == (Funcdata*)0)
-                throw IfaceExecutionError("Unknown function name: " + funcname);
+            if (dcp.fd == (Funcdata)null)
+                throw new IfaceExecutionError("Unknown function name: " + funcname);
 
             if (!dcp.fd.hasNoCode())
                 dcp.followFlow(*status.optr, 0);

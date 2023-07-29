@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Perform SubVariableFlow analysis triggered by SUBPIECE
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_SUBPIECE);
+            oplist.Add(CPUI_SUBPIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -34,7 +34,7 @@ namespace Sla.DECCORE
             Varnode* vn = op.getIn(0);
             Varnode* outvn = op.getOut();
             int flowsize = outvn.getSize();
-            ulong mask = calc_mask(flowsize);
+            ulong mask = Globals.calc_mask(flowsize);
             mask <<= 8 * ((int)op.getIn(1).getOffset());
             bool aggressive = outvn.isPtrFlow();
             if (!aggressive)
@@ -52,7 +52,7 @@ namespace Sla.DECCORE
                 if (vn.loneDescend() == op)
                     big = true;
             }
-            SubvariableFlow subflow(&data,vn,mask,aggressive,false,big);
+            SubvariableFlow subflow = new SubvariableFlow(&data,vn,mask,aggressive,false,big);
             if (!subflow.doTrace()) return 0;
             subflow.doReplacement();
             return 1;

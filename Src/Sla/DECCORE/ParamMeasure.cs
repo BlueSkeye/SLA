@@ -112,7 +112,7 @@ namespace Sla.DECCORE
                         case CPUI_MULTIEQUAL:
                             // The only op for which there can be a loop in the graph is with the MULTIEQUAL (not for CALL, etc.).
                             // Walk forward only if the path is not part of a loop.
-                            if (!op.getParent().isLoopIn(op.getSlot(vn))) walkforward(state, (PcodeOp*)0, op.getOut());
+                            if (!op.getParent().isLoopIn(op.getSlot(vn))) walkforward(state, (PcodeOp)null, op.getOut());
                             break;
                         default:
                             updaterank(DIRECTREAD, state.best);
@@ -148,7 +148,7 @@ namespace Sla.DECCORE
                 case CPUI_CALLIND:
                     break;
                 case CPUI_CALLOTHER:
-                    if (op.getOut() != (Varnode*)0) updaterank(DIRECTREAD, state.best);
+                    if (op.getOut() != (Varnode)null) updaterank(DIRECTREAD, state.best);
                     break;
                 case CPUI_RETURN:
                     updaterank(SUBFNRETURN, state.best);

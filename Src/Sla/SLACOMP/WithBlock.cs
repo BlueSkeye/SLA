@@ -39,7 +39,7 @@ namespace Sla.SLACOMP
             if (cvec != (List<ContextChange*>*)0)
             {
                 for (int i = 0; i < cvec.size(); ++i)
-                    contvec.push_back((*cvec)[i]);  // Lay claim to -cvec-s pointers, we don't clone
+                    contvec.Add((*cvec)[i]);  // Lay claim to -cvec-s pointers, we don't clone
                 delete cvec;
             }
         }
@@ -94,7 +94,7 @@ namespace Sla.SLACOMP
                     res = new List<ContextChange*>();
                 for (int i = 0; i < changelist.size(); ++i)
                 {
-                    res.push_back(changelist[i].clone());
+                    res.Add(changelist[i].clone());
                 }
             }
             if (contvec != (List<ContextChange*>*)0)
@@ -104,7 +104,7 @@ namespace Sla.SLACOMP
                     if (res == (List<ContextChange*>*)0)
                         res = new List<ContextChange*>();
                     for (int i = 0; i < contvec.size(); ++i)
-                        res.push_back((*contvec)[i]);      // lay claim to contvecs pointer
+                        res.Add((*contvec)[i]);      // lay claim to contvecs pointer
                 }
                 delete contvec;
             }

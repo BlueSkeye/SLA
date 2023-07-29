@@ -32,7 +32,7 @@ namespace Sla.DECCORE
                 AddrSpace* spc = currentOp.getIn(0).getSpaceFromConst();
                 off = AddrSpace::addressToByte(off, spc.getWordSize());
                 int sz = currentOp.getOut().getSize();
-                loadpoints.push_back(LoadTable(Address(spc, off), sz));
+                loadpoints.Add(LoadTable(Address(spc, off), sz));
             }
             EmulatePcodeOp::executeLoad();
         }
@@ -90,7 +90,7 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Bad execute address");
 
             currentOp = fd.target(addr);
-            if (currentOp == (PcodeOp*)0)
+            if (currentOp == (PcodeOp)null)
                 throw new LowlevelError("Could not set execute address");
             currentBehave = currentOp.getOpcode().getBehavior();
         }
@@ -179,7 +179,7 @@ namespace Sla.DECCORE
             List<LoadTable>::iterator lastiter;
 
             iter = loadpoints.begin();
-            res.push_back(*iter);   // Copy the first entry
+            res.Add(*iter);   // Copy the first entry
             ++iter;
             lastiter = res.begin();
 
@@ -194,7 +194,7 @@ namespace Sla.DECCORE
                 else
                 {
                     issorted = false;
-                    res.push_back(*iter);
+                    res.Add(*iter);
                 }
             }
             if (!issorted)

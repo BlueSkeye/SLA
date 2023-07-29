@@ -98,7 +98,7 @@ namespace Sla.SLEIGH
             m = m - 1;
 
             int total = 0;
-            List<int> count(numBins,0);
+            List<int> count = new List<int>(numBins);
 
             for (i = 0; i < list.size(); ++i)
             {
@@ -165,7 +165,7 @@ namespace Sla.SLEIGH
             for (uint i = 0; i <= dontCareMask; ++i)
             { // Iterate over values that contain all don't care bits
                 if ((i & dontCareMask) != i) continue; // If all 1 bits in the value are don't cares
-                bins.push_back(commonValue | i); // add 1 bits into full value and store
+                bins.Add(commonValue | i); // add 1 bits into full value and store
             }
         }
 
@@ -217,7 +217,7 @@ namespace Sla.SLEIGH
         public void addConstructorPair(DisjointPattern pat, Constructor ct)
         {
             DisjointPattern* clone = (DisjointPattern*)pat.simplifyClone(); // We need to own pattern
-            list.push_back(pair<DisjointPattern*, Constructor*>(clone, ct));
+            list.Add(pair<DisjointPattern*, Constructor*>(clone, ct));
             num += 1;
         }
 
@@ -243,7 +243,7 @@ namespace Sla.SLEIGH
             for (int i = 0; i < numChildren; ++i)
             {
                 DecisionNode* nd = new DecisionNode(this);
-                children.push_back(nd);
+                children.Add(nd);
             }
             for (int i = 0; i < list.size(); ++i)
             {
@@ -319,8 +319,8 @@ namespace Sla.SLEIGH
                         }
                         else
                         {           // A true conflict that needs to be resolved
-                            conflictlist.push_back(pair<DisjointPattern*, Constructor*>(ipat, iconst));
-                            conflictlist.push_back(pair<DisjointPattern*, Constructor*>(jpat, jconst));
+                            conflictlist.Add(pair<DisjointPattern*, Constructor*>(ipat, iconst));
+                            conflictlist.Add(pair<DisjointPattern*, Constructor*>(jpat, jconst));
                         }
                     }
                 }
@@ -383,18 +383,18 @@ namespace Sla.SLEIGH
         {
             parent = par;
             {
-                istringstream s(el.getAttributeValue("number"));
+                istringstream s = new istringstream(el.getAttributeValue("number"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> num;
             }
             contextdecision = xml_readbool(el.getAttributeValue("context"));
             {
-                istringstream s(el.getAttributeValue("start"));
+                istringstream s = new istringstream(el.getAttributeValue("start"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> startbit;
             }
             {
-                istringstream s(el.getAttributeValue("size"));
+                istringstream s = new istringstream(el.getAttributeValue("size"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> bitsize;
             }
@@ -405,23 +405,23 @@ namespace Sla.SLEIGH
             {
                 if ((*iter).getName() == "pair")
                 {
-                    Constructor* ct;
-                    DisjointPattern* pat;
+                    Constructor ct;
+                    DisjointPattern pat;
                     uint id;
-                    istringstream s((* iter).getAttributeValue("id"));
+                    istringstream s = new istringstream((* iter).getAttributeValue("id"));
                     s.unsetf(ios::dec | ios::hex | ios::oct);
                     s >> id;
                     ct = sub.getConstructor(id);
                     pat = DisjointPattern::restoreDisjoint((*iter).getChildren().front());
                     //This increments num      addConstructorPair(pat,ct);
-                    list.push_back(pair<DisjointPattern*, Constructor*>(pat, ct));
+                    list.Add(pair<DisjointPattern*, Constructor*>(pat, ct));
                     //delete pat;		// addConstructorPair makes its own copy
                 }
                 else if ((*iter).getName() == "decision")
                 {
-                    DecisionNode* subnode = new DecisionNode();
+                    DecisionNode subnode = new DecisionNode();
                     subnode.restoreXml(*iter, this, sub);
-                    children.push_back(subnode);
+                    children.Add(subnode);
                 }
                 ++iter;
             }

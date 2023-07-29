@@ -26,19 +26,19 @@ namespace Sla.EXTRA
             Datatype* ct;
             string name;
 
-            if (dcp.fd == (Funcdata*)0)
-                throw IfaceExecutionError("No function selected");
+            if (dcp.fd == (Funcdata)null)
+                throw new IfaceExecutionError("No function selected");
 
             Address pc;
-            Address loc(parse_varnode(s, size, pc, uq,* dcp.conf.types)); // Get specified varnode
+            Address loc = new Address(parse_varnode(s, size, pc, uq,* dcp.conf.types)); // Get specified varnode
             ct = parse_type(s, name, dcp.conf);
 
             dcp.conf.clearAnalysis(dcp.fd); // Make sure varnodes are cleared
 
-            Scope* scope = dcp.fd.getScopeLocal().discoverScope(loc, size, pc);
-            if (scope == (Scope*)0) // Variable does not have natural scope
+            Scope scope = dcp.fd.getScopeLocal().discoverScope(loc, size, pc);
+            if (scope == (Scope)null) // Variable does not have natural scope
                 scope = dcp.fd.getScopeLocal();   // force it to be in function scope
-            Symbol* sym = scope.addSymbol(name, ct, loc, pc).getSymbol();
+            Symbol sym = scope.addSymbol(name, ct, loc, pc).getSymbol();
             scope.setAttribute(sym, Varnode::typelock);
             sym.setIsolated(true);
             if (name.size() > 0)

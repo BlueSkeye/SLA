@@ -19,7 +19,7 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             if (dcp.cgraph == (CallGraph*)0)
-                throw IfaceExecutionError("Callgraph not generated");
+                throw new IfaceExecutionError("Callgraph not generated");
 
             iterateFunctionsLeafOrder();
         }

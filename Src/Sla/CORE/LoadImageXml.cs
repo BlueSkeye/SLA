@@ -75,7 +75,7 @@ namespace Sla.CORE
                 }
                 List<byte> & vec(chunk[endaddr]);
                 for (int i = 0; i < maxsize; ++i)
-                    vec.push_back(0);
+                    vec.Add(0);
             }
         }
 
@@ -109,13 +109,13 @@ namespace Sla.CORE
                 if (subId == ELEM_SYMBOL)
                 {
                     AddrSpace @base = decoder.readSpace(ATTRIB_SPACE);
-                    Address addr(@base, @base.decodeAttributes(decoder, sz));
+                    Address addr(@base, @@base.decodeAttributes(decoder, sz));
                     string nm = decoder.readString(ATTRIB_NAME);
                     addrtosymbol[addr] = nm;
                 }
                 else if (subId == ELEM_BYTECHUNK) {
                     AddrSpace @base = decoder.readSpace(ATTRIB_SPACE);
-                    Address addr(@base, @base.decodeAttributes(decoder, sz));
+                    Address addr(@base, @@base.decodeAttributes(decoder, sz));
                     map<Address, List<byte>>::iterator chnkiter;
                     List<byte> & vec(chunk[addr]);
                     vec.clear();
@@ -147,7 +147,7 @@ namespace Sla.CORE
                         else
                             c2 = c2 + 10 - 'a';
                         val = c1 * 16 + c2;
-                        vec.push_back((byte)val);
+                        vec.Add((byte)val);
                         @is >> ws;
                         c1 = @is.get();
                         c2 = @is.get();

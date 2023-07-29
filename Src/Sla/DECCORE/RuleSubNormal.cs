@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         ///  - `sub( V>>n, c )  =>  ext( sub( V, c+k/8 ) )  if n is big`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_SUBPIECE);
+            oplist.Add(CPUI_SUBPIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

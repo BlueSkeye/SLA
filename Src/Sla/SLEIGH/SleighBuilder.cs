@@ -112,7 +112,7 @@ namespace Sla.SLEIGH
 
                 walker.pushOperand(i);
                 ConstructTpl* construct = walker.getConstructor().getNamedTempl(secnum);
-                if (construct == (ConstructTpl*)0)
+                if (construct == (ConstructTpl)null)
                     buildEmpty(walker.getConstructor(), secnum);
                 else
                     build(construct, secnum);
@@ -129,7 +129,7 @@ namespace Sla.SLEIGH
             vn.space = vntpl.getSpace().fixSpace(*walker);
             vn.size = vntpl.getSize().fix(*walker);
             if (vn.space == const_space)
-                vn.offset = vntpl.getOffset().fix(*walker) & calc_mask(vn.size);
+                vn.offset = vntpl.getOffset().fix(*walker) & Globals.calc_mask(vn.size);
             else if (vn.space == uniq_space)
             {
                 vn.offset = vntpl.getOffset().fix(*walker);
@@ -154,7 +154,7 @@ namespace Sla.SLEIGH
             vn.space = hand.offset_space;
             vn.size = hand.offset_size;
             if (vn.space == const_space)
-                vn.offset = hand.offset_offset & calc_mask(vn.size);
+                vn.offset = hand.offset_offset & Globals.calc_mask(vn.size);
             else if (vn.space == uniq_space)
                 vn.offset = hand.offset_offset | uniqueoffset;
             else
@@ -228,7 +228,7 @@ namespace Sla.SLEIGH
             if (secnum >= 0)
             {
                 ConstructTpl* construct = ct.getNamedTempl(secnum);
-                if (construct == (ConstructTpl*)0)
+                if (construct == (ConstructTpl)null)
                     buildEmpty(ct, secnum);
                 else
                     build(construct, secnum);
@@ -304,7 +304,7 @@ namespace Sla.SLEIGH
             walker.baseState();
             Constructor* ct = walker.getConstructor();
             ConstructTpl* construct = ct.getNamedTempl(secnum);
-            if (construct == (ConstructTpl*)0)
+            if (construct == (ConstructTpl)null)
                 buildEmpty(ct, secnum);
             else
                 build(construct, secnum);

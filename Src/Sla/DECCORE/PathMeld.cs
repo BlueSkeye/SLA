@@ -58,12 +58,12 @@ namespace Sla.DECCORE
                 if (vn.isMark())
                 {       // Look for previously marked varnode, so we know it is in both lists
                     lastIntersect = newVn.size();
-                    parentMap.push_back(lastIntersect);
-                    newVn.push_back(vn);
+                    parentMap.Add(lastIntersect);
+                    newVn.Add(vn);
                     vn.clearMark();
                 }
                 else
-                    parentMap.push_back(-1);
+                    parentMap.Add(-1);
             }
             commonVn = newVn;
             lastIntersect = -1;
@@ -96,7 +96,7 @@ namespace Sla.DECCORE
                 int pos = parentMap[opMeld[i].rootVn];
                 if (pos == -1)
                 {
-                    opMeld[i].op = (PcodeOp*)0;     // Op split but did not rejoin
+                    opMeld[i].op = (PcodeOp)null;     // Op split but did not rejoin
                 }
                 else
                     opMeld[i].rootVn = pos;         // New index
@@ -110,11 +110,11 @@ namespace Sla.DECCORE
             for (int i = 0; i < cutOff; ++i)
             {
                 PcodeOp* op = path[i].op;           // Current op in the new path
-                PcodeOp* curOp = (PcodeOp*)0;
+                PcodeOp* curOp = (PcodeOp)null;
                 while (meldPos < opMeld.size())
                 {
                     PcodeOp* trialOp = opMeld[meldPos].op;  // Current op in the old opMeld
-                    if (trialOp == (PcodeOp*)0)
+                    if (trialOp == (PcodeOp)null)
                     {
                         meldPos += 1;
                         continue;
@@ -123,7 +123,7 @@ namespace Sla.DECCORE
                     {
                         if (op.getParent() == lastBlock)
                         {
-                            curOp = (PcodeOp*)0;        // op comes AFTER trialOp
+                            curOp = (PcodeOp)null;        // op comes AFTER trialOp
                             break;
                         }
                         else if (trialOp.getParent() != lastBlock)
@@ -142,19 +142,19 @@ namespace Sla.DECCORE
                         break;
                     }
                     lastBlock = trialOp.getParent();
-                    newMeld.push_back(opMeld[meldPos]); // Current old op moved into newMeld
+                    newMeld.Add(opMeld[meldPos]); // Current old op moved into newMeld
                     curRoot = opMeld[meldPos].rootVn;
                     meldPos += 1;
                 }
                 if (curOp == op)
                 {
-                    newMeld.push_back(opMeld[meldPos]);
+                    newMeld.Add(opMeld[meldPos]);
                     curRoot = opMeld[meldPos].rootVn;
                     meldPos += 1;
                 }
                 else
                 {
-                    newMeld.push_back(RootedOp(op, curRoot));
+                    newMeld.Add(RootedOp(op, curRoot));
                 }
                 lastBlock = op.getParent();
             }
@@ -195,8 +195,8 @@ namespace Sla.DECCORE
             {
                 PcodeOpNode node = path[i];
                 Varnode* vn = node.op.getIn(node.slot);
-                opMeld.push_back(RootedOp(node.op, i));
-                commonVn.push_back(vn);
+                opMeld.Add(RootedOp(node.op, i));
+                commonVn.Add(vn);
             }
         }
 
@@ -205,8 +205,8 @@ namespace Sla.DECCORE
         /// \param vn is the one Varnode (input to the PcodeOp) in the path
         public void set(PcodeOp op, Varnode vn)
         {
-            commonVn.push_back(vn);
-            opMeld.push_back(RootedOp(op, 0));
+            commonVn.Add(vn);
+            opMeld.Add(RootedOp(op, 0));
         }
 
         /// Append a new set of paths to \b this set of paths
@@ -319,7 +319,7 @@ namespace Sla.DECCORE
                 if (opMeld[i].rootVn == pos)
                     return opMeld[i].op;
             }
-            return (PcodeOp*)0;
+            return (PcodeOp)null;
         }
 
         /// Return \b true if \b this container holds no paths

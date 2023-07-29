@@ -50,7 +50,7 @@ namespace Sla.SLEIGH
                     throw BadDataError(s.str());
                 }
             }
-            return (Constructor*)0;
+            return (Constructor)null;
         }
 
         public override void getFixedHandle(FixedHandle hand, ParserWalker walker)
@@ -58,7 +58,7 @@ namespace Sla.SLEIGH
             uint ind = (uint)patval.getValue(walker);
             // The resolve routine has checked that -ind- must be a valid index
             hand.space = walker.getConstSpace();
-            hand.offset_space = (AddrSpace*)0; // Not a dynamic value
+            hand.offset_space = (AddrSpace)null; // Not a dynamic value
             hand.offset_offset = (ulong)valuetable[ind];
             hand.size = 0;      // Cannot provide size
         }
@@ -99,16 +99,16 @@ namespace Sla.SLEIGH
             List list = el.getChildren();
             List::const_iterator iter;
             iter = list.begin();
-            patval = (PatternValue*)PatternExpression::restoreExpression(*iter, trans);
+            patval = (PatternValue)PatternExpression::restoreExpression(*iter, trans);
             patval.layClaim();
             ++iter;
             while (iter != list.end())
             {
-                istringstream s((* iter).getAttributeValue("val"));
+                istringstream s = new istringstream((* iter).getAttributeValue("val"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 long val;
                 s >> val;
-                valuetable.push_back(val);
+                valuetable.Add(val);
                 ++iter;
             }
             checkTableFill();

@@ -19,15 +19,15 @@ namespace Sla.EXTRA
             int res;
 
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("Decompile action not loaded");
+                throw new IfaceExecutionError("Decompile action not loaded");
 
-            if (dcp.fd == (Funcdata*)0)
-                throw IfaceExecutionError("No function selected");
+            if (dcp.fd == (Funcdata)null)
+                throw new IfaceExecutionError("No function selected");
 
             if (dcp.conf.allacts.getCurrent().getStatus() == Action::status_start)
-                throw IfaceExecutionError("Decompilation has not been started");
+                throw new IfaceExecutionError("Decompilation has not been started");
             if (dcp.conf.allacts.getCurrent().getStatus() == Action::status_end)
-                throw IfaceExecutionError("Decompilation is already complete");
+                throw new IfaceExecutionError("Decompilation is already complete");
 
             res = dcp.conf.allacts.getCurrent().perform(*dcp.fd); // Try to continue decompilation
             if (res < 0)

@@ -57,7 +57,7 @@ namespace Sla.DECCORE
             { // Iterate through saved registers
                 if ((*eiter).getType() == EffectRecord::killedbycall) continue;  // Not saved
                 vn = data.findVarnodeInput((*eiter).getSize(), (*eiter).getAddress());
-                if ((vn != (Varnode*)0) && (vn.isUnaffected()))
+                if ((vn != (Varnode)null) && (vn.isUnaffected()))
                 {
                     // Mark storage locations for saved registers as not mapped
                     // This should pickup unaffected, reload, and return_address effecttypes

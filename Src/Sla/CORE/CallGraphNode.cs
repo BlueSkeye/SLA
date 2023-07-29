@@ -32,7 +32,7 @@ namespace Sla.CORE
 
         public CallGraphNode()
         {
-            fd = (Funcdata*)0;
+            fd = (Funcdata)null;
             flags = 0;
             parentedge = -1;
         }
@@ -64,7 +64,7 @@ namespace Sla.CORE
 
         public void setFuncdata(Funcdata f)
         {
-            if ((fd != (Funcdata*)0) && (fd != f))
+            if ((fd != (Funcdata)null) && (fd != f))
                 throw new LowlevelError("Multiple functions at one address in callgraph");
 
             if (f.getAddress() != entryaddr)

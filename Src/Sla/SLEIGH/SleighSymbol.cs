@@ -56,12 +56,12 @@ namespace Sla.SLEIGH
         {
             name = el.getAttributeValue("name");
             {
-                istringstream s(el.getAttributeValue("id"));
+                istringstream s = new istringstream(el.getAttributeValue("id"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> id;
             }
             {
-                istringstream s(el.getAttributeValue("scope"));
+                istringstream s = new istringstream(el.getAttributeValue("scope"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> scopeid;
             }

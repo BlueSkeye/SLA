@@ -134,8 +134,10 @@ namespace Sla.DECCORE
         /// \return \b true if there is a Cover violation
         private static bool checkImpliedCover(Funcdata data, Varnode vn)
         {
-            PcodeOp* op,*storeop,*callop;
-            Varnode* defvn;
+            PcodeOp op;
+            PcodeOp storeop;
+            PcodeOp callop;
+            Varnode defvn;
             int i;
 
             op = vn.getDef();
@@ -192,8 +194,11 @@ namespace Sla.DECCORE
         {
             VarnodeLocSet::const_iterator viter;
             list<PcodeOp*>::const_iterator oiter;
-            Varnode* vn,*vncur,*defvn,*outvn;
-            PcodeOp* op;
+            Varnode vn;
+            Varnode vncur;
+            Varnode defvn;
+            Varnode outvn;
+            PcodeOp op;
             List<DescTreeElement> varstack; // Depth first varnode traversal stack
 
             for (viter = data.beginLoc(); viter != data.endLoc(); ++viter)
@@ -202,7 +207,7 @@ namespace Sla.DECCORE
                 if (vn.isFree()) continue;
                 if (vn.isExplicit()) continue;
                 if (vn.isImplied()) continue;
-                varstack.push_back(vn);
+                varstack.Add(vn);
                 do
                 {
                     vncur = varstack.back().vn;
@@ -231,10 +236,10 @@ namespace Sla.DECCORE
                     else
                     {
                         outvn = (*varstack.back().desciter++).getOut();
-                        if (outvn != (Varnode*)0)
+                        if (outvn != (Varnode)null)
                         {
                             if ((!outvn.isExplicit()) && (!outvn.isImplied()))
-                                varstack.push_back(outvn);
+                                varstack.Add(outvn);
                         }
                     }
                 } while (!varstack.empty());

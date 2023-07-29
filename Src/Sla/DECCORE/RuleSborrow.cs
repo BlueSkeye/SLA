@@ -35,15 +35,19 @@ namespace Sla.DECCORE
         /// Supports variations where W is constant.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_SBORROW);
+            oplist.Add(CPUI_INT_SBORROW);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* svn = op.getOut();
-            Varnode* cvn,*avn,*bvn;
-            list<PcodeOp*>::const_iterator iter;
-            PcodeOp* compop,*signop,*addop;
+            Varnode svn = op.getOut();
+            Varnode cvn;
+            Varnode avn;
+            Varnode bvn;
+            IEnumerator<PcodeOp> iter;
+            PcodeOp compop;
+            PcodeOp signop;
+            PcodeOp addop;
             int zside;
 
             // Check for trivial case
@@ -97,7 +101,7 @@ namespace Sla.DECCORE
                     if (otherop.code() == CPUI_INT_MULT)
                     {
                         if (!otherop.getIn(1).isConstant()) continue;
-                        if (otherop.getIn(1).getOffset() != calc_mask(otherop.getIn(1).getSize())) continue;
+                        if (otherop.getIn(1).getOffset() != Globals.calc_mask(otherop.getIn(1).getSize())) continue;
                         bvn = otherop.getIn(0);
                     }
                     else if (otherop.code() == CPUI_INT_2COMP)

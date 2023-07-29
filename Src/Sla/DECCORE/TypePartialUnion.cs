@@ -112,12 +112,12 @@ namespace Sla.DECCORE
         {
             Datatype* curType = container;
             int curOff = offset;
-            while (curType != (Datatype*)0 && curType.getSize() > size)
+            while (curType != (Datatype)null && curType.getSize() > size)
             {
                 if (curType.getMetatype() == TYPE_UNION)
                 {
                     TypeField field = curType.resolveTruncation(curOff, op, slot, curOff);
-                    curType = (field == (TypeField*)0) ? (Datatype*)0 : field.type;
+                    curType = (field == (TypeField*)0) ? (Datatype)null : field.type;
                 }
                 else
                 {
@@ -126,7 +126,7 @@ namespace Sla.DECCORE
                     curOff = newOff;
                 }
             }
-            if (curType != (Datatype*)0 && curType.getSize() == size)
+            if (curType != (Datatype)null && curType.getSize() == size)
                 return curType;
             return stripped;
         }
@@ -135,12 +135,12 @@ namespace Sla.DECCORE
         {
             Datatype* curType = container;
             int curOff = offset;
-            while (curType != (Datatype*)0 && curType.getSize() > size)
+            while (curType != (Datatype)null && curType.getSize() > size)
             {
                 if (curType.getMetatype() == TYPE_UNION)
                 {
                     Datatype* newType = curType.findResolve(op, slot);
-                    curType = (newType == curType) ? (Datatype*)0 : newType;
+                    curType = (newType == curType) ? (Datatype)null : newType;
                 }
                 else
                 {
@@ -149,7 +149,7 @@ namespace Sla.DECCORE
                     curOff = newOff;
                 }
             }
-            if (curType != (Datatype*)0 && curType.getSize() == size)
+            if (curType != (Datatype)null && curType.getSize() == size)
                 return curType;
             return stripped;
         }

@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Simplify division form: `(V + (V s>> 0x1f)>>(32-n)) & (-1<<n)  =>  (V s/ 2^n) * 2^n`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_AND);
+            oplist.Add(CPUI_INT_AND);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -36,7 +36,7 @@ namespace Sla.DECCORE
             PcodeOp* addop = op.getIn(0).getDef();
             if (addop.code() != CPUI_INT_ADD) return 0;
             Varnode* shiftvn;
-            PcodeOp* unshiftop = (PcodeOp*)0;
+            PcodeOp* unshiftop = (PcodeOp)null;
             int i;
             for (i = 0; i < 2; ++i)
             {
@@ -56,7 +56,7 @@ namespace Sla.DECCORE
             if (n <= 0) return 0;
             n = shiftvn.getSize() * 8 - n;
             if (n <= 0) return 0;
-            ulong mask = calc_mask(shiftvn.getSize());
+            ulong mask = Globals.calc_mask(shiftvn.getSize());
             mask = (mask << n) & mask;
             if (mask != op.getIn(1).getOffset()) return 0;
             Varnode* sgnvn = unshiftop.getIn(0);

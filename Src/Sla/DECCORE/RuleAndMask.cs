@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Collapse unnecessary INT_AND
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_AND);
+            oplist.Add(CPUI_INT_AND);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

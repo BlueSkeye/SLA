@@ -37,7 +37,7 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Unknown userop name in <callotherfixup>: " + name);
             if (dynamic_cast<UnspecializedPcodeOp*>(base) == (UnspecializedPcodeOp*)0)  // Make sure the userop isn't used for some other purpose
                 throw new LowlevelError("<callotherfixup> overloads userop with another purpose: " + name);
-            useropindex = base.getIndex(); // Get the index from the core userop
+            useropindex = @base.getIndex(); // Get the index from the core userop
         }
     }
 }

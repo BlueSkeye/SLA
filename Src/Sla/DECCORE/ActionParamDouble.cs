@@ -123,7 +123,7 @@ namespace Sla.DECCORE
                     type_metatype mt = tp.getMetatype();
                     if ((mt == TYPE_ARRAY) || (mt == TYPE_STRUCT)) continue; // Not double precision objects
                     Varnode* vn = data.findVarnodeInput(tp.getSize(), param.getAddress());
-                    if (vn == (Varnode*)0) continue;
+                    if (vn == (Varnode)null) continue;
                     if (vn.getSize() < minDoubleSize) continue;
                     int halfSize = vn.getSize() / 2;
                     lovec.clear();
@@ -140,9 +140,9 @@ namespace Sla.DECCORE
                         Varnode* outvn = subop.getOut();
                         if (outvn.getSize() != halfSize) continue;
                         if (subop.getIn(1).getOffset() == 0)  // Possible lo precision piece
-                            lovec.push_back(outvn);
+                            lovec.Add(outvn);
                         else if (subop.getIn(1).getOffset() == halfSize)  // Possible hi precision piece
-                            hivec.push_back(outvn);
+                            hivec.Add(outvn);
                         else
                         {
                             otherUse = true;

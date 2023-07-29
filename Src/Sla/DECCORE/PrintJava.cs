@@ -155,7 +155,7 @@ namespace Sla.DECCORE
         public override void docFunction(Funcdata fd)
         {
             bool singletonFunction = false;
-            if (curscope == (Scope*)0) {
+            if (curscope == (Scope)null) {
                 singletonFunction = true;
                 // Always assume we are in the scope of the parent class
                 pushScope(fd.getScopeLocal().getParent());
@@ -196,9 +196,9 @@ namespace Sla.DECCORE
             else
                 tok = &type_expr_space;
 
-            pushOp(tok, (PcodeOp*)0);
+            pushOp(tok, (PcodeOp)null);
             for (int i = 0; i < arrayCount; ++i)
-                pushOp(&subscript, (PcodeOp*)0);
+                pushOp(&subscript, (PcodeOp)null);
 
             if (ct.getName().size() == 0)
             {   // Check for anonymous type
@@ -235,7 +235,7 @@ namespace Sla.DECCORE
                 pushOp(&subscript, op);
             pushVn(op.getIn(1), op, m);
             if (printArrayRef)
-                push_integer(0, 4, false, (Varnode*)0, op);
+                push_integer(0, 4, false, (Varnode)null, op);
         }
 
         public override void opStore(PcodeOp op)
@@ -246,7 +246,7 @@ namespace Sla.DECCORE
             {
                 pushOp(&subscript, op);
                 pushVn(op.getIn(1), op, m);
-                push_integer(0, 4, false, (Varnode*)0, op);
+                push_integer(0, 4, false, (Varnode)null, op);
                 pushVn(op.getIn(2), op, mods);
             }
             else
@@ -302,7 +302,7 @@ namespace Sla.DECCORE
             Varnode* vn0 = op.getIn(0);
             List<ulong> refs;
             for (int i = 1; i < op.numInput(); ++i)
-                refs.push_back(op.getIn(i).getOffset());
+                refs.Add(op.getIn(i).getOffset());
             CPoolRecord* rec = glb.cpool.getRecord(refs);
             if (rec == (CPoolRecord*)0) {
                 pushAtom(Atom("UNKNOWNREF", syntax, EmitMarkup::const_color, op, outvn));

@@ -30,7 +30,7 @@ namespace Sla.DECCORE
                 if (opc == CPUI_INT_EQUAL || opc == CPUI_INT_NOTEQUAL)
                 {
                     if (op.getIn(1).isConstant())
-                        res.push_back(op);
+                        res.Add(op);
                 }
             }
         }
@@ -50,7 +50,7 @@ namespace Sla.DECCORE
         /// \brief Convert sign-bit test to signed comparison:  `(V s>> 0x1f) != 0   =>  V s< 0`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_SRIGHT);
+            oplist.Add(CPUI_INT_SRIGHT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -77,7 +77,7 @@ namespace Sla.DECCORE
                 int sgn;
                 if (offset == 0)
                     sgn = 1;
-                else if (offset == calc_mask(compSize))
+                else if (offset == Globals.calc_mask(compSize))
                     sgn = -1;
                 else
                     continue;

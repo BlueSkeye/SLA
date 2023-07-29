@@ -26,17 +26,17 @@ namespace Sla.EXTRA
             uint type;
             string token;
 
-            if (dcp.fd == (Funcdata*)0)
-                throw IfaceExecutionError("No function selected");
+            if (dcp.fd == (Funcdata)null)
+                throw new IfaceExecutionError("No function selected");
 
             s >> ws;
-            Address addr(parse_machaddr(s, discard,* dcp.conf.types));
+            Address addr = new Address(parse_machaddr(s, discard,* dcp.conf.types));
             s >> token;
             if (token.size() == 0)
-                throw IfaceParseError("Missing override type");
+                throw new IfaceParseError("Missing override type");
             type = Override::stringToType(token);
             if (type == Override::NONE)
-                throw IfaceParseError("Bad override type");
+                throw new IfaceParseError("Bad override type");
 
             dcp.fd.getOverride().insertFlowOverride(addr, type);
             *status.optr << "Successfully added override" << endl;

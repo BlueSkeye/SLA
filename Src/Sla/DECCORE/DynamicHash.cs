@@ -69,7 +69,7 @@ namespace Sla.DECCORE
                 if (transtable[op.code()] != 0) break; // Do not ignore this operation
                 vn = op.getIn(0);
             }
-            opedge.push_back(ToOpEdge(op, -1));
+            opedge.Add(ToOpEdge(op, -1));
         }
 
         /// Add in edges between the given Varnode and any PcodeOp that reads it
@@ -97,7 +97,7 @@ namespace Sla.DECCORE
                 }
                 if (op == null) continue;
                 int slot = op.getSlot(tmpvn);
-                opedge.push_back(ToOpEdge(op, slot));
+                opedge.Add(ToOpEdge(op, slot));
             }
             if ((uint)opedge.size() - insize > 1)
                 sort(opedge.begin() + insize, opedge.end());
@@ -110,7 +110,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < op.numInput(); ++i)
             {
                 Varnode* vn = op.getIn(i);
-                vnedge.push_back(vn);
+                vnedge.Add(vn);
             }
         }
 
@@ -119,8 +119,8 @@ namespace Sla.DECCORE
         private void buildOpDown(PcodeOp op)
         {
             Varnode* vn = op.getOut();
-            if (vn == (Varnode*)0) return;
-            vnedge.push_back(vn);
+            if (vn == (Varnode)null) return;
+            vnedge.Add(vn);
         }
 
         /// Move staged Varnodes into the sub-graph and mark them
@@ -130,7 +130,7 @@ namespace Sla.DECCORE
             {
                 Varnode* vn = vnedge[i];
                 if (vn.isMark()) continue;
-                markvn.push_back(vn);
+                markvn.Add(vn);
                 vn.setMark();
             }
             vnedge.clear();
@@ -143,7 +143,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* op = opedge[opedgeproc].getOp();
                 if (op.isMark()) continue;
-                markop.push_back(op);
+                markop.Add(op);
                 op.setMark();
             }
         }
@@ -186,7 +186,7 @@ namespace Sla.DECCORE
                 reg = opedge[i].hash(reg);
 
             // Build the final 64-bit hash
-            PcodeOp* op = (PcodeOp*)0;
+            PcodeOp* op = (PcodeOp)null;
             int slot = 0;
             uint ct;
             bool attachedop = true;
@@ -233,7 +233,7 @@ namespace Sla.DECCORE
                 {
                     Varnode* vn = op.getOut();
                     op = vn.loneDescend();
-                    if (op == (PcodeOp*)0)
+                    if (op == (PcodeOp)null)
                     {
                         return; // Indicate the end of the data-flow path
                     }
@@ -261,7 +261,7 @@ namespace Sla.DECCORE
                 if (!vn.isMark())
                 {
                     vn.setMark();
-                    resList.push_back(vn);
+                    resList.Add(vn);
                 }
             }
             for (int i = 0; i < resList.size(); ++i)
@@ -296,7 +296,7 @@ namespace Sla.DECCORE
             opproc = 0;
             opedgeproc = 0;
 
-            vnedge.push_back(root);
+            vnedge.Add(root);
             gatherUnmarkedVn();
             for (uint i = vnproc; i < markvn.size(); ++i)
                 buildVnUp(markvn[i]);
@@ -350,7 +350,7 @@ namespace Sla.DECCORE
             if (slot < 0)
             {
                 root = op.getOut();
-                if (root == (Varnode*)0) {
+                if (root == (Varnode)null) {
                     hash = 0;
                     addrresult = Address();
                     return;     // slot does not fit op
@@ -370,7 +370,7 @@ namespace Sla.DECCORE
             opproc = 0;
             opedgeproc = 0;
 
-            opedge.push_back(ToOpEdge(op, slot));
+            opedge.Add(ToOpEdge(op, slot));
             switch (method)
             {
                 case 4:
@@ -444,7 +444,7 @@ namespace Sla.DECCORE
                     calcHash(tmpvn, method);
                     if (getComparable(hash) == getComparable(tmphash))
                     {   // Hash collision
-                        vnlist2.push_back(tmpvn);
+                        vnlist2.Add(tmpvn);
                         if (vnlist2.size() > maxduplicates) break;
                     }
                 }
@@ -496,7 +496,7 @@ namespace Sla.DECCORE
             uint maxduplicates = 8;
 
             moveOffSkip(op, slot);
-            if (op == (PcodeOp*)0) {
+            if (op == (PcodeOp)null) {
                 hash = (ulong)0;
                 addrresult = Address(); // Hash cannot be calculated
                 return;
@@ -519,7 +519,7 @@ namespace Sla.DECCORE
                     calcHash(tmpop, slot, method);
                     if (getComparable(hash) == getComparable(tmphash))
                     {   // Hash collision
-                        oplist2.push_back(tmpop);
+                        oplist2.Add(tmpop);
                         if (oplist2.size() > maxduplicates)
                             break;
                     }
@@ -582,9 +582,9 @@ namespace Sla.DECCORE
                 clear();
                 calcHash(tmpvn, method);
                 if (getComparable(hash) == getComparable(h))
-                    vnlist2.push_back(tmpvn);
+                    vnlist2.Add(tmpvn);
             }
-            if (total != vnlist2.size()) return (Varnode*)0;
+            if (total != vnlist2.size()) return (Varnode)null;
             return vnlist2[pos];
         }
 
@@ -616,10 +616,10 @@ namespace Sla.DECCORE
                 clear();
                 calcHash(tmpop, slot, method);
                 if (getComparable(hash) == getComparable(h))
-                    oplist2.push_back(tmpop);
+                    oplist2.Add(tmpop);
             }
             if (total != oplist2.size())
-                return (PcodeOp*)0;
+                return (PcodeOp)null;
             return oplist2[pos];
         }
 
@@ -656,21 +656,21 @@ namespace Sla.DECCORE
                 if (slot < 0)
                 {
                     Varnode* vn = op.getOut();
-                    if (vn != (Varnode*)0)
+                    if (vn != (Varnode)null)
                     {
                         if (isnotattached)
                         {   // If original varnode was not attached to (this) op
                             op = vn.loneDescend();
-                            if (op != (PcodeOp*)0)
+                            if (op != (PcodeOp)null)
                             {
                                 if (transtable[op.code()] == 0)
                                 { // Check for skipped op
                                     vn = op.getOut();
-                                    if (vn == (Varnode*)0) continue;
+                                    if (vn == (Varnode)null) continue;
                                 }
                             }
                         }
-                        varlist.push_back(vn);
+                        varlist.Add(vn);
                     }
                 }
                 else if (slot < op.numInput())
@@ -679,10 +679,10 @@ namespace Sla.DECCORE
                     if (isnotattached)
                     {
                         op = vn.getDef();
-                        if ((op != (PcodeOp*)0) && (transtable[op.code()] == 0))
+                        if ((op != (PcodeOp)null) && (transtable[op.code()] == 0))
                             vn = op.getIn(0);
                     }
-                    varlist.push_back(vn);
+                    varlist.Add(vn);
                 }
             }
             dedupVarnodes(varlist);
@@ -701,7 +701,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* op = (*iter).second;
                 if (op.isDead()) continue;
-                opList.push_back(op);
+                opList.Add(op);
             }
         }
 

@@ -103,7 +103,7 @@ namespace Sla.DECCORE
                 {
                     int curOff = (vn.getAddr().getOffset() - entry.getAddr().getOffset()) + entry.getOffset();
                     ct = typegrp.getExactPiece(entry.getSymbol().getType(), curOff, vn.getSize());
-                    if (ct == (Datatype*)0 || ct.getMetatype() == TYPE_UNKNOWN)    // If we can't resolve, or resolve to UNKNOWN
+                    if (ct == (Datatype)null || ct.getMetatype() == TYPE_UNKNOWN)    // If we can't resolve, or resolve to UNKNOWN
                         ct = vn.getLocalType(needsBlock);      // Let data-type float, even though parent symbol is type-locked
                 }
                 else
@@ -111,7 +111,7 @@ namespace Sla.DECCORE
                 if (needsBlock)
                     vn.setStopUpPropagation();
 #if TYPEPROP_DEBUG
-                propagationDebug(data.getArch(), vn, ct, (PcodeOp*)0, 0, (Varnode*)0);
+                propagationDebug(data.getArch(), vn, ct, (PcodeOp)null, 0, (Varnode)null);
 #endif
                 vn.setTempType(ct);
             }
@@ -183,13 +183,13 @@ namespace Sla.DECCORE
             }
 
             Datatype* newtype = op.getOpcode().propagateType(alttype, op, invn, outvn, inslot, outslot);
-            if (newtype == (Datatype*)0)
+            if (newtype == (Datatype)null)
                 return false;
 
             if (0 > newtype.typeOrder(*outvn.getTempType()))
             {
 #if TYPEPROP_DEBUG
-                propagationDebug(typegrp.getArch(), outvn, newtype, op, inslot, (Varnode*)0);
+                propagationDebug(typegrp.getArch(), outvn, newtype, op, inslot, (Varnode)null);
 #endif
                 outvn.setTempType(newtype);
                 return !outvn.isMark();
@@ -282,13 +282,13 @@ namespace Sla.DECCORE
                     lastsize = cursize;
                     lastct = typegrp.getExactPiece(ct, curoff, cursize);
                 }
-                if (lastct == (Datatype*)0) continue;
+                if (lastct == (Datatype)null) continue;
 
                 // Try to propagate the reference type into a varnode that is pointed to by that reference
                 if (0 > lastct.typeOrder(*curvn.getTempType()))
                 {
 #if TYPEPROP_DEBUG
-                    propagationDebug(data.getArch(), curvn, lastct, (PcodeOp*)0, 0, vn);
+                    propagationDebug(data.getArch(), curvn, lastct, (PcodeOp)null, 0, vn);
 #endif
                     curvn.setTempType(lastct);
                     propagateOneType(typegrp, curvn); // Try to propagate the new type as far as possible
@@ -356,8 +356,8 @@ namespace Sla.DECCORE
         /// \return the representative CPUI_RETURN op or NULL
         private static PcodeOp canonicalReturnOp(Funcdata data)
         {
-            PcodeOp* res = (PcodeOp*)0;
-            Datatype* bestdt = (Datatype*)0;
+            PcodeOp* res = (PcodeOp)null;
+            Datatype* bestdt = (Datatype)null;
             list<PcodeOp*>::const_iterator iter, iterend;
             iterend = data.endOp(CPUI_RETURN);
             for (iter = data.beginOp(CPUI_RETURN); iter != iterend; ++iter)
@@ -369,7 +369,7 @@ namespace Sla.DECCORE
                 {
                     Varnode* vn = retop.getIn(1);
                     Datatype* ct = vn.getTempType();
-                    if (bestdt == (Datatype*)0)
+                    if (bestdt == (Datatype)null)
                     {
                         res = retop;
                         bestdt = ct;
@@ -392,7 +392,7 @@ namespace Sla.DECCORE
         {
             if (data.getFuncProto().isOutputLocked()) return;
             PcodeOp* op = canonicalReturnOp(data);
-            if (op == (PcodeOp*)0) return;
+            if (op == (PcodeOp)null) return;
             TypeFactory* typegrp = data.getArch().types;
             Varnode* baseVn = op.getIn(1);
             Datatype* ct = baseVn.getTempType();
@@ -414,7 +414,7 @@ namespace Sla.DECCORE
                     if (vn.getTempType() == ct) continue;      // Already propagated
                     vn.setTempType(ct);
 #if TYPEPROP_DEBUG
-                    propagationDebug(typegrp.getArch(), vn, ct, op, 1, (Varnode*)0);
+                    propagationDebug(typegrp.getArch(), vn, ct, op, 1, (Varnode)null);
 #endif
                     propagateOneType(typegrp, vn);
                 }
@@ -470,7 +470,7 @@ namespace Sla.DECCORE
             propagateAcrossReturns(data);
             AddrSpace* spcid = data.getScopeLocal().getSpaceId();
             Varnode* spcvn = data.findSpacebaseInput(spcid);
-            if (spcvn != (Varnode*)0)
+            if (spcvn != (Varnode)null)
                 propagateSpacebaseRef(data, spcvn);
             if (writeBack(data))
             {

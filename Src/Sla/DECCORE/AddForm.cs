@@ -56,8 +56,8 @@ namespace Sla.DECCORE
                     // In constant forms, the <= will get converted to a <
                     // Note the lessthan to less conversion adds 1 then the 2's complement subtracts 1 and negates
                     // So all we really need to do is negate
-                    negconst = (~negconst) & calc_mask(lo1.getSize());
-                    lo2 = (Varnode*)0;
+                    negconst = (~negconst) & Globals.calc_mask(lo1.getSize());
+                    lo2 = (Varnode)null;
                     return true;
                 }
                 else if (tmpvn.isWritten())
@@ -74,7 +74,7 @@ namespace Sla.DECCORE
                     if (othervn.isConstant())
                     {
                         negconst = othervn.getOffset();
-                        lo2 = (Varnode*)0;
+                        lo2 = (Varnode)null;
                         Varnode* relvn = carryop.getIn(1);
                         if (relvn == lo1) return true;  // Comparison can be relative to lo1
                         if (!relvn.isConstant()) return false;
@@ -96,8 +96,8 @@ namespace Sla.DECCORE
                 if (!carryop.getIn(1).isConstant()) return false;
                 if (carryop.getIn(0) != lo1) return false;
                 if (carryop.getIn(1).getOffset() != 0) return false;
-                negconst = calc_mask(lo1.getSize()); // Original CARRY constant must have been -1
-                lo2 = (Varnode*)0;
+                negconst = Globals.calc_mask(lo1.getSize()); // Original CARRY constant must have been -1
+                lo2 = (Varnode)null;
                 return true;
             }
             return false;
@@ -124,7 +124,7 @@ namespace Sla.DECCORE
                 if (i == 0)
                 {       // Assume we have to descend one more add
                     add2 = op.getOut().loneDescend();
-                    if (add2 == (PcodeOp*)0) continue;
+                    if (add2 == (PcodeOp)null) continue;
                     if (add2.code() != CPUI_INT_ADD) continue;
                     reshi = add2.getOut();
                     hizext1 = op.getIn(1 - slot1);
@@ -144,7 +144,7 @@ namespace Sla.DECCORE
                 {           // Assume there is only one add, with second implied add by 0
                     reshi = op.getOut();
                     hizext1 = op.getIn(1 - slot1);
-                    hizext2 = (Varnode*)0;
+                    hizext2 = (Varnode)null;
                 }
                 for (int j = 0; j < 2; ++j)
                 {
@@ -152,7 +152,7 @@ namespace Sla.DECCORE
                     {       // hi2 is an implied 0
                         if (!hizext1.isWritten()) continue;
                         zextop = hizext1.getDef();
-                        hi2 = (Varnode*)0;
+                        hi2 = (Varnode)null;
                     }
                     else if (j == 0)
                     {
@@ -177,7 +177,7 @@ namespace Sla.DECCORE
                         ++iter2;
                         if (loadd.code() != CPUI_INT_ADD) continue;
                         Varnode* tmpvn = loadd.getIn(1 - loadd.getSlot(lo1));
-                        if (lo2 == (Varnode*)0)
+                        if (lo2 == (Varnode)null)
                         {
                             if (!tmpvn.isConstant()) continue;
                             if (tmpvn.getOffset() != negconst) continue;   // Must add same constant used to calculate CARRY
@@ -203,13 +203,13 @@ namespace Sla.DECCORE
             if (!workishi) return false;
             if (!i.hasBothPieces()) return false;
             @in = i;
-            if (!verify(@in.getHi(), @in.getLo(), op))
+            if (!verify(@@in.getHi(), @@in.getLo(), op))
                 return false;
 
-            indoub.initPartial(@in.getSize(), lo2, hi2);
-            outdoub.initPartial(@in.getSize(), reslo, reshi);
+            indoub.initPartial(@@in.getSize(), lo2, hi2);
+            outdoub.initPartial(@@in.getSize(), reslo, reshi);
             existop = SplitVarnode.prepareBinaryOp(outdoub, @in, indoub);
-            if (existop == (PcodeOp*)0)
+            if (existop == (PcodeOp)null)
                 return false;
             SplitVarnode.createBinaryOp(data, outdoub, @in, indoub, existop, CPUI_INT_ADD);
             return true;

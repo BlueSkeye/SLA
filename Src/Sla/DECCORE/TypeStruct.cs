@@ -29,7 +29,7 @@ namespace Sla.DECCORE
             size = 0;
             for (iter = fd.begin(); iter != fd.end(); ++iter)
             {
-                field.push_back(*iter);
+                field.Add(*iter);
                 end = (*iter).offset + (*iter).type.getSize();
                 if (end > size)
                     size = end;
@@ -191,7 +191,7 @@ namespace Sla.DECCORE
                 {
                     ulong suboff;
                     Datatype* res = subtype.nearestArrayedComponentForward(0, &suboff, elSize);
-                    if (res != (Datatype*)0)
+                    if (res != (Datatype)null)
                     {
                         *newoff = (long) - diff;
                         return subtype;
@@ -199,7 +199,7 @@ namespace Sla.DECCORE
                 }
                 i += 1;
             }
-            return (Datatype*)0;
+            return (Datatype)null;
         }
 
         public override Datatype nearestArrayedComponentBackward(ulong off, ulong newoff, int elSize)
@@ -221,7 +221,7 @@ namespace Sla.DECCORE
                 {
                     ulong suboff;
                     Datatype* res = subtype.nearestArrayedComponentBackward(subtype.getSize(), &suboff, elSize);
-                    if (res != (Datatype*)0)
+                    if (res != (Datatype)null)
                     {
                         *newoff = (long)diff;
                         return subtype;
@@ -229,7 +229,7 @@ namespace Sla.DECCORE
                 }
                 i -= 1;
             }
-            return (Datatype*)0;
+            return (Datatype)null;
         }
 
         public override int getHoleSize(int off)
@@ -331,7 +331,7 @@ namespace Sla.DECCORE
 
         public override void encode(Encoder encoder)
         {
-            if (typedefImm != (Datatype*)0)
+            if (typedefImm != (Datatype)null)
             {
                 encodeTypedef(encoder);
                 return;
@@ -350,7 +350,7 @@ namespace Sla.DECCORE
         {
             Funcdata* fd = op.getParent().getFuncdata();
             ResolvedUnion res = fd.getUnionField(this, op, slot);
-            if (res != (ResolvedUnion*)0)
+            if (res != (ResolvedUnion)null)
                 return res.getDatatype();
 
             int fieldNum = scoreSingleComponent(this, op, slot);
@@ -364,7 +364,7 @@ namespace Sla.DECCORE
         {
             Funcdata fd = op.getParent().getFuncdata();
             ResolvedUnion res = fd.getUnionField(this, op, slot);
-            if (res != (ResolvedUnion*)0)
+            if (res != (ResolvedUnion)null)
                 return res.getDatatype();
             return field[0].type;       // If not calculated before, assume referring to field
         }

@@ -26,8 +26,8 @@ namespace Sla.DECCORE
         /// \brief Simply OR with unconsumed input:  `V = A | B  =>  V = B  if  nzm(A) & consume(V) == 0
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_OR);
-            oplist.push_back(CPUI_INT_XOR);
+            oplist.Add(CPUI_INT_OR);
+            oplist.Add(CPUI_INT_XOR);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

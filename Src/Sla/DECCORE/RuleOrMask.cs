@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         /// \brief Simplify INT_OR with full mask:  `V = W | 0xffff  =>  V = W`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_OR);
+            oplist.Add(CPUI_INT_OR);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -39,7 +39,7 @@ namespace Sla.DECCORE
             constvn = op.getIn(1);
             if (!constvn.isConstant()) return 0;
             ulong val = constvn.getOffset();
-            ulong mask = calc_mask(size);
+            ulong mask = Globals.calc_mask(size);
             if ((val & mask) != mask) return 0;
             data.opSetOpcode(op, CPUI_COPY);
             data.opSetInput(op, constvn, 0);

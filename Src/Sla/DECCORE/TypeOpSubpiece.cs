@@ -19,7 +19,7 @@ namespace Sla.DECCORE
 
         public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
-            return (Datatype*)0;        // Never need a cast into a SUBPIECE
+            return (Datatype)null;        // Never need a cast into a SUBPIECE
         }
 
         public override Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)
@@ -43,7 +43,7 @@ namespace Sla.DECCORE
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
             int inslot, int outslot)
         {
-            if (inslot != 0 || outslot != -1) return (Datatype*)0;  // Propagation must be from in0 to out
+            if (inslot != 0 || outslot != -1) return (Datatype)null;  // Propagation must be from in0 to out
             int byteOff;
             int newoff;
             TypeField field;
@@ -61,11 +61,11 @@ namespace Sla.DECCORE
                 field = alttype.findTruncation(byteOff, outvn.getSize(), op, 1, newoff);
             }
             else
-                return (Datatype*)0;
+                return (Datatype)null;
             if (field != (TypeField*)0 && newoff == 0 && field.type.getSize() == outvn.getSize()) {
                 return field.type;
             }
-            return (Datatype*)0;
+            return (Datatype)null;
         }
 
         public override string getOperatorName(PcodeOp op)

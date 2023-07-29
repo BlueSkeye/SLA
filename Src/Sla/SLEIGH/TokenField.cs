@@ -96,31 +96,31 @@ namespace Sla.SLEIGH
 
         public override void restoreXml(Element el, Translate trans)
         {
-            tok = (Token*)0;
+            tok = (Token)null;
             bigendian = xml_readbool(el.getAttributeValue("bigendian"));
             signbit = xml_readbool(el.getAttributeValue("signbit"));
             {
-                istringstream s(el.getAttributeValue("bitstart"));
+                istringstream s = new istringstream(el.getAttributeValue("bitstart"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> bitstart;
             }
             {
-                istringstream s(el.getAttributeValue("bitend"));
+                istringstream s = new istringstream(el.getAttributeValue("bitend"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> bitend;
             }
             {
-                istringstream s(el.getAttributeValue("bytestart"));
+                istringstream s = new istringstream(el.getAttributeValue("bytestart"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> bytestart;
             }
             {
-                istringstream s(el.getAttributeValue("byteend"));
+                istringstream s = new istringstream(el.getAttributeValue("byteend"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> byteend;
             }
             {
-                istringstream s(el.getAttributeValue("shift"));
+                istringstream s = new istringstream(el.getAttributeValue("shift"));
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 s >> shift;
             }

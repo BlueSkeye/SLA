@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// `((V + c) + W) & 0xfff0   =>   (V + (c & 0xfff0)) + W`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_AND);
+            oplist.Add(CPUI_INT_AND);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -44,7 +44,7 @@ namespace Sla.DECCORE
             ulong val = cvn1.getOffset();
             int size = cvn1.getSize();
             // Check that cvn1 is of the form    11110000
-            if (((val - 1) | val) != calc_mask(size)) return 0;
+            if (((val - 1) | val) != Globals.calc_mask(size)) return 0;
 
             Varnode* cvn2 = addop.getIn(1);
             if (cvn2.isConstant())

@@ -20,7 +20,7 @@ namespace Sla.EXTRA
         private int registerDynamicInject(InjectPayload payload)
         {
             int id = injection.size();
-            injection.push_back(payload);
+            injection.Add(payload);
             return id;
         }
 
@@ -70,7 +70,7 @@ namespace Sla.EXTRA
             {
                 compiler.setUniqueBase(0x2000); // Don't need to deconflict with anything other injects
                 ExecutablePcodeSleigh* sleighpayload = (ExecutablePcodeSleigh*)payload;
-                istringstream s(sleighpayload.parsestring);
+                istringstream s = new istringstream(sleighpayload.parsestring);
                 if (!compiler.parseStream(s))
                     throw new LowlevelError(payload.getSource() + ": Unable to compile pcode: " + compiler.getErrorMessage());
                 sleighpayload.tpl = compiler.releaseResult();
@@ -80,7 +80,7 @@ namespace Sla.EXTRA
             {
                 compiler.setUniqueBase(tempbase);
                 InjectPayloadSleigh* sleighpayload = (InjectPayloadSleigh*)payload;
-                istringstream s(sleighpayload.parsestring);
+                istringstream s = new istringstream(sleighpayload.parsestring);
                 if (!compiler.parseStream(s))
                     throw new LowlevelError(payload.getSource() + ": Unable to compile pcode: " + compiler.getErrorMessage());
                 tempbase = compiler.getUniqueBase();
@@ -93,13 +93,13 @@ namespace Sla.EXTRA
         {
             int injectid = injection.size();
             if (type == InjectPayload::CALLFIXUP_TYPE)
-                injection.push_back(new InjectPayloadCallfixup(sourceName));
+                injection.Add(new InjectPayloadCallfixup(sourceName));
             else if (type == InjectPayload::CALLOTHERFIXUP_TYPE)
-                injection.push_back(new InjectPayloadCallother(sourceName));
+                injection.Add(new InjectPayloadCallother(sourceName));
             else if (type == InjectPayload::EXECUTABLEPCODE_TYPE)
-                injection.push_back(new ExecutablePcodeSleigh(glb, sourceName, name));
+                injection.Add(new ExecutablePcodeSleigh(glb, sourceName, name));
             else
-                injection.push_back(new InjectPayloadSleigh(sourceName, name, type));
+                injection.Add(new InjectPayloadSleigh(sourceName, name, type));
             return injectid;
         }
 
@@ -181,9 +181,9 @@ namespace Sla.EXTRA
             int injectid = allocateInject(sourceName, name, InjectPayload::CALLOTHERFIXUP_TYPE);
             InjectPayloadSleigh* payload = (InjectPayloadSleigh*)getPayload(injectid);
             for (int i = 0; i < inname.size(); ++i)
-                payload.inputlist.push_back(InjectParameter(inname[i], 0));
+                payload.inputlist.Add(InjectParameter(inname[i], 0));
             if (outname.size() != 0)
-                payload.output.push_back(InjectParameter(outname, 0));
+                payload.output.Add(InjectParameter(outname, 0));
             payload.orderParameters();
             payload.parsestring = snippet;
             registerInject(injectid);

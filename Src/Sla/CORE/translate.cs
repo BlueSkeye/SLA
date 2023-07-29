@@ -267,7 +267,7 @@ namespace Sla.CORE {
         /// \param isFormal is the formal stack space indicator
         public SpacebaseSpace(AddrSpaceManager m, Translate t, ref string nm, int ind, int sz,
             AddrSpace @base, int dl,bool isFormal)
-            : base(m, t, spacetype.IPTR_SPACEBASE, nm, (uint)sz, @base.getWordSize(), ind,0, dl)
+            : base(m, t, spacetype.IPTR_SPACEBASE, nm, (uint)sz, @@base.getWordSize(), ind,0, dl)
         {
             contain = @base;
             // No base register assigned yet

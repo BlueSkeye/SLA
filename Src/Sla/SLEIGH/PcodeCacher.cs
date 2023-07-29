@@ -133,7 +133,7 @@ namespace Sla.SLEIGH
         public void addLabel(uint id)
         {
             while (labels.size() <= id)
-                labels.push_back(0xbadbeef);
+                labels.Add(0xbadbeef);
             labels[id] = issued.size();
         }
 
@@ -161,7 +161,7 @@ namespace Sla.SLEIGH
                     throw new LowlevelError("Reference to non-existant sleigh label");
                 // Calculate the relative index given the two absolute indices
                 ulong res = labels[id] - (*iter).calling_index;
-                res &= calc_mask(ptr.size);
+                res &= Globals.calc_mask(ptr.size);
                 ptr.offset = res;
             }
         }

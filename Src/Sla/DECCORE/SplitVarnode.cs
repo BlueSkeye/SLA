@@ -44,10 +44,10 @@ namespace Sla.DECCORE
         /// \return \b true if the \b whole Varnode is found
         private bool findWholeSplitToPieces()
         {
-            if (whole == (Varnode*)0)
+            if (whole == (Varnode)null)
             {
-                if (hi == (Varnode*)0) return false;
-                if (lo == (Varnode*)0) return false;
+                if (hi == (Varnode)null) return false;
+                if (lo == (Varnode)null) return false;
                 if (!hi.isWritten()) return false;
                 PcodeOp* subhi = hi.getDef();
                 if (subhi.code() == CPUI_COPY)
@@ -69,13 +69,13 @@ namespace Sla.DECCORE
                 }
                 if (sublo.code() != CPUI_SUBPIECE) return false;
                 Varnode* res = sublo.getIn(0);
-                if (whole == (Varnode*)0)
+                if (whole == (Varnode)null)
                     whole = res;
                 else if (whole != res)
                     return false;       // Doesn't match between pieces
                 if (sublo.getIn(1).getOffset() != 0)
                     return false;
-                if (whole == (Varnode*)0) return false;
+                if (whole == (Varnode)null) return false;
             }
 
             if (whole.isWritten())
@@ -85,7 +85,7 @@ namespace Sla.DECCORE
             }
             else if (whole.isInput())
             {
-                defpoint = (PcodeOp*)0;
+                defpoint = (PcodeOp)null;
                 defblock = (BlockBasic*)0;
             }
             return true;
@@ -101,14 +101,14 @@ namespace Sla.DECCORE
         private bool findDefinitionPoint()
         {
             PcodeOp* lastop;
-            if (hi != (Varnode*)0 && hi.isConstant()) return false; // If one but not both is constant
+            if (hi != (Varnode)null && hi.isConstant()) return false; // If one but not both is constant
             if (lo.isConstant()) return false;
-            if (hi == (Varnode*)0)
+            if (hi == (Varnode)null)
             {   // Implied zero extension
                 if (lo.isInput())
                 {
                     defblock = (BlockBasic*)0;
-                    defpoint = (PcodeOp*)0;
+                    defpoint = (PcodeOp)null;
                 }
                 else if (lo.isWritten())
                 {
@@ -155,7 +155,7 @@ namespace Sla.DECCORE
                 if (!lo.isInput())
                     return false;       // Do not allow mixed input/non-input pairs
                 defblock = (BlockBasic*)0;
-                defpoint = (PcodeOp*)0;
+                defpoint = (PcodeOp)null;
             }
             return true;
         }
@@ -168,12 +168,12 @@ namespace Sla.DECCORE
         /// \return \b true if a \b whole concatenated from \b hi and \b lo is found
         private bool findWholeBuiltFromPieces()
         {
-            if (hi == (Varnode*)0) return false;
-            if (lo == (Varnode*)0) return false;
+            if (hi == (Varnode)null) return false;
+            if (lo == (Varnode)null) return false;
             list<PcodeOp*>::const_iterator iter, enditer;
             iter = lo.beginDescend();
             enditer = lo.endDescend();
-            PcodeOp* res = (PcodeOp*)0;
+            PcodeOp* res = (PcodeOp)null;
             BlockBasic* bb;
             if (lo.isWritten())
                 bb = lo.getDef().getParent();
@@ -193,7 +193,7 @@ namespace Sla.DECCORE
                 }
                 else if (!op.getParent().isEntryPoint())
                     continue;
-                if (res == (PcodeOp*)0)
+                if (res == (PcodeOp)null)
                     res = op;
                 else
                 {
@@ -202,15 +202,15 @@ namespace Sla.DECCORE
                 }
             }
 
-            if (res == (PcodeOp*)0)
-                whole = (Varnode*)0;
+            if (res == (PcodeOp)null)
+                whole = (Varnode)null;
             else
             {
                 defpoint = res;
                 defblock = defpoint.getParent();
                 whole = res.getOut();
             }
-            return (whole != (Varnode*)0);
+            return (whole != (Varnode)null);
         }
 
         /// Construct an uninitialized SplitVarnode
@@ -227,10 +227,10 @@ namespace Sla.DECCORE
         {
             val = v;
             wholesize = sz;
-            lo = (Varnode*)0;
-            hi = (Varnode*)0;
-            whole = (Varnode*)0;
-            defpoint = (PcodeOp*)0;
+            lo = (Varnode)null;
+            hi = (Varnode)null;
+            whole = (Varnode)null;
+            defpoint = (PcodeOp)null;
             defblock = (BlockBasic*)0;
         }
 
@@ -240,7 +240,7 @@ namespace Sla.DECCORE
         }    ///< Construct from \b lo and \b hi piece
 
         /// Construct given Varnode pieces and a known \b whole Varnode
-        /// The \b lo, \b hi, and \b whole fields are filled in.  The definition point remains uninitialized.
+        /// The \b lo, \b hi, and \b whole fields are filled @in.  The definition point remains uninitialized.
         /// \param w is the given whole Varnode
         /// \param l is the given (least significant) Varnode piece
         /// \param h is the given (most significant) Varnode piece
@@ -250,7 +250,7 @@ namespace Sla.DECCORE
             lo = l;
             hi = h;
             whole = w;
-            defpoint = (PcodeOp*)0;
+            defpoint = (PcodeOp)null;
             defblock = (BlockBasic*)0;
         }
 
@@ -261,10 +261,10 @@ namespace Sla.DECCORE
         {
             val = v;
             wholesize = sz;
-            lo = (Varnode*)0;
-            hi = (Varnode*)0;
-            whole = (Varnode*)0;
-            defpoint = (PcodeOp*)0;
+            lo = (Varnode)null;
+            hi = (Varnode)null;
+            whole = (Varnode)null;
+            defpoint = (PcodeOp)null;
             defblock = (BlockBasic*)0;
         }
 
@@ -277,13 +277,13 @@ namespace Sla.DECCORE
         /// \param h is the given (most significant) Varnode piece
         public void initPartial(int sz, Varnode l, Varnode h)
         {
-            if (h == (Varnode*)0)
+            if (h == (Varnode)null)
             {   // hi is an implied zero
-                hi = (Varnode*)0;
+                hi = (Varnode)null;
                 if (l.isConstant())
                 {
                     val = l.getOffset();   // Assume l is a constant
-                    lo = (Varnode*)0;
+                    lo = (Varnode)null;
                 }
                 else
                     lo = l;
@@ -295,8 +295,8 @@ namespace Sla.DECCORE
                     val = h.getOffset();
                     val <<= (l.getSize() * 8);
                     val |= l.getOffset();
-                    lo = (Varnode*)0;
-                    hi = (Varnode*)0;
+                    lo = (Varnode)null;
+                    hi = (Varnode)null;
                 }
                 else
                 {
@@ -305,8 +305,8 @@ namespace Sla.DECCORE
                 }
             }
             wholesize = sz;
-            whole = (Varnode*)0;
-            defpoint = (PcodeOp*)0;
+            whole = (Varnode)null;
+            defpoint = (PcodeOp)null;
             defblock = (BlockBasic*)0;
         }
 
@@ -418,14 +418,14 @@ namespace Sla.DECCORE
                 initAll(w, l, tmphi);
                 return true;
             }
-            initAll(w, l, (Varnode*)0);
+            initAll(w, l, (Varnode)null);
             return true;
         }
 
         /// Try to initialize given just the most significant piece concatenated into whole
         /// Initialize the SplitVarnode given the most significant piece, if it is concatenated together
         /// immediately with is least significant piece.  The CPUI_PIECE and the matching least significant
-        /// piece must be unique.  If these are found, \b hi, \b lo, and \b whole are all filled in.
+        /// piece must be unique.  If these are found, \b hi, \b lo, and \b whole are all filled @in.
         /// \param h is the given (most significant) piece
         /// \return \b true if initialization was successful and the least significant piece was found
         public bool inHandHiOut(Varnode h)
@@ -433,8 +433,8 @@ namespace Sla.DECCORE
             list<PcodeOp*>::const_iterator iter, enditer;
             iter = h.beginDescend();
             enditer = h.endDescend();
-            Varnode* loTmp = (Varnode*)0;
-            Varnode* outvn = (Varnode*)0;
+            Varnode* loTmp = (Varnode)null;
+            Varnode* outvn = (Varnode)null;
             while (iter != enditer)
             {
                 PcodeOp* pieceop = *iter;
@@ -443,11 +443,11 @@ namespace Sla.DECCORE
                 if (pieceop.getIn(0) != h) continue;
                 Varnode* l = pieceop.getIn(1);
                 if (!l.isPrecisLo()) continue;
-                if (loTmp != (Varnode*)0) return false; // Whole is not unique
+                if (loTmp != (Varnode)null) return false; // Whole is not unique
                 loTmp = l;
                 outvn = pieceop.getOut();
             }
-            if (loTmp != (Varnode*)0)
+            if (loTmp != (Varnode)null)
             {
                 initAll(outvn, loTmp, h);
                 return true;
@@ -458,7 +458,7 @@ namespace Sla.DECCORE
         /// Try to initialize given just the least significant piece concatenated into whole
         /// Initialize the SplitVarnode given the least significant piece, if it is concatenated together
         /// immediately with is nost significant piece.  The CPUI_PIECE and the matching most significant
-        /// piece must be unique.  If these are found, \b hi, \b lo, and \b whole are all filled in.
+        /// piece must be unique.  If these are found, \b hi, \b lo, and \b whole are all filled @in.
         /// \param l is the given (least significant) piece
         /// \return \b true if initialization was successful and the most significant piece was found
         public bool inHandLoOut(Varnode l)
@@ -466,8 +466,8 @@ namespace Sla.DECCORE
             list<PcodeOp*>::const_iterator iter, enditer;
             iter = l.beginDescend();
             enditer = l.endDescend();
-            Varnode* hiTmp = (Varnode*)0;
-            Varnode* outvn = (Varnode*)0;
+            Varnode* hiTmp = (Varnode)null;
+            Varnode* outvn = (Varnode)null;
             while (iter != enditer)
             {
                 PcodeOp* pieceop = *iter;
@@ -476,11 +476,11 @@ namespace Sla.DECCORE
                 if (pieceop.getIn(1) != l) continue;
                 Varnode* h = pieceop.getIn(0);
                 if (!h.isPrecisHi()) continue;
-                if (hiTmp != (Varnode*)0) return false; // Whole is not unique
+                if (hiTmp != (Varnode)null) return false; // Whole is not unique
                 hiTmp = h;
                 outvn = pieceop.getOut();
             }
-            if (hiTmp != (Varnode*)0)
+            if (hiTmp != (Varnode)null)
             {
                 initAll(outvn, l, hiTmp);
                 return true;
@@ -524,7 +524,7 @@ namespace Sla.DECCORE
         public bool isWholeFeasible(PcodeOp existop)
         {
             if (isConstant()) return true;
-            if ((lo != (Varnode*)0) && (hi != (Varnode*)0))
+            if ((lo != (Varnode)null) && (hi != (Varnode)null))
                 if (lo.isConstant() != hi.isConstant()) return false; // Mixed constant/non-constant
             if (!findWholeSplitToPieces())
             {
@@ -588,13 +588,13 @@ namespace Sla.DECCORE
             }
             else
             {
-                if (lo != (Varnode*)0)
+                if (lo != (Varnode)null)
                     lo.setPrecisLo();      // Mark the pieces
-                if (hi != (Varnode*)0)
+                if (hi != (Varnode)null)
                     hi.setPrecisHi();
             }
 
-            if (whole != (Varnode*)0) return; // Already found the whole
+            if (whole != (Varnode)null) return; // Already found the whole
             PcodeOp* concatop;
             Address addr;
             BlockBasic* topblock = (BlockBasic*)0;
@@ -607,7 +607,7 @@ namespace Sla.DECCORE
                 addr = topblock.getStart();
             }
 
-            if (hi != (Varnode*)0)
+            if (hi != (Varnode)null)
             {
                 concatop = data.newOp(2, addr);
                 // Do we need to pick something other than a unique????
@@ -643,7 +643,7 @@ namespace Sla.DECCORE
         { // Create the actual -whole- varnode
             lo.setPrecisLo();      // Mark the pieces
             hi.setPrecisHi();
-            if (whole != (Varnode*)0) return;
+            if (whole != (Varnode)null) return;
             whole = data.newUnique(wholesize);
         }
 
@@ -655,7 +655,7 @@ namespace Sla.DECCORE
         {
             lo.setPrecisLo();
             hi.setPrecisHi();
-            if (whole != (Varnode*)0) return;
+            if (whole != (Varnode)null) return;
             Address newaddr;
             if (!isAddrTiedContiguous(lo, hi, newaddr))
             {
@@ -673,12 +673,12 @@ namespace Sla.DECCORE
         public void buildLoFromWhole(Funcdata data)
         {
             PcodeOp* loop = lo.getDef();
-            if (loop == (PcodeOp*)0)
+            if (loop == (PcodeOp)null)
                 throw new LowlevelError("Building low piece that was originally undefined");
 
             List<Varnode*> inlist;
-            inlist.push_back(whole);
-            inlist.push_back(data.newConstant(4, 0));
+            inlist.Add(whole);
+            inlist.Add(data.newConstant(4, 0));
             if (loop.code() == CPUI_MULTIEQUAL)
             {
                 // When converting the MULTIEQUAL to a SUBPIECE, we need to reinsert the op so that we don't
@@ -714,12 +714,12 @@ namespace Sla.DECCORE
         public void buildHiFromWhole(Funcdata data)
         {
             PcodeOp* hiop = hi.getDef();
-            if (hiop == (PcodeOp*)0)
+            if (hiop == (PcodeOp)null)
                 throw new LowlevelError("Building low piece that was originally undefined");
 
             List<Varnode*> inlist;
-            inlist.push_back(whole);
-            inlist.push_back(data.newConstant(4, lo.getSize()));
+            inlist.Add(whole);
+            inlist.Add(data.newConstant(4, lo.getSize()));
             if (hiop.code() == CPUI_MULTIEQUAL)
             {
                 // When converting the MULTIEQUAL to a SUBPIECE, we need to reinsert the op so that we don't
@@ -754,12 +754,12 @@ namespace Sla.DECCORE
         /// \return the earlier of the two defining PcodeOps or null
         public PcodeOp findEarliestSplitPoint()
         {
-            if (!hi.isWritten()) return (PcodeOp*)0;
-            if (!lo.isWritten()) return (PcodeOp*)0;
+            if (!hi.isWritten()) return (PcodeOp)null;
+            if (!lo.isWritten()) return (PcodeOp)null;
             PcodeOp* hiop = hi.getDef();
             PcodeOp* loop = lo.getDef();
             if (loop.getParent() != hiop.getParent())
-                return (PcodeOp*)0;
+                return (PcodeOp)null;
             return (loop.getSeqNum().getOrder() < hiop.getSeqNum().getOrder()) ? loop : hiop;
         }
 
@@ -910,8 +910,8 @@ namespace Sla.DECCORE
             SplitVarnode basic;
 
             basic.whole = w;
-            basic.hi = (Varnode*)0;
-            basic.lo = (Varnode*)0;
+            basic.hi = (Varnode)null;
+            basic.lo = (Varnode)null;
             basic.wholesize = w.getSize();
             list<PcodeOp*>::const_iterator iter, enditer;
 
@@ -941,7 +941,7 @@ namespace Sla.DECCORE
             if (res == 3 && (basic.lo.getSize() + basic.hi.getSize() != basic.wholesize))
                 return;
 
-            splitvec.push_back(basic);
+            splitvec.Add(basic);
             findCopies(basic, splitvec);
         }
 
@@ -954,11 +954,11 @@ namespace Sla.DECCORE
         /// \param splitvec is the container for holding SplitVarnode copies
         public static void findCopies(SplitVarnode @in, List<SplitVarnode> splitvec)
         {
-            if (!@in.hasBothPieces()) return;
+            if (!@@in.hasBothPieces()) return;
             list<PcodeOp*>::const_iterator iter, enditer;
 
-            iter = @in.getLo().beginDescend();
-            enditer = @in.getLo().endDescend();
+            iter = @@in.getLo().beginDescend();
+            enditer = @@in.getLo().endDescend();
             while (iter != enditer)
             {
                 PcodeOp* loop = *iter;
@@ -967,12 +967,12 @@ namespace Sla.DECCORE
                 Varnode* locpy = loop.getOut();
                 Address addr = locpy.getAddr(); // Calculate address of hi part
                 if (addr.isBigEndian())
-                    addr = addr - (@in.getHi().getSize());
+                    addr = addr - (@@in.getHi().getSize());
                 else
                     addr = addr + locpy.getSize();
                 list<PcodeOp*>::const_iterator iter2, enditer2;
-                iter2 = @in.getHi().beginDescend();
-                enditer2 = @in.getHi().endDescend();
+                iter2 = @@in.getHi().beginDescend();
+                enditer2 = @@in.getHi().endDescend();
                 while (iter2 != enditer2)
                 {
                     PcodeOp* hiop = *iter2;
@@ -982,8 +982,8 @@ namespace Sla.DECCORE
                     if (hicpy.getAddr() != addr) continue;
                     if (hiop.getParent() != loop.getParent()) continue;
                     SplitVarnode newsplit;
-                    newsplit.initAll(@in.getWhole(), locpy, hicpy);
-                    splitvec.push_back(newsplit);
+                    newsplit.initAll(@@in.getWhole(), locpy, hicpy);
+                    splitvec.Add(newsplit);
                 }
             }
         }
@@ -1024,7 +1024,7 @@ namespace Sla.DECCORE
         {
             BlockBasic* bl = branchop.getParent();
             if (bl.sizeIn() != 1) return false;
-            PcodeOp* otherop = (PcodeOp*)0;
+            PcodeOp* otherop = (PcodeOp)null;
             Varnode* vn = branchop.getIn(1);
             if (vn.isWritten())
                 otherop = vn.getDef();
@@ -1052,7 +1052,7 @@ namespace Sla.DECCORE
             if (op.code() != CPUI_INT_MULT) return false;
             Varnode* in1 = op.getIn(1);
             if (!in1.isConstant()) return false;
-            if (in1.getOffset() != calc_mask(in1.getSize())) return false;
+            if (in1.getOffset() != Globals.calc_mask(in1.getSize())) return false;
             return true;
         }
 
@@ -1069,9 +1069,9 @@ namespace Sla.DECCORE
             SplitVarnode in2)
         {
             PcodeOp* existop = @out.findOutExist(); // Find point where output whole needs to exist
-            if (existop == (PcodeOp*)0) return existop; // If we can find no such point return false;
-            if (!in1.isWholeFeasible(existop)) return (PcodeOp*)0;
-            if (!in2.isWholeFeasible(existop)) return (PcodeOp*)0;
+            if (existop == (PcodeOp)null) return existop; // If we can find no such point return false;
+            if (!in1.isWholeFeasible(existop)) return (PcodeOp)null;
+            if (!in2.isWholeFeasible(existop)) return (PcodeOp)null;
             return existop;
         }
 
@@ -1121,9 +1121,9 @@ namespace Sla.DECCORE
         /// \return the PcodeOp where output whole must exist or null
         public static PcodeOp prepareShiftOp(SplitVarnode @out, SplitVarnode @in)
         {
-            PcodeOp* existop = @out.findOutExist(); // Find point where output whole needs to exist
-            if (existop == (PcodeOp*)0) return existop;
-            if (!in.isWholeFeasible(existop)) return (PcodeOp*)0;
+            PcodeOp existop = @out.findOutExist(); // Find point where output whole needs to exist
+            if (existop == (PcodeOp)null) return existop;
+            if (!@@in.isWholeFeasible(existop)) return (PcodeOp)null;
             return existop;
         }
 
@@ -1143,7 +1143,7 @@ namespace Sla.DECCORE
             Varnode sa, PcodeOp existop, OpCode opc)
         {
             @out.findCreateOutputWhole(data);
-            @in.findCreateWhole(data);
+            @@in.findCreateWhole(data);
             if (sa.isConstant())
                 sa = data.newConstant(sa.getSize(), sa.getOffset());
             if (existop.code() != CPUI_PIECE)
@@ -1151,7 +1151,7 @@ namespace Sla.DECCORE
                 PcodeOp* newop = data.newOp(2, existop.getAddr());
                 data.opSetOpcode(newop, opc);
                 data.opSetOutput(newop, @out.getWhole());
-                data.opSetInput(newop, @in.getWhole(), 0);
+                data.opSetInput(newop, @@in.getWhole(), 0);
                 data.opSetInput(newop, sa, 1);
                 data.opInsertBefore(newop, existop);
                 @out.buildLoFromWhole(data);
@@ -1160,7 +1160,7 @@ namespace Sla.DECCORE
             else
             {           // The whole previously existed, we remake the defining op
                 data.opSetOpcode(existop, opc);
-                data.opSetInput(existop, @in.getWhole(), 0);
+                data.opSetInput(existop, @@in.getWhole(), 0);
                 data.opSetInput(existop, sa, 1);
             }
         }
@@ -1236,7 +1236,7 @@ namespace Sla.DECCORE
         public static PcodeOp preparePhiOp(SplitVarnode @out, List<SplitVarnode> inlist)
         {
             PcodeOp* existop = @out.findEarliestSplitPoint(); // Point where output whole needs to exist
-            if (existop == (PcodeOp*)0) return existop;
+            if (existop == (PcodeOp)null) return existop;
             // existop should always be a MULTIEQUAL defining one of the pieces
             if (existop.code() != CPUI_MULTIEQUAL)
                 throw new LowlevelError("Trying to create phi-node double precision op with phi-node pieces");
@@ -1244,7 +1244,7 @@ namespace Sla.DECCORE
             int numin = inlist.size();
             for (int i = 0; i < numin; ++i)
                 if (!inlist[i].isWholePhiFeasible(bl.getIn(i)))
-                    return (PcodeOp*)0;
+                    return (PcodeOp)null;
             return existop;
         }
 
@@ -1286,7 +1286,7 @@ namespace Sla.DECCORE
         public static bool prepareIndirectOp(SplitVarnode @in, PcodeOp affector)
         {
             // We already have the exist point, -indop-
-            return @in.isWholeFeasible(affector);
+            return @@in.isWholeFeasible(affector);
         }
 
         /// \brief Rewrite a double precision INDIRECT operation by replacing the pieces with unified Varnodes
@@ -1303,11 +1303,11 @@ namespace Sla.DECCORE
         {
             @out.createJoinedWhole(data);
 
-            @in.findCreateWhole(data);
+            @@in.findCreateWhole(data);
             PcodeOp* newop = data.newOp(2, affector.getAddr());
             data.opSetOpcode(newop, CPUI_INDIRECT);
             data.opSetOutput(newop, @out.getWhole());
-            data.opSetInput(newop, @in.getWhole(), 0);
+            data.opSetInput(newop, @@in.getWhole(), 0);
             data.opSetInput(newop, data.newVarnodeIop(affector), 1);
             data.opInsertBefore(newop, affector);
             @out.buildLoFromWhole(data);
@@ -1326,8 +1326,8 @@ namespace Sla.DECCORE
             for (int i = 0; i < 2; ++i)
             {
                 Varnode* vn;
-                vn = (i == 0) ? in.getHi() : in.getLo();
-                if (vn == (Varnode*)0) continue;
+                vn = (i == 0) ? @in.getHi() : @in.getLo();
+                if (vn == (Varnode)null) continue;
                 bool workishi = (i == 0);
                 list<PcodeOp*>::const_iterator iter, enditer;
                 iter = vn.beginDescend();

@@ -55,7 +55,7 @@ namespace Sla.DECCORE
                 ulong unusedOffset;
                 TypePointer* unusedParent;
                 Datatype* rettype = ptype.downChain(offset, unusedParent, unusedOffset, false, *tlst);
-                if ((offset == 0) && (rettype != (Datatype*)0))
+                if ((offset == 0) && (rettype != (Datatype)null))
                     return rettype;
                 rettype = tlst.getBase(1, TYPE_UNKNOWN);
                 return tlst.getTypePointer(op.getOut().getSize(), rettype, ptype.getWordSize());
@@ -66,9 +66,9 @@ namespace Sla.DECCORE
         public override Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
             int inslot, int outslot)
         {
-            if ((inslot != -1) && (outslot != -1)) return (Datatype*)0; // Must propagate input <. output
+            if ((inslot != -1) && (outslot != -1)) return (Datatype)null; // Must propagate input <. output
             type_metatype metain = alttype.getMetatype();
-            if (metain != TYPE_PTR) return (Datatype*)0;
+            if (metain != TYPE_PTR) return (Datatype)null;
             Datatype* newtype;
             if (inslot == -1)       // Propagating output to input
                 newtype = op.getIn(outslot).getTempType();    // Don't propagate pointer types this direction

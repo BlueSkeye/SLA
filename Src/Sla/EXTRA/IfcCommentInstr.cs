@@ -21,10 +21,10 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         { // Comment on a particular address within current function
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("Decompile action not loaded");
+                throw new IfaceExecutionError("Decompile action not loaded");
 
-            if (dcp.fd == (Funcdata*)0)
-                throw IfaceExecutionError("No function selected");
+            if (dcp.fd == (Funcdata)null)
+                throw new IfaceExecutionError("No function selected");
 
             int size;
             Address addr = parse_machaddr(s, size, *dcp.conf.types);

@@ -48,7 +48,7 @@ namespace Sla.DECCORE
             if (spc.isBigEndian() && (sz < sizeof(ulong)))
                 res >>= (sizeof(ulong) - sz) * 8;
             else
-                res &= calc_mask(sz);
+                res &= Globals.calc_mask(sz);
             return res;
         }
 
@@ -64,9 +64,9 @@ namespace Sla.DECCORE
         {
             ulong in1 = getVarnodeValue(currentOp.getIn(0));
             ulong in2 = getVarnodeValue(currentOp.getIn(1));
-            ulong out = currentBehave.evaluateBinary(currentOp.getOut().getSize(),
+            ulong @out = currentBehave.evaluateBinary(currentOp.getOut().getSize(),
                                   currentOp.getIn(0).getSize(), in1, in2);
-            setVarnodeValue(currentOp.getOut(), out);
+            setVarnodeValue(currentOp.getOut(), @out);
         }
 
         protected override void executeLoad()
@@ -135,8 +135,8 @@ namespace Sla.DECCORE
             ulong in1 = getVarnodeValue(currentOp.getIn(1));
             ulong in2 = getVarnodeValue(currentOp.getIn(2));
             List<ulong> bindlist;
-            bindlist.push_back(in1);
-            bindlist.push_back(in2);
+            bindlist.Add(in1);
+            bindlist.Add(in2);
             ulong res = segdef.execute(bindlist);
             setVarnodeValue(currentOp.getOut(), res);
         }
@@ -157,8 +157,8 @@ namespace Sla.DECCORE
         public EmulatePcodeOp(Architecture g)
         {
             glb = g;
-            currentOp = (PcodeOp*)0;
-            lastOp = (PcodeOp*)0;
+            currentOp = (PcodeOp)null;
+            lastOp = (PcodeOp)null;
         }
 
         /// \brief Establish the current PcodeOp being emulated

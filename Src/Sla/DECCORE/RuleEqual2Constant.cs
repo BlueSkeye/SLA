@@ -51,21 +51,21 @@ namespace Sla.DECCORE
                 Varnode* otherconst = leftop.getIn(1);
                 if (!otherconst.isConstant()) return 0;
                 newconst = cvn.getOffset() - otherconst.getOffset();
-                newconst &= calc_mask(cvn.getSize());
+                newconst &= Globals.calc_mask(cvn.getSize());
             }
             else if (opc == CPUI_INT_MULT)
             {
                 Varnode* otherconst = leftop.getIn(1);
                 if (!otherconst.isConstant()) return 0;
                 // The only multiply we transform, is multiply by -1
-                if (otherconst.getOffset() != calc_mask(otherconst.getSize())) return 0;
+                if (otherconst.getOffset() != Globals.calc_mask(otherconst.getSize())) return 0;
                 newconst = cvn.getOffset();
-                newconst = (-newconst) & calc_mask(otherconst.getSize());
+                newconst = (-newconst) & Globals.calc_mask(otherconst.getSize());
             }
             else if (opc == CPUI_INT_NEGATE)
             {
                 newconst = cvn.getOffset();
-                newconst = (~newconst) & calc_mask(lhs.getSize());
+                newconst = (~newconst) & Globals.calc_mask(lhs.getSize());
             }
             else
                 return 0;

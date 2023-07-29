@@ -73,7 +73,7 @@ namespace Sla.SLEIGH
 
         public void addInput(VarnodeTpl vt)
         {
-            input.push_back(vt);
+            input.Add(vt);
         }
 
         public void setInput(VarnodeTpl vt, int slot)
@@ -129,7 +129,7 @@ namespace Sla.SLEIGH
             {
                 VarnodeTpl* vn = new VarnodeTpl();
                 vn.restoreXml(*iter, manage);
-                input.push_back(vn);
+                input.Add(vn);
                 ++iter;
             }
         }

@@ -16,12 +16,12 @@ namespace Sla.EXTRA
         /// The current function must already be decompiled.
         public override void execute(TextReader s)
         {
-            if (dcp.fd == (Funcdata*)0)
-                throw IfaceExecutionError("No function selected");
+            if (dcp.fd == (Funcdata)null)
+                throw new IfaceExecutionError("No function selected");
 
             s >> ws;
             if (s.eof())
-                throw IfaceParseError("No print language specified");
+                throw new IfaceParseError("No print language specified");
             string langroot;
             s >> langroot;
             langroot = langroot + "-language";

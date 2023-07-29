@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Apply INT_NEGATE identities:  `V & ~V  => #0,  V | ~V  .  #-1`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_NEGATE);
+            oplist.Add(CPUI_INT_NEGATE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -44,7 +44,7 @@ namespace Sla.DECCORE
                 if (logicOp.getIn(1 - slot) != vn) continue;
                 ulong value = 0;
                 if (opc != CPUI_INT_AND)
-                    value = calc_mask(vn.getSize());
+                    value = Globals.calc_mask(vn.getSize());
                 data.opSetInput(logicOp, data.newConstant(vn.getSize(), value), 0);
                 data.opRemoveInput(logicOp, 1);
                 data.opSetOpcode(logicOp, CPUI_COPY);

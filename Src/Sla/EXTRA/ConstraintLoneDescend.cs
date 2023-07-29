@@ -30,7 +30,7 @@ namespace Sla.EXTRA
             if (!traverse.step()) return false;
             Varnode* vn = state.data(varindex).getVarnode();
             PcodeOp* res = vn.loneDescend();
-            if (res == (PcodeOp*)0) return false;
+            if (res == (PcodeOp)null) return false;
             state.data(opindex).setOp(res);
             return true;
         }

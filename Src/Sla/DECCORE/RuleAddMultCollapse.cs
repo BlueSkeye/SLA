@@ -38,9 +38,11 @@ namespace Sla.DECCORE
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            Varnode* c[2];           // Constant varnodes
-            Varnode* sub,*sub2,*newvn;
-            PcodeOp* subop;
+            Varnode[] c = new Varnode[2];           // Constant varnodes
+            Varnode sub;
+            Varnode sub2;
+            Varnode newvn;
+            PcodeOp subop;
             OpCode opc;
 
             opc = op.code();

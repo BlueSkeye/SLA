@@ -421,7 +421,7 @@ namespace Sla.DECCORE
         /// \param s is the stream to print to
         public void printRaw(TextWriter s)
         {
-            if (vn == (Varnode*)0)
+            if (vn == (Varnode)null)
                 s << "root";
             else
                 vn.printRaw(s);

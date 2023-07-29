@@ -83,13 +83,13 @@ namespace Sla.SLACOMP
                     VarnodeTpl* plusvn = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl::real, plus),
                                      ConstTpl(ConstTpl::real, 4));
                     subpieceop.addInput(plusvn);
-                    outvec.push_back(subpieceop);
+                    outvec.Add(subpieceop);
 
                     delete vn;        // Replace original varnode
                     op.setInput(new VarnodeTpl(*newvn), i); // with output of subpiece
                 }
             }
-            outvec.push_back(op);
+            outvec.Add(op);
             return true;
         }
         
@@ -160,7 +160,7 @@ namespace Sla.SLACOMP
             {
                 vn = macroop.getIn(i);
                 hand = new HandleTpl(vn);
-                @params.push_back(hand);
+                @params.Add(hand);
             }
         }
 
@@ -195,7 +195,7 @@ namespace Sla.SLACOMP
             ulong val = v_clone.getOffset().getReal() + getLabelBase();
             v_clone.setOffset(val);
             clone.addInput(v_clone);
-            outvec.push_back(clone);
+            outvec.Add(clone);
         }
 
         public virtual void appendCrossBuild(OpTpl bld, int secnum)

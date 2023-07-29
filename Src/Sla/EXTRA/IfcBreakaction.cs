@@ -25,14 +25,14 @@ namespace Sla.EXTRA
             s >> specify >> ws;     // Which action or rule to put breakpoint on
 
             if (specify.empty())
-                throw IfaceExecutionError("No action/rule specified");
+                throw new IfaceExecutionError("No action/rule specified");
 
             if (dcp.conf == (Architecture*)0)
-                throw IfaceExecutionError("Decompile action not loaded");
+                throw new IfaceExecutionError("Decompile action not loaded");
 
             res = dcp.conf.allacts.getCurrent().setBreakPoint(Action::break_action, specify);
             if (!res)
-                throw IfaceExecutionError("Bad action/rule specifier: " + specify);
+                throw new IfaceExecutionError("Bad action/rule specifier: " + specify);
         }
     }
 }

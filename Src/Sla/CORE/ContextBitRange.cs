@@ -35,7 +35,7 @@ namespace Sla.CORE
             startbit = sbit - word * 8 * sizeof(uint);
             endbit = ebit - word * 8 * sizeof(uint);
             shift = 8 * sizeof(uint) - endbit - 1;
-            mask = (~((uint)0)) >> (startbit + shift);
+            mask = (uint.MaxValue) >> (startbit + shift);
         }
 
         ///< Return the shift-amount for \b this value

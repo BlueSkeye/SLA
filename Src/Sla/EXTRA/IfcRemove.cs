@@ -22,15 +22,15 @@ namespace Sla.EXTRA
 
             s >> ws >> name;
             if (name.size() == 0)
-                throw IfaceParseError("Missing symbol name");
+                throw new IfaceParseError("Missing symbol name");
 
             List<Symbol*> symList;
             dcp.readSymbol(name, symList);
 
             if (symList.empty())
-                throw IfaceExecutionError("No symbol named: " + name);
+                throw new IfaceExecutionError("No symbol named: " + name);
             if (symList.size() > 1)
-                throw IfaceExecutionError("More than one symbol named: " + name);
+                throw new IfaceExecutionError("More than one symbol named: " + name);
             symList[0].getScope().removeSymbol(symList[0]);
         }
     }

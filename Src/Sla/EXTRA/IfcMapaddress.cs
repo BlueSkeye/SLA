@@ -29,7 +29,7 @@ namespace Sla.EXTRA
 
             s >> ws;
             ct = parse_type(s, name, dcp.conf); // Parse the required type
-            if (dcp.fd != (Funcdata*)0)
+            if (dcp.fd != (Funcdata)null)
             {
                 Symbol* sym;
                 sym = dcp.fd.getScopeLocal().addSymbol(name, ct, addr, Address()).getSymbol();
@@ -41,10 +41,10 @@ namespace Sla.EXTRA
                 uint flags = Varnode::namelock | Varnode::typelock;
                 flags |= dcp.conf.symboltab.getProperty(addr); // Inherit existing properties
                 string basename;
-                Scope* scope = dcp.conf.symboltab.findCreateScopeFromSymbolName(name, "::", basename, (Scope*)0);
+                Scope* scope = dcp.conf.symboltab.findCreateScopeFromSymbolName(name, "::", basename, (Scope)null);
                 sym = scope.addSymbol(basename, ct, addr, Address()).getSymbol();
                 sym.getScope().setAttribute(sym, flags);
-                if (scope.getParent() != (Scope*)0)
+                if (scope.getParent() != (Scope)null)
                 {       // If this is a global namespace scope
                     SymbolEntry* e = sym.getFirstWholeMap();       // Adjust range
                     dcp.conf.symboltab.addRange(scope, e.getAddr().getSpace(), e.getFirst(), e.getLast());

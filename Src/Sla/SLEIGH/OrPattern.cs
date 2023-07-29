@@ -22,8 +22,8 @@ namespace Sla.SLEIGH
 
         public OrPattern(DisjointPattern a, DisjointPattern b)
         {
-            orlist.push_back(a);
-            orlist.push_back(b);
+            orlist.Add(a);
+            orlist.Add(b);
         }
 
         public OrPattern(List<DisjointPattern> list)
@@ -31,7 +31,7 @@ namespace Sla.SLEIGH
             List<DisjointPattern*>::const_iterator iter;
 
             for (iter = list.begin(); iter != list.end(); ++iter)
-                orlist.push_back(*iter);
+                orlist.Add(*iter);
         }
 
         ~OrPattern()
@@ -53,7 +53,7 @@ namespace Sla.SLEIGH
             List<DisjointPattern*> newlist;
             for (iter = orlist.begin(); iter != orlist.end(); ++iter) // Look for alwaysFalse
                 if (!(*iter).alwaysFalse())
-                    newlist.push_back((DisjointPattern*)(*iter).simplifyClone());
+                    newlist.Add((DisjointPattern*)(*iter).simplifyClone());
 
             if (newlist.empty())
                 return new InstructionPattern(false);
@@ -117,17 +117,17 @@ namespace Sla.SLEIGH
             List<DisjointPattern*>::const_iterator iter;
 
             for (iter = orlist.begin(); iter != orlist.end(); ++iter)
-                newlist.push_back((DisjointPattern*)(*iter).simplifyClone());
+                newlist.Add((DisjointPattern*)(*iter).simplifyClone());
             if (sa < 0)
                 for (iter = orlist.begin(); iter != orlist.end(); ++iter)
                     (*iter).shiftInstruction(-sa);
 
             if (b2 == (OrPattern*)0)
-                newlist.push_back((DisjointPattern*)b.simplifyClone());
+                newlist.Add((DisjointPattern*)b.simplifyClone());
             else
             {
                 for (iter = b2.orlist.begin(); iter != b2.orlist.end(); ++iter)
-                    newlist.push_back((DisjointPattern*)(*iter).simplifyClone());
+                    newlist.Add((DisjointPattern*)(*iter).simplifyClone());
             }
             if (sa > 0)
                 for (int i = 0; i < newlist.size(); ++i)
@@ -149,7 +149,7 @@ namespace Sla.SLEIGH
                 for (iter = orlist.begin(); iter != orlist.end(); ++iter)
                 {
                     tmp = (DisjointPattern*)(*iter).doAnd(b, sa);
-                    newlist.push_back(tmp);
+                    newlist.Add(tmp);
                 }
             }
             else
@@ -158,7 +158,7 @@ namespace Sla.SLEIGH
                     for (iter2 = b2.orlist.begin(); iter2 != b2.orlist.end(); ++iter2)
                     {
                         tmp = (DisjointPattern*)(*iter).doAnd(*iter2, sa);
-                        newlist.push_back(tmp);
+                        newlist.Add(tmp);
                     }
             }
             tmpor = new OrPattern(newlist);
@@ -202,7 +202,7 @@ namespace Sla.SLEIGH
             while (iter != list.end())
             {
                 DisjointPattern* pat = DisjointPattern::restoreDisjoint(*iter);
-                orlist.push_back(pat);
+                orlist.Add(pat);
                 ++iter;
             }
         }

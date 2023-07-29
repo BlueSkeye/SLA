@@ -17,7 +17,7 @@ namespace Sla.EXTRA
 
   s >> filename;
   if (filename.size() == 0)
-    throw IfaceParseError("Missing rule input file");
+    throw new IfaceParseError("Missing rule input file");
 
   s >> ws;
   if (!s.eof()) {
@@ -28,7 +28,7 @@ namespace Sla.EXTRA
   }
   ifstream thefile( filename.c_str());
   if (!thefile)
-    throw IfaceExecutionError("Unable to open rule file: "+filename);
+    throw new IfaceExecutionError("Unable to open rule file: "+filename);
 
   RuleCompile ruler;
   ruler.setErrorStream(*status.optr);

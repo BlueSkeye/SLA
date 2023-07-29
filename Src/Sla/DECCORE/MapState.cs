@@ -90,7 +90,7 @@ namespace Sla.DECCORE
         /// \param hi is the biggest guaranteed index for \e open range hints
         private void addRange(ulong st, Datatype ct, uint fl, RangeHint::RangeType rt, int hi)
         {
-            if ((ct == (Datatype*)0) || (ct.getSize() == 0)) // Must have a real type
+            if ((ct == (Datatype)null) || (ct.getSize() == 0)) // Must have a real type
                 ct = defaultType;
             int sz = ct.getSize();
             if (!range.inRange(Address(spaceid, st), sz))
@@ -99,7 +99,7 @@ namespace Sla.DECCORE
             sign_extend(sst, spaceid.getAddrSize() * 8 - 1);
             sst = (long)AddrSpace::addressToByte(sst, spaceid.getWordSize());
             RangeHint* newRange = new RangeHint(st, sz, sst, ct, fl, rt, hi);
-            maplist.push_back(newRange);
+            maplist.Add(newRange);
 #if OPACTION_DEBUG
             if (debugon)
             {
@@ -123,7 +123,7 @@ namespace Sla.DECCORE
             int startPos = 0;
             RangeHint* startHint = maplist[0];
             Datatype* startDatatype = startHint.type;
-            newList.push_back(startHint);
+            newList.Add(startHint);
             int curPos = 1;
             while (curPos < maplist.size())
             {
@@ -134,7 +134,7 @@ namespace Sla.DECCORE
                     if (curDatatype.typeOrder(*startDatatype) < 0) // Take the most specific variant of data-type
                         startDatatype = curDatatype;
                     if (curHint.compare(*newList.back()) != 0)
-                        newList.push_back(curHint);     // Keep the current hint if it is otherwise different
+                        newList.Add(curHint);     // Keep the current hint if it is otherwise different
                     else
                         delete curHint;     // RangeHint is on the heap, so delete if we are not keeping it
                 }
@@ -147,7 +147,7 @@ namespace Sla.DECCORE
                     }
                     startHint = curHint;
                     startDatatype = startHint.type;
-                    newList.push_back(startHint);
+                    newList.Add(startHint);
                 }
             }
             while (startPos < newList.size())
@@ -216,7 +216,7 @@ namespace Sla.DECCORE
             sst = (long)AddrSpace::addressToByte(sst, spaceid.getWordSize());
             // Add extra range to bound any final open entry
             RangeHint* termRange = new RangeHint(high, 1, sst, defaultType, 0, RangeHint::endpoint, -2);
-            maplist.push_back(termRange);
+            maplist.Add(termRange);
 
             stable_sort(maplist.begin(), maplist.end(), RangeHint::compareRanges);
             reconcileDatatypes();
@@ -276,7 +276,7 @@ namespace Sla.DECCORE
                 // Do not force Varnode flags on the entry
                 // as the flags were inherited from the previous
                 // (now obsolete) entry
-                addRange(start, ct, 0, RangeHint::fixed,-1);
+                addRange(start, ct, 0, RangeHint::@fixed,-1);
             }
         }
 
@@ -301,11 +301,11 @@ namespace Sla.DECCORE
                 if (!high.isAddrTied()) continue;
                 vn = high.getTiedVarnode();    // Original vn may not be good representative
                 high.setMark();
-                varvec.push_back(high);
+                varvec.Add(high);
                 ulong start = vn.getOffset();
                 Datatype* ct = high.getType(); // Get type from high
                 if (ct.getMetatype() == TYPE_PARTIALUNION) continue;
-                addRange(start, ct, 0, RangeHint::fixed,-1);
+                addRange(start, ct, 0, RangeHint::@fixed,-1);
             }
             for (int i = 0; i < varvec.size(); ++i)
                 varvec[i].clearMark();
@@ -327,7 +327,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < addbase.size(); ++i)
             {
                 offset = alias[i];
-                ct = addbase[i].base.getType();
+                ct = addbase[i].@base.getType();
                 if (ct.getMetatype() == TYPE_PTR)
                 {
                     ct = ((TypePointer*)ct).getPtrTo();
@@ -335,9 +335,9 @@ namespace Sla.DECCORE
                         ct = ((TypeArray*)ct).getBase();
                 }
                 else
-                    ct = (Datatype*)0;  // Do unknown array
+                    ct = (Datatype)null;  // Do unknown array
                 int minItems;
-                if (addbase[i].index != (Varnode*)0)
+                if (addbase[i].index != (Varnode)null)
                 {
                     minItems = 3;           // If there is an index, assume it takes on at least the 4 values [0,3]
                 }

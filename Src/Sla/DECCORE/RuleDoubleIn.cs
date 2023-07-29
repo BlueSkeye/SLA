@@ -75,7 +75,7 @@ namespace Sla.DECCORE
                         return 0;
                 }
             }
-            Varnode* vnLo = (Varnode*)0;
+            Varnode* vnLo = (Varnode)null;
             list<PcodeOp*>::const_iterator iter;
             for (iter = whole.beginDescend(); iter != whole.endDescend(); ++iter)
             {
@@ -88,7 +88,7 @@ namespace Sla.DECCORE
                     break;
                 }
             }
-            if (vnLo == (Varnode*)0) return 0;
+            if (vnLo == (Varnode)null) return 0;
             vnLo.setPrecisLo();
             vn.setPrecisHi();
             return 1;
@@ -111,7 +111,7 @@ namespace Sla.DECCORE
 
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_SUBPIECE);
+            oplist.Add(CPUI_SUBPIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

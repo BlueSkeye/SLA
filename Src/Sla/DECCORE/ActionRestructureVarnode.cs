@@ -41,7 +41,7 @@ namespace Sla.DECCORE
                     curVn = curOp.getIn(0);
                 else if (curOp.code() == CPUI_INDIRECT)
                 {
-                    indirects.push_back(curOp);
+                    indirects.Add(curOp);
                     curVn = curOp.getIn(0);
                 }
                 else if (curOp.code() == CPUI_LOAD)
@@ -68,7 +68,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < bblocks.getSize(); ++i)
             {
                 PcodeOp* op = bblocks.getBlock(i).lastOp();
-                if (op == (PcodeOp*)0) continue;
+                if (op == (PcodeOp)null) continue;
                 if (op.code() != CPUI_BRANCHIND) continue;
                 protectSwitchPathIndirects(op);
             }

@@ -117,7 +117,7 @@ namespace Sla.DECCORE
             }
             decoder.rewindAttributes();
             VarnodeData storage;
-            storage.space = (AddrSpace*)0;
+            storage.space = (AddrSpace)null;
             storage.decodeFromAttributes(decoder);
             decoder.closeElement(elemId);
             wholeSize = storage.size;
@@ -139,7 +139,7 @@ namespace Sla.DECCORE
                     if (pos >= laneSizes.size())
                         pos = string::npos;
                 }
-                istringstream s(value);
+                istringstream s = new istringstream(value);
                 s.unsetf(ios::dec | ios::hex | ios::oct);
                 int sz = -1;
                 s >> sz;

@@ -50,7 +50,7 @@ namespace Sla.DECCORE
             public ValueSetEdge(ValueSet node, List<ValueSet> roots)
             {
                 vn = node.getVarnode();
-                if (vn == (Varnode*)0)
+                if (vn == (Varnode)null)
                 {       // Assume this is the simulated root
                     rootEdges = &roots;         // Set up for simulated edges
                     rootPos = 0;
@@ -68,7 +68,7 @@ namespace Sla.DECCORE
             /// \return the next ValueSet or NULL if the end of the list is reached
             public ValueSet getNext()
             {
-                if (vn == (Varnode*)0)
+                if (vn == (Varnode)null)
                 {
                     if (rootPos < rootEdges.size())
                     {
@@ -83,7 +83,7 @@ namespace Sla.DECCORE
                     PcodeOp* op = *iter;
                     ++iter;
                     Varnode* outVn = op.getOut();
-                    if (outVn != (Varnode*)0 && outVn.isMark())
+                    if (outVn != (Varnode)null && outVn.isMark())
                     {
                         return outVn.getValueSet();
                     }
@@ -149,7 +149,7 @@ namespace Sla.DECCORE
         /// \param part is the partition to store
         private void partitionSurround(Partition part)
         {
-            recordStorage.push_back(part);
+            recordStorage.Add(part);
             part.startNode.partHead = &recordStorage.back();
         }
 
@@ -178,7 +178,7 @@ namespace Sla.DECCORE
         /// \return the index of calculated head ValueSet for the current Parition
         private int visit(ValueSet vertex, Partition part)
         {
-            nodeStack.push_back(vertex);
+            nodeStack.Add(vertex);
             depthFirstIndex += 1;
             vertex.count = depthFirstIndex;
             int head = depthFirstIndex;
@@ -242,7 +242,7 @@ namespace Sla.DECCORE
                 (*iter).partHead = (Partition*)0;
             }
             ValueSet rootNode;
-            rootNode.vn = (Varnode*)0;
+            rootNode.vn = (Varnode)null;
             depthFirstIndex = 0;
             visit(&rootNode, orderPartition);
             orderPartition.startNode = orderPartition.startNode.next;  // Remove simulated root
@@ -259,7 +259,7 @@ namespace Sla.DECCORE
         /// \param range is the range of \b true values
         private void generateTrueEquation(Varnode vn, PcodeOp op, int slot, int type, CircleRange range)
         {
-            if (vn != (Varnode*)0)
+            if (vn != (Varnode)null)
                 vn.getValueSet().addEquation(slot, type, range);
             else
                 readNodes[op.getSeqNum()].addEquation(slot, type, range);// Special read site
@@ -278,7 +278,7 @@ namespace Sla.DECCORE
         {
             CircleRange falseRange(range);
             falseRange.invert();
-            if (vn != (Varnode*)0)
+            if (vn != (Varnode)null)
                 vn.getValueSet().addEquation(slot, type, falseRange);
             else
                 readNodes[op.getSeqNum()].addEquation(slot, type, falseRange);// Special read site
@@ -324,11 +324,11 @@ namespace Sla.DECCORE
             for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {
                 PcodeOp* op = *iter;
-                Varnode* outVn = (Varnode*)0;
+                Varnode* outVn = (Varnode)null;
                 if (!op.isMark())
                 {   // If this is not a special read site
                     outVn = op.getOut();   // Make sure there is a Varnode in the system
-                    if (outVn == (Varnode*)0) continue;
+                    if (outVn == (Varnode)null) continue;
                     if (!outVn.isMark()) continue;
                 }
                 FlowBlock* curBlock = op.getParent();
@@ -392,7 +392,7 @@ namespace Sla.DECCORE
             {
                 Varnode* constVn;
                 startVn = lift.pullBack(startVn.getDef(), &constVn, false);
-                if (startVn == (Varnode*)0) return; // Couldn't pull all the way back to our value set
+                if (startVn == (Varnode)null) return; // Couldn't pull all the way back to our value set
             }
             for (; ; )
             {
@@ -402,7 +402,7 @@ namespace Sla.DECCORE
                 PcodeOp* op = endVn.getDef();
                 if (op.isCall() || op.isMarker()) break;
                 endVn = lift.pullBack(op, &constVn, false);
-                if (endVn == (Varnode*)0) break;
+                if (endVn == (Varnode)null) break;
                 if (!endVn.isMark()) break;
             }
         }
@@ -440,8 +440,8 @@ namespace Sla.DECCORE
             }
             if (vn.isMark())
             {
-                CircleRange lift(true);
-                Varnode* startVn = cbranch.getIn(1);
+                CircleRange lift = new CircleRange(true);
+                Varnode startVn = cbranch.getIn(1);
                 constraintsFromPath(0, lift, startVn, vn, cbranch);
             }
         }
@@ -462,7 +462,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < worklist.size(); ++i)
             {
                 PcodeOp* op = worklist[i].getDef();
-                if (op == (PcodeOp*)0) continue;
+                if (op == (PcodeOp)null) continue;
                 FlowBlock* bl = op.getParent();
                 if (op.code() == CPUI_MULTIEQUAL)
                 {
@@ -473,7 +473,7 @@ namespace Sla.DECCORE
                         {
                             if (curBl.isMark()) break;
                             curBl.setMark();
-                            blockList.push_back(curBl);
+                            blockList.Add(curBl);
                             curBl = curBl.getImmedDom();
                         } while (curBl != (FlowBlock*)0);
                     }
@@ -484,7 +484,7 @@ namespace Sla.DECCORE
                     {
                         if (bl.isMark()) break;
                         bl.setMark();
-                        blockList.push_back(bl);
+                        blockList.Add(bl);
                         bl = bl.getImmedDom();
                     } while (bl != (FlowBlock*)0);
                 }
@@ -496,7 +496,7 @@ namespace Sla.DECCORE
                 {
                     if (bl.isMark()) break;
                     bl.setMark();
-                    blockList.push_back(bl);
+                    blockList.Add(bl);
                     bl = bl.getImmedDom();
                 } while (bl != (FlowBlock*)0);
             }
@@ -514,10 +514,10 @@ namespace Sla.DECCORE
                     if (splitPoint.isMark()) continue;
                     if (splitPoint.sizeOut() != 2) continue;
                     PcodeOp* lastOp = splitPoint.lastOp();
-                    if (lastOp != (PcodeOp*)0 && lastOp.code() == CPUI_CBRANCH)
+                    if (lastOp != (PcodeOp)null && lastOp.code() == CPUI_CBRANCH)
                     {
                         splitPoint.setMark();
-                        finalList.push_back(splitPoint);
+                        finalList.Add(splitPoint);
                         constraintsFromCBranch(lastOp);     // Try to generate constraints from this splitPoint
                     }
                 }
@@ -558,7 +558,7 @@ namespace Sla.DECCORE
                     Varnode* constVn = op.getIn(1);
                     if (!constVn.isConstant())
                         return false;
-                    value = (value + constVn.getOffset()) & calc_mask(constVn.getSize());
+                    value = (value + constVn.getOffset()) & Globals.calc_mask(constVn.getSize());
                     vn = op.getIn(0);
                 }
                 else
@@ -594,10 +594,10 @@ namespace Sla.DECCORE
             }
             int typeCode;
             ulong value;
-            Varnode* vn;
-            Varnode* inVn0 = compOp.getIn(0);
-            Varnode* inVn1 = compOp.getIn(1);
-            CircleRange lift(true);
+            Varnode vn;
+            Varnode inVn0 = compOp.getIn(0);
+            Varnode inVn1 = compOp.getIn(1);
+            CircleRange lift = new CircleRange(true);
             if (checkRelativeConstant(inVn0, typeCode, value))
             {
                 vn = inVn1;
@@ -648,20 +648,20 @@ namespace Sla.DECCORE
         {
             List<Varnode*> worklist;
             int workPos = 0;
-            if (stackReg != (Varnode*)0)
+            if (stackReg != (Varnode)null)
             {
                 newValueSet(stackReg, 1);       // Establish stack pointer as special
                 stackReg.setMark();
-                worklist.push_back(stackReg);
+                worklist.Add(stackReg);
                 workPos += 1;
-                rootNodes.push_back(stackReg.getValueSet());
+                rootNodes.Add(stackReg.getValueSet());
             }
             for (int i = 0; i < sinks.size(); ++i)
             {
                 Varnode* vn = sinks[i];
                 newValueSet(vn, 0);
                 vn.setMark();
-                worklist.push_back(vn);
+                worklist.Add(vn);
             }
             while (workPos < worklist.size())
             {
@@ -675,10 +675,10 @@ namespace Sla.DECCORE
                         // get picked up during iteration by the other input, except in the case of a
                         // a PTRSUB from a spacebase constant.
                         if (vn.isSpacebase() || vn.loneDescend().numInput() == 1)
-                            rootNodes.push_back(vn.getValueSet());
+                            rootNodes.Add(vn.getValueSet());
                     }
                     else
-                        rootNodes.push_back(vn.getValueSet());
+                        rootNodes.Add(vn.getValueSet());
                     continue;
                 }
                 PcodeOp* op = vn.getDef();
@@ -692,13 +692,13 @@ namespace Sla.DECCORE
                             {
                                 newValueSet(inVn, 0);
                                 inVn.setMark();
-                                worklist.push_back(inVn);
+                                worklist.Add(inVn);
                             }
                         }
                         else
                         {
                             vn.getValueSet().setFull();
-                            rootNodes.push_back(vn.getValueSet());
+                            rootNodes.Add(vn.getValueSet());
                         }
                         break;
                     case CPUI_CALL:
@@ -722,7 +722,7 @@ namespace Sla.DECCORE
                     case CPUI_FLOAT_FLOOR:
                     case CPUI_FLOAT_ROUND:
                         vn.getValueSet().setFull();
-                        rootNodes.push_back(vn.getValueSet());
+                        rootNodes.Add(vn.getValueSet());
                         break;
                     default:
                         for (int i = 0; i < op.numInput(); ++i)
@@ -731,7 +731,7 @@ namespace Sla.DECCORE
                             if (inVn.isMark() || inVn.isAnnotation()) continue;
                             newValueSet(inVn, 0);
                             inVn.setMark();
-                            worklist.push_back(inVn);
+                            worklist.Add(inVn);
                         }
                         break;
                 }
@@ -784,7 +784,7 @@ namespace Sla.DECCORE
                 if (numIterations > maxIterations) break;   // Quit if max iterations exceeded
                 if (curSet.partHead != (Partition*)0 && curSet.partHead != curComponent)
                 {
-                    componentStack.push_back(curSet.partHead);
+                    componentStack.Add(curSet.partHead);
                     curComponent = curSet.partHead;
                     curComponent.isDirty = false;
                     // Reset component counter upon entry

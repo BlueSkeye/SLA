@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using static System.Net.WebRequestMethods;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ghidra
+namespace Sla
 {
     public static partial class Globals
     {
@@ -43,7 +43,7 @@ namespace ghidra
 
         /// \param size is the desired size in bytes
         /// \return a value appropriate for masking off the first \e size bytes
-        public static ulong calc_mask(uint size)
+        public static ulong Globals.calc_mask(uint size)
         {
             return uintbmasks[(8 > size) ? size : 8];
         }
@@ -136,7 +136,7 @@ namespace ghidra
         public static ulong uintb_negate(ulong @in, int size)
         {
             // Invert bits
-            return ((~@in) & calc_mask((uint)size));
+            return ((~@in) & Globals.calc_mask((uint)size));
         }
 
         /// Take the first \b sizein bytes of the given \b in and sign-extend
@@ -151,12 +151,12 @@ namespace ghidra
             ulong mask;
 
             signbit = sizein * 8 - 1;
-            @in &= calc_mask((uint)sizein);
+            @in &= Globals.calc_mask((uint)sizein);
             if (sizein >= sizeout) {
                 return @in;
             }
             if ((@in >> signbit) != 0) {
-                mask = calc_mask((uint)sizeout);
+                mask = Globals.calc_mask((uint)sizeout);
                 // Split shift into two pieces
                 ulong tmp = mask << signbit;
                 // In case, everything is shifted out
@@ -617,7 +617,7 @@ namespace ghidra
         }
 
         //extern bool signbit_negative(ulong val, int size); ///< Return true if the sign-bit is set
-        //extern ulong calc_mask(int size);          ///< Calculate a mask for a given byte size
+        //extern ulong Globals.calc_mask(int size);          ///< Calculate a mask for a given byte size
         //extern ulong uintb_negate(ulong in, int size);     ///< Negate the \e sized value
         //extern ulong sign_extend(ulong in, int sizein, int sizeout);  ///< Sign-extend a value between two byte sizes
 
@@ -681,7 +681,7 @@ namespace ghidra
             if (vn1.isWritten())
                 if (vn1.getDef().code() == CPUI_SUBPIECE)
                     return vn1.getDef().getIn(0);
-            return (Varnode*)0;
+            return (Varnode)null;
         }
 
         internal static int run_xml(string filein, SleighCompile compiler)

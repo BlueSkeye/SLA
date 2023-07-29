@@ -27,12 +27,12 @@ namespace Sla.DECCORE
         public bool applyRule(SplitVarnode i, PcodeOp op, bool workishi, Funcdata data)
         {
             if (!workishi) return false;
-            if (i.getHi() == (Varnode*)0) return false; // We don't necessarily need the lo part
+            if (i.getHi() == (Varnode)null) return false; // We don't necessarily need the lo part
             @in = i;
-            vn = @in.getHi();
+            vn = @@in.getHi();
             inslot = op.getSlot(vn);
             cvn = op.getIn(1 - inslot);
-            int losize = @in.getSize() - vn.getSize();
+            int losize = @@in.getSize() - vn.getSize();
 
             if (!cvn.isConstant()) return false;
 
@@ -41,14 +41,14 @@ namespace Sla.DECCORE
 
             ulong val = cvn.getOffset() << 8 * losize;
             if (hilessequalform != (inslot == 1))
-                val |= calc_mask(losize);
+                val |= Globals.calc_mask(losize);
 
             // This rule can apply and mess up less,equal rules, so we only apply it if it directly affects a branch
             PcodeOp* desc = op.getOut().loneDescend();
-            if (desc == (PcodeOp*)0) return false;
+            if (desc == (PcodeOp)null) return false;
             if (desc.code() != CPUI_CBRANCH) return false;
 
-            constin.initPartial(in.getSize(), val);
+            constin.initPartial(@in.getSize(), val);
 
             if (inslot == 0)
             {

@@ -257,7 +257,7 @@ namespace Sla.DECCORE
         /// \param stp is the desired step (1,2,4,8,..)
         public CircleRange(ulong lft, ulong rgt, int size, int stp)
         {
-            mask = calc_mask(size);
+            mask = Globals.calc_mask(size);
             step = stp;
             left = lft;
             right = rgt;
@@ -283,7 +283,7 @@ namespace Sla.DECCORE
         /// \param size is the size of the mask in bytes
         public CircleRange(ulong val, int size)
         {
-            mask = calc_mask(size);
+            mask = Globals.calc_mask(size);
             step = 1;
             left = val;
             right = (left + 1) & mask;
@@ -297,7 +297,7 @@ namespace Sla.DECCORE
         /// \param stp is the step/stride of the range
         public void setRange(ulong lft, ulong rgt, int size, int step)
         {
-            mask = calc_mask(size);
+            mask = Globals.calc_mask(size);
             left = lft;
             right = rgt;
             step = stp;
@@ -311,7 +311,7 @@ namespace Sla.DECCORE
         /// \param size is the size of the mask in bytes
         public void setRange(ulong val, int size)
         {
-            mask = calc_mask(size);
+            mask = Globals.calc_mask(size);
             step = 1;
             left = val;
             right = (left + 1) & mask;
@@ -323,7 +323,7 @@ namespace Sla.DECCORE
         /// \param size is the size (in bytes) of the range
         public void setFull(int size)
         {
-            mask = calc_mask(size);
+            mask = Globals.calc_mask(size);
             step = 1;
             left = 0;
             right = 0;
@@ -632,7 +632,7 @@ namespace Sla.DECCORE
             isempty = false;
             if (trans == 0)
             {
-                mask = calc_mask(size);
+                mask = Globals.calc_mask(size);
                 if (hasstep)
                 {       // All zeros
                     step = 1;
@@ -650,7 +650,7 @@ namespace Sla.DECCORE
             int shift = leastsigbit_set(nzmask);
             step = 1;
             step <<= shift;
-            mask = calc_mask(size);
+            mask = Globals.calc_mask(size);
             left = 0;
             right = (nzmask + step) & mask;
             return true;
@@ -918,7 +918,7 @@ namespace Sla.DECCORE
                     break;
                 case CPUI_INT_ZEXT:
                     {
-                        val = calc_mask(inSize); // (smaller) input mask
+                        val = Globals.calc_mask(inSize); // (smaller) input mask
                         ulong rem = left % step;
                         CircleRange zextrange;
                         zextrange.left = rem;
@@ -935,7 +935,7 @@ namespace Sla.DECCORE
                     }
                 case CPUI_INT_SEXT:
                     {
-                        val = calc_mask(inSize); // (smaller) input mask
+                        val = Globals.calc_mask(inSize); // (smaller) input mask
                         ulong rem = left & step;
                         CircleRange sextrange;
                         sextrange.left = val ^ (val >> 1); // High order bit for (small) input space
@@ -984,7 +984,7 @@ namespace Sla.DECCORE
             {
                 case CPUI_INT_EQUAL:
                     bothTrueFalse = convertToBoolean();
-                    mask = calc_mask(inSize);
+                    mask = Globals.calc_mask(inSize);
                     if (bothTrueFalse)
                         break;  // All possible outs => all possible ins
                     yescomplement = (left == 0);
@@ -995,7 +995,7 @@ namespace Sla.DECCORE
                     break;
                 case CPUI_INT_NOTEQUAL:
                     bothTrueFalse = convertToBoolean();
-                    mask = calc_mask(inSize);
+                    mask = Globals.calc_mask(inSize);
                     if (bothTrueFalse) break;   // All possible outs => all possible ins
                     yescomplement = (left == 0);
                     left = (val + 1) & mask;
@@ -1005,7 +1005,7 @@ namespace Sla.DECCORE
                     break;
                 case CPUI_INT_LESS:
                     bothTrueFalse = convertToBoolean();
-                    mask = calc_mask(inSize);
+                    mask = Globals.calc_mask(inSize);
                     if (bothTrueFalse) break;   // All possible outs => all possible ins
                     yescomplement = (left == 0);
                     if (slot == 0)
@@ -1033,7 +1033,7 @@ namespace Sla.DECCORE
                     break;
                 case CPUI_INT_LESSEQUAL:
                     bothTrueFalse = convertToBoolean();
-                    mask = calc_mask(inSize);
+                    mask = Globals.calc_mask(inSize);
                     if (bothTrueFalse) break;   // All possible outs => all possible ins
                     yescomplement = (left == 0);
                     if (slot == 0)
@@ -1051,7 +1051,7 @@ namespace Sla.DECCORE
                     break;
                 case CPUI_INT_SLESS:
                     bothTrueFalse = convertToBoolean();
-                    mask = calc_mask(inSize);
+                    mask = Globals.calc_mask(inSize);
                     if (bothTrueFalse) break;   // All possible outs => all possible ins
                     yescomplement = (left == 0);
                     if (slot == 0)
@@ -1079,7 +1079,7 @@ namespace Sla.DECCORE
                     break;
                 case CPUI_INT_SLESSEQUAL:
                     bothTrueFalse = convertToBoolean();
-                    mask = calc_mask(inSize);
+                    mask = Globals.calc_mask(inSize);
                     if (bothTrueFalse) break;   // All possible outs => all possible ins
                     yescomplement = (left == 0);
                     if (slot == 0)
@@ -1097,7 +1097,7 @@ namespace Sla.DECCORE
                     break;
                 case CPUI_INT_CARRY:
                     bothTrueFalse = convertToBoolean();
-                    mask = calc_mask(inSize);
+                    mask = Globals.calc_mask(inSize);
                     if (bothTrueFalse) break;   // All possible outs => all possible ins
                     yescomplement = (left == 0);
                     if (val == 0)
@@ -1158,7 +1158,7 @@ namespace Sla.DECCORE
                     {
                         if (step == 1)
                         {
-                            ulong rightb = calc_mask(inSize);
+                            ulong rightb = Globals.calc_mask(inSize);
                             ulong leftb = rightb >> (val + 1);
                             rightb = leftb ^ rightb; // Smallest negative possible
                             leftb += 1;     // Biggest positive (+1) possible
@@ -1216,9 +1216,9 @@ namespace Sla.DECCORE
             if (op.numInput() == 1)
             {
                 res = op.getIn(0);
-                if (res.isConstant()) return (Varnode*)0;
+                if (res.isConstant()) return (Varnode)null;
                 if (!pullBackUnary(op.code(), res.getSize(), op.getOut().getSize()))
-                    return (Varnode*)0;
+                    return (Varnode)null;
             }
             else if (op.numInput() == 2)
             {
@@ -1235,10 +1235,10 @@ namespace Sla.DECCORE
                     constvn = res;
                     res = op.getIn(slot);
                     if (res.isConstant())
-                        return (Varnode*)0;
+                        return (Varnode)null;
                 }
                 else if (!constvn.isConstant())
-                    return (Varnode*)0;
+                    return (Varnode)null;
                 val = constvn.getOffset();
                 OpCode opc = op.code();
                 if (!pullBackBinary(opc, val, slot, res.getSize(), op.getOut().getSize()))
@@ -1249,23 +1249,23 @@ namespace Sla.DECCORE
                         int msbset = mostsigbit_set(res.getNZMask());
                         msbset = (msbset + 8) / 8;
                         if (op.getOut().getSize() < msbset) // Some bytes we are chopping off might not be zero
-                            return (Varnode*)0;
+                            return (Varnode)null;
                         else
                         {
-                            mask = calc_mask(res.getSize()); // Keep the range but make the mask bigger
+                            mask = Globals.calc_mask(res.getSize()); // Keep the range but make the mask bigger
                                                               // If the range wraps (left>right) then, increasing the mask adds all the new space into
                                                               // the range, and it would be an inaccurate pullback by itself, but with the nzmask intersection
                                                               // all the new space will get intersected away again.
                         }
                     }
                     else
-                        return (Varnode*)0;
+                        return (Varnode)null;
                 }
                 if (constvn.getSymbolEntry() != (SymbolEntry*)0)
                     *constMarkup = constvn;
             }
             else    // Neither unary or binary
-                return (Varnode*)0;
+                return (Varnode)null;
 
             if (usenzmask)
             {
@@ -1303,7 +1303,7 @@ namespace Sla.DECCORE
                 case CPUI_INT_ZEXT:
                     isempty = false;
                     step = in1.step;
-                    mask = calc_mask(outSize);
+                    mask = Globals.calc_mask(outSize);
                     if (in1.left == in1.right)
                     {
                         left = in1.left % step;
@@ -1321,11 +1321,11 @@ namespace Sla.DECCORE
                 case CPUI_INT_SEXT:
                     isempty = false;
                     step = in1.step;
-                    mask = calc_mask(outSize);
+                    mask = Globals.calc_mask(outSize);
                     if (in1.left == in1.right)
                     {
                         ulong rem = in1.left % step;
-                        right = calc_mask(inSize) >> 1;
+                        right = Globals.calc_mask(inSize) >> 1;
                         left = (calc_mask(outSize) ^ right) + rem;
                         right = right + 1 + rem;
                     }
@@ -1498,7 +1498,7 @@ namespace Sla.DECCORE
                         if (!in2.isSingle()) return false;
                         isempty = false;
                         int sa = (int)in2.left * 8;
-                        mask = calc_mask(outSize);
+                        mask = Globals.calc_mask(outSize);
                         step = (sa == 0) ? in1.step : 1;
 
                         left = (in1.left >> sa) & mask;
@@ -1520,7 +1520,7 @@ namespace Sla.DECCORE
                         if (!in2.isSingle()) return false;
                         isempty = false;
                         int sa = (int)in2.left;
-                        mask = calc_mask(outSize);
+                        mask = Globals.calc_mask(outSize);
                         step = 1;           // Lose any step
                         if (in1.left < in1.right)
                         {
@@ -1541,7 +1541,7 @@ namespace Sla.DECCORE
                         if (!in2.isSingle()) return false;
                         isempty = false;
                         int sa = (int)in2.left;
-                        mask = calc_mask(outSize);
+                        mask = Globals.calc_mask(outSize);
                         step = 1;           // Lose any step
                         long valLeft = in1.left;
                         long valRight = in1.right;

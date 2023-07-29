@@ -44,7 +44,7 @@ namespace Sla.SLEIGH
                 }
             } while (advance_combo(cur, min, max));
             if (count == 0)
-                throw SleighError("Less than constraint is impossible to match");
+                throw new SleighError("Less than constraint is impossible to match");
         }
     }
 }

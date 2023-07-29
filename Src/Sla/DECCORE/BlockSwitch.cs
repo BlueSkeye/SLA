@@ -191,7 +191,7 @@ namespace Sla.DECCORE
             // Make sure to still recurse
             // We need to order the cases based on the label
             // First populate the label and depth fields of the CaseOrder objects
-            base.finalizePrinting(data);
+            @base.finalizePrinting(data);
             for (int i = 0; i < caseblocks.Count; ++i) {
                 // Construct the depth parameter, to sort fall-thru cases
                 CaseOrder curcase = caseblocks[i];

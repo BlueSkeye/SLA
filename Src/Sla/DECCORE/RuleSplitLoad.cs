@@ -30,13 +30,13 @@ namespace Sla.DECCORE
         /// rewrite the LOAD operator as multiple LOADs.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_LOAD);
+            oplist.Add(CPUI_LOAD);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
             Datatype* inType = SplitDatatype::getValueDatatype(op, op.getOut().getSize(), data.getArch().types);
-            if (inType == (Datatype*)0)
+            if (inType == (Datatype)null)
                 return 0;
             type_metatype metain = inType.getMetatype();
             if (metain != TYPE_STRUCT && metain != TYPE_ARRAY && metain != TYPE_PARTIALSTRUCT)

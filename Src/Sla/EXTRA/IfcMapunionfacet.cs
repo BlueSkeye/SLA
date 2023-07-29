@@ -25,15 +25,15 @@ namespace Sla.EXTRA
             int size;
             ulong hash;
 
-            if (dcp.fd == (Funcdata*)0)
-                throw IfaceExecutionError("No function loaded");
+            if (dcp.fd == (Funcdata)null)
+                throw new IfaceExecutionError("No function loaded");
             s >> ws >> unionName;
             ct = dcp.conf.types.findByName(unionName);
-            if (ct == (Datatype*)0 || ct.getMetatype() != TYPE_UNION)
-                throw IfaceParseError("Bad union data-type: " + unionName);
+            if (ct == (Datatype)null || ct.getMetatype() != TYPE_UNION)
+                throw new IfaceParseError("Bad union data-type: " + unionName);
             s >> ws >> dec >> fieldNum;
             if (fieldNum < -1 || fieldNum >= ct.numDepend())
-                throw IfaceParseError("Bad field index");
+                throw new IfaceParseError("Bad field index");
             Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read pc address of hash
 
             s >> hex >> hash;       // Parse the hash value

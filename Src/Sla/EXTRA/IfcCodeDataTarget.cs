@@ -16,7 +16,7 @@ namespace Sla.EXTRA
 
             s >> ws;
             if (s.eof())
-                throw IfaceParseError("Missing system call name");
+                throw new IfaceParseError("Missing system call name");
 
             s >> token;
             List<ImportRecord> irec;

@@ -31,7 +31,7 @@ namespace Sla.DECCORE
             size = 0;
             for (iter = fd.begin(); iter != fd.end(); ++iter)
             {
-                field.push_back(*iter);
+                field.Add(*iter);
                 int end = field.back().type.getSize();
                 if (end > size)
                     size = end;
@@ -88,7 +88,7 @@ namespace Sla.DECCORE
             // No new scoring is done, but if a cached result is available, return it.
             Funcdata fd = op.getParent().getFuncdata();
             ResolvedUnion res = fd.getUnionField(this, op, slot);
-            if (res != (ResolvedUnion*)0 && res.getFieldNum() >= 0)
+            if (res != (ResolvedUnion)null && res.getFieldNum() >= 0)
             {
                 TypeField field = getField(res.getFieldNum());
                 newoff = offset - field.offset;
@@ -178,7 +178,7 @@ namespace Sla.DECCORE
 
         public override void encode(Encoder encoder)
         {
-            if (typedefImm != (Datatype*)0)
+            if (typedefImm != (Datatype)null)
             {
                 encodeTypedef(encoder);
                 return;
@@ -195,11 +195,11 @@ namespace Sla.DECCORE
 
         public override Datatype resolveInFlow(PcodeOp op, int slot)
         {
-            Funcdata* fd = op.getParent().getFuncdata();
-            ResolvedUnion* res = fd.getUnionField(this, op, slot);
-            if (res != (ResolvedUnion*)0)
+            Funcdata fd = op.getParent().getFuncdata();
+            ResolvedUnion res = fd.getUnionField(this, op, slot);
+            if (res != (ResolvedUnion)null)
                 return res.getDatatype();
-            ScoreUnionFields scoreFields(*fd.getArch().types,this,op,slot);
+            ScoreUnionFields scoreFields = new ScoreUnionFields(*fd.getArch().types,this,op,slot);
             fd.setUnionField(this, op, slot, scoreFields.getResult());
             return scoreFields.getResult().getDatatype();
         }
@@ -208,7 +208,7 @@ namespace Sla.DECCORE
         {
             Funcdata fd = op.getParent().getFuncdata();
             ResolvedUnion res = fd.getUnionField(this, op, slot);
-            if (res != (ResolvedUnion*)0)
+            if (res != (ResolvedUnion)null)
                 return res.getDatatype();
             return this;
         }
@@ -242,7 +242,7 @@ namespace Sla.DECCORE
         {
             Funcdata* fd = op.getParent().getFuncdata();
             ResolvedUnion res = fd.getUnionField(this, op, slot);
-            if (res != (ResolvedUnion*)0)
+            if (res != (ResolvedUnion)null)
             {
                 if (res.getFieldNum() >= 0)
                 {
@@ -253,7 +253,7 @@ namespace Sla.DECCORE
             }
             else if (op.code() == CPUI_SUBPIECE && slot == 1)
             {   // The slot is artificial in this case
-                ScoreUnionFields scoreFields(*fd.getArch().types,this,offset,op);
+                ScoreUnionFields scoreFields = new ScoreUnionFields(*fd.getArch().types,this,offset,op);
                 fd.setUnionField(this, op, slot, scoreFields.getResult());
                 if (scoreFields.getResult().getFieldNum() >= 0)
                 {
@@ -263,7 +263,7 @@ namespace Sla.DECCORE
             }
             else
             {
-                ScoreUnionFields scoreFields(*fd.getArch().types,this,offset,op,slot);
+                ScoreUnionFields scoreFields = new ScoreUnionFields(*fd.getArch().types,this,offset,op,slot);
                 fd.setUnionField(this, op, slot, scoreFields.getResult());
                 if (scoreFields.getResult().getFieldNum() >= 0)
                 {

@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// is also not set in V   i.e. NZM(V) | c == c
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_OR);
+            oplist.Add(CPUI_INT_OR);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

@@ -58,7 +58,7 @@ namespace Sla.DECCORE
             if (!check.second)      // This symbol is already mapped
                 throw new LowlevelError("Duplicate <callfixup>: " + fixupName);
             while (callFixupNames.size() <= injectid)
-                callFixupNames.push_back("");
+                callFixupNames.Add("");
             callFixupNames[injectid] = fixupName;
         }
 
@@ -73,7 +73,7 @@ namespace Sla.DECCORE
             if (!check.second)      // This symbol is already mapped
                 throw new LowlevelError("Duplicate <callotherfixup>: " + fixupName);
             while (callOtherTarget.size() <= injectid)
-                callOtherTarget.push_back("");
+                callOtherTarget.Add("");
             callOtherTarget[injectid] = fixupName;
         }
 
@@ -88,7 +88,7 @@ namespace Sla.DECCORE
             if (!check.second)      // This symbol is already mapped
                 throw new LowlevelError("Duplicate <callmechanism>: " + fixupName);
             while (callMechTarget.size() <= injectid)
-                callMechTarget.push_back("");
+                callMechTarget.Add("");
             callMechTarget[injectid] = fixupName;
         }
 
@@ -103,7 +103,7 @@ namespace Sla.DECCORE
             if (!check.second)      // This symbol is already mapped
                 throw new LowlevelError("Duplicate <script>: " + scriptName);
             while (scriptNames.size() <= injectid)
-                scriptNames.push_back("");
+                scriptNames.Add("");
             scriptNames[injectid] = scriptName;
         }
 

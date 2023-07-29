@@ -50,12 +50,12 @@ namespace Sla.DECCORE
                 PcodeOp* op = block.getStop();
                 ustart = CoverBlock::getUIndex(block.getStart());
                 ustop = CoverBlock::getUIndex(op);
-                if ((ustop != ~((uint)0)) && (ustop >= ustart))
+                if ((ustop != uint.MaxValue) && (ustop >= ustart))
                     block.setEnd((PcodeOp*)1); // Fill in to the bottom
 
 
-                if ((ustop == (uint)0) && (block.getStart() == (PcodeOp*)0)) {
-                    if ((op != (PcodeOp*)0)&& (op.code() == CPUI_MULTIEQUAL)) {
+                if ((ustop == (uint)0) && (block.getStart() == (PcodeOp)null)) {
+                    if ((op != (PcodeOp)null)&& (op.code() == CPUI_MULTIEQUAL)) {
                         // This block contains only an infinitesimal tip
                         // of cover through one branch of a MULTIEQUAL
                         // we still need to traverse through branches
@@ -215,7 +215,7 @@ namespace Sla.DECCORE
                 {
                     val = (*iter).second.intersect((*iter2).second);
                     if (val >= level)
-                        listout.push_back((*iter).first);
+                        listout.Add((*iter).first);
                     ++iter;
                     ++iter2;
                 }
@@ -360,8 +360,8 @@ namespace Sla.DECCORE
                     ustop = CoverBlock::getUIndex(block.getStop());
                     if (ustop >= CoverBlock::getUIndex(startop))
                     {
-                        if ((op != (PcodeOp*)0)&& (op != (PcodeOp*)2)&&
-                            (op.code() == CPUI_MULTIEQUAL) && (startop == (PcodeOp*)0)) {
+                        if ((op != (PcodeOp)null)&& (op != (PcodeOp*)2)&&
+                            (op.code() == CPUI_MULTIEQUAL) && (startop == (PcodeOp)null)) {
                             // This block contains only an infinitesimal tip
                             // of cover through one branch of a MULTIEQUAL
                             // we still need to traverse through branches

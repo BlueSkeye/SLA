@@ -30,13 +30,13 @@ namespace Sla.DECCORE
         /// rewrite the STORE operator as multiple STOREs.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_STORE);
+            oplist.Add(CPUI_STORE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
             Datatype* outType = SplitDatatype::getValueDatatype(op, op.getIn(2).getSize(), data.getArch().types);
-            if (outType == (Datatype*)0)
+            if (outType == (Datatype)null)
                 return 0;
             type_metatype metain = outType.getMetatype();
             if (metain != TYPE_STRUCT && metain != TYPE_ARRAY && metain != TYPE_PARTIALSTRUCT)

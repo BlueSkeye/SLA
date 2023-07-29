@@ -262,7 +262,7 @@ namespace Sla.DECCORE
             submeta = base2sub[m];
             flags = 0;
             id = 0;
-            typedefImm = (Datatype*)0;
+            typedefImm = (Datatype)null;
         }
     
         ~Datatype()
@@ -401,7 +401,7 @@ namespace Sla.DECCORE
         public virtual Datatype getSubType(ulong off, ulong newoff)
         {               // There is no subtype
             *newoff = off;
-            return (Datatype*)0;
+            return (Datatype)null;
         }
 
         /// Find the first component data-type after the given offset that is (or contains)

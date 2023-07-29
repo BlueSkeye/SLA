@@ -19,8 +19,8 @@ namespace Sla.EXTRA
         /// \e address of the p-code op using the constant plus a dynamic \e hash is also given.
         public override void execute(TextReader s)
         {
-            if (dcp.fd == (Funcdata*)0)
-                throw IfaceExecutionError("No function loaded");
+            if (dcp.fd == (Funcdata)null)
+                throw new IfaceExecutionError("No function loaded");
             string name;
             ulong value;
             ulong hash;
@@ -39,7 +39,7 @@ namespace Sla.EXTRA
             else if (name == "char")
                 format = Symbol::force_char;
             else
-                throw IfaceParseError("Bad convert format");
+                throw new IfaceParseError("Bad convert format");
 
             s >> ws >> hex >> value;
             Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read pc address of hash

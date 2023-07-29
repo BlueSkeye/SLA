@@ -21,7 +21,7 @@ namespace Sla.EXTRA
 
             s >> ws >> name;
             if (name.size() == 0)
-                throw IfaceParseError("Need file name to write to");
+                throw new IfaceParseError("Need file name to write to");
 
             ofstream os;
             os.open(name.c_str());

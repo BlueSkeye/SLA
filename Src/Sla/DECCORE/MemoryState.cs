@@ -49,7 +49,7 @@ namespace Sla.DECCORE
             int index = spc.getIndex();
 
             while (index >= memspace.size())
-                memspace.push_back((MemoryBank*)0);
+                memspace.Add((MemoryBank*)0);
 
             memspace[index] = bank;
         }

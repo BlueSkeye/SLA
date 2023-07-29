@@ -29,8 +29,8 @@ namespace Sla.DECCORE
         /// - `( V & 0xf000 ) s>> 24  =>   V s>> 24`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.push_back(CPUI_INT_RIGHT);
-            oplist.push_back(CPUI_INT_SRIGHT);
+            oplist.Add(CPUI_INT_RIGHT);
+            oplist.Add(CPUI_INT_SRIGHT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -47,7 +47,7 @@ namespace Sla.DECCORE
             int sa = (int)constVn.getOffset();
             ulong mask = maskVn.getOffset() >> sa;
             Varnode* rootVn = andOp.getIn(0);
-            ulong full = calc_mask(rootVn.getSize()) >> sa;
+            ulong full = Globals.calc_mask(rootVn.getSize()) >> sa;
             if (full != mask) return 0;
             if (rootVn.isFree()) return 0;
             data.opSetInput(op, rootVn, 0); // Bypass the INT_AND

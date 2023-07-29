@@ -38,7 +38,7 @@ namespace Sla.EXTRA
                 // fallthru
                 case CPUI_BRANCH:
                 case CPUI_CBRANCH:
-                    jumpaddr.push_back(Address(vars[0].space, vars[0].offset));
+                    jumpaddr.Add(Address(vars[0].space, vars[0].offset));
                     break;
                 case CPUI_COPY:
                 case CPUI_BRANCHIND:
@@ -72,13 +72,13 @@ namespace Sla.EXTRA
             {
                 res.length = trans.oneInstruction(*this, addr);
             }
-            catch (BadDataError &err) {
+            catch (BadDataError err) {
                 res.success = false;
                 return;
-            } catch (DataUnavailError &err) {
+            } catch (DataUnavailError err) {
                 res.success = false;
                 return;
-            } catch (UnimplError &err) {
+            } catch (UnimplError err) {
                 res.length = err.instruction_length;
             }
             res.success = true;

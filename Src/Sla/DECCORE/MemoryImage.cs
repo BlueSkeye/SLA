@@ -28,23 +28,25 @@ namespace Sla.DECCORE
         /// \param addr is the address of the word to fetch
         /// \return the fetched value
         protected override ulong find(ulong addr)
-        { // Assume that -addr- is word aligned
+        {
+            // Assume that -addr- is word aligned
             ulong res = 0;      // Make sure all bytes start as 0, as load may not fill all bytes
-            AddrSpace* spc = getSpace();
+            AddrSpace spc = getSpace();
             try
             {
                 byte* ptr = (byte*)&res;
                 ptr += (HOST_ENDIAN == 1) ? (sizeof(ulong) - getWordSize()) : 0;
                 loader.loadFill(ptr, getWordSize(), Address(spc, addr));
             }
-            catch (DataUnavailError &err) {
+            catch (DataUnavailError err)
+            {
                 // Pages not mapped in the load image, are assumed to be zero
                 res = 0;
             }
             if ((HOST_ENDIAN == 1) != spc.isBigEndian())
                 res = byte_swap(res, getWordSize());
             return res;
-            }
+        }
 
         /// Overridded getPage method
         /// Retrieve an aligned page from the bank.  First an attempt is made to retrieve the

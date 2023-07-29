@@ -571,7 +571,7 @@ namespace Sla.DECCORE
             bool sawretaddr = false;
             stackgrowsnegative = true;  // Default growth direction
             AddrSpace* stackspc = glb.getStackSpace();
-            if (stackspc != (AddrSpace*)0)
+            if (stackspc != (AddrSpace)null)
                 stackgrowsnegative = stackspc.stackGrowsNegative();    // Get growth boolean from stack space itself
             string strategystring;
             localrange.clear();
@@ -627,7 +627,7 @@ namespace Sla.DECCORE
                 if (subId == ELEM_INPUT)
                 {
                     input.decode(decoder, effectlist, stackgrowsnegative);
-                    if (stackspc != (AddrSpace*)0)
+                    if (stackspc != (AddrSpace)null)
                     {
                         input.getRangeList(stackspc, paramrange);
                         if (!paramrange.empty())
@@ -717,10 +717,10 @@ namespace Sla.DECCORE
                     throw new LowlevelError("Unknown element in prototype");
             }
             decoder.closeElement(elemId);
-            if ((!sawretaddr) && (glb.defaultReturnAddr.space != (AddrSpace*)0))
+            if ((!sawretaddr) && (glb.defaultReturnAddr.space != (AddrSpace)null))
             {
                 // Provide the default return address, if there isn't a specific one for the model
-                effectlist.push_back(EffectRecord(glb.defaultReturnAddr, EffectRecord::return_address));
+                effectlist.Add(EffectRecord(glb.defaultReturnAddr, EffectRecord::return_address));
             }
             sort(effectlist.begin(), effectlist.end(), EffectRecord::compareByAddress);
             sort(likelytrash.begin(), likelytrash.end());
