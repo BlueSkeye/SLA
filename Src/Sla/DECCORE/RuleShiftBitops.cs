@@ -47,21 +47,21 @@ namespace Sla.DECCORE
 
             switch (op.code())
             {
-                case CPUI_INT_LEFT:
+                case OpCode.CPUI_INT_LEFT:
                     sa = (int)constvn.getOffset();
                     leftshift = true;
                     break;
-                case CPUI_INT_RIGHT:
+                case OpCode.CPUI_INT_RIGHT:
                     sa = (int)constvn.getOffset();
                     leftshift = false;
                     break;
-                case CPUI_SUBPIECE:
+                case OpCode.CPUI_SUBPIECE:
                     sa = (int)constvn.getOffset();
                     sa = sa * 8;
                     leftshift = false;
                     break;
-                case CPUI_INT_MULT:
-                    sa = leastsigbit_set(constvn.getOffset());
+                case OpCode.CPUI_INT_MULT:
+                    sa = Globals.leastsigbit_set(constvn.getOffset());
                     if (sa == -1) return 0;
                     leftshift = true;
                     break;
@@ -72,12 +72,12 @@ namespace Sla.DECCORE
             PcodeOp* bitop = vn.getDef();
             switch (bitop.code())
             {
-                case CPUI_INT_AND:
-                case CPUI_INT_OR:
-                case CPUI_INT_XOR:
+                case OpCode.CPUI_INT_AND:
+                case OpCode.CPUI_INT_OR:
+                case OpCode.CPUI_INT_XOR:
                     break;
-                case CPUI_INT_MULT:
-                case CPUI_INT_ADD:
+                case OpCode.CPUI_INT_MULT:
+                case OpCode.CPUI_INT_ADD:
                     if (!leftshift) return 0;
                     break;
                 default:
@@ -90,22 +90,22 @@ namespace Sla.DECCORE
                 ulong nzm = bitop.getIn(i).getNZMask();
                 ulong mask = Globals.calc_mask(op.getOut().getSize());
                 if (leftshift)
-                    nzm = pcode_left(nzm, sa);
+                    nzm = Globals.pcode_left(nzm, sa);
                 else
-                    nzm = pcode_right(nzm, sa);
+                    nzm = Globals.pcode_right(nzm, sa);
                 if ((nzm & mask) == (ulong)0) break;
             }
             if (i == bitop.numInput()) return 0;
             switch (bitop.code())
             {
-                case CPUI_INT_MULT:
-                case CPUI_INT_AND:
+                case OpCode.CPUI_INT_MULT:
+                case OpCode.CPUI_INT_AND:
                     vn = data.newConstant(vn.getSize(), 0);
                     data.opSetInput(op, vn, 0); // Result will be zero
                     break;
-                case CPUI_INT_ADD:
-                case CPUI_INT_XOR:
-                case CPUI_INT_OR:
+                case OpCode.CPUI_INT_ADD:
+                case OpCode.CPUI_INT_XOR:
+                case OpCode.CPUI_INT_OR:
                     vn = bitop.getIn(1 - i);
                     if (!vn.isHeritageKnown()) return 0;
                     data.opSetInput(op, vn, 0);

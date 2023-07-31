@@ -36,7 +36,7 @@ namespace Sla.DECCORE
             if (!constvn.isConstant()) return 0;
             if (constvn.getOffset() != Globals.calc_mask(constvn.getSize())) return 0;
 
-            data.opSetOpcode(op, CPUI_INT_2COMP);
+            data.opSetOpcode(op, OpCode.CPUI_INT_2COMP);
             data.opRemoveInput(op, 1);
             return 1;
         }

@@ -52,8 +52,8 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[newopindex] = UnifyDatatype(UnifyDatatype::op_type);
-            typelist[oldopindex] = UnifyDatatype(UnifyDatatype::op_type);
+            typelist[newopindex] = UnifyDatatype(UnifyDatatype.TypeKind.op_type);
+            typelist[oldopindex] = UnifyDatatype(UnifyDatatype.TypeKind.op_type);
         }
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
@@ -62,7 +62,7 @@ namespace Sla.EXTRA
             s << printstate.getName(newopindex) << " = data.newOp(" << dec << numparams;
             s << ',' << printstate.getName(oldopindex) << ".getAddr());" << endl;
             printstate.printIndent(s);
-            s << "data.opSetOpcode(" << printstate.getName(newopindex) << ",CPUI_" << get_opname(opc) << ");" << endl;
+            s << "data.opSetOpcode(" << printstate.getName(newopindex) << ",CPUI_" << Globals.get_opname(opc) << ");" << endl;
             s << "data.opInsert";
             if (insertafter)
                 s << "After(";

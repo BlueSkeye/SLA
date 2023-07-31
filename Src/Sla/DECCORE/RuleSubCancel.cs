@@ -46,14 +46,14 @@ namespace Sla.DECCORE
             OpCode opc;
 
             @base = op.getIn(0);
-            if (!@@base.isWritten()) return 0;
-            extop = @@base.getDef();
+            if (!@base.isWritten()) return 0;
+            extop = @base.getDef();
             opc = extop.code();
-            if ((opc != CPUI_INT_ZEXT) && (opc != CPUI_INT_SEXT))
+            if ((opc != OpCode.CPUI_INT_ZEXT) && (opc != OpCode.CPUI_INT_SEXT))
                 return 0;
             offset = op.getIn(1).getOffset();
             outsize = op.getOut().getSize();
-            insize = @@base.getSize();
+            insize = @base.getSize();
             farinsize = extop.getIn(0).getSize();
 
             if (offset == 0)
@@ -64,22 +64,22 @@ namespace Sla.DECCORE
                     if (thruvn.isConstant() && (insize > sizeof(ulong)) && (outsize == farinsize))
                     {
                         // If we have a constant that is too big to represent, and the elimination is total
-                        opc = CPUI_COPY;    // go ahead and do elimination
+                        opc = OpCode.CPUI_COPY;    // go ahead and do elimination
                         thruvn = data.newConstant(thruvn.getSize(), thruvn.getOffset()); // with new constant varnode
                     }
                     else
                         return 0; // If original is constant or undefined don't proceed
                 }
                 else if (outsize == farinsize)
-                    opc = CPUI_COPY;        // Total elimination of extension
+                    opc = OpCode.CPUI_COPY;        // Total elimination of extension
                 else if (outsize < farinsize)
-                    opc = CPUI_SUBPIECE;
+                    opc = OpCode.CPUI_SUBPIECE;
             }
             else
             {
-                if ((opc == CPUI_INT_ZEXT) && (farinsize <= offset))
+                if ((opc == OpCode.CPUI_INT_ZEXT) && (farinsize <= offset))
                 { // output contains nothing of original input
-                    opc = CPUI_COPY;        // Nothing but zero coming through
+                    opc = OpCode.CPUI_COPY;        // Nothing but zero coming through
                     thruvn = data.newConstant(outsize, 0);
                 }
                 else            // Missing one case here
@@ -89,7 +89,7 @@ namespace Sla.DECCORE
             data.opSetOpcode(op, opc);  // SUBPIECE <- EXT replaced with one op
             data.opSetInput(op, thruvn, 0);
 
-            if (opc == CPUI_SUBPIECE)
+            if (opc == OpCode.CPUI_SUBPIECE)
                 data.opSetInput(op, data.newConstant(op.getIn(1).getSize(), offset), 1);
             else
                 data.opRemoveInput(op, 1);  // ZEXT, SEXT, or COPY has only 1 input

@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     internal class TypeOpCast : TypeOp
     {
         public TypeOpCast(TypeFactory t)
-            : base(t, CPUI_CAST,"(cast)")
+            : base(t, OpCode.CPUI_CAST,"(cast)")
 
         {
             opflags = PcodeOp::unary | PcodeOp::special | PcodeOp::nocollapse;

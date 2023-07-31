@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     internal class TypeOpIntSrem : TypeOpBinary
     {
         public TypeOpIntSrem(TypeFactory t)
-            : base(t, CPUI_INT_SREM,"%", TYPE_INT, TYPE_INT)
+            : base(t, OpCode.CPUI_INT_SREM,"%", type_metatype.TYPE_INT, type_metatype.TYPE_INT)
         {
             opflags = PcodeOp::binary;
             addlflags = arithmetic_op | inherits_sign | inherits_sign_zero;

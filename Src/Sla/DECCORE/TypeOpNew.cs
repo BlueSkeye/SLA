@@ -12,7 +12,7 @@ namespace Sla.DECCORE
     internal class TypeOpNew : TypeOp
     {
         public TypeOpNew(TypeFactory t)
-            : base(t, CPUI_NEW,"new")
+            : base(t, OpCode.CPUI_NEW,"new")
         {
             opflags = PcodeOp::special | PcodeOp::call | PcodeOp::nocollapse;
             behave = new OpBehavior(CPUI_NEW, false, true);     // Dummy behavior
@@ -30,7 +30,7 @@ namespace Sla.DECCORE
             if ((inslot != 0) || (outslot != -1)) return (Datatype)null;
             Varnode* vn0 = op.getIn(0);
             if (!vn0.isWritten()) return (Datatype)null;     // Don't propagate
-            if (vn0.getDef().code() != CPUI_CPOOLREF) return (Datatype)null;
+            if (vn0.getDef().code() != OpCode.CPUI_CPOOLREF) return (Datatype)null;
             return alttype;     // Propagate cpool result as result of new operator
         }
 

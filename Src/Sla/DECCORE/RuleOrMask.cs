@@ -41,7 +41,7 @@ namespace Sla.DECCORE
             ulong val = constvn.getOffset();
             ulong mask = Globals.calc_mask(size);
             if ((val & mask) != mask) return 0;
-            data.opSetOpcode(op, CPUI_COPY);
+            data.opSetOpcode(op, OpCode.CPUI_COPY);
             data.opSetInput(op, constvn, 0);
             data.opRemoveInput(op, 1);
             return 1;

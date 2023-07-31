@@ -56,7 +56,7 @@ namespace Sla.DECCORE
             if (!addrVn.isWritten()) return false;
             assistOp = addrVn.getDef();
             if (assistOp == (PcodeOp)null) return false;
-            if (assistOp.code() != CPUI_CALLOTHER) return false;
+            if (assistOp.code() != OpCode.CPUI_CALLOTHER) return false;
             if (assistOp.numInput() < 3) return false;
             int index = assistOp.getIn(0).getOffset();
             userop = dynamic_cast<JumpAssistOp*>(fd.getArch().userops.getOp(index));

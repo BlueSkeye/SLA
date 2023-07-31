@@ -11,7 +11,7 @@ namespace Sla.DECCORE
     internal class TypeOpFloatTrunc : TypeOpFunc
     {
         public TypeOpFloatTrunc(TypeFactory t, Translate trans)
-            : base(t, CPUI_FLOAT_TRUNC,"TRUNC", TYPE_INT, TYPE_FLOAT)
+            : base(t, OpCode.CPUI_FLOAT_TRUNC,"TRUNC", type_metatype.TYPE_INT, type_metatype.TYPE_FLOAT)
         {
             opflags = PcodeOp::unary;
             addlflags = floatingpoint_op;

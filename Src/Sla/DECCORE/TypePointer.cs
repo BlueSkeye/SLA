@@ -56,24 +56,24 @@ namespace Sla.DECCORE
         protected void calcSubmeta()
         {
             type_metatype ptrtoMeta = ptrto.getMetatype();
-            if (ptrtoMeta == TYPE_STRUCT)
+            if (ptrtoMeta == type_metatype.TYPE_STRUCT)
             {
                 if (ptrto.numDepend() > 1 || ptrto.isIncomplete())
                     submeta = SUB_PTR_STRUCT;
                 else
                     submeta = SUB_PTR;
             }
-            else if (ptrtoMeta == TYPE_UNION)
+            else if (ptrtoMeta == type_metatype.TYPE_UNION)
             {
                 submeta = SUB_PTR_STRUCT;
             }
-            if (ptrto.needsResolution() && ptrtoMeta != TYPE_PTR)
+            if (ptrto.needsResolution() && ptrtoMeta != type_metatype.TYPE_PTR)
                 flags |= needs_resolution;      // Inherit needs_resolution, but only if not a pointer
         }
 
         /// Internal constructor for use with decode
         protected TypePointer()
-            : base(0, TYPE_PTR)
+            : base(0, type_metatype.TYPE_PTR)
         {
             ptrto = (Datatype)null;
             wordsize = 1;
@@ -91,7 +91,7 @@ namespace Sla.DECCORE
 
         /// Construct from a size, pointed-to type, and wordsize
         public TypePointer(int s, Datatype pt, uint ws)
-            : base(s, TYPE_PTR)
+            : base(s, type_metatype.TYPE_PTR)
         {
             ptrto = pt;
             flags = ptrto.getInheritable();
@@ -102,7 +102,7 @@ namespace Sla.DECCORE
 
         /// Construct from a pointed-to type and an address space attribute
         public TypePointer(Datatype pt, AddrSpace spc)
-            : base(spc.getAddrSize(), TYPE_PTR)
+            : base(spc.getAddrSize(), type_metatype.TYPE_PTR)
         {
             ptrto = pt;
             flags = ptrto.getInheritable();
@@ -222,7 +222,7 @@ namespace Sla.DECCORE
                     if (!allowArrayWrap)
                         return (TypePointer*)0;
                     long signOff = (long)off;
-                    sign_extend(signOff, size * 8 - 1);
+                    Globals.sign_extend(signOff, size * 8 - 1);
                     signOff = signOff % ptrtoSize;
                     if (signOff < 0)
                         signOff = signOff + ptrtoSize;
@@ -233,8 +233,8 @@ namespace Sla.DECCORE
             }
 
             type_metatype meta = ptrto.getMetatype();
-            bool isArray = (meta == TYPE_ARRAY);
-            if (isArray || meta == TYPE_STRUCT)
+            bool isArray = (meta == type_metatype.TYPE_ARRAY);
+            if (isArray || meta == type_metatype.TYPE_STRUCT)
             {
                 par = this;
                 parOff = off;
@@ -250,21 +250,21 @@ namespace Sla.DECCORE
 
         public override bool isPtrsubMatching(ulong off)
         {
-            if (ptrto.getMetatype() == TYPE_SPACEBASE)
+            if (ptrto.getMetatype() == type_metatype.TYPE_SPACEBASE)
             {
                 ulong newoff = AddrSpace::addressToByte(off, wordsize);
                 ptrto.getSubType(newoff, &newoff);
                 if (newoff != 0)
                     return false;
             }
-            else if (ptrto.getMetatype() == TYPE_ARRAY || ptrto.getMetatype() == TYPE_STRUCT)
+            else if (ptrto.getMetatype() == type_metatype.TYPE_ARRAY || ptrto.getMetatype() == type_metatype.TYPE_STRUCT)
             {
                 int sz = off;
                 int typesize = ptrto.getSize();
                 if ((typesize <= AddrSpace::addressToByteInt(sz, wordsize)) && (typesize != 0))
                     return false;
             }
-            else if (ptrto.getMetatype() == TYPE_UNION)
+            else if (ptrto.getMetatype() == type_metatype.TYPE_UNION)
             {
                 // A PTRSUB reaching here cannot be used for a union field resolution
                 // These are created by ActionSetCasts::resolveUnion
@@ -277,7 +277,7 @@ namespace Sla.DECCORE
 
         public override Datatype resolveInFlow(PcodeOp op, int slot)
         {
-            if (ptrto.getMetatype() == TYPE_UNION)
+            if (ptrto.getMetatype() == type_metatype.TYPE_UNION)
             {
                 Funcdata* fd = op.getParent().getFuncdata();
                 ResolvedUnion res = fd.getUnionField(this, op, slot);
@@ -292,7 +292,7 @@ namespace Sla.DECCORE
 
         public override Datatype findResolve(PcodeOp op, int slot)
         {
-            if (ptrto.getMetatype() == TYPE_UNION)
+            if (ptrto.getMetatype() == type_metatype.TYPE_UNION)
             {
                 Funcdata fd = op.getParent().getFuncdata();
                 ResolvedUnion res = fd.getUnionField(this, op, slot);

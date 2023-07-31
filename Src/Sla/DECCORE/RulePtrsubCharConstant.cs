@@ -24,7 +24,7 @@ namespace Sla.DECCORE
         /// \return \b true if the descendant was collapsed
         private bool pushConstFurther(Funcdata data, TypePointer outtype, PcodeOp op, int slot, ulong val)
         {
-            if (op.code() != CPUI_PTRADD) return false;        // Must be a PTRADD
+            if (op.code() != OpCode.CPUI_PTRADD) return false;        // Must be a PTRADD
             if (slot != 0) return false;
             Varnode* vn = op.getIn(1);
             if (!vn.isConstant()) return false;            // that is adding a constant
@@ -35,7 +35,7 @@ namespace Sla.DECCORE
             newconst.updateType(outtype, false, false);        // Put the pointer datatype on new constant
             data.opRemoveInput(op, 2);
             data.opRemoveInput(op, 1);
-            data.opSetOpcode(op, CPUI_COPY);
+            data.opSetOpcode(op, OpCode.CPUI_COPY);
             data.opSetInput(op, newconst, 0);
             return true;
         }
@@ -66,14 +66,14 @@ namespace Sla.DECCORE
         {
             Varnode* sb = op.getIn(0);
             Datatype* sbType = sb.getTypeReadFacing(op);
-            if (sbType.getMetatype() != TYPE_PTR) return 0;
+            if (sbType.getMetatype() != type_metatype.TYPE_PTR) return 0;
             TypeSpacebase* sbtype = (TypeSpacebase*)((TypePointer*)sbType).getPtrTo();
-            if (sbtype.getMetatype() != TYPE_SPACEBASE) return 0;
+            if (sbtype.getMetatype() != type_metatype.TYPE_SPACEBASE) return 0;
             Varnode* vn1 = op.getIn(1);
             if (!vn1.isConstant()) return 0;
             Varnode* outvn = op.getOut();
             TypePointer* outtype = (TypePointer*)outvn.getTypeDefFacing();
-            if (outtype.getMetatype() != TYPE_PTR) return 0;
+            if (outtype.getMetatype() != type_metatype.TYPE_PTR) return 0;
             Datatype* basetype = outtype.getPtrTo();
             if (!basetype.isCharPrint()) return 0;
             Address symaddr = sbtype.getAddress(vn1.getOffset(), vn1.getSize(), op.getAddr());
@@ -110,7 +110,7 @@ namespace Sla.DECCORE
                 newvn.updateType(outtype, false, false);
                 data.opRemoveInput(op, 1);
                 data.opSetInput(op, newvn, 0);
-                data.opSetOpcode(op, CPUI_COPY);
+                data.opSetOpcode(op, OpCode.CPUI_COPY);
             }
             return 1;
         }

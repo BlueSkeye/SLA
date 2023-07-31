@@ -40,29 +40,29 @@ namespace Sla.DECCORE
             for (iter = outVn.beginDescend(); iter != outVn.endDescend(); ++iter)
             {
                 PcodeOp* baseOp = *iter;
-                if (baseOp.code() != CPUI_INT_AND) continue;
+                if (baseOp.code() != OpCode.CPUI_INT_AND) continue;
                 Varnode* tmpVn = baseOp.getIn(1);
                 if (!tmpVn.isConstant()) continue;
                 if (tmpVn.getOffset() != 1) continue;  // Masking 1 bit means we are checking parity of POPCOUNT input
                 if (tmpVn.getSize() != 1) continue;    // Must be boolean sized output
                 Varnode* inVn = op.getIn(0);
                 if (!inVn.isWritten()) return 0;
-                int count = popcount(inVn.getNZMask());
+                int count = Globals.popcount(inVn.getNZMask());
                 if (count == 1)
                 {
-                    int leastPos = leastsigbit_set(inVn.getNZMask());
+                    int leastPos = Globals.leastsigbit_set(inVn.getNZMask());
                     int constRes;
                     Varnode* b1 = getBooleanResult(inVn, leastPos, constRes);
                     if (b1 == (Varnode)null) continue;
-                    data.opSetOpcode(baseOp, CPUI_COPY);    // Recognized  popcount( b1 << #pos ) & 1
+                    data.opSetOpcode(baseOp, OpCode.CPUI_COPY);    // Recognized  Globals.popcount( b1 << #pos ) & 1
                     data.opRemoveInput(baseOp, 1);      // Simplify to  COPY(b1)
                     data.opSetInput(baseOp, b1, 0);
                     return 1;
                 }
                 if (count == 2)
                 {
-                    int pos0 = leastsigbit_set(inVn.getNZMask());
-                    int pos1 = mostsigbit_set(inVn.getNZMask());
+                    int pos0 = Globals.leastsigbit_set(inVn.getNZMask());
+                    int pos1 = Globals.mostsigbit_set(inVn.getNZMask());
                     int constRes0, constRes1;
                     Varnode* b1 = getBooleanResult(inVn, pos0, constRes0);
                     if (b1 == (Varnode)null && constRes0 != 1) continue;
@@ -73,7 +73,7 @@ namespace Sla.DECCORE
                         b1 = data.newConstant(1, 1);
                     if (b2 == (Varnode)null)
                         b2 = data.newConstant(1, 1);
-                    data.opSetOpcode(baseOp, CPUI_INT_XOR); // Recognized  popcount ( b1 << #pos1 | b2 << #pos2 ) & 1
+                    data.opSetOpcode(baseOp, OpCode.CPUI_INT_XOR); // Recognized  Globals.popcount ( b1 << #pos1 | b2 << #pos2 ) & 1
                     data.opSetInput(baseOp, b1, 0);
                     data.opSetInput(baseOp, b2, 1);
                     return 1;
@@ -114,12 +114,12 @@ namespace Sla.DECCORE
                 PcodeOp* op = vn.getDef();
                 switch (op.code())
                 {
-                    case CPUI_INT_AND:
+                    case OpCode.CPUI_INT_AND:
                         if (!op.getIn(1).isConstant()) return (Varnode)null;
                         vn = op.getIn(0);
                         break;
-                    case CPUI_INT_XOR:
-                    case CPUI_INT_OR:
+                    case OpCode.CPUI_INT_XOR:
+                    case OpCode.CPUI_INT_OR:
                         vn0 = op.getIn(0);
                         vn1 = op.getIn(1);
                         if ((vn0.getNZMask() & mask) != 0)
@@ -135,18 +135,18 @@ namespace Sla.DECCORE
                         else
                             return (Varnode)null;
                         break;
-                    case CPUI_INT_ZEXT:
-                    case CPUI_INT_SEXT:
+                    case OpCode.CPUI_INT_ZEXT:
+                    case OpCode.CPUI_INT_SEXT:
                         vn = op.getIn(0);
                         if (bitPos >= vn.getSize() * 8) return (Varnode)null;
                         break;
-                    case CPUI_SUBPIECE:
+                    case OpCode.CPUI_SUBPIECE:
                         sa = (int)op.getIn(1).getOffset() * 8;
                         bitPos += sa;
                         mask <<= sa;
                         vn = op.getIn(0);
                         break;
-                    case CPUI_PIECE:
+                    case OpCode.CPUI_PIECE:
                         vn0 = op.getIn(0);
                         vn1 = op.getIn(1);
                         sa = (int)vn1.getSize() * 8;
@@ -161,7 +161,7 @@ namespace Sla.DECCORE
                             vn = vn1;
                         }
                         break;
-                    case CPUI_INT_LEFT:
+                    case OpCode.CPUI_INT_LEFT:
                         vn1 = op.getIn(1);
                         if (!vn1.isConstant()) return (Varnode)null;
                         sa = (int)vn1.getOffset();
@@ -170,8 +170,8 @@ namespace Sla.DECCORE
                         mask >>= sa;
                         vn = op.getIn(0);
                         break;
-                    case CPUI_INT_RIGHT:
-                    case CPUI_INT_SRIGHT:
+                    case OpCode.CPUI_INT_RIGHT:
+                    case OpCode.CPUI_INT_SRIGHT:
                         vn1 = op.getIn(1);
                         if (!vn1.isConstant()) return (Varnode)null;
                         sa = (int)vn1.getOffset();

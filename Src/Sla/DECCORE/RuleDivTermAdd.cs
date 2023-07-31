@@ -49,7 +49,7 @@ namespace Sla.DECCORE
             Varnode* multvn = subop.getIn(0);
             if (!multvn.isWritten()) return 0;
             PcodeOp* multop = multvn.getDef();
-            if (multop.code() != CPUI_INT_MULT) return 0;
+            if (multop.code() != OpCode.CPUI_INT_MULT) return 0;
             ulong multConst;
             int constExtType = multop.getIn(1).isConstantExtended(multConst);
             if (constExtType < 0) return 0;
@@ -58,13 +58,13 @@ namespace Sla.DECCORE
             if (!extvn.isWritten()) return 0;
             PcodeOp* extop = extvn.getDef();
             OpCode opc = extop.code();
-            if (opc == CPUI_INT_ZEXT)
+            if (opc == OpCode.CPUI_INT_ZEXT)
             {
-                if (op.code() == CPUI_INT_SRIGHT) return 0;
+                if (op.code() == OpCode.CPUI_INT_SRIGHT) return 0;
             }
-            else if (opc == CPUI_INT_SEXT)
+            else if (opc == OpCode.CPUI_INT_SEXT)
             {
-                if (op.code() == CPUI_INT_RIGHT) return 0;
+                if (op.code() == OpCode.CPUI_INT_RIGHT) return 0;
             }
 
             ulong newc;
@@ -89,7 +89,7 @@ namespace Sla.DECCORE
             for (iter = op.getOut().beginDescend(); iter != op.getOut().endDescend(); ++iter)
             {
                 PcodeOp* addop = *iter;
-                if (addop.code() != CPUI_INT_ADD) continue;
+                if (addop.code() != OpCode.CPUI_INT_ADD) continue;
                 if ((addop.getIn(0) != x) && (addop.getIn(1) != x))
                     continue;
 
@@ -101,7 +101,7 @@ namespace Sla.DECCORE
                 {
                     // Create new extension of the constant
                     PcodeOp* newExtOp = data.newOp(1, op.getAddr());
-                    data.opSetOpcode(newExtOp, (constExtType == 1) ? CPUI_INT_ZEXT : CPUI_INT_SEXT);
+                    data.opSetOpcode(newExtOp, (constExtType == 1) ? OpCode.CPUI_INT_ZEXT : OpCode.CPUI_INT_SEXT);
                     newConstVn = data.newUniqueOut(extvn.getSize(), newExtOp);
                     data.opSetInput(newExtOp, data.newConstant(8, multConst), 0);
                     data.opInsertBefore(newExtOp, op);
@@ -109,22 +109,22 @@ namespace Sla.DECCORE
 
                 // Construct the new multiply
                 PcodeOp* newmultop = data.newOp(2, op.getAddr());
-                data.opSetOpcode(newmultop, CPUI_INT_MULT);
+                data.opSetOpcode(newmultop, OpCode.CPUI_INT_MULT);
                 Varnode* newmultvn = data.newUniqueOut(extvn.getSize(), newmultop);
                 data.opSetInput(newmultop, extvn, 0);
                 data.opSetInput(newmultop, newConstVn, 1);
                 data.opInsertBefore(newmultop, op);
 
                 PcodeOp* newshiftop = data.newOp(2, op.getAddr());
-                if (shiftopc == CPUI_MAX)
-                    shiftopc = CPUI_INT_RIGHT;
+                if (shiftopc == OpCode.CPUI_MAX)
+                    shiftopc = OpCode.CPUI_INT_RIGHT;
                 data.opSetOpcode(newshiftop, shiftopc);
                 Varnode* newshiftvn = data.newUniqueOut(extvn.getSize(), newshiftop);
                 data.opSetInput(newshiftop, newmultvn, 0);
                 data.opSetInput(newshiftop, data.newConstant(4, n), 1);
                 data.opInsertBefore(newshiftop, op);
 
-                data.opSetOpcode(addop, CPUI_SUBPIECE);
+                data.opSetOpcode(addop, OpCode.CPUI_SUBPIECE);
                 data.opSetInput(addop, newshiftvn, 0);
                 data.opSetInput(addop, data.newConstant(4, 0), 1);
                 return 1;
@@ -141,25 +141,25 @@ namespace Sla.DECCORE
         /// Pass back whether a shift was involved and the total truncation in bits:  `n+c*8`
         /// \param op is the root of the expression
         /// \param n is the reference that will hold the total truncation
-        /// \param shiftopc will hold the shift OpCode if used, CPUI_MAX otherwise
+        /// \param shiftopc will hold the shift OpCode if used, OpCode.CPUI_MAX otherwise
         /// \return the SUBPIECE op if present or NULL otherwise
         public static PcodeOp findSubshift(PcodeOp op, int n, OpCode shiftopc)
         { // SUB( .,#c) or SUB(.,#c)>>n  return baseop and n+c*8
           // make SUB is high
             PcodeOp* subop;
             shiftopc = op.code();
-            if (shiftopc != CPUI_SUBPIECE)
+            if (shiftopc != OpCode.CPUI_SUBPIECE)
             { // Must be right shift
                 Varnode* vn = op.getIn(0);
                 if (!vn.isWritten()) return (PcodeOp)null;
                 subop = vn.getDef();
-                if (subop.code() != CPUI_SUBPIECE) return (PcodeOp)null;
+                if (subop.code() != OpCode.CPUI_SUBPIECE) return (PcodeOp)null;
                 if (!op.getIn(1).isConstant()) return (PcodeOp)null;
                 n = op.getIn(1).getOffset();
             }
             else
             {
-                shiftopc = CPUI_MAX;    // Indicate there was no shift
+                shiftopc = OpCode.CPUI_MAX;    // Indicate there was no shift
                 subop = op;
                 n = 0;
             }

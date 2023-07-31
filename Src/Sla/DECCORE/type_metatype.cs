@@ -19,8 +19,9 @@ namespace Sla.DECCORE
         /// Signed integer. Signed is considered less specific than unsigned in C
         TYPE_INT = 11,
         /// Unsigned integer
-        /// Boolean
         TYPE_UINT = 10,
+        /// Boolean
+        TYPE_BOOL = 9,
         /// Data is actual executable code
         TYPE_CODE = 8,
         /// Floating-point
@@ -28,7 +29,7 @@ namespace Sla.DECCORE
 
         /// Pointer data-type
         TYPE_PTR = 6,
-        /// Pointer relative to another data-type (specialization of TYPE_PTR)
+        /// Pointer relative to another data-type (specialization of type_metatype.TYPE_PTR)
         TYPE_PTRREL = 5,
         /// Array data-type, made up of a sequence of "element" datatype
         TYPE_ARRAY = 4,

@@ -56,7 +56,7 @@ namespace Sla.DECCORE
         public FlowBlock extract()
         {
             FlowBlock* res = queue[curdepth].GetLastItem();
-            queue[curdepth].pop_back();
+            queue[curdepth].RemoveLastItem();
             while (queue[curdepth].empty())
             {
                 curdepth -= 1;

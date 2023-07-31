@@ -47,25 +47,25 @@ namespace Sla.DECCORE
                 return 0;               // Make sure SUBPIECE is taking most significant part
             PcodeOp* concatOp = (PcodeOp)null;
             PcodeOp* multiOp = vn.getDef();
-            while (multiOp.code() == CPUI_INDIRECT)
+            while (multiOp.code() == OpCode.CPUI_INDIRECT)
             {   // PIECE may come through INDIRECT
                 Varnode* tmpvn = multiOp.getIn(0);
                 if (!tmpvn.isWritten()) return 0;
                 multiOp = tmpvn.getDef();
             }
-            if (multiOp.code() == CPUI_PIECE)
+            if (multiOp.code() == OpCode.CPUI_PIECE)
             {
                 if (vn.getDef() != multiOp)
                     concatOp = multiOp;
             }
-            else if (multiOp.code() == CPUI_MULTIEQUAL)
+            else if (multiOp.code() == OpCode.CPUI_MULTIEQUAL)
             {   // Otherwise PIECE comes through MULTIEQUAL
                 for (int i = 0; i < multiOp.numInput(); ++i)
                 {
                     Varnode* invn = multiOp.getIn(i);
                     if (!invn.isWritten()) continue;
                     PcodeOp* tmpOp = invn.getDef();
-                    if (tmpOp.code() == CPUI_PIECE)
+                    if (tmpOp.code() == OpCode.CPUI_PIECE)
                     {
                         concatOp = tmpOp;
                         break;

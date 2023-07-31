@@ -23,12 +23,12 @@ namespace Sla.DECCORE
             Varnode* vn = op.getIn(slot);
             if (!vn.isWritten()) return true;
             PcodeOp* preOp = vn.getDef();
-            if (preOp.code() != CPUI_INT_ADD) return true;
+            if (preOp.code() != OpCode.CPUI_INT_ADD) return true;
             int preslot = 0;
-            if (preOp.getIn(preslot).getTypeReadFacing(preOp).getMetatype() != TYPE_PTR)
+            if (preOp.getIn(preslot).getTypeReadFacing(preOp).getMetatype() != type_metatype.TYPE_PTR)
             {
                 preslot = 1;
-                if (preOp.getIn(preslot).getTypeReadFacing(preOp).getMetatype() != TYPE_PTR)
+                if (preOp.getIn(preslot).getTypeReadFacing(preOp).getMetatype() != type_metatype.TYPE_PTR)
                     return true;
             }
             return (1 != evaluatePointerExpression(preOp, preslot));    // Does earlier varnode look like the base pointer
@@ -79,7 +79,7 @@ namespace Sla.DECCORE
             for (slot = 0; slot < op.numInput(); ++slot)
             { // Search for pointer type
                 ct = op.getIn(slot).getTypeReadFacing(op);
-                if (ct.getMetatype() == TYPE_PTR) break;
+                if (ct.getMetatype() == type_metatype.TYPE_PTR) break;
             }
             if (slot == op.numInput()) return 0;
             if (evaluatePointerExpression(op, slot) != 2) return 0;
@@ -113,7 +113,7 @@ namespace Sla.DECCORE
             Varnode* ptrBase = op.getIn(slot);
             if (ptrBase.isFree() && !ptrBase.isConstant())
                 return 0;
-            if (op.getIn(1 - slot).getTypeReadFacing(op).getMetatype() == TYPE_PTR)
+            if (op.getIn(1 - slot).getTypeReadFacing(op).getMetatype() == type_metatype.TYPE_PTR)
                 res = 2;
             Varnode* outVn = op.getOut();
             list<PcodeOp*>::const_iterator iter;
@@ -122,15 +122,15 @@ namespace Sla.DECCORE
                 PcodeOp* decOp = *iter;
                 count += 1;
                 OpCode opc = decOp.code();
-                if (opc == CPUI_INT_ADD)
+                if (opc == OpCode.CPUI_INT_ADD)
                 {
                     Varnode* otherVn = decOp.getIn(1 - decOp.getSlot(outVn));
                     if (otherVn.isFree() && !otherVn.isConstant())
                         return 0;   // No action if the data-flow isn't fully linked
-                    if (otherVn.getTypeReadFacing(decOp).getMetatype() == TYPE_PTR)
+                    if (otherVn.getTypeReadFacing(decOp).getMetatype() == type_metatype.TYPE_PTR)
                         res = 2;    // Do not push in the presence of other pointers
                 }
-                else if ((opc == CPUI_LOAD || opc == CPUI_STORE) && decOp.getIn(1) == outVn)
+                else if ((opc == OpCode.CPUI_LOAD || opc == OpCode.CPUI_STORE) && decOp.getIn(1) == outVn)
                 {   // If use is as pointer for LOAD or STORE
                     if (ptrBase.isSpacebase() && (ptrBase.isInput() || (ptrBase.isConstant())) &&
                         (op.getIn(1 - slot).isConstant()))

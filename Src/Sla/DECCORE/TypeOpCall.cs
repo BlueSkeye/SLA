@@ -64,14 +64,14 @@ namespace Sla.DECCORE
                 if (param.isTypeLocked())
                 {
                     ct = param.getType();
-                    if ((ct.getMetatype() != TYPE_VOID) && (ct.getSize() <= op.getIn(slot).getSize())) // parameter may not match varnode
+                    if ((ct.getMetatype() != type_metatype.TYPE_VOID) && (ct.getSize() <= op.getIn(slot).getSize())) // parameter may not match varnode
                         return ct;
                 }
                 else if (param.isThisPointer())
                 {
                     // Known "this" pointer is effectively typelocked even if the prototype as a whole isn't
                     ct = param.getType();
-                    if (ct.getMetatype() == TYPE_PTR && ((TypePointer*)ct).getPtrTo().getMetatype() == TYPE_STRUCT)
+                    if (ct.getMetatype() == type_metatype.TYPE_PTR && ((TypePointer*)ct).getPtrTo().getMetatype() == type_metatype.TYPE_STRUCT)
                         return ct;
                 }
             }
@@ -91,7 +91,7 @@ namespace Sla.DECCORE
             fc = FuncCallSpecs::getFspecFromConst(vn.getAddr());
             if (!fc.isOutputLocked()) return TypeOp::getOutputLocal(op);
             ct = fc.getOutputType();
-            if (ct.getMetatype() == TYPE_VOID) return TypeOp::getOutputLocal(op);
+            if (ct.getMetatype() == type_metatype.TYPE_VOID) return TypeOp::getOutputLocal(op);
             return ct;
         }
     }

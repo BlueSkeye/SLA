@@ -47,17 +47,17 @@ namespace Sla.DECCORE
             if (!vnout2.isWritten()) return 0;
             op_less = vnout1.getDef();
             opc = op_less.code();
-            if ((opc != CPUI_INT_LESSEQUAL) && (opc != CPUI_INT_SLESSEQUAL))
+            if ((opc != OpCode.CPUI_INT_LESSEQUAL) && (opc != OpCode.CPUI_INT_SLESSEQUAL))
             {
                 op_equal = op_less;
                 op_less = vnout2.getDef();
                 opc = op_less.code();
-                if ((opc != CPUI_INT_LESSEQUAL) && (opc != CPUI_INT_SLESSEQUAL))
+                if ((opc != OpCode.CPUI_INT_LESSEQUAL) && (opc != OpCode.CPUI_INT_SLESSEQUAL))
                     return 0;
             }
             else
                 op_equal = vnout2.getDef();
-            if (op_equal.code() != CPUI_INT_NOTEQUAL) return 0;
+            if (op_equal.code() != OpCode.CPUI_INT_NOTEQUAL) return 0;
 
             compvn1 = op_less.getIn(0);
             compvn2 = op_less.getIn(1);
@@ -69,7 +69,7 @@ namespace Sla.DECCORE
 
             data.opSetInput(op, compvn1, 0);
             data.opSetInput(op, compvn2, 1);
-            data.opSetOpcode(op, (opc == CPUI_INT_SLESSEQUAL) ? CPUI_INT_SLESS : CPUI_INT_LESS);
+            data.opSetOpcode(op, (opc == OpCode.CPUI_INT_SLESSEQUAL) ? OpCode.CPUI_INT_SLESS : OpCode.CPUI_INT_LESS);
 
             return 1;
         }

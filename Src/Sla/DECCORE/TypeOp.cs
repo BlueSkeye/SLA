@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
@@ -169,7 +169,7 @@ namespace Sla.DECCORE
         public virtual Datatype getOutputLocal(PcodeOp op)
         {
             // Default type lookup
-            return tlst.getBase(op.getOut().getSize(), TYPE_UNKNOWN);
+            return tlst.getBase(op.getOut().getSize(), type_metatype.TYPE_UNKNOWN);
         }
 
         /// \brief Find the minimal (or suggested) data-type of an input to \b this op-code
@@ -179,7 +179,7 @@ namespace Sla.DECCORE
         /// \return the data-type
         public virtual Datatype getInputLocal(PcodeOp op, int slot)
         {               // Default type lookup
-            return tlst.getBase(op.getIn(slot).getSize(), TYPE_UNKNOWN);
+            return tlst.getBase(op.getIn(slot).getSize(), type_metatype.TYPE_UNKNOWN);
         }
 
         /// \brief Find the data-type of the output that would be assigned by a compiler
@@ -256,7 +256,7 @@ namespace Sla.DECCORE
         /// \param trans is the Translate object for floating-point formats
         public static void registerInstructions(List<TypeOp> inst, TypeFactory tlst, Translate trans)
         {
-            inst.insert(inst.end(), CPUI_MAX, (TypeOp*)0);
+            inst.insert(inst.end(), OpCode.CPUI_MAX, (TypeOp*)0);
 
             inst[CPUI_COPY] = new TypeOpCopy(tlst);
             inst[CPUI_LOAD] = new TypeOpLoad(tlst);

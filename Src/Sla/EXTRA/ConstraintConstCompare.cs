@@ -51,10 +51,10 @@ namespace Sla.EXTRA
             s << "if (";
             switch (opc)
             {
-                case CPUI_INT_EQUAL:
+                case OpCode.CPUI_INT_EQUAL:
                     s << printstate.getName(const1index) << " != " << printstate.getName(const2index);
                     break;
-                case CPUI_INT_NOTEQUAL:
+                case OpCode.CPUI_INT_NOTEQUAL:
                     s << printstate.getName(const1index) << " == " << printstate.getName(const2index);
                     break;
                 default:

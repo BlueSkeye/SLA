@@ -36,7 +36,7 @@ namespace Sla.DECCORE
             if (!vnlo.isPrecisLo()) return 0;
             if (!vnlo.isWritten()) return 0;
             PcodeOp* subpieceOpLo = vnlo.getDef();
-            if (subpieceOpLo.code() != CPUI_SUBPIECE) return 0;
+            if (subpieceOpLo.code() != OpCode.CPUI_SUBPIECE) return 0;
             if (subpieceOpLo.getIn(1).getOffset() != 0) return 0;
             Varnode* whole = subpieceOpLo.getIn(0);
             if (whole.isFree()) return 0;
@@ -44,7 +44,7 @@ namespace Sla.DECCORE
             for (iter = whole.beginDescend(); iter != whole.endDescend(); ++iter)
             {
                 PcodeOp* subpieceOpHi = *iter;
-                if (subpieceOpHi.code() != CPUI_SUBPIECE) continue;
+                if (subpieceOpHi.code() != OpCode.CPUI_SUBPIECE) continue;
                 if (subpieceOpHi == subpieceOpLo) continue;
                 int offset = (int)subpieceOpHi.getIn(1).getOffset();
                 if (offset != vnlo.getSize()) continue;
@@ -55,7 +55,7 @@ namespace Sla.DECCORE
                 for (iter2 = vnhi.beginDescend(); iter2 != vnhi.endDescend(); ++iter2)
                 {
                     PcodeOp* storeOp2 = *iter2;
-                    if (storeOp2.code() != CPUI_STORE) continue;
+                    if (storeOp2.code() != OpCode.CPUI_STORE) continue;
                     if (storeOp2.getIn(2) != vnhi) continue;
                     if (SplitVarnode::testContiguousPointers(storeOp2, op, storelo, storehi, spc))
                     {
@@ -66,7 +66,7 @@ namespace Sla.DECCORE
                         // Create new STORE op that combines the two smaller STOREs
                         PcodeOp* newstore = data.newOp(3, latest.getAddr());
                         Varnode* spcvn = data.newVarnodeSpace(spc);
-                        data.opSetOpcode(newstore, CPUI_STORE);
+                        data.opSetOpcode(newstore, OpCode.CPUI_STORE);
                         data.opSetInput(newstore, spcvn, 0);
                         Varnode* addrvn = storelo.getIn(1);
                         if (addrvn.isConstant())
@@ -116,7 +116,7 @@ namespace Sla.DECCORE
                     if (op.getSeqNum().getOrder() < op1.getSeqNum().getOrder()) continue;
                     if (op.getSeqNum().getOrder() > op2.getSeqNum().getOrder()) continue;
                     // Its likely that INDIRECTs from the first STORE feed INDIRECTs for the second STORE
-                    if (op.code() == CPUI_INDIRECT && op2 == PcodeOp::getOpFromConst(op.getIn(1).getAddr()))
+                    if (op.code() == OpCode.CPUI_INDIRECT && op2 == PcodeOp::getOpFromConst(op.getIn(1).getAddr()))
                     {
                         usebyop2 += 1;  // Note this pairing
                         continue;

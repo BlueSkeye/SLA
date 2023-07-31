@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using _List = System.Collections.Generic.List<ghidra.Element>;
+using _List = System.Collections.Generic.List<Sla.CORE.Element>;
 
 namespace Sla.CORE
 {
@@ -24,7 +24,7 @@ namespace Sla.CORE
         /// The parent Element (or null)
         protected Element? parent;
         /// A list of child Element objects
-        protected _List? children;
+        protected _List children = new _List();
 
         /// Constructor given a parent Element
         public Element(Element? par)
@@ -87,16 +87,10 @@ namespace Sla.CORE
         }
 
         /// Get the list of child elements
-        public ref _List? getChildren()
-        {
-            return ref children;
-        }
+        public _List getChildren() => children;
 
         /// Get the character content of \b this element
-        public ref string getContent()
-        {
-            return ref content;
-        }
+        public string getContent() => content;
 
         /// \brief Get an attribute value by name
         /// Look up the value for the given attribute name and return it. An exception is
@@ -120,15 +114,9 @@ namespace Sla.CORE
         }
 
         /// Get the name of the i-th attribute
-        public string getAttributeName(int i)
-        {
-            return attr[i];
-        }
+        public string getAttributeName(int i) => attr[i];
 
         /// Get the value of the i-th attribute
-        public string getAttributeValue(int i)
-        {
-            return value[i];
-        }
+        public string getAttributeValue(int i) => value[i];
     }
 }

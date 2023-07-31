@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Sla.EXTRA
@@ -16,45 +15,44 @@ namespace Sla.EXTRA
         }
         // friend class CallGraphNode;
         // friend class CallGraph;
-        private CallGraphNode from;        // Node of the caller
-        private CallGraphNode to;      // Node of the callee
-        private Address callsiteaddr;       // Address where call was made from
-        private int complement;        // Index of complementary edge
-        private /*mutable*/ Flags flags;
+        internal CallGraphNode from;        // Node of the caller
+        internal CallGraphNode to;      // Node of the callee
+        internal Address callsiteaddr;       // Address where call was made from
+        internal int complement;        // Index of complementary edge
+        internal /*mutable*/ Flags flags;
 
         public CallGraphEdge()
         {
             flags = 0;
         }
 
-        public bool isCycle() => ((flags&1)!=0);
+        public bool isCycle() => ((flags & Flags.cycle) != 0);
 
         public void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_EDGE);
+            encoder.openElement(ElementId.ELEM_EDGE);
             from.getAddr().encode(encoder);
             to.getAddr().encode(encoder);
             callsiteaddr.encode(encoder);
-            encoder.closeElement(ELEM_EDGE);
+            encoder.closeElement(ElementId.ELEM_EDGE);
         }
 
         public Address getCallSiteAddr() => callsiteaddr;
 
         public static void decode(Decoder decoder, CallGraph graph)
         {
-            uint elemId = decoder.openElement(ELEM_EDGE);
-            Address fromaddr, toaddr, siteaddr;
+            uint elemId = decoder.openElement(ElementId.ELEM_EDGE);
 
-            fromaddr = Address::decode(decoder);
-            toaddr = Address::decode(decoder);
-            siteaddr = Address::decode(decoder);
+            Address fromaddr = Address.decode(decoder);
+            Address toaddr = Address.decode(decoder);
+            Address siteaddr = Address.decode(decoder);
             decoder.closeElement(elemId);
 
-            CallGraphNode* fromnode = graph.findNode(fromaddr);
-            if (fromnode == (CallGraphNode*)0)
+            CallGraphNode fromnode = graph.findNode(fromaddr);
+            if (fromnode == (CallGraphNode)null)
                 throw new LowlevelError("Could not find from node");
-            CallGraphNode* tonode = graph.findNode(toaddr);
-            if (tonode == (CallGraphNode*)0)
+            CallGraphNode tonode = graph.findNode(toaddr);
+            if (tonode == (CallGraphNode)null)
                 throw new LowlevelError("Could not find to node");
 
             graph.addEdge(fromnode, tonode, siteaddr);

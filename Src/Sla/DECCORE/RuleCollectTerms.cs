@@ -29,7 +29,7 @@ namespace Sla.DECCORE
                 return vn;
             }
             testop = vn.getDef();
-            if ((testop.code() != CPUI_INT_MULT) || (!testop.getIn(1).isConstant()))
+            if ((testop.code() != OpCode.CPUI_INT_MULT) || (!testop.getIn(1).isConstant()))
             {
                 coef = 1;
                 return vn;
@@ -60,7 +60,7 @@ namespace Sla.DECCORE
         {
             PcodeOp* nextop = op.getOut().loneDescend();
             // Do we have the root of an ADD tree
-            if ((nextop != (PcodeOp)null) && (nextop.code() == CPUI_INT_ADD)) return 0;
+            if ((nextop != (PcodeOp)null) && (nextop.code() == OpCode.CPUI_INT_ADD)) return 0;
 
             TermOrder termorder(op);
             termorder.collect();        // Collect additive terms in the expression
@@ -95,7 +95,7 @@ namespace Sla.DECCORE
                         {
                             nextop = data.newOp(2, order[i].getOp().getAddr());
                             vn2 = data.newUniqueOut(vn1.getSize(), nextop);
-                            data.opSetOpcode(nextop, CPUI_INT_MULT);
+                            data.opSetOpcode(nextop, OpCode.CPUI_INT_MULT);
                             data.opSetInput(nextop, vn1, 0);
                             data.opSetInput(nextop, newcoeff, 1);
                             data.opInsertBefore(nextop, order[i].getOp());

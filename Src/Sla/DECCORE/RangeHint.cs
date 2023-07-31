@@ -88,14 +88,14 @@ namespace Sla.DECCORE
             // If we reach here, component sizes do not match
             // Check for data-types we want to protect more
             type_metatype meta = a.type.getMetatype();
-            if (meta != TYPE_STRUCT && meta != TYPE_UNION)
+            if (meta != type_metatype.TYPE_STRUCT && meta != type_metatype.TYPE_UNION)
             {
-                if (meta != TYPE_ARRAY || ((TypeArray*)(a.type)).getBase().getMetatype() == TYPE_UNKNOWN)
+                if (meta != type_metatype.TYPE_ARRAY || ((TypeArray*)(a.type)).getBase().getMetatype() == type_metatype.TYPE_UNKNOWN)
                     return false;
             }
             // For structures, unions, and arrays, test if b looks like a partial data-type
             meta = b.type.getMetatype();
-            if (meta == TYPE_UNKNOWN || meta == TYPE_INT || meta == TYPE_UINT)
+            if (meta == type_metatype.TYPE_UNKNOWN || meta == type_metatype.TYPE_INT || meta == type_metatype.TYPE_UINT)
             {
                 return true;
             }
@@ -171,22 +171,22 @@ namespace Sla.DECCORE
             {
                 Datatype* aTestType = type;
                 Datatype* bTestType = b.type;
-                while (aTestType.getMetatype() == TYPE_PTR)
+                while (aTestType.getMetatype() == type_metatype.TYPE_PTR)
                 {
-                    if (bTestType.getMetatype() != TYPE_PTR)
+                    if (bTestType.getMetatype() != type_metatype.TYPE_PTR)
                         break;
                     aTestType = ((TypePointer*)aTestType).getPtrTo();
                     bTestType = ((TypePointer*)bTestType).getPtrTo();
                 }
-                if (aTestType.getMetatype() == TYPE_UNKNOWN)
+                if (aTestType.getMetatype() == type_metatype.TYPE_UNKNOWN)
                     settype = b.type;
-                else if (bTestType.getMetatype() == TYPE_UNKNOWN)
+                else if (bTestType.getMetatype() == type_metatype.TYPE_UNKNOWN)
                 {
                 }
-                else if (aTestType.getMetatype() == TYPE_INT && bTestType.getMetatype() == TYPE_UINT)
+                else if (aTestType.getMetatype() == type_metatype.TYPE_INT && bTestType.getMetatype() == type_metatype.TYPE_UINT)
                 {
                 }
-                else if (aTestType.getMetatype() == TYPE_UINT && bTestType.getMetatype() == TYPE_INT)
+                else if (aTestType.getMetatype() == type_metatype.TYPE_UINT && bTestType.getMetatype() == type_metatype.TYPE_INT)
                 {
                 }
                 else if (aTestType != bTestType)    // If they are both not unknown, they must be the same
@@ -293,7 +293,7 @@ namespace Sla.DECCORE
                     size = 1;
                     rangeType = open;
                 }
-                type = typeFactory.getBase(size, TYPE_UNKNOWN);
+                type = typeFactory.getBase(size, type_metatype.TYPE_UNKNOWN);
                 flags = 0;
                 highind = -1;
                 return false;

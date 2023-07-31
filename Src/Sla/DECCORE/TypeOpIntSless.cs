@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     internal class TypeOpIntSless : TypeOpBinary
     {
         public TypeOpIntSless(TypeFactory t)
-            : base(t, CPUI_INT_SLESS,"<", TYPE_BOOL, TYPE_INT)
+            : base(t, OpCode.CPUI_INT_SLESS,"<", type_metatype.TYPE_BOOL, type_metatype.TYPE_INT)
         {
             opflags = PcodeOp::binary | PcodeOp::booloutput;
             addlflags = inherits_sign;
@@ -30,7 +30,7 @@ namespace Sla.DECCORE
             int inslot, int outslot)
         {
             if ((inslot == -1) || (outslot == -1)) return (Datatype)null; // Must propagate input <. input
-            if (alttype.getMetatype() != TYPE_INT) return (Datatype)null;    // Only propagate signed things
+            if (alttype.getMetatype() != type_metatype.TYPE_INT) return (Datatype)null;    // Only propagate signed things
             return alttype;
         }
 

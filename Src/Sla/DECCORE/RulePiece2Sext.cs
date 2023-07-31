@@ -36,7 +36,7 @@ namespace Sla.DECCORE
             shiftout = op.getIn(0);
             if (!shiftout.isWritten()) return 0;
             shiftop = shiftout.getDef();
-            if (shiftop.code() != CPUI_INT_SRIGHT) return 0;
+            if (shiftop.code() != OpCode.CPUI_INT_SRIGHT) return 0;
             if (!shiftop.getIn(1).isConstant()) return 0;
             int n = shiftop.getIn(1).getOffset();
             x = shiftop.getIn(0);
@@ -44,7 +44,7 @@ namespace Sla.DECCORE
             if (n != 8 * x.getSize() - 1) return 0;
 
             data.opRemoveInput(op, 0);
-            data.opSetOpcode(op, CPUI_INT_SEXT);
+            data.opSetOpcode(op, OpCode.CPUI_INT_SEXT);
             return 1;
         }
     }

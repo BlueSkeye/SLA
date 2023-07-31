@@ -46,43 +46,43 @@ namespace Sla.DECCORE
             int i, j, offset, insize;
 
             @base = op.getIn(0);
-            if (!@@base.isWritten()) return 0;
+            if (!@base.isWritten()) return 0;
             offset = op.getIn(1).getOffset();
             outvn = op.getOut();
             if (outvn.isPrecisLo() || outvn.isPrecisHi()) return 0;
-            insize = @@base.getSize();
-            longform = @@base.getDef();
+            insize = @base.getSize();
+            longform = @base.getDef();
             j = -1;
             switch (longform.code())
             {   // Determine if this op commutes with SUBPIECE
-                //  case CPUI_COPY:
-                case CPUI_INT_LEFT:
+                //  case OpCode.CPUI_COPY:
+                case OpCode.CPUI_INT_LEFT:
                     j = 1;          // Special processing for shift amount param
                     if (offset != 0) return 0;
                     if (!longform.getIn(0).isWritten()) return 0;
                     prevop = longform.getIn(0).getDef();
-                    if (prevop.code() == CPUI_INT_ZEXT)
+                    if (prevop.code() == OpCode.CPUI_INT_ZEXT)
                     {
                     }
-                    else if (prevop.code() == CPUI_PIECE)
+                    else if (prevop.code() == OpCode.CPUI_PIECE)
                     {
                     }
                     else
                         return 0;
                     break;
-                case CPUI_INT_REM:
-                case CPUI_INT_DIV:
+                case OpCode.CPUI_INT_REM:
+                case OpCode.CPUI_INT_DIV:
                     {
                         // Only commutes if inputs are zero extended
                         if (offset != 0) return 0;
                         if (!longform.getIn(0).isWritten()) return 0;
                         PcodeOp* zext0 = longform.getIn(0).getDef();
-                        if (zext0.code() != CPUI_INT_ZEXT) return 0;
+                        if (zext0.code() != OpCode.CPUI_INT_ZEXT) return 0;
                         Varnode* zext0In = zext0.getIn(0);
                         if (longform.getIn(1).isWritten())
                         {
                             PcodeOp* zext1 = longform.getIn(1).getDef();
-                            if (zext1.code() != CPUI_INT_ZEXT) return 0;
+                            if (zext1.code() != OpCode.CPUI_INT_ZEXT) return 0;
                             Varnode* zext1In = zext1.getIn(0);
                             if (zext1In.getSize() > outvn.getSize() || zext0In.getSize() > outvn.getSize())
                             {
@@ -105,19 +105,19 @@ namespace Sla.DECCORE
                             return 0;
                         break;
                     }
-                case CPUI_INT_SREM:
-                case CPUI_INT_SDIV:
+                case OpCode.CPUI_INT_SREM:
+                case OpCode.CPUI_INT_SDIV:
                     {
                         // Only commutes if inputs are sign extended
                         if (offset != 0) return 0;
                         if (!longform.getIn(0).isWritten()) return 0;
                         PcodeOp* sext0 = longform.getIn(0).getDef();
-                        if (sext0.code() != CPUI_INT_SEXT) return 0;
+                        if (sext0.code() != OpCode.CPUI_INT_SEXT) return 0;
                         Varnode* sext0In = sext0.getIn(0);
                         if (longform.getIn(1).isWritten())
                         {
                             PcodeOp* sext1 = longform.getIn(1).getDef();
-                            if (sext1.code() != CPUI_INT_SEXT) return 0;
+                            if (sext1.code() != OpCode.CPUI_INT_SEXT) return 0;
                             Varnode* sext1In = sext1.getIn(0);
                             if (sext1In.getSize() > outvn.getSize() || sext0In.getSize() > outvn.getSize())
                             {
@@ -133,7 +133,7 @@ namespace Sla.DECCORE
                         {
                             ulong val = longform.getIn(1).getOffset();
                             ulong smallval = val & Globals.calc_mask(outvn.getSize());
-                            smallval = sign_extend(smallval, outvn.getSize(), insize);
+                            smallval = Globals.sign_extend(smallval, outvn.getSize(), insize);
                             if (val != smallval)
                                 return 0;
                         }
@@ -141,18 +141,18 @@ namespace Sla.DECCORE
                             return 0;
                         break;
                     }
-                case CPUI_INT_ADD:
+                case OpCode.CPUI_INT_ADD:
                     if (offset != 0) return 0;  // Only commutes with least significant SUBPIECE
                     if (longform.getIn(0).isSpacebase()) return 0;    // Deconflict with RulePtrArith
                     break;
-                case CPUI_INT_MULT:
+                case OpCode.CPUI_INT_MULT:
                     if (offset != 0) return 0;  // Only commutes with least significant SUBPIECE
                     break;
                 // Bitwise ops, type of subpiece doesnt matter
-                case CPUI_INT_NEGATE:
-                case CPUI_INT_XOR:
-                case CPUI_INT_AND:
-                case CPUI_INT_OR:
+                case OpCode.CPUI_INT_NEGATE:
+                case OpCode.CPUI_INT_XOR:
+                case OpCode.CPUI_INT_AND:
+                case OpCode.CPUI_INT_OR:
                     break;
                 default:            // Most ops don't commute
                     return 0;
@@ -164,7 +164,7 @@ namespace Sla.DECCORE
             if (offset == 0)
             {       // Look for overlap with RuleSubZext
                 PcodeOp* nextop = outvn.loneDescend();
-                if ((nextop != (PcodeOp)null) && (nextop.code() == CPUI_INT_ZEXT))
+                if ((nextop != (PcodeOp)null) && (nextop.code() == OpCode.CPUI_INT_ZEXT))
                 {
                     if (nextop.getOut().getSize() == insize)
                         return 0;
@@ -177,7 +177,7 @@ namespace Sla.DECCORE
                 if (i != j)
                 {
                     newsub = data.newOp(2, op.getAddr()); // Commuted SUBPIECE op
-                    data.opSetOpcode(newsub, CPUI_SUBPIECE);
+                    data.opSetOpcode(newsub, OpCode.CPUI_SUBPIECE);
                     newvn = data.newUniqueOut(outvn.getSize(), newsub);  // New varnode is subpiece
                     data.opSetInput(longform, newvn, i);
                     data.opSetInput(newsub, vn, 0); // of old varnode

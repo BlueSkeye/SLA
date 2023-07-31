@@ -185,7 +185,7 @@ namespace Sla.CORE
         /// Read \b from attributes on another tag
         /// Reconstruct from attributes that may not be part of a \<range> element.
         /// \param decoder is the stream decoder
-        public void decodeFromAttributes(ghidra.Decoder decoder)
+        public void decodeFromAttributes(Sla.CORE.Decoder decoder)
         {
             spc = null;
             bool seenLast = false;

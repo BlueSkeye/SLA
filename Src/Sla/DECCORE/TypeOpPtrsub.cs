@@ -12,7 +12,7 @@ namespace Sla.DECCORE
     internal class TypeOpPtrsub : TypeOp
     {
         public TypeOpPtrsub(TypeFactory t)
-            : base(t, CPUI_PTRSUB,".")
+            : base(t, OpCode.CPUI_PTRSUB,".")
 
         {
             // As an operation this is really addition
@@ -26,12 +26,12 @@ namespace Sla.DECCORE
 
         public override Datatype getOutputLocal(PcodeOp op)
         {               // Output is ptr to type of subfield
-            return tlst.getBase(op.getOut().getSize(), TYPE_INT);
+            return tlst.getBase(op.getOut().getSize(), type_metatype.TYPE_INT);
         }
 
         public override Datatype getInputLocal(PcodeOp op, int slot)
         {
-            return tlst.getBase(op.getIn(slot).getSize(), TYPE_INT);
+            return tlst.getBase(op.getIn(slot).getSize(), type_metatype.TYPE_INT);
         }
 
         public override Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
@@ -49,7 +49,7 @@ namespace Sla.DECCORE
         public override Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)
         {
             TypePointer* ptype = (TypePointer*)op.getIn(0).getHighTypeReadFacing(op);
-            if (ptype.getMetatype() == TYPE_PTR)
+            if (ptype.getMetatype() == type_metatype.TYPE_PTR)
             {
                 ulong offset = AddrSpace::addressToByte(op.getIn(1).getOffset(), ptype.getWordSize());
                 ulong unusedOffset;
@@ -57,7 +57,7 @@ namespace Sla.DECCORE
                 Datatype* rettype = ptype.downChain(offset, unusedParent, unusedOffset, false, *tlst);
                 if ((offset == 0) && (rettype != (Datatype)null))
                     return rettype;
-                rettype = tlst.getBase(1, TYPE_UNKNOWN);
+                rettype = tlst.getBase(1, type_metatype.TYPE_UNKNOWN);
                 return tlst.getTypePointer(op.getOut().getSize(), rettype, ptype.getWordSize());
             }
             return TypeOp::getOutputToken(op, castStrategy);
@@ -68,7 +68,7 @@ namespace Sla.DECCORE
         {
             if ((inslot != -1) && (outslot != -1)) return (Datatype)null; // Must propagate input <. output
             type_metatype metain = alttype.getMetatype();
-            if (metain != TYPE_PTR) return (Datatype)null;
+            if (metain != type_metatype.TYPE_PTR) return (Datatype)null;
             Datatype* newtype;
             if (inslot == -1)       // Propagating output to input
                 newtype = op.getIn(outslot).getTempType();    // Don't propagate pointer types this direction

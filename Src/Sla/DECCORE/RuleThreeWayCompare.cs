@@ -63,7 +63,7 @@ namespace Sla.DECCORE
 
             tmpvn = op.getIn(1 - constSlot);
             if (!tmpvn.isWritten()) return 0;
-            if (tmpvn.getDef().code() != CPUI_INT_ADD) return 0;
+            if (tmpvn.getDef().code() != OpCode.CPUI_INT_ADD) return 0;
             bool isPartial = false;
             PcodeOp* lessop = detectThreeWay(tmpvn.getDef(), isPartial);
             if (lessop == (PcodeOp)null)
@@ -79,11 +79,11 @@ namespace Sla.DECCORE
                 form += 1;
             OpCode lessform = lessop.code();   // Either INT_LESS, INT_SLESS, or FLOAT_LESS
             form <<= 2;
-            if (op.code() == CPUI_INT_SLESSEQUAL)
+            if (op.code() == OpCode.CPUI_INT_SLESSEQUAL)
                 form += 1;
-            else if (op.code() == CPUI_INT_EQUAL)
+            else if (op.code() == OpCode.CPUI_INT_EQUAL)
                 form += 2;
-            else if (op.code() == CPUI_INT_NOTEQUAL)
+            else if (op.code() == OpCode.CPUI_INT_NOTEQUAL)
                 form += 3;
             // Encode base op (SLESS, SLESSEQUAL, EQUAL, NOTEQUAL) as final 2 bits
 
@@ -95,13 +95,13 @@ namespace Sla.DECCORE
             {
                 case 1: // -1  s<= threeway   =>   always true
                 case 21:    // threeway  s<=  1   =>   always true
-                    data.opSetOpcode(op, CPUI_INT_EQUAL);
+                    data.opSetOpcode(op, OpCode.CPUI_INT_EQUAL);
                     data.opSetInput(op, data.newConstant(1, 0), 0);
                     data.opSetInput(op, data.newConstant(1, 0), 1);
                     break;
                 case 4: // threeway  s<  -1   =>   always false
                 case 16:    //  1  s<  threeway   =>   always false
-                    data.opSetOpcode(op, CPUI_INT_NOTEQUAL);
+                    data.opSetOpcode(op, OpCode.CPUI_INT_NOTEQUAL);
                     data.opSetInput(op, data.newConstant(1, 0), 0);
                     data.opSetInput(op, data.newConstant(1, 0), 1);
                     break;
@@ -139,20 +139,20 @@ namespace Sla.DECCORE
                     break;
                 case 10:    //  0  ==  threeway   =>   a == b
                 case 14:    // threeway  ==   0   =>   a == b
-                    if (lessform == CPUI_FLOAT_LESS)            // Choose the right equal form
-                        lessform = CPUI_FLOAT_EQUAL;            // float form
+                    if (lessform == OpCode.CPUI_FLOAT_LESS)            // Choose the right equal form
+                        lessform = OpCode.CPUI_FLOAT_EQUAL;            // float form
                     else
-                        lessform = CPUI_INT_EQUAL;          // or integer form
+                        lessform = OpCode.CPUI_INT_EQUAL;          // or integer form
                     data.opSetOpcode(op, lessform);
                     data.opSetInput(op, avn, 0);
                     data.opSetInput(op, bvn, 1);
                     break;
                 case 11:    //  0  !=  threeway   =>   a != b
                 case 15:    // threeway  !=   0   =>   a != b
-                    if (lessform == CPUI_FLOAT_LESS)            // Choose the right notequal form
-                        lessform = CPUI_FLOAT_NOTEQUAL;         // float form
+                    if (lessform == OpCode.CPUI_FLOAT_LESS)            // Choose the right notequal form
+                        lessform = OpCode.CPUI_FLOAT_NOTEQUAL;         // float form
                     else
-                        lessform = CPUI_INT_NOTEQUAL;           // or integer form
+                        lessform = OpCode.CPUI_INT_NOTEQUAL;           // or integer form
                     data.opSetOpcode(op, lessform);
                     data.opSetInput(op, avn, 0);
                     data.opSetInput(op, bvn, 1);
@@ -191,29 +191,29 @@ namespace Sla.DECCORE
                 vn1 = op.getIn(0);
                 if (!vn1.isWritten()) return (PcodeOp)null;
                 addop = vn1.getDef();
-                if (addop.code() != CPUI_INT_ADD) return (PcodeOp)null;  // Match the add
+                if (addop.code() != OpCode.CPUI_INT_ADD) return (PcodeOp)null;  // Match the add
                 tmpvn = addop.getIn(0);
                 if (!tmpvn.isWritten()) return (PcodeOp)null;
                 zext1 = tmpvn.getDef();
-                if (zext1.code() != CPUI_INT_ZEXT) return (PcodeOp)null; // Match the first zext
+                if (zext1.code() != OpCode.CPUI_INT_ZEXT) return (PcodeOp)null; // Match the first zext
                 tmpvn = addop.getIn(1);
                 if (!tmpvn.isWritten()) return (PcodeOp)null;
                 zext2 = tmpvn.getDef();
-                if (zext2.code() != CPUI_INT_ZEXT) return (PcodeOp)null; // Match the second zext
+                if (zext2.code() != OpCode.CPUI_INT_ZEXT) return (PcodeOp)null; // Match the second zext
             }
             else if (vn2.isWritten())
             {
                 PcodeOp* tmpop = vn2.getDef();
-                if (tmpop.code() == CPUI_INT_ZEXT)
+                if (tmpop.code() == OpCode.CPUI_INT_ZEXT)
                 {   // Form 2 : (z - 1) + z
                     zext2 = tmpop;                  // Second zext is already matched
                     vn1 = op.getIn(0);
                     if (!vn1.isWritten()) return (PcodeOp)null;
                     addop = vn1.getDef();
-                    if (addop.code() != CPUI_INT_ADD)
+                    if (addop.code() != OpCode.CPUI_INT_ADD)
                     {   // Partial form:  (z + z)
                         zext1 = addop;
-                        if (zext1.code() != CPUI_INT_ZEXT)
+                        if (zext1.code() != OpCode.CPUI_INT_ZEXT)
                             return (PcodeOp)null;         // Match the first zext
                         isPartial = true;
                     }
@@ -226,16 +226,16 @@ namespace Sla.DECCORE
                         tmpvn = addop.getIn(0);
                         if (!tmpvn.isWritten()) return (PcodeOp)null;
                         zext1 = tmpvn.getDef();
-                        if (zext1.code() != CPUI_INT_ZEXT) return (PcodeOp)null; // Match the first zext
+                        if (zext1.code() != OpCode.CPUI_INT_ZEXT) return (PcodeOp)null; // Match the first zext
                     }
                 }
-                else if (tmpop.code() == CPUI_INT_ADD)
+                else if (tmpop.code() == OpCode.CPUI_INT_ADD)
                 {   // Form 3 : z + (z - 1)
                     addop = tmpop;              // Matched the add
                     vn1 = op.getIn(0);
                     if (!vn1.isWritten()) return (PcodeOp)null;
                     zext1 = vn1.getDef();
-                    if (zext1.code() != CPUI_INT_ZEXT) return (PcodeOp)null; // Match the first zext
+                    if (zext1.code() != OpCode.CPUI_INT_ZEXT) return (PcodeOp)null; // Match the first zext
                     tmpvn = addop.getIn(1);
                     if (!tmpvn.isConstant()) return (PcodeOp)null;
                     mask = Globals.calc_mask(tmpvn.getSize());
@@ -243,7 +243,7 @@ namespace Sla.DECCORE
                     tmpvn = addop.getIn(0);
                     if (!tmpvn.isWritten()) return (PcodeOp)null;
                     zext2 = tmpvn.getDef();
-                    if (zext2.code() != CPUI_INT_ZEXT) return (PcodeOp)null; // Match the second zext
+                    if (zext2.code() != OpCode.CPUI_INT_ZEXT) return (PcodeOp)null; // Match the second zext
                 }
                 else
                     return (PcodeOp)null;
@@ -257,7 +257,7 @@ namespace Sla.DECCORE
             lessop = vn1.getDef();
             lessequalop = vn2.getDef();
             OpCode opc = lessop.code();
-            if ((opc != CPUI_INT_LESS) && (opc != CPUI_INT_SLESS) && (opc != CPUI_FLOAT_LESS))
+            if ((opc != OpCode.CPUI_INT_LESS) && (opc != OpCode.CPUI_INT_SLESS) && (opc != OpCode.CPUI_FLOAT_LESS))
             {   // Make sure first zext is less
                 PcodeOp* tmpop = lessop;
                 lessop = lessequalop;
@@ -289,27 +289,27 @@ namespace Sla.DECCORE
         public static int testCompareEquivalence(PcodeOp lessop, PcodeOp lessequalop)
         {
             bool twoLessThan;
-            if (lessop.code() == CPUI_INT_LESS)
+            if (lessop.code() == OpCode.CPUI_INT_LESS)
             {   // Make sure second zext is matching lessequal
-                if (lessequalop.code() == CPUI_INT_LESSEQUAL)
+                if (lessequalop.code() == OpCode.CPUI_INT_LESSEQUAL)
                     twoLessThan = false;
-                else if (lessequalop.code() == CPUI_INT_LESS)
+                else if (lessequalop.code() == OpCode.CPUI_INT_LESS)
                     twoLessThan = true;
                 else
                     return -1;
             }
-            else if (lessop.code() == CPUI_INT_SLESS)
+            else if (lessop.code() == OpCode.CPUI_INT_SLESS)
             {
-                if (lessequalop.code() == CPUI_INT_SLESSEQUAL)
+                if (lessequalop.code() == OpCode.CPUI_INT_SLESSEQUAL)
                     twoLessThan = false;
-                else if (lessequalop.code() == CPUI_INT_SLESS)
+                else if (lessequalop.code() == OpCode.CPUI_INT_SLESS)
                     twoLessThan = true;
                 else
                     return -1;
             }
-            else if (lessop.code() == CPUI_FLOAT_LESS)
+            else if (lessop.code() == OpCode.CPUI_FLOAT_LESS)
             {
-                if (lessequalop.code() == CPUI_FLOAT_LESSEQUAL)
+                if (lessequalop.code() == OpCode.CPUI_FLOAT_LESSEQUAL)
                     twoLessThan = false;
                 else
                     return -1;              // No partial form for floating-point comparison

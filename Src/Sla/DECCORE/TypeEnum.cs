@@ -65,8 +65,8 @@ namespace Sla.DECCORE
                     }
 
                     // Fill in any holes in the mask (bit field must consist of contiguous bits
-                    int lsb = leastsigbit_set(curmask);
-                    int msb = mostsigbit_set(curmask);
+                    int lsb = Globals.leastsigbit_set(curmask);
+                    int msb = Globals.mostsigbit_set(curmask);
                     if (msb > curmaxbit)
                         curmaxbit = msb;
 
@@ -101,7 +101,7 @@ namespace Sla.DECCORE
         {
             //  uint elemId = decoder.openElement();
             decodeBasic(decoder);
-            submeta = (metatype == TYPE_INT) ? SUB_INT_ENUM : SUB_UINT_ENUM;
+            submeta = (metatype == type_metatype.TYPE_INT) ? SUB_INT_ENUM : SUB_UINT_ENUM;
             Dictionary<ulong, string> nmap;
 
             for (; ; )
@@ -140,12 +140,12 @@ namespace Sla.DECCORE
             flags |= (op.flags & poweroftwo) | enumtype;
         }
 
-        /// Construct from a size and meta-type (TYPE_INT or TYPE_UINT)
+        /// Construct from a size and meta-type (TYPE_INT or type_metatype.TYPE_UINT)
         public TypeEnum(int s, type_metatype m)
             : base(s, m)
         {
             flags |= enumtype;
-            submeta = (m == TYPE_INT) ? SUB_INT_ENUM : SUB_UINT_ENUM;
+            submeta = (m == type_metatype.TYPE_INT) ? SUB_INT_ENUM : SUB_UINT_ENUM;
         }
 
         /// Construct from a size, meta-type, and name
@@ -153,7 +153,7 @@ namespace Sla.DECCORE
             : base(s, m, nm)
         {
             flags |= enumtype;
-            submeta = (m == TYPE_INT) ? SUB_INT_ENUM : SUB_UINT_ENUM;
+            submeta = (m == type_metatype.TYPE_INT) ? SUB_INT_ENUM : SUB_UINT_ENUM;
         }
 
         /// Beginning of name map

@@ -32,9 +32,9 @@ namespace Sla.EXTRA
                     int slot = op.getSlot(vn);
                     if (slot == 0)
                     {
-                        if (op.code() == CPUI_LOAD) continue;
-                        if (op.code() == CPUI_STORE) continue;
-                        if (op.code() == CPUI_RETURN) continue;
+                        if (op.code() == OpCode.CPUI_LOAD) continue;
+                        if (op.code() == OpCode.CPUI_STORE) continue;
+                        if (op.code() == OpCode.CPUI_RETURN) continue;
                     }
                 }
                 else if (vn.getSpace().getType() != IPTR_INTERNAL)

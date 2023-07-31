@@ -29,7 +29,7 @@ namespace Sla.SLACOMP
         /// VarnodesTpls used by the op are examined to see if they are derived from
         /// parameters of the macro. If so, details of the parameters actively passed
         /// as part of the specific macro invocation are substituted into the VarnodeTpl.
-        /// Truncation operations on a macro parameter may cause additional CPUI_SUBPIECE
+        /// Truncation operations on a macro parameter may cause additional OpCode.CPUI_SUBPIECE
         /// operators to be inserted as part of the expansion and certain forms are not
         /// permitted.
         /// \param op is the cloned op to emit

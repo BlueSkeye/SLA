@@ -7,7 +7,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla.DECCORE
 {
-    /// \brief Mark illegal Varnode inputs used only in CPUI_INDIRECT ops
+    /// \brief Mark illegal Varnode inputs used only in OpCode.CPUI_INDIRECT ops
     internal class ActionMarkIndirectOnly
     {
         public ActionMarkIndirectOnly(string g)

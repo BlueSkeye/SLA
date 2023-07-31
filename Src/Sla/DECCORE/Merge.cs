@@ -243,7 +243,7 @@ namespace Sla.DECCORE
                 vn = high.getInstance(i);
                 if (!vn.isWritten()) continue;
                 op = vn.getDef();
-                if (op.code() != CPUI_COPY) continue; // vn must be defineed by copy
+                if (op.code() != OpCode.CPUI_COPY) continue; // vn must be defineed by copy
                 if (op.getIn(0).getHigh() == high) continue;  // From something NOT in same high
                 singlelist.Add(vn);
             }
@@ -343,7 +343,7 @@ namespace Sla.DECCORE
                 Varnode* vn = high.getInstance(i);
                 if (!vn.isWritten()) continue;
                 PcodeOp* op = vn.getDef();
-                if (op.code() != CPUI_COPY) continue;
+                if (op.code() != OpCode.CPUI_COPY) continue;
                 if (op.getIn(0).getHigh() == high) continue;
                 if (filterTemps && op.getOut().getSpace().getType() != IPTR_INTERNAL) continue;
                 copyIns.Add(op);
@@ -421,7 +421,7 @@ namespace Sla.DECCORE
         private PcodeOp allocateCopyTrim(Varnode inVn, Address addr, PcodeOp trimOp)
         {
             PcodeOp* copyOp = data.newOp(1, addr);
-            data.opSetOpcode(copyOp, CPUI_COPY);
+            data.opSetOpcode(copyOp, OpCode.CPUI_COPY);
             Datatype* ct = inVn.getType();
             if (ct.needsResolution())
             {       // If the data-type needs resolution
@@ -472,7 +472,7 @@ namespace Sla.DECCORE
             {
                 bl = vn.getDef().getParent();
                 pc = vn.getDef().getAddr();
-                if (vn.getDef().code() == CPUI_INDIRECT) // snip must come after OP CAUSING EFFECT
+                if (vn.getDef().code() == OpCode.CPUI_INDIRECT) // snip must come after OP CAUSING EFFECT
                                                            // Not the indirect op itself
                     afterop = PcodeOp::getOpFromConst(vn.getDef().getIn(1).getAddr());
                 else
@@ -616,7 +616,7 @@ namespace Sla.DECCORE
                             if (!vn2.isAddrForce()) continue;
                             if (!vn2.isWritten()) continue;
                             PcodeOp* indop = vn2.getDef();
-                            if (indop.code() != CPUI_INDIRECT) continue;
+                            if (indop.code() != OpCode.CPUI_INDIRECT) continue;
                             // The vn2 INDIRECT must be linked to the read op
                             if (op != PcodeOp::getOpFromConst(indop.getIn(1).getAddr())) continue;
                             if (overlaptype != 1)
@@ -682,19 +682,19 @@ namespace Sla.DECCORE
             Varnode* uniq,*vn;
             PcodeOp* afterop;
 
-            if (op.code() == CPUI_INDIRECT)
+            if (op.code() == OpCode.CPUI_INDIRECT)
                 afterop = PcodeOp::getOpFromConst(op.getIn(1).getAddr()); // Insert copyop AFTER source of indirect
             else
                 afterop = op;
             vn = op.getOut();
             Datatype* ct = vn.getType();
             copyop = data.newOp(1, op.getAddr());
-            data.opSetOpcode(copyop, CPUI_COPY);
+            data.opSetOpcode(copyop, OpCode.CPUI_COPY);
             if (ct.needsResolution())
             {
                 int fieldNum = data.inheritResolution(ct, copyop, -1, op, -1);
                 data.forceFacingType(ct, fieldNum, copyop, 0);
-                if (ct.getMetatype() == TYPE_PARTIALUNION)
+                if (ct.getMetatype() == type_metatype.TYPE_PARTIALUNION)
                     ct = vn.getTypeDefFacing();
             }
             uniq = data.newUnique(vn.getSize(), ct);
@@ -718,7 +718,7 @@ namespace Sla.DECCORE
             Varnode* vn;
             Address pc;
 
-            if (op.code() == CPUI_MULTIEQUAL)
+            if (op.code() == OpCode.CPUI_MULTIEQUAL)
             {
                 BlockBasic* bb = (BlockBasic*)op.getParent().getIn(slot);
                 pc = bb.getStop();
@@ -728,7 +728,7 @@ namespace Sla.DECCORE
             vn = op.getIn(slot);
             copyop = allocateCopyTrim(vn, pc, op);
             data.opSetInput(op, copyop.getOut(), slot);
-            if (op.code() == CPUI_MULTIEQUAL)
+            if (op.code() == OpCode.CPUI_MULTIEQUAL)
                 data.opInsertEnd(copyop, (BlockBasic*)op.getParent().getIn(slot));
             else
                 data.opInsertBefore(copyop, op);
@@ -771,7 +771,7 @@ namespace Sla.DECCORE
             HighVariable* high_out;
             int i, nexttrim, max;
 
-            max = (op.code() == CPUI_INDIRECT) ? 1 : op.numInput();
+            max = (op.code() == OpCode.CPUI_INDIRECT) ? 1 : op.numInput();
             high_out = op.getOut().getHigh();
             // First try to deal with non-cover related merge
             // restrictions
@@ -933,7 +933,7 @@ namespace Sla.DECCORE
                 Varnode* vn = high.getInstance(i);
                 if (!vn.isWritten()) continue;
                 PcodeOp* op = vn.getDef();
-                if (op.code() == CPUI_COPY)
+                if (op.code() == OpCode.CPUI_COPY)
                 {       // If the write is not a COPY
                     if (op.getIn(0) == inVn) continue; // from the same Varnode as domOp and subOp
                 }
@@ -977,7 +977,7 @@ namespace Sla.DECCORE
                 domCopyIsNew = true;
                 PcodeOp* oldCopy = domCopy;
                 domCopy = data.newOp(1, domBl.getStop());
-                data.opSetOpcode(domCopy, CPUI_COPY);
+                data.opSetOpcode(domCopy, OpCode.CPUI_COPY);
                 Datatype* ct = rootVn.getType();
                 if (ct.needsResolution())
                 {
@@ -985,7 +985,7 @@ namespace Sla.DECCORE
                     int fieldNum = (resUnion == (ResolvedUnion)null) ? -1 : resUnion.getFieldNum();
                     data.forceFacingType(ct, fieldNum, domCopy, 0);
                     data.forceFacingType(ct, fieldNum, domCopy, -1);
-                    if (ct.getMetatype() == TYPE_PARTIALUNION)
+                    if (ct.getMetatype() == type_metatype.TYPE_PARTIALUNION)
                         ct = rootVn.getTypeReadFacing(oldCopy);
                 }
                 domVn = data.newUnique(rootVn.getSize(), ct);
@@ -1001,7 +1001,7 @@ namespace Sla.DECCORE
                 if (vn.isWritten())
                 {
                     PcodeOp* op = vn.getDef();
-                    if (op.code() == CPUI_COPY)
+                    if (op.code() == OpCode.CPUI_COPY)
                     {
                         if (op.getIn(0).copyShadow(rootVn)) continue;
                     }
@@ -1456,7 +1456,7 @@ namespace Sla.DECCORE
             {
                 op = *iter;
                 if ((!op.isMarker()) || op.isIndirectCreation()) continue;
-                if (op.code() == CPUI_INDIRECT)
+                if (op.code() == OpCode.CPUI_INDIRECT)
                     mergeIndirect(op);
                 else
                     mergeOp(op);
@@ -1682,7 +1682,7 @@ namespace Sla.DECCORE
                 op = *iter;
                 switch (op.code())
                 {
-                    case CPUI_COPY:
+                    case OpCode.CPUI_COPY:
                         v1 = op.getOut();
                         h1 = v1.getHigh();
                         if (h1 == op.getIn(0).getHigh())
@@ -1707,7 +1707,7 @@ namespace Sla.DECCORE
                             }
                         }
                         break;
-                    case CPUI_PIECE:        // Check if output is built out of pieces of itself
+                    case OpCode.CPUI_PIECE:        // Check if output is built out of pieces of itself
                         v1 = op.getOut();
                         v2 = op.getIn(0);
                         v3 = op.getIn(1);
@@ -1731,7 +1731,7 @@ namespace Sla.DECCORE
                         }
                         data.opMarkNonPrinting(op);
                         break;
-                    case CPUI_SUBPIECE:
+                    case OpCode.CPUI_SUBPIECE:
                         v1 = op.getOut();
                         v2 = op.getIn(0);
                         p1 = v1.getHigh().piece;
@@ -1768,7 +1768,7 @@ namespace Sla.DECCORE
 
         /// \brief Register an unmapped CONCAT stack with the merge process
         ///
-        /// The given Varnode must be the root of a tree of CPUI_PIECE operations as produced by
+        /// The given Varnode must be the root of a tree of OpCode.CPUI_PIECE operations as produced by
         /// PieceNode::gatherPieces.  These will be grouped together into a single variable.
         /// \param vn is the given root Varnode
         public void registerProtoPartialRoot(Varnode vn)

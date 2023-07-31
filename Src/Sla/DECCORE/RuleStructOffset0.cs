@@ -33,7 +33,7 @@ namespace Sla.DECCORE
         /// to drill down to the first component.
         public override void getOpList(List<uint> oplist)
         {
-            uint list[] = { CPUI_LOAD, CPUI_STORE };
+            uint list[] = { OpCode.CPUI_LOAD, OpCode.CPUI_STORE };
             oplist.insert(oplist.end(), list, list + 2);
         }
 
@@ -42,11 +42,11 @@ namespace Sla.DECCORE
             int movesize;          // Number of bytes being moved by load or store
 
             if (!data.hasTypeRecoveryStarted()) return 0;
-            if (op.code() == CPUI_LOAD)
+            if (op.code() == OpCode.CPUI_LOAD)
             {
                 movesize = op.getOut().getSize();
             }
-            else if (op.code() == CPUI_STORE)
+            else if (op.code() == OpCode.CPUI_STORE)
             {
                 movesize = op.getIn(2).getSize();
             }
@@ -55,14 +55,14 @@ namespace Sla.DECCORE
 
             Varnode* ptrVn = op.getIn(1);
             Datatype* ct = ptrVn.getTypeReadFacing(op);
-            if (ct.getMetatype() != TYPE_PTR) return 0;
+            if (ct.getMetatype() != type_metatype.TYPE_PTR) return 0;
             Datatype* baseType = ((TypePointer*)ct).getPtrTo();
             ulong offset = 0;
             if (ct.isFormalPointerRel() && ((TypePointerRel*)ct).evaluateThruParent(0))
             {
                 TypePointerRel* ptRel = (TypePointerRel*)ct;
                 baseType = ptRel.getParent();
-                if (baseType.getMetatype() != TYPE_STRUCT)
+                if (baseType.getMetatype() != type_metatype.TYPE_STRUCT)
                     return 0;
                 int iOff = ptRel.getPointerOffset();
                 iOff = AddrSpace::addressToByteInt(iOff, ptRel.getWordSize());
@@ -70,7 +70,7 @@ namespace Sla.DECCORE
                     return 0;
                 offset = iOff;
             }
-            if (baseType.getMetatype() == TYPE_STRUCT)
+            if (baseType.getMetatype() == type_metatype.TYPE_STRUCT)
             {
                 if (baseType.getSize() < movesize)
                     return 0;               // Moving something bigger than entire structure
@@ -82,7 +82,7 @@ namespace Sla.DECCORE
                                                                 // the first element.
                                                                 //    }
             }
-            else if (baseType.getMetatype() == TYPE_ARRAY)
+            else if (baseType.getMetatype() == type_metatype.TYPE_ARRAY)
             {
                 if (baseType.getSize() < movesize)
                     return 0;               // Moving something bigger than entire array
@@ -96,7 +96,7 @@ namespace Sla.DECCORE
             else
                 return 0;
 
-            PcodeOp* newop = data.newOpBefore(op, CPUI_PTRSUB, ptrVn, data.newConstant(ptrVn.getSize(), 0));
+            PcodeOp* newop = data.newOpBefore(op, OpCode.CPUI_PTRSUB, ptrVn, data.newConstant(ptrVn.getSize(), 0));
             if (ptrVn.getType().needsResolution())
                 data.inheritResolution(ptrVn.getType(), newop, 0, op, 1);
             newop.setStopTypePropagation();

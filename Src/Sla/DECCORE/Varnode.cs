@@ -411,9 +411,6 @@ namespace Sla.DECCORE
         /// Get the defining PcodeOp of this Varnode
         public PcodeOp getDef() => def;
 
-        /// Get the defining PcodeOp
-        public PcodeOp getDef() => (PcodeOp)def;
-
         /// Get the high-level variable associated with this Varnode
         /// During the course of analysis Varnodes are merged into high-level variables that are intended
         /// to be closer to the concept of variables in C source code. For a large portion of the decompiler
@@ -964,10 +961,10 @@ namespace Sla.DECCORE
             {
                 if (op.isConstant()) return -1;
                 Varnode vn = this;
-                if (vn.isWritten() && (vn.getDef().code() == CPUI_INT_MULT))
+                if (vn.isWritten() && (vn.getDef().code() == OpCode.CPUI_INT_MULT))
                     if (vn.getDef().getIn(1).isConstant())
                         vn = vn.getDef().getIn(0);
-                if (op.isWritten() && (op.getDef().code() == CPUI_INT_MULT))
+                if (op.isWritten() && (op.getDef().code() == OpCode.CPUI_INT_MULT))
                     if (op.getDef().getIn(1).isConstant())
                         op = op.getDef().getIn(0);
 
@@ -1172,7 +1169,7 @@ namespace Sla.DECCORE
             }
             if (!isWritten()) return -1;
             OpCode opc = def.code();
-            if (opc == CPUI_INT_ZEXT)
+            if (opc == OpCode.CPUI_INT_ZEXT)
             {
                 Varnode* vn0 = def.getIn(0);
                 if (vn0.isConstant())
@@ -1181,7 +1178,7 @@ namespace Sla.DECCORE
                     return 1;
                 }
             }
-            else if (opc == CPUI_INT_SEXT)
+            else if (opc == OpCode.CPUI_INT_SEXT)
             {
                 Varnode* vn0 = def.getIn(0);
                 if (vn0.isConstant())
@@ -1423,7 +1420,7 @@ namespace Sla.DECCORE
         /// \return \b true if the Datatype or the lock setting was changed
         public bool updateType(Datatype ct, bool @lock, bool @override)
         {
-            if (ct.getMetatype() == TYPE_UNKNOWN) // Unknown data type is ALWAYS unlocked
+            if (ct.getMetatype() == type_metatype.TYPE_UNKNOWN) // Unknown data type is ALWAYS unlocked
                 lock = false;
 
             if (isTypeLock() && (!@override)) return false; // Type is locked
@@ -1437,7 +1434,7 @@ namespace Sla.DECCORE
             return true;
         }
 
-        /// Mark as produced by explicit CPUI_STORE
+        /// Mark as produced by explicit OpCode.CPUI_STORE
         public void setStackStore()
         {
             addlflags |= Varnode::stack_store;
@@ -1543,7 +1540,7 @@ namespace Sla.DECCORE
                 return false;
             if ((flags & (input | typelock)) == (input | typelock))
             {
-                if (size == 1 && type.getMetatype() == TYPE_BOOL)
+                if (size == 1 && type.getMetatype() == type_metatype.TYPE_BOOL)
                     return true;
             }
             return false;
@@ -1562,13 +1559,13 @@ namespace Sla.DECCORE
             if (this == op2) return true;
             // Trace -this- to the source of the copy chain
             vn = this;
-            while ((vn.isWritten()) && (vn.getDef().code() == CPUI_COPY))
+            while ((vn.isWritten()) && (vn.getDef().code() == OpCode.CPUI_COPY))
             {
                 vn = vn.getDef().getIn(0);
                 if (vn == op2) return true; // If we hit op2 then this and op2 must be the same
             }
             // Trace op2 to the source of copy chain
-            while ((op2.isWritten()) && (op2.getDef().code() == CPUI_COPY))
+            while ((op2.isWritten()) && (op2.getDef().code() == OpCode.CPUI_COPY))
             {
                 op2 = op2.getDef().getIn(0);
                 if (vn == op2) return true; // If the source is the same then this and op2 are same
@@ -1588,13 +1585,13 @@ namespace Sla.DECCORE
         public bool findSubpieceShadow(int leastByte, Varnode whole, int recurse)
         {
             Varnode vn = this;
-            while (vn.isWritten() && vn.getDef().code() == CPUI_COPY)
+            while (vn.isWritten() && vn.getDef().code() == OpCode.CPUI_COPY)
                 vn = vn.getDef().getIn(0);
             if (!vn.isWritten())
             {
                 if (vn.isConstant())
                 {
-                    while (whole.isWritten() && whole.getDef().code() == CPUI_COPY)
+                    while (whole.isWritten() && whole.getDef().code() == OpCode.CPUI_COPY)
                         whole = whole.getDef().getIn(0);
                     if (!whole.isConstant()) return false;
                     ulong off = whole.getOffset() >> leastByte * 8;
@@ -1604,28 +1601,28 @@ namespace Sla.DECCORE
                 return false;
             }
             OpCode opc = vn.getDef().code();
-            if (opc == CPUI_SUBPIECE)
+            if (opc == OpCode.CPUI_SUBPIECE)
             {
                 Varnode tmpvn = vn.getDef().getIn(0);
                 int off = (int)vn.getDef().getIn(1).getOffset();
                 if (off != leastByte || tmpvn.getSize() != whole.getSize())
                     return false;
                 if (tmpvn == whole) return true;
-                while (tmpvn.isWritten() && tmpvn.getDef().code() == CPUI_COPY)
+                while (tmpvn.isWritten() && tmpvn.getDef().code() == OpCode.CPUI_COPY)
                 {
                     tmpvn = tmpvn.getDef().getIn(0);
                     if (tmpvn == whole) return true;
                 }
             }
-            else if (opc == CPUI_MULTIEQUAL)
+            else if (opc == OpCode.CPUI_MULTIEQUAL)
             {
                 recurse += 1;
                 if (recurse > 1) return false;  // Truncate the recursion at maximum depth
-                while (whole.isWritten() && whole.getDef().code() == CPUI_COPY)
+                while (whole.isWritten() && whole.getDef().code() == OpCode.CPUI_COPY)
                     whole = whole.getDef().getIn(0);
                 if (!whole.isWritten()) return false;
                 PcodeOp bigOp = whole.getDef();
-                if (bigOp.code() != CPUI_MULTIEQUAL) return false;
+                if (bigOp.code() != OpCode.CPUI_MULTIEQUAL) return false;
                 PcodeOp smallOp = vn.getDef();
                 if (bigOp.getParent() != smallOp.getParent()) return false;
                 // Recurse search through all branches of the two MULTIEQUALs
@@ -1649,11 +1646,11 @@ namespace Sla.DECCORE
         public bool findPieceShadow(int leastByte, Varnode piece)
         {
             Varnode vn = this;
-            while (vn.isWritten() && vn.getDef().code() == CPUI_COPY)
+            while (vn.isWritten() && vn.getDef().code() == OpCode.CPUI_COPY)
                 vn = vn.getDef().getIn(0);
             if (!vn.isWritten()) return false;
             OpCode opc = vn.getDef().code();
-            if (opc == CPUI_PIECE)
+            if (opc == OpCode.CPUI_PIECE)
             {
                 Varnode tmpvn = vn.getDef().getIn(1);  // Least significant part
                 if (leastByte >= tmpvn.getSize())
@@ -1668,14 +1665,14 @@ namespace Sla.DECCORE
                 if (leastByte == 0 && tmpvn.getSize() == piece.getSize())
                 {
                     if (tmpvn == piece) return true;
-                    while (tmpvn.isWritten() && tmpvn.getDef().code() == CPUI_COPY)
+                    while (tmpvn.isWritten() && tmpvn.getDef().code() == OpCode.CPUI_COPY)
                     {
                         tmpvn = tmpvn.getDef().getIn(0);
                         if (tmpvn == piece) return true;
                     }
                     return false;
                 }
-                // CPUI_PIECE input is too big, recursively search for another CPUI_PIECE
+                // OpCode.CPUI_PIECE input is too big, recursively search for another OpCode.CPUI_PIECE
                 return tmpvn.findPieceShadow(leastByte, piece);
             }
             return false;

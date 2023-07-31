@@ -51,13 +51,13 @@ namespace Sla.DECCORE
                 ++iter;
                 switch (arithOp.code())
                 {
-                    case CPUI_INT_EQUAL:
-                    case CPUI_INT_NOTEQUAL:
+                    case OpCode.CPUI_INT_EQUAL:
+                    case OpCode.CPUI_INT_NOTEQUAL:
                         if (arithOp.getIn(1).isConstant())
                             doConversion = true;
                         break;
-                    case CPUI_INT_ADD:
-                    case CPUI_INT_MULT:
+                    case OpCode.CPUI_INT_ADD:
+                    case OpCode.CPUI_INT_MULT:
                         doConversion = true;
                         break;
                     default:
@@ -69,11 +69,11 @@ namespace Sla.DECCORE
             if (!doConversion)
                 return 0;
             PcodeOp* shiftOp = data.newOp(2, op.getAddr());
-            data.opSetOpcode(shiftOp, CPUI_INT_SRIGHT);
+            data.opSetOpcode(shiftOp, OpCode.CPUI_INT_SRIGHT);
             Varnode* uniqueVn = data.newUniqueOut(inVn.getSize(), shiftOp);
             data.opSetInput(op, uniqueVn, 0);
             data.opSetInput(op, data.newConstant(inVn.getSize(), Globals.calc_mask(inVn.getSize())), 1);
-            data.opSetOpcode(op, CPUI_INT_MULT);
+            data.opSetOpcode(op, OpCode.CPUI_INT_MULT);
             data.opSetInput(shiftOp, inVn, 0);
             data.opSetInput(shiftOp, constVn, 1);
             data.opInsertBefore(shiftOp, op);

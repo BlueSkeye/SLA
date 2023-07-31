@@ -1,21 +1,25 @@
-﻿using ghidra;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
+using EntryMap = Sla.EXTRA.rangemap<Sla.DECCORE.SymbolEntry>;
+
 namespace Sla.DECCORE
 {
     /// \brief An iterator over SymbolEntry objects in multiple address spaces
     /// Given an EntryMap (a rangemap of SymbolEntry objects in a single address space)
     /// for each address space, iterator over all the SymbolEntry objects
-    internal class MapIterator
+    internal class MapIterator : IEnumerator<SymbolEntry>
     {
-        private List<EntryMap>? map;       ///< The list of EntryMaps, one per address space
-        private IEnumerator<EntryMap> curmap;   ///< Current EntryMap being iterated
-        private IEnumerator<SymbolEntry> curiter;  ///< Current SymbolEntry being iterated
+        /// The list of EntryMaps, one per address space
+        private List<EntryMap>? map;
+        /// Current EntryMap being iterated
+        private IEnumerator<EntryMap> curmap;
+        /// Current SymbolEntry being iterated
+        private IEnumerator<SymbolEntry> curiter;
 
         /// Construct an uninitialized iterator
         public MapIterator()

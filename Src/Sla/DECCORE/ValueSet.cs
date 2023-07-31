@@ -111,7 +111,7 @@ namespace Sla.DECCORE
             vn.setValueSet(this);
             if (typeCode != 0)
             {
-                opCode = CPUI_MAX;
+                opCode = OpCode.CPUI_MAX;
                 numParams = 0;
                 range.setRange(0, vn.getSize());   // Treat as offset of 0 relative to special value
                 leftIsStable = true;
@@ -121,10 +121,10 @@ namespace Sla.DECCORE
             {
                 PcodeOp* op = vn.getDef();
                 opCode = op.code();
-                if (opCode == CPUI_INDIRECT)
-                {   // Treat CPUI_INDIRECT as CPUI_COPY
+                if (opCode == OpCode.CPUI_INDIRECT)
+                {   // Treat OpCode.CPUI_INDIRECT as OpCode.CPUI_COPY
                     numParams = 1;
-                    opCode = CPUI_COPY;
+                    opCode = OpCode.CPUI_COPY;
                 }
                 else
                     numParams = op.numInput();
@@ -133,7 +133,7 @@ namespace Sla.DECCORE
             }
             else if (vn.isConstant())
             {
-                opCode = CPUI_MAX;
+                opCode = OpCode.CPUI_MAX;
                 numParams = 0;
                 range.setRange(vn.getOffset(), vn.getSize());
                 leftIsStable = true;
@@ -141,7 +141,7 @@ namespace Sla.DECCORE
             }
             else
             {   // Some other form of input
-                opCode = CPUI_MAX;
+                opCode = OpCode.CPUI_MAX;
                 numParams = 0;
                 typeCode = 0;
                 range.setFull(vn.getSize());
@@ -202,19 +202,19 @@ namespace Sla.DECCORE
             // Only certain operations can propagate a relative value set
             switch (opCode)
             {
-                case CPUI_PTRSUB:
-                case CPUI_PTRADD:
-                case CPUI_INT_ADD:
-                case CPUI_INT_SUB:
+                case OpCode.CPUI_PTRSUB:
+                case OpCode.CPUI_PTRADD:
+                case OpCode.CPUI_INT_ADD:
+                case OpCode.CPUI_INT_SUB:
                     if (relCount == 1)
                         typeCode = lastTypeCode;
                     else
                         return true;
                     break;
-                case CPUI_CAST:
-                case CPUI_COPY:
-                case CPUI_INDIRECT:
-                case CPUI_MULTIEQUAL:
+                case OpCode.CPUI_CAST:
+                case OpCode.CPUI_COPY:
+                case OpCode.CPUI_INDIRECT:
+                case OpCode.CPUI_MULTIEQUAL:
                     typeCode = lastTypeCode;
                     break;
                 default:
@@ -244,7 +244,7 @@ namespace Sla.DECCORE
             CircleRange res;
             PcodeOp* op = vn.getDef();
             int eqPos = 0;
-            if (opCode == CPUI_MULTIEQUAL)
+            if (opCode == OpCode.CPUI_MULTIEQUAL)
             {
                 int pieces = 0;
                 for (int i = 0; i < numParams; ++i)
@@ -429,7 +429,7 @@ namespace Sla.DECCORE
                 s << " absolute";
             else
                 s << " stackptr";
-            if (opCode == CPUI_MAX)
+            if (opCode == OpCode.CPUI_MAX)
             {
                 if (vn.isConstant())
                     s << " const";
@@ -437,7 +437,7 @@ namespace Sla.DECCORE
                     s << " input";
             }
             else
-                s << ' ' << get_opname(opCode);
+                s << ' ' << Globals.get_opname(opCode);
             s << ' ';
             range.printRaw(s);
         }

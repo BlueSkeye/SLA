@@ -41,7 +41,7 @@ namespace Sla.DECCORE
             Varnode* shiftin = op.getIn(0);
             if (!shiftin.isWritten()) return 0;
             PcodeOp* concat = shiftin.getDef();
-            if (concat.code() != CPUI_PIECE) return 0;
+            if (concat.code() != OpCode.CPUI_PIECE) return 0;
 
             int sa = op.getIn(1).getOffset();
             int leastsize = concat.getIn(1).getSize() * 8;
@@ -49,7 +49,7 @@ namespace Sla.DECCORE
             Varnode* mainin = concat.getIn(0);
             if (mainin.isFree()) return 0;
             sa -= leastsize;
-            OpCode extcode = (op.code() == CPUI_INT_RIGHT) ? CPUI_INT_ZEXT : CPUI_INT_SEXT;
+            OpCode extcode = (op.code() == OpCode.CPUI_INT_RIGHT) ? OpCode.CPUI_INT_ZEXT : OpCode.CPUI_INT_SEXT;
             if (sa == 0)
             {       // Exact cancelation
                 data.opRemoveInput(op, 1);  // Remove thrown away least

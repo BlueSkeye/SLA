@@ -1,12 +1,14 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using Sla.EXTRA;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+
+using ScopeMap = System.Collections.Generic.Dictionary<ulong, Sla.DECCORE.Scope>;
+using ScopeResolve = Sla.EXTRA.rangemap<Sla.DECCORE.ScopeMapper>;
 
 namespace Sla.DECCORE
 {

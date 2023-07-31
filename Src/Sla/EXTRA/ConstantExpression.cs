@@ -24,15 +24,15 @@ namespace Sla.EXTRA
         ~ConstantExpression()
         {
             delete expr1;
-            if (expr2 != (RHSConstant*)0)
+            if (expr2 != (RHSConstant)null)
                 delete expr2;
         }
 
         public override RHSConstant clone()
         {
             RHSConstant* ecopy1 = expr1.clone();
-            RHSConstant* ecopy2 = (RHSConstant*)0;
-            if (expr2 != (RHSConstant*)0)
+            RHSConstant* ecopy2 = (RHSConstant)null;
+            if (expr2 != (RHSConstant)null)
                 ecopy2 = expr2.clone();
             return new ConstantExpression(ecopy1, ecopy2, opc);
         }
@@ -63,66 +63,66 @@ namespace Sla.EXTRA
             string name;            // name of operator
             switch (opc)
             {
-                case CPUI_INT_ADD:
+                case OpCode.CPUI_INT_ADD:
                     type = 0;
                     name = " + ";
                     break;
-                case CPUI_INT_SUB:
+                case OpCode.CPUI_INT_SUB:
                     type = 0;
                     name = " - ";
                     break;
-                case CPUI_INT_AND:
+                case OpCode.CPUI_INT_AND:
                     type = 0;
                     name = " & ";
                     break;
-                case CPUI_INT_OR:
+                case OpCode.CPUI_INT_OR:
                     type = 0;
                     name = " | ";
                     break;
-                case CPUI_INT_XOR:
+                case OpCode.CPUI_INT_XOR:
                     type = 0;
                     name = " ^ ";
                     break;
-                case CPUI_INT_MULT:
+                case OpCode.CPUI_INT_MULT:
                     type = 0;
                     name = " * ";
                     break;
-                case CPUI_INT_DIV:
+                case OpCode.CPUI_INT_DIV:
                     type = 0;
                     name = " / ";
                     break;
-                case CPUI_INT_EQUAL:
+                case OpCode.CPUI_INT_EQUAL:
                     type = 0;
                     name = " == ";
                     break;
-                case CPUI_INT_NOTEQUAL:
+                case OpCode.CPUI_INT_NOTEQUAL:
                     type = 0;
                     name = " != ";
                     break;
-                //  case CPUI_INT_SLESS:
-                //  case CPUI_INT_SLESSEQUAL:
-                case CPUI_INT_LESS:
+                //  case OpCode.CPUI_INT_SLESS:
+                //  case OpCode.CPUI_INT_SLESSEQUAL:
+                case OpCode.CPUI_INT_LESS:
                     type = 0;
                     name = " < ";
                     break;
-                case CPUI_INT_LESSEQUAL:
+                case OpCode.CPUI_INT_LESSEQUAL:
                     type = 0;
                     name = " <= ";
                     break;
-                //  case CPUI_INT_ZEXT:
-                //  case CPUI_INT_SEXT:
-                //  case CPUI_INT_CARRY:
-                //  case CPUI_INT_SCARRY:
-                //  case CPUI_INT_SBORROW:
-                case CPUI_INT_LEFT:
+                //  case OpCode.CPUI_INT_ZEXT:
+                //  case OpCode.CPUI_INT_SEXT:
+                //  case OpCode.CPUI_INT_CARRY:
+                //  case OpCode.CPUI_INT_SCARRY:
+                //  case OpCode.CPUI_INT_SBORROW:
+                case OpCode.CPUI_INT_LEFT:
                     type = 0;
                     name = " << ";
                     break;
-                case CPUI_INT_RIGHT:
+                case OpCode.CPUI_INT_RIGHT:
                     type = 0;
                     name = " >> ";
                     break;
-                //  case CPUI_INT_SRIGHT:
+                //  case OpCode.CPUI_INT_SRIGHT:
                 default:
                     throw new LowlevelError("Unable to generate C for this expression element");
             }

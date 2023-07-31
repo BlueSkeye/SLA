@@ -50,28 +50,28 @@ namespace Sla.DECCORE
             if (!secvn.isWritten()) return 0;
             secop = secvn.getDef();
             opc2 = secop.code();
-            if ((opc2 != CPUI_INT_LEFT) && (opc2 != CPUI_INT_RIGHT) && (opc2 != CPUI_INT_MULT))
+            if ((opc2 != OpCode.CPUI_INT_LEFT) && (opc2 != OpCode.CPUI_INT_RIGHT) && (opc2 != OpCode.CPUI_INT_MULT))
                 return 0;
             if (!secop.getIn(1).isConstant()) return 0;
             opc1 = op.code();
             size = secvn.getSize();
             if (!secop.getIn(0).isHeritageKnown()) return 0;
 
-            if (opc1 == CPUI_INT_MULT)
+            if (opc1 == OpCode.CPUI_INT_MULT)
             {
                 ulong val = op.getIn(1).getOffset();
-                sa1 = leastsigbit_set(val);
+                sa1 = Globals.leastsigbit_set(val);
                 if ((val >> sa1) != (ulong)1) return 0; // Not multiplying by a power of 2
-                opc1 = CPUI_INT_LEFT;
+                opc1 = OpCode.CPUI_INT_LEFT;
             }
             else
                 sa1 = op.getIn(1).getOffset();
-            if (opc2 == CPUI_INT_MULT)
+            if (opc2 == OpCode.CPUI_INT_MULT)
             {
                 ulong val = secop.getIn(1).getOffset();
-                sa2 = leastsigbit_set(val);
+                sa2 = Globals.leastsigbit_set(val);
                 if ((val >> sa2) != (ulong)1) return 0; // Not multiplying by a power of 2
-                opc2 = CPUI_INT_LEFT;
+                opc2 = OpCode.CPUI_INT_LEFT;
             }
             else
                 sa2 = secop.getIn(1).getOffset();
@@ -87,7 +87,7 @@ namespace Sla.DECCORE
                 else
                 {
                     newvn = data.newConstant(size, 0);
-                    data.opSetOpcode(op, CPUI_COPY);
+                    data.opSetOpcode(op, OpCode.CPUI_COPY);
                     data.opSetInput(op, newvn, 0);
                     data.opRemoveInput(op, 1);
                 }
@@ -95,12 +95,12 @@ namespace Sla.DECCORE
             else if (sa1 == sa2 && size <= sizeof(ulong))
             {   // FIXME:  precision
                 mask = Globals.calc_mask(size);
-                if (opc1 == CPUI_INT_LEFT)
+                if (opc1 == OpCode.CPUI_INT_LEFT)
                     mask = (mask << sa1) & mask;
                 else
                     mask = (mask >> sa1) & mask;
                 newvn = data.newConstant(size, mask);
-                data.opSetOpcode(op, CPUI_INT_AND);
+                data.opSetOpcode(op, OpCode.CPUI_INT_AND);
                 data.opSetInput(op, secop.getIn(0), 0);
                 data.opSetInput(op, newvn, 1);
             }

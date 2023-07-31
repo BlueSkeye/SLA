@@ -38,7 +38,7 @@ namespace Sla.DECCORE
             vn = op.getIn(0);
             if (!vn.isWritten()) return 0;
             op2 = vn.getDef();
-            if (op2.code() != CPUI_SUBPIECE) return 0;
+            if (op2.code() != OpCode.CPUI_SUBPIECE) return 0;
             offset1 = op.getIn(1).getOffset();
             offset2 = op2.getIn(1).getOffset();
 

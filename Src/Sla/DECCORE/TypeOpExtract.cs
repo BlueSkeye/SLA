@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     internal class TypeOpExtract : TypeOpFunc
     {
         public TypeOpExtract(TypeFactory t)
-            : base(t, CPUI_EXTRACT,"EXTRACT", TYPE_INT, TYPE_INT)
+            : base(t, OpCode.CPUI_EXTRACT,"EXTRACT", type_metatype.TYPE_INT, type_metatype.TYPE_INT)
         {
             opflags = PcodeOp::ternary;
             behave = new OpBehavior(CPUI_EXTRACT, false);   // Dummy behavior
@@ -19,7 +19,7 @@ namespace Sla.DECCORE
         public override Datatype getInputLocal(PcodeOp op, int slot)
         {
             if (slot == 0)
-                return tlst.getBase(op.getIn(slot).getSize(), TYPE_UNKNOWN);
+                return tlst.getBase(op.getIn(slot).getSize(), type_metatype.TYPE_UNKNOWN);
             return TypeOpFunc::getInputLocal(op, slot);
         }
 

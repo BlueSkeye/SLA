@@ -49,7 +49,7 @@ namespace Sla.DECCORE
             for (iter1 = outvn.beginDescend(); iter1 != outvn.endDescend(); ++iter1)
             {
                 multop = *iter1;
-                if (multop.code() != CPUI_INT_MULT) continue;
+                if (multop.code() != OpCode.CPUI_INT_MULT) continue;
                 div2 = multop.getIn(1);
                 if (div2 == outvn)
                     div2 = multop.getIn(0);
@@ -64,14 +64,14 @@ namespace Sla.DECCORE
                 else
                 {
                     if (!div2.isWritten()) continue;
-                    if (div2.getDef().code() != CPUI_INT_2COMP) continue;
+                    if (div2.getDef().code() != OpCode.CPUI_INT_2COMP) continue;
                     if (div2.getDef().getIn(0) != div) continue;
                 }
                 outvn2 = multop.getOut();
                 for (iter2 = outvn2.beginDescend(); iter2 != outvn2.endDescend(); ++iter2)
                 {
                     addop = *iter2;
-                    if (addop.code() != CPUI_INT_ADD) continue;
+                    if (addop.code() != OpCode.CPUI_INT_ADD) continue;
                     Varnode* lvn;
                     lvn = addop.getIn(0);
                     if (lvn == outvn2)
@@ -82,10 +82,10 @@ namespace Sla.DECCORE
                         data.opSetInput(addop, data.newConstant(div.getSize(), div.getOffset()), 1);
                     else
                         data.opSetInput(addop, div, 1);
-                    if (op.code() == CPUI_INT_DIV) // Remainder of proper signedness
-                        data.opSetOpcode(addop, CPUI_INT_REM);
+                    if (op.code() == OpCode.CPUI_INT_DIV) // Remainder of proper signedness
+                        data.opSetOpcode(addop, OpCode.CPUI_INT_REM);
                     else
-                        data.opSetOpcode(addop, CPUI_INT_SREM);
+                        data.opSetOpcode(addop, OpCode.CPUI_INT_SREM);
                     return 1;
                 }
             }

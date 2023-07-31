@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     internal class TypeOpIntCarry : TypeOpFunc
     {
         public TypeOpIntCarry(TypeFactory t)
-            : base(t, CPUI_INT_CARRY,"CARRY", TYPE_BOOL, TYPE_UINT)
+            : base(t, OpCode.CPUI_INT_CARRY,"CARRY", type_metatype.TYPE_BOOL, type_metatype.TYPE_UINT)
         {
             opflags = PcodeOp::binary;
             addlflags = arithmetic_op;

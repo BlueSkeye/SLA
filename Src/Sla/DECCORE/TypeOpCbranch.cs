@@ -20,7 +20,7 @@ namespace Sla.DECCORE
             Datatype* td;
 
             if (slot == 1)
-                return tlst.getBase(op.getIn(1).getSize(), TYPE_BOOL); // Second param is bool
+                return tlst.getBase(op.getIn(1).getSize(), type_metatype.TYPE_BOOL); // Second param is bool
             td = tlst.getTypeCode();
             AddrSpace* spc = op.getIn(0).getSpace();
             return tlst.getTypePointer(op.getIn(0).getSize(), td, spc.getWordSize()); // First parameter is code pointer

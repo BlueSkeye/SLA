@@ -27,7 +27,7 @@ namespace Sla.DECCORE
                 PcodeOp* op = *iter1;
                 ++iter1;
                 OpCode opc = op.code();
-                if (opc == CPUI_INT_EQUAL || opc == CPUI_INT_NOTEQUAL)
+                if (opc == OpCode.CPUI_INT_EQUAL || opc == OpCode.CPUI_INT_NOTEQUAL)
                 {
                     if (op.getIn(1).isConstant())
                         res.Add(op);
@@ -81,7 +81,7 @@ namespace Sla.DECCORE
                     sgn = -1;
                 else
                     continue;
-                if (compareOp.code() == CPUI_INT_NOTEQUAL)
+                if (compareOp.code() == OpCode.CPUI_INT_NOTEQUAL)
                     sgn = -sgn; // Complement the domain
 
                 Varnode* zeroVn = data.newConstant(inVn.getSize(), 0);
@@ -89,13 +89,13 @@ namespace Sla.DECCORE
                 {
                     data.opSetInput(compareOp, inVn, 1);
                     data.opSetInput(compareOp, zeroVn, 0);
-                    data.opSetOpcode(compareOp, CPUI_INT_SLESSEQUAL);
+                    data.opSetOpcode(compareOp, OpCode.CPUI_INT_SLESSEQUAL);
                 }
                 else
                 {
                     data.opSetInput(compareOp, inVn, 0);
                     data.opSetInput(compareOp, zeroVn, 1);
-                    data.opSetOpcode(compareOp, CPUI_INT_SLESS);
+                    data.opSetOpcode(compareOp, OpCode.CPUI_INT_SLESS);
                 }
                 resultCode = 1;
             }

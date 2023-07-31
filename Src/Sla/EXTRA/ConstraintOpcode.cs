@@ -40,7 +40,7 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[opindex] = UnifyDatatype(UnifyDatatype::op_type);
+            typelist[opindex] = UnifyDatatype(UnifyDatatype.TypeKind.op_type);
         }
 
         public override int getBaseIndex() => opindex;
@@ -51,15 +51,15 @@ namespace Sla.EXTRA
             s << "if (";
             if (opcodes.size() == 1)
             {
-                s << printstate.getName(opindex) << ".code() != CPUI_" << get_opname(opcodes[0]);
+                s << printstate.getName(opindex) << ".code() != CPUI_" << Globals.get_opname(opcodes[0]);
             }
             else
             {
-                s << '(' << printstate.getName(opindex) << ".code() != CPUI_" << get_opname(opcodes[0]) << ')';
+                s << '(' << printstate.getName(opindex) << ".code() != CPUI_" << Globals.get_opname(opcodes[0]) << ')';
                 for (int i = 1; i < opcodes.size(); ++i)
                 {
                     s << "&&";
-                    s << '(' << printstate.getName(opindex) << ".code() != CPUI_" << get_opname(opcodes[i]) << ')';
+                    s << '(' << printstate.getName(opindex) << ".code() != CPUI_" << Globals.get_opname(opcodes[i]) << ')';
                 }
             }
             s << ')' << endl;

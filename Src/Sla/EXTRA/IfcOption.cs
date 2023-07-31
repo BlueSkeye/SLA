@@ -20,7 +20,7 @@ namespace Sla.EXTRA
             string optname;
             string p1, p2, p3;
 
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
             s >> ws >> optname >> ws;
             if (optname.size() == 0)

@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     internal class TypeOpInt2Comp : TypeOpUnary
     {
         public TypeOpInt2Comp(TypeFactory t)
-            : base(t, CPUI_INT_2COMP,"-", TYPE_INT, TYPE_INT)
+            : base(t, OpCode.CPUI_INT_2COMP,"-", type_metatype.TYPE_INT, type_metatype.TYPE_INT)
         {
             opflags = PcodeOp::unary;
             addlflags = arithmetic_op | inherits_sign;

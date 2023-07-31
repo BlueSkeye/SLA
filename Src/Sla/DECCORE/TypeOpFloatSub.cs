@@ -11,7 +11,7 @@ namespace Sla.DECCORE
     internal class TypeOpFloatSub : TypeOpBinary
     {
         public TypeOpFloatSub(TypeFactory t, Translate trans)
-            : base(t, CPUI_FLOAT_SUB,"-", TYPE_FLOAT, TYPE_FLOAT)
+            : base(t, OpCode.CPUI_FLOAT_SUB,"-", type_metatype.TYPE_FLOAT, type_metatype.TYPE_FLOAT)
         {
             opflags = PcodeOp::binary;
             addlflags = floatingpoint_op;

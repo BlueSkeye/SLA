@@ -31,10 +31,10 @@ namespace Sla.DECCORE
         }
 
         private TypePartialStruct(Datatype contain, int off, int sz, Datatype strip)
-            : base(sz, TYPE_PARTIALSTRUCT)
+            : base(sz, type_metatype.TYPE_PARTIALSTRUCT)
         {
 #if CPUI_DEBUG
-            if (contain.getMetatype() != TYPE_STRUCT && contain.getMetatype() != TYPE_ARRAY)
+            if (contain.getMetatype() != type_metatype.TYPE_STRUCT && contain.getMetatype() != type_metatype.TYPE_ARRAY)
                 throw new LowlevelError("Parent of partial struct is not a struture or array");
 #endif
             flags |= has_stripped;

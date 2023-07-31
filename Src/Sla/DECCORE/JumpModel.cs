@@ -80,11 +80,11 @@ namespace Sla.DECCORE
             JumpModel orig);
 
         /// \brief Do normalization of the given switch specific to \b this model.
-        /// The PcodeOp machinery is removed so it looks like the CPUI_BRANCHIND simply takes the
+        /// The PcodeOp machinery is removed so it looks like the OpCode.CPUI_BRANCHIND simply takes the
         /// switch variable as an input Varnode and automatically interprets its values to reach
         /// the correct destination.
         /// \param fd is the function containing the switch
-        /// \param indop is the given switch as a CPUI_BRANCHIND
+        /// \param indop is the given switch as a OpCode.CPUI_BRANCHIND
         /// \return the Varnode holding the final unnormalized switch variable
         public abstract Varnode foldInNormalization(Funcdata fd, PcodeOp indop);
 

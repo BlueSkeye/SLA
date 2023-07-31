@@ -60,7 +60,7 @@ namespace Sla.EXTRA
         public void processTaint()
         {
             Dictionary<Address, CodeUnit>::iterator iter = taintlist.GetLastItem();
-            taintlist.pop_back();
+            taintlist.RemoveLastItem();
 
             CodeUnit & cu((*iter).second);
             cu.flags |= CodeUnit::notcode;

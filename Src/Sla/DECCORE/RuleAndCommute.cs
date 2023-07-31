@@ -46,7 +46,7 @@ namespace Sla.DECCORE
             PcodeOp newop1;
             PcodeOp newop2;
             ulong ormask1, ormask2, othermask, fullmask;
-            OpCode opc = CPUI_INT_OR; // Unnecessary initialization
+            OpCode opc = OpCode.CPUI_INT_OR; // Unnecessary initialization
             int sa, i, size;
 
             orvn = othervn = savn = (Varnode)null; // Unnecessary initialization
@@ -59,7 +59,7 @@ namespace Sla.DECCORE
                 shiftop = shiftvn.getDef();
                 if (shiftop == (PcodeOp)null) continue;
                 opc = shiftop.code();
-                if ((opc != CPUI_INT_LEFT) && (opc != CPUI_INT_RIGHT)) continue;
+                if ((opc != OpCode.CPUI_INT_LEFT) && (opc != OpCode.CPUI_INT_RIGHT)) continue;
                 savn = shiftop.getIn(1);
                 if (!savn.isConstant()) continue;
                 sa = (int)savn.getOffset();
@@ -70,7 +70,7 @@ namespace Sla.DECCORE
                 // Check if AND is only zeroing bits which are already
                 // zeroed by the shift, in which case andmask takes
                 // care of it
-                if (opc == CPUI_INT_RIGHT)
+                if (opc == OpCode.CPUI_INT_RIGHT)
                 {
                     if ((fullmask >> sa) == othermask) continue;
                     othermask <<= sa;       // Calc mask as it will be after commute
@@ -84,7 +84,7 @@ namespace Sla.DECCORE
                 if (othermask == fullmask) continue;
 
                 orvn = shiftop.getIn(0);
-                if ((opc == CPUI_INT_LEFT) && (othervn.isConstant()))
+                if ((opc == OpCode.CPUI_INT_LEFT) && (othervn.isConstant()))
                 {
                     //  (v & #c) << #sa     if preferred to (v << #sa) & #(c << sa)
                     // because the mask is right/least justified, so it makes sense as a normalization
@@ -97,7 +97,7 @@ namespace Sla.DECCORE
                 if (!orvn.isWritten()) continue;
                 orop = orvn.getDef();
 
-                if (orop.code() == CPUI_INT_OR)
+                if (orop.code() == OpCode.CPUI_INT_OR)
                 {
                     ormask1 = orop.getIn(0).getNZMask();
                     if ((ormask1 & othermask) == 0) break;
@@ -109,7 +109,7 @@ namespace Sla.DECCORE
                         if ((ormask2 & othermask) == ormask2) break;
                     }
                 }
-                else if (orop.code() == CPUI_PIECE)
+                else if (orop.code() == OpCode.CPUI_PIECE)
                 {
                     ormask1 = orop.getIn(1).getNZMask();  // Low part of piece
                     if ((ormask1 & othermask) == 0) break;
@@ -124,14 +124,14 @@ namespace Sla.DECCORE
             // Do the commute
             newop1 = data.newOp(2, op.getAddr());
             newvn1 = data.newUniqueOut(size, newop1);
-            data.opSetOpcode(newop1, (opc == CPUI_INT_LEFT) ? CPUI_INT_RIGHT : CPUI_INT_LEFT);
+            data.opSetOpcode(newop1, (opc == OpCode.CPUI_INT_LEFT) ? OpCode.CPUI_INT_RIGHT : OpCode.CPUI_INT_LEFT);
             data.opSetInput(newop1, othervn, 0);
             data.opSetInput(newop1, savn, 1);
             data.opInsertBefore(newop1, op);
 
             newop2 = data.newOp(2, op.getAddr());
             newvn2 = data.newUniqueOut(size, newop2);
-            data.opSetOpcode(newop2, CPUI_INT_AND);
+            data.opSetOpcode(newop2, OpCode.CPUI_INT_AND);
             data.opSetInput(newop2, orvn, 0);
             data.opSetInput(newop2, newvn1, 1);
             data.opInsertBefore(newop2, op);

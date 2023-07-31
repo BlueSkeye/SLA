@@ -39,7 +39,7 @@ namespace Sla.DECCORE
             if (!vn.isWritten()) return 0;
             PcodeOp* divOp = vn.getDef();
             OpCode opc1 = divOp.code();
-            if (opc1 != opc2 && (opc2 != CPUI_INT_DIV || opc1 != CPUI_INT_RIGHT))
+            if (opc1 != opc2 && (opc2 != OpCode.CPUI_INT_DIV || opc1 != OpCode.CPUI_INT_RIGHT))
                 return 0;
             Varnode* constVn1 = divOp.getIn(1);
             if (!constVn1.isConstant()) return 0;
@@ -67,9 +67,9 @@ namespace Sla.DECCORE
                 val1 = (~val1 + 1) & Globals.calc_mask(sz);
             if (signbit_negative(val2, sz))
                 val2 = (~val2 + 1) & Globals.calc_mask(sz);
-            int bitcount = mostsigbit_set(val1) + mostsigbit_set(val2) + 2;
-            if (opc2 == CPUI_INT_DIV && bitcount > sz * 8) return 0;    // Unsigned overflow
-            if (opc2 == CPUI_INT_SDIV && bitcount > sz * 8 - 2) return 0;   // Signed overflow
+            int bitcount = Globals.mostsigbit_set(val1) + Globals.mostsigbit_set(val2) + 2;
+            if (opc2 == OpCode.CPUI_INT_DIV && bitcount > sz * 8) return 0;    // Unsigned overflow
+            if (opc2 == OpCode.CPUI_INT_SDIV && bitcount > sz * 8 - 2) return 0;   // Signed overflow
             data.opSetInput(op, baseVn, 0);
             data.opSetInput(op, data.newConstant(sz, resval), 1);
             return 1;

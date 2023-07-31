@@ -42,7 +42,7 @@ namespace Sla.DECCORE
             if (basevn.getTypeReadFacing(op).isPtrsubMatching(op.getIn(1).getOffset()))
                 return 0;
 
-            data.opSetOpcode(op, CPUI_INT_ADD);
+            data.opSetOpcode(op, OpCode.CPUI_INT_ADD);
             op.clearStopTypePropagation();
             return 1;
         }

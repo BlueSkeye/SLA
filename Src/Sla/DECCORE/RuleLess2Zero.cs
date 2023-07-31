@@ -45,12 +45,12 @@ namespace Sla.DECCORE
             {
                 if (lvn.getOffset() == 0)
                 {
-                    data.opSetOpcode(op, CPUI_INT_NOTEQUAL); // All values except 0 are true   .  NOT_EQUAL
+                    data.opSetOpcode(op, OpCode.CPUI_INT_NOTEQUAL); // All values except 0 are true   .  NOT_EQUAL
                     return 1;
                 }
                 else if (lvn.getOffset() == Globals.calc_mask(lvn.getSize()))
                 {
-                    data.opSetOpcode(op, CPUI_COPY); // Always false
+                    data.opSetOpcode(op, OpCode.CPUI_COPY); // Always false
                     data.opRemoveInput(op, 1);
                     data.opSetInput(op, data.newConstant(1, 0), 0);
                     return 1;
@@ -60,14 +60,14 @@ namespace Sla.DECCORE
             {
                 if (rvn.getOffset() == 0)
                 {
-                    data.opSetOpcode(op, CPUI_COPY); // Always false
+                    data.opSetOpcode(op, OpCode.CPUI_COPY); // Always false
                     data.opRemoveInput(op, 1);
                     data.opSetInput(op, data.newConstant(1, 0), 0);
                     return 1;
                 }
                 else if (rvn.getOffset() == Globals.calc_mask(rvn.getSize()))
                 { // All values except -1 are true . NOT_EQUAL
-                    data.opSetOpcode(op, CPUI_INT_NOTEQUAL);
+                    data.opSetOpcode(op, OpCode.CPUI_INT_NOTEQUAL);
                     return 1;
                 }
             }

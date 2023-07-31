@@ -40,7 +40,7 @@ namespace Sla.DECCORE
             Varnode* vn = op.getIn(0);
             if (!vn.isWritten()) return 0;
             PcodeOp* andop = vn.getDef();
-            if (andop.code() != CPUI_INT_AND) return 0;
+            if (andop.code() != OpCode.CPUI_INT_AND) return 0;
             Varnode* maskvn = andop.getIn(1);
             if (!maskvn.isConstant()) return 0;
             ulong val = maskvn.getOffset();
@@ -50,7 +50,7 @@ namespace Sla.DECCORE
             if ((testmask & slide) == val)
             { // 1-bit encoding
                 data.opRemoveInput(andop, 1);   // Eliminate the mask
-                data.opSetOpcode(andop, CPUI_COPY);
+                data.opSetOpcode(andop, OpCode.CPUI_COPY);
                 return 1;
             }
             return 0;

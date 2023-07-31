@@ -16,7 +16,7 @@ namespace Sla.EXTRA
         /// locations as global variables.
         public override void execute(TextReader s)
         {
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
             dcp.conf.globalify();
             *status.optr << "Successfully made all registers/memory locations global" << endl;

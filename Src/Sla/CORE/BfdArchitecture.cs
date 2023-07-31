@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Sla.DECCORE;
+using Sla.EXTRA;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,64 +17,67 @@ namespace Sla.CORE
         
         protected override void buildLoader(DocumentStorage store)
         {
-            LoadImageBfd* ldr;
+            LoadImageBfd ldr;
 
-            collectSpecFiles(*errorstream);
-            if (getTarget().find("binary") == 0)
+            collectSpecFiles(errorstream);
+            string target = getTarget();
+            if (target.StartsWith("binary"))
                 ldr = new LoadImageBfd(getFilename(), "binary");
-            else if (getTarget().find("default") == 0)
+            else if (target.StartsWith("default"))
                 ldr = new LoadImageBfd(getFilename(), "default");
             else
                 ldr = new LoadImageBfd(getFilename(), getTarget());
             ldr.open();
-            if (adjustvma != 0)
+            if (adjustvma != 0) {
                 ldr.adjustVma(adjustvma);
+            }
             loader = ldr;
         }
 
         protected override void resolveArchitecture()
         {
             archid = getTarget();
-            if (archid.find(':') == string::npos)
-            {
+            if (-1 == archid.IndexOf(':')) {
                 archid = loader.getArchType();
                 // kludge to distinguish windows binaries from linux/gcc
-                if (archid.find("efi-app-ia32") != string::npos)
+                if (-1 != archid.IndexOf("efi-app-ia32"))
                     archid = "x86:LE:32:default:windows";
-                else if (archid.find("pe-i386") != string::npos)
+                else if (-1 != archid.IndexOf("pe-i386"))
                     archid = "x86:LE:32:default:windows";
-                else if (archid.find("pei-i386") != string::npos)
+                else if (-1 != archid.IndexOf("pei-i386"))
                     archid = "x86:LE:32:default:windows";
-                else if (archid.find("pei-x86-64") != string::npos)
+                else if (-1 != archid.IndexOf("pei-x86-64"))
                     archid = "x86:LE:64:default:windows";
-                else if (archid.find("sparc") != string::npos)
+                else if (-1 != archid.IndexOf("sparc"))
                     archid = "sparc:BE:32:default:default";
-                else if (archid.find("elf64") != string::npos)
+                else if (-1 != archid.IndexOf("elf64"))
                     archid = "x86:LE:64:default:gcc";
-                else if (archid.find("elf") != string::npos)
+                else if (-1 != archid.IndexOf("elf"))
                     archid = "x86:LE:32:default:gcc";
-                else if (archid.find("mach-o") != string::npos)
+                else if (-1 != archid.IndexOf("mach-o"))
                     archid = "PowerPC:BE:32:default:macosx";
                 else
                     throw new LowlevelError("Cannot convert bfd target to sleigh target: " + archid);
             }
-            SleighArchitecture::resolveArchitecture();
+            base.resolveArchitecture();
         }
 
-        protected void postSpecFile()
-        { // Attach default space to loader
-            Architecture::postSpecFile();
-            ((LoadImageBfd*)loader).attachToSpace(getDefaultCodeSpace());
+        protected override void postSpecFile()
+        {
+            // Attach default space to loader
+            base.postSpecFile();
+            ((LoadImageBfd)loader).attachToSpace(getDefaultCodeSpace());
         }
 
         public override void encode(Encoder encoder)
-        {               // prepend extra stuff to specify binary file and spec
-            encoder.openElement(ELEM_BFD_SAVEFILE);
+        {
+            // prepend extra stuff to specify binary file and spec
+            encoder.openElement(ElementId.ELEM_BFD_SAVEFILE);
             encodeHeader(encoder);
-            encoder.writeUnsignedInteger(ATTRIB_ADJUSTVMA, adjustvma);
+            encoder.writeUnsignedInteger(AttributeId.ATTRIB_ADJUSTVMA, adjustvma);
             types.encodeCoreTypes(encoder);
-            SleighArchitecture::encode(encoder); // Save the rest of the state
-            encoder.closeElement(ELEM_BFD_SAVEFILE);
+            base.encode(encoder); // Save the rest of the state
+            encoder.closeElement(ElementId.ELEM_BFD_SAVEFILE);
         }
 
         public override void restoreXml(DocumentStorage store)
@@ -82,30 +87,22 @@ namespace Sla.CORE
                 throw new LowlevelError("Could not find bfd_savefile tag");
 
             restoreXmlHeader(el);
-            {
-                istringstream s = new istringstream(el.getAttributeValue("adjustvma"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> adjustvma;
-            }
-            List &list(el.getChildren());
-            List::const_iterator iter;
+            adjustvma = long.Parse(el.getAttributeValue("adjustvma"));
+            List<Element> list = el.getChildren();
+            int childIndex = 0;
 
-            iter = list.begin();
-
-            if (iter != list.end())
-            {
-                if ((*iter).getName() == "coretypes")
-                {
-                    store.registerTag(*iter);
-                    ++iter;
+            if (0 < list.Count) {
+                if (list[0].getName() == "coretypes") {
+                    store.registerTag(list[0]);
+                    childIndex++;
                 }
             }
-            init(store); // Load the image and configure
+            // Load the image and configure
+            init(store);
 
-            if (iter != list.end())
-            {
-                store.registerTag(*iter);
-                SleighArchitecture::restoreXml(store);
+            if (childIndex < list.Count) {
+                store.registerTag(list[childIndex]);
+                base.restoreXml(store);
             }
         }
 

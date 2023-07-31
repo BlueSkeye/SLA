@@ -40,7 +40,7 @@ namespace Sla.DECCORE
             Varnode* shiftin = op.getIn(0);
             if (!shiftin.isWritten()) return 0;
             PcodeOp* andop = shiftin.getDef();
-            if (andop.code() != CPUI_INT_AND) return 0;
+            if (andop.code() != OpCode.CPUI_INT_AND) return 0;
             if (shiftin.loneDescend() != op) return 0;
             Varnode* maskvn = andop.getIn(1);
             if (!maskvn.isConstant()) return 0;
@@ -50,20 +50,20 @@ namespace Sla.DECCORE
 
             OpCode opc = op.code();
             int sa;
-            if ((opc == CPUI_INT_RIGHT) || (opc == CPUI_INT_LEFT))
+            if ((opc == OpCode.CPUI_INT_RIGHT) || (opc == OpCode.CPUI_INT_LEFT))
                 sa = (int)cvn.getOffset();
             else
             {
-                sa = leastsigbit_set(cvn.getOffset()); // Make sure the multiply is really a shift
+                sa = Globals.leastsigbit_set(cvn.getOffset()); // Make sure the multiply is really a shift
                 if (sa <= 0) return 0;
                 ulong testval = 1;
                 testval <<= sa;
                 if (testval != cvn.getOffset()) return 0;
-                opc = CPUI_INT_LEFT;    // Treat CPUI_INT_MULT as CPUI_INT_LEFT
+                opc = OpCode.CPUI_INT_LEFT;    // Treat OpCode.CPUI_INT_MULT as OpCode.CPUI_INT_LEFT
             }
             ulong nzm = invn.getNZMask();
             ulong fullmask = Globals.calc_mask(invn.getSize());
-            if (opc == CPUI_INT_RIGHT)
+            if (opc == OpCode.CPUI_INT_RIGHT)
             {
                 nzm >>= sa;
                 mask >>= sa;
@@ -76,7 +76,7 @@ namespace Sla.DECCORE
                 mask &= fullmask;
             }
             if ((mask & nzm) != nzm) return 0;
-            data.opSetOpcode(andop, CPUI_COPY); // AND effectively does nothing, so we change it to a copy
+            data.opSetOpcode(andop, OpCode.CPUI_COPY); // AND effectively does nothing, so we change it to a copy
             data.opRemoveInput(andop, 1);
             return 1;
         }

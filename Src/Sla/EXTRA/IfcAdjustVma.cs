@@ -19,7 +19,7 @@ namespace Sla.EXTRA
             unsigned long adjust;
 
             adjust = 0uL;
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
             s.unsetf(ios::dec | ios::hex | ios::oct); // Let user specify base
             s >> ws >> adjust;

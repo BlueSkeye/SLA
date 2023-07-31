@@ -7,7 +7,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla.DECCORE
 {
-    /// \brief Make \e required Varnode merges as dictated by CPUI_MULTIEQUAL, CPUI_INDIRECT, and \e addrtied property
+    /// \brief Make \e required Varnode merges as dictated by OpCode.CPUI_MULTIEQUAL, OpCode.CPUI_INDIRECT, and \e addrtied property
     internal class ActionMergeRequired : Action
     {
         public ActionMergeRequired(string g)

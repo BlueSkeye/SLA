@@ -40,7 +40,7 @@ namespace Sla.DECCORE
             {
                 lophi = *iter;
                 ++iter;
-                if (lophi.code() != CPUI_MULTIEQUAL) continue;
+                if (lophi.code() != OpCode.CPUI_MULTIEQUAL) continue;
                 if (lophi.getParent() != blbase) continue;
                 if (lophi.getIn(inslot) != lobase) continue;
                 return true;

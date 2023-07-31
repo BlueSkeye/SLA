@@ -24,7 +24,7 @@ namespace Sla.DECCORE
         }
 
         /// \class RuleIndirectCollapse
-        /// \brief Remove a CPUI_INDIRECT if its blocking PcodeOp is dead
+        /// \brief Remove a OpCode.CPUI_INDIRECT if its blocking PcodeOp is dead
         public override void getOpList(List<uint> oplist)
         {
             oplist.Add(CPUI_INDIRECT);
@@ -40,7 +40,7 @@ namespace Sla.DECCORE
             // Is the indirect effect gone?
             if (!indop.isDead())
             {
-                if (indop.code() == CPUI_COPY)
+                if (indop.code() == OpCode.CPUI_COPY)
                 { // STORE resolved to a COPY
                     Varnode* vn1 = indop.getOut();
                     Varnode* vn2 = op.getOut();
@@ -53,7 +53,7 @@ namespace Sla.DECCORE
                             data.opUninsert(op);
                             data.opSetInput(op, vn1, 0);
                             data.opRemoveInput(op, 1);
-                            data.opSetOpcode(op, CPUI_COPY);
+                            data.opSetOpcode(op, OpCode.CPUI_COPY);
                             data.opInsertAfter(op, indop);
                             return 1;
                         }
@@ -68,7 +68,7 @@ namespace Sla.DECCORE
                             data.opUninsert(op);
                             data.opSetInput(op, vn1, 0);
                             data.opSetInput(op, data.newConstant(4, trunc), 1);
-                            data.opSetOpcode(op, CPUI_SUBPIECE);
+                            data.opSetOpcode(op, OpCode.CPUI_SUBPIECE);
                             data.opInsertAfter(op, indop);
                             return 1;
                         }
@@ -86,7 +86,7 @@ namespace Sla.DECCORE
                 }
                 else if (indop.usesSpacebasePtr())
                 {
-                    if (indop.code() == CPUI_STORE)
+                    if (indop.code() == OpCode.CPUI_STORE)
                     {
                         LoadGuard* guard = data.getStoreGuard(indop);
                         if (guard != (LoadGuard*)0) {

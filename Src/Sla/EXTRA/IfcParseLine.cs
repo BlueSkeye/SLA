@@ -20,7 +20,7 @@ namespace Sla.EXTRA
         /// must already exist.
         public override void execute(TextReader s)
         {
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
 
             s >> ws;

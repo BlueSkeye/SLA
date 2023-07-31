@@ -34,7 +34,7 @@ namespace Sla.SLEIGH
                 {
                     generateLocation(vn, invars[i]); // Input of -op- is really temporary storage
                     PcodeData* load_op = cache.allocateInstruction();
-                    load_op.opc = CPUI_LOAD;
+                    load_op.opc = OpCode.CPUI_LOAD;
                     load_op.outvar = invars + i;
                     load_op.isize = 2;
                     loadvars = load_op.invar = cache.allocateVarnodes(2);
@@ -66,7 +66,7 @@ namespace Sla.SLEIGH
                     generateLocation(outvn, storevars[2]); // Output of -op- is really temporary storage
                     thisop.outvar = storevars + 2;
                     PcodeData* store_op = cache.allocateInstruction();
-                    store_op.opc = CPUI_STORE;
+                    store_op.opc = OpCode.CPUI_STORE;
                     store_op.isize = 3;
                     // store_op.outvar = (VarnodeData *)0;
                     store_op.invar = storevars;
@@ -175,7 +175,7 @@ namespace Sla.SLEIGH
             nextop.isize = op.isize;
             nextop.outvar = op.outvar;
             op.isize = 2;
-            op.opc = CPUI_INT_ADD;
+            op.opc = OpCode.CPUI_INT_ADD;
             VarnodeData* newparams = op.invar = cache.allocateVarnodes(2);
             newparams[0] = nextop.invar[1];
             newparams[1].space = const_space;   // Add in V_OFFSET_PLUS

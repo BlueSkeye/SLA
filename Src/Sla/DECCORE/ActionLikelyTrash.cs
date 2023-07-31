@@ -48,7 +48,7 @@ namespace Sla.DECCORE
                         res += 1;
                         break;
                     }
-                    else if (defOp.code() != CPUI_INDIRECT)    // Chain up through INDIRECTs
+                    else if (defOp.code() != OpCode.CPUI_INDIRECT)    // Chain up through INDIRECTs
                         break;
                     vn = vn.getDef().getIn(0);
                 }
@@ -56,20 +56,20 @@ namespace Sla.DECCORE
             return res;
         }
 
-        /// \brief Decide if the given Varnode only ever flows into CPUI_INDIRECT
+        /// \brief Decide if the given Varnode only ever flows into OpCode.CPUI_INDIRECT
         ///
-        /// Return all the CPUI_INDIRECT ops that the Varnode hits in a list.
+        /// Return all the OpCode.CPUI_INDIRECT ops that the Varnode hits in a list.
         /// Trace forward down all paths from -vn-, if we hit
-        ///    - CPUI_INDIRECT  . trim that path and store that op in the resulting -indlist-
-        ///    - CPUI_SUBPIECE
-        ///    - CPUI_MULTIEQUAL
-        ///    - CPUI_PIECE
+        ///    - OpCode.CPUI_INDIRECT  . trim that path and store that op in the resulting -indlist-
+        ///    - OpCode.CPUI_SUBPIECE
+        ///    - OpCode.CPUI_MULTIEQUAL
+        ///    - OpCode.CPUI_PIECE
         ///    - CPUI_AND       . follow through to output
         ///    - anything else  . consider -vn- to NOT be trash
         ///
-        /// For any CPUI_MULTIEQUAL and CPUI_PIECE that are hit, all the other inputs must be hit as well
+        /// For any OpCode.CPUI_MULTIEQUAL and OpCode.CPUI_PIECE that are hit, all the other inputs must be hit as well
         /// \param vn is the given Varnode
-        /// \param indlist is the list to populate with CPUI_INDIRECT ops
+        /// \param indlist is the list to populate with OpCode.CPUI_INDIRECT ops
         /// \return \b true if all flows look like trash
         private static bool traceTrash(Varnode vn, List<PcodeOp> indlist)
         {
@@ -94,7 +94,7 @@ namespace Sla.DECCORE
                     outvn = op.getOut();
                     switch (op.code())
                     {
-                        case CPUI_INDIRECT:
+                        case OpCode.CPUI_INDIRECT:
                             if (outvn.isPersist())
                                 istrash = false;
                             else if (op.isIndirectStore())
@@ -108,7 +108,7 @@ namespace Sla.DECCORE
                             else
                                 indlist.Add(op);
                             break;
-                        case CPUI_SUBPIECE:
+                        case OpCode.CPUI_SUBPIECE:
                             if (outvn.isPersist())
                                 istrash = false;
                             else
@@ -120,8 +120,8 @@ namespace Sla.DECCORE
                                 }
                             }
                             break;
-                        case CPUI_MULTIEQUAL:
-                        case CPUI_PIECE:
+                        case OpCode.CPUI_MULTIEQUAL:
+                        case OpCode.CPUI_PIECE:
                             if (outvn.isPersist())
                                 istrash = false;
                             else
@@ -142,7 +142,7 @@ namespace Sla.DECCORE
                                 }
                             }
                             break;
-                        case CPUI_INT_AND:
+                        case OpCode.CPUI_INT_AND:
                             // If the AND is using only the topmost significant bytes then it is likely trash
                             if (op.getIn(1).isConstant())
                             {
@@ -206,13 +206,13 @@ namespace Sla.DECCORE
                 for (uint i = 0; i < indlist.size(); ++i)
                 {
                     PcodeOp* op = indlist[i];
-                    if (op.code() == CPUI_INDIRECT)
+                    if (op.code() == OpCode.CPUI_INDIRECT)
                     {
                         // Trucate data-flow through INDIRECT, turning it into indirect creation
                         data.opSetInput(op, data.newConstant(op.getOut().getSize(), 0), 0);
                         data.markIndirectCreation(op, false);
                     }
-                    else if (op.code() == CPUI_INT_AND)
+                    else if (op.code() == OpCode.CPUI_INT_AND)
                     {
                         data.opSetInput(op, data.newConstant(op.getIn(1).getSize(), 0), 1);
                     }

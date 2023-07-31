@@ -61,7 +61,7 @@ namespace Sla.DECCORE
             curvn.setMark();
             if (curvn.isWritten()) {
                 PcodeOp tmp = curvn.getDef();
-                if (tmp.code() == CPUI_BOOL_NEGATE) {
+                if (tmp.code() == OpCode.CPUI_BOOL_NEGATE) {
                     boolvn = tmp.getIn(0);
                     curvn = boolvn;
                     curvn.setMark();
@@ -75,7 +75,7 @@ namespace Sla.DECCORE
                     if (!binvn.isConstant()) {
                         if (binvn.isWritten()) {
                             PcodeOp negop = binvn.getDef();
-                            if (negop.code() == CPUI_BOOL_NEGATE) {
+                            if (negop.code() == OpCode.CPUI_BOOL_NEGATE) {
                                 if (!negop.getIn(0).isConstant()) {
                                     bool2vn = negop.getIn(0);
                                     bool2vn.setMark();
@@ -88,7 +88,7 @@ namespace Sla.DECCORE
                     if (!binvn.isConstant()) {
                         if (binvn.isWritten()) {
                             PcodeOp negop = binvn.getDef();
-                            if (negop.code() == CPUI_BOOL_NEGATE) {
+                            if (negop.code() == OpCode.CPUI_BOOL_NEGATE) {
                                 if (!negop.getIn(0).isConstant()) {
                                     bool3vn = negop.getIn(0);
                                     bool3vn.setMark();
@@ -127,7 +127,7 @@ namespace Sla.DECCORE
                 bool popstate = true;
                 if (curvn.isWritten()) {
                     curop = curvn.getDef();
-                    if (curop.code() == CPUI_BOOL_NEGATE) {
+                    if (curop.code() == OpCode.CPUI_BOOL_NEGATE) {
                         curvn = curop.getIn(0);
                         if (!binon) {
                             // Only flip if we haven't seen binop yet, as binops get compared directly
@@ -135,7 +135,7 @@ namespace Sla.DECCORE
                         }
                         popstate = false;
                     }
-                    //       else if (curop.code() == CPUI_MULTIEQUAL) {
+                    //       else if (curop.code() == OpCode.CPUI_MULTIEQUAL) {
                     // 	if ((curop.getParent()==bl)&&(!multion)) {
                     // 	  opstate[state] = curop;
                     // 	  slotstate[state] = 0;
@@ -168,7 +168,7 @@ namespace Sla.DECCORE
                             break;
                         }
                         state -= 1;
-                        if (opstate[state].code() == CPUI_MULTIEQUAL) {
+                        if (opstate[state].code() == OpCode.CPUI_MULTIEQUAL) {
                             multion = false;
                         }
                         else {
@@ -193,7 +193,7 @@ namespace Sla.DECCORE
         private bool sameOpComplement(PcodeOp bin1op, PcodeOp bin2op)
         {
             OpCode opcode = bin1op.code();
-            if ((opcode == CPUI_INT_SLESS) || (opcode == CPUI_INT_LESS)) {
+            if ((opcode == OpCode.CPUI_INT_SLESS) || (opcode == OpCode.CPUI_INT_LESS)) {
                 // Basically we test for the scenario like:  x < 9   8 < x
                 int constslot = 0;
                 if (bin1op.getIn(1).isConstant()) {
@@ -218,11 +218,11 @@ namespace Sla.DECCORE
                 if (val1 + 1 != val2) {
                     return false;
                 }
-                if ((val2 == 0) && (opcode == CPUI_INT_LESS)) {
+                if ((val2 == 0) && (opcode == OpCode.CPUI_INT_LESS)) {
                     // Corner case for unsigned
                     return false;
                 }
-                if (opcode == CPUI_INT_SLESS) {
+                if (opcode == OpCode.CPUI_INT_SLESS) {
                     // Corner case for signed
                     int sz = bin1op.getIn(constslot).getSize();
                     if (signbit_negative(val2, sz) && (!signbit_negative(val1, sz))){
@@ -240,13 +240,13 @@ namespace Sla.DECCORE
         /// \return \b true if the p-code ops produce complementary values
         private bool andOrComplement(PcodeOp bin1op, PcodeOp bin2op)
         {
-            if (bin1op.code() == CPUI_BOOL_AND) {
-                if (bin2op.code() != CPUI_BOOL_OR) {
+            if (bin1op.code() == OpCode.CPUI_BOOL_AND) {
+                if (bin2op.code() != OpCode.CPUI_BOOL_OR) {
                     return false;
                 }
             }
-            else if (bin1op.code() == CPUI_BOOL_OR) {
-                if (bin2op.code() != CPUI_BOOL_AND) {
+            else if (bin1op.code() == OpCode.CPUI_BOOL_OR) {
+                if (bin2op.code() != OpCode.CPUI_BOOL_AND) {
                     return false;
                 }
             }
@@ -325,7 +325,7 @@ namespace Sla.DECCORE
             int slot1 = 0;
             int slot2 = 0;
             bool reorder;
-            if (binaryop.code() != get_booleanflip(binary2op.code(), reorder)) {
+            if (binaryop.code() != Globals.get_booleanflip(binary2op.code(), reorder)) {
                 return false;
             }
             if (reorder) {
@@ -385,7 +385,7 @@ namespace Sla.DECCORE
             }
             else {
                 for (int i = 0; i < state; ++i) {
-                    if (opstate[i].code() == CPUI_MULTIEQUAL) {
+                    if (opstate[i].code() == OpCode.CPUI_MULTIEQUAL) {
                         multislot = slotstate[i];
                         break;
                     }
@@ -433,7 +433,7 @@ namespace Sla.DECCORE
             PcodeOp negop;
             if (a.isWritten()) {
                 negop = a.getDef();
-                if (negop.code() == CPUI_BOOL_NEGATE) {
+                if (negop.code() == OpCode.CPUI_BOOL_NEGATE) {
                     if (negop.getIn(0) == b) {
                         return true;
                     }
@@ -441,7 +441,7 @@ namespace Sla.DECCORE
             }
             if (b.isWritten()) {
                 negop = b.getDef();
-                if (negop.code() == CPUI_BOOL_NEGATE) {
+                if (negop.code() == OpCode.CPUI_BOOL_NEGATE) {
                     if (negop.getIn(0) == a) {
                         return true;
                     }

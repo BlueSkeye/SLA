@@ -38,7 +38,7 @@ namespace Sla.DECCORE
                 data.opRemoveInput(op, 1);
 
             // Treat these operations as always returning false (0)
-            data.opSetOpcode(op, CPUI_COPY);
+            data.opSetOpcode(op, OpCode.CPUI_COPY);
             data.opSetInput(op, data.newConstant(1, 0), 0);
             return 1;
         }

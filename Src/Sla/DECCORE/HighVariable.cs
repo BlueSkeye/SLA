@@ -160,12 +160,12 @@ namespace Sla.DECCORE
             type = vn.getType();
             if (type.hasStripped())
             {
-                if (type.getMetatype() == TYPE_PARTIALUNION)
+                if (type.getMetatype() == type_metatype.TYPE_PARTIALUNION)
                 {
                     if (symbol != (Symbol)null && symboloffset != -1)
                     {
                         type_metatype meta = symbol.getType().getMetatype();
-                        if (meta != TYPE_STRUCT && meta != TYPE_UNION)  // If partial union does not have a bigger backing symbol
+                        if (meta != type_metatype.TYPE_STRUCT && meta != type_metatype.TYPE_UNION)  // If partial union does not have a bigger backing symbol
                             type = type.getStripped();         // strip the partial union
                     }
                 }
@@ -377,7 +377,7 @@ namespace Sla.DECCORE
                 symboloffset = vn.getAddr().overlapJoin(0, entry.getAddr(), symbol.getType().getSize()) + entry.getOffset();
             }
 
-            if (type != (Datatype)null && type.getMetatype() == TYPE_PARTIALUNION)
+            if (type != (Datatype)null && type.getMetatype() == type_metatype.TYPE_PARTIALUNION)
                 highflags |= typedirty;
             highflags &= ~((uint)symboldirty);     // We are no longer dirty
         }
@@ -524,10 +524,10 @@ namespace Sla.DECCORE
         {
             type = tp;
             if (type.hasStripped()) {
-                if (type.getMetatype() == TYPE_PARTIALUNION) {
+                if (type.getMetatype() == type_metatype.TYPE_PARTIALUNION) {
                     if (symbol != (Symbol)null && symboloffset != -1) {
                         type_metatype meta = symbol.getType().getMetatype();
-                        if (meta != TYPE_STRUCT && meta != TYPE_UNION)  // If partial union does not have a bigger backing symbol
+                        if (meta != type_metatype.TYPE_STRUCT && meta != type_metatype.TYPE_UNION)  // If partial union does not have a bigger backing symbol
                             type = type.getStripped();         // strip the partial union
                     }
                 }
@@ -1019,7 +1019,7 @@ namespace Sla.DECCORE
             PcodeOp* op = vn.getDef();
             if (op.isCall())
                 retVal |= 1;
-            if (op.code() == CPUI_LOAD)
+            if (op.code() == OpCode.CPUI_LOAD)
                 retVal |= 2;
             path.Add(PcodeOpNode(op, 0));
             while (!path.empty())
@@ -1027,7 +1027,7 @@ namespace Sla.DECCORE
                 PcodeOpNode & node(path.GetLastItem());
                 if (node.op.numInput() <= node.slot)
                 {
-                    path.pop_back();
+                    path.RemoveLastItem();
                     continue;
                 }
                 Varnode* curVn = node.op.getIn(node.slot);
@@ -1045,7 +1045,7 @@ namespace Sla.DECCORE
                 op = curVn.getDef();
                 if (op.isCall())
                     retVal |= 1;
-                if (op.code() == CPUI_LOAD)
+                if (op.code() == OpCode.CPUI_LOAD)
                     retVal |= 2;
                 path.Add(PcodeOpNode(curVn.getDef(), 0));
             }

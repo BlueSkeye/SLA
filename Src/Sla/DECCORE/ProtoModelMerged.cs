@@ -127,7 +127,7 @@ namespace Sla.DECCORE
                 ((ParamListMerged*)input).foldIn(*(ParamListStandard*)model.input);
                 // We assume here that the output models are the same, but we don't check
                 if (extrapop != model.extrapop)
-                    extrapop = ProtoModel::extrapop_unknown;
+                    extrapop = ProtoModel.extrapop_unknown;
                 if ((injectUponEntry != model.injectUponEntry) || (injectUponReturn != model.injectUponReturn))
                     throw new LowlevelError("Cannot merge prototype models with different inject ids");
                 intersectEffects(model.effectlist);

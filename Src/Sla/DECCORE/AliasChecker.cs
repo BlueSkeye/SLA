@@ -205,7 +205,7 @@ namespace Sla.DECCORE
                     op = *iter;
                     switch (op.code())
                     {
-                        case CPUI_COPY:
+                        case OpCode.CPUI_COPY:
                             nonadduse = true;   // Treat COPY as both non-add use and part of ADD expression
                             subvn = op.getOut();
                             if (!subvn.isMark())
@@ -214,7 +214,7 @@ namespace Sla.DECCORE
                                 vnqueue.Add(AddBase(subvn, indexvn));
                             }
                             break;
-                        case CPUI_INT_SUB:
+                        case OpCode.CPUI_INT_SUB:
                             if (vn == op.getIn(1))
                             {   // Subtracting the pointer
                                 nonadduse = true;
@@ -230,16 +230,16 @@ namespace Sla.DECCORE
                                 vnqueue.Add(AddBase(subvn, indexvn));
                             }
                             break;
-                        case CPUI_INT_ADD:
-                        case CPUI_PTRADD:
+                        case OpCode.CPUI_INT_ADD:
+                        case OpCode.CPUI_PTRADD:
                             othervn = op.getIn(1); // Check if something else is being added in besides a constant
                             if (othervn == vn)
                                 othervn = op.getIn(0);
                             if (!othervn.isConstant())
                                 indexvn = othervn;
                         // fallthru
-                        case CPUI_PTRSUB:
-                        case CPUI_SEGMENTOP:
+                        case OpCode.CPUI_PTRSUB:
+                        case OpCode.CPUI_SEGMENTOP:
                             subvn = op.getOut();
                             if (!subvn.isMark())
                             {
@@ -275,19 +275,19 @@ namespace Sla.DECCORE
             if (def == (PcodeOp)null) return 0;
             switch (def.code())
             {
-                case CPUI_COPY:
+                case OpCode.CPUI_COPY:
                     retval = gatherOffset(def.getIn(0));
                     break;
-                case CPUI_PTRSUB:
-                case CPUI_INT_ADD:
+                case OpCode.CPUI_PTRSUB:
+                case OpCode.CPUI_INT_ADD:
                     retval = gatherOffset(def.getIn(0));
                     retval += gatherOffset(def.getIn(1));
                     break;
-                case CPUI_INT_SUB:
+                case OpCode.CPUI_INT_SUB:
                     retval = gatherOffset(def.getIn(0));
                     retval -= gatherOffset(def.getIn(1));
                     break;
-                case CPUI_PTRADD:
+                case OpCode.CPUI_PTRADD:
                     othervn = def.getIn(2);
                     retval = gatherOffset(def.getIn(0));
                     // We need to treat PTRADD exactly as if it were encoded as an ADD and MULT
@@ -296,7 +296,7 @@ namespace Sla.DECCORE
                     if (othervn.isConstant() && (othervn.getOffset() == 1))
                         retval = retval + gatherOffset(def.getIn(1));
                     break;
-                case CPUI_SEGMENTOP:
+                case OpCode.CPUI_SEGMENTOP:
                     retval = gatherOffset(def.getIn(2));
                     break;
                 default:

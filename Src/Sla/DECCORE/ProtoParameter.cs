@@ -52,14 +52,14 @@ namespace Sla.DECCORE
 
         /// \brief Change (override) the data-type of a \e size-locked parameter.
         ///
-        /// The original parameter must have a \e type-lock and TYPE_UNKNOWN data-type.
-        /// The \e size-lock is preserved and \b this can be cleared back to its TYPE_UNKNOWN state.
+        /// The original parameter must have a \e type-lock and type_metatype.TYPE_UNKNOWN data-type.
+        /// The \e size-lock is preserved and \b this can be cleared back to its type_metatype.TYPE_UNKNOWN state.
         /// \param ct is the overriding data-type
         public abstract void overrideSizeLockType(Datatype ct);
 
         /// \brief Clear \b this parameter's data-type preserving any \e size-lock
         ///
-        /// The data-type is converted to a TYPE_UNKNOWN of the same size
+        /// The data-type is converted to a type_metatype.TYPE_UNKNOWN of the same size
         /// \param factory is the TypeFactory that will construct the unknown data-type
         public abstract void resetSizeLockType(TypeFactory factory);
 

@@ -17,7 +17,7 @@ namespace Sla.EXTRA
         /// variables.  The will be treated as local or temporary storage.
         public override void execute(TextReader s)
         {
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No image loaded");
 
             int size;

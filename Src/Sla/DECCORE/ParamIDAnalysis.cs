@@ -80,7 +80,7 @@ namespace Sla.DECCORE
 
             encoder.writeString(ATTRIB_MODEL, fd.getFuncProto().getModelName());
             int extrapop = fd.getFuncProto().getExtraPop();
-            if (extrapop == ProtoModel::extrapop_unknown)
+            if (extrapop == ProtoModel.extrapop_unknown)
                 encoder.writeString(ATTRIB_EXTRAPOP, "unknown");
             else
                 encoder.writeSignedInteger(ATTRIB_EXTRAPOP, extrapop);

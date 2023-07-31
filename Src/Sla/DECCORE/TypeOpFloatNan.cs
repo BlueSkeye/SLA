@@ -11,7 +11,7 @@ namespace Sla.DECCORE
     internal class TypeOpFloatNan : TypeOpFunc
     {
         public TypeOpFloatNan(TypeFactory t, Translate trans)
-            : base(t, CPUI_FLOAT_NAN,"NAN", TYPE_BOOL, TYPE_FLOAT)
+            : base(t, OpCode.CPUI_FLOAT_NAN,"NAN", type_metatype.TYPE_BOOL, type_metatype.TYPE_FLOAT)
         {
             opflags = PcodeOp::unary | PcodeOp::booloutput;
             addlflags = floatingpoint_op;

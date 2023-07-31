@@ -1108,9 +1108,9 @@ namespace Sla.SLACOMP
         /// in the parent source file.
         public void parseFileFinished()
         {
-            filename.pop_back();
-            relpath.pop_back();
-            lineno.pop_back();
+            filename.RemoveLastItem();
+            relpath.RemoveLastItem();
+            lineno.RemoveLastItem();
         }
 
         ///< Indicate parsing proceeded to the next line of the current file
@@ -1909,7 +1909,7 @@ namespace Sla.SLACOMP
         /// \brief Pop the current \b with block from the stack
         public void popWith()
         {
-            withstack.pop_back();
+            withstack.RemoveLastItem();
         }
 
         /// \brief Finish building a given Constructor after all its pieces have been parsed

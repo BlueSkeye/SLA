@@ -40,7 +40,7 @@ namespace Sla.DECCORE
             Varnode* shiftin = op.getIn(0);
             if (!shiftin.isWritten()) return 0;
             PcodeOp* shift2op = shiftin.getDef();
-            if (shift2op.code() != CPUI_INT_SRIGHT) return 0;
+            if (shift2op.code() != OpCode.CPUI_INT_SRIGHT) return 0;
             Varnode* constC = shift2op.getIn(1);
             if (!constC.isConstant()) return 0;
             Varnode* inVn = shift2op.getIn(0);

@@ -65,7 +65,7 @@ namespace Sla.DECCORE
             if (val)
             {
                 flags |= ParameterPieces::typelock;
-                if (type.getMetatype() == TYPE_UNKNOWN) // Check if we are locking TYPE_UNKNOWN
+                if (type.getMetatype() == type_metatype.TYPE_UNKNOWN) // Check if we are locking type_metatype.TYPE_UNKNOWN
                     flags |= ParameterPieces::sizelock;
             }
             else
@@ -102,9 +102,9 @@ namespace Sla.DECCORE
 
         public override void resetSizeLockType(TypeFactory factory)
         {
-            if (type.getMetatype() == TYPE_UNKNOWN) return; // Nothing to do
+            if (type.getMetatype() == type_metatype.TYPE_UNKNOWN) return; // Nothing to do
             int size = type.getSize();
-            type = factory.getBase(size, TYPE_UNKNOWN);
+            type = factory.getBase(size, type_metatype.TYPE_UNKNOWN);
         }
 
         public override ProtoParameter clone()

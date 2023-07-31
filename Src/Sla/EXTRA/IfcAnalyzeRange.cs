@@ -23,7 +23,7 @@ namespace Sla.EXTRA
         /// full or partial widening.
         public override void execute(TextReader s)
         {
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("Image not loaded");
             if (dcp.fd == (Funcdata)null)
                 throw new IfaceExecutionError("No function selected");
@@ -46,7 +46,7 @@ namespace Sla.EXTRA
             for (list<PcodeOp*>::const_iterator iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {
                 PcodeOp* op = *iter;
-                if (op.code() == CPUI_LOAD || op.code() == CPUI_STORE)
+                if (op.code() == OpCode.CPUI_LOAD || op.code() == OpCode.CPUI_STORE)
                     reads.Add(op);
             }
             Varnode* stackReg = dcp.fd.findSpacebaseInput(dcp.conf.getStackSpace());

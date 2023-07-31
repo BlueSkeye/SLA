@@ -200,11 +200,11 @@ namespace Sla.DECCORE
 #if PRETTY_DEBUG
                     if (checkid.empty() || (checkid.GetLastItem() != tok.getCount()))
                         throw new LowlevelError("mismatch1");
-                    checkid.pop_back();
+                    checkid.RemoveLastItem();
                     if (indentstack.empty())
                         throw new LowlevelError("Empty indent stack");
 #endif
-                    indentstack.pop_back();
+                    indentstack.RemoveLastItem();
                     break;
                 case TokenSplit::end_comment:
                     commentmode = false;
@@ -214,11 +214,11 @@ namespace Sla.DECCORE
 #if PRETTY_DEBUG
                     if (checkid.empty() || (checkid.GetLastItem() != tok.getCount()))
                         throw new LowlevelError("mismatch2");
-                    checkid.pop_back();
+                    checkid.RemoveLastItem();
                     if (indentstack.empty())
                         throw new LowlevelError("indent error");
 #endif
-                    indentstack.pop_back();
+                    indentstack.RemoveLastItem();
                     break;
                 case TokenSplit::tokenstring:
                     if (tok.getSize() > spaceremain)

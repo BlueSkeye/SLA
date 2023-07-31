@@ -27,7 +27,7 @@ namespace Sla.DECCORE
             Datatype* valueType = op.getIn(2).getHighTypeReadFacing(op);
             AddrSpace* spc = op.getIn(0).getSpaceFromConst();
             int destSize;
-            if (pointerType.getMetatype() == TYPE_PTR)
+            if (pointerType.getMetatype() == type_metatype.TYPE_PTR)
             {
                 pointedToType = ((TypePointer*)pointerType).getPtrTo();
                 destSize = pointedToType.getSize();
@@ -43,7 +43,7 @@ namespace Sla.DECCORE
             }
             if (slot == 1)
             {
-                if (pointerVn.isWritten() && pointerVn.getDef().code() == CPUI_CAST)
+                if (pointerVn.isWritten() && pointerVn.getDef().code() == OpCode.CPUI_CAST)
                 {
                     if (pointerVn.isImplied() && pointerVn.loneDescend() == op)
                     {
@@ -70,7 +70,7 @@ namespace Sla.DECCORE
                 AddrSpace* spc = op.getIn(0).getSpaceFromConst();
                 newtype = tlst.getTypePointerNoDepth(outvn.getTempType().getSize(), alttype, spc.getWordSize());
             }
-            else if (alttype.getMetatype() == TYPE_PTR)
+            else if (alttype.getMetatype() == type_metatype.TYPE_PTR)
             {
                 newtype = ((TypePointer*)alttype).getPtrTo();
                 if (newtype.getSize() != outvn.getTempType().getSize() || newtype.isVariableLength())

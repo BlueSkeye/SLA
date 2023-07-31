@@ -33,23 +33,23 @@ namespace Sla.EXTRA
             lastop = opc;
             switch (opc)
             {
-                case CPUI_CALL:
+                case OpCode.CPUI_CALL:
                     hascall = true;
                 // fallthru
-                case CPUI_BRANCH:
-                case CPUI_CBRANCH:
+                case OpCode.CPUI_BRANCH:
+                case OpCode.CPUI_CBRANCH:
                     jumpaddr.Add(Address(vars[0].space, vars[0].offset));
                     break;
-                case CPUI_COPY:
-                case CPUI_BRANCHIND:
-                case CPUI_CALLIND:
+                case OpCode.CPUI_COPY:
+                case OpCode.CPUI_BRANCHIND:
+                case OpCode.CPUI_CALLIND:
                     if (targetoffsets.end() != targetoffsets.find(vars[0].offset))
                     {
                         hitsaddress = true;
                         targethit = vars[0].offset;
                     }
                     break;
-                case CPUI_LOAD:
+                case OpCode.CPUI_LOAD:
                     if (targetoffsets.end() != targetoffsets.find(vars[1].offset))
                     {
                         hitsaddress = true;
@@ -64,7 +64,7 @@ namespace Sla.EXTRA
         public void disassemble(Address addr,DisassemblyResult res)
         {
             jumpaddr.clear();
-            lastop = CPUI_COPY;
+            lastop = OpCode.CPUI_COPY;
             hascall = false;
             hitsaddress = false;
             res.flags = 0;
@@ -92,12 +92,12 @@ namespace Sla.EXTRA
             Address lastaddr = addr + res.length;
             switch (lastop)
             {
-                case CPUI_BRANCH:
-                case CPUI_BRANCHIND:
+                case OpCode.CPUI_BRANCH:
+                case OpCode.CPUI_BRANCHIND:
                     if (hitsaddress)
                         res.flags |= CodeUnit::thunkhit; // Hits target via indirect jump
                     break;
-                case CPUI_RETURN:
+                case OpCode.CPUI_RETURN:
                     break;
                 default:
                     res.flags |= CodeUnit::fallthru;

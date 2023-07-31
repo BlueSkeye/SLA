@@ -71,7 +71,7 @@ namespace Sla.DECCORE
             if (!tmpvn.isSpacebasePlaceholder()) return (Varnode)null;
             if (!tmpvn.isWritten()) return (Varnode)null;
             PcodeOp* loadop = tmpvn.getDef();
-            if (loadop.code() != CPUI_LOAD) return (Varnode)null;
+            if (loadop.code() != OpCode.CPUI_LOAD) return (Varnode)null;
             return loadop.getIn(1);    // The load input (ptr) is the reference we want
         }
 
@@ -99,7 +99,7 @@ namespace Sla.DECCORE
             }
             if (vn.getSize() == param.getSize()) return vn;
             PcodeOp* newop = data.newOp(2, op.getAddr());
-            data.opSetOpcode(newop, CPUI_SUBPIECE);
+            data.opSetOpcode(newop, OpCode.CPUI_SUBPIECE);
             Varnode* newout = data.newUniqueOut(param.getSize(), newop);
             // Its possible vn is free, in which case the SetInput would give it multiple descendants
             // See we construct a new version
@@ -161,7 +161,7 @@ namespace Sla.DECCORE
                 return (PcodeOp)null;
             }
             PcodeOp* indop = op.previousOp();
-            while ((indop != (PcodeOp)null) && (indop.code() == CPUI_INDIRECT))
+            while ((indop != (PcodeOp)null) && (indop.code() == OpCode.CPUI_INDIRECT))
             {
                 if (indop.isIndirectCreation())
                 {
@@ -219,7 +219,7 @@ namespace Sla.DECCORE
         private bool transferLockedOutput(Varnode newoutput, FuncProto source)
         {
             ProtoParameter* param = source.getOutput();
-            if (param.getType().getMetatype() == TYPE_VOID)
+            if (param.getType().getMetatype() == type_metatype.TYPE_VOID)
             {
                 newoutput = (Varnode)null;
                 return true;
@@ -307,7 +307,7 @@ namespace Sla.DECCORE
                 // We could conceivably truncate the output to the correct size to match the parameter
                 activeoutput.registerTrial(param.getAddress(), param.getSize());
                 PcodeOp* indop = newout.getDef();
-                if (newout.getSize() == 1 && param.getType().getMetatype() == TYPE_BOOL && data.isTypeRecoveryOn())
+                if (newout.getSize() == 1 && param.getType().getMetatype() == type_metatype.TYPE_BOOL && data.isTypeRecoveryOn())
                     data.opMarkCalculatedBool(op);
                 if (newout.getSize() == param.getSize())
                 {
@@ -325,12 +325,12 @@ namespace Sla.DECCORE
                     if (indop != op)
                     {
                         data.opUninsert(indop);
-                        data.opSetOpcode(indop, CPUI_SUBPIECE);
+                        data.opSetOpcode(indop, OpCode.CPUI_SUBPIECE);
                     }
                     else
                     {
                         indop = data.newOp(2, op.getAddr());
-                        data.opSetOpcode(indop, CPUI_SUBPIECE);
+                        data.opSetOpcode(indop, OpCode.CPUI_SUBPIECE);
                         data.opSetOutput(indop, newout);    // Move -newout- from -op- to -indop-
                     }
                     Varnode* realout = data.newVarnodeOut(param.getSize(), param.getAddress(), op);
@@ -345,15 +345,15 @@ namespace Sla.DECCORE
                     // Test whether the new prototype naturally extends its output
                     OpCode opc = assumedOutputExtension(param.getAddress(), param.getSize(), vardata);
                     Address hiaddr = newout.getAddr();
-                    if (opc != CPUI_COPY)
+                    if (opc != OpCode.CPUI_COPY)
                     {
                         // If -newout- looks like a natural extension of the true output type, create the extension op
-                        if (opc == CPUI_PIECE)
+                        if (opc == OpCode.CPUI_PIECE)
                         {   // Extend based on the datatype
-                            if (param.getType().getMetatype() == TYPE_INT)
-                                opc = CPUI_INT_SEXT;
+                            if (param.getType().getMetatype() == type_metatype.TYPE_INT)
+                                opc = OpCode.CPUI_INT_SEXT;
                             else
-                                opc = CPUI_INT_ZEXT;
+                                opc = OpCode.CPUI_INT_ZEXT;
                         }
                         if (indop != op)
                         {
@@ -383,7 +383,7 @@ namespace Sla.DECCORE
                         if (indop != op)
                         {
                             data.opUninsert(indop);
-                            data.opSetOpcode(indop, CPUI_PIECE);
+                            data.opSetOpcode(indop, OpCode.CPUI_PIECE);
                             Varnode* outvn = data.newVarnodeOut(param.getSize(), param.getAddress(), op);
                             data.opSetInput(indop, newindop.getOut(), 0);
                             data.opSetInput(indop, outvn, 1);
@@ -392,7 +392,7 @@ namespace Sla.DECCORE
                         else
                         {
                             PcodeOp* concatop = data.newOp(2, op.getAddr());
-                            data.opSetOpcode(concatop, CPUI_PIECE);
+                            data.opSetOpcode(concatop, OpCode.CPUI_PIECE);
                             data.opSetOutput(concatop, newout); // Move newout from -op- to -concatop-
                             Varnode* outvn = data.newVarnodeOut(param.getSize(), param.getAddress(), op);
                             data.opSetInput(concatop, newindop.getOut(), 0);
@@ -420,7 +420,7 @@ namespace Sla.DECCORE
             PcodeOp* indop = op.previousOp();
             while (indop != (PcodeOp)null)
             {
-                if (indop.code() != CPUI_INDIRECT) break;
+                if (indop.code() != OpCode.CPUI_INDIRECT) break;
                 if (indop.isIndirectCreation())
                 {
                     Varnode* vn = indop.getOut();
@@ -461,13 +461,13 @@ namespace Sla.DECCORE
         {
             activeinput = true;
             activeoutput = true;
-            effective_extrapop = ProtoModel::extrapop_unknown;
+            effective_extrapop = ProtoModel.extrapop_unknown;
             stackoffset = offset_unknown;
             stackPlaceholderSlot = -1;
             paramshift = 0;
             op = call_op;
             fd = (Funcdata)null;
-            if (call_op.code() == CPUI_CALL)
+            if (call_op.code() == OpCode.CPUI_CALL)
             {
                 entryaddress = call_op.getIn(0).getAddr();
                 if (entryaddress.getSpace().getType() == IPTR_FSPEC)
@@ -716,7 +716,7 @@ namespace Sla.DECCORE
 
             Varnode* vn = data.newVarnodeCallSpecs(this);
             data.opSetInput(op, vn, 0);
-            data.opSetOpcode(op, CPUI_CALL);
+            data.opSetOpcode(op, OpCode.CPUI_CALL);
 
             data.getOverride().insertIndirectOverride(op.getAddr(), entryaddress);
 
@@ -916,12 +916,12 @@ namespace Sla.DECCORE
             int expop = 0;
             if (hasModel())
             {
-                callee_pop = (getModelExtraPop() == ProtoModel::extrapop_unknown);
+                callee_pop = (getModelExtraPop() == ProtoModel.extrapop_unknown);
                 if (callee_pop)
                 {
                     expop = getExtraPop();
                     // Tried to use getEffectiveExtraPop at one point, but it is too unreliable
-                    if ((expop == ProtoModel::extrapop_unknown) || (expop <= 4))
+                    if ((expop == ProtoModel.extrapop_unknown) || (expop <= 4))
                         callee_pop = false;
                     // If the subfunctions do their own parameter popping and
                     // if the extrapop is successfully recovered this is hard evidence
@@ -1061,7 +1061,7 @@ namespace Sla.DECCORE
                             outvn = data.newVarnodeOut(sz, vn.getAddr() + (vn.getSize() - sz), newop);
                         else
                             outvn = data.newVarnodeOut(sz, vn.getAddr(), newop);
-                        data.opSetOpcode(newop, CPUI_SUBPIECE);
+                        data.opSetOpcode(newop, OpCode.CPUI_SUBPIECE);
                         data.opSetInput(newop, vn, 0);
                         data.opSetInput(newop, data.newConstant(1, 0), 1);
                         data.opInsertBefore(newop, op);
@@ -1142,13 +1142,13 @@ namespace Sla.DECCORE
                     finaloutvn = data.newVarnode(hivn.getSize() + lovn.getSize(), joinaddr);
                     data.opSetOutput(op, finaloutvn);
                     PcodeOp* sublo = data.newOp(2, op.getAddr());
-                    data.opSetOpcode(sublo, CPUI_SUBPIECE);
+                    data.opSetOpcode(sublo, OpCode.CPUI_SUBPIECE);
                     data.opSetInput(sublo, finaloutvn, 0);
                     data.opSetInput(sublo, data.newConstant(4, 0), 1);
                     data.opSetOutput(sublo, lovn);
                     data.opInsertAfter(sublo, op);
                     PcodeOp* subhi = data.newOp(2, op.getAddr());
-                    data.opSetOpcode(subhi, CPUI_SUBPIECE);
+                    data.opSetOpcode(subhi, OpCode.CPUI_SUBPIECE);
                     data.opSetInput(subhi, finaloutvn, 0);
                     data.opSetInput(subhi, data.newConstant(4, lovn.getSize()), 1);
                     data.opSetOutput(subhi, hivn);
@@ -1267,7 +1267,7 @@ namespace Sla.DECCORE
             PcodeOp* op2 = vn2.loneDescend();
             if (op2 == (PcodeOp)null) return (Varnode)null;
             if (op1 != op2) return (Varnode)null;
-            if (op1.code() != CPUI_PIECE) return (Varnode)null;
+            if (op1.code() != OpCode.CPUI_PIECE) return (Varnode)null;
             return op1.getOut();
         }
 

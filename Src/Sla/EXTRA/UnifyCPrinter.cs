@@ -48,7 +48,7 @@ namespace Sla.EXTRA
             s << '{' << endl;
             for (int i = 0; i < opcodelist.size(); ++i)
             {
-                s << "  oplist.Add(CPUI_" << get_opname(opcodelist[i]) << ");" << endl;
+                s << "  oplist.Add(CPUI_" << Globals.get_opname(opcodelist[i]) << ");" << endl;
             }
             s << '}' << endl;
             s << endl;

@@ -45,10 +45,10 @@ namespace Sla.DECCORE
                 offset = 0;
             }
 
-            /// \brief Constructor from old state pulled back through a CPUI_SUBPIECE
+            /// \brief Constructor from old state pulled back through a OpCode.CPUI_SUBPIECE
             ///
             /// Data ultimately in SUBPIECE output is copied from a non-zero offset within the input Varnode. Note this offset
-            /// \param o is the CPUI_SUBPIECE
+            /// \param o is the OpCode.CPUI_SUBPIECE
             /// \param oldState is the old state being pulled back from
             private State(PcodeOp o, State oldState)
             {
@@ -139,7 +139,7 @@ namespace Sla.DECCORE
             PcodeOp* op = stateVn.getDef();
             switch (op.code())
             {
-                case CPUI_INDIRECT:
+                case OpCode.CPUI_INDIRECT:
                     if (op.isIndirectCreation())
                     {   // Backtracking is stopped by a call
                         trial.setIndCreateFormed();
@@ -154,7 +154,7 @@ namespace Sla.DECCORE
                     }
                     stateStack.Add(State(op, 0));
                     return enter_node;          // Enter the new node
-                case CPUI_SUBPIECE:
+                case OpCode.CPUI_SUBPIECE:
                     // Extracting to a temporary, or to the same storage location, or otherwise incidental
                     // are viewed as just another node on the path to traverse
                     if (op.getOut().getSpace().getType() == IPTR_INTERNAL
@@ -175,9 +175,9 @@ namespace Sla.DECCORE
                                 return pop_fail;
                         }
                         op = vn.getDef();
-                    } while ((op != (PcodeOp)null) && ((op.code() == CPUI_COPY) || (op.code() == CPUI_SUBPIECE)));
+                    } while ((op != (PcodeOp)null) && ((op.code() == OpCode.CPUI_COPY) || (op.code() == OpCode.CPUI_SUBPIECE)));
                     return pop_solid;   // treat the COPY as a solid movement
-                case CPUI_COPY:
+                case OpCode.CPUI_COPY:
                     {
                         // Copies to a temporary, or between varnodes with same storage location, or otherwise incidental
                         // are viewed as just another node on the path to traverse
@@ -201,20 +201,20 @@ namespace Sla.DECCORE
                             op = vn.getDef();
                             if (op == (PcodeOp)null) break;
                             OpCode opc = op.code();
-                            if (opc == CPUI_COPY || opc == CPUI_SUBPIECE)
+                            if (opc == OpCode.CPUI_COPY || opc == OpCode.CPUI_SUBPIECE)
                                 vn = op.getIn(0);
-                            else if (opc == CPUI_PIECE)
+                            else if (opc == OpCode.CPUI_PIECE)
                                 vn = op.getIn(1);      // Follow least significant piece
                             else
                                 break;
                         }
                         return pop_solid;   // treat the COPY as a solid movement
                     }
-                case CPUI_MULTIEQUAL:
+                case OpCode.CPUI_MULTIEQUAL:
                     multiDepth += 1;
                     stateStack.Add(State(op, 0));
                     return enter_node;              // Nothing to check, start traversing inputs of MULTIEQUAL
-                case CPUI_PIECE:
+                case OpCode.CPUI_PIECE:
                     if (stateVn.getSize() > trial.getSize())
                     {   // Did we already pull-back from a SUBPIECE?
                         // If the trial is getting pieced together and then truncated in a register,
@@ -249,13 +249,13 @@ namespace Sla.DECCORE
         private int uponPop(int command)
         {
             State & state(stateStack.GetLastItem());
-            if (state.op.code() == CPUI_MULTIEQUAL)
+            if (state.op.code() == OpCode.CPUI_MULTIEQUAL)
             {   // All the interesting action happens for MULTIEQUAL branch points
                 State & prevstate(stateStack[stateStack.size() - 2]);   // State previous the one being popped
                 if (pop_command == pop_fail)
                 {       // For a pop_fail, we always pop and pass along the fail
                     multiDepth -= 1;
-                    stateStack.pop_back();
+                    stateStack.RemoveLastItem();
                     return pop_command;
                 }
                 else if ((pop_command == pop_solid) && (multiDepth == 1) && (state.op.numInput() == 2))
@@ -286,14 +286,14 @@ namespace Sla.DECCORE
                     else
                         pop_command = pop_success;          // seeing neither solid nor failkill is still a success
                     multiDepth -= 1;
-                    stateStack.pop_back();
+                    stateStack.RemoveLastItem();
                     return pop_command;
                 }
                 return enter_node;
             }
             else
             {
-                stateStack.pop_back();
+                stateStack.RemoveLastItem();
                 return pop_command;
             }
         }

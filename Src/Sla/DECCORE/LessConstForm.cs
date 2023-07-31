@@ -36,8 +36,8 @@ namespace Sla.DECCORE
 
             if (!cvn.isConstant()) return false;
 
-            signcompare = ((op.code() == CPUI_INT_SLESSEQUAL) || (op.code() == CPUI_INT_SLESS));
-            hilessequalform = ((op.code() == CPUI_INT_SLESSEQUAL) || (op.code() == CPUI_INT_LESSEQUAL));
+            signcompare = ((op.code() == OpCode.CPUI_INT_SLESSEQUAL) || (op.code() == OpCode.CPUI_INT_SLESS));
+            hilessequalform = ((op.code() == OpCode.CPUI_INT_SLESSEQUAL) || (op.code() == OpCode.CPUI_INT_LESSEQUAL));
 
             ulong val = cvn.getOffset() << 8 * losize;
             if (hilessequalform != (inslot == 1))
@@ -46,7 +46,7 @@ namespace Sla.DECCORE
             // This rule can apply and mess up less,equal rules, so we only apply it if it directly affects a branch
             PcodeOp* desc = op.getOut().loneDescend();
             if (desc == (PcodeOp)null) return false;
-            if (desc.code() != CPUI_CBRANCH) return false;
+            if (desc.code() != OpCode.CPUI_CBRANCH) return false;
 
             constin.initPartial(@in.getSize(), val);
 

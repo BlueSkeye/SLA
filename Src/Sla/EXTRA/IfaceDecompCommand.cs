@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ScopeMap = System.Collections.Generic.Dictionary<ulong, Sla.DECCORE.Scope>;
+
 namespace Sla.EXTRA
 {
     /// \brief Root class for all decompiler specific commands
@@ -25,12 +27,9 @@ namespace Sla.EXTRA
         {
             if (!scope.isGlobal()) return;
             iterateFunctionsAddrOrder(scope);
-            ScopeMap::const_iterator iter, enditer;
-            iter = scope.childrenBegin();
-            enditer = scope.childrenEnd();
-            for (; iter != enditer; ++iter)
-            {
-                iterateScopesRecursive((*iter).second);
+            ScopeMap.Enumerator iter = scope.childrenBegin();
+            while(iter.MoveNext()) { 
+                iterateScopesRecursive(iter.Current.Value);
             }
         }
 
@@ -39,15 +38,11 @@ namespace Sla.EXTRA
         /// \param scope is the given scope
         protected void iterateFunctionsAddrOrder(Scope scope)
         {
-            MapIterator miter, menditer;
-            miter = scope.begin();
-            menditer = scope.end();
-            while (miter != menditer)
-            {
-                Symbol* sym = (*miter).getSymbol();
-                FunctionSymbol* fsym = dynamic_cast<FunctionSymbol*>(sym);
-                ++miter;
-                if (fsym != (FunctionSymbol*)0)
+            IEnumerator<SymbolEntry> miter = scope.begin();
+            while (miter.MoveNext()) {
+                Symbol sym = miter.Current.getSymbol();
+                FunctionSymbol fsym = (FunctionSymbol)(sym);
+                if (fsym != (FunctionSymbol)null)
                     iterationCallback(fsym.getFunction());
             }
         }
@@ -74,7 +69,7 @@ namespace Sla.EXTRA
         /// traversed in address order.
         public void iterateFunctionsAddrOrder()
         {
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No architecture loaded");
             iterateScopesRecursive(dcp.conf.symboltab.getGlobalScope());
         }
@@ -84,15 +79,15 @@ namespace Sla.EXTRA
         /// Child functions are traversed before their parents.
         public void iterateFunctionsLeafOrder()
         {
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No architecture loaded");
 
-            if (dcp.cgraph == (CallGraph*)0)
+            if (dcp.cgraph == (CallGraph)null)
                 throw new IfaceExecutionError("No callgraph present");
 
             CallGraphNode* node;
             node = dcp.cgraph.initLeafWalk();
-            while (node != (CallGraphNode*)0)
+            while (node != (CallGraphNode)null)
             {
                 if (node.getName().size() == 0) continue; // Skip if has no name
                 Funcdata* fd = node.getFuncdata();

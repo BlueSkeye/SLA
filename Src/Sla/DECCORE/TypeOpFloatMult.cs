@@ -11,7 +11,7 @@ namespace Sla.DECCORE
     internal class TypeOpFloatMult : TypeOpBinary
     {
         public TypeOpFloatMult(TypeFactory t, Translate trans)
-            : base(t, CPUI_FLOAT_MULT,"*", TYPE_FLOAT, TYPE_FLOAT)
+            : base(t, OpCode.CPUI_FLOAT_MULT,"*", type_metatype.TYPE_FLOAT, type_metatype.TYPE_FLOAT)
         {
             opflags = PcodeOp::binary | PcodeOp::commutative;
             addlflags = floatingpoint_op;

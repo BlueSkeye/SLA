@@ -11,7 +11,7 @@ namespace Sla.DECCORE
     internal class TypeOpMulti : TypeOp
     {
         public TypeOpMulti(TypeFactory t)
-            : base(t, CPUI_MULTIEQUAL,"?")
+            : base(t, OpCode.CPUI_MULTIEQUAL,"?")
 
         {
             opflags = PcodeOp::special | PcodeOp::marker | PcodeOp::nocollapse;
@@ -29,7 +29,7 @@ namespace Sla.DECCORE
             if (invn.isSpacebase())
             {
                 AddrSpace* spc = tlst.getArch().getDefaultDataSpace();
-                newtype = tlst.getTypePointer(alttype.getSize(), tlst.getBase(1, TYPE_UNKNOWN), spc.getWordSize());
+                newtype = tlst.getTypePointer(alttype.getSize(), tlst.getBase(1, type_metatype.TYPE_UNKNOWN), spc.getWordSize());
             }
             else
                 newtype = alttype;

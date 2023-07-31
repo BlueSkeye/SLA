@@ -14,7 +14,7 @@ namespace Sla.EXTRA
         /// \brief Print any known type definitions: `print C types`
         public override void execute(TextReader s)
         {
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
 
             if (dcp.conf.types != (TypeFactory*)0)

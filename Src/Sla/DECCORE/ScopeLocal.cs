@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 using static ghidra.ParamMeasure;
 using static ghidra.ScoreProtoModel;
 
+using EntryMap = Sla.EXTRA.rangemap<Sla.DECCORE.SymbolEntry>;
+
 namespace Sla.DECCORE
 {
     /// \brief A Symbol scope for \e local variables of a particular function.
@@ -194,9 +196,9 @@ namespace Sla.DECCORE
                     else
                     {
                         type_metatype meta = symbol.getType().getMetatype();
-                        if (meta == TYPE_STRUCT)
+                        if (meta == type_metatype.TYPE_STRUCT)
                             aliason = false;        // Only structures block aliases
-                        else if (meta == TYPE_ARRAY && alias_block_level > 1) aliason = false;// Only arrays (and structures) block aliases
+                        else if (meta == type_metatype.TYPE_ARRAY && alias_block_level > 1) aliason = false;// Only arrays (and structures) block aliases
                     }
                 }
             }
@@ -242,7 +244,7 @@ namespace Sla.DECCORE
                     // 	usepoint = vn.getUsePoint(*fd);
                     // Double check to make sure vn doesn't already have a
                     // representative symbol.  If the input prototype is locked
-                    // but one of the types is TYPE_UNKNOWN, then the 
+                    // but one of the types is type_metatype.TYPE_UNKNOWN, then the 
                     // corresponding varnodes won't get typelocked
                     if (lockedinputs != 0)
                     {
@@ -256,7 +258,7 @@ namespace Sla.DECCORE
                     }
 
                     int size = (endpoint - addr.getOffset()) + 1;
-                    Datatype* ct = fd.getArch().types.getBase(size, TYPE_UNKNOWN);
+                    Datatype* ct = fd.getArch().types.getBase(size, type_metatype.TYPE_UNKNOWN);
                     try
                     {
                         addSymbol("", ct, addr, usepoint).getSymbol();
@@ -315,9 +317,9 @@ namespace Sla.DECCORE
                     if (sym.isThisPointer())
                     {       // If there is a "this" pointer
                         Datatype* dt = sym.getType();
-                        if (dt.getMetatype() == TYPE_PTR)
+                        if (dt.getMetatype() == type_metatype.TYPE_PTR)
                         {
-                            if (((TypePointer*)dt).getPtrTo().getMetatype() == TYPE_STRUCT)
+                            if (((TypePointer*)dt).getPtrTo().getMetatype() == type_metatype.TYPE_STRUCT)
                             {
                                 // If the "this" pointer points to a class, try to preserve the data-type
                                 // even though the symbol is not preserved.
@@ -347,7 +349,7 @@ namespace Sla.DECCORE
                 PcodeOp* op = *iter;
                 if (op.getEvalType() == PcodeOp::special && !op.isCall()) continue;
                 OpCode opc = op.code();
-                if (opc == CPUI_INT_ADD || opc == CPUI_PTRSUB || opc == CPUI_PTRADD)
+                if (opc == OpCode.CPUI_INT_ADD || opc == OpCode.CPUI_PTRSUB || opc == OpCode.CPUI_PTRADD)
                     continue;
                 refOps.Add(op);
             }
@@ -355,7 +357,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* op = refOps[i];
                 int slot = op.getSlot(spVn);
-                PcodeOp* ptrsub = fd.newOpBefore(op, CPUI_PTRSUB, spVn, fd.newConstant(spVn.getSize(), 0));
+                PcodeOp* ptrsub = fd.newOpBefore(op, OpCode.CPUI_PTRSUB, spVn, fd.newConstant(spVn.getSize(), 0));
                 fd.opSetInput(op, ptrsub.getOut(), slot);
             }
         }
@@ -481,7 +483,7 @@ namespace Sla.DECCORE
                 if (fd.getFuncProto().getLocalRange().inRange(addr, 1))
                 {
                     long start = (long)AddrSpace::byteToAddress(addr.getOffset(), space.getWordSize());
-                    sign_extend(start, addr.getAddrSize() * 8 - 1);
+                    Globals.sign_extend(start, addr.getAddrSize() * 8 - 1);
                     if (stackGrowsNegative)
                         start = -start;
                     ostringstream s;

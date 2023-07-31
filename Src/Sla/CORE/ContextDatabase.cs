@@ -6,7 +6,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-using TrackedSet = System.Collections.Generic.List<ghidra.TrackedContext>;
+using TrackedSet = System.Collections.Generic.List<Sla.CORE.TrackedContext>;
 
 namespace Sla.CORE
 {
@@ -164,7 +164,7 @@ namespace Sla.CORE
 
         /// \brief Encode the entire database to a stream
         /// \param encoder is the stream encoder
-        protected abstract void encode(Encoder encoder);
+        internal abstract void encode(Encoder encoder);
 
         /// \brief Restore the state of \b this database object from the given stream decoder
         /// \param decoder is the given stream decoder

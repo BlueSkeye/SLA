@@ -41,10 +41,10 @@ namespace Sla.EXTRA
                 for (iter = tmpvn.beginDescend(); iter != tmpvn.endDescend(); ++iter)
                 {
                     PcodeOp* op = *iter;
-                    if ((op.code() == CPUI_COPY) ||
-                    (op.code() == CPUI_CAST) ||
-                    (op.code() == CPUI_INDIRECT) ||
-                    (op.code() == CPUI_MULTIEQUAL))
+                    if ((op.code() == OpCode.CPUI_COPY) ||
+                    (op.code() == OpCode.CPUI_CAST) ||
+                    (op.code() == OpCode.CPUI_INDIRECT) ||
+                    (op.code() == OpCode.CPUI_MULTIEQUAL))
                     {
                         Varnode* outvn = op.getOut();
                         if (!outvn.isMark())
@@ -98,7 +98,7 @@ namespace Sla.EXTRA
                 else
                 {
                     PcodeOp* op = tmpvn.getDef();
-                    if ((op.code() == CPUI_COPY) || (op.code() == CPUI_CAST))
+                    if ((op.code() == OpCode.CPUI_COPY) || (op.code() == OpCode.CPUI_CAST))
                     {
                         tmpvn = op.getIn(0);
                         if (!tmpvn.isMark())
@@ -107,7 +107,7 @@ namespace Sla.EXTRA
                             vnlist.Add(tmpvn);
                         }
                     }
-                    else if (op.code() == CPUI_INDIRECT)
+                    else if (op.code() == OpCode.CPUI_INDIRECT)
                     {
                         tmpvn = op.getIn(0);
                         if (!tmpvn.isMark())
@@ -116,7 +116,7 @@ namespace Sla.EXTRA
                             vnlist.Add(tmpvn);
                         }
                     }
-                    else if (op.code() == CPUI_MULTIEQUAL)
+                    else if (op.code() == OpCode.CPUI_MULTIEQUAL)
                     {
                         for (int i = 0; i < op.numInput(); ++i)
                         {
@@ -159,7 +159,7 @@ namespace Sla.EXTRA
                 if (!vn.hasNoDescend()) continue;
                 if (!vn.isWritten()) continue;
                 PcodeOp* op = vn.getDef();
-                if (op.code() == CPUI_INDIRECT) continue; // Not a global return address force
+                if (op.code() == OpCode.CPUI_INDIRECT) continue; // Not a global return address force
                 int res = checkRestore(vn);
                 if (res != 0) return false;
                 count += 1;

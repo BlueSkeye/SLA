@@ -17,7 +17,7 @@ namespace Sla.EXTRA
         /// Name any global symbol stored in a register with the name of the register.
         public override void execute(TextReader s)
         {
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
             Dictionary<VarnodeData, string> reglist;
             dcp.conf.translate.getAllRegisters(reglist);
@@ -41,7 +41,7 @@ namespace Sla.EXTRA
                 globalscope.queryProperties(addr, dat.size, Address(), flags);
                 if ((flags & Varnode.varnode_flags.persist) != 0)
                 {
-                    Datatype* ct = dcp.conf.types.getBase(dat.size, TYPE_UINT);
+                    Datatype* ct = dcp.conf.types.getBase(dat.size, type_metatype.TYPE_UINT);
                     globalscope.addSymbol((*iter).second, ct, addr, Address());
                     count += 1;
                 }

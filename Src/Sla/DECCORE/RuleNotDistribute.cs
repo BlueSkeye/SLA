@@ -39,11 +39,11 @@ namespace Sla.DECCORE
             if (compop == (PcodeOp)null) return 0;
             switch (compop.code())
             {
-                case CPUI_BOOL_AND:
-                    opc = CPUI_BOOL_OR;
+                case OpCode.CPUI_BOOL_AND:
+                    opc = OpCode.CPUI_BOOL_OR;
                     break;
-                case CPUI_BOOL_OR:
-                    opc = CPUI_BOOL_AND;
+                case OpCode.CPUI_BOOL_OR:
+                    opc = OpCode.CPUI_BOOL_AND;
                     break;
                 default:
                     return 0;
@@ -51,13 +51,13 @@ namespace Sla.DECCORE
 
             newneg1 = data.newOp(1, op.getAddr());
             newout1 = data.newUniqueOut(1, newneg1);
-            data.opSetOpcode(newneg1, CPUI_BOOL_NEGATE);
+            data.opSetOpcode(newneg1, OpCode.CPUI_BOOL_NEGATE);
             data.opSetInput(newneg1, compop.getIn(0), 0);
             data.opInsertBefore(newneg1, op);
 
             newneg2 = data.newOp(1, op.getAddr());
             newout2 = data.newUniqueOut(1, newneg2);
-            data.opSetOpcode(newneg2, CPUI_BOOL_NEGATE);
+            data.opSetOpcode(newneg2, OpCode.CPUI_BOOL_NEGATE);
             data.opSetInput(newneg2, compop.getIn(1), 0);
             data.opInsertBefore(newneg2, op);
 

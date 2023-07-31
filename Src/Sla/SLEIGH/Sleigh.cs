@@ -251,7 +251,7 @@ namespace Sla.SLEIGH
          print_vardata(cout,*outvar);
          cout << " = ";
        }
-       cout << get_opname(opc);
+       cout << Globals.get_opname(opc);
        // Possibly check for a code reference or a space reference
        for(int i=0;i<isize;++i) {
          cout << ' ';
@@ -262,7 +262,7 @@ namespace Sla.SLEIGH
      \endcode
 
      Notice that the \e dump routine uses the built-in function
-     \e get_opname to find a string version of the opcode.  Each
+     \e Globals.get_opname to find a string version of the opcode.  Each
      varnode is defined in terms of the VarnodeData object, which
      is defined simply:
 

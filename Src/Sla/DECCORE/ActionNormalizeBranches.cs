@@ -41,7 +41,7 @@ namespace Sla.DECCORE
                 if (cbranch == null) {
                     continue;
                 }
-                if (cbranch.code() != CPUI_CBRANCH) {
+                if (cbranch.code() != OpCode.CPUI_CBRANCH) {
                     continue;
                 }
                 fliplist.Clear();

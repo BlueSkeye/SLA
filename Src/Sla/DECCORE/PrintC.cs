@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using static ghidra.GrammarToken;
 using static ghidra.XmlScan;
 
+using ScopeMap = System.Collections.Generic.Dictionary<ulong, Sla.DECCORE.Scope>;
+
 namespace Sla.DECCORE
 {
     /// \brief The c-language token emitter
@@ -189,11 +191,11 @@ namespace Sla.DECCORE
                 typestack.Add(ct);
                 if (ct.getName().size() != 0)  // This can be a base type
                     break;
-                if (ct.getMetatype() == TYPE_PTR)
+                if (ct.getMetatype() == type_metatype.TYPE_PTR)
                     ct = ((TypePointer*)ct).getPtrTo();
-                else if (ct.getMetatype() == TYPE_ARRAY)
+                else if (ct.getMetatype() == type_metatype.TYPE_ARRAY)
                     ct = ((TypeArray*)ct).getBase();
-                else if (ct.getMetatype() == TYPE_CODE)
+                else if (ct.getMetatype() == type_metatype.TYPE_CODE)
                 {
                     FuncProto* proto = ((TypeCode*)ct).getPrototype();
                     if (proto != (FuncProto)null)
@@ -347,11 +349,11 @@ namespace Sla.DECCORE
             for (int i = typestack.size() - 2; i >= 0; --i)
             {
                 ct = typestack[i];
-                if (ct.getMetatype() == TYPE_PTR)
+                if (ct.getMetatype() == type_metatype.TYPE_PTR)
                     pushOp(&ptr_expr, (PcodeOp)null);
-                else if (ct.getMetatype() == TYPE_ARRAY)
+                else if (ct.getMetatype() == type_metatype.TYPE_ARRAY)
                     pushOp(&array_expr, (PcodeOp)null);
-                else if (ct.getMetatype() == TYPE_CODE)
+                else if (ct.getMetatype() == type_metatype.TYPE_CODE)
                     pushOp(&function_call, (PcodeOp)null);
                 else
                 {
@@ -379,16 +381,16 @@ namespace Sla.DECCORE
             {
                 if (ct.getName().size() != 0)  // This is the base type
                     break;
-                if (ct.getMetatype() == TYPE_PTR)
+                if (ct.getMetatype() == type_metatype.TYPE_PTR)
                     ct = ((TypePointer*)ct).getPtrTo();
-                else if (ct.getMetatype() == TYPE_ARRAY)
+                else if (ct.getMetatype() == type_metatype.TYPE_ARRAY)
                 {
                     TypeArray* ctarray = (TypeArray*)ct;
                     ct = ctarray.getBase();
                     push_integer(ctarray.numElements(), 4, false,
                          (Varnode)null, (PcodeOp)null);
                 }
-                else if (ct.getMetatype() == TYPE_CODE)
+                else if (ct.getMetatype() == type_metatype.TYPE_CODE)
                 {
                     TypeCode* ctcode = (TypeCode*)ct;
                     FuncProto* proto = ctcode.getPrototype();
@@ -433,7 +435,7 @@ namespace Sla.DECCORE
         protected void pushCharConstant(ulong val, Datatype ct, Varnode vn, PcodeOp op)
         {
             uint displayFormat = 0;
-            bool isSigned = (ct.getMetatype() == TYPE_INT);
+            bool isSigned = (ct.getMetatype() == type_metatype.TYPE_INT);
             if ((vn != (Varnode)null)&& (!vn.isAnnotation())) {
                 HighVariable* high = vn.getHigh();
                 Symbol* sym = high.getSymbol();
@@ -492,7 +494,7 @@ namespace Sla.DECCORE
             Datatype* subtype;
             switch (ct.getMetatype())
             {
-                case TYPE_UINT:
+                case type_metatype.TYPE_UINT:
                     if (ct.isCharPrint())
                         pushCharConstant(val, (TypeChar*)ct, vn, op);
                     else if (ct.isEnumType())
@@ -500,7 +502,7 @@ namespace Sla.DECCORE
                     else
                         push_integer(val, ct.getSize(), false, vn, op);
                     return;
-                case TYPE_INT:
+                case type_metatype.TYPE_INT:
                     if (ct.isCharPrint())
                         pushCharConstant(val, (TypeChar*)ct, vn, op);
                     else if (ct.isEnumType())
@@ -508,17 +510,17 @@ namespace Sla.DECCORE
                     else
                         push_integer(val, ct.getSize(), true, vn, op);
                     return;
-                case TYPE_UNKNOWN:
+                case type_metatype.TYPE_UNKNOWN:
                     push_integer(val, ct.getSize(), false, vn, op);
                     return;
-                case TYPE_BOOL:
+                case type_metatype.TYPE_BOOL:
                     pushBoolConstant(val, (TypeBase*)ct,vn,op);
                     return;
-                case TYPE_VOID:
+                case type_metatype.TYPE_VOID:
                     clear();
                     throw new LowlevelError("Cannot have a constant of type void");
-                case TYPE_PTR:
-                case TYPE_PTRREL:
+                case type_metatype.TYPE_PTR:
+                case type_metatype.TYPE_PTRREL:
                     if (option_NULL && (val == 0))
                     { // A null pointer
                         pushAtom(Atom(nullToken, vartoken, EmitMarkup::var_color, op, vn));
@@ -530,22 +532,22 @@ namespace Sla.DECCORE
                         if (pushPtrCharConstant(val, (TypePointer*)ct,vn,op))
                             return;
                     }
-                    else if (subtype.getMetatype() == TYPE_CODE)
+                    else if (subtype.getMetatype() == type_metatype.TYPE_CODE)
                     {
                         if (pushPtrCodeConstant(val, (TypePointer*)ct,vn,op))
                             return;
                     }
                     break;
-                case TYPE_FLOAT:
+                case type_metatype.TYPE_FLOAT:
                     push_float(val, ct.getSize(), vn, op);
                     return;
-                case TYPE_SPACEBASE:
-                case TYPE_CODE:
-                case TYPE_ARRAY:
-                case TYPE_STRUCT:
-                case TYPE_UNION:
-                case TYPE_PARTIALSTRUCT:
-                case TYPE_PARTIALUNION:
+                case type_metatype.TYPE_SPACEBASE:
+                case type_metatype.TYPE_CODE:
+                case type_metatype.TYPE_ARRAY:
+                case type_metatype.TYPE_STRUCT:
+                case type_metatype.TYPE_UNION:
+                case type_metatype.TYPE_PARTIALSTRUCT:
+                case type_metatype.TYPE_PARTIALUNION:
                     break;
             }
             // Default printing
@@ -671,14 +673,14 @@ namespace Sla.DECCORE
             if (!vn.isImplied()) return false;
             if (!vn.isWritten()) return false;
             op = vn.getDef();
-            if (op.code() == CPUI_SEGMENTOP)
+            if (op.code() == OpCode.CPUI_SEGMENTOP)
             {
                 vn = op.getIn(2);
                 if (!vn.isImplied()) return false;
                 if (!vn.isWritten()) return false;
                 op = vn.getDef();
             }
-            if ((op.code() != CPUI_PTRSUB) && (op.code() != CPUI_PTRADD)) return false;
+            if ((op.code() != OpCode.CPUI_PTRSUB) && (op.code() != OpCode.CPUI_PTRADD)) return false;
             return true;
         }
 
@@ -736,7 +738,7 @@ namespace Sla.DECCORE
             }
 
             pushMod();
-            bool sign = (ct.getMetatype() == TYPE_INT);
+            bool sign = (ct.getMetatype() == type_metatype.TYPE_INT);
             emit.tagLine();
             emit.print("typedef enum", EmitMarkup::keyword_color);
             emit.spaces(1);
@@ -787,7 +789,7 @@ namespace Sla.DECCORE
                 op = (PcodeOp)null;
 
             Datatype* outtype = proto.getOutputType();
-            if ((outtype.getMetatype() != TYPE_VOID) && (op != (PcodeOp)null))
+            if ((outtype.getMetatype() != type_metatype.TYPE_VOID) && (op != (PcodeOp)null))
                 vn = op.getIn(1);
             else
                 vn = (Varnode)null;
@@ -847,12 +849,9 @@ namespace Sla.DECCORE
         {
             if (!symScope.isGlobal()) return;
             emitScopeVarDecls(symScope, Symbol::no_category);
-            ScopeMap::const_iterator iter, enditer;
-            iter = symScope.childrenBegin();
-            enditer = symScope.childrenEnd();
-            for (; iter != enditer; ++iter)
-            {
-                emitGlobalVarDeclsRecursive((*iter).second);
+            ScopeMap.Enumerator iter = symScope.childrenBegin();
+            while(iter.MoveNext()) {
+                emitGlobalVarDeclsRecursive(iter.Current.Value);
             }
         }
 
@@ -866,15 +865,11 @@ namespace Sla.DECCORE
 
             if (emitScopeVarDecls(fd.getScopeLocal(), Symbol::no_category))
                 notempty = true;
-            ScopeMap::const_iterator iter, enditer;
-            iter = fd.getScopeLocal().childrenBegin();
-            enditer = fd.getScopeLocal().childrenEnd();
-            while (iter != enditer)
-            {
-                Scope* l1 = (*iter).second;
+            ScopeMap.Enumerator iter = fd.getScopeLocal().childrenBegin();
+            while (iter.MoveNext()) {
+                Scope l1 = iter.Current.Value;
                 if (emitScopeVarDecls(l1, Symbol::no_category))
                     notempty = true;
-                ++iter;
             }
 
             if (notempty)
@@ -905,37 +900,37 @@ namespace Sla.DECCORE
             OpToken* tok;
             switch (op.code())
             {
-                case CPUI_INT_MULT:
+                case OpCode.CPUI_INT_MULT:
                     tok = &multequal;
                     break;
-                case CPUI_INT_DIV:
-                case CPUI_INT_SDIV:
+                case OpCode.CPUI_INT_DIV:
+                case OpCode.CPUI_INT_SDIV:
                     tok = &divequal;
                     break;
-                case CPUI_INT_REM:
-                case CPUI_INT_SREM:
+                case OpCode.CPUI_INT_REM:
+                case OpCode.CPUI_INT_SREM:
                     tok = &remequal;
                     break;
-                case CPUI_INT_ADD:
+                case OpCode.CPUI_INT_ADD:
                     tok = &plusequal;
                     break;
-                case CPUI_INT_SUB:
+                case OpCode.CPUI_INT_SUB:
                     tok = &minusequal;
                     break;
-                case CPUI_INT_LEFT:
+                case OpCode.CPUI_INT_LEFT:
                     tok = &leftequal;
                     break;
-                case CPUI_INT_RIGHT:
-                case CPUI_INT_SRIGHT:
+                case OpCode.CPUI_INT_RIGHT:
+                case OpCode.CPUI_INT_SRIGHT:
                     tok = &rightequal;
                     break;
-                case CPUI_INT_AND:
+                case OpCode.CPUI_INT_AND:
                     tok = &andequal;
                     break;
-                case CPUI_INT_OR:
+                case OpCode.CPUI_INT_OR:
                     tok = &orequal;
                     break;
-                case CPUI_INT_XOR:
+                case OpCode.CPUI_INT_XOR:
                     tok = &xorequal;
                     break;
                 default:
@@ -1391,7 +1386,7 @@ namespace Sla.DECCORE
         protected virtual void pushConstant(ulong val, Datatype ct, Varnode vn, PcodeOp op)
         {
             uint displayFormat = 0;
-            bool isSigned = (ct.getMetatype() == TYPE_INT);
+            bool isSigned = (ct.getMetatype() == type_metatype.TYPE_INT);
             if ((vn != (Varnode)null)&& (!vn.isAnnotation())) {
                 HighVariable* high = vn.getHigh();
                 Symbol* sym = high.getSymbol();
@@ -1497,7 +1492,7 @@ namespace Sla.DECCORE
         {
             Scope symScope = op.getParent().getFuncdata().getScopeLocal();
             int size = 0;
-            if (op.code() == CPUI_CALLOTHER)
+            if (op.code() == OpCode.CPUI_CALLOTHER)
             {
                 int userind = (int)op.getIn(0).getOffset();
                 size = glb.userops.getOp(userind).extractAnnotationSize(vn, op);
@@ -1598,11 +1593,11 @@ namespace Sla.DECCORE
             {
                 if (off == 0)
                 {
-                    if (sz == 0 || (sz == ct.getSize() && (!ct.needsResolution() || ct.getMetatype() == TYPE_PTR)))
+                    if (sz == 0 || (sz == ct.getSize() && (!ct.needsResolution() || ct.getMetatype() == type_metatype.TYPE_PTR)))
                         break;
                 }
                 bool succeeded = false;
-                if (ct.getMetatype() == TYPE_STRUCT)
+                if (ct.getMetatype() == type_metatype.TYPE_STRUCT)
                 {
                     if (ct.needsResolution() && ct.getSize() == sz)
                     {
@@ -1624,7 +1619,7 @@ namespace Sla.DECCORE
                         succeeded = true;
                     }
                 }
-                else if (ct.getMetatype() == TYPE_ARRAY)
+                else if (ct.getMetatype() == type_metatype.TYPE_ARRAY)
                 {
                     int el;
                     Datatype* arrayof = ((TypeArray*)ct).getSubEntry(off, sz, &off, &el);
@@ -1642,7 +1637,7 @@ namespace Sla.DECCORE
                         succeeded = true;
                     }
                 }
-                else if (ct.getMetatype() == TYPE_UNION)
+                else if (ct.getMetatype() == type_metatype.TYPE_UNION)
                 {
                     TypeField* field;
                     field = ct.findTruncation(off, sz, op, inslot, off);
@@ -1728,18 +1723,18 @@ namespace Sla.DECCORE
             bool proceed = false;
             Datatype* parent = vn.getHigh().getType();
             TypeField* field;
-            if (parent.needsResolution() && parent.getMetatype() != TYPE_PTR)
+            if (parent.needsResolution() && parent.getMetatype() != type_metatype.TYPE_PTR)
             {
                 Funcdata fd = op.getParent().getFuncdata();
                 int slot = op.getSlot(vn);
                 ResolvedUnion* res = fd.getUnionField(parent, op, slot);
                 if (res != (ResolvedUnion)null && res.getFieldNum() >= 0) {
-                    if (parent.getMetatype() == TYPE_STRUCT && res.getFieldNum() == 0)
+                    if (parent.getMetatype() == type_metatype.TYPE_STRUCT && res.getFieldNum() == 0)
                     {
                         field = &(*((TypeStruct*)parent).beginField());
                         proceed = true;
                     }
-                    else if (parent.getMetatype() == TYPE_UNION)
+                    else if (parent.getMetatype() == type_metatype.TYPE_UNION)
                     {
                         field = ((TypeUnion*)parent).getField(res.getFieldNum());
                         proceed = true;
@@ -2015,19 +2010,19 @@ namespace Sla.DECCORE
             ostringstream s;
             switch (ct.getMetatype())
             {
-                case TYPE_INT:
+                case type_metatype.TYPE_INT:
                     s << "unkint";
                     break;
-                case TYPE_UINT:
+                case type_metatype.TYPE_UINT:
                     s << "unkuint";
                     break;
-                case TYPE_UNKNOWN:
+                case type_metatype.TYPE_UNKNOWN:
                     s << "unkbyte";
                     break;
-                case TYPE_SPACEBASE:
+                case type_metatype.TYPE_SPACEBASE:
                     s << "BADSPACEBASE";
                     return s.str();
-                case TYPE_FLOAT:
+                case type_metatype.TYPE_FLOAT:
                     s << "unkfloat";
                     break;
                 default:
@@ -2105,21 +2100,18 @@ namespace Sla.DECCORE
                 }
                 return notempty;
             }
-            MapIterator iter = symScope.begin();
-            MapIterator enditer = symScope.end();
-            for (; iter != enditer; ++iter)
-            {
-                SymbolEntry entry = *iter;
+            IEnumerator<SymbolEntry> iter = symScope.begin();
+            while (iter.MoveNext()) {
+                SymbolEntry entry = iter.Current;
                 if (entry.isPiece()) continue; // Don't do a partial entry
-                Symbol* sym = entry.getSymbol();
+                Symbol sym = entry.getSymbol();
                 if (sym.getCategory() != cat) continue;
                 if (sym.getName().Length == 0) continue;
-                if (dynamic_cast<FunctionSymbol*>(sym) != (FunctionSymbol*)0)
+                if (sym is FunctionSymbol)
                     continue;
-                if (dynamic_cast<LabSymbol*>(sym) != (LabSymbol*)0)
+                if (sym is LabSymbol)
                     continue;
-                if (sym.isMultiEntry())
-                {
+                if (sym.isMultiEntry()) {
                     if (sym.getFirstWholeMap() != entry)
                         continue;       // Only emit the first SymbolEntry for declaration of multi-entry Symbol
                 }
@@ -2135,7 +2127,7 @@ namespace Sla.DECCORE
                 Symbol* sym = (*iter_d).getSymbol();
                 if (sym.getCategory() != cat) continue;
                 if (sym.getName().Length == 0) continue;
-                if (dynamic_cast<FunctionSymbol*>(sym) != (FunctionSymbol*)0)
+                if ((FunctionSymbol)(sym) != (FunctionSymbol)null)
                     continue;
                 if (dynamic_cast<LabSymbol*>(sym) != (LabSymbol*)0)
                     continue;
@@ -2196,7 +2188,7 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Expression stack not empty at beginning of emit");
             }
 #endif
-            if (ct.getMetatype() == TYPE_STRUCT)
+            if (ct.getMetatype() == type_metatype.TYPE_STRUCT)
                 emitStructDefinition((TypeStruct*)ct);
             else if (ct.isEnumType())
                 emitEnumDefinition((TypeEnum*)ct);
@@ -2213,8 +2205,8 @@ namespace Sla.DECCORE
             if (!vn.isWritten()) return false;
             PcodeOp op = vn.getDef();
             bool reorder = false;
-            OpCode opc = get_booleanflip(op.code(), reorder); // This is the set of ops that can be negated as a token
-            if (opc == CPUI_MAX)
+            OpCode opc = Globals.get_booleanflip(op.code(), reorder); // This is the set of ops that can be negated as a token
+            if (opc == OpCode.CPUI_MAX)
                 return false;
             return true;
         }
@@ -2433,7 +2425,7 @@ namespace Sla.DECCORE
                         if (isSet(no_branch)) continue;
                         // A straight branch is always printed by
                         // the block classes
-                        if (inst.code() == CPUI_BRANCH) continue;
+                        if (inst.code() == OpCode.CPUI_BRANCH) continue;
                     }
                     Varnode* vn = inst.getOut();
                     if ((vn != (Varnode)null) && (vn.isImplied()))
@@ -2601,7 +2593,7 @@ namespace Sla.DECCORE
                 ReversePolish pol;
                 pol.op = (PcodeOp)null;
                 pol.visited = 1;
-                if (bl.getOpcode() == CPUI_BOOL_AND)
+                if (bl.getOpcode() == OpCode.CPUI_BOOL_AND)
                     pol.tok = &boolean_and;
                 else
                     pol.tok = &boolean_or;
@@ -3135,7 +3127,7 @@ namespace Sla.DECCORE
                 Varnode thisvn = op.getIn(1);
                 dt = thisvn.getType();
             }
-            if (dt.getMetatype() == TYPE_PTR)
+            if (dt.getMetatype() == type_metatype.TYPE_PTR)
             {
                 dt = ((TypePointer*)dt).getPtrTo();
             }
@@ -3176,16 +3168,16 @@ namespace Sla.DECCORE
                     }
                     return;
                 case PcodeOp::noreturn: // Previous instruction does not exit
-                case PcodeOp::halt:     // Process halts
+                case PcodeOp.Flags.halt:     // Process halts
                     nm = "halt";
                     break;
-                case PcodeOp::badinstruction:
+                case PcodeOp.Flags.badinstruction:
                     nm = "halt_baddata";    // CPU executes bad instruction
                     break;
-                case PcodeOp::unimplemented:    // instruction is unimplemented
+                case PcodeOp.Flags.unimplemented:    // instruction is unimplemented
                     nm = "halt_unimplemented";
                     break;
-                case PcodeOp::missing:  // Did not analyze this instruction
+                case PcodeOp.Flags.missing:  // Did not analyze this instruction
                     nm = "halt_missing";
                     break;
             }
@@ -3530,9 +3522,9 @@ namespace Sla.DECCORE
             if (!printval)
             {
                 TypePointer* tp = (TypePointer*)op.getIn(0).getHighTypeReadFacing(op);
-                if (tp.getMetatype() == TYPE_PTR)
+                if (tp.getMetatype() == type_metatype.TYPE_PTR)
                 {
-                    if (tp.getPtrTo().getMetatype() == TYPE_ARRAY)
+                    if (tp.getPtrTo().getMetatype() == type_metatype.TYPE_ARRAY)
                         printval = true;
                 }
             }
@@ -3575,7 +3567,7 @@ namespace Sla.DECCORE
             in0 = op.getIn(0);
             in1const = op.getIn(1).getOffset();
             ptype = (TypePointer*)in0.getHighTypeReadFacing(op);
-            if (ptype.getMetatype() != TYPE_PTR)
+            if (ptype.getMetatype() != type_metatype.TYPE_PTR)
             {
                 clear();
                 throw new LowlevelError("PTRSUB off of non-pointer type");
@@ -3594,7 +3586,7 @@ namespace Sla.DECCORE
             valueon = (mods & (print_load_value | print_store_value)) != 0;
             flex = isValueFlexible(in0);
 
-            if (ct.getMetatype() == TYPE_STRUCT || ct.getMetatype() == TYPE_UNION)
+            if (ct.getMetatype() == type_metatype.TYPE_STRUCT || ct.getMetatype() == type_metatype.TYPE_UNION)
             {
                 ulong suboff = in1const;    // How far into container
                 if (ptrel != (TypePointerRel*)0)
@@ -3617,7 +3609,7 @@ namespace Sla.DECCORE
                 Datatype* fieldtype;
                 int fieldid;
                 int newoff;
-                if (ct.getMetatype() == TYPE_UNION)
+                if (ct.getMetatype() == type_metatype.TYPE_UNION)
                 {
                     if (suboff != 0)
                         throw new LowlevelError("PTRSUB accesses union with non-zero offset");
@@ -3631,7 +3623,7 @@ namespace Sla.DECCORE
                     fieldtype = fld.type;
                 }
                 else
-                {   // TYPE_STRUCT
+                {   // type_metatype.TYPE_STRUCT
                     TypeField* fld = ct.findTruncation((int)suboff, 0, op, 0, newoff);
                     if (fld == (TypeField*)0) {
                         if (ct.getSize() <= suboff)
@@ -3655,7 +3647,7 @@ namespace Sla.DECCORE
                 }
                 arrayvalue = false;
                 // The '&' is dropped if the output type is an array
-                if ((fieldtype != (Datatype)null) && (fieldtype.getMetatype() == TYPE_ARRAY))
+                if ((fieldtype != (Datatype)null) && (fieldtype.getMetatype() == type_metatype.TYPE_ARRAY))
                 {
                     arrayvalue = valueon;   // If printing value, use [0]
                     valueon = true;     // Don't print &
@@ -3706,7 +3698,7 @@ namespace Sla.DECCORE
                         push_integer(0, 4, false, (Varnode)null, op);
                 }
             }
-            else if (ct.getMetatype() == TYPE_SPACEBASE)
+            else if (ct.getMetatype() == type_metatype.TYPE_SPACEBASE)
             {
                 HighVariable* high = op.getIn(1).getHigh();
                 Symbol* symbol = high.getSymbol();
@@ -3715,12 +3707,12 @@ namespace Sla.DECCORE
                 {
                     ct = symbol.getType();
                     // The '&' is dropped if the output type is an array
-                    if (ct.getMetatype() == TYPE_ARRAY)
+                    if (ct.getMetatype() == type_metatype.TYPE_ARRAY)
                     {
                         arrayvalue = valueon;   // If printing value, use [0]
                         valueon = true;     // If printing ptr, don't use &
                     }
-                    else if (ct.getMetatype() == TYPE_CODE)
+                    else if (ct.getMetatype() == type_metatype.TYPE_CODE)
                         valueon = true;     // If printing ptr, don't use &
                 }
                 if (!valueon)
@@ -3755,7 +3747,7 @@ namespace Sla.DECCORE
                 if (arrayvalue)
                     push_integer(0, 4, false, (Varnode)null, op);
             }
-            else if (ct.getMetatype() == TYPE_ARRAY)
+            else if (ct.getMetatype() == type_metatype.TYPE_ARRAY)
             {
                 if (in1const != 0)
                 {
@@ -3859,7 +3851,7 @@ namespace Sla.DECCORE
                     case CPoolRecord::instance_of:
                         {
                             Datatype* dt = rec.getType();
-                            while (dt.getMetatype() == TYPE_PTR)
+                            while (dt.getMetatype() == type_metatype.TYPE_PTR)
                             {
                                 dt = ((TypePointer*)dt).getPtrTo();
                             }
@@ -3879,10 +3871,10 @@ namespace Sla.DECCORE
                         {
                             Datatype* ct = rec.getType();
                             EmitMarkup::syntax_highlight color = EmitMarkup::var_color;
-                            if (ct.getMetatype() == TYPE_PTR)
+                            if (ct.getMetatype() == type_metatype.TYPE_PTR)
                             {
                                 ct = ((TypePointer*)ct).getPtrTo();
-                                if (ct.getMetatype() == TYPE_CODE)
+                                if (ct.getMetatype() == type_metatype.TYPE_CODE)
                                     color = EmitMarkup::funcname_color;
                             }
                             if (vn0.isConstant())
@@ -3920,7 +3912,7 @@ namespace Sla.DECCORE
                     else
                     {
                         Datatype* dt = outvn.getTypeDefFacing();
-                        while (dt.getMetatype() == TYPE_PTR)
+                        while (dt.getMetatype() == type_metatype.TYPE_PTR)
                         {
                             dt = ((TypePointer*)dt).getPtrTo();
                         }
@@ -3961,8 +3953,8 @@ namespace Sla.DECCORE
         {
             if ((vn.isImplied()) && (vn.isWritten())) {
                 PcodeOp def = vn.getDef();
-                if (def.code() == CPUI_PTRSUB) return true;
-                if (def.code() == CPUI_PTRADD) return true;
+                if (def.code() == OpCode.CPUI_PTRSUB) return true;
+                if (def.code() == OpCode.CPUI_PTRADD) return true;
             }
             return false;
         }

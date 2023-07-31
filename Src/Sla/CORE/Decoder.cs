@@ -23,17 +23,14 @@ namespace Sla.CORE
         ///< Manager for decoding address space attributes
         protected readonly AddrSpaceManager spcManager;
 
-        ///< Base constructor
+        /// Base constructor
         public Decoder(AddrSpaceManager spc)
         {
             spcManager = spc;
         }
 
-        ///< Get the manager used for address space decoding
-        public AddrSpaceManager getAddrSpaceManager()
-        {
-            return spcManager;
-        }
+        /// Get the manager used for address space decoding
+        public AddrSpaceManager getAddrSpaceManager() => spcManager;
 
         ///< Destructor
         ~Decoder()
@@ -107,7 +104,7 @@ namespace Sla.CORE
         /// Parsing via getNextAttributeId is reset.
         /// \param attribId is the specific attribute id to match
         /// \return the boolean value
-        public abstract bool readBool(ref AttributeId attribId);
+        public abstract bool readBool(AttributeId attribId);
 
         /// \brief Parse the current attribute as a signed integer value
         /// The last attribute, as returned by getNextAttributeId, is treated as a signed integer, and its value is returned.

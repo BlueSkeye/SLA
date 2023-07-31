@@ -20,7 +20,7 @@ namespace Sla.EXTRA
         /// the text of the comment.
         public override void execute(TextReader s)
         { // Comment on a particular address within current function
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("Decompile action not loaded");
 
             if (dcp.fd == (Funcdata)null)

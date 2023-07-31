@@ -16,10 +16,10 @@ namespace Sla.DECCORE
             type_metatype meta = vn.getHighTypeReadFacing(op).getMetatype();
             // 1= natural zero extension, 2= natural sign extension
             int natural;
-            if ((meta == TYPE_UINT) || (meta == TYPE_BOOL) || (meta == TYPE_UNKNOWN)) {
+            if ((meta == type_metatype.TYPE_UINT) || (meta == type_metatype.TYPE_BOOL) || (meta == type_metatype.TYPE_UNKNOWN)) {
                 natural = UNSIGNED_EXTENSION;
             }
-            else if (meta == TYPE_INT) {
+            else if (meta == type_metatype.TYPE_INT) {
                 natural = SIGNED_EXTENSION;
             }
             else {
@@ -44,10 +44,10 @@ namespace Sla.DECCORE
                 return EITHER_EXTENSION;
             }
             OpCode opc = defOp.code();
-            if ((opc == CPUI_CAST) || (opc == CPUI_LOAD) || defOp.isCall()) {
+            if ((opc == OpCode.CPUI_CAST) || (opc == OpCode.CPUI_LOAD) || defOp.isCall()) {
                 return natural;
             }
-            if (opc == CPUI_INT_AND) {
+            if (opc == OpCode.CPUI_INT_AND) {
                 // This is kind of recursing
                 Varnode tmpvn = defOp.getIn(1);
                 if (tmpvn.isConstant()) {
@@ -77,7 +77,7 @@ namespace Sla.DECCORE
             PcodeOp op = vn.getDef();
             Varnode othervn;
             switch (op.code()) {
-                case CPUI_INT_AND:
+                case OpCode.CPUI_INT_AND:
                     othervn = op.getIn(1);
                     if ((localExtensionType(othervn, op) & UNSIGNED_EXTENSION) != 0) {
                         return UNSIGNED_EXTENSION;
@@ -88,7 +88,7 @@ namespace Sla.DECCORE
                         return UNSIGNED_EXTENSION;
                     }
                     break;
-                case CPUI_INT_RIGHT:
+                case OpCode.CPUI_INT_RIGHT:
                     othervn = op.getIn(0);
                     val = localExtensionType(othervn, op);
                     if ((val & UNSIGNED_EXTENSION) != 0) {
@@ -97,7 +97,7 @@ namespace Sla.DECCORE
                         return val;
                     }
                     break;
-                case CPUI_INT_SRIGHT:
+                case OpCode.CPUI_INT_SRIGHT:
                     othervn = op.getIn(0);
                     val = localExtensionType(othervn, op);
                     if ((val & SIGNED_EXTENSION) != 0) {
@@ -106,10 +106,10 @@ namespace Sla.DECCORE
                         return val;
                     }
                     break;
-                case CPUI_INT_XOR:
-                case CPUI_INT_OR:
-                case CPUI_INT_DIV:
-                case CPUI_INT_REM:
+                case OpCode.CPUI_INT_XOR:
+                case OpCode.CPUI_INT_OR:
+                case OpCode.CPUI_INT_DIV:
+                case OpCode.CPUI_INT_REM:
                     othervn = op.getIn(0);
                     if ((localExtensionType(othervn, op) & UNSIGNED_EXTENSION) == 0) {
                         return UNKNOWN_PROMOTION;
@@ -120,8 +120,8 @@ namespace Sla.DECCORE
                     }
                     // If both sides have zero extension, result has zero extension
                     return UNSIGNED_EXTENSION;
-                case CPUI_INT_SDIV:
-                case CPUI_INT_SREM:
+                case OpCode.CPUI_INT_SDIV:
+                case OpCode.CPUI_INT_SREM:
                     othervn = op.getIn(0);
                     if ((localExtensionType(othervn, op) & SIGNED_EXTENSION) == 0) {
                         return UNKNOWN_PROMOTION;
@@ -132,17 +132,17 @@ namespace Sla.DECCORE
                     }
                     // If both sides have sign extension, result has sign extension
                     return SIGNED_EXTENSION;
-                case CPUI_INT_NEGATE:
-                case CPUI_INT_2COMP:
+                case OpCode.CPUI_INT_NEGATE:
+                case OpCode.CPUI_INT_2COMP:
                     othervn = op.getIn(0);
                     if ((localExtensionType(othervn, op) & SIGNED_EXTENSION) != 0) {
                         return SIGNED_EXTENSION;
                     }
                     break;
-                case CPUI_INT_ADD:
-                case CPUI_INT_SUB:
-                case CPUI_INT_LEFT:
-                case CPUI_INT_MULT:
+                case OpCode.CPUI_INT_ADD:
+                case OpCode.CPUI_INT_SUB:
+                case OpCode.CPUI_INT_LEFT:
+                case OpCode.CPUI_INT_MULT:
                     break;
                 default:
                     // No integer promotion at all
@@ -188,10 +188,10 @@ namespace Sla.DECCORE
             }
 
             // Test if the promotion extension matches the explicit extension
-            if (((exttype & UNSIGNED_EXTENSION) != 0) && (op.code() == CPUI_INT_ZEXT)) {
+            if (((exttype & UNSIGNED_EXTENSION) != 0) && (op.code() == OpCode.CPUI_INT_ZEXT)) {
                 return false;
             }
-            if (((exttype & SIGNED_EXTENSION) != 0) && (op.code() == CPUI_INT_SEXT)) {
+            if (((exttype & SIGNED_EXTENSION) != 0) && (op.code() == OpCode.CPUI_INT_SEXT)) {
                 return false;
             }
             // Otherwise we need a cast before we extend
@@ -211,21 +211,21 @@ namespace Sla.DECCORE
                 Varnode otherVn;
                 int slot;
                 switch (readOp.code()) {
-                    case CPUI_PTRADD:
+                    case OpCode.CPUI_PTRADD:
                         break;
-                    case CPUI_INT_ADD:
-                    case CPUI_INT_SUB:
-                    case CPUI_INT_MULT:
-                    case CPUI_INT_DIV:
-                    case CPUI_INT_AND:
-                    case CPUI_INT_OR:
-                    case CPUI_INT_XOR:
-                    case CPUI_INT_EQUAL:
-                    case CPUI_INT_NOTEQUAL:
-                    case CPUI_INT_LESS:
-                    case CPUI_INT_LESSEQUAL:
-                    case CPUI_INT_SLESS:
-                    case CPUI_INT_SLESSEQUAL:
+                    case OpCode.CPUI_INT_ADD:
+                    case OpCode.CPUI_INT_SUB:
+                    case OpCode.CPUI_INT_MULT:
+                    case OpCode.CPUI_INT_DIV:
+                    case OpCode.CPUI_INT_AND:
+                    case OpCode.CPUI_INT_OR:
+                    case OpCode.CPUI_INT_XOR:
+                    case OpCode.CPUI_INT_EQUAL:
+                    case OpCode.CPUI_INT_NOTEQUAL:
+                    case OpCode.CPUI_INT_LESS:
+                    case OpCode.CPUI_INT_LESSEQUAL:
+                    case OpCode.CPUI_INT_SLESS:
+                    case OpCode.CPUI_INT_SLESSEQUAL:
                         slot = readOp.getSlot(outVn);
                         otherVn = readOp.getIn(1 - slot);
                         // Check if the expression involves an explicit variable of the right integer type
@@ -265,7 +265,7 @@ namespace Sla.DECCORE
             Datatype reqbase = reqtype;
             Datatype curbase = curtype;
             bool isptr = false;
-            while ((reqbase.getMetatype() == TYPE_PTR) && (curbase.getMetatype() == TYPE_PTR)) {
+            while ((reqbase.getMetatype() == type_metatype.TYPE_PTR) && (curbase.getMetatype() == type_metatype.TYPE_PTR)) {
                 TypePointer reqptr = (TypePointer)reqbase;
                 TypePointer curptr = (TypePointer)curbase;
                 if (reqptr.getWordSize() != curptr.getWordSize()) {
@@ -293,7 +293,7 @@ namespace Sla.DECCORE
             if (curbase == reqbase) {
                 return null;
             }
-            if ((reqbase.getMetatype() == TYPE_VOID) || (curtype.getMetatype() == TYPE_VOID)) {
+            if ((reqbase.getMetatype() == type_metatype.TYPE_VOID) || (curtype.getMetatype() == type_metatype.TYPE_VOID)) {
                 // Don't cast from or to VOID
                 return null;
             }
@@ -306,53 +306,53 @@ namespace Sla.DECCORE
                 return reqtype;
             }
             switch (reqbase.getMetatype()) {
-                case TYPE_UNKNOWN:
+                case type_metatype.TYPE_UNKNOWN:
                     return null;
-                case TYPE_UINT:
+                case type_metatype.TYPE_UINT:
                     if (!care_uint_int) {
                         type_metatype meta = curbase.getMetatype();
-                        // Note: meta can be TYPE_UINT if curbase is typedef/enumerated
-                        if ((meta == TYPE_UNKNOWN) || (meta == TYPE_INT) || (meta == TYPE_UINT) || (meta == TYPE_BOOL)) {
+                        // Note: meta can be type_metatype.TYPE_UINT if curbase is typedef/enumerated
+                        if ((meta == type_metatype.TYPE_UNKNOWN) || (meta == type_metatype.TYPE_INT) || (meta == type_metatype.TYPE_UINT) || (meta == type_metatype.TYPE_BOOL)) {
                             return null;
                         }
                     }
                     else {
                         type_metatype meta = curbase.getMetatype();
-                        if ((meta == TYPE_UINT) || (meta == TYPE_BOOL)) {
-                            // Can be TYPE_UINT for typedef/enumerated
+                        if ((meta == type_metatype.TYPE_UINT) || (meta == type_metatype.TYPE_BOOL)) {
+                            // Can be type_metatype.TYPE_UINT for typedef/enumerated
                             return null;
                         }
-                        if (isptr && (meta == TYPE_UNKNOWN)) {
+                        if (isptr && (meta == type_metatype.TYPE_UNKNOWN)) {
                             // Don't cast pointers to unknown
                             return null;
                         }
                     }
-                    if ((!care_ptr_uint) && (curbase.getMetatype() == TYPE_PTR)) {
+                    if ((!care_ptr_uint) && (curbase.getMetatype() == type_metatype.TYPE_PTR)) {
                         return null;
                     }
                     break;
-                case TYPE_INT:
+                case type_metatype.TYPE_INT:
                     if (!care_uint_int) {
                         type_metatype meta = curbase.getMetatype();
-                        // Note: meta can be TYPE_INT if curbase is an enumerated type
-                        if ((meta == TYPE_UNKNOWN) || (meta == TYPE_INT) || (meta == TYPE_UINT) || (meta == TYPE_BOOL)) {
+                        // Note: meta can be type_metatype.TYPE_INT if curbase is an enumerated type
+                        if ((meta == type_metatype.TYPE_UNKNOWN) || (meta == type_metatype.TYPE_INT) || (meta == type_metatype.TYPE_UINT) || (meta == type_metatype.TYPE_BOOL)) {
                             return null;
                         }
                     }
                     else {
                         type_metatype meta = curbase.getMetatype();
-                        if ((meta == TYPE_INT) || (meta == TYPE_BOOL)) {
-                            // Can be TYPE_INT for typedef/enumerated/char
+                        if ((meta == type_metatype.TYPE_INT) || (meta == type_metatype.TYPE_BOOL)) {
+                            // Can be type_metatype.TYPE_INT for typedef/enumerated/char
                             return null;
                         }
-                        if (isptr && (meta == TYPE_UNKNOWN)) {
+                        if (isptr && (meta == type_metatype.TYPE_UNKNOWN)) {
                             // Don't cast pointers to unknown
                             return null;
                         }
                     }
                     break;
-                case TYPE_CODE:
-                    if (curbase.getMetatype() == TYPE_CODE) {
+                case type_metatype.TYPE_CODE:
+                    if (curbase.getMetatype() == type_metatype.TYPE_CODE) {
                         // Don't cast between function pointer and generic code pointer
                         if (((TypeCode)reqbase).getPrototype() == null) {
                             return null;
@@ -371,15 +371,15 @@ namespace Sla.DECCORE
         public Datatype arithmeticOutputStandard(PcodeOp op)
         {
             Datatype res1 = op.getIn(0).getHighTypeReadFacing(op);
-            if (res1.getMetatype() == TYPE_BOOL) {
+            if (res1.getMetatype() == type_metatype.TYPE_BOOL) {
                 // Treat boolean as if it is cast to an integer
-                res1 = tlst.getBase(res1.getSize(), TYPE_INT);
+                res1 = tlst.getBase(res1.getSize(), type_metatype.TYPE_INT);
             }
             Datatype res2;
 
             for (int i = 1; i < op.numInput(); ++i) {
                 res2 = op.getIn(i).getHighTypeReadFacing(op);
-                if (res2.getMetatype() == TYPE_BOOL) {
+                if (res2.getMetatype() == type_metatype.TYPE_BOOL) {
                     continue;
                 }
                 if (0 > res2.typeOrder(*res1)) {
@@ -395,30 +395,30 @@ namespace Sla.DECCORE
                 return false;
             }
             type_metatype inmeta = intype.getMetatype();
-            if ((inmeta != TYPE_INT) &&
-                (inmeta != TYPE_UINT) &&
-                (inmeta != TYPE_UNKNOWN) &&
-                (inmeta != TYPE_PTR))
+            if ((inmeta != type_metatype.TYPE_INT) &&
+                (inmeta != type_metatype.TYPE_UINT) &&
+                (inmeta != type_metatype.TYPE_UNKNOWN) &&
+                (inmeta != type_metatype.TYPE_PTR))
             {
                 return false;
             }
             type_metatype outmeta = outtype.getMetatype();
-            if ((outmeta != TYPE_INT) &&
-                (outmeta != TYPE_UINT) &&
-                (outmeta != TYPE_UNKNOWN) &&
-                (outmeta != TYPE_PTR) &&
-                (outmeta != TYPE_FLOAT))
+            if ((outmeta != type_metatype.TYPE_INT) &&
+                (outmeta != type_metatype.TYPE_UINT) &&
+                (outmeta != type_metatype.TYPE_UNKNOWN) &&
+                (outmeta != type_metatype.TYPE_PTR) &&
+                (outmeta != type_metatype.TYPE_FLOAT))
             {
                 return false;
             }
-            if (inmeta == TYPE_PTR) {
-                if (outmeta == TYPE_PTR) {
+            if (inmeta == type_metatype.TYPE_PTR) {
+                if (outmeta == type_metatype.TYPE_PTR) {
                     if (outtype.getSize() < intype.getSize()) {
                         // Cast from far pointer to near pointer
                         return true;
                     }
                 }
-                if ((outmeta != TYPE_INT) && (outmeta != TYPE_UINT)) {
+                if ((outmeta != type_metatype.TYPE_INT) && (outmeta != type_metatype.TYPE_UINT)) {
                     //other casts don't make sense for pointers
                     return false;
                 }
@@ -439,25 +439,25 @@ namespace Sla.DECCORE
         public bool isSextCast(Datatype outtype, Datatype intype)
         {
             type_metatype metaout = outtype.getMetatype();
-            if (metaout != TYPE_UINT && metaout != TYPE_INT) {
+            if (metaout != type_metatype.TYPE_UINT && metaout != type_metatype.TYPE_INT) {
                 return false;
             }
             type_metatype metain = intype.getMetatype();
             // Casting to larger storage always extends based on signedness of the input data-type
             // So the input must be SIGNED in order to treat SEXT as a cast
-            return ((metain == TYPE_INT) || (metain = TYPE_BOOL));
+            return ((metain == type_metatype.TYPE_INT) || (metain = type_metatype.TYPE_BOOL));
         }
 
         public bool isZextCast(Datatype outtype, Datatype intype)
         {
             type_metatype metaout = outtype.getMetatype();
-            if (metaout != TYPE_UINT && metaout != TYPE_INT) {
+            if (metaout != type_metatype.TYPE_UINT && metaout != type_metatype.TYPE_INT) {
                 return false;
             }
             type_metatype metain = intype.getMetatype();
             // Casting to larger storage always extends based on signedness of the input data-type
             // So the input must be UNSIGNED in order to treat ZEXT as a cast
-            return ((metain == TYPE_UINT) || (metain == TYPE_BOOL));
+            return ((metain == type_metatype.TYPE_UINT) || (metain == type_metatype.TYPE_BOOL));
         }
     }
 }

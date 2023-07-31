@@ -49,11 +49,11 @@ namespace Sla.DECCORE
 
             ulong val = op.getIn(1).getOffset();
             ulong val2 = op2.getIn(1).getOffset();
-            if (opc == CPUI_INT_AND)
+            if (opc == OpCode.CPUI_INT_AND)
                 val &= val2;
-            else if (opc == CPUI_INT_OR)
+            else if (opc == OpCode.CPUI_INT_OR)
                 val |= val2;
-            else if (opc == CPUI_INT_XOR)
+            else if (opc == OpCode.CPUI_INT_XOR)
                 val ^= val2;
 
             data.opSetInput(op, basevn, 0);

@@ -187,7 +187,7 @@ namespace Sla.SLEIGH
                 }
             }
             while (vec.size() > poscur)
-                vec.pop_back();
+                vec.RemoveLastItem();
         }
 
         public void saveXml(TextWriter s, int sectionid)

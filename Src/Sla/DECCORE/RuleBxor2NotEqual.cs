@@ -30,7 +30,7 @@ namespace Sla.DECCORE
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            data.opSetOpcode(op, CPUI_INT_NOTEQUAL);
+            data.opSetOpcode(op, OpCode.CPUI_INT_NOTEQUAL);
             return 1;
         }
     }

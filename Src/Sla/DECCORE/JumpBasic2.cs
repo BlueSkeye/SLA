@@ -95,7 +95,7 @@ namespace Sla.DECCORE
             if (joinvn == (Varnode)null) return false;
             if (!joinvn.isWritten()) return false;
             PcodeOp* multiop = joinvn.getDef();
-            if (multiop.code() != CPUI_MULTIEQUAL) return false;
+            if (multiop.code() != OpCode.CPUI_MULTIEQUAL) return false;
             if (multiop.numInput() != 2) return false; // Must be exactly 2 paths
                                                         // Search for a constant along one of the paths
             int path;
@@ -104,7 +104,7 @@ namespace Sla.DECCORE
                 Varnode* vn = multiop.getIn(path);
                 if (!vn.isWritten()) continue;
                 copyop = vn.getDef();
-                if (copyop.code() != CPUI_COPY) continue;
+                if (copyop.code() != OpCode.CPUI_COPY) continue;
                 othervn = copyop.getIn(0);
                 if (othervn.isConstant())
                 {

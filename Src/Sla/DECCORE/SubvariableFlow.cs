@@ -117,7 +117,7 @@ namespace Sla.DECCORE
 
         /// \brief Return \e slot of constant if INT_OR op sets all bits in mask, otherwise -1
         ///
-        /// \param orop is the given CPUI_INT_OR op
+        /// \param orop is the given OpCode.CPUI_INT_OR op
         /// \param mask is the given mask
         /// \return constant slot or -1
         private static int doesOrSet(PcodeOp orop, ulong mask)
@@ -133,7 +133,7 @@ namespace Sla.DECCORE
 
         /// \brief Return \e slot of constant if INT_AND op clears all bits in mask, otherwise -1
         ///
-        /// \param andop is the given CPUI_INT_AND op
+        /// \param andop is the given OpCode.CPUI_INT_AND op
         /// \param mask is the given mask
         /// \return constant slot or -1
         private static int doesAndClear(PcodeOp andop, ulong mask)
@@ -154,7 +154,7 @@ namespace Sla.DECCORE
         private Address getReplacementAddress(ReplaceVarnode rvn)
         {
             Address addr = rvn.vn.getAddr();
-            int sa = leastsigbit_set(rvn.mask) / 8; // Number of bytes value is shifted into container
+            int sa = Globals.leastsigbit_set(rvn.mask) / 8; // Number of bytes value is shifted into container
             if (addr.isBigEndian())
                 addr = addr + (rvn.vn.getSize() - flowsize - sa);
             else
@@ -195,7 +195,7 @@ namespace Sla.DECCORE
                 {   // Check that -vn- is a sign extension
                     ulong cval = vn.getOffset();
                     ulong smallval = cval & mask; // From its logical size
-                    ulong sextval = sign_extend(smallval, flowsize, vn.getSize());// to its fullsize
+                    ulong sextval = Globals.sign_extend(smallval, flowsize, vn.getSize());// to its fullsize
                     if (sextval != cval)
                         return (ReplaceVarnode*)0;
                 }
@@ -215,7 +215,7 @@ namespace Sla.DECCORE
                     if ((!aggressive) && vn.isInput()) return (ReplaceVarnode*)0; // Cannot assume input is sign extended
                     if (vn.isPersist()) return (ReplaceVarnode*)0;
                 }
-                if (vn.isTypeLock() && vn.getType().getMetatype() != TYPE_PARTIALSTRUCT)
+                if (vn.isTypeLock() && vn.getType().getMetatype() != type_metatype.TYPE_PARTIALSTRUCT)
                 {
                     if (vn.getType().getSize() != flowsize)
                         return (ReplaceVarnode*)0;
@@ -229,7 +229,7 @@ namespace Sla.DECCORE
                         // are packed into a single location, i.e. always consider it a single variable
                     if ((!aggressive) && ((vn.getConsume() & ~mask) != 0)) // If there is any use of value outside of the logical variable
                         return (ReplaceVarnode*)0; // This probably means the whole thing is a variable, i.e. quit
-                    if (vn.isTypeLock() && vn.getType().getMetatype() != TYPE_PARTIALSTRUCT)
+                    if (vn.isTypeLock() && vn.getType().getMetatype() != type_metatype.TYPE_PARTIALSTRUCT)
                     {
                         int sz = vn.getType().getSize();
                         if (sz != flowsize)
@@ -484,21 +484,21 @@ namespace Sla.DECCORE
                 slot = op.getSlot(rvn.vn);
                 switch (op.code())
                 {
-                    case CPUI_COPY:
-                    case CPUI_MULTIEQUAL:
-                    case CPUI_INT_NEGATE:
-                    case CPUI_INT_XOR:
+                    case OpCode.CPUI_COPY:
+                    case OpCode.CPUI_MULTIEQUAL:
+                    case OpCode.CPUI_INT_NEGATE:
+                    case OpCode.CPUI_INT_XOR:
                         rop = createOpDown(op.code(), op.numInput(), op, rvn, slot);
                         if (!createLink(rop, rvn.mask, -1, outvn)) return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
-                    case CPUI_INT_OR:
+                    case OpCode.CPUI_INT_OR:
                         if (doesOrSet(op, rvn.mask) != -1) break; // Subvar set to 1s, truncate flow
                         rop = createOpDown(CPUI_INT_OR, 2, op, rvn, slot);
                         if (!createLink(rop, rvn.mask, -1, outvn)) return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
-                    case CPUI_INT_AND:
+                    case OpCode.CPUI_INT_AND:
                         if ((op.getIn(1).isConstant()) && (op.getIn(1).getOffset() == rvn.mask))
                         {
                             if ((outvn.getSize() == flowsize) && ((rvn.mask & 1) != 0))
@@ -520,30 +520,30 @@ namespace Sla.DECCORE
                         if (!createLink(rop, rvn.mask, -1, outvn)) return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
-                    case CPUI_INT_ZEXT:
-                    case CPUI_INT_SEXT:
+                    case OpCode.CPUI_INT_ZEXT:
+                    case OpCode.CPUI_INT_SEXT:
                         rop = createOpDown(CPUI_COPY, 1, op, rvn, 0);
                         if (!createLink(rop, rvn.mask, -1, outvn)) return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
-                    case CPUI_INT_MULT:
+                    case OpCode.CPUI_INT_MULT:
                         if ((rvn.mask & 1) == 0)
                             return false;       // Cannot account for carry
-                        sa = leastsigbit_set(op.getIn(1 - slot).getNZMask());
+                        sa = Globals.leastsigbit_set(op.getIn(1 - slot).getNZMask());
                         sa &= ~7;           // Should be nearest multiple of 8
                         if (bitsize + sa > 8 * rvn.vn.getSize()) return false;
                         rop = createOpDown(CPUI_INT_MULT, 2, op, rvn, slot);
                         if (!createLink(rop, rvn.mask << sa, -1, outvn)) return false;
                         hcount += 1;
                         break;
-                    case CPUI_INT_ADD:
+                    case OpCode.CPUI_INT_ADD:
                         if ((rvn.mask & 1) == 0)
                             return false;       // Cannot account for carry
                         rop = createOpDown(CPUI_INT_ADD, 2, op, rvn, slot);
                         if (!createLink(rop, rvn.mask, -1, outvn)) return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
-                    case CPUI_INT_LEFT:
+                    case OpCode.CPUI_INT_LEFT:
                         if (slot == 1)
                         {       // Logical flow is into shift amount
                             if ((rvn.mask & 1) == 0) return false; // Cannot account for effect of extraneous bits
@@ -572,8 +572,8 @@ namespace Sla.DECCORE
                         if (!createLink(rop, newmask, -1, outvn)) return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
-                    case CPUI_INT_RIGHT:
-                    case CPUI_INT_SRIGHT:
+                    case OpCode.CPUI_INT_RIGHT:
+                    case OpCode.CPUI_INT_SRIGHT:
                         if (slot == 1)
                         {       // Logical flow is into shift amount
                             if ((rvn.mask & 1) == 0) return false; // Cannot account for effect of extraneous bits
@@ -587,7 +587,7 @@ namespace Sla.DECCORE
                         newmask = rvn.mask >> sa;
                         if (newmask == 0)
                         {
-                            if (op.code() == CPUI_INT_RIGHT) break; // subvar is set to zero, truncate flow
+                            if (op.code() == OpCode.CPUI_INT_RIGHT) break; // subvar is set to zero, truncate flow
                             return false;
                         }
                         if (rvn.mask != (newmask << sa)) return false;
@@ -610,7 +610,7 @@ namespace Sla.DECCORE
                         if (!createLink(rop, newmask, -1, outvn)) return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
-                    case CPUI_SUBPIECE:
+                    case OpCode.CPUI_SUBPIECE:
                         sa = (int)op.getIn(1).getOffset() * 8;
                         newmask = (rvn.mask >> sa) & Globals.calc_mask(outvn.getSize());
                         if (newmask == 0) break;    // subvar is set to zero, truncate flow
@@ -635,7 +635,7 @@ namespace Sla.DECCORE
                         if (!createLink(rop, newmask, -1, outvn)) return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
-                    case CPUI_PIECE:
+                    case OpCode.CPUI_PIECE:
                         if (rvn.vn == op.getIn(0))
                             newmask = rvn.mask << (8 * op.getIn(1).getSize());
                         else
@@ -644,8 +644,8 @@ namespace Sla.DECCORE
                         if (!createLink(rop, newmask, -1, outvn)) return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
-                    case CPUI_INT_LESS:
-                    case CPUI_INT_LESSEQUAL:
+                    case OpCode.CPUI_INT_LESS:
+                    case OpCode.CPUI_INT_LESSEQUAL:
                         outvn = op.getIn(1 - slot); // The OTHER side of the comparison
                         if ((!aggressive) && (((rvn.vn.getNZMask() | rvn.mask) != rvn.mask)))
                             return false;       // Everything but logical variable must definitely be zero (unless we are aggressive)
@@ -663,8 +663,8 @@ namespace Sla.DECCORE
                             return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
-                    case CPUI_INT_NOTEQUAL:
-                    case CPUI_INT_EQUAL:
+                    case OpCode.CPUI_INT_NOTEQUAL:
+                    case OpCode.CPUI_INT_EQUAL:
                         outvn = op.getIn(1 - slot); // The OTHER side of the comparison
                         if (bitsize != 1)
                         {
@@ -694,7 +694,7 @@ namespace Sla.DECCORE
                                 booldir = false;
                             else
                                 return false;
-                            if (op.code() == CPUI_INT_EQUAL)
+                            if (op.code() == OpCode.CPUI_INT_EQUAL)
                                 booldir = !booldir;
                             if (booldir)
                                 addTerminalPatch(op, rvn);
@@ -707,31 +707,31 @@ namespace Sla.DECCORE
                         }
                         hcount += 1;        // Dealt with this descendant
                         break;
-                    case CPUI_CALL:
-                    case CPUI_CALLIND:
+                    case OpCode.CPUI_CALL:
+                    case OpCode.CPUI_CALLIND:
                         callcount += 1;
                         if (callcount > 1)
                             slot = op.getRepeatSlot(rvn.vn, slot, iter);
                         if (!tryCallPull(op, rvn, slot)) return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
-                    case CPUI_RETURN:
+                    case OpCode.CPUI_RETURN:
                         if (!tryReturnPull(op, rvn, slot)) return false;
                         hcount += 1;
                         break;
-                    case CPUI_BRANCHIND:
+                    case OpCode.CPUI_BRANCHIND:
                         if (!trySwitchPull(op, rvn)) return false;
                         hcount += 1;
                         break;
-                    case CPUI_BOOL_NEGATE:
-                    case CPUI_BOOL_AND:
-                    case CPUI_BOOL_OR:
-                    case CPUI_BOOL_XOR:
+                    case OpCode.CPUI_BOOL_NEGATE:
+                    case OpCode.CPUI_BOOL_AND:
+                    case OpCode.CPUI_BOOL_OR:
+                    case OpCode.CPUI_BOOL_XOR:
                         if (bitsize != 1) return false;
                         if (rvn.mask != 1) return false;
                         addBooleanPatch(op, rvn, slot);
                         break;
-                    case CPUI_CBRANCH:
+                    case OpCode.CPUI_CBRANCH:
                         if ((bitsize != 1) || (slot != 1)) return false;
                         if (rvn.mask != 1) return false;
                         addBooleanPatch(op, rvn, 1);
@@ -764,16 +764,16 @@ namespace Sla.DECCORE
 
             switch (op.code())
             {
-                case CPUI_COPY:
-                case CPUI_MULTIEQUAL:
-                case CPUI_INT_NEGATE:
-                case CPUI_INT_XOR:
+                case OpCode.CPUI_COPY:
+                case OpCode.CPUI_MULTIEQUAL:
+                case OpCode.CPUI_INT_NEGATE:
+                case OpCode.CPUI_INT_XOR:
                     rop = createOp(op.code(), op.numInput(), rvn);
                     for (int i = 0; i < op.numInput(); ++i)
                         if (!createLink(rop, rvn.mask, i, op.getIn(i))) // Same inputs and mask
                             return false;
                     return true;
-                case CPUI_INT_AND:
+                case OpCode.CPUI_INT_AND:
                     sa = doesAndClear(op, rvn.mask);
                     if (sa != -1)
                     {
@@ -787,7 +787,7 @@ namespace Sla.DECCORE
                         if (!createLink(rop, rvn.mask, 1, op.getIn(1))) return false;
                     }
                     return true;
-                case CPUI_INT_OR:
+                case OpCode.CPUI_INT_OR:
                     sa = doesOrSet(op, rvn.mask);
                     if (sa != -1)
                     {
@@ -801,8 +801,8 @@ namespace Sla.DECCORE
                         if (!createLink(rop, rvn.mask, 1, op.getIn(1))) return false;
                     }
                     return true;
-                case CPUI_INT_ZEXT:
-                case CPUI_INT_SEXT:
+                case OpCode.CPUI_INT_ZEXT:
+                case OpCode.CPUI_INT_SEXT:
                     if ((rvn.mask & Globals.calc_mask(op.getIn(0).getSize())) != rvn.mask)
                     {
                         if ((rvn.mask & 1) != 0 && flowsize > op.getIn(0).getSize())
@@ -815,7 +815,7 @@ namespace Sla.DECCORE
                     rop = createOp(CPUI_COPY, 1, rvn);
                     if (!createLink(rop, rvn.mask, 0, op.getIn(0))) return false;
                     return true;
-                case CPUI_INT_ADD:
+                case OpCode.CPUI_INT_ADD:
                     if ((rvn.mask & 1) == 0)
                         break;          // Cannot account for carry
                     if (rvn.mask == (ulong)1)
@@ -825,7 +825,7 @@ namespace Sla.DECCORE
                     if (!createLink(rop, rvn.mask, 0, op.getIn(0))) return false;
                     if (!createLink(rop, rvn.mask, 1, op.getIn(1))) return false;
                     return true;
-                case CPUI_INT_LEFT:
+                case OpCode.CPUI_INT_LEFT:
                     if (!op.getIn(1).isConstant()) break; // Dynamic shift
                     sa = (int)op.getIn(1).getOffset();
                     newmask = rvn.mask >> sa;  // What mask looks like before shift
@@ -840,7 +840,7 @@ namespace Sla.DECCORE
                     rop = createOp(CPUI_COPY, 1, rvn);
                     if (!createLink(rop, newmask, 0, op.getIn(0))) return false;
                     return true;
-                case CPUI_INT_RIGHT:
+                case OpCode.CPUI_INT_RIGHT:
                     if (!op.getIn(1).isConstant()) break; // Dynamic shift
                     sa = (int)op.getIn(1).getOffset();
                     newmask = (rvn.mask << sa) & Globals.calc_mask(op.getIn(0).getSize());
@@ -855,7 +855,7 @@ namespace Sla.DECCORE
                     rop = createOp(CPUI_COPY, 1, rvn);
                     if (!createLink(rop, newmask, 0, op.getIn(0))) return false;
                     return true;
-                case CPUI_INT_SRIGHT:
+                case OpCode.CPUI_INT_SRIGHT:
                     if (!op.getIn(1).isConstant()) break; // Dynamic shift
                     sa = (int)op.getIn(1).getOffset();
                     newmask = (rvn.mask << sa) & Globals.calc_mask(op.getIn(0).getSize());
@@ -864,11 +864,11 @@ namespace Sla.DECCORE
                     rop = createOp(CPUI_COPY, 1, rvn);
                     if (!createLink(rop, newmask, 0, op.getIn(0))) return false;
                     return true;
-                case CPUI_INT_MULT:
-                    sa = leastsigbit_set(rvn.mask);
+                case OpCode.CPUI_INT_MULT:
+                    sa = Globals.leastsigbit_set(rvn.mask);
                     if (sa != 0)
                     {
-                        int sa2 = leastsigbit_set(op.getIn(1).getNZMask());
+                        int sa2 = Globals.leastsigbit_set(op.getIn(1).getNZMask());
                         if (sa2 < sa) return false; // Cannot deal with carries into logical multiply
                         newmask = rvn.mask >> sa;
                         rop = createOp(CPUI_INT_MULT, 2, rvn);
@@ -885,13 +885,13 @@ namespace Sla.DECCORE
                         if (!createLink(rop, rvn.mask, 1, op.getIn(1))) return false;
                     }
                     return true;
-                case CPUI_SUBPIECE:
+                case OpCode.CPUI_SUBPIECE:
                     sa = (int)op.getIn(1).getOffset() * 8;
                     newmask = rvn.mask << sa;
                     rop = createOp(CPUI_COPY, 1, rvn);
                     if (!createLink(rop, newmask, 0, op.getIn(0))) return false;
                     return true;
-                case CPUI_PIECE:
+                case OpCode.CPUI_PIECE:
                     if ((rvn.mask & Globals.calc_mask(op.getIn(1).getSize())) == rvn.mask)
                     {
                         rop = createOp(CPUI_COPY, 1, rvn);
@@ -907,28 +907,28 @@ namespace Sla.DECCORE
                         return true;
                     }
                     break;
-                case CPUI_CALL:
-                case CPUI_CALLIND:
+                case OpCode.CPUI_CALL:
+                case OpCode.CPUI_CALLIND:
                     if (tryCallReturnPush(op, rvn))
                         return true;
                     break;
-                case CPUI_INT_EQUAL:
-                case CPUI_INT_NOTEQUAL:
-                case CPUI_INT_SLESS:
-                case CPUI_INT_SLESSEQUAL:
-                case CPUI_INT_LESS:
-                case CPUI_INT_LESSEQUAL:
-                case CPUI_INT_CARRY:
-                case CPUI_INT_SCARRY:
-                case CPUI_INT_SBORROW:
-                case CPUI_BOOL_NEGATE:
-                case CPUI_BOOL_XOR:
-                case CPUI_BOOL_AND:
-                case CPUI_BOOL_OR:
-                case CPUI_FLOAT_EQUAL:
-                case CPUI_FLOAT_NOTEQUAL:
-                case CPUI_FLOAT_LESSEQUAL:
-                case CPUI_FLOAT_NAN:
+                case OpCode.CPUI_INT_EQUAL:
+                case OpCode.CPUI_INT_NOTEQUAL:
+                case OpCode.CPUI_INT_SLESS:
+                case OpCode.CPUI_INT_SLESSEQUAL:
+                case OpCode.CPUI_INT_LESS:
+                case OpCode.CPUI_INT_LESSEQUAL:
+                case OpCode.CPUI_INT_CARRY:
+                case OpCode.CPUI_INT_SCARRY:
+                case OpCode.CPUI_INT_SBORROW:
+                case OpCode.CPUI_BOOL_NEGATE:
+                case OpCode.CPUI_BOOL_XOR:
+                case OpCode.CPUI_BOOL_AND:
+                case OpCode.CPUI_BOOL_OR:
+                case OpCode.CPUI_FLOAT_EQUAL:
+                case OpCode.CPUI_FLOAT_NOTEQUAL:
+                case OpCode.CPUI_FLOAT_LESSEQUAL:
+                case OpCode.CPUI_FLOAT_NAN:
                     // Mask won't be 1, because setReplacement takes care of it
                     if ((rvn.mask & 1) == 1) break; // Not normal variable flow
                                                      // Variable is filled with zero
@@ -969,29 +969,29 @@ namespace Sla.DECCORE
                 slot = op.getSlot(rvn.vn);
                 switch (op.code())
                 {
-                    case CPUI_COPY:
-                    case CPUI_MULTIEQUAL:
-                    case CPUI_INT_NEGATE:
-                    case CPUI_INT_XOR:
-                    case CPUI_INT_OR:
-                    case CPUI_INT_AND:
+                    case OpCode.CPUI_COPY:
+                    case OpCode.CPUI_MULTIEQUAL:
+                    case OpCode.CPUI_INT_NEGATE:
+                    case OpCode.CPUI_INT_XOR:
+                    case OpCode.CPUI_INT_OR:
+                    case OpCode.CPUI_INT_AND:
                         rop = createOpDown(op.code(), op.numInput(), op, rvn, slot);
                         if (!createLink(rop, rvn.mask, -1, outvn)) return false;
                         hcount += 1;
                         break;
-                    case CPUI_INT_SEXT:     // extended logical variable into even larger container
+                    case OpCode.CPUI_INT_SEXT:     // extended logical variable into even larger container
                         rop = createOpDown(CPUI_COPY, 1, op, rvn, 0);
                         if (!createLink(rop, rvn.mask, -1, outvn)) return false;
                         hcount += 1;
                         break;
-                    case CPUI_INT_SRIGHT:
+                    case OpCode.CPUI_INT_SRIGHT:
                         if (!op.getIn(1).isConstant()) return false; // Right now we only deal with constant shifts
                         rop = createOpDown(CPUI_INT_SRIGHT, 2, op, rvn, 0);
                         if (!createLink(rop, rvn.mask, -1, outvn)) return false; // Keep the same mask size
                         addConstant(rop, Globals.calc_mask(op.getIn(1).getSize()), 1, op.getIn(1)); // Preserve the shift amount
                         hcount += 1;
                         break;
-                    case CPUI_SUBPIECE:
+                    case OpCode.CPUI_SUBPIECE:
                         if (op.getIn(1).getOffset() != 0) return false;   // Only allow proper truncation
                         if (outvn.getSize() > flowsize) return false;
                         if (outvn.getSize() == flowsize)
@@ -1000,29 +1000,29 @@ namespace Sla.DECCORE
                             addTerminalPatchSameOp(op, rvn, 0); // Termination of flow, SUBPIECE truncates even more
                         hcount += 1;
                         break;
-                    case CPUI_INT_LESS:     // Unsigned comparisons are equivalent at the 2 sizes on sign extended values
-                    case CPUI_INT_LESSEQUAL:
-                    case CPUI_INT_SLESS:
-                    case CPUI_INT_SLESSEQUAL:
-                    case CPUI_INT_EQUAL:    // Everything works if both sides are sign extended
-                    case CPUI_INT_NOTEQUAL:
+                    case OpCode.CPUI_INT_LESS:     // Unsigned comparisons are equivalent at the 2 sizes on sign extended values
+                    case OpCode.CPUI_INT_LESSEQUAL:
+                    case OpCode.CPUI_INT_SLESS:
+                    case OpCode.CPUI_INT_SLESSEQUAL:
+                    case OpCode.CPUI_INT_EQUAL:    // Everything works if both sides are sign extended
+                    case OpCode.CPUI_INT_NOTEQUAL:
                         outvn = op.getIn(1 - slot); // The OTHER side of the comparison
                         if (!createCompareBridge(op, rvn, slot, outvn)) return false;
                         hcount += 1;
                         break;
-                    case CPUI_CALL:
-                    case CPUI_CALLIND:
+                    case OpCode.CPUI_CALL:
+                    case OpCode.CPUI_CALLIND:
                         callcount += 1;
                         if (callcount > 1)
                             slot = op.getRepeatSlot(rvn.vn, slot, iter);
                         if (!tryCallPull(op, rvn, slot)) return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
-                    case CPUI_RETURN:
+                    case OpCode.CPUI_RETURN:
                         if (!tryReturnPull(op, rvn, slot)) return false;
                         hcount += 1;
                         break;
-                    case CPUI_BRANCHIND:
+                    case OpCode.CPUI_BRANCHIND:
                         if (!trySwitchPull(op, rvn)) return false;
                         hcount += 1;
                         break;
@@ -1051,18 +1051,18 @@ namespace Sla.DECCORE
 
             switch (op.code())
             {
-                case CPUI_COPY:
-                case CPUI_MULTIEQUAL:
-                case CPUI_INT_NEGATE:
-                case CPUI_INT_XOR:
-                case CPUI_INT_AND:
-                case CPUI_INT_OR:
+                case OpCode.CPUI_COPY:
+                case OpCode.CPUI_MULTIEQUAL:
+                case OpCode.CPUI_INT_NEGATE:
+                case OpCode.CPUI_INT_XOR:
+                case OpCode.CPUI_INT_AND:
+                case OpCode.CPUI_INT_OR:
                     rop = createOp(op.code(), op.numInput(), rvn);
                     for (int i = 0; i < op.numInput(); ++i)
                         if (!createLink(rop, rvn.mask, i, op.getIn(i))) // Same inputs and mask
                             return false;
                     return true;
-                case CPUI_INT_ZEXT:
+                case OpCode.CPUI_INT_ZEXT:
                     if (op.getIn(0).getSize() < flowsize)
                     {
                         // zero extension from a smaller size still acts as a signed extension
@@ -1070,12 +1070,12 @@ namespace Sla.DECCORE
                         return true;
                     }
                     break;
-                case CPUI_INT_SEXT:
+                case OpCode.CPUI_INT_SEXT:
                     if (flowsize != op.getIn(0).getSize()) return false;
                     rop = createOp(CPUI_COPY, 1, rvn);
                     if (!createLink(rop, rvn.mask, 0, op.getIn(0))) return false;
                     return true;
-                case CPUI_INT_SRIGHT:
+                case OpCode.CPUI_INT_SRIGHT:
                     // A sign-extended logical value is arithmetically right-shifted
                     // we can replace with the logical value, keeping the same shift amount
                     if (!op.getIn(1).isConstant()) return false;
@@ -1084,8 +1084,8 @@ namespace Sla.DECCORE
                     if (rop.input.size() == 1)
                         addConstant(rop, Globals.calc_mask(op.getIn(1).getSize()), 1, op.getIn(1)); // Preserve the shift amount
                     return true;
-                case CPUI_CALL:
-                case CPUI_CALLIND:
+                case OpCode.CPUI_CALL:
+                case OpCode.CPUI_CALLIND:
                     if (tryCallReturnPush(op, rvn))
                         return true;
                     break;
@@ -1237,7 +1237,7 @@ namespace Sla.DECCORE
             patchlist.GetLastItem().in1 = rvn;
             patchlist.GetLastItem().patchOp = pushop;
             if (sa == -1)
-                sa = leastsigbit_set(rvn.mask);
+                sa = Globals.leastsigbit_set(rvn.mask);
             patchlist.GetLastItem().slot = sa;
             // This is not a true modification because the output is still the expanded size
         }
@@ -1275,7 +1275,7 @@ namespace Sla.DECCORE
             res.mask = mask;
 
             // Calculate the actual constant value
-            int sa = leastsigbit_set(mask);
+            int sa = Globals.leastsigbit_set(mask);
             res.val = (mask & constvn.getOffset()) >> sa;
             res.def = (ReplaceOp*)0;
             if (rop != (ReplaceOp*)0)
@@ -1417,7 +1417,7 @@ namespace Sla.DECCORE
         {
             ReplaceVarnode* rvn = worklist.GetLastItem();
 
-            worklist.pop_back();
+            worklist.RemoveLastItem();
 
             if (sextrestrictions)
             {
@@ -1445,7 +1445,7 @@ namespace Sla.DECCORE
             }
             aggressive = aggr;
             sextrestrictions = sext;
-            bitsize = (mostsigbit_set(mask) - leastsigbit_set(mask)) + 1;
+            bitsize = (mostsigbit_set(mask) - Globals.leastsigbit_set(mask)) + 1;
             if (bitsize <= 8)
                 flowsize = 1;
             else if (bitsize <= 16)
@@ -1520,7 +1520,7 @@ namespace Sla.DECCORE
 
                 // Create placeholder defining op for old Varnode, until dead code cleans it up
                 PcodeOp* newZext = fd.newOp(1, pushOp.getAddr());
-                fd.opSetOpcode(newZext, CPUI_INT_ZEXT);
+                fd.opSetOpcode(newZext, OpCode.CPUI_INT_ZEXT);
                 fd.opSetInput(newZext, newVn, 0);
                 fd.opSetOutput(newZext, oldVn);
                 fd.opInsertAfter(newZext, pushOp);
@@ -1562,7 +1562,7 @@ namespace Sla.DECCORE
                         while (pullop.numInput() > 1)
                             fd.opRemoveInput(pullop, pullop.numInput() - 1);
                         fd.opSetInput(pullop, getReplaceVarnode((*piter).in1), 0);
-                        fd.opSetOpcode(pullop, CPUI_COPY);
+                        fd.opSetOpcode(pullop, OpCode.CPUI_COPY);
                         break;
                     case PatchRecord::compare_patch:
                         fd.opSetInput(pullop, getReplaceVarnode((*piter).in1), 0);
@@ -1582,7 +1582,7 @@ namespace Sla.DECCORE
                             if (sa == 0)
                             {
                                 invec.Add(inVn);
-                                OpCode opc = (inVn.getSize() == outSize) ? CPUI_COPY : CPUI_INT_ZEXT;
+                                OpCode opc = (inVn.getSize() == outSize) ? OpCode.CPUI_COPY : OpCode.CPUI_INT_ZEXT;
                                 fd.opSetOpcode(pullop, opc);
                                 fd.opSetAllInput(pullop, invec);
                             }
@@ -1591,7 +1591,7 @@ namespace Sla.DECCORE
                                 if (inVn.getSize() != outSize)
                                 {
                                     PcodeOp* zextop = fd.newOp(1, pullop.getAddr());
-                                    fd.opSetOpcode(zextop, CPUI_INT_ZEXT);
+                                    fd.opSetOpcode(zextop, OpCode.CPUI_INT_ZEXT);
                                     Varnode* zextout = fd.newUniqueOut(outSize, zextop);
                                     fd.opSetInput(zextop, inVn, 0);
                                     fd.opInsertBefore(zextop, pullop);
@@ -1601,7 +1601,7 @@ namespace Sla.DECCORE
                                     invec.Add(inVn);
                                 invec.Add(fd.newConstant(4, sa));
                                 fd.opSetAllInput(pullop, invec);
-                                fd.opSetOpcode(pullop, CPUI_INT_LEFT);
+                                fd.opSetOpcode(pullop, OpCode.CPUI_INT_LEFT);
                             }
                             break;
                         }

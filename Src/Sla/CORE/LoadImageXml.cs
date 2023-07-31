@@ -22,7 +22,8 @@ namespace Sla.CORE
         private set<Address> readonlyset;           ///< Starting address of read-only chunks
         private Dictionary<Address, List<byte>> chunk;      ///< Chunks of image data, mapped by address
         private Dictionary<Address, string> addrtosymbol;      ///< Symbols sorted by address
-        private /*mutable*/ Dictionary<Address, string>::const_iterator cursymbol; ///< Current symbol being reported
+        /// Current symbol being reported. Reset to null pointer when enumeration end is reached.
+        private /*mutable*/ Dictionary<Address, string>.Enumerator? cursymbol = null;
 
         /// Make sure every chunk is followed by at least 512 bytes of pad
         private void pad()
@@ -109,13 +110,13 @@ namespace Sla.CORE
                 if (subId == ELEM_SYMBOL)
                 {
                     AddrSpace @base = decoder.readSpace(ATTRIB_SPACE);
-                    Address addr(@base, @@base.decodeAttributes(decoder, sz));
+                    Address addr(@base, @base.decodeAttributes(decoder, sz));
                     string nm = decoder.readString(ATTRIB_NAME);
                     addrtosymbol[addr] = nm;
                 }
                 else if (subId == ELEM_BYTECHUNK) {
                     AddrSpace @base = decoder.readSpace(ATTRIB_SPACE);
-                    Address addr(@base, @@base.decodeAttributes(decoder, sz));
+                    Address addr(@base, @base.decodeAttributes(decoder, sz));
                     Dictionary<Address, List<byte>>::iterator chnkiter;
                     List<byte> & vec(chunk[addr]);
                     vec.clear();
@@ -218,100 +219,96 @@ namespace Sla.CORE
 
         public override void loadFill(byte[] ptr, int size, Address addr)
         {
-            Dictionary<Address, List<byte>>::const_iterator iter;
             Address curaddr;
             bool emptyhit = false;
 
             curaddr = addr;
-            iter = chunk.upper_bound(curaddr); // First one greater than
+            // First one greater than
+            Dictionary<Address, List<byte>>.Enumerator iter = chunk.upper_bound(curaddr);
             if (iter != chunk.begin())
                 --iter;         // Last one less or equal
-            while ((size > 0) && (iter != chunk.end()))
-            {
-                List<byte> &chnk((*iter).second);
-                int chnksize = chnk.size();
-                int over = curaddr.overlap(0, (*iter).first, chnksize);
-                if (over != -1)
-                {
+            while ((size > 0) && (iter != chunk.end())) {
+                List<byte> chnk = iter.Current.Value;
+                int chnksize = chnk.Count;
+                int over = curaddr.overlap(0, iter.Current.Key, chnksize);
+                if (over != -1) {
                     if (chnksize - over > size)
                         chnksize = over + size;
                     for (int i = over; i < chnksize; ++i)
                         *ptr++ = chnk[i];
                     size -= (chnksize - over);
                     curaddr = curaddr + (chnksize - over);
-                    ++iter;
+                    if (!iter.MoveNext()) {
+                        break;
+                    }
                 }
-                else
-                {
+                else {
                     emptyhit = true;
                     break;
                 }
             }
-            if ((size > 0) || emptyhit)
-            {
-                ostringstream errmsg;
-                errmsg << "Bytes at ";
+            if ((size > 0) || emptyhit) {
+                StringWriter errmsg = new StringWriter();
+                errmsg.Write("Bytes at ");
                 curaddr.printRaw(errmsg);
-                errmsg << " are not mapped";
-                throw DataUnavailError(errmsg.str());
+                errmsg.Write(" are not mapped");
+                throw new DataUnavailError(errmsg.ToString());
             }
         }
 
         public override void openSymbols()
         {
-            cursymbol = addrtosymbol.begin();
+            cursymbol = addrtosymbol.GetEnumerator();
         }
 
         public override bool getNextSymbol(LoadImageFunc record)
         {
-            if (cursymbol == addrtosymbol.end()) return false;
-            record.name = (*cursymbol).second;
-            record.address = (*cursymbol).first;
-            ++cursymbol;
+            if (null == cursymbol) return false;
+            record.name = cursymbol.Value.Current.Value;
+            record.address = cursymbol.Value.Current.Key;
+            if (!cursymbol.Value.MoveNext()) {
+                cursymbol.Value.Dispose();
+                cursymbol = null;
+            }
             return true;
         }
 
         public override void getReadonly(RangeList list)
         {
-            Dictionary<Address, List<byte>>::const_iterator iter;
+            Dictionary<Address, List<byte>>.Enumerator iter = chunk.GetEnumerator();
 
             // List all the readonly chunks
-            for (iter = chunk.begin(); iter != chunk.end(); ++iter)
-            {
-                if (readonlyset.find((*iter).first) != readonlyset.end())
-                {
-                    List<byte> &chnk((*iter).second);
-                    ulong start = (*iter).first.getOffset();
-                    ulong stop = start + chnk.size() - 1;
-                    list.insertRange((*iter).first.getSpace(), start, stop);
+            while(iter.MoveNext()) {
+                if (readonlyset.find(iter.Current.Key) != readonlyset.end()) {
+                    List<byte> chnk = iter.Current.Value;
+                    ulong start = iter.Current.Key.getOffset();
+                    ulong stop = (ulong)(start + (uint)chnk.Count - 1);
+                    list.insertRange(iter.Current.Key.getSpace(), start, stop);
                 }
             }
         }
 
         public override string getArchType() => archtype;
 
-        public override void adjustVma(long adjust)
+        public override void adjustVma(ulong adjust)
         {
-            Dictionary<Address, List<byte>>::iterator iter1;
-            Dictionary<Address, string>::iterator iter2;
+            Dictionary<Address, List<byte>>.Enumerator iter1 = chunk.GetEnumerator();
+            Dictionary<Address, List<byte>> newchunk = new Dictionary<Address, List<byte>>();
 
-            Dictionary<Address, List<byte>> newchunk;
-            Dictionary<Address, string> newsymbol;
-
-            for (iter1 = chunk.begin(); iter1 != chunk.end(); ++iter1)
-            {
-                AddrSpace* spc = (*iter1).first.getSpace();
-                int off = AddrSpace::addressToByte(adjust, spc.getWordSize());
-                Address newaddr = (*iter1).first + off;
-                newchunk[newaddr] = (*iter1).second;
+            while (iter1.MoveNext()) {
+                AddrSpace spc = iter1.Current.Key.getSpace();
+                uint off = (uint)AddrSpace.addressToByte(adjust, spc.getWordSize());
+                Address newaddr = iter1.Current.Key + off;
+                newchunk[newaddr] = iter1.Current.Value;
             }
             chunk = newchunk;
-            for (iter2 = addrtosymbol.begin(); iter2 != addrtosymbol.end(); ++iter2)
-            {
-                AddrSpace* spc = (*iter2).first.getSpace();
-                int off = AddrSpace::addressToByte(adjust, spc.getWordSize());
-                Address newaddr = (*iter2).first + off;
-                newsymbol[newaddr] = (*iter2).second;
+            Dictionary<Address, string>.Enumerator iter2 = addrtosymbol.GetEnumerator();
+            Dictionary<Address, string> newsymbol = new Dictionary<Address, string>();
+            while (iter2.MoveNext()) {
+                AddrSpace spc = iter2.Current.Key.getSpace();
+                uint off = (uint)AddrSpace.addressToByte(adjust, spc.getWordSize());
+                Address newaddr = iter2.Current.Key + off;
+                newsymbol[newaddr] = iter2.Current.Value;
             }
             addrtosymbol = newsymbol;
         }

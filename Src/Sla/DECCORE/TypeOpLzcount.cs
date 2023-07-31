@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     internal class TypeOpLzcount : TypeOpFunc
     {
         public TypeOpLzcount(TypeFactory t)
-            : base(t, CPUI_LZCOUNT,"LZCOUNT", TYPE_INT, TYPE_UNKNOWN)
+            : base(t, OpCode.CPUI_LZCOUNT,"LZCOUNT", type_metatype.TYPE_INT, type_metatype.TYPE_UNKNOWN)
         {
             opflags = PcodeOp::unary;
             behave = new OpBehaviorLzcount();

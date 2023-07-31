@@ -1075,7 +1075,7 @@ namespace Sla.DECCORE
         {
             FlowBlock out0 = b2.getOut(0);
             List<FlowBlock> nodes = new List<FlowBlock>();
-            OpCode opc = (b1.getFalseOut() == b2) ? CPUI_INT_OR : CPUI_INT_AND;
+            OpCode opc = (b1.getFalseOut() == b2) ? OpCode.CPUI_INT_OR : OpCode.CPUI_INT_AND;
             BlockCondition ret = new BlockCondition(opc);
             nodes.Add(b1);
             nodes.Add(b2);

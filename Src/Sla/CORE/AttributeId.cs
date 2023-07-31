@@ -180,12 +180,12 @@ namespace Sla.CORE
         /// Access static List of AttributeId objects that are registered during static initialization
         /// The list itself is created once on the first call to this method.
         /// \return a reference to the List
-        private static ref List<AttributeId> getList()
+        private static List<AttributeId> getList()
         {
             if (null == _thelist) {
                 _thelist = new List<AttributeId>();
             }
-            return ref _thelist;
+            return _thelist;
         }
 
         /// Construct given a name and id
@@ -229,7 +229,7 @@ namespace Sla.CORE
         /// Fill the hashtable mapping attribute names to their id, from registered attribute objects
         public static void initialize()
         {
-            ref List<AttributeId> thelist = ref getList();
+            List<AttributeId> thelist = getList();
             for (int i = 0; i < thelist.Count; ++i) {
                 AttributeId attrib = thelist[i];
 #if CPUI_DEBUG

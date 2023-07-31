@@ -38,7 +38,7 @@ namespace Sla.DECCORE
         private int wholesize;
 
         /// Find whole out of which \b hi and \b lo are split
-        /// Look for CPUI_SUBPIECE operations off of a common Varnode.
+        /// Look for OpCode.CPUI_SUBPIECE operations off of a common Varnode.
         /// The \b whole field is set to this Varnode if found; the definition point and block are
         /// filled in and \b true is returned.  Otherwise \b false is returned.
         /// \return \b true if the \b whole Varnode is found
@@ -50,24 +50,24 @@ namespace Sla.DECCORE
                 if (lo == (Varnode)null) return false;
                 if (!hi.isWritten()) return false;
                 PcodeOp* subhi = hi.getDef();
-                if (subhi.code() == CPUI_COPY)
+                if (subhi.code() == OpCode.CPUI_COPY)
                 { // Go thru one level of copy, if the piece is addrtied
                     Varnode* otherhi = subhi.getIn(0);
                     if (!otherhi.isWritten()) return false;
                     subhi = otherhi.getDef();
                 }
-                if (subhi.code() != CPUI_SUBPIECE) return false;
+                if (subhi.code() != OpCode.CPUI_SUBPIECE) return false;
                 if (subhi.getIn(1).getOffset() != wholesize - hi.getSize()) return false;
                 whole = subhi.getIn(0);
                 if (!lo.isWritten()) return false;
                 PcodeOp* sublo = lo.getDef();
-                if (sublo.code() == CPUI_COPY)
+                if (sublo.code() == OpCode.CPUI_COPY)
                 { // Go thru one level of copy, if the piece is addrtied
                     Varnode* otherlo = sublo.getIn(0);
                     if (!otherlo.isWritten()) return false;
                     sublo = otherlo.getDef();
                 }
-                if (sublo.code() != CPUI_SUBPIECE) return false;
+                if (sublo.code() != OpCode.CPUI_SUBPIECE) return false;
                 Varnode* res = sublo.getIn(0);
                 if (whole == (Varnode)null)
                     whole = res;
@@ -160,7 +160,7 @@ namespace Sla.DECCORE
             return true;
         }
 
-        /// Find whole Varnode formed as a CPUI_PIECE of \b hi and \b lo
+        /// Find whole Varnode formed as a OpCode.CPUI_PIECE of \b hi and \b lo
         /// We scan for concatenations formed out of \b hi and \b lo, in the correct significance order.
         /// We assume \b hi and \b lo are defined in the same basic block (or  are both inputs) and that
         /// the concatenation is also in this block. If such a concatenation is found, \b whole is set to the
@@ -185,7 +185,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* op = *iter;
                 ++iter;
-                if (op.code() != CPUI_PIECE) continue;
+                if (op.code() != OpCode.CPUI_PIECE) continue;
                 if (op.getIn(0) != hi) continue;
                 if (bb != (BlockBasic)null)
                 {
@@ -311,8 +311,8 @@ namespace Sla.DECCORE
         }
 
         /// Try to initialize given just the most significant piece split from whole
-        /// Verify that the given most significant piece is formed via CPUI_SUBPIECE and search
-        /// for the least significant piece being formed as a CPUI_SUBPIECE of the same whole.
+        /// Verify that the given most significant piece is formed via OpCode.CPUI_SUBPIECE and search
+        /// for the least significant piece being formed as a OpCode.CPUI_SUBPIECE of the same whole.
         /// \param h is the given (most significant) Varnode piece
         /// \return \b true if the matching \b whole and least significant piece is found
         public bool inHandHi(Varnode h)
@@ -323,7 +323,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* op = h.getDef();
                 // We could check for double loads here
-                if (op.code() == CPUI_SUBPIECE)
+                if (op.code() == OpCode.CPUI_SUBPIECE)
                 {
                     Varnode* w = op.getIn(0);
                     if (op.getIn(1).getOffset() != (ulong)(w.getSize() - h.getSize())) return false;
@@ -334,7 +334,7 @@ namespace Sla.DECCORE
                     {
                         PcodeOp* tmpop = *iter;
                         ++iter;
-                        if (tmpop.code() != CPUI_SUBPIECE) continue;
+                        if (tmpop.code() != OpCode.CPUI_SUBPIECE) continue;
                         Varnode* tmplo = tmpop.getOut();
                         if (!tmplo.isPrecisLo()) continue;
                         if (tmplo.getSize() + h.getSize() != w.getSize()) continue;
@@ -349,8 +349,8 @@ namespace Sla.DECCORE
         }
 
         /// Try to initialize given just the least significant piece split from whole
-        /// Verify that the given least significant piece is formed via CPUI_SUBPIECE and search
-        /// for the most significant piece being formed as a CPUI_SUBPIECE of the same whole.
+        /// Verify that the given least significant piece is formed via OpCode.CPUI_SUBPIECE and search
+        /// for the most significant piece being formed as a OpCode.CPUI_SUBPIECE of the same whole.
         /// \param l is the given (least significant) Varnode piece
         /// \return \b true if the matching \b whole and most significant piece is found
         public bool inHandLo(Varnode l)
@@ -361,7 +361,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* op = l.getDef();
                 // We could check for double loads here
-                if (op.code() == CPUI_SUBPIECE)
+                if (op.code() == OpCode.CPUI_SUBPIECE)
                 {
                     Varnode* w = op.getIn(0);
                     if (op.getIn(1).getOffset() != 0) return false;
@@ -372,7 +372,7 @@ namespace Sla.DECCORE
                     {
                         PcodeOp* tmpop = *iter;
                         ++iter;
-                        if (tmpop.code() != CPUI_SUBPIECE) continue;
+                        if (tmpop.code() != OpCode.CPUI_SUBPIECE) continue;
                         Varnode* tmphi = tmpop.getOut();
                         if (!tmphi.isPrecisHi()) continue;
                         if (tmphi.getSize() + l.getSize() != w.getSize()) continue;
@@ -389,7 +389,7 @@ namespace Sla.DECCORE
         /// Try to initialize given just the least significant piece (other piece may be zero)
         /// The given least significant Varnode must already be marked as a piece.
         /// Initialize the SplitVarnode with the given piece and the \b whole that it came from.
-        /// If a matching most significant piece can be found, as another CPUI_SUBPIECE off of the same
+        /// If a matching most significant piece can be found, as another OpCode.CPUI_SUBPIECE off of the same
         /// \b whole, initialize that as well.  Otherwise leave the most significant piece as null.
         /// \param l is the given (least significant) Varnode piece
         /// \return \b true if the SplitVarnode is successfully initialized
@@ -398,7 +398,7 @@ namespace Sla.DECCORE
             if (!l.isPrecisLo()) return false;
             if (!l.isWritten()) return false;
             PcodeOp* op = l.getDef();
-            if (op.code() != CPUI_SUBPIECE) return false;
+            if (op.code() != OpCode.CPUI_SUBPIECE) return false;
             if (op.getIn(1).getOffset() != 0) return false;
             Varnode* w = op.getIn(0);
 
@@ -409,7 +409,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* tmpop = *iter;
                 ++iter;
-                if (tmpop.code() != CPUI_SUBPIECE) continue;
+                if (tmpop.code() != OpCode.CPUI_SUBPIECE) continue;
                 Varnode* tmphi = tmpop.getOut();
                 if (!tmphi.isPrecisHi()) continue;
                 if (tmphi.getSize() + l.getSize() != w.getSize()) continue;
@@ -424,7 +424,7 @@ namespace Sla.DECCORE
 
         /// Try to initialize given just the most significant piece concatenated into whole
         /// Initialize the SplitVarnode given the most significant piece, if it is concatenated together
-        /// immediately with is least significant piece.  The CPUI_PIECE and the matching least significant
+        /// immediately with is least significant piece.  The OpCode.CPUI_PIECE and the matching least significant
         /// piece must be unique.  If these are found, \b hi, \b lo, and \b whole are all filled @in.
         /// \param h is the given (most significant) piece
         /// \return \b true if initialization was successful and the least significant piece was found
@@ -439,7 +439,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* pieceop = *iter;
                 ++iter;
-                if (pieceop.code() != CPUI_PIECE) continue;
+                if (pieceop.code() != OpCode.CPUI_PIECE) continue;
                 if (pieceop.getIn(0) != h) continue;
                 Varnode* l = pieceop.getIn(1);
                 if (!l.isPrecisLo()) continue;
@@ -457,7 +457,7 @@ namespace Sla.DECCORE
 
         /// Try to initialize given just the least significant piece concatenated into whole
         /// Initialize the SplitVarnode given the least significant piece, if it is concatenated together
-        /// immediately with is nost significant piece.  The CPUI_PIECE and the matching most significant
+        /// immediately with is nost significant piece.  The OpCode.CPUI_PIECE and the matching most significant
         /// piece must be unique.  If these are found, \b hi, \b lo, and \b whole are all filled @in.
         /// \param l is the given (least significant) piece
         /// \return \b true if initialization was successful and the most significant piece was found
@@ -472,7 +472,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* pieceop = *iter;
                 ++iter;
-                if (pieceop.code() != CPUI_PIECE) continue;
+                if (pieceop.code() != OpCode.CPUI_PIECE) continue;
                 if (pieceop.getIn(1) != l) continue;
                 Varnode* h = pieceop.getIn(0);
                 if (!h.isPrecisHi()) continue;
@@ -612,7 +612,7 @@ namespace Sla.DECCORE
                 concatop = data.newOp(2, addr);
                 // Do we need to pick something other than a unique????
                 whole = data.newUniqueOut(wholesize, concatop);
-                data.opSetOpcode(concatop, CPUI_PIECE);
+                data.opSetOpcode(concatop, OpCode.CPUI_PIECE);
                 data.opSetOutput(concatop, whole);
                 data.opSetInput(concatop, hi, 0);
                 data.opSetInput(concatop, lo, 1);
@@ -621,7 +621,7 @@ namespace Sla.DECCORE
             {
                 concatop = data.newOp(1, addr);
                 whole = data.newUniqueOut(wholesize, concatop);
-                data.opSetOpcode(concatop, CPUI_INT_ZEXT);
+                data.opSetOpcode(concatop, OpCode.CPUI_INT_ZEXT);
                 data.opSetOutput(concatop, whole);
                 data.opSetInput(concatop, lo, 0);
             }
@@ -666,9 +666,9 @@ namespace Sla.DECCORE
             whole.setWriteMask();
         }
 
-        /// Rebuild the least significant piece as a CPUI_SUBPIECE of the \b whole
+        /// Rebuild the least significant piece as a OpCode.CPUI_SUBPIECE of the \b whole
         /// Assume \b lo was initially defined in some other way but now needs to be defined as a split from
-        /// a new \b whole Varnode.  The original PcodeOp defining \b lo is transformed into a CPUI_SUBPIECE.
+        /// a new \b whole Varnode.  The original PcodeOp defining \b lo is transformed into a OpCode.CPUI_SUBPIECE.
         /// The method findCreateOutputWhole() must already have been called on \b this.
         public void buildLoFromWhole(Funcdata data)
         {
@@ -679,37 +679,37 @@ namespace Sla.DECCORE
             List<Varnode*> inlist;
             inlist.Add(whole);
             inlist.Add(data.newConstant(4, 0));
-            if (loop.code() == CPUI_MULTIEQUAL)
+            if (loop.code() == OpCode.CPUI_MULTIEQUAL)
             {
                 // When converting the MULTIEQUAL to a SUBPIECE, we need to reinsert the op so that we don't
                 // get a break in the sequence of MULTIEQUALs at the beginning of the block
                 BlockBasic* bl = loop.getParent();
                 data.opUninsert(loop);
-                data.opSetOpcode(loop, CPUI_SUBPIECE);
+                data.opSetOpcode(loop, OpCode.CPUI_SUBPIECE);
                 data.opSetAllInput(loop, inlist);
                 data.opInsertBegin(loop, bl);
             }
-            else if (loop.code() == CPUI_INDIRECT)
+            else if (loop.code() == OpCode.CPUI_INDIRECT)
             {
                 // When converting an INDIRECT to a SUBPIECE, we need to reinsert the op AFTER the affector
                 PcodeOp* affector = PcodeOp::getOpFromConst(loop.getIn(1).getAddr());
                 if (!affector.isDead())
                     data.opUninsert(loop);
-                data.opSetOpcode(loop, CPUI_SUBPIECE);
+                data.opSetOpcode(loop, OpCode.CPUI_SUBPIECE);
                 data.opSetAllInput(loop, inlist);
                 if (!affector.isDead())
                     data.opInsertAfter(loop, affector);
             }
             else
             {
-                data.opSetOpcode(loop, CPUI_SUBPIECE);
+                data.opSetOpcode(loop, OpCode.CPUI_SUBPIECE);
                 data.opSetAllInput(loop, inlist);
             }
         }
 
-        /// Rebuild the most significant piece as a CPUI_SUBPIECE of the \b whole
+        /// Rebuild the most significant piece as a OpCode.CPUI_SUBPIECE of the \b whole
         /// Assume \b hi was initially defined in some other way but now needs to be defined as a split from
-        /// a new \b whole Varnode.  The original PcodeOp defining \b hi is transformed into a CPUI_SUBPIECE.
+        /// a new \b whole Varnode.  The original PcodeOp defining \b hi is transformed into a OpCode.CPUI_SUBPIECE.
         /// The method findCreateOutputWhole() must already have been called on \b this.
         public void buildHiFromWhole(Funcdata data)
         {
@@ -720,30 +720,30 @@ namespace Sla.DECCORE
             List<Varnode*> inlist;
             inlist.Add(whole);
             inlist.Add(data.newConstant(4, lo.getSize()));
-            if (hiop.code() == CPUI_MULTIEQUAL)
+            if (hiop.code() == OpCode.CPUI_MULTIEQUAL)
             {
                 // When converting the MULTIEQUAL to a SUBPIECE, we need to reinsert the op so that we don't
                 // get a break in the sequence of MULTIEQUALs at the beginning of the block
                 BlockBasic* bl = hiop.getParent();
                 data.opUninsert(hiop);
-                data.opSetOpcode(hiop, CPUI_SUBPIECE);
+                data.opSetOpcode(hiop, OpCode.CPUI_SUBPIECE);
                 data.opSetAllInput(hiop, inlist);
                 data.opInsertBegin(hiop, bl);
             }
-            else if (hiop.code() == CPUI_INDIRECT)
+            else if (hiop.code() == OpCode.CPUI_INDIRECT)
             {
                 // When converting the INDIRECT to a SUBPIECE, we need to reinsert AFTER the affector
                 PcodeOp* affector = PcodeOp::getOpFromConst(hiop.getIn(1).getAddr());
                 if (!affector.isDead())
                     data.opUninsert(hiop);
-                data.opSetOpcode(hiop, CPUI_SUBPIECE);
+                data.opSetOpcode(hiop, OpCode.CPUI_SUBPIECE);
                 data.opSetAllInput(hiop, inlist);
                 if (!affector.isDead())
                     data.opInsertAfter(hiop, affector);
             }
             else
             {
-                data.opSetOpcode(hiop, CPUI_SUBPIECE);
+                data.opSetOpcode(hiop, OpCode.CPUI_SUBPIECE);
                 data.opSetAllInput(hiop, inlist);
             }
         }
@@ -796,7 +796,7 @@ namespace Sla.DECCORE
 
             if (!vn2.isWritten()) return false;
             PcodeOp* op2 = vn2.getDef();
-            if (op2.code() != CPUI_INT_ADD) return false;
+            if (op2.code() != OpCode.CPUI_INT_ADD) return false;
             if (!op2.getIn(1).isConstant()) return false;
             ulong c2 = op2.getIn(1).getOffset();
 
@@ -805,7 +805,7 @@ namespace Sla.DECCORE
 
             if (!vn1.isWritten()) return false;
             PcodeOp* op1 = vn1.getDef();
-            if (op1.code() != CPUI_INT_ADD) return false;
+            if (op1.code() != OpCode.CPUI_INT_ADD) return false;
             if (!op1.getIn(1).isConstant()) return false;
             ulong c1 = op1.getIn(1).getOffset();
 
@@ -847,9 +847,9 @@ namespace Sla.DECCORE
             Varnode* firstptr = first.getIn(1);
             if (firstptr.isFree()) return false;
             int sizeres;
-            if (first.code() == CPUI_LOAD)
+            if (first.code() == OpCode.CPUI_LOAD)
                 sizeres = first.getOut().getSize(); // # of bytes read by lowest address load
-            else        // CPUI_STORE
+            else        // OpCode.CPUI_STORE
                 sizeres = first.getIn(2).getSize();
 
             // Check if the loads are adjacent to each other
@@ -922,7 +922,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* subop = *iter;
                 ++iter;
-                if (subop.code() != CPUI_SUBPIECE) continue;
+                if (subop.code() != OpCode.CPUI_SUBPIECE) continue;
                 Varnode* vn = subop.getOut();
                 if (vn.isPrecisHi())
                 {
@@ -963,7 +963,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* loop = *iter;
                 ++iter;
-                if (loop.code() != CPUI_COPY) continue;
+                if (loop.code() != OpCode.CPUI_COPY) continue;
                 Varnode* locpy = loop.getOut();
                 Address addr = locpy.getAddr(); // Calculate address of hi part
                 if (addr.isBigEndian())
@@ -977,7 +977,7 @@ namespace Sla.DECCORE
                 {
                     PcodeOp* hiop = *iter2;
                     ++iter2;
-                    if (hiop.code() != CPUI_COPY) continue;
+                    if (hiop.code() != OpCode.CPUI_COPY) continue;
                     Varnode* hicpy = hiop.getOut();
                     if (hicpy.getAddr() != addr) continue;
                     if (hiop.getParent() != loop.getParent()) continue;
@@ -1042,14 +1042,14 @@ namespace Sla.DECCORE
             return true;
         }
 
-        /// \brief Verify that the given PcodeOp is a CPUI_INT_MULT by -1
+        /// \brief Verify that the given PcodeOp is a OpCode.CPUI_INT_MULT by -1
         ///
-        /// The PcodeOp must be a CPUI_INT_MULT and the second operand must be a constant -1.
+        /// The PcodeOp must be a OpCode.CPUI_INT_MULT and the second operand must be a constant -1.
         /// \param op is the given PcodeOp
         /// \return \b true if the PcodeOp is a multiple by -1
         public static bool verifyMultNegOne(PcodeOp op)
         {
-            if (op.code() != CPUI_INT_MULT) return false;
+            if (op.code() != OpCode.CPUI_INT_MULT) return false;
             Varnode* in1 = op.getIn(1);
             if (!in1.isConstant()) return false;
             if (in1.getOffset() != Globals.calc_mask(in1.getSize())) return false;
@@ -1092,7 +1092,7 @@ namespace Sla.DECCORE
             @out.findCreateOutputWhole(data);
             in1.findCreateWhole(data);
             in2.findCreateWhole(data);
-            if (existop.code() != CPUI_PIECE)
+            if (existop.code() != OpCode.CPUI_PIECE)
             { // If the output whole didn't previously exist
                 PcodeOp* newop = data.newOp(2, existop.getAddr()); // new op which creates the output whole
                 data.opSetOpcode(newop, opc);
@@ -1146,7 +1146,7 @@ namespace Sla.DECCORE
             @@in.findCreateWhole(data);
             if (sa.isConstant())
                 sa = data.newConstant(sa.getSize(), sa.getOffset());
-            if (existop.code() != CPUI_PIECE)
+            if (existop.code() != OpCode.CPUI_PIECE)
             { // If the output whole didn't previously exist
                 PcodeOp* newop = data.newOp(2, existop.getAddr());
                 data.opSetOpcode(newop, opc);
@@ -1225,7 +1225,7 @@ namespace Sla.DECCORE
             data.opSetInput(cbranch, newbool, 1); // CBRANCH now determined by new compare
         }
 
-        /// \brief Check that the logical version of a CPUI_MULTIEQUAL operation can be created
+        /// \brief Check that the logical version of a OpCode.CPUI_MULTIEQUAL operation can be created
         ///
         /// This checks only the most generic aspects of the calculation.  The input and output whole Varnodes
         /// must already exist or be creatable.  The point where the output Varnode must exist is identified
@@ -1238,7 +1238,7 @@ namespace Sla.DECCORE
             PcodeOp* existop = @out.findEarliestSplitPoint(); // Point where output whole needs to exist
             if (existop == (PcodeOp)null) return existop;
             // existop should always be a MULTIEQUAL defining one of the pieces
-            if (existop.code() != CPUI_MULTIEQUAL)
+            if (existop.code() != OpCode.CPUI_MULTIEQUAL)
                 throw new LowlevelError("Trying to create phi-node double precision op with phi-node pieces");
             BlockBasic* bl = existop.getParent();
             int numin = inlist.size();
@@ -1268,7 +1268,7 @@ namespace Sla.DECCORE
                 inlist[i].findCreateWhole(data);
 
             PcodeOp* newop = data.newOp(numin, existop.getAddr());
-            data.opSetOpcode(newop, CPUI_MULTIEQUAL);
+            data.opSetOpcode(newop, OpCode.CPUI_MULTIEQUAL);
             data.opSetOutput(newop, @out.getWhole());
             for (int i = 0; i < numin; ++i)
                 data.opSetInput(newop, inlist[i].getWhole(), i);
@@ -1277,12 +1277,12 @@ namespace Sla.DECCORE
             @out.buildHiFromWhole(data);
         }
 
-        /// \brief Check that the logical version of a CPUI_INDIRECT operation can be created
+        /// \brief Check that the logical version of a OpCode.CPUI_INDIRECT operation can be created
         ///
         /// This checks only the most generic aspects of the calculation.  The input whole Varnode
         /// must already exist or be creatable.  If the INDIRECT operation cannot be created, \b false is returned.
         /// \param in is the (first) input operand of the INDIRECT
-        /// \return \b true if the logical version of the CPUI_INDIRECT can be created
+        /// \return \b true if the logical version of the OpCode.CPUI_INDIRECT can be created
         public static bool prepareIndirectOp(SplitVarnode @in, PcodeOp affector)
         {
             // We already have the exist point, -indop-
@@ -1305,7 +1305,7 @@ namespace Sla.DECCORE
 
             @@in.findCreateWhole(data);
             PcodeOp* newop = data.newOp(2, affector.getAddr());
-            data.opSetOpcode(newop, CPUI_INDIRECT);
+            data.opSetOpcode(newop, OpCode.CPUI_INDIRECT);
             data.opSetOutput(newop, @out.getWhole());
             data.opSetInput(newop, @@in.getWhole(), 0);
             data.opSetInput(newop, data.newVarnodeIop(affector), 1);
@@ -1338,7 +1338,7 @@ namespace Sla.DECCORE
                     ++iter;
                     switch (workop.code())
                     {
-                        case CPUI_INT_ADD:
+                        case OpCode.CPUI_INT_ADD:
                             {
                                 AddForm addform;
                                 if (addform.applyRule(in, workop, workishi, data))
@@ -1348,7 +1348,7 @@ namespace Sla.DECCORE
                                     return 1;
                             }
                             break;
-                        case CPUI_INT_AND:
+                        case OpCode.CPUI_INT_AND:
                             {
                                 Equal3Form equal3form;
                                 if (equal3form.applyRule(in, workop, workishi, data))
@@ -1358,7 +1358,7 @@ namespace Sla.DECCORE
                                     return 1;
                             }
                             break;
-                        case CPUI_INT_OR:
+                        case OpCode.CPUI_INT_OR:
                             {
                                 Equal2Form equal2form;
                                 if (equal2form.applyRule(in, workop, workishi, data))
@@ -1368,7 +1368,7 @@ namespace Sla.DECCORE
                                     return 1;
                             }
                             break;
-                        case CPUI_INT_XOR:
+                        case OpCode.CPUI_INT_XOR:
                             {
                                 Equal2Form equal2form;
                                 if (equal2form.applyRule(in, workop, workishi, data))
@@ -1378,8 +1378,8 @@ namespace Sla.DECCORE
                                     return 1;
                             }
                             break;
-                        case CPUI_INT_EQUAL:
-                        case CPUI_INT_NOTEQUAL:
+                        case OpCode.CPUI_INT_EQUAL:
+                        case OpCode.CPUI_INT_NOTEQUAL:
                             {
                                 LessThreeWay lessthreeway;
                                 if (lessthreeway.applyRule(in, workop, workishi, data))
@@ -1389,8 +1389,8 @@ namespace Sla.DECCORE
                                     return 1;
                             }
                             break;
-                        case CPUI_INT_LESS:
-                        case CPUI_INT_LESSEQUAL:
+                        case OpCode.CPUI_INT_LESS:
+                        case OpCode.CPUI_INT_LESSEQUAL:
                             {
                                 LessThreeWay lessthreeway;
                                 if (lessthreeway.applyRule(in, workop, workishi, data))
@@ -1400,56 +1400,56 @@ namespace Sla.DECCORE
                                     return 1;
                             }
                             break;
-                        case CPUI_INT_SLESS:
+                        case OpCode.CPUI_INT_SLESS:
                             {
                                 LessConstForm lessconstform;
                                 if (lessconstform.applyRule(in, workop, workishi, data))
                                     return 1;
                             }
                             break;
-                        case CPUI_INT_SLESSEQUAL:
+                        case OpCode.CPUI_INT_SLESSEQUAL:
                             {
                                 LessConstForm lessconstform;
                                 if (lessconstform.applyRule(in, workop, workishi, data))
                                     return 1;
                             }
                             break;
-                        case CPUI_INT_LEFT:
+                        case OpCode.CPUI_INT_LEFT:
                             {
                                 ShiftForm shiftform;
                                 if (shiftform.applyRuleLeft(in, workop, workishi, data))
                                     return 1;
                             }
                             break;
-                        case CPUI_INT_RIGHT:
+                        case OpCode.CPUI_INT_RIGHT:
                             {
                                 ShiftForm shiftform;
                                 if (shiftform.applyRuleRight(in, workop, workishi, data))
                                     return 1;
                             }
                             break;
-                        case CPUI_INT_SRIGHT:
+                        case OpCode.CPUI_INT_SRIGHT:
                             {
                                 ShiftForm shiftform;
                                 if (shiftform.applyRuleRight(in, workop, workishi, data))
                                     return 1;
                             }
                             break;
-                        case CPUI_INT_MULT:
+                        case OpCode.CPUI_INT_MULT:
                             {
                                 MultForm multform;
                                 if (multform.applyRule(in, workop, workishi, data))
                                     return 1;
                             }
                             break;
-                        case CPUI_MULTIEQUAL:
+                        case OpCode.CPUI_MULTIEQUAL:
                             {
                                 PhiForm phiform;
                                 if (phiform.applyRule(in, workop, workishi, data))
                                     return 1;
                             }
                             break;
-                        case CPUI_INDIRECT:
+                        case OpCode.CPUI_INDIRECT:
                             {
                                 IndirectForm indform;
                                 if (indform.applyRule(in, workop, workishi, data))

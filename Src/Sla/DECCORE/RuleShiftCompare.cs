@@ -53,14 +53,14 @@ namespace Sla.DECCORE
             if (!shiftvn.isWritten()) return 0;
             shiftop = shiftvn.getDef();
             opc = shiftop.code();
-            if (opc == CPUI_INT_LEFT)
+            if (opc == OpCode.CPUI_INT_LEFT)
             {
                 isleft = true;
                 savn = shiftop.getIn(1);
                 if (!savn.isConstant()) return 0;
                 sa = savn.getOffset();
             }
-            else if (opc == CPUI_INT_RIGHT)
+            else if (opc == OpCode.CPUI_INT_RIGHT)
             {
                 isleft = false;
                 savn = shiftop.getIn(1);
@@ -72,22 +72,22 @@ namespace Sla.DECCORE
                 // We only apply when we know we will eliminate a variable
                 if (shiftvn.loneDescend() != op) return 0;
             }
-            else if (opc == CPUI_INT_MULT)
+            else if (opc == OpCode.CPUI_INT_MULT)
             {
                 isleft = true;
                 savn = shiftop.getIn(1);
                 if (!savn.isConstant()) return 0;
                 ulong val = savn.getOffset();
-                sa = leastsigbit_set(val);
+                sa = Globals.leastsigbit_set(val);
                 if ((val >> sa) != (ulong)1) return 0; // Not multiplying by a power of 2
             }
-            else if (opc == CPUI_INT_DIV)
+            else if (opc == OpCode.CPUI_INT_DIV)
             {
                 isleft = false;
                 savn = shiftop.getIn(1);
                 if (!savn.isConstant()) return 0;
                 ulong val = savn.getOffset();
-                sa = leastsigbit_set(val);
+                sa = Globals.leastsigbit_set(val);
                 if ((val >> sa) != (ulong)1) return 0; // Not dividing by a power of 2
                 if (shiftvn.loneDescend() != op) return 0;
             }
@@ -115,7 +115,7 @@ namespace Sla.DECCORE
                     tmp = (((ulong)1) << sa) - 1;
                     Varnode* newmask = data.newConstant(constvn.getSize(), tmp);
                     PcodeOp* newop = data.newOp(2, op.getAddr());
-                    data.opSetOpcode(newop, CPUI_INT_AND);
+                    data.opSetOpcode(newop, OpCode.CPUI_INT_AND);
                     Varnode* newtmpvn = data.newUniqueOut(constvn.getSize(), newop);
                     data.opSetInput(newop, mainvn, 0);
                     data.opSetInput(newop, newmask, 1);

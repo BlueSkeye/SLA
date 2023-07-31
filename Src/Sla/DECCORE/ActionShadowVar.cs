@@ -8,7 +8,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla.DECCORE
 {
-    /// \brief Check for one CPUI_MULTIEQUAL input set defining more than one Varnode
+    /// \brief Check for one OpCode.CPUI_MULTIEQUAL input set defining more than one Varnode
     internal class ActionShadowVar
     {
         /// Constructor
@@ -45,7 +45,7 @@ namespace Sla.DECCORE
                 {
                     op = *iter++;
                     if (op.getAddr().getOffset() != startoffset) break;
-                    if (op.code() != CPUI_MULTIEQUAL) continue;
+                    if (op.code() != OpCode.CPUI_MULTIEQUAL) continue;
                     vn = op.getIn(0);
                     if (vn.isMark())
                         oplist.Add(op);
@@ -65,7 +65,7 @@ namespace Sla.DECCORE
                 PcodeOp* op2;
                 for (op2 = op.previousOp(); op2 != (PcodeOp)null; op2 = op2.previousOp())
                 {
-                    if (op2.code() != CPUI_MULTIEQUAL) continue;
+                    if (op2.code() != OpCode.CPUI_MULTIEQUAL) continue;
                     int i;
                     for (i = 0; i < op.numInput(); ++i) // Check for match in each branch
                         if (op.getIn(i) != op2.getIn(i)) break;
@@ -73,7 +73,7 @@ namespace Sla.DECCORE
 
                     List<Varnode*> plist;
                     plist.Add(op2.getOut());
-                    data.opSetOpcode(op, CPUI_COPY);
+                    data.opSetOpcode(op, OpCode.CPUI_COPY);
                     data.opSetAllInput(op, plist);
                     count += 1;
                 }

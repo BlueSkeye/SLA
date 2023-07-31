@@ -64,13 +64,13 @@ namespace Sla.DECCORE
                 if (param.isTypeLocked())
                 {
                     ct = param.getType();
-                    if (ct.getMetatype() != TYPE_VOID)
+                    if (ct.getMetatype() != type_metatype.TYPE_VOID)
                         return ct;
                 }
                 else if (param.isThisPointer())
                 {
                     ct = param.getType();
-                    if (ct.getMetatype() == TYPE_PTR && ((TypePointer*)ct).getPtrTo().getMetatype() == TYPE_STRUCT)
+                    if (ct.getMetatype() == type_metatype.TYPE_PTR && ((TypePointer*)ct).getPtrTo().getMetatype() == type_metatype.TYPE_STRUCT)
                         return ct;
                 }
             }
@@ -87,7 +87,7 @@ namespace Sla.DECCORE
                 return TypeOp::getOutputLocal(op);
             if (!fc.isOutputLocked()) return TypeOp::getOutputLocal(op);
             ct = fc.getOutputType();
-            if (ct.getMetatype() == TYPE_VOID) return TypeOp::getOutputLocal(op);
+            if (ct.getMetatype() == type_metatype.TYPE_VOID) return TypeOp::getOutputLocal(op);
             return ct;
         }
     }

@@ -39,7 +39,7 @@ namespace Sla.DECCORE
             if (!cvn1.isConstant()) return 0;
             if (!op.getIn(0).isWritten()) return 0;
             PcodeOp* addop = op.getIn(0).getDef();
-            if (addop.code() != CPUI_INT_ADD) return 0;
+            if (addop.code() != OpCode.CPUI_INT_ADD) return 0;
 
             ulong val = cvn1.getOffset();
             int size = cvn1.getSize();
@@ -55,7 +55,7 @@ namespace Sla.DECCORE
                 // addop.Input(0) must be unaffected by the AND
                 if ((mask1 & val) != mask1) return 0;
 
-                data.opSetOpcode(op, CPUI_INT_ADD);
+                data.opSetOpcode(op, OpCode.CPUI_INT_ADD);
                 data.opSetInput(op, xalign, 0);
                 val = val & cvn2.getOffset();
                 data.opSetInput(op, data.newConstant(size, val), 1);
@@ -72,7 +72,7 @@ namespace Sla.DECCORE
                     Varnode* nonzerovn = addop.getIn(1 - i);
                     if (!nonzerovn.isWritten()) continue;
                     PcodeOp* addop2 = nonzerovn.getDef();
-                    if (addop2.code() != CPUI_INT_ADD) continue;
+                    if (addop2.code() != OpCode.CPUI_INT_ADD) continue;
                     if (nonzerovn.loneDescend() != addop) continue;
                     cvn2 = addop2.getIn(1);
                     if (!cvn2.isConstant()) continue;
@@ -83,7 +83,7 @@ namespace Sla.DECCORE
                     data.opSetInput(addop2, data.newConstant(size, val), 1);
                     // Convert the AND to a COPY
                     data.opRemoveInput(op, 1);
-                    data.opSetOpcode(op, CPUI_COPY);
+                    data.opSetOpcode(op, OpCode.CPUI_COPY);
                     return 1;
                 }
             }

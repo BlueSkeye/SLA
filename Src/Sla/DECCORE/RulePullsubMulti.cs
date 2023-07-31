@@ -39,7 +39,7 @@ namespace Sla.DECCORE
             Varnode* vn = op.getIn(0);
             if (!vn.isWritten()) return 0;
             PcodeOp* mult = vn.getDef();
-            if (mult.code() != CPUI_MULTIEQUAL) return 0;
+            if (mult.code() != OpCode.CPUI_MULTIEQUAL) return 0;
             // We only pull up, do not pull "down" to bottom of loop
             if (mult.getParent().hasLoopIn()) return 0;
             minMaxUse(vn, maxByte, minByte);        // Figure out what part of -vn- is used
@@ -64,7 +64,7 @@ namespace Sla.DECCORE
                     {
                         PcodeOp* defOp = inVn.getDef();
                         OpCode opc = defOp.code();
-                        if (opc == CPUI_INT_ZEXT || opc == CPUI_INT_SEXT)
+                        if (opc == OpCode.CPUI_INT_ZEXT || opc == OpCode.CPUI_INT_SEXT)
                         {
                             if (newSize == defOp.getIn(0).getSize())
                                 continue;       // We have matching extension, so new SUBPIECE will cancel anyway
@@ -97,7 +97,7 @@ namespace Sla.DECCORE
             PcodeOp* new_multi = data.newOp (@params.size(), mult.getAddr());
             smalladdr2.renormalize(newSize);
             Varnode* new_vn = data.newVarnodeOut(newSize, smalladdr2, new_multi);
-            data.opSetOpcode(new_multi, CPUI_MULTIEQUAL);
+            data.opSetOpcode(new_multi, OpCode.CPUI_MULTIEQUAL);
             data.opSetAllInput(new_multi,@params);
             data.opInsertBegin(new_multi, mult.getParent());
 
@@ -124,7 +124,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* op = *iter;
                 OpCode opc = op.code();
-                if (opc == CPUI_SUBPIECE)
+                if (opc == OpCode.CPUI_SUBPIECE)
                 {
                     int min = (int)op.getIn(1).getOffset();
                     int max = min + op.getOut().getSize() - 1;
@@ -160,7 +160,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* op = *iter;
                 ++iter;
-                if (op.code() == CPUI_SUBPIECE)
+                if (op.code() == OpCode.CPUI_SUBPIECE)
                 {
                     int truncAmount = (int)op.getIn(1).getOffset();
                     int outSize = op.getOut().getSize();
@@ -169,7 +169,7 @@ namespace Sla.DECCORE
                     {
                         if (truncAmount != minByte)
                             throw new LowlevelError("Could not perform -replaceDescendants-");
-                        data.opSetOpcode(op, CPUI_COPY);
+                        data.opSetOpcode(op, OpCode.CPUI_COPY);
                         data.opRemoveInput(op, 1);
                     }
                     else if (newVn.getSize() > outSize)
@@ -266,7 +266,7 @@ namespace Sla.DECCORE
             }
             // Build new subpiece near definition of basevn
             new_op = data.newOp(2, newaddr);
-            data.opSetOpcode(new_op, CPUI_SUBPIECE);
+            data.opSetOpcode(new_op, OpCode.CPUI_SUBPIECE);
             if (usetmp)
                 outvn = data.newUniqueOut(outsize, new_op);
             else
@@ -300,7 +300,7 @@ namespace Sla.DECCORE
             for (iter = basevn.beginDescend(); iter != basevn.endDescend(); ++iter)
             {
                 prevop = *iter;
-                if (prevop.code() != CPUI_SUBPIECE) continue; // Find previous SUBPIECE
+                if (prevop.code() != OpCode.CPUI_SUBPIECE) continue; // Find previous SUBPIECE
                                                                // Make sure output is defined in same block as vn_piece
                 if (basevn.isInput() && (prevop.getParent().getIndex() != 0)) continue;
                 if (!basevn.isWritten()) continue;

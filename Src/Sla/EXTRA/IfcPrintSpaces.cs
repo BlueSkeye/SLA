@@ -17,7 +17,7 @@ namespace Sla.EXTRA
         /// to the console.
         public override void execute(TextReader s)
         {
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
 
             AddrSpaceManager manage = dcp.conf;

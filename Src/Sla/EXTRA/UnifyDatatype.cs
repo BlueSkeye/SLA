@@ -1,11 +1,4 @@
 ﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using static Sla.DECCORE.FlowBlock;
 using static Sla.DECCORE.TokenSplit;
 using static Sla.SLEIGH.ConstTpl;
@@ -16,7 +9,10 @@ namespace Sla.EXTRA
     {
         public enum TypeKind
         {
-            op_type, var_type, const_type, block_type
+            op_type,
+            var_type,
+            const_type,
+            block_type
         }
         
         private TypeKind type;
@@ -32,19 +28,18 @@ namespace Sla.EXTRA
 
         public UnifyDatatype()
         {
-            type = op_type;
+            type = TypeKind.op_type;
         }
 
-        public UnifyDatatype(uint tp)
+        public UnifyDatatype(UnifyDatatype.TypeKind tp)
         {
             type = tp;
-            switch (type)
-            {
-                case op_type:
-                case var_type:
-                case block_type:
+            switch (type) {
+                case TypeKind.op_type:
+                case TypeKind.var_type:
+                case TypeKind.block_type:
                     break;
-                case const_type:
+                case TypeKind.const_type:
                     storespot.cn = new ulong;
                     break;
                 default:
@@ -55,13 +50,12 @@ namespace Sla.EXTRA
         public UnifyDatatype(UnifyDatatype op2)
         {
             type = op2.type;
-            switch (type)
-            {
-                case op_type:
-                case var_type:
-                case block_type:
+            switch (type) {
+                case TypeKind.op_type:
+                case TypeKind.var_type:
+                case TypeKind.block_type:
                     break;
-                case const_type:
+                case TypeKind.const_type:
                     storespot.cn = new ulong; // Copy needs its own memory
                     break;
                 default:
@@ -71,26 +65,24 @@ namespace Sla.EXTRA
 
         public UnifyDatatype operator=(UnifyDatatype op2)
         {
-            switch (type)
-            {
-                case op_type:
-                case var_type:
-                case block_type:
+            switch (type) {
+                case TypeKind.op_type:
+                case TypeKind.var_type:
+                case TypeKind.block_type:
                     break;
-                case const_type:
+                case TypeKind.const_type:
                     delete storespot.cn;
                     break;
                 default:
                     throw new LowlevelError("Bad unify datatype");
             }
             type = op2.type;
-            switch (type)
-            {
-                case op_type:
-                case var_type:
-                case block_type:
+            switch (type) {
+                case TypeKind.op_type:
+                case TypeKind.var_type:
+                case TypeKind.block_type:
                     break;
-                case const_type:
+                case TypeKind.const_type:
                     storespot.cn = new ulong; // Copy needs its own memory
                     break;
                 default:
@@ -103,11 +95,11 @@ namespace Sla.EXTRA
         {
             switch (type)
             {
-                case op_type:
-                case var_type:
-                case block_type:
+                case TypeKind.op_type:
+                case TypeKind.var_type:
+                case TypeKind.block_type:
                     break;
-                case const_type:
+                case TypeKind.const_type:
                     delete storespot.cn;
                     break;
                 default:
@@ -115,7 +107,7 @@ namespace Sla.EXTRA
             }
         }
 
-        public uint getType() => type;
+        public TypeKind getType() => type;
 
         public void setOp(PcodeOp o)
         {
@@ -148,19 +140,18 @@ namespace Sla.EXTRA
         public void printVarDecl(TextWriter s, int id, UnifyCPrinter cprinter)
         {
             cprinter.printIndent(s);
-            switch (type)
-            {
-                case op_type:
-                    s << "PcodeOp *" << cprinter.getName(id) << ';' << endl;
+            switch (type) {
+                case TypeKind.op_type:
+                    s.WriteLine($"PcodeOp *{cprinter.getName(id)};");
                     break;
-                case var_type:
-                    s << "Varnode *" << cprinter.getName(id) << ';' << endl;
+                case TypeKind.var_type:
+                    s.WriteLine($"Varnode *{cprinter.getName(id)};");
                     break;
-                case block_type:
-                    s << "BlockBasic *" << cprinter.getName(id) << ';' << endl;
+                case TypeKind.block_type:
+                    s.WriteLine("BlockBasic *{cprinter.getName(id)};");
                     break;
-                case const_type:
-                    s << "ulong " << cprinter.getName(id) << ';' << endl;
+                case TypeKind.const_type:
+                    s.WriteLine($"ulong {cprinter.getName(id)};");
                     break;
                 default:
                     throw new LowlevelError("Bad unify datatype");
@@ -169,15 +160,14 @@ namespace Sla.EXTRA
 
         public string getBaseName()
         {
-            switch (type)
-            {
-                case op_type:
+            switch (type) {
+                case TypeKind.op_type:
                     return "op";
-                case var_type:
+                case TypeKind.var_type:
                     return "vn";
-                case block_type:
+                case TypeKind.block_type:
                     return "bl";
-                case const_type:
+                case TypeKind.const_type:
                     return "cn";
                 default:
                     throw new LowlevelError("Bad unify datatype");

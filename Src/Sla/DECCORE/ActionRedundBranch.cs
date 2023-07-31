@@ -22,7 +22,7 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            // Remove redundant branches, i.e. a CPUI_CBRANCH that falls thru and branches to the same place
+            // Remove redundant branches, i.e. a OpCode.CPUI_CBRANCH that falls thru and branches to the same place
             int i, j;
             BlockGraph graph = data.getBasicBlocks();
             BlockBasic* bb;

@@ -37,7 +37,7 @@ namespace Sla.DECCORE
             sextout = op.getIn(0);
             if (!sextout.isWritten()) return 0;
             sextop = sextout.getDef();
-            if (sextop.code() != CPUI_INT_SEXT)
+            if (sextop.code() != OpCode.CPUI_INT_SEXT)
                 return 0;
             a = sextop.getIn(0);
             int c = op.getIn(1).getOffset();
@@ -47,7 +47,7 @@ namespace Sla.DECCORE
             data.opSetInput(op, a, 0);
             int n = 8 * a.getSize() - 1;
             data.opSetInput(op, data.newConstant(4, n), 1);
-            data.opSetOpcode(op, CPUI_INT_SRIGHT);
+            data.opSetOpcode(op, OpCode.CPUI_INT_SRIGHT);
             return 1;
         }
     }

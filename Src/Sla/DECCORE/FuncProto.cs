@@ -242,7 +242,7 @@ namespace Sla.DECCORE
                 typelist.Add(typefactory.getTypeVoid());
             nmlist.Add("");
 
-            Datatype* extra = typefactory.getBase(4, TYPE_UNKNOWN); // The extra parameters have this type
+            Datatype* extra = typefactory.getBase(4, type_metatype.TYPE_UNKNOWN); // The extra parameters have this type
             for (int i = 0; i < paramshift; ++i)
             {
                 nmlist.Add("");
@@ -420,7 +420,7 @@ namespace Sla.DECCORE
             {
                 int expop = m.getExtraPop();
                 // If a model previously existed don't overwrite extrapop with unknown
-                if ((model == (ProtoModel*)0) || (expop != ProtoModel::extrapop_unknown))
+                if ((model == (ProtoModel*)0) || (expop != ProtoModel.extrapop_unknown))
                     extrapop = expop;
                 if (m.hasThisPointer())
                     flags |= has_thisptr;
@@ -431,7 +431,7 @@ namespace Sla.DECCORE
             else
             {
                 model = m;
-                extrapop = ProtoModel::extrapop_unknown;
+                extrapop = ProtoModel.extrapop_unknown;
             }
         }
 
@@ -798,7 +798,7 @@ namespace Sla.DECCORE
                         if (sz == vn.getSize())
                             pieces.type = vn.getHigh().getType();
                         else
-                            pieces.type = data.getArch().types.getBase(sz, TYPE_UNKNOWN);
+                            pieces.type = data.getArch().types.getBase(sz, type_metatype.TYPE_UNKNOWN);
                         pieces.flags = 0;
                     }
                     else
@@ -845,13 +845,13 @@ namespace Sla.DECCORE
                     {
                         int sz;
                         pieces.addr = data.findDisjointCover(vn, sz);
-                        pieces.type = factory.getBase(sz, TYPE_UNKNOWN);
+                        pieces.type = factory.getBase(sz, type_metatype.TYPE_UNKNOWN);
                         pieces.flags = 0;
                     }
                     else
                     {
                         pieces.addr = trial.getAddress();
-                        pieces.type = factory.getBase(vn.getSize(), TYPE_UNKNOWN);
+                        pieces.type = factory.getBase(vn.getSize(), type_metatype.TYPE_UNKNOWN);
                         pieces.flags = 0;
                     }
                     store.setInput(count, "", pieces);
@@ -916,7 +916,7 @@ namespace Sla.DECCORE
                 return;
             }
             ParameterPieces pieces;
-            pieces.type = factory.getBase(triallist[0].getSize(), TYPE_UNKNOWN);
+            pieces.type = factory.getBase(triallist[0].getSize(), type_metatype.TYPE_UNKNOWN);
             pieces.addr = triallist[0].getAddr();
             pieces.flags = 0;
             store.setOutput(pieces);
@@ -1114,7 +1114,7 @@ namespace Sla.DECCORE
             if (isOutputLocked())
             {
                 ProtoParameter* outparam = getOutput();
-                if (outparam.getType().getMetatype() == TYPE_VOID)
+                if (outparam.getType().getMetatype() == type_metatype.TYPE_VOID)
                     return ParamEntry::no_containment;
                 Address iaddr = outparam.getAddress();
                 // If the output is locked, the varnode must be justified in the location relative
@@ -1178,7 +1178,7 @@ namespace Sla.DECCORE
             if (isOutputLocked())
             {
                 ProtoParameter* outparam = getOutput();
-                if (outparam.getType().getMetatype() == TYPE_VOID)
+                if (outparam.getType().getMetatype() == type_metatype.TYPE_VOID)
                     return false;
                 Address iaddr = outparam.getAddress();
                 // If the output is locked, the varnode must be justified in the location relative
@@ -1327,7 +1327,7 @@ namespace Sla.DECCORE
             if (isOutputLocked())
             {
                 ProtoParameter* outparam = getOutput();
-                if (outparam.getType().getMetatype() == TYPE_VOID)
+                if (outparam.getType().getMetatype() == type_metatype.TYPE_VOID)
                     return false;
                 Address iaddr = outparam.getAddress();
                 if (iaddr.containedBy(outparam.getSize(), loc, size))
@@ -1384,7 +1384,7 @@ namespace Sla.DECCORE
                     if (*out1 != *out2) return false;
                 }
             }
-            if ((extrapop != ProtoModel::extrapop_unknown) &&
+            if ((extrapop != ProtoModel.extrapop_unknown) &&
                 (extrapop != op2.extrapop)) return false;
             if (isDotdotdot() != op2.isDotdotdot())
             { // Mismatch in varargs
@@ -1459,7 +1459,7 @@ namespace Sla.DECCORE
         {
             encoder.openElement(ELEM_PROTOTYPE);
             encoder.writeString(ATTRIB_MODEL, model.getName());
-            if (extrapop == ProtoModel::extrapop_unknown)
+            if (extrapop == ProtoModel.extrapop_unknown)
                 encoder.writeString(ATTRIB_EXTRAPOP, "unknown");
             else
                 encoder.writeSignedInteger(ATTRIB_EXTRAPOP, extrapop);
@@ -1535,7 +1535,7 @@ namespace Sla.DECCORE
                 else if (attribId == ATTRIB_EXTRAPOP)
                 {
                     seenextrapop = true;
-                    readextrapop = decoder.readSignedIntegerExpectString("unknown", ProtoModel::extrapop_unknown);
+                    readextrapop = decoder.readSignedIntegerExpectString("unknown", ProtoModel.extrapop_unknown);
                 }
                 else if (attribId == ATTRIB_MODELLOCK)
                 {
@@ -1689,11 +1689,11 @@ namespace Sla.DECCORE
                 if (isInputLocked())
                     flags |= modellock;
             }
-            if (extrapop == ProtoModel::extrapop_unknown)
+            if (extrapop == ProtoModel.extrapop_unknown)
                 resolveExtraPop();
 
             ProtoParameter* outparam = store.getOutput();
-            if ((outparam.getType().getMetatype() != TYPE_VOID) && outparam.getAddress().isInvalid())
+            if ((outparam.getType().getMetatype() != type_metatype.TYPE_VOID) && outparam.getAddress().isInvalid())
             {
                 throw new LowlevelError("<returnsym> tag must include a valid storage address");
             }

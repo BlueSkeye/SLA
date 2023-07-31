@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     /// \brief Adjust improperly justified parameters
     ///
     /// Scan through all inputs, find Varnodes that look like improperly justified input parameters
-    /// create a new full input, and change the old partial input to be formed as a CPUI_SUBPIECE of the
+    /// create a new full input, and change the old partial input to be formed as a OpCode.CPUI_SUBPIECE of the
     /// full input
     internal class ActionUnjustifiedParams : Action
     {

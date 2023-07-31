@@ -36,7 +36,7 @@ namespace Sla.DECCORE
                 if (!vn.isWritten()) continue; // Varnode must be written to
 
                 copyop = vn.getDef();
-                if (copyop.code() != CPUI_COPY)
+                if (copyop.code() != OpCode.CPUI_COPY)
                     continue;           // not a propagating instruction
 
                 invn = copyop.getIn(0);

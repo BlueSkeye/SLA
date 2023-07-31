@@ -17,7 +17,7 @@ namespace Sla.EXTRA
         /// the current function, which may vary depending on the state of it transformation.
         public override void execute(TextReader s)
         {
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("Image not loaded");
 
             if (dcp.fd == (Funcdata)null)

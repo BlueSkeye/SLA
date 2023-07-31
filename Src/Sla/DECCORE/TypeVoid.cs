@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     /// \brief Formal "void" data-type object.
     ///
     /// A placeholder for "no data-type".
-    /// This should be the only object with meta-type set to TYPE_VOID
+    /// This should be the only object with meta-type set to type_metatype.TYPE_VOID
     internal class TypeVoid : Datatype
     {
         // protected: friend class TypeFactory;
@@ -24,7 +24,7 @@ namespace Sla.DECCORE
         
         /// Constructor
         public TypeVoid()
-            : base(0, TYPE_VOID)
+            : base(0, type_metatype.TYPE_VOID)
         {
             name = "void";
             displayName = name;

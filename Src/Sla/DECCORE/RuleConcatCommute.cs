@@ -53,7 +53,7 @@ namespace Sla.DECCORE
                 if (!vn.isWritten()) continue;
                 logicop = vn.getDef();
                 opc = logicop.code();
-                if ((opc == CPUI_INT_OR) || (opc == CPUI_INT_XOR))
+                if ((opc == OpCode.CPUI_INT_OR) || (opc == OpCode.CPUI_INT_XOR))
                 {
                     if (!logicop.getIn(1).isConstant()) continue;
                     val = logicop.getIn(1).getOffset();
@@ -69,7 +69,7 @@ namespace Sla.DECCORE
                         lo = logicop.getIn(0);
                     }
                 }
-                else if (opc == CPUI_INT_AND)
+                else if (opc == OpCode.CPUI_INT_AND)
                 {
                     if (!logicop.getIn(1).isConstant()) continue;
                     val = logicop.getIn(1).getOffset();
@@ -92,7 +92,7 @@ namespace Sla.DECCORE
                 if (hi.isFree()) continue;
                 if (lo.isFree()) continue;
                 newconcat = data.newOp(2, op.getAddr());
-                data.opSetOpcode(newconcat, CPUI_PIECE);
+                data.opSetOpcode(newconcat, OpCode.CPUI_PIECE);
                 newvn = data.newUniqueOut(outsz, newconcat);
                 data.opSetInput(newconcat, hi, 0);
                 data.opSetInput(newconcat, lo, 1);

@@ -36,7 +36,7 @@ namespace Sla.DECCORE
             Varnode* vn = op.getIn(0);
             if (!vn.isWritten()) return 0;
             PcodeOp* indir = vn.getDef();
-            if (indir.code() != CPUI_INDIRECT) return 0;
+            if (indir.code() != OpCode.CPUI_INDIRECT) return 0;
             if (indir.getIn(1).getSpace().getType() != IPTR_IOP) return 0;
 
             PcodeOp* targ_op = PcodeOp::getOpFromConst(indir.getIn(1).getAddr());
@@ -77,7 +77,7 @@ namespace Sla.DECCORE
                     small1 = RulePullsubMulti::buildSubpiece(basevn, newSize, op.getIn(1).getOffset(), data);
                 // Create new indirect near original indirect
                 new_ind = data.newOp(2, indir.getAddr());
-                data.opSetOpcode(new_ind, CPUI_INDIRECT);
+                data.opSetOpcode(new_ind, OpCode.CPUI_INDIRECT);
                 small2 = data.newVarnodeOut(newSize, smalladdr2, new_ind);
                 data.opSetInput(new_ind, small1, 0);
                 data.opSetInput(new_ind, data.newVarnodeIop(targ_op), 1);

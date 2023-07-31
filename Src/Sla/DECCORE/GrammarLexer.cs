@@ -361,7 +361,7 @@ namespace Sla.DECCORE
 
         public void popFile()
         {
-            filestack.pop_back();
+            filestack.RemoveLastItem();
             if (filestack.empty())
             {
                 endoffile = true;

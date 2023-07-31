@@ -24,12 +24,12 @@ namespace Sla.DECCORE
         {
             switch (op.code())
             {
-                case CPUI_COPY:
-                case CPUI_MULTIEQUAL:
-                case CPUI_INT_ADD:
-                case CPUI_INDIRECT:
-                case CPUI_PTRSUB:
-                case CPUI_PTRADD:
+                case OpCode.CPUI_COPY:
+                case OpCode.CPUI_MULTIEQUAL:
+                case OpCode.CPUI_INT_ADD:
+                case OpCode.CPUI_INDIRECT:
+                case OpCode.CPUI_PTRSUB:
+                case OpCode.CPUI_PTRADD:
                     if (!op.isPtrFlow())
                     {
                         op.setPtrFlow();
@@ -97,7 +97,7 @@ namespace Sla.DECCORE
         {
             Varnode* newvn;
             PcodeOp* truncop = data.newOp(2, op.getAddr());
-            data.opSetOpcode(truncop, CPUI_SUBPIECE);
+            data.opSetOpcode(truncop, OpCode.CPUI_SUBPIECE);
             data.opSetInput(truncop, data.newConstant(vn.getSize(), 0), 1);
             if (vn.getSpace().getType() == IPTR_INTERNAL)
             {
@@ -159,8 +159,8 @@ namespace Sla.DECCORE
 
             switch (op.code())
             {
-                case CPUI_LOAD:
-                case CPUI_STORE:
+                case OpCode.CPUI_LOAD:
+                case OpCode.CPUI_STORE:
                     vn = op.getIn(1);
                     spc = op.getIn(0).getSpaceFromConst();
                     if (vn.getSize() > spc.getAddrSize())
@@ -171,8 +171,8 @@ namespace Sla.DECCORE
                     if (propagateFlowToDef(vn))
                         madeChange = 1;
                     break;
-                case CPUI_CALLIND:
-                case CPUI_BRANCHIND:
+                case OpCode.CPUI_CALLIND:
+                case OpCode.CPUI_BRANCHIND:
                     vn = op.getIn(0);
                     spc = data.getArch().getDefaultCodeSpace();
                     if (vn.getSize() > spc.getAddrSize())
@@ -183,12 +183,12 @@ namespace Sla.DECCORE
                     if (propagateFlowToDef(vn))
                         madeChange = 1;
                     break;
-                case CPUI_NEW:
+                case OpCode.CPUI_NEW:
                     vn = op.getOut();
                     if (propagateFlowToReads(vn))
                         madeChange = 1;
                     break;
-                case CPUI_INDIRECT:
+                case OpCode.CPUI_INDIRECT:
                     if (!op.isPtrFlow()) return 0;
                     vn = op.getOut();
                     if (propagateFlowToReads(vn))
@@ -197,9 +197,9 @@ namespace Sla.DECCORE
                     if (propagateFlowToDef(vn))
                         madeChange = 1;
                     break;
-                case CPUI_COPY:
-                case CPUI_PTRSUB:
-                case CPUI_PTRADD:
+                case OpCode.CPUI_COPY:
+                case OpCode.CPUI_PTRSUB:
+                case OpCode.CPUI_PTRADD:
                     if (!op.isPtrFlow()) return 0;
                     vn = op.getOut();
                     if (propagateFlowToReads(vn))
@@ -208,8 +208,8 @@ namespace Sla.DECCORE
                     if (propagateFlowToDef(vn))
                         madeChange = 1;
                     break;
-                case CPUI_MULTIEQUAL:
-                case CPUI_INT_ADD:
+                case OpCode.CPUI_MULTIEQUAL:
+                case OpCode.CPUI_INT_ADD:
                     if (!op.isPtrFlow()) return 0;
                     vn = op.getOut();
                     if (propagateFlowToReads(vn))

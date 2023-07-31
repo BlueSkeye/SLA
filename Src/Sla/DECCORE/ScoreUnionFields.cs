@@ -146,7 +146,7 @@ namespace Sla.DECCORE
         /// \return \b true if \b op is doing array arithmetic with elements at least as large as the union
         private bool testArrayArithmetic(PcodeOp op, int inslot)
         {
-            if (op.code() == CPUI_INT_ADD)
+            if (op.code() == OpCode.CPUI_INT_ADD)
             {
                 Varnode* vn = op.getIn(1 - inslot);
                 if (vn.isConstant())
@@ -157,7 +157,7 @@ namespace Sla.DECCORE
                 else if (vn.isWritten())
                 {
                     PcodeOp* multOp = vn.getDef();
-                    if (multOp.code() == CPUI_INT_MULT)
+                    if (multOp.code() == OpCode.CPUI_INT_MULT)
                     {
                         Varnode* vn2 = multOp.getIn(1);
                         if (vn2.isConstant() && vn2.getOffset() >= result.baseType.getSize())
@@ -165,7 +165,7 @@ namespace Sla.DECCORE
                     }
                 }
             }
-            else if (op.code() == CPUI_PTRADD)
+            else if (op.code() == OpCode.CPUI_PTRADD)
             {
                 Varnode* vn = op.getIn(2);
                 if (vn.getOffset() >= result.baseType.getSize())
@@ -184,14 +184,14 @@ namespace Sla.DECCORE
         {
             if (op.isMarker())
                 return true;        // Propagate raw union across MULTIEQUAL and INDIRECT
-            if (parent.getMetatype() == TYPE_PTR)
+            if (parent.getMetatype() == type_metatype.TYPE_PTR)
             {
                 if (inslot < 0)
                     return true;        // Don't resolve pointers "up", there's only 1 possibility for assignment
                 if (testArrayArithmetic(op, inslot))
                     return true;
             }
-            if (op.code() != CPUI_COPY)
+            if (op.code() != OpCode.CPUI_COPY)
                 return false;       // A more complicated case
             if (inslot < 0)
                 return false;       // Generally we don't want to propagate union backward thru COPY
@@ -213,9 +213,9 @@ namespace Sla.DECCORE
             if (lockType == ct)
                 score += 5;     // Perfect match
 
-            while (ct.getMetatype() == TYPE_PTR)
+            while (ct.getMetatype() == type_metatype.TYPE_PTR)
             {
-                if (lockType.getMetatype() != TYPE_PTR) break;
+                if (lockType.getMetatype() != type_metatype.TYPE_PTR) break;
                 score += 5;
                 ct = ((TypePointer*)ct).getPtrTo();
                 lockType = ((TypePointer*)lockType).getPtrTo();
@@ -225,14 +225,14 @@ namespace Sla.DECCORE
             type_metatype vnMeta = lockType.getMetatype();
             if (ctMeta == vnMeta)
             {
-                if (ctMeta == TYPE_STRUCT || ctMeta == TYPE_UNION || ctMeta == TYPE_ARRAY || ctMeta == TYPE_CODE)
+                if (ctMeta == type_metatype.TYPE_STRUCT || ctMeta == type_metatype.TYPE_UNION || ctMeta == type_metatype.TYPE_ARRAY || ctMeta == type_metatype.TYPE_CODE)
                     score += 10;
                 else
                     score += 3;
             }
             else
             {
-                if ((ctMeta == TYPE_INT && vnMeta == TYPE_UINT) || (ctMeta == TYPE_UINT && vnMeta == TYPE_INT))
+                if ((ctMeta == type_metatype.TYPE_INT && vnMeta == type_metatype.TYPE_UINT) || (ctMeta == type_metatype.TYPE_UINT && vnMeta == type_metatype.TYPE_INT))
                     score -= 1;
                 else
                     score -= 5;
@@ -259,7 +259,7 @@ namespace Sla.DECCORE
                 return scoreLockedType(ct, fc.getParam(paramSlot).getType());
             }
             type_metatype meta = ct.getMetatype();
-            if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE)
+            if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE)
                 return -1;      // Vaguely unlikely thing to pass as a param
             return 0;
         }
@@ -280,7 +280,7 @@ namespace Sla.DECCORE
                 return scoreLockedType(ct, fc.getOutputType());
             }
             type_metatype meta = ct.getMetatype();
-            if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE)
+            if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE)
                 return -1;      // Vaguely unlikely thing to return from a function
             return 0;
         }
@@ -298,7 +298,7 @@ namespace Sla.DECCORE
         {
             Datatype* resType = (Datatype)null;
             score = 0;
-            if (ct.getMetatype() == TYPE_PTR)
+            if (ct.getMetatype() == type_metatype.TYPE_PTR)
             {
                 Datatype* ptrto = ((TypePointer*)ct).getPtrTo();
                 while (ptrto != (Datatype)null && ptrto.getSize() > vn.getSize())
@@ -388,15 +388,15 @@ namespace Sla.DECCORE
             int score = 0;
             switch (trial.op.code())
             {
-                case CPUI_COPY:
-                case CPUI_MULTIEQUAL:
-                case CPUI_INDIRECT:
+                case OpCode.CPUI_COPY:
+                case OpCode.CPUI_MULTIEQUAL:
+                case OpCode.CPUI_INDIRECT:
                     resType = trial.fitType;        // No score, but we can propagate
                     break;
-                case CPUI_LOAD:
+                case OpCode.CPUI_LOAD:
                     resType = derefPointer(trial.fitType, trial.op.getOut(), score);
                     break;
-                case CPUI_STORE:
+                case OpCode.CPUI_STORE:
                     if (trial.inslot == 1)
                     {
                         Datatype* ptrto = derefPointer(trial.fitType, trial.op.getIn(2), score);
@@ -408,37 +408,37 @@ namespace Sla.DECCORE
                     }
                     else if (trial.inslot == 2)
                     {
-                        if (meta == TYPE_CODE)
+                        if (meta == type_metatype.TYPE_CODE)
                             score = -5;
                         else
                             score = 1;
                     }
                     break;
-                case CPUI_CBRANCH:
-                    if (meta == TYPE_BOOL)
+                case OpCode.CPUI_CBRANCH:
+                    if (meta == type_metatype.TYPE_BOOL)
                         score = 10;
                     else
                         score = -10;
                     break;
-                case CPUI_BRANCHIND:
-                    if (meta == TYPE_PTR || meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION ||
-                    meta == TYPE_CODE || meta == TYPE_FLOAT)
+                case OpCode.CPUI_BRANCHIND:
+                    if (meta == type_metatype.TYPE_PTR || meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION ||
+                    meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -5;
                     else
                         score = 1;
                     break;
-                case CPUI_CALL:
-                case CPUI_CALLOTHER:
+                case OpCode.CPUI_CALL:
+                case OpCode.CPUI_CALLOTHER:
                     if (trial.inslot > 0)
                         score = scoreParameter(trial.fitType, trial.op, trial.inslot - 1);
                     break;
-                case CPUI_CALLIND:
+                case OpCode.CPUI_CALLIND:
                     if (trial.inslot == 0)
                     {
-                        if (meta == TYPE_PTR)
+                        if (meta == type_metatype.TYPE_PTR)
                         {
                             Datatype* ptrto = ((TypePointer*)trial.fitType).getPtrTo();
-                            if (ptrto.getMetatype() == TYPE_CODE)
+                            if (ptrto.getMetatype() == type_metatype.TYPE_CODE)
                             {
                                 score = 10;
                             }
@@ -453,63 +453,63 @@ namespace Sla.DECCORE
                         score = scoreParameter(trial.fitType, trial.op, trial.inslot - 1);
                     }
                     break;
-                case CPUI_RETURN:
+                case OpCode.CPUI_RETURN:
                     // We could check for locked return data-type
-                    if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE)
+                    if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE)
                         score = -1;
                     break;
-                case CPUI_INT_EQUAL:
-                case CPUI_INT_NOTEQUAL:
-                    if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                case OpCode.CPUI_INT_EQUAL:
+                case OpCode.CPUI_INT_NOTEQUAL:
+                    if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -1;
                     else
                         score = 1;
                     break;
-                case CPUI_INT_SLESS:
-                case CPUI_INT_SLESSEQUAL:
-                case CPUI_INT_SCARRY:
-                case CPUI_INT_SBORROW:
-                    if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                case OpCode.CPUI_INT_SLESS:
+                case OpCode.CPUI_INT_SLESSEQUAL:
+                case OpCode.CPUI_INT_SCARRY:
+                case OpCode.CPUI_INT_SBORROW:
+                    if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -5;
-                    else if (meta == TYPE_PTR || meta == TYPE_UNKNOWN || meta == TYPE_UINT || meta == TYPE_BOOL)
+                    else if (meta == type_metatype.TYPE_PTR || meta == type_metatype.TYPE_UNKNOWN || meta == type_metatype.TYPE_UINT || meta == type_metatype.TYPE_BOOL)
                         score = -1;
                     else
                         score = 5;
                     break;
-                case CPUI_INT_LESS:
-                case CPUI_INT_LESSEQUAL:
-                case CPUI_INT_CARRY:
-                    if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                case OpCode.CPUI_INT_LESS:
+                case OpCode.CPUI_INT_LESSEQUAL:
+                case OpCode.CPUI_INT_CARRY:
+                    if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -5;
-                    else if (meta == TYPE_PTR || meta == TYPE_UNKNOWN || meta == TYPE_UINT)
+                    else if (meta == type_metatype.TYPE_PTR || meta == type_metatype.TYPE_UNKNOWN || meta == type_metatype.TYPE_UINT)
                         score = 5;
-                    else if (meta == TYPE_INT)
+                    else if (meta == type_metatype.TYPE_INT)
                         score = -5;
                     break;
-                case CPUI_INT_ZEXT:
-                    if (meta == TYPE_UINT)
+                case OpCode.CPUI_INT_ZEXT:
+                    if (meta == type_metatype.TYPE_UINT)
                         score = 2;
-                    else if (meta == TYPE_INT || meta == TYPE_BOOL)
+                    else if (meta == type_metatype.TYPE_INT || meta == type_metatype.TYPE_BOOL)
                         score = 1;
-                    else if (meta == TYPE_UNKNOWN)
+                    else if (meta == type_metatype.TYPE_UNKNOWN)
                         score = 0;
                     else    // struct,union,ptr,array,code,float
                         score = -5;
                     break;
-                case CPUI_INT_SEXT:
-                    if (meta == TYPE_INT)
+                case OpCode.CPUI_INT_SEXT:
+                    if (meta == type_metatype.TYPE_INT)
                         score = 2;
-                    else if (meta == TYPE_UINT || meta == TYPE_BOOL)
+                    else if (meta == type_metatype.TYPE_UINT || meta == type_metatype.TYPE_BOOL)
                         score = 1;
-                    else if (meta == TYPE_UNKNOWN)
+                    else if (meta == type_metatype.TYPE_UNKNOWN)
                         score = 0;
                     else    // struct,union,ptr,array,code,float
                         score = -5;
                     break;
-                case CPUI_INT_ADD:
-                case CPUI_INT_SUB:
-                case CPUI_PTRSUB:
-                    if (meta == TYPE_PTR)
+                case OpCode.CPUI_INT_ADD:
+                case OpCode.CPUI_INT_SUB:
+                case OpCode.CPUI_PTRSUB:
+                    if (meta == type_metatype.TYPE_PTR)
                     {
                         if (trial.inslot >= 0)
                         {
@@ -533,7 +533,7 @@ namespace Sla.DECCORE
                                     if (vn.isWritten())
                                     {
                                         PcodeOp* multOp = vn.getDef();
-                                        if (multOp.code() == CPUI_INT_MULT)
+                                        if (multOp.code() == OpCode.CPUI_INT_MULT)
                                         {
                                             Varnode* multVn = multOp.getIn(1);
                                             if (multVn.isConstant())
@@ -552,150 +552,150 @@ namespace Sla.DECCORE
                             }
                         }
                     }
-                    else if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                    else if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -5;
                     else
                         score = 1;
                     break;
-                case CPUI_INT_2COMP:
-                    if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                case OpCode.CPUI_INT_2COMP:
+                    if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -5;
-                    else if (meta == TYPE_PTR || meta == TYPE_UNKNOWN || meta == TYPE_BOOL)
+                    else if (meta == type_metatype.TYPE_PTR || meta == type_metatype.TYPE_UNKNOWN || meta == type_metatype.TYPE_BOOL)
                         score = -1;
-                    else if (meta == TYPE_INT)
+                    else if (meta == type_metatype.TYPE_INT)
                         score = 5;
                     break;
-                case CPUI_INT_NEGATE:
-                case CPUI_INT_XOR:
-                case CPUI_INT_AND:
-                case CPUI_INT_OR:
-                case CPUI_POPCOUNT:
-                case CPUI_LZCOUNT:
-                    if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                case OpCode.CPUI_INT_NEGATE:
+                case OpCode.CPUI_INT_XOR:
+                case OpCode.CPUI_INT_AND:
+                case OpCode.CPUI_INT_OR:
+                case OpCode.CPUI_POPCOUNT:
+                case OpCode.CPUI_LZCOUNT:
+                    if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -5;
-                    else if (meta == TYPE_PTR || meta == TYPE_BOOL)
+                    else if (meta == type_metatype.TYPE_PTR || meta == type_metatype.TYPE_BOOL)
                         score = -1;
-                    else if (meta == TYPE_UINT || meta == TYPE_UNKNOWN)
+                    else if (meta == type_metatype.TYPE_UINT || meta == type_metatype.TYPE_UNKNOWN)
                         score = 2;
                     break;
-                case CPUI_INT_LEFT:
-                case CPUI_INT_RIGHT:
+                case OpCode.CPUI_INT_LEFT:
+                case OpCode.CPUI_INT_RIGHT:
                     if (trial.inslot == 0)
                     {
-                        if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                        if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                             score = -5;
-                        else if (meta == TYPE_PTR || meta == TYPE_BOOL)
+                        else if (meta == type_metatype.TYPE_PTR || meta == type_metatype.TYPE_BOOL)
                             score = -1;
-                        else if (meta == TYPE_UINT || meta == TYPE_UNKNOWN)
+                        else if (meta == type_metatype.TYPE_UINT || meta == type_metatype.TYPE_UNKNOWN)
                             score = 2;
                     }
                     else
                     {
-                        if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE ||
-                            meta == TYPE_FLOAT || meta == TYPE_PTR)
+                        if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE ||
+                            meta == type_metatype.TYPE_FLOAT || meta == type_metatype.TYPE_PTR)
                             score = -5;
                         else
                             score = 1;
                     }
                     break;
-                case CPUI_INT_SRIGHT:
+                case OpCode.CPUI_INT_SRIGHT:
                     if (trial.inslot == 0)
                     {
-                        if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                        if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                             score = -5;
-                        else if (meta == TYPE_PTR || meta == TYPE_BOOL || meta == TYPE_UINT || meta == TYPE_UNKNOWN)
+                        else if (meta == type_metatype.TYPE_PTR || meta == type_metatype.TYPE_BOOL || meta == type_metatype.TYPE_UINT || meta == type_metatype.TYPE_UNKNOWN)
                             score = -1;
                         else
                             score = 2;
                     }
                     else
                     {
-                        if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE ||
-                            meta == TYPE_FLOAT || meta == TYPE_PTR)
+                        if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE ||
+                            meta == type_metatype.TYPE_FLOAT || meta == type_metatype.TYPE_PTR)
                             score = -5;
                         else
                             score = 1;
                     }
                     break;
-                case CPUI_INT_MULT:
-                    if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                case OpCode.CPUI_INT_MULT:
+                    if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -10;
-                    else if (meta == TYPE_PTR || meta == TYPE_BOOL)
+                    else if (meta == type_metatype.TYPE_PTR || meta == type_metatype.TYPE_BOOL)
                         score = -2;
                     else
                         score = 5;
                     break;
-                case CPUI_INT_DIV:
-                case CPUI_INT_REM:
-                    if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                case OpCode.CPUI_INT_DIV:
+                case OpCode.CPUI_INT_REM:
+                    if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -10;
-                    else if (meta == TYPE_PTR || meta == TYPE_BOOL)
+                    else if (meta == type_metatype.TYPE_PTR || meta == type_metatype.TYPE_BOOL)
                         score = -2;
-                    else if (meta == TYPE_UINT || meta == TYPE_UNKNOWN)
+                    else if (meta == type_metatype.TYPE_UINT || meta == type_metatype.TYPE_UNKNOWN)
                         score = 5;
                     break;
-                case CPUI_INT_SDIV:
-                case CPUI_INT_SREM:
-                    if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                case OpCode.CPUI_INT_SDIV:
+                case OpCode.CPUI_INT_SREM:
+                    if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -10;
-                    else if (meta == TYPE_PTR || meta == TYPE_BOOL)
+                    else if (meta == type_metatype.TYPE_PTR || meta == type_metatype.TYPE_BOOL)
                         score = -2;
-                    else if (meta == TYPE_INT)
+                    else if (meta == type_metatype.TYPE_INT)
                         score = 5;
                     break;
-                case CPUI_BOOL_NEGATE:
-                case CPUI_BOOL_AND:
-                case CPUI_BOOL_XOR:
-                case CPUI_BOOL_OR:
-                    if (meta == TYPE_BOOL)
+                case OpCode.CPUI_BOOL_NEGATE:
+                case OpCode.CPUI_BOOL_AND:
+                case OpCode.CPUI_BOOL_XOR:
+                case OpCode.CPUI_BOOL_OR:
+                    if (meta == type_metatype.TYPE_BOOL)
                         score = 10;
-                    else if (meta == TYPE_INT || meta == TYPE_UINT || meta == TYPE_UNKNOWN)
+                    else if (meta == type_metatype.TYPE_INT || meta == type_metatype.TYPE_UINT || meta == type_metatype.TYPE_UNKNOWN)
                         score = -1;
                     else
                         score = -10;
                     break;
-                case CPUI_FLOAT_EQUAL:
-                case CPUI_FLOAT_NOTEQUAL:
-                case CPUI_FLOAT_LESS:
-                case CPUI_FLOAT_LESSEQUAL:
-                case CPUI_FLOAT_NAN:
-                case CPUI_FLOAT_ADD:
-                case CPUI_FLOAT_DIV:
-                case CPUI_FLOAT_MULT:
-                case CPUI_FLOAT_SUB:
-                case CPUI_FLOAT_NEG:
-                case CPUI_FLOAT_ABS:
-                case CPUI_FLOAT_SQRT:
-                case CPUI_FLOAT_FLOAT2FLOAT:
-                case CPUI_FLOAT_TRUNC:
-                case CPUI_FLOAT_CEIL:
-                case CPUI_FLOAT_FLOOR:
-                case CPUI_FLOAT_ROUND:
-                    if (meta == TYPE_FLOAT)
+                case OpCode.CPUI_FLOAT_EQUAL:
+                case OpCode.CPUI_FLOAT_NOTEQUAL:
+                case OpCode.CPUI_FLOAT_LESS:
+                case OpCode.CPUI_FLOAT_LESSEQUAL:
+                case OpCode.CPUI_FLOAT_NAN:
+                case OpCode.CPUI_FLOAT_ADD:
+                case OpCode.CPUI_FLOAT_DIV:
+                case OpCode.CPUI_FLOAT_MULT:
+                case OpCode.CPUI_FLOAT_SUB:
+                case OpCode.CPUI_FLOAT_NEG:
+                case OpCode.CPUI_FLOAT_ABS:
+                case OpCode.CPUI_FLOAT_SQRT:
+                case OpCode.CPUI_FLOAT_FLOAT2FLOAT:
+                case OpCode.CPUI_FLOAT_TRUNC:
+                case OpCode.CPUI_FLOAT_CEIL:
+                case OpCode.CPUI_FLOAT_FLOOR:
+                case OpCode.CPUI_FLOAT_ROUND:
+                    if (meta == type_metatype.TYPE_FLOAT)
                         score = 10;
                     else
                         score = -10;
                     break;
-                case CPUI_FLOAT_INT2FLOAT:
-                    if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                case OpCode.CPUI_FLOAT_INT2FLOAT:
+                    if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -10;
-                    else if (meta == TYPE_PTR)
+                    else if (meta == type_metatype.TYPE_PTR)
                         score = -5;
-                    else if (meta == TYPE_INT)
+                    else if (meta == type_metatype.TYPE_INT)
                         score = 5;
                     break;
-                case CPUI_PIECE:
-                    if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                case OpCode.CPUI_PIECE:
+                    if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -5;
                     break;
-                case CPUI_SUBPIECE:
+                case OpCode.CPUI_SUBPIECE:
                     {
                         int offset = TypeOpSubpiece::computeByteOffsetForComposite(trial.op);
                         resType = scoreTruncation(trial.fitType, trial.op.getOut(), offset, trial.scoreIndex);
                         break;
                     }
-                case CPUI_PTRADD:
-                    if (meta == TYPE_PTR)
+                case OpCode.CPUI_PTRADD:
+                    if (meta == type_metatype.TYPE_PTR)
                     {
                         if (trial.inslot == 0)
                         {
@@ -711,25 +711,25 @@ namespace Sla.DECCORE
                             score = -10;
                         }
                     }
-                    else if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                    else if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -5;
                     else
                         score = 1;
                     break;
-                case CPUI_SEGMENTOP:
+                case OpCode.CPUI_SEGMENTOP:
                     if (trial.inslot == 2)
                     {
-                        if (meta == TYPE_PTR)
+                        if (meta == type_metatype.TYPE_PTR)
                             score = 5;
-                        else if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                        else if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                             score = -5;
                         else
                             score = -1;
                     }
                     else
                     {
-                        if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT ||
-                            meta == TYPE_PTR)
+                        if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT ||
+                            meta == type_metatype.TYPE_PTR)
                             score = -2;
                     }
                     break;
@@ -760,153 +760,153 @@ namespace Sla.DECCORE
             PcodeOp* def = trial.vn.getDef();
             switch (def.code())
             {
-                case CPUI_COPY:
-                case CPUI_MULTIEQUAL:
-                case CPUI_INDIRECT:
+                case OpCode.CPUI_COPY:
+                case OpCode.CPUI_MULTIEQUAL:
+                case OpCode.CPUI_INDIRECT:
                     resType = trial.fitType;        // No score, but we can propagate
                     newslot = 0;
                     break;
-                case CPUI_LOAD:
+                case OpCode.CPUI_LOAD:
                     resType = typegrp.getTypePointer(def.getIn(1).getSize(), trial.fitType, 1);
                     newslot = 1;    // No score, but we can propagate
                     break;
-                case CPUI_CALL:
-                case CPUI_CALLOTHER:
-                case CPUI_CALLIND:
+                case OpCode.CPUI_CALL:
+                case OpCode.CPUI_CALLOTHER:
+                case OpCode.CPUI_CALLIND:
                     score = scoreReturnType(trial.fitType, def);
                     break;
-                case CPUI_INT_EQUAL:
-                case CPUI_INT_NOTEQUAL:
-                case CPUI_INT_SLESS:
-                case CPUI_INT_SLESSEQUAL:
-                case CPUI_INT_SCARRY:
-                case CPUI_INT_SBORROW:
-                case CPUI_INT_LESS:
-                case CPUI_INT_LESSEQUAL:
-                case CPUI_INT_CARRY:
-                case CPUI_BOOL_NEGATE:
-                case CPUI_BOOL_AND:
-                case CPUI_BOOL_XOR:
-                case CPUI_BOOL_OR:
-                case CPUI_FLOAT_EQUAL:
-                case CPUI_FLOAT_NOTEQUAL:
-                case CPUI_FLOAT_LESS:
-                case CPUI_FLOAT_LESSEQUAL:
-                case CPUI_FLOAT_NAN:
-                    if (meta == TYPE_BOOL)
+                case OpCode.CPUI_INT_EQUAL:
+                case OpCode.CPUI_INT_NOTEQUAL:
+                case OpCode.CPUI_INT_SLESS:
+                case OpCode.CPUI_INT_SLESSEQUAL:
+                case OpCode.CPUI_INT_SCARRY:
+                case OpCode.CPUI_INT_SBORROW:
+                case OpCode.CPUI_INT_LESS:
+                case OpCode.CPUI_INT_LESSEQUAL:
+                case OpCode.CPUI_INT_CARRY:
+                case OpCode.CPUI_BOOL_NEGATE:
+                case OpCode.CPUI_BOOL_AND:
+                case OpCode.CPUI_BOOL_XOR:
+                case OpCode.CPUI_BOOL_OR:
+                case OpCode.CPUI_FLOAT_EQUAL:
+                case OpCode.CPUI_FLOAT_NOTEQUAL:
+                case OpCode.CPUI_FLOAT_LESS:
+                case OpCode.CPUI_FLOAT_LESSEQUAL:
+                case OpCode.CPUI_FLOAT_NAN:
+                    if (meta == type_metatype.TYPE_BOOL)
                         score = 10;
                     else if (trial.fitType.getSize() == 1)
                         score = 1;
                     else
                         score = -10;
                     break;
-                case CPUI_INT_ADD:
-                case CPUI_INT_SUB:
-                case CPUI_PTRSUB:
-                    if (meta == TYPE_PTR)
+                case OpCode.CPUI_INT_ADD:
+                case OpCode.CPUI_INT_SUB:
+                case OpCode.CPUI_PTRSUB:
+                    if (meta == type_metatype.TYPE_PTR)
                     {
                         score = 5;  // Don't try to back up further
                     }
-                    else if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                    else if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -5;
                     else
                         score = 1;
                     break;
-                case CPUI_INT_2COMP:
-                    if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                case OpCode.CPUI_INT_2COMP:
+                    if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -5;
-                    else if (meta == TYPE_PTR || meta == TYPE_UNKNOWN || meta == TYPE_BOOL)
+                    else if (meta == type_metatype.TYPE_PTR || meta == type_metatype.TYPE_UNKNOWN || meta == type_metatype.TYPE_BOOL)
                         score = -1;
-                    else if (meta == TYPE_INT)
+                    else if (meta == type_metatype.TYPE_INT)
                         score = 5;
                     break;
-                case CPUI_INT_NEGATE:
-                case CPUI_INT_XOR:
-                case CPUI_INT_AND:
-                case CPUI_INT_OR:
-                case CPUI_POPCOUNT:
-                case CPUI_LZCOUNT:
-                    if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                case OpCode.CPUI_INT_NEGATE:
+                case OpCode.CPUI_INT_XOR:
+                case OpCode.CPUI_INT_AND:
+                case OpCode.CPUI_INT_OR:
+                case OpCode.CPUI_POPCOUNT:
+                case OpCode.CPUI_LZCOUNT:
+                    if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -5;
-                    else if (meta == TYPE_PTR || meta == TYPE_BOOL)
+                    else if (meta == type_metatype.TYPE_PTR || meta == type_metatype.TYPE_BOOL)
                         score = -1;
-                    else if (meta == TYPE_UINT || meta == TYPE_UNKNOWN)
+                    else if (meta == type_metatype.TYPE_UINT || meta == type_metatype.TYPE_UNKNOWN)
                         score = 2;
                     break;
-                case CPUI_INT_LEFT:
-                case CPUI_INT_RIGHT:
-                    if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                case OpCode.CPUI_INT_LEFT:
+                case OpCode.CPUI_INT_RIGHT:
+                    if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -5;
-                    else if (meta == TYPE_PTR || meta == TYPE_BOOL)
+                    else if (meta == type_metatype.TYPE_PTR || meta == type_metatype.TYPE_BOOL)
                         score = -1;
-                    else if (meta == TYPE_UINT || meta == TYPE_UNKNOWN)
+                    else if (meta == type_metatype.TYPE_UINT || meta == type_metatype.TYPE_UNKNOWN)
                         score = 2;
                     break;
-                case CPUI_INT_SRIGHT:
-                    if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                case OpCode.CPUI_INT_SRIGHT:
+                    if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -5;
-                    else if (meta == TYPE_PTR || meta == TYPE_BOOL || meta == TYPE_UINT || meta == TYPE_UNKNOWN)
+                    else if (meta == type_metatype.TYPE_PTR || meta == type_metatype.TYPE_BOOL || meta == type_metatype.TYPE_UINT || meta == type_metatype.TYPE_UNKNOWN)
                         score = -1;
                     else
                         score = 2;
                     break;
-                case CPUI_INT_MULT:
-                    if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                case OpCode.CPUI_INT_MULT:
+                    if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -10;
-                    else if (meta == TYPE_PTR || meta == TYPE_BOOL)
+                    else if (meta == type_metatype.TYPE_PTR || meta == type_metatype.TYPE_BOOL)
                         score = -2;
                     else
                         score = 5;
                     break;
-                case CPUI_INT_DIV:
-                case CPUI_INT_REM:
-                    if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                case OpCode.CPUI_INT_DIV:
+                case OpCode.CPUI_INT_REM:
+                    if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -10;
-                    else if (meta == TYPE_PTR || meta == TYPE_BOOL)
+                    else if (meta == type_metatype.TYPE_PTR || meta == type_metatype.TYPE_BOOL)
                         score = -2;
-                    else if (meta == TYPE_UINT || meta == TYPE_UNKNOWN)
+                    else if (meta == type_metatype.TYPE_UINT || meta == type_metatype.TYPE_UNKNOWN)
                         score = 5;
                     break;
-                case CPUI_INT_SDIV:
-                case CPUI_INT_SREM:
-                    if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                case OpCode.CPUI_INT_SDIV:
+                case OpCode.CPUI_INT_SREM:
+                    if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -10;
-                    else if (meta == TYPE_PTR || meta == TYPE_BOOL)
+                    else if (meta == type_metatype.TYPE_PTR || meta == type_metatype.TYPE_BOOL)
                         score = -2;
-                    else if (meta == TYPE_INT)
+                    else if (meta == type_metatype.TYPE_INT)
                         score = 5;
                     break;
-                case CPUI_FLOAT_ADD:
-                case CPUI_FLOAT_DIV:
-                case CPUI_FLOAT_MULT:
-                case CPUI_FLOAT_SUB:
-                case CPUI_FLOAT_NEG:
-                case CPUI_FLOAT_ABS:
-                case CPUI_FLOAT_SQRT:
-                case CPUI_FLOAT_FLOAT2FLOAT:
-                case CPUI_FLOAT_CEIL:
-                case CPUI_FLOAT_FLOOR:
-                case CPUI_FLOAT_ROUND:
-                case CPUI_FLOAT_INT2FLOAT:
-                    if (meta == TYPE_FLOAT)
+                case OpCode.CPUI_FLOAT_ADD:
+                case OpCode.CPUI_FLOAT_DIV:
+                case OpCode.CPUI_FLOAT_MULT:
+                case OpCode.CPUI_FLOAT_SUB:
+                case OpCode.CPUI_FLOAT_NEG:
+                case OpCode.CPUI_FLOAT_ABS:
+                case OpCode.CPUI_FLOAT_SQRT:
+                case OpCode.CPUI_FLOAT_FLOAT2FLOAT:
+                case OpCode.CPUI_FLOAT_CEIL:
+                case OpCode.CPUI_FLOAT_FLOOR:
+                case OpCode.CPUI_FLOAT_ROUND:
+                case OpCode.CPUI_FLOAT_INT2FLOAT:
+                    if (meta == type_metatype.TYPE_FLOAT)
                         score = 10;
                     else
                         score = -10;
                     break;
-                case CPUI_FLOAT_TRUNC:
-                    if (meta == TYPE_INT || meta == TYPE_UINT)
+                case OpCode.CPUI_FLOAT_TRUNC:
+                    if (meta == type_metatype.TYPE_INT || meta == type_metatype.TYPE_UINT)
                         score = 2;
                     else
                         score = -2;
                     break;
-                case CPUI_PIECE:
-                    if (meta == TYPE_FLOAT || meta == TYPE_BOOL)
+                case OpCode.CPUI_PIECE:
+                    if (meta == type_metatype.TYPE_FLOAT || meta == type_metatype.TYPE_BOOL)
                         score = -5;
-                    else if (meta == TYPE_CODE || meta == TYPE_PTR)
+                    else if (meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_PTR)
                         score = -2;
                     break;
-                case CPUI_SUBPIECE:
-                    if (meta == TYPE_INT || meta == TYPE_UINT || meta == TYPE_BOOL)
+                case OpCode.CPUI_SUBPIECE:
+                    if (meta == type_metatype.TYPE_INT || meta == type_metatype.TYPE_UINT || meta == type_metatype.TYPE_BOOL)
                     {
                         if (def.getIn(1).getOffset() == 0)
                             score = 3;      // Likely truncation
@@ -916,8 +916,8 @@ namespace Sla.DECCORE
                     else
                         score = -5;
                     break;
-                case CPUI_PTRADD:
-                    if (meta == TYPE_PTR)
+                case OpCode.CPUI_PTRADD:
+                    if (meta == type_metatype.TYPE_PTR)
                     {
                         Datatype* ptrto = ((TypePointer*)trial.fitType).getPtrTo();
                         if (ptrto.getSize() == def.getIn(2).getOffset())
@@ -925,7 +925,7 @@ namespace Sla.DECCORE
                         else
                             score = 2;
                     }
-                    else if (meta == TYPE_ARRAY || meta == TYPE_STRUCT || meta == TYPE_UNION || meta == TYPE_CODE || meta == TYPE_FLOAT)
+                    else if (meta == type_metatype.TYPE_ARRAY || meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_UNION || meta == type_metatype.TYPE_CODE || meta == type_metatype.TYPE_FLOAT)
                         score = -5;
                     else
                         score = 1;
@@ -942,7 +942,7 @@ namespace Sla.DECCORE
         }
 
         /// Score a truncation in the data-flow
-        /// The truncation may be an explicit CPUI_SUBPIECE, or it may be implied.
+        /// The truncation may be an explicit OpCode.CPUI_SUBPIECE, or it may be implied.
         /// A score is computed for fitting a given data-type to the truncation, and a possible
         /// data-type to recurse is also computed.
         /// \param ct is the given data-type to truncate
@@ -953,7 +953,7 @@ namespace Sla.DECCORE
         private Datatype scoreTruncation(Datatype ct, Varnode vn, int offset, int scoreIndex)
         {
             int score;
-            if (ct.getMetatype() == TYPE_UNION)
+            if (ct.getMetatype() == type_metatype.TYPE_UNION)
             {
                 TypeUnion* unionDt = (TypeUnion*)ct;
                 ct = (Datatype)null;          // Don't recurse a data-type from truncation of a union
@@ -977,7 +977,7 @@ namespace Sla.DECCORE
                 score = 10;     // If we can find a size match for the truncation
                 while (ct != (Datatype)null && (off != 0 || ct.getSize() != vn.getSize()))
                 {
-                    if (ct.getMetatype() == TYPE_INT || ct.getMetatype() == TYPE_UINT)
+                    if (ct.getMetatype() == type_metatype.TYPE_INT || ct.getMetatype() == type_metatype.TYPE_UINT)
                     {
                         if (ct.getSize() >= vn.getSize() + off)
                         {
@@ -1004,11 +1004,11 @@ namespace Sla.DECCORE
             ulong val = trial.vn.getOffset();
             type_metatype meta = trial.fitType.getMetatype();
             int score = 0;
-            if (meta == TYPE_BOOL)
+            if (meta == type_metatype.TYPE_BOOL)
             {
                 score = (size == 1 && val < 2) ? 2 : -2;
             }
-            else if (meta == TYPE_FLOAT)
+            else if (meta == type_metatype.TYPE_FLOAT)
             {
                 score = -1;
                 FloatFormat format = typegrp.getArch().translate.getFloatFormat(size);
@@ -1018,7 +1018,7 @@ namespace Sla.DECCORE
                         score = 2;
                 }
             }
-            else if (meta == TYPE_INT || meta == TYPE_UINT || meta == TYPE_PTR)
+            else if (meta == type_metatype.TYPE_INT || meta == type_metatype.TYPE_UINT || meta == type_metatype.TYPE_PTR)
             {
                 if (val == 0)
                 {
@@ -1035,7 +1035,7 @@ namespace Sla.DECCORE
                             looksLikePointer = true;
                         }
                     }
-                    if (meta == TYPE_PTR)
+                    if (meta == type_metatype.TYPE_PTR)
                     {
                         score = looksLikePointer ? 2 : -2;
                     }
@@ -1123,7 +1123,7 @@ namespace Sla.DECCORE
             result = new ResolvedUnion(parentType);
             if (testSimpleCases(op, slot, parentType))
                 return;
-            int wordSize = (parentType.getMetatype() == TYPE_PTR) ? ((TypePointer*)parentType).getWordSize() : 0;
+            int wordSize = (parentType.getMetatype() == type_metatype.TYPE_PTR) ? ((TypePointer*)parentType).getWordSize() : 0;
             int numFields = result.baseType.numDepend();
             scores.resize(numFields + 1, 0);
             fields.resize(numFields + 1, (Datatype)null);
@@ -1152,7 +1152,7 @@ namespace Sla.DECCORE
                 bool isArray = false;
                 if (wordSize != 0)
                 {
-                    if (fieldType.getMetatype() == TYPE_ARRAY)
+                    if (fieldType.getMetatype() == type_metatype.TYPE_ARRAY)
                         isArray = true;
                     fieldType = typegrp.getTypePointerStripArray(parentType.getSize(), fieldType, wordSize);
                 }

@@ -47,7 +47,7 @@ namespace Sla.DECCORE
                         if (vn.isWritten())
                         {
                             PcodeOp* loadOp = vn.getDef();
-                            if (loadOp.code() == CPUI_LOAD)
+                            if (loadOp.code() == OpCode.CPUI_LOAD)
                             {
                                 Varnode* ptr = loadOp.getIn(1);
                                 if (ptr.isConstant() || ptr.isReadOnly())
@@ -55,7 +55,7 @@ namespace Sla.DECCORE
                                 if (ptr.isWritten())
                                 {
                                     PcodeOp* copyOp = ptr.getDef();
-                                    if (copyOp.code() == CPUI_COPY)
+                                    if (copyOp.code() == OpCode.CPUI_COPY)
                                     {
                                         ptr = copyOp.getIn(0);
                                         if (ptr.isConstant() || ptr.isReadOnly())
@@ -85,7 +85,7 @@ namespace Sla.DECCORE
                     if (vn.isConstant()) continue; // Don't replace a constant
                     if (vn.isWritten())
                     {
-                        if (vn.getDef().code() == CPUI_COPY)
+                        if (vn.getDef().code() == OpCode.CPUI_COPY)
                         {
                             if (vn.getDef().getIn(0).isConstant())
                             {

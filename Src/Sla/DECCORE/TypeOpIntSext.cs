@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     internal class TypeOpIntSext : TypeOpFunc
     {
         public TypeOpIntSext(TypeFactory t)
-            : base(t, CPUI_INT_SEXT,"SEXT", TYPE_INT, TYPE_INT)
+            : base(t, OpCode.CPUI_INT_SEXT,"SEXT", type_metatype.TYPE_INT, type_metatype.TYPE_INT)
         {
             opflags = PcodeOp::unary;
             behave = new OpBehaviorIntSext();

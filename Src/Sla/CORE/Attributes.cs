@@ -19,9 +19,9 @@ namespace Sla.CORE
         /// The name of the XML element
         private string elementname;
         /// List of names for each formal XML attribute
-        private List<string> name;
+        private List<string> name = new List<string>();
         /// List of values for each formal XML attribute
-        private List<string> value;
+        private List<string> value = new List<string>();
 
         /// Construct from element name string
         public Attributes(string el)
@@ -67,12 +67,6 @@ namespace Sla.CORE
         /// Add a formal attribute
         public void add_attribute(string nm, string vl)
         {
-            if (null == name) {
-                name = new List<string>();
-            }
-            if (null == value) {
-                value = new List<string>();
-            }
             name.Add(nm);
             value.Add(vl);
         }

@@ -19,7 +19,7 @@ namespace Sla.DECCORE
         private List<StackEqn> guess = new List<StackEqn>();
         /// The indexed set of variables, one for each reference to the stack-pointer
         private List<Varnode> vnlist;
-        /// Index of companion input for variable produced by CPUI_INDIRECT
+        /// Index of companion input for variable produced by OpCode.CPUI_INDIRECT
         private List<int> companion;
         /// Starting address of the stack-pointer
         private Address spacebase;
@@ -159,7 +159,7 @@ namespace Sla.DECCORE
                 Varnode constvn;
                 PcodeOp op = vn.getDef();
 
-                if (op.code() == CPUI_INT_ADD) {
+                if (op.code() == OpCode.CPUI_INT_ADD) {
                     othervn = op.getIn(0);
                     constvn = op.getIn(1);
                     if (othervn.isConstant()) {
@@ -180,7 +180,7 @@ namespace Sla.DECCORE
                     eqn.rhs = constvn.getOffset();
                     eqs.Add(eqn);
                 }
-                else if (op.code() == CPUI_COPY) {
+                else if (op.code() == OpCode.CPUI_COPY) {
                     othervn = op.getIn(0);
                     if (othervn.getAddr() != spacebase) { missedvariables += 1; continue; }
                     iter = lower_bound(vnlist.begin(), vnlist.end(), othervn, Varnode::comparePointers);
@@ -189,7 +189,7 @@ namespace Sla.DECCORE
                     eqn.rhs = 0;
                     eqs.Add(eqn);
                 }
-                else if (op.code() == CPUI_INDIRECT) {
+                else if (op.code() == OpCode.CPUI_INDIRECT) {
                     othervn = op.getIn(0);
                     if (othervn.getAddr() != spacebase) {
                         missedvariables += 1;
@@ -205,7 +205,7 @@ namespace Sla.DECCORE
                         PcodeOp iop = PcodeOp::getOpFromConst(iopvn.getAddr());
                         FuncCallSpecs fc = data.getCallSpecs(iop); // Look up function proto
                         if (fc != null) {
-                            if (fc.getExtraPop() != ProtoModel::extrapop_unknown) {
+                            if (fc.getExtraPop() != ProtoModel.extrapop_unknown) {
                                 // Double check that extrapop is unknown
                                 eqn.rhs = fc.getExtraPop(); // As the deindirect process may have filled it in
                                 eqs.Add(eqn);
@@ -217,7 +217,7 @@ namespace Sla.DECCORE
                     eqn.rhs = 4;
                     guess.Add(eqn);
                 }
-                else if (op.code() == CPUI_MULTIEQUAL) {
+                else if (op.code() == OpCode.CPUI_MULTIEQUAL) {
                     for (int j = 0; j < op.numInput(); ++j) {
                         othervn = op.getIn(j);
                         if (othervn.getAddr() != spacebase) {
@@ -231,7 +231,7 @@ namespace Sla.DECCORE
                         eqs.Add(eqn);
                     }
                 }
-                else if (op.code() == CPUI_INT_AND) {
+                else if (op.code() == OpCode.CPUI_INT_AND) {
                     // This can occur if a function aligns its stack pointer
                     othervn = op.getIn(0);
                     constvn = op.getIn(1);

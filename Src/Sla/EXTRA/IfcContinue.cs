@@ -18,7 +18,7 @@ namespace Sla.EXTRA
         {
             int res;
 
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("Decompile action not loaded");
 
             if (dcp.fd == (Funcdata)null)

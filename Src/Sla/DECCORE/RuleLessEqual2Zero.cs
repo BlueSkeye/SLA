@@ -45,14 +45,14 @@ namespace Sla.DECCORE
             {
                 if (lvn.getOffset() == 0)
                 {
-                    data.opSetOpcode(op, CPUI_COPY); // All values => true
+                    data.opSetOpcode(op, OpCode.CPUI_COPY); // All values => true
                     data.opRemoveInput(op, 1);
                     data.opSetInput(op, data.newConstant(1, 1), 0);
                     return 1;
                 }
                 else if (lvn.getOffset() == Globals.calc_mask(lvn.getSize()))
                 {
-                    data.opSetOpcode(op, CPUI_INT_EQUAL); // No value is true except -1
+                    data.opSetOpcode(op, OpCode.CPUI_INT_EQUAL); // No value is true except -1
                     return 1;
                 }
             }
@@ -60,12 +60,12 @@ namespace Sla.DECCORE
             {
                 if (rvn.getOffset() == 0)
                 {
-                    data.opSetOpcode(op, CPUI_INT_EQUAL); // No value is true except 0
+                    data.opSetOpcode(op, OpCode.CPUI_INT_EQUAL); // No value is true except 0
                     return 1;
                 }
                 else if (rvn.getOffset() == Globals.calc_mask(rvn.getSize()))
                 {
-                    data.opSetOpcode(op, CPUI_COPY); // All values => true
+                    data.opSetOpcode(op, OpCode.CPUI_COPY); // All values => true
                     data.opRemoveInput(op, 1);
                     data.opSetInput(op, data.newConstant(1, 1), 0);
                     return 1;

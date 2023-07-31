@@ -42,7 +42,7 @@ namespace Sla.DECCORE
             int size = (int)op.getIn(2).getOffset(); // Size the PTRADD thinks we are pointing
             basevn = op.getIn(0);
             tp = (TypePointer*)basevn.getTypeReadFacing(op);
-            if (tp.getMetatype() == TYPE_PTR)                              // Make sure we are still a pointer
+            if (tp.getMetatype() == type_metatype.TYPE_PTR)                              // Make sure we are still a pointer
                 if (tp.getPtrTo().getSize() == AddrSpace::addressToByteInt(size, tp.getWordSize()))
                 {   // of the correct size
                     Varnode* indVn = op.getIn(1);

@@ -250,7 +250,7 @@ namespace Sla.DECCORE
                 }
                 switch (op.code())
                 {
-                    case CPUI_CBRANCH:
+                    case OpCode.CPUI_CBRANCH:
                         {
                             Address destaddr = op.getIn(0).getAddr();
                             if (destaddr.isConstant())
@@ -272,7 +272,7 @@ namespace Sla.DECCORE
                             startbasic = true;
                         }
                         break;
-                    case CPUI_BRANCH:
+                    case OpCode.CPUI_BRANCH:
                         {
                             Address destaddr = op.getIn(0).getAddr();
                             if (destaddr.isConstant())
@@ -299,7 +299,7 @@ namespace Sla.DECCORE
                             startbasic = true;
                         }
                         break;
-                    case CPUI_BRANCHIND:
+                    case OpCode.CPUI_BRANCHIND:
                         tablelist.Add(op);    // Put off trying to recover the table
                         if (op.getTime() >= maxtime)
                         {
@@ -308,7 +308,7 @@ namespace Sla.DECCORE
                         }
                         startbasic = true;
                         break;
-                    case CPUI_RETURN:
+                    case OpCode.CPUI_RETURN:
                         if (op.getTime() >= maxtime)
                         {
                             deleteRemainingOps(oiter);
@@ -316,15 +316,15 @@ namespace Sla.DECCORE
                         }
                         startbasic = true;
                         break;
-                    case CPUI_CALL:
+                    case OpCode.CPUI_CALL:
                         if (setupCallSpecs(op, fc))
                             --oiter;        // Backup one op, to pickup halt
                         break;
-                    case CPUI_CALLIND:
+                    case OpCode.CPUI_CALLIND:
                         if (setupCallindSpecs(op, fc))
                             --oiter;        // Backup one op, to pickup halt
                         break;
-                    case CPUI_CALLOTHER:
+                    case OpCode.CPUI_CALLOTHER:
                         {
                             InjectedUserOp* userop = dynamic_cast<InjectedUserOp*>(glb.userops.getOp(op.getIn(0).getOffset()));
                             if (userop != (InjectedUserOp*)0)
@@ -345,9 +345,9 @@ namespace Sla.DECCORE
                 {
                     switch (op.code())
                     {
-                        case CPUI_BRANCH:
-                        case CPUI_BRANCHIND:
-                        case CPUI_RETURN:
+                        case OpCode.CPUI_BRANCH:
+                        case OpCode.CPUI_BRANCHIND:
+                        case OpCode.CPUI_RETURN:
                             break;          // If the last instruction is a branch, then no fallthru
                         default:
                             isfallthru = true;  // otherwise it is a fallthru
@@ -383,7 +383,7 @@ namespace Sla.DECCORE
                 else
                 {
                     step = 1;
-                    artificialHalt(curaddr, PcodeOp::badinstruction);
+                    artificialHalt(curaddr, PcodeOp.Flags.badinstruction);
                     data.warning("Too many instructions -- Truncating flow here", curaddr);
                     if (!hasTooManyInstructions())
                     {
@@ -427,7 +427,7 @@ namespace Sla.DECCORE
                 {
                     // Add infinite loop instruction
                     step = 1;           // Pretend size 1
-                    artificialHalt(curaddr, PcodeOp::unimplemented);
+                    artificialHalt(curaddr, PcodeOp.Flags.unimplemented);
                     data.warning("Unimplemented instruction - Truncating control flow here", curaddr);
                     if (!hasUnimplemented())
                     {
@@ -443,7 +443,7 @@ namespace Sla.DECCORE
                 {
                     // Add infinite loop instruction
                     step = 1;           // Pretend size 1
-                    artificialHalt(curaddr, PcodeOp::badinstruction);
+                    artificialHalt(curaddr, PcodeOp.Flags.badinstruction);
                     data.warning("Bad instruction - Truncating control flow here", curaddr);
                     if (!hasBadData())
                     {
@@ -496,7 +496,7 @@ namespace Sla.DECCORE
             for (; ; )
             {
                 curaddr = addrlist.GetLastItem();
-                addrlist.pop_back();
+                addrlist.RemoveLastItem();
                 fallthruflag = processInstruction(curaddr, startbasic);
                 if (!fallthruflag) break;
                 if (addrlist.empty()) break;
@@ -506,7 +506,7 @@ namespace Sla.DECCORE
                     {
                         handleOutOfBounds(eaddr, addrlist.GetLastItem());
                         unprocessed.Add(addrlist.GetLastItem());
-                        addrlist.pop_back();
+                        addrlist.RemoveLastItem();
                         return;
                     }
                     if (bound == addrlist.GetLastItem())
@@ -516,7 +516,7 @@ namespace Sla.DECCORE
                             PcodeOp* op = target(addrlist.GetLastItem());
                             data.opMarkStartBasic(op);
                         }
-                        addrlist.pop_back();
+                        addrlist.RemoveLastItem();
                         break;
                     }
                     if (!setFallthruBound(bound)) return; // Reset bound
@@ -621,7 +621,7 @@ namespace Sla.DECCORE
             dedupUnprocessed();
             for (iter = unprocessed.begin(); iter != unprocessed.end(); ++iter)
             {
-                PcodeOp* op = artificialHalt(*iter, PcodeOp::missing);
+                PcodeOp* op = artificialHalt(*iter, PcodeOp.Flags.missing);
                 data.opMarkStartBasic(op);
                 data.opMarkStartInstruction(op);
             }
@@ -653,13 +653,13 @@ namespace Sla.DECCORE
                     nextstart = (*iter).isBlockStart();
                 switch (op.code())
                 {
-                    case CPUI_BRANCH:
+                    case OpCode.CPUI_BRANCH:
                         targ_op = branchTarget(op);
                         block_edge1.Add(op);
                         //      block_edge2.Add(op.Input(0).getAddr().Iop());
                         block_edge2.Add(targ_op);
                         break;
-                    case CPUI_BRANCHIND:
+                    case OpCode.CPUI_BRANCHIND:
                         jt = data.findJumpTable(op);
                         if (jt == (JumpTable*)0) break;
                         // If we are in this routine and there is no table
@@ -686,9 +686,9 @@ namespace Sla.DECCORE
                                 break;
                         }
                         break;
-                    case CPUI_RETURN:
+                    case OpCode.CPUI_RETURN:
                         break;
-                    case CPUI_CBRANCH:
+                    case OpCode.CPUI_CBRANCH:
                         targ_op = fallthruOp(op); // Put in fallthru edge
                         block_edge1.Add(op);
                         block_edge2.Add(targ_op);
@@ -795,7 +795,7 @@ namespace Sla.DECCORE
                 { // If we have already visited this address
                     PcodeOp* op = target(addr); // But make sure the address
                     data.opMarkStartBasic(op); // starts a basic block
-                    addrlist.pop_back();    // Throw it away
+                    addrlist.RemoveLastItem();    // Throw it away
                     return false;
                 }
                 if (addr < (*iter).first + (*iter).second.size)
@@ -852,7 +852,7 @@ namespace Sla.DECCORE
         private PcodeOp artificialHalt(Address addr, uint flag)
         {
             PcodeOp* haltop = data.newOp(1, addr);
-            data.opSetOpcode(haltop, CPUI_RETURN);
+            data.opSetOpcode(haltop, OpCode.CPUI_RETURN);
             data.opSetInput(haltop, data.newConstant(4, 1), 0);
             if (flag != 0)
                 data.opMarkHalt(haltop, flag); // What kind of halt
@@ -980,7 +980,7 @@ namespace Sla.DECCORE
             if (!res.getEntryAddress().isInvalid())
             {   // If we are overridden to a direct call
                 // Change indirect pcode call into a normal pcode call
-                data.opSetOpcode(op, CPUI_CALL); // Set normal opcode
+                data.opSetOpcode(op, OpCode.CPUI_CALL); // Set normal opcode
                 data.opSetInput(op, data.newVarnodeCallSpecs(res), 0);
             }
             return checkForFlowModification(*res);
@@ -992,11 +992,11 @@ namespace Sla.DECCORE
         /// \param op is the given injected p-code op
         private void xrefInlinedBranch(PcodeOp op)
         {
-            if (op.code() == CPUI_CALL)
+            if (op.code() == OpCode.CPUI_CALL)
                 setupCallSpecs(op, (FuncCallSpecs*)0);
-            else if (op.code() == CPUI_CALLIND)
+            else if (op.code() == OpCode.CPUI_CALLIND)
                 setupCallindSpecs(op, (FuncCallSpecs*)0);
-            else if (op.code() == CPUI_BRANCHIND)
+            else if (op.code() == OpCode.CPUI_BRANCHIND)
             {
                 JumpTable* jt = data.linkJumpTable(op);
                 if (jt == (JumpTable*)0)
@@ -1141,7 +1141,7 @@ namespace Sla.DECCORE
                 Funcdata* fd = fc.getFuncdata();
                 if (fd != (Funcdata)null) continue;
                 PcodeOp* op = fc.getOp();
-                if (op.code() != CPUI_CALL) continue;
+                if (op.code() != OpCode.CPUI_CALL) continue;
 
                 Address addr = fc.getEntryAddress();
                 Dictionary<Address, VisitStat>::const_iterator miter;
@@ -1157,7 +1157,7 @@ namespace Sla.DECCORE
                     op.getAddr().printRaw(s);
                     s << ": Changing call to branch";
                     data.warningHeader(s.str());
-                    data.opSetOpcode(op, CPUI_BRANCH);
+                    data.opSetOpcode(op, OpCode.CPUI_BRANCH);
                     // Make sure target of new goto starts a basic block
                     PcodeOp* targ = target(addr);
                     data.opMarkStartBasic(targ);
@@ -1208,7 +1208,7 @@ namespace Sla.DECCORE
             string nm = s1.str();
             // Prepare partial Funcdata object for analysis if necessary
             Funcdata partial = new Funcdata(nm, nm, data.getScopeLocal().getParent(), data.getAddress(),
-                (FunctionSymbol*)0);
+                (FunctionSymbol)null);
 
             for (int i = 0; i < tablelist.size(); ++i)
             {
@@ -1250,7 +1250,7 @@ namespace Sla.DECCORE
         /// \param failuremode is a code indicating the type of failure when trying to recover the jump table
         private void truncateIndirectJump(PcodeOp op, int failuremode)
         {
-            data.opSetOpcode(op, CPUI_CALLIND); // Turn jump into call
+            data.opSetOpcode(op, OpCode.CPUI_CALLIND); // Turn jump into call
             setupCallindSpecs(op, (FuncCallSpecs*)0);
             if (failuremode != 2)                   // Unless the switch was a thunk mechanism
                 data.getCallSpecs(op).setBadJumpTable(true);   // Consider using special name for switch variable
@@ -1578,11 +1578,11 @@ namespace Sla.DECCORE
                 PcodeOp* op = injectlist[i];
                 if (op == (PcodeOp)null) continue;
                 injectlist[i] = (PcodeOp)null;    // Nullify entry, so we don't inject more than once
-                if (op.code() == CPUI_CALLOTHER) {
+                if (op.code() == OpCode.CPUI_CALLOTHER) {
                     injectUserOp(op);
                 }
                 else {
-                    // CPUI_CALL or CPUI_CALLIND
+                    // OpCode.CPUI_CALL or OpCode.CPUI_CALLIND
                     FuncCallSpecs fc = FuncCallSpecs::getFspecFromConst(op.getIn(0).getAddr());
                     if (fc.isInline()) {
                         if (fc.getInjectId() >= 0) {
@@ -1627,9 +1627,9 @@ namespace Sla.DECCORE
             {
                 PcodeOp op = *iter;
                 PcodeOp cloneop;
-                if ((op.code() == CPUI_RETURN) && (!retaddr.isInvalid())) {
+                if ((op.code() == OpCode.CPUI_RETURN) && (!retaddr.isInvalid())) {
                     cloneop = data.newOp(1, op.getSeqNum());
-                    data.opSetOpcode(cloneop, CPUI_BRANCH);
+                    data.opSetOpcode(cloneop, OpCode.CPUI_BRANCH);
                     Varnode vn = data.newCodeRef(retaddr);
                     data.opSetInput(cloneop, vn, 0);
                 }
@@ -1660,7 +1660,7 @@ namespace Sla.DECCORE
             for (iter = inlineflow.data.beginOpDead(); iter != inlineflow.data.endOpDead(); ++iter)
             {
                 PcodeOp op = *iter;
-                if (op.code() == CPUI_RETURN) break;
+                if (op.code() == OpCode.CPUI_RETURN) break;
                 SeqNum myseq = new SeqNum(calladdr, op.getSeqNum().getTime());
                 data.cloneOp(op, myseq);
             }

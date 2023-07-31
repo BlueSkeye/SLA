@@ -22,7 +22,7 @@ namespace Sla.EXTRA
         public override void execute(TextReader s)
         {
             int size = 0;
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
             Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read storage location
             if (size == 0)

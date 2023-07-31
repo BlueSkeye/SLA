@@ -46,10 +46,10 @@ namespace Sla.DECCORE
             offoff = AddrSpace::addressToByte(offoff, baseoff.getWordSize());
             Address addr(baseoff, offoff);
             data.newVarnodeOut(size, addr, op);
-            op.getOut().setStackStore();  // Mark as originally coming from CPUI_STORE
+            op.getOut().setStackStore();  // Mark as originally coming from OpCode.CPUI_STORE
             data.opRemoveInput(op, 1);
             data.opRemoveInput(op, 0);
-            data.opSetOpcode(op, CPUI_COPY);
+            data.opSetOpcode(op, OpCode.CPUI_COPY);
             return 1;
         }
     }

@@ -48,7 +48,7 @@ namespace Sla.DECCORE
             subvn = op.getIn(0);
             if (!subvn.isWritten()) return 0;
             subop = subvn.getDef();
-            if (subop.code() == CPUI_SUBPIECE)
+            if (subop.code() == OpCode.CPUI_SUBPIECE)
             {
                 basevn = subop.getIn(0);
                 if (basevn.isFree()) return 0;
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
                     constvn = subop.getIn(1);
                     ulong rightVal = constvn.getOffset() * 8;
                     data.opSetInput(op, newvn, 0);
-                    data.opSetOpcode(subop, CPUI_INT_RIGHT); // Convert the truncation to a shift
+                    data.opSetOpcode(subop, OpCode.CPUI_INT_RIGHT); // Convert the truncation to a shift
                     data.opSetInput(subop, data.newConstant(constvn.getSize(), rightVal), 1);
                     data.opSetOutput(subop, newvn);
                 }
@@ -70,18 +70,18 @@ namespace Sla.DECCORE
                     data.opSetInput(op, basevn, 0); // Otherwise, bypass the truncation entirely
                 val = Globals.calc_mask(subvn.getSize());
                 constvn = data.newConstant(basevn.getSize(), val);
-                data.opSetOpcode(op, CPUI_INT_AND);
+                data.opSetOpcode(op, OpCode.CPUI_INT_AND);
                 data.opInsertInput(op, constvn, 1);
                 return 1;
             }
-            else if (subop.code() == CPUI_INT_RIGHT)
+            else if (subop.code() == OpCode.CPUI_INT_RIGHT)
             {
                 PcodeOp* shiftop = subop;
                 if (!shiftop.getIn(1).isConstant()) return 0;
                 Varnode* midvn = shiftop.getIn(0);
                 if (!midvn.isWritten()) return 0;
                 subop = midvn.getDef();
-                if (subop.code() != CPUI_SUBPIECE) return 0;
+                if (subop.code() != OpCode.CPUI_SUBPIECE) return 0;
                 basevn = subop.getIn(0);
                 if (basevn.isFree()) return 0;
                 if (basevn.getSize() != op.getOut().getSize()) return 0; // Truncating then extending to same size
@@ -97,7 +97,7 @@ namespace Sla.DECCORE
                 data.opSetInput(shiftop, data.newConstant(shiftop.getIn(1).getSize(), sa), 1);    // by the combined amount
                 data.opSetOutput(shiftop, newvn);
                 constvn = data.newConstant(basevn.getSize(), val);
-                data.opSetOpcode(op, CPUI_INT_AND); // Turn the ZEXT into an AND
+                data.opSetOpcode(op, OpCode.CPUI_INT_AND); // Turn the ZEXT into an AND
                 data.opInsertInput(op, constvn, 1); // With the appropriate mask
                 return 1;
             }

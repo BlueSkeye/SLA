@@ -47,20 +47,17 @@ namespace Sla.CORE
             JoinRecord rec = getManager().findJoin(offset);
             encoder.writeSpace(AttributeId.ATTRIB_SPACE, this);
             int num = rec.numPieces();
-            if (num > MAX_PIECES)
-            {
+            if (num > MAX_PIECES) {
                 throw new LowlevelError("Exceeded maximum pieces in one join address");
             }
-            for (uint i = 0; i < num; ++i)
-            {
+            for (uint i = 0; i < num; ++i) {
                 VarnodeData vdata = rec.getPiece(i);
                 StringBuilder t = new StringBuilder();
                 t.Append(vdata.space.getName());
                 t.AppendFormat(":0x{0:X}:{1}", vdata.offset, vdata.size);
                 encoder.writeStringIndexed(AttributeId.ATTRIB_PIECE, i, t.ToString());
             }
-            if (num == 1)
-            {
+            if (num == 1) {
                 encoder.writeUnsignedInteger(AttributeId.ATTRIB_LOGICALSIZE, rec.getUnified().size);
             }
         }
@@ -87,47 +84,38 @@ namespace Sla.CORE
             List<VarnodeData> pieces = new List<VarnodeData>();
             uint sizesum = 0;
             uint logicalsize = 0;
-            for (; ; )
-            {
+            for (; ; ) {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
-                if (attribId == AttributeId.ATTRIB_LOGICALSIZE)
-                {
+                if (attribId == AttributeId.ATTRIB_LOGICALSIZE) {
                     logicalsize = (uint)decoder.readUnsignedInteger();
                     continue;
                 }
-                else if (attribId == AttributeId.ATTRIB_UNKNOWN)
-                {
+                else if (attribId == AttributeId.ATTRIB_UNKNOWN) {
                     attribId = decoder.getIndexedAttributeId(AttributeId.ATTRIB_PIECE);
                 }
-                if (attribId < AttributeId.ATTRIB_PIECE.getId())
-                {
+                if (attribId < AttributeId.ATTRIB_PIECE.getId()) {
                     continue;
                 }
                 int pos = (int)(attribId - AttributeId.ATTRIB_PIECE.getId());
-                if (pos > MAX_PIECES)
-                {
+                if (pos > MAX_PIECES) {
                     continue;
                 }
                 VarnodeData vdat = pieces[pos];
-                while (pieces.Count <= pos)
-                {
+                while (pieces.Count <= pos) {
                     pieces.Add(vdat = new VarnodeData());
                 }
 
                 string attrVal = decoder.readString();
                 int offpos = attrVal.IndexOf(':');
-                if (-1 == offpos)
-                {
+                if (-1 == offpos) {
                     Translate tr = getTrans();
                     ref VarnodeData point = ref tr.getRegister(attrVal);
                     vdat = point;
                 }
-                else
-                {
+                else {
                     int szpos = attrVal.IndexOf(':', offpos + 1);
-                    if (-1 == szpos)
-                    {
+                    if (-1 == szpos) {
                         throw new LowlevelError("join address piece attribute is malformed");
                     }
                     string spcname = attrVal.Substring(0, offpos);
@@ -150,31 +138,23 @@ namespace Sla.CORE
         public override int overlapJoin(ulong offset, int size, AddrSpace pointSpace,
             ulong pointOffset, int pointSkip)
         {
-            if (this == pointSpace)
-            {
+            if (this == pointSpace) {
                 // If the point is in the join space, translate the point into the piece address space
                 JoinRecord pieceRecord = getManager().findJoin(pointOffset);
                 int pos;
-                if (0 > pointSkip)
-                {
+                if (0 > pointSkip) {
                     throw new BugException();
-                }
-                {
-
                 }
                 Address addr = pieceRecord.getEquivalentAddress(pointOffset + (uint)pointSkip,
                     out pos);
                 pointSpace = addr.getSpace();
                 pointOffset = addr.getOffset();
             }
-            else
-            {
-                if (pointSpace.getType() == spacetype.IPTR_CONSTANT)
-                {
+            else {
+                if (pointSpace.getType() == spacetype.IPTR_CONSTANT) {
                     return -1;
                 }
-                if (0 > pointSkip)
-                {
+                if (0 > pointSkip) {
                     throw new BugException();
                 }
                 pointOffset = pointSpace.wrapOffset(pointOffset + (uint)pointSkip);
@@ -182,28 +162,25 @@ namespace Sla.CORE
             JoinRecord joinRecord = getManager().findJoin(offset);
             // Set up so we traverse pieces in data order
             int startPiece, endPiece, dir;
-            if (isBigEndian())
-            {
+            if (isBigEndian()) {
                 startPiece = 0;
                 endPiece = joinRecord.numPieces();
                 dir = 1;
             }
-            else
-            {
+            else {
                 startPiece = joinRecord.numPieces() - 1;
                 endPiece = -1;
                 dir = -1;
             }
             int bytesAccum = 0;
-            for (int i = startPiece; i != endPiece; i += dir)
-            {
+            for (int i = startPiece; i != endPiece; i += dir) {
                 VarnodeData vData = joinRecord.getPiece((uint)i);
-                if (vData.space == pointSpace && pointOffset >= vData.offset && pointOffset <= vData.offset + (vData.size - 1))
+                if (vData.space == pointSpace
+                    && pointOffset >= vData.offset
+                    && pointOffset <= vData.offset + (vData.size - 1))
                 {
                     int res = (int)(pointOffset - vData.offset) + bytesAccum;
-                    if (res >= size)
-                        return -1;
-                    return res;
+                    return (res >= size) ? -1 : res;
                 }
                 bytesAccum += (int)vData.size;
             }
@@ -216,18 +193,15 @@ namespace Sla.CORE
             int szsum = 0;
             int num = rec.numPieces();
             s.Write('{');
-            for (uint i = 0; i < num; ++i)
-            {
+            for (uint i = 0; i < num; ++i) {
                 VarnodeData vdat = rec.getPiece(i);
                 szsum += (int)vdat.size;
-                if (i != 0)
-                {
+                if (i != 0) {
                     s.Write(',');
                 }
                 vdat.space.printRaw(s, vdat.offset);
             }
-            if (num == 1)
-            {
+            if (num == 1) {
                 szsum = (int)rec.getUnified().size;
                 s.Write(':');
                 s.Write(szsum);
@@ -240,31 +214,26 @@ namespace Sla.CORE
             List<VarnodeData> pieces = new List<VarnodeData>();
             int szsum = 0;
             int i = 0;
-            while (i < s.Length)
-            {
+            while (i < s.Length) {
                 // Prepare to read next VarnodeData
                 pieces.Add(new VarnodeData());
                 string token = string.Empty;
-                while ((i < s.Length) && (s[i] != ','))
-                {
+                while ((i < s.Length) && (s[i] != ',')) {
                     token += s[i];
                     i += 1;
                 }
                 // Skip the comma
                 i += 1;
                 VarnodeData lastnode;
-                try
-                {
+                try {
                     pieces.Add(lastnode = getTrans().getRegister(token));
                 }
-                catch (LowlevelError)
-                {
+                catch (LowlevelError) {
                     // Name doesn't exist
                     char tryShortcut = token[0];
                     AddrSpace spc = getManager().getSpaceByShortcut(tryShortcut)
                         ?? throw new BugException();
-                    if (spc == null)
-                    {
+                    if (spc == null) {
                         throw new LowlevelError("Could not parse join string");
                     }
                     int subsize;

@@ -9,6 +9,8 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
+using EntryMap = Sla.EXTRA.rangemap<Sla.DECCORE.SymbolEntry>;
+
 namespace Sla.DECCORE
 {
     /// \brief An in-memory implementation of the Scope interface.
@@ -57,7 +59,7 @@ namespace Sla.DECCORE
             decoder.closeElement(elemId);
             SymbolNameTree::const_iterator iter = findFirstByName(nm);
             if (iter == nametree.end()) {
-                Datatype ct = glb.types.getBase(1, TYPE_INT);
+                Datatype ct = glb.types.getBase(1, type_metatype.TYPE_INT);
                 addSymbol(nm, ct);
             }
         }
@@ -423,11 +425,11 @@ namespace Sla.DECCORE
             return new MapIterator(&maptable, iter, curiter);
         }
 
-        public override MapIterator end()
-        {
-            IEnumerator<SymbolEntry> curiter;
-            return new MapIterator(&maptable, maptable.end(), curiter);
-        }
+        //public override MapIterator end()
+        //{
+        //    IEnumerator<SymbolEntry> curiter;
+        //    return new MapIterator(&maptable, maptable.end(), curiter);
+        //}
 
         public override IEnumerator<SymbolEntry> beginDynamic()
         {
@@ -478,7 +480,7 @@ namespace Sla.DECCORE
                 List<Symbol*> & list(category[symbol.category]);
                 list[symbol.catindex] = (Symbol)null;
                 while ((!list.empty()) && (list.GetLastItem() == (Symbol)null))
-                    list.pop_back();
+                    list.RemoveLastItem();
             }
             removeSymbolMappings(symbol);
             nametree.erase(symbol);
@@ -521,7 +523,7 @@ namespace Sla.DECCORE
                     EntryMap* rangemap = maptable[(*iter).getAddr().getSpace().getIndex()];
                     // Remove the map entry
                     rangemap.erase(iter);
-                    sym.mapentry.pop_back();   // Remove reference to map entry
+                    sym.mapentry.RemoveLastItem();   // Remove reference to map entry
                     sym.wholeCount = 0;
 
                     // Now we are ready to change the type
@@ -675,8 +677,8 @@ namespace Sla.DECCORE
                     SymbolEntry* entry = &(*res.first);
                     if (entry.getAddr().getOffset() == addr.getOffset())
                     {
-                        sym = dynamic_cast<FunctionSymbol*>(entry.getSymbol());
-                        if (sym != (FunctionSymbol*)0)
+                        sym = (FunctionSymbol)(entry.getSymbol());
+                        if (sym != (FunctionSymbol)null)
                             return sym.getFunction();
                     }
                     ++res.first;
@@ -1120,7 +1122,7 @@ namespace Sla.DECCORE
                 List<Symbol*> & list(category[sym.category]);
                 list[sym.catindex] = (Symbol)null;
                 while ((!list.empty()) && (list.GetLastItem() == (Symbol)null))
-                    list.pop_back();
+                    list.RemoveLastItem();
             }
 
             sym.category = cat;

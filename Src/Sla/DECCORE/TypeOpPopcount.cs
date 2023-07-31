@@ -9,7 +9,7 @@ namespace Sla.DECCORE
     internal class TypeOpPopcount : TypeOpFunc
     {
         public TypeOpPopcount(TypeFactory t)
-            : base(t, CPUI_POPCOUNT,"POPCOUNT", TYPE_INT, TYPE_UNKNOWN)
+            : base(t, OpCode.CPUI_POPCOUNT,"POPCOUNT", type_metatype.TYPE_INT, type_metatype.TYPE_UNKNOWN)
         {
             opflags = PcodeOp::unary;
             behave = new OpBehaviorPopcount();

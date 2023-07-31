@@ -105,202 +105,202 @@ namespace Sla.SLACOMP
         {
             switch (op.getOpcode())
             {
-                case CPUI_COPY:
+                case OpCode.CPUI_COPY:
                     s << "Copy(=)";
                     break;
-                case CPUI_LOAD:
+                case OpCode.CPUI_LOAD:
                     s << "Load(*)";
                     break;
-                case CPUI_STORE:
+                case OpCode.CPUI_STORE:
                     s << "Store(*)";
                     break;
-                case CPUI_BRANCH:
+                case OpCode.CPUI_BRANCH:
                     s << "Branch(goto)";
                     break;
-                case CPUI_CBRANCH:
+                case OpCode.CPUI_CBRANCH:
                     s << "Conditional branch(if)";
                     break;
-                case CPUI_BRANCHIND:
+                case OpCode.CPUI_BRANCHIND:
                     s << "Indirect branch(goto[])";
                     break;
-                case CPUI_CALL:
+                case OpCode.CPUI_CALL:
                     s << "Call";
                     break;
-                case CPUI_CALLIND:
+                case OpCode.CPUI_CALLIND:
                     s << "Indirect Call";
                     break;
-                case CPUI_CALLOTHER:
+                case OpCode.CPUI_CALLOTHER:
                     s << "User defined";
                     break;
-                case CPUI_RETURN:
+                case OpCode.CPUI_RETURN:
                     s << "Return";
                     break;
-                case CPUI_INT_EQUAL:
+                case OpCode.CPUI_INT_EQUAL:
                     s << "Equality(==)";
                     break;
-                case CPUI_INT_NOTEQUAL:
+                case OpCode.CPUI_INT_NOTEQUAL:
                     s << "Notequal(!=)";
                     break;
-                case CPUI_INT_SLESS:
+                case OpCode.CPUI_INT_SLESS:
                     s << "Signed less than(s<)";
                     break;
-                case CPUI_INT_SLESSEQUAL:
+                case OpCode.CPUI_INT_SLESSEQUAL:
                     s << "Signed less than or equal(s<=)";
                     break;
-                case CPUI_INT_LESS:
+                case OpCode.CPUI_INT_LESS:
                     s << "Less than(<)";
                     break;
-                case CPUI_INT_LESSEQUAL:
+                case OpCode.CPUI_INT_LESSEQUAL:
                     s << "Less than or equal(<=)";
                     break;
-                case CPUI_INT_ZEXT:
+                case OpCode.CPUI_INT_ZEXT:
                     s << "Zero extension(zext)";
                     break;
-                case CPUI_INT_SEXT:
+                case OpCode.CPUI_INT_SEXT:
                     s << "Signed extension(sext)";
                     break;
-                case CPUI_INT_ADD:
+                case OpCode.CPUI_INT_ADD:
                     s << "Addition(+)";
                     break;
-                case CPUI_INT_SUB:
+                case OpCode.CPUI_INT_SUB:
                     s << "Subtraction(-)";
                     break;
-                case CPUI_INT_CARRY:
+                case OpCode.CPUI_INT_CARRY:
                     s << "Carry";
                     break;
-                case CPUI_INT_SCARRY:
+                case OpCode.CPUI_INT_SCARRY:
                     s << "Signed carry";
                     break;
-                case CPUI_INT_SBORROW:
+                case OpCode.CPUI_INT_SBORROW:
                     s << "Signed borrow";
                     break;
-                case CPUI_INT_2COMP:
+                case OpCode.CPUI_INT_2COMP:
                     s << "Twos complement(-)";
                     break;
-                case CPUI_INT_NEGATE:
+                case OpCode.CPUI_INT_NEGATE:
                     s << "Negate(~)";
                     break;
-                case CPUI_INT_XOR:
+                case OpCode.CPUI_INT_XOR:
                     s << "Exclusive or(^)";
                     break;
-                case CPUI_INT_AND:
+                case OpCode.CPUI_INT_AND:
                     s << "And(&)";
                     break;
-                case CPUI_INT_OR:
+                case OpCode.CPUI_INT_OR:
                     s << "Or(|)";
                     break;
-                case CPUI_INT_LEFT:
+                case OpCode.CPUI_INT_LEFT:
                     s << "Left shift(<<)";
                     break;
-                case CPUI_INT_RIGHT:
+                case OpCode.CPUI_INT_RIGHT:
                     s << "Right shift(>>)";
                     break;
-                case CPUI_INT_SRIGHT:
+                case OpCode.CPUI_INT_SRIGHT:
                     s << "Signed right shift(s>>)";
                     break;
-                case CPUI_INT_MULT:
+                case OpCode.CPUI_INT_MULT:
                     s << "Multiplication(*)";
                     break;
-                case CPUI_INT_DIV:
+                case OpCode.CPUI_INT_DIV:
                     s << "Division(/)";
                     break;
-                case CPUI_INT_SDIV:
+                case OpCode.CPUI_INT_SDIV:
                     s << "Signed division(s/)";
                     break;
-                case CPUI_INT_REM:
+                case OpCode.CPUI_INT_REM:
                     s << "Remainder(%)";
                     break;
-                case CPUI_INT_SREM:
+                case OpCode.CPUI_INT_SREM:
                     s << "Signed remainder(s%)";
                     break;
-                case CPUI_BOOL_NEGATE:
+                case OpCode.CPUI_BOOL_NEGATE:
                     s << "Boolean negate(!)";
                     break;
-                case CPUI_BOOL_XOR:
+                case OpCode.CPUI_BOOL_XOR:
                     s << "Boolean xor(^^)";
                     break;
-                case CPUI_BOOL_AND:
+                case OpCode.CPUI_BOOL_AND:
                     s << "Boolean and(&&)";
                     break;
-                case CPUI_BOOL_OR:
+                case OpCode.CPUI_BOOL_OR:
                     s << "Boolean or(||)";
                     break;
-                case CPUI_FLOAT_EQUAL:
+                case OpCode.CPUI_FLOAT_EQUAL:
                     s << "Float equal(f==)";
                     break;
-                case CPUI_FLOAT_NOTEQUAL:
+                case OpCode.CPUI_FLOAT_NOTEQUAL:
                     s << "Float notequal(f!=)";
                     break;
-                case CPUI_FLOAT_LESS:
+                case OpCode.CPUI_FLOAT_LESS:
                     s << "Float less than(f<)";
                     break;
-                case CPUI_FLOAT_LESSEQUAL:
+                case OpCode.CPUI_FLOAT_LESSEQUAL:
                     s << "Float less than or equal(f<=)";
                     break;
-                case CPUI_FLOAT_NAN:
+                case OpCode.CPUI_FLOAT_NAN:
                     s << "Not a number(nan)";
                     break;
-                case CPUI_FLOAT_ADD:
+                case OpCode.CPUI_FLOAT_ADD:
                     s << "Float addition(f+)";
                     break;
-                case CPUI_FLOAT_DIV:
+                case OpCode.CPUI_FLOAT_DIV:
                     s << "Float division(f/)";
                     break;
-                case CPUI_FLOAT_MULT:
+                case OpCode.CPUI_FLOAT_MULT:
                     s << "Float multiplication(f*)";
                     break;
-                case CPUI_FLOAT_SUB:
+                case OpCode.CPUI_FLOAT_SUB:
                     s << "Float subtractions(f-)";
                     break;
-                case CPUI_FLOAT_NEG:
+                case OpCode.CPUI_FLOAT_NEG:
                     s << "Float minus(f-)";
                     break;
-                case CPUI_FLOAT_ABS:
+                case OpCode.CPUI_FLOAT_ABS:
                     s << "Absolute value(abs)";
                     break;
-                case CPUI_FLOAT_SQRT:
+                case OpCode.CPUI_FLOAT_SQRT:
                     s << "Square root";
                     break;
-                case CPUI_FLOAT_INT2FLOAT:
+                case OpCode.CPUI_FLOAT_INT2FLOAT:
                     s << "Integer to float conversion(int2float)";
                     break;
-                case CPUI_FLOAT_FLOAT2FLOAT:
+                case OpCode.CPUI_FLOAT_FLOAT2FLOAT:
                     s << "Float to float conversion(float2float)";
                     break;
-                case CPUI_FLOAT_TRUNC:
+                case OpCode.CPUI_FLOAT_TRUNC:
                     s << "Float truncation(trunc)";
                     break;
-                case CPUI_FLOAT_CEIL:
+                case OpCode.CPUI_FLOAT_CEIL:
                     s << "Ceiling(ceil)";
                     break;
-                case CPUI_FLOAT_FLOOR:
+                case OpCode.CPUI_FLOAT_FLOOR:
                     s << "Floor";
                     break;
-                case CPUI_FLOAT_ROUND:
+                case OpCode.CPUI_FLOAT_ROUND:
                     s << "Round";
                     break;
-                case CPUI_MULTIEQUAL:
+                case OpCode.CPUI_MULTIEQUAL:
                     s << "Build";
                     break;
-                case CPUI_INDIRECT:
+                case OpCode.CPUI_INDIRECT:
                     s << "Delay";
                     break;
-                case CPUI_SUBPIECE:
+                case OpCode.CPUI_SUBPIECE:
                     s << "Truncation(:)";
                     break;
-                case CPUI_SEGMENTOP:
+                case OpCode.CPUI_SEGMENTOP:
                     s << "Segment table(segment)";
                     break;
-                case CPUI_CPOOLREF:
+                case OpCode.CPUI_CPOOLREF:
                     s << "Constant Pool(cpool)";
                     break;
-                case CPUI_NEW:
+                case OpCode.CPUI_NEW:
                     s << "New object(newobject)";
                     break;
-                case CPUI_POPCOUNT:
+                case OpCode.CPUI_POPCOUNT:
                     s << "Count bits(popcount)";
                     break;
-                case CPUI_LZCOUNT:
+                case OpCode.CPUI_LZCOUNT:
                     s << "Count leading zero bits(lzcount)";
                     break;
                 default:
@@ -404,7 +404,7 @@ namespace Sla.SLACOMP
         {
             switch (op.getOpcode())
             {
-                case CPUI_INT_LESS:
+                case OpCode.CPUI_INT_LESS:
                     {
                         VarnodeTpl* vn = op.getIn(1);
                         if (vn.getSpace().isConstSpace() && vn.getOffset().isZero())
@@ -435,15 +435,15 @@ namespace Sla.SLACOMP
 
             switch (op.getOpcode())
             {
-                case CPUI_COPY:         // Instructions where all inputs and output are same size
-                case CPUI_INT_2COMP:
-                case CPUI_INT_NEGATE:
-                case CPUI_FLOAT_NEG:
-                case CPUI_FLOAT_ABS:
-                case CPUI_FLOAT_SQRT:
-                case CPUI_FLOAT_CEIL:
-                case CPUI_FLOAT_FLOOR:
-                case CPUI_FLOAT_ROUND:
+                case OpCode.CPUI_COPY:         // Instructions where all inputs and output are same size
+                case OpCode.CPUI_INT_2COMP:
+                case OpCode.CPUI_INT_NEGATE:
+                case OpCode.CPUI_FLOAT_NEG:
+                case OpCode.CPUI_FLOAT_ABS:
+                case OpCode.CPUI_FLOAT_SQRT:
+                case OpCode.CPUI_FLOAT_CEIL:
+                case OpCode.CPUI_FLOAT_FLOOR:
+                case OpCode.CPUI_FLOAT_ROUND:
                     vnout = recoverSize(op.getOut().getSize(), ct);
                     if (vnout == -1)
                     {
@@ -460,20 +460,20 @@ namespace Sla.SLACOMP
                     if ((vnout == 0) || (vn0 == 0)) return true;
                     printOpError(op, ct, -1, 0, "Input and output sizes must match");
                     return false;
-                case CPUI_INT_ADD:
-                case CPUI_INT_SUB:
-                case CPUI_INT_XOR:
-                case CPUI_INT_AND:
-                case CPUI_INT_OR:
-                case CPUI_INT_MULT:
-                case CPUI_INT_DIV:
-                case CPUI_INT_SDIV:
-                case CPUI_INT_REM:
-                case CPUI_INT_SREM:
-                case CPUI_FLOAT_ADD:
-                case CPUI_FLOAT_DIV:
-                case CPUI_FLOAT_MULT:
-                case CPUI_FLOAT_SUB:
+                case OpCode.CPUI_INT_ADD:
+                case OpCode.CPUI_INT_SUB:
+                case OpCode.CPUI_INT_XOR:
+                case OpCode.CPUI_INT_AND:
+                case OpCode.CPUI_INT_OR:
+                case OpCode.CPUI_INT_MULT:
+                case OpCode.CPUI_INT_DIV:
+                case OpCode.CPUI_INT_SDIV:
+                case OpCode.CPUI_INT_REM:
+                case OpCode.CPUI_INT_SREM:
+                case OpCode.CPUI_FLOAT_ADD:
+                case OpCode.CPUI_FLOAT_DIV:
+                case OpCode.CPUI_FLOAT_MULT:
+                case OpCode.CPUI_FLOAT_SUB:
                     vnout = recoverSize(op.getOut().getSize(), ct);
                     if (vnout == -1)
                     {
@@ -508,7 +508,7 @@ namespace Sla.SLACOMP
                         return false;
                     }
                     return true;
-                case CPUI_FLOAT_NAN:
+                case OpCode.CPUI_FLOAT_NAN:
                     vnout = recoverSize(op.getOut().getSize(), ct);
                     if (vnout == -1)
                     {
@@ -521,19 +521,19 @@ namespace Sla.SLACOMP
                         return false;
                     }
                     break;
-                case CPUI_INT_EQUAL:        // Instructions with bool output, all inputs equal size
-                case CPUI_INT_NOTEQUAL:
-                case CPUI_INT_SLESS:
-                case CPUI_INT_SLESSEQUAL:
-                case CPUI_INT_LESS:
-                case CPUI_INT_LESSEQUAL:
-                case CPUI_INT_CARRY:
-                case CPUI_INT_SCARRY:
-                case CPUI_INT_SBORROW:
-                case CPUI_FLOAT_EQUAL:
-                case CPUI_FLOAT_NOTEQUAL:
-                case CPUI_FLOAT_LESS:
-                case CPUI_FLOAT_LESSEQUAL:
+                case OpCode.CPUI_INT_EQUAL:        // Instructions with bool output, all inputs equal size
+                case OpCode.CPUI_INT_NOTEQUAL:
+                case OpCode.CPUI_INT_SLESS:
+                case OpCode.CPUI_INT_SLESSEQUAL:
+                case OpCode.CPUI_INT_LESS:
+                case OpCode.CPUI_INT_LESSEQUAL:
+                case OpCode.CPUI_INT_CARRY:
+                case OpCode.CPUI_INT_SCARRY:
+                case OpCode.CPUI_INT_SBORROW:
+                case OpCode.CPUI_FLOAT_EQUAL:
+                case OpCode.CPUI_FLOAT_NOTEQUAL:
+                case OpCode.CPUI_FLOAT_LESS:
+                case OpCode.CPUI_FLOAT_LESSEQUAL:
                     vnout = recoverSize(op.getOut().getSize(), ct);
                     if (vnout == -1)
                     {
@@ -564,9 +564,9 @@ namespace Sla.SLACOMP
                         return false;
                     }
                     return true;
-                case CPUI_BOOL_XOR:
-                case CPUI_BOOL_AND:
-                case CPUI_BOOL_OR:
+                case OpCode.CPUI_BOOL_XOR:
+                case OpCode.CPUI_BOOL_AND:
+                case OpCode.CPUI_BOOL_OR:
                     vnout = recoverSize(op.getOut().getSize(), ct);
                     if (vnout == -1)
                     {
@@ -590,7 +590,7 @@ namespace Sla.SLACOMP
                         return false;
                     }
                     return true;
-                case CPUI_BOOL_NEGATE:
+                case OpCode.CPUI_BOOL_NEGATE:
                     vnout = recoverSize(op.getOut().getSize(), ct);
                     if (vnout == -1)
                     {
@@ -616,9 +616,9 @@ namespace Sla.SLACOMP
                     return true;
                 // The shift amount does not necessarily have to be the same size
                 // But the output and first parameter must be same size
-                case CPUI_INT_LEFT:
-                case CPUI_INT_RIGHT:
-                case CPUI_INT_SRIGHT:
+                case OpCode.CPUI_INT_LEFT:
+                case OpCode.CPUI_INT_RIGHT:
+                case OpCode.CPUI_INT_SRIGHT:
                     vnout = recoverSize(op.getOut().getSize(), ct);
                     if (vnout == -1)
                     {
@@ -638,8 +638,8 @@ namespace Sla.SLACOMP
                         return false;
                     }
                     return true;
-                case CPUI_INT_ZEXT:
-                case CPUI_INT_SEXT:
+                case OpCode.CPUI_INT_ZEXT:
+                case OpCode.CPUI_INT_SEXT:
                     vnout = recoverSize(op.getOut().getSize(), ct);
                     if (vnout == -1)
                     {
@@ -664,7 +664,7 @@ namespace Sla.SLACOMP
                         return false;
                     }
                     return true;
-                case CPUI_CBRANCH:
+                case OpCode.CPUI_CBRANCH:
                     vn1 = recoverSize(op.getIn(1).getSize(), ct);
                     if (vn1 == -1)
                     {
@@ -677,8 +677,8 @@ namespace Sla.SLACOMP
                         return false;
                     }
                     return true;
-                case CPUI_LOAD:
-                case CPUI_STORE:
+                case OpCode.CPUI_LOAD:
+                case OpCode.CPUI_STORE:
                     if (op.getIn(0).getOffset().getType() != ConstTpl::spaceid)
                         return true;
                     spc = op.getIn(0).getOffset().getSpace();
@@ -694,7 +694,7 @@ namespace Sla.SLACOMP
                         return false;
                     }
                     return true;
-                case CPUI_SUBPIECE:
+                case OpCode.CPUI_SUBPIECE:
                     vnout = recoverSize(op.getOut().getSize(), ct);
                     if (vnout == -1)
                     {
@@ -943,12 +943,12 @@ namespace Sla.SLACOMP
             return testresult;
         }
 
-        /// \brief Convert an unnecessary CPUI_INT_ZEXT and CPUI_INT_SEXT into a COPY
+        /// \brief Convert an unnecessary OpCode.CPUI_INT_ZEXT and OpCode.CPUI_INT_SEXT into a COPY
         ///
         /// SLEIGH allows \b zext and \b sext notation even if the input and output
         /// Varnodes are ultimately the same size.  In this case, a warning may be
-        /// issued and the operator is converted to a CPUI_COPY.
-        /// \param op is the given CPUI_INT_ZEXT or CPUI_INT_SEXT operator to check
+        /// issued and the operator is converted to a OpCode.CPUI_COPY.
+        /// \param op is the given OpCode.CPUI_INT_ZEXT or OpCode.CPUI_INT_SEXT operator to check
         /// \param ct is the Constructor containing the operator
         private void dealWithUnnecessaryExt(OpTpl op, Constructor ct)
         {
@@ -963,12 +963,12 @@ namespace Sla.SLACOMP
             unnecessarypcode += 1;
         }
 
-        /// \brief Convert an unnecessary CPUI_SUBPIECE into a COPY
+        /// \brief Convert an unnecessary OpCode.CPUI_SUBPIECE into a COPY
         ///
         /// SLEIGH allows truncation notation even if the input and output Varnodes are
         /// ultimately the same size.  In this case, a warning may be issued and the operator
-        /// is converted to a CPUI_COPY.
-        /// \param op is the given CPUI_SUBPIECE operator
+        /// is converted to a OpCode.CPUI_COPY.
+        /// \param op is the given OpCode.CPUI_SUBPIECE operator
         /// \param ct is the containing Constructor
         private void dealWithUnnecessaryTrunc(OpTpl op, Constructor ct)
         {
@@ -1011,9 +1011,9 @@ namespace Sla.SLACOMP
                 int ctind = state.GetLastItem();
                 if (ctind >= cur.getNumConstructors())
                 {
-                    path.pop_back();        // Table is fully traversed
-                    state.pop_back();
-                    ctstate.pop_back();
+                    path.RemoveLastItem();        // Table is fully traversed
+                    state.RemoveLastItem();
+                    ctstate.RemoveLastItem();
                     postorder.Add(cur);   // Post the traversed table
                 }
                 else
@@ -1137,15 +1137,15 @@ namespace Sla.SLACOMP
                 case CROSSBUILD:
                 case DELAY_SLOT:
                 case MACROBUILD:
-                case CPUI_LOAD:
-                case CPUI_STORE:
-                case CPUI_BRANCH:
-                case CPUI_CBRANCH:
-                case CPUI_BRANCHIND:
-                case CPUI_CALL:
-                case CPUI_CALLIND:
-                case CPUI_CALLOTHER:
-                case CPUI_RETURN:
+                case OpCode.CPUI_LOAD:
+                case OpCode.CPUI_STORE:
+                case OpCode.CPUI_BRANCH:
+                case OpCode.CPUI_CBRANCH:
+                case OpCode.CPUI_BRANCHIND:
+                case OpCode.CPUI_CALL:
+                case OpCode.CPUI_CALLIND:
+                case OpCode.CPUI_CALLOTHER:
+                case OpCode.CPUI_RETURN:
                 case LABELBUILD:        // Another value might jump in here
                     return true;
                 default:
@@ -1282,7 +1282,7 @@ namespace Sla.SLACOMP
                     OpTpl op = ops[currec.readop];
                     if (currec.writeop >= currec.readop) // Read must come after write
                         throw new SleighError("Read of temporary before write");
-                    if (op.getOpcode() == CPUI_COPY)
+                    if (op.getOpcode() == OpCode.CPUI_COPY)
                     {
                         bool saverecord = true;
                         currec.opttype = 0; // Read op is a COPY
@@ -1299,7 +1299,7 @@ namespace Sla.SLACOMP
                             return &currec;
                     }
                     op = ops[currec.writeop];
-                    if (op.getOpcode() == CPUI_COPY)
+                    if (op.getOpcode() == OpCode.CPUI_COPY)
                     {
                         bool saverecord = true;
                         currec.opttype = 1; // Write op is a COPY

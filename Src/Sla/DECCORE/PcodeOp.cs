@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.Intrinsics;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Sla.DECCORE
@@ -50,7 +50,7 @@ namespace Sla.DECCORE
             /// This operation is dead
             dead = 0x20,
             /// special placeholder op (multiequal or indirect)
-            /// or CPUI_COPY between different copies
+            /// or OpCode.CPUI_COPY between different copies
             /// of same variable
             marker = 0x40,
             /// Boolean operation
@@ -101,7 +101,7 @@ namespace Sla.DECCORE
             has_callspec = 0x20000000,
             /// Op consumes or produces a ptr
             ptrflow = 0x40000000,
-            /// CPUI_INDIRECT is caused by CPUI_STORE
+            /// OpCode.CPUI_INDIRECT is caused by OpCode.CPUI_STORE
             indirect_store = 0x80000000
         }
 
@@ -133,7 +133,7 @@ namespace Sla.DECCORE
         /// Pointer to class providing behavioral details of the operation
         private TypeOp opcode;
         /// Collection of boolean attributes on this op
-        private /*mutable*/ uint flags;
+        private /*mutable*/ PcodeOp.Flags flags;
         /// Additional boolean attributes for this op
         private /*mutable*/ uint addlflags;
         /// What instruction address is this attached to
@@ -167,7 +167,7 @@ namespace Sla.DECCORE
         }
 
         /// Set the output Varnode of this op
-        private void setOutput(Varnode vn)
+        internal void setOutput(Varnode vn)
         {
             output = vn;
         }
@@ -185,7 +185,7 @@ namespace Sla.DECCORE
         }
 
         /// Set specific boolean attribute(s) on this op
-        private void setFlag(uint fl)
+        private void setFlag(PcodeOp.Flags fl)
         {
             flags |= fl;
         }
@@ -233,7 +233,7 @@ namespace Sla.DECCORE
         {
             for (int i = slot + 1; i < inrefs.size(); ++i)
                 inrefs[i - 1] = inrefs[i];
-            inrefs.pop_back();
+            inrefs.RemoveLastItem();
         }
 
         /// Make room for a new input Varnode at a specific position
@@ -292,14 +292,8 @@ namespace Sla.DECCORE
         /// Get the output Varnode of this op or \e null
         public Varnode getOut() => output;
 
-        /// Get the output Varnode of this op or \e null
-        public Varnode getOut() => (Varnode) output;
-
         /// Get a specific input Varnode to this op
         public Varnode getIn(int slot) => inrefs[slot];
-
-        /// Get a specific input Varnode to this op
-        public Varnode getIn(int slot) => (Varnode) inrefs[slot];
 
         /// Get the parent basic block
         public BlockBasic getParent() => (BlockBasic) parent;
@@ -365,7 +359,7 @@ namespace Sla.DECCORE
         public uint getEvalType() => (flags&(PcodeOp::unary|PcodeOp::binary|PcodeOp::special|PcodeOp::ternary));
 
         /// \brief Get type which indicates unusual halt in control-flow
-        public uint getHaltType() => (flags&(PcodeOp::halt|PcodeOp::badinstruction|PcodeOp::unimplemented| PcodeOp::noreturn|PcodeOp::missing));
+        public uint getHaltType() => (flags&(PcodeOp.Flags.halt|PcodeOp.Flags.badinstruction|PcodeOp.Flags.unimplemented| PcodeOp::noreturn|PcodeOp.Flags.missing));
 
         /// Return \b true if this op is dead
         public bool isDead() => ((flags&PcodeOp::dead)!= 0);
@@ -548,7 +542,7 @@ namespace Sla.DECCORE
         {
             uint hash;
             if ((getEvalType() & (PcodeOp::unary | PcodeOp::binary)) == 0) return ((uint)0);
-            if (code() == CPUI_COPY) return ((uint)0); // Let copy propagation deal with this
+            if (code() == OpCode.CPUI_COPY) return ((uint)0); // Let copy propagation deal with this
 
             hash = (output.getSize() << 8) | (uint)code();
             for (int i = 0; i < inrefs.size(); ++i)
@@ -574,7 +568,7 @@ namespace Sla.DECCORE
             if ((op.getEvalType() & (PcodeOp::unary | PcodeOp::binary)) == 0) return false;
             if (output.getSize() != op.output.getSize()) return false;
             if (code() != op.code()) return false;
-            if (code() == CPUI_COPY) return false; // Let copy propagation deal with this
+            if (code() == OpCode.CPUI_COPY) return false; // Let copy propagation deal with this
             if (inrefs.size() != op.inrefs.size()) return false;
             for (int i = 0; i < inrefs.size(); ++i)
             {
@@ -600,7 +594,7 @@ namespace Sla.DECCORE
             bool movingLoad = false;
             if (getEvalType() == PcodeOp::special)
             {
-                if (code() == CPUI_LOAD)
+                if (code() == OpCode.CPUI_LOAD)
                     movingLoad = true;  // Allow LOAD to be moved with additional restrictions
                 else
                     return false;   // Don't move special ops
@@ -654,13 +648,13 @@ namespace Sla.DECCORE
                 {
                     switch (op.code())
                     {
-                        case CPUI_LOAD:
+                        case OpCode.CPUI_LOAD:
                             if (output != (Varnode)null)
                             {
                                 if (output.isAddrTied()) return false;
                             }
                             break;
-                        case CPUI_STORE:
+                        case OpCode.CPUI_STORE:
                             if (movingLoad)
                                 return false;
                             else
@@ -672,13 +666,13 @@ namespace Sla.DECCORE
                                 }
                             }
                             break;
-                        case CPUI_INDIRECT:     // Let thru, deal with what's INDIRECTed around separately
-                        case CPUI_SEGMENTOP:
-                        case CPUI_CPOOLREF:
+                        case OpCode.CPUI_INDIRECT:     // Let thru, deal with what's INDIRECTed around separately
+                        case OpCode.CPUI_SEGMENTOP:
+                        case OpCode.CPUI_CPOOLREF:
                             break;
-                        case CPUI_CALL:
-                        case CPUI_CALLIND:
-                        case CPUI_NEW:
+                        case OpCode.CPUI_CALL:
+                        case OpCode.CPUI_CALLIND:
+                        case OpCode.CPUI_NEW:
                             if (!crossCalls) return false;
                             break;
                         default:
@@ -757,27 +751,27 @@ namespace Sla.DECCORE
             Varnode copyVn = (Varnode)null;
             switch (code())
             {
-                case CPUI_SUBPIECE:
+                case OpCode.CPUI_SUBPIECE:
                     if (getIn(1).getOffset() != 0)
                         return;             // Must be truncating high bytes
                     copyVn = getIn(0);
                     break;
-                case CPUI_COPY:
-                case CPUI_INT_ZEXT:
-                case CPUI_INT_NEGATE:
-                case CPUI_INT_2COMP:
+                case OpCode.CPUI_COPY:
+                case OpCode.CPUI_INT_ZEXT:
+                case OpCode.CPUI_INT_NEGATE:
+                case OpCode.CPUI_INT_2COMP:
                     copyVn = getIn(0);
                     break;
-                case CPUI_INT_LEFT:
-                case CPUI_INT_RIGHT:
-                case CPUI_INT_SRIGHT:
+                case OpCode.CPUI_INT_LEFT:
+                case OpCode.CPUI_INT_RIGHT:
+                case OpCode.CPUI_INT_SRIGHT:
                     copyVn = getIn(0);  // Marked varnode must be first input
                     break;
-                case CPUI_INT_ADD:
-                case CPUI_INT_MULT:
-                case CPUI_INT_AND:
-                case CPUI_INT_OR:
-                case CPUI_INT_XOR:
+                case OpCode.CPUI_INT_ADD:
+                case OpCode.CPUI_INT_MULT:
+                case OpCode.CPUI_INT_AND:
+                case OpCode.CPUI_INT_OR:
+                case OpCode.CPUI_INT_XOR:
                     copyVn = getIn(0);
                     if (copyVn.getSymbolEntry() == (SymbolEntry)null)
                     {
@@ -864,55 +858,55 @@ namespace Sla.DECCORE
 
             switch (opcode.getOpcode())
             {
-                case CPUI_INT_EQUAL:
-                case CPUI_INT_NOTEQUAL:
-                case CPUI_INT_SLESS:
-                case CPUI_INT_SLESSEQUAL:
-                case CPUI_INT_LESS:
-                case CPUI_INT_LESSEQUAL:
-                case CPUI_INT_CARRY:
-                case CPUI_INT_SCARRY:
-                case CPUI_INT_SBORROW:
-                case CPUI_BOOL_NEGATE:
-                case CPUI_BOOL_XOR:
-                case CPUI_BOOL_AND:
-                case CPUI_BOOL_OR:
-                case CPUI_FLOAT_EQUAL:
-                case CPUI_FLOAT_NOTEQUAL:
-                case CPUI_FLOAT_LESS:
-                case CPUI_FLOAT_LESSEQUAL:
-                case CPUI_FLOAT_NAN:
+                case OpCode.CPUI_INT_EQUAL:
+                case OpCode.CPUI_INT_NOTEQUAL:
+                case OpCode.CPUI_INT_SLESS:
+                case OpCode.CPUI_INT_SLESSEQUAL:
+                case OpCode.CPUI_INT_LESS:
+                case OpCode.CPUI_INT_LESSEQUAL:
+                case OpCode.CPUI_INT_CARRY:
+                case OpCode.CPUI_INT_SCARRY:
+                case OpCode.CPUI_INT_SBORROW:
+                case OpCode.CPUI_BOOL_NEGATE:
+                case OpCode.CPUI_BOOL_XOR:
+                case OpCode.CPUI_BOOL_AND:
+                case OpCode.CPUI_BOOL_OR:
+                case OpCode.CPUI_FLOAT_EQUAL:
+                case OpCode.CPUI_FLOAT_NOTEQUAL:
+                case OpCode.CPUI_FLOAT_LESS:
+                case OpCode.CPUI_FLOAT_LESSEQUAL:
+                case OpCode.CPUI_FLOAT_NAN:
                     resmask = 1;            // Only 1 bit not guaranteed to be 0
                     break;
-                case CPUI_COPY:
-                case CPUI_INT_ZEXT:
+                case OpCode.CPUI_COPY:
+                case OpCode.CPUI_INT_ZEXT:
                     resmask = getIn(0).getNZMask();
                     break;
-                case CPUI_INT_SEXT:
-                    resmask = sign_extend(getIn(0).getNZMask(), getIn(0).getSize(), size);
+                case OpCode.CPUI_INT_SEXT:
+                    resmask = Globals.sign_extend(getIn(0).getNZMask(), getIn(0).getSize(), size);
                     break;
-                case CPUI_INT_XOR:
-                case CPUI_INT_OR:
+                case OpCode.CPUI_INT_XOR:
+                case OpCode.CPUI_INT_OR:
                     resmask = getIn(0).getNZMask();
                     if (resmask != fullmask)
                         resmask |= getIn(1).getNZMask();
                     break;
-                case CPUI_INT_AND:
+                case OpCode.CPUI_INT_AND:
                     resmask = getIn(0).getNZMask();
                     if (resmask != 0)
                         resmask &= getIn(1).getNZMask();
                     break;
-                case CPUI_INT_LEFT:
+                case OpCode.CPUI_INT_LEFT:
                     if (!getIn(1).isConstant())
                         resmask = fullmask;
                     else
                     {
                         sa = getIn(1).getOffset(); // Get shift amount
                         resmask = getIn(0).getNZMask();
-                        resmask = pcode_left(resmask, sa) & fullmask;
+                        resmask = Globals.pcode_left(resmask, sa) & fullmask;
                     }
                     break;
-                case CPUI_INT_RIGHT:
+                case OpCode.CPUI_INT_RIGHT:
                     if (!getIn(1).isConstant())
                         resmask = fullmask;
                     else
@@ -920,7 +914,7 @@ namespace Sla.DECCORE
                         sz1 = getIn(0).getSize();
                         sa = getIn(1).getOffset(); // Get shift amount
                         resmask = getIn(0).getNZMask();
-                        resmask = pcode_right(resmask, sa);
+                        resmask = Globals.pcode_right(resmask, sa);
                         if (sz1 > sizeof(ulong))
                         {
                             // resmask did not hold most sig bits of mask
@@ -945,7 +939,7 @@ namespace Sla.DECCORE
                         }
                     }
                     break;
-                case CPUI_INT_SRIGHT:
+                case OpCode.CPUI_INT_SRIGHT:
                     if ((!getIn(1).isConstant()) || (size > sizeof(ulong)))
                         resmask = fullmask;
                     else
@@ -954,42 +948,42 @@ namespace Sla.DECCORE
                         resmask = getIn(0).getNZMask();
                         if ((resmask & (fullmask ^ (fullmask >> 1))) == 0)
                         {   // If we know sign bit is zero
-                            resmask = pcode_right(resmask, sa);         // Same as CPUI_INT_RIGHT
+                            resmask = Globals.pcode_right(resmask, sa);         // Same as OpCode.CPUI_INT_RIGHT
                         }
                         else
                         {
-                            resmask = pcode_right(resmask, sa);
+                            resmask = Globals.pcode_right(resmask, sa);
                             resmask |= (fullmask >> sa) ^ fullmask;         // Don't know what the new high bits are
                         }
                     }
                     break;
-                case CPUI_INT_DIV:
+                case OpCode.CPUI_INT_DIV:
                     val = getIn(0).getNZMask();
-                    resmask = coveringmask(val);
+                    resmask = Globals.coveringmask(val);
                     if (getIn(1).isConstant())
                     {
                         // Dividing by power of 2 is equiv to right shift
                         // if the denom is bigger than a power of 2, then
                         // the result still has at least that many highsig zerobits
-                        sa = mostsigbit_set(getIn(1).getNZMask());
+                        sa = Globals.mostsigbit_set(getIn(1).getNZMask());
                         if (sa != -1)
                             resmask >>= sa;     // Add sa additional zerobits
                     }
                     break;
-                case CPUI_INT_REM:
+                case OpCode.CPUI_INT_REM:
                     val = (getIn(1).getNZMask() - 1); // Result is less than modulus
-                    resmask = coveringmask(val);
+                    resmask = Globals.coveringmask(val);
                     break;
-                case CPUI_POPCOUNT:
-                    sz1 = popcount(getIn(0).getNZMask());
-                    resmask = coveringmask((ulong)sz1);
+                case OpCode.CPUI_POPCOUNT:
+                    sz1 = Globals.popcount(getIn(0).getNZMask());
+                    resmask = Globals.coveringmask((ulong)sz1);
                     resmask &= fullmask;
                     break;
-                case CPUI_LZCOUNT:
-                    resmask = coveringmask(getIn(0).getSize() * 8);
+                case OpCode.CPUI_LZCOUNT:
+                    resmask = Globals.coveringmask(getIn(0).getSize() * 8);
                     resmask &= fullmask;
                     break;
-                case CPUI_SUBPIECE:
+                case OpCode.CPUI_SUBPIECE:
                     resmask = getIn(0).getNZMask();
                     sz1 = (int)getIn(1).getOffset();
                     if ((int)getIn(0).getSize() <= sizeof(ulong))
@@ -1012,34 +1006,34 @@ namespace Sla.DECCORE
                     }
                     resmask &= fullmask;
                     break;
-                case CPUI_PIECE:
+                case OpCode.CPUI_PIECE:
                     resmask = getIn(0).getNZMask();
                     resmask <<= 8 * getIn(1).getSize();
                     resmask |= getIn(1).getNZMask();
                     break;
-                case CPUI_INT_MULT:
+                case OpCode.CPUI_INT_MULT:
                     val = getIn(0).getNZMask();
                     resmask = getIn(1).getNZMask();
-                    sz1 = (size > sizeof(ulong)) ? 8 * size - 1 : mostsigbit_set(val);
+                    sz1 = (size > sizeof(ulong)) ? 8 * size - 1 : Globals.mostsigbit_set(val);
                     if (sz1 == -1)
                         resmask = 0;
                     else
                     {
-                        sz2 = (size > sizeof(ulong)) ? 8 * size - 1 : mostsigbit_set(resmask);
+                        sz2 = (size > sizeof(ulong)) ? 8 * size - 1 : Globals.mostsigbit_set(resmask);
                         if (sz2 == -1)
                             resmask = 0;
                         else
                         {
                             if (sz1 + sz2 < 8 * size - 2)
                                 fullmask >>= (8 * size - 2 - sz1 - sz2);
-                            sz1 = leastsigbit_set(val);
-                            sz2 = leastsigbit_set(resmask);
+                            sz1 = Globals.leastsigbit_set(val);
+                            sz2 = Globals.leastsigbit_set(resmask);
                             resmask = (~((ulong)0)) << (sz1 + sz2);
                             resmask &= fullmask;
                         }
                     }
                     break;
-                case CPUI_INT_ADD:
+                case OpCode.CPUI_INT_ADD:
                     resmask = getIn(0).getNZMask();
                     if (resmask != fullmask)
                     {
@@ -1048,7 +1042,7 @@ namespace Sla.DECCORE
                         resmask &= fullmask;
                     }
                     break;
-                case CPUI_MULTIEQUAL:
+                case OpCode.CPUI_MULTIEQUAL:
                     if (inrefs.size() == 0)
                         resmask = fullmask;
                     else
@@ -1070,9 +1064,9 @@ namespace Sla.DECCORE
                         }
                     }
                     break;
-                case CPUI_CALL:
-                case CPUI_CALLIND:
-                case CPUI_CPOOLREF:
+                case OpCode.CPUI_CALL:
+                case OpCode.CPUI_CALLIND:
+                case OpCode.CPUI_CPOOLREF:
                     if (isCalculatedBool())
                         resmask = 1;        // In certain cases we know the output is strictly boolean
                     else
@@ -1154,7 +1148,7 @@ namespace Sla.DECCORE
                 }
                 else if (vn.getSpace().getType() == IPTR_IOP)
                 {
-                    if ((i == 1) && (code() == CPUI_INDIRECT))
+                    if ((i == 1) && (code() == OpCode.CPUI_INDIRECT))
                     {
                         PcodeOp* indop = PcodeOp::getOpFromConst(vn.getAddr());
                         encoder.openElement(ELEM_IOP);
@@ -1169,7 +1163,7 @@ namespace Sla.DECCORE
                 }
                 else if (vn.getSpace().getType() == IPTR_CONSTANT)
                 {
-                    if ((i == 0) && ((code() == CPUI_STORE) || (code() == CPUI_LOAD)))
+                    if ((i == 0) && ((code() == OpCode.CPUI_STORE) || (code() == OpCode.CPUI_LOAD)))
                     {
                         AddrSpace* spc = vn.getSpaceFromConst();
                         encoder.openElement(ELEM_SPACEID);

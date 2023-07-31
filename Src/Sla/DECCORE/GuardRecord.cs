@@ -101,8 +101,8 @@ namespace Sla.DECCORE
             if (loadOp2 == (PcodeOp)null) return 0;
             if (oneOffMatch(loadOp, loadOp2) == 1)      // Check for simple duplicate calculations
                 return 1;
-            if (loadOp.code() != CPUI_LOAD) return 0;
-            if (loadOp2.code() != CPUI_LOAD) return 0;
+            if (loadOp.code() != OpCode.CPUI_LOAD) return 0;
+            if (loadOp2.code() != OpCode.CPUI_LOAD) return 0;
             if (loadOp.getIn(0).getOffset() != loadOp2.getIn(0).getOffset()) return 0;
             Varnode* ptr = loadOp.getIn(1);
             Varnode* ptr2 = loadOp2.getIn(1);
@@ -110,11 +110,11 @@ namespace Sla.DECCORE
             if (!ptr.isWritten()) return 0;
             if (!ptr2.isWritten()) return 0;
             PcodeOp* addop = ptr.getDef();
-            if (addop.code() != CPUI_INT_ADD) return 0;
+            if (addop.code() != OpCode.CPUI_INT_ADD) return 0;
             Varnode* constvn = addop.getIn(1);
             if (!constvn.isConstant()) return 0;
             PcodeOp* addop2 = ptr2.getDef();
-            if (addop2.code() != CPUI_INT_ADD) return 0;
+            if (addop2.code() != OpCode.CPUI_INT_ADD) return 0;
             Varnode* constvn2 = addop2.getIn(1);
             if (!constvn2.isConstant()) return 0;
             if (addop.getIn(0) != addop2.getIn(0)) return 0;
@@ -135,15 +135,15 @@ namespace Sla.DECCORE
                 return 0;
             switch (op1.code())
             {
-                case CPUI_INT_AND:
-                case CPUI_INT_ADD:
-                case CPUI_INT_XOR:
-                case CPUI_INT_OR:
-                case CPUI_INT_LEFT:
-                case CPUI_INT_RIGHT:
-                case CPUI_INT_SRIGHT:
-                case CPUI_INT_MULT:
-                case CPUI_SUBPIECE:
+                case OpCode.CPUI_INT_AND:
+                case OpCode.CPUI_INT_ADD:
+                case OpCode.CPUI_INT_XOR:
+                case OpCode.CPUI_INT_OR:
+                case OpCode.CPUI_INT_LEFT:
+                case OpCode.CPUI_INT_RIGHT:
+                case OpCode.CPUI_INT_SRIGHT:
+                case OpCode.CPUI_INT_MULT:
+                case OpCode.CPUI_SUBPIECE:
                     if (op2.getIn(0) != op1.getIn(0)) return 0;
                     if (matching_constants(op2.getIn(1), op1.getIn(1)))
                         return 1;
@@ -166,7 +166,7 @@ namespace Sla.DECCORE
         /// \return the earliest source of the quasi-copy, which may just be the given Varnode
         public static Varnode quasiCopy(Varnode vn, int bitsPreserved)
         {
-            bitsPreserved = mostsigbit_set(vn.getNZMask()) + 1;
+            bitsPreserved = Globals.mostsigbit_set(vn.getNZMask()) + 1;
             if (bitsPreserved == 0) return vn;
             ulong mask = 1;
             mask <<= bitsPreserved;
@@ -177,11 +177,11 @@ namespace Sla.DECCORE
             {
                 switch (op.code())
                 {
-                    case CPUI_COPY:
+                    case OpCode.CPUI_COPY:
                         vn = op.getIn(0);
                         op = vn.getDef();
                         break;
-                    case CPUI_INT_AND:
+                    case OpCode.CPUI_INT_AND:
                         constVn = op.getIn(1);
                         if (constVn.isConstant() && constVn.getOffset() == mask)
                         {
@@ -191,7 +191,7 @@ namespace Sla.DECCORE
                         else
                             op = (PcodeOp)null;
                         break;
-                    case CPUI_INT_OR:
+                    case OpCode.CPUI_INT_OR:
                         constVn = op.getIn(1);
                         if (constVn.isConstant() && ((constVn.getOffset() | mask) == (constVn.getOffset() ^ mask)))
                         {
@@ -201,8 +201,8 @@ namespace Sla.DECCORE
                         else
                             op = (PcodeOp)null;
                         break;
-                    case CPUI_INT_SEXT:
-                    case CPUI_INT_ZEXT:
+                    case OpCode.CPUI_INT_SEXT:
+                    case OpCode.CPUI_INT_ZEXT:
                         if (op.getIn(0).getSize() * 8 >= bitsPreserved)
                         {
                             vn = op.getIn(0);
@@ -211,7 +211,7 @@ namespace Sla.DECCORE
                         else
                             op = (PcodeOp)null;
                         break;
-                    case CPUI_PIECE:
+                    case OpCode.CPUI_PIECE:
                         if (op.getIn(1).getSize() * 8 >= bitsPreserved)
                         {
                             vn = op.getIn(1);
@@ -220,7 +220,7 @@ namespace Sla.DECCORE
                         else
                             op = (PcodeOp)null;
                         break;
-                    case CPUI_SUBPIECE:
+                    case OpCode.CPUI_SUBPIECE:
                         constVn = op.getIn(1);
                         if (constVn.isConstant() && constVn.getOffset() == 0)
                         {

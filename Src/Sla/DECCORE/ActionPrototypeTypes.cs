@@ -28,13 +28,13 @@ namespace Sla.DECCORE
         {
             VarnodeData vdata;
             OpCode res = data.getFuncProto().assumedInputExtension(invn.getAddr(), invn.getSize(), vdata);
-            if (res == CPUI_COPY) return;       // no extension
-            if (res == CPUI_PIECE)
+            if (res == OpCode.CPUI_COPY) return;       // no extension
+            if (res == OpCode.CPUI_PIECE)
             {   // Do an extension based on type of parameter
-                if (param.getType().getMetatype() == TYPE_INT)
-                    res = CPUI_INT_SEXT;
+                if (param.getType().getMetatype() == type_metatype.TYPE_INT)
+                    res = OpCode.CPUI_INT_SEXT;
                 else
-                    res = CPUI_INT_ZEXT;
+                    res = OpCode.CPUI_INT_ZEXT;
             }
             PcodeOp* op = data.newOp(1, topbl.getStart());
             data.newVarnodeOut(vdata.size, vdata.getAddr(), op);
@@ -85,7 +85,7 @@ namespace Sla.DECCORE
             if (data.getFuncProto().isOutputLocked())
             {
                 ProtoParameter* outparam = data.getFuncProto().getOutput();
-                if (outparam.getType().getMetatype() != TYPE_VOID)
+                if (outparam.getType().getMetatype() != type_metatype.TYPE_VOID)
                 {
                     for (iter = data.beginOp(CPUI_RETURN); iter != iterend; ++iter)
                     {
@@ -120,7 +120,7 @@ namespace Sla.DECCORE
                         invn = data.setInputVarnode(invn);
                         PcodeOp* extop = data.newOp(1, topbl.getStart());
                         data.newVarnodeOut(fullReg.size, fullReg.getAddr(), extop);
-                        data.opSetOpcode(extop, CPUI_INT_ZEXT);
+                        data.opSetOpcode(extop, OpCode.CPUI_INT_ZEXT);
                         data.opSetInput(extop, invn, 0);
                         data.opInsertBegin(extop, topbl);
                     }
@@ -153,7 +153,7 @@ namespace Sla.DECCORE
                     if (ptr_size > 0)
                     {
                         Datatype* ct = param.getType();
-                        if ((ct.getMetatype() == TYPE_PTR) && (ct.getSize() == ptr_size))
+                        if ((ct.getMetatype() == type_metatype.TYPE_PTR) && (ct.getSize() == ptr_size))
                             vn.setPtrFlow();
                     }
                 }

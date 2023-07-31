@@ -29,7 +29,7 @@ namespace Sla.DECCORE
             if (myfp == null) {
                 myfp = data.getArch().defaultfp;
             }
-            if (myfp.getExtraPop() != ProtoModel::extrapop_unknown) {
+            if (myfp.getExtraPop() != ProtoModel.extrapop_unknown) {
                 return;
             }
 
@@ -63,7 +63,7 @@ namespace Sla.DECCORE
                 }
                 PcodeOp op = vn.getDef();
 
-                if (op.code() == CPUI_INDIRECT) {
+                if (op.code() == OpCode.CPUI_INDIRECT) {
                     Varnode iopvn = op.getIn(1);
                     if (iopvn.getSpace().getType() == IPTR_IOP) {
                         PcodeOp iop = PcodeOp::getOpFromConst(iopvn.getAddr());
@@ -82,7 +82,7 @@ namespace Sla.DECCORE
                 paramlist.Add(invn);
                 int sz = invn.getSize();
                 paramlist.Add(data.newConstant(sz, soln & Globals.calc_mask(sz)));
-                data.opSetOpcode(op, CPUI_INT_ADD);
+                data.opSetOpcode(op, OpCode.CPUI_INT_ADD);
                 data.opSetAllInput(op, paramlist);
             }
             return;
@@ -106,7 +106,7 @@ namespace Sla.DECCORE
                 return false;
             }
             PcodeOp addop = vn.getDef();
-            if (addop.code() != CPUI_INT_ADD) {
+            if (addop.code() != OpCode.CPUI_INT_ADD) {
                 return false;
             }
             if (addop.getIn(0) != spcbasein) {
@@ -136,7 +136,7 @@ namespace Sla.DECCORE
                 return false;
             }
             data.opRemoveInput(loadop, 1);
-            data.opSetOpcode(loadop, CPUI_COPY);
+            data.opSetOpcode(loadop, OpCode.CPUI_COPY);
             data.opSetInput(loadop, vn, 0);
             return true;
         }
@@ -176,7 +176,7 @@ namespace Sla.DECCORE
                     // Don't try to trace aliasing through a call
                     return 0;
                 }
-                if (curop.code() == CPUI_STORE) {
+                if (curop.code() == OpCode.CPUI_STORE) {
                     Varnode ptrvn = curop.getIn(1);
                     Varnode datavn = curop.getIn(2);
                     ulong constnew;
@@ -239,7 +239,7 @@ namespace Sla.DECCORE
                     continue;
                 }
                 PcodeOp addop = outvn.getDef();
-                if (addop.code() != CPUI_INT_ADD) {
+                if (addop.code() != OpCode.CPUI_INT_ADD) {
                     continue;
                 }
                 Varnode* y = addop.getIn(1);
@@ -260,7 +260,7 @@ namespace Sla.DECCORE
                     }
                 }
                 PcodeOp loadop = y.getDef();
-                if (loadop.code() == CPUI_INT_MULT) {
+                if (loadop.code() == OpCode.CPUI_INT_MULT) {
                     // If we multiply
                     Varnode constvn = loadop.getIn(1);
                     if (!constvn.isConstant()) {
@@ -276,7 +276,7 @@ namespace Sla.DECCORE
                     }
                     loadop = y.getDef();
                 }
-                if (loadop.code() != CPUI_LOAD) {
+                if (loadop.code() != OpCode.CPUI_LOAD) {
                         continue;
                     }
                 Varnode ptrvn = loadop.getIn(1);

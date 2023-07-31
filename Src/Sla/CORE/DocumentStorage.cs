@@ -14,9 +14,9 @@ namespace Sla.CORE
     public class DocumentStorage
     {
         /// The list of documents held by this container
-        private List<Document> doclist;
+        private List<Document> doclist = new List<Document>();
         /// The map from name to registered XML elements
-        private Dictionary<string, Element> tagmap;
+        private Dictionary<string, Element> tagmap = new Dictionary<string, Element>();
 
         /// Destructor
         ~DocumentStorage()
@@ -35,7 +35,7 @@ namespace Sla.CORE
         /// \return the in-memory DOM tree
         Document parseDocument(StreamReader s)
         {
-            Document result = Globals.xml_tree(s);
+            Document result = Xml.xml_tree(s);
             doclist.Add(result);
             return result;
         }
@@ -71,7 +71,7 @@ namespace Sla.CORE
         /// \brief Retrieve a registered XML Element by name
         /// \param nm is the XML tag name
         /// \return the matching registered Element or null
-        public Element? getTag(ref string nm)
+        public Element? getTag(string nm)
         {
             Element? result;
 

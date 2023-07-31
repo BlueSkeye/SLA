@@ -13,7 +13,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla
 {
-    public static partial class Globals
+    internal static partial class Globals
     {
 #if UINTB4
         ulong[] uintbmasks = new ulong[] {
@@ -43,35 +43,27 @@ namespace Sla
 
         /// \param size is the desired size in bytes
         /// \return a value appropriate for masking off the first \e size bytes
-        public static ulong Globals.calc_mask(uint size)
+        public static ulong calc_mask(uint size)
         {
             return uintbmasks[(8 > size) ? size : 8];
         }
 
-        /// Perform a CPUI_INT_RIGHT on the given val
+        /// Perform a OpCode.CPUI_INT_RIGHT on the given val
         /// \param val is the value to shift
         /// \param sa is the number of bits to shift
         /// \return the shifted value
         public static ulong pcode_right(ulong val, int sa)
         {
-            if (sa >= 8 * sizeof(ulong))
-            {
-                return 0;
-            }
-            return val >> sa;
+            return (sa >= 8 * sizeof(ulong)) ? 0 : val >> sa;
         }
 
-        /// Perform a CPUI_INT_LEFT on the given val
+        /// Perform a OpCode.CPUI_INT_LEFT on the given val
         /// \param val is the value to shift
         /// \param sa is the number of bits to shift
         /// \return the shifted value
         public static ulong pcode_left(ulong val, int sa)
         {
-            if (sa >= 8 * sizeof(ulong))
-            {
-                return 0;
-            }
-            return val << sa;
+            return (sa >= 8 * sizeof(ulong)) ? 0 : val << sa;
         }
 
         /// \brief Calculate smallest mask that covers the given value
@@ -81,19 +73,16 @@ namespace Sla
         /// \return the minimal mask
         public static ulong minimalmask(ulong val)
         {
-            if (val > 0xffffffff)
-            {
-                return ~((ulong)0);
+            if (val > 0xffffffff) {
+                return ulong.MaxValue;
             }
-            if (val > 0xffff)
-            {
-                return 0xffffffff;
+            if (val > 0xffff) {
+                return uint.MaxValue;
             }
-            if (val > 0xff)
-            {
-                return 0xffff;
+            if (val > 0xff) {
+                return ushort.MaxValue;
             }
-            return 0xff;
+            return byte.MaxValue;
         }
 
         //public static StreamWriter operator <<(StreamWriter s, SeqNum sq)
@@ -211,7 +200,7 @@ namespace Sla
         /// \param val is the value to swap
         /// \param size is the number of bytes to swap
         /// \return the swapped value
-        public static ulong byte_swap(ulong val, int size)
+        public static ulong byte_swap(ulong val, uint size)
         {
             ulong res = 0;
             while (size > 0) {
@@ -271,7 +260,6 @@ namespace Sla
         /// \param val is the given value
         /// \return the number of one bits
         public static int popcount(ulong val)
-
         {
             val = (val & 0x5555555555555555L) + ((val >> 1) & 0x5555555555555555L);
             val = (val & 0x3333333333333333L) + ((val >> 2) & 0x3333333333333333L);
@@ -459,7 +447,7 @@ namespace Sla
                 else {
                     tmpq >>= 1;
                 }
-                mult64to128(mult, divisor, tmpq);
+                Globals.mult64to128(mult, divisor, tmpq);
                 if (unsignedCompare128(fullpower, mult) < 0) {
                     max = tmpq - 1;
                 }
@@ -469,10 +457,10 @@ namespace Sla
             }
             // min is now our putative quotient
             if (tmpq != min) {
-                mult64to128(mult, divisor, min);
+                Globals.mult64to128(mult, divisor, min);
             }
             // Calculate remainder
-            unsignedSubtract128(fullpower, mult);
+            Globals.unsignedSubtract128(fullpower, mult);
             // min might be 1 too small
             if (fullpower[1] != 0 || fullpower[0] >= divisor) {
                 q = min + 1;
@@ -616,28 +604,28 @@ namespace Sla
             return size;
         }
 
-        //extern bool signbit_negative(ulong val, int size); ///< Return true if the sign-bit is set
+        //extern bool Globals.signbit_negative(ulong val, int size); ///< Return true if the sign-bit is set
         //extern ulong Globals.calc_mask(int size);          ///< Calculate a mask for a given byte size
-        //extern ulong uintb_negate(ulong in, int size);     ///< Negate the \e sized value
-        //extern ulong sign_extend(ulong in, int sizein, int sizeout);  ///< Sign-extend a value between two byte sizes
+        //extern ulong Globals.uintb_negate(ulong in, int size);     ///< Negate the \e sized value
+        //extern ulong Globals.sign_extend(ulong in, int sizein, int sizeout);  ///< Sign-extend a value between two byte sizes
 
-        //extern void sign_extend(long &val, int bit);       ///< Sign extend above given bit
-        //extern void zero_extend(long &val, int bit);       ///< Clear all bits above given bit
-        //extern void byte_swap(long &val, int size);        ///< Swap bytes in the given value
+        //extern void Globals.sign_extend(long &val, int bit);       ///< Sign extend above given bit
+        //extern void Globals.zero_extend(long &val, int bit);       ///< Clear all bits above given bit
+        //extern void Globals.byte_swap(long &val, int size);        ///< Swap bytes in the given value
 
-        //extern ulong byte_swap(ulong val, int size);       ///< Return the given value with bytes swapped
-        //extern int leastsigbit_set(ulong val);         ///< Return index of least significant bit set in given value
-        //extern int mostsigbit_set(ulong val);          ///< Return index of most significant bit set in given value
-        //extern int popcount(ulong val);            ///< Return the number of one bits in the given value
-        //extern int count_leading_zeros(ulong val);     ///< Return the number of leading zero bits in the given value
+        //extern ulong Globals.byte_swap(ulong val, int size);       ///< Return the given value with bytes swapped
+        //extern int Globals.leastsigbit_set(ulong val);         ///< Return index of least significant bit set in given value
+        //extern int Globals.mostsigbit_set(ulong val);          ///< Return index of most significant bit set in given value
+        //extern int Globals.popcount(ulong val);            ///< Return the number of one bits in the given value
+        //extern int Globals.count_leading_zeros(ulong val);     ///< Return the number of leading zero bits in the given value
 
-        //extern ulong coveringmask(ulong val);           ///< Return a mask that \e covers the given value
-        //extern int bit_transitions(ulong val, int sz);        ///< Calculate the number of bit transitions in the sized value
+        //extern ulong Globals.coveringmask(ulong val);           ///< Return a mask that \e covers the given value
+        //extern int Globals.bit_transitions(ulong val, int sz);        ///< Calculate the number of bit transitions in the sized value
 
-        //extern void mult64to128(ulong* res, ulong x, ulong y);
-        //extern void unsignedSubtract128(ulong* a, ulong* b);
-        //extern int unsignedCompare128(ulong* a, ulong* b);
-        //extern int power2Divide(int n, ulong divisor, ulong &q, ulong &r);
+        //extern void Globals.mult64to128(ulong* res, ulong x, ulong y);
+        //extern void Globals.unsignedSubtract128(ulong* a, ulong* b);
+        //extern int Globals.unsignedCompare128(ulong* a, ulong* b);
+        //extern int Globals.power2Divide(int n, ulong divisor, ulong &q, ulong &r);
 
         /// Return true if \b vn1 contains the high part and \b vn2 the low part
         /// of what was(is) a single value.
@@ -651,13 +639,12 @@ namespace Sla
                 return false;
             }
             if ((!vn1.isWritten()) || (!vn2.isWritten())) return false;
-            PcodeOp* op1 = vn1.getDef();
-            PcodeOp* op2 = vn2.getDef();
-            Varnode* vnwhole;
-            switch (op1.code())
-            {
-                case CPUI_SUBPIECE:
-                    if (op2.code() != CPUI_SUBPIECE) return false;
+            PcodeOp op1 = vn1.getDef();
+            PcodeOp op2 = vn2.getDef();
+            Varnode vnwhole;
+            switch (op1.code()) {
+                case OpCode.CPUI_SUBPIECE:
+                    if (op2.code() != OpCode.CPUI_SUBPIECE) return false;
                     vnwhole = op1.getIn(0);
                     if (op2.getIn(0) != vnwhole) return false;
                     if (op2.getIn(1).getOffset() != 0)
@@ -670,7 +657,7 @@ namespace Sla
             }
         }
 
-        /// Assuming vn1,vn2 has passed the contiguous_test(), return
+        /// Assuming vn1,vn2 has passed the Globals.contiguous_test(), return
         /// the Varnode containing the whole value.
         /// \param data is the underlying function
         /// \param vn1 is the high Varnode
@@ -679,7 +666,7 @@ namespace Sla
         internal static Varnode findContiguousWhole(Funcdata data, Varnode vn1, Varnode vn2)
         {
             if (vn1.isWritten())
-                if (vn1.getDef().code() == CPUI_SUBPIECE)
+                if (vn1.getDef().code() == OpCode.CPUI_SUBPIECE)
                     return vn1.getDef().getIn(0);
             return (Varnode)null;
         }
@@ -748,15 +735,15 @@ namespace Sla
 
         internal static void findSlaSpecs(List<string> res, string dir, string suffix)
         {
-            FileManage::matchListDir(res, suffix, true, dir, false);
+            FileManage.matchListDir(res, suffix, true, dir, false);
 
             List<string> dirs;
-            FileManage::directoryList(dirs, dir);
+            FileManage.directoryList(dirs, dir);
             List<string>::const_iterator iter;
             for (iter = dirs.begin(); iter != dirs.end(); ++iter)
             {
                 string nextdir = *iter;
-                findSlaSpecs(res, nextdir, suffix);
+                Globals.findSlaSpecs(res, nextdir, suffix);
             }
         }
         internal static void segvHandler(int sig)
@@ -764,15 +751,208 @@ namespace Sla
             exit(1);            // Just die - prevents OS from popping-up a dialog
         }
 
-        int pcodelex()
+        internal static int pcodelex()
         {
             return pcode.lex();
         }
 
-        int pcodeerror(string s)
+        internal static int pcodeerror(string s)
         {
             pcode.reportError((Location*)0, s);
             return 0;
+        }
+
+        // ------------------ OpCode related ------------------------------
+        /// \brief Names of operations associated with their opcode number
+        ///
+        /// Some of the names have been replaced with special placeholder
+        /// ops for the sleigh compiler and interpreter these are as follows:
+        ///  -  MULTIEQUAL = BUILD
+        ///  -  INDIRECT   = DELAY_SLOT
+        ///  -  PTRADD     = LABEL
+        ///  -  PTRSUB     = CROSSBUILD
+        public static readonly string[] opcode_name = {
+            "BLANK", "COPY", "LOAD", "STORE",
+            "BRANCH", "CBRANCH", "BRANCHIND", "CALL",
+            "CALLIND", "CALLOTHER", "RETURN", "INT_EQUAL",
+            "INT_NOTEQUAL", "INT_SLESS", "INT_SLESSEQUAL", "INT_LESS",
+            "INT_LESSEQUAL", "INT_ZEXT", "INT_SEXT", "INT_ADD",
+            "INT_SUB", "INT_CARRY", "INT_SCARRY", "INT_SBORROW",
+            "INT_2COMP", "INT_NEGATE", "INT_XOR", "INT_AND",
+            "INT_OR", "INT_LEFT", "INT_RIGHT", "INT_SRIGHT",
+            "INT_MULT", "INT_DIV", "INT_SDIV", "INT_REM",
+            "INT_SREM", "BOOL_NEGATE", "BOOL_XOR", "BOOL_AND",
+            "BOOL_OR", "FLOAT_EQUAL", "FLOAT_NOTEQUAL", "FLOAT_LESS",
+            "FLOAT_LESSEQUAL", "UNUSED1", "FLOAT_NAN", "FLOAT_ADD",
+            "FLOAT_DIV", "FLOAT_MULT", "FLOAT_SUB", "FLOAT_NEG",
+            "FLOAT_ABS", "FLOAT_SQRT", "INT2FLOAT", "FLOAT2FLOAT",
+            "TRUNC", "CEIL", "FLOOR", "ROUND",
+            "BUILD", "DELAY_SLOT", "PIECE", "SUBPIECE", "CAST",
+            "LABEL", "CROSSBUILD", "SEGMENTOP", "CPOOLREF", "NEW",
+            "INSERT", "EXTRACT", "POPCOUNT", "LZCOUNT"
+        };
+
+        public static readonly int[] opcode_indices = {
+            0, 39, 37, 40, 38,  4,  6, 60,  7,  8,  9, 64,  5, 57,  1, 68, 66,
+            61, 71, 55, 52, 47, 48, 41, 43, 44, 49, 46, 51, 42, 53, 50, 58, 70,
+            54, 24, 19, 27, 21, 33, 11, 29, 15, 16, 32, 25, 12, 28, 35, 30,
+            23, 22, 34, 18, 13, 14, 36, 31, 20, 26, 17, 65,  2, 73, 69, 62, 72, 10, 59,
+            67,  3, 63, 56, 45
+        };
+
+        /// \param opc is an OpCode value
+        /// \return the name of the operation as a string
+        public static string get_opname(OpCode opc)
+        {
+            return opcode_name[(int)opc];
+        }
+
+        /// \param nm is the name of an operation
+        /// \return the corresponding OpCode value
+        public static OpCode get_opcode(ref string nm)
+        {
+            int min = 1;           // Don't include BLANK
+            int max = (int)OpCode.CPUI_MAX - 1;
+            int cur, ind;
+
+            while (min <= max)
+            {
+                // Binary search
+                cur = (min + max) / 2;
+                // Get opcode in cur's sort slot
+                ind = opcode_indices[cur];
+                int comparisonResult = string.Compare(opcode_name[ind], nm);
+                if (comparisonResult < 0)
+                {
+                    // Everything equal or below cur is less
+                    min = cur + 1;
+                }
+                else if (comparisonResult > 0)
+                {
+                    // Everything equal or above cur is greater
+                    max = cur - 1;
+                }
+                else
+                {
+                    // Found the match
+                    return (OpCode)ind;
+                }
+            }
+            // Name isn't an op
+            return (OpCode)0;
+        }
+
+        /// Every comparison operation has a complementary form that produces
+        /// the opposite output on the same inputs. Set \b reorder to true if
+        /// the complimentary operation involves reordering the input parameters.
+        /// \param opc is the OpCode to complement
+        /// \param reorder is set to \b true if the inputs need to be reordered
+        /// \return the complementary OpCode or OpCode.CPUI_MAX if not given a comparison operation
+        public static OpCode get_booleanflip(OpCode opc, ref bool reorder)
+        {
+            switch (opc)
+            {
+                case OpCode.CPUI_INT_EQUAL:
+                    reorder = false;
+                    return OpCode.CPUI_INT_NOTEQUAL;
+                case OpCode.CPUI_INT_NOTEQUAL:
+                    reorder = false;
+                    return OpCode.CPUI_INT_EQUAL;
+                case OpCode.CPUI_INT_SLESS:
+                    reorder = true;
+                    return OpCode.CPUI_INT_SLESSEQUAL;
+                case OpCode.CPUI_INT_SLESSEQUAL:
+                    reorder = true;
+                    return OpCode.CPUI_INT_SLESS;
+                case OpCode.CPUI_INT_LESS:
+                    reorder = true;
+                    return OpCode.CPUI_INT_LESSEQUAL;
+                case OpCode.CPUI_INT_LESSEQUAL:
+                    reorder = true;
+                    return OpCode.CPUI_INT_LESS;
+                case OpCode.CPUI_BOOL_NEGATE:
+                    reorder = false;
+                    return OpCode.CPUI_COPY;
+                case OpCode.CPUI_FLOAT_EQUAL:
+                    reorder = false;
+                    return OpCode.CPUI_FLOAT_NOTEQUAL;
+                case OpCode.CPUI_FLOAT_NOTEQUAL:
+                    reorder = false;
+                    return OpCode.CPUI_FLOAT_EQUAL;
+                case OpCode.CPUI_FLOAT_LESS:
+                    reorder = true;
+                    return OpCode.CPUI_FLOAT_LESSEQUAL;
+                case OpCode.CPUI_FLOAT_LESSEQUAL:
+                    reorder = true;
+                    return OpCode.CPUI_FLOAT_LESS;
+                default:
+                    return OpCode.CPUI_MAX;
+            }
+        }
+
+        // ------------------------ Crc32 related -------------------------------
+        /// Table for quickly computing a 32-bit Cyclic Redundacy Check (CRC)
+        private static uint[] crc32tab = {
+            0x0,0x77073096,0xee0e612c,0x990951ba,0x76dc419,0x706af48f,
+            0xe963a535,0x9e6495a3,0xedb8832,0x79dcb8a4,0xe0d5e91e,
+            0x97d2d988,0x9b64c2b,0x7eb17cbd,0xe7b82d07,0x90bf1d91,
+            0x1db71064,0x6ab020f2,0xf3b97148,0x84be41de,0x1adad47d,
+            0x6ddde4eb,0xf4d4b551,0x83d385c7,0x136c9856,0x646ba8c0,
+            0xfd62f97a,0x8a65c9ec,0x14015c4f,0x63066cd9,0xfa0f3d63,
+            0x8d080df5,0x3b6e20c8,0x4c69105e,0xd56041e4,0xa2677172,
+            0x3c03e4d1,0x4b04d447,0xd20d85fd,0xa50ab56b,0x35b5a8fa,
+            0x42b2986c,0xdbbbc9d6,0xacbcf940,0x32d86ce3,0x45df5c75,
+            0xdcd60dcf,0xabd13d59,0x26d930ac,0x51de003a,0xc8d75180,
+            0xbfd06116,0x21b4f4b5,0x56b3c423,0xcfba9599,0xb8bda50f,
+            0x2802b89e,0x5f058808,0xc60cd9b2,0xb10be924,0x2f6f7c87,
+            0x58684c11,0xc1611dab,0xb6662d3d,0x76dc4190,0x1db7106,
+            0x98d220bc,0xefd5102a,0x71b18589,0x6b6b51f,0x9fbfe4a5,
+            0xe8b8d433,0x7807c9a2,0xf00f934,0x9609a88e,0xe10e9818,
+            0x7f6a0dbb,0x86d3d2d,0x91646c97,0xe6635c01,0x6b6b51f4,
+            0x1c6c6162,0x856530d8,0xf262004e,0x6c0695ed,0x1b01a57b,
+            0x8208f4c1,0xf50fc457,0x65b0d9c6,0x12b7e950,0x8bbeb8ea,
+            0xfcb9887c,0x62dd1ddf,0x15da2d49,0x8cd37cf3,0xfbd44c65,
+            0x4db26158,0x3ab551ce,0xa3bc0074,0xd4bb30e2,0x4adfa541,
+            0x3dd895d7,0xa4d1c46d,0xd3d6f4fb,0x4369e96a,0x346ed9fc,
+            0xad678846,0xda60b8d0,0x44042d73,0x33031de5,0xaa0a4c5f,
+            0xdd0d7cc9,0x5005713c,0x270241aa,0xbe0b1010,0xc90c2086,
+            0x5768b525,0x206f85b3,0xb966d409,0xce61e49f,0x5edef90e,
+            0x29d9c998,0xb0d09822,0xc7d7a8b4,0x59b33d17,0x2eb40d81,
+            0xb7bd5c3b,0xc0ba6cad,0xedb88320,0x9abfb3b6,0x3b6e20c,
+            0x74b1d29a,0xead54739,0x9dd277af,0x4db2615,0x73dc1683,
+            0xe3630b12,0x94643b84,0xd6d6a3e,0x7a6a5aa8,0xe40ecf0b,
+            0x9309ff9d,0xa00ae27,0x7d079eb1,0xf00f9344,0x8708a3d2,
+            0x1e01f268,0x6906c2fe,0xf762575d,0x806567cb,0x196c3671,
+            0x6e6b06e7,0xfed41b76,0x89d32be0,0x10da7a5a,0x67dd4acc,
+            0xf9b9df6f,0x8ebeeff9,0x17b7be43,0x60b08ed5,0xd6d6a3e8,
+            0xa1d1937e,0x38d8c2c4,0x4fdff252,0xd1bb67f1,0xa6bc5767,
+            0x3fb506dd,0x48b2364b,0xd80d2bda,0xaf0a1b4c,0x36034af6,
+            0x41047a60,0xdf60efc3,0xa867df55,0x316e8eef,0x4669be79,
+            0xcb61b38c,0xbc66831a,0x256fd2a0,0x5268e236,0xcc0c7795,
+            0xbb0b4703,0x220216b9,0x5505262f,0xc5ba3bbe,0xb2bd0b28,
+            0x2bb45a92,0x5cb36a04,0xc2d7ffa7,0xb5d0cf31,0x2cd99e8b,
+            0x5bdeae1d,0x9b64c2b0,0xec63f226,0x756aa39c,0x26d930a,
+            0x9c0906a9,0xeb0e363f,0x72076785,0x5005713,0x95bf4a82,
+            0xe2b87a14,0x7bb12bae,0xcb61b38,0x92d28e9b,0xe5d5be0d,
+            0x7cdcefb7,0xbdbdf21,0x86d3d2d4,0xf1d4e242,0x68ddb3f8,
+            0x1fda836e,0x81be16cd,0xf6b9265b,0x6fb077e1,0x18b74777,
+            0x88085ae6,0xff0f6a70,0x66063bca,0x11010b5c,0x8f659eff,
+            0xf862ae69,0x616bffd3,0x166ccf45,0xa00ae278,0xd70dd2ee,
+            0x4e048354,0x3903b3c2,0xa7672661,0xd06016f7,0x4969474d,
+            0x3e6e77db,0xaed16a4a,0xd9d65adc,0x40df0b66,0x37d83bf0,
+            0xa9bcae53,0xdebb9ec5,0x47b2cf7f,0x30b5ffe9,0xbdbdf21c,
+            0xcabac28a,0x53b39330,0x24b4a3a6,0xbad03605,0xcdd70693,
+            0x54de5729,0x23d967bf,0xb3667a2e,0xc4614ab8,0x5d681b02,
+            0x2a6f2b94,0xb40bbe37,0xc30c8ea1,0x5a05df1b,0x2d02ef8d };
+
+        /// \brief Feed 8 bits into a CRC register
+        ///
+        /// \param reg is the current state of the CRC register
+        /// \param val holds 8 bits (least significant) to feed in
+        /// \return the new value of the register
+        internal static uint crc_update(uint reg, uint val)
+        {
+            return crc32tab[(reg ^ val) & 0xff] ^ (reg >> 8);
         }
     }
 }

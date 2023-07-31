@@ -50,18 +50,18 @@ namespace Sla.DECCORE
             if (!vnout2.isWritten()) return 0;
             op_less = vnout1.getDef();
             opc = op_less.code();
-            if ((opc != CPUI_INT_LESS) && (opc != CPUI_INT_SLESS))
+            if ((opc != OpCode.CPUI_INT_LESS) && (opc != OpCode.CPUI_INT_SLESS))
             {
                 op_equal = op_less;
                 op_less = vnout2.getDef();
                 opc = op_less.code();
-                if ((opc != CPUI_INT_LESS) && (opc != CPUI_INT_SLESS))
+                if ((opc != OpCode.CPUI_INT_LESS) && (opc != OpCode.CPUI_INT_SLESS))
                     return 0;
             }
             else
                 op_equal = vnout2.getDef();
             equalopc = op_equal.code();
-            if ((equalopc != CPUI_INT_EQUAL) && (equalopc != CPUI_INT_NOTEQUAL))
+            if ((equalopc != OpCode.CPUI_INT_EQUAL) && (equalopc != OpCode.CPUI_INT_NOTEQUAL))
                 return 0;
 
             compvn1 = op_less.getIn(0);
@@ -72,9 +72,9 @@ namespace Sla.DECCORE
                 ((*compvn1 != *op_equal.getIn(1)) || (*compvn2 != *op_equal.getIn(0))))
                 return 0;
 
-            if (equalopc == CPUI_INT_NOTEQUAL)
+            if (equalopc == OpCode.CPUI_INT_NOTEQUAL)
             { // op_less is redundant
-                data.opSetOpcode(op, CPUI_COPY); // Convert OR to COPY
+                data.opSetOpcode(op, OpCode.CPUI_COPY); // Convert OR to COPY
                 data.opRemoveInput(op, 1);
                 data.opSetInput(op, op_equal.getOut(), 0); // Taking the NOTEQUAL output
             }
@@ -82,7 +82,7 @@ namespace Sla.DECCORE
             {
                 data.opSetInput(op, compvn1, 0);
                 data.opSetInput(op, compvn2, 1);
-                data.opSetOpcode(op, (opc == CPUI_INT_SLESS) ? CPUI_INT_SLESSEQUAL : CPUI_INT_LESSEQUAL);
+                data.opSetOpcode(op, (opc == OpCode.CPUI_INT_SLESS) ? OpCode.CPUI_INT_SLESSEQUAL : OpCode.CPUI_INT_LESSEQUAL);
             }
 
             return 1;

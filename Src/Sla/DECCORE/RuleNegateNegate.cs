@@ -34,12 +34,12 @@ namespace Sla.DECCORE
             Varnode* vn1 = op.getIn(0);
             if (!vn1.isWritten()) return 0;
             PcodeOp* neg2 = vn1.getDef();
-            if (neg2.code() != CPUI_INT_NEGATE)
+            if (neg2.code() != OpCode.CPUI_INT_NEGATE)
                 return 0;
             Varnode* vn2 = neg2.getIn(0);
             if (vn2.isFree()) return 0;
             data.opSetInput(op, vn2, 0);
-            data.opSetOpcode(op, CPUI_COPY);
+            data.opSetOpcode(op, OpCode.CPUI_COPY);
             return 1;
         }
     }

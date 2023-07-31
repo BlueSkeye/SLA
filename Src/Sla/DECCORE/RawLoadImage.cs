@@ -93,7 +93,7 @@ namespace Sla.DECCORE
                 ostringstream errmsg;
                 errmsg << "Unable to load " << dec << size << " bytes at " << addr.getShortcut();
                 addr.printRaw(errmsg);
-                throw DataUnavailError(errmsg.str());
+                throw new DataUnavailError(errmsg.str());
             }
         }
 

@@ -43,7 +43,7 @@ namespace Sla.DECCORE
         /// \param nm is the given number
         public override void truncate(int nm)
         {
-            int rangeSize = 8 * sizeof(ulong) - count_leading_zeros(range.getMask());
+            int rangeSize = 8 * sizeof(ulong) - Globals.count_leading_zeros(range.getMask());
             rangeSize >>= 3;
             ulong left = range.getMin();
             int step = range.getStep();

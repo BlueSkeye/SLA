@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     internal class TypeOpPiece : TypeOpFunc
     {
         public TypeOpPiece(TypeFactory t)
-            : base(t, CPUI_PIECE,"CONCAT", TYPE_UNKNOWN, TYPE_UNKNOWN)
+            : base(t, OpCode.CPUI_PIECE,"CONCAT", type_metatype.TYPE_UNKNOWN, type_metatype.TYPE_UNKNOWN)
         {
             opflags = PcodeOp::binary;
             behave = new OpBehaviorPiece();
@@ -26,9 +26,9 @@ namespace Sla.DECCORE
             Varnode vn = op.getOut();
             Datatype* dt = vn.getHighTypeDefFacing();
             type_metatype meta = dt.getMetatype();
-            if ((meta == TYPE_INT) || (meta == TYPE_UINT))      // PIECE casts to uint or int, based on output
+            if ((meta == type_metatype.TYPE_INT) || (meta == type_metatype.TYPE_UINT))      // PIECE casts to uint or int, based on output
                 return dt;
-            return tlst.getBase(vn.getSize(), TYPE_UINT); // If output is unknown or pointer, treat as cast to uint
+            return tlst.getBase(vn.getSize(), type_metatype.TYPE_UINT); // If output is unknown or pointer, treat as cast to uint
         }
 
         public override string getOperatorName(PcodeOp op)

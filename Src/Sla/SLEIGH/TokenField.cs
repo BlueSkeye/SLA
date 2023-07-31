@@ -50,9 +50,9 @@ namespace Sla.SLEIGH
 
             res >>= shift;
             if (signbit)
-                sign_extend(res, bitend - bitstart);
+                Globals.sign_extend(res, bitend - bitstart);
             else
-                zero_extend(res, bitend - bitstart);
+                Globals.zero_extend(res, bitend - bitstart);
             return res;
         }
 
@@ -70,7 +70,7 @@ namespace Sla.SLEIGH
         {
             long res=0;
             res = ~res;
-            zero_extend(res, bitend - bitstart);
+            Globals.zero_extend(res, bitend - bitstart);
             return res;
         }
 

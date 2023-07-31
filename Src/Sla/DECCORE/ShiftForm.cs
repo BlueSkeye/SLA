@@ -46,24 +46,24 @@ namespace Sla.DECCORE
             if (!reshi.isWritten()) return false;
             loshift = reslo.getDef();
             opc = loshift.code();
-            if (opc != CPUI_INT_LEFT) return false;
+            if (opc != OpCode.CPUI_INT_LEFT) return false;
             orop = reshi.getDef();
-            if ((orop.code() != CPUI_INT_OR) && (orop.code() != CPUI_INT_XOR) && (orop.code() != CPUI_INT_ADD))
+            if ((orop.code() != OpCode.CPUI_INT_OR) && (orop.code() != OpCode.CPUI_INT_XOR) && (orop.code() != OpCode.CPUI_INT_ADD))
                 return false;
             midlo = orop.getIn(0);
             midhi = orop.getIn(1);
             if (!midlo.isWritten()) return false;
             if (!midhi.isWritten()) return false;
-            if (midhi.getDef().code() != CPUI_INT_LEFT)
+            if (midhi.getDef().code() != OpCode.CPUI_INT_LEFT)
             {
                 Varnode* tmpvn = midhi;
                 midhi = midlo;
                 midlo = tmpvn;
             }
             midshift = midlo.getDef();
-            if (midshift.code() != CPUI_INT_RIGHT) return false;   // Must be unsigned RIGHT
+            if (midshift.code() != OpCode.CPUI_INT_RIGHT) return false;   // Must be unsigned RIGHT
             hishift = midhi.getDef();
-            if (hishift.code() != CPUI_INT_LEFT) return false;
+            if (hishift.code() != OpCode.CPUI_INT_LEFT) return false;
 
             if (lo != loshift.getIn(0)) return false;
             if (hi != hishift.getIn(0)) return false;
@@ -80,24 +80,24 @@ namespace Sla.DECCORE
             if (!reshi.isWritten()) return false;
             hishift = reshi.getDef();
             opc = hishift.code();
-            if ((opc != CPUI_INT_RIGHT) && (opc != CPUI_INT_SRIGHT)) return false;
+            if ((opc != OpCode.CPUI_INT_RIGHT) && (opc != OpCode.CPUI_INT_SRIGHT)) return false;
             orop = reslo.getDef();
-            if ((orop.code() != CPUI_INT_OR) && (orop.code() != CPUI_INT_XOR) && (orop.code() != CPUI_INT_ADD))
+            if ((orop.code() != OpCode.CPUI_INT_OR) && (orop.code() != OpCode.CPUI_INT_XOR) && (orop.code() != OpCode.CPUI_INT_ADD))
                 return false;
             midlo = orop.getIn(0);
             midhi = orop.getIn(1);
             if (!midlo.isWritten()) return false;
             if (!midhi.isWritten()) return false;
-            if (midlo.getDef().code() != CPUI_INT_RIGHT)
+            if (midlo.getDef().code() != OpCode.CPUI_INT_RIGHT)
             { // Must be unsigned RIGHT
                 Varnode* tmpvn = midhi;
                 midhi = midlo;
                 midlo = tmpvn;
             }
             midshift = midhi.getDef();
-            if (midshift.code() != CPUI_INT_LEFT) return false;
+            if (midshift.code() != OpCode.CPUI_INT_LEFT) return false;
             loshift = midlo.getDef();
-            if (loshift.code() != CPUI_INT_RIGHT) return false; // Must be unsigned RIGHT
+            if (loshift.code() != OpCode.CPUI_INT_RIGHT) return false; // Must be unsigned RIGHT
 
             if (lo != loshift.getIn(0)) return false;
             if (hi != hishift.getIn(0)) return false;
@@ -123,7 +123,7 @@ namespace Sla.DECCORE
             {
                 hishift = *iter;
                 ++iter;
-                if (hishift.code() != CPUI_INT_LEFT) continue;
+                if (hishift.code() != OpCode.CPUI_INT_LEFT) continue;
                 Varnode* outvn = hishift.getOut();
                 list<PcodeOp*>::const_iterator iter2, enditer2;
                 iter2 = outvn.beginDescend();
@@ -157,7 +157,7 @@ namespace Sla.DECCORE
             {
                 loshift = *iter;
                 ++iter;
-                if (loshift.code() != CPUI_INT_RIGHT) continue;
+                if (loshift.code() != OpCode.CPUI_INT_RIGHT) continue;
                 Varnode* outvn = loshift.getOut();
                 list<PcodeOp*>::const_iterator iter2, enditer2;
                 iter2 = outvn.beginDescend();

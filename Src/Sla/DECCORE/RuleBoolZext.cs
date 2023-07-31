@@ -49,7 +49,7 @@ namespace Sla.DECCORE
 
             multop1 = op.getOut().loneDescend();
             if (multop1 == (PcodeOp)null) return 0;
-            if (multop1.code() != CPUI_INT_MULT) return 0;
+            if (multop1.code() != OpCode.CPUI_INT_MULT) return 0;
             if (!multop1.getIn(1).isConstant()) return 0;
             coeff = multop1.getIn(1).getOffset();
             if (coeff != Globals.calc_mask(multop1.getIn(1).getSize()))
@@ -61,25 +61,25 @@ namespace Sla.DECCORE
             if (actionop == (PcodeOp)null) return 0;
             switch (actionop.code())
             {
-                case CPUI_INT_ADD:
+                case OpCode.CPUI_INT_ADD:
                     if (!actionop.getIn(1).isConstant()) return 0;
                     if (actionop.getIn(1).getOffset() == 1)
                     {
                         Varnode* vn;
                         PcodeOp* newop = data.newOp(1, op.getAddr());
-                        data.opSetOpcode(newop, CPUI_BOOL_NEGATE);  // Negate the boolean
+                        data.opSetOpcode(newop, OpCode.CPUI_BOOL_NEGATE);  // Negate the boolean
                         vn = data.newUniqueOut(1, newop);
                         data.opSetInput(newop, boolVn1, 0);
                         data.opInsertBefore(newop, op);
                         data.opSetInput(op, vn, 0);
                         data.opRemoveInput(actionop, 1); // eliminate the INT_ADD operator
-                        data.opSetOpcode(actionop, CPUI_COPY);
+                        data.opSetOpcode(actionop, OpCode.CPUI_COPY);
                         data.opSetInput(actionop, op.getOut(), 0); // propagate past the INT_MULT operator
                         return 1;
                     }
                     return 0;
-                case CPUI_INT_EQUAL:
-                case CPUI_INT_NOTEQUAL:
+                case OpCode.CPUI_INT_EQUAL:
+                case OpCode.CPUI_INT_NOTEQUAL:
 
                     if (actionop.getIn(1).isConstant())
                     {
@@ -98,14 +98,14 @@ namespace Sla.DECCORE
                     data.opSetInput(actionop, boolVn1, 0);
                     data.opSetInput(actionop, data.newConstant(1, val), 1);
                     return 1;
-                case CPUI_INT_AND:
-                    opc = CPUI_BOOL_AND;
+                case OpCode.CPUI_INT_AND:
+                    opc = OpCode.CPUI_BOOL_AND;
                     break;
-                case CPUI_INT_OR:
-                    opc = CPUI_BOOL_OR;
+                case OpCode.CPUI_INT_OR:
+                    opc = OpCode.CPUI_BOOL_OR;
                     break;
-                case CPUI_INT_XOR:
-                    opc = CPUI_BOOL_XOR;
+                case OpCode.CPUI_INT_XOR:
+                    opc = OpCode.CPUI_BOOL_XOR;
                     break;
                 default:
                     return 0;
@@ -116,14 +116,14 @@ namespace Sla.DECCORE
             // Check that the other side is also an extended boolean
             multop2 = (multop1 == actionop.getIn(0).getDef()) ? actionop.getIn(1).getDef() : actionop.getIn(0).getDef();
             if (multop2 == (PcodeOp)null) return 0;
-            if (multop2.code() != CPUI_INT_MULT) return 0;
+            if (multop2.code() != OpCode.CPUI_INT_MULT) return 0;
             if (!multop2.getIn(1).isConstant()) return 0;
             coeff = multop2.getIn(1).getOffset();
             if (coeff != Globals.calc_mask(size))
                 return 0;
             zextop2 = multop2.getIn(0).getDef();
             if (zextop2 == (PcodeOp)null) return 0;
-            if (zextop2.code() != CPUI_INT_ZEXT) return 0;
+            if (zextop2.code() != OpCode.CPUI_INT_ZEXT) return 0;
             boolVn2 = zextop2.getIn(0);
             if (!boolVn2.isBooleanValue(data.isTypeRecoveryOn())) return 0;
 
@@ -138,11 +138,11 @@ namespace Sla.DECCORE
 
             PcodeOp* newzext = data.newOp(1, actionop.getAddr());
             Varnode* newzout = data.newUniqueOut(size, newzext);
-            data.opSetOpcode(newzext, CPUI_INT_ZEXT);
+            data.opSetOpcode(newzext, OpCode.CPUI_INT_ZEXT);
             data.opSetInput(newzext, newres, 0);
             data.opInsertBefore(newzext, actionop);
 
-            data.opSetOpcode(actionop, CPUI_INT_MULT);
+            data.opSetOpcode(actionop, OpCode.CPUI_INT_MULT);
             data.opSetInput(actionop, newzout, 0);
             data.opSetInput(actionop, data.newConstant(size, coeff), 1);
             return 1;

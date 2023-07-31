@@ -19,8 +19,8 @@ namespace Sla.DECCORE
     /// (usually) starting from the front of the range.  The amount of space consumed by each
     /// parameter is dictated by an \e alignment setting in bytes.
     /// A ParamEntry can be associated with a particular class of data-types. Usually:
-    ///   - TYPE_UNKNOWN   for general purpose parameters
-    ///   - TYPE_FLOAT     for dedicated floating-point registers
+    ///   - type_metatype.TYPE_UNKNOWN   for general purpose parameters
+    ///   - type_metatype.TYPE_FLOAT     for dedicated floating-point registers
     internal class ParamEntry
     {
         [Flags()]
@@ -243,7 +243,7 @@ namespace Sla.DECCORE
         /// \return \b true if the given entry is subsumed
         public bool subsumesDefinition(ParamEntry op2)
         {
-            if ((type != TYPE_UNKNOWN) && (op2.type != type)) return false;
+            if ((type != type_metatype.TYPE_UNKNOWN) && (op2.type != type)) return false;
             if (spaceid != op2.spaceid) return false;
             if (op2.addressbase < addressbase) return false;
             if ((op2.addressbase + op2.size - 1) > (addressbase + size - 1)) return false;
@@ -423,10 +423,10 @@ namespace Sla.DECCORE
         /// \brief Calculate the type of \e extension to expect for the given logical value
         ///
         /// Return:
-        ///   - CPUI_COPY if no extensions are assumed for small values in this container
-        ///   - CPUI_INT_SEXT indicates a sign extension
-        ///   - CPUI_INT_ZEXT indicates a zero extension
-        ///   - CPUI_PIECE indicates an integer extension based on type of parameter
+        ///   - OpCode.CPUI_COPY if no extensions are assumed for small values in this container
+        ///   - OpCode.CPUI_INT_SEXT indicates a sign extension
+        ///   - OpCode.CPUI_INT_ZEXT indicates a zero extension
+        ///   - OpCode.CPUI_PIECE indicates an integer extension based on type of parameter
         ///
         ///  (A CPUI_FLOAT2FLOAT=float extension is handled by heritage and JoinRecord)
         /// If returning an extension operator, pass back the container being extended.
@@ -436,16 +436,16 @@ namespace Sla.DECCORE
         /// \return the type of extension
         public OpCode assumedExtension(Address addr, int sz, VarnodeData res)
         {
-            if ((flags & (smallsize_zext | smallsize_sext | smallsize_inttype)) == 0) return CPUI_COPY;
+            if ((flags & (smallsize_zext | smallsize_sext | smallsize_inttype)) == 0) return OpCode.CPUI_COPY;
             if (alignment != 0)
             {
                 if (sz >= alignment)
-                    return CPUI_COPY;
+                    return OpCode.CPUI_COPY;
             }
             else if (sz >= size)
-                return CPUI_COPY;
-            if (joinrec != (JoinRecord*)0) return CPUI_COPY;
-            if (justifiedContain(addr, sz) != 0) return CPUI_COPY; // (addr,sz) is not justified properly to allow an extension
+                return OpCode.CPUI_COPY;
+            if (joinrec != (JoinRecord*)0) return OpCode.CPUI_COPY;
+            if (justifiedContain(addr, sz) != 0) return OpCode.CPUI_COPY; // (addr,sz) is not justified properly to allow an extension
             if (alignment == 0)
             {   // If exclusion, take up the whole entry
                 res.space = spaceid;
@@ -460,10 +460,10 @@ namespace Sla.DECCORE
                 res.size = alignment;
             }
             if ((flags & smallsize_zext) != 0)
-                return CPUI_INT_ZEXT;
+                return OpCode.CPUI_INT_ZEXT;
             if ((flags & smallsize_inttype) != 0)
-                return CPUI_PIECE;
-            return CPUI_INT_SEXT;
+                return OpCode.CPUI_PIECE;
+            return OpCode.CPUI_INT_SEXT;
         }
 
         /// \brief Calculate the \e slot occupied by a specific address
@@ -562,7 +562,7 @@ namespace Sla.DECCORE
         public void decode(Decoder decoder, bool normalstack, bool grouped, List<ParamEntry> curList)
         {
             flags = 0;
-            type = TYPE_UNKNOWN;
+            type = type_metatype.TYPE_UNKNOWN;
             size = minsize = -1;        // Must be filled in
             alignment = 0;      // default
             numslots = 1;
@@ -662,7 +662,7 @@ namespace Sla.DECCORE
                 return;
             if (entry1.type != entry2.type)
             {
-                if (entry1.type == TYPE_UNKNOWN)
+                if (entry1.type == type_metatype.TYPE_UNKNOWN)
                 {
                     throw new LowlevelError("<pentry> tags with a specific type must come before the general type");
                 }

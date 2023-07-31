@@ -49,7 +49,7 @@ namespace Sla.DECCORE
             if (vn.isAddrForce() && (vn.getSize() != precision))
                 return (TransformVar*)0;
 
-            if (vn.isTypeLock() && vn.getType().getMetatype() != TYPE_PARTIALSTRUCT)
+            if (vn.isTypeLock() && vn.getType().getMetatype() != type_metatype.TYPE_PARTIALSTRUCT)
             {
                 int sz = vn.getType().getSize();
                 if (sz != precision)
@@ -95,18 +95,18 @@ namespace Sla.DECCORE
                     continue;
                 switch (op.code())
                 {
-                    case CPUI_COPY:
-                    case CPUI_FLOAT_CEIL:
-                    case CPUI_FLOAT_FLOOR:
-                    case CPUI_FLOAT_ROUND:
-                    case CPUI_FLOAT_NEG:
-                    case CPUI_FLOAT_ABS:
-                    case CPUI_FLOAT_SQRT:
-                    case CPUI_FLOAT_ADD:
-                    case CPUI_FLOAT_SUB:
-                    case CPUI_FLOAT_MULT:
-                    case CPUI_FLOAT_DIV:
-                    case CPUI_MULTIEQUAL:
+                    case OpCode.CPUI_COPY:
+                    case OpCode.CPUI_FLOAT_CEIL:
+                    case OpCode.CPUI_FLOAT_FLOOR:
+                    case OpCode.CPUI_FLOAT_ROUND:
+                    case OpCode.CPUI_FLOAT_NEG:
+                    case OpCode.CPUI_FLOAT_ABS:
+                    case OpCode.CPUI_FLOAT_SQRT:
+                    case OpCode.CPUI_FLOAT_ADD:
+                    case OpCode.CPUI_FLOAT_SUB:
+                    case OpCode.CPUI_FLOAT_MULT:
+                    case OpCode.CPUI_FLOAT_DIV:
+                    case OpCode.CPUI_MULTIEQUAL:
                         {
                             TransformOp* rop = newOpReplace(op.numInput(), op.code(), op);
                             TransformVar* outrvn = setReplacement(outvn);
@@ -115,19 +115,19 @@ namespace Sla.DECCORE
                             opSetOutput(rop, outrvn);
                             break;
                         }
-                    case CPUI_FLOAT_FLOAT2FLOAT:
+                    case OpCode.CPUI_FLOAT_FLOAT2FLOAT:
                         {
                             if (outvn.getSize() < precision)
                                 return false;
-                            TransformOp* rop = newPreexistingOp(1, (outvn.getSize() == precision) ? CPUI_COPY : CPUI_FLOAT_FLOAT2FLOAT, op);
+                            TransformOp* rop = newPreexistingOp(1, (outvn.getSize() == precision) ? OpCode.CPUI_COPY : OpCode.CPUI_FLOAT_FLOAT2FLOAT, op);
                             opSetInput(rop, rvn, 0);
                             terminatorCount += 1;
                             break;
                         }
-                    case CPUI_FLOAT_EQUAL:
-                    case CPUI_FLOAT_NOTEQUAL:
-                    case CPUI_FLOAT_LESS:
-                    case CPUI_FLOAT_LESSEQUAL:
+                    case OpCode.CPUI_FLOAT_EQUAL:
+                    case OpCode.CPUI_FLOAT_NOTEQUAL:
+                    case OpCode.CPUI_FLOAT_LESS:
+                    case OpCode.CPUI_FLOAT_LESSEQUAL:
                         {
                             int slot = op.getSlot(vn);
                             TransformVar* rvn2 = setReplacement(op.getIn(1 - slot));
@@ -147,8 +147,8 @@ namespace Sla.DECCORE
                             }
                             break;
                         }
-                    case CPUI_FLOAT_TRUNC:
-                    case CPUI_FLOAT_NAN:
+                    case OpCode.CPUI_FLOAT_TRUNC:
+                    case OpCode.CPUI_FLOAT_NAN:
                         {
                             TransformOp* rop = newPreexistingOp(1, op.code(), op);
                             opSetInput(rop, rvn, 0);
@@ -176,18 +176,18 @@ namespace Sla.DECCORE
 
             switch (op.code())
             {
-                case CPUI_COPY:
-                case CPUI_FLOAT_CEIL:
-                case CPUI_FLOAT_FLOOR:
-                case CPUI_FLOAT_ROUND:
-                case CPUI_FLOAT_NEG:
-                case CPUI_FLOAT_ABS:
-                case CPUI_FLOAT_SQRT:
-                case CPUI_FLOAT_ADD:
-                case CPUI_FLOAT_SUB:
-                case CPUI_FLOAT_MULT:
-                case CPUI_FLOAT_DIV:
-                case CPUI_MULTIEQUAL:
+                case OpCode.CPUI_COPY:
+                case OpCode.CPUI_FLOAT_CEIL:
+                case OpCode.CPUI_FLOAT_FLOOR:
+                case OpCode.CPUI_FLOAT_ROUND:
+                case OpCode.CPUI_FLOAT_NEG:
+                case OpCode.CPUI_FLOAT_ABS:
+                case OpCode.CPUI_FLOAT_SQRT:
+                case OpCode.CPUI_FLOAT_ADD:
+                case OpCode.CPUI_FLOAT_SUB:
+                case OpCode.CPUI_FLOAT_MULT:
+                case OpCode.CPUI_FLOAT_DIV:
+                case OpCode.CPUI_MULTIEQUAL:
                     {
                         TransformOp* rop = rvn.getDef();
                         if (rop == (TransformOp*)0)
@@ -208,25 +208,25 @@ namespace Sla.DECCORE
                         }
                         return true;
                     }
-                case CPUI_FLOAT_INT2FLOAT:
+                case OpCode.CPUI_FLOAT_INT2FLOAT:
                     {
                         Varnode* vn = op.getIn(0);
                         if (!vn.isConstant() && vn.isFree())
                             return false;
-                        TransformOp* rop = newOpReplace(1, CPUI_FLOAT_INT2FLOAT, op);
+                        TransformOp* rop = newOpReplace(1, OpCode.CPUI_FLOAT_INT2FLOAT, op);
                         opSetOutput(rop, rvn);
                         TransformVar* newvar = getPreexistingVarnode(vn);
                         opSetInput(rop, newvar, 0);
                         return true;
                     }
-                case CPUI_FLOAT_FLOAT2FLOAT:
+                case OpCode.CPUI_FLOAT_FLOAT2FLOAT:
                     {
                         Varnode* vn = op.getIn(0);
                         TransformVar* newvar;
                         OpCode opc;
                         if (vn.isConstant())
                         {
-                            opc = CPUI_COPY;
+                            opc = OpCode.CPUI_COPY;
                             if (vn.getSize() == precision)
                                 newvar = newConstant(precision, 0, vn.getOffset());
                             else
@@ -239,7 +239,7 @@ namespace Sla.DECCORE
                         else
                         {
                             if (vn.isFree()) return false;
-                            opc = (vn.getSize() == precision) ? CPUI_COPY : CPUI_FLOAT_FLOAT2FLOAT;
+                            opc = (vn.getSize() == precision) ? OpCode.CPUI_COPY : OpCode.CPUI_FLOAT_FLOAT2FLOAT;
                             newvar = getPreexistingVarnode(vn);
                         }
                         TransformOp* rop = newOpReplace(1, opc, op);
@@ -264,7 +264,7 @@ namespace Sla.DECCORE
         {
             TransformVar* rvn = worklist.GetLastItem();
 
-            worklist.pop_back();
+            worklist.RemoveLastItem();
 
             if (!traceBackward(rvn)) return false;
             return traceForward(rvn);

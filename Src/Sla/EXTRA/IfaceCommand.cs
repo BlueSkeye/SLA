@@ -60,7 +60,7 @@ namespace Sla.EXTRA
         /// Remove the last token from the associated command line string
         public void removeWord()
         {
-            com.pop_back();
+            com.RemoveLastItem();
         }
 
         ///< Get the i-th command token

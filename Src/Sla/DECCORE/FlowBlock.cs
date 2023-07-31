@@ -887,12 +887,6 @@ namespace Sla.DECCORE
             return outofthis[i].point;
         }
 
-        /// Get i-th output FlowBlock
-        public FlowBlock getOut(int i)
-        {
-            return (FlowBlock) outofthis[i].point;
-        }
-
         /// Get the input index of the i-th output FlowBlock
         public int getOutRevIndex(int i)
         {
@@ -903,12 +897,6 @@ namespace Sla.DECCORE
         public FlowBlock getIn(int i)
         {
             return intothis[i].point;
-        }
-
-        /// Get the i-th input FlowBlock
-        public FlowBlock getIn(int i)
-        {
-            return (FlowBlock) intothis[i].point;
         }
 
         /// Get the output index of the i-th input FlowBlock
@@ -1284,19 +1272,19 @@ namespace Sla.DECCORE
             if (null != op1) {
                 // Make sure return blocks come last
                 if (null != op2) {
-                    if ((op1.code() == CPUI_RETURN) && (op2.code() != CPUI_RETURN)) {
+                    if ((op1.code() == OpCode.CPUI_RETURN) && (op2.code() != OpCode.CPUI_RETURN)) {
                         return false;
                     }
-                    else if ((op1.code() != CPUI_RETURN) && (op2.code() == CPUI_RETURN)) {
+                    else if ((op1.code() != OpCode.CPUI_RETURN) && (op2.code() == OpCode.CPUI_RETURN)) {
                         return true;
                     }
                 }
-                if (op1.code() == CPUI_RETURN) {
+                if (op1.code() == OpCode.CPUI_RETURN) {
                     return false;
                 }
             }
             else if (null != op2) {
-                if (op2.code() == CPUI_RETURN) {
+                if (op2.code() == OpCode.CPUI_RETURN) {
                     return true;
                 }
             }

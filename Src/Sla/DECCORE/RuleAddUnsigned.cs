@@ -36,7 +36,7 @@ namespace Sla.DECCORE
 
             if (!constvn.isConstant()) return 0;
             Datatype* dt = constvn.getTypeReadFacing(op);
-            if (dt.getMetatype() != TYPE_UINT) return 0;
+            if (dt.getMetatype() != type_metatype.TYPE_UINT) return 0;
             if (dt.isCharPrint()) return 0;    // Only change integer forms
             if (dt.isEnumType()) return 0;
             ulong val = constvn.getOffset();
@@ -53,7 +53,7 @@ namespace Sla.DECCORE
                         return 0;       // Dont transform a named equate
                 }
             }
-            data.opSetOpcode(op, CPUI_INT_SUB);
+            data.opSetOpcode(op, OpCode.CPUI_INT_SUB);
             Varnode* cvn = data.newConstant(constvn.getSize(), (-val) & mask);
             cvn.copySymbol(constvn);
             data.opSetInput(op, cvn, 1);

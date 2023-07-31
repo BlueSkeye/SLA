@@ -1477,7 +1477,7 @@ namespace Sla.SLACOMP
         //        {
         //            if (ifstack.empty())
         //                preproc_error("preprocessing endif without matching if");
-        //            ifstack.pop_back();
+        //            ifstack.RemoveLastItem();
         //            check_to_endofline(s);
         //        }
         //        else if (type == "else")
@@ -2614,7 +2614,7 @@ namespace Sla.SLACOMP
         //                        FILE* curfile = filebuffers.GetLastItem().file;
         //                        if (curfile != (FILE*)0)
         //                            fclose(curfile);
-        //                        filebuffers.pop_back();
+        //                        filebuffers.RemoveLastItem();
         //                        slgh.parseFileFinished();
         //                    }
         //                    YY_BREAK

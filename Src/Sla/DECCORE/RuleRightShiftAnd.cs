@@ -40,7 +40,7 @@ namespace Sla.DECCORE
             Varnode* inVn = op.getIn(0);
             if (!inVn.isWritten()) return 0;
             PcodeOp* andOp = inVn.getDef();
-            if (andOp.code() != CPUI_INT_AND) return 0;
+            if (andOp.code() != OpCode.CPUI_INT_AND) return 0;
             Varnode* maskVn = andOp.getIn(1);
             if (!maskVn.isConstant()) return 0;
 

@@ -16,7 +16,7 @@
 //#include "space.hh"
 //#include "translate.hh"
 
-using ghidra;
+using Sla;
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -177,18 +177,18 @@ namespace Sla.CORE {
         /// \param s the stream where the attributes are written
         internal void saveBasicAttributes(StreamWriter s)
         {
-            Globals.a_v(s, "name", name);
-            Globals.a_v_i(s, "index", index);
-            Globals.a_v_b(s, "bigendian", isBigEndian());
-            Globals.a_v_i(s, "delay", delay);
+            Xml.a_v(s, "name", name);
+            Xml.a_v_i(s, "index", index);
+            Xml.a_v_b(s, "bigendian", isBigEndian());
+            Xml.a_v_i(s, "delay", delay);
             if (delay != deadcodedelay) {
-                Globals.a_v_i(s, "deadcodedelay", deadcodedelay);
+                Xml.a_v_i(s, "deadcodedelay", deadcodedelay);
             }
-            Globals.a_v_i(s, "size", addressSize);
+            Xml.a_v_i(s, "size", addressSize);
             if (wordsize > 1) {
-                Globals.a_v_i(s, "wordsize", wordsize);
+                Xml.a_v_i(s, "wordsize", wordsize);
             }
-            Globals.a_v_b(s, "physical", hasPhysical());
+            Xml.a_v_b(s, "physical", hasPhysical());
         }
 
         /// Read attributes for \b this space from an open XML element

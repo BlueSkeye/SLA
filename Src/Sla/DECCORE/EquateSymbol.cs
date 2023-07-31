@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         {
             value = val;
             category = equate;
-            type = sc.getArch().types.getBase(1, TYPE_UNKNOWN);
+            type = sc.getArch().types.getBase(1, type_metatype.TYPE_UNKNOWN);
             dispflags |= format;
         }
 
@@ -58,7 +58,7 @@ namespace Sla.DECCORE
             if (maskValue != value)
             {       // If '1' bits are getting masked off
                     // Make sure only sign-extension is getting masked off
-                if (value != sign_extend(maskValue, size, sizeof(ulong)))
+                if (value != Globals.sign_extend(maskValue, size, sizeof(ulong)))
                     return false;
             }
             if (maskValue == (op2Value & mask)) return true;
@@ -89,7 +89,7 @@ namespace Sla.DECCORE
             decoder.closeElement(subId);
 
             TypeFactory* types = scope.getArch().types;
-            type = types.getBase(1, TYPE_UNKNOWN);
+            type = types.getBase(1, type_metatype.TYPE_UNKNOWN);
             decoder.closeElement(elemId);
         }
     }

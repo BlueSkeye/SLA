@@ -113,7 +113,7 @@ namespace Sla.SLACOMP
                 string dirStr = ".";
                 if (i != argc)
                     dirStr = argv[i];
-                findSlaSpecs(slaspecs, dirStr, SLASPECEXT);
+                Globals.findSlaSpecs(slaspecs, dirStr, SLASPECEXT);
                 cout << "Compiling " << dec << slaspecs.size() << " slaspec files in " << dirStr << endl;
                 for (int j = 0; j < slaspecs.size(); ++j)
                 {
@@ -190,7 +190,7 @@ namespace Sla.SLACOMP
                     }
                     else
                     {
-                        retval = run_xml(fileinExamine, compiler);
+                        retval = Globals.run_xml(fileinExamine, compiler);
                     }
 
                 }

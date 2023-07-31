@@ -39,21 +39,21 @@ namespace Sla.DECCORE
                 Varnode* vn = op.getIn(i);
                 if (!vn.isWritten()) continue;
                 PcodeOp* op2 = vn.getDef();
-                if (op2.code() != CPUI_INT_XOR) continue;
+                if (op2.code() != OpCode.CPUI_INT_XOR) continue;
                 Varnode* othervn = op.getIn(1 - i);
                 Varnode* vn0 = op2.getIn(0);
                 Varnode* vn1 = op2.getIn(1);
                 if (othervn == vn0 && !vn1.isFree())
                 {
                     data.opRemoveInput(op, 1);
-                    data.opSetOpcode(op, CPUI_COPY);
+                    data.opSetOpcode(op, OpCode.CPUI_COPY);
                     data.opSetInput(op, vn1, 0);
                     return 1;
                 }
                 else if (othervn == vn1 && !vn0.isFree())
                 {
                     data.opRemoveInput(op, 1);
-                    data.opSetOpcode(op, CPUI_COPY);
+                    data.opSetOpcode(op, OpCode.CPUI_COPY);
                     data.opSetInput(op, vn0, 0);
                     return 1;
                 }

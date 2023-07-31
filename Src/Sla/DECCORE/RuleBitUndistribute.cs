@@ -31,7 +31,7 @@ namespace Sla.DECCORE
         /// Works with INT_ZEXT, INT_SEXT, INT_LEFT, INT_RIGHT, and INT_SRIGHT.
         public override void getOpList(List<uint> oplist)
         {
-            uint list[] = { CPUI_INT_AND, CPUI_INT_OR, CPUI_INT_XOR };
+            uint list[] = { OpCode.CPUI_INT_AND, OpCode.CPUI_INT_OR, OpCode.CPUI_INT_XOR };
             oplist.insert(oplist.end(), list, list + 3);
         }
 
@@ -51,8 +51,8 @@ namespace Sla.DECCORE
             if (vn2.getDef().code() != opc) return 0;
             switch (opc)
             {
-                case CPUI_INT_ZEXT:
-                case CPUI_INT_SEXT:
+                case OpCode.CPUI_INT_ZEXT:
+                case OpCode.CPUI_INT_SEXT:
                     // Test for full equality of extension operation
                     in1 = vn1.getDef().getIn(0);
                     if (in1.isFree()) return 0;
@@ -61,9 +61,9 @@ namespace Sla.DECCORE
                     if (in1.getSize() != in2.getSize()) return 0;
                     data.opRemoveInput(op, 1);
                     break;
-                case CPUI_INT_LEFT:
-                case CPUI_INT_RIGHT:
-                case CPUI_INT_SRIGHT:
+                case OpCode.CPUI_INT_LEFT:
+                case OpCode.CPUI_INT_RIGHT:
+                case OpCode.CPUI_INT_SRIGHT:
                     // Test for full equality of shift operation
                     in1 = vn1.getDef().getIn(1);
                     in2 = vn2.getDef().getIn(1);

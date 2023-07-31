@@ -43,8 +43,7 @@ namespace Sla.CORE
                     throw new OverflowException();
                 }
             }
-            clearFlags(Properties.heritaged | Properties.does_deadcode
-                | Properties.big_endian);
+            clearFlags(Properties.heritaged | Properties.does_deadcode | Properties.big_endian);
             //if (HOST_ENDIAN == 1) {
             //    // Endianness always matches host
             //    setFlags(Properties.big_endian);

@@ -31,7 +31,7 @@ namespace Sla.SLEIGH
         {
             minimumreuse = min;
             mask = hashsize - 1;
-            ulong masktest = coveringmask((ulong)mask);
+            ulong masktest = Globals.coveringmask((ulong)mask);
             if (masktest != (ulong)mask)    // -hashsize- must be a power of 2
                 throw new LowlevelError("Bad windowsize for disassembly cache");
             list = new ParserContext*[minimumreuse];

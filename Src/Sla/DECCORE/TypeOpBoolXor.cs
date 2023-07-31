@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     internal class TypeOpBoolXor : TypeOpBinary
     {
         public TypeOpBoolXor(TypeFactory t)
-            : base(t, CPUI_BOOL_XOR,"^^", TYPE_BOOL, TYPE_BOOL)
+            : base(t, OpCode.CPUI_BOOL_XOR,"^^", type_metatype.TYPE_BOOL, type_metatype.TYPE_BOOL)
         {
             opflags = PcodeOp::binary | PcodeOp::commutative | PcodeOp::booloutput;
             addlflags = logical_op;

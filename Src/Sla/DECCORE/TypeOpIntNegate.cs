@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     internal class TypeOpIntNegate : TypeOpUnary
     {
         public TypeOpIntNegate(TypeFactory t)
-            : base(t, CPUI_INT_NEGATE,"~", TYPE_UINT, TYPE_UINT)
+            : base(t, OpCode.CPUI_INT_NEGATE,"~", type_metatype.TYPE_UINT, type_metatype.TYPE_UINT)
         {
             opflags = PcodeOp::unary;
             addlflags = logical_op | inherits_sign;

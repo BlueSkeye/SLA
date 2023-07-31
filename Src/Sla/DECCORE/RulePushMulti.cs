@@ -31,7 +31,7 @@ namespace Sla.DECCORE
                 PcodeOp* op = *iter;
                 ++iter;
                 if (op.getParent() != bb) continue;
-                if (op.code() != CPUI_MULTIEQUAL) continue;
+                if (op.code() != OpCode.CPUI_MULTIEQUAL) continue;
                 if (op.getIn(0) != in1) continue;
                 if (op.getIn(1) != in2) continue;
                 return op;
@@ -92,11 +92,11 @@ namespace Sla.DECCORE
             if (res < 0) return 0;
             if (res > 1) return 0;
             PcodeOp* op1 = in1.getDef();
-            if (op1.code() == CPUI_SUBPIECE) return 0; // SUBPIECE is pulled not pushed
+            if (op1.code() == OpCode.CPUI_SUBPIECE) return 0; // SUBPIECE is pulled not pushed
 
             BlockBasic* bl = op.getParent();
             PcodeOp* earliest = earliestUseInBlock(op.getOut(), bl);
-            if (op1.code() == CPUI_COPY)
+            if (op1.code() == OpCode.CPUI_COPY)
             { // Special case of MERGE of 2 shadowing varnodes
                 if (res == 0) return 0;
                 PcodeOp* substitute = findSubstitute(buf1[0], buf2[0], bl, earliest);
@@ -121,7 +121,7 @@ namespace Sla.DECCORE
                 if (substitute == (PcodeOp)null)
                 {
                     substitute = data.newOp(2, op.getAddr());
-                    data.opSetOpcode(substitute, CPUI_MULTIEQUAL);
+                    data.opSetOpcode(substitute, OpCode.CPUI_MULTIEQUAL);
                     // Try to preserve the storage location if the input varnodes share it
                     // But don't propagate addrtied varnode (thru MULTIEQUAL)
                     if ((buf1[0].getAddr() == buf2[0].getAddr()) && (!buf1[0].isAddrTied()))

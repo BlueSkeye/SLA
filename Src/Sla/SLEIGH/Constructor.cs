@@ -451,9 +451,9 @@ namespace Sla.SLEIGH
         {
             // Allow for user to force extra space at end of printing
             if ((!printpiece.empty()) && (printpiece.GetLastItem() == " "))
-                printpiece.pop_back();
+                printpiece.RemoveLastItem();
             //  while((!printpiece.empty())&&(printpiece.GetLastItem()==" "))
-            //    printpiece.pop_back();
+            //    printpiece.RemoveLastItem();
         }
 
         public void applyContext(ParserWalkerChange walker)

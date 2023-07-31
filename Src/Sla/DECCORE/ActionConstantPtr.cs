@@ -28,7 +28,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < 3; ++i)
             {
                 Datatype* dt = vn.getType();
-                if (dt.getMetatype() == TYPE_PTR)
+                if (dt.getMetatype() == type_metatype.TYPE_PTR)
                 {
                     AddrSpace* spc = ((TypePointer*)dt).getSpace();
                     if (spc != (AddrSpace)null && spc.getAddrSize() == vn.getSize())    // If provided a pointer with space attribute
@@ -36,16 +36,16 @@ namespace Sla.DECCORE
                 }
                 switch (op.code())
                 {
-                    case CPUI_INT_ADD:
-                    case CPUI_COPY:
-                    case CPUI_INDIRECT:
-                    case CPUI_MULTIEQUAL:
+                    case OpCode.CPUI_INT_ADD:
+                    case OpCode.CPUI_COPY:
+                    case OpCode.CPUI_INDIRECT:
+                    case OpCode.CPUI_MULTIEQUAL:
                         vn = op.getOut();
                         op = vn.loneDescend();
                         break;
-                    case CPUI_LOAD:
+                    case OpCode.CPUI_LOAD:
                         return op.getIn(0).getSpaceFromConst();
-                    case CPUI_STORE:
+                    case OpCode.CPUI_STORE:
                         if (op.getIn(1) == vn)
                             return op.getIn(0).getSpaceFromConst();
                         return (AddrSpace)null;
@@ -58,9 +58,9 @@ namespace Sla.DECCORE
             {
                 op = *iter;
                 OpCode opc = op.code();
-                if (opc == CPUI_LOAD)
+                if (opc == OpCode.CPUI_LOAD)
                     return op.getIn(0).getSpaceFromConst();
-                else if (opc == CPUI_STORE && op.getIn(1) == vn)
+                else if (opc == OpCode.CPUI_STORE && op.getIn(1) == vn)
                     return op.getIn(0).getSpaceFromConst();
             }
             return (AddrSpace)null;
@@ -78,7 +78,7 @@ namespace Sla.DECCORE
             List<AddrSpace*> &spaceList)
         {
             AddrSpace* resSpace = (AddrSpace)null;
-            if (vn.getType().getMetatype() == TYPE_PTR)
+            if (vn.getType().getMetatype() == type_metatype.TYPE_PTR)
             {
                 AddrSpace* spc = ((TypePointer*)vn.getType()).getSpace();
                 if (spc != (AddrSpace)null && spc.getAddrSize() == vn.getSize())
@@ -127,7 +127,7 @@ namespace Sla.DECCORE
             bool needexacthit;
             Architecture* glb = data.getArch();
             Varnode* outvn;
-            if (vn.getTypeReadFacing(op).getMetatype() == TYPE_PTR)
+            if (vn.getTypeReadFacing(op).getMetatype() == type_metatype.TYPE_PTR)
             { // Are we explicitly marked as a pointer
                 rampoint = glb.resolveConstant(spc, vn.getOffset(), vn.getSize(), op.getAddr(), fullEncoding);
                 needexacthit = false;
@@ -140,30 +140,30 @@ namespace Sla.DECCORE
                 // as the base
                 switch (op.code())
                 {
-                    case CPUI_RETURN:
-                    case CPUI_CALL:
-                    case CPUI_CALLIND:
+                    case OpCode.CPUI_RETURN:
+                    case OpCode.CPUI_CALL:
+                    case OpCode.CPUI_CALLIND:
                         // A constant parameter or return value could be a pointer
                         if (!glb.infer_pointers)
                             return (SymbolEntry)null;
                         if (slot == 0)
                             return (SymbolEntry)null;
                         break;
-                    case CPUI_PIECE:
+                    case OpCode.CPUI_PIECE:
                     // Pointers get concatenated in structures
-                    case CPUI_COPY:
-                    case CPUI_INT_EQUAL:
-                    case CPUI_INT_NOTEQUAL:
-                    case CPUI_INT_LESS:
-                    case CPUI_INT_LESSEQUAL:
+                    case OpCode.CPUI_COPY:
+                    case OpCode.CPUI_INT_EQUAL:
+                    case OpCode.CPUI_INT_NOTEQUAL:
+                    case OpCode.CPUI_INT_LESS:
+                    case OpCode.CPUI_INT_LESSEQUAL:
                         // A comparison with a constant could be a pointer
                         break;
-                    case CPUI_INT_ADD:
+                    case OpCode.CPUI_INT_ADD:
                         outvn = op.getOut();
-                        if (outvn.getTypeDefFacing().getMetatype() == TYPE_PTR)
+                        if (outvn.getTypeDefFacing().getMetatype() == type_metatype.TYPE_PTR)
                         {
                             // Is there another pointer base in this expression
-                            if (op.getIn(1 - slot).getTypeReadFacing(op).getMetatype() == TYPE_PTR)
+                            if (op.getIn(1 - slot).getTypeReadFacing(op).getMetatype() == type_metatype.TYPE_PTR)
                                 return (SymbolEntry)null; // If so, we are not a pointer
                                                         // FIXME: need to fully explore additive tree
                             needexacthit = false;
@@ -171,7 +171,7 @@ namespace Sla.DECCORE
                         else if (!glb.infer_pointers)
                             return (SymbolEntry)null;
                         break;
-                    case CPUI_STORE:
+                    case OpCode.CPUI_STORE:
                         if (slot != 2)
                             return (SymbolEntry)null;
                         break;
@@ -196,7 +196,7 @@ namespace Sla.DECCORE
             if (entry != (SymbolEntry)null)
             {
                 Datatype* ptrType = entry.getSymbol().getType();
-                if (ptrType.getMetatype() == TYPE_ARRAY)
+                if (ptrType.getMetatype() == type_metatype.TYPE_ARRAY)
                 {
                     Datatype* ct = ((TypeArray*)ptrType).getBase();
                     // In the special case of strings (character arrays) we allow the constant pointer to
@@ -259,11 +259,11 @@ namespace Sla.DECCORE
                 if (rspc == (AddrSpace)null) continue;
                 int slot = op.getSlot(vn);
                 OpCode opc = op.code();
-                if (opc == CPUI_INT_ADD)
+                if (opc == OpCode.CPUI_INT_ADD)
                 {
                     if (op.getIn(1 - slot).isSpacebase()) continue; // Make sure other side is not a spacebase already
                 }
-                else if ((opc == CPUI_PTRSUB) || (opc == CPUI_PTRADD))
+                else if ((opc == OpCode.CPUI_PTRSUB) || (opc == OpCode.CPUI_PTRADD))
                     continue;
                 Address rampoint;
                 ulong fullEncoding;
@@ -272,7 +272,7 @@ namespace Sla.DECCORE
                 if (entry != (SymbolEntry)null)
                 {
                     data.spacebaseConstant(op, slot, entry, rampoint, fullEncoding, vn.getSize());
-                    if ((opc == CPUI_INT_ADD) && (slot == 1))
+                    if ((opc == OpCode.CPUI_INT_ADD) && (slot == 1))
                         data.opSwapInput(op, 0, 1);
                     count += 1;
                 }

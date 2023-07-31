@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     internal class TypeOpIntXor : TypeOpBinary
     {
         public TypeOpIntXor(TypeFactory t)
-            : base(t, CPUI_INT_XOR,"^", TYPE_UINT, TYPE_UINT)
+            : base(t, OpCode.CPUI_INT_XOR,"^", type_metatype.TYPE_UINT, type_metatype.TYPE_UINT)
         {
             opflags = PcodeOp::binary | PcodeOp::commutative;
             addlflags = logical_op | inherits_sign;
@@ -30,7 +30,7 @@ namespace Sla.DECCORE
             if (invn.isSpacebase())
             {
                 AddrSpace* spc = tlst.getArch().getDefaultDataSpace();
-                newtype = tlst.getTypePointer(alttype.getSize(), tlst.getBase(1, TYPE_UNKNOWN), spc.getWordSize());
+                newtype = tlst.getTypePointer(alttype.getSize(), tlst.getBase(1, type_metatype.TYPE_UNKNOWN), spc.getWordSize());
             }
             else
                 newtype = alttype;

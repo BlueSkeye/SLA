@@ -54,7 +54,7 @@ namespace Sla.DECCORE
             }
             if (!vn.isWritten()) return (AddrSpace)null;
             op = vn.getDef();
-            if (op.code() != CPUI_INT_ADD) return (AddrSpace)null;
+            if (op.code() != OpCode.CPUI_INT_ADD) return (AddrSpace)null;
             vn1 = op.getIn(0);
             vn2 = op.getIn(1);
             retspace = correctSpacebase(glb, vn1, spc);
@@ -94,7 +94,7 @@ namespace Sla.DECCORE
             offvn = op.getIn(1);       // Address offset
             loadspace = op.getIn(0).getSpaceFromConst(); // Space being loaded/stored
                                                            // Treat segmentop as part of load/store
-            if (offvn.isWritten() && (offvn.getDef().code() == CPUI_SEGMENTOP))
+            if (offvn.isWritten() && (offvn.getDef().code() == OpCode.CPUI_SEGMENTOP))
             {
                 offvn = offvn.getDef().getIn(2);
                 // If we are looking for a spacebase (i.e. stackpointer)
@@ -153,7 +153,7 @@ namespace Sla.DECCORE
             newvn = data.newVarnode(size, baseoff, offoff);
             data.opSetInput(op, newvn, 0);
             data.opRemoveInput(op, 1);
-            data.opSetOpcode(op, CPUI_COPY);
+            data.opSetOpcode(op, OpCode.CPUI_COPY);
             Varnode* refvn = op.getOut();
             if (refvn.isSpacebasePlaceholder())
             {

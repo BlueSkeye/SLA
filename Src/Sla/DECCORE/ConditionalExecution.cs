@@ -145,7 +145,7 @@ namespace Sla.DECCORE
             if (cbranch == null) {
                 return false;
             }
-            if (cbranch.code() != CPUI_CBRANCH) {
+            if (cbranch.code() != OpCode.CPUI_CBRANCH) {
                 return false;
             }
             return true;
@@ -189,7 +189,7 @@ namespace Sla.DECCORE
             if (init_cbranch == null) {
                 return false;
             }
-            if (init_cbranch.code() != CPUI_CBRANCH) {
+            if (init_cbranch.code() != OpCode.CPUI_CBRANCH) {
                 return false;
             }
             ConditionMarker tester;
@@ -222,13 +222,13 @@ namespace Sla.DECCORE
             if (op.getParent() == iblock) {
                 return true;
             }
-            if ((op.code() == CPUI_RETURN) && !directsplit) {
+            if ((op.code() == OpCode.CPUI_RETURN) && !directsplit) {
                 if ((op.numInput() < 2) || (op.getIn(1) != vn)) {
                     // Only test for flow thru to return value
                     return false;
                 }
                 PcodeOp copyop = vn.getDef();
-                if (copyop.code() == CPUI_COPY) {
+                if (copyop.code() == OpCode.CPUI_COPY) {
                     // Ordinarily, if -vn- is produced by a COPY we want to return false here because the propagation
                     // hasn't had time to happen here.  But if the flow is into a RETURN this can't propagate, so
                     // we allow this as a read that can be altered.  (We have to move the COPY)
@@ -237,7 +237,7 @@ namespace Sla.DECCORE
                         return false;
                     }
                     PcodeOp upop = invn.getDef();
-                    if ((upop.getParent() == iblock) && (upop.code() != CPUI_MULTIEQUAL)) {
+                    if ((upop.getParent() == iblock) && (upop.code() != OpCode.CPUI_MULTIEQUAL)) {
                         return false;
                     }
                     returnop.Add(op);
@@ -259,15 +259,15 @@ namespace Sla.DECCORE
                 if (!directsplit) {
                     // The COPY is tested separately
                     // If the COPY's output reads can be altered, then -vn- can be altered
-                    return (op.code() == CPUI_COPY);
+                    return (op.code() == OpCode.CPUI_COPY);
                 }
             }
-            if (op.code() == CPUI_RETURN) {
+            if (op.code() == OpCode.CPUI_RETURN) {
                 if ((op.numInput() < 2) || (op.getIn(1) != vn)) {
                     // Only test for flow thru to return value
                     return false;
                 }
-                // mark that CPUI_RETURN needs special handling
+                // mark that OpCode.CPUI_RETURN needs special handling
                 returnop.Add(op);
             }
             return true;
@@ -281,7 +281,7 @@ namespace Sla.DECCORE
             PcodeOp readop;
             Varnode vn;
 
-            if (op.code() == CPUI_MULTIEQUAL) {
+            if (op.code() == OpCode.CPUI_MULTIEQUAL) {
                 vn = op.getOut();
                 IEnumerator<PcodeOp>::const_iterator iter;
                 for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter) {
@@ -295,10 +295,10 @@ namespace Sla.DECCORE
                 if (op.isFlowBreak() || op.isCall()) {
                     return false;
                 }
-                if ((op.code() == CPUI_LOAD) || (op.code() == CPUI_STORE)){
+                if ((op.code() == OpCode.CPUI_LOAD) || (op.code() == OpCode.CPUI_STORE)){
                     return false;
                 }
-                if (op.code() == CPUI_INDIRECT) {
+                if (op.code() == OpCode.CPUI_INDIRECT) {
                     return false;
                 }
                 vn = op.getOut();
@@ -330,7 +330,7 @@ namespace Sla.DECCORE
             Varnode outvn = op.getOut();
             Varnode newoutvn;
             newoutvn = fd.newVarnodeOut(outvn.getSize(), outvn.getAddr(), newop);
-            fd.opSetOpcode(newop, CPUI_MULTIEQUAL);
+            fd.opSetOpcode(newop, OpCode.CPUI_MULTIEQUAL);
             Varnode vn;
             int inslot = iblock.getOutRevIndex(posta_outslot);
             for (int i = 0; i < posta_block.sizeIn(); ++i) {
@@ -355,12 +355,12 @@ namespace Sla.DECCORE
             int inslot = iblock.getOutRevIndex(posta_outslot);
             foreach (PcodeOp iter in posta_block) {
                 PcodeOp op;
-                if (op.code() != CPUI_MULTIEQUAL) {
+                if (op.code() != OpCode.CPUI_MULTIEQUAL) {
                     continue;
                 }
                 Varnode vn = op.getIn(inslot);
                 if (vn.isWritten() && (vn.getDef().getParent() == iblock)) {
-                    if (vn.getDef().code() != CPUI_MULTIEQUAL)
+                    if (vn.getDef().code() != OpCode.CPUI_MULTIEQUAL)
                         throw new LowlevelError("Cannot push non-trivial operation");
                     // Flow that stays in iblock, comes from modified side
                     fd.opSetInput(op, vn.getDef().getIn(1 - camethruposta_slot), inslot);
@@ -384,7 +384,7 @@ namespace Sla.DECCORE
             // Using the original outvn address may cause merge conflicts
             //  newoutvn = fd.newVarnodeOut(outvn.getSize(),outvn.getAddr(),newop);
             newoutvn = fd.newUniqueOut(outvn.getSize(), newop);
-            fd.opSetOpcode(newop, CPUI_MULTIEQUAL);
+            fd.opSetOpcode(newop, OpCode.CPUI_MULTIEQUAL);
 
             // We create NEW references to outvn, these refs will get put
             // at the end of the dependency list and will get handled in
@@ -449,7 +449,7 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp
         private void doReplacement(PcodeOp op)
         {
-            if (op.code() == CPUI_COPY) {
+            if (op.code() == OpCode.CPUI_COPY) {
                 // Verify that this has been dealt with by fixReturnOp
                 if (op.getOut().hasNoDescend()) {
                     return;
@@ -477,7 +477,7 @@ namespace Sla.DECCORE
                     }
                 }
                 else {
-                    if (readop.code() == CPUI_MULTIEQUAL) {
+                    if (readop.code() == OpCode.CPUI_MULTIEQUAL) {
                         BlockBasic inbl = (BlockBasic)bl.getIn(slot);
                         if (inbl == iblock) {
                             int s = (bl.getInRevIndex(slot) == posta_outslot)
@@ -507,13 +507,13 @@ namespace Sla.DECCORE
                 Varnode retvn = retop.getIn(1);
                 PcodeOp iblockop = retvn.getDef();
                 Varnode invn;
-                invn = (iblockop.code() == CPUI_COPY)
+                invn = (iblockop.code() == OpCode.CPUI_COPY)
                     // This must either be from MULTIEQUAL or something written outside of iblock
                     ? iblockop.getIn(0)
                     : retvn;
                 PcodeOp newcopyop = fd.newOp(1, retop.getAddr());
-                fd.opSetOpcode(newcopyop, CPUI_COPY);
-                // Preserve the CPUI_RETURN storage address
+                fd.opSetOpcode(newcopyop, OpCode.CPUI_COPY);
+                // Preserve the OpCode.CPUI_RETURN storage address
                 Varnode outvn = fd.newVarnodeOut(retvn.getSize(), retvn.getAddr(), newcopyop);
                 fd.opSetInput(newcopyop, invn, 0);
                 fd.opSetInput(retop, outvn, 1);
@@ -644,7 +644,7 @@ namespace Sla.DECCORE
             list<PcodeOp*>::iterator iter;
             PcodeOp op;
 
-            // Patch any data-flow thru to CPUI_RETURN
+            // Patch any data-flow thru to OpCode.CPUI_RETURN
             fixReturnOp();
             if (!directsplit) {
                 iter = iblock.beginOp();
@@ -664,7 +664,7 @@ namespace Sla.DECCORE
                 iter = iblock.beginOp();
                 while (iter != iblock.endOp()) {
                     op = *iter++;
-                    if (op.code() == CPUI_MULTIEQUAL) {
+                    if (op.code() == OpCode.CPUI_MULTIEQUAL) {
                         // Only adjust MULTIEQUALs
                         doReplacement(op);
                         fd.opDestroy(op);

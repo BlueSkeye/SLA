@@ -225,7 +225,7 @@ namespace Sla.DECCORE
             if (vn.isTypeLock())
             {
                 type_metatype meta = vn.getType().getMetatype();
-                if (meta == TYPE_STRUCT || meta == TYPE_ARRAY)
+                if (meta == type_metatype.TYPE_STRUCT || meta == type_metatype.TYPE_ARRAY)
                     preventConstCollapse = true;
             }
 
@@ -244,7 +244,7 @@ namespace Sla.DECCORE
                     Varnode* leasthalf = nextlev[2 * i + 1];
                     if (leasthalf == (Varnode)null) continue; // Varnode didn't get split this level
                     PcodeOp* concat = fd.newOp(2, op.getAddr());
-                    fd.opSetOpcode(concat, CPUI_PIECE);
+                    fd.opSetOpcode(concat, OpCode.CPUI_PIECE);
                     fd.opSetOutput(concat, curvn);
                     fd.opSetInput(concat, mosthalf, 0);
                     fd.opSetInput(concat, leasthalf, 1);
@@ -296,7 +296,7 @@ namespace Sla.DECCORE
                         split = fd.newOp(2, bb.getStart());
                     else
                         split = fd.newOp(2, op.getAddr());
-                    fd.opSetOpcode(split, CPUI_SUBPIECE);
+                    fd.opSetOpcode(split, OpCode.CPUI_SUBPIECE);
                     fd.opSetOutput(split, mosthalf);
                     fd.opSetInput(split, curvn, 0);
                     fd.opSetInput(split, fd.newConstant(4, leasthalf.getSize()), 1);
@@ -307,7 +307,7 @@ namespace Sla.DECCORE
                     op = split;     // Keep -op- as the latest op in the split construction
 
                     split = fd.newOp(2, op.getAddr());
-                    fd.opSetOpcode(split, CPUI_SUBPIECE);
+                    fd.opSetOpcode(split, OpCode.CPUI_SUBPIECE);
                     fd.opSetOutput(split, leasthalf);
                     fd.opSetInput(split, curvn, 0);
                     fd.opSetInput(split, fd.newConstant(4, 0), 1);
@@ -340,7 +340,7 @@ namespace Sla.DECCORE
             PcodeOp* trunc = fd.newOp(1, op.getAddr());
             VarnodeData vdata = joinrec.getPiece(0); // Float extensions have exactly 1 piece
             Varnode* bigvn = fd.newVarnode(vdata.size, vdata.space, vdata.offset);
-            fd.opSetOpcode(trunc, CPUI_FLOAT_FLOAT2FLOAT);
+            fd.opSetOpcode(trunc, OpCode.CPUI_FLOAT_FLOAT2FLOAT);
             fd.opSetOutput(trunc, vn);
             fd.opSetInput(trunc, bigvn, 0);
             fd.opInsertBefore(trunc, op);
@@ -363,7 +363,7 @@ namespace Sla.DECCORE
             else
                 ext = fd.newOp(1, op.getAddr());
             VarnodeData vdata = joinrec.getPiece(0); // Float extensions have exactly 1 piece
-            fd.opSetOpcode(ext, CPUI_FLOAT_FLOAT2FLOAT);
+            fd.opSetOpcode(ext, OpCode.CPUI_FLOAT_FLOAT2FLOAT);
             fd.newVarnodeOut(vdata.size, vdata.getAddr(), ext);
             fd.opSetInput(ext, vn, 0);
             if (op == (PcodeOp)null)
@@ -498,7 +498,7 @@ namespace Sla.DECCORE
             }
         }
 
-        /// \brief Remove deprecated CPUI_MULTIEQUAL or CPUI_INDIRECT ops, preparing to re-heritage
+        /// \brief Remove deprecated OpCode.CPUI_MULTIEQUAL or OpCode.CPUI_INDIRECT ops, preparing to re-heritage
         ///
         /// If a previous Varnode was heritaged through a MULTIEQUAL or INDIRECT op, but now
         /// a larger range containing the Varnode is being heritaged, we throw away the op,
@@ -531,7 +531,7 @@ namespace Sla.DECCORE
                 Varnode* vn = remove[i];
                 PcodeOp* op = vn.getDef();
                 BlockBasic* bl = op.getParent();
-                if (op.code() == CPUI_INDIRECT)
+                if (op.code() == OpCode.CPUI_INDIRECT)
                 {
                     Varnode* iopVn = op.getIn(1);
                     PcodeOp* targetOp = PcodeOp::getOpFromConst(iopVn.getAddr());
@@ -545,7 +545,7 @@ namespace Sla.DECCORE
                 {
                     pos = op.getBasicIter();   // Insert SUBPIECE after all MULTIEQUALs in block
                     ++pos;
-                    while (pos != bl.endOp() && (*pos).code() == CPUI_MULTIEQUAL)
+                    while (pos != bl.endOp() && (*pos).code() == OpCode.CPUI_MULTIEQUAL)
                         ++pos;
                 }
                 int offset = vn.overlap(addr, size);
@@ -555,7 +555,7 @@ namespace Sla.DECCORE
                 big.setActiveHeritage();
                 newInputs.Add(big);
                 newInputs.Add(fd.newConstant(4, offset));
-                fd.opSetOpcode(op, CPUI_SUBPIECE);
+                fd.opSetOpcode(op, OpCode.CPUI_SUBPIECE);
                 fd.opSetAllInput(op, newInputs);
                 fd.opInsert(op, bl, pos);
                 vn.setWriteMask();
@@ -624,7 +624,7 @@ namespace Sla.DECCORE
         /// \return \b true, unless the range is unaffected by the op
         private bool callOpIndirectEffect(Address addr, int size, PcodeOp op)
         {
-            if ((op.code() == CPUI_CALL) || (op.code() == CPUI_CALLIND))
+            if ((op.code() == OpCode.CPUI_CALL) || (op.code() == OpCode.CPUI_CALLIND))
             {
                 // We should be able to get the callspec
                 FuncCallSpecs* fc = fd.getCallSpecs(op);
@@ -656,7 +656,7 @@ namespace Sla.DECCORE
             if (oiter != vn.endDescend())
                 throw new LowlevelError("Free varnode with multiple reads");
             newop = fd.newOp(2, op.getAddr());
-            fd.opSetOpcode(newop, CPUI_SUBPIECE);
+            fd.opSetOpcode(newop, OpCode.CPUI_SUBPIECE);
             vn1 = fd.newVarnode(size, addr);
             overlap = vn.overlap(addr, size);
             vn2 = fd.newConstant(addr.getAddrSize(), (ulong)overlap);
@@ -716,7 +716,7 @@ namespace Sla.DECCORE
                     mostvn = fd.newVarnodeOut(mostsigsize, pieceaddr, newop);
                     big = fd.newVarnode(size, addr);   // The new read
                     big.setActiveHeritage();
-                    fd.opSetOpcode(newop, CPUI_SUBPIECE);
+                    fd.opSetOpcode(newop, OpCode.CPUI_SUBPIECE);
                     fd.opSetInput(newop, big, 0);
                     fd.opSetInput(newop, fd.newConstant(addr.getAddrSize(), (ulong)overlap + vn.getSize()), 1);
                     fd.opInsertBefore(newop, op);
@@ -740,7 +740,7 @@ namespace Sla.DECCORE
                     leastvn = fd.newVarnodeOut(overlap, pieceaddr, newop);
                     big = fd.newVarnode(size, addr);   // The new read
                     big.setActiveHeritage();
-                    fd.opSetOpcode(newop, CPUI_SUBPIECE);
+                    fd.opSetOpcode(newop, OpCode.CPUI_SUBPIECE);
                     fd.opSetInput(newop, big, 0);
                     fd.opSetInput(newop, fd.newConstant(addr.getAddrSize(), 0), 1);
                     fd.opInsertBefore(newop, op);
@@ -753,7 +753,7 @@ namespace Sla.DECCORE
                     midvn = fd.newVarnodeOut(overlap + vn.getSize(), vn.getAddr(), newop);
                 else
                     midvn = fd.newVarnodeOut(overlap + vn.getSize(), addr, newop);
-                fd.opSetOpcode(newop, CPUI_PIECE);
+                fd.opSetOpcode(newop, OpCode.CPUI_PIECE);
                 fd.opSetInput(newop, vn, 0); // Most significant part
                 fd.opSetInput(newop, leastvn, 1); // Least sig
                 fd.opInsertAfter(newop, op);
@@ -764,7 +764,7 @@ namespace Sla.DECCORE
             {
                 newop = fd.newOp(2, op.getAddr());
                 bigout = fd.newVarnodeOut(size, addr, newop);
-                fd.opSetOpcode(newop, CPUI_PIECE);
+                fd.opSetOpcode(newop, OpCode.CPUI_PIECE);
                 fd.opSetInput(newop, mostvn, 0);
                 fd.opSetInput(newop, midvn, 1);
                 fd.opInsertAfter(newop, midvn.getDef());
@@ -810,7 +810,7 @@ namespace Sla.DECCORE
             {
                 Varnode* vn = vnlist[i];
                 PcodeOp* newop = fd.newOp(2, opaddress);
-                fd.opSetOpcode(newop, CPUI_PIECE);
+                fd.opSetOpcode(newop, OpCode.CPUI_PIECE);
                 Varnode* newvn;
                 if (i == vnlist.size() - 1)
                 {
@@ -878,7 +878,7 @@ namespace Sla.DECCORE
             {
                 Varnode* vn = vnlist[i];
                 PcodeOp* newop = fd.newOp(2, opaddress);
-                fd.opSetOpcode(newop, CPUI_SUBPIECE);
+                fd.opSetOpcode(newop, OpCode.CPUI_SUBPIECE);
                 ulong diff;
                 if (isbigendian)
                     diff = baseoff - (vn.getOffset() + vn.getSize());
@@ -930,7 +930,7 @@ namespace Sla.DECCORE
                     newOp.setMark();
                     OpCode opc = newOp.code();
                     bool isArtificial = false;
-                    if (opc == CPUI_COPY || opc == CPUI_MULTIEQUAL)
+                    if (opc == OpCode.CPUI_COPY || opc == OpCode.CPUI_MULTIEQUAL)
                     {
                         isArtificial = true;
                         int maxInNew = newOp.numInput();
@@ -944,7 +944,7 @@ namespace Sla.DECCORE
                             }
                         }
                     }
-                    else if (opc == CPUI_INDIRECT && newOp.isIndirectStore())
+                    else if (opc == OpCode.CPUI_INDIRECT && newOp.isIndirectStore())
                     {
                         // An INDIRECT can be considered artificial if it is caused by a STORE
                         Varnode* inVn = newOp.getIn(0);
@@ -971,7 +971,7 @@ namespace Sla.DECCORE
             while (inVn.isWritten())
             {       // Follow any COPY chain to earliest input
                 PcodeOp* nextOp = inVn.getDef();
-                if (nextOp.code() != CPUI_COPY) break;
+                if (nextOp.code() != OpCode.CPUI_COPY) break;
                 Varnode* nextIn = nextOp.getIn(0);
                 if (nextIn.getAddr() != inVn.getAddr()) break;
                 inVn = nextIn;
@@ -1058,7 +1058,7 @@ namespace Sla.DECCORE
                 LoadGuard & guard(*loadIter);
                 if (guard.analysisState != 0) break;
                 reads.Add(guard.op);
-                sinks.Add(guard.op.getIn(1));    // The CPUI_LOAD pointer
+                sinks.Add(guard.op.getIn(1));    // The OpCode.CPUI_LOAD pointer
             }
             list<LoadGuard>::iterator storeIter = storeGuard.end();
             while (storeIter != storeGuard.begin())
@@ -1067,7 +1067,7 @@ namespace Sla.DECCORE
                 LoadGuard & guard(*storeIter);
                 if (guard.analysisState != 0) break;
                 reads.Add(guard.op);
-                sinks.Add(guard.op.getIn(1));    // The CPUI_STORE pointer
+                sinks.Add(guard.op.getIn(1));    // The OpCode.CPUI_STORE pointer
             }
             AddrSpace* stackSpc = fd.getArch().getStackSpace();
             Varnode* stackReg = (Varnode)null;
@@ -1144,7 +1144,7 @@ namespace Sla.DECCORE
             }
         }
 
-        /// \brief Identify any CPUI_STORE ops that use a free pointer from a given address space
+        /// \brief Identify any OpCode.CPUI_STORE ops that use a free pointer from a given address space
         ///
         /// When performing heritage for stack Varnodes, data-flow around a STORE with a
         /// free pointer must be guarded (with an INDIRECT) to be safe. This routine collects
@@ -1167,9 +1167,9 @@ namespace Sla.DECCORE
                 {
                     PcodeOp* defOp = vn.getDef();
                     OpCode opc = defOp.code();
-                    if (opc == CPUI_COPY)
+                    if (opc == OpCode.CPUI_COPY)
                         vn = defOp.getIn(0);
-                    else if (opc == CPUI_INT_ADD && defOp.getIn(1).isConstant())
+                    else if (opc == OpCode.CPUI_INT_ADD && defOp.getIn(1).isConstant())
                         vn = defOp.getIn(0);
                     else
                         break;
@@ -1215,7 +1215,7 @@ namespace Sla.DECCORE
                     StackNode & curNode(path.GetLastItem());
                     if (curNode.iter == curNode.vn.endDescend())
                     {
-                        path.pop_back();
+                        path.RemoveLastItem();
                         continue;
                     }
                     PcodeOp* op = *curNode.iter;
@@ -1224,7 +1224,7 @@ namespace Sla.DECCORE
                     if (outVn != (Varnode)null && outVn.isMark()) continue;      // Don't revisit Varnodes
                     switch (op.code())
                     {
-                        case CPUI_INT_ADD:
+                        case OpCode.CPUI_INT_ADD:
                             {
                                 Varnode* otherVn = op.getIn(1 - op.getSlot(curNode.vn));
                                 if (otherVn.isConstant())
@@ -1254,13 +1254,13 @@ namespace Sla.DECCORE
                                 }
                                 break;
                             }
-                        case CPUI_SEGMENTOP:
+                        case OpCode.CPUI_SEGMENTOP:
                             {
                                 if (op.getIn(2) != curNode.vn) break;  // Check that stackpointer comes in as inner pointer
                                                                         // Treat output as having the same offset, fallthru to COPY
                             }
-                        case CPUI_INDIRECT:
-                        case CPUI_COPY:
+                        case OpCode.CPUI_INDIRECT:
+                        case OpCode.CPUI_COPY:
                             {
                                 StackNode nextNode(outVn, curNode.offset, curNode.traversals);
                                 if (nextNode.iter != nextNode.vn.endDescend())
@@ -1273,7 +1273,7 @@ namespace Sla.DECCORE
                                     unknownStackStorage = true;
                                 break;
                             }
-                        case CPUI_MULTIEQUAL:
+                        case OpCode.CPUI_MULTIEQUAL:
                             {
                                 StackNode nextNode = new StackNode(outVn, curNode.offset, curNode.traversals | StackNode::multiequal);
                                 if (nextNode.iter != nextNode.vn.endDescend())
@@ -1286,7 +1286,7 @@ namespace Sla.DECCORE
                                     unknownStackStorage = true;
                                 break;
                             }
-                        case CPUI_LOAD:
+                        case OpCode.CPUI_LOAD:
                             {
                                 // Note that if ANY path has one of the traversals (non-constant ADD or MULTIEQUAL), then
                                 // THIS path must have one of the traversals, because the only other acceptable path elements
@@ -1297,7 +1297,7 @@ namespace Sla.DECCORE
                                 }
                                 break;
                             }
-                        case CPUI_STORE:
+                        case OpCode.CPUI_STORE:
                             {
                                 if (op.getIn(1) == curNode.vn)
                                 {   // Make sure the STORE pointer comes from our path
@@ -1354,7 +1354,7 @@ namespace Sla.DECCORE
                 PcodeOp* indOp = op.previousOp();
                 while (indOp != (PcodeOp)null)
                 {
-                    if (indOp.code() != CPUI_INDIRECT) break;
+                    if (indOp.code() != OpCode.CPUI_INDIRECT) break;
                     Varnode* iopVn = indOp.getIn(1);
                     if (iopVn.getSpace().getType() != IPTR_IOP) break;
                     if (op != PcodeOp::getOpFromConst(iopVn.getAddr())) break;
@@ -1523,7 +1523,7 @@ namespace Sla.DECCORE
                     truncAddr = addr + diff;        // Convert truncated Address to caller's perspective
                     PcodeOp* op = fc.getOp();
                     PcodeOp* subpieceOp = fd.newOp(2, op.getAddr());
-                    fd.opSetOpcode(subpieceOp, CPUI_SUBPIECE);
+                    fd.opSetOpcode(subpieceOp, OpCode.CPUI_SUBPIECE);
                     Varnode* wholeVn = fd.newVarnode(size, addr);
                     wholeVn.setActiveHeritage();
                     fd.opSetInput(subpieceOp, wholeVn, 0);
@@ -1569,7 +1569,7 @@ namespace Sla.DECCORE
                 Varnode* newFront = indOpFront.getOut();
                 PcodeOp* concatFront = fd.newOp(2, indOp.getAddr());
                 int slotNew = vData.space.isBigEndian() ? 0 : 1;
-                fd.opSetOpcode(concatFront, CPUI_PIECE);
+                fd.opSetOpcode(concatFront, OpCode.CPUI_PIECE);
                 fd.opSetInput(concatFront, newFront, slotNew);
                 fd.opSetInput(concatFront, vnCollect, 1 - slotNew);
                 vnCollect = fd.newVarnodeOut(sizeFront + vData.size, addr, concatFront);
@@ -1583,7 +1583,7 @@ namespace Sla.DECCORE
                 Varnode* newBack = indOpBack.getOut();
                 PcodeOp* concatBack = fd.newOp(2, indOp.getAddr());
                 int slotNew = vData.space.isBigEndian() ? 1 : 0;
-                fd.opSetOpcode(concatBack, CPUI_PIECE);
+                fd.opSetOpcode(concatBack, OpCode.CPUI_PIECE);
                 fd.opSetInput(concatBack, newBack, slotNew);
                 fd.opSetInput(concatBack, vnCollect, 1 - slotNew);
                 vnCollect = fd.newVarnodeOut(size, addr, concatBack);
@@ -1764,7 +1764,7 @@ namespace Sla.DECCORE
                 Varnode* vn = fd.newVarnodeOut(size, addr, copyop);
                 vn.setActiveHeritage();
                 vn.setAddrForce();
-                fd.opSetOpcode(copyop, CPUI_COPY);
+                fd.opSetOpcode(copyop, OpCode.CPUI_COPY);
                 Varnode* invn = fd.newVarnode(size, addr);
                 invn.setActiveHeritage();
                 fd.opSetInput(copyop, invn, 0);
@@ -1800,7 +1800,7 @@ namespace Sla.DECCORE
                 if (op.getHaltType() != 0) continue; // Special halt points cannot take return values
                 Varnode* invn = fd.newVarnode(size, addr);
                 PcodeOp* subOp = fd.newOp(2, op.getAddr());
-                fd.opSetOpcode(subOp, CPUI_SUBPIECE);
+                fd.opSetOpcode(subOp, OpCode.CPUI_SUBPIECE);
                 fd.opSetInput(subOp, invn, 0);
                 fd.opSetInput(subOp, fd.newConstant(4, offset), 1);
                 fd.opInsertBefore(subOp, op);
@@ -1858,7 +1858,7 @@ namespace Sla.DECCORE
                 Varnode* vn = fd.newVarnodeOut(size, addr, copyop);
                 vn.setAddrForce();
                 vn.setActiveHeritage();
-                fd.opSetOpcode(copyop, CPUI_COPY);
+                fd.opSetOpcode(copyop, OpCode.CPUI_COPY);
                 copyop.setStopCopyPropagation();
                 Varnode* invn = fd.newVarnode(size, addr);
                 invn.setActiveHeritage();
@@ -2228,7 +2228,7 @@ namespace Sla.DECCORE
             for (oiter = bl.beginOp(); oiter != bl.endOp(); ++oiter)
             {
                 op = *oiter;
-                if (op.code() != CPUI_MULTIEQUAL)
+                if (op.code() != OpCode.CPUI_MULTIEQUAL)
                 {
                     // First replace reads with top of stack
                     for (slot = 0; slot < op.numInput(); ++slot)
@@ -2247,7 +2247,7 @@ namespace Sla.DECCORE
                         else
                             vnnew = stack.GetLastItem();
                         // INDIRECTs and their op really happen AT SAME TIME
-                        if (vnnew.isWritten() && (vnnew.getDef().code() == CPUI_INDIRECT))
+                        if (vnnew.isWritten() && (vnnew.getDef().code() == OpCode.CPUI_INDIRECT))
                         {
                             if (PcodeOp::getOpFromConst(vnnew.getDef().getIn(1).getAddr()) == op)
                             {
@@ -2281,7 +2281,7 @@ namespace Sla.DECCORE
                 for (suboiter = subbl.beginOp(); suboiter != subbl.endOp(); ++suboiter)
                 {
                     multiop = *suboiter;
-                    if (multiop.code() != CPUI_MULTIEQUAL) break; // For each MULTIEQUAL
+                    if (multiop.code() != OpCode.CPUI_MULTIEQUAL) break; // For each MULTIEQUAL
                     vnin = multiop.getIn(slot);
                     if (!vnin.isHeritageKnown())
                     {
@@ -2308,7 +2308,7 @@ namespace Sla.DECCORE
             for (i = 0; i < writelist.size(); ++i)
             {
                 vnout = writelist[i];
-                varstack[vnout.getAddr()].pop_back();
+                varstack[vnout.getAddr()].RemoveLastItem();
             }
         }
 
@@ -2386,7 +2386,7 @@ namespace Sla.DECCORE
                     PcodeOp* multiop = fd.newOp(bl.sizeIn(), bl.getStart());
                     Varnode* vnout = fd.newVarnodeOut(size, addr, multiop);
                     vnout.setActiveHeritage();
-                    fd.opSetOpcode(multiop, CPUI_MULTIEQUAL); // Create each MULTIEQUAL
+                    fd.opSetOpcode(multiop, OpCode.CPUI_MULTIEQUAL); // Create each MULTIEQUAL
                     for (int j = 0; j < bl.sizeIn(); ++j)
                     {
                         Varnode* vnin = fd.newVarnode(size, addr);

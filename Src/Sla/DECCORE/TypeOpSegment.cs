@@ -19,7 +19,7 @@ namespace Sla.DECCORE
     internal class TypeOpSegment : TypeOp
     {
         public TypeOpSegment(TypeFactory t)
-            : base(t, CPUI_SEGMENTOP,"segmentop")
+            : base(t, OpCode.CPUI_SEGMENTOP,"segmentop")
 
         {
             opflags = PcodeOp::special | PcodeOp::nocollapse;
@@ -47,7 +47,7 @@ namespace Sla.DECCORE
             if ((outslot == 0) || (outslot == 1)) return (Datatype)null;
             if (invn.isSpacebase()) return (Datatype)null;
             type_metatype metain = alttype.getMetatype();
-            if (metain != TYPE_PTR) return (Datatype)null;
+            if (metain != type_metatype.TYPE_PTR) return (Datatype)null;
             AddrSpace* spc = tlst.getArch().getDefaultDataSpace();
             Datatype* btype = ((TypePointer*)alttype).getPtrTo();
             return tlst.getTypePointer(outvn.getSize(), btype, spc.getWordSize());

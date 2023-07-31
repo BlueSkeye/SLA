@@ -59,7 +59,7 @@ namespace Sla.CORE
                 outStream.Write(val ? "true" : "false");
                 return;
             }
-            Globals.a_v_b(outStream, attribId.getName(), val);
+            Xml.a_v_b(outStream, attribId.getName(), val);
         }
 
         public override void writeSignedInteger(AttributeId attribId, long val)
@@ -73,7 +73,7 @@ namespace Sla.CORE
                 outStream.Write(val);
                 return;
             }
-            Globals.a_v_i(outStream, attribId.getName(), val);
+            Xml.a_v_i(outStream, attribId.getName(), val);
         }
 
         public override void writeUnsignedInteger(AttributeId attribId, ulong val)
@@ -101,7 +101,7 @@ namespace Sla.CORE
                 Globals.xml_escape(outStream, val);
                 return;
             }
-            Globals.a_v(outStream, attribId.getName(), val);
+            Xml.a_v(outStream, attribId.getName(), val);
         }
 
         public override void writeStringIndexed(AttributeId attribId, uint index, string val)
@@ -125,7 +125,7 @@ namespace Sla.CORE
                 Globals.xml_escape(outStream, spc.getName());
                 return;
             }
-            Globals.a_v(outStream, attribId.getName(), spc.getName());
+            Xml.a_v(outStream, attribId.getName(), spc.getName());
         }
     }
 }

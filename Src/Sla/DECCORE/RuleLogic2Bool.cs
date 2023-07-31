@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// INT_AND to BOOL_AND, INT_OR to BOOL_OR etc.
         public override void getOpList(List<uint> oplist)
         {
-            uint list[] = { CPUI_INT_AND, CPUI_INT_OR, CPUI_INT_XOR };
+            uint list[] = { OpCode.CPUI_INT_AND, OpCode.CPUI_INT_OR, OpCode.CPUI_INT_XOR };
             oplist.insert(oplist.end(), list, list + 3);
         }
 
@@ -51,14 +51,14 @@ namespace Sla.DECCORE
             }
             switch (op.code())
             {
-                case CPUI_INT_AND:
-                    data.opSetOpcode(op, CPUI_BOOL_AND);
+                case OpCode.CPUI_INT_AND:
+                    data.opSetOpcode(op, OpCode.CPUI_BOOL_AND);
                     break;
-                case CPUI_INT_OR:
-                    data.opSetOpcode(op, CPUI_BOOL_OR);
+                case OpCode.CPUI_INT_OR:
+                    data.opSetOpcode(op, OpCode.CPUI_BOOL_OR);
                     break;
-                case CPUI_INT_XOR:
-                    data.opSetOpcode(op, CPUI_BOOL_XOR);
+                case OpCode.CPUI_INT_XOR:
+                    data.opSetOpcode(op, OpCode.CPUI_BOOL_XOR);
                     break;
                 default:
                     return 0;

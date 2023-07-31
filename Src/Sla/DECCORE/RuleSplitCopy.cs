@@ -39,9 +39,9 @@ namespace Sla.DECCORE
             Datatype* outType = op.getOut().getTypeDefFacing();
             type_metatype metain = inType.getMetatype();
             type_metatype metaout = outType.getMetatype();
-            if (metain != TYPE_PARTIALSTRUCT && metaout != TYPE_PARTIALSTRUCT &&
-                metain != TYPE_ARRAY && metaout != TYPE_ARRAY &&
-                metain != TYPE_STRUCT && metaout != TYPE_STRUCT)
+            if (metain != type_metatype.TYPE_PARTIALSTRUCT && metaout != type_metatype.TYPE_PARTIALSTRUCT &&
+                metain != type_metatype.TYPE_ARRAY && metaout != type_metatype.TYPE_ARRAY &&
+                metain != type_metatype.TYPE_STRUCT && metaout != type_metatype.TYPE_STRUCT)
                 return false;
             SplitDatatype splitter(data);
             if (splitter.splitCopy(op, inType, outType))

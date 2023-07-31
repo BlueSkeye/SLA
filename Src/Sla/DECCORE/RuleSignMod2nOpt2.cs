@@ -27,7 +27,7 @@ namespace Sla.DECCORE
                 Varnode* addOut = op.getIn(slot);
                 if (!addOut.isWritten()) continue;
                 PcodeOp* addOp = addOut.getDef();
-                if (addOp.code() != CPUI_INT_ADD) continue;
+                if (addOp.code() != OpCode.CPUI_INT_ADD) continue;
                 Varnode* constVn = addOp.getIn(1);
                 if (!constVn.isConstant()) continue;
                 if (constVn.getOffset() != npow) continue;
@@ -50,11 +50,11 @@ namespace Sla.DECCORE
             BlockBasic* decision = (BlockBasic*)inner.getIn(0);
             if (bl.getIn(1 - innerSlot) != decision) return (Varnode)null;
             PcodeOp* cbranch = decision.lastOp();
-            if (cbranch == (PcodeOp)null || cbranch.code() != CPUI_CBRANCH) return (Varnode)null;
+            if (cbranch == (PcodeOp)null || cbranch.code() != OpCode.CPUI_CBRANCH) return (Varnode)null;
             Varnode* boolVn = cbranch.getIn(1);
             if (!boolVn.isWritten()) return (Varnode)null;
             PcodeOp* lessOp = boolVn.getDef();
-            if (lessOp.code() != CPUI_INT_SLESS) return (Varnode)null;
+            if (lessOp.code() != OpCode.CPUI_INT_SLESS) return (Varnode)null;
             if (!lessOp.getIn(1).isConstant()) return (Varnode)null;
             if (lessOp.getIn(1).getOffset() != 0) return (Varnode)null;
             FlowBlock* negBlock = cbranch.isBooleanFlip() ? decision.getFalseOut() : decision.getTrueOut();
@@ -75,7 +75,7 @@ namespace Sla.DECCORE
                 Varnode* minusVn = op.getIn(slot);
                 if (!minusVn.isWritten()) continue;
                 PcodeOp* multOp = minusVn.getDef();
-                if (multOp.code() != CPUI_INT_MULT) continue;
+                if (multOp.code() != OpCode.CPUI_INT_MULT) continue;
                 Varnode* constVn = multOp.getIn(1);
                 if (!constVn.isConstant()) continue;
                 if (constVn.getOffset() != Globals.calc_mask(constVn.getSize())) continue;
@@ -83,7 +83,7 @@ namespace Sla.DECCORE
                 Varnode* signExt = multOp.getIn(0);
                 if (!signExt.isWritten()) continue;
                 PcodeOp* shiftOp = signExt.getDef();
-                if (shiftOp.code() != CPUI_INT_SRIGHT) continue;
+                if (shiftOp.code() != OpCode.CPUI_INT_SRIGHT) continue;
                 if (shiftOp.getIn(0) != base) continue;
                 constVn = shiftOp.getIn(1);
                 if (!constVn.isConstant()) continue;
@@ -122,7 +122,7 @@ namespace Sla.DECCORE
             Varnode* andOut = op.getIn(0);
             if (!andOut.isWritten()) return 0;
             PcodeOp* andOp = andOut.getDef();
-            if (andOp.code() != CPUI_INT_AND) return 0;
+            if (andOp.code() != OpCode.CPUI_INT_AND) return 0;
             constVn = andOp.getIn(1);
             if (!constVn.isConstant()) return 0;
             ulong npow = (~constVn.getOffset() + 1) & mask;
@@ -132,12 +132,12 @@ namespace Sla.DECCORE
             if (!adjVn.isWritten()) return 0;
             PcodeOp* adjOp = adjVn.getDef();
             Varnode * base;
-            if (adjOp.code() == CPUI_INT_ADD)
+            if (adjOp.code() == OpCode.CPUI_INT_ADD)
             {
                 if (npow != 2) return 0;        // Special mod 2 form
                 base = checkSignExtForm(adjOp);
             }
-            else if (adjOp.code() == CPUI_MULTIEQUAL)
+            else if (adjOp.code() == OpCode.CPUI_MULTIEQUAL)
             {
                 base = checkMultiequalForm(adjOp, npow);
             }
@@ -150,13 +150,13 @@ namespace Sla.DECCORE
             for (iter = multOut.beginDescend(); iter != multOut.endDescend(); ++iter)
             {
                 PcodeOp* rootOp = *iter;
-                if (rootOp.code() != CPUI_INT_ADD) continue;
+                if (rootOp.code() != OpCode.CPUI_INT_ADD) continue;
                 int slot = rootOp.getSlot(multOut);
                 if (rootOp.getIn(1 - slot) != base) continue;
                 if (slot == 0)
                     data.opSetInput(rootOp, base, 0);
                 data.opSetInput(rootOp, data.newConstant(@base.getSize(), npow), 1);
-                data.opSetOpcode(rootOp, CPUI_INT_SREM);
+                data.opSetOpcode(rootOp, OpCode.CPUI_INT_SREM);
                 return 1;
             }
             return 0;

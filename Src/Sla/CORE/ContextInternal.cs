@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Sla.EXTRA;
 using System.Diagnostics.CodeAnalysis;
 
-using TrackedSet = System.Collections.Generic.List<ghidra.TrackedContext>;
+using TrackedSet = System.Collections.Generic.List<Sla.CORE.TrackedContext>;
 using static System.Diagnostics.Activity;
 
 namespace Sla.CORE
@@ -115,7 +115,7 @@ namespace Sla.CORE
         /// \param encoder is the stream encoder
         /// \param addr is the address of the split point where the blob is valid
         /// \param vec is the array of words holding the blob values
-        public void encodeContext(ghidra.Encoder encoder, Address addr, uint[] vec)
+        public void encodeContext(Sla.CORE.Encoder encoder, Address addr, uint[] vec)
         {
             encoder.openElement(ElementId.ELEM_CONTEXT_POINTSET);
             addr.getSpace().encodeAttributes(encoder, addr.getOffset());
@@ -249,10 +249,7 @@ namespace Sla.CORE
         //{
         //}
 
-        public override int getContextSize()
-        {
-            return size;
-        }
+        public override int getContextSize() => size;
 
         protected override void registerVariable(ref string nm, int sbit, int ebit)
         {
@@ -272,10 +269,7 @@ namespace Sla.CORE
             variables[nm] = bitrange;
         }
 
-        internal override uint[] getContext(Address addr)
-        {
-            return database.getValue(addr).array;
-        }
+        internal override uint[] getContext(Address addr) => database.getValue(addr).array;
 
         internal override uint[] getContext(Address addr, out ulong first, out ulong last)
         {
@@ -300,10 +294,7 @@ namespace Sla.CORE
             return ref trackbase.defaultValue();
         }
 
-        internal override TrackedSet getTrackedSet(Address addr)
-        {
-            return trackbase.getValue(addr);
-        }
+        internal override TrackedSet getTrackedSet(Address addr) => trackbase.getValue(addr);
 
         internal override TrackedSet createSet(Address addr1, Address addr2)
         {
@@ -315,7 +306,7 @@ namespace Sla.CORE
             return res;
         }
 
-        protected override void encode(Encoder encoder)
+        internal override void encode(Encoder encoder)
         {
             if (database.empty() && trackbase.empty()) {
                 return;

@@ -17,7 +17,7 @@ namespace Sla.EXTRA
         /// if the symbol already exists, associate the prototype with the symbol.
         public override void execute(TextReader s)
         {
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
 
             string filename;

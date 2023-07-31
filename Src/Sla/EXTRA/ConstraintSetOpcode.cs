@@ -40,13 +40,13 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[opindex] = UnifyDatatype(UnifyDatatype::op_type);
+            typelist[opindex] = UnifyDatatype(UnifyDatatype.TypeKind.op_type);
         }
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << "data.opSetOpcode(" << printstate.getName(opindex) << ",CPUI_" << get_opname(opc) << ");" << endl;
+            s << "data.opSetOpcode(" << printstate.getName(opindex) << ",CPUI_" << Globals.get_opname(opc) << ");" << endl;
         }
     }
 }

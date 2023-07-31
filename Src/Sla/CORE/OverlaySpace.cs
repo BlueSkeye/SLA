@@ -34,9 +34,9 @@ namespace Sla.CORE
         public virtual void saveXml(StreamWriter s)
         {
             s.Write("<space_overlay");
-            Globals.a_v(s, "name", name);
-            Globals.a_v_i(s, "index", index);
-            Globals.a_v(s, "base", baseSpace.getName());
+            Xml.a_v(s, "name", name);
+            Xml.a_v_i(s, "index", index);
+            Xml.a_v(s, "base", baseSpace.getName());
             s.WriteLine("/>");
         }
         

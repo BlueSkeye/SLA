@@ -39,12 +39,12 @@ namespace Sla.DECCORE
                 }
                 else if ((evalType & PcodeOp::unary) != 0)
                     curVn = curOp.getIn(0);
-                else if (curOp.code() == CPUI_INDIRECT)
+                else if (curOp.code() == OpCode.CPUI_INDIRECT)
                 {
                     indirects.Add(curOp);
                     curVn = curOp.getIn(0);
                 }
-                else if (curOp.code() == CPUI_LOAD)
+                else if (curOp.code() == OpCode.CPUI_LOAD)
                 {
                     curVn = curOp.getIn(1);
                 }
@@ -69,7 +69,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* op = bblocks.getBlock(i).lastOp();
                 if (op == (PcodeOp)null) continue;
-                if (op.code() != CPUI_BRANCHIND) continue;
+                if (op.code() != OpCode.CPUI_BRANCHIND) continue;
                 protectSwitchPathIndirects(op);
             }
         }

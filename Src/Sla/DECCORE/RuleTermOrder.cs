@@ -31,11 +31,11 @@ namespace Sla.DECCORE
         {
             // FIXME:  All the commutative ops
             // Use the TypeOp::commutative function
-            uint list[] ={ CPUI_INT_EQUAL, CPUI_INT_NOTEQUAL, CPUI_INT_ADD, CPUI_INT_CARRY,
-         CPUI_INT_SCARRY, CPUI_INT_XOR, CPUI_INT_AND, CPUI_INT_OR,
-         CPUI_INT_MULT, CPUI_BOOL_XOR, CPUI_BOOL_AND, CPUI_BOOL_OR,
-         CPUI_FLOAT_EQUAL, CPUI_FLOAT_NOTEQUAL, CPUI_FLOAT_ADD,
-         CPUI_FLOAT_MULT };
+            uint list[] ={ OpCode.CPUI_INT_EQUAL, OpCode.CPUI_INT_NOTEQUAL, OpCode.CPUI_INT_ADD, OpCode.CPUI_INT_CARRY,
+         OpCode.CPUI_INT_SCARRY, OpCode.CPUI_INT_XOR, OpCode.CPUI_INT_AND, OpCode.CPUI_INT_OR,
+         OpCode.CPUI_INT_MULT, OpCode.CPUI_BOOL_XOR, OpCode.CPUI_BOOL_AND, OpCode.CPUI_BOOL_OR,
+         OpCode.CPUI_FLOAT_EQUAL, OpCode.CPUI_FLOAT_NOTEQUAL, OpCode.CPUI_FLOAT_ADD,
+         OpCode.CPUI_FLOAT_MULT };
             oplist.insert(oplist.end(), list, list + 16);
         }
 

@@ -22,7 +22,7 @@ namespace Sla.EXTRA
 
             s >> name;
 
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image");
             if (name.size() != 0 || dcp.fd == (Funcdata)null)
             {

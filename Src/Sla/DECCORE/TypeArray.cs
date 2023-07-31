@@ -47,7 +47,7 @@ namespace Sla.DECCORE
 
         /// Internal constructor for decode
         protected TypeArray()
-            : base(0, TYPE_ARRAY)
+            : base(0, type_metatype.TYPE_ARRAY)
         {
             arraysize = 0;
             arrayof = (Datatype)null;

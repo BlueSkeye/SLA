@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Simplify trivial shifts:  `V << 0  =>  V,  V << #64  =>  0`
         public override void getOpList(List<uint> oplist)
         {
-            uint list[] = { CPUI_INT_LEFT, CPUI_INT_RIGHT, CPUI_INT_SRIGHT };
+            uint list[] = { OpCode.CPUI_INT_LEFT, OpCode.CPUI_INT_RIGHT, OpCode.CPUI_INT_SRIGHT };
             oplist.insert(oplist.end(), list, list + 3);
         }
 
@@ -40,12 +40,12 @@ namespace Sla.DECCORE
             {
                 Varnode* replace;
                 if (val < 8 * op.getIn(0).getSize()) return 0;    // Non-trivial
-                if (op.code() == CPUI_INT_SRIGHT) return 0; // Cant predict signbit
+                if (op.code() == OpCode.CPUI_INT_SRIGHT) return 0; // Cant predict signbit
                 replace = data.newConstant(op.getIn(0).getSize(), 0);
                 data.opSetInput(op, replace, 0);
             }
             data.opRemoveInput(op, 1);
-            data.opSetOpcode(op, CPUI_COPY);
+            data.opSetOpcode(op, OpCode.CPUI_COPY);
             return 1;
         }
     }

@@ -37,7 +37,7 @@ namespace Sla.DECCORE
             if (!constvn.isConstant()) return 0;   // Must append with constant
             if (constvn.getOffset() != 0) return 0; // of value 0
             data.opRemoveInput(op, 0);  // Remove the constant
-            data.opSetOpcode(op, CPUI_INT_ZEXT);
+            data.opSetOpcode(op, OpCode.CPUI_INT_ZEXT);
             return 1;
         }
     }

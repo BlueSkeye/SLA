@@ -17,7 +17,7 @@ namespace Sla.DECCORE
         private ConstantPool cpool;
 
         public TypeOpCpoolref(TypeFactory t)
-            : base(t, CPUI_CPOOLREF, "cpoolref")
+            : base(t, OpCode.CPUI_CPOOLREF, "cpoolref")
         {
             cpool = t.getArch().cpool;
             opflags = PcodeOp::special | PcodeOp::nocollapse;
@@ -34,7 +34,7 @@ namespace Sla.DECCORE
             if (rec == (CPoolRecord*)0)
                 return TypeOp::getOutputLocal(op);
             if (rec.getTag() == CPoolRecord::instance_of)
-                return tlst.getBase(1, TYPE_BOOL);
+                return tlst.getBase(1, type_metatype.TYPE_BOOL);
             return rec.getType();
         }
 
@@ -45,7 +45,7 @@ namespace Sla.DECCORE
 
         public override Datatype getInputLocal(PcodeOp op, int slot)
         {
-            return tlst.getBase(op.getIn(slot).getSize(), TYPE_INT);
+            return tlst.getBase(op.getIn(slot).getSize(), type_metatype.TYPE_INT);
         }
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)

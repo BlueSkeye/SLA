@@ -16,7 +16,7 @@ namespace Sla.EXTRA
         /// Each function is decompiled, and info about its input Varnodes are printed.
         public override void execute(TextReader s)
         {
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
 
             iterateFunctionsAddrOrder();

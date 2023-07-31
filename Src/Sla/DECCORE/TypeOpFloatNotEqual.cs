@@ -11,7 +11,7 @@ namespace Sla.DECCORE
     internal class TypeOpFloatNotEqual : TypeOpBinary
     {
         public TypeOpFloatNotEqual(TypeFactory t, Translate trans)
-            : base(t, CPUI_FLOAT_NOTEQUAL,"!=", TYPE_BOOL, TYPE_FLOAT)
+            : base(t, OpCode.CPUI_FLOAT_NOTEQUAL,"!=", type_metatype.TYPE_BOOL, type_metatype.TYPE_FLOAT)
         {
             opflags = PcodeOp::binary | PcodeOp::booloutput | PcodeOp::commutative;
             addlflags = floatingpoint_op;

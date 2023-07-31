@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     internal class TypeOpIntAdd : TypeOpBinary
     {
         public TypeOpIntAdd(TypeFactory t)
-            : base(t, CPUI_INT_ADD,"+", TYPE_INT, TYPE_INT)
+            : base(t, OpCode.CPUI_INT_ADD,"+", type_metatype.TYPE_INT, type_metatype.TYPE_INT)
         {
             opflags = PcodeOp::binary | PcodeOp::commutative;
             addlflags = arithmetic_op | inherits_sign;
@@ -31,9 +31,9 @@ namespace Sla.DECCORE
             int inslot, int outslot)
         {
             type_metatype invnMeta = alttype.getMetatype();
-            if (invnMeta != TYPE_PTR)
+            if (invnMeta != type_metatype.TYPE_PTR)
             {
-                if (invnMeta != TYPE_INT && invnMeta != TYPE_UINT)
+                if (invnMeta != type_metatype.TYPE_INT && invnMeta != type_metatype.TYPE_UINT)
                     return (Datatype)null;
                 if (outslot != 1 || !op.getIn(1).isConstant())
                     return (Datatype)null;
@@ -41,7 +41,7 @@ namespace Sla.DECCORE
             else if ((inslot != -1) && (outslot != -1))
                 return (Datatype)null;    // Must propagate input <. output for pointers
             Datatype* newtype;
-            if (outvn.isConstant() && (alttype.getMetatype() != TYPE_PTR))
+            if (outvn.isConstant() && (alttype.getMetatype() != type_metatype.TYPE_PTR))
                 newtype = alttype;
             else if (inslot == -1)      // Propagating output to input
                 newtype = op.getIn(outslot).getTempType();    // Don't propagate pointer types this direction
@@ -74,7 +74,7 @@ namespace Sla.DECCORE
             if (command != 3)
             {
                 uoffset = AddrSpace::addressToByte(uoffset, pointer.getWordSize());
-                bool allowWrap = (op.code() != CPUI_PTRSUB);
+                bool allowWrap = (op.code() != OpCode.CPUI_PTRSUB);
                 do
                 {
                     pointer = pointer.downChain(uoffset, parent, parentOff, allowWrap, *typegrp);
@@ -84,11 +84,11 @@ namespace Sla.DECCORE
             }
             if (parent != (TypePointer*)0)
             {
-                // If the innermost containing object is a TYPE_STRUCT or TYPE_ARRAY
+                // If the innermost containing object is a type_metatype.TYPE_STRUCT or type_metatype.TYPE_ARRAY
                 // preserve info about this container
                 Datatype* pt;
                 if (pointer == (TypePointer*)0)
-                    pt = typegrp.getBase(1, TYPE_UNKNOWN); // Offset does not point at a proper sub-type
+                    pt = typegrp.getBase(1, type_metatype.TYPE_UNKNOWN); // Offset does not point at a proper sub-type
                 else
                     pt = pointer.getPtrTo();   // The sub-type being directly pointed at
                 pointer = typegrp.getTypePointerRel(parent, pt, parentOff);
@@ -101,8 +101,8 @@ namespace Sla.DECCORE
             }
             if (op.getIn(inslot).isSpacebase())
             {
-                if (pointer.getPtrTo().getMetatype() == TYPE_SPACEBASE)
-                    pointer = typegrp.getTypePointer(pointer.getSize(), typegrp.getBase(1, TYPE_UNKNOWN), pointer.getWordSize());
+                if (pointer.getPtrTo().getMetatype() == type_metatype.TYPE_SPACEBASE)
+                    pointer = typegrp.getTypePointer(pointer.getSize(), typegrp.getBase(1, type_metatype.TYPE_UNKNOWN), pointer.getWordSize());
             }
             return pointer;
         }
@@ -122,7 +122,7 @@ namespace Sla.DECCORE
         /// \return a command indicating how the op should be treated
         public static int propagateAddPointer(ulong off, PcodeOp op, int slot, int sz)
         {
-            if (op.code() == CPUI_PTRADD)
+            if (op.code() == OpCode.CPUI_PTRADD)
             {
                 if (slot != 0) return 2;
                 Varnode* constvn = op.getIn(1);
@@ -136,13 +136,13 @@ namespace Sla.DECCORE
                     return 2;
                 return 3;
             }
-            if (op.code() == CPUI_PTRSUB)
+            if (op.code() == OpCode.CPUI_PTRSUB)
             {
                 if (slot != 0) return 2;
                 off = op.getIn(1).getOffset();
                 return (off == 0) ? 0 : 1;
             }
-            if (op.code() == CPUI_INT_ADD)
+            if (op.code() == OpCode.CPUI_INT_ADD)
             {
                 Varnode* othervn = op.getIn(1 - slot);
                 // Check if othervn is an offset
@@ -151,7 +151,7 @@ namespace Sla.DECCORE
                     if (othervn.isWritten())
                     {
                         PcodeOp* multop = othervn.getDef();
-                        if (multop.code() == CPUI_INT_MULT)
+                        if (multop.code() == OpCode.CPUI_INT_MULT)
                         {
                             Varnode* constvn = multop.getIn(1);
                             if (constvn.isConstant())
@@ -169,7 +169,7 @@ namespace Sla.DECCORE
                         return 3;
                     return 2;
                 }
-                if (othervn.getTempType().getMetatype() == TYPE_PTR) // Check if othervn marked as ptr
+                if (othervn.getTempType().getMetatype() == type_metatype.TYPE_PTR) // Check if othervn marked as ptr
                     return 2;
                 off = othervn.getOffset();
                 return (off == 0) ? 0 : 1;

@@ -52,11 +52,12 @@ namespace Sla.EXTRA
         //typedef typename _recordtype::linetype linetype;  ///< Integer data-type defining the linear domain
         //typedef typename _recordtype::subsorttype subsorttype;  ///< The data-type used for subsorting
         //typedef typename _recordtype::inittype inittype;    ///< The data-type containing initialization data for records
-  /// \brief The internal \e sub-range object for the interval map
-  ///
-  /// It defines a disjoint range within the common refinement of all ranges
-  /// in the container. It also knows about its containing range and \b recordtype.
-private class AddrRange
+
+        /// \brief The internal \e sub-range object for the interval map
+        ///
+        /// It defines a disjoint range within the common refinement of all ranges
+        /// in the container. It also knows about its containing range and \b recordtype.
+        private class AddrRange
         {
             //friend class rangemap<_recordtype>;
             //friend class PartIterator;

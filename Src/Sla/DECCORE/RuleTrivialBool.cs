@@ -33,7 +33,7 @@ namespace Sla.DECCORE
         ///   - `V ^^ false  =>  V`
         public override void getOpList(List<uint> oplist)
         {
-            uint list[] = { CPUI_BOOL_AND, CPUI_BOOL_OR, CPUI_BOOL_XOR };
+            uint list[] = { OpCode.CPUI_BOOL_AND, OpCode.CPUI_BOOL_OR, OpCode.CPUI_BOOL_XOR };
             oplist.insert(oplist.end(), list, list + 3);
         }
 
@@ -49,19 +49,19 @@ namespace Sla.DECCORE
 
             switch (op.code())
             {
-                case CPUI_BOOL_XOR:
+                case OpCode.CPUI_BOOL_XOR:
                     vn = op.getIn(0);
-                    opc = (val == 1) ? CPUI_BOOL_NEGATE : CPUI_COPY;
+                    opc = (val == 1) ? OpCode.CPUI_BOOL_NEGATE : OpCode.CPUI_COPY;
                     break;
-                case CPUI_BOOL_AND:
-                    opc = CPUI_COPY;
+                case OpCode.CPUI_BOOL_AND:
+                    opc = OpCode.CPUI_COPY;
                     if (val == 1)
                         vn = op.getIn(0);
                     else
                         vn = data.newConstant(1, 0); // Copy false
                     break;
-                case CPUI_BOOL_OR:
-                    opc = CPUI_COPY;
+                case OpCode.CPUI_BOOL_OR:
+                    opc = OpCode.CPUI_COPY;
                     if (val == 1)
                         vn = data.newConstant(1, 1);
                     else

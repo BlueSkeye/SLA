@@ -21,7 +21,7 @@ namespace Sla.EXTRA
             if (!vn.isConstant())
                 throw new IfaceExecutionError("Can only force format on a constant");
             type_metatype mt = vn.getType().getMetatype();
-            if ((mt != TYPE_INT) && (mt != TYPE_UINT) && (mt != TYPE_UNKNOWN))
+            if ((mt != type_metatype.TYPE_INT) && (mt != type_metatype.TYPE_UINT) && (mt != type_metatype.TYPE_UNKNOWN))
                 throw new IfaceExecutionError("Can only force format on integer type constant");
             dcp.fd.buildDynamicSymbol(vn);
             Symbol* sym = vn.getHigh().getSymbol();

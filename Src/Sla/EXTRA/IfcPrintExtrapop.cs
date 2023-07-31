@@ -33,13 +33,13 @@ namespace Sla.EXTRA
                         *status.optr << fc.getOp().getAddr() << ')';
                         int expop = fc.getEffectiveExtraPop();
                         *status.optr << " ";
-                        if (expop == ProtoModel::extrapop_unknown)
+                        if (expop == ProtoModel.extrapop_unknown)
                             *status.optr << "unknown";
                         else
                             *status.optr << dec << expop;
                         *status.optr << '(';
                         expop = fc.getExtraPop();
-                        if (expop == ProtoModel::extrapop_unknown)
+                        if (expop == ProtoModel.extrapop_unknown)
                             *status.optr << "unknown";
                         else
                             *status.optr << dec << expop;
@@ -50,7 +50,7 @@ namespace Sla.EXTRA
                 {
                     int expop = dcp.conf.defaultfp.getExtraPop();
                     *status.optr << "Default extra pop = ";
-                    if (expop == ProtoModel::extrapop_unknown)
+                    if (expop == ProtoModel.extrapop_unknown)
                         *status.optr << "unknown" << endl;
                     else
                         *status.optr << dec << expop << endl;
@@ -64,7 +64,7 @@ namespace Sla.EXTRA
                     throw new IfaceExecutionError("Unknown function: " + name);
                 int expop = fd.getFuncProto().getExtraPop();
                 *status.optr << "ExtraPop for function " << name << " is ";
-                if (expop == ProtoModel::extrapop_unknown)
+                if (expop == ProtoModel.extrapop_unknown)
                     *status.optr << "unknown" << endl;
                 else
                     *status.optr << dec << expop << endl;
@@ -78,13 +78,13 @@ namespace Sla.EXTRA
                         {
                             expop = fc.getEffectiveExtraPop();
                             *status.optr << "For this function, extrapop = ";
-                            if (expop == ProtoModel::extrapop_unknown)
+                            if (expop == ProtoModel.extrapop_unknown)
                                 *status.optr << "unknown";
                             else
                                 *status.optr << dec << expop;
                             *status.optr << '(';
                             expop = fc.getExtraPop();
-                            if (expop == ProtoModel::extrapop_unknown)
+                            if (expop == ProtoModel.extrapop_unknown)
                                 *status.optr << "unknown";
                             else
                                 *status.optr << dec << expop;

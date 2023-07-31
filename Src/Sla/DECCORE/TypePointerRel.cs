@@ -39,7 +39,7 @@ namespace Sla.DECCORE
             flags |= has_stripped;
             // An ephemeral relative pointer that points to something unknown, propagates slightly
             // differently than a formal relative pointer
-            if (ptrto.getMetatype() == TYPE_UNKNOWN)
+            if (ptrto.getMetatype() == type_metatype.TYPE_UNKNOWN)
                 submeta = SUB_PTRREL_UNK;
         }
 
@@ -53,7 +53,7 @@ namespace Sla.DECCORE
             //  uint elemId = decoder.openElement();
             flags |= is_ptrrel;
             decodeBasic(decoder);
-            metatype = TYPE_PTR;        // Don't use TYPE_PTRREL internally
+            metatype = type_metatype.TYPE_PTR;        // Don't use type_metatype.TYPE_PTRREL internally
             decoder.rewindAttributes();
             for (; ; )
             {
@@ -123,7 +123,7 @@ namespace Sla.DECCORE
         public bool evaluateThruParent(ulong addrOff)
         {
             ulong byteOff = AddrSpace::addressToByte(addrOff, wordsize);
-            if (ptrto.getMetatype() == TYPE_STRUCT && byteOff < ptrto.getSize())
+            if (ptrto.getMetatype() == type_metatype.TYPE_STRUCT && byteOff < ptrto.getSize())
                 return false;
             byteOff = (byteOff + offset) & Globals.calc_mask(size);
             return (byteOff < parent.getSize());
@@ -197,7 +197,7 @@ namespace Sla.DECCORE
             TypeFactory typegrp)
         {
             type_metatype ptrtoMeta = ptrto.getMetatype();
-            if (off < ptrto.getSize() && (ptrtoMeta == TYPE_STRUCT || ptrtoMeta == TYPE_ARRAY))
+            if (off < ptrto.getSize() && (ptrtoMeta == type_metatype.TYPE_STRUCT || ptrtoMeta == type_metatype.TYPE_ARRAY))
             {
                 return TypePointer::downChain(off, par, parOff, allowArrayWrap, typegrp);
             }
@@ -239,13 +239,13 @@ namespace Sla.DECCORE
                 ulong curoff = off;
                 do
                 {
-                    @base = @@base.getSubType(curoff, &curoff);
+                    @base = @base.getSubType(curoff, &curoff);
                 } while (curoff != 0 && @base != (Datatype)null);
                 if (@base == (Datatype)null)
-                    @base = typegrp.getBase(1, TYPE_UNKNOWN);
+                    @base = typegrp.getBase(1, type_metatype.TYPE_UNKNOWN);
             }
             else
-                @base = typegrp.getBase(1, TYPE_UNKNOWN);
+                @base = typegrp.getBase(1, type_metatype.TYPE_UNKNOWN);
             return @base;
         }
     }

@@ -32,7 +32,7 @@ namespace Sla.DECCORE
         ///  - `((V + (W + c)) + d)  =>  (W + (c+d)) + V`
         public override void getOpList(List<uint> oplist)
         {
-            uint list[] = { CPUI_INT_ADD, CPUI_INT_MULT };
+            uint list[] = { OpCode.CPUI_INT_ADD, OpCode.CPUI_INT_MULT };
             oplist.insert(oplist.end(), list, list + 2);
         }
 
@@ -61,7 +61,7 @@ namespace Sla.DECCORE
                 // This lets two constant offsets get added together even in the case where there is:
                 //    another term getting added in AND
                 //    the result of the intermediate sum is used more than once  (otherwise collectterms should pick it up)
-                if (opc != CPUI_INT_ADD) return 0;
+                if (opc != OpCode.CPUI_INT_ADD) return 0;
                 Varnode* othervn,*basevn;
                 PcodeOp* baseop;
                 for (int i = 0; i < 2; ++i)
@@ -72,7 +72,7 @@ namespace Sla.DECCORE
                     sub2 = subop.getIn(1 - i);
                     if (!sub2.isWritten()) continue;
                     baseop = sub2.getDef();
-                    if (baseop.code() != CPUI_INT_ADD) continue;
+                    if (baseop.code() != OpCode.CPUI_INT_ADD) continue;
                     c[1] = baseop.getIn(1);
                     if (!c[1].isConstant()) continue;
                     basevn = baseop.getIn(0);
@@ -86,7 +86,7 @@ namespace Sla.DECCORE
                     else if (c[1].getSymbolEntry() != (SymbolEntry)null)
                         newvn.copySymbolIfValid(c[1]);
                     PcodeOp* newop = data.newOp(2, op.getAddr());
-                    data.opSetOpcode(newop, CPUI_INT_ADD);
+                    data.opSetOpcode(newop, OpCode.CPUI_INT_ADD);
                     Varnode* newout = data.newUniqueOut(c[0].getSize(), newop);
                     data.opSetInput(newop, basevn, 0);
                     data.opSetInput(newop, newvn, 1);

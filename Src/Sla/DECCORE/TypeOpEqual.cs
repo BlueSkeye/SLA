@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     internal class TypeOpEqual : TypeOpBinary
     {
         public TypeOpEqual(TypeFactory t)
-            : base(t, CPUI_INT_EQUAL, "==", TYPE_BOOL, TYPE_INT)
+            : base(t, OpCode.CPUI_INT_EQUAL, "==", type_metatype.TYPE_BOOL, type_metatype.TYPE_INT)
         {
             opflags = PcodeOp::binary | PcodeOp::booloutput | PcodeOp::commutative;
             addlflags = inherits_sign;
@@ -43,7 +43,7 @@ namespace Sla.DECCORE
         /// \brief Propagate a given data-type across a \e comparison PcodeOp
         ///
         /// This implements the propagateType() method for multiple p-code operators:
-        ///   CPUI_INT_EQUAL, CPUI_INT_NOTEQUAL, CPUI_INT_LESS, etc.
+        ///   OpCode.CPUI_INT_EQUAL, OpCode.CPUI_INT_NOTEQUAL, OpCode.CPUI_INT_LESS, etc.
         /// The propagation must be across the input Varnodes of the comparison.
         /// \param alttype is the incoming data-type to propagate
         /// \param typegrp is the TypeFactory used for constructing transformed data-types
@@ -60,17 +60,17 @@ namespace Sla.DECCORE
             if (invn.isSpacebase())
             {
                 AddrSpace* spc = typegrp.getArch().getDefaultDataSpace();
-                newtype = typegrp.getTypePointer(alttype.getSize(), typegrp.getBase(1, TYPE_UNKNOWN), spc.getWordSize());
+                newtype = typegrp.getTypePointer(alttype.getSize(), typegrp.getBase(1, type_metatype.TYPE_UNKNOWN), spc.getWordSize());
             }
             else if (alttype.isPointerRel() && !outvn.isConstant())
             {
                 TypePointerRel* relPtr = (TypePointerRel*)alttype;
-                if (relPtr.getParent().getMetatype() == TYPE_STRUCT && relPtr.getPointerOffset() >= 0)
+                if (relPtr.getParent().getMetatype() == type_metatype.TYPE_STRUCT && relPtr.getPointerOffset() >= 0)
                 {
                     // If we know the pointer is in the middle of a structure, don't propagate across comparison operators
                     // as the two sides of the operator are likely to be different types , and the other side can also
                     // get data-type information from the structure pointer
-                    newtype = typegrp.getTypePointer(relPtr.getSize(), typegrp.getBase(1, TYPE_UNKNOWN), relPtr.getWordSize());
+                    newtype = typegrp.getTypePointer(relPtr.getSize(), typegrp.getBase(1, type_metatype.TYPE_UNKNOWN), relPtr.getWordSize());
                 }
                 else
                     newtype = alttype;

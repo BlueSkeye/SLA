@@ -31,7 +31,7 @@ namespace Sla.DECCORE
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            data.opSetOpcode(op, CPUI_INT_MULT);
+            data.opSetOpcode(op, OpCode.CPUI_INT_MULT);
             int size = op.getIn(0).getSize();
             Varnode* negone = data.newConstant(size, Globals.calc_mask(size));
             data.opInsertInput(op, negone, 1);

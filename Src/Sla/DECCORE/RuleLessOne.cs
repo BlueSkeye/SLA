@@ -36,10 +36,10 @@ namespace Sla.DECCORE
 
             if (!constvn.isConstant()) return 0;
             ulong val = constvn.getOffset();
-            if ((op.code() == CPUI_INT_LESS) && (val != 1)) return 0;
-            if ((op.code() == CPUI_INT_LESSEQUAL) && (val != 0)) return 0;
+            if ((op.code() == OpCode.CPUI_INT_LESS) && (val != 1)) return 0;
+            if ((op.code() == OpCode.CPUI_INT_LESSEQUAL) && (val != 0)) return 0;
 
-            data.opSetOpcode(op, CPUI_INT_EQUAL);
+            data.opSetOpcode(op, OpCode.CPUI_INT_EQUAL);
             if (val != 0)
                 data.opSetInput(op, data.newConstant(constvn.getSize(), 0), 1);
             return 1;

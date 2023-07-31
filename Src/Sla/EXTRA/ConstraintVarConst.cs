@@ -28,15 +28,15 @@ namespace Sla.EXTRA
         ~ConstraintVarConst()
         {
             delete expr;
-            if (exprsz != (RHSConstant*)0)
+            if (exprsz != (RHSConstant)null)
                 delete exprsz;
         }
 
         public override UnifyConstraint clone()
         {
             UnifyConstraint* res;
-            RHSConstant* newexprsz = (RHSConstant*)0;
-            if (exprsz != (RHSConstant*)0)
+            RHSConstant* newexprsz = (RHSConstant)null;
+            if (exprsz != (RHSConstant)null)
                 newexprsz = exprsz.clone();
             res = (new ConstraintVarConst(varindex, expr.clone(), newexprsz)).copyid(this);
             return res;
@@ -49,7 +49,7 @@ namespace Sla.EXTRA
             ulong ourconst = expr.getConstant(state);
             Funcdata* fd = state.getFunction();
             int sz;
-            if (exprsz != (RHSConstant*)0)
+            if (exprsz != (RHSConstant)null)
                 sz = (int)exprsz.getConstant(state);
             else
                 sz = (int)sizeof(ulong);
@@ -61,7 +61,7 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[varindex] = UnifyDatatype(UnifyDatatype::var_type);
+            typelist[varindex] = UnifyDatatype(UnifyDatatype.TypeKind.var_type);
         }
 
         public override int getBaseIndex() => varindex;
@@ -70,7 +70,7 @@ namespace Sla.EXTRA
         {
             printstate.printIndent(s);
             s << printstate.getName(varindex) << " = data.newConstant(";
-            if (exprsz != (RHSConstant*)0)
+            if (exprsz != (RHSConstant)null)
                 exprsz.writeExpression(s, printstate);
             else
                 s << dec << (int)sizeof(ulong);

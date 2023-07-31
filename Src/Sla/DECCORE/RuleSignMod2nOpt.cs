@@ -45,27 +45,27 @@ namespace Sla.DECCORE
             for (iter = correctVn.beginDescend(); iter != correctVn.endDescend(); ++iter)
             {
                 PcodeOp* multop = *iter;
-                if (multop.code() != CPUI_INT_MULT) continue;
+                if (multop.code() != OpCode.CPUI_INT_MULT) continue;
                 Varnode* negone = multop.getIn(1);
                 if (!negone.isConstant()) continue;
                 if (negone.getOffset() != Globals.calc_mask(correctVn.getSize())) continue;
                 PcodeOp* baseOp = multop.getOut().loneDescend();
                 if (baseOp == (PcodeOp)null) continue;
-                if (baseOp.code() != CPUI_INT_ADD) continue;
+                if (baseOp.code() != OpCode.CPUI_INT_ADD) continue;
                 int slot = 1 - baseOp.getSlot(multop.getOut());
                 Varnode* andOut = baseOp.getIn(slot);
                 if (!andOut.isWritten()) continue;
                 PcodeOp* andOp = andOut.getDef();
                 int truncSize = -1;
-                if (andOp.code() == CPUI_INT_ZEXT)
+                if (andOp.code() == OpCode.CPUI_INT_ZEXT)
                 {   // Look for intervening extension after INT_AND
                     andOut = andOp.getIn(0);
                     if (!andOut.isWritten()) continue;
                     andOp = andOut.getDef();
-                    if (andOp.code() != CPUI_INT_AND) continue;
+                    if (andOp.code() != OpCode.CPUI_INT_AND) continue;
                     truncSize = andOut.getSize();      // If so we have a truncated form
                 }
-                else if (andOp.code() != CPUI_INT_AND)
+                else if (andOp.code() != OpCode.CPUI_INT_AND)
                     continue;
 
                 Varnode* constVn = andOp.getIn(1);
@@ -74,7 +74,7 @@ namespace Sla.DECCORE
                 Varnode* addOut = andOp.getIn(0);
                 if (!addOut.isWritten()) continue;
                 PcodeOp* addOp = addOut.getDef();
-                if (addOp.code() != CPUI_INT_ADD) continue;
+                if (addOp.code() != OpCode.CPUI_INT_ADD) continue;
                 // Search for "a" as one of the inputs to addOp
                 int aSlot;
                 for (aSlot = 0; aSlot < 2; ++aSlot)
@@ -84,7 +84,7 @@ namespace Sla.DECCORE
                     {
                         if (!vn.isWritten()) continue;
                         PcodeOp* subOp = vn.getDef();
-                        if (subOp.code() != CPUI_SUBPIECE) continue;
+                        if (subOp.code() != OpCode.CPUI_SUBPIECE) continue;
                         if (subOp.getIn(1).getOffset() != 0) continue;
                         vn = subOp.getIn(0);
                     }
@@ -95,7 +95,7 @@ namespace Sla.DECCORE
                 Varnode* extVn = addOp.getIn(1 - aSlot);
                 if (!extVn.isWritten()) continue;
                 PcodeOp* shiftOp = extVn.getDef();
-                if (shiftOp.code() != CPUI_INT_RIGHT) continue;
+                if (shiftOp.code() != OpCode.CPUI_INT_RIGHT) continue;
                 constVn = shiftOp.getIn(1);
                 if (!constVn.isConstant()) continue;
                 int shiftval = constVn.getOffset();
@@ -109,13 +109,13 @@ namespace Sla.DECCORE
                 {
                     if (!extVn.isWritten()) continue;
                     PcodeOp* subOp = extVn.getDef();
-                    if (subOp.code() != CPUI_SUBPIECE) continue;
+                    if (subOp.code() != OpCode.CPUI_SUBPIECE) continue;
                     if ((int)subOp.getIn(1).getOffset() != truncSize) continue;
                     extVn = subOp.getIn(0);
                 }
                 if (a != extVn) continue;
 
-                data.opSetOpcode(baseOp, CPUI_INT_SREM);
+                data.opSetOpcode(baseOp, OpCode.CPUI_INT_SREM);
                 data.opSetInput(baseOp, a, 0);
                 data.opSetInput(baseOp, data.newConstant(a.getSize(), mask + 1), 1);
                 return 1;
@@ -132,7 +132,7 @@ namespace Sla.DECCORE
         {
             if (!outVn.isWritten()) return 0;
             PcodeOp* signOp = outVn.getDef();
-            if (signOp.code() != CPUI_INT_SRIGHT)
+            if (signOp.code() != OpCode.CPUI_INT_SRIGHT)
                 return (Varnode)null;
             Varnode* constVn = signOp.getIn(1);
             if (!constVn.isConstant())

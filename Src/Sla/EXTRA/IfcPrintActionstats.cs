@@ -17,7 +17,7 @@ namespace Sla.EXTRA
         /// over multiple decompilations.
         public override void execute(TextReader s)
         {
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("Image not loaded");
             if (dcp.conf.allacts.getCurrent() == (Action*)0)
                 throw new IfaceExecutionError("No action set");

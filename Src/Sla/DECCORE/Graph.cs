@@ -35,13 +35,13 @@ namespace Sla.DECCORE
                 stop = op.numInput();
                 switch (op.code())
                 {
-                    case CPUI_LOAD:
-                    case CPUI_STORE:
-                    case CPUI_BRANCH:
-                    case CPUI_CALL:
+                    case OpCode.CPUI_LOAD:
+                    case OpCode.CPUI_STORE:
+                    case OpCode.CPUI_BRANCH:
+                    case OpCode.CPUI_CALL:
                         start = 1;
                         break;
-                    case CPUI_INDIRECT:
+                    case OpCode.CPUI_INDIRECT:
                         stop = 1;
                         break;
                     default:

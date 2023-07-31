@@ -11,12 +11,12 @@ namespace Sla.DECCORE
     /// \brief Determine data-flow holding the \e return \e value of the function.
     internal class ActionReturnRecovery : Action
     {
-        /// \brief Rewrite a CPUI_RETURN op to reflect a recovered output parameter.
+        /// \brief Rewrite a OpCode.CPUI_RETURN op to reflect a recovered output parameter.
         ///
-        /// Add a second input Varnode to the given CPUI_RETURN PcodeOp holding the return value
+        /// Add a second input Varnode to the given OpCode.CPUI_RETURN PcodeOp holding the return value
         /// for the function at that point. Construct concatentations if there are multiple pieces
         /// \param active is the output parameter description
-        /// \param retop is the given CPUI_RETURN
+        /// \param retop is the given OpCode.CPUI_RETURN
         /// \param data is the function being analyzed
         private static void buildReturnOutput(ParamActive active, PcodeOp retop, Funcdata data)
         {
@@ -42,11 +42,11 @@ namespace Sla.DECCORE
                                             trialhi.getAddress(), trialhi.getSize(),
                                             triallo.getAddress(), triallo.getSize());
                 PcodeOp* newop = data.newOp(2, retop.getAddr());
-                data.opSetOpcode(newop, CPUI_PIECE);
+                data.opSetOpcode(newop, OpCode.CPUI_PIECE);
                 Varnode* newwhole = data.newVarnodeOut(trialhi.getSize() + triallo.getSize(), joinaddr, newop);
                 newwhole.setWriteMask();       // Don't let new Varnode cause additional heritage
                 data.opInsertBefore(newop, retop);
-                newparam.pop_back();
+                newparam.RemoveLastItem();
                 newparam.GetLastItem() = newwhole;
                 data.opSetAllInput(retop, newparam);
                 data.opSetInput(newop, hivn, 0);
@@ -75,7 +75,7 @@ namespace Sla.DECCORE
                         Varnode* vn = retop.getIn(curtrial.getSlot());
                         // Concatenate the preexisting pieces with this new piece
                         PcodeOp* newop = data.newOp(2, retop.getAddr());
-                        data.opSetOpcode(newop, CPUI_PIECE);
+                        data.opSetOpcode(newop, OpCode.CPUI_PIECE);
                         Address addr = preexist.getAddr();
                         if (vn.getAddr() < addr)
                             addr = vn.getAddr();

@@ -31,7 +31,7 @@ namespace Sla.DECCORE
             {
                 bb = (BlockBasic*)graph.getBlock(i);
                 cbranch = bb.lastOp();
-                if ((cbranch == (PcodeOp)null) || (cbranch.code() != CPUI_CBRANCH)) continue;
+                if ((cbranch == (PcodeOp)null) || (cbranch.code() != OpCode.CPUI_CBRANCH)) continue;
                 if (!cbranch.getIn(1).isConstant()) continue;
                 ulong val = cbranch.getIn(1).getOffset();
                 int num = ((val != 0) != cbranch.isBooleanFlip()) ? 0 : 1;

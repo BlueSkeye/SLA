@@ -33,8 +33,8 @@ namespace Sla.DECCORE
         ///   - `V * 1  =>  V`
         public override void getOpList(List<uint> oplist)
         {
-            uint list[] = { CPUI_INT_ADD, CPUI_INT_XOR, CPUI_INT_OR,
-          CPUI_BOOL_XOR, CPUI_BOOL_OR, CPUI_INT_MULT };
+            uint list[] = { OpCode.CPUI_INT_ADD, OpCode.CPUI_INT_XOR, OpCode.CPUI_INT_OR,
+          OpCode.CPUI_BOOL_XOR, OpCode.CPUI_BOOL_OR, OpCode.CPUI_INT_MULT };
             oplist.insert(oplist.end(), list, list + 6);
         }
 
@@ -46,22 +46,22 @@ namespace Sla.DECCORE
             constvn = op.getIn(1);
             if (!constvn.isConstant()) return 0;
             val = constvn.getOffset();
-            if ((val == 0) && (op.code() != CPUI_INT_MULT))
+            if ((val == 0) && (op.code() != OpCode.CPUI_INT_MULT))
             {
-                data.opSetOpcode(op, CPUI_COPY);
+                data.opSetOpcode(op, OpCode.CPUI_COPY);
                 data.opRemoveInput(op, 1); // Remove identity from operation
                 return 1;
             }
-            if (op.code() != CPUI_INT_MULT) return 0;
+            if (op.code() != OpCode.CPUI_INT_MULT) return 0;
             if (val == 1)
             {
-                data.opSetOpcode(op, CPUI_COPY);
+                data.opSetOpcode(op, OpCode.CPUI_COPY);
                 data.opRemoveInput(op, 1);
                 return 1;
             }
             if (val == 0)
             {       // Multiply by zero
-                data.opSetOpcode(op, CPUI_COPY);
+                data.opSetOpcode(op, OpCode.CPUI_COPY);
                 data.opRemoveInput(op, 0);
                 return 1;
             }

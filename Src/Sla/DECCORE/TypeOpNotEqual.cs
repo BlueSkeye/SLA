@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     internal class TypeOpNotEqual : TypeOpBinary
     {
         public TypeOpNotEqual(TypeFactory t)
-            : base(t, CPUI_INT_NOTEQUAL, "!=", TYPE_BOOL, TYPE_INT)
+            : base(t, OpCode.CPUI_INT_NOTEQUAL, "!=", type_metatype.TYPE_BOOL, type_metatype.TYPE_INT)
         {
             opflags = PcodeOp::binary | PcodeOp::booloutput | PcodeOp::commutative;
             addlflags = inherits_sign;

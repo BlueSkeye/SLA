@@ -55,7 +55,7 @@ namespace Sla.DECCORE
             PcodeOp* op = (PcodeOp*)(ulong)offset; // Treat offset as op
 
             if (!op.isBranch())
-            {   // op parameter for CPUI_INDIRECT
+            {   // op parameter for OpCode.CPUI_INDIRECT
                 s << op.getSeqNum();
                 return;
             }

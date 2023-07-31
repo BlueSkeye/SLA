@@ -86,7 +86,7 @@ namespace Sla.SLEIGH
             delete input[index];
             for (int i = index; i < input.size() - 1; ++i)
                 input[i] = input[i + 1];
-            input.pop_back();
+            input.RemoveLastItem();
         }
 
         public void changeHandleIndex(List<int> handmap)
@@ -101,7 +101,7 @@ namespace Sla.SLEIGH
 
         public void saveXml(TextWriter s)
         {
-            s << "<op_tpl code=\"" << get_opname(opc) << "\">";
+            s << "<op_tpl code=\"" << Globals.get_opname(opc) << "\">";
             if (output == (VarnodeTpl*)0)
                 s << "<null/>\n";
             else

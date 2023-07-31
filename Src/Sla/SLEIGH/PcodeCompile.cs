@@ -416,7 +416,7 @@ namespace Sla.SLEIGH
             if (finalout != (VarnodeTpl*)0)
             {
                 delete vn;  // Don't keep the original Varnode object
-                res = createOpOutUnary(finalout, CPUI_COPY, rhs);
+                res = createOpOutUnary(finalout, OpCode.CPUI_COPY, rhs);
             }
             else
             {
@@ -430,7 +430,7 @@ namespace Sla.SLEIGH
                     appendOp(CPUI_INT_LEFT, rhs, bitoffset, 4);
 
                 finalout = new VarnodeTpl(*vn);
-                res = createOpOut(finalout, CPUI_INT_OR, res, rhs);
+                res = createOpOut(finalout, OpCode.CPUI_INT_OR, res, rhs);
             }
             if (errmsg.size() > 0)
                 reportError((Location*)0, errmsg);
@@ -630,29 +630,29 @@ namespace Sla.SLEIGH
 
             switch (op.getOpcode())
             {
-                case CPUI_COPY:         // Instructions where all inputs and output are same size
-                case CPUI_INT_ADD:
-                case CPUI_INT_SUB:
-                case CPUI_INT_2COMP:
-                case CPUI_INT_NEGATE:
-                case CPUI_INT_XOR:
-                case CPUI_INT_AND:
-                case CPUI_INT_OR:
-                case CPUI_INT_MULT:
-                case CPUI_INT_DIV:
-                case CPUI_INT_SDIV:
-                case CPUI_INT_REM:
-                case CPUI_INT_SREM:
-                case CPUI_FLOAT_ADD:
-                case CPUI_FLOAT_DIV:
-                case CPUI_FLOAT_MULT:
-                case CPUI_FLOAT_SUB:
-                case CPUI_FLOAT_NEG:
-                case CPUI_FLOAT_ABS:
-                case CPUI_FLOAT_SQRT:
-                case CPUI_FLOAT_CEIL:
-                case CPUI_FLOAT_FLOOR:
-                case CPUI_FLOAT_ROUND:
+                case OpCode.CPUI_COPY:         // Instructions where all inputs and output are same size
+                case OpCode.CPUI_INT_ADD:
+                case OpCode.CPUI_INT_SUB:
+                case OpCode.CPUI_INT_2COMP:
+                case OpCode.CPUI_INT_NEGATE:
+                case OpCode.CPUI_INT_XOR:
+                case OpCode.CPUI_INT_AND:
+                case OpCode.CPUI_INT_OR:
+                case OpCode.CPUI_INT_MULT:
+                case OpCode.CPUI_INT_DIV:
+                case OpCode.CPUI_INT_SDIV:
+                case OpCode.CPUI_INT_REM:
+                case OpCode.CPUI_INT_SREM:
+                case OpCode.CPUI_FLOAT_ADD:
+                case OpCode.CPUI_FLOAT_DIV:
+                case OpCode.CPUI_FLOAT_MULT:
+                case OpCode.CPUI_FLOAT_SUB:
+                case OpCode.CPUI_FLOAT_NEG:
+                case OpCode.CPUI_FLOAT_ABS:
+                case OpCode.CPUI_FLOAT_SQRT:
+                case OpCode.CPUI_FLOAT_CEIL:
+                case OpCode.CPUI_FLOAT_FLOOR:
+                case OpCode.CPUI_FLOAT_ROUND:
                     if ((op.getOut() != (VarnodeTpl*)0) && (op.getOut().isZeroSize()))
                         matchSize(-1, op, false, ops);
                     inputsize = op.numInput();
@@ -660,24 +660,24 @@ namespace Sla.SLEIGH
                         if (op.getIn(i).isZeroSize())
                             matchSize(i, op, false, ops);
                     break;
-                case CPUI_INT_EQUAL:        // Instructions with bool output
-                case CPUI_INT_NOTEQUAL:
-                case CPUI_INT_SLESS:
-                case CPUI_INT_SLESSEQUAL:
-                case CPUI_INT_LESS:
-                case CPUI_INT_LESSEQUAL:
-                case CPUI_INT_CARRY:
-                case CPUI_INT_SCARRY:
-                case CPUI_INT_SBORROW:
-                case CPUI_FLOAT_EQUAL:
-                case CPUI_FLOAT_NOTEQUAL:
-                case CPUI_FLOAT_LESS:
-                case CPUI_FLOAT_LESSEQUAL:
-                case CPUI_FLOAT_NAN:
-                case CPUI_BOOL_NEGATE:
-                case CPUI_BOOL_XOR:
-                case CPUI_BOOL_AND:
-                case CPUI_BOOL_OR:
+                case OpCode.CPUI_INT_EQUAL:        // Instructions with bool output
+                case OpCode.CPUI_INT_NOTEQUAL:
+                case OpCode.CPUI_INT_SLESS:
+                case OpCode.CPUI_INT_SLESSEQUAL:
+                case OpCode.CPUI_INT_LESS:
+                case OpCode.CPUI_INT_LESSEQUAL:
+                case OpCode.CPUI_INT_CARRY:
+                case OpCode.CPUI_INT_SCARRY:
+                case OpCode.CPUI_INT_SBORROW:
+                case OpCode.CPUI_FLOAT_EQUAL:
+                case OpCode.CPUI_FLOAT_NOTEQUAL:
+                case OpCode.CPUI_FLOAT_LESS:
+                case OpCode.CPUI_FLOAT_LESSEQUAL:
+                case OpCode.CPUI_FLOAT_NAN:
+                case OpCode.CPUI_BOOL_NEGATE:
+                case OpCode.CPUI_BOOL_XOR:
+                case OpCode.CPUI_BOOL_AND:
+                case OpCode.CPUI_BOOL_OR:
                     if (op.getOut().isZeroSize())
                         force_size(op.getOut(), ConstTpl(ConstTpl::real, 1), ops);
                     inputsize = op.numInput();
@@ -687,9 +687,9 @@ namespace Sla.SLEIGH
                     break;
                 // The shift amount does not necessarily have to be the same size
                 // But if no size is specified, assume it is the same size
-                case CPUI_INT_LEFT:
-                case CPUI_INT_RIGHT:
-                case CPUI_INT_SRIGHT:
+                case OpCode.CPUI_INT_LEFT:
+                case OpCode.CPUI_INT_RIGHT:
+                case OpCode.CPUI_INT_SRIGHT:
                     if (op.getOut().isZeroSize())
                     {
                         if (!op.getIn(0).isZeroSize())
@@ -698,11 +698,11 @@ namespace Sla.SLEIGH
                     else if (op.getIn(0).isZeroSize())
                         force_size(op.getIn(0), op.getOut().getSize(), ops);
                 // fallthru to subpiece constant check
-                case CPUI_SUBPIECE:
+                case OpCode.CPUI_SUBPIECE:
                     if (op.getIn(1).isZeroSize())
                         force_size(op.getIn(1), ConstTpl(ConstTpl::real, 4), ops);
                     break;
-                case CPUI_CPOOLREF:
+                case OpCode.CPUI_CPOOLREF:
                     if (op.getOut().isZeroSize() && (!op.getIn(0).isZeroSize()))
                         force_size(op.getOut(), op.getIn(0).getSize(), ops);
                     if (op.getIn(0).isZeroSize() && (!op.getOut().isZeroSize()))

@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// must be boolean values.
         public override void getOpList(List<uint> oplist)
         {
-            uint list[] = { CPUI_INT_NOTEQUAL, CPUI_INT_EQUAL };
+            uint list[] = { OpCode.CPUI_INT_NOTEQUAL, OpCode.CPUI_INT_EQUAL };
             oplist.insert(oplist.end(), list, list + 2);
         }
 
@@ -48,7 +48,7 @@ namespace Sla.DECCORE
             val = constvn.getOffset();
             if ((val != 0) && (val != 1))
                 return 0;
-            negate = (opc == CPUI_INT_NOTEQUAL);
+            negate = (opc == OpCode.CPUI_INT_NOTEQUAL);
             if (val == 0)
                 negate = !negate;
 
@@ -57,9 +57,9 @@ namespace Sla.DECCORE
             data.opRemoveInput(op, 1);  // Remove second parameter
             data.opSetInput(op, subbool, 0); // Keep original boolean parameter
             if (negate)
-                data.opSetOpcode(op, CPUI_BOOL_NEGATE);
+                data.opSetOpcode(op, OpCode.CPUI_BOOL_NEGATE);
             else
-                data.opSetOpcode(op, CPUI_COPY);
+                data.opSetOpcode(op, OpCode.CPUI_COPY);
 
             return 1;
         }

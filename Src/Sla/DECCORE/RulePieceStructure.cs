@@ -105,7 +105,7 @@ namespace Sla.DECCORE
             Varnode* zerovn = data.newConstant(sz, 0);
             if (ct != (Datatype)null && ct.getSize() == sz)
                 zerovn.updateType(ct, false, false);
-            data.opSetOpcode(zext, CPUI_PIECE);
+            data.opSetOpcode(zext, OpCode.CPUI_PIECE);
             data.opInsertInput(zext, zerovn, 0);
             if (invn.getType().needsResolution())
                 data.inheritResolution(invn.getType(), zext, 1, zext, 0);  // Transfer invn's resolution to slot 1
@@ -130,7 +130,7 @@ namespace Sla.DECCORE
                 Varnode* vn = node.getVarnode();
                 if (!vn.isWritten()) continue;
                 PcodeOp* op = vn.getDef();
-                if (op.code() != CPUI_INT_ZEXT) continue;
+                if (op.code() != OpCode.CPUI_INT_ZEXT) continue;
                 if (!spanningRange(structuredType, node.getTypeOffset(), vn.getSize())) continue;
                 if (convertZextToPiece(op, structuredType, node.getTypeOffset(), data))
                     change = true;
@@ -152,7 +152,7 @@ namespace Sla.DECCORE
             if (leaf.isProtoPartial()) return true;    // Already in another tree
             PcodeOp* op = leaf.getDef();
             if (op.isMarker()) return true;    // Leaf is not defined locally
-            if (op.code() != CPUI_PIECE) return false;
+            if (op.code() != OpCode.CPUI_PIECE) return false;
             if (leaf.getType().isPieceStructured()) return true;  // Would be a separate root
 
             return false;
@@ -188,7 +188,7 @@ namespace Sla.DECCORE
             Datatype* ct = determineDatatype(outvn, baseOffset);
             if (ct == (Datatype)null) return 0;
 
-            if (op.code() == CPUI_INT_ZEXT)
+            if (op.code() == OpCode.CPUI_INT_ZEXT)
             {
                 if (convertZextToPiece(op, outvn.getType(), 0, data))
                     return 1;
@@ -198,9 +198,9 @@ namespace Sla.DECCORE
             PcodeOp* zext = outvn.loneDescend();
             if (zext != (PcodeOp)null)
             {
-                if (zext.code() == CPUI_PIECE)
+                if (zext.code() == OpCode.CPUI_PIECE)
                     return 0;       // More PIECEs below us, not a root
-                if (zext.code() == CPUI_INT_ZEXT)
+                if (zext.code() == OpCode.CPUI_INT_ZEXT)
                 {
                     // Extension of a structured data-type,  convert extension to PIECE first
                     if (convertZextToPiece(zext, zext.getOut().getType(), 0, data))
@@ -250,7 +250,7 @@ namespace Sla.DECCORE
                     if (newType == (Datatype)null)
                         newType = vn.getType();
                     newVn.updateType(newType, false, false);
-                    data.opSetOpcode(copyOp, CPUI_COPY);
+                    data.opSetOpcode(copyOp, OpCode.CPUI_COPY);
                     data.opSetInput(copyOp, vn, 0);
                     data.opSetInput(node.getOp(), newVn, node.getSlot());
                     data.opInsertBefore(copyOp, node.getOp());

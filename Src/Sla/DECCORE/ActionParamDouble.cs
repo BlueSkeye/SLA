@@ -48,7 +48,7 @@ namespace Sla.DECCORE
                         Varnode* vn = op.getIn(slot);
                         if (!vn.isWritten()) continue;
                         PcodeOp* concatop = vn.getDef();
-                        if (concatop.code() != CPUI_PIECE) continue;
+                        if (concatop.code() != OpCode.CPUI_PIECE) continue;
                         if (!fc.hasModel()) continue;
                         Varnode* mostvn = concatop.getIn(0);
                         Varnode* leastvn = concatop.getIn(1);
@@ -121,7 +121,7 @@ namespace Sla.DECCORE
                     ProtoParameter* param = fp.getParam(i);
                     Datatype* tp = param.getType();
                     type_metatype mt = tp.getMetatype();
-                    if ((mt == TYPE_ARRAY) || (mt == TYPE_STRUCT)) continue; // Not double precision objects
+                    if ((mt == type_metatype.TYPE_ARRAY) || (mt == type_metatype.TYPE_STRUCT)) continue; // Not double precision objects
                     Varnode* vn = data.findVarnodeInput(tp.getSize(), param.getAddress());
                     if (vn == (Varnode)null) continue;
                     if (vn.getSize() < minDoubleSize) continue;
@@ -136,7 +136,7 @@ namespace Sla.DECCORE
                     {
                         PcodeOp* subop = *iter;
                         ++iter;
-                        if (subop.code() != CPUI_SUBPIECE) continue;
+                        if (subop.code() != OpCode.CPUI_SUBPIECE) continue;
                         Varnode* outvn = subop.getOut();
                         if (outvn.getSize() != halfSize) continue;
                         if (subop.getIn(1).getOffset() == 0)  // Possible lo precision piece

@@ -85,7 +85,7 @@ namespace Sla.DECCORE
             // so there isn't much to follow. The OpFollow arrays are no
             // longer needed for unification but are needed to provide
             // a definition for the userop
-            if (op.code() != CPUI_CALLOTHER) return false;
+            if (op.code() != OpCode.CPUI_CALLOTHER) return false;
             if (op.getIn(0).getOffset() != useropindex) return false;
             if (op.numInput() != 3) return false;
             innervn = op.getIn(1);

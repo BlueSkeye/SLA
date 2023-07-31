@@ -64,10 +64,10 @@ namespace Sla.DECCORE
             foreach (PcodeOp iter in b) {
                 PcodeOp op = iter;
                 OpCode opc = op.code();
-                if (opc == CPUI_MULTIEQUAL) {
+                if (opc == OpCode.CPUI_MULTIEQUAL) {
                     continue;
                 }
-                if ((opc == CPUI_COPY) || (opc == CPUI_RETURN)) {
+                if ((opc == OpCode.CPUI_COPY) || (opc == OpCode.CPUI_RETURN)) {
                     for (int i = 0; i < op.numInput(); ++i) {
                         if (op.getIn(i).isConstant()) {
                             continue;

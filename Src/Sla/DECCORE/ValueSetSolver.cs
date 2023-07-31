@@ -203,14 +203,14 @@ namespace Sla.DECCORE
             {
                 vertex.count = 0x7fffffff; // Set to "infinity"
                 ValueSet* element = nodeStack.GetLastItem();
-                nodeStack.pop_back();
+                nodeStack.RemoveLastItem();
                 if (loop)
                 {
                     while (element != vertex)
                     {
                         element.count = 0;
                         element = nodeStack.GetLastItem();
-                        nodeStack.pop_back();
+                        nodeStack.RemoveLastItem();
                     }
                     Partition compPart;         // empty partition
                     component(vertex, compPart);
@@ -316,7 +316,7 @@ namespace Sla.DECCORE
             if (vn.isWritten())
             {
                 ValueSet* vSet = vn.getValueSet();
-                if (vSet.opCode == CPUI_MULTIEQUAL)
+                if (vSet.opCode == OpCode.CPUI_MULTIEQUAL)
                 {
                     vSet.addLandmark(type, range);     // Leave landmark for widening
                 }
@@ -333,7 +333,7 @@ namespace Sla.DECCORE
                 }
                 FlowBlock* curBlock = op.getParent();
                 int slot = op.getSlot(vn);
-                if (op.code() == CPUI_MULTIEQUAL)
+                if (op.code() == OpCode.CPUI_MULTIEQUAL)
                 {
                     if (curBlock == trueBlock)
                     {
@@ -464,7 +464,7 @@ namespace Sla.DECCORE
                 PcodeOp* op = worklist[i].getDef();
                 if (op == (PcodeOp)null) continue;
                 FlowBlock* bl = op.getParent();
-                if (op.code() == CPUI_MULTIEQUAL)
+                if (op.code() == OpCode.CPUI_MULTIEQUAL)
                 {
                     for (int j = 0; j < bl.sizeIn(); ++j)
                     {
@@ -514,7 +514,7 @@ namespace Sla.DECCORE
                     if (splitPoint.isMark()) continue;
                     if (splitPoint.sizeOut() != 2) continue;
                     PcodeOp* lastOp = splitPoint.lastOp();
-                    if (lastOp != (PcodeOp)null && lastOp.code() == CPUI_CBRANCH)
+                    if (lastOp != (PcodeOp)null && lastOp.code() == OpCode.CPUI_CBRANCH)
                     {
                         splitPoint.setMark();
                         finalList.Add(splitPoint);
@@ -551,9 +551,9 @@ namespace Sla.DECCORE
                 if (!vn.isWritten()) return false;
                 PcodeOp* op = vn.getDef();
                 OpCode opc = op.code();
-                if (opc == CPUI_COPY || opc == CPUI_INDIRECT)
+                if (opc == OpCode.CPUI_COPY || opc == OpCode.CPUI_INDIRECT)
                     vn = op.getIn(0);
-                else if (opc == CPUI_INT_ADD || opc == CPUI_PTRSUB)
+                else if (opc == OpCode.CPUI_INT_ADD || opc == OpCode.CPUI_PTRSUB)
                 {
                     Varnode* constVn = op.getIn(1);
                     if (!constVn.isConstant())
@@ -578,16 +578,16 @@ namespace Sla.DECCORE
             OpCode opc = compOp.code();
             switch (opc)
             {
-                case CPUI_INT_LESS:
-                    opc = CPUI_INT_SLESS;   // Treat unsigned pointer comparisons as signed relative to the base register
+                case OpCode.CPUI_INT_LESS:
+                    opc = OpCode.CPUI_INT_SLESS;   // Treat unsigned pointer comparisons as signed relative to the base register
                     break;
-                case CPUI_INT_LESSEQUAL:
-                    opc = CPUI_INT_SLESSEQUAL;
+                case OpCode.CPUI_INT_LESSEQUAL:
+                    opc = OpCode.CPUI_INT_SLESSEQUAL;
                     break;
-                case CPUI_INT_SLESS:
-                case CPUI_INT_SLESSEQUAL:
-                case CPUI_INT_EQUAL:
-                case CPUI_INT_NOTEQUAL:
+                case OpCode.CPUI_INT_SLESS:
+                case OpCode.CPUI_INT_SLESSEQUAL:
+                case OpCode.CPUI_INT_EQUAL:
+                case OpCode.CPUI_INT_NOTEQUAL:
                     break;
                 default:
                     return;
@@ -619,11 +619,11 @@ namespace Sla.DECCORE
                 if (!endVn.isWritten()) return;
                 PcodeOp* op = endVn.getDef();
                 opc = op.code();
-                if (opc == CPUI_COPY || opc == CPUI_PTRSUB)
+                if (opc == OpCode.CPUI_COPY || opc == OpCode.CPUI_PTRSUB)
                 {
                     endVn = op.getIn(0);
                 }
-                else if (opc == CPUI_INT_ADD)
+                else if (opc == OpCode.CPUI_INT_ADD)
                 {   // Can pull-back through INT_ADD
                     if (!op.getIn(1).isConstant())    // if second param is constant
                         return;
@@ -642,7 +642,7 @@ namespace Sla.DECCORE
         /// \param sinks is the list terminating Varnodes
         /// \param reads are add-on PcodeOps where we would like to know input ValueSets at the point of read
         /// \param stackReg (if non-NULL) gives the stack pointer (for keeping track of relative offsets)
-        /// \param indirectAsCopy is \b true if solver should treat CPUI_INDIRECT as CPUI_COPY operations
+        /// \param indirectAsCopy is \b true if solver should treat OpCode.CPUI_INDIRECT as OpCode.CPUI_COPY operations
         public void establishValueSets(List<Varnode> sinks, List<PcodeOp> reads, Varnode stackReg,
             bool indirectAsCopy)
         {
@@ -684,7 +684,7 @@ namespace Sla.DECCORE
                 PcodeOp* op = vn.getDef();
                 switch (op.code())
                 {   // Distinguish ops where we can never predict an integer range
-                    case CPUI_INDIRECT:
+                    case OpCode.CPUI_INDIRECT:
                         if (indirectAsCopy || op.isIndirectStore())
                         {
                             Varnode* inVn = op.getIn(0);
@@ -701,26 +701,26 @@ namespace Sla.DECCORE
                             rootNodes.Add(vn.getValueSet());
                         }
                         break;
-                    case CPUI_CALL:
-                    case CPUI_CALLIND:
-                    case CPUI_CALLOTHER:
-                    case CPUI_LOAD:
-                    case CPUI_NEW:
-                    case CPUI_SEGMENTOP:
-                    case CPUI_CPOOLREF:
-                    case CPUI_FLOAT_ADD:
-                    case CPUI_FLOAT_DIV:
-                    case CPUI_FLOAT_MULT:
-                    case CPUI_FLOAT_SUB:
-                    case CPUI_FLOAT_NEG:
-                    case CPUI_FLOAT_ABS:
-                    case CPUI_FLOAT_SQRT:
-                    case CPUI_FLOAT_INT2FLOAT:
-                    case CPUI_FLOAT_FLOAT2FLOAT:
-                    case CPUI_FLOAT_TRUNC:
-                    case CPUI_FLOAT_CEIL:
-                    case CPUI_FLOAT_FLOOR:
-                    case CPUI_FLOAT_ROUND:
+                    case OpCode.CPUI_CALL:
+                    case OpCode.CPUI_CALLIND:
+                    case OpCode.CPUI_CALLOTHER:
+                    case OpCode.CPUI_LOAD:
+                    case OpCode.CPUI_NEW:
+                    case OpCode.CPUI_SEGMENTOP:
+                    case OpCode.CPUI_CPOOLREF:
+                    case OpCode.CPUI_FLOAT_ADD:
+                    case OpCode.CPUI_FLOAT_DIV:
+                    case OpCode.CPUI_FLOAT_MULT:
+                    case OpCode.CPUI_FLOAT_SUB:
+                    case OpCode.CPUI_FLOAT_NEG:
+                    case OpCode.CPUI_FLOAT_ABS:
+                    case OpCode.CPUI_FLOAT_SQRT:
+                    case OpCode.CPUI_FLOAT_INT2FLOAT:
+                    case OpCode.CPUI_FLOAT_FLOAT2FLOAT:
+                    case OpCode.CPUI_FLOAT_TRUNC:
+                    case OpCode.CPUI_FLOAT_CEIL:
+                    case OpCode.CPUI_FLOAT_FLOOR:
+                    case OpCode.CPUI_FLOAT_ROUND:
                         vn.getValueSet().setFull();
                         rootNodes.Add(vn.getValueSet());
                         break;
@@ -813,7 +813,7 @@ namespace Sla.DECCORE
                                 break;
                             }
 
-                            componentStack.pop_back();
+                            componentStack.RemoveLastItem();
                             if (componentStack.empty())
                             {
                                 curComponent = (Partition*)0;

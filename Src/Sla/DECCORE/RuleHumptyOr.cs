@@ -48,9 +48,9 @@ namespace Sla.DECCORE
             vn2 = op.getIn(1);
             if (!vn2.isWritten()) return 0;
             and1 = vn1.getDef();
-            if (and1.code() != CPUI_INT_AND) return 0;
+            if (and1.code() != OpCode.CPUI_INT_AND) return 0;
             and2 = vn2.getDef();
-            if (and2.code() != CPUI_INT_AND) return 0;
+            if (and2.code() != OpCode.CPUI_INT_AND) return 0;
             a = and1.getIn(0);
             b = and1.getIn(1);
             c = and2.getIn(0);
@@ -83,14 +83,14 @@ namespace Sla.DECCORE
                 if (totalbits == Globals.calc_mask(a.getSize()))
                 {
                     // Between the two sides, we get all bits of a. Convert to COPY
-                    data.opSetOpcode(op, CPUI_COPY);
+                    data.opSetOpcode(op, OpCode.CPUI_COPY);
                     data.opRemoveInput(op, 1);
                     data.opSetInput(op, a, 0);
                 }
                 else
                 {
                     // We get some bits, but not all.  Convert to an AND
-                    data.opSetOpcode(op, CPUI_INT_AND);
+                    data.opSetOpcode(op, OpCode.CPUI_INT_AND);
                     data.opSetInput(op, a, 0);
                     Varnode* newconst = data.newConstant(a.getSize(), totalbits);
                     data.opSetInput(op, newconst, 1);
@@ -104,14 +104,14 @@ namespace Sla.DECCORE
                 if ((b.getNZMask() & aMask) == 0) return 0; // RuleAndDistribute would reverse us
                 if ((c.getNZMask() & aMask) == 0) return 0; // RuleAndDistribute would reverse us
                 PcodeOp* newOrOp = data.newOp(2, op.getAddr());
-                data.opSetOpcode(newOrOp, CPUI_INT_OR);
+                data.opSetOpcode(newOrOp, OpCode.CPUI_INT_OR);
                 Varnode* orVn = data.newUniqueOut(a.getSize(), newOrOp);
                 data.opSetInput(newOrOp, b, 0);
                 data.opSetInput(newOrOp, c, 1);
                 data.opInsertBefore(newOrOp, op);
                 data.opSetInput(op, a, 0);
                 data.opSetInput(op, orVn, 1);
-                data.opSetOpcode(op, CPUI_INT_AND);
+                data.opSetOpcode(op, OpCode.CPUI_INT_AND);
             }
             return 1;
         }

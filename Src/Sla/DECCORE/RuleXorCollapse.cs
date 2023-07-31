@@ -40,7 +40,7 @@ namespace Sla.DECCORE
             if (!op.getIn(1).isConstant()) return 0;
             PcodeOp* xorop = op.getIn(0).getDef();
             if (xorop == (PcodeOp)null) return 0;
-            if (xorop.code() != CPUI_INT_XOR) return 0;
+            if (xorop.code() != OpCode.CPUI_INT_XOR) return 0;
             if (op.getIn(0).loneDescend() == (PcodeOp)null) return 0;
             coeff1 = op.getIn(1).getOffset();
             Varnode* xorvn = xorop.getIn(1);

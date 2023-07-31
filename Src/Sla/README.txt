@@ -58,5 +58,12 @@ yytype_int8 --> sbyte
 yytype_uint16 --> ushort
 yytype_int16 --> short
 
+Other aliases :
+using EntryMap = Sla.EXTRA.rangemap<Sla.DECCORE.SymbolEntry>;
+
+using ParamEntryResolver = Sla.EXTRA.rangemap<Sla.DECCORE.ParamEntryRange>;using ScopeMap = System.Collections.Generic.Dictionary<ulong, Sla.DECCORE.Scope>;
+using ScopeResolve = Sla.EXTRA.rangemap<Sla.DECCORE.ScopeMapper>;
+using TrackedSet = System.Collections.Generic.List<Sla.CORE.TrackedContext>;
+
 Returning references from functions and references to array element
 https://www.danielcrabtree.com/blog/128/c-sharp-7-ref-returns-ref-locals-and-how-to-use-them#:~:text=To%20return%20by%20reference%2C%20add,to%20be%20returned%20by%20reference.

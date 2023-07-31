@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
-    /// \brief All paths from a (putative) switch variable to the CPUI_BRANCHIND
+    /// \brief All paths from a (putative) switch variable to the OpCode.CPUI_BRANCHIND
     ///
     /// This is a container for intersecting paths during the construction of a
     /// JumpModel.  It contains every PcodeOp from some starting Varnode through
@@ -173,7 +173,7 @@ namespace Sla.DECCORE
             {
                 if (opMeld.GetLastItem().rootVn < cutPoint)    // If we see op using varnode earlier than cut point
                     break;                  // Keep that and all subsequent ops
-                opMeld.pop_back();              // Otherwise cut the op
+                opMeld.RemoveLastItem();              // Otherwise cut the op
             }
             commonVn.resize(cutPoint);          // Since intersection is ordered, just resize to cutPoint
         }

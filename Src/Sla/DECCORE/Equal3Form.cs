@@ -18,7 +18,7 @@ namespace Sla.DECCORE
         
         public bool verify(Varnode h, Varnode l, PcodeOp aop)
         {
-            if (aop.code() != CPUI_INT_AND) return false;
+            if (aop.code() != OpCode.CPUI_INT_AND) return false;
             hi = h;
             lo = l;
             andop = aop;
@@ -26,7 +26,7 @@ namespace Sla.DECCORE
             if (andop.getIn(1 - hislot) != lo) return false;   // hi and lo must be ANDed together
             compareop = andop.getOut().loneDescend();
             if (compareop == (PcodeOp)null) return false;
-            if ((compareop.code() != CPUI_INT_EQUAL) && (compareop.code() != CPUI_INT_NOTEQUAL))
+            if ((compareop.code() != OpCode.CPUI_INT_EQUAL) && (compareop.code() != OpCode.CPUI_INT_NOTEQUAL))
                 return false;
             ulong allonesval = Globals.calc_mask(lo.getSize());
             smallc = compareop.getIn(1);

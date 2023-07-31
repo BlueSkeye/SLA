@@ -16,7 +16,7 @@ namespace Sla.EXTRA
         /// read in and attached to the appropriate address.
         public override void execute(TextReader s)
         {
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
             if (dcp.conf.loader == (LoadImage*)0)
                 throw new IfaceExecutionError("No binary loaded");

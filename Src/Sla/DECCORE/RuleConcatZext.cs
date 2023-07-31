@@ -37,7 +37,7 @@ namespace Sla.DECCORE
             hi = op.getIn(0);
             if (!hi.isWritten()) return 0;
             zextop = hi.getDef();
-            if (zextop.code() != CPUI_INT_ZEXT) return 0;
+            if (zextop.code() != OpCode.CPUI_INT_ZEXT) return 0;
             hi = zextop.getIn(0);
             lo = op.getIn(1);
             if (hi.isFree()) return 0;
@@ -45,7 +45,7 @@ namespace Sla.DECCORE
 
             // Create new (earlier) concat out of hi and lo
             PcodeOp* newconcat = data.newOp(2, op.getAddr());
-            data.opSetOpcode(newconcat, CPUI_PIECE);
+            data.opSetOpcode(newconcat, OpCode.CPUI_PIECE);
             Varnode* newvn = data.newUniqueOut(hi.getSize() + lo.getSize(), newconcat);
             data.opSetInput(newconcat, hi, 0);
             data.opSetInput(newconcat, lo, 1);
@@ -54,7 +54,7 @@ namespace Sla.DECCORE
             // Change original op into a ZEXT
             data.opRemoveInput(op, 1);
             data.opSetInput(op, newvn, 0);
-            data.opSetOpcode(op, CPUI_INT_ZEXT);
+            data.opSetOpcode(op, OpCode.CPUI_INT_ZEXT);
             return 1;
         }
     }

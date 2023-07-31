@@ -75,7 +75,7 @@ namespace Sla.DECCORE
         protected void checkSizeTypeLock()
         {
             dispflags &= ~((uint)size_typelock);
-            if (isTypeLocked() && (type.getMetatype() == TYPE_UNKNOWN))
+            if (isTypeLocked() && (type.getMetatype() == type_metatype.TYPE_UNKNOWN))
                 dispflags |= size_typelock;
         }
 

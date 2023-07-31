@@ -48,7 +48,7 @@ namespace Sla.DECCORE
                 {       // Assume we have to descend one more add
                     add2 = op.getOut().loneDescend();
                     if (add2 == (PcodeOp)null) continue;
-                    if (add2.code() != CPUI_INT_ADD) continue;
+                    if (add2.code() != OpCode.CPUI_INT_ADD) continue;
                     reshi = add2.getOut();
                     hineg1 = op.getIn(1 - slot1);
                     hineg2 = add2.getIn(1 - add2.getSlot(op.getOut()));
@@ -58,7 +58,7 @@ namespace Sla.DECCORE
                     Varnode* tmpvn = op.getIn(1 - slot1);
                     if (!tmpvn.isWritten()) continue;
                     add2 = tmpvn.getDef();
-                    if (add2.code() != CPUI_INT_ADD) continue;
+                    if (add2.code() != OpCode.CPUI_INT_ADD) continue;
                     reshi = op.getOut();
                     hineg1 = add2.getIn(0);
                     hineg2 = add2.getIn(1);
@@ -83,10 +83,10 @@ namespace Sla.DECCORE
                         zextop = hizext2.getDef();
                         hi2 = hizext1;
                     }
-                    if (zextop.code() != CPUI_INT_ZEXT) continue;
+                    if (zextop.code() != OpCode.CPUI_INT_ZEXT) continue;
                     if (!zextop.getIn(0).isWritten()) continue;
                     lessop = zextop.getIn(0).getDef();
-                    if (lessop.code() != CPUI_INT_LESS) continue;
+                    if (lessop.code() != OpCode.CPUI_INT_LESS) continue;
                     if (lessop.getIn(0) != lo1) continue;
                     lo2 = lessop.getIn(1);
                     iter2 = lo1.beginDescend();
@@ -95,7 +95,7 @@ namespace Sla.DECCORE
                     {
                         loadd = *iter2;
                         ++iter2;
-                        if (loadd.code() != CPUI_INT_ADD) continue;
+                        if (loadd.code() != OpCode.CPUI_INT_ADD) continue;
                         Varnode* tmpvn = loadd.getIn(1 - loadd.getSlot(lo1));
                         if (!tmpvn.isWritten()) continue;
                         negop = tmpvn.getDef();
@@ -123,7 +123,7 @@ namespace Sla.DECCORE
             existop = SplitVarnode::prepareBinaryOp(outdoub, @in, indoub);
             if (existop == (PcodeOp)null)
                 return false;
-            SplitVarnode::createBinaryOp(data, outdoub, @in, indoub, existop, CPUI_INT_SUB);
+            SplitVarnode::createBinaryOp(data, outdoub, @in, indoub, existop, OpCode.CPUI_INT_SUB);
             return true;
         }
     }

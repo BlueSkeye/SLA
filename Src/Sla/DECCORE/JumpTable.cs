@@ -12,7 +12,7 @@ namespace Sla.DECCORE
 {
     /// \brief A map from values to control-flow targets within a function
     ///
-    /// A JumpTable is attached to a specific CPUI_BRANCHIND and encapsulates all
+    /// A JumpTable is attached to a specific OpCode.CPUI_BRANCHIND and encapsulates all
     /// the information necessary to model the indirect jump as a \e switch statement.
     /// It knows how to map from specific switch variable values to the destination
     /// \e case block and how to label the value.
@@ -68,7 +68,7 @@ namespace Sla.DECCORE
         private List<LoadTable> loadpoints;
         /// Absolute address of the BRANCHIND jump
         private Address opaddress;
-        /// CPUI_BRANCHIND linked to \b this jump-table
+        /// OpCode.CPUI_BRANCHIND linked to \b this jump-table
         private PcodeOp indirect;
         /// Bits of the switch variable being consumed
         private ulong switchVarConsume;
@@ -105,7 +105,7 @@ namespace Sla.DECCORE
             if (vn.isWritten())
             {
                 PcodeOp op = vn.getDef();
-                if (op.code() == CPUI_CALLOTHER)
+                if (op.code() == OpCode.CPUI_CALLOTHER)
                 {
                     JumpAssisted jassisted = new JumpAssisted(this);
                     jmodel = jassisted;
@@ -216,7 +216,7 @@ namespace Sla.DECCORE
                 BlockBasic bl = (BlockBasic)parent.getIn(0);
                 if (bl.sizeOut() != 2) continue; // Check if -bl- looks like it contains a guard
                 PcodeOp cbranch = bl.lastOp();
-                if ((cbranch == (PcodeOp)null) || (cbranch.code() != CPUI_CBRANCH))
+                if ((cbranch == (PcodeOp)null) || (cbranch.code() != OpCode.CPUI_CBRANCH))
                     continue;
                 Varnode vn = cbranch.getIn(1); // Get the boolean variable
                 if (!vn.isConstant()) continue; // Has the guard collapsed
@@ -478,7 +478,7 @@ namespace Sla.DECCORE
 
         /// Hide the normalization code for the switch
         /// Eliminate any code involved in actually computing the destination address so
-        /// it looks like the CPUI_BRANCHIND operation does it all internally.
+        /// it looks like the OpCode.CPUI_BRANCHIND operation does it all internally.
         /// \param fd is the function containing \b this switch
         private void foldInNormalization(Funcdata fd)
         {
@@ -486,12 +486,12 @@ namespace Sla.DECCORE
             if (switchvn != (Varnode)null) {
                 // If possible, mark up the switch variable as not fully consumed so that
                 // subvariable flow can truncate it.
-                switchVarConsume = minimalmask(switchvn.getNZMask());
+                switchVarConsume = Globals.minimalmask(switchvn.getNZMask());
                 if (switchVarConsume >= Globals.calc_mask(switchvn.getSize()))
                 {   // If mask covers everything
                     if (switchvn.isWritten()) {
                         PcodeOp op = switchvn.getDef();
-                        if (op.code() == CPUI_INT_SEXT) {
+                        if (op.code() == OpCode.CPUI_INT_SEXT) {
                             // Check for a signed extension
                             switchVarConsume = Globals.calc_mask(op.getIn(0).getSize());  // Assume the extension is not consumed
                         }

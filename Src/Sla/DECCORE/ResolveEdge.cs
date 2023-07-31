@@ -29,12 +29,12 @@ namespace Sla.DECCORE
         {
             opTime = op.getTime();
             encoding = slot;
-            if (parent.getMetatype() == TYPE_PTR)
+            if (parent.getMetatype() == type_metatype.TYPE_PTR)
             {
                 typeId = ((TypePointer*)parent).getPtrTo().getId();   // Strip pointer
                 encoding += 0x1000;     // Encode the fact that a pointer is getting accessed
             }
-            else if (parent.getMetatype() == TYPE_PARTIALUNION)
+            else if (parent.getMetatype() == type_metatype.TYPE_PARTIALUNION)
                 typeId = ((TypePartialUnion*)parent).getParentUnion().getId();
             else
                 typeId = parent.getId();

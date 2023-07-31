@@ -53,10 +53,10 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[opindex] = UnifyDatatype(UnifyDatatype::op_type);
-            typelist[newvarindex] = UnifyDatatype(UnifyDatatype::var_type);
+            typelist[opindex] = UnifyDatatype(UnifyDatatype.TypeKind.op_type);
+            typelist[newvarindex] = UnifyDatatype(UnifyDatatype.TypeKind.var_type);
             if (sizevarindex >= 0)
-                typelist[sizevarindex] = UnifyDatatype(UnifyDatatype::var_type);
+                typelist[sizevarindex] = UnifyDatatype(UnifyDatatype.TypeKind.var_type);
         }
 
         public override void print(TextWriter s, UnifyCPrinter printstate)

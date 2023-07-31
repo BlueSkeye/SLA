@@ -11,7 +11,7 @@ namespace Sla.DECCORE
     internal class TypeOpPtradd : TypeOp
     {
         public TypeOpPtradd(TypeFactory t)
-            : base(t, CPUI_PTRADD,"+")
+            : base(t, OpCode.CPUI_PTRADD,"+")
 
         {
             opflags = PcodeOp::ternary | PcodeOp::nocollapse;
@@ -21,12 +21,12 @@ namespace Sla.DECCORE
 
         public override Datatype getInputLocal(PcodeOp op, int slot)
         {
-            return tlst.getBase(op.getIn(slot).getSize(), TYPE_INT); // For type propagation, treat same as INT_ADD
+            return tlst.getBase(op.getIn(slot).getSize(), type_metatype.TYPE_INT); // For type propagation, treat same as INT_ADD
         }
 
         public override Datatype getOutputLocal(PcodeOp op)
         {
-            return tlst.getBase(op.getOut().getSize(), TYPE_INT);    // For type propagation, treat same as INT_ADD
+            return tlst.getBase(op.getOut().getSize(), type_metatype.TYPE_INT);    // For type propagation, treat same as INT_ADD
         }
 
         public override Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)
@@ -52,7 +52,7 @@ namespace Sla.DECCORE
             if ((inslot == 2) || (outslot == 2)) return (Datatype)null; // Don't propagate along this edge
             if ((inslot != -1) && (outslot != -1)) return (Datatype)null; // Must propagate input <. output
             type_metatype metain = alttype.getMetatype();
-            if (metain != TYPE_PTR) return (Datatype)null;
+            if (metain != type_metatype.TYPE_PTR) return (Datatype)null;
             Datatype* newtype;
             if (inslot == -1)       // Propagating output to input
                 newtype = op.getIn(outslot).getTempType();    // Don't propagate pointer types this direction

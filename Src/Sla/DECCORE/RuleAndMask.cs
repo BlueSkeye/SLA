@@ -58,7 +58,7 @@ namespace Sla.DECCORE
                 return 0;
             if (!vn.isHeritageKnown()) return 0;
 
-            data.opSetOpcode(op, CPUI_COPY);
+            data.opSetOpcode(op, OpCode.CPUI_COPY);
             data.opRemoveInput(op, 1);
             data.opSetInput(op, vn, 0);
             return 1;

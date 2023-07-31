@@ -45,7 +45,7 @@ namespace Sla.DECCORE
                     if (fc.isInputActive())
                     {
                         ParamActive* activeinput = fc.getActiveInput();
-                        bool trimmable = ((activeinput.getNumPasses() > 0) || (fc.getOp().code() != CPUI_CALLIND));
+                        bool trimmable = ((activeinput.getNumPasses() > 0) || (fc.getOp().code() != OpCode.CPUI_CALLIND));
                         if (!activeinput.isFullyChecked())
                             fc.checkInputTrialUse(data, aliascheck);
                         activeinput.finishPass();

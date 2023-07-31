@@ -20,7 +20,7 @@ namespace Sla.DECCORE
         private static Varnode getHiBit(PcodeOp op)
         {
             OpCode opc = op.code();
-            if ((opc != CPUI_INT_ADD) && (opc != CPUI_INT_OR) && (opc != CPUI_INT_XOR))
+            if ((opc != OpCode.CPUI_INT_ADD) && (opc != OpCode.CPUI_INT_OR) && (opc != OpCode.CPUI_INT_XOR))
                 return (Varnode)null;
 
             Varnode* vn1 = op.getIn(0);
@@ -96,7 +96,7 @@ namespace Sla.DECCORE
                 {
                     feedOp = rvn.getDef();
                     feedOpCode = feedOp.code();
-                    if (feedOpCode == CPUI_INT_MULT)
+                    if (feedOpCode == OpCode.CPUI_INT_MULT)
                     {
                         coeff = feedOp.getIn(1);
                         if (!coeff.isConstant()) return 0;
@@ -119,11 +119,11 @@ namespace Sla.DECCORE
                             data.opSetInput(op, data.newConstant(hibit.getSize(), hibit.getOffset()), 1);
                         else
                             data.opSetInput(op, hibit, 1);
-                        data.opSetOpcode(op, CPUI_INT_EQUAL);
+                        data.opSetOpcode(op, OpCode.CPUI_INT_EQUAL);
                         data.opSetInput(op, data.newConstant(hibit.getSize(), 0), 0);
                         return 1;
                     }
-                    else if (feedOpCode == CPUI_SUBPIECE)
+                    else if (feedOpCode == OpCode.CPUI_SUBPIECE)
                     {
                         avn = feedOp.getIn(0);
                         if (avn.isFree() || avn.getSize() > 8)    // Don't create comparison bigger than 8 bytes
@@ -136,7 +136,7 @@ namespace Sla.DECCORE
                             return 1;
                         }
                     }
-                    else if (feedOpCode == CPUI_INT_NEGATE)
+                    else if (feedOpCode == OpCode.CPUI_INT_NEGATE)
                     {
                         // We have -1 s< ~avn
                         avn = feedOp.getIn(0);
@@ -146,7 +146,7 @@ namespace Sla.DECCORE
                         data.opSetInput(op, data.newConstant(avn.getSize(), 0), 1);
                         return 1;
                     }
-                    else if (feedOpCode == CPUI_INT_AND)
+                    else if (feedOpCode == OpCode.CPUI_INT_AND)
                     {
                         avn = feedOp.getIn(0);
                         if (avn.isFree() || rvn.loneDescend() == (PcodeOp)null)
@@ -165,7 +165,7 @@ namespace Sla.DECCORE
                             }
                         }
                     }
-                    else if (feedOpCode == CPUI_PIECE)
+                    else if (feedOpCode == OpCode.CPUI_PIECE)
                     {
                         // We have -1 s< CONCAT(V,W)
                         avn = feedOp.getIn(0);     // Most significant piece
@@ -184,7 +184,7 @@ namespace Sla.DECCORE
                 {
                     feedOp = lvn.getDef();
                     feedOpCode = feedOp.code();
-                    if (feedOpCode == CPUI_INT_MULT)
+                    if (feedOpCode == OpCode.CPUI_INT_MULT)
                     {
                         coeff = feedOp.getIn(1);
                         if (!coeff.isConstant()) return 0;
@@ -204,10 +204,10 @@ namespace Sla.DECCORE
                                 data.opSetInput(op, data.newConstant(hibit.getSize(), hibit.getOffset()), 0);
                             else
                                 data.opSetInput(op, hibit, 0);
-                            data.opSetOpcode(op, CPUI_INT_NOTEQUAL);
+                            data.opSetOpcode(op, OpCode.CPUI_INT_NOTEQUAL);
                             return 1;
                         }
-                        else if (feedOpCode == CPUI_SUBPIECE)
+                        else if (feedOpCode == OpCode.CPUI_SUBPIECE)
                         {
                             avn = feedOp.getIn(0);
                             if (avn.isFree() || avn.getSize() > 8)    // Don't create comparison greater than 8 bytes
@@ -220,7 +220,7 @@ namespace Sla.DECCORE
                                 return 1;
                             }
                         }
-                        else if (feedOpCode == CPUI_INT_NEGATE)
+                        else if (feedOpCode == OpCode.CPUI_INT_NEGATE)
                         {
                             // We have ~avn s< 0
                             avn = feedOp.getIn(0);
@@ -229,7 +229,7 @@ namespace Sla.DECCORE
                             data.opSetInput(op, data.newConstant(avn.getSize(), Globals.calc_mask(avn.getSize())), 0);
                             return 1;
                         }
-                        else if (feedOpCode == CPUI_INT_AND)
+                        else if (feedOpCode == OpCode.CPUI_INT_AND)
                         {
                             avn = feedOp.getIn(0);
                             if (avn.isFree() || lvn.loneDescend() == (PcodeOp)null)
@@ -247,7 +247,7 @@ namespace Sla.DECCORE
                                 }
                             }
                         }
-                        else if (feedOpCode == CPUI_PIECE)
+                        else if (feedOpCode == OpCode.CPUI_PIECE)
                         {
                             // We have CONCAT(V,W) s< 0
                             avn = feedOp.getIn(0);     // Most significant piece

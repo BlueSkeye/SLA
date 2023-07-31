@@ -41,14 +41,14 @@ namespace Sla.DECCORE
             if ((int)constVn.getOffset() != sizeout * 8 - 1) return 0;
             if (!inVn.isWritten()) return 0;
             PcodeOp* subOp = inVn.getDef();
-            if (subOp.code() != CPUI_SUBPIECE) return 0;
+            if (subOp.code() != OpCode.CPUI_SUBPIECE) return 0;
             int c = subOp.getIn(1).getOffset();
             Varnode* multOut = subOp.getIn(0);
             int multSize = multOut.getSize();
             if (c + sizeout != multSize) return 0;  // Must be extracting high part
             if (!multOut.isWritten()) return 0;
             PcodeOp* multOp = multOut.getDef();
-            if (multOp.code() != CPUI_INT_MULT) return 0;
+            if (multOp.code() != OpCode.CPUI_INT_MULT) return 0;
             int slot;
             PcodeOp* sextOp;
             for (slot = 0; slot < 2; ++slot)
@@ -56,7 +56,7 @@ namespace Sla.DECCORE
                 Varnode* vn = multOp.getIn(slot);
                 if (!vn.isWritten()) continue;
                 sextOp = vn.getDef();
-                if (sextOp.code() == CPUI_INT_SEXT) break;
+                if (sextOp.code() == OpCode.CPUI_INT_SEXT) break;
             }
             if (slot > 1) return 0;
             Varnode* a = sextOp.getIn(0);
@@ -71,7 +71,7 @@ namespace Sla.DECCORE
             else if (otherVn.isWritten())
             {
                 PcodeOp* zextOp = otherVn.getDef();
-                if (zextOp.code() != CPUI_INT_ZEXT) return 0;
+                if (zextOp.code() != OpCode.CPUI_INT_ZEXT) return 0;
                 if (zextOp.getIn(0).getSize() + sizeout > multSize) return 0;
             }
             else

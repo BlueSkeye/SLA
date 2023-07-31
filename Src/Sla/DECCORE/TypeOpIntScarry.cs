@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     internal class TypeOpIntScarry : TypeOpFunc
     {
         public TypeOpIntScarry(TypeFactory t)
-            : base(t, CPUI_INT_SCARRY,"SCARRY", TYPE_BOOL, TYPE_INT)
+            : base(t, OpCode.CPUI_INT_SCARRY,"SCARRY", type_metatype.TYPE_BOOL, type_metatype.TYPE_INT)
         {
             opflags = PcodeOp::binary;
             behave = new OpBehaviorIntScarry();

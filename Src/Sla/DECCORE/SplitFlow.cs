@@ -36,7 +36,7 @@ namespace Sla.DECCORE
                 return res;
             }
 
-            if (vn.isTypeLock() && vn.getType().getMetatype() != TYPE_PARTIALSTRUCT)
+            if (vn.isTypeLock() && vn.getType().getMetatype() != type_metatype.TYPE_PARTIALSTRUCT)
                 return (TransformVar*)0;
             if (vn.isInput())
                 return (TransformVar*)0;        // Right now we can't split inputs
@@ -78,7 +78,7 @@ namespace Sla.DECCORE
             TransformOp* loOp = newOpReplace(op.numInput(), op.code(), op);
             TransformOp* hiOp = newOpReplace(op.numInput(), op.code(), op);
             int numParam = op.numInput();
-            if (op.code() == CPUI_INDIRECT)
+            if (op.code() == OpCode.CPUI_INDIRECT)
             {
                 opSetInput(loOp, newIop(op.getIn(1)), 1);
                 opSetInput(hiOp, newIop(op.getIn(1)), 1);
@@ -122,36 +122,36 @@ namespace Sla.DECCORE
                     continue;
                 switch (op.code())
                 {
-                    case CPUI_COPY:
-                    case CPUI_MULTIEQUAL:
-                    case CPUI_INDIRECT:
-                    case CPUI_INT_AND:
-                    case CPUI_INT_OR:
-                    case CPUI_INT_XOR:
-                        //  case CPUI_INT_NEGATE:
+                    case OpCode.CPUI_COPY:
+                    case OpCode.CPUI_MULTIEQUAL:
+                    case OpCode.CPUI_INDIRECT:
+                    case OpCode.CPUI_INT_AND:
+                    case OpCode.CPUI_INT_OR:
+                    case OpCode.CPUI_INT_XOR:
+                        //  case OpCode.CPUI_INT_NEGATE:
                         if (!addOp(op, rvn, op.getSlot(origvn)))
                             return false;
                         break;
-                    case CPUI_SUBPIECE:
+                    case OpCode.CPUI_SUBPIECE:
                         {
                             if (outvn.isPrecisLo() || outvn.isPrecisHi())
                                 return false;       // Do not split if we know value comes from double precision pieces
                             ulong val = op.getIn(1).getOffset();
                             if ((val == 0) && (outvn.getSize() == laneDescription.getSize(0)))
                             {
-                                TransformOp* rop = newPreexistingOp(1, CPUI_COPY, op);  // Grabs the low piece
+                                TransformOp* rop = newPreexistingOp(1, OpCode.CPUI_COPY, op);  // Grabs the low piece
                                 opSetInput(rop, rvn, 0);
                             }
                             else if ((val == laneDescription.getSize(0)) && (outvn.getSize() == laneDescription.getSize(1)))
                             {
-                                TransformOp* rop = newPreexistingOp(1, CPUI_COPY, op);  // Grabs the high piece
+                                TransformOp* rop = newPreexistingOp(1, OpCode.CPUI_COPY, op);  // Grabs the high piece
                                 opSetInput(rop, rvn + 1, 0);
                             }
                             else
                                 return false;
                             break;
                         }
-                    case CPUI_INT_LEFT:
+                    case OpCode.CPUI_INT_LEFT:
                         {
                             Varnode* tmpvn = op.getIn(1);
                             if (!tmpvn.isConstant())
@@ -159,16 +159,16 @@ namespace Sla.DECCORE
                             ulong val = tmpvn.getOffset();
                             if (val < laneDescription.getSize(1) * 8)
                                 return false;           // Must obliterate all high bits
-                            TransformOp* rop = newPreexistingOp(2, CPUI_INT_LEFT, op);      // Keep original shift
-                            TransformOp* zextrop = newOp(1, CPUI_INT_ZEXT, rop);
+                            TransformOp* rop = newPreexistingOp(2, OpCode.CPUI_INT_LEFT, op);      // Keep original shift
+                            TransformOp* zextrop = newOp(1, OpCode.CPUI_INT_ZEXT, rop);
                             opSetInput(zextrop, rvn, 0);        // Input is just the low piece
                             opSetOutput(zextrop, newUnique(laneDescription.getWholeSize()));
                             opSetInput(rop, zextrop.getOut(), 0);
                             opSetInput(rop, newConstant(op.getIn(1).getSize(), 0, op.getIn(1).getOffset()), 1); // Original shift amount
                             break;
                         }
-                    case CPUI_INT_SRIGHT:
-                    case CPUI_INT_RIGHT:
+                    case OpCode.CPUI_INT_SRIGHT:
+                    case OpCode.CPUI_INT_RIGHT:
                         {
                             Varnode* tmpvn = op.getIn(1);
                             if (!tmpvn.isConstant())
@@ -176,7 +176,7 @@ namespace Sla.DECCORE
                             ulong val = tmpvn.getOffset();
                             if (val < laneDescription.getSize(0) * 8)
                                 return false;
-                            OpCode extOpCode = (op.code() == CPUI_INT_RIGHT) ? CPUI_INT_ZEXT : CPUI_INT_SEXT;
+                            OpCode extOpCode = (op.code() == OpCode.CPUI_INT_RIGHT) ? OpCode.CPUI_INT_ZEXT : OpCode.CPUI_INT_SEXT;
                             if (val == laneDescription.getSize(0) * 8)
                             {   // Shift of exactly loSize bytes
                                 TransformOp* rop = newPreexistingOp(1, extOpCode, op);
@@ -213,45 +213,45 @@ namespace Sla.DECCORE
 
             switch (op.code())
             {
-                case CPUI_COPY:
-                case CPUI_MULTIEQUAL:
-                case CPUI_INT_AND:
-                case CPUI_INT_OR:
-                case CPUI_INT_XOR:
-                case CPUI_INDIRECT:
-                    //  case CPUI_INT_NEGATE:
+                case OpCode.CPUI_COPY:
+                case OpCode.CPUI_MULTIEQUAL:
+                case OpCode.CPUI_INT_AND:
+                case OpCode.CPUI_INT_OR:
+                case OpCode.CPUI_INT_XOR:
+                case OpCode.CPUI_INDIRECT:
+                    //  case OpCode.CPUI_INT_NEGATE:
                     if (!addOp(op, rvn, -1))
                         return false;
                     break;
-                case CPUI_PIECE:
+                case OpCode.CPUI_PIECE:
                     {
                         if (op.getIn(0).getSize() != laneDescription.getSize(1))
                             return false;
                         if (op.getIn(1).getSize() != laneDescription.getSize(0))
                             return false;
-                        TransformOp* loOp = newOpReplace(1, CPUI_COPY, op);
-                        TransformOp* hiOp = newOpReplace(1, CPUI_COPY, op);
+                        TransformOp* loOp = newOpReplace(1, OpCode.CPUI_COPY, op);
+                        TransformOp* hiOp = newOpReplace(1, OpCode.CPUI_COPY, op);
                         opSetInput(loOp, getPreexistingVarnode(op.getIn(1)), 0);
                         opSetOutput(loOp, rvn); // Least sig . low
                         opSetInput(hiOp, getPreexistingVarnode(op.getIn(0)), 0);
                         opSetOutput(hiOp, rvn + 1); // Most sig . high
                         break;
                     }
-                case CPUI_INT_ZEXT:
+                case OpCode.CPUI_INT_ZEXT:
                     {
                         if (op.getIn(0).getSize() != laneDescription.getSize(0))
                             return false;
                         if (op.getOut().getSize() != laneDescription.getWholeSize())
                             return false;
-                        TransformOp* loOp = newOpReplace(1, CPUI_COPY, op);
-                        TransformOp* hiOp = newOpReplace(1, CPUI_COPY, op);
+                        TransformOp* loOp = newOpReplace(1, OpCode.CPUI_COPY, op);
+                        TransformOp* hiOp = newOpReplace(1, OpCode.CPUI_COPY, op);
                         opSetInput(loOp, getPreexistingVarnode(op.getIn(0)), 0);
                         opSetOutput(loOp, rvn); // ZEXT input . low
                         opSetInput(hiOp, newConstant(laneDescription.getSize(1), 0, 0), 0);
                         opSetOutput(hiOp, rvn + 1); // zero . high
                         break;
                     }
-                case CPUI_INT_LEFT:
+                case OpCode.CPUI_INT_LEFT:
                     {
                         Varnode* cvn = op.getIn(1);
                         if (!cvn.isConstant()) return false;
@@ -259,19 +259,19 @@ namespace Sla.DECCORE
                         Varnode* invn = op.getIn(0);
                         if (!invn.isWritten()) return false;
                         PcodeOp* zextOp = invn.getDef();
-                        if (zextOp.code() != CPUI_INT_ZEXT) return false;
+                        if (zextOp.code() != OpCode.CPUI_INT_ZEXT) return false;
                         invn = zextOp.getIn(0);
                         if (invn.getSize() != laneDescription.getSize(1)) return false;
                         if (invn.isFree()) return false;
-                        TransformOp* loOp = newOpReplace(1, CPUI_COPY, op);
-                        TransformOp* hiOp = newOpReplace(1, CPUI_COPY, op);
+                        TransformOp* loOp = newOpReplace(1, OpCode.CPUI_COPY, op);
+                        TransformOp* hiOp = newOpReplace(1, OpCode.CPUI_COPY, op);
                         opSetInput(loOp, newConstant(laneDescription.getSize(0), 0, 0), 0);
                         opSetOutput(loOp, rvn); // zero . low
                         opSetInput(hiOp, getPreexistingVarnode(invn), 0);
                         opSetOutput(hiOp, rvn + 1); // invn . high
                         break;
                     }
-                //  case CPUI_LOAD:		// We could split into two different loads
+                //  case OpCode.CPUI_LOAD:		// We could split into two different loads
                 default:
                     return false;
             }
@@ -284,7 +284,7 @@ namespace Sla.DECCORE
         {
             TransformVar* rvn = worklist.GetLastItem();
 
-            worklist.pop_back();
+            worklist.RemoveLastItem();
 
             if (!traceBackward(rvn)) return false;
             return traceForward(rvn);

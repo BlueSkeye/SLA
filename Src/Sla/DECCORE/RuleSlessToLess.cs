@@ -40,10 +40,10 @@ namespace Sla.DECCORE
             if (signbit_negative(vn.getNZMask(), sz)) return 0;
             if (signbit_negative(op.getIn(1).getNZMask(), sz)) return 0;
 
-            if (op.code() == CPUI_INT_SLESS)
-                data.opSetOpcode(op, CPUI_INT_LESS);
+            if (op.code() == OpCode.CPUI_INT_SLESS)
+                data.opSetOpcode(op, OpCode.CPUI_INT_LESS);
             else
-                data.opSetOpcode(op, CPUI_INT_LESSEQUAL);
+                data.opSetOpcode(op, OpCode.CPUI_INT_LESSEQUAL);
             return 1;
         }
     }

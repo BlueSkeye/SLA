@@ -36,12 +36,12 @@ namespace Sla.DECCORE
 
             vn = op.getIn(1);      // Parameter being subtracted
             newop = data.newOp(2, op.getAddr());
-            data.opSetOpcode(newop, CPUI_INT_MULT);
+            data.opSetOpcode(newop, OpCode.CPUI_INT_MULT);
             newvn = data.newUniqueOut(vn.getSize(), newop);
             data.opSetInput(op, newvn, 1); // Replace vn's reference first
             data.opSetInput(newop, vn, 0);
             data.opSetInput(newop, data.newConstant(vn.getSize(), Globals.calc_mask(vn.getSize())), 1);
-            data.opSetOpcode(op, CPUI_INT_ADD);
+            data.opSetOpcode(op, OpCode.CPUI_INT_ADD);
             data.opInsertBefore(newop, op);
             return 1;
         }

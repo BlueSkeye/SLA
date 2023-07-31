@@ -38,8 +38,8 @@ namespace Sla.DECCORE
             Varnode* highvn = op.getIn(0);
             PcodeOp* newop = data.newOp(1, op.getAddr());
             Varnode* outvn = data.newUniqueOut(op.getOut().getSize(), newop);
-            data.opSetOpcode(newop, CPUI_INT_ZEXT);
-            data.opSetOpcode(op, CPUI_INT_LEFT);
+            data.opSetOpcode(newop, OpCode.CPUI_INT_ZEXT);
+            data.opSetOpcode(op, OpCode.CPUI_INT_LEFT);
             data.opSetInput(op, outvn, 0);
             data.opSetInput(op, data.newConstant(4, sa), 1);
             data.opSetInput(newop, highvn, 0);

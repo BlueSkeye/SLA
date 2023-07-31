@@ -43,7 +43,7 @@ namespace Sla.DECCORE
             Varnode * base = op.getIn(0);
             if (!@base.isWritten()) return 0;
             PcodeOp* extop = @base.getDef();
-            if ((extop.code() != CPUI_INT_ZEXT) && (extop.code() != CPUI_INT_SEXT))
+            if ((extop.code() != OpCode.CPUI_INT_ZEXT) && (extop.code() != OpCode.CPUI_INT_SEXT))
                 return 0;
             Varnode* invn = extop.getIn(0);
             if (invn.isFree()) return 0;
@@ -55,7 +55,7 @@ namespace Sla.DECCORE
                 if (invn.getSize() == op.getOut().getSize())
                 {
                     data.opRemoveInput(op, 1);
-                    data.opSetOpcode(op, CPUI_COPY);
+                    data.opSetOpcode(op, OpCode.CPUI_COPY);
                 }
                 return 1;
             }
@@ -66,7 +66,7 @@ namespace Sla.DECCORE
             if (subcut != 0)
             {
                 PcodeOp* newop = data.newOp(2, op.getAddr());
-                data.opSetOpcode(newop, CPUI_SUBPIECE);
+                data.opSetOpcode(newop, OpCode.CPUI_SUBPIECE);
                 newvn = data.newUniqueOut(invn.getSize() - subcut, newop);
                 data.opSetInput(newop, data.newConstant(op.getIn(1).getSize(), (ulong)subcut), 1);
                 data.opSetInput(newop, invn, 0);

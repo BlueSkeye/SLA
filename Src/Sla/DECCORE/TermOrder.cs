@@ -46,7 +46,7 @@ namespace Sla.DECCORE
 
         /// Collect all the terms in the expression
         /// Assuming root.getOut() is the root of an expression formed with the
-        /// CPUI_INT_ADD op, collect all the Varnode \e terms of the expression.
+        /// OpCode.CPUI_INT_ADD op, collect all the Varnode \e terms of the expression.
         public void collect()
         {
             Varnode* curvn;
@@ -63,8 +63,8 @@ namespace Sla.DECCORE
             {
                 curop = opstack.GetLastItem();
                 multop = multstack.GetLastItem();
-                opstack.pop_back();
-                multstack.pop_back();
+                opstack.RemoveLastItem();
+                multstack.RemoveLastItem();
                 for (int i = 0; i < curop.numInput(); ++i)
                 {
                     curvn = curop.getIn(i);    // curvn is a node of the subtree IF
@@ -79,12 +79,12 @@ namespace Sla.DECCORE
                         continue;
                     }
                     subop = curvn.getDef();
-                    if (subop.code() != CPUI_INT_ADD)
+                    if (subop.code() != OpCode.CPUI_INT_ADD)
                     { // or if curvn is defined with some other type of op
-                        if ((subop.code() == CPUI_INT_MULT) && (subop.getIn(1).isConstant()))
+                        if ((subop.code() == OpCode.CPUI_INT_MULT) && (subop.getIn(1).isConstant()))
                         {
                             PcodeOp* addop = subop.getIn(0).getDef();
-                            if ((addop != (PcodeOp)null) && (addop.code() == CPUI_INT_ADD))
+                            if ((addop != (PcodeOp)null) && (addop.code() == OpCode.CPUI_INT_ADD))
                             {
                                 if (addop.getOut().loneDescend() != (PcodeOp)null)
                                 {

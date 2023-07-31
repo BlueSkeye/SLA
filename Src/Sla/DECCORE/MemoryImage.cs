@@ -44,7 +44,7 @@ namespace Sla.DECCORE
                 res = 0;
             }
             if ((HOST_ENDIAN == 1) != spc.isBigEndian())
-                res = byte_swap(res, getWordSize());
+                res = Globals.byte_swap(res, getWordSize());
             return res;
         }
 

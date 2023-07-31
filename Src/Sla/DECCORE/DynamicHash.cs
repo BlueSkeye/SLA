@@ -171,13 +171,13 @@ namespace Sla.DECCORE
             uint reg = 0x3ba0fe06; // Calculate the 32-bit hash
 
             // Hash in information about the root
-            reg = crc_update(reg, (uint)root.getSize());
+            reg = Globals.crc_update(reg, (uint)root.getSize());
             if (root.isConstant())
             {
                 ulong val = root.getOffset();
                 for (int i = 0; i < root.getSize(); ++i)
                 {
-                    reg = crc_update(reg, (uint)val);
+                    reg = Globals.crc_update(reg, (uint)val);
                     val >>= 8;
                 }
             }

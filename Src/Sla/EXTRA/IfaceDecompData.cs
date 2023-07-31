@@ -25,9 +25,9 @@ namespace Sla.EXTRA
 #endif
         public IfaceDecompData()
         {
-            conf = (Architecture*)0;
+            conf = (Architecture)null;
             fd = (Funcdata)null;
-            cgraph = (CallGraph*)0;
+            cgraph = (CallGraph)null;
             testCollection = (FunctionTestCollection*)0;
 #if OPACTION_DEBUG
             jumptabledebug = false;
@@ -36,9 +36,9 @@ namespace Sla.EXTRA
 
         ~IfaceDecompData()
         {
-            if (cgraph != (CallGraph*)0)
+            if (cgraph != (CallGraph)null)
                 delete cgraph;
-            if (conf != (Architecture*)0)
+            if (conf != (Architecture)null)
                 delete conf;
             if (testCollection != (FunctionTestCollection*)0)
                 delete testCollection;
@@ -48,7 +48,7 @@ namespace Sla.EXTRA
         ///< Allocate the call-graph object
         public void allocateCallGraph()
         {
-            if (cgraph != (CallGraph*)0)
+            if (cgraph != (CallGraph)null)
                 delete cgraph;
             cgraph = new CallGraph(conf);
         }
@@ -69,9 +69,9 @@ namespace Sla.EXTRA
         /// Free all resources for the current architecture/program
         public void clearArchitecture()
         {
-            if (conf != (Architecture*)0)
+            if (conf != (Architecture)null)
                 delete conf;
-            conf = (Architecture*)0;
+            conf = (Architecture)null;
             fd = (Funcdata)null;
         }
 

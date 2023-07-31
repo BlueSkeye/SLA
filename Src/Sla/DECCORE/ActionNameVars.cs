@@ -43,7 +43,7 @@ namespace Sla.DECCORE
             if (vn.isImplied() && vn.isWritten())
             { // Skip any cast into the function
                 PcodeOp* castop = vn.getDef();
-                if (castop.code() == CPUI_CAST)
+                if (castop.code() == OpCode.CPUI_CAST)
                 {
                     vn = castop.getIn(0);
                     ct = (Datatype)null;  // Indicate that this is a less preferred name
@@ -92,7 +92,7 @@ namespace Sla.DECCORE
                     if (vn.isImplied() && vn.isWritten())
                     { // Skip any cast into the function
                         PcodeOp* castop = vn.getDef();
-                        if (castop.code() == CPUI_CAST)
+                        if (castop.code() == OpCode.CPUI_CAST)
                             vn = castop.getIn(0);
                     }
                     if (vn.isFree()) continue;
@@ -172,7 +172,7 @@ namespace Sla.DECCORE
             for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
             {
                 PcodeOp* op = *iter;
-                if (op.code() != CPUI_PTRSUB) continue;
+                if (op.code() != OpCode.CPUI_PTRSUB) continue;
                 Varnode* offVn = op.getIn(1);
                 Symbol* sym = data.linkSymbolReference(offVn);
                 if ((sym != (Symbol)null) && sym.isNameUndefined())

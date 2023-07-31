@@ -294,7 +294,7 @@ namespace Sla.DECCORE
                 if (declist.GetLastItem() == (TypeDeclarator*)0)
                 {
                     dotdotdot = true;
-                    declist.pop_back();
+                    declist.RemoveLastItem();
                 }
             }
             FunctionModifier* newmod = new FunctionModifier(declist, dotdotdot);
@@ -332,7 +332,7 @@ namespace Sla.DECCORE
         public Datatype oldStruct(string ident)
         {
             Datatype* res = glb.types.findByName(ident);
-            if ((res == (Datatype)null) || (res.getMetatype() != TYPE_STRUCT))
+            if ((res == (Datatype)null) || (res.getMetatype() != type_metatype.TYPE_STRUCT))
                 setError("Identifier does not represent a struct as required");
             return res;
         }
@@ -366,7 +366,7 @@ namespace Sla.DECCORE
         public Datatype oldUnion(string ident)
         {
             Datatype* res = glb.types.findByName(ident);
-            if ((res == (Datatype)null) || (res.getMetatype() != TYPE_UNION))
+            if ((res == (Datatype)null) || (res.getMetatype() != type_metatype.TYPE_UNION))
                 setError("Identifier does not represent a union as required");
             return res;
         }

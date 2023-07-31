@@ -37,10 +37,10 @@ namespace Sla.DECCORE
         /// Handles other signed, boolean, and floating-point variants.
         public override void getOpList(List<uint> oplist)
         {
-            uint list[] ={ CPUI_INT_NOTEQUAL, CPUI_INT_SLESS, CPUI_INT_LESS, CPUI_BOOL_XOR, CPUI_BOOL_AND, CPUI_BOOL_OR,
-         CPUI_INT_EQUAL, CPUI_INT_SLESSEQUAL, CPUI_INT_LESSEQUAL,
-         CPUI_INT_XOR, CPUI_INT_AND, CPUI_INT_OR,
-                 CPUI_FLOAT_EQUAL, CPUI_FLOAT_NOTEQUAL, CPUI_FLOAT_LESS, CPUI_FLOAT_LESSEQUAL };
+            uint list[] ={ OpCode.CPUI_INT_NOTEQUAL, OpCode.CPUI_INT_SLESS, OpCode.CPUI_INT_LESS, OpCode.CPUI_BOOL_XOR, OpCode.CPUI_BOOL_AND, OpCode.CPUI_BOOL_OR,
+         OpCode.CPUI_INT_EQUAL, OpCode.CPUI_INT_SLESSEQUAL, OpCode.CPUI_INT_LESSEQUAL,
+         OpCode.CPUI_INT_XOR, OpCode.CPUI_INT_AND, OpCode.CPUI_INT_OR,
+                 OpCode.CPUI_FLOAT_EQUAL, OpCode.CPUI_FLOAT_NOTEQUAL, OpCode.CPUI_FLOAT_LESS, OpCode.CPUI_FLOAT_LESSEQUAL };
             oplist.insert(oplist.end(), list, list + 16);
         }
 
@@ -61,29 +61,29 @@ namespace Sla.DECCORE
             switch (op.code())
             {
 
-                case CPUI_INT_NOTEQUAL: // Boolean 0
-                case CPUI_INT_SLESS:
-                case CPUI_INT_LESS:
-                case CPUI_BOOL_XOR:
-                case CPUI_FLOAT_NOTEQUAL:
-                case CPUI_FLOAT_LESS:
+                case OpCode.CPUI_INT_NOTEQUAL: // Boolean 0
+                case OpCode.CPUI_INT_SLESS:
+                case OpCode.CPUI_INT_LESS:
+                case OpCode.CPUI_BOOL_XOR:
+                case OpCode.CPUI_FLOAT_NOTEQUAL:
+                case OpCode.CPUI_FLOAT_LESS:
                     vn = data.newConstant(1, 0);
                     break;
-                case CPUI_INT_EQUAL:        // Boolean 1
-                case CPUI_INT_SLESSEQUAL:
-                case CPUI_INT_LESSEQUAL:
-                case CPUI_FLOAT_EQUAL:
-                case CPUI_FLOAT_LESSEQUAL:
+                case OpCode.CPUI_INT_EQUAL:        // Boolean 1
+                case OpCode.CPUI_INT_SLESSEQUAL:
+                case OpCode.CPUI_INT_LESSEQUAL:
+                case OpCode.CPUI_FLOAT_EQUAL:
+                case OpCode.CPUI_FLOAT_LESSEQUAL:
                     vn = data.newConstant(1, 1);
                     break;
-                case CPUI_INT_XOR:      // Same size 0
-                                        //  case CPUI_INT_SUB:
+                case OpCode.CPUI_INT_XOR:      // Same size 0
+                                        //  case OpCode.CPUI_INT_SUB:
                     vn = data.newConstant(op.getOut().getSize(), 0);
                     break;
-                case CPUI_BOOL_AND:     // Identity
-                case CPUI_BOOL_OR:
-                case CPUI_INT_AND:
-                case CPUI_INT_OR:
+                case OpCode.CPUI_BOOL_AND:     // Identity
+                case OpCode.CPUI_BOOL_OR:
+                case OpCode.CPUI_INT_AND:
+                case OpCode.CPUI_INT_OR:
                     vn = (Varnode)null;
                     break;
                 default:
@@ -91,7 +91,7 @@ namespace Sla.DECCORE
             }
 
             data.opRemoveInput(op, 1);
-            data.opSetOpcode(op, CPUI_COPY);
+            data.opSetOpcode(op, OpCode.CPUI_COPY);
             if (vn != (Varnode)null)
                 data.opSetInput(op, vn, 0);
 

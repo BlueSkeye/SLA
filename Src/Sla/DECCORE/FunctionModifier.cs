@@ -23,7 +23,7 @@ namespace Sla.DECCORE
                 if (decl.numModifiers() == 0)
                 { // Check for void as an inputtype
                     Datatype* ct = decl.getBaseType();
-                    if ((ct != (Datatype)null) && (ct.getMetatype() == TYPE_VOID))
+                    if ((ct != (Datatype)null) && (ct.getMetatype() == type_metatype.TYPE_VOID))
                         paramlist.clear();
                 }
             }
@@ -58,7 +58,7 @@ namespace Sla.DECCORE
                 if (decl.numModifiers() == 0)
                 {
                     Datatype* ct = decl.getBaseType();
-                    if ((ct != (Datatype)null) && (ct.getMetatype() == TYPE_VOID))
+                    if ((ct != (Datatype)null) && (ct.getMetatype() == type_metatype.TYPE_VOID))
                         return false;       // Extra void type
                 }
             }

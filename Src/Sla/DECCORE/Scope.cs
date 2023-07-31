@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml;
 using System.Runtime.Intrinsics;
+
+using ScopeMap = System.Collections.Generic.Dictionary<ulong, Sla.DECCORE.Scope>;
 
 namespace Sla.DECCORE
 {
@@ -41,10 +43,14 @@ namespace Sla.DECCORE
     {
         //friend class Database;
         //friend class ScopeCompare;
-        private RangeList rangetree;                ///< Range of data addresses \e owned by \b this scope
-        private Scope parent;              ///< The parent scope
-        private Scope owner;                   ///< Scope using \b this as a cache
-        private ScopeMap children;              ///< Sorted list of child scopes
+        /// Range of data addresses \e owned by \b this scope
+        private RangeList rangetree;
+        /// The parent scope
+        private Scope parent;
+        /// Scope using \b this as a cache
+        private Scope owner;
+        /// Sorted list of child scopes
+        private ScopeMap children;
 
         /// Attach a new child Scope to \b this
         /// Attach the child as an immediate sub-scope of \b this.
@@ -75,13 +81,13 @@ namespace Sla.DECCORE
         {
             uint reg1 = (uint)(baseId >> 32);
             uint reg2 = (uint)baseId;
-            reg1 = crc_update(reg1, 0xa9);
-            reg2 = crc_update(reg2, reg1);
+            reg1 = Globals.crc_update(reg1, 0xa9);
+            reg2 = Globals.crc_update(reg2, reg1);
             for (int i = 0; i < nm.size(); ++i)
             {
                 uint val = nm[i];
-                reg1 = crc_update(reg1, val);
-                reg2 = crc_update(reg2, reg1);
+                reg1 = Globals.crc_update(reg1, val);
+                reg2 = Globals.crc_update(reg2, reg1);
             }
             ulong res = reg1;
             res = (res << 32) | reg2;
@@ -473,10 +479,10 @@ namespace Sla.DECCORE
         }
 
         /// Beginning iterator to mapped SymbolEntrys
-        public abstract MapIterator begin();
+        public abstract IEnumerator<SymbolEntry> begin();
 
-        /// Ending iterator to mapped SymbolEntrys
-        public abstract MapIterator end();
+        ///// Ending iterator to mapped SymbolEntrys
+        //public abstract MapIterator end();
 
         /// Beginning iterator to dynamic SymbolEntrys
         public abstract IEnumerator<SymbolEntry> beginDynamic();
@@ -713,8 +719,8 @@ namespace Sla.DECCORE
             for (int i = 0; i < symList.size(); ++i)
             {
                 Symbol* sym = symList[i];
-                FunctionSymbol* funcsym = dynamic_cast<FunctionSymbol*>(sym);
-                if (funcsym != (FunctionSymbol*)0)
+                FunctionSymbol* funcsym = (FunctionSymbol)(sym);
+                if (funcsym != (FunctionSymbol)null)
                     return funcsym.getFunction();
             }
             return (Funcdata)null;
@@ -886,9 +892,11 @@ namespace Sla.DECCORE
             return (Scope)null;
         }
 
-        public ScopeMap::const_iterator childrenBegin() => children.begin(); ///< Beginning iterator of child scopes
+        /// Beginning iterator of child scopes
+        public ScopeMap.Enumerator childrenBegin() => children.GetEnumerator();
 
-        public ScopeMap::const_iterator childrenEnd() => children.end(); ///< Ending iterator of child scopes
+        /// Ending iterator of child scopes
+        // public ScopeMap::const_iterator childrenEnd() => children.end();
 
         ///< Encode all contained scopes to a stream
         /// This Scope and all of its sub-scopes are encoded as a sequence of \<scope> elements
@@ -930,9 +938,9 @@ namespace Sla.DECCORE
         /// \param sym is the Symbol to clear
         public void resetSizeLockType(Symbol sym)
         {
-            if (sym.type.getMetatype() == TYPE_UNKNOWN) return;   // Nothing to do
+            if (sym.type.getMetatype() == type_metatype.TYPE_UNKNOWN) return;   // Nothing to do
             int size = sym.type.getSize();
-            sym.type = glb.types.getBase(size, TYPE_UNKNOWN);
+            sym.type = glb.types.getBase(size, type_metatype.TYPE_UNKNOWN);
         }
 
         /// Toggle the given Symbol as the "this" pointer

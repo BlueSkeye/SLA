@@ -21,7 +21,7 @@ namespace Sla.CORE
         /// Encode \b this to a stream
         /// The register storage and value are encoded as a \<set> element.
         /// \param encoder is the stream encoder
-        internal void encode(ghidra.Encoder encoder)
+        internal void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_SET);
             loc.space.encodeAttributes(encoder, loc.offset, (int)loc.size);
@@ -32,7 +32,7 @@ namespace Sla.CORE
         /// Decode \b this from a stream
         /// Parse a \<set> element to fill in the storage and value details.
         /// \param decoder is the stream decoder
-        internal void decode(ghidra.Decoder decoder)
+        internal void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_SET);
             this.loc = VarnodeData.decodeFromAttributes(decoder);

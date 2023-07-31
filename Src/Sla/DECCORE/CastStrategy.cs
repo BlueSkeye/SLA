@@ -173,7 +173,7 @@ namespace Sla.DECCORE
             }
             Datatype dt = vn.getHighTypeReadFacing(op);
             type_metatype meta = dt.getMetatype();
-            if ((meta != TYPE_UINT) && (meta != TYPE_UNKNOWN)) {
+            if ((meta != type_metatype.TYPE_UINT) && (meta != type_metatype.TYPE_UNKNOWN)) {
                 return false;
             }
             if (dt.isCharPrint()) {
@@ -185,7 +185,7 @@ namespace Sla.DECCORE
             if ((op.numInput() == 2) && !inheritsFirstParamOnly) {
                 Varnode firstvn = op.getIn(1 - slot);
                 meta = firstvn.getHighTypeReadFacing(op).getMetatype();
-                if ((meta == TYPE_UINT) || (meta == TYPE_UNKNOWN)){
+                if ((meta == type_metatype.TYPE_UINT) || (meta == type_metatype.TYPE_UNKNOWN)){
                     // Other side of the operation will force the unsigned
                     return false;
                 }
@@ -232,19 +232,19 @@ namespace Sla.DECCORE
             }
             Datatype dt = vn.getHigh().getType();
             type_metatype meta = dt.getMetatype();
-            if ((meta != TYPE_UINT) && (meta != TYPE_INT) && (meta != TYPE_UNKNOWN)) {
+            if ((meta != type_metatype.TYPE_UINT) && (meta != type_metatype.TYPE_INT) && (meta != type_metatype.TYPE_UNKNOWN)) {
                 return false;
             }
             ulong off = vn.getOffset();
-            if (meta == TYPE_INT && signbit_negative(off, vn.getSize())) {
-                off = uintb_negate(off, vn.getSize());
-                int bit = mostsigbit_set(off);
+            if (meta == type_metatype.TYPE_INT && Globals.signbit_negative(off, vn.getSize())) {
+                off = Globals.uintb_negate(off, vn.getSize());
+                int bit = Globals.mostsigbit_set(off);
                 if (bit >= promoteSize * 8 - 1) {
                     return false;
                 }
             }
             else {
-                int bit = mostsigbit_set(off);
+                int bit = Globals.mostsigbit_set(off);
                 // If integer is big enough, it naturally becomes a long
                 if (bit >= promoteSize * 8) {
                     return false;

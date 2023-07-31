@@ -67,7 +67,7 @@ namespace Sla.DECCORE
                     return false;
                 }
                 op = vn.getDef();
-                if (op.code() != CPUI_MULTIEQUAL) {
+                if (op.code() != OpCode.CPUI_MULTIEQUAL) {
                     return false;
                 }
                 if (op.numInput() != 2) {
@@ -79,8 +79,8 @@ namespace Sla.DECCORE
                         continue;
                     }
                     PcodeOp copyop = tmpvn.getDef();
-                    if (copyop.code() != CPUI_COPY) {
-                        // Multiequal must have CPUI_COPY input
+                    if (copyop.code() != OpCode.CPUI_COPY) {
+                        // Multiequal must have OpCode.CPUI_COPY input
                         continue;
                     }
                     Varnode zerovn = copyop.getIn(0);
@@ -148,7 +148,7 @@ namespace Sla.DECCORE
                 if (cbranch == null) {
                     return false;
                 }
-                return (cbranch.code() == CPUI_CBRANCH);
+                return (cbranch.code() == OpCode.CPUI_CBRANCH);
             }
 
             /// \brief Does the \b condBlock \b true outgoing edge flow to the block that sets zero
@@ -181,11 +181,11 @@ namespace Sla.DECCORE
                 }
                 PcodeOp compareop = boolvn.getDef();
                 OpCode opc = compareop.code();
-                if (opc == CPUI_INT_NOTEQUAL) {
+                if (opc == OpCode.CPUI_INT_NOTEQUAL) {
                     // Verify that CBRANCH depends on INT_NOTEQUAL
                     zeroPathIsTrue = !zeroPathIsTrue;
                 }
-                else if (opc != CPUI_INT_EQUAL) {
+                else if (opc != OpCode.CPUI_INT_EQUAL) {
                     // or INT_EQUAL
                     return false;
                 }
@@ -251,7 +251,7 @@ namespace Sla.DECCORE
             }
             data.opSetInput(branch.op, vn, branch.zeroSlot);
             data.opRemoveInput(op, 1);
-            data.opSetOpcode(op, CPUI_COPY);
+            data.opSetOpcode(op, OpCode.CPUI_COPY);
             data.opSetInput(op, branch.op.getOut(), 0);
             return 1;
         }
@@ -342,7 +342,7 @@ namespace Sla.DECCORE
                 slot0SetsBranch0 = branch0.zeroSlot == 1;
             }
             PcodeOp newMulti = data.newOp(2, finalBlock.getStart());
-            data.opSetOpcode(newMulti, CPUI_MULTIEQUAL);
+            data.opSetOpcode(newMulti, OpCode.CPUI_MULTIEQUAL);
             if (slot0SetsBranch0) {
                 data.opSetInput(newMulti, branch0.otherVn, 0);
                 data.opSetInput(newMulti, branch1.otherVn, 1);
@@ -355,7 +355,7 @@ namespace Sla.DECCORE
             data.opInsertBegin(newMulti, finalBlock);
             data.opRemoveInput(op, 1);
             data.opSetInput(op, newvn, 0);
-            data.opSetOpcode(op, CPUI_COPY);
+            data.opSetOpcode(op, OpCode.CPUI_COPY);
             return 1;
         }
     }

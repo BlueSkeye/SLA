@@ -30,9 +30,9 @@ namespace Sla.DECCORE
     /// of the Varnodes, so that the highest-level types are propagated first,
     /// would probably fix the worst-case, but this seems unnecessary.
     /// Complications:
-    /// TYPE_SPACEBASE is a problem because we have to make sure that it doesn't
+    /// type_metatype.TYPE_SPACEBASE is a problem because we have to make sure that it doesn't
     /// propagate.
-    /// Also, offsets off of pointers to TYPE_SPACEBASE look up the data-type in the
+    /// Also, offsets off of pointers to type_metatype.TYPE_SPACEBASE look up the data-type in the
     /// local map. Then ActionRestructure uses data-type information recovered by
     /// this algorithm to reconstruct the local map.  This causes a feedback loop
     /// which allows type information recovered about mapped Varnodes to be propagated
@@ -103,7 +103,7 @@ namespace Sla.DECCORE
                 {
                     int curOff = (vn.getAddr().getOffset() - entry.getAddr().getOffset()) + entry.getOffset();
                     ct = typegrp.getExactPiece(entry.getSymbol().getType(), curOff, vn.getSize());
-                    if (ct == (Datatype)null || ct.getMetatype() == TYPE_UNKNOWN)    // If we can't resolve, or resolve to UNKNOWN
+                    if (ct == (Datatype)null || ct.getMetatype() == type_metatype.TYPE_UNKNOWN)    // If we can't resolve, or resolve to UNKNOWN
                         ct = vn.getLocalType(needsBlock);      // Let data-type float, even though parent symbol is type-locked
                 }
                 else
@@ -176,7 +176,7 @@ namespace Sla.DECCORE
             if (outvn.isTypeLock()) return false; // Can't propagate through typelock
             if (outvn.stopsUpPropagation() && outslot >= 0) return false;  // Propagation is blocked
 
-            if (alttype.getMetatype() == TYPE_BOOL)
+            if (alttype.getMetatype() == type_metatype.TYPE_BOOL)
             {   // Only propagate boolean
                 if (outvn.getNZMask() > 1)         // If we know output can only take boolean values
                     return false;
@@ -221,7 +221,7 @@ namespace Sla.DECCORE
                 if (!ptr.valid())
                 {   // If we are out of edges to traverse
                     ptr.vn.clearMark();
-                    state.pop_back();
+                    state.RemoveLastItem();
                 }
                 else
                 {
@@ -249,10 +249,10 @@ namespace Sla.DECCORE
         private static void propagateRef(Funcdata data, Varnode vn, Address addr)
         {
             Datatype* ct = vn.getTempType();
-            if (ct.getMetatype() != TYPE_PTR) return;
+            if (ct.getMetatype() != type_metatype.TYPE_PTR) return;
             ct = ((TypePointer*)ct).getPtrTo();
-            if (ct.getMetatype() == TYPE_SPACEBASE) return;
-            if (ct.getMetatype() == TYPE_UNKNOWN) return; // Don't bother propagating this
+            if (ct.getMetatype() == type_metatype.TYPE_SPACEBASE) return;
+            if (ct.getMetatype() == type_metatype.TYPE_UNKNOWN) return; // Don't bother propagating this
             VarnodeLocSet::const_iterator iter, enditer;
             ulong off = addr.getOffset();
             TypeFactory* typegrp = data.getArch().types;
@@ -308,9 +308,9 @@ namespace Sla.DECCORE
         private static void propagateSpacebaseRef(Funcdata data, Varnode spcvn)
         {
             Datatype* spctype = spcvn.getType();   // This is an absolute property of the varnode, so not temptype
-            if (spctype.getMetatype() != TYPE_PTR) return;
+            if (spctype.getMetatype() != type_metatype.TYPE_PTR) return;
             spctype = ((TypePointer*)spctype).getPtrTo();
-            if (spctype.getMetatype() != TYPE_SPACEBASE) return;
+            if (spctype.getMetatype() != type_metatype.TYPE_SPACEBASE) return;
             TypeSpacebase* sbtype = (TypeSpacebase*)spctype;
             list<PcodeOp*>::const_iterator iter;
             Address addr;
@@ -321,13 +321,13 @@ namespace Sla.DECCORE
                 Varnode* vn;
                 switch (op.code())
                 {
-                    case CPUI_COPY:
+                    case OpCode.CPUI_COPY:
                         vn = op.getIn(0);
                         addr = sbtype.getAddress(0, vn.getSize(), op.getAddr());
                         propagateRef(data, op.getOut(), addr);
                         break;
-                    case CPUI_INT_ADD:
-                    case CPUI_PTRSUB:
+                    case OpCode.CPUI_INT_ADD:
+                    case OpCode.CPUI_PTRSUB:
                         vn = op.getIn(1);
                         if (vn.isConstant())
                         {
@@ -335,7 +335,7 @@ namespace Sla.DECCORE
                             propagateRef(data, op.getOut(), addr);
                         }
                         break;
-                    case CPUI_PTRADD:
+                    case OpCode.CPUI_PTRADD:
                         vn = op.getIn(1);
                         if (vn.isConstant())
                         {
@@ -350,10 +350,10 @@ namespace Sla.DECCORE
             }
         }
 
-        /// Return the CPUI_RETURN op with the most specialized data-type, which is not
+        /// Return the OpCode.CPUI_RETURN op with the most specialized data-type, which is not
         /// dead and is not a special halt.
         /// \param data is the function
-        /// \return the representative CPUI_RETURN op or NULL
+        /// \return the representative OpCode.CPUI_RETURN op or NULL
         private static PcodeOp canonicalReturnOp(Funcdata data)
         {
             PcodeOp* res = (PcodeOp)null;
@@ -384,10 +384,10 @@ namespace Sla.DECCORE
             return res;
         }
 
-        /// \brief Give data-types a chance to propagate between CPUI_RETURN operations.
+        /// \brief Give data-types a chance to propagate between OpCode.CPUI_RETURN operations.
         ///
         /// Since a function is intended to return a single data-type, data-types effectively
-        /// propagate between the input Varnodes to CPUI_RETURN ops, if there are more than one.
+        /// propagate between the input Varnodes to OpCode.CPUI_RETURN ops, if there are more than one.
         private static void propagateAcrossReturns(Funcdata data)
         {
             if (data.getFuncProto().isOutputLocked()) return;
@@ -397,7 +397,7 @@ namespace Sla.DECCORE
             Varnode* baseVn = op.getIn(1);
             Datatype* ct = baseVn.getTempType();
             int baseSize = baseVn.getSize();
-            bool isBool = ct.getMetatype() == TYPE_BOOL;
+            bool isBool = ct.getMetatype() == type_metatype.TYPE_BOOL;
             list<PcodeOp*>::const_iterator iter, iterend;
             iterend = data.endOp(CPUI_RETURN);
             for (iter = data.beginOp(CPUI_RETURN); iter != iterend; ++iter)

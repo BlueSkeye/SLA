@@ -14,14 +14,14 @@ namespace Sla.DECCORE
     /// that varnode can trace at least part of its data-flow ancestry to legal inputs,
     /// where \b legal inputs include:  globals, spacebase registers, and normal function parameters.
     /// The directwrite attribute is set on these inputs initially and then propagated
-    /// to other varnodes through all other ops except CPUI_INDIRECT. The attribute propagates
-    /// through CPUI_INDIRECT depending on the setting of -propagateIndirect-.
+    /// to other varnodes through all other ops except OpCode.CPUI_INDIRECT. The attribute propagates
+    /// through OpCode.CPUI_INDIRECT depending on the setting of -propagateIndirect-.
     /// For normal decompilation, propagation through CPUI_INDIRECTs is important for stack and other
     /// high-level addrtied variables that need to hold their value over ranges where they are not
     /// accessed directly. But propagation adds unnecessary clutter for normalization style analysis.
     internal class ActionDirectWrite : Action
     {
-        /// Propagate thru CPUI_INDIRECT ops
+        /// Propagate thru OpCode.CPUI_INDIRECT ops
         private bool propagateIndirect;
 
         /// Constructor
@@ -74,15 +74,15 @@ namespace Sla.DECCORE
                             vn.setDirectWrite();
                             worklist.Add(vn);
                         }
-                        else if (op.code() == CPUI_COPY)
+                        else if (op.code() == OpCode.CPUI_COPY)
                         {   // For most COPYs, do not consider it a direct write
                             if (vn.isStackStore())
-                            {       // But, if the original operation was really a CPUI_STORE
+                            {       // But, if the original operation was really a OpCode.CPUI_STORE
                                 Varnode* invn = op.getIn(0);   // Trace COPY source
                                 if (invn.isWritten())
                                 {       // Through possible multiple COPYs
                                     PcodeOp* curop = invn.getDef();
-                                    if (curop.code() == CPUI_COPY)
+                                    if (curop.code() == OpCode.CPUI_COPY)
                                         invn = curop.getIn(0);
                                 }
                                 if (invn.isWritten() && invn.getDef().isMarker())
@@ -92,14 +92,14 @@ namespace Sla.DECCORE
                                 }
                             }
                         }
-                        else if ((op.code() != CPUI_PIECE) && (op.code() != CPUI_SUBPIECE))
+                        else if ((op.code() != OpCode.CPUI_PIECE) && (op.code() != OpCode.CPUI_SUBPIECE))
                         {
                             // Anything that writes to a variable in a way that isn't some form of COPY is a direct write
                             vn.setDirectWrite();
                             worklist.Add(vn);
                         }
                     }
-                    else if (!propagateIndirect && op.code() == CPUI_INDIRECT)
+                    else if (!propagateIndirect && op.code() == OpCode.CPUI_INDIRECT)
                     {
                         Varnode* outvn = op.getOut();
                         if (op.getIn(0).getAddr() != outvn.getAddr())    // Check if storage address changes from input to output
@@ -122,7 +122,7 @@ namespace Sla.DECCORE
             while (!worklist.empty())
             {
                 vn = worklist.GetLastItem();
-                worklist.pop_back();
+                worklist.RemoveLastItem();
                 for (oiter = vn.beginDescend(); oiter != vn.endDescend(); ++oiter)
                 {
                     op = *oiter;
@@ -132,7 +132,7 @@ namespace Sla.DECCORE
                     {
                         dvn.setDirectWrite();
                         // For call based INDIRECTs, output is marked, but does not propagate depending on setting
-                        if (propagateIndirect || op.code() != CPUI_INDIRECT || op.isIndirectStore())
+                        if (propagateIndirect || op.code() != OpCode.CPUI_INDIRECT || op.isIndirectStore())
                             worklist.Add(dvn);
                     }
                 }

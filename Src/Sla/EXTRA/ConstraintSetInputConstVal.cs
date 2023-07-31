@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.DECCORE;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -14,7 +15,7 @@ namespace Sla.EXTRA
         private int opindex;
         private RHSConstant slot;
         private RHSConstant val;
-        private RHSConstant exprsz;
+        private RHSConstant? exprsz;
         
         public ConstraintSetInputConstVal(int oind, RHSConstant sl, RHSConstant v, RHSConstant sz)
         {
@@ -29,29 +30,29 @@ namespace Sla.EXTRA
         {
             delete val;
             delete slot;
-            if (exprsz != (RHSConstant*)0)
+            if (exprsz != (RHSConstant)null)
                 delete exprsz;
         }
 
         public override UnifyConstraint clone()
         {
-            RHSConstant* newexprsz = (RHSConstant*)0;
-            if (exprsz != (RHSConstant*)0)
+            RHSConstant newexprsz = (RHSConstant)null;
+            if (exprsz != (RHSConstant)null)
                 newexprsz = exprsz.clone();
-            UnifyConstraint* res;
+            UnifyConstraint res;
             res = (new ConstraintSetInputConstVal(opindex, slot.clone(), val.clone(), newexprsz)).copyid(this);
             return res;
         }
 
         public override bool step(UnifyState state)
         {
-            TraverseCountState* traverse = (TraverseCountState*)state.getTraverse(uniqid);
+            TraverseCountState traverse = (TraverseCountState)state.getTraverse(uniqid);
             if (!traverse.step()) return false;
-            Funcdata* fd = state.getFunction();
-            PcodeOp* op = state.data(opindex).getOp();
+            Funcdata fd = state.getFunction();
+            PcodeOp op = state.data(opindex).getOp();
             ulong ourconst = val.getConstant(state);
             int sz;
-            if (exprsz != (RHSConstant*)0)
+            if (exprsz != (RHSConstant)null)
                 sz = (int)exprsz.getConstant(state);
             else
                 sz = (int)sizeof(ulong);
@@ -62,28 +63,28 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[opindex] = UnifyDatatype(UnifyDatatype::op_type);
-            //  typelist[varindex] = UnifyDatatype(UnifyDatatype::var_type);
+            typelist[opindex] = new UnifyDatatype(UnifyDatatype.TypeKind.op_type);
+            //  typelist[varindex] = UnifyDatatype(UnifyDatatype.TypeKind.var_type);
         }
 
         public override void print(TextWriter s, UnifyCPrinter printstate)
         {
             printstate.printIndent(s);
-            s << "data.opSetInput(" << printstate.getName(opindex) << ",data.newConstant(";
-            if (exprsz != (RHSConstant*)0)
+            s.Write("data.opSetInput({printstate.getName(opindex)},data.newConstant(");
+            if (exprsz != (RHSConstant)null)
                 exprsz.writeExpression(s, printstate);
             else
-                s << dec << (int)sizeof(ulong);
-            s << ",calc_mask(";
-            if (exprsz != (RHSConstant*)0)
+                s.Write((int)sizeof(ulong));
+            s.Write(",calc_mask(");
+            if (exprsz != (RHSConstant)null)
                 exprsz.writeExpression(s, printstate);
             else
-                s << dec << (int)sizeof(ulong);
-            s << ")&";
+                s.Write((int)sizeof(ulong));
+            s.Write(")&");
             val.writeExpression(s, printstate);
-            s << "),";
+            s.Write("),");
             slot.writeExpression(s, printstate);
-            s << ");" << endl;
+            s.WriteLine(");");
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Sla.DECCORE
     internal class TypeOpFloatFloat2Float : TypeOpFunc
     {
         public TypeOpFloatFloat2Float(TypeFactory t, Translate trans)
-            : base(t, CPUI_FLOAT_FLOAT2FLOAT,"FLOAT2FLOAT", TYPE_FLOAT, TYPE_FLOAT)
+            : base(t, OpCode.CPUI_FLOAT_FLOAT2FLOAT,"FLOAT2FLOAT", type_metatype.TYPE_FLOAT, type_metatype.TYPE_FLOAT)
         {
             opflags = PcodeOp::unary;
             addlflags = floatingpoint_op;

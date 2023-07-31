@@ -18,7 +18,7 @@ namespace Sla.DECCORE
         // Single op affecting both lo and hi
         private PcodeOp affector;
         private PcodeOp indhi;
-        // Two partial CPUI_INDIRECT ops
+        // Two partial OpCode.CPUI_INDIRECT ops
         private Varnode indlo;
 
         public bool verify(Varnode h, Varnode l, PcodeOp ihi)
@@ -39,7 +39,7 @@ namespace Sla.DECCORE
             {
                 indlo = *iter;
                 ++iter;
-                if (indlo.code() != CPUI_INDIRECT) continue;
+                if (indlo.code() != OpCode.CPUI_INDIRECT) continue;
                 if (indlo.getIn(1).getSpace().getType() != IPTR_IOP) continue;
                 if (affector != PcodeOp::getOpFromConst(indlo.getIn(1).getAddr())) continue;  // hi and lo must be affected by same op
                 reslo = indlo.getOut();

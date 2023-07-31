@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.Intrinsics;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Sla.DECCORE
@@ -59,7 +59,7 @@ namespace Sla.DECCORE
         {
             bool isTrunc;       // unused here
             List<byte> buffer = getStringData(addr, charType, isTrunc);
-            return !buffer.empty();
+            return (0 != buffer.Count);
         }
 
         /// \brief Retrieve string data at the given address as a UTF8 byte array
@@ -77,29 +77,28 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         public void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_STRINGMANAGE);
+            encoder.openElement(ElementId.ELEM_STRINGMANAGE);
 
-            Dictionary<Address, StringData>::const_iterator iter1;
-            for (iter1 = stringMap.begin(); iter1 != stringMap.end(); ++iter1)
-            {
-                encoder.openElement(ELEM_STRING);
-                (*iter1).first.encode(encoder);
-                StringData stringData = (*iter1).second;
-                encoder.openElement(ELEM_BYTES);
-                encoder.writeBool(ATTRIB_TRUNC, stringData.isTruncated);
-                ostringstream s;
-                s << '\n' << setfill('0');
-                for (int i = 0; i < stringData.byteData.size(); ++i)
-                {
-                    s << hex << setw(2) << (int)stringData.byteData[i];
-                    if (i % 20 == 19)
-                        s << "\n  ";
+            foreach (KeyValuePair<Address, StringData> pair in stringMap) {
+                encoder.openElement(ElementId.ELEM_STRING);
+                pair.Key.encode(encoder);
+                StringData stringData = pair.Value;
+                encoder.openElement(ElementId.ELEM_BYTES);
+                encoder.writeBool(AttributeId.ATTRIB_TRUNC, stringData.isTruncated);
+                System.Text.StringBuilder s = new System.Text.StringBuilder();
+                s.AppendLine();
+                for (int i = 0; i < stringData.byteData.Count; ++i) {
+                    s.AppendFormat("{0:X2}", (int)stringData.byteData[i]);
+                    if (i % 20 == 19) {
+                        s.AppendLine();
+                        s.Append("  ");
+                    }
                 }
-                s << '\n';
-                encoder.writeString(ATTRIB_CONTENT, s.str());
-                encoder.closeElement(ELEM_BYTES);
+                s.AppendLine();
+                encoder.writeString(AttributeId.ATTRIB_CONTENT, s.ToString());
+                encoder.closeElement(ElementId.ELEM_BYTES);
             }
-            encoder.closeElement(ELEM_STRINGMANAGE);
+            encoder.closeElement(ElementId.ELEM_STRINGMANAGE);
         }
 
         /// Restore string cache from a stream
@@ -107,23 +106,22 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decode(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_STRINGMANAGE);
+            uint elemId = decoder.openElement(ElementId.ELEM_STRINGMANAGE);
             for (; ; )
             {
                 uint subId = decoder.openElement();
-                if (subId != ELEM_STRING) break;
-                Address addr = Address::decode(decoder);
-                StringData & stringData(stringMap[addr]);
-                uint subId2 = decoder.openElement(ELEM_BYTES);
-                stringData.isTruncated = decoder.readBool(ATTRIB_TRUNC);
-                istringstream @is = new istringstream(decoder.readString(ATTRIB_CONTENT));
+                if (subId != ElementId.ELEM_STRING) break;
+                Address addr = Address.decode(decoder);
+                StringData stringData = stringMap[addr];
+                uint subId2 = decoder.openElement(ElementId.ELEM_BYTES);
+                stringData.isTruncated = decoder.readBool(AttributeId.ATTRIB_TRUNC);
+                istringstream @is = new istringstream(decoder.readString(AttributeId.ATTRIB_CONTENT));
                 int val;
                 char c1, c2;
                 @is >> ws;
                 c1 = @is.get();
                 c2 = @is.get();
-                while ((c1 > 0) && (c2 > 0))
-                {
+                while ((c1 > 0) && (c2 > 0)) {
                     if (c1 <= '9')
                         c1 = c1 - '0';
                     else if (c1 <= 'F')
@@ -153,15 +151,13 @@ namespace Sla.DECCORE
         /// \param size is the number of bytes in the buffer
         /// \param charsize is the presumed size (in bytes) of character elements
         /// \return \b true if a string terminator is found
-        public static bool hasCharTerminator(byte buffer, int size,int charsize)
+        public static bool hasCharTerminator(byte[] buffer, int size,int charsize)
         {
-            for (int i = 0; i < size; i += charsize)
-            {
+            for (int i = 0; i < size; i += charsize) {
                 bool isTerminator = true;
-                for (int j = 0; j < charsize; ++j)
-                {
-                    if (buffer[i + j] != 0)
-                    {   // Non-zero bytes means character can't be a null terminator
+                for (int j = 0; j < charsize; ++j) {
+                    if (buffer[i + j] != 0) {
+                        // Non-zero bytes means character can't be a null terminator
                         isTerminator = false;
                         break;
                     }
@@ -176,17 +172,15 @@ namespace Sla.DECCORE
         /// \param buf is the byte array
         /// \param bigend is \b true to request big endian encoding
         /// \return the decoded UTF16 element
-        public static int readUtf16(byte buf,bool bigend)
+        public static int readUtf16(byte[] buf,bool bigend)
         {
             int codepoint;
-            if (bigend)
-            {
+            if (bigend) {
                 codepoint = buf[0];
                 codepoint <<= 8;
                 codepoint += buf[1];
             }
-            else
-            {
+            else {
                 codepoint = buf[1];
                 codepoint <<= 8;
                 codepoint += buf[0];
@@ -201,34 +195,31 @@ namespace Sla.DECCORE
         /// \param codepoint is the unicode codepoint
         public static void writeUtf8(TextWriter s, int codepoint)
         {
-            byte bytes[4];
+            byte[] bytes = new byte[4];
             int size;
 
             if (codepoint < 0)
                 throw new LowlevelError("Negative unicode codepoint");
-            if (codepoint < 128)
-            {
+            if (codepoint < 128) {
                 s.put((byte)codepoint);
                 return;
             }
-            int bits = mostsigbit_set(codepoint) + 1;
+            int bits = Globals.mostsigbit_set(codepoint) + 1;
             if (bits > 21)
                 throw new LowlevelError("Bad unicode codepoint");
-            if (bits < 12)
-            {   // Encode with two bytes
+            if (bits < 12) {
+                // Encode with two bytes
                 bytes[0] = 0xc0 ^ ((codepoint >> 6) & 0x1f);
                 bytes[1] = 0x80 ^ (codepoint & 0x3f);
                 size = 2;
             }
-            else if (bits < 17)
-            {
+            else if (bits < 17) {
                 bytes[0] = 0xe0 ^ ((codepoint >> 12) & 0xf);
                 bytes[1] = 0x80 ^ ((codepoint >> 6) & 0x3f);
                 bytes[2] = 0x80 ^ (codepoint & 0x3f);
                 size = 3;
             }
-            else
-            {
+            else {
                 bytes[0] = 0xf0 ^ ((codepoint >> 18) & 7);
                 bytes[1] = 0x80 ^ ((codepoint >> 12) & 0x3f);
                 bytes[2] = 0x80 ^ ((codepoint >> 6) & 0x3f);

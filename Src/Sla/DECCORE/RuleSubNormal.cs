@@ -39,7 +39,7 @@ namespace Sla.DECCORE
             if (!shiftout.isWritten()) return 0;
             PcodeOp* shiftop = shiftout.getDef();
             OpCode opc = shiftop.code();
-            if ((opc != CPUI_INT_RIGHT) && (opc != CPUI_INT_SRIGHT))
+            if ((opc != OpCode.CPUI_INT_RIGHT) && (opc != OpCode.CPUI_INT_SRIGHT))
                 return 0;
             if (!shiftop.getIn(1).isConstant()) return 0;
             Varnode* a = shiftop.getIn(0);
@@ -57,13 +57,13 @@ namespace Sla.DECCORE
             if (k + c + outsize > insize)
             {
                 int truncSize = insize - c - k;
-                if (n == k * 8 && truncSize > 0 && popcount(truncSize) == 1)
+                if (n == k * 8 && truncSize > 0 && Globals.popcount(truncSize) == 1)
                 {
                     // We need an additional extension
                     c += k;
                     PcodeOp* newop = data.newOp(2, op.getAddr());
-                    opc = (opc == CPUI_INT_SRIGHT) ? CPUI_INT_SEXT : CPUI_INT_ZEXT;
-                    data.opSetOpcode(newop, CPUI_SUBPIECE);
+                    opc = (opc == OpCode.CPUI_INT_SRIGHT) ? OpCode.CPUI_INT_SEXT : OpCode.CPUI_INT_ZEXT;
+                    data.opSetOpcode(newop, OpCode.CPUI_SUBPIECE);
                     data.newUniqueOut(truncSize, newop);
                     data.opSetInput(newop, a, 0);
                     data.opSetInput(newop, data.newConstant(4, c), 1);
@@ -90,12 +90,12 @@ namespace Sla.DECCORE
             else if (n >= outsize * 8)
             {
                 n = outsize * 8;        // Can only shift so far
-                if (opc == CPUI_INT_SRIGHT)
+                if (opc == OpCode.CPUI_INT_SRIGHT)
                     n -= 1;
             }
 
             PcodeOp* newop = data.newOp(2, op.getAddr());
-            data.opSetOpcode(newop, CPUI_SUBPIECE);
+            data.opSetOpcode(newop, OpCode.CPUI_SUBPIECE);
             data.newUniqueOut(outsize, newop);
             data.opSetInput(newop, a, 0);
             data.opSetInput(newop, data.newConstant(4, c), 1);

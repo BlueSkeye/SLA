@@ -77,7 +77,7 @@ namespace Sla.DECCORE
                     continue;
                 }
                 PcodeOp defOp = nextVn.getDef();
-                if (defOp.code() == CPUI_MULTIEQUAL) {
+                if (defOp.code() == OpCode.CPUI_MULTIEQUAL) {
                     if (defOp.getParent() != head) {
                         continue;
                     }
@@ -184,7 +184,7 @@ namespace Sla.DECCORE
             PcodeOp finalOp = vn.getDef();
             BlockBasic parentBlock = (BlockBasic)loopDef.getParent().getIn(slot);
             PcodeOp resOp = finalOp;
-            if (finalOp.code() == CPUI_COPY && finalOp.notPrinted()) {
+            if (finalOp.code() == OpCode.CPUI_COPY && finalOp.notPrinted()) {
                 vn = finalOp.getIn(0);
                 if (!vn.isWritten()) {
                     return null;
@@ -360,7 +360,7 @@ namespace Sla.DECCORE
                 return;
             }
             PcodeOp? cbranch = getBlock(0).lastOp();
-            if (cbranch == null || cbranch.code() != CPUI_CBRANCH) {
+            if (cbranch == null || cbranch.code() != OpCode.CPUI_CBRANCH) {
                 return;
             }
             if (lastOp.isBranch()) {

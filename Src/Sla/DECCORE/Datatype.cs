@@ -74,7 +74,7 @@ namespace Sla.DECCORE
         private void decodeBasic(Decoder decoder)
         {
             size = -1;
-            metatype = TYPE_VOID;
+            metatype = type_metatype.TYPE_VOID;
             id = 0;
             for (; ; )
             {
@@ -374,8 +374,8 @@ namespace Sla.DECCORE
         /// \brief Find an immediate subfield of \b this data-type
         ///
         /// Given a byte range within \b this data-type, determine the field it is contained in
-        /// and pass back the renormalized offset. This method applies to TYPE_STRUCT, TYPE_UNION, and
-        /// TYPE_PARTIALUNION, data-types that have field components. For TYPE_UNION and TYPE_PARTIALUNION, the
+        /// and pass back the renormalized offset. This method applies to type_metatype.TYPE_STRUCT, type_metatype.TYPE_UNION, and
+        /// type_metatype.TYPE_PARTIALUNION, data-types that have field components. For type_metatype.TYPE_UNION and type_metatype.TYPE_PARTIALUNION, the
         /// field may depend on the p-code op extracting or writing the value.
         /// \param off is the byte offset into \b this
         /// \param sz is the size of the byte range
@@ -482,8 +482,8 @@ namespace Sla.DECCORE
             encoder.closeElement(ElementId.ELEM_TYPE);
         }
 
-        /// Is this data-type suitable as input to a CPUI_PTRSUB op
-        /// A CPUI_PTRSUB must act on a pointer data-type where the given offset addresses a component.
+        /// Is this data-type suitable as input to a OpCode.CPUI_PTRSUB op
+        /// A OpCode.CPUI_PTRSUB must act on a pointer data-type where the given offset addresses a component.
         /// Perform this check.
         /// \param off is the given offset
         /// \return \b true if \b this is a suitable PTRSUB data-type
@@ -533,13 +533,13 @@ namespace Sla.DECCORE
 
         /// \brief Resolve which union field is being used for a given PcodeOp when a truncation is involved
         ///
-        /// This method applies to the TYPE_UNION and TYPE_PARTIALUNION data-types, when a Varnode is backed
-        /// by a larger Symbol with a union data-type, or if the Varnode is produced by a CPUI_SUBPIECE where
+        /// This method applies to the type_metatype.TYPE_UNION and type_metatype.TYPE_PARTIALUNION data-types, when a Varnode is backed
+        /// by a larger Symbol with a union data-type, or if the Varnode is produced by a OpCode.CPUI_SUBPIECE where
         /// the input Varnode has a union data-type.
         /// Scoring is done to compute the best field and the result is cached with the function.
         /// The record of the best field is returned or null if there is no appropriate field
         /// \param offset is the byte offset into the union we are truncating to
-        /// \param op is either the PcodeOp reading the truncated Varnode or the CPUI_SUBPIECE doing the truncation
+        /// \param op is either the PcodeOp reading the truncated Varnode or the OpCode.CPUI_SUBPIECE doing the truncation
         /// \param slot is either the input slot of the reading PcodeOp or the artificial SUBPIECE slot: 1
         /// \param newoff is used to pass back how much offset is left to resolve
         /// \return the field of the union best associated with the truncation or null
@@ -565,8 +565,8 @@ namespace Sla.DECCORE
         public int typeOrderBool(Datatype op)
         {
             if (this == &op) return 0;
-            if (metatype == TYPE_BOOL) return 1;        // Never prefer bool over other data-types
-            if (op.metatype == TYPE_BOOL) return -1;
+            if (metatype == type_metatype.TYPE_BOOL) return 1;        // Never prefer bool over other data-types
+            if (op.metatype == type_metatype.TYPE_BOOL) return -1;
             return compare(op, 10);
         }
 
@@ -576,7 +576,7 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         public void encodeRef(Encoder encoder)
         {               // Save just a name reference if possible
-            if ((id != 0) && (metatype != TYPE_VOID))
+            if ((id != 0) && (metatype != type_metatype.TYPE_VOID))
             {
                 encoder.openElement(ELEM_TYPEREF);
                 encoder.writeString(ATTRIB_NAME, name);
@@ -598,13 +598,13 @@ namespace Sla.DECCORE
         /// Does \b this data-type consist of separate pieces?
         /// If a value with \b this data-type is put together from multiple pieces, is it better to display
         /// this construction as a sequence of separate assignments or as a single concatenation.
-        /// Generally a TYPE_STRUCT or TYPE_ARRAY should be represented with separate assignments.
+        /// Generally a type_metatype.TYPE_STRUCT or type_metatype.TYPE_ARRAY should be represented with separate assignments.
         /// \return \b true if the data-type is put together with multiple assignments
         public bool isPieceStructured()
         {
-            //  if (metatype == TYPE_STRUCT || metatype == TYPE_ARRAY || metatype == TYPE_UNION ||
-            //      metatype == TYPE_PARTIALUNION || metatype == TYPE_PARTIALSTRUCT)
-            return (metatype <= TYPE_ARRAY);
+            //  if (metatype == type_metatype.TYPE_STRUCT || metatype == type_metatype.TYPE_ARRAY || metatype == type_metatype.TYPE_UNION ||
+            //      metatype == type_metatype.TYPE_PARTIALUNION || metatype == type_metatype.TYPE_PARTIALSTRUCT)
+            return (metatype <= type_metatype.TYPE_ARRAY);
         }
 
         /// \brief Encode the \b format attribute from an XML element

@@ -95,23 +95,23 @@ namespace Sla.DECCORE
             {
                 ProtoParameter* outparam = fc.getOutput();
                 Datatype* outtype = outparam.getType();
-                if (outtype.getMetatype() != TYPE_VOID)
+                if (outtype.getMetatype() != type_metatype.TYPE_VOID)
                 {
                     int sz = outparam.getSize();
-                    if (sz == 1 && outtype.getMetatype() == TYPE_BOOL && data.isTypeRecoveryOn())
+                    if (sz == 1 && outtype.getMetatype() == type_metatype.TYPE_BOOL && data.isTypeRecoveryOn())
                         data.opMarkCalculatedBool(callop);
                     Address addr = outparam.getAddress();
                     data.newVarnodeOut(sz, addr, callop);
                     VarnodeData vdata;
                     OpCode res = fc.assumedOutputExtension(addr, sz, vdata);
-                    if (res == CPUI_PIECE)
+                    if (res == OpCode.CPUI_PIECE)
                     {       // Pick an extension based on type
-                        if (outtype.getMetatype() == TYPE_INT)
-                            res = CPUI_INT_SEXT;
+                        if (outtype.getMetatype() == type_metatype.TYPE_INT)
+                            res = OpCode.CPUI_INT_SEXT;
                         else
-                            res = CPUI_INT_ZEXT;
+                            res = OpCode.CPUI_INT_ZEXT;
                     }
-                    if (res != CPUI_COPY)
+                    if (res != OpCode.CPUI_COPY)
                     { // We assume the (smallsize) output is extended to a full register
                       // Create the extension operation to eliminate artifact
                         PcodeOp* op = data.newOp(1, callop.getAddr());

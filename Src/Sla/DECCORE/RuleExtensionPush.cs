@@ -23,7 +23,7 @@ namespace Sla.DECCORE
         }
 
         /// \class RuleExtensionPush
-        /// \brief Duplicate CPUI_INT_ZEXT and CPUI_INT_SEXT operations if the result is used in multiple pointer calculations
+        /// \brief Duplicate OpCode.CPUI_INT_ZEXT and OpCode.CPUI_INT_SEXT operations if the result is used in multiple pointer calculations
         ///
         /// By making the extension operation part of each pointer calculation (where it is usually an implied cast),
         /// we can frequently eliminate an explicit variable that would just hold the extension.
@@ -49,15 +49,15 @@ namespace Sla.DECCORE
             {
                 PcodeOp* decOp = *iter;
                 OpCode opc = decOp.code();
-                if (opc == CPUI_PTRADD)
+                if (opc == OpCode.CPUI_PTRADD)
                 {
                     // This extension will likely be hidden
                     ptrcount += 1;
                 }
-                else if (opc == CPUI_INT_ADD)
+                else if (opc == OpCode.CPUI_INT_ADD)
                 {
                     PcodeOp* subOp = decOp.getOut().loneDescend();
-                    if (subOp == (PcodeOp)null || subOp.code() != CPUI_PTRADD)
+                    if (subOp == (PcodeOp)null || subOp.code() != OpCode.CPUI_PTRADD)
                         return 0;
                     addcount += 1;
                 }

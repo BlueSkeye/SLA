@@ -226,7 +226,7 @@ namespace Sla.EXTRA
         public ConstraintGroup opCompareConstraint(ConstraintGroup @base, int opid, OpCode opc)
         {
             int op1index = @base.getBaseIndex();
-            UnifyConstraint* newconstraint = new ConstraintOpCompare(op1index, opid, (opc == CPUI_INT_EQUAL));
+            UnifyConstraint* newconstraint = new ConstraintOpCompare(op1index, opid, (opc == OpCode.CPUI_INT_EQUAL));
             @base.addConstraint(newconstraint);
             return base;
         }
@@ -234,7 +234,7 @@ namespace Sla.EXTRA
         public ConstraintGroup varCompareConstraint(ConstraintGroup @base, int varid, OpCode opc)
         {
             int var1index = @base.getBaseIndex();
-            UnifyConstraint* newconstraint = new ConstraintVarCompare(var1index, varid, (opc == CPUI_INT_EQUAL));
+            UnifyConstraint* newconstraint = new ConstraintVarCompare(var1index, varid, (opc == OpCode.CPUI_INT_EQUAL));
             @base.addConstraint(newconstraint);
             return base;
         }

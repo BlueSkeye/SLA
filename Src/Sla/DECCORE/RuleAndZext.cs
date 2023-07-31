@@ -39,9 +39,9 @@ namespace Sla.DECCORE
             PcodeOp* otherop = op.getIn(0).getDef();
             OpCode opc = otherop.code();
             Varnode* rootvn;
-            if (opc == CPUI_INT_SEXT)
+            if (opc == OpCode.CPUI_INT_SEXT)
                 rootvn = otherop.getIn(0);
-            else if (opc == CPUI_PIECE)
+            else if (opc == OpCode.CPUI_PIECE)
                 rootvn = otherop.getIn(1);
             else
                 return 0;
@@ -52,7 +52,7 @@ namespace Sla.DECCORE
                 return 0;
             if (rootvn.getSize() > sizeof(ulong))  // FIXME: Should be arbitrary precision
                 return 0;
-            data.opSetOpcode(op, CPUI_INT_ZEXT);
+            data.opSetOpcode(op, OpCode.CPUI_INT_ZEXT);
             data.opRemoveInput(op, 1);
             data.opSetInput(op, rootvn, 0);
             return 1;

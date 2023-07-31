@@ -111,8 +111,11 @@ using System.Linq;
 
 
 namespace Sla.CORE {
-    public static partial class Globals
+    public static class Xml
     {
+
+
+        // -------------------------- Xml related -----------------------------
         /// \brief Start-up the XML parser given a stream and a handler
         /// This runs the low-level XML parser.
         /// \param i is the given stream to get character data from
@@ -125,17 +128,21 @@ namespace Sla.CORE {
             //  yydebug = dbg;
             //#endif
             Parsing.global_scan = new XmlScan(i);
-            try {
+            try
+            {
                 Parsing.handler = hand;
                 Parsing.handler.startDocument();
                 int result = Parsing.xmlparse();
-                if (0 == result) {
+                if (0 == result)
+                {
                     Parsing.handler.endDocument();
                 }
                 return result;
             }
-            finally {
-                if (null != Parsing.global_scan) {
+            finally
+            {
+                if (null != Parsing.global_scan)
+                {
                     Parsing.global_scan.Dispose();
                     Parsing.global_scan = null;
                 }
@@ -151,7 +158,8 @@ namespace Sla.CORE {
         {
             Document doc = new Document();
             TreeHandler handle = new TreeHandler(doc);
-            if (0 != xml_parse(i, handle)) {
+            if (0 != xml_parse(i, handle))
+            {
                 // delete doc;
                 throw new DecoderError(handle.getError() ?? "NULL");
             }
@@ -171,16 +179,20 @@ namespace Sla.CORE {
         internal static void xml_escape(StreamWriter s, string str)
         {
             int stringLength = str.Length;
-            for(int index = 0; index < stringLength; index++) {
+            for (int index = 0; index < stringLength; index++)
+            {
                 char scannedCharacter = str[index];
-                if ('\0' == scannedCharacter) {
+                if ('\0' == scannedCharacter)
+                {
                     break;
                 }
-                if ('?' <= scannedCharacter) {
+                if ('?' <= scannedCharacter)
+                {
                     s.Write(str);
                     continue;
                 }
-                switch (scannedCharacter) {
+                switch (scannedCharacter)
+                {
                     case '<':
                         s.Write("&lt;");
                         break;
@@ -261,7 +273,8 @@ namespace Sla.CORE {
         /// \return either \b true or \b false
         internal static bool xml_readbool(string attr)
         {
-            if (0 == attr.Length) {
+            if (0 == attr.Length)
+            {
                 return false;
             }
             char firstc = attr[0];
@@ -270,49 +283,42 @@ namespace Sla.CORE {
                 || (firstc == '1')
                 || (firstc == 'y');
         }
-    }
 
+        /// Interface to the scanner
+        //extern int xmllex(void);
+        /// Interface for registering an error in parsing
+        //extern int xmlerror(const char *str);
+        //# ifndef YY_NULLPTR
+        //#  if defined __cplusplus && 201103L <= __cplusplus
+        //#   define YY_NULLPTR nullptr
+        //#  else
+        //#   define YY_NULLPTR 0
+        //#  endif
+        //# endif
 
+        ///* Enabling verbose error messages.  */
+        //#ifdef YYERROR_VERBOSE
+        //# undef YYERROR_VERBOSE
+        //# define YYERROR_VERBOSE 1
+        //#else
+        //# define YYERROR_VERBOSE 0
+        //#endif
 
-
-    /// Interface to the scanner
-    //extern int xmllex(void);
-    /// Interface for registering an error in parsing
-    //extern int xmlerror(const char *str);
-
-    public static partial class Globals
-    {
-//# ifndef YY_NULLPTR
-//#  if defined __cplusplus && 201103L <= __cplusplus
-//#   define YY_NULLPTR nullptr
-//#  else
-//#   define YY_NULLPTR 0
-//#  endif
-//# endif
-
-///* Enabling verbose error messages.  */
-//#ifdef YYERROR_VERBOSE
-//# undef YYERROR_VERBOSE
-//# define YYERROR_VERBOSE 1
-//#else
-//# define YYERROR_VERBOSE 0
-//#endif
-
-///* Debug traces.  */
-//#ifndef XMLDEBUG
-//# if defined YYDEBUG
-//#if YYDEBUG
-//#   define XMLDEBUG 1
-//#  else
-//#   define XMLDEBUG 0
-//#  endif
-//# else /* ! defined YYDEBUG */
-//#  define XMLDEBUG 0
-//# endif /* ! defined YYDEBUG */
-//#endif  /* ! defined XMLDEBUG */
-//#if XMLDEBUG
-//extern int xmldebug;
-//#endif
+        ///* Debug traces.  */
+        //#ifndef XMLDEBUG
+        //# if defined YYDEBUG
+        //#if YYDEBUG
+        //#   define XMLDEBUG 1
+        //#  else
+        //#   define XMLDEBUG 0
+        //#  endif
+        //# else /* ! defined YYDEBUG */
+        //#  define XMLDEBUG 0
+        //# endif /* ! defined YYDEBUG */
+        //#endif  /* ! defined XMLDEBUG */
+        //#if XMLDEBUG
+        //extern int xmldebug;
+        //#endif
 
         /* Token type.  */
         //#ifndef XMLTOKENTYPE
@@ -345,214 +351,208 @@ namespace Sla.CORE {
         private const int XMLSTYPE_IS_TRIVIAL = 1;
         private const int XMLSTYPE_IS_DECLARED = 1;
         //#endif
-    }
 
-    // extern XMLSTYPE xmllval;
+        // extern XMLSTYPE xmllval;
 
-    /* Copy the second part of user declarations.  */
-    //#ifdef short
-    //# undef short
-    //#endif
+        /* Copy the second part of user declarations.  */
+        //#ifdef short
+        //# undef short
+        //#endif
 
-    //#ifndef YY_
-    //# if defined YYENABLE_NLS && YYENABLE_NLS
-    //#  if ENABLE_NLS
-    //#   include <libintl.h> /* INFRINGES ON USER NAME SPACE */
-    //#   define YY_(Msgid) dgettext ("bison-runtime", Msgid)
-    //#  endif
-    //# endif
-    //# ifndef YY_
-    //#  define YY_(Msgid) Msgid
-    //# endif
-    //#endif
+        //#ifndef YY_
+        //# if defined YYENABLE_NLS && YYENABLE_NLS
+        //#  if ENABLE_NLS
+        //#   include <libintl.h> /* INFRINGES ON USER NAME SPACE */
+        //#   define YY_(Msgid) dgettext ("bison-runtime", Msgid)
+        //#  endif
+        //# endif
+        //# ifndef YY_
+        //#  define YY_(Msgid) Msgid
+        //# endif
+        //#endif
 
-    //#ifndef YY_ATTRIBUTE
-    //# if (defined __GNUC__                                               \
-    //      && (2 < __GNUC__ || (__GNUC__ == 2 && 96 <= __GNUC_MINOR__)))  \
-    //     || defined __SUNPRO_C && 0x5110 <= __SUNPRO_C
-    //#  define YY_ATTRIBUTE(Spec) __attribute__(Spec)
-    //# else
-    //#  define YY_ATTRIBUTE(Spec) /* empty */
-    //# endif
-    //#endif
+        //#ifndef YY_ATTRIBUTE
+        //# if (defined __GNUC__                                               \
+        //      && (2 < __GNUC__ || (__GNUC__ == 2 && 96 <= __GNUC_MINOR__)))  \
+        //     || defined __SUNPRO_C && 0x5110 <= __SUNPRO_C
+        //#  define YY_ATTRIBUTE(Spec) __attribute__(Spec)
+        //# else
+        //#  define YY_ATTRIBUTE(Spec) /* empty */
+        //# endif
+        //#endif
 
-    //#ifndef YY_ATTRIBUTE_PURE
-    //# define YY_ATTRIBUTE_PURE   YY_ATTRIBUTE ((__pure__))
-    //#endif
+        //#ifndef YY_ATTRIBUTE_PURE
+        //# define YY_ATTRIBUTE_PURE   YY_ATTRIBUTE ((__pure__))
+        //#endif
 
-    //#ifndef YY_ATTRIBUTE_UNUSED
-    //# define YY_ATTRIBUTE_UNUSED YY_ATTRIBUTE ((__unused__))
-    //#endif
+        //#ifndef YY_ATTRIBUTE_UNUSED
+        //# define YY_ATTRIBUTE_UNUSED YY_ATTRIBUTE ((__unused__))
+        //#endif
 
-    //#if !defined _Noreturn \
-    //     && (!defined __STDC_VERSION__ || __STDC_VERSION__ < 201112)
-    //# if defined _MSC_VER && 1200 <= _MSC_VER
-    //#  define _Noreturn __declspec (noreturn)
-    //# else
-    //#  define _Noreturn YY_ATTRIBUTE ((__noreturn__))
-    //# endif
-    //#endif
+        //#if !defined _Noreturn \
+        //     && (!defined __STDC_VERSION__ || __STDC_VERSION__ < 201112)
+        //# if defined _MSC_VER && 1200 <= _MSC_VER
+        //#  define _Noreturn __declspec (noreturn)
+        //# else
+        //#  define _Noreturn YY_ATTRIBUTE ((__noreturn__))
+        //# endif
+        //#endif
 
-    ///* Suppress unused-variable warnings by "using" E.  */
-    //#if ! defined lint || defined __GNUC__
-    //# define YYUSE(E) ((void) (E))
-    //#else
-    //# define YYUSE(E) /* empty */
-    //#endif
+        ///* Suppress unused-variable warnings by "using" E.  */
+        //#if ! defined lint || defined __GNUC__
+        //# define YYUSE(E) ((void) (E))
+        //#else
+        //# define YYUSE(E) /* empty */
+        //#endif
 
-    //#if defined __GNUC__ && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
-    ///* Suppress an incorrect diagnostic about yylval being uninitialized.  */
-    //# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN \
-    //    _Pragma ("GCC diagnostic push") \
-    //    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")\
-    //    _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
-    //# define YY_IGNORE_MAYBE_UNINITIALIZED_END \
-    //    _Pragma ("GCC diagnostic pop")
-    //#else
-    //# define YY_INITIAL_VALUE(Value) Value
-    //#endif
-    //#ifndef YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-    //# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-    //# define YY_IGNORE_MAYBE_UNINITIALIZED_END
-    //#endif
-    //#ifndef YY_INITIAL_VALUE
-    //# define YY_INITIAL_VALUE(Value) /* Nothing. */
-    //#endif
-
-
-    //#if ! defined yyoverflow || YYERROR_VERBOSE
-
-    ///* The parser invokes alloca or malloc; define the necessary symbols.  */
-
-    //# ifdef YYSTACK_USE_ALLOCA
-    //#  if YYSTACK_USE_ALLOCA
-    //#   ifdef __GNUC__
-    //#    define YYSTACK_ALLOC __builtin_alloca
-    //#   elif defined __BUILTIN_VA_ARG_INCR
-    //#    include <alloca.h> /* INFRINGES ON USER NAME SPACE */
-    //#   elif defined _AIX
-    //#    define YYSTACK_ALLOC __alloca
-    //#   elif defined _MSC_VER
-    //#    include <malloc.h> /* INFRINGES ON USER NAME SPACE */
-    //#    define alloca _alloca
-    //#   else
-    //#    define YYSTACK_ALLOC alloca
-    //#    if ! defined _ALLOCA_H && ! defined EXIT_SUCCESS
-    //#     include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
-    //      /* Use EXIT_SUCCESS as a witness for stdlib.h.  */
-    //#     ifndef EXIT_SUCCESS
-    //#      define EXIT_SUCCESS 0
-    //#     endif
-    //#    endif
-    //#   endif
-    //#  endif
-    //# endif
-
-    //# ifdef YYSTACK_ALLOC
-    //   /* Pacify GCC's 'empty if-body' warning.  */
-    //#  define YYSTACK_FREE(Ptr) do { /* empty */; } while (0)
-    //#  ifndef YYSTACK_ALLOC_MAXIMUM
-    //    /* The OS might guarantee only one guard page at the bottom of the stack,
-    //       and a page size can be as small as 4096 bytes.  So we cannot safely
-    //       invoke alloca (N) if N exceeds 4096.  Use a slightly smaller number
-    //       to allow for a few compiler-allocated temporary stack slots.  */
-    //#   define YYSTACK_ALLOC_MAXIMUM 4032 /* reasonable circa 2006 */
-    //#  endif
-    //# else
-    //#  define YYSTACK_ALLOC YYMALLOC
-    //#  define YYSTACK_FREE YYFREE
-    //#  ifndef YYSTACK_ALLOC_MAXIMUM
-    //#   define YYSTACK_ALLOC_MAXIMUM YYSIZE_MAXIMUM
-    //#  endif
-    //#  if (defined __cplusplus && ! defined EXIT_SUCCESS \
-    //       && ! ((defined YYMALLOC || defined malloc) \
-    //             && (defined YYFREE || defined free)))
-    //#   include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
-    //#   ifndef EXIT_SUCCESS
-    //#    define EXIT_SUCCESS 0
-    //#   endif
-    //#  endif
-    //#  ifndef YYMALLOC
-    //#   define YYMALLOC malloc
-    //#   if ! defined malloc && ! defined EXIT_SUCCESS
-    //void *malloc (ulong); /* INFRINGES ON USER NAME SPACE */
-    //#   endif
-    //#  endif
-    //#  ifndef YYFREE
-    //#   define YYFREE free
-    //#   if ! defined free && ! defined EXIT_SUCCESS
-    //void free (void *); /* INFRINGES ON USER NAME SPACE */
-    //#   endif
-    //#  endif
-    //# endif
-    //#endif /* ! defined yyoverflow || YYERROR_VERBOSE */
+        //#if defined __GNUC__ && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
+        ///* Suppress an incorrect diagnostic about yylval being uninitialized.  */
+        //# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN \
+        //    _Pragma ("GCC diagnostic push") \
+        //    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")\
+        //    _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
+        //# define YY_IGNORE_MAYBE_UNINITIALIZED_END \
+        //    _Pragma ("GCC diagnostic pop")
+        //#else
+        //# define YY_INITIAL_VALUE(Value) Value
+        //#endif
+        //#ifndef YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
+        //# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
+        //# define YY_IGNORE_MAYBE_UNINITIALIZED_END
+        //#endif
+        //#ifndef YY_INITIAL_VALUE
+        //# define YY_INITIAL_VALUE(Value) /* Nothing. */
+        //#endif
 
 
-    //#if (! defined yyoverflow \
-    //     && (! defined __cplusplus \
-    //         || (defined XMLSTYPE_IS_TRIVIAL && XMLSTYPE_IS_TRIVIAL)))
+        //#if ! defined yyoverflow || YYERROR_VERBOSE
 
-    ///* A type that is properly aligned for any stack member.  */
-    //union yyalloc
-    //{
-    //  yytype_int16 yyss_alloc;
-    //  XMLSTYPE yyvs_alloc;
-    //};
+        ///* The parser invokes alloca or malloc; define the necessary symbols.  */
 
-    ///* The size of the maximum gap between one aligned stack and the next.  */
-    //# define YYSTACK_GAP_MAXIMUM (sizeof (union yyalloc) - 1)
+        //# ifdef YYSTACK_USE_ALLOCA
+        //#  if YYSTACK_USE_ALLOCA
+        //#   ifdef __GNUC__
+        //#    define YYSTACK_ALLOC __builtin_alloca
+        //#   elif defined __BUILTIN_VA_ARG_INCR
+        //#    include <alloca.h> /* INFRINGES ON USER NAME SPACE */
+        //#   elif defined _AIX
+        //#    define YYSTACK_ALLOC __alloca
+        //#   elif defined _MSC_VER
+        //#    include <malloc.h> /* INFRINGES ON USER NAME SPACE */
+        //#    define alloca _alloca
+        //#   else
+        //#    define YYSTACK_ALLOC alloca
+        //#    if ! defined _ALLOCA_H && ! defined EXIT_SUCCESS
+        //#     include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
+        //      /* Use EXIT_SUCCESS as a witness for stdlib.h.  */
+        //#     ifndef EXIT_SUCCESS
+        //#      define EXIT_SUCCESS 0
+        //#     endif
+        //#    endif
+        //#   endif
+        //#  endif
+        //# endif
 
-    ///* The size of an array large to enough to hold all stacks, each with
-    //   N elements.  */
-    //# define YYSTACK_BYTES(N) \
-    //     ((N) * (sizeof (yytype_int16) + sizeof (XMLSTYPE)) \
-    //      + YYSTACK_GAP_MAXIMUM)
-
-    //# define YYCOPY_NEEDED 1
-
-    ///* Relocate STACK from its old location to the new one.  The
-    //   local variables YYSIZE and YYSTACKSIZE give the old and new number of
-    //   elements in the stack, and YYPTR gives the new location of the
-    //   stack.  Advance YYPTR to a properly aligned location for the next
-    //   stack.  */
-    //# define YYSTACK_RELOCATE(Stack_alloc, Stack)                           \
-    //    do                                                                  \
-    //      {                                                                 \
-    //        ulong yynewbytes;                                            \
-    //        YYCOPY (&yyptr.Stack_alloc, Stack, yysize);                    \
-    //        Stack = &yyptr.Stack_alloc;                                    \
-    //        yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
-    //        yyptr += yynewbytes / sizeof (*yyptr);                          \
-    //      }                                                                 \
-    //    while (0)
-
-    //#endif
-
-    //#if defined YYCOPY_NEEDED && YYCOPY_NEEDED
-    ///* Copy COUNT objects from SRC to DST.  The source and destination do
-    //   not overlap.  */
-    //# ifndef YYCOPY
-    //#  if defined __GNUC__ && 1 < __GNUC__
-    //#   define YYCOPY(Dst, Src, Count) \
-    //      __builtin_memcpy (Dst, Src, (Count) * sizeof (*(Src)))
-    //#  else
-    //#   define YYCOPY(Dst, Src, Count)              \
-    //      do                                        \
-    //        {                                       \
-    //          ulong yyi;                         \
-    //          for (yyi = 0; yyi < (Count); yyi++)   \
-    //            (Dst)[yyi] = (Src)[yyi];            \
-    //        }                                       \
-    //      while (0)
-    //#  endif
-    //# endif
-    //#endif /* !YYCOPY_NEEDED */
+        //# ifdef YYSTACK_ALLOC
+        //   /* Pacify GCC's 'empty if-body' warning.  */
+        //#  define YYSTACK_FREE(Ptr) do { /* empty */; } while (0)
+        //#  ifndef YYSTACK_ALLOC_MAXIMUM
+        //    /* The OS might guarantee only one guard page at the bottom of the stack,
+        //       and a page size can be as small as 4096 bytes.  So we cannot safely
+        //       invoke alloca (N) if N exceeds 4096.  Use a slightly smaller number
+        //       to allow for a few compiler-allocated temporary stack slots.  */
+        //#   define YYSTACK_ALLOC_MAXIMUM 4032 /* reasonable circa 2006 */
+        //#  endif
+        //# else
+        //#  define YYSTACK_ALLOC YYMALLOC
+        //#  define YYSTACK_FREE YYFREE
+        //#  ifndef YYSTACK_ALLOC_MAXIMUM
+        //#   define YYSTACK_ALLOC_MAXIMUM YYSIZE_MAXIMUM
+        //#  endif
+        //#  if (defined __cplusplus && ! defined EXIT_SUCCESS \
+        //       && ! ((defined YYMALLOC || defined malloc) \
+        //             && (defined YYFREE || defined free)))
+        //#   include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
+        //#   ifndef EXIT_SUCCESS
+        //#    define EXIT_SUCCESS 0
+        //#   endif
+        //#  endif
+        //#  ifndef YYMALLOC
+        //#   define YYMALLOC malloc
+        //#   if ! defined malloc && ! defined EXIT_SUCCESS
+        //void *malloc (ulong); /* INFRINGES ON USER NAME SPACE */
+        //#   endif
+        //#  endif
+        //#  ifndef YYFREE
+        //#   define YYFREE free
+        //#   if ! defined free && ! defined EXIT_SUCCESS
+        //void free (void *); /* INFRINGES ON USER NAME SPACE */
+        //#   endif
+        //#  endif
+        //# endif
+        //#endif /* ! defined yyoverflow || YYERROR_VERBOSE */
 
 
+        //#if (! defined yyoverflow \
+        //     && (! defined __cplusplus \
+        //         || (defined XMLSTYPE_IS_TRIVIAL && XMLSTYPE_IS_TRIVIAL)))
 
+        ///* A type that is properly aligned for any stack member.  */
+        //union yyalloc
+        //{
+        //  yytype_int16 yyss_alloc;
+        //  XMLSTYPE yyvs_alloc;
+        //};
 
-    public static partial class Globals
-    {
+        ///* The size of the maximum gap between one aligned stack and the next.  */
+        //# define YYSTACK_GAP_MAXIMUM (sizeof (union yyalloc) - 1)
+
+        ///* The size of an array large to enough to hold all stacks, each with
+        //   N elements.  */
+        //# define YYSTACK_BYTES(N) \
+        //     ((N) * (sizeof (yytype_int16) + sizeof (XMLSTYPE)) \
+        //      + YYSTACK_GAP_MAXIMUM)
+
+        //# define YYCOPY_NEEDED 1
+
+        ///* Relocate STACK from its old location to the new one.  The
+        //   local variables YYSIZE and YYSTACKSIZE give the old and new number of
+        //   elements in the stack, and YYPTR gives the new location of the
+        //   stack.  Advance YYPTR to a properly aligned location for the next
+        //   stack.  */
+        //# define YYSTACK_RELOCATE(Stack_alloc, Stack)                           \
+        //    do                                                                  \
+        //      {                                                                 \
+        //        ulong yynewbytes;                                            \
+        //        YYCOPY (&yyptr.Stack_alloc, Stack, yysize);                    \
+        //        Stack = &yyptr.Stack_alloc;                                    \
+        //        yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
+        //        yyptr += yynewbytes / sizeof (*yyptr);                          \
+        //      }                                                                 \
+        //    while (0)
+
+        //#endif
+
+        //#if defined YYCOPY_NEEDED && YYCOPY_NEEDED
+        ///* Copy COUNT objects from SRC to DST.  The source and destination do
+        //   not overlap.  */
+        //# ifndef YYCOPY
+        //#  if defined __GNUC__ && 1 < __GNUC__
+        //#   define YYCOPY(Dst, Src, Count) \
+        //      __builtin_memcpy (Dst, Src, (Count) * sizeof (*(Src)))
+        //#  else
+        //#   define YYCOPY(Dst, Src, Count)              \
+        //      do                                        \
+        //        {                                       \
+        //          ulong yyi;                         \
+        //          for (yyi = 0; yyi < (Count); yyi++)   \
+        //            (Dst)[yyi] = (Src)[yyi];            \
+        //        }                                       \
+        //      while (0)
+        //#  endif
+        //# endif
+        //#endif /* !YYCOPY_NEEDED */
+
         /* YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to TOKEN-NUM
            as returned by xmllex, without out-of-bounds checking.  */
         internal static readonly byte[] /*yytype_uint8*/ yytranslate =
@@ -584,8 +584,7 @@ namespace Sla.CORE {
            2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
            2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
            5,     6,     7,     8,     9,    10,    11
-        };
-    }
+        }
 
     //#if XMLDEBUG
     //  /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
@@ -602,45 +601,40 @@ namespace Sla.CORE {
     //};
     //#endif
 
-    //#if XMLDEBUG || YYERROR_VERBOSE || 0
-    ///* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
-    //   First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
-    //static const char *const yytname[] =
-    //{
-    //  "$end", "error", "$undefined", "CHARDATA", "CDATA", "ATTVALUE",
-    //  "COMMENT", "CHARREF", "NAME", "SNAME", "ELEMBRACE", "COMMBRACE", "' '",
-    //  "'\\n'", "'\\r'", "'\\t'", "'\\''", "'\"'", "'!'", "'-'", "'>'", "'?'",
-    //  "'['", "'C'", "'D'", "'A'", "'T'", "']'", "'O'", "'Y'", "'P'", "'E'",
-    //  "'='", "'v'", "'e'", "'r'", "'s'", "'i'", "'o'", "'n'", "'c'", "'d'",
-    //  "'g'", "'x'", "'m'", "'l'", "'/'", "'&'", "'#'", "';'", "$accept",
-    //  "document", "whitespace", "S", "attsinglemid", "attdoublemid",
-    //  "AttValue", "elemstart", "commentstart", "Comment", "PI", "CDSect",
-    //  "CDStart", "CDEnd", "doctypepro", "prologpre", "prolog", "doctypedecl",
-    //  "Eq", "Misc", "VersionInfo", "EncodingDecl", "xmldeclstart", "XMLDecl",
-    //  "element", "STag", "EmptyElemTag", "stagstart", "SAttribute",
-    //  "etagbrace", "ETag", "content", "Reference", "refstart", "charrefstart",
-    //  "CharRef", "EntityRef", YY_NULLPTR
-    //};
-    //#endif
+        //#if XMLDEBUG || YYERROR_VERBOSE || 0
+        ///* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
+        //   First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
+        //static const char *const yytname[] =
+        //{
+        //  "$end", "error", "$undefined", "CHARDATA", "CDATA", "ATTVALUE",
+        //  "COMMENT", "CHARREF", "NAME", "SNAME", "ELEMBRACE", "COMMBRACE", "' '",
+        //  "'\\n'", "'\\r'", "'\\t'", "'\\''", "'\"'", "'!'", "'-'", "'>'", "'?'",
+        //  "'['", "'C'", "'D'", "'A'", "'T'", "']'", "'O'", "'Y'", "'P'", "'E'",
+        //  "'='", "'v'", "'e'", "'r'", "'s'", "'i'", "'o'", "'n'", "'c'", "'d'",
+        //  "'g'", "'x'", "'m'", "'l'", "'/'", "'&'", "'#'", "';'", "$accept",
+        //  "document", "whitespace", "S", "attsinglemid", "attdoublemid",
+        //  "AttValue", "elemstart", "commentstart", "Comment", "PI", "CDSect",
+        //  "CDStart", "CDEnd", "doctypepro", "prologpre", "prolog", "doctypedecl",
+        //  "Eq", "Misc", "VersionInfo", "EncodingDecl", "xmldeclstart", "XMLDecl",
+        //  "element", "STag", "EmptyElemTag", "stagstart", "SAttribute",
+        //  "etagbrace", "ETag", "content", "Reference", "refstart", "charrefstart",
+        //  "CharRef", "EntityRef", YY_NULLPTR
+        //};
+        //#endif
 
-    //# ifdef YYPRINT
-    //    /* YYTOKNUM[NUM] -- (External) token number corresponding to the
-    //       (internal) symbol number NUM (which must be that of a token).  */
-    //    static const yytype_uint16 yytoknum[] =
-    //{
-    //       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-    //     265,   266,    32,    10,    13,     9,    39,    34,    33,    45,
-    //      62,    63,    91,    67,    68,    65,    84,    93,    79,    89,
-    //      80,    69,    61,   118,   101,   114,   115,   105,   111,   110,
-    //      99,   100,   103,   120,   109,   108,    47,    38,    35,    59
-    //};
-    //# endif
+        //# ifdef YYPRINT
+        //    /* YYTOKNUM[NUM] -- (External) token number corresponding to the
+        //       (internal) symbol number NUM (which must be that of a token).  */
+        //    static const yytype_uint16 yytoknum[] =
+        //{
+        //       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
+        //     265,   266,    32,    10,    13,     9,    39,    34,    33,    45,
+        //      62,    63,    91,    67,    68,    65,    84,    93,    79,    89,
+        //      80,    69,    61,   118,   101,   114,   115,   105,   111,   110,
+        //      99,   100,   103,   120,   109,   108,    47,    38,    35,    59
+        //};
+        //# endif
 
-    //#define YYTABLE_NINF -1
-
-
-    public static partial class Globals
-    {
+        //#define YYTABLE_NINF -1
     }
-
 }

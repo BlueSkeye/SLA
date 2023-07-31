@@ -227,9 +227,9 @@ namespace Sla.EXTRA
         public override void popScript()
         {
             prompt = promptstack.GetLastItem();
-            promptstack.pop_back();
+            promptstack.RemoveLastItem();
             uint flags = flagstack.GetLastItem();
-            flagstack.pop_back();
+            flagstack.RemoveLastItem();
             errorisdone = ((flags & 1) != 0);
             inerror = false;
         }

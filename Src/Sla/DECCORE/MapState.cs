@@ -10,6 +10,8 @@ using System.Text;
 using System.Threading.Tasks;
 using static ghidra.AliasChecker;
 
+using EntryMap = Sla.EXTRA.rangemap<Sla.DECCORE.SymbolEntry>;
+
 namespace Sla.DECCORE
 {
     /// \brief A container for hints about the data-type layout of an address space
@@ -37,7 +39,7 @@ namespace Sla.DECCORE
         /// The given LoadGuard, which may be a LOAD or STORE, is converted into an appropriate
         /// RangeHint, attempting to make use of any data-type or index information.
         /// \param guard is the given LoadGuard
-        /// \param opc is the expected op-code (CPUI_LOAD or CPUI_STORE)
+        /// \param opc is the expected op-code (CPUI_LOAD or OpCode.CPUI_STORE)
         /// \param typeFactory is used to manufacture a data-type for the hint if necessary
         private void addGuard(LoadGuard guard,OpCode opc, TypeFactory typeFactory)
         {
@@ -45,14 +47,14 @@ namespace Sla.DECCORE
             int step = guard.getStep();
             if (step == 0) return;      // No definitive sign of array access
             Datatype* ct = guard.getOp().getIn(1).getTypeReadFacing(guard.getOp());
-            if (ct.getMetatype() == TYPE_PTR)
+            if (ct.getMetatype() == type_metatype.TYPE_PTR)
             {
                 ct = ((TypePointer*)ct).getPtrTo();
-                while (ct.getMetatype() == TYPE_ARRAY)
+                while (ct.getMetatype() == type_metatype.TYPE_ARRAY)
                     ct = ((TypeArray*)ct).getBase();
             }
             int outSize;
-            if (opc == CPUI_STORE)
+            if (opc == OpCode.CPUI_STORE)
                 outSize = guard.getOp().getIn(2).getSize();   // The Varnode being stored
             else
                 outSize = guard.getOp().getOut().getSize();   // The Varnode being loaded
@@ -69,7 +71,7 @@ namespace Sla.DECCORE
             {   // Make sure data-type matches our step size
                 if (step > 8)
                     return;     // Don't manufacture primitives bigger than 8-bytes
-                ct = typeFactory.getBase(step, TYPE_UNKNOWN);
+                ct = typeFactory.getBase(step, type_metatype.TYPE_UNKNOWN);
             }
             if (guard.isRangeLocked())
             {
@@ -96,7 +98,7 @@ namespace Sla.DECCORE
             if (!range.inRange(Address(spaceid, st), sz))
                 return;
             long sst = (long)AddrSpace::byteToAddress(st, spaceid.getWordSize());
-            sign_extend(sst, spaceid.getAddrSize() * 8 - 1);
+            Globals.sign_extend(sst, spaceid.getAddrSize() * 8 - 1);
             sst = (long)AddrSpace::addressToByte(sst, spaceid.getWordSize());
             RangeHint* newRange = new RangeHint(st, sz, sst, ct, fl, rt, hi);
             maplist.Add(newRange);
@@ -212,7 +214,7 @@ namespace Sla.DECCORE
             if (maplist.empty()) return false;
             ulong high = spaceid.wrapOffset(lastrange.getLast() + 1);
             long sst = (long)AddrSpace::byteToAddress(high, spaceid.getWordSize());
-            sign_extend(sst, spaceid.getAddrSize() * 8 - 1);
+            Globals.sign_extend(sst, spaceid.getAddrSize() * 8 - 1);
             sst = (long)AddrSpace::addressToByte(sst, spaceid.getWordSize());
             // Add extra range to bound any final open entry
             RangeHint* termRange = new RangeHint(high, 1, sst, defaultType, 0, RangeHint::endpoint, -2);
@@ -271,8 +273,8 @@ namespace Sla.DECCORE
                 ulong start = vn.getOffset();
                 Datatype* ct = vn.getType();
                 // Assume parents are present so partials aren't needed
-                if (ct.getMetatype() == TYPE_PARTIALSTRUCT) continue;
-                if (ct.getMetatype() == TYPE_PARTIALUNION) continue;
+                if (ct.getMetatype() == type_metatype.TYPE_PARTIALSTRUCT) continue;
+                if (ct.getMetatype() == type_metatype.TYPE_PARTIALUNION) continue;
                 // Do not force Varnode flags on the entry
                 // as the flags were inherited from the previous
                 // (now obsolete) entry
@@ -304,7 +306,7 @@ namespace Sla.DECCORE
                 varvec.Add(high);
                 ulong start = vn.getOffset();
                 Datatype* ct = high.getType(); // Get type from high
-                if (ct.getMetatype() == TYPE_PARTIALUNION) continue;
+                if (ct.getMetatype() == type_metatype.TYPE_PARTIALUNION) continue;
                 addRange(start, ct, 0, RangeHint::@fixed,-1);
             }
             for (int i = 0; i < varvec.size(); ++i)
@@ -328,10 +330,10 @@ namespace Sla.DECCORE
             {
                 offset = alias[i];
                 ct = addbase[i].@base.getType();
-                if (ct.getMetatype() == TYPE_PTR)
+                if (ct.getMetatype() == type_metatype.TYPE_PTR)
                 {
                     ct = ((TypePointer*)ct).getPtrTo();
-                    while (ct.getMetatype() == TYPE_ARRAY)
+                    while (ct.getMetatype() == type_metatype.TYPE_ARRAY)
                         ct = ((TypeArray*)ct).getBase();
                 }
                 else
@@ -351,11 +353,11 @@ namespace Sla.DECCORE
             TypeFactory* typeFactory = fd.getArch().types;
             List<LoadGuard> loadGuard = fd.getLoadGuards();
             for (list<LoadGuard>::const_iterator giter = loadGuard.begin(); giter != loadGuard.end(); ++giter)
-                addGuard(*giter, CPUI_LOAD, typeFactory);
+                addGuard(*giter, OpCode.CPUI_LOAD, typeFactory);
 
             List<LoadGuard> storeGuard = fd.getStoreGuards();
             for (list<LoadGuard>::const_iterator siter = storeGuard.begin(); siter != storeGuard.end(); ++siter)
-                addGuard(*siter, CPUI_STORE, typeFactory);
+                addGuard(*siter, OpCode.CPUI_STORE, typeFactory);
         }
 
         /// Get the current RangeHint in the collection

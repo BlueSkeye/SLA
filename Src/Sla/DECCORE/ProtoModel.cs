@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
@@ -37,6 +37,9 @@ namespace Sla.DECCORE
     /// changes made by the callee.
     internal class ProtoModel
     {
+        /// Reserved extrapop value meaning the function's \e extrapop is unknown
+        internal const int extrapop_unknown = 0x8000;
+
         // friend class ProtoModelMerged;
         /// The Architecture owning this prototype model
         private Architecture glb;
@@ -152,11 +155,6 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Unknown strategy type: " + strategy);
         }
 
-        public enum ExtraPop
-        {
-            extrapop_unknown = 0x8000   ///< Reserved extrapop value meaning the function's \e extrapop is unknown
-        }
-
         /// Constructor for use with decode()
         /// \param g is the Architecture that will own the new prototype model
         public ProtoModel(Architecture g)
@@ -242,10 +240,11 @@ namespace Sla.DECCORE
         /// Get the stack-pointer \e extrapop for \b this model
         public int getExtraPop() => extrapop;
 
+        /// Set the stack-pointer \e extrapop
         public void setExtraPop(int ep)
         {
             extrapop = ep;
-        }      ///< Set the stack-pointer \e extrapop
+        }
 
         /// Get the inject \e uponentry id
         public int getInjectUponEntry() => injectUponEntry;
@@ -292,7 +291,7 @@ namespace Sla.DECCORE
         /// as the first entry.  The model has the option of inserting a \e hidden return value
         /// pointer in the input storage locations.
         ///
-        /// A \b void return type is indicated by the formal TYPE_VOID in the (either) list.
+        /// A \b void return type is indicated by the formal type_metatype.TYPE_VOID in the (either) list.
         /// If the model can't map the specific output prototype, the caller has the option of whether
         /// an exception (ParamUnassignedError) is thrown.  If they choose not to throw,
         /// the unmapped return value is assumed to be \e void.

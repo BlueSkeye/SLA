@@ -45,7 +45,7 @@ namespace Sla.DECCORE
             lo1 = in1.getLo();
             hi1slot = hiop.getSlot(hi1);
             hi2 = hiop.getIn(1 - hi1slot);
-            notequalformhi = (hiop.code() == CPUI_INT_NOTEQUAL);
+            notequalformhi = (hiop.code() == OpCode.CPUI_INT_NOTEQUAL);
 
             list<PcodeOp*>::const_iterator iter, enditer;
             list<PcodeOp*>::const_iterator iter2, enditer2;
@@ -56,9 +56,9 @@ namespace Sla.DECCORE
             {
                 loop = *iter;
                 ++iter;
-                if (loop.code() == CPUI_INT_EQUAL)
+                if (loop.code() == OpCode.CPUI_INT_EQUAL)
                     notequalformlo = false;
-                else if (loop.code() == CPUI_INT_NOTEQUAL)
+                else if (loop.code() == OpCode.CPUI_INT_NOTEQUAL)
                     notequalformlo = true;
                 else
                     continue;
@@ -80,7 +80,7 @@ namespace Sla.DECCORE
 
                         in2.initPartial(in1.getSize(), lo2, hi2);
 
-                        if ((hibool.code() == CPUI_CBRANCH) && (lobool.code() == CPUI_CBRANCH))
+                        if ((hibool.code() == OpCode.CPUI_CBRANCH) && (lobool.code() == OpCode.CPUI_CBRANCH))
                         {
                             // Branching form of the equal operation
                             BlockBasic* hibooltrue,*hiboolfalse;
@@ -95,7 +95,7 @@ namespace Sla.DECCORE
                                 if (SplitVarnode::prepareBoolOp(in1, in2, hibool))
                                 {
                                     setonlow = true;
-                                    SplitVarnode::createBoolOp(data, hibool, in1, in2, notequalformhi ? CPUI_INT_NOTEQUAL : CPUI_INT_EQUAL);
+                                    SplitVarnode::createBoolOp(data, hibool, in1, in2, notequalformhi ? OpCode.CPUI_INT_NOTEQUAL : OpCode.CPUI_INT_EQUAL);
                                     // We change lobool so that it always goes to the original TRUE block
                                     data.opSetInput(lobool, data.newConstant(1, notequalformlo ? 0 : 1), 1);
                                     return true;
@@ -108,7 +108,7 @@ namespace Sla.DECCORE
                                 if (SplitVarnode::prepareBoolOp(in1, in2, lobool))
                                 {
                                     setonlow = false;
-                                    SplitVarnode::createBoolOp(data, lobool, in1, in2, notequalformlo ? CPUI_INT_NOTEQUAL : CPUI_INT_EQUAL);
+                                    SplitVarnode::createBoolOp(data, lobool, in1, in2, notequalformlo ? OpCode.CPUI_INT_NOTEQUAL : OpCode.CPUI_INT_EQUAL);
                                     // We change hibool so that it always goes to the original TRUE block
                                     data.opSetInput(hibool, data.newConstant(1, notequalformhi ? 0 : 1), 1);
                                     return true;

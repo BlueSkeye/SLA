@@ -68,7 +68,7 @@ namespace Sla.DECCORE
                 inparam[j] = (ProtoParameter*)0;
             }
             while (inparam.GetLastItem() == (ProtoParameter*)0)
-                inparam.pop_back();
+                inparam.RemoveLastItem();
         }
 
         public override void clearAllInputs()

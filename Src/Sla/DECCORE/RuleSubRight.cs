@@ -54,14 +54,14 @@ namespace Sla.DECCORE
                 if (outvn.overlap(*a) == c) // This SUBPIECE should get converted to a marker by ActionCopyMarker
                     return 0;           // So don't convert it
             }
-            OpCode opc = CPUI_INT_RIGHT; // Default shift type
+            OpCode opc = OpCode.CPUI_INT_RIGHT; // Default shift type
             int d = c * 8;         // Convert to bit shift
                                     // Search for lone right shift descendant
             PcodeOp* lone = outvn.loneDescend();
             if (lone != (PcodeOp)null)
             {
                 OpCode opc2 = lone.code();
-                if ((opc2 == CPUI_INT_RIGHT) || (opc2 == CPUI_INT_SRIGHT))
+                if ((opc2 == OpCode.CPUI_INT_RIGHT) || (opc2 == OpCode.CPUI_INT_SRIGHT))
                 {
                     if (lone.getIn(1).isConstant())
                     { // Shift by constant
@@ -71,13 +71,13 @@ namespace Sla.DECCORE
                             d += lone.getIn(1).getOffset();
                             if (d >= a.getSize() * 8)
                             {
-                                if (opc2 == CPUI_INT_RIGHT)
+                                if (opc2 == OpCode.CPUI_INT_RIGHT)
                                     return 0;       // Result should have been 0
                                 d = a.getSize() * 8 - 1;   // sign extraction
                             }
                             data.opUnlink(op);
                             op = lone;
-                            data.opSetOpcode(op, CPUI_SUBPIECE);
+                            data.opSetOpcode(op, OpCode.CPUI_SUBPIECE);
                             opc = opc2;
                         }
                     }
@@ -85,10 +85,10 @@ namespace Sla.DECCORE
             }
             // Create shift BEFORE the SUBPIECE happens
             Datatype* ct;
-            if (opc == CPUI_INT_RIGHT)
-                ct = data.getArch().types.getBase(a.getSize(), TYPE_UINT);
+            if (opc == OpCode.CPUI_INT_RIGHT)
+                ct = data.getArch().types.getBase(a.getSize(), type_metatype.TYPE_UINT);
             else
-                ct = data.getArch().types.getBase(a.getSize(), TYPE_INT);
+                ct = data.getArch().types.getBase(a.getSize(), type_metatype.TYPE_INT);
             PcodeOp* shiftop = data.newOp(2, op.getAddr());
             data.opSetOpcode(shiftop, opc);
             Varnode* newout = data.newUnique(a.getSize(), ct);

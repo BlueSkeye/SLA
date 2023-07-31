@@ -23,7 +23,7 @@ namespace Sla.EXTRA
         {
             string name;
             int size;
-            if ((dcp.conf == (Architecture*)0) || (dcp.conf.loader == (LoadImage*)0))
+            if ((dcp.conf == (Architecture)null) || (dcp.conf.loader == (LoadImage*)0))
                 throw new IfaceExecutionError("No binary loaded");
 
             Address addr = parse_machaddr(s, size, *dcp.conf.types); // Read required address;

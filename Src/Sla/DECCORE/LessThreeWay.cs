@@ -73,13 +73,13 @@ namespace Sla.DECCORE
         {
             lolessbool = lolessbl.lastOp();
             if (lolessbool == (PcodeOp)null) return false;
-            if (lolessbool.code() != CPUI_CBRANCH) return false;
+            if (lolessbool.code() != OpCode.CPUI_CBRANCH) return false;
             hieqbool = hieqbl.lastOp();
             if (hieqbool == (PcodeOp)null) return false;
-            if (hieqbool.code() != CPUI_CBRANCH) return false;
+            if (hieqbool.code() != OpCode.CPUI_CBRANCH) return false;
             hilessbool = hilessbl.lastOp();
             if (hilessbool == (PcodeOp)null) return false;
-            if (hilessbool.code() != CPUI_CBRANCH) return false;
+            if (hilessbool.code() != OpCode.CPUI_CBRANCH) return false;
 
             Varnode* vn;
 
@@ -94,28 +94,28 @@ namespace Sla.DECCORE
             hiequal = vn.getDef();
             switch (hiequal.code())
             {
-                case CPUI_INT_EQUAL:
+                case OpCode.CPUI_INT_EQUAL:
                     midlessform = false;
                     break;
-                case CPUI_INT_NOTEQUAL:
+                case OpCode.CPUI_INT_NOTEQUAL:
                     midlessform = false;
                     break;
-                case CPUI_INT_LESS:
+                case OpCode.CPUI_INT_LESS:
                     midlessequal = false;
                     midsigncompare = false;
                     midlessform = true;
                     break;
-                case CPUI_INT_LESSEQUAL:
+                case OpCode.CPUI_INT_LESSEQUAL:
                     midlessequal = true;
                     midsigncompare = false;
                     midlessform = true;
                     break;
-                case CPUI_INT_SLESS:
+                case OpCode.CPUI_INT_SLESS:
                     midlessequal = false;
                     midsigncompare = true;
                     midlessform = true;
                     break;
-                case CPUI_INT_SLESSEQUAL:
+                case OpCode.CPUI_INT_SLESSEQUAL:
                     midlessequal = true;
                     midsigncompare = true;
                     midlessform = true;
@@ -129,19 +129,19 @@ namespace Sla.DECCORE
             loless = vn.getDef();
             switch (loless.code())
             {   // Only unsigned forms
-                case CPUI_INT_LESS:
+                case OpCode.CPUI_INT_LESS:
                     lolessequalform = false;
                     break;
-                case CPUI_INT_LESSEQUAL:
+                case OpCode.CPUI_INT_LESSEQUAL:
                     lolessequalform = true;
                     break;
-                case CPUI_INT_EQUAL:
+                case OpCode.CPUI_INT_EQUAL:
                     if (!loless.getIn(1).isConstant()) return false;
                     if (loless.getIn(1).getOffset() != 0) return false;
                     lolessiszerocomp = true;
                     lolessequalform = true;
                     break;
-                case CPUI_INT_NOTEQUAL:
+                case OpCode.CPUI_INT_NOTEQUAL:
                     if (!loless.getIn(1).isConstant()) return false;
                     if (loless.getIn(1).getOffset() != 0) return false;
                     lolessiszerocomp = true;
@@ -156,19 +156,19 @@ namespace Sla.DECCORE
             hiless = vn.getDef();
             switch (hiless.code())
             {
-                case CPUI_INT_LESS:
+                case OpCode.CPUI_INT_LESS:
                     hilessequalform = false;
                     signcompare = false;
                     break;
-                case CPUI_INT_LESSEQUAL:
+                case OpCode.CPUI_INT_LESSEQUAL:
                     hilessequalform = true;
                     signcompare = false;
                     break;
-                case CPUI_INT_SLESS:
+                case OpCode.CPUI_INT_SLESS:
                     hilessequalform = false;
                     signcompare = true;
                     break;
-                case CPUI_INT_SLESSEQUAL:
+                case OpCode.CPUI_INT_SLESSEQUAL:
                     hilessequalform = true;
                     signcompare = true;
                     break;
@@ -297,7 +297,7 @@ namespace Sla.DECCORE
             }
             else
             {
-                if (hiequal.code() == CPUI_INT_NOTEQUAL)
+                if (hiequal.code() == OpCode.CPUI_INT_NOTEQUAL)
                 {
                     equalflip = !equalflip;
                 }
@@ -464,9 +464,9 @@ namespace Sla.DECCORE
         private void setOpCode()
         { // Decide on the opcode of the final double precision compare
             if (lolessequalform != hiflip)
-                finalopc = signcompare ? CPUI_INT_SLESSEQUAL : CPUI_INT_LESSEQUAL;
+                finalopc = signcompare ? OpCode.CPUI_INT_SLESSEQUAL : OpCode.CPUI_INT_LESSEQUAL;
             else
-                finalopc = signcompare ? CPUI_INT_SLESS : CPUI_INT_LESS;
+                finalopc = signcompare ? OpCode.CPUI_INT_SLESS : OpCode.CPUI_INT_LESS;
             if (hiflip)
             {
                 hislot = 1 - hislot;

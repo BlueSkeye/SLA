@@ -41,14 +41,14 @@ namespace Sla.DECCORE
             vn2 = op.getIn(1);
             zextslot = 0;
             otherslot = 1;
-            if ((vn2.isWritten()) && (vn2.getDef().code() == CPUI_INT_ZEXT))
+            if ((vn2.isWritten()) && (vn2.getDef().code() == OpCode.CPUI_INT_ZEXT))
             {
                 vn1 = vn2;
                 vn2 = op.getIn(0);
                 zextslot = 1;
                 otherslot = 0;
             }
-            else if ((!vn1.isWritten()) || (vn1.getDef().code() != CPUI_INT_ZEXT))
+            else if ((!vn1.isWritten()) || (vn1.getDef().code() != OpCode.CPUI_INT_ZEXT))
                 return 0;
 
             if (!vn2.isConstant()) return 0;
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
             Varnode* newvn = data.newConstant(smallsize, val);
             data.opSetInput(op, zext.getIn(0), zextslot);
             data.opSetInput(op, newvn, otherslot); ;
-            data.opSetOpcode(op, (op.code() == CPUI_INT_SLESS) ? CPUI_INT_LESS : CPUI_INT_LESSEQUAL);
+            data.opSetOpcode(op, (op.code() == OpCode.CPUI_INT_SLESS) ? OpCode.CPUI_INT_LESS : OpCode.CPUI_INT_LESSEQUAL);
             return 1;
         }
     }

@@ -8,7 +8,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla.DECCORE
 {
-    /// \brief Perform Common Sub-expression Elimination on CPUI_MULTIEQUAL ops
+    /// \brief Perform Common Sub-expression Elimination on OpCode.CPUI_MULTIEQUAL ops
     internal class ActionMultiCse : Action
     {
         /// Which of two outputs is preferred
@@ -19,20 +19,20 @@ namespace Sla.DECCORE
         /// \return preference
         private static bool preferredOutput(Varnode out1, Varnode out2)
         {
-            // Prefer the output that is used in a CPUI_RETURN
+            // Prefer the output that is used in a OpCode.CPUI_RETURN
             list<PcodeOp*>::const_iterator iter, enditer;
             enditer = out1.endDescend();
             for (iter = out1.beginDescend(); iter != enditer; ++iter)
             {
                 PcodeOp* op = *iter;
-                if (op.code() == CPUI_RETURN)
+                if (op.code() == OpCode.CPUI_RETURN)
                     return false;
             }
             enditer = out2.endDescend();
             for (iter = out2.beginDescend(); iter != enditer; ++iter)
             {
                 PcodeOp* op = *iter;
-                if (op.code() == CPUI_RETURN)
+                if (op.code() == OpCode.CPUI_RETURN)
                     return true;
             }
             // Prefer addrtied over register over unique
@@ -52,11 +52,11 @@ namespace Sla.DECCORE
             return false;
         }
 
-        /// Find match to CPUI_MULTIEQUAL
-        /// Find any matching CPUI_MULTIEQUAL that occurs before \b target that has \b in as an input.
+        /// Find match to OpCode.CPUI_MULTIEQUAL
+        /// Find any matching OpCode.CPUI_MULTIEQUAL that occurs before \b target that has \b in as an input.
         /// Then test to see if the \b target and the recovered op are functionally equivalent.
         /// \param bl is the parent block
-        /// \param target is the given target CPUI_MULTIEQUAL
+        /// \param target is the given target OpCode.CPUI_MULTIEQUAL
         /// \param in is the specific input Varnode
         private static PcodeOp findMatch(BlockBasic bl, PcodeOp target, Varnode @in)
         {
@@ -73,7 +73,7 @@ namespace Sla.DECCORE
                 for (i = 0; i < numinput; ++i)
                 {
                     Varnode* vn = op.getIn(i);
-                    if (vn.isWritten() && (vn.getDef().code() == CPUI_COPY))
+                    if (vn.isWritten() && (vn.getDef().code() == OpCode.CPUI_COPY))
                         vn = vn.getDef().getIn(0);        // Allow for differences in copy propagation
                     if (vn == @in) break;
                 }
@@ -83,10 +83,10 @@ namespace Sla.DECCORE
                     Varnode* buf2[2];
                     for (j = 0; j < numinput; ++j) {
                         Varnode* in1 = op.getIn(j);
-                        if (in1.isWritten() && (in1.getDef().code() == CPUI_COPY))
+                        if (in1.isWritten() && (in1.getDef().code() == OpCode.CPUI_COPY))
                             in1 = in1.getDef().getIn(0);    // Allow for differences in copy propagation
                         Varnode* in2 = target.getIn(j);
-                        if (in2.isWritten() && (in2.getDef().code() == CPUI_COPY))
+                        if (in2.isWritten() && (in2.getDef().code() == OpCode.CPUI_COPY))
                             in2 = in2.getDef().getIn(0);
                         if (in1 == in2) continue;
                         if (0 != functionalEqualityLevel(in1, in2, buf1, buf2))
@@ -99,12 +99,12 @@ namespace Sla.DECCORE
             return (PcodeOp)null;
         }
 
-        /// Search a block for equivalent CPUI_MULTIEQUAL
-        /// Search for pairs of CPUI_MULTIEQUAL ops in \b bl that share an input.
+        /// Search a block for equivalent OpCode.CPUI_MULTIEQUAL
+        /// Search for pairs of OpCode.CPUI_MULTIEQUAL ops in \b bl that share an input.
         /// If the pairs found are functionally equivalent, delete one of the two.
         /// \param data is the function owning the block
         /// \param bl is the specific basic block
-        /// return \b true if a CPUI_MULTIEQUAL was (successfully) deleted
+        /// return \b true if a OpCode.CPUI_MULTIEQUAL was (successfully) deleted
         private bool processBlock(Funcdata data, BlockBasic bl)
         {
             List<Varnode*> vnlist;
@@ -117,15 +117,15 @@ namespace Sla.DECCORE
                 PcodeOp* op = *iter;
                 ++iter;
                 OpCode opc = op.code();
-                if (opc == CPUI_COPY) continue;
-                if (opc != CPUI_MULTIEQUAL) break;
+                if (opc == OpCode.CPUI_COPY) continue;
+                if (opc != OpCode.CPUI_MULTIEQUAL) break;
                 int vnpos = vnlist.size();
                 int i;
                 int numinput = op.numInput();
                 for (i = 0; i < numinput; ++i)
                 {
                     Varnode* vn = op.getIn(i);
-                    if (vn.isWritten() && (vn.getDef().code() == CPUI_COPY)) // Some copies may not propagate into MULTIEQUAL
+                    if (vn.isWritten() && (vn.getDef().code() == OpCode.CPUI_COPY)) // Some copies may not propagate into MULTIEQUAL
                         vn = vn.getDef().getIn(0);                    // Allow for differences in copy propagation
                     vnlist.Add(vn);
                     if (vn.isMark())

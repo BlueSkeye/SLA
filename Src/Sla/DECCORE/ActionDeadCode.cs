@@ -58,7 +58,7 @@ namespace Sla.DECCORE
         private static void propagateConsumed(List<Varnode> worklist)
         {
             Varnode* vn = worklist.GetLastItem();
-            worklist.pop_back();
+            worklist.RemoveLastItem();
             ulong outc = vn.getConsume();
             vn.clearConsumeList();
 
@@ -69,11 +69,11 @@ namespace Sla.DECCORE
 
             switch (op.code())
             {
-                case CPUI_INT_MULT:
-                    b = coveringmask(outc);
+                case OpCode.CPUI_INT_MULT:
+                    b = Globals.coveringmask(outc);
                     if (op.getIn(1).isConstant())
                     {
-                        int leastSet = leastsigbit_set(op.getIn(1).getOffset());
+                        int leastSet = Globals.leastsigbit_set(op.getIn(1).getOffset());
                         if (leastSet >= 0)
                         {
                             a = Globals.calc_mask(vn.getSize()) >> leastSet;
@@ -87,13 +87,13 @@ namespace Sla.DECCORE
                     pushConsumed(a, op.getIn(0), worklist);
                     pushConsumed(b, op.getIn(1), worklist);
                     break;
-                case CPUI_INT_ADD:
-                case CPUI_INT_SUB:
-                    a = coveringmask(outc); // Make sure value is filled out as a contiguous mask
+                case OpCode.CPUI_INT_ADD:
+                case OpCode.CPUI_INT_SUB:
+                    a = Globals.coveringmask(outc); // Make sure value is filled out as a contiguous mask
                     pushConsumed(a, op.getIn(0), worklist);
                     pushConsumed(a, op.getIn(1), worklist);
                     break;
-                case CPUI_SUBPIECE:
+                case OpCode.CPUI_SUBPIECE:
                     sz = op.getIn(1).getOffset();
                     if (sz >= sizeof(ulong))    // If we are truncating beyond the precision of the consume field
                         a = 0;          // this tells us nothing about consuming bits within the field
@@ -111,7 +111,7 @@ namespace Sla.DECCORE
                     pushConsumed(a, op.getIn(0), worklist);
                     pushConsumed(b, op.getIn(1), worklist);
                     break;
-                case CPUI_PIECE:
+                case OpCode.CPUI_PIECE:
                     sz = op.getIn(1).getSize();
                     if (vn.getSize() > sizeof(ulong))
                     { // If the concatenation goes beyond the consume precision
@@ -134,14 +134,14 @@ namespace Sla.DECCORE
                     pushConsumed(a, op.getIn(0), worklist);
                     pushConsumed(b, op.getIn(1), worklist);
                     break;
-                case CPUI_INDIRECT:
+                case OpCode.CPUI_INDIRECT:
                     pushConsumed(outc, op.getIn(0), worklist);
                     if (op.getIn(1).getSpace().getType() == IPTR_IOP)
                     {
                         PcodeOp* indop = PcodeOp::getOpFromConst(op.getIn(1).getAddr());
                         if (!indop.isDead())
                         {
-                            if (indop.code() == CPUI_COPY)
+                            if (indop.code() == OpCode.CPUI_COPY)
                             {
                                 if (indop.getOut().characterizeOverlap(*op.getOut()) > 0)
                                 {
@@ -155,16 +155,16 @@ namespace Sla.DECCORE
                         }
                     }
                     break;
-                case CPUI_COPY:
-                case CPUI_INT_NEGATE:
+                case OpCode.CPUI_COPY:
+                case OpCode.CPUI_INT_NEGATE:
                     pushConsumed(outc, op.getIn(0), worklist);
                     break;
-                case CPUI_INT_XOR:
-                case CPUI_INT_OR:
+                case OpCode.CPUI_INT_XOR:
+                case OpCode.CPUI_INT_OR:
                     pushConsumed(outc, op.getIn(0), worklist);
                     pushConsumed(outc, op.getIn(1), worklist);
                     break;
-                case CPUI_INT_AND:
+                case OpCode.CPUI_INT_AND:
                     if (op.getIn(1).isConstant())
                     {
                         ulong val = op.getIn(1).getOffset();
@@ -177,21 +177,21 @@ namespace Sla.DECCORE
                         pushConsumed(outc, op.getIn(1), worklist);
                     }
                     break;
-                case CPUI_MULTIEQUAL:
+                case OpCode.CPUI_MULTIEQUAL:
                     for (int i = 0; i < op.numInput(); ++i)
                         pushConsumed(outc, op.getIn(i), worklist);
                     break;
-                case CPUI_INT_ZEXT:
+                case OpCode.CPUI_INT_ZEXT:
                     pushConsumed(outc, op.getIn(0), worklist);
                     break;
-                case CPUI_INT_SEXT:
+                case OpCode.CPUI_INT_SEXT:
                     b = Globals.calc_mask(op.getIn(0).getSize());
                     a = outc & b;
                     if (outc > b)
                         a |= (b ^ (b >> 1));    // Make sure signbit is marked used
                     pushConsumed(a, op.getIn(0), worklist);
                     break;
-                case CPUI_INT_LEFT:
+                case OpCode.CPUI_INT_LEFT:
                     if (op.getIn(1).isConstant())
                     {
                         sz = vn.getSize();
@@ -223,7 +223,7 @@ namespace Sla.DECCORE
                         pushConsumed(a, op.getIn(1), worklist);
                     }
                     break;
-                case CPUI_INT_RIGHT:
+                case OpCode.CPUI_INT_RIGHT:
                     if (op.getIn(1).isConstant())
                     {
                         int sa = op.getIn(1).getOffset();
@@ -242,10 +242,10 @@ namespace Sla.DECCORE
                         pushConsumed(a, op.getIn(1), worklist);
                     }
                     break;
-                case CPUI_INT_LESS:
-                case CPUI_INT_LESSEQUAL:
-                case CPUI_INT_EQUAL:
-                case CPUI_INT_NOTEQUAL:
+                case OpCode.CPUI_INT_LESS:
+                case OpCode.CPUI_INT_LESSEQUAL:
+                case OpCode.CPUI_INT_EQUAL:
+                case OpCode.CPUI_INT_NOTEQUAL:
                     if (outc == 0)
                         a = 0;
                     else            // Anywhere we know is zero, is not getting "consumed"
@@ -253,7 +253,7 @@ namespace Sla.DECCORE
                     pushConsumed(a, op.getIn(0), worklist);
                     pushConsumed(a, op.getIn(1), worklist);
                     break;
-                case CPUI_INSERT:
+                case OpCode.CPUI_INSERT:
                     a = 1;
                     a <<= (int)op.getIn(3).getOffset();
                     a -= 1; // Insert mask
@@ -264,7 +264,7 @@ namespace Sla.DECCORE
                     pushConsumed(b, op.getIn(2), worklist);
                     pushConsumed(b, op.getIn(3), worklist);
                     break;
-                case CPUI_EXTRACT:
+                case OpCode.CPUI_EXTRACT:
                     a = 1;
                     a <<= (int)op.getIn(2).getOffset();
                     a -= 1; // Extract mask
@@ -275,15 +275,15 @@ namespace Sla.DECCORE
                     pushConsumed(b, op.getIn(1), worklist);
                     pushConsumed(b, op.getIn(2), worklist);
                     break;
-                case CPUI_POPCOUNT:
-                case CPUI_LZCOUNT:
+                case OpCode.CPUI_POPCOUNT:
+                case OpCode.CPUI_LZCOUNT:
                     a = 16 * op.getIn(0).getSize() - 1;   // Mask for possible bits that could be set
                     a &= outc;                  // Of the bits that could be set, which are consumed
                     b = (a == 0) ? 0 : ~((ulong)0);     // if any consumed, treat all input bits as consumed
                     pushConsumed(b, op.getIn(0), worklist);
                     break;
-                case CPUI_CALL:
-                case CPUI_CALLIND:
+                case OpCode.CPUI_CALL:
+                case OpCode.CPUI_CALLIND:
                     break;      // Call output doesn't indicate consumption of inputs
                 default:
                     a = (outc == 0) ? 0 : ~((ulong)0); // all or nothing
@@ -328,7 +328,7 @@ namespace Sla.DECCORE
 
         /// \brief Determine how the given sub-function parameters are consumed
         ///
-        /// Set the consume property for each input Varnode of a CPUI_CALL or CPUI_CALLIND.
+        /// Set the consume property for each input Varnode of a OpCode.CPUI_CALL or OpCode.CPUI_CALLIND.
         /// If the prototype is locked, assume parameters are entirely consumed.
         /// \param fc is the call specification for the given sub-function
         /// \param worklist will hold input Varnodes that can propagate their consume property
@@ -349,7 +349,7 @@ namespace Sla.DECCORE
                 if (vn.isAutoLive())
                     consumeVal = ~((ulong)0);
                 else
-                    consumeVal = minimalmask(vn.getNZMask());
+                    consumeVal = Globals.minimalmask(vn.getNZMask());
                 int bytesConsumed = fc.getInputBytesConsumed(i);
                 if (bytesConsumed != 0)
                     consumeVal &= Globals.calc_mask(bytesConsumed);
@@ -359,9 +359,9 @@ namespace Sla.DECCORE
 
         /// \brief Determine how the \e return \e values for the given function are consumed
         ///
-        /// Examine each CPUI_RETURN to see how the Varnode input is consumed.
+        /// Examine each OpCode.CPUI_RETURN to see how the Varnode input is consumed.
         /// If the function's prototype is locked, assume the Varnode is entirely consumed.
-        /// If there are no CPUI_RETURN ops, return 0
+        /// If there are no OpCode.CPUI_RETURN ops, return 0
         /// \param data is the given function
         /// \return the bit mask of what is consumed
         private static ulong gatherConsumedReturn(Funcdata data)
@@ -378,7 +378,7 @@ namespace Sla.DECCORE
                 if (returnOp.numInput() > 1)
                 {
                     Varnode* vn = returnOp.getIn(1);
-                    consumeVal |= minimalmask(vn.getNZMask());
+                    consumeVal |= Globals.minimalmask(vn.getNZMask());
                 }
             }
             int val = data.getFuncProto().getReturnBytesConsumed();
@@ -397,15 +397,15 @@ namespace Sla.DECCORE
         ///   - Loaded from a pointer that is a constant
         ///
         /// \param vn is the given Varnode
-        /// \param addCount is the number of CPUI_INT_ADD operations seen so far
-        /// \param loadCount is the number of CPUI_LOAD operations seen so far
+        /// \param addCount is the number of OpCode.CPUI_INT_ADD operations seen so far
+        /// \param loadCount is the number of OpCode.CPUI_LOAD operations seen so far
         /// \return \b true if the Varnode (might) collapse to a constant
         private static bool isEventualConstant(Varnode vn, int addCount, int loadCount)
         {
             if (vn.isConstant()) return true;
             if (!vn.isWritten()) return false;
             PcodeOp* op = vn.getDef();
-            while (op.code() == CPUI_COPY)
+            while (op.code() == OpCode.CPUI_COPY)
             {
                 vn = op.getIn(0);
                 if (vn.isConstant()) return true;
@@ -414,23 +414,23 @@ namespace Sla.DECCORE
             }
             switch (op.code())
             {
-                case CPUI_INT_ADD:
+                case OpCode.CPUI_INT_ADD:
                     if (addCount > 0) return false;
                     if (!isEventualConstant(op.getIn(0), addCount + 1, loadCount))
                         return false;
                     return isEventualConstant(op.getIn(1), addCount + 1, loadCount);
-                case CPUI_LOAD:
+                case OpCode.CPUI_LOAD:
                     if (loadCount > 0) return false;
                     return isEventualConstant(op.getIn(1), 0, loadCount + 1);
-                case CPUI_INT_LEFT:
-                case CPUI_INT_RIGHT:
-                case CPUI_INT_SRIGHT:
-                case CPUI_INT_MULT:
+                case OpCode.CPUI_INT_LEFT:
+                case OpCode.CPUI_INT_RIGHT:
+                case OpCode.CPUI_INT_SRIGHT:
+                case OpCode.CPUI_INT_MULT:
                     if (!op.getIn(1).isConstant())
                         return false;
                     return isEventualConstant(op.getIn(0), addCount, loadCount);
-                case CPUI_INT_ZEXT:
-                case CPUI_INT_SEXT:
+                case OpCode.CPUI_INT_ZEXT:
+                case OpCode.CPUI_INT_SEXT:
                     return isEventualConstant(op.getIn(0), addCount, loadCount);
                 default:
                     break;
@@ -537,13 +537,13 @@ namespace Sla.DECCORE
                 else if (!op.isAssignment())
                 {
                     OpCode opc = op.code();
-                    if (opc == CPUI_RETURN)
+                    if (opc == OpCode.CPUI_RETURN)
                     {
                         pushConsumed(~((ulong)0), op.getIn(0), worklist);
                         for (i = 1; i < op.numInput(); ++i)
                             pushConsumed(returnConsume, op.getIn(i), worklist);
                     }
-                    else if (opc == CPUI_BRANCHIND)
+                    else if (opc == OpCode.CPUI_BRANCHIND)
                     {
                         JumpTable* jt = data.findJumpTable(op);
                         ulong mask;

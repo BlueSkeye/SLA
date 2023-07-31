@@ -17,7 +17,7 @@ namespace Sla.EXTRA
         /// the fixup is set on the function's prototype.
         public override void execute(TextReader s)
         {
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
 
             string fixupName, funcName;

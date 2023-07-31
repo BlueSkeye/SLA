@@ -39,7 +39,7 @@ namespace Sla.DECCORE
             if (outType == (Datatype)null)
                 return 0;
             type_metatype metain = outType.getMetatype();
-            if (metain != TYPE_STRUCT && metain != TYPE_ARRAY && metain != TYPE_PARTIALSTRUCT)
+            if (metain != type_metatype.TYPE_STRUCT && metain != type_metatype.TYPE_ARRAY && metain != type_metatype.TYPE_PARTIALSTRUCT)
                 return 0;
             SplitDatatype splitter(data);
             if (splitter.splitStore(op, outType))

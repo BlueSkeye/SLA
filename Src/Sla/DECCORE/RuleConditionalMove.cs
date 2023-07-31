@@ -48,7 +48,7 @@ namespace Sla.DECCORE
                 opc = op.code();
                 switch (opc)
                 {
-                    case CPUI_COPY:
+                    case OpCode.CPUI_COPY:
                         in0 = op.getIn(0);
                         if (in0.isConstant())
                         {
@@ -57,28 +57,28 @@ namespace Sla.DECCORE
                             return ((val & ~((ulong)1)) == 0);
                         }
                         return false;
-                    case CPUI_INT_EQUAL:
-                    case CPUI_INT_NOTEQUAL:
-                    case CPUI_INT_SLESS:
-                    case CPUI_INT_SLESSEQUAL:
-                    case CPUI_INT_LESS:
-                    case CPUI_INT_LESSEQUAL:
-                    case CPUI_INT_CARRY:
-                    case CPUI_INT_SCARRY:
-                    case CPUI_INT_SBORROW:
-                    case CPUI_BOOL_XOR:
-                    case CPUI_BOOL_AND:
-                    case CPUI_BOOL_OR:
-                    case CPUI_FLOAT_EQUAL:
-                    case CPUI_FLOAT_NOTEQUAL:
-                    case CPUI_FLOAT_LESS:
-                    case CPUI_FLOAT_LESSEQUAL:
-                    case CPUI_FLOAT_NAN:
+                    case OpCode.CPUI_INT_EQUAL:
+                    case OpCode.CPUI_INT_NOTEQUAL:
+                    case OpCode.CPUI_INT_SLESS:
+                    case OpCode.CPUI_INT_SLESSEQUAL:
+                    case OpCode.CPUI_INT_LESS:
+                    case OpCode.CPUI_INT_LESSEQUAL:
+                    case OpCode.CPUI_INT_CARRY:
+                    case OpCode.CPUI_INT_SCARRY:
+                    case OpCode.CPUI_INT_SBORROW:
+                    case OpCode.CPUI_BOOL_XOR:
+                    case OpCode.CPUI_BOOL_AND:
+                    case OpCode.CPUI_BOOL_OR:
+                    case OpCode.CPUI_FLOAT_EQUAL:
+                    case OpCode.CPUI_FLOAT_NOTEQUAL:
+                    case OpCode.CPUI_FLOAT_LESS:
+                    case OpCode.CPUI_FLOAT_LESSEQUAL:
+                    case OpCode.CPUI_FLOAT_NAN:
                         in0 = op.getIn(0);
                         in1 = op.getIn(1);
                         optype = 2;
                         break;
-                    case CPUI_BOOL_NEGATE:
+                    case OpCode.CPUI_BOOL_NEGATE:
                         in0 = op.getIn(0);
                         optype = 1;
                         break;
@@ -157,7 +157,7 @@ namespace Sla.DECCORE
         private static Varnode constructNegate(Varnode vn, PcodeOp op, Funcdata data)
         {
             PcodeOp* negateop = data.newOp(1, op.getAddr());
-            data.opSetOpcode(negateop, CPUI_BOOL_NEGATE);
+            data.opSetOpcode(negateop, OpCode.CPUI_BOOL_NEGATE);
             Varnode* resvn = data.newUniqueOut(1, negateop);
             data.opSetInput(negateop, vn, 0);
             data.opInsertBefore(negateop, op);
@@ -246,7 +246,7 @@ namespace Sla.DECCORE
             // rootblock must end in CBRANCH, which gives the boolean for the conditional move
             PcodeOp* cbranch = rootblock0.lastOp();
             if (cbranch == (PcodeOp)null) return 0;
-            if (cbranch.code() != CPUI_CBRANCH) return 0;
+            if (cbranch.code() != OpCode.CPUI_CBRANCH) return 0;
 
             if (!bool0.evaluatePropagation(rootblock0, inblock0)) return 0;
             if (!bool1.evaluatePropagation(rootblock0, inblock1)) return 0;
@@ -270,11 +270,11 @@ namespace Sla.DECCORE
                     {
                         if (!boolvn.isWritten()) return 0;
                         PcodeOp* negop = boolvn.getDef();
-                        if (negop.code() != CPUI_BOOL_NEGATE) return 0;
+                        if (negop.code() != OpCode.CPUI_BOOL_NEGATE) return 0;
                         if (negop.getIn(0) != op.getIn(0)) return 0;
                         andorselect = !andorselect;
                     }
-                    OpCode opc = andorselect ? CPUI_BOOL_OR : CPUI_BOOL_AND;
+                    OpCode opc = andorselect ? OpCode.CPUI_BOOL_OR : OpCode.CPUI_BOOL_AND;
                     data.opUninsert(op);
                     data.opSetOpcode(op, opc);
                     data.opInsertBegin(op, bb);
@@ -293,12 +293,12 @@ namespace Sla.DECCORE
                     {
                         if (!boolvn.isWritten()) return 0;
                         PcodeOp* negop = boolvn.getDef();
-                        if (negop.code() != CPUI_BOOL_NEGATE) return 0;
+                        if (negop.code() != OpCode.CPUI_BOOL_NEGATE) return 0;
                         if (negop.getIn(0) != op.getIn(1)) return 0;
                         andorselect = !andorselect;
                     }
                     data.opUninsert(op);
-                    OpCode opc = andorselect ? CPUI_BOOL_OR : CPUI_BOOL_AND;
+                    OpCode opc = andorselect ? OpCode.CPUI_BOOL_OR : OpCode.CPUI_BOOL_AND;
                     data.opSetOpcode(op, opc);
                     data.opInsertBegin(op, bb);
                     Varnode* firstvn = bool1.constructBool(op, data);
@@ -318,7 +318,7 @@ namespace Sla.DECCORE
                 if (bool0.getVal() == bool1.getVal())
                 {
                     data.opRemoveInput(op, 1);
-                    data.opSetOpcode(op, CPUI_COPY);
+                    data.opSetOpcode(op, OpCode.CPUI_COPY);
                     data.opSetInput(op, data.newConstant(sz, bool0.getVal()), 0);
                     data.opInsertBegin(op, bb);
                 }
@@ -330,15 +330,15 @@ namespace Sla.DECCORE
                     if (sz == 1)
                     {
                         if (needcomplement)
-                            data.opSetOpcode(op, CPUI_BOOL_NEGATE);
+                            data.opSetOpcode(op, OpCode.CPUI_BOOL_NEGATE);
                         else
-                            data.opSetOpcode(op, CPUI_COPY);
+                            data.opSetOpcode(op, OpCode.CPUI_COPY);
                         data.opInsertBegin(op, bb);
                         data.opSetInput(op, boolvn, 0);
                     }
                     else
                     {
-                        data.opSetOpcode(op, CPUI_INT_ZEXT);
+                        data.opSetOpcode(op, OpCode.CPUI_INT_ZEXT);
                         data.opInsertBegin(op, bb);
                         if (needcomplement)
                             boolvn = constructNegate(boolvn, op, data);
@@ -349,7 +349,7 @@ namespace Sla.DECCORE
             else if (bool0.isConstant())
             {
                 bool needcomplement = (path0istrue != (bool0.getVal() != 0));
-                OpCode opc = (bool0.getVal() != 0) ? CPUI_BOOL_OR : CPUI_BOOL_AND;
+                OpCode opc = (bool0.getVal() != 0) ? OpCode.CPUI_BOOL_OR : OpCode.CPUI_BOOL_AND;
                 data.opSetOpcode(op, opc);
                 data.opInsertBegin(op, bb);
                 Varnode* boolvn = cbranch.getIn(1);
@@ -362,7 +362,7 @@ namespace Sla.DECCORE
             else
             {           // bool1 must be constant
                 bool needcomplement = (path0istrue == (bool1.getVal() != 0));
-                OpCode opc = (bool1.getVal() != 0) ? CPUI_BOOL_OR : CPUI_BOOL_AND;
+                OpCode opc = (bool1.getVal() != 0) ? OpCode.CPUI_BOOL_OR : OpCode.CPUI_BOOL_AND;
                 data.opSetOpcode(op, opc);
                 data.opInsertBegin(op, bb);
                 Varnode* boolvn = cbranch.getIn(1);

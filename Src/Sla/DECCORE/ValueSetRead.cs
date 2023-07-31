@@ -93,7 +93,7 @@ namespace Sla.DECCORE
         /// \param s is the stream to print to
         public void printRaw(TextWriter s)
         {
-            s << "Read: " << get_opname(op.code());
+            s << "Read: " << Globals.get_opname(op.code());
             s << '(' << op.getSeqNum() << ')';
             if (typeCode == 0)
                 s << " absolute ";

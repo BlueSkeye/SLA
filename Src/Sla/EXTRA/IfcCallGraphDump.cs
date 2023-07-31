@@ -17,7 +17,7 @@ namespace Sla.EXTRA
         /// XML document.
         public override void execute(TextReader s)
         {
-            if (dcp.cgraph == (CallGraph*)0)
+            if (dcp.cgraph == (CallGraph)null)
                 throw new IfaceExecutionError("No callgraph has been built");
 
             string name;

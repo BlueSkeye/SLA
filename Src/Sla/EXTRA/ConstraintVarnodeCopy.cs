@@ -36,8 +36,8 @@ namespace Sla.EXTRA
 
         public override void collectTypes(List<UnifyDatatype> typelist)
         {
-            typelist[oldvarindex] = UnifyDatatype(UnifyDatatype::var_type);
-            typelist[newvarindex] = UnifyDatatype(UnifyDatatype::var_type);
+            typelist[oldvarindex] = UnifyDatatype(UnifyDatatype.TypeKind.var_type);
+            typelist[newvarindex] = UnifyDatatype(UnifyDatatype.TypeKind.var_type);
         }
 
         public override int getBaseIndex() => oldvarindex;

@@ -121,7 +121,7 @@ namespace Sla.DECCORE
 
         /// Construct an incomplete TypeCode
         public TypeCode()
-            : base(1, TYPE_CODE)
+            : base(1, type_metatype.TYPE_CODE)
         {
             proto = (FuncProto)null;
             factory = (TypeFactory*)0;
@@ -191,7 +191,7 @@ namespace Sla.DECCORE
         {
             if (factory == (TypeFactory*)0) return (Datatype)null;
             *newoff = 0;
-            return factory.getBase(1, TYPE_CODE);  // Return code byte unattached to function prototype
+            return factory.getBase(1, type_metatype.TYPE_CODE);  // Return code byte unattached to function prototype
         }
 
         public override int compare(Datatype op, int level)

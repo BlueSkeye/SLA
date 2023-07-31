@@ -50,7 +50,7 @@ namespace Sla.DECCORE
             for (i = op.numInput() - 1; i > 0; --i)
                 data.opRemoveInput(op, i);  // unlink old constants
             data.opSetInput(op, vn, 0); // Link in new collapsed constant
-            data.opSetOpcode(op, CPUI_COPY); // Change ourselves to a copy
+            data.opSetOpcode(op, OpCode.CPUI_COPY); // Change ourselves to a copy
 
             return 1;
         }

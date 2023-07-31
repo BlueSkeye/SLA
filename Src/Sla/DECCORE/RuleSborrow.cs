@@ -54,7 +54,7 @@ namespace Sla.DECCORE
             if ((op.getIn(1).isConstant() && op.getIn(1).getOffset() == 0) ||
                 (op.getIn(0).isConstant() && op.getIn(0).getOffset() == 0))
             {
-                data.opSetOpcode(op, CPUI_COPY);
+                data.opSetOpcode(op, OpCode.CPUI_COPY);
                 data.opSetInput(op, data.newConstant(1, 0), 0);
                 data.opRemoveInput(op, 1);
                 return 1;
@@ -62,12 +62,12 @@ namespace Sla.DECCORE
             for (iter = svn.beginDescend(); iter != svn.endDescend(); ++iter)
             {
                 compop = *iter;
-                if ((compop.code() != CPUI_INT_EQUAL) && (compop.code() != CPUI_INT_NOTEQUAL))
+                if ((compop.code() != OpCode.CPUI_INT_EQUAL) && (compop.code() != OpCode.CPUI_INT_NOTEQUAL))
                     continue;
                 cvn = (compop.getIn(0) == svn) ? compop.getIn(1) : compop.getIn(0);
                 if (!cvn.isWritten()) continue;
                 signop = cvn.getDef();
-                if (signop.code() != CPUI_INT_SLESS) continue;
+                if (signop.code() != OpCode.CPUI_INT_SLESS) continue;
                 if (!signop.getIn(0).constantMatch(0))
                 {
                     if (!signop.getIn(1).constantMatch(0)) continue;
@@ -77,7 +77,7 @@ namespace Sla.DECCORE
                     zside = 0;
                 if (!signop.getIn(1 - zside).isWritten()) continue;
                 addop = signop.getIn(1 - zside).getDef();
-                if (addop.code() == CPUI_INT_ADD)
+                if (addop.code() == OpCode.CPUI_INT_ADD)
                 {
                     avn = op.getIn(0);
                     if (functionalEquality(avn, addop.getIn(0)))
@@ -91,34 +91,34 @@ namespace Sla.DECCORE
                     continue;
                 if (bvn.isConstant())
                 {
-                    Address flip = new Address(bvn.getSpace(), uintb_negate(bvn.getOffset() - 1, bvn.getSize()));
+                    Address flip = new Address(bvn.getSpace(), Globals.uintb_negate(bvn.getOffset() - 1, bvn.getSize()));
                     bvn = op.getIn(1);
                     if (flip != bvn.getAddr()) continue;
                 }
                 else if (bvn.isWritten())
                 {
                     PcodeOp* otherop = bvn.getDef();
-                    if (otherop.code() == CPUI_INT_MULT)
+                    if (otherop.code() == OpCode.CPUI_INT_MULT)
                     {
                         if (!otherop.getIn(1).isConstant()) continue;
                         if (otherop.getIn(1).getOffset() != Globals.calc_mask(otherop.getIn(1).getSize())) continue;
                         bvn = otherop.getIn(0);
                     }
-                    else if (otherop.code() == CPUI_INT_2COMP)
+                    else if (otherop.code() == OpCode.CPUI_INT_2COMP)
                         bvn = otherop.getIn(0);
                     if (!functionalEquality(bvn, op.getIn(1))) continue;
                 }
                 else
                     continue;
-                if (compop.code() == CPUI_INT_NOTEQUAL)
+                if (compop.code() == OpCode.CPUI_INT_NOTEQUAL)
                 {
-                    data.opSetOpcode(compop, CPUI_INT_SLESS);   // Replace all this with simple less than
+                    data.opSetOpcode(compop, OpCode.CPUI_INT_SLESS);   // Replace all this with simple less than
                     data.opSetInput(compop, avn, 1 - zside);
                     data.opSetInput(compop, bvn, zside);
                 }
                 else
                 {
-                    data.opSetOpcode(compop, CPUI_INT_SLESSEQUAL);
+                    data.opSetOpcode(compop, OpCode.CPUI_INT_SLESSEQUAL);
                     data.opSetInput(compop, avn, zside);
                     data.opSetInput(compop, bvn, 1 - zside);
                 }

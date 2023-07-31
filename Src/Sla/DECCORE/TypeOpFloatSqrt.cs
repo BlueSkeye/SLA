@@ -11,7 +11,7 @@ namespace Sla.DECCORE
     internal class TypeOpFloatSqrt : TypeOpFunc
     {
         public TypeOpFloatSqrt(TypeFactory t, Translate trans)
-            : base(t, CPUI_FLOAT_SQRT,"SQRT", TYPE_FLOAT, TYPE_FLOAT)
+            : base(t, OpCode.CPUI_FLOAT_SQRT,"SQRT", type_metatype.TYPE_FLOAT, type_metatype.TYPE_FLOAT)
         {
             opflags = PcodeOp::unary;
             addlflags = floatingpoint_op;

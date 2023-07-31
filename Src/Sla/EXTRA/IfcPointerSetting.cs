@@ -21,7 +21,7 @@ namespace Sla.EXTRA
         void IfcPointerSetting::execute(istream &s)
 
         {
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
             string typeName;
             string baseType;
@@ -45,7 +45,7 @@ namespace Sla.EXTRA
                 if (off <= 0)
                     throw new IfaceParseError("Missing offset");
                 Datatype* bt = dcp.conf.types.findByName(baseType);
-                if (bt == (Datatype)null || bt.getMetatype() != TYPE_STRUCT)
+                if (bt == (Datatype)null || bt.getMetatype() != type_metatype.TYPE_STRUCT)
                     throw new IfaceParseError("Base-type must be a structure");
                 Datatype* ptrto = TypePointerRel::getPtrToFromParent(bt, off, *dcp.conf.types);
                 AddrSpace* spc = dcp.conf.getDefaultDataSpace();

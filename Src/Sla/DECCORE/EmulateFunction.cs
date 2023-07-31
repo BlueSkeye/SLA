@@ -129,7 +129,7 @@ namespace Sla.DECCORE
             uint i;
             for (i = 0; i < pathMeld.numOps(); ++i)
                 if (pathMeld.getOp(i) == startop) break;
-            if (startop.code() == CPUI_MULTIEQUAL)
+            if (startop.code() == OpCode.CPUI_MULTIEQUAL)
             { // If we start on a MULTIEQUAL
                 int j;
                 for (j = 0; j < startop.numInput(); ++j)

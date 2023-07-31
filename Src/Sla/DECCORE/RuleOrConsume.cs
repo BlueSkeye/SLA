@@ -39,13 +39,13 @@ namespace Sla.DECCORE
             if ((consume & op.getIn(0).getNZMask()) == 0)
             {
                 data.opRemoveInput(op, 0);
-                data.opSetOpcode(op, CPUI_COPY);
+                data.opSetOpcode(op, OpCode.CPUI_COPY);
                 return 1;
             }
             else if ((consume & op.getIn(1).getNZMask()) == 0)
             {
                 data.opRemoveInput(op, 1);
-                data.opSetOpcode(op, CPUI_COPY);
+                data.opSetOpcode(op, OpCode.CPUI_COPY);
                 return 1;
             }
             return 0;

@@ -51,9 +51,9 @@ namespace Sla.DECCORE
             }
             if (op.isMarker())
             {
-                if (op.code() == CPUI_MULTIEQUAL) // MULTIEQUALs are considered very beginning
+                if (op.code() == OpCode.CPUI_MULTIEQUAL) // MULTIEQUALs are considered very beginning
                     return (uint)0;
-                else if (op.code() == CPUI_INDIRECT) // INDIRECTs are considered to be at
+                else if (op.code() == OpCode.CPUI_INDIRECT) // INDIRECTs are considered to be at
                                                       // the location of the op they are indirect for
                     return PcodeOp::getOpFromConst(op.getIn(1).getAddr()).getSeqNum().getOrder();
             }

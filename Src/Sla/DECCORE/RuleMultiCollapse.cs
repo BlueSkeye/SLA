@@ -51,7 +51,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < op.numInput(); ++i)
             { // Find base branch to match
                 copyr = matchlist[i];
-                if ((!copyr.isWritten()) || (copyr.getDef().code() != CPUI_MULTIEQUAL))
+                if ((!copyr.isWritten()) || (copyr.getDef().code() != OpCode.CPUI_MULTIEQUAL))
                 {
                     defcopyr = copyr;
                     break;
@@ -74,7 +74,7 @@ namespace Sla.DECCORE
                     defcopyr = copyr;       // all other branches must match
                     if (defcopyr.isWritten())
                     {
-                        if (defcopyr.getDef().code() == CPUI_MULTIEQUAL)
+                        if (defcopyr.getDef().code() == OpCode.CPUI_MULTIEQUAL)
                             nofunc = true;  // MULTIEQUAL cannot match by functional equal
                     }
                     else
@@ -88,7 +88,7 @@ namespace Sla.DECCORE
                     func_eq = true;     // Now matching by functional equality
                     continue;
                 }
-                else if ((copyr.isWritten()) && (copyr.getDef().code() == CPUI_MULTIEQUAL))
+                else if ((copyr.isWritten()) && (copyr.getDef().code() == OpCode.CPUI_MULTIEQUAL))
                 {
                     // If the non-matching branch is a MULTIEQUAL
                     newop = copyr.getDef();
@@ -131,7 +131,7 @@ namespace Sla.DECCORE
                         }
                         else
                         {           // Otherwise, create a copy
-                            bool needsreinsert = (op.code() == CPUI_MULTIEQUAL);
+                            bool needsreinsert = (op.code() == OpCode.CPUI_MULTIEQUAL);
                             List<Varnode*> parms;
                             for (int i = 0; i < newop.numInput(); ++i)
                                 parms.Add(newop.getIn(i)); // Copy parameters

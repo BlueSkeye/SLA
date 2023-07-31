@@ -33,7 +33,7 @@ namespace Sla.DECCORE
             }
             if (!orvnin.isWritten()) return false;
             loxor = orvnin.getDef();
-            if (loxor.code() != CPUI_INT_XOR) return false;
+            if (loxor.code() != OpCode.CPUI_INT_XOR) return false;
             if (loxor.getIn(0) == lo1)
             {
                 lo2 = loxor.getIn(1);
@@ -58,7 +58,7 @@ namespace Sla.DECCORE
             {
                 equalop = *iter;
                 ++iter;
-                if ((equalop.code() != CPUI_INT_EQUAL) && (equalop.code() != CPUI_INT_NOTEQUAL)) continue;
+                if ((equalop.code() != OpCode.CPUI_INT_EQUAL) && (equalop.code() != OpCode.CPUI_INT_NOTEQUAL)) continue;
                 if (!equalop.getIn(1).isConstant()) continue;
                 if (equalop.getIn(1).getOffset() != 0) continue;
 
@@ -127,7 +127,7 @@ namespace Sla.DECCORE
             hi1 = @@in.getHi();
             lo1 = @@in.getLo();
 
-            if (op.code() == CPUI_INT_OR)
+            if (op.code() == OpCode.CPUI_INT_OR)
             {
                 orop = op;
                 orhislot = op.getSlot(hi1);
@@ -152,7 +152,7 @@ namespace Sla.DECCORE
                 {
                     orop = *iter;
                     ++iter;
-                    if (orop.code() != CPUI_INT_OR) continue;
+                    if (orop.code() != OpCode.CPUI_INT_OR) continue;
                     orhislot = orop.getSlot(vn);
                     if (fillOutFromOr(data))
                     {

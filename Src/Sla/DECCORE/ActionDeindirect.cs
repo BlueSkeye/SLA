@@ -32,9 +32,9 @@ namespace Sla.DECCORE
             {
                 fc = data.getCallSpecs(i);
                 op = fc.getOp();
-                if (op.code() != CPUI_CALLIND) continue;
+                if (op.code() != OpCode.CPUI_CALLIND) continue;
                 vn = op.getIn(0);
-                while (vn.isWritten() && (vn.getDef().code() == CPUI_COPY))
+                while (vn.isWritten() && (vn.getDef().code() == OpCode.CPUI_COPY))
                     vn = vn.getDef().getIn(0);
                 if (vn.isPersist() && vn.isExternalRef())
                 { // Check for possible external reference
@@ -70,8 +70,8 @@ namespace Sla.DECCORE
                 {
                     // Check for a function pointer that has an attached prototype
                     Datatype* ct = op.getIn(0).getTypeReadFacing(op);
-                    if ((ct.getMetatype() == TYPE_PTR) &&
-                    (((TypePointer*)ct).getPtrTo().getMetatype() == TYPE_CODE))
+                    if ((ct.getMetatype() == type_metatype.TYPE_PTR) &&
+                    (((TypePointer*)ct).getPtrTo().getMetatype() == type_metatype.TYPE_CODE))
                     {
                         TypeCode* tc = (TypeCode*)((TypePointer*)ct).getPtrTo();
                         FuncProto* fp = tc.getPrototype();

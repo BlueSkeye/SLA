@@ -42,7 +42,7 @@ namespace Sla.DECCORE
 
         /// Construct given an address space, scope, and architecture
         public TypeSpacebase(AddrSpace id, Address frame, Architecture g)
-            : base(0, TYPE_SPACEBASE)
+            : base(0, type_metatype.TYPE_SPACEBASE)
         {
             localframe = frame;
             spaceid = id;
@@ -98,7 +98,7 @@ namespace Sla.DECCORE
             if (smallest == (SymbolEntry)null)
             {
                 *newoff = 0;
-                return glb.types.getBase(1, TYPE_UNKNOWN);
+                return glb.types.getBase(1, type_metatype.TYPE_UNKNOWN);
             }
             *newoff = (addr.getOffset() - smallest.getAddr().getOffset()) + smallest.getOffset();
             return smallest.getSymbol().getType();
@@ -121,7 +121,7 @@ namespace Sla.DECCORE
             else
             {
                 symbolType = smallest.getSymbol().getType();
-                if (symbolType.getMetatype() == TYPE_STRUCT)
+                if (symbolType.getMetatype() == type_metatype.TYPE_STRUCT)
                 {
                     ulong structOff = addr.getOffset() - smallest.getAddr().getOffset();
                     ulong dummyOff;
@@ -142,12 +142,12 @@ namespace Sla.DECCORE
                 return (Datatype)null;
             symbolType = smallest.getSymbol().getType();
             *newoff = addr.getOffset() - smallest.getAddr().getOffset();
-            if (symbolType.getMetatype() == TYPE_ARRAY)
+            if (symbolType.getMetatype() == type_metatype.TYPE_ARRAY)
             {
                 *elSize = ((TypeArray*)symbolType).getBase().getSize();
                 return symbolType;
             }
-            if (symbolType.getMetatype() == TYPE_STRUCT)
+            if (symbolType.getMetatype() == type_metatype.TYPE_STRUCT)
             {
                 ulong dummyOff;
                 Datatype* res = symbolType.nearestArrayedComponentForward(0, &dummyOff, elSize);
@@ -162,12 +162,12 @@ namespace Sla.DECCORE
             Datatype* subType = getSubType(off, newoff);
             if (subType == (Datatype)null)
                 return (Datatype)null;
-            if (subType.getMetatype() == TYPE_ARRAY)
+            if (subType.getMetatype() == type_metatype.TYPE_ARRAY)
             {
                 *elSize = ((TypeArray*)subType).getBase().getSize();
                 return subType;
             }
-            if (subType.getMetatype() == TYPE_STRUCT)
+            if (subType.getMetatype() == type_metatype.TYPE_STRUCT)
             {
                 ulong dummyOff;
                 Datatype* res = subType.nearestArrayedComponentBackward(*newoff, &dummyOff, elSize);

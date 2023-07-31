@@ -45,25 +45,25 @@ namespace Sla.DECCORE
             cmp2 = vn2.getDef();
             OpCode opccmp1 = cmp1.code();
             // Set cmp1 to LESS or LESSEQUAL operator, cmp2 is the "other" operator
-            if ((opccmp1 != CPUI_FLOAT_LESS) && (opccmp1 != CPUI_FLOAT_LESSEQUAL))
+            if ((opccmp1 != OpCode.CPUI_FLOAT_LESS) && (opccmp1 != OpCode.CPUI_FLOAT_LESSEQUAL))
             {
                 cmp1 = cmp2;
                 cmp2 = vn1.getDef();
                 opccmp1 = cmp1.code();
             }
-            OpCode resultopc = CPUI_COPY;
-            if (opccmp1 == CPUI_FLOAT_LESS)
+            OpCode resultopc = OpCode.CPUI_COPY;
+            if (opccmp1 == OpCode.CPUI_FLOAT_LESS)
             {
-                if ((cmp2.code() == CPUI_FLOAT_EQUAL) && (op.code() == CPUI_BOOL_OR))
-                    resultopc = CPUI_FLOAT_LESSEQUAL;
+                if ((cmp2.code() == OpCode.CPUI_FLOAT_EQUAL) && (op.code() == OpCode.CPUI_BOOL_OR))
+                    resultopc = OpCode.CPUI_FLOAT_LESSEQUAL;
             }
-            else if (opccmp1 == CPUI_FLOAT_LESSEQUAL)
+            else if (opccmp1 == OpCode.CPUI_FLOAT_LESSEQUAL)
             {
-                if ((cmp2.code() == CPUI_FLOAT_NOTEQUAL) && (op.code() == CPUI_BOOL_AND))
-                    resultopc = CPUI_FLOAT_LESS;
+                if ((cmp2.code() == OpCode.CPUI_FLOAT_NOTEQUAL) && (op.code() == OpCode.CPUI_BOOL_AND))
+                    resultopc = OpCode.CPUI_FLOAT_LESS;
             }
 
-            if (resultopc == CPUI_COPY) return 0;
+            if (resultopc == OpCode.CPUI_COPY) return 0;
 
             // Make sure both operators are comparing the same things
             Varnode* nvn1,*cvn1;

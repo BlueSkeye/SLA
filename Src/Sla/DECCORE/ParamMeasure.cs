@@ -84,15 +84,15 @@ namespace Sla.DECCORE
                     OpCode oc = op.getOpcode().getOpcode();
                     switch (oc)
                     {
-                        case CPUI_BRANCH:
-                        case CPUI_BRANCHIND:
+                        case OpCode.CPUI_BRANCH:
+                        case OpCode.CPUI_BRANCHIND:
                             if (op.getSlot(vn) == 0) updaterank(DIRECTREAD, state.best);
                             break;
-                        case CPUI_CBRANCH:
+                        case OpCode.CPUI_CBRANCH:
                             if (op.getSlot(vn) < 2) updaterank(DIRECTREAD, state.best);
                             break;
-                        case CPUI_CALL:
-                        case CPUI_CALLIND:
+                        case OpCode.CPUI_CALL:
+                        case OpCode.CPUI_CALLIND:
                             if (op.getSlot(vn) == 0) updaterank(DIRECTREAD, state.best);
                             else
                             {
@@ -100,16 +100,16 @@ namespace Sla.DECCORE
                                 updaterank(SUBFNPARAM, state.best);
                             }
                             break;
-                        case CPUI_CALLOTHER:
+                        case OpCode.CPUI_CALLOTHER:
                             updaterank(DIRECTREAD, state.best);
                             break;
-                        case CPUI_RETURN:
+                        case OpCode.CPUI_RETURN:
                             updaterank(THISFNRETURN, state.best);
                             break;
-                        case CPUI_INDIRECT:
+                        case OpCode.CPUI_INDIRECT:
                             updaterank(INDIRECT, state.best);
                             break;
-                        case CPUI_MULTIEQUAL:
+                        case OpCode.CPUI_MULTIEQUAL:
                             // The only op for which there can be a loop in the graph is with the MULTIEQUAL (not for CALL, etc.).
                             // Walk forward only if the path is not part of a loop.
                             if (!op.getParent().isLoopIn(op.getSlot(vn))) walkforward(state, (PcodeOp)null, op.getOut());
@@ -141,22 +141,22 @@ namespace Sla.DECCORE
             OpCode oc = op.getOpcode().getOpcode();
             switch (oc)
             {
-                case CPUI_BRANCH:
-                case CPUI_BRANCHIND:
-                case CPUI_CBRANCH:
-                case CPUI_CALL:
-                case CPUI_CALLIND:
+                case OpCode.CPUI_BRANCH:
+                case OpCode.CPUI_BRANCHIND:
+                case OpCode.CPUI_CBRANCH:
+                case OpCode.CPUI_CALL:
+                case OpCode.CPUI_CALLIND:
                     break;
-                case CPUI_CALLOTHER:
+                case OpCode.CPUI_CALLOTHER:
                     if (op.getOut() != (Varnode)null) updaterank(DIRECTREAD, state.best);
                     break;
-                case CPUI_RETURN:
+                case OpCode.CPUI_RETURN:
                     updaterank(SUBFNRETURN, state.best);
                     break;
-                case CPUI_INDIRECT:
+                case OpCode.CPUI_INDIRECT:
                     updaterank(INDIRECT, state.best);
                     break;
-                case CPUI_MULTIEQUAL:
+                case OpCode.CPUI_MULTIEQUAL:
                     // The only op for which there can be a loop in the graph is with the MULTIEQUAL (not for CALL, etc.).
                     // Walk backward only if the path is not part of a loop.
                     for (int slot = 0; slot < op.numInput() && rank != state.terminalrank; slot++)

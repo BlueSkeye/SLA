@@ -38,16 +38,16 @@ namespace Sla.DECCORE
             {
                 PcodeOp* logicOp = *iter;
                 OpCode opc = logicOp.code();
-                if (opc != CPUI_INT_AND && opc != CPUI_INT_OR && opc != CPUI_INT_XOR)
+                if (opc != OpCode.CPUI_INT_AND && opc != OpCode.CPUI_INT_OR && opc != OpCode.CPUI_INT_XOR)
                     continue;
                 int slot = logicOp.getSlot(outVn);
                 if (logicOp.getIn(1 - slot) != vn) continue;
                 ulong value = 0;
-                if (opc != CPUI_INT_AND)
+                if (opc != OpCode.CPUI_INT_AND)
                     value = Globals.calc_mask(vn.getSize());
                 data.opSetInput(logicOp, data.newConstant(vn.getSize(), value), 0);
                 data.opRemoveInput(logicOp, 1);
-                data.opSetOpcode(logicOp, CPUI_COPY);
+                data.opSetOpcode(logicOp, OpCode.CPUI_COPY);
                 return 1;
             }
             return 0;

@@ -10,51 +10,51 @@ namespace Sla.DECCORE
     /// Ordering is important: The lower the number, the more \b specific the data-type, affecting propagation.
     internal enum sub_metatype
     {
-        /// Compare as a TYPE_VOID
+        /// Compare as a type_metatype.TYPE_VOID
         SUB_VOID = 22,
-        /// Compare as a TYPE_SPACEBASE
+        /// Compare as a type_metatype.TYPE_SPACEBASE
         SUB_SPACEBASE = 21,
-        /// Compare as a TYPE_UNKNOWN
+        /// Compare as a type_metatype.TYPE_UNKNOWN
         SUB_UNKNOWN = 20,
-        /// Compare as TYPE_PARTIALSTRUCT
+        /// Compare as type_metatype.TYPE_PARTIALSTRUCT
         SUB_PARTIALSTRUCT = 19,
-        /// Signed 1-byte character, sub-type of TYPE_INT
+        /// Signed 1-byte character, sub-type of type_metatype.TYPE_INT
         SUB_INT_CHAR = 18,
-        /// Unsigned 1-byte character, sub-type of TYPE_UINT
+        /// Unsigned 1-byte character, sub-type of type_metatype.TYPE_UINT
         SUB_UINT_CHAR = 17,
-        /// Compare as a plain TYPE_INT
+        /// Compare as a plain type_metatype.TYPE_INT
         SUB_INT_PLAIN = 16,
-        /// Compare as a plain TYPE_UINT
+        /// Compare as a plain type_metatype.TYPE_UINT
         SUB_UINT_PLAIN = 15,
-        /// Signed enum, sub-type of TYPE_INT
+        /// Signed enum, sub-type of type_metatype.TYPE_INT
         SUB_INT_ENUM = 14,
-        /// Unsigned enum, sub-type of TYPE_UINT
+        /// Unsigned enum, sub-type of type_metatype.TYPE_UINT
         SUB_UINT_ENUM = 13,
-        /// Signed wide character, sub-type of TYPE_INT
+        /// Signed wide character, sub-type of type_metatype.TYPE_INT
         SUB_INT_UNICODE = 12,
-        /// Unsigned wide character, sub-type of TYPE_UINT
+        /// Unsigned wide character, sub-type of type_metatype.TYPE_UINT
         SUB_UINT_UNICODE = 11,
-        /// Compare as TYPE_BOOL
+        /// Compare as type_metatype.TYPE_BOOL
         SUB_BOOL = 10,
-        /// Compare as TYPE_CODE
+        /// Compare as type_metatype.TYPE_CODE
         SUB_CODE = 9,
-        /// Compare as TYPE_FLOAT
+        /// Compare as type_metatype.TYPE_FLOAT
         SUB_FLOAT = 8,
-        /// Pointer to unknown field of struct, sub-type of TYPE_PTR
+        /// Pointer to unknown field of struct, sub-type of type_metatype.TYPE_PTR
         SUB_PTRREL_UNK = 7,
-        /// Compare as TYPE_PTR
+        /// Compare as type_metatype.TYPE_PTR
         SUB_PTR = 6,
-        /// Pointer relative to another data-type, sub-type of TYPE_PTR
+        /// Pointer relative to another data-type, sub-type of type_metatype.TYPE_PTR
         SUB_PTRREL = 5,
-        /// Pointer into struct, sub-type of TYPE_PTR
+        /// Pointer into struct, sub-type of type_metatype.TYPE_PTR
         SUB_PTR_STRUCT = 4,
-        /// Compare as TYPE_ARRAY
+        /// Compare as type_metatype.TYPE_ARRAY
         SUB_ARRAY = 3,
-        /// Compare as TYPE_STRUCT
+        /// Compare as type_metatype.TYPE_STRUCT
         SUB_STRUCT = 2,
-        /// Compare as TYPE_UNION
+        /// Compare as type_metatype.TYPE_UNION
         SUB_UNION = 1,
-        /// Compare as a TYPE_PARTIALUNION
+        /// Compare as a type_metatype.TYPE_PARTIALUNION
         SUB_PARTIALUNION = 0
     }
 }

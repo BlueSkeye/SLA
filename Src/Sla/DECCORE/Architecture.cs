@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 using System.Threading.Tasks;
 using static System.Formats.Asn1.AsnWriter;
 using System.Xml.Linq;
@@ -617,7 +617,7 @@ namespace Sla.DECCORE
         /// a function name based on its address
         /// \param addr is the address of the function
         /// \param name will hold the constructed name
-        public virtual void nameFunction(Address addr, string name)
+        public virtual void nameFunction(Address addr, out string name)
         {
             StringWriter defname = new StringWriter();
             defname.Write("func_");

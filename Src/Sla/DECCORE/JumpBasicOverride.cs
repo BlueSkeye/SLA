@@ -168,7 +168,7 @@ namespace Sla.DECCORE
             for (i = 0; i < pathMeld.numOps(); ++i)
             { // Look for last LOAD
                 op = pathMeld.getOp(i);
-                if (op.code() == CPUI_LOAD)
+                if (op.code() == OpCode.CPUI_LOAD)
                 {
                     res = pathMeld.getOpParent(i);
                     break;
@@ -179,7 +179,7 @@ namespace Sla.DECCORE
             while (i < pathMeld.numOps())
             { // Look for preceding ADD
                 op = pathMeld.getOp(i);
-                if (op.code() == CPUI_INT_ADD)
+                if (op.code() == OpCode.CPUI_INT_ADD)
                 {
                     res = pathMeld.getOpParent(i);
                     break;
@@ -190,7 +190,7 @@ namespace Sla.DECCORE
             while (i < pathMeld.numOps())
             { // Look for preceding MULT
                 op = pathMeld.getOp(i);
-                if (op.code() == CPUI_INT_MULT)
+                if (op.code() == OpCode.CPUI_INT_MULT)
                 {
                     res = pathMeld.getOpParent(i);
                     break;

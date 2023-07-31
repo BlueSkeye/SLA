@@ -64,7 +64,7 @@ namespace Sla.DECCORE
                     for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
                     {
                         op = *iter;
-                        if (op.code() != CPUI_COPY) continue;
+                        if (op.code() != OpCode.CPUI_COPY) continue;
                         Varnode* outvn = op.getOut();
                         if (!data.getScopeLocal().isUnaffectedStorage(outvn))  // Is this where unaffected values get saved
                             continue;

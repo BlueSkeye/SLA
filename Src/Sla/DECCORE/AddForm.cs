@@ -31,11 +31,11 @@ namespace Sla.DECCORE
         { // If -op- matches a CARRY construction based on lo1 (i.e. CARRY(x,lo1) )
           //    set lo1 (and negconst if lo1 is a constant) to be the corresponding part of the carry
           //    and return true
-            if (op.code() != CPUI_INT_ZEXT) return false;
+            if (op.code() != OpCode.CPUI_INT_ZEXT) return false;
             if (!op.getIn(0).isWritten()) return false;
 
             PcodeOp* carryop = op.getIn(0).getDef();
-            if (carryop.code() == CPUI_INT_CARRY)
+            if (carryop.code() == OpCode.CPUI_INT_CARRY)
             { // Normal CARRY form
                 if (carryop.getIn(0) == lo1)
                     lo2 = carryop.getIn(1);
@@ -46,7 +46,7 @@ namespace Sla.DECCORE
                 if (lo2.isConstant()) return false;
                 return true;
             }
-            if (carryop.code() == CPUI_INT_LESS)
+            if (carryop.code() == OpCode.CPUI_INT_LESS)
             { // Possible CARRY
                 Varnode* tmpvn = carryop.getIn(0);
                 if (tmpvn.isConstant())
@@ -63,7 +63,7 @@ namespace Sla.DECCORE
                 else if (tmpvn.isWritten())
                 {   // Calculate CARRY relative to result of loadd
                     PcodeOp* loadd_op = tmpvn.getDef();    // This is the putative loadd
-                    if (loadd_op.code() != CPUI_INT_ADD) return false;
+                    if (loadd_op.code() != OpCode.CPUI_INT_ADD) return false;
                     Varnode* othervn;
                     if (loadd_op.getIn(0) == lo1)
                         othervn = loadd_op.getIn(1);
@@ -91,7 +91,7 @@ namespace Sla.DECCORE
                 }
                 return false;
             }
-            if (carryop.code() == CPUI_INT_NOTEQUAL)
+            if (carryop.code() == OpCode.CPUI_INT_NOTEQUAL)
             { // Possible CARRY against -1
                 if (!carryop.getIn(1).isConstant()) return false;
                 if (carryop.getIn(0) != lo1) return false;
@@ -125,7 +125,7 @@ namespace Sla.DECCORE
                 {       // Assume we have to descend one more add
                     add2 = op.getOut().loneDescend();
                     if (add2 == (PcodeOp)null) continue;
-                    if (add2.code() != CPUI_INT_ADD) continue;
+                    if (add2.code() != OpCode.CPUI_INT_ADD) continue;
                     reshi = add2.getOut();
                     hizext1 = op.getIn(1 - slot1);
                     hizext2 = add2.getIn(1 - add2.getSlot(op.getOut()));
@@ -135,7 +135,7 @@ namespace Sla.DECCORE
                     Varnode* tmpvn = op.getIn(1 - slot1);
                     if (!tmpvn.isWritten()) continue;
                     add2 = tmpvn.getDef();
-                    if (add2.code() != CPUI_INT_ADD) continue;
+                    if (add2.code() != OpCode.CPUI_INT_ADD) continue;
                     reshi = op.getOut();
                     hizext1 = add2.getIn(0);
                     hizext2 = add2.getIn(1);
@@ -175,7 +175,7 @@ namespace Sla.DECCORE
                     {
                         loadd = *iter2;
                         ++iter2;
-                        if (loadd.code() != CPUI_INT_ADD) continue;
+                        if (loadd.code() != OpCode.CPUI_INT_ADD) continue;
                         Varnode* tmpvn = loadd.getIn(1 - loadd.getSlot(lo1));
                         if (lo2 == (Varnode)null)
                         {
@@ -211,7 +211,7 @@ namespace Sla.DECCORE
             existop = SplitVarnode.prepareBinaryOp(outdoub, @in, indoub);
             if (existop == (PcodeOp)null)
                 return false;
-            SplitVarnode.createBinaryOp(data, outdoub, @in, indoub, existop, CPUI_INT_ADD);
+            SplitVarnode.createBinaryOp(data, outdoub, @in, indoub, existop, OpCode.CPUI_INT_ADD);
             return true;
         }
     }

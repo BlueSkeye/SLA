@@ -34,7 +34,7 @@ namespace Sla.DECCORE
             Varnode* zextvn = op.getIn(0);
             if (!zextvn.isWritten()) return 0;
             PcodeOp* zextop = zextvn.getDef();
-            if (zextop.code() != CPUI_INT_ZEXT) return 0;
+            if (zextop.code() != OpCode.CPUI_INT_ZEXT) return 0;
             Varnode* zextin = zextop.getIn(0);
             if (zextin.isFree()) return 0;
             Varnode* savn = op.getIn(1);
@@ -42,11 +42,11 @@ namespace Sla.DECCORE
                 return 0;
 
             PcodeOp* newop = data.newOp(2, op.getAddr());
-            data.opSetOpcode(newop, CPUI_INT_RIGHT);
+            data.opSetOpcode(newop, OpCode.CPUI_INT_RIGHT);
             Varnode* newout = data.newUniqueOut(zextin.getSize(), newop);
             data.opRemoveInput(op, 1);
             data.opSetInput(op, newout, 0);
-            data.opSetOpcode(op, CPUI_INT_ZEXT);
+            data.opSetOpcode(op, OpCode.CPUI_INT_ZEXT);
             data.opSetInput(newop, zextin, 0);
             data.opSetInput(newop, savn, 1);
             data.opInsertBefore(newop, op);

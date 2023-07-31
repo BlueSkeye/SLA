@@ -32,8 +32,8 @@ namespace Sla.DECCORE
         ///   - `zext(V) <= c =>  V <= c`
         public override void getOpList(List<uint> oplist)
         {
-            uint list[] = {CPUI_INT_EQUAL, CPUI_INT_NOTEQUAL,
-          CPUI_INT_LESS,CPUI_INT_LESSEQUAL };
+            uint list[] = {CPUI_INT_EQUAL, OpCode.CPUI_INT_NOTEQUAL,
+          OpCode.CPUI_INT_LESS,CPUI_INT_LESSEQUAL };
             oplist.insert(oplist.end(), list, list + 4);
         }
 
@@ -52,14 +52,14 @@ namespace Sla.DECCORE
             vn2 = op.getIn(1);
             zextslot = 0;
             otherslot = 1;
-            if ((vn2.isWritten()) && (vn2.getDef().code() == CPUI_INT_ZEXT))
+            if ((vn2.isWritten()) && (vn2.getDef().code() == OpCode.CPUI_INT_ZEXT))
             {
                 vn1 = vn2;
                 vn2 = op.getIn(0);
                 zextslot = 1;
                 otherslot = 0;
             }
-            else if ((!vn1.isWritten()) || (vn1.getDef().code() != CPUI_INT_ZEXT))
+            else if ((!vn1.isWritten()) || (vn1.getDef().code() != OpCode.CPUI_INT_ZEXT))
                 return 0;
 
             if (!vn2.isConstant()) return 0;

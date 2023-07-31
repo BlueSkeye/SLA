@@ -64,7 +64,7 @@ namespace Sla.DECCORE
                     output.createReplacement(fd);
                 if (follow == (TransformOp*)0)
                 {       // Can be inserted immediately
-                    if (opc == CPUI_MULTIEQUAL)
+                    if (opc == OpCode.CPUI_MULTIEQUAL)
                         fd.opInsertBegin(replacement, op.getParent());
                     else
                         fd.opInsertBefore(replacement, op);
@@ -81,7 +81,7 @@ namespace Sla.DECCORE
             {
                 if (follow.follow == (TransformOp*)0)
                 {   // Check if the follow is inserted
-                    if (opc == CPUI_MULTIEQUAL)
+                    if (opc == OpCode.CPUI_MULTIEQUAL)
                         fd.opInsertBegin(replacement, follow.replacement.getParent());
                     else
                         fd.opInsertBefore(replacement, follow.replacement);

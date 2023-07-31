@@ -262,19 +262,13 @@ namespace Sla.CORE
         private string name;
         /// The (internal) id of the attribute
         private uint id;
-        private static List<ElementId>? _thelist;
+        private static List<ElementId> _thelist = new List<ElementId>();
 
         /// Retrieve the list of static ElementId
         /// Access static List of ElementId objects that are registered during static initialization
         /// The list itself is created once on the first call to this method.
         /// \return a reference to the List
-        private static ref List<ElementId> getList()
-        {
-            if (null == _thelist) {
-                _thelist = new List<ElementId>();
-            }
-            return ref _thelist;
-        }
+        private static List<ElementId> getList() => _thelist;
 
         /// Construct given a name and id
         /// This constructor should only be invoked for static objects.  It registers the element for inclusion
@@ -295,10 +289,7 @@ namespace Sla.CORE
         }
 
         /// Get the element's id
-        public uint getId()
-        {
-            return id;
-        }
+        public uint getId() => id;
 
         /// Test equality with another ElementId
         public static bool operator ==(ElementId op1, ElementId op2)
@@ -311,13 +302,14 @@ namespace Sla.CORE
             return !(op1 == op2);
         }
 
-        // static uint find(const string &nm);          ///< Find the id associated with a specific element name
+        ///< Find the id associated with a specific element name
+        // static uint find(const string &nm);
 
         /// Populate a hashtable with all ElementId objects
         /// Fill the hashtable mapping element names to their id, from registered element objects
         public static void initialize()
         {
-            ref List<ElementId> thelist = ref getList();
+            List<ElementId> thelist = getList();
             for (int i = 0; i < thelist.Count; ++i) {
                 ElementId elem = thelist[i];
 #if CPUI_DEBUG

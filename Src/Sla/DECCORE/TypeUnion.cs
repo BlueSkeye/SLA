@@ -69,7 +69,7 @@ namespace Sla.DECCORE
         }
 
         public TypeUnion()
-            : base(0, TYPE_UNION)
+            : base(0, type_metatype.TYPE_UNION)
         {
             flags |= (type_incomplete | needs_resolution);
         }  ///< Construct incomplete TypeUnion
@@ -251,7 +251,7 @@ namespace Sla.DECCORE
                     return field;
                 }
             }
-            else if (op.code() == CPUI_SUBPIECE && slot == 1)
+            else if (op.code() == OpCode.CPUI_SUBPIECE && slot == 1)
             {   // The slot is artificial in this case
                 ScoreUnionFields scoreFields = new ScoreUnionFields(*fd.getArch().types,this,offset,op);
                 fd.setUnionField(this, op, slot, scoreFields.getResult());

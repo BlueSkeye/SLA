@@ -11,7 +11,7 @@ namespace Sla.DECCORE
     internal class TypeOpIndirect : TypeOp
     {
         public TypeOpIndirect(TypeFactory t)
-            : base(t, CPUI_INDIRECT,"[]")
+            : base(t, OpCode.CPUI_INDIRECT,"[]")
 
         {
             opflags = PcodeOp::special | PcodeOp::marker | PcodeOp::nocollapse;
@@ -41,7 +41,7 @@ namespace Sla.DECCORE
             if (invn.isSpacebase())
             {
                 AddrSpace* spc = tlst.getArch().getDefaultDataSpace();
-                newtype = tlst.getTypePointer(alttype.getSize(), tlst.getBase(1, TYPE_UNKNOWN), spc.getWordSize());
+                newtype = tlst.getTypePointer(alttype.getSize(), tlst.getBase(1, type_metatype.TYPE_UNKNOWN), spc.getWordSize());
             }
             else
                 newtype = alttype;

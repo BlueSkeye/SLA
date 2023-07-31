@@ -131,28 +131,28 @@ namespace Sla.EXTRA
             else
             {
                 // Put in the core types
-                types.setCoreType("void", 1, TYPE_VOID, false);
-                types.setCoreType("bool", 1, TYPE_BOOL, false);
-                types.setCoreType("byte", 1, TYPE_UINT, false);
-                types.setCoreType("ushort", 2, TYPE_UINT, false);
-                types.setCoreType("uint", 4, TYPE_UINT, false);
-                types.setCoreType("ulong", 8, TYPE_UINT, false);
-                types.setCoreType("int1", 1, TYPE_INT, false);
-                types.setCoreType("short", 2, TYPE_INT, false);
-                types.setCoreType("int", 4, TYPE_INT, false);
-                types.setCoreType("long", 8, TYPE_INT, false);
-                types.setCoreType("float4", 4, TYPE_FLOAT, false);
-                types.setCoreType("float8", 8, TYPE_FLOAT, false);
-                types.setCoreType("float10", 10, TYPE_FLOAT, false);
-                types.setCoreType("float16", 16, TYPE_FLOAT, false);
-                types.setCoreType("xunknown1", 1, TYPE_UNKNOWN, false);
-                types.setCoreType("xunknown2", 2, TYPE_UNKNOWN, false);
-                types.setCoreType("xunknown4", 4, TYPE_UNKNOWN, false);
-                types.setCoreType("xunknown8", 8, TYPE_UNKNOWN, false);
-                types.setCoreType("code", 1, TYPE_CODE, false);
-                types.setCoreType("char", 1, TYPE_INT, true);
-                types.setCoreType("wchar2", 2, TYPE_INT, true);
-                types.setCoreType("wchar4", 4, TYPE_INT, true);
+                types.setCoreType("void", 1, type_metatype.TYPE_VOID, false);
+                types.setCoreType("bool", 1, type_metatype.TYPE_BOOL, false);
+                types.setCoreType("byte", 1, type_metatype.TYPE_UINT, false);
+                types.setCoreType("ushort", 2, type_metatype.TYPE_UINT, false);
+                types.setCoreType("uint", 4, type_metatype.TYPE_UINT, false);
+                types.setCoreType("ulong", 8, type_metatype.TYPE_UINT, false);
+                types.setCoreType("int1", 1, type_metatype.TYPE_INT, false);
+                types.setCoreType("short", 2, type_metatype.TYPE_INT, false);
+                types.setCoreType("int", 4, type_metatype.TYPE_INT, false);
+                types.setCoreType("long", 8, type_metatype.TYPE_INT, false);
+                types.setCoreType("float4", 4, type_metatype.TYPE_FLOAT, false);
+                types.setCoreType("float8", 8, type_metatype.TYPE_FLOAT, false);
+                types.setCoreType("float10", 10, type_metatype.TYPE_FLOAT, false);
+                types.setCoreType("float16", 16, type_metatype.TYPE_FLOAT, false);
+                types.setCoreType("xunknown1", 1, type_metatype.TYPE_UNKNOWN, false);
+                types.setCoreType("xunknown2", 2, type_metatype.TYPE_UNKNOWN, false);
+                types.setCoreType("xunknown4", 4, type_metatype.TYPE_UNKNOWN, false);
+                types.setCoreType("xunknown8", 8, type_metatype.TYPE_UNKNOWN, false);
+                types.setCoreType("code", 1, type_metatype.TYPE_CODE, false);
+                types.setCoreType("char", 1, type_metatype.TYPE_INT, true);
+                types.setCoreType("wchar2", 2, type_metatype.TYPE_INT, true);
+                types.setCoreType("wchar4", 4, type_metatype.TYPE_INT, true);
                 types.cacheCoreTypes();
             }
         }
@@ -222,7 +222,7 @@ namespace Sla.EXTRA
                     else
                         symboltab.setPropertyRange(Varnode::volatil, range);
                 }
-                Datatype ct = types.getBase(size, TYPE_UNKNOWN);
+                Datatype ct = types.getBase(size, type_metatype.TYPE_UNKNOWN);
                 Address usepoint;
                 symboltab.getGlobalScope().addSymbol(name, ct, addr, usepoint);
             }

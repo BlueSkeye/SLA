@@ -76,7 +76,7 @@ namespace Sla.DECCORE
             }
 
             if (inst.isBranch()) {
-                if (inst.code() == CPUI_BRANCHIND)
+                if (inst.code() == OpCode.CPUI_BRANCHIND)
                     setFlag(block_flags.f_switch_out);
             }
         }
@@ -246,7 +246,7 @@ namespace Sla.DECCORE
                 return 2;
             }
             PcodeOp lastop = op[op.Count - 1];
-            return (lastop.code() != CPUI_CBRANCH) ? 2 : opFlipInPlaceTest(lastop, fliplist);
+            return (lastop.code() != OpCode.CPUI_CBRANCH) ? 2 : opFlipInPlaceTest(lastop, fliplist);
         }
 
         public override void flipInPlaceExecute()
@@ -368,7 +368,7 @@ namespace Sla.DECCORE
             }
             foreach (PcodeOp iter in blout.op) {
                 multiop = iter;
-                if (multiop.code() != CPUI_MULTIEQUAL) {
+                if (multiop.code() != OpCode.CPUI_MULTIEQUAL) {
                     continue;
                 }
                 foreach (FlowBlock biter in redundlist) {
@@ -378,7 +378,7 @@ namespace Sla.DECCORE
                     vnremove = multiop.getIn(blout.getInIndex(this));
                     if (vnremove.isWritten()) {
                         othermulti = vnremove.getDef();
-                        if ((othermulti.code() == CPUI_MULTIEQUAL) && (othermulti.getParent() == this)) {
+                        if ((othermulti.code() == OpCode.CPUI_MULTIEQUAL) && (othermulti.getParent() == this)) {
                             vnremove = othermulti.getIn(getInIndex(bl));
                         }
                     }
@@ -436,7 +436,7 @@ namespace Sla.DECCORE
                 }
             }
             PcodeOp lastop = lastOp();
-            return ((lastop == null) || (lastop.code() != CPUI_BRANCHIND) || hasOnlyMarkers());
+            return ((lastop == null) || (lastop.code() != OpCode.CPUI_BRANCHIND) || hasOnlyMarkers());
         }
 
         /// Return an iterator to the beginning of the PcodeOps
@@ -481,7 +481,7 @@ namespace Sla.DECCORE
         }
 
         /// Find MULTIEQUAL with given inputs
-        /// If there exists a CPUI_MULTIEQUAL PcodeOp in \b this basic block that takes the given exact list of Varnodes
+        /// If there exists a OpCode.CPUI_MULTIEQUAL PcodeOp in \b this basic block that takes the given exact list of Varnodes
         /// as its inputs, return that PcodeOp. Otherwise return null.
         /// \param varArray is the exact list of Varnodes
         /// \return the MULTIEQUAL or null
@@ -492,7 +492,7 @@ namespace Sla.DECCORE
             IEnumerator<PcodeOp> iter = vn.beginDescend();
             while (true) {
                 op = iter.Current;
-                if (op.code() == CPUI_MULTIEQUAL && op.getParent() == this) {
+                if (op.code() == OpCode.CPUI_MULTIEQUAL && op.getParent() == this) {
                     break;
                 }
                 ++iter;

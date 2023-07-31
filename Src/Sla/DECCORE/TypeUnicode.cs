@@ -37,13 +37,13 @@ namespace Sla.DECCORE
             decodeBasic(decoder);
             // Get endianness flag from architecture, rather than specific type encoding
             setflags();
-            submeta = (metatype == TYPE_INT) ? SUB_INT_UNICODE : SUB_UINT_UNICODE;
+            submeta = (metatype == type_metatype.TYPE_INT) ? SUB_INT_UNICODE : SUB_UINT_UNICODE;
             //  decoder.closeElement(elemId);
         }
 
         /// For use with decode
         public TypeUnicode()
-            : base(0, TYPE_INT)
+            : base(0, type_metatype.TYPE_INT)
         {
         }
 
@@ -58,7 +58,7 @@ namespace Sla.DECCORE
             : base(sz, m, nm)
         {
             setflags();         // Set special unicode UTF flags
-            submeta = (m == TYPE_INT) ? SUB_INT_UNICODE : SUB_UINT_UNICODE;
+            submeta = (m == type_metatype.TYPE_INT) ? SUB_INT_UNICODE : SUB_UINT_UNICODE;
         }
 
         public override Datatype clone() => new TypeUnicode(this);

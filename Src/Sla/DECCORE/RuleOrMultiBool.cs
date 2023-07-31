@@ -43,12 +43,12 @@ namespace Sla.DECCORE
                 PcodeOp* baseOp = *iter;
                 OpCode opc = baseOp.code();
                 // Result of INT_OR must be compared with zero
-                if (opc != CPUI_INT_EQUAL && opc != CPUI_INT_NOTEQUAL) continue;
+                if (opc != OpCode.CPUI_INT_EQUAL && opc != OpCode.CPUI_INT_NOTEQUAL) continue;
                 Varnode* zerovn = baseOp.getIn(1);
                 if (!zerovn.isConstant()) continue;
                 if (zerovn.getOffset() != 0) continue;
-                int pos0 = leastsigbit_set(outVn.getNZMask());
-                int pos1 = mostsigbit_set(outVn.getNZMask());
+                int pos0 = Globals.leastsigbit_set(outVn.getNZMask());
+                int pos1 = Globals.mostsigbit_set(outVn.getNZMask());
                 int constRes0, constRes1;
                 Varnode* b1 = RulePopcountBoolXor::getBooleanResult(outVn, pos0, constRes0);
                 if (b1 == (Varnode)null && constRes0 != 1) continue;
@@ -60,21 +60,21 @@ namespace Sla.DECCORE
                     b1 = data.newConstant(1, 1);
                 if (b2 == (Varnode)null)
                     b2 = data.newConstant(1, 1);
-                if (opc == CPUI_INT_EQUAL)
+                if (opc == OpCode.CPUI_INT_EQUAL)
                 {
                     PcodeOp* newOp = data.newOp(2, baseOp.getAddr());
                     Varnode* notIn = data.newUniqueOut(1, newOp);
-                    data.opSetOpcode(newOp, CPUI_BOOL_OR);
+                    data.opSetOpcode(newOp, OpCode.CPUI_BOOL_OR);
                     data.opSetInput(newOp, b1, 0);
                     data.opSetInput(newOp, b2, 1);
                     data.opInsertBefore(newOp, baseOp);
                     data.opRemoveInput(baseOp, 1);
                     data.opSetInput(baseOp, notIn, 0);
-                    data.opSetOpcode(baseOp, CPUI_BOOL_NEGATE);
+                    data.opSetOpcode(baseOp, OpCode.CPUI_BOOL_NEGATE);
                 }
                 else
                 {
-                    data.opSetOpcode(baseOp, CPUI_BOOL_OR);
+                    data.opSetOpcode(baseOp, OpCode.CPUI_BOOL_OR);
                     data.opSetInput(baseOp, b1, 0);
                     data.opSetInput(baseOp, b2, 1);
                 }

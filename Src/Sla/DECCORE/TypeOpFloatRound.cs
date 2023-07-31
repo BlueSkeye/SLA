@@ -12,7 +12,7 @@ namespace Sla.DECCORE
     internal class TypeOpFloatRound : TypeOpFunc
     {
         public TypeOpFloatRound(TypeFactory t, Translate trans)
-            : base(t, CPUI_FLOAT_ROUND,"ROUND", TYPE_FLOAT, TYPE_FLOAT)
+            : base(t, OpCode.CPUI_FLOAT_ROUND,"ROUND", type_metatype.TYPE_FLOAT, type_metatype.TYPE_FLOAT)
         {
             opflags = PcodeOp::unary;
             addlflags = floatingpoint_op;

@@ -40,12 +40,12 @@ namespace Sla.DECCORE
                 if (v.isWritten())
                 {
                     OpCode opc = v.getDef().code();
-                    if (opc == CPUI_LOAD)
+                    if (opc == OpCode.CPUI_LOAD)
                     {
                         slot = 1;
                         slotback = 2;
                     }
-                    else if (opc == CPUI_PTRADD)
+                    else if (opc == OpCode.CPUI_PTRADD)
                         slotback = 1;           // Don't traverse the multiplier slot
                     else
                         slotback = v.getDef().numInput();
@@ -54,7 +54,7 @@ namespace Sla.DECCORE
         }
 
         ///< Make initial determination if a Varnode should be \e explicit
-        /// If the given Varnode is defined by CPUI_NEW, return -2 indicating it should be explicit
+        /// If the given Varnode is defined by OpCode.CPUI_NEW, return -2 indicating it should be explicit
         /// and that it needs special printing.
         /// \param vn is the given Varnode
         /// \param maxref is the maximum number of references to consider before forcing explicitness
@@ -68,7 +68,7 @@ namespace Sla.DECCORE
             if (def.isMarker()) return -1;
             if (def.isCall())
             {
-                if ((def.code() == CPUI_NEW) && (def.numInput() == 1))
+                if ((def.code() == OpCode.CPUI_NEW) && (def.numInput() == 1))
                     return -2;      // Explicit, but may need special printing
                 return -1;
             }
@@ -76,7 +76,7 @@ namespace Sla.DECCORE
             if ((high != (HighVariable)null) && (high.numInstances() > 1)) return -1; // Must not be merged at all
             if (vn.isAddrTied())
             {       // We need to see addrtied as explicit because pointers may reference it
-                if (def.code() == CPUI_SUBPIECE)
+                if (def.code() == OpCode.CPUI_SUBPIECE)
                 {
                     Varnode* vin = def.getIn(0);
                     if (vin.isAddrTied())
@@ -87,20 +87,20 @@ namespace Sla.DECCORE
                 }
                 PcodeOp* useOp = vn.loneDescend();
                 if (useOp == (PcodeOp)null) return -1;
-                if (useOp.code() == CPUI_INT_ZEXT)
+                if (useOp.code() == OpCode.CPUI_INT_ZEXT)
                 {
                     Varnode* vnout = useOp.getOut();
                     if ((!vnout.isAddrTied()) || (0 != vnout.contains(*vn)))
                         return -1;
                 }
-                else if (useOp.code() == CPUI_PIECE)
+                else if (useOp.code() == OpCode.CPUI_PIECE)
                 {
                     Varnode* rootVn = PieceNode::findRoot(vn);
                     if (vn == rootVn) return -1;
                     if (rootVn.getDef().isPartialRoot())
                     {
                         // Getting PIECEd into a structured thing.  Unless vn is a leaf, it should be implicit
-                        if (def.code() != CPUI_PIECE) return -1;
+                        if (def.code() != OpCode.CPUI_PIECE) return -1;
                         if (vn.loneDescend() == (PcodeOp)null) return -1;
                         Varnode* vn0 = def.getIn(0);
                         Varnode* vn1 = def.getIn(1);
@@ -126,19 +126,19 @@ namespace Sla.DECCORE
                 // or a dynamic mapping causing the bit to be set. In either case, it should probably be explicit
                 return -1;
             }
-            else if (vn.isProtoPartial() && def.code() != CPUI_PIECE)
+            else if (vn.isProtoPartial() && def.code() != OpCode.CPUI_PIECE)
             {
                 // Varnode is part of structure. Write to structure should be an explicit statement
                 return -1;
             }
-            else if (def.code() == CPUI_PIECE && def.getIn(0).isProtoPartial() && !vn.isProtoPartial())
+            else if (def.code() == OpCode.CPUI_PIECE && def.getIn(0).isProtoPartial() && !vn.isProtoPartial())
             {
                 // The base of PIECE operations building a structure
                 return -1;
             }
             if (vn.hasNoDescend()) return -1;  // Must have at least one descendant
 
-            if (def.code() == CPUI_PTRSUB)
+            if (def.code() == OpCode.CPUI_PTRSUB)
             { // A dereference
                 Varnode* basevn = def.getIn(0);
                 if (basevn.isSpacebase())
@@ -176,7 +176,7 @@ namespace Sla.DECCORE
                 Varnode* vn = multlist[i];  // All elements in this list should have a defining op
                 PcodeOp* op = vn.getDef();
                 OpCode opc = op.code();
-                if (op.isBoolOutput() || (opc == CPUI_INT_ZEXT) || (opc == CPUI_INT_SEXT) || (opc == CPUI_PTRADD))
+                if (op.isBoolOutput() || (opc == OpCode.CPUI_INT_ZEXT) || (opc == OpCode.CPUI_INT_SEXT) || (opc == OpCode.CPUI_PTRADD))
                 {
                     int maxparam = 2;
                     if (op.numInput() < maxparam)
@@ -187,16 +187,16 @@ namespace Sla.DECCORE
                         topvn = op.getIn(j);
                         if (topvn.isMark())
                         {   // We have a "multiple" interaction between -topvn- and -vn-
-                            OpCode topopc = CPUI_COPY;
+                            OpCode topopc = OpCode.CPUI_COPY;
                             if (topvn.isWritten())
                             {
                                 if (topvn.getDef().isBoolOutput())
                                     continue;       // Try not to make boolean outputs explicit
                                 topopc = topvn.getDef().code();
                             }
-                            if (opc == CPUI_PTRADD)
+                            if (opc == OpCode.CPUI_PTRADD)
                             {
-                                if (topopc == CPUI_PTRADD)
+                                if (topopc == OpCode.CPUI_PTRADD)
                                     purgelist.Add(topvn);
                             }
                             else
@@ -248,7 +248,7 @@ namespace Sla.DECCORE
                         vn.clearImplied();
                         return;
                     }
-                    opstack.pop_back();
+                    opstack.RemoveLastItem();
                 }
                 else
                 {
@@ -264,8 +264,8 @@ namespace Sla.DECCORE
             } while (!opstack.empty());
         }
 
-        /// Set special properties on output of CPUI_NEW
-        /// Assume \b vn is produced via a CPUI_NEW operation. If it is immediately fed to a constructor,
+        /// Set special properties on output of OpCode.CPUI_NEW
+        /// Assume \b vn is produced via a OpCode.CPUI_NEW operation. If it is immediately fed to a constructor,
         /// set special printing flags on the Varnode.
         /// \param data is the function being analyzed
         /// \param vn is the given Varnode
@@ -283,7 +283,7 @@ namespace Sla.DECCORE
                     firstuse = curop;
                 else if (curop.getSeqNum().getOrder() < firstuse.getSeqNum().getOrder())
                     firstuse = curop;
-                else if (curop.code() == CPUI_CALLIND)
+                else if (curop.code() == OpCode.CPUI_CALLIND)
                 {
                     Varnode* ptr = curop.getIn(0);
                     if (ptr.isWritten())

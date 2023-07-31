@@ -29,7 +29,7 @@ namespace Sla.EXTRA
                 throw new IfaceExecutionError("No function loaded");
             s >> ws >> unionName;
             ct = dcp.conf.types.findByName(unionName);
-            if (ct == (Datatype)null || ct.getMetatype() != TYPE_UNION)
+            if (ct == (Datatype)null || ct.getMetatype() != type_metatype.TYPE_UNION)
                 throw new IfaceParseError("Bad union data-type: " + unionName);
             s >> ws >> dec >> fieldNum;
             if (fieldNum < -1 || fieldNum >= ct.numDepend())

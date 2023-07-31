@@ -11,7 +11,7 @@ namespace Sla.DECCORE
     internal class TypeOpFloatLess : TypeOpBinary
     {
         public TypeOpFloatLess(TypeFactory t, Translate trans)
-            : base(t, CPUI_FLOAT_LESS,"<", TYPE_BOOL, TYPE_FLOAT)
+            : base(t, OpCode.CPUI_FLOAT_LESS,"<", type_metatype.TYPE_BOOL, type_metatype.TYPE_FLOAT)
         {
             opflags = PcodeOp::binary | PcodeOp::booloutput;
             addlflags = floatingpoint_op;

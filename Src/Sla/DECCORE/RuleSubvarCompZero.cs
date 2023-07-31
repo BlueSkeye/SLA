@@ -40,7 +40,7 @@ namespace Sla.DECCORE
             if (!op.getIn(1).isConstant()) return 0;
             Varnode* vn = op.getIn(0);
             ulong mask = vn.getNZMask();
-            int bitnum = leastsigbit_set(mask);
+            int bitnum = Globals.leastsigbit_set(mask);
             if (bitnum == -1) return 0;
             if ((mask >> bitnum) != 1) return 0; // Check if only one bit active
 
@@ -59,9 +59,9 @@ namespace Sla.DECCORE
                 Varnode* vn0 = andop.getIn(0);
                 switch (andop.code())
                 {
-                    case CPUI_INT_AND:
-                    case CPUI_INT_OR:
-                    case CPUI_INT_RIGHT:
+                    case OpCode.CPUI_INT_AND:
+                    case OpCode.CPUI_INT_OR:
+                    case OpCode.CPUI_INT_RIGHT:
                         {
                             if (vn0.isConstant()) return 0;
                             ulong mask0 = vn0.getConsume() & vn0.getNZMask();

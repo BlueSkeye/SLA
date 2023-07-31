@@ -33,7 +33,7 @@ namespace Sla.DECCORE
         {
             if (!op.getIn(0).isWritten()) return 0;
             PcodeOp* shiftop = op.getIn(0).getDef();
-            if (shiftop.code() != CPUI_INT_LEFT) return 0;
+            if (shiftop.code() != OpCode.CPUI_INT_LEFT) return 0;
             Varnode* sa = shiftop.getIn(1);
             if (!sa.isConstant()) return 0;
             int n = sa.getOffset();

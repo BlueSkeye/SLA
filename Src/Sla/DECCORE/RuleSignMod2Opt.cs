@@ -40,7 +40,7 @@ namespace Sla.DECCORE
             Varnode* addOut = op.getIn(0);
             if (!addOut.isWritten()) return 0;
             PcodeOp* addOp = addOut.getDef();
-            if (addOp.code() != CPUI_INT_ADD) return 0;
+            if (addOp.code() != OpCode.CPUI_INT_ADD) return 0;
             int multSlot;
             PcodeOp* multOp;
             bool trunc = false;
@@ -49,7 +49,7 @@ namespace Sla.DECCORE
                 Varnode* vn = addOp.getIn(multSlot);
                 if (!vn.isWritten()) continue;
                 multOp = vn.getDef();
-                if (multOp.code() != CPUI_INT_MULT) continue;
+                if (multOp.code() != OpCode.CPUI_INT_MULT) continue;
                 constVn = multOp.getIn(1);
                 if (!constVn.isConstant()) continue;
                 if (constVn.getOffset() == Globals.calc_mask(constVn.getSize())) break;   // Check for INT_MULT by -1
@@ -62,12 +62,12 @@ namespace Sla.DECCORE
             {
                 if (!@base.isWritten() || !otherBase.isWritten()) return 0;
                 PcodeOp* subOp = @base.getDef();
-                if (subOp.code() != CPUI_SUBPIECE) return 0;
+                if (subOp.code() != OpCode.CPUI_SUBPIECE) return 0;
                 int truncAmt = subOp.getIn(1).getOffset();
                 if (truncAmt + @base.getSize() != subOp.getIn(0).getSize()) return 0; // Must truncate all but high part
                 base = subOp.getIn(0);
                 subOp = otherBase.getDef();
-                if (subOp.code() != CPUI_SUBPIECE) return 0;
+                if (subOp.code() != OpCode.CPUI_SUBPIECE) return 0;
                 if (subOp.getIn(1).getOffset() != 0) return 0;
                 otherBase = subOp.getIn(0);
                 if (otherBase != base) return 0;
@@ -78,18 +78,18 @@ namespace Sla.DECCORE
             if (trunc)
             {
                 PcodeOp* extOp = andOut.loneDescend();
-                if (extOp == (PcodeOp)null || extOp.code() != CPUI_INT_ZEXT) return 0;
+                if (extOp == (PcodeOp)null || extOp.code() != OpCode.CPUI_INT_ZEXT) return 0;
                 andOut = extOp.getOut();
             }
             list<PcodeOp*>::const_iterator iter;
             for (iter = andOut.beginDescend(); iter != andOut.endDescend(); ++iter)
             {
                 PcodeOp* rootOp = *iter;
-                if (rootOp.code() != CPUI_INT_ADD) continue;
+                if (rootOp.code() != OpCode.CPUI_INT_ADD) continue;
                 int slot = rootOp.getSlot(andOut);
                 otherBase = RuleSignMod2nOpt::checkSignExtraction(rootOp.getIn(1 - slot));
                 if (otherBase != base) continue;
-                data.opSetOpcode(rootOp, CPUI_INT_SREM);
+                data.opSetOpcode(rootOp, OpCode.CPUI_INT_SREM);
                 data.opSetInput(rootOp, base, 0);
                 data.opSetInput(rootOp, data.newConstant(@base.getSize(), 2), 1);
                 return 1;

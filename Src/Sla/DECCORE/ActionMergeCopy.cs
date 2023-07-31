@@ -7,7 +7,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla.DECCORE
 {
-    /// \brief Try to merge the input and output Varnodes of a CPUI_COPY op
+    /// \brief Try to merge the input and output Varnodes of a OpCode.CPUI_COPY op
     internal class ActionMergeCopy : Action
     {
         public ActionMergeCopy(string g)

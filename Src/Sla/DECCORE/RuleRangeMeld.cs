@@ -62,13 +62,13 @@ namespace Sla.DECCORE
             CircleRange range2 = new CircleRange(true);
             A2 = range2.pullBack(sub2, &markup, false);
             if (A2 == (Varnode)null) return 0;
-            if (sub1.code() == CPUI_BOOL_NEGATE)
+            if (sub1.code() == OpCode.CPUI_BOOL_NEGATE)
             { // Do an extra pull back, if the last step is a '!'
                 if (!A1.isWritten()) return 0;
                 A1 = range1.pullBack(A1.getDef(), &markup, false);
                 if (A1 == (Varnode)null) return 0;
             }
-            if (sub2.code() == CPUI_BOOL_NEGATE)
+            if (sub2.code() == OpCode.CPUI_BOOL_NEGATE)
             { // Do an extra pull back, if the last step is a '!'
                 if (!A2.isWritten()) return 0;
                 A2 = range2.pullBack(A2.getDef(), &markup, false);
@@ -85,7 +85,7 @@ namespace Sla.DECCORE
             }
             if (!A1.isHeritageKnown()) return 0;
 
-            if (op.code() == CPUI_BOOL_AND)
+            if (op.code() == OpCode.CPUI_BOOL_AND)
                 restype = range1.intersect(range2);
             else
                 restype = range1.circleUnion(range2);
@@ -113,13 +113,13 @@ namespace Sla.DECCORE
             if (restype == 2) return 0; // Cannot represent
             if (restype == 1)
             {       // Pieces covers everything, condition is always true
-                data.opSetOpcode(op, CPUI_COPY);
+                data.opSetOpcode(op, OpCode.CPUI_COPY);
                 data.opRemoveInput(op, 1);
                 data.opSetInput(op, data.newConstant(1, 1), 0);
             }
             else if (restype == 3)
             {   // Nothing left in intersection, condition is always false
-                data.opSetOpcode(op, CPUI_COPY);
+                data.opSetOpcode(op, OpCode.CPUI_COPY);
                 data.opRemoveInput(op, 1);
                 data.opSetInput(op, data.newConstant(1, 0), 0);
             }

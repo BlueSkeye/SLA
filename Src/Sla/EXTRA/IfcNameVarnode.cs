@@ -34,7 +34,7 @@ namespace Sla.EXTRA
             if (token.size() == 0)
                 throw new IfaceParseError("Must specify name");
 
-            Datatype ct = dcp.conf.types.getBase(size, TYPE_UNKNOWN);
+            Datatype ct = dcp.conf.types.getBase(size, type_metatype.TYPE_UNKNOWN);
 
             dcp.conf.clearAnalysis(dcp.fd); // Make sure varnodes are cleared
 

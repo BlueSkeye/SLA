@@ -18,7 +18,7 @@ namespace Sla.EXTRA
         /// the evaluation model for called functions.
         public override void execute(TextReader s)
         {
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
 
             Dictionary<string, ProtoModel*>::const_iterator iter;

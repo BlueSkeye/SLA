@@ -254,7 +254,7 @@ namespace Sla.EXTRA
             {
                 delete sptr;
                 sptr = inputstack.GetLastItem();
-                inputstack.pop_back();
+                inputstack.RemoveLastItem();
             }
 #if __TERMINAL__
             if (is_terminal)
@@ -275,7 +275,7 @@ namespace Sla.EXTRA
         {
             delete sptr;
             sptr = inputstack.GetLastItem();
-            inputstack.pop_back();
+            inputstack.RemoveLastItem();
             IfaceStatus::popScript();
         }
 

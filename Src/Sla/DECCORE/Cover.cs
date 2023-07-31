@@ -55,7 +55,7 @@ namespace Sla.DECCORE
 
 
                 if ((ustop == (uint)0) && (block.getStart() == (PcodeOp)null)) {
-                    if ((op != (PcodeOp)null)&& (op.code() == CPUI_MULTIEQUAL)) {
+                    if ((op != (PcodeOp)null)&& (op.code() == OpCode.CPUI_MULTIEQUAL)) {
                         // This block contains only an infinitesimal tip
                         // of cover through one branch of a MULTIEQUAL
                         // we still need to traverse through branches
@@ -347,7 +347,7 @@ namespace Sla.DECCORE
             {
                 if (block.contain(@ref))
                 {
-                    if (@ref.code() != CPUI_MULTIEQUAL) return;
+                    if (@ref.code() != OpCode.CPUI_MULTIEQUAL) return;
                     // Even if MULTIEQUAL ref is contained
                     // we may be adding new cover because we are
                     // looking at a different branch. So don't return
@@ -361,7 +361,7 @@ namespace Sla.DECCORE
                     if (ustop >= CoverBlock::getUIndex(startop))
                     {
                         if ((op != (PcodeOp)null)&& (op != (PcodeOp*)2)&&
-                            (op.code() == CPUI_MULTIEQUAL) && (startop == (PcodeOp)null)) {
+                            (op.code() == OpCode.CPUI_MULTIEQUAL) && (startop == (PcodeOp)null)) {
                             // This block contains only an infinitesimal tip
                             // of cover through one branch of a MULTIEQUAL
                             // we still need to traverse through branches
@@ -374,7 +374,7 @@ namespace Sla.DECCORE
             }
             //  if (bl.InSize()==0)
             //    throw new LowlevelError("Ref point is not in flow of defpoint");
-            if (ref.code() == CPUI_MULTIEQUAL)
+            if (ref.code() == OpCode.CPUI_MULTIEQUAL)
             {
                 for (j = 0; j < ref.numInput(); ++j)
                     if (ref.getIn(j) == vn)

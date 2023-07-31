@@ -73,11 +73,11 @@ namespace Sla.DECCORE
         private bool findDups()
         {
             cbranch1 = block1.lastOp();
-            if (cbranch1.code() != CPUI_CBRANCH) {
+            if (cbranch1.code() != OpCode.CPUI_CBRANCH) {
                 return false;
             }
             cbranch2 = block2.lastOp();
-            if (cbranch2.code() != CPUI_CBRANCH) {
+            if (cbranch2.code() != OpCode.CPUI_CBRANCH) {
                 return false;
             }
 
@@ -119,10 +119,10 @@ namespace Sla.DECCORE
                 return false;
             }
             PcodeOp op1 = vn1.getDef();
-            if (op1.code() == CPUI_SUBPIECE) {
+            if (op1.code() == OpCode.CPUI_SUBPIECE) {
                 return false;
             }
-            if (op1.code() == CPUI_COPY) {
+            if (op1.code() == OpCode.CPUI_COPY) {
                 return false;
             }
             mergeneed[new MergePair(vn1, vn2)] = null;
@@ -143,7 +143,7 @@ namespace Sla.DECCORE
             while (!completed) {
                 PcodeOp op = iter.Current;
                 completed = !iter.MoveNext();
-                if (op.code() == CPUI_MULTIEQUAL) {
+                if (op.code() == OpCode.CPUI_MULTIEQUAL) {
                     // Anything merging from our two root blocks -block1- and -block2-
                     Varnode vn1 = op.getIn(in1);
                     Varnode vn2 = op.getIn(in2);
@@ -151,7 +151,7 @@ namespace Sla.DECCORE
                         mergeneed[new MergePair(vn1, vn2)] = null;
                     }
                 }
-                else if (op.code() != CPUI_COPY) {
+                else if (op.code() != OpCode.CPUI_COPY) {
                     break;
                 }
             }
@@ -180,7 +180,7 @@ namespace Sla.DECCORE
                 PcodeOp op = iter.Current;
                 // Advance iterator before inserts happen
                 completed = !iter.MoveNext();
-                if (op.code() == CPUI_MULTIEQUAL) {
+                if (op.code() == OpCode.CPUI_MULTIEQUAL) {
                     Varnode vn1 = op.getIn(in1);
                     Varnode vn2 = op.getIn(in2);
                     if (vn1 == vn2) {
@@ -193,11 +193,11 @@ namespace Sla.DECCORE
                     }
                     if (op.numInput() == 1) {
                         data.opUninsert(op);
-                        data.opSetOpcode(op, CPUI_COPY);
+                        data.opSetOpcode(op, OpCode.CPUI_COPY);
                         data.opInsertBegin(op, exit);
                     }
                 }
-                else if (op.code() != CPUI_COPY) {
+                else if (op.code() != OpCode.CPUI_COPY) {
                     break;
                 }
             }
@@ -215,7 +215,7 @@ namespace Sla.DECCORE
                 Varnode vn1 = iter.Key.side1;
                 Varnode vn2 = iter.Key.side2;
                 PcodeOp multi = data.newOp(2, cbranch1.getAddr());
-                data.opSetOpcode(multi, CPUI_MULTIEQUAL);
+                data.opSetOpcode(multi, OpCode.CPUI_MULTIEQUAL);
                 Varnode outvn = data.newUniqueOut(vn1.getSize(), multi);
                 data.opSetInput(multi, vn1, 0);
                 data.opSetInput(multi, vn2, 1);

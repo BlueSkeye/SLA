@@ -37,7 +37,7 @@ namespace Sla.DECCORE
         }
 
         public TypePartialUnion(TypeUnion contain, int off, int sz, Datatype strip)
-            : base(sz, TYPE_PARTIALUNION)
+            : base(sz, type_metatype.TYPE_PARTIALUNION)
         {
             flags |= (needs_resolution | has_stripped);
             stripped = strip;
@@ -114,7 +114,7 @@ namespace Sla.DECCORE
             int curOff = offset;
             while (curType != (Datatype)null && curType.getSize() > size)
             {
-                if (curType.getMetatype() == TYPE_UNION)
+                if (curType.getMetatype() == type_metatype.TYPE_UNION)
                 {
                     TypeField field = curType.resolveTruncation(curOff, op, slot, curOff);
                     curType = (field == (TypeField*)0) ? (Datatype)null : field.type;
@@ -137,7 +137,7 @@ namespace Sla.DECCORE
             int curOff = offset;
             while (curType != (Datatype)null && curType.getSize() > size)
             {
-                if (curType.getMetatype() == TYPE_UNION)
+                if (curType.getMetatype() == type_metatype.TYPE_UNION)
                 {
                     Datatype* newType = curType.findResolve(op, slot);
                     curType = (newType == curType) ? (Datatype)null : newType;

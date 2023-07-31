@@ -8,18 +8,18 @@ using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
-    /// \brief A node in a tree structure of CPUI_PIECE operations
+    /// \brief A node in a tree structure of OpCode.CPUI_PIECE operations
     ///
     /// If a group of Varnodes are concatenated into a larger structure, this object is used to explicitly gather
     /// the PcodeOps (and Varnodes) in the data-flow and view them as a unit. In a properly formed tree, for each
-    /// CPUI_PIECE operation, the addresses of the input Varnodes and the output Varnode align according to the
+    /// OpCode.CPUI_PIECE operation, the addresses of the input Varnodes and the output Varnode align according to the
     /// concatenation. Internal Varnodes can have only one descendant, but the leaf and the root Varnodes
     /// can each have multiple descendants
     internal class PieceNode
     {
-        /// CPUI_PIECE operation combining this particular Varnode piece
+        /// OpCode.CPUI_PIECE operation combining this particular Varnode piece
         private PcodeOp pieceOp;
-        /// The particular slot of this Varnode within CPUI_PIECE
+        /// The particular slot of this Varnode within OpCode.CPUI_PIECE
         private int slot;
         /// Byte offset into structure/array
         private int typeOffset;
@@ -51,7 +51,7 @@ namespace Sla.DECCORE
 
         /// \brief Determine if a Varnode is a leaf within the CONCAT tree rooted at the given Varnode
         ///
-        /// The CONCAT tree is the maximal set of Varnodes that are all inputs to CPUI_PIECE operations,
+        /// The CONCAT tree is the maximal set of Varnodes that are all inputs to OpCode.CPUI_PIECE operations,
         /// with no other uses, and that all ultimately flow to the root Varnode.  This method tests
         /// whether a Varnode is a leaf of this tree.
         /// \param rootVn is the given root of the CONCAT tree
@@ -66,7 +66,7 @@ namespace Sla.DECCORE
             }
             if (!vn.isWritten()) return true;
             PcodeOp* def = vn.getDef();
-            if (def.code() != CPUI_PIECE) return true;
+            if (def.code() != OpCode.CPUI_PIECE) return true;
             PcodeOp* op = vn.loneDescend();
             if (op == (PcodeOp)null) return true;
             if (vn.isAddrTied())
@@ -92,7 +92,7 @@ namespace Sla.DECCORE
                 {
                     PcodeOp* op = *iter;
                     ++iter;
-                    if (op.code() != CPUI_PIECE) continue;
+                    if (op.code() != OpCode.CPUI_PIECE) continue;
                     int slot = op.getSlot(vn);
                     Address addr = op.getOut().getAddr();
                     if (addr.getSpace().isBigEndian() == (slot == 1))
@@ -118,7 +118,7 @@ namespace Sla.DECCORE
 
         /// \brief Build the CONCAT tree rooted at the given Varnode
         ///
-        /// Recursively walk backwards from the root through CPUI_PIECE operations, stopping if a Varnode
+        /// Recursively walk backwards from the root through OpCode.CPUI_PIECE operations, stopping if a Varnode
         /// is deemed a leaf.  Collect all Varnodes involved in the tree in a list.  For each Varnode in the tree,
         /// record whether it is leaf and also calculate its offset within the data-type attached to the root.
         /// \param stack holds the markup for each node of the tree

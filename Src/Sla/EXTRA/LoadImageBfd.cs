@@ -141,7 +141,7 @@ namespace Sla.EXTRA
             int cursize;
 
             if (addr.getSpace() != spaceid)
-                throw DataUnavailError("Trying to get loadimage bytes from space: " + addr.getSpace().getName());
+                throw new DataUnavailError("Trying to get loadimage bytes from space: " + addr.getSpace().getName());
             curaddr = addr.getOffset();
             if ((curaddr >= bufoffset) && (curaddr + size < bufoffset + bufsize))
             {   // Requested bytes were previously buffered
@@ -189,7 +189,7 @@ namespace Sla.EXTRA
                 ostringstream errmsg;
                 errmsg << "Unable to load " << dec << cursize << " bytes at " << addr.getShortcut();
                 addr.printRaw(errmsg);
-                throw DataUnavailError(errmsg.str());
+                throw new DataUnavailError(errmsg.str());
             }
             memcpy(ptr, buffer, size);  // Copy requested bytes from the buffer
         }

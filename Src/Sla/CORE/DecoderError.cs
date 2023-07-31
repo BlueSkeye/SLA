@@ -11,7 +11,7 @@ namespace Sla.CORE
     /// and is thrown as a formal exception.
     internal class DecoderError : Exception
     {
-        ///< Constructor
+        /// Constructor
         public DecoderError(string s)
             : base(s)
         {

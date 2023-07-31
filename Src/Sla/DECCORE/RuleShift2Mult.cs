@@ -56,7 +56,7 @@ namespace Sla.DECCORE
                 if (arithop != (PcodeOp)null)
                 {
                     opc = arithop.code();
-                    if ((opc == CPUI_INT_ADD) || (opc == CPUI_INT_SUB) || (opc == CPUI_INT_MULT))
+                    if ((opc == OpCode.CPUI_INT_ADD) || (opc == OpCode.CPUI_INT_SUB) || (opc == OpCode.CPUI_INT_MULT))
                     {
                         flag = 1;
                         break;
@@ -69,7 +69,7 @@ namespace Sla.DECCORE
             if (flag == 0) return 0;
             constvn = data.newConstant(vn.getSize(), ((ulong)1) << val);
             data.opSetInput(op, constvn, 1);
-            data.opSetOpcode(op, CPUI_INT_MULT);
+            data.opSetOpcode(op, OpCode.CPUI_INT_MULT);
             return 1;
         }
     }

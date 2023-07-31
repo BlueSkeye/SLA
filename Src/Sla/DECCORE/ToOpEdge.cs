@@ -60,13 +60,13 @@ namespace Sla.DECCORE
         /// \return the accumulator value with \b this edge folded in
         public uint hash(uint reg)
         {
-            reg = crc_update(reg, (uint)slot);
-            reg = crc_update(reg, DynamicHash::transtable[op.code()]);
+            reg = Globals.crc_update(reg, (uint)slot);
+            reg = Globals.crc_update(reg, DynamicHash::transtable[op.code()]);
             ulong val = op.getSeqNum().getAddr().getOffset();
             int sz = op.getSeqNum().getAddr().getAddrSize();
             for (int i = 0; i < sz; ++i)
             {
-                reg = crc_update(reg, (uint)val); // Hash in the address
+                reg = Globals.crc_update(reg, (uint)val); // Hash in the address
                 val >>= 8;
             }
             return reg;

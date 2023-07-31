@@ -48,7 +48,7 @@ namespace Sla.DECCORE
             loadimage.loadFill((byte*)&res, sizeof(ulong), Address(spc, off));
 
             if ((HOST_ENDIAN == 1) != spc.isBigEndian())
-                res = byte_swap(res, sizeof(ulong));
+                res = Globals.byte_swap(res, sizeof(ulong));
             if (spc.isBigEndian() && (sz < sizeof(ulong)))
                 res >>= (sizeof(ulong) - sz) * 8;
             else
@@ -233,11 +233,11 @@ namespace Sla.DECCORE
                 PcodeOpRaw* op = opList[i];
                 VarnodeData* vn;
                 OpCode opc = op.getOpcode();
-                if (opc == CPUI_BRANCHIND || opc == CPUI_CALL || opc == CPUI_CALLIND || opc == CPUI_CALLOTHER ||
-                opc == CPUI_STORE || opc == CPUI_SEGMENTOP || opc == CPUI_CPOOLREF ||
-                opc == CPUI_NEW || opc == CPUI_MULTIEQUAL || opc == CPUI_INDIRECT)
+                if (opc == OpCode.CPUI_BRANCHIND || opc == OpCode.CPUI_CALL || opc == OpCode.CPUI_CALLIND || opc == OpCode.CPUI_CALLOTHER ||
+                opc == OpCode.CPUI_STORE || opc == OpCode.CPUI_SEGMENTOP || opc == OpCode.CPUI_CPOOLREF ||
+                opc == OpCode.CPUI_NEW || opc == OpCode.CPUI_MULTIEQUAL || opc == OpCode.CPUI_INDIRECT)
                     return false;
-                if (opc == CPUI_BRANCH)
+                if (opc == OpCode.CPUI_BRANCH)
                 {
                     vn = op.getInput(0);
                     if (vn.space.getType() != IPTR_CONSTANT)  // Only relative branching allowed

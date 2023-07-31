@@ -11,7 +11,7 @@ namespace Sla.DECCORE
     internal class TypeOpFloatFloor : TypeOpFunc
     {
         public TypeOpFloatFloor(TypeFactory t, Translate trans)
-            : base(t, CPUI_FLOAT_FLOOR,"FLOOR", TYPE_FLOAT, TYPE_FLOAT)
+            : base(t, OpCode.CPUI_FLOAT_FLOOR,"FLOOR", type_metatype.TYPE_FLOAT, type_metatype.TYPE_FLOAT)
         {
             opflags = PcodeOp::unary;
             addlflags = floatingpoint_op;

@@ -44,7 +44,7 @@ namespace Sla.DECCORE
             addout = op.getIn(0);
             if (!addout.isWritten()) return 0;
             addop = addout.getDef();
-            if (addop.code() != CPUI_INT_ADD) return 0;
+            if (addop.code() != OpCode.CPUI_INT_ADD) return 0;
             int i;
             a = (Varnode)null;
             for (i = 0; i < 2; ++i)
@@ -52,7 +52,7 @@ namespace Sla.DECCORE
                 multout = addop.getIn(i);
                 if (!multout.isWritten()) continue;
                 multop = multout.getDef();
-                if (multop.code() != CPUI_INT_MULT)
+                if (multop.code() != OpCode.CPUI_INT_MULT)
                     continue;
                 if (!multop.getIn(1).isConstant()) continue;
                 if (multop.getIn(1).getOffset() !=
@@ -61,7 +61,7 @@ namespace Sla.DECCORE
                 shiftout = multop.getIn(0);
                 if (!shiftout.isWritten()) continue;
                 shiftop = shiftout.getDef();
-                if (shiftop.code() != CPUI_INT_SRIGHT)
+                if (shiftop.code() != OpCode.CPUI_INT_SRIGHT)
                     continue;
                 if (!shiftop.getIn(1).isConstant()) continue;
                 int n = shiftop.getIn(1).getOffset();
@@ -75,7 +75,7 @@ namespace Sla.DECCORE
 
             data.opSetInput(op, a, 0);
             data.opSetInput(op, data.newConstant(a.getSize(), 2), 1);
-            data.opSetOpcode(op, CPUI_INT_SDIV);
+            data.opSetOpcode(op, OpCode.CPUI_INT_SDIV);
             return 1;
         }
     }

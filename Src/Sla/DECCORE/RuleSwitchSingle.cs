@@ -74,7 +74,7 @@ namespace Sla.DECCORE
             }
 
             // Convert the BRANCHIND to just a branch
-            data.opSetOpcode(op, CPUI_BRANCH);
+            data.opSetOpcode(op, OpCode.CPUI_BRANCH);
             // Stick in the coderef of the single jumptable entry
             data.opSetInput(op, data.newCodeRef(addr), 0);
             data.removeJumpTable(jt);

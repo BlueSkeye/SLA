@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     internal class TypeOpIntSub : TypeOpBinary
     {
         public TypeOpIntSub(TypeFactory t)
-            : base(t, CPUI_INT_SUB,"-", TYPE_INT, TYPE_INT)
+            : base(t, OpCode.CPUI_INT_SUB,"-", type_metatype.TYPE_INT, type_metatype.TYPE_INT)
         {
             opflags = PcodeOp::binary;
             addlflags = arithmetic_op | inherits_sign;

@@ -17,9 +17,9 @@ namespace Sla.EXTRA
         /// Functions are walked in leaf order.
         public override void execute(TextReader s)
         {
-            if (dcp.conf == (Architecture*)0)
+            if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image");
-            if (dcp.cgraph == (CallGraph*)0)
+            if (dcp.cgraph == (CallGraph)null)
                 throw new IfaceExecutionError("Callgraph has not been built");
             if (dcp.conf.evalfp_current == (ProtoModel*)0)
             {

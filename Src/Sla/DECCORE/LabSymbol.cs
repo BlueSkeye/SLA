@@ -15,7 +15,7 @@ namespace Sla.DECCORE
         /// a size 1 placeholder.
         private void buildType()
         {
-            type = scope.getArch().types.getBase(1, TYPE_UNKNOWN);
+            type = scope.getArch().types.getBase(1, type_metatype.TYPE_UNKNOWN);
         }
 
         /// Construct given name

@@ -45,7 +45,7 @@ namespace Sla.DECCORE
             val = vn.getOffset();
             if ((mask | val) != val) return 0; // first param may turn on other bits
 
-            data.opSetOpcode(op, CPUI_COPY);
+            data.opSetOpcode(op, OpCode.CPUI_COPY);
             data.opRemoveInput(op, 0);
             return 1;
         }

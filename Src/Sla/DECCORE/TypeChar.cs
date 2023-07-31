@@ -20,7 +20,7 @@ namespace Sla.DECCORE
         {
             //  uint elemId = decoder.openElement();
             decodeBasic(decoder);
-            submeta = (metatype == TYPE_INT) ? SUB_INT_CHAR : SUB_UINT_CHAR;
+            submeta = (metatype == type_metatype.TYPE_INT) ? SUB_INT_CHAR : SUB_UINT_CHAR;
             //  decoder.closeElement(elemId);
         }
 
@@ -33,7 +33,7 @@ namespace Sla.DECCORE
         
         /// Construct a char (always 1-byte) given a name
         public TypeChar(string n)
-            : base(1, TYPE_INT, n)
+            : base(1, type_metatype.TYPE_INT, n)
         {
             flags |= Datatype::chartype;
             submeta = SUB_INT_CHAR;

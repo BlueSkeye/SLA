@@ -34,7 +34,7 @@ namespace Sla.DECCORE
             if (!op.getIn(1).isConstant()) return 0;
             if (!op.getIn(0).isWritten()) return 0;
             PcodeOp* addop = op.getIn(0).getDef();
-            if (addop.code() != CPUI_INT_ADD) return 0;
+            if (addop.code() != OpCode.CPUI_INT_ADD) return 0;
             Varnode* shiftvn;
             PcodeOp* unshiftop = (PcodeOp)null;
             int i;
@@ -43,7 +43,7 @@ namespace Sla.DECCORE
                 shiftvn = addop.getIn(i);
                 if (!shiftvn.isWritten()) continue;
                 unshiftop = shiftvn.getDef();
-                if (unshiftop.code() == CPUI_INT_RIGHT)
+                if (unshiftop.code() == OpCode.CPUI_INT_RIGHT)
                 {
                     if (!unshiftop.getIn(1).isConstant()) continue;
                     break;
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
             Varnode* sgnvn = unshiftop.getIn(0);
             if (!sgnvn.isWritten()) return 0;
             PcodeOp* sshiftop = sgnvn.getDef();
-            if (sshiftop.code() != CPUI_INT_SRIGHT) return 0;
+            if (sshiftop.code() != OpCode.CPUI_INT_SRIGHT) return 0;
             if (!sshiftop.getIn(1).isConstant()) return 0;
             if (sshiftop.getIn(0) != x) return 0;
             int val = sshiftop.getIn(1).getOffset();
@@ -71,13 +71,13 @@ namespace Sla.DECCORE
             ulong pow = 1;
             pow <<= n;
             PcodeOp* newdiv = data.newOp(2, op.getAddr());
-            data.opSetOpcode(newdiv, CPUI_INT_SDIV);
+            data.opSetOpcode(newdiv, OpCode.CPUI_INT_SDIV);
             Varnode* divvn = data.newUniqueOut(x.getSize(), newdiv);
             data.opSetInput(newdiv, x, 0);
             data.opSetInput(newdiv, data.newConstant(x.getSize(), pow), 1);
             data.opInsertBefore(newdiv, op);
 
-            data.opSetOpcode(op, CPUI_INT_MULT);
+            data.opSetOpcode(op, OpCode.CPUI_INT_MULT);
             data.opSetInput(op, divvn, 0);
             data.opSetInput(op, data.newConstant(x.getSize(), pow), 1);
             return 1;

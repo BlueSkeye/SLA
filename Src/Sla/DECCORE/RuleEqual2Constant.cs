@@ -31,7 +31,7 @@ namespace Sla.DECCORE
         ///  - `~V == c     =>  V == ~c`
         public override void getOpList(List<uint> oplist)
         {
-            uint list[] = { CPUI_INT_EQUAL, CPUI_INT_NOTEQUAL };
+            uint list[] = { OpCode.CPUI_INT_EQUAL, OpCode.CPUI_INT_NOTEQUAL };
             oplist.insert(oplist.end(), list, list + 2);
         }
 
@@ -46,14 +46,14 @@ namespace Sla.DECCORE
             Varnode* a;
             ulong newconst;
             OpCode opc = leftop.code();
-            if (opc == CPUI_INT_ADD)
+            if (opc == OpCode.CPUI_INT_ADD)
             {
                 Varnode* otherconst = leftop.getIn(1);
                 if (!otherconst.isConstant()) return 0;
                 newconst = cvn.getOffset() - otherconst.getOffset();
                 newconst &= Globals.calc_mask(cvn.getSize());
             }
-            else if (opc == CPUI_INT_MULT)
+            else if (opc == OpCode.CPUI_INT_MULT)
             {
                 Varnode* otherconst = leftop.getIn(1);
                 if (!otherconst.isConstant()) return 0;
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
                 newconst = cvn.getOffset();
                 newconst = (-newconst) & Globals.calc_mask(otherconst.getSize());
             }
-            else if (opc == CPUI_INT_NEGATE)
+            else if (opc == OpCode.CPUI_INT_NEGATE)
             {
                 newconst = cvn.getOffset();
                 newconst = (~newconst) & Globals.calc_mask(lhs.getSize());
@@ -80,7 +80,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* dop = *iter;
                 if (dop == op) continue;
-                if ((dop.code() != CPUI_INT_EQUAL) && (dop.code() != CPUI_INT_NOTEQUAL))
+                if ((dop.code() != OpCode.CPUI_INT_EQUAL) && (dop.code() != OpCode.CPUI_INT_NOTEQUAL))
                     return 0;
                 if (!dop.getIn(1).isConstant()) return 0;
             }

@@ -95,7 +95,7 @@ namespace Sla.CORE
             if (null == @base) {
                 throw new BugException();
             }
-            return (int)@@base.getAddrSize();
+            return (int)@base.getAddrSize();
         }
 
         /// Is data at this address big endian encoded
@@ -106,7 +106,7 @@ namespace Sla.CORE
             if (null == @base) {
                 throw new BugException();
             }
-            return @@base.isBigEndian();
+            return @base.isBigEndian();
         }
 
         /// Write a raw version of the address to a stream
@@ -118,7 +118,7 @@ namespace Sla.CORE
                 s.Write("invalid_addr");
                 return;
             }
-            @@base.printRaw(s, offset);
+            @base.printRaw(s, offset);
         }
 
         /// Read in the address from a string
@@ -132,7 +132,7 @@ namespace Sla.CORE
                 throw new BugException();
             }
             int sz;
-            offset = @@base.read(s, out sz);
+            offset = @base.read(s, out sz);
             return sz;
         }
 
@@ -163,7 +163,7 @@ namespace Sla.CORE
             if (null == @base) {
                 throw new BugException();
             }
-            return @@base.getShortcut();
+            return @base.getShortcut();
         }
 
         // TODO : Find where the assignment operator is used. Reference copy must be
@@ -215,16 +215,16 @@ namespace Sla.CORE
                 if (op1.@base == null) {
                     return true;
                 }
-                if (op1.@@base.IsMaxAddressSpace) {
+                if (op1.@base.IsMaxAddressSpace) {
                     return false;
                 }
                 if (op2.@base == null) {
                     return false;
                 }
-                if (op2.@@base.IsMaxAddressSpace) {
+                if (op2.@base.IsMaxAddressSpace) {
                     return true;
                 }
-                return (op1.@@base.getIndex() < op2.@@base.getIndex());
+                return (op1.@base.getIndex() < op2.@base.getIndex());
             }
             if (op1.offset != op2.offset) {
                 return (op1.offset < op2.offset);
@@ -252,16 +252,16 @@ namespace Sla.CORE
                 if (op1.@base == null) {
                     return true;
                 }
-                if (op1.@@base.IsMaxAddressSpace) {
+                if (op1.@base.IsMaxAddressSpace) {
                     return false;
                 }
                 if (null == op2.@base) {
                     return false;
                 }
-                if (op2.@@base.IsMaxAddressSpace) {
+                if (op2.@base.IsMaxAddressSpace) {
                     return true;
                 }
-                return (op1.@@base.getIndex() < op2.@@base.getIndex());
+                return (op1.@base.getIndex() < op2.@base.getIndex());
             }
             if (op1.offset != op2.offset) {
                 return (op1.offset < op2.offset);
@@ -284,7 +284,7 @@ namespace Sla.CORE
                 throw new BugException();
             }
             return new Address(source.@base,
-                source.@@base.wrapOffset(source.offset + (uint)off));
+                source.@base.wrapOffset(source.offset + (uint)off));
         }
 
         /// Decrement address by a number of bytes
@@ -302,7 +302,7 @@ namespace Sla.CORE
                 throw new BugException();
             }
             return new Address(source.@base,
-                source.@@base.wrapOffset(source.offset - (uint)off));
+                source.@base.wrapOffset(source.offset - (uint)off));
         }
 
         /// Write out an address to stream
@@ -362,7 +362,7 @@ namespace Sla.CORE
             if (null == @base) {
                 throw new BugException();
             }
-            return (@@base.isBigEndian() && !forceleft)
+            return (@base.isBigEndian() && !forceleft)
                 ? (int)(off1 - off2)
                 : (int)(op2.offset - offset);
         }
@@ -377,7 +377,7 @@ namespace Sla.CORE
         /// \param op is the start of the range to check
         /// \param size is the size of the range
         /// \return an integer indicating how overlap occurs
-        public int overlap(int skip, ref Address op, int size)
+        public int overlap(int skip, Address op, int size)
         {
             ulong dist;
 
@@ -388,14 +388,14 @@ namespace Sla.CORE
             if (null == @base) {
                 throw new BugException();
             }
-            if (@@base.getType() == spacetype.IPTR_CONSTANT) {
+            if (@base.getType() == spacetype.IPTR_CONSTANT) {
                 // Must not be constants
                 return -1;
             }
             if (0 > skip) {
                 throw new BugException();
             }
-            dist = @@base.wrapOffset(offset + (ulong)skip - op.offset);
+            dist = @base.wrapOffset(offset + (ulong)skip - op.offset);
             if (dist >= (ulong)size) {
                 // but must fall before op+size
                 return -1;
@@ -432,11 +432,11 @@ namespace Sla.CORE
             if (null == @base) {
                 throw new BugException();
             }
-            if (@@base.isBigEndian()) {
+            if (@base.isBigEndian()) {
                 if(0 > sz) {
                     throw new BugException();
                 }
-                ulong nextoff = @@base.wrapOffset(offset + (uint)sz);
+                ulong nextoff = @base.wrapOffset(offset + (uint)sz);
                 if (nextoff == loaddr.offset) {
                     return true;
                 }
@@ -445,7 +445,7 @@ namespace Sla.CORE
                 if(0 > losz) {
                     throw new BugException();
                 }
-                ulong nextoff = @@base.wrapOffset(loaddr.offset + (uint)losz);
+                ulong nextoff = @base.wrapOffset(loaddr.offset + (uint)losz);
                 if (nextoff == offset) {
                     return true;
                 }
@@ -460,7 +460,7 @@ namespace Sla.CORE
         /// \return \b true if this address represents a constant
         public bool isConstant()
         {
-            return (@@base.getType() == spacetype.IPTR_CONSTANT);
+            return (@base.getType() == spacetype.IPTR_CONSTANT);
         }
 
         /// Make sure there is a backing JoinRecord if \b this is in the \e join space
@@ -472,8 +472,8 @@ namespace Sla.CORE
             if (null == @base) {
                 throw new BugException();
             }
-            if (@@base.getType() == spacetype.IPTR_JOIN) {
-                @@base.getManager().renormalizeJoinAddress(this, size);
+            if (@base.getType() == spacetype.IPTR_JOIN) {
+                @base.getManager().renormalizeJoinAddress(this, size);
             }
         }
 
@@ -482,7 +482,7 @@ namespace Sla.CORE
         /// \return \b true if this address represents a join
         public bool isJoin()
         {
-            return (@@base.getType() == spacetype.IPTR_JOIN);
+            return (@base.getType() == spacetype.IPTR_JOIN);
         }
 
         /// Encode \b this to a stream
@@ -490,11 +490,11 @@ namespace Sla.CORE
         /// stream.  The exact format is determined by the address space,
         /// but this generally has a \e space and an \e offset attribute.
         /// \param encoder is the stream encoder
-        public void encode(ghidra.Encoder encoder)
+        public void encode(Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_ADDR);
             if (@base != null) {
-                @@base.encodeAttributes(encoder, offset);
+                @base.encodeAttributes(encoder, offset);
             }
             encoder.closeElement(ElementId.ELEM_ADDR);
         }
@@ -505,11 +505,11 @@ namespace Sla.CORE
         /// so that it can describe an entire memory range.
         /// \param encoder is the stream encoder
         /// \param size is the number of bytes in the range
-        public void encode(ghidra.Encoder encoder, int size)
+        public void encode(Encoder encoder, int size)
         {
             encoder.openElement(ElementId.ELEM_ADDR);
             if (@base != null) {
-                @@base.encodeAttributes(encoder, offset, size);
+                @base.encodeAttributes(encoder, offset, size);
             }
             encoder.closeElement(ElementId.ELEM_ADDR);
         }
@@ -523,7 +523,7 @@ namespace Sla.CORE
         /// based on a register name.
         /// \param decoder is the stream decoder
         /// \return the resulting Address
-        public static Address decode(ghidra.Decoder decoder)
+        public static Address decode(Decoder decoder)
         {
             VarnodeData var = VarnodeData.decode(decoder);
             return new Address(var.space, var.offset);
@@ -542,7 +542,7 @@ namespace Sla.CORE
         /// \param decoder is the stream decoder
         /// \param size is the reference to any recovered size
         /// \return the resulting Address
-        public static Address decode(ghidra.Decoder decoder, ref int size)
+        public static Address decode(Decoder decoder, ref int size)
         {
             VarnodeData var = VarnodeData.decode(decoder);
             size = (int)var.size;
@@ -551,7 +551,7 @@ namespace Sla.CORE
 
         public int CompareTo(Address? other)
         {
-            if (null == other) {
+            if (object.ReferenceEquals(null, other)) {
                 throw new InvalidOperationException();
             }
             throw new NotImplementedException();

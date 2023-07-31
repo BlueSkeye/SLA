@@ -36,7 +36,7 @@ namespace Sla.DECCORE
             if (!vn1.isWritten()) return 0;
             PcodeOp* castop = vn1.getDef();
             OpCode opc2 = castop.code();
-            if ((opc2 != CPUI_FLOAT_FLOAT2FLOAT) && (opc2 != CPUI_FLOAT_INT2FLOAT))
+            if ((opc2 != OpCode.CPUI_FLOAT_FLOAT2FLOAT) && (opc2 != OpCode.CPUI_FLOAT_INT2FLOAT))
                 return 0;
             OpCode opc1 = op.code();
             Varnode* vn2 = castop.getIn(0);
@@ -46,13 +46,13 @@ namespace Sla.DECCORE
 
             if (vn2.isFree()) return 0;    // Don't propagate free
 
-            if ((opc2 == CPUI_FLOAT_FLOAT2FLOAT) && (opc1 == CPUI_FLOAT_FLOAT2FLOAT))
+            if ((opc2 == OpCode.CPUI_FLOAT_FLOAT2FLOAT) && (opc1 == OpCode.CPUI_FLOAT_FLOAT2FLOAT))
             {
                 if (insize1 > outsize)
                 {   // op is superfluous
                     data.opSetInput(op, vn2, 0);
                     if (outsize == insize2)
-                        data.opSetOpcode(op, CPUI_COPY);    // We really have the identity
+                        data.opSetOpcode(op, OpCode.CPUI_COPY);    // We really have the identity
                     return 1;
                 }
                 else if (insize2 < insize1)
@@ -61,14 +61,14 @@ namespace Sla.DECCORE
                     return 1;
                 }
             }
-            else if ((opc2 == CPUI_FLOAT_INT2FLOAT) && (opc1 == CPUI_FLOAT_FLOAT2FLOAT))
+            else if ((opc2 == OpCode.CPUI_FLOAT_INT2FLOAT) && (opc1 == OpCode.CPUI_FLOAT_FLOAT2FLOAT))
             {
                 // Convert integer straight into final float size
                 data.opSetInput(op, vn2, 0);
-                data.opSetOpcode(op, CPUI_FLOAT_INT2FLOAT);
+                data.opSetOpcode(op, OpCode.CPUI_FLOAT_INT2FLOAT);
                 return 1;
             }
-            else if ((opc2 == CPUI_FLOAT_FLOAT2FLOAT) && (opc1 == CPUI_FLOAT_TRUNC))
+            else if ((opc2 == OpCode.CPUI_FLOAT_FLOAT2FLOAT) && (opc1 == OpCode.CPUI_FLOAT_TRUNC))
             {
                 // Convert float straight into final integer
                 data.opSetInput(op, vn2, 0);

@@ -35,11 +35,11 @@ namespace Sla.DECCORE
                 {
                     switch (op.code())
                     {
-                        case CPUI_COPY:
+                        case OpCode.CPUI_COPY:
                             vn = op.getIn(0);
                             op = vn.getDef();
                             break;
-                        case CPUI_MULTIEQUAL:
+                        case OpCode.CPUI_MULTIEQUAL:
                             if (!op.isMark())
                             {
                                 op.setMark();
@@ -47,7 +47,7 @@ namespace Sla.DECCORE
                             }
                             op = (PcodeOp)null;
                             break;
-                        case CPUI_INDIRECT:
+                        case OpCode.CPUI_INDIRECT:
                             if (op.getIn(1).getSpace().getType() == IPTR_IOP)
                             {
                                 PcodeOp* callOp = PcodeOp::getOpFromConst(op.getIn(1).getAddr());
@@ -62,8 +62,8 @@ namespace Sla.DECCORE
                             }
                             op = (PcodeOp)null;
                             break;
-                        case CPUI_CALL:
-                        case CPUI_CALLIND:
+                        case OpCode.CPUI_CALL:
+                        case OpCode.CPUI_CALLIND:
                             {
                                 FuncCallSpecs* fspec = data.getCallSpecs(op);
                                 if (fspec != (FuncCallSpecs*)0 && !fspec.isOutputActive())
@@ -103,7 +103,7 @@ namespace Sla.DECCORE
         /// If the pathology reaches a CALL or RETURN, it is noted, through the FuncProto or FuncCallSpecs
         /// object, that the parameter or return value is only partially consumed.  The subvariable flow
         /// rules can then decide whether or not to truncate this part of the data-flow.
-        /// \param op is CPUI_PIECE op that is the pathological concatenation
+        /// \param op is OpCode.CPUI_PIECE op that is the pathological concatenation
         /// \param data is the function containing the data-flow
         /// \return a non-zero value if new bytes are labeled as unconsumed
         private static int tracePathologyForward(PcodeOp op, Funcdata data)
@@ -126,17 +126,17 @@ namespace Sla.DECCORE
                     curOp = *iter;
                     switch (curOp.code())
                     {
-                        case CPUI_COPY:
-                        case CPUI_INDIRECT:
-                        case CPUI_MULTIEQUAL:
+                        case OpCode.CPUI_COPY:
+                        case OpCode.CPUI_INDIRECT:
+                        case OpCode.CPUI_MULTIEQUAL:
                             if (!curOp.isMark())
                             {
                                 curOp.setMark();
                                 worklist.Add(curOp);
                             }
                             break;
-                        case CPUI_CALL:
-                        case CPUI_CALLIND:
+                        case OpCode.CPUI_CALL:
+                        case OpCode.CPUI_CALLIND:
                             fProto = data.getCallSpecs(curOp);
                             if (fProto != (FuncProto)null && !fProto.isInputActive() && !fProto.isInputLocked())
                             {
@@ -151,7 +151,7 @@ namespace Sla.DECCORE
                                 }
                             }
                             break;
-                        case CPUI_RETURN:
+                        case OpCode.CPUI_RETURN:
                             if (!data.getFuncProto().isOutputLocked())
                             {
                                 if (data.getFuncProto().setReturnBytesConsumed(op.getIn(1).getSize()))
@@ -203,12 +203,12 @@ namespace Sla.DECCORE
 
             // Make sure we are concatenating the most significant bytes of a truncation
             OpCode opc = subOp.code();
-            if (opc == CPUI_SUBPIECE)
+            if (opc == OpCode.CPUI_SUBPIECE)
             {
                 if (subOp.getIn(1).getOffset() == 0) return 0;
                 if (!isPathology(subOp.getIn(0), data)) return 0;
             }
-            else if (opc == CPUI_INDIRECT)
+            else if (opc == OpCode.CPUI_INDIRECT)
             {
                 if (!subOp.isIndirectCreation()) return 0;                 // Indirect concatenation
                 Varnode* lsbVn = op.getIn(1);

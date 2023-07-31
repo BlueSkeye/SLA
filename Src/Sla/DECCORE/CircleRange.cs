@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -387,16 +387,16 @@ namespace Sla.DECCORE
         {
             ulong halfPoint = mask ^ (mask >> 1);
             if (contains(halfPoint))
-                return 8 * sizeof(ulong) - count_leading_zeros(halfPoint);
+                return 8 * sizeof(ulong) - Globals.count_leading_zeros(halfPoint);
             int sizeLeft, sizeRight;
             if ((halfPoint & left) == 0)
-                sizeLeft = count_leading_zeros(left);
+                sizeLeft = Globals.count_leading_zeros(left);
             else
-                sizeLeft = count_leading_zeros(~left & mask);
+                sizeLeft = Globals.count_leading_zeros(~left & mask);
             if ((halfPoint & right) == 0)
-                sizeRight = count_leading_zeros(right);
+                sizeRight = Globals.count_leading_zeros(right);
             else
-                sizeRight = count_leading_zeros(~right & mask);
+                sizeRight = Globals.count_leading_zeros(~right & mask);
             int size1 = 8 * sizeof(ulong) - (sizeRight < sizeLeft ? sizeRight : sizeLeft);
             return size1;
         }
@@ -625,7 +625,7 @@ namespace Sla.DECCORE
         /// \return \b true if the mask is valid
         public bool setNZMask(ulong nzmask, int size)
         {
-            int trans = bit_transitions(nzmask, size);
+            int trans = Globals.bit_transitions(nzmask, size);
             if (trans > 2) return false;    // Too many transitions to form a valid range
             bool hasstep = ((nzmask & 1) == 0);
             if ((!hasstep) && (trans == 2)) return false; // Two sections of non-zero bits
@@ -647,7 +647,7 @@ namespace Sla.DECCORE
                 }
                 return true;
             }
-            int shift = leastsigbit_set(nzmask);
+            int shift = Globals.leastsigbit_set(nzmask);
             step = 1;
             step <<= shift;
             mask = Globals.calc_mask(size);
@@ -785,7 +785,7 @@ namespace Sla.DECCORE
                 ulong diff = max - min;
                 if (diff > 0 && diff <= maxStep)
                 {
-                    if (leastsigbit_set(diff) == mostsigbit_set(diff))
+                    if (leastsigbit_set(diff) == Globals.mostsigbit_set(diff))
                     {
                         step = (int)diff;
                         left = min;
@@ -898,25 +898,25 @@ namespace Sla.DECCORE
 
             switch (opc)
             {
-                case CPUI_BOOL_NEGATE:
+                case OpCode.CPUI_BOOL_NEGATE:
                     if (convertToBoolean())
                         break;          // Both outputs possible => both inputs possible
                     left = left ^ 1;        // Flip the boolean range
                     right = left + 1;
                     break;
-                case CPUI_COPY:
+                case OpCode.CPUI_COPY:
                     break;          // Identity transform on range
-                case CPUI_INT_2COMP:
+                case OpCode.CPUI_INT_2COMP:
                     val = (~left + 1 + step) & mask;
                     left = (~right + 1 + step) & mask;
                     right = val;
                     break;
-                case CPUI_INT_NEGATE:
+                case OpCode.CPUI_INT_NEGATE:
                     val = (~left + step) & mask;
                     left = (~right + step) & mask;
                     right = val;
                     break;
-                case CPUI_INT_ZEXT:
+                case OpCode.CPUI_INT_ZEXT:
                     {
                         val = Globals.calc_mask(inSize); // (smaller) input mask
                         ulong rem = left % step;
@@ -933,14 +933,14 @@ namespace Sla.DECCORE
                         mask &= val;        // Preserve the stride
                         break;
                     }
-                case CPUI_INT_SEXT:
+                case OpCode.CPUI_INT_SEXT:
                     {
                         val = Globals.calc_mask(inSize); // (smaller) input mask
                         ulong rem = left & step;
                         CircleRange sextrange;
                         sextrange.left = val ^ (val >> 1); // High order bit for (small) input space
                         sextrange.left += rem;
-                        sextrange.right = sign_extend(sextrange.left, inSize, outSize);
+                        sextrange.right = Globals.sign_extend(sextrange.left, inSize, outSize);
                         sextrange.mask = mask;
                         sextrange.step = step;  // Keep the same stride
                         sextrange.isempty = false;
@@ -982,7 +982,7 @@ namespace Sla.DECCORE
 
             switch (opc)
             {
-                case CPUI_INT_EQUAL:
+                case OpCode.CPUI_INT_EQUAL:
                     bothTrueFalse = convertToBoolean();
                     mask = Globals.calc_mask(inSize);
                     if (bothTrueFalse)
@@ -993,7 +993,7 @@ namespace Sla.DECCORE
                     if (yescomplement)
                         complement();
                     break;
-                case CPUI_INT_NOTEQUAL:
+                case OpCode.CPUI_INT_NOTEQUAL:
                     bothTrueFalse = convertToBoolean();
                     mask = Globals.calc_mask(inSize);
                     if (bothTrueFalse) break;   // All possible outs => all possible ins
@@ -1003,7 +1003,7 @@ namespace Sla.DECCORE
                     if (yescomplement)
                         complement();
                     break;
-                case CPUI_INT_LESS:
+                case OpCode.CPUI_INT_LESS:
                     bothTrueFalse = convertToBoolean();
                     mask = Globals.calc_mask(inSize);
                     if (bothTrueFalse) break;   // All possible outs => all possible ins
@@ -1031,7 +1031,7 @@ namespace Sla.DECCORE
                     if (yescomplement)
                         complement();
                     break;
-                case CPUI_INT_LESSEQUAL:
+                case OpCode.CPUI_INT_LESSEQUAL:
                     bothTrueFalse = convertToBoolean();
                     mask = Globals.calc_mask(inSize);
                     if (bothTrueFalse) break;   // All possible outs => all possible ins
@@ -1049,7 +1049,7 @@ namespace Sla.DECCORE
                     if (yescomplement)
                         complement();
                     break;
-                case CPUI_INT_SLESS:
+                case OpCode.CPUI_INT_SLESS:
                     bothTrueFalse = convertToBoolean();
                     mask = Globals.calc_mask(inSize);
                     if (bothTrueFalse) break;   // All possible outs => all possible ins
@@ -1077,7 +1077,7 @@ namespace Sla.DECCORE
                     if (yescomplement)
                         complement();
                     break;
-                case CPUI_INT_SLESSEQUAL:
+                case OpCode.CPUI_INT_SLESSEQUAL:
                     bothTrueFalse = convertToBoolean();
                     mask = Globals.calc_mask(inSize);
                     if (bothTrueFalse) break;   // All possible outs => all possible ins
@@ -1095,7 +1095,7 @@ namespace Sla.DECCORE
                     if (yescomplement)
                         complement();
                     break;
-                case CPUI_INT_CARRY:
+                case OpCode.CPUI_INT_CARRY:
                     bothTrueFalse = convertToBoolean();
                     mask = Globals.calc_mask(inSize);
                     if (bothTrueFalse) break;   // All possible outs => all possible ins
@@ -1110,11 +1110,11 @@ namespace Sla.DECCORE
                     if (yescomplement)
                         complement();
                     break;
-                case CPUI_INT_ADD:
+                case OpCode.CPUI_INT_ADD:
                     left = (left - val) & mask;
                     right = (right - val) & mask;
                     break;
-                case CPUI_INT_SUB:
+                case OpCode.CPUI_INT_SUB:
                     if (slot == 0)
                     {
                         left = (left + val) & mask;
@@ -1126,11 +1126,11 @@ namespace Sla.DECCORE
                         right = (val - right) & mask;
                     }
                     break;
-                case CPUI_INT_RIGHT:
+                case OpCode.CPUI_INT_RIGHT:
                     {
                         if (step == 1)
                         {
-                            ulong rightBound = (calc_mask(inSize) >> val) + 1; // The maximal right bound
+                            ulong rightBound = (Globals.calc_mask(inSize) >> val) + 1; // The maximal right bound
                             if (((left >= rightBound) && (right >= rightBound) && (left >= right))
                                 || ((left == 0) && (right >= rightBound)) || (left == right))
                             {
@@ -1154,7 +1154,7 @@ namespace Sla.DECCORE
                             return false;
                         break;
                     }
-                case CPUI_INT_SRIGHT:
+                case OpCode.CPUI_INT_SRIGHT:
                     {
                         if (step == 1)
                         {
@@ -1243,10 +1243,10 @@ namespace Sla.DECCORE
                 OpCode opc = op.code();
                 if (!pullBackBinary(opc, val, slot, res.getSize(), op.getOut().getSize()))
                 {
-                    if (usenzmask && opc == CPUI_SUBPIECE && val == 0)
+                    if (usenzmask && opc == OpCode.CPUI_SUBPIECE && val == 0)
                     {
                         // If everything we are truncating is known to be zero, we may still have a range
-                        int msbset = mostsigbit_set(res.getNZMask());
+                        int msbset = Globals.mostsigbit_set(res.getNZMask());
                         msbset = (msbset + 8) / 8;
                         if (op.getOut().getSize() < msbset) // Some bytes we are chopping off might not be zero
                             return (Varnode)null;
@@ -1287,20 +1287,18 @@ namespace Sla.DECCORE
         /// \param inSize is the storage space in bytes for the input
         /// \param outSize is the storage space in bytes for the output
         /// \return \b true if the result is known and forms a range
-        public bool pushForwardUnary(OpCode opc, CircleRange in1, int inSize, int outSize)
+        public bool pushForwardUnary(OpCode opc, CircleRange in1, int inSize, uint outSize)
         {
-            if (in1.isempty)
-            {
+            if (in1.isempty) {
                 isempty = true;
                 return true;
             }
-            switch (opc)
-            {
-                case CPUI_CAST:
-                case CPUI_COPY:
+            switch (opc) {
+                case OpCode.CPUI_CAST:
+                case OpCode.CPUI_COPY:
                     *this = in1;
                     break;
-                case CPUI_INT_ZEXT:
+                case OpCode.CPUI_INT_ZEXT:
                     isempty = false;
                     step = in1.step;
                     mask = Globals.calc_mask(outSize);
@@ -1318,27 +1316,25 @@ namespace Sla.DECCORE
                         right += step;  // Impossible for it to wrap with bigger mask
                     }
                     break;
-                case CPUI_INT_SEXT:
+                case OpCode.CPUI_INT_SEXT:
                     isempty = false;
                     step = in1.step;
                     mask = Globals.calc_mask(outSize);
-                    if (in1.left == in1.right)
-                    {
+                    if (in1.left == in1.right) {
                         ulong rem = in1.left % step;
                         right = Globals.calc_mask(inSize) >> 1;
-                        left = (calc_mask(outSize) ^ right) + rem;
+                        left = (Globals.calc_mask(outSize) ^ right) + rem;
                         right = right + 1 + rem;
                     }
-                    else
-                    {
-                        left = sign_extend(in1.left, inSize, outSize);
-                        right = sign_extend((in1.right - in1.step) & in1.mask, inSize, outSize);
+                    else {
+                        left = Globals.sign_extend(in1.left, inSize, outSize);
+                        right = Globals.sign_extend((in1.right - in1.step) & in1.mask, inSize, outSize);
                         if ((long)right < (long)left)
                             return false;   // Extending causes 2 pieces
                         right = (right + step) & mask;
                     }
                     break;
-                case CPUI_INT_2COMP:
+                case OpCode.CPUI_INT_2COMP:
                     isempty = false;
                     step = in1.step;
                     mask = in1.mask;
@@ -1346,7 +1342,7 @@ namespace Sla.DECCORE
                     left = (~in1.right + 1 + step) & mask;
                     normalize();
                     break;
-                case CPUI_INT_NEGATE:
+                case OpCode.CPUI_INT_NEGATE:
                     isempty = false;
                     step = in1.step;
                     mask = in1.mask;
@@ -1354,8 +1350,8 @@ namespace Sla.DECCORE
                     right = (~in1.left + step) & mask;
                     normalize();
                     break;
-                case CPUI_BOOL_NEGATE:
-                case CPUI_FLOAT_NAN:
+                case OpCode.CPUI_BOOL_NEGATE:
+                case OpCode.CPUI_FLOAT_NAN:
                     isempty = false;
                     mask = 0xff;
                     step = 1;
@@ -1389,8 +1385,8 @@ namespace Sla.DECCORE
             }
             switch (opc)
             {
-                case CPUI_PTRSUB:
-                case CPUI_INT_ADD:
+                case OpCode.CPUI_PTRSUB:
+                case OpCode.CPUI_INT_ADD:
                     isempty = false;
                     mask = in1.mask | in2.mask;
                     if (in1.left == in1.right || in2.left == in2.right)
@@ -1425,7 +1421,7 @@ namespace Sla.DECCORE
                         normalize();
                     }
                     break;
-                case CPUI_INT_MULT:
+                case OpCode.CPUI_INT_MULT:
                     {
                         isempty = false;
                         mask = in1.mask | in2.mask;
@@ -1449,7 +1445,7 @@ namespace Sla.DECCORE
                             step <<= 1;
                             tmp >>= 1;
                         }
-                        int wholeSize = 8 * sizeof(ulong) - count_leading_zeros(mask);
+                        int wholeSize = 8 * sizeof(ulong) - Globals.count_leading_zeros(mask);
                         if (in1.getMaxInfo() + in2.getMaxInfo() > wholeSize)
                         {
                             left = in1.left;    // Covered everything
@@ -1469,7 +1465,7 @@ namespace Sla.DECCORE
                         }
                         break;
                     }
-                case CPUI_INT_LEFT:
+                case OpCode.CPUI_INT_LEFT:
                     {
                         if (!in2.isSingle()) return false;
                         isempty = false;
@@ -1484,7 +1480,7 @@ namespace Sla.DECCORE
                         }
                         left = (in1.left << sa) & mask;
                         right = (in1.right << sa) & mask;
-                        int wholeSize = 8 * sizeof(ulong) - count_leading_zeros(mask);
+                        int wholeSize = 8 * sizeof(ulong) - Globals.count_leading_zeros(mask);
                         if (in1.getMaxInfo() + sa > wholeSize)
                         {
                             right = left;   // Covered everything
@@ -1493,7 +1489,7 @@ namespace Sla.DECCORE
                         }
                         break;
                     }
-                case CPUI_SUBPIECE:
+                case OpCode.CPUI_SUBPIECE:
                     {
                         if (!in2.isSingle()) return false;
                         isempty = false;
@@ -1515,7 +1511,7 @@ namespace Sla.DECCORE
                         }
                         break;
                     }
-                case CPUI_INT_RIGHT:
+                case OpCode.CPUI_INT_RIGHT:
                     {
                         if (!in2.isSingle()) return false;
                         isempty = false;
@@ -1536,7 +1532,7 @@ namespace Sla.DECCORE
                             right = (left + 1) & mask;
                         break;
                     }
-                case CPUI_INT_SRIGHT:
+                case OpCode.CPUI_INT_SRIGHT:
                     {
                         if (!in2.isSingle()) return false;
                         isempty = false;
@@ -1546,13 +1542,13 @@ namespace Sla.DECCORE
                         long valLeft = in1.left;
                         long valRight = in1.right;
                         int bitPos = 8 * inSize - 1;
-                        sign_extend(valLeft, bitPos);
-                        sign_extend(valRight, bitPos);
+                        Globals.sign_extend(valLeft, bitPos);
+                        Globals.sign_extend(valRight, bitPos);
                         if (valLeft >= valRight)
                         {
                             valRight = (long)(mask >> 1);   // Max positive
                             valLeft = valRight + 1;     // Min negative
-                            sign_extend(valLeft, bitPos);
+                            Globals.sign_extend(valLeft, bitPos);
                         }
                         left = (valLeft >> sa) & mask;
                         right = (valRight >> sa) & mask;
@@ -1560,22 +1556,22 @@ namespace Sla.DECCORE
                             right = (left + 1) & mask;
                         break;
                     }
-                case CPUI_INT_EQUAL:
-                case CPUI_INT_NOTEQUAL:
-                case CPUI_INT_SLESS:
-                case CPUI_INT_SLESSEQUAL:
-                case CPUI_INT_LESS:
-                case CPUI_INT_LESSEQUAL:
-                case CPUI_INT_CARRY:
-                case CPUI_INT_SCARRY:
-                case CPUI_INT_SBORROW:
-                case CPUI_BOOL_XOR:
-                case CPUI_BOOL_AND:
-                case CPUI_BOOL_OR:
-                case CPUI_FLOAT_EQUAL:
-                case CPUI_FLOAT_NOTEQUAL:
-                case CPUI_FLOAT_LESS:
-                case CPUI_FLOAT_LESSEQUAL:
+                case OpCode.CPUI_INT_EQUAL:
+                case OpCode.CPUI_INT_NOTEQUAL:
+                case OpCode.CPUI_INT_SLESS:
+                case OpCode.CPUI_INT_SLESSEQUAL:
+                case OpCode.CPUI_INT_LESS:
+                case OpCode.CPUI_INT_LESSEQUAL:
+                case OpCode.CPUI_INT_CARRY:
+                case OpCode.CPUI_INT_SCARRY:
+                case OpCode.CPUI_INT_SBORROW:
+                case OpCode.CPUI_BOOL_XOR:
+                case OpCode.CPUI_BOOL_AND:
+                case OpCode.CPUI_BOOL_OR:
+                case OpCode.CPUI_FLOAT_EQUAL:
+                case OpCode.CPUI_FLOAT_NOTEQUAL:
+                case OpCode.CPUI_FLOAT_LESS:
+                case OpCode.CPUI_FLOAT_LESSEQUAL:
                     // Ops with boolean outcome.  We don't try to eliminate outcomes here.
                     isempty = false;
                     mask = 0xff;
@@ -1591,7 +1587,7 @@ namespace Sla.DECCORE
 
         /// \brief Push \b this range forward through a trinary operation
         ///
-        /// Push all values in the given ranges through a trinary p-code operator (currenly only CPUI_PTRADD).
+        /// Push all values in the given ranges through a trinary p-code operator (currenly only OpCode.CPUI_PTRADD).
         /// If the output set of values forms a range, then set \b this to the range and return \b true.
         /// \param opc is the given p-code operator
         /// \param in1 is the first given input range
@@ -1604,7 +1600,7 @@ namespace Sla.DECCORE
         public bool pushForwardTrinary(OpCode opc, CircleRange in1, CircleRange in2, CircleRange in3,
             int inSize, int outSize, int maxStep)
         {
-            if (opc != CPUI_PTRADD) return false;
+            if (opc != OpCode.CPUI_PTRADD) return false;
             CircleRange tmpRange;
             if (!tmpRange.pushForwardBinary(CPUI_INT_MULT, in2, in3, inSize, inSize, maxStep))
                 return false;
@@ -1653,14 +1649,14 @@ namespace Sla.DECCORE
             if (step != 1) return 2;    // Not possible with a stride
             if (right == ((left + 1) & mask))
             {   // Single value
-                opc = CPUI_INT_EQUAL;
+                opc = OpCode.CPUI_INT_EQUAL;
                 cslot = 0;
                 c = left;
                 return 0;
             }
             if (left == ((right + 1) & mask))
             {   // All but one value
-                opc = CPUI_INT_NOTEQUAL;
+                opc = OpCode.CPUI_INT_NOTEQUAL;
                 cslot = 0;
                 c = right;
                 return 0;
@@ -1668,28 +1664,28 @@ namespace Sla.DECCORE
             if (left == right) return 1;    // All outputs are possible
             if (left == 0)
             {
-                opc = CPUI_INT_LESS;
+                opc = OpCode.CPUI_INT_LESS;
                 cslot = 1;
                 c = right;
                 return 0;
             }
             if (right == 0)
             {
-                opc = CPUI_INT_LESS;
+                opc = OpCode.CPUI_INT_LESS;
                 cslot = 0;
                 c = (left - 1) & mask;
                 return 0;
             }
             if (left == (mask >> 1) + 1)
             {
-                opc = CPUI_INT_SLESS;
+                opc = OpCode.CPUI_INT_SLESS;
                 cslot = 1;
                 c = right;
                 return 0;
             }
             if (right == (mask >> 1) + 1)
             {
-                opc = CPUI_INT_SLESS;
+                opc = OpCode.CPUI_INT_SLESS;
                 cslot = 0;
                 c = (left - 1) & mask;
                 return 0;

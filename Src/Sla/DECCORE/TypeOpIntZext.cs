@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     internal class TypeOpIntZext : TypeOpFunc
     {
         public TypeOpIntZext(TypeFactory t)
-            : base(t, CPUI_INT_ZEXT,"ZEXT", TYPE_UINT, TYPE_UINT)
+            : base(t, OpCode.CPUI_INT_ZEXT,"ZEXT", type_metatype.TYPE_UINT, type_metatype.TYPE_UINT)
         {
             opflags = PcodeOp::unary;
             behave = new OpBehaviorIntZext();

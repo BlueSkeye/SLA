@@ -125,16 +125,16 @@ namespace Sla.DECCORE
             if (!vn.isWritten())
                 return maxValue;
             PcodeOp* op = vn.getDef();
-            if (op.code() == CPUI_INT_AND)
+            if (op.code() == OpCode.CPUI_INT_AND)
             {
                 Varnode* constvn = op.getIn(1);
                 if (constvn.isConstant())
                 {
-                    maxValue = coveringmask(constvn.getOffset());
+                    maxValue = Globals.coveringmask(constvn.getOffset());
                     maxValue = (maxValue + 1) & Globals.calc_mask(vn.getSize());
                 }
             }
-            else if (op.code() == CPUI_MULTIEQUAL)
+            else if (op.code() == OpCode.CPUI_MULTIEQUAL)
             {   // Its possible the AND is duplicated across multiple blocks
                 int i;
                 for (i = 0; i < op.numInput(); ++i)
@@ -142,7 +142,7 @@ namespace Sla.DECCORE
                     Varnode* subvn = op.getIn(i);
                     if (!subvn.isWritten()) break;
                     PcodeOp* andOp = subvn.getDef();
-                    if (andOp.code() != CPUI_INT_AND) break;
+                    if (andOp.code() != OpCode.CPUI_INT_AND) break;
                     Varnode* constvn = andOp.getIn(1);
                     if (!constvn.isConstant()) break;
                     if (maxValue < constvn.getOffset())
@@ -150,7 +150,7 @@ namespace Sla.DECCORE
                 }
                 if (i == op.numInput())
                 {
-                    maxValue = coveringmask(maxValue);
+                    maxValue = Globals.coveringmask(maxValue);
                     maxValue = (maxValue + 1) & Globals.calc_mask(vn.getSize());
                 }
                 else
@@ -192,7 +192,7 @@ namespace Sla.DECCORE
                     path.GetLastItem().slot += 1;
                     while (path.GetLastItem().slot >= path.GetLastItem().op.numInput())
                     {
-                        path.pop_back();
+                        path.RemoveLastItem();
                         if (path.empty()) break;
                         path.GetLastItem().slot += 1;
                     }
@@ -262,14 +262,14 @@ namespace Sla.DECCORE
                     indpath = bl.getInRevIndex(0);
                 }
                 PcodeOp* cbranch = prevbl.lastOp();
-                if ((cbranch == (PcodeOp)null) || (cbranch.code() != CPUI_CBRANCH))
+                if ((cbranch == (PcodeOp)null) || (cbranch.code() != OpCode.CPUI_CBRANCH))
                     break;
                 if (i != 0)
                 {
                     // Check that this CBRANCH isn't protecting some other switch
                     BlockBasic* otherbl = (BlockBasic*)prevbl.getOut(1 - indpath);
                     PcodeOp* otherop = otherbl.lastOp();
-                    if (otherop != (PcodeOp)null && otherop.code() == CPUI_BRANCHIND)
+                    if (otherop != (PcodeOp)null && otherop.code() == OpCode.CPUI_BRANCHIND)
                     {
                         if (otherop != jumptable.getIndirectOp())
                             break;
@@ -491,7 +491,7 @@ namespace Sla.DECCORE
         {
             BlockBasic* curBlock = (BlockBasic*)bl.getIn(0);
             PcodeOp* op = curBlock.lastOp();
-            if (op == (PcodeOp)null || op.code() != CPUI_CBRANCH)
+            if (op == (PcodeOp)null || op.code() != OpCode.CPUI_CBRANCH)
                 return false;
             int outslot = bl.getInRevIndex(0);
             bool isOpFlip = op.isBooleanFlip();
@@ -500,7 +500,7 @@ namespace Sla.DECCORE
             {
                 curBlock = (BlockBasic*)bl.getIn(i);
                 op = curBlock.lastOp();
-                if (op == (PcodeOp)null || op.code() != CPUI_CBRANCH)
+                if (op == (PcodeOp)null || op.code() != OpCode.CPUI_CBRANCH)
                     return false;               // All blocks must end with CBRANCH
                 if (op.isBooleanFlip() != isOpFlip)
                     return false;
@@ -696,15 +696,15 @@ namespace Sla.DECCORE
                 if (j == normop.numInput()) break;
                 switch (normop.code())
                 {
-                    case CPUI_INT_ADD:
-                    case CPUI_INT_SUB:
+                    case OpCode.CPUI_INT_ADD:
+                    case OpCode.CPUI_INT_SUB:
                         countaddsub += 1;
                         if (countaddsub > maxaddsub) break;
                         if (!normop.getIn(1 - j).isConstant()) break;
                         switchvn = testvn;
                         break;
-                    case CPUI_INT_ZEXT:
-                    case CPUI_INT_SEXT:
+                    case OpCode.CPUI_INT_ZEXT:
+                    case OpCode.CPUI_INT_SEXT:
                         countext += 1;
                         if (countext > maxext) break;
                         switchvn = testvn;

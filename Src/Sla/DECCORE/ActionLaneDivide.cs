@@ -17,7 +17,7 @@ namespace Sla.DECCORE
     {
         /// \brief Examine the PcodeOps using the given Varnode to determine possible lane sizes
         /// Run through the defining op and any descendant ops of the given Varnode, looking for
-        /// CPUI_PIECE and CPUI_SUBPIECE. Use these to determine possible lane sizes and
+        /// OpCode.CPUI_PIECE and OpCode.CPUI_SUBPIECE. Use these to determine possible lane sizes and
         /// register them with the given LanedRegister object.
         /// \param vn is the given Varnode
         /// \param allowedLanes is used to determine if a putative lane size is allowed
@@ -40,7 +40,7 @@ namespace Sla.DECCORE
                     ++iter;
                     if (iter == vn.endDescend())
                         step = 1;
-                    if (op.code() != CPUI_SUBPIECE) continue;  // Is the big register split into pieces
+                    if (op.code() != OpCode.CPUI_SUBPIECE) continue;  // Is the big register split into pieces
                     curSize = op.getOut().getSize();
                 }
                 else
@@ -48,7 +48,7 @@ namespace Sla.DECCORE
                     step = 2;
                     if (!vn.isWritten()) continue;
                     PcodeOp* op = vn.getDef();
-                    if (op.code() != CPUI_PIECE) continue;     // Is the big register formed from smaller pieces
+                    if (op.code() != OpCode.CPUI_PIECE) continue;     // Is the big register formed from smaller pieces
                     curSize = op.getIn(0).getSize();
                     int tmpSize = op.getIn(1).getSize();
                     if (tmpSize < curSize)

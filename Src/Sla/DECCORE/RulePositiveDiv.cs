@@ -42,7 +42,7 @@ namespace Sla.DECCORE
                 return 0;       // Input 0 may be negative
             if (((op.getIn(1).getNZMask() >> sa) & 1) != 0)
                 return 0;       // Input 1 may be negative
-            OpCode opc = (op.code() == CPUI_INT_SDIV) ? CPUI_INT_DIV : CPUI_INT_REM;
+            OpCode opc = (op.code() == OpCode.CPUI_INT_SDIV) ? OpCode.CPUI_INT_DIV : OpCode.CPUI_INT_REM;
             data.opSetOpcode(op, opc);
             return 1;
         }

@@ -11,7 +11,7 @@ namespace Sla.DECCORE
     internal class TypeOpFloatNeg : TypeOpUnary
     {
         public TypeOpFloatNeg(TypeFactory t, Translate trans)
-            : base(t, CPUI_FLOAT_NEG,"-", TYPE_FLOAT, TYPE_FLOAT)
+            : base(t, OpCode.CPUI_FLOAT_NEG,"-", type_metatype.TYPE_FLOAT, type_metatype.TYPE_FLOAT)
         {
             opflags = PcodeOp::unary;
             addlflags = floatingpoint_op;

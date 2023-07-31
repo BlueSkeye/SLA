@@ -45,31 +45,31 @@ namespace Sla.DECCORE
                 // Categorize opcodes as "producing a logical whole"
                 switch (whole.getDef().code())
                 {
-                    case CPUI_INT_ADD:
+                    case OpCode.CPUI_INT_ADD:
                     // Its hard to tell if the bit operators are really being used to act on the "logical whole"
-                    //      case CPUI_INT_AND:
-                    //      case CPUI_INT_OR:
-                    //      case CPUI_INT_XOR:
-                    //      case CPUI_INT_NEGATE:
-                    case CPUI_INT_MULT:
-                    case CPUI_INT_DIV:
-                    case CPUI_INT_SDIV:
-                    case CPUI_INT_REM:
-                    case CPUI_INT_SREM:
-                    case CPUI_INT_2COMP:
-                    case CPUI_FLOAT_ADD:
-                    case CPUI_FLOAT_DIV:
-                    case CPUI_FLOAT_MULT:
-                    case CPUI_FLOAT_SUB:
-                    case CPUI_FLOAT_NEG:
-                    case CPUI_FLOAT_ABS:
-                    case CPUI_FLOAT_SQRT:
-                    case CPUI_FLOAT_INT2FLOAT:
-                    case CPUI_FLOAT_FLOAT2FLOAT:
-                    case CPUI_FLOAT_TRUNC:
-                    case CPUI_FLOAT_CEIL:
-                    case CPUI_FLOAT_FLOOR:
-                    case CPUI_FLOAT_ROUND:
+                    //      case OpCode.CPUI_INT_AND:
+                    //      case OpCode.CPUI_INT_OR:
+                    //      case OpCode.CPUI_INT_XOR:
+                    //      case OpCode.CPUI_INT_NEGATE:
+                    case OpCode.CPUI_INT_MULT:
+                    case OpCode.CPUI_INT_DIV:
+                    case OpCode.CPUI_INT_SDIV:
+                    case OpCode.CPUI_INT_REM:
+                    case OpCode.CPUI_INT_SREM:
+                    case OpCode.CPUI_INT_2COMP:
+                    case OpCode.CPUI_FLOAT_ADD:
+                    case OpCode.CPUI_FLOAT_DIV:
+                    case OpCode.CPUI_FLOAT_MULT:
+                    case OpCode.CPUI_FLOAT_SUB:
+                    case OpCode.CPUI_FLOAT_NEG:
+                    case OpCode.CPUI_FLOAT_ABS:
+                    case OpCode.CPUI_FLOAT_SQRT:
+                    case OpCode.CPUI_FLOAT_INT2FLOAT:
+                    case OpCode.CPUI_FLOAT_FLOAT2FLOAT:
+                    case OpCode.CPUI_FLOAT_TRUNC:
+                    case OpCode.CPUI_FLOAT_CEIL:
+                    case OpCode.CPUI_FLOAT_FLOOR:
+                    case OpCode.CPUI_FLOAT_ROUND:
                         break;
                     default:
                         return 0;
@@ -80,7 +80,7 @@ namespace Sla.DECCORE
             for (iter = whole.beginDescend(); iter != whole.endDescend(); ++iter)
             {
                 PcodeOp* op = *iter;
-                if (op.code() != CPUI_SUBPIECE) continue;
+                if (op.code() != OpCode.CPUI_SUBPIECE) continue;
                 if (op.getIn(1).getOffset() != 0) continue;
                 if (op.getOut().getSize() == vn.getSize())
                 {

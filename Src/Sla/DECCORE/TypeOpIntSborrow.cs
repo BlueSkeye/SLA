@@ -10,7 +10,7 @@ namespace Sla.DECCORE
     internal class TypeOpIntSborrow : TypeOpFunc
     {
         public TypeOpIntSborrow(TypeFactory t)
-            : base(t, CPUI_INT_SBORROW,"SBORROW", TYPE_BOOL, TYPE_INT)
+            : base(t, OpCode.CPUI_INT_SBORROW,"SBORROW", type_metatype.TYPE_BOOL, type_metatype.TYPE_INT)
         {
             opflags = PcodeOp::binary;
             addlflags = arithmetic_op;

@@ -55,7 +55,7 @@ namespace Sla.DECCORE
                     {
                         data.opRemoveInput(op, op.numInput() - 1);
                     }
-                    data.opSetOpcode(op, CPUI_COPY);
+                    data.opSetOpcode(op, OpCode.CPUI_COPY);
                     data.opSetInput(op, cvn, 0);
                     return 1;
                 }

@@ -9,7 +9,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace Sla.DECCORE
 {
     /// \brief Make sure pointers into segmented spaces have the correct form.
-    /// Convert user-defined ops defined as segment p-code ops by a cspec tag into the internal CPUI_SEGMENTOP
+    /// Convert user-defined ops defined as segment p-code ops by a cspec tag into the internal OpCode.CPUI_SEGMENTOP
     internal class ActionSegmentize : Action
     {
         /// Number of times this Action has been performed on the function
@@ -77,7 +77,7 @@ namespace Sla.DECCORE
                         bindlist[0] = data.newConstant(4, 0);
                     }
                     // Redefine the op as a segmentop
-                    data.opSetOpcode(segroot, CPUI_SEGMENTOP);
+                    data.opSetOpcode(segroot, OpCode.CPUI_SEGMENTOP);
                     data.opSetInput(segroot, data.newVarnodeSpace(spc), 0);
                     data.opSetInput(segroot, bindlist[0], 1);
                     data.opSetInput(segroot, bindlist[1], 2);

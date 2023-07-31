@@ -18,9 +18,9 @@ namespace Sla.DECCORE
     ///   - An constant offset to a sub-component of the base data-type
     ///   - An remaining terms
     ///
-    /// The \e multiple terms are rewritten using a CPUI_PTRADD. The constant offset
-    /// is rewritten using a CPUI_PTRSUB.  Other terms are added back @in.  Analysis may cause
-    /// multiplication (CPUI_INT_MULT) by a constant to be distributed to its CPUI_INT_ADD input.
+    /// The \e multiple terms are rewritten using a OpCode.CPUI_PTRADD. The constant offset
+    /// is rewritten using a OpCode.CPUI_PTRSUB.  Other terms are added back @in.  Analysis may cause
+    /// multiplication (CPUI_INT_MULT) by a constant to be distributed to its OpCode.CPUI_INT_ADD input.
     internal class AddTreeState
     {
         /// The function containing the expression
@@ -53,7 +53,7 @@ namespace Sla.DECCORE
         private List<long> coeff;
         /// Varnodes which are not multiples
         private List<Varnode> nonmult;
-        /// A CPUI_INT_MULT op that needs to be distributed
+        /// A OpCode.CPUI_INT_MULT op that needs to be distributed
         private PcodeOp distributeOp;
         /// Sum of multiple constants
         private ulong multsum;
@@ -63,7 +63,7 @@ namespace Sla.DECCORE
         private bool preventDistribution;
         /// Are terms produced by distributing used
         private bool isDistributeUsed;
-        /// Is there a sub-type (using CPUI_PTRSUB)
+        /// Is there a sub-type (using OpCode.CPUI_PTRSUB)
         private bool isSubtype;
         /// Set to \b true if the whole expression can be transformed
         private bool valid;
@@ -73,7 +73,7 @@ namespace Sla.DECCORE
         /// Look for evidence of an array in a sub-component
         /// Even if the current base data-type is not an array, the pointer expression may incorporate
         /// an array access for a sub component.  This manifests as a non-constant non-multiple terms in
-        /// the tree.  If this term is itself defined by a CPUI_INT_MULT with a constant, the constant
+        /// the tree.  If this term is itself defined by a OpCode.CPUI_INT_MULT with a constant, the constant
         /// indicates a likely element size. Return a non-zero value, the likely element size, if there
         /// is evidence of a non-constant non-multiple term. Return zero otherwise.
         /// \return a non-zero value indicating likely element size, or zero
@@ -88,13 +88,13 @@ namespace Sla.DECCORE
                 if (vn.isWritten())
                 {
                     PcodeOp* op = vn.getDef();
-                    if (op.code() == CPUI_INT_MULT)
+                    if (op.code() == OpCode.CPUI_INT_MULT)
                     {
                         Varnode* vnconst = op.getIn(1);
                         if (vnconst.isConstant())
                         {
                             long sval = vnconst.getOffset();
-                            sign_extend(sval, vnconst.getSize() * 8 - 1);
+                            Globals.sign_extend(sval, vnconst.getSize() * 8 - 1);
                             vncoeff = (sval < 0) ? (uint) - sval : (uint)sval;
                         }
                     }
@@ -167,13 +167,13 @@ namespace Sla.DECCORE
         }
 
         /// Accumulate details of INT_MULT term and continue traversal if appropriate
-        /// Examine a CPUI_INT_MULT element in the middle of the add tree. Determine if we treat
+        /// Examine a OpCode.CPUI_INT_MULT element in the middle of the add tree. Determine if we treat
         /// the output simply as a leaf, or if the multiply needs to be distributed to an
         /// additive subtree.  If the Varnode is a leaf of the tree, return \b true if
         /// it is considered a multiple of the base data-type size. If the Varnode is the
         /// root of another additive sub-tree, return \b true if no sub-node is a multiple.
         /// \param vn is the output Varnode of the operation
-        /// \param op is the CPUI_INT_MULT operation
+        /// \param op is the OpCode.CPUI_INT_MULT operation
         /// \param treeCoeff is constant multiple being applied to the node
         /// \return \b true if there are no multiples of the base data-type size discovered
         private bool checkMultTerm(Varnode vn, PcodeOp op, ulong treeCoeff)
@@ -191,7 +191,7 @@ namespace Sla.DECCORE
             {
                 val = (vnconst.getOffset() * treeCoeff) & ptrmask;
                 long sval = (long)val;
-                sign_extend(sval, vn.getSize() * 8 - 1);
+                Globals.sign_extend(sval, vn.getSize() * 8 - 1);
                 long rem = (size == 0) ? sval : sval % size;
                 if (rem != 0)
                 {
@@ -202,7 +202,7 @@ namespace Sla.DECCORE
                     }
                     if (!preventDistribution)
                     {
-                        if (vnterm.isWritten() && vnterm.getDef().code() == CPUI_INT_ADD)
+                        if (vnterm.isWritten() && vnterm.getDef().code() == OpCode.CPUI_INT_ADD)
                         {
                             if (distributeOp == (PcodeOp)null)
                                 distributeOp = op;
@@ -239,14 +239,14 @@ namespace Sla.DECCORE
             {
                 val = vn.getOffset() * treeCoeff;
                 long sval = (long)val;
-                sign_extend(sval, vn.getSize() * 8 - 1);
+                Globals.sign_extend(sval, vn.getSize() * 8 - 1);
                 long rem = (size == 0) ? sval : (sval % size);
                 if (rem != 0)
                 {       // constant is not multiple of size
                     if (treeCoeff != 1)
                     {
                         // An offset "into" the base data-type makes little sense unless is has subcomponents
-                        if (baseType.getMetatype() == TYPE_ARRAY || baseType.getMetatype() == TYPE_STRUCT)
+                        if (baseType.getMetatype() == type_metatype.TYPE_ARRAY || baseType.getMetatype() == type_metatype.TYPE_STRUCT)
                             isDistributeUsed = true;
                     }
                     nonmultsum += val;
@@ -262,14 +262,14 @@ namespace Sla.DECCORE
             if (vn.isWritten())
             {
                 def = vn.getDef();
-                if (def.code() == CPUI_INT_ADD) // Recurse
+                if (def.code() == OpCode.CPUI_INT_ADD) // Recurse
                     return spanAddTree(def, treeCoeff);
-                if (def.code() == CPUI_COPY)
+                if (def.code() == OpCode.CPUI_COPY)
                 { // Not finished reducing yet
                     valid = false;
                     return false;
                 }
-                if (def.code() == CPUI_INT_MULT)   // Check for constant coeff indicating size
+                if (def.code() == OpCode.CPUI_INT_MULT)   // Check for constant coeff indicating size
                     return checkMultTerm(vn, def, treeCoeff);
             }
             else if (vn.isFree())
@@ -318,7 +318,7 @@ namespace Sla.DECCORE
 
         /// Calculate final sub-type offset
         /// Make final calcultions to determine if a pointer to a sub data-type of the base
-        /// data-type is being calculated, which will result in a CPUI_PTRSUB being generated.
+        /// data-type is being calculated, which will result in a OpCode.CPUI_PTRSUB being generated.
         private void calcSubtype()
         {
             if (size == 0 || nonmultsum < size)
@@ -330,7 +330,7 @@ namespace Sla.DECCORE
                 // If we knew here whether an array of the baseType was possible we could make a slightly
                 // better decision.
                 long snonmult = (long)nonmultsum;
-                sign_extend(snonmult, ptrsize * 8 - 1);
+                Globals.sign_extend(snonmult, ptrsize * 8 - 1);
                 snonmult = snonmult % size;
                 if (snonmult >= 0)
                     // We assume the sum is big enough it represents an array index at this level
@@ -339,7 +339,7 @@ namespace Sla.DECCORE
                 {
                     // For a negative sum, if the baseType is a structure and there is array hints,
                     // we assume the sum is an array index at a lower level
-                    if (baseType.getMetatype() == TYPE_STRUCT && findArrayHint() != 0)
+                    if (baseType.getMetatype() == type_metatype.TYPE_STRUCT && findArrayHint() != 0)
                         offset = nonmultsum;
                     else
                         offset = (ulong)(snonmult + size);
@@ -357,7 +357,7 @@ namespace Sla.DECCORE
                 }
                 isSubtype = false;      // There are no offsets INTO the pointer
             }
-            else if (baseType.getMetatype() == TYPE_SPACEBASE)
+            else if (baseType.getMetatype() == type_metatype.TYPE_SPACEBASE)
             {
                 ulong nonmultbytes = AddrSpace::addressToByte(nonmultsum, ct.getWordSize()); // Convert to bytes
                 ulong extra;
@@ -372,7 +372,7 @@ namespace Sla.DECCORE
                 offset = (nonmultsum - extra) & ptrmask;
                 isSubtype = true;
             }
-            else if (baseType.getMetatype() == TYPE_STRUCT)
+            else if (baseType.getMetatype() == type_metatype.TYPE_STRUCT)
             {
                 ulong nonmultbytes = AddrSpace::addressToByte(nonmultsum, ct.getWordSize()); // Convert to bytes
                 ulong extra;
@@ -400,7 +400,7 @@ namespace Sla.DECCORE
                 }
                 isSubtype = true;
             }
-            else if (baseType.getMetatype() == TYPE_ARRAY)
+            else if (baseType.getMetatype() == type_metatype.TYPE_ARRAY)
             {
                 isSubtype = true;
                 offset = 0;
@@ -414,7 +414,7 @@ namespace Sla.DECCORE
 
         /// Build part of tree that is multiple of base size
         /// Construct part of the tree that sums to a multiple of the base data-type size.
-        /// This value will be added to the base pointer as a CPUI_PTRADD. The final Varnode produced
+        /// This value will be added to the base pointer as a OpCode.CPUI_PTRADD. The final Varnode produced
         /// by the sum is returned.  If there are no multiples, null is returned.
         /// \return the output Varnode of the multiple tree or null
         private Varnode buildMultiples()
@@ -424,7 +424,7 @@ namespace Sla.DECCORE
             // Be sure to preserve sign in division below
             // Calc size-relative constant PTR addition
             long smultsum = (long)multsum;
-            sign_extend(smultsum, ptrsize * 8 - 1);
+            Globals.sign_extend(smultsum, ptrsize * 8 - 1);
             ulong constCoeff = (size == 0) ? (ulong)0 : (smultsum / size) & ptrmask;
             if (constCoeff == 0)
                 resNode = (Varnode)null;
@@ -436,14 +436,14 @@ namespace Sla.DECCORE
                 Varnode* vn = multiple[i];
                 if (finalCoeff != 1)
                 {
-                    PcodeOp* op = data.newOpBefore(baseOp, CPUI_INT_MULT, vn, data.newConstant(ptrsize, finalCoeff));
+                    PcodeOp* op = data.newOpBefore(baseOp, OpCode.CPUI_INT_MULT, vn, data.newConstant(ptrsize, finalCoeff));
                     vn = op.getOut();
                 }
                 if (resNode == (Varnode)null)
                     resNode = vn;
                 else
                 {
-                    PcodeOp* op = data.newOpBefore(baseOp, CPUI_INT_ADD, vn, resNode);
+                    PcodeOp* op = data.newOpBefore(baseOp, OpCode.CPUI_INT_ADD, vn, resNode);
                     resNode = op.getOut();
                 }
             }
@@ -471,19 +471,19 @@ namespace Sla.DECCORE
                     resNode = vn;
                 else
                 {
-                    PcodeOp* op = data.newOpBefore(baseOp, CPUI_INT_ADD, vn, resNode);
+                    PcodeOp* op = data.newOpBefore(baseOp, OpCode.CPUI_INT_ADD, vn, resNode);
                     resNode = op.getOut();
                 }
             }
             correct &= ptrmask;
             if (correct != 0)
             {
-                Varnode* vn = data.newConstant(ptrsize, uintb_negate(correct - 1, ptrsize));
+                Varnode* vn = data.newConstant(ptrsize, Globals.uintb_negate(correct - 1, ptrsize));
                 if (resNode == (Varnode)null)
                     resNode = vn;
                 else
                 {
-                    PcodeOp* op = data.newOpBefore(baseOp, CPUI_INT_ADD, vn, resNode);
+                    PcodeOp* op = data.newOpBefore(baseOp, OpCode.CPUI_INT_ADD, vn, resNode);
                     resNode = op.getOut();
                 }
             }
@@ -500,7 +500,7 @@ namespace Sla.DECCORE
                 // If the size is really less than scale, there is
                 // probably some sort of padding going on
                 return false;   // Don't transform at all
-            if (baseOp.getOut().getTypeDefFacing().getMetatype() != TYPE_PTR)    // Make sure pointer propagates thru INT_ADD
+            if (baseOp.getOut().getTypeDefFacing().getMetatype() != type_metatype.TYPE_PTR)    // Make sure pointer propagates thru INT_ADD
                 return false;
             List<Varnode*> newparams;
             int slot = baseOp.getSlot(ptr);
@@ -508,7 +508,7 @@ namespace Sla.DECCORE
             newparams.Add(baseOp.getIn(1 - slot));
             newparams.Add(data.newConstant(ct.getSize(), 1));
             data.opSetAllInput(baseOp, newparams);
-            data.opSetOpcode(baseOp, CPUI_PTRADD);
+            data.opSetOpcode(baseOp, OpCode.CPUI_PTRADD);
             return true;
         }
 
@@ -531,7 +531,7 @@ namespace Sla.DECCORE
             // Create PTRADD portion of operation
             if (multNode != (Varnode)null)
             {
-                newop = data.newOpBefore(baseOp, CPUI_PTRADD, ptr, multNode, data.newConstant(ptrsize, size));
+                newop = data.newOpBefore(baseOp, OpCode.CPUI_PTRADD, ptr, multNode, data.newConstant(ptrsize, size));
                 if (ptr.getType().needsResolution())
                     data.inheritResolution(ptr.getType(), newop, 0, baseOp, baseSlot);
                 multNode = newop.getOut();
@@ -542,7 +542,7 @@ namespace Sla.DECCORE
             // Create PTRSUB portion of operation
             if (isSubtype)
             {
-                newop = data.newOpBefore(baseOp, CPUI_PTRSUB, multNode, data.newConstant(ptrsize, offset));
+                newop = data.newOpBefore(baseOp, OpCode.CPUI_PTRSUB, multNode, data.newConstant(ptrsize, offset));
                 if (multNode.getType().needsResolution())
                     data.inheritResolution(multNode.getType(), newop, 0, baseOp, baseSlot);
                 if (size != 0)
@@ -552,7 +552,7 @@ namespace Sla.DECCORE
 
             // Add back in any remaining terms
             if (extraNode != (Varnode)null)
-                newop = data.newOpBefore(baseOp, CPUI_INT_ADD, multNode, extraNode);
+                newop = data.newOpBefore(baseOp, OpCode.CPUI_INT_ADD, multNode, extraNode);
 
             if (newop == (PcodeOp)null)
             {

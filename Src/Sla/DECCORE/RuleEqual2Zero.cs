@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         /// The Rule also applies to INT_NOTEQUAL comparisons.
         public override void getOpList(List<uint> oplist)
         {
-            uint list[] = { CPUI_INT_EQUAL, CPUI_INT_NOTEQUAL };
+            uint list[] = { OpCode.CPUI_INT_EQUAL, OpCode.CPUI_INT_NOTEQUAL };
             oplist.insert(oplist.end(), list, list + 2);
         }
 
@@ -61,24 +61,24 @@ namespace Sla.DECCORE
             //  if (addvn.lone_descendant() != op) return 0;
             addop = addvn.getDef();
             if (addop == (PcodeOp)null) return 0;
-            if (addop.code() != CPUI_INT_ADD) return 0;
+            if (addop.code() != OpCode.CPUI_INT_ADD) return 0;
             vn = addop.getIn(0);
             vn2 = addop.getIn(1);
             if (vn2.isConstant())
             {
-                Address val = new Address(vn2.getSpace(), uintb_negate(vn2.getOffset()-1,vn2.getSize()));
+                Address val = new Address(vn2.getSpace(), Globals.uintb_negate(vn2.getOffset()-1,vn2.getSize()));
                 unnegvn = data.newVarnode(vn2.getSize(), val);
                 unnegvn.copySymbolIfValid(vn2);    // Propagate any markup
                 posvn = vn;
             }
             else
             {
-                if ((vn.isWritten()) && (vn.getDef().code() == CPUI_INT_MULT))
+                if ((vn.isWritten()) && (vn.getDef().code() == OpCode.CPUI_INT_MULT))
                 {
                     negvn = vn;
                     posvn = vn2;
                 }
-                else if ((vn2.isWritten()) && (vn2.getDef().code() == CPUI_INT_MULT))
+                else if ((vn2.isWritten()) && (vn2.getDef().code() == OpCode.CPUI_INT_MULT))
                 {
                     negvn = vn2;
                     posvn = vn;

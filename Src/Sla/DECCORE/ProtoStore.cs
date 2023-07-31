@@ -47,12 +47,12 @@ namespace Sla.DECCORE
         /// \brief Establish the data-type and storage of the return value
         ///
         /// This either allocates a new parameter or replaces the existing one.
-        /// A \e void return value can be specified with an \e invalid address and TYPE_VOID data-type.
+        /// A \e void return value can be specified with an \e invalid address and type_metatype.TYPE_VOID data-type.
         /// \param piece holds the raw storage address and data-type to set
         /// \return the new/modified ProtoParameter
         public abstract ProtoParameter setOutput(ParameterPieces piece);
 
-        /// Clear the return value to TYPE_VOID
+        /// Clear the return value to type_metatype.TYPE_VOID
         public abstract void clearOutput();
 
         /// Get the return-value description

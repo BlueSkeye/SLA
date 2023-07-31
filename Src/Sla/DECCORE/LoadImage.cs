@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -57,7 +58,7 @@ namespace Sla.DECCORE
         /// \param ptr points to where the resulting bytes will be stored
         /// \param size is the number of bytes to retrieve from the image
         /// \param addr is the starting address of the bytes to retrieve
-        public abstract void loadFill(byte ptr, int size, Address addr);
+        public abstract void loadFill(byte[] ptr, int size, Address addr);
 
         /// Prepare to read symbols
         /// This routine should read in and parse any symbol information
@@ -146,21 +147,17 @@ namespace Sla.DECCORE
 
         /// Adjust load addresses with a global offset
         /// \fn void LoadImage::adjustVma(long adjust)
-        /// Most load image formats automatically encode information
-        /// about the true loading address(es) for the data in the image.
-        /// But if this is missing or incorrect, this routine can be
-        /// used to make a global adjustment to the load address. Only
-        /// one adjustment is made across \e all addresses in the image.
-        /// The offset passed to this method is added to the stored
-        /// or default value for any address queried in the image.
-        /// This is most often used in a \e raw binary file format.  In
-        /// this case, the entire executable file is intended to be
-        /// read straight into RAM, as one contiguous chunk, in order to
-        /// be executed.  In the absence of any other info, the first
-        /// byte of the image file is loaded at offset 0. This method
-        /// then would adjust the load address of the first byte.
+        /// Most load image formats automatically encode information about the true loading address(es)
+        /// for the data in the image. But if this is missing or incorrect, this routine can be used to
+        /// make a global adjustment to the load address. Only one adjustment is made across \e all
+        /// addresses in the image. The offset passed to this method is added to the stored or default
+        /// value for any address queried in the image. This is most often used in a \e raw binary file
+        /// format. In this case, the entire executable file is intended to be read straight into RAM,
+        /// as one contiguous chunk, in order to be executed. In the absence of any other info, the first
+        /// byte of the image file is loaded at offset 0. This method then would adjust the load address
+        /// of the first byte.
         /// \param adjust is the offset amount to be added to default values
-        public abstract void adjustVma(long adjust);
+        public abstract void adjustVma(ulong adjust);
 
         /// Load a chunk of image
         /// This is a convenience method wrapped around the core

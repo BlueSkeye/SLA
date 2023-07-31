@@ -50,19 +50,19 @@ namespace Sla.DECCORE
             andvn = op.getIn(0);
             if (!andvn.isWritten()) return 0;
             andop = andvn.getDef();
-            if (andop.code() != CPUI_INT_AND) return 0;
+            if (andop.code() != OpCode.CPUI_INT_AND) return 0;
             if (!andop.getIn(1).isConstant()) return 0;
             subvn = andop.getIn(0);
             if (!subvn.isWritten()) return 0;
             subop = subvn.getDef();
             switch (subop.code())
             {
-                case CPUI_SUBPIECE:
+                case OpCode.CPUI_SUBPIECE:
                     basevn = subop.getIn(0);
                     baseconst = andop.getIn(1).getOffset();
                     andconst = baseconst << subop.getIn(1).getOffset() * 8;
                     break;
-                case CPUI_INT_ZEXT:
+                case OpCode.CPUI_INT_ZEXT:
                     basevn = subop.getIn(0);
                     baseconst = andop.getIn(1).getOffset();
                     andconst = baseconst & Globals.calc_mask(basevn.getSize());
@@ -79,7 +79,7 @@ namespace Sla.DECCORE
                 constvn.copySymbol(andop.getIn(1));   // Keep any old symbol
                                                         // New version of and with bigger inputs
             PcodeOp* newop = data.newOp(2, andop.getAddr());
-            data.opSetOpcode(newop, CPUI_INT_AND);
+            data.opSetOpcode(newop, OpCode.CPUI_INT_AND);
             Varnode* newout = data.newUniqueOut(basevn.getSize(), newop);
             data.opSetInput(newop, basevn, 0);
             data.opSetInput(newop, constvn, 1);

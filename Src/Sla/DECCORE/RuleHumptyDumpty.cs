@@ -45,11 +45,11 @@ namespace Sla.DECCORE
             vn1 = op.getIn(0);
             if (!vn1.isWritten()) return 0;
             sub1 = vn1.getDef();
-            if (sub1.code() != CPUI_SUBPIECE) return 0; // from piece1
+            if (sub1.code() != OpCode.CPUI_SUBPIECE) return 0; // from piece1
             vn2 = op.getIn(1);
             if (!vn2.isWritten()) return 0;
             sub2 = vn2.getDef();
-            if (sub2.code() != CPUI_SUBPIECE) return 0; // from piece2
+            if (sub2.code() != OpCode.CPUI_SUBPIECE) return 0; // from piece2
 
             root = sub1.getIn(0);
             if (root != sub2.getIn(0)) return 0; // pieces of the same whole
@@ -65,13 +65,13 @@ namespace Sla.DECCORE
             {   // Pieced together whole thing
                 data.opRemoveInput(op, 1);
                 data.opSetInput(op, root, 0);
-                data.opSetOpcode(op, CPUI_COPY);
+                data.opSetOpcode(op, OpCode.CPUI_COPY);
             }
             else
             {           // Pieced together a larger part of the whole
                 data.opSetInput(op, root, 0);
                 data.opSetInput(op, data.newConstant(sub2.getIn(1).getSize(), pos2), 1);
-                data.opSetOpcode(op, CPUI_SUBPIECE);
+                data.opSetOpcode(op, OpCode.CPUI_SUBPIECE);
             }
             return 1;
         }

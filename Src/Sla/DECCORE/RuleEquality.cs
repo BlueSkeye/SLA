@@ -39,9 +39,9 @@ namespace Sla.DECCORE
             if (!functionalEquality(op.getIn(0), op.getIn(1)))
                 return 0;
 
-            data.opSetOpcode(op, CPUI_COPY);
+            data.opSetOpcode(op, OpCode.CPUI_COPY);
             data.opRemoveInput(op, 1);
-            vn = data.newConstant(1, (op.code() == CPUI_INT_EQUAL) ? 1 : 0);
+            vn = data.newConstant(1, (op.code() == OpCode.CPUI_INT_EQUAL) ? 1 : 0);
             data.opSetInput(op, vn, 0);
             return 1;
         }

@@ -38,23 +38,14 @@ namespace Sla.CORE
             mask = (uint.MaxValue) >> (startbit + shift);
         }
 
-        ///< Return the shift-amount for \b this value
-        public int getShift()
-        {
-            return shift;
-        }
+        /// Return the shift-amount for \b this value
+        public int getShift() => shift;
 
-        ///< Return the mask for \b this value
-        public uint getMask()
-        {
-            return mask;
-        }
+        /// Return the mask for \b this value
+        public uint getMask() => mask;
 
-        ///< Return the word index for \b this value
-        public int getWord()
-        {
-            return word;
-        }
+        /// Return the word index for \b this value
+        public int getWord() => word;
 
         /// \brief Set \b this value within a given context blob
         /// \param vec is the given context blob to alter (as an array of uint words)

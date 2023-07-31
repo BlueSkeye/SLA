@@ -59,7 +59,7 @@ namespace Sla.DECCORE
             //  if (vn.isFree())
             //    return (TransformVar *)0;
 
-            if (vn.isTypeLock() && vn.getType().getMetatype() != TYPE_PARTIALSTRUCT)
+            if (vn.isTypeLock() && vn.getType().getMetatype() != type_metatype.TYPE_PARTIALSTRUCT)
             {
                 return (TransformVar*)0;
             }
@@ -116,16 +116,16 @@ namespace Sla.DECCORE
             }
         }
 
-        /// \brief Convert a CPUI_PIECE operation into copies between placeholders, given the output lanes
+        /// \brief Convert a OpCode.CPUI_PIECE operation into copies between placeholders, given the output lanes
         ///
-        /// Model the given CPUI_PIECE either as either copies from preexisting Varnodes into the
+        /// Model the given OpCode.CPUI_PIECE either as either copies from preexisting Varnodes into the
         /// output lanes, or as copies from placeholder variables into the output lanes.  Return \b false
         /// if the operation cannot be modeled as natural copies between lanes.
-        /// \param op is the original CPUI_PIECE PcodeOp
+        /// \param op is the original OpCode.CPUI_PIECE PcodeOp
         /// \param outVars is the placeholder variables making up the lanes of the output
         /// \param numLanes is the number of lanes in the output
         /// \param skipLanes is the index of the least significant output lane within the global description
-        /// \return \b true if the CPUI_PIECE was modeled as natural lane copies
+        /// \return \b true if the OpCode.CPUI_PIECE was modeled as natural lane copies
         private bool buildPiece(PcodeOp op, TransformVar outVars, int numLanes, int skipLanes)
         {
             int highLanes, highSkip;
@@ -140,7 +140,7 @@ namespace Sla.DECCORE
             if (highLanes == 1)
             {
                 TransformVar* highRvn = getPreexistingVarnode(highVn);
-                TransformOp* rop = newOpReplace(1, CPUI_COPY, op);
+                TransformOp* rop = newOpReplace(1, OpCode.CPUI_COPY, op);
                 opSetInput(rop, highRvn, 0);
                 opSetOutput(rop, outVars + (numLanes - 1));
             }
@@ -151,7 +151,7 @@ namespace Sla.DECCORE
                 int outHighStart = numLanes - highLanes;
                 for (int i = 0; i < highLanes; ++i)
                 {
-                    TransformOp* rop = newOpReplace(1, CPUI_COPY, op);
+                    TransformOp* rop = newOpReplace(1, OpCode.CPUI_COPY, op);
                     opSetInput(rop, highRvn + i, 0);
                     opSetOutput(rop, outVars + (outHighStart + i));
                 }
@@ -159,7 +159,7 @@ namespace Sla.DECCORE
             if (lowLanes == 1)
             {
                 TransformVar* lowRvn = getPreexistingVarnode(lowVn);
-                TransformOp* rop = newOpReplace(1, CPUI_COPY, op);
+                TransformOp* rop = newOpReplace(1, OpCode.CPUI_COPY, op);
                 opSetInput(rop, lowRvn, 0);
                 opSetOutput(rop, outVars);
             }
@@ -169,7 +169,7 @@ namespace Sla.DECCORE
                 if (lowRvn == (TransformVar*)0) return false;
                 for (int i = 0; i < lowLanes; ++i)
                 {
-                    TransformOp* rop = newOpReplace(1, CPUI_COPY, op);
+                    TransformOp* rop = newOpReplace(1, OpCode.CPUI_COPY, op);
                     opSetInput(rop, lowRvn + i, 0);
                     opSetOutput(rop, outVars + i);
                 }
@@ -177,11 +177,11 @@ namespace Sla.DECCORE
             return true;
         }
 
-        /// \brief Split a given CPUI_MULTIEQUAL operation into placeholders given the output lanes
+        /// \brief Split a given OpCode.CPUI_MULTIEQUAL operation into placeholders given the output lanes
         ///
-        /// Model the single given CPUI_MULTIEQUAL as a sequence of smaller MULTIEQUALs on
+        /// Model the single given OpCode.CPUI_MULTIEQUAL as a sequence of smaller MULTIEQUALs on
         /// each individual lane. Return \b false if the operation cannot be modeled as naturally.
-        /// \param op is the original CPUI_MULTIEQUAL PcodeOp
+        /// \param op is the original OpCode.CPUI_MULTIEQUAL PcodeOp
         /// \param outVars is the placeholder variables making up the lanes of the output
         /// \param numLanes is the number of lanes in the output
         /// \param skipLanes is the index of the least significant output lane within the global description
@@ -198,7 +198,7 @@ namespace Sla.DECCORE
             }
             for (int i = 0; i < numLanes; ++i)
             {
-                TransformOp* rop = newOpReplace(numInput, CPUI_MULTIEQUAL, op);
+                TransformOp* rop = newOpReplace(numInput, OpCode.CPUI_MULTIEQUAL, op);
                 opSetOutput(rop, outVars + i);
                 for (int j = 0; j < numInput; ++j)
                     opSetInput(rop, inVarSets[j] + i, j);
@@ -206,14 +206,14 @@ namespace Sla.DECCORE
             return true;
         }
 
-        /// \brief Split a given CPUI_STORE operation into a sequence of STOREs of individual lanes
+        /// \brief Split a given OpCode.CPUI_STORE operation into a sequence of STOREs of individual lanes
         ///
         /// A new pointer is constructed for each individual lane into a temporary, then a
         /// STORE is created using the pointer that stores an individual lane.
-        /// \param op is the given CPUI_STORE PcodeOp
+        /// \param op is the given OpCode.CPUI_STORE PcodeOp
         /// \param numLanes is the number of lanes the STORE is split into
         /// \param skipLanes is the starting lane (within the global description) of the value being stored
-        /// \return \b true if the CPUI_STORE was successfully modeled on lanes
+        /// \return \b true if the OpCode.CPUI_STORE was successfully modeled on lanes
         private bool buildStore(PcodeOp op, int numLanes, int skipLanes)
         {
             TransformVar* inVars = setReplacement(op.getIn(2), numLanes, skipLanes);
@@ -231,7 +231,7 @@ namespace Sla.DECCORE
             Varnode* valueVn = op.getIn(2);
             for (int i = 0; i < numLanes; ++i)
             {
-                TransformOp* ropStore = newOpReplace(3, CPUI_STORE, op);
+                TransformOp* ropStore = newOpReplace(3, OpCode.CPUI_STORE, op);
                 int bytePos = description.getPosition(skipLanes + i);
                 int sz = description.getSize(skipLanes + i);
                 if (spc.isBigEndian())
@@ -244,7 +244,7 @@ namespace Sla.DECCORE
                 else
                 {
                     ptrVn = newUnique(ptrSize);
-                    TransformOp* addOp = newOp(2, CPUI_INT_ADD, ropStore);
+                    TransformOp* addOp = newOp(2, OpCode.CPUI_INT_ADD, ropStore);
                     opSetOutput(addOp, ptrVn);
                     opSetInput(addOp, basePtr, 0);
                     opSetInput(addOp, newConstant(ptrSize, 0, bytePos), 1);
@@ -257,15 +257,15 @@ namespace Sla.DECCORE
             return true;
         }
 
-        /// \brief Split a given CPUI_LOAD operation into a sequence of LOADs of individual lanes
+        /// \brief Split a given OpCode.CPUI_LOAD operation into a sequence of LOADs of individual lanes
         ///
         /// A new pointer is constructed for each individual lane into a temporary, then a
         /// LOAD is created using the pointer that loads an individual lane.
-        /// \param op is the given CPUI_LOAD PcodeOp
+        /// \param op is the given OpCode.CPUI_LOAD PcodeOp
         /// \param outVars is the output placeholders for the LOAD
         /// \param numLanes is the number of lanes the LOAD is split into
         /// \param skipLanes is the starting lane (within the global description) of the value being loaded
-        /// \return \b true if the CPUI_LOAD was successfully modeled on lanes
+        /// \return \b true if the OpCode.CPUI_LOAD was successfully modeled on lanes
         private bool buildLoad(PcodeOp op, TransformVar outVars, int numLanes, int skipLanes)
         {
             ulong spaceConst = op.getIn(0).getOffset();
@@ -281,7 +281,7 @@ namespace Sla.DECCORE
             int outSize = op.getOut().getSize();
             for (int i = 0; i < numLanes; ++i)
             {
-                TransformOp* ropLoad = newOpReplace(2, CPUI_LOAD, op);
+                TransformOp* ropLoad = newOpReplace(2, OpCode.CPUI_LOAD, op);
                 int bytePos = description.getPosition(skipLanes + i);
                 int sz = description.getSize(skipLanes + i);
                 if (spc.isBigEndian())
@@ -294,7 +294,7 @@ namespace Sla.DECCORE
                 else
                 {
                     ptrVn = newUnique(ptrSize);
-                    TransformOp* addOp = newOp(2, CPUI_INT_ADD, ropLoad);
+                    TransformOp* addOp = newOp(2, OpCode.CPUI_INT_ADD, ropLoad);
                     opSetOutput(addOp, ptrVn);
                     opSetInput(addOp, basePtr, 0);
                     opSetInput(addOp, newConstant(ptrSize, 0, bytePos), 1);
@@ -307,15 +307,15 @@ namespace Sla.DECCORE
             return true;
         }
 
-        /// \brief Check that a CPUI_INT_RIGHT respects the lanes then generate lane placeholders
+        /// \brief Check that a OpCode.CPUI_INT_RIGHT respects the lanes then generate lane placeholders
         ///
         /// For the given lane scheme, check that the RIGHT shift is copying whole lanes to each other.
         /// If so, generate the placeholder COPYs that model the shift.
-        /// \param op is the given CPUI_INT_RIGHT PcodeOp
+        /// \param op is the given OpCode.CPUI_INT_RIGHT PcodeOp
         /// \param outVars is the output placeholders for the RIGHT shift
         /// \param numLanes is the number of lanes the shift is split into
         /// \param skipLanes is the starting lane (within the global description) of the value being loaded
-        /// \return \b true if the CPUI_INT_RIGHT was successfully modeled on lanes
+        /// \return \b true if the OpCode.CPUI_INT_RIGHT was successfully modeled on lanes
         private bool buildRightShift(PcodeOp op, TransformVar outVars, int numLanes, int skipLanes)
         {
             if (!op.getIn(1).isConstant()) return false;
@@ -338,7 +338,7 @@ namespace Sla.DECCORE
             buildUnaryOp(CPUI_COPY, op, inVars + (startLane - skipLanes), outVars, numLanes - (startLane - skipLanes));
             for (int zeroLane = numLanes - (startLane - skipLanes); zeroLane < numLanes; ++zeroLane)
             {
-                TransformOp* rop = newOpReplace(1, CPUI_COPY, op);
+                TransformOp* rop = newOpReplace(1, OpCode.CPUI_COPY, op);
                 opSetOutput(rop, outVars + zeroLane);
                 opSetInput(rop, newConstant(description.getSize(zeroLane), 0, 0), 0);
             }
@@ -368,7 +368,7 @@ namespace Sla.DECCORE
                     continue;
                 switch (op.code())
                 {
-                    case CPUI_SUBPIECE:
+                    case OpCode.CPUI_SUBPIECE:
                         {
                             int bytePos = (int)op.getIn(1).getOffset();
                             int outLanes, outSkip;
@@ -382,7 +382,7 @@ namespace Sla.DECCORE
                                     if (description.getSize(laneIndex) <= outvn.getSize())     // Is the piece smaller than a lane?
                                         return false;
                                     // Treat SUBPIECE as terminating
-                                    TransformOp* rop = newPreexistingOp(2, CPUI_SUBPIECE, op);
+                                    TransformOp* rop = newPreexistingOp(2, OpCode.CPUI_SUBPIECE, op);
                                     opSetInput(rop, rvn + (laneIndex - skipLanes), 0);
                                     opSetInput(rop, newConstant(4, 0, 0), 1);
                                     break;
@@ -391,7 +391,7 @@ namespace Sla.DECCORE
                             }
                             if (outLanes == 1)
                             {
-                                TransformOp* rop = newPreexistingOp(1, CPUI_COPY, op);
+                                TransformOp* rop = newPreexistingOp(1, OpCode.CPUI_COPY, op);
                                 opSetInput(rop, rvn + (outSkip - skipLanes), 0);
                             }
                             else
@@ -402,7 +402,7 @@ namespace Sla.DECCORE
                             }
                             break;
                         }
-                    case CPUI_PIECE:
+                    case OpCode.CPUI_PIECE:
                         {
                             int outLanes, outSkip;
                             int bytePos = (op.getIn(0) == origvn) ? op.getIn(1).getSize() : 0;
@@ -413,19 +413,19 @@ namespace Sla.DECCORE
                             // Don't create the placeholder ops, let traceBackward make them
                             break;
                         }
-                    case CPUI_COPY:
-                    case CPUI_INT_NEGATE:
-                    case CPUI_INT_AND:
-                    case CPUI_INT_OR:
-                    case CPUI_INT_XOR:
-                    case CPUI_MULTIEQUAL:
+                    case OpCode.CPUI_COPY:
+                    case OpCode.CPUI_INT_NEGATE:
+                    case OpCode.CPUI_INT_AND:
+                    case OpCode.CPUI_INT_OR:
+                    case OpCode.CPUI_INT_XOR:
+                    case OpCode.CPUI_MULTIEQUAL:
                         {
                             TransformVar* outRvn = setReplacement(outvn, numLanes, skipLanes);
                             if (outRvn == (TransformVar*)0) return false;
                             // Don't create the placeholder ops, let traceBackward make them
                             break;
                         }
-                    case CPUI_INT_RIGHT:
+                    case OpCode.CPUI_INT_RIGHT:
                         {
                             if (!op.getIn(1).isConstant()) return false;  // Trace must come through op.getIn(0)
                             TransformVar* outRvn = setReplacement(outvn, numLanes, skipLanes);
@@ -433,7 +433,7 @@ namespace Sla.DECCORE
                             // Don't create the placeholder ops, let traceBackward make them
                             break;
                         }
-                    case CPUI_STORE:
+                    case OpCode.CPUI_STORE:
                         if (op.getIn(2) != origvn) return false;   // Can only propagate through value being stored
                         if (!buildStore(op, numLanes, skipLanes))
                             return false;
@@ -461,17 +461,17 @@ namespace Sla.DECCORE
 
             switch (op.code())
             {
-                case CPUI_INT_NEGATE:
-                case CPUI_COPY:
+                case OpCode.CPUI_INT_NEGATE:
+                case OpCode.CPUI_COPY:
                     {
                         TransformVar* inVars = setReplacement(op.getIn(0), numLanes, skipLanes);
                         if (inVars == (TransformVar*)0) return false;
                         buildUnaryOp(op.code(), op, inVars, rvn, numLanes);
                         break;
                     }
-                case CPUI_INT_AND:
-                case CPUI_INT_OR:
-                case CPUI_INT_XOR:
+                case OpCode.CPUI_INT_AND:
+                case OpCode.CPUI_INT_OR:
+                case OpCode.CPUI_INT_XOR:
                     {
                         TransformVar* in0Vars = setReplacement(op.getIn(0), numLanes, skipLanes);
                         if (in0Vars == (TransformVar*)0) return false;
@@ -480,11 +480,11 @@ namespace Sla.DECCORE
                         buildBinaryOp(op.code(), op, in0Vars, in1Vars, rvn, numLanes);
                         break;
                     }
-                case CPUI_MULTIEQUAL:
+                case OpCode.CPUI_MULTIEQUAL:
                     if (!buildMultiequal(op, rvn, numLanes, skipLanes))
                         return false;
                     break;
-                case CPUI_SUBPIECE:
+                case OpCode.CPUI_SUBPIECE:
                     {
                         Varnode* inVn = op.getIn(0);
                         int bytePos = (int)op.getIn(1).getOffset();
@@ -496,15 +496,15 @@ namespace Sla.DECCORE
                         buildUnaryOp(CPUI_COPY, op, inVars + (skipLanes - inSkip), rvn, numLanes);
                         break;
                     }
-                case CPUI_PIECE:
+                case OpCode.CPUI_PIECE:
                     if (!buildPiece(op, rvn, numLanes, skipLanes))
                         return false;
                     break;
-                case CPUI_LOAD:
+                case OpCode.CPUI_LOAD:
                     if (!buildLoad(op, rvn, numLanes, skipLanes))
                         return false;
                     break;
-                case CPUI_INT_RIGHT:
+                case OpCode.CPUI_INT_RIGHT:
                     if (!buildRightShift(op, rvn, numLanes, skipLanes))
                         return false;
                     break;
@@ -522,7 +522,7 @@ namespace Sla.DECCORE
             int numLanes = workList.GetLastItem().numLanes;
             int skipLanes = workList.GetLastItem().skipLanes;
 
-            workList.pop_back();
+            workList.RemoveLastItem();
 
             if (!traceBackward(rvn, numLanes, skipLanes)) return false;
             return traceForward(rvn, numLanes, skipLanes);

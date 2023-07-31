@@ -67,22 +67,22 @@ namespace Sla.DECCORE
                     return false;
                 PcodeOp* addOp = pointer.getDef();
                 OpCode opc = addOp.code();
-                if (opc != CPUI_PTRSUB && opc != CPUI_INT_ADD && opc != CPUI_PTRADD)
+                if (opc != OpCode.CPUI_PTRSUB && opc != OpCode.CPUI_INT_ADD && opc != OpCode.CPUI_PTRADD)
                     return false;
                 Varnode* cvn = addOp.getIn(1);
                 if (!cvn.isConstant())
                     return false;
                 Varnode* tmpPointer = addOp.getIn(0);
                 Datatype* ct = tmpPointer.getTypeReadFacing(addOp);
-                if (ct.getMetatype() != TYPE_PTR)
+                if (ct.getMetatype() != type_metatype.TYPE_PTR)
                     return false;
                 Datatype* parent = ((TypePointer*)ct).getPtrTo();
                 type_metatype meta = parent.getMetatype();
-                if (meta != TYPE_STRUCT && meta != TYPE_ARRAY)
+                if (meta != type_metatype.TYPE_STRUCT && meta != type_metatype.TYPE_ARRAY)
                     return false;
                 ptrType = (TypePointer*)ct;
                 int off = (int)cvn.getOffset();
-                if (opc == CPUI_PTRADD)
+                if (opc == OpCode.CPUI_PTRADD)
                     off *= (int)addOp.getIn(2).getOffset();
                 off = AddrSpace::addressToByteInt(off, ptrType.getWordSize());
                 baseOffset += off;
@@ -100,13 +100,13 @@ namespace Sla.DECCORE
             /// \return \b true if the root pointer is found
             public bool find(PcodeOp op, Datatype valueType)
             {
-                if (valueType.getMetatype() == TYPE_PARTIALSTRUCT)
+                if (valueType.getMetatype() == type_metatype.TYPE_PARTIALSTRUCT)
                     valueType = ((TypePartialStruct*)valueType).getParent();
                 loadStore = op;
                 baseOffset = 0;
                 firstPointer = pointer = op.getIn(1);
                 Datatype* ct = pointer.getTypeReadFacing(op);
-                if (ct.getMetatype() != TYPE_PTR)
+                if (ct.getMetatype() != type_metatype.TYPE_PTR)
                     return false;
                 ptrType = (TypePointer*)ct;
                 if (ptrType.getPtrTo() != valueType)
@@ -177,11 +177,11 @@ namespace Sla.DECCORE
                         if (hole > 8)
                             hole = 8;
                         isHole = true;
-                        return types.getBase(hole, TYPE_UNKNOWN);
+                        return types.getBase(hole, type_metatype.TYPE_UNKNOWN);
                     }
                     return curType;
                 }
-            } while (curOff != 0 || curType.getMetatype() == TYPE_ARRAY);
+            } while (curOff != 0 || curType.getMetatype() == type_metatype.TYPE_ARRAY);
             return curType;
         }
 
@@ -197,38 +197,38 @@ namespace Sla.DECCORE
             Datatype* subType;
             switch (ct.getMetatype())
             {
-                case TYPE_ARRAY:
+                case type_metatype.TYPE_ARRAY:
                     if (!splitArrays) break;
                     subType = ((TypeArray*)ct).getBase();
-                    if (subType.getMetatype() != TYPE_UNKNOWN || subType.getSize() != 1)
+                    if (subType.getMetatype() != type_metatype.TYPE_UNKNOWN || subType.getSize() != 1)
                         return 0;
                     else
                         return 1;   // unknown1 array does not need splitting and acts as (large) primitive
-                case TYPE_PARTIALSTRUCT:
+                case type_metatype.TYPE_PARTIALSTRUCT:
                     subType = ((TypePartialStruct*)ct).getParent();
-                    if (subType.getMetatype() == TYPE_ARRAY)
+                    if (subType.getMetatype() == type_metatype.TYPE_ARRAY)
                     {
                         if (!splitArrays) break;
                         subType = ((TypeArray*)subType).getBase();
-                        if (subType.getMetatype() != TYPE_UNKNOWN || subType.getSize() != 1)
+                        if (subType.getMetatype() != type_metatype.TYPE_UNKNOWN || subType.getSize() != 1)
                             return 0;
                         else
                             return 1;   // unknown1 array does not need splitting and acts as (large) primitive
                     }
-                    else if (subType.getMetatype() == TYPE_STRUCT)
+                    else if (subType.getMetatype() == type_metatype.TYPE_STRUCT)
                     {
                         if (!splitStructures) break;
                         return 0;
                     }
                     break;
-                case TYPE_STRUCT:
+                case type_metatype.TYPE_STRUCT:
                     if (!splitStructures) break;
                     if (ct.numDepend() > 1)
                         return 0;
                     break;
-                case TYPE_INT:
-                case TYPE_UINT:
-                case TYPE_UNKNOWN:
+                case type_metatype.TYPE_INT:
+                case type_metatype.TYPE_UINT:
+                case type_metatype.TYPE_UNKNOWN:
                     return 1;
                 default:
                     break;
@@ -241,7 +241,7 @@ namespace Sla.DECCORE
         /// Test if the data-types have components with matching size and offset. If so, the component
         /// data-types and offsets are saved to the \b pieces array and \b true is returned.
         /// At least one of the data-types must be a partial data-type, but the other may be a
-        /// TYPE_UNKNOWN, which this method assumes can be split into components of arbitrary size.
+        /// type_metatype.TYPE_UNKNOWN, which this method assumes can be split into components of arbitrary size.
         /// \param inBase is the data-type coming into the operation
         /// \param outBase is the data-type coming out of the operation
         /// \param inConstant is \b true if the incoming data-type labels a constant
@@ -256,7 +256,7 @@ namespace Sla.DECCORE
                 return false;
             if (outCategory != 0 && inCategory != 0)
                 return false;
-            if (!inConstant && inBase == outBase && inBase.getMetatype() == TYPE_STRUCT)
+            if (!inConstant && inBase == outBase && inBase.getMetatype() == type_metatype.TYPE_STRUCT)
                 return false;   // Don't split a whole structure unless it is getting initialized from a constant
             bool inHole;
             bool outHole;
@@ -269,7 +269,7 @@ namespace Sla.DECCORE
                     Datatype* curOut = getComponent(outBase, curOff, outHole);
                     if (curOut == (Datatype)null) return false;
                     // Throw away primitive data-type if it is a constant
-                    Datatype* curIn = inConstant ? curOut : types.getBase(curOut.getSize(), TYPE_UNKNOWN);
+                    Datatype* curIn = inConstant ? curOut : types.getBase(curOut.getSize(), type_metatype.TYPE_UNKNOWN);
                     dataTypePieces.emplace_back(curIn, curOut, curOff);
                     sizeLeft -= curOut.getSize();
                     curOff += curOut.getSize();
@@ -288,7 +288,7 @@ namespace Sla.DECCORE
                 {
                     Datatype* curIn = getComponent(inBase, curOff, inHole);
                     if (curIn == (Datatype)null) return false;
-                    Datatype* curOut = types.getBase(curIn.getSize(), TYPE_UNKNOWN);
+                    Datatype* curOut = types.getBase(curIn.getSize(), type_metatype.TYPE_UNKNOWN);
                     dataTypePieces.emplace_back(curIn, curOut, curOff);
                     sizeLeft -= curIn.getSize();
                     curOff += curIn.getSize();
@@ -314,7 +314,7 @@ namespace Sla.DECCORE
                         if (curIn.getSize() > curOut.getSize())
                         {
                             if (inHole)
-                                curIn = types.getBase(curOut.getSize(), TYPE_UNKNOWN);
+                                curIn = types.getBase(curOut.getSize(), type_metatype.TYPE_UNKNOWN);
                             else
                                 curIn = getComponent(curIn, 0, inHole);
                             if (curIn == (Datatype)null) return false;
@@ -322,7 +322,7 @@ namespace Sla.DECCORE
                         else
                         {
                             if (outHole)
-                                curOut = types.getBase(curIn.getSize(), TYPE_UNKNOWN);
+                                curOut = types.getBase(curIn.getSize(), type_metatype.TYPE_UNKNOWN);
                             else
                                 curOut = getComponent(curOut, 0, outHole);
                             if (curOut == (Datatype)null) return false;
@@ -350,7 +350,7 @@ namespace Sla.DECCORE
                 if (outVn.isAddrTied() && outVn.getAddr() == inVn.getAddr())
                     return false;
             }
-            else if (inVn.isWritten() && inVn.getDef().code() == CPUI_LOAD)
+            else if (inVn.isWritten() && inVn.getDef().code() == OpCode.CPUI_LOAD)
             {
                 if (inVn.loneDescend() == copyOp)
                     return false;       // This situation is handled by splitCopy()
@@ -370,11 +370,11 @@ namespace Sla.DECCORE
             if (!vn.isWritten()) return false;
             PcodeOp* op = vn.getDef();
             OpCode opc = op.code();
-            if (opc == CPUI_INT_ZEXT)
+            if (opc == OpCode.CPUI_INT_ZEXT)
             {
                 if (!op.getIn(0).isConstant()) return false;
             }
-            else if (opc == CPUI_PIECE)
+            else if (opc == OpCode.CPUI_PIECE)
             {
                 if (!op.getIn(0).isConstant() || !op.getIn(1).isConstant())
                     return false;
@@ -385,7 +385,7 @@ namespace Sla.DECCORE
             int losize;
             int fullsize = vn.getSize();
             bool isBigEndian = vn.getSpace().isBigEndian();
-            if (opc == CPUI_INT_ZEXT)
+            if (opc == OpCode.CPUI_INT_ZEXT)
             {
                 hi = 0;
                 lo = op.getIn(0).getOffset();
@@ -472,7 +472,7 @@ namespace Sla.DECCORE
                 if (addr.isBigEndian())
                     off = rootVn.getSize() - off - dt.getSize();
                 PcodeOp* subpiece = data.newOp(2, followOp.getAddr());
-                data.opSetOpcode(subpiece, CPUI_SUBPIECE);
+                data.opSetOpcode(subpiece, OpCode.CPUI_SUBPIECE);
                 data.opSetInput(subpiece, rootVn, 0);
                 data.opSetInput(subpiece, data.newConstant(4, off), 1);
                 Varnode* outVn = data.newVarnodeOut(dt.getSize(), addr, subpiece);
@@ -530,7 +530,7 @@ namespace Sla.DECCORE
                 for (int i = 1; ; ++i)
                 {               // Traverse most to least significant
                     concatOp = data.newOp(2, previousOp.getAddr());
-                    data.opSetOpcode(concatOp, CPUI_PIECE);
+                    data.opSetOpcode(concatOp, OpCode.CPUI_PIECE);
                     data.opSetInput(concatOp, vn, 0);           // Most significant
                     data.opSetInput(concatOp, outVarnodes[i], 1);   // Least significant
                     data.opInsertAfter(concatOp, preOp);
@@ -550,7 +550,7 @@ namespace Sla.DECCORE
                 for (int i = outVarnodes.size() - 2; ; --i)
                 {       // Traverse most to least significant
                     concatOp = data.newOp(2, previousOp.getAddr());
-                    data.opSetOpcode(concatOp, CPUI_PIECE);
+                    data.opSetOpcode(concatOp, OpCode.CPUI_PIECE);
                     data.opSetInput(concatOp, vn, 0);           // Most significant
                     data.opSetInput(concatOp, outVarnodes[i], 1);   // Least significant
                     data.opInsertAfter(concatOp, preOp);
@@ -614,26 +614,26 @@ namespace Sla.DECCORE
                             newOff = 0;
                         }
                     }
-                    if (tmpType == newType || tmpType.getMetatype() == TYPE_ARRAY)
+                    if (tmpType == newType || tmpType.getMetatype() == type_metatype.TYPE_ARRAY)
                     {
                         int finalOffset = (int)curOff - (int)newOff;
                         int sz = newType.getSize();       // Element size in bytes
                         finalOffset = finalOffset / sz;     // Number of elements
                         sz = AddrSpace::byteToAddressInt(sz, ptrType.getWordSize());
                         newOp = data.newOp(3, followOp.getAddr());
-                        data.opSetOpcode(newOp, CPUI_PTRADD);
+                        data.opSetOpcode(newOp, OpCode.CPUI_PTRADD);
                         data.opSetInput(newOp, inPtr, 0);
                         Varnode* indexVn = data.newConstant(inPtr.getSize(), finalOffset);
                         data.opSetInput(newOp, indexVn, 1);
                         data.opSetInput(newOp, data.newConstant(inPtr.getSize(), sz), 2);
-                        Datatype* indexType = types.getBase(indexVn.getSize(), TYPE_INT);
+                        Datatype* indexType = types.getBase(indexVn.getSize(), type_metatype.TYPE_INT);
                         indexVn.updateType(indexType, false, false);
                     }
                     else
                     {
                         int finalOffset = AddrSpace::byteToAddressInt((int)curOff - (int)newOff, ptrType.getWordSize());
                         newOp = data.newOp(2, followOp.getAddr());
-                        data.opSetOpcode(newOp, CPUI_PTRSUB);
+                        data.opSetOpcode(newOp, OpCode.CPUI_PTRSUB);
                         data.opSetInput(newOp, inPtr, 0);
                         data.opSetInput(newOp, data.newConstant(inPtr.getSize(), finalOffset), 1);
                     }
@@ -715,7 +715,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < inVarnodes.size(); ++i)
             {
                 PcodeOp* newCopyOp = data.newOp(1, copyOp.getAddr());
-                data.opSetOpcode(newCopyOp, CPUI_COPY);
+                data.opSetOpcode(newCopyOp, OpCode.CPUI_COPY);
                 data.opSetInput(newCopyOp, inVarnodes[i], 0);
                 data.opSetOutput(newCopyOp, outVarnodes[i]);
                 data.opInsertBefore(newCopyOp, copyOp);
@@ -741,8 +741,8 @@ namespace Sla.DECCORE
             if (copyOp != (PcodeOp)null)
             {
                 OpCode opc = copyOp.code();
-                if (opc == CPUI_STORE) return false;    // Handled by RuleSplitStore
-                if (opc != CPUI_COPY)
+                if (opc == OpCode.CPUI_STORE) return false;    // Handled by RuleSplitStore
+                if (opc != OpCode.CPUI_COPY)
                     copyOp = (PcodeOp)null;
             }
             if (copyOp != (PcodeOp)null)
@@ -765,7 +765,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < ptrVarnodes.size(); ++i)
             {
                 PcodeOp* newLoadOp = data.newOp(2, insertPoint.getAddr());
-                data.opSetOpcode(newLoadOp, CPUI_LOAD);
+                data.opSetOpcode(newLoadOp, OpCode.CPUI_LOAD);
                 data.opSetInput(newLoadOp, data.newVarnodeSpace(spc), 0);
                 data.opSetInput(newLoadOp, ptrVarnodes[i], 1);
                 data.opSetOutput(newLoadOp, outVarnodes[i]);
@@ -790,7 +790,7 @@ namespace Sla.DECCORE
             Varnode* inVn = storeOp.getIn(2);
             PcodeOp* loadOp = (PcodeOp)null;
             Datatype* inType = (Datatype)null;
-            if (inVn.isWritten() && inVn.getDef().code() == CPUI_LOAD && inVn.loneDescend() == storeOp)
+            if (inVn.isWritten() && inVn.getDef().code() == OpCode.CPUI_LOAD && inVn.loneDescend() == storeOp)
             {
                 loadOp = inVn.getDef();
                 inType = getValueDatatype(loadOp, inVn.getSize(), data.getArch().types);
@@ -841,7 +841,7 @@ namespace Sla.DECCORE
                 for (int i = 0; i < loadPtrs.size(); ++i)
                 {
                     PcodeOp* newLoadOp = data.newOp(2, loadOp.getAddr());
-                    data.opSetOpcode(newLoadOp, CPUI_LOAD);
+                    data.opSetOpcode(newLoadOp, OpCode.CPUI_LOAD);
                     data.opSetInput(newLoadOp, data.newVarnodeSpace(loadSpace), 0);
                     data.opSetInput(newLoadOp, loadPtrs[i], 1);
                     Datatype* dt = dataTypePieces[i].inType;
@@ -865,7 +865,7 @@ namespace Sla.DECCORE
             for (int i = 1; i < storePtrs.size(); ++i)
             {
                 PcodeOp* newStoreOp = data.newOp(3, storeOp.getAddr());
-                data.opSetOpcode(newStoreOp, CPUI_STORE);
+                data.opSetOpcode(newStoreOp, OpCode.CPUI_STORE);
                 data.opSetInput(newStoreOp, data.newVarnodeSpace(storeSpace), 0);
                 data.opSetInput(newStoreOp, storePtrs[i], 1);
                 data.opSetInput(newStoreOp, inVarnodes[i], 2);
@@ -896,7 +896,7 @@ namespace Sla.DECCORE
         {
             Datatype* resType;
             Datatype* ptrType = loadStore.getIn(1).getTypeReadFacing(loadStore);
-            if (ptrType.getMetatype() != TYPE_PTR)
+            if (ptrType.getMetatype() != type_metatype.TYPE_PTR)
                 return (Datatype)null;
             int baseOffset;
             if (ptrType.isPointerRel())
@@ -912,7 +912,7 @@ namespace Sla.DECCORE
                 baseOffset = 0;
             }
             type_metatype metain = resType.getMetatype();
-            if (metain != TYPE_STRUCT && metain == TYPE_ARRAY)
+            if (metain != type_metatype.TYPE_STRUCT && metain == type_metatype.TYPE_ARRAY)
                 return (Datatype)null;
             return tlst.getExactPiece(resType, baseOffset, size);
         }

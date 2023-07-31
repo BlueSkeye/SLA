@@ -9,7 +9,7 @@ namespace Sla.DECCORE
 {
     /// \brief Description of a LOAD operation that needs to be guarded
     ///
-    /// Heritage maintains a list of CPUI_LOAD ops that reference the stack dynamically. These
+    /// Heritage maintains a list of OpCode.CPUI_LOAD ops that reference the stack dynamically. These
     /// can potentially alias stack Varnodes, so we maintain what (possibly limited) information
     /// we known about the range of stack addresses that can be referenced.
     internal class LoadGuard

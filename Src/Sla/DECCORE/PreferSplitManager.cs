@@ -77,8 +77,8 @@ namespace Sla.DECCORE
         { // Create COPY ops based on input -ininst- and output -outinst- to replace -op-
             PcodeOp* hiop = data.newOp(1, op.getAddr()); // Create two new COPYs
             PcodeOp* loop = data.newOp(1, op.getAddr());
-            data.opSetOpcode(hiop, CPUI_COPY);
-            data.opSetOpcode(loop, CPUI_COPY);
+            data.opSetOpcode(hiop, OpCode.CPUI_COPY);
+            data.opSetOpcode(loop, OpCode.CPUI_COPY);
 
             data.opInsertAfter(loop, op); // Insert new COPYs at same position as original operation
             data.opInsertAfter(hiop, op);
@@ -215,8 +215,8 @@ namespace Sla.DECCORE
             fillinInstance(inst, bigendian, true, true);
             PcodeOp* hiop = data.newOp(1, op.getAddr());
             PcodeOp* loop = data.newOp(1, op.getAddr());
-            data.opSetOpcode(hiop, CPUI_COPY);
-            data.opSetOpcode(loop, CPUI_COPY);
+            data.opSetOpcode(hiop, OpCode.CPUI_COPY);
+            data.opSetOpcode(loop, OpCode.CPUI_COPY);
             data.opSetOutput(hiop, inst.hi); // Outputs are the pieces of the original
             data.opSetOutput(loop, inst.lo);
 
@@ -254,14 +254,14 @@ namespace Sla.DECCORE
         }
 
         private void splitSubpiece(SplitInstance inst, PcodeOp op)
-        { // Knowing -op- is a CPUI_SUBPIECE that extracts a logical piece from -inst-, rewrite it to a copy
+        { // Knowing -op- is a OpCode.CPUI_SUBPIECE that extracts a logical piece from -inst-, rewrite it to a copy
             Varnode* vn = inst.vn;
             int suboff = (int)op.getIn(1).getOffset();
             bool grabbinglo = (suboff == 0);
 
             bool bigendian = vn.getSpace().isBigEndian();
             fillinInstance(inst, bigendian, !grabbinglo, grabbinglo);
-            data.opSetOpcode(op, CPUI_COPY); // Change SUBPIECE to a copy
+            data.opSetOpcode(op, OpCode.CPUI_COPY); // Change SUBPIECE to a copy
             data.opRemoveInput(op, 1);
 
             // Input is most/least significant piece, depending on which the SUBPIECE extracts
@@ -275,7 +275,7 @@ namespace Sla.DECCORE
         }
 
         private void splitLoad(SplitInstance inst, PcodeOp op)
-        { // Knowing -op- is a CPUI_LOAD that defines the -inst- varnode, split it into two pieces
+        { // Knowing -op- is a OpCode.CPUI_LOAD that defines the -inst- varnode, split it into two pieces
             bool bigendian = inst.vn.getSpace().isBigEndian();
             fillinInstance(inst, bigendian, true, true);
             PcodeOp* hiop = data.newOp(2, op.getAddr());  // Create two new LOAD ops
@@ -283,10 +283,10 @@ namespace Sla.DECCORE
             PcodeOp* addop = data.newOp(2, op.getAddr());
             Varnode* ptrvn = op.getIn(1);
 
-            data.opSetOpcode(hiop, CPUI_LOAD);
-            data.opSetOpcode(loop, CPUI_LOAD);
+            data.opSetOpcode(hiop, OpCode.CPUI_LOAD);
+            data.opSetOpcode(loop, OpCode.CPUI_LOAD);
 
-            data.opSetOpcode(addop, CPUI_INT_ADD); // Create a new ADD op to calculate and hold the second pointer
+            data.opSetOpcode(addop, OpCode.CPUI_INT_ADD); // Create a new ADD op to calculate and hold the second pointer
 
             data.opInsertAfter(loop, op);
             data.opInsertAfter(hiop, op);
@@ -333,10 +333,10 @@ namespace Sla.DECCORE
             PcodeOp* addop = data.newOp(2, op.getAddr());
             Varnode* ptrvn = op.getIn(1);
 
-            data.opSetOpcode(hiop, CPUI_STORE);
-            data.opSetOpcode(loop, CPUI_STORE);
+            data.opSetOpcode(hiop, OpCode.CPUI_STORE);
+            data.opSetOpcode(loop, OpCode.CPUI_STORE);
 
-            data.opSetOpcode(addop, CPUI_INT_ADD); // Create a new ADD op to calculate and hold the second pointer
+            data.opSetOpcode(addop, OpCode.CPUI_INT_ADD); // Create a new ADD op to calculate and hold the second pointer
 
             data.opInsertAfter(loop, op);
             data.opInsertAfter(hiop, op);
@@ -381,22 +381,22 @@ namespace Sla.DECCORE
                 PcodeOp* op = vn.getDef();
                 switch (op.code())
                 {
-                    case CPUI_COPY:
+                    case OpCode.CPUI_COPY:
                         if (!testDefiningCopy(inst, op, istemp))
                             return false;
                         splitDefiningCopy(inst, op, istemp);
                         break;
-                    case CPUI_PIECE:
+                    case OpCode.CPUI_PIECE:
                         if (!testPiece(inst, op))
                             return false;
                         splitPiece(inst, op);
                         break;
-                    case CPUI_LOAD:
+                    case OpCode.CPUI_LOAD:
                         if (!testLoad(inst, op))
                             return false;
                         splitLoad(inst, op);
                         break;
-                    case CPUI_INT_ZEXT:
+                    case OpCode.CPUI_INT_ZEXT:
                         if (!testZext(inst, op))
                             return false;
                         splitZext(inst, op);
@@ -414,17 +414,17 @@ namespace Sla.DECCORE
                     return false;
                 switch (op.code())
                 {
-                    case CPUI_COPY:
+                    case OpCode.CPUI_COPY:
                         if (!testReadingCopy(inst, op, istemp))
                             return false;
                         splitReadingCopy(inst, op, istemp);
                         break;
-                    case CPUI_SUBPIECE:
+                    case OpCode.CPUI_SUBPIECE:
                         if (!testSubpiece(inst, op))
                             return false;
                         splitSubpiece(inst, op);
                         return true;        // Do not destroy op, it has been transformed
-                    case CPUI_STORE:
+                    case OpCode.CPUI_STORE:
                         if (!testStore(inst, op))
                             return false;
                         splitStore(inst, op);
@@ -464,15 +464,15 @@ namespace Sla.DECCORE
             PcodeOp* op = inst.vn.getDef();
             switch (op.code())
             {
-                case CPUI_PIECE:
+                case OpCode.CPUI_PIECE:
                     if (!testPiece(inst, op))
                         return false;
                     break;
-                case CPUI_LOAD:
+                case OpCode.CPUI_LOAD:
                     if (!testLoad(inst, op))
                         return false;
                     break;
-                case CPUI_INT_ZEXT:
+                case OpCode.CPUI_INT_ZEXT:
                     if (!testZext(inst, op))
                         return false;
                     break;
@@ -488,11 +488,11 @@ namespace Sla.DECCORE
                 ++iter;
                 switch (readop.code())
                 {
-                    case CPUI_SUBPIECE:
+                    case OpCode.CPUI_SUBPIECE:
                         if (!testSubpiece(inst, readop))
                             return false;
                         break;
-                    case CPUI_STORE:
+                    case OpCode.CPUI_STORE:
                         if (!testStore(inst, readop))
                             return false;
                         break;
@@ -509,13 +509,13 @@ namespace Sla.DECCORE
             PcodeOp* op = vn.getDef();
             switch (op.code())
             {
-                case CPUI_PIECE:
+                case OpCode.CPUI_PIECE:
                     splitPiece(inst, op);
                     break;
-                case CPUI_LOAD:
+                case OpCode.CPUI_LOAD:
                     splitLoad(inst, op);
                     break;
-                case CPUI_INT_ZEXT:
+                case OpCode.CPUI_INT_ZEXT:
                     splitZext(inst, op);
                     break;
                 default:
@@ -527,10 +527,10 @@ namespace Sla.DECCORE
                 PcodeOp* readop = *vn.beginDescend();
                 switch (readop.code())
                 {
-                    case CPUI_SUBPIECE:
+                    case OpCode.CPUI_SUBPIECE:
                         splitSubpiece(inst, readop);
                         break;
-                    case CPUI_STORE:
+                    case OpCode.CPUI_STORE:
                         splitStore(inst, readop);
                         data.opDestroy(readop);
                         break;
@@ -584,7 +584,7 @@ namespace Sla.DECCORE
                 if (vn.isWritten())
                 {
                     PcodeOp* defop = vn.getDef();
-                    if (defop.code() == CPUI_SUBPIECE)
+                    if (defop.code() == OpCode.CPUI_SUBPIECE)
                     { // SUBPIECEs flowing into the COPY
                         Varnode* invn = defop.getIn(0);
                         if (invn.getSpace().getType() == IPTR_INTERNAL) // Might be from a temporary that needs further splitting
@@ -598,7 +598,7 @@ namespace Sla.DECCORE
                 {
                     PcodeOp* defop = *iter;
                     ++iter;
-                    if (defop.code() == CPUI_PIECE)
+                    if (defop.code() == OpCode.CPUI_PIECE)
                     { // COPY flowing into PIECEs
                         Varnode* outvn = defop.getOut();
                         if (outvn.getSpace().getType() == IPTR_INTERNAL) // Might be to a temporary that needs further splitting
@@ -610,7 +610,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* op = defops[i];
                 if (op.isDead()) continue;
-                if (op.code() == CPUI_PIECE)
+                if (op.code() == OpCode.CPUI_PIECE)
                 {
                     int splitoff;
                     Varnode* vn = op.getOut();
@@ -622,7 +622,7 @@ namespace Sla.DECCORE
                     if (testTemporary(&inst))
                         splitTemporary(&inst);
                 }
-                else if (op.code() == CPUI_SUBPIECE)
+                else if (op.code() == OpCode.CPUI_SUBPIECE)
                 {
                     int splitoff;
                     Varnode* vn = op.getIn(0);

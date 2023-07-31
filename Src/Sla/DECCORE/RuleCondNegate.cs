@@ -43,7 +43,7 @@ namespace Sla.DECCORE
 
             vn = op.getIn(1);
             newop = data.newOp(1, op.getAddr());
-            data.opSetOpcode(newop, CPUI_BOOL_NEGATE);
+            data.opSetOpcode(newop, OpCode.CPUI_BOOL_NEGATE);
             outvn = data.newUniqueOut(1, newop); // Flipped version of varnode
             data.opSetInput(newop, vn, 0);
             data.opSetInput(op, outvn, 1);

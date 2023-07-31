@@ -29,7 +29,7 @@ namespace Sla.DECCORE
             int expop = -300;
             string res;
             if (p1 == "unknown")
-                expop = ProtoModel::extrapop_unknown;
+                expop = ProtoModel.extrapop_unknown;
             else
             {
                 istringstream s1(p1);

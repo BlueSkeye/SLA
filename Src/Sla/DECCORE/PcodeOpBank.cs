@@ -43,16 +43,16 @@ namespace Sla.DECCORE
         {
             switch (op.code())
             {
-                case CPUI_STORE:
+                case OpCode.CPUI_STORE:
                     op.codeiter = storelist.insert(storelist.end(), op);
                     break;
-                case CPUI_LOAD:
+                case OpCode.CPUI_LOAD:
                     op.codeiter = loadlist.insert(loadlist.end(), op);
                     break;
-                case CPUI_RETURN:
+                case OpCode.CPUI_RETURN:
                     op.codeiter = returnlist.insert(returnlist.end(), op);
                     break;
-                case CPUI_CALLOTHER:
+                case OpCode.CPUI_CALLOTHER:
                     op.codeiter = useroplist.insert(useroplist.end(), op);
                     break;
                 default:
@@ -68,16 +68,16 @@ namespace Sla.DECCORE
         {
             switch (op.code())
             {
-                case CPUI_STORE:
+                case OpCode.CPUI_STORE:
                     storelist.erase(op.codeiter);
                     break;
-                case CPUI_LOAD:
+                case OpCode.CPUI_LOAD:
                     loadlist.erase(op.codeiter);
                     break;
-                case CPUI_RETURN:
+                case OpCode.CPUI_RETURN:
                     returnlist.erase(op.codeiter);
                     break;
-                case CPUI_CALLOTHER:
+                case OpCode.CPUI_CALLOTHER:
                     useroplist.erase(op.codeiter);
                     break;
                 default:
@@ -278,7 +278,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* op = *iter;
                 ++iter;
-                if (op.code() == CPUI_COPY)
+                if (op.code() == OpCode.CPUI_COPY)
                     op.setAdditionalFlag(PcodeOp::incidental_copy);
             }
         }
@@ -385,13 +385,13 @@ namespace Sla.DECCORE
         {
             switch (opc)
             {
-                case CPUI_STORE:
+                case OpCode.CPUI_STORE:
                     return storelist.begin();
-                case CPUI_LOAD:
+                case OpCode.CPUI_LOAD:
                     return loadlist.begin();
-                case CPUI_RETURN:
+                case OpCode.CPUI_RETURN:
                     return returnlist.begin();
-                case CPUI_CALLOTHER:
+                case OpCode.CPUI_CALLOTHER:
                     return useroplist.begin();
                 default:
                     break;
@@ -404,13 +404,13 @@ namespace Sla.DECCORE
         {
             switch (opc)
             {
-                case CPUI_STORE:
+                case OpCode.CPUI_STORE:
                     return storelist.end();
-                case CPUI_LOAD:
+                case OpCode.CPUI_LOAD:
                     return loadlist.end();
-                case CPUI_RETURN:
+                case OpCode.CPUI_RETURN:
                     return returnlist.end();
-                case CPUI_CALLOTHER:
+                case OpCode.CPUI_CALLOTHER:
                     return useroplist.end();
                 default:
                     break;
@@ -446,7 +446,7 @@ namespace Sla.DECCORE
             if (num != op2.numInput()) return -1;
             if (op1.isMarker()) return -1;
             if (op2.isCall()) return -1;
-            if (opc == CPUI_LOAD)
+            if (opc == OpCode.CPUI_LOAD)
             {
                 // FIXME: We assume two loads produce the same
                 // result if the address is the same and the loads
@@ -455,7 +455,7 @@ namespace Sla.DECCORE
             }
             if (num >= 3)
             {
-                if (opc != CPUI_PTRADD) return -1; // If this is a PTRADD
+                if (opc != OpCode.CPUI_PTRADD) return -1; // If this is a PTRADD
                 if (op1.getIn(2).getOffset() != op2.getIn(2).getOffset()) return -1; // Make sure the elsize constant is equal
                 num = 2;            // Otherwise treat as having 2 inputs
             }

@@ -44,7 +44,7 @@ namespace Sla.DECCORE
             PcodeOp pieceop;
             PcodeOp newop;
             ulong othermask, maskhigh, masklow;
-            OpCode opc = CPUI_PIECE;    // Unnecessary initialization
+            OpCode opc = OpCode.CPUI_PIECE;    // Unnecessary initialization
             int i, size;
 
             size = op.getOut().getSize();
@@ -54,7 +54,7 @@ namespace Sla.DECCORE
                 piecevn = op.getIn(i);
                 if (!piecevn.isWritten()) continue;
                 pieceop = piecevn.getDef();
-                if (pieceop.code() != CPUI_PIECE) continue;
+                if (pieceop.code() != OpCode.CPUI_PIECE) continue;
                 othervn = op.getIn(1 - i);
                 othermask = othervn.getNZMask();
                 if (othermask == Globals.calc_mask(size)) continue;
@@ -68,18 +68,18 @@ namespace Sla.DECCORE
                 if ((maskhigh & (othermask >> (lowvn.getSize() * 8))) == 0)
                 {
                     if ((maskhigh == 0) && (highvn.isConstant())) continue; // Handled by piece2zext
-                    opc = CPUI_INT_ZEXT;
+                    opc = OpCode.CPUI_INT_ZEXT;
                     break;
                 }
                 else if ((masklow & othermask) == 0)
                 {
                     if (lowvn.isConstant()) continue; // Nothing to do
-                    opc = CPUI_PIECE;
+                    opc = OpCode.CPUI_PIECE;
                     break;
                 }
             }
             if (i == 2) return 0;
-            if (opc == CPUI_INT_ZEXT)
+            if (opc == OpCode.CPUI_INT_ZEXT)
             {   // Change PIECE(a,b) to ZEXT(b)
                 newop = data.newOp(1, op.getAddr());
                 data.opSetOpcode(newop, opc);

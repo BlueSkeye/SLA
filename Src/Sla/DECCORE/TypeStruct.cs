@@ -134,7 +134,7 @@ namespace Sla.DECCORE
 
         /// Construct incomplete/empty TypeStruct
         public TypeStruct()
-            : base(0, TYPE_STRUCT)
+            : base(0, type_metatype.TYPE_STRUCT)
         {
             flags |= type_incomplete;
         }
@@ -181,7 +181,7 @@ namespace Sla.DECCORE
                 int diff = subfield.offset - off;
                 if (diff > 128) break;
                 Datatype* subtype = subfield.type;
-                if (subtype.getMetatype() == TYPE_ARRAY)
+                if (subtype.getMetatype() == type_metatype.TYPE_ARRAY)
                 {
                     *newoff = (long) - diff;
                     *elSize = ((TypeArray*)subtype).getBase().getSize();
@@ -211,7 +211,7 @@ namespace Sla.DECCORE
                 int diff = (int)off - subfield.offset;
                 if (diff > 128) break;
                 Datatype* subtype = subfield.type;
-                if (subtype.getMetatype() == TYPE_ARRAY)
+                if (subtype.getMetatype() == type_metatype.TYPE_ARRAY)
                 {
                     *newoff = (long)diff;
                     *elSize = ((TypeArray*)subtype).getBase().getSize();
@@ -421,7 +421,7 @@ namespace Sla.DECCORE
         /// \return either 0 to indicate the field or -1 to indicate the structure
         public override int scoreSingleComponent(Datatype parent, PcodeOp op, int slot)
         {
-            if (op.code() == CPUI_COPY || op.code() == CPUI_INDIRECT)
+            if (op.code() == OpCode.CPUI_COPY || op.code() == OpCode.CPUI_INDIRECT)
             {
                 Varnode* vn;
                 if (slot == 0)
@@ -431,13 +431,13 @@ namespace Sla.DECCORE
                 if (vn.isTypeLock() && vn.getType() == parent)
                     return -1;  // COPY of the structure directly, use whole structure
             }
-            else if ((op.code() == CPUI_LOAD && slot == -1) || (op.code() == CPUI_STORE && slot == 2))
+            else if ((op.code() == OpCode.CPUI_LOAD && slot == -1) || (op.code() == OpCode.CPUI_STORE && slot == 2))
             {
                 Varnode* vn = op.getIn(1);
                 if (vn.isTypeLock())
                 {
                     Datatype* ct = vn.getTypeReadFacing(op);
-                    if (ct.getMetatype() == TYPE_PTR && ((TypePointer*)ct).getPtrTo() == parent)
+                    if (ct.getMetatype() == type_metatype.TYPE_PTR && ((TypePointer*)ct).getPtrTo() == parent)
                         return -1;  // LOAD or STORE of the structure directly, use whole structure
                 }
             }

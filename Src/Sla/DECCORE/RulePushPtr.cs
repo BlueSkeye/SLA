@@ -42,9 +42,9 @@ namespace Sla.DECCORE
                 if (vn.loneDescend() == (PcodeOp)null) return;   // Already has multiple descendants
                 PcodeOp* op = vn.getDef();
                 OpCode opc = op.code();
-                if (opc == CPUI_INT_ZEXT || opc == CPUI_INT_SEXT || opc == CPUI_INT_2COMP)
+                if (opc == OpCode.CPUI_INT_ZEXT || opc == OpCode.CPUI_INT_SEXT || opc == OpCode.CPUI_INT_2COMP)
                     reslist.Add(op);
-                else if (opc == CPUI_INT_MULT)
+                else if (opc == OpCode.CPUI_INT_MULT)
                 {
                     if (op.getIn(1).isConstant())
                         reslist.Add(op);
@@ -85,7 +85,7 @@ namespace Sla.DECCORE
             for (slot = 0; slot < op.numInput(); ++slot)
             { // Search for pointer type
                 vni = op.getIn(slot);
-                if (vni.getTypeReadFacing(op).getMetatype() == TYPE_PTR) break;
+                if (vni.getTypeReadFacing(op).getMetatype() == type_metatype.TYPE_PTR) break;
             }
             if (slot == op.numInput()) return 0;
 
@@ -110,7 +110,7 @@ namespace Sla.DECCORE
                 // We don't associate it with the address of the original INT_ADD
                 // We don't preserve the Varnode address of the original INT_ADD
                 PcodeOp* newop = data.newOp(2, decop.getAddr());       // Use the later address
-                data.opSetOpcode(newop, CPUI_INT_ADD);
+                data.opSetOpcode(newop, OpCode.CPUI_INT_ADD);
                 newout = data.newUniqueOut(vnadd1.getSize(), newop);   // Use a temporary storage address
 
                 data.opSetInput(decop, vni, 0);

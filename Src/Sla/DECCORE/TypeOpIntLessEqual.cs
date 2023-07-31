@@ -9,7 +9,7 @@ namespace Sla.DECCORE
     internal class TypeOpIntLessEqual : TypeOpBinary
     {
         public TypeOpIntLessEqual(TypeFactory t)
-            : base(t, CPUI_INT_LESSEQUAL,"<=", TYPE_BOOL, TYPE_UINT)
+            : base(t, OpCode.CPUI_INT_LESSEQUAL,"<=", type_metatype.TYPE_BOOL, type_metatype.TYPE_UINT)
         {
             opflags = PcodeOp::binary | PcodeOp::booloutput;
             addlflags = inherits_sign;

@@ -42,7 +42,7 @@ namespace Sla.DECCORE
             Varnode* shiftin = op.getIn(0);
             if (!shiftin.isWritten()) return 0;
             PcodeOp* leftshift = shiftin.getDef();
-            if (leftshift.code() != CPUI_INT_LEFT) return 0;
+            if (leftshift.code() != OpCode.CPUI_INT_LEFT) return 0;
             if (!leftshift.getIn(1).isConstant()) return 0;
             ulong sa = op.getIn(1).getOffset();
             if (leftshift.getIn(1).getOffset() != sa) return 0; // Left shift must be by same amount
@@ -60,11 +60,11 @@ namespace Sla.DECCORE
             data.opUnsetOutput(leftshift);
             addr.renormalize(tsz);
             Varnode* newvn = data.newVarnodeOut(tsz, addr, leftshift);
-            data.opSetOpcode(leftshift, CPUI_SUBPIECE);
+            data.opSetOpcode(leftshift, OpCode.CPUI_SUBPIECE);
             data.opSetInput(leftshift, data.newConstant(leftshift.getIn(1).getSize(), 0), 1);
             data.opSetInput(op, newvn, 0);
             data.opRemoveInput(op, 1);  // Remove the right-shift constant
-            data.opSetOpcode(op, (op.code() == CPUI_INT_SRIGHT) ? CPUI_INT_SEXT : CPUI_INT_ZEXT);
+            data.opSetOpcode(op, (op.code() == OpCode.CPUI_INT_SRIGHT) ? OpCode.CPUI_INT_SEXT : OpCode.CPUI_INT_ZEXT);
             return 1;
         }
     }

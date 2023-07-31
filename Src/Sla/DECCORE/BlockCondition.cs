@@ -44,7 +44,7 @@ namespace Sla.DECCORE
         public override void printHeader(TextWriter s)
         {
             s.Write("Condition block(");
-            s.Write((opc == CPUI_BOOL_AND) ? "&&" : "||");
+            s.Write((opc == OpCode.CPUI_BOOL_AND) ? "&&" : "||");
             s.Write(") ");
             @base.printHeader(s);
         }
@@ -60,7 +60,7 @@ namespace Sla.DECCORE
             bool res1 = getBlock(0).negateCondition(false);
             // to each side of condition
             bool res2 = getBlock(1).negateCondition(false);
-            opc = (opc == CPUI_BOOL_AND) ? CPUI_BOOL_OR : CPUI_BOOL_AND;
+            opc = (opc == OpCode.CPUI_BOOL_AND) ? OpCode.CPUI_BOOL_OR : OpCode.CPUI_BOOL_AND;
             // Flip order of outofthis
             @base.negateCondition(toporbottom);
             return (res1 || res2);
@@ -91,7 +91,7 @@ namespace Sla.DECCORE
 
         public override void flipInPlaceExecute()
         {
-            opc = (opc == CPUI_BOOL_AND) ? CPUI_BOOL_OR : CPUI_BOOL_AND;
+            opc = (opc == OpCode.CPUI_BOOL_AND) ? OpCode.CPUI_BOOL_OR : OpCode.CPUI_BOOL_AND;
             getBlock(0).getSplitPoint().flipInPlaceExecute();
             getBlock(1).getSplitPoint().flipInPlaceExecute();
         }
@@ -114,7 +114,7 @@ namespace Sla.DECCORE
         public override void encodeHeader(Encoder encoder)
         {
             @base.encodeHeader(encoder);
-            string nm = get_opname(opc);
+            string nm = Globals.get_opname(opc);
             encoder.writeString(AttributeId.ATTRIB_OPCODE, nm);
         }
     }

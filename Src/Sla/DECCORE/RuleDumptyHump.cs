@@ -46,9 +46,9 @@ namespace Sla.DECCORE
             int offset, outsize;
 
             @base = op.getIn(0);
-            if (!@@base.isWritten()) return 0;
-            pieceop = @@base.getDef();
-            if (pieceop.code() != CPUI_PIECE) return 0;
+            if (!@base.isWritten()) return 0;
+            pieceop = @base.getDef();
+            if (pieceop.code() != OpCode.CPUI_PIECE) return 0;
             offset = op.getIn(1).getOffset();
             outsize = op.getOut().getSize();
 
@@ -70,7 +70,7 @@ namespace Sla.DECCORE
             if ((offset == 0) && (outsize == vn.getSize()))
             {
                 // Eliminate SUB and CONCAT altogether
-                data.opSetOpcode(op, CPUI_COPY);
+                data.opSetOpcode(op, OpCode.CPUI_COPY);
                 data.opRemoveInput(op, 1);
                 data.opSetInput(op, vn, 0); // Skip over CONCAT
             }

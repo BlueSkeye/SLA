@@ -11,7 +11,7 @@ namespace Sla.DECCORE
     internal class TypeOpIntSright : TypeOpBinary
     {
         public TypeOpIntSright(TypeFactory t)
-            : base(t, CPUI_INT_SRIGHT,">>", TYPE_INT, TYPE_INT)
+            : base(t, OpCode.CPUI_INT_SRIGHT,">>", type_metatype.TYPE_INT, type_metatype.TYPE_INT)
         {
             opflags = PcodeOp::binary;
             addlflags = inherits_sign | inherits_sign_zero | shift_op;
@@ -50,15 +50,15 @@ namespace Sla.DECCORE
         public override Datatype getInputLocal(PcodeOp op, int slot)
         {
             if (slot == 1)
-                return tlst.getBaseNoChar(op.getIn(1).getSize(), TYPE_INT);
+                return tlst.getBaseNoChar(op.getIn(1).getSize(), type_metatype.TYPE_INT);
             return TypeOpBinary::getInputLocal(op, slot);
         }
 
         public override Datatype getOutputToken(PcodeOp op, CastStrategy castStrategy)
         {
             Datatype* res1 = op.getIn(0).getHighTypeReadFacing(op);
-            if (res1.getMetatype() == TYPE_BOOL)
-                res1 = tlst.getBase(res1.getSize(), TYPE_INT);
+            if (res1.getMetatype() == type_metatype.TYPE_BOOL)
+                res1 = tlst.getBase(res1.getSize(), type_metatype.TYPE_INT);
             return res1;
         }
     }

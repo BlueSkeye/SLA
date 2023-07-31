@@ -9,13 +9,15 @@ using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
 
+using ParamEntryResolver = Sla.EXTRA.rangemap<Sla.DECCORE.ParamEntryRange>;
+
 namespace Sla.DECCORE
 {
     /// \brief A standard model for parameters as an ordered list of storage resources
     ///
     /// This is a configurable model for passing (input) parameters as a list to a function.
-    /// The model allows 1 or more resource lists based on data-type, either TYPE_UNKNOWN for
-    /// general purpose or TYPE_FLOAT for floating-point registers. Within a resource list,
+    /// The model allows 1 or more resource lists based on data-type, either type_metatype.TYPE_UNKNOWN for
+    /// general purpose or type_metatype.TYPE_FLOAT for floating-point registers. Within a resource list,
     /// any number of parameters can be used but they must come starting at the beginning of
     /// the list with no \e holes (skipped resources). A resource list can include (at the end)
     /// \e stack parameters that are allocated based on an alignment.  Optionally, the model supports

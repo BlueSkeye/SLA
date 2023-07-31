@@ -53,7 +53,7 @@ namespace Sla.CORE
             zero = 2,			///< An encoding of the value zero
             nan = 3,			///< An invalid encoding, Not-a-Number
             denormalized = 4		///< A denormalized encoding (for very small values)
-        };
+        }
 
         private int size;			///< Size of float in bytes (this format)
         private int signbit_pos;		///< Bit position of sign bit
@@ -396,10 +396,7 @@ namespace Sla.CORE
         }
         
         ///< Get number of digits of precision
-        public int getDecimalPrecision()
-        {
-            return decimal_precision;
-        }
+        public int getDecimalPrecision() => decimal_precision;
 
         ///< Convert between two different formats
         /// \param encoding is the value in the \e other FloatFormat
@@ -728,14 +725,14 @@ namespace Sla.CORE
         public void saveXml(StreamWriter s)
         {
             s.Write("<floatformat");
-            Globals.a_v_i(s,"size", size);
-            Globals.a_v_i(s,"signpos", signbit_pos);
-            Globals.a_v_i(s,"fracpos", frac_pos);
-            Globals.a_v_i(s,"fracsize", frac_size);
-            Globals.a_v_i(s,"exppos", exp_pos);
-            Globals.a_v_i(s,"expsize", exp_size);
-            Globals.a_v_i(s,"bias", bias);
-            Globals.a_v_b(s,"jbitimplied", jbitimplied);
+            Xml.a_v_i(s,"size", size);
+            Xml.a_v_i(s,"signpos", signbit_pos);
+            Xml.a_v_i(s,"fracpos", frac_pos);
+            Xml.a_v_i(s,"fracsize", frac_size);
+            Xml.a_v_i(s,"exppos", exp_pos);
+            Xml.a_v_i(s,"expsize", exp_size);
+            Xml.a_v_i(s,"bias", bias);
+            Xml.a_v_b(s,"jbitimplied", jbitimplied);
             s.WriteLine("/>");
         }
 
@@ -772,7 +769,7 @@ namespace Sla.CORE
                 // s.unsetf(ios::dec | ios::hex | ios::oct);
                 bias = s.ReadDecimalInteger();
             }
-            jbitimplied = Globals.xml_readbool(el.getAttributeValue("jbitimplied"));
+            jbitimplied = Xml.xml_readbool(el.getAttributeValue("jbitimplied"));
             maxexponent = (1 << exp_size) - 1;
             calcPrecision();
         }

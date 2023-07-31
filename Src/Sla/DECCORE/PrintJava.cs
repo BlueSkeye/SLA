@@ -21,11 +21,11 @@ namespace Sla.DECCORE
     /// \b int, \b long, \b short, \b byte, \b boolean, \b float, and \b double all map directly. The
     /// \b char primitive is treated as a 2 byte unsigned integer. A TypeStruct object holds the field
     /// layout for a java class, then java objects get mapped as follows:
-    ///   - Class reference = pointer to TYPE_UINT
-    ///   - Array of \b int, \b long, \b short, or \b byte = pointer to TYPE_INT
-    ///   - Array of \b float or \b double = pointer to TYPE_FLOAT
-    ///   - Array of \b boolean = pointer to TYPE_BOOL
-    ///   - Array of class objects = pointer to TYPE_PTR
+    ///   - Class reference = pointer to type_metatype.TYPE_UINT
+    ///   - Array of \b int, \b long, \b short, or \b byte = pointer to type_metatype.TYPE_INT
+    ///   - Array of \b float or \b double = pointer to type_metatype.TYPE_FLOAT
+    ///   - Array of \b boolean = pointer to type_metatype.TYPE_BOOL
+    ///   - Array of class objects = pointer to type_metatype.TYPE_PTR
     ///
     /// There are some adjustments to the printing of data-types and LOAD/STORE expressions
     /// to account for this mapping.
@@ -45,19 +45,19 @@ namespace Sla.DECCORE
         /// \return \b true if the data-type references a java array object
         private static bool isArrayType(Datatype ct)
         {
-            if (ct.getMetatype() != TYPE_PTR)  // Java arrays are always Ghidra pointer types
+            if (ct.getMetatype() != type_metatype.TYPE_PTR)  // Java arrays are always Ghidra pointer types
                 return false;
             ct = ((TypePointer*)ct).getPtrTo();
             switch (ct.getMetatype())
             {
-                case TYPE_UINT:     // Pointer to unsigned is placeholder for class reference, not an array
+                case type_metatype.TYPE_UINT:     // Pointer to unsigned is placeholder for class reference, not an array
                     if (ct.isCharPrint())
                         return true;
                     break;
-                case TYPE_INT:
-                case TYPE_BOOL:
-                case TYPE_FLOAT:    // Pointer to primitive type is an array
-                case TYPE_PTR:  // Pointer to class reference is an array
+                case type_metatype.TYPE_INT:
+                case type_metatype.TYPE_BOOL:
+                case type_metatype.TYPE_FLOAT:    // Pointer to primitive type is an array
+                case type_metatype.TYPE_PTR:  // Pointer to class reference is an array
                     return true;
                 default:
                     break;
@@ -77,7 +77,7 @@ namespace Sla.DECCORE
             if (vn.isExplicit()) return true;
             if (!vn.isWritten()) return true;
             OpCode opc = vn.getDef().code();
-            if ((opc == CPUI_PTRADD) || (opc == CPUI_PTRSUB) || (opc == CPUI_CPOOLREF))
+            if ((opc == OpCode.CPUI_PTRADD) || (opc == OpCode.CPUI_PTRSUB) || (opc == OpCode.CPUI_CPOOLREF))
                 return false;
             return true;
         }
@@ -175,7 +175,7 @@ namespace Sla.DECCORE
             int arrayCount = 0;
             for (; ; )
             {
-                if (ct.getMetatype() == TYPE_PTR)
+                if (ct.getMetatype() == type_metatype.TYPE_PTR)
                 {
                     if (isArrayType(ct))
                         arrayCount += 1;
@@ -334,7 +334,7 @@ namespace Sla.DECCORE
                     case CPoolRecord::instance_of:
                         {
                             Datatype* dt = rec.getType();
-                            while (dt.getMetatype() == TYPE_PTR)
+                            while (dt.getMetatype() == type_metatype.TYPE_PTR)
                             {
                                 dt = ((TypePointer*)dt).getPtrTo();
                             }
@@ -352,10 +352,10 @@ namespace Sla.DECCORE
                         {
                             Datatype* ct = rec.getType();
                             EmitMarkup::syntax_highlight color = EmitMarkup::var_color;
-                            if (ct.getMetatype() == TYPE_PTR)
+                            if (ct.getMetatype() == type_metatype.TYPE_PTR)
                             {
                                 ct = ((TypePointer*)ct).getPtrTo();
-                                if (ct.getMetatype() == TYPE_CODE)
+                                if (ct.getMetatype() == type_metatype.TYPE_CODE)
                                     color = EmitMarkup::funcname_color;
                             }
                             if (vn0.isConstant())

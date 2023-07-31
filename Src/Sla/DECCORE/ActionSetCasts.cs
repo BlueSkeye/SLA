@@ -10,7 +10,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla.DECCORE
 {
-    /// \brief Fill-in CPUI_CAST p-code ops as required by the casting strategy
+    /// \brief Fill-in OpCode.CPUI_CAST p-code ops as required by the casting strategy
     ///
     /// Setting the casts is complicated by type inference and
     /// implied variables.  By the time this Action is run, the
@@ -24,7 +24,7 @@ namespace Sla.DECCORE
     /// For most of these cases, the algorithm just changes the type
     /// to that dictated by syntax and gets back on track at the
     /// next explicit variable in the flow. It tries to avoid losing
-    /// pointer types however because any CPUI_PTRADD \b mst have a pointer
+    /// pointer types however because any OpCode.CPUI_PTRADD \b mst have a pointer
     /// input. In this case, it casts to the necessary pointer type
     /// immediately.
     internal class ActionSetCasts : Action
@@ -43,13 +43,13 @@ namespace Sla.DECCORE
         {
             Datatype* ptrtype = op.getIn(1).getHighTypeReadFacing(op);
             int valsize = vn.getSize();
-            if ((ptrtype.getMetatype() != TYPE_PTR) || (((TypePointer*)ptrtype).getPtrTo().getSize() != valsize))
+            if ((ptrtype.getMetatype() != type_metatype.TYPE_PTR) || (((TypePointer*)ptrtype).getPtrTo().getSize() != valsize))
             {
                 string name = op.getOpcode().getName();
                 name[0] = toupper(name[0]);
                 data.warning(name + " size is inaccurate", op.getAddr());
             }
-            if (ptrtype.getMetatype() == TYPE_PTR)
+            if (ptrtype.getMetatype() == type_metatype.TYPE_PTR)
             {
                 AddrSpace* spc = ((TypePointer*)ptrtype).getSpace();
                 if (spc != (AddrSpace)null)
@@ -81,20 +81,20 @@ namespace Sla.DECCORE
         private static bool testStructOffset0(Varnode vn, PcodeOp op, Datatype ct,
             CastStrategy castStrategy)
         {
-            if (ct.getMetatype() != TYPE_PTR) return false;
+            if (ct.getMetatype() != type_metatype.TYPE_PTR) return false;
             Datatype* highType = vn.getHighTypeReadFacing(op);
-            if (highType.getMetatype() != TYPE_PTR) return false;
+            if (highType.getMetatype() != type_metatype.TYPE_PTR) return false;
             Datatype* highPtrTo = ((TypePointer*)highType).getPtrTo();
-            if (highPtrTo.getMetatype() != TYPE_STRUCT) return false;
+            if (highPtrTo.getMetatype() != type_metatype.TYPE_STRUCT) return false;
             TypeStruct* highStruct = (TypeStruct*)highPtrTo;
             if (highStruct.numDepend() == 0) return false;
             List<TypeField>::const_iterator iter = highStruct.beginField();
             if ((*iter).offset != 0) return false;
             Datatype* reqtype = ((TypePointer*)ct).getPtrTo();
             Datatype* curtype = (*iter).type;
-            if (reqtype.getMetatype() == TYPE_ARRAY)
+            if (reqtype.getMetatype() == type_metatype.TYPE_ARRAY)
                 reqtype = ((TypeArray*)reqtype).getBase();
-            if (curtype.getMetatype() == TYPE_ARRAY)
+            if (curtype.getMetatype() == type_metatype.TYPE_ARRAY)
                 curtype = ((TypeArray*)curtype).getBase();
             return (castStrategy.castStandard(reqtype, curtype, true, true) == (Datatype)null);
         }
@@ -158,7 +158,7 @@ namespace Sla.DECCORE
         /// \param ct2 is the second data-type
         private static bool isOpIdentical(Datatype ct1, Datatype ct2)
         {
-            while ((ct1.getMetatype() == TYPE_PTR) && (ct2.getMetatype() == TYPE_PTR))
+            while ((ct1.getMetatype() == type_metatype.TYPE_PTR) && (ct2.getMetatype() == type_metatype.TYPE_PTR))
             {
                 ct1 = ((TypePointer)ct1).getPtrTo();
                 ct2 = ((TypePointer)ct2).getPtrTo();
@@ -170,7 +170,7 @@ namespace Sla.DECCORE
             return (ct1 == ct2);
         }
 
-        /// \brief If the given op reads a pointer to a union, insert the CPUI_PTRSUB that resolves the union
+        /// \brief If the given op reads a pointer to a union, insert the OpCode.CPUI_PTRSUB that resolves the union
         ///
         /// \param op is the given PcodeOp
         /// \param slot is index of the input slot being read
@@ -189,7 +189,7 @@ namespace Sla.DECCORE
             if (resUnion != (ResolvedUnion)null && resUnion.getFieldNum() >= 0)
             {
                 // Insert specific placeholder indicating which field is accessed
-                if (dt.getMetatype() == TYPE_PTR)
+                if (dt.getMetatype() == type_metatype.TYPE_PTR)
                 {
                     PcodeOp* ptrsub = insertPtrsubZero(op, slot, resUnion.getDatatype(), data);
                     data.setUnionField(dt, ptrsub, -1, *resUnion);          // Attach the resolution to the PTRSUB
@@ -255,24 +255,24 @@ namespace Sla.DECCORE
                 if (outvn.isTypeLock())
                 {
                     PcodeOp* outOp = outvn.loneDescend();
-                    // The Varnode input to a CPUI_RETURN is marked as implied but
+                    // The Varnode input to a OpCode.CPUI_RETURN is marked as implied but
                     // casting should act as if it were explicit
-                    if (outOp == (PcodeOp)null || outOp.code() != CPUI_RETURN)
+                    if (outOp == (PcodeOp)null || outOp.code() != OpCode.CPUI_RETURN)
                     {
                         force = !isOpIdentical(outHighResolve, tokenct);
                     }
                 }
-                else if (outHighResolve.getMetatype() != TYPE_PTR)
+                else if (outHighResolve.getMetatype() != type_metatype.TYPE_PTR)
                 {   // If implied varnode has an atomic (non-pointer) type
                     outvn.updateType(tokenct, false, false); // Ignore it in favor of the token type
                     outHighResolve = outvn.getHighTypeDefFacing();
                 }
-                else if (tokenct.getMetatype() == TYPE_PTR)
+                else if (tokenct.getMetatype() == type_metatype.TYPE_PTR)
                 { // If the token is a pointer AND implied varnode is pointer
                     outct = ((TypePointer*)outHighResolve).getPtrTo();
                     type_metatype meta = outct.getMetatype();
                     // Preserve implied pointer if it points to a composite
-                    if ((meta != TYPE_ARRAY) && (meta != TYPE_STRUCT) && (meta != TYPE_UNION))
+                    if ((meta != type_metatype.TYPE_ARRAY) && (meta != type_metatype.TYPE_STRUCT) && (meta != type_metatype.TYPE_UNION))
                     {
                         outvn.updateType(tokenct, false, false); // Otherwise ignore it in favor of the token type
                         outHighResolve = outvn.getHighTypeDefFacing();
@@ -293,7 +293,7 @@ namespace Sla.DECCORE
 #if CPUI_STATISTICS
             data.getArch().stats.countCast();
 #endif
-            data.opSetOpcode(newop, CPUI_CAST);
+            data.opSetOpcode(newop, OpCode.CPUI_CAST);
             data.opSetOutput(newop, outvn);
             data.opSetInput(newop, vn, 0);
             data.opSetOutput(op, vn);
@@ -333,7 +333,7 @@ namespace Sla.DECCORE
 
             vn = op.getIn(slot);
             // Check to make sure we don't have a double cast
-            if (vn.isWritten() && (vn.getDef().code() == CPUI_CAST))
+            if (vn.isWritten() && (vn.getDef().code() == OpCode.CPUI_CAST))
             {
                 if (vn.isImplied() && (vn.loneDescend() == op))
                 {
@@ -367,7 +367,7 @@ namespace Sla.DECCORE
 #if CPUI_STATISTICS
             data.getArch().stats.countCast();
 #endif
-            data.opSetOpcode(newop, CPUI_CAST);
+            data.opSetOpcode(newop, OpCode.CPUI_CAST);
             data.opSetInput(newop, vn, 0);
             data.opSetInput(op, vnout, slot);
             data.opInsertBefore(newop, op); // Cast comes AFTER operation
@@ -400,7 +400,7 @@ namespace Sla.DECCORE
             Varnode* vnout = data.newUniqueOut(vn.getSize(), newop);
             vnout.updateType(ct, false, false);
             vnout.setImplied();
-            data.opSetOpcode(newop, CPUI_PTRSUB);
+            data.opSetOpcode(newop, OpCode.CPUI_PTRSUB);
             data.opSetInput(newop, vn, 0);
             data.opSetInput(newop, data.newConstant(4, 0), 1);
             data.opSetInput(op, vnout, slot);
@@ -436,25 +436,25 @@ namespace Sla.DECCORE
                     op = *iter;
                     if (op.notPrinted()) continue;
                     OpCode opc = op.code();
-                    if (opc == CPUI_CAST) continue;
-                    if (opc == CPUI_PTRADD)
+                    if (opc == OpCode.CPUI_CAST) continue;
+                    if (opc == OpCode.CPUI_PTRADD)
                     {   // Check for PTRADD that no longer fits its pointer
                         int sz = (int)op.getIn(2).getOffset();
                         TypePointer* ct = (TypePointer*)op.getIn(0).getHighTypeReadFacing(op);
-                        if ((ct.getMetatype() != TYPE_PTR) || (ct.getPtrTo().getSize() != AddrSpace::addressToByteInt(sz, ct.getWordSize())))
+                        if ((ct.getMetatype() != type_metatype.TYPE_PTR) || (ct.getPtrTo().getSize() != AddrSpace::addressToByteInt(sz, ct.getWordSize())))
                             data.opUndoPtradd(op, true);
                     }
-                    else if (opc == CPUI_PTRSUB)
+                    else if (opc == OpCode.CPUI_PTRSUB)
                     {   // Check for PTRSUB that no longer fits pointer
                         if (!op.getIn(0).getHighTypeReadFacing(op).isPtrsubMatching(op.getIn(1).getOffset()))
                         {
                             if (op.getIn(1).getOffset() == 0)
                             {
                                 data.opRemoveInput(op, 1);
-                                data.opSetOpcode(op, CPUI_COPY);
+                                data.opSetOpcode(op, OpCode.CPUI_COPY);
                             }
                             else
-                                data.opSetOpcode(op, CPUI_INT_ADD);
+                                data.opSetOpcode(op, OpCode.CPUI_INT_ADD);
                         }
                     }
                     // Do input casts first, as output may depend on input
@@ -463,11 +463,11 @@ namespace Sla.DECCORE
                         count += resolveUnion(op, i, data);
                         count += castInput(op, i, data, castStrategy);
                     }
-                    if (opc == CPUI_LOAD)
+                    if (opc == OpCode.CPUI_LOAD)
                     {
                         checkPointerIssues(op, op.getOut(), data);
                     }
-                    else if (opc == CPUI_STORE)
+                    else if (opc == OpCode.CPUI_STORE)
                     {
                         checkPointerIssues(op, op.getIn(2), data);
                     }
