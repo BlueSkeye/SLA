@@ -74,7 +74,7 @@ namespace Sla.DECCORE
             // However stack locations saving a parameter across a function call is a common construction
             // Since this all a heuristic for recovering parameters, we assume this rule is always true
             // to get an efficient test
-            if (addr.getSpace().getType() != IPTR_SPACEBASE)
+            if (addr.getSpace().getType() != spacetype.IPTR_SPACEBASE)
                 trial.GetLastItem().markKilledByCall();
             slotbase += 1;
         }

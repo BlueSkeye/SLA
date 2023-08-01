@@ -2995,7 +2995,7 @@ namespace Sla.DECCORE
             pushOp(&function_call, op);
             Varnode* callpoint = op.getIn(0);
             FuncCallSpecs* fc;
-            if (callpoint.getSpace().getType() == IPTR_FSPEC)
+            if (callpoint.getSpace().getType() == spacetype.IPTR_FSPEC)
             {
                 fc = FuncCallSpecs::getFspecFromConst(callpoint.getAddr());
                 if (fc.getName().Length == 0)

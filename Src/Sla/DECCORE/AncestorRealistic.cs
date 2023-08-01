@@ -157,7 +157,7 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_SUBPIECE:
                     // Extracting to a temporary, or to the same storage location, or otherwise incidental
                     // are viewed as just another node on the path to traverse
-                    if (op.getOut().getSpace().getType() == IPTR_INTERNAL
+                    if (op.getOut().getSpace().getType() == spacetype.IPTR_INTERNAL
                     || op.isIncidentalCopy() || op.getIn(0).isIncidentalCopy()
                     || (op.getOut().overlap(*op.getIn(0)) == (int)op.getIn(1).getOffset()))
                     {
@@ -181,7 +181,7 @@ namespace Sla.DECCORE
                     {
                         // Copies to a temporary, or between varnodes with same storage location, or otherwise incidental
                         // are viewed as just another node on the path to traverse
-                        if (op.getOut().getSpace().getType() == IPTR_INTERNAL
+                        if (op.getOut().getSpace().getType() == spacetype.IPTR_INTERNAL
                         || op.isIncidentalCopy() || op.getIn(0).isIncidentalCopy()
                         || (op.getOut().getAddr() == op.getIn(0).getAddr()))
                         {
@@ -231,7 +231,7 @@ namespace Sla.DECCORE
                             stateStack.Add(State(op, 0));
                             return enter_node;
                         }
-                        if (stateVn.getSpace().getType() != IPTR_SPACEBASE)
+                        if (stateVn.getSpace().getType() != spacetype.IPTR_SPACEBASE)
                         {
                             return pop_fail;
                         }

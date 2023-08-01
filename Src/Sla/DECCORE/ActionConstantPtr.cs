@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -23,19 +24,16 @@ namespace Sla.DECCORE
         /// \param vn is the constant we are searching from
         /// \param op is the PcodeOp reading the constant
         /// \return the discovered AddrSpace or null
-        private static AddrSpace searchForSpaceAttribute(Varnode vn, PcodeOp op)
+        private static AddrSpace? searchForSpaceAttribute(Varnode vn, PcodeOp op)
         {
-            for (int i = 0; i < 3; ++i)
-            {
-                Datatype* dt = vn.getType();
-                if (dt.getMetatype() == type_metatype.TYPE_PTR)
-                {
-                    AddrSpace* spc = ((TypePointer*)dt).getSpace();
+            for (int i = 0; i < 3; ++i) {
+                Datatype dt = vn.getType();
+                if (dt.getMetatype() == type_metatype.TYPE_PTR) {
+                    AddrSpace? spc = ((TypePointer)dt).getSpace();
                     if (spc != (AddrSpace)null && spc.getAddrSize() == vn.getSize())    // If provided a pointer with space attribute
                         return spc;     // use that
                 }
-                switch (op.code())
-                {
+                switch (op.code()) {
                     case OpCode.CPUI_INT_ADD:
                     case OpCode.CPUI_COPY:
                     case OpCode.CPUI_INDIRECT:
@@ -54,9 +52,9 @@ namespace Sla.DECCORE
                 }
                 if (op == (PcodeOp)null) break;
             }
-            for (list<PcodeOp*>::const_iterator iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
-            {
-                op = *iter;
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (iter.MoveNext()) {
+                op = iter.Current;
                 OpCode opc = op.code();
                 if (opc == OpCode.CPUI_LOAD)
                     return op.getIn(0).getSpaceFromConst();

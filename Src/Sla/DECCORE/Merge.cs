@@ -345,7 +345,7 @@ namespace Sla.DECCORE
                 PcodeOp* op = vn.getDef();
                 if (op.code() != OpCode.CPUI_COPY) continue;
                 if (op.getIn(0).getHigh() == high) continue;
-                if (filterTemps && op.getOut().getSpace().getType() != IPTR_INTERNAL) continue;
+                if (filterTemps && op.getOut().getSpace().getType() != spacetype.IPTR_INTERNAL) continue;
                 copyIns.Add(op);
             }
             // Group COPYs based on the incoming Varnode then block order
@@ -1403,7 +1403,7 @@ namespace Sla.DECCORE
             {
                 AddrSpace* spc = (*startiter).getSpace();
                 spacetype type = spc.getType();
-                if (type != IPTR_PROCESSOR && type != IPTR_SPACEBASE)
+                if (type != spacetype.IPTR_PROCESSOR && type != spacetype.IPTR_SPACEBASE)
                 {
                     startiter = data.endLoc(spc);   // Skip over the whole space
                     continue;

@@ -161,19 +161,18 @@ namespace Sla.DECCORE
         /// For efficiency, this method assumes the given op can actually fall-thru.
         /// \param op is the given PcodeOp
         /// \return the PcodeOp that fall-thru flow would reach (or NULL if there is no possible p-code op)
-        private PcodeOp fallthruOp(PcodeOp op)
+        private PcodeOp? fallthruOp(PcodeOp op)
         {
-            PcodeOp* retop;
-            list<PcodeOp*>::const_iterator iter = op.getInsertIter();
+            PcodeOp retop;
+            IEnumerator<PcodeOp> iter = op.getInsertIter();
             ++iter;
-            if (iter != obank.endDead())
-            {
+            if (iter != obank.endDead()) {
                 retop = *iter;
                 if (!retop.isInstructionStart()) // If within same instruction
                     return retop;       // Then this is the fall thru
             }
             // Find address of instruction containing this op
-            Dictionary<Address, VisitStat>::const_iterator miter;
+            Dictionary<Address, VisitStat>.Enumerator miter;
             miter = visited.upper_bound(op.getAddr());
             if (miter == visited.begin()) return (PcodeOp)null;
             --miter;
@@ -533,37 +532,33 @@ namespace Sla.DECCORE
         /// \param op is the given branching p-code op
         /// \param res is a reference to the fall-thru address being passed back
         /// \return the target PcodeOp or NULL if the fall-thru address is passed back instead
-        private PcodeOp findRelTarget(PcodeOp op, Address res)
+        private PcodeOp? findRelTarget(PcodeOp op, Address res)
         {
             Address addr = op.getIn(0).getAddr();
             uint id = op.getTime() + addr.getOffset();
-            SeqNum seqnum(op.getAddr(), id);
-            PcodeOp* retop = obank.findOp(seqnum);
+            SeqNum seqnum = new SeqNum(op.getAddr(), id);
+            PcodeOp? retop = obank.findOp(seqnum);
             if (retop != (PcodeOp)null)   // Is this a "properly" internal branch
                 return retop;
 
             // Now we check if the relative branch is really to the next instruction
             SeqNum seqnum1 = new SeqNum(op.getAddr(), id-1);
             retop = obank.findOp(seqnum1); // We go back one sequence number
-            if (retop != (PcodeOp)null)
-            {
+            if (retop != (PcodeOp)null) {
                 // If the PcodeOp exists here then branch was indeed to next instruction
-                Dictionary<Address, VisitStat>::const_iterator miter;
+                Dictionary<Address, VisitStat>.Enumerator miter;
                 miter = visited.upper_bound(retop.getAddr());
-                if (miter != visited.begin())
-                {
+                if (miter != visited.begin()) {
                     --miter;
                     res = (*miter).first + (*miter).second.size;
                     if (op.getAddr() < res)
                         return (PcodeOp)null; // Indicate that res has the fallthru address
                 }
             }
-            ostringstream errmsg;
-            errmsg << "Bad relative branch at instruction : (";
-            errmsg << op.getAddr().getSpace().getName() << ',';
+            StringWriter errmsg = new StringWriter();
+            errmsg.Write($"Bad relative branch at instruction : ({op.getAddr().getSpace().getName()},");
             op.getAddr().printRaw(errmsg);
-            errmsg << ')';
-            throw new LowlevelError(errmsg.str());
+            throw new LowlevelError((errmsg + ")").ToString());
         }
 
         /// Add any remaining un-followed addresses to the \b unprocessed list
@@ -572,17 +567,12 @@ namespace Sla.DECCORE
         /// add the Address to the \b unprocessed array.
         private void findUnprocessed()
         {
-            List<Address>::iterator iter;
-
-            for (iter = addrlist.begin(); iter != addrlist.end(); ++iter)
-            {
-                if (seenInstruction(*iter))
-                {
-                    PcodeOp* op = target(*iter);
-                    data.opMarkStartBasic(op);
+            foreach (Address scannedAddress in addrlist) {
+                if (seenInstruction(scannedAddress)) {
+                    data.opMarkStartBasic(target(scannedAddress));
                 }
                 else
-                    unprocessed.Add(*iter);
+                    unprocessed.Add(scannedAddress);
             }
         }
 
@@ -590,8 +580,8 @@ namespace Sla.DECCORE
         /// The list is also sorted
         private void dedupUnprocessed()
         {
-            if (unprocessed.empty()) return;
-            sort(unprocessed.begin(), unprocessed.end());
+            if (0 == unprocessed.Count) return;
+            unprocessed.Sort();
             List<Address>::iterator iter1, iter2;
 
             iter1 = unprocessed.begin();
@@ -615,13 +605,10 @@ namespace Sla.DECCORE
         /// the \b unprocessed list.
         private void fillinBranchStubs()
         {
-            List<Address>::iterator iter;
-
             findUnprocessed();
             dedupUnprocessed();
-            for (iter = unprocessed.begin(); iter != unprocessed.end(); ++iter)
-            {
-                PcodeOp* op = artificialHalt(*iter, PcodeOp.Flags.missing);
+            foreach (Address scannedAddress in unprocessed) {
+                PcodeOp op = artificialHalt(scannedAddress, PcodeOp.Flags.missing);
                 data.opMarkStartBasic(op);
                 data.opMarkStartInstruction(op);
             }
@@ -849,9 +836,9 @@ namespace Sla.DECCORE
         /// \param addr is the target address for the new p-code op
         /// \param flag is the desired \e type
         /// \return the new p-code op
-        private PcodeOp artificialHalt(Address addr, uint flag)
+        private PcodeOp artificialHalt(Address addr, PcodeOp.Flags flag)
         {
-            PcodeOp* haltop = data.newOp(1, addr);
+            PcodeOp haltop = data.newOp(1, addr);
             data.opSetOpcode(haltop, OpCode.CPUI_RETURN);
             data.opSetInput(haltop, data.newConstant(4, 1), 0);
             if (flag != 0)

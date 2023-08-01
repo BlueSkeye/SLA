@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -168,7 +169,7 @@ namespace Sla.DECCORE
                     }
                     if (!checkForCarry(zextop)) continue; // Calculate lo2 and negconst
 
-                    list<PcodeOp*>::const_iterator iter2, enditer2;
+                    IEnumerator<PcodeOp> iter2, enditer2;
                     iter2 = lo1.beginDescend();
                     enditer2 = lo1.endDescend();
                     while (iter2 != enditer2)
@@ -176,7 +177,7 @@ namespace Sla.DECCORE
                         loadd = *iter2;
                         ++iter2;
                         if (loadd.code() != OpCode.CPUI_INT_ADD) continue;
-                        Varnode* tmpvn = loadd.getIn(1 - loadd.getSlot(lo1));
+                        Varnode tmpvn = loadd.getIn(1 - loadd.getSlot(lo1));
                         if (lo2 == (Varnode)null)
                         {
                             if (!tmpvn.isConstant()) continue;

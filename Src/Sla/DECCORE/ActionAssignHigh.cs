@@ -11,7 +11,7 @@ namespace Sla.DECCORE
     internal class ActionAssignHigh : Action
     {
         public ActionAssignHigh(string g)
-            : base(rule_onceperfunc,"assignhigh", g)
+            : base(ruleflags.rule_onceperfunc,"assignhigh", g)
         {
         }
 

@@ -10,6 +10,7 @@
     internal abstract class Action
     {
         /// Boolean behavior properties governing this particular Action
+        [Flags()]
         public enum ruleflags
         {
             rule_repeatapply = 4,   ///< Apply rule repeatedly until no change
@@ -18,9 +19,10 @@
             rule_debug = 32,        ///< Print debug messages specifically for this action
             rule_warnings_on = 64,  ///< If this action makes a change, issue a warning
             rule_warnings_given = 128   ///< A warning has been issued for this action
-        };
+        }
 
         /// Boolean properties describing the \e status of an action
+        [Flags()]
         public enum statusflags
         {
             status_start = 1,       ///< At start of action
@@ -29,16 +31,17 @@
             status_mid = 8,     ///< In middle of action (use subclass status)
             status_end = 16,        ///< getFuncdata has completed once (for onceperfunc)
             status_actionbreak = 32 ///< Completed full action last time but indicated action break
-        };
-        
+        }
+
         /// Break points associated with an Action
+        [Flags()]
         public enum breakflags
         {
             break_start = 1,        ///< Break at beginning of action
             tmpbreak_start = 2,     ///< Temporary break at start of action
             break_action = 4,       ///< Break if a change has been made
             tmpbreak_action = 8
-        };
+        }
 
         /// Changes not including last call to apply()
         protected int lcount;
@@ -264,7 +267,7 @@
                 res.breakpoint |= tp;
                 return true;
             }
-            ghidra.Rule? rule = getSubRule(specify);
+            Rule? rule = getSubRule(specify);
             if (null != rule) {
                 rule.setBreak(tp);
                 return true;
@@ -318,7 +321,7 @@
         /// \return \b true if the Rule is successfully disabled
         public bool disableRule(string specify)
         {
-            ghidra.Rule? rule = getSubRule(specify);
+            Rule? rule = getSubRule(specify);
             if (null != rule) {
                 rule.setDisable();
                 return true;
@@ -334,7 +337,7 @@
         /// \return \b true if the Rule is successfully enabled
         public bool enableRule(string specify)
         {
-            ghidra.Rule? rule = getSubRule(specify);
+            Rule? rule = getSubRule(specify);
             if (null != rule) {
                 rule.clearDisable();
                 return true;

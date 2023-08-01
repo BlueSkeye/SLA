@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.Intrinsics;
-using System.Text;
 using System.Threading.Tasks;
 using static ghidra.FlowBlock;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -47,7 +46,7 @@ namespace Sla.DECCORE
         {
             uint ordbefore;
             uint ordafter;
-            List<PcodeOp>::iterator newiter;
+            IEnumerator<PcodeOp> newiter;
 
             inst.setParent(this);
             newiter = op.insert(iter, inst);
@@ -190,6 +189,7 @@ namespace Sla.DECCORE
 
         public override void encodeBody(Encoder encoder)
         {
+            base.encodeBody
             cover.encode(encoder);
         }
 
@@ -485,7 +485,7 @@ namespace Sla.DECCORE
         /// as its inputs, return that PcodeOp. Otherwise return null.
         /// \param varArray is the exact list of Varnodes
         /// \return the MULTIEQUAL or null
-        public PcodeOp findMultiequal(List<Varnode> varArray)
+        public PcodeOp? findMultiequal(List<Varnode> varArray)
         {
             Varnode vn = varArray[0];
             PcodeOp op;
@@ -495,8 +495,7 @@ namespace Sla.DECCORE
                 if (op.code() == OpCode.CPUI_MULTIEQUAL && op.getParent() == this) {
                     break;
                 }
-                ++iter;
-                if (iter == vn.endDescend()) {
+                if (!iter.MoveNext()) {
                     return null;
                 }
             }

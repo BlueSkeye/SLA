@@ -1,4 +1,5 @@
-﻿using ghidra;
+﻿using Sla.CORE;
+using ghidra;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,29 +26,26 @@ namespace Sla.DECCORE
         private void collectLaneSizes(Varnode vn, LanedRegister allowedLanes,
             LanedRegister checkLanes)
         {
-            list<PcodeOp*>::const_iterator iter = vn.beginDescend();
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            bool iterationCompleted = !iter.MoveNext();
             int step = 0;      // 0 = descendants, 1 = def, 2 = done
-            if (iter == vn.endDescend())
-            {
+            if (iterationCompleted) {
                 step = 1;
             }
-            while (step < 2)
-            {
+            while (step < 2) {
                 int curSize;       // Putative lane size
-                if (step == 0)
-                {
-                    PcodeOp* op = *iter;
-                    ++iter;
-                    if (iter == vn.endDescend())
+                if (step == 0) {
+                    PcodeOp op = iter.Current;
+                    iterationCompleted = !iter.MoveNext();
+                    if (iterationCompleted)
                         step = 1;
                     if (op.code() != OpCode.CPUI_SUBPIECE) continue;  // Is the big register split into pieces
                     curSize = op.getOut().getSize();
                 }
-                else
-                {
+                else {
                     step = 2;
                     if (!vn.isWritten()) continue;
-                    PcodeOp* op = vn.getDef();
+                    PcodeOp op = vn.getDef();
                     if (op.code() != OpCode.CPUI_PIECE) continue;     // Is the big register formed from smaller pieces
                     curSize = op.getIn(0).getSize();
                     int tmpSize = op.getIn(1).getSize();

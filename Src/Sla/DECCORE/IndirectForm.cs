@@ -26,11 +26,11 @@ namespace Sla.DECCORE
             hi = h;
             lo = l;
             indhi = ind;
-            if (indhi.getIn(1).getSpace().getType() != IPTR_IOP) return false;
+            if (indhi.getIn(1).getSpace().getType() != spacetype.IPTR_IOP) return false;
             affector = PcodeOp::getOpFromConst(indhi.getIn(1).getAddr());
             if (affector.isDead()) return false;
             reshi = indhi.getOut();
-            if (reshi.getSpace().getType() == IPTR_INTERNAL) return false;        // Indirect must not be through a temporary
+            if (reshi.getSpace().getType() == spacetype.IPTR_INTERNAL) return false;        // Indirect must not be through a temporary
 
             list<PcodeOp*>::const_iterator iter, enditer;
             iter = lo.beginDescend();
@@ -40,10 +40,10 @@ namespace Sla.DECCORE
                 indlo = *iter;
                 ++iter;
                 if (indlo.code() != OpCode.CPUI_INDIRECT) continue;
-                if (indlo.getIn(1).getSpace().getType() != IPTR_IOP) continue;
+                if (indlo.getIn(1).getSpace().getType() != spacetype.IPTR_IOP) continue;
                 if (affector != PcodeOp::getOpFromConst(indlo.getIn(1).getAddr())) continue;  // hi and lo must be affected by same op
                 reslo = indlo.getOut();
-                if (reslo.getSpace().getType() == IPTR_INTERNAL) return false;        // Indirect must not be through a temporary
+                if (reslo.getSpace().getType() == spacetype.IPTR_INTERNAL) return false;        // Indirect must not be through a temporary
                 if (reslo.isAddrTied() || reshi.isAddrTied())
                 {
                     Address addr;

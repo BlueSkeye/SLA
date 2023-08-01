@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -131,27 +132,26 @@ namespace Sla.DECCORE
                     numparam = op.numInput() - 1;
                 for (int j = 0; j < numparam; ++j)
                 {
-                    ProtoParameter* param = fc.getParam(j); // Looking for a parameter
-                    Varnode* vn = op.getIn(j + 1);
+                    ProtoParameter param = fc.getParam(j); // Looking for a parameter
+                    Varnode vn = op.getIn(j + 1);
                     makeRec(param, vn, recmap);
                 }
             }
             if (recmap.empty()) return;
 
-            Dictionary<HighVariable*, OpRecommend>::iterator iter;
+            Dictionary<HighVariable, OpRecommend>.Enumerator iter;
             for (uint i = 0; i < varlist.size(); ++i)
             {   // Do the actual naming in the original (address based) order
-                Varnode* vn = varlist[i];
+                Varnode vn = varlist[i];
                 if (vn.isFree()) continue;
                 if (vn.isInput()) continue;    // Don't override unaffected or input naming strategy
-                HighVariable* high = vn.getHigh();
+                HighVariable high = vn.getHigh();
                 if (high.getNumMergeClasses() > 1) continue;   // Don't inherit a name if speculatively merged
-                Symbol* sym = high.getSymbol();
+                Symbol? sym = high.getSymbol();
                 if (sym == (Symbol)null) continue;
                 if (!sym.isNameUndefined()) continue;
                 iter = recmap.find(high);
-                if (iter != recmap.end())
-                {
+                if (iter != recmap.end()) {
                     sym.getScope().renameSymbol(sym, localmap.makeNameUnique((*iter).second.namerec));
                 }
             }
@@ -168,13 +168,12 @@ namespace Sla.DECCORE
         private static void linkSpacebaseSymbol(Varnode vn, Funcdata data, List<Varnode> namerec)
         {
             if (!vn.isConstant() && !vn.isInput()) return;
-            list<PcodeOp*>::const_iterator iter;
-            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
-            {
-                PcodeOp* op = *iter;
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if (op.code() != OpCode.CPUI_PTRSUB) continue;
-                Varnode* offVn = op.getIn(1);
-                Symbol* sym = data.linkSymbolReference(offVn);
+                Varnode offVn = op.getIn(1);
+                Symbol? sym = data.linkSymbolReference(offVn);
                 if ((sym != (Symbol)null) && sym.isNameUndefined())
                     namerec.Add(offVn);
             }
@@ -190,14 +189,13 @@ namespace Sla.DECCORE
         /// \param namerec is the container for collecting Symbols with a name
         private static void linkSymbols(Funcdata data, List<Varnode> namerec)
         {
-            AddrSpaceManager* manage = data.getArch();
+            AddrSpaceManager manage = data.getArch();
             VarnodeLocSet::const_iterator iter, enditer;
-            AddrSpace* spc;
-            AddrSpace* constSpace = manage.getConstantSpace();
+            AddrSpace spc;
+            AddrSpace constSpace = manage.getConstantSpace();
             enditer = data.endLoc(constSpace);
-            for (iter = data.beginLoc(constSpace); iter != enditer; ++iter)
-            {
-                Varnode* curvn = *iter;
+            for (iter = data.beginLoc(constSpace); iter != enditer; ++iter) {
+                Varnode curvn = *iter;
                 if (curvn.getSymbolEntry() != (SymbolEntry)null)
                     data.linkSymbol(curvn);     // Special equate symbol
                 else if (curvn.isSpacebase())

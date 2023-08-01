@@ -344,11 +344,11 @@ namespace Sla.CORE {
 
         ///< Get the type of space
         /// Return the defining type for this address space.
-        ///   - IPTR_CONSTANT for the constant space
-        ///   - IPTR_PROCESSOR for a normal space
-        ///   - IPTR_INTERNAL for the temporary register space
-        ///   - IPTR_FSPEC for special FuncCallSpecs references
-        ///   - IPTR_IOP for special PcodeOp references
+        ///   - spacetype.IPTR_CONSTANT for the constant space
+        ///   - spacetype.IPTR_PROCESSOR for a normal space
+        ///   - spacetype.IPTR_INTERNAL for the temporary register space
+        ///   - spacetype.IPTR_FSPEC for special FuncCallSpecs references
+        ///   - spacetype.IPTR_IOP for special PcodeOp references
         /// \return the basic type of this space
         public spacetype getType()
         {
@@ -709,7 +709,7 @@ namespace Sla.CORE {
         /// returns the expected/typical size of values from this space.
         /// \param s is the stream being written
         /// \param offset is the offset to be printed
-        public virtual void printRaw(StreamWriter s, ulong offset)
+        public virtual void printRaw(TextWriter s, ulong offset)
         {
             int sz = (int)getAddrSize();
             if (sz > 4) {

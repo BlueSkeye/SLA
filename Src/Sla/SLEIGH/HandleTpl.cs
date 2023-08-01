@@ -95,7 +95,7 @@ namespace Sla.SLEIGH
                 hand.size = size.fix(walker);
                 hand.offset_offset = ptroffset.fix(walker);
                 hand.offset_space = ptrspace.fixSpace(walker);
-                if (hand.offset_space.getType() == IPTR_CONSTANT)
+                if (hand.offset_space.getType() == spacetype.IPTR_CONSTANT)
                 {
                     // Handle could have been dynamic but wasn't
                     hand.offset_space = (AddrSpace)null;

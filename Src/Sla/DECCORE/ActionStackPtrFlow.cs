@@ -65,7 +65,7 @@ namespace Sla.DECCORE
 
                 if (op.code() == OpCode.CPUI_INDIRECT) {
                     Varnode iopvn = op.getIn(1);
-                    if (iopvn.getSpace().getType() == IPTR_IOP) {
+                    if (iopvn.getSpace().getType() == spacetype.IPTR_IOP) {
                         PcodeOp iop = PcodeOp::getOpFromConst(iopvn.getAddr());
                         FuncCallSpecs fc = data.getCallSpecs(iop);
                         if (fc != null) {

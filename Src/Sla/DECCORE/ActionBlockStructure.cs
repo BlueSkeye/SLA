@@ -8,7 +8,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace Sla.DECCORE
 {
     /// \brief Structure control-flow using standard high-level code constructs.
-    internal class ActionBlockStructure
+    internal class ActionBlockStructure : Action
     {
         /// Constructor
         public ActionBlockStructure(string g)

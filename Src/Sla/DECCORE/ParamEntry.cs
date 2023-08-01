@@ -103,7 +103,7 @@ namespace Sla.DECCORE
         /// \param curList is the current list of ParamEntry
         private void resolveJoin(List<ParamEntry> curList)
         {
-            if (spaceid.getType() != IPTR_JOIN)
+            if (spaceid.getType() != spacetype.IPTR_JOIN)
             {
                 joinrec = (JoinRecord*)0;
                 return;

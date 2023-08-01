@@ -28,10 +28,10 @@ namespace Sla.CORE
         /// Make sure every chunk is followed by at least 512 bytes of pad
         private void pad()
         {
-            Dictionary<Address, List<byte>>::iterator iter, lastiter;
+            Dictionary<Address, List<byte>>.Enumerator iter, lastiter;
 
             // Search for completely redundant chunks
-            if (chunk.empty()) return;
+            if (0 == chunk.Count) return;
             lastiter = chunk.begin();
             iter = lastiter;
             ++iter;
@@ -117,7 +117,7 @@ namespace Sla.CORE
                 else if (subId == ELEM_BYTECHUNK) {
                     AddrSpace @base = decoder.readSpace(ATTRIB_SPACE);
                     Address addr(@base, @base.decodeAttributes(decoder, sz));
-                    Dictionary<Address, List<byte>>::iterator chnkiter;
+                    Dictionary<Address, List<byte>>.Enumerator chnkiter;
                     List<byte> & vec(chunk[addr]);
                     vec.clear();
                     decoder.rewindAttributes();
@@ -179,7 +179,7 @@ namespace Sla.CORE
             encoder.openElement(ELEM_BINARYIMAGE);
             encoder.writeString(ATTRIB_ARCH, archtype);
 
-            Dictionary<Address, List<byte>>::const_iterator iter1;
+            Dictionary<Address, List<byte>>.Enumerator iter1;
             for (iter1 = chunk.begin(); iter1 != chunk.end(); ++iter1)
             {
                 List<byte> &vec((*iter1).second);
@@ -201,7 +201,7 @@ namespace Sla.CORE
                 encoder.closeElement(ELEM_BYTECHUNK);
             }
 
-            Dictionary<Address, string>::const_iterator iter2;
+            Dictionary<Address, string>.Enumerator iter2;
             for (iter2 = addrtosymbol.begin(); iter2 != addrtosymbol.end(); ++iter2)
             {
                 encoder.openElement(ELEM_SYMBOL);

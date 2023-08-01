@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -307,20 +308,18 @@ namespace Sla.DECCORE
         /// \param spcvn is the spacebase register
         private static void propagateSpacebaseRef(Funcdata data, Varnode spcvn)
         {
-            Datatype* spctype = spcvn.getType();   // This is an absolute property of the varnode, so not temptype
+            Datatype spctype = spcvn.getType();   // This is an absolute property of the varnode, so not temptype
             if (spctype.getMetatype() != type_metatype.TYPE_PTR) return;
-            spctype = ((TypePointer*)spctype).getPtrTo();
+            spctype = ((TypePointer)spctype).getPtrTo();
             if (spctype.getMetatype() != type_metatype.TYPE_SPACEBASE) return;
-            TypeSpacebase* sbtype = (TypeSpacebase*)spctype;
-            list<PcodeOp*>::const_iterator iter;
+            TypeSpacebase sbtype = (TypeSpacebase)spctype;
+            IEnumerator<PcodeOp> iter = spcvn.beginDescend();
             Address addr;
 
-            for (iter = spcvn.beginDescend(); iter != spcvn.endDescend(); ++iter)
-            {
-                PcodeOp* op = *iter;
-                Varnode* vn;
-                switch (op.code())
-                {
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
+                Varnode vn;
+                switch (op.code()) {
                     case OpCode.CPUI_COPY:
                         vn = op.getIn(0);
                         addr = sbtype.getAddress(0, vn.getSize(), op.getAddr());
@@ -329,16 +328,14 @@ namespace Sla.DECCORE
                     case OpCode.CPUI_INT_ADD:
                     case OpCode.CPUI_PTRSUB:
                         vn = op.getIn(1);
-                        if (vn.isConstant())
-                        {
+                        if (vn.isConstant()) {
                             addr = sbtype.getAddress(vn.getOffset(), vn.getSize(), op.getAddr());
                             propagateRef(data, op.getOut(), addr);
                         }
                         break;
                     case OpCode.CPUI_PTRADD:
                         vn = op.getIn(1);
-                        if (vn.isConstant())
-                        {
+                        if (vn.isConstant()) {
                             ulong off = vn.getOffset() * op.getIn(2).getOffset();
                             addr = sbtype.getAddress(off, vn.getSize(), op.getAddr());
                             propagateRef(data, op.getOut(), addr);
@@ -356,13 +353,13 @@ namespace Sla.DECCORE
         /// \return the representative OpCode.CPUI_RETURN op or NULL
         private static PcodeOp canonicalReturnOp(Funcdata data)
         {
-            PcodeOp* res = (PcodeOp)null;
-            Datatype* bestdt = (Datatype)null;
-            list<PcodeOp*>::const_iterator iter, iterend;
-            iterend = data.endOp(CPUI_RETURN);
-            for (iter = data.beginOp(CPUI_RETURN); iter != iterend; ++iter)
+            PcodeOp? res = (PcodeOp)null;
+            Datatype? bestdt = (Datatype)null;
+            IEnumerator<PcodeOp> iter, iterend;
+            iterend = data.endOp(OpCode.CPUI_RETURN);
+            for (iter = data.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter)
             {
-                PcodeOp* retop = *iter;
+                PcodeOp retop = *iter;
                 if (retop.isDead()) continue;
                 if (retop.getHaltType() != 0) continue;
                 if (retop.numInput() > 1)
@@ -391,24 +388,22 @@ namespace Sla.DECCORE
         private static void propagateAcrossReturns(Funcdata data)
         {
             if (data.getFuncProto().isOutputLocked()) return;
-            PcodeOp* op = canonicalReturnOp(data);
+            PcodeOp? op = canonicalReturnOp(data);
             if (op == (PcodeOp)null) return;
-            TypeFactory* typegrp = data.getArch().types;
-            Varnode* baseVn = op.getIn(1);
-            Datatype* ct = baseVn.getTempType();
+            TypeFactory typegrp = data.getArch().types;
+            Varnode baseVn = op.getIn(1);
+            Datatype ct = baseVn.getTempType();
             int baseSize = baseVn.getSize();
             bool isBool = ct.getMetatype() == type_metatype.TYPE_BOOL;
-            list<PcodeOp*>::const_iterator iter, iterend;
+            IEnumerator<PcodeOp> iter, iterend;
             iterend = data.endOp(CPUI_RETURN);
-            for (iter = data.beginOp(CPUI_RETURN); iter != iterend; ++iter)
-            {
-                PcodeOp* retop = *iter;
+            for (iter = data.beginOp(CPUI_RETURN); iter != iterend; ++iter) {
+                PcodeOp retop = *iter;
                 if (retop == op) continue;
                 if (retop.isDead()) continue;
                 if (retop.getHaltType() != 0) continue;
-                if (retop.numInput() > 1)
-                {
-                    Varnode* vn = retop.getIn(1);
+                if (retop.numInput() > 1) {
+                    Varnode vn = retop.getIn(1);
                     if (vn.getSize() != baseSize) continue;
                     if (isBool && vn.getNZMask() > 1) continue;    // Don't propagate bool if value is not necessarily 0 or 1
                     if (vn.getTempType() == ct) continue;      // Already propagated

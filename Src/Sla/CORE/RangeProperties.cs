@@ -26,7 +26,7 @@ namespace Sla.CORE
         }
 
         ///< Restore \b this from an XML stream
-        public void decode(ghidra.Decoder decoder)
+        public void decode(Decoder decoder)
         {
             uint elemId = decoder.openElement();
             if ((elemId != ElementId.ELEM_RANGE) && (elemId != ElementId.ELEM_REGISTER)) {

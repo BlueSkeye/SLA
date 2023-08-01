@@ -99,7 +99,7 @@ namespace Sla.DECCORE
             PcodeOp* truncop = data.newOp(2, op.getAddr());
             data.opSetOpcode(truncop, OpCode.CPUI_SUBPIECE);
             data.opSetInput(truncop, data.newConstant(vn.getSize(), 0), 1);
-            if (vn.getSpace().getType() == IPTR_INTERNAL)
+            if (vn.getSpace().getType() == spacetype.IPTR_INTERNAL)
             {
                 newvn = data.newUniqueOut(spc.getAddrSize(), truncop);
             }

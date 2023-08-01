@@ -48,7 +48,7 @@ namespace Sla.DECCORE
                             op = (PcodeOp)null;
                             break;
                         case OpCode.CPUI_INDIRECT:
-                            if (op.getIn(1).getSpace().getType() == IPTR_IOP)
+                            if (op.getIn(1).getSpace().getType() == spacetype.IPTR_IOP)
                             {
                                 PcodeOp* callOp = PcodeOp::getOpFromConst(op.getIn(1).getAddr());
                                 if (callOp.isCall())

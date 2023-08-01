@@ -44,9 +44,9 @@ namespace Sla.DECCORE
                 }
             }
             for (; ; ) {
-                IEnumerator<PcodeOp> iter;
-                for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter) {
-                    PcodeOp op = *iter;
+                IEnumerator<PcodeOp> iter = vn.beginDescend();
+                while (iter.MoveNext()) {
+                    PcodeOp op = iter.Current;
                     if (op.isMark()) continue;
                     OpCode opc = op.code();
                     if (opc == OpCode.CPUI_MULTIEQUAL) {
@@ -87,10 +87,9 @@ namespace Sla.DECCORE
             while (count < markSet.Count) {
                 vn = markSet[count];
                 count += 1;
-                list<PcodeOp*>::const_iterator iter;
-                for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
-                {
-                    PcodeOp nextOp = *iter;
+                IEnumerator<PcodeOp> iter = vn.beginDescend();
+                while (iter.MoveNext()) {
+                    PcodeOp nextOp = iter.Current;
                     OpCode opc = nextOp.code();
                     if (opc == OpCode.CPUI_MULTIEQUAL) {
                         if (nextOp.isMark()) {
@@ -149,7 +148,7 @@ namespace Sla.DECCORE
         private static Varnode placeCopy(PcodeOp op, BlockBasic bl, Varnode constVn, Funcdata data)
         {
             PcodeOp? lastOp = bl.lastOp();
-            list<PcodeOp*>::iterator iter;
+            IEnumerator<PcodeOp> iter;
             Address addr;
             if (lastOp == (PcodeOp)null) {
                 iter = bl.endOp();
@@ -262,15 +261,17 @@ namespace Sla.DECCORE
             bool useMultiequal, Funcdata data)
         {
             List<PcodeOpNode> phiNodeEdges = new List<PcodeOpNode>();
-            list<PcodeOp*>::const_iterator iter, enditer;
-            iter = varVn.beginDescend();
-            enditer = varVn.endDescend();
-            while (iter != enditer) {
-                PcodeOp op = *iter;
-                while (iter != enditer && *iter == op)
-                    ++iter;             // Advance iterator off of current op, as this descendant may be erased
+            IEnumerator<PcodeOp> iter = varVn.beginDescend();
+            bool iterationCompleted = !iter.MoveNext();
+            while (!iterationCompleted) {
+                PcodeOp op = iter.Current;
+                while (!iterationCompleted && iter.Current == op) {
+                    // Advance iterator off of current op, as this descendant may be erased
+                    iterationCompleted = !iter.MoveNext();
+                }
                 OpCode opc = op.code();
-                if (opc == OpCode.CPUI_INDIRECT)           // Don't propagate constant into these
+                if (opc == OpCode.CPUI_INDIRECT)
+                    // Don't propagate constant into these
                     continue;
                 else if (opc == OpCode.CPUI_MULTIEQUAL) {
                     if (!useMultiequal)
@@ -280,9 +281,8 @@ namespace Sla.DECCORE
                     FlowBlock bl = op.getParent();
                     for (int slot = 0; slot < op.numInput(); ++slot) {
                         if (op.getIn(slot) == varVn) {
-                            if (constBlock.dominates(bl.getIn(slot)))
-                            {
-                                phiNodeEdges.emplace_back(op, slot);
+                            if (constBlock.dominates(bl.getIn(slot))) {
+                                phiNodeEdges.Add(new PcodeOpNode(op, slot));
                             }
                         }
                     }
@@ -302,7 +302,7 @@ namespace Sla.DECCORE
                     count += 1;         // We made a change
                 }
             }
-            if (!phiNodeEdges.empty())
+            if (0 != phiNodeEdges.Count)
                 handlePhiNodes(varVn, constVn, phiNodeEdges, data);
         }
 

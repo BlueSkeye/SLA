@@ -135,7 +135,7 @@ namespace Sla.DECCORE
                 if (curtrial.isDefinitelyNotUsed()) return 0;   // Trial has already been stripped
                 return curtrial.getSlot();
             }
-            if (startaddr.getSpace().getType() == IPTR_SPACEBASE)
+            if (startaddr.getSpace().getType() == spacetype.IPTR_SPACEBASE)
                 return -1;
             return 0;
         }
@@ -263,7 +263,7 @@ namespace Sla.DECCORE
                 newinput[1 + i] = vn;
                 activeinput.registerTrial(param.getAddress(), param.getSize());
                 activeinput.getTrial(i).markActive(); // Parameter is not optional
-                if (noplacehold && (param.getAddress().getSpace().getType() == IPTR_SPACEBASE))
+                if (noplacehold && (param.getAddress().getSpace().getType() == spacetype.IPTR_SPACEBASE))
                 {
                     // We have a locked stack parameter, use it to recover the stack offset
                     vn.setSpacebasePlaceholder();
@@ -470,7 +470,7 @@ namespace Sla.DECCORE
             if (call_op.code() == OpCode.CPUI_CALL)
             {
                 entryaddress = call_op.getIn(0).getAddr();
-                if (entryaddress.getSpace().getType() == IPTR_FSPEC)
+                if (entryaddress.getSpace().getType() == spacetype.IPTR_FSPEC)
                 {
                     // op.getIn(0) was already converted to fspec pointer
                     // This can happen if we are cloning an op for inlining
@@ -827,7 +827,7 @@ namespace Sla.DECCORE
         {
             Varnode* refvn = phvn.getDef().getIn(0);
             AddrSpace* spacebase = refvn.getSpace();
-            if (spacebase.getType() != IPTR_SPACEBASE)
+            if (spacebase.getType() != spacetype.IPTR_SPACEBASE)
             {
                 data.warningHeader("This function may have set the stack pointer");
             }
@@ -853,7 +853,7 @@ namespace Sla.DECCORE
                 Address addr = param.getAddress();
                 if (addr.getSpace() != spacebase)
                 {
-                    if (spacebase.getType() == IPTR_SPACEBASE)
+                    if (spacebase.getType() == spacetype.IPTR_SPACEBASE)
                         throw new LowlevelError("Stack placeholder does not match locked space");
                 }
                 stackoffset -= addr.getOffset();
@@ -875,7 +875,7 @@ namespace Sla.DECCORE
                 data.opRemoveInput(op, stackPlaceholderSlot);
                 clearStackPlaceholderSlot();
                 // Remove the op producing the placeholder as well
-                if (vn.hasNoDescend() && vn.getSpace().getType() == IPTR_INTERNAL && vn.isWritten())
+                if (vn.hasNoDescend() && vn.getSpace().getType() == spacetype.IPTR_INTERNAL && vn.isWritten())
                     data.opDestroy(vn.getDef());
             }
         }
@@ -938,7 +938,7 @@ namespace Sla.DECCORE
                 if (trial.isChecked()) continue;
                 int slot = trial.getSlot();
                 Varnode* vn = op.getIn(slot);
-                if (vn.getSpace().getType() == IPTR_SPACEBASE)
+                if (vn.getSpace().getType() == spacetype.IPTR_SPACEBASE)
                 {
                     if (aliascheck.hasLocalAlias(vn))
                         trial.markNoUse();
@@ -1041,7 +1041,7 @@ namespace Sla.DECCORE
                 Address addr = paramtrial.getAddress();
                 spc = addr.getSpace();
                 off = addr.getOffset();
-                if (spc.getType() == IPTR_SPACEBASE)
+                if (spc.getType() == spacetype.IPTR_SPACEBASE)
                 {
                     isspacebase = true;
                     off = spc.wrapOffset(stackoffset + off);   // Translate the parameter address relative to caller's spacebase
@@ -1246,7 +1246,7 @@ namespace Sla.DECCORE
         public uint hasEffectTranslate(Address addr, int size)
         {
             AddrSpace* spc = addr.getSpace();
-            if (spc.getType() != IPTR_SPACEBASE)
+            if (spc.getType() != spacetype.IPTR_SPACEBASE)
                 return hasEffect(addr, size);
             if (stackoffset == offset_unknown) return EffectRecord::unknown_effect;
             ulong newoff = spc.wrapOffset(addr.getOffset() - stackoffset); // Translate to callee's spacebase point of view

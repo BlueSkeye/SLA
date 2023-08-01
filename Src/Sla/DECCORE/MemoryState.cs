@@ -93,7 +93,7 @@ namespace Sla.DECCORE
         /// \return the queried value
         public ulong getValue(AddrSpace spc, ulong off, int size)
         {
-            if (spc.getType() == IPTR_CONSTANT) return off;
+            if (spc.getType() == spacetype.IPTR_CONSTANT) return off;
             MemoryBank* mspace = getMemoryBank(spc);
             if (mspace == (MemoryBank*)0)
                 throw new LowlevelError("Getting value from unmapped memory space: " + spc.getName());

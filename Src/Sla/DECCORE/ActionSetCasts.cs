@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -82,20 +83,20 @@ namespace Sla.DECCORE
             CastStrategy castStrategy)
         {
             if (ct.getMetatype() != type_metatype.TYPE_PTR) return false;
-            Datatype* highType = vn.getHighTypeReadFacing(op);
+            Datatype highType = vn.getHighTypeReadFacing(op);
             if (highType.getMetatype() != type_metatype.TYPE_PTR) return false;
-            Datatype* highPtrTo = ((TypePointer*)highType).getPtrTo();
+            Datatype highPtrTo = ((TypePointer)highType).getPtrTo();
             if (highPtrTo.getMetatype() != type_metatype.TYPE_STRUCT) return false;
-            TypeStruct* highStruct = (TypeStruct*)highPtrTo;
+            TypeStruct highStruct = (TypeStruct)highPtrTo;
             if (highStruct.numDepend() == 0) return false;
-            List<TypeField>::const_iterator iter = highStruct.beginField();
+            IEnumerator<TypeField> iter = highStruct.beginField();
             if ((*iter).offset != 0) return false;
-            Datatype* reqtype = ((TypePointer*)ct).getPtrTo();
-            Datatype* curtype = (*iter).type;
+            Datatype reqtype = ((TypePointer)ct).getPtrTo();
+            Datatype curtype = (*iter).type;
             if (reqtype.getMetatype() == type_metatype.TYPE_ARRAY)
-                reqtype = ((TypeArray*)reqtype).getBase();
+                reqtype = ((TypeArray)reqtype).getBase();
             if (curtype.getMetatype() == type_metatype.TYPE_ARRAY)
-                curtype = ((TypeArray*)curtype).getBase();
+                curtype = ((TypeArray)curtype).getBase();
             return (castStrategy.castStandard(reqtype, curtype, true, true) == (Datatype)null);
         }
 
@@ -420,17 +421,17 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            list<PcodeOp*>::const_iterator iter;
-            PcodeOp* op;
+            IEnumerator<PcodeOp> iter;
+            PcodeOp op;
 
             data.startCastPhase();
-            CastStrategy* castStrategy = data.getArch().print.getCastStrategy();
+            CastStrategy castStrategy = data.getArch().print.getCastStrategy();
             // We follow data flow, doing basic blocks in dominance order
             // Doing operations in basic block order
             BlockGraph basicblocks = data.getBasicBlocks();
             for (int j = 0; j < basicblocks.getSize(); ++j)
             {
-                BlockBasic* bb = (BlockBasic*)basicblocks.getBlock(j);
+                BlockBasic bb = (BlockBasic)basicblocks.getBlock(j);
                 for (iter = bb.beginOp(); iter != bb.endOp(); ++iter)
                 {
                     op = *iter;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -61,9 +62,7 @@ namespace Sla.DECCORE
         /// \return -1 or -2 if given Varnode should be marked explicit, the number of descendants otherwise
         private static int baseExplicit(Varnode vn, int maxref)
         {
-            list<PcodeOp*>::const_iterator iter;
-
-            PcodeOp* def = vn.getDef();
+            PcodeOp def = vn.getDef();
             if (def == (PcodeOp)null) return -1;
             if (def.isMarker()) return -1;
             if (def.isCall())
@@ -72,38 +71,33 @@ namespace Sla.DECCORE
                     return -2;      // Explicit, but may need special printing
                 return -1;
             }
-            HighVariable* high = vn.getHigh();
+            HighVariable? high = vn.getHigh();
             if ((high != (HighVariable)null) && (high.numInstances() > 1)) return -1; // Must not be merged at all
-            if (vn.isAddrTied())
-            {       // We need to see addrtied as explicit because pointers may reference it
-                if (def.code() == OpCode.CPUI_SUBPIECE)
-                {
-                    Varnode* vin = def.getIn(0);
-                    if (vin.isAddrTied())
-                    {
-                        if (vn.overlapJoin(*vin) == def.getIn(1).getOffset())
+            if (vn.isAddrTied()) {
+                // We need to see addrtied as explicit because pointers may reference it
+                if (def.code() == OpCode.CPUI_SUBPIECE) {
+                    Varnode vin = def.getIn(0);
+                    if (vin.isAddrTied()) {
+                        if (vn.overlapJoin(vin) == def.getIn(1).getOffset())
                             return -1;      // Should be explicit, will be a copymarker and not printed
                     }
                 }
-                PcodeOp* useOp = vn.loneDescend();
+                PcodeOp? useOp = vn.loneDescend();
                 if (useOp == (PcodeOp)null) return -1;
-                if (useOp.code() == OpCode.CPUI_INT_ZEXT)
-                {
-                    Varnode* vnout = useOp.getOut();
-                    if ((!vnout.isAddrTied()) || (0 != vnout.contains(*vn)))
+                if (useOp.code() == OpCode.CPUI_INT_ZEXT) {
+                    Varnode vnout = useOp.getOut();
+                    if ((!vnout.isAddrTied()) || (0 != vnout.contains(vn)))
                         return -1;
                 }
-                else if (useOp.code() == OpCode.CPUI_PIECE)
-                {
-                    Varnode* rootVn = PieceNode::findRoot(vn);
+                else if (useOp.code() == OpCode.CPUI_PIECE) {
+                    Varnode rootVn = PieceNode.findRoot(vn);
                     if (vn == rootVn) return -1;
-                    if (rootVn.getDef().isPartialRoot())
-                    {
+                    if (rootVn.getDef().isPartialRoot()) {
                         // Getting PIECEd into a structured thing.  Unless vn is a leaf, it should be implicit
                         if (def.code() != OpCode.CPUI_PIECE) return -1;
                         if (vn.loneDescend() == (PcodeOp)null) return -1;
-                        Varnode* vn0 = def.getIn(0);
-                        Varnode* vn1 = def.getIn(1);
+                        Varnode vn0 = def.getIn(0);
+                        Varnode vn1 = def.getIn(1);
                         Address addr = vn.getAddr();
                         if (!addr.getSpace().isBigEndian())
                             addr = addr + vn1.getSize();
@@ -115,47 +109,43 @@ namespace Sla.DECCORE
                         // If we reach here vn is a non-leaf in a CONCAT tree and should be implicit
                     }
                 }
-                else
-                {
+                else {
                     return -1;
                 }
             }
-            else if (vn.isMapped())
-            {
+            else if (vn.isMapped()) {
                 // If NOT addrtied but is still mapped, there must be either a first use (register) mapping
                 // or a dynamic mapping causing the bit to be set. In either case, it should probably be explicit
                 return -1;
             }
-            else if (vn.isProtoPartial() && def.code() != OpCode.CPUI_PIECE)
-            {
+            else if (vn.isProtoPartial() && def.code() != OpCode.CPUI_PIECE) {
                 // Varnode is part of structure. Write to structure should be an explicit statement
                 return -1;
             }
-            else if (def.code() == OpCode.CPUI_PIECE && def.getIn(0).isProtoPartial() && !vn.isProtoPartial())
-            {
+            else if (def.code() == OpCode.CPUI_PIECE && def.getIn(0).isProtoPartial() && !vn.isProtoPartial()) {
                 // The base of PIECE operations building a structure
                 return -1;
             }
             if (vn.hasNoDescend()) return -1;  // Must have at least one descendant
 
-            if (def.code() == OpCode.CPUI_PTRSUB)
-            { // A dereference
-                Varnode* basevn = def.getIn(0);
-                if (basevn.isSpacebase())
-                { // of a spacebase
+            if (def.code() == OpCode.CPUI_PTRSUB) {
+                // A dereference
+                Varnode basevn = def.getIn(0);
+                if (basevn.isSpacebase()) {
+                    // of a spacebase
                     if (basevn.isConstant() || basevn.isInput())
-                        maxref = 1000000;   // Should always be implicit, so remove limit on max references
+                        // Should always be implicit, so remove limit on max references
+                        maxref = 1000000;
                 }
             }
             int desccount = 0;
-            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
-            {
-                PcodeOp* op = *iter;
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if (op.isMarker()) return -1;
                 desccount += 1;
                 if (desccount > maxref) return -1; // Must not exceed max descendants
             }
-
             return desccount;
         }
 
@@ -271,23 +261,20 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode
         private static void checkNewToConstructor(Funcdata data, Varnode vn)
         {
-            PcodeOp* op = vn.getDef();
-            BlockBasic* bb = op.getParent();
-            PcodeOp* firstuse = (PcodeOp)null;
-            list<PcodeOp*>::const_iterator iter;
-            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
-            {
-                PcodeOp* curop = *iter;
+            PcodeOp op = vn.getDef();
+            BlockBasic bb = op.getParent();
+            PcodeOp? firstuse = (PcodeOp)null;
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp curop = iter.Current;
                 if (curop.getParent() != bb) continue;
                 if (firstuse == (PcodeOp)null)
                     firstuse = curop;
                 else if (curop.getSeqNum().getOrder() < firstuse.getSeqNum().getOrder())
                     firstuse = curop;
-                else if (curop.code() == OpCode.CPUI_CALLIND)
-                {
-                    Varnode* ptr = curop.getIn(0);
-                    if (ptr.isWritten())
-                    {
+                else if (curop.code() == OpCode.CPUI_CALLIND) {
+                    Varnode ptr = curop.getIn(0);
+                    if (ptr.isWritten()) {
                         if (ptr.getDef() == firstuse)
                             firstuse = curop;
                     }
@@ -305,7 +292,7 @@ namespace Sla.DECCORE
         }
 
         public ActionMarkExplicit(string g)
-            : base(rule_onceperfunc,"markexplicit", g)
+            : base(ruleflags.rule_onceperfunc,"markexplicit", g)
         {
         }
 

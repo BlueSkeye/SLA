@@ -60,7 +60,7 @@ namespace Sla.SLEIGH
 
         public override void collectLocalValues(List<ulong> results)
         {
-            if (fix.space.getType() == IPTR_INTERNAL)
+            if (fix.space.getType() == spacetype.IPTR_INTERNAL)
                 results.Add(fix.offset);
         }
 

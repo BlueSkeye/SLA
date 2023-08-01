@@ -21,7 +21,7 @@ namespace Sla.DECCORE
         /// \return the duplicate Varnode
         private static Varnode buildVarnodeOut(Varnode vn, PcodeOp op, Funcdata data)
         {
-            if (vn.isAddrTied() || vn.getSpace().getType() == IPTR_INTERNAL)
+            if (vn.isAddrTied() || vn.getSpace().getType() == spacetype.IPTR_INTERNAL)
                 return data.newUniqueOut(vn.getSize(), op);
             return data.newVarnodeOut(vn.getSize(), vn.getAddr(), op);
         }

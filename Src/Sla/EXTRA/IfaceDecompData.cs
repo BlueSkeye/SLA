@@ -144,7 +144,7 @@ namespace Sla.EXTRA
 
             Address pc;
             Address loc = new Address(parse_varnode(s, defsize, pc, uq,* conf.types));
-            if (loc.getSpace().getType() == IPTR_CONSTANT)
+            if (loc.getSpace().getType() == spacetype.IPTR_CONSTANT)
             {
                 if (pc.isInvalid() || (uq == uint.MaxValue))
                     throw new IfaceParseError("Missing p-code sequence number");

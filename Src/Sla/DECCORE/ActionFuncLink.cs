@@ -48,7 +48,7 @@ namespace Sla.DECCORE
                     AddrSpace* spc = param.getAddress().getSpace();
                     ulong off = param.getAddress().getOffset();
                     int sz = param.getSize();
-                    if (spc.getType() == IPTR_SPACEBASE)
+                    if (spc.getType() == spacetype.IPTR_SPACEBASE)
                     { // Param is stack relative
                         Varnode* loadval = data.opStackLoad(spc, off, sz, op, (Varnode)null, false);
                         data.opInsertInput(op, loadval, op.numInput());
@@ -79,7 +79,7 @@ namespace Sla.DECCORE
             if (callop.getOut() != (Varnode)null)
             {
                 // CALL ops are expected to have no output, but its possible an override has produced one
-                if (callop.getOut().getSpace().getType() == IPTR_INTERNAL)
+                if (callop.getOut().getSpace().getType() == spacetype.IPTR_INTERNAL)
                 {
                     // Removing a varnode in the unique space will likely produce an input varnode in the unique space
                     ostringstream s;

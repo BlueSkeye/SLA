@@ -254,13 +254,13 @@ namespace Sla.DECCORE
         }
 
         /// Set the parent basic block of this op
-        private void setParent(BlockBasic p)
+        internal void setParent(BlockBasic p)
         {
             parent = p;
         }
 
         /// Store the iterator into this op's basic block
-        private void setBasicIter(IEnumerator<PcodeOp> iter)
+        internal void setBasicIter(IEnumerator<PcodeOp> iter)
         {
             basiciter = iter;
         }
@@ -1146,7 +1146,7 @@ namespace Sla.DECCORE
                     encoder.openElement(ELEM_VOID);
                     encoder.closeElement(ELEM_VOID);
                 }
-                else if (vn.getSpace().getType() == IPTR_IOP)
+                else if (vn.getSpace().getType() == spacetype.IPTR_IOP)
                 {
                     if ((i == 1) && (code() == OpCode.CPUI_INDIRECT))
                     {
@@ -1161,7 +1161,7 @@ namespace Sla.DECCORE
                         encoder.closeElement(ELEM_VOID);
                     }
                 }
-                else if (vn.getSpace().getType() == IPTR_CONSTANT)
+                else if (vn.getSpace().getType() == spacetype.IPTR_CONSTANT)
                 {
                     if ((i == 0) && ((code() == OpCode.CPUI_STORE) || (code() == OpCode.CPUI_LOAD)))
                     {

@@ -648,7 +648,7 @@ namespace Sla.DECCORE
             {
                 ProtoParameter* param = getParam(i);
                 Address addr = param.getAddress();
-                if (addr.getSpace().getType() != IPTR_SPACEBASE) continue;
+                if (addr.getSpace().getType() != spacetype.IPTR_SPACEBASE) continue;
                 int cur = (int)addr.getOffset() + param.getSize();
                 cur = (cur + 3) & 0xffffffc;    // Must be 4-byte aligned
                 if (cur > expop)

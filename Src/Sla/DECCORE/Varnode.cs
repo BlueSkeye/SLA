@@ -516,7 +516,7 @@ namespace Sla.DECCORE
         }
 
         /// Get iterator to list of syntax tree descendants (reads)
-        public IEnumerator<PcodeOp> beginDescend() => descend.begin();
+        public IEnumerator<PcodeOp> beginDescend() => descend.GetEnumerator();
 
         /// Get the end iterator to list of descendants
         public IEnumerator<PcodeOp> endDescend() => descend.end();
@@ -722,12 +722,12 @@ namespace Sla.DECCORE
                 return;
             }
             spacetype tp = m.getSpace().getType();
-            if (tp == IPTR_CONSTANT)
+            if (tp == spacetype.IPTR_CONSTANT)
             {
                 flags = Varnode.varnode_flags.constant;
                 nzm = m.getOffset();
             }
-            else if ((tp == IPTR_FSPEC) || (tp == IPTR_IOP))
+            else if ((tp == spacetype.IPTR_FSPEC) || (tp == spacetype.IPTR_IOP))
             {
                 flags = Varnode.varnode_flags.annotation | Varnode.varnode_flags.coverdirty;
                 nzm = ~((ulong)0);
@@ -810,7 +810,7 @@ namespace Sla.DECCORE
         public bool intersects(Varnode op)
         {
             if (loc.getSpace() != op.loc.getSpace()) return false;
-            if (loc.getSpace().getType() == IPTR_CONSTANT) return false;
+            if (loc.getSpace().getType() == spacetype.IPTR_CONSTANT) return false;
             ulong a = loc.getOffset();
             ulong b = op.loc.getOffset();
             if (b < a)
@@ -830,7 +830,7 @@ namespace Sla.DECCORE
         public bool intersects(Address op2loc, int op2size)
         {
             if (loc.getSpace() != op2loc.getSpace()) return false;
-            if (loc.getSpace().getType() == IPTR_CONSTANT) return false;
+            if (loc.getSpace().getType() == spacetype.IPTR_CONSTANT) return false;
             ulong a = loc.getOffset();
             ulong b = op2loc.getOffset();
             if (b < a)
@@ -855,7 +855,7 @@ namespace Sla.DECCORE
         public int contains(Varnode op)
         {
             if (loc.getSpace() != op.loc.getSpace()) return 3;
-            if (loc.getSpace().getType() == IPTR_CONSTANT) return 3;
+            if (loc.getSpace().getType() == spacetype.IPTR_CONSTANT) return 3;
             ulong a = loc.getOffset();
             ulong b = op.loc.getOffset();
             if (b < a) return -1;

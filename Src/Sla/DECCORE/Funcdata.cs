@@ -1527,7 +1527,7 @@ namespace Sla.DECCORE
                 PcodeOp* newop = findOp(oldspec.getOp().getSeqNum());
                 FuncCallSpecs* newspec = oldspec.clone(newop);
                 Varnode* invn0 = newop.getIn(0);
-                if (invn0.getSpace().getType() == IPTR_FSPEC)
+                if (invn0.getSpace().getType() == spacetype.IPTR_FSPEC)
                 { // Replace embedded pointer to callspec
                     Varnode* newvn0 = newVarnodeCallSpecs(newspec);
                     opSetInput(newop, newvn0, 0);
@@ -1971,7 +1971,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < glb.numSpaces(); ++i)
             {
                 AddrSpace * base = glb.getSpace(i);
-                if (base == (AddrSpace)null || @base.getType() == IPTR_IOP) continue;
+                if (base == (AddrSpace)null || @base.getType() == spacetype.IPTR_IOP) continue;
                 VarnodeLocSet::const_iterator iter = vbank.beginLoc(base);
                 VarnodeLocSet::const_iterator enditer = vbank.endLoc(base);
                 encodeVarnode(encoder, iter, enditer);
@@ -2331,7 +2331,7 @@ namespace Sla.DECCORE
             Varnode* vn;
 
             vn = op.getIn(0);
-            if (vn.getSpace().getType() == IPTR_FSPEC)
+            if (vn.getSpace().getType() == spacetype.IPTR_FSPEC)
                 return FuncCallSpecs::getFspecFromConst(vn.getAddr());
 
             for (i = 0; i < qlst.size(); ++i)
@@ -3052,7 +3052,7 @@ namespace Sla.DECCORE
                             curFlags |= TraverseNode::indirectalt;
                             break;
                         case OpCode.CPUI_COPY:
-                            if ((op.getOut().getSpace().getType() != IPTR_INTERNAL) && !op.isIncidentalCopy() && !vn.isIncidentalCopy())
+                            if ((op.getOut().getSpace().getType() != spacetype.IPTR_INTERNAL) && !op.isIncidentalCopy() && !vn.isIncidentalCopy())
                             {
                                 curFlags |= TraverseNode::actionalt;
                             }
@@ -3174,7 +3174,7 @@ namespace Sla.DECCORE
                     def.clearMark();
                     return false;
                 case OpCode.CPUI_COPY:
-                    if ((invn.getSpace().getType() == IPTR_INTERNAL) || def.isIncidentalCopy() || def.getIn(0).isIncidentalCopy())
+                    if ((invn.getSpace().getType() == spacetype.IPTR_INTERNAL) || def.isIncidentalCopy() || def.getIn(0).isIncidentalCopy())
                     {
                         return ancestorOpUse(maxlevel - 1, def.getIn(0), op, trial, offset, mainFlags);
                     }
@@ -3202,7 +3202,7 @@ namespace Sla.DECCORE
                                     trial.setRemFormed();
                             }
                         }
-                        if (invn.getSpace().getType() == IPTR_INTERNAL || def.isIncidentalCopy() ||
+                        if (invn.getSpace().getType() == spacetype.IPTR_INTERNAL || def.isIncidentalCopy() ||
                         def.getIn(0).isIncidentalCopy() ||
                         invn.overlap(*def.getIn(0)) == newOff)
                         {
@@ -4161,7 +4161,7 @@ namespace Sla.DECCORE
                 if (prev.code() == OpCode.CPUI_INDIRECT)
                 {
                     Varnode* invn = prev.getIn(1);
-                    if (invn.getSpace().getType() == IPTR_IOP)
+                    if (invn.getSpace().getType() == spacetype.IPTR_IOP)
                     {
                         PcodeOp* targOp = PcodeOp::getOpFromConst(invn.getAddr()); // Store or call
                         if (!targOp.isDead())

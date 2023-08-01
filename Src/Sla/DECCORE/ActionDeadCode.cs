@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -136,7 +136,7 @@ namespace Sla.DECCORE
                     break;
                 case OpCode.CPUI_INDIRECT:
                     pushConsumed(outc, op.getIn(0), worklist);
-                    if (op.getIn(1).getSpace().getType() == IPTR_IOP)
+                    if (op.getIn(1).getSpace().getType() == spacetype.IPTR_IOP)
                     {
                         PcodeOp* indop = PcodeOp::getOpFromConst(op.getIn(1).getAddr());
                         if (!indop.isDead())
@@ -304,8 +304,8 @@ namespace Sla.DECCORE
         private static bool neverConsumed(Varnode vn, Funcdata data)
         {
             if (vn.getSize() > sizeof(ulong)) return false; // Not enough precision to really tell
-            list<PcodeOp*>::const_iterator iter;
-            PcodeOp* op;
+            IEnumerator<PcodeOp> iter;
+            PcodeOp op;
             iter = vn.beginDescend();
             while (iter != vn.endDescend())
             {
@@ -368,12 +368,12 @@ namespace Sla.DECCORE
         {
             if (data.getFuncProto().isOutputLocked() || data.getActiveOutput() != (ParamActive*)0)
                 return ~((ulong)0);
-            list<PcodeOp*>::const_iterator iter, enditer;
+            IEnumerator<PcodeOp> iter, enditer;
             enditer = data.endOp(CPUI_RETURN);
             ulong consumeVal = 0;
             for (iter = data.beginOp(CPUI_RETURN); iter != enditer; ++iter)
             {
-                PcodeOp* returnOp = *iter;
+                PcodeOp returnOp = *iter;
                 if (returnOp.isDead()) continue;
                 if (returnOp.numInput() > 1)
                 {
@@ -450,8 +450,8 @@ namespace Sla.DECCORE
         {
             if (data.getHeritagePass() > 1) return false;
             if (data.isJumptableRecoveryOn()) return false;
-            list<PcodeOp*>::const_iterator iter = data.beginOp(CPUI_LOAD);
-            list<PcodeOp*>::const_iterator enditer = data.endOp(CPUI_LOAD);
+            IEnumerator<PcodeOp> iter = data.beginOp(OpCode.CPUI_LOAD);
+            IEnumerator<PcodeOp> enditer = data.endOp(OpCode.CPUI_LOAD);
             bool res = false;
             while (iter != enditer)
             {

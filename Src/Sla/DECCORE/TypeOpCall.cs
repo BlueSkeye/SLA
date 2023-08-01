@@ -50,7 +50,7 @@ namespace Sla.DECCORE
             Datatype* ct;
 
             vn = op.getIn(0);
-            if ((slot == 0) || (vn.getSpace().getType() != IPTR_FSPEC))// Do we have a prototype to look at
+            if ((slot == 0) || (vn.getSpace().getType() != spacetype.IPTR_FSPEC))// Do we have a prototype to look at
                 return TypeOp::getInputLocal(op, slot);
 
             // Get types of call input parameters
@@ -85,7 +85,7 @@ namespace Sla.DECCORE
             Datatype* ct;
 
             vn = op.getIn(0);      // Varnode containing pointer to fspec
-            if (vn.getSpace().getType() != IPTR_FSPEC) // Do we have a prototype to look at
+            if (vn.getSpace().getType() != spacetype.IPTR_FSPEC) // Do we have a prototype to look at
                 return TypeOp::getOutputLocal(op);
 
             fc = FuncCallSpecs::getFspecFromConst(vn.getAddr());

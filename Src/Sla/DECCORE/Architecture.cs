@@ -113,7 +113,7 @@ namespace Sla.DECCORE
         ~Architecture()
         {
             // Delete anything that was allocated
-            List<TypeOp*>::iterator iter;
+            IEnumerator<TypeOp> iter;
 
             foreach (TypeOp iter in inst) {
                 TypeOp? t_op = iter;
@@ -480,7 +480,7 @@ namespace Sla.DECCORE
         }
 
         /// Mark \e all spaces as global
-        /// Set all IPTR_PROCESSOR and IPTR_SPACEBASE spaces to be global
+        /// Set all spacetype.IPTR_PROCESSOR and spacetype.IPTR_SPACEBASE spaces to be global
         public void globalify()
         {
             Scope scope = symboltab.getGlobalScope();
@@ -491,7 +491,7 @@ namespace Sla.DECCORE
                 if (null == spc) {
                     continue;
                 }
-                if ((spc.getType() != IPTR_PROCESSOR) && (spc.getType() != IPTR_SPACEBASE)) {
+                if ((spc.getType() != spacetype.IPTR_PROCESSOR) && (spc.getType() != spacetype.IPTR_SPACEBASE)) {
                     continue;
                 }
                 symboltab.addRange(scope, spc, 0UL, spc.getHighest());
@@ -864,7 +864,7 @@ namespace Sla.DECCORE
                 if (0 == spc.getDelay()) {
                     continue;
                 }
-                if (spc.getType() == IPTR_SPACEBASE) {
+                if (spc.getType() == spacetype.IPTR_SPACEBASE) {
                     continue;
                 }
                 if (spc.isOtherSpace()) {

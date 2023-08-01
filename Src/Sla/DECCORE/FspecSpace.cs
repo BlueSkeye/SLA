@@ -32,7 +32,7 @@ namespace Sla.DECCORE
         /// \param t is the associated processor translator
         /// \param ind is the index associated with the space
         public FspecSpace(AddrSpaceManager m, Translate t, int ind)
-            : base(m, t, IPTR_FSPEC, NAME, sizeof(void*), 1, ind, 0, 1)
+            : base(m, t, spacetype.IPTR_FSPEC, NAME, sizeof(void*), 1, ind, 0, 1)
         {
             clearFlags(heritaged | does_deadcode | big_endian);
             if (HOST_ENDIAN == 1)       // Endianness always set by host

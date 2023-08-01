@@ -27,13 +27,13 @@ namespace Sla.EXTRA
                 AddrSpace* spc = manage.getSpace(i);
                 if (spc == (AddrSpace)null) continue;
                 *status.fileoptr << dec << spc.getIndex() << " : '" << spc.getShortcut() << "' " << spc.getName();
-                if (spc.getType() == IPTR_CONSTANT)
+                if (spc.getType() == spacetype.IPTR_CONSTANT)
                     *status.fileoptr << " constant ";
-                else if (spc.getType() == IPTR_PROCESSOR)
+                else if (spc.getType() == spacetype.IPTR_PROCESSOR)
                     *status.fileoptr << " processor";
-                else if (spc.getType() == IPTR_SPACEBASE)
+                else if (spc.getType() == spacetype.IPTR_SPACEBASE)
                     *status.fileoptr << " spacebase";
-                else if (spc.getType() == IPTR_INTERNAL)
+                else if (spc.getType() == spacetype.IPTR_INTERNAL)
                     *status.fileoptr << " internal ";
                 else
                     *status.fileoptr << " special  ";

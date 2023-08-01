@@ -26,15 +26,13 @@ namespace Sla.DECCORE
         public override int apply(Funcdata data)
         {
             int i;
-            FuncCallSpecs* fc;
+            FuncCallSpecs fc;
 
-            for (i = 0; i < data.numCalls(); ++i)
-            {
+            for (i = 0; i < data.numCalls(); ++i) {
                 fc = data.getCallSpecs(i);
-                if (fc.isOutputActive())
-                {
-                    ParamActive* activeoutput = fc.getActiveOutput();
-                    List<Varnode*> trialvn;
+                if (fc.isOutputActive()) {
+                    ParamActive activeoutput = fc.getActiveOutput();
+                    List<Varnode> trialvn = new List<Varnode>();
                     fc.checkOutputTrialUse(data, trialvn);
                     fc.deriveOutputMap(activeoutput);
                     fc.buildOutputFromTrials(data, trialvn);

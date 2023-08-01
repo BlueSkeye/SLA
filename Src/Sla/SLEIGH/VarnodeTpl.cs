@@ -129,7 +129,7 @@ namespace Sla.SLEIGH
         public bool isLocalTemp()
         {
             if (space.getType() != ConstTpl::spaceid) return false;
-            if (space.getSpace().getType() != IPTR_INTERNAL) return false;
+            if (space.getSpace().getType() != spacetype.IPTR_INTERNAL) return false;
             return true;
         }
 

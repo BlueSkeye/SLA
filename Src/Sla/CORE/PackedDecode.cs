@@ -397,9 +397,8 @@ namespace Sla.CORE
             return ((typeByte & PackedFormat.LENGTHCODE_MASK) != 0);
         }
 
-        public override bool readBool(ref AttributeId attribId)
+        public override bool readBool(AttributeId attribId)
         {
-            base.readBool
             findMatchingAttribute(attribId);
             bool res = readBool();
             curPos = startPos;

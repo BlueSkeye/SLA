@@ -350,7 +350,7 @@ namespace Sla.CORE
         /// Encode \b this RangeList to a stream
         /// Encode \b this as a \<rangelist> element
         /// \param encoder is the stream encoder
-        public void encode(ghidra.Encoder encoder)
+        public void encode(Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_RANGELIST);
             foreach(Range scannedRange in tree) {
@@ -362,7 +362,7 @@ namespace Sla.CORE
         /// Decode \b this RangeList from a \<rangelist> element
         /// Recover each individual disjoint Range for \b this RangeList.
         /// \param decoder is the stream decoder
-        public void decode(ghidra.Decoder decoder)
+        public void decode(Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_RANGELIST);
             while (0 != decoder.peekElement()) {

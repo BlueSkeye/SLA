@@ -169,7 +169,7 @@ namespace Sla.DECCORE
         public virtual bool preserveAddress(Varnode vn, int bitSize, int lsbOffset)
         {
             if ((lsbOffset & 7) != 0) return false; // Logical value not aligned
-            if (vn.getSpace().getType() == IPTR_INTERNAL) return false;
+            if (vn.getSpace().getType() == spacetype.IPTR_INTERNAL) return false;
             return true;
         }
 

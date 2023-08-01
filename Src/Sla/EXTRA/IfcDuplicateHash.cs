@@ -37,7 +37,7 @@ namespace Sla.EXTRA
                         if (op.code() == OpCode.CPUI_RETURN) continue;
                     }
                 }
-                else if (vn.getSpace().getType() != IPTR_INTERNAL)
+                else if (vn.getSpace().getType() != spacetype.IPTR_INTERNAL)
                     continue;
                 else if (vn.isImplied())
                     continue;

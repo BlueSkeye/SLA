@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -21,9 +22,9 @@ namespace Sla.DECCORE
         public struct AddBase
         {
             /// The Varnode holding the base pointer
-            private Varnode @base;
+            internal Varnode @base;
             /// The index value or NULL
-            private Varnode index;
+            internal Varnode index;
             
             internal AddBase(Varnode b, Varnode i)
             {
@@ -33,9 +34,9 @@ namespace Sla.DECCORE
         }
 
         /// Function being searched for aliases
-        private Funcdata fd;
+        private Funcdata? fd;
         /// AddressSpace in which to search
-        private AddrSpace space;
+        private AddrSpace? space;
         /// Collection of pointers into the AddressSpace
         private /*mutable*/ List<AddBase> addBase;
         /// List of aliased addresses (as offsets)
@@ -88,21 +89,19 @@ namespace Sla.DECCORE
         {
             calculated = true;
             aliasBoundary = localExtreme;
-            Varnode* spacebase = fd.findSpacebaseInput(space);
+            Varnode spacebase = fd.findSpacebaseInput(space);
             if (spacebase == (Varnode)null) return; // No possible alias
 
             gatherAdditiveBase(spacebase, addBase);
-            for (List<AddBase>::iterator iter = addBase.begin(); iter != addBase.end(); ++iter)
+            for (IEnumerator<AddBase> iter = addBase.begin(); iter != addBase.end(); ++iter)
             {
-                ulong offset = gatherOffset((*iter).base);
+                ulong offset = gatherOffset((iter).@base);
                 offset = AddrSpace::addressToByte(offset, space.getWordSize()); // Convert to byte offset
                 alias.Add(offset);
-                if (direction == 1)
-                {
+                if (direction == 1) {
                     if (offset < localBoundary) continue; // Parameter ref
                 }
-                else
-                {
+                else {
                     if (offset > localBoundary) continue; // Parameter ref
                 }
                 // Always consider anything AFTER a pointer reference as
@@ -182,41 +181,38 @@ namespace Sla.DECCORE
         /// \param addbase will contain all the collected roots
         public static void gatherAdditiveBase(Varnode startvn, List<AddBase> addbase)
         {
-            List<AddBase> vnqueue;        // varnodes involved in addition with original vn
+            // varnodes involved in addition with original vn
+            List<AddBase> vnqueue  = new List<AddBase>();
             Varnode vn;
             Varnode subvn;
             Varnode indexvn;
             Varnode othervn;
-            list<PcodeOp*>::const_iterator iter;
+            IEnumerator<PcodeOp> iter;
             PcodeOp op;
             bool nonadduse;
             int i = 0;
 
             vn = startvn;
             vn.setMark();
-            vnqueue.Add(AddBase(vn, (Varnode)null));
-            while (i < vnqueue.size())
-            {
-                vn = vnqueue[i].base;
+            vnqueue.Add(new AddBase(vn, (Varnode)null));
+            while (i < vnqueue.Count) {
+                vn = vnqueue[i].@base;
                 indexvn = vnqueue[i++].index;
                 nonadduse = false;
-                for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
-                {
+                for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter) {
                     op = *iter;
-                    switch (op.code())
-                    {
+                    switch (op.code()) {
                         case OpCode.CPUI_COPY:
                             nonadduse = true;   // Treat COPY as both non-add use and part of ADD expression
                             subvn = op.getOut();
-                            if (!subvn.isMark())
-                            {
+                            if (!subvn.isMark()) {
                                 subvn.setMark();
-                                vnqueue.Add(AddBase(subvn, indexvn));
+                                vnqueue.Add(new AddBase(subvn, indexvn));
                             }
                             break;
                         case OpCode.CPUI_INT_SUB:
-                            if (vn == op.getIn(1))
-                            {   // Subtracting the pointer
+                            if (vn == op.getIn(1)) {
+                                // Subtracting the pointer
                                 nonadduse = true;
                                 break;
                             }
@@ -224,10 +220,9 @@ namespace Sla.DECCORE
                             if (!othervn.isConstant())
                                 indexvn = othervn;
                             subvn = op.getOut();
-                            if (!subvn.isMark())
-                            {
+                            if (!subvn.isMark()) {
                                 subvn.setMark();
-                                vnqueue.Add(AddBase(subvn, indexvn));
+                                vnqueue.Add(new AddBase(subvn, indexvn));
                             }
                             break;
                         case OpCode.CPUI_INT_ADD:
@@ -237,24 +232,25 @@ namespace Sla.DECCORE
                                 othervn = op.getIn(0);
                             if (!othervn.isConstant())
                                 indexvn = othervn;
+                            goto case OpCode.CPUI_PTRSUB;
                         // fallthru
                         case OpCode.CPUI_PTRSUB:
                         case OpCode.CPUI_SEGMENTOP:
                             subvn = op.getOut();
-                            if (!subvn.isMark())
-                            {
+                            if (!subvn.isMark()) {
                                 subvn.setMark();
-                                vnqueue.Add(AddBase(subvn, indexvn));
+                                vnqueue.Add(new AddBase(subvn, indexvn));
                             }
                             break;
                         default:
                             nonadduse = true;   // Used in non-additive expression
+                            break;
                     }
                 }
                 if (nonadduse)
-                    addbase.Add(AddBase(vn, indexvn));
+                    addbase.Add(new AddBase(vn, indexvn));
             }
-            for (i = 0; i < vnqueue.size(); ++i)
+            for (i = 0; i < vnqueue.Count; ++i)
                 vnqueue[i].@base.clearMark();
         }
 
@@ -268,13 +264,12 @@ namespace Sla.DECCORE
         public static ulong gatherOffset(Varnode vn)
         {
             ulong retval;
-            Varnode* othervn;
+            Varnode othervn;
 
             if (vn.isConstant()) return vn.getOffset();
-            PcodeOp* def = vn.getDef();
+            PcodeOp? def = vn.getDef();
             if (def == (PcodeOp)null) return 0;
-            switch (def.code())
-            {
+            switch (def.code()) {
                 case OpCode.CPUI_COPY:
                     retval = gatherOffset(def.getIn(0));
                     break;
@@ -302,7 +297,7 @@ namespace Sla.DECCORE
                 default:
                     retval = 0;
             }
-            return retval & Globals.calc_mask(vn.getSize());
+            return retval & Globals.calc_mask((uint)vn.getSize());
         }
     }
 }

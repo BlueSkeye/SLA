@@ -50,19 +50,13 @@ namespace Sla.CORE
         /// Get the underlying behavior object for this pcode operation.  From this
         /// object you can determine how the object evaluates inputs to get the output
         /// \return the behavior object
-        public OpBehavior getBehavior()
-        {
-            return behave;
-        }
+        public OpBehavior getBehavior() => behave;
 
         /// Get the opcode for this op
         /// The possible types of pcode operations are enumerated by OpCode
         /// This routine retrieves the enumeration value for this particular op
         /// \return the opcode value
-        public OpCode getOpcode()
-        {
-            return behave.getOpcode();
-        }
+        public OpCode getOpcode() => behave.getOpcode();
 
         /// Set the sequence number
         /// Every pcode operation has a \b sequence \b number
@@ -81,19 +75,13 @@ namespace Sla.CORE
         /// the operation with the address of the machine instruction being translated
         /// and an index number for this operation within the translation.
         /// \return a reference to the sequence number
-        public ref SeqNum getSeqNum()
-        {
-            return ref seq;
-        }
+        public SeqNum getSeqNum() => seq;
 
         /// Get address of this operation
         /// This is a convenience function to get the address of the machine instruction
         /// (of which this pcode op is a translation)
         /// \return the machine instruction address
-        public Address getAddr()
-        {
-            return seq.getAddr();
-        }
+        public Address getAddr() => seq.getAddr();
 
         /// Set the output varnode for this op
         /// Most pcode operations output to a varnode.  This routine sets what that varnode is.
@@ -106,10 +94,7 @@ namespace Sla.CORE
         /// Retrieve the output varnode for this op
         /// Most pcode operations have an output varnode. This routine retrieves that varnode.
         /// \return the output varnode or \b null if there is no output
-        public VarnodeData getOutput()
-        {
-            return @out;
-        }
+        public VarnodeData getOutput() => @out;
 
         /// Add an additional input varnode to this op
         /// A PcodeOpRaw is initially created with no input varnodes.  Inputs are added with this method.
@@ -117,7 +102,7 @@ namespace Sla.CORE
         /// \param i is the varnode to be added as input
         public void addInput(VarnodeData i)
         {
-            @@in.Add(i);
+            @in.Add(i);
         }
 
         /// Remove all input varnodes to this op
@@ -125,15 +110,12 @@ namespace Sla.CORE
         /// inputs so new ones can be added.
         public void clearInputs()
         {
-            @@in.Clear();
+            @in.Clear();
         }
 
         /// Get the number of input varnodes to this op
         /// \return the number of inputs
-        public int numInput()
-        {
-            return @@in.Count;
-        }
+        public int numInput() => @in.Count;
 
         /// Get the i-th input varnode for this op
         /// Input varnodes are indexed starting at 0.  This retrieves the input varnode by index.
@@ -141,10 +123,7 @@ namespace Sla.CORE
         /// to get the number of inputs.
         /// \param i is the index of the desired input
         /// \return the desired input varnode
-        public VarnodeData getInput(int i)
-        {
-            return @in[i];
-        }
+        public VarnodeData getInput(int i) => @in[i];
 
         /// \brief Decode the raw OpCode and input/output Varnode data for a PcodeOp
         /// This assumes the \<op> element is already open.
@@ -156,7 +135,7 @@ namespace Sla.CORE
         /// \param outvar is a (handle) to the storage for the output Varnode
         /// \return the p-code op OpCode
         public static OpCode decode(Decoder decoder, int isize, VarnodeData[] invar,
-            out VarnodeData outvar)
+            out VarnodeData? outvar)
         {
             OpCode opcode = (OpCode)decoder.readSignedInteger(AttributeId.ATTRIB_CODE);
             uint subId = decoder.peekElement();

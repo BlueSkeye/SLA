@@ -34,7 +34,7 @@ namespace Sla.DECCORE
         {
             PcodeOp* indop;
 
-            if (op.getIn(1).getSpace().getType() != IPTR_IOP) return 0;
+            if (op.getIn(1).getSpace().getType() != spacetype.IPTR_IOP) return 0;
             indop = PcodeOp::getOpFromConst(op.getIn(1).getAddr());
 
             // Is the indirect effect gone?

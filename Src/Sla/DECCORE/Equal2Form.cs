@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -127,41 +128,36 @@ namespace Sla.DECCORE
             hi1 = @@in.getHi();
             lo1 = @@in.getLo();
 
-            if (op.code() == OpCode.CPUI_INT_OR)
-            {
+            if (op.code() == OpCode.CPUI_INT_OR) {
                 orop = op;
                 orhislot = op.getSlot(hi1);
                 hixor = (PcodeOp)null;
                 hi2 = (Varnode)null;
-                if (fillOutFromOr(data))
-                {
-                    SplitVarnode::replaceBoolOp(data, equalop, in, param2, equalop.code());
+                if (fillOutFromOr(data)) {
+                    SplitVarnode.replaceBoolOp(data, equalop, in, param2, equalop.code());
                     return true;
                 }
             }
-            else
-            {           // We see an XOR
+            else {
+                // We see an XOR
                 hixor = op;
                 xorhislot = hixor.getSlot(hi1);
                 hi2 = hixor.getIn(1 - xorhislot);
-                Varnode* vn = op.getOut();
-                list<PcodeOp*>::const_iterator iter, enditer;
+                Varnode vn = op.getOut();
+                IEnumerator<PcodeOp> iter, enditer;
                 iter = vn.beginDescend();
                 enditer = vn.endDescend();
-                while (iter != enditer)
-                {
+                while (iter != enditer) {
                     orop = *iter;
                     ++iter;
                     if (orop.code() != OpCode.CPUI_INT_OR) continue;
                     orhislot = orop.getSlot(vn);
-                    if (fillOutFromOr(data))
-                    {
-                        SplitVarnode::replaceBoolOp(data, equalop, in, param2, equalop.code());
+                    if (fillOutFromOr(data)) {
+                        SplitVarnode.replaceBoolOp(data, equalop, @in, param2, equalop.code());
                         return true;
                     }
                 }
             }
-
             return false;
         }
     }

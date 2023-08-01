@@ -127,14 +127,14 @@ namespace Sla.SLEIGH
         public bool isConstSpace()
         {
             if (type == spaceid)
-                return (value.spaceid.getType() == IPTR_CONSTANT);
+                return (value.spaceid.getType() == spacetype.IPTR_CONSTANT);
             return false;
         }
 
         public bool isUniqueSpace()
         {
             if (type == spaceid)
-                return (value.spaceid.getType() == IPTR_INTERNAL);
+                return (value.spaceid.getType() == spacetype.IPTR_INTERNAL);
             return false;
         }
 

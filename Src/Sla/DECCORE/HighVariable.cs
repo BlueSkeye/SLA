@@ -970,11 +970,11 @@ namespace Sla.DECCORE
                 return vn2.isProtoPartial();
 
             // Prefer NOT internal
-            if ((vn1.getSpace().getType() != IPTR_INTERNAL) &&
-                (vn2.getSpace().getType() == IPTR_INTERNAL))
+            if ((vn1.getSpace().getType() != spacetype.IPTR_INTERNAL) &&
+                (vn2.getSpace().getType() == spacetype.IPTR_INTERNAL))
                 return false;
-            if ((vn1.getSpace().getType() == IPTR_INTERNAL) &&
-                (vn2.getSpace().getType() != IPTR_INTERNAL))
+            if ((vn1.getSpace().getType() == spacetype.IPTR_INTERNAL) &&
+                (vn2.getSpace().getType() != spacetype.IPTR_INTERNAL))
                 return true;
             if (vn1.isWritten() != vn2.isWritten()) // Prefer written
                 return vn2.isWritten();

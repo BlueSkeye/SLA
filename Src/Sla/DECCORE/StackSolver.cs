@@ -200,7 +200,7 @@ namespace Sla.DECCORE
                     eqn.var2 = iter - vnlist.begin();
                     companion[i] = eqn.var2;
                     Varnode iopvn = op.getIn(1);
-                    if (iopvn.getSpace().getType() == IPTR_IOP) {
+                    if (iopvn.getSpace().getType() == spacetype.IPTR_IOP) {
                         // If INDIRECT is due call
                         PcodeOp iop = PcodeOp::getOpFromConst(iopvn.getAddr());
                         FuncCallSpecs fc = data.getCallSpecs(iop); // Look up function proto

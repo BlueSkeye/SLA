@@ -45,7 +45,7 @@ namespace Sla.DECCORE
                 {
                     ProtoParameter* param = fc.getParam(j);
                     Address addr = param.getAddress();
-                    if (addr.getSpace().getType() != IPTR_SPACEBASE) continue;
+                    if (addr.getSpace().getType() != spacetype.IPTR_SPACEBASE) continue;
                     ulong off = addr.getSpace().wrapOffset(fc.getSpacebaseOffset() + addr.getOffset());
                     data.getScopeLocal().markNotMapped(addr.getSpace(), off, param.getSize(), true);
                 }

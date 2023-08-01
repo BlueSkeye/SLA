@@ -1237,7 +1237,7 @@ namespace Sla.DECCORE
                                         path.Add(nextNode);
                                         markedVn.Add(outVn);
                                     }
-                                    else if (outVn.getSpace().getType() == IPTR_SPACEBASE)
+                                    else if (outVn.getSpace().getType() == spacetype.IPTR_SPACEBASE)
                                         unknownStackStorage = true;
                                 }
                                 else
@@ -1249,7 +1249,7 @@ namespace Sla.DECCORE
                                         path.Add(nextNode);
                                         markedVn.Add(outVn);
                                     }
-                                    else if (outVn.getSpace().getType() == IPTR_SPACEBASE)
+                                    else if (outVn.getSpace().getType() == spacetype.IPTR_SPACEBASE)
                                         unknownStackStorage = true;
                                 }
                                 break;
@@ -1269,7 +1269,7 @@ namespace Sla.DECCORE
                                     path.Add(nextNode);
                                     markedVn.Add(outVn);
                                 }
-                                else if (outVn.getSpace().getType() == IPTR_SPACEBASE)
+                                else if (outVn.getSpace().getType() == spacetype.IPTR_SPACEBASE)
                                     unknownStackStorage = true;
                                 break;
                             }
@@ -1282,7 +1282,7 @@ namespace Sla.DECCORE
                                     path.Add(nextNode);
                                     markedVn.Add(outVn);
                                 }
-                                else if (outVn.getSpace().getType() == IPTR_SPACEBASE)
+                                else if (outVn.getSpace().getType() == spacetype.IPTR_SPACEBASE)
                                     unknownStackStorage = true;
                                 break;
                             }
@@ -1356,7 +1356,7 @@ namespace Sla.DECCORE
                 {
                     if (indOp.code() != OpCode.CPUI_INDIRECT) break;
                     Varnode* iopVn = indOp.getIn(1);
-                    if (iopVn.getSpace().getType() != IPTR_IOP) break;
+                    if (iopVn.getSpace().getType() != spacetype.IPTR_IOP) break;
                     if (op != PcodeOp::getOpFromConst(iopVn.getAddr())) break;
                     PcodeOp* nextOp = indOp.previousOp();
                     if (indOp.getOut().getSpace() == spc)
@@ -1649,7 +1649,7 @@ namespace Sla.DECCORE
                     AddrSpace* spc = addr.getSpace();
                     ulong off = addr.getOffset();
                     bool tryregister = true;
-                    if (spc.getType() == IPTR_SPACEBASE)
+                    if (spc.getType() == spacetype.IPTR_SPACEBASE)
                     {
                         if (fc.getSpacebaseOffset() != FuncCallSpecs::offset_unknown)
                             off = spc.wrapOffset(off - fc.getSpacebaseOffset());
@@ -2321,7 +2321,7 @@ namespace Sla.DECCORE
         /// \param spc is the given AddrSpace
         private void bumpDeadcodeDelay(AddrSpace spc)
         {
-            if ((spc.getType() != IPTR_PROCESSOR) && (spc.getType() != IPTR_SPACEBASE))
+            if ((spc.getType() != spacetype.IPTR_PROCESSOR) && (spc.getType() != spacetype.IPTR_SPACEBASE))
                 return;         // Not the right kind of space
             if (spc.getDelay() != spc.getDeadcodeDelay())
                 return;         // there is already a global delay
@@ -2372,7 +2372,7 @@ namespace Sla.DECCORE
                     {
                         continue;
                     }
-                    if (addr.getSpace().getType() == IPTR_INTERNAL || guardPerformed)
+                    if (addr.getSpace().getType() == spacetype.IPTR_INTERNAL || guardPerformed)
                         continue;
                 }
                 if (!removevars.empty())

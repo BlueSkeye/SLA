@@ -43,7 +43,7 @@ namespace Sla.DECCORE
                         if (paramtrial.isChecked()) continue;
                         if (paramtrial.isUnref()) continue;
                         AddrSpace* spc = paramtrial.getAddress().getSpace();
-                        if (spc.getType() != IPTR_SPACEBASE) continue;
+                        if (spc.getType() != spacetype.IPTR_SPACEBASE) continue;
                         int slot = paramtrial.getSlot();
                         Varnode* vn = op.getIn(slot);
                         if (!vn.isWritten()) continue;

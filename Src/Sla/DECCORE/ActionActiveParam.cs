@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,22 +31,20 @@ namespace Sla.DECCORE
         public override int apply(Funcdata data)
         {
             int i;
-            FuncCallSpecs* fc;
-            AliasChecker aliascheck;
-            aliascheck.gather(&data, data.getArch().getStackSpace(), true);
+            FuncCallSpecs fc;
+            AliasChecker aliascheck = new AliasChecker();
+            aliascheck.gather(data, data.getArch().getStackSpace(), true);
 
-            for (i = 0; i < data.numCalls(); ++i)
-            {
+            for (i = 0; i < data.numCalls(); ++i) {
                 fc = data.getCallSpecs(i);
                 // An indirect function is not trimmable until
                 // there has been at least one simplification pass
                 // there has been a change to deindirect
-                try
-                {
-                    if (fc.isInputActive())
-                    {
-                        ParamActive* activeinput = fc.getActiveInput();
-                        bool trimmable = ((activeinput.getNumPasses() > 0) || (fc.getOp().code() != OpCode.CPUI_CALLIND));
+                try {
+                    if (fc.isInputActive()) {
+                        ParamActive activeinput = fc.getActiveInput();
+                        bool trimmable = ((activeinput.getNumPasses() > 0)
+                            || (fc.getOp().code() != OpCode.CPUI_CALLIND));
                         if (!activeinput.isFullyChecked())
                             fc.checkInputTrialUse(data, aliascheck);
                         activeinput.finishPass();
@@ -53,8 +52,7 @@ namespace Sla.DECCORE
                             activeinput.markFullyChecked();
                         else
                             count += 1;     // Count a change, to indicate we still have work to do
-                        if (trimmable && activeinput.isFullyChecked())
-                        {
+                        if (trimmable && activeinput.isFullyChecked()) {
                             if (activeinput.needsFinalCheck())
                                 fc.finalInputCheck();
                             fc.resolveModel(activeinput);
@@ -65,18 +63,17 @@ namespace Sla.DECCORE
                         }
                     }
                 }
-                catch (LowlevelError err)
-                {
-                    ostringstream s;
-                    s << "Error processing " << fc.getName();
-                    PcodeOp* op = fc.getOp();
+                catch (LowlevelError err) {
+                    StringBuilder s = new StringBuilder();
+                    s.Append($"Error processing {fc.getName()}");
+                    PcodeOp? op = fc.getOp();
                     if (op != (PcodeOp)null)
-                        s << " called at " << op.getSeqNum();
-                    s << ": " << err.ToString();
-                    throw new LowlevelError(s.str());
+                        s.Append($" called at {op.getSeqNum()}");
+                    s.Append($": {err.ToString()}");
+                    throw new LowlevelError(s.ToString());
                 }
             }
             return 0;
         }
-}
+    }
 }

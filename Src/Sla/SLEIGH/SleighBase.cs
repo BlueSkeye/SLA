@@ -270,10 +270,10 @@ namespace Sla.SLEIGH
             {
                 AddrSpace* spc = getSpace(i);
                 if (spc == (AddrSpace)null) continue;
-                if ((spc.getType() == IPTR_CONSTANT) ||
-                (spc.getType() == IPTR_FSPEC) ||
-                (spc.getType() == IPTR_IOP) ||
-                (spc.getType() == IPTR_JOIN))
+                if ((spc.getType() == spacetype.IPTR_CONSTANT) ||
+                (spc.getType() == spacetype.IPTR_FSPEC) ||
+                (spc.getType() == spacetype.IPTR_IOP) ||
+                (spc.getType() == spacetype.IPTR_JOIN))
                     continue;
                 spc.saveXml(s);
             }

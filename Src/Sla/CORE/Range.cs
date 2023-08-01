@@ -11,7 +11,7 @@ namespace Sla.CORE
     {
         // friend class RangeList;
         /// Space containing range
-        internal AddrSpace spc;
+        internal AddrSpace? spc;
         /// Offset of first byte in \b this Range
         internal ulong first;
         /// Offset of last byte in \b this Range
@@ -160,7 +160,7 @@ namespace Sla.CORE
         ///< Encode \b this Range to a stream
         /// Encode \b this to a stream as a \<range> element.
         /// \param encoder is the stream encoder
-        public void encode(ghidra.Encoder encoder)
+        public void encode(Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_RANGE);
             encoder.writeSpace(AttributeId.ATTRIB_SPACE, spc);
@@ -172,7 +172,7 @@ namespace Sla.CORE
         ///< Restore \b this from a stream
         /// Reconstruct this object from a \<range> or \<register> element
         /// \param decoder is the stream decoder
-        public void decode(ghidra.Decoder decoder)
+        public void decode(Decoder decoder)
         {
             uint elemId = decoder.openElement();
             if ((elemId != ElementId.ELEM_RANGE) && (elemId != ElementId.ELEM_REGISTER)) {

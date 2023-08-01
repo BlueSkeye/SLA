@@ -52,7 +52,7 @@ namespace Sla.SLEIGH
             {
                 AddrSpace* spc = slgh.getSpace(i);
                 spacetype type = spc.getType();
-                if ((type == IPTR_CONSTANT) || (type == IPTR_PROCESSOR) || (type == IPTR_SPACEBASE) || (type == IPTR_INTERNAL))
+                if ((type == spacetype.IPTR_CONSTANT) || (type == spacetype.IPTR_PROCESSOR) || (type == spacetype.IPTR_SPACEBASE) || (type == spacetype.IPTR_INTERNAL))
                     tree.insert(new SpaceSymbol(spc));
             }
             addSymbol(new FlowDestSymbol("inst_dest", slgh.getConstantSpace()));

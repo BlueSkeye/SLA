@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -20,11 +21,11 @@ namespace Sla.DECCORE
         private static bool preferredOutput(Varnode out1, Varnode out2)
         {
             // Prefer the output that is used in a OpCode.CPUI_RETURN
-            list<PcodeOp*>::const_iterator iter, enditer;
+            IEnumerator<PcodeOp> iter, enditer;
             enditer = out1.endDescend();
             for (iter = out1.beginDescend(); iter != enditer; ++iter)
             {
-                PcodeOp* op = *iter;
+                PcodeOp op = iter.Current;
                 if (op.code() == OpCode.CPUI_RETURN)
                     return false;
             }
@@ -42,9 +43,9 @@ namespace Sla.DECCORE
                     return true;
                 else
                 {
-                    if (out1.getSpace().getType() == IPTR_INTERNAL)
+                    if (out1.getSpace().getType() == spacetype.IPTR_INTERNAL)
                     {
-                        if (out2.getSpace().getType() != IPTR_INTERNAL)
+                        if (out2.getSpace().getType() != spacetype.IPTR_INTERNAL)
                             return true;
                     }
                 }
@@ -60,32 +61,30 @@ namespace Sla.DECCORE
         /// \param in is the specific input Varnode
         private static PcodeOp findMatch(BlockBasic bl, PcodeOp target, Varnode @in)
         {
-            list<PcodeOp*>::iterator iter = bl.beginOp();
+            IEnumerator<PcodeOp> iter = bl.beginOp();
 
-            for (; ; )
-            {
-                PcodeOp* op = *iter;
+            for (; ; ) {
+                PcodeOp op = *iter;
                 ++iter;
                 if (op == target)       // Caught up with target, nothing else before it
                     break;
                 int i, numinput;
                 numinput = op.numInput();
-                for (i = 0; i < numinput; ++i)
-                {
-                    Varnode* vn = op.getIn(i);
+                for (i = 0; i < numinput; ++i) {
+                    Varnode vn = op.getIn(i);
                     if (vn.isWritten() && (vn.getDef().code() == OpCode.CPUI_COPY))
                         vn = vn.getDef().getIn(0);        // Allow for differences in copy propagation
                     if (vn == @in) break;
                 }
                 if (i < numinput) {
                     int j;
-                    Varnode* buf1[2];
-                    Varnode* buf2[2];
+                    Varnode buf1[2];
+                    Varnode buf2[2];
                     for (j = 0; j < numinput; ++j) {
-                        Varnode* in1 = op.getIn(j);
+                        Varnode in1 = op.getIn(j);
                         if (in1.isWritten() && (in1.getDef().code() == OpCode.CPUI_COPY))
                             in1 = in1.getDef().getIn(0);    // Allow for differences in copy propagation
-                        Varnode* in2 = target.getIn(j);
+                        Varnode in2 = target.getIn(j);
                         if (in2.isWritten() && (in2.getDef().code() == OpCode.CPUI_COPY))
                             in2 = in2.getDef().getIn(0);
                         if (in1 == in2) continue;
@@ -107,14 +106,13 @@ namespace Sla.DECCORE
         /// return \b true if a OpCode.CPUI_MULTIEQUAL was (successfully) deleted
         private bool processBlock(Funcdata data, BlockBasic bl)
         {
-            List<Varnode*> vnlist;
-            PcodeOp* targetop = (PcodeOp)null;
-            PcodeOp* pairop;
-            list<PcodeOp*>::iterator iter = bl.beginOp();
-            list<PcodeOp*>::iterator enditer = bl.endOp();
-            while (iter != enditer)
-            {
-                PcodeOp* op = *iter;
+            List<Varnode> vnlist;
+            PcodeOp? targetop = (PcodeOp)null;
+            PcodeOp? pairop;
+            IEnumerator<PcodeOp> iter = bl.beginOp();
+            IEnumerator<PcodeOp> enditer = bl.endOp();
+            while (iter != enditer) {
+                PcodeOp op = *iter;
                 ++iter;
                 OpCode opc = op.code();
                 if (opc == OpCode.CPUI_COPY) continue;

@@ -1453,7 +1453,7 @@ namespace Sla.DECCORE
             // Look for directed cycles in graph
             // Mark edges (loopedges) that can be removed
             // to prevent looping
-            List<FlowBlock*>::iterator iter;
+            IEnumerator<FlowBlock> iter;
             FlowBlock bl;
             FlowBlock nextbl;
             int i;

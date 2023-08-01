@@ -101,7 +101,7 @@ namespace Sla.DECCORE
         /// Name to display in output
         protected string displayName;
         /// (If non-null) the function which \b this is the local Scope for
-        protected Funcdata fd;
+        internal Funcdata? fd;
         /// Unique id for the scope, for deduping scope names, assigning symbol ids
         protected ulong uniqueId;
 

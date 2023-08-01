@@ -740,7 +740,7 @@ namespace Sla.DECCORE
         public static uint lookupEffect(List<EffectRecord> efflist, Address addr, int size)
         {
             // Unique is always local to function
-            if (addr.getSpace().getType() == IPTR_INTERNAL) return EffectRecord::unaffected;
+            if (addr.getSpace().getType() == spacetype.IPTR_INTERNAL) return EffectRecord::unaffected;
 
             EffectRecord cur(addr, size);
 

@@ -98,7 +98,7 @@ namespace Sla.DECCORE
             istemp = false;
             if (!invn.isConstant())
             {
-                if (invn.getSpace().getType() != IPTR_INTERNAL)
+                if (invn.getSpace().getType() != spacetype.IPTR_INTERNAL)
                 {
                     PreferSplitRecord inrec = findRecord(invn);
                     if (inrec == (PreferSplitRecord*)0) return false;
@@ -125,7 +125,7 @@ namespace Sla.DECCORE
         { // Check that -inst- read by -readop- is really splittable
             Varnode* outvn = readop.getOut();
             istemp = false;
-            if (outvn.getSpace().getType() != IPTR_INTERNAL)
+            if (outvn.getSpace().getType() != spacetype.IPTR_INTERNAL)
             {
                 PreferSplitRecord outrec = findRecord(outvn);
                 if (outrec == (PreferSplitRecord*)0) return false;
@@ -587,7 +587,7 @@ namespace Sla.DECCORE
                     if (defop.code() == OpCode.CPUI_SUBPIECE)
                     { // SUBPIECEs flowing into the COPY
                         Varnode* invn = defop.getIn(0);
-                        if (invn.getSpace().getType() == IPTR_INTERNAL) // Might be from a temporary that needs further splitting
+                        if (invn.getSpace().getType() == spacetype.IPTR_INTERNAL) // Might be from a temporary that needs further splitting
                             defops.Add(defop);
                     }
                 }
@@ -601,7 +601,7 @@ namespace Sla.DECCORE
                     if (defop.code() == OpCode.CPUI_PIECE)
                     { // COPY flowing into PIECEs
                         Varnode* outvn = defop.getOut();
-                        if (outvn.getSpace().getType() == IPTR_INTERNAL) // Might be to a temporary that needs further splitting
+                        if (outvn.getSpace().getType() == spacetype.IPTR_INTERNAL) // Might be to a temporary that needs further splitting
                             defops.Add(defop);
                     }
                 }

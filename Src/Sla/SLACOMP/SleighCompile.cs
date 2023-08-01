@@ -417,7 +417,7 @@ namespace Sla.SLACOMP
         /// Treating names as case insensitive, look for duplicate register names and
         /// report as errors.  For this method, \e register means any global Varnode defined
         /// using SLEIGH's `define <address space>` directive, in an address space of
-        /// type \e IPTR_PROCESSOR  (either RAM or REGISTER)
+        /// type \e spacetype.IPTR_PROCESSOR  (either RAM or REGISTER)
         private void checkCaseSensitivity()
         {
             if (!failinsensitivedups) return;       // Case insensitive duplicates don't cause error
@@ -430,7 +430,7 @@ namespace Sla.SLACOMP
                 if (sym.getType() != SleighSymbol::varnode_symbol) continue;
                 VarnodeSymbol* vsym = (VarnodeSymbol*)sym;
                 AddrSpace* space = vsym.getFixedVarnode().space;
-                if (space.getType() != IPTR_PROCESSOR) continue;
+                if (space.getType() != spacetype.IPTR_PROCESSOR) continue;
                 string nm = sym.getName();
                 transform(nm.begin(), nm.end(), nm.begin(), ::toupper);
                 pair<Dictionary<string, SleighSymbol*>::iterator, bool> check;
@@ -1250,7 +1250,7 @@ namespace Sla.SLACOMP
             }
 
             int delay = (qual.type == SpaceQuality::registertype) ? 0 : 1;
-            AddrSpace* spc = new AddrSpace(this, this, IPTR_PROCESSOR, qual.name, qual.size, qual.wordsize, numSpaces(), AddrSpace::hasphysical, delay);
+            AddrSpace* spc = new AddrSpace(this, this, spacetype.IPTR_PROCESSOR, qual.name, qual.size, qual.wordsize, numSpaces(), AddrSpace::hasphysical, delay);
             insertSpace(spc);
             if (qual.isdefault)
             {

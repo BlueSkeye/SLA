@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -92,7 +93,7 @@ namespace Sla.DECCORE
         protected override void executeBranch()
         {
             VarnodeData* vn = currentOp.getInput(0);
-            if (vn.space.getType() != IPTR_CONSTANT)
+            if (vn.space.getType() != spacetype.IPTR_CONSTANT)
                 throw new LowlevelError("Tried to emulate absolute branch in snippet code");
             int rel = (int)vn.offset;
             pos += rel;
@@ -240,19 +241,19 @@ namespace Sla.DECCORE
                 if (opc == OpCode.CPUI_BRANCH)
                 {
                     vn = op.getInput(0);
-                    if (vn.space.getType() != IPTR_CONSTANT)  // Only relative branching allowed
+                    if (vn.space.getType() != spacetype.IPTR_CONSTANT)  // Only relative branching allowed
                         return false;
                 }
                 vn = op.getOutput();
                 if (vn != (VarnodeData*)0)
                 {
-                    if (vn.space.getType() != IPTR_INTERNAL)
+                    if (vn.space.getType() != spacetype.IPTR_INTERNAL)
                         return false;                   // Can only write to temporaries
                 }
                 for (int j = 0; j < op.numInput(); ++j)
                 {
                     vn = op.getInput(j);
-                    if (vn.space.getType() == IPTR_PROCESSOR)
+                    if (vn.space.getType() == spacetype.IPTR_PROCESSOR)
                         return false;                   // Cannot read from normal registers
                 }
             }
@@ -288,10 +289,10 @@ namespace Sla.DECCORE
         /// \return the retrieved value
         public ulong getVarnodeValue(VarnodeData vn)
         {
-            AddrSpace* spc = vn.space;
-            if (spc.getType() == IPTR_CONSTANT)
+            AddrSpace spc = vn.space;
+            if (spc.getType() == spacetype.IPTR_CONSTANT)
                 return vn.offset;
-            if (spc.getType() == IPTR_INTERNAL)
+            if (spc.getType() == spacetype.IPTR_INTERNAL)
             {
                 Dictionary<ulong, ulong>::const_iterator iter;
                 iter = tempValues.find(vn.offset);
@@ -311,10 +312,8 @@ namespace Sla.DECCORE
         /// \return the calculated value or 0 if the register was never written
         public ulong getTempValue(ulong offset)
         {
-            Dictionary<ulong, ulong>::const_iterator iter = tempValues.find(offset);
-            if (iter == tempValues.end())
-                return 0;
-            return (*iter).second;
+            ulong result;
+            return tempValues.TryGetValue(offset, out result) ? result : 0;
         }
     }
 }
