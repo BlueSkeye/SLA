@@ -16,7 +16,7 @@ namespace Sla.CORE
     public class OverlaySpace : AddrSpace
     {
         ///< Space being overlayed
-        private AddrSpace baseSpace;
+        private AddrSpace? baseSpace;
 
         /// \param m is the address space manager
         /// \param t is the processor translator
@@ -26,12 +26,12 @@ namespace Sla.CORE
             baseSpace = null;
             setFlags(Properties.overlay);
         }
-        public virtual AddrSpace getContain()
+        public override AddrSpace? getContain()
         {
             return baseSpace;
         }
 
-        public virtual void saveXml(StreamWriter s)
+        public override void saveXml(StreamWriter s)
         {
             s.Write("<space_overlay");
             Xml.a_v(s, "name", name);

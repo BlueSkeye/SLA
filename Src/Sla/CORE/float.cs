@@ -714,7 +714,7 @@ namespace Sla.CORE
         /// \param a is an encoded floating-point value
         /// \param outformat is the desired output FloatFormat
         /// \return a converted to the output FloatFormat
-        public ulong opFloat2Float(ulong a, ref FloatFormat outformat)
+        public ulong opFloat2Float(ulong a, FloatFormat outformat)
         {
             return outformat.convertEncoding(a, this);
         }

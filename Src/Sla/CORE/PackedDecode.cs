@@ -320,18 +320,15 @@ namespace Sla.CORE
         public override void closeElement(uint id)
         {
             byte header1 = getNextByte(endPos);
-            if ((header1 & PackedFormat.HEADER_MASK) != PackedFormat.ELEMENT_END)
-            {
+            if ((header1 & PackedFormat.HEADER_MASK) != PackedFormat.ELEMENT_END) {
                 throw new DecoderError("Expecting element close");
             }
             uint closeId = (byte)(header1 & PackedFormat.ELEMENTID_MASK);
-            if ((header1 & PackedFormat.HEADEREXTEND_MASK) != 0)
-            {
+            if ((header1 & PackedFormat.HEADEREXTEND_MASK) != 0) {
                 closeId <<= PackedFormat.RAWDATA_BITSPERBYTE;
                 closeId |= (byte)(getNextByte(endPos) & PackedFormat.RAWDATA_MASK);
             }
-            if (id != closeId)
-            {
+            if (id != closeId) {
                 throw new DecoderError("Did not see expected closing element");
             }
         }
@@ -340,21 +337,17 @@ namespace Sla.CORE
         {
             List<uint> idstack = new List<uint>();
             idstack.Add(id);
-            do
-            {
+            do {
                 byte header1 = (byte)(getByte(endPos) & PackedFormat.HEADER_MASK);
-                if (header1 == PackedFormat.ELEMENT_END)
-                {
+                if (header1 == PackedFormat.ELEMENT_END) {
                     int lastIndex = idstack.Count - 1;
                     closeElement(idstack[lastIndex]);
                     idstack.RemoveAt(lastIndex);
                 }
-                else if (header1 == PackedFormat.ELEMENT_START)
-                {
+                else if (header1 == PackedFormat.ELEMENT_START) {
                     idstack.Add(openElement());
                 }
-                else
-                {
+                else {
                     throw new DecoderError("Corrupt stream");
                 }
             } while (0 != idstack.Count);
@@ -368,18 +361,15 @@ namespace Sla.CORE
 
         public override uint getNextAttributeId()
         {
-            if (!attributeRead)
-            {
+            if (!attributeRead) {
                 skipAttribute();
             }
             byte header1 = getByte(curPos);
-            if ((header1 & PackedFormat.HEADER_MASK) != PackedFormat.ATTRIBUTE)
-            {
+            if ((header1 & PackedFormat.HEADER_MASK) != PackedFormat.ATTRIBUTE) {
                 return 0;
             }
             uint id = (byte)(header1 & PackedFormat.ELEMENTID_MASK);
-            if ((header1 & PackedFormat.HEADEREXTEND_MASK) != 0)
-            {
+            if ((header1 & PackedFormat.HEADEREXTEND_MASK) != 0) {
                 id <<= PackedFormat.RAWDATA_BITSPERBYTE;
                 id |= (uint)(getBytePlus1(curPos) & PackedFormat.RAWDATA_MASK);
             }
@@ -396,14 +386,12 @@ namespace Sla.CORE
         public override bool readBool()
         {
             byte header1 = getNextByte(curPos);
-            if ((header1 & PackedFormat.HEADEREXTEND_MASK) != 0)
-            {
+            if ((header1 & PackedFormat.HEADEREXTEND_MASK) != 0) {
                 getNextByte(curPos);
             }
             byte typeByte = getNextByte(curPos);
             attributeRead = true;
-            if ((typeByte >> PackedFormat.TYPECODE_SHIFT) != PackedFormat.TYPECODE_BOOLEAN)
-            {
+            if ((typeByte >> PackedFormat.TYPECODE_SHIFT) != PackedFormat.TYPECODE_BOOLEAN) {
                 throw new DecoderError("Expecting boolean attribute");
             }
             return ((typeByte & PackedFormat.LENGTHCODE_MASK) != 0);
@@ -411,6 +399,7 @@ namespace Sla.CORE
 
         public override bool readBool(ref AttributeId attribId)
         {
+            base.readBool
             findMatchingAttribute(attribId);
             bool res = readBool();
             curPos = startPos;
@@ -420,8 +409,7 @@ namespace Sla.CORE
         public override long readSignedInteger()
         {
             byte header1 = getNextByte(curPos);
-            if ((header1 & PackedFormat.HEADEREXTEND_MASK) != 0)
-            {
+            if ((header1 & PackedFormat.HEADEREXTEND_MASK) != 0) {
                 getNextByte(curPos);
             }
             byte typeByte = getNextByte(curPos);
