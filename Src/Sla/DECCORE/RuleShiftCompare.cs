@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,8 +32,8 @@ namespace Sla.DECCORE
         /// The rule works on both INT_EQUAL and INT_NOTEQUAL.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_INT_EQUAL);
-            oplist.Add(CPUI_INT_NOTEQUAL);
+            oplist.Add(OpCode.CPUI_INT_EQUAL);
+            oplist.Add(OpCode.CPUI_INT_NOTEQUAL);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

@@ -1,4 +1,4 @@
-﻿using Sla.DECCORE;
+﻿using Sla.CORE;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -547,30 +547,24 @@ namespace Sla.DECCORE
         private void eliminateIntersect(Varnode vn, List<BlockVarnode> blocksort)
         {
             list<PcodeOp*> markedop;
-            list<PcodeOp*>::const_iterator oiter;
-            Dictionary<int, CoverBlock>::const_iterator iter, enditer;
-            Varnode* vn2;
+            Varnode vn2;
             int boundtype;
             int overlaptype;
             bool insertop;
 
-            for (oiter = vn.beginDescend(); oiter != vn.endDescend(); ++oiter)
-            {
+            IEnumerator<PcodeOp> oiter = vn.beginDescend();
+            while (oiter.MoveNext()) {
                 insertop = false;
-                Cover single;
+                Cover single = new Cover();
                 single.addDefPoint(vn);
-                PcodeOp* op = *oiter;
+                PcodeOp op = oiter.Current;
                 single.addRefPoint(op, vn); // Build range for a single read
-                iter = single.begin();
-                enditer = single.end();
-                while (iter != enditer)
-                {
-                    int blocknum = (*iter).first;
-                    ++iter;
-                    int slot = BlockVarnode::findFront(blocknum, blocksort);
+                Dictionary<int, CoverBlock>.Enumerator iter = single.begin();
+                while (iter.MoveNext()) {
+                    int blocknum = iter.Current.Key;
+                    int slot = BlockVarnode.findFront(blocknum, blocksort);
                     if (slot == -1) continue;
-                    while (slot < blocksort.size())
-                    {
+                    while (slot < blocksort.Count) {
                         if (blocksort[slot].getIndex() != blocknum)
                             break;
                         vn2 = blocksort[slot].getVarnode();
@@ -578,36 +572,32 @@ namespace Sla.DECCORE
                         if (vn2 == vn) continue;
                         boundtype = single.containVarnodeDef(vn2);
                         if (boundtype == 0) continue;
-                        overlaptype = vn.characterizeOverlap(*vn2);
+                        overlaptype = vn.characterizeOverlap(vn2);
                         if (overlaptype == 0) continue;     // No overlap in storage
-                        if (overlaptype == 1)
-                        {           // Partial overlap
+                        if (overlaptype == 1) {
+                            // Partial overlap
                             int off = (int)(vn.getOffset() - vn2.getOffset());
                             if (vn.partialCopyShadow(vn2, off))
                                 continue;       // SUBPIECE shadow, not a new value
                         }
-                        if (boundtype == 2)
-                        {   // We have to resolve things defined at same place
-                            if (vn2.getDef() == (PcodeOp)null)
-                            {
-                                if (vn.getDef() == (PcodeOp)null)
-                                {
+                        if (boundtype == 2) {
+                            // We have to resolve things defined at same place
+                            if (vn2.getDef() == (PcodeOp)null) {
+                                if (vn.getDef() == (PcodeOp)null) {
                                     if (vn < vn2) continue; // Choose an arbitrary order if both are inputs
                                 }
                                 else
                                     continue;
                             }
-                            else
-                            {
-                                if (vn.getDef() != (PcodeOp)null)
-                                {
+                            else {
+                                if (vn.getDef() != (PcodeOp)null) {
                                     if (vn2.getDef().getSeqNum().getOrder() < vn.getDef().getSeqNum().getOrder())
                                         continue;
                                 }
                             }
                         }
-                        else if (boundtype == 3)
-                        { // intersection on the tail of the range
+                        else if (boundtype == 3) {
+                            // intersection on the tail of the range
                           // For most operations if the READ and WRITE happen on the same op, there is really no cover
                           // intersection because the READ happens before the op and the WRITE happens after,  but
                           // if the WRITE is for an INDIRECT that is marking the READING (call) op, and the WRITE is to
@@ -615,16 +605,14 @@ namespace Sla.DECCORE
                           // there really is an intersection.
                             if (!vn2.isAddrForce()) continue;
                             if (!vn2.isWritten()) continue;
-                            PcodeOp* indop = vn2.getDef();
+                            PcodeOp? indop = vn2.getDef();
                             if (indop.code() != OpCode.CPUI_INDIRECT) continue;
                             // The vn2 INDIRECT must be linked to the read op
-                            if (op != PcodeOp::getOpFromConst(indop.getIn(1).getAddr())) continue;
-                            if (overlaptype != 1)
-                            {
+                            if (op != PcodeOp.getOpFromConst(indop.getIn(1).getAddr())) continue;
+                            if (overlaptype != 1) {
                                 if (vn.copyShadow(indop.getIn(0))) continue; // If INDIRECT input shadows vn, don't consider as intersection
                             }
-                            else
-                            {
+                            else {
                                 int off = (int)(vn.getOffset() - vn2.getOffset());
                                 if (vn.partialCopyShadow(indop.getIn(0), off)) continue;
                             }
@@ -901,7 +889,7 @@ namespace Sla.DECCORE
             if (high1 == high2) return true; // Already merged
             if (testCache.intersection(high1, high2)) return false;
 
-            high1.merge(high2, &testCache, isspeculative); // Do the actual merge
+            high1.merge(high2, testCache, isspeculative); // Do the actual merge
             high1.updateCover();               // Update cover now so that updateHigh won't purge cached tests
 
             return true;
@@ -1450,11 +1438,9 @@ namespace Sla.DECCORE
         /// resolve Cover intersections.
         public void mergeMarker()
         {
-            PcodeOp* op;
-            list<PcodeOp*>::const_iterator iter;
-            for (iter = data.beginOpAlive(); iter != data.endOpAlive(); ++iter)
-            {
-                op = *iter;
+            IEnumerator<PcodeOp> iter = data.beginOpAlive();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if ((!op.isMarker()) || op.isIndirectCreation()) continue;
                 if (op.code() == OpCode.CPUI_INDIRECT)
                     mergeIndirect(op);
@@ -1483,16 +1469,15 @@ namespace Sla.DECCORE
         /// intersections.
         public void mergeAdjacent()
         {
-            list<PcodeOp*>::const_iterator oiter;
-            PcodeOp* op;
+            PcodeOp op;
             int i;
-            HighVariable* high_in,*high_out;
-            Varnode* vn1,*vn2;
+            HighVariable high_in, high_out;
+            Varnode vn1, vn2;
             Datatype ct;
 
-            for (oiter = data.beginOpAlive(); oiter != data.endOpAlive(); ++oiter)
-            {
-                op = *oiter;
+            IEnumerator<PcodeOp> oiter = data.beginOpAlive();
+            while (oiter.MoveNext()) {
+                op = oiter.Current;
                 if (op.isCall()) continue;
                 vn1 = op.getOut();
                 if (!mergeTestBasic(vn1)) continue;
@@ -1665,8 +1650,7 @@ namespace Sla.DECCORE
         /// These, as a result, are not printed in the final source code representation.
         public void markInternalCopies()
         {
-            List<HighVariable> multiCopy;
-            IEnumerator<PcodeOp> iter;
+            List<HighVariable> multiCopy = new List<HighVariable>();
             PcodeOp op;
             HighVariable h1;
             Varnode v1;
@@ -1677,37 +1661,35 @@ namespace Sla.DECCORE
             VariablePiece p3;
             int val;
 
-            for (iter = data.beginOpAlive(); iter != data.endOpAlive(); ++iter)
-            {
-                op = *iter;
-                switch (op.code())
-                {
+            IEnumerator<PcodeOp> iter = data.beginOpAlive();
+            while (iter.MoveNext()) {
+                op = iter.Current;
+                switch (op.code()) {
                     case OpCode.CPUI_COPY:
                         v1 = op.getOut();
                         h1 = v1.getHigh();
-                        if (h1 == op.getIn(0).getHigh())
-                        {
+                        if (h1 == op.getIn(0).getHigh()) {
                             data.opMarkNonPrinting(op);
                         }
-                        else
-                        {   // COPY between different HighVariables
-                            if (!h1.hasCopyIn1())
-                            {   // If this is the first COPY we've seen for this high
+                        else {
+                            // COPY between different HighVariables
+                            if (!h1.hasCopyIn1()) {
+                                // If this is the first COPY we've seen for this high
                                 h1.setCopyIn1();       // Mark it
                                 multiCopy.Add(h1);
                             }
                             else
                                 h1.setCopyIn2();       // This is at least the second COPY we've seen
-                            if (v1.hasNoDescend())
-                            {   // Don't print shadow assignments
-                                if (shadowedVarnode(v1))
-                                {
+                            if (v1.hasNoDescend()) {
+                                // Don't print shadow assignments
+                                if (shadowedVarnode(v1)) {
                                     data.opMarkNonPrinting(op);
                                 }
                             }
                         }
                         break;
-                    case OpCode.CPUI_PIECE:        // Check if output is built out of pieces of itself
+                    case OpCode.CPUI_PIECE:
+                        // Check if output is built out of pieces of itself
                         v1 = op.getOut();
                         v2 = op.getIn(0);
                         v3 = op.getIn(1);
@@ -1719,13 +1701,11 @@ namespace Sla.DECCORE
                         if (p3 == (VariablePiece)null) break;
                         if (p1.getGroup() != p2.getGroup()) break;
                         if (p1.getGroup() != p3.getGroup()) break;
-                        if (v1.getSpace().isBigEndian())
-                        {
+                        if (v1.getSpace().isBigEndian()) {
                             if (p2.getOffset() != p1.getOffset()) break;
                             if (p3.getOffset() != p1.getOffset() + v2.getSize()) break;
                         }
-                        else
-                        {
+                        else {
                             if (p3.getOffset() != p1.getOffset()) break;
                             if (p2.getOffset() != p1.getOffset() + v3.getSize()) break;
                         }
@@ -1739,13 +1719,11 @@ namespace Sla.DECCORE
                         if (p1 == (VariablePiece)null) break;
                         if (p2 == (VariablePiece)null) break;
                         if (p1.getGroup() != p2.getGroup()) break;
-                        val = op.getIn(1).getOffset();
-                        if (v1.getSpace().isBigEndian())
-                        {
+                        val = (int)op.getIn(1).getOffset();
+                        if (v1.getSpace().isBigEndian()) {
                             if (p2.getOffset() + (v2.getSize() - v1.getSize() - val) != p1.getOffset()) break;
                         }
-                        else
-                        {
+                        else {
                             if (p2.getOffset() + val != p1.getOffset()) break;
                         }
                         data.opMarkNonPrinting(op);

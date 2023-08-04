@@ -422,7 +422,7 @@ namespace Sla.DECCORE
 
                 }
             }
-            return new MapIterator(&maptable, iter, curiter);
+            return new MapIterator(maptable, iter, curiter);
         }
 
         //public override MapIterator end()

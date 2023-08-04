@@ -1854,7 +1854,7 @@ namespace Sla.SLACOMP
                                                    ConstTpl(ConstTpl::real, sym.getTemplateId()),
                                                    ConstTpl(ConstTpl::real, 4));
             // This is simply a single pcodeop (template), where the opcode indicates the crossbuild directive
-            OpTpl* op = new OpTpl(CROSSBUILD);
+            OpTpl* op = new OpTpl(OpCode.CROSSBUILD);
             op.addInput(addr);     // The first input is the VarnodeTpl representing the address
             op.addInput(sectionid);    // The second input is the indexed representing the named pcode section to build
             res.Add(op);

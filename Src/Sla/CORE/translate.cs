@@ -44,8 +44,14 @@ namespace Sla.CORE {
         /// \brief Constructor
         /// \param s is a more verbose description of the error
         /// \param l is the length (in bytes) of the unimplemented instruction
-        public UnimplError(ref string s, int l)
+        public UnimplError(string s, int l)
             : base(s)
+        {
+            instruction_length = l;
+        }
+
+        public UnimplError(string s, int l, Exception innerException)
+            : base(s, innerException)
         {
             instruction_length = l;
         }
@@ -90,16 +96,10 @@ namespace Sla.CORE {
         }
 
         ///< Get name of address space being truncated
-        public ref string getName()
-        {
-            return ref spaceName;
-        }
+        public string getName() => spaceName;
 
         ///< Size (of pointers) for new truncated space
-        public uint getSize()
-        {
-            return size;
-        }
+        public uint getSize() => size;
     }
 
     /// \brief Abstract class for emitting pcode to an application
@@ -120,7 +120,7 @@ namespace Sla.CORE {
         /// \param outvar if not \e null is a pointer to data about the output varnode
         /// \param vars is a pointer to an array of VarnodeData for each input varnode
         /// \param isize is the number of input varnodes
-        public abstract void dump(Address addr, OpCode opc, VarnodeData outvar,
+        public abstract void dump(Address addr, OpCode opc, VarnodeData? outvar,
             VarnodeData[] vars, int isize);
 
         /// Emit pcode directly from an \<op> element
@@ -135,7 +135,7 @@ namespace Sla.CORE {
             int isize;
             // VarnodeData outvar = new VarnodeData();
             VarnodeData[] invar = new VarnodeData[16];
-            VarnodeData outptr; //  = ref outvar;
+            VarnodeData? outptr; //  = ref outvar;
 
             uint elemId = decoder.openElement(ElementId.ELEM_OP);
             isize = (int)decoder.readSignedInteger(AttributeId.ATTRIB_SIZE);

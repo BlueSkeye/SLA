@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// \brief Pull SUBPIECE back through MULTIEQUAL
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_SUBPIECE);
+            oplist.Add(OpCode.CPUI_SUBPIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -114,18 +114,14 @@ namespace Sla.DECCORE
         /// \param minByte will hold the index of the minimum byte
         public static void minMaxUse(Varnode vn, int maxByte, int minByte)
         {
-            list<PcodeOp*>::const_iterator iter, enditer;
-            enditer = vn.endDescend();
-
             int inSize = vn.getSize();
             maxByte = -1;
             minByte = inSize;
-            for (iter = vn.beginDescend(); iter != enditer; ++iter)
-            {
-                PcodeOp* op = *iter;
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 OpCode opc = op.code();
-                if (opc == OpCode.CPUI_SUBPIECE)
-                {
+                if (opc == OpCode.CPUI_SUBPIECE) {
                     int min = (int)op.getIn(1).getOffset();
                     int max = min + op.getOut().getSize() - 1;
                     if (min < minByte)
@@ -133,8 +129,8 @@ namespace Sla.DECCORE
                     if (max > maxByte)
                         maxByte = max;
                 }
-                else
-                {   // By default assume all bytes are used
+                else {
+                    // By default assume all bytes are used
                     maxByte = inSize - 1;
                     minByte = 0;
                     return;
@@ -153,27 +149,20 @@ namespace Sla.DECCORE
         public static void replaceDescendants(Varnode origVn, Varnode newVn, int maxByte, int minByte,
             Funcdata data)
         {
-            list<PcodeOp*>::const_iterator iter, enditer;
-            iter = origVn.beginDescend();
-            enditer = origVn.endDescend();
-            while (iter != enditer)
-            {
-                PcodeOp* op = *iter;
-                ++iter;
-                if (op.code() == OpCode.CPUI_SUBPIECE)
-                {
+            IEnumerator<PcodeOp> iter = origVn.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
+                if (op.code() == OpCode.CPUI_SUBPIECE) {
                     int truncAmount = (int)op.getIn(1).getOffset();
                     int outSize = op.getOut().getSize();
                     data.opSetInput(op, newVn, 0);
-                    if (newVn.getSize() == outSize)
-                    {
+                    if (newVn.getSize() == outSize) {
                         if (truncAmount != minByte)
                             throw new LowlevelError("Could not perform -replaceDescendants-");
                         data.opSetOpcode(op, OpCode.CPUI_COPY);
                         data.opRemoveInput(op, 1);
                     }
-                    else if (newVn.getSize() > outSize)
-                    {
+                    else if (newVn.getSize() > outSize) {
                         int newTrunc = truncAmount - minByte;
                         if (newTrunc < 0)
                             throw new LowlevelError("Could not perform -replaceDescendants-");
@@ -294,12 +283,11 @@ namespace Sla.DECCORE
         /// \return the truncated Varnode or NULL
         public static Varnode findSubpiece(Varnode basevn, uint outsize, uint shift)
         {
-            list<PcodeOp*>::const_iterator iter;
-            PcodeOp* prevop;
+            IEnumerator<PcodeOp> iter = basevn.beginDescend();
+            PcodeOp prevop;
 
-            for (iter = basevn.beginDescend(); iter != basevn.endDescend(); ++iter)
-            {
-                prevop = *iter;
+            while (iter.MoveNext()) {
+                prevop = iter.Current;
                 if (prevop.code() != OpCode.CPUI_SUBPIECE) continue; // Find previous SUBPIECE
                                                                // Make sure output is defined in same block as vn_piece
                 if (basevn.isInput() && (prevop.getParent().getIndex() != 0)) continue;
@@ -307,8 +295,8 @@ namespace Sla.DECCORE
                 if (basevn.getDef().getParent() != prevop.getParent()) continue;
                 // Make sure subpiece matches form
                 if ((prevop.getIn(0) == basevn) &&
-                (prevop.getOut().getSize() == outsize) &&
-                (prevop.getIn(1).getOffset() == shift))
+                    (prevop.getOut().getSize() == outsize) &&
+                    (prevop.getIn(1).getOffset() == shift))
                 {
                     return prevop.getOut();
                 }

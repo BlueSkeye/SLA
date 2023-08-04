@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +35,7 @@ namespace Sla.DECCORE
         /// Supports variations where W is constant.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_INT_SBORROW);
+            oplist.Add(OpCode.CPUI_INT_SBORROW);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -44,7 +44,6 @@ namespace Sla.DECCORE
             Varnode cvn;
             Varnode avn;
             Varnode bvn;
-            IEnumerator<PcodeOp> iter;
             PcodeOp compop;
             PcodeOp signop;
             PcodeOp addop;
@@ -59,17 +58,16 @@ namespace Sla.DECCORE
                 data.opRemoveInput(op, 1);
                 return 1;
             }
-            for (iter = svn.beginDescend(); iter != svn.endDescend(); ++iter)
-            {
-                compop = *iter;
+            IEnumerator<PcodeOp> iter = svn.beginDescend();
+            while (iter.MoveNext()) {
+                compop = iter.Current;
                 if ((compop.code() != OpCode.CPUI_INT_EQUAL) && (compop.code() != OpCode.CPUI_INT_NOTEQUAL))
                     continue;
                 cvn = (compop.getIn(0) == svn) ? compop.getIn(1) : compop.getIn(0);
                 if (!cvn.isWritten()) continue;
                 signop = cvn.getDef();
                 if (signop.code() != OpCode.CPUI_INT_SLESS) continue;
-                if (!signop.getIn(0).constantMatch(0))
-                {
+                if (!signop.getIn(0).constantMatch(0)) {
                     if (!signop.getIn(1).constantMatch(0)) continue;
                     zside = 1;
                 }
@@ -77,8 +75,7 @@ namespace Sla.DECCORE
                     zside = 0;
                 if (!signop.getIn(1 - zside).isWritten()) continue;
                 addop = signop.getIn(1 - zside).getDef();
-                if (addop.code() == OpCode.CPUI_INT_ADD)
-                {
+                if (addop.code() == OpCode.CPUI_INT_ADD) {
                     avn = op.getIn(0);
                     if (functionalEquality(avn, addop.getIn(0)))
                         bvn = addop.getIn(1);
@@ -89,17 +86,14 @@ namespace Sla.DECCORE
                 }
                 else
                     continue;
-                if (bvn.isConstant())
-                {
+                if (bvn.isConstant()) {
                     Address flip = new Address(bvn.getSpace(), Globals.uintb_negate(bvn.getOffset() - 1, bvn.getSize()));
                     bvn = op.getIn(1);
                     if (flip != bvn.getAddr()) continue;
                 }
-                else if (bvn.isWritten())
-                {
-                    PcodeOp* otherop = bvn.getDef();
-                    if (otherop.code() == OpCode.CPUI_INT_MULT)
-                    {
+                else if (bvn.isWritten()) {
+                    PcodeOp otherop = bvn.getDef();
+                    if (otherop.code() == OpCode.CPUI_INT_MULT) {
                         if (!otherop.getIn(1).isConstant()) continue;
                         if (otherop.getIn(1).getOffset() != Globals.calc_mask(otherop.getIn(1).getSize())) continue;
                         bvn = otherop.getIn(0);
@@ -110,14 +104,12 @@ namespace Sla.DECCORE
                 }
                 else
                     continue;
-                if (compop.code() == OpCode.CPUI_INT_NOTEQUAL)
-                {
+                if (compop.code() == OpCode.CPUI_INT_NOTEQUAL) {
                     data.opSetOpcode(compop, OpCode.CPUI_INT_SLESS);   // Replace all this with simple less than
                     data.opSetInput(compop, avn, 1 - zside);
                     data.opSetInput(compop, bvn, zside);
                 }
-                else
-                {
+                else {
                     data.opSetOpcode(compop, OpCode.CPUI_INT_SLESSEQUAL);
                     data.opSetInput(compop, avn, zside);
                     data.opSetInput(compop, bvn, 1 - zside);

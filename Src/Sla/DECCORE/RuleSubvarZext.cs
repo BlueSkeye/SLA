@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Perform SubvariableFlow analysis triggered by INT_ZEXT
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_INT_ZEXT);
+            oplist.Add(OpCode.CPUI_INT_ZEXT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

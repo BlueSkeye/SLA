@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -47,15 +47,9 @@ namespace Sla.DECCORE
             hi2 = hiop.getIn(1 - hi1slot);
             notequalformhi = (hiop.code() == OpCode.CPUI_INT_NOTEQUAL);
 
-            list<PcodeOp*>::const_iterator iter, enditer;
-            list<PcodeOp*>::const_iterator iter2, enditer2;
-            list<PcodeOp*>::const_iterator iter3, enditer3;
-            iter = lo1.beginDescend();
-            enditer = lo1.endDescend();
-            while (iter != enditer)
-            {
-                loop = *iter;
-                ++iter;
+            IEnumerator<PcodeOp> iter = lo1.beginDescend();
+            while (iter.MoveNext()) {
+                loop = iter.Current;
                 if (loop.code() == OpCode.CPUI_INT_EQUAL)
                     notequalformlo = false;
                 else if (loop.code() == OpCode.CPUI_INT_NOTEQUAL)
@@ -65,52 +59,46 @@ namespace Sla.DECCORE
                 lo1slot = loop.getSlot(lo1);
                 lo2 = loop.getIn(1 - lo1slot);
 
-                iter2 = hiop.getOut().beginDescend();
-                enditer2 = hiop.getOut().endDescend();
-                while (iter2 != enditer2)
-                {
-                    hibool = *iter2;
-                    ++iter2;
-                    iter3 = loop.getOut().beginDescend();
-                    enditer3 = loop.getOut().endDescend();
-                    while (iter3 != enditer3)
-                    {
-                        lobool = *iter3;
-                        ++iter3;
+                IEnumerator<PcodeOp> iter2 = hiop.getOut().beginDescend();
+                // enditer2 = hiop.getOut().endDescend();
+                while (iter2.MoveNext()) {
+                    hibool = iter2.Current;
+                    IEnumerator<PcodeOp> iter3 = loop.getOut().beginDescend();
+                    // enditer3 = loop.getOut().endDescend();
+                    while (iter3.MoveNext()) {
+                        lobool = iter3.Current;
 
                         in2.initPartial(in1.getSize(), lo2, hi2);
 
-                        if ((hibool.code() == OpCode.CPUI_CBRANCH) && (lobool.code() == OpCode.CPUI_CBRANCH))
-                        {
+                        if ((hibool.code() == OpCode.CPUI_CBRANCH) && (lobool.code() == OpCode.CPUI_CBRANCH)) {
                             // Branching form of the equal operation
-                            BlockBasic* hibooltrue,*hiboolfalse;
-                            BlockBasic* lobooltrue,*loboolfalse;
-                            SplitVarnode::getTrueFalse(hibool, notequalformhi, hibooltrue, hiboolfalse);
-                            SplitVarnode::getTrueFalse(lobool, notequalformlo, lobooltrue, loboolfalse);
+                            BlockBasic hibooltrue, hiboolfalse;
+                            BlockBasic lobooltrue, loboolfalse;
+                            SplitVarnode.getTrueFalse(hibool, notequalformhi, out hibooltrue, out hiboolfalse);
+                            SplitVarnode.getTrueFalse(lobool, notequalformlo, out lobooltrue, out loboolfalse);
 
                             if ((hibooltrue == lobool.getParent()) &&  // hi is checked first then lo
                                 (hiboolfalse == loboolfalse) &&
-                                SplitVarnode::otherwiseEmpty(lobool))
+                                SplitVarnode.otherwiseEmpty(lobool))
                             {
-                                if (SplitVarnode::prepareBoolOp(in1, in2, hibool))
-                                {
+                                if (SplitVarnode.prepareBoolOp(in1, in2, hibool)) {
                                     setonlow = true;
-                                    SplitVarnode::createBoolOp(data, hibool, in1, in2, notequalformhi ? OpCode.CPUI_INT_NOTEQUAL : OpCode.CPUI_INT_EQUAL);
+                                    SplitVarnode.createBoolOp(data, hibool, in1, in2,
+                                        notequalformhi ? OpCode.CPUI_INT_NOTEQUAL : OpCode.CPUI_INT_EQUAL);
                                     // We change lobool so that it always goes to the original TRUE block
-                                    data.opSetInput(lobool, data.newConstant(1, notequalformlo ? 0 : 1), 1);
+                                    data.opSetInput(lobool, data.newConstant(1, notequalformlo ? 0UL : 1), 1);
                                     return true;
                                 }
                             }
                             else if ((lobooltrue == hibool.getParent()) && // lo is checked first then hi
                                  (hiboolfalse == loboolfalse) &&
-                                 SplitVarnode::otherwiseEmpty(hibool))
+                                 SplitVarnode.otherwiseEmpty(hibool))
                             {
-                                if (SplitVarnode::prepareBoolOp(in1, in2, lobool))
-                                {
+                                if (SplitVarnode.prepareBoolOp(in1, in2, lobool)) {
                                     setonlow = false;
-                                    SplitVarnode::createBoolOp(data, lobool, in1, in2, notequalformlo ? OpCode.CPUI_INT_NOTEQUAL : OpCode.CPUI_INT_EQUAL);
+                                    SplitVarnode.createBoolOp(data, lobool, in1, in2, notequalformlo ? OpCode.CPUI_INT_NOTEQUAL : OpCode.CPUI_INT_EQUAL);
                                     // We change hibool so that it always goes to the original TRUE block
-                                    data.opSetInput(hibool, data.newConstant(1, notequalformhi ? 0 : 1), 1);
+                                    data.opSetInput(hibool, data.newConstant(1, notequalformhi ? 0UL : 1), 1);
                                     return true;
                                 }
                             }

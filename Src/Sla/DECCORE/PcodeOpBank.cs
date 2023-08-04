@@ -370,19 +370,21 @@ namespace Sla.DECCORE
         }
 
         /// \brief Start of all PcodeOps marked as \e alive
-        public List<PcodeOp>::const_iterator beginAlive() => alivelist.begin();
+        public IEnumerator<PcodeOp> beginAlive() => alivelist.GetEnumerator();
 
-        /// \brief End of all PcodeOps marked as \e alive
-        public List<PcodeOp*>::const_iterator endAlive() => alivelist.end();
+        ///// \brief End of all PcodeOps marked as \e alive
+        //public IEnumerator<PcodeOp> endAlive() => alivelist.end();
 
         /// \brief Start of all PcodeOps marked as \e dead
-        public List<PcodeOp>::const_iterator beginDead() => deadlist.begin();
+        public IEnumerator<PcodeOp> beginDead() => deadlist.GetEnumerator();
+        
+        public IEnumerator<PcodeOp> beginReverseDead() => deadlist.GetReverseEnumerator();
 
         /// \brief End of all PcodeOps marked as \e dead
-        public List<PcodeOp>::const_iterator endDead() => deadlist.end();
+        public IEnumerator<PcodeOp> endDead() => deadlist.end();
 
         /// \brief Start of all PcodeOps sharing the given op-code
-        public List<PcodeOp>::const_iterator begin(OpCode opc)
+        public IEnumerator<PcodeOp> begin(OpCode opc)
         {
             switch (opc)
             {

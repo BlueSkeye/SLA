@@ -49,17 +49,18 @@ namespace Sla.DECCORE
         }
 
         private bool fillOutFromOr(Funcdata data)
-        { // We have filled in either or <- xor <- hi1,  OR,  or <- hi1
-          // Now try to fill in the rest of the form
-            Varnode* outvn = orop.getOut();
-            list<PcodeOp*>::const_iterator iter, enditer;
-            iter = outvn.beginDescend();
-            enditer = outvn.endDescend();
-            while (iter != enditer)
-            {
-                equalop = *iter;
-                ++iter;
-                if ((equalop.code() != OpCode.CPUI_INT_EQUAL) && (equalop.code() != OpCode.CPUI_INT_NOTEQUAL)) continue;
+        {
+            // We have filled in either or <- xor <- hi1,  OR,  or <- hi1
+            // Now try to fill in the rest of the form
+            Varnode outvn = orop.getOut();
+            IEnumerator<PcodeOp> iter = outvn.beginDescend();
+            while (iter.MoveNext()) {
+                equalop = iter.Current;
+                if (   (equalop.code() != OpCode.CPUI_INT_EQUAL)
+                    && (equalop.code() != OpCode.CPUI_INT_NOTEQUAL))
+                {
+                    continue;
+                }
                 if (!equalop.getIn(1).isConstant()) continue;
                 if (equalop.getIn(1).getOffset() != 0) continue;
 
@@ -144,12 +145,9 @@ namespace Sla.DECCORE
                 xorhislot = hixor.getSlot(hi1);
                 hi2 = hixor.getIn(1 - xorhislot);
                 Varnode vn = op.getOut();
-                IEnumerator<PcodeOp> iter, enditer;
-                iter = vn.beginDescend();
-                enditer = vn.endDescend();
-                while (iter != enditer) {
-                    orop = *iter;
-                    ++iter;
+                IEnumerator<PcodeOp> iter = vn.beginDescend();
+                while (iter.MoveNext()) {
+                    orop = iter.Current;
                     if (orop.code() != OpCode.CPUI_INT_OR) continue;
                     orhislot = orop.getSlot(vn);
                     if (fillOutFromOr(data)) {

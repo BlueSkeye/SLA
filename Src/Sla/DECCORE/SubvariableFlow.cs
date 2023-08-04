@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -335,7 +335,7 @@ namespace Sla.DECCORE
                     return false;               // Don't truncate
             }
             FuncCallSpecs* fc = fd.getCallSpecs(op);
-            if (fc == (FuncCallSpecs*)0) return false;
+            if (fc == (FuncCallSpecs)null) return false;
             if (fc.isInputActive()) return false; // Don't trim while in the middle of figuring out params
             if (fc.isInputLocked() && (!fc.isDotdotdot())) return false;
 
@@ -371,8 +371,8 @@ namespace Sla.DECCORE
                 // If we plan to truncate the size of a return variable, we need to propagate the logical size to any other
                 // return variables so that there can still be a single return value type for the function
                 list<PcodeOp*>::const_iterator iter, enditer;
-                iter = fd.beginOp(CPUI_RETURN);
-                enditer = fd.endOp(CPUI_RETURN);
+                iter = fd.beginOp(OpCode.CPUI_RETURN);
+                enditer = fd.endOp(OpCode.CPUI_RETURN);
                 while (iter != enditer)
                 {
                     PcodeOp* retop = *iter;
@@ -424,7 +424,7 @@ namespace Sla.DECCORE
             if ((rvn.mask & 1) == 0) return false; // Verify the logical value is the least significant part
             if (bitsize < 8) return false;      // Make sure logical value is at least a byte
             FuncCallSpecs* fc = fd.getCallSpecs(op);
-            if (fc == (FuncCallSpecs*)0) return false;
+            if (fc == (FuncCallSpecs)null) return false;
             if (fc.isOutputLocked()) return false;
             if (fc.isOutputActive()) return false; // Don't trim while in the middle of figuring out return value
 
@@ -461,9 +461,9 @@ namespace Sla.DECCORE
         /// \return \b true if the logical value can be traced forward one level
         private bool traceForward(ReplaceVarnode rvn)
         {
-            ReplaceOp* rop;
-            PcodeOp* op;
-            Varnode* outvn;
+            ReplaceOp rop;
+            PcodeOp op;
+            Varnode? outvn;
             int slot;
             int sa;
             ulong newmask;
@@ -472,11 +472,9 @@ namespace Sla.DECCORE
             int hcount = 0;
             int callcount = 0;
 
-            list<PcodeOp*>::const_iterator iter, enditer;
-            enditer = rvn.vn.endDescend();
-            for (iter = rvn.vn.beginDescend(); iter != enditer; ++iter)
-            {
-                op = *iter;
+            IEnumerator<PcodeOp> iter = rvn.vn.beginDescend();
+            while (iter.MoveNext()) {
+                op = iter.Current;
                 outvn = op.getOut();
                 if ((outvn != (Varnode)null) && outvn.isMark() && !op.isCall())
                     continue;
@@ -494,35 +492,32 @@ namespace Sla.DECCORE
                         break;
                     case OpCode.CPUI_INT_OR:
                         if (doesOrSet(op, rvn.mask) != -1) break; // Subvar set to 1s, truncate flow
-                        rop = createOpDown(CPUI_INT_OR, 2, op, rvn, slot);
+                        rop = createOpDown(OpCode.CPUI_INT_OR, 2, op, rvn, slot);
                         if (!createLink(rop, rvn.mask, -1, outvn)) return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
                     case OpCode.CPUI_INT_AND:
-                        if ((op.getIn(1).isConstant()) && (op.getIn(1).getOffset() == rvn.mask))
-                        {
-                            if ((outvn.getSize() == flowsize) && ((rvn.mask & 1) != 0))
-                            {
+                        if ((op.getIn(1).isConstant()) && (op.getIn(1).getOffset() == rvn.mask)) {
+                            if ((outvn.getSize() == flowsize) && ((rvn.mask & 1) != 0)) {
                                 addTerminalPatch(op, rvn);
                                 hcount += 1;        // Dealt with this descendant
                                 break;
                             }
                             // Is the small variable getting zero padded into something that is fully consumed
-                            if ((!aggressive) && ((outvn.getConsume() & rvn.mask) != outvn.getConsume()))
-                            {
+                            if ((!aggressive) && ((outvn.getConsume() & rvn.mask) != outvn.getConsume())) {
                                 addSuggestedPatch(rvn, op, -1);
                                 hcount += 1;        // Dealt with this descendant
                                 break;
                             }
                         }
                         if (doesAndClear(op, rvn.mask) != -1) break; // Subvar set to zero, truncate flow
-                        rop = createOpDown(CPUI_INT_AND, 2, op, rvn, slot);
+                        rop = createOpDown(OpCode.CPUI_INT_AND, 2, op, rvn, slot);
                         if (!createLink(rop, rvn.mask, -1, outvn)) return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
                     case OpCode.CPUI_INT_ZEXT:
                     case OpCode.CPUI_INT_SEXT:
-                        rop = createOpDown(CPUI_COPY, 1, op, rvn, 0);
+                        rop = createOpDown(OpCode.CPUI_COPY, 1, op, rvn, 0);
                         if (!createLink(rop, rvn.mask, -1, outvn)) return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
@@ -532,20 +527,20 @@ namespace Sla.DECCORE
                         sa = Globals.leastsigbit_set(op.getIn(1 - slot).getNZMask());
                         sa &= ~7;           // Should be nearest multiple of 8
                         if (bitsize + sa > 8 * rvn.vn.getSize()) return false;
-                        rop = createOpDown(CPUI_INT_MULT, 2, op, rvn, slot);
+                        rop = createOpDown(OpCode.CPUI_INT_MULT, 2, op, rvn, slot);
                         if (!createLink(rop, rvn.mask << sa, -1, outvn)) return false;
                         hcount += 1;
                         break;
                     case OpCode.CPUI_INT_ADD:
                         if ((rvn.mask & 1) == 0)
                             return false;       // Cannot account for carry
-                        rop = createOpDown(CPUI_INT_ADD, 2, op, rvn, slot);
+                        rop = createOpDown(OpCode.CPUI_INT_ADD, 2, op, rvn, slot);
                         if (!createLink(rop, rvn.mask, -1, outvn)) return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
                     case OpCode.CPUI_INT_LEFT:
-                        if (slot == 1)
-                        {       // Logical flow is into shift amount
+                        if (slot == 1) {
+                            // Logical flow is into shift amount
                             if ((rvn.mask & 1) == 0) return false; // Cannot account for effect of extraneous bits
                             if (bitsize < 8) return false;
                             // Its possible that truncating to the logical value could have an effect, if there were non-zero bits
@@ -562,20 +557,20 @@ namespace Sla.DECCORE
                         if (rvn.mask != (newmask >> sa)) return false; // subvar is clipped
                                                                         // Is the small variable getting zero padded into something that is fully consumed
                         if (((rvn.mask & 1) != 0) && (sa + bitsize == 8 * outvn.getSize())
-                        && (calc_mask(outvn.getSize()) == outvn.getConsume()))
+                        && (Globals.calc_mask(outvn.getSize()) == outvn.getConsume()))
                         {
                             addSuggestedPatch(rvn, op, sa);
                             hcount += 1;
                             break;
                         }
-                        rop = createOpDown(CPUI_COPY, 1, op, rvn, 0);
+                        rop = createOpDown(OpCode.CPUI_COPY, 1, op, rvn, 0);
                         if (!createLink(rop, newmask, -1, outvn)) return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
                     case OpCode.CPUI_INT_RIGHT:
                     case OpCode.CPUI_INT_SRIGHT:
-                        if (slot == 1)
-                        {       // Logical flow is into shift amount
+                        if (slot == 1) {
+                            // Logical flow is into shift amount
                             if ((rvn.mask & 1) == 0) return false; // Cannot account for effect of extraneous bits
                             if (bitsize < 8) return false;
                             addTerminalPatchSameOp(op, rvn, slot);
@@ -585,14 +580,13 @@ namespace Sla.DECCORE
                         if (!op.getIn(1).isConstant()) return false;
                         sa = (int)op.getIn(1).getOffset();
                         newmask = rvn.mask >> sa;
-                        if (newmask == 0)
-                        {
+                        if (newmask == 0) {
                             if (op.code() == OpCode.CPUI_INT_RIGHT) break; // subvar is set to zero, truncate flow
                             return false;
                         }
                         if (rvn.mask != (newmask << sa)) return false;
                         if ((outvn.getSize() == flowsize) && ((newmask & 1) == 1) &&
-                        (op.getIn(0).getNZMask() == rvn.mask))
+                            (op.getIn(0).getNZMask() == rvn.mask))
                         {
                             addTerminalPatch(op, rvn);
                             hcount += 1;        // Dealt with this descendant
@@ -600,13 +594,13 @@ namespace Sla.DECCORE
                         }
                         // Is the small variable getting zero padded into something that is fully consumed
                         if (((newmask & 1) == 1) && (sa + bitsize == 8 * outvn.getSize())
-                        && (calc_mask(outvn.getSize()) == outvn.getConsume()))
+                            && (Globals.calc_mask(outvn.getSize()) == outvn.getConsume()))
                         {
                             addSuggestedPatch(rvn, op, 0);
                             hcount += 1;
                             break;
                         }
-                        rop = createOpDown(CPUI_COPY, 1, op, rvn, 0);
+                        rop = createOpDown(OpCode.CPUI_COPY, 1, op, rvn, 0);
                         if (!createLink(rop, newmask, -1, outvn)) return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
@@ -614,10 +608,9 @@ namespace Sla.DECCORE
                         sa = (int)op.getIn(1).getOffset() * 8;
                         newmask = (rvn.mask >> sa) & Globals.calc_mask(outvn.getSize());
                         if (newmask == 0) break;    // subvar is set to zero, truncate flow
-                        if (rvn.mask != (newmask << sa))
-                        {   // Some kind of truncation of the logical value
-                            if (flowsize > ((sa / 8) + outvn.getSize()) && (rvn.mask & 1) != 0)
-                            {
+                        if (rvn.mask != (newmask << sa)) {
+                            // Some kind of truncation of the logical value
+                            if (flowsize > ((sa / 8) + outvn.getSize()) && (rvn.mask & 1) != 0) {
                                 // Only a piece of the logical value remains
                                 addTerminalPatchSameOp(op, rvn, 0);
                                 hcount += 1;
@@ -625,13 +618,12 @@ namespace Sla.DECCORE
                             }
                             return false;
                         }
-                        if (((newmask & 1) != 0) && (outvn.getSize() == flowsize))
-                        {
+                        if (((newmask & 1) != 0) && (outvn.getSize() == flowsize)) {
                             addTerminalPatch(op, rvn);
                             hcount += 1;        // Dealt with this descendant
                             break;
                         }
-                        rop = createOpDown(CPUI_COPY, 1, op, rvn, 0);
+                        rop = createOpDown(OpCode.CPUI_COPY, 1, op, rvn, 0);
                         if (!createLink(rop, newmask, -1, outvn)) return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
@@ -640,7 +632,7 @@ namespace Sla.DECCORE
                             newmask = rvn.mask << (8 * op.getIn(1).getSize());
                         else
                             newmask = rvn.mask;
-                        rop = createOpDown(CPUI_COPY, 1, op, rvn, 0);
+                        rop = createOpDown(OpCode.CPUI_COPY, 1, op, rvn, 0);
                         if (!createLink(rop, newmask, -1, outvn)) return false;
                         hcount += 1;        // Dealt with this descendant
                         break;
@@ -649,13 +641,11 @@ namespace Sla.DECCORE
                         outvn = op.getIn(1 - slot); // The OTHER side of the comparison
                         if ((!aggressive) && (((rvn.vn.getNZMask() | rvn.mask) != rvn.mask)))
                             return false;       // Everything but logical variable must definitely be zero (unless we are aggressive)
-                        if (outvn.isConstant())
-                        {
+                        if (outvn.isConstant()) {
                             if ((rvn.mask | outvn.getOffset()) != rvn.mask)
                                 return false;       // Must compare only bits of logical variable
                         }
-                        else
-                        {
+                        else {
                             if ((!aggressive) && (((rvn.mask | outvn.getNZMask()) != rvn.mask))) // unused bits of otherside must be zero
                                 return false;
                         }
@@ -666,25 +656,22 @@ namespace Sla.DECCORE
                     case OpCode.CPUI_INT_NOTEQUAL:
                     case OpCode.CPUI_INT_EQUAL:
                         outvn = op.getIn(1 - slot); // The OTHER side of the comparison
-                        if (bitsize != 1)
-                        {
+                        if (bitsize != 1) {
                             if ((!aggressive) && (((rvn.vn.getNZMask() | rvn.mask) != rvn.mask)))
                                 return false;   // Everything but logical variable must definitely be zero (unless we are aggressive)
-                            if (outvn.isConstant())
-                            {
+                            if (outvn.isConstant()) {
                                 if ((rvn.mask | outvn.getOffset()) != rvn.mask)
                                     return false;   // Not comparing to just bits of the logical variable
                             }
-                            else
-                            {
+                            else {
                                 if ((!aggressive) && (((rvn.mask | outvn.getNZMask()) != rvn.mask))) // unused bits must be zero
                                     return false;
                             }
                             if (!createCompareBridge(op, rvn, slot, outvn))
                                 return false;
                         }
-                        else
-                        {           // Movement of boolean variables
+                        else {
+                            // Movement of boolean variables
                             if (!outvn.isConstant()) return false;
                             newmask = rvn.vn.getNZMask();
                             if (newmask != rvn.mask) return false;
@@ -698,9 +685,8 @@ namespace Sla.DECCORE
                                 booldir = !booldir;
                             if (booldir)
                                 addTerminalPatch(op, rvn);
-                            else
-                            {
-                                rop = createOpDown(CPUI_BOOL_NEGATE, 1, op, rvn, 0);
+                            else {
+                                rop = createOpDown(OpCode.CPUI_BOOL_NEGATE, 1, op, rvn, 0);
                                 createNewOut(rop, (ulong)1);
                                 addTerminalPatch(op, rop.output);
                             }
@@ -741,8 +727,7 @@ namespace Sla.DECCORE
                         return false;
                 }
             }
-            if (dcount != hcount)
-            {
+            if (dcount != hcount) {
                 // Must account for all descendants of an input
                 if (rvn.vn.isInput()) return false;
             }
@@ -756,14 +741,13 @@ namespace Sla.DECCORE
         /// \return \b true if the logical value can be traced backward one level
         private bool traceBackward(ReplaceVarnode rvn)
         {
-            PcodeOp* op = rvn.vn.getDef();
+            PcodeOp? op = rvn.vn.getDef();
             if (op == (PcodeOp)null) return true; // If vn is input
             int sa;
             ulong newmask;
-            ReplaceOp* rop;
+            ReplaceOp rop;
 
-            switch (op.code())
-            {
+            switch (op.code()) {
                 case OpCode.CPUI_COPY:
                 case OpCode.CPUI_MULTIEQUAL:
                 case OpCode.CPUI_INT_NEGATE:
@@ -775,53 +759,47 @@ namespace Sla.DECCORE
                     return true;
                 case OpCode.CPUI_INT_AND:
                     sa = doesAndClear(op, rvn.mask);
-                    if (sa != -1)
-                    {
-                        rop = createOp(CPUI_COPY, 1, rvn);
+                    if (sa != -1) {
+                        rop = createOp(OpCode.CPUI_COPY, 1, rvn);
                         addConstant(rop, rvn.mask, 0, op.getIn(sa));
                     }
-                    else
-                    {
-                        rop = createOp(CPUI_INT_AND, 2, rvn);
+                    else {
+                        rop = createOp(OpCode.CPUI_INT_AND, 2, rvn);
                         if (!createLink(rop, rvn.mask, 0, op.getIn(0))) return false;
                         if (!createLink(rop, rvn.mask, 1, op.getIn(1))) return false;
                     }
                     return true;
                 case OpCode.CPUI_INT_OR:
                     sa = doesOrSet(op, rvn.mask);
-                    if (sa != -1)
-                    {
-                        rop = createOp(CPUI_COPY, 1, rvn);
+                    if (sa != -1) {
+                        rop = createOp(OpCode.CPUI_COPY, 1, rvn);
                         addConstant(rop, rvn.mask, 0, op.getIn(sa));
                     }
-                    else
-                    {
-                        rop = createOp(CPUI_INT_OR, 2, rvn);
+                    else {
+                        rop = createOp(OpCode.CPUI_INT_OR, 2, rvn);
                         if (!createLink(rop, rvn.mask, 0, op.getIn(0))) return false;
                         if (!createLink(rop, rvn.mask, 1, op.getIn(1))) return false;
                     }
                     return true;
                 case OpCode.CPUI_INT_ZEXT:
                 case OpCode.CPUI_INT_SEXT:
-                    if ((rvn.mask & Globals.calc_mask(op.getIn(0).getSize())) != rvn.mask)
-                    {
-                        if ((rvn.mask & 1) != 0 && flowsize > op.getIn(0).getSize())
-                        {
+                    if ((rvn.mask & Globals.calc_mask(op.getIn(0).getSize())) != rvn.mask) {
+                        if ((rvn.mask & 1) != 0 && flowsize > op.getIn(0).getSize()) {
                             addPush(op, rvn);
                             return true;
                         }
                         break;         // Check if subvariable comes through extension
                     }
-                    rop = createOp(CPUI_COPY, 1, rvn);
+                    rop = createOp(OpCode.CPUI_COPY, 1, rvn);
                     if (!createLink(rop, rvn.mask, 0, op.getIn(0))) return false;
                     return true;
                 case OpCode.CPUI_INT_ADD:
                     if ((rvn.mask & 1) == 0)
                         break;          // Cannot account for carry
                     if (rvn.mask == (ulong)1)
-                        rop = createOp(CPUI_INT_XOR, 2, rvn); // Single bit add
+                        rop = createOp(OpCode.CPUI_INT_XOR, 2, rvn); // Single bit add
                     else
-                        rop = createOp(CPUI_INT_ADD, 2, rvn);
+                        rop = createOp(OpCode.CPUI_INT_ADD, 2, rvn);
                     if (!createLink(rop, rvn.mask, 0, op.getIn(0))) return false;
                     if (!createLink(rop, rvn.mask, 1, op.getIn(1))) return false;
                     return true;
@@ -829,30 +807,30 @@ namespace Sla.DECCORE
                     if (!op.getIn(1).isConstant()) break; // Dynamic shift
                     sa = (int)op.getIn(1).getOffset();
                     newmask = rvn.mask >> sa;  // What mask looks like before shift
-                    if (newmask == 0)
-                    {       // Subvariable filled with shifted zero
-                        rop = createOp(CPUI_COPY, 1, rvn);
+                    if (newmask == 0) {
+                        // Subvariable filled with shifted zero
+                        rop = createOp(OpCode.CPUI_COPY, 1, rvn);
                         addNewConstant(rop, 0, (ulong)0);
                         return true;
                     }
                     if ((newmask << sa) != rvn.mask)
                         break;          // subvariable is truncated by shift
-                    rop = createOp(CPUI_COPY, 1, rvn);
+                    rop = createOp(OpCode.CPUI_COPY, 1, rvn);
                     if (!createLink(rop, newmask, 0, op.getIn(0))) return false;
                     return true;
                 case OpCode.CPUI_INT_RIGHT:
                     if (!op.getIn(1).isConstant()) break; // Dynamic shift
                     sa = (int)op.getIn(1).getOffset();
                     newmask = (rvn.mask << sa) & Globals.calc_mask(op.getIn(0).getSize());
-                    if (newmask == 0)
-                    {       // Subvariable filled with shifted zero
-                        rop = createOp(CPUI_COPY, 1, rvn);
+                    if (newmask == 0) {
+                        // Subvariable filled with shifted zero
+                        rop = createOp(OpCode.CPUI_COPY, 1, rvn);
                         addNewConstant(rop, 0, (ulong)0);
                         return true;
                     }
                     if ((newmask >> sa) != rvn.mask)
                         break;          // subvariable is truncated by shift
-                    rop = createOp(CPUI_COPY, 1, rvn);
+                    rop = createOp(OpCode.CPUI_COPY, 1, rvn);
                     if (!createLink(rop, newmask, 0, op.getIn(0))) return false;
                     return true;
                 case OpCode.CPUI_INT_SRIGHT:
@@ -861,7 +839,7 @@ namespace Sla.DECCORE
                     newmask = (rvn.mask << sa) & Globals.calc_mask(op.getIn(0).getSize());
                     if ((newmask >> sa) != rvn.mask)
                         break;          // subvariable is truncated by shift
-                    rop = createOp(CPUI_COPY, 1, rvn);
+                    rop = createOp(OpCode.CPUI_COPY, 1, rvn);
                     if (!createLink(rop, newmask, 0, op.getIn(0))) return false;
                     return true;
                 case OpCode.CPUI_INT_MULT:
@@ -871,16 +849,15 @@ namespace Sla.DECCORE
                         int sa2 = Globals.leastsigbit_set(op.getIn(1).getNZMask());
                         if (sa2 < sa) return false; // Cannot deal with carries into logical multiply
                         newmask = rvn.mask >> sa;
-                        rop = createOp(CPUI_INT_MULT, 2, rvn);
+                        rop = createOp(OpCode.CPUI_INT_MULT, 2, rvn);
                         if (!createLink(rop, newmask, 0, op.getIn(0))) return false;
                         if (!createLink(rop, rvn.mask, 1, op.getIn(1))) return false;
                     }
-                    else
-                    {
+                    else {
                         if (rvn.mask == (ulong)1)
-                            rop = createOp(CPUI_INT_AND, 2, rvn); // Single bit multiply
+                            rop = createOp(OpCode.CPUI_INT_AND, 2, rvn); // Single bit multiply
                         else
-                            rop = createOp(CPUI_INT_MULT, 2, rvn);
+                            rop = createOp(OpCode.CPUI_INT_MULT, 2, rvn);
                         if (!createLink(rop, rvn.mask, 0, op.getIn(0))) return false;
                         if (!createLink(rop, rvn.mask, 1, op.getIn(1))) return false;
                     }
@@ -888,21 +865,19 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_SUBPIECE:
                     sa = (int)op.getIn(1).getOffset() * 8;
                     newmask = rvn.mask << sa;
-                    rop = createOp(CPUI_COPY, 1, rvn);
+                    rop = createOp(OpCode.CPUI_COPY, 1, rvn);
                     if (!createLink(rop, newmask, 0, op.getIn(0))) return false;
                     return true;
                 case OpCode.CPUI_PIECE:
-                    if ((rvn.mask & Globals.calc_mask(op.getIn(1).getSize())) == rvn.mask)
-                    {
-                        rop = createOp(CPUI_COPY, 1, rvn);
+                    if ((rvn.mask & Globals.calc_mask(op.getIn(1).getSize())) == rvn.mask) {
+                        rop = createOp(OpCode.CPUI_COPY, 1, rvn);
                         if (!createLink(rop, rvn.mask, 0, op.getIn(1))) return false;
                         return true;
                     }
                     sa = op.getIn(1).getSize() * 8;
                     newmask = rvn.mask >> sa;
-                    if (newmask << sa == rvn.mask)
-                    {
-                        rop = createOp(CPUI_COPY, 1, rvn);
+                    if (newmask << sa == rvn.mask) {
+                        rop = createOp(OpCode.CPUI_COPY, 1, rvn);
                         if (!createLink(rop, newmask, 0, op.getIn(0))) return false;
                         return true;
                     }
@@ -932,7 +907,7 @@ namespace Sla.DECCORE
                     // Mask won't be 1, because setReplacement takes care of it
                     if ((rvn.mask & 1) == 1) break; // Not normal variable flow
                                                      // Variable is filled with zero
-                    rop = createOp(CPUI_COPY, 1, rvn);
+                    rop = createOp(OpCode.CPUI_COPY, 1, rvn);
                     addNewConstant(rop, 0, (ulong)0);
                     return true;
                 default:
@@ -949,26 +924,23 @@ namespace Sla.DECCORE
         /// \return \b true if the logical value can successfully traced forward one level
         private bool traceForwardSext(ReplaceVarnode rvn)
         {
-            ReplaceOp* rop;
-            PcodeOp* op;
-            Varnode* outvn;
+            ReplaceOp rop;
+            PcodeOp op;
+            Varnode? outvn;
             int slot;
             int dcount = 0;
             int hcount = 0;
             int callcount = 0;
 
-            list<PcodeOp*>::const_iterator iter, enditer;
-            enditer = rvn.vn.endDescend();
-            for (iter = rvn.vn.beginDescend(); iter != enditer; ++iter)
-            {
-                op = *iter;
+            IEnumerator<PcodeOp> iter = rvn.vn.beginDescend();
+            while (iter.MoveNext()) {
+                op = iter.Current;
                 outvn = op.getOut();
                 if ((outvn != (Varnode)null) && outvn.isMark() && !op.isCall())
                     continue;
                 dcount += 1;        // Count this descendant
                 slot = op.getSlot(rvn.vn);
-                switch (op.code())
-                {
+                switch (op.code()) {
                     case OpCode.CPUI_COPY:
                     case OpCode.CPUI_MULTIEQUAL:
                     case OpCode.CPUI_INT_NEGATE:
@@ -980,13 +952,13 @@ namespace Sla.DECCORE
                         hcount += 1;
                         break;
                     case OpCode.CPUI_INT_SEXT:     // extended logical variable into even larger container
-                        rop = createOpDown(CPUI_COPY, 1, op, rvn, 0);
+                        rop = createOpDown(OpCode.CPUI_COPY, 1, op, rvn, 0);
                         if (!createLink(rop, rvn.mask, -1, outvn)) return false;
                         hcount += 1;
                         break;
                     case OpCode.CPUI_INT_SRIGHT:
                         if (!op.getIn(1).isConstant()) return false; // Right now we only deal with constant shifts
-                        rop = createOpDown(CPUI_INT_SRIGHT, 2, op, rvn, 0);
+                        rop = createOpDown(OpCode.CPUI_INT_SRIGHT, 2, op, rvn, 0);
                         if (!createLink(rop, rvn.mask, -1, outvn)) return false; // Keep the same mask size
                         addConstant(rop, Globals.calc_mask(op.getIn(1).getSize()), 1, op.getIn(1)); // Preserve the shift amount
                         hcount += 1;
@@ -1030,8 +1002,7 @@ namespace Sla.DECCORE
                         return false;
                 }
             }
-            if (dcount != hcount)
-            {
+            if (dcount != hcount) {
                 // Must account for all descendants of an input
                 if (rvn.vn.isInput()) return false;
             }
@@ -1072,14 +1043,14 @@ namespace Sla.DECCORE
                     break;
                 case OpCode.CPUI_INT_SEXT:
                     if (flowsize != op.getIn(0).getSize()) return false;
-                    rop = createOp(CPUI_COPY, 1, rvn);
+                    rop = createOp(OpCode.CPUI_COPY, 1, rvn);
                     if (!createLink(rop, rvn.mask, 0, op.getIn(0))) return false;
                     return true;
                 case OpCode.CPUI_INT_SRIGHT:
                     // A sign-extended logical value is arithmetically right-shifted
                     // we can replace with the logical value, keeping the same shift amount
                     if (!op.getIn(1).isConstant()) return false;
-                    rop = createOp(CPUI_INT_SRIGHT, 2, rvn);
+                    rop = createOp(OpCode.CPUI_INT_SRIGHT, 2, rvn);
                     if (!createLink(rop, rvn.mask, 0, op.getIn(0))) return false; // Keep the same mask
                     if (rop.input.size() == 1)
                         addConstant(rop, Globals.calc_mask(op.getIn(1).getSize()), 1, op.getIn(1)); // Preserve the shift amount

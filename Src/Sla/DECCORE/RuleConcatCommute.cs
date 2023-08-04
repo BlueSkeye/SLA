@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +31,7 @@ namespace Sla.DECCORE
         ///   - `concat( V, W | c)  =>  concat(V,W) | c`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_PIECE);
+            oplist.Add(OpCode.CPUI_PIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

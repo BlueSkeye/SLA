@@ -1,5 +1,4 @@
-﻿using ghidra;
-using Sla.DECCORE;
+﻿using Sla.CORE;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -628,7 +627,7 @@ namespace Sla.DECCORE
             {
                 // We should be able to get the callspec
                 FuncCallSpecs* fc = fd.getCallSpecs(op);
-                if (fc == (FuncCallSpecs*)0) return true;       // Assume indirect effect
+                if (fc == (FuncCallSpecs)null) return true;       // Assume indirect effect
                 return (fc.hasEffectTranslate(addr, size) != EffectRecord::unaffected);
             }
             // If we reach here, this is a CALLOTHER, NEW
@@ -648,12 +647,15 @@ namespace Sla.DECCORE
         private Varnode normalizeReadSize(Varnode vn, Address addr, int size)
         {
             int overlap;
-            Varnode* vn1,*vn2;
-            PcodeOp* op,*newop;
+            Varnode vn1, vn2;
+            PcodeOp op, newop;
 
-            list<PcodeOp*>::const_iterator oiter = vn.beginDescend();
-            op = *oiter++;
-            if (oiter != vn.endDescend())
+            IEnumerator<PcodeOp> oiter = vn.beginDescend();
+            if (!oiter.MoveNext()) {
+                throw new BugException();
+            }
+            op = oiter.Current;
+            if (oiter.MoveNext())
                 throw new LowlevelError("Free varnode with multiple reads");
             newop = fd.newOp(2, op.getAddr());
             fd.opSetOpcode(newop, OpCode.CPUI_SUBPIECE);
@@ -1154,8 +1156,8 @@ namespace Sla.DECCORE
         /// \return \b true if there are any new STOREs needing a guard
         private bool protectFreeStores(AddrSpace spc, List<PcodeOp> freeStores)
         {
-            list<PcodeOp*>::const_iterator iter = fd.beginOp(CPUI_STORE);
-            list<PcodeOp*>::const_iterator enditer = fd.endOp(CPUI_STORE);
+            list<PcodeOp*>::const_iterator iter = fd.beginOp(OpCode.CPUI_STORE);
+            list<PcodeOp*>::const_iterator enditer = fd.endOp(OpCode.CPUI_STORE);
             bool hasNew = false;
             while (iter != enditer)
             {
@@ -1713,8 +1715,8 @@ namespace Sla.DECCORE
             AddrSpace* spc = addr.getSpace();
             AddrSpace* container = spc.getContain();
 
-            iterend = fd.endOp(CPUI_STORE);
-            for (iter = fd.beginOp(CPUI_STORE); iter != iterend; ++iter)
+            iterend = fd.endOp(OpCode.CPUI_STORE);
+            for (iter = fd.beginOp(OpCode.CPUI_STORE); iter != iterend; ++iter)
             {
                 op = *iter;
                 if (op.isDead()) continue;
@@ -1749,7 +1751,7 @@ namespace Sla.DECCORE
             while (iter != loadGuard.end())
             {
                 LoadGuard & guardRec(*iter);
-                if (!guardRec.isValid(CPUI_LOAD))
+                if (!guardRec.isValid(OpCode.CPUI_LOAD))
                 {
                     list<LoadGuard>::iterator copyIter = iter;
                     ++iter;
@@ -1792,8 +1794,8 @@ namespace Sla.DECCORE
             int offset = (int)(vData.offset - addr.getOffset());  // Number of least significant bytes to truncate
             if (vData.space.isBigEndian())
                 offset = (size - vData.size) - offset;
-            iterend = fd.endOp(CPUI_RETURN);
-            for (iter = fd.beginOp(CPUI_RETURN); iter != iterend; ++iter)
+            iterend = fd.endOp(OpCode.CPUI_RETURN);
+            for (iter = fd.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter)
             {
                 PcodeOp* op = *iter;
                 if (op.isDead()) continue;
@@ -1836,8 +1838,8 @@ namespace Sla.DECCORE
                 else if (outputCharacter != ParamEntry::no_containment)
                 {
                     active.registerTrial(addr, size);
-                    iterend = fd.endOp(CPUI_RETURN);
-                    for (iter = fd.beginOp(CPUI_RETURN); iter != iterend; ++iter)
+                    iterend = fd.endOp(OpCode.CPUI_RETURN);
+                    for (iter = fd.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter)
                     {
                         op = *iter;
                         if (op.isDead()) continue;
@@ -1849,8 +1851,8 @@ namespace Sla.DECCORE
                 }
             }
             if ((fl & Varnode.varnode_flags.persist) == 0) return;
-            iterend = fd.endOp(CPUI_RETURN);
-            for (iter = fd.beginOp(CPUI_RETURN); iter != iterend; ++iter)
+            iterend = fd.endOp(OpCode.CPUI_RETURN);
+            for (iter = fd.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter)
             {
                 op = *iter;
                 if (op.isDead()) continue;
@@ -2216,7 +2218,6 @@ namespace Sla.DECCORE
         {
             List<Varnode> writelist = new List<Varnode>(); // List varnodes that are written in this block
             BlockBasic subbl;
-            IEnumerator<PcodeOp> oiter;
             IEnumerator<PcodeOp> suboiter;
             PcodeOp op;
             PcodeOp multiop;
@@ -2225,21 +2226,18 @@ namespace Sla.DECCORE
             Varnode vnnew;
             int i, slot;
 
-            for (oiter = bl.beginOp(); oiter != bl.endOp(); ++oiter)
-            {
-                op = *oiter;
-                if (op.code() != OpCode.CPUI_MULTIEQUAL)
-                {
+            IEnumerator<PcodeOp> oiter = bl.beginOp();
+            while (oiter.MoveNext()) {
+                op = oiter.Current;
+                if (op.code() != OpCode.CPUI_MULTIEQUAL) {
                     // First replace reads with top of stack
-                    for (slot = 0; slot < op.numInput(); ++slot)
-                    {
+                    for (slot = 0; slot < op.numInput(); ++slot) {
                         vnin = op.getIn(slot);
                         if (vnin.isHeritageKnown()) continue; // not free
                         if (!vnin.isActiveHeritage()) continue; // Not being heritaged this round
                         vnin.clearActiveHeritage();
-                        List<Varnode*> & stack(varstack[vnin.getAddr()]);
-                        if (stack.empty())
-                        {
+                        List<Varnode> stack(varstack[vnin.getAddr()]);
+                        if (stack.empty()) {
                             vnnew = fd.newVarnode(vnin.getSize(), vnin.getAddr());
                             vnnew = fd.setInputVarnode(vnnew);
                             stack.Add(vnnew);
@@ -2247,15 +2245,12 @@ namespace Sla.DECCORE
                         else
                             vnnew = stack.GetLastItem();
                         // INDIRECTs and their op really happen AT SAME TIME
-                        if (vnnew.isWritten() && (vnnew.getDef().code() == OpCode.CPUI_INDIRECT))
-                        {
-                            if (PcodeOp::getOpFromConst(vnnew.getDef().getIn(1).getAddr()) == op)
-                            {
-                                if (stack.size() == 1)
-                                {
+                        if (vnnew.isWritten() && (vnnew.getDef().code() == OpCode.CPUI_INDIRECT)) {
+                            if (PcodeOp.getOpFromConst(vnnew.getDef().getIn(1).getAddr()) == op) {
+                                if (stack.size() == 1) {
                                     vnnew = fd.newVarnode(vnin.getSize(), vnin.getAddr());
                                     vnnew = fd.setInputVarnode(vnnew);
-                                    stack.insert(stack.begin(), vnnew);
+                                    stack.Insert(0, vnnew);
                                 }
                                 else
                                     vnnew = stack[stack.size() - 2];
@@ -2274,20 +2269,16 @@ namespace Sla.DECCORE
                 varstack[vnout.getAddr()].Add(vnout); // Push write onto stack
                 writelist.Add(vnout);
             }
-            for (i = 0; i < bl.sizeOut(); ++i)
-            {
-                subbl = (BlockBasic*)bl.getOut(i);
+            for (i = 0; i < bl.sizeOut(); ++i) {
+                subbl = (BlockBasic)bl.getOut(i);
                 slot = bl.getOutRevIndex(i);
-                for (suboiter = subbl.beginOp(); suboiter != subbl.endOp(); ++suboiter)
-                {
+                for (suboiter = subbl.beginOp(); suboiter != subbl.endOp(); ++suboiter) {
                     multiop = *suboiter;
                     if (multiop.code() != OpCode.CPUI_MULTIEQUAL) break; // For each MULTIEQUAL
                     vnin = multiop.getIn(slot);
-                    if (!vnin.isHeritageKnown())
-                    {
-                        List<Varnode*> & stack(varstack[vnin.getAddr()]);
-                        if (stack.empty())
-                        {
+                    if (!vnin.isHeritageKnown()) {
+                        List<Varnode> stack(varstack[vnin.getAddr()]);
+                        if (stack.empty()) {
                             vnnew = fd.newVarnode(vnin.getSize(), vnin.getAddr());
                             vnnew = fd.setInputVarnode(vnnew);
                             stack.Add(vnnew);
@@ -2302,11 +2293,10 @@ namespace Sla.DECCORE
             }
             // Now we recurse to subtrees
             i = bl.getIndex();
-            for (slot = 0; slot < domchild[i].size(); ++slot)
-                renameRecurse((BlockBasic*)domchild[i][slot], varstack);
+            for (slot = 0; slot < domchild[i].Count; ++slot)
+                renameRecurse((BlockBasic)domchild[i][slot], varstack);
             // Now we pop this blocks writes of the stack
-            for (i = 0; i < writelist.size(); ++i)
-            {
+            for (i = 0; i < writelist.Count; ++i) {
                 vnout = writelist[i];
                 varstack[vnout.getAddr()].RemoveLastItem();
             }

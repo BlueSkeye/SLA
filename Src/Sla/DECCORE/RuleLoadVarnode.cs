@@ -162,7 +162,7 @@ namespace Sla.DECCORE
                 if (placeOp != (PcodeOp)null)
                 {
                     FuncCallSpecs* fc = data.getCallSpecs(placeOp);
-                    if (fc != (FuncCallSpecs*)0)
+                    if (fc != (FuncCallSpecs)null)
                         fc.resolveSpacebaseRelative(data, refvn);
                 }
             }

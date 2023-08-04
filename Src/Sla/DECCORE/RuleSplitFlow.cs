@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +31,7 @@ namespace Sla.DECCORE
         /// If so:  split the pieces into independent data-flows
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_SUBPIECE);
+            oplist.Add(OpCode.CPUI_SUBPIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

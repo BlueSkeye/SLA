@@ -187,7 +187,6 @@ namespace Sla.DECCORE
             Varnode subvn;
             Varnode indexvn;
             Varnode othervn;
-            IEnumerator<PcodeOp> iter;
             PcodeOp op;
             bool nonadduse;
             int i = 0;
@@ -199,8 +198,9 @@ namespace Sla.DECCORE
                 vn = vnqueue[i].@base;
                 indexvn = vnqueue[i++].index;
                 nonadduse = false;
-                for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter) {
-                    op = *iter;
+                IEnumerator<PcodeOp> iter = vn.beginDescend();
+                while (iter.MoveNext()) {
+                    op = iter.Current;
                     switch (op.code()) {
                         case OpCode.CPUI_COPY:
                             nonadduse = true;   // Treat COPY as both non-add use and part of ADD expression

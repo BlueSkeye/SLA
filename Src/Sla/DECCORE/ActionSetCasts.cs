@@ -421,7 +421,6 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            IEnumerator<PcodeOp> iter;
             PcodeOp op;
 
             data.startCastPhase();
@@ -429,28 +428,28 @@ namespace Sla.DECCORE
             // We follow data flow, doing basic blocks in dominance order
             // Doing operations in basic block order
             BlockGraph basicblocks = data.getBasicBlocks();
-            for (int j = 0; j < basicblocks.getSize(); ++j)
-            {
+            for (int j = 0; j < basicblocks.getSize(); ++j) {
                 BlockBasic bb = (BlockBasic)basicblocks.getBlock(j);
-                for (iter = bb.beginOp(); iter != bb.endOp(); ++iter)
-                {
-                    op = *iter;
+                IEnumerator<PcodeOp> iter = bb.beginOp();
+                while (iter.MoveNext()) {
+                    op = iter.Current;
                     if (op.notPrinted()) continue;
                     OpCode opc = op.code();
                     if (opc == OpCode.CPUI_CAST) continue;
                     if (opc == OpCode.CPUI_PTRADD)
                     {   // Check for PTRADD that no longer fits its pointer
                         int sz = (int)op.getIn(2).getOffset();
-                        TypePointer* ct = (TypePointer*)op.getIn(0).getHighTypeReadFacing(op);
-                        if ((ct.getMetatype() != type_metatype.TYPE_PTR) || (ct.getPtrTo().getSize() != AddrSpace::addressToByteInt(sz, ct.getWordSize())))
-                            data.opUndoPtradd(op, true);
-                    }
-                    else if (opc == OpCode.CPUI_PTRSUB)
-                    {   // Check for PTRSUB that no longer fits pointer
-                        if (!op.getIn(0).getHighTypeReadFacing(op).isPtrsubMatching(op.getIn(1).getOffset()))
+                        TypePointer ct = (TypePointer)op.getIn(0).getHighTypeReadFacing(op);
+                        if (   (ct.getMetatype() != type_metatype.TYPE_PTR)
+                            || (ct.getPtrTo().getSize() != AddrSpace.addressToByteInt(sz, ct.getWordSize())))
                         {
-                            if (op.getIn(1).getOffset() == 0)
-                            {
+                            data.opUndoPtradd(op, true);
+                        }
+                    }
+                    else if (opc == OpCode.CPUI_PTRSUB) {
+                        // Check for PTRSUB that no longer fits pointer
+                        if (!op.getIn(0).getHighTypeReadFacing(op).isPtrsubMatching(op.getIn(1).getOffset())) {
+                            if (op.getIn(1).getOffset() == 0) {
                                 data.opRemoveInput(op, 1);
                                 data.opSetOpcode(op, OpCode.CPUI_COPY);
                             }
@@ -459,20 +458,17 @@ namespace Sla.DECCORE
                         }
                     }
                     // Do input casts first, as output may depend on input
-                    for (int i = 0; i < op.numInput(); ++i)
-                    {
+                    for (int i = 0; i < op.numInput(); ++i) {
                         count += resolveUnion(op, i, data);
                         count += castInput(op, i, data, castStrategy);
                     }
-                    if (opc == OpCode.CPUI_LOAD)
-                    {
+                    if (opc == OpCode.CPUI_LOAD) {
                         checkPointerIssues(op, op.getOut(), data);
                     }
-                    else if (opc == OpCode.CPUI_STORE)
-                    {
+                    else if (opc == OpCode.CPUI_STORE) {
                         checkPointerIssues(op, op.getIn(2), data);
                     }
-                    Varnode* vn = op.getOut();
+                    Varnode? vn = op.getOut();
                     if (vn == (Varnode)null) continue;
                     count += castOutput(op, data, castStrategy);
                 }

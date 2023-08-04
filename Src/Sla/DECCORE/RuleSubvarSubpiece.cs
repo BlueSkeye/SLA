@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Perform SubVariableFlow analysis triggered by SUBPIECE
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_SUBPIECE);
+            oplist.Add(OpCode.CPUI_SUBPIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

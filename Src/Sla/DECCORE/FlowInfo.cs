@@ -127,7 +127,7 @@ namespace Sla.DECCORE
         /// Does the function have registered flow override instructions
         private bool flowoverride_present;
         /// Boolean options for flow following
-        private uint flags;
+        private FlowInfo.FlowFlag flags;
         /// First function in the in-lining chain
         private Funcdata inline_head;
         /// Active list of addresses for function that are in-lined
@@ -211,9 +211,8 @@ namespace Sla.DECCORE
         /// \param oiter is the point within the raw p-code list where deletion should start
         private void deleteRemainingOps(IEnumerator<PcodeOp> oiter)
         {
-            while (oiter != obank.endDead())
-            {
-                PcodeOp* op = *oiter;
+            while (oiter != obank.endDead()) {
+                PcodeOp op = oiter.Current;
                 ++oiter;
                 data.opDestroyRaw(op);
             }
@@ -233,31 +232,27 @@ namespace Sla.DECCORE
         /// \param isfallthru passes back if the instruction has fall-thru flow
         /// \param fc if the p-code is generated from an \e injection, this holds the reference to the injecting sub-function
         /// \return the last processed PcodeOp (or NULL if there were no ops in the instruction)
-        private PcodeOp xrefControlFlow(IEnumerator<PcodeOp> oiter, bool startbasic,
-            bool isfallthru, FuncCallSpecs fc)
+        private PcodeOp xrefControlFlow(IEnumerator<PcodeOp> oiter, bool startbasic, bool isfallthru,
+            FuncCallSpecs fc)
         {
-            PcodeOp* op = (PcodeOp)null;
+            PcodeOp? op = (PcodeOp)null;
             isfallthru = false;
             uint maxtime = 0;  // Deepest internal relative branch
-            while (oiter != obank.endDead())
-            {
+            bool loopCompleted = false;
+            while (!loopCompleted && (oiter != obank.endDead())) {
                 op = *oiter++;
-                if (startbasic)
-                {
+                if (startbasic) {
                     data.opMarkStartBasic(op);
                     startbasic = false;
                 }
-                switch (op.code())
-                {
+                switch (op.code()) {
                     case OpCode.CPUI_CBRANCH:
                         {
                             Address destaddr = op.getIn(0).getAddr();
-                            if (destaddr.isConstant())
-                            {
+                            if (destaddr.isConstant()) {
                                 Address fallThruAddr;
-                                PcodeOp* destop = findRelTarget(op, fallThruAddr);
-                                if (destop != (PcodeOp)null)
-                                {
+                                PcodeOp? destop = findRelTarget(op, fallThruAddr);
+                                if (destop != (PcodeOp)null) {
                                     data.opMarkStartBasic(destop);  // Make sure the target op is a basic block start
                                     uint newtime = destop.getTime();
                                     if (newtime > maxtime)
@@ -274,12 +269,10 @@ namespace Sla.DECCORE
                     case OpCode.CPUI_BRANCH:
                         {
                             Address destaddr = op.getIn(0).getAddr();
-                            if (destaddr.isConstant())
-                            {
+                            if (destaddr.isConstant()) {
                                 Address fallThruAddr;
-                                PcodeOp* destop = findRelTarget(op, fallThruAddr);
-                                if (destop != (PcodeOp)null)
-                                {
+                                PcodeOp? destop = findRelTarget(op, fallThruAddr);
+                                if (destop != (PcodeOp)null) {
                                     data.opMarkStartBasic(destop);  // Make sure the target op is a basic block start
                                     uint newtime = destop.getTime();
                                     if (newtime > maxtime)
@@ -290,28 +283,25 @@ namespace Sla.DECCORE
                             }
                             else
                                 newAddress(op, destaddr); // Generate branch address
-                            if (op.getTime() >= maxtime)
-                            {
+                            if (op.getTime() >= maxtime) {
                                 deleteRemainingOps(oiter);
-                                oiter = obank.endDead();
+                                loopCompleted = true;
                             }
                             startbasic = true;
                         }
                         break;
                     case OpCode.CPUI_BRANCHIND:
                         tablelist.Add(op);    // Put off trying to recover the table
-                        if (op.getTime() >= maxtime)
-                        {
+                        if (op.getTime() >= maxtime) {
                             deleteRemainingOps(oiter);
-                            oiter = obank.endDead();
+                            loopCompleted = true;
                         }
                         startbasic = true;
                         break;
                     case OpCode.CPUI_RETURN:
-                        if (op.getTime() >= maxtime)
-                        {
+                        if (op.getTime() >= maxtime) {
                             deleteRemainingOps(oiter);
-                            oiter = obank.endDead();
+                            loopCompleted = true;
                         }
                         startbasic = true;
                         break;
@@ -325,8 +315,8 @@ namespace Sla.DECCORE
                         break;
                     case OpCode.CPUI_CALLOTHER:
                         {
-                            InjectedUserOp* userop = dynamic_cast<InjectedUserOp*>(glb.userops.getOp(op.getIn(0).getOffset()));
-                            if (userop != (InjectedUserOp*)0)
+                            InjectedUserOp? userop = (glb.userops.getOp(op.getIn(0).getOffset())) as InjectedUserOp;
+                            if (userop != (InjectedUserOp)null)
                                 injectlist.Add(op);
                             break;
                         }
@@ -336,14 +326,12 @@ namespace Sla.DECCORE
             }
             if (isfallthru)     // We have seen an explicit relative branch to end of instruction
                 startbasic = true;      // So we know next instruction starts a basicblock
-            else
-            {           // If we haven't seen a relative branch, calculate fallthru by looking at last op
+            else {
+                // If we haven't seen a relative branch, calculate fallthru by looking at last op
                 if (op == (PcodeOp)null)
                     isfallthru = true;  // No ops at all, mean a fallthru
-                else
-                {
-                    switch (op.code())
-                    {
+                else {
+                    switch (op.code()) {
                         case OpCode.CPUI_BRANCH:
                         case OpCode.CPUI_BRANCHIND:
                         case OpCode.CPUI_RETURN:
@@ -373,19 +361,16 @@ namespace Sla.DECCORE
             //  JumpTable *jt;
             list<PcodeOp*>::const_iterator oiter;
             int step;
-            uint flowoverride;
+            Override.Branching flowoverride;
 
-            if (insn_count >= insn_max)
-            {
+            if (insn_count >= insn_max) {
                 if ((flags & error_toomanyinstructions) != 0)
                     throw new LowlevelError("Flow exceeded maximum allowable instructions");
-                else
-                {
+                else {
                     step = 1;
                     artificialHalt(curaddr, PcodeOp.Flags.badinstruction);
                     data.warning("Too many instructions -- Truncating flow here", curaddr);
-                    if (!hasTooManyInstructions())
-                    {
+                    if (!hasTooManyInstructions()) {
                         flags |= toomanyinstructions_present;
                         data.warningHeader("Exceeded maximum allowable instructions: Some flow is truncated");
                     }
@@ -395,8 +380,7 @@ namespace Sla.DECCORE
 
             if (obank.empty())
                 emptyflag = true;
-            else
-            {
+            else {
                 emptyflag = false;
                 oiter = obank.endDead();
                 --oiter;
@@ -404,13 +388,13 @@ namespace Sla.DECCORE
             if (flowoverride_present)
                 flowoverride = data.getOverride().getFlowOverride(curaddr);
             else
-                flowoverride = Override::NONE;
+                flowoverride = Override.Branching.NONE;
 
-            try
-            {
+            try {
                 step = glb.translate.oneInstruction(emitter, curaddr); // Generate ops for instruction
             }
-            catch (UnimplError rr) {  // Instruction is unimplemented
+            catch (UnimplError rr) {
+                // Instruction is unimplemented
                 if ((flags & ignore_unimplemented) != 0)
                 {
                     step = err.instruction_length;
@@ -422,36 +406,32 @@ namespace Sla.DECCORE
                 }
                 else if ((flags & error_unimplemented) != 0)
                     throw err;      // rethrow
-                else
-                {
+                else {
                     // Add infinite loop instruction
                     step = 1;           // Pretend size 1
                     artificialHalt(curaddr, PcodeOp.Flags.unimplemented);
                     data.warning("Unimplemented instruction - Truncating control flow here", curaddr);
-                    if (!hasUnimplemented())
-                    {
+                    if (!hasUnimplemented()) {
                         flags |= unimplemented_present;
                         data.warningHeader("Control flow encountered unimplemented instructions");
                     }
                 }
             }
-  catch (BadDataError err) {
+            catch (BadDataError err) {
                 if ((flags & error_unimplemented) != 0)
                     throw err;      // rethrow
-                else
-                {
+                else {
                     // Add infinite loop instruction
                     step = 1;           // Pretend size 1
                     artificialHalt(curaddr, PcodeOp.Flags.badinstruction);
                     data.warning("Bad instruction - Truncating control flow here", curaddr);
-                    if (!hasBadData())
-                    {
+                    if (!hasBadData()) {
                         flags |= baddata_present;
                         data.warningHeader("Control flow encountered bad instruction data");
                     }
                 }
             }
-            VisitStat & stat(visited[curaddr]); // Mark that we visited this instruction
+            VisitStat stat = visited[curaddr]; // Mark that we visited this instruction
             stat.size = step;       // Record size of instruction
 
             if (curaddr < minaddr)  // Update minimum and maximum address
@@ -464,13 +444,12 @@ namespace Sla.DECCORE
             else
                 ++oiter;
 
-            if (oiter != obank.endDead())
-            {
+            if (oiter != obank.endDead()) {
                 stat.seqnum = (*oiter).getSeqNum();
                 data.opMarkStartInstruction(*oiter); // Mark the first op in the instruction
-                if (flowoverride != Override::NONE)
+                if (flowoverride != Override.Branching.NONE)
                     data.overrideFlow(curaddr, flowoverride);
-                xrefControlFlow(oiter, startbasic, isfallthru, (FuncCallSpecs*)0);
+                xrefControlFlow(oiter, startbasic, isfallthru, (FuncCallSpecs)null);
             }
 
             if (isfallthru)
@@ -582,17 +561,15 @@ namespace Sla.DECCORE
         {
             if (0 == unprocessed.Count) return;
             unprocessed.Sort();
-            List<Address>::iterator iter1, iter2;
+            IEnumerator<Address> iter2;
 
-            iter1 = unprocessed.begin();
+            IEnumerator<Address> iter1 = unprocessed.GetEnumerator();
             Address lastaddr = *iter1++;
             iter2 = iter1;
-            while (iter1 != unprocessed.end())
-            {
+            while (iter1 != unprocessed.end()) {
                 if (*iter1 == lastaddr)
                     iter1++;
-                else
-                {
+                else {
                     lastaddr = *iter1++;
                     *iter2++ = lastaddr;
                 }
@@ -620,26 +597,26 @@ namespace Sla.DECCORE
         /// or for an explicit branch.
         private void collectEdges()
         {
-            list<PcodeOp*>::const_iterator iter, iterend, iter1, iter2;
-            PcodeOp* op,*targ_op;
-            JumpTable* jt;
+            PcodeOp op, targ_op;
+            JumpTable jt;
             bool nextstart;
             int i, num;
 
             if (bblocks.getSize() != 0)
-                throw RecovError("Basic blocks already calculated\n");
+                throw new RecovError("Basic blocks already calculated\n");
 
-            iter = obank.beginDead();
-            iterend = obank.endDead();
-            while (iter != iterend)
-            {
-                op = *iter++;
-                if (iter == iterend)
+            IEnumerator<PcodeOp> iter = obank.beginDead();
+            bool loopCompleted = !iter.MoveNext();
+            while (!loopCompleted) {
+                op = iter.Current;
+                if (!iter.MoveNext()) {
+                    loopCompleted = true;
                     nextstart = true;
-                else
-                    nextstart = (*iter).isBlockStart();
-                switch (op.code())
-                {
+                }
+                else {
+                    nextstart = iter.Current.isBlockStart();
+                }
+                switch (op.code()) {
                     case OpCode.CPUI_BRANCH:
                         targ_op = branchTarget(op);
                         block_edge1.Add(op);
@@ -648,27 +625,24 @@ namespace Sla.DECCORE
                         break;
                     case OpCode.CPUI_BRANCHIND:
                         jt = data.findJumpTable(op);
-                        if (jt == (JumpTable*)0) break;
+                        if (jt == (JumpTable)null) break;
                         // If we are in this routine and there is no table
                         // Then we must be doing partial flow analysis
                         // so assume there are no branches out
                         num = jt.numEntries();
-                        for (i = 0; i < num; ++i)
-                        {
+                        for (i = 0; i < num; ++i) {
                             targ_op = target(jt.getAddressByIndex(i));
                             if (targ_op.isMark()) continue; // Already a link between these blocks
                             targ_op.setMark();
                             block_edge1.Add(op);
                             block_edge2.Add(targ_op);
                         }
-                        iter1 = block_edge1.end(); // Clean up our marks
-                        iter2 = block_edge2.end();
-                        while (iter1 != block_edge1.begin())
-                        {
-                            --iter1;
-                            --iter2;
-                            if ((*iter1) == op)
-                                (*iter2).clearMark();
+                        IEnumerator<PcodeOp> iter1 = block_edge1.GetReverseEnumerator(); // Clean up our marks
+                        IEnumerator<PcodeOp> iter2 = block_edge2.GetReverseEnumerator();
+                        while (iter1.MoveNext()) {
+                            iter2.MoveNext();
+                            if (iter1.Current == op)
+                                iter2.Current.clearMark();
                             else
                                 break;
                         }
@@ -684,8 +658,8 @@ namespace Sla.DECCORE
                         block_edge2.Add(targ_op);
                         break;
                     default:
-                        if (nextstart)
-                        {       // Put in fallthru edge if new basic block
+                        if (nextstart) {
+                            // Put in fallthru edge if new basic block
                             targ_op = fallthruOp(op);
                             block_edge1.Add(op);
                             block_edge2.Add(targ_op);
@@ -858,25 +832,23 @@ namespace Sla.DECCORE
             if (iter == visited.begin()) return; // Should never happen
             --iter;
             Address addr2 = (*iter).first;
-            ostringstream s;
+            StringWriter s = new StringWriter();
 
-            s << "Instruction at (" << addr.getSpace().getName() << ',';
+            s.Write($"Instruction at ({addr.getSpace().getName()},");
             addr.printRaw(s);
-            s << ") overlaps instruction at (" << addr2.getSpace().getName() << ',';
+            s.Write($") overlaps instruction at ({addr2.getSpace().getName()},");
             addr2.printRaw(s);
-            s << ')' << endl;
+            s.WriteLine(')');
             if ((flags & error_reinterpreted) != 0)
                 throw new LowlevelError(s.str());
 
-            if ((flags & reinterpreted_present) == 0)
-            {
+            if ((flags & reinterpreted_present) == 0) {
                 flags |= reinterpreted_present;
-                data.warningHeader(s.str());
+                data.warningHeader(s.ToString());
             }
         }
 
         /// \brief Check for modifications to flow at a call site given the recovered FuncCallSpecs
-        ///
         /// The sub-function may be in-lined or never return.
         /// \param fspecs is the given call site
         /// \return \b true if the sub-function never returns
@@ -937,7 +909,7 @@ namespace Sla.DECCORE
 
             data.getOverride().applyPrototype(data, *res);
             queryCall(*res);
-            if (fc != (FuncCallSpecs*)0)
+            if (fc != (FuncCallSpecs)null)
             {   // If we are already in the midst of an injection
                 if (fc.getEntryAddress() == res.getEntryAddress())
                     res.cancelInjectId();      // Don't allow recursion
@@ -959,7 +931,7 @@ namespace Sla.DECCORE
             qlst.Add(res);
 
             data.getOverride().applyIndirect(data, *res);
-            if (fc != (FuncCallSpecs*)0 && fc.getEntryAddress() == res.getEntryAddress())
+            if (fc != (FuncCallSpecs)null && fc.getEntryAddress() == res.getEntryAddress())
                 res.setAddress(Address()); // Cancel any indirect override
             data.getOverride().applyPrototype(data, *res);
             queryCall(*res);
@@ -980,9 +952,9 @@ namespace Sla.DECCORE
         private void xrefInlinedBranch(PcodeOp op)
         {
             if (op.code() == OpCode.CPUI_CALL)
-                setupCallSpecs(op, (FuncCallSpecs*)0);
+                setupCallSpecs(op, (FuncCallSpecs)null);
             else if (op.code() == OpCode.CPUI_CALLIND)
-                setupCallindSpecs(op, (FuncCallSpecs*)0);
+                setupCallindSpecs(op, (FuncCallSpecs)null);
             else if (op.code() == OpCode.CPUI_BRANCHIND)
             {
                 JumpTable* jt = data.linkJumpTable(op);
@@ -1003,36 +975,38 @@ namespace Sla.DECCORE
             FuncCallSpecs fc)
         {
             // Create marker at current end of the deadlist
-            list<PcodeOp*>::const_iterator iter = obank.endDead();
-            --iter;         // There must be at least one op
+            IEnumerator<PcodeOp> iter = obank.beginReverseDead();
 
             payload.inject(icontext, emitter);     // Do the injection
 
             bool startbasic = op.isBlockStart();
-            ++iter;         // Now points to first op in the injection
-            if (iter == obank.endDead())
+            // There must be at least one op
+            // Now points to first op in the injection
+            if (!iter.MoveNext()) {
                 throw new LowlevelError("Empty injection: " + payload.getName());
-            PcodeOp* firstop = *iter;
+            }
+            PcodeOp firstop = iter.Current;
             bool isfallthru = true;
-            PcodeOp* lastop = xrefControlFlow(iter, startbasic, isfallthru, fc);
+            PcodeOp lastop = xrefControlFlow(iter, startbasic, isfallthru, fc);
 
-            if (startbasic)
-            {       // If the inject code does NOT fall thru
+            if (startbasic) {       // If the inject code does NOT fall thru
                 iter = op.getInsertIter();
                 ++iter;         // Mark next op after the call
                 if (iter != obank.endDead())
-                    data.opMarkStartBasic(*iter); // as start of basic block
+                    data.opMarkStartBasic(iter.Current); // as start of basic block
             }
 
             if (payload.isIncidentalCopy())
                 obank.markIncidentalCopy(firstop, lastop);
             obank.moveSequenceDead(firstop, lastop, op); // Move the injection to right after the call
 
-            Dictionary<Address, VisitStat>::iterator viter = visited.find(op.getAddr());
-            if (viter != visited.end())
-            {               // Check if -op- is a possible branch target
-                if ((*viter).second.seqnum == op.getSeqNum())  // (if injection op is the first op for its address)
-                    (*viter).second.seqnum = firstop.getSeqNum();  //    change the seqnum to the first injected op
+            VisitStat visitStatus;
+            if (visited.TryGetValue(op.getAddr(), out visitStatus)) {
+                // Check if -op- is a possible branch target
+                if (visitStatus.seqnum == op.getSeqNum())
+                    // (if injection op is the first op for its address)
+                    // change the seqnum to the first injected op
+                    visitStatus.seqnum = firstop.getSeqNum();
             }
             // Get rid of the original call
             data.opDestroyRaw(op);
@@ -1065,7 +1039,7 @@ namespace Sla.DECCORE
                 icontext.output.GetLastItem().offset = outvn.getOffset();
                 icontext.output.GetLastItem().size = outvn.getSize();
             }
-            doInjection(payload, icontext, op, (FuncCallSpecs*)0);
+            doInjection(payload, icontext, op, (FuncCallSpecs)null);
         }
 
         /// In-line the sub-function at the given call site
@@ -1172,7 +1146,7 @@ namespace Sla.DECCORE
             int num = data.numJumpTables();
             for (int i = 0; i < num; ++i) {
                 JumpTable jt = data.getJumpTable(i);
-                if (jt.checkForMultistage(&data))
+                if (jt.checkForMultistage(data))
                     tablelist.Add(jt.getIndirectOp());
             }
         }
@@ -1238,7 +1212,7 @@ namespace Sla.DECCORE
         private void truncateIndirectJump(PcodeOp op, int failuremode)
         {
             data.opSetOpcode(op, OpCode.CPUI_CALLIND); // Turn jump into call
-            setupCallindSpecs(op, (FuncCallSpecs*)0);
+            setupCallindSpecs(op, (FuncCallSpecs)null);
             if (failuremode != 2)                   // Unless the switch was a thunk mechanism
                 data.getCallSpecs(op).setBadJumpTable(true);   // Consider using special name for switch variable
 
@@ -1317,13 +1291,12 @@ namespace Sla.DECCORE
             addrlist = op2.addrlist;
             visited = op2.visited;
             inline_head = op2.inline_head;
-            if (inline_head != (Funcdata)null)
-            {
+            if (inline_head != (Funcdata)null) {
                 inline_base = op2.inline_base;
-                inline_recursion = &inline_base;
+                inline_recursion = inline_base;
             }
             else
-                inline_recursion = (set<Address>*)0;
+                inline_recursion = (set<Address>)null;
             insn_count = op2.insn_count;
             insn_max = op2.insn_max;
             flowoverride_present = data.getOverride().hasFlowOverride();
@@ -1343,13 +1316,13 @@ namespace Sla.DECCORE
         }
 
         /// Enable a specific option
-        public void setFlags(uint val)
+        public void setFlags(FlowInfo.FlowFlag val)
         {
             flags |= val;
         }
 
         /// Disable a specific option
-        public void clearFlags(uint val)
+        public void clearFlags(FlowInfo.FlowFlag val)
         {
             flags &= ~val;
         }
@@ -1500,12 +1473,10 @@ namespace Sla.DECCORE
                 return false;
             }
 
-            if (!inlinefd.getFuncProto().isNoReturn())
-            {
+            if (!inlinefd.getFuncProto().isNoReturn()) {
                 list<PcodeOp*>::iterator iter = op.getInsertIter();
                 ++iter;
-                if (iter == obank.endDead())
-                {
+                if (iter == obank.endDead()) {
                     inline_head.warning("No fallthrough prevents inlining here", op.getAddr());
                     return false;
                 }
@@ -1529,12 +1500,10 @@ namespace Sla.DECCORE
         /// \return \b true if this flow contains no CALL or BRANCH ops
         public bool checkEZModel()
         {
-            list<PcodeOp*>::const_iterator iter = obank.beginDead();
-            while (iter != obank.endDead())
-            {
-                PcodeOp* op = *iter;
+            IEnumerator<PcodeOp> iter = obank.beginDead();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if (op.isCallOrBranch()) return false;
-                ++iter;
             }
             return true;
         }

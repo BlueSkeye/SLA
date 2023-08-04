@@ -292,16 +292,15 @@ namespace Sla.DECCORE
             AddrSpace spc = vn.space;
             if (spc.getType() == spacetype.IPTR_CONSTANT)
                 return vn.offset;
-            if (spc.getType() == spacetype.IPTR_INTERNAL)
-            {
-                Dictionary<ulong, ulong>::const_iterator iter;
-                iter = tempValues.find(vn.offset);
-                if (iter != tempValues.end())
-                    return (*iter).second;  // We have seen this varnode before
+            if (spc.getType() == spacetype.IPTR_INTERNAL) {
+                ulong result;
+                if (tempValues.TryGetValue(vn.offset, out result)) {
+                    // We have seen this varnode before
+                    return result;
+                }
                 throw new LowlevelError("Read before write in snippet emulation");
             }
-
-            return getLoadImageValue(vn.space, vn.offset, vn.size);
+            return getLoadImageValue(vn.space, vn.offset, (int)vn.size);
         }
 
         /// \brief Retrieve a temporary register value directly

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,8 +27,8 @@ namespace Sla.DECCORE
         /// \brief Simplify expressions that optimize INT_REM and INT_SREM
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_INT_DIV);
-            oplist.Add(CPUI_INT_SDIV);
+            oplist.Add(OpCode.CPUI_INT_DIV);
+            oplist.Add(OpCode.CPUI_INT_SDIV);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
@@ -40,15 +40,13 @@ namespace Sla.DECCORE
             Varnode outvn;
             Varnode outvn2;
             Varnode div2;
-            IEnumerator<PcodeOp> iter1;
-            IEnumerator<PcodeOp> iter2;
 
             x = op.getIn(0);
             div = op.getIn(1);
             outvn = op.getOut();
-            for (iter1 = outvn.beginDescend(); iter1 != outvn.endDescend(); ++iter1)
-            {
-                multop = *iter1;
+            IEnumerator<PcodeOp> iter1 = outvn.beginDescend();
+            while (iter1.MoveNext()) {
+                multop = iter1.Current;
                 if (multop.code() != OpCode.CPUI_INT_MULT) continue;
                 div2 = multop.getIn(1);
                 if (div2 == outvn)
@@ -68,12 +66,11 @@ namespace Sla.DECCORE
                     if (div2.getDef().getIn(0) != div) continue;
                 }
                 outvn2 = multop.getOut();
-                for (iter2 = outvn2.beginDescend(); iter2 != outvn2.endDescend(); ++iter2)
-                {
-                    addop = *iter2;
+                IEnumerator<PcodeOp> iter2 = outvn2.beginDescend();
+                while (iter2.MoveNext()) {
+                    addop = iter2.Current;
                     if (addop.code() != OpCode.CPUI_INT_ADD) continue;
-                    Varnode* lvn;
-                    lvn = addop.getIn(0);
+                    Varnode lvn = addop.getIn(0);
                     if (lvn == outvn2)
                         lvn = addop.getIn(1);
                     if (lvn != x) continue;

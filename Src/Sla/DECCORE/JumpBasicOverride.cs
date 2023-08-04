@@ -40,22 +40,19 @@ namespace Sla.DECCORE
         /// \return the PcodeOp or null
         private int findStartOp(Varnode vn)
         {
-            list<PcodeOp*>::const_iterator iter, enditer;
-            iter = vn.beginDescend();
-            enditer = vn.endDescend();
-            for (; iter != enditer; ++iter)
-                (*iter).setMark();
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (iter.MoveNext())
+                iter.Current.setMark();
             int res = -1;
-            for (int i = 0; i < pathMeld.numOps(); ++i)
-            {
-                if (pathMeld.getOp(i).isMark())
-                {
+            for (int i = 0; i < pathMeld.numOps(); ++i) {
+                if (pathMeld.getOp(i).isMark()) {
                     res = i;
                     break;
                 }
             }
-            for (iter = vn.beginDescend(); iter != enditer; ++iter)
-                (*iter).clearMark();
+            iter = vn.beginDescend();
+            while (iter.MoveNext())
+                iter.Current.clearMark();
             return res;
         }
 

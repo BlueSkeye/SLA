@@ -24,13 +24,9 @@ namespace Sla.EXTRA
                 throw new IfaceExecutionError("No function selected");
 
             uint count = 0;
-            list<PcodeOp*>::const_iterator iter, enditer;
-            iter = dcp.fd.beginOpAlive();
-            enditer = dcp.fd.endOpAlive();
-            while (iter != enditer)
-            {
+            IEnumerator<PcodeOp> iter = dcp.fd.beginOpAlive();
+            while (iter.MoveNext()) {
                 count += 1;
-                ++iter;
             }
             *status.optr << "Count - pcode = " << dec << count << endl;
         }

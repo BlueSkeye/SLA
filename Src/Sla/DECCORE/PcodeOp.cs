@@ -147,9 +147,9 @@ namespace Sla.DECCORE
         /// Position in opcode list
         private IEnumerator<PcodeOp> codeiter;
         /// The one possible output Varnode of this op
-        private Varnode output;
+        private Varnode? output;
         /// The ordered list of input Varnodes for this op
-        private List<Varnode> inrefs;
+        private List<Varnode?> inrefs;
 
         // Only used by Funcdata
         /// Set the opcode for this PcodeOp
@@ -158,22 +158,22 @@ namespace Sla.DECCORE
         /// \param t_op is the behavioural class to set
         private void setOpcode(TypeOp t_op)
         {
-            flags &= ~(PcodeOp::branch | PcodeOp::call | PcodeOp::coderef | PcodeOp::commutative |
-                   PcodeOp::returns | PcodeOp::nocollapse | PcodeOp::marker | PcodeOp::booloutput |
-                   PcodeOp::unary | PcodeOp::binary | PcodeOp::ternary | PcodeOp::special |
-                   PcodeOp::has_callspec | PcodeOp::no_copy_propagation);
+            flags &= ~(PcodeOp.Flags.branch | PcodeOp.Flags.call | PcodeOp.Flags.coderef | PcodeOp.Flags.commutative |
+                   PcodeOp.Flags.returns | PcodeOp.Flags.nocollapse | PcodeOp.Flags.marker | PcodeOp.Flags.booloutput |
+                   PcodeOp.Flags.unary | PcodeOp.Flags.binary | PcodeOp.Flags.ternary | PcodeOp.Flags.special |
+                   PcodeOp.Flags.has_callspec | PcodeOp.Flags.no_copy_propagation);
             opcode = t_op;
             flags |= t_op.getFlags();
         }
 
         /// Set the output Varnode of this op
-        internal void setOutput(Varnode vn)
+        internal void setOutput(Varnode? vn)
         {
             output = vn;
         }
 
         /// Clear a specific input Varnode to \e null
-        private void clearInput(int slot)
+        internal void clearInput(int slot)
         {
             inrefs[slot] = (Varnode)null;
         }
@@ -242,13 +242,13 @@ namespace Sla.DECCORE
         private void insertInput(int slot)
         {
             inrefs.Add((Varnode)null);
-            for (int i = inrefs.size() - 1; i > slot; --i)
+            for (int i = inrefs.Count - 1; i > slot; --i)
                 inrefs[i] = inrefs[i - 1];
             inrefs[slot] = (Varnode)null;
         }
 
         /// Order this op within the ops for a single instruction
-        private void setOrder(uint ord)
+        internal void setOrder(uint ord)
         {
             start.setOrder(ord);
         }
@@ -336,17 +336,15 @@ namespace Sla.DECCORE
         public int getRepeatSlot(Varnode vn, int firstSlot, IEnumerator<PcodeOp> iter)
         {
             int count = 1;
-            for (list<PcodeOp*>::const_iterator oiter = vn.beginDescend(); oiter != iter; ++oiter)
-            {
-                if ((*oiter) == this)
+            IEnumerator<PcodeOp> oiter = vn.beginDescend();
+            while (oiter.MoveNext()) {
+                if ((oiter.Current) == this)
                     count += 1;
             }
             if (count == 1) return firstSlot;
             int recount = 1;
-            for (int i = firstSlot + 1; i < inrefs.size(); ++i)
-            {
-                if (inrefs[i] == vn)
-                {
+            for (int i = firstSlot + 1; i < inrefs.Count; ++i) {
+                if (inrefs[i] == vn) {
                     recount += 1;
                     if (recount == count)
                         return i;
@@ -356,19 +354,21 @@ namespace Sla.DECCORE
         }
 
         /// \brief Get the evaluation type of this op
-        public uint getEvalType() => (flags&(PcodeOp::unary|PcodeOp::binary|PcodeOp::special|PcodeOp::ternary));
+        public Flags getEvalType()
+            => (flags & (Flags.unary | Flags.binary | Flags.special | Flags.ternary));
 
         /// \brief Get type which indicates unusual halt in control-flow
-        public uint getHaltType() => (flags&(PcodeOp.Flags.halt|PcodeOp.Flags.badinstruction|PcodeOp.Flags.unimplemented| PcodeOp::noreturn|PcodeOp.Flags.missing));
+        public Flags getHaltType()
+            => (flags & (Flags.halt | Flags.badinstruction | Flags.unimplemented | Flags.noreturn | Flags.missing));
 
         /// Return \b true if this op is dead
-        public bool isDead() => ((flags&PcodeOp::dead)!= 0);
+        public bool isDead() => ((flags & Flags.dead) != 0);
 
         /// Return \b true is this op has an output
-        public bool isAssignment() => (output!=(Varnode *)0);
+        public bool isAssignment() => (output != (Varnode)null);
 
         /// Return \b true if this op indicates call semantics
-        public bool isCall() => ((flags&PcodeOp::call)!= 0);
+        public bool isCall() => ((flags & Flags.call) != 0);
 
         /// \brief Return \b true if this op acts as call but does not have a full specification
         public bool isCallWithoutSpec() => ((flags&(PcodeOp::call|PcodeOp::has_callspec))== PcodeOp::call);
@@ -592,23 +592,18 @@ namespace Sla.DECCORE
         {
             if (this == point) return true; // No movement necessary
             bool movingLoad = false;
-            if (getEvalType() == PcodeOp::special)
-            {
+            if (getEvalType() == PcodeOp.Flags.special) {
                 if (code() == OpCode.CPUI_LOAD)
                     movingLoad = true;  // Allow LOAD to be moved with additional restrictions
                 else
                     return false;   // Don't move special ops
             }
             if (parent != point.parent) return false;  // Not in the same block
-            if (output != (Varnode)null)
-            {
+            if (output != (Varnode)null) {
                 // Output cannot be moved past an op that reads it
-                list<PcodeOp*>::const_iterator iter = output.beginDescend();
-                list<PcodeOp*>::const_iterator enditer = output.endDescend();
-                while (iter != enditer)
-                {
-                    PcodeOp* readOp = *iter;
-                    ++iter;
+                IEnumerator<PcodeOp> iter = output.beginDescend();
+                while (iter.MoveNext()) {
+                    PcodeOp readOp = iter.Current;
                     if (readOp.parent != parent) continue;
                     if (readOp.start.getOrder() <= point.start.getOrder())
                         return false;       // Is in the block and is read before (or at) -point-
@@ -814,7 +809,7 @@ namespace Sla.DECCORE
         /// \return the previous PcodeOp or \e null
         public PcodeOp previousOp()
         {
-            list<PcodeOp*>::iterator iter;
+            list<PcodeOp>::iterator iter;
 
             if (basiciter == parent.beginOp()) return (PcodeOp)null;
             iter = basiciter;
@@ -1090,7 +1085,7 @@ namespace Sla.DECCORE
             if (parent == bop.parent)
                 return (start.getOrder() < bop.start.getOrder()) ? -1 : 1;
 
-            FlowBlock* common = FlowBlock::findCommonBlock(parent, bop.parent);
+            FlowBlock common = FlowBlock.findCommonBlock(parent, bop.parent);
             if (common == parent)
                 return -1;
             if (common == bop.parent)

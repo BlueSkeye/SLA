@@ -83,7 +83,7 @@ namespace Sla.DECCORE
             /// Is the varnode storage for a return address
             return_address = 0x800000,
             /// Cover is not upto date
-            coverdirty = 0x1000000,
+            HighVariable.DirtinessFlags.coverdirty = 0x1000000,
             /// Is this Varnode the low part of a double precision value
             precislo = 0x2000000,
             /// Is this Varnode the high part of a double precision value
@@ -148,7 +148,7 @@ namespace Sla.DECCORE
 
         // Heritage fields
         /// The defining operation of this Varnode
-        private PcodeOp def;
+        internal PcodeOp? def;
         /// High-level variable of which this is an instantiation
         private HighVariable? high;
         /// cached SymbolEntry associated with Varnode
@@ -160,9 +160,10 @@ namespace Sla.DECCORE
         /// Iterator into VarnodeBank sorted by definition
         private VarnodeDefSet::iterator defiter;
         /// List of every op using this varnode as input
-        private List<PcodeOp> descend;
+        internal List<PcodeOp> descend;
         /// Addresses covered by the def.use of this Varnode
         private /*mutable*/ Cover cover;
+        
         private /*mutable*/ struct TempStorage
         {
             /// Temporary data-type associated with \b this for use in type propagate algorithm
@@ -176,7 +177,7 @@ namespace Sla.DECCORE
         /// What parts of this varnode are used
         private ulong consumed;
         /// Which bits do we know are zero
-        private ulong nzm;
+        internal ulong nzm;
         //friend class VarnodeBank;
         //friend class Merge;
         //friend class Funcdata;
@@ -374,9 +375,9 @@ namespace Sla.DECCORE
         /// Clear all descendant (reading) PcodeOps
         /// Completely clear the descendant list
         /// Only called if Varnode is about to be irrevocably destroyed
-        private void destroyDescend()
+        internal void destroyDescend()
         {
-            descend.clear();
+            descend.Clear();
         }
 
         // only to be used by HighVariable
@@ -409,7 +410,7 @@ namespace Sla.DECCORE
         public short getMergeGroup() => mergegroup;
 
         /// Get the defining PcodeOp of this Varnode
-        public PcodeOp getDef() => def;
+        public PcodeOp? getDef() => def;
 
         /// Get the high-level variable associated with this Varnode
         /// During the course of analysis Varnodes are merged into high-level variables that are intended

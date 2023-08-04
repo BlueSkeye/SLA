@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,10 +52,10 @@ namespace Sla.DECCORE
                 if ((!vn.isConstant()) || (vn.getOffset() != 0))
                     return 0;
             }
-            for (list<PcodeOp*>::const_iterator iter = addvn.beginDescend(); iter != addvn.endDescend(); ++iter)
-            {
+            IEnumerator<PcodeOp> iter = addvn.beginDescend();
+            while (iter.MoveNext()) {
                 // make sure the sum is only used in comparisons
-                PcodeOp* boolop = *iter;
+                PcodeOp boolop = iter.Current;
                 if (!boolop.isBoolOutput()) return 0;
             }
             //  if (addvn.lone_descendant() != op) return 0;
@@ -64,8 +64,7 @@ namespace Sla.DECCORE
             if (addop.code() != OpCode.CPUI_INT_ADD) return 0;
             vn = addop.getIn(0);
             vn2 = addop.getIn(1);
-            if (vn2.isConstant())
-            {
+            if (vn2.isConstant()) {
                 Address val = new Address(vn2.getSpace(), Globals.uintb_negate(vn2.getOffset()-1,vn2.getSize()));
                 unnegvn = data.newVarnode(vn2.getSize(), val);
                 unnegvn.copySymbolIfValid(vn2);    // Propagate any markup

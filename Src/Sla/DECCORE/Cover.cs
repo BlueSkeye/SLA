@@ -85,7 +85,7 @@ namespace Sla.DECCORE
         {
             int a, b;
 
-            Dictionary<int, CoverBlock>::const_iterator iter;
+            Dictionary<int, CoverBlock>.Enumerator iter;
             iter = cover.begin();
             if (iter == cover.end())
                 a = 1000000;
@@ -115,7 +115,7 @@ namespace Sla.DECCORE
         /// \return a reference to the corresponding CoverBlock
         public CoverBlock getCoverBlock(int i)
         {
-            Dictionary<int, CoverBlock>::const_iterator iter = cover.find(i);
+            Dictionary<int, CoverBlock>.Enumerator iter = cover.find(i);
             if (iter == cover.end())
                 return emptyBlock;
             return (*iter).second;
@@ -131,7 +131,7 @@ namespace Sla.DECCORE
         /// \return the intersection characterization
         public int intersect(Cover op2)
         {
-            Dictionary<int, CoverBlock>::const_iterator iter, iter2;
+            Dictionary<int, CoverBlock>.Enumerator iter, iter2;
             int res, newres;
 
             res = 0;
@@ -171,12 +171,12 @@ namespace Sla.DECCORE
         /// \return the characterization
         public int intersectByBlock(int blk, Cover op2)
         {
-            Dictionary<int, CoverBlock>::const_iterator iter;
+            Dictionary<int, CoverBlock>.Enumerator iter;
 
             iter = cover.find(blk);
             if (iter == cover.end()) return 0;
 
-            Dictionary<int, CoverBlock>::const_iterator iter2;
+            Dictionary<int, CoverBlock>.Enumerator iter2;
 
             iter2 = op2.cover.find(blk);
             if (iter2 == op2.cover.end()) return 0;
@@ -194,7 +194,7 @@ namespace Sla.DECCORE
         /// \param level is the characterization threshold which must be exceeded
         public void intersectList(List<int> listout, Cover op2, int level)
         {
-            Dictionary<int, CoverBlock>::const_iterator iter, iter2;
+            Dictionary<int, CoverBlock>.Enumerator iter, iter2;
             int val;
 
             listout.clear();
@@ -229,7 +229,7 @@ namespace Sla.DECCORE
         /// \return true if there is containment
         public bool contain(PcodeOp op, int max)
         {
-            Dictionary<int, CoverBlock>::const_iterator iter;
+            Dictionary<int, CoverBlock>.Enumerator iter;
 
             iter = cover.find(op.getParent().getIndex());
             if (iter == cover.end()) return false;
@@ -266,11 +266,10 @@ namespace Sla.DECCORE
             }
             else
                 blk = op.getParent().getIndex();
-            Dictionary<int, CoverBlock>::const_iterator iter = cover.find(blk);
-            if (iter == cover.end()) return 0;
-            if ((*iter).second.contain(op))
-            {
-                int boundtype = (*iter).second.boundary(op);
+            CoverBlock? block;
+            if (!cover.TryGetValue(blk, out block)) return 0;
+            if (block.contain(op)) {
+                int boundtype = block.boundary(op);
                 if (boundtype == 0) return 1;
                 if (boundtype == 2) return 2;
                 return 3;
@@ -282,10 +281,8 @@ namespace Sla.DECCORE
         /// \param op2 is the other Cover
         public void merge(Cover op2)
         {
-            Dictionary<int, CoverBlock>::const_iterator iter;
-
-            for (iter = op2.cover.begin(); iter != op2.cover.end(); ++iter)
-                cover[(*iter).first].merge((*iter).second);
+            foreach (KeyValuePair<int, CoverBlock> pair in op2.cover)
+                cover[pair.Key].merge(pair.Value);
         }
 
         /// Reset \b this based on def-use of a single Varnode
@@ -294,11 +291,10 @@ namespace Sla.DECCORE
         /// \param vn is the single Varnode
         public void rebuild(Varnode vn)
         {
-            list<PcodeOp*>::const_iterator iter;
-
             addDefPoint(vn);
-            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
-                addRefPoint(*iter, vn);
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (iter.MoveNext())
+                addRefPoint(iter.Current, vn);
         }
 
         /// Reset to the single point where the given Varnode is defined
@@ -390,20 +386,17 @@ namespace Sla.DECCORE
 
         ///< Dump a description of \b this cover to stream
         /// \param s is the output stream
-        public void print(ostream s)
+        public void print(TextWriter s)
         {
-            Dictionary<int, CoverBlock>::const_iterator iter;
-
-            for (iter = cover.begin(); iter != cover.end(); ++iter)
-            {
-                s << dec << (*iter).first << ": ";
-                (*iter).second.print(s);
-                s << endl;
+            foreach (KeyValuePair<int, CoverBlock> pair in cover) {
+                s.Write($"{pair.Key}: ");
+                pair.Value.print(s);
+                s.WriteLine();
             }
         }
 
         /// Get beginning of CoverBlocks
-        public IEnumerator<KeyValuePair<int, CoverBlock>> begin()
+        public Dictionary<int, CoverBlock>.Enumerator begin()
         {
             return cover.GetEnumerator();
         }

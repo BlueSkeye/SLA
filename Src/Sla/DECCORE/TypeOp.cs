@@ -258,85 +258,85 @@ namespace Sla.DECCORE
         {
             inst.insert(inst.end(), OpCode.CPUI_MAX, (TypeOp*)0);
 
-            inst[CPUI_COPY] = new TypeOpCopy(tlst);
-            inst[CPUI_LOAD] = new TypeOpLoad(tlst);
-            inst[CPUI_STORE] = new TypeOpStore(tlst);
-            inst[CPUI_BRANCH] = new TypeOpBranch(tlst);
-            inst[CPUI_CBRANCH] = new TypeOpCbranch(tlst);
-            inst[CPUI_BRANCHIND] = new TypeOpBranchind(tlst);
-            inst[CPUI_CALL] = new TypeOpCall(tlst);
-            inst[CPUI_CALLIND] = new TypeOpCallind(tlst);
-            inst[CPUI_CALLOTHER] = new TypeOpCallother(tlst);
-            inst[CPUI_RETURN] = new TypeOpReturn(tlst);
+            inst[(int)OpCode.CPUI_COPY] = new TypeOpCopy(tlst);
+            inst[(int)OpCode.CPUI_LOAD] = new TypeOpLoad(tlst);
+            inst[(int)OpCode.CPUI_STORE] = new TypeOpStore(tlst);
+            inst[(int)OpCode.CPUI_BRANCH] = new TypeOpBranch(tlst);
+            inst[(int)OpCode.CPUI_CBRANCH] = new TypeOpCbranch(tlst);
+            inst[(int)OpCode.CPUI_BRANCHIND] = new TypeOpBranchind(tlst);
+            inst[(int)OpCode.CPUI_CALL] = new TypeOpCall(tlst);
+            inst[(int)OpCode.CPUI_CALLIND] = new TypeOpCallind(tlst);
+            inst[(int)OpCode.CPUI_CALLOTHER] = new TypeOpCallother(tlst);
+            inst[(int)OpCode.CPUI_RETURN] = new TypeOpReturn(tlst);
 
-            inst[CPUI_MULTIEQUAL] = new TypeOpMulti(tlst);
-            inst[CPUI_INDIRECT] = new TypeOpIndirect(tlst);
+            inst[(int)OpCode.CPUI_MULTIEQUAL] = new TypeOpMulti(tlst);
+            inst[(int)OpCode.CPUI_INDIRECT] = new TypeOpIndirect(tlst);
 
-            inst[CPUI_PIECE] = new TypeOpPiece(tlst);
-            inst[CPUI_SUBPIECE] = new TypeOpSubpiece(tlst);
-            inst[CPUI_INT_EQUAL] = new TypeOpEqual(tlst);
-            inst[CPUI_INT_NOTEQUAL] = new TypeOpNotEqual(tlst);
-            inst[CPUI_INT_SLESS] = new TypeOpIntSless(tlst);
-            inst[CPUI_INT_SLESSEQUAL] = new TypeOpIntSlessEqual(tlst);
-            inst[CPUI_INT_LESS] = new TypeOpIntLess(tlst);
-            inst[CPUI_INT_LESSEQUAL] = new TypeOpIntLessEqual(tlst);
-            inst[CPUI_INT_ZEXT] = new TypeOpIntZext(tlst);
-            inst[CPUI_INT_SEXT] = new TypeOpIntSext(tlst);
-            inst[CPUI_INT_ADD] = new TypeOpIntAdd(tlst);
-            inst[CPUI_INT_SUB] = new TypeOpIntSub(tlst);
-            inst[CPUI_INT_CARRY] = new TypeOpIntCarry(tlst);
-            inst[CPUI_INT_SCARRY] = new TypeOpIntScarry(tlst);
-            inst[CPUI_INT_SBORROW] = new TypeOpIntSborrow(tlst);
-            inst[CPUI_INT_2COMP] = new TypeOpInt2Comp(tlst);
-            inst[CPUI_INT_NEGATE] = new TypeOpIntNegate(tlst);
-            inst[CPUI_INT_XOR] = new TypeOpIntXor(tlst);
-            inst[CPUI_INT_AND] = new TypeOpIntAnd(tlst);
-            inst[CPUI_INT_OR] = new TypeOpIntOr(tlst);
-            inst[CPUI_INT_LEFT] = new TypeOpIntLeft(tlst);
-            inst[CPUI_INT_RIGHT] = new TypeOpIntRight(tlst);
-            inst[CPUI_INT_SRIGHT] = new TypeOpIntSright(tlst);
-            inst[CPUI_INT_MULT] = new TypeOpIntMult(tlst);
-            inst[CPUI_INT_DIV] = new TypeOpIntDiv(tlst);
-            inst[CPUI_INT_SDIV] = new TypeOpIntSdiv(tlst);
-            inst[CPUI_INT_REM] = new TypeOpIntRem(tlst);
-            inst[CPUI_INT_SREM] = new TypeOpIntSrem(tlst);
+            inst[(int)OpCode.CPUI_PIECE] = new TypeOpPiece(tlst);
+            inst[(int)OpCode.CPUI_SUBPIECE] = new TypeOpSubpiece(tlst);
+            inst[(int)OpCode.CPUI_INT_EQUAL] = new TypeOpEqual(tlst);
+            inst[(int)OpCode.CPUI_INT_NOTEQUAL] = new TypeOpNotEqual(tlst);
+            inst[(int)OpCode.CPUI_INT_SLESS] = new TypeOpIntSless(tlst);
+            inst[(int)OpCode.CPUI_INT_SLESSEQUAL] = new TypeOpIntSlessEqual(tlst);
+            inst[(int)OpCode.CPUI_INT_LESS] = new TypeOpIntLess(tlst);
+            inst[(int)OpCode.CPUI_INT_LESSEQUAL] = new TypeOpIntLessEqual(tlst);
+            inst[(int)OpCode.CPUI_INT_ZEXT] = new TypeOpIntZext(tlst);
+            inst[(int)OpCode.CPUI_INT_SEXT] = new TypeOpIntSext(tlst);
+            inst[(int)OpCode.CPUI_INT_ADD] = new TypeOpIntAdd(tlst);
+            inst[(int)OpCode.CPUI_INT_SUB] = new TypeOpIntSub(tlst);
+            inst[(int)OpCode.CPUI_INT_CARRY] = new TypeOpIntCarry(tlst);
+            inst[(int)OpCode.CPUI_INT_SCARRY] = new TypeOpIntScarry(tlst);
+            inst[(int)OpCode.CPUI_INT_SBORROW] = new TypeOpIntSborrow(tlst);
+            inst[(int)OpCode.CPUI_INT_2COMP] = new TypeOpInt2Comp(tlst);
+            inst[(int)OpCode.CPUI_INT_NEGATE] = new TypeOpIntNegate(tlst);
+            inst[(int)OpCode.CPUI_INT_XOR] = new TypeOpIntXor(tlst);
+            inst[(int)OpCode.CPUI_INT_AND] = new TypeOpIntAnd(tlst);
+            inst[(int)OpCode.CPUI_INT_OR] = new TypeOpIntOr(tlst);
+            inst[(int)OpCode.CPUI_INT_LEFT] = new TypeOpIntLeft(tlst);
+            inst[(int)OpCode.CPUI_INT_RIGHT] = new TypeOpIntRight(tlst);
+            inst[(int)OpCode.CPUI_INT_SRIGHT] = new TypeOpIntSright(tlst);
+            inst[(int)OpCode.CPUI_INT_MULT] = new TypeOpIntMult(tlst);
+            inst[(int)OpCode.CPUI_INT_DIV] = new TypeOpIntDiv(tlst);
+            inst[(int)OpCode.CPUI_INT_SDIV] = new TypeOpIntSdiv(tlst);
+            inst[(int)OpCode.CPUI_INT_REM] = new TypeOpIntRem(tlst);
+            inst[(int)OpCode.CPUI_INT_SREM] = new TypeOpIntSrem(tlst);
 
-            inst[CPUI_BOOL_NEGATE] = new TypeOpBoolNegate(tlst);
-            inst[CPUI_BOOL_XOR] = new TypeOpBoolXor(tlst);
-            inst[CPUI_BOOL_AND] = new TypeOpBoolAnd(tlst);
-            inst[CPUI_BOOL_OR] = new TypeOpBoolOr(tlst);
+            inst[(int)OpCode.CPUI_BOOL_NEGATE] = new TypeOpBoolNegate(tlst);
+            inst[(int)OpCode.CPUI_BOOL_XOR] = new TypeOpBoolXor(tlst);
+            inst[(int)OpCode.CPUI_BOOL_AND] = new TypeOpBoolAnd(tlst);
+            inst[(int)OpCode.CPUI_BOOL_OR] = new TypeOpBoolOr(tlst);
 
-            inst[CPUI_CAST] = new TypeOpCast(tlst);
-            inst[CPUI_PTRADD] = new TypeOpPtradd(tlst);
-            inst[CPUI_PTRSUB] = new TypeOpPtrsub(tlst);
+            inst[(int)OpCode.CPUI_CAST] = new TypeOpCast(tlst);
+            inst[(int)OpCode.CPUI_PTRADD] = new TypeOpPtradd(tlst);
+            inst[(int)OpCode.CPUI_PTRSUB] = new TypeOpPtrsub(tlst);
 
-            inst[CPUI_FLOAT_EQUAL] = new TypeOpFloatEqual(tlst, trans);
-            inst[CPUI_FLOAT_NOTEQUAL] = new TypeOpFloatNotEqual(tlst, trans);
-            inst[CPUI_FLOAT_LESS] = new TypeOpFloatLess(tlst, trans);
-            inst[CPUI_FLOAT_LESSEQUAL] = new TypeOpFloatLessEqual(tlst, trans);
-            inst[CPUI_FLOAT_NAN] = new TypeOpFloatNan(tlst, trans);
+            inst[(int)OpCode.CPUI_FLOAT_EQUAL] = new TypeOpFloatEqual(tlst, trans);
+            inst[(int)OpCode.CPUI_FLOAT_NOTEQUAL] = new TypeOpFloatNotEqual(tlst, trans);
+            inst[(int)OpCode.CPUI_FLOAT_LESS] = new TypeOpFloatLess(tlst, trans);
+            inst[(int)OpCode.CPUI_FLOAT_LESSEQUAL] = new TypeOpFloatLessEqual(tlst, trans);
+            inst[(int)OpCode.CPUI_FLOAT_NAN] = new TypeOpFloatNan(tlst, trans);
 
-            inst[CPUI_FLOAT_ADD] = new TypeOpFloatAdd(tlst, trans);
-            inst[CPUI_FLOAT_DIV] = new TypeOpFloatDiv(tlst, trans);
-            inst[CPUI_FLOAT_MULT] = new TypeOpFloatMult(tlst, trans);
-            inst[CPUI_FLOAT_SUB] = new TypeOpFloatSub(tlst, trans);
-            inst[CPUI_FLOAT_NEG] = new TypeOpFloatNeg(tlst, trans);
-            inst[CPUI_FLOAT_ABS] = new TypeOpFloatAbs(tlst, trans);
-            inst[CPUI_FLOAT_SQRT] = new TypeOpFloatSqrt(tlst, trans);
+            inst[(int)OpCode.CPUI_FLOAT_ADD] = new TypeOpFloatAdd(tlst, trans);
+            inst[(int)OpCode.CPUI_FLOAT_DIV] = new TypeOpFloatDiv(tlst, trans);
+            inst[(int)OpCode.CPUI_FLOAT_MULT] = new TypeOpFloatMult(tlst, trans);
+            inst[(int)OpCode.CPUI_FLOAT_SUB] = new TypeOpFloatSub(tlst, trans);
+            inst[(int)OpCode.CPUI_FLOAT_NEG] = new TypeOpFloatNeg(tlst, trans);
+            inst[(int)OpCode.CPUI_FLOAT_ABS] = new TypeOpFloatAbs(tlst, trans);
+            inst[(int)OpCode.CPUI_FLOAT_SQRT] = new TypeOpFloatSqrt(tlst, trans);
 
-            inst[CPUI_FLOAT_INT2FLOAT] = new TypeOpFloatInt2Float(tlst, trans);
-            inst[CPUI_FLOAT_FLOAT2FLOAT] = new TypeOpFloatFloat2Float(tlst, trans);
-            inst[CPUI_FLOAT_TRUNC] = new TypeOpFloatTrunc(tlst, trans);
-            inst[CPUI_FLOAT_CEIL] = new TypeOpFloatCeil(tlst, trans);
-            inst[CPUI_FLOAT_FLOOR] = new TypeOpFloatFloor(tlst, trans);
-            inst[CPUI_FLOAT_ROUND] = new TypeOpFloatRound(tlst, trans);
-            inst[CPUI_SEGMENTOP] = new TypeOpSegment(tlst);
-            inst[CPUI_CPOOLREF] = new TypeOpCpoolref(tlst);
-            inst[CPUI_NEW] = new TypeOpNew(tlst);
-            inst[CPUI_INSERT] = new TypeOpInsert(tlst);
-            inst[CPUI_EXTRACT] = new TypeOpExtract(tlst);
-            inst[CPUI_POPCOUNT] = new TypeOpPopcount(tlst);
-            inst[CPUI_LZCOUNT] = new TypeOpLzcount(tlst);
+            inst[(int)OpCode.CPUI_FLOAT_INT2FLOAT] = new TypeOpFloatInt2Float(tlst, trans);
+            inst[(int)OpCode.CPUI_FLOAT_FLOAT2FLOAT] = new TypeOpFloatFloat2Float(tlst, trans);
+            inst[(int)OpCode.CPUI_FLOAT_TRUNC] = new TypeOpFloatTrunc(tlst, trans);
+            inst[(int)OpCode.CPUI_FLOAT_CEIL] = new TypeOpFloatCeil(tlst, trans);
+            inst[(int)OpCode.CPUI_FLOAT_FLOOR] = new TypeOpFloatFloor(tlst, trans);
+            inst[(int)OpCode.CPUI_FLOAT_ROUND] = new TypeOpFloatRound(tlst, trans);
+            inst[(int)OpCode.CPUI_SEGMENTOP] = new TypeOpSegment(tlst);
+            inst[(int)OpCode.CPUI_CPOOLREF] = new TypeOpCpoolref(tlst);
+            inst[(int)OpCode.CPUI_NEW] = new TypeOpNew(tlst);
+            inst[(int)OpCode.CPUI_INSERT] = new TypeOpInsert(tlst);
+            inst[(int)OpCode.CPUI_EXTRACT] = new TypeOpExtract(tlst);
+            inst[(int)OpCode.CPUI_POPCOUNT] = new TypeOpPopcount(tlst);
+            inst[(int)OpCode.CPUI_LZCOUNT] = new TypeOpLzcount(tlst);
         }
 
         /// \brief Toggle Java specific aspects of the op-code information
@@ -348,35 +348,35 @@ namespace Sla.DECCORE
         {
             if (val)
             {
-                inst[CPUI_INT_ZEXT].setMetatypeIn(TYPE_UNKNOWN);
-                inst[CPUI_INT_ZEXT].setMetatypeOut(TYPE_INT);
-                inst[CPUI_INT_NEGATE].setMetatypeIn(TYPE_INT);
-                inst[CPUI_INT_NEGATE].setMetatypeOut(TYPE_INT);
-                inst[CPUI_INT_XOR].setMetatypeIn(TYPE_INT);
-                inst[CPUI_INT_XOR].setMetatypeOut(TYPE_INT);
-                inst[CPUI_INT_OR].setMetatypeIn(TYPE_INT);
-                inst[CPUI_INT_OR].setMetatypeOut(TYPE_INT);
-                inst[CPUI_INT_AND].setMetatypeIn(TYPE_INT);
-                inst[CPUI_INT_AND].setMetatypeOut(TYPE_INT);
-                inst[CPUI_INT_RIGHT].setMetatypeIn(TYPE_INT);
-                inst[CPUI_INT_RIGHT].setMetatypeOut(TYPE_INT);
-                inst[CPUI_INT_RIGHT].setSymbol(">>>");
+                inst[(int)OpCode.CPUI_INT_ZEXT].setMetatypeIn(TYPE_UNKNOWN);
+                inst[(int)OpCode.CPUI_INT_ZEXT].setMetatypeOut(TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_NEGATE].setMetatypeIn(TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_NEGATE].setMetatypeOut(TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_XOR].setMetatypeIn(TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_XOR].setMetatypeOut(TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_OR].setMetatypeIn(TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_OR].setMetatypeOut(TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_AND].setMetatypeIn(TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_AND].setMetatypeOut(TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_RIGHT].setMetatypeIn(TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_RIGHT].setMetatypeOut(TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_RIGHT].setSymbol(">>>");
             }
             else
             {
-                inst[CPUI_INT_ZEXT].setMetatypeIn(TYPE_UINT);
-                inst[CPUI_INT_ZEXT].setMetatypeOut(TYPE_UINT);
-                inst[CPUI_INT_NEGATE].setMetatypeIn(TYPE_UINT);
-                inst[CPUI_INT_NEGATE].setMetatypeOut(TYPE_UINT);
-                inst[CPUI_INT_XOR].setMetatypeIn(TYPE_UINT);
-                inst[CPUI_INT_XOR].setMetatypeOut(TYPE_UINT);
-                inst[CPUI_INT_OR].setMetatypeIn(TYPE_UINT);
-                inst[CPUI_INT_OR].setMetatypeOut(TYPE_UINT);
-                inst[CPUI_INT_AND].setMetatypeIn(TYPE_UINT);
-                inst[CPUI_INT_AND].setMetatypeOut(TYPE_UINT);
-                inst[CPUI_INT_RIGHT].setMetatypeIn(TYPE_UINT);
-                inst[CPUI_INT_RIGHT].setMetatypeOut(TYPE_UINT);
-                inst[CPUI_INT_RIGHT].setSymbol(">>");
+                inst[(int)OpCode.CPUI_INT_ZEXT].setMetatypeIn(TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_ZEXT].setMetatypeOut(TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_NEGATE].setMetatypeIn(TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_NEGATE].setMetatypeOut(TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_XOR].setMetatypeIn(TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_XOR].setMetatypeOut(TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_OR].setMetatypeIn(TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_OR].setMetatypeOut(TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_AND].setMetatypeIn(TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_AND].setMetatypeOut(TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_RIGHT].setMetatypeIn(TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_RIGHT].setMetatypeOut(TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_RIGHT].setSymbol(">>");
             }
         }
     }

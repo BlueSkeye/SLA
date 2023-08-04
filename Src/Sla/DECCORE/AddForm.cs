@@ -169,23 +169,17 @@ namespace Sla.DECCORE
                     }
                     if (!checkForCarry(zextop)) continue; // Calculate lo2 and negconst
 
-                    IEnumerator<PcodeOp> iter2, enditer2;
-                    iter2 = lo1.beginDescend();
-                    enditer2 = lo1.endDescend();
-                    while (iter2 != enditer2)
-                    {
-                        loadd = *iter2;
-                        ++iter2;
+                    IEnumerator<PcodeOp> iter2 = lo1.beginDescend();
+                    while (iter2.MoveNext()) {
+                        loadd = iter2.Current;
                         if (loadd.code() != OpCode.CPUI_INT_ADD) continue;
                         Varnode tmpvn = loadd.getIn(1 - loadd.getSlot(lo1));
-                        if (lo2 == (Varnode)null)
-                        {
+                        if (lo2 == (Varnode)null) {
                             if (!tmpvn.isConstant()) continue;
                             if (tmpvn.getOffset() != negconst) continue;   // Must add same constant used to calculate CARRY
                             lo2 = tmpvn;
                         }
-                        else if (lo2.isConstant())
-                        {
+                        else if (lo2.isConstant()) {
                             if (!tmpvn.isConstant()) continue;
                             if (lo2.getOffset() != tmpvn.getOffset()) continue;
                         }

@@ -177,11 +177,13 @@ namespace Sla.CORE
             return value;
         }
 
-        protected override void getRegionForSet(List<uint[]> res, Address addr1,
-            Address addr2, int num, uint mask)
+        protected override void getRegionForSet(List<uint[]> res, Address addr1, Address addr2, int num,
+            uint mask)
         {
             database.split(addr1);
 
+            // WARNING : The returned enumerator is already set on the first relevant record.
+            // DO NOT use MoveNext before reading
             IEnumerator<KeyValuePair<Address, FreeArray>>? aiter = database.begin(addr1);
             IEnumerator<KeyValuePair<Address, FreeArray>>? biter;
             if (!addr2.isInvalid()) {
@@ -194,27 +196,25 @@ namespace Sla.CORE
             if (null == aiter) {
                 return;
             }
-            while (true) {
+            do {
+                // TODO Check the biter test is correctly set BEFORE marking
+                if ((null != biter) && (biter.Current.Key == aiter.Current.Key)) {
+                    break;
+                }
                 uint[] context = aiter.Current.Value.array;
                 uint[] maskPtr = aiter.Current.Value.mask;
                 res.Add(context);
                 // Mark that this value is being definitely set
                 maskPtr[num] |= mask;
-                if (!aiter.MoveNext()) {
-                    break;
-                }
-                if (   (null != biter)
-                    && (biter.Current.Key == aiter.Current.Key))
-                {
-                    break;
-                }
-            }
+            } while(aiter.MoveNext());
         }
 
         protected override void getRegionToChangePoint(List<uint[]> res, Address addr,
             int num, uint mask)
         {
             database.split(addr);
+            // WARNING : The returned enumerator is already set on the first relevant record.
+            // DO NOT use MoveNext before reading
             IEnumerator<KeyValuePair<Address, FreeArray>>? aiter = database.begin(addr);
             uint[] maskArray;
             if (null == aiter) {
@@ -224,7 +224,7 @@ namespace Sla.CORE
             res.Add(vecArray);
             maskArray = aiter.Current.Value.mask;
             maskArray[num] |= mask;
-            while (aiter.MoveNext()) {
+            do {
                 vecArray = vecArray = aiter.Current.Value.array;
                 maskArray = aiter.Current.Value.mask;
                 if ((maskArray[num] & mask) != 0) {
@@ -232,7 +232,7 @@ namespace Sla.CORE
                     break;
                 }
                 res.Add(vecArray);
-            }
+            } while (aiter.MoveNext());
         }
 
         protected override uint[] getDefaultValue()

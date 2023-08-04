@@ -469,10 +469,9 @@ namespace Sla.DECCORE
         /// \return \b true if the only flow is into \b this model
         protected bool flowsOnlyToModel(Varnode vn, PcodeOp trailOp)
         {
-            list<PcodeOp*>::const_iterator iter;
-            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
-            {
-                PcodeOp* op = *iter;
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if (op == trailOp) continue;
                 if (!op.isMark())
                     return false;

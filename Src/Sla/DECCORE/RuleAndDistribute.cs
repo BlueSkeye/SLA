@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace Sla.DECCORE
         /// \brief Distribute INT_AND through INT_OR if result is simpler
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_INT_AND);
+            oplist.Add(OpCode.CPUI_INT_AND);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

@@ -1,4 +1,4 @@
-﻿using Sla.DECCORE;
+﻿using Sla.CORE;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -40,22 +40,24 @@ namespace Sla.DECCORE
         public static ulong getUIndex(PcodeOp op)
         {
             ulong switchval = (ulong)op;
-            switch (switchval)
-            {
-                case 0:         // Special marker for very beginning of block
+            switch (switchval) {
+                case 0:
+                    // Special marker for very beginning of block
                     return (uint)0;
-                case 1:         // Special marker for very end of block
+                case 1:
+                    // Special marker for very end of block
                     return uint.MaxValue;
-                case 2:         // Special marker for input
+                case 2:
+                    // Special marker for input
                     return (uint)0;
             }
-            if (op.isMarker())
-            {
-                if (op.code() == OpCode.CPUI_MULTIEQUAL) // MULTIEQUALs are considered very beginning
+            if (op.isMarker()) {
+                if (op.code() == OpCode.CPUI_MULTIEQUAL)
+                    // MULTIEQUALs are considered very beginning
                     return (uint)0;
-                else if (op.code() == OpCode.CPUI_INDIRECT) // INDIRECTs are considered to be at
-                                                      // the location of the op they are indirect for
-                    return PcodeOp::getOpFromConst(op.getIn(1).getAddr()).getSeqNum().getOrder();
+                else if (op.code() == OpCode.CPUI_INDIRECT)
+                    // INDIRECTs are considered to be at the location of the op they are indirect for
+                    return PcodeOp.getOpFromConst(op.getIn(1).getAddr()).getSeqNum().getOrder();
             }
             return op.getSeqNum().getOrder();
         }
@@ -250,33 +252,29 @@ namespace Sla.DECCORE
         /// Dump a description to stream
         /// Print a description of the covered range of ops in this block
         /// \param s is the output stream
-        public void print(ostream s)
+        public void print(TextWriter s)
         {
-            uint ustart, ustop;
-
-            if (empty())
-            {
-                s << "empty";
+            if (empty()) {
+                s.Write("empty");
                 return;
             }
-
-            ustart = getUIndex(start);
-            ustop = getUIndex(stop);
+            uint ustart = (uint)getUIndex(start);
+            uint ustop = (uint)getUIndex(stop);
             if (ustart == (uint)0)
-                s << "begin";
+                s.Write("begin");
             else if (ustart == uint.MaxValue)
-                s << "end";
+                s.Write("end");
             else
-                s << start.getSeqNum();
+                s.Write(start.getSeqNum());
 
-            s << '-';
+            s.Write('-');
 
             if (ustop == (uint)0)
-                s << "begin";
+                s.Write("begin");
             else if (ustop == uint.MaxValue)
-                s << "end";
+                s.Write("end");
             else
-                s << stop.getSeqNum();
+                s.Write(stop.getSeqNum());
         }
     }
 }

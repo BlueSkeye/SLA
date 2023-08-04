@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         private Varnode reshi;
         private SplitVarnode outdoub;
         private SplitVarnode in2;
-        private PcodeOp existop;
+        private PcodeOp? existop;
 
         private bool zextOf(Varnode big, Varnode small)
         { // Verify that big is (some form of) a zero extension of small
@@ -215,14 +215,11 @@ namespace Sla.DECCORE
         }
 
         private bool findResLo()
-        { // Assuming we found -midtmp-, find potential reslo
-            list<PcodeOp*>::const_iterator iter, enditer;
-            iter = midtmp.beginDescend();
-            enditer = midtmp.endDescend();
-            while (iter != enditer)
-            {
-                PcodeOp* op = *iter;
-                ++iter;
+        {
+            // Assuming we found -midtmp-, find potential reslo
+            IEnumerator<PcodeOp> iter = midtmp.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if (op.code() != OpCode.CPUI_SUBPIECE) continue;
                 if (op.getIn(1).getOffset() != 0) continue; // Must grab low bytes
                 reslo = op.getOut();
@@ -231,16 +228,12 @@ namespace Sla.DECCORE
             }
             // If we reach here, it may be that separate multiplies of lo1*lo2 were used for reshi and reslo
             iter = lo1.beginDescend();
-            enditer = lo1.endDescend();
-            while (iter != enditer)
-            {
-                PcodeOp* op = *iter;
-                ++iter;
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if (op.code() != OpCode.CPUI_INT_MULT) continue;
-                Varnode* vn1 = op.getIn(0);
-                Varnode* vn2 = op.getIn(1);
-                if (lo2.isConstant())
-                {
+                Varnode vn1 = op.getIn(0);
+                Varnode vn2 = op.getIn(1);
+                if (lo2.isConstant()) {
                     if ((!vn1.isConstant() || (vn1.getOffset() != lo2.getOffset())) &&
                     (!vn2.isConstant() || (vn2.getOffset() != lo2.getOffset())))
                         continue;
@@ -272,13 +265,14 @@ namespace Sla.DECCORE
         }
 
         private bool replace(Funcdata data)
-        { // We have matched a double precision multiply, now transform to logical variables
+        {
+            // We have matched a double precision multiply, now transform to logical variables
             outdoub.initPartial(@in.getSize(), reslo, reshi);
             in2.initPartial(@in.getSize(), lo2, hi2);
-            existop = SplitVarnode::prepareBinaryOp(outdoub, in, in2);
+            existop = SplitVarnode.prepareBinaryOp(outdoub, @in, in2);
             if (existop == (PcodeOp)null)
                 return false;
-            SplitVarnode::createBinaryOp(data, outdoub, in, in2, existop, OpCode.CPUI_INT_MULT);
+            SplitVarnode.createBinaryOp(data, outdoub, @in, in2, existop, OpCode.CPUI_INT_MULT);
             return true;
         }
 
@@ -286,21 +280,13 @@ namespace Sla.DECCORE
         {
             hi1 = h;
             lo1 = l;
-            list<PcodeOp*>::const_iterator iter, enditer;
-            iter = hop.getOut().beginDescend();
-            enditer = hop.getOut().endDescend();
-            while (iter != enditer)
-            {
-                add1 = *iter;
-                ++iter;
+            IEnumerator<PcodeOp> iter = hop.getOut().beginDescend();
+            while (iter.MoveNext()) {
+                add1 = iter.Current;
                 if (add1.code() != OpCode.CPUI_INT_ADD) continue;
-                list<PcodeOp*>::const_iterator iter2, enditer2;
-                iter2 = add1.getOut().beginDescend();
-                enditer2 = add1.getOut().endDescend();
-                while (iter2 != enditer2)
-                {
-                    add2 = *iter2;
-                    ++iter2;
+                IEnumerator<PcodeOp> iter2 = add1.getOut().beginDescend();
+                while (iter2.MoveNext()) {
+                    add2 = iter2.Current;
                     if (add2.code() != OpCode.CPUI_INT_ADD) continue;
                     if (mapFromIn(add2.getOut()))
                         return true;

@@ -56,7 +56,7 @@ namespace Sla.DECCORE
                 return tlst.getTypePointer(op.getIn(0).getSize(), td, spc.getWordSize()); // First parameter is code pointer
             }
             fc = op.getParent().getFuncdata().getCallSpecs(op);
-            if (fc == (FuncCallSpecs*)0)
+            if (fc == (FuncCallSpecs)null)
                 return TypeOp::getInputLocal(op, slot);
             ProtoParameter* param = fc.getParam(slot - 1);
             if (param != (ProtoParameter*)0)
@@ -83,7 +83,7 @@ namespace Sla.DECCORE
             Datatype* ct;
 
             fc = op.getParent().getFuncdata().getCallSpecs(op);
-            if (fc == (FuncCallSpecs*)0)
+            if (fc == (FuncCallSpecs)null)
                 return TypeOp::getOutputLocal(op);
             if (!fc.isOutputLocked()) return TypeOp::getOutputLocal(op);
             ct = fc.getOutputType();

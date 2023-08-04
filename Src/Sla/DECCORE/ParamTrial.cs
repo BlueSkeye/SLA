@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,7 +51,7 @@ namespace Sla.DECCORE
         }
 
         /// Boolean properties of the trial
-        private uint flags;
+        private ParamFlags flags;
         /// Starting address of the memory range
         private Address addr;
         /// Number of bytes in the memory range
@@ -72,7 +72,7 @@ namespace Sla.DECCORE
             size = sz;
             slot = sl;
             flags=0;
-            entry=(ParamEntry*)0;
+            entry=(ParamEntry)null;
             offset=-1;
             fixedPosition = -1;
         }
@@ -108,104 +108,104 @@ namespace Sla.DECCORE
         /// Mark the trial as a formal parameter
         public void markUsed()
         {
-            flags |= used;
+            flags |= ParamFlags.used;
         }
 
         /// Mark that trial is actively used (in data-flow)
         public void markActive()
         {
-            flags |= (active | @checked);
+            flags |= (ParamFlags.active | ParamFlags.@checked);
         }
 
         /// Mark that trial is not actively used
         public void markInactive()
         {
-            flags &= ~((uint)active);
-            flags |= @checked;
+            flags &= ~ParamFlags.active;
+            flags |= ParamFlags.@checked;
         }
 
         /// Mark trial as definitely \e not a parameter
         public void markNoUse()
         {
-            flags &= ~((uint)(active | used));
-            flags |= (@checked| defnouse);
+            flags &= ~(ParamFlags.active | ParamFlags.used);
+            flags |= (ParamFlags.@checked | ParamFlags.defnouse);
         }
 
         /// Mark that \b this trial has no Varnode representative
         public void markUnref()
         {
-            flags |= (unref | @checked);
+            flags |= (ParamFlags.unref | ParamFlags.@checked);
             slot = -1;
         }
 
         /// Mark that \b this storage is \e killed-by-call
         public void markKilledByCall()
         {
-            flags |= killedbycall;
+            flags |= ParamFlags.killedbycall;
         }
 
         /// Has \b this trial been checked
-        public bool isChecked() => ((flags & @checked)!= 0);
+        public bool isChecked() => ((flags & ParamFlags.@checked)!= 0);
 
         /// Is \b this trial actively used in data-flow
-        public bool isActive() => ((flags & active)!= 0);
+        public bool isActive() => ((flags & ParamFlags.active)!= 0);
 
         /// Is \b this trial as definitely not a parameter
-        public bool isDefinitelyNotUsed() => ((flags & defnouse)!= 0);
+        public bool isDefinitelyNotUsed() => ((flags & ParamFlags.defnouse)!= 0);
 
         /// Is \b this trial as a formal parameter
-        public bool isUsed() => ((flags & used)!= 0);
+        public bool isUsed() => ((flags & ParamFlags.used)!= 0);
 
         /// Does \b this trial not have a Varnode representative
-        public bool isUnref() => ((flags & unref)!= 0);
+        public bool isUnref() => ((flags & ParamFlags.unref)!= 0);
 
         /// Is \b this storage \e killed-by-call
-        public bool isKilledByCall() => ((flags & killedbycall)!= 0);
+        public bool isKilledByCall() => ((flags & ParamFlags.killedbycall)!= 0);
 
         /// Mark that \b this is formed by a INT_REM operation
         public void setRemFormed()
         {
-            flags |= rem_formed;
+            flags |= ParamFlags.rem_formed;
         }
 
         /// Is \b this formed by a INT_REM operation
-        public bool isRemFormed() => ((flags & rem_formed)!= 0);
+        public bool isRemFormed() => ((flags & ParamFlags.rem_formed)!= 0);
 
         /// Mark \b this trial as formed by \e indirect \e creation
         public void setIndCreateFormed()
         {
-            flags |= indcreate_formed;
+            flags |= ParamFlags.indcreate_formed;
         }
 
         /// Is \b this trial formed by \e indirect \e creation
-        public bool isIndCreateFormed() => ((flags & indcreate_formed)!= 0);
+        public bool isIndCreateFormed() => ((flags & ParamFlags.indcreate_formed)!= 0);
 
         /// Mark \b this trial as possibly affected by conditional execution
         public void setCondExeEffect()
         {
-            flags |= condexe_effect;
+            flags |= ParamFlags.condexe_effect;
         }
 
         /// Is \b this trial possibly affected by conditional execution
-        public bool hasCondExeEffect() => ((flags & condexe_effect)!= 0);
+        public bool hasCondExeEffect() => ((flags & ParamFlags.condexe_effect)!= 0);
 
         /// Mark \b this as having a realistic ancestor
         public void setAncestorRealistic()
         {
-            flags |= ancestor_realistic;
+            flags |= ParamFlags.ancestor_realistic;
         }
 
         /// Does \b this have a realistic ancestor
-        public bool hasAncestorRealistic() => ((flags & ancestor_realistic)!= 0);
+        public bool hasAncestorRealistic() => ((flags & ParamFlags.ancestor_realistic)!= 0);
 
         /// Mark \b this as showing solid movement into Varnode
         public void setAncestorSolid()
         {
-            flags |= ancestor_solid;
+            flags |= ParamFlags.ancestor_solid;
         }
 
         /// Does \b this show solid movement into Varnode
-        public bool hasAncestorSolid() => ((flags & ancestor_solid)!= 0);
+        public bool hasAncestorSolid() => ((flags & ParamFlags.ancestor_solid)!= 0);
 
         /// Get position of \b this within its parameter \e group
         public int slotGroup() => entry.getSlot(addr, size-1);
@@ -223,7 +223,7 @@ namespace Sla.DECCORE
         /// \return the new trial
         public ParamTrial splitHi(int sz)
         {
-            ParamTrial res(addr, sz, slot);
+            ParamTrial res = new ParamTrial(addr, sz, slot);
             res.flags = flags;
             return res;
         }
@@ -256,8 +256,8 @@ namespace Sla.DECCORE
                 testaddr = addr;
             if (testaddr != newaddr)
                 return false;
-            if (entry != (ParamEntry*)0) return false;
-            //  if (entry != (ParamEntry*)0) {
+            if (entry != (ParamEntry)null) return false;
+            //  if (entry != (ParamEntry)null) {
             //    int res = entry.justifiedContain(newaddr,sz);
             //    if (res < 0) return false;
             //  }
@@ -271,26 +271,24 @@ namespace Sla.DECCORE
         /// \return \b true if \b this should be ordered before the other trial
         public static bool operator <(ParamTrial a, ParamTrial b)
         {
-            if (entry == (ParamEntry*)0) return false;
-            if (b.entry == (ParamEntry*)0) return true;
-            int grpa = entry.getGroup();
+            if (a.entry == (ParamEntry)null) return false;
+            if (b.entry == (ParamEntry)null) return true;
+            int grpa = a.entry.getGroup();
             int grpb = b.entry.getGroup();
             if (grpa != grpb)
                 return (grpa < grpb);
-            if (entry != b.entry)       // Compare entry pointers directly
-                return (entry < b.entry);
-            if (entry.isExclusion())
-            {
-                return (offset < b.offset);
+            if (a.entry != b.entry)       // Compare entry pointers directly
+                return (a.entry < b.entry);
+            if (a.entry.isExclusion()) {
+                return (a.offset < b.offset);
             }
-            if (addr != b.addr)
-            {
-                if (entry.isReverseStack())
-                    return (b.addr < addr);
+            if (a.addr != b.addr) {
+                if (a.entry.isReverseStack())
+                    return (b.addr < a.addr);
                 else
-                    return (addr < b.addr);
+                    return (a.addr < b.addr);
             }
-            return (size < b.size);
+            return (a.size < b.size);
         }
 
         /// Set fixed position

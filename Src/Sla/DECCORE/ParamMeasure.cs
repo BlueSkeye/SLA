@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Sla.DECCORE
@@ -75,39 +74,35 @@ namespace Sla.DECCORE
                 state.depth -= 1;
                 return;
             }
-            list<PcodeOp*>::const_iterator iter = vn.beginDescend();
-            while (rank != state.terminalrank && iter != vn.endDescend())
-            {
-                PcodeOp* op = *iter;
-                if (op != ignoreop)
-                {
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (rank != state.terminalrank && iter.MoveNext()) {
+                PcodeOp op = iter.Current;
+                if (op != ignoreop) {
                     OpCode oc = op.getOpcode().getOpcode();
-                    switch (oc)
-                    {
+                    switch (oc) {
                         case OpCode.CPUI_BRANCH:
                         case OpCode.CPUI_BRANCHIND:
-                            if (op.getSlot(vn) == 0) updaterank(DIRECTREAD, state.best);
+                            if (op.getSlot(vn) == 0) updaterank(ParamRank.DIRECTREAD, state.best);
                             break;
                         case OpCode.CPUI_CBRANCH:
-                            if (op.getSlot(vn) < 2) updaterank(DIRECTREAD, state.best);
+                            if (op.getSlot(vn) < 2) updaterank(ParamRank.DIRECTREAD, state.best);
                             break;
                         case OpCode.CPUI_CALL:
                         case OpCode.CPUI_CALLIND:
-                            if (op.getSlot(vn) == 0) updaterank(DIRECTREAD, state.best);
-                            else
-                            {
+                            if (op.getSlot(vn) == 0) updaterank(ParamRank.DIRECTREAD, state.best);
+                            else {
                                 numcalls++;
-                                updaterank(SUBFNPARAM, state.best);
+                                updaterank(ParamRank.SUBFNPARAM, state.best);
                             }
                             break;
                         case OpCode.CPUI_CALLOTHER:
-                            updaterank(DIRECTREAD, state.best);
+                            updaterank(ParamRank.DIRECTREAD, state.best);
                             break;
                         case OpCode.CPUI_RETURN:
-                            updaterank(THISFNRETURN, state.best);
+                            updaterank(ParamRank.THISFNRETURN, state.best);
                             break;
                         case OpCode.CPUI_INDIRECT:
-                            updaterank(INDIRECT, state.best);
+                            updaterank(ParamRank.INDIRECT, state.best);
                             break;
                         case OpCode.CPUI_MULTIEQUAL:
                             // The only op for which there can be a loop in the graph is with the MULTIEQUAL (not for CALL, etc.).
@@ -115,11 +110,10 @@ namespace Sla.DECCORE
                             if (!op.getParent().isLoopIn(op.getSlot(vn))) walkforward(state, (PcodeOp)null, op.getOut());
                             break;
                         default:
-                            updaterank(DIRECTREAD, state.best);
+                            updaterank(ParamRank.DIRECTREAD, state.best);
                             break;
                     }
                 }
-                iter++;
             }
             state.depth -= 1;
         }

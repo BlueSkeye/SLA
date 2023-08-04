@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -75,7 +75,7 @@ namespace Sla.DECCORE
         ///
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_INT_SLESS);
+            oplist.Add(OpCode.CPUI_INT_SLESS);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

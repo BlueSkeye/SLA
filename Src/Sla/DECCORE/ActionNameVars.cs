@@ -50,20 +50,20 @@ namespace Sla.DECCORE
                     ct = (Datatype)null;  // Indicate that this is a less preferred name
                 }
             }
-            HighVariable* high = vn.getHigh();
+            HighVariable high = vn.getHigh();
             if (high.isAddrTied()) return; // Don't propagate parameter name to address tied variable
             if (param.getName().compare(0, 6, "param_") == 0) return;
 
-            Dictionary<HighVariable*, OpRecommend>::iterator iter = recmap.find(high);
+            Dictionary<HighVariable, OpRecommend>.Enumerator iter = recmap.find(high);
             if (iter != recmap.end())
             {   // We have seen this varnode before
                 if (ct == (Datatype)null) return; // Cannot override with null (casted) type
-                Datatype* oldtype = (*iter).second.ct;
+                Datatype oldtype = (*iter).second.ct;
                 if (oldtype != (Datatype)null)
                 {
                     if (oldtype.typeOrder(*ct) <= 0) return; // oldtype is more specified
                 }
-              (*iter).second.ct = ct;
+                (*iter).second.ct = ct;
                 (*iter).second.namerec = param.getName();
             }
             else

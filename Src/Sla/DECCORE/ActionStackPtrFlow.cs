@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -155,7 +155,7 @@ namespace Sla.DECCORE
         {
             int loadsize = loadop.getOut().getSize();
             BlockBasic curblock = loadop.getParent();
-            list<PcodeOp*>::iterator begiter = curblock.beginOp();
+            IEnumerator<PcodeOp> begiter = curblock.beginOp();
             list<PcodeOp*>::iterator iter = loadop.getBasicIter();
             for (; ; ) {
                 if (iter == begiter) {

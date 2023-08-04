@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -51,24 +51,22 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         /// \param name is used to pass back the parameter name
         /// \param size is used to pass back the parameter size
-        protected static void decodeParameter(Decoder decoder, string name, uint size)
+        protected static void decodeParameter(Sla.CORE.Decoder decoder, out string name, out uint size)
         {
             name = "";
             size = 0;
             uint elemId = decoder.openElement();
-            for (; ; )
-            {
+            for (; ; ) {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
-                if (attribId == ATTRIB_NAME)
+                if (attribId == AttributeId.ATTRIB_NAME)
                     name = decoder.readString();
-                else if (attribId == ATTRIB_SIZE)
-                {
-                    size = decoder.readUnsignedInteger();
+                else if (attribId == AttributeId.ATTRIB_SIZE) {
+                    size = (uint)decoder.readUnsignedInteger();
                 }
             }
             decoder.closeElement(elemId);
-            if (name.size() == 0)
+            if (name.Length == 0)
                 throw new LowlevelError("Missing inject parameter name");
         }
 
@@ -123,24 +121,21 @@ namespace Sla.DECCORE
         /// Elements are processed until the first child that isn't an \<input> or \<output> tag
         /// is encountered. The \<pcode> element must be current and already opened.
         /// \param decoder is the stream decoder
-        protected void decodePayloadParams(Decoder decoder)
+        protected void decodePayloadParams(Sla.CORE.Decoder decoder)
         {
-            for (; ; )
-            {
+            for (; ; ) {
                 uint subId = decoder.peekElement();
-                if (subId == ELEM_INPUT)
-                {
+                if (subId == ElementId.ELEM_INPUT) {
                     string paramName;
                     uint size;
-                    decodeParameter(decoder, paramName, size);
-                    inputlist.Add(InjectParameter(paramName, size));
+                    decodeParameter(decoder, out paramName, out size);
+                    inputlist.Add(new InjectParameter(paramName, size));
                 }
-                else if (subId == ELEM_OUTPUT)
-                {
+                else if (subId == ElementId.ELEM_OUTPUT) {
                     string paramName;
                     uint size;
-                    decodeParameter(decoder, paramName, size);
-                    output.Add(InjectParameter(paramName, size));
+                    decodeParameter(decoder, out paramName, out size);
+                    output.Add(new InjectParameter(paramName, size));
                 }
                 else
                     break;
@@ -164,13 +159,13 @@ namespace Sla.DECCORE
         protected bool isDynamic() => dynamic;
 
         /// Return \b true if any injected COPY is considered \e incidental
-        protected bool isIncidentalCopy() => incidentalCopy;
+        internal bool isIncidentalCopy() => incidentalCopy;
 
         /// Return the number of input parameters
-        protected int sizeInput() => inputlist.size();
+        protected int sizeInput() => inputlist.Count;
 
         /// Return the number of output parameters
-        protected int sizeOutput() => output.size();
+        protected int sizeOutput() => output.Count;
 
         /// Get the i-th input parameter
         protected InjectParameter getInput(int i) => inputlist[i];
@@ -183,7 +178,6 @@ namespace Sla.DECCORE
         }
 
         /// Perform the injection of \b this payload into data-flow.
-        ///
         /// P-code operations representing \b this payload are copied into the
         /// controlling analysis context. The provided PcodeEmit object dictates exactly
         /// where the PcodeOp and Varnode objects are inserted and to what container.
@@ -191,7 +185,7 @@ namespace Sla.DECCORE
         /// in the appropriate context.
         /// \param context is the provided InjectConject object
         /// \param emit is the provovided PcodeEmit object
-        protected abstract void inject(InjectContext context, PcodeEmit emit);
+        internal abstract void inject(InjectContext context, PcodeEmit emit);
 
         /// Decode \b this payload from a stream
         protected abstract void decode(Sla.CORE.Decoder decoder);
@@ -200,10 +194,10 @@ namespace Sla.DECCORE
         protected abstract void printTemplate(TextWriter s);
 
         /// Return the name of the injection
-        protected abstract string getName() => name;
+        protected virtual string getName() => name;
 
         /// Return the type of injection (CALLFIXUP_TYPE, CALLOTHERFIXUP_TYPE, etc.)
-        protected abstract int getType() => type;
+        protected virtual int getType() => type;
 
         /// Return a string describing the \e source of the injection (.cspec, prototype model, etc.)
         protected abstract string getSource();

@@ -21,30 +21,24 @@ namespace Sla.DECCORE
         private static bool preferredOutput(Varnode out1, Varnode out2)
         {
             // Prefer the output that is used in a OpCode.CPUI_RETURN
-            IEnumerator<PcodeOp> iter, enditer;
-            enditer = out1.endDescend();
-            for (iter = out1.beginDescend(); iter != enditer; ++iter)
-            {
+            IEnumerator<PcodeOp> iter = out1.beginDescend();
+            while (iter.MoveNext()) {
                 PcodeOp op = iter.Current;
                 if (op.code() == OpCode.CPUI_RETURN)
                     return false;
             }
-            enditer = out2.endDescend();
-            for (iter = out2.beginDescend(); iter != enditer; ++iter)
-            {
-                PcodeOp* op = *iter;
+            iter = out2.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if (op.code() == OpCode.CPUI_RETURN)
                     return true;
             }
             // Prefer addrtied over register over unique
-            if (!out1.isAddrTied())
-            {
+            if (!out1.isAddrTied()) {
                 if (out2.isAddrTied())
                     return true;
-                else
-                {
-                    if (out1.getSpace().getType() == spacetype.IPTR_INTERNAL)
-                    {
+                else {
+                    if (out1.getSpace().getType() == spacetype.IPTR_INTERNAL) {
                         if (out2.getSpace().getType() != spacetype.IPTR_INTERNAL)
                             return true;
                     }
@@ -59,13 +53,12 @@ namespace Sla.DECCORE
         /// \param bl is the parent block
         /// \param target is the given target OpCode.CPUI_MULTIEQUAL
         /// \param in is the specific input Varnode
-        private static PcodeOp findMatch(BlockBasic bl, PcodeOp target, Varnode @in)
+        private static PcodeOp? findMatch(BlockBasic bl, PcodeOp target, Varnode @in)
         {
             IEnumerator<PcodeOp> iter = bl.beginOp();
 
-            for (; ; ) {
-                PcodeOp op = *iter;
-                ++iter;
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if (op == target)       // Caught up with target, nothing else before it
                     break;
                 int i, numinput;
@@ -78,8 +71,8 @@ namespace Sla.DECCORE
                 }
                 if (i < numinput) {
                     int j;
-                    Varnode buf1[2];
-                    Varnode buf2[2];
+                    Varnode[] buf1 = new Varnode[2];
+                    Varnode[] buf2 = new Varnode[2];
                     for (j = 0; j < numinput; ++j) {
                         Varnode in1 = op.getIn(j);
                         if (in1.isWritten() && (in1.getDef().code() == OpCode.CPUI_COPY))
@@ -106,57 +99,50 @@ namespace Sla.DECCORE
         /// return \b true if a OpCode.CPUI_MULTIEQUAL was (successfully) deleted
         private bool processBlock(Funcdata data, BlockBasic bl)
         {
-            List<Varnode> vnlist;
+            List<Varnode> vnlist = new List<Varnode>();
             PcodeOp? targetop = (PcodeOp)null;
             PcodeOp? pairop;
             IEnumerator<PcodeOp> iter = bl.beginOp();
-            IEnumerator<PcodeOp> enditer = bl.endOp();
-            while (iter != enditer) {
-                PcodeOp op = *iter;
-                ++iter;
+            while (iter.MoveNext()) {
+                PcodeOp op iter.Current;
                 OpCode opc = op.code();
                 if (opc == OpCode.CPUI_COPY) continue;
                 if (opc != OpCode.CPUI_MULTIEQUAL) break;
-                int vnpos = vnlist.size();
+                int vnpos = vnlist.Count;
                 int i;
                 int numinput = op.numInput();
-                for (i = 0; i < numinput; ++i)
-                {
-                    Varnode* vn = op.getIn(i);
+                for (i = 0; i < numinput; ++i) {
+                    Varnode vn = op.getIn(i);
                     if (vn.isWritten() && (vn.getDef().code() == OpCode.CPUI_COPY)) // Some copies may not propagate into MULTIEQUAL
                         vn = vn.getDef().getIn(0);                    // Allow for differences in copy propagation
                     vnlist.Add(vn);
-                    if (vn.isMark())
-                    {       // If we've seen this varnode before
+                    if (vn.isMark()) {
+                        // If we've seen this varnode before
                         pairop = findMatch(bl, op, vn);
                         if (pairop != (PcodeOp)null)
                             break;
                     }
                 }
-                if (i < numinput)
-                {
+                if (i < numinput) {
                     targetop = op;
                     break;
                 }
-                for (i = vnpos; i < vnlist.size(); ++i)
+                for (i = vnpos; i < vnlist.Count; ++i)
                     vnlist[i].setMark();       // Mark that we have seen this varnode
             }
 
             // Clear out any of the marks we put down
-            for (int i = 0; i < vnlist.size(); ++i)
+            for (int i = 0; i < vnlist.Count; ++i)
                 vnlist[i].clearMark();
 
-            if (targetop != (PcodeOp)null)
-            {
-                Varnode* out1 = pairop.getOut();
-                Varnode* out2 = targetop.getOut();
-                if (preferredOutput(out1, out2))
-                {
+            if (targetop != (PcodeOp)null) {
+                Varnode out1 = pairop.getOut();
+                Varnode out2 = targetop.getOut();
+                if (preferredOutput(out1, out2)) {
                     data.totalReplace(out1, out2);  // Replace pairop and out1 in favor of targetop and out2
                     data.opDestroy(pairop);
                 }
-                else
-                {
+                else {
                     data.totalReplace(out2, out1);
                     data.opDestroy(targetop);
                 }

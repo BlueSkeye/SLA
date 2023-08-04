@@ -38,7 +38,7 @@ namespace Sla.EXTRA
                 // fallthru
                 case OpCode.CPUI_BRANCH:
                 case OpCode.CPUI_CBRANCH:
-                    jumpaddr.Add(Address(vars[0].space, vars[0].offset));
+                    jumpaddr.Add(new Address(vars[0].space, vars[0].offset));
                     break;
                 case OpCode.CPUI_COPY:
                 case OpCode.CPUI_BRANCHIND:

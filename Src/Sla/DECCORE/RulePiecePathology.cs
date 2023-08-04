@@ -54,7 +54,7 @@ namespace Sla.DECCORE
                                 if (callOp.isCall())
                                 {
                                     FuncCallSpecs* fspec = data.getCallSpecs(callOp);
-                                    if (fspec != (FuncCallSpecs*)0 && !fspec.isOutputActive())
+                                    if (fspec != (FuncCallSpecs)null && !fspec.isOutputActive())
                                     {
                                         res = true;
                                     }
@@ -66,7 +66,7 @@ namespace Sla.DECCORE
                         case OpCode.CPUI_CALLIND:
                             {
                                 FuncCallSpecs* fspec = data.getCallSpecs(op);
-                                if (fspec != (FuncCallSpecs*)0 && !fspec.isOutputActive())
+                                if (fspec != (FuncCallSpecs)null && !fspec.isOutputActive())
                                 {
                                     res = true;
                                 }
@@ -218,7 +218,7 @@ namespace Sla.DECCORE
                 {   // from either a unary/binary operation
                     if (!lsbOp.isCall()) return 0;                     // or a CALL
                     FuncCallSpecs* fc = data.getCallSpecs(lsbOp);
-                    if (fc == (FuncCallSpecs*)0) return 0;
+                    if (fc == (FuncCallSpecs)null) return 0;
                     if (!fc.isOutputLocked()) return 0;                    // with a locked output
                 }
                 Address addr = lsbVn.getAddr();

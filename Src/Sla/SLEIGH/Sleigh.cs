@@ -631,27 +631,25 @@ namespace Sla.SLEIGH
             ParserWalker walker = new ParserWalker(pos);
             walker.baseState();
             pcode_cache.clear();
-            SleighBuilder builder = new SleighBuilder(&walker, discache, &pcode_cache, getConstantSpace(), getUniqueSpace(), unique_allocatemask);
+            SleighBuilder builder = new SleighBuilder(walker, discache, pcode_cache, getConstantSpace(), getUniqueSpace(), unique_allocatemask);
             try
             {
                 builder.build(walker.getConstructor().getTempl(), -1);
                 pcode_cache.resolveRelatives();
-                pcode_cache.emit(baseaddr, &emit);
+                pcode_cache.emit(baseaddr, emit);
             }
             catch (UnimplError err) {
-                ostringstream s;
-                s << "Instruction not implemented in pcode:\n ";
-                ParserWalker* cur = builder.getCurrentWalker();
+                StringWriter s = new StringWriter();
+                s.Write("Instruction not implemented in pcode:\n ");
+                ParserWalker cur = builder.getCurrentWalker();
                 cur.baseState();
-                Constructor* ct = cur.getConstructor();
+                Constructor ct = cur.getConstructor();
                 cur.getAddr().printRaw(s);
-                s << ": ";
-                ct.printMnemonic(s, *cur);
-                s << "  ";
-                ct.printBody(s, *cur);
-                err.ToString() = s.str();
-                err.instruction_length = fallOffset;
-                throw err;
+                s.Write(": ");
+                ct.printMnemonic(s, cur);
+                s.Write("  ");
+                ct.printBody(s, cur);
+                throw new UnimplError(s.ToString(), fallOffset);
             }
             return fallOffset;
         }

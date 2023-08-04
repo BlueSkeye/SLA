@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace Sla.DECCORE
         /// \brief Convert INT_SRIGHT form into INT_SDIV:  `(V + -1*(V s>> 31)) s>> 1  =>  V s/ 2`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_INT_SRIGHT);
+            oplist.Add(OpCode.CPUI_INT_SRIGHT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

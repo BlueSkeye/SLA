@@ -62,10 +62,10 @@ namespace Sla.EXTRA
             setupParameters(con, walker, inputlist, output, source);
             // delayslot and crossbuild directives are not allowed in snippets, so we don't need the DisassemblyCache
             // and we don't need a unique allocation mask
-            SleighBuilder builder = new SleighBuilder(&walker,(DisassemblyCache)null,&con.cacher,con.glb.getConstantSpace(),con.glb.getUniqueSpace(),0);
+            SleighBuilder builder = new SleighBuilder(walker,(DisassemblyCache)null, con.cacher,con.glb.getConstantSpace(),con.glb.getUniqueSpace(),0);
             builder.build(tpl, -1);
             con.cacher.resolveRelatives();
-            con.cacher.emit(con.baseaddr, &emit);
+            con.cacher.emit(con.baseaddr, emit);
         }
 
         public override void decode(Decoder decoder)

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,15 +20,11 @@ namespace Sla.DECCORE
         /// \param res is the array for holding the comparison op results
         private void findComparisons(Varnode vn, List<PcodeOp> res)
         {
-            list<PcodeOp*>::const_iterator iter1;
-            iter1 = vn.beginDescend();
-            while (iter1 != vn.endDescend())
-            {
-                PcodeOp* op = *iter1;
-                ++iter1;
+            IEnumerator<PcodeOp> iter1 = vn.beginDescend();
+            while (iter1.MoveNext()) {
+                PcodeOp op = iter1.Current;
                 OpCode opc = op.code();
-                if (opc == OpCode.CPUI_INT_EQUAL || opc == OpCode.CPUI_INT_NOTEQUAL)
-                {
+                if (opc == OpCode.CPUI_INT_EQUAL || opc == OpCode.CPUI_INT_NOTEQUAL) {
                     if (op.getIn(1).isConstant())
                         res.Add(op);
                 }
@@ -50,7 +46,7 @@ namespace Sla.DECCORE
         /// \brief Convert sign-bit test to signed comparison:  `(V s>> 0x1f) != 0   =>  V s< 0`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_INT_SRIGHT);
+            oplist.Add(OpCode.CPUI_INT_SRIGHT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -84,25 +84,21 @@ namespace Sla.DECCORE
         /// \return the root of the CONCAT tree
         public static Varnode findRoot(Varnode vn)
         {
-            while (vn.isProtoPartial() || vn.isAddrTied())
-            {
-                list<PcodeOp*>::const_iterator iter = vn.beginDescend();
-                PcodeOp* pieceOp = (PcodeOp)null;
-                while (iter != vn.endDescend())
-                {
-                    PcodeOp* op = *iter;
-                    ++iter;
+            while (vn.isProtoPartial() || vn.isAddrTied()) {
+                IEnumerator<PcodeOp> iter = vn.beginDescend();
+                PcodeOp? pieceOp = (PcodeOp)null;
+                while (iter.MoveNext()) {
+                    PcodeOp op = iter.Current;
                     if (op.code() != OpCode.CPUI_PIECE) continue;
                     int slot = op.getSlot(vn);
                     Address addr = op.getOut().getAddr();
                     if (addr.getSpace().isBigEndian() == (slot == 1))
                         addr = addr + op.getIn(1 - slot).getSize();
                     addr.renormalize(vn.getSize());        // Allow for possible join address
-                    if (addr == vn.getAddr())
-                    {
-                        if (pieceOp != (PcodeOp)null)
-                        {       // If there is more than one valid PIECE
-                            if (op.compareOrder(pieceOp))  // Attach this to earliest one
+                    if (addr == vn.getAddr()) {
+                        if (pieceOp != (PcodeOp)null) {
+                            // If there is more than one valid PIECE
+                            if (0 != op.compareOrder(pieceOp))  // Attach this to earliest one
                                 pieceOp = op;
                         }
                         else
@@ -127,12 +123,11 @@ namespace Sla.DECCORE
         /// \param baseOffset is the offset associated with the output of the current PIECE op
         public static void gatherPieces(List<PieceNode> stack, Varnode rootVn, PcodeOp op, int baseOffset)
         {
-            for (int i = 0; i < 2; ++i)
-            {
-                Varnode* vn = op.getIn(i);
+            for (int i = 0; i < 2; ++i) {
+                Varnode vn = op.getIn(i);
                 int offset = (rootVn.getSpace().isBigEndian() == (i == 1)) ? baseOffset + op.getIn(1 - i).getSize() : baseOffset;
                 bool res = isLeaf(rootVn, vn, offset);
-                stack.emplace_back(op, i, offset, res);
+                stack.Add(new PieceNode(op, i, offset, res));
                 if (!res)
                     gatherPieces(stack, rootVn, vn.getDef(), offset);
             }

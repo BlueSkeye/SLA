@@ -48,11 +48,10 @@ namespace Sla.DECCORE
             if (scope == globalscope) return;       // Does not apply to the global scope
             if (scope.fd != (Funcdata)null) return;  // Does not apply to functional scopes
 
-            set<Range>::const_iterator iter;
+            IEnumerator<Sla.CORE.Range> iter = scope.rangetree.begin();
 
-            for (iter = scope.rangetree.begin(); iter != scope.rangetree.end(); ++iter)
-            {
-                Range rng = *iter;
+            while (iter.MoveNext()) {
+                Sla.CORE.Range rng = iter.Current;
                 pair<ScopeResolve::const_iterator, ScopeResolve::const_iterator> res;
                 res = resolvemap.find(rng.getFirstAddr());
                 while (res.first != res.second)
@@ -90,10 +89,9 @@ namespace Sla.DECCORE
             if (scope == globalscope) return;       // Does not apply to the global scope
             if (scope.fd != (Funcdata)null) return;  // Does not apply to functional scopes
 
-            set<Range>::const_iterator iter;
-            for (iter = scope.rangetree.begin(); iter != scope.rangetree.end(); ++iter)
-            {
-                Range rng = *iter;
+            IEnumerator<Sla.CORE.Range> iter = scope.rangetree.begin();
+            while (iter.MoveNext()) {
+                Sla.CORE.Range rng = iter.Current;
                 resolvemap.insert(scope, rng.getFirstAddr(), rng.getLastAddr());
             }
         }
@@ -302,32 +300,30 @@ namespace Sla.DECCORE
         /// \param basename will hold the passed back base Symbol name
         /// \param start is the Scope to start drilling down from, or NULL for the global scope
         /// \return the Scope being referred to by the name
-        public Scope resolveScopeFromSymbolName(string fullname, string delim, string basename,
-            Scope start)
+        public Scope? resolveScopeFromSymbolName(string fullname, string delim, string basename,
+            Scope? start)
         {
             if (start == (Scope)null)
                 start = globalscope;
 
-            string::size_type mark = 0;
-            string::size_type endmark;
-            for (; ; )
-            {
-                endmark = fullname.find(delim, mark);
-                if (endmark == string::npos) break;
-                if (endmark == 0)
-                {       // Path is "absolute"
+            int mark = 0;
+            int endmark;
+            while (true) {
+                endmark = fullname.IndexOf(delim, mark);
+                if (-1 == endmark) break;
+                if (endmark == 0) {
+                    // Path is "absolute"
                     start = globalscope;    // Start from the global scope
                 }
-                else
-                {
-                    string scopename = fullname.substr(mark, endmark - mark);
+                else {
+                    string scopename = fullname.Substring(mark, endmark - mark);
                     start = start.resolveScope(scopename, idByNameHash);
                     if (start == (Scope)null) // Was the scope name bad
-                        return start;
+                        return (Scope)null;
                 }
-                mark = endmark + delim.size();
+                mark = endmark + delim.Length;
             }
-            basename = fullname.substr(mark, endmark);
+            basename = fullname.Substring(mark, endmark);
             return start;
         }
 
@@ -366,20 +362,19 @@ namespace Sla.DECCORE
             if (start == (Scope)null)
                 start = globalscope;
 
-            string::size_type mark = 0;
-            string::size_type endmark;
-            for (; ; )
-            {
-                endmark = fullname.find(delim, mark);
-                if (endmark == string::npos) break;
+            int mark = 0;
+            int endmark;
+            while (true) {
+                endmark = fullname.IndexOf(delim, mark);
+                if (-1 == endmark) break;
                 if (!idByNameHash)
                     throw new LowlevelError("Scope name hashes not allowed");
-                string scopename = fullname.substr(mark, endmark - mark);
-                ulong nameId = Scope::hashScopeName(start.uniqueId, scopename);
+                string scopename = fullname.Substring(mark, endmark - mark);
+                ulong nameId = Scope.hashScopeName(start.uniqueId, scopename);
                 start = findCreateScope(nameId, scopename, start);
-                mark = endmark + delim.size();
+                mark = endmark + delim.Length;
             }
-            basename = fullname.substr(mark, endmark);
+            basename = fullname.Substring(mark, endmark);
             return start;
         }
 
@@ -433,25 +428,31 @@ namespace Sla.DECCORE
         /// Scope::queryProperties() method in particular.
         /// \param flags is the set of boolean properties
         /// \param range is the memory range to label
-        public void setPropertyRange(uint flags, Range range)
+        public void setPropertyRange(uint flags, Sla.CORE.Range range)
         {
             Address addr1 = range.getFirstAddr();
             Address addr2 = range.getLastAddrOpen(glb);
             flagbase.split(addr1);
-            partmap<Address, uint>::iterator aiter, biter;
+            // WARNING : The returned enumerator is already set on the first relevant record.
+            // DO NOT use MoveNext before reading
+            IEnumerator<KeyValuePair<Address, uint>> aiter = flagbase.begin(addr1) ?? throw new BugException();
+            IEnumerator<KeyValuePair<Address, uint>>? biter;
 
-            aiter = flagbase.begin(addr1);
-            if (!addr2.isInvalid())
-            {
+            if (!addr2.isInvalid()) {
                 flagbase.split(addr2);
                 biter = flagbase.begin(addr2);
             }
             else
-                biter = flagbase.end();
-            while (aiter != biter)
-            {   // Update bits across whole range
-                (*aiter).second |= flags;
-                ++aiter;
+                biter = null;
+            while (true) {
+                if ((null != biter) && (aiter.Current.Key == biter.Current.Key)) {
+                    break;
+                }
+                // Update bits across whole range
+                flagbase.updateValue(aiter.Current.Key, aiter.Current.Value | flags);
+                if (!aiter.MoveNext()) {
+                    break;
+                }
             }
         }
 
@@ -460,26 +461,32 @@ namespace Sla.DECCORE
         /// No other properties are altered.
         /// \param flags is the set of properties to clear
         /// \param range is the memory range to clear
-        public void clearPropertyRange(uint flags, Range range)
+        public void clearPropertyRange(uint flags, Sla.CORE.Range range)
         {
             Address addr1 = range.getFirstAddr();
             Address addr2 = range.getLastAddrOpen(glb);
             flagbase.split(addr1);
-            partmap<Address, uint>::iterator aiter, biter;
+            IEnumerator<KeyValuePair<Address, uint>>? biter;
 
-            aiter = flagbase.begin(addr1);
-            if (!addr2.isInvalid())
-            {
+            // WARNING : The returned enumerator is already set on the first relevant record.
+            // DO NOT use MoveNext before reading
+            IEnumerator<KeyValuePair<Address, uint>> aiter = flagbase.begin(addr1) ?? throw new BugException();
+            if (!addr2.isInvalid()) {
                 flagbase.split(addr2);
                 biter = flagbase.begin(addr2);
             }
             else
-                biter = flagbase.end();
+                biter = null;
             flags = ~flags;
-            while (aiter != biter)
-            {   // Update bits across whole range
-                (*aiter).second &= flags;
-                ++aiter;
+            while (true) {
+                if ((null != biter) && (aiter.Current.Key == biter.Current.Key)) {
+                    break;
+                }
+                // Update bits across whole range
+                flagbase.updateValue(aiter.Current.Key, aiter.Current.Value & flags);
+                if (!aiter.MoveNext()) {
+                    break;
+                }
             }
         }
 
@@ -497,27 +504,23 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         public void encode(Encoder encoder)
         {
-            partmap<Address, uint>::const_iterator piter, penditer;
-
-            encoder.openElement(ELEM_DB);
+            encoder.openElement(ElementId.ELEM_DB);
             if (idByNameHash)
-                encoder.writeBool(ATTRIB_SCOPEIDBYNAME, true);
+                encoder.writeBool(AttributeId.ATTRIB_SCOPEIDBYNAME, true);
             // Save the property change points
-            piter = flagbase.begin();
-            penditer = flagbase.end();
-            for (; piter != penditer; ++piter)
-            {
-                Address addr = (*piter).first;
-                uint val = (*piter).second;
-                encoder.openElement(ELEM_PROPERTY_CHANGEPOINT);
+            IEnumerator<KeyValuePair<Address, uint>> piter = flagbase.begin() ?? throw new BugException();
+            while (piter.MoveNext()) {
+                Address addr = piter.Current.Key;
+                uint val = piter.Current.Value;
+                encoder.openElement(ElementId.ELEM_PROPERTY_CHANGEPOINT);
                 addr.getSpace().encodeAttributes(encoder, addr.getOffset());
-                encoder.writeUnsignedInteger(ATTRIB_VAL, val);
-                encoder.closeElement(ELEM_PROPERTY_CHANGEPOINT);
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_VAL, val);
+                encoder.closeElement(ElementId.ELEM_PROPERTY_CHANGEPOINT);
             }
 
             if (globalscope != (Scope)null)
                 globalscope.encodeRecursive(encoder, true);        // Save the global scopes
-            encoder.closeElement(ELEM_DB);
+            encoder.closeElement(ElementId.ELEM_DB);
         }
 
         /// Decode the whole database from a stream

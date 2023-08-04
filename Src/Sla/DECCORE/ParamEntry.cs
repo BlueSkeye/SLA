@@ -94,7 +94,7 @@ namespace Sla.DECCORE
                     return &entry;
                 }
             }
-            return (ParamEntry*)0;
+            return (ParamEntry)null;
         }
 
         /// Make adjustments for a \e join ParamEntry
@@ -113,7 +113,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < joinrec.numPieces(); ++i)
             {
                 ParamEntry entry = findEntryByStorage(curList, joinrec.getPiece(i));
-                if (entry != (ParamEntry*)0) {
+                if (entry != (ParamEntry)null) {
                     groupSet.insert(groupSet.end(), entry.groupSet.begin(), entry.groupSet.end());
                     // For output <pentry>, if the most signifigant part overlaps with an earlier <pentry>
                     // the least signifigant part is marked for extra checks, and vice versa.

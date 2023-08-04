@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -168,7 +168,7 @@ namespace Sla.DECCORE
         /// this returns a clone of the Rule, otherwise NULL is returned.
         /// \param grouplist is the list of groups being cloned
         /// \return the cloned Rule or NULL
-        public abstract Rule clone(ActionGroupList grouplist);
+        public abstract Rule? clone(ActionGroupList grouplist);
 
         /// List of op codes this rule operates on
         /// Populate the given array with all possible OpCodes this Rule might apply to.

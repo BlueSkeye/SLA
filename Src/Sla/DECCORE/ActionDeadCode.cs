@@ -304,12 +304,11 @@ namespace Sla.DECCORE
         private static bool neverConsumed(Varnode vn, Funcdata data)
         {
             if (vn.getSize() > sizeof(ulong)) return false; // Not enough precision to really tell
-            IEnumerator<PcodeOp> iter;
             PcodeOp op;
-            iter = vn.beginDescend();
-            while (iter != vn.endDescend())
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (iter.MoveNext())
             {
-                op = *iter++;       // Advance before ref is removed
+                op = iter.Current;       // Advance before ref is removed
                 int slot = op.getSlot(vn);
                 // Replace vn with 0 whereever it is read
                 // We don't worry about putting a constant in a marker
@@ -369,9 +368,9 @@ namespace Sla.DECCORE
             if (data.getFuncProto().isOutputLocked() || data.getActiveOutput() != (ParamActive*)0)
                 return ~((ulong)0);
             IEnumerator<PcodeOp> iter, enditer;
-            enditer = data.endOp(CPUI_RETURN);
+            enditer = data.endOp(OpCode.CPUI_RETURN);
             ulong consumeVal = 0;
-            for (iter = data.beginOp(CPUI_RETURN); iter != enditer; ++iter)
+            for (iter = data.beginOp(OpCode.CPUI_RETURN); iter != enditer; ++iter)
             {
                 PcodeOp returnOp = *iter;
                 if (returnOp.isDead()) continue;
@@ -483,14 +482,13 @@ namespace Sla.DECCORE
         public override int apply(Funcdata data)
         {
             int i;
-            list<PcodeOp*>::const_iterator iter;
-            PcodeOp* op;
-            Varnode* vn;
+            PcodeOp op;
+            Varnode vn;
             ulong returnConsume;
-            List<Varnode*> worklist;
+            List<Varnode> worklist;
             VarnodeLocSet::const_iterator viter, endviter;
             AddrSpaceManager manage = data.getArch();
-            AddrSpace* spc;
+            AddrSpace spc;
 
             // Clear consume flags
             for (viter = data.beginLoc(); viter != data.endLoc(); ++viter) {
@@ -516,16 +514,13 @@ namespace Sla.DECCORE
             }
 
             returnConsume = gatherConsumedReturn(data);
-            for (iter = data.beginOpAlive(); iter != data.endOpAlive(); ++iter)
-            {
-                op = *iter;
-
+            IEnumerator<PcodeOp> iter = data.beginOpAlive();
+            while (iter.MoveNext()) {
+                op = iter.Current;
                 op.clearIndirectSource();
-                if (op.isCall())
-                {
+                if (op.isCall()) {
                     // Postpone setting consumption on CALL and CALLIND inputs
-                    if (op.isCallWithoutSpec())
-                    {
+                    if (op.isCallWithoutSpec()) {
                         for (i = 0; i < op.numInput(); ++i)
                             pushConsumed(~((ulong)0), op.getIn(i), worklist);
                     }

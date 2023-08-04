@@ -78,15 +78,13 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode
         private void buildVnDown(Varnode vn)
         {
-            list<PcodeOp*>::const_iterator iter;
-            uint insize = opedge.size();
+            int insize = opedge.Count;
 
-            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
-            {
-                PcodeOp* op = *iter;
-                Varnode* tmpvn = vn;
-                while (transtable[op.code()] == 0)
-                {
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp? op = iter.Current;
+                Varnode? tmpvn = vn;
+                while (transtable[(int)op.code()] == 0) {
                     tmpvn = op.getOut();
                     if (tmpvn == null) {
                         op = null;
@@ -97,10 +95,10 @@ namespace Sla.DECCORE
                 }
                 if (op == null) continue;
                 int slot = op.getSlot(tmpvn);
-                opedge.Add(ToOpEdge(op, slot));
+                opedge.Add(new ToOpEdge(op, slot));
             }
-            if ((uint)opedge.size() - insize > 1)
-                sort(opedge.begin() + insize, opedge.end());
+            if ((uint)opedge.Count - insize > 1)
+                opedge.Sort(insize, opedge.Count - insize, ToOpEdge.Comparer);
         }
 
         /// Move input Varnodes for the given PcodeOp into staging

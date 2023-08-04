@@ -21,11 +21,12 @@ namespace Sla.DECCORE
         private SplitVarnode outdoub;
 
         private int findHiMatch()
-        { // Look for the op computing the most significant part of the result for which -loop- computes
-          // the least significant part,  look for a known double precis out, then look for known double
-          // precis @in.  If the other input is constant, look for a unique op that might be computing the high,
-          // Return 0 if we found an op, return -1, if we can't find an op, return -2 if no op exists
-            Varnode lo1Tmp = @@in.getLo();
+        {
+            // Look for the op computing the most significant part of the result for which -loop- computes
+            // the least significant part,  look for a known double precis out, then look for known double
+            // precis @in.  If the other input is constant, look for a unique op that might be computing the high,
+            // Return 0 if we found an op, return -1, if we can't find an op, return -2 if no op exists
+            Varnode lo1Tmp = @in.getLo();
             Varnode vn2 = loop.getIn(1 - loop.getSlot(lo1Tmp));
 
             SplitVarnode @out = new SplitVarnode();
@@ -56,18 +57,11 @@ namespace Sla.DECCORE
                 SplitVarnode in2 = new SplitVarnode();
                 if (in2.inHandLo(vn2)) {
                     // If we already know what the other double precision input looks like
-                    IEnumerator<PcodeOp> iter;
-                    IEnumerator<PcodeOp> enditer;
-                    iter = in2.getHi().beginDescend();
-                    enditer = in2.getHi().endDescend();
-                    while (iter != enditer)
-                    {
-                        PcodeOp* maybeop = *iter;
-                        ++iter;
-                        if (maybeop.code() == loop.code())
-                        {
-                            if ((maybeop.getIn(0) == hi1) || (maybeop.getIn(1) == hi1))
-                            {
+                    IEnumerator<PcodeOp> iter = in2.getHi().beginDescend();
+                    while (iter.MoveNext()) {
+                        PcodeOp maybeop = iter.Current;
+                        if (maybeop.code() == loop.code()) {
+                            if ((maybeop.getIn(0) == hi1) || (maybeop.getIn(1) == hi1)) {
                                 hiop = maybeop;
                                 return 0;
                             }
@@ -76,29 +70,21 @@ namespace Sla.DECCORE
                 }
                 return -1;
             }
-            else
-            {
-                list<PcodeOp*>::const_iterator iter, enditer;
-                iter = hi1.beginDescend();
-                enditer = hi1.endDescend();
+            else {
+                IEnumerator<PcodeOp> iter = hi1.beginDescend();
                 int count = 0;
-                PcodeOp* lastop = (PcodeOp)null;
-                while (iter != enditer)
-                {
-                    PcodeOp* maybeop = *iter;
-                    ++iter;
-                    if (maybeop.code() == loop.code())
-                    {
-                        if (maybeop.getIn(1).isConstant())
-                        {
+                PcodeOp? lastop = (PcodeOp)null;
+                while (iter.MoveNext()) {
+                    PcodeOp maybeop = iter.Current;
+                    if (maybeop.code() == loop.code()) {
+                        if (maybeop.getIn(1).isConstant()) {
                             count += 1;
                             if (count > 1) break;
                             lastop = maybeop;
                         }
                     }
                 }
-                if (count == 1)
-                {
+                if (count == 1) {
                     hiop = lastop;
                     return 0;
                 }

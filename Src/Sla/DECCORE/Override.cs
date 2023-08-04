@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -52,7 +52,7 @@ namespace Sla.DECCORE
         /// Addresses of indirect jumps that need multistage recovery
         private List<Address> multistagejump;
         /// Override the CALL <. BRANCH
-        private Dictionary<Address, uint> flowoverride;
+        private Dictionary<Address, Override.Branching> flowoverride;
 
         /// Clear the entire set of overrides
         private void clear()
@@ -258,13 +258,10 @@ namespace Sla.DECCORE
         ///
         /// \param addr is the address of a branch instruction
         /// \return the override type
-        public uint getFlowOverride(Address addr)
+        public Override.Branching getFlowOverride(Sla.CORE.Address addr)
         {
-            Dictionary<Address, uint>::const_iterator iter;
-            iter = flowoverride.find(addr);
-            if (iter == flowoverride.end())
-                return Override::NONE;
-            return (*iter).second;
+            Override.Branching result;
+            return flowoverride.TryGetValue(addr, out result) ? result : Override.Branching.NONE;
         }
 
         /// \brief Dump a description of the overrides to stream
@@ -430,7 +427,7 @@ namespace Sla.DECCORE
                 {
                     uint type = stringToType(decoder.readString(ATTRIB_TYPE));
                     Address addr = Address::decode(decoder);
-                    if ((type == Override::NONE) || (addr.isInvalid()))
+                    if ((type == Override.Branching.NONE) || (addr.isInvalid()))
                         throw new LowlevelError("Bad flowoverride tag");
                     insertFlowOverride(addr, type);
                 }
@@ -468,7 +465,7 @@ namespace Sla.DECCORE
                 return Override::CALL_RETURN;
             else if (nm == "return")
                 return Override::RETURN;
-            return Override::NONE;
+            return Override.Branching.NONE;
         }
     }
 }

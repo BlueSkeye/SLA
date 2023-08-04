@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +31,7 @@ namespace Sla.DECCORE
         /// trigger the full SubvariableFlow analysis.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_INT_RIGHT);
+            oplist.Add(OpCode.CPUI_INT_RIGHT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

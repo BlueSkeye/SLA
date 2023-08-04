@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -33,13 +33,9 @@ namespace Sla.DECCORE
             if (hiphi.getOut().hasNoDescend()) return false;
             blbase = hiphi.getParent();
 
-            list<PcodeOp*>::const_iterator iter, enditer;
-            iter = lobase.beginDescend();
-            enditer = lobase.endDescend();
-            while (iter != enditer)
-            {
-                lophi = *iter;
-                ++iter;
+            IEnumerator<PcodeOp> iter = lobase.beginDescend();
+            while (iter.MoveNext()) {
+                lophi = iter.Current;
                 if (lophi.code() != OpCode.CPUI_MULTIEQUAL) continue;
                 if (lophi.getParent() != blbase) continue;
                 if (lophi.getIn(inslot) != lobase) continue;
@@ -54,22 +50,20 @@ namespace Sla.DECCORE
             if (!i.hasBothPieces()) return false;
             @in = i;
 
-            if (!verify(@@in.getHi(), @@in.getLo(), hphi))
+            if (!verify(@in.getHi(), @in.getLo(), hphi))
                 return false;
 
             int numin = hiphi.numInput();
-            List<SplitVarnode> inlist;
-            for (int j = 0; j < numin; ++j)
-            {
-                Varnode* vhi = hiphi.getIn(j);
-                Varnode* vlo = lophi.getIn(j);
-                inlist.Add(SplitVarnode(vlo, vhi));
+            List<SplitVarnode> inlist = new List<SplitVarnode>();
+            for (int j = 0; j < numin; ++j) {
+                Varnode vhi = hiphi.getIn(j);
+                Varnode vlo = lophi.getIn(j);
+                inlist.Add(new SplitVarnode(vlo, vhi));
             }
-            outvn.initPartial(@@in.getSize(), lophi.getOut(), hiphi.getOut());
-            existop = SplitVarnode::preparePhiOp(outvn, inlist);
-            if (existop != (PcodeOp)null)
-            {
-                SplitVarnode::createPhiOp(data, outvn, inlist, existop);
+            outvn.initPartial(@in.getSize(), lophi.getOut(), hiphi.getOut());
+            existop = SplitVarnode.preparePhiOp(outvn, inlist);
+            if (existop != (PcodeOp)null) {
+                SplitVarnode.createPhiOp(data, outvn, inlist, existop);
                 return true;
             }
             return false;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace Sla.DECCORE
         /// \brief Perform SubfloatFlow analysis triggered by FLOAT_FLOAT2FLOAT
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_FLOAT_FLOAT2FLOAT);
+            oplist.Add(OpCode.CPUI_FLOAT_FLOAT2FLOAT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

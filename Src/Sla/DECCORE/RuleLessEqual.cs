@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -31,7 +31,7 @@ namespace Sla.DECCORE
         /// Handle INT_SLESS variants as well.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_BOOL_OR);
+            oplist.Add(OpCode.CPUI_BOOL_OR);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

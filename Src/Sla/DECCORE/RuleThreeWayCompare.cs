@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,10 +37,10 @@ namespace Sla.DECCORE
         ///  - `V <= W`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_INT_SLESS);
-            oplist.Add(CPUI_INT_SLESSEQUAL);
-            oplist.Add(CPUI_INT_EQUAL);
-            oplist.Add(CPUI_INT_NOTEQUAL);
+            oplist.Add(OpCode.CPUI_INT_SLESS);
+            oplist.Add(OpCode.CPUI_INT_SLESSEQUAL);
+            oplist.Add(OpCode.CPUI_INT_EQUAL);
+            oplist.Add(OpCode.CPUI_INT_NOTEQUAL);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

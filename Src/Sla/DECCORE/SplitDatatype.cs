@@ -654,13 +654,11 @@ namespace Sla.DECCORE
         /// \return \b true if the Varnode has an arithmetic op as a descendant
         private static bool isArithmeticInput(Varnode vn)
         {
-            list<PcodeOp*>::const_iterator iter = vn.beginDescend();
-            while (iter != vn.endDescend())
-            {
-                PcodeOp* op = *iter;
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if (op.getOpcode().isArithmeticOp())
                     return true;
-                ++iter;
             }
             return false;
         }

@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         /// \brief Perform SubvariableFlow analysis triggered by INT_SEXT
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_INT_SEXT);
+            oplist.Add(OpCode.CPUI_INT_SEXT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

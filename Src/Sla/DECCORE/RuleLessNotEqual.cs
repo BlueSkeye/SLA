@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         /// Handle INT_SLESSEQUAL variant.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_BOOL_AND);
+            oplist.Add(OpCode.CPUI_BOOL_AND);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

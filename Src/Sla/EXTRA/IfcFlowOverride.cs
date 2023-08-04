@@ -35,7 +35,7 @@ namespace Sla.EXTRA
             if (token.size() == 0)
                 throw new IfaceParseError("Missing override type");
             type = Override::stringToType(token);
-            if (type == Override::NONE)
+            if (type == Override.Branching.NONE)
                 throw new IfaceParseError("Bad override type");
 
             dcp.fd.getOverride().insertFlowOverride(addr, type);

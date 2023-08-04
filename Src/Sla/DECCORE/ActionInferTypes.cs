@@ -396,8 +396,8 @@ namespace Sla.DECCORE
             int baseSize = baseVn.getSize();
             bool isBool = ct.getMetatype() == type_metatype.TYPE_BOOL;
             IEnumerator<PcodeOp> iter, iterend;
-            iterend = data.endOp(CPUI_RETURN);
-            for (iter = data.beginOp(CPUI_RETURN); iter != iterend; ++iter) {
+            iterend = data.endOp(OpCode.CPUI_RETURN);
+            for (iter = data.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter) {
                 PcodeOp retop = *iter;
                 if (retop == op) continue;
                 if (retop.isDead()) continue;

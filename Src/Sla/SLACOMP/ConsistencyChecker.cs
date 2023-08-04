@@ -959,7 +959,7 @@ namespace Sla.SLACOMP
                 printOpName(msg, op);
                 compiler.reportWarning(compiler.getLocation(ct), msg.str());
             }
-            op.setOpcode(CPUI_COPY);   // Equivalent to copy
+            op.setOpcode(OpCode.CPUI_COPY);   // Equivalent to copy
             unnecessarypcode += 1;
         }
 
@@ -979,7 +979,7 @@ namespace Sla.SLACOMP
                 printOpName(msg, op);
                 compiler.reportWarning(compiler.getLocation(ct), msg.str());
             }
-            op.setOpcode(CPUI_COPY);   // Equivalent to copy
+            op.setOpcode(OpCode.CPUI_COPY);   // Equivalent to copy
             op.removeInput(1);
             unnecessarypcode += 1;
         }

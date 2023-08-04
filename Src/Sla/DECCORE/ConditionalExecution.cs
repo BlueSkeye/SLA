@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -279,12 +280,12 @@ namespace Sla.DECCORE
         private bool testRemovability(PcodeOp op)
         {
             PcodeOp readop;
-            Varnode vn;
+            Varnode? vn;
 
             if (op.code() == OpCode.CPUI_MULTIEQUAL) {
                 vn = op.getOut();
-                IEnumerator<PcodeOp>::const_iterator iter;
-                for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter) {
+                IEnumerator<PcodeOp> iter = vn.beginDescend();
+                while (iter.MoveNext()) {
                     readop = iter.Current;
                     if (!testMultiRead(vn, readop)) {
                         return false;
@@ -304,7 +305,8 @@ namespace Sla.DECCORE
                 vn = op.getOut();
                 if (vn != null) {
                     bool hasnodescend = true;
-                    for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter) {
+                    IEnumerator<PcodeOp> iter = vn.beginDescend();
+                    while (iter.MoveNext()) {
                         readop = iter.Current;
                         if (!testOpRead(vn, readop)) {
                             return false;
@@ -463,7 +465,7 @@ namespace Sla.DECCORE
             Varnode vn = op.getOut();
             IEnumerator<PcodeOp> iter = vn.beginDescend();
             while (iter.MoveNext()) {
-                PcodeOp readop = iter;
+                PcodeOp readop = iter.Current;
                 int slot = readop.getSlot(vn);
                 BlockBasic bl = readop.getParent();
                 Varnode rvn;
@@ -548,15 +550,12 @@ namespace Sla.DECCORE
             postb_block = (BlockBasic)iblock.getOut(1 - posta_outslot);
 
             returnop.Clear();
-            IEnumerator<PcodeOp>::const_iterator iter;
-            iter = iblock.endOp();
-            if (iter != iblock.beginOp() {
-                // Skip branch
-                --iter;
-            }
-            while (iter != iblock.beginOp()) {
-                --iter;
-                if (!testRemovability(iter)) {
+            IEnumerator<PcodeOp> iter = iblock.reverseEnumerator();
+
+            // Skip branch
+            iter.MoveNext();
+            while (iter.MoveNext()) {
+                if (!testRemovability(iter.Current)) {
                     return false;
                 }
             }
@@ -641,15 +640,14 @@ namespace Sla.DECCORE
         /// We assume the last call to verify() returned \b true
         public void execute()
         {
-            list<PcodeOp*>::iterator iter;
             PcodeOp op;
 
             // Patch any data-flow thru to OpCode.CPUI_RETURN
             fixReturnOp();
             if (!directsplit) {
-                iter = iblock.beginOp();
-                while (iter != iblock.endOp()) {
-                    op = *iter++;
+                IEnumerator<PcodeOp> iter = iblock.beginOp();
+                while (iter.MoveNext()) {
+                    op = iter.Current;
                     if (!op.isBranch()) {
                         // Remove all read refs of op
                         doReplacement(op);
@@ -661,9 +659,9 @@ namespace Sla.DECCORE
             }
             else {
                 adjustDirectMulti();
-                iter = iblock.beginOp();
-                while (iter != iblock.endOp()) {
-                    op = *iter++;
+                IEnumerator<PcodeOp> iter = iblock.beginOp();
+                while (iter.MoveNext()) {
+                    op = iter.Current;
                     if (op.code() == OpCode.CPUI_MULTIEQUAL) {
                         // Only adjust MULTIEQUALs
                         doReplacement(op);

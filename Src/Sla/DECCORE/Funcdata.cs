@@ -1,4 +1,5 @@
-﻿using Sla.CORE;
+﻿using Microsoft.VisualBasic.FileIO;
+using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -285,37 +286,35 @@ namespace Sla.DECCORE
         /// \return \b true if a PcodeOp is modified
         private bool descend2Undef(Varnode vn)
         {
-            PcodeOp* op,*copyop;
-            BlockBasic* inbl;
-            Varnode* badconst;
-            list<PcodeOp*>::const_iterator iter;
+            PcodeOp op, copyop;
+            BlockBasic inbl;
+            Varnode badconst;
             int i, sz;
             bool res;
 
             res = false;
             sz = vn.getSize();
-            iter = vn.beginDescend();
-            while (iter != vn.endDescend())
-            {
-                op = *iter++;       // Move to next in list before deletion
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (iter.MoveNext()) {
+                op = iter.Current;       // Move to next in list before deletion
                 if (op.getParent().isDead()) continue;
                 if (op.getParent().sizeIn() != 0) res = true;
                 i = op.getSlot(vn);
                 badconst = newConstant(sz, 0xBADDEF);
-                if (op.code() == OpCode.CPUI_MULTIEQUAL)
-                { // Cannot put constant directly into MULTIEQUAL
-                    inbl = (BlockBasic*)op.getParent().getIn(i);
+                if (op.code() == OpCode.CPUI_MULTIEQUAL) {
+                    // Cannot put constant directly into MULTIEQUAL
+                    inbl = (BlockBasic)op.getParent().getIn(i);
                     copyop = newOp(1, inbl.getStart());
-                    Varnode* inputvn = newUniqueOut(sz, copyop);
+                    Varnode inputvn = newUniqueOut(sz, copyop);
                     opSetOpcode(copyop, OpCode.CPUI_COPY);
                     opSetInput(copyop, badconst, 0);
                     opInsertEnd(copyop, inbl);
                     opSetInput(op, inputvn, i);
                 }
-                else if (op.code() == OpCode.CPUI_INDIRECT)
-                { // Cannot put constant directly into INDIRECT
+                else if (op.code() == OpCode.CPUI_INDIRECT) {
+                    // Cannot put constant directly into INDIRECT
                     copyop = newOp(1, op.getAddr());
-                    Varnode* inputvn = newUniqueOut(sz, copyop);
+                    Varnode inputvn = newUniqueOut(sz, copyop);
                     opSetOpcode(copyop, OpCode.CPUI_COPY);
                     opSetInput(copyop, badconst, 0);
                     opInsertBefore(copyop, op);
@@ -334,18 +333,16 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode
         private void splitUses(Varnode vn)
         {
-            PcodeOp* op = vn.getDef();
-            Varnode* newvn;
-            PcodeOp* newop,*useop;
-            list<PcodeOp*>::iterator iter;
+            PcodeOp op = vn.getDef() ?? throw new BugException();
+            Varnode newvn;
+            PcodeOp newop, useop;
             int slot;
 
-            iter = vn.descend.begin();
-            if (iter == vn.descend.end()) return; // No descendants at all
-            useop = *iter++;
-            if (iter == vn.descend.end()) return; // Only one descendant
-            for (; ; )
-            {
+            IEnumerator<PcodeOp> iter = vn.descend.GetEnumerator();
+            if (!iter.MoveNext()) return; // No descendants at all
+            useop = iter.Current;
+            if (!iter.MoveNext()) return; // Only one descendant
+            while (true) {
                 slot = useop.getSlot(vn);      // Get first descendant
                 newop = newOp(op.numInput(), op.getAddr());
                 newvn = newVarnode(vn.getSize(), vn.getAddr(), vn.getType());
@@ -355,8 +352,8 @@ namespace Sla.DECCORE
                     opSetInput(newop, op.getIn(i), i);
                 opSetInput(useop, newvn, slot);
                 opInsertBefore(newop, op);
-                if (iter == vn.descend.end()) break;
-                useop = *iter++;
+                if (!iter.MoveNext()) break;
+                useop = iter.Current;
             }
             // Dead-code actions should remove original op
         }
@@ -387,23 +384,20 @@ namespace Sla.DECCORE
         /// \param vn is the Varnode to delete
         private void destroyVarnode(Varnode vn)
         {
-            list<PcodeOp*>::const_iterator iter;
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
 
-            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
-            {
-                PcodeOp* op = *iter;
-# ifdef OPACTION_DEBUG
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
+#if OPACTION_DEBUG
                 if (opactdbg_active)
                     debugModCheck(op);
 #endif
                 op.clearInput(op.getSlot(vn));
             }
-            if (vn.def != (PcodeOp)null)
-            {
+            if (vn.def != (PcodeOp)null) {
                 vn.def.setOutput((Varnode)null);
                 vn.def = (PcodeOp)null;
             }
-
             vn.destroyDescend();
             vbank.destroy(vn);
         }
@@ -493,44 +487,43 @@ namespace Sla.DECCORE
         /// \param unreachable is \b true if the caller wants a warning for stranded Varnodes
         private void blockRemoveInternal(BlockBasic bb, bool unreachable)
         {
-            BlockBasic* bbout;
-            Varnode* deadvn;
-            PcodeOp* op,*deadop;
-            list<PcodeOp*>::iterator iter;
+            BlockBasic bbout;
+            Varnode deadvn;
+            PcodeOp deadop;
             int i, j, blocknum;
             bool desc_warning;
 
-            op = bb.lastOp();
-            if ((op != (PcodeOp)null) && (op.code() == OpCode.CPUI_BRANCHIND))
-            {
-                JumpTable* jt = findJumpTable(op);
-                if (jt != (JumpTable*)0)
+            PcodeOp? op = bb.lastOp();
+            if ((op != (PcodeOp)null) && (op.code() == OpCode.CPUI_BRANCHIND)) {
+                JumpTable? jt = findJumpTable(op);
+                if (jt != (JumpTable)null)
                     removeJumpTable(jt);
             }
-            if (!unreachable)
-            {
-                pushMultiequals(bb);    // Make sure data flow is preserved
+            IEnumerator<PcodeOp> iter;
+            if (!unreachable) {
+                // Make sure data flow is preserved
+                pushMultiequals(bb);
 
-                for (i = 0; i < bb.sizeOut(); ++i)
-                {
-                    bbout = (BlockBasic*)bb.getOut(i);
+                for (i = 0; i < bb.sizeOut(); ++i) {
+                    bbout = (BlockBasic)bb.getOut(i);
                     if (bbout.isDead()) continue;
                     blocknum = bbout.getInIndex(bb); // Get index of bb into bbout
-                    for (iter = bbout.beginOp(); iter != bbout.endOp(); ++iter)
-                    {
-                        op = *iter;
+                    iter = bbout.beginOp();
+                    while (iter.MoveNext()) {
+                        op = iter.Current;
                         if (op.code() != OpCode.CPUI_MULTIEQUAL) continue;
                         deadvn = op.getIn(blocknum);
                         opRemoveInput(op, blocknum);    // Remove the deleted blocks branch
                         deadop = deadvn.getDef();
-                        if ((deadvn.isWritten()) && (deadop.code() == OpCode.CPUI_MULTIEQUAL) && (deadop.getParent() == bb))
+                        if (   deadvn.isWritten()
+                            && (deadop.code() == OpCode.CPUI_MULTIEQUAL)
+                            && (deadop.getParent() == bb))
                         {
                             // Append new branches
                             for (j = 0; j < bb.sizeIn(); ++j)
                                 opInsertInput(op, deadop.getIn(j), op.numInput());
                         }
-                        else
-                        {
+                        else {
                             for (j = 0; j < bb.sizeIn(); ++j)
                                 opInsertInput(op, deadvn, op.numInput()); // Otherwise make copies
                         }
@@ -542,17 +535,16 @@ namespace Sla.DECCORE
 
             desc_warning = false;
             iter = bb.beginOp();
-            while (iter != bb.endOp())
-            {   // Finally remove all the ops
-                op = *iter;
-                if (op.isAssignment())
-                {   // op still has some descendants
+            while (iter.MoveNext()) {
+                // Finally remove all the ops
+                op = iter.Current;
+                if (op.isAssignment()) {
+                    // op still has some descendants
                     deadvn = op.getOut();
-                    if (unreachable)
-                    {
+                    if (unreachable) {
                         bool undef = descend2Undef(deadvn);
-                        if (undef && (!desc_warning))
-                        { // Mark descendants as undefined
+                        if (undef && !desc_warning) {
+                            // Mark descendants as undefined
                             warningHeader("Creating undefined varnodes in (possibly) reachable block");
                             desc_warning = true;    // Print the warning only once
                         }
@@ -562,7 +554,7 @@ namespace Sla.DECCORE
                 }
                 if (op.isCall())
                     deleteCallSpecs(op);
-                iter++;         // Increment iterator before unlinking
+                // Increment iterator before unlinking
                 opDestroy(op);      // No longer has descendants
             }
             bblocks.removeBlock(bb);    // Remove the block altogether
@@ -576,20 +568,19 @@ namespace Sla.DECCORE
         /// \param num is the index of the outgoing edge to remove
         private void branchRemoveInternal(BlockBasic bb, int num)
         {
-            BlockBasic* bbout;
-            list<PcodeOp*>::iterator iter;
-            PcodeOp* op;
+            BlockBasic bbout;
+            PcodeOp op;
             int blocknum;
 
             if (bb.sizeOut() == 2) // If there is no decision left
                 opDestroy(bb.lastOp());    // Remove the branch instruction
 
-            bbout = (BlockBasic*)bb.getOut(num);
+            bbout = (BlockBasic)bb.getOut(num);
             blocknum = bbout.getInIndex(bb);
             bblocks.removeEdge(bb, bbout); // Sever (one) connection between bb and bbout
-            for (iter = bbout.beginOp(); iter != bbout.endOp(); ++iter)
-            {
-                op = *iter;
+            IEnumerator<PcodeOp> iter = bbout.beginOp();
+            while (iter.MoveNext()) {
+                op = iter.Current;
                 if (op.code() != OpCode.CPUI_MULTIEQUAL) continue;
                 opRemoveInput(op, blocknum);
                 opZeroMulti(op);
@@ -603,43 +594,37 @@ namespace Sla.DECCORE
         /// \param bb is the given basic block
         private void pushMultiequals(BlockBasic bb)
         {
-            BlockBasic* outblock;
-            PcodeOp* origop,*replaceop;
-            Varnode* origvn,*replacevn;
-            list<PcodeOp*>::iterator iter;
-            list<PcodeOp*>::const_iterator citer;
+            PcodeOp origop, replaceop;
+            Varnode origvn, replacevn;
 
             if (bb.sizeOut() == 0) return;
             if (bb.sizeOut() > 1)
                 warningHeader("push_multiequal on block with multiple outputs");
-            outblock = (BlockBasic*)bb.getOut(0); // Take first output block. If this is a
-                                                   // donothing block, it is the only output block
+            // Take first output block. If this is a donothing block, it is the only output block
+            BlockBasic outblock = (BlockBasic)bb.getOut(0);
             int outblock_ind = bb.getOutRevIndex(0);
-            for (iter = bb.beginOp(); iter != bb.endOp(); ++iter)
-            {
-                origop = *iter;
+            IEnumerator<PcodeOp> iter = bb.beginOp();
+            while (iter.MoveNext()) {
+                origop = iter.Current;
                 if (origop.code() != OpCode.CPUI_MULTIEQUAL) continue;
                 origvn = origop.getOut();
                 if (origvn.hasNoDescend()) continue;
                 bool needreplace = false;
                 bool neednewunique = false;
-                for (citer = origvn.beginDescend(); citer != origvn.endDescend(); ++citer)
-                {
-                    PcodeOp* op = *citer;
-                    if ((op.code() == OpCode.CPUI_MULTIEQUAL) && (op.getParent() == outblock))
-                    {
+                IEnumerator<PcodeOp> citer = origvn.beginDescend();
+                while (citer.MoveNext()) {
+                    PcodeOp op = citer.Current;
+                    if ((op.code() == OpCode.CPUI_MULTIEQUAL) && (op.getParent() == outblock)) {
                         bool deadEdge = true;   // Check for reference to origvn NOT thru the dead edge
-                        for (int i = 0; i < op.numInput(); ++i)
-                        {
+                        for (int i = 0; i < op.numInput(); ++i) {
                             if (i == outblock_ind) continue;    // Not going thru dead edge
-                            if (op.getIn(i) == origvn)
-                            {       // Reference to origvn
+                            if (op.getIn(i) == origvn) {
+                                // Reference to origvn
                                 deadEdge = false;
                                 break;
                             }
                         }
-                        if (deadEdge)
-                        {
+                        if (deadEdge) {
                             if ((origvn.getAddr() == op.getOut().getAddr()) && origvn.isAddrTied())
                                 // If origvn is addrtied and feeds into a MULTIEQUAL at same address in outblock
                                 // Then any use of origvn beyond outblock that did not go thru this MULTIEQUAL must have
@@ -653,13 +638,12 @@ namespace Sla.DECCORE
                 }
                 if (!needreplace) continue;
                 // Construct artificial MULTIEQUAL
-                List<Varnode*> branches;
+                List<Varnode> branches = new List<Varnode>();
                 if (neednewunique)
                     replacevn = newUnique(origvn.getSize());
                 else
                     replacevn = newVarnode(origvn.getSize(), origvn.getAddr());
-                for (int i = 0; i < outblock.sizeIn(); ++i)
-                {
+                for (int i = 0; i < outblock.sizeIn(); ++i) {
                     if (outblock.getIn(i) == bb)
                         branches.Add(origvn);
                     else
@@ -672,7 +656,7 @@ namespace Sla.DECCORE
                     // dominated by bb.  So the artificial MULTIEQUAL we construct must have
                     // all inputs be origvn
                 }
-                replaceop = newOp(branches.size(), outblock.getStart());
+                replaceop = newOp(branches.Count, outblock.getStart());
                 opSetOpcode(replaceop, OpCode.CPUI_MULTIEQUAL);
                 opSetOutput(replaceop, replacevn);
                 opSetAllInput(replaceop, branches);
@@ -680,10 +664,9 @@ namespace Sla.DECCORE
 
                 // Replace obsolete origvn with replacevn
                 int i;
-                list<PcodeOp*>::iterator titer = origvn.descend.begin();
-                while (titer != origvn.descend.end())
-                {
-                    PcodeOp* op = *titer++;
+                IEnumerator<PcodeOp> titer = origvn.descend.GetEnumerator();
+                while (titer.MoveNext()) {
+                    PcodeOp op = titer.Current;
                     i = op.getSlot(origvn);
                     // Do not replace MULTIEQUAL references in the same block
                     // as replaceop.  These are patched by block_remove
@@ -707,22 +690,20 @@ namespace Sla.DECCORE
         /// The structured hierarchy is also reset.
         private void structureReset()
         {
-            List<JumpTable*>::iterator iter;
-            List<FlowBlock*> rootlist;
+            List<FlowBlock> rootlist = new List<FlowBlock>();
 
-            flags &= ~blocks_unreachable;   // Clear any old blocks flag
+            flags &= ~Flags.blocks_unreachable;   // Clear any old blocks flag
             bblocks.structureLoops(rootlist);
             bblocks.calcForwardDominator(rootlist);
-            if (rootlist.size() > 1)
-                flags |= blocks_unreachable;
+            if (rootlist.Count > 1)
+                flags |= Flags.blocks_unreachable;
             // Check for dead jumptables
-            List<JumpTable*> alivejumps;
-            for (iter = jumpvec.begin(); iter != jumpvec.end(); ++iter)
-            {
-                JumpTable* jt = *iter;
-                PcodeOp* indop = jt.getIndirectOp();
-                if (indop.isDead())
-                {
+            List<JumpTable> alivejumps = new List<JumpTable>();
+            IEnumerator<JumpTable> iter = jumpvec.GetEnumerator();
+            while (iter.MoveNext()) {
+                JumpTable jt = iter.Current;
+                PcodeOp indop = jt.getIndirectOp();
+                if (indop.isDead()) {
                     warningHeader("Recovered jumptable eliminated as dead code");
                     delete jt;
                     continue;
@@ -730,8 +711,10 @@ namespace Sla.DECCORE
                 alivejumps.Add(jt);
             }
             jumpvec = alivejumps;
-            sblocks.clear();        // Force structuring algorithm to start over
-                                    //  sblocks.build_copy(bblocks);	// Make copy of the basic block control flow graph
+            // Force structuring algorithm to start over
+            sblocks.clear();
+            // Make copy of the basic block control flow graph
+            //  sblocks.build_copy(bblocks);
             heritage.forceRestructure();
         }
 
@@ -817,25 +800,23 @@ namespace Sla.DECCORE
         /// \param flow is the flow object (mapping addresses to p-code ops)
         private void switchOverJumpTables(FlowInfo flow)
         {
-            List<JumpTable*>::iterator iter;
+            IEnumerator<JumpTable> iter = jumpvec.GetEnumerator();
 
-            for (iter = jumpvec.begin(); iter != jumpvec.end(); ++iter)
-                (*iter).switchOver(flow);
+            while (iter.MoveNext())
+                iter.Current.switchOver(flow);
         }
 
         /// Clear any jump-table information
         /// Any override information is preserved.
         private void clearJumpTables()
         {
-            List<JumpTable*> remain;
-            List<JumpTable*>::iterator iter;
+            List<JumpTable> remain = new List<JumpTable>();
+            IEnumerator<JumpTable> iter = jumpvec.GetEnumerator();
 
-            for (iter = jumpvec.begin(); iter != jumpvec.end(); ++iter)
-            {
-                JumpTable* jt = *iter;
-                if (jt.isOverride())
-                {
-                    jt.clear();        // Clear out any derived data
+            while (iter.MoveNext()) {
+                JumpTable jt = iter.Current;
+                if (jt.isOverride()) {
+                    jt.Clear();        // Clear out any derived data
                     remain.Add(jt);   // Keep the override itself
                 }
                 else
@@ -858,15 +839,13 @@ namespace Sla.DECCORE
         /// \param op is the particular specification to remove
         private void deleteCallSpecs(PcodeOp op)
         {
-            List<FuncCallSpecs*>::iterator iter;
+            IEnumerator<FuncCallSpecs> iter = qlst.GetEnumerator();
 
-            for (iter = qlst.begin(); iter != qlst.end(); ++iter)
-            {
-                FuncCallSpecs* fc = *iter;
-                if (fc.getOp() == op)
-                {
+            while (iter.MoveNext()) {
+                FuncCallSpecs fc = iter.Current;
+                if (fc.getOp() == op) {
+                    qlst.Remove(fc);
                     delete fc;
-                    qlst.erase(iter);
                     return;
                 }
             }
@@ -953,12 +932,11 @@ namespace Sla.DECCORE
         /// \param bprime is the cloned block
         private void nodeSplitRawDuplicate(BlockBasic b, BlockBasic bprime)
         {
-            PcodeOp* b_op,*prime_op;
-            list<PcodeOp*>::iterator iter;
+            PcodeOp b_op, prime_op;
+            IEnumerator<PcodeOp> iter = b.beginOp();
 
-            for (iter = b.beginOp(); iter != b.endOp(); ++iter)
-            {
-                b_op = *iter;
+            while (iter.MoveNext()) {
+                b_op = iter.Current;
                 prime_op = nodeSplitCloneOp(b_op);
                 if (prime_op == (PcodeOp)null) continue;
                 nodeSplitCloneVarnode(b_op, prime_op);
@@ -978,24 +956,22 @@ namespace Sla.DECCORE
         /// \param inedge is the incoming edge index that was split on
         private void nodeSplitInputPatch(BlockBasic b, BlockBasic bprime, int inedge)
         {
-            list<PcodeOp*>::iterator biter, piter;
-            PcodeOp* bop,*pop;
-            Varnode* bvn,*pvn;
-            Dictionary<PcodeOp*, PcodeOp*> btop; // Map from b to bprime
-            List<PcodeOp*> pind;  // pop needing b input
-            List<PcodeOp*> bind;  // bop giving input
+            IEnumerator<PcodeOp> biter, piter;
+            PcodeOp bop, pop;
+            Varnode bvn, pvn;
+            Dictionary<PcodeOp, PcodeOp> btop; // Map from b to bprime
+            List<PcodeOp> pind = new List<PcodeOp>();  // pop needing b input
+            List<PcodeOp> bind = new List<PcodeOp>();  // bop giving input
             List<int> pslot;     // slot within pop needing b input
 
             biter = b.beginOp();
             piter = bprime.beginOp();
 
-            while (piter != bprime.endOp())
-            {
+            while (piter != bprime.endOp()) {
                 bop = *biter;
                 pop = *piter;
                 btop[bop] = pop;        // Establish mapping
-                if (bop.code() == OpCode.CPUI_MULTIEQUAL)
-                {
+                if (bop.code() == OpCode.CPUI_MULTIEQUAL) {
                     pop.setNumInputs(1);   // One edge now goes into bprime
                     opSetOpcode(pop, OpCode.CPUI_COPY);
                     opSetInput(pop, bop.getIn(inedge), 0);
@@ -1003,18 +979,14 @@ namespace Sla.DECCORE
                     if (bop.numInput() == 1)
                         opSetOpcode(bop, OpCode.CPUI_COPY);
                 }
-                else if (bop.code() == OpCode.CPUI_INDIRECT)
-                {
+                else if (bop.code() == OpCode.CPUI_INDIRECT) {
                     throw new LowlevelError("Can't handle INDIRECTs in nodesplit");
                 }
-                else if (bop.isCall())
-                {
+                else if (bop.isCall()) {
                     throw new LowlevelError("Can't handle CALLs in nodesplit");
                 }
-                else
-                {
-                    for (int i = 0; i < pop.numInput(); ++i)
-                    {
+                else {
+                    for (int i = 0; i < pop.numInput(); ++i) {
                         bvn = bop.getIn(i);
                         if (bvn.isConstant())
                             pvn = newConstant(bvn.getSize(), bvn.getOffset());
@@ -1022,12 +994,9 @@ namespace Sla.DECCORE
                             pvn = newCodeRef(bvn.getAddr());
                         else if (bvn.isFree())
                             throw new LowlevelError("Can't handle free varnode in nodesplit");
-                        else
-                        {
-                            if (bvn.isWritten())
-                            {
-                                if (bvn.getDef().getParent() == b)
-                                {
+                        else {
+                            if (bvn.isWritten()) {
+                                if (bvn.getDef().getParent() == b) {
                                     pind.Add(pop); // Need a cross reference
                                     bind.Add(bvn.getDef());
                                     pslot.Add(i);
@@ -1062,10 +1031,10 @@ namespace Sla.DECCORE
         /// \return \b true if the Varnode is read in the dead block
         private static bool descendantsOutside(Varnode vn)
         {
-            list<PcodeOp*>::const_iterator iter;
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
 
-            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
-                if (!(*iter).getParent().isDead()) return true;
+            while (iter.MoveNext())
+                if (!iter.Current.getParent().isDead()) return true;
             return false;
         }
 
@@ -1095,43 +1064,35 @@ namespace Sla.DECCORE
         /// \return \b true if all flows hit an INDIRECT op
         private static bool checkIndirectUse(Varnode vn)
         {
-            List<Varnode*> vlist;
+            List<Varnode> vlist = new List<Varnode>();
             int i = 0;
             vlist.Add(vn);
             vn.setMark();
             bool result = true;
-            while ((i < vlist.size()) && result)
-            {
+            while ((i < vlist.Count) && result) {
                 vn = vlist[i++];
-                list<PcodeOp*>::const_iterator iter;
-                for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
-                {
-                    PcodeOp* op = *iter;
+                IEnumerator<PcodeOp> iter = vn.beginDescend();
+                while (iter.MoveNext()) {
+                    PcodeOp op = iter.Current;
                     OpCode opc = op.code();
-                    if (opc == OpCode.CPUI_INDIRECT)
-                    {
-                        if (op.isIndirectStore())
-                        {
+                    if (opc == OpCode.CPUI_INDIRECT) {
+                        if (op.isIndirectStore()) {
                             // INDIRECT from a STORE is not a negative result but continue to follow data-flow
-                            Varnode* outvn = op.getOut();
-                            if (!outvn.isMark())
-                            {
+                            Varnode outvn = op.getOut();
+                            if (!outvn.isMark()) {
                                 vlist.Add(outvn);
                                 outvn.setMark();
                             }
                         }
                     }
-                    else if (opc == OpCode.CPUI_MULTIEQUAL)
-                    {
-                        Varnode* outvn = op.getOut();
-                        if (!outvn.isMark())
-                        {
+                    else if (opc == OpCode.CPUI_MULTIEQUAL) {
+                        Varnode outvn = op.getOut();
+                        if (!outvn.isMark()) {
                             vlist.Add(outvn);
                             outvn.setMark();
                         }
                     }
-                    else
-                    {
+                    else {
                         result = false;
                         break;
                     }
@@ -1515,37 +1476,37 @@ namespace Sla.DECCORE
             if (!obank.empty())
                 throw new LowlevelError("Trying to do truncated flow on pre-existing pcode");
 
-            list<PcodeOp*>::const_iterator oiter; // Clone the raw pcode
-            for (oiter = fd.obank.beginDead(); oiter != fd.obank.endDead(); ++oiter)
-                cloneOp(*oiter, (*oiter).getSeqNum());
+            IEnumerator<PcodeOp> oiter = fd.obank.beginDead(); // Clone the raw pcode
+            while (oiter.MoveNext())
+                cloneOp(oiter.Current, oiter.Current.getSeqNum());
             obank.setUniqId(fd.obank.getUniqId());
 
             // Clone callspecs
-            for (int i = 0; i < fd.qlst.size(); ++i)
-            {
-                FuncCallSpecs* oldspec = fd.qlst[i];
-                PcodeOp* newop = findOp(oldspec.getOp().getSeqNum());
-                FuncCallSpecs* newspec = oldspec.clone(newop);
-                Varnode* invn0 = newop.getIn(0);
-                if (invn0.getSpace().getType() == spacetype.IPTR_FSPEC)
-                { // Replace embedded pointer to callspec
-                    Varnode* newvn0 = newVarnodeCallSpecs(newspec);
+            for (int i = 0; i < fd.qlst.Count; ++i) {
+                FuncCallSpecs oldspec = fd.qlst[i];
+                PcodeOp newop = findOp(oldspec.getOp().getSeqNum());
+                FuncCallSpecs newspec = oldspec.clone(newop);
+                Varnode invn0 = newop.getIn(0);
+                if (invn0.getSpace().getType() == spacetype.IPTR_FSPEC) {
+                    // Replace embedded pointer to callspec
+                    Varnode newvn0 = newVarnodeCallSpecs(newspec);
                     opSetInput(newop, newvn0, 0);
                     deleteVarnode(invn0);
                 }
                 qlst.Add(newspec);
             }
 
-            List<JumpTable*>::const_iterator jiter; // Clone the jumptables
-            for (jiter = fd.jumpvec.begin(); jiter != fd.jumpvec.end(); ++jiter)
-            {
-                PcodeOp* indop = (*jiter).getIndirectOp();
-                if (indop == (PcodeOp)null)   // If indirect op has not been linked, this is probably a jumptable override
-                    continue;           // that has not been reached by the flow yet, so we ignore/truncate it
-                PcodeOp* newop = findOp(indop.getSeqNum());
+            IEnumerator<JumpTable> jiter = fd.jumpvec.GetEnumerator(); // Clone the jumptables
+            while (jiter.MoveNext()) {
+                PcodeOp? indop = jiter.Current.getIndirectOp();
+                if (indop == (PcodeOp)null)
+                    // If indirect op has not been linked, this is probably a jumptable override
+                    // that has not been reached by the flow yet, so we ignore/truncate it
+                    continue;
+                PcodeOp? newop = findOp(indop.getSeqNum());
                 if (newop == (PcodeOp)null)
                     throw new LowlevelError("Could not trace jumptable across partial clone");
-                JumpTable* jtclone = new JumpTable(*jiter);
+                JumpTable jtclone = new JumpTable(jiter.Current);
                 jtclone.setIndirectOp(newop);
                 jumpvec.Add(jtclone);
             }
@@ -1583,41 +1544,40 @@ namespace Sla.DECCORE
             Address baddr = new Address(baseaddr.getSpace(),0);
             Address eaddr = new Address(baseaddr.getSpace(),ulong.MaxValue);
             inlineflow.setRange(baddr, eaddr);
-            inlineflow.setFlags(FlowInfo::error_outofbounds | FlowInfo::error_unimplemented |
-                        FlowInfo::error_reinterpreted | FlowInfo::flow_forinline);
+            inlineflow.setFlags(FlowInfo.FlowFlag.error_outofbounds | FlowInfo.FlowFlag.error_unimplemented |
+                FlowInfo.FlowFlag.error_reinterpreted | FlowInfo.FlowFlag.flow_forinline);
             inlineflow.forwardRecursion(flow);
             inlineflow.generateOps();
 
-            if (inlineflow.checkEZModel())
-            {
+            if (inlineflow.checkEZModel()) {
                 // With an EZ clone there are no jumptables to clone
                 list<PcodeOp*>::const_iterator oiter = obank.endDead();
-                --oiter;            // There is at least one op
+                // There is at least one op
+                --oiter;
                 flow.inlineEZClone(inlineflow, callop.getAddr());
                 ++oiter;
-                if (oiter != obank.endDead())
-                { // If there was at least one PcodeOp cloned
-                    PcodeOp* firstop = *oiter;
+                if (oiter != obank.endDead()) {
+                    // If there was at least one PcodeOp cloned
+                    PcodeOp firstop = *oiter;
                     oiter = obank.endDead();
                     --oiter;
-                    PcodeOp* lastop = *oiter;
+                    PcodeOp lastop = *oiter;
                     obank.moveSequenceDead(firstop, lastop, callop); // Move cloned sequence to right after callop
                     if (callop.isBlockStart())
-                        firstop.setFlag(PcodeOp::startbasic); // First op of inline inherits callop's startbasic flag
+                        firstop.setFlag(PcodeOp.Flags.startbasic); // First op of inline inherits callop's startbasic flag
                     else
-                        firstop.clearFlag(PcodeOp::startbasic);
+                        firstop.clearFlag(PcodeOp.Flags.startbasic);
                 }
                 opDestroyRaw(callop);
             }
-            else
-            {
+            else {
                 Address retaddr;
                 if (!flow.testHardInlineRestrictions(inlinefd, callop, retaddr))
                     return false;
-                List<JumpTable*>::const_iterator jiter; // Clone any jumptables from inline piece
-                for (jiter = inlinefd.jumpvec.begin(); jiter != inlinefd.jumpvec.end(); ++jiter)
-                {
-                    JumpTable* jtclone = new JumpTable(*jiter);
+                // Clone any jumptables from inline piece
+                IEnumerator<JumpTable> jiter = inlinefd.jumpvec.GetEnumerator();
+                while (jiter.MoveNext()) {
+                    JumpTable jtclone = new JumpTable(jiter.Current);
                     jumpvec.Add(jtclone);
                 }
                 flow.inlineClone(inlineflow, retaddr);
@@ -1627,12 +1587,10 @@ namespace Sla.DECCORE
                     opRemoveInput(callop, callop.numInput() - 1);
 
                 opSetOpcode(callop, OpCode.CPUI_BRANCH);
-                Varnode* inlineaddr = newCodeRef(inlinefd.getAddress());
+                Varnode inlineaddr = newCodeRef(inlinefd.getAddress());
                 opSetInput(callop, inlineaddr, 0);
             }
-
             obank.setUniqId(inlinefd.obank.getUniqId());
-
             return true;
         }
 
@@ -1709,15 +1667,15 @@ namespace Sla.DECCORE
         /// \param iter indicates the point of insertion
         public void doLiveInject(InjectPayload payload, Address addr, BlockBasic bl, IEnumerator<PcodeOp> pos)
         {
-            PcodeEmitFd emitter;
-            InjectContext & context(glb.pcodeinjectlib.getCachedContext());
+            PcodeEmitFd emitter = new PcodeEmitFd();
+            InjectContext context = glb.pcodeinjectlib.getCachedContext();
 
             emitter.setFuncdata(this);
             context.clear();
             context.baseaddr = addr;        // Shouldn't be using inst_next, inst_next2 or inst_start here
             context.nextaddr = addr;
 
-            list<PcodeOp*>::const_iterator deaditer = obank.endDead();
+            IEnumerator<PcodeOp> deaditer = obank.endDead();
             bool deadempty = (obank.beginDead() == deaditer);
             if (!deadempty)
                 --deaditer;
@@ -1727,9 +1685,8 @@ namespace Sla.DECCORE
                 deaditer = obank.beginDead();
             else
                 ++deaditer;
-            while (deaditer != obank.endDead())
-            {
-                PcodeOp* op = *deaditer;
+            while (deaditer != obank.endDead()) {
+                PcodeOp op = deaditer.Current;
                 ++deaditer;
                 if (op.isCallOrBranch())
                     throw new LowlevelError("Illegal branching injection");
@@ -1933,15 +1890,14 @@ namespace Sla.DECCORE
         /// A \<jumptablelist> element is written with \<jumptable> children describing
         /// each jump-table associated with the control-flow of \b this function.
         /// \param encoder is the stream encoder
-        public void encodeJumpTable(Encoder encoder)
+        public void encodeJumpTable(Sla.CORE.Encoder encoder)
         {
-            if (jumpvec.empty()) return;
-            List<JumpTable*>::const_iterator iter;
-
-            encoder.openElement(ELEM_JUMPTABLELIST);
-            for (iter = jumpvec.begin(); iter != jumpvec.end(); ++iter)
-                (*iter).encode(encoder);
-            encoder.closeElement(ELEM_JUMPTABLELIST);
+            if (0 == jumpvec.Count) return;
+            encoder.openElement(ElementId.ELEM_JUMPTABLELIST);
+            IEnumerator<JumpTable> iter = jumpvec.GetEnumerator();
+            while (iter.MoveNext())
+                iter.Current.encode(encoder);
+            encoder.closeElement(ElementId.ELEM_JUMPTABLELIST);
         }
 
         /// Decode jump-tables from a stream
@@ -1964,10 +1920,10 @@ namespace Sla.DECCORE
         /// A single \<ast> element is produced with children describing Varnodes, PcodeOps, and
         /// basic blocks making up \b this function's current syntax tree.
         /// \param encoder is the stream encoder
-        public void encodeTree(Encoder encoder)
+        public void encodeTree(Sla.CORE.Encoder encoder)
         {
-            encoder.openElement(ELEM_AST);
-            encoder.openElement(ELEM_VARNODES);
+            encoder.openElement(ElementId.ELEM_AST);
+            encoder.openElement(ElementId.ELEM_VARNODES);
             for (int i = 0; i < glb.numSpaces(); ++i)
             {
                 AddrSpace * base = glb.getSpace(i);
@@ -1976,52 +1932,48 @@ namespace Sla.DECCORE
                 VarnodeLocSet::const_iterator enditer = vbank.endLoc(base);
                 encodeVarnode(encoder, iter, enditer);
             }
-            encoder.closeElement(ELEM_VARNODES);
+            encoder.closeElement(ElementId.ELEM_VARNODES);
 
-            list<PcodeOp*>::iterator oiter, endoiter;
-            PcodeOp* op;
-            BlockBasic* bs;
-            for (int i = 0; i < bblocks.getSize(); ++i)
-            {
-                bs = (BlockBasic*)bblocks.getBlock(i);
-                encoder.openElement(ELEM_BLOCK);
-                encoder.writeSignedInteger(ATTRIB_INDEX, bs.getIndex());
+            IEnumerator<PcodeOp> oiter, endoiter;
+            PcodeOp op;
+            BlockBasic bs;
+            for (int i = 0; i < bblocks.getSize(); ++i) {
+                bs = (BlockBasic)bblocks.getBlock(i);
+                encoder.openElement(ElementId.ELEM_BLOCK);
+                encoder.writeSignedInteger(AttributeId.ATTRIB_INDEX, bs.getIndex());
                 bs.encodeBody(encoder);
                 oiter = bs.beginOp();
                 endoiter = bs.endOp();
-                while (oiter != endoiter)
-                {
+                while (oiter != endoiter) {
                     op = *oiter++;
                     op.encode(encoder);
                 }
-                encoder.closeElement(ELEM_BLOCK);
+                encoder.closeElement(ElementId.ELEM_BLOCK);
             }
-            for (int i = 0; i < bblocks.getSize(); ++i)
-            {
-                bs = (BlockBasic*)bblocks.getBlock(i);
+            for (int i = 0; i < bblocks.getSize(); ++i) {
+                bs = (BlockBasic)bblocks.getBlock(i);
                 if (bs.sizeIn() == 0) continue;
-                encoder.openElement(ELEM_BLOCKEDGE);
-                encoder.writeSignedInteger(ATTRIB_INDEX, bs.getIndex());
+                encoder.openElement(ElementId.ELEM_BLOCKEDGE);
+                encoder.writeSignedInteger(AttributeId.ATTRIB_INDEX, bs.getIndex());
                 bs.encodeEdges(encoder);
-                encoder.closeElement(ELEM_BLOCKEDGE);
+                encoder.closeElement(ElementId.ELEM_BLOCKEDGE);
             }
-            encoder.closeElement(ELEM_AST);
+            encoder.closeElement(ElementId.ELEM_AST);
         }
 
         /// Encode a description of all HighVariables to stream
         /// This produces a single \<highlist> element, with a \<high> child for each
         /// high-level variable (HighVariable) currently associated with \b this function.
         /// \param encoder is the stream encoder
-        public void encodeHigh(Encoder encoder)
+        public void encodeHigh(Sla.CORE.Encoder encoder)
         {
-            Varnode* vn;
-            HighVariable* high;
+            Varnode vn;
+            HighVariable high;
 
             if (!isHighOn()) return;
-            encoder.openElement(ELEM_HIGHLIST);
+            encoder.openElement(ElmeentId.ELEM_HIGHLIST);
             VarnodeLocSet::const_iterator iter;
-            for (iter = beginLoc(); iter != endLoc(); ++iter)
-            {
+            for (iter = beginLoc(); iter != endLoc(); ++iter) {
                 vn = *iter;
                 if (vn.isAnnotation()) continue;
                 high = vn.getHigh();
@@ -2029,13 +1981,12 @@ namespace Sla.DECCORE
                 high.setMark();
                 high.encode(encoder);
             }
-            for (iter = beginLoc(); iter != endLoc(); ++iter)
-            {
+            for (iter = beginLoc(); iter != endLoc(); ++iter) {
                 vn = *iter;
                 if (!vn.isAnnotation())
                     vn.getHigh().clearMark();
             }
-            encoder.closeElement(ELEM_HIGHLIST);
+            encoder.closeElement(ElementId.ELEM_HIGHLIST);
         }
 
         ///< Get the Override object for \b this function
@@ -2336,7 +2287,7 @@ namespace Sla.DECCORE
 
             for (i = 0; i < qlst.size(); ++i)
                 if (qlst[i].getOp() == op) return qlst[i];
-            return (FuncCallSpecs*)0;
+            return (FuncCallSpecs)null;
         }
 
         /// Recover and return the \e extrapop for this function
@@ -2354,10 +2305,10 @@ namespace Sla.DECCORE
             if (funcp.getExtraPop() != ProtoModel.extrapop_unknown)
                 return funcp.getExtraPop(); // If we already know it, just return it
 
-            list<PcodeOp*>::const_iterator iter = beginOp(CPUI_RETURN);
-            if (iter == endOp(CPUI_RETURN)) return 0; // If no return statements, answer is irrelevant
+            IEnumerator<PcodeOp> iter = beginOp(OpCode.CPUI_RETURN);
+            if (iter == endOp(OpCode.CPUI_RETURN)) return 0; // If no return statements, answer is irrelevant
 
-            PcodeOp* retop = *iter;
+            PcodeOp retop = *iter;
             byte buffer[4];
 
             glb.loader.loadFill(buffer, 4, retop.getAddr());
@@ -2461,11 +2412,10 @@ namespace Sla.DECCORE
         /// \return the new Varnode object
         public Varnode newConstant(int s, ulong constant_val)
         {
-            Datatype* ct = glb.types.getBase(s, type_metatype.TYPE_UNKNOWN);
+            Datatype ct = glb.types.getBase(s, type_metatype.TYPE_UNKNOWN);
 
-            Varnode* vn = vbank.create(s, glb.getConstant(constant_val), ct);
+            Varnode vn = vbank.create(s, glb.getConstant(constant_val), ct);
             assignHigh(vn);
-
             // There is no chance of matching localmap
             return vn;
         }
@@ -3246,23 +3196,20 @@ namespace Sla.DECCORE
         /// \return \b true if any change was made
         public bool fillinReadOnly(Varnode vn)
         {
-            if (vn.isWritten())
-            {   // Can't replace output with constant
-                PcodeOp* defop = vn.getDef();
+            if (vn.isWritten()) {
+                // Can't replace output with constant
+                PcodeOp? defop = vn.getDef();
                 if (defop.isMarker())
-                    defop.setAdditionalFlag(PcodeOp::warning); // Not a true write, ignore it
-                else if (!defop.isWarning())
-                { // No warning generated before
-                    defop.setAdditionalFlag(PcodeOp::warning);
-                    ostringstream s;
-                    if ((!vn.isAddrForce()) || (!vn.hasNoDescend()))
-                    {
-                        s << "Read-only address (";
-                        s << vn.getSpace().getName();
-                        s << ',';
+                    defop.setAdditionalFlag(PcodeOp.AdditionalFlags.warning); // Not a true write, ignore it
+                else if (!defop.isWarning()) {
+                    // No warning generated before
+                    defop.setAdditionalFlag(PcodeOp.AdditionalFlags.warning);
+                    if ((!vn.isAddrForce()) || (!vn.hasNoDescend())) {
+                        StringWriter s = new StringWriter();
+                        s.Write($"Read-only address ({vn.getSpace().getName()},");
                         vn.getAddr().printRaw(s);
-                        s << ") is written";
-                        warning(s.str(), defop.getAddr());
+                        s.Write(") is written");
+                        warning(s.ToString(), defop.getAddr());
                     }
                 }
                 return false;       // No change was made
@@ -3272,56 +3219,50 @@ namespace Sla.DECCORE
                 return false;       // Constant will exceed precision
 
             ulong res;
-            byte bytes[32];
-            try
-            {
+            byte[] bytes = new byte[32];
+            try {
                 glb.loader.loadFill(bytes, vn.getSize(), vn.getAddr());
             }
             catch (DataUnavailError err) { // Could not get value from LoadImage
-                vn.clearFlags(Varnode::@readonly); // Treat as writeable
+                vn.clearFlags(Varnode.varnode_flags.@readonly); // Treat as writeable
                 return true;
             }
 
-            if (vn.getSpace().isBigEndian())
-            { // Big endian
+            if (vn.getSpace().isBigEndian()) {
+                // Big endian
                 res = 0;
-                for (int i = 0; i < vn.getSize(); ++i)
-                {
+                for (int i = 0; i < vn.getSize(); ++i) {
                     res <<= 8;
                     res |= bytes[i];
                 }
             }
-            else
-            {
+            else {
                 res = 0;
-                for (int i = vn.getSize() - 1; i >= 0; --i)
-                {
+                for (int i = vn.getSize() - 1; i >= 0; --i) {
                     res <<= 8;
                     res |= bytes[i];
                 }
             }
             // Replace all references to vn
             bool changemade = false;
-            list<PcodeOp*>::const_iterator iter;
-            PcodeOp* op;
+            PcodeOp op;
             int i;
-            Datatype* locktype = vn.isTypeLock() ? vn.getType() : (Datatype)null;
+            Datatype? locktype = vn.isTypeLock() ? vn.getType() : (Datatype)null;
 
-            iter = vn.beginDescend();
-            while (iter != vn.endDescend())
-            {
-                op = *iter++;
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (iter.MoveNext()) {
+                op = iter.Current;
                 i = op.getSlot(vn);
-                if (op.isMarker())
-                {       // Must be careful putting constants in here
+                if (op.isMarker()) {
+                    // Must be careful putting constants in here
                     if ((op.code() != OpCode.CPUI_INDIRECT) || (i != 0)) continue;
-                    Varnode* outvn = op.getOut();
+                    Varnode outvn = op.getOut();
                     if (outvn.getAddr() == vn.getAddr()) continue; // Ignore indirect to itself
                                                                      // Change the indirect to a COPY
                     opRemoveInput(op, 1);
                     opSetOpcode(op, OpCode.CPUI_COPY);
                 }
-                Varnode* cvn = newConstant(vn.getSize(), res);
+                Varnode cvn = newConstant(vn.getSize(), res);
                 if (locktype != (Datatype)null)
                     cvn.updateType(locktype, true, true); // Try to pass on the locked datatype
                 opSetInput(op, cvn, i);
@@ -3406,19 +3347,16 @@ namespace Sla.DECCORE
         }
 
         /// \brief Replace all read references to the first Varnode with a second Varnode
-        ///
         /// \param vn is the first Varnode (being replaced)
         /// \param newvn is the second Varnode (the replacement)
         public void totalReplace(Varnode vn, Varnode newvn)
         {
-            list<PcodeOp*>::const_iterator iter;
-            PcodeOp* op;
+            PcodeOp op;
             int i;
 
-            iter = vn.beginDescend();
-            while (iter != vn.endDescend())
-            {
-                op = *iter++;          // Increment before removing descendant
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (iter.MoveNext()) {
+                op = iter.Current;          // Increment before removing descendant
                 i = op.getSlot(vn);
                 opSetInput(op, newvn, i);
             }
@@ -3433,32 +3371,29 @@ namespace Sla.DECCORE
         /// \param val is the constant value to replace it with
         public void totalReplaceConstant(Varnode vn, ulong val)
         {
-            list<PcodeOp*>::const_iterator iter;
-            PcodeOp* op;
-            PcodeOp* copyop = (PcodeOp)null;
-            Varnode* newrep;
+            PcodeOp op;
+            PcodeOp? copyop = (PcodeOp)null;
+            Varnode newrep;
             int i;
 
-            iter = vn.beginDescend();
-            while (iter != vn.endDescend())
-            {
-                op = *iter++;       // Increment before removing descendant
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (iter.MoveNext()) {
+                // WARNING : see behavior
+                throw new NotImplementedException();
+                op = iter++;       // Increment before removing descendant
                 i = op.getSlot(vn);
-                if (op.isMarker())
-                {    // Do not put constant directly in marker
-                    if (copyop == (PcodeOp)null)
-                    {
-                        if (vn.isWritten())
-                        {
+                if (op.isMarker()) {
+                    // Do not put constant directly in marker
+                    if (copyop == (PcodeOp)null) {
+                        if (vn.isWritten()) {
                             copyop = newOp(1, vn.getDef().getAddr());
                             opSetOpcode(copyop, OpCode.CPUI_COPY);
                             newrep = newUniqueOut(vn.getSize(), copyop);
                             opSetInput(copyop, newConstant(vn.getSize(), val), 0);
                             opInsertAfter(copyop, vn.getDef());
                         }
-                        else
-                        {
-                            BlockBasic* bb = (BlockBasic*)getBasicBlocks().getBlock(0);
+                        else {
+                            BlockBasic bb = (BlockBasic)getBasicBlocks().getBlock(0);
                             copyop = newOp(1, bb.getStart());
                             opSetOpcode(copyop, OpCode.CPUI_COPY);
                             newrep = newUniqueOut(vn.getSize(), copyop);
@@ -3545,25 +3480,22 @@ namespace Sla.DECCORE
         /// information forward through the data-flow until additional changes are apparent.
         public void calcNZMask()
         {
-            List<PcodeOpNode> opstack;
-            list<PcodeOp*>::const_iterator oiter;
+            List<PcodeOpNode> opstack = new List<PcodeOpNode>();
+            IEnumerator<PcodeOp> oiter = beginOpAlive();
 
-            for (oiter = beginOpAlive(); oiter != endOpAlive(); ++oiter)
-            {
-                PcodeOp* op = *oiter;
+            while (oiter.MoveNext()) {
+                PcodeOp op = oiter.Current;
                 if (op.isMark()) continue;
-                opstack.Add(PcodeOpNode(op, 0));
+                opstack.Add(new PcodeOpNode(op, 0));
                 op.setMark();
 
-                do
-                {
+                do {
                     // Get next edge
-                    PcodeOpNode & node(opstack.GetLastItem());
-                    if (node.slot >= node.op.numInput())
-                    { // If no edge left
-                        Varnode* outvn = node.op.getOut();
-                        if (outvn != (Varnode)null)
-                        {
+                    PcodeOpNode node = opstack.GetLastItem();
+                    if (node.slot >= node.op.numInput()) {
+                        // If no edge left
+                        Varnode outvn = node.op.getOut();
+                        if (outvn != (Varnode)null) {
                             outvn.nzm = node.op.getNZMaskLocal(true);
                         }
                         opstack.RemoveLastItem(); // Pop a level
@@ -3578,49 +3510,45 @@ namespace Sla.DECCORE
                             continue;
                     }
                     // Traverse edge indicated by slot
-                    Varnode* vn = node.op.getIn(oldslot);
-                    if (!vn.isWritten())
-                    {
+                    Varnode vn = node.op.getIn(oldslot);
+                    if (!vn.isWritten()) {
                         if (vn.isConstant())
                             vn.nzm = vn.getOffset();
-                        else
-                        {
-                            vn.nzm = Globals.calc_mask(vn.getSize());
+                        else {
+                            vn.nzm = Globals.calc_mask((uint)vn.getSize());
                             if (vn.isSpacebase())
                                 vn.nzm &= ~((ulong)0xff); // Treat spacebase input as aligned
                         }
                     }
-                    else if (!vn.getDef().isMark())
-                    { // If haven't traversed before
-                        opstack.Add(PcodeOpNode(vn.getDef(), 0));
+                    else if (!vn.getDef().isMark()) {
+                        // If haven't traversed before
+                        opstack.Add(new PcodeOpNode(vn.getDef(), 0));
                         vn.getDef().setMark();
                     }
-                } while (!opstack.empty());
+                } while (0 != opstack.Count);
             }
 
-            List<PcodeOp*> worklist;
+            List<PcodeOp> worklist = new List<PcodeOp>();
             // Clear marks and push ops with looping edges onto worklist
-            for (oiter = beginOpAlive(); oiter != endOpAlive(); ++oiter)
-            {
-                PcodeOp* op = *oiter;
+            oiter = beginOpAlive();
+            while (oiter.MoveNext()) {
+                PcodeOp op = oiter.Current;
                 op.clearMark();
                 if (op.code() == OpCode.CPUI_MULTIEQUAL)
                     worklist.Add(op);
             }
 
             // Continue to propagate changes along all edges
-            while (!worklist.empty())
-            {
-                PcodeOp* op = worklist.GetLastItem();
+            while (0 != worklist.Count) {
+                PcodeOp op = worklist.GetLastItem();
                 worklist.RemoveLastItem();
-                Varnode* vn = op.getOut();
+                Varnode vn = op.getOut();
                 if (vn == (Varnode)null) continue;
                 ulong nzmask = op.getNZMaskLocal(false);
-                if (nzmask != vn.nzm)
-                {
+                if (nzmask != vn.nzm) {
                     vn.nzm = nzmask;
-                    for (oiter = vn.beginDescend(); oiter != vn.endDescend(); ++oiter)
-                        worklist.Add(*oiter);
+                    oiter = vn.beginDescend();
+                    worklist.AddRange(oiter);
                 }
             }
         }
@@ -4026,8 +3954,8 @@ namespace Sla.DECCORE
         public PcodeOp getFirstReturnOp()
         {
             list<PcodeOp*>::const_iterator iter, iterend;
-            iterend = endOp(CPUI_RETURN);
-            for (iter = beginOp(CPUI_RETURN); iter != iterend; ++iter)
+            iterend = endOp(OpCode.CPUI_RETURN);
+            for (iter = beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter)
             {
                 PcodeOp* retop = *iter;
                 if (retop.isDead()) continue;
@@ -4731,8 +4659,8 @@ namespace Sla.DECCORE
         /// \brief Start of PcodeOp objects in the \e alive list
         public IEnumerator<PcodeOp> beginOpAlive() => obank.beginAlive();
 
-        /// \brief End of PcodeOp objects in the \e alive list
-        public IEnumerator<PcodeOp> endOpAlive() => obank.endAlive();
+        ///// \brief End of PcodeOp objects in the \e alive list
+        //public IEnumerator<PcodeOp> endOpAlive() => obank.endAlive();
 
         /// \brief Start of PcodeOp objects in the \e dead list
         public IEnumerator<PcodeOp> beginOpDead() => obank.beginDead();
@@ -5023,12 +4951,11 @@ namespace Sla.DECCORE
         /// \return \b true if jump-table analysis is guaranteed to fail
         public bool earlyJumpTableFail(PcodeOp op)
         {
-            Varnode* vn = op.getIn(0);
+            Varnode vn = op.getIn(0);
             list<PcodeOp*>::const_iterator iter = op.insertiter;
             list<PcodeOp*>::const_iterator startiter = beginOpDead();
             int countMax = 8;
-            while (iter != startiter)
-            {
+            while (iter != startiter) {
                 if (vn.getSize() == 1) return false;
                 countMax -= 1;
                 if (countMax < 0) return false;     // Don't iterate too many times
@@ -5459,10 +5386,9 @@ namespace Sla.DECCORE
         /// Make sure default switch cases are properly labeled
         public void installSwitchDefaults()
         {
-            IEnumerator<JumpTable> iter;
-            for (iter = jumpvec.begin(); iter != jumpvec.end(); ++iter)
-            {
-                JumpTable jt = *iter;
+            IEnumerator<JumpTable> iter = jumpvec.GetEnumerator();
+            while (iter.MoveNext()) {
+                JumpTable jt = iter.Current;
                 PcodeOp indop = jt.getIndirectOp();
                 BlockBasic ind = indop.getParent();
                 // Mark any switch blocks default edge
@@ -5905,19 +5831,16 @@ namespace Sla.DECCORE
         /// \param vn is the Varnode to search for
         /// \param bl is the specified basic block in which to search
         /// \return the earliest PcodeOp reading the Varnode or NULL
-        private static PcodeOp earliestUseInBlock(Varnode vn, BlockBasic bl)
+        private static PcodeOp? earliestUseInBlock(Varnode vn, BlockBasic bl)
         {
-            list<PcodeOp*>::const_iterator iter;
-            PcodeOp* res = (PcodeOp)null;
-
-            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
-            {
-                PcodeOp* op = *iter;
+            PcodeOp? res = (PcodeOp)null;
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if (op.getParent() != bl) continue;
                 if (res == (PcodeOp)null)
                     res = op;
-                else
-                {
+                else {
                     if (op.getSeqNum().getOrder() < res.getSeqNum().getOrder())
                         res = op;
                 }
@@ -5936,22 +5859,20 @@ namespace Sla.DECCORE
         /// \return the discovered duplicate PcodeOp or NULL
         private static PcodeOp cseFindInBlock(PcodeOp op, Varnode vn, BlockBasic bl, PcodeOp earliest)
         {
-            list<PcodeOp*>::const_iterator iter;
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
 
-            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
-            {
-                PcodeOp* res = *iter;
+            while (iter.MoveNext()) {
+                PcodeOp res = iter.Current;
                 if (res == op) continue;    // Must not be -op-
                 if (res.getParent() != bl) continue; // Must be in -bl-
-                if (earliest != (PcodeOp)null)
-                {
+                if (earliest != (PcodeOp)null) {
                     if (earliest.getSeqNum().getOrder() < res.getSeqNum().getOrder()) continue; // Must occur earlier than earliest
                 }
-                Varnode* outvn1 = op.getOut();
-                Varnode* outvn2 = res.getOut();
+                Varnode outvn1 = op.getOut();
+                Varnode outvn2 = res.getOut();
                 if (outvn2 == (Varnode)null) continue;
-                Varnode* buf1[2];
-                Varnode* buf2[2];
+                Varnode[] buf1 = new Varnode[2];
+                Varnode[] buf2 = new Varnode[2];
                 if (functionalEqualityLevel(outvn1, outvn2, buf1, buf2) == 0)
                     return res;
             }

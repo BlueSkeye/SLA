@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,16 +68,14 @@ namespace Sla.DECCORE
         /// \return \b true if a change was made
         private bool propagateFlowToReads(Varnode vn)
         {
-            list<PcodeOp*>::const_iterator iter;
             bool madeChange = false;
-            if (!vn.isPtrFlow())
-            {
+            if (!vn.isPtrFlow()) {
                 vn.setPtrFlow();
                 madeChange = true;
             }
-            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
-            {
-                PcodeOp* op = *iter;
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if (trialSetPtrFlow(op))
                     madeChange = true;
             }
@@ -139,16 +138,16 @@ namespace Sla.DECCORE
         private void getOpList(List<uint> oplist)
         {
             if (!hasTruncations) return;    // Only stick ourselves into pool if aggresiveness is turned on
-            oplist.Add(CPUI_STORE);
-            oplist.Add(CPUI_LOAD);
-            oplist.Add(CPUI_COPY);
-            oplist.Add(CPUI_MULTIEQUAL);
-            oplist.Add(CPUI_INDIRECT);
-            oplist.Add(CPUI_INT_ADD);
-            oplist.Add(CPUI_CALLIND);
-            oplist.Add(CPUI_BRANCHIND);
-            oplist.Add(CPUI_PTRSUB);
-            oplist.Add(CPUI_PTRADD);
+            oplist.Add(OpCode.CPUI_STORE);
+            oplist.Add(OpCode.CPUI_LOAD);
+            oplist.Add(OpCode.CPUI_COPY);
+            oplist.Add(OpCode.CPUI_MULTIEQUAL);
+            oplist.Add(OpCode.CPUI_INDIRECT);
+            oplist.Add(OpCode.CPUI_INT_ADD);
+            oplist.Add(OpCode.CPUI_CALLIND);
+            oplist.Add(OpCode.CPUI_BRANCHIND);
+            oplist.Add(OpCode.CPUI_PTRSUB);
+            oplist.Add(OpCode.CPUI_PTRADD);
         }
 
         private int applyOp(PcodeOp op, Funcdata data)

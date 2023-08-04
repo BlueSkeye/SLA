@@ -271,26 +271,21 @@ namespace Sla.EXTRA
             return curaddr;
         }
 
-        public void disassembleRange(Range range)
+        public void disassembleRange(Sla.CORE.Range range)
         {
             Address addr = range.getFirstAddr();
             Address lastaddr = range.getLastAddr();
-            while (addr <= lastaddr)
-            {
+            while (addr <= lastaddr) {
                 addr = disassembleBlock(addr, lastaddr);
             }
         }
 
         public void disassembleRangeList(RangeList rangelist)
         {
-            set<Range>::const_iterator iter, enditer;
-            iter = rangelist.begin();
-            enditer = rangelist.end();
+            IEnumerator<Sla.CORE.Range> iter = rangelist.begin();
 
-            while (iter != enditer)
-            {
-                disassembleRange(*iter);
-                ++iter;
+            while (iter.MoveNext()) {
+                disassembleRange(iter.Current);
             }
         }
 
@@ -533,22 +528,19 @@ namespace Sla.EXTRA
 
         public void dumpModelHits(TextWriter s)
         {
-            set<Range>::const_iterator iter, enditer;
-            iter = modelhits.begin();
-            enditer = modelhits.end();
-            while (iter != enditer)
-            {
-                ulong off = (*iter).getFirst();
-                s << hex << "0x" << off << ' ';
-                ulong endoff = (*iter).getLast();
-                s << hex << "0x" << endoff;
-                ++iter;
-                if (iter != enditer)
-                {
-                    off = (*iter).getFirst();
-                    s << ' ' << dec << (int)(off - endoff);
+            IEnumerator<Sla.CORE.Range> iter = modelhits.begin();
+            bool completed = !iter.MoveNext();
+            while (!completed) {
+                ulong off = iter.Current.getFirst();
+                s.Write($"0x{off:X} ");
+                ulong endoff = iter.Current.getLast();
+                s.Write($"0x{endoff:X}");
+                completed = !iter.MoveNext();
+                if (!completed) {
+                    off = iter.Current.getFirst();
+                    s.Write($" {(int)(off - endoff)}");
                 }
-                s << endl;
+                s.WriteLine();
             }
         }
 

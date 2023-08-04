@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,9 +34,9 @@ namespace Sla.DECCORE
         ///  - `(zext(W s>> 0x1f) << 0x20) + X        =>  sext(W) where W = sub(X,0)`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_INT_OR);
-            oplist.Add(CPUI_INT_XOR);
-            oplist.Add(CPUI_INT_ADD);
+            oplist.Add(OpCode.CPUI_INT_OR);
+            oplist.Add(OpCode.CPUI_INT_XOR);
+            oplist.Add(OpCode.CPUI_INT_ADD);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

@@ -254,7 +254,7 @@ namespace Sla.DECCORE
             Funcdata fd = callOp.getParent().getFuncdata();
 
             FuncCallSpecs* fc = fd.getCallSpecs(callOp);
-            if (fc != (FuncCallSpecs*)0 && fc.isInputLocked() && fc.numParams() > paramSlot)
+            if (fc != (FuncCallSpecs)null && fc.isInputLocked() && fc.numParams() > paramSlot)
             {
                 return scoreLockedType(ct, fc.getParam(paramSlot).getType());
             }
@@ -275,7 +275,7 @@ namespace Sla.DECCORE
             Funcdata fd = callOp.getParent().getFuncdata();
 
             FuncCallSpecs* fc = fd.getCallSpecs(callOp);
-            if (fc != (FuncCallSpecs*)0 && fc.isOutputLocked())
+            if (fc != (FuncCallSpecs)null && fc.isOutputLocked())
             {
                 return scoreLockedType(ct, fc.getOutputType());
             }
@@ -325,19 +325,17 @@ namespace Sla.DECCORE
         /// \param isArray is \b true if the data-type to fit is a pointer to an array
         private void newTrialsDown(Varnode vn, Datatype ct, int scoreIndex, bool isArray)
         {
-            VisitMark mark(vn, scoreIndex);
+            VisitMark mark = new VisitMark(vn, scoreIndex);
             if (!visited.insert(mark).second)
                 return;             // Already visited this Varnode
-            if (vn.isTypeLock())
-            {
+            if (vn.isTypeLock()) {
                 scores[scoreIndex] += scoreLockedType(ct, vn.getType());
                 return;             // Don't propagate through locked Varnode
             }
-            list<PcodeOp*>::const_iterator piter;
-            for (piter = vn.beginDescend(); piter != vn.endDescend(); ++piter)
-            {
-                PcodeOp* op = *piter;
-                trialNext.emplace_back(op, op.getSlot(vn), ct, scoreIndex, isArray);
+            IEnumerator<PcodeOp> piter = vn.beginDescend();
+            while (piter.MoveNext()) {
+                PcodeOp op = piter.Current;
+                trialNext.Add(new Trial(op, op.getSlot(vn), ct, scoreIndex, isArray));
             }
         }
 

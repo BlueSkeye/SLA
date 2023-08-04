@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -54,7 +54,7 @@ namespace Sla.DECCORE
         /// Depth first numbering / widening count
         private int count;
         /// Op-code defining Varnode
-        private OpCode opCode;
+        internal OpCode opCode;
         /// Set to \b true if left boundary of range didn't change (last iteration)
         private bool leftIsStable;
         /// Set to \b true if right boundary of range didn't change (last iteration)
@@ -165,11 +165,11 @@ namespace Sla.DECCORE
                     break;
                 ++iter;
             }
-            equations.insert(iter, Equation(slot, type, constraint));
+            equations.insert(iter, new Equation(slot, type, constraint));
         }
 
         /// Add a widening landmark
-        private void addLandmark(int type, CircleRange constraint)
+        internal void addLandmark(int type, CircleRange constraint)
         {
             addEquation(numParams, type, constraint);
         }

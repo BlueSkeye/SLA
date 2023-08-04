@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         /// Most significant piece of the double precision object
         private Varnode hi;
         /// A representative of the whole object
-        private Varnode whole;
+        private Varnode? whole;
         /// Operation at which both \b lo and \b hi are defined
         private PcodeOp defpoint;
         /// Block in which both \b lo and \b hi are defined
@@ -170,33 +170,27 @@ namespace Sla.DECCORE
         {
             if (hi == (Varnode)null) return false;
             if (lo == (Varnode)null) return false;
-            list<PcodeOp*>::const_iterator iter, enditer;
-            iter = lo.beginDescend();
-            enditer = lo.endDescend();
-            PcodeOp* res = (PcodeOp)null;
-            BlockBasic* bb;
+            IEnumerator<PcodeOp> iter = lo.beginDescend();
+            PcodeOp res = (PcodeOp)null;
+            BlockBasic? bb;
             if (lo.isWritten())
                 bb = lo.getDef().getParent();
             else if (lo.isInput())
                 bb = (BlockBasic)null;
             else
                 throw new LowlevelError("Trying to find whole on free varnode");
-            while (iter != enditer)
-            {
-                PcodeOp* op = *iter;
-                ++iter;
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if (op.code() != OpCode.CPUI_PIECE) continue;
                 if (op.getIn(0) != hi) continue;
-                if (bb != (BlockBasic)null)
-                {
+                if (bb != (BlockBasic)null) {
                     if (op.getParent() != bb) continue; // Not defined in earliest block
                 }
                 else if (!op.getParent().isEntryPoint())
                     continue;
                 if (res == (PcodeOp)null)
                     res = op;
-                else
-                {
+                else {
                     if (op.getSeqNum().getOrder() < res.getSeqNum().getOrder()) // Find "earliest" whole
                         res = op;
                 }
@@ -204,8 +198,7 @@ namespace Sla.DECCORE
 
             if (res == (PcodeOp)null)
                 whole = (Varnode)null;
-            else
-            {
+            else {
                 defpoint = res;
                 defblock = defpoint.getParent();
                 whole = res.getOut();
@@ -430,25 +423,20 @@ namespace Sla.DECCORE
         /// \return \b true if initialization was successful and the least significant piece was found
         public bool inHandHiOut(Varnode h)
         {
-            list<PcodeOp*>::const_iterator iter, enditer;
-            iter = h.beginDescend();
-            enditer = h.endDescend();
-            Varnode* loTmp = (Varnode)null;
-            Varnode* outvn = (Varnode)null;
-            while (iter != enditer)
-            {
-                PcodeOp* pieceop = *iter;
-                ++iter;
+            IEnumerator<PcodeOp> iter = h.beginDescend();
+            Varnode? loTmp = (Varnode)null;
+            Varnode? outvn = (Varnode)null;
+            while (iter.MoveNext()) {
+                PcodeOp pieceop = iter.Current;
                 if (pieceop.code() != OpCode.CPUI_PIECE) continue;
                 if (pieceop.getIn(0) != h) continue;
-                Varnode* l = pieceop.getIn(1);
+                Varnode l = pieceop.getIn(1);
                 if (!l.isPrecisLo()) continue;
                 if (loTmp != (Varnode)null) return false; // Whole is not unique
                 loTmp = l;
                 outvn = pieceop.getOut();
             }
-            if (loTmp != (Varnode)null)
-            {
+            if (loTmp != (Varnode)null) {
                 initAll(outvn, loTmp, h);
                 return true;
             }
@@ -463,25 +451,20 @@ namespace Sla.DECCORE
         /// \return \b true if initialization was successful and the most significant piece was found
         public bool inHandLoOut(Varnode l)
         {
-            list<PcodeOp*>::const_iterator iter, enditer;
-            iter = l.beginDescend();
-            enditer = l.endDescend();
-            Varnode* hiTmp = (Varnode)null;
-            Varnode* outvn = (Varnode)null;
-            while (iter != enditer)
-            {
-                PcodeOp* pieceop = *iter;
-                ++iter;
+            IEnumerator<PcodeOp> iter = l.beginDescend();
+            Varnode? hiTmp = (Varnode)null;
+            Varnode? outvn = (Varnode)null;
+            while (iter.MoveNext()) {
+                PcodeOp pieceop = iter.Current;
                 if (pieceop.code() != OpCode.CPUI_PIECE) continue;
                 if (pieceop.getIn(1) != l) continue;
-                Varnode* h = pieceop.getIn(0);
+                Varnode h = pieceop.getIn(0);
                 if (!h.isPrecisHi()) continue;
                 if (hiTmp != (Varnode)null) return false; // Whole is not unique
                 hiTmp = h;
                 outvn = pieceop.getOut();
             }
-            if (hiTmp != (Varnode)null)
-            {
+            if (hiTmp != (Varnode)null) {
                 initAll(outvn, l, hiTmp);
                 return true;
             }
@@ -907,31 +890,24 @@ namespace Sla.DECCORE
         /// \param splitvec is the container for holding any discovered SplitVarnodes
         public static void wholeList(Varnode w, List<SplitVarnode> splitvec)
         {
-            SplitVarnode basic;
-
-            basic.whole = w;
-            basic.hi = (Varnode)null;
-            basic.lo = (Varnode)null;
-            basic.wholesize = w.getSize();
-            list<PcodeOp*>::const_iterator iter, enditer;
-
-            iter = basic.whole.beginDescend();
-            enditer = basic.whole.endDescend();
+            SplitVarnode basic = new SplitVarnode() {
+                whole = w,
+                hi = (Varnode)null,
+                lo = (Varnode)null,
+                wholesize = w.getSize()
+            };
+            IEnumerator<PcodeOp> iter = basic.whole.beginDescend();
             int res = 0;
-            while (iter != enditer)
-            {
-                PcodeOp* subop = *iter;
-                ++iter;
+            while (iter.MoveNext()) {
+                PcodeOp subop = iter.Current;
                 if (subop.code() != OpCode.CPUI_SUBPIECE) continue;
-                Varnode* vn = subop.getOut();
-                if (vn.isPrecisHi())
-                {
+                Varnode vn = subop.getOut();
+                if (vn.isPrecisHi()) {
                     if (subop.getIn(1).getOffset() != basic.wholesize - vn.getSize()) continue;
                     basic.hi = vn;
                     res |= 2;
                 }
-                else if (vn.isPrecisLo())
-                {
+                else if (vn.isPrecisLo()) {
                     if (subop.getIn(1).getOffset() != 0) continue;
                     basic.lo = vn;
                     res |= 1;
@@ -940,7 +916,6 @@ namespace Sla.DECCORE
             if (res == 0) return;
             if (res == 3 && (basic.lo.getSize() + basic.hi.getSize() != basic.wholesize))
                 return;
-
             splitvec.Add(basic);
             findCopies(basic, splitvec);
         }
@@ -954,35 +929,26 @@ namespace Sla.DECCORE
         /// \param splitvec is the container for holding SplitVarnode copies
         public static void findCopies(SplitVarnode @in, List<SplitVarnode> splitvec)
         {
-            if (!@@in.hasBothPieces()) return;
-            list<PcodeOp*>::const_iterator iter, enditer;
-
-            iter = @@in.getLo().beginDescend();
-            enditer = @@in.getLo().endDescend();
-            while (iter != enditer)
-            {
-                PcodeOp* loop = *iter;
-                ++iter;
+            if (!@in.hasBothPieces()) return;
+            IEnumerator<PcodeOp> iter = @in.getLo().beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp loop = iter.Current;
                 if (loop.code() != OpCode.CPUI_COPY) continue;
-                Varnode* locpy = loop.getOut();
+                Varnode locpy = loop.getOut();
                 Address addr = locpy.getAddr(); // Calculate address of hi part
                 if (addr.isBigEndian())
-                    addr = addr - (@@in.getHi().getSize());
+                    addr = addr - (@in.getHi().getSize());
                 else
                     addr = addr + locpy.getSize();
-                list<PcodeOp*>::const_iterator iter2, enditer2;
-                iter2 = @@in.getHi().beginDescend();
-                enditer2 = @@in.getHi().endDescend();
-                while (iter2 != enditer2)
-                {
-                    PcodeOp* hiop = *iter2;
-                    ++iter2;
+                IEnumerator<PcodeOp> iter2 = @in.getHi().beginDescend();
+                while (iter2.MoveNext()) {
+                    PcodeOp hiop = iter2.Current;
                     if (hiop.code() != OpCode.CPUI_COPY) continue;
-                    Varnode* hicpy = hiop.getOut();
+                    Varnode hicpy = hiop.getOut();
                     if (hicpy.getAddr() != addr) continue;
                     if (hiop.getParent() != loop.getParent()) continue;
-                    SplitVarnode newsplit;
-                    newsplit.initAll(@@in.getWhole(), locpy, hicpy);
+                    SplitVarnode newsplit = new SplitVarnode();
+                    newsplit.initAll(@in.getWhole(), locpy, hicpy);
                     splitvec.Add(newsplit);
                 }
             }
@@ -1210,15 +1176,15 @@ namespace Sla.DECCORE
         public static void createBoolOp(Funcdata data, PcodeOp cbranch, SplitVarnode in1,
             SplitVarnode in2, OpCode opc)
         {
-            PcodeOp* addrop = cbranch;
-            Varnode* boolvn = cbranch.getIn(1);
+            PcodeOp addrop = cbranch;
+            Varnode boolvn = cbranch.getIn(1);
             if (boolvn.isWritten())
                 addrop = boolvn.getDef();  // Use the address of the comparison operator
             in1.findCreateWhole(data);
             in2.findCreateWhole(data);
-            PcodeOp* newop = data.newOp(2, addrop.getAddr());
+            PcodeOp newop = data.newOp(2, addrop.getAddr());
             data.opSetOpcode(newop, opc);
-            Varnode* newbool = data.newUniqueOut(1, newop);
+            Varnode newbool = data.newUniqueOut(1, newop);
             data.opSetInput(newop, in1.getWhole(), 0);
             data.opSetInput(newop, in2.getWhole(), 1);
             data.opInsertBefore(newop, cbranch);

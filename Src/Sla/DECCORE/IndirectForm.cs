@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,33 +22,29 @@ namespace Sla.DECCORE
         private Varnode indlo;
 
         public bool verify(Varnode h, Varnode l, PcodeOp ihi)
-        {  // Verify the basic double precision indirect form and fill out the pieces
+        {
+            // Verify the basic double precision indirect form and fill out the pieces
             hi = h;
             lo = l;
             indhi = ind;
             if (indhi.getIn(1).getSpace().getType() != spacetype.IPTR_IOP) return false;
-            affector = PcodeOp::getOpFromConst(indhi.getIn(1).getAddr());
+            affector = PcodeOp.getOpFromConst(indhi.getIn(1).getAddr());
             if (affector.isDead()) return false;
             reshi = indhi.getOut();
             if (reshi.getSpace().getType() == spacetype.IPTR_INTERNAL) return false;        // Indirect must not be through a temporary
 
-            list<PcodeOp*>::const_iterator iter, enditer;
-            iter = lo.beginDescend();
-            enditer = lo.endDescend();
-            while (iter != enditer)
-            {
-                indlo = *iter;
-                ++iter;
+            IEnumerator<PcodeOp> iter = lo.beginDescend();
+            while (iter.MoveNext()) {
+                indlo = iter.Current;
                 if (indlo.code() != OpCode.CPUI_INDIRECT) continue;
                 if (indlo.getIn(1).getSpace().getType() != spacetype.IPTR_IOP) continue;
                 if (affector != PcodeOp::getOpFromConst(indlo.getIn(1).getAddr())) continue;  // hi and lo must be affected by same op
                 reslo = indlo.getOut();
                 if (reslo.getSpace().getType() == spacetype.IPTR_INTERNAL) return false;        // Indirect must not be through a temporary
-                if (reslo.isAddrTied() || reshi.isAddrTied())
-                {
+                if (reslo.isAddrTied() || reshi.isAddrTied()) {
                     Address addr;
                     // If one piece is address tied, the other must be as well, and they must fit together as contiguous whole
-                    if (!SplitVarnode::isAddrTiedContiguous(reslo, reshi, addr))
+                    if (!SplitVarnode.isAddrTiedContiguous(reslo, reshi, addr))
                         return false;
                 }
                 return true;

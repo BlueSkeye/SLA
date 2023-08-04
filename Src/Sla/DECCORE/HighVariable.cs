@@ -1,5 +1,4 @@
 ﻿using Sla.CORE;
-using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +28,7 @@ namespace Sla.DECCORE
         /// The object holds these explicitly, but the values may become stale as the data-flow transforms.
         /// So we keep track of when these inherited values are \e dirty
         [Flags()]
-        public enum DitinessFlags
+        public enum DirtinessFlags
         {
             /// Boolean properties for the HighVariable are dirty
             flagsdirty = 1,
@@ -74,7 +73,7 @@ namespace Sla.DECCORE
         /// The ranges of code addresses covered by this HighVariable
         private /*mutable*/ Cover internalCover;
         /// Additional info about intersections with other pieces (if non-null)
-        private /*mutable*/ VariablePiece? piece;
+        internal /*mutable*/ VariablePiece? piece;
         /// The Symbol \b this HighVariable is tied to
         private /*mutable*/ Symbol symbol;
         /// -1=perfect symbol match >=0, offset
@@ -100,7 +99,7 @@ namespace Sla.DECCORE
         /// inherit it.  The Varnode.varnode_flags.typelock field is not set here, but in updateType().
         private void updateFlags()
         {
-            if ((highflags & flagsdirty) == 0) return; // flags are up to date
+            if ((highflags & HighVariable.DirtinessFlags.flagsdirty) == 0) return; // flags are up to date
 
             List<Varnode*>::const_iterator iter;
             uint fl = 0;
@@ -120,7 +119,7 @@ namespace Sla.DECCORE
         /// Merge the covers of all Varnode instances.
         private void updateInternalCover()
         {
-            if ((highflags & coverdirty) != 0)
+            if ((highflags & HighVariable.DirtinessFlags.coverdirty) != 0)
             {
                 internalCover.clear();
                 if (inst[0].hasCover())
@@ -152,9 +151,9 @@ namespace Sla.DECCORE
         {
             Varnode* vn;
 
-            if ((highflags & typedirty) == 0) return; // Type is up to date
+            if ((highflags & HighVariable.DirtinessFlags.typedirty) == 0) return; // Type is up to date
             highflags &= ~typedirty; // Mark type as clean
-            if ((highflags & type_finalized) != 0) return;  // Type has been finalized
+            if ((highflags & HighVariable.DirtinessFlags.type_finalized) != 0) return;  // Type has been finalized
             vn = getTypeRepresentative();
 
             type = vn.getType();
@@ -181,7 +180,7 @@ namespace Sla.DECCORE
         /// (Re)derive the Symbol and offset for \b this from member Varnodes
         private void updateSymbol()
         {
-            if ((highflags & symboldirty) == 0) return; // flags are up to date
+            if ((highflags & HighVariable.DirtinessFlags.symboldirty) == 0) return; // flags are up to date
             highflags &= ~((uint)symboldirty);
             List<Varnode*>::const_iterator iter;
             symbol = (Symbol)null;
@@ -198,28 +197,28 @@ namespace Sla.DECCORE
         }
 
         /// Mark the existence of one COPY into \b this
-        private void setCopyIn1() 
+        internal void setCopyIn1() 
         {
-            highflags |= copy_in1;
+            highflags |= HighVariable.DirtinessFlags.copy_in1;
         }
 
         /// Mark the existence of two COPYs into \b this
-        private void setCopyIn2() 
+        internal void setCopyIn2() 
         {
-            highflags |= copy_in2;
+            highflags |= HighVariable.DirtinessFlags.copy_in2;
         }
 
         /// Clear marks indicating COPYs into \b this
         private void clearCopyIns() 
         {
-            highflags &= ~(copy_in1 | copy_in2);
+            highflags &= ~(copy_in1 | HighVariable.DirtinessFlags.copy_in2);
         }
 
         /// Is there at least one COPY into \b this
-        private bool hasCopyIn1() => ((highflags&copy_in1)!= 0);
+        internal bool hasCopyIn1() => ((highflags&copy_in1)!= 0);
 
         /// Is there at least two COPYs into \b this
-        private bool hasCopyIn2() => ((highflags&copy_in2)!= 0);
+        internal bool hasCopyIn2() => ((highflags&copy_in2)!= 0);
 
         /// Remove a member Varnode from \b this
         /// Search for the given Varnode and cut it out of the list, marking all properties as \e dirty.
@@ -234,9 +233,9 @@ namespace Sla.DECCORE
                 if (*iter == vn)
                 {
                     inst.erase(iter);
-                    highflags |= (flagsdirty | namerepdirty | coverdirty | typedirty);
+                    highflags |= (flagsdirty | HighVariable.DirtinessFlags.namerepdirty | HighVariable.DirtinessFlags.coverdirty | HighVariable.DirtinessFlags.typedirty);
                     if (vn.getSymbolEntry() != (SymbolEntry)null)
-                        highflags |= symboldirty;
+                        highflags |= HighVariable.DirtinessFlags.symboldirty;
                     if (piece != (VariablePiece)null)
                         piece.markExtendCoverDirty();
                     return;
@@ -252,10 +251,10 @@ namespace Sla.DECCORE
         {
             int i;
 
-            highflags |= (flagsdirty | namerepdirty | typedirty);
+            highflags |= (flagsdirty | HighVariable.DirtinessFlags.namerepdirty | HighVariable.DirtinessFlags.typedirty);
             if (tv2.symbol != (Symbol)null)
             {       // Check if we inherit a Symbol
-                if ((tv2.highflags & symboldirty) == 0)
+                if ((tv2.highflags & HighVariable.DirtinessFlags.symboldirty) == 0)
                 {
                     symbol = tv2.symbol;           // Overwrite our Symbol (assume it is the same)
                     symboloffset = tv2.symboloffset;
@@ -287,10 +286,10 @@ namespace Sla.DECCORE
             std::merge(instcopy.begin(), instcopy.end(), tv2.inst.begin(), tv2.inst.end(), inst.begin(), compareJustLoc);
             tv2.inst.clear();
 
-            if (((highflags & coverdirty) == 0) && ((tv2.highflags & coverdirty) == 0))
+            if (((highflags & HighVariable.DirtinessFlags.coverdirty) == 0) && ((tv2.highflags & HighVariable.DirtinessFlags.coverdirty) == 0))
                 internalCover.merge(tv2.internalCover);
             else
-                highflags |= coverdirty;
+                highflags |= HighVariable.DirtinessFlags.coverdirty;
 
             delete tv2;
         }
@@ -352,7 +351,7 @@ namespace Sla.DECCORE
             SymbolEntry* entry = vn.getSymbolEntry();
             if (symbol != (Symbol)null && symbol != entry.getSymbol())
             {
-                if ((highflags & symboldirty) == 0)
+                if ((highflags & HighVariable.DirtinessFlags.symboldirty) == 0)
                 {
                     ostringstream s;
                     s << "Symbols \"" << symbol.getName() << "\" and \"" << entry.getSymbol().getName();
@@ -378,7 +377,7 @@ namespace Sla.DECCORE
             }
 
             if (type != (Datatype)null && type.getMetatype() == type_metatype.TYPE_PARTIALUNION)
-                highflags |= typedirty;
+                highflags |= HighVariable.DirtinessFlags.typedirty;
             highflags &= ~((uint)symboldirty);     // We are no longer dirty
         }
 
@@ -402,14 +401,14 @@ namespace Sla.DECCORE
             piece = tv2.piece;
             tv2.piece = (VariablePiece)null;
             piece.setHigh(this);
-            highflags |= (tv2.highflags & (intersectdirty | extendcoverdirty));
-            tv2.highflags &= ~(uint)(intersectdirty | extendcoverdirty);
+            highflags |= (tv2.highflags & (intersectdirty | HighVariable.DirtinessFlags.extendcoverdirty));
+            tv2.highflags &= ~(uint)(intersectdirty | HighVariable.DirtinessFlags.extendcoverdirty);
         }
 
         /// Mark the boolean properties as \e dirty
         internal void flagsDirty() 
         {
-            highflags |= flagsdirty | namerepdirty;
+            highflags |= HighVariable.DirtinessFlags.flagsdirty | HighVariable.DirtinessFlags.namerepdirty;
         }
 
         /// Mark the cover as \e dirty
@@ -417,7 +416,7 @@ namespace Sla.DECCORE
         /// HighVariables it intersects with are marked as having a dirty extended cover.
         internal void coverDirty()
         {
-            highflags |= coverdirty;
+            highflags |= HighVariable.DirtinessFlags.coverdirty;
             if (piece != (VariablePiece)null)
                 piece.markExtendCoverDirty();
         }
@@ -425,19 +424,19 @@ namespace Sla.DECCORE
         /// Mark the data-type as \e dirty
         private void typeDirty()
         {
-            highflags |= typedirty;
+            highflags |= HighVariable.DirtinessFlags.typedirty;
         }
 
         /// Mark the symbol as \e dirty
         private void symbolDirty()
         {
-            highflags |= symboldirty;
+            highflags |= HighVariable.DirtinessFlags.symboldirty;
         }
 
         /// Mark \b this as having merge problems
         private void setUnmerged() 
         {
-            highflags |= unmerged;
+            highflags |= HighVariable.DirtinessFlags.unmerged;
         }
 
         /// Is the cover returned by getCover() up-to-date
@@ -445,7 +444,7 @@ namespace Sla.DECCORE
         /// \return \b true if the cover needs to be recomputed.
         private bool isCoverDirty()
         {
-            return ((highflags & (Varnode.varnode_flags.coverdirty | extendcoverdirty)) != 0);
+            return ((highflags & (Varnode.varnode_flags.coverdirty | HighVariable.DirtinessFlags.extendcoverdirty)) != 0);
         }
 
         /// Construct a HighVariable with a single member Varnode
@@ -454,7 +453,7 @@ namespace Sla.DECCORE
         public HighVariable(Varnode vn)
         {
             numMergeClasses = 1;
-            highflags = flagsdirty | namerepdirty | typedirty | coverdirty;
+            highflags = HighVariable.DirtinessFlags.flagsdirty | HighVariable.DirtinessFlags.namerepdirty | HighVariable.DirtinessFlags.typedirty | HighVariable.DirtinessFlags.coverdirty;
             flags = 0;
             type = (Datatype)null;
             piece = (VariablePiece)null;
@@ -535,7 +534,7 @@ namespace Sla.DECCORE
                     type = type.getStripped();
                 }
             }
-            highflags |= type_finalized;
+            highflags |= HighVariable.DirtinessFlags.type_finalized;
         }
 
         /// Put \b this and another HighVariable in the same intersection group
@@ -551,9 +550,9 @@ namespace Sla.DECCORE
                 return;
             }
             if (piece == (VariablePiece)null) {
-                if ((hi2.highflags & intersectdirty) == 0)
+                if ((hi2.highflags & HighVariable.DirtinessFlags.intersectdirty) == 0)
                     hi2.piece.markIntersectionDirty();
-                highflags |= intersectdirty | extendcoverdirty;
+                highflags |= HighVariable.DirtinessFlags.intersectdirty | HighVariable.DirtinessFlags.extendcoverdirty;
                 off += hi2.piece.getOffset();
                 piece = new VariablePiece(this, off, hi2);
             }
@@ -563,9 +562,9 @@ namespace Sla.DECCORE
                     piece.getGroup().adjustOffsets(-hi2Off);
                     hi2Off = 0;
                 }
-                if ((highflags & intersectdirty) == 0)
+                if ((highflags & HighVariable.DirtinessFlags.intersectdirty) == 0)
                     piece.markIntersectionDirty();
-                hi2.highflags |= intersectdirty | extendcoverdirty;
+                hi2.highflags |= HighVariable.DirtinessFlags.intersectdirty | HighVariable.DirtinessFlags.extendcoverdirty;
                 hi2.piece = new VariablePiece(hi2, hi2Off, this);
             }
             else
@@ -734,7 +733,7 @@ namespace Sla.DECCORE
         /// \return the highest scoring Varnode member
         public Varnode getNameRepresentative()
         {
-            if ((highflags & namerepdirty) == 0)
+            if ((highflags & HighVariable.DirtinessFlags.namerepdirty) == 0)
                 return nameRepresentative;      // Name representative is up to date
             highflags &= ~namerepdirty;
 

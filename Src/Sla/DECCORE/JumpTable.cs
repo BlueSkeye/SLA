@@ -22,7 +22,7 @@ namespace Sla.DECCORE
         internal struct IndexPair
         {
             /// Out-edge index for the basic-block
-            private int blockPosition;
+            internal int blockPosition;
             /// Index of address targeting the basic-block
             private int addressIndex;
             
@@ -252,7 +252,7 @@ namespace Sla.DECCORE
         /// This is a partial clone of another jump-table. Objects that are specific
         /// to the particular Funcdata instance must be recalculated.
         /// \param op2 is the jump-table to clone
-        private JumpTable(JumpTable op2)
+        internal JumpTable(JumpTable op2)
         {
             glb = op2.glb;
             jmodel = (JumpModel)null;
@@ -297,28 +297,28 @@ namespace Sla.DECCORE
         }
 
         /// Return \b true if this could be multi-staged
-        private bool isPossibleMultistage() => (addresstable.size()== 1);
+        private bool isPossibleMultistage() => (addresstable.Count == 1);
 
         /// Return what stage of recovery this jump-table is @in.
         private int getStage() => recoverystage;
 
         /// Return the size of the address table for \b this jump-table
-        private int numEntries() => addresstable.size();
+        internal int numEntries() => addresstable.Count;
 
         /// Get bits of switch variable consumed by \b this table
         private ulong getSwitchVarConsume() => switchVarConsume;
 
         /// Get the out-edge corresponding to the \e default switch destination
-        private int getDefaultBlock() => defaultBlock;
+        internal int getDefaultBlock() => defaultBlock;
 
         /// Get the address of the BRANCHIND for the switch
         private Address getOpAddress() => opaddress;
 
         /// Get the BRANCHIND PcodeOp
-        private PcodeOp getIndirectOp() => indirect;
+        internal PcodeOp getIndirectOp() => indirect;
 
         /// Set the BRANCHIND PcodeOp
-        private void setIndirectOp(PcodeOp ind)
+        internal void setIndirectOp(PcodeOp ind)
         {
             opaddress = ind.getAddr();
             indirect = ind;
@@ -388,7 +388,7 @@ namespace Sla.DECCORE
         }
 
         /// Get the i-th address table entry
-        private Address getAddressByIndex(int i) => addresstable[i];
+        internal Address getAddressByIndex(int i) => addresstable[i];
 
         /// Set the most common jump-table target to be the last address in the table
         private void setLastAsMostCommon()
@@ -429,18 +429,18 @@ namespace Sla.DECCORE
         /// to addresses in the table targetting that out-block. The most common
         /// address table entry is also calculated here.
         /// \param flow is used to resolve address targets
-        private void switchOver(FlowInfo flow)
+        internal void switchOver(FlowInfo flow)
         {
             FlowBlock parent;
             FlowBlock tmpbl;
             int pos;
             PcodeOp op;
 
-            block2addr.clear();
-            block2addr.reserve(addresstable.size());
+            block2addr.Clear();
+            block2addr.reserve(addresstable.Count);
             parent = indirect.getParent();
 
-            for (int i = 0; i < addresstable.size(); ++i) {
+            for (int i = 0; i < addresstable.Count; ++i) {
                 Address addr = addresstable[i];
                 op = flow.target(addr);
                 tmpbl = op.getParent();
@@ -448,16 +448,17 @@ namespace Sla.DECCORE
                     if (parent.getOut(pos) == tmpbl) break;
                 if (pos == parent.sizeOut())
                     throw new LowlevelError("Jumptable destination not linked");
-                block2addr.Add(IndexPair(pos, i));
+                block2addr.Add(new IndexPair(pos, i));
             }
-            lastBlock = block2addr.GetLastItem().blockPosition;    // Out-edge of last address in table
-            sort(block2addr.begin(), block2addr.end());
+            // Out-edge of last address in table
+            lastBlock = block2addr.GetLastItem().blockPosition;
+            block2addr.Sort();
 
             defaultBlock = -1;          // There is no default case initially
             int maxcount = 1;          // If the maxcount is less than 2
-            List<IndexPair>::const_iterator iter = block2addr.begin();
-            while (iter != block2addr.end()) {
-                int curPos = (*iter).blockPosition;
+            IEnumerator<IndexPair> iter = block2addr.GetEnumerator();
+            while (iter.MoveNext()) {
+                int curPos = iter.Current.blockPosition;
                 List<IndexPair>::const_iterator nextiter = iter;
                 int count = 0;
                 while (nextiter != block2addr.end() && (*nextiter).blockPosition == curPos) {
@@ -465,8 +466,7 @@ namespace Sla.DECCORE
                     ++nextiter;
                 }
                 iter = nextiter;
-                if (count > maxcount)
-                {
+                if (count > maxcount) {
                     maxcount = count;
                     defaultBlock = curPos;
                 }
@@ -528,7 +528,7 @@ namespace Sla.DECCORE
             //  if (sz < 2)
             //    fd.warning("Jumptable has only one branch",opaddress);
             if (collectloads)
-                jmodel.buildAddresses(fd, indirect, addresstable, &loadpoints);
+                jmodel.buildAddresses(fd, indirect, addresstable, loadpoints);
             else
                 jmodel.buildAddresses(fd, indirect, addresstable, (List<LoadTable>*)0);
             sanityCheck(fd);
@@ -644,7 +644,7 @@ namespace Sla.DECCORE
         /// \b this jump-table.
         /// \param fd is the function containing the switch
         /// \return \b true if an additional recovery stage is required.
-        private bool checkForMultistage(Funcdata fd)
+        internal bool checkForMultistage(Funcdata fd)
         {
             if (addresstable.size() != 1) return false;
             if (recoverystage != 0) return false;

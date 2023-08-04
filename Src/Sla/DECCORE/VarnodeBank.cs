@@ -389,8 +389,8 @@ namespace Sla.DECCORE
         /// \return the beginning iterator
         public VarnodeLocSet::const_iterator beginLoc(AddrSpace spaceid)
         {
-            searchvn.loc = Address(spaceid, 0);
-            return loc_tree.lower_bound(&searchvn);
+            searchvn.loc = new Address(spaceid, 0);
+            return loc_tree.lower_bound(searchvn);
         }
 
         /// \brief Ending of Varnodes in given address space sorted by location
@@ -399,8 +399,8 @@ namespace Sla.DECCORE
         /// \return the ending iterator
         public VarnodeLocSet::const_iterator endLoc(AddrSpace spaceid)
         {
-            searchvn.loc = Address(manage.getNextSpaceInOrder(spaceid), 0);
-            return loc_tree.lower_bound(&searchvn);
+            searchvn.loc = new Address(manage.getNextSpaceInOrder(spaceid), 0);
+            return loc_tree.lower_bound(searchvn);
         }
 
         /// \brief Beginning of Varnodes starting at a given address sorted by location
@@ -410,7 +410,7 @@ namespace Sla.DECCORE
         public VarnodeLocSet::const_iterator beginLoc(Address addr)
         {
             searchvn.loc = addr;
-            return loc_tree.lower_bound(&searchvn);
+            return loc_tree.lower_bound(searchvn);
         }
 
         /// \brief End of Varnodes starting at a given address sorted by location
@@ -419,14 +419,13 @@ namespace Sla.DECCORE
         /// \return the ending iterator
         public VarnodeLocSet::const_iterator endLoc(Address addr)
         {
-            if (addr.getOffset() == addr.getSpace().getHighest())
-            {
-                AddrSpace* space = addr.getSpace();
-                searchvn.loc = Address(manage.getNextSpaceInOrder(space), 0);
+            if (addr.getOffset() == addr.getSpace().getHighest()) {
+                AddrSpace space = addr.getSpace();
+                searchvn.loc = new Address(manage.getNextSpaceInOrder(space), 0);
             }
             else
                 searchvn.loc = addr + 1;
-            return loc_tree.lower_bound(&searchvn);
+            return loc_tree.lower_bound(searchvn);
         }
 
         /// \brief Beginning of Varnodes of given size and starting address sorted by location
@@ -438,7 +437,7 @@ namespace Sla.DECCORE
         {
             searchvn.size = s;
             searchvn.loc = addr;
-            VarnodeLocSet::const_iterator iter = loc_tree.lower_bound(&searchvn);
+            VarnodeLocSet::const_iterator iter = loc_tree.lower_bound(searchvn);
             searchvn.size = 0;      // Return size to 0
             return iter;
         }
@@ -452,7 +451,7 @@ namespace Sla.DECCORE
         {
             searchvn.size = s + 1;
             searchvn.loc = addr;
-            VarnodeLocSet::const_iterator iter = loc_tree.lower_bound(&searchvn);
+            VarnodeLocSet::const_iterator iter = loc_tree.lower_bound(searchvn);
             searchvn.size = 0;      // Return size to 0
             return iter;
         }
@@ -478,7 +477,7 @@ namespace Sla.DECCORE
                 case Varnode.varnode_flags.input:
                     searchvn.size = s;
                     searchvn.loc = addr;
-                    iter = loc_tree.lower_bound(&searchvn);
+                    iter = loc_tree.lower_bound(searchvn);
                     searchvn.size = 0;
                     return iter;
                 case Varnode.varnode_flags.written:
@@ -487,8 +486,8 @@ namespace Sla.DECCORE
                     searchvn.size = s;
                     searchvn.loc = addr;
                     searchvn.flags = Varnode.varnode_flags.written;
-                    searchvn.def = &searchop;
-                    iter = loc_tree.lower_bound(&searchvn);
+                    searchvn.def = searchop;
+                    iter = loc_tree.lower_bound(searchvn);
                     searchvn.size = 0;
                     searchvn.flags = Varnode.varnode_flags.input;
                     return iter;
@@ -498,8 +497,8 @@ namespace Sla.DECCORE
                     searchvn.size = s;
                     searchvn.loc = addr;
                     searchvn.flags = Varnode.varnode_flags.written;
-                    searchvn.def = &searchop;
-                    iter = loc_tree.upper_bound(&searchvn);
+                    searchvn.def = searchop;
+                    iter = loc_tree.upper_bound(searchvn);
                     searchvn.size = 0;
                     searchvn.flags = Varnode.varnode_flags.input;
                     return iter;
@@ -528,19 +527,19 @@ namespace Sla.DECCORE
                     searchvn.flags = Varnode.varnode_flags.written;
                     SeqNum sq = new SeqNum(Address.mach_extreme.m_maximal); // Maximal sequence number
                     PcodeOp searchop = new PcodeOp(0, sq);
-                    searchvn.def = &searchop;
-                    iter = loc_tree.upper_bound(&searchvn);
+                    searchvn.def = searchop;
+                    iter = loc_tree.upper_bound(searchvn);
                     searchvn.size = 0;
                     searchvn.flags = Varnode.varnode_flags.input;
                     return iter;
                 case Varnode.varnode_flags.input:
                     searchvn.size = s;
-                    iter = loc_tree.upper_bound(&searchvn);
+                    iter = loc_tree.upper_bound(searchvn);
                     searchvn.size = 0;
                     return iter;
                 default:
                     searchvn.size = s + 1;
-                    iter = loc_tree.lower_bound(&searchvn); // Find following input varnode
+                    iter = loc_tree.lower_bound(searchvn); // Find following input varnode
                     searchvn.size = 0;
                     return iter;
             }
@@ -567,7 +566,7 @@ namespace Sla.DECCORE
             SeqNum sq = new SeqNum(pc, uniq);
             PcodeOp searchop = new PcodeOp(0,sq);
             searchvn.def = &searchop;
-            iter = loc_tree.lower_bound(&searchvn);
+            iter = loc_tree.lower_bound(searchvn);
 
             searchvn.size = 0;
             searchvn.flags = Varnode.varnode_flags.input;
@@ -593,8 +592,8 @@ namespace Sla.DECCORE
             //    uniq = 0;
             SeqNum sq = new SeqNum(pc, uniq);
             PcodeOp searchop = new PcodeOp(0,sq);
-            searchvn.def = &searchop;
-            iter = loc_tree.upper_bound(&searchvn);
+            searchvn.def = searchop;
+            iter = loc_tree.upper_bound(searchvn);
 
             searchvn.size = 0;
             searchvn.flags = Varnode.varnode_flags.input;
@@ -665,12 +664,12 @@ namespace Sla.DECCORE
                 return def_tree.begin();    // Inputs occur first with def_tree
             else if (fl == Varnode.varnode_flags.written)
             {
-                searchvn.loc = Address(Address.mach_extreme.m_minimal); // Lowest possible location
+                searchvn.loc = new Address(Address.mach_extreme.m_minimal); // Lowest possible location
                 searchvn.flags = Varnode.varnode_flags.written;
                 SeqNum sq = new SeqNum(Address.mach_extreme.m_minimal); // Lowest possible seqnum
                 PcodeOp searchop = new PcodeOp(0,sq);
-                searchvn.def = &searchop;
-                iter = def_tree.lower_bound(&searchvn);
+                searchvn.def = searchop;
+                iter = def_tree.lower_bound(searchvn);
                 searchvn.flags = Varnode.varnode_flags.input; // Reset flags
                 return iter;
             }
@@ -680,8 +679,8 @@ namespace Sla.DECCORE
             searchvn.flags = Varnode.varnode_flags.written;
             SeqNum sq = new SeqNum(Address.mach_extreme.m_maximal); // Maximal seqnum
             PcodeOp searchop = new PcodeOp(0,sq);
-            searchvn.def = &searchop;
-            iter = def_tree.upper_bound(&searchvn);
+            searchvn.def = searchop;
+            iter = def_tree.upper_bound(searchvn);
             searchvn.flags = Varnode.varnode_flags.input; // Reset flags
             return iter;
         }
@@ -705,19 +704,19 @@ namespace Sla.DECCORE
                 searchvn.flags = Varnode.varnode_flags.written;
                 SeqNum sq = new SeqNum(Address.mach_extreme.m_minimal); // Lowest possible seqnum
                 PcodeOp searchop = new PcodeOp(0,sq);
-                searchvn.def = &searchop;
-                iter = def_tree.lower_bound(&searchvn);
+                searchvn.def = searchop;
+                iter = def_tree.lower_bound(searchvn);
                 searchvn.flags = Varnode.varnode_flags.input; // Reset flags
                 return iter;
             }
-            else if (fl == Varnode.varnode_flags.written)
-            { // Highest written
+            else if (fl == Varnode.varnode_flags.written) {
+                // Highest written
                 searchvn.loc = new Address(Address.mach_extreme.m_maximal); // Maximal possible location
                 searchvn.flags = Varnode.varnode_flags.written;
                 SeqNum sq = new SeqNum(Address.mach_extreme.m_maximal); // Maximal seqnum
                 PcodeOp searchop = new PcodeOp(0,sq);
-                searchvn.def = &searchop;
-                iter = def_tree.upper_bound(&searchvn);
+                searchvn.def = searchop;
+                iter = def_tree.upper_bound(searchvn);
                 searchvn.flags = Varnode.varnode_flags.input; // Reset flags
                 return iter;
             }
@@ -735,16 +734,15 @@ namespace Sla.DECCORE
         /// \param fl is the property restriction
         /// \param addr is the given starting address
         /// \return the beginning iterator
-        public VarnodeDefSet::const_iterator beginDef(uint fl, Address addr)
+        public VarnodeDefSet::const_iterator beginDef(Varnode.varnode_flags fl, Address addr)
         {               // Get varnodes with addr and with definition type
             VarnodeDefSet::const_iterator iter;
 
             if (fl == Varnode.varnode_flags.written)
                 throw new LowlevelError("Cannot get contiguous written AND addressed");
-            else if (fl == Varnode.varnode_flags.input)
-            {
+            else if (fl == Varnode.varnode_flags.input) {
                 searchvn.loc = addr;
-                iter = def_tree.lower_bound(&searchvn);
+                iter = def_tree.lower_bound(searchvn);
                 return iter;
             }
 
@@ -753,7 +751,7 @@ namespace Sla.DECCORE
             searchvn.flags = 0;
             // Since a size 0 object shouldn't exist, an upper bound
             // should bump up to first free of addr with non-zero size
-            iter = def_tree.upper_bound(&searchvn);
+            iter = def_tree.upper_bound(searchvn);
             searchvn.flags = Varnode.varnode_flags.input; // Reset flags
             return iter;
         }
@@ -779,7 +777,7 @@ namespace Sla.DECCORE
             {
                 searchvn.loc = addr;
                 searchvn.size = 1000000;
-                iter = def_tree.lower_bound(&searchvn);
+                iter = def_tree.lower_bound(searchvn);
                 searchvn.size = 0;
                 return iter;
             }
@@ -790,7 +788,7 @@ namespace Sla.DECCORE
             searchvn.flags = 0;
             // Since a size 0 object shouldn't exist, an upper bound
             // should bump up to first free of addr with non-zero size
-            iter = def_tree.lower_bound(&searchvn);
+            iter = def_tree.lower_bound(searchvn);
             searchvn.flags = Varnode.varnode_flags.input; // Reset flags
             searchvn.size = 0;
             return iter;

@@ -44,7 +44,7 @@ namespace Sla.DECCORE
         //friend class Database;
         //friend class ScopeCompare;
         /// Range of data addresses \e owned by \b this scope
-        private RangeList rangetree;
+        internal RangeList rangetree;
         /// The parent scope
         private Scope parent;
         /// Scope using \b this as a cache
@@ -77,14 +77,13 @@ namespace Sla.DECCORE
         /// \param baseId is the scope id of the parent scope
         /// \param nm is the name of scope
         /// \return the hash of the parent id and name
-        private static ulong hashScopeName(ulong baseId, string nm)
+        internal static ulong hashScopeName(ulong baseId, string nm)
         {
             uint reg1 = (uint)(baseId >> 32);
             uint reg2 = (uint)baseId;
             reg1 = Globals.crc_update(reg1, 0xa9);
             reg2 = Globals.crc_update(reg2, reg1);
-            for (int i = 0; i < nm.size(); ++i)
-            {
+            for (int i = 0; i < nm.Length; ++i) {
                 uint val = nm[i];
                 reg1 = Globals.crc_update(reg1, val);
                 reg2 = Globals.crc_update(reg2, reg1);
@@ -903,7 +902,7 @@ namespace Sla.DECCORE
         /// in post order.  For each Scope, the encode() method is invoked.
         /// \param encoder is the stream encoder
         /// \param onlyGlobal is \b true if only non-local Scopes should be saved
-        public void encodeRecursive(Encoder encoder, bool onlyGlobal)
+        public void encodeRecursive(Sla.CORE.Encoder encoder, bool onlyGlobal)
         {
             if (onlyGlobal && (!isGlobal())) return;        // Only save global scopes
             encode(encoder);

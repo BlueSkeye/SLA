@@ -262,7 +262,6 @@ namespace Sla.DECCORE
 
         public override bool isComplex()
         {
-            IEnumerator<PcodeOp> iter2;
             PcodeOp inst, d_op;
             Varnode vn;
             int statement;
@@ -308,8 +307,9 @@ namespace Sla.DECCORE
                     else {
                         int totalref = 0;
 
-                        for (iter2 = vn.beginDescend(); iter2 != vn.endDescend(); ++iter2) {
-                            d_op = *iter2;
+                        IEnumerator<PcodeOp> iter2 = vn.beginDescend();
+                        while (iter2.MoveNext()) {
+                            d_op = iter2.Current;
                             if (d_op.isMarker() || (d_op.getParent() != this)) {
                                 // Variable used outside of block
                                 yesstatement = true;
@@ -440,7 +440,10 @@ namespace Sla.DECCORE
         }
 
         /// Return an iterator to the beginning of the PcodeOps
-        public IEnumerator<PcodeOp> beginOp() => op.begin();
+        public IEnumerator<PcodeOp> beginOp() => op.GetEnumerator();
+
+        /// <summary>Return an enumerator in reverse order</summary>
+        public IEnumerator<PcodeOp> reverseEnumerator() => op.GetReverseEnumerator();
 
         // list<PcodeOp*>::iterator endOp(void) { return op.end(); }       ///< Return an iterator to the end of the PcodeOps
         //list<PcodeOp*>::const_iterator beginOp(void) { return op.begin(); }	///< Return an iterator to the beginning of the PcodeOps

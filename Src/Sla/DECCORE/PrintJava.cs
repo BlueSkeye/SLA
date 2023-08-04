@@ -263,7 +263,7 @@ namespace Sla.DECCORE
             pushOp(&function_call, op);
             Funcdata fd = op.getParent().getFuncdata();
             FuncCallSpecs* fc = fd.getCallSpecs(op);
-            if (fc == (FuncCallSpecs*)0)
+            if (fc == (FuncCallSpecs)null)
                 throw new LowlevelError("Missing indirect function callspec");
             int skip = getHiddenThisSlot(op, fc);
             int count = op.numInput() - 1;

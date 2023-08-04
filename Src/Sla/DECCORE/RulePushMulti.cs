@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,15 +21,11 @@ namespace Sla.DECCORE
         /// \param bb is the given block to search in
         /// \param earliest is the earliest of the inputs
         /// \return the discovered MULTIEQUAL or the equivalent sub-expression
-        private static PcodeOp findSubstitute(Varnode in1, Varnode in2, BlockBasic bb, PcodeOp earliest)
+        private static PcodeOp? findSubstitute(Varnode in1, Varnode in2, BlockBasic bb, PcodeOp earliest)
         {
-            list<PcodeOp*>::const_iterator iter, enditer;
-            iter = in1.beginDescend();
-            enditer = in1.endDescend();
-            while (iter != enditer)
-            {
-                PcodeOp* op = *iter;
-                ++iter;
+            IEnumerator<PcodeOp> iter = in1.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if (op.getParent() != bb) continue;
                 if (op.code() != OpCode.CPUI_MULTIEQUAL) continue;
                 if (op.getIn(0) != in1) continue;
@@ -37,14 +33,13 @@ namespace Sla.DECCORE
                 return op;
             }
             if (in1 == in2) return (PcodeOp)null;
-            Varnode* buf1[2];
-            Varnode* buf2[2];
+            Varnode[] buf1 = new Varnode[2];
+            Varnode[] buf2 = new Varnode[2];
             if (0 != functionalEqualityLevel(in1, in2, buf1, buf2)) return (PcodeOp)null;
-            PcodeOp* op1 = in1.getDef();   // in1 and in2 must be written to not be equal and pass functional equality test
-            PcodeOp* op2 = in2.getDef();
-            for (int i = 0; i < op1.numInput(); ++i)
-            {
-                Varnode* vn = op1.getIn(i);
+            PcodeOp op1 = in1.getDef();   // in1 and in2 must be written to not be equal and pass functional equality test
+            PcodeOp op2 = in2.getDef();
+            for (int i = 0; i < op1.numInput(); ++i) {
+                Varnode vn = op1.getIn(i);
                 if (vn.isConstant()) continue;
                 if (vn == op2.getIn(i))    // Find matching inputs to op1 and op2,
                     return cseFindInBlock(op1, vn, bb, earliest); // search for cse of op1 in bb
@@ -72,7 +67,7 @@ namespace Sla.DECCORE
         /// and move the other into the merge block.
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_MULTIEQUAL);
+            oplist.Add(OpCode.CPUI_MULTIEQUAL);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

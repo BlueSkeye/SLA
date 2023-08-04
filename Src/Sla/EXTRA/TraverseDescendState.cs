@@ -9,31 +9,37 @@ namespace Sla.EXTRA
 {
     internal class TraverseDescendState : TraverseConstraint
     {
-        private bool onestep;           // true if first step has occurred
-        private List<PcodeOp>::const_iterator iter;    // Different forward branches we could traverse
-        private List<PcodeOp>::const_iterator enditer;
+        // Different forward branches we could traverse
+        private IEnumerator<PcodeOp>? iter = null;
+        private bool iterationComplete = false;
 
         public TraverseDescendState(int i)
             : base(i)
         {
         }
 
-        public PcodeOp getCurrentOp() => *iter;
+        public PcodeOp getCurrentOp()
+        {
+            if (null == iter) {
+                throw new InvalidOperationException();
+            }
+            if (iterationComplete) {
+                throw new BugException();
+            }
+            return iter.Current;
+        }
 
         public void initialize(Varnode vn)
         {
-            onestep = false;
             iter = vn.beginDescend();
-            enditer = vn.endDescend();
         }
 
         public bool step()
         {
-            if (onestep)
-                ++iter;
-            else
-                onestep = true;
-            return (iter != enditer);
+            if (null == iter) {
+                throw new InvalidOperationException();
+            }
+            return (iterationComplete = !iter.MoveNext());
         }
     }
 }

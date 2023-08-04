@@ -26,12 +26,12 @@ namespace Sla.DECCORE
             if (val)
             {
                 res = "Unimplemented instructions are now a fatal error";
-                glb.flowoptions |= FlowInfo::error_unimplemented;
+                glb.flowoptions |= FlowInfo.FlowFlag.error_unimplemented;
             }
             else
             {
                 res = "Unimplemented instructions now NOT a fatal error";
-                glb.flowoptions &= ~((uint)FlowInfo::error_unimplemented);
+                glb.flowoptions &= ~((uint)FlowInfo.FlowFlag.error_unimplemented);
             }
 
             return res;

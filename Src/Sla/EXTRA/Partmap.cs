@@ -39,7 +39,8 @@ namespace Sla.EXTRA
         //typedef typename maptype::const_iterator const_iterator;
 
         /// Map from linear split points to the value objects
-        private SortedDictionary<_linetype, _valuetype> database;
+        private SortedDictionary<_linetype, _valuetype> database =
+            new SortedDictionary<_linetype, _valuetype>();
         /// The value object \e before the first split point
         private _valuetype defaultvalue;
         
@@ -62,6 +63,15 @@ namespace Sla.EXTRA
                 return result.Value.Value;
             }
             return defaultvalue;
+        }
+
+        // Added this method because directly updating an enumerator record is not supported.
+        public void updateValue(_linetype pnt, _valuetype newValue)
+        {
+            if (!database.ContainsKey(pnt)) {
+                throw new BugException();
+            }
+            database[pnt] = newValue;
         }
 
         /// Introduce a new split point

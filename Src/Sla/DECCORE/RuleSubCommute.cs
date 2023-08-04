@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +32,7 @@ namespace Sla.DECCORE
         /// constant, a INT_SEXT, or a INT_ZEXT, canceling out
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_SUBPIECE);
+            oplist.Add(OpCode.CPUI_SUBPIECE);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)

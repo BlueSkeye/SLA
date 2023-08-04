@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,8 +33,8 @@ namespace Sla.DECCORE
         ///   - `zext(V) <= c =>  V <= c`
         public override void getOpList(List<uint> oplist)
         {
-            uint list[] = {CPUI_INT_EQUAL, OpCode.CPUI_INT_NOTEQUAL,
-          OpCode.CPUI_INT_LESS,CPUI_INT_LESSEQUAL };
+            uint list[] = {OpCode.CPUI_INT_EQUAL, OpCode.CPUI_INT_NOTEQUAL,
+          OpCode.CPUI_INT_LESS,OpCode.CPUI_INT_LESSEQUAL };
             oplist.insert(oplist.end(), list, list + 4);
         }
 

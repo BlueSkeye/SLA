@@ -445,7 +445,7 @@ namespace Sla.DECCORE
             {
                 Funcdata* fd = op.getParent().getFuncdata();
                 FuncCallSpecs* fc = fd.getCallSpecs(op);
-                if (fc != (FuncCallSpecs*)0)
+                if (fc != (FuncCallSpecs)null)
                 {
                     ProtoParameter* param = (ProtoParameter*)0;
                     if (slot >= 1 && fc.isInputLocked())

@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,7 +32,7 @@ namespace Sla.DECCORE
         internal class ValueSetEdge
         {
             /// The list of nodes attached to the simulated root node (or NULL)
-            private List<ValueSet> rootEdges;
+            private List<ValueSet>? rootEdges;
             /// The iterator position for the simulated root node
             private int rootPos;
             /// The Varnode attached to a normal ValueSet node (or NULL)
@@ -50,14 +50,13 @@ namespace Sla.DECCORE
             public ValueSetEdge(ValueSet node, List<ValueSet> roots)
             {
                 vn = node.getVarnode();
-                if (vn == (Varnode)null)
-                {       // Assume this is the simulated root
+                if (vn == (Varnode)null) {
+                    // Assume this is the simulated root
                     rootEdges = &roots;         // Set up for simulated edges
                     rootPos = 0;
                 }
-                else
-                {
-                    rootEdges = (List<ValueSet>*)0;
+                else {
+                    rootEdges = (List<ValueSet>)null;
                     iter = vn.beginDescend();
                 }
             }
@@ -66,29 +65,26 @@ namespace Sla.DECCORE
             ///
             /// This method assumes all Varnodes with an attached ValueSet have been marked.
             /// \return the next ValueSet or NULL if the end of the list is reached
-            public ValueSet getNext()
+            public ValueSet? getNext()
             {
-                if (vn == (Varnode)null)
-                {
-                    if (rootPos < rootEdges.size())
-                    {
-                        ValueSet* res = (*rootEdges)[rootPos];
+                if (vn == (Varnode)null) {
+                    if (rootPos < rootEdges.Count) {
+                        ValueSet res = rootEdges[rootPos];
                         rootPos += 1;
                         return res;
                     }
-                    return (ValueSet*)0;
+                    return (ValueSet)null;
                 }
                 while (iter != vn.endDescend())
                 {
                     PcodeOp* op = *iter;
                     ++iter;
-                    Varnode* outVn = op.getOut();
-                    if (outVn != (Varnode)null && outVn.isMark())
-                    {
+                    Varnode? outVn = op.getOut();
+                    if (outVn != (Varnode)null && outVn.isMark()) {
                         return outVn.getValueSet();
                     }
                 }
-                return (ValueSet*)0;
+                return (ValueSet)null;
             }
         }
 
@@ -296,15 +292,13 @@ namespace Sla.DECCORE
         /// \param cbranch is conditional branch creating the constraint
         private void applyConstraints(Varnode vn, int type, CircleRange range,PcodeOp cbranch)
         {
-            FlowBlock* splitPoint = cbranch.getParent();
-            FlowBlock* trueBlock,*falseBlock;
-            if (cbranch.isBooleanFlip())
-            {
+            FlowBlock splitPoint = cbranch.getParent();
+            FlowBlock trueBlock, falseBlock;
+            if (cbranch.isBooleanFlip()) {
                 trueBlock = splitPoint.getFalseOut();
                 falseBlock = splitPoint.getTrueOut();
             }
-            else
-            {
+            else {
                 trueBlock = splitPoint.getTrueOut();
                 falseBlock = splitPoint.getFalseOut();
             }
@@ -312,39 +306,34 @@ namespace Sla.DECCORE
             bool trueIsRestricted = trueBlock.restrictedByConditional(splitPoint);
             bool falseIsRestricted = falseBlock.restrictedByConditional(splitPoint);
 
-            list<PcodeOp*>::const_iterator iter;
-            if (vn.isWritten())
-            {
-                ValueSet* vSet = vn.getValueSet();
-                if (vSet.opCode == OpCode.CPUI_MULTIEQUAL)
-                {
+            if (vn.isWritten()) {
+                ValueSet vSet = vn.getValueSet();
+                if (vSet.opCode == OpCode.CPUI_MULTIEQUAL) {
                     vSet.addLandmark(type, range);     // Leave landmark for widening
                 }
             }
-            for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
+            IEnumerator<PcodeOp> iter = vn.beginDescend();
+            while (iter.MoveNext())
             {
-                PcodeOp* op = *iter;
-                Varnode* outVn = (Varnode)null;
-                if (!op.isMark())
-                {   // If this is not a special read site
+                PcodeOp op = iter.Current;
+                Varnode? outVn = (Varnode)null;
+                if (!op.isMark()) {
+                    // If this is not a special read site
                     outVn = op.getOut();   // Make sure there is a Varnode in the system
                     if (outVn == (Varnode)null) continue;
                     if (!outVn.isMark()) continue;
                 }
-                FlowBlock* curBlock = op.getParent();
+                FlowBlock? curBlock = op.getParent();
                 int slot = op.getSlot(vn);
-                if (op.code() == OpCode.CPUI_MULTIEQUAL)
-                {
-                    if (curBlock == trueBlock)
-                    {
+                if (op.code() == OpCode.CPUI_MULTIEQUAL) {
+                    if (curBlock == trueBlock) {
                         // If its possible that both the true and false edges can reach trueBlock
                         // then the only input we can restrict is a MULTIEQUAL input along the exact true edge
                         if (trueIsRestricted || trueBlock.getIn(slot) == splitPoint)
                             generateTrueEquation(outVn, op, slot, type, range);
                         continue;
                     }
-                    else if (curBlock == falseBlock)
-                    {
+                    else if (curBlock == falseBlock) {
                         // If its possible that both the true and false edges can reach falseBlock
                         // then the only input we can restrict is a MULTIEQUAL input along the exact false edge
                         if (falseIsRestricted || falseBlock.getIn(slot) == splitPoint)
@@ -354,21 +343,18 @@ namespace Sla.DECCORE
                     else
                         curBlock = curBlock.getIn(slot);   // MULTIEQUAL input is really only from one in-block
                 }
-                for (; ; )
-                {
-                    if (curBlock == trueBlock)
-                    {
+                for (; ; ) {
+                    if (curBlock == trueBlock) {
                         if (trueIsRestricted)
                             generateTrueEquation(outVn, op, slot, type, range);
                         break;
                     }
-                    else if (curBlock == falseBlock)
-                    {
+                    else if (curBlock == falseBlock) {
                         if (falseIsRestricted)
                             generateFalseEquation(outVn, op, slot, type, range);
                         break;
                     }
-                    else if (curBlock == splitPoint || curBlock == (FlowBlock*)0)
+                    else if (curBlock == splitPoint || curBlock == (FlowBlock)null)
                         break;
                     curBlock = curBlock.getImmedDom();
                 }

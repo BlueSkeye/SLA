@@ -28,8 +28,9 @@ namespace Sla.DECCORE
         {
             vn = v;
             iter = vn.beginDescend();
-            if (iter != vn.endDescend())
-            {
+            if (iter.MoveNext()) {
+                // WARNING : Carefull, how is iter used with other methods.
+                throw new NotImplementedException();
                 op = *iter++;
                 if (op.getOut() != (Varnode)null)
                     slot = -1;
@@ -37,8 +38,7 @@ namespace Sla.DECCORE
                     slot = 0;
                 inslot = op.getSlot(vn);
             }
-            else
-            {
+            else {
                 op = vn.getDef();
                 inslot = -1;
                 slot = 0;
@@ -55,8 +55,7 @@ namespace Sla.DECCORE
             slot += 1;
             if (slot < op.numInput())
                 return;
-            if (iter != vn.endDescend())
-            {
+            if (iter != vn.endDescend()) {
                 op = *iter++;
                 if (op.getOut() != (Varnode)null)
                     slot = -1;

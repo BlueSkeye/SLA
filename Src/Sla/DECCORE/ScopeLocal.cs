@@ -144,18 +144,16 @@ namespace Sla.DECCORE
         /// \param alias is the given set of alias starting offsets
         private void markUnaliased(List<ulong> alias)
         {
-            EntryMap* rangemap = maptable[space.getIndex()];
+            EntryMap rangemap = maptable[space.getIndex()];
             if (rangemap == (EntryMap)null) return;
-            list<SymbolEntry>::iterator iter, enditer;
-            set<Range>::const_iterator rangeIter, rangeEndIter;
-            rangeIter = getRangeTree().begin();
-            rangeEndIter = getRangeTree().end();
+            IEnumerator<Sla.CORE.Range> rangeIter = getRangeTree().begin();
 
             int alias_block_level = glb.alias_block_level;
             bool aliason = false;
             ulong curalias = 0;
             int i = 0;
 
+            list<SymbolEntry>::iterator iter, enditer;
             iter = rangemap.begin_list();
             enditer = rangemap.end_list();
 
@@ -163,26 +161,23 @@ namespace Sla.DECCORE
             {
                 SymbolEntry & entry(*iter++);
                 ulong curoff = entry.getAddr().getOffset() + entry.getSize() - 1;
-                while ((i < alias.size()) && (alias[i] <= curoff))
-                {
+                while ((i < alias.Count) && (alias[i] <= curoff)) {
                     aliason = true;
                     curalias = alias[i++];
                 }
                 // Aliases shouldn't go thru unmapped regions of the local variables
-                while (rangeIter != rangeEndIter)
+                while (rangeIter.MoveNext())
                 {
-                    Range rng = *rangeIter;
-                    if (rng.getSpace() == space)
-                    {
+                    Sla.CORE.Range rng = rangeIter.Current;
+                    if (rng.getSpace() == space) {
                         if (rng.getFirst() > curalias && curoff >= rng.getFirst())
                             aliason = false;
                         if (rng.getLast() >= curoff) break; // Check if symbol past end of mapped range
                         if (rng.getLast() > curalias)       // If past end of range AND past last alias offset
                             aliason = false;            //    turn aliases off
                     }
-                    ++rangeIter;
                 }
-                Symbol* symbol = entry.getSymbol();
+                Symbol symbol = entry.getSymbol();
                 // Test if there is enough distance between symbol
                 // and last alias to warrant ignoring the alias
                 // NOTE: this is primarily to reset aliasing between

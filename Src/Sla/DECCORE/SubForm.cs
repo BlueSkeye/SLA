@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -38,7 +38,6 @@ namespace Sla.DECCORE
         //   reslo = lo1 + -lo2
         public bool verify(Varnode h, Varnode l, PcodeOp op)
         {
-            list<PcodeOp*>::const_iterator iter2, enditer2;
             hi1 = h;
             lo1 = l;
             slot1 = op.getSlot(hi1);
@@ -55,7 +54,7 @@ namespace Sla.DECCORE
                 }
                 else
                 {
-                    Varnode* tmpvn = op.getIn(1 - slot1);
+                    Varnode tmpvn = op.getIn(1 - slot1);
                     if (!tmpvn.isWritten()) continue;
                     add2 = tmpvn.getDef();
                     if (add2.code() != OpCode.CPUI_INT_ADD) continue;
@@ -65,20 +64,17 @@ namespace Sla.DECCORE
                 }
                 if (!hineg1.isWritten()) continue;
                 if (!hineg2.isWritten()) continue;
-                if (!SplitVarnode::verifyMultNegOne(hineg1.getDef())) continue;
-                if (!SplitVarnode::verifyMultNegOne(hineg2.getDef())) continue;
+                if (!SplitVarnode.verifyMultNegOne(hineg1.getDef())) continue;
+                if (!SplitVarnode.verifyMultNegOne(hineg2.getDef())) continue;
                 hizext1 = hineg1.getDef().getIn(0);
                 hizext2 = hineg2.getDef().getIn(0);
-                for (int j = 0; j < 2; ++j)
-                {
-                    if (j == 0)
-                    {
+                for (int j = 0; j < 2; ++j) {
+                    if (j == 0) {
                         if (!hizext1.isWritten()) continue;
                         zextop = hizext1.getDef();
                         hi2 = hizext2;
                     }
-                    else
-                    {
+                    else {
                         if (!hizext2.isWritten()) continue;
                         zextop = hizext2.getDef();
                         hi2 = hizext1;
@@ -89,17 +85,14 @@ namespace Sla.DECCORE
                     if (lessop.code() != OpCode.CPUI_INT_LESS) continue;
                     if (lessop.getIn(0) != lo1) continue;
                     lo2 = lessop.getIn(1);
-                    iter2 = lo1.beginDescend();
-                    enditer2 = lo1.endDescend();
-                    while (iter2 != enditer2)
-                    {
-                        loadd = *iter2;
-                        ++iter2;
+                    IEnumerator<PcodeOp> iter2 = lo1.beginDescend();
+                    while (iter2.MoveNext()) {
+                        loadd = iter2.Current;
                         if (loadd.code() != OpCode.CPUI_INT_ADD) continue;
-                        Varnode* tmpvn = loadd.getIn(1 - loadd.getSlot(lo1));
+                        Varnode tmpvn = loadd.getIn(1 - loadd.getSlot(lo1));
                         if (!tmpvn.isWritten()) continue;
                         negop = tmpvn.getDef();
-                        if (!SplitVarnode::verifyMultNegOne(negop)) continue;
+                        if (!SplitVarnode.verifyMultNegOne(negop)) continue;
                         if (negop.getIn(0) != lo2) continue;
                         reslo = loadd.getOut();
                         return true;

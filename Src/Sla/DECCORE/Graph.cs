@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,31 +10,30 @@ namespace Sla.DECCORE
 {
     internal static class Graph
     {
-        internal static void dump_varnode_vertex(Funcdata data, ostream s)
+        internal static void dump_varnode_vertex(Funcdata data, TextWriter s)
         {
-            list<PcodeOp*>::const_iterator oiter;
-            PcodeOp* op;
+            PcodeOp op;
             int i, start, stop;
 
-            s << "\n\n// Add Vertices\n";
-            s << "*CMD=*COLUMNAR_INPUT,\n";
-            s << "  Command=AddVertices,\n";
-            s << "  Parsing=WhiteSpace,\n";
-            s << "  Fields=({Name=Internal, Location=1},\n";
-            s << "          {Name=SubClass, Location=2},\n";
-            s << "          {Name=Type, Location=3},\n";
-            s << "          {Name=Name, Location=4},\n";
-            s << "          {Name=Address, Location=5});\n\n";
-            s << "//START:varnodes\n";
+            s.WriteLine("\n\n// Add Vertices");
+            s.WriteLine("*CMD=*COLUMNAR_INPUT,");
+            s.WriteLine("  Command=AddVertices,");
+            s.WriteLine("  Parsing=WhiteSpace,");
+            s.WriteLine("  Fields=({Name=Internal, Location=1},");
+            s.WriteLine("          {Name=SubClass, Location=2},");
+            s.WriteLine("          {Name=Type, Location=3},");
+            s.WriteLine("          {Name=Name, Location=4},");
+            s.WriteLine("          {Name=Address, Location=5});");
+            s.WriteLine();
+            s.WriteLine("//START:varnodes");
 
-            for (oiter = data.beginOpAlive(); oiter != data.endOpAlive(); ++oiter)
-            {
-                op = *oiter;
+            IEnumerator<PcodeOp> oiter = data.beginOpAlive();
+            while (oiter.MoveNext()) {
+                op = oiter.Current;
                 print_varnode_vertex(op.getOut(), s);
                 start = 0;
                 stop = op.numInput();
-                switch (op.code())
-                {
+                switch (op.code()) {
                     case OpCode.CPUI_LOAD:
                     case OpCode.CPUI_STORE:
                     case OpCode.CPUI_BRANCH:
@@ -50,10 +49,10 @@ namespace Sla.DECCORE
                 for (i = start; i < stop; ++i)
                     print_varnode_vertex(op.getIn(i), s);
             }
-            s << "*END_COLUMNS\n";
-            for (oiter = data.beginOpAlive(); oiter != data.endOpAlive(); ++oiter)
-            {
-                op = *oiter;
+            s.WriteLine("*END_COLUMNS");
+            oiter = data.beginOpAlive();
+            while (oiter.MoveNext()) {
+                op = oiter.Current;
                 if (op.getOut() != (Varnode)null)
                     op.getOut().clearMark();
                 for (i = 0; i < op.numInput(); ++i)
@@ -61,42 +60,43 @@ namespace Sla.DECCORE
             }
         }
 
-        internal static void dump_op_vertex(Funcdata data, ostream s)
+        internal static void dump_op_vertex(Funcdata data, TextWriter s)
         {
-            list<PcodeOp*>::const_iterator oiter;
-            PcodeOp* op;
+            PcodeOp op;
 
-            s << "\n\n// Add Vertices\n";
-            s << "*CMD=*COLUMNAR_INPUT,\n";
-            s << "  Command=AddVertices,\n";
-            s << "  Parsing=WhiteSpace,\n";
-            s << "  Fields=({Name=Internal, Location=1},\n";
-            s << "          {Name=SubClass, Location=2},\n";
-            s << "          {Name=Type, Location=3},\n";
-            s << "          {Name=Name, Location=4},\n";
-            s << "          {Name=Address, Location=5});\n\n";
-            s << "//START:opnodes\n";
+            s.WriteLine("\n\n// Add Vertices");
+            s.WriteLine("*CMD=*COLUMNAR_INPUT,");
+            s.WriteLine("  Command=AddVertices,");
+            s.WriteLine("  Parsing=WhiteSpace,");
+            s.WriteLine("  Fields=({Name=Internal, Location=1},");
+            s.WriteLine("          {Name=SubClass, Location=2},");
+            s.WriteLine("          {Name=Type, Location=3},");
+            s.WriteLine("          {Name=Name, Location=4},");
+            s.WriteLine("          {Name=Address, Location=5});");
+            s.WriteLine();
+            s.WriteLine("//START:opnodes");
 
-            for (oiter = data.beginOpAlive(); oiter != data.endOpAlive(); ++oiter)
-            {
-                op = *oiter;
+            IEnumerator<PcodeOp> oiter = data.beginOpAlive();
+            while (oiter.MoveNext()) {
+                op = oiter.Current;
                 print_op_vertex(op, s);
             }
-            s << "*END_COLUMNS\n";
+            s.WriteLine("*END_COLUMNS");
         }
 
-        internal static void dump_dom_edges(BlockGraph graph, ostream s, bool falsenode)
+        internal static void dump_dom_edges(BlockGraph graph, TextWriter s, bool falsenode)
         {
-            s << "\n\n// Add Edges\n";
-            s << "*CMD=*COLUMNAR_INPUT,\n";
-            s << "  Command=AddEdges,\n";
-            s << "  Parsing=WhiteSpace,\n";
-            s << "  Fields=({Name=*FromKey, Location=1},\n";
-            s << "          {Name=*ToKey, Location=2});\n\n";
+            s.WriteLine("\n\n// Add Edges");
+            s.WriteLine("*CMD=*COLUMNAR_INPUT,");
+            s.WriteLine("  Command=AddEdges,");
+            s.WriteLine("  Parsing=WhiteSpace,");
+            s.WriteLine("  Fields=({Name=*FromKey, Location=1},");
+            s.WriteLine("          {Name=*ToKey, Location=2});";
+            s.WriteLine();
 
             for (int i = 0; i < graph.getSize(); ++i)
                 print_dom_edge(graph.getBlock(i), s, falsenode);
-            s << "*END_COLUMNS\n";
+            s.WriteLine("*END_COLUMNS");
         }
     }
 }

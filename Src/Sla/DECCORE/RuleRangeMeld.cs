@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,8 +25,8 @@ namespace Sla.DECCORE
 
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_BOOL_OR);
-            oplist.Add(CPUI_BOOL_AND);
+            oplist.Add(OpCode.CPUI_BOOL_OR);
+            oplist.Add(OpCode.CPUI_BOOL_AND);
         }
 
         /// \class RuleRangeMeld

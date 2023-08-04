@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -116,23 +116,15 @@ namespace Sla.DECCORE
             loshift = loop;
             reslo = loshift.getOut();
 
-            list<PcodeOp*>::const_iterator iter, enditer;
-            iter = hi.beginDescend();
-            enditer = hi.endDescend();
-            while (iter != enditer)
-            {
-                hishift = *iter;
-                ++iter;
+            IEnumerator<PcodeOp> iter = hi.beginDescend();
+            while (iter.MoveNext()) {
+                hishift = iter.Current;
                 if (hishift.code() != OpCode.CPUI_INT_LEFT) continue;
-                Varnode* outvn = hishift.getOut();
-                list<PcodeOp*>::const_iterator iter2, enditer2;
-                iter2 = outvn.beginDescend();
-                enditer2 = outvn.endDescend();
-                while (iter2 != enditer2)
-                {
-                    midshift = *iter2;
-                    ++iter2;
-                    Varnode* tmpvn = midshift.getOut();
+                Varnode outvn = hishift.getOut();
+                IEnumerator<PcodeOp> iter2 = outvn.beginDescend();
+                while (iter2.MoveNext()) {
+                    midshift = iter2.Current;
+                    Varnode? tmpvn = midshift.getOut();
                     if (tmpvn == (Varnode)null) continue;
                     reshi = tmpvn;
                     if (!mapLeft()) continue;
@@ -150,23 +142,15 @@ namespace Sla.DECCORE
             hishift = hiop;
             reshi = hiop.getOut();
 
-            list<PcodeOp*>::const_iterator iter, enditer;
-            iter = lo.beginDescend();
-            enditer = lo.endDescend();
-            while (iter != enditer)
-            {
-                loshift = *iter;
-                ++iter;
+            IEnumerator<PcodeOp> iter = lo.beginDescend();
+            while (iter.MoveNext()) {
+                loshift = iter.Current;
                 if (loshift.code() != OpCode.CPUI_INT_RIGHT) continue;
-                Varnode* outvn = loshift.getOut();
-                list<PcodeOp*>::const_iterator iter2, enditer2;
-                iter2 = outvn.beginDescend();
-                enditer2 = outvn.endDescend();
-                while (iter2 != enditer2)
-                {
-                    midshift = *iter2;
-                    ++iter2;
-                    Varnode* tmpvn = midshift.getOut();
+                Varnode outvn = loshift.getOut();
+                IEnumerator<PcodeOp> iter2 = outvn.beginDescend();
+                while (iter2.MoveNext()) {
+                    midshift = iter2.Current;
+                    Varnode? tmpvn = midshift.getOut();
                     if (tmpvn == (Varnode)null) continue;
                     reslo = tmpvn;
                     if (!mapRight()) continue;

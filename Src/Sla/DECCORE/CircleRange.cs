@@ -1601,10 +1601,10 @@ namespace Sla.DECCORE
             int inSize, int outSize, int maxStep)
         {
             if (opc != OpCode.CPUI_PTRADD) return false;
-            CircleRange tmpRange;
-            if (!tmpRange.pushForwardBinary(CPUI_INT_MULT, in2, in3, inSize, inSize, maxStep))
+            CircleRange tmpRange = new CircleRange();
+            if (!tmpRange.pushForwardBinary(OpCode.CPUI_INT_MULT, in2, in3, inSize, inSize, maxStep))
                 return false;
-            return pushForwardBinary(CPUI_INT_ADD, in1, tmpRange, inSize, outSize, maxStep);
+            return pushForwardBinary(OpCode.CPUI_INT_ADD, in1, tmpRange, inSize, outSize, maxStep);
         }
 
         /// Widen the unstable bound to match containing range

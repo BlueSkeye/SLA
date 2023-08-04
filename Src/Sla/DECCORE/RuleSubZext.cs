@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Buffers.Text;
 using System.Collections;
 using System.Collections.Generic;
@@ -34,7 +35,7 @@ namespace Sla.DECCORE
         ///  - `zext( sub( V, c) >> d )   =>    (V >> (c*8+d)) & mask`
         public override void getOpList(List<uint> oplist)
         {
-            oplist.Add(CPUI_INT_ZEXT);
+            oplist.Add(OpCode.CPUI_INT_ZEXT);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
