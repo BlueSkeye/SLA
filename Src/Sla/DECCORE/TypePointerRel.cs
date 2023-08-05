@@ -70,8 +70,8 @@ namespace Sla.DECCORE
             }
             ptrto = typegrp.decodeType(decoder);
             parent = typegrp.decodeType(decoder);
-            uint subId = decoder.openElement(ELEM_OFF);
-            offset = decoder.readSignedInteger(ATTRIB_CONTENT);
+            uint subId = decoder.openElement(ElementId.ELEM_OFF);
+            offset = decoder.readSignedInteger(AttributeId.ATTRIB_CONTENT);
             decoder.closeElement(subId);
             if (offset == 0)
                 throw new LowlevelError("For metatype=\"ptrstruct\", <off> tag must not be zero");
@@ -181,16 +181,16 @@ namespace Sla.DECCORE
 
         public override void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_TYPE);
+            encoder.openElement(ElementId.ELEM_TYPE);
             encodeBasic(TYPE_PTRREL, encoder);  // Override the metatype for XML
             if (wordsize != 1)
-                encoder.writeUnsignedInteger(ATTRIB_WORDSIZE, wordsize);
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_WORDSIZE, wordsize);
             ptrto.encode(encoder);
             parent.encodeRef(encoder);
-            encoder.openElement(ELEM_OFF);
-            encoder.writeSignedInteger(ATTRIB_CONTENT, offset);
-            encoder.closeElement(ELEM_OFF);
-            encoder.closeElement(ELEM_TYPE);
+            encoder.openElement(ElementId.ELEM_OFF);
+            encoder.writeSignedInteger(AttributeId.ATTRIB_CONTENT, offset);
+            encoder.closeElement(ElementId.ELEM_OFF);
+            encoder.closeElement(ElementId.ELEM_TYPE);
         }
 
         public override TypePointer downChain(ulong off, TypePointer par, ulong parOff, bool allowArrayWrap,

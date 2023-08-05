@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSlessToLess(getGroup());
         }
 
@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         ///
         /// This also works converting INT_SLESSEQUAL to INT_LESSEQUAL.
         /// We use the non-zero mask to verify the sign bit is zero.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_INT_SLESS);
             oplist.Add(CPUI_INT_SLESSEQUAL);

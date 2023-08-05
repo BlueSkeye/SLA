@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleLeftRight(getGroup());
         }
 
@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// amount must be a multiple of 8.
         ///
         /// `(V << c) s>> c  =>  sext( sub(V, #0) )`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_INT_RIGHT);
             oplist.Add(CPUI_INT_SRIGHT);

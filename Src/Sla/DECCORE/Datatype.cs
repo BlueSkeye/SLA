@@ -51,19 +51,19 @@ namespace Sla.DECCORE
         // friend class TypeFactory;
         // friend struct DatatypeCompare;
         /// A unique id for the type (or 0 if an id is not assigned)
-        private ulong id;
+        internal ulong id;
         /// Size (of variable holding a value of this type)
-        private int size;
+        protected int size;
         /// Boolean properties of the type
-        private uint flags;
+        internal Properties flags;
         /// Name of type
-        private string name;
+        internal string name;
         /// Name to display in output
-        private string displayName;
+        internal string displayName;
         /// Meta-type - type disregarding size
         private type_metatype metatype;
         /// Sub-type of of the meta-type, for comparisons
-        private sub_metatype submeta;
+        internal sub_metatype submeta;
         /// The immediate data-type being typedefed by \e this
         private Datatype typedefImm;
 
@@ -71,67 +71,57 @@ namespace Sla.DECCORE
         /// Restore the basic properties (name,size,id) of a data-type from an XML element
         /// Properties are read from the attributes of the element
         /// \param decoder is the stream decoder
-        private void decodeBasic(Decoder decoder)
+        protected void decodeBasic(Decoder decoder)
         {
             size = -1;
             metatype = type_metatype.TYPE_VOID;
             id = 0;
-            for (; ; )
-            {
+            for (; ; ) {
                 uint attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
-                if (attrib == ATTRIB_NAME)
-                {
+                if (attrib == AttributeId.ATTRIB_NAME) {
                     name = decoder.readString();
                 }
-                else if (attrib == ATTRIB_SIZE)
-                {
-                    size = decoder.readSignedInteger();
+                else if (attrib == AttributeId.ATTRIB_SIZE) {
+                    size = (int)decoder.readSignedInteger();
                 }
-                else if (attrib == ATTRIB_METATYPE)
-                {
-                    metatype = string2metatype(decoder.readString());
+                else if (attrib == AttributeId.ATTRIB_METATYPE) {
+                    metatype = Globals.string2metatype(decoder.readString());
                 }
-                else if (attrib == ATTRIB_CORE)
-                {
+                else if (attrib == AttributeId.ATTRIB_CORE) {
                     if (decoder.readBool())
-                        flags |= coretype;
+                        flags |= Properties.coretype;
                 }
-                else if (attrib == ATTRIB_ID)
-                {
+                else if (attrib == AttributeId.ATTRIB_ID) {
                     id = decoder.readUnsignedInteger();
                 }
-                else if (attrib == ATTRIB_VARLENGTH)
-                {
+                else if (attrib == AttributeId.ATTRIB_VARLENGTH) {
                     if (decoder.readBool())
-                        flags |= variable_length;
+                        flags |= Properties.variable_length;
                 }
-                else if (attrib == ATTRIB_OPAQUESTRING)
-                {
+                else if (attrib == AttributeId.ATTRIB_OPAQUESTRING) {
                     if (decoder.readBool())
-                        flags |= opaque_string;
+                        flags |= Properties.opaque_string;
                 }
-                else if (attrib == ATTRIB_FORMAT)
-                {
+                else if (attrib == AttributeId.ATTRIB_FORMAT) {
                     uint val = encodeIntegerFormat(decoder.readString());
                     setDisplayFormat(val);
                 }
-                else if (attrib == ATTRIB_LABEL)
-                {
+                else if (attrib == AttributeId.ATTRIB_LABEL) {
                     displayName = decoder.readString();
                 }
             }
             if (size < 0)
                 throw new LowlevelError("Bad size for type " + name);
             submeta = base2sub[metatype];
-            if ((id == 0) && (name.size() > 0)) // If there is a type name
+            if ((id == 0) && (name.Length > 0)) // If there is a type name
                 id = hashName(name);    // There must be some kind of id
             if (isVariableLength())
             {
                 // Id needs to be unique compared to another data-type with the same name
                 id = hashSize(id, size);
             }
-            if (displayName.empty())
+            if (0 == displayName.Length)
                 displayName = name;
         }
 
@@ -142,7 +132,7 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         private void encodeBasic(type_metatype meta, Encoder encoder)
         {
-            encoder.writeString(ATTRIB_NAME, name);
+            encoder.writeString(AttributeId.ATTRIB_NAME, name);
             ulong saveId;
             if (isVariableLength())
                 saveId = hashSize(id, size);
@@ -150,21 +140,21 @@ namespace Sla.DECCORE
                 saveId = id;
             if (saveId != 0)
             {
-                encoder.writeUnsignedInteger(ATTRIB_ID, saveId);
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_ID, saveId);
             }
-            encoder.writeSignedInteger(ATTRIB_SIZE, size);
+            encoder.writeSignedInteger(AttributeId.ATTRIB_SIZE, size);
             string metastring;
             metatype2string(meta, metastring);
-            encoder.writeString(ATTRIB_METATYPE, metastring);
-            if ((flags & coretype) != 0)
-                encoder.writeBool(ATTRIB_CORE, true);
+            encoder.writeString(AttributeId.ATTRIB_METATYPE, metastring);
+            if ((flags & Properties.coretype) != 0)
+                encoder.writeBool(AttributeId.ATTRIB_CORE, true);
             if (isVariableLength())
-                encoder.writeBool(ATTRIB_VARLENGTH, true);
-            if ((flags & opaque_string) != 0)
-                encoder.writeBool(ATTRIB_OPAQUESTRING, true);
+                encoder.writeBool(AttributeId.ATTRIB_VARLENGTH, true);
+            if ((flags & Properties.opaque_string) != 0)
+                encoder.writeBool(AttributeId.ATTRIB_OPAQUESTRING, true);
             uint format = getDisplayFormat();
             if (format != 0)
-                encoder.writeString(ATTRIB_FORMAT, decodeIntegerFormat(format));
+                encoder.writeString(AttributeId.ATTRIB_FORMAT, decodeIntegerFormat(format));
         }
 
         /// Encode \b this as a \e typedef element to a stream
@@ -174,20 +164,20 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         private void encodeTypedef(Encoder encoder)
         {
-            encoder.openElement(ELEM_DEF);
-            encoder.writeString(ATTRIB_NAME, name);
-            encoder.writeUnsignedInteger(ATTRIB_ID, id);
+            encoder.openElement(ElementId.ELEM_DEF);
+            encoder.writeString(AttributeId.ATTRIB_NAME, name);
+            encoder.writeUnsignedInteger(AttributeId.ATTRIB_ID, id);
             uint format = getDisplayFormat();
             if (format != 0)
-                encoder.writeString(ATTRIB_FORMAT, Datatype::decodeIntegerFormat(format));
+                encoder.writeString(AttributeId.ATTRIB_FORMAT, Datatype.decodeIntegerFormat(format));
             typedefImm.encodeRef(encoder);
-            encoder.closeElement(ELEM_DEF);
+            encoder.closeElement(ElementId.ELEM_DEF);
         }
 
         /// Mark \b this data-type as completely defined
-        private void markComplete()
+        internal void markComplete()
         {
-            flags &= ~(uint)type_incomplete;
+            flags &= ~Properties.type_incomplete;
         }
 
         /// Set a specific display format
@@ -197,8 +187,8 @@ namespace Sla.DECCORE
         /// \param format is the given format
         internal void setDisplayFormat(uint format)
         {
-            flags &= ~(uint)force_format;  // Clear preexisting
-            flags |= (format << 12);
+            flags &= ~Properties.force_format;  // Clear preexisting
+            flags |= (Properties)(format << 12);
         }
 
         /// Clone the data-type
@@ -209,11 +199,10 @@ namespace Sla.DECCORE
         /// to produce an id based on a hash of the name.  IDs produced this way will
         /// have their sign-bit set to distinguish it from other IDs.
         /// \param nm is the type name to be hashed
-        private static ulong hashName(string nm)
+        internal static ulong hashName(string nm)
         {
             ulong res = 123;
-            for (uint i = 0; i < nm.size(); ++i)
-            {
+            for (int i = 0; i < nm.Length; ++i) {
                 res = (res << 8) | (res >> 56);
                 res += (ulong)nm[i];
                 if ((res & 1) == 0)
@@ -234,7 +223,7 @@ namespace Sla.DECCORE
         /// \return the (de)uniquified id
         private static ulong hashSize(ulong id, int size)
         {
-            ulong sizeHash = size;
+            ulong sizeHash = (uint)size;
             sizeHash *= 0x98251033aecbabaf; // Hash the size
             id ^= sizeHash;
             return id;
@@ -269,28 +258,29 @@ namespace Sla.DECCORE
         }
 
         /// Is this a core data-type
-        public bool isCoreType() => ((flags&coretype)!= 0);
+        public bool isCoreType() => ((flags & Properties.coretype)!= 0);
 
         /// Does this print as a 'char'
-        public bool isCharPrint() => ((flags&(chartype|utf16|utf32|opaque_string))!= 0);
+        public bool isCharPrint()
+            => ((flags&(Properties.chartype | Properties.utf16 | Properties.utf32 | Properties.opaque_string))!= 0);
 
         /// Is this an enumerated type
-        public bool isEnumType() => ((flags&enumtype)!= 0);
+        public bool isEnumType() => ((flags& Properties.enumtype)!= 0);
 
         /// Is this a flag-based enumeration
-        public bool isPowerOfTwo() => ((flags&poweroftwo)!= 0);
+        public bool isPowerOfTwo() => ((flags& Properties.poweroftwo)!= 0);
 
         /// Does this print as an ASCII 'char'
-        public bool isASCII() => ((flags&chartype)!= 0);
+        public bool isASCII() => ((flags& Properties.chartype)!= 0);
 
         /// Does this print as UTF16 'wchar'
-        public bool isUTF16() => ((flags&utf16)!= 0);
+        public bool isUTF16() => ((flags& Properties.utf16)!= 0);
 
         /// Does this print as UTF32 'wchar'
-        public bool isUTF32() => ((flags&utf32)!= 0);
+        public bool isUTF32() => ((flags& Properties.utf32)!= 0);
 
         ///< Is \b this a variable length structure
-        public bool isVariableLength() => ((flags&variable_length)!= 0);
+        public bool isVariableLength() => ((flags& Properties.variable_length)!= 0);
 
         /// Are these the same variable length data-type
         /// If \b this and the other given data-type are both variable length and come from the
@@ -307,25 +297,25 @@ namespace Sla.DECCORE
         }
 
         /// Is \b this an opaquely encoded string
-        public bool isOpaqueString() => ((flags&opaque_string)!= 0);
+        public bool isOpaqueString() => ((flags& Properties.opaque_string)!= 0);
 
         /// Is \b this a TypePointerRel
-        public bool isPointerRel() => ((flags & is_ptrrel)!= 0);
+        public bool isPointerRel() => ((flags & Properties.is_ptrrel)!= 0);
 
         /// Is \b this a non-ephemeral TypePointerRel
-        public bool isFormalPointerRel() => (flags & (is_ptrrel | has_stripped))== is_ptrrel;
+        public bool isFormalPointerRel() => (flags & (Properties.is_ptrrel | Properties.has_stripped))== Properties.is_ptrrel;
 
         /// Return \b true if \b this has a stripped form
-        public bool hasStripped() => (flags & has_stripped)!= 0;
+        public bool hasStripped() => (flags & Properties.has_stripped)!= 0;
 
         /// Is \b this an incompletely defined data-type
-        public bool isIncomplete() => (flags & type_incomplete)!= 0;
+        public bool isIncomplete() => (flags & Properties.type_incomplete)!= 0;
 
         /// Is \b this a union or a pointer to union
-        public bool needsResolution() => (flags & needs_resolution)!= 0;
+        public bool needsResolution() => (flags & Properties.needs_resolution)!= 0;
 
         /// Get properties pointers inherit
-        public uint getInheritable() => (flags & coretype);
+        public uint getInheritable() => (flags & Properties.coretype);
 
         /// Get the display format for constants with \b this data-type
         /// A non-zero result indicates the type of formatting that is forced on the constant.
@@ -336,7 +326,7 @@ namespace Sla.DECCORE
         ///   - 4 for binary
         ///   - 5 for char
         ///
-        public uint getDisplayFormat() => (flags & force_format) >> 12;
+        public Symbol.DisplayFlags getDisplayFormat() => (flags & Properties.force_format) >> 12;
 
         /// Get the type \b meta-type
         public type_metatype getMetatype() => metatype;
@@ -365,10 +355,7 @@ namespace Sla.DECCORE
         /// \param s is the output stream
         public virtual void printRaw(TextWriter s)
         {
-            if (name.size() > 0)
-                s << name;
-            else
-                s << "unkbyte" << dec << size;
+            s.Write((name.Length > 0) ? name : $"unkbyte{size}");
         }
 
         /// \brief Find an immediate subfield of \b this data-type
@@ -385,7 +372,7 @@ namespace Sla.DECCORE
         /// \return the containing field or NULL if the range is not contained
         public virtual TypeField findTruncation(int off, int sz, PcodeOp op, int slot, int newoff)
         {
-            return (TypeField*)0;
+            return (TypeField)null;
         }
 
         /// Recover component data-type one-level down
@@ -397,9 +384,10 @@ namespace Sla.DECCORE
         /// \param off is the offset into \b this data-type
         /// \param newoff is a pointer to the passed-back offset
         /// \return a pointer to the component data-type or NULL
-        public virtual Datatype getSubType(ulong off, ulong newoff)
-        {               // There is no subtype
-            *newoff = off;
+        public virtual Datatype? getSubType(ulong off, out ulong newoff)
+        {
+            // There is no subtype
+            newoff = off;
             return (Datatype)null;
         }
 
@@ -412,7 +400,7 @@ namespace Sla.DECCORE
         /// \return the component data-type or null
         public virtual Datatype nearestArrayedComponentForward(ulong off, ulong newoff, int elSize)
         {
-            return (TypeArray*)0;
+            return (TypeArray)null;
         }
 
         /// Find the first component data-type before the given offset that is (or contains)
@@ -424,7 +412,7 @@ namespace Sla.DECCORE
         /// \return the component data-type or null
         public virtual Datatype nearestArrayedComponentBackward(ulong off, ulong newoff, int elSize)
         {
-            return (TypeArray*)0;
+            return (TypeArray)null;
         }
 
         /// Get number of bytes at the given offset that are padding
@@ -434,12 +422,12 @@ namespace Sla.DECCORE
         public virtual int numDepend() => 0;
 
         /// Return the i-th component sub-type
-        public virtual Datatype getDepend(int index) => (Datatype *)0;
+        public virtual Datatype getDepend(int index) => (Datatype)null;
 
         /// Print name as short prefix
         public virtual void printNameBase(TextWriter s) 
         {
-            if (!name.empty()) s << name[0];
+            if (!name.empty()) s.Write(name[0]);
         }
 
         /// Order types for propagation
@@ -545,7 +533,7 @@ namespace Sla.DECCORE
         /// \return the field of the union best associated with the truncation or null
         public virtual TypeField? resolveTruncation(int offset, PcodeOp op, int slot, int newoff)
         {
-            return (TypeField*)0;
+            return (TypeField)null;
         }
 
         /// Order this with -op- datatype
@@ -576,20 +564,18 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         public void encodeRef(Encoder encoder)
         {               // Save just a name reference if possible
-            if ((id != 0) && (metatype != type_metatype.TYPE_VOID))
-            {
-                encoder.openElement(ELEM_TYPEREF);
-                encoder.writeString(ATTRIB_NAME, name);
-                if (isVariableLength())
-                {           // For a type with a "variable length" base
-                    encoder.writeUnsignedInteger(ATTRIB_ID, hashSize(id, size));    // Emit the size independent version of the id
-                    encoder.writeSignedInteger(ATTRIB_SIZE, size);          // but also emit size of this instance
+            if ((id != 0) && (metatype != type_metatype.TYPE_VOID)) {
+                encoder.openElement(ElementId.ELEM_TYPEREF);
+                encoder.writeString(AttributeId.ATTRIB_NAME, name);
+                if (isVariableLength()) {
+                    // For a type with a "variable length" base
+                    encoder.writeUnsignedInteger(AttributeId.ATTRIB_ID, hashSize(id, size));    // Emit the size independent version of the id
+                    encoder.writeSignedInteger(AttributeId.ATTRIB_SIZE, size);          // but also emit size of this instance
                 }
-                else
-                {
-                    encoder.writeUnsignedInteger(ATTRIB_ID, id);
+                else {
+                    encoder.writeUnsignedInteger(AttributeId.ATTRIB_ID, id);
                 }
-                encoder.closeElement(ELEM_TYPEREF);
+                encoder.closeElement(ElementId.ELEM_TYPEREF);
             }
             else
                 encode(encoder);

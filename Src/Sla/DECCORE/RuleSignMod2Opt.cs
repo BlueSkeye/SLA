@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSignMod2Opt(getGroup());
         }
 
@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         ///
         /// Note: `sign = V s>> 63`  The INT_AND may be performed on a truncated result and then reextended.
         /// This is a specialized form of RuleSignMod2nOpt.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_INT_AND);
         }

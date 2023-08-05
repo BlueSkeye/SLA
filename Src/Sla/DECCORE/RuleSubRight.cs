@@ -19,7 +19,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSubRight(getGroup());
         }
 
@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         /// from a structure. If so, mark the op as requiring special printing and return.
         /// If the lone descendant of the SUBPIECE is a INT_RIGHT or INT_SRIGHT,
         /// we lump that into the shift as well.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_SUBPIECE);
         }

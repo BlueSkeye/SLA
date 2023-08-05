@@ -87,7 +87,7 @@ namespace Sla.CORE {
         /// Parse a \<truncate_space> element to configure \b this object
         /// \param decoder is the stream decoder
         ///< Restore \b this from a stream
-        public void decode(ref Decoder decoder)
+        public void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_TRUNCATE_SPACE);
             spaceName = decoder.readString(AttributeId.ATTRIB_SPACE);
@@ -1462,7 +1462,7 @@ namespace Sla.CORE {
         /// by ':' to separate it from the offset.  If the name is not present, the default data space is assumed.
         /// \param val is the string to parse
         /// \return the parsed address
-        public Address parseAddressSimple(ref string val)
+        public Address parseAddressSimple(string val)
         {
             int col = val.IndexOf(':');
             AddrSpace spc;
@@ -1733,6 +1733,6 @@ namespace Sla.CORE {
         /// method in the \e emit object.
         /// \param emit is the disassembly emitting object
         /// \param baseaddr is the address of the machine instruction to disassemble
-        public abstract int printAssembly(ref AssemblyEmit emit, ref Address baseaddr);
+        public abstract int printAssembly(AssemblyEmit emit, ref Address baseaddr);
     }
 }

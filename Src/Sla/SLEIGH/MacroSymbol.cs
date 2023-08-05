@@ -48,6 +48,6 @@ namespace Sla.SLEIGH
             if (construct != (ConstructTpl)null) delete construct;
         }
 
-        public override symbol_type getType() => macro_symbol;
+        public override symbol_type getType() => SleighSymbol.symbol_type.macro_symbol;
     }
 }

@@ -22,7 +22,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSubZext(getGroup());
         }
 
@@ -33,7 +33,7 @@ namespace Sla.DECCORE
         ///  - `zext( sub( V, 0) )        =>    V & mask`
         ///  - `zext( sub( V, c)          =>    (V >> c*8) & mask`
         ///  - `zext( sub( V, c) >> d )   =>    (V >> (c*8+d)) & mask`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(OpCode.CPUI_INT_ZEXT);
         }

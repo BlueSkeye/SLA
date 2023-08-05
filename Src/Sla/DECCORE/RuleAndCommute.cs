@@ -19,7 +19,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleAndCommute(getGroup());
         }
 
@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// This makes sense to do if W is constant and there is no other use of (V << W)
         /// If W is \b not constant, it only makes sense if the INT_AND is likely to cancel
         /// with a specific INT_OR or PIECE
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(OpCode.CPUI_INT_AND);
         }

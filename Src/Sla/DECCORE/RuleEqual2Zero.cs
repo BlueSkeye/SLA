@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleEqual2Zero(getGroup());
         }
 
@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Simplify INT_EQUAL applied to 0: `0 == V + W * -1  =>  V == W  or  0 == V + c  =>  V == -c`
         ///
         /// The Rule also applies to INT_NOTEQUAL comparisons.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             uint list[] = { OpCode.CPUI_INT_EQUAL, OpCode.CPUI_INT_NOTEQUAL };
             oplist.insert(oplist.end(), list, list + 2);

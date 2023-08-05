@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleFloatRange(getGroup());
         }
 
@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Merge range conditions of the form: `V f< c, c f< V, V f== c` etc.
         ///
         /// Convert `(V f< W)||(V f== W)   =>   V f<= W` (and similar variants)
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_BOOL_OR);
             oplist.Add(CPUI_BOOL_AND);

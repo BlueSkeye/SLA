@@ -39,14 +39,14 @@ namespace Sla.DECCORE
 
         public override void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_LABELSYM);
+            encoder.openElement(ElementId.ELEM_LABELSYM);
             encodeHeader(encoder);      // We never set category
-            encoder.closeElement(ELEM_LABELSYM);
+            encoder.closeElement(ElementId.ELEM_LABELSYM);
         }
 
         public override void decode(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_LABELSYM);
+            uint elemId = decoder.openElement(ElementId.ELEM_LABELSYM);
             decodeHeader(decoder);
             decoder.closeElement(elemId);
         }

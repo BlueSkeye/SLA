@@ -123,7 +123,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleLoadVarnode(getGroup());
         }
 
@@ -133,7 +133,7 @@ namespace Sla.DECCORE
         /// The pointer can either be a constant offset into the LOAD's specified address space,
         /// or it can be a \e spacebase register plus an offset, in which case it points into
         /// the \e spacebase register's address space.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_LOAD);
         }

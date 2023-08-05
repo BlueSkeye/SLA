@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleCarryElim(getGroup());
         }
 
@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         ///
         /// There is a special case when the constant is zero:
         ///   - `carry(V,0)  => false`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_INT_CARRY);
         }

@@ -211,15 +211,15 @@ namespace Sla.DECCORE
         private void encode(Encoder encoder, ElementId tag, bool moredetail)
         {
             encoder.openElement(tag);
-            encoder.openElement(ELEM_ADDR);
+            encoder.openElement(ElementId.ELEM_ADDR);
             vndata.space.encodeAttributes(encoder, vndata.offset, vndata.size);
-            encoder.closeElement(ELEM_ADDR);
+            encoder.closeElement(ElementId.ELEM_ADDR);
             vntype.encode(encoder);
             if (moredetail)
             {
-                encoder.openElement(ELEM_RANK);
-                encoder.writeSignedInteger(ATTRIB_VAL, rank);
-                encoder.closeElement(ELEM_RANK);
+                encoder.openElement(ElementId.ELEM_RANK);
+                encoder.writeSignedInteger(AttributeId.ATTRIB_VAL, rank);
+                encoder.closeElement(ElementId.ELEM_RANK);
             }
             encoder.closeElement(tag);
         }

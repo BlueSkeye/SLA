@@ -85,7 +85,7 @@ namespace Sla.SLEIGH
             s << varnode_table[ind].getName();
         }
 
-        public override symbol_type getType() => varnodelist_symbol;
+        public override symbol_type getType() => SleighSymbol.symbol_type.varnodelist_symbol;
 
         public override void saveXml(TextWriter s)
         {

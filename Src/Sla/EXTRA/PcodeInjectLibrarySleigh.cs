@@ -49,9 +49,9 @@ namespace Sla.EXTRA
                 if (slgh == (SleighBase*)0)
                     throw new LowlevelError("Registering pcode snippet before language is instantiated");
             }
-            if (contextCache.pos == (ParserContext*)0)
+            if (contextCache.pos == (ParserContext)null)
             {   // Make sure we have a context
-                contextCache.pos = new ParserContext((ContextCache*)0, (Translate*)0);
+                contextCache.pos = new ParserContext((ContextCache)null, (Translate*)0);
                 contextCache.pos.initialize(8, 8, slgh.getConstantSpace());
             }
             PcodeSnippet compiler(slgh);
@@ -66,7 +66,7 @@ namespace Sla.EXTRA
                 InjectParameter & param(payload.getOutput(i));
                 compiler.addOperand(param.getName(), param.getIndex());
             }
-            if (payload.getType() == InjectPayload::EXECUTABLEPCODE_TYPE)
+            if (payload.getType() == InjectPayload.InjectionType.EXECUTABLEPCODE_TYPE)
             {
                 compiler.setUniqueBase(0x2000); // Don't need to deconflict with anything other injects
                 ExecutablePcodeSleigh* sleighpayload = (ExecutablePcodeSleigh*)payload;
@@ -92,11 +92,11 @@ namespace Sla.EXTRA
         protected override int allocateInject(string sourceName, string name,int type)
         {
             int injectid = injection.size();
-            if (type == InjectPayload::CALLFIXUP_TYPE)
+            if (type == InjectPayload.InjectionType.CALLFIXUP_TYPE)
                 injection.Add(new InjectPayloadCallfixup(sourceName));
-            else if (type == InjectPayload::CALLOTHERFIXUP_TYPE)
+            else if (type == InjectPayload.InjectionType.CALLOTHERFIXUP_TYPE)
                 injection.Add(new InjectPayloadCallother(sourceName));
-            else if (type == InjectPayload::EXECUTABLEPCODE_TYPE)
+            else if (type == InjectPayload.InjectionType.EXECUTABLEPCODE_TYPE)
                 injection.Add(new ExecutablePcodeSleigh(glb, sourceName, name));
             else
                 injection.Add(new InjectPayloadSleigh(sourceName, name, type));
@@ -115,19 +115,19 @@ namespace Sla.EXTRA
             }
             switch (payload.getType())
             {
-                case InjectPayload::CALLFIXUP_TYPE:
+                case InjectPayload.InjectionType.CALLFIXUP_TYPE:
                     registerCallFixup(payload.getName(), injectid);
                     parseInject(payload);
                     break;
-                case InjectPayload::CALLOTHERFIXUP_TYPE:
+                case InjectPayload.InjectionType.CALLOTHERFIXUP_TYPE:
                     registerCallOtherFixup(payload.getName(), injectid);
                     parseInject(payload);
                     break;
-                case InjectPayload::CALLMECHANISM_TYPE:
+                case InjectPayload.InjectionType.CALLMECHANISM_TYPE:
                     registerCallMechanism(payload.getName(), injectid);
                     parseInject(payload);
                     break;
-                case InjectPayload::EXECUTABLEPCODE_TYPE:
+                case InjectPayload.InjectionType.EXECUTABLEPCODE_TYPE:
                     registerExeScript(payload.getName(), injectid);
                     parseInject(payload);
                     break;
@@ -145,13 +145,13 @@ namespace Sla.EXTRA
 
         public override void decodeDebug(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_INJECTDEBUG);
+            uint elemId = decoder.openElement(ElementId.ELEM_INJECTDEBUG);
             for (; ; )
             {
                 uint subId = decoder.openElement();
                 if (subId != ELEM_INJECT) break;
-                string name = decoder.readString(ATTRIB_NAME);
-                int type = decoder.readSignedInteger(ATTRIB_TYPE);
+                string name = decoder.readString(AttributeId.ATTRIB_NAME);
+                int type = decoder.readSignedInteger(AttributeId.ATTRIB_TYPE);
                 int id = getPayloadId(type, name);
                 InjectPayloadDynamic* payload = dynamic_cast<InjectPayloadDynamic*>(getPayload(id));
                 if (payload == (InjectPayloadDynamic*)0)
@@ -167,7 +167,7 @@ namespace Sla.EXTRA
         protected override int manualCallFixup(string name, string snippetstring)
         {
             string sourceName = "(manual callfixup name=\"" + name + "\")";
-            int injectid = allocateInject(sourceName, name, InjectPayload::CALLFIXUP_TYPE);
+            int injectid = allocateInject(sourceName, name, InjectPayload.InjectionType.CALLFIXUP_TYPE);
             InjectPayloadSleigh* payload = (InjectPayloadSleigh*)getPayload(injectid);
             payload.parsestring = snippetstring;
             registerInject(injectid);
@@ -178,7 +178,7 @@ namespace Sla.EXTRA
             string snippet)
         {
             string sourceName = "<manual callotherfixup name=\"" + name + "\")";
-            int injectid = allocateInject(sourceName, name, InjectPayload::CALLOTHERFIXUP_TYPE);
+            int injectid = allocateInject(sourceName, name, InjectPayload.InjectionType.CALLOTHERFIXUP_TYPE);
             InjectPayloadSleigh* payload = (InjectPayloadSleigh*)getPayload(injectid);
             for (int i = 0; i < inname.size(); ++i)
                 payload.inputlist.Add(InjectParameter(inname[i], 0));

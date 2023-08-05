@@ -18,13 +18,13 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleZextSless(getGroup());
         }
 
         /// \class RuleZextSless
         /// \brief Transform INT_ZEXT and INT_SLESS:  `zext(V) s< c  =>  V < c`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_INT_SLESS);
             oplist.Add(CPUI_INT_SLESSEQUAL);

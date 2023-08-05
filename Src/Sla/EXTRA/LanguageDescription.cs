@@ -40,47 +40,45 @@ namespace Sla.EXTRA
         /// Parse \b this description from a stream
         /// Parse an ldefs \<language> element
         /// \param decoder is the stream decoder
-        public void decode(Decoder decoder)
+        public void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_LANGUAGE);
-            processor = decoder.readString(ATTRIB_PROCESSOR);
-            isbigendian = (decoder.readString(ATTRIB_ENDIAN) == "big");
-            size = decoder.readSignedInteger(ATTRIB_SIZE);
-            variant = decoder.readString(ATTRIB_VARIANT);
-            version = decoder.readString(ATTRIB_VERSION);
-            slafile = decoder.readString(ATTRIB_SLAFILE);
-            processorspec = decoder.readString(ATTRIB_PROCESSORSPEC);
-            id = decoder.readString(ATTRIB_ID);
+            uint elemId = decoder.openElement(ElementId.ELEM_LANGUAGE);
+            processor = decoder.readString(AttributeId.ATTRIB_PROCESSOR);
+            isbigendian = (decoder.readString(AttributeId.ATTRIB_ENDIAN) == "big");
+            size = (int)decoder.readSignedInteger(AttributeId.ATTRIB_SIZE);
+            variant = decoder.readString(AttributeId.ATTRIB_VARIANT);
+            version = decoder.readString(AttributeId.ATTRIB_VERSION);
+            slafile = decoder.readString(AttributeId.ATTRIB_SLAFILE);
+            processorspec = decoder.readString(AttributeId.ATTRIB_PROCESSORSPEC);
+            id = decoder.readString(AttributeId.ATTRIB_ID);
             deprecated = false;
             for (; ; )
             {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
-                if (attribId == ATTRIB_DEPRECATED)
+                if (attribId == AttributeId.ATTRIB_DEPRECATED)
                     deprecated = decoder.readBool();
             }
-            for (; ; )
-            {
+            while(true) {
                 uint subId = decoder.peekElement();
                 if (subId == 0) break;
-                if (subId == ELEM_DESCRIPTION)
-                {
+                if (subId == ElementId.ELEM_DESCRIPTION) {
                     decoder.openElement();
-                    description = decoder.readString(ATTRIB_CONTENT);
+                    description = decoder.readString(AttributeId.ATTRIB_CONTENT);
                     decoder.closeElement(subId);
                 }
-                else if (subId == ELEM_COMPILER)
-                {
-                    compilers.emplace_back();
-                    compilers.GetLastItem().decode(decoder);
+                else if (subId == ElementId.ELEM_COMPILER) {
+                    CompilerTag newTag = new CompilerTag();
+                    newTag.decode(decoder);
+                    compilers.Add(newTag);
                 }
-                else if (subId == ELEM_TRUNCATE_SPACE)
-                {
-                    truncations.emplace_back();
-                    truncations.GetLastItem().decode(decoder);
+                else if (subId == ElementId.ELEM_TRUNCATE_SPACE) {
+                    TruncationTag newTag = new TruncationTag();
+                    newTag.decode(decoder);
+                    truncations.Add(newTag);
                 }
-                else
-                {   // Ignore other child elements
+                else {
+                    // Ignore other child elements
                     decoder.openElement();
                     decoder.closeElementSkipping(subId);
                 }
@@ -125,8 +123,7 @@ namespace Sla.EXTRA
         public CompilerTag getCompiler(string nm)
         {
             int defaultind = -1;
-            for (int i = 0; i < compilers.size(); ++i)
-            {
+            for (int i = 0; i < compilers.Count; ++i) {
                 if (compilers[i].getId() == nm)
                     return compilers[i];
                 if (compilers[i].getId() == "default")
@@ -138,13 +135,13 @@ namespace Sla.EXTRA
         }
 
         /// Get the number of compiler records
-        public int numCompilers() => compilers.size();
+        public int numCompilers() => compilers.Count;
 
         /// Get the i-th compiler record
         public CompilerTag getCompiler(int i) => compilers[i] ;
 
         /// Get the number of truncation records
-        public int numTruncations() => truncations.size();
+        public int numTruncations() => truncations.Count;
 
         /// Get the i-th truncation record
         public TruncationTag getTruncation(int i) => truncations[i] ;

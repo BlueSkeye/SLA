@@ -19,7 +19,7 @@ namespace Sla.DECCORE
         /// Name of the parameter (for use in parsing p-code \e source)
         private string name;
         /// Unique index assigned (for cross referencing associated Varnode in the InjectContext)
-        private int index;
+        internal int index;
         /// Size of the parameter Varnode in bytes
         private uint size;
         

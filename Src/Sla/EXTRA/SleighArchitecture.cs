@@ -37,31 +37,31 @@ namespace Sla.EXTRA
         /// \param errs is an output stream for printing error messages
         private static void loadLanguageDescription(string specfile, TextWriter errs)
         {
-            ifstream s = new ifstream(specfile.c_str());
-            if (!s) return;
-
-            XmlDecode decoder = new XmlDecode((AddrSpaceManager*)0);
-            try
-            {
+            StreamReader s;
+            
+            try { s = new StreamReader(File.OpenRead(specfile)); }
+            catch {
+                return;
+            }
+            XmlDecode decoder = new XmlDecode((AddrSpaceManager)null);
+            try {
                 decoder.ingestStream(s);
             }
-            catch (DecoderError err) {
-                errs << "WARNING: Unable to parse sleigh specfile: " << specfile;
+            catch (DecoderError) {
+                errs.Write($"WARNING: Unable to parse sleigh specfile: {specfile}");
                 return;
             }
 
-            uint elemId = decoder.openElement(ELEM_LANGUAGE_DEFINITIONS);
-            for (; ; )
-            {
+            uint elemId = decoder.openElement(ElementId.ELEM_LANGUAGE_DEFINITIONS);
+            while (true) {
                 uint subId = decoder.peekElement();
                 if (subId == 0) break;
-                if (subId == ELEM_LANGUAGE)
-                {
-                    description.emplace_back();
-                    description.GetLastItem().decode(decoder);
+                if (subId == ElementId.ELEM_LANGUAGE) {
+                    LanguageDescription newDescription = new LanguageDescription();
+                    newDescription.decode(decoder);
+                    description.Add(newDescription);
                 }
-                else
-                {
+                else {
                     decoder.openElement();
                     decoder.closeElementSkipping(subId);
                 }
@@ -74,7 +74,7 @@ namespace Sla.EXTRA
         /// try to reuse the previous Sleigh object, so we don't reload
         /// the .sla file.
         /// \return \b true if it can be reused
-        private bool isTranslateReused() => (translators.find(languageindex) != translators.end());
+        private bool isTranslateReused() => translators.ContainsKey(languageindex);
 
         /// Error stream associated with \b this SleighArchitecture
         protected TextWriter errorstream;
@@ -89,21 +89,17 @@ namespace Sla.EXTRA
         {
             if (!description.empty()) return; // Have we already collected before
 
-            List<string> testspecs;
-            List<string>::iterator iter;
+            List<string> testspecs = new List<string>();
             specpaths.matchList(testspecs, ".ldefs", true);
-            for (iter = testspecs.begin(); iter != testspecs.end(); ++iter)
-                loadLanguageDescription(*iter, errs);
+            foreach (string candidate in testspecs)
+                loadLanguageDescription(candidate, errs);
         }
 
         protected override Translate buildTranslator(DocumentStorage store)
-        {               // Build a sleigh translator
-            Dictionary<int, Sleigh*>::const_iterator iter;
-            Sleigh* sleigh;
-            iter = translators.find(languageindex);
-            if (iter != translators.end())
-            {
-                sleigh = (*iter).second;
+        {
+            // Build a sleigh translator
+            Sleigh? sleigh;
+            if (translators.TryGetValue(languageindex, out sleigh)) {
                 sleigh.reset(loader, context);
                 return sleigh;
             }
@@ -113,23 +109,20 @@ namespace Sla.EXTRA
         }
 
         protected override PcodeInjectLibrary buildPcodeInjectLibrary()
-        { // Build the pcode injector based on sleigh
-            PcodeInjectLibrary* res;
-
-            res = new PcodeInjectLibrarySleigh(this);
-            return res;
+        {
+            // Build the pcode injector based on sleigh
+            return new PcodeInjectLibrarySleigh(this);
         }
 
         protected override void buildTypegrp(DocumentStorage store)
         {
-            Element* el = store.getTag("coretypes");
+            Element? el = store.getTag("coretypes");
             types = new TypeFactory(this); // Initialize the object
             if (el != (Element)null) {
                 XmlDecode decoder = new XmlDecode(this, el);
                 types.decodeCoreTypes(decoder);
             }
-            else
-            {
+            else {
                 // Put in the core types
                 types.setCoreType("void", 1, type_metatype.TYPE_VOID, false);
                 types.setCoreType("bool", 1, type_metatype.TYPE_BOOL, false);
@@ -179,51 +172,51 @@ namespace Sla.EXTRA
 
         protected override void buildSymbols(DocumentStorage store)
         {
-            Element* symtag = store.getTag(ELEM_DEFAULT_SYMBOLS.getName());
+            Element? symtag = store.getTag(ElementId.ELEM_DEFAULT_SYMBOLS.getName());
             if (symtag == (Element)null) return;
             XmlDecode decoder = new XmlDecode(this, symtag);
-            uint el = decoder.openElement(ELEM_DEFAULT_SYMBOLS);
+            uint el = decoder.openElement(ElementId.ELEM_DEFAULT_SYMBOLS);
             while (decoder.peekElement() != 0)
             {
-                uint subel = decoder.openElement(ELEM_SYMBOL);
-                Address addr;
-                string name;
+                uint subel = decoder.openElement(ElementId.ELEM_SYMBOL);
+                Address? addr = null;
+                string? name = null;
                 int size = 0;
                 int volatileState = -1;
-                for (; ; )
-                {
+                while (true) {
                     uint attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;
-                    if (attribId == ATTRIB_NAME)
+                    if (attribId == AttributeId.ATTRIB_NAME)
                         name = decoder.readString();
-                    else if (attribId == ATTRIB_ADDRESS)
-                    {
+                    else if (attribId == AttributeId.ATTRIB_ADDRESS) {
                         addr = parseAddressSimple(decoder.readString());
                     }
-                    else if (attribId == ATTRIB_VOLATILE)
-                    {
+                    else if (attribId == AttributeId.ATTRIB_VOLATILE) {
                         volatileState = decoder.readBool() ? 1 : 0;
                     }
-                    else if (attribId == ATTRIB_SIZE)
-                        size = decoder.readSignedInteger();
+                    else if (attribId == AttributeId.ATTRIB_SIZE)
+                        size = (int)decoder.readSignedInteger();
                 }
                 decoder.closeElement(subel);
+                if (null == name) throw new BugException();
+                if (null == addr) throw new BugException();
                 if (name.Length == 0)
                     throw new LowlevelError("Missing name attribute in <symbol> element");
                 if (addr.isInvalid())
                     throw new LowlevelError("Missing address attribute in <symbol> element");
                 if (size == 0)
-                    size = addr.getSpace().getWordSize();
+                    size = (int)addr.getSpace().getWordSize();
                 if (volatileState >= 0)
                 {
-                    CORE.Range range = new CORE.Range(addr.getSpace(), addr.getOffset(), addr.getOffset() +(size - 1));
+                    CORE.Range range = new CORE.Range(addr.getSpace(), addr.getOffset(),
+                        (ulong)((int)addr.getOffset() + (size - 1)));
                     if (volatileState == 0)
-                        symboltab.clearPropertyRange(Varnode::volatil, range);
+                        symboltab.clearPropertyRange(Varnode.varnode_flags.volatil, range);
                     else
-                        symboltab.setPropertyRange(Varnode::volatil, range);
+                        symboltab.setPropertyRange(Varnode.varnode_flags.volatil, range);
                 }
                 Datatype ct = types.getBase(size, type_metatype.TYPE_UNKNOWN);
-                Address usepoint;
+                Address usepoint = new Address();
                 symboltab.getGlobalScope().addSymbol(name, ct, addr, usepoint);
             }
             decoder.closeElement(el);
@@ -370,8 +363,8 @@ namespace Sla.EXTRA
         /// \param encoder is the stream encoder
         public void encodeHeader(Encoder encoder)
         {
-            encoder.writeString(ATTRIB_NAME, filename);
-            encoder.writeString(ATTRIB_TARGET, target);
+            encoder.writeString(AttributeId.ATTRIB_NAME, filename);
+            encoder.writeString(AttributeId.ATTRIB_TARGET, target);
         }
 
         /// Restore from basic attributes of an executable

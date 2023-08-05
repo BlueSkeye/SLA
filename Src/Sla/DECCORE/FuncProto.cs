@@ -118,26 +118,26 @@ namespace Sla.DECCORE
             }
             if (!unaffectedList.empty())
             {
-                encoder.openElement(ELEM_UNAFFECTED);
+                encoder.openElement(ElementId.ELEM_UNAFFECTED);
                 for (int i = 0; i < unaffectedList.size(); ++i)
                 {
                     unaffectedList[i].encode(encoder);
                 }
-                encoder.closeElement(ELEM_UNAFFECTED);
+                encoder.closeElement(ElementId.ELEM_UNAFFECTED);
             }
             if (!killedByCallList.empty())
             {
-                encoder.openElement(ELEM_KILLEDBYCALL);
+                encoder.openElement(ElementId.ELEM_KILLEDBYCALL);
                 for (int i = 0; i < killedByCallList.size(); ++i)
                 {
                     killedByCallList[i].encode(encoder);
                 }
-                encoder.closeElement(ELEM_KILLEDBYCALL);
+                encoder.closeElement(ElementId.ELEM_KILLEDBYCALL);
             }
             if (retAddr != (EffectRecord*)0) {
-                encoder.openElement(ELEM_RETURNADDRESS);
+                encoder.openElement(ElementId.ELEM_RETURNADDRESS);
                 retAddr.encode(encoder);
-                encoder.closeElement(ELEM_RETURNADDRESS);
+                encoder.closeElement(ElementId.ELEM_RETURNADDRESS);
             }
         }
 
@@ -151,16 +151,16 @@ namespace Sla.DECCORE
             List<VarnodeData>::const_iterator iter1, iter2;
             iter1 = model.trashBegin();
             iter2 = model.trashEnd();
-            encoder.openElement(ELEM_LIKELYTRASH);
+            encoder.openElement(ElementId.ELEM_LIKELYTRASH);
             for (List<VarnodeData>::const_iterator iter = likelytrash.begin(); iter != likelytrash.end(); ++iter)
             {
                 VarnodeData cur = *iter;
                 if (binary_search(iter1, iter2, cur)) continue; // Already exists in ProtoModel
-                encoder.openElement(ELEM_ADDR);
+                encoder.openElement(ElementId.ELEM_ADDR);
                 cur.space.encodeAttributes(encoder, cur.offset, cur.size);
-                encoder.closeElement(ELEM_ADDR);
+                encoder.closeElement(ElementId.ELEM_ADDR);
             }
-            encoder.closeElement(ELEM_LIKELYTRASH);
+            encoder.closeElement(ElementId.ELEM_LIKELYTRASH);
         }
 
         /// Merge in any EffectRecord overrides
@@ -1457,46 +1457,46 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         public void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_PROTOTYPE);
-            encoder.writeString(ATTRIB_MODEL, model.getName());
+            encoder.openElement(ElementId.ELEM_PROTOTYPE);
+            encoder.writeString(AttributeId.ATTRIB_MODEL, model.getName());
             if (extrapop == ProtoModel.extrapop_unknown)
-                encoder.writeString(ATTRIB_EXTRAPOP, "unknown");
+                encoder.writeString(AttributeId.ATTRIB_EXTRAPOP, "unknown");
             else
-                encoder.writeSignedInteger(ATTRIB_EXTRAPOP, extrapop);
+                encoder.writeSignedInteger(AttributeId.ATTRIB_EXTRAPOP, extrapop);
             if (isDotdotdot())
-                encoder.writeBool(ATTRIB_DOTDOTDOT, true);
+                encoder.writeBool(AttributeId.ATTRIB_DOTDOTDOT, true);
             if (isModelLocked())
-                encoder.writeBool(ATTRIB_MODELLOCK, true);
+                encoder.writeBool(AttributeId.ATTRIB_MODELLOCK, true);
             if ((flags & voidinputlock) != 0)
-                encoder.writeBool(ATTRIB_VOIDLOCK, true);
+                encoder.writeBool(AttributeId.ATTRIB_VOIDLOCK, true);
             if (isInline())
-                encoder.writeBool(ATTRIB_INLINE, true);
+                encoder.writeBool(AttributeId.ATTRIB_INLINE, true);
             if (isNoReturn())
-                encoder.writeBool(ATTRIB_NORETURN, true);
+                encoder.writeBool(AttributeId.ATTRIB_NORETURN, true);
             if (hasCustomStorage())
-                encoder.writeBool(ATTRIB_CUSTOM, true);
+                encoder.writeBool(AttributeId.ATTRIB_CUSTOM, true);
             if (isConstructor())
-                encoder.writeBool(ATTRIB_CONSTRUCTOR, true);
+                encoder.writeBool(AttributeId.ATTRIB_CONSTRUCTOR, true);
             if (isDestructor())
-                encoder.writeBool(ATTRIB_DESTRUCTOR, true);
+                encoder.writeBool(AttributeId.ATTRIB_DESTRUCTOR, true);
             ProtoParameter* outparam = store.getOutput();
-            encoder.openElement(ELEM_RETURNSYM);
+            encoder.openElement(ElementId.ELEM_RETURNSYM);
             if (outparam.isTypeLocked())
-                encoder.writeBool(ATTRIB_TYPELOCK, true);
+                encoder.writeBool(AttributeId.ATTRIB_TYPELOCK, true);
             outparam.getAddress().encode(encoder, outparam.getSize());
             outparam.getType().encode(encoder);
-            encoder.closeElement(ELEM_RETURNSYM);
+            encoder.closeElement(ElementId.ELEM_RETURNSYM);
             encodeEffect(encoder);
             encodeLikelyTrash(encoder);
             if (injectid >= 0)
             {
                 Architecture* glb = model.getArch();
-                encoder.openElement(ELEM_INJECT);
-                encoder.writeString(ATTRIB_CONTENT, glb.pcodeinjectlib.getCallFixupName(injectid));
-                encoder.closeElement(ELEM_INJECT);
+                encoder.openElement(ElementId.ELEM_INJECT);
+                encoder.writeString(AttributeId.ATTRIB_CONTENT, glb.pcodeinjectlib.getCallFixupName(injectid));
+                encoder.closeElement(ElementId.ELEM_INJECT);
             }
             store.encode(encoder);     // Store any internally backed prototyped symbols
-            encoder.closeElement(ELEM_PROTOTYPE);
+            encoder.closeElement(ElementId.ELEM_PROTOTYPE);
         }
 
         /// \brief Restore \b this from a \<prototype> element in the given stream
@@ -1515,7 +1515,7 @@ namespace Sla.DECCORE
             int readextrapop;
             flags = 0;
             injectid = -1;
-            uint elemId = decoder.openElement(ELEM_PROTOTYPE);
+            uint elemId = decoder.openElement(ElementId.ELEM_PROTOTYPE);
             for (; ; )
             {
                 uint attribId = decoder.getNextAttributeId();
@@ -1671,8 +1671,8 @@ namespace Sla.DECCORE
                 else if (subId == ELEM_INJECT)
                 {
                     decoder.openElement();
-                    string injectString = decoder.readString(ATTRIB_CONTENT);
-                    injectid = glb.pcodeinjectlib.getPayloadId(InjectPayload::CALLFIXUP_TYPE, injectString);
+                    string injectString = decoder.readString(AttributeId.ATTRIB_CONTENT);
+                    injectid = glb.pcodeinjectlib.getPayloadId(InjectPayload.InjectionType.CALLFIXUP_TYPE, injectString);
                     flags |= is_inline;
                     decoder.closeElement(subId);
                 }

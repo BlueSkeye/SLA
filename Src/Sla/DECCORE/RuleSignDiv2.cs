@@ -17,15 +17,14 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
-            return new RuleSignDiv2(getGroup());
+            return (!grouplist.contains(getGroup())) ? (Rule)null : new RuleSignDiv2(getGroup());
         }
 
         /// \class RuleSignDiv2
         /// \brief Convert INT_SRIGHT form into INT_SDIV:  `(V + -1*(V s>> 31)) s>> 1  =>  V s/ 2`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(OpCode.CPUI_INT_SRIGHT);
         }
@@ -35,37 +34,32 @@ namespace Sla.DECCORE
             Varnode addout;
             Varnode multout;
             Varnode shiftout;
-            Varnode a;
-            PcodeOp addop;
-            PcodeOp multop;
-            PcodeOp shiftop;
 
             if (!op.getIn(1).isConstant()) return 0;
             if (op.getIn(1).getOffset() != 1) return 0;
             addout = op.getIn(0);
             if (!addout.isWritten()) return 0;
-            addop = addout.getDef();
+            PcodeOp addop = addout.getDef() ?? throw new BugException();
             if (addop.code() != OpCode.CPUI_INT_ADD) return 0;
             int i;
-            a = (Varnode)null;
-            for (i = 0; i < 2; ++i)
-            {
+            Varnode? a = (Varnode)null;
+            for (i = 0; i < 2; ++i) {
                 multout = addop.getIn(i);
                 if (!multout.isWritten()) continue;
-                multop = multout.getDef();
+                PcodeOp multop = multout.getDef() ?? throw new BugException();
                 if (multop.code() != OpCode.CPUI_INT_MULT)
                     continue;
                 if (!multop.getIn(1).isConstant()) continue;
                 if (multop.getIn(1).getOffset() !=
-                Globals.calc_mask(multop.getIn(1).getSize()))
+                Globals.calc_mask((uint)multop.getIn(1).getSize()))
                     continue;
                 shiftout = multop.getIn(0);
                 if (!shiftout.isWritten()) continue;
-                shiftop = shiftout.getDef();
+                PcodeOp shiftop = shiftout.getDef() ?? throw new BugException();
                 if (shiftop.code() != OpCode.CPUI_INT_SRIGHT)
                     continue;
                 if (!shiftop.getIn(1).isConstant()) continue;
-                int n = shiftop.getIn(1).getOffset();
+                int n = (int)shiftop.getIn(1).getOffset();
                 a = shiftop.getIn(0);
                 if (a != addop.getIn(1 - i)) continue;
                 if (n != 8 * a.getSize() - 1) continue;

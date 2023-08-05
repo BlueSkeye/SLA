@@ -109,7 +109,7 @@ namespace Sla.DECCORE
             data.setDoublePrecisRecovery(true); // Mark that we are doing double precision recovery
         }
 
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_SUBPIECE);
         }

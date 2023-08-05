@@ -56,8 +56,8 @@ namespace Sla.EXTRA
                 throw DecoderError("Expecting <pcode>, <case_pcode>, <addr_pcode>, <default_pcode>, or <size_pcode>");
             decodePayloadAttributes(decoder);
             decodePayloadParams(decoder);
-            uint subId = decoder.openElement(ELEM_BODY);
-            parsestring = decoder.readString(ATTRIB_CONTENT);
+            uint subId = decoder.openElement(ElementId.ELEM_BODY);
+            parsestring = decoder.readString(AttributeId.ATTRIB_CONTENT);
             decoder.closeElement(subId);
             decoder.closeElement(elemId);
         }

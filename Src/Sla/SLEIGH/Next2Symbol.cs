@@ -57,7 +57,7 @@ namespace Sla.SLEIGH
             s << "0x" << hex << val;
         }
 
-        public override symbol_type getType() => next2_symbol;
+        public override symbol_type getType() => SleighSymbol.symbol_type.next2_symbol;
 
         public override void saveXml(TextWriter s)
         {

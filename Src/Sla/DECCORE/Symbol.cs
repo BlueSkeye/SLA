@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -21,6 +21,30 @@ namespace Sla.DECCORE
         //friend class Scope;
         //friend class ScopeInternal;
         //friend class SymbolCompareName;
+
+        /// \brief Possible display (dispflag) properties for a Symbol
+        public enum DisplayFlags
+        {
+            force_hex = 1,      ///< Force hexadecimal printing of constant symbol
+            force_dec = 2,      ///< Force decimal printing of constant symbol
+            force_oct = 3,      ///< Force octal printing of constant symbol
+            force_bin = 4,      ///< Force binary printing of constant symbol
+            force_char = 5,     ///< Force integer to be printed as a character constant
+            size_typelock = 8,          ///< Only the size of the symbol is typelocked
+            isolate = 16,       ///< Symbol should not speculatively merge automatically
+            merge_problems = 32,    ///< Set if some SymbolEntrys did not get merged
+            is_this_ptr = 64        ///< We are the "this" symbol for a class method
+        }
+
+        /// \brief The possible specialize Symbol \e categories
+        public enum SymbolCategory
+        {
+            no_category = -1,       ///< Symbol is not in a special category
+            function_parameter = 0, ///< The Symbol is a parameter to a function
+            equate = 1,         ///< The Symbol holds \e equate information about a constant
+            union_facet = 2     ///< Symbol holding read or write facing union field information
+        }
+
         /// Base of internal ID's
         public const ulong ID_BASE = 0x4000000000000000UL;
 
@@ -31,11 +55,11 @@ namespace Sla.DECCORE
         /// Name to use when displaying symbol in output
         protected string displayName;
         /// The symbol's data-type
-        protected Datatype type;
+        internal Datatype type;
         /// id to distinguish symbols with the same name
         protected uint nameDedup;
         /// Varnode-like properties of the symbol
-        protected uint flags;
+        protected Varnode.varnode_flags flags;
         // only typelock,namelock,readonly,externref
         // addrtied, persist inherited from scope
         /// Flags affecting the display of this symbol
@@ -81,35 +105,12 @@ namespace Sla.DECCORE
 
         /// Toggle whether \b this is the "this" pointer for a class method
         /// \param val is \b true if we are the "this" pointer
-        protected void setThisPointer(bool val)
+        internal void setThisPointer(bool val)
         {
             if (val)
                 dispflags |= is_this_ptr;
             else
                 dispflags &= ~((uint)is_this_ptr);
-        }
-
-        /// \brief Possible display (dispflag) properties for a Symbol
-        public enum DisplayFlags
-        {
-            force_hex = 1,      ///< Force hexadecimal printing of constant symbol
-            force_dec = 2,      ///< Force decimal printing of constant symbol
-            force_oct = 3,      ///< Force octal printing of constant symbol
-            force_bin = 4,      ///< Force binary printing of constant symbol
-            force_char = 5,     ///< Force integer to be printed as a character constant
-            size_typelock = 8,          ///< Only the size of the symbol is typelocked
-            isolate = 16,       ///< Symbol should not speculatively merge automatically
-            merge_problems = 32,    ///< Set if some SymbolEntrys did not get merged
-            is_this_ptr = 64        ///< We are the "this" symbol for a class method
-        }
-
-        /// \brief The possible specialize Symbol \e categories
-        public enum SymbolCategory
-        {
-            no_category = -1,       ///< Symbol is not in a special category
-            function_parameter = 0, ///< The Symbol is a parameter to a function
-            equate = 1,         ///< The Symbol holds \e equate information about a constant
-            union_facet = 2     ///< Symbol holding read or write facing union field information
         }
 
         /// Construct given a name and data-type
@@ -341,113 +342,98 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         public void encodeHeader(Encoder encoder)
         {
-            encoder.writeString(ATTRIB_NAME, name);
-            encoder.writeUnsignedInteger(ATTRIB_ID, getId());
+            encoder.writeString(AttributeId.ATTRIB_NAME, name);
+            encoder.writeUnsignedInteger(AttributeId.ATTRIB_ID, getId());
             if ((flags & Varnode.varnode_flags.namelock) != 0)
-                encoder.writeBool(ATTRIB_NAMELOCK, true);
+                encoder.writeBool(AttributeId.ATTRIB_NAMELOCK, true);
             if ((flags & Varnode.varnode_flags.typelock) != 0)
-                encoder.writeBool(ATTRIB_TYPELOCK, true);
+                encoder.writeBool(AttributeId.ATTRIB_TYPELOCK, true);
             if ((flags & Varnode::@readonly)!= 0)
-                encoder.writeBool(ATTRIB_READONLY, true);
+                encoder.writeBool(AttributeId.ATTRIB_READONLY, true);
             if ((flags & Varnode::volatil) != 0)
-                encoder.writeBool(ATTRIB_VOLATILE, true);
+                encoder.writeBool(AttributeId.ATTRIB_VOLATILE, true);
             if ((flags & Varnode::indirectstorage) != 0)
-                encoder.writeBool(ATTRIB_INDIRECTSTORAGE, true);
+                encoder.writeBool(AttributeId.ATTRIB_INDIRECTSTORAGE, true);
             if ((flags & Varnode::hiddenretparm) != 0)
-                encoder.writeBool(ATTRIB_HIDDENRETPARM, true);
+                encoder.writeBool(AttributeId.ATTRIB_HIDDENRETPARM, true);
             if ((dispflags & isolate) != 0)
-                encoder.writeBool(ATTRIB_MERGE, false);
+                encoder.writeBool(AttributeId.ATTRIB_MERGE, false);
             if ((dispflags & is_this_ptr) != 0)
-                encoder.writeBool(ATTRIB_THISPTR, true);
+                encoder.writeBool(AttributeId.ATTRIB_THISPTR, true);
             int format = getDisplayFormat();
             if (format != 0)
             {
-                encoder.writeString(ATTRIB_FORMAT, Datatype::decodeIntegerFormat(format));
+                encoder.writeString(AttributeId.ATTRIB_FORMAT, Datatype::decodeIntegerFormat(format));
             }
-            encoder.writeSignedInteger(ATTRIB_CAT, category);
+            encoder.writeSignedInteger(AttributeId.ATTRIB_CAT, category);
             if (category >= 0)
-                encoder.writeUnsignedInteger(ATTRIB_INDEX, catindex);
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_INDEX, catindex);
         }
 
         /// Decode basic Symbol properties from a \<symbol> element
         /// \param decoder is the stream decoder
-        public void decodeHeader(Decoder decoder)
+        public void decodeHeader(Sla.CORE.Decoder decoder)
         {
             name.clear();
             displayName.clear();
             category = no_category;
             symbolId = 0;
-            for (; ; )
-            {
-                ulong attribId = decoder.getNextAttributeId();
+            while (true) {
+                AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
-                if (attribId == ATTRIB_CAT)
-                {
-                    category = decoder.readSignedInteger();
+                if (attribId == AttributeId.ATTRIB_CAT) {
+                    category = (short)decoder.readSignedInteger();
                 }
-                else if (attribId == ATTRIB_FORMAT)
-                {
-                    dispflags |= Datatype::encodeIntegerFormat(decoder.readString());
+                else if (attribId == AttributeId.ATTRIB_FORMAT) {
+                    dispflags |= Datatype.encodeIntegerFormat(decoder.readString());
                 }
-                else if (attribId == ATTRIB_HIDDENRETPARM)
-                {
+                else if (attribId == AttributeId.ATTRIB_HIDDENRETPARM) {
                     if (decoder.readBool())
-                        flags |= Varnode::hiddenretparm;
+                        flags |= Varnode.varnode_flags.hiddenretparm;
                 }
-                else if (attribId == ATTRIB_ID)
-                {
+                else if (attribId == AttributeId.ATTRIB_ID) {
                     symbolId = decoder.readUnsignedInteger();
                     if ((symbolId >> 56) == (ID_BASE >> 56))
                         symbolId = 0;       // Don't keep old internal id's
                 }
-                else if (attribId == ATTRIB_INDIRECTSTORAGE)
-                {
+                else if (attribId == AttributeId.ATTRIB_INDIRECTSTORAGE) {
                     if (decoder.readBool())
-                        flags |= Varnode::indirectstorage;
+                        flags |= Varnode.varnode_flags.indirectstorage;
                 }
-                else if (attribId == ATTRIB_MERGE)
-                {
-                    if (!decoder.readBool())
-                    {
+                else if (attribId == AttributeId.ATTRIB_MERGE) {
+                    if (!decoder.readBool()) {
                         dispflags |= isolate;
                         flags |= Varnode.varnode_flags.typelock;
                     }
                 }
-                else if (attribId == ATTRIB_NAME)
+                else if (attribId == AttributeId.ATTRIB_NAME)
                     name = decoder.readString();
-                else if (attribId == ATTRIB_NAMELOCK)
-                {
+                else if (attribId == AttributeId.ATTRIB_NAMELOCK) {
                     if (decoder.readBool())
                         flags |= Varnode.varnode_flags.namelock;
                 }
-                else if (attribId == ATTRIB_READONLY)
-                {
+                else if (attribId == AttributeId.ATTRIB_READONLY) {
                     if (decoder.readBool())
-                        flags |= Varnode::@readonly;
+                        flags |= Varnode.varnode_flags.@readonly;
                 }
-                else if (attribId == ATTRIB_TYPELOCK)
-                {
+                else if (attribId == AttributeId.ATTRIB_TYPELOCK) {
                     if (decoder.readBool())
                         flags |= Varnode.varnode_flags.typelock;
                 }
-                else if (attribId == ATTRIB_THISPTR)
-                {
+                else if (attribId == AttributeId.ATTRIB_THISPTR) {
                     if (decoder.readBool())
                         dispflags |= is_this_ptr;
                 }
-                else if (attribId == ATTRIB_VOLATILE)
-                {
+                else if (attribId == AttributeId.ATTRIB_VOLATILE) {
                     if (decoder.readBool())
                         flags |= Varnode::volatil;
                 }
-                else if (attribId == ATTRIB_LABEL)
-                {
+                else if (attribId == AttributeId.ATTRIB_LABEL) {
                     displayName = decoder.readString();
                 }
             }
-            if (category == function_parameter)
-            {
-                catindex = decoder.readUnsignedInteger(ATTRIB_INDEX);
+            if (category == function_parameter) {
+                catindex = decoder.readUnsignedInteger(AttributeId.ATTRIB_INDEX);
             }
             else
                 catindex = 0;
@@ -475,18 +461,18 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         public override void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_SYMBOL);
+            encoder.openElement(ElementId.ELEM_SYMBOL);
             encodeHeader(encoder);
             encodeBody(encoder);
-            encoder.closeElement(ELEM_SYMBOL);
+            encoder.closeElement(ElementId.ELEM_SYMBOL);
         }
 
         /// Decode \b this Symbol from a stream
         /// Parse a Symbol from the next element in the stream
         /// \param decoder is the stream decoder
-        public override void decode(Decoder decoder)
+        public virtual void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_SYMBOL);
+            uint elemId = decoder.openElement(ElementId.ELEM_SYMBOL);
             decodeHeader(decoder);
 
             decodeBody(decoder);

@@ -26,7 +26,7 @@ namespace Sla.EXTRA
             uint elemId = decoder.openElement();       // Tag may not be present
             if (elemId == ELEM_BODY)
             {
-                parsestring = decoder.readString(ATTRIB_CONTENT);
+                parsestring = decoder.readString(AttributeId.ATTRIB_CONTENT);
                 decoder.closeElement(elemId);
             }
             if (parsestring.size() == 0 && (!dynamic))
@@ -71,7 +71,7 @@ namespace Sla.EXTRA
         public override void decode(Decoder decoder)
         {
             // Restore a raw <pcode> tag.  Used for uponentry, uponreturn
-            uint elemId = decoder.openElement(ELEM_PCODE);
+            uint elemId = decoder.openElement(ElementId.ELEM_PCODE);
             decodePayloadAttributes(decoder);
             decodePayloadParams(decoder);
             decodeBody(decoder);

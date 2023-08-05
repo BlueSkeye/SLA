@@ -102,20 +102,20 @@ namespace Sla.CORE
 
             // Read parsed xml file
             XmlDecode decoder(m, rootel);
-            uint elemId = decoder.openElement(ELEM_BINARYIMAGE);
+            uint elemId = decoder.openElement(ElementId.ELEM_BINARYIMAGE);
             for (; ; )
             {
                 uint subId = decoder.openElement();
                 if (subId == 0) break;
                 if (subId == ELEM_SYMBOL)
                 {
-                    AddrSpace @base = decoder.readSpace(ATTRIB_SPACE);
+                    AddrSpace @base = decoder.readSpace(AttributeId.ATTRIB_SPACE);
                     Address addr(@base, @base.decodeAttributes(decoder, sz));
-                    string nm = decoder.readString(ATTRIB_NAME);
+                    string nm = decoder.readString(AttributeId.ATTRIB_NAME);
                     addrtosymbol[addr] = nm;
                 }
                 else if (subId == ELEM_BYTECHUNK) {
-                    AddrSpace @base = decoder.readSpace(ATTRIB_SPACE);
+                    AddrSpace @base = decoder.readSpace(AttributeId.ATTRIB_SPACE);
                     Address addr(@base, @base.decodeAttributes(decoder, sz));
                     Dictionary<Address, List<byte>>.Enumerator chnkiter;
                     List<byte> & vec(chunk[addr]);
@@ -128,7 +128,7 @@ namespace Sla.CORE
                             if (decoder.readBool())
                                 readonlyset.insert(addr);
                     }
-                    istringstream @is = new istringstream(decoder.readString(ATTRIB_CONTENT));
+                    istringstream @is = new istringstream(decoder.readString(AttributeId.ATTRIB_CONTENT));
                     int val;
                     char c1, c2;
                     @is >> ws;
@@ -176,18 +176,18 @@ namespace Sla.CORE
         /// \param encoder is the stream encoder
         public void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_BINARYIMAGE);
-            encoder.writeString(ATTRIB_ARCH, archtype);
+            encoder.openElement(ElementId.ELEM_BINARYIMAGE);
+            encoder.writeString(AttributeId.ATTRIB_ARCH, archtype);
 
             Dictionary<Address, List<byte>>.Enumerator iter1;
             for (iter1 = chunk.begin(); iter1 != chunk.end(); ++iter1)
             {
                 List<byte> &vec((*iter1).second);
                 if (vec.size() == 0) continue;
-                encoder.openElement(ELEM_BYTECHUNK);
+                encoder.openElement(ElementId.ELEM_BYTECHUNK);
                 (*iter1).first.getSpace().encodeAttributes(encoder, (*iter1).first.getOffset());
                 if (readonlyset.find((*iter1).first) != readonlyset.end())
-                    encoder.writeBool(ATTRIB_READONLY, "true");
+                    encoder.writeBool(AttributeId.ATTRIB_READONLY, "true");
                 ostringstream s;
                 s << '\n' << setfill('0');
                 for (int i = 0; i < vec.size(); ++i)
@@ -197,19 +197,19 @@ namespace Sla.CORE
                         s << '\n';
                 }
                 s << '\n';
-                encoder.writeString(ATTRIB_CONTENT, s.str());
-                encoder.closeElement(ELEM_BYTECHUNK);
+                encoder.writeString(AttributeId.ATTRIB_CONTENT, s.str());
+                encoder.closeElement(ElementId.ELEM_BYTECHUNK);
             }
 
             Dictionary<Address, string>.Enumerator iter2;
             for (iter2 = addrtosymbol.begin(); iter2 != addrtosymbol.end(); ++iter2)
             {
-                encoder.openElement(ELEM_SYMBOL);
+                encoder.openElement(ElementId.ELEM_SYMBOL);
                 (*iter2).first.getSpace().encodeAttributes(encoder, (*iter2).first.getOffset());
-                encoder.writeString(ATTRIB_NAME, (*iter2).second);
-                encoder.closeElement(ELEM_SYMBOL);
+                encoder.writeString(AttributeId.ATTRIB_NAME, (*iter2).second);
+                encoder.closeElement(ElementId.ELEM_SYMBOL);
             }
-            encoder.closeElement(ELEM_BINARYIMAGE);
+            encoder.closeElement(ElementId.ELEM_BINARYIMAGE);
         }
 
         ~LoadImageXml()

@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSubNormal(getGroup());
         }
 
@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         /// The form looks like:
         ///  - `sub( V>>n ,c )  =>  sub( V, c+k/8 ) >> (n-k)  where k = (n/8)*8`  or
         ///  - `sub( V>>n, c )  =>  ext( sub( V, c+k/8 ) )  if n is big`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_SUBPIECE);
         }

@@ -112,23 +112,23 @@ namespace Sla.DECCORE
             uint subId = decoder.openElement();
             if (subId == ELEM_PARAM1)
             {
-                p1 = decoder.readString(ATTRIB_CONTENT);
+                p1 = decoder.readString(AttributeId.ATTRIB_CONTENT);
                 decoder.closeElement(subId);
                 subId = decoder.openElement();
                 if (subId == ELEM_PARAM2)
                 {
-                    p2 = decoder.readString(ATTRIB_CONTENT);
+                    p2 = decoder.readString(AttributeId.ATTRIB_CONTENT);
                     decoder.closeElement(subId);
                     subId = decoder.openElement();
                     if (subId == ELEM_PARAM3)
                     {
-                        p3 = decoder.readString(ATTRIB_CONTENT);
+                        p3 = decoder.readString(AttributeId.ATTRIB_CONTENT);
                         decoder.closeElement(subId);
                     }
                 }
             }
             else if (subId == 0)
-                p1 = decoder.readString(ATTRIB_CONTENT);    // If no children, content is param 1
+                p1 = decoder.readString(AttributeId.ATTRIB_CONTENT);    // If no children, content is param 1
             decoder.closeElement(elemId);
             set(elemId, p1, p2, p3);
         }
@@ -138,7 +138,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decode(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_OPTIONSLIST);
+            uint elemId = decoder.openElement(ElementId.ELEM_OPTIONSLIST);
 
             while (decoder.peekElement() != 0)
                 decodeOne(decoder);

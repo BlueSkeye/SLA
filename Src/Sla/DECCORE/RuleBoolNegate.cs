@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleBoolNegate(getGroup());
         }
 
@@ -33,7 +33,7 @@ namespace Sla.DECCORE
         ///  - `!(V != W)  =>  V == W`
         ///
         /// This supports signed and floating-point variants as well
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_BOOL_NEGATE);
         }

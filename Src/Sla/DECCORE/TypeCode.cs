@@ -30,22 +30,22 @@ namespace Sla.DECCORE
         /// \param intypes is the list of input parameters
         /// \param dotdotdot is true if the prototype takes variable arguments
         /// \param voidtype is the reference "void" data-type
-        protected void setPrototype(TypeFactory tfact, ProtoModel model, Datatype outtype,
+        internal void setPrototype(TypeFactory tfact, ProtoModel model, Datatype outtype,
             List<Datatype> intypes, bool dotdotdot, Datatype voidtype)
         {
             factory = tfact;
-            flags |= variable_length;
-            if (proto != (FuncProto)null)
-                delete proto;
+            flags |= Properties.variable_length;
+            //if (proto != (FuncProto)null)
+            //    delete proto;
             proto = new FuncProto();
             proto.setInternal(model, voidtype);
-            List<Datatype> typelist;
-            List<string> blanknames = new List<string>(intypes.size()+1);
+            List<Datatype> typelist = new List<Datatype>();
+            List<string> blanknames = new List<string>(intypes.Count+1);
             if (outtype == (Datatype)null)
                 typelist.Add(voidtype);
             else
                 typelist.Add(outtype);
-            for (int i = 0; i < intypes.size(); ++i)
+            for (int i = 0; i < intypes.Count; ++i)
                 typelist.Add(intypes[i]);
 
             proto.updateAllTypes(blanknames, typelist, dotdotdot);
@@ -266,11 +266,11 @@ namespace Sla.DECCORE
                 encodeTypedef(encoder);
                 return;
             }
-            encoder.openElement(ELEM_TYPE);
+            encoder.openElement(ElementId.ELEM_TYPE);
             encodeBasic(metatype, encoder);
             if (proto != (FuncProto)null)
                 proto.encode(encoder);
-            encoder.closeElement(ELEM_TYPE);
+            encoder.closeElement(ElementId.ELEM_TYPE);
         }
     }
 }

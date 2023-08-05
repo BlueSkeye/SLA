@@ -42,12 +42,12 @@ namespace Sla.EXTRA
 
         public override void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_RAW_SAVEFILE);
+            encoder.openElement(ElementId.ELEM_RAW_SAVEFILE);
             encodeHeader(encoder);
-            encoder.writeUnsignedInteger(ATTRIB_ADJUSTVMA, adjustvma);
+            encoder.writeUnsignedInteger(AttributeId.ATTRIB_ADJUSTVMA, adjustvma);
             types.encodeCoreTypes(encoder);
             SleighArchitecture::encode(encoder);
-            encoder.closeElement(ELEM_RAW_SAVEFILE);
+            encoder.closeElement(ElementId.ELEM_RAW_SAVEFILE);
         }
 
         public override void restoreXml(DocumentStorage store)

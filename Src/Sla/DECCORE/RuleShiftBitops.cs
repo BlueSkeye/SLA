@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleShiftBitops(getGroup());
         }
 
@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         ///
         /// `( V & 0xf000 ) << 4   =>   #0 << 4`
         /// `( V + 0xf000 ) << 4   =>    V << 4`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_INT_LEFT);
             oplist.Add(CPUI_INT_RIGHT);

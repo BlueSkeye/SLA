@@ -44,12 +44,12 @@ namespace Sla.DECCORE
             FuncCallSpecs* fc = (FuncCallSpecs*)(ulong)offset;
 
             if (fc.getEntryAddress().isInvalid())
-                encoder.writeString(ATTRIB_SPACE, "fspec");
+                encoder.writeString(AttributeId.ATTRIB_SPACE, "fspec");
             else
             {
                 AddrSpace* id = fc.getEntryAddress().getSpace();
-                encoder.writeSpace(ATTRIB_SPACE, id);
-                encoder.writeUnsignedInteger(ATTRIB_OFFSET, fc.getEntryAddress().getOffset());
+                encoder.writeSpace(AttributeId.ATTRIB_SPACE, id);
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_OFFSET, fc.getEntryAddress().getOffset());
             }
         }
 
@@ -58,13 +58,13 @@ namespace Sla.DECCORE
             FuncCallSpecs* fc = (FuncCallSpecs*)(ulong)offset;
 
             if (fc.getEntryAddress().isInvalid())
-                encoder.writeString(ATTRIB_SPACE, "fspec");
+                encoder.writeString(AttributeId.ATTRIB_SPACE, "fspec");
             else
             {
                 AddrSpace* id = fc.getEntryAddress().getSpace();
-                encoder.writeSpace(ATTRIB_SPACE, id);
-                encoder.writeUnsignedInteger(ATTRIB_OFFSET, fc.getEntryAddress().getOffset());
-                encoder.writeSignedInteger(ATTRIB_SIZE, size);
+                encoder.writeSpace(AttributeId.ATTRIB_SPACE, id);
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_OFFSET, fc.getEntryAddress().getOffset());
+                encoder.writeSignedInteger(AttributeId.ATTRIB_SIZE, size);
             }
         }
 

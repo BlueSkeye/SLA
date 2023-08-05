@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSignShift(getGroup());
         }
 
@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         ///
         /// A logical shift of the sign-bit gets converted to an arithmetic shift if it is involved
         /// in an arithmetic expression or a comparison.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_INT_RIGHT);
         }

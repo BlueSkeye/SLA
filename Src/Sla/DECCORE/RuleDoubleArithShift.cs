@@ -19,7 +19,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleDoubleArithShift(getGroup());
         }
 
@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         ///
         /// Division optimization in particular can produce a sequence of signed right shifts.
         /// The shift amounts add up to the point where the sign bit has saturated the entire result.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_INT_SRIGHT);
         }

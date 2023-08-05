@@ -120,18 +120,18 @@ namespace Sla.DECCORE
         public override void encode(Encoder encoder)
         {
             Dictionary<CheapSorter, CPoolRecord>::const_iterator iter;
-            encoder.openElement(ELEM_CONSTANTPOOL);
+            encoder.openElement(ElementId.ELEM_CONSTANTPOOL);
             for (iter = cpoolMap.begin(); iter != cpoolMap.end(); ++iter)
             {
                 (*iter).first.encode(encoder);
                 (*iter).second.encode(encoder);
             }
-            encoder.closeElement(ELEM_CONSTANTPOOL);
+            encoder.closeElement(ElementId.ELEM_CONSTANTPOOL);
         }
 
         public override void decode(Decoder decoder, TypeFactory typegrp)
         {
-            uint elemId = decoder.openElement(ELEM_CONSTANTPOOL);
+            uint elemId = decoder.openElement(ElementId.ELEM_CONSTANTPOOL);
             while (decoder.peekElement() != 0)
             {
                 CheapSorter sorter;

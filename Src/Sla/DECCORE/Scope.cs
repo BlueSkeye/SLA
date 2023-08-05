@@ -46,7 +46,7 @@ namespace Sla.DECCORE
         /// Range of data addresses \e owned by \b this scope
         internal RangeList rangetree;
         /// The parent scope
-        private Scope parent;
+        private Scope? parent;
         /// Scope using \b this as a cache
         private Scope owner;
         /// Sorted list of child scopes
@@ -245,7 +245,7 @@ namespace Sla.DECCORE
             if (addr.isConstant()) return (Scope)null;
             while ((scope1 != (Scope)null)&& (scope1 != scope2)) {
                 sym = scope1.findExternalRef(addr);
-                if (sym != (ExternRefSymbol*)0)
+                if (sym != (ExternRefSymbol)null)
                 {
                     *addrmatch = sym;
                     return scope1;
@@ -278,7 +278,7 @@ namespace Sla.DECCORE
             if (addr.isConstant()) return (Scope)null;
             while ((scope1 != (Scope)null)&& (scope1 != scope2)) {
                 sym = scope1.findCodeLabel(addr);
-                if (sym != (LabSymbol*)0)
+                if (sym != (LabSymbol)null)
                 {
                     *addrmatch = sym;
                     return scope1;
@@ -628,15 +628,19 @@ namespace Sla.DECCORE
         /// \return return a unique version of the name
         public abstract string makeNameUnique(string nm);
 
-        public abstract void encode(Encoder encoder); ///< Encode \b this as a \<scope> element
+        ///< Encode \b this as a \<scope> element
+        public abstract void encode(Sla.CORE.Encoder encoder);
 
-        public abstract void decode(Decoder decoder);       ///< Decode \b this Scope from a \<scope> element
+        ///< Decode \b this Scope from a \<scope> element
+        public abstract void decode(Sla.CORE.Decoder decoder);
 
-        void decodeWrappingAttributes(Decoder decoder)
+        ///< Restore attributes for \b this Scope from wrapping element
+        public void decodeWrappingAttributes(Sla.CORE.Decoder decoder)
         {
-        } ///< Restore attributes for \b this Scope from wrapping element
+        }
 
-        public abstract void printEntries(TextWriter s); ///< Dump a description of all SymbolEntry objects to a stream
+        ///< Dump a description of all SymbolEntry objects to a stream
+        public abstract void printEntries(TextWriter s);
 
         /// \brief Get the number of Symbols in the given category
         /// \param cat is the Symbol \e category
@@ -667,11 +671,9 @@ namespace Sla.DECCORE
         /// \return the SymbolEntry matching the new mapping
         public SymbolEntry addSymbol(string nm, Datatype ct, Address addr, Address usepoint)
         {
-            Symbol* sym;
-
             if (ct.hasStripped())
-                ct = ct.getStripped();
-            sym = new Symbol(owner, nm, ct);
+                ct = ct.getStripped() ?? throw new BugException();
+            Symbol sym = new Symbol(owner, nm, ct);
             addSymbolInternal(sym);
             return addMapPoint(sym, addr, usepoint);
         }
@@ -683,7 +685,7 @@ namespace Sla.DECCORE
         public string getDisplayName() => displayName;
 
         /// Get the globally unique id
-        public abstract ulong getId() => uniqueId;
+        public virtual ulong getId() => uniqueId;
 
         /// Return \b true if \b this scope is global
         public bool isGlobal() => (fd == null);
@@ -711,14 +713,12 @@ namespace Sla.DECCORE
         /// If there are no Symbols with that name in \b this Scope at all, recurse into the parent Scope.
         /// \param nm if the name to search for
         /// \return the Funcdata object of the matching function, or NULL if it doesn't exist
-        public Funcdata queryFunction(string nm)
+        public Funcdata? queryFunction(string nm)
         {
-            List<Symbol*> symList;
+            List<Symbol> symList = new List<Symbol>();
             queryByName(nm, symList);
-            for (int i = 0; i < symList.size(); ++i)
-            {
-                Symbol* sym = symList[i];
-                FunctionSymbol* funcsym = (FunctionSymbol)(sym);
+            for (int i = 0; i < symList.Count; ++i) {
+                FunctionSymbol? funcsym = symList[i] as FunctionSymbol;
                 if (funcsym != (FunctionSymbol)null)
                     return funcsym.getFunction();
             }
@@ -733,9 +733,9 @@ namespace Sla.DECCORE
         /// \return the matching SymbolEntry
         public SymbolEntry queryByAddr(Address addr, Address usepoint)
         {
-            SymbolEntry* res = (SymbolEntry)null;
+            SymbolEntry? res = (SymbolEntry)null;
             Scope basescope = glb.symboltab.mapScope(this, addr, usepoint);
-            stackAddr(basescope, (Scope)null,addr,usepoint,&res);
+            stackAddr(basescope, (Scope)null, addr, usepoint, out res);
             return res;
         }
 
@@ -746,11 +746,11 @@ namespace Sla.DECCORE
         /// \param size is the number of bytes in the range
         /// \param usepoint is a point at which the Symbol is accessed (may be \e invalid)
         /// \return the matching SymbolEntry or NULL
-        public virtual SymbolEntry queryContainer(Address addr, int size, Address usepoint)
+        public virtual SymbolEntry? queryContainer(Address addr, int size, Address usepoint)
         {
-            SymbolEntry* res = (SymbolEntry)null;
+            SymbolEntry? res = (SymbolEntry)null;
             Scope basescope = glb.symboltab.mapScope(this, addr, usepoint);
-            stackContainer(basescope, (Scope)null,addr,size,usepoint,&res);
+            stackContainer(basescope, (Scope)null, addr, size, usepoint, out res);
             return res;
         }
 
@@ -763,16 +763,17 @@ namespace Sla.DECCORE
         /// \param usepoint is a point at which the memory range is accessed (may be \e invalid)
         /// \param flags is a reference used to pass back the boolean properties of the memory range
         /// \return the smallest SymbolEntry containing the range, or NULL
-        public SymbolEntry queryProperties(Address addr, int size, Address usepoint, uint &flags)
+        public SymbolEntry? queryProperties(Address addr, int size, Address usepoint,
+            out Varnode.varnode_flags flags)
         {
-            SymbolEntry* res = (SymbolEntry)null;
+            SymbolEntry? res = (SymbolEntry)null;
             Scope basescope = glb.symboltab.mapScope(this, addr, usepoint);
-            Scope finalscope = stackContainer(basescope, (Scope)null,addr,size,usepoint,&res);
+            Scope finalscope = stackContainer(basescope, (Scope)null, addr, size, usepoint, out res);
             if (res != (SymbolEntry)null) // If we found a symbol
                 flags = res.getAllFlags(); // use its flags
-            else if (finalscope != (Scope)null)
-            { // If we found just a scope
-              // set flags just based on scope
+            else if (finalscope != (Scope)null) {
+                // If we found just a scope
+                // set flags just based on scope
                 flags = Varnode.varnode_flags.mapped | Varnode.varnode_flags.addrtied;
                 if (finalscope.isGlobal())
                     flags |= Varnode.varnode_flags.persist;
@@ -788,12 +789,12 @@ namespace Sla.DECCORE
         /// at the given address.
         /// \param addr is the starting address of the function
         /// \return the Funcdata object of the matching function, or NULL if it doesn't exist
-        public Funcdata queryFunction(Address addr)
+        public Funcdata? queryFunction(Address addr)
         {
-            Funcdata* res = (Funcdata)null;
+            Funcdata? res = (Funcdata)null;
             // We have no usepoint, so try to map from addr
-            Scope basescope = glb.symboltab.mapScope(this, addr, Address());
-            stackFunction(basescope, (Scope)null,addr,&res);
+            Scope basescope = glb.symboltab.mapScope(this, addr, new Address());
+            stackFunction(basescope, (Scope)null, addr, out res);
             return res;
         }
 
@@ -804,14 +805,14 @@ namespace Sla.DECCORE
         /// and return it.
         /// \param addr is the given address where an \e external \e reference might be
         /// \return the referred to Funcdata object or NULL if not found
-        public Funcdata queryExternalRefFunction(Address addr)
+        public Funcdata? queryExternalRefFunction(Address addr)
         {
-            ExternRefSymbol* sym = (ExternRefSymbol*)0;
+            ExternRefSymbol? sym = (ExternRefSymbol)null;
             // We have no usepoint, so try to map from addr
-            Scope basescope = glb.symboltab.mapScope(this, addr, Address());
-            basescope = stackExternalRef(basescope, (Scope)null,addr,&sym);
+            Scope basescope = glb.symboltab.mapScope(this, addr, new Address());
+            basescope = stackExternalRef(basescope, (Scope)null, addr, out sym);
             // Resolve the reference from the same scope we found the reference
-            if (sym != (ExternRefSymbol*)0)
+            if (sym != (ExternRefSymbol)null)
                 return basescope.resolveExternalRefFunction(sym);
             return (Funcdata)null;
         }
@@ -821,12 +822,12 @@ namespace Sla.DECCORE
         /// at the given address.
         /// \param addr is the given address
         /// \return the LabSymbol object, or NULL if it doesn't exist
-        public LabSymbol queryCodeLabel(Address addr)
+        public LabSymbol? queryCodeLabel(Address addr)
         {
-            LabSymbol* res = (LabSymbol*)0;
+            LabSymbol res = (LabSymbol)null;
             // We have no usepoint, so try to map from addr
-            Scope basescope = glb.symboltab.mapScope(this, addr, Address());
-            stackCodeLabel(basescope, (Scope)null,addr,&res);
+            Scope basescope = glb.symboltab.mapScope(this, addr, new Address());
+            stackCodeLabel(basescope, (Scope)null, addr, out res);
             return res;
         }
 
@@ -835,34 +836,24 @@ namespace Sla.DECCORE
         /// \param nm is the child's name
         /// \param strategy is \b true if hash of the name determines id
         /// \return the child Scope or NULL if there is no child with that name
-        public Scope resolveScope(string nm, bool strategy)
+        public Scope? resolveScope(string nm, bool strategy)
         {
-            if (strategy)
-            {
+            Scope? result;
+
+            if (strategy) {
                 ulong key = hashScopeName(uniqueId, nm);
-                ScopeMap::const_iterator iter = children.find(key);
-                if (iter == children.end()) return (Scope)null;
-                Scope* scope = (*iter).second;
-                if (scope.name == nm)
-                    return scope;
+                if (!children.TryGetValue(key, out result)) return (Scope)null;
+                if (null == result) throw new BugException();
+                if (result.name == nm)
+                    return result;
             }
-            else if (nm.length() > 0 && nm[0] <= '9' && nm[0] >= '0')
-            {
+            else if (nm.Length > 0 && nm[0] <= '9' && nm[0] >= '0') {
                 // Allow the string to directly specify the id
-                istringstream s = new istringstream(nm);
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                ulong key;
-                s >> key;
-                ScopeMap::const_iterator iter = children.find(key);
-                if (iter == children.end()) return (Scope)null;
-                return (*iter).second;
+                ulong key = ulong.Parse(nm);
+                return (children.TryGetValue(key, out result)) ? result : (Scope)null;
             }
-            else
-            {
-                ScopeMap::const_iterator iter;
-                for (iter = children.begin(); iter != children.end(); ++iter)
-                {
-                    Scope* scope = (*iter).second;
+            else {
+                foreach (Scope scope in children.Values) {
                     if (scope.name == nm)
                         return scope;
                 }
@@ -877,13 +868,13 @@ namespace Sla.DECCORE
         /// \param addr is the starting address of the memory range
         /// \param sz is the number of bytes in the range
         /// \param usepoint is a point at which the memory is getting accesses
-        public Scope discoverScope(Address addr, int sz, Address usepoint)
-        {               // Which scope "should" this range belong to
+        public Scope? discoverScope(Address addr, int sz, Address usepoint)
+        {
+            // Which scope "should" this range belong to
             if (addr.isConstant())
                 return (Scope)null;
-            Scope* basescope = glb.symboltab.mapScope(this, addr, usepoint);
-            while (basescope != (Scope)null)
-            {
+            Scope? basescope = glb.symboltab.mapScope(this, addr, usepoint);
+            while (basescope != (Scope)null) {
                 if (basescope.inScope(addr, sz, usepoint))
                     return basescope;
                 basescope = basescope.getParent();
@@ -904,13 +895,11 @@ namespace Sla.DECCORE
         /// \param onlyGlobal is \b true if only non-local Scopes should be saved
         public void encodeRecursive(Sla.CORE.Encoder encoder, bool onlyGlobal)
         {
-            if (onlyGlobal && (!isGlobal())) return;        // Only save global scopes
+            // Only save global scopes
+            if (onlyGlobal && !isGlobal()) return;
             encode(encoder);
-            ScopeMap::const_iterator iter = children.begin();
-            ScopeMap::const_iterator enditer = children.end();
-            for (; iter != enditer; ++iter)
-            {
-                (*iter).second.encodeRecursive(encoder, onlyGlobal);
+            foreach (Scope scope in children.Values) {
+                scope.encodeRecursive(encoder, onlyGlobal);
             }
         }
 
@@ -921,8 +910,7 @@ namespace Sla.DECCORE
         /// \param ct is the data-type to change the Symbol to
         public void overrideSizeLockType(Symbol sym, Datatype ct)
         {
-            if (sym.type.getSize() == ct.getSize())
-            {
+            if (sym.type.getSize() == ct.getSize()) {
                 if (!sym.isSizeTypeLocked())
                     throw new LowlevelError("Overriding symbol that is not size locked");
                 sym.type = ct;
@@ -955,8 +943,7 @@ namespace Sla.DECCORE
         public bool isSubScope(Scope scp)
         {
             Scope tmp = this;
-            do
-            {
+            do {
                 if (tmp == scp) return true;
                 tmp = tmp.parent;
             } while (tmp != (Scope)null);
@@ -968,9 +955,8 @@ namespace Sla.DECCORE
         {
             if (parent == (Scope)null) return "";
             string fname = name;
-            Scope* scope = parent;
-            while (scope.parent != (Scope)null)
-            {
+            Scope scope = parent;
+            while (scope.parent != (Scope)null) {
                 fname = scope.name + "::" + fname;
                 scope = scope.parent;
             }
@@ -983,7 +969,7 @@ namespace Sla.DECCORE
         public void getScopePath(List<Scope> vec)
         {
             int count = 0;
-            Scope cur = this;
+            Scope? cur = this;
             while (cur != (Scope)null) {    // Count number of elements in path
                 count += 1;
                 cur = cur.parent;
@@ -1032,7 +1018,7 @@ namespace Sla.DECCORE
         public Architecture getArch() => glb;
 
         /// Get the parent Scope (or NULL if \b this is the global Scope)
-        public Scope getParent() => parent;
+        public Scope? getParent() => parent;
 
         /// Add a new Symbol \e without mapping it to an address
         /// The Symbol is created and added to any name map, but no SymbolEntry objects are created for it.
@@ -1041,9 +1027,7 @@ namespace Sla.DECCORE
         /// \return the new Symbol object
         public Symbol addSymbol(string nm, Datatype ct)
         {
-            Symbol* sym;
-
-            sym = new Symbol(owner, nm, ct);
+            Symbol sym = new Symbol(owner, nm, ct);
             addSymbolInternal(sym);     // Let this scope lay claim to the new object
             return sym;
         }
@@ -1056,7 +1040,7 @@ namespace Sla.DECCORE
         /// \return the SymbolEntry representing the new mapping
         public SymbolEntry addMapPoint(Symbol sym, Address addr, Address usepoint)
         {
-            SymbolEntry entry(sym);
+            SymbolEntry entry = new SymbolEntry(sym);
             if (!usepoint.isInvalid())  // Restrict maps use if necessary
                 entry.uselimit.insertRange(usepoint.getSpace(), usepoint.getOffset(), usepoint.getOffset());
             entry.addr = addr;
@@ -1069,29 +1053,29 @@ namespace Sla.DECCORE
         /// The new Symbol and SymbolEntry mappings are integrated into \b this Scope.
         /// \param decoder is the stream decoder
         /// \return the new Symbol
-        public Symbol addMapSym(Decoder decoder)
+        public Symbol addMapSym(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_MAPSYM);
+            uint elemId = decoder.openElement(ElementId.ELEM_MAPSYM);
             uint subId = decoder.peekElement();
-            Symbol* sym;
-            if (subId == ELEM_SYMBOL)
+            Symbol sym;
+            if (subId == ElementId.ELEM_SYMBOL)
                 sym = new Symbol(owner);
-            else if (subId == ELEM_EQUATESYMBOL)
+            else if (subId == ElementId.ELEM_EQUATESYMBOL)
                 sym = new EquateSymbol(owner);
-            else if (subId == ELEM_FUNCTION)
+            else if (subId == ElementId.ELEM_FUNCTION)
                 sym = new FunctionSymbol(owner, glb.min_funcsymbol_size);
-            else if (subId == ELEM_FUNCTIONSHELL)
+            else if (subId == ElementId.ELEM_FUNCTIONSHELL)
                 sym = new FunctionSymbol(owner, glb.min_funcsymbol_size);
-            else if (subId == ELEM_LABELSYM)
+            else if (subId == ElementId.ELEM_LABELSYM)
                 sym = new LabSymbol(owner);
-            else if (subId == ELEM_EXTERNREFSYMBOL)
+            else if (subId == ElementId.ELEM_EXTERNREFSYMBOL)
                 sym = new ExternRefSymbol(owner);
-            else if (subId == ELEM_FACETSYMBOL)
+            else if (subId == ElementId.ELEM_FACETSYMBOL)
                 sym = new UnionFacetSymbol(owner);
             else
                 throw new LowlevelError("Unknown symbol type");
-            try
-            {       // Protect against duplicate scope errors
+            try {
+                // Protect against duplicate scope errors
                 sym.decode(decoder);
             }
             catch (RecovError err) {

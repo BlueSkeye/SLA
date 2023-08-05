@@ -14,14 +14,14 @@ namespace Sla.SLEIGH
         private readonly ParserContext const_context;
         private readonly ParserContext cross_context;
 
-        protected ConstructState point;    // The current node being visited
+        internal ConstructState point;    // The current node being visited
         protected int depth;         // Depth of the current node
-        protected int[] breadcrumb = new int[32];    // Path of operands from root
+        internal int[] breadcrumb = new int[32];    // Path of operands from root
 
         public ParserWalker(ParserContext c)
         {
             const_context = c;
-            cross_context = (ParserContext*)0;
+            cross_context = (ParserContext)null;
         }
 
         public ParserWalker(ParserContext c, ParserContext cross)
@@ -39,27 +39,27 @@ namespace Sla.SLEIGH
             breadcrumb[0] = 0;
         }
 
-        public void setOutOfBandState(Constructor ct, int index, ConstructState tempstate, ParserWalker otherwalker)
-        { // Initialize walker for future calls into getInstructionBytes assuming -ct- is the current position in the walk
+        public void setOutOfBandState(Constructor ct, int index, ConstructState tempstate,
+            ParserWalker otherwalker)
+        {
+            // Initialize walker for future calls into getInstructionBytes assuming -ct- is the current position in the walk
             ConstructState pt = otherwalker.point;
             int curdepth = otherwalker.depth;
-            while (pt.ct != ct)
-            {
+            while (pt.ct != ct) {
                 if (curdepth <= 0) return;
                 curdepth -= 1;
                 pt = pt.parent;
             }
-            OperandSymbol* sym = ct.getOperand(index);
+            OperandSymbol sym = ct.getOperand(index);
             int i = sym.getOffsetBase();
             // if i<0, i.e. the offset of the operand is constructor relative
             // its possible that the branch corresponding to the operand
             // has not been constructed yet. Context expressions are
             // evaluated BEFORE the constructors branches are created.
             // So we have to construct the offset explicitly.
-            if (i < 0)
-                tempstate.offset = pt.offset + sym.getRelativeOffset();
-            else
-                tempstate.offset = pt.resolve[index].offset;
+            tempstate.offset = (i < 0)
+                ? pt.offset + sym.getRelativeOffset()
+                : pt.resolve[index].offset;
 
             tempstate.ct = ct;
             tempstate.length = pt.length;
@@ -68,7 +68,7 @@ namespace Sla.SLEIGH
             breadcrumb[0] = 0;
         }
 
-        public bool isState() => (point != (ConstructState*)0);
+        public bool isState() => (point != (ConstructState)null);
 
         public void pushOperand(int i)
         {
@@ -87,7 +87,7 @@ namespace Sla.SLEIGH
         {
             if (i < 0) return point.offset;
             ConstructState op = point.resolve[i];
-            return op.offset + op.length;
+            return (uint)(op.offset + op.length);
         }
 
         public Constructor getConstructor() => point.ct;
@@ -104,31 +104,31 @@ namespace Sla.SLEIGH
 
         public Address getAddr()
         {
-            if (cross_context != (ParserContext*)0) { return cross_context.getAddr(); }
+            if (cross_context != (ParserContext)null) { return cross_context.getAddr(); }
             return const_context.getAddr();
         }
 
         public Address getNaddr()
         {
-            if (cross_context != (ParserContext*)0) { return cross_context.getNaddr(); }
+            if (cross_context != (ParserContext)null) { return cross_context.getNaddr(); }
             return const_context.getNaddr();
         }
 
         public Address getN2addr()
         {
-            if (cross_context != (ParserContext*)0) { return cross_context.getN2addr(); }
+            if (cross_context != (ParserContext)null) { return cross_context.getN2addr(); }
             return const_context.getN2addr();
         }
 
         public Address getRefAddr()
         {
-            if (cross_context != (ParserContext*)0) { return cross_context.getRefAddr(); }
+            if (cross_context != (ParserContext)null) { return cross_context.getRefAddr(); }
             return const_context.getRefAddr();
         }
 
         public Address getDestAddr()
         {
-            if (cross_context != (ParserContext*)0) { return cross_context.getDestAddr(); }
+            if (cross_context != (ParserContext)null) { return cross_context.getDestAddr(); }
             return const_context.getDestAddr();
         }
 

@@ -38,6 +38,6 @@ namespace Sla.SLEIGH
 
         public int getRefCount() => ref_count;
 
-        public override symbol_type getType() => section_symbol;
+        public override symbol_type getType() => SleighSymbol.symbol_type.section_symbol;
     }
 }

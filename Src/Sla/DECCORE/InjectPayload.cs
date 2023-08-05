@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.Intrinsics;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -75,13 +74,11 @@ namespace Sla.DECCORE
         protected void orderParameters()
         {
             int id = 0;
-            for (int i = 0; i < inputlist.size(); ++i)
-            {
+            for (int i = 0; i < inputlist.Count; ++i) {
                 inputlist[i].index = id;
                 id += 1;
             }
-            for (int i = 0; i < output.size(); ++i)
-            {
+            for (int i = 0; i < output.Count; ++i) {
                 output[i].index = id;
                 id += 1;
             }
@@ -94,20 +91,17 @@ namespace Sla.DECCORE
         {
             paramshift = 0;
             dynamic = false;
-            for (; ; )
-            {
+            for (; ; ) {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
-                if (attribId == ATTRIB_PARAMSHIFT)
-                {
-                    paramshift = decoder.readSignedInteger();
+                if (attribId == AttributeId.ATTRIB_PARAMSHIFT) {
+                    paramshift = (int)decoder.readSignedInteger();
                 }
-                else if (attribId == ATTRIB_DYNAMIC)
+                else if (attribId == AttributeId.ATTRIB_DYNAMIC)
                     dynamic = decoder.readBool();
-                else if (attribId == ATTRIB_INCIDENTALCOPY)
+                else if (attribId == AttributeId.ATTRIB_INCIDENTALCOPY)
                     incidentalCopy = decoder.readBool();
-                else if (attribId == ATTRIB_INJECT)
-                {
+                else if (attribId == AttributeId.ATTRIB_INJECT) {
                     string uponType = decoder.readString();
                     if (uponType == "uponentry")
                         name = name + "@@inject_uponentry";
@@ -150,7 +144,7 @@ namespace Sla.DECCORE
             paramshift=0;
             dynamic = false;
             incidentalCopy = false;
-        }   ///< Construct for use with decode
+        }
 
         /// Get the number of parameters shifted
         protected int getParamShift() => paramshift;
@@ -188,13 +182,13 @@ namespace Sla.DECCORE
         internal abstract void inject(InjectContext context, PcodeEmit emit);
 
         /// Decode \b this payload from a stream
-        protected abstract void decode(Sla.CORE.Decoder decoder);
+        internal abstract void decode(Sla.CORE.Decoder decoder);
 
         /// Print the p-code ops of the injection to a stream (for debugging)
-        protected abstract void printTemplate(TextWriter s);
+        internal abstract void printTemplate(TextWriter s);
 
         /// Return the name of the injection
-        protected virtual string getName() => name;
+        internal virtual string getName() => name;
 
         /// Return the type of injection (CALLFIXUP_TYPE, CALLOTHERFIXUP_TYPE, etc.)
         protected virtual int getType() => type;

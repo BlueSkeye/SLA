@@ -19,7 +19,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleTransformCpool(getGroup());
         }
 
@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         ///
         /// If a reference into the constant pool is a constant, convert the CPOOLREF to
         /// a COPY of the constant.  Otherwise just append the type id of the reference to the top.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_CPOOLREF);
         }

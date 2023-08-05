@@ -321,62 +321,62 @@ namespace Sla.DECCORE
             if (forcegoto.empty() && deadcodedelay.empty() && indirectover.empty() && protoover.empty() &&
                 multistagejump.empty() && flowoverride.empty())
                 return;
-            encoder.openElement(ELEM_OVERRIDE);
+            encoder.openElement(ElementId.ELEM_OVERRIDE);
 
             Dictionary<Address, Address>::const_iterator iter;
 
             for (iter = forcegoto.begin(); iter != forcegoto.end(); ++iter)
             {
-                encoder.openElement(ELEM_FORCEGOTO);
+                encoder.openElement(ElementId.ELEM_FORCEGOTO);
                 (*iter).first.encode(encoder);
                 (*iter).second.encode(encoder);
-                encoder.closeElement(ELEM_FORCEGOTO);
+                encoder.closeElement(ElementId.ELEM_FORCEGOTO);
             }
 
             for (int i = 0; i < deadcodedelay.size(); ++i)
             {
                 if (deadcodedelay[i] < 0) continue;
                 AddrSpace* spc = glb.getSpace(i);
-                encoder.openElement(ELEM_DEADCODEDELAY);
-                encoder.writeSpace(ATTRIB_SPACE, spc);
-                encoder.writeSignedInteger(ATTRIB_DELAY, deadcodedelay[i]);
-                encoder.closeElement(ELEM_DEADCODEDELAY);
+                encoder.openElement(ElementId.ELEM_DEADCODEDELAY);
+                encoder.writeSpace(AttributeId.ATTRIB_SPACE, spc);
+                encoder.writeSignedInteger(AttributeId.ATTRIB_DELAY, deadcodedelay[i]);
+                encoder.closeElement(ElementId.ELEM_DEADCODEDELAY);
             }
 
             for (iter = indirectover.begin(); iter != indirectover.end(); ++iter)
             {
-                encoder.openElement(ELEM_INDIRECTOVERRIDE);
+                encoder.openElement(ElementId.ELEM_INDIRECTOVERRIDE);
                 (*iter).first.encode(encoder);
                 (*iter).second.encode(encoder);
-                encoder.closeElement(ELEM_INDIRECTOVERRIDE);
+                encoder.closeElement(ElementId.ELEM_INDIRECTOVERRIDE);
             }
 
             Dictionary<Address, FuncProto*>::const_iterator fiter;
 
             for (fiter = protoover.begin(); fiter != protoover.end(); ++fiter)
             {
-                encoder.openElement(ELEM_PROTOOVERRIDE);
+                encoder.openElement(ElementId.ELEM_PROTOOVERRIDE);
                 (*fiter).first.encode(encoder);
                 (*fiter).second.encode(encoder);
-                encoder.closeElement(ELEM_PROTOOVERRIDE);
+                encoder.closeElement(ElementId.ELEM_PROTOOVERRIDE);
             }
 
             for (int i = 0; i < multistagejump.size(); ++i)
             {
-                encoder.openElement(ELEM_MULTISTAGEJUMP);
+                encoder.openElement(ElementId.ELEM_MULTISTAGEJUMP);
                 multistagejump[i].encode(encoder);
-                encoder.closeElement(ELEM_MULTISTAGEJUMP);
+                encoder.closeElement(ElementId.ELEM_MULTISTAGEJUMP);
             }
 
             Dictionary<Address, uint>::const_iterator titer;
             for (titer = flowoverride.begin(); titer != flowoverride.end(); ++titer)
             {
-                encoder.openElement(ELEM_FLOW);
-                encoder.writeString(ATTRIB_TYPE, typeToString((*titer).second));
+                encoder.openElement(ElementId.ELEM_FLOW);
+                encoder.writeString(AttributeId.ATTRIB_TYPE, typeToString((*titer).second));
                 (*titer).first.encode(encoder);
-                encoder.closeElement(ELEM_FLOW);
+                encoder.closeElement(ElementId.ELEM_FLOW);
             }
-            encoder.closeElement(ELEM_OVERRIDE);
+            encoder.closeElement(ElementId.ELEM_OVERRIDE);
         }
 
         /// \brief Parse and \<override> element containing override commands
@@ -385,7 +385,7 @@ namespace Sla.DECCORE
         /// \param glb is the Architecture
         public void decode(Decoder decoder, Architecture glb)
         {
-            uint elemId = decoder.openElement(ELEM_OVERRIDE);
+            uint elemId = decoder.openElement(ElementId.ELEM_OVERRIDE);
             for (; ; )
             {
                 uint subId = decoder.openElement();
@@ -412,8 +412,8 @@ namespace Sla.DECCORE
                 }
                 else if (subId == ELEM_DEADCODEDELAY)
                 {
-                    int delay = decoder.readSignedInteger(ATTRIB_DELAY);
-                    AddrSpace* spc = decoder.readSpace(ATTRIB_SPACE);
+                    int delay = decoder.readSignedInteger(AttributeId.ATTRIB_DELAY);
+                    AddrSpace* spc = decoder.readSpace(AttributeId.ATTRIB_SPACE);
                     if (delay < 0)
                         throw new LowlevelError("Bad deadcodedelay tag");
                     insertDeadcodeDelay(spc, delay);
@@ -425,7 +425,7 @@ namespace Sla.DECCORE
                 }
                 else if (subId == ELEM_FLOW)
                 {
-                    uint type = stringToType(decoder.readString(ATTRIB_TYPE));
+                    uint type = stringToType(decoder.readString(AttributeId.ATTRIB_TYPE));
                     Address addr = Address::decode(decoder);
                     if ((type == Override.Branching.NONE) || (addr.isInvalid()))
                         throw new LowlevelError("Bad flowoverride tag");

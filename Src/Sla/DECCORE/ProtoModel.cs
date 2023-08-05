@@ -563,13 +563,13 @@ namespace Sla.DECCORE
         /// Restore \b this model from a stream
         /// Parse details about \b this model from a \<prototype> element
         /// \param decoder is the stream decoder
-        public virtual void decode(Decoder decoder)
+        public virtual void decode(Sla.CORE.Decoder decoder)
         {
             bool sawlocalrange = false;
             bool sawparamrange = false;
             bool sawretaddr = false;
             stackgrowsnegative = true;  // Default growth direction
-            AddrSpace* stackspc = glb.getStackSpace();
+            AddrSpace? stackspc = glb.getStackSpace();
             if (stackspc != (AddrSpace)null)
                 stackgrowsnegative = stackspc.stackGrowsNegative();    // Get growth boolean from stack space itself
             string strategystring;
@@ -579,35 +579,30 @@ namespace Sla.DECCORE
             hasThis = false;
             isConstruct = false;
             isPrinted = true;
-            effectlist.clear();
+            effectlist.Clear();
             injectUponEntry = -1;
             injectUponReturn = -1;
-            likelytrash.clear();
-            uint elemId = decoder.openElement(ELEM_PROTOTYPE);
+            likelytrash.Clear();
+            uint elemId = decoder.openElement(ElementId.ELEM_PROTOTYPE);
             for (; ; )
             {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
-                if (attribId == ATTRIB_NAME)
+                if (attribId == AttributeId.ATTRIB_NAME)
                     name = decoder.readString();
-                else if (attribId == ATTRIB_EXTRAPOP)
-                {
+                else if (attribId == AttributeId.ATTRIB_EXTRAPOP) {
                     extrapop = decoder.readSignedIntegerExpectString("unknown", extrapop_unknown);
                 }
-                else if (attribId == ATTRIB_STACKSHIFT)
-                {
+                else if (attribId == AttributeId.ATTRIB_STACKSHIFT) {
                     // Allow this attribute for backward compatibility
                 }
-                else if (attribId == ATTRIB_STRATEGY)
-                {
+                else if (attribId == AttributeId.ATTRIB_STRATEGY) {
                     strategystring = decoder.readString();
                 }
-                else if (attribId == ATTRIB_HASTHIS)
-                {
+                else if (attribId == AttributeId.ATTRIB_HASTHIS) {
                     hasThis = decoder.readBool();
                 }
-                else if (attribId == ATTRIB_CONSTRUCTOR)
-                {
+                else if (attribId == AttributeId.ATTRIB_CONSTRUCTOR) {
                     isConstruct = decoder.readBool();
                 }
                 else
@@ -623,32 +618,26 @@ namespace Sla.DECCORE
             {
                 uint subId = decoder.peekElement();
                 if (subId == 0) break;
-                if (subId == ELEM_INPUT)
-                {
+                if (subId == ElementId.ELEM_INPUT) {
                     input.decode(decoder, effectlist, stackgrowsnegative);
-                    if (stackspc != (AddrSpace)null)
-                    {
+                    if (stackspc != (AddrSpace)null) {
                         input.getRangeList(stackspc, paramrange);
                         if (!paramrange.empty())
                             sawparamrange = true;
                     }
                 }
-                else if (subId == ELEM_OUTPUT)
-                {
+                else if (subId == ElementId.ELEM_OUTPUT) {
                     output.decode(decoder, effectlist, stackgrowsnegative);
                 }
-                else if (subId == ELEM_UNAFFECTED)
-                {
+                else if (subId == ElementId.ELEM_UNAFFECTED) {
                     decoder.openElement();
-                    while (decoder.peekElement() != 0)
-                    {
+                    while (decoder.peekElement() != 0) {
                         effectlist.emplace_back();
                         effectlist.GetLastItem().decode(EffectRecord::unaffected, decoder);
                     }
                     decoder.closeElement(subId);
                 }
-                else if (subId == ELEM_KILLEDBYCALL)
-                {
+                else if (subId == ElementId.ELEM_KILLEDBYCALL) {
                     decoder.openElement();
                     while (decoder.peekElement() != 0)
                     {
@@ -657,57 +646,47 @@ namespace Sla.DECCORE
                     }
                     decoder.closeElement(subId);
                 }
-                else if (subId == ELEM_RETURNADDRESS)
-                {
+                else if (subId == ElementId.ELEM_RETURNADDRESS) {
                     decoder.openElement();
-                    while (decoder.peekElement() != 0)
-                    {
+                    while (decoder.peekElement() != 0) {
                         effectlist.emplace_back();
                         effectlist.GetLastItem().decode(EffectRecord::return_address, decoder);
                     }
                     decoder.closeElement(subId);
                     sawretaddr = true;
                 }
-                else if (subId == ELEM_LOCALRANGE)
-                {
+                else if (subId == ElementId.ELEM_LOCALRANGE) {
                     sawlocalrange = true;
                     decoder.openElement();
-                    while (decoder.peekElement() != 0)
-                    {
-                        Range range;
+                    while (decoder.peekElement() != 0) {
+                        Sla.CORE.Range range = new CORE.Range();
                         range.decode(decoder);
                         localrange.insertRange(range.getSpace(), range.getFirst(), range.getLast());
                     }
                     decoder.closeElement(subId);
                 }
-                else if (subId == ELEM_PARAMRANGE)
-                {
+                else if (subId == ElementId.ELEM_PARAMRANGE) {
                     sawparamrange = true;
                     decoder.openElement();
-                    while (decoder.peekElement() != 0)
-                    {
-                        Range range;
+                    while (decoder.peekElement() != 0) {
+                        Sla.CORE.Range range = new CORE.Range();
                         range.decode(decoder);
                         paramrange.insertRange(range.getSpace(), range.getFirst(), range.getLast());
                     }
                     decoder.closeElement(subId);
                 }
-                else if (subId == ELEM_LIKELYTRASH)
-                {
+                else if (subId == ElementId.ELEM_LIKELYTRASH) {
                     decoder.openElement();
-                    while (decoder.peekElement() != 0)
-                    {
-                        likelytrash.emplace_back();
-                        likelytrash.GetLastItem().decode(decoder);
+                    while (decoder.peekElement() != 0) {
+                        likelytrash.Add(VarnodeData.decode(decoder));
                     }
                     decoder.closeElement(subId);
                 }
-                else if (subId == ELEM_PCODE)
-                {
+                else if (subId == ElementId.ELEM_PCODE) {
                     int injectId = glb.pcodeinjectlib.decodeInject("Protomodel : " + name, name,
-                                          InjectPayload::CALLMECHANISM_TYPE, decoder);
-                    InjectPayload* payload = glb.pcodeinjectlib.getPayload(injectId);
-                    if (payload.getName().find("uponentry") != string::npos)
+                        InjectPayload.InjectionType.CALLMECHANISM_TYPE, decoder);
+                    InjectPayload payload = glb.pcodeinjectlib.getPayload(injectId);
+                    if (-1 != payload.getName().IndexOf("uponentry"))
                         injectUponEntry = injectId;
                     else
                         injectUponReturn = injectId;
@@ -716,13 +695,12 @@ namespace Sla.DECCORE
                     throw new LowlevelError("Unknown element in prototype");
             }
             decoder.closeElement(elemId);
-            if ((!sawretaddr) && (glb.defaultReturnAddr.space != (AddrSpace)null))
-            {
+            if (!sawretaddr && (glb.defaultReturnAddr.space != (AddrSpace)null)) {
                 // Provide the default return address, if there isn't a specific one for the model
-                effectlist.Add(EffectRecord(glb.defaultReturnAddr, EffectRecord::return_address));
+                effectlist.Add(new EffectRecord(glb.defaultReturnAddr, EffectRecord::return_address));
             }
-            sort(effectlist.begin(), effectlist.end(), EffectRecord::compareByAddress);
-            sort(likelytrash.begin(), likelytrash.end());
+            effectlist.Sort(EffectRecord::compareByAddress);
+            likelytrash.Sort();
             if (!sawlocalrange)
                 defaultLocalRange();
             if (!sawparamrange)
@@ -730,7 +708,6 @@ namespace Sla.DECCORE
         }
 
         /// \brief Look up an effect from the given EffectRecord list
-        ///
         /// If a given memory range matches an EffectRecord, return the effect type.
         /// Otherwise return EffectRecord::unknown_effect
         /// \param efflist is the list of EffectRecords which must be sorted
@@ -778,23 +755,20 @@ namespace Sla.DECCORE
             int size)
         {
             if (listSize == 0) return -1;
-            EffectRecord cur(addr, size);
+            EffectRecord cur = new EffectRecord(addr, size);
 
             List<EffectRecord>::const_iterator begiter = efflist.begin();
             List<EffectRecord>::const_iterator enditer = begiter + listSize;
-            List<EffectRecord>::const_iterator iter;
-
-            iter = upper_bound(begiter, enditer, cur, EffectRecord::compareByAddress);
+            
+            IEnumerator<EffectRecord> iter = upper_bound(begiter, enditer, cur, EffectRecord.compareByAddress);
             // First element greater than cur  (address must be greater)
             // go back one more, and we get first el less or equal to cur
-            if (iter == efflist.begin())
-            {
-                Address closeAddr = (*iter).getAddress();
-                return (closeAddr.overlap(0, addr, size) < 0) ? -1 : -2;
+            if (iter == efflist.begin()) {
+                return (iter.Current.getAddress().overlap(0, addr, size) < 0) ? -1 : -2;
             }
             --iter;
-            Address closeAddr = (*iter).getAddress();
-            int sz = (*iter).getSize();
+            Address closeAddr = iter.Current.getAddress();
+            int sz = iter.Current.getSize();
             if (addr == closeAddr && size == sz)
                 return iter - begiter;
             return (addr.overlap(0, closeAddr, sz) < 0) ? -1 : -2;

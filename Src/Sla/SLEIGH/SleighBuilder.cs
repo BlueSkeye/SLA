@@ -108,7 +108,7 @@ namespace Sla.SLEIGH
             {
                 SubtableSymbol* sym = (SubtableSymbol*)ct.getOperand(i).getDefiningSymbol();
                 if (sym == (SubtableSymbol*)0) continue;
-                if (sym.getType() != SleighSymbol::subtable_symbol) continue;
+                if (sym.getType() !=  SleighSymbol.symbol_type.subtable_symbol) continue;
 
                 walker.pushOperand(i);
                 ConstructTpl* construct = walker.getConstructor().getNamedTempl(secnum);
@@ -221,7 +221,7 @@ namespace Sla.SLEIGH
             int index = bld.getIn(0).getOffset().getReal(); // Recover operand index from build statement
                                                                // Check if operand is a subtable
             SubtableSymbol* sym = (SubtableSymbol*)walker.getConstructor().getOperand(index).getDefiningSymbol();
-            if ((sym == (SubtableSymbol*)0) || (sym.getType() != SleighSymbol::subtable_symbol)) return;
+            if ((sym == (SubtableSymbol*)0) || (sym.getType() !=  SleighSymbol.symbol_type.subtable_symbol)) return;
 
             walker.pushOperand(index);
             Constructor* ct = walker.getConstructor();

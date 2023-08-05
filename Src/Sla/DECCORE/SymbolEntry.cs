@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// Varnode flags specific to this storage location
         private uint extraflags;
         /// Starting address of the storage location
-        private Address addr;
+        internal Address addr;
         /// A dynamic storage address (an alternative to \b addr for dynamic symbols)
         private ulong hash;
         /// Offset into the Symbol that \b this covers
@@ -37,13 +37,13 @@ namespace Sla.DECCORE
         /// Number of bytes consumed by \b this (piece of the) storage
         private int size;
         /// Code address ranges where this storage is valid
-        private RangeList uselimit;
+        internal RangeList uselimit;
 
         /// Construct a mapping for a Symbol without an address
         /// This SymbolEntry is unintegrated. An address or hash must be provided
         /// either directly or via decode().
         /// \param sym is the Symbol \b this will be a map for
-        private SymbolEntry(Symbol sym)
+        internal SymbolEntry(Symbol sym)
         {
             symbol = sym;
             extraflags = 0;
@@ -59,8 +59,8 @@ namespace Sla.DECCORE
         public class EntryInitData
         {
             // friend class SymbolEntry;
-            private AddrSpace* space;       ///< The address space of the main SymbolEntry starting address
-            private Symbol* symbol;     ///< The symbol being mapped
+            private AddrSpace space;       ///< The address space of the main SymbolEntry starting address
+            private Symbol symbol;     ///< The symbol being mapped
             private uint extraflags;       ///< Varnode flags specific to the storage location
             private int offset;        ///< Starting offset of the portion of the Symbol being covered
             private readonly RangeList uselimit = new RangeList();	///< Reference to the range of code addresses for which the storage is valid
@@ -174,8 +174,9 @@ namespace Sla.DECCORE
 
         /// Is \b this storage \e invalid
         public bool isInvalid() => (addr.isInvalid() && (hash == 0));
-  
-        public uint getAllFlags();                    ///< Get all Varnode flags for \b this storage
+
+        ///< Get all Varnode flags for \b this storage
+        public Varnode.varnode_flags getAllFlags();
 
         /// Get offset of \b this within the Symbol
         public int getOffset() => offset;

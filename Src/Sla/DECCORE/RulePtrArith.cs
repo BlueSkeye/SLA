@@ -41,7 +41,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RulePtrArith(getGroup());
         }
 
@@ -64,7 +64,7 @@ namespace Sla.DECCORE
         /// We need to be wary of most things being in the units of the
         /// space being pointed at. Type calculations are always in bytes
         /// so we need to convert between space units and bytes.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_INT_ADD);
         }

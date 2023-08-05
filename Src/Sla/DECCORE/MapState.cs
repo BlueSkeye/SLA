@@ -120,30 +120,27 @@ namespace Sla.DECCORE
         /// the most specific data-type.  Set all elements to use this data-type, and eliminate duplicates.
         private void reconcileDatatypes()
         {
-            List<RangeHint*> newList;
-            newList.reserve(maplist.size());
+            List<RangeHint> newList = new List<RangeHint>();
+            newList.reserve(maplist.Count);
             int startPos = 0;
-            RangeHint* startHint = maplist[0];
-            Datatype* startDatatype = startHint.type;
+            RangeHint startHint = maplist[0];
+            Datatype startDatatype = startHint.type;
             newList.Add(startHint);
             int curPos = 1;
-            while (curPos < maplist.size())
-            {
-                RangeHint* curHint = maplist[curPos++];
-                if (curHint.start == startHint.start && curHint.size == startHint.size)
-                {
-                    Datatype* curDatatype = curHint.type;
+            while (curPos < maplist.Count) {
+                RangeHint curHint = maplist[curPos++];
+                if (curHint.start == startHint.start && curHint.size == startHint.size) {
+                    Datatype curDatatype = curHint.type;
                     if (curDatatype.typeOrder(*startDatatype) < 0) // Take the most specific variant of data-type
                         startDatatype = curDatatype;
                     if (curHint.compare(*newList.GetLastItem()) != 0)
                         newList.Add(curHint);     // Keep the current hint if it is otherwise different
-                    else
-                        delete curHint;     // RangeHint is on the heap, so delete if we are not keeping it
+                    else {
+                        // delete curHint;     // RangeHint is on the heap, so delete if we are not keeping it
+                    }
                 }
-                else
-                {
-                    while (startPos < newList.size())
-                    {
+                else {
+                    while (startPos < newList.size()) {
                         newList[startPos].type = startDatatype;
                         startPos += 1;
                     }
@@ -152,8 +149,7 @@ namespace Sla.DECCORE
                     newList.Add(startHint);
                 }
             }
-            while (startPos < newList.size())
-            {
+            while (startPos < newList.size()) {
                 newList[startPos].type = startDatatype;
                 startPos += 1;
             }

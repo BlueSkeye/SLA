@@ -194,22 +194,20 @@ namespace Sla.DECCORE
         /// \return the categorization
         private int categorizeDatatype(Datatype ct)
         {
-            Datatype* subType;
-            switch (ct.getMetatype())
-            {
+            Datatype subType;
+            switch (ct.getMetatype()) {
                 case type_metatype.TYPE_ARRAY:
                     if (!splitArrays) break;
-                    subType = ((TypeArray*)ct).getBase();
+                    subType = ((TypeArray)ct).getBase();
                     if (subType.getMetatype() != type_metatype.TYPE_UNKNOWN || subType.getSize() != 1)
                         return 0;
                     else
                         return 1;   // unknown1 array does not need splitting and acts as (large) primitive
                 case type_metatype.TYPE_PARTIALSTRUCT:
-                    subType = ((TypePartialStruct*)ct).getParent();
-                    if (subType.getMetatype() == type_metatype.TYPE_ARRAY)
-                    {
+                    subType = ((TypePartialStruct)ct).getParent();
+                    if (subType.getMetatype() == type_metatype.TYPE_ARRAY) {
                         if (!splitArrays) break;
-                        subType = ((TypeArray*)subType).getBase();
+                        subType = ((TypeArray)subType).getBase();
                         if (subType.getMetatype() != type_metatype.TYPE_UNKNOWN || subType.getSize() != 1)
                             return 0;
                         else

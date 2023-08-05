@@ -48,10 +48,10 @@ namespace Sla.DECCORE
                 encodeTypedef(encoder);
                 return;
             }
-            encoder.openElement(ELEM_TYPE);
+            encoder.openElement(ElementId.ELEM_TYPE);
             encodeBasic(metatype, encoder);
-            encoder.writeBool(ATTRIB_CHAR, true);
-            encoder.closeElement(ELEM_TYPE);
+            encoder.writeBool(AttributeId.ATTRIB_CHAR, true);
+            encoder.closeElement(ElementId.ELEM_TYPE);
         }
     }
 }

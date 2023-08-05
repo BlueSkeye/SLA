@@ -37,38 +37,37 @@ namespace Sla.DECCORE
             if (contain.getMetatype() != type_metatype.TYPE_STRUCT && contain.getMetatype() != type_metatype.TYPE_ARRAY)
                 throw new LowlevelError("Parent of partial struct is not a struture or array");
 #endif
-            flags |= has_stripped;
+            flags |= Properties.has_stripped;
             stripped = strip;
             container = contain;
             offset = off;
         }
 
         /// Get the data-type containing \b this piece
-        private Datatype getParent() => container;
+        internal Datatype getParent() => container;
 
-        private override void printRaw(TextWriter s)
+        public override void printRaw(TextWriter s)
         {
             container.printRaw(s);
-            s << "[off=" << dec << offset << ",sz=" << size << ']';
+            s.Write($"[off={offset},sz={size}]");
         }
 
-        private override Datatype getSubType(ulong off, out ulong newoff)
+        public override Datatype? getSubType(ulong off, out ulong newoff)
         {
             int sizeLeft = (size - (int)off);
-            off += offset;
-            Datatype* ct = container;
-            do
-            {
-                ct = ct.getSubType(off, newoff);
+            off += (uint)offset;
+            Datatype? ct = container;
+            do {
+                ct = ct.getSubType(off, out newoff);
                 if (ct == (Datatype)null)
                     break;
-                off = *newoff;
+                off = newoff;
                 // Component can extend beyond range of this partial, in which case we go down another level
             } while (ct.getSize() - (int)off > sizeLeft);
             return ct;
         }
 
-        private override int getHoleSize(int off)
+        public override int getHoleSize(int off)
         {
             int sizeLeft = size - off;
             off += offset;
@@ -78,33 +77,32 @@ namespace Sla.DECCORE
             return res;
         }
 
-        private override int compare(Datatype op, int level)
+        public override int compare(Datatype op, int level)
         {
-            int res = Datatype::compare(op, level);
+            int res = base.compare(op, level);
             if (res != 0) return res;
             // Both must be partial
-            TypePartialStruct* tp = (TypePartialStruct*)&op;
+            TypePartialStruct tp = (TypePartialStruct)op;
             if (offset != tp.offset) return (offset < tp.offset) ? -1 : 1;
             level -= 1;
-            if (level < 0)
-            {
+            if (level < 0) {
                 if (id == op.getId()) return 0;
                 return (id < op.getId()) ? -1 : 1;
             }
-            return container.compare(*tp.container, level); // Compare the underlying union
+            return container.compare(tp.container, level); // Compare the underlying union
         }
 
-        private override int compareDependency(Datatype op)
+        public override int compareDependency(Datatype op)
         {
             if (submeta != op.getSubMeta()) return (submeta < op.getSubMeta()) ? -1 : 1;
-            TypePartialStruct* tp = (TypePartialStruct*)&op;    // Both must be partial
+            TypePartialStruct tp = (TypePartialStruct)op;    // Both must be partial
             if (container != tp.container) return (container < tp.container) ? -1 : 1;    // Compare absolute pointers
             if (offset != tp.offset) return (offset < tp.offset) ? -1 : 1;
             return (op.getSize() - size);
         }
 
-        private override Datatype clone() => new TypePartialStruct(this);
+        internal override Datatype clone() => new TypePartialStruct(this);
 
-        private override Datatype getStripped() => stripped;
+        public override Datatype getStripped() => stripped;
     }
 }

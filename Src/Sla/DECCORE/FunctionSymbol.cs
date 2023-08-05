@@ -79,11 +79,11 @@ namespace Sla.DECCORE
                 fd.encode(encoder, symbolId, false);   // Save the function itself
             else
             {
-                encoder.openElement(ELEM_FUNCTIONSHELL);
-                encoder.writeString(ATTRIB_NAME, name);
+                encoder.openElement(ElementId.ELEM_FUNCTIONSHELL);
+                encoder.writeString(AttributeId.ATTRIB_NAME, name);
                 if (symbolId != 0)
-                    encoder.writeUnsignedInteger(ATTRIB_ID, symbolId);
-                encoder.closeElement(ELEM_FUNCTIONSHELL);
+                    encoder.writeUnsignedInteger(AttributeId.ATTRIB_ID, symbolId);
+                encoder.closeElement(ElementId.ELEM_FUNCTIONSHELL);
             }
         }
 

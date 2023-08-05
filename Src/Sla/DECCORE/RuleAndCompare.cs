@@ -21,7 +21,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleAndCompare(getGroup());
         }
 
@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// \brief Simplify INT_ZEXT and SUBPIECE in masked comparison: `zext(V) & c == 0  =>  V & (c & mask) == 0`
         ///
         /// Similarly:  `sub(V,c) & d == 0  =>  V & (d & mask) == 0`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(OpCode.CPUI_INT_EQUAL);
             oplist.Add(OpCode.CPUI_INT_NOTEQUAL);

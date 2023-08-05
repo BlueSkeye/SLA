@@ -38,6 +38,6 @@ namespace Sla.SLEIGH
 
         public bool isPlaced() => isplaced;
 
-        public override symbol_type getType() => label_symbol;
+        public override symbol_type getType() => SleighSymbol.symbol_type.label_symbol;
     }
 }

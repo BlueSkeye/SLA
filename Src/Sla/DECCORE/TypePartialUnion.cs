@@ -99,11 +99,11 @@ namespace Sla.DECCORE
 
         public override void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_TYPE);
+            encoder.openElement(ElementId.ELEM_TYPE);
             encodeBasic(metatype, encoder);
-            encoder.writeSignedInteger(ATTRIB_OFFSET, offset);
+            encoder.writeSignedInteger(AttributeId.ATTRIB_OFFSET, offset);
             container.encodeRef(encoder);
-            encoder.closeElement(ELEM_TYPE);
+            encoder.closeElement(ElementId.ELEM_TYPE);
         }
 
         public override Datatype getStripped() => stripped;
@@ -117,7 +117,7 @@ namespace Sla.DECCORE
                 if (curType.getMetatype() == type_metatype.TYPE_UNION)
                 {
                     TypeField field = curType.resolveTruncation(curOff, op, slot, curOff);
-                    curType = (field == (TypeField*)0) ? (Datatype)null : field.type;
+                    curType = (field == (TypeField)null) ? (Datatype)null : field.type;
                 }
                 else
                 {

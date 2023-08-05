@@ -268,7 +268,7 @@ namespace Sla.DECCORE
             return new RuleOrPredicate(getGroup());
         }
     
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_INT_OR);
             oplist.Add(CPUI_INT_XOR);

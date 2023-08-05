@@ -1583,7 +1583,7 @@ namespace Sla.SLACOMP
         //            case SleighSymbol::next2_symbol:
         //                sleighlval.next2sym = (Next2Symbol*)sym;
         //                return NEXT2SYM;
-        //            case SleighSymbol::subtable_symbol:
+        //            case  SleighSymbol.symbol_type.subtable_symbol:
         //                sleighlval.subtablesym = (SubtableSymbol*)sym;
         //                return SUBTABLESYM;
         //            case SleighSymbol::macro_symbol:

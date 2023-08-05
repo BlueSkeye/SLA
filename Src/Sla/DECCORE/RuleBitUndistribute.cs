@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleBitUndistribute(getGroup());
         }
 
@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         ///  - `(V >> X) | (W >> X)  =>  (V | W) >> X`
         ///
         /// Works with INT_ZEXT, INT_SEXT, INT_LEFT, INT_RIGHT, and INT_SRIGHT.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             uint list[] = { OpCode.CPUI_INT_AND, OpCode.CPUI_INT_OR, OpCode.CPUI_INT_XOR };
             oplist.insert(oplist.end(), list, list + 3);

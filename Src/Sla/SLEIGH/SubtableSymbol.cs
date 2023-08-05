@@ -145,7 +145,7 @@ namespace Sla.SLEIGH
                 construct[i].collectLocalExports(results);
         }
 
-        public override symbol_type getType() => subtable_symbol;
+        public override symbol_type getType() => SleighSymbol.symbol_type.subtable_symbol;
 
         public override void saveXml(TextWriter s)
         {

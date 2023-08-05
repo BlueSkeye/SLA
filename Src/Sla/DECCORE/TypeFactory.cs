@@ -317,28 +317,25 @@ namespace Sla.DECCORE
         private Datatype decodeTypeNoRef(Decoder decoder, bool forcecore)
         {
             string metastring;
-            Datatype* ct;
+            Datatype ct;
 
             uint elemId = decoder.openElement();
-            if (elemId == ELEM_VOID)
-            {
+            if (elemId == ElementId.ELEM_VOID) {
                 ct = getTypeVoid(); // Automatically a coretype
                 decoder.closeElement(elemId);
                 return ct;
             }
-            if (elemId == ELEM_DEF)
-            {
+            if (elemId == ElementId.ELEM_DEF) {
                 ct = decodeTypedef(decoder);
                 decoder.closeElement(elemId);
                 return ct;
             }
-            type_metatype meta = string2metatype(decoder.readString(ATTRIB_METATYPE));
-            switch (meta)
-            {
+            type_metatype meta = string2metatype(decoder.readString(AttributeId.ATTRIB_METATYPE));
+            switch (meta) {
                 case type_metatype.TYPE_PTR:
                     {
-                        TypePointer tp;
-                        tp.decode(decoder, *this);
+                        TypePointer tp = new TypePointer();
+                        tp.decode(decoder, this);
                         if (forcecore)
                             tp.flags |= Datatype::coretype;
                         ct = findAdd(tp);
@@ -385,9 +382,8 @@ namespace Sla.DECCORE
                     {
                         uint attribId = decoder.getNextAttributeId();
                         if (attribId == 0) break;
-                        if (attribId == ATTRIB_CHAR && decoder.readBool())
-                        {
-                            TypeChar tc(decoder.readString(ATTRIB_NAME));
+                        if (attribId == AttributeId.ATTRIB_CHAR && decoder.readBool()) {
+                            TypeChar tc = new TypeChar(decoder.readString(AttributeId.ATTRIB_NAME));
                             decoder.rewindAttributes();
                             tc.decode(decoder, *this);
                             if (forcecore)
@@ -396,7 +392,7 @@ namespace Sla.DECCORE
                             decoder.closeElement(elemId);
                             return ct;
                         }
-                        else if (attribId == ATTRIB_ENUM && decoder.readBool())
+                        else if (attribId == AttributeId.ATTRIB_ENUM && decoder.readBool())
                         {
                             TypeEnum te = new TypeEnum(1, type_metatype.TYPE_INT); // size and metatype are replaced
                             decoder.rewindAttributes();
@@ -407,8 +403,7 @@ namespace Sla.DECCORE
                             decoder.closeElement(elemId);
                             return ct;
                         }
-                        else if (attribId == ATTRIB_UTF && decoder.readBool())
-                        {
+                        else if (attribId == AttributeId.ATTRIB_UTF && decoder.readBool()) {
                             TypeUnicode tu;
                             decoder.rewindAttributes();
                             tu.decode(decoder, *this);
@@ -452,9 +447,9 @@ namespace Sla.DECCORE
         /// \return the new character Datatype object
         private TypeChar getTypeChar(string n)
         {
-            TypeChar tc(n);
-            tc.id = Datatype::hashName(n);
-            return (TypeChar*)findAdd(tc);
+            TypeChar tc = new TypeChar(n);
+            tc.id = Datatype.hashName(n);
+            return (TypeChar)findAdd(tc);
         }
 
         /// Create a default "unicode" type
@@ -465,9 +460,9 @@ namespace Sla.DECCORE
         /// \return the new character Datatype object
         private TypeUnicode getTypeUnicode(string nm, int sz, type_metatype m)
         {
-            TypeUnicode tu(nm, sz, m);
-            tu.id = Datatype::hashName(nm);
-            return (TypeUnicode*)findAdd(tu);
+            TypeUnicode tu = new TypeUnicode(nm, sz, m);
+            tu.id = Datatype.hashName(nm);
+            return (TypeUnicode)findAdd(tu);
         }
 
         /// Create a default "code" type
@@ -478,12 +473,12 @@ namespace Sla.DECCORE
         private TypeCode getTypeCode(string n)
         {
             if (nm.size() == 0) return getTypeCode();
-            TypeCode tmp;                   // Generic code data-type
+            TypeCode tmp = new TypeCode();                   // Generic code data-type
             tmp.name = nm;              // with a name
             tmp.displayName = nm;
-            tmp.id = Datatype::hashName(nm);
+            tmp.id = Datatype.hashName(nm);
             tmp.markComplete(); // considered complete
-            return (TypeCode*)findAdd(tmp);
+            return (TypeCode)findAdd(tmp);
         }
 
         /// Recalculate submeta for pointers to given base data-type
@@ -623,20 +618,17 @@ namespace Sla.DECCORE
         public void clearNoncore()
         {
             DatatypeSet::iterator iter;
-            Datatype* ct;
 
             iter = tree.begin();
-            while (iter != tree.end())
-            {
-                ct = *iter;
-                if (ct.isCoreType())
-                {
+            while (iter != tree.end()) {
+                Datatype ct = *iter;
+                if (ct.isCoreType()) {
                     ++iter;
                     continue;
                 }
                 nametree.erase(ct);
                 tree.erase(iter++);
-                delete ct;
+                // delete ct;
             }
         }
 
@@ -870,7 +862,7 @@ namespace Sla.DECCORE
         {
             Datatype* ct;
             uint elemId = decoder.peekElement();
-            if (ELEM_TYPEREF == elemId)
+            if (ElementId.ELEM_TYPEREF == elemId)
             {
                 elemId = decoder.openElement();
                 ulong newid = 0;
@@ -888,7 +880,7 @@ namespace Sla.DECCORE
                         size = decoder.readSignedInteger();
                     }
                 }
-                string newname = decoder.readString(ATTRIB_NAME);
+                string newname = decoder.readString(AttributeId.ATTRIB_NAME);
                 if (newid == 0)     // If there was no id, use the name hash
                     newid = Datatype::hashName(newname);
                 ct = findById(newname, newid, size);
@@ -1187,10 +1179,10 @@ namespace Sla.DECCORE
         public TypeCode getTypeCode(ProtoModel model, Datatype outtype, List<Datatype> intypes,
           bool dotdotdot)
         {
-            TypeCode tc;        // getFuncdata type with no name
+            TypeCode tc = new TypeCode();        // getFuncdata type with no name
             tc.setPrototype(this, model, outtype, intypes, dotdotdot, getTypeVoid());
             tc.markComplete();
-            return (TypeCode*)findAdd(tc);
+            return (TypeCode)findAdd(tc);
         }
 
         /// Create a new \e typedef data-type
@@ -1327,7 +1319,7 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Cannot destroy core type");
             nametree.erase(ct);
             tree.erase(ct);
-            delete ct;
+            // delete ct;
         }
 
         /// Convert given data-type to concrete form

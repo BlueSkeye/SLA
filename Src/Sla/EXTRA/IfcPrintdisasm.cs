@@ -18,14 +18,13 @@ namespace Sla.EXTRA
         /// Otherwise disassembly is between the two provided addresses.
         public override void execute(TextReader s)
         {
-            Architecture* glb;
+            Architecture glb;
             Address addr;
             int size;
             // TODO add partial listings
 
             s >> ws;
-            if (s.eof())
-            {
+            if (s.eof()) {
                 if (dcp.fd == (Funcdata)null)
                     throw new IfaceExecutionError("No function selected");
                 *status.fileoptr << "Assembly listing for " << dcp.fd.getName() << endl;
@@ -33,17 +32,15 @@ namespace Sla.EXTRA
                 size = dcp.fd.getSize();
                 glb = dcp.fd.getArch();
             }
-            else
-            {
+            else {
                 addr = parse_machaddr(s, size, *dcp.conf.types); // Read beginning address
                 s >> ws;
                 Address offset2 = parse_machaddr(s, size, *dcp.conf.types);
-                size = offset2.getOffset() - addr.getOffset();
+                size = (int)(offset2.getOffset() - addr.getOffset());
                 glb = dcp.conf;
             }
             IfaceAssemblyEmit assem = new IfaceAssemblyEmit(status.fileoptr,10);
-            while (size > 0)
-            {
+            while (size > 0) {
                 int sz;
                 sz = glb.translate.printAssembly(assem, addr);
                 addr = addr + sz;

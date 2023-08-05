@@ -179,26 +179,23 @@ namespace Sla.DECCORE
                 vn.setSymbolEntry(entry);
                 return entry.getSymbol();
             }
-            HighVariable* high = vn.getHigh();
-            Varnode* otherVn;
-            HighVariable* otherHigh = (HighVariable)null;
+            HighVariable high = vn.getHigh();
+            Varnode otherVn;
+            HighVariable? otherHigh = (HighVariable)null;
             // Look for a conflicting HighVariable
             VarnodeLocSet::const_iterator iter = beginLoc(entry.getSize(), entry.getAddr());
-            while (iter != endLoc())
-            {
+            while (iter != endLoc()) {
                 otherVn = *iter;
                 if (otherVn.getSize() != entry.getSize()) break;
                 if (otherVn.getAddr() != entry.getAddr()) break;
-                HighVariable* tmpHigh = otherVn.getHigh();
-                if (tmpHigh != high)
-                {
+                HighVariable tmpHigh = otherVn.getHigh();
+                if (tmpHigh != high) {
                     otherHigh = tmpHigh;
                     break;
                 }
                 ++iter;
             }
-            if (otherHigh == (HighVariable)null)
-            {
+            if (otherHigh == (HighVariable)null) {
                 vn.setSymbolEntry(entry);
                 return entry.getSymbol();
             }
@@ -218,57 +215,49 @@ namespace Sla.DECCORE
         /// \param updateDatatypes is \b true if the caller wants to update data-types
         /// \param unmappedAliasCheck is \b true if an alias check should be performed on unmapped Varnodes
         /// \return \b true if any Varnode was updated
-        private bool syncVarnodesWithSymbol(VarnodeLocSet::const_iterator iter, uint fl,
-            Datatype ct)
+        private bool syncVarnodesWithSymbol(ScopeLocal lm, bool updateDatatypes, bool unmappedAliasCheck)
         {
             bool updateoccurred = false;
             VarnodeLocSet::const_iterator iter, enditer;
-            Datatype* ct;
-            SymbolEntry* entry;
-            uint fl;
+            Datatype? ct;
+            SymbolEntry? entry;
+            Varnode.varnode_flags fl;
 
             iter = vbank.beginLoc(lm.getSpaceId());
             enditer = vbank.endLoc(lm.getSpaceId());
-            while (iter != enditer)
-            {
-                Varnode* vnexemplar = *iter;
+            while (iter != enditer) {
+                Varnode vnexemplar = *iter;
                 entry = lm.findOverlap(vnexemplar.getAddr(), vnexemplar.getSize());
                 ct = (Datatype)null;
-                if (entry != (SymbolEntry)null)
-                {
+                if (entry != (SymbolEntry)null) {
                     fl = entry.getAllFlags();
-                    if (entry.getSize() >= vnexemplar.getSize())
-                    {
-                        if (updateDatatypes)
-                        {
+                    if (entry.getSize() >= vnexemplar.getSize()) {
+                        if (updateDatatypes) {
                             ct = entry.getSizedType(vnexemplar.getAddr(), vnexemplar.getSize());
                             if (ct != (Datatype)null && ct.getMetatype() == type_metatype.TYPE_UNKNOWN)
                                 ct = (Datatype)null;
                         }
                     }
-                    else
-                    { // Overlapping but not containing
-                      // This is usual indicative of a small locked symbol
-                      // getting put in a bigger register
-                      // Don't try to figure out type
-                      // Don't keep typelock and namelock
-                        fl &= ~((uint)(Varnode.varnode_flags.typelock | Varnode.varnode_flags.namelock));
+                    else {
+                        // Overlapping but not containing
+                        // This is usual indicative of a small locked symbol
+                        // getting put in a bigger register
+                        // Don't try to figure out type
+                        // Don't keep typelock and namelock
+                        fl &= ~(Varnode.varnode_flags.typelock | Varnode.varnode_flags.namelock);
                         // we do particularly want to keep the nolocalalias
                     }
                 }
-                else
-                { // Could not find any symbol
-                    if (lm.inScope(vnexemplar.getAddr(), vnexemplar.getSize(),
-                            vnexemplar.getUsePoint(*this)))
-                    {
+                else {
+                    // Could not find any symbol
+                    if (lm.inScope(vnexemplar.getAddr(), vnexemplar.getSize(), vnexemplar.getUsePoint(*this))) {
                         // This is technically an error, there should be some
                         // kind of symbol, if we are in scope
                         fl = Varnode.varnode_flags.mapped | Varnode.varnode_flags.addrtied;
                     }
-                    else if (unmappedAliasCheck)
-                    {
+                    else if (unmappedAliasCheck) {
                         // If the varnode is not in scope, check if we should treat as unaliased
-                        fl = lm.isUnmappedUnaliased(vnexemplar) ? Varnode::nolocalalias : 0;
+                        fl = lm.isUnmappedUnaliased(vnexemplar) ? Varnode.varnode_flags.nolocalalias : 0;
                     }
                     else
                         fl = 0;
@@ -1775,13 +1764,13 @@ namespace Sla.DECCORE
         /// \param savetree is \b true if the p-code tree should be emitted
         public void encode(Encoder encoder, ulong id, bool savetree)
         {
-            encoder.openElement(ELEM_FUNCTION);
+            encoder.openElement(ElementId.ELEM_FUNCTION);
             if (id != 0)
-                encoder.writeUnsignedInteger(ATTRIB_ID, id);
-            encoder.writeString(ATTRIB_NAME, name);
-            encoder.writeSignedInteger(ATTRIB_SIZE, size);
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_ID, id);
+            encoder.writeString(AttributeId.ATTRIB_NAME, name);
+            encoder.writeSignedInteger(AttributeId.ATTRIB_SIZE, size);
             if (hasNoCode())
-                encoder.writeBool(ATTRIB_NOCODE, true);
+                encoder.writeBool(AttributeId.ATTRIB_NOCODE, true);
             baseaddr.encode(encoder);
 
             if (!hasNoCode())
@@ -1797,7 +1786,7 @@ namespace Sla.DECCORE
             encodeJumpTable(encoder);
             funcp.encode(encoder);      // Must be saved after database
             localoverride.encode(encoder, glb);
-            encoder.closeElement(ELEM_FUNCTION);
+            encoder.closeElement(ElementId.ELEM_FUNCTION);
         }
 
         /// Restore the state of \b this function from an XML description
@@ -1812,7 +1801,7 @@ namespace Sla.DECCORE
             size = -1;
             ulong id = 0;
             AddrSpace* stackid = glb.getStackSpace();
-            uint elemId = decoder.openElement(ELEM_FUNCTION);
+            uint elemId = decoder.openElement(ElementId.ELEM_FUNCTION);
             for (; ; )
             {
                 uint attribId = decoder.getNextAttributeId();
@@ -1906,7 +1895,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decodeJumpTable(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_JUMPTABLELIST);
+            uint elemId = decoder.openElement(ElementId.ELEM_JUMPTABLELIST);
             while (decoder.peekElement() != 0)
             {
                 JumpTable* jt = new JumpTable(glb);
@@ -4855,7 +4844,7 @@ namespace Sla.DECCORE
                     return jt;
                 }
             }
-            return (JumpTable*)0;
+            return (JumpTable)null;
         }
 
         /// Find a jump-table associated with a given BRANCHIND
@@ -4872,7 +4861,7 @@ namespace Sla.DECCORE
                 jt = *iter;
                 if (jt.getOpAddress() == op.getAddr()) return jt;
             }
-            return (JumpTable*)0;
+            return (JumpTable)null;
         }
 
         /// Install a new jump-table for the given Address
@@ -4913,7 +4902,7 @@ namespace Sla.DECCORE
 
             failuremode = 0;
             jt = linkJumpTable(op);     // Search for pre-existing jumptable
-            if (jt != (JumpTable*)0)
+            if (jt != (JumpTable)null)
             {
                 if (!jt.isOverride())
                 {
@@ -4922,19 +4911,19 @@ namespace Sla.DECCORE
                 }
                 failuremode = stageJumpTable(partial, jt, op, flow); // Recover based on override information
                 if (failuremode != 0)
-                    return (JumpTable*)0;
+                    return (JumpTable)null;
                 jt.setIndirectOp(op);  // Relink table back to original op
                 return jt;
             }
 
             if ((flags & jumptablerecovery_dont) != 0)
-                return (JumpTable*)0;   // Explicitly told not to recover jumptables
+                return (JumpTable)null;   // Explicitly told not to recover jumptables
             if (earlyJumpTableFail(op))
-                return (JumpTable*)0;
+                return (JumpTable)null;
             JumpTable trialjt(glb);
             failuremode = stageJumpTable(partial, &trialjt, op, flow);
             if (failuremode != 0)
-                return (JumpTable*)0;
+                return (JumpTable)null;
             //  if (trialjt.is_twostage())
             //    warning("Jumptable maybe incomplete. Second-stage recovery not implemented",trialjt.Opaddress());
             jt = new JumpTable(&trialjt); // Make the jumptable permanent

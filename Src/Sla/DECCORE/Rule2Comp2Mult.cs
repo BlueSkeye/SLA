@@ -18,13 +18,13 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new Rule2Comp2Mult(getGroup());
         }
 
         /// \class Rule2Comp2Mult
         /// \brief Eliminate INT_2COMP:  `-V  =>  V * -1`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_INT_2COMP);
         }

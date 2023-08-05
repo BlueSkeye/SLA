@@ -119,7 +119,7 @@ namespace Sla.SLEIGH
         {
             pattern = (TokenPattern)null;
             parent = (SubtableSymbol*)0;
-            pateq = (PatternEquation*)0;
+            pateq = (PatternEquation)null;
             templ = (ConstructTpl)null;
             firstwhitespace = -1;
             flowthruindex = -1;
@@ -130,7 +130,7 @@ namespace Sla.SLEIGH
         {
             pattern = (TokenPattern)null;
             parent = p;
-            pateq = (PatternEquation*)0;
+            pateq = (PatternEquation)null;
             templ = (ConstructTpl)null;
             firstwhitespace = -1;
             inerror = false;
@@ -138,21 +138,20 @@ namespace Sla.SLEIGH
 
         ~Constructor()
         {
-            if (pattern != (TokenPattern)null)
-                delete pattern;
-            if (pateq != (PatternEquation*)0)
-                PatternEquation::release(pateq);
-            if (templ != (ConstructTpl)null)
-                delete templ;
-            for (int i = 0; i < namedtempl.size(); ++i)
-            {
-                ConstructTpl* ntpl = namedtempl[i];
-                if (ntpl != (ConstructTpl)null)
-                    delete ntpl;
-            }
-            List<ContextChange*>::iterator iter;
-            for (iter = context.begin(); iter != context.end(); ++iter)
-                delete* iter;
+            //if (pattern != (TokenPattern)null)
+            //    delete pattern;
+            //if (pateq != (PatternEquation)null)
+            //    PatternEquation.release(pateq);
+            //if (templ != (ConstructTpl)null)
+            //    delete templ;
+            //for (int i = 0; i < namedtempl.Count; ++i) {
+            //    ConstructTpl? ntpl = namedtempl[i];
+            //    if (ntpl != (ConstructTpl)null)
+            //        delete ntpl;
+            //}
+            //foreach (ContextChange change in context) {
+            //    // delete deleted;
+            //}
         }
 
         public TokenPattern buildPattern(TextWriter s)
@@ -160,48 +159,43 @@ namespace Sla.SLEIGH
             if (pattern != (TokenPattern)null) return pattern; // Already built
 
             pattern = new TokenPattern();
-            List<TokenPattern> oppattern;
+            List<TokenPattern> oppattern = new List<TokenPattern>();
             bool recursion = false;
             // Generate pattern for each operand, store in oppattern
-            for (int i = 0; i < operands.size(); ++i)
-            {
-                OperandSymbol* sym = operands[i];
-                TripleSymbol* triple = sym.getDefiningSymbol();
-                PatternExpression* defexp = sym.getDefiningExpression();
-                if (triple != (TripleSymbol)null)
-                {
-                    SubtableSymbol* subsym = dynamic_cast<SubtableSymbol*>(triple);
-                    if (subsym != (SubtableSymbol*)0)
-                    {
-                        if (subsym.isBeingBuilt())
-                        { // Detected recursion
-                            if (recursion)
-                            {
+            for (int i = 0; i < operands.Count; ++i) {
+                OperandSymbol sym = operands[i];
+                TripleSymbol? triple = sym.getDefiningSymbol();
+                PatternExpression defexp = sym.getDefiningExpression();
+                if (triple != (TripleSymbol)null) {
+                    SubtableSymbol? subsym = triple as SubtableSymbol;
+                    if (subsym != (SubtableSymbol)null) {
+                        if (subsym.isBeingBuilt()) {
+                            // Detected recursion
+                            if (recursion) {
                                 throw new SleighError("Illegal recursion");
                             }
                             // We should also check that recursion is rightmost extreme
                             recursion = true;
-                            oppattern.emplace_back();
+                            oppattern.Add(new TokenPattern());
                         }
                         else
-                            oppattern.Add(*subsym.buildPattern(s));
+                            oppattern.Add(subsym.buildPattern(s));
                     }
                     else
                         oppattern.Add(triple.getPatternExpression().genMinPattern(oppattern));
                 }
                 else if (defexp != (PatternExpression)null)
                     oppattern.Add(defexp.genMinPattern(oppattern));
-                else
-                {
+                else {
                     throw new SleighError(sym.getName() + ": operand is undefined");
                 }
-                TokenPattern & sympat(oppattern.GetLastItem());
+                TokenPattern sympat = oppattern.GetLastItem();
                 sym.minimumlength = sympat.getMinimumLength();
                 if (sympat.getLeftEllipsis() || sympat.getRightEllipsis())
                     sym.setVariableLength();
             }
 
-            if (pateq == (PatternEquation*)0)
+            if (pateq == (PatternEquation)null)
                 throw new SleighError("Missing equation");
 
             // Build the entire pattern
@@ -469,7 +463,7 @@ namespace Sla.SLEIGH
             for (int i = 0; i < operands.size(); ++i)
             {
                 TripleSymbol* sym = operands[i].getDefiningSymbol();
-                if ((sym != (TripleSymbol)null) && (sym.getType() == SleighSymbol::subtable_symbol))
+                if ((sym != (TripleSymbol)null) && (sym.getType() ==  SleighSymbol.symbol_type.subtable_symbol))
                     check[i] = 0;
                 else
                     check[i] = 2;

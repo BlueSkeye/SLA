@@ -115,7 +115,7 @@ namespace Sla.DECCORE
         /// \param name is the formal name of the payload
         /// \param type is the formal type (CALLFIXUP_TYPE, CALLOTHERFIXUP_TYPE, etc.) of the payload
         /// \return the id associated with the new InjectPayload object
-        protected abstract int allocateInject(string sourceName, string name,int type);
+        protected abstract int allocateInject(string sourceName, string name, InjectPayload.InjectionType type);
 
         ///\brief Finalize a payload within the library, once the payload is initialized
         ///
@@ -150,19 +150,19 @@ namespace Sla.DECCORE
         public int getPayloadId(int type, string nm)
         {
             Dictionary<string, int>::const_iterator iter;
-            if (type == InjectPayload::CALLFIXUP_TYPE)
+            if (type == InjectPayload.InjectionType.CALLFIXUP_TYPE)
             {
                 iter = callFixupMap.find(nm);
                 if (iter == callFixupMap.end())
                     return -1;
             }
-            else if (type == InjectPayload::CALLOTHERFIXUP_TYPE)
+            else if (type == InjectPayload.InjectionType.CALLOTHERFIXUP_TYPE)
             {
                 iter = callOtherFixupMap.find(nm);
                 if (iter == callOtherFixupMap.end())
                     return -1;
             }
-            else if (type == InjectPayload::CALLMECHANISM_TYPE)
+            else if (type == InjectPayload.InjectionType.CALLMECHANISM_TYPE)
             {
                 iter = callMechFixupMap.find(nm);
                 if (iter == callMechFixupMap.end())
@@ -220,7 +220,8 @@ namespace Sla.DECCORE
         /// \param tp is the type of the payload (CALLFIXUP_TYPE, EXECUTABLEPCODE_TYPE, etc.)
         /// \param decoder is the stream decoder
         /// \return the id of the newly registered payload
-        public int decodeInject(string src, string suffix, int tp, Decoder decoder)
+        public int decodeInject(string src, string suffix, InjectPayload.InjectionType tp,
+            Sla.CORE.Decoder decoder)
         {
             int injectid = allocateInject(src, nm, tp);
             getPayload(injectid).decode(decoder);

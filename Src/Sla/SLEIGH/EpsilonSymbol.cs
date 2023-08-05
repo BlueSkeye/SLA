@@ -36,7 +36,7 @@ namespace Sla.SLEIGH
             s << '0';
         }
 
-        public override symbol_type getType() => epsilon_symbol;
+        public override symbol_type getType() => SleighSymbol.symbol_type.epsilon_symbol;
 
         public override VarnodeTpl getVarnode()
         {

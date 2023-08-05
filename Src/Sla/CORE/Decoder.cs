@@ -78,7 +78,7 @@ namespace Sla.CORE
         /// Attributes are automatically set up for traversal using this method, when the element is opened.
         /// If all attributes have been traversed (or there are no attributes), 0 is returned.
         /// \return the id of the next attribute or 0
-        public abstract uint getNextAttributeId();
+        public abstract AttributeId getNextAttributeId();
 
         /// \brief Get the id for the (current) attribute, assuming it is indexed
         /// Assuming the previous call to getNextAttributeId() returned the id of ATTRIB_UNKNOWN,

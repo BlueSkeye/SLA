@@ -71,12 +71,12 @@ namespace Sla.DECCORE
 
         public override void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_EQUATESYMBOL);
+            encoder.openElement(ElementId.ELEM_EQUATESYMBOL);
             encodeHeader(encoder);
-            encoder.openElement(ELEM_VALUE);
-            encoder.writeUnsignedInteger(ATTRIB_CONTENT, value);
-            encoder.closeElement(ELEM_VALUE);
-            encoder.closeElement(ELEM_EQUATESYMBOL);
+            encoder.openElement(ElementId.ELEM_VALUE);
+            encoder.writeUnsignedInteger(AttributeId.ATTRIB_CONTENT, value);
+            encoder.closeElement(ElementId.ELEM_VALUE);
+            encoder.closeElement(ElementId.ELEM_EQUATESYMBOL);
         }
 
         public override void decode(Decoder decoder)
@@ -85,7 +85,7 @@ namespace Sla.DECCORE
             decodeHeader(decoder);
 
             uint subId = decoder.openElement(ElementId.ELEM_VALUE);
-            value = decoder.readUnsignedInteger(ATTRIB_CONTENT);
+            value = decoder.readUnsignedInteger(AttributeId.ATTRIB_CONTENT);
             decoder.closeElement(subId);
 
             TypeFactory* types = scope.getArch().types;

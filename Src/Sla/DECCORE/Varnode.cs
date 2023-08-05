@@ -1748,22 +1748,22 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         public void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_ADDR);
+            encoder.openElement(ElementId.ELEM_ADDR);
             loc.getSpace().encodeAttributes(encoder, loc.getOffset(), size);
-            encoder.writeUnsignedInteger(ATTRIB_REF, getCreateIndex());
+            encoder.writeUnsignedInteger(AttributeId.ATTRIB_REF, getCreateIndex());
             if (mergegroup != 0)
-                encoder.writeSignedInteger(ATTRIB_GRP, getMergeGroup());
+                encoder.writeSignedInteger(AttributeId.ATTRIB_GRP, getMergeGroup());
             if (isPersist())
-                encoder.writeBool(ATTRIB_PERSISTS, true);
+                encoder.writeBool(AttributeId.ATTRIB_PERSISTS, true);
             if (isAddrTied())
-                encoder.writeBool(ATTRIB_ADDRTIED, true);
+                encoder.writeBool(AttributeId.ATTRIB_ADDRTIED, true);
             if (isUnaffected())
-                encoder.writeBool(ATTRIB_UNAFF, true);
+                encoder.writeBool(AttributeId.ATTRIB_UNAFF, true);
             if (isInput())
-                encoder.writeBool(ATTRIB_INPUT, true);
+                encoder.writeBool(AttributeId.ATTRIB_INPUT, true);
             if (isVolatile())
-                encoder.writeBool(ATTRIB_VOLATILE, true);
-            encoder.closeElement(ELEM_ADDR);
+                encoder.writeBool(AttributeId.ATTRIB_VOLATILE, true);
+            encoder.closeElement(ElementId.ELEM_ADDR);
         }
 
         /// Compare Varnodes as pointers

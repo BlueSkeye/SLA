@@ -15,10 +15,10 @@ namespace Sla.SLEIGH
         }
         
         private Translate translate;     // Instruction parser
-        private int parsestate;
+        private ParserContext.State parsestate;
         private AddrSpace const_space;
         private byte[] buf = new byte[16];      // Buffer of bytes in the instruction stream
-        private uint context;     // Pointer to local context
+        private uint[] context;     // Pointer to local context
         private int contextsize;       // Number of entries in context array
         private ContextCache contcache;   // Interface for getting/setting context
         private List<ContextSet> contextcommit;
@@ -33,41 +33,39 @@ namespace Sla.SLEIGH
         
         public ParserContext(ContextCache ccache, Translate trans)
         {
-            parsestate = uninitialized;
+            parsestate = State.uninitialized;
             contcache = ccache;
             translate = trans;
-            if (ccache != (ContextCache*)0)
-            {
+            if (ccache != (ContextCache)null) {
                 contextsize = ccache.getDatabase().getContextSize();
                 context = new uint[contextsize];
             }
-            else
-            {
+            else {
                 contextsize = 0;
-                context = (uint*)0;
+                context = null;
             }
         }
 
         ~ParserContext()
         {
-            if (context != (uint*)0) delete[] context;
+            // if (context != null) delete[] context;
         }
 
-        public byte getBuffer() => buf;
+        public byte[] getBuffer() => buf;
 
         public void initialize(int maxstate, int maxparam, AddrSpace spc)
         {
             const_space = spc;
             state.resize(maxstate);
-            state[0].parent = (ConstructState*)0;
+            state[0].parent = (ConstructState)null;
             for (int i = 0; i < maxstate; ++i)
                 state[i].resolve.resize(maxparam);
             base_state = &state[0];
         }
 
-        public int getParserState() => parsestate;
+        public State getParserState() => parsestate;
 
-        public void setParserState(int st)
+        public void setParserState(State st)
         {
             parsestate = st;
         }
@@ -81,7 +79,7 @@ namespace Sla.SLEIGH
 
         public void allocateOperand(int i, ParserWalkerChange walker)
         {
-            ConstructState* opstate = &state[alloc++];
+            ConstructState opstate = &state[alloc++];
             opstate.parent = walker.point;
             opstate.ct = (Constructor)null;
             walker.point.resolve[i] = opstate;

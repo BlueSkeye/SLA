@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleLessEqual2Zero(getGroup());
         }
 
@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         ///  - `V <= 0  =>  V == 0`
         ///  - `ffff <= V  =>  ffff == V`
         ///  - `V <= ffff` =>  true`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_INT_LESSEQUAL);
         }

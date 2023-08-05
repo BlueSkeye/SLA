@@ -334,36 +334,36 @@ namespace Sla.DECCORE
         {
             set<Address>::const_iterator iter;
 
-            encoder.openElement(ELEM_BASICOVERRIDE);
+            encoder.openElement(ElementId.ELEM_BASICOVERRIDE);
             for (iter = adset.begin(); iter != adset.end(); ++iter)
             {
-                encoder.openElement(ELEM_DEST);
+                encoder.openElement(ElementId.ELEM_DEST);
                 AddrSpace* spc = (*iter).getSpace();
                 ulong off = (*iter).getOffset();
                 spc.encodeAttributes(encoder, off);
-                encoder.closeElement(ELEM_DEST);
+                encoder.closeElement(ElementId.ELEM_DEST);
             }
             if (hash != 0)
             {
-                encoder.openElement(ELEM_NORMADDR);
+                encoder.openElement(ElementId.ELEM_NORMADDR);
                 normaddress.getSpace().encodeAttributes(encoder, normaddress.getOffset());
-                encoder.closeElement(ELEM_NORMADDR);
-                encoder.openElement(ELEM_NORMHASH);
-                encoder.writeUnsignedInteger(ATTRIB_CONTENT, hash);
-                encoder.closeElement(ELEM_NORMHASH);
+                encoder.closeElement(ElementId.ELEM_NORMADDR);
+                encoder.openElement(ElementId.ELEM_NORMHASH);
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_CONTENT, hash);
+                encoder.closeElement(ElementId.ELEM_NORMHASH);
             }
             if (startingvalue != 0)
             {
-                encoder.openElement(ELEM_STARTVAL);
-                encoder.writeUnsignedInteger(ATTRIB_CONTENT, startingvalue);
-                encoder.closeElement(ELEM_STARTVAL);
+                encoder.openElement(ElementId.ELEM_STARTVAL);
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_CONTENT, startingvalue);
+                encoder.closeElement(ElementId.ELEM_STARTVAL);
             }
-            encoder.closeElement(ELEM_BASICOVERRIDE);
+            encoder.closeElement(ElementId.ELEM_BASICOVERRIDE);
         }
 
         public override void decode(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_BASICOVERRIDE);
+            uint elemId = decoder.openElement(ElementId.ELEM_BASICOVERRIDE);
             for (; ; )
             {
                 uint subId = decoder.openElement();
@@ -382,11 +382,11 @@ namespace Sla.DECCORE
                 }
                 else if (subId == ELEM_NORMHASH)
                 {
-                    hash = decoder.readUnsignedInteger(ATTRIB_CONTENT);
+                    hash = decoder.readUnsignedInteger(AttributeId.ATTRIB_CONTENT);
                 }
                 else if (subId == ELEM_STARTVAL)
                 {
-                    startingvalue = decoder.readUnsignedInteger(ATTRIB_CONTENT);
+                    startingvalue = decoder.readUnsignedInteger(AttributeId.ATTRIB_CONTENT);
                 }
                 decoder.closeElement(subId);
             }

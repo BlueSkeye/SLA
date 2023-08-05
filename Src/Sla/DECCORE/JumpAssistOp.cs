@@ -52,8 +52,8 @@ namespace Sla.DECCORE
 
         public override void decode(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_JUMPASSIST);
-            name = decoder.readString(ATTRIB_NAME);
+            uint elemId = decoder.openElement(ElementId.ELEM_JUMPASSIST);
+            name = decoder.readString(AttributeId.ATTRIB_NAME);
             index2case = -1;    // Mark as not present until we see a tag
             index2addr = -1;
             defaultaddr = -1;
@@ -67,28 +67,28 @@ namespace Sla.DECCORE
                     if (index2case != -1)
                         throw new LowlevelError("Too many <case_pcode> tags");
                     index2case = glb.pcodeinjectlib.decodeInject("jumpassistop", name + "_index2case",
-                                           InjectPayload::EXECUTABLEPCODE_TYPE, decoder);
+                                           InjectPayload.InjectionType.EXECUTABLEPCODE_TYPE, decoder);
                 }
                 else if (subId == ELEM_ADDR_PCODE)
                 {
                     if (index2addr != -1)
                         throw new LowlevelError("Too many <addr_pcode> tags");
                     index2addr = glb.pcodeinjectlib.decodeInject("jumpassistop", name + "_index2addr",
-                                           InjectPayload::EXECUTABLEPCODE_TYPE, decoder);
+                                           InjectPayload.InjectionType.EXECUTABLEPCODE_TYPE, decoder);
                 }
                 else if (subId == ELEM_DEFAULT_PCODE)
                 {
                     if (defaultaddr != -1)
                         throw new LowlevelError("Too many <default_pcode> tags");
                     defaultaddr = glb.pcodeinjectlib.decodeInject("jumpassistop", name + "_defaultaddr",
-                                            InjectPayload::EXECUTABLEPCODE_TYPE, decoder);
+                                            InjectPayload.InjectionType.EXECUTABLEPCODE_TYPE, decoder);
                 }
                 else if (subId == ELEM_SIZE_PCODE)
                 {
                     if (calcsize != -1)
                         throw new LowlevelError("Too many <size_pcode> tags");
                     calcsize = glb.pcodeinjectlib.decodeInject("jumpassistop", name + "_calcsize",
-                                         InjectPayload::EXECUTABLEPCODE_TYPE, decoder);
+                                         InjectPayload.InjectionType.EXECUTABLEPCODE_TYPE, decoder);
                 }
             }
             decoder.closeElement(elemId);

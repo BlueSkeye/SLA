@@ -18,13 +18,13 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleConcatZero(getGroup());
         }
 
         /// \class RuleConcatZero
         /// \brief Simplify concatenation with zero:  `concat(V,0)  =>  zext(V) << c`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_PIECE);
         }

@@ -19,7 +19,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleHumptyDumpty(getGroup());
         }
 
@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         ///
         /// There is also the variation:
         ///  - `concat( sub(V,c), sub(V,d) )  => sub(V,d)`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(OpCode.CPUI_PIECE);
         }

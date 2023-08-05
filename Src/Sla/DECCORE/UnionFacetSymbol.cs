@@ -45,18 +45,18 @@ namespace Sla.DECCORE
     
         public override void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_FACETSYMBOL);
+            encoder.openElement(ElementId.ELEM_FACETSYMBOL);
             encodeHeader(encoder);
-            encoder.writeSignedInteger(ATTRIB_FIELD, fieldNum);
+            encoder.writeSignedInteger(AttributeId.ATTRIB_FIELD, fieldNum);
             encodeBody(encoder);
-            encoder.closeElement(ELEM_FACETSYMBOL);
+            encoder.closeElement(ElementId.ELEM_FACETSYMBOL);
         }
 
         public override void decode(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_FACETSYMBOL);
+            uint elemId = decoder.openElement(ElementId.ELEM_FACETSYMBOL);
             decodeHeader(decoder);
-            fieldNum = decoder.readSignedInteger(ATTRIB_FIELD);
+            fieldNum = decoder.readSignedInteger(AttributeId.ATTRIB_FIELD);
 
             decodeBody(decoder);
             decoder.closeElement(elemId);

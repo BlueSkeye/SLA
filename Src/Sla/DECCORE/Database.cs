@@ -35,7 +35,7 @@ namespace Sla.DECCORE
         /// Map from id to Scope
         private ScopeMap idmap;
         /// Map of global properties
-        private partmap<Address, uint> flagbase;
+        private partmap<Address, Varnode.varnode_flags> flagbase;
         /// True if scope ids are built from hash of name
         private bool idByNameHash;
 
@@ -104,8 +104,8 @@ namespace Sla.DECCORE
         /// \return the matching scope
         private Scope parseParentTag(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_PARENT);
-            ulong id = decoder.readUnsignedInteger(ATTRIB_ID);
+            uint elemId = decoder.openElement(ElementId.ELEM_PARENT);
+            ulong id = decoder.readUnsignedInteger(AttributeId.ATTRIB_ID);
             Scope* res = resolveScope(id);
             if (res == (Scope)null)
                 throw new LowlevelError("Could not find scope matching id");
@@ -401,25 +401,8 @@ namespace Sla.DECCORE
             return qpoint;
         }
 
-        /// \brief A non-constant version of mapScope()
-        ///
-        /// \param qpoint is the default Scope returned if no \e owner is found
-        /// \param addr is the address whose owner should be searched for
-        /// \param usepoint is a point in code where the address is being accessed (may be \e invalid)
-        /// \return a Scope to act as a starting point for a hierarchical search
-        public Scope mapScope(Scope qpoint, Address addr, Address usepoint)
-        {
-            if (resolvemap.empty()) // If there are no namespace scopes
-                return qpoint;      // Start querying from scope placing query
-            pair<ScopeResolve::const_iterator, ScopeResolve::const_iterator> res;
-            res = resolvemap.find(addr);
-            if (res.first != res.second)
-                return (*res.first).getScope();
-            return qpoint;
-        }
-
         /// Get boolean properties at the given address
-        public uint getProperty(Address addr) => flagbase.getValue(addr);
+        public Varnode.varnode_flags getProperty(Address addr) => flagbase.getValue(addr);
 
         /// Set boolean properties over a given memory range
         /// This allows the standard boolean Varnode properties like
@@ -428,7 +411,7 @@ namespace Sla.DECCORE
         /// Scope::queryProperties() method in particular.
         /// \param flags is the set of boolean properties
         /// \param range is the memory range to label
-        public void setPropertyRange(uint flags, Sla.CORE.Range range)
+        public void setPropertyRange(Varnode.varnode_flags flags, Sla.CORE.Range range)
         {
             Address addr1 = range.getFirstAddr();
             Address addr2 = range.getLastAddrOpen(glb);
@@ -461,7 +444,7 @@ namespace Sla.DECCORE
         /// No other properties are altered.
         /// \param flags is the set of properties to clear
         /// \param range is the memory range to clear
-        public void clearPropertyRange(uint flags, Sla.CORE.Range range)
+        public void clearPropertyRange(Varnode.varnode_flags flags, Sla.CORE.Range range)
         {
             Address addr1 = range.getFirstAddr();
             Address addr2 = range.getLastAddrOpen(glb);
@@ -528,7 +511,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decode(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_DB);
+            uint elemId = decoder.openElement(ElementId.ELEM_DB);
             idByNameHash = false;       // Default
             for (; ; )
             {
@@ -542,7 +525,7 @@ namespace Sla.DECCORE
                 uint subId = decoder.peekElement();
                 if (subId != ELEM_PROPERTY_CHANGEPOINT) break;
                 decoder.openElement();
-                uint val = decoder.readUnsignedInteger(ATTRIB_VAL);
+                uint val = decoder.readUnsignedInteger(AttributeId.ATTRIB_VAL);
                 VarnodeData vData;
                 vData.decodeFromAttributes(decoder);
                 Address addr = vData.getAddr();
@@ -609,7 +592,7 @@ namespace Sla.DECCORE
             else
             {
                 newScope.decodeWrappingAttributes(decoder);
-                uint subId = decoder.openElement(ELEM_SCOPE);
+                uint subId = decoder.openElement(ElementId.ELEM_SCOPE);
                 Scope* parentScope = parseParentTag(decoder);
                 attachScope(newScope, parentScope);
                 newScope.decode(decoder);
@@ -625,7 +608,7 @@ namespace Sla.DECCORE
         public Scope decodeScopePath(Decoder decoder)
         {
             Scope* curscope = getGlobalScope();
-            uint elemId = decoder.openElement(ELEM_PARENT);
+            uint elemId = decoder.openElement(ElementId.ELEM_PARENT);
             uint subId = decoder.openElement();
             decoder.closeElementSkipping(subId);        // Skip element describing the root scope
             for (; ; )
@@ -643,7 +626,7 @@ namespace Sla.DECCORE
                     else if (attribId == ATTRIB_LABEL)
                         displayName = decoder.readString();
                 }
-                string name = decoder.readString(ATTRIB_CONTENT);
+                string name = decoder.readString(AttributeId.ATTRIB_CONTENT);
                 if (scopeId == 0)
                     throw DecoderError("Missing name and id in scope");
                 curscope = findCreateScope(scopeId, name, curscope);

@@ -1403,14 +1403,12 @@ namespace Sla.DECCORE
             ulong tmp = val;
             int dig, setdig;
             if (tmp == 0) return 10;
-            setdig = tmp % 10;
-            if ((setdig == 0) || (setdig == 9))
-            {
+            setdig = (int)(tmp % 10);
+            if ((setdig == 0) || (setdig == 9)) {
                 countdec += 1;
                 tmp /= 10;
-                while (tmp != 0)
-                {
-                    dig = tmp % 10;
+                while (tmp != 0) {
+                    dig = (int)(tmp % 10);
                     if (dig == setdig)
                         countdec += 1;
                     else
@@ -1418,8 +1416,7 @@ namespace Sla.DECCORE
                     tmp /= 10;
                 }
             }
-            switch (countdec)
-            {
+            switch (countdec) {
                 case 0:
                     return 16;
                 case 1:
@@ -1440,14 +1437,12 @@ namespace Sla.DECCORE
             int counthex = 0;      // Count 0's and f's
 
             tmp = val;
-            setdig = tmp & 0xf;
-            if ((setdig == 0) || (setdig == 0xf))
-            {
+            setdig = (int)(tmp & 0xf);
+            if ((setdig == 0) || (setdig == 0xf)) {
                 counthex += 1;
                 tmp >>= 4;
-                while (tmp != 0)
-                {
-                    dig = tmp & 0xf;
+                while (tmp != 0) {
+                    dig = (int)(tmp & 0xf);
                     if (dig == setdig)
                         counthex += 1;
                     else

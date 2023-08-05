@@ -64,7 +64,7 @@ namespace Sla.SLEIGH
                 results.Add(fix.offset);
         }
 
-        public override symbol_type getType() => varnode_symbol;
+        public override symbol_type getType() => SleighSymbol.symbol_type.varnode_symbol;
 
         public override void saveXml(TextWriter s)
         {

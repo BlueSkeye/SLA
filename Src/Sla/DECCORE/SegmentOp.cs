@@ -113,7 +113,7 @@ namespace Sla.DECCORE
 
         public override void decode(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_SEGMENTOP);
+            uint elemId = decoder.openElement(ElementId.ELEM_SEGMENTOP);
             spc = (AddrSpace)null;
             injectId = -1;
             baseinsize = 0;
@@ -163,7 +163,7 @@ namespace Sla.DECCORE
                 {
                     string nm = name + "_pcode";
                     string source = "cspec";
-                    injectId = glb.pcodeinjectlib.decodeInject(source, nm, InjectPayload::EXECUTABLEPCODE_TYPE, decoder);
+                    injectId = glb.pcodeinjectlib.decodeInject(source, nm, InjectPayload.InjectionType.EXECUTABLEPCODE_TYPE, decoder);
                 }
             }
             decoder.closeElement(elemId);

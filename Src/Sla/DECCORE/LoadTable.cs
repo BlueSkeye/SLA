@@ -49,20 +49,20 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         public void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_LOADTABLE);
-            encoder.writeSignedInteger(ATTRIB_SIZE, size);
-            encoder.writeSignedInteger(ATTRIB_NUM, num);
+            encoder.openElement(ElementId.ELEM_LOADTABLE);
+            encoder.writeSignedInteger(AttributeId.ATTRIB_SIZE, size);
+            encoder.writeSignedInteger(AttributeId.ATTRIB_NUM, num);
             addr.encode(encoder);
-            encoder.closeElement(ELEM_LOADTABLE);
+            encoder.closeElement(ElementId.ELEM_LOADTABLE);
         }
 
         /// \param decoder is the stream decoder
         /// Decode \b this table from a \<loadtable> element
         public void decode(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_LOADTABLE);
-            size = decoder.readSignedInteger(ATTRIB_SIZE);
-            num = decoder.readSignedInteger(ATTRIB_NUM);
+            uint elemId = decoder.openElement(ElementId.ELEM_LOADTABLE);
+            size = decoder.readSignedInteger(AttributeId.ATTRIB_SIZE);
+            num = decoder.readSignedInteger(AttributeId.ATTRIB_NUM);
             addr = Address::decode(decoder);
             decoder.closeElement(elemId);
         }

@@ -66,15 +66,15 @@ namespace Sla.DECCORE
 
         public override void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_EXTERNREFSYMBOL);
-            encoder.writeString(ATTRIB_NAME, name);
+            encoder.openElement(ElementId.ELEM_EXTERNREFSYMBOL);
+            encoder.writeString(AttributeId.ATTRIB_NAME, name);
             refaddr.encode(encoder);
-            encoder.closeElement(ELEM_EXTERNREFSYMBOL);
+            encoder.closeElement(ElementId.ELEM_EXTERNREFSYMBOL);
         }
 
         public override void decode(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_EXTERNREFSYMBOL);
+            uint elemId = decoder.openElement(ElementId.ELEM_EXTERNREFSYMBOL);
             name.clear();           // Name is empty
             displayName.clear();
             for (; ; )

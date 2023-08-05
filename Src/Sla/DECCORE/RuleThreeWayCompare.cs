@@ -20,7 +20,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleThreeWayCompare(getGroup());
         }
 
@@ -35,7 +35,7 @@ namespace Sla.DECCORE
         /// comparisons of the three-way, such as
         ///  - `X < 1`  which simplifies to
         ///  - `V <= W`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(OpCode.CPUI_INT_SLESS);
             oplist.Add(OpCode.CPUI_INT_SLESSEQUAL);

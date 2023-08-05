@@ -40,12 +40,12 @@ namespace Sla.DECCORE
 
         public override void encodeAttributes(Encoder encoder, ulong offset)
         {
-            encoder.writeString(ATTRIB_SPACE, "iop");
+            encoder.writeString(AttributeId.ATTRIB_SPACE, "iop");
         }
 
         public override void encodeAttributes(Encoder encoder, ulong offset, int size)
         {
-            encoder.writeString(ATTRIB_SPACE, "iop");
+            encoder.writeString(AttributeId.ATTRIB_SPACE, "iop");
         }
 
         public override void printRaw(TextWriter s, ulong offset)

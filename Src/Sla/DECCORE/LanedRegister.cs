@@ -98,7 +98,7 @@ namespace Sla.DECCORE
         /// \return \b true if the XML description provides lane sizes
         public bool decode(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_REGISTER);
+            uint elemId = decoder.openElement(ElementId.ELEM_REGISTER);
             string laneSizes;
             for (; ; )
             {

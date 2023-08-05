@@ -106,37 +106,37 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         public void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_CPOOLREC);
+            encoder.openElement(ElementId.ELEM_CPOOLREC);
             if (tag == pointer_method)
-                encoder.writeString(ATTRIB_TAG, "method");
+                encoder.writeString(AttributeId.ATTRIB_TAG, "method");
             else if (tag == pointer_field)
-                encoder.writeString(ATTRIB_TAG, "field");
+                encoder.writeString(AttributeId.ATTRIB_TAG, "field");
             else if (tag == instance_of)
-                encoder.writeString(ATTRIB_TAG, "instanceof");
+                encoder.writeString(AttributeId.ATTRIB_TAG, "instanceof");
             else if (tag == array_length)
-                encoder.writeString(ATTRIB_TAG, "arraylength");
+                encoder.writeString(AttributeId.ATTRIB_TAG, "arraylength");
             else if (tag == check_cast)
-                encoder.writeString(ATTRIB_TAG, "checkcast");
+                encoder.writeString(AttributeId.ATTRIB_TAG, "checkcast");
             else if (tag == string_literal)
-                encoder.writeString(ATTRIB_TAG, "string");
+                encoder.writeString(AttributeId.ATTRIB_TAG, "string");
             else if (tag == class_reference)
-                encoder.writeString(ATTRIB_TAG, "classref");
+                encoder.writeString(AttributeId.ATTRIB_TAG, "classref");
             else
-                encoder.writeString(ATTRIB_TAG, "primitive");
+                encoder.writeString(AttributeId.ATTRIB_TAG, "primitive");
             if (isConstructor())
-                encoder.writeBool(ATTRIB_CONSTRUCTOR, true);
+                encoder.writeBool(AttributeId.ATTRIB_CONSTRUCTOR, true);
             if (isDestructor())
-                encoder.writeBool(ATTRIB_DESTRUCTOR, true);
+                encoder.writeBool(AttributeId.ATTRIB_DESTRUCTOR, true);
             if (tag == primitive)
             {
-                encoder.openElement(ELEM_VALUE);
-                encoder.writeUnsignedInteger(ATTRIB_CONTENT, value);
-                encoder.closeElement(ELEM_VALUE);
+                encoder.openElement(ElementId.ELEM_VALUE);
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_CONTENT, value);
+                encoder.closeElement(ElementId.ELEM_VALUE);
             }
             if (byteData != (byte*)0)
             {
-                encoder.openElement(ELEM_DATA);
-                encoder.writeSignedInteger(ATTRIB_LENGTH, byteDataLen);
+                encoder.openElement(ElementId.ELEM_DATA);
+                encoder.writeSignedInteger(AttributeId.ATTRIB_LENGTH, byteDataLen);
                 int wrap = 0;
                 ostringstream s;
                 for (int i = 0; i < byteDataLen; ++i)
@@ -149,17 +149,17 @@ namespace Sla.DECCORE
                         wrap = 0;
                     }
                 }
-                encoder.writeString(ATTRIB_CONTENT, s.str());
-                encoder.closeElement(ELEM_DATA);
+                encoder.writeString(AttributeId.ATTRIB_CONTENT, s.str());
+                encoder.closeElement(ElementId.ELEM_DATA);
             }
             else
             {
-                encoder.openElement(ELEM_TOKEN);
-                encoder.writeString(ATTRIB_CONTENT, token);
-                encoder.closeElement(ELEM_TOKEN);
+                encoder.openElement(ElementId.ELEM_TOKEN);
+                encoder.writeString(AttributeId.ATTRIB_CONTENT, token);
+                encoder.closeElement(ElementId.ELEM_TOKEN);
             }
             type.encode(encoder);
-            encoder.closeElement(ELEM_CPOOLREC);
+            encoder.closeElement(ElementId.ELEM_CPOOLREC);
         }
 
         /// Decode \b this from a stream
@@ -171,7 +171,7 @@ namespace Sla.DECCORE
             tag = primitive;    // Default tag
             value = 0;
             flags = 0;
-            uint elemId = decoder.openElement(ELEM_CPOOLREC);
+            uint elemId = decoder.openElement(ElementId.ELEM_CPOOLREC);
             for (; ; )
             {
                 uint attribId = decoder.getNextAttributeId();
@@ -208,17 +208,17 @@ namespace Sla.DECCORE
             uint subId;
             if (tag == primitive)
             {   // First tag must be value
-                subId = decoder.openElement(ELEM_VALUE);
-                value = decoder.readUnsignedInteger(ATTRIB_CONTENT);
+                subId = decoder.openElement(ElementId.ELEM_VALUE);
+                value = decoder.readUnsignedInteger(AttributeId.ATTRIB_CONTENT);
                 decoder.closeElement(subId);
             }
             subId = decoder.openElement();
             if (subId == ELEM_TOKEN)
-                token = decoder.readString(ATTRIB_CONTENT);
+                token = decoder.readString(AttributeId.ATTRIB_CONTENT);
             else
             {
-                byteDataLen = decoder.readSignedInteger(ATTRIB_LENGTH);
-                istringstream s3(decoder.readString(ATTRIB_CONTENT));
+                byteDataLen = decoder.readSignedInteger(AttributeId.ATTRIB_LENGTH);
+                istringstream s3(decoder.readString(AttributeId.ATTRIB_CONTENT));
                 byteData = new byte[byteDataLen];
                 for (int i = 0; i < byteDataLen; ++i)
                 {

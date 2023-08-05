@@ -18,8 +18,8 @@ namespace Sla.EXTRA
 
         public override void decode(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_CALLFIXUP);
-            name = decoder.readString(ATTRIB_NAME);
+            uint elemId = decoder.openElement(ElementId.ELEM_CALLFIXUP);
+            name = decoder.readString(AttributeId.ATTRIB_NAME);
             bool pcodeSubtag = false;
 
             for (; ; )
@@ -34,7 +34,7 @@ namespace Sla.EXTRA
                     pcodeSubtag = true;
                 }
                 else if (subId == ELEM_TARGET)
-                    targetSymbolNames.Add(decoder.readString(ATTRIB_NAME));
+                    targetSymbolNames.Add(decoder.readString(AttributeId.ATTRIB_NAME));
                 decoder.closeElement(subId);
             }
             decoder.closeElement(elemId);

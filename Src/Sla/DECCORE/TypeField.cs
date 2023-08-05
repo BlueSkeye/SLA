@@ -25,7 +25,7 @@ namespace Sla.DECCORE
         /// \param typegrp is the TypeFactory for parsing data-type info
         public TypeField(Decoder decoder, TypeFactory typegrp)
         {
-            uint elemId = decoder.openElement(ELEM_FIELD);
+            uint elemId = decoder.openElement(ElementId.ELEM_FIELD);
             ident = -1;
             offset = -1;
             for (; ; )
@@ -73,13 +73,13 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         public void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_FIELD);
-            encoder.writeString(ATTRIB_NAME, name);
-            encoder.writeSignedInteger(ATTRIB_OFFSET, offset);
+            encoder.openElement(ElementId.ELEM_FIELD);
+            encoder.writeString(AttributeId.ATTRIB_NAME, name);
+            encoder.writeSignedInteger(AttributeId.ATTRIB_OFFSET, offset);
             if (ident != offset)
-                encoder.writeSignedInteger(ATTRIB_ID, ident);
+                encoder.writeSignedInteger(AttributeId.ATTRIB_ID, ident);
             type.encodeRef(encoder);
-            encoder.closeElement(ELEM_FIELD);
+            encoder.closeElement(ElementId.ELEM_FIELD);
         }
     }
 }

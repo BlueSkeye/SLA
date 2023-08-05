@@ -180,13 +180,13 @@ namespace Sla.DECCORE
 
         public override void decode(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_RESOLVEPROTOTYPE);
-            name = decoder.readString(ATTRIB_NAME);
+            uint elemId = decoder.openElement(ElementId.ELEM_RESOLVEPROTOTYPE);
+            name = decoder.readString(AttributeId.ATTRIB_NAME);
             for (; ; )
             { // A tag for each merged prototype
                 uint subId = decoder.openElement();
                 if (subId != ELEM_MODEL) break;
-                string modelName = decoder.readString(ATTRIB_NAME);
+                string modelName = decoder.readString(AttributeId.ATTRIB_NAME);
                 ProtoModel* mymodel = glb.getModel(modelName);
                 if (mymodel == (ProtoModel*)0)
                     throw new LowlevelError("Missing prototype model: " + modelName);

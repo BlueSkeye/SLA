@@ -19,7 +19,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSplitCopy(getGroup());
         }
 
@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         ///
         /// If more than one logical component of a structure or array is copied at once,
         /// rewrite the COPY operator as multiple COPYs.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_COPY);
         }

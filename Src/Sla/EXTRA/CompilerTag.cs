@@ -23,12 +23,12 @@ namespace Sla.EXTRA
         /// Restore the record from an XML stream
         /// Parse file attributes from a \<compiler> element
         /// \param decoder is the stream decoder
-        public void decode(Decoder decoder)
+        public void decode(Sla.CORE.Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_COMPILER);
-            name = decoder.readString(ATTRIB_NAME);
-            spec = decoder.readString(ATTRIB_SPEC);
-            id = decoder.readString(ATTRIB_ID);
+            uint elemId = decoder.openElement(ElementId.ELEM_COMPILER);
+            name = decoder.readString(AttributeId.ATTRIB_NAME);
+            spec = decoder.readString(AttributeId.ATTRIB_SPEC);
+            id = decoder.readString(AttributeId.ATTRIB_ID);
             decoder.closeElement(elemId);
         }
 

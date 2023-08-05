@@ -31,8 +31,8 @@ namespace Sla.EXTRA
         public void decodeEntry(Decoder decoder)
         {
             Address addr = Address::decode(decoder);
-            uint subId = decoder.openElement(ELEM_PAYLOAD);
-            istringstream s = new istringstream(decoder.readString(ATTRIB_CONTENT));
+            uint subId = decoder.openElement(ElementId.ELEM_PAYLOAD);
+            istringstream s = new istringstream(decoder.readString(AttributeId.ATTRIB_CONTENT));
             try
             {
                 Document* doc = xml_tree(s);
@@ -54,7 +54,7 @@ namespace Sla.EXTRA
                 throw new LowlevelError("Missing dynamic inject");
             Element el = (*eiter).second.getRoot();
             XmlDecode decoder(glb.translate, el);
-            uint rootId = decoder.openElement(ELEM_INST);
+            uint rootId = decoder.openElement(ElementId.ELEM_INST);
             Address addr = Address::decode(decoder);
             while (decoder.peekElement() != 0)
                 emit.decodeOp(addr, decoder);

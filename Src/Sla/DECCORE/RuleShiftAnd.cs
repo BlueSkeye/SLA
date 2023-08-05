@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleShiftAnd(getGroup());
         }
 
@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// \brief Eliminate any INT_AND when the bits it zeroes out are discarded by a shift
         ///
         /// This also allows for bits that aren't discarded but are already zero.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_INT_RIGHT);
             oplist.Add(CPUI_INT_LEFT);

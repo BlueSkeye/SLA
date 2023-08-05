@@ -567,7 +567,7 @@ namespace Sla.DECCORE
             alignment = 0;      // default
             numslots = 1;
 
-            uint elemId = decoder.openElement(ELEM_PENTRY);
+            uint elemId = decoder.openElement(ElementId.ELEM_PENTRY);
             for (; ; )
             {
                 uint attribId = decoder.getNextAttributeId();

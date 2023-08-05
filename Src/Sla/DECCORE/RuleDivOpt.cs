@@ -162,7 +162,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleDivOpt(getGroup());
         }
 
@@ -172,7 +172,7 @@ namespace Sla.DECCORE
         /// The unsigned and signed variants are:
         ///   - `sub( (zext(V)*c)>>n, 0)   =>  V / (2^n/(c-1))`
         ///   - `sub( (sext(V)*c)s>>n, 0)  =>  V s/ (2^n/(c-1))`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_SUBPIECE);
             oplist.Add(CPUI_INT_RIGHT);

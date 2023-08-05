@@ -15,8 +15,8 @@ namespace Sla.EXTRA
 
         public override void decode(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_CALLOTHERFIXUP);
-            name = decoder.readString(ATTRIB_TARGETOP);
+            uint elemId = decoder.openElement(ElementId.ELEM_CALLOTHERFIXUP);
+            name = decoder.readString(AttributeId.ATTRIB_TARGETOP);
             uint subId = decoder.openElement();
             if (subId != ELEM_PCODE)
                 throw new LowlevelError("<callotherfixup> does not contain a <pcode> tag");

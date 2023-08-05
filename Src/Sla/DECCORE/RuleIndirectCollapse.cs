@@ -19,13 +19,13 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleIndirectCollapse(getGroup());
         }
 
         /// \class RuleIndirectCollapse
         /// \brief Remove a OpCode.CPUI_INDIRECT if its blocking PcodeOp is dead
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_INDIRECT);
         }

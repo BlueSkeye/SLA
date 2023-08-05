@@ -31,7 +31,7 @@ namespace Sla.SLEIGH
 
         public bool getFlow() => flow;
 
-        public override symbol_type getType() => context_symbol;
+        public override symbol_type getType() => SleighSymbol.symbol_type.context_symbol;
 
         public override void saveXml(TextWriter s)
         {

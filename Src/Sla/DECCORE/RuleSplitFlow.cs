@@ -19,7 +19,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSplitFlow(getGroup());
         }
 
@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// Look for SUBPIECE coming from a PIECE that has come through INDIRECTs and/or MULTIEQUAL
         /// Then: check if the input to SUBPIECE can be viewed as two independent pieces
         /// If so:  split the pieces into independent data-flows
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(OpCode.CPUI_SUBPIECE);
         }

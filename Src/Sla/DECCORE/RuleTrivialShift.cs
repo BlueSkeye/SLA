@@ -18,13 +18,13 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleTrivialShift(getGroup());
         }
 
         /// \class RuleTrivialShift
         /// \brief Simplify trivial shifts:  `V << 0  =>  V,  V << #64  =>  0`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             uint list[] = { OpCode.CPUI_INT_LEFT, OpCode.CPUI_INT_RIGHT, OpCode.CPUI_INT_SRIGHT };
             oplist.insert(oplist.end(), list, list + 3);

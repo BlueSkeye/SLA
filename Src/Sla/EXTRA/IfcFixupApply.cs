@@ -30,7 +30,7 @@ namespace Sla.EXTRA
                 throw new IfaceParseError("Missing function name");
             s >> funcName;
 
-            int injectid = dcp.conf.pcodeinjectlib.getPayloadId(InjectPayload::CALLFIXUP_TYPE, fixupName);
+            int injectid = dcp.conf.pcodeinjectlib.getPayloadId(InjectPayload.InjectionType.CALLFIXUP_TYPE, fixupName);
             if (injectid < 0)
                 throw new IfaceExecutionError("Unknown fixup: " + fixupName);
 

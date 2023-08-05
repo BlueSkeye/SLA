@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleCondNegate(getGroup());
         }
 
@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// branch directions as \b true or \b false, but this may conflict with the
         /// natural meaning of the boolean calculation feeding into a CBRANCH.
         /// This Rule introduces a BOOL_NEGATE op as necessary to get the meanings to align.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_CBRANCH);
         }

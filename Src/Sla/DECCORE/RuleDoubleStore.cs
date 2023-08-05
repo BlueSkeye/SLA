@@ -22,7 +22,7 @@ namespace Sla.DECCORE
             return (!grouplist.contains(getGroup())) ? null : new RuleDoubleStore(getGroup());
         }
 
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_STORE);
         }

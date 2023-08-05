@@ -2320,7 +2320,7 @@ namespace Sla.SLACOMP
 
         //    case 70:
 
-        //        { (yyval.pateq) = (PatternEquation*)0; }
+        //        { (yyval.pateq) = (PatternEquation)null; }
 
         //        break;
 
@@ -2613,7 +2613,7 @@ namespace Sla.SLACOMP
 
         //        {
         //            (yyval.pateq) = slgh.constrainOperand((yyvsp[-2].operandsym), (yyvsp[0].patexp));
-        //            if ((yyval.pateq) == (PatternEquation*)0)
+        //            if ((yyval.pateq) == (PatternEquation)null)
         //            { string errmsg = "Constraining currently undefined operand " + (yyvsp[-2].operandsym).getName(); slgh.reportError(errmsg); }
         //        }
 

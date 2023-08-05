@@ -27,19 +27,19 @@ namespace Sla.SLEIGH
         
         private uint reloffset;      // Relative offset
         private int offsetbase;        // Base operand to which offset is relative (-1=constructor start)
-        private int minimumlength;     // Minimum size of operand (within instruction tokens)
+        internal int minimumlength;     // Minimum size of operand (within instruction tokens)
         private int hand;          // Handle index
         private OperandValue localexp;
-        private TripleSymbol triple;       // Defining symbol
-        private PatternExpression defexp;  // OR defining expression
-        private uint flags;
+        private TripleSymbol? triple;       // Defining symbol
+        private PatternExpression? defexp;  // OR defining expression
+        private Flags flags;
 
-        private void setVariableLength()
+        internal void setVariableLength()
         {
-            flags |= variable_len;
+            flags |= Flags.variable_len;
         }
 
-        private bool isVariableLength() => ((flags&variable_len)!=0);
+        private bool isVariableLength() => ((flags& Flags.variable_len)!=0);
 
         public OperandSymbol()
         {
@@ -85,49 +85,48 @@ namespace Sla.SLEIGH
 
         public void setCodeAddress()
         {
-            flags |= code_address;
+            flags |= Flags.code_address;
         }
 
-        public bool isCodeAddress() => ((flags&code_address)!= 0);
+        public bool isCodeAddress() => ((flags& Flags.code_address)!= 0);
 
         public void setOffsetIrrelevant()
         {
-            flags |= offset_irrel;
+            flags |= Flags.offset_irrel;
         }
 
-        public bool isOffsetIrrelevant() => ((flags&offset_irrel)!= 0);
+        public bool isOffsetIrrelevant() => ((flags& Flags.offset_irrel)!= 0);
 
         public void setMark()
         {
-            flags |= marked;
+            flags |= Flags.marked;
         }
 
         public void clearMark()
         {
-            flags &= ~((uint)marked);
+            flags &= ~Flags.marked;
         }
 
-        public bool isMarked() => ((flags&marked)!= 0);
+        public bool isMarked() => ((flags& Flags.marked)!= 0);
 
         ~OperandSymbol()
         {
-            PatternExpression::release(localexp);
+            PatternExpression.release(localexp);
             if (defexp != (PatternExpression)null)
-                PatternExpression::release(defexp);
+                PatternExpression.release(defexp);
         }
 
         public override VarnodeTpl getVarnode()
         {
-            VarnodeTpl* res;
+            VarnodeTpl res;
             if (defexp != (PatternExpression)null)
                 res = new VarnodeTpl(hand, true); // Definite constant handle
-            else
-            {
-                SpecificSymbol* specsym = dynamic_cast<SpecificSymbol*>(triple);
-                if (specsym != (SpecificSymbol*)0)
+            else {
+                SpecificSymbol? specsym = triple as SpecificSymbol;
+                if (specsym != (SpecificSymbol)null)
                     res = specsym.getVarnode();
                 else if ((triple != (TripleSymbol)null) &&
-                     ((triple.getType() == valuemap_symbol) || (triple.getType() == name_symbol)))
+                     ((triple.getType() == SleighSymbol.symbol_type.valuemap_symbol) || (triple.getType() == SleighSymbol.symbol_type.name_symbol)))
                     res = new VarnodeTpl(hand, true); // Zero-size symbols
                 else
                     res = new VarnodeTpl(hand, false); // Possible dynamic handle
@@ -142,30 +141,23 @@ namespace Sla.SLEIGH
             hnd = walker.getFixedHandle(hand);
         }
 
-        public override int getSize()
-        {
-            if (triple != (TripleSymbol)null)
-                return triple.getSize();
-            return 0;
-        }
+        public override int getSize() => (triple == (TripleSymbol)null) ? 0 : triple.getSize();
 
         public override void print(TextWriter s, ParserWalker walker)
         {
             walker.pushOperand(getIndex());
-            if (triple != (TripleSymbol)null)
-            {
-                if (triple.getType() == SleighSymbol::subtable_symbol)
+            if (triple != (TripleSymbol)null) {
+                if (triple.getType() ==  SleighSymbol.symbol_type.subtable_symbol)
                     walker.getConstructor().print(s, walker);
                 else
                     triple.print(s, walker);
             }
-            else
-            {
+            else {
                 long val = defexp.getValue(walker);
                 if (val >= 0)
-                    s << "0x" << hex << val;
+                    s.Write($"0x{val:X}");
                 else
-                    s << "-0x" << hex << -val;
+                    s.Write($"-0x{val:X}");
             }
             walker.popOperand();
         }
@@ -176,31 +168,29 @@ namespace Sla.SLEIGH
                 triple.collectLocalValues(results);
         }
 
-        public override symbol_type getType() => operand_symbol;
+        public override symbol_type getType() => SleighSymbol.symbol_type.operand_symbol;
 
         public override void saveXml(TextWriter s)
         {
-            s << "<operand_sym";
-            SleighSymbol::saveXmlHeader(s);
+            s.Write("<operand_sym");
+            base.saveXmlHeader(s);
             if (triple != (TripleSymbol)null)
-                s << " subsym=\"0x" << hex << triple.getId() << "\"";
-            s << " off=\"" << dec << reloffset << "\"";
-            s << " base=\"" << offsetbase << "\"";
-            s << " minlen=\"" << minimumlength << "\"";
+                s.Write($" subsym=\"0x{triple.getId():X}\"");
+            s.Write($" off=\"{reloffset}\" base=\"{offsetbase}\" minlen=\"{minimumlength}\"");
             if (isCodeAddress())
-                s << " code=\"true\"";
-            s << " index=\"" << dec << hand << "\">\n";
+                s.Write(" code=\"true\"");
+            s.WriteLine(" index=\"{hand}\">";
             localexp.saveXml(s);
             if (defexp != (PatternExpression)null)
                 defexp.saveXml(s);
-            s << "</operand_sym>\n";
+            s.WriteLine("</operand_sym>");
         }
 
         public override void saveXmlHeader(TextWriter s)
         {
-            s << "<operand_sym_head";
-            SleighSymbol::saveXmlHeader(s);
-            s << "/>\n";
+            s.Write("<operand_sym_head");
+            base.saveXmlHeader(s);
+            s.WriteLine("/>");
         }
 
         public override void restoreXml(Element el, SleighBase trans)
@@ -208,51 +198,25 @@ namespace Sla.SLEIGH
             defexp = (PatternExpression)null;
             triple = (TripleSymbol)null;
             flags = 0;
-            {
-                istringstream s = new istringstream(el.getAttributeValue("index"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> hand;
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("off"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> reloffset;
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("base"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> offsetbase;
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("minlen"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> minimumlength;
-            }
-            for (int i = 0; i < el.getNumAttributes(); ++i)
-            {
-                if (el.getAttributeName(i) == "subsym")
-                {
-                    uint id;
-                    istringstream s = new istringstream(el.getAttributeValue(i));
-                    s.unsetf(ios::dec | ios::hex | ios::oct);
-                    s >> id;
+            hand = int.Parse(el.getAttributeValue("index"));
+            reloffset = uint.Parse(el.getAttributeValue("off"));
+            offsetbase = int.Parse(el.getAttributeValue("base"));
+            minimumlength = int.Parse(el.getAttributeValue("minlen"));
+            for (int i = 0; i < el.getNumAttributes(); ++i) {
+                if (el.getAttributeName(i) == "subsym") {
+                    uint id = uint.Parse(el.getAttributeValue(i));
                     triple = (TripleSymbol)trans.findSymbol(id);
                 }
-                else if (el.getAttributeName(i) == "code")
-                {
-                    if (xml_readbool(el.getAttributeValue(i)))
-                        flags |= code_address;
+                else if (el.getAttributeName(i) == "code") {
+                    if (Xml.xml_readbool(el.getAttributeValue(i)))
+                        flags |= Flags.code_address;
                 }
             }
-            List list = el.getChildren();
-            List::const_iterator iter;
-            iter = list.begin();
-            localexp = (OperandValue)PatternExpression::restoreExpression(*iter, trans);
+            List<Element> list = el.getChildren();
+            localexp = (OperandValue)PatternExpression.restoreExpression(list[0], trans);
             localexp.layClaim();
-            ++iter;
-            if (iter != list.end())
-            {
-                defexp = PatternExpression::restoreExpression(*iter, trans);
+            if (1 < list.Count) {
+                defexp = PatternExpression.restoreExpression(list[1], trans);
                 defexp.layClaim();
             }
         }

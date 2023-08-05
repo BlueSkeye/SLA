@@ -250,18 +250,18 @@ namespace Sla.DECCORE
                 encodeTypedef(encoder);
                 return;
             }
-            encoder.openElement(ELEM_TYPE);
+            encoder.openElement(ElementId.ELEM_TYPE);
             encodeBasic(metatype, encoder);
-            encoder.writeString(ATTRIB_ENUM, "true");
+            encoder.writeString(AttributeId.ATTRIB_ENUM, "true");
             Dictionary<ulong, string>::const_iterator iter;
             for (iter = namemap.begin(); iter != namemap.end(); ++iter)
             {
-                encoder.openElement(ELEM_VAL);
-                encoder.writeString(ATTRIB_NAME, (*iter).second);
-                encoder.writeUnsignedInteger(ATTRIB_VALUE, (*iter).first);
-                encoder.closeElement(ELEM_VAL);
+                encoder.openElement(ElementId.ELEM_VAL);
+                encoder.writeString(AttributeId.ATTRIB_NAME, (*iter).second);
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_VALUE, (*iter).first);
+                encoder.closeElement(ElementId.ELEM_VAL);
             }
-            encoder.closeElement(ELEM_TYPE);
+            encoder.closeElement(ElementId.ELEM_TYPE);
         }
     }
 }

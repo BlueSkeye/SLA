@@ -18,13 +18,13 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleIntLessEqual(getGroup());
         }
 
         /// \class RuleIntLessEqual
         /// \brief Convert LESSEQUAL to LESS:  `V <= c  =>  V < (c+1)`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_INT_LESSEQUAL);
             oplist.Add(CPUI_INT_SLESSEQUAL);

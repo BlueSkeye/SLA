@@ -14,16 +14,31 @@ namespace Sla.SLEIGH
         /// friend class SymbolTable;
         public enum symbol_type
         {
-            space_symbol, token_symbol, userop_symbol, value_symbol, valuemap_symbol,
-            name_symbol, varnode_symbol, varnodelist_symbol, operand_symbol,
-            start_symbol, end_symbol, next2_symbol, subtable_symbol, macro_symbol, section_symbol,
-            bitrange_symbol, context_symbol, epsilon_symbol, label_symbol,
+            space_symbol,
+            token_symbol,
+            userop_symbol,
+            value_symbol,
+            valuemap_symbol,
+            name_symbol,
+            varnode_symbol,
+            varnodelist_symbol,
+            operand_symbol,
+            start_symbol,
+            end_symbol,
+            next2_symbol,
+            subtable_symbol,
+            macro_symbol,
+            section_symbol,
+            bitrange_symbol,
+            context_symbol,
+            epsilon_symbol,
+            label_symbol,
             dummy_symbol
         }
 
         private string name;
-        private uint id;           // Unique id across all symbols
-        private uint scopeid;      // Unique id of scope this symbol is in
+        internal uint id;           // Unique id across all symbols
+        internal uint scopeid;      // Unique id of scope this symbol is in
         
         public SleighSymbol()
         {
@@ -43,28 +58,19 @@ namespace Sla.SLEIGH
 
         public uint getId() => id;
 
-        public virtual symbol_type getType() => dummy_symbol;
+        public virtual symbol_type getType() => SleighSymbol.symbol_type.dummy_symbol;
 
         public virtual void saveXmlHeader(TextWriter s)
-        {               // Save the basic attributes of a symbol
-            s << " name=\"" << name << "\"";
-            s << " id=\"0x" << hex << id << "\"";
-            s << " scope=\"0x" << scopeid << "\"";
+        {
+            // Save the basic attributes of a symbol
+            s.Write($" name=\"{name}\" id=\"0x{id:X}\" scope=\"0x{scopeid:X}\"");
         }
 
         public void restoreXmlHeader(Element el)
         {
             name = el.getAttributeValue("name");
-            {
-                istringstream s = new istringstream(el.getAttributeValue("id"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> id;
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("scope"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> scopeid;
-            }
+            id = uint.Parse(el.getAttributeValue("id"));
+            scopeid = uint.Parse(el.getAttributeValue("scope"));
         }
 
         public virtual void saveXml(TextWriter s)

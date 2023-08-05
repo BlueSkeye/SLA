@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleFuncPtrEncoding(getGroup());
         }
 
@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         /// NOTE: The emulation philosophy is that it really isn't eliminated but,
         /// the CALLIND operator is now dealing with it.  Hence actions like ActionDeindirect
         /// that are modeling a CALLIND's behavior need to take this into account.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_CALLIND);
         }

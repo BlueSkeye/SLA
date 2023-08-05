@@ -22,7 +22,7 @@ namespace Sla.SLACOMP
         
         public WithBlock()
         {
-            pateq = (PatternEquation*)0;
+            pateq = (PatternEquation)null;
         }
 
         ///< Set components of the header
@@ -34,7 +34,7 @@ namespace Sla.SLACOMP
         {
             ss = s;
             pateq = pq;
-            if (pateq != (PatternEquation*)0)
+            if (pateq != (PatternEquation)null)
                 pateq.layClaim();
             if (cvec != (List<ContextChange*>*)0)
             {
@@ -46,7 +46,7 @@ namespace Sla.SLACOMP
 
         ~WithBlock()
         {
-            if (pateq != (PatternEquation*)0)
+            if (pateq != (PatternEquation)null)
                 PatternEquation::release(pateq);
             for (int i = 0; i < contvec.size(); ++i)
             {
@@ -68,7 +68,7 @@ namespace Sla.SLACOMP
             for (iter = stack.begin(); iter != stack.end(); ++iter)
             {
                 PatternEquation* witheq = (*iter).pateq;
-                if (witheq != (PatternEquation*)0)
+                if (witheq != (PatternEquation)null)
                     pateq = new EquationAnd(witheq, pateq);
             }
             return pateq;

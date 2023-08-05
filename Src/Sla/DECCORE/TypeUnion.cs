@@ -93,10 +93,10 @@ namespace Sla.DECCORE
                 TypeField field = getField(res.getFieldNum());
                 newoff = offset - field.offset;
                 if (newoff + sz > field.type.getSize())
-                    return (TypeField*)0; // Truncation spans more than one field
+                    return (TypeField)null; // Truncation spans more than one field
                 return field;
             }
-            return (TypeField*)0;
+            return (TypeField)null;
         }
 
         //  virtual Datatype *getSubType(ulong off,ulong *newoff);
@@ -183,14 +183,14 @@ namespace Sla.DECCORE
                 encodeTypedef(encoder);
                 return;
             }
-            encoder.openElement(ELEM_TYPE);
+            encoder.openElement(ElementId.ELEM_TYPE);
             encodeBasic(metatype, encoder);
             List<TypeField>::const_iterator iter;
             for (iter = field.begin(); iter != field.end(); ++iter)
             {
                 (*iter).encode(encoder);
             }
-            encoder.closeElement(ELEM_TYPE);
+            encoder.closeElement(ElementId.ELEM_TYPE);
         }
 
         public override Datatype resolveInFlow(PcodeOp op, int slot)
@@ -272,7 +272,7 @@ namespace Sla.DECCORE
                     return field;
                 }
             }
-            return (TypeField*)0;
+            return (TypeField)null;
         }
     }
 }

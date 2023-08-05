@@ -73,18 +73,18 @@ namespace Sla.DECCORE
 
         public void encode(Encoder encoder, bool moredetail)
         {
-            encoder.openElement(ELEM_PARAMMEASURES);
-            encoder.writeString(ATTRIB_NAME, fd.getName());
+            encoder.openElement(ElementId.ELEM_PARAMMEASURES);
+            encoder.writeString(AttributeId.ATTRIB_NAME, fd.getName());
             fd.getAddress().encode(encoder);
-            encoder.openElement(ELEM_PROTO);
+            encoder.openElement(ElementId.ELEM_PROTO);
 
-            encoder.writeString(ATTRIB_MODEL, fd.getFuncProto().getModelName());
+            encoder.writeString(AttributeId.ATTRIB_MODEL, fd.getFuncProto().getModelName());
             int extrapop = fd.getFuncProto().getExtraPop();
             if (extrapop == ProtoModel.extrapop_unknown)
-                encoder.writeString(ATTRIB_EXTRAPOP, "unknown");
+                encoder.writeString(AttributeId.ATTRIB_EXTRAPOP, "unknown");
             else
-                encoder.writeSignedInteger(ATTRIB_EXTRAPOP, extrapop);
-            encoder.closeElement(ELEM_PROTO);
+                encoder.writeSignedInteger(AttributeId.ATTRIB_EXTRAPOP, extrapop);
+            encoder.closeElement(ElementId.ELEM_PROTO);
             list<ParamMeasure>::const_iterator pm_iter;
             for (pm_iter = InputParamMeasures.begin(); pm_iter != InputParamMeasures.end(); ++pm_iter)
             {
@@ -96,7 +96,7 @@ namespace Sla.DECCORE
                 ParamMeasure pm = *pm_iter;
                 pm.encode(encoder, ELEM_OUTPUT, moredetail);
             }
-            encoder.closeElement(ELEM_PARAMMEASURES);
+            encoder.closeElement(ElementId.ELEM_PARAMMEASURES);
         }
 
         public void savePretty(TextWriter s, bool moredetail)

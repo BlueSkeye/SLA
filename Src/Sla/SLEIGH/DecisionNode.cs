@@ -285,42 +285,38 @@ namespace Sla.SLEIGH
             //      the subconstructors.
             // This routine can determine if an intersection results from case 1) or case 2)
             int i, j, k;
-            List<pair<DisjointPattern*, Constructor*>> newlist;
-            List<pair<DisjointPattern*, Constructor*>> conflictlist;
+            List<pair<DisjointPattern, Constructor>> newlist;
+            List<pair<DisjointPattern, Constructor>> conflictlist;
 
             // Check for identical patterns
-            for (i = 0; i < list.size(); ++i)
-            {
-                for (j = 0; j < i; ++j)
-                {
-                    DisjointPattern* ipat = list[i].first;
-                    DisjointPattern* jpat = list[j].first;
+            for (i = 0; i < list.Count; ++i) {
+                for (j = 0; j < i; ++j) {
+                    DisjointPattern ipat = list[i].first;
+                    DisjointPattern jpat = list[j].first;
                     if (ipat.identical(jpat))
                         props.identicalPattern(list[i].second, list[j].second);
                 }
             }
 
             newlist = list;
-            for (i = 0; i < list.size(); ++i)
-            {
-                for (j = 0; j < i; ++j)
-                {
-                    DisjointPattern* ipat = newlist[i].first;
-                    DisjointPattern* jpat = list[j].first;
+            for (i = 0; i < list.Count; ++i) {
+                for (j = 0; j < i; ++j) {
+                    DisjointPattern ipat = newlist[i].first;
+                    DisjointPattern jpat = list[j].first;
                     if (ipat.specializes(jpat))
                         break;
-                    if (!jpat.specializes(ipat))
-                    { // We have a potential conflict
-                        Constructor* iconst = newlist[i].second;
-                        Constructor* jconst = list[j].second;
-                        if (iconst == jconst)
-                        { // This is an OR in the pattern for ONE constructor
-                          // So there is no conflict
+                    if (!jpat.specializes(ipat)) {
+                        // We have a potential conflict
+                        Constructor iconst = newlist[i].second;
+                        Constructor jconst = list[j].second;
+                        if (iconst == jconst) {
+                            // This is an OR in the pattern for ONE constructor
+                            // So there is no conflict
                         }
-                        else
-                        {           // A true conflict that needs to be resolved
-                            conflictlist.Add(pair<DisjointPattern*, Constructor*>(ipat, iconst));
-                            conflictlist.Add(pair<DisjointPattern*, Constructor*>(jpat, jconst));
+                        else {
+                            // A true conflict that needs to be resolved
+                            conflictlist.Add(new pair<DisjointPattern, Constructor>(ipat, iconst));
+                            conflictlist.Add(new pair<DisjointPattern, Constructor>(jpat, jconst));
                         }
                     }
                 }
@@ -330,23 +326,20 @@ namespace Sla.SLEIGH
             }
 
             // Check if intersection patterns are present, which resolve conflicts
-            for (i = 0; i < conflictlist.size(); i += 2)
-            {
-                DisjointPattern* pat1,*pat2;
-                Constructor* const1,*const2;
+            for (i = 0; i < conflictlist.Count; i += 2) {
+                DisjointPattern pat1, pat2;
+                Constructor const1, const2;
                 pat1 = conflictlist[i].first;
                 const1 = conflictlist[i].second;
                 pat2 = conflictlist[i + 1].first;
                 const2 = conflictlist[i + 1].second;
                 bool resolved = false;
-                for (j = 0; j < list.size(); ++j)
-                {
-                    DisjointPattern* tpat = list[j].first;
-                    Constructor* tconst = list[j].second;
+                for (j = 0; j < list.Count; ++j) {
+                    DisjointPattern tpat = list[j].first;
+                    Constructor tconst = list[j].second;
                     if ((tpat == pat1) && (tconst == const1)) break; // Ran out of possible specializations
                     if ((tpat == pat2) && (tconst == const2)) break;
-                    if (tpat.resolvesIntersect(pat1, pat2))
-                    {
+                    if (tpat.resolvesIntersect(pat1, pat2)) {
                         resolved = true;
                         break;
                     }
@@ -358,72 +351,41 @@ namespace Sla.SLEIGH
 
         public void saveXml(TextWriter s)
         {
-            s << "<decision";
-            s << " number=\"" << dec << num << "\"";
-            s << " context=\"";
-            if (contextdecision)
-                s << "true\"";
-            else
-                s << "false\"";
-            s << " start=\"" << startbit << "\"";
-            s << " size=\"" << bitsize << "\"";
-            s << ">\n";
-            for (int i = 0; i < list.size(); ++i)
-            {
-                s << "<pair id=\"" << dec << list[i].second.getId() << "\">\n";
+            s.Write($"<decision number=\"{num}\" context=\"{(contextdecision ? "true\"" : "false\"")}");
+            s.WriteLine($" start=\"{startbit}\" size=\"{bitsize}\">");
+            for (int i = 0; i < list.Count; ++i) {
+                s.WriteLine($"<pair id=\"{list[i].second.getId()}\">");
                 list[i].first.saveXml(s);
-                s << "</pair>\n";
+                s.WriteLine("</pair>");
             }
-            for (int i = 0; i < children.size(); ++i)
+            for (int i = 0; i < children.Count; ++i)
                 children[i].saveXml(s);
-            s << "</decision>\n";
+            s.WriteLine("</decision>");
         }
 
         public void restoreXml(Element el, DecisionNode par,SubtableSymbol sub)
         {
             parent = par;
-            {
-                istringstream s = new istringstream(el.getAttributeValue("number"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> num;
-            }
-            contextdecision = xml_readbool(el.getAttributeValue("context"));
-            {
-                istringstream s = new istringstream(el.getAttributeValue("start"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> startbit;
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("size"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> bitsize;
-            }
-            List childlist = el.getChildren();
-            List::const_iterator iter;
-            iter = childlist.begin();
-            while (iter != childlist.end())
-            {
-                if ((*iter).getName() == "pair")
-                {
+            num = int.Parse(el.getAttributeValue("number"));
+            contextdecision = Xml.xml_readbool(el.getAttributeValue("context"));
+            startbit = int.Parse(el.getAttributeValue("start"));
+            bitsize = int.Parse(el.getAttributeValue("size"));
+            foreach (Element element in el.getChildren()) {
+                if (element.getName() == "pair") {
                     Constructor ct;
                     DisjointPattern pat;
-                    uint id;
-                    istringstream s = new istringstream((* iter).getAttributeValue("id"));
-                    s.unsetf(ios::dec | ios::hex | ios::oct);
-                    s >> id;
+                    uint id = uint.Parse(element.getAttributeValue("id"));
                     ct = sub.getConstructor(id);
-                    pat = DisjointPattern::restoreDisjoint((*iter).getChildren().front());
+                    pat = DisjointPattern.restoreDisjoint(element.getChildren().front());
                     //This increments num      addConstructorPair(pat,ct);
-                    list.Add(pair<DisjointPattern*, Constructor*>(pat, ct));
+                    list.Add(pair<DisjointPattern, Constructor>(pat, ct));
                     //delete pat;		// addConstructorPair makes its own copy
                 }
-                else if ((*iter).getName() == "decision")
-                {
+                else if (element.getName() == "decision") {
                     DecisionNode subnode = new DecisionNode();
-                    subnode.restoreXml(*iter, this, sub);
+                    subnode.restoreXml(element, this, sub);
                     children.Add(subnode);
                 }
-                ++iter;
             }
         }
     }

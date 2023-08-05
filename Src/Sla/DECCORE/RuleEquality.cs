@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleEquality(getGroup());
         }
 
@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         ///
         /// If both inputs to an INT_EQUAL or INT_NOTEQUAL op are functionally equivalent,
         /// the op can be collapsed to a COPY of a \b true or \b false.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_INT_EQUAL);
             oplist.Add(CPUI_INT_NOTEQUAL);

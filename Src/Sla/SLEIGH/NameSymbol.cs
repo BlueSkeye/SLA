@@ -64,7 +64,7 @@ namespace Sla.SLEIGH
             s << nametable[ind];
         }
 
-        public override symbol_type getType() => name_symbol;
+        public override symbol_type getType() => SleighSymbol.symbol_type.name_symbol;
 
         public override void saveXml(TextWriter s)
         {

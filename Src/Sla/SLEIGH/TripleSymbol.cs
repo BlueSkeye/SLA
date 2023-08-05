@@ -24,7 +24,7 @@ namespace Sla.SLEIGH
 
         public abstract PatternExpression getPatternExpression();
 
-        public abstract void getFixedHandle(FixedHandle hand, ParserWalker walker);
+        public abstract void getFixedHandle(out FixedHandle hand, ParserWalker walker);
         
         public override int getSize() => 0;
 

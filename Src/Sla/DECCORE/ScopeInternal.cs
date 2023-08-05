@@ -689,7 +689,7 @@ namespace Sla.DECCORE
 
         public override ExternRefSymbol findExternalRef(Address addr)
         {
-            ExternRefSymbol* sym = (ExternRefSymbol*)0;
+            ExternRefSymbol* sym = (ExternRefSymbol)null;
             EntryMap* rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap)null)
             {
@@ -711,7 +711,7 @@ namespace Sla.DECCORE
 
         public override LabSymbol findCodeLabel(Address addr)
         {
-            LabSymbol* sym = (LabSymbol*)0;
+            LabSymbol* sym = (LabSymbol)null;
             EntryMap* rangemap = maptable[addr.getSpace().getIndex()];
             if (rangemap != (EntryMap)null)
             {
@@ -984,19 +984,19 @@ namespace Sla.DECCORE
 
         public override void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_SCOPE);
-            encoder.writeString(ATTRIB_NAME, name);
-            encoder.writeUnsignedInteger(ATTRIB_ID, uniqueId);
+            encoder.openElement(ElementId.ELEM_SCOPE);
+            encoder.writeString(AttributeId.ATTRIB_NAME, name);
+            encoder.writeUnsignedInteger(AttributeId.ATTRIB_ID, uniqueId);
             if (getParent() != (Scope)null) {
-                encoder.openElement(ELEM_PARENT);
-                encoder.writeUnsignedInteger(ATTRIB_ID, getParent().getId());
-                encoder.closeElement(ELEM_PARENT);
+                encoder.openElement(ElementId.ELEM_PARENT);
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_ID, getParent().getId());
+                encoder.closeElement(ElementId.ELEM_PARENT);
             }
             getRangeTree().encode(encoder);
 
             if (!nametree.empty())
             {
-                encoder.openElement(ELEM_SYMBOLLIST);
+                encoder.openElement(ElementId.ELEM_SYMBOLLIST);
                 SymbolNameTree::const_iterator iter;
                 for (iter = nametree.begin(); iter != nametree.end(); ++iter)
                 {
@@ -1012,11 +1012,11 @@ namespace Sla.DECCORE
                             symbolType = (sym.getCategory() == Symbol::equate) ? 2 : 1;
                         }
                     }
-                    encoder.openElement(ELEM_MAPSYM);
+                    encoder.openElement(ElementId.ELEM_MAPSYM);
                     if (symbolType == 1)
-                        encoder.writeString(ATTRIB_TYPE, "dynamic");
+                        encoder.writeString(AttributeId.ATTRIB_TYPE, "dynamic");
                     else if (symbolType == 2)
-                        encoder.writeString(ATTRIB_TYPE, "equate");
+                        encoder.writeString(AttributeId.ATTRIB_TYPE, "equate");
                     sym.encode(encoder);
                     List<list<SymbolEntry>::iterator>::const_iterator miter;
                     for (miter = sym.mapentry.begin(); miter != sym.mapentry.end(); ++miter)
@@ -1024,16 +1024,16 @@ namespace Sla.DECCORE
                         SymbolEntry entry = (*(*miter));
                         entry.encode(encoder);
                     }
-                    encoder.closeElement(ELEM_MAPSYM);
+                    encoder.closeElement(ElementId.ELEM_MAPSYM);
                 }
-                encoder.closeElement(ELEM_SYMBOLLIST);
+                encoder.closeElement(ElementId.ELEM_SYMBOLLIST);
             }
-            encoder.closeElement(ELEM_SCOPE);
+            encoder.closeElement(ElementId.ELEM_SCOPE);
         }
 
         public override void decode(Decoder decoder)
         {
-            //  uint elemId = decoder.openElement(ELEM_SCOPE);
+            //  uint elemId = decoder.openElement(ElementId.ELEM_SCOPE);
             //  name = el.getAttributeValue("name");	// Name must already be set in the constructor
             bool rangeequalssymbols = false;
 
@@ -1055,7 +1055,7 @@ namespace Sla.DECCORE
                 decoder.closeElement(subId);
                 rangeequalssymbols = true;
             }
-            subId = decoder.openElement(ELEM_SYMBOLLIST);
+            subId = decoder.openElement(ElementId.ELEM_SYMBOLLIST);
             if (subId != 0)
             {
                 for (; ; )

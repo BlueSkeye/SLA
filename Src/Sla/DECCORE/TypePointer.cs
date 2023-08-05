@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
@@ -26,27 +26,24 @@ namespace Sla.DECCORE
         /// Parse a \<type> element with a child describing the data-type being pointed to
         /// \param decoder is the stream decoder
         /// \param typegrp is the factory owning \b this data-type
-        protected void decode(Decoder decoder, TypeFactory typegrp)
+        internal void decode(Decoder decoder, TypeFactory typegrp)
         {
             //  uint elemId = decoder.openElement();
             decodeBasic(decoder); ;
             decoder.rewindAttributes();
-            for (; ; )
-            {
+            for (; ; ) {
                 uint attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
-                if (attrib == ATTRIB_WORDSIZE)
-                {
+                if (attrib == AttributeId.ATTRIB_WORDSIZE) {
                     wordsize = decoder.readUnsignedInteger();
                 }
-                else if (attrib == ATTRIB_SPACE)
-                {
+                else if (attrib == AttributeId.ATTRIB_SPACE) {
                     spaceid = decoder.readSpace();
                 }
             }
             ptrto = typegrp.decodeType(decoder);
             calcSubmeta();
-            if (name.size() == 0)       // Inherit only if no name
+            if (name.Length == 0)       // Inherit only if no name
                 flags |= ptrto.getInheritable();
             //  decoder.closeElement(elemId);
         }
@@ -56,23 +53,21 @@ namespace Sla.DECCORE
         protected void calcSubmeta()
         {
             type_metatype ptrtoMeta = ptrto.getMetatype();
-            if (ptrtoMeta == type_metatype.TYPE_STRUCT)
-            {
+            if (ptrtoMeta == type_metatype.TYPE_STRUCT) {
                 if (ptrto.numDepend() > 1 || ptrto.isIncomplete())
                     submeta = SUB_PTR_STRUCT;
                 else
                     submeta = SUB_PTR;
             }
-            else if (ptrtoMeta == type_metatype.TYPE_UNION)
-            {
+            else if (ptrtoMeta == type_metatype.TYPE_UNION) {
                 submeta = SUB_PTR_STRUCT;
             }
             if (ptrto.needsResolution() && ptrtoMeta != type_metatype.TYPE_PTR)
-                flags |= needs_resolution;      // Inherit needs_resolution, but only if not a pointer
+                flags |= Properties.needs_resolution;      // Inherit needs_resolution, but only if not a pointer
         }
 
         /// Internal constructor for use with decode
-        protected TypePointer()
+        internal TypePointer()
             : base(0, type_metatype.TYPE_PTR)
         {
             ptrto = (Datatype)null;
@@ -186,14 +181,14 @@ namespace Sla.DECCORE
                 encodeTypedef(encoder);
                 return;
             }
-            encoder.openElement(ELEM_TYPE);
+            encoder.openElement(ElementId.ELEM_TYPE);
             encodeBasic(metatype, encoder);
             if (wordsize != 1)
-                encoder.writeUnsignedInteger(ATTRIB_WORDSIZE, wordsize);
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_WORDSIZE, wordsize);
             if (spaceid != (AddrSpace)null)
-                encoder.writeSpace(ATTRIB_SPACE, spaceid);
+                encoder.writeSpace(AttributeId.ATTRIB_SPACE, spaceid);
             ptrto.encodeRef(encoder);
-            encoder.closeElement(ELEM_TYPE);
+            encoder.closeElement(ElementId.ELEM_TYPE);
         }
 
         /// \brief Find a sub-type pointer given an offset into \b this

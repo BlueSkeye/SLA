@@ -42,13 +42,13 @@ namespace Sla.EXTRA
         /// \param encoder is the stream encoder
         public override void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_XML_SAVEFILE);
+            encoder.openElement(ElementId.ELEM_XML_SAVEFILE);
             encodeHeader(encoder);
-            encoder.writeUnsignedInteger(ATTRIB_ADJUSTVMA, adjustvma);
+            encoder.writeUnsignedInteger(AttributeId.ATTRIB_ADJUSTVMA, adjustvma);
             ((LoadImageXml*)loader).encode(encoder); // Save the LoadImage
             types.encodeCoreTypes(encoder);
             SleighArchitecture::encode(encoder); // Save the rest of the state
-            encoder.closeElement(ELEM_XML_SAVEFILE);
+            encoder.closeElement(ElementId.ELEM_XML_SAVEFILE);
         }
 
         public override void restoreXml(DocumentStorage store)

@@ -19,7 +19,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleZextEliminate(getGroup());
         }
 
@@ -31,7 +31,7 @@ namespace Sla.DECCORE
         ///   - `zext(V) != c =>  V != c`
         ///   - `zext(V) < c  =>  V < c`
         ///   - `zext(V) <= c =>  V <= c`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             uint list[] = {OpCode.CPUI_INT_EQUAL, OpCode.CPUI_INT_NOTEQUAL,
           OpCode.CPUI_INT_LESS,OpCode.CPUI_INT_LESSEQUAL };

@@ -19,7 +19,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleShift2Mult(getGroup());
         }
 
@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         /// \brief Convert INT_LEFT to INT_MULT:  `V << 2  =>  V * 4`
         ///
         /// This only applies if the result is involved in an arithmetic expression.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_INT_LEFT);
         }

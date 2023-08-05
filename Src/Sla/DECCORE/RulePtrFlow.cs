@@ -131,7 +131,7 @@ namespace Sla.DECCORE
 
         private virtual Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RulePtrFlow(getGroup(), glb);
         }
 

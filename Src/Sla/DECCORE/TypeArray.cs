@@ -159,11 +159,11 @@ namespace Sla.DECCORE
                 encodeTypedef(encoder);
                 return;
             }
-            encoder.openElement(ELEM_TYPE);
+            encoder.openElement(ElementId.ELEM_TYPE);
             encodeBasic(metatype, encoder);
-            encoder.writeSignedInteger(ATTRIB_ARRAYSIZE, arraysize);
+            encoder.writeSignedInteger(AttributeId.ATTRIB_ARRAYSIZE, arraysize);
             arrayof.encodeRef(encoder);
-            encoder.closeElement(ELEM_TYPE);
+            encoder.closeElement(ElementId.ELEM_TYPE);
         }
 
         public override Datatype resolveInFlow(PcodeOp op, int slot)

@@ -18,13 +18,13 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSwitchSingle(getGroup());
         }
 
         /// \class RuleSwitchSingle
         /// \brief Convert BRANCHIND with only one computed destination to a BRANCH
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_BRANCHIND);
         }
@@ -35,7 +35,7 @@ namespace Sla.DECCORE
             if (bb.sizeOut() != 1) return 0;
 
             JumpTable* jt = data.findJumpTable(op);
-            if (jt == (JumpTable*)0) return 0;
+            if (jt == (JumpTable)null) return 0;
             if (jt.numEntries() == 0) return 0;
             if (!jt.isLabelled()) return 0; // Labels must be recovered (as this discovers multistage issues)
             Address addr = jt.getAddressByIndex(0);

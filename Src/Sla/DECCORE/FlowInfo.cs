@@ -127,7 +127,7 @@ namespace Sla.DECCORE
         /// Does the function have registered flow override instructions
         private bool flowoverride_present;
         /// Boolean options for flow following
-        private FlowInfo.FlowFlag flags;
+        private FlowFlag flags;
         /// First function in the in-lining chain
         private Funcdata inline_head;
         /// Active list of addresses for function that are in-lined
@@ -136,25 +136,25 @@ namespace Sla.DECCORE
         private HashSet<Address> inline_base;
 
         /// Are there possible unreachable ops
-        private bool hasPossibleUnreachable() => ((flags & possible_unreachable)!=0);
+        private bool hasPossibleUnreachable() => ((flags & FlowFlag.possible_unreachable)!=0);
 
         /// Mark that there may be unreachable ops
         private void setPossibleUnreachable()
         {
-            flags |= possible_unreachable;
+            flags |= FlowFlag.possible_unreachable;
         }
 
         /// Clear any discovered flow properties
         private void clearProperties()
         {
-            flags &= ~((uint)(unimplemented_present | baddata_present | outofbounds_present));
+            flags &= ~(FlowFlag.unimplemented_present | FlowFlag.baddata_present | FlowFlag.outofbounds_present);
             insn_count = 0;
         }
 
         /// Has the given instruction (address) been seen in flow
         private bool seenInstruction(Address addr)
         {
-            return (visited.find(addr) != visited.end());
+            return visited.ContainsKey(addr);
         }
 
         /// Find fallthru pcode-op for given op
@@ -189,16 +189,15 @@ namespace Sla.DECCORE
         /// \param to is the target address of the branch
         private void newAddress(PcodeOp from, Address to)
         {
-            if ((to < baddr) || (eaddr < to))
-            {
+            if ((to < baddr) || (eaddr < to)) {
                 handleOutOfBounds(from.getAddr(), to);
                 unprocessed.Add(to);
                 return;
             }
 
-            if (seenInstruction(to))
-            {   // If we have seen this address before
-                PcodeOp* op = target(to);
+            if (seenInstruction(to)) {
+                // If we have seen this address before
+                PcodeOp op = target(to);
                 data.opMarkStartBasic(op);
                 return;
             }
@@ -251,7 +250,7 @@ namespace Sla.DECCORE
                             Address destaddr = op.getIn(0).getAddr();
                             if (destaddr.isConstant()) {
                                 Address fallThruAddr;
-                                PcodeOp? destop = findRelTarget(op, fallThruAddr);
+                                PcodeOp? destop = findRelTarget(op, out fallThruAddr);
                                 if (destop != (PcodeOp)null) {
                                     data.opMarkStartBasic(destop);  // Make sure the target op is a basic block start
                                     uint newtime = destop.getTime();
@@ -271,7 +270,7 @@ namespace Sla.DECCORE
                             Address destaddr = op.getIn(0).getAddr();
                             if (destaddr.isConstant()) {
                                 Address fallThruAddr;
-                                PcodeOp? destop = findRelTarget(op, fallThruAddr);
+                                PcodeOp? destop = findRelTarget(op, out fallThruAddr);
                                 if (destop != (PcodeOp)null) {
                                     data.opMarkStartBasic(destop);  // Make sure the target op is a basic block start
                                     uint newtime = destop.getTime();
@@ -364,14 +363,14 @@ namespace Sla.DECCORE
             Override.Branching flowoverride;
 
             if (insn_count >= insn_max) {
-                if ((flags & error_toomanyinstructions) != 0)
+                if ((flags & FlowFlag.error_toomanyinstructions) != 0)
                     throw new LowlevelError("Flow exceeded maximum allowable instructions");
                 else {
                     step = 1;
                     artificialHalt(curaddr, PcodeOp.Flags.badinstruction);
                     data.warning("Too many instructions -- Truncating flow here", curaddr);
                     if (!hasTooManyInstructions()) {
-                        flags |= toomanyinstructions_present;
+                        flags |= FlowFlag.toomanyinstructions_present;
                         data.warningHeader("Exceeded maximum allowable instructions: Some flow is truncated");
                     }
                 }
@@ -393,18 +392,16 @@ namespace Sla.DECCORE
             try {
                 step = glb.translate.oneInstruction(emitter, curaddr); // Generate ops for instruction
             }
-            catch (UnimplError rr) {
+            catch (UnimplError err) {
                 // Instruction is unimplemented
-                if ((flags & ignore_unimplemented) != 0)
-                {
+                if ((flags & FlowFlag.ignore_unimplemented) != 0) {
                     step = err.instruction_length;
-                    if (!hasUnimplemented())
-                    {
-                        flags |= unimplemented_present;
+                    if (!hasUnimplemented()) {
+                        flags |= FlowFlag.unimplemented_present;
                         data.warningHeader("Control flow ignored unimplemented instructions");
                     }
                 }
-                else if ((flags & error_unimplemented) != 0)
+                else if ((flags & FlowFlag.error_unimplemented) != 0)
                     throw err;      // rethrow
                 else {
                     // Add infinite loop instruction
@@ -412,13 +409,13 @@ namespace Sla.DECCORE
                     artificialHalt(curaddr, PcodeOp.Flags.unimplemented);
                     data.warning("Unimplemented instruction - Truncating control flow here", curaddr);
                     if (!hasUnimplemented()) {
-                        flags |= unimplemented_present;
+                        flags |= FlowFlag.unimplemented_present;
                         data.warningHeader("Control flow encountered unimplemented instructions");
                     }
                 }
             }
             catch (BadDataError err) {
-                if ((flags & error_unimplemented) != 0)
+                if ((flags & FlowFlag.error_unimplemented) != 0)
                     throw err;      // rethrow
                 else {
                     // Add infinite loop instruction
@@ -426,7 +423,7 @@ namespace Sla.DECCORE
                     artificialHalt(curaddr, PcodeOp.Flags.badinstruction);
                     data.warning("Bad instruction - Truncating control flow here", curaddr);
                     if (!hasBadData()) {
-                        flags |= baddata_present;
+                        flags |= FlowFlag.baddata_present;
                         data.warningHeader("Control flow encountered bad instruction data");
                     }
                 }
@@ -471,27 +468,23 @@ namespace Sla.DECCORE
             bool startbasic = true;
             bool fallthruflag;
 
-            for (; ; )
-            {
+            while(true) {
                 curaddr = addrlist.GetLastItem();
                 addrlist.RemoveLastItem();
                 fallthruflag = processInstruction(curaddr, startbasic);
                 if (!fallthruflag) break;
                 if (addrlist.empty()) break;
-                if (bound <= addrlist.GetLastItem())
-                {
-                    if (bound == eaddr)
-                    {
+                if (bound <= addrlist.GetLastItem()) {
+                    if (bound == eaddr) {
                         handleOutOfBounds(eaddr, addrlist.GetLastItem());
                         unprocessed.Add(addrlist.GetLastItem());
                         addrlist.RemoveLastItem();
                         return;
                     }
-                    if (bound == addrlist.GetLastItem())
-                    { // Hit the bound exactly
-                        if (startbasic)
-                        {
-                            PcodeOp* op = target(addrlist.GetLastItem());
+                    if (bound == addrlist.GetLastItem()) {
+                        // Hit the bound exactly
+                        if (startbasic) {
+                            PcodeOp op = target(addrlist.GetLastItem());
                             data.opMarkStartBasic(op);
                         }
                         addrlist.RemoveLastItem();
@@ -511,14 +504,17 @@ namespace Sla.DECCORE
         /// \param op is the given branching p-code op
         /// \param res is a reference to the fall-thru address being passed back
         /// \return the target PcodeOp or NULL if the fall-thru address is passed back instead
-        private PcodeOp? findRelTarget(PcodeOp op, Address res)
+        private PcodeOp? findRelTarget(PcodeOp op, out Address? res)
         {
             Address addr = op.getIn(0).getAddr();
-            uint id = op.getTime() + addr.getOffset();
+            uint id = (uint)(op.getTime() + addr.getOffset());
             SeqNum seqnum = new SeqNum(op.getAddr(), id);
             PcodeOp? retop = obank.findOp(seqnum);
-            if (retop != (PcodeOp)null)   // Is this a "properly" internal branch
+            if (retop != (PcodeOp)null) {
+                // Is this a "properly" internal branch
+                res = null;
                 return retop;
+            }
 
             // Now we check if the relative branch is really to the next instruction
             SeqNum seqnum1 = new SeqNum(op.getAddr(), id-1);
@@ -718,19 +714,15 @@ namespace Sla.DECCORE
         /// previously collected p-code op pairs in \b block_edge1 and \b block_edge2
         private void connectBasic()
         {
-            PcodeOp op;
-            PcodeOp targ_op;
             BlockBasic bs;
             BlockBasic targ_bs;
-            IEnumerator<PcodeOp> iter;
-            IEnumerator<PcodeOp> iter2;
 
-            iter = block_edge1.begin();
-            iter2 = block_edge2.begin();
-            while (iter != block_edge1.end())
-            {
-                op = *iter++;
-                targ_op = *iter2++;
+            IEnumerator<PcodeOp> iter = block_edge1.GetEnumerator();
+            IEnumerator<PcodeOp> iter2 = block_edge2.GetEnumerator();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
+                if (!iter2.MoveNext()) throw new BugException();
+                PcodeOp targ_op = iter2.Current;
                 bs = op.getParent();
                 targ_bs = targ_op.getParent();
                 bblocks.addEdge(bs, targ_bs);
@@ -749,12 +741,11 @@ namespace Sla.DECCORE
             Address addr = addrlist.GetLastItem();
 
             iter = visited.upper_bound(addr); // First range greater than addr
-            if (iter != visited.begin())
-            {
+            if (iter != visited.begin()) {
                 --iter;         // Last range less than or equal to us
-                if (addr == (*iter).first)
-                { // If we have already visited this address
-                    PcodeOp* op = target(addr); // But make sure the address
+                if (addr == (*iter).first) {
+                    // If we have already visited this address
+                    PcodeOp op = target(addr); // But make sure the address
                     data.opMarkStartBasic(op); // starts a basic block
                     addrlist.RemoveLastItem();    // Throw it away
                     return false;
@@ -776,26 +767,22 @@ namespace Sla.DECCORE
         /// \param toaddr is the given destination address that is out of bounds
         private void handleOutOfBounds(Address fromaddr, Address toaddr)
         {
-            if ((flags & ignore_outofbounds) == 0)
-            { // Should we throw an error for out of bounds
-                ostringstream errmsg;
-                errmsg << "Function flow out of bounds: ";
-                errmsg << fromaddr.getShortcut();
+            if ((flags & FlowFlag.ignore_outofbounds) == 0) {
+                // Should we throw an error for out of bounds
+                StringWriter errmsg = new StringWriter();
+                errmsg.Write($"Function flow out of bounds: {fromaddr.getShortcut()}");
                 fromaddr.printRaw(errmsg);
-                errmsg << " flows to ";
-                errmsg << toaddr.getShortcut();
+                errmsg.Write($" flows to {toaddr.getShortcut()}");
                 toaddr.printRaw(errmsg);
-                if ((flags & error_outofbounds) == 0)
-                {
-                    data.warning(errmsg.str(), toaddr);
-                    if (!hasOutOfBounds())
-                    {
-                        flags |= outofbounds_present;
+                if ((flags & FlowFlag.error_outofbounds) == 0) {
+                    data.warning(errmsg.ToString(), toaddr);
+                    if (!hasOutOfBounds()) {
+                        flags |= FlowFlag.outofbounds_present;
                         data.warningHeader("Function flows out of bounds");
                     }
                 }
                 else
-                    throw new LowlevelError(errmsg.str());
+                    throw new LowlevelError(errmsg.ToString());
             }
         }
 
@@ -839,11 +826,11 @@ namespace Sla.DECCORE
             s.Write($") overlaps instruction at ({addr2.getSpace().getName()},");
             addr2.printRaw(s);
             s.WriteLine(')');
-            if ((flags & error_reinterpreted) != 0)
-                throw new LowlevelError(s.str());
+            if ((flags & FlowFlag.error_reinterpreted) != 0)
+                throw new LowlevelError(s.ToString());
 
-            if ((flags & reinterpreted_present) == 0) {
-                flags |= reinterpreted_present;
+            if ((flags & FlowFlag.reinterpreted_present) == 0) {
+                flags |= FlowFlag.reinterpreted_present;
                 data.warningHeader(s.ToString());
             }
         }
@@ -856,10 +843,9 @@ namespace Sla.DECCORE
         {
             if (fspecs.isInline())
                 injectlist.Add(fspecs.getOp());
-            if (fspecs.isNoReturn())
-            {
-                PcodeOp* op = fspecs.getOp();
-                PcodeOp* haltop = artificialHalt(op.getAddr(), PcodeOp::noreturn);
+            if (fspecs.isNoReturn()) {
+                PcodeOp op = fspecs.getOp();
+                PcodeOp haltop = artificialHalt(op.getAddr(), PcodeOp.Flags.noreturn);
                 data.opDeadInsertAfter(haltop, op);
                 if (!fspecs.isInline())
                     data.warning("Subroutine does not return", op.getAddr());
@@ -875,19 +861,19 @@ namespace Sla.DECCORE
         /// \param fspecs is the call site object
         private void queryCall(FuncCallSpecs fspecs)
         {
-            if (!fspecs.getEntryAddress().isInvalid())
-            { // If this is a direct call
-                Funcdata* otherfunc = data.getScopeLocal().getParent().queryFunction(fspecs.getEntryAddress());
-                if (otherfunc != (Funcdata)null)
-                {
+            if (!fspecs.getEntryAddress().isInvalid()) {
+                // If this is a direct call
+                Funcdata? otherfunc = data.getScopeLocal().getParent().queryFunction(fspecs.getEntryAddress());
+                if (otherfunc != (Funcdata)null) {
                     fspecs.setFuncdata(otherfunc); // Associate the symbol with the callsite
-                    if (!fspecs.hasModel() || otherfunc.getFuncProto().isInline())
-                    {   // If the prototype was not overridden
-                        fspecs.copyFlowEffects(otherfunc.getFuncProto());  // Take the flow affects of the symbol
-                                                                            // If the call site is applying just the standard prototype from the symbol,
-                                                                            // this postpones the full copy of the prototype until ActionDefaultParams
-                                                                            // Which lets "last second" changes come in, between when the function is first walked and
-                                                                            // when it is finally decompiled
+                    if (!fspecs.hasModel() || otherfunc.getFuncProto().isInline()) {
+                        // If the prototype was not overridden
+                        // Take the flow affects of the symbol
+                        // If the call site is applying just the standard prototype from the symbol,
+                        // this postpones the full copy of the prototype until ActionDefaultParams
+                        // Which lets "last second" changes come in, between when the function is first walked and
+                        // when it is finally decompiled
+                        fspecs.copyFlowEffects(otherfunc.getFuncProto());
                     }
                 }
             }
@@ -900,21 +886,20 @@ namespace Sla.DECCORE
         /// \param op is the given CALL op
         /// \param fc is non-NULL if \e injection is in progress and a cycle check needs to be made
         /// \return \b true if it is discovered the sub-function never returns
-        private bool setupCallSpecs(PcodeOp op, FuncCallSpecs fc)
+        private bool setupCallSpecs(PcodeOp op, FuncCallSpecs? fc)
         {
-            FuncCallSpecs* res;
-            res = new FuncCallSpecs(op);
+            FuncCallSpecs res = new FuncCallSpecs(op);
             data.opSetInput(op, data.newVarnodeCallSpecs(res), 0);
             qlst.Add(res);
 
-            data.getOverride().applyPrototype(data, *res);
-            queryCall(*res);
-            if (fc != (FuncCallSpecs)null)
-            {   // If we are already in the midst of an injection
+            data.getOverride().applyPrototype(data, res);
+            queryCall(res);
+            if (fc != (FuncCallSpecs)null) {
+                // If we are already in the midst of an injection
                 if (fc.getEntryAddress() == res.getEntryAddress())
                     res.cancelInjectId();      // Don't allow recursion
             }
-            return checkForFlowModification(*res);
+            return checkForFlowModification(res);
         }
 
         /// \brief Set up the FuncCallSpecs object for a new indirect call site
@@ -924,25 +909,24 @@ namespace Sla.DECCORE
         /// \param op is the given CALLIND op
         /// \param fc is non-NULL if \e injection is in progress and a cycle check needs to be made
         /// \return \b true if it is discovered the sub-function never returns
-        private bool setupCallindSpecs(PcodeOp op, FuncCallSpecs fc)
+        private bool setupCallindSpecs(PcodeOp op, FuncCallSpecs? fc)
         {
-            FuncCallSpecs* res;
-            res = new FuncCallSpecs(op);
+            FuncCallSpecs res = new FuncCallSpecs(op);
             qlst.Add(res);
 
-            data.getOverride().applyIndirect(data, *res);
+            data.getOverride().applyIndirect(data, res);
             if (fc != (FuncCallSpecs)null && fc.getEntryAddress() == res.getEntryAddress())
                 res.setAddress(Address()); // Cancel any indirect override
-            data.getOverride().applyPrototype(data, *res);
-            queryCall(*res);
+            data.getOverride().applyPrototype(data, res);
+            queryCall(res);
 
-            if (!res.getEntryAddress().isInvalid())
-            {   // If we are overridden to a direct call
+            if (!res.getEntryAddress().isInvalid()) {
+                // If we are overridden to a direct call
                 // Change indirect pcode call into a normal pcode call
                 data.opSetOpcode(op, OpCode.CPUI_CALL); // Set normal opcode
                 data.opSetInput(op, data.newVarnodeCallSpecs(res), 0);
             }
-            return checkForFlowModification(*res);
+            return checkForFlowModification(res);
         }
 
         /// Check for control-flow in a new injected p-code op
@@ -955,10 +939,9 @@ namespace Sla.DECCORE
                 setupCallSpecs(op, (FuncCallSpecs)null);
             else if (op.code() == OpCode.CPUI_CALLIND)
                 setupCallindSpecs(op, (FuncCallSpecs)null);
-            else if (op.code() == OpCode.CPUI_BRANCHIND)
-            {
-                JumpTable* jt = data.linkJumpTable(op);
-                if (jt == (JumpTable*)0)
+            else if (op.code() == OpCode.CPUI_BRANCHIND) {
+                JumpTable? jt = data.linkJumpTable(op);
+                if (jt == (JumpTable)null)
                     tablelist.Add(op); // Didn't recover a jumptable
             }
         }
@@ -1017,23 +1000,22 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp
         private void injectUserOp(PcodeOp op)
         {
-            InjectedUserOp* userop = (InjectedUserOp*)glb.userops.getOp((int)op.getIn(0).getOffset());
-            InjectPayload* payload = glb.pcodeinjectlib.getPayload(userop.getInjectId());
-            InjectContext & icontext(glb.pcodeinjectlib.getCachedContext());
+            InjectedUserOp userop = (InjectedUserOp)glb.userops.getOp((int)op.getIn(0).getOffset());
+            InjectPayload payload = glb.pcodeinjectlib.getPayload(userop.getInjectId());
+            InjectContext icontext = glb.pcodeinjectlib.getCachedContext();
             icontext.clear();
             icontext.baseaddr = op.getAddr();
             icontext.nextaddr = icontext.baseaddr;
-            for (int i = 1; i < op.numInput(); ++i)
-            {       // Skip the first operand containing the injectid
-                Varnode* vn = op.getIn(i);
+            for (int i = 1; i < op.numInput(); ++i) {
+                // Skip the first operand containing the injectid
+                Varnode vn = op.getIn(i);
                 icontext.inputlist.emplace_back();
                 icontext.inputlist.GetLastItem().space = vn.getSpace();
                 icontext.inputlist.GetLastItem().offset = vn.getOffset();
                 icontext.inputlist.GetLastItem().size = vn.getSize();
             }
-            Varnode* outvn = op.getOut();
-            if (outvn != (Varnode)null)
-            {
+            Varnode? outvn = op.getOut();
+            if (outvn != (Varnode)null) {
                 icontext.output.emplace_back();
                 icontext.output.GetLastItem().space = outvn.getSpace();
                 icontext.output.GetLastItem().offset = outvn.getOffset();
@@ -1049,9 +1031,9 @@ namespace Sla.DECCORE
         /// \return \b true if the in-lining is successful
         private bool inlineSubFunction(FuncCallSpecs fc)
         {
-            Funcdata* fd = fc.getFuncdata();
+            Funcdata? fd = fc.getFuncdata();
             if (fd == (Funcdata)null) return false;
-            PcodeOp* op = fc.getOp();
+            PcodeOp op = fc.getOp();
             Address retaddr;
 
             if (!data.inlineFlow(fd, *this, op))
@@ -1071,15 +1053,15 @@ namespace Sla.DECCORE
         /// \return \b true if the injection was successfully performed
         private bool injectSubFunction(FuncCallSpecs fc)
         {
-            PcodeOp* op = fc.getOp();
+            PcodeOp op = fc.getOp();
 
             // Inject to end of the deadlist
-            InjectContext & icontext(glb.pcodeinjectlib.getCachedContext());
+            InjectContext icontext = glb.pcodeinjectlib.getCachedContext();
             icontext.clear();
             icontext.baseaddr = op.getAddr();
             icontext.nextaddr = icontext.baseaddr;
             icontext.calladdr = fc.getEntryAddress();
-            InjectPayload* payload = glb.pcodeinjectlib.getPayload(fc.getInjectId());
+            InjectPayload payload = glb.pcodeinjectlib.getPayload(fc.getInjectId());
             doInjection(payload, icontext, op, fc);
             // If the injection fills in the -paramshift- field of the context
             // pass this information on to the callspec of the injected call, which must be last in the list
@@ -1095,13 +1077,12 @@ namespace Sla.DECCORE
         /// This situation is most likely due to a Position Indepent Code construction.
         private void checkContainedCall()
         {
-            List<FuncCallSpecs*>::iterator iter;
-            for (iter = qlst.begin(); iter != qlst.end(); ++iter)
-            {
-                FuncCallSpecs* fc = *iter;
-                Funcdata* fd = fc.getFuncdata();
+            IEnumerator<FuncCallSpecs> iter = qlst.begin();
+            while (iter.MoveNext()) {
+                FuncCallSpecs fc = iter.Current;
+                Funcdata? fd = fc.getFuncdata();
                 if (fd != (Funcdata)null) continue;
-                PcodeOp* op = fc.getOp();
+                PcodeOp op = fc.getOp();
                 if (op.code() != OpCode.CPUI_CALL) continue;
 
                 Address addr = fc.getEntryAddress();
@@ -1111,16 +1092,12 @@ namespace Sla.DECCORE
                 --miter;
                 if ((*miter).first + (*miter).second.size <= addr)
                     continue;
-                if ((*miter).first == addr)
-                {
-                    ostringstream s;
-                    s << "Possible PIC construction at ";
-                    op.getAddr().printRaw(s);
-                    s << ": Changing call to branch";
-                    data.warningHeader(s.str());
+                if ((*miter).first == addr) {
+                    data.warningHeader(
+                        "Possible PIC construction at {op.getAddr().printRaw(s)}: Changing call to branch");
                     data.opSetOpcode(op, OpCode.CPUI_BRANCH);
                     // Make sure target of new goto starts a basic block
-                    PcodeOp* targ = target(addr);
+                    PcodeOp targ = target(addr);
                     data.opMarkStartBasic(targ);
                     // Make sure the following op starts a basic block
                     list<PcodeOp*>::const_iterator oiter = op.getInsertIter();
@@ -1130,11 +1107,10 @@ namespace Sla.DECCORE
                     // Restore original address
                     data.opSetInput(op, data.newCodeRef(addr), 0);
                     iter = qlst.erase(iter);    // Delete the call
-                    delete fc;
+                    // delete fc;
                     if (iter == qlst.end()) break;
                 }
-                else
-                {
+                else {
                     data.warning("Call to offcut address within same function", op.getAddr());
                 }
             }
@@ -1161,7 +1137,7 @@ namespace Sla.DECCORE
         /// \param notreached will hold the list of BRANCHIND ops that could not be reached
         private void recoverJumpTables(List<JumpTable> newTables, List<PcodeOp> notreached)
         {
-            PcodeOp* op = tablelist[0];
+            PcodeOp op = tablelist[0];
             ostringstream s1;
             s1 << data.getName() << "@@jump@";
             op.getAddr().printRaw(s1);
@@ -1176,7 +1152,7 @@ namespace Sla.DECCORE
                 op = tablelist[i];
                 int failuremode;
                 JumpTable* jt = data.recoverJumpTable(partial, op, this, failuremode); // Recover it
-                if (jt == (JumpTable*)0)
+                if (jt == (JumpTable)null)
                 { // Could not recover jumptable
                     if ((failuremode == 3) && (tablelist.size() > 1) && (!isInArray(notreached, op)))
                     {
@@ -1403,7 +1379,7 @@ namespace Sla.DECCORE
                     for (int i = 0; i < newTables.size(); ++i)
                     {
                         JumpTable* jt = newTables[i];
-                        if (jt == (JumpTable*)0) continue;
+                        if (jt == (JumpTable)null) continue;
 
                         int num = jt.numEntries();
                         for (int i = 0; i < num; ++i)

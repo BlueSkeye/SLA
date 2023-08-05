@@ -47,7 +47,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RulePtrsubCharConstant(getGroup());
         }
 
@@ -57,7 +57,7 @@ namespace Sla.DECCORE
         /// If a SUBPIECE refers to a global symbol, the output of the SUBPIECE is a (char *),
         /// and the address is read-only, then get rid of the SUBPIECE in favor
         /// of printing a constant string.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_PTRSUB);
         }

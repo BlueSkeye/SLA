@@ -449,11 +449,11 @@ namespace Sla.DECCORE
         // Routines that are specific to one address space
         public override void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_LOCALDB);
-            encoder.writeSpace(ATTRIB_MAIN, space);
-            encoder.writeBool(ATTRIB_LOCK, rangeLocked);
+            encoder.openElement(ElementId.ELEM_LOCALDB);
+            encoder.writeSpace(AttributeId.ATTRIB_MAIN, space);
+            encoder.writeBool(AttributeId.ATTRIB_LOCK, rangeLocked);
             ScopeInternal::encode(encoder);
-            encoder.closeElement(ELEM_LOCALDB);
+            encoder.closeElement(ElementId.ELEM_LOCALDB);
         }
 
         public override void decode(Decoder decoder)
@@ -465,9 +465,9 @@ namespace Sla.DECCORE
         public override void decodeWrappingAttributes(Decoder decoder)
         {
             rangeLocked = false;
-            if (decoder.readBool(ATTRIB_LOCK))
+            if (decoder.readBool(AttributeId.ATTRIB_LOCK))
                 rangeLocked = true;
-            space = decoder.readSpace(ATTRIB_MAIN);
+            space = decoder.readSpace(AttributeId.ATTRIB_MAIN);
         }
 
         public override string buildVariableName(Address addr, Address pc, Datatype ct, int index, uint flags)

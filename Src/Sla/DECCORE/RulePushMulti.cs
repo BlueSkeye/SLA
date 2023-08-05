@@ -55,7 +55,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RulePushMulti(getGroup());
         }
 
@@ -65,7 +65,7 @@ namespace Sla.DECCORE
         /// Look for a two-branch MULTIEQUAL where both inputs are constructed in
         /// functionally equivalent ways.  Remove (the reference to) one construction
         /// and move the other into the merge block.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(OpCode.CPUI_MULTIEQUAL);
         }

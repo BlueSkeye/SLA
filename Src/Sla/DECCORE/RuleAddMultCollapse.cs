@@ -20,7 +20,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleAddMultCollapse(getGroup());
         }
 
@@ -31,7 +31,7 @@ namespace Sla.DECCORE
         ///  - `((V + c) + d)  =>  V + (c+d)`
         ///  - `((V * c) * d)  =>  V * (c*d)`
         ///  - `((V + (W + c)) + d)  =>  (W + (c+d)) + V`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             uint list[] = { OpCode.CPUI_INT_ADD, OpCode.CPUI_INT_MULT };
             oplist.insert(oplist.end(), list, list + 2);

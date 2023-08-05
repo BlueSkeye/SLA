@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleConcatShift(getGroup());
         }
 
@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         /// Right shifts (signed and unsigned) can throw away the least significant part
         /// of a concatentation.  The result is a (sign or zero) extension of the most significant part.
         /// Depending on the original shift amount, the extension may still need to be shifted.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_INT_RIGHT);
             oplist.Add(CPUI_INT_SRIGHT);

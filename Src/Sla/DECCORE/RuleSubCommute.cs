@@ -19,7 +19,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSubCommute(getGroup());
         }
 
@@ -30,7 +30,7 @@ namespace Sla.DECCORE
         /// We try to push SUBPIECE earlier in the expression trees (preferring short versions
         /// of ops over long) in the hopes that the SUBPIECE will run into a
         /// constant, a INT_SEXT, or a INT_ZEXT, canceling out
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(OpCode.CPUI_SUBPIECE);
         }

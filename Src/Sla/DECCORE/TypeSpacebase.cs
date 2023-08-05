@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         {
             //  uint elemId = decoder.openElement();
             decodeBasic(decoder);
-            spaceid = decoder.readSpace(ATTRIB_SPACE);
+            spaceid = decoder.readSpace(AttributeId.ATTRIB_SPACE);
             localframe = Address::decode(decoder);
             //  decoder.closeElement(elemId);
         }
@@ -200,11 +200,11 @@ namespace Sla.DECCORE
                 encodeTypedef(encoder);
                 return;
             }
-            encoder.openElement(ELEM_TYPE);
+            encoder.openElement(ElementId.ELEM_TYPE);
             encodeBasic(metatype, encoder);
-            encoder.writeSpace(ATTRIB_SPACE, spaceid);
+            encoder.writeSpace(AttributeId.ATTRIB_SPACE, spaceid);
             localframe.encode(encoder);
-            encoder.closeElement(ELEM_TYPE);
+            encoder.closeElement(ElementId.ELEM_TYPE);
         }
     }
 }

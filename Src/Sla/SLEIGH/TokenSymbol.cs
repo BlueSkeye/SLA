@@ -24,6 +24,6 @@ namespace Sla.SLEIGH
     
         public Token getToken() => tok;
 
-        public override symbol_type getType() => token_symbol;
+        public override symbol_type getType() => SleighSymbol.symbol_type.token_symbol;
     }
 }

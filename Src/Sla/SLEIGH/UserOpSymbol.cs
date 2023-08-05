@@ -31,7 +31,7 @@ namespace Sla.SLEIGH
 
         public uint getIndex() => index;
 
-        public override symbol_type getType() => userop_symbol;
+        public override symbol_type getType() => SleighSymbol.symbol_type.userop_symbol;
 
         public override void saveXml(TextWriter s)
         {

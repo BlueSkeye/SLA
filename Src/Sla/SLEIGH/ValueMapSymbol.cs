@@ -74,7 +74,7 @@ namespace Sla.SLEIGH
                 s << "-0x" << hex << -val;
         }
 
-        public override symbol_type getType() => valuemap_symbol;
+        public override symbol_type getType() => SleighSymbol.symbol_type.valuemap_symbol;
 
         public override void saveXml(TextWriter s)
         {

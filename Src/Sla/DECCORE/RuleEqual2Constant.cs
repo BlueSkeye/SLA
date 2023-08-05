@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleEqual2Constant(getGroup());
         }
 
@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         ///  - `V * -1 == c  =>  V == -c`
         ///  - `V + c == d  =>  V == (d-c)`
         ///  - `~V == c     =>  V == ~c`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             uint list[] = { OpCode.CPUI_INT_EQUAL, OpCode.CPUI_INT_NOTEQUAL };
             oplist.insert(oplist.end(), list, list + 2);

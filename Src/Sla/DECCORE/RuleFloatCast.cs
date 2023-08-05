@@ -18,13 +18,13 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleFloatCast(getGroup());
         }
 
         /// \class RuleFloatCast
         /// \brief Replace (casttosmall)(casttobig)V with identity or with single cast
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_FLOAT_FLOAT2FLOAT);
             oplist.Add(CPUI_FLOAT_TRUNC);

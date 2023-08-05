@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -42,13 +42,13 @@ namespace Sla.DECCORE
         private uint opedgeproc;
 
         /// List of PcodeOps in the sub-graph being hashed
-        private List<PcodeOp> markop;
+        private List<PcodeOp> markop = new List<PcodeOp>();
         /// List of Varnodes is the sub-graph being hashed
-        private List<Varnode> markvn;
+        private List<Varnode> markvn = new List<Varnode>();
         /// A staging area for Varnodes before formally adding to the sub-graph
-        private List<Varnode> vnedge;
+        private List<Varnode> vnedge = new List<Varnode>();
         /// The edges in the sub-graph
-        private List<ToOpEdge> opedge;
+        private List<ToOpEdge> opedge = new List<ToOpEdge>();
 
         /// Address most closely associated with variable
         private Address addrresult;
@@ -61,15 +61,14 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode
         private void buildVnUp(Varnode vn)
         {
-            PcodeOp* op;
-            for (; ; )
-            {
+            PcodeOp? op;
+            while (true) {
                 if (!vn.isWritten()) return;
                 op = vn.getDef();
-                if (transtable[op.code()] != 0) break; // Do not ignore this operation
+                if (transtable[(int)op.code()] != 0) break; // Do not ignore this operation
                 vn = op.getIn(0);
             }
-            opedge.Add(ToOpEdge(op, -1));
+            opedge.Add(new ToOpEdge(op, -1));
         }
 
         /// Add in edges between the given Varnode and any PcodeOp that reads it
@@ -105,9 +104,8 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp thats already in the sub-graph
         private void buildOpUp(PcodeOp op)
         {
-            for (int i = 0; i < op.numInput(); ++i)
-            {
-                Varnode* vn = op.getIn(i);
+            for (int i = 0; i < op.numInput(); ++i) {
+                Varnode vn = op.getIn(i);
                 vnedge.Add(vn);
             }
         }
@@ -116,7 +114,7 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp thats already in the sub-graph
         private void buildOpDown(PcodeOp op)
         {
-            Varnode* vn = op.getOut();
+            Varnode vn = op.getOut();
             if (vn == (Varnode)null) return;
             vnedge.Add(vn);
         }
@@ -124,22 +122,20 @@ namespace Sla.DECCORE
         /// Move staged Varnodes into the sub-graph and mark them
         private void gatherUnmarkedVn()
         {
-            for (int i = 0; i < vnedge.size(); ++i)
-            {
-                Varnode* vn = vnedge[i];
+            for (int i = 0; i < vnedge.size(); ++i) {
+                Varnode vn = vnedge[i];
                 if (vn.isMark()) continue;
                 markvn.Add(vn);
                 vn.setMark();
             }
-            vnedge.clear();
+            vnedge.Clear();
         }
 
         /// Mark any new PcodeOps in the sub-graph
         private void gatherUnmarkedOp()
         {
-            for (; opedgeproc < opedge.size(); ++opedgeproc)
-            {
-                PcodeOp* op = opedge[opedgeproc].getOp();
+            for (; opedgeproc < opedge.size(); ++opedgeproc) {
+                PcodeOp op = opedge[(int)opedgeproc].getOp();
                 if (op.isMark()) continue;
                 markop.Add(op);
                 op.setMark();
@@ -155,14 +151,13 @@ namespace Sla.DECCORE
         private void pieceTogetherHash(Varnode root, uint method)
         {
             for (uint i = 0; i < markvn.size(); ++i) // Clear our marks
-                markvn[i].clearMark();
+                markvn[(int)i].clearMark();
             for (uint i = 0; i < markop.size(); ++i)
-                markop[i].clearMark();
+                markop[(int)i].clearMark();
 
-            if (opedge.size() == 0)
-            {
+            if (opedge.size() == 0) {
                 hash = (ulong)0;
-                addrresult = Address();
+                addrresult = new Address();
                 return;
             }
 
@@ -170,11 +165,9 @@ namespace Sla.DECCORE
 
             // Hash in information about the root
             reg = Globals.crc_update(reg, (uint)root.getSize());
-            if (root.isConstant())
-            {
+            if (root.isConstant()) {
                 ulong val = root.getOffset();
-                for (int i = 0; i < root.getSize(); ++i)
-                {
+                for (int i = 0; i < root.getSize(); ++i) {
                     reg = Globals.crc_update(reg, (uint)val);
                     val >>= 8;
                 }
@@ -184,19 +177,19 @@ namespace Sla.DECCORE
                 reg = opedge[i].hash(reg);
 
             // Build the final 64-bit hash
-            PcodeOp* op = (PcodeOp)null;
+            PcodeOp op = (PcodeOp)null;
             int slot = 0;
             uint ct;
             bool attachedop = true;
-            for (ct = 0; ct < opedge.size(); ++ct)
-            { // Find op that is directly attached to -root- i.e. not a skip op
-                op = opedge[ct].getOp();
-                slot = opedge[ct].getSlot();
+            for (ct = 0; ct < opedge.size(); ++ct) {
+                // Find op that is directly attached to -root- i.e. not a skip op
+                op = opedge[(int)ct].getOp();
+                slot = opedge[(int)ct].getSlot();
                 if ((slot < 0) && (op.getOut() == root)) break;
                 if ((slot >= 0) && (op.getIn(slot) == root)) break;
             }
-            if (ct == opedge.size())
-            {   // If everything attached to the root was a skip op
+            if (ct == opedge.size()) {
+                // If everything attached to the root was a skip op
                 op = opedge[0].getOp(); // Return op that is not attached directly
                 slot = opedge[0].getSlot();
                 attachedop = false;
@@ -223,23 +216,19 @@ namespace Sla.DECCORE
         /// and slot. Pass back null if the data-flow path ends.
         /// \param op is the given PcodeOp to modify
         /// \param slot is the slot to modify
-        private static void moveOffSkip(PcodeOp op, int slot)
+        private static void moveOffSkip(PcodeOp? op, int slot)
         {
-            while (transtable[op.code()] == 0)
-            {
-                if (slot >= 0)
-                {
-                    Varnode* vn = op.getOut();
+            while (transtable[(int)op.code()] == 0) {
+                if (slot >= 0) {
+                    Varnode vn = op.getOut();
                     op = vn.loneDescend();
-                    if (op == (PcodeOp)null)
-                    {
+                    if (op == (PcodeOp)null) {
                         return; // Indicate the end of the data-flow path
                     }
                     slot = op.getSlot(vn);
                 }
-                else
-                {
-                    Varnode* vn = op.getIn(0);
+                else {
+                    Varnode vn = op.getIn(0);
                     if (!vn.isWritten()) return;   // Indicate the end of the data-flow path
                     op = vn.getDef();
                 }
@@ -252,12 +241,10 @@ namespace Sla.DECCORE
         private static void dedupVarnodes(List<Varnode> varlist)
         {
             if (varlist.size() < 2) return;
-            List<Varnode*> resList;
-            for (int i = 0; i < varlist.size(); ++i)
-            {
-                Varnode* vn = varlist[i];
-                if (!vn.isMark())
-                {
+            List<Varnode> resList = new List<Varnode>();
+            for (int i = 0; i < varlist.size(); ++i) {
+                Varnode vn = varlist[i];
+                if (!vn.isMark()) {
                     vn.setMark();
                     resList.Add(vn);
                 }
@@ -270,10 +257,10 @@ namespace Sla.DECCORE
         /// Called for each additional hash (after the first)
         public void clear()
         {
-            markop.clear();
-            markvn.clear();
-            vnedge.clear();
-            opedge.clear();
+            markop.Clear();
+            markvn.Clear();
+            vnedge.Clear();
+            opedge.Clear();
         }
 
         /// Calculate the hash for given Varnode and method
@@ -299,38 +286,37 @@ namespace Sla.DECCORE
             for (uint i = vnproc; i < markvn.size(); ++i)
                 buildVnUp(markvn[i]);
             for (; vnproc < markvn.size(); ++vnproc)
-                buildVnDown(markvn[vnproc]);
+                buildVnDown(markvn[(int)vnproc]);
 
-            switch (method)
-            {
+            switch (method) {
                 case 0:
                     break;
                 case 1:
                     gatherUnmarkedOp();
                     for (; opproc < markop.size(); ++opproc)
-                        buildOpUp(markop[opproc]);
+                        buildOpUp(markop[(int)opproc]);
 
                     gatherUnmarkedVn();
                     for (; vnproc < markvn.size(); ++vnproc)
-                        buildVnUp(markvn[vnproc]);
+                        buildVnUp(markvn[(int)vnproc]);
                     break;
                 case 2:
                     gatherUnmarkedOp();
                     for (; opproc < markop.size(); ++opproc)
-                        buildOpDown(markop[opproc]);
+                        buildOpDown(markop[(int)opproc]);
 
                     gatherUnmarkedVn();
                     for (; vnproc < markvn.size(); ++vnproc)
-                        buildVnDown(markvn[vnproc]);
+                        buildVnDown(markvn[(int)vnproc]);
                     break;
                 case 3:
                     gatherUnmarkedOp();
                     for (; opproc < markop.size(); ++opproc)
-                        buildOpUp(markop[opproc]);
+                        buildOpUp(markop[(int)opproc]);
 
                     gatherUnmarkedVn();
                     for (; vnproc < markvn.size(); ++vnproc)
-                        buildVnDown(markvn[vnproc]);
+                        buildVnDown(markvn[(int)vnproc]);
                     break;
                 default:
                     break;
@@ -341,25 +327,22 @@ namespace Sla.DECCORE
         /// Calculate hash for given PcodeOp, slot, and method
         public void calcHash(PcodeOp op, int slot, uint method)
         {
-            Varnode* root;
+            Varnode? root;
 
             // slot may be from a hash unassociated with op
             // we need to check that slot indicates a valid Varnode
-            if (slot < 0)
-            {
+            if (slot < 0) {
                 root = op.getOut();
                 if (root == (Varnode)null) {
                     hash = 0;
-                    addrresult = Address();
+                    addrresult = new Address();
                     return;     // slot does not fit op
                 }
             }
-            else
-            {
-                if (slot >= op.numInput())
-                {
+            else {
+                if (slot >= op.numInput()) {
                     hash = 0;
-                    addrresult = Address();
+                    addrresult = new Address();
                     return;     // slot does not fit op
                 }
                 root = op.getIn(slot);
@@ -368,30 +351,27 @@ namespace Sla.DECCORE
             opproc = 0;
             opedgeproc = 0;
 
-            opedge.Add(ToOpEdge(op, slot));
-            switch (method)
-            {
+            opedge.Add(new ToOpEdge(op, slot));
+            switch (method) {
                 case 4:
                     break;
                 case 5:
                     gatherUnmarkedOp();
-                    for (; opproc < markop.size(); ++opproc)
-                    {
-                        buildOpUp(markop[opproc]);
+                    for (; opproc < markop.size(); ++opproc) {
+                        buildOpUp(markop[(int)opproc]);
                     }
                     gatherUnmarkedVn();
                     for (; vnproc < markvn.size(); ++vnproc)
-                        buildVnUp(markvn[vnproc]);
+                        buildVnUp(markvn[(int)vnproc]);
                     break;
                 case 6:
                     gatherUnmarkedOp();
-                    for (; opproc < markop.size(); ++opproc)
-                    {
-                        buildOpDown(markop[opproc]);
+                    for (; opproc < markop.size(); ++opproc) {
+                        buildOpDown(markop[(int)opproc]);
                     }
                     gatherUnmarkedVn();
                     for (; vnproc < markvn.size(); ++vnproc)
-                        buildVnDown(markvn[vnproc]);
+                        buildVnDown(markvn[(int)vnproc]);
                     break;
                 default:
                     break;
@@ -417,58 +397,52 @@ namespace Sla.DECCORE
         /// \param fd is the function (holding the data-flow graph)
         public void uniqueHash(Varnode root, Funcdata fd)
         {
-            List<Varnode*> vnlist;
-            List<Varnode*> vnlist2;
-            List<Varnode*> champion;
+            List<Varnode> vnlist = new List<Varnode>();
+            List<Varnode> vnlist2 = new List<Varnode>();
+            List<Varnode> champion = new List<Varnode>();
             uint method;
-            ulong tmphash;
-            Address tmpaddr;
+            ulong tmphash = 0;
+            Address? tmpaddr = null;
             uint maxduplicates = 8;
 
-            for (method = 0; method < 4; ++method)
-            {
+            for (method = 0; method < 4; ++method) {
                 clear();
                 calcHash(root, method);
                 if (hash == 0) return;  // Can't get a good hash
                 tmphash = hash;
                 tmpaddr = addrresult;
-                vnlist.clear();
-                vnlist2.clear();
+                vnlist.Clear();
+                vnlist2.Clear();
                 gatherFirstLevelVars(vnlist, fd, tmpaddr, tmphash);
-                for (uint i = 0; i < vnlist.size(); ++i)
-                {
-                    Varnode* tmpvn = vnlist[i];
+                for (uint i = 0; i < vnlist.size(); ++i) {
+                    Varnode tmpvn = vnlist[i];
                     clear();
                     calcHash(tmpvn, method);
-                    if (getComparable(hash) == getComparable(tmphash))
-                    {   // Hash collision
+                    if (getComparable(hash) == getComparable(tmphash)) {
+                        // Hash collision
                         vnlist2.Add(tmpvn);
                         if (vnlist2.size() > maxduplicates) break;
                     }
                 }
-                if (vnlist2.size() <= maxduplicates)
-                {
-                    if ((champion.size() == 0) || (vnlist2.size() < champion.size()))
-                    {
+                if (vnlist2.size() <= maxduplicates) {
+                    if ((champion.size() == 0) || (vnlist2.size() < champion.size())) {
                         champion = vnlist2;
                         if (champion.size() == 1) break; // Current hash is unique
                     }
                 }
             }
-            if (champion.empty())
-            {
+            if (champion.empty()) {
                 hash = (ulong)0;
-                addrresult = Address(); // Couldn't find a unique hash
+                addrresult = new Address(); // Couldn't find a unique hash
                 return;
             }
             uint total = (uint)champion.size() - 1; // total is in range [0,maxduplicates-1]
             uint pos;
             for (pos = 0; pos <= total; ++pos)
-                if (champion[pos] == root) break;
-            if (pos > total)
-            {
+                if (champion[(int)pos] == root) break;
+            if (pos > total) {
                 hash = (ulong)0;
-                addrresult = Address();
+                addrresult = new Address();
                 return;
             }
             hash = tmphash | ((ulong)pos << 49); // Store three bits for position with list of duplicate hashes
@@ -483,70 +457,64 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp
         /// \param slot is the particular slot to encode in the hash
         /// \param fd is the function containing the given PcodeOp
-        public void uniqueHash(PcodeOp op, int slot, Funcdata fd)
+        public void uniqueHash(PcodeOp? op, int slot, Funcdata fd)
         {
-            List<PcodeOp*> oplist;
-            List<PcodeOp*> oplist2;
-            List<PcodeOp*> champion;
+            List<PcodeOp> oplist = new List<PcodeOp>();
+            List<PcodeOp> oplist2 = new List<PcodeOp>();
+            List<PcodeOp> champion = new List<PcodeOp>();
             uint method;
-            ulong tmphash;
-            Address tmpaddr;
+            ulong tmphash = 0;
+            Address? tmpaddr = null;
             uint maxduplicates = 8;
 
             moveOffSkip(op, slot);
             if (op == (PcodeOp)null) {
                 hash = (ulong)0;
-                addrresult = Address(); // Hash cannot be calculated
+                addrresult = new Address(); // Hash cannot be calculated
                 return;
             }
             gatherOpsAtAddress(oplist, fd, op.getAddr());
-            for (method = 4; method < 7; ++method)
-            {
+            for (method = 4; method < 7; ++method) {
                 clear();
                 calcHash(op, slot, method);
                 if (hash == 0) return;  // Can't get a good hash
                 tmphash = hash;
                 tmpaddr = addrresult;
-                oplist.clear();
-                oplist2.clear();
-                for (uint i = 0; i < oplist.size(); ++i)
-                {
-                    PcodeOp* tmpop = oplist[i];
+                oplist.Clear();
+                oplist2.Clear();
+                for (uint i = 0; i < oplist.size(); ++i) {
+                    PcodeOp tmpop = oplist[i];
                     if (slot >= tmpop.numInput()) continue;
                     clear();
                     calcHash(tmpop, slot, method);
-                    if (getComparable(hash) == getComparable(tmphash))
-                    {   // Hash collision
+                    if (getComparable(hash) == getComparable(tmphash)) {
+                        // Hash collision
                         oplist2.Add(tmpop);
                         if (oplist2.size() > maxduplicates)
                             break;
                     }
                 }
-                if (oplist2.size() <= maxduplicates)
-                {
-                    if ((champion.size() == 0) || (oplist2.size() < champion.size()))
-                    {
+                if (oplist2.size() <= maxduplicates) {
+                    if ((champion.size() == 0) || (oplist2.size() < champion.size())) {
                         champion = oplist2;
                         if (champion.size() == 1)
                             break; // Current hash is unique
                     }
                 }
             }
-            if (champion.empty())
-            {
+            if (champion.empty()) {
                 hash = (ulong)0;
-                addrresult = Address(); // Couldn't find a unique hash
+                addrresult = new Address(); // Couldn't find a unique hash
                 return;
             }
             uint total = (uint)champion.size() - 1; // total is in range [0,maxduplicates-1]
             uint pos;
             for (pos = 0; pos <= total; ++pos)
-                if (champion[pos] == op)
+                if (champion[(int)pos] == op)
                     break;
-            if (pos > total)
-            {
+            if (pos > total) {
                 hash = (ulong)0;
-                addrresult = Address();
+                addrresult = new Address();
                 return;
             }
             hash = tmphash | ((ulong)pos << 49); // Store three bits for position with list of duplicate hashes
@@ -565,25 +533,24 @@ namespace Sla.DECCORE
         /// \param addr is the given address
         /// \param h is the hash
         /// \return the matching Varnode or NULL
-        public Varnode findVarnode(Funcdata fd, Address addr, ulong h)
+        public Varnode? findVarnode(Funcdata fd, Address addr, ulong h)
         {
             uint method = getMethodFromHash(h);
             uint total = getTotalFromHash(h);
             uint pos = getPositionFromHash(h);
             clearTotalPosition(h);
-            List<Varnode*> vnlist;
-            List<Varnode*> vnlist2;
+            List<Varnode> vnlist = new List<Varnode>();
+            List<Varnode> vnlist2 = new List<Varnode>();
             gatherFirstLevelVars(vnlist, fd, addr, h);
-            for (uint i = 0; i < vnlist.size(); ++i)
-            {
-                Varnode* tmpvn = vnlist[i];
+            for (uint i = 0; i < vnlist.size(); ++i) {
+                Varnode tmpvn = vnlist[(int)i];
                 clear();
                 calcHash(tmpvn, method);
                 if (getComparable(hash) == getComparable(h))
                     vnlist2.Add(tmpvn);
             }
             if (total != vnlist2.size()) return (Varnode)null;
-            return vnlist2[pos];
+            return vnlist2[(int)pos];
         }
 
         /// \brief Given an address and hash, find the unique matching PcodeOp
@@ -597,19 +564,18 @@ namespace Sla.DECCORE
         /// \param addr is the given address
         /// \param h is the hash
         /// \return the matching PcodeOp or NULL
-        public PcodeOp findOp(Funcdata fd, Address addr, ulong h)
+        public PcodeOp? findOp(Funcdata fd, Address addr, ulong h)
         {
-            int method = getMethodFromHash(h);
+            uint method = getMethodFromHash(h);
             int slot = getSlotFromHash(h);
-            int total = getTotalFromHash(h);
-            int pos = getPositionFromHash(h);
+            uint total = getTotalFromHash(h);
+            uint pos = getPositionFromHash(h);
             clearTotalPosition(h);
-            List<PcodeOp*> oplist;
-            List<PcodeOp*> oplist2;
+            List<PcodeOp> oplist = new List<PcodeOp>();
+            List<PcodeOp> oplist2 = new List<PcodeOp>();
             gatherOpsAtAddress(oplist, fd, addr);
-            for (uint i = 0; i < oplist.size(); ++i)
-            {
-                PcodeOp* tmpop = oplist[i];
+            for (uint i = 0; i < oplist.size(); ++i) {
+                PcodeOp tmpop = oplist[i];
                 if (slot >= tmpop.numInput()) continue;
                 clear();
                 calcHash(tmpop, slot, method);
@@ -618,7 +584,7 @@ namespace Sla.DECCORE
             }
             if (total != oplist2.size())
                 return (PcodeOp)null;
-            return oplist2[pos];
+            return oplist2[(int)pos];
         }
 
         /// Get the (current) hash
@@ -645,24 +611,20 @@ namespace Sla.DECCORE
             PcodeOpTree::const_iterator iter = fd.beginOp(addr);
             PcodeOpTree::const_iterator enditer = fd.endOp(addr);
 
-            while (iter != enditer)
-            {
-                PcodeOp* op = (*iter).second;
+            while (iter != enditer) {
+                PcodeOp? op = (*iter).second;
                 ++iter;
                 if (op.isDead()) continue;
-                if (transtable[op.code()] != opcVal) continue;
-                if (slot < 0)
-                {
-                    Varnode* vn = op.getOut();
-                    if (vn != (Varnode)null)
-                    {
-                        if (isnotattached)
-                        {   // If original varnode was not attached to (this) op
+                if (transtable[(int)op.code()] != opcVal) continue;
+                if (slot < 0) {
+                    Varnode? vn = op.getOut();
+                    if (vn != (Varnode)null) {
+                        if (isnotattached) {
+                            // If original varnode was not attached to (this) op
                             op = vn.loneDescend();
-                            if (op != (PcodeOp)null)
-                            {
-                                if (transtable[op.code()] == 0)
-                                { // Check for skipped op
+                            if (op != (PcodeOp)null) {
+                                if (transtable[(int)op.code()] == 0) {
+                                    // Check for skipped op
                                     vn = op.getOut();
                                     if (vn == (Varnode)null) continue;
                                 }
@@ -671,13 +633,11 @@ namespace Sla.DECCORE
                         varlist.Add(vn);
                     }
                 }
-                else if (slot < op.numInput())
-                {
-                    Varnode* vn = op.getIn(slot);
-                    if (isnotattached)
-                    {
+                else if (slot < op.numInput()) {
+                    Varnode vn = op.getIn(slot);
+                    if (isnotattached) {
                         op = vn.getDef();
-                        if ((op != (PcodeOp)null) && (transtable[op.code()] == 0))
+                        if ((op != (PcodeOp)null) && (transtable[(int)op.code()] == 0))
                             vn = op.getIn(0);
                     }
                     varlist.Add(vn);
@@ -695,9 +655,8 @@ namespace Sla.DECCORE
         {
             PcodeOpTree::const_iterator iter, enditer;
             enditer = fd.endOp(addr);
-            for (iter = fd.beginOp(addr); iter != enditer; ++iter)
-            {
-                PcodeOp* op = (*iter).second;
+            for (iter = fd.beginOp(addr); iter != enditer; ++iter) {
+                PcodeOp op = (*iter).second;
                 if (op.isDead()) continue;
                 opList.Add(op);
             }
@@ -730,7 +689,7 @@ namespace Sla.DECCORE
         /// \return the op-code as an integer
         public static uint getOpCodeFromHash(ulong h)
         {
-            return (h >> 37) & 0x7f;
+            return (uint)((h >> 37) & 0x7F);
         }
 
         /// Retrieve the encoded position from a hash

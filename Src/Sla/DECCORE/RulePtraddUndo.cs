@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RulePtraddUndo(getGroup());
         }
 
@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         /// It is possible for Varnodes to be assigned incorrect types in the
         /// middle of simplification. This leads to incorrect PTRADD conversions.
         /// Once the correct type is found, the PTRADD must be converted back to an INT_ADD.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_PTRADD);
         }

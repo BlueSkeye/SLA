@@ -38,12 +38,12 @@ namespace Sla.EXTRA
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleGeneric(getGroup(), getName(), starterops, opinit,
                 (ConstraintGroup*)constraint.clone());
         }
 
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             for (int i = 0; i < starterops.size(); ++i)
                 oplist.Add((uint)starterops[i]);

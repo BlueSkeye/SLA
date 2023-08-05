@@ -542,7 +542,7 @@ namespace Sla.DECCORE
                     {
                         JumpTable* jt = data.findJumpTable(op);
                         ulong mask;
-                        if (jt != (JumpTable*)0)
+                        if (jt != (JumpTable)null)
                             mask = jt.getSwitchVarConsume();
                         else
                             mask = ~((ulong)0);

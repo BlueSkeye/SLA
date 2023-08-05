@@ -1532,7 +1532,7 @@ namespace Sla.SLACOMP
             else
             {           // Operand is currently undefined, so we can't constrain
                 PatternExpression::release(patexp);
-                res = (PatternEquation*)0;
+                res = (PatternEquation)null;
             }
             return res;
         }
@@ -1920,35 +1920,33 @@ namespace Sla.SLACOMP
         /// \param pateq is the parsed pattern equation
         /// \param contvec is the list of context changes or null
         /// \param vec is the collection of p-code sections, or null
-        public void buildConstructor(Constructor big, PatternEquation pateq, List<ContextChange> contvec, SectionVector vec)
+        public void buildConstructor(Constructor big, PatternEquation pateq, List<ContextChange> contvec,
+            SectionVector vec)
         {
             bool noerrors = true;
-            if (vec != (SectionVector*)0)
-            { // If the sections were implemented
+            if (vec != (SectionVector)null) {
+                // If the sections were implemented
                 noerrors = finalizeSections(big, vec);
-                if (noerrors)
-                {       // Attach the sections to the Constructor
+                if (noerrors) {
+                    // Attach the sections to the Constructor
                     big.setMainSection(vec.getMainSection());
                     int max = vec.getMaxId();
-                    for (int i = 0; i < max; ++i)
-                    {
-                        ConstructTpl* section = vec.getNamedSection(i);
+                    for (int i = 0; i < max; ++i) {
+                        ConstructTpl section = vec.getNamedSection(i);
                         if (section != (ConstructTpl)null)
                             big.setNamedSection(section, i);
                     }
                 }
-                delete vec;
+                // delete vec;
             }
-            if (noerrors)
-            {
-                pateq = WithBlock::collectAndPrependPattern(withstack, pateq);
-                contvec = WithBlock::collectAndPrependContext(withstack, contvec);
+            if (noerrors) {
+                pateq = WithBlock.collectAndPrependPattern(withstack, pateq);
+                contvec = WithBlock.collectAndPrependContext(withstack, contvec);
                 big.addEquation(pateq);
                 big.removeTrailingSpace();
-                if (contvec != (List<ContextChange*>*)0)
-                {
+                if (contvec != (List<ContextChange*>*)0) {
                     big.addContext(*contvec);
-                    delete contvec;
+                    // delete contvec;
                 }
             }
             symtab.popScope();      // In all cases pop scope

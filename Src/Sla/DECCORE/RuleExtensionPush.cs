@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleExtensionPush(getGroup());
         }
 
@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         ///
         /// By making the extension operation part of each pointer calculation (where it is usually an implied cast),
         /// we can frequently eliminate an explicit variable that would just hold the extension.
-        public override void getOpList(List<uint> &oplist)
+        public override void getOpList(List<OpCode> &oplist)
         {
             oplist.Add(CPUI_INT_ZEXT);
             oplist.Add(CPUI_INT_SEXT);

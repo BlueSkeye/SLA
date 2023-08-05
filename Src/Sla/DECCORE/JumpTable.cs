@@ -696,11 +696,11 @@ namespace Sla.DECCORE
             if (!isRecovered())
                 throw new LowlevelError("Trying to save unrecovered jumptable");
 
-            encoder.openElement(ELEM_JUMPTABLE);
+            encoder.openElement(ElementId.ELEM_JUMPTABLE);
             opaddress.encode(encoder);
             for (int i = 0; i < addresstable.size(); ++i)
             {
-                encoder.openElement(ELEM_DEST);
+                encoder.openElement(ElementId.ELEM_DEST);
                 AddrSpace* spc = addresstable[i].getSpace();
                 ulong off = addresstable[i].getOffset();
                 if (spc != (AddrSpace)null)
@@ -708,9 +708,9 @@ namespace Sla.DECCORE
                 if (i < label.size())
                 {
                     if (label[i] != 0xBAD1ABE1)
-                        encoder.writeUnsignedInteger(ATTRIB_LABEL, label[i]);
+                        encoder.writeUnsignedInteger(AttributeId.ATTRIB_LABEL, label[i]);
                 }
-                encoder.closeElement(ELEM_DEST);
+                encoder.closeElement(ElementId.ELEM_DEST);
             }
             if (!loadpoints.empty())
             {
@@ -719,7 +719,7 @@ namespace Sla.DECCORE
             }
             if ((jmodel != (JumpModel)null) && (jmodel.isOverride()))
                 jmodel.encode(encoder);
-            encoder.closeElement(ELEM_JUMPTABLE);
+            encoder.closeElement(ElementId.ELEM_JUMPTABLE);
         }
 
         /// Decode \b this jump-table from a \<jumptable> element
@@ -728,7 +728,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         private void decode(Decoder decoder)
         {
-            uint elemId = decoder.openElement(ELEM_JUMPTABLE);
+            uint elemId = decoder.openElement(ElementId.ELEM_JUMPTABLE);
             opaddress = Address::decode(decoder);
             bool missedlabel = false;
             for (; ; )

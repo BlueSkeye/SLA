@@ -9,6 +9,10 @@ namespace Sla
 {
     internal static class Extensions
     {
+        internal static bool empty<T>(this List<T> from) => from.Count == 0;
+
+        internal static int size<T>(this List<T> from) => from.Count;
+
         internal static T GetLastItem<T>(this List<T> from)
         {
             int lastItemIndex = from.Count - 1;

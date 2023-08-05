@@ -151,11 +151,11 @@ namespace Sla.DECCORE
             int noff;
 
             i = getFieldIter(off);
-            if (i < 0) return (TypeField*)0;
+            if (i < 0) return (TypeField)null;
             TypeField curfield  = field[i];
             noff = off - curfield.offset;
             if (noff + sz > curfield.type.getSize()) // Requested piece spans more than one field
-                return (TypeField*)0;
+                return (TypeField)null;
             newoff = noff;
             return &curfield;
         }
@@ -336,14 +336,14 @@ namespace Sla.DECCORE
                 encodeTypedef(encoder);
                 return;
             }
-            encoder.openElement(ELEM_TYPE);
+            encoder.openElement(ElementId.ELEM_TYPE);
             encodeBasic(metatype, encoder);
             List<TypeField>::const_iterator iter;
             for (iter = field.begin(); iter != field.end(); ++iter)
             {
                 (*iter).encode(encoder);
             }
-            encoder.closeElement(ELEM_TYPE);
+            encoder.closeElement(ElementId.ELEM_TYPE);
         }
 
         public override Datatype resolveInFlow(PcodeOp op, int slot)

@@ -20,6 +20,6 @@ namespace Sla.SLEIGH
         
         public AddrSpace getSpace() => space;
 
-        public override symbol_type getType() => space_symbol;
+        public override symbol_type getType() => SleighSymbol.symbol_type.space_symbol;
     }
 }

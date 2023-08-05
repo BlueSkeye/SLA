@@ -387,18 +387,17 @@ namespace Sla.SLEIGH
         /// \return the parse tree object (ParseContext)
         protected ParserContext obtainContext(Address addr,int state)
         {
-            ParserContext* pos = discache.getParserContext(addr);
-            int curstate = pos.getParserState();
+            ParserContext pos = discache.getParserContext(addr);
+            ParserContext.State curstate = pos.getParserState();
             if (curstate >= state)
                 return pos;
-            if (curstate == ParserContext::uninitialized)
-            {
-                resolve(*pos);
-                if (state == ParserContext::disassembly)
+            if (curstate == ParserContext.State.uninitialized) {
+                resolve(pos);
+                if (state == ParserContext.State.disassembly)
                     return pos;
             }
             // If we reach here,  state must be ParserContext::pcode
-            resolveHandles(*pos);
+            resolveHandles(pos);
             return pos;
         }
 
@@ -486,7 +485,7 @@ namespace Sla.SLEIGH
                     triple = sym.getDefiningSymbol();
                     if (triple != (TripleSymbol)null)
                     {
-                        if (triple.getType() == SleighSymbol::subtable_symbol)
+                        if (triple.getType() ==  SleighSymbol.symbol_type.subtable_symbol)
                             break;
                         else            // Some other kind of symbol as an operand
                             triple.getFixedHandle(walker.getParentHandle(), walker);

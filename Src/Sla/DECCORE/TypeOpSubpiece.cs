@@ -30,7 +30,7 @@ namespace Sla.DECCORE
             int offset;
             int byteOff = computeByteOffsetForComposite(op);
             field = ct.findTruncation(byteOff, outvn.getSize(), op, 1, offset);   // Use artificial slot
-            if (field != (TypeField*)0) {
+            if (field != (TypeField)null) {
                 if (outvn.getSize() == field.type.getSize())
                     return field.type;
             }
@@ -62,7 +62,7 @@ namespace Sla.DECCORE
             }
             else
                 return (Datatype)null;
-            if (field != (TypeField*)0 && newoff == 0 && field.type.getSize() == outvn.getSize()) {
+            if (field != (TypeField)null && newoff == 0 && field.type.getSize() == outvn.getSize()) {
                 return field.type;
             }
             return (Datatype)null;

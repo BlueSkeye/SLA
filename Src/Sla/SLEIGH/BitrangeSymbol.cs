@@ -32,6 +32,6 @@ namespace Sla.SLEIGH
 
         public uint numBits() => numbits;
 
-        public override symbol_type getType() => bitrange_symbol;
+        public override symbol_type getType() => SleighSymbol.symbol_type.bitrange_symbol;
     }
 }

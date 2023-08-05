@@ -1379,7 +1379,7 @@ namespace Sla.DECCORE
 
         protected override bool pushEquate(ulong val, int sz, EquateSymbol sym, Varnode vn, PcodeOp op)
         {
-            ulong mask = Globals.calc_mask(sz);
+            ulong mask = Globals.calc_mask((uint)sz);
             ulong baseval = sym.getValue();
             ulong modval = baseval & mask;
             if (modval != baseval) {
@@ -1394,27 +1394,27 @@ namespace Sla.DECCORE
             modval = (~baseval) & mask;
             if (modval == val) {
                 // Negation
-                pushOp(&bitwise_not, (PcodeOp)null);
+                pushOp(bitwise_not, (PcodeOp)null);
                 pushSymbol(sym, vn, op);
                 return true;
             }
             modval = (-baseval) & mask;
             if (modval == val) {
                 // twos complement
-                pushOp(&unary_minus, (PcodeOp)null);
+                pushOp(unary_minus, (PcodeOp)null);
                 pushSymbol(sym, vn, op);
                 return true;
             }
             modval = (baseval + 1) & mask;
             if (modval == val) {
-                pushOp(&binary_plus, (PcodeOp)null);
+                pushOp(binary_plus, (PcodeOp)null);
                 pushSymbol(sym, vn, op);
                 push_integer(1, sz, false, (Varnode)null, (PcodeOp)null);
                 return true;
             }
             modval = (baseval - 1) & mask;
             if (modval == val) {
-                pushOp(&binary_minus, (PcodeOp)null);
+                pushOp(binary_minus, (PcodeOp)null);
                 pushSymbol(sym, vn, op);
                 push_integer(1, sz, false, (Varnode)null, (PcodeOp)null);
                 return true;
@@ -1444,9 +1444,8 @@ namespace Sla.DECCORE
             if (entry != (SymbolEntry)null) {
                 if (entry.getSize() == size)
                     pushSymbol(entry.getSymbol(), vn, op);
-                else
-                {
-                    int symboloff = vn.getOffset() - entry.getFirst();
+                else {
+                    int symboloff = (int)(vn.getOffset() - entry.getFirst());
                     pushPartialSymbol(entry.getSymbol(), symboloff, size, vn, op, -1);
                 }
             }
@@ -1454,12 +1453,11 @@ namespace Sla.DECCORE
                 string regname = glb.translate.getRegisterName(vn.getSpace(), vn.getOffset(), size);
                 if (regname.empty()) {
                     AddrSpace spc = vn.getSpace();
-                    string spacename = spc.getName();
-                    spacename[0] = toupper(spacename[0]); // Capitalize space
+                    string spacename = spc.getName().Capitalize();
                     StringWriter s = new StringWriter();
                     s.Write(spacename);
-                    s << hex << setfill('0') << setw(2 * spc.getAddrSize());
-                    s.Write(AddrSpace.byteToAddress(vn.getOffset(), spc.getWordSize()));
+                    string formatString = $"{{0:X{2 * spc.getAddrSize()}}}";
+                    s.Write(formatString, AddrSpace.byteToAddress(vn.getOffset(), spc.getWordSize()));
                     regname = s.ToString();
                 }
                 pushAtom(new Atom(regname, vartoken, EmitMarkup.syntax_highlight.special_color, op, vn));
@@ -3454,7 +3452,7 @@ namespace Sla.DECCORE
                         s.Write($"field_0x{suboff:X}");
                         fieldname = s.ToString();
                         fieldtype = (Datatype)null;
-                        fieldid = suboff;
+                        fieldid = (int)suboff;
                     }
                     else {
                         fieldname = fld.name;
@@ -3549,7 +3547,7 @@ namespace Sla.DECCORE
                         // If this "value" is getting used as a storage location
                         // we can't use a cast in its description, so turn off
                         // casting when printing the partial symbol
-                        //	Datatype *exttype = ((mods & print_store_value)!=0) ? (Datatype *)0 : ct;
+                        //	Datatype *exttype = ((mods & print_store_value)!=0) ? (Datatype)null : ct;
                         pushPartialSymbol(symbol, off, 0, (Varnode)null, op, -1);
                     }
                 }

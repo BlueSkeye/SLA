@@ -19,7 +19,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSplitLoad(getGroup());
         }
 
@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         ///
         /// If more than one logical component of a structure or array is loaded at once,
         /// rewrite the LOAD operator as multiple LOADs.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_LOAD);
         }

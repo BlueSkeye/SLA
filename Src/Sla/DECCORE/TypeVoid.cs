@@ -40,8 +40,8 @@ namespace Sla.DECCORE
                 encodeTypedef(encoder);
                 return;
             }
-            encoder.openElement(ELEM_VOID);
-            encoder.closeElement(ELEM_VOID);
+            encoder.openElement(ElementId.ELEM_VOID);
+            encoder.closeElement(ElementId.ELEM_VOID);
         }
     }
 }

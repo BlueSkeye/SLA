@@ -100,7 +100,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSignMod2nOpt2(getGroup());
         }
 
@@ -108,7 +108,7 @@ namespace Sla.DECCORE
         /// \brief Convert INT_SREM form:  `V - (Vadj & ~(2^n-1)) =>  V s% 2^n`
         ///
         /// Note: `Vadj = (V<0) ? V + 2^n-1 : V`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_INT_MULT);
         }

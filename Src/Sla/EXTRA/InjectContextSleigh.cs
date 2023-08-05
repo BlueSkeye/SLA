@@ -15,12 +15,12 @@ namespace Sla.EXTRA
 
         public InjectContextSleigh()
         {
-            pos = (ParserContext*)0;
+            pos = (ParserContext)null;
         }
         
         ~InjectContextSleigh()
         {
-            if (pos != (ParserContext*)0)
+            if (pos != (ParserContext)null)
                 delete pos;
         }
 

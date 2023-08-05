@@ -894,9 +894,8 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_INT_LEFT:
                     if (!getIn(1).isConstant())
                         resmask = fullmask;
-                    else
-                    {
-                        sa = getIn(1).getOffset(); // Get shift amount
+                    else {
+                        sa = (int)getIn(1).getOffset(); // Get shift amount
                         resmask = getIn(0).getNZMask();
                         resmask = Globals.pcode_left(resmask, sa) & fullmask;
                     }
@@ -904,19 +903,16 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_INT_RIGHT:
                     if (!getIn(1).isConstant())
                         resmask = fullmask;
-                    else
-                    {
+                    else {
                         sz1 = getIn(0).getSize();
-                        sa = getIn(1).getOffset(); // Get shift amount
+                        sa = (int)getIn(1).getOffset(); // Get shift amount
                         resmask = getIn(0).getNZMask();
                         resmask = Globals.pcode_right(resmask, sa);
-                        if (sz1 > sizeof(ulong))
-                        {
+                        if (sz1 > sizeof(ulong)) {
                             // resmask did not hold most sig bits of mask
                             if (sa >= 8 * sz1)
                                 resmask = 0;
-                            else if (sa >= 8 * sizeof(ulong))
-                            {
+                            else if (sa >= 8 * sizeof(ulong)) {
                                 // Full mask shifted over 8*sizeof(ulong)
                                 resmask = Globals.calc_mask(sz1 - sizeof(ulong));
                                 // Shift over remaining portion of sa
@@ -937,18 +933,18 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_INT_SRIGHT:
                     if ((!getIn(1).isConstant()) || (size > sizeof(ulong)))
                         resmask = fullmask;
-                    else
-                    {
-                        sa = getIn(1).getOffset(); // Get shift amount
+                    else {
+                        sa = (int)getIn(1).getOffset(); // Get shift amount
                         resmask = getIn(0).getNZMask();
-                        if ((resmask & (fullmask ^ (fullmask >> 1))) == 0)
-                        {   // If we know sign bit is zero
-                            resmask = Globals.pcode_right(resmask, sa);         // Same as OpCode.CPUI_INT_RIGHT
-                        }
-                        else
-                        {
+                        if ((resmask & (fullmask ^ (fullmask >> 1))) == 0) {
+                            // If we know sign bit is zero
+                            // Same as OpCode.CPUI_INT_RIGHT
                             resmask = Globals.pcode_right(resmask, sa);
-                            resmask |= (fullmask >> sa) ^ fullmask;         // Don't know what the new high bits are
+                        }
+                        else {
+                            resmask = Globals.pcode_right(resmask, sa);
+                            // Don't know what the new high bits are
+                            resmask |= (fullmask >> sa) ^ fullmask;
                         }
                     }
                     break;
@@ -1120,40 +1116,40 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         public void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_OP);
-            encoder.writeSignedInteger(ATTRIB_CODE, (int)code());
+            encoder.openElement(ElementId.ELEM_OP);
+            encoder.writeSignedInteger(AttributeId.ATTRIB_CODE, (int)code());
             start.encode(encoder);
             if (output == (Varnode)null)
             {
-                encoder.openElement(ELEM_VOID);
-                encoder.closeElement(ELEM_VOID);
+                encoder.openElement(ElementId.ELEM_VOID);
+                encoder.closeElement(ElementId.ELEM_VOID);
             }
             else
             {
-                encoder.openElement(ELEM_ADDR);
-                encoder.writeUnsignedInteger(ATTRIB_REF, output.getCreateIndex());
-                encoder.closeElement(ELEM_ADDR);
+                encoder.openElement(ElementId.ELEM_ADDR);
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_REF, output.getCreateIndex());
+                encoder.closeElement(ElementId.ELEM_ADDR);
             }
             for (int i = 0; i < inrefs.size(); ++i)
             {
                 Varnode* vn = getIn(i);
                 if (vn == (Varnode)null) {
-                    encoder.openElement(ELEM_VOID);
-                    encoder.closeElement(ELEM_VOID);
+                    encoder.openElement(ElementId.ELEM_VOID);
+                    encoder.closeElement(ElementId.ELEM_VOID);
                 }
                 else if (vn.getSpace().getType() == spacetype.IPTR_IOP)
                 {
                     if ((i == 1) && (code() == OpCode.CPUI_INDIRECT))
                     {
                         PcodeOp* indop = PcodeOp::getOpFromConst(vn.getAddr());
-                        encoder.openElement(ELEM_IOP);
-                        encoder.writeUnsignedInteger(ATTRIB_VALUE, indop.getSeqNum().getTime());
-                        encoder.closeElement(ELEM_IOP);
+                        encoder.openElement(ElementId.ELEM_IOP);
+                        encoder.writeUnsignedInteger(AttributeId.ATTRIB_VALUE, indop.getSeqNum().getTime());
+                        encoder.closeElement(ElementId.ELEM_IOP);
                     }
                     else
                     {
-                        encoder.openElement(ELEM_VOID);
-                        encoder.closeElement(ELEM_VOID);
+                        encoder.openElement(ElementId.ELEM_VOID);
+                        encoder.closeElement(ElementId.ELEM_VOID);
                     }
                 }
                 else if (vn.getSpace().getType() == spacetype.IPTR_CONSTANT)
@@ -1161,25 +1157,25 @@ namespace Sla.DECCORE
                     if ((i == 0) && ((code() == OpCode.CPUI_STORE) || (code() == OpCode.CPUI_LOAD)))
                     {
                         AddrSpace* spc = vn.getSpaceFromConst();
-                        encoder.openElement(ELEM_SPACEID);
-                        encoder.writeSpace(ATTRIB_NAME, spc);
-                        encoder.closeElement(ELEM_SPACEID);
+                        encoder.openElement(ElementId.ELEM_SPACEID);
+                        encoder.writeSpace(AttributeId.ATTRIB_NAME, spc);
+                        encoder.closeElement(ElementId.ELEM_SPACEID);
                     }
                     else
                     {
-                        encoder.openElement(ELEM_ADDR);
-                        encoder.writeUnsignedInteger(ATTRIB_REF, vn.getCreateIndex());
-                        encoder.closeElement(ELEM_ADDR);
+                        encoder.openElement(ElementId.ELEM_ADDR);
+                        encoder.writeUnsignedInteger(AttributeId.ATTRIB_REF, vn.getCreateIndex());
+                        encoder.closeElement(ElementId.ELEM_ADDR);
                     }
                 }
                 else
                 {
-                    encoder.openElement(ELEM_ADDR);
-                    encoder.writeUnsignedInteger(ATTRIB_REF, vn.getCreateIndex());
-                    encoder.closeElement(ELEM_ADDR);
+                    encoder.openElement(ElementId.ELEM_ADDR);
+                    encoder.writeUnsignedInteger(AttributeId.ATTRIB_REF, vn.getCreateIndex());
+                    encoder.closeElement(ElementId.ELEM_ADDR);
                 }
             }
-            encoder.closeElement(ELEM_OP);
+            encoder.closeElement(ElementId.ELEM_OP);
         }
 
         /// \brief Retrieve the PcodeOp encoded as the address \e addr

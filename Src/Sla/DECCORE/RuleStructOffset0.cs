@@ -19,7 +19,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleStructOffset0(getGroup());
         }
 
@@ -31,7 +31,7 @@ namespace Sla.DECCORE
         /// this is happening if we load or store too little data from the pointer, interpreting
         /// it as a pointer to the structure.  This Rule then applies a PTRSUB(,0) to the pointer
         /// to drill down to the first component.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             uint list[] = { OpCode.CPUI_LOAD, OpCode.CPUI_STORE };
             oplist.insert(oplist.end(), list, list + 2);

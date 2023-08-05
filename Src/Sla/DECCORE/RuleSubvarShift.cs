@@ -19,7 +19,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSubvarShift(getGroup());
         }
 
@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// If the INT_RIGHT input has only 1 bit that can possibly be non-zero
         /// and it is getting shifted into the least significant bit position,
         /// trigger the full SubvariableFlow analysis.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(OpCode.CPUI_INT_RIGHT);
         }

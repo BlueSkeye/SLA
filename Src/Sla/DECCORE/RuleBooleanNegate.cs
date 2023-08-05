@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleBooleanNegate(getGroup());
         }
 
@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         ///
         /// Works with both INT_EQUAL and INT_NOTEQUAL.  Both sides of the comparison
         /// must be boolean values.
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             uint list[] = { OpCode.CPUI_INT_NOTEQUAL, OpCode.CPUI_INT_EQUAL };
             oplist.insert(oplist.end(), list, list + 2);

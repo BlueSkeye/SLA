@@ -127,47 +127,47 @@ namespace Sla.DECCORE
 
         public override void encode(Encoder encoder)
         {
-            encoder.openElement(ELEM_INTERNALLIST);
+            encoder.openElement(ElementId.ELEM_INTERNALLIST);
             if (outparam != (ProtoParameter*)0)
             {
-                encoder.openElement(ELEM_RETPARAM);
+                encoder.openElement(ElementId.ELEM_RETPARAM);
                 if (outparam.isTypeLocked())
-                    encoder.writeBool(ATTRIB_TYPELOCK, true);
+                    encoder.writeBool(AttributeId.ATTRIB_TYPELOCK, true);
                 outparam.getAddress().encode(encoder);
                 outparam.getType().encode(encoder);
-                encoder.closeElement(ELEM_RETPARAM);
+                encoder.closeElement(ElementId.ELEM_RETPARAM);
             }
             else
             {
-                encoder.openElement(ELEM_RETPARAM);
-                encoder.openElement(ELEM_ADDR);
-                encoder.closeElement(ELEM_ADDR);
-                encoder.openElement(ELEM_VOID);
-                encoder.closeElement(ELEM_VOID);
-                encoder.closeElement(ELEM_RETPARAM);
+                encoder.openElement(ElementId.ELEM_RETPARAM);
+                encoder.openElement(ElementId.ELEM_ADDR);
+                encoder.closeElement(ElementId.ELEM_ADDR);
+                encoder.openElement(ElementId.ELEM_VOID);
+                encoder.closeElement(ElementId.ELEM_VOID);
+                encoder.closeElement(ElementId.ELEM_RETPARAM);
             }
 
             for (int i = 0; i < inparam.size(); ++i)
             {
                 ProtoParameter* param = inparam[i];
-                encoder.openElement(ELEM_PARAM);
+                encoder.openElement(ElementId.ELEM_PARAM);
                 if (param.getName().size() != 0)
-                    encoder.writeString(ATTRIB_NAME, param.getName());
+                    encoder.writeString(AttributeId.ATTRIB_NAME, param.getName());
                 if (param.isTypeLocked())
-                    encoder.writeBool(ATTRIB_TYPELOCK, true);
+                    encoder.writeBool(AttributeId.ATTRIB_TYPELOCK, true);
                 if (param.isNameLocked())
-                    encoder.writeBool(ATTRIB_NAMELOCK, true);
+                    encoder.writeBool(AttributeId.ATTRIB_NAMELOCK, true);
                 if (param.isThisPointer())
-                    encoder.writeBool(ATTRIB_THISPTR, true);
+                    encoder.writeBool(AttributeId.ATTRIB_THISPTR, true);
                 if (param.isIndirectStorage())
-                    encoder.writeBool(ATTRIB_INDIRECTSTORAGE, true);
+                    encoder.writeBool(AttributeId.ATTRIB_INDIRECTSTORAGE, true);
                 if (param.isHiddenReturn())
-                    encoder.writeBool(ATTRIB_HIDDENRETPARM, true);
+                    encoder.writeBool(AttributeId.ATTRIB_HIDDENRETPARM, true);
                 param.getAddress().encode(encoder);
                 param.getType().encode(encoder);
-                encoder.closeElement(ELEM_PARAM);
+                encoder.closeElement(ElementId.ELEM_PARAM);
             }
-            encoder.closeElement(ELEM_INTERNALLIST);
+            encoder.closeElement(ElementId.ELEM_INTERNALLIST);
         }
 
         public override void decode(Decoder decoder, ProtoModel model)
@@ -188,7 +188,7 @@ namespace Sla.DECCORE
             if (outparam.getAddress().isInvalid())
                 addressesdetermined = false;
 
-            uint elemId = decoder.openElement(ELEM_INTERNALLIST);
+            uint elemId = decoder.openElement(ElementId.ELEM_INTERNALLIST);
             for (; ; )
             { // This is only the input params
                 uint subId = decoder.openElement();        // <retparam> or <param>

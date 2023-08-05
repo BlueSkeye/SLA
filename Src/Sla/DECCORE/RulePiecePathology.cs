@@ -175,7 +175,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RulePiecePathology(getGroup());
         }
 
@@ -190,7 +190,7 @@ namespace Sla.DECCORE
         ///     ...
         ///     retreg = CONCAT(SUBPIECE(retreg,#4),smallval);
         /// \endcode
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(CPUI_PIECE);
         }

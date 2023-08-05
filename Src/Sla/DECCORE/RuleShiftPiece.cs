@@ -18,7 +18,7 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleShiftPiece(getGroup());
         }
 
@@ -32,7 +32,7 @@ namespace Sla.DECCORE
         ///
         ///  - `(zext(V s>> 0x1f) << 0x20) + zext(V)  =>  sext(V)`
         ///  - `(zext(W s>> 0x1f) << 0x20) + X        =>  sext(W) where W = sub(X,0)`
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(OpCode.CPUI_INT_OR);
             oplist.Add(OpCode.CPUI_INT_XOR);
@@ -41,9 +41,6 @@ namespace Sla.DECCORE
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            PcodeOp shiftop;
-            PcodeOp zextloop;
-            PcodeOp zexthiop;
             Varnode vn1;
             Varnode vn2;
 
@@ -51,48 +48,46 @@ namespace Sla.DECCORE
             if (!vn1.isWritten()) return 0;
             vn2 = op.getIn(1);
             if (!vn2.isWritten()) return 0;
-            shiftop = vn1.getDef();
-            zextloop = vn2.getDef();
-            if (shiftop.code() != OpCode.CPUI_INT_LEFT)
-            {
+            PcodeOp shiftop = vn1.getDef() ?? throw new BugException();
+            PcodeOp zextloop = vn2.getDef() ?? throw new BugException();
+            if (shiftop.code() != OpCode.CPUI_INT_LEFT) {
                 if (zextloop.code() != OpCode.CPUI_INT_LEFT) return 0;
-                PcodeOp* tmpop = zextloop;
+                PcodeOp tmpop = zextloop;
                 zextloop = shiftop;
                 shiftop = tmpop;
             }
             if (!shiftop.getIn(1).isConstant()) return 0;
             vn1 = shiftop.getIn(0);
             if (!vn1.isWritten()) return 0;
-            zexthiop = vn1.getDef();
+            PcodeOp zexthiop = vn1.getDef() ?? throw new BugException();
             if ((zexthiop.code() != OpCode.CPUI_INT_ZEXT) &&
                 (zexthiop.code() != OpCode.CPUI_INT_SEXT))
                 return 0;
             vn1 = zexthiop.getIn(0);
-            if (vn1.isConstant())
-            {
+            if (vn1.isConstant()) {
                 if (vn1.getSize() < sizeof(ulong))
                     return 0;       // Normally we let ZEXT of a constant collapse naturally
                                     // But if the ZEXTed constant is too big, this won't happen
             }
             else if (vn1.isFree())
                 return 0;
-            int sa = shiftop.getIn(1).getOffset();
+            int sa = (int)shiftop.getIn(1).getOffset();
             int concatsize = sa + 8 * vn1.getSize();
             if (op.getOut().getSize() * 8 < concatsize) return 0;
-            if (zextloop.code() != OpCode.CPUI_INT_ZEXT)
-            {
+            if (zextloop.code() != OpCode.CPUI_INT_ZEXT) {
                 // This is a special case triggered by CDQ: IDIV
                 // This would be handled by the base case, but it interacts with RuleSubZext sometimes
                 if (!vn1.isWritten()) return 0;
-                PcodeOp* rShiftOp = vn1.getDef();          // Look for s<< #c forming the high piece
+                // Look for s<< #c forming the high piece
+                PcodeOp? rShiftOp = vn1.getDef() ?? throw new BugException();
                 if (rShiftOp.code() != OpCode.CPUI_INT_SRIGHT) return 0;
                 if (!rShiftOp.getIn(1).isConstant()) return 0;
                 vn2 = rShiftOp.getIn(0);
                 if (!vn2.isWritten()) return 0;
-                PcodeOp* subop = vn2.getDef();
+                PcodeOp? subop = vn2.getDef() ?? throw new BugException();
                 if (subop.code() != OpCode.CPUI_SUBPIECE) return 0;   // SUBPIECE connects high and low parts
                 if (subop.getIn(1).getOffset() != 0) return 0;    //    (must be low part)
-                Varnode* bigVn = zextloop.getOut();
+                Varnode bigVn = zextloop.getOut();
                 if (subop.getIn(0) != bigVn) return 0; // Verify we have link thru SUBPIECE with low part
                 int rsa = (int)rShiftOp.getIn(1).getOffset();
                 if (rsa != vn2.getSize() * 8 - 1) return 0;    // Arithmetic shift must copy sign-bit thru whole high part

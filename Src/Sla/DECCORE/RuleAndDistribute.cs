@@ -19,13 +19,13 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleAndDistribute(getGroup());
         }
 
         /// \class RuleAndDistribute
         /// \brief Distribute INT_AND through INT_OR if result is simpler
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(OpCode.CPUI_INT_AND);
         }

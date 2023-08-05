@@ -19,13 +19,13 @@ namespace Sla.DECCORE
 
         public override Rule clone(ActionGroupList grouplist)
         {
-            if (!grouplist.contains(getGroup())) return (Rule*)0;
+            if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleSubfloatConvert(getGroup());
         }
 
         /// \class RuleSubfloatConvert
         /// \brief Perform SubfloatFlow analysis triggered by FLOAT_FLOAT2FLOAT
-        public override void getOpList(List<uint> oplist)
+        public override void getOpList(List<OpCode> oplist)
         {
             oplist.Add(OpCode.CPUI_FLOAT_FLOAT2FLOAT);
         }
