@@ -392,7 +392,7 @@ namespace Sla.DECCORE
                         tok = GrammarToken::badtoken;
                         break;
                     }
-                    @@in.get(nextchar);
+                    @in.get(nextchar);
                     if (!(*@in)) {
                         endoffile = true;
                         break;

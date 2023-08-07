@@ -82,7 +82,7 @@ namespace Sla.DECCORE
             if (hilessbool == (PcodeOp)null) return false;
             if (hilessbool.code() != OpCode.CPUI_CBRANCH) return false;
 
-            Varnode* vn;
+            Varnode vn;
 
             hiflip = false;
             equalflip = false;
@@ -93,8 +93,7 @@ namespace Sla.DECCORE
             vn = hieqbool.getIn(1);
             if (!vn.isWritten()) return false;
             hiequal = vn.getDef();
-            switch (hiequal.code())
-            {
+            switch (hiequal.code()) {
                 case OpCode.CPUI_INT_EQUAL:
                     midlessform = false;
                     break;
@@ -128,8 +127,8 @@ namespace Sla.DECCORE
             vn = lolessbool.getIn(1);
             if (!vn.isWritten()) return false;
             loless = vn.getDef();
-            switch (loless.code())
-            {   // Only unsigned forms
+            switch (loless.code()) {
+                // Only unsigned forms
                 case OpCode.CPUI_INT_LESS:
                     lolessequalform = false;
                     break;
@@ -155,8 +154,7 @@ namespace Sla.DECCORE
             vn = hilessbool.getIn(1);
             if (!vn.isWritten()) return false;
             hiless = vn.getDef();
-            switch (hiless.code())
-            {
+            switch (hiless.code()) {
                 case OpCode.CPUI_INT_LESS:
                     hilessequalform = false;
                     signcompare = false;
@@ -181,16 +179,12 @@ namespace Sla.DECCORE
 
         private bool checkSignedness()
         {
-            if (midlessform)
-            {
-                if (midsigncompare != signcompare) return false;
-            }
-            return true;
+            return !midlessform || (midsigncompare == signcompare);
         }
 
         private bool normalizeHi()
         {
-            Varnode* tmpvn;
+            Varnode tmpvn;
             vnhil1 = hiless.getIn(0);
             vnhil2 = hiless.getIn(1);
             if (vnhil1.isConstant())
@@ -206,7 +200,7 @@ namespace Sla.DECCORE
             {
                 hiconstform = true;
                 hival = vnhil2.getOffset();
-                SplitVarnode::getTrueFalse(hilessbool, hiflip, hilesstrue, hilessfalse);
+                SplitVarnode.getTrueFalse(hilessbool, hiflip, out hilesstrue, out hilessfalse);
                 int inc = 1;
                 if (hilessfalse != hieqbl)
                 {   // Make sure the hiless false branch goes to the hieq block
@@ -220,10 +214,10 @@ namespace Sla.DECCORE
                 if (hilessequalform)
                 {   // Make sure to normalize lessequal to less
                     hival += inc;
-                    hival &= Globals.calc_mask(@@in.getSize());
+                    hival &= Globals.calc_mask(@in.getSize());
                     hilessequalform = false;
                 }
-                hival >>= @@in.getLo().getSize() * 8;
+                hival >>= @in.getLo().getSize() * 8;
             }
             else
             {
@@ -261,15 +255,15 @@ namespace Sla.DECCORE
                 if (!hiconstform) return false; // If mid is constant, both mid and hi must be constant
                 midconstform = true;
                 midval = vnhie2.getOffset();
-                if (vnhie2.getSize() == @@in.getSize()) {
+                if (vnhie2.getSize() == @in.getSize()) {
                     // Convert to comparison on high part
-                    ulong lopart = midval & Globals.calc_mask(@@in.getLo().getSize());
-                    midval >>= @@in.getLo().getSize() * 8;
+                    ulong lopart = midval & Globals.calc_mask(@in.getLo().getSize());
+                    midval >>= @in.getLo().getSize() * 8;
                     if (midlessform)
                     {
                         if (midlessequal)
                         {
-                            if (lopart != Globals.calc_mask(@@in.getLo().getSize())) return false;
+                            if (lopart != Globals.calc_mask(@in.getLo().getSize())) return false;
                         }
                         else
                         {
@@ -283,7 +277,7 @@ namespace Sla.DECCORE
                 {   // If the mid and hi don't match
                     if (!midlessform) return false;
                     midval += (midlessequal) ? 1 : -1; // We may just be one off
-                    midval &= Globals.calc_mask(@@in.getLo().getSize());
+                    midval &= Globals.calc_mask(@in.getLo().getSize());
                     midlessequal = !midlessequal;
                     if (midval != hival) return false; // Last chance
                 }
@@ -362,22 +356,22 @@ namespace Sla.DECCORE
 
         private bool checkBlockForm()
         {
-            SplitVarnode::getTrueFalse(hilessbool, hiflip, hilesstrue, hilessfalse);
-            SplitVarnode::getTrueFalse(lolessbool, loflip, lolesstrue, lolessfalse);
-            SplitVarnode::getTrueFalse(hieqbool, equalflip, hieqtrue, hieqfalse);
+            SplitVarnode.getTrueFalse(hilessbool, hiflip, out hilesstrue, out hilessfalse);
+            SplitVarnode.getTrueFalse(lolessbool, loflip, out lolesstrue, out lolessfalse);
+            SplitVarnode.getTrueFalse(hieqbool, equalflip, out hieqtrue, out hieqfalse);
             if ((hilesstrue == lolesstrue) &&
                 (hieqfalse == lolessfalse) &&
                 (hilessfalse == hieqbl) &&
                 (hieqtrue == lolessbl))
             {
-                if (SplitVarnode::otherwiseEmpty(hieqbool) && SplitVarnode::otherwiseEmpty(lolessbool))
+                if (SplitVarnode.otherwiseEmpty(hieqbool) && SplitVarnode.otherwiseEmpty(lolessbool))
                     return true;
             }
             //  else if ((hilessfalse == lolessfalse)&&
             //	   (hieqfalse == lolesstrue)&&
             //	   (hilesstrue == hieqbl)&&
             //	   (hieqtrue == lolessbl)) {
-            //    if (SplitVarnode::otherwiseEmpty(hieqbool)&&SplitVarnode::otherwiseEmpty(lolessbool))
+            //    if (SplitVarnode.otherwiseEmpty(hieqbool)&&SplitVarnode.otherwiseEmpty(lolessbool))
             //      return true;
             //  }
             return false;
@@ -385,18 +379,18 @@ namespace Sla.DECCORE
 
         private bool checkOpForm()
         {
-            lo = @@in.getLo();
-            hi = @@in.getHi();
+            lo = @in.getLo();
+            hi = @in.getHi();
 
             if (midconstform)
             {
                 if (!hiconstform) return false;
-                if (vnhie2.getSize() == @@in.getSize()) {
+                if (vnhie2.getSize() == @in.getSize()) {
                     if ((vnhie1 != vnhil1) && (vnhie1 != vnhil2)) return false;
                 }
                 else
                 {
-                    if (vnhie1 !=@@in.getHi()) return false;
+                    if (vnhie1 !=@in.getHi()) return false;
                 }
                 // normalizeMid checks that midval == hival
             }
@@ -413,7 +407,7 @@ namespace Sla.DECCORE
                 hi2 = vnhil2;
                 if (vnlo1 != lo)
                 { // Pieces must be on the same side
-                    Varnode* tmpvn = vnlo1;
+                    Varnode tmpvn = vnlo1;
                     vnlo1 = vnlo2;
                     vnlo2 = tmpvn;
                     if (vnlo1 != lo) return false;
@@ -429,7 +423,7 @@ namespace Sla.DECCORE
                 hi2 = vnhil1;
                 if (vnlo2 != lo)
                 {
-                    Varnode* tmpvn = vnlo1;
+                    Varnode tmpvn = vnlo1;
                     vnlo1 = vnlo2;
                     vnlo2 = tmpvn;
                     if (vnlo2 != lo) return false;
@@ -438,13 +432,13 @@ namespace Sla.DECCORE
                 }
                 lo2 = vnlo1;
             }
-            else if (@@in.getWhole() == vnhil1) {
+            else if (@in.getWhole() == vnhil1) {
                 if (!hiconstform) return false;
                 if (!loconstform) return false;
                 if (vnlo1 != lo) return false;
                 hislot = 0;
             }
-            else if (@@in.getWhole() == vnhil2) { // Whole constant appears on the left
+            else if (@in.getWhole() == vnhil2) { // Whole constant appears on the left
                 if (!hiconstform) return false;
                 if (!loconstform) return false;
                 if (vnlo2 != lo)
@@ -479,12 +473,12 @@ namespace Sla.DECCORE
         { // Make changes to the threeway branch so that it becomes a single double precision branch
             if (hislot == 0)
             {
-                if (SplitVarnode::prepareBoolOp(in, in2, hilessbool))
+                if (SplitVarnode.prepareBoolOp(@in, in2, hilessbool))
                     return true;
             }
             else
             {
-                if (SplitVarnode::prepareBoolOp(in2, in, hilessbool))
+                if (SplitVarnode.prepareBoolOp(in2, @in, hilessbool))
                     return true;
             }
             return false;
@@ -493,7 +487,7 @@ namespace Sla.DECCORE
         private bool mapFromLow(PcodeOp op)
         { // Given the less than comparison for the lo piece and an input varnode explicitly marked as isPrecisLo
           // try to map out the threeway lessthan form
-            PcodeOp* loop = op.getOut().loneDescend();
+            PcodeOp loop = op.getOut().loneDescend();
             if (loop == (PcodeOp)null) return false;
             if (!mapBlocksFromLow(loop.getParent())) return false;
             if (!mapOpsFromBlocks()) return false;
@@ -511,12 +505,12 @@ namespace Sla.DECCORE
             setOpCode();
             if (hiconstform)
             {
-                in2.initPartial(@@in.getSize(), (hival << (8 *@@in.getLo().getSize()))| loval);
+                in2.initPartial(@in.getSize(), (hival << (8 *@in.getLo().getSize()))| loval);
                 if (!setBoolOp()) return false;
             }
             else
             {
-                in2.initPartial(@@in.getSize(), lo2, hi2);
+                in2.initPartial(@in.getSize(), lo2, hi2);
                 if (!setBoolOp()) return false;
             }
             return true;
@@ -546,9 +540,9 @@ namespace Sla.DECCORE
             if (res)
             {
                 if (hislot == 0)
-                    SplitVarnode::createBoolOp(data, hilessbool, @in, in2, finalopc);
+                    SplitVarnode.createBoolOp(data, hilessbool, @in, in2, finalopc);
                 else
-                    SplitVarnode::createBoolOp(data, hilessbool, in2, @in, finalopc);
+                    SplitVarnode.createBoolOp(data, hilessbool, in2, @in, finalopc);
                 // We change hieqbool so that it always goes to the original FALSE block
                 data.opSetInput(hieqbool, data.newConstant(1, equalflip ? 1 : 0), 1);
                 // The lolessbool block now becomes unreachable and is eventually removed

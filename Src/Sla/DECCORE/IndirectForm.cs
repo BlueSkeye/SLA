@@ -38,7 +38,7 @@ namespace Sla.DECCORE
                 indlo = iter.Current;
                 if (indlo.code() != OpCode.CPUI_INDIRECT) continue;
                 if (indlo.getIn(1).getSpace().getType() != spacetype.IPTR_IOP) continue;
-                if (affector != PcodeOp::getOpFromConst(indlo.getIn(1).getAddr())) continue;  // hi and lo must be affected by same op
+                if (affector != PcodeOp.getOpFromConst(indlo.getIn(1).getAddr())) continue;  // hi and lo must be affected by same op
                 reslo = indlo.getOut();
                 if (reslo.getSpace().getType() == spacetype.IPTR_INTERNAL) return false;        // Indirect must not be through a temporary
                 if (reslo.isAddrTied() || reshi.isAddrTied()) {
@@ -57,10 +57,10 @@ namespace Sla.DECCORE
             if (!workishi) return false;
             if (!i.hasBothPieces()) return false;
             @in = i;
-            if (!verify(@@in.getHi(), @@in.getLo(), ind))
+            if (!verify(@in.getHi(), @in.getLo(), ind))
                 return false;
 
-            outvn.initPartial(@@in.getSize(), reslo, reshi);
+            outvn.initPartial(@in.getSize(), reslo, reshi);
 
             if (!SplitVarnode::prepareIndirectOp(@in, affector))
                 return false;

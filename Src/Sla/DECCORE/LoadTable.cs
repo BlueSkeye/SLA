@@ -63,7 +63,7 @@ namespace Sla.DECCORE
             uint elemId = decoder.openElement(ElementId.ELEM_LOADTABLE);
             size = decoder.readSignedInteger(AttributeId.ATTRIB_SIZE);
             num = decoder.readSignedInteger(AttributeId.ATTRIB_NUM);
-            addr = Address::decode(decoder);
+            addr = Address.decode(decoder);
             decoder.closeElement(elemId);
         }
 

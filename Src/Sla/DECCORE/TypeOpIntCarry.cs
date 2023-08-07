@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpIntCarry(TypeFactory t)
             : base(t, OpCode.CPUI_INT_CARRY,"CARRY", type_metatype.TYPE_BOOL, type_metatype.TYPE_UINT)
         {
-            opflags = PcodeOp::binary;
+            opflags = PcodeOp.Flags.binary;
             addlflags = arithmetic_op;
             behave = new OpBehaviorIntCarry();
         }

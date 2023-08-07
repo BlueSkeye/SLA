@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpIntAnd(TypeFactory t)
             : base(t, OpCode.CPUI_INT_AND,"&", type_metatype.TYPE_UINT, type_metatype.TYPE_UINT)
         {
-            opflags = PcodeOp::binary | PcodeOp::commutative;
+            opflags = PcodeOp.Flags.binary | PcodeOp::commutative;
             addlflags = logical_op | inherits_sign;
             behave = new OpBehaviorIntAnd();
         }

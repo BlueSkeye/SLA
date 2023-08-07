@@ -12,7 +12,7 @@ namespace Sla.DECCORE
     {
         public TypeOpCopy(TypeFactory t)
         {
-            opflags = PcodeOp::unary | PcodeOp::nocollapse;
+            opflags = PcodeOp.Flags.unary | PcodeOp.Flags.nocollapse;
             behave = new OpBehaviorCopy();
         }
 

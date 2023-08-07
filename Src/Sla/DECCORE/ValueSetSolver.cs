@@ -52,7 +52,7 @@ namespace Sla.DECCORE
                 vn = node.getVarnode();
                 if (vn == (Varnode)null) {
                     // Assume this is the simulated root
-                    rootEdges = &roots;         // Set up for simulated edges
+                    rootEdges = roots;         // Set up for simulated edges
                     rootPos = 0;
                 }
                 else {
@@ -75,9 +75,8 @@ namespace Sla.DECCORE
                     }
                     return (ValueSet)null;
                 }
-                while (iter != vn.endDescend())
-                {
-                    PcodeOp* op = *iter;
+                while (iter != vn.endDescend()) {
+                    PcodeOp op = iter.Current;
                     ++iter;
                     Varnode? outVn = op.getOut();
                     if (outVn != (Varnode)null && outVn.isMark()) {
@@ -113,8 +112,9 @@ namespace Sla.DECCORE
         /// \param tCode is the type to associate with the Varnode
         private void newValueSet(Varnode vn, int tCode)
         {
-            valueNodes.emplace_back();
-            valueNodes.GetLastItem().setVarnode(vn, tCode);
+            ValueSet newSet = new ValueSet();
+            newSet.setVarnode(vn, tCode);
+            valueNodes.Add(newSet);
         }
 
         /// Prepend a vertex to a partition
@@ -124,7 +124,7 @@ namespace Sla.DECCORE
         {
             vertex.next = part.startNode;  // Attach new vertex to beginning of list
             part.startNode = vertex;        // Change the first value set to be the new vertex
-            if (part.stopNode == (ValueSet*)0)
+            if (part.stopNode == (ValueSet)null)
                 part.stopNode = vertex;
         }
 
@@ -135,7 +135,7 @@ namespace Sla.DECCORE
         {
             head.stopNode.next = part.startNode;
             part.startNode = head.startNode;
-            if (part.stopNode == (ValueSet*)0)
+            if (part.stopNode == (ValueSet)null)
                 part.stopNode = head.stopNode;
         }
 
@@ -158,7 +158,7 @@ namespace Sla.DECCORE
         {
             ValueSetEdge edgeIterator(vertex, rootNodes);
             ValueSet* succ = edgeIterator.getNext();
-            while (succ != (ValueSet*)0)
+            while (succ != (ValueSet)null)
             {
                 if (succ.count == 0)
                     visit(succ, part);
@@ -181,7 +181,7 @@ namespace Sla.DECCORE
             bool loop = false;
             ValueSetEdge edgeIterator(vertex, rootNodes);
             ValueSet* succ = edgeIterator.getNext();
-            while (succ != (ValueSet*)0)
+            while (succ != (ValueSet)null)
             {
                 int min;
                 if (succ.count == 0)
@@ -234,8 +234,8 @@ namespace Sla.DECCORE
             for (list<ValueSet>::iterator iter = valueNodes.begin(); iter != valueNodes.end(); ++iter)
             {
                 (*iter).count = 0;
-                (*iter).next = (ValueSet*)0;
-                (*iter).partHead = (Partition*)0;
+                (*iter).next = (ValueSet)null;
+                (*iter).partHead = (Partition)null;
             }
             ValueSet rootNode;
             rootNode.vn = (Varnode)null;
@@ -461,7 +461,7 @@ namespace Sla.DECCORE
                             curBl.setMark();
                             blockList.Add(curBl);
                             curBl = curBl.getImmedDom();
-                        } while (curBl != (FlowBlock*)0);
+                        } while (curBl != (FlowBlock)null);
                     }
                 }
                 else
@@ -472,7 +472,7 @@ namespace Sla.DECCORE
                         bl.setMark();
                         blockList.Add(bl);
                         bl = bl.getImmedDom();
-                    } while (bl != (FlowBlock*)0);
+                    } while (bl != (FlowBlock)null);
                 }
             }
             for (int i = 0; i < reads.size(); ++i)
@@ -484,7 +484,7 @@ namespace Sla.DECCORE
                     bl.setMark();
                     blockList.Add(bl);
                     bl = bl.getImmedDom();
-                } while (bl != (FlowBlock*)0);
+                } while (bl != (FlowBlock)null);
             }
             for (int i = 0; i < blockList.size(); ++i)
                 blockList[i].clearMark();
@@ -562,8 +562,7 @@ namespace Sla.DECCORE
         private void generateRelativeConstraint(PcodeOp compOp, PcodeOp cbranch)
         {
             OpCode opc = compOp.code();
-            switch (opc)
-            {
+            switch (opc) {
                 case OpCode.CPUI_INT_LESS:
                     opc = OpCode.CPUI_INT_SLESS;   // Treat unsigned pointer comparisons as signed relative to the base register
                     break;
@@ -584,14 +583,12 @@ namespace Sla.DECCORE
             Varnode inVn0 = compOp.getIn(0);
             Varnode inVn1 = compOp.getIn(1);
             CircleRange lift = new CircleRange(true);
-            if (checkRelativeConstant(inVn0, typeCode, value))
-            {
+            if (checkRelativeConstant(inVn0, typeCode, value)) {
                 vn = inVn1;
                 if (!lift.pullBackBinary(opc, value, 1, vn.getSize(), 1))
                     return;
             }
-            else if (checkRelativeConstant(inVn1, typeCode, value))
-            {
+            else if (checkRelativeConstant(inVn1, typeCode, value)) {
                 vn = inVn0;
                 if (!lift.pullBackBinary(opc, value, 0, vn.getSize(), 1))
                     return;
@@ -599,18 +596,16 @@ namespace Sla.DECCORE
             else
                 return;     // Neither side looks like a relative constant
 
-            Varnode* endVn = vn;
-            while (!endVn.isMark())
-            {
+            Varnode endVn = vn;
+            while (!endVn.isMark()) {
                 if (!endVn.isWritten()) return;
-                PcodeOp* op = endVn.getDef();
+                PcodeOpop = endVn.getDef();
                 opc = op.code();
-                if (opc == OpCode.CPUI_COPY || opc == OpCode.CPUI_PTRSUB)
-                {
+                if (opc == OpCode.CPUI_COPY || opc == OpCode.CPUI_PTRSUB) {
                     endVn = op.getIn(0);
                 }
-                else if (opc == OpCode.CPUI_INT_ADD)
-                {   // Can pull-back through INT_ADD
+                else if (opc == OpCode.CPUI_INT_ADD) {
+                    // Can pull-back through INT_ADD
                     if (!op.getIn(1).isConstant())    // if second param is constant
                         return;
                     endVn = op.getIn(0);
@@ -632,31 +627,26 @@ namespace Sla.DECCORE
         public void establishValueSets(List<Varnode> sinks, List<PcodeOp> reads, Varnode stackReg,
             bool indirectAsCopy)
         {
-            List<Varnode*> worklist;
+            List<Varnode> worklist = new List<Varnode>();
             int workPos = 0;
-            if (stackReg != (Varnode)null)
-            {
+            if (stackReg != (Varnode)null) {
                 newValueSet(stackReg, 1);       // Establish stack pointer as special
                 stackReg.setMark();
                 worklist.Add(stackReg);
                 workPos += 1;
                 rootNodes.Add(stackReg.getValueSet());
             }
-            for (int i = 0; i < sinks.size(); ++i)
-            {
-                Varnode* vn = sinks[i];
+            for (int i = 0; i < sinks.size(); ++i) {
+                Varnode vn = sinks[i];
                 newValueSet(vn, 0);
                 vn.setMark();
                 worklist.Add(vn);
             }
-            while (workPos < worklist.size())
-            {
-                Varnode* vn = worklist[workPos];
+            while (workPos < worklist.size()) {
+                Varnode vn = worklist[workPos];
                 workPos += 1;
-                if (!vn.isWritten())
-                {
-                    if (vn.isConstant())
-                    {
+                if (!vn.isWritten()) {
+                    if (vn.isConstant()) {
                         // Constant inputs to binary ops should not be treated as root nodes as they
                         // get picked up during iteration by the other input, except in the case of a
                         // a PTRSUB from a spacebase constant.
@@ -667,15 +657,13 @@ namespace Sla.DECCORE
                         rootNodes.Add(vn.getValueSet());
                     continue;
                 }
-                PcodeOp* op = vn.getDef();
-                switch (op.code())
-                {   // Distinguish ops where we can never predict an integer range
+                PcodeOp op = vn.getDef();
+                switch (op.code()) {
+                    // Distinguish ops where we can never predict an integer range
                     case OpCode.CPUI_INDIRECT:
-                        if (indirectAsCopy || op.isIndirectStore())
-                        {
-                            Varnode* inVn = op.getIn(0);
-                            if (!inVn.isMark())
-                            {
+                        if (indirectAsCopy || op.isIndirectStore()) {
+                            Varnode inVn = op.getIn(0);
+                            if (!inVn.isMark()) {
                                 newValueSet(inVn, 0);
                                 inVn.setMark();
                                 worklist.Add(inVn);
@@ -711,9 +699,8 @@ namespace Sla.DECCORE
                         rootNodes.Add(vn.getValueSet());
                         break;
                     default:
-                        for (int i = 0; i < op.numInput(); ++i)
-                        {
-                            Varnode* inVn = op.getIn(i);
+                        for (int i = 0; i < op.numInput(); ++i) {
+                            Varnode inVn = op.getIn(i);
                             if (inVn.isMark() || inVn.isAnnotation()) continue;
                             newValueSet(inVn, 0);
                             inVn.setMark();
@@ -722,14 +709,11 @@ namespace Sla.DECCORE
                         break;
                 }
             }
-            for (int i = 0; i < reads.size(); ++i)
-            {
-                PcodeOp* op = reads[i];
-                for (int slot = 0; slot < op.numInput(); ++slot)
-                {
-                    Varnode* vn = op.getIn(slot);
-                    if (vn.isMark())
-                    {
+            for (int i = 0; i < reads.size(); ++i) {
+                PcodeOp op = reads[i];
+                for (int slot = 0; slot < op.numInput(); ++slot) {
+                    Varnode vn = op.getIn(slot);
+                    if (vn.isMark()) {
                         readNodes[op.getSeqNum()].setPcodeOp(op, slot);
                         op.setMark();          // Mark read ops for equation generation stage
                         break;          // Only 1 read allowed
@@ -760,74 +744,63 @@ namespace Sla.DECCORE
             for (list<ValueSet>::iterator iter = valueNodes.begin(); iter != valueNodes.end(); ++iter)
                 (*iter).count = 0;
 
-            List<Partition*> componentStack;
-            Partition* curComponent = (Partition*)0;
-            ValueSet* curSet = orderPartition.startNode;
+            List<Partition> componentStack;
+            Partition? curComponent = (Partition)null;
+            ValueSet curSet = orderPartition.startNode;
 
-            while (curSet != (ValueSet*)0)
-            {
+            while (curSet != (ValueSet)null) {
                 numIterations += 1;
                 if (numIterations > maxIterations) break;   // Quit if max iterations exceeded
-                if (curSet.partHead != (Partition*)0 && curSet.partHead != curComponent)
-                {
+                if (curSet.partHead != (Partition)null && curSet.partHead != curComponent) {
                     componentStack.Add(curSet.partHead);
                     curComponent = curSet.partHead;
                     curComponent.isDirty = false;
                     // Reset component counter upon entry
                     curComponent.startNode.count = widener.determineIterationReset(*curComponent.startNode);
                 }
-                if (curComponent != (Partition*)0)
-                {
+                if (curComponent != (Partition)null) {
                     if (curSet.iterate(widener))
                         curComponent.isDirty = true;
-                    if (curComponent.stopNode != curSet)
-                    {
+                    if (curComponent.stopNode != curSet) {
                         curSet = curSet.next;
                     }
-                    else
-                    {
-                        for (; ; )
-                        {
-                            if (curComponent.isDirty)
-                            {
+                    else {
+                        for (; ; ) {
+                            if (curComponent.isDirty) {
                                 curComponent.isDirty = false;
                                 curSet = curComponent.startNode;
-                                if (componentStack.size() > 1)
-                                {   // Mark parent as dirty if we are restarting dirty child
+                                if (componentStack.size() > 1) {
+                                    // Mark parent as dirty if we are restarting dirty child
                                     componentStack[componentStack.size() - 2].isDirty = true;
                                 }
                                 break;
                             }
 
                             componentStack.RemoveLastItem();
-                            if (componentStack.empty())
-                            {
-                                curComponent = (Partition*)0;
+                            if (componentStack.empty()) {
+                                curComponent = (Partition)null;
                                 curSet = curSet.next;
                                 break;
                             }
                             curComponent = componentStack.GetLastItem();
-                            if (curComponent.stopNode != curSet)
-                            {
+                            if (curComponent.stopNode != curSet) {
                                 curSet = curSet.next;
                                 break;
                             }
                         }
                     }
                 }
-                else
-                {
+                else {
                     curSet.iterate(widener);
                     curSet = curSet.next;
                 }
             }
-            Dictionary<SeqNum, ValueSetRead>::iterator riter;
-            for (riter = readNodes.begin(); riter != readNodes.end(); ++riter)
-                (*riter).second.compute();              // Calculate any follow-on value sets
+            foreach (ValueSetRead reader in readNodes.Values)
+                reader.compute();              // Calculate any follow-on value sets
         }
 
         /// Start of all ValueSets in the system
-        public IEnumerator<ValueSet> beginValueSets() => valueNodes.begin();
+        public IEnumerator<ValueSet> beginValueSets() => valueNodes.GetEnumerator();
 
         /// End of all ValueSets in the system
         public IEnumerator<ValueSet> endValueSets() => valueNodes.end();
@@ -839,7 +812,11 @@ namespace Sla.DECCORE
         public IEnumerator<KeyValuePair<SeqNum, ValueSetRead>> endValueSetReads() => readNodes.end();
 
         /// Get ValueSetRead by SeqNum
-        public ValueSetRead getValueSetRead(SeqNum seq) => (*readNodes.find(seq)).second;
+        public ValueSetRead? getValueSetRead(SeqNum seq)
+        {
+            ValueSetRead? result;
+            return readNodes.TryGetValue(seq, out result) ? result : null;
+        }
 
 #if CPUI_DEBUG
         public void dumpValueSets(TextWriter s)

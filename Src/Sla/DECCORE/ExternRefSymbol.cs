@@ -37,7 +37,7 @@ namespace Sla.DECCORE
             }
             if (displayName.size() == 0)
                 displayName = name;
-            flags |= Varnode::externref | Varnode.varnode_flags.typelock;
+            flags |= Varnode.varnode_flags.externref | Varnode.varnode_flags.typelock;
         }
 
         ~ExternRefSymbol()
@@ -81,12 +81,12 @@ namespace Sla.DECCORE
             {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
-                if (attribId == ATTRIB_NAME) // Unless we see it explicitly
+                if (attribId == AttributeId.ATTRIB_NAME) // Unless we see it explicitly
                     name = decoder.readString();
                 else if (attribId == ATTRIB_LABEL)
                     displayName = decoder.readString();
             }
-            refaddr = Address::decode(decoder);
+            refaddr = Address.decode(decoder);
             decoder.closeElement(elemId);
             buildNameType();
         }

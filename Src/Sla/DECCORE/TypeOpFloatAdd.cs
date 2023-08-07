@@ -13,7 +13,7 @@ namespace Sla.DECCORE
         public TypeOpFloatAdd(TypeFactory t, Translate trans)
             : base(t, OpCode.CPUI_FLOAT_ADD,"+", type_metatype.TYPE_FLOAT, type_metatype.TYPE_FLOAT)
         {
-            opflags = PcodeOp::binary | PcodeOp::commutative;
+            opflags = PcodeOp.Flags.binary | PcodeOp::commutative;
             addlflags = floatingpoint_op;
             behave = new OpBehaviorFloatAdd(trans);
         }

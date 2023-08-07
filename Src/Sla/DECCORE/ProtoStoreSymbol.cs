@@ -33,11 +33,11 @@ namespace Sla.DECCORE
         private ParameterSymbol getSymbolBacked(int i)
         {
             while (inparam.size() <= i)
-                inparam.Add((ProtoParameter*)0);
+                inparam.Add((ProtoParameter)null);
             ParameterSymbol* res = dynamic_cast<ParameterSymbol*>(inparam[i]);
             if (res != (ParameterSymbol*)0)
                 return res;
-            if (inparam[i] != (ProtoParameter*)0)
+            if (inparam[i] != (ProtoParameter)null)
                 delete inparam[i];
             res = new ParameterSymbol();
             inparam[i] = res;
@@ -50,7 +50,7 @@ namespace Sla.DECCORE
         {
             scope = sc;
             restricted_usepoint = usepoint;
-            outparam = (ProtoParameter*)0;
+            outparam = (ProtoParameter)null;
             ParameterPieces pieces;
             pieces.type = scope.getArch().types.getTypeVoid();
             pieces.flags = 0;
@@ -62,10 +62,10 @@ namespace Sla.DECCORE
             for (int i = 0; i < inparam.size(); ++i)
             {
                 ProtoParameter* param = inparam[i];
-                if (param != (ProtoParameter*)0)
+                if (param != (ProtoParameter)null)
                     delete param;
             }
-            if (outparam != (ProtoParameter*)0)
+            if (outparam != (ProtoParameter)null)
                 delete outparam;
         }
 
@@ -157,7 +157,7 @@ namespace Sla.DECCORE
         {
             Symbol* sym = scope.getCategorySymbol(Symbol::function_parameter, i);
             if (sym == (Symbol)null)
-                return (ProtoParameter*)0;
+                return (ProtoParameter)null;
             ParameterSymbol* res = getSymbolBacked(i);
             res.sym = sym;
             return res;
@@ -165,7 +165,7 @@ namespace Sla.DECCORE
 
         public override ProtoParameter setOutput(ParameterPieces piece)
         {
-            if (outparam != (ProtoParameter*)0)
+            if (outparam != (ProtoParameter)null)
                 delete outparam;
             outparam = new ParameterBasic("", piece.addr, piece.type, piece.flags);
             return outparam;
@@ -189,10 +189,10 @@ namespace Sla.DECCORE
             ProtoStoreSymbol* res;
             res = new ProtoStoreSymbol(scope, restricted_usepoint);
             delete res.outparam;
-            if (outparam != (ProtoParameter*)0)
+            if (outparam != (ProtoParameter)null)
                 res.outparam = outparam.clone();
             else
-                res.outparam = (ProtoParameter*)0;
+                res.outparam = (ProtoParameter)null;
             return res;
         }
 

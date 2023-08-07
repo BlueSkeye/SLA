@@ -121,10 +121,10 @@ namespace Sla.SLACOMP
             list<WithBlock>::const_iterator iter;
             for (iter = stack.begin(); iter != stack.end(); ++iter)
             {
-                if ((*iter).ss != (SubtableSymbol*)0)
+                if ((*iter).ss != (SubtableSymbol)null)
                     return (*iter).ss;
             }
-            return (SubtableSymbol*)0;
+            return (SubtableSymbol)null;
         }
     }
 }

@@ -1,14 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Sla.DECCORE
 {
@@ -58,7 +49,7 @@ namespace Sla.DECCORE
         private Datatype findNoName(Datatype ct)
         {
             DatatypeSet::const_iterator iter;
-            Datatype* res = (Datatype)null;
+            Datatype? res = (Datatype)null;
             iter = tree.find(&ct);
             if (iter != tree.end())
                 res = *iter;
@@ -71,16 +62,15 @@ namespace Sla.DECCORE
         private void insert(Datatype newtype)
         {
             pair<DatatypeSet::iterator, bool> insres = tree.insert(newtype);
-            if (!insres.second)
-            {
-                ostringstream s;
-                s << "Shared type id: " << hex << newtype.getId() << endl;
-                s << "  ";
+            if (!insres.second) {
+                StringWriter s = new StringWriter();
+                s.WriteLine($"Shared type id: {newtype.getId():X}");
+                s.Write("  ");
                 newtype.printRaw(s);
-                s << " : ";
+                s.Write(" : ");
                 (*insres.first).printRaw(s);
-                delete newtype;
-                throw new LowlevelError(s.str());
+                // delete newtype;
+                throw new LowlevelError(s.ToString());
             }
             if (newtype.id != 0)
                 nametree.insert(newtype);
@@ -93,26 +83,24 @@ namespace Sla.DECCORE
         /// \return the matching Datatype object in this container
         private Datatype findAdd(Datatype ct)
         {
-            Datatype* newtype,*res;
+            Datatype newtype, res;
 
-            if (ct.name.size() != 0)
-            {   // If there is a name
+            if (ct.name.Length != 0) {
+                // If there is a name
                 if (ct.id == 0)     // There must be an id
                     throw new LowlevelError("Datatype must have a valid id");
                 res = findByIdLocal(ct.name, ct.id); // Lookup type by it
-                if (res != (Datatype)null)
-                { // If a type has this name
+                if (res != (Datatype)null) {
+                    // If a type has this name
                     if (0 != res.compareDependency(ct)) // Check if it is the same type
                         throw new LowlevelError("Trying to alter definition of type: " + ct.name);
                     return res;
                 }
             }
-            else
-            {
+            else {
                 res = findNoName(ct);
                 if (res != (Datatype)null) return res; // Found it
             }
-
             newtype = ct.clone();       // Add the new type to trees
             insert(newtype);
             return newtype;
@@ -144,54 +132,48 @@ namespace Sla.DECCORE
         private Datatype decodeTypedef(Decoder decoder)
         {
             ulong id = 0;
-            string nm;
+            string nm = string.Empty;
             uint format = 0;       // No forced display format by default
                                     //  uint elemId = decoder.openElement();
-            for (; ; )
-            {
-                uint attribId = decoder.getNextAttributeId();
+            while (true) {
+                AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
-                if (attribId == ATTRIB_ID)
-                {
+                if (attribId == AttributeId.ATTRIB_ID) {
                     id = decoder.readUnsignedInteger();
                 }
-                else if (attribId == ATTRIB_NAME)
-                {
+                else if (attribId == AttributeId.ATTRIB_NAME) {
                     nm = decoder.readString();
                 }
-                else if (attribId == ATTRIB_FORMAT)
-                {
-                    format = Datatype::encodeIntegerFormat(decoder.readString());
+                else if (attribId == AttributeId.ATTRIB_FORMAT) {
+                    format = Datatype.encodeIntegerFormat(decoder.readString());
                 }
             }
-            if (id == 0)
-            {           // Its possible the typedef is a builtin
-                id = Datatype::hashName(nm);    // There must be some kind of id
+            if (id == 0) {
+                // Its possible the typedef is a builtin
+                id = Datatype.hashName(nm);    // There must be some kind of id
             }
-            Datatype* defedType = decodeType(decoder);
+            Datatype defedType = decodeType(decoder);
             //  decoder.closeElement(elemId);
-            if (defedType.isVariableLength())
-                id = Datatype::hashSize(id, defedType.size);
+            if (defedType.isVariableLength()) {
+                id = Datatype.hashSize(id, defedType.size);
+            }
             if (defedType.getMetatype() == type_metatype.TYPE_STRUCT || defedType.getMetatype() == type_metatype.TYPE_UNION)
             {
                 // Its possible that a typedef of a struct/union is recursively defined, in which case
                 // an incomplete version may already be in the container
-                Datatype* prev = findByIdLocal(nm, id);
-                if (prev != (Datatype)null)
-                {
+                Datatype? prev = findByIdLocal(nm, id);
+                if (prev != (Datatype)null) {
                     if (defedType != prev.getTypedef())
                         throw new LowlevelError("Trying to create typedef of existing type: " + prev.name);
-                    if (prev.getMetatype() == type_metatype.TYPE_STRUCT)
-                    {
-                        TypeStruct* prevStruct = (TypeStruct*)prev;
-                        TypeStruct* defedStruct = (TypeStruct*)defedType;
+                    if (prev.getMetatype() == type_metatype.TYPE_STRUCT) {
+                        TypeStruct prevStruct = (TypeStruct)prev;
+                        TypeStruct defedStruct = (TypeStruct)defedType;
                         if (prevStruct.field.size() != defedStruct.field.size())
                             setFields(defedStruct.field, prevStruct, defedStruct.size, defedStruct.flags);
                     }
-                    else
-                    {
-                        TypeUnion* prevUnion = (TypeUnion*)prev;
-                        TypeUnion* defedUnion = (TypeUnion*)defedType;
+                    else {
+                        TypeUnion prevUnion = (TypeUnion)prev;
+                        TypeUnion defedUnion = (TypeUnion)defedType;
                         if (prevUnion.field.size() != defedUnion.field.size())
                             setFields(defedUnion.field, prevUnion, defedUnion.size, defedUnion.flags);
                     }
@@ -208,14 +190,13 @@ namespace Sla.DECCORE
         /// \return the newly minted structure data-type
         private Datatype decodeStruct(Decoder decoder, bool forcecore)
         {
-            TypeStruct ts;
+            TypeStruct ts = new TypeStruct();
             //  uint elemId = decoder.openElement();
             ts.decodeBasic(decoder);
             if (forcecore)
-                ts.flags |= Datatype::coretype;
-            Datatype* ct = findByIdLocal(ts.name, ts.id);
-            if (ct == (Datatype)null)
-            {
+                ts.flags |= Datatype.Properties.coretype;
+            Datatype? ct = findByIdLocal(ts.name, ts.id);
+            if (ct == (Datatype)null) {
                 ct = findAdd(ts);   // Create stub to allow recursive definitions
             }
             else if (ct.getMetatype() != type_metatype.TYPE_STRUCT)
@@ -228,7 +209,7 @@ namespace Sla.DECCORE
             }
             else
             {       // If structure is a placeholder stub
-                if (!setFields(ts.field, (TypeStruct*)ct, ts.size, ts.flags)) // Define structure now by copying fields
+                if (!setFields(ts.field, (TypeStruct)ct, ts.size, ts.flags)) // Define structure now by copying fields
                     throw new LowlevelError("Bad structure definition");
             }
             //  decoder.closeElement(elemId);
@@ -246,10 +227,9 @@ namespace Sla.DECCORE
             //  uint elemId = decoder.openElement();
             tu.decodeBasic(decoder);
             if (forcecore)
-                tu.flags |= Datatype::coretype;
-            Datatype* ct = findByIdLocal(tu.name, tu.id);
-            if (ct == (Datatype)null)
-            {
+                tu.flags |= Datatype.Properties.coretype;
+            Datatype ct = findByIdLocal(tu.name, tu.id);
+            if (ct == (Datatype)null) {
                 ct = findAdd(tu);   // Create stub to allow recursive definitions
             }
             else if (ct.getMetatype() != type_metatype.TYPE_UNION)
@@ -260,9 +240,9 @@ namespace Sla.DECCORE
                 if (0 != ct.compareDependency(tu))
                     throw new LowlevelError("Redefinition of union: " + tu.name);
             }
-            else
-            {       // If structure is a placeholder stub
-                if (!setFields(tu.field, (TypeUnion*)ct, tu.size, tu.flags)) // Define structure now by copying fields
+            else {
+                // If structure is a placeholder stub
+                if (!setFields(tu.field, (TypeUnion)ct, tu.size, tu.flags)) // Define structure now by copying fields
                     throw new LowlevelError("Bad union definition");
             }
             //  decoder.closeElement(elemId);
@@ -278,31 +258,29 @@ namespace Sla.DECCORE
         /// \return the newly minted code data-type
         private Datatype decodeCode(Decoder decoder, bool isConstructor, bool isDestructor, bool forcecore)
         {
-            TypeCode tc;
+            TypeCode tc = new TypeCode();
             //  uint elemId = decoder.openElement();
             tc.decodeStub(decoder);
-            if (tc.getMetatype() != type_metatype.TYPE_CODE)
-            {
+            if (tc.getMetatype() != type_metatype.TYPE_CODE) {
                 throw new LowlevelError("Expecting metatype=\"code\"");
             }
             if (forcecore)
-                tc.flags |= Datatype::coretype;
-            Datatype* ct = findByIdLocal(tc.name, tc.id);
-            if (ct == (Datatype)null)
-            {
+                tc.flags |= Datatype.Properties.coretype;
+            Datatype ct = findByIdLocal(tc.name, tc.id);
+            if (ct == (Datatype)null) {
                 ct = findAdd(tc);   // Create stub to allow recursive definitions
             }
             else if (ct.getMetatype() != type_metatype.TYPE_CODE)
                 throw new LowlevelError("Trying to redefine type: " + tc.name);
             tc.decodePrototype(decoder, isConstructor, isDestructor, *this);
-            if (!ct.isIncomplete())
-            {   // Code data-type of this name was already present
+            if (!ct.isIncomplete()) {
+                // Code data-type of this name was already present
                 if (0 != ct.compareDependency(tc))
                     throw new LowlevelError("Redefinition of code data-type: " + tc.name);
             }
-            else
-            {   // If there was a placeholder stub
-                setPrototype(tc.proto, (TypeCode*)ct, tc.flags);
+            else {
+                // If there was a placeholder stub
+                setPrototype(tc.proto, (TypeCode)ct, tc.flags);
             }
             //  decoder.closeElement(elemId);
             return ct;
@@ -337,7 +315,7 @@ namespace Sla.DECCORE
                         TypePointer tp = new TypePointer();
                         tp.decode(decoder, this);
                         if (forcecore)
-                            tp.flags |= Datatype::coretype;
+                            tp.flags |= Datatype.Properties.coretype;
                         ct = findAdd(tp);
                     }
                     break;
@@ -346,7 +324,7 @@ namespace Sla.DECCORE
                         TypePointerRel tp;
                         tp.decode(decoder, *this);
                         if (forcecore)
-                            tp.flags |= Datatype::coretype;
+                            tp.flags |= Datatype.Properties.coretype;
                         ct = findAdd(tp);
                     }
                     break;
@@ -355,7 +333,7 @@ namespace Sla.DECCORE
                         TypeArray ta;
                         ta.decode(decoder, *this);
                         if (forcecore)
-                            ta.flags |= Datatype::coretype;
+                            ta.flags |= Datatype.Properties.coretype;
                         ct = findAdd(ta);
                     }
                     break;
@@ -367,10 +345,10 @@ namespace Sla.DECCORE
                     break;
                 case type_metatype.TYPE_SPACEBASE:
                     {
-                        TypeSpacebase tsb = new TypeSpacebase((AddrSpace)null,Address(),glb);
+                        TypeSpacebase tsb = new TypeSpacebase((AddrSpace)null, new Address(),glb);
                         tsb.decode(decoder, *this);
                         if (forcecore)
-                            tsb.flags |= Datatype::coretype;
+                            tsb.flags |= Datatype.Properties.coretype;
                         ct = findAdd(tsb);
                     }
                     break;
@@ -378,8 +356,7 @@ namespace Sla.DECCORE
                     ct = decodeCode(decoder, false, false, forcecore);
                     break;
                 default:
-                    for (; ; )
-                    {
+                    while (true) {
                         uint attribId = decoder.getNextAttributeId();
                         if (attribId == 0) break;
                         if (attribId == AttributeId.ATTRIB_CHAR && decoder.readBool()) {
@@ -387,18 +364,17 @@ namespace Sla.DECCORE
                             decoder.rewindAttributes();
                             tc.decode(decoder, *this);
                             if (forcecore)
-                                tc.flags |= Datatype::coretype;
+                                tc.flags |= Datatype.Properties.coretype;
                             ct = findAdd(tc);
                             decoder.closeElement(elemId);
                             return ct;
                         }
-                        else if (attribId == AttributeId.ATTRIB_ENUM && decoder.readBool())
-                        {
+                        else if (attribId == AttributeId.ATTRIB_ENUM && decoder.readBool()) {
                             TypeEnum te = new TypeEnum(1, type_metatype.TYPE_INT); // size and metatype are replaced
                             decoder.rewindAttributes();
                             te.decode(decoder, *this);
                             if (forcecore)
-                                te.flags |= Datatype::coretype;
+                                te.flags |= Datatype.Properties.coretype;
                             ct = findAdd(te);
                             decoder.closeElement(elemId);
                             return ct;
@@ -408,7 +384,7 @@ namespace Sla.DECCORE
                             decoder.rewindAttributes();
                             tu.decode(decoder, *this);
                             if (forcecore)
-                                tu.flags |= Datatype::coretype;
+                                tu.flags |= Datatype.Properties.coretype;
                             ct = findAdd(tu);
                             decoder.closeElement(elemId);
                             return ct;
@@ -419,7 +395,7 @@ namespace Sla.DECCORE
                         TypeBase tb = new TypeBase(0, type_metatype.TYPE_UNKNOWN);
                         tb.decodeBasic(decoder);
                         if (forcecore)
-                            tb.flags |= Datatype::coretype;
+                            tb.flags |= Datatype.Properties.coretype;
                         ct = findAdd(tb);
                     }
                     break;
@@ -552,7 +528,7 @@ namespace Sla.DECCORE
         {
             if (sz > 0)
             {               // If the id is for a "variable length" base data-type
-                id = Datatype::hashSize(id, sz);    // Construct the id for the "sized" variant
+                id = Datatype.hashSize(id, sz);    // Construct the id for the "sized" variant
             }
             return findByIdLocal(n, id);
         }
@@ -677,7 +653,7 @@ namespace Sla.DECCORE
             ct.name = n;           // Change the name
             ct.displayName = n;
             if (ct.id == 0)
-                ct.id = Datatype::hashName(n);
+                ct.id = Datatype.hashName(n);
             // Insert type with new name
             tree.insert(ct);
             nametree.insert(ct);    // Re-insert name reference
@@ -882,7 +858,7 @@ namespace Sla.DECCORE
                 }
                 string newname = decoder.readString(AttributeId.ATTRIB_NAME);
                 if (newid == 0)     // If there was no id, use the name hash
-                    newid = Datatype::hashName(newname);
+                    newid = Datatype.hashName(newname);
                 ct = findById(newname, newid, size);
                 if (ct == (Datatype)null)
                     throw new LowlevelError("Unable to resolve type: " + newname);
@@ -929,7 +905,7 @@ namespace Sla.DECCORE
             if (ct != (TypeVoid*)0)
                 return ct;
             TypeVoid tv;
-            tv.id = Datatype::hashName(tv.name);
+            tv.id = Datatype.hashName(tv.name);
             ct = (TypeVoid*)tv.clone();
             tree.insert(ct);
             nametree.insert(ct);
@@ -998,7 +974,7 @@ namespace Sla.DECCORE
         public Datatype getBase(int s, type_metatype m,string n)
         {
             TypeBase tmp(s, m, n);
-            tmp.id = Datatype::hashName(n);
+            tmp.id = Datatype.hashName(n);
             return findAdd(tmp);
         }
 
@@ -1063,7 +1039,7 @@ namespace Sla.DECCORE
             TypePointer tmp(s, pt, ws);
             tmp.name = n;
             tmp.displayName = n;
-            tmp.id = Datatype::hashName(n);
+            tmp.id = Datatype.hashName(n);
             return (TypePointer*)findAdd(tmp);
         }
 
@@ -1113,7 +1089,7 @@ namespace Sla.DECCORE
             TypeStruct tmp;
             tmp.name = n;
             tmp.displayName = n;
-            tmp.id = Datatype::hashName(n);
+            tmp.id = Datatype.hashName(n);
             return (TypeStruct*)findAdd(tmp);
         }
 
@@ -1134,7 +1110,7 @@ namespace Sla.DECCORE
             TypeUnion tmp;
             tmp.name = n;
             tmp.displayName = n;
-            tmp.id = Datatype::hashName(n);
+            tmp.id = Datatype.hashName(n);
             return (TypeUnion*)findAdd(tmp);
         }
 
@@ -1154,7 +1130,7 @@ namespace Sla.DECCORE
         public TypeEnum getTypeEnum(string n)
         {
             TypeEnum tmp(enumsize, enumtype, n);
-            tmp.id = Datatype::hashName(n);
+            tmp.id = Datatype.hashName(n);
             return (TypeEnum*)findAdd(tmp);
         }
 
@@ -1196,10 +1172,9 @@ namespace Sla.DECCORE
         public Datatype getTypedef(Datatype ct, string name, ulong id, uint format)
         {
             if (id == 0)
-                id = Datatype::hashName(name);
-            Datatype* res = findByIdLocal(name, id);
-            if (res != (Datatype)null)
-            {
+                id = Datatype.hashName(name);
+            Datatype? res = findByIdLocal(name, id);
+            if (res != (Datatype)null) {
                 if (ct != res.getTypedef())
                     throw new LowlevelError("Trying to create typedef of existing type: " + name);
                 return res;
@@ -1208,7 +1183,7 @@ namespace Sla.DECCORE
             res.name = name;       // But a new name
             res.displayName = name;
             res.id = id;           // and new id
-            res.flags &= ~((uint)Datatype::coretype); // Not a core type
+            res.flags &= ~(Datatype.Properties.coretype); // Not a core type
             res.typedefImm = ct;
             res.setDisplayFormat(format);
             insert(res);
@@ -1247,7 +1222,7 @@ namespace Sla.DECCORE
             TypePointerRel tp(sz, ptrTo, ws, parent, off);
             tp.name = nm;
             tp.displayName = nm;
-            tp.id = Datatype::hashName(nm);
+            tp.id = Datatype.hashName(nm);
             TypePointerRel* res = (TypePointerRel*)findAdd(tp);
             return res;
         }
@@ -1265,7 +1240,7 @@ namespace Sla.DECCORE
             TypePointer tp(ptrTo, spc);
             tp.name = nm;
             tp.displayName = nm;
-            tp.id = Datatype::hashName(nm);
+            tp.id = Datatype.hashName(nm);
             TypePointer* res = (TypePointer*)findAdd(tp);
             return res;
         }
@@ -1521,7 +1496,7 @@ namespace Sla.DECCORE
                 ct = getTypeVoid();
             else
                 ct = getBase(size, meta, name);
-            ct.flags |= Datatype::coretype;
+            ct.flags |= Datatype.Properties.coretype;
         }
 
         /// Cache common types

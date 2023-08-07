@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpIntLess(TypeFactory t)
             : base(t, OpCode.CPUI_INT_LESS,"<", type_metatype.TYPE_BOOL, type_metatype.TYPE_UINT)
         {
-            opflags = PcodeOp::binary | PcodeOp::booloutput;
+            opflags = PcodeOp.Flags.binary | PcodeOp::booloutput;
             addlflags = inherits_sign;
             behave = new OpBehaviorIntLess();
         }

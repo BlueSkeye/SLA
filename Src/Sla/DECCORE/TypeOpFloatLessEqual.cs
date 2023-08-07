@@ -13,7 +13,7 @@ namespace Sla.DECCORE
         public TypeOpFloatLessEqual(TypeFactory t, Translate trans)
             : base(t, OpCode.CPUI_FLOAT_LESSEQUAL,"<=", type_metatype.TYPE_BOOL, type_metatype.TYPE_FLOAT)
         {
-            opflags = PcodeOp::binary | PcodeOp::booloutput;
+            opflags = PcodeOp.Flags.binary | PcodeOp::booloutput;
             addlflags = floatingpoint_op;
             behave = new OpBehaviorFloatLessEqual(trans);
         }

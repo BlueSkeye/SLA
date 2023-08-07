@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpIntSborrow(TypeFactory t)
             : base(t, OpCode.CPUI_INT_SBORROW,"SBORROW", type_metatype.TYPE_BOOL, type_metatype.TYPE_INT)
         {
-            opflags = PcodeOp::binary;
+            opflags = PcodeOp.Flags.binary;
             addlflags = arithmetic_op;
             behave = new OpBehaviorIntSborrow();
         }

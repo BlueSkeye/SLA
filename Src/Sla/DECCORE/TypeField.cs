@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +23,7 @@ namespace Sla.DECCORE
         /// Construct from a \<field> element.
         /// \param decoder is the stream decoder
         /// \param typegrp is the TypeFactory for parsing data-type info
-        public TypeField(Decoder decoder, TypeFactory typegrp)
+        public TypeField(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_FIELD);
             ident = -1;
@@ -32,7 +32,7 @@ namespace Sla.DECCORE
             {
                 uint attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
-                if (attrib == ATTRIB_NAME)
+                if (attrib == AttributeId.ATTRIB_NAME)
                     name = decoder.readString();
                 else if (attrib == ATTRIB_OFFSET)
                 {
@@ -71,7 +71,7 @@ namespace Sla.DECCORE
         /// Encode \b this field to a stream
         /// Encode a formal description of \b this as a \<field> element.
         /// \param encoder is the stream encoder
-        public void encode(Encoder encoder)
+        public void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_FIELD);
             encoder.writeString(AttributeId.ATTRIB_NAME, name);

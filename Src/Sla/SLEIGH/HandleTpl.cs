@@ -29,7 +29,7 @@ namespace Sla.SLEIGH
         {               // Build handle which indicates given varnode
             space = vn.getSpace();
             size = vn.getSize();
-            ptrspace = ConstTpl(ConstTpl::real, 0);
+            ptrspace = ConstTpl(ConstTpl.const_type.real, 0);
             ptroffset = vn.getOffset();
         }
 
@@ -42,7 +42,7 @@ namespace Sla.SLEIGH
             ptroffset = new ConstTpl(vn.getOffset());
             ptrsize = new ConstTpl(vn.getSize());
             temp_space = new ConstTpl(t_space);
-            temp_offset = new ConstTpl(ConstTpl::real, t_offset);
+            temp_offset = new ConstTpl(ConstTpl.const_type.real, t_offset);
         }
 
         public ConstTpl getSpace() => space;
@@ -71,17 +71,17 @@ namespace Sla.SLEIGH
 
         public void setPtrOffset(ulong val)
         {
-            ptroffset = new ConstTpl(ConstTpl::real, val);
+            ptroffset = new ConstTpl(ConstTpl.const_type.real, val);
         }
 
         public void setTempOffset(ulong val)
         {
-            temp_offset = new ConstTpl(ConstTpl::real, val);
+            temp_offset = new ConstTpl(ConstTpl.const_type.real, val);
         }
 
         public void fix(FixedHandle hand, ParserWalker walker)
         {
-            if (ptrspace.getType() == ConstTpl::real)
+            if (ptrspace.getType() == ConstTpl.const_type.real)
             {
                 // The export is unstarred, but this doesn't mean the varnode
                 // being exported isn't dynamic
@@ -99,7 +99,7 @@ namespace Sla.SLEIGH
                 {
                     // Handle could have been dynamic but wasn't
                     hand.offset_space = (AddrSpace)null;
-                    hand.offset_offset = AddrSpace::addressToByte(hand.offset_offset, hand.space.getWordSize());
+                    hand.offset_offset = AddrSpace.addressToByte(hand.offset_offset, hand.space.getWordSize());
                     hand.offset_offset = hand.space.wrapOffset(hand.offset_offset);
                 }
                 else

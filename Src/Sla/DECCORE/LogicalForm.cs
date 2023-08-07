@@ -118,17 +118,17 @@ namespace Sla.DECCORE
             return false;
         }
 
-        private bool applyRule(SplitVarnode i, PcodeOp lop, bool workishi, Funcdata data)
+        internal bool applyRule(SplitVarnode i, PcodeOp lop, bool workishi, Funcdata data)
         {
             if (workishi) return false;
             if (!i.hasBothPieces()) return false;
             @in = i;
 
-            if (!verify(@@in.getHi(), @@in.getLo(), lop))
+            if (!verify(@in.getHi(), @in.getLo(), lop))
                 return false;
 
-            outdoub.initPartial(@@in.getSize(), loop.getOut(), hiop.getOut());
-            indoub.initPartial(@@in.getSize(), lo2, hi2);
+            outdoub.initPartial(@in.getSize(), loop.getOut(), hiop.getOut());
+            indoub.initPartial(@in.getSize(), lo2, hi2);
             existop = SplitVarnode::prepareBinaryOp(outdoub, @in, indoub);
             if (existop == (PcodeOp)null)
                 return false;

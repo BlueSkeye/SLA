@@ -59,7 +59,7 @@ namespace Sla.DECCORE
         public class EntryInitData
         {
             // friend class SymbolEntry;
-            private AddrSpace space;       ///< The address space of the main SymbolEntry starting address
+            internal AddrSpace space;       ///< The address space of the main SymbolEntry starting address
             private Symbol symbol;     ///< The symbol being mapped
             private uint extraflags;       ///< Varnode flags specific to the storage location
             private int offset;        ///< Starting offset of the portion of the Symbol being covered
@@ -133,7 +133,7 @@ namespace Sla.DECCORE
         public SymbolEntry(EntryInitData data, ulong a, ulong b)
         {
             addr = new Address(data.space, a);
-            size = (b - a) + 1;
+            size = (int)((b - a) + 1);
             symbol = data.symbol;
             extraflags = data.extraflags;
             offset = data.offset;
@@ -163,7 +163,7 @@ namespace Sla.DECCORE
 
         public bool isPiece()
         {
-            return ((extraflags&(Varnode::precislo|Varnode::precishi))!= 0);
+            return ((extraflags&(Varnode.varnode_flags.precislo|Varnode.varnode_flags.precishi))!= 0);
         }	///< Is \b this a high or low piece of the whole Symbol
 
         /// Is \b storage \e dynamic

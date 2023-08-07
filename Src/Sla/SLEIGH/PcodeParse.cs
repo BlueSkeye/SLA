@@ -2252,43 +2252,43 @@ namespace Sla.SLEIGH
 
         //    case 93:
 
-        //        { VarnodeTpl* sym = (yyvsp[0].startsym).getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), sym.getOffset(), ConstTpl(ConstTpl::j_curspace_size)); delete sym; }
+        //        { VarnodeTpl* sym = (yyvsp[0].startsym).getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl.const_type.j_curspace), sym.getOffset(), ConstTpl(ConstTpl.const_type.j_curspace_size)); delete sym; }
 
         //        break;
 
         //    case 94:
 
-        //        { VarnodeTpl* sym = (yyvsp[0].endsym).getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), sym.getOffset(), ConstTpl(ConstTpl::j_curspace_size)); delete sym; }
+        //        { VarnodeTpl* sym = (yyvsp[0].endsym).getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl.const_type.j_curspace), sym.getOffset(), ConstTpl(ConstTpl.const_type.j_curspace_size)); delete sym; }
 
         //        break;
 
         //    case 95:
 
-        //        { VarnodeTpl* sym = (yyvsp[0].next2sym).getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), sym.getOffset(), ConstTpl(ConstTpl::j_curspace_size)); delete sym; }
+        //        { VarnodeTpl* sym = (yyvsp[0].next2sym).getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl.const_type.j_curspace), sym.getOffset(), ConstTpl(ConstTpl.const_type.j_curspace_size)); delete sym; }
 
         //        break;
 
         //    case 96:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), ConstTpl(ConstTpl::real, *(yyvsp[0].i)), ConstTpl(ConstTpl::j_curspace_size)); delete(yyvsp[0].i); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl.const_type.j_curspace), ConstTpl(ConstTpl.const_type.real, *(yyvsp[0].i)), ConstTpl(ConstTpl.const_type.j_curspace_size)); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 97:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), ConstTpl(ConstTpl::real, 0), ConstTpl(ConstTpl::j_curspace_size)); yyerror("Parsed integer is too big (overflow)"); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl.const_type.j_curspace), ConstTpl(ConstTpl.const_type.real, 0), ConstTpl(ConstTpl.const_type.j_curspace_size)); yyerror("Parsed integer is too big (overflow)"); }
 
         //        break;
 
         //    case 98:
 
-        //        { AddrSpace* spc = (yyvsp[-1].spacesym).getSpace(); (yyval.varnode) = new VarnodeTpl(ConstTpl(spc), ConstTpl(ConstTpl::real, *(yyvsp[-3].i)), ConstTpl(ConstTpl::real, spc.getAddrSize())); delete(yyvsp[-3].i); }
+        //        { AddrSpace* spc = (yyvsp[-1].spacesym).getSpace(); (yyval.varnode) = new VarnodeTpl(ConstTpl(spc), ConstTpl(ConstTpl.const_type.real, *(yyvsp[-3].i)), ConstTpl(ConstTpl.const_type.real, spc.getAddrSize())); delete(yyvsp[-3].i); }
 
         //        break;
 
         //    case 99:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(pcode.getConstantSpace()), ConstTpl(ConstTpl::j_relative, (yyvsp[0].labelsym).getIndex()), ConstTpl(ConstTpl::real, sizeof(uint))); (yyvsp[0].labelsym).incrementRefCount(); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(pcode.getConstantSpace()), ConstTpl(ConstTpl.const_type.j_relative, (yyvsp[0].labelsym).getIndex()), ConstTpl(ConstTpl.const_type.real, sizeof(uint))); (yyvsp[0].labelsym).incrementRefCount(); }
 
         //        break;
 
@@ -2318,19 +2318,19 @@ namespace Sla.SLEIGH
 
         //    case 104:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(pcode.getConstantSpace()), ConstTpl(ConstTpl::real, *(yyvsp[0].i)), ConstTpl(ConstTpl::real, 0)); delete(yyvsp[0].i); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(pcode.getConstantSpace()), ConstTpl(ConstTpl.const_type.real, *(yyvsp[0].i)), ConstTpl(ConstTpl.const_type.real, 0)); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 105:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(pcode.getConstantSpace()), ConstTpl(ConstTpl::real, 0), ConstTpl(ConstTpl::real, 0)); yyerror("Parsed integer is too big (overflow)"); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(pcode.getConstantSpace()), ConstTpl(ConstTpl.const_type.real, 0), ConstTpl(ConstTpl.const_type.real, 0)); yyerror("Parsed integer is too big (overflow)"); }
 
         //        break;
 
         //    case 106:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(pcode.getConstantSpace()), ConstTpl(ConstTpl::real, *(yyvsp[-2].i)), ConstTpl(ConstTpl::real, *(yyvsp[0].i))); delete(yyvsp[-2].i); delete(yyvsp[0].i); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(pcode.getConstantSpace()), ConstTpl(ConstTpl.const_type.real, *(yyvsp[-2].i)), ConstTpl(ConstTpl.const_type.real, *(yyvsp[0].i))); delete(yyvsp[-2].i); delete(yyvsp[0].i); }
 
         //        break;
 

@@ -88,7 +88,7 @@ namespace Sla.DECCORE
                 top = op.getOpcode();
                 for (slot = 0; slot < op.numInput(); ++slot) // Find first non-constant input
                     if (!op.getIn(slot).isConstant()) break;
-                if (op.getEvalType() == PcodeOp::binary)
+                if (op.getEvalType() == PcodeOp.Flags.binary)
                 {
                     Address addr = op.getIn(1 - slot).getAddr();
                     ulong otherval;
@@ -103,7 +103,7 @@ namespace Sla.DECCORE
                                      op.getIn(slot).getSize(), otherval);
                     curvn = op.getIn(slot);
                 }
-                else if (op.getEvalType() == PcodeOp::unary)
+                else if (op.getEvalType() == PcodeOp.Flags.unary)
                 {
                     output = top.recoverInputUnary(op.getOut().getSize(), output, op.getIn(slot).getSize());
                     curvn = op.getIn(slot);
@@ -663,7 +663,7 @@ namespace Sla.DECCORE
             {
                 val = jrange.getValue();
                 addr = emul.emulatePath(val, pathMeld, jrange.getStartOp(), jrange.getStartVarnode());
-                addr = AddrSpace::addressToByte(addr, spc.getWordSize());
+                addr = AddrSpace.addressToByte(addr, spc.getWordSize());
                 addr &= mask;
                 addresstable.Add(Address(spc, addr));
                 notdone = jrange.next();

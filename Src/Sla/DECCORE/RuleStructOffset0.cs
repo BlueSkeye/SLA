@@ -65,7 +65,7 @@ namespace Sla.DECCORE
                 if (baseType.getMetatype() != type_metatype.TYPE_STRUCT)
                     return 0;
                 int iOff = ptRel.getPointerOffset();
-                iOff = AddrSpace::addressToByteInt(iOff, ptRel.getWordSize());
+                iOff = AddrSpace.addressToByteInt(iOff, ptRel.getWordSize());
                 if (iOff >= baseType.getSize())
                     return 0;
                 offset = iOff;

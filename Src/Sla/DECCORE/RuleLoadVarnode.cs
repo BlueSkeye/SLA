@@ -149,7 +149,7 @@ namespace Sla.DECCORE
             if (baseoff == (AddrSpace)null) return 0;
 
             size = op.getOut().getSize();
-            offoff = AddrSpace::addressToByte(offoff, baseoff.getWordSize());
+            offoff = AddrSpace.addressToByte(offoff, baseoff.getWordSize());
             newvn = data.newVarnode(size, baseoff, offoff);
             data.opSetInput(op, newvn, 0);
             data.opRemoveInput(op, 1);

@@ -29,10 +29,10 @@ namespace Sla.DECCORE
             if (!workishi) return false;
             if (i.getHi() == (Varnode)null) return false; // We don't necessarily need the lo part
             @in = i;
-            vn = @@in.getHi();
+            vn = @in.getHi();
             inslot = op.getSlot(vn);
             cvn = op.getIn(1 - inslot);
-            int losize = @@in.getSize() - vn.getSize();
+            int losize = @in.getSize() - vn.getSize();
 
             if (!cvn.isConstant()) return false;
 
@@ -52,7 +52,7 @@ namespace Sla.DECCORE
 
             if (inslot == 0)
             {
-                if (SplitVarnode::prepareBoolOp(@in, constin, op))
+                if (SplitVarnode.prepareBoolOp(@in, constin, op))
                 {
                     SplitVarnode::replaceBoolOp(data, op, @in, constin, op.code());
                     return true;
@@ -60,7 +60,7 @@ namespace Sla.DECCORE
             }
             else
             {
-                if (SplitVarnode::prepareBoolOp(constin, @in, op))
+                if (SplitVarnode.prepareBoolOp(constin, @in, op))
                 {
                     SplitVarnode::replaceBoolOp(data, op, constin, @in, op.code());
                     return true;

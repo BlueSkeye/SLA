@@ -74,7 +74,7 @@ namespace Sla.DECCORE
             // op will be null, use current_op
             ulong off = getVarnodeValue(currentOp.getIn(1));
             AddrSpace* spc = currentOp.getIn(0).getSpaceFromConst();
-            off = AddrSpace::addressToByte(off, spc.getWordSize());
+            off = AddrSpace.addressToByte(off, spc.getWordSize());
             int sz = currentOp.getOut().getSize();
             ulong res = getLoadImageValue(spc, off, sz);
             setVarnodeValue(currentOp.getOut(), res);
@@ -129,7 +129,7 @@ namespace Sla.DECCORE
         protected override void executeSegmentOp()
         {
             SegmentOp* segdef = glb.userops.getSegmentOp(currentOp.getIn(0).getSpaceFromConst().getIndex());
-            if (segdef == (SegmentOp*)0)
+            if (segdef == (SegmentOp)null)
                 throw new LowlevelError("Segment operand missing definition");
 
             ulong in1 = getVarnodeValue(currentOp.getIn(1));

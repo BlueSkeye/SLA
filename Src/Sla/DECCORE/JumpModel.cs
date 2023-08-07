@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -113,12 +113,12 @@ namespace Sla.DECCORE
         }
 
         /// Encode this model to a stream
-        public virtual void encode(Encoder encoder)
+        public virtual void encode(Sla.CORE.Encoder encoder)
         {
         }
 
         /// Decode \b this model from a stream
-        public virtual void decode(Decoder decoder)
+        public virtual void decode(Sla.CORE.Decoder decoder)
         {
         }
     }

@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpBoolNegate(TypeFactory t)
             : base(t, OpCode.CPUI_BOOL_NEGATE,"!", type_metatype.TYPE_BOOL, type_metatype.TYPE_BOOL)
         {
-            opflags = PcodeOp::unary | PcodeOp::booloutput;
+            opflags = PcodeOp.Flags.unary | PcodeOp::booloutput;
             addlflags = logical_op;
             behave = new OpBehaviorBoolNegate();
         }

@@ -36,7 +36,7 @@ namespace Sla.SLEIGH
         public override VarnodeTpl getVarnode()
         { // Returns current instruction offset as a constant
             ConstTpl spc(const_space);
-            ConstTpl off(ConstTpl::j_start);
+            ConstTpl off(ConstTpl.const_type.j_start);
             ConstTpl sz_zero;
             return new VarnodeTpl(spc, off, sz_zero);
         }

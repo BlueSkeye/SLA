@@ -31,7 +31,7 @@ namespace Sla.DECCORE
     {
         // friend class Funcdata;              // Only uses private functions
         /// The sequence of p-code operations
-        private List<PcodeOp> op = new List<PcodeOp>();
+        internal List<PcodeOp> op = new List<PcodeOp>();
         /// The function of which this block is a part
         private Funcdata data;
         /// Original range of addresses covered by this basic block
@@ -85,7 +85,7 @@ namespace Sla.DECCORE
         /// from its first instruction to its last. This method establishes that range.
         /// \param beg is the address of the first instruction in the block
         /// \param end is the address of the last instruction in the block
-        private void setInitialRange(Address beg, Address end)
+        internal void setInitialRange(Address beg, Address end)
         {
             cover.clear();
             // TODO: We could check that -beg- and -end- are in the same address space
@@ -99,7 +99,7 @@ namespace Sla.DECCORE
         }
 
         /// Merge address ranges from another basic block
-        private void mergeRange(BlockBasic bb)
+        internal void mergeRange(BlockBasic bb)
         {
             cover.merge(bb.cover);
         }
@@ -110,7 +110,7 @@ namespace Sla.DECCORE
         /// for the new PcodeOp, but sometime there isn't enough room between existing ops.  This method is
         /// then called to recalculate the SeqNum::order field for all PcodeOp objects in \b this block,
         /// reestablishing space between the field values.
-        private void setOrder()
+        internal void setOrder()
         {
             uint step = uint.MaxValue;
             step = (uint)((step / op.Count) - 1);
@@ -123,7 +123,7 @@ namespace Sla.DECCORE
 
         /// Remove PcodeOp from \b this basic block
         /// \param inst is the PcodeOp to remove, which \e must be in the block
-        private void removeOp(PcodeOp inst)
+        internal void removeOp(PcodeOp inst)
         {
             inst.setParent(null);
             op.erase(inst.basiciter);

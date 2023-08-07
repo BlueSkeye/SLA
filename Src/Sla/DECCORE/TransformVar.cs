@@ -97,7 +97,7 @@ namespace Sla.DECCORE
                     }
                 case TransformVar::constant_iop:
                     {
-                        PcodeOp* indeffect = PcodeOp::getOpFromConst(Address(fd.getArch().getIopSpace(), val));
+                        PcodeOp* indeffect = PcodeOp.getOpFromConst(Address(fd.getArch().getIopSpace(), val));
                         replacement = fd.newVarnodeIop(indeffect);
                         break;
                     }

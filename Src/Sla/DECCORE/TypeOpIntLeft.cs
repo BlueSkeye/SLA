@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpIntLeft(TypeFactory t)
             : base(t, OpCode.CPUI_INT_LEFT,"<<", type_metatype.TYPE_INT, type_metatype.TYPE_INT)
         {
-            opflags = PcodeOp::binary;
+            opflags = PcodeOp.Flags.binary;
             addlflags = inherits_sign | inherits_sign_zero | shift_op;
             behave = new OpBehaviorIntLeft();
         }

@@ -202,7 +202,7 @@ namespace Sla.DECCORE
                     Varnode iopvn = op.getIn(1);
                     if (iopvn.getSpace().getType() == spacetype.IPTR_IOP) {
                         // If INDIRECT is due call
-                        PcodeOp iop = PcodeOp::getOpFromConst(iopvn.getAddr());
+                        PcodeOp iop = PcodeOp.getOpFromConst(iopvn.getAddr());
                         FuncCallSpecs fc = data.getCallSpecs(iop); // Look up function proto
                         if (fc != null) {
                             if (fc.getExtraPop() != ProtoModel.extrapop_unknown) {

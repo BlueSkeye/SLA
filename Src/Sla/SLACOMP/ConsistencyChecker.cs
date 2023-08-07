@@ -85,7 +85,7 @@ namespace Sla.SLACOMP
 
             switch (vn.getSize().getType())
             {
-                case ConstTpl::handle:
+                case ConstTpl.const_type.handle:
                     handindex = vn.getSize().getHandleIndex();
                     opsym = ct.getOperand(handindex);
                     break;
@@ -368,17 +368,17 @@ namespace Sla.SLACOMP
 
             switch (sizeconst.getType())
             {
-                case ConstTpl::real:
+                case ConstTpl.const_type.real:
                     size = (int)sizeconst.getReal();
                     break;
-                case ConstTpl::handle:
+                case ConstTpl.const_type.handle:
                     handindex = sizeconst.getHandleIndex();
                     opsym = ct.getOperand(handindex);
                     size = opsym.getSize();
                     if (size == -1)
                     {
                         tabsym = dynamic_cast<SubtableSymbol*>(opsym.getDefiningSymbol());
-                        if (tabsym == (SubtableSymbol*)0)
+                        if (tabsym == (SubtableSymbol)null)
                             throw new SleighError("Could not recover varnode template size");
                         iter = sizemap.find(tabsym);
                         if (iter == sizemap.end())
@@ -679,7 +679,7 @@ namespace Sla.SLACOMP
                     return true;
                 case OpCode.CPUI_LOAD:
                 case OpCode.CPUI_STORE:
-                    if (op.getIn(0).getOffset().getType() != ConstTpl::spaceid)
+                    if (op.getIn(0).getOffset().getType() != ConstTpl.const_type.spaceid)
                         return true;
                     spc = op.getIn(0).getOffset().getSpace();
                     vn1 = recoverSize(op.getIn(1).getSize(), ct);
@@ -807,10 +807,10 @@ namespace Sla.SLACOMP
         private bool checkVarnodeTruncation(Constructor ct, int slot, OpTpl op, VarnodeTpl vn, bool isbigendian)
         {
             ConstTpl off = vn.getOffset();
-            if (off.getType() != ConstTpl::handle) return true;
+            if (off.getType() != ConstTpl.const_type.handle) return true;
             if (off.getSelect() != ConstTpl::v_offset_plus) return true;
             ConstTpl::const_type sztype = vn.getSize().getType();
-            if ((sztype != ConstTpl::real) && (sztype != ConstTpl::handle))
+            if ((sztype != ConstTpl.const_type.real) && (sztype != ConstTpl.const_type.handle))
             {
                 printOpError(op, ct, slot, slot, "Bad truncation expression");
                 return false;
@@ -1030,7 +1030,7 @@ namespace Sla.SLACOMP
                         ctstate.GetLastItem() = oper + 1;
                         OperandSymbol* opsym = ct.getOperand(oper);
                         SubtableSymbol* subsym = dynamic_cast<SubtableSymbol*>(opsym.getDefiningSymbol());
-                        if (subsym != (SubtableSymbol*)0)
+                        if (subsym != (SubtableSymbol)null)
                         {
                             Dictionary<SubtableSymbol*, int>::const_iterator iter;
                             iter = sizemap.find(subsym);
@@ -1062,7 +1062,7 @@ namespace Sla.SLACOMP
         {
             if (vn == (VarnodeTpl*)0) return;
             if (!vn.getSpace().isUniqueSpace()) return;
-            if (vn.getOffset().getType() != ConstTpl::real) return;
+            if (vn.getOffset().getType() != ConstTpl.const_type.real) return;
 
             Dictionary<ulong, OptimizeRecord>::iterator iter;
             iter = recs.insert(pair<uint, OptimizeRecord>(vn.getOffset().getReal(), OptimizeRecord())).first;
@@ -1098,17 +1098,17 @@ namespace Sla.SLACOMP
 
             if (u1 != u2) return false;
 
-            if (vn1.getSpace().getType() != ConstTpl::spaceid) return true;
-            if (vn2.getSpace().getType() != ConstTpl::spaceid) return true;
+            if (vn1.getSpace().getType() != ConstTpl.const_type.spaceid) return true;
+            if (vn2.getSpace().getType() != ConstTpl.const_type.spaceid) return true;
             AddrSpace* spc = vn1.getSpace().getSpace();
             if (spc != vn2.getSpace().getSpace()) return false;
 
 
-            if (vn2.getOffset().getType() != ConstTpl::real) return true;
-            if (vn2.getSize().getType() != ConstTpl::real) return true;
+            if (vn2.getOffset().getType() != ConstTpl.const_type.real) return true;
+            if (vn2.getSize().getType() != ConstTpl.const_type.real) return true;
 
-            if (vn1.getOffset().getType() != ConstTpl::real) return true;
-            if (vn1.getSize().getType() != ConstTpl::real) return true;
+            if (vn1.getOffset().getType() != ConstTpl.const_type.real) return true;
+            if (vn1.getSize().getType() != ConstTpl.const_type.real) return true;
 
             ulong offset = vn1.getOffset().getReal();
             ulong size = vn1.getSize().getReal();
@@ -1220,7 +1220,7 @@ namespace Sla.SLACOMP
             if (hand == (HandleTpl)null) return;
             if (hand.getPtrSpace().isUniqueSpace())
             {
-                if (hand.getPtrOffset().getType() == ConstTpl::real)
+                if (hand.getPtrOffset().getType() == ConstTpl.const_type.real)
                 {
                     pair<Dictionary<ulong, OptimizeRecord>::iterator, bool> res;
                     ulong offset = hand.getPtrOffset().getReal();
@@ -1235,8 +1235,8 @@ namespace Sla.SLACOMP
             }
             if (hand.getSpace().isUniqueSpace())
             {
-                if ((hand.getPtrSpace().getType() == ConstTpl::real) &&
-                (hand.getPtrOffset().getType() == ConstTpl::real))
+                if ((hand.getPtrSpace().getType() == ConstTpl.const_type.real) &&
+                (hand.getPtrOffset().getType() == ConstTpl.const_type.real))
                 {
                     pair<Dictionary<ulong, OptimizeRecord>::iterator, bool> res;
                     ulong offset = hand.getPtrOffset().getReal();

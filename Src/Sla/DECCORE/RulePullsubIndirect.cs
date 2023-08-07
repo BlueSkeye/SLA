@@ -39,7 +39,7 @@ namespace Sla.DECCORE
             if (indir.code() != OpCode.CPUI_INDIRECT) return 0;
             if (indir.getIn(1).getSpace().getType() != spacetype.IPTR_IOP) return 0;
 
-            PcodeOp* targ_op = PcodeOp::getOpFromConst(indir.getIn(1).getAddr());
+            PcodeOp* targ_op = PcodeOp.getOpFromConst(indir.getIn(1).getAddr());
             if (targ_op.isDead()) return 0;
             if (vn.isAddrForce()) return 0;
             RulePullsubMulti::minMaxUse(vn, maxByte, minByte);

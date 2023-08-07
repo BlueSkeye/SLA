@@ -43,7 +43,7 @@ namespace Sla.DECCORE
             if (baseoff == (AddrSpace)null) return 0;
 
             size = op.getIn(2).getSize();
-            offoff = AddrSpace::addressToByte(offoff, baseoff.getWordSize());
+            offoff = AddrSpace.addressToByte(offoff, baseoff.getWordSize());
             Address addr(baseoff, offoff);
             data.newVarnodeOut(size, addr, op);
             op.getOut().setStackStore();  // Mark as originally coming from OpCode.CPUI_STORE

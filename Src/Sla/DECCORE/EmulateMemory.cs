@@ -46,7 +46,7 @@ namespace Sla.DECCORE
             ulong off = memstate.getValue(currentOp.getInput(1));
             AddrSpace* spc = currentOp.getInput(0).getSpaceFromConst();
 
-            off = AddrSpace::addressToByte(off, spc.getWordSize());
+            off = AddrSpace.addressToByte(off, spc.getWordSize());
             ulong res = memstate.getValue(spc, off, currentOp.getOutput().size);
             memstate.setValue(currentOp.getOutput(), res);
         }
@@ -57,7 +57,7 @@ namespace Sla.DECCORE
             ulong off = memstate.getValue(currentOp.getInput(1)); // Offset to store at
             AddrSpace* spc = currentOp.getInput(0).getSpaceFromConst(); // Space to store in
 
-            off = AddrSpace::addressToByte(off, spc.getWordSize());
+            off = AddrSpace.addressToByte(off, spc.getWordSize());
             memstate.setValue(spc, off, currentOp.getInput(2).size, val);
         }
 

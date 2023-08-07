@@ -51,8 +51,8 @@ namespace Sla.DECCORE
             }
 
             while (useroplist.size() <= ind)
-                useroplist.Add((UserPcodeOp*)0);
-            if (useroplist[ind] != (UserPcodeOp*)0)
+                useroplist.Add((UserPcodeOp)null);
+            if (useroplist[ind] != (UserPcodeOp)null)
             {
                 if (useroplist[ind].getName() != op.getName())
                     throw new LowlevelError("User op " + op.getName() + " has same index as " + useroplist[ind].getName());
@@ -63,14 +63,14 @@ namespace Sla.DECCORE
             useropmap[op.getName()] = op; // Name crossref
 
             SegmentOp* s_op = dynamic_cast<SegmentOp*>(op);
-            if (s_op != (SegmentOp*)0)
+            if (s_op != (SegmentOp)null)
             {
                 int index = s_op.getSpace().getIndex();
 
                 while (segmentop.size() <= index)
-                    segmentop.Add((SegmentOp*)0);
+                    segmentop.Add((SegmentOp)null);
 
-                if (segmentop[index] != (SegmentOp*)0)
+                if (segmentop[index] != (SegmentOp)null)
                     throw new LowlevelError("Multiple segmentops defined for same space");
                 segmentop[index] = s_op;
                 return;
@@ -106,7 +106,7 @@ namespace Sla.DECCORE
             for (iter = useroplist.begin(); iter != useroplist.end(); ++iter)
             {
                 UserPcodeOp* userop = *iter;
-                if (userop != (UserPcodeOp*)0)
+                if (userop != (UserPcodeOp)null)
                     delete userop;
             }
         }
@@ -153,7 +153,7 @@ namespace Sla.DECCORE
         /// \return the indicated user-op description
         public UserPcodeOp getOp(int i)
         {
-            if (i >= useroplist.size()) return (UserPcodeOp*)0;
+            if (i >= useroplist.size()) return (UserPcodeOp)null;
             return useroplist[i];
         }
 
@@ -164,7 +164,7 @@ namespace Sla.DECCORE
         {
             Dictionary<string, UserPcodeOp*>::const_iterator iter;
             iter = useropmap.find(nm);
-            if (iter == useropmap.end()) return (UserPcodeOp*)0;
+            if (iter == useropmap.end()) return (UserPcodeOp)null;
             return (*iter).second;
         }
 
@@ -173,7 +173,7 @@ namespace Sla.DECCORE
         /// \return the indicated segment-op description
         public SegmentOp getSegmentOp(int i)
         {
-            if (i >= segmentop.size()) return (SegmentOp*)0;
+            if (i >= segmentop.size()) return (SegmentOp)null;
             return segmentop[i];
         }
 
@@ -305,9 +305,9 @@ namespace Sla.DECCORE
             string snippet, Architecture glb)
         {
             UserPcodeOp* userop = getOp(useropname);
-            if (userop == (UserPcodeOp*)0)
+            if (userop == (UserPcodeOp)null)
                 throw new LowlevelError("Unknown userop: " + useropname);
-            if (dynamic_cast<UnspecializedPcodeOp*>(userop) == (UnspecializedPcodeOp*)0)
+            if (dynamic_cast<UnspecializedPcodeOp*>(userop) == (UnspecializedPcodeOp)null)
                 throw new LowlevelError("Cannot fixup userop: " + useropname);
 
             int injectid = glb.pcodeinjectlib.manualCallOtherFixup(useropname, outname, inname, snippet);

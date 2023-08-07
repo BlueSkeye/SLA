@@ -25,11 +25,11 @@ namespace Sla.SLEIGH
             marked = 8
         }
         
-        private uint reloffset;      // Relative offset
-        private int offsetbase;        // Base operand to which offset is relative (-1=constructor start)
+        internal uint reloffset;      // Relative offset
+        internal int offsetbase;        // Base operand to which offset is relative (-1=constructor start)
         internal int minimumlength;     // Minimum size of operand (within instruction tokens)
-        private int hand;          // Handle index
-        private OperandValue localexp;
+        internal int hand;          // Handle index
+        internal OperandValue localexp;
         private TripleSymbol? triple;       // Defining symbol
         private PatternExpression? defexp;  // OR defining expression
         private Flags flags;
@@ -39,7 +39,7 @@ namespace Sla.SLEIGH
             flags |= Flags.variable_len;
         }
 
-        private bool isVariableLength() => ((flags& Flags.variable_len)!=0);
+        internal bool isVariableLength() => ((flags& Flags.variable_len)!=0);
 
         public OperandSymbol()
         {

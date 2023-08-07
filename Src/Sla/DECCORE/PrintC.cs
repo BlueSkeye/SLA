@@ -665,8 +665,6 @@ namespace Sla.DECCORE
         /// \param ct is the structure data-type
         protected void emitStructDefinition(TypeStruct ct)
         {
-            List<TypeField>::const_iterator iter;
-
             if (ct.getName().Length == 0) {
                 clear();
                 throw new LowlevelError("Trying to save unnamed structure");
@@ -678,13 +676,15 @@ namespace Sla.DECCORE
             int id = emit.startIndent();
             emit.print(OPEN_CURLY);
             emit.tagLine();
-            iter = ct.beginField();
-            while (iter != ct.endField()) {
-                pushTypeStart((*iter).type, false);
-                pushAtom(new Atom((*iter).name, syntax, EmitMarkup.syntax_highlight.var_color));
-                pushTypeEnd((*iter).type);
-                iter++;
-                if (iter != ct.endField()) {
+            IEnumerator<TypeField> iter = ct.beginField();
+            if (iter.MoveNext()) {
+                while (true) {
+                    pushTypeStart(iter.Current.type, false);
+                    pushAtom(new Atom(iter.Current.name, syntax, EmitMarkup.syntax_highlight.var_color));
+                    pushTypeEnd(iter.Current.type);
+                    if (!iter.MoveNext()) {
+                        break;
+                    }
                     emit.print(COMMA); // Print comma separator
                     emit.tagLine();
                 }
@@ -718,8 +718,7 @@ namespace Sla.DECCORE
             emit.print(OPEN_CURLY);
             emit.tagLine();
             iter = ct.beginEnum();
-            while (iter != ct.endEnum())
-            {
+            while (iter != ct.endEnum()) {
                 emit.print((*iter).second, EmitMarkup.syntax_highlight.const_color);
                 emit.spaces(1);
                 emit.print(EQUALSIGN, EmitMarkup.syntax_highlight.no_color);

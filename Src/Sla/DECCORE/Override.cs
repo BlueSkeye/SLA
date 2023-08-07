@@ -392,13 +392,13 @@ namespace Sla.DECCORE
                 if (subId == 0) break;
                 if (subId == ELEM_INDIRECTOVERRIDE)
                 {
-                    Address callpoint = Address::decode(decoder);
-                    Address directcall = Address::decode(decoder);
+                    Address callpoint = Address.decode(decoder);
+                    Address directcall = Address.decode(decoder);
                     insertIndirectOverride(callpoint, directcall);
                 }
                 else if (subId == ELEM_PROTOOVERRIDE)
                 {
-                    Address callpoint = Address::decode(decoder);
+                    Address callpoint = Address.decode(decoder);
                     FuncProto* fp = new FuncProto();
                     fp.setInternal(glb.defaultfp, glb.types.getTypeVoid());
                     fp.decode(decoder, glb);
@@ -406,8 +406,8 @@ namespace Sla.DECCORE
                 }
                 else if (subId == ELEM_FORCEGOTO)
                 {
-                    Address targetpc = Address::decode(decoder);
-                    Address destpc = Address::decode(decoder);
+                    Address targetpc = Address.decode(decoder);
+                    Address destpc = Address.decode(decoder);
                     insertForceGoto(targetpc, destpc);
                 }
                 else if (subId == ELEM_DEADCODEDELAY)
@@ -420,13 +420,13 @@ namespace Sla.DECCORE
                 }
                 else if (subId == ELEM_MULTISTAGEJUMP)
                 {
-                    Address callpoint = Address::decode(decoder);
+                    Address callpoint = Address.decode(decoder);
                     insertMultistageJump(callpoint);
                 }
                 else if (subId == ELEM_FLOW)
                 {
                     uint type = stringToType(decoder.readString(AttributeId.ATTRIB_TYPE));
-                    Address addr = Address::decode(decoder);
+                    Address addr = Address.decode(decoder);
                     if ((type == Override.Branching.NONE) || (addr.isInvalid()))
                         throw new LowlevelError("Bad flowoverride tag");
                     insertFlowOverride(addr, type);

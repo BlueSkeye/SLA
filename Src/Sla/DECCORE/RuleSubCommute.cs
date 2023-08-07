@@ -41,18 +41,17 @@ namespace Sla.DECCORE
             Varnode vn;
             Varnode newvn;
             Varnode outvn;
-            PcodeOp longform;
             PcodeOp newsub;
             PcodeOp prevop;
             int i, j, offset, insize;
 
             @base = op.getIn(0);
             if (!@base.isWritten()) return 0;
-            offset = op.getIn(1).getOffset();
+            offset = (int)op.getIn(1).getOffset();
             outvn = op.getOut();
             if (outvn.isPrecisLo() || outvn.isPrecisHi()) return 0;
             insize = @base.getSize();
-            longform = @base.getDef();
+            PcodeOp longform = @base.getDef() ?? throw new BugException();
             j = -1;
             switch (longform.code())
             {   // Determine if this op commutes with SUBPIECE
@@ -61,7 +60,7 @@ namespace Sla.DECCORE
                     j = 1;          // Special processing for shift amount param
                     if (offset != 0) return 0;
                     if (!longform.getIn(0).isWritten()) return 0;
-                    prevop = longform.getIn(0).getDef();
+                    prevop = longform.getIn(0).getDef() ?? throw new BugException();
                     if (prevop.code() == OpCode.CPUI_INT_ZEXT)
                     {
                     }
@@ -77,14 +76,14 @@ namespace Sla.DECCORE
                         // Only commutes if inputs are zero extended
                         if (offset != 0) return 0;
                         if (!longform.getIn(0).isWritten()) return 0;
-                        PcodeOp* zext0 = longform.getIn(0).getDef();
+                        PcodeOp zext0 = longform.getIn(0).getDef() ?? throw new BugException();
                         if (zext0.code() != OpCode.CPUI_INT_ZEXT) return 0;
-                        Varnode* zext0In = zext0.getIn(0);
+                        Varnode zext0In = zext0.getIn(0);
                         if (longform.getIn(1).isWritten())
                         {
-                            PcodeOp* zext1 = longform.getIn(1).getDef();
+                            PcodeOp zext1 = longform.getIn(1).getDef() ?? throw new BugException();
                             if (zext1.code() != OpCode.CPUI_INT_ZEXT) return 0;
-                            Varnode* zext1In = zext1.getIn(0);
+                            Varnode zext1In = zext1.getIn(0);
                             if (zext1In.getSize() > outvn.getSize() || zext0In.getSize() > outvn.getSize())
                             {
                                 // Special case where we need a PARTIAL commute of the SUBPIECE
@@ -98,7 +97,7 @@ namespace Sla.DECCORE
                         else if (longform.getIn(1).isConstant() && (zext0In.getSize() <= outvn.getSize()))
                         {
                             ulong val = longform.getIn(1).getOffset();
-                            ulong smallval = val & Globals.calc_mask(outvn.getSize());
+                            ulong smallval = val & Globals.calc_mask((uint)outvn.getSize());
                             if (val != smallval)
                                 return 0;
                         }
@@ -112,14 +111,14 @@ namespace Sla.DECCORE
                         // Only commutes if inputs are sign extended
                         if (offset != 0) return 0;
                         if (!longform.getIn(0).isWritten()) return 0;
-                        PcodeOp* sext0 = longform.getIn(0).getDef();
+                        PcodeOp sext0 = longform.getIn(0).getDef() ?? throw new BugException(); ;
                         if (sext0.code() != OpCode.CPUI_INT_SEXT) return 0;
-                        Varnode* sext0In = sext0.getIn(0);
+                        Varnode sext0In = sext0.getIn(0);
                         if (longform.getIn(1).isWritten())
                         {
-                            PcodeOp* sext1 = longform.getIn(1).getDef();
+                            PcodeOp sext1 = longform.getIn(1).getDef() ?? throw new BugException(); ;
                             if (sext1.code() != OpCode.CPUI_INT_SEXT) return 0;
-                            Varnode* sext1In = sext1.getIn(0);
+                            Varnode sext1In = sext1.getIn(0);
                             if (sext1In.getSize() > outvn.getSize() || sext0In.getSize() > outvn.getSize())
                             {
                                 // Special case where we need a PARTIAL commute of the SUBPIECE
@@ -133,7 +132,7 @@ namespace Sla.DECCORE
                         else if (longform.getIn(1).isConstant() && (sext0In.getSize() <= outvn.getSize()))
                         {
                             ulong val = longform.getIn(1).getOffset();
-                            ulong smallval = val & Globals.calc_mask(outvn.getSize());
+                            ulong smallval = val & Globals.calc_mask((uint)outvn.getSize());
                             smallval = Globals.sign_extend(smallval, outvn.getSize(), insize);
                             if (val != smallval)
                                 return 0;
@@ -164,7 +163,7 @@ namespace Sla.DECCORE
 
             if (offset == 0)
             {       // Look for overlap with RuleSubZext
-                PcodeOp* nextop = outvn.loneDescend();
+                PcodeOp? nextop = outvn.loneDescend();
                 if ((nextop != (PcodeOp)null) && (nextop.code() == OpCode.CPUI_INT_ZEXT))
                 {
                     if (nextop.getOut().getSize() == insize)
@@ -182,7 +181,7 @@ namespace Sla.DECCORE
                     newvn = data.newUniqueOut(outvn.getSize(), newsub);  // New varnode is subpiece
                     data.opSetInput(longform, newvn, i);
                     data.opSetInput(newsub, vn, 0); // of old varnode
-                    data.opSetInput(newsub, data.newConstant(4, offset), 1);
+                    data.opSetInput(newsub, data.newConstant(4, (ulong)offset), 1);
                     data.opInsertBefore(newsub, longform);
                 }
             }
@@ -206,7 +205,7 @@ namespace Sla.DECCORE
             if (ext0In.getSize() != ext1In.getSize()) return false;   // Sizes must match
             if (ext0In.isFree()) return false;     // Must be able to propagate inputs
             if (ext1In.isFree()) return false;
-            Varnode* outvn = longform.getOut();
+            Varnode outvn = longform.getOut();
             if (outvn.loneDescend() != subOp) return false;    // Must be exactly one output to SUBPIECE
             data.opUnsetOutput(longform);
             outvn = data.newUniqueOut(ext0In.getSize(), longform); // Create truncated form of longform output

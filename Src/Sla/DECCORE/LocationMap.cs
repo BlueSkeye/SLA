@@ -1,9 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
@@ -33,7 +29,7 @@ namespace Sla.DECCORE
         /// \param pass is the pass number when the range was heritaged
         /// \param intersect is a reference for passing back the intersect code
         /// \return the iterator to the map element containing the added range
-        public IEnumerator add(Address addr, int size, int pass, int intersect)
+        public IEnumerator add(Address addr, int size, int pass, out int intersect)
         {
             iterator iter = themap.lower_bound(addr);
             if (iter != themap.begin())

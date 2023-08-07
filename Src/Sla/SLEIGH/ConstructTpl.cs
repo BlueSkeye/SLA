@@ -106,8 +106,8 @@ namespace Sla.SLEIGH
                 {   // Didn't see a BUILD statement
                     op = new OpTpl(BUILD);
                     indvn = new VarnodeTpl(ConstTpl(const_space),
-                                ConstTpl(ConstTpl::real, i),
-                                ConstTpl(ConstTpl::real, 4));
+                                ConstTpl(ConstTpl.const_type.real, i),
+                                ConstTpl(ConstTpl.const_type.real, 4));
                     op.addInput(indvn);
                     vec.insert(vec.begin(), op);
                 }

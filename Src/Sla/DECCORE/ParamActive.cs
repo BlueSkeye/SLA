@@ -1,11 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -22,7 +15,7 @@ namespace Sla.DECCORE
     internal class ParamActive
     {
         /// The list of parameter trials
-        private List<ParamTrial> trial;
+        private List<ParamTrial> trial = new List<ParamTrial>();
         /// Slot where next parameter will go
         private int slotbase;
         /// Which call input slot holds the stack placeholder
@@ -54,7 +47,7 @@ namespace Sla.DECCORE
         /// Reset to an empty container
         public void clear()
         {
-            trial.clear();
+            trial.Clear();
             slotbase = 1;
             stackplaceholder = -1;
             numpasses = 0;
@@ -67,7 +60,7 @@ namespace Sla.DECCORE
         /// \param sz is the number of bytes in the range
         public void registerTrial(Address addr,int sz)
         {
-            trial.Add(ParamTrial(addr, sz, slotbase));
+            trial.Add(new ParamTrial(addr, sz, slotbase));
             // It would require too much work to calculate whether a specific data location is changed
             // by a subfunction, but a fairly strong assumption is that (unless it is explicitly saved) a
             // register may change and is thus unlikely to be used as a location for passing parameters.
@@ -146,8 +139,7 @@ namespace Sla.DECCORE
         /// Free up the stack placeholder slot, which may cause trial slots to get adjusted
         public void freePlaceholderSlot()
         {
-            for (int i = 0; i < trial.size(); ++i)
-            {
+            for (int i = 0; i < trial.size(); ++i) {
                 if (trial[i].getSlot() > stackplaceholder)
                     trial[i].setSlot(trial[i].getSlot() - 1);
             }
@@ -180,7 +172,7 @@ namespace Sla.DECCORE
         /// Sort the trials in formal parameter order
         public void sortTrials()
         {
-            sort(trial.begin(), trial.end());
+            trial.Sort();
         }
 
         /// Remove trials that were found not to be parameters
@@ -189,14 +181,12 @@ namespace Sla.DECCORE
         /// reordered too.
         public void deleteUnusedTrials()
         {
-            List<ParamTrial> newtrials;
+            List<ParamTrial> newtrials = new List<ParamTrial>();
             int slot = 1;
 
-            for (int i = 0; i < trial.size(); ++i)
-            {
-                ParamTrial & curtrial(trial[i]);
-                if (curtrial.isUsed())
-                {
+            for (int i = 0; i < trial.size(); ++i) {
+                ParamTrial curtrial = trial[i];
+                if (curtrial.isUsed()) {
                     curtrial.setSlot(slot);
                     slot += 1;
                     newtrials.Add(curtrial);
@@ -213,11 +203,10 @@ namespace Sla.DECCORE
         {
             if (stackplaceholder >= 0)
                 throw new LowlevelError("Cannot split parameter when the placeholder has not been recovered");
-            List<ParamTrial> newtrials;
+            List<ParamTrial> newtrials = new List<ParamTrial>();
             int slot = trial[i].getSlot();
 
-            for (int j = 0; j < i; ++j)
-            {
+            for (int j = 0; j < i; ++j) {
                 newtrials.Add(trial[j]);
                 int oldslot = newtrials.GetLastItem().getSlot();
                 if (oldslot > slot)
@@ -225,8 +214,7 @@ namespace Sla.DECCORE
             }
             newtrials.Add(trial[i].splitHi(sz));
             newtrials.Add(trial[i].splitLo(trial[i].getSize() - sz));
-            for (int j = i + 1; j < trial.size(); ++j)
-            {
+            for (int j = i + 1; j < trial.size(); ++j) {
                 newtrials.Add(trial[j]);
                 int oldslot = newtrials.GetLastItem().getSlot();
                 if (oldslot > slot)
@@ -245,27 +233,25 @@ namespace Sla.DECCORE
         {
             if (stackplaceholder >= 0)
                 throw new LowlevelError("Cannot join parameters when the placeholder has not been removed");
-            List<ParamTrial> newtrials;
+            List<ParamTrial> newtrials = new List<ParamTrial>();
             int sizecheck = 0;
-            for (int i = 0; i < trial.size(); ++i)
-            {
-                ParamTrial & curtrial(trial[i]);
+            for (int i = 0; i < trial.size(); ++i) {
+                ParamTrial curtrial = trial[i];
                 int curslot = curtrial.getSlot();
                 if (curslot < slot)
                     newtrials.Add(curtrial);
                 else if (curslot == slot)
                 {
                     sizecheck += curtrial.getSize();
-                    newtrials.Add(ParamTrial(addr, sz, slot));
+                    newtrials.Add(new ParamTrial(addr, sz, slot));
                     newtrials.GetLastItem().markUsed();
                     newtrials.GetLastItem().markActive();
                 }
-                else if (curslot == slot + 1)
-                { // this slot is thrown out
+                else if (curslot == slot + 1) {
+                    // this slot is thrown out
                     sizecheck += curtrial.getSize();
                 }
-                else
-                {
+                else {
                     newtrials.Add(curtrial);
                     newtrials.GetLastItem().setSlot(curslot - 1);
                 }
@@ -282,8 +268,7 @@ namespace Sla.DECCORE
         public int getNumUsed()
         {
             int count;
-            for (count = 0; count < trial.size(); ++count)
-            {
+            for (count = 0; count < trial.size(); ++count) {
                 if (!trial[count].isUsed()) break;
             }
             return count;
@@ -311,7 +296,7 @@ namespace Sla.DECCORE
         /// sort the trials by fixed position then <
         public void sortFixedPosition()
         {
-            sort(trial.begin(), trial.end(), ParamTrial::fixedPositionCompare);
+            trial.Sort(ParamTrial.fixedPositionCompare);
         }
     }
 }

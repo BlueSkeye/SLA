@@ -156,16 +156,16 @@ namespace Sla.DECCORE
         internal bool isIncidentalCopy() => incidentalCopy;
 
         /// Return the number of input parameters
-        protected int sizeInput() => inputlist.Count;
+        internal int sizeInput() => inputlist.Count;
 
         /// Return the number of output parameters
-        protected int sizeOutput() => output.Count;
+        internal int sizeOutput() => output.Count;
 
         /// Get the i-th input parameter
-        protected InjectParameter getInput(int i) => inputlist[i];
+        internal InjectParameter getInput(int i) => inputlist[i];
 
         /// Get the i-th output parameter
-        protected InjectParameter getOutput(int i) => output[i];
+        internal InjectParameter getOutput(int i) => output[i];
 
         ~InjectPayload()
         {

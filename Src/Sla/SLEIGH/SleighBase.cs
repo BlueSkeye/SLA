@@ -177,14 +177,14 @@ namespace Sla.SLEIGH
         /// Construct an uninitialized translator
         public SleighBase()
         {
-            root = (SubtableSymbol*)0;
+            root = (SubtableSymbol)null;
             maxdelayslotbytes = 0;
             unique_allocatemask = 0;
             numSections = 0;
         }
 
         /// Return \b true if \b this is initialized
-        public bool isInitialized() => (root != (SubtableSymbol*)0);
+        public bool isInitialized() => (root != (SubtableSymbol)null);
 
         ~SleighBase()
         {

@@ -24,12 +24,12 @@ namespace Sla.DECCORE
         /// Parse the \<type> tag.
         /// \param decoder is the stream decoder
         /// \param typegrp is the factory owning \b this data-type
-        private void decode(Decoder decoder, TypeFactory typegrp)
+        internal void decode(Decoder decoder, TypeFactory typegrp)
         {
             //  uint elemId = decoder.openElement();
             decodeBasic(decoder);
             spaceid = decoder.readSpace(AttributeId.ATTRIB_SPACE);
-            localframe = Address::decode(decoder);
+            localframe = Address.decode(decoder);
             //  decoder.closeElement(elemId);
         }
 

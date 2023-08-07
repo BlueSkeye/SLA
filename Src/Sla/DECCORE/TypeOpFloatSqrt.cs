@@ -13,7 +13,7 @@ namespace Sla.DECCORE
         public TypeOpFloatSqrt(TypeFactory t, Translate trans)
             : base(t, OpCode.CPUI_FLOAT_SQRT,"SQRT", type_metatype.TYPE_FLOAT, type_metatype.TYPE_FLOAT)
         {
-            opflags = PcodeOp::unary;
+            opflags = PcodeOp.Flags.unary;
             addlflags = floatingpoint_op;
             behave = new OpBehaviorFloatSqrt(trans);
         }

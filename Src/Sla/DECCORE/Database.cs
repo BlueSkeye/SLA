@@ -545,7 +545,7 @@ namespace Sla.DECCORE
                 {
                     uint attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;
-                    if (attribId == ATTRIB_NAME)
+                    if (attribId == AttributeId.ATTRIB_NAME)
                         name = decoder.readString();
                     else if (attribId == ATTRIB_ID)
                     {

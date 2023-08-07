@@ -79,7 +79,7 @@ namespace Sla.DECCORE
             // op will be null, use current_op
             ulong off = getVarnodeValue(currentOp.getInput(1));
             AddrSpace* spc = currentOp.getInput(0).getSpaceFromConst();
-            off = AddrSpace::addressToByte(off, spc.getWordSize());
+            off = AddrSpace.addressToByte(off, spc.getWordSize());
             int sz = currentOp.getOutput().size;
             ulong res = getLoadImageValue(spc, off, sz);
             setVarnodeValue(currentOp.getOutput().offset, res);

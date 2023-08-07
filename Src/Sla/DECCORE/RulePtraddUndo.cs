@@ -43,7 +43,7 @@ namespace Sla.DECCORE
             basevn = op.getIn(0);
             tp = (TypePointer*)basevn.getTypeReadFacing(op);
             if (tp.getMetatype() == type_metatype.TYPE_PTR)                              // Make sure we are still a pointer
-                if (tp.getPtrTo().getSize() == AddrSpace::addressToByteInt(size, tp.getWordSize()))
+                if (tp.getPtrTo().getSize() == AddrSpace.addressToByteInt(size, tp.getWordSize()))
                 {   // of the correct size
                     Varnode* indVn = op.getIn(1);
                     if ((!indVn.isConstant()) || (indVn.getOffset() != 0))                    // and that index isn't zero

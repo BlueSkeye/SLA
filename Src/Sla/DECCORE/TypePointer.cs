@@ -18,7 +18,7 @@ namespace Sla.DECCORE
         /// Type being pointed to
         protected Datatype ptrto;
         /// If non-null, the address space \b this is intented to point into
-        protected AddrSpace spaceid;
+        protected AddrSpace? spaceid;
         /// What size unit does the pointer address
         protected uint wordsize;
 
@@ -26,16 +26,16 @@ namespace Sla.DECCORE
         /// Parse a \<type> element with a child describing the data-type being pointed to
         /// \param decoder is the stream decoder
         /// \param typegrp is the factory owning \b this data-type
-        internal void decode(Decoder decoder, TypeFactory typegrp)
+        internal void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
             //  uint elemId = decoder.openElement();
             decodeBasic(decoder); ;
             decoder.rewindAttributes();
             for (; ; ) {
-                uint attrib = decoder.getNextAttributeId();
+                AttributeId attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
                 if (attrib == AttributeId.ATTRIB_WORDSIZE) {
-                    wordsize = decoder.readUnsignedInteger();
+                    wordsize = (uint)decoder.readUnsignedInteger();
                 }
                 else if (attrib == AttributeId.ATTRIB_SPACE) {
                     spaceid = decoder.readSpace();
@@ -55,12 +55,12 @@ namespace Sla.DECCORE
             type_metatype ptrtoMeta = ptrto.getMetatype();
             if (ptrtoMeta == type_metatype.TYPE_STRUCT) {
                 if (ptrto.numDepend() > 1 || ptrto.isIncomplete())
-                    submeta = SUB_PTR_STRUCT;
+                    submeta = sub_metatype.SUB_PTR_STRUCT;
                 else
-                    submeta = SUB_PTR;
+                    submeta = sub_metatype.SUB_PTR;
             }
             else if (ptrtoMeta == type_metatype.TYPE_UNION) {
-                submeta = SUB_PTR_STRUCT;
+                submeta = sub_metatype.SUB_PTR_STRUCT;
             }
             if (ptrto.needsResolution() && ptrtoMeta != type_metatype.TYPE_PTR)
                 flags |= Properties.needs_resolution;      // Inherit needs_resolution, but only if not a pointer
@@ -97,7 +97,7 @@ namespace Sla.DECCORE
 
         /// Construct from a pointed-to type and an address space attribute
         public TypePointer(Datatype pt, AddrSpace spc)
-            : base(spc.getAddrSize(), type_metatype.TYPE_PTR)
+            : base((int)spc.getAddrSize(), type_metatype.TYPE_PTR)
         {
             ptrto = pt;
             flags = ptrto.getInheritable();
@@ -113,15 +113,14 @@ namespace Sla.DECCORE
         public uint getWordSize() => wordsize;
 
         /// Get any address space associated with \b this pointer
-        public AddrSpace getSpace() => spaceid;
+        public AddrSpace? getSpace() => spaceid;
 
         public override void printRaw(TextWriter s)
         {
             ptrto.printRaw(s);
-            s << " *";
-            if (spaceid != (AddrSpace)null)
-            {
-                s << '(' << spaceid.getName() << ')';
+            s.Write(" *");
+            if (spaceid != (AddrSpace)null) {
+                s.Write($"({spaceid.getName()})");
             }
         }
 
@@ -131,19 +130,18 @@ namespace Sla.DECCORE
 
         public override void printNameBase(TextWriter s) 
         {
-            s << 'p';
+            s.Write('p');
             ptrto.printNameBase(s);
         }
 
         public override int compare(Datatype op, int level)
         {
-            int res = Datatype::compare(op, level);
+            int res = base.compare(op, level);
             if (res != 0) return res;
             // Both must be pointers
-            TypePointer* tp = (TypePointer*)&op;
+            TypePointer tp = (TypePointer)op;
             if (wordsize != tp.wordsize) return (wordsize < tp.wordsize) ? -1 : 1;
-            if (spaceid != tp.spaceid)
-            {
+            if (spaceid != tp.spaceid) {
                 if (spaceid == (AddrSpace)null) return 1; // Pointers with address space come earlier
                 if (tp.spaceid == (AddrSpace)null) return -1;
                 return (spaceid.getIndex() < tp.spaceid.getIndex()) ? -1 : 1;
@@ -154,13 +152,13 @@ namespace Sla.DECCORE
                 if (id == op.getId()) return 0;
                 return (id < op.getId()) ? -1 : 1;
             }
-            return ptrto.compare(*tp.ptrto, level); // Compare whats pointed to
+            return ptrto.compare(tp.ptrto, level); // Compare whats pointed to
         }
 
         public override int compareDependency(Datatype op)
         {
             if (submeta != op.getSubMeta()) return (submeta < op.getSubMeta()) ? -1 : 1;
-            TypePointer* tp = (TypePointer*)&op;    // Both must be pointers
+            TypePointer tp = (TypePointer)op;    // Both must be pointers
             if (ptrto != tp.ptrto) return (ptrto < tp.ptrto) ? -1 : 1;    // Compare absolute pointers
             if (wordsize != tp.wordsize) return (wordsize < tp.wordsize) ? -1 : 1;
             if (spaceid != tp.spaceid)
@@ -172,12 +170,11 @@ namespace Sla.DECCORE
             return (op.getSize() - size);
         }
 
-        public override Datatype clone() => new TypePointer(this);
+        internal override Datatype clone() => new TypePointer(this);
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
-            if (typedefImm != (Datatype)null)
-            {
+            if (typedefImm != (Datatype)null) {
                 encodeTypedef(encoder);
                 return;
             }
@@ -215,7 +212,7 @@ namespace Sla.DECCORE
                 if (ptrtoSize != 0 && !ptrto.isVariableLength())
                 {   // Check if pointed-to is wrappable
                     if (!allowArrayWrap)
-                        return (TypePointer*)0;
+                        return (TypePointer)null;
                     long signOff = (long)off;
                     Globals.sign_extend(signOff, size * 8 - 1);
                     signOff = signOff % ptrtoSize;
@@ -235,9 +232,9 @@ namespace Sla.DECCORE
                 parOff = off;
             }
 
-            Datatype* pt = ptrto.getSubType(off, &off);
+            Datatype? pt = ptrto.getSubType(off, out off);
             if (pt == (Datatype)null)
-                return (TypePointer*)0;
+                return (TypePointer)null;
             if (!isArray)
                 return typegrp.getTypePointerStripArray(size, pt, wordsize);
             return typegrp.getTypePointer(size, pt, wordsize);
@@ -245,37 +242,35 @@ namespace Sla.DECCORE
 
         public override bool isPtrsubMatching(ulong off)
         {
-            if (ptrto.getMetatype() == type_metatype.TYPE_SPACEBASE)
-            {
-                ulong newoff = AddrSpace::addressToByte(off, wordsize);
-                ptrto.getSubType(newoff, &newoff);
-                if (newoff != 0)
-                    return false;
+            switch (ptrto.getMetatype()) {
+                case type_metatype.TYPE_SPACEBASE:
+                    ulong newoff = AddrSpace.addressToByte(off, wordsize);
+                    ptrto.getSubType(newoff, out newoff);
+                    if (newoff != 0)
+                        return false;
+                    break;
+                case type_metatype.TYPE_ARRAY:
+                case type_metatype.TYPE_STRUCT:
+                    int sz = (int)off;
+                    int typesize = ptrto.getSize();
+                    if ((typesize <= AddrSpace.addressToByteInt(sz, wordsize)) && (typesize != 0))
+                        return false;
+                    break;
+                case type_metatype.TYPE_UNION:
+                    // A PTRSUB reaching here cannot be used for a union field resolution
+                    // These are created by ActionSetCasts::resolveUnion
+                    return false;   // So we always return false
+                default:
+                    return false;   // Not a pointer to a structured data-type
             }
-            else if (ptrto.getMetatype() == type_metatype.TYPE_ARRAY || ptrto.getMetatype() == type_metatype.TYPE_STRUCT)
-            {
-                int sz = off;
-                int typesize = ptrto.getSize();
-                if ((typesize <= AddrSpace::addressToByteInt(sz, wordsize)) && (typesize != 0))
-                    return false;
-            }
-            else if (ptrto.getMetatype() == type_metatype.TYPE_UNION)
-            {
-                // A PTRSUB reaching here cannot be used for a union field resolution
-                // These are created by ActionSetCasts::resolveUnion
-                return false;   // So we always return false
-            }
-            else
-                return false;   // Not a pointer to a structured data-type
             return true;
         }
 
         public override Datatype resolveInFlow(PcodeOp op, int slot)
         {
-            if (ptrto.getMetatype() == type_metatype.TYPE_UNION)
-            {
-                Funcdata* fd = op.getParent().getFuncdata();
-                ResolvedUnion res = fd.getUnionField(this, op, slot);
+            if (ptrto.getMetatype() == type_metatype.TYPE_UNION) {
+                Funcdata fd = op.getParent().getFuncdata();
+                ResolvedUnion? res = fd.getUnionField(this, op, slot);
                 if (res != (ResolvedUnion)null)
                     return res.getDatatype();
                 ScoreUnionFields scoreFields = new ScoreUnionFields(*fd.getArch().types,this,op,slot);
@@ -287,10 +282,9 @@ namespace Sla.DECCORE
 
         public override Datatype findResolve(PcodeOp op, int slot)
         {
-            if (ptrto.getMetatype() == type_metatype.TYPE_UNION)
-            {
+            if (ptrto.getMetatype() == type_metatype.TYPE_UNION) {
                 Funcdata fd = op.getParent().getFuncdata();
-                ResolvedUnion res = fd.getUnionField(this, op, slot);
+                ResolvedUnion? res = fd.getUnionField(this, op, slot);
                 if (res != (ResolvedUnion)null)
                     return res.getDatatype();
             }

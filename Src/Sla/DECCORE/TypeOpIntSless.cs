@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpIntSless(TypeFactory t)
             : base(t, OpCode.CPUI_INT_SLESS,"<", type_metatype.TYPE_BOOL, type_metatype.TYPE_INT)
         {
-            opflags = PcodeOp::binary | PcodeOp::booloutput;
+            opflags = PcodeOp.Flags.binary | PcodeOp::booloutput;
             addlflags = inherits_sign;
             behave = new OpBehaviorIntSless();
         }

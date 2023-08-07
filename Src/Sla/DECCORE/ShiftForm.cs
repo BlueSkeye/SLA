@@ -167,10 +167,10 @@ namespace Sla.DECCORE
             if (!i.hasBothPieces()) return false;
             @in = i;
 
-            if (!verifyLeft(@@in.getHi(), @@in.getLo(), loop))
+            if (!verifyLeft(@in.getHi(), @in.getLo(), loop))
                 return false;
 
-            @out.initPartial(@@in.getSize(), reslo, reshi);
+            @out.initPartial(@in.getSize(), reslo, reshi);
             existop = SplitVarnode::prepareShiftOp(@out, @in);
             if (existop == (PcodeOp)null)
                 return false;
@@ -184,10 +184,10 @@ namespace Sla.DECCORE
             if (!i.hasBothPieces()) return false;
             @in = i;
 
-            if (!verifyRight(@@in.getHi(), @@in.getLo(), hiop))
+            if (!verifyRight(@in.getHi(), @in.getLo(), hiop))
                 return false;
 
-            @out.initPartial(@@in.getSize(), reslo, reshi);
+            @out.initPartial(@in.getSize(), reslo, reshi);
             existop = SplitVarnode::prepareShiftOp(@out, @in);
             if (existop == (PcodeOp)null)
                 return false;

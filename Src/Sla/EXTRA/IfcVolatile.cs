@@ -25,7 +25,7 @@ namespace Sla.EXTRA
             if (size == 0)
                 throw new IfaceExecutionError("Must specify a size");
             CORE.Range range = new CORE.Range(addr.getSpace(), addr.getOffset(), addr.getOffset() +(size - 1));
-            dcp.conf.symboltab.setPropertyRange(Varnode::volatil, range);
+            dcp.conf.symboltab.setPropertyRange(Varnode.varnode_flags.volatil, range);
 
             *status.optr << "Successfully marked range as volatile" << endl;
         }

@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpPiece(TypeFactory t)
             : base(t, OpCode.CPUI_PIECE,"CONCAT", type_metatype.TYPE_UNKNOWN, type_metatype.TYPE_UNKNOWN)
         {
-            opflags = PcodeOp::binary;
+            opflags = PcodeOp.Flags.binary;
             behave = new OpBehaviorPiece();
         }
 

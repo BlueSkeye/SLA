@@ -14,7 +14,7 @@ namespace Sla.DECCORE
         public TypeOpNew(TypeFactory t)
             : base(t, OpCode.CPUI_NEW,"new")
         {
-            opflags = PcodeOp::special | PcodeOp::call | PcodeOp::nocollapse;
+            opflags = PcodeOp.Flags.special | PcodeOp::call | PcodeOp.Flags.nocollapse;
             behave = new OpBehavior(CPUI_NEW, false, true);     // Dummy behavior
         }
 

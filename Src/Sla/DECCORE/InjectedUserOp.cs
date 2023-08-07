@@ -1,9 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -17,7 +12,7 @@ namespace Sla.DECCORE
     {
         private uint injectid;         ///< The id of the injection object (to which this op maps)
         
-        public InjectedUserOp(Architecture g, string nm,int ind, int injid)
+        public InjectedUserOp(Architecture g, string nm,int ind, uint injid)
             : base(g, nm, ind)
         {
             injectid = injid;
@@ -26,16 +21,16 @@ namespace Sla.DECCORE
         /// Get the id of the injection object
         public uint getInjectId() => injectid;
     
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
-            injectid = glb.pcodeinjectlib.decodeInject("userop", "", InjectPayload.InjectionType.CALLOTHERFIXUP_TYPE, decoder);
+            injectid = (uint)glb.pcodeinjectlib.decodeInject("userop", "", InjectPayload.InjectionType.CALLOTHERFIXUP_TYPE, decoder);
             name = glb.pcodeinjectlib.getCallOtherTarget(injectid);
-            UserPcodeOp * base = glb.userops.getOp(name);
+            UserPcodeOp? @base = glb.userops.getOp(name);
             // This tag overrides the base functionality of a userop
             // so the core userop name and index may already be defined
-            if (base == (UserPcodeOp*)0)
+            if (@base == (UserPcodeOp)null)
                 throw new LowlevelError("Unknown userop name in <callotherfixup>: " + name);
-            if (dynamic_cast<UnspecializedPcodeOp*>(base) == (UnspecializedPcodeOp*)0)  // Make sure the userop isn't used for some other purpose
+            if ((@base as UnspecializedPcodeOp) == (UnspecializedPcodeOp)null)  // Make sure the userop isn't used for some other purpose
                 throw new LowlevelError("<callotherfixup> overloads userop with another purpose: " + name);
             useropindex = @base.getIndex(); // Get the index from the core userop
         }

@@ -33,7 +33,7 @@ namespace Sla.DECCORE
         public override int applyOp(PcodeOp op, Funcdata data)
         {
             SegmentOp* segdef = data.getArch().userops.getSegmentOp(op.getIn(0).getSpaceFromConst().getIndex());
-            if (segdef == (SegmentOp*)0)
+            if (segdef == (SegmentOp)null)
                 throw new LowlevelError("Segment operand missing definition");
 
             Varnode* vn1 = op.getIn(1);

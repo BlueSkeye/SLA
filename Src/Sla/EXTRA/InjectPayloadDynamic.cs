@@ -30,7 +30,7 @@ namespace Sla.EXTRA
 
         public void decodeEntry(Decoder decoder)
         {
-            Address addr = Address::decode(decoder);
+            Address addr = Address.decode(decoder);
             uint subId = decoder.openElement(ElementId.ELEM_PAYLOAD);
             istringstream s = new istringstream(decoder.readString(AttributeId.ATTRIB_CONTENT));
             try
@@ -55,7 +55,7 @@ namespace Sla.EXTRA
             Element el = (*eiter).second.getRoot();
             XmlDecode decoder(glb.translate, el);
             uint rootId = decoder.openElement(ElementId.ELEM_INST);
-            Address addr = Address::decode(decoder);
+            Address addr = Address.decode(decoder);
             while (decoder.peekElement() != 0)
                 emit.decodeOp(addr, decoder);
             decoder.closeElement(rootId);

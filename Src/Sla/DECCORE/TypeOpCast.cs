@@ -13,7 +13,7 @@ namespace Sla.DECCORE
             : base(t, OpCode.CPUI_CAST,"(cast)")
 
         {
-            opflags = PcodeOp::unary | PcodeOp::special | PcodeOp::nocollapse;
+            opflags = PcodeOp.Flags.unary | PcodeOp.Flags.special | PcodeOp.Flags.nocollapse;
             behave = new OpBehavior(CPUI_CAST, false, true); // Dummy behavior
         }
 

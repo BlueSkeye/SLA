@@ -185,7 +185,7 @@ namespace Sla.DECCORE
         public bool isSizeTypeLocked() => ((dispflags & size_typelock)!= 0);
 
         /// Is the Symbol volatile
-        public bool isVolatile() => ((flags & Varnode::volatil)!= 0);
+        public bool isVolatile() => ((flags & Varnode.varnode_flags.volatil)!= 0);
 
         /// Is \b this the "this" pointer
         public bool isThisPointer() => ((dispflags & is_this_ptr)!= 0);
@@ -348,9 +348,9 @@ namespace Sla.DECCORE
                 encoder.writeBool(AttributeId.ATTRIB_NAMELOCK, true);
             if ((flags & Varnode.varnode_flags.typelock) != 0)
                 encoder.writeBool(AttributeId.ATTRIB_TYPELOCK, true);
-            if ((flags & Varnode::@readonly)!= 0)
+            if ((flags & Varnode.varnode_flags.@readonly)!= 0)
                 encoder.writeBool(AttributeId.ATTRIB_READONLY, true);
-            if ((flags & Varnode::volatil) != 0)
+            if ((flags & Varnode.varnode_flags.volatil) != 0)
                 encoder.writeBool(AttributeId.ATTRIB_VOLATILE, true);
             if ((flags & Varnode::indirectstorage) != 0)
                 encoder.writeBool(AttributeId.ATTRIB_INDIRECTSTORAGE, true);
@@ -426,7 +426,7 @@ namespace Sla.DECCORE
                 }
                 else if (attribId == AttributeId.ATTRIB_VOLATILE) {
                     if (decoder.readBool())
-                        flags |= Varnode::volatil;
+                        flags |= Varnode.varnode_flags.volatil;
                 }
                 else if (attribId == AttributeId.ATTRIB_LABEL) {
                     displayName = decoder.readString();

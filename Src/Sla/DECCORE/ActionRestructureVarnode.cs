@@ -29,7 +29,7 @@ namespace Sla.DECCORE
             {
                 PcodeOp* curOp = curVn.getDef();
                 uint evalType = curOp.getEvalType();
-                if ((evalType & (PcodeOp::binary | PcodeOp::ternary)) != 0)
+                if ((evalType & (PcodeOp.Flags.binary | PcodeOp::ternary)) != 0)
                 {
                     if (curOp.numInput() > 1)
                     {
@@ -37,7 +37,7 @@ namespace Sla.DECCORE
                     }
                     curVn = curOp.getIn(0);
                 }
-                else if ((evalType & PcodeOp::unary) != 0)
+                else if ((evalType & PcodeOp.Flags.unary) != 0)
                     curVn = curOp.getIn(0);
                 else if (curOp.code() == OpCode.CPUI_INDIRECT)
                 {

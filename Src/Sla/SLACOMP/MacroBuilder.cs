@@ -56,10 +56,10 @@ namespace Sla.SLACOMP
             for (int i = 0; i < op.numInput(); ++i)
             {
                 VarnodeTpl* vn = op.getIn(i);
-                if (vn.getOffset().getType() == ConstTpl::handle)
+                if (vn.getOffset().getType() == ConstTpl.const_type.handle)
                 {
                     handleIndex = vn.getOffset().getHandleIndex();
-                    hasrealsize = (vn.getSize().getType() == ConstTpl::real);
+                    hasrealsize = (vn.getSize().getType() == ConstTpl.const_type.real);
                     realsize = vn.getSize().getReal();
                 }
                 plus = vn.transfer(@params);
@@ -74,14 +74,14 @@ namespace Sla.SLACOMP
 
                     // Generate a SUBPIECE op that implements the offset_plus
                     OpTpl* subpieceop = new OpTpl(CPUI_SUBPIECE);
-                    VarnodeTpl* newvn = new VarnodeTpl(ConstTpl(slgh.getUniqueSpace()), ConstTpl(ConstTpl::real, newtemp),
-                                   ConstTpl(ConstTpl::real, realsize));
+                    VarnodeTpl* newvn = new VarnodeTpl(ConstTpl(slgh.getUniqueSpace()), ConstTpl(ConstTpl.const_type.real, newtemp),
+                                   ConstTpl(ConstTpl.const_type.real, realsize));
                     subpieceop.setOutput(newvn);
                     HandleTpl* hand = @params[handleIndex];
                     VarnodeTpl* origvn = new VarnodeTpl(hand.getSpace(), hand.getPtrOffset(), hand.getSize());
                     subpieceop.addInput(origvn);
-                    VarnodeTpl* plusvn = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl::real, plus),
-                                     ConstTpl(ConstTpl::real, 4));
+                    VarnodeTpl* plusvn = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl.const_type.real, plus),
+                                     ConstTpl(ConstTpl.const_type.real, 4));
                     subpieceop.addInput(plusvn);
                     outvec.Add(subpieceop);
 

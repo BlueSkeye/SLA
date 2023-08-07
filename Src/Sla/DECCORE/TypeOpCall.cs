@@ -12,7 +12,7 @@ namespace Sla.DECCORE
     {
         public TypeOpCall(TypeFactory t)
         {
-            opflags = (PcodeOp::special | PcodeOp::call | PcodeOp::has_callspec | PcodeOp::coderef | PcodeOp::nocollapse);
+            opflags = (PcodeOp.Flags.special | PcodeOp::call | PcodeOp::has_callspec | PcodeOp::coderef | PcodeOp.Flags.nocollapse);
             behave = new OpBehavior(CPUI_CALL, false, true); // Dummy behavior
         }
 
@@ -59,7 +59,7 @@ namespace Sla.DECCORE
             // to the varnode in the same slot, but this is easiest until
             // we get giant sized parameters working properly
             ProtoParameter* param = fc.getParam(slot - 1);
-            if (param != (ProtoParameter*)0)
+            if (param != (ProtoParameter)null)
             {
                 if (param.isTypeLocked())
                 {

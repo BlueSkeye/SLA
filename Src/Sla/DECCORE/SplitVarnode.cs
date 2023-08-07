@@ -25,13 +25,13 @@ namespace Sla.DECCORE
         /// Least significant piece of the double precision object
         private Varnode lo;
         /// Most significant piece of the double precision object
-        private Varnode hi;
+        private Varnode? hi;
         /// A representative of the whole object
         private Varnode? whole;
         /// Operation at which both \b lo and \b hi are defined
-        private PcodeOp defpoint;
+        private PcodeOp? defpoint;
         /// Block in which both \b lo and \b hi are defined
-        private BlockBasic defblock;
+        private BlockBasic? defblock;
         /// Value of a double precision constant
         private ulong val;
         /// Size in bytes of the (virtual) whole
@@ -44,31 +44,30 @@ namespace Sla.DECCORE
         /// \return \b true if the \b whole Varnode is found
         private bool findWholeSplitToPieces()
         {
-            if (whole == (Varnode)null)
-            {
+            if (whole == (Varnode)null) {
                 if (hi == (Varnode)null) return false;
                 if (lo == (Varnode)null) return false;
                 if (!hi.isWritten()) return false;
-                PcodeOp* subhi = hi.getDef();
+                PcodeOp subhi = hi.getDef() ?? throw new BugException();
                 if (subhi.code() == OpCode.CPUI_COPY)
                 { // Go thru one level of copy, if the piece is addrtied
-                    Varnode* otherhi = subhi.getIn(0);
+                    Varnode otherhi = subhi.getIn(0);
                     if (!otherhi.isWritten()) return false;
-                    subhi = otherhi.getDef();
+                    subhi = otherhi.getDef() ?? throw new BugException();
                 }
                 if (subhi.code() != OpCode.CPUI_SUBPIECE) return false;
                 if (subhi.getIn(1).getOffset() != wholesize - hi.getSize()) return false;
                 whole = subhi.getIn(0);
                 if (!lo.isWritten()) return false;
-                PcodeOp* sublo = lo.getDef();
+                PcodeOp sublo = lo.getDef() ?? throw new BugException();
                 if (sublo.code() == OpCode.CPUI_COPY)
                 { // Go thru one level of copy, if the piece is addrtied
-                    Varnode* otherlo = sublo.getIn(0);
+                    Varnode otherlo = sublo.getIn(0);
                     if (!otherlo.isWritten()) return false;
-                    sublo = otherlo.getDef();
+                    sublo = otherlo.getDef() ?? throw new BugException();
                 }
                 if (sublo.code() != OpCode.CPUI_SUBPIECE) return false;
-                Varnode* res = sublo.getIn(0);
+                Varnode res = sublo.getIn(0);
                 if (whole == (Varnode)null)
                     whole = res;
                 else if (whole != res)
@@ -100,7 +99,7 @@ namespace Sla.DECCORE
         /// \return \b true if the definition point is located
         private bool findDefinitionPoint()
         {
-            PcodeOp* lastop;
+            PcodeOp lastop;
             if (hi != (Varnode)null && hi.isConstant()) return false; // If one but not both is constant
             if (lo.isConstant()) return false;
             if (hi == (Varnode)null)
@@ -121,15 +120,15 @@ namespace Sla.DECCORE
             else if (hi.isWritten())
             {
                 if (!lo.isWritten()) return false;     // Do not allow mixed input/non-input pairs
-                lastop = hi.getDef();
+                lastop = hi.getDef() ?? throw new BugException();
                 defblock = lastop.getParent();
-                PcodeOp* lastop2 = lo.getDef();
-                BlockBasic* otherblock = lastop2.getParent();
+                PcodeOp lastop2 = lo.getDef() ?? throw new BugException();
+                BlockBasic otherblock = lastop2.getParent();
                 if (defblock != otherblock)
                 {
                     defpoint = lastop;
-                    FlowBlock* curbl = defblock;
-                    while (curbl != (FlowBlock*)0)
+                    FlowBlock? curbl = defblock;
+                    while (curbl != (FlowBlock)null)
                     { // Make sure defblock dominated by otherblock
                         curbl = curbl.getImmedDom();
                         if (curbl == otherblock) return true;
@@ -138,7 +137,7 @@ namespace Sla.DECCORE
                     otherblock = lastop.getParent();
                     defpoint = lastop2;
                     curbl = defblock;
-                    while (curbl != (FlowBlock*)0)
+                    while (curbl != (FlowBlock)null)
                     {
                         curbl = curbl.getImmedDom();
                         if (curbl == otherblock) return true;
@@ -174,7 +173,7 @@ namespace Sla.DECCORE
             PcodeOp res = (PcodeOp)null;
             BlockBasic? bb;
             if (lo.isWritten())
-                bb = lo.getDef().getParent();
+                bb = (lo.getDef() ?? throw new BugException()).getParent();
             else if (lo.isInput())
                 bb = (BlockBasic)null;
             else
@@ -312,23 +311,17 @@ namespace Sla.DECCORE
         {
             if (!h.isPrecisHi()) return false; // Check for mark, in order to have quick -false- in most cases
                                                 // Search for the companion
-            if (h.isWritten())
-            {
-                PcodeOp* op = h.getDef();
+            if (h.isWritten()) {
+                PcodeOp op = h.getDef() ?? throw new BugException();
                 // We could check for double loads here
-                if (op.code() == OpCode.CPUI_SUBPIECE)
-                {
-                    Varnode* w = op.getIn(0);
+                if (op.code() == OpCode.CPUI_SUBPIECE) {
+                    Varnode w = op.getIn(0);
                     if (op.getIn(1).getOffset() != (ulong)(w.getSize() - h.getSize())) return false;
-                    list<PcodeOp*>::const_iterator iter, enditer;
-                    iter = w.beginDescend();
-                    enditer = w.endDescend();
-                    while (iter != enditer)
-                    {
-                        PcodeOp* tmpop = *iter;
-                        ++iter;
+                    IEnumerator<PcodeOp> iter = w.beginDescend();
+                    while (iter.MoveNext()) {
+                        PcodeOp tmpop = iter.Current;
                         if (tmpop.code() != OpCode.CPUI_SUBPIECE) continue;
-                        Varnode* tmplo = tmpop.getOut();
+                        Varnode tmplo = tmpop.getOut() ?? throw new BugException();
                         if (!tmplo.isPrecisLo()) continue;
                         if (tmplo.getSize() + h.getSize() != w.getSize()) continue;
                         if (tmpop.getIn(1).getOffset() != 0) continue;
@@ -350,23 +343,17 @@ namespace Sla.DECCORE
         {
             if (!l.isPrecisLo()) return false; // Check for mark, in order to have quick -false- in most cases
                                                 // Search for the companion
-            if (l.isWritten())
-            {
-                PcodeOp* op = l.getDef();
+            if (l.isWritten()) {
+                PcodeOp op = l.getDef() ?? throw new BugException();
                 // We could check for double loads here
-                if (op.code() == OpCode.CPUI_SUBPIECE)
-                {
-                    Varnode* w = op.getIn(0);
+                if (op.code() == OpCode.CPUI_SUBPIECE) {
+                    Varnode w = op.getIn(0);
                     if (op.getIn(1).getOffset() != 0) return false;
-                    list<PcodeOp*>::const_iterator iter, enditer;
-                    iter = w.beginDescend();
-                    enditer = w.endDescend();
-                    while (iter != enditer)
-                    {
-                        PcodeOp* tmpop = *iter;
-                        ++iter;
+                    IEnumerator<PcodeOp> iter = w.beginDescend();
+                    while (iter.MoveNext()) {
+                        PcodeOp tmpop = iter.Current;
                         if (tmpop.code() != OpCode.CPUI_SUBPIECE) continue;
-                        Varnode* tmphi = tmpop.getOut();
+                        Varnode tmphi = tmpop.getOut() ?? throw new BugException();
                         if (!tmphi.isPrecisHi()) continue;
                         if (tmphi.getSize() + l.getSize() != w.getSize()) continue;
                         if (tmpop.getIn(1).getOffset() != (ulong)l.getSize()) continue;
@@ -390,20 +377,16 @@ namespace Sla.DECCORE
         {
             if (!l.isPrecisLo()) return false;
             if (!l.isWritten()) return false;
-            PcodeOp* op = l.getDef();
+            PcodeOp op = l.getDef() ?? throw new BugException();
             if (op.code() != OpCode.CPUI_SUBPIECE) return false;
             if (op.getIn(1).getOffset() != 0) return false;
-            Varnode* w = op.getIn(0);
+            Varnode w = op.getIn(0) ?? throw new BugException();
 
-            list<PcodeOp*>::const_iterator iter, enditer;
-            iter = w.beginDescend();
-            enditer = w.endDescend();
-            while (iter != enditer)
-            {
-                PcodeOp* tmpop = *iter;
-                ++iter;
+            IEnumerator<PcodeOp> iter = w.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp tmpop = iter.Current;
                 if (tmpop.code() != OpCode.CPUI_SUBPIECE) continue;
-                Varnode* tmphi = tmpop.getOut();
+                Varnode tmphi = tmpop.getOut() ?? throw new BugException();
                 if (!tmphi.isPrecisHi()) continue;
                 if (tmphi.getSize() + l.getSize() != w.getSize()) continue;
                 if (tmpop.getIn(1).getOffset() != (ulong)l.getSize()) continue;
@@ -475,7 +458,7 @@ namespace Sla.DECCORE
         public bool isConstant() => (lo == null);
 
         /// Return \b true if both pieces are initialized
-        public bool hasBothPieces() => ((hi!=null)&&(lo!=null));
+        public bool hasBothPieces() => ((hi != null) && (lo != null));
 
         /// Get the size of \b this SplitVarnode as a whole in bytes
         public int getSize() => wholesize;
@@ -509,19 +492,17 @@ namespace Sla.DECCORE
             if (isConstant()) return true;
             if ((lo != (Varnode)null) && (hi != (Varnode)null))
                 if (lo.isConstant() != hi.isConstant()) return false; // Mixed constant/non-constant
-            if (!findWholeSplitToPieces())
-            {
-                if (!findWholeBuiltFromPieces())
-                {
+            if (!findWholeSplitToPieces()) {
+                if (!findWholeBuiltFromPieces()) {
                     if (!findDefinitionPoint())
                         return false;
                 }
             }
             if (defblock == (BlockBasic)null) return true;
-            FlowBlock* curbl = existop.getParent();
+            FlowBlock curbl = existop.getParent() ?? throw new BugException();
             if (curbl == defblock)  // If defined in same block as -existop- check PcodeOp ordering
                 return (defpoint.getSeqNum().getOrder() <= existop.getSeqNum().getOrder());
-            while (curbl != (FlowBlock*)0)
+            while (curbl != (FlowBlock)null)
             { // Make sure defbock dominates block containing -existop-
                 curbl = curbl.getImmedDom();
                 if (curbl == defblock) return true;
@@ -537,10 +518,8 @@ namespace Sla.DECCORE
         public bool isWholePhiFeasible(FlowBlock bl)
         {
             if (isConstant()) return false;
-            if (!findWholeSplitToPieces())
-            {
-                if (!findWholeBuiltFromPieces())
-                {
+            if (!findWholeSplitToPieces()) {
+                if (!findWholeBuiltFromPieces()) {
                     if (!findDefinitionPoint())
                         return false;
                 }
@@ -548,8 +527,8 @@ namespace Sla.DECCORE
             if (defblock == (BlockBasic)null) return true;
             if (bl == defblock) // If defined in same block
                 return true;
-            while (bl != (FlowBlock*)0)
-            { // Make sure defblock dominates block containing -existop-
+            while (bl != (FlowBlock)null) {
+                // Make sure defblock dominates block containing -existop-
                 bl = bl.getImmedDom();
                 if (bl == defblock) return true;
             }
@@ -564,13 +543,11 @@ namespace Sla.DECCORE
         /// \param data is the function owning the Varnode pieces
         public void findCreateWhole(Funcdata data)
         {
-            if (isConstant())
-            {
+            if (isConstant()) {
                 whole = data.newConstant(wholesize, val);
                 return;
             }
-            else
-            {
+            else {
                 if (lo != (Varnode)null)
                     lo.setPrecisLo();      // Mark the pieces
                 if (hi != (Varnode)null)
@@ -578,20 +555,19 @@ namespace Sla.DECCORE
             }
 
             if (whole != (Varnode)null) return; // Already found the whole
-            PcodeOp* concatop;
+            PcodeOp concatop;
             Address addr;
-            BlockBasic* topblock = (BlockBasic)null;
+            BlockBasic topblock = (BlockBasic)null;
 
             if (defblock != (BlockBasic)null)
                 addr = defpoint.getAddr();
             else
             {
-                topblock = (BlockBasic*)data.getBasicBlocks().getStartBlock();
+                topblock = (BlockBasic)data.getBasicBlocks().getStartBlock();
                 addr = topblock.getStart();
             }
 
-            if (hi != (Varnode)null)
-            {
+            if (hi != (Varnode)null) {
                 concatop = data.newOp(2, addr);
                 // Do we need to pick something other than a unique????
                 whole = data.newUniqueOut(wholesize, concatop);
@@ -600,8 +576,7 @@ namespace Sla.DECCORE
                 data.opSetInput(concatop, hi, 0);
                 data.opSetInput(concatop, lo, 1);
             }
-            else
-            {
+            else {
                 concatop = data.newOp(1, addr);
                 whole = data.newUniqueOut(wholesize, concatop);
                 data.opSetOpcode(concatop, OpCode.CPUI_INT_ZEXT);
@@ -623,7 +598,8 @@ namespace Sla.DECCORE
         /// The new Varnode must later be set explicitly as the output of some PcodeOp.
         /// \param data is the function owning the Varnode pieces
         public void findCreateOutputWhole(Funcdata data)
-        { // Create the actual -whole- varnode
+        {
+            // Create the actual -whole- varnode
             lo.setPrecisLo();      // Mark the pieces
             hi.setPrecisHi();
             if (whole != (Varnode)null) return;
@@ -640,10 +616,9 @@ namespace Sla.DECCORE
             hi.setPrecisHi();
             if (whole != (Varnode)null) return;
             Address newaddr;
-            if (!isAddrTiedContiguous(lo, hi, newaddr))
-            {
-                newaddr = data.getArch().constructJoinAddress(data.getArch().translate, hi.getAddr(), hi.getSize(),
-                                                    lo.getAddr(), lo.getSize());
+            if (!isAddrTiedContiguous(lo, hi, newaddr)) {
+                newaddr = data.getArch().constructJoinAddress(data.getArch().translate, hi.getAddr(),
+                    hi.getSize(), lo.getAddr(), lo.getSize());
             }
             whole = data.newVarnode(wholesize, newaddr);
             whole.setWriteMask();
@@ -655,27 +630,25 @@ namespace Sla.DECCORE
         /// The method findCreateOutputWhole() must already have been called on \b this.
         public void buildLoFromWhole(Funcdata data)
         {
-            PcodeOp* loop = lo.getDef();
+            PcodeOp? loop = lo.getDef();
             if (loop == (PcodeOp)null)
                 throw new LowlevelError("Building low piece that was originally undefined");
 
-            List<Varnode*> inlist;
+            List<Varnode> inlist = new List<Varnode>();
             inlist.Add(whole);
             inlist.Add(data.newConstant(4, 0));
-            if (loop.code() == OpCode.CPUI_MULTIEQUAL)
-            {
+            if (loop.code() == OpCode.CPUI_MULTIEQUAL) {
                 // When converting the MULTIEQUAL to a SUBPIECE, we need to reinsert the op so that we don't
                 // get a break in the sequence of MULTIEQUALs at the beginning of the block
-                BlockBasic* bl = loop.getParent();
+                BlockBasic bl = loop.getParent();
                 data.opUninsert(loop);
                 data.opSetOpcode(loop, OpCode.CPUI_SUBPIECE);
                 data.opSetAllInput(loop, inlist);
                 data.opInsertBegin(loop, bl);
             }
-            else if (loop.code() == OpCode.CPUI_INDIRECT)
-            {
+            else if (loop.code() == OpCode.CPUI_INDIRECT) {
                 // When converting an INDIRECT to a SUBPIECE, we need to reinsert the op AFTER the affector
-                PcodeOp* affector = PcodeOp::getOpFromConst(loop.getIn(1).getAddr());
+                PcodeOp affector = PcodeOp.getOpFromConst(loop.getIn(1).getAddr());
                 if (!affector.isDead())
                     data.opUninsert(loop);
                 data.opSetOpcode(loop, OpCode.CPUI_SUBPIECE);
@@ -683,8 +656,7 @@ namespace Sla.DECCORE
                 if (!affector.isDead())
                     data.opInsertAfter(loop, affector);
             }
-            else
-            {
+            else {
                 data.opSetOpcode(loop, OpCode.CPUI_SUBPIECE);
                 data.opSetAllInput(loop, inlist);
             }
@@ -696,27 +668,25 @@ namespace Sla.DECCORE
         /// The method findCreateOutputWhole() must already have been called on \b this.
         public void buildHiFromWhole(Funcdata data)
         {
-            PcodeOp* hiop = hi.getDef();
+            PcodeOp? hiop = hi.getDef();
             if (hiop == (PcodeOp)null)
                 throw new LowlevelError("Building low piece that was originally undefined");
 
-            List<Varnode*> inlist;
+            List<Varnode> inlist = new List<Varnode>();
             inlist.Add(whole);
             inlist.Add(data.newConstant(4, lo.getSize()));
-            if (hiop.code() == OpCode.CPUI_MULTIEQUAL)
-            {
+            if (hiop.code() == OpCode.CPUI_MULTIEQUAL) {
                 // When converting the MULTIEQUAL to a SUBPIECE, we need to reinsert the op so that we don't
                 // get a break in the sequence of MULTIEQUALs at the beginning of the block
-                BlockBasic* bl = hiop.getParent();
+                BlockBasic bl = hiop.getParent();
                 data.opUninsert(hiop);
                 data.opSetOpcode(hiop, OpCode.CPUI_SUBPIECE);
                 data.opSetAllInput(hiop, inlist);
                 data.opInsertBegin(hiop, bl);
             }
-            else if (hiop.code() == OpCode.CPUI_INDIRECT)
-            {
+            else if (hiop.code() == OpCode.CPUI_INDIRECT) {
                 // When converting the INDIRECT to a SUBPIECE, we need to reinsert AFTER the affector
-                PcodeOp* affector = PcodeOp::getOpFromConst(hiop.getIn(1).getAddr());
+                PcodeOp affector = PcodeOp.getOpFromConst(hiop.getIn(1).getAddr());
                 if (!affector.isDead())
                     data.opUninsert(hiop);
                 data.opSetOpcode(hiop, OpCode.CPUI_SUBPIECE);
@@ -724,8 +694,7 @@ namespace Sla.DECCORE
                 if (!affector.isDead())
                     data.opInsertAfter(hiop, affector);
             }
-            else
-            {
+            else {
                 data.opSetOpcode(hiop, OpCode.CPUI_SUBPIECE);
                 data.opSetAllInput(hiop, inlist);
             }
@@ -739,8 +708,8 @@ namespace Sla.DECCORE
         {
             if (!hi.isWritten()) return (PcodeOp)null;
             if (!lo.isWritten()) return (PcodeOp)null;
-            PcodeOp* hiop = hi.getDef();
-            PcodeOp* loop = lo.getDef();
+            PcodeOp hiop = hi.getDef() ?? throw new BugException();
+            PcodeOp loop = lo.getDef() ?? throw new BugException();
             if (loop.getParent() != hiop.getParent())
                 return (PcodeOp)null;
             return (loop.getSeqNum().getOrder() < hiop.getSeqNum().getOrder()) ? loop : hiop;
@@ -753,11 +722,7 @@ namespace Sla.DECCORE
         /// \return the first PcodeOp where the \b whole needs to exist or null
         public PcodeOp findOutExist()
         {
-            if (findWholeBuiltFromPieces())
-            {
-                return defpoint;
-            }
-            return findEarliestSplitPoint();
+            return (findWholeBuiltFromPieces()) ? defpoint : findEarliestSplitPoint();
         }
 
         /// \brief Check if the values in the given Varnodes differ by the given size
@@ -771,14 +736,13 @@ namespace Sla.DECCORE
         /// \return \b true if the values in \b vn1 and \b vn2 are related by the given size
         public static bool adjacentOffsets(Varnode vn1, Varnode vn2, ulong size1)
         {
-            if (vn1.isConstant())
-            {
+            if (vn1.isConstant()) {
                 if (!vn2.isConstant()) return false;
                 return ((vn1.getOffset() + size1) == vn2.getOffset());
             }
 
             if (!vn2.isWritten()) return false;
-            PcodeOp* op2 = vn2.getDef();
+            PcodeOp op2 = vn2.getDef();
             if (op2.code() != OpCode.CPUI_INT_ADD) return false;
             if (!op2.getIn(1).isConstant()) return false;
             ulong c2 = op2.getIn(1).getOffset();
@@ -787,7 +751,7 @@ namespace Sla.DECCORE
                 return (size1 == c2);
 
             if (!vn1.isWritten()) return false;
-            PcodeOp* op1 = vn1.getDef();
+            PcodeOp op1 = vn1.getDef();
             if (op1.code() != OpCode.CPUI_INT_ADD) return false;
             if (!op1.getIn(1).isConstant()) return false;
             ulong c1 = op1.getIn(1).getOffset();
@@ -817,17 +781,16 @@ namespace Sla.DECCORE
             spc = least.getIn(0).getSpaceFromConst();
             if (most.getIn(0).getSpaceFromConst() != spc) return false;
 
-            if (spc.isBigEndian())
-            {   // Convert significance order to address order
+            if (spc.isBigEndian()) {
+                // Convert significance order to address order
                 first = most;
                 second = least;
             }
-            else
-            {
+            else {
                 first = least;
                 second = most;
             }
-            Varnode* firstptr = first.getIn(1);
+            Varnode firstptr = first.getIn(1);
             if (firstptr.isFree()) return false;
             int sizeres;
             if (first.code() == OpCode.CPUI_LOAD)
@@ -853,27 +816,24 @@ namespace Sla.DECCORE
             if (!hi.isAddrTied()) return false;
 
             // Make sure there is no explicit symbol that would prevent the pieces from being joined
-            SymbolEntry* entryLo = lo.getSymbolEntry();
-            SymbolEntry* entryHi = hi.getSymbolEntry();
-            if (entryLo != (SymbolEntry)null || entryHi != (SymbolEntry)null)
-            {
+            SymbolEntry? entryLo = lo.getSymbolEntry();
+            SymbolEntry? entryHi = hi.getSymbolEntry();
+            if (entryLo != (SymbolEntry)null || entryHi != (SymbolEntry)null) {
                 if (entryLo == (SymbolEntry)null || entryHi == (SymbolEntry)null)
                     return false;       // One is marked with a symbol, the other is not
                 if (entryLo.getSymbol() != entryHi.getSymbol())
                     return false;       // They are part of different symbols
             }
-            AddrSpace* spc = lo.getSpace();
+            AddrSpace spc = lo.getSpace() ?? throw new BugException();
             if (spc != hi.getSpace()) return false;
             ulong looffset = lo.getOffset();
             ulong hioffset = hi.getOffset();
-            if (spc.isBigEndian())
-            {
+            if (spc.isBigEndian()) {
                 if (hioffset >= looffset) return false;
                 if (hioffset + hi.getSize() != looffset) return false;
                 res = hi.getAddr();
             }
-            else
-            {
+            else {
                 if (looffset >= hioffset) return false;
                 if (looffset + lo.getSize() != hioffset) return false;
                 res = lo.getAddr();
@@ -965,16 +925,14 @@ namespace Sla.DECCORE
         public static void getTrueFalse(PcodeOp boolop, bool flip, out BlockBasic trueout,
             out BlockBasic falseout)
         {
-            BlockBasic* parent = boolop.getParent();
-            BlockBasic* trueblock = (BlockBasic*)parent.getTrueOut();
-            BlockBasic* falseblock = (BlockBasic*)parent.getFalseOut();
-            if (boolop.isBooleanFlip() != flip)
-            {
+            BlockBasic parent = boolop.getParent();
+            BlockBasic trueblock = (BlockBasic)parent.getTrueOut();
+            BlockBasic falseblock = (BlockBasic)parent.getFalseOut();
+            if (boolop.isBooleanFlip() != flip) {
                 trueout = falseblock;
                 falseout = trueblock;
             }
-            else
-            {
+            else {
                 trueout = trueblock;
                 falseout = falseblock;
             }
@@ -988,19 +946,15 @@ namespace Sla.DECCORE
         /// \return \b true if the parent basic block performs only the branch operation
         public static bool otherwiseEmpty(PcodeOp branchop)
         {
-            BlockBasic* bl = branchop.getParent();
+            BlockBasic bl = branchop.getParent();
             if (bl.sizeIn() != 1) return false;
-            PcodeOp* otherop = (PcodeOp)null;
-            Varnode* vn = branchop.getIn(1);
+            PcodeOp? otherop = (PcodeOp)null;
+            Varnode vn = branchop.getIn(1);
             if (vn.isWritten())
                 otherop = vn.getDef();
-            list<PcodeOp*>::const_iterator iter, enditer;
-            iter = bl.beginOp();
-            enditer = bl.endOp();
-            while (iter != enditer)
-            {
-                PcodeOp* op = *iter;
-                ++iter;
+            IEnumerator<PcodeOp> iter = bl.beginOp();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if (op == otherop) continue;
                 if (op == branchop) continue;
                 return false;
@@ -1016,7 +970,7 @@ namespace Sla.DECCORE
         public static bool verifyMultNegOne(PcodeOp op)
         {
             if (op.code() != OpCode.CPUI_INT_MULT) return false;
-            Varnode* in1 = op.getIn(1);
+            Varnode in1 = op.getIn(1) ?? throw new BugException();
             if (!in1.isConstant()) return false;
             if (in1.getOffset() != Globals.calc_mask(in1.getSize())) return false;
             return true;
@@ -1031,10 +985,10 @@ namespace Sla.DECCORE
         /// \param in1 is the first input of the binary operation
         /// \param in2 is the second input of the binary operation
         /// \return the first PcodeOp where the output whole must exist
-        public static PcodeOp prepareBinaryOp(SplitVarnode @out, SplitVarnode in1,
+        public static PcodeOp? prepareBinaryOp(SplitVarnode @out, SplitVarnode in1,
             SplitVarnode in2)
         {
-            PcodeOp* existop = @out.findOutExist(); // Find point where output whole needs to exist
+            PcodeOp? existop = @out.findOutExist(); // Find point where output whole needs to exist
             if (existop == (PcodeOp)null) return existop; // If we can find no such point return false;
             if (!in1.isWholeFeasible(existop)) return (PcodeOp)null;
             if (!in2.isWholeFeasible(existop)) return (PcodeOp)null;
@@ -1060,7 +1014,7 @@ namespace Sla.DECCORE
             in2.findCreateWhole(data);
             if (existop.code() != OpCode.CPUI_PIECE)
             { // If the output whole didn't previously exist
-                PcodeOp* newop = data.newOp(2, existop.getAddr()); // new op which creates the output whole
+                PcodeOp newop = data.newOp(2, existop.getAddr()); // new op which creates the output whole
                 data.opSetOpcode(newop, opc);
                 data.opSetOutput(newop, @out.getWhole());
                 data.opSetInput(newop, in1.getWhole(), 0);
@@ -1069,8 +1023,8 @@ namespace Sla.DECCORE
                 @out.buildLoFromWhole(data);
                 @out.buildHiFromWhole(data);
             }
-            else
-            {           // The whole previously existed
+            else {
+                // The whole previously existed
                 data.opSetOpcode(existop, opc); // our new op replaces the op previously defining the output whole
                 data.opSetInput(existop, in1.getWhole(), 0);
                 data.opSetInput(existop, in2.getWhole(), 1);
@@ -1085,11 +1039,11 @@ namespace Sla.DECCORE
         /// \param out is the output of the double precision shift operation
         /// \param in is the (first) input operand of the double precision shift operation
         /// \return the PcodeOp where output whole must exist or null
-        public static PcodeOp prepareShiftOp(SplitVarnode @out, SplitVarnode @in)
+        public static PcodeOp? prepareShiftOp(SplitVarnode @out, SplitVarnode @in)
         {
             PcodeOp existop = @out.findOutExist(); // Find point where output whole needs to exist
             if (existop == (PcodeOp)null) return existop;
-            if (!@@in.isWholeFeasible(existop)) return (PcodeOp)null;
+            if (!@in.isWholeFeasible(existop)) return (PcodeOp)null;
             return existop;
         }
 
@@ -1109,24 +1063,24 @@ namespace Sla.DECCORE
             Varnode sa, PcodeOp existop, OpCode opc)
         {
             @out.findCreateOutputWhole(data);
-            @@in.findCreateWhole(data);
+            @in.findCreateWhole(data);
             if (sa.isConstant())
                 sa = data.newConstant(sa.getSize(), sa.getOffset());
             if (existop.code() != OpCode.CPUI_PIECE)
             { // If the output whole didn't previously exist
-                PcodeOp* newop = data.newOp(2, existop.getAddr());
+                PcodeOp newop = data.newOp(2, existop.getAddr());
                 data.opSetOpcode(newop, opc);
                 data.opSetOutput(newop, @out.getWhole());
-                data.opSetInput(newop, @@in.getWhole(), 0);
+                data.opSetInput(newop, @in.getWhole(), 0);
                 data.opSetInput(newop, sa, 1);
                 data.opInsertBefore(newop, existop);
                 @out.buildLoFromWhole(data);
                 @out.buildHiFromWhole(data);
             }
-            else
-            {           // The whole previously existed, we remake the defining op
+            else {
+                // The whole previously existed, we remake the defining op
                 data.opSetOpcode(existop, opc);
-                data.opSetInput(existop, @@in.getWhole(), 0);
+                data.opSetInput(existop, @in.getWhole(), 0);
                 data.opSetInput(existop, sa, 1);
             }
         }
@@ -1179,7 +1133,7 @@ namespace Sla.DECCORE
             PcodeOp addrop = cbranch;
             Varnode boolvn = cbranch.getIn(1);
             if (boolvn.isWritten())
-                addrop = boolvn.getDef();  // Use the address of the comparison operator
+                addrop = boolvn.getDef() ?? throw new BugException();  // Use the address of the comparison operator
             in1.findCreateWhole(data);
             in2.findCreateWhole(data);
             PcodeOp newop = data.newOp(2, addrop.getAddr());
@@ -1199,14 +1153,14 @@ namespace Sla.DECCORE
         /// \param out is the output of the MULTIEQUAL operation
         /// \param inlist is a List of the input operands to the MULTIEQUAL
         /// \return the first PcodeOp where the output whole must exist
-        public static PcodeOp preparePhiOp(SplitVarnode @out, List<SplitVarnode> inlist)
+        public static PcodeOp? preparePhiOp(SplitVarnode @out, List<SplitVarnode> inlist)
         {
-            PcodeOp* existop = @out.findEarliestSplitPoint(); // Point where output whole needs to exist
+            PcodeOp? existop = @out.findEarliestSplitPoint(); // Point where output whole needs to exist
             if (existop == (PcodeOp)null) return existop;
             // existop should always be a MULTIEQUAL defining one of the pieces
             if (existop.code() != OpCode.CPUI_MULTIEQUAL)
                 throw new LowlevelError("Trying to create phi-node double precision op with phi-node pieces");
-            BlockBasic* bl = existop.getParent();
+            BlockBasic bl = existop.getParent();
             int numin = inlist.size();
             for (int i = 0; i < numin; ++i)
                 if (!inlist[i].isWholePhiFeasible(bl.getIn(i)))
@@ -1223,7 +1177,7 @@ namespace Sla.DECCORE
         /// \param out is the output of the MULTIEQUAL operation
         /// \param inlist is the list of input operands to the MULTIEQUAL
         /// \param existop is the precalculated PcodeOp where the output whole Varnode must exist
-        public static void createPhiOp(Funcdata data, out SplitVarnode @out,
+        public static void createPhiOp(Funcdata data, SplitVarnode @out,
             List<SplitVarnode> inlist, PcodeOp existop)
         {
             // Unlike replaceBoolOp, we MUST create a newop even if the output whole already exists
@@ -1233,7 +1187,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < numin; ++i)
                 inlist[i].findCreateWhole(data);
 
-            PcodeOp* newop = data.newOp(numin, existop.getAddr());
+            PcodeOp newop = data.newOp(numin, existop.getAddr());
             data.opSetOpcode(newop, OpCode.CPUI_MULTIEQUAL);
             data.opSetOutput(newop, @out.getWhole());
             for (int i = 0; i < numin; ++i)
@@ -1252,7 +1206,7 @@ namespace Sla.DECCORE
         public static bool prepareIndirectOp(SplitVarnode @in, PcodeOp affector)
         {
             // We already have the exist point, -indop-
-            return @@in.isWholeFeasible(affector);
+            return @in.isWholeFeasible(affector);
         }
 
         /// \brief Rewrite a double precision INDIRECT operation by replacing the pieces with unified Varnodes
@@ -1269,11 +1223,11 @@ namespace Sla.DECCORE
         {
             @out.createJoinedWhole(data);
 
-            @@in.findCreateWhole(data);
-            PcodeOp* newop = data.newOp(2, affector.getAddr());
+            @in.findCreateWhole(data);
+            PcodeOp newop = data.newOp(2, affector.getAddr());
             data.opSetOpcode(newop, OpCode.CPUI_INDIRECT);
             data.opSetOutput(newop, @out.getWhole());
-            data.opSetInput(newop, @@in.getWhole(), 0);
+            data.opSetInput(newop, @in.getWhole(), 0);
             data.opSetInput(newop, data.newVarnodeIop(affector), 1);
             data.opInsertBefore(newop, affector);
             @out.buildLoFromWhole(data);
@@ -1289,10 +1243,8 @@ namespace Sla.DECCORE
         /// \return a count of the number of transforms applied, 0 or 1
         public static int applyRuleIn(SplitVarnode @in, Funcdata data)
         {
-            for (int i = 0; i < 2; ++i)
-            {
-                Varnode* vn;
-                vn = (i == 0) ? @in.getHi() : @in.getLo();
+            for (int i = 0; i < 2; ++i) {
+                Varnode vn = (i == 0) ? @in.getHi() : @in.getLo();
                 if (vn == (Varnode)null) continue;
                 bool workishi = (i == 0);
                 list<PcodeOp*>::const_iterator iter, enditer;
@@ -1300,125 +1252,124 @@ namespace Sla.DECCORE
                 enditer = vn.endDescend();
                 while (iter != enditer)
                 {
-                    PcodeOp* workop = *iter;
+                    PcodeOp workop = *iter;
                     ++iter;
-                    switch (workop.code())
-                    {
+                    switch (workop.code()) {
                         case OpCode.CPUI_INT_ADD:
                             {
-                                AddForm addform;
-                                if (addform.applyRule(in, workop, workishi, data))
+                                AddForm addform = new AddForm();
+                                if (addform.applyRule(@in, workop, workishi, data))
                                     return 1;
-                                SubForm subform;
-                                if (subform.applyRule(in, workop, workishi, data))
+                                SubForm subform = new SubForm();
+                                if (subform.applyRule(@in, workop, workishi, data))
                                     return 1;
                             }
                             break;
                         case OpCode.CPUI_INT_AND:
                             {
-                                Equal3Form equal3form;
-                                if (equal3form.applyRule(in, workop, workishi, data))
+                                Equal3Form equal3form = new Equal3Form();
+                                if (equal3form.applyRule(@in, workop, workishi, data))
                                     return 1;
-                                LogicalForm logicalform;
-                                if (logicalform.applyRule(in, workop, workishi, data))
+                                LogicalForm logicalform = new LogicalForm();
+                                if (logicalform.applyRule(@in, workop, workishi, data))
                                     return 1;
                             }
                             break;
                         case OpCode.CPUI_INT_OR:
                             {
-                                Equal2Form equal2form;
-                                if (equal2form.applyRule(in, workop, workishi, data))
+                                Equal2Form equal2form = new Equal2Form();
+                                if (equal2form.applyRule(@in, workop, workishi, data))
                                     return 1;
-                                LogicalForm logicalform;
-                                if (logicalform.applyRule(in, workop, workishi, data))
+                                LogicalForm logicalform = new LogicalForm();
+                                if (logicalform.applyRule(@in, workop, workishi, data))
                                     return 1;
                             }
                             break;
                         case OpCode.CPUI_INT_XOR:
                             {
-                                Equal2Form equal2form;
-                                if (equal2form.applyRule(in, workop, workishi, data))
+                                Equal2Form equal2form = new Equal2Form();
+                                if (equal2form.applyRule(@in, workop, workishi, data))
                                     return 1;
-                                LogicalForm logicalform;
-                                if (logicalform.applyRule(in, workop, workishi, data))
+                                LogicalForm logicalform = new LogicalForm();
+                                if (logicalform.applyRule(@in, workop, workishi, data))
                                     return 1;
                             }
                             break;
                         case OpCode.CPUI_INT_EQUAL:
                         case OpCode.CPUI_INT_NOTEQUAL:
                             {
-                                LessThreeWay lessthreeway;
-                                if (lessthreeway.applyRule(in, workop, workishi, data))
+                                LessThreeWay lessthreeway = new LessThreeWay();
+                                if (lessthreeway.applyRule(@in, workop, workishi, data))
                                     return 1;
-                                Equal1Form equal1form;
-                                if (equal1form.applyRule(in, workop, workishi, data))
+                                Equal1Form equal1form = new Equal1Form();
+                                if (equal1form.applyRule(@in, workop, workishi, data))
                                     return 1;
                             }
                             break;
                         case OpCode.CPUI_INT_LESS:
                         case OpCode.CPUI_INT_LESSEQUAL:
                             {
-                                LessThreeWay lessthreeway;
-                                if (lessthreeway.applyRule(in, workop, workishi, data))
+                                LessThreeWay lessthreeway = new LessThreeWay();
+                                if (lessthreeway.applyRule(@in, workop, workishi, data))
                                     return 1;
-                                LessConstForm lessconstform;
-                                if (lessconstform.applyRule(in, workop, workishi, data))
+                                LessConstForm lessconstform = new LessConstForm();
+                                if (lessconstform.applyRule(@in, workop, workishi, data))
                                     return 1;
                             }
                             break;
                         case OpCode.CPUI_INT_SLESS:
                             {
-                                LessConstForm lessconstform;
-                                if (lessconstform.applyRule(in, workop, workishi, data))
+                                LessConstForm lessconstform = new LessConstForm();
+                                if (lessconstform.applyRule(@in, workop, workishi, data))
                                     return 1;
                             }
                             break;
                         case OpCode.CPUI_INT_SLESSEQUAL:
                             {
-                                LessConstForm lessconstform;
-                                if (lessconstform.applyRule(in, workop, workishi, data))
+                                LessConstForm lessconstform = new LessConstForm();
+                                if (lessconstform.applyRule(@in, workop, workishi, data))
                                     return 1;
                             }
                             break;
                         case OpCode.CPUI_INT_LEFT:
                             {
-                                ShiftForm shiftform;
-                                if (shiftform.applyRuleLeft(in, workop, workishi, data))
+                                ShiftForm shiftform = new ShiftForm();
+                                if (shiftform.applyRuleLeft(@in, workop, workishi, data))
                                     return 1;
                             }
                             break;
                         case OpCode.CPUI_INT_RIGHT:
                             {
-                                ShiftForm shiftform;
-                                if (shiftform.applyRuleRight(in, workop, workishi, data))
+                                ShiftForm shiftform = new ShiftForm();
+                                if (shiftform.applyRuleRight(@in, workop, workishi, data))
                                     return 1;
                             }
                             break;
                         case OpCode.CPUI_INT_SRIGHT:
                             {
-                                ShiftForm shiftform;
-                                if (shiftform.applyRuleRight(in, workop, workishi, data))
+                                ShiftForm shiftform = new ShiftForm();
+                                if (shiftform.applyRuleRight(@in, workop, workishi, data))
                                     return 1;
                             }
                             break;
                         case OpCode.CPUI_INT_MULT:
                             {
-                                MultForm multform;
-                                if (multform.applyRule(in, workop, workishi, data))
+                                MultForm multform = new MultForm();
+                                if (multform.applyRule(@in, workop, workishi, data))
                                     return 1;
                             }
                             break;
                         case OpCode.CPUI_MULTIEQUAL:
                             {
-                                PhiForm phiform;
-                                if (phiform.applyRule(in, workop, workishi, data))
+                                PhiForm phiform = new PhiForm();
+                                if (phiform.applyRule(@in, workop, workishi, data))
                                     return 1;
                             }
                             break;
                         case OpCode.CPUI_INDIRECT:
                             {
-                                IndirectForm indform;
-                                if (indform.applyRule(in, workop, workishi, data))
+                                IndirectForm indform = new IndirectForm();
+                                if (indform.applyRule(@in, workop, workishi, data))
                                     return 1;
                             }
                             break;

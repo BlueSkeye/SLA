@@ -18,7 +18,7 @@ namespace Sla.DECCORE
     {
         // friend class TypeFactory;
         /// The list of fields
-        protected List<TypeField> field;
+        internal List<TypeField> field;
 
         /// Establish fields for \b this
         /// Copy a list of fields into this union, establishing its size.

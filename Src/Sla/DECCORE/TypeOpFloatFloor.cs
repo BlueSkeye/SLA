@@ -13,7 +13,7 @@ namespace Sla.DECCORE
         public TypeOpFloatFloor(TypeFactory t, Translate trans)
             : base(t, OpCode.CPUI_FLOAT_FLOOR,"FLOOR", type_metatype.TYPE_FLOAT, type_metatype.TYPE_FLOAT)
         {
-            opflags = PcodeOp::unary;
+            opflags = PcodeOp.Flags.unary;
             addlflags = floatingpoint_op;
             behave = new OpBehaviorFloatFloor(trans);
         }

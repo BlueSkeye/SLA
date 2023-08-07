@@ -87,7 +87,7 @@ namespace Sla.DECCORE
         {
             offset = 0;
             parent = (Datatype)null;
-            stripped = (TypePointer*)0;
+            stripped = (TypePointer)null;
             submeta = SUB_PTRREL;
         }
 
@@ -107,7 +107,7 @@ namespace Sla.DECCORE
         {
             parent = par; 
             offset = off;
-            stripped = (TypePointer*)0;
+            stripped = (TypePointer)null;
             flags |= is_ptrrel;
             submeta = SUB_PTRREL;
         }
@@ -122,7 +122,7 @@ namespace Sla.DECCORE
         /// \return \b true if the variable should be displayed as coming from the parent
         public bool evaluateThruParent(ulong addrOff)
         {
-            ulong byteOff = AddrSpace::addressToByte(addrOff, wordsize);
+            ulong byteOff = AddrSpace.addressToByte(addrOff, wordsize);
             if (ptrto.getMetatype() == type_metatype.TYPE_STRUCT && byteOff < ptrto.getSize())
                 return false;
             byteOff = (byteOff + offset) & Globals.calc_mask(size);
@@ -152,14 +152,14 @@ namespace Sla.DECCORE
             TypePointerRel* tp = (TypePointerRel*)&op;
             // Its possible a formal relative pointer gets compared to its equivalent ephemeral version.
             // In which case, we prefer the formal version.
-            if (stripped == (TypePointer*)0)
+            if (stripped == (TypePointer)null)
             {
-                if (tp.stripped != (TypePointer*)0)
+                if (tp.stripped != (TypePointer)null)
                     return -1;
             }
             else
             {
-                if (tp.stripped == (TypePointer*)0)
+                if (tp.stripped == (TypePointer)null)
                     return 1;
             }
             return 0;
@@ -203,7 +203,7 @@ namespace Sla.DECCORE
             }
             ulong relOff = (off + offset) & Globals.calc_mask(size);        // Convert off to be relative to the parent container
             if (relOff >= parent.getSize())
-                return (TypePointer*)0;         // Don't let pointer shift beyond original container
+                return (TypePointer)null;         // Don't let pointer shift beyond original container
 
             TypePointer* origPointer = typegrp.getTypePointer(size, parent, wordsize);
             off = relOff;
@@ -214,9 +214,9 @@ namespace Sla.DECCORE
 
         public override bool isPtrsubMatching(ulong off)
         {
-            if (stripped != (TypePointer*)0)
+            if (stripped != (TypePointer)null)
                 return TypePointer::isPtrsubMatching(off);
-            int iOff = AddrSpace::addressToByteInt((int)off, wordsize);
+            int iOff = AddrSpace.addressToByteInt((int)off, wordsize);
             iOff += offset;
             return (iOff >= 0 && iOff <= parent.getSize());
         }

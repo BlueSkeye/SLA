@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpIntSrem(TypeFactory t)
             : base(t, OpCode.CPUI_INT_SREM,"%", type_metatype.TYPE_INT, type_metatype.TYPE_INT)
         {
-            opflags = PcodeOp::binary;
+            opflags = PcodeOp.Flags.binary;
             addlflags = arithmetic_op | inherits_sign | inherits_sign_zero;
             behave = new OpBehaviorIntSrem();
         }

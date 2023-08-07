@@ -316,7 +316,7 @@ namespace Sla.EXTRA
         public override void adjustVma(long adjust)
         {
             asection* s;
-            adjust = AddrSpace::addressToByte(adjust, spaceid.getWordSize());
+            adjust = AddrSpace.addressToByte(adjust, spaceid.getWordSize());
             for (s = thebfd.sections; s != (asection*)NULL; s = s.next)
             {
                 s.vma += adjust;

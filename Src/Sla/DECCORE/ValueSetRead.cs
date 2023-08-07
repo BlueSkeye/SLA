@@ -36,7 +36,7 @@ namespace Sla.DECCORE
         /// Establish \e read this value set corresponds to
         /// \param o is the PcodeOp reading the value set
         /// \param slt is the input slot the values are coming in from
-        private void setPcodeOp(PcodeOp o, int slt)
+        internal void setPcodeOp(PcodeOp o, int slt)
         {
             typeCode = 0;
             op = o;

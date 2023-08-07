@@ -183,7 +183,7 @@ namespace Sla.DECCORE
                 // NOTE: this is primarily to reset aliasing between
                 // stack parameters and stack locals
                 if (aliason && (curoff - curalias > 0xffff)) aliason = false;
-                if (!aliason) symbol.getScope().setAttribute(symbol, Varnode::nolocalalias);
+                if (!aliason) symbol.getScope().setAttribute(symbol, Varnode.varnode_flags.nolocalalias);
                 if (symbol.isTypeLocked() && alias_block_level != 0)
                 {
                     if (alias_block_level == 3)
@@ -342,7 +342,7 @@ namespace Sla.DECCORE
             for (iter = spVn.beginDescend(); iter != spVn.endDescend(); ++iter)
             {
                 PcodeOp* op = *iter;
-                if (op.getEvalType() == PcodeOp::special && !op.isCall()) continue;
+                if (op.getEvalType() == PcodeOp.Flags.special && !op.isCall()) continue;
                 OpCode opc = op.code();
                 if (opc == OpCode.CPUI_INT_ADD || opc == OpCode.CPUI_PTRSUB || opc == OpCode.CPUI_PTRADD)
                     continue;

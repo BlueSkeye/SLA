@@ -84,7 +84,7 @@ namespace Sla.DECCORE
                 int off = (int)cvn.getOffset();
                 if (opc == OpCode.CPUI_PTRADD)
                     off *= (int)addOp.getIn(2).getOffset();
-                off = AddrSpace::addressToByteInt(off, ptrType.getWordSize());
+                off = AddrSpace.addressToByteInt(off, ptrType.getWordSize());
                 baseOffset += off;
                 pointer = tmpPointer;
                 return true;
@@ -900,7 +900,7 @@ namespace Sla.DECCORE
                 TypePointerRel* ptrRel = (TypePointerRel*)ptrType;
                 resType = ptrRel.getParent();
                 baseOffset = ptrRel.getPointerOffset();
-                baseOffset = AddrSpace::addressToByteInt(baseOffset, ptrRel.getWordSize());
+                baseOffset = AddrSpace.addressToByteInt(baseOffset, ptrRel.getWordSize());
             }
             else
             {

@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpIntAdd(TypeFactory t)
             : base(t, OpCode.CPUI_INT_ADD,"+", type_metatype.TYPE_INT, type_metatype.TYPE_INT)
         {
-            opflags = PcodeOp::binary | PcodeOp::commutative;
+            opflags = PcodeOp.Flags.binary | PcodeOp::commutative;
             addlflags = arithmetic_op | inherits_sign;
             behave = new OpBehaviorIntAdd();
         }
@@ -69,31 +69,31 @@ namespace Sla.DECCORE
             ulong uoffset;
             int command = propagateAddPointer(uoffset, op, inslot, pointer.getPtrTo().getSize());
             if (command == 2) return op.getOut().getTempType(); // Doesn't look like a good pointer add
-            TypePointer* parent = (TypePointer*)0;
+            TypePointer* parent = (TypePointer)null;
             ulong parentOff;
             if (command != 3)
             {
-                uoffset = AddrSpace::addressToByte(uoffset, pointer.getWordSize());
+                uoffset = AddrSpace.addressToByte(uoffset, pointer.getWordSize());
                 bool allowWrap = (op.code() != OpCode.CPUI_PTRSUB);
                 do
                 {
                     pointer = pointer.downChain(uoffset, parent, parentOff, allowWrap, *typegrp);
-                    if (pointer == (TypePointer*)0)
+                    if (pointer == (TypePointer)null)
                         break;
                 } while (uoffset != 0);
             }
-            if (parent != (TypePointer*)0)
+            if (parent != (TypePointer)null)
             {
                 // If the innermost containing object is a type_metatype.TYPE_STRUCT or type_metatype.TYPE_ARRAY
                 // preserve info about this container
                 Datatype* pt;
-                if (pointer == (TypePointer*)0)
+                if (pointer == (TypePointer)null)
                     pt = typegrp.getBase(1, type_metatype.TYPE_UNKNOWN); // Offset does not point at a proper sub-type
                 else
                     pt = pointer.getPtrTo();   // The sub-type being directly pointed at
                 pointer = typegrp.getTypePointerRel(parent, pt, parentOff);
             }
-            if (pointer == (TypePointer*)0)
+            if (pointer == (TypePointer)null)
             {
                 if (command == 0)
                     return alttype;

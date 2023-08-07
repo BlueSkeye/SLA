@@ -14,7 +14,7 @@ namespace Sla.DECCORE
             : base(t, OpCode.CPUI_INDIRECT,"[]")
 
         {
-            opflags = PcodeOp::special | PcodeOp::marker | PcodeOp::nocollapse;
+            opflags = PcodeOp.Flags.special | PcodeOp::marker | PcodeOp.Flags.nocollapse;
             behave = new OpBehavior(CPUI_INDIRECT, false, true); // Dummy behavior
         }
 
@@ -25,7 +25,7 @@ namespace Sla.DECCORE
             if (slot == 0)
                 return TypeOp::getInputLocal(op, slot);
             ct = tlst.getTypeCode();
-            PcodeOp* iop = PcodeOp::getOpFromConst(op.getIn(1).getAddr());
+            PcodeOp* iop = PcodeOp.getOpFromConst(op.getIn(1).getAddr());
             AddrSpace* spc = iop.getAddr().getSpace();
             return tlst.getTypePointer(op.getIn(0).getSize(), ct, spc.getWordSize()); // Second parameter is code pointer
         }

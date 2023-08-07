@@ -474,7 +474,7 @@ namespace Sla.DECCORE
                 pc = vn.getDef().getAddr();
                 if (vn.getDef().code() == OpCode.CPUI_INDIRECT) // snip must come after OP CAUSING EFFECT
                                                            // Not the indirect op itself
-                    afterop = PcodeOp::getOpFromConst(vn.getDef().getIn(1).getAddr());
+                    afterop = PcodeOp.getOpFromConst(vn.getDef().getIn(1).getAddr());
                 else
                     afterop = vn.getDef();
             }
@@ -502,7 +502,7 @@ namespace Sla.DECCORE
         /// \param indop is the given INDIRECT op
         private void snipIndirect(PcodeOp indop)
         {
-            PcodeOp* op = PcodeOp::getOpFromConst(indop.getIn(1).getAddr()); // Indirect effect op
+            PcodeOp* op = PcodeOp.getOpFromConst(indop.getIn(1).getAddr()); // Indirect effect op
             List<Varnode*> problemvn;
             list<PcodeOp*> correctable;
             List<int> correctslot;
@@ -671,7 +671,7 @@ namespace Sla.DECCORE
             PcodeOp* afterop;
 
             if (op.code() == OpCode.CPUI_INDIRECT)
-                afterop = PcodeOp::getOpFromConst(op.getIn(1).getAddr()); // Insert copyop AFTER source of indirect
+                afterop = PcodeOp.getOpFromConst(op.getIn(1).getAddr()); // Insert copyop AFTER source of indirect
             else
                 afterop = op;
             vn = op.getOut();

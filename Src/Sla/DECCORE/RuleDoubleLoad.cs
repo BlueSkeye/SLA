@@ -122,7 +122,7 @@ namespace Sla.DECCORE
                             return (PcodeOp)null; // Don't go any further trying to resolve alias
                         break;
                     case OpCode.CPUI_INDIRECT:
-                        affector = PcodeOp::getOpFromConst(curop.getIn(1).getAddr());
+                        affector = PcodeOp.getOpFromConst(curop.getIn(1).getAddr());
                         if (affector == op1 || affector == op2)
                         {
                             if (indirects != (List<PcodeOp*>*)0)

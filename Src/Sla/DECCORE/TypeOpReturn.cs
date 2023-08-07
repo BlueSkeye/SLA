@@ -12,7 +12,7 @@ namespace Sla.DECCORE
     {
         public TypeOpReturn(TypeFactory t)
         {
-            opflags = PcodeOp::special | PcodeOp::returns | PcodeOp::nocollapse | PcodeOp::no_copy_propagation;
+            opflags = PcodeOp.Flags.special | PcodeOp::returns | PcodeOp.Flags.nocollapse | PcodeOp::no_copy_propagation;
             behave = new OpBehavior(CPUI_RETURN, false, true); // Dummy behavior
         }
 

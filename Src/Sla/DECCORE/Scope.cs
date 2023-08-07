@@ -412,11 +412,11 @@ namespace Sla.DECCORE
                         int i = bigendian ? j : (num - 1 - j); // Take pieces in endian order
                         VarnodeData vdat = rec.getPiece(i);
                         if (i == 0)     // i==0 is most signif
-                            exfl = Varnode::precishi;
+                            exfl = Varnode.varnode_flags.precishi;
                         else if (i == num - 1)
-                            exfl = Varnode::precislo;
+                            exfl = Varnode.varnode_flags.precislo;
                         else
-                            exfl = Varnode::precislo | Varnode::precishi; // Middle pieces have both flags set
+                            exfl = Varnode.varnode_flags.precislo | Varnode.varnode_flags.precishi; // Middle pieces have both flags set
                                                                           // NOTE: we do not turn on the mapped flag for the pieces
                         addMapInternal(entry.symbol, exfl, vdat.getAddr(), off, vdat.size, entry.uselimit);
                         off += vdat.size;
@@ -1145,7 +1145,7 @@ namespace Sla.DECCORE
             SymbolEntry* ret = addMapPoint(sym, addr, Address());
             // Even if the external reference is in a readonly region, treat it as not readonly
             // As the value in the image probably isn't valid
-            ret.symbol.flags &= ~((uint)Varnode::@readonly);
+            ret.symbol.flags &= ~((uint)Varnode.varnode_flags.@readonly);
             return sym;
         }
 
@@ -1293,7 +1293,7 @@ namespace Sla.DECCORE
         {
             uint flags;
             queryProperties(addr, size, usepoint, flags);
-            return ((flags & Varnode::@readonly)!= 0);
+            return ((flags & Varnode.varnode_flags.@readonly)!= 0);
         }
 
         /// Print a description of \b this Scope's \e owned memory ranges

@@ -496,7 +496,7 @@ namespace Sla.DECCORE
 #endif
 
         /// Set a boolean property
-        protected void setFlag(block_flags fl)
+        internal void setFlag(block_flags fl)
         {
             flags |= fl;
         }

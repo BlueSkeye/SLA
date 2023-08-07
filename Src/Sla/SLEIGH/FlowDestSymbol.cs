@@ -28,7 +28,7 @@ namespace Sla.SLEIGH
         public override VarnodeTpl getVarnode()
         {
             ConstTpl spc(const_space);
-            ConstTpl off(ConstTpl::j_flowdest);
+            ConstTpl off(ConstTpl.const_type.j_flowdest);
             ConstTpl sz_zero;
             return new VarnodeTpl(spc, off, sz_zero);
         }

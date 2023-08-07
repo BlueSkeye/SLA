@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -15,7 +15,7 @@ namespace Sla.DECCORE
     {
         // friend class TypeFactory;
         /// The list of fields
-        protected List<TypeField> field;
+        internal List<TypeField> field;
 
         /// Establish fields for \b this
         /// Copy a list of fields into this structure, establishing its size.
@@ -23,21 +23,19 @@ namespace Sla.DECCORE
         /// \param fd is the list of fields to copy in
         protected void setFields(List<TypeField> fd)
         {
-            List<TypeField>::const_iterator iter;
             int end;
             // Need to calculate size
             size = 0;
-            for (iter = fd.begin(); iter != fd.end(); ++iter)
-            {
-                field.Add(*iter);
-                end = (*iter).offset + (*iter).type.getSize();
+            foreach (TypeField typeField in fd) {
+                field.Add(typeField);
+                end = typeField.offset + typeField.type.getSize();
                 if (end > size)
                     size = end;
             }
-            if (field.size() == 1)
-            {           // A single field
+            if (field.size() == 1) {
+                // A single field
                 if (field[0].type.getSize() == size)   // that fills the whole structure
-                    flags |= needs_resolution;      // needs special attention
+                    flags |= Properties.needs_resolution;      // needs special attention
             }
         }
 
@@ -51,14 +49,13 @@ namespace Sla.DECCORE
             int min = 0;
             int max = field.size() - 1;
 
-            while (min <= max)
-            {
+            while (min <= max) {
                 int mid = (min + max) / 2;
                 TypeField curfield = field[mid];
                 if (curfield.offset > off)
                     max = mid - 1;
-                else
-                {           // curfield.offset <= off
+                else {
+                    // curfield.offset <= off
                     if ((curfield.offset + curfield.type.getSize()) > off)
                         return mid;
                     min = mid + 1;
@@ -78,13 +75,12 @@ namespace Sla.DECCORE
             int min = 0;
             int max = field.size() - 1;
 
-            while (min < max)
-            {
+            while (min < max) {
                 int mid = (min + max + 1) / 2;
                 if (field[mid].offset > off)
                     max = mid - 1;
-                else
-                {           // curfield.offset <= off
+                else {
+                    // curfield.offset <= off
                     min = mid;
                 }
             }
@@ -97,30 +93,28 @@ namespace Sla.DECCORE
         /// Children of the structure element describe each field.
         /// \param decoder is the stream decoder
         /// \param typegrp is the factory owning the new structure
-        protected void decodeFields(Decoder decoder, TypeFactory typegrp)
+        internal void decodeFields(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
             int maxoffset = 0;
-            while (decoder.peekElement() != 0)
-            {
-                field.emplace_back(decoder, typegrp);
-                int trialmax = field.GetLastItem().offset + field.GetLastItem().type.getSize();
+            while (decoder.peekElement() != 0) {
+                TypeField newField = new TypeField(decoder, typegrp);
+                field.Add(newField);
+                int trialmax = newField.offset + newField.type.getSize();
                 if (trialmax > maxoffset)
                     maxoffset = trialmax;
-                if (maxoffset > size)
-                {
-                    ostringstream s;
-                    s << "Field " << field.GetLastItem().name << " does not fit in structure " + name;
-                    throw new LowlevelError(s.str());
+                if (maxoffset > size) {
+                    throw new LowlevelError(
+                        $"Field {field.GetLastItem().name} does not fit in structure {name}");
                 }
             }
             if (size == 0)      // We can decode an incomplete structure, indicated by 0 size
-                flags |= type_incomplete;
+                flags |= Properties.type_incomplete;
             else
                 markComplete();     // Otherwise the structure is complete
-            if (field.size() == 1)
-            {           // A single field
+            if (field.size() == 1) {
+                // A single field
                 if (field[0].type.getSize() == size)   // that fills the whole structure
-                    flags |= needs_resolution;      // needs special resolution
+                    flags |= Properties.needs_resolution;      // needs special resolution
             }
         }
 
@@ -136,64 +130,56 @@ namespace Sla.DECCORE
         public TypeStruct()
             : base(0, type_metatype.TYPE_STRUCT)
         {
-            flags |= type_incomplete;
+            flags |= Properties.type_incomplete;
         }
 
         /// Beginning of fields
-        public IEnumerator<TypeField> beginField() => field.begin();
+        public IEnumerator<TypeField> beginField() => field.GetEnumerator();
 
-        /// End of fields
-        public IEnumerator<TypeField> endField() => field.end();
+        ///// End of fields
+        //public IEnumerator<TypeField> endField() => field.end();
 
-        public override TypeField findTruncation(int off, int sz, PcodeOp op, int slot, int newoff)
+        public override TypeField? findTruncation(int off, int sz, PcodeOp op, int slot, int newoff)
         {
-            int i;
-            int noff;
-
-            i = getFieldIter(off);
+            int i = getFieldIter(off);
             if (i < 0) return (TypeField)null;
             TypeField curfield  = field[i];
-            noff = off - curfield.offset;
+            int noff = off - curfield.offset;
             if (noff + sz > curfield.type.getSize()) // Requested piece spans more than one field
                 return (TypeField)null;
             newoff = noff;
-            return &curfield;
+            return curfield;
         }
 
-        public override Datatype getSubType(ulong off, ulong newoff)
-        {               // Go down one level to field that contains offset
-            int i;
-
-            i = getFieldIter(off);
-            if (i < 0) return Datatype::getSubType(off, newoff);
+        public override Datatype? getSubType(ulong off, out ulong newoff)
+        {
+            // Go down one level to field that contains offset
+            int i = getFieldIter((int)off);
+            if (i < 0) return base.getSubType(off, out newoff);
             TypeField curfield = field[i];
-            *newoff = off - curfield.offset;
+            newoff = off - (uint)curfield.offset;
             return curfield.type;
         }
 
-        public override Datatype nearestArrayedComponentForward(ulong off, ulong newoff, int elSize)
+        public override Datatype? nearestArrayedComponentForward(ulong off, out ulong newoff, out int elSize)
         {
-            int i = getLowerBoundField(off);
+            int i = getLowerBoundField((int)off);
             i += 1;
-            while (i < field.size())
-            {
+            while (i < field.size()) {
                 TypeField subfield = field[i];
-                int diff = subfield.offset - off;
+                int diff = (int)((uint)subfield.offset - off);
                 if (diff > 128) break;
-                Datatype* subtype = subfield.type;
-                if (subtype.getMetatype() == type_metatype.TYPE_ARRAY)
-                {
-                    *newoff = (long) - diff;
-                    *elSize = ((TypeArray*)subtype).getBase().getSize();
+                Datatype subtype = subfield.type;
+                if (subtype.getMetatype() == type_metatype.TYPE_ARRAY) {
+                    newoff = (ulong) (-diff);
+                    elSize = ((TypeArray)subtype).getBase().getSize();
                     return subtype;
                 }
-                else
-                {
+                else {
                     ulong suboff;
-                    Datatype* res = subtype.nearestArrayedComponentForward(0, &suboff, elSize);
-                    if (res != (Datatype)null)
-                    {
-                        *newoff = (long) - diff;
+                    Datatype? res = subtype.nearestArrayedComponentForward(0, out suboff, out elSize);
+                    if (res != (Datatype)null) {
+                        newoff = (ulong)(-diff);
                         return subtype;
                     }
                 }
@@ -202,28 +188,25 @@ namespace Sla.DECCORE
             return (Datatype)null;
         }
 
-        public override Datatype nearestArrayedComponentBackward(ulong off, ulong newoff, int elSize)
+        public override Datatype? nearestArrayedComponentBackward(ulong off, ulong newoff, int elSize)
         {
-            int i = getLowerBoundField(off);
-            while (i >= 0)
-            {
+            int i = getLowerBoundField((int)off);
+            while (i >= 0) {
                 TypeField subfield = field[i];
                 int diff = (int)off - subfield.offset;
                 if (diff > 128) break;
-                Datatype* subtype = subfield.type;
-                if (subtype.getMetatype() == type_metatype.TYPE_ARRAY)
-                {
-                    *newoff = (long)diff;
-                    *elSize = ((TypeArray*)subtype).getBase().getSize();
+                Datatype subtype = subfield.type;
+                if (subtype.getMetatype() == type_metatype.TYPE_ARRAY) {
+                    newoff = (ulong)diff;
+                    elSize = ((TypeArray)subtype).getBase().getSize();
                     return subtype;
                 }
-                else
-                {
+                else {
                     ulong suboff;
-                    Datatype* res = subtype.nearestArrayedComponentBackward(subtype.getSize(), &suboff, elSize);
-                    if (res != (Datatype)null)
-                    {
-                        *newoff = (long)diff;
+                    Datatype res = subtype.nearestArrayedComponentBackward(subtype.getSize(),
+                        out suboff, out elSize);
+                    if (res != (Datatype)null) {
+                        newoff = (ulong)diff;
                         return subtype;
                     }
                 }
@@ -235,16 +218,14 @@ namespace Sla.DECCORE
         public override int getHoleSize(int off)
         {
             int i = getLowerBoundField(off);
-            if (i >= 0)
-            {
+            if (i >= 0) {
                 TypeField curfield = field[i];
                 int newOff = off - curfield.offset;
                 if (newOff < curfield.type.getSize())
                     return curfield.type.getHoleSize(newOff);
             }
             i += 1;             // advance to first field following off
-            if (i < field.size())
-            {
+            if (i < field.size()) {
                 return field[i].offset - off;   // Distance to following field
             }
             return getSize() - off;     // Distance to end of structure
@@ -257,44 +238,38 @@ namespace Sla.DECCORE
         // For tree structure
         public override int compare(Datatype op, int level)
         {
-            int res = Datatype::compare(op, level);
+            int res = Datatype.compare(op, level);
             if (res != 0) return res;
-            TypeStruct ts = (TypeStruct*)&op;
-            List<TypeField>::const_iterator iter1, iter2;
+            TypeStruct ts = (TypeStruct)op;
 
             if (field.size() != ts.field.size()) return (ts.field.size() - field.size());
-            iter1 = field.begin();
-            iter2 = ts.field.begin();
+            IEnumerator<TypeField> iter1 = field.GetEnumerator();
+            IEnumerator<TypeField> iter2 = ts.field.GetEnumerator();
             // Test only the name and first level metatype first
-            while (iter1 != field.end())
-            {
-                if ((*iter1).offset != (*iter2).offset)
-                    return ((*iter1).offset < (*iter2).offset) ? -1 : 1;
-                if ((*iter1).name != (*iter2).name)
-                    return ((*iter1).name < (*iter2).name) ? -1 : 1;
-                if ((*iter1).type.getMetatype() != (*iter2).type.getMetatype())
-                    return ((*iter1).type.getMetatype() < (*iter2).type.getMetatype()) ? -1 : 1;
-                ++iter1;
-                ++iter2;
+            while (iter1.MoveNext()) {
+                if (!iter2.MoveNext()) throw new BugException();
+                if (iter1.Current.offset != iter2.Current.offset)
+                    return (iter1.Current.offset < iter2.Current.offset) ? -1 : 1;
+                if (iter1.Current.name != iter2.Current.name)
+                    return string.Compare(iter1.Current.name, iter2.Current.name);
+                if (iter1.Current.type.getMetatype() != iter2.Current.type.getMetatype())
+                    return (iter1.Current.type.getMetatype() < iter2.Current.type.getMetatype()) ? -1 : 1;
             }
             level -= 1;
-            if (level < 0)
-            {
+            if (level < 0) {
                 if (id == op.getId()) return 0;
                 return (id < op.getId()) ? -1 : 1;
             }
             // If we are still equal, now go down deep into each field type
-            iter1 = field.begin();
-            iter2 = ts.field.begin();
-            while (iter1 != field.end())
-            {
-                if ((*iter1).type != (*iter2).type)
-                { // Short circuit recursive loops
-                    int c = (*iter1).type.compare(*(*iter2).type, level);
+            iter1 = field.GetEnumerator();
+            iter2 = ts.field.GetEnumerator();
+            while (iter1.MoveNext()) {
+                if (!iter2.MoveNext()) throw new BugException();
+                if (iter1.Current.type != iter2.Current.type) {
+                    // Short circuit recursive loops
+                    int c = iter1.Current.type.compare(iter2.Current.type, level);
                     if (c != 0) return c;
                 }
-                ++iter1;
-                ++iter2;
             }
             return 0;
         }
@@ -302,60 +277,54 @@ namespace Sla.DECCORE
         // For tree structure
         public override int compareDependency(Datatype op)
         {
-            int res = Datatype::compareDependency(op);
+            int res = base.compareDependency(op);
             if (res != 0) return res;
-            TypeStruct ts = (TypeStruct*)&op;
-            List<TypeField>::const_iterator iter1, iter2;
+            TypeStruct ts = (TypeStruct)op;
 
             if (field.size() != ts.field.size()) return (ts.field.size() - field.size());
-            iter1 = field.begin();
-            iter2 = ts.field.begin();
+            IEnumerator<TypeField> iter1 = field.GetEnumerator();
+            IEnumerator<TypeField> iter2 = ts.field.GetEnumerator();
             // Test only the name and first level metatype first
-            while (iter1 != field.end())
-            {
-                if ((*iter1).offset != (*iter2).offset)
-                    return ((*iter1).offset < (*iter2).offset) ? -1 : 1;
-                if ((*iter1).name != (*iter2).name)
-                    return ((*iter1).name < (*iter2).name) ? -1 : 1;
-                Datatype* fld1 = (*iter1).type;
-                Datatype* fld2 = (*iter2).type;
+            while (iter1.MoveNext()) {
+                if (!iter2.MoveNext()) throw new BugException();
+                if (iter1.Current.offset != iter2.Current.offset)
+                    return (iter1.Current.offset < iter2.Current.offset) ? -1 : 1;
+                if (iter1.Current.name != iter2.Current.name)
+                    return string.Compare(iter1.Current.name, iter2.Current.name);
+                Datatype fld1 = iter1.Current.type;
+                Datatype fld2 = iter2.Current.type;
                 if (fld1 != fld2)
                     return (fld1 < fld2) ? -1 : 1; // compare the pointers directly
-                ++iter1;
-                ++iter2;
             }
             return 0;
         }
 
-        public override Datatype clone() => new TypeStruct(this);
+        internal override Datatype clone() => new TypeStruct(this);
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
-            if (typedefImm != (Datatype)null)
-            {
+            if (typedefImm != (Datatype)null) {
                 encodeTypedef(encoder);
                 return;
             }
             encoder.openElement(ElementId.ELEM_TYPE);
             encodeBasic(metatype, encoder);
-            List<TypeField>::const_iterator iter;
-            for (iter = field.begin(); iter != field.end(); ++iter)
-            {
-                (*iter).encode(encoder);
+            foreach (TypeField scannedField in field) {
+                scannedField.encode(encoder);
             }
             encoder.closeElement(ElementId.ELEM_TYPE);
         }
 
         public override Datatype resolveInFlow(PcodeOp op, int slot)
         {
-            Funcdata* fd = op.getParent().getFuncdata();
-            ResolvedUnion res = fd.getUnionField(this, op, slot);
+            Funcdata fd = op.getParent().getFuncdata();
+            ResolvedUnion? res = fd.getUnionField(this, op, slot);
             if (res != (ResolvedUnion)null)
                 return res.getDatatype();
 
             int fieldNum = scoreSingleComponent(this, op, slot);
 
-            ResolvedUnion compFill(this, fieldNum,* fd.getArch().types);
+            ResolvedUnion compFill = new ResolvedUnion(this, fieldNum, fd.getArch().types);
             fd.setUnionField(this, op, slot, compFill);
             return compFill.getDatatype();
         }
@@ -363,7 +332,7 @@ namespace Sla.DECCORE
         public override Datatype findResolve(PcodeOp op, int slot)
         {
             Funcdata fd = op.getParent().getFuncdata();
-            ResolvedUnion res = fd.getUnionField(this, op, slot);
+            ResolvedUnion? res = fd.getUnionField(this, op, slot);
             if (res != (ResolvedUnion)null)
                 return res.getDatatype();
             return field[0].type;       // If not calculated before, assume referring to field
@@ -371,32 +340,26 @@ namespace Sla.DECCORE
 
         public override int findCompatibleResolve(Datatype ct)
         {
-            Datatype* fieldType = field[0].type;
-            if (ct.needsResolution() && !fieldType.needsResolution())
-            {
+            Datatype fieldType = field[0].type;
+            if (ct.needsResolution() && !fieldType.needsResolution()) {
                 if (ct.findCompatibleResolve(fieldType) >= 0)
                     return 0;
             }
-            if (fieldType == ct)
-                return 0;
-            return -1;
+            return (fieldType == ct) ? 0 : -1;
         }
 
         /// Assign field offsets given a byte alignment
         /// Assign an offset to fields in order so that each field starts at an aligned offset within the structure
         /// \param list is the list of fields
         /// \param align is the given alignment
-        public override void assignFieldOffsets(List<TypeField> list, int align)
+        public static void assignFieldOffsets(List<TypeField> list, int align)
         {
             int offset = 0;
-            List<TypeField>::iterator iter;
-            for (iter = list.begin(); iter != list.end(); ++iter)
-            {
-                if ((*iter).offset != -1) continue;
-                int cursize = (*iter).type.getSize();
+            foreach (TypeField scannedField in list) {
+                if (scannedField.offset != -1) continue;
+                int cursize = scannedField.type.getSize();
                 int curalign = 0;
-                if (align > 1)
-                {
+                if (align > 1) {
                     curalign = align;
                     while ((curalign >> 1) >= cursize)
                         curalign >>= 1;
@@ -404,8 +367,8 @@ namespace Sla.DECCORE
                 }
                 if ((offset & curalign) != 0)
                     offset = (offset - (offset & curalign) + (curalign + 1));
-                (*iter).offset = offset;
-                (*iter).ident = offset;
+                scannedField.offset = offset;
+                scannedField.ident = offset;
                 offset += cursize;
             }
         }
@@ -419,40 +382,31 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp using the Varnode
         /// \param slot is -1 if the Varnode is an output or >=0 indicating the input slot
         /// \return either 0 to indicate the field or -1 to indicate the structure
-        public override int scoreSingleComponent(Datatype parent, PcodeOp op, int slot)
+        public static int scoreSingleComponent(Datatype parent, PcodeOp op, int slot)
         {
-            if (op.code() == OpCode.CPUI_COPY || op.code() == OpCode.CPUI_INDIRECT)
-            {
-                Varnode* vn;
-                if (slot == 0)
-                    vn = op.getOut();
-                else
-                    vn = op.getIn(0);
+            if (op.code() == OpCode.CPUI_COPY || op.code() == OpCode.CPUI_INDIRECT) {
+                Varnode vn = (slot == 0) ? op.getOut() : op.getIn(0);
                 if (vn.isTypeLock() && vn.getType() == parent)
                     return -1;  // COPY of the structure directly, use whole structure
             }
-            else if ((op.code() == OpCode.CPUI_LOAD && slot == -1) || (op.code() == OpCode.CPUI_STORE && slot == 2))
-            {
-                Varnode* vn = op.getIn(1);
-                if (vn.isTypeLock())
-                {
-                    Datatype* ct = vn.getTypeReadFacing(op);
-                    if (ct.getMetatype() == type_metatype.TYPE_PTR && ((TypePointer*)ct).getPtrTo() == parent)
+            else if ((op.code() == OpCode.CPUI_LOAD && slot == -1) || (op.code() == OpCode.CPUI_STORE && slot == 2)) {
+                Varnode vn = op.getIn(1);
+                if (vn.isTypeLock()) {
+                    Datatype ct = vn.getTypeReadFacing(op);
+                    if (ct.getMetatype() == type_metatype.TYPE_PTR && ((TypePointer)ct).getPtrTo() == parent)
                         return -1;  // LOAD or STORE of the structure directly, use whole structure
                 }
             }
-            else if (op.isCall())
-            {
-                Funcdata* fd = op.getParent().getFuncdata();
-                FuncCallSpecs* fc = fd.getCallSpecs(op);
-                if (fc != (FuncCallSpecs)null)
-                {
-                    ProtoParameter* param = (ProtoParameter*)0;
+            else if (op.isCall()) {
+                Funcdata fd = op.getParent().getFuncdata();
+                FuncCallSpecs? fc = fd.getCallSpecs(op);
+                if (fc != (FuncCallSpecs)null) {
+                    ProtoParameter param = (ProtoParameter)null;
                     if (slot >= 1 && fc.isInputLocked())
                         param = fc.getParam(slot - 1);
                     else if (slot < 0 && fc.isOutputLocked())
                         param = fc.getOutput();
-                    if (param != (ProtoParameter*)0 && param.getType() == parent)
+                    if (param != (ProtoParameter)null && param.getType() == parent)
                         return -1;  // Function signature refers to parent directly, resolve to parent
                 }
             }

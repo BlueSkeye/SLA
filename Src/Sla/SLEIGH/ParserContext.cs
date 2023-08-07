@@ -154,7 +154,7 @@ namespace Sla.SLEIGH
                     // If the symbol handed to globalset was a computed value, the getFixedHandle calculation
                     // will return a value in the constant space. If this is a case, we explicitly convert the
                     // offset into the current address space
-                    ulong newoff = AddrSpace::addressToByte(commitaddr.getOffset(), addr.getSpace().getWordSize());
+                    ulong newoff = AddrSpace.addressToByte(commitaddr.getOffset(), addr.getSpace().getWordSize());
                     commitaddr = Address(addr.getSpace(), newoff);
                 }
 

@@ -17,9 +17,19 @@ namespace Sla.SLEIGH
     {
         public enum const_type
         {
-            real = 0, handle = 1, j_start = 2, j_next = 3, j_next2 = 4, j_curspace = 5,
-            j_curspace_size = 6, spaceid = 7, j_relative = 8,
-            j_flowref = 9, j_flowref_size = 10, j_flowdest = 11, j_flowdest_size = 12
+            real = 0,
+            handle = 1,
+            j_start = 2,
+            j_next = 3,
+            j_next2 = 4,
+            j_curspace = 5,
+            j_curspace_size = 6,
+            spaceid = 7,
+            j_relative = 8,
+            j_flowref = 9,
+            j_flowref_size = 10,
+            j_flowdest = 11,
+            j_flowdest_size = 12
         }
         
         public enum v_field
@@ -43,21 +53,20 @@ namespace Sla.SLEIGH
         private ulong value_real;
         private v_field select;     // Which part of handle to use as constant
 
-        private static void printHandleSelector(ostream &s, v_field val)
+        private static void printHandleSelector(TextWriter s, v_field val)
         {
-            switch (val)
-            {
-                case v_space:
-                    s << "space";
+            switch (val) {
+                case v_field.v_space:
+                    s.Write("space");
                     break;
-                case v_offset:
-                    s << "offset";
+                case v_field.v_offset:
+                    s.Write("offset");
                     break;
-                case v_size:
-                    s << "size";
+                case v_field.v_size:
+                    s.Write("size");
                     break;
-                case v_offset_plus:
-                    s << "offset_plus";
+                case v_field.v_offset_plus:
+                    s.Write("offset_plus");
                     break;
             }
         }
@@ -65,13 +74,13 @@ namespace Sla.SLEIGH
         private static v_field readHandleSelector(string name)
         {
             if (name == "space")
-                return v_space;
+                return v_field.v_space;
             if (name == "offset")
-                return v_offset;
+                return v_field.v_offset;
             if (name == "size")
-                return v_size;
+                return v_field.v_size;
             if (name == "offset_plus")
-                return v_offset_plus;
+                return v_field.v_offset_plus;
             throw new LowlevelError("Bad handle selector");
         }
 
@@ -94,7 +103,7 @@ namespace Sla.SLEIGH
             type = tp;
             value_real = val;
             value.handle_index = 0;
-            select = v_space;
+            select = v_field.v_space;
         }
 
         public ConstTpl(const_type tp)
@@ -126,31 +135,31 @@ namespace Sla.SLEIGH
 
         public bool isConstSpace()
         {
-            if (type == spaceid)
+            if (type == const_type.spaceid)
                 return (value.spaceid.getType() == spacetype.IPTR_CONSTANT);
             return false;
         }
 
         public bool isUniqueSpace()
         {
-            if (type == spaceid)
+            if (type == const_type.spaceid)
                 return (value.spaceid.getType() == spacetype.IPTR_INTERNAL);
             return false;
         }
 
         public static bool operator ==(ConstTpl op1, ConstTpl op2)
         {
-            if (type != op2.type) return false;
-            switch (type)
+            if (op1.type != op2.type) return false;
+            switch (op1.type)
             {
-                case real:
-                    return (value_real == op2.value_real);
-                case handle:
-                    if (value.handle_index != op2.value.handle_index) return false;
-                    if (select != op2.select) return false;
+                case const_type.real:
+                    return (op1.value_real == op2.value_real);
+                case const_type.handle:
+                    if (op1.value.handle_index != op2.value.handle_index) return false;
+                    if (op1.select != op2.select) return false;
                     break;
-                case spaceid:
-                    return (value.spaceid == op2.value.spaceid);
+                case const_type.spaceid:
+                    return (op1.value.spaceid == op2.value.spaceid);
                 default:            // Nothing additional to compare
                     break;
             }
@@ -159,18 +168,18 @@ namespace Sla.SLEIGH
 
         public static bool operator <(ConstTpl op1, ConstTpl op2)
         {
-            if (type != op2.type) return (type < op2.type);
-            switch (type)
+            if (op1.type != op2.type) return (op1.type < op2.type);
+            switch (op1.type)
             {
-                case real:
-                    return (value_real < op2.value_real);
-                case handle:
-                    if (value.handle_index != op2.value.handle_index)
-                        return (value.handle_index < op2.value.handle_index);
-                    if (select != op2.select) return (select < op2.select);
+                case const_type.real:
+                    return (op1.value_real < op2.value_real);
+                case const_type.handle:
+                    if (op1.value.handle_index != op2.value.handle_index)
+                        return (op1.value.handle_index < op2.value.handle_index);
+                    if (op1.select != op2.select) return (op1.select < op2.select);
                     break;
-                case spaceid:
-                    return (value.spaceid < op2.value.spaceid);
+                case const_type.spaceid:
+                    return (op1.value.spaceid < op2.value.spaceid);
                 default:            // Nothing additional to compare
                     break;
             }
@@ -193,48 +202,48 @@ namespace Sla.SLEIGH
           // of the temporary storage
             switch (type)
             {
-                case j_start:
+                case const_type.j_start:
                     return walker.getAddr().getOffset(); // Fill in starting address placeholder with real address
-                case j_next:
+                case const_type.j_next:
                     return walker.getNaddr().getOffset(); // Fill in next address placeholder with real address
-                case j_next2:
+                case const_type.j_next2:
                     return walker.getN2addr().getOffset(); // Fill in next2 address placeholder with real address
-                case j_flowref:
+                case const_type.j_flowref:
                     return walker.getRefAddr().getOffset();
-                case j_flowref_size:
+                case const_type.j_flowref_size:
                     return walker.getRefAddr().getAddrSize();
-                case j_flowdest:
+                case const_type.j_flowdest:
                     return walker.getDestAddr().getOffset();
-                case j_flowdest_size:
+                case const_type.j_flowdest_size:
                     return walker.getDestAddr().getAddrSize();
-                case j_curspace_size:
+                case const_type.j_curspace_size:
                     return walker.getCurSpace().getAddrSize();
-                case j_curspace:
+                case const_type.j_curspace:
                     return (ulong)(ulong)walker.getCurSpace();
-                case handle:
+                case const_type.handle:
                     {
                         FixedHandle hand = walker.getFixedHandle(value.handle_index);
                         switch (select)
                         {
-                            case v_space:
+                            case v_field.v_space:
                                 if (hand.offset_space == (AddrSpace)null)
                                     return (ulong)(ulong)hand.space;
                                 return (ulong)(ulong)hand.temp_space;
-                            case v_offset:
+                            case v_field.v_offset:
                                 if (hand.offset_space == (AddrSpace)null)
                                     return hand.offset_offset;
                                 return hand.temp_offset;
-                            case v_size:
+                            case v_field.v_size:
                                 return hand.size;
-                            case v_offset_plus:
-                                if (hand.space != walker.getConstSpace())
-                                { // If we are not a constant
+                            case v_field.v_offset_plus:
+                                if (hand.space != walker.getConstSpace()) {
+                                    // If we are not a constant
                                     if (hand.offset_space == (AddrSpace)null)
                                         return hand.offset_offset + (value_real & 0xffff); // Adjust offset by truncation amount
                                     return hand.temp_offset + (value_real & 0xffff);
                                 }
-                                else
-                                {           // If we are a constant, we want to return a shifted value
+                                else {
+                                    // If we are a constant, we want to return a shifted value
                                     ulong val;
                                     if (hand.offset_space == (AddrSpace)null)
                                         val = hand.offset_offset;
@@ -246,10 +255,10 @@ namespace Sla.SLEIGH
                         }
                         break;
                     }
-                case j_relative:
-                case real:
+                case const_type.j_relative:
+                case const_type.real:
                     return value_real;
-                case spaceid:
+                case const_type.spaceid:
                     return (ulong)(ulong)value.spaceid;
             }
             return 0;           // Should never reach here
@@ -258,16 +267,15 @@ namespace Sla.SLEIGH
         public AddrSpace fixSpace(ParserWalker walker)
         {               // Get the value of the ConstTpl in context
                         // when we know it is a space
-            switch (type)
-            {
-                case j_curspace:
+            switch (type) {
+                case const_type.j_curspace:
                     return walker.getCurSpace();
-                case handle:
+                case const_type.handle:
                     {
                         FixedHandle hand = walker.getFixedHandle(value.handle_index);
                         switch (select)
                         {
-                            case v_space:
+                            case v_field.v_space:
                                 if (hand.offset_space == (AddrSpace)null)
                                     return hand.space;
                                 return hand.temp_space;
@@ -276,9 +284,9 @@ namespace Sla.SLEIGH
                         }
                         break;
                     }
-                case spaceid:
+                case const_type.spaceid:
                     return value.spaceid;
-                case j_flowref:
+                case const_type.j_flowref:
                     return walker.getRefAddr().getSpace();
                 default:
                     break;
@@ -286,37 +294,37 @@ namespace Sla.SLEIGH
             throw new LowlevelError("ConstTpl is not a spaceid as expected");
         }
 
-        public void transfer(List<HandleTpl*> @params)
-        {               // Replace old handles with new handles
+        public void transfer(List<HandleTpl> @params)
+        {
+            // Replace old handles with new handles
             if (type != handle) return;
-            HandleTpl* newhandle = params[value.handle_index] ;
+            HandleTpl newhandle = params[value.handle_index] ;
 
-            switch (select)
-            {
-                case v_space:
+            switch (select) {
+                case v_field.v_space:
                     *this = newhandle.getSpace();
                     break;
-                case v_offset:
+                case v_field.v_offset:
                     *this = newhandle.getPtrOffset();
                     break;
-                case v_offset_plus:
+                case v_field.v_offset_plus:
                     {
                         ulong tmp = value_real;
                         *this = newhandle.getPtrOffset();
-                        if (type == real)
+                        if (type == const_type.real)
                         {
                             value_real += (tmp & 0xffff);
                         }
-                        else if ((type == handle) && (select == v_offset))
+                        else if ((type == const_type.handle) && (select == v_field.v_offset))
                         {
-                            select = v_offset_plus;
+                            select = v_field.v_offset_plus;
                             value_real = tmp;
                         }
                         else
                             throw new LowlevelError("Cannot truncate macro input in this way");
                         break;
                     }
-                case v_size:
+                case v_field.v_size:
                     *this = newhandle.getSize();
                     break;
             }
@@ -326,23 +334,22 @@ namespace Sla.SLEIGH
 
         public void changeHandleIndex(List<int> handmap)
         {
-            if (type == handle)
+            if (type == const_type.handle)
                 value.handle_index = handmap[value.handle_index];
         }
 
         public void fillinSpace(FixedHandle hand, ParserWalker walker)
-        { // Fill in the space portion of a FixedHandle, base on this ConstTpl
-            switch (type)
-            {
-                case j_curspace:
+        {
+            // Fill in the space portion of a FixedHandle, base on this ConstTpl
+            switch (type) {
+                case const_type.j_curspace:
                     hand.space = walker.getCurSpace();
                     return;
-                case handle:
+                case const_type.handle:
                     {
                         FixedHandle otherhand = walker.getFixedHandle(value.handle_index);
-                        switch (select)
-                        {
-                            case v_space:
+                        switch (select) {
+                            case v_field.v_space:
                                 hand.space = otherhand.space;
                                 return;
                             default:
@@ -350,7 +357,7 @@ namespace Sla.SLEIGH
                         }
                         break;
                     }
-                case spaceid:
+                case const_type.spaceid:
                     hand.space = value.spaceid;
                     return;
                 default:
@@ -360,12 +367,12 @@ namespace Sla.SLEIGH
         }
 
         public void fillinOffset(FixedHandle hand, ParserWalker walker)
-        { // Fillin the offset portion of a FixedHandle, based on this ConstTpl
-          // If the offset value is dynamic, indicate this in the handle
-          // we don't just fill in the temporary variable offset
-          // we assume hand.space is already filled in
-            if (type == handle)
-            {
+        {
+            // Fillin the offset portion of a FixedHandle, based on this ConstTpl
+            // If the offset value is dynamic, indicate this in the handle
+            // we don't just fill in the temporary variable offset
+            // we assume hand.space is already filled in
+            if (type == const_type.handle) {
                 FixedHandle otherhand = walker.getFixedHandle(value.handle_index);
                 hand.offset_space = otherhand.offset_space;
                 hand.offset_offset = otherhand.offset_offset;
@@ -373,8 +380,7 @@ namespace Sla.SLEIGH
                 hand.temp_space = otherhand.temp_space;
                 hand.temp_offset = otherhand.temp_offset;
             }
-            else
-            {
+            else {
                 hand.offset_space = (AddrSpace)null;
                 hand.offset_offset = hand.space.wrapOffset(fix(walker));
             }
@@ -382,53 +388,51 @@ namespace Sla.SLEIGH
 
         public void saveXml(TextWriter s)
         {
-            s << "<const_tpl type=\"";
-            switch (type)
-            {
-                case real:
-                    s << "real\" val=\"0x" << hex << value_real << "\"/>";
+            s.Write("<const_tpl type=\"");
+            switch (type) {
+                case const_type.real:
+                    s.Write($"real\" val=\"0x{value_real:X}\"/>");
                     break;
-                case handle:
-                    s << "handle\" val=\"" << dec << value.handle_index << "\" ";
-                    s << "s=\"";
+                case const_type.handle:
+                    s.Write($"handle\" val=\"{value.handle_index}\" s=\"");
                     printHandleSelector(s, select);
-                    s << "\"";
-                    if (select == v_offset_plus)
-                        s << " plus=\"0x" << hex << value_real << "\"";
-                    s << "/>";
+                    s.Write("\"");
+                    if (select == v_field.v_offset_plus)
+                        s.Write($" plus=\"0x{value_real:X}\"");
+                    s.Write("/>");
                     break;
-                case j_start:
-                    s << "start\"/>";
+                case const_type.j_start:
+                    s.Write("start\"/>");
                     break;
-                case j_next:
-                    s << "next\"/>";
+                case const_type.j_next:
+                    s.Write("next\"/>");
                     break;
-                case j_next2:
-                    s << "next2\"/>";
+                case const_type.j_next2:
+                    s.Write("next2\"/>");
                     break;
-                case j_curspace:
-                    s << "curspace\"/>";
+                case const_type.j_curspace:
+                    s.Write("curspace\"/>");
                     break;
-                case j_curspace_size:
-                    s << "curspace_size\"/>";
+                case const_type.j_curspace_size:
+                    s.Write("curspace_size\"/>");
                     break;
-                case spaceid:
-                    s << "spaceid\" name=\"" << value.spaceid.getName() << "\"/>";
+                case const_type.spaceid:
+                    s.Write($"spaceid\" name=\"{value.spaceid.getName()}\"/>");
                     break;
-                case j_relative:
-                    s << "relative\" val=\"0x" << hex << value_real << "\"/>";
+                case const_type.j_relative:
+                    s.Write($"relative\" val=\"0x{value_real:X}\"/>");
                     break;
-                case j_flowref:
-                    s << "flowref\"/>";
+                case const_type.j_flowref:
+                    s.Write("flowref\"/>");
                     break;
-                case j_flowref_size:
-                    s << "flowref_size\"/>";
+                case const_type.j_flowref_size:
+                    s.Write("flowref_size\"/>");
                     break;
-                case j_flowdest:
-                    s << "flowdest\"/>";
+                case const_type.j_flowdest:
+                    s.Write("flowdest\"/>");
                     break;
-                case j_flowdest_size:
-                    s << "flowdest_size\"/>";
+                case const_type.j_flowdest_size:
+                    s.Write("flowdest_size\"/>");
                     break;
             }
         }
@@ -436,74 +440,51 @@ namespace Sla.SLEIGH
         public void restoreXml(Element el, AddrSpaceManager manage)
         {
             string typestring = el.getAttributeValue("type");
-            if (typestring == "real")
-            {
-                type = real;
-                istringstream s = new istringstream(el.getAttributeValue("val"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> value_real;
+            if (typestring == "real") {
+                value_real = ulong.Parse(el.getAttributeValue("val"));
             }
-            else if (typestring == "handle")
-            {
-                type = handle;
-                istringstream s = new istringstream(el.getAttributeValue("val"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> value.handle_index;
+            else if (typestring == "handle") {
+                type = const_type.handle;
+                value.handle_index = int.Parse(el.getAttributeValue("val"));
                 select = readHandleSelector(el.getAttributeValue("s"));
-                if (select == v_offset_plus)
-                {
-                    istringstream s2 = new istringstream(el.getAttributeValue("plus"));
-                    s2.unsetf(ios::dec | ios::hex | ios::oct);
-                    s2 >> value_real;
+                if (select == v_field.v_offset_plus) {
+                    value_real = ulong.Parse(el.getAttributeValue("plus"));
                 }
             }
-            else if (typestring == "start")
-            {
-                type = j_start;
+            else if (typestring == "start") {
+                type = const_type.j_start;
             }
-            else if (typestring == "next")
-            {
-                type = j_next;
+            else if (typestring == "next") {
+                type = const_type.j_next;
             }
-            else if (typestring == "next2")
-            {
-                type = j_next2;
+            else if (typestring == "next2") {
+                type = const_type.j_next2;
             }
-            else if (typestring == "curspace")
-            {
-                type = j_curspace;
+            else if (typestring == "curspace") {
+                type = const_type.j_curspace;
             }
-            else if (typestring == "curspace_size")
-            {
-                type = j_curspace_size;
+            else if (typestring == "curspace_size") {
+                type = const_type.j_curspace_size;
             }
-            else if (typestring == "spaceid")
-            {
-                type = spaceid;
+            else if (typestring == "spaceid") {
+                type = const_type.spaceid;
                 value.spaceid = manage.getSpaceByName(el.getAttributeValue("name"));
             }
-            else if (typestring == "relative")
-            {
-                type = j_relative;
-                istringstream s = new istringstream(el.getAttributeValue("val"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> value_real;
+            else if (typestring == "relative") {
+                type = const_type.j_relative;
+                value_real = ulong.Parse(el.getAttributeValue("val"));
             }
-            else if (typestring == "flowref")
-            {
-                type = j_flowref;
+            else if (typestring == "flowref") {
+                type = const_type.j_flowref;
             }
-            else if (typestring == "flowref_size")
-            {
-                type = j_flowref_size;
+            else if (typestring == "flowref_size") {
+                type = const_type.j_flowref_size;
             }
-            else if (typestring == "flowdest")
-            {
-                type = j_flowdest;
+            else if (typestring == "flowdest") {
+                type = const_type.j_flowdest;
             }
-            else if (typestring == "flowdest_size")
-            {
-                type = j_flowdest_size;
+            else if (typestring == "flowdest_size") {
+                type = const_type.j_flowdest_size;
             }
             else
                 throw new LowlevelError("Bad constant type");

@@ -68,7 +68,7 @@ namespace Sla.DECCORE
         /// If Varnode is a component head, pointer to corresponding Partition
         private Partition partHead;
         /// Next ValueSet to iterate
-        private ValueSet next;
+        internal ValueSet next;
 
         /// Does the indicated equation apply for the given input slot
         /// Perform basic checks that the selected Equation exists and applies
@@ -104,25 +104,23 @@ namespace Sla.DECCORE
         ///
         /// \param v is the given Varnode to attach to
         /// \param tCode indicates whether to treat values as constants are relative offsets
-        private void setVarnode(Varnode v, int tCode)
+        internal void setVarnode(Varnode v, int tCode)
         {
             typeCode = tCode;
             vn = v;
             vn.setValueSet(this);
-            if (typeCode != 0)
-            {
+            if (typeCode != 0) {
                 opCode = OpCode.CPUI_MAX;
                 numParams = 0;
                 range.setRange(0, vn.getSize());   // Treat as offset of 0 relative to special value
                 leftIsStable = true;
                 rightIsStable = true;
             }
-            else if (vn.isWritten())
-            {
-                PcodeOp* op = vn.getDef();
+            else if (vn.isWritten()) {
+                PcodeOp op = vn.getDef();
                 opCode = op.code();
-                if (opCode == OpCode.CPUI_INDIRECT)
-                {   // Treat OpCode.CPUI_INDIRECT as OpCode.CPUI_COPY
+                if (opCode == OpCode.CPUI_INDIRECT) {
+                    // Treat OpCode.CPUI_INDIRECT as OpCode.CPUI_COPY
                     numParams = 1;
                     opCode = OpCode.CPUI_COPY;
                 }
@@ -131,16 +129,15 @@ namespace Sla.DECCORE
                 leftIsStable = false;
                 rightIsStable = false;
             }
-            else if (vn.isConstant())
-            {
+            else if (vn.isConstant()) {
                 opCode = OpCode.CPUI_MAX;
                 numParams = 0;
                 range.setRange(vn.getOffset(), vn.getSize());
                 leftIsStable = true;
                 rightIsStable = true;
             }
-            else
-            {   // Some other form of input
+            else {
+                // Some other form of input
                 opCode = OpCode.CPUI_MAX;
                 numParams = 0;
                 typeCode = 0;
@@ -228,7 +225,7 @@ namespace Sla.DECCORE
         /// operator defining the Varnode attached to \b this value set and pushing them
         /// forward through the operator.
         /// \return \b true if there was a change to \b this value set
-        private bool iterate(Widener widener)
+        internal bool iterate(Widener widener)
         {
             if (!vn.isWritten()) return false;
             if (widener.checkFreeze(*this)) return false;
@@ -372,7 +369,7 @@ namespace Sla.DECCORE
 
             if (res == range)
                 return false;
-            if (partHead != (Partition*)0)
+            if (partHead != (Partition)null)
             {
                 if (!widener.doWidening(*this, range, res))
                     setFull();

@@ -19,7 +19,7 @@ namespace Sla.DECCORE
             // So it should be commutative
             // But the typing information doesn't really
             // allow this to be commutative.
-            opflags = PcodeOp::binary | PcodeOp::nocollapse;
+            opflags = PcodeOp.Flags.binary | PcodeOp.Flags.nocollapse;
             addlflags = arithmetic_op;
             behave = new OpBehavior(CPUI_PTRSUB, false); // Dummy behavior
         }
@@ -51,7 +51,7 @@ namespace Sla.DECCORE
             TypePointer* ptype = (TypePointer*)op.getIn(0).getHighTypeReadFacing(op);
             if (ptype.getMetatype() == type_metatype.TYPE_PTR)
             {
-                ulong offset = AddrSpace::addressToByte(op.getIn(1).getOffset(), ptype.getWordSize());
+                ulong offset = AddrSpace.addressToByte(op.getIn(1).getOffset(), ptype.getWordSize());
                 ulong unusedOffset;
                 TypePointer* unusedParent;
                 Datatype* rettype = ptype.downChain(offset, unusedParent, unusedOffset, false, *tlst);

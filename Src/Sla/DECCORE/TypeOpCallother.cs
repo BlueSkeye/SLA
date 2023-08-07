@@ -12,7 +12,7 @@ namespace Sla.DECCORE
     {
         public TypeOpCallother(TypeFactory t)
         {
-            opflags = PcodeOp::special | PcodeOp::call | PcodeOp::nocollapse;
+            opflags = PcodeOp.Flags.special | PcodeOp::call | PcodeOp.Flags.nocollapse;
             behave = new OpBehavior(CPUI_CALLOTHER, false, true); // Dummy behavior
         }
 
@@ -50,7 +50,7 @@ namespace Sla.DECCORE
                 Architecture* glb = bb.getFuncdata().getArch();
                 int index = op.getIn(0).getOffset();
                 UserPcodeOp* userop = glb.userops.getOp(index);
-                if (userop != (UserPcodeOp*)0)
+                if (userop != (UserPcodeOp)null)
                     return userop.getOperatorName(op);
             }
             ostringstream res;

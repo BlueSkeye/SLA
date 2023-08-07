@@ -18,13 +18,13 @@ namespace Sla.SLEIGH
         
         public VarnodeTpl(int hand, bool zerosize)
         {
-            space = new ConstTpl(ConstTpl::handle, hand, ConstTpl::v_space);
-            offset = new ConstTpl(ConstTpl::handle, hand, ConstTpl::v_offset);
-            size = new ConstTpl(ConstTpl::handle, hand, ConstTpl::v_size);
+            space = new ConstTpl(ConstTpl.const_type.handle, hand, ConstTpl::v_space);
+            offset = new ConstTpl(ConstTpl.const_type.handle, hand, ConstTpl::v_offset);
+            size = new ConstTpl(ConstTpl.const_type.handle, hand, ConstTpl::v_size);
                 // Varnode built from a handle
                         // if zerosize is true, set the size constant to zero
             if (zerosize)
-                size = ConstTpl(ConstTpl::real, 0);
+                size = ConstTpl(ConstTpl.const_type.real, 0);
             unnamed_flag = false;
         }
 
@@ -62,7 +62,7 @@ namespace Sla.SLEIGH
 
         public bool isDynamic(ParserWalker walker)
         {
-            if (offset.getType() != ConstTpl::handle) return false;
+            if (offset.getType() != ConstTpl.const_type.handle) return false;
             // Technically we should probably check all three
             // ConstTpls for dynamic handles, but in all cases
             // if there is any dynamic piece then the offset is
@@ -75,7 +75,7 @@ namespace Sla.SLEIGH
             bool doesOffsetPlus = false;
             int handleIndex;
             int plus;
-            if ((offset.getType() == ConstTpl::handle) && (offset.getSelect() == ConstTpl::v_offset_plus))
+            if ((offset.getType() == ConstTpl.const_type.handle) && (offset.getSelect() == ConstTpl::v_offset_plus))
             {
                 handleIndex = offset.getHandleIndex();
                 plus = (int)offset.getReal();
@@ -106,12 +106,12 @@ namespace Sla.SLEIGH
 
         public void setOffset(ulong constVal)
         {
-            offset = new ConstTpl(ConstTpl::real, constVal);
+            offset = new ConstTpl(ConstTpl.const_type.real, constVal);
         }
 
         public void setRelative(ulong constVal)
         {
-            offset = new ConstTpl(ConstTpl::j_relative, constVal);
+            offset = new ConstTpl(ConstTpl.const_type.j_relative, constVal);
         }
 
         public void setSize(ConstTpl sz )
@@ -128,14 +128,14 @@ namespace Sla.SLEIGH
 
         public bool isLocalTemp()
         {
-            if (space.getType() != ConstTpl::spaceid) return false;
+            if (space.getType() != ConstTpl.const_type.spaceid) return false;
             if (space.getSpace().getType() != spacetype.IPTR_INTERNAL) return false;
             return true;
         }
 
         public bool isRelative()
         {
-            return (offset.getType() == ConstTpl::j_relative);
+            return (offset.getType() == ConstTpl.const_type.j_relative);
         }
 
         public void changeHandleIndex(List<int> handmap)
@@ -149,7 +149,7 @@ namespace Sla.SLEIGH
         { // We know this.offset is an offset_plus, check that the truncation is in bounds (given -sz-)
           // adjust plus for endianness if necessary
           // return true if truncation is in bounds
-            if (size.getType() != ConstTpl::real)
+            if (size.getType() != ConstTpl.const_type.real)
                 return false;
             int numbytes = (int)size.getReal();
             int byteoffset = (int)offset.getReal();
@@ -168,7 +168,7 @@ namespace Sla.SLEIGH
             }
 
 
-            offset = ConstTpl(ConstTpl::handle, offset.getHandleIndex(), ConstTpl::v_offset_plus, val);
+            offset = ConstTpl(ConstTpl.const_type.handle, offset.getHandleIndex(), ConstTpl::v_offset_plus, val);
             return true;
         }
 

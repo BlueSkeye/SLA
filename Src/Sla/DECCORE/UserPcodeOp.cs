@@ -1,9 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -37,7 +32,7 @@ namespace Sla.DECCORE
         /// Architecture owning the user defined op
         protected Architecture glb;
         /// Boolean attributes of the CALLOTHER
-        protected uint flags;
+        protected userop_flags flags;
 
         /// Construct from name and index
         public UserPcodeOp(Architecture g, string nm,int ind)
@@ -55,7 +50,8 @@ namespace Sla.DECCORE
         public int getIndex() => useropindex;
 
         /// Get display type (0=functional)
-        public uint getDisplay() => (flags & (annotation_assignment | no_operator));
+        public userop_flags getDisplay()
+            => (flags & (userop_flags.annotation_assignment | userop_flags.no_operator));
 
         ~UserPcodeOp()
         {
@@ -84,6 +80,6 @@ namespace Sla.DECCORE
         ///
         /// The details of how a user defined operation behaves are parsed from the element.
         /// \param decoder is the stream decoder
-        public abstract void decode(Decoder decoder);
+        public abstract void decode(Sla.CORE.Decoder decoder);
     }
 }

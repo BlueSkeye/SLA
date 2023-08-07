@@ -108,7 +108,7 @@ namespace Sla.DECCORE
         public override int apply(Funcdata data)
         {
             ParamActive* active = data.getActiveOutput();
-            if (active != (ParamActive*)0)
+            if (active != (ParamActive)null)
             {
                 PcodeOp* op;
                 Varnode* vn;

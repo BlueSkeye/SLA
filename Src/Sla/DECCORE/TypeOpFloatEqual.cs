@@ -13,7 +13,7 @@ namespace Sla.DECCORE
         public TypeOpFloatEqual(TypeFactory t, Translate trans)
             : base(t, OpCode.CPUI_FLOAT_EQUAL,"==", type_metatype.TYPE_BOOL, type_metatype.TYPE_FLOAT)
         {
-            opflags = PcodeOp::binary | PcodeOp::booloutput | PcodeOp::commutative;
+            opflags = PcodeOp.Flags.binary | PcodeOp::booloutput | PcodeOp::commutative;
             addlflags = floatingpoint_op;
             behave = new OpBehaviorFloatEqual(trans);
         }

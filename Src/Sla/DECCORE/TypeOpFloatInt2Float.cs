@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpFloatInt2Float(TypeFactory t, Translate trans)
             : base(t, OpCode.CPUI_FLOAT_INT2FLOAT,"INT2FLOAT", type_metatype.TYPE_FLOAT, type_metatype.TYPE_INT)
         {
-            opflags = PcodeOp::unary;
+            opflags = PcodeOp.Flags.unary;
             addlflags = floatingpoint_op;
             behave = new OpBehaviorFloatInt2Float(trans);
         }

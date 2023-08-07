@@ -36,9 +36,9 @@ namespace Sla.DECCORE
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if ((attribId == AttributeId.ATTRIB_READONLY) && decoder.readBool())
-                    flags |= Varnode::@readonly;
+                    flags |= Varnode.varnode_flags.@readonly;
                 else if ((attribId == AttributeId.ATTRIB_VOLATILE) && decoder.readBool())
-                    flags |= Varnode::volatil;
+                    flags |= Varnode.varnode_flags.volatil;
             }
             if (flags != 0) {
                 glb.symboltab.setPropertyRange(flags, range);
@@ -313,7 +313,7 @@ namespace Sla.DECCORE
                             renameSymbol(sym, buildUndefinedName());
                         }
                     }
-                    clearAttribute(sym, Varnode::nolocalalias); // Clear any calculated attributes
+                    clearAttribute(sym, Varnode.varnode_flags.nolocalalias); // Clear any calculated attributes
                     if (sym.isSizeTypeLocked())
                         resetSizeLockType(sym);
                 }
@@ -538,16 +538,16 @@ namespace Sla.DECCORE
 
         public override void setAttribute(Symbol sym, uint attr)
         {
-            attr &= (Varnode.varnode_flags.typelock | Varnode.varnode_flags.namelock | Varnode::@readonly | Varnode::incidental_copy |
-                 Varnode::nolocalalias | Varnode::volatil | Varnode::indirectstorage | Varnode::hiddenretparm);
+            attr &= (Varnode.varnode_flags.typelock | Varnode.varnode_flags.namelock | Varnode.varnode_flags.@readonly | Varnode.varnode_flags.incidental_copy |
+                 Varnode.varnode_flags.nolocalalias | Varnode.varnode_flags.volatil | Varnode::indirectstorage | Varnode::hiddenretparm);
             sym.flags |= attr;
             sym.checkSizeTypeLock();
         }
 
         public override void clearAttribute(Symbol sym, uint attr)
         {
-            attr &= (Varnode.varnode_flags.typelock | Varnode.varnode_flags.namelock | Varnode::@readonly | Varnode::incidental_copy |
-                 Varnode::nolocalalias | Varnode::volatil | Varnode::indirectstorage | Varnode::hiddenretparm);
+            attr &= (Varnode.varnode_flags.typelock | Varnode.varnode_flags.namelock | Varnode.varnode_flags.@readonly | Varnode.varnode_flags.incidental_copy |
+                 Varnode.varnode_flags.nolocalalias | Varnode.varnode_flags.volatil | Varnode::indirectstorage | Varnode::hiddenretparm);
             sym.flags &= ~attr;
             sym.checkSizeTypeLock();
         }
@@ -788,7 +788,7 @@ namespace Sla.DECCORE
 
             if ((flags & Varnode.varnode_flags.unaffected) != 0)
             {
-                if ((flags & Varnode::return_address) != 0)
+                if ((flags & Varnode.varnode_flags.return_address) != 0)
                     s << "unaff_retaddr";
                 else
                 {

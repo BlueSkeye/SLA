@@ -14,7 +14,7 @@ namespace Sla.DECCORE
             : base(t, OpCode.CPUI_MULTIEQUAL,"?")
 
         {
-            opflags = PcodeOp::special | PcodeOp::marker | PcodeOp::nocollapse;
+            opflags = PcodeOp.Flags.special | PcodeOp::marker | PcodeOp.Flags.nocollapse;
             behave = new OpBehavior(CPUI_MULTIEQUAL, false, true); // Dummy behavior
         }
 

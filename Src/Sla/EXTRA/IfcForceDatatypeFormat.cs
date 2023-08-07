@@ -24,7 +24,7 @@ namespace Sla.EXTRA
                 throw new IfaceExecutionError("Unknown data-type: " + typeName);
             string formatString;
             s >> ws >> formatString;
-            uint format = Datatype::encodeIntegerFormat(formatString);
+            uint format = Datatype.encodeIntegerFormat(formatString);
             dcp.conf.types.setDisplayFormat(dt, format);
             *status.optr << "Successfully forced data-type display" << endl;
         }

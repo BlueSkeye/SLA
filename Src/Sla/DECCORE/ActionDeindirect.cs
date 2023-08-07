@@ -50,7 +50,7 @@ namespace Sla.DECCORE
                 {
                     AddrSpace* sp = data.getAddress().getSpace(); // Assume function is in same space as calling function
                                                                   // Convert constant to a byte address in this space
-                    ulong offset = AddrSpace::addressToByte(vn.getOffset(), sp.getWordSize());
+                    ulong offset = AddrSpace.addressToByte(vn.getOffset(), sp.getWordSize());
                     int align = data.getArch().funcptr_align;
                     if (align != 0)
                     {       // If we know function pointer should be aligned

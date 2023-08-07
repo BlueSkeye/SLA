@@ -359,7 +359,7 @@ namespace Sla.DECCORE
             }
             else if (baseType.getMetatype() == type_metatype.TYPE_SPACEBASE)
             {
-                ulong nonmultbytes = AddrSpace::addressToByte(nonmultsum, ct.getWordSize()); // Convert to bytes
+                ulong nonmultbytes = AddrSpace.addressToByte(nonmultsum, ct.getWordSize()); // Convert to bytes
                 ulong extra;
                 uint arrayHint = findArrayHint();
                 // Get offset into mapped variable
@@ -374,7 +374,7 @@ namespace Sla.DECCORE
             }
             else if (baseType.getMetatype() == type_metatype.TYPE_STRUCT)
             {
-                ulong nonmultbytes = AddrSpace::addressToByte(nonmultsum, ct.getWordSize()); // Convert to bytes
+                ulong nonmultbytes = AddrSpace.addressToByte(nonmultsum, ct.getWordSize()); // Convert to bytes
                 ulong extra;
                 uint arrayHint = findArrayHint();
                 // Get offset into field in structure
@@ -616,7 +616,7 @@ namespace Sla.DECCORE
             isDistributeUsed = false;
             isSubtype = false;
             distributeOp = (PcodeOp)null;
-            int unitsize = AddrSpace::addressToByteInt(1, ct.getWordSize());
+            int unitsize = AddrSpace.addressToByteInt(1, ct.getWordSize());
             isDegenerate = (baseType.getSize() <= unitsize && baseType.getSize() > 0);
         }
 
@@ -685,7 +685,7 @@ namespace Sla.DECCORE
                 size = 0;       // Open-ended size being pointed to, there will be no "multiples" component
             else
                 size = AddrSpace::byteToAddressInt(baseType.getSize(), ct.getWordSize());
-            int unitsize = AddrSpace::addressToByteInt(1, ct.getWordSize());
+            int unitsize = AddrSpace.addressToByteInt(1, ct.getWordSize());
             isDegenerate = (baseType.getSize() <= unitsize && baseType.getSize() > 0);
             preventDistribution = false;
             clear();

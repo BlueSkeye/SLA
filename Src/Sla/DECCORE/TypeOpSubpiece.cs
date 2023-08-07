@@ -13,7 +13,7 @@ namespace Sla.DECCORE
         public TypeOpSubpiece(TypeFactory t)
             : base(t, OpCode.CPUI_SUBPIECE,"SUB", type_metatype.TYPE_UNKNOWN, type_metatype.TYPE_UNKNOWN)
         {
-            opflags = PcodeOp::binary;
+            opflags = PcodeOp.Flags.binary;
             behave = new OpBehaviorSubpiece();
         }
 

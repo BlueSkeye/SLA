@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         public ProtoStoreInternal(Datatype vt)
         {
             voidtype = vt;
-            outparam = (ProtoParameter*)0;
+            outparam = (ProtoParameter)null;
             ParameterPieces pieces;
             pieces.type = voidtype;
             pieces.flags = 0;
@@ -35,12 +35,12 @@ namespace Sla.DECCORE
 
         ~ProtoStoreInternal()
         {
-            if (outparam != (ProtoParameter*)0)
+            if (outparam != (ProtoParameter)null)
                 delete outparam;
             for (int i = 0; i < inparam.size(); ++i)
             {
                 ProtoParameter* param = inparam[i];
-                if (param != (ProtoParameter*)0)
+                if (param != (ProtoParameter)null)
                     delete param;
             }
         }
@@ -48,8 +48,8 @@ namespace Sla.DECCORE
         public override ProtoParameter setInput(int i, string nm, ParameterPieces pieces)
         {
             while (inparam.size() <= i)
-                inparam.Add((ProtoParameter*)0);
-            if (inparam[i] != (ProtoParameter*)0)
+                inparam.Add((ProtoParameter)null);
+            if (inparam[i] != (ProtoParameter)null)
                 delete inparam[i];
             inparam[i] = new ParameterBasic(nm, pieces.addr, pieces.type, pieces.flags);
             return inparam[i];
@@ -59,15 +59,15 @@ namespace Sla.DECCORE
         {
             int sz = inparam.size();
             if (i >= sz) return;
-            if (inparam[i] != (ProtoParameter*)0)
+            if (inparam[i] != (ProtoParameter)null)
                 delete inparam[i];
-            inparam[i] = (ProtoParameter*)0;
+            inparam[i] = (ProtoParameter)null;
             for (int j = i + 1; j < sz; ++j)
             {   // Renumber parameters with index > i
                 inparam[j - 1] = inparam[j];
-                inparam[j] = (ProtoParameter*)0;
+                inparam[j] = (ProtoParameter)null;
             }
-            while (inparam.GetLastItem() == (ProtoParameter*)0)
+            while (inparam.GetLastItem() == (ProtoParameter)null)
                 inparam.RemoveLastItem();
         }
 
@@ -75,7 +75,7 @@ namespace Sla.DECCORE
         {
             for (int i = 0; i < inparam.size(); ++i)
             {
-                if (inparam[i] != (ProtoParameter*)0)
+                if (inparam[i] != (ProtoParameter)null)
                     delete inparam[i];
             }
             inparam.clear();
@@ -86,13 +86,13 @@ namespace Sla.DECCORE
         public override ProtoParameter getInput(int i)
         {
             if (i >= inparam.size())
-                return (ProtoParameter*)0;
+                return (ProtoParameter)null;
             return inparam[i];
         }
 
         public override ProtoParameter setOutput(ParameterPieces piece)
         {
-            if (outparam != (ProtoParameter*)0)
+            if (outparam != (ProtoParameter)null)
                 delete outparam;
             outparam = new ParameterBasic("", piece.addr, piece.type, piece.flags);
             return outparam;
@@ -100,7 +100,7 @@ namespace Sla.DECCORE
 
         public override void clearOutput()
         {
-            if (outparam != (ProtoParameter*)0)
+            if (outparam != (ProtoParameter)null)
                 delete outparam;
             outparam = new ParameterBasic(voidtype);
         }
@@ -111,14 +111,14 @@ namespace Sla.DECCORE
         {
             ProtoStoreInternal* res = new ProtoStoreInternal(voidtype);
             delete res.outparam;
-            if (outparam != (ProtoParameter*)0)
+            if (outparam != (ProtoParameter)null)
                 res.outparam = outparam.clone();
             else
-                res.outparam = (ProtoParameter*)0;
+                res.outparam = (ProtoParameter)null;
             for (int i = 0; i < inparam.size(); ++i)
             {
                 ProtoParameter* param = inparam[i];
-                if (param != (ProtoParameter*)0)
+                if (param != (ProtoParameter)null)
                     param = param.clone();
                 res.inparam.Add(param);
             }
@@ -128,7 +128,7 @@ namespace Sla.DECCORE
         public override void encode(Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_INTERNALLIST);
-            if (outparam != (ProtoParameter*)0)
+            if (outparam != (ProtoParameter)null)
             {
                 encoder.openElement(ElementId.ELEM_RETPARAM);
                 if (outparam.isTypeLocked())
@@ -199,7 +199,7 @@ namespace Sla.DECCORE
                 {
                     uint attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;
-                    if (attribId == ATTRIB_NAME)
+                    if (attribId == AttributeId.ATTRIB_NAME)
                         name = decoder.readString();
                     else if (attribId == ATTRIB_TYPELOCK)
                     {
@@ -231,7 +231,7 @@ namespace Sla.DECCORE
                     namelist.Add(name);
                 pieces.emplace_back();
                 ParameterPieces & curparam(pieces.GetLastItem());
-                curparam.addr = Address::decode(decoder);
+                curparam.addr = Address.decode(decoder);
                 curparam.type = glb.types.decodeType(decoder);
                 curparam.flags = flags;
                 if (curparam.addr.isInvalid())

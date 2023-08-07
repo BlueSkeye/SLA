@@ -69,7 +69,7 @@ namespace Sla.DECCORE
             }
             if (curvn.isWritten()) {
                 PcodeOp tmp = curvn.getDef();
-                if (tmp.isBoolOutput() && (tmp.getEvalType() == PcodeOp::binary)) {
+                if (tmp.isBoolOutput() && (tmp.getEvalType() == PcodeOp.Flags.binary)) {
                     binaryop = tmp;
                     Varnode binvn = binaryop.getIn(0);
                     if (!binvn.isConstant()) {
@@ -146,7 +146,7 @@ namespace Sla.DECCORE
                     // 	  popstate = false;
                     // 	}
                     //       }
-                    else if (curop.isBoolOutput() && (curop.getEvalType() == PcodeOp::binary)) {
+                    else if (curop.isBoolOutput() && (curop.getEvalType() == PcodeOp.Flags.binary)) {
                         if (!binon) {
                             opstate[state] = curop;
                             slotstate[state] = 0;

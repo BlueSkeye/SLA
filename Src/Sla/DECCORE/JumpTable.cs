@@ -391,7 +391,7 @@ namespace Sla.DECCORE
         internal Address getAddressByIndex(int i) => addresstable[i];
 
         /// Set the most common jump-table target to be the last address in the table
-        private void setLastAsMostCommon()
+        internal void setLastAsMostCommon()
         {
             defaultBlock = lastBlock;
         }
@@ -729,7 +729,7 @@ namespace Sla.DECCORE
         private void decode(Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_JUMPTABLE);
-            opaddress = Address::decode(decoder);
+            opaddress = Address.decode(decoder);
             bool missedlabel = false;
             for (; ; )
             {
@@ -755,7 +755,7 @@ namespace Sla.DECCORE
                     }
                     if (!foundlabel)        // No label attribute
                         missedlabel = true; // No following entries are allowed to have a label attribute
-                    addresstable.Add(Address::decode(decoder));
+                    addresstable.Add(Address.decode(decoder));
                 }
                 else if (subId == ELEM_LOADTABLE)
                 {

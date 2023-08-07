@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpIntSext(TypeFactory t)
             : base(t, OpCode.CPUI_INT_SEXT,"SEXT", type_metatype.TYPE_INT, type_metatype.TYPE_INT)
         {
-            opflags = PcodeOp::unary;
+            opflags = PcodeOp.Flags.unary;
             behave = new OpBehaviorIntSext();
         }
 

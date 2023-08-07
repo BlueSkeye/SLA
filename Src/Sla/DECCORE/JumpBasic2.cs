@@ -35,7 +35,7 @@ namespace Sla.DECCORE
                 return true;
             FlowBlock* defblock = normalvn.getDef().getParent();
             FlowBlock* switchblock = pathMeld.getOp(0).getParent();
-            while (switchblock != (FlowBlock*)0)
+            while (switchblock != (FlowBlock)null)
             {
                 if (switchblock == defblock)
                     return true;

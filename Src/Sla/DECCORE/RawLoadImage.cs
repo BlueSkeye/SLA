@@ -101,7 +101,7 @@ namespace Sla.DECCORE
 
         public override void adjustVma(long adjust)
         {
-            adjust = AddrSpace::addressToByte(adjust, spaceid.getWordSize());
+            adjust = AddrSpace.addressToByte(adjust, spaceid.getWordSize());
             vma += adjust;
         }
     }

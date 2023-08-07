@@ -138,7 +138,7 @@ namespace Sla.DECCORE
                     pushConsumed(outc, op.getIn(0), worklist);
                     if (op.getIn(1).getSpace().getType() == spacetype.IPTR_IOP)
                     {
-                        PcodeOp* indop = PcodeOp::getOpFromConst(op.getIn(1).getAddr());
+                        PcodeOp* indop = PcodeOp.getOpFromConst(op.getIn(1).getAddr());
                         if (!indop.isDead())
                         {
                             if (indop.code() == OpCode.CPUI_COPY)
@@ -365,7 +365,7 @@ namespace Sla.DECCORE
         /// \return the bit mask of what is consumed
         private static ulong gatherConsumedReturn(Funcdata data)
         {
-            if (data.getFuncProto().isOutputLocked() || data.getActiveOutput() != (ParamActive*)0)
+            if (data.getFuncProto().isOutputLocked() || data.getActiveOutput() != (ParamActive)null)
                 return ~((ulong)0);
             IEnumerator<PcodeOp> iter, enditer;
             enditer = data.endOp(OpCode.CPUI_RETURN);

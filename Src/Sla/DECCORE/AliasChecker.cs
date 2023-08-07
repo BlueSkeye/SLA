@@ -96,7 +96,7 @@ namespace Sla.DECCORE
             for (IEnumerator<AddBase> iter = addBase.begin(); iter != addBase.end(); ++iter)
             {
                 ulong offset = gatherOffset((iter).@base);
-                offset = AddrSpace::addressToByte(offset, space.getWordSize()); // Convert to byte offset
+                offset = AddrSpace.addressToByte(offset, space.getWordSize()); // Convert to byte offset
                 alias.Add(offset);
                 if (direction == 1) {
                     if (offset < localBoundary) continue; // Parameter ref

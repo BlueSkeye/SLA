@@ -738,9 +738,9 @@ namespace Sla.DECCORE
         /// \param outafter is the new output FlowBlock
         public void switchEdge(FlowBlock @in, FlowBlock outbefore, FlowBlock outafter)
         {
-            for (int i = 0; i < @@in.outofthis.Count; ++i) {
-                if (@@in.outofthis[i].point == outbefore) {
-                    @@in.replaceOutEdge(i, outafter);
+            for (int i = 0; i < @in.outofthis.Count; ++i) {
+                if (@in.outofthis[i].point == outbefore) {
+                    @in.replaceOutEdge(i, outafter);
                 }
             }
         }

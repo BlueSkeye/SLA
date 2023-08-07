@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpIntZext(TypeFactory t)
             : base(t, OpCode.CPUI_INT_ZEXT,"ZEXT", type_metatype.TYPE_UINT, type_metatype.TYPE_UINT)
         {
-            opflags = PcodeOp::unary;
+            opflags = PcodeOp.Flags.unary;
             behave = new OpBehaviorIntZext();
         }
 

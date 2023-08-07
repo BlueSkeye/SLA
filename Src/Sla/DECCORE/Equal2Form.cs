@@ -76,17 +76,17 @@ namespace Sla.DECCORE
             if ((hi2 == (Varnode)null) && (lo2 == (Varnode)null))
             {
                 param2.initPartial(@in.getSize(), 0); // Double precis zero constant
-                return SplitVarnode::prepareBoolOp(in, param2, equalop);
+                return SplitVarnode.prepareBoolOp(in, param2, equalop);
             }
             if ((hi2 == (Varnode)null) && (lo2.isConstant()))
             {
                 param2.initPartial(@in.getSize(), lo2.getOffset());
-                return SplitVarnode::prepareBoolOp(in, param2, equalop);
+                return SplitVarnode.prepareBoolOp(in, param2, equalop);
             }
             if ((lo2 == (Varnode)null) && (hi2.isConstant()))
             {
                 param2.initPartial(@in.getSize(), hi2.getOffset() << 8 * lo1.getSize());
-                return SplitVarnode::prepareBoolOp(in, param2, equalop);
+                return SplitVarnode.prepareBoolOp(in, param2, equalop);
             }
             if (lo2 == (Varnode)null)
             {
@@ -104,7 +104,7 @@ namespace Sla.DECCORE
                 val <<= 8 * lo1.getSize();
                 val |= lo2.getOffset();
                 param2.initPartial(@in.getSize(), val);
-                return SplitVarnode::prepareBoolOp(in, param2, equalop);
+                return SplitVarnode.prepareBoolOp(in, param2, equalop);
             }
             if (hi2.isConstant() || lo2.isConstant())
             {
@@ -112,7 +112,7 @@ namespace Sla.DECCORE
                 return false;
             }
             param2.initPartial(@in.getSize(), lo2, hi2);
-            return SplitVarnode::prepareBoolOp(in, param2, equalop);
+            return SplitVarnode.prepareBoolOp(in, param2, equalop);
         }
 
         // Given a known double precis input, look for double precision compares of the form
@@ -126,8 +126,8 @@ namespace Sla.DECCORE
             if (!workishi) return false;
             if (!i.hasBothPieces()) return false;
             @in = i;
-            hi1 = @@in.getHi();
-            lo1 = @@in.getLo();
+            hi1 = @in.getHi();
+            lo1 = @in.getLo();
 
             if (op.code() == OpCode.CPUI_INT_OR) {
                 orop = op;

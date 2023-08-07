@@ -14,7 +14,7 @@ namespace Sla.DECCORE
             : base(t, OpCode.CPUI_PTRADD,"+")
 
         {
-            opflags = PcodeOp::ternary | PcodeOp::nocollapse;
+            opflags = PcodeOp::ternary | PcodeOp.Flags.nocollapse;
             addlflags = arithmetic_op;
             behave = new OpBehavior(CPUI_PTRADD, false); // Dummy behavior
         }

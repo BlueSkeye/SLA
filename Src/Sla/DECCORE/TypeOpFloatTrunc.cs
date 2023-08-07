@@ -13,7 +13,7 @@ namespace Sla.DECCORE
         public TypeOpFloatTrunc(TypeFactory t, Translate trans)
             : base(t, OpCode.CPUI_FLOAT_TRUNC,"TRUNC", type_metatype.TYPE_INT, type_metatype.TYPE_FLOAT)
         {
-            opflags = PcodeOp::unary;
+            opflags = PcodeOp.Flags.unary;
             addlflags = floatingpoint_op;
             behave = new OpBehaviorFloatTrunc(trans);
         }

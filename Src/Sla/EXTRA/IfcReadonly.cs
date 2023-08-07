@@ -26,7 +26,7 @@ namespace Sla.EXTRA
             if (size == 0)
                 throw new IfaceExecutionError("Must specify a size");
             CORE.Range range = new CORE.Range(addr.getSpace(), addr.getOffset(), addr.getOffset() +(size - 1));
-            dcp.conf.symboltab.setPropertyRange(Varnode::@readonly, range);
+            dcp.conf.symboltab.setPropertyRange(Varnode.varnode_flags.@readonly, range);
 
             *status.optr << "Successfully marked range as readonly" << endl;
         }

@@ -19,7 +19,7 @@ namespace Sla.DECCORE
         public TypeVoid(TypeVoid op)
                   : base(op)
         {
-            flags |= Datatype::coretype;
+            flags |= Datatype.Properties.coretype;
         }
         
         /// Constructor
@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         {
             name = "void";
             displayName = name;
-            flags |= Datatype::coretype;
+            flags |= Datatype.Properties.coretype;
         }
         
         internal override Datatype clone() => new TypeVoid(this);

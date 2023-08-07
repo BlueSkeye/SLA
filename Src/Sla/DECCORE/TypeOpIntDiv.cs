@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpIntDiv(TypeFactory t)
             : base(t, OpCode.CPUI_INT_DIV,"/", type_metatype.TYPE_UINT, type_metatype.TYPE_UINT)
         {
-            opflags = PcodeOp::binary;
+            opflags = PcodeOp.Flags.binary;
             addlflags = arithmetic_op | inherits_sign;
             behave = new OpBehaviorIntDiv();
         }

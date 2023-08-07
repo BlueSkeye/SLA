@@ -30,7 +30,7 @@ namespace Sla.DECCORE
             {
                 ulong off = getVarnodeValue(currentOp.getIn(1));
                 AddrSpace* spc = currentOp.getIn(0).getSpaceFromConst();
-                off = AddrSpace::addressToByte(off, spc.getWordSize());
+                off = AddrSpace.addressToByte(off, spc.getWordSize());
                 int sz = currentOp.getOut().getSize();
                 loadpoints.Add(LoadTable(Address(spc, off), sz));
             }

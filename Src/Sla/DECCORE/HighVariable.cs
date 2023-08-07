@@ -110,7 +110,7 @@ namespace Sla.DECCORE
             // Keep these flags
             flags &= (Varnode.varnode_flags.mark | Varnode.varnode_flags.typelock);
             // Update all but these
-            flags |= fl & ~(Varnode.varnode_flags.mark | Varnode::directwrite | Varnode.varnode_flags.typelock);
+            flags |= fl & ~(Varnode.varnode_flags.mark | Varnode.varnode_flags.directwrite | Varnode.varnode_flags.typelock);
             highflags &= ~flagsdirty; // Clear the dirty flag
         }
 

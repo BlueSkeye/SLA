@@ -116,7 +116,7 @@ namespace Sla.DECCORE
                     if (op.getSeqNum().getOrder() < op1.getSeqNum().getOrder()) continue;
                     if (op.getSeqNum().getOrder() > op2.getSeqNum().getOrder()) continue;
                     // Its likely that INDIRECTs from the first STORE feed INDIRECTs for the second STORE
-                    if (op.code() == OpCode.CPUI_INDIRECT && op2 == PcodeOp::getOpFromConst(op.getIn(1).getAddr()))
+                    if (op.code() == OpCode.CPUI_INDIRECT && op2 == PcodeOp.getOpFromConst(op.getIn(1).getAddr()))
                     {
                         usebyop2 += 1;  // Note this pairing
                         continue;

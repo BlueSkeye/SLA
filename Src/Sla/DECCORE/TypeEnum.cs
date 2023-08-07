@@ -1,4 +1,5 @@
 ﻿using ghidra;
+using Sla.CORE;
 using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
@@ -37,28 +38,27 @@ namespace Sla.DECCORE
             bool fieldisempty;
 
             namemap = nmap;
-            masklist.clear();
+            masklist.Clear();
 
-            flags &= ~((uint)poweroftwo);
+            flags &= ~(Properties.poweroftwo);
 
             maxbit = 8 * size - 1;
 
             curmaxbit = 0;
-            while (curmaxbit <= maxbit)
-            {
+            while (curmaxbit <= maxbit) {
                 curmask = 1;
                 curmask <<= curmaxbit;
                 lastmask = 0;
                 fieldisempty = true;
-                while (curmask != lastmask)
-                {   // Repeat until there is no change in the current mask
+                while (curmask != lastmask) {
+                    // Repeat until there is no change in the current mask
                     lastmask = curmask;     // Note changes from last time through
 
-                    for (iter = namemap.begin(); iter != namemap.end(); ++iter)
-                    { // For every named enumeration value
+                    for (iter = namemap.begin(); iter != namemap.end(); ++iter) {
+                        // For every named enumeration value
                         ulong val = (*iter).first;
-                        if ((val & curmask) != 0)
-                        {   // If the value shares ANY bits in common with the current mask
+                        if ((val & curmask) != 0) {
+                            // If the value shares ANY bits in common with the current mask
                             curmask |= val;     // Absorb ALL defined bits of the value into the current mask
                             fieldisempty = false;
                         }
@@ -78,10 +78,10 @@ namespace Sla.DECCORE
                     mask2 -= 1;                  // every bit below or equal to msb is set to 1
                     curmask = mask1 ^ mask2;
                 }
-                if (fieldisempty)
-                {       // If no value hits this bit
+                if (fieldisempty) {
+                    // If no value hits this bit
                     if (!masklist.empty())
-                        masklist.GetLastItem() |= curmask; // Include the bit with the previous mask
+                        masklist[masklist.Count - 1] |= curmask; // Include the bit with the previous mask
                     else
                         masklist.Add(curmask);
                 }
@@ -90,36 +90,36 @@ namespace Sla.DECCORE
                 curmaxbit += 1;
             }
             if (masklist.size() > 1)
-                flags |= poweroftwo;
+                flags |= Properties.poweroftwo;
         }
 
         /// Restore \b this enum data-type from a stream
         /// Parse a \<type> element with children describing each specific enumeration value.
         /// \param decoder is the stream decoder
         /// \param typegrp is the factory owning \b this data-type
-        protected void decode(Decoder decoder, TypeFactory typegrp)
+        internal void decode(Decoder decoder, TypeFactory typegrp)
         {
             //  uint elemId = decoder.openElement();
             decodeBasic(decoder);
-            submeta = (metatype == type_metatype.TYPE_INT) ? SUB_INT_ENUM : SUB_UINT_ENUM;
+            submeta = (metatype == type_metatype.TYPE_INT)
+                ? sub_metatype.SUB_INT_ENUM
+                : sub_metatype.SUB_UINT_ENUM;
             Dictionary<ulong, string> nmap;
 
-            for (; ; )
-            {
+            while (true) {
                 uint childId = decoder.openElement();
                 if (childId == 0) break;
                 ulong val = 0;
                 string nm;
                 for (; ; )
                 {
-                    uint attrib = decoder.getNextAttributeId();
+                    AttributeId  attrib = decoder.getNextAttributeId();
                     if (attrib == 0) break;
-                    if (attrib == ATTRIB_VALUE)
-                    {
+                    if (attrib == AttributeId.ATTRIB_VALUE) {
                         long valsign = decoder.readSignedInteger(); // Value might be negative
                         val = (ulong)valsign & Globals.calc_mask(size);
                     }
-                    else if (attrib == ATTRIB_NAME)
+                    else if (attrib == AttributeId.ATTRIB_NAME)
                         nm = decoder.readString();
                 }
                 if (nm.size() == 0)
@@ -137,7 +137,7 @@ namespace Sla.DECCORE
         {
             namemap = op.namemap;
             masklist = op.masklist;
-            flags |= (op.flags & poweroftwo) | enumtype;
+            flags |= (op.flags & Properties.poweroftwo) | Properties.enumtype;
         }
 
         /// Construct from a size and meta-type (TYPE_INT or type_metatype.TYPE_UINT)
@@ -145,15 +145,19 @@ namespace Sla.DECCORE
             : base(s, m)
         {
             flags |= enumtype;
-            submeta = (m == type_metatype.TYPE_INT) ? SUB_INT_ENUM : SUB_UINT_ENUM;
+            submeta = (m == type_metatype.TYPE_INT)
+                ? sub_metatype.SUB_INT_ENUM
+                : sub_metatype.SUB_UINT_ENUM;
         }
 
         /// Construct from a size, meta-type, and name
         public TypeEnum(int s, type_metatype m, string nm)
             : base(s, m, nm)
         {
-            flags |= enumtype;
-            submeta = (m == type_metatype.TYPE_INT) ? SUB_INT_ENUM : SUB_UINT_ENUM;
+            flags |= Properties.enumtype;
+            submeta = (m == type_metatype.TYPE_INT)
+                ? sub_metatype.SUB_INT_ENUM
+                : sub_metatype.SUB_UINT_ENUM;
         }
 
         /// Beginning of name map
@@ -171,32 +175,28 @@ namespace Sla.DECCORE
         /// \return true if the representation needs to be complemented
         public bool getMatches(ulong val, List<string> matchname)
         {
-            Dictionary<ulong, string>::const_iterator iter;
             int count;
 
-            for (count = 0; count < 2; ++count)
-            {
+            for (count = 0; count < 2; ++count) {
                 bool allmatch = true;
-                if (val == 0)
-                {   // Zero handled specially, it crosses all masks
-                    iter = namemap.find(val);
-                    if (iter != namemap.end())
-                        valnames.Add((*iter).second);
+                if (val == 0) {
+                    // Zero handled specially, it crosses all masks
+                    string value;
+                    if (namemap.TryGetValue(val, out value))
+                        valnames.Add(value);
                     else
                         allmatch = false;
                 }
-                else
-                {
-                    for (int i = 0; i < masklist.size(); ++i)
-                    {
+                else {
+                    for (int i = 0; i < masklist.size(); ++i) {
                         ulong maskedval = val & masklist[i];
                         if (maskedval == 0) // No component of -val- in this mask
                             continue;       // print nothing
-                        iter = namemap.find(maskedval);
-                        if (iter != namemap.end())
-                            valnames.Add((*iter).second); // Found name for this component
-                        else
-                        {                   // If no name for this component
+                        string value;
+                        if (namemap.TryGetValue(maskedval, out value))
+                            valnames.Add(value); // Found name for this component
+                        else {
+                            // If no name for this component
                             allmatch = false;           // Give up on representation
                             break;              // Stop searching for other components
                         }
@@ -205,7 +205,7 @@ namespace Sla.DECCORE
                 if (allmatch)           // If we have a complete representation
                     return (count == 1);        // Return whether we represented original value or complement
                 val = val ^ Globals.calc_mask(size);    // Switch value we are trying to represent (to complement)
-                valnames.clear();           // Clear out old attempt
+                valnames.Clear();           // Clear out old attempt
             }
             return false;   // If we reach here, no representation was possible, -valnames- is empty
         }
@@ -217,20 +217,18 @@ namespace Sla.DECCORE
 
         public override int compareDependency(Datatype op)
         {
-            int res = TypeBase::compareDependency(op); // Compare as basic types first
+            int res = base.compareDependency(op); // Compare as basic types first
             if (res != 0) return res;
 
-            TypeEnum te = (TypeEnum*) &op;
+            TypeEnum te = (TypeEnum) op;
             Dictionary<ulong, string>::const_iterator iter1, iter2;
 
-            if (namemap.size() != te.namemap.size())
-            {
-                return (namemap.size() < te.namemap.size()) ? -1 : 1;
+            if (namemap.Count != te.namemap.Count) {
+                return (namemap.Count < te.namemap.Count) ? -1 : 1;
             }
             iter1 = namemap.begin();
             iter2 = te.namemap.begin();
-            while (iter1 != namemap.end())
-            {
+            while (iter1 != namemap.end()) {
                 if ((*iter1).first != (*iter2).first)
                     return ((*iter1).first < (*iter2).first) ? -1 : 1;
                 if ((*iter1).second != (*iter2).second)
@@ -243,22 +241,19 @@ namespace Sla.DECCORE
 
         public override Datatype clone() => new TypeEnum(this);
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
-            if (typedefImm != (Datatype)null)
-            {
+            if (typedefImm != (Datatype)null) {
                 encodeTypedef(encoder);
                 return;
             }
             encoder.openElement(ElementId.ELEM_TYPE);
             encodeBasic(metatype, encoder);
             encoder.writeString(AttributeId.ATTRIB_ENUM, "true");
-            Dictionary<ulong, string>::const_iterator iter;
-            for (iter = namemap.begin(); iter != namemap.end(); ++iter)
-            {
+            foreach (KeyValuePair<ulong, string> pair in namemap) {
                 encoder.openElement(ElementId.ELEM_VAL);
-                encoder.writeString(AttributeId.ATTRIB_NAME, (*iter).second);
-                encoder.writeUnsignedInteger(AttributeId.ATTRIB_VALUE, (*iter).first);
+                encoder.writeString(AttributeId.ATTRIB_NAME, pair.Value);
+                encoder.writeUnsignedInteger(AttributeId.ATTRIB_VALUE, pair.Key);
                 encoder.closeElement(ElementId.ELEM_VAL);
             }
             encoder.closeElement(ElementId.ELEM_TYPE);

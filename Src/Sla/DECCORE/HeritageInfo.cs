@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -29,13 +25,13 @@ namespace Sla.DECCORE
         /// \b true if warning issued previously
         private bool warningissued;
         /// \b true for the \e stack space, if stack placeholders have not been removed
-        private bool hasCallPlaceholders;
+        internal bool hasCallPlaceholders;
 
         /// Return \b true if heritage is performed on this space
         private bool isHeritaged() => (space != (AddrSpace)null);
 
         /// Reset the state
-        private void reset()
+        internal void reset()
         {
             // Leave any override intact: deadcodedelay = delay;
             deadremoved = 0;
@@ -49,22 +45,19 @@ namespace Sla.DECCORE
         /// \param spc is the address space
         public HeritageInfo(AddrSpace spc)
         {
-            if (spc == (AddrSpace)null)
-            {
+            if (spc == (AddrSpace)null) {
                 space = (AddrSpace)null;
                 delay = 0;
                 deadcodedelay = 0;
                 hasCallPlaceholders = false;
             }
-            else if (!spc.isHeritaged())
-            {
+            else if (!spc.isHeritaged()) {
                 space = (AddrSpace)null;
                 delay = spc.getDelay();
                 deadcodedelay = spc.getDeadcodeDelay();
                 hasCallPlaceholders = false;
             }
-            else
-            {
+            else {
                 space = spc;
                 delay = spc.getDelay();
                 deadcodedelay = spc.getDeadcodeDelay();

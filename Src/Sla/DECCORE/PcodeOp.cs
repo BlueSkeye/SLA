@@ -133,7 +133,7 @@ namespace Sla.DECCORE
         /// Pointer to class providing behavioral details of the operation
         private TypeOp opcode;
         /// Collection of boolean attributes on this op
-        private /*mutable*/ PcodeOp.Flags flags;
+        internal /*mutable*/ PcodeOp.Flags flags;
         /// Additional boolean attributes for this op
         private /*mutable*/ uint addlflags;
         /// What instruction address is this attached to
@@ -179,19 +179,19 @@ namespace Sla.DECCORE
         }
 
         /// Set a specific input Varnode
-        private void setInput(Varnode vn, int slot)
+        internal void setInput(Varnode vn, int slot)
         {
             inrefs[slot] = vn;
         }
 
         /// Set specific boolean attribute(s) on this op
-        private void setFlag(PcodeOp.Flags fl)
+        internal void setFlag(Flags fl)
         {
             flags |= fl;
         }
 
         /// Clear specific boolean attribute(s)
-        private void clearFlag(uint fl)
+        internal void clearFlag(Flags fl)
         {
             flags &= ~fl;
         }
@@ -209,7 +209,7 @@ namespace Sla.DECCORE
         }
 
         /// Flip the setting of specific boolean attribute(s)
-        private void flipFlag(uint fl)
+        internal void flipFlag(Flags fl)
         {
             flags ^= fl;
         }
@@ -218,7 +218,7 @@ namespace Sla.DECCORE
         /// Make sure there are exactly \e num input slots for this op.
         /// All slots, regardless of the total being increased or decreased, are set to \e null.
         /// \param num is the number of inputs to set
-        private void setNumInputs(int num)
+        internal void setNumInputs(int num)
         {
             inrefs.resize(num);
             for (int i = 0; i < num; ++i)
@@ -229,7 +229,7 @@ namespace Sla.DECCORE
         /// Remove the input Varnode in a specific slot.  The slot is eliminated and all Varnodes beyond this
         /// slot are renumbered.  All the other Varnodes are otherwise undisturbed.
         /// \param slot is the index of the Varnode to remove
-        private void removeInput(int slot)
+        internal void removeInput(int slot)
         {
             for (int i = slot + 1; i < inrefs.size(); ++i)
                 inrefs[i - 1] = inrefs[i];
@@ -239,7 +239,7 @@ namespace Sla.DECCORE
         /// Make room for a new input Varnode at a specific position
         /// Insert space for a new Varnode before \e slot.  The new space is filled with \e null.
         /// \param slot is index of the slot where the new space is inserted
-        private void insertInput(int slot)
+        internal void insertInput(int slot)
         {
             inrefs.Add((Varnode)null);
             for (int i = inrefs.Count - 1; i > slot; --i)
@@ -377,13 +377,13 @@ namespace Sla.DECCORE
         public bool isMarker() => ((flags&PcodeOp::marker)!= 0);
 
         /// Return \b true if op creates a varnode indirectly
-        public bool isIndirectCreation() => ((flags&PcodeOp::indirect_creation)!= 0);
+        public bool isIndirectCreation() => ((flags&PcodeOp.Flags.indirect_creation)!= 0);
 
         /// Return \b true if \b this INDIRECT is caused by STORE
         public bool isIndirectStore() => ((flags&PcodeOp::indirect_store)!= 0);
 
         /// \brief Return \b true if this op is not directly represented in C output
-        public bool notPrinted() => ((flags&(PcodeOp::marker|PcodeOp::nonprinting|PcodeOp::noreturn))!= 0);
+        public bool notPrinted() => ((flags&(PcodeOp::marker|PcodeOp.Flags.nonprinting|PcodeOp::noreturn))!= 0);
         
         /// \brief Return \b true if this op produces a boolean output
         public bool isBoolOutput() => ((flags&PcodeOp::booloutput)!= 0);
@@ -398,7 +398,7 @@ namespace Sla.DECCORE
         public bool isFlowBreak() => ((flags&(PcodeOp::branch|PcodeOp::returns))!= 0);
 
         /// \brief Return \b true if this op flips the true/false meaning of its control-flow branching
-        public bool isBooleanFlip() => ((flags&PcodeOp::boolean_flip)!= 0);
+        public bool isBooleanFlip() => ((flags&PcodeOp.Flags.boolean_flip)!= 0);
 
         /// \brief Return \b true if the fall-thru branch is taken when the boolean input is true
         public bool isFallthruTrue() => ((flags&PcodeOp::fallthru_true)!= 0);
@@ -407,10 +407,10 @@ namespace Sla.DECCORE
         public bool isCodeRef() => ((flags&PcodeOp::coderef)!= 0);
 
         /// Return \b true if this starts an instruction
-        public bool isInstructionStart() => ((flags&PcodeOp::startmark)!= 0);
+        public bool isInstructionStart() => ((flags&PcodeOp.Flags.startmark)!= 0);
 
         /// Return \b true if this starts a basic block
-        public bool isBlockStart() => ((flags&PcodeOp::startbasic)!= 0);
+        public bool isBlockStart() => ((flags&PcodeOp.Flags.startbasic)!= 0);
 
         /// Return \b true if this is modified by the current action
         public bool isModified() => ((addlflags&PcodeOp::modified)!= 0);
@@ -461,7 +461,7 @@ namespace Sla.DECCORE
         public bool isIncidentalCopy() => ((addlflags&PcodeOp::incidental_copy)!= 0);
 
         /// \brief Return \b true if output is 1-bit boolean
-        public bool isCalculatedBool() => ((flags&(PcodeOp::calculated_bool|PcodeOp::booloutput))!= 0);
+        public bool isCalculatedBool() => ((flags&(PcodeOp.Flags.calculated_bool|PcodeOp::booloutput))!= 0);
         
         /// \brief Return \b true if we have already examined this cpool
         public bool isCpoolTransformed() => ((addlflags&PcodeOp::is_cpool_transformed)!= 0);
@@ -471,7 +471,7 @@ namespace Sla.DECCORE
         /// \return \b true if this op can be callapsed
         public bool isCollapsible()
         {
-            if ((flags & PcodeOp::nocollapse) != 0) return false;
+            if ((flags & PcodeOp.Flags.nocollapse) != 0) return false;
             if (!isAssignment()) return false;
             if (inrefs.size() == 0) return false;
             for (int i = 0; i < inrefs.size(); ++i)
@@ -532,7 +532,7 @@ namespace Sla.DECCORE
         }
 
         /// \brief Return \b true if this LOADs or STOREs from a dynamic \e spacebase pointer
-        public bool usesSpacebasePtr() => ((flags&PcodeOp::spacebase_ptr)!= 0);
+        public bool usesSpacebasePtr() => ((flags&PcodeOp.Flags.spacebase_ptr)!= 0);
 
         /// Return hash indicating possibility of common subexpression elimination
         /// Produce a hash of the following attributes: output size, the opcode, and the identity
@@ -541,7 +541,7 @@ namespace Sla.DECCORE
         public uint getCseHash()
         {
             uint hash;
-            if ((getEvalType() & (PcodeOp::unary | PcodeOp::binary)) == 0) return ((uint)0);
+            if ((getEvalType() & (PcodeOp.Flags.unary | PcodeOp.Flags.binary)) == 0) return ((uint)0);
             if (code() == OpCode.CPUI_COPY) return ((uint)0); // Let copy propagation deal with this
 
             hash = (output.getSize() << 8) | (uint)code();
@@ -564,8 +564,8 @@ namespace Sla.DECCORE
         /// \return \b true if the two ops are a common subexpression match
         public bool isCseMatch(PcodeOp op)
         {
-            if ((getEvalType() & (PcodeOp::unary | PcodeOp::binary)) == 0) return false;
-            if ((op.getEvalType() & (PcodeOp::unary | PcodeOp::binary)) == 0) return false;
+            if ((getEvalType() & (PcodeOp.Flags.unary | PcodeOp.Flags.binary)) == 0) return false;
+            if ((op.getEvalType() & (PcodeOp.Flags.unary | PcodeOp.Flags.binary)) == 0) return false;
             if (output.getSize() != op.output.getSize()) return false;
             if (code() != op.code()) return false;
             if (code() == OpCode.CPUI_COPY) return false; // Let copy propagation deal with this
@@ -611,7 +611,7 @@ namespace Sla.DECCORE
             }
             // Only allow this op to be moved across a CALL in very restrictive circumstances
             bool crossCalls = false;
-            if (getEvalType() != PcodeOp::special)
+            if (getEvalType() != PcodeOp.Flags.special)
             {
                 // Check for a normal op where all inputs and output are not address tied
                 if (output != (Varnode)null && !output.isAddrTied() && !output.isPersist())
@@ -639,7 +639,7 @@ namespace Sla.DECCORE
             {
                 ++biter;
                 PcodeOp* op = *biter;
-                if (op.getEvalType() == PcodeOp::special)
+                if (op.getEvalType() == PcodeOp.Flags.special)
                 {
                     switch (op.code())
                     {
@@ -721,9 +721,9 @@ namespace Sla.DECCORE
             }
             switch (getEvalType())
             {
-                case PcodeOp::unary:
+                case PcodeOp.Flags.unary:
                     return opcode.evaluateUnary(output.getSize(), vn0.getSize(), vn0.getOffset());
-                case PcodeOp::binary:
+                case PcodeOp.Flags.binary:
                     vn1 = getIn(1);
                     if (vn1.getSymbolEntry() != (SymbolEntry)null)
                     {
@@ -829,7 +829,7 @@ namespace Sla.DECCORE
             list<PcodeOp*>::iterator iter;
             iter = isDead() ? insertiter : basiciter;
             retop = *iter;
-            while ((retop.flags & PcodeOp::startmark) == 0)
+            while ((retop.flags & PcodeOp.Flags.startmark) == 0)
             {
                 --iter;
                 retop = *iter;
@@ -1141,7 +1141,7 @@ namespace Sla.DECCORE
                 {
                     if ((i == 1) && (code() == OpCode.CPUI_INDIRECT))
                     {
-                        PcodeOp* indop = PcodeOp::getOpFromConst(vn.getAddr());
+                        PcodeOp* indop = PcodeOp.getOpFromConst(vn.getAddr());
                         encoder.openElement(ElementId.ELEM_IOP);
                         encoder.writeUnsignedInteger(AttributeId.ATTRIB_VALUE, indop.getSeqNum().getTime());
                         encoder.closeElement(ElementId.ELEM_IOP);

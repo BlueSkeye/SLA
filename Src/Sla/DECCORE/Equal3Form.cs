@@ -46,11 +46,11 @@ namespace Sla.DECCORE
             if (!workishi) return false;
             if (!i.hasBothPieces()) return false;
             @in = i;
-            if (!verify(@@in.getHi(), @@in.getLo(), op))
+            if (!verify(@in.getHi(), @in.getLo(), op))
                 return false;
 
-            SplitVarnode in2 = new SplitVarnode(@@in.getSize(), Globals.calc_mask(@@in.getSize()));    // Create the -1 value
-            if (!SplitVarnode::prepareBoolOp(@in, in2, compareop)) return false;
+            SplitVarnode in2 = new SplitVarnode(@in.getSize(), Globals.calc_mask(@in.getSize()));    // Create the -1 value
+            if (!SplitVarnode.prepareBoolOp(@in, in2, compareop)) return false;
             SplitVarnode::replaceBoolOp(data, compareop, @in, in2, compareop.code());
             return true;
         }

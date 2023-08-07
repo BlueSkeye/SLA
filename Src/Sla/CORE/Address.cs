@@ -542,7 +542,7 @@ namespace Sla.CORE
         /// \param decoder is the stream decoder
         /// \param size is the reference to any recovered size
         /// \return the resulting Address
-        public static Address decode(Decoder decoder, ref int size)
+        public static Address decode(Decoder decoder, out int size)
         {
             VarnodeData var = VarnodeData.decode(decoder);
             size = (int)var.size;

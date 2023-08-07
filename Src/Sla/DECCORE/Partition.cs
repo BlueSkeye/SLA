@@ -11,17 +11,17 @@ namespace Sla.DECCORE
     {
         // friend class ValueSetSolver;
         /// Starting node of component
-        private ValueSet startNode;
+        internal ValueSet startNode;
         /// Ending node of component
-        private ValueSet stopNode;
+        internal ValueSet stopNode;
         /// Set to \b true if a node in \b this component has changed this iteration
-        private bool isDirty;
+        internal bool isDirty;
 
         /// Construct empty partition
         public Partition()
         {
-            startNode = (ValueSet*)0;
-            stopNode = (ValueSet*)0;
+            startNode = (ValueSet)null;
+            stopNode = (ValueSet)null;
             isDirty = false;
         }
     }

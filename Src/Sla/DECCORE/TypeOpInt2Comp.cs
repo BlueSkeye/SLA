@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpInt2Comp(TypeFactory t)
             : base(t, OpCode.CPUI_INT_2COMP,"-", type_metatype.TYPE_INT, type_metatype.TYPE_INT)
         {
-            opflags = PcodeOp::unary;
+            opflags = PcodeOp.Flags.unary;
             addlflags = arithmetic_op | inherits_sign;
             behave = new OpBehaviorInt2Comp();
         }

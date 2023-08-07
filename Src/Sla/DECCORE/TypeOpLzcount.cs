@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpLzcount(TypeFactory t)
             : base(t, OpCode.CPUI_LZCOUNT,"LZCOUNT", type_metatype.TYPE_INT, type_metatype.TYPE_UNKNOWN)
         {
-            opflags = PcodeOp::unary;
+            opflags = PcodeOp.Flags.unary;
             behave = new OpBehaviorLzcount();
         }
 

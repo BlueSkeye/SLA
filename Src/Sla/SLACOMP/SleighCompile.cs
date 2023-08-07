@@ -709,7 +709,7 @@ namespace Sla.SLACOMP
         /// \param sa is the number of bits to shift by
         private static void shiftUniqueVn(VarnodeTpl vn, int sa)
         {
-            if (vn.getSpace().isUniqueSpace() && (vn.getOffset().getType() == ConstTpl::real))
+            if (vn.getSpace().isUniqueSpace() && (vn.getOffset().getType() == ConstTpl.const_type.real))
             {
                 ulong val = vn.getOffset().getReal();
                 val <<= sa;
@@ -736,21 +736,21 @@ namespace Sla.SLACOMP
         /// \param sa is the number of bits to shift by
         private static void shiftUniqueHandle(HandleTpl hand, int sa)
         {
-            if (hand.getSpace().isUniqueSpace() && (hand.getPtrSpace().getType() == ConstTpl::real)
-                && (hand.getPtrOffset().getType() == ConstTpl::real))
+            if (hand.getSpace().isUniqueSpace() && (hand.getPtrSpace().getType() == ConstTpl.const_type.real)
+                && (hand.getPtrOffset().getType() == ConstTpl.const_type.real))
             {
                 ulong val = hand.getPtrOffset().getReal();
                 val <<= sa;
                 hand.setPtrOffset(val);
             }
-            else if (hand.getPtrSpace().isUniqueSpace() && (hand.getPtrOffset().getType() == ConstTpl::real))
+            else if (hand.getPtrSpace().isUniqueSpace() && (hand.getPtrOffset().getType() == ConstTpl.const_type.real))
             {
                 ulong val = hand.getPtrOffset().getReal();
                 val <<= sa;
                 hand.setPtrOffset(val);
             }
 
-            if (hand.getTempSpace().isUniqueSpace() && (hand.getTempOffset().getType() == ConstTpl::real))
+            if (hand.getTempSpace().isUniqueSpace() && (hand.getTempOffset().getType() == ConstTpl.const_type.real))
             {
                 ulong val = hand.getTempOffset().getReal();
                 val <<= sa;
@@ -880,7 +880,7 @@ namespace Sla.SLACOMP
             warnalllocalcollisions = false;
             warnallnops = false;
             failinsensitivedups = true;
-            root = (SubtableSymbol*)0;
+            root = (SubtableSymbol)null;
             curmacro = (MacroSymbol*)0;
             curct = (Constructor)null;
         }
@@ -1641,7 +1641,7 @@ namespace Sla.SLACOMP
         /// \return the p-code section
         public ConstructTpl setResultStarVarnode(ConstructTpl ct, StarQuality star, VarnodeTpl vn)
         {
-            HandleTpl* res = new HandleTpl(star.id, ConstTpl(ConstTpl::real, star.size), vn,
+            HandleTpl* res = new HandleTpl(star.id, ConstTpl(ConstTpl.const_type.real, star.size), vn,
                              getUniqueSpace(), getUniqueAddr());
             delete star;
             delete vn;
@@ -1731,7 +1731,7 @@ namespace Sla.SLACOMP
                 VarnodeTpl* outvn = param[i].getOut();
                 if (outvn == (VarnodeTpl*)0) continue;
                 // Check if an OperandSymbol was passed into this macro
-                if (outvn.getOffset().getType() != ConstTpl::handle) continue;
+                if (outvn.getOffset().getType() != ConstTpl.const_type.handle) continue;
                 int hand = outvn.getOffset().getHandleIndex();
 
                 // The matching operands
@@ -1767,8 +1767,8 @@ namespace Sla.SLACOMP
             compareMacroParams(sym, *param);
             OpTpl* op = new OpTpl(MACROBUILD);
             VarnodeTpl* idvn = new VarnodeTpl(ConstTpl(getConstantSpace()),
-                                ConstTpl(ConstTpl::real, sym.getIndex()),
-                                ConstTpl(ConstTpl::real, 4));
+                                ConstTpl(ConstTpl.const_type.real, sym.getIndex()),
+                                ConstTpl(ConstTpl.const_type.real, 4));
             op.addInput(idvn);
             return ExprTree::appendParams(op, param);
         }
@@ -1851,8 +1851,8 @@ namespace Sla.SLACOMP
             unique_allocatemask = 1;
             List<OpTpl*>* res = new List<OpTpl*>();
             VarnodeTpl* sectionid = new VarnodeTpl(ConstTpl(getConstantSpace()),
-                                                   ConstTpl(ConstTpl::real, sym.getTemplateId()),
-                                                   ConstTpl(ConstTpl::real, 4));
+                                                   ConstTpl(ConstTpl.const_type.real, sym.getTemplateId()),
+                                                   ConstTpl(ConstTpl.const_type.real, 4));
             // This is simply a single pcodeop (template), where the opcode indicates the crossbuild directive
             OpTpl* op = new OpTpl(OpCode.CROSSBUILD);
             op.addInput(addr);     // The first input is the VarnodeTpl representing the address
@@ -1869,9 +1869,9 @@ namespace Sla.SLACOMP
         /// \return the new Constructor
         public Constructor createConstructor(SubtableSymbol sym)
         {
-            if (sym == (SubtableSymbol*)0)
+            if (sym == (SubtableSymbol)null)
                 sym = WithBlock::getCurrentSubtable(withstack);
-            if (sym == (SubtableSymbol*)0)
+            if (sym == (SubtableSymbol)null)
                 sym = root;
             curmacro = (MacroSymbol*)0; // Not currently defining a macro
             curct = new Constructor(sym);

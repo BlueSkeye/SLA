@@ -40,7 +40,7 @@ namespace Sla.SLEIGH
 
         public override VarnodeTpl getVarnode()
         {
-            return new VarnodeTpl(ConstTpl(fix.space), ConstTpl(ConstTpl::real, fix.offset), ConstTpl(ConstTpl::real, fix.size));
+            return new VarnodeTpl(ConstTpl(fix.space), ConstTpl(ConstTpl.const_type.real, fix.offset), ConstTpl(ConstTpl.const_type.real, fix.size));
         }
 
         public override void getFixedHandle(FixedHandle hand, ParserWalker walker)

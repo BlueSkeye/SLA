@@ -22,7 +22,7 @@ namespace Sla.DECCORE
             : base(t, OpCode.CPUI_SEGMENTOP,"segmentop")
 
         {
-            opflags = PcodeOp::special | PcodeOp::nocollapse;
+            opflags = PcodeOp.Flags.special | PcodeOp.Flags.nocollapse;
             behave = new OpBehavior(CPUI_SEGMENTOP, false, true); // Dummy behavior
         }
 

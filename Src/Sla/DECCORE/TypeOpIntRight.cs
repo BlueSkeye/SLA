@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpIntRight(TypeFactory t)
             : base(t, OpCode.CPUI_INT_RIGHT,">>", type_metatype.TYPE_UINT, type_metatype.TYPE_UINT)
         {
-            opflags = PcodeOp::binary;
+            opflags = PcodeOp.Flags.binary;
             addlflags = inherits_sign | inherits_sign_zero | shift_op;
             behave = new OpBehaviorIntRight();
         }

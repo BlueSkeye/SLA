@@ -1,11 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -44,7 +37,7 @@ namespace Sla.DECCORE
         /// Is \b true if the joined pair base:near acts as a \b far pointer
         private bool supportsfarpointer;
         /// How to resolve constant near pointers
-        private VarnodeData constresolve;
+        private VarnodeData constresolve = new VarnodeData();
 
         /// \param g is the owning Architecture for this instance of the segment operation
         /// \param nm is the low-level name of the segment operation
@@ -69,7 +62,6 @@ namespace Sla.DECCORE
 
         /// Get the default register for resolving indirect segments
         public VarnodeData getResolve() => constresolve;
-        
 
         public override int getNumVariableTerms()
         {
@@ -78,7 +70,7 @@ namespace Sla.DECCORE
 
         public override bool unify(Funcdata data, PcodeOp op, List<Varnode> bindlist)
         {
-            Varnode* basevn,*innervn;
+            Varnode basevn, innervn;
 
             // Segmenting is done by a user defined p-code op, so this is what we look for
             // The op must have innervn and basevn (if base is present) as inputs
@@ -86,11 +78,10 @@ namespace Sla.DECCORE
             // longer needed for unification but are needed to provide
             // a definition for the userop
             if (op.code() != OpCode.CPUI_CALLOTHER) return false;
-            if (op.getIn(0).getOffset() != useropindex) return false;
+            if (op.getIn(0).getOffset() != (ulong)useropindex) return false;
             if (op.numInput() != 3) return false;
             innervn = op.getIn(1);
-            if (baseinsize != 0)
-            {
+            if (baseinsize != 0) {
                 basevn = op.getIn(1);
                 innervn = op.getIn(2);
                 if (basevn.isConstant())
@@ -107,7 +98,7 @@ namespace Sla.DECCORE
 
         public override ulong execute(List<ulong> input)
         {
-            ExecutablePcode* pcodeScript = (ExecutablePcode*)glb.pcodeinjectlib.getPayload(injectId);
+            ExecutablePcode pcodeScript = (ExecutablePcode)glb.pcodeinjectlib.getPayload(injectId);
             return pcodeScript.evaluate(input);
         }
 
@@ -120,47 +111,42 @@ namespace Sla.DECCORE
             innerinsize = 0;
             supportsfarpointer = false;
             name = "segment";       // Default name, might be overridden by userop attribute
-            for (; ; )
-            {
+            for (; ; ) {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
-                if (attribId == ATTRIB_SPACE)
+                if (attribId == AttributeId.ATTRIB_SPACE)
                     spc = decoder.readSpace();
-                else if (attribId == ATTRIB_FARPOINTER)
+                else if (attribId == AttributeId.ATTRIB_FARPOINTER)
                     supportsfarpointer = true;
-                else if (attribId == ATTRIB_USEROP)
+                else if (attribId == AttributeId.ATTRIB_USEROP)
                 {   // Based on existing sleigh op
                     name = decoder.readString();
                 }
             }
             if (spc == (AddrSpace)null)
                 throw new LowlevelError("<segmentop> expecting space attribute");
-            UserPcodeOp* otherop = glb.userops.getOp(name);
-            if (otherop == (UserPcodeOp*)0)
+            UserPcodeOp? otherop = glb.userops.getOp(name);
+            if (otherop == (UserPcodeOp)null)
                 throw new LowlevelError("<segmentop> unknown userop " + name);
             useropindex = otherop.getIndex();
-            if (dynamic_cast<UnspecializedPcodeOp*>(otherop) == (UnspecializedPcodeOp*)0)
+            if ((otherop as UnspecializedPcodeOp) == (UnspecializedPcodeOp)null)
                 throw new LowlevelError("Redefining userop " + name);
 
-            for (; ; )
-            {
+            for (; ; ) {
                 uint subId = decoder.peekElement();
                 if (subId == 0) break;
-                if (subId == ELEM_CONSTRESOLVE)
-                {
+                if (subId == ElementId.ELEM_CONSTRESOLVE) {
                     int sz;
                     decoder.openElement();
-                    if (decoder.peekElement() != 0)
-                    {
-                        Address addr = Address::decode(decoder, sz);
+                    if (decoder.peekElement() != 0) {
+                        Address addr = Address.decode(decoder, out sz);
                         constresolve.space = addr.getSpace();
                         constresolve.offset = addr.getOffset();
-                        constresolve.size = sz;
+                        constresolve.size = (uint)sz;
                     }
                     decoder.closeElement(subId);
                 }
-                else if (subId == ELEM_PCODE)
-                {
+                else if (subId == ElementId.ELEM_PCODE) {
                     string nm = name + "_pcode";
                     string source = "cspec";
                     injectId = glb.pcodeinjectlib.decodeInject(source, nm, InjectPayload.InjectionType.EXECUTABLEPCODE_TYPE, decoder);
@@ -169,17 +155,15 @@ namespace Sla.DECCORE
             decoder.closeElement(elemId);
             if (injectId < 0)
                 throw new LowlevelError("Missing <pcode> child in <segmentop> tag");
-            InjectPayload* payload = glb.pcodeinjectlib.getPayload(injectId);
+            InjectPayload payload = glb.pcodeinjectlib.getPayload(injectId);
             if (payload.sizeOutput() != 1)
                 throw new LowlevelError("<pcode> child of <segmentop> tag must declare one <output>");
-            if (payload.sizeInput() == 1)
-            {
-                innerinsize = payload.getInput(0).getSize();
+            if (payload.sizeInput() == 1) {
+                innerinsize = (int)payload.getInput(0).getSize();
             }
-            else if (payload.sizeInput() == 2)
-            {
-                baseinsize = payload.getInput(0).getSize();
-                innerinsize = payload.getInput(1).getSize();
+            else if (payload.sizeInput() == 2) {
+                baseinsize = (int)payload.getInput(0).getSize();
+                innerinsize = (int)payload.getInput(1).getSize();
             }
             else
                 throw new LowlevelError("<pcode> child of <segmentop> tag must declare one or two <input> tags");

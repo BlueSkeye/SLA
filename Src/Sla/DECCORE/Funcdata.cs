@@ -358,11 +358,11 @@ namespace Sla.DECCORE
             newvn = vbank.create(vn.getSize(), vn.getAddr(), vn.getType());
             uint vflags = vn.getFlags();
             // These are the flags we allow to be cloned
-            vflags &= (Varnode.varnode_flags.annotation | Varnode::externref |
-                   Varnode::@readonly | Varnode.varnode_flags.persist |
-                   Varnode.varnode_flags.addrtied | Varnode::addrforce |
-                   Varnode.varnode_flags.indirect_creation | Varnode::incidental_copy |
-                   Varnode::volatil | Varnode.varnode_flags.mapped);
+            vflags &= (Varnode.varnode_flags.annotation | Varnode.varnode_flags.externref |
+                   Varnode.varnode_flags.@readonly | Varnode.varnode_flags.persist |
+                   Varnode.varnode_flags.addrtied | Varnode.varnode_flags.addrforce |
+                   Varnode.varnode_flags.indirect_creation | Varnode.varnode_flags.incidental_copy |
+                   Varnode.varnode_flags.volatil | Varnode.varnode_flags.mapped);
             newvn.setFlags(vflags);
             return newvn;
         }
@@ -887,8 +887,8 @@ namespace Sla.DECCORE
             }
             dup = newOp(op.numInput(), op.getAddr());
             opSetOpcode(dup, op.code());
-            uint fl = op.flags & (PcodeOp::startbasic | PcodeOp::nocollapse |
-                        PcodeOp::startmark);
+            uint fl = op.flags & (PcodeOp.Flags.startbasic | PcodeOp.Flags.nocollapse |
+                        PcodeOp.Flags.startmark);
             dup.setFlag(fl);
             return dup;
         }
@@ -907,9 +907,9 @@ namespace Sla.DECCORE
             if (opvn == (Varnode)null) return;
             newvn = newVarnodeOut(opvn.getSize(), opvn.getAddr(), newop);
             uint vflags = opvn.getFlags();
-            vflags &= (Varnode::externref | Varnode::volatil | Varnode::incidental_copy |
-                   Varnode::@readonly | Varnode.varnode_flags.persist |
-                   Varnode.varnode_flags.addrtied | Varnode::addrforce);
+            vflags &= (Varnode.varnode_flags.externref | Varnode.varnode_flags.volatil | Varnode.varnode_flags.incidental_copy |
+                   Varnode.varnode_flags.@readonly | Varnode.varnode_flags.persist |
+                   Varnode.varnode_flags.addrtied | Varnode.varnode_flags.addrforce);
             newvn.setFlags(vflags);
         }
 
@@ -1185,7 +1185,7 @@ namespace Sla.DECCORE
                 funcp.setScope(localmap, baseaddr + -1);
                 localmap.resetLocalWindow();
             }
-            activeoutput = (ParamActive*)0;
+            activeoutput = (ParamActive)null;
 
 #if OPACTION_DEBUG
             jtcallback = (void(*)(Funcdata & orig, Funcdata & fd))0;
@@ -1806,7 +1806,7 @@ namespace Sla.DECCORE
             {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
-                if (attribId == ATTRIB_NAME)
+                if (attribId == AttributeId.ATTRIB_NAME)
                     name = decoder.readString();
                 else if (attribId == ATTRIB_SIZE)
                 {
@@ -1830,7 +1830,7 @@ namespace Sla.DECCORE
                 displayName = name;
             if (size == -1)
                 throw new LowlevelError("Missing function size");
-            baseaddr = Address::decode(decoder);
+            baseaddr = Address.decode(decoder);
             for (; ; )
             {
                 uint subId = decoder.peekElement();
@@ -3002,7 +3002,7 @@ namespace Sla.DECCORE
                                 if (op.getIn(trial.getSlot()) == vn) // But at the same slot
                                     continue;
                             }
-                            else if (activeoutput != (ParamActive*)0)
+                            else if (activeoutput != (ParamActive)null)
                             {   // Are we in the middle of analyzing returns
                                 if (op.getIn(0) != vn)
                                 {       // Unless we hold actual return value
@@ -3172,7 +3172,7 @@ namespace Sla.DECCORE
         {
             ulong newConsume = (vn.getConsume() >> 8 * lsbOffset) & Globals.calc_mask(newVn.getSize());
 
-            uint vnFlags = vn.getFlags() & (Varnode::directwrite | Varnode::addrforce);
+            uint vnFlags = vn.getFlags() & (Varnode.varnode_flags.directwrite | Varnode.varnode_flags.addrforce);
 
             newVn.setFlags(vnFlags);   // Preserve addrforce setting
             newVn.setConsume(newConsume);
@@ -3281,7 +3281,7 @@ namespace Sla.DECCORE
                 opSetInput(newop, newConstant(4, vw_op.getIndex()), 0);
                 // The first parameter is the offset of volatile memory location
                 Varnode* annoteVn = newCodeRef(vn.getAddr());
-                annoteVn.setFlags(Varnode::volatil);
+                annoteVn.setFlags(Varnode.varnode_flags.volatil);
                 opSetInput(newop, annoteVn, 1);
                 // Replace the volatile variable with a temp
                 Varnode* tmp = newUnique(vn.getSize());
@@ -3305,7 +3305,7 @@ namespace Sla.DECCORE
                 opSetInput(newop, newConstant(4, vr_op.getIndex()), 0);
                 // The first parameter is the offset of the volatile memory loc
                 Varnode* annoteVn = newCodeRef(vn.getAddr());
-                annoteVn.setFlags(Varnode::volatil);
+                annoteVn.setFlags(Varnode.varnode_flags.volatil);
                 opSetInput(newop, annoteVn, 1);
                 opSetInput(readop, tmp, readop.getSlot(vn));
                 opInsertBefore(newop, readop); // Insert before read
@@ -3331,7 +3331,7 @@ namespace Sla.DECCORE
                 Varnode* vn = *iter;
                 if (!vn.isIllegalInput()) continue; // Only check illegal inputs
                 if (checkIndirectUse(vn))
-                    vn.setFlags(Varnode::indirectonly);
+                    vn.setFlags(Varnode.varnode_flags.indirectonly);
             }
         }
 
@@ -3418,8 +3418,8 @@ namespace Sla.DECCORE
         /// \brief Clear any analysis of the function's \e return prototype
         public void clearActiveOutput()
         {
-            if (activeoutput != (ParamActive*)0) delete activeoutput;
-            activeoutput = (ParamActive*)0;
+            if (activeoutput != (ParamActive)null) delete activeoutput;
+            activeoutput = (ParamActive)null;
         }
 
         /// Get the \e return prototype recovery object
@@ -3928,7 +3928,7 @@ namespace Sla.DECCORE
         {
             PcodeOp* newop = newOp(op.numInput(), seq);
             opSetOpcode(newop, op.code());
-            uint fl = op.flags & (PcodeOp::startmark | PcodeOp::startbasic);
+            uint fl = op.flags & (PcodeOp.Flags.startmark | PcodeOp.Flags.startbasic);
             newop.setFlag(fl);
             if (op.getOut() != (Varnode)null)
                 opSetOutput(newop, cloneVarnode(op.getOut()));
@@ -3963,13 +3963,11 @@ namespace Sla.DECCORE
         /// \param sz is the number of bytes in the storage range
         /// \param extraFlags are extra boolean properties to put on the INDIRECT
         /// \return the new OpCode.CPUI_INDIRECT op
-        public PcodeOp newIndirectOp(PcodeOp indeffect, Address addr, int sz, uint extraFlags)
+        public PcodeOp newIndirectOp(PcodeOp indeffect, Address addr, int sz, PcodeOp.Flags extraFlags)
         {
-            Varnode* newin;
-            PcodeOp* newop;
+            Varnode newin = newVarnode(sz, addr);
+            PcodeOp newop = newOp(2, indeffect.getAddr());
 
-            newin = newVarnode(sz, addr);
-            newop = newOp(2, indeffect.getAddr());
             newop.flags |= extraFlags;
             newVarnodeOut(sz, addr, newop);
             opSetOpcode(newop, OpCode.CPUI_INDIRECT);
@@ -3989,16 +3987,12 @@ namespace Sla.DECCORE
         /// \param sz is the number of bytes in the storage range
         /// \param possibleout is \b true if the output should be treated as a \e directwrite.
         /// \return the new OpCode.CPUI_INDIRECT op
-        public PcodeOp newIndirectCreation(PcodeOp indeffect, Address addr, int sz,
-            bool possibleout)
+        public PcodeOp newIndirectCreation(PcodeOp indeffect, Address addr, int sz, bool possibleout)
         {
-            Varnode* newout,*newin;
-            PcodeOp* newop;
-
-            newin = newConstant(sz, 0);
-            newop = newOp(2, indeffect.getAddr());
-            newop.flags |= PcodeOp::indirect_creation;
-            newout = newVarnodeOut(sz, addr, newop);
+            Varnode newin = newConstant(sz, 0);
+            PcodeOp newop = newOp(2, indeffect.getAddr());
+            newop.flags |= PcodeOp.Flags.indirect_creation;
+            Varnode newout = newVarnodeOut(sz, addr, newop);
             if (!possibleout)
                 newin.flags |= Varnode.varnode_flags.indirect_creation;
             newout.flags |= Varnode.varnode_flags.indirect_creation;
@@ -4018,10 +4012,10 @@ namespace Sla.DECCORE
         /// \param possibleOutput is \b true if INDIRECT should be marked as a possible call output
         public void markIndirectCreation(PcodeOp indop, bool possibleOutput)
         {
-            Varnode* outvn = indop.getOut();
-            Varnode* in0 = indop.getIn(0);
+            Varnode outvn = indop.getOut();
+            Varnode in0 = indop.getIn(0);
 
-            indop.flags |= PcodeOp::indirect_creation;
+            indop.flags |= PcodeOp.Flags.indirect_creation;
             if (!in0.isConstant())
                 throw new LowlevelError("Indirect creation not properly formed");
             if (!possibleOutput)
@@ -4042,19 +4036,16 @@ namespace Sla.DECCORE
         /// \param follow is the op to insert before
         public void opInsertBefore(PcodeOp op, PcodeOp follow)
         {
-            list<PcodeOp*>::iterator iter = follow.getBasicIter();
-            BlockBasic* parent = follow.getParent();
+            IEnumerator<PcodeOp> iter = follow.getBasicIter();
+            BlockBasic parent = follow.getParent();
 
-            if (op.code() != OpCode.CPUI_INDIRECT)
-            {
+            if (op.code() != OpCode.CPUI_INDIRECT) {
                 // There should not be an INDIRECT immediately preceding op
-                PcodeOp* previousop;
-                while (iter != parent.beginOp())
-                {
+                PcodeOp previousop;
+                while (iter != parent.beginOp()) {
                     --iter;
                     previousop = *iter;
-                    if (previousop.code() != OpCode.CPUI_INDIRECT)
-                    {
+                    if (previousop.code() != OpCode.CPUI_INDIRECT) {
                         ++iter;
                         break;
                     }
@@ -4073,34 +4064,28 @@ namespace Sla.DECCORE
         /// \param prev is the op to insert after
         public void opInsertAfter(PcodeOp op, PcodeOp prev)
         {
-            if (prev.isMarker())
-            {
-                if (prev.code() == OpCode.CPUI_INDIRECT)
-                {
-                    Varnode* invn = prev.getIn(1);
-                    if (invn.getSpace().getType() == spacetype.IPTR_IOP)
-                    {
-                        PcodeOp* targOp = PcodeOp::getOpFromConst(invn.getAddr()); // Store or call
+            if (prev.isMarker()) {
+                if (prev.code() == OpCode.CPUI_INDIRECT) {
+                    Varnode invn = prev.getIn(1);
+                    if (invn.getSpace().getType() == spacetype.IPTR_IOP) {
+                        PcodeOp targOp = PcodeOp.getOpFromConst(invn.getAddr()); // Store or call
                         if (!targOp.isDead())
                             prev = targOp;
                     }
                 }
             }
             list<PcodeOp*>::iterator iter = prev.getBasicIter();
-            BlockBasic* parent = prev.getParent();
+            BlockBasic parent = prev.getParent();
 
             iter++;
 
-            if (op.code() != OpCode.CPUI_MULTIEQUAL)
-            {
+            if (op.code() != OpCode.CPUI_MULTIEQUAL) {
                 // There should not be a MULTIEQUAL immediately after op
-                PcodeOp* nextop;
-                while (iter != parent.endOp())
-                {
+                PcodeOp nextop;
+                while (iter != parent.endOp()) {
                     nextop = *iter;
                     ++iter;
-                    if (nextop.code() != OpCode.CPUI_MULTIEQUAL)
-                    {
+                    if (nextop.code() != OpCode.CPUI_MULTIEQUAL) {
                         --iter;
                         break;
                     }
@@ -4119,15 +4104,12 @@ namespace Sla.DECCORE
         /// \param bl is the basic block to insert into
         public void opInsertBegin(PcodeOp op, BlockBasic bl)
         {
-            list<PcodeOp*>::iterator iter = bl.beginOp();
+            IEnumerator<PcodeOp> iter = bl.beginOp();
 
-            if (op.code() != OpCode.CPUI_MULTIEQUAL)
-            {
-                while (iter != bl.endOp())
-                {
-                    if ((*iter).code() != OpCode.CPUI_MULTIEQUAL)
+            if (op.code() != OpCode.CPUI_MULTIEQUAL) {
+                while (iter.MoveNext()) {
+                    if (iter.Current.code() != OpCode.CPUI_MULTIEQUAL)
                         break;
-                    ++iter;
                 }
             }
             opInsert(op, bl, iter);
@@ -4143,12 +4125,11 @@ namespace Sla.DECCORE
         /// \param bl is the basic block to insert into
         public void opInsertEnd(PcodeOp op, BlockBasic bl)
         {
-            list<PcodeOp*>::iterator iter = bl.endOp();
+            IEnumerator<PcodeOp> iter = bl.endOp();
 
-            if (iter != bl.beginOp())
-            {
+            if (iter != bl.beginOp()) {
                 --iter;
-                if (!(*iter).isFlowBreak())
+                if (!iter.Current.isFlowBreak())
                     ++iter;
             }
             opInsert(op, bl, iter);
@@ -4224,12 +4205,12 @@ namespace Sla.DECCORE
         public void opSetInput(PcodeOp op, Varnode vn, int slot)
         {
             if (vn == op.getIn(slot)) return; // Already set to this vn
-            if (vn.isConstant())
-            {   // Constants should have only one descendant
+            if (vn.isConstant()) {
+                // Constants should have only one descendant
                 if (!vn.hasNoDescend())
-                    if (!vn.isSpacebase())
-                    {   // Unless they are a spacebase
-                        Varnode* cvn = newConstant(vn.getSize(), vn.getOffset());
+                    if (!vn.isSpacebase()) {
+                        // Unless they are a spacebase
+                        Varnode cvn = newConstant(vn.getSize(), vn.getOffset());
                         cvn.copySymbol(vn);
                         vn = cvn;
                     }
@@ -4256,7 +4237,7 @@ namespace Sla.DECCORE
             if (opactdbg_active)
                 debugModCheck(op);
 #endif
-            Varnode* tmp = op.getIn(slot1);
+            Varnode tmp = op.getIn(slot1);
             op.setInput(op.getIn(slot2), slot1);
             op.setInput(tmp, slot2);
         }
@@ -4267,7 +4248,7 @@ namespace Sla.DECCORE
         /// \param slot is the input slot to clear
         public void opUnsetInput(PcodeOp op, int slot)
         {
-            Varnode* vn = op.getIn(slot);
+            Varnode vn = op.getIn(slot);
 
             vn.eraseDescend(op);
             op.clearInput(slot);       // Must be called AFTER descend_erase
@@ -4342,14 +4323,12 @@ namespace Sla.DECCORE
 
             if (op.getOut() != (Varnode)null)
                 destroyVarnode(op.getOut());
-            for (int i = 0; i < op.numInput(); ++i)
-            {
-                Varnode* vn = op.getIn(i);
+            for (int i = 0; i < op.numInput(); ++i) {
+                Varnode? vn = op.getIn(i);
                 if (vn != (Varnode)null)
                     opUnsetInput(op, i);
             }
-            if (op.getParent() != (BlockBasic)null)
-            {
+            if (op.getParent() != (BlockBasic)null) {
                 obank.markDead(op);
                 op.getParent().removeOp(op);
             }
@@ -4434,19 +4413,19 @@ namespace Sla.DECCORE
         /// Mark PcodeOp as starting a basic block
         public void opMarkStartBasic(PcodeOp op)
         {
-            op.setFlag(PcodeOp::startbasic);
+            op.setFlag(PcodeOp.Flags.startbasic);
         }
 
         /// Mark PcodeOp as starting its instruction
         public void opMarkStartInstruction(PcodeOp op)
         {
-            op.setFlag(PcodeOp::startmark);
+            op.setFlag(PcodeOp.Flags.startmark);
         }
 
         /// Mark PcodeOp as not being printed
         public void opMarkNonPrinting(PcodeOp op)
         {
-            op.setFlag(PcodeOp::nonprinting);
+            op.setFlag(PcodeOp.Flags.nonprinting);
         }
 
         /// Mark PcodeOp as needing special printing
@@ -4458,7 +4437,7 @@ namespace Sla.DECCORE
         /// Mark PcodeOp as not collapsible
         public void opMarkNoCollapse(PcodeOp op)
         {
-            op.setFlag(PcodeOp::nocollapse);
+            op.setFlag(PcodeOp.Flags.nocollapse);
         }
 
         /// Mark cpool record was visited
@@ -4470,25 +4449,25 @@ namespace Sla.DECCORE
         /// Mark PcodeOp as having boolean output
         public void opMarkCalculatedBool(PcodeOp op)
         {
-            op.setFlag(PcodeOp::calculated_bool);
+            op.setFlag(PcodeOp.Flags.calculated_bool);
         }
 
         /// Mark PcodeOp as LOAD/STORE from spacebase ptr
         public void opMarkSpacebasePtr(PcodeOp op)
         {
-            op.setFlag(PcodeOp::spacebase_ptr);
+            op.setFlag(PcodeOp.Flags.spacebase_ptr);
         }
 
         /// Unmark PcodeOp as using spacebase ptr
         public void opClearSpacebasePtr(PcodeOp op)
         {
-            op.clearFlag(PcodeOp::spacebase_ptr);
+            op.clearFlag(PcodeOp.Flags.spacebase_ptr);
         }
 
         /// Flip output condition of given CBRANCH
         public void opFlipCondition(PcodeOp op)
         {
-            op.flipFlag(PcodeOp::boolean_flip);
+            op.flipFlag(PcodeOp.Flags.boolean_flip);
         }
 
         /// Look up a PcodeOp by an instruction Address
@@ -4508,8 +4487,8 @@ namespace Sla.DECCORE
         public Varnode createStackRef(AddrSpace spc, ulong off, PcodeOp op,
             Varnode stackptr, bool insertafter)
         {
-            PcodeOp* addop;
-            Varnode* addout;
+            PcodeOp addop;
+            Varnode addout;
             int addrsize;
 
             // Calculate CURRENT stackpointer as base for relative offset
@@ -4527,14 +4506,13 @@ namespace Sla.DECCORE
             else
                 opInsertBefore(addop, op);
 
-            AddrSpace* containerid = spc.getContain();
-            SegmentOp* segdef = glb.userops.getSegmentOp(containerid.getIndex());
+            AddrSpace containerid = spc.getContain();
+            SegmentOp segdef = glb.userops.getSegmentOp(containerid.getIndex());
 
-            if (segdef != (SegmentOp*)0)
-            {
-                PcodeOp* segop = newOp(3, op.getAddr());
+            if (segdef != (SegmentOp)null) {
+                PcodeOp segop = newOp(3, op.getAddr());
                 opSetOpcode(segop, OpCode.CPUI_SEGMENTOP);
-                Varnode* segout = newUniqueOut(containerid.getAddrSize(), segop);
+                Varnode segout = newUniqueOut(containerid.getAddrSize(), segop);
                 opSetInput(segop, newVarnodeSpace(containerid), 0);
                 opSetInput(segop, newConstant(segdef.getBaseSize(), 0), 1);
                 opSetInput(segop, addout, 2);
@@ -4560,12 +4538,12 @@ namespace Sla.DECCORE
         public Varnode opStackLoad(AddrSpace spc, ulong off, uint sz, PcodeOp op,
             Varnode stackptr, bool insertafter)
         {
-            Varnode* addout = createStackRef(spc, off, op, stackref, insertafter);
-            PcodeOp* loadop = newOp(2, op.getAddr());
+            Varnode addout = createStackRef(spc, off, op, stackref, insertafter);
+            PcodeOp loadop = newOp(2, op.getAddr());
             opSetOpcode(loadop, OpCode.CPUI_LOAD);
             opSetInput(loadop, newVarnodeSpace(spc.getContain()), 0);
             opSetInput(loadop, addout, 1);
-            Varnode* res = newUniqueOut(sz, loadop);
+            Varnode res = newUniqueOut(sz, loadop);
             opInsertAfter(loadop, addout.getDef()); // LOAD comes after stack building op, regardless of -insertafter-
             return res;
         }
@@ -4581,17 +4559,16 @@ namespace Sla.DECCORE
         /// \param insertafter is \b true if new ops are inserted \e after the insertion point
         /// \return the STORE PcodeOp
         public PcodeOp opStackStore(AddrSpace spc, ulong off, PcodeOp op, bool insertafter)
-        { // Create pcode sequence that stores a value at an offset relative to a spacebase
-          // -off- is the offset, -size- is the size of the value
-          // The sequence is inserted before/after -op- based on whether -insertafter- is false/true
-          // Return the store op
-            Varnode* addout;
-            PcodeOp* storeop;
+        {
+            // Create pcode sequence that stores a value at an offset relative to a spacebase
+            // -off- is the offset, -size- is the size of the value
+            // The sequence is inserted before/after -op- based on whether -insertafter- is false/true
+            // Return the store op
 
             // Calculate CURRENT stackpointer as base for relative offset
-            addout = createStackRef(spc, off, op, (Varnode)null, insertafter);
+            Varnode addout = createStackRef(spc, off, op, (Varnode)null, insertafter);
 
-            storeop = newOp(3, op.getAddr());
+            PcodeOp storeop = newOp(3, op.getAddr());
             opSetOpcode(storeop, OpCode.CPUI_STORE);
 
             opSetInput(storeop, newVarnodeSpace(spc.getContain()), 0);
@@ -4608,28 +4585,26 @@ namespace Sla.DECCORE
         /// \param finalize is \b true if finalization is needed for any new PcodeOp
         public void opUndoPtradd(PcodeOp op, bool finalize)
         {
-            Varnode* multVn = op.getIn(2);
+            Varnode multVn = op.getIn(2);
             int multSize = multVn.getOffset(); // Size the PTRADD thinks we are pointing
 
             opRemoveInput(op, 2);
             opSetOpcode(op, OpCode.CPUI_INT_ADD);
             if (multSize == 1) return;  // If no multiplier, we are done
-            Varnode* offVn = op.getIn(1);
-            if (offVn.isConstant())
-            {
+            Varnode offVn = op.getIn(1);
+            if (offVn.isConstant()) {
                 ulong newVal = multSize * offVn.getOffset();
                 newVal &= Globals.calc_mask(offVn.getSize());
-                Varnode* newOffVn = newConstant(offVn.getSize(), newVal);
+                Varnode newOffVn = newConstant(offVn.getSize(), newVal);
                 if (finalize)
                     newOffVn.updateType(offVn.getTypeReadFacing(op), false, false);
                 opSetInput(op, newOffVn, 1);
                 return;
             }
-            PcodeOp* multOp = newOp(2, op.getAddr());
+            PcodeOp multOp = newOp(2, op.getAddr());
             opSetOpcode(multOp, OpCode.CPUI_INT_MULT);
-            Varnode* addVn = newUniqueOut(offVn.getSize(), multOp);
-            if (finalize)
-            {
+            Varnode addVn = newUniqueOut(offVn.getSize(), multOp);
+            if (finalize) {
                 addVn.updateType(multVn.getType(), false, false);
                 addVn.setImplied();
             }
@@ -4682,41 +4657,39 @@ namespace Sla.DECCORE
         {
             if (op == lastOp) return true;  // Nothing to move past
             if (op.isCall()) return false;
-            PcodeOp* prevOp = (PcodeOp)null;
-            if (op.code() == OpCode.CPUI_CAST)
-            {
-                Varnode* vn = op.getIn(0);
-                if (!vn.isExplicit())
-                {       // If CAST is part of expression, we need to move the previous op as well
+            PcodeOp prevOp = (PcodeOp)null;
+            if (op.code() == OpCode.CPUI_CAST) {
+                Varnode vn = op.getIn(0);
+                if (!vn.isExplicit()) {
+                    // If CAST is part of expression, we need to move the previous op as well
                     if (!vn.isWritten()) return false;
                     prevOp = vn.getDef();
                     if (prevOp.isCall()) return false;
                     if (op.previousOp() != prevOp) return false;   // Previous op must exist and feed into the CAST
                 }
             }
-            Varnode* rootvn = op.getOut();
-            List<HighVariable*> highList;
-            int typeVal = HighVariable::markExpression(rootvn, highList);
-            PcodeOp* curOp = op;
-            do
-            {
-                PcodeOp* nextOp = curOp.nextOp();
+            Varnode rootvn = op.getOut();
+            List<HighVariable> highList = new List<HighVariable>();
+            int typeVal = HighVariable.markExpression(rootvn, highList);
+            PcodeOp curOp = op;
+            do {
+                PcodeOp nextOp = curOp.nextOp();
                 OpCode opc = nextOp.code();
                 if (opc != OpCode.CPUI_COPY && opc != OpCode.CPUI_CAST) break;    // Limit ourselves to only crossing COPY and CAST ops
                 if (rootvn == nextOp.getIn(0)) break;  // Data-flow order dependence
-                Varnode* copyVn = nextOp.getOut();
+                Varnode copyVn = nextOp.getOut();
                 if (copyVn.getHigh().isMark()) break; // Direct interference: COPY writes what original op reads
                 if (typeVal != 0 && copyVn.isAddrTied()) break;    // Possible indirect interference
                 curOp = nextOp;
             } while (curOp != lastOp);
             for (int i = 0; i < highList.size(); ++i)      // Clear marks on expression
                 highList[i].clearMark();
-            if (curOp == lastOp)
-            {           // If we are able to cross everything
+            if (curOp == lastOp) {
+                // If we are able to cross everything
                 opUninsert(op);             // Move -op-
                 opInsertAfter(op, lastOp);
-                if (prevOp != (PcodeOp)null)
-                {       // If there was a CAST, move both ops
+                if (prevOp != (PcodeOp)null) {
+                    // If there was a CAST, move both ops
                     opUninsert(prevOp);
                     opInsertAfter(prevOp, lastOp);
                 }
@@ -4732,14 +4705,11 @@ namespace Sla.DECCORE
         /// \param op is the PcodeOp component of the given edge
         /// \param slot is the slot component of the given edge
         /// \return the associated field as a ResolvedUnion or null
-        public ResolvedUnion getUnionField(Datatype parent, PcodeOp op, int slot)
+        public ResolvedUnion? getUnionField(Datatype parent, PcodeOp op, int slot)
         {
-            Dictionary<ResolveEdge, ResolvedUnion>::const_iterator iter;
-            ResolveEdge edge(parent, op, slot);
-            iter = unionMap.find(edge);
-            if (iter != unionMap.end())
-                return &(*iter).second;
-            return (ResolvedUnion)null;
+            ResolveEdge edge = new ResolveEdge(parent, op, slot);
+            ResolvedUnion? result;
+            return unionMap.TryGetValue(edge, out result) ? result : (ResolvedUnion)null;
         }
 
         /// \brief Associate a union field with the given edge
@@ -4753,30 +4723,25 @@ namespace Sla.DECCORE
         /// \return \b true unless there was a locked association
         public bool setUnionField(Datatype parent, PcodeOp op, int slot, ResolvedUnion resolve)
         {
-            ResolveEdge edge(parent, op, slot);
+            ResolveEdge edge = new ResolveEdge(parent, op, slot);
             pair<Dictionary<ResolveEdge, ResolvedUnion>::iterator, bool> res;
             res = unionMap.emplace(edge, resolve);
-            if (!res.second)
-            {
-                if ((*res.first).second.isLocked())
-                {
+            if (!res.second) {
+                if ((*res.first).second.isLocked()) {
                     return false;
                 }
-              (*res.first).second = resolve;
+                (*res.first).second = resolve;
             }
-            if (op.code() == OpCode.CPUI_MULTIEQUAL && slot >= 0)
-            {
+            if (op.code() == OpCode.CPUI_MULTIEQUAL && slot >= 0) {
                 // Data-type propagation doesn't happen between MULTIEQUAL input slots holding the same Varnode
                 // So if this is a MULTIEQUAL, copy resolution to any other input slots holding the same Varnode
                 Varnode vn = op.getIn(slot);        // The Varnode being directly set
-                for (int i = 0; i < op.numInput(); ++i)
-                {
+                for (int i = 0; i < op.numInput(); ++i) {
                     if (i == slot) continue;
                     if (op.getIn(i) != vn) continue;       // Check that different input slot holds same Varnode
-                    ResolveEdge dupedge(parent, op, i);
+                    ResolveEdge dupedge = new ResolveEdge(parent, op, i);
                     res = unionMap.emplace(dupedge, resolve);
-                    if (!res.second)
-                    {
+                    if (!res.second) {
                         if (!(*res.first).second.isLocked())
                             (*res.first).second = resolve;
                     }
@@ -4794,15 +4759,15 @@ namespace Sla.DECCORE
         /// \param slot is -1 for the write edge or >=0 indicating the particular read edge
         public void forceFacingType(Datatype parent, int fieldNum, PcodeOp op, int slot)
         {
-            Datatype* baseType = parent;
+            Datatype baseType = parent;
             if (baseType.getMetatype() == type_metatype.TYPE_PTR)
-                baseType = ((TypePointer*)baseType).getPtrTo();
-            if (parent.isPointerRel())
-            {
+                baseType = ((TypePointer)baseType).getPtrTo();
+            if (parent.isPointerRel()) {
                 // Don't associate a relative pointer with the resolution, but convert to a standard pointer
-                parent = glb.types.getTypePointer(parent.getSize(), baseType, ((TypePointer*)parent).getWordSize());
+                parent = glb.types.getTypePointer(parent.getSize(), baseType,
+                    ((TypePointer)parent).getWordSize());
             }
-            ResolvedUnion resolve(parent, fieldNum,* glb.types);
+            ResolvedUnion resolve = new ResolvedUnion(parent, fieldNum, glb.types);
             setUnionField(parent, op, slot, resolve);
         }
 
@@ -4816,7 +4781,7 @@ namespace Sla.DECCORE
         public int inheritResolution(Datatype parent, PcodeOp op, int slot, PcodeOp oldOp, int oldSlot)
         {
             Dictionary<ResolveEdge, ResolvedUnion>::const_iterator iter;
-            ResolveEdge edge(parent, oldOp, oldSlot);
+            ResolveEdge edge = new ResolveEdge(parent, oldOp, oldSlot);
             iter = unionMap.find(edge);
             if (iter == unionMap.end())
                 return -1;
@@ -4830,16 +4795,10 @@ namespace Sla.DECCORE
         /// attach the given PcodeOp to it.
         /// \param op is the given BRANCHIND PcodeOp
         /// \return the matching jump-table object or NULL
-        public JumpTable linkJumpTable(PcodeOp op)
+        public JumpTable? linkJumpTable(PcodeOp op)
         {
-            List<JumpTable*>::iterator iter;
-            JumpTable* jt;
-
-            for (iter = jumpvec.begin(); iter != jumpvec.end(); ++iter)
-            {
-                jt = *iter;
-                if (jt.getOpAddress() == op.getAddr())
-                {
+            foreach (JumpTable jt in jumpvec) {
+                if (jt.getOpAddress() == op.getAddr()) {
                     jt.setIndirectOp(op);
                     return jt;
                 }
@@ -4851,14 +4810,9 @@ namespace Sla.DECCORE
         /// Look up the jump-table object with the matching PcodeOp address
         /// \param op is the given BRANCHIND PcodeOp
         /// \return the matching jump-table object or NULL
-        public JumpTable findJumpTable(PcodeOp op)
+        public JumpTable? findJumpTable(PcodeOp op)
         {
-            List<JumpTable*>::const_iterator iter;
-            JumpTable* jt;
-
-            for (iter = jumpvec.begin(); iter != jumpvec.end(); ++iter)
-            {
-                jt = *iter;
+            foreach (JumpTable jt in jumpvec) {
                 if (jt.getOpAddress() == op.getAddr()) return jt;
             }
             return (JumpTable)null;
@@ -4874,13 +4828,12 @@ namespace Sla.DECCORE
         {
             if (isProcStarted())
                 throw new LowlevelError("Cannot install jumptable if flow is already traced");
-            for (int i = 0; i < jumpvec.size(); ++i)
-            {
-                JumpTable* jt = jumpvec[i];
+            for (int i = 0; i < jumpvec.size(); ++i) {
+                JumpTable jt = jumpvec[i];
                 if (jt.getOpAddress() == addr)
                     throw new LowlevelError("Trying to install over existing jumptable");
             }
-            JumpTable* newjt = new JumpTable(glb, addr);
+            JumpTable newjt = new JumpTable(glb, addr);
             jumpvec.Add(newjt);
             return newjt;
         }
@@ -4895,17 +4848,13 @@ namespace Sla.DECCORE
         /// \param flow is current flow information for \b this function
         /// \param failuremode will hold the final success/failure code (0=success)
         /// \return the recovered JumpTable or NULL if there was no success
-        public JumpTable recoverJumpTable(Funcdata partial, PcodeOp op, FlowInfo flow,
+        public JumpTable? recoverJumpTable(Funcdata partial, PcodeOp op, FlowInfo flow,
             int failuremode)
         {
-            JumpTable* jt;
-
             failuremode = 0;
-            jt = linkJumpTable(op);     // Search for pre-existing jumptable
-            if (jt != (JumpTable)null)
-            {
-                if (!jt.isOverride())
-                {
+            JumpTable? jt = linkJumpTable(op);     // Search for pre-existing jumptable
+            if (jt != (JumpTable)null) {
+                if (!jt.isOverride()) {
                     if (jt.getStage() != 1)
                         return jt;      // Previously calculated jumptable (NOT an override and NOT incomplete)
                 }
@@ -4916,12 +4865,12 @@ namespace Sla.DECCORE
                 return jt;
             }
 
-            if ((flags & jumptablerecovery_dont) != 0)
+            if ((flags & Flags.jumptablerecovery_dont) != 0)
                 return (JumpTable)null;   // Explicitly told not to recover jumptables
             if (earlyJumpTableFail(op))
                 return (JumpTable)null;
-            JumpTable trialjt(glb);
-            failuremode = stageJumpTable(partial, &trialjt, op, flow);
+            JumpTable trialjt = new JumpTable(glb);
+            failuremode = stageJumpTable(partial, trialjt, op, flow);
             if (failuremode != 0)
                 return (JumpTable)null;
             //  if (trialjt.is_twostage())
@@ -4941,80 +4890,74 @@ namespace Sla.DECCORE
         public bool earlyJumpTableFail(PcodeOp op)
         {
             Varnode vn = op.getIn(0);
-            list<PcodeOp*>::const_iterator iter = op.insertiter;
-            list<PcodeOp*>::const_iterator startiter = beginOpDead();
+            IEnumerator<PcodeOp> iter = op.insertiter;
+            IEnumerator<PcodeOp> startiter = beginOpDead();
             int countMax = 8;
             while (iter != startiter) {
                 if (vn.getSize() == 1) return false;
                 countMax -= 1;
                 if (countMax < 0) return false;     // Don't iterate too many times
                 --iter;
-                op = *iter;
-                Varnode* outvn = op.getOut();
+                op = iter.Current;
+                Varnode? outvn = op.getOut();
                 bool outhit = false;
                 if (outvn != (Varnode)null)
-                    outhit = vn.intersects(*outvn);
-                if (op.getEvalType() == PcodeOp::special)
-                {
-                    if (op.isCall())
-                    {
+                    outhit = vn.intersects(outvn);
+                if (op.getEvalType() == PcodeOp.Flags.special) {
+                    if (op.isCall()) {
                         OpCode opc = op.code();
-                        if (opc == OpCode.CPUI_CALLOTHER)
-                        {
+                        if (opc == OpCode.CPUI_CALLOTHER) {
                             int id = (int)op.getIn(0).getOffset();
-                            UserPcodeOp* userOp = glb.userops.getOp(id);
-                            if (dynamic_cast<InjectedUserOp*>(userOp) != (InjectedUserOp*)0)
+                            UserPcodeOp userOp = glb.userops.getOp(id);
+                            if (userOp is InjectedUserOp)
                                 return false;   // Don't try to back track through injection
-                            if (dynamic_cast<JumpAssistOp*>(userOp) != (JumpAssistOp*)0)
+                            if (userOp is JumpAssistOp)
                                 return false;
-                            if (dynamic_cast<SegmentOp*>(userOp) != (SegmentOp*)0)
+                            if (userOp is SegmentOp)
                                 return false;
                             if (outhit)
                                 return true;    // Address formed via uninjected CALLOTHER, analysis will fail
                                                 // Assume CALLOTHER will not interfere with address and continue backtracking
                         }
-                        else
-                        {
+                        else {
                             // CALL or CALLIND - Output has not been established yet
                             return false;   // Don't try to back track through CALL
                         }
                     }
                     else if (op.isBranch())
                         return false;   // Don't try to back track further
-                    else
-                    {
+                    else {
                         if (op.code() == OpCode.CPUI_STORE) return false; // Don't try to back track through STORE
                         if (outhit)
                             return false;       // Some special op (CPOOLREF, NEW, etc) generates address, don't assume failure
                                                 // Assume special will not interfere with address and continue backtracking
                     }
                 }
-                else if (op.getEvalType() == PcodeOp::unary)
-                {
-                    if (outhit)
-                    {
-                        Varnode* invn = op.getIn(0);
+                else if (op.getEvalType() == PcodeOp.Flags.unary) {
+                    if (outhit) {
+                        Varnode invn = op.getIn(0);
                         if (invn.getSize() != vn.getSize()) return false;
                         vn = invn;      // Treat input as address
                     }
                     // Continue backtracking
                 }
-                else if (op.getEvalType() == PcodeOp::binary)
-                {
-                    if (outhit)
-                    {
+                else if (op.getEvalType() == PcodeOp.Flags.binary) {
+                    if (outhit) {
                         OpCode opc = op.code();
-                        if (opc != OpCode.CPUI_INT_ADD && opc != OpCode.CPUI_INT_SUB && opc != OpCode.CPUI_INT_XOR)
+                        if (   opc != OpCode.CPUI_INT_ADD
+                            && opc != OpCode.CPUI_INT_SUB
+                            && opc != OpCode.CPUI_INT_XOR)
+                        {
                             return false;
+                        }
                         if (!op.getIn(1).isConstant()) return false;      // Don't back-track thru binary op, don't assume failure
-                        Varnode* invn = op.getIn(0);
+                        Varnode invn = op.getIn(0);
                         if (invn.getSize() != vn.getSize()) return false;
                         vn = invn;      // Treat input as address
                     }
                     // Continue backtracking
                 }
-                else
-                {
+                else {
                     if (outhit)
                         return false;
                 }
@@ -5034,16 +4977,16 @@ namespace Sla.DECCORE
         /// \param jt is the given JumpTable object
         public void removeJumpTable(JumpTable jt)
         {
-            List<JumpTable*> remain;
-            List<JumpTable*>::iterator iter;
+            List<JumpTable> remain = new List<JumpTable>();
+            IEnumerator<JumpTable> iter = jumpvec.begin();
 
-            for (iter = jumpvec.begin(); iter != jumpvec.end(); ++iter)
-                if ((*iter) != jt)
-                    remain.Add(*iter);
-            PcodeOp* op = jt.getIndirectOp();
-            delete jt;
+            while (iter.MoveNext())
+                if (iter.Current != jt)
+                    remain.Add(iter.Current);
+            PcodeOp op = jt.getIndirectOp();
+            // delete jt;
             if (op != (PcodeOp)null)
-                op.getParent().clearFlag(FlowBlock::f_switch_out);
+                op.getParent().clearFlag(FlowBlock.block_flags.f_switch_out);
             jumpvec = remain;
         }
 
@@ -5089,16 +5032,15 @@ namespace Sla.DECCORE
         /// \return \b true if unreachable blocks were actually found and removed
         public bool removeUnreachableBlocks(bool issuewarning, bool checkexistence)
         {
-            List<FlowBlock*> list;
+            List<FlowBlock> list = new List<FlowBlock>();
             uint i;
 
-            if (checkexistence)
-            { // Quick check for the existence of unreachable blocks
-                for (i = 0; i < bblocks.getSize(); ++i)
-                {
-                    FlowBlock* blk = bblocks.getBlock(i);
+            if (checkexistence) {
+                // Quick check for the existence of unreachable blocks
+                for (i = 0; i < bblocks.getSize(); ++i) {
+                    FlowBlock blk = bblocks.getBlock(i);
                     if (blk.isEntryPoint()) continue; // Don't remove starting component
-                    if (blk.getImmedDom() == (FlowBlock*)0) break;
+                    if (blk.getImmedDom() == (FlowBlock)null) break;
                 }
                 if (i == bblocks.getSize()) return false;
             }
@@ -5111,30 +5053,24 @@ namespace Sla.DECCORE
                 if (bblocks.getBlock(i).isEntryPoint()) break;
             bblocks.collectReachable(list, bblocks.getBlock(i), true); // Collect (un)reachable blocks
 
-            for (i = 0; i < list.size(); ++i)
-            {
-                list[i].setDead();
-                if (issuewarning)
-                {
-                    ostringstream s;
-                    BlockBasic* bb = (BlockBasic*)list[i];
-                    s << "Removing unreachable block (";
-                    s << bb.getStart().getSpace().getName();
-                    s << ',';
+            for (i = 0; i < list.size(); ++i) {
+                list[(int)i].setDead();
+                if (issuewarning) {
+                    StringWriter s = new StringWriter();
+                    BlockBasic bb = (BlockBasic)list[i];
+                    s.Write($"Removing unreachable block ({bb.getStart().getSpace().getName()},");
                     bb.getStart().printRaw(s);
-                    s << ')';
-                    warningHeader(s.str());
+                    s.Write(")");
+                    warningHeader(s.ToString());
                 }
             }
-            for (i = 0; i < list.size(); ++i)
-            {
-                BlockBasic* bb = (BlockBasic*)list[i];
+            for (i = 0; i < list.size(); ++i) {
+                BlockBasic bb = (BlockBasic)list[(int)i];
                 while (bb.sizeOut() > 0)
                     branchRemoveInternal(bb, 0);
             }
-            for (i = 0; i < list.size(); ++i)
-            {
-                BlockBasic* bb = (BlockBasic*)list[i];
+            for (i = 0; i < list.size(); ++i) {
+                BlockBasic bb = (BlockBasic)list[(int)i];
                 blockRemoveInternal(bb, true);
             }
             structureReset();
@@ -5151,10 +5087,10 @@ namespace Sla.DECCORE
         /// \param bbnew is the basic block where the edge should get moved to
         public void pushBranch(BlockBasic bb, int slot, BlockBasic bbnew)
         {
-            PcodeOp* cbranch = bb.lastOp();
+            PcodeOp cbranch = bb.lastOp();
             if ((cbranch.code() != OpCode.CPUI_CBRANCH) || (bb.sizeOut() != 2))
                 throw new LowlevelError("Cannot push non-conditional edge");
-            PcodeOp* indop = bbnew.lastOp();
+            PcodeOp indop = bbnew.lastOp();
             if (indop.code() != OpCode.CPUI_BRANCHIND)
                 throw new LowlevelError("Can only push branch into indirect jump");
 
@@ -5196,7 +5132,7 @@ namespace Sla.DECCORE
             bool forb_block1ishigh, Address addr)
         {
             BlockBasic newblock = bblocks.newBlockBasic(this);
-            newblock.setFlag(FlowBlock::f_joined_block);
+            newblock.setFlag(FlowBlock.block_flags.f_joined_block);
             newblock.setInitialRange(addr, addr);
             FlowBlock swapa;
             FlowBlock swapb;
@@ -5243,8 +5179,7 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Cannot (currently) nodesplit block with out flow");
             if (b.sizeIn() <= 1)
                 throw new LowlevelError("Cannot nodesplit block with only 1 in edge");
-            for (int i = 0; i < b.sizeIn(); ++i)
-            {
+            for (int i = 0; i < b.sizeIn(); ++i) {
                 if (b.getIn(i).isMark())
                     throw new LowlevelError("Cannot nodesplit block with redundant in edges");
                 b.setMark();
@@ -5279,8 +5214,8 @@ namespace Sla.DECCORE
         {
             FlowBlock bl;
             FlowBlock bl2;
-            PcodeOp op;
-            PcodeOp op2;
+            PcodeOp? op;
+            PcodeOp? op2;
             int i, j;
 
             for (i = 0; i < bblocks.getSize(); ++i) {
@@ -5336,7 +5271,7 @@ namespace Sla.DECCORE
         /// \param bl is the given basic block
         public void spliceBlockBasic(BlockBasic bl)
         {
-            BlockBasic outbl = (BlockBasic)null;
+            BlockBasic? outbl = (BlockBasic)null;
             if (bl.sizeOut() == 1) {
                 outbl = (BlockBasic)bl.getOut(0);
                 if (outbl.sizeIn() != 1)
@@ -5355,11 +5290,11 @@ namespace Sla.DECCORE
                 PcodeOp firstop = outbl.op.front();
                 if (firstop.code() == OpCode.CPUI_MULTIEQUAL)
                     throw new LowlevelError("Splicing block with MULTIEQUAL");
-                firstop.clearFlag(PcodeOp::startbasic);
-                IEnumerator<PcodeOp> iter;
+                firstop.clearFlag(PcodeOp.Flags.startbasic);
+                IEnumerator<PcodeOp> iter = outbl.beginOp();
                 // Move ops into -bl-
                 for (iter = outbl.beginOp(); iter != outbl.endOp(); ++iter) {
-                    PcodeOp op = *iter;
+                    PcodeOp op = iter.Current;
                     op.setParent(bl);  // Reset ops parent to -bl-
                 }
                 // Move all ops from -outbl- to end of -bl-
@@ -5399,34 +5334,31 @@ namespace Sla.DECCORE
             int i;
             long val, diff;
 
-            if ((vn = op.getIn(0)).isConstant())
-            {
+            if ((vn = op.getIn(0)).isConstant()) {
                 diff = -1;
                 i = 0;
             }
-            else if ((vn = op.getIn(1)).isConstant())
-            {
+            else if ((vn = op.getIn(1)).isConstant()) {
                 diff = 1;
                 i = 1;
             }
             else
                 return false;
 
-            val = vn.getOffset();  // Treat this as signed value
+            val = (long)vn.getOffset();  // Treat this as signed value
             Globals.sign_extend(val, 8 * vn.getSize() - 1);
-            if (op.code() == OpCode.CPUI_INT_SLESSEQUAL)
-            {
+            if (op.code() == OpCode.CPUI_INT_SLESSEQUAL) {
                 if ((val < 0) && (val + diff > 0)) return false; // Check for sign overflow
                 if ((val > 0) && (val + diff < 0)) return false;
                 opSetOpcode(op, OpCode.CPUI_INT_SLESS);
             }
-            else
-            {           // Check for unsigned overflow
+            else {
+                // Check for unsigned overflow
                 if ((diff == -1) && (val == 0)) return false;
                 if ((diff == 1) && (val == -1)) return false;
                 opSetOpcode(op, OpCode.CPUI_INT_LESS);
             }
-            ulong res = (val + diff) & Globals.calc_mask(vn.getSize());
+            ulong res = (val + diff) & Globals.calc_mask((uint)vn.getSize());
             Varnode newvn = newConstant(vn.getSize(), res);
             newvn.copySymbol(vn);  // Preserve data-type (and any Symbol info)
             opSetInput(op, newvn, i);
@@ -5452,14 +5384,12 @@ namespace Sla.DECCORE
             ulong coeff = op.getIn(1).getOffset();
             int sz = op.getOut().getSize();
             // Do distribution
-            if (vn0.isConstant())
-            {
+            if (vn0.isConstant()) {
                 ulong val = coeff * vn0.getOffset();
                 val &= Globals.calc_mask(sz);
                 newvn0 = newConstant(sz, val);
             }
-            else
-            {
+            else {
                 PcodeOp newop0 = newOp(2, op.getAddr());
                 opSetOpcode(newop0, OpCode.CPUI_INT_MULT);
                 newvn0 = newUniqueOut(sz, newop0);
@@ -5469,14 +5399,12 @@ namespace Sla.DECCORE
                 opInsertBefore(newop0, op);
             }
 
-            if (vn1.isConstant())
-            {
+            if (vn1.isConstant()) {
                 ulong val = coeff * vn1.getOffset();
                 val &= Globals.calc_mask(sz);
                 newvn1 = newConstant(sz, val);
             }
-            else
-            {
+            else {
                 PcodeOp newop1 = newOp(2, op.getAddr());
                 opSetOpcode(newop1, OpCode.CPUI_INT_MULT);
                 newvn1 = newUniqueOut(sz, newop1);
@@ -5507,12 +5435,12 @@ namespace Sla.DECCORE
         public bool collapseIntMultMult(Varnode vn)
         {
             if (!vn.isWritten()) return false;
-            PcodeOp op = vn.getDef();
+            PcodeOp op = vn.getDef() ?? throw new BugException();
             if (op.code() != OpCode.CPUI_INT_MULT) return false;
             Varnode constVnFirst = op.getIn(1);
             if (!constVnFirst.isConstant()) return false;
             if (!op.getIn(0).isWritten()) return false;
-            PcodeOp otherMultOp = op.getIn(0).getDef();
+            PcodeOp otherMultOp = op.getIn(0).getDef() ?? throw new BugException();
             if (otherMultOp.code() != OpCode.CPUI_INT_MULT) return false;
             Varnode constVnSecond = otherMultOp.getIn(1);
             if (!constVnSecond.isConstant()) return false;
@@ -5718,10 +5646,9 @@ namespace Sla.DECCORE
         /// \return 0 if the change normalizes, 1 if the change is ambivalent, 2 if the change does not normalize
         private static int opFlipInPlaceTest(PcodeOp op, List<PcodeOp> fliplist)
         {
-            Varnode* vn;
+            Varnode vn;
             int subtest1, subtest2;
-            switch (op.code())
-            {
+            switch (op.code()) {
                 case OpCode.CPUI_CBRANCH:
                     vn = op.getIn(1);
                     if (vn.loneDescend() != op) return 2;
@@ -5778,22 +5705,20 @@ namespace Sla.DECCORE
         /// \param fliplist is the list of PcodeOps to modify
         private static void opFlipInPlaceExecute(Funcdata data, List<PcodeOp> fliplist)
         {
-            Varnode* vn;
-            for (int i = 0; i < fliplist.size(); ++i)
-            {
-                PcodeOp* op = fliplist[i];
+            Varnode vn;
+            for (int i = 0; i < fliplist.size(); ++i) {
+                PcodeOp op = fliplist[i];
                 bool flipyes;
                 OpCode opc = Globals.get_booleanflip(op.code(), flipyes);
-                if (opc == OpCode.CPUI_COPY)
-                {   // We remove this (CPUI_BOOL_NEGATE) entirely
+                if (opc == OpCode.CPUI_COPY) {
+                    // We remove this (CPUI_BOOL_NEGATE) entirely
                     vn = op.getIn(0);
-                    PcodeOp* otherop = op.getOut().loneDescend(); // Must be a lone descendant
+                    PcodeOp otherop = op.getOut().loneDescend(); // Must be a lone descendant
                     int slot = otherop.getSlot(op.getOut());
                     data.opSetInput(otherop, vn, slot); // Propagate -vn- into otherop
                     data.opDestroy(op);
                 }
-                else if (opc == OpCode.CPUI_MAX)
-                {
+                else if (opc == OpCode.CPUI_MAX) {
                     if (op.code() == OpCode.CPUI_BOOL_AND)
                         data.opSetOpcode(op, OpCode.CPUI_BOOL_OR);
                     else if (op.code() == OpCode.CPUI_BOOL_OR)
@@ -5801,13 +5726,10 @@ namespace Sla.DECCORE
                     else
                         throw new LowlevelError("Bad flipInPlace op");
                 }
-                else
-                {
+                else {
                     data.opSetOpcode(op, opc);
-                    if (flipyes)
-                    {
+                    if (flipyes) {
                         data.opSwapInput(op, 0, 1);
-
                         if ((opc == OpCode.CPUI_INT_LESSEQUAL) || (opc == OpCode.CPUI_INT_SLESSEQUAL))
                             data.replaceLessequal(op);
                     }
@@ -5880,30 +5802,26 @@ namespace Sla.DECCORE
         /// \return the dominating PcodeOp
         private static PcodeOp cseElimination(Funcdata data, PcodeOp op1, PcodeOp op2)
         {
-            PcodeOp* replace;
+            PcodeOp replace;
 
-            if (op1.getParent() == op2.getParent())
-            {
+            if (op1.getParent() == op2.getParent()) {
                 if (op1.getSeqNum().getOrder() < op2.getSeqNum().getOrder())
                     replace = op1;
                 else
                     replace = op2;
             }
-            else
-            {
-                BlockBasic* common;
-                common = (BlockBasic*)FlowBlock::findCommonBlock(op1.getParent(), op2.getParent());
+            else {
+                BlockBasic common = (BlockBasic)FlowBlock.findCommonBlock(op1.getParent(), op2.getParent());
                 if (common == op1.getParent())
                     replace = op1;
                 else if (common == op2.getParent())
                     replace = op2;
-                else
-                {           // Neither op is ancestor of the other
+                else {
+                    // Neither op is ancestor of the other
                     replace = data.newOp(op1.numInput(), common.getStop());
                     data.opSetOpcode(replace, op1.code());
                     data.newVarnodeOut(op1.getOut().getSize(), op1.getOut().getAddr(), replace);
-                    for (int i = 0; i < op1.numInput(); ++i)
-                    {
+                    for (int i = 0; i < op1.numInput(); ++i) {
                         if (op1.getIn(i).isConstant())
                             data.opSetInput(replace, data.newConstant(op1.getIn(i).getSize(), op1.getIn(i).getOffset()), i);
                         else
@@ -5912,13 +5830,11 @@ namespace Sla.DECCORE
                     data.opInsertEnd(replace, common);
                 }
             }
-            if (replace != op1)
-            {
+            if (replace != op1) {
                 data.totalReplace(op1.getOut(), replace.getOut());
                 data.opDestroy(op1);
             }
-            if (replace != op2)
-            {
+            if (replace != op2) {
                 data.totalReplace(op2.getOut(), replace.getOut());
                 data.opDestroy(op2);
             }
@@ -5958,20 +5874,15 @@ namespace Sla.DECCORE
             liter1 = list.begin();
             liter2 = list.begin();
             liter2++;
-            while (liter2 != list.end())
-            {
-                if ((*liter1).first == (*liter2).first)
-                {
+            while (liter2 != list.end()) {
+                if ((*liter1).first == (*liter2).first) {
                     op1 = (*liter1).second;
                     op2 = (*liter2).second;
-                    if ((!op1.isDead()) && (!op2.isDead()) && op1.isCseMatch(op2))
-                    {
-                        Varnode* outvn1 = op1.getOut();
-                        Varnode* outvn2 = op2.getOut();
-                        if ((outvn1 == (Varnode)null) || data.isHeritaged(outvn1))
-                        {
-                            if ((outvn2 == (Varnode)null) || data.isHeritaged(outvn2))
-                            {
+                    if ((!op1.isDead()) && (!op2.isDead()) && op1.isCseMatch(op2)) {
+                        Varnode outvn1 = op1.getOut();
+                        Varnode outvn2 = op2.getOut();
+                        if ((outvn1 == (Varnode)null) || data.isHeritaged(outvn1)) {
+                            if ((outvn2 == (Varnode)null) || data.isHeritaged(outvn2)) {
                                 resop = cseElimination(data, op1, op2);
                                 outlist.Add(resop.getOut());
                             }

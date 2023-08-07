@@ -2302,7 +2302,7 @@ namespace Sla.SLACOMP
 
         //    case 67:
 
-        //        { (yyval.subtablesym) = (SubtableSymbol*)0; }
+        //        { (yyval.subtablesym) = (SubtableSymbol)null; }
 
         //        break;
 
@@ -2434,7 +2434,7 @@ namespace Sla.SLACOMP
 
         //    case 89:
 
-        //        { (yyval.construct) = slgh.createConstructor((SubtableSymbol*)0); }
+        //        { (yyval.construct) = slgh.createConstructor((SubtableSymbol)null); }
 
         //        break;
 
@@ -3353,31 +3353,31 @@ namespace Sla.SLACOMP
 
         //    case 245:
 
-        //        { VarnodeTpl* sym = (yyvsp[0].startsym).getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), sym.getOffset(), ConstTpl(ConstTpl::j_curspace_size)); delete sym; }
+        //        { VarnodeTpl* sym = (yyvsp[0].startsym).getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl.const_type.j_curspace), sym.getOffset(), ConstTpl(ConstTpl.const_type.j_curspace_size)); delete sym; }
 
         //        break;
 
         //    case 246:
 
-        //        { VarnodeTpl* sym = (yyvsp[0].endsym).getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), sym.getOffset(), ConstTpl(ConstTpl::j_curspace_size)); delete sym; }
+        //        { VarnodeTpl* sym = (yyvsp[0].endsym).getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl.const_type.j_curspace), sym.getOffset(), ConstTpl(ConstTpl.const_type.j_curspace_size)); delete sym; }
 
         //        break;
 
         //    case 247:
 
-        //        { VarnodeTpl* sym = (yyvsp[0].next2sym).getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), sym.getOffset(), ConstTpl(ConstTpl::j_curspace_size)); delete sym; }
+        //        { VarnodeTpl* sym = (yyvsp[0].next2sym).getVarnode(); (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl.const_type.j_curspace), sym.getOffset(), ConstTpl(ConstTpl.const_type.j_curspace_size)); delete sym; }
 
         //        break;
 
         //    case 248:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), ConstTpl(ConstTpl::real, *(yyvsp[0].i)), ConstTpl(ConstTpl::j_curspace_size)); delete(yyvsp[0].i); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl.const_type.j_curspace), ConstTpl(ConstTpl.const_type.real, *(yyvsp[0].i)), ConstTpl(ConstTpl.const_type.j_curspace_size)); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 249:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl::j_curspace), ConstTpl(ConstTpl::real, 0), ConstTpl(ConstTpl::j_curspace_size)); slgh.reportError("Parsed integer is too big (overflow)"); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(ConstTpl.const_type.j_curspace), ConstTpl(ConstTpl.const_type.real, 0), ConstTpl(ConstTpl.const_type.j_curspace_size)); slgh.reportError("Parsed integer is too big (overflow)"); }
 
         //        break;
 
@@ -3389,13 +3389,13 @@ namespace Sla.SLACOMP
 
         //    case 251:
 
-        //        { AddrSpace* spc = (yyvsp[-1].spacesym).getSpace(); (yyval.varnode) = new VarnodeTpl(ConstTpl(spc), ConstTpl(ConstTpl::real, *(yyvsp[-3].i)), ConstTpl(ConstTpl::real, spc.getAddrSize())); delete(yyvsp[-3].i); }
+        //        { AddrSpace* spc = (yyvsp[-1].spacesym).getSpace(); (yyval.varnode) = new VarnodeTpl(ConstTpl(spc), ConstTpl(ConstTpl.const_type.real, *(yyvsp[-3].i)), ConstTpl(ConstTpl.const_type.real, spc.getAddrSize())); delete(yyvsp[-3].i); }
 
         //        break;
 
         //    case 252:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl::j_relative, (yyvsp[0].labelsym).getIndex()), ConstTpl(ConstTpl::real, sizeof(uint))); (yyvsp[0].labelsym).incrementRefCount(); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl.const_type.j_relative, (yyvsp[0].labelsym).getIndex()), ConstTpl(ConstTpl.const_type.real, sizeof(uint))); (yyvsp[0].labelsym).incrementRefCount(); }
 
         //        break;
 
@@ -3431,19 +3431,19 @@ namespace Sla.SLACOMP
 
         //    case 258:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl::real, *(yyvsp[0].i)), ConstTpl(ConstTpl::real, 0)); delete(yyvsp[0].i); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl.const_type.real, *(yyvsp[0].i)), ConstTpl(ConstTpl.const_type.real, 0)); delete(yyvsp[0].i); }
 
         //        break;
 
         //    case 259:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl::real, 0), ConstTpl(ConstTpl::real, 0)); slgh.reportError("Parsed integer is too big (overflow)"); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl.const_type.real, 0), ConstTpl(ConstTpl.const_type.real, 0)); slgh.reportError("Parsed integer is too big (overflow)"); }
 
         //        break;
 
         //    case 260:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl::real, *(yyvsp[-2].i)), ConstTpl(ConstTpl::real, *(yyvsp[0].i))); delete(yyvsp[-2].i); delete(yyvsp[0].i); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl.const_type.real, *(yyvsp[-2].i)), ConstTpl(ConstTpl.const_type.real, *(yyvsp[0].i))); delete(yyvsp[-2].i); delete(yyvsp[0].i); }
 
         //        break;
 
@@ -3509,7 +3509,7 @@ namespace Sla.SLACOMP
 
         //    case 271:
 
-        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl::real, *(yyvsp[-2].i)), ConstTpl(ConstTpl::real, *(yyvsp[0].i))); delete(yyvsp[-2].i); delete(yyvsp[0].i); }
+        //        { (yyval.varnode) = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl.const_type.real, *(yyvsp[-2].i)), ConstTpl(ConstTpl.const_type.real, *(yyvsp[0].i))); delete(yyvsp[-2].i); delete(yyvsp[0].i); }
 
         //        break;
 

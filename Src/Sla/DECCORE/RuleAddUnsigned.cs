@@ -47,7 +47,7 @@ namespace Sla.DECCORE
             if (constvn.getSymbolEntry() != (SymbolEntry)null)
             {
                 EquateSymbol* sym = dynamic_cast<EquateSymbol*>(constvn.getSymbolEntry().getSymbol());
-                if (sym != (EquateSymbol*)0)
+                if (sym != (EquateSymbol)null)
                 {
                     if (sym.isNameLocked())
                         return 0;       // Dont transform a named equate

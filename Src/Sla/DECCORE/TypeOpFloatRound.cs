@@ -14,7 +14,7 @@ namespace Sla.DECCORE
         public TypeOpFloatRound(TypeFactory t, Translate trans)
             : base(t, OpCode.CPUI_FLOAT_ROUND,"ROUND", type_metatype.TYPE_FLOAT, type_metatype.TYPE_FLOAT)
         {
-            opflags = PcodeOp::unary;
+            opflags = PcodeOp.Flags.unary;
             addlflags = floatingpoint_op;
             behave = new OpBehaviorFloatRound(trans);
         }

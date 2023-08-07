@@ -20,7 +20,7 @@ namespace Sla.DECCORE
             : base(t, OpCode.CPUI_CPOOLREF, "cpoolref")
         {
             cpool = t.getArch().cpool;
-            opflags = PcodeOp::special | PcodeOp::nocollapse;
+            opflags = PcodeOp.Flags.special | PcodeOp.Flags.nocollapse;
             behave = new OpBehavior(CPUI_CPOOLREF, false, true); // Dummy behavior
         }
 

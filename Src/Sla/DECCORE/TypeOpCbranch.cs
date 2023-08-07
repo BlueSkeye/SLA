@@ -11,7 +11,7 @@ namespace Sla.DECCORE
     {
         public TypeOpCbranch(TypeFactory t)
         {
-            opflags = (PcodeOp::special | PcodeOp::branch | PcodeOp::coderef | PcodeOp::nocollapse);
+            opflags = (PcodeOp.Flags.special | PcodeOp::branch | PcodeOp::coderef | PcodeOp.Flags.nocollapse);
             behave = new OpBehavior(CPUI_CBRANCH, false, true); // Dummy behavior
         }
 

@@ -1,11 +1,4 @@
 ﻿using Sla.CORE;
-using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
@@ -18,7 +11,7 @@ namespace Sla.DECCORE
 
         /// Boolean properties of datatypes
         [Flags()]
-        protected enum Properties
+        internal enum Properties
         {
             /// This is a basic type which will never be redefined
             coretype = 1,
@@ -61,23 +54,23 @@ namespace Sla.DECCORE
         /// Name to display in output
         internal string displayName;
         /// Meta-type - type disregarding size
-        private type_metatype metatype;
+        internal type_metatype metatype;
         /// Sub-type of of the meta-type, for comparisons
         internal sub_metatype submeta;
         /// The immediate data-type being typedefed by \e this
-        private Datatype typedefImm;
+        internal Datatype typedefImm;
 
         /// Recover basic data-type properties
         /// Restore the basic properties (name,size,id) of a data-type from an XML element
         /// Properties are read from the attributes of the element
         /// \param decoder is the stream decoder
-        protected void decodeBasic(Decoder decoder)
+        internal void decodeBasic(Decoder decoder)
         {
             size = -1;
             metatype = type_metatype.TYPE_VOID;
             id = 0;
-            for (; ; ) {
-                uint attrib = decoder.getNextAttributeId();
+            while (true) {
+                AttributeId attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
                 if (attrib == AttributeId.ATTRIB_NAME) {
                     name = decoder.readString();
@@ -113,7 +106,7 @@ namespace Sla.DECCORE
             }
             if (size < 0)
                 throw new LowlevelError("Bad size for type " + name);
-            submeta = base2sub[metatype];
+            submeta = base2sub[(int)metatype];
             if ((id == 0) && (name.Length > 0)) // If there is a type name
                 id = hashName(name);    // There must be some kind of id
             if (isVariableLength())
@@ -130,7 +123,7 @@ namespace Sla.DECCORE
         /// This routine presumes the initial element is already written to the stream.
         /// \param meta is the metatype attribute
         /// \param encoder is the stream encoder
-        private void encodeBasic(type_metatype meta, Encoder encoder)
+        internal void encodeBasic(type_metatype meta, Encoder encoder)
         {
             encoder.writeString(AttributeId.ATTRIB_NAME, name);
             ulong saveId;
@@ -152,7 +145,7 @@ namespace Sla.DECCORE
                 encoder.writeBool(AttributeId.ATTRIB_VARLENGTH, true);
             if ((flags & Properties.opaque_string) != 0)
                 encoder.writeBool(AttributeId.ATTRIB_OPAQUESTRING, true);
-            uint format = getDisplayFormat();
+            Symbol.DisplayFlags format = getDisplayFormat();
             if (format != 0)
                 encoder.writeString(AttributeId.ATTRIB_FORMAT, decodeIntegerFormat(format));
         }
@@ -162,12 +155,12 @@ namespace Sla.DECCORE
         /// stream as a simple \<typedef> element including only the names and ids of \b this and
         /// the data-type it typedefs.
         /// \param encoder is the stream encoder
-        private void encodeTypedef(Encoder encoder)
+        internal void encodeTypedef(Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_DEF);
             encoder.writeString(AttributeId.ATTRIB_NAME, name);
             encoder.writeUnsignedInteger(AttributeId.ATTRIB_ID, id);
-            uint format = getDisplayFormat();
+            Symbol.DisplayFlags format = getDisplayFormat();
             if (format != 0)
                 encoder.writeString(AttributeId.ATTRIB_FORMAT, Datatype.decodeIntegerFormat(format));
             typedefImm.encodeRef(encoder);
@@ -221,7 +214,7 @@ namespace Sla.DECCORE
         /// \param id is the given ID to (de)uniquify
         /// \param size is the instance size of the structure
         /// \return the (de)uniquified id
-        private static ulong hashSize(ulong id, int size)
+        internal static ulong hashSize(ulong id, int size)
         {
             ulong sizeHash = (uint)size;
             sizeHash *= 0x98251033aecbabaf; // Hash the size
@@ -315,7 +308,7 @@ namespace Sla.DECCORE
         public bool needsResolution() => (flags & Properties.needs_resolution)!= 0;
 
         /// Get properties pointers inherit
-        public uint getInheritable() => (flags & Properties.coretype);
+        public Properties getInheritable() => (flags & Properties.coretype);
 
         /// Get the display format for constants with \b this data-type
         /// A non-zero result indicates the type of formatting that is forced on the constant.
@@ -398,8 +391,10 @@ namespace Sla.DECCORE
         /// \param newoff is used to pass back the offset difference
         /// \param elSize is used to pass back the array element size
         /// \return the component data-type or null
-        public virtual Datatype nearestArrayedComponentForward(ulong off, ulong newoff, int elSize)
+        public virtual Datatype? nearestArrayedComponentForward(ulong off, out ulong newoff, out int elSize)
         {
+            newoff = 0;
+            elSize = 0;
             return (TypeArray)null;
         }
 

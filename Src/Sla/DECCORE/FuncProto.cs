@@ -1089,8 +1089,8 @@ namespace Sla.DECCORE
                     if (locktest)
                     {
                         if (resContains) return ParamEntry::contains_unjustified;
-                        if (resContainedBy) return ParamEntry::contained_by;
-                        return ParamEntry::no_containment;
+                        if (resContainedBy) return ParamEntry.Containment.contained_by;
+                        return ParamEntryParamEntry.Containment.no_containment;
                     }
                 }
             }
@@ -1115,7 +1115,7 @@ namespace Sla.DECCORE
             {
                 ProtoParameter* outparam = getOutput();
                 if (outparam.getType().getMetatype() == type_metatype.TYPE_VOID)
-                    return ParamEntry::no_containment;
+                    return ParamEntryParamEntry.Containment.no_containment;
                 Address iaddr = outparam.getAddress();
                 // If the output is locked, the varnode must be justified in the location relative
                 // to the endianness of the space, irregardless of the forceleft flag
@@ -1125,8 +1125,8 @@ namespace Sla.DECCORE
                 else if (off > 0)
                     return ParamEntry::contains_unjustified;
                 if (iaddr.containedBy(outparam.getSize(), addr, size))
-                    return ParamEntry::contained_by;
-                return ParamEntry::no_containment;
+                    return ParamEntry.Containment.contained_by;
+                return ParamEntryParamEntry.Containment.no_containment;
             }
             return model.characterizeAsOutput(addr, size);
         }
@@ -1600,7 +1600,7 @@ namespace Sla.DECCORE
                             outputlock = decoder.readBool();
                     }
                     int tmpsize;
-                    outpieces.addr = Address::decode(decoder, tmpsize);
+                    outpieces.addr = Address.decode(decoder, tmpsize);
                     outpieces.type = glb.types.decodeType(decoder);
                     outpieces.flags = 0;
                     decoder.closeElement(subId);
@@ -1608,7 +1608,7 @@ namespace Sla.DECCORE
                 else if (subId == ELEM_ADDR)
                 { // Old-style specification of return (supported partially for backward compat)
                     int tmpsize;
-                    outpieces.addr = Address::decode(decoder, tmpsize);
+                    outpieces.addr = Address.decode(decoder, tmpsize);
                     outpieces.type = glb.types.decodeType(decoder);
                     outpieces.flags = 0;
                 }

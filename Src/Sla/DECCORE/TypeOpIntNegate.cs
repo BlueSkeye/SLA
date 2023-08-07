@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpIntNegate(TypeFactory t)
             : base(t, OpCode.CPUI_INT_NEGATE,"~", type_metatype.TYPE_UINT, type_metatype.TYPE_UINT)
         {
-            opflags = PcodeOp::unary;
+            opflags = PcodeOp.Flags.unary;
             addlflags = logical_op | inherits_sign;
             behave = new OpBehaviorIntNegate();
         }

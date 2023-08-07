@@ -1,9 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -50,7 +45,7 @@ namespace Sla.DECCORE
         /// Get the injection id for \b calcsize
         public int getCalcSize() => calcsize;
 
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_JUMPASSIST);
             name = decoder.readString(AttributeId.ATTRIB_NAME);
@@ -58,33 +53,28 @@ namespace Sla.DECCORE
             index2addr = -1;
             defaultaddr = -1;
             calcsize = -1;
-            for (; ; )
-            {
+            for (; ; ) {
                 uint subId = decoder.peekElement();
                 if (subId == 0) break;
-                if (subId == ELEM_CASE_PCODE)
-                {
+                if (subId == ElementId.ELEM_CASE_PCODE) {
                     if (index2case != -1)
                         throw new LowlevelError("Too many <case_pcode> tags");
                     index2case = glb.pcodeinjectlib.decodeInject("jumpassistop", name + "_index2case",
                                            InjectPayload.InjectionType.EXECUTABLEPCODE_TYPE, decoder);
                 }
-                else if (subId == ELEM_ADDR_PCODE)
-                {
+                else if (subId == ElementId.ELEM_ADDR_PCODE) {
                     if (index2addr != -1)
                         throw new LowlevelError("Too many <addr_pcode> tags");
                     index2addr = glb.pcodeinjectlib.decodeInject("jumpassistop", name + "_index2addr",
                                            InjectPayload.InjectionType.EXECUTABLEPCODE_TYPE, decoder);
                 }
-                else if (subId == ELEM_DEFAULT_PCODE)
-                {
+                else if (subId == ElementId.ELEM_DEFAULT_PCODE) {
                     if (defaultaddr != -1)
                         throw new LowlevelError("Too many <default_pcode> tags");
                     defaultaddr = glb.pcodeinjectlib.decodeInject("jumpassistop", name + "_defaultaddr",
                                             InjectPayload.InjectionType.EXECUTABLEPCODE_TYPE, decoder);
                 }
-                else if (subId == ELEM_SIZE_PCODE)
-                {
+                else if (subId == ElementId.ELEM_SIZE_PCODE) {
                     if (calcsize != -1)
                         throw new LowlevelError("Too many <size_pcode> tags");
                     calcsize = glb.pcodeinjectlib.decodeInject("jumpassistop", name + "_calcsize",
@@ -97,12 +87,12 @@ namespace Sla.DECCORE
                 throw new LowlevelError("userop: " + name + " is missing <addr_pcode>");
             if (defaultaddr == -1)
                 throw new LowlevelError("userop: " + name + " is missing <default_pcode>");
-            UserPcodeOp * base = glb.userops.getOp(name);
+            UserPcodeOp? @base = glb.userops.getOp(name);
             // This tag overrides the base functionality of a userop
             // so the core userop name and index may already be defined
-            if (base == (UserPcodeOp*)0)
+            if (@base == (UserPcodeOp)null)
                 throw new LowlevelError("Unknown userop name in <jumpassist>: " + name);
-            if (dynamic_cast<UnspecializedPcodeOp*>(base) == (UnspecializedPcodeOp*)0)  // Make sure the userop isn't used for some other purpose
+            if ((@base as UnspecializedPcodeOp) == (UnspecializedPcodeOp)null)  // Make sure the userop isn't used for some other purpose
                 throw new LowlevelError("<jumpassist> overloads userop with another purpose: " + name);
             useropindex = @base.getIndex(); // Get the index from the core userop
         }

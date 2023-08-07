@@ -28,7 +28,7 @@ namespace Sla.DECCORE
         /// Step of any access into this range (0=unknown)
         private int step;
         /// 0=unanalyzed, 1=analyzed(partial result), 2=analyzed(full result)
-        private int analysisState;
+        internal int analysisState;
 
         /// Convert partial value set analysis into guard range
         /// Make some determination of the range of possible values for a LOAD based
@@ -39,7 +39,7 @@ namespace Sla.DECCORE
         ///
         /// isAnalyzed is set to \b true, if full range analysis is not needed
         /// \param valueSet is the calculated value set as seen by the LOAD operation
-        private void establishRange(ValueSetRead valueSet)
+        internal void establishRange(ValueSetRead valueSet)
         {
             CircleRange range = valueSet.getRange();
             ulong rangeSize = range.getSize();

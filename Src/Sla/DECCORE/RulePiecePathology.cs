@@ -50,7 +50,7 @@ namespace Sla.DECCORE
                         case OpCode.CPUI_INDIRECT:
                             if (op.getIn(1).getSpace().getType() == spacetype.IPTR_IOP)
                             {
-                                PcodeOp* callOp = PcodeOp::getOpFromConst(op.getIn(1).getAddr());
+                                PcodeOp* callOp = PcodeOp.getOpFromConst(op.getIn(1).getAddr());
                                 if (callOp.isCall())
                                 {
                                     FuncCallSpecs* fspec = data.getCallSpecs(callOp);
@@ -214,7 +214,7 @@ namespace Sla.DECCORE
                 Varnode* lsbVn = op.getIn(1);
                 if (!lsbVn.isWritten()) return 0;
                 PcodeOp* lsbOp = lsbVn.getDef();
-                if ((lsbOp.getEvalType() & (PcodeOp::binary | PcodeOp::unary)) == 0)
+                if ((lsbOp.getEvalType() & (PcodeOp.Flags.binary | PcodeOp.Flags.unary)) == 0)
                 {   // from either a unary/binary operation
                     if (!lsbOp.isCall()) return 0;                     // or a CALL
                     FuncCallSpecs* fc = data.getCallSpecs(lsbOp);

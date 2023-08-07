@@ -12,7 +12,7 @@ namespace Sla.DECCORE
     {
         public TypeOpCallind(TypeFactory t)
         {
-            opflags = PcodeOp::special | PcodeOp::call | PcodeOp::has_callspec | PcodeOp::nocollapse;
+            opflags = PcodeOp.Flags.special | PcodeOp::call | PcodeOp::has_callspec | PcodeOp.Flags.nocollapse;
             behave = new OpBehavior(CPUI_CALLIND, false, true); // Dummy behavior
         }
 
@@ -59,7 +59,7 @@ namespace Sla.DECCORE
             if (fc == (FuncCallSpecs)null)
                 return TypeOp::getInputLocal(op, slot);
             ProtoParameter* param = fc.getParam(slot - 1);
-            if (param != (ProtoParameter*)0)
+            if (param != (ProtoParameter)null)
             {
                 if (param.isTypeLocked())
                 {

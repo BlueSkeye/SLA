@@ -613,7 +613,7 @@ namespace Sla.DECCORE
             if (alignment == size)
                 alignment = 0;
             Address addr;
-            addr = Address::decode(decoder);
+            addr = Address.decode(decoder);
             decoder.closeElement(elemId);
             spaceid = addr.getSpace();
             addressbase = addr.getOffset();

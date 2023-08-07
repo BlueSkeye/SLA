@@ -13,7 +13,7 @@ namespace Sla.DECCORE
     {
         public TypeOpLoad(TypeFactory t)
         {
-            opflags = PcodeOp::special | PcodeOp::nocollapse;
+            opflags = PcodeOp.Flags.special | PcodeOp.Flags.nocollapse;
             behave = new OpBehavior(CPUI_LOAD, false, true); // Dummy behavior
         }
 

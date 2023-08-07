@@ -13,7 +13,7 @@ namespace Sla.DECCORE
         public TypeOpFloatNeg(TypeFactory t, Translate trans)
             : base(t, OpCode.CPUI_FLOAT_NEG,"-", type_metatype.TYPE_FLOAT, type_metatype.TYPE_FLOAT)
         {
-            opflags = PcodeOp::unary;
+            opflags = PcodeOp.Flags.unary;
             addlflags = floatingpoint_op;
             behave = new OpBehaviorFloatNeg(trans);
         }

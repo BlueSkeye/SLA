@@ -305,7 +305,7 @@ namespace Sla.DECCORE
             if (!i.hasBothPieces()) return false;
             @in = i;
 
-            if (!verify(@@in.getHi(), @@in.getLo(), hop))
+            if (!verify(@in.getHi(), @in.getLo(), hop))
                 return false;
 
             if (replace(data)) return true;

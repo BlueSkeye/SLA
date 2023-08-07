@@ -97,7 +97,7 @@ namespace Sla.DECCORE
                     addr = 0;
                     miss = tolerance;       // Terminate early
                 }
-                addr = AddrSpace::addressToByte(addr, spc.getWordSize());
+                addr = AddrSpace.addressToByte(addr, spc.getWordSize());
                 Address newaddr(spc, addr);
                 if (adset.find(newaddr) != adset.end())
                 {

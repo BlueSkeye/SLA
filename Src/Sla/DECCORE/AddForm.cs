@@ -198,11 +198,11 @@ namespace Sla.DECCORE
             if (!workishi) return false;
             if (!i.hasBothPieces()) return false;
             @in = i;
-            if (!verify(@@in.getHi(), @@in.getLo(), op))
+            if (!verify(@in.getHi(), @in.getLo(), op))
                 return false;
 
-            indoub.initPartial(@@in.getSize(), lo2, hi2);
-            outdoub.initPartial(@@in.getSize(), reslo, reshi);
+            indoub.initPartial(@in.getSize(), lo2, hi2);
+            outdoub.initPartial(@in.getSize(), reslo, reshi);
             existop = SplitVarnode.prepareBinaryOp(outdoub, @in, indoub);
             if (existop == (PcodeOp)null)
                 return false;
