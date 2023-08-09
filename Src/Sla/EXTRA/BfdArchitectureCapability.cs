@@ -26,7 +26,7 @@ namespace Sla.EXTRA
 
         ~BfdArchitectureCapability()
         {
-            SleighArchitecture::shutdown();
+            SleighArchitecture.shutdown();
         }
 
         public override Architecture buildArchitecture(string filename, string target,

@@ -1,4 +1,5 @@
 ﻿using Sla.CORE;
+using Sla.EXTRA;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,7 +19,7 @@ namespace Sla.DECCORE
     /// processor, and compiler spec. This class is the \e owner of
     /// the LoadImage, Translate, symbols (Database), PrintLanguage, etc.
     /// This class also holds numerous configuration parameters for the analysis process
-    internal class Architecture : AddrSpaceManager
+    internal abstract class Architecture : AddrSpaceManager
     {
         /// ID string uniquely describing this architecture
         public string archid;
@@ -34,36 +35,36 @@ namespace Sla.DECCORE
         public bool readonlypropagate; ///< true if readonly values should be treated as constants
         public bool infer_pointers;        ///< True if we should infer pointers from constants that are likely addresses
         public bool analyze_for_loops; ///< True if we should attempt conversion of \e whiledo loops to \e for loops
-        List<AddrSpace*> inferPtrSpaces;  ///< Set of address spaces in which a pointer constant is inferable
+        public List<AddrSpace> inferPtrSpaces = new List<AddrSpace>();  ///< Set of address spaces in which a pointer constant is inferable
         public int funcptr_align;     ///< How many bits of alignment a function ptr has
-        public uint flowoptions;            ///< options passed to flow following engine
+        public FlowInfo.FlowFlag flowoptions;            ///< options passed to flow following engine
         public uint max_instructions; ///< Maximum instructions that can be processed in one function
         public int alias_block_level; ///< Aliases blocked by 0=none, 1=struct, 2=array, 3=all
-        public uint split_datatype_config;    ///< Toggle for data-types splitting: Bit 0=structs, 1=arrays, 2=pointers
-        List<Rule*> extra_pool_rules; ///< Extra rules that go in the main pool (cpu specific, experimental)
+        public OptionSplitDatatypes.Options split_datatype_config;    ///< Toggle for data-types splitting: Bit 0=structs, 1=arrays, 2=pointers
+        public List<Rule> extra_pool_rules = new List<Rule>(); ///< Extra rules that go in the main pool (cpu specific, experimental)
 
-        public Database symboltab;        ///< Memory map of global variables and functions
-        public ContextDatabase context;   ///< Map from addresses to context settings
-        Dictionary<string, ProtoModel*> protoModels; ///< Parsed forms of possible prototypes
-        public ProtoModel defaultfp;  ///< Parsed form of default prototype
+        public Database? symboltab;        ///< Memory map of global variables and functions
+        public ContextDatabase? context;   ///< Map from addresses to context settings
+        public Dictionary<string, ProtoModel> protoModels = new Dictionary<string, ProtoModel>(); ///< Parsed forms of possible prototypes
+        public ProtoModel? defaultfp;  ///< Parsed form of default prototype
         public VarnodeData defaultReturnAddr;  ///< Default storage location of return address (for current function)
-        public ProtoModel evalfp_current; ///< Function proto to use when evaluating current function
-        public ProtoModel evalfp_called;  ///< Function proto to use when evaluating called functions
-        public TypeFactory types;     ///< List of types for this binary
-        public Translate translate; ///< Translation method for this binary
-        public LoadImage loader;      ///< Method for loading portions of binary
-        public PcodeInjectLibrary pcodeinjectlib; ///< Pcode injection manager
+        public ProtoModel? evalfp_current; ///< Function proto to use when evaluating current function
+        public ProtoModel? evalfp_called;  ///< Function proto to use when evaluating called functions
+        public TypeFactory? types;     ///< List of types for this binary
+        public Translate? translate; ///< Translation method for this binary
+        public LoadImage? loader;      ///< Method for loading portions of binary
+        public PcodeInjectLibrary? pcodeinjectlib; ///< Pcode injection manager
         public RangeList nohighptr;          ///< Ranges for which high-level pointers are not possible
-        public CommentDatabase commentdb; ///< Comments for this architecture
-        public StringManager stringManager;   ///< Manager of decoded strings
-        public ConstantPool cpool;        ///< Deferred constant values
+        public CommentDatabase? commentdb; ///< Comments for this architecture
+        public StringManager? stringManager;   ///< Manager of decoded strings
+        public ConstantPool? cpool;        ///< Deferred constant values
         public PrintLanguage print;           ///< Current high-level language printer
-        List<PrintLanguage*> printlist;   ///< List of high-level language printers supported
+        public List<PrintLanguage> printlist = new List<PrintLanguage>();   ///< List of high-level language printers supported
         public OptionDatabase options;    ///< Options that can be configured
-        List<TypeOp*> inst;   ///< Registered p-code instructions
+        public List<TypeOp> inst = new List<TypeOp>();   ///< Registered p-code instructions
         public UserOpManage userops;       ///< Specifically registered user-defined p-code ops
-        List<PreferSplitRecord> splitrecords; ///< registers that we would prefer to see split for this processor
-        List<LanedRegister> lanerecords;  ///< Vector registers that have preferred lane sizes
+        public List<PreferSplitRecord> splitrecords; ///< registers that we would prefer to see split for this processor
+        public List<LanedRegister> lanerecords;  ///< Vector registers that have preferred lane sizes
         public ActionDatabase allacts; ///< Actions that can be applied in this architecture
         public bool loadersymbols_parsed;   ///< True if loader symbols have been read
 #if CPUI_STATISTICS
@@ -97,7 +98,7 @@ namespace Sla.DECCORE
             cpool = null;
             symboltab = null;
             context = null;
-            print = PrintLanguageCapability::getDefault().buildLanguage(this);
+            print = PrintLanguageCapability.getDefault().buildLanguage(this);
             printlist.Add(print);
             options = new OptionDatabase(this);
             loadersymbols_parsed = false;
@@ -113,10 +114,7 @@ namespace Sla.DECCORE
         ~Architecture()
         {
             // Delete anything that was allocated
-            IEnumerator<TypeOp> iter;
-
-            foreach (TypeOp iter in inst) {
-                TypeOp? t_op = iter;
+            foreach (TypeOp t_op in inst) {
                 if (null != t_op) {
                     // delete t_op;
                 }
@@ -208,15 +206,15 @@ namespace Sla.DECCORE
             max_term_duplication = 2;
             // Needs to be 8 or bigger
             max_basetype_size = 10;
-            flowoptions = FlowInfo.error_toomanyinstructions;
+            flowoptions = FlowInfo.FlowFlag.error_toomanyinstructions;
             max_instructions = 100000;
             infer_pointers = true;
             analyze_for_loops = true;
             readonlypropagate = false;
             // Block structs and arrays by default, but not more primitive data-types
             alias_block_level = 2;
-            split_datatype_config = OptionSplitDatatypes.option_struct |
-                OptionSplitDatatypes.option_array | OptionSplitDatatypes.option_pointer;
+            split_datatype_config = OptionSplitDatatypes.Options.option_struct |
+                OptionSplitDatatypes.Options.option_array | OptionSplitDatatypes.Options.option_pointer;
             max_jumptable_size = 1024;
         }
 
@@ -369,9 +367,9 @@ namespace Sla.DECCORE
         public void clearAnalysis(Funcdata fd)
         {
             // Clear stuff internal to function
-            fd.Clear();
+            fd.clear();
             // Clear out any analysis generated comments
-            commentdb.clearType(fd.getAddress(), Comment::warning | Comment::warningheader);
+            commentdb.clearType(fd.getAddress(), Comment.comment_type.warning | Comment.comment_type.warningheader);
         }
 
         /// Read any symbols from loader into database
@@ -386,11 +384,10 @@ namespace Sla.DECCORE
             }
             loader.openSymbols();
             loadersymbols_parsed = true;
-            LoadImageFunc record;
+            LoadImageFunc record = new LoadImageFunc();
             while (loader.getNextSymbol(record)) {
                 string basename;
-                Scope scope = symboltab.findCreateScopeFromSymbolName(
-                    record.name, delim, basename, null);
+                Scope scope = symboltab.findCreateScopeFromSymbolName(record.name, delim, out basename, null);
                 scope.addFunction(record.address, basename);
             }
             loader.closeSymbols();
@@ -435,11 +432,10 @@ namespace Sla.DECCORE
         public void setPrototype(PrototypePieces pieces)
         {
             string basename;
-            Scope? scope = symboltab.resolveScopeFromSymbolName(
-                pieces.name, "::", basename, null);
+            Scope? scope = symboltab.resolveScopeFromSymbolName(pieces.name, "::", out basename, null);
             if (null == scope)
                 throw new ParseError($"Unknown namespace: {pieces.name}");
-            Funcdata fd = scope.queryFunction(basename);
+            Funcdata? fd = scope.queryFunction(basename);
             if (null == fd) {
                 throw new ParseError($"Unknown function name: {pieces.name}");
             }
@@ -504,15 +500,15 @@ namespace Sla.DECCORE
         public void decodeFlowOverride(Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_FLOWOVERRIDELIST);
-            for (; ; ) {
+            while(true) {
                 uint subId = decoder.openElement();
-                if (subId != ELEM_FLOW) {
+                if (subId != ElementId.ELEM_FLOW) {
                     break;
                 }
                 string flowType = decoder.readString(AttributeId.ATTRIB_TYPE);
                 Address funcaddr = Address.decode(decoder);
                 Address overaddr = Address.decode(decoder);
-                Funcdata fd = symboltab.getGlobalScope().queryFunction(funcaddr);
+                Funcdata? fd = symboltab.getGlobalScope().queryFunction(funcaddr);
                 if (null != fd) {
                     fd.getOverride().insertFlowOverride(overaddr, Override.stringToType(flowType));
                 }
@@ -520,9 +516,6 @@ namespace Sla.DECCORE
             }
             decoder.closeElement(elemId);
         }
-
-        /// Destructor
-        public ~Architecture()
 
         /// Get a string describing \b this architecture
         public string getDescription() => archid;
@@ -535,7 +528,7 @@ namespace Sla.DECCORE
         /// Encode \b this architecture to a stream
         /// Write the current state of all types, symbols, functions, etc. to a stream.
         /// \param encoder is the stream encoder
-        public virtual void encode(Encoder encoder)
+        public virtual void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_SAVE_STATE);
             encoder.writeBool(AttributeId.ATTRIB_LOADERSYMBOLS, loadersymbols_parsed);
@@ -568,7 +561,7 @@ namespace Sla.DECCORE
                 if (0 == attribId) {
                     break;
                 }
-                if (attribId == ElementId.ATTRIB_LOADERSYMBOLS) {
+                if (attribId == AttributeId.ATTRIB_LOADERSYMBOLS) {
                     loadersymbols_parsed = decoder.readBool();
                 }
             }
@@ -577,36 +570,35 @@ namespace Sla.DECCORE
                 if (0 == subId) {
                     break;
                 }
-                switch(subId) {
-                    case ELEM_TYPEGRP:
-                        types.decode(decoder);
-                        break;
-                    case ELEM_DB:
-                        symboltab.decode(decoder);
-                        break;
-                    case ELEM_CONTEXT_POINTS:
-                        context.decode(decoder);
-                        break;
-                    case ELEM_COMMENTDB:
-                        commentdb.decode(decoder);
-                        break;
-                    case ELEM_STRINGMANAGE:
-                        stringManager.decode(decoder);
-                        break;
-                    case ELEM_CONSTANTPOOL:
-                        cpool.decode(decoder, *types);
-                        break;
-                    case ELEM_OPTIONSLIST:
-                        options.decode(decoder);
-                        break;
-                    case ELEM_FLOWOVERRIDELIST:
-                        decodeFlowOverride(decoder);
-                        break;
-                    case ELEM_INJECTDEBUG:
-                        pcodeinjectlib.decodeDebug(decoder);
-                        break;
-                    default:
-                        throw new LowlevelError("XML error restoring architecture");
+                if (subId == ElementId.ELEM_TYPEGRP) {
+                    types.decode(decoder);
+                }
+                else if (subId == ElementId.ELEM_DB) {
+                    symboltab.decode(decoder);
+                }
+                else if (subId == ElementId.ELEM_CONTEXT_POINTS) {
+                    context.decode(decoder);
+                }
+                else if (subId == ElementId.ELEM_COMMENTDB) {
+                    commentdb.decode(decoder);
+                }
+                else if (subId == ElementId.ELEM_STRINGMANAGE) {
+                    stringManager.decode(decoder);
+                }
+                else if (subId == ElementId.ELEM_CONSTANTPOOL) {
+                    cpool.decode(decoder, types);
+                }
+                else if (subId == ElementId.ELEM_OPTIONSLIST) {
+                    options.decode(decoder);
+                }
+                else if (subId == ElementId.ELEM_FLOWOVERRIDELIST) {
+                    decodeFlowOverride(decoder);
+                }
+                else if (subId == ElementId.ELEM_INJECTDEBUG) {
+                    pcodeinjectlib.decodeDebug(decoder);
+                }
+                else {
+                    throw new LowlevelError("XML error restoring architecture");
                 }
             }
             decoder.closeElement(elemId);
@@ -669,7 +661,7 @@ namespace Sla.DECCORE
         /// address ranges to which there is never an (indirect) pointer
         /// Should only be called during initialization
         /// \param rng is the new range with no aliases to be added
-        protected void addNoHighPtr(Range rng)
+        protected void addNoHighPtr(Sla.CORE.Range rng)
         {
             nohighptr.insertRange(rng.getSpace(), rng.getFirst(), rng.getLast());
         }
@@ -752,23 +744,23 @@ namespace Sla.DECCORE
         /// Build the database which holds status register settings and other
         /// information that can affect disassembly depending on context.
         /// \param store may hold configuration information
-        protected abstract void buildContext(DocumentStorage store)
+        protected abstract void buildContext(DocumentStorage store);
 
         /// \brief Build any symbols from spec files
         /// Formal symbols described in a spec file are added to the global scope.
         /// \param store may hold symbol elements
-        protected abstract void buildSymbols(DocumentStorage store)
+        protected abstract void buildSymbols(DocumentStorage store);
 
         /// \brief Load any relevant specification files
         /// Processor/architecture specific configuration files are loaded into the XML store
         /// \param store is the document store that will hold the configuration
-        protected abstract void buildSpecFile(DocumentStorage store)
+        protected abstract void buildSpecFile(DocumentStorage store);
 
         /// \brief Modify address spaces as required by \b this Architecture
         /// If spaces need to be truncated or otherwise changed from processor defaults,
         /// this routine performs the modification.
         /// \param trans is the processor disassembly object
-        protected abstract void modifySpaces(Translate trans)
+        protected abstract void modifySpaces(Translate trans);
 
         /// Let components initialize after Translate is built
         protected virtual void postSpecFile()
@@ -777,7 +769,7 @@ namespace Sla.DECCORE
         }
 
         /// Figure out the processor and compiler of the target executable
-        protected abstract void resolveArchitecture()
+        protected abstract void resolveArchitecture();
 
         /// Fully initialize the Translate object
         /// Once the processor is known, the Translate object can be built and
@@ -817,8 +809,8 @@ namespace Sla.DECCORE
             RangeList rangelist = new RangeList();
             // Get read only ranges
             loader.getReadonly(rangelist);
-            foreach (Range iter in rangelist) {
-                symboltab.setPropertyRange(Varnode.@readonly, iter);
+            foreach (Sla.CORE.Range iter in rangelist) {
+                symboltab.setPropertyRange(Varnode.varnode_flags.@readonly, iter);
             }
         }
 
@@ -851,7 +843,7 @@ namespace Sla.DECCORE
             copyList.Add(getDefaultCodeSpace());
             // Make sure the default data space is present
             copyList.Add(getDefaultDataSpace());
-            inferPtrSpaces.clear();
+            inferPtrSpaces.Clear();
             copyList.Sort(AddrSpace.compareByIndex);
             AddrSpace? lastSpace = null;
             for (int i = 0; i < copyList.Count; ++i) {
@@ -935,62 +927,59 @@ namespace Sla.DECCORE
                 if (subId == 0) {
                     break;
                 }
-                switch (subId)
-                {
-                    case ELEM_PROGRAMCOUNTER:
-                        decoder.openElement();
-                        decoder.closeElementSkipping(subId);
-                        break;
-                    case ELEM_VOLATILE:
-                        decodeVolatile(decoder);
-                        break;
-                    case ELEM_INCIDENTALCOPY:
-                        decodeIncidentalCopy(decoder);
-                        break;
-                    case ELEM_CONTEXT_DATA:
-                        context.decodeFromSpec(decoder);
-                        break;
-                    case ELEM_JUMPASSIST:
-                        userops.decodeJumpAssist(decoder, this);
-                        break;
-                    case ELEM_SEGMENTOP:
-                        userops.decodeSegmentOp(decoder, this);
-                        break;
-                    case ELEM_REGISTER_DATA:
-                        decodeLaneSizes(decoder);
-                        break;
-                    case ELEM_DATA_SPACE: {
-                            uint elemId = decoder.openElement();
-                            AddrSpace spc = decoder.readSpace(AttributeId.ATTRIB_SPACE);
-                            decoder.closeElement(elemId);
-                            setDefaultDataSpace(spc.getIndex());
-                            break;
-                        }
-                    case ELEM_INFERPTRBOUNDS:
-                        decodeInferPtrBounds(decoder);
-                        break;
-                    case ELEM_SEGMENTED_ADDRESS:
-                        decoder.openElement();
-                        decoder.closeElementSkipping(subId);
-                        break;
-                    case ELEM_DEFAULT_SYMBOLS:
-                        decoder.openElement();
-                        store.registerTag(decoder.getCurrentXmlElement());
-                        decoder.closeElementSkipping(subId);
-                        break;
-                    case ELEM_DEFAULT_MEMORY_BLOCKS:
-                        decoder.openElement();
-                        decoder.closeElementSkipping(subId);
-                        break;
-                    case ELEM_ADDRESS_SHIFT_AMOUNT:
-                        decoder.openElement();
-                        decoder.closeElementSkipping(subId);
-                        break;
-                    case ELEM_PROPERTIES:
-                        decoder.openElement();
-                        decoder.closeElementSkipping(subId);
-                        break;
-                    default:
+                if (subId == ElementId.ELEM_PROGRAMCOUNTER) {
+                    decoder.openElement();
+                    decoder.closeElementSkipping(subId);
+                }
+                else if (subId == ElementId.ELEM_VOLATILE) {
+                    decodeVolatile(decoder);
+                }
+                else if (subId == ElementId.ELEM_INCIDENTALCOPY) {
+                    decodeIncidentalCopy(decoder);
+                }
+                else if (subId == ElementId.ELEM_CONTEXT_DATA) {
+                    context.decodeFromSpec(decoder);
+                }
+                else if (subId == ElementId.ELEM_JUMPASSIST) {
+                    userops.decodeJumpAssist(decoder, this);
+                }
+                else if (subId == ElementId.ELEM_SEGMENTOP) {
+                    userops.decodeSegmentOp(decoder, this);
+                }
+                else if (subId == ElementId.ELEM_REGISTER_DATA) {
+                    decodeLaneSizes(decoder);
+                }
+                else if (subId == ElementId.ELEM_DATA_SPACE) {
+                    elemId = decoder.openElement();
+                    AddrSpace spc = decoder.readSpace(AttributeId.ATTRIB_SPACE);
+                    decoder.closeElement(elemId);
+                    setDefaultDataSpace(spc.getIndex());
+                }
+                else if (subId == ElementId.ELEM_INFERPTRBOUNDS) {
+                    decodeInferPtrBounds(decoder);
+                }
+                else if (subId == ElementId.ELEM_SEGMENTED_ADDRESS) {
+                    decoder.openElement();
+                    decoder.closeElementSkipping(subId);
+                }
+                else if (subId == ElementId.ELEM_DEFAULT_SYMBOLS) {
+                    decoder.openElement();
+                    store.registerTag(decoder.getCurrentXmlElement());
+                    decoder.closeElementSkipping(subId);
+                }
+                else if (subId == ElementId.ELEM_DEFAULT_MEMORY_BLOCKS) {
+                    decoder.openElement();
+                    decoder.closeElementSkipping(subId);
+                }
+                else if (subId == ElementId.ELEM_ADDRESS_SHIFT_AMOUNT) {
+                    decoder.openElement();
+                    decoder.closeElementSkipping(subId);
+                }
+                else if (subId == ElementId.ELEM_PROPERTIES) {
+                    decoder.openElement();
+                    decoder.closeElementSkipping(subId);
+                }
+                else {
                         throw new LowlevelError("Unknown element in <processor_spec>");
                 }
             }
@@ -1015,81 +1004,79 @@ namespace Sla.DECCORE
                 if (subId == 0) {
                     break;
                 }
-                switch (subId) {
-                    case ELEM_DEFAULT_PROTO:
-                        decodeDefaultProto(decoder);
-                        break;
-                    case ELEM_PROTOTYPE:
-                        decodeProto(decoder);
-                        break;
-                    case ELEM_STACKPOINTER:
-                        decodeStackPointer(decoder);
-                        break;
-                    case ELEM_RETURNADDRESS:
-                        decodeReturnAddress(decoder);
-                        break;
-                    case ELEM_SPACEBASE:
-                        decodeSpacebase(decoder);
-                        break;
-                    case ELEM_NOHIGHPTR:
-                        decodeNoHighPtr(decoder);
-                        break;
-                    case ELEM_PREFERSPLIT:
-                        decodePreferSplit(decoder);
-                        break;
-                    case ELEM_AGGRESSIVETRIM:
-                        decodeAggressiveTrim(decoder);
-                        break;
-                    case ELEM_DATA_ORGANIZATION:
-                        types.decodeDataOrganization(decoder);
-                        break;
-                    case ELEM_ENUM:
-                        types.parseEnumConfig(decoder);
-                        break;
-                    case ELEM_GLOBAL:
-                        decodeGlobal(decoder, globalRanges);
-                        break;
-                    case ELEM_SEGMENTOP:
-                        userops.decodeSegmentOp(decoder, this);
-                        break;
-                    case ELEM_READONLY:
-                        decodeReadOnly(decoder);
-                        break;
-                    case ELEM_CONTEXT_DATA:
-                        context.decodeFromSpec(decoder);
-                        break;
-                    case ELEM_RESOLVEPROTOTYPE:
-                        decodeProto(decoder);
-                        break;
-                    case ELEM_EVAL_CALLED_PROTOTYPE:
-                        decodeProtoEval(decoder);
-                        break;
-                    case ELEM_EVAL_CURRENT_PROTOTYPE:
-                        decodeProtoEval(decoder);
-                        break;
-                    case ELEM_CALLFIXUP:
-                        pcodeinjectlib.decodeInject(archid + " : compiler spec", "", InjectPayload.InjectionType.CALLFIXUP_TYPE, decoder);
-                        break;
-                    case ELEM_CALLOTHERFIXUP:
-                        userops.decodeCallOtherFixup(decoder, this);
-                        break;
-                    case ELEM_FUNCPTR:
-                        decodeFuncPtrAlign(decoder);
-                        break;
-                    case ELEM_DEADCODEDELAY:
-                        decodeDeadcodeDelay(decoder);
-                        break;
-                    case ELEM_INFERPTRBOUNDS:
-                        decodeInferPtrBounds(decoder);
-                        break;
-                    case ELEM_MODELALIAS: {
-                            uint elemId = decoder.openElement();
-                            string aliasName = decoder.readString(AttributeId.ATTRIB_NAME);
-                            string parentName = decoder.readString(AttributeId.ATTRIB_PARENT);
-                            decoder.closeElement(elemId);
-                            createModelAlias(aliasName, parentName);
-                            break;
-                        }
+                if (subId == ElementId.ELEM_DEFAULT_PROTO) {
+                    decodeDefaultProto(decoder);
+                }
+                else if (subId == ElementId. ELEM_PROTOTYPE) {
+                    decodeProto(decoder);
+                }
+                else if (subId == ElementId. ELEM_STACKPOINTER) {
+                    decodeStackPointer(decoder);
+                }
+                else if (subId == ElementId. ELEM_RETURNADDRESS) {
+                    decodeReturnAddress(decoder);
+                }
+                else if (subId == ElementId. ELEM_SPACEBASE) {
+                    decodeSpacebase(decoder);
+                }
+                else if (subId == ElementId.ELEM_NOHIGHPTR) {
+                    decodeNoHighPtr(decoder);
+                }
+                else if (subId == ElementId.ELEM_PREFERSPLIT) {
+                    decodePreferSplit(decoder);
+                }
+                else if (subId == ElementId.ELEM_AGGRESSIVETRIM) {
+                    decodeAggressiveTrim(decoder);
+                }
+                else if (subId == ElementId.ELEM_DATA_ORGANIZATION) {
+                    types.decodeDataOrganization(decoder);
+                }
+                else if (subId == ElementId.ELEM_ENUM) {
+                    types.parseEnumConfig(decoder);
+                }
+                else if (subId == ElementId.ELEM_GLOBAL) {
+                    decodeGlobal(decoder, globalRanges);
+                }
+                else if (subId == ElementId.ELEM_SEGMENTOP) {
+                    userops.decodeSegmentOp(decoder, this);
+                }
+                else if (subId == ElementId.ELEM_READONLY) {
+                    decodeReadOnly(decoder);
+                }
+                else if (subId == ElementId.ELEM_CONTEXT_DATA) {
+                    context.decodeFromSpec(decoder);
+                }
+                else if (subId == ElementId.ELEM_RESOLVEPROTOTYPE) {
+                    decodeProto(decoder);
+                }
+                else if (subId == ElementId.ELEM_EVAL_CALLED_PROTOTYPE) {
+                    decodeProtoEval(decoder);
+                }
+                else if (subId == ElementId.ELEM_EVAL_CURRENT_PROTOTYPE) {
+                    decodeProtoEval(decoder);
+                }
+                else if (subId == ElementId.ELEM_CALLFIXUP) {
+                    pcodeinjectlib.decodeInject(archid + " : compiler spec", "", InjectPayload.InjectionType.CALLFIXUP_TYPE, decoder);
+                }
+                else if (subId == ElementId.ELEM_CALLOTHERFIXUP) {
+                    userops.decodeCallOtherFixup(decoder, this);
+                }
+                else if (subId == ElementId.ELEM_FUNCPTR) {
+                    decodeFuncPtrAlign(decoder);
+                }
+                else if (subId == ElementId.ELEM_DEADCODEDELAY) {
+                    decodeDeadcodeDelay(decoder);
+                }
+                else if (subId == ElementId.ELEM_INFERPTRBOUNDS) {
+                    decodeInferPtrBounds(decoder);
+                }
+                else if (subId == ElementId.ELEM_MODELALIAS) {
+                    elemId = decoder.openElement();
+                    string aliasName = decoder.readString(AttributeId.ATTRIB_NAME);
+                    string parentName = decoder.readString(AttributeId.ATTRIB_PARENT);
+                    decoder.closeElement(elemId);
+                    createModelAlias(aliasName, parentName);
+                    break;
                 }
             }
             decoder.closeElement(elemId);
@@ -1104,20 +1091,18 @@ namespace Sla.DECCORE
                     if (subId == 0) {
                         break;
                     }
-                    switch (subId) {
-                        case ELEM_PROTOTYPE:
-                            decodeProto(decoderExt);
-                            break;
-                        case ELEM_CALLFIXUP:
-                            pcodeinjectlib.decodeInject(archid + " : compiler spec", "",
-                                InjectPayload.InjectionType.CALLFIXUP_TYPE, decoder);
-                            break;
-                        case ELEM_CALLOTHERFIXUP:
-                            userops.decodeCallOtherFixup(decoder, this);
-                            break;
-                        case ELEM_GLOBAL:
-                            decodeGlobal(decoder, globalRanges);
-                            break;
+                    if (subId == ElementId.ELEM_PROTOTYPE) {
+                        decodeProto(decoderExt);
+                    }
+                    else if (subId == ElementId.ELEM_CALLFIXUP) {
+                        pcodeinjectlib.decodeInject(archid + " : compiler spec", "",
+                            InjectPayload.InjectionType.CALLFIXUP_TYPE, decoder);
+                    }
+                    else if (subId == ElementId.ELEM_CALLOTHERFIXUP) {
+                        userops.decodeCallOtherFixup(decoder, this);
+                    }
+                    else if (subId == ElementId.ELEM_GLOBAL) {
+                        decodeGlobal(decoder, globalRanges);
                     }
                 }
                 decoderExt.closeElement(elemId);
@@ -1178,22 +1163,21 @@ namespace Sla.DECCORE
             string groupname = string.Empty;
             bool enabled = false;
             while (true) {
-                uint attribId = decoder.getNextAttributeId();
+                AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) {
                     break;
                 }
-                switch (attribId) {
-                    case ATTRIB_NAME:
-                        rulename = decoder.readString();
-                        break;
-                    case ATTRIB_GROUP:
-                        groupname = decoder.readString();
-                        break;
-                    case ATTRIB_ENABLE:
-                        enabled = decoder.readBool();
-                        break;
-                    default:
-                        throw new LowlevelError("Dynamic rule tag contains illegal attribute");
+                if (attribId == AttributeId.ATTRIB_NAME) {
+                    rulename = decoder.readString();
+                }
+                else if (attribId == AttributeId.ATTRIB_GROUP) {
+                    groupname = decoder.readString();
+                }
+                else if (attribId == AttributeId.ATTRIB_ENABLE) {
+                    enabled = decoder.readBool();
+                }
+                else {
+                    throw new LowlevelError("Dynamic rule tag contains illegal attribute");
                 }
             }
             if (rulename.Length == 0) {
@@ -1258,7 +1242,7 @@ namespace Sla.DECCORE
             if (null == res)
                 throw new LowlevelError($"Unknown prototype model name: {modelName}");
 
-            if (elemId == ELEM_EVAL_CALLED_PROTOTYPE) {
+            if (elemId == ElementId.ELEM_EVAL_CALLED_PROTOTYPE) {
                 if (null != evalfp_called) {
                     throw new LowlevelError("Duplicate <eval_called_prototype> tag");
                 }
@@ -1314,7 +1298,7 @@ namespace Sla.DECCORE
         protected void addToGlobalScope(RangeProperties props)
         {
             Scope scope = symboltab.getGlobalScope();
-            Range range = new Range(props, this);
+            Sla.CORE.Range range = new Sla.CORE.Range(props, this);
             AddrSpace spc = range.getSpace();
             inferPtrSpaces.Add(spc);
             symboltab.addRange(scope, spc, range.getFirst(), range.getLast());
@@ -1340,7 +1324,7 @@ namespace Sla.DECCORE
         protected void addOtherSpace()
         {
             Scope scope = symboltab.getGlobalScope();
-            AddrSpace otherSpace = getSpaceByName(OtherSpace::NAME);
+            AddrSpace otherSpace = getSpaceByName(OtherSpace.NAME);
             symboltab.addRange(scope, otherSpace, 0, otherSpace.getHighest());
             if (otherSpace.isOverlayBase()) {
                 int num = numSpaces();
@@ -1365,9 +1349,9 @@ namespace Sla.DECCORE
         {
             uint elemId = decoder.openElement(ElementId.ELEM_READONLY);
             while (decoder.peekElement() != 0) {
-                Range range = new Range();
+                Sla.CORE.Range range = new Sla.CORE.Range();
                 range.decode(decoder);
-                symboltab.setPropertyRange(Varnode.@readonly, range);
+                symboltab.setPropertyRange(Varnode.varnode_flags.@readonly, range);
             }
             decoder.closeElement(elemId);
         }
@@ -1381,10 +1365,10 @@ namespace Sla.DECCORE
             uint elemId = decoder.openElement(ElementId.ELEM_VOLATILE);
             userops.decodeVolatile(decoder, this);
             while (decoder.peekElement() != 0) {
-                Range range = new Range();
+                Sla.CORE.Range range = new Sla.CORE.Range();
                 // Tag itself is range
                 range.decode(decoder);
-                symboltab.setPropertyRange(Varnode.volatil, range);
+                symboltab.setPropertyRange(Varnode.varnode_flags.volatil, range);
             }
             decoder.closeElement(elemId);
         }
@@ -1416,8 +1400,8 @@ namespace Sla.DECCORE
             while (decoder.peekElement() != 0) {
                 VarnodeData vdata = new VarnodeData();
                 vdata.decode(decoder);
-                Range range = new Range(vdata.space, vdata.offset, vdata.offset+vdata.size - 1);
-                symboltab.setPropertyRange(Varnode.incidental_copy, range);
+                Sla.CORE.Range range = new Sla.CORE.Range(vdata.space, vdata.offset, vdata.offset+vdata.size - 1);
+                symboltab.setPropertyRange(Varnode.varnode_flags.incidental_copy, range);
             }
             decoder.closeElement(elemId);
         }
@@ -1443,7 +1427,7 @@ namespace Sla.DECCORE
                 }
             }
             decoder.closeElement(elemId);
-            lanerecords.clear();
+            lanerecords.Clear();
             for (int i = 0; i < maskList.Count; ++i) {
                 if (maskList[i] == 0) {
                     continue;
@@ -1464,36 +1448,36 @@ namespace Sla.DECCORE
             bool isreversejustify = false;
             AddrSpace basespace = null;
             while (true) {
-                uint attribId = decoder.getNextAttributeId();
+                AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) {
                     break;
                 }
-                if (attribId == ATTRIB_REVERSEJUSTIFY) {
+                if (attribId == AttributeId.ATTRIB_REVERSEJUSTIFY) {
                     isreversejustify = decoder.readBool();
                 }
-                else if (attribId == ATTRIB_GROWTH) {
+                else if (attribId == AttributeId.ATTRIB_GROWTH) {
                     stackGrowth = decoder.readString() == "negative";
                 }
-                else if (attribId == ATTRIB_SPACE) {
+                else if (attribId == AttributeId.ATTRIB_SPACE) {
                     basespace = decoder.readSpace();
                 }
-                else if (attribId == ATTRIB_REGISTER) {
+                else if (attribId == AttributeId.ATTRIB_REGISTER) {
                     registerName = decoder.readString();
                 }
             }
 
             if (null == basespace) {
                 throw new LowlevelError(
-                    $"{ELEM_STACKPOINTER.getName()} element missing \"space\" attribute");
+                    $"{ElementId.ELEM_STACKPOINTER.getName()} element missing \"space\" attribute");
             }
 
             VarnodeData point = translate.getRegister(registerName);
             decoder.closeElement(elemId);
 
             // If creating a stackpointer to a truncated space, make sure to truncate the stackpointer
-            int truncSize = point.size;
+            int truncSize = (int)point.size;
             if (basespace.isTruncated() && (point.size > basespace.getAddrSize())) {
-                truncSize = basespace.getAddrSize();
+                truncSize = (int)basespace.getAddrSize();
             }
             // Create the "official" stackpointer
             addSpacebase(basespace, "stack", point, truncSize, isreversejustify,
@@ -1507,8 +1491,8 @@ namespace Sla.DECCORE
         protected void decodeDeadcodeDelay(Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_DEADCODEDELAY);
-            AddrSpacespc = decoder.readSpace(AttributeId.ATTRIB_SPACE);
-            int delay = decoder.readSignedInteger(AttributeId.ATTRIB_DELAY);
+            AddrSpace spc = decoder.readSpace(AttributeId.ATTRIB_SPACE);
+            int delay = (int)decoder.readSignedInteger(AttributeId.ATTRIB_DELAY);
             if (delay >= 0) {
                 setDeadcodeDelay(spc, delay);
             }
@@ -1524,7 +1508,7 @@ namespace Sla.DECCORE
         {
             uint elemId = decoder.openElement(ElementId.ELEM_INFERPTRBOUNDS);
             while (decoder.peekElement() != 0) {
-                Range range = new Range();
+                Sla.CORE.Range range = new Sla.CORE.Range();
                 range.decode(decoder);
                 setInferPtrBounds(range);
             }
@@ -1539,7 +1523,7 @@ namespace Sla.DECCORE
         protected void decodeFuncPtrAlign(Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_FUNCPTR);
-            int align = decoder.readSignedInteger(AttributeId.ATTRIB_ALIGN);
+            int align = (int)decoder.readSignedInteger(AttributeId.ATTRIB_ALIGN);
             decoder.closeElement(elemId);
 
             if (align == 0) {
@@ -1567,9 +1551,8 @@ namespace Sla.DECCORE
             string registerName = decoder.readString(AttributeId.ATTRIB_REGISTER);
             AddrSpace basespace = decoder.readSpace(AttributeId.ATTRIB_SPACE);
             decoder.closeElement(elemId);
-            VarnodeData point = new VarnodeData(translate.getRegister(registerName));
-            addSpacebase(basespace, nameString, point, point.size,
-                false, false, false);
+            VarnodeData point = translate.getRegister(registerName);
+            addSpacebase(basespace, nameString, point, (int)point.size, false, false, false);
         }
 
         /// Apply memory alias configuration
@@ -1581,7 +1564,7 @@ namespace Sla.DECCORE
             uint elemId = decoder.openElement(ElementId.ELEM_NOHIGHPTR);
             while (decoder.peekElement() != 0) {
                 // Iterate over every range tag in the list
-                Range range = new Range();
+                Sla.CORE.Range range = new Sla.CORE.Range();
                 range.decode(decoder);
                 addNoHighPtr(range);
             }
@@ -1604,7 +1587,7 @@ namespace Sla.DECCORE
                 PreferSplitRecord record = new PreferSplitRecord();
                 splitrecords.Add(record);
                 record.storage.decode(decoder);
-                record.splitoffset = record.storage.size / 2;
+                record.splitoffset = record.storage.size() / 2;
             }
             decoder.closeElement(elemId);
         }
@@ -1617,11 +1600,11 @@ namespace Sla.DECCORE
         {
             uint elemId = decoder.openElement(ElementId.ELEM_AGGRESSIVETRIM);
             while (true) {
-                uint attribId = decoder.getNextAttributeId();
+                AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) {
                     break;
                 }
-                if (attribId == ATTRIB_SIGNEXT) {
+                if (attribId == AttributeId.ATTRIB_SIGNEXT) {
                     aggressive_ext_trim = decoder.readBool();
                 }
             }

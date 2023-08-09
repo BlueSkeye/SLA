@@ -47,10 +47,10 @@ namespace Sla.DECCORE
         private ProtoModel getModel(Architecture glb)
         {
             // Get prototype model
-            ProtoModel* protomodel = (ProtoModel*)0;
+            ProtoModel* protomodel = (ProtoModel)null;
             if (model.size() != 0)
                 protomodel = glb.getModel(model);
-            if (protomodel == (ProtoModel*)0)
+            if (protomodel == (ProtoModel)null)
                 protomodel = glb.defaultfp;
             return protomodel;
         }

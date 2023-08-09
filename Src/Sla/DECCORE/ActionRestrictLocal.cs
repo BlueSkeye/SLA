@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -26,24 +26,22 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            FuncCallSpecs* fc;
-            list<PcodeOp*>::const_iterator iter;
-            PcodeOp* op;
-            Varnode* vn;
+            FuncCallSpecs fc;
+            IEnumerator<PcodeOp> iter;
+            PcodeOp op;
+            Varnode vn;
             int i;
-            List<EffectRecord>::const_iterator eiter, endeiter;
+            IEnumerator<EffectRecord> eiter, endeiter;
 
-            for (i = 0; i < data.numCalls(); ++i)
-            {
+            for (i = 0; i < data.numCalls(); ++i) {
                 fc = data.getCallSpecs(i);
                 op = fc.getOp();
 
                 if (!fc.isInputLocked()) continue;
                 if (fc.getSpacebaseOffset() == FuncCallSpecs::offset_unknown) continue;
                 int numparam = fc.numParams();
-                for (int j = 0; j < numparam; ++j)
-                {
-                    ProtoParameter* param = fc.getParam(j);
+                for (int j = 0; j < numparam; ++j) {
+                    ProtoParameter param = fc.getParam(j);
                     Address addr = param.getAddress();
                     if (addr.getSpace().getType() != spacetype.IPTR_SPACEBASE) continue;
                     ulong off = addr.getSpace().wrapOffset(fc.getSpacebaseOffset() + addr.getOffset());
@@ -53,19 +51,17 @@ namespace Sla.DECCORE
 
             eiter = data.getFuncProto().effectBegin();
             endeiter = data.getFuncProto().effectEnd();
-            for (; eiter != endeiter; ++eiter)
-            { // Iterate through saved registers
+            for (; eiter != endeiter; ++eiter) {
+                // Iterate through saved registers
                 if ((*eiter).getType() == EffectRecord::killedbycall) continue;  // Not saved
                 vn = data.findVarnodeInput((*eiter).getSize(), (*eiter).getAddress());
-                if ((vn != (Varnode)null) && (vn.isUnaffected()))
-                {
+                if ((vn != (Varnode)null) && (vn.isUnaffected())) {
                     // Mark storage locations for saved registers as not mapped
                     // This should pickup unaffected, reload, and return_address effecttypes
-                    for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
-                    {
+                    for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter) {
                         op = *iter;
                         if (op.code() != OpCode.CPUI_COPY) continue;
-                        Varnode* outvn = op.getOut();
+                        Varnode outvn = op.getOut();
                         if (!data.getScopeLocal().isUnaffectedStorage(outvn))  // Is this where unaffected values get saved
                             continue;
                         data.getScopeLocal().markNotMapped(outvn.getSpace(), outvn.getOffset(), outvn.getSize(), false);

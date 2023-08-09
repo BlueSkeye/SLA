@@ -40,7 +40,7 @@ namespace Sla.EXTRA
             ((RawLoadImage*)loader).attachToSpace(getDefaultCodeSpace());   // Attach default space to loader
         }
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_RAW_SAVEFILE);
             encodeHeader(encoder);

@@ -13,7 +13,7 @@ namespace Sla.DECCORE
         public TypeOpReturn(TypeFactory t)
         {
             opflags = PcodeOp.Flags.special | PcodeOp::returns | PcodeOp.Flags.nocollapse | PcodeOp::no_copy_propagation;
-            behave = new OpBehavior(CPUI_RETURN, false, true); // Dummy behavior
+            behave = new OpBehavior(OpCode.CPUI_RETURN, false, true); // Dummy behavior
         }
 
         public override void push(PrintLanguage lng, PcodeOp op, PcodeOp readOp)

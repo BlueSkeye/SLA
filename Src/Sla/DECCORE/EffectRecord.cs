@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +14,8 @@ namespace Sla.DECCORE
     /// sub-function gets called. The main enumeration below lists the possible effects.
     internal class EffectRecord
     {
-        public enum {
+        public enum EffectType
+        {
             unaffected = 1, ///< The sub-function does not change the value at all
             killedbycall = 2,   ///< The memory is changed and is completely unrelated to its original value
             return_address = 3, ///< The memory is being used to store the return address
@@ -22,7 +23,7 @@ namespace Sla.DECCORE
         }
 
         private VarnodeData range;        ///< The memory range affected
-        private uint type;         ///< The type of effect
+        private EffectType type;         ///< The type of effect
 
         /// Constructor for use with decode()
         public EffectRecord()
@@ -45,13 +46,13 @@ namespace Sla.DECCORE
             range.space = addr.getSpace();
             range.offset = addr.getOffset();
             range.size = size;
-            type = unknown_effect;
+            type = EffectType.unknown_effect;
         }
 
         /// Construct an effect on a parameter storage location
         /// \param entry is a model of the parameter storage
         /// \param t is the effect type
-        public EffectRecord(ParamEntry entry, uint t)
+        public EffectRecord(ParamEntry entry, EffectType t)
         {
             range.space = entry.getSpace();
             range.offset = entry.getBase();
@@ -62,14 +63,14 @@ namespace Sla.DECCORE
         /// Construct an effect on a memory range
         /// \param data is the memory range affected
         /// \param t is the effect type
-        public EffectRecord(VarnodeData addr, uint t)
+        public EffectRecord(VarnodeData addr, EffectType t)
         {
             range = data;
             type = t;
         }
 
         /// Get the type of effect
-        public uint getType() => type;
+        public EffectType getType() => type;
 
         /// Get the starting address of the affected range
         public Address getAddress() => new Address(range.space, range.offset);
@@ -80,24 +81,24 @@ namespace Sla.DECCORE
         /// Equality operator
         public static bool operator ==(EffectRecord op1, EffectRecord op2)
         {
-            if (range != op2.range) return false;
-            return (type == op2.type);
+            if (op1.range != op2.range) return false;
+            return (op1.type == op2.type);
         }
 
         /// Inequality operator
         public bool operator !=(EffectRecord op1, EffectRecord op2)
         {
-            if (range != op2.range) return true;
-            return (type != op2.type);
+            if (op1.range != op2.range) return true;
+            return (op1.type != op2.type);
         }
 
         /// Encode the record to a stream
         /// Encode just an \<addr> element.  The effect type is indicated by the parent element.
         /// \param encoder is the stream encoder
-        public void encode(Encoder encoder)
+        public void encode(Sla.CORE.Encoder encoder)
         {
-            Address addr(range.space, range.offset);
-            if ((type == unaffected) || (type == killedbycall) || (type == return_address))
+            Address addr = new Address(range.space, range.offset);
+            if ((type == EffectType.unaffected) || (type == EffectType.killedbycall) || (type == EffectType.return_address))
                 addr.encode(encoder, range.size);
             else
                 throw new LowlevelError("Bad EffectRecord type");
@@ -107,7 +108,7 @@ namespace Sla.DECCORE
         /// Parse an \<addr> element to get the memory range. The effect type is inherited from the parent.
         /// \param grouptype is the effect inherited from the parent
         /// \param decoder is the stream decoder
-        public void decode(uint grouptype, Decoder decoder)
+        public void decode(EffectType grouptype, Sla.CORE.Decoder decoder)
         {
             type = grouptype;
             range.decode(decoder);

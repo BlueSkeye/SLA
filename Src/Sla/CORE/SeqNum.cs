@@ -115,7 +115,7 @@ namespace Sla.CORE
             uint uniq = uint.MaxValue;
             uint elemId = decoder.openElement(ElementId.ELEM_SEQNUM);
             Address pc = Address.decode(decoder); // Recover address
-            for (; ; )
+            while(true)
             {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;

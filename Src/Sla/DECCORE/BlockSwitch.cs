@@ -173,18 +173,76 @@ namespace Sla.DECCORE
         public bool isExit(int i) => caseblocks[i].isexit;
 
         /// Get the data-type of the switch variable
+        /// Drill down to the variable associated with the BRANCHIND itself, and return its data-type
+        /// \return the Datatype associated with the switch variable
         public Datatype getSwitchType()
-        
+        {
+            PcodeOp op = jump.getIndirectOp();
+            return op.getIn(0).getHighTypeReadFacing(op);
+        }
+
         public override block_type getType() => block_type.t_switch;
+
         public override void markUnstructured()
+        {
+            base.markUnstructured();
+            for (int i = 0; i < caseblocks.size(); ++i) {
+                if (caseblocks[i].gototype ==  f_goto_goto)
+                    markCopyBlock(caseblocks[i].block, f_unstructured_targ);
+            }
+        }
+
         public override void scopeBreak(int curexit, int curloopexit)
+        {
+            // New scope, current loop exit = curexit
+            getBlock(0).scopeBreak(-1, curexit); // Top block has multiple exits
+            for (int i = 0; i < caseblocks.size(); ++i) {
+                FlowBlock bl = caseblocks[i].block;
+                if (caseblocks[i].gototype != 0) {
+                    if (bl.getIndex() == curexit) // A goto that goes straight to exit, print is (empty) break
+                        caseblocks[i].gototype = f_break_goto;
+                }
+                else {
+                    // All case blocks are either plaingotos (curexit doesn't matter)
+                    //                            exitpoints (exit to switches exit   curexit = curexit)
+                    bl.scopeBreak(curexit, curexit);
+                }
+            }
+        }
+
         public override void printHeader(TextWriter s)
+        {
+            s.Write("Switch block ");
+            base.printHeader(s);
+        }
+
         public override void emit(PrintLanguage lng)
         {
             lng.emitBlockSwitch(this);
         }
 
         public override FlowBlock? nextFlowAfter(FlowBlock bl)
+        {
+            if (getBlock(0) == bl)
+                return (FlowBlock)null;   // Don't know what will execute
+
+            // Can only evaluate this if bl is a case block that falls through to another case block.
+            // Otherwise there is a break statement in the flow
+            if (bl.getType() != t_goto)    // Fallthru must be a goto block
+                return (FlowBlock)null;
+            int i;
+            // Look for block to find flow after
+            for (i = 0; i < caseblocks.size(); ++i)
+                if (caseblocks[i].block == bl) break;
+            if (i == caseblocks.size()) return (FlowBlock)null; // Didn't find block
+
+            i = i + 1;                  // Blocks are printed in fallthru order, "flow" is to next block in this order
+            if (i < caseblocks.size())
+                return caseblocks[i].block.getFrontLeaf();
+            // Otherwise we are at last block of switch, flow is to exit of switch
+            if (getParent() == (FlowBlock)null) return (FlowBlock)null;
+            return getParent().nextFlowAfter(this);
+        }
 
         public override void finalizePrinting(Funcdata data)
         {

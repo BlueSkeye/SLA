@@ -85,8 +85,8 @@ namespace Sla.EXTRA
             ///< Comparison method based on ending boundary point
             public static bool operator <(AddrRange op1, AddrRange op2)
             {
-                if (last != op2.last) return (last < op2.last);
-                return (subsort < op2.subsort);
+                if (op1.last != op2.last) return (op1.last < op2.last);
+                return (op1.subsort < op2.subsort);
             }
 
             /// Retrieve the \b recordtype
@@ -180,13 +180,13 @@ namespace Sla.EXTRA
         /// \param iter points to the first sub-range that ends with the given boundary point
         private void zip(linetype i, typename std::multiset<AddrRange>::iterator iter)
         {
-            linetype f = (*iter).first;
+            linetype f = iter.Current.Key;
             while ((*iter).last == i)
                 tree.erase(iter++);
             i = i + 1;
-            while ((iter != tree.end()) && ((*iter).first == i))
+            while ((iter != tree.end()) && (iter.Current.Key == i))
             {
-                (*iter).first = f;
+                iter.Current.Key = f;
                 ++iter;
             }
         }
@@ -203,10 +203,10 @@ namespace Sla.EXTRA
             if ((*iter).last == i) return; // Can't split size 1 (i.e. split already present)
             linetype f;
             linetype plus1 = i + 1;
-            while ((iter != tree.end()) && ((*iter).first <= i))
+            while ((iter != tree.end()) && (iter.Current.Key <= i))
             {
-                f = (*iter).first;
-                (*iter).first = plus1;
+                f = iter.Current.Key;
+                iter.Current.Key = plus1;
                 typename std::multiset<AddrRange>::iterator newiter;
                 newiter = tree.insert(hint, AddrRange(i, (*iter).subsort));
                 AddrRange newrange = *newiter;
@@ -307,11 +307,11 @@ namespace Sla.EXTRA
             typename std::multiset<AddrRange>::const_iterator iter;
 
             iter = tree.upper_bound(addrend);
-            if ((iter == tree.end()) || (point < (*iter).first))
+            if ((iter == tree.end()) || (point < iter.Current.Key))
                 return iter;
 
             // If we reach here, (*iter).last is bigger than point (as per upper_bound) but
-            // point >= than (*iter).first, i.e. point is contained in the sub-range.
+            // point >= than iter.Current.Key, i.e. point is contained in the sub-range.
             // So we have to do one more search for first sub-range after the containing sub-range.
             AddrRange addrbeyond = new AddrRange((* iter).last, subsorttype(true));
             return tree.upper_bound(addrbeyond);
@@ -329,7 +329,7 @@ namespace Sla.EXTRA
             // First range where right boundary is equal to or past point
             iter = tree.lower_bound(addrrange);
             if (iter == tree.end()) return iter;
-            if ((*iter).first <= end)
+            if (iter.Current.Key <= end)
                 return iter;
             return tree.end();
         }

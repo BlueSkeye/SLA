@@ -191,7 +191,7 @@ namespace Sla.DECCORE
                         // For other COPIES, do a minimal traversal to rule out unaffected or other invalid inputs,
                         // but otherwise treat it as valid, active, movement into the parameter
                         Varnode* vn = op.getIn(0);
-                        for (; ; )
+                        while(true)
                         {
                             if ((!vn.isMark()) && (vn.isInput()))
                             {

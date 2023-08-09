@@ -601,7 +601,7 @@ namespace Sla.DECCORE
             BlockBasic postb_block_copy;
             bool directsplit_copy;
 
-            for (; ; ) {
+            while(true) {
                 if (!directsplit) {
                     return true;
                 }

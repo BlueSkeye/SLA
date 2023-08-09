@@ -300,7 +300,7 @@ namespace Sla.DECCORE
         /// \param basename will hold the passed back base Symbol name
         /// \param start is the Scope to start drilling down from, or NULL for the global scope
         /// \return the Scope being referred to by the name
-        public Scope? resolveScopeFromSymbolName(string fullname, string delim, string basename,
+        public Scope? resolveScopeFromSymbolName(string fullname, string delim, out string basename,
             Scope? start)
         {
             if (start == (Scope)null)
@@ -356,8 +356,8 @@ namespace Sla.DECCORE
         /// \param basename will hold the passed back base Symbol name
         /// \param start is the Scope to start drilling down from, or NULL for the global scope
         /// \return the Scope being referred to by the name
-        public Scope findCreateScopeFromSymbolName(string fullname, string delim, string basename,
-            Scope start)
+        public Scope findCreateScopeFromSymbolName(string fullname, string delim, out string basename,
+            Scope? start)
         {
             if (start == (Scope)null)
                 start = globalscope;
@@ -485,7 +485,7 @@ namespace Sla.DECCORE
         /// Encode a single \<db> element to the stream, which contains child elements
         /// for each Scope (which contain Symbol children in turn).
         /// \param encoder is the stream encoder
-        public void encode(Encoder encoder)
+        public void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_DB);
             if (idByNameHash)
@@ -509,18 +509,18 @@ namespace Sla.DECCORE
         /// Decode the whole database from a stream
         /// Parse a \<db> element to recover Scope and Symbol objects.
         /// \param decoder is the stream decoder
-        public void decode(Decoder decoder)
+        public void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_DB);
             idByNameHash = false;       // Default
-            for (; ; )
+            while(true)
             {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == ATTRIB_SCOPEIDBYNAME)
                     idByNameHash = decoder.readBool();
             }
-            for (; ; )
+            while(true)
             {
                 uint subId = decoder.peekElement();
                 if (subId != ELEM_PROPERTY_CHANGEPOINT) break;
@@ -533,7 +533,7 @@ namespace Sla.DECCORE
                 flagbase.split(addr) = val;
             }
 
-            for (; ; )
+            while(true)
             {
                 uint subId = decoder.openElement();
                 if (subId != ELEM_SCOPE) break;
@@ -541,7 +541,7 @@ namespace Sla.DECCORE
                 string displayName;
                 ulong id = 0;
                 bool seenId = false;
-                for (; ; )
+                while(true)
                 {
                     uint attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;
@@ -611,13 +611,13 @@ namespace Sla.DECCORE
             uint elemId = decoder.openElement(ElementId.ELEM_PARENT);
             uint subId = decoder.openElement();
             decoder.closeElementSkipping(subId);        // Skip element describing the root scope
-            for (; ; )
+            while(true)
             {
                 subId = decoder.openElement();
                 if (subId != ELEM_VAL) break;
                 string displayName;
                 ulong scopeId = 0;
-                for (; ; )
+                while(true)
                 {
                     uint attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;

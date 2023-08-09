@@ -136,7 +136,7 @@ namespace Sla.DECCORE
         /// Execute a series of \e option \e commands parsed from a stream
         /// Parse an \<optionslist> element, treating each child as an \e option \e command.
         /// \param decoder is the stream decoder
-        public void decode(Decoder decoder)
+        public void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_OPTIONSLIST);
 

@@ -83,7 +83,7 @@ namespace Sla.DECCORE
             /// Is the varnode storage for a return address
             return_address = 0x800000,
             /// Cover is not upto date
-            HighVariable.DirtinessFlags.coverdirty = 0x1000000,
+            coverdirty = 0x1000000,
             /// Is this Varnode the low part of a double precision value
             precislo = 0x2000000,
             /// Is this Varnode the high part of a double precision value
@@ -211,11 +211,10 @@ namespace Sla.DECCORE
 
         /// Turn off any coverage information
         /// Delete the Cover object.  Used for dead Varnodes before full deletion.
-        private void clearCover()
+        internal void clearCover()
         {
-            if (cover != (Cover)null)
-            {
-                delete cover;
+            if (cover != (Cover)null) {
+                // delete cover;
                 cover = (Cover)null;
             }
         }
@@ -223,7 +222,7 @@ namespace Sla.DECCORE
         /// Internal method for setting boolean attributes
         /// Set desired boolean attributes on this Varnode and then set dirty bits if appropriate
         /// \param fl is the mask containing the list of attributes to set
-        private void setFlags(varnode_flags fl)
+        internal void setFlags(varnode_flags fl)
         {
             flags |= fl;
             if (high != (HighVariable)null) {
@@ -236,7 +235,7 @@ namespace Sla.DECCORE
         /// Internal method for clearing boolean attributes
         /// Clear desired boolean attributes on this Varnode and then set dirty bits if appropriate
         /// \param fl is the mask containing the list of attributes to clear
-        private void clearFlags(varnode_flags fl)
+        internal void clearFlags(varnode_flags fl)
         {
             flags &= ~fl;
             if (high != (HighVariable)null) {
@@ -249,12 +248,11 @@ namespace Sla.DECCORE
         /// Clear any Symbol attached to \b this Varnode
         /// For \b this Varnode and any others attached to the same HighVariable,
         /// remove any SymbolEntry reference and associated properties.
-        private void clearSymbolLinks()
+        internal void clearSymbolLinks()
         {
             bool foundEntry = false;
-            for (int i = 0; i < high.numInstances(); ++i)
-            {
-                Varnode* vn = high.getInstance(i);
+            for (int i = 0; i < high.numInstances(); ++i) {
+                Varnode vn = high.getInstance(i);
                 foundEntry = foundEntry || (vn.mapentry != (SymbolEntry)null);
                 vn.mapentry = (SymbolEntry)null;
                 vn.clearFlags(Varnode.varnode_flags.namelock | Varnode.varnode_flags.typelock | Varnode.varnode_flags.mapped);
@@ -264,7 +262,7 @@ namespace Sla.DECCORE
         }
 
         /// Mark Varnode as \e unaffected
-        private void setUnaffected()
+        internal void setUnaffected()
         {
             setFlags(Varnode.varnode_flags.unaffected);
         }
@@ -282,8 +280,7 @@ namespace Sla.DECCORE
         private void setDef(PcodeOp op)
         {               // Set the defining op
             def = op;
-            if (op == (PcodeOp)null)
-            {
+            if (op == (PcodeOp)null) {
                 setFlags(Varnode.varnode_flags.coverdirty);
                 clearFlags(Varnode.varnode_flags.written);
             }
@@ -296,7 +293,7 @@ namespace Sla.DECCORE
         /// If the Symbol is \e type-locked, a reference to the Symbol is set on \b this Varnode.
         /// \param entry is a mapping to the given Symbol
         /// \return \b true if any properties have changed
-        private bool setSymbolProperties(SymbolEntry entry)
+        internal bool setSymbolProperties(SymbolEntry entry)
         {
             bool res = entry.updateType(this);
             if (entry.getSymbol().isTypeLocked())
@@ -317,12 +314,12 @@ namespace Sla.DECCORE
         /// A reference to the given Symbol is set on \b this Varnode.
         /// The data-type on \b this Varnode is not changed.
         /// \param entry is a mapping to the given Symbol
-        private void setSymbolEntry(SymbolEntry entry)
+        internal void setSymbolEntry(SymbolEntry entry)
         {
             mapentry = entry;
-            uint fl = Varnode.varnode_flags.mapped; // Flags are generally not changed, but we do mark this as mapped
+            varnode_flags fl = varnode_flags.mapped; // Flags are generally not changed, but we do mark this as mapped
             if (entry.getSymbol().isNameLocked())
-                fl |= Varnode.varnode_flags.namelock;
+                fl |= varnode_flags.namelock;
             setFlags(fl);
             if (high != (HighVariable)null)
                 high.setSymbol(this);
@@ -334,10 +331,9 @@ namespace Sla.DECCORE
         /// reference, not the actual value of the Symbol.
         /// \param entry is a mapping to the given Symbol
         /// \param off is the byte offset into the Symbol of the reference
-        private void setSymbolReference(SymbolEntry entry, int off)
+        internal void setSymbolReference(SymbolEntry entry, int off)
         {
-            if (high != (HighVariable)null)
-            {
+            if (high != (HighVariable)null) {
                 high.setSymbolReference(entry.getSymbol(), off);
             }
         }
@@ -425,7 +421,7 @@ namespace Sla.DECCORE
         public SymbolEntry getSymbolEntry() => mapentry;
 
         /// Get all the boolean attributes
-        public uint getFlags() => flags;
+        public varnode_flags getFlags() => flags;
 
         /// Get the Datatype associated with this Varnode
         public Datatype getType() => type;

@@ -203,7 +203,7 @@ namespace Sla.EXTRA
 
         public int nextToken()
         {
-            for (; ; )
+            while(true)
             {
                 int mychar = next(0);
                 switch (mychar)

@@ -36,7 +36,7 @@ namespace Sla.DECCORE
         public override void assignMap(List<Datatype> proto, TypeFactory typefactory,
             List<ParameterPieces> res);
 
-        public override void decode(Decoder decoder, List<EffectRecord> effectlist,
+        public override void decode(Sla.CORE.Decoder decoder, List<EffectRecord> effectlist,
             bool normalstack);
 
         public override ParamList clone();

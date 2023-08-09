@@ -671,7 +671,7 @@ namespace Sla.DECCORE
         /// Parse a \<block> element.  This is currently just a wrapper around the
         /// FlowBlock::decode() that sets of the BlockMap resolver
         /// \param decoder is the stream decoder
-        public void decode(Decoder decoder)
+        public void decode(Sla.CORE.Decoder decoder)
         {
             BlockMap resolver;
             @base.decode(decoder, resolver);

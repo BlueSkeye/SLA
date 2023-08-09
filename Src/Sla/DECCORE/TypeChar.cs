@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         /// Parse a \<type> element for attributes of the character data-type
         /// \param decoder is the stream decoder
         /// \param typegrp is the factory owning \b this data-type
-        internal void decode(Decoder decoder, TypeFactory typegrp)
+        internal void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
             //  uint elemId = decoder.openElement();
             decodeBasic(decoder);
@@ -41,7 +41,7 @@ namespace Sla.DECCORE
 
         public override Datatype clone() => new TypeChar(this);
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             if (typedefImm != (Datatype)null)
             {

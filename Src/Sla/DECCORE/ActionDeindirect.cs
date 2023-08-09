@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -24,61 +24,53 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            FuncCallSpecs* fc;
-            PcodeOp* op;
-            Varnode* vn;
+            FuncCallSpecs fc;
+            PcodeOp op;
+            Varnode vn;
 
-            for (int i = 0; i < data.numCalls(); ++i)
-            {
+            for (int i = 0; i < data.numCalls(); ++i) {
                 fc = data.getCallSpecs(i);
                 op = fc.getOp();
                 if (op.code() != OpCode.CPUI_CALLIND) continue;
                 vn = op.getIn(0);
                 while (vn.isWritten() && (vn.getDef().code() == OpCode.CPUI_COPY))
                     vn = vn.getDef().getIn(0);
-                if (vn.isPersist() && vn.isExternalRef())
-                { // Check for possible external reference
-                    Funcdata* newfd = data.getScopeLocal().getParent().queryExternalRefFunction(vn.getAddr());
-                    if (newfd != (Funcdata)null)
-                    {
+                if (vn.isPersist() && vn.isExternalRef()) {
+                    // Check for possible external reference
+                    Funcdata? newfd = data.getScopeLocal().getParent().queryExternalRefFunction(vn.getAddr());
+                    if (newfd != (Funcdata)null) {
                         fc.deindirect(data, newfd);
                         count += 1;
                         continue;
                     }
                 }
-                else if (vn.isConstant())
-                {
-                    AddrSpace* sp = data.getAddress().getSpace(); // Assume function is in same space as calling function
+                else if (vn.isConstant()) {
+                    AddrSpace sp = data.getAddress().getSpace(); // Assume function is in same space as calling function
                                                                   // Convert constant to a byte address in this space
                     ulong offset = AddrSpace.addressToByte(vn.getOffset(), sp.getWordSize());
                     int align = data.getArch().funcptr_align;
-                    if (align != 0)
-                    {       // If we know function pointer should be aligned
+                    if (align != 0) {
+                        // If we know function pointer should be aligned
                         offset >>= align;   // Remove any encoding bits before querying for the function
                         offset <<= align;
                     }
-                    Address codeaddr(sp, offset);
-                    Funcdata* newfd = data.getScopeLocal().getParent().queryFunction(codeaddr);
-                    if (newfd != (Funcdata)null)
-                    {
+                    Address codeaddr = new Address(sp, offset);
+                    Funcdata? newfd = data.getScopeLocal().getParent().queryFunction(codeaddr);
+                    if (newfd != (Funcdata)null) {
                         fc.deindirect(data, newfd);
                         count += 1;
                         continue;
                     }
                 }
-                if (data.hasTypeRecoveryStarted())
-                {
+                if (data.hasTypeRecoveryStarted()) {
                     // Check for a function pointer that has an attached prototype
-                    Datatype* ct = op.getIn(0).getTypeReadFacing(op);
+                    Datatype ct = op.getIn(0).getTypeReadFacing(op);
                     if ((ct.getMetatype() == type_metatype.TYPE_PTR) &&
-                    (((TypePointer*)ct).getPtrTo().getMetatype() == type_metatype.TYPE_CODE))
-                    {
-                        TypeCode* tc = (TypeCode*)((TypePointer*)ct).getPtrTo();
-                        FuncProto* fp = tc.getPrototype();
-                        if (fp != (FuncProto)null)
-                        {
-                            if (!fc.isInputLocked())
-                            {
+                    (((TypePointer)ct).getPtrTo().getMetatype() == type_metatype.TYPE_CODE)) {
+                        TypeCode tc = (TypeCode)((TypePointer)ct).getPtrTo();
+                        FuncProto? fp = tc.getPrototype();
+                        if (fp != (FuncProto)null) {
+                            if (!fc.isInputLocked()) {
                                 // We use isInputLocked as a test of whether the
                                 // function pointer prototype has been applied before
                                 fc.forceSet(data, *fp);

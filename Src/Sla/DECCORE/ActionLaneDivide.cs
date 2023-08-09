@@ -118,8 +118,8 @@ namespace Sla.DECCORE
                 IEnumerator<KeyValuePair<VarnodeData, LanedRegister>> iter;
                 for (iter = data.beginLaneAccess(); iter != data.endLaneAccess(); ++iter) {
                     LanedRegister lanedReg = (*iter).second;
-                    Address addr = (*iter).first.getAddr();
-                    int sz = (*iter).first.size;
+                    Address addr = iter.Current.Key.getAddr();
+                    int sz = iter.Current.Key.size;
                     VarnodeLocSet::const_iterator viter = data.beginLoc(sz, addr);
                     VarnodeLocSet::const_iterator venditer = data.endLoc(sz, addr);
                     bool allVarnodesProcessed = true;

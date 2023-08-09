@@ -591,7 +591,7 @@ namespace Sla.DECCORE
                 // We should be able to get the callspec
                 FuncCallSpecs fc = fd.getCallSpecs(op);
                 if (fc == (FuncCallSpecs)null) return true;       // Assume indirect effect
-                return (fc.hasEffectTranslate(addr, size) != EffectRecord::unaffected);
+                return (fc.hasEffectTranslate(addr, size) != EffectRecord.EffectType.unaffected);
             }
             // If we reach here, this is a CALLOTHER, NEW
             // We assume these do not have effects on -fd- variables except for op.getOut().
@@ -989,19 +989,18 @@ namespace Sla.DECCORE
 
             List<Varnode> sinks;
             List<PcodeOp> reads;
-            list<LoadGuard>::iterator loadIter = loadGuard.end();
-            while (loadIter != loadGuard.begin())
-            {
+            IEnumerator<LoadGuard> loadIter = loadGuard.end();
+            while (loadIter != loadGuard.begin()) {
                 --loadIter;
-                LoadGuard guard(*loadIter);
+                LoadGuard guard(loadIter);
                 if (guard.analysisState != 0) break;
                 reads.Add(guard.op);
                 sinks.Add(guard.op.getIn(1));    // The OpCode.CPUI_LOAD pointer
             }
-            list<LoadGuard>::iterator storeIter = storeGuard.end();
+            IEnumerator<LoadGuard> storeIter = storeGuard.end();
             while (storeIter != storeGuard.begin()) {
                 --storeIter;
-                LoadGuard & guard(*storeIter);
+                LoadGuard guard = storeIter.Current;
                 if (guard.analysisState != 0) break;
                 reads.Add(guard.op);
                 sinks.Add(guard.op.getIn(1));    // The OpCode.CPUI_STORE pointer
@@ -1022,23 +1021,20 @@ namespace Sla.DECCORE
             }
             for (iter = storeIter; iter != storeGuard.end(); ++iter)
             {
-                LoadGuard & guard(*iter);
+                LoadGuard guard = iter.Current;
                 guard.establishRange(vsSolver.getValueSetRead(guard.op.getSeqNum()));
                 if (guard.analysisState == 0)
                     runFullAnalysis = true;
             }
-            if (runFullAnalysis)
-            {
+            if (runFullAnalysis) {
                 WidenerFull fullWidener;
                 vsSolver.solve(10000, fullWidener);
-                for (iter = loadIter; iter != loadGuard.end(); ++iter)
-                {
-                    LoadGuard & guard(*iter);
+                for (iter = loadIter; iter != loadGuard.end(); ++iter) {
+                    LoadGuard guard = iter.Current;
                     guard.finalizeRange(vsSolver.getValueSetRead(guard.op.getSeqNum()));
                 }
-                for (iter = storeIter; iter != storeGuard.end(); ++iter)
-                {
-                    LoadGuard & guard(*iter);
+                for (iter = storeIter; iter != storeGuard.end(); ++iter) {
+                    LoadGuard guard = iter.Current;
                     guard.finalizeRange(vsSolver.getValueSetRead(guard.op.getSeqNum()));
                 }
             }
@@ -1053,10 +1049,10 @@ namespace Sla.DECCORE
         /// \param spc is the stack space
         private void generateLoadGuard(StackNode node, PcodeOp op, AddrSpace spc)
         {
-            if (!op.usesSpacebasePtr())
-            {
-                loadGuard.emplace_back();
-                loadGuard.GetLastItem().set(op, spc, node.offset);
+            if (!op.usesSpacebasePtr()) {
+                LoadGuard newGuard = new LoadGuard();
+                newGuard.set(op, spc, node.offset);
+                loadGuard.Add(newGuard);
                 fd.opMarkSpacebasePtr(op);
             }
         }
@@ -1347,7 +1343,7 @@ namespace Sla.DECCORE
             {
                 fl = 0;
                 // Query for generic properties of address (use empty usepoint)
-                fd.getScopeLocal().queryProperties(addr, size, Address(), fl);
+                fd.getScopeLocal().queryProperties(addr, size, new Address(), fl);
                 guardCalls(fl, addr, size, write);
                 guardReturns(fl, addr, size, write);
                 if (fd.getArch().highPtrPossible(addr, size))
@@ -1566,7 +1562,7 @@ namespace Sla.DECCORE
                         if (outputCharacter == ParamEntry.Containment.contained_by)
                         {
                             if (guardCallOverlappingOutput(fc, addr, size, write))
-                                effecttype = EffectRecord::unaffected;  // Range is handled, don't do additional guarding
+                                effecttype = EffectRecord.EffectType.unaffected;  // Range is handled, don't do additional guarding
                         }
                         else
                         {
@@ -1611,7 +1607,7 @@ namespace Sla.DECCORE
                     }
                 }
                 // We do not guard the call if the effect is "unaffected" or "reload"
-                if ((effecttype == EffectRecord::unknown_effect) || (effecttype == EffectRecord::return_address))
+                if ((effecttype == EffectRecord::unknown_effect) || (effecttype == EffectRecord.EffectType.return_address))
                 {
                     indop = fd.newIndirectOp(fc.getOp(), addr, size, 0);
                     indop.getIn(0).setActiveHeritage();
@@ -1619,7 +1615,7 @@ namespace Sla.DECCORE
                     write.Add(indop.getOut());
                     if (holdind)
                         indop.getOut().setAddrForce();
-                    if (effecttype == EffectRecord::return_address)
+                    if (effecttype == EffectRecord.EffectType.return_address)
                         indop.getOut().setReturnAddress();
                 }
                 else if (effecttype == EffectRecord::killedbycall)
@@ -2245,7 +2241,7 @@ namespace Sla.DECCORE
             List<Varnode> removevars = new List<Varnode>();
 
             for (iter = disjoint.begin(); iter != disjoint.end(); ++iter) {
-                Address addr = (*iter).first;
+                Address addr = iter.Current.Key;
                 int size = (*iter).second.size;
                 bool guardPerformed = (*iter).second.pass < pass;
                 readvars.Clear();

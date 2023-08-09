@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +34,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < op.numInput(); ++i)
             {
                 Varnode* vn = op.getIn(i);
-                for (; ; )
+                while(true)
                 {
                     if (vn.isMark())
                     {
@@ -73,34 +73,29 @@ namespace Sla.DECCORE
         /// \return \b true if all flows look like trash
         private static bool traceTrash(Varnode vn, List<PcodeOp> indlist)
         {
-            List<PcodeOp*> allroutes; // Keep track of merging ops (with more than 1 input)
-            List<Varnode*> markedlist;    // All varnodes we have visited on paths from -vn-
-            list<PcodeOp*>::const_iterator iter, enditer;
-            Varnode* outvn;
+            List<PcodeOp> allroutes = new List<PcodeOp>(); // Keep track of merging ops (with more than 1 input)
+            List<Varnode> markedlist = new List<Varnode>();    // All varnodes we have visited on paths from -vn-
+            IEnumerator<PcodeOp> iter, enditer;
+            Varnode outvn;
             ulong val;
             uint traced = 0;
             vn.setMark();
             markedlist.Add(vn);
             bool istrash = true;
 
-            while (traced < markedlist.size())
-            {
-                Varnode* curvn = markedlist[traced++];
+            while (traced < markedlist.size()) {
+                Varnode curvn = markedlist[traced++];
                 iter = curvn.beginDescend();
                 enditer = curvn.endDescend();
-                for (; iter != enditer; ++iter)
-                {
-                    PcodeOp* op = *iter;
+                for (; iter != enditer; ++iter) {
+                    PcodeOp op = *iter;
                     outvn = op.getOut();
-                    switch (op.code())
-                    {
+                    switch (op.code()) {
                         case OpCode.CPUI_INDIRECT:
                             if (outvn.isPersist())
                                 istrash = false;
-                            else if (op.isIndirectStore())
-                            {
-                                if (!outvn.isMark())
-                                {
+                            else if (op.isIndirectStore()) {
+                                if (!outvn.isMark()) {
                                     outvn.setMark();
                                     markedlist.Add(outvn);
                                 }
@@ -111,10 +106,8 @@ namespace Sla.DECCORE
                         case OpCode.CPUI_SUBPIECE:
                             if (outvn.isPersist())
                                 istrash = false;
-                            else
-                            {
-                                if (!outvn.isMark())
-                                {
+                            else {
+                                if (!outvn.isMark()) {
                                     outvn.setMark();
                                     markedlist.Add(outvn);
                                 }
@@ -124,18 +117,14 @@ namespace Sla.DECCORE
                         case OpCode.CPUI_PIECE:
                             if (outvn.isPersist())
                                 istrash = false;
-                            else
-                            {
-                                if (!op.isMark())
-                                {
+                            else {
+                                if (!op.isMark()) {
                                     op.setMark();
                                     allroutes.Add(op);
                                 }
                                 uint nummark = countMarks(op);
-                                if (nummark == op.numInput())
-                                {
-                                    if (!outvn.isMark())
-                                    {
+                                if (nummark == op.numInput()) {
+                                    if (!outvn.isMark()) {
                                         outvn.setMark();
                                         markedlist.Add(outvn);
                                     }
@@ -144,8 +133,7 @@ namespace Sla.DECCORE
                             break;
                         case OpCode.CPUI_INT_AND:
                             // If the AND is using only the topmost significant bytes then it is likely trash
-                            if (op.getIn(1).isConstant())
-                            {
+                            if (op.getIn(1).isConstant()) {
                                 val = op.getIn(1).getOffset();
                                 ulong mask = Globals.calc_mask(op.getIn(1).getSize());
                                 if ((val == ((mask << 8) & mask)) || (val == ((mask << 16) & mask)) || (val == ((mask << 32) & mask)))
@@ -165,15 +153,13 @@ namespace Sla.DECCORE
                 if (!istrash) break;
             }
 
-            for (uint i = 0; i < allroutes.size(); ++i)
-            {
+            for (int i = 0; i < allroutes.size(); ++i) {
                 if (!allroutes[i].getOut().isMark())
                     istrash = false;        // Didn't see all inputs
                 allroutes[i].clearMark();
             }
-            for (uint i = 0; i < markedlist.size(); ++i)
+            for (int i = 0; i < markedlist.size(); ++i)
                 markedlist[i].clearMark();
-
             return istrash;
         }
 
@@ -189,31 +175,27 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            List<PcodeOp*> indlist;
+            List<PcodeOp> indlist;
 
-            List<VarnodeData>::const_iterator iter, enditer;
+            IEnumerator<VarnodeData> iter, enditer;
             iter = data.getFuncProto().trashBegin();
             enditer = data.getFuncProto().trashEnd();
-            for (; iter != enditer; ++iter)
-            {
+            for (; iter != enditer; ++iter) {
                 VarnodeData vdata = *iter;
-                Varnode* vn = data.findCoveredInput(vdata.size, vdata.getAddr());
+                Varnode vn = data.findCoveredInput(vdata.size, vdata.getAddr());
                 if (vn == (Varnode)null) continue;
                 if (vn.isTypeLock() || vn.isNameLock()) continue;
                 indlist.clear();
                 if (!traceTrash(vn, indlist)) continue;
 
-                for (uint i = 0; i < indlist.size(); ++i)
-                {
-                    PcodeOp* op = indlist[i];
-                    if (op.code() == OpCode.CPUI_INDIRECT)
-                    {
+                for (uint i = 0; i < indlist.size(); ++i) {
+                    PcodeOp op = indlist[i];
+                    if (op.code() == OpCode.CPUI_INDIRECT) {
                         // Trucate data-flow through INDIRECT, turning it into indirect creation
                         data.opSetInput(op, data.newConstant(op.getOut().getSize(), 0), 0);
                         data.markIndirectCreation(op, false);
                     }
-                    else if (op.code() == OpCode.CPUI_INT_AND)
-                    {
+                    else if (op.code() == OpCode.CPUI_INT_AND) {
                         data.opSetInput(op, data.newConstant(op.getIn(1).getSize(), 0), 1);
                     }
                     count += 1;         // Indicate we made a change

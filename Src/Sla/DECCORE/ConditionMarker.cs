@@ -120,7 +120,7 @@ namespace Sla.DECCORE
 
             matchflip = op.isBooleanFlip();
 
-            for (; ; ) {
+            while(true) {
                 if (curvn.isMark()) {
                     return curvn;
                 }

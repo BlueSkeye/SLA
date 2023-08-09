@@ -82,8 +82,9 @@ namespace Sla.SLEIGH
         }
 
         public void removeInput(int index)
-        { // Remove the indicated input
-            delete input[index];
+        {
+            // Remove the indicated input
+            // delete input[index];
             for (int i = index; i < input.size() - 1; ++i)
                 input[i] = input[i + 1];
             input.RemoveLastItem();

@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -205,11 +205,11 @@ namespace Sla.DECCORE
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            BoolExpress bool0;
-            BoolExpress bool1;
-            BlockBasic* bb;
-            FlowBlock* inblock0,*inblock1;
-            FlowBlock* rootblock0,*rootblock1;
+            BoolExpress bool0 = new BoolExpress();
+            BoolExpress bool1 = new BoolExpress();
+            BlockBasic bb;
+            FlowBlock inblock0, inblock1;
+            FlowBlock rootblock0, rootblock1;
 
             if (op.numInput() != 2) return 0; // MULTIEQUAL must have exactly 2 inputs
 
@@ -226,16 +226,14 @@ namespace Sla.DECCORE
             // Either inblock0 or inblock1 can be empty
             bb = op.getParent();
             inblock0 = bb.getIn(0);
-            if (inblock0.sizeOut() == 1)
-            {
+            if (inblock0.sizeOut() == 1) {
                 if (inblock0.sizeIn() != 1) return 0;
                 rootblock0 = inblock0.getIn(0);
             }
             else
                 rootblock0 = inblock0;
             inblock1 = bb.getIn(1);
-            if (inblock1.sizeOut() == 1)
-            {
+            if (inblock1.sizeOut() == 1) {
                 if (inblock1.sizeIn() != 1) return 0;
                 rootblock1 = inblock1.getIn(0);
             }
@@ -244,7 +242,7 @@ namespace Sla.DECCORE
             if (rootblock0 != rootblock1) return 0;
 
             // rootblock must end in CBRANCH, which gives the boolean for the conditional move
-            PcodeOp* cbranch = rootblock0.lastOp();
+            PcodeOp? cbranch = rootblock0.lastOp();
             if (cbranch == (PcodeOp)null) return 0;
             if (cbranch.code() != OpCode.CPUI_CBRANCH) return 0;
 
@@ -259,17 +257,14 @@ namespace Sla.DECCORE
             if (cbranch.isBooleanFlip())
                 path0istrue = !path0istrue;
 
-            if (!bool0.isConstant() && !bool1.isConstant())
-            {
-                if (inblock0 == rootblock0)
-                {
-                    Varnode* boolvn = cbranch.getIn(1);
+            if (!bool0.isConstant() && !bool1.isConstant()) {
+                if (inblock0 == rootblock0) {
+                    Varnode boolvn = cbranch.getIn(1);
                     bool andorselect = path0istrue;
                     // Force 0 branch to either be boolvn OR !boolvn
-                    if (boolvn != op.getIn(0))
-                    {
+                    if (boolvn != op.getIn(0)) {
                         if (!boolvn.isWritten()) return 0;
-                        PcodeOp* negop = boolvn.getDef();
+                        PcodeOp negop = boolvn.getDef();
                         if (negop.code() != OpCode.CPUI_BOOL_NEGATE) return 0;
                         if (negop.getIn(0) != op.getIn(0)) return 0;
                         andorselect = !andorselect;
@@ -278,21 +273,19 @@ namespace Sla.DECCORE
                     data.opUninsert(op);
                     data.opSetOpcode(op, opc);
                     data.opInsertBegin(op, bb);
-                    Varnode* firstvn = bool0.constructBool(op, data);
-                    Varnode* secondvn = bool1.constructBool(op, data);
+                    Varnode firstvn = bool0.constructBool(op, data);
+                    Varnode secondvn = bool1.constructBool(op, data);
                     data.opSetInput(op, firstvn, 0);
                     data.opSetInput(op, secondvn, 1);
                     return 1;
                 }
-                else if (inblock1 == rootblock0)
-                {
-                    Varnode* boolvn = cbranch.getIn(1);
+                else if (inblock1 == rootblock0) {
+                    Varnode boolvn = cbranch.getIn(1);
                     bool andorselect = !path0istrue;
                     // Force 1 branch to either be boolvn OR !boolvn
-                    if (boolvn != op.getIn(1))
-                    {
+                    if (boolvn != op.getIn(1)) {
                         if (!boolvn.isWritten()) return 0;
-                        PcodeOp* negop = boolvn.getDef();
+                        PcodeOp negop = boolvn.getDef();
                         if (negop.code() != OpCode.CPUI_BOOL_NEGATE) return 0;
                         if (negop.getIn(0) != op.getIn(1)) return 0;
                         andorselect = !andorselect;
@@ -301,8 +294,8 @@ namespace Sla.DECCORE
                     OpCode opc = andorselect ? OpCode.CPUI_BOOL_OR : OpCode.CPUI_BOOL_AND;
                     data.opSetOpcode(op, opc);
                     data.opInsertBegin(op, bb);
-                    Varnode* firstvn = bool1.constructBool(op, data);
-                    Varnode* secondvn = bool0.constructBool(op, data);
+                    Varnode firstvn = bool1.constructBool(op, data);
+                    Varnode secondvn = bool0.constructBool(op, data);
                     data.opSetInput(op, firstvn, 0);
                     data.opSetInput(op, secondvn, 1);
                     return 1;
@@ -325,7 +318,7 @@ namespace Sla.DECCORE
                 else
                 {
                     data.opRemoveInput(op, 1);
-                    Varnode* boolvn = cbranch.getIn(1);
+                    Varnode boolvn = cbranch.getIn(1);
                     bool needcomplement = ((bool0.getVal() == 0) == path0istrue);
                     if (sz == 1)
                     {
@@ -352,10 +345,10 @@ namespace Sla.DECCORE
                 OpCode opc = (bool0.getVal() != 0) ? OpCode.CPUI_BOOL_OR : OpCode.CPUI_BOOL_AND;
                 data.opSetOpcode(op, opc);
                 data.opInsertBegin(op, bb);
-                Varnode* boolvn = cbranch.getIn(1);
+                Varnode boolvn = cbranch.getIn(1);
                 if (needcomplement)
                     boolvn = constructNegate(boolvn, op, data);
-                Varnode* body1 = bool1.constructBool(op, data);
+                Varnode body1 = bool1.constructBool(op, data);
                 data.opSetInput(op, boolvn, 0);
                 data.opSetInput(op, body1, 1);
             }
@@ -365,10 +358,10 @@ namespace Sla.DECCORE
                 OpCode opc = (bool1.getVal() != 0) ? OpCode.CPUI_BOOL_OR : OpCode.CPUI_BOOL_AND;
                 data.opSetOpcode(op, opc);
                 data.opInsertBegin(op, bb);
-                Varnode* boolvn = cbranch.getIn(1);
+                Varnode boolvn = cbranch.getIn(1);
                 if (needcomplement)
                     boolvn = constructNegate(boolvn, op, data);
-                Varnode* body0 = bool0.constructBool(op, data);
+                Varnode body0 = bool0.constructBool(op, data);
                 data.opSetInput(op, boolvn, 0);
                 data.opSetInput(op, body0, 1);
             }

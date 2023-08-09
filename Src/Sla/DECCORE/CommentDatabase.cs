@@ -34,7 +34,7 @@ namespace Sla.DECCORE
         /// at least one of the given properties
         /// \param fad is the address of the owning function
         /// \param tp is a set of one or more properties
-        public abstract void clearType(Address fad, uint tp);
+        public abstract void clearType(Address fad, Comment.comment_type tp);
 
         /// \brief Add a new comment to the container
         /// \param tp is a set of properties to associate with the new comment (may be zero)
@@ -70,10 +70,10 @@ namespace Sla.DECCORE
         /// \brief Encode all comments in the container to a stream
         /// Writes a \<commentdb> element, with \<comment> children for each Comment object.
         /// \param encoder is the stream encoder
-        public abstract void encode(Encoder encoder);
+        public abstract void encode(Sla.CORE.Encoder encoder);
 
         /// \brief Restore all comments from a \<commentdb> element
         /// \param decoder is the stream decoder
-        public abstract void decode(Decoder decoder);
+        public abstract void decode(Sla.CORE.Decoder decoder);
     }
 }

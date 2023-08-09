@@ -205,7 +205,7 @@ namespace Sla.DECCORE
         /// the scope marked as category '0').
         private void fakeInputSymbols()
         {
-            int lockedinputs = getCategorySize(Symbol::function_parameter);
+            int lockedinputs = getCategorySize(Symbol.SymbolCategory.function_parameter);
             VarnodeDefSet::const_iterator iter, enditer;
 
             iter = fd.beginDef(Varnode.varnode_flags.input);
@@ -247,7 +247,7 @@ namespace Sla.DECCORE
                         SymbolEntry* entry = queryProperties(vn.getAddr(), vn.getSize(), usepoint, vflags);
                         if (entry != (SymbolEntry)null)
                         {
-                            if (entry.getSymbol().getCategory() == Symbol::function_parameter)
+                            if (entry.getSymbol().getCategory() == Symbol.SymbolCategory.function_parameter)
                                 continue;       // Found a matching symbol
                         }
                     }
@@ -436,7 +436,7 @@ namespace Sla.DECCORE
                     // If the symbol and the use are both as parameters
                     // this is likely the special case of a shared return call sharing the parameter location
                     // of the original function in which case we don't print a warning
-                    if ((!parameter) || (sym.getCategory() != Symbol::function_parameter))
+                    if ((!parameter) || (sym.getCategory() != Symbol.SymbolCategory.function_parameter))
                         fd.warningHeader("Variable defined which should be unmapped: " + sym.getName());
                     return;
                 }
@@ -447,7 +447,7 @@ namespace Sla.DECCORE
         }
 
         // Routines that are specific to one address space
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_LOCALDB);
             encoder.writeSpace(AttributeId.ATTRIB_MAIN, space);
@@ -456,7 +456,7 @@ namespace Sla.DECCORE
             encoder.closeElement(ElementId.ELEM_LOCALDB);
         }
 
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
             ScopeInternal::decode(decoder);
             collectNameRecs();
@@ -477,7 +477,7 @@ namespace Sla.DECCORE
             {
                 if (fd.getFuncProto().getLocalRange().inRange(addr, 1))
                 {
-                    long start = (long)AddrSpace::byteToAddress(addr.getOffset(), space.getWordSize());
+                    long start = (long)AddrSpace.byteToAddress(addr.getOffset(), space.getWordSize());
                     Globals.sign_extend(start, addr.getAddrSize() * 8 - 1);
                     if (stackGrowsNegative)
                         start = -start;

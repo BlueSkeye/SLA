@@ -111,7 +111,7 @@ namespace Sla.DECCORE
         /// Encode the comment to a stream
         /// The single comment is encoded as a \<comment> element.
         /// \param encoder is the stream encoder
-        public void encode(Encoder encoder)
+        public void encode(Sla.CORE.Encoder encoder)
         {
             string tpname = Comment.decodeCommentType(type);
 
@@ -132,7 +132,7 @@ namespace Sla.DECCORE
         /// Restore the comment from XML
         /// Parse a \<comment> element from the given stream decoder
         /// \param decoder is the given stream decoder
-        public void decode(Decoder decoder)
+        public void decode(Sla.CORE.Decoder decoder)
         {
             emitted = false;
             type = 0;

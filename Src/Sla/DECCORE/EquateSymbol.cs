@@ -69,7 +69,7 @@ namespace Sla.DECCORE
             return false;
         }
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_EQUATESYMBOL);
             encodeHeader(encoder);
@@ -79,7 +79,7 @@ namespace Sla.DECCORE
             encoder.closeElement(ElementId.ELEM_EQUATESYMBOL);
         }
 
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_EQUATESYMBOL);
             decodeHeader(decoder);

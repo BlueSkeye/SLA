@@ -343,7 +343,7 @@ namespace Sla.DECCORE
                     else
                         curBlock = curBlock.getIn(slot);   // MULTIEQUAL input is really only from one in-block
                 }
-                for (; ; ) {
+                while(true) {
                     if (curBlock == trueBlock) {
                         if (trueIsRestricted)
                             generateTrueEquation(outVn, op, slot, type, range);
@@ -380,7 +380,7 @@ namespace Sla.DECCORE
                 startVn = lift.pullBack(startVn.getDef(), &constVn, false);
                 if (startVn == (Varnode)null) return; // Couldn't pull all the way back to our value set
             }
-            for (; ; )
+            while(true)
             {
                 Varnode* constVn;
                 applyConstraints(endVn, type, lift, cbranch);
@@ -523,7 +523,7 @@ namespace Sla.DECCORE
         private bool checkRelativeConstant(Varnode vn, int typeCode, ulong value)
         {
             value = 0;
-            for (; ; )
+            while(true)
             {
                 if (vn.isMark())
                 {
@@ -765,7 +765,7 @@ namespace Sla.DECCORE
                         curSet = curSet.next;
                     }
                     else {
-                        for (; ; ) {
+                        while(true) {
                             if (curComponent.isDirty) {
                                 curComponent.isDirty = false;
                                 curSet = curComponent.startNode;

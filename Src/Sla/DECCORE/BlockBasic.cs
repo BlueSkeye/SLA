@@ -7,7 +7,6 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.Intrinsics;
 using System.Threading.Tasks;
-using static ghidra.FlowBlock;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla.DECCORE
@@ -49,7 +48,7 @@ namespace Sla.DECCORE
             IEnumerator<PcodeOp> newiter;
 
             inst.setParent(this);
-            newiter = op.insert(iter, inst);
+            newiter = op.Insert(iter, inst);
             inst.setBasicIter(newiter);
             if (newiter == op.begin()) {
                 // This is minimum possible order val
@@ -150,7 +149,7 @@ namespace Sla.DECCORE
         /// \return the address of the original entry point instruction for \b this block
         public Address getEntryAddr()
         {
-            Range? range;
+            Sla.CORE.Range? range;
 
             if (cover.numRanges() == 1) {
                 // If block consists of 1 range
@@ -164,7 +163,7 @@ namespace Sla.DECCORE
                 // Find range of first op
                 Address addr = new Address(op.front().getAddr());
                 range = cover.getRange(addr.getSpace(), addr.getOffset());
-                if (null == range) {
+                if (range == null) {
                     return op.front().getAddr();
                 }
             }
@@ -173,13 +172,13 @@ namespace Sla.DECCORE
 
         public override Address getStart()
         {
-            Range? range = cover.getFirstRange();
+            Sla.CORE.Range? range = cover.getFirstRange();
             return (null == range) ? new Address() : range.getFirstAddr();
         }
 
         public override Address getStop()
         {
-            Range? range = cover.getLastRange();
+            Sla.CORE.Range? range = cover.getLastRange();
             return (null == range) ? new Address() : range.getLastAddr();
         }
 
@@ -189,7 +188,6 @@ namespace Sla.DECCORE
 
         public override void encodeBody(Encoder encoder)
         {
-            base.encodeBody
             cover.encode(encoder);
         }
 
@@ -201,7 +199,7 @@ namespace Sla.DECCORE
         public override void printHeader(TextWriter s)
         {
             s.Write("Basic Block ");
-            @base.printHeader(s);
+            base.printHeader(s);
         }
 
         public override void printRaw(TextWriter s)
@@ -229,11 +227,11 @@ namespace Sla.DECCORE
         {
             PcodeOp lastop = op[op.Count - 1];
             // Flip the meaning of condition
-            lastop.flipFlag(PcodeOp.boolean_flip);
+            lastop.flipFlag(PcodeOp.Flags.boolean_flip);
             // Flip whether fall-thru block is true/false
-            lastop.flipFlag(PcodeOp.fallthru_true);
+            lastop.flipFlag(PcodeOp.Flags.fallthru_true);
             // Flip the order of outgoing edges
-            @base.negateCondition(true);
+            base.negateCondition(true);
             // Return -true- to indicate a change was made to data-flow
             return true;
         }
@@ -255,9 +253,9 @@ namespace Sla.DECCORE
             // This is similar to negateCondition but we don't need to set the boolean_flip flag on lastop
             // because it is getting explicitly changed
             // Flip whether the fallthru block is true/false
-            lastop.flipFlag(PcodeOp::fallthru_true);
+            lastop.flipFlag(PcodeOp.Flags.fallthru_true);
             // Flip the order of outof this
-            @base.negateCondition(true);
+            base.negateCondition(true);
         }
 
         public override bool isComplex()

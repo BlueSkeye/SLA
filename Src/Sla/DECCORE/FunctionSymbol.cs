@@ -73,7 +73,7 @@ namespace Sla.DECCORE
             return fd;
         }
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             if (fd != (Funcdata)null)
                 fd.encode(encoder, symbolId, false);   // Save the function itself
@@ -87,7 +87,7 @@ namespace Sla.DECCORE
             }
         }
 
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.peekElement();
             if (elemId == ElementId.ELEM_FUNCTION) {
@@ -111,7 +111,7 @@ namespace Sla.DECCORE
             {           // functionshell
                 decoder.openElement();
                 symbolId = 0;
-                for (; ; ) {
+                while(true) {
                     uint attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;
                     if (attribId == AttributeId.ATTRIB_NAME)

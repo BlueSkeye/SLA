@@ -235,7 +235,7 @@ namespace Sla.DECCORE
         /// \<injectdebug> element.  Within the library, this replaces the original InjectPayload,
         /// allowing its p-code to be \e replayed for debugging purposes.
         /// \param decoder is the stream decoder
-        public virtual void decodeDebug(Decoder decoder)
+        public virtual void decodeDebug(Sla.CORE.Decoder decoder)
         {
         }
 

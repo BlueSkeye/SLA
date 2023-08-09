@@ -72,7 +72,7 @@ namespace Sla.DECCORE
         public override ProtoParameter setInput(int i, string nm, ParameterPieces pieces)
         {
             ParameterSymbol* res = getSymbolBacked(i);
-            res.sym = scope.getCategorySymbol(Symbol::function_parameter, i);
+            res.sym = scope.getCategorySymbol(Symbol.SymbolCategory.function_parameter, i);
             SymbolEntry* entry;
             Address usepoint;
 
@@ -92,14 +92,14 @@ namespace Sla.DECCORE
                 if (scope.discoverScope(pieces.addr, pieces.type.getSize(), usepoint) == (Scope)null)
                     usepoint = restricted_usepoint;
                 res.sym = scope.addSymbol(nm, pieces.type, pieces.addr, usepoint).getSymbol();
-                scope.setCategory(res.sym, Symbol::function_parameter, i);
+                scope.setCategory(res.sym, Symbol.SymbolCategory.function_parameter, i);
                 if (isindirect || ishidden)
                 {
                     uint mirror = 0;
                     if (isindirect)
-                        mirror |= Varnode::indirectstorage;
+                        mirror |= Varnode.varnode_flags.indirectstorage;
                     if (ishidden)
-                        mirror |= Varnode::hiddenretparm;
+                        mirror |= Varnode.varnode_flags.hiddenretparm;
                     scope.setAttribute(res.sym, mirror);
                 }
                 return res;
@@ -107,16 +107,16 @@ namespace Sla.DECCORE
             if (res.sym.isIndirectStorage() != isindirect)
             {
                 if (isindirect)
-                    scope.setAttribute(res.sym, Varnode::indirectstorage);
+                    scope.setAttribute(res.sym, Varnode.varnode_flags.indirectstorage);
                 else
-                    scope.clearAttribute(res.sym, Varnode::indirectstorage);
+                    scope.clearAttribute(res.sym, Varnode.varnode_flags.indirectstorage);
             }
             if (res.sym.isHiddenReturn() != ishidden)
             {
                 if (ishidden)
-                    scope.setAttribute(res.sym, Varnode::hiddenretparm);
+                    scope.setAttribute(res.sym, Varnode.varnode_flags.hiddenretparm);
                 else
-                    scope.clearAttribute(res.sym, Varnode::hiddenretparm);
+                    scope.clearAttribute(res.sym, Varnode.varnode_flags.hiddenretparm);
             }
             if ((nm.size() != 0) && (nm != res.sym.getName()))
                 scope.renameSymbol(res.sym, nm);
@@ -127,19 +127,19 @@ namespace Sla.DECCORE
 
         public override void clearInput(int i)
         {
-            Symbol* sym = scope.getCategorySymbol(Symbol::function_parameter, i);
+            Symbol* sym = scope.getCategorySymbol(Symbol.SymbolCategory.function_parameter, i);
             if (sym != (Symbol)null)
             {
                 scope.setCategory(sym, Symbol::no_category, 0); // Remove it from category list
                 scope.removeSymbol(sym);   // Remove it altogether
             }
             // Renumber any category 0 symbol with index greater than i
-            int sz = scope.getCategorySize(Symbol::function_parameter);
+            int sz = scope.getCategorySize(Symbol.SymbolCategory.function_parameter);
             for (int j = i + 1; j < sz; ++j)
             {
-                sym = scope.getCategorySymbol(Symbol::function_parameter, j);
+                sym = scope.getCategorySymbol(Symbol.SymbolCategory.function_parameter, j);
                 if (sym != (Symbol)null)
-                    scope.setCategory(sym, Symbol::function_parameter, j - 1);
+                    scope.setCategory(sym, Symbol.SymbolCategory.function_parameter, j - 1);
             }
         }
 
@@ -150,12 +150,12 @@ namespace Sla.DECCORE
 
         public override int getNumInputs()
         {
-            return scope.getCategorySize(Symbol::function_parameter);
+            return scope.getCategorySize(Symbol.SymbolCategory.function_parameter);
         }
 
         public override ProtoParameter getInput(int i)
         {
-            Symbol* sym = scope.getCategorySymbol(Symbol::function_parameter, i);
+            Symbol* sym = scope.getCategorySymbol(Symbol.SymbolCategory.function_parameter, i);
             if (sym == (Symbol)null)
                 return (ProtoParameter)null;
             ParameterSymbol* res = getSymbolBacked(i);
@@ -196,12 +196,12 @@ namespace Sla.DECCORE
             return res;
         }
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         { // Do not store anything explicitly for a symboltable backed store
           // as the symboltable will be stored separately
         }
 
-        public override void decode(Decoder decoder, ProtoModel model)
+        public override void decode(Sla.CORE.Decoder decoder, ProtoModel model)
         {
             throw new LowlevelError("Do not decode symbol-backed prototype through this interface");
         }

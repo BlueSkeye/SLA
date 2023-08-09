@@ -65,7 +65,7 @@ namespace Sla.CORE
             fd = f;
         }
 
-        public void encode(Encoder encoder)
+        public void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_NODE);
             if (name.Length != 0)
@@ -74,11 +74,11 @@ namespace Sla.CORE
             encoder.closeElement(ElementId.ELEM_NODE);
         }
 
-        public static void decode(Decoder decoder, CallGraph graph)
+        public static void decode(Sla.CORE.Decoder decoder, CallGraph graph)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_NODE);
             string? name = null;
-            for (; ; ) {
+            while(true) {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_NAME)

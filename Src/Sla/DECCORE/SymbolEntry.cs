@@ -25,13 +25,13 @@ namespace Sla.DECCORE
     {
         // friend class Scope;
         /// Symbol object being mapped
-        private Symbol symbol;
+        internal Symbol symbol;
         /// Varnode flags specific to this storage location
-        private uint extraflags;
+        private Varnode.varnode_flags extraflags;
         /// Starting address of the storage location
         internal Address addr;
         /// A dynamic storage address (an alternative to \b addr for dynamic symbols)
-        private ulong hash;
+        internal ulong hash;
         /// Offset into the Symbol that \b this covers
         private int offset;
         /// Number of bytes consumed by \b this (piece of the) storage
@@ -60,12 +60,12 @@ namespace Sla.DECCORE
         {
             // friend class SymbolEntry;
             internal AddrSpace space;       ///< The address space of the main SymbolEntry starting address
-            private Symbol symbol;     ///< The symbol being mapped
-            private uint extraflags;       ///< Varnode flags specific to the storage location
-            private int offset;        ///< Starting offset of the portion of the Symbol being covered
-            private readonly RangeList uselimit = new RangeList();	///< Reference to the range of code addresses for which the storage is valid
+            internal Symbol symbol;     ///< The symbol being mapped
+            internal Varnode.varnode_flags extraflags;       ///< Varnode flags specific to the storage location
+            internal int offset;        ///< Starting offset of the portion of the Symbol being covered
+            internal readonly RangeList uselimit = new RangeList();	///< Reference to the range of code addresses for which the storage is valid
 
-            public EntryInitData(Symbol sym, uint exfl, AddrSpace spc, int off, RangeList ul)
+            public EntryInitData(Symbol sym, Varnode.varnode_flags exfl, AddrSpace spc, int off, RangeList ul)
             {
                 uselimit = ul;
                 symbol = sym;
@@ -154,17 +154,18 @@ namespace Sla.DECCORE
         {
             symbol = sym;
             extraflags = exfl;
-            addr = Address();
+            addr = new Address();
             hash = h;
             offset = off;
             size = sz;
             uselimit = rnglist;
         }
 
+        ///< Is \b this a high or low piece of the whole Symbol
         public bool isPiece()
         {
-            return ((extraflags&(Varnode.varnode_flags.precislo|Varnode.varnode_flags.precishi))!= 0);
-        }	///< Is \b this a high or low piece of the whole Symbol
+            return ((extraflags & (Varnode.varnode_flags.precislo | Varnode.varnode_flags.precishi)) != 0);
+        }
 
         /// Is \b storage \e dynamic
         public bool isDynamic()
@@ -176,7 +177,7 @@ namespace Sla.DECCORE
         public bool isInvalid() => (addr.isInvalid() && (hash == 0));
 
         ///< Get all Varnode flags for \b this storage
-        public Varnode.varnode_flags getAllFlags();
+        public Varnode.varnode_flags getAllFlags() => extraflags | symbol.getFlags();
 
         /// Get offset of \b this within the Symbol
         public int getOffset() => offset;
@@ -185,7 +186,7 @@ namespace Sla.DECCORE
         public ulong getFirst() => addr.getOffset();
 
         /// Get the last offset of \b this storage location
-        public ulong getLast() => (addr.getOffset()+size - 1);
+        public ulong getLast() => (addr.getOffset() + (uint)size - 1);
 
         /// Get the sub-sort object
         /// Get data used to sub-sort entries (in a rangemap) at the same address
@@ -233,10 +234,8 @@ namespace Sla.DECCORE
         /// Get the first code address where \b this storage is valid
         public Address getFirstUseAddress()
         {
-            Range rng = uselimit.getFirstRange();
-            if (rng == null)
-                return new Address();
-            return rng.getFirstAddr();
+            Sla.CORE.Range? rng = uselimit.getFirstRange();
+            return (rng == null) ? new Address() : rng.getFirstAddr();
         }
 
         /// Set the range of code addresses where \b this is valid
@@ -245,7 +244,8 @@ namespace Sla.DECCORE
             uselimit = uselim;
         }
 
-        public bool isAddrTied();///< Is \b this storage address tied
+        ///< Is \b this storage address tied
+        public bool isAddrTied() => ((symbol.getFlags() & Varnode.varnode_flags.addrtied) != 0);
 
         /// Update a Varnode data-type from \b this
         /// If the Symbol associated with \b this is type-locked, change the given
@@ -306,7 +306,7 @@ namespace Sla.DECCORE
         /// It encodes the address element (or the \<hash> element for dynamic symbols) and
         /// a \<rangelist> element associated with the \b uselimit.
         /// \param encoder is the stream encoder
-        public void encode(Encoder encoder)
+        public void encode(Sla.CORE.Encoder encoder)
         {
             if (isPiece()) {
                 // Don't save a piece
@@ -329,7 +329,7 @@ namespace Sla.DECCORE
         /// range of code addresses.
         /// \param decoder is the stream decoder
         /// \return the advanced iterator
-        public void decode(Decoder decoder)
+        public void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.peekElement();
             if (elemId == ElementId.ELEM_HASH) {

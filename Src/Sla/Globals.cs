@@ -690,7 +690,7 @@ namespace Sla
             s.close();
 
             Element* el = doc.getRoot();
-            for (; ; )
+            while(true)
             {
                 List & list(el.getChildren());
                 List::const_iterator iter;

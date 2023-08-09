@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,7 +18,7 @@ namespace Sla.DECCORE
     /// depending on the type of breakpoint they currently want to invoke
     internal abstract class BreakTable
     {
-        public ~BreakTable()
+        ~BreakTable()
         {
         }
 

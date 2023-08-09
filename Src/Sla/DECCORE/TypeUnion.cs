@@ -176,7 +176,7 @@ namespace Sla.DECCORE
 
         public override Datatype clone() => new TypeUnion(this);
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             if (typedefImm != (Datatype)null)
             {

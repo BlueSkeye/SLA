@@ -35,7 +35,7 @@ namespace Sla.DECCORE
         /// \param vn is the offset Varnode being added to the pointer
         private static void collectDuplicateNeeds(List<PcodeOp> reslist, Varnode vn)
         {
-            for (; ; )
+            while(true)
             {
                 if (!vn.isWritten()) return;
                 if (vn.isAutoLive()) return;
@@ -96,7 +96,7 @@ namespace Sla.DECCORE
             if (vn.loneDescend() == (PcodeOp)null)
                 collectDuplicateNeeds(duplicateList, vnadd2);
 
-            for (; ; )
+            while(true)
             {
                 list<PcodeOp*>::const_iterator iter = vn.beginDescend();
                 if (iter == vn.endDescend()) break;

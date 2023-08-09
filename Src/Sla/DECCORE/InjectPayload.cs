@@ -55,7 +55,7 @@ namespace Sla.DECCORE
             name = "";
             size = 0;
             uint elemId = decoder.openElement();
-            for (; ; ) {
+            while(true) {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_NAME)
@@ -91,7 +91,7 @@ namespace Sla.DECCORE
         {
             paramshift = 0;
             dynamic = false;
-            for (; ; ) {
+            while(true) {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_PARAMSHIFT) {
@@ -117,7 +117,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         protected void decodePayloadParams(Sla.CORE.Decoder decoder)
         {
-            for (; ; ) {
+            while(true) {
                 uint subId = decoder.peekElement();
                 if (subId == ElementId.ELEM_INPUT) {
                     string paramName;

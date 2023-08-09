@@ -101,7 +101,7 @@ namespace Sla.DECCORE
             Varnode* vn0;
             Varnode* vn1;
             int sa;
-            for (; ; )
+            while(true)
             {
                 if (vn.isConstant())
                 {

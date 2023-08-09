@@ -28,7 +28,7 @@ namespace Sla.EXTRA
 
         public bool isCycle() => ((flags & Flags.cycle) != 0);
 
-        public void encode(Encoder encoder)
+        public void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_EDGE);
             from.getAddr().encode(encoder);
@@ -39,7 +39,7 @@ namespace Sla.EXTRA
 
         public Address getCallSiteAddr() => callsiteaddr;
 
-        public static void decode(Decoder decoder, CallGraph graph)
+        public static void decode(Sla.CORE.Decoder decoder, CallGraph graph)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_EDGE);
 

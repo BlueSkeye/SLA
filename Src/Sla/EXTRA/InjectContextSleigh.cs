@@ -25,7 +25,7 @@ namespace Sla.EXTRA
         }
 
         // We don't need this functionality for sleigh
-        public override void encode(Encoder encoder) 
+        public override void encode(Sla.CORE.Encoder encoder) 
         {
         }
     }

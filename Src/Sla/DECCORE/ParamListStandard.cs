@@ -124,7 +124,7 @@ namespace Sla.DECCORE
 
         public virtual int getMaxDelay() => maxdelay;
 
-        public virtual void decode(Decoder decoder, List<EffectRecord> effectlist, bool normalstack);
+        public virtual void decode(Sla.CORE.Decoder decoder, List<EffectRecord> effectlist, bool normalstack);
 
         public virtual ParamList clone();
     }

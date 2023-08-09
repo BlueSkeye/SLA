@@ -371,7 +371,7 @@ namespace Sla.DECCORE
         /// \param bl is the given basic-block
         /// \param i requests a specific position within the duplicate entries
         /// \return the address table index
-        private int getIndexByBlock(FlowBlock bl, int i)
+        internal int getIndexByBlock(FlowBlock bl, int i)
         {
             IndexPair val = new IndexPair(block2Position(bl),0);
             int count = 0;
@@ -474,7 +474,7 @@ namespace Sla.DECCORE
         }
 
         /// Given a \e case index, get its label
-        private ulong getLabelByIndex(int index) => label[index];
+        internal ulong getLabelByIndex(int index) => label[index];
 
         /// Hide the normalization code for the switch
         /// Eliminate any code involved in actually computing the destination address so
@@ -691,7 +691,7 @@ namespace Sla.DECCORE
         /// The recovered addresses and case labels are encode to the stream.
         /// If override information is present, this is also incorporated into the element.
         /// \param encoder is the stream encoder
-        private void encode(Encoder encoder)
+        private void encode(Sla.CORE.Encoder encoder)
         {
             if (!isRecovered())
                 throw new LowlevelError("Trying to save unrecovered jumptable");
@@ -726,12 +726,12 @@ namespace Sla.DECCORE
         /// Parse addresses, \e case labels, and any override information from a \<jumptable> element.
         /// Other parts of the model and jump-table will still need to be recovered.
         /// \param decoder is the stream decoder
-        private void decode(Decoder decoder)
+        private void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_JUMPTABLE);
             opaddress = Address.decode(decoder);
             bool missedlabel = false;
-            for (; ; )
+            while(true)
             {
                 uint subId = decoder.peekElement();
                 if (subId == 0) break;
@@ -739,7 +739,7 @@ namespace Sla.DECCORE
                 {
                     decoder.openElement();
                     bool foundlabel = false;
-                    for (; ; )
+                    while(true)
                     {
                         uint attribId = decoder.getNextAttributeId();
                         if (attribId == 0) break;

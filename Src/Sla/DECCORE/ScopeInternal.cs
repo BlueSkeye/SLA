@@ -32,7 +32,7 @@ namespace Sla.DECCORE
             Range range;
             range.decodeFromAttributes(decoder);
             decoder.rewindAttributes();
-            for (; ; ) {
+            while(true) {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if ((attribId == AttributeId.ATTRIB_READONLY) && decoder.readBool())
@@ -317,7 +317,7 @@ namespace Sla.DECCORE
                     if (sym.isSizeTypeLocked())
                         resetSizeLockType(sym);
                 }
-                else if (sym.getCategory() == Symbol::equate)
+                else if (sym.getCategory() == Symbol.SymbolCategory.equate)
                 {
                     // Note we treat EquateSymbols as locked for purposes of this method
                     // as a typelock (which traditionally prevents a symbol from being cleared)
@@ -529,7 +529,7 @@ namespace Sla.DECCORE
                     // Now we are ready to change the type
                     sym.type = ct;
                     sym.checkSizeTypeLock();
-                    addMapPoint(sym, addr, Address()); // Re-add map with new size
+                    addMapPoint(sym, addr, new Address()); // Re-add map with new size
                     return;
                 }
             }
@@ -539,7 +539,7 @@ namespace Sla.DECCORE
         public override void setAttribute(Symbol sym, uint attr)
         {
             attr &= (Varnode.varnode_flags.typelock | Varnode.varnode_flags.namelock | Varnode.varnode_flags.@readonly | Varnode.varnode_flags.incidental_copy |
-                 Varnode.varnode_flags.nolocalalias | Varnode.varnode_flags.volatil | Varnode::indirectstorage | Varnode::hiddenretparm);
+                 Varnode.varnode_flags.nolocalalias | Varnode.varnode_flags.volatil | Varnode.varnode_flags.indirectstorage | Varnode.varnode_flags.hiddenretparm);
             sym.flags |= attr;
             sym.checkSizeTypeLock();
         }
@@ -547,7 +547,7 @@ namespace Sla.DECCORE
         public override void clearAttribute(Symbol sym, uint attr)
         {
             attr &= (Varnode.varnode_flags.typelock | Varnode.varnode_flags.namelock | Varnode.varnode_flags.@readonly | Varnode.varnode_flags.incidental_copy |
-                 Varnode.varnode_flags.nolocalalias | Varnode.varnode_flags.volatil | Varnode::indirectstorage | Varnode::hiddenretparm);
+                 Varnode.varnode_flags.nolocalalias | Varnode.varnode_flags.volatil | Varnode.varnode_flags.indirectstorage | Varnode.varnode_flags.hiddenretparm);
             sym.flags &= ~attr;
             sym.checkSizeTypeLock();
         }
@@ -817,7 +817,7 @@ namespace Sla.DECCORE
                     spacename[0] = toupper(spacename[0]); // Capitalize space
                     s << spacename;
                     s << hex << setfill('0') << setw(2 * addr.getAddrSize());
-                    s << AddrSpace::byteToAddress(addr.getOffset(), addr.getSpace().getWordSize());
+                    s << AddrSpace.byteToAddress(addr.getOffset(), addr.getSpace().getWordSize());
                 }
             }
             else if (((flags & Varnode.varnode_flags.input) != 0) && (index < 0))
@@ -844,7 +844,7 @@ namespace Sla.DECCORE
                 spacename[0] = toupper(spacename[0]); // Capitalize space
                 s << spacename;
                 s << hex << setfill('0') << setw(2 * addr.getAddrSize());
-                s << AddrSpace::byteToAddress(addr.getOffset(), addr.getSpace().getWordSize());
+                s << AddrSpace.byteToAddress(addr.getOffset(), addr.getSpace().getWordSize());
             }
             else if ((flags & Varnode.varnode_flags.indirect_creation) != 0)
             {
@@ -982,7 +982,7 @@ namespace Sla.DECCORE
             return resString;
         }
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_SCOPE);
             encoder.writeString(AttributeId.ATTRIB_NAME, name);
@@ -1007,9 +1007,9 @@ namespace Sla.DECCORE
                         SymbolEntry entry = *sym.mapentry.front();
                         if (entry.isDynamic())
                         {
-                            if (sym.getCategory() == Symbol::union_facet)
+                            if (sym.getCategory() == Symbol.SymbolCategory.union_facet)
                                 continue;       // Don't save override
-                            symbolType = (sym.getCategory() == Symbol::equate) ? 2 : 1;
+                            symbolType = (sym.getCategory() == Symbol.SymbolCategory.equate) ? 2 : 1;
                         }
                     }
                     encoder.openElement(ElementId.ELEM_MAPSYM);
@@ -1031,7 +1031,7 @@ namespace Sla.DECCORE
             encoder.closeElement(ElementId.ELEM_SCOPE);
         }
 
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
             //  uint elemId = decoder.openElement(ElementId.ELEM_SCOPE);
             //  name = el.getAttributeValue("name");	// Name must already be set in the constructor
@@ -1058,7 +1058,7 @@ namespace Sla.DECCORE
             subId = decoder.openElement(ElementId.ELEM_SYMBOLLIST);
             if (subId != 0)
             {
-                for (; ; )
+                while(true)
                 {
                     uint symId = decoder.peekElement();
                     if (symId == 0) break;

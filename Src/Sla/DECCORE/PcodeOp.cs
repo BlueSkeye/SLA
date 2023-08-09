@@ -133,9 +133,9 @@ namespace Sla.DECCORE
         /// Pointer to class providing behavioral details of the operation
         private TypeOp opcode;
         /// Collection of boolean attributes on this op
-        internal /*mutable*/ PcodeOp.Flags flags;
+        internal /*mutable*/ Flags flags;
         /// Additional boolean attributes for this op
-        private /*mutable*/ uint addlflags;
+        private /*mutable*/ AdditionalFlags addlflags;
         /// What instruction address is this attached to
         private SeqNum start;
         /// Basic block in which this op is contained
@@ -197,13 +197,13 @@ namespace Sla.DECCORE
         }
 
         /// Set specific boolean attribute
-        private void setAdditionalFlag(uint fl)
+        internal void setAdditionalFlag(AdditionalFlags fl)
         {
             addlflags |= fl;
         }
 
         /// Clear specific boolean atribute
-        private void clearAdditionalFlag(uint fl)
+        private void clearAdditionalFlag(AdditionalFlags fl)
         {
             addlflags &= ~fl;
         }
@@ -1114,7 +1114,7 @@ namespace Sla.DECCORE
         /// Encode a description including: the opcode name, the sequence number, and separate elements
         /// providing a reference number for each input and output Varnode
         /// \param encoder is the stream encoder
-        public void encode(Encoder encoder)
+        public void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_OP);
             encoder.writeSignedInteger(AttributeId.ATTRIB_CODE, (int)code());

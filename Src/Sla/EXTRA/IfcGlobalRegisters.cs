@@ -28,7 +28,7 @@ namespace Sla.EXTRA
             int count = 0;
             for (iter = reglist.begin(); iter != reglist.end(); ++iter)
             {
-                VarnodeData dat = (*iter).first;
+                VarnodeData dat = iter.Current.Key;
                 if (dat.space == spc)
                 {
                     if (dat.offset <= lastoff) continue; // Nested register def
@@ -38,11 +38,11 @@ namespace Sla.EXTRA
                 Address addr(spc, dat.offset);
                 uint flags = 0;
                 // Check if the register location is global
-                globalscope.queryProperties(addr, dat.size, Address(), flags);
+                globalscope.queryProperties(addr, dat.size, new Address(), flags);
                 if ((flags & Varnode.varnode_flags.persist) != 0)
                 {
                     Datatype* ct = dcp.conf.types.getBase(dat.size, type_metatype.TYPE_UINT);
-                    globalscope.addSymbol((*iter).second, ct, addr, Address());
+                    globalscope.addSymbol((*iter).second, ct, addr, new Address());
                     count += 1;
                 }
             }

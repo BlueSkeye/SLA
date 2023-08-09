@@ -31,6 +31,6 @@ namespace Sla.DECCORE
         /// Number of bytes in section
         internal ulong size;
         /// Properties of the section
-        internal uint flags;
+        internal LoadImageSection.Properties flags;
     }
 }

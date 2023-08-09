@@ -75,7 +75,7 @@ namespace Sla.DECCORE
         /// Encode cached strings to a stream
         /// Encode \<stringmanage> element, with \<string> children.
         /// \param encoder is the stream encoder
-        public void encode(Encoder encoder)
+        public void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_STRINGMANAGE);
 
@@ -104,10 +104,10 @@ namespace Sla.DECCORE
         /// Restore string cache from a stream
         /// Parse a \<stringmanage> element, with \<string> children.
         /// \param decoder is the stream decoder
-        public void decode(Decoder decoder)
+        public void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_STRINGMANAGE);
-            for (; ; )
+            while(true)
             {
                 uint subId = decoder.openElement();
                 if (subId != ElementId.ELEM_STRING) break;

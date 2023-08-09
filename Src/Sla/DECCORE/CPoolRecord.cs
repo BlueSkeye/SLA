@@ -104,7 +104,7 @@ namespace Sla.DECCORE
         /// Encode \b this to a stream
         /// Encode the constant pool object description as a \<cpoolrec> element.
         /// \param encoder is the stream encoder
-        public void encode(Encoder encoder)
+        public void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_CPOOLREC);
             if (tag == pointer_method)
@@ -166,13 +166,13 @@ namespace Sla.DECCORE
         /// Initialize \b this CPoolRecord instance from a \<cpoolrec> element.
         /// \param decoder is the stream decoder
         /// \param typegrp is the TypeFactory used to resolve data-types
-        public void decode(Decoder decoder, TypeFactory typegrp)
+        public void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
             tag = primitive;    // Default tag
             value = 0;
             flags = 0;
             uint elemId = decoder.openElement(ElementId.ELEM_CPOOLREC);
-            for (; ; )
+            while(true)
             {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;

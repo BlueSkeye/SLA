@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,7 +38,7 @@ namespace Sla.DECCORE
     ///     tmp1 = val1 ? val2
     ///     result = tmp1
     /// \endcode
-    internal class RuleOrPredicate
+    internal class RuleOrPredicate : Rule
     {
         /// \brief A helper class to mark up predicated INT_OR expressions
         private struct MultiPredicate

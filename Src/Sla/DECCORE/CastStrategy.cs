@@ -72,7 +72,7 @@ namespace Sla.DECCORE
         /// Recursively examine the expression defining the Varnode as necessary
         /// \param vn is the given Varnode
         /// \return the IntPromotionCode
-        public abstract int intPromotionType(Varnode vn);
+        public abstract IntPromotionCode intPromotionType(Varnode vn);
 
         /// \brief Check if integer promotion forces a cast for the given comparison op and slot
         /// Compute to what level the given slot has seen integer promotion and if
@@ -106,7 +106,7 @@ namespace Sla.DECCORE
         /// \param care_uint_int is \b true if we care about a change in signedness
         /// \param care_ptr_uint is \b true if we care about conversions between pointers and unsigned values
         /// \return NULL to indicate no cast, or the data-type to cast to
-        public abstract Datatype castStandard(Datatype reqtype, Datatype curtype,
+        public abstract Datatype? castStandard(Datatype reqtype, Datatype curtype,
             bool care_uint_int, bool care_ptr_uint);
 
         /// \brief What is the output data-type produced by the given integer arithmetic operation

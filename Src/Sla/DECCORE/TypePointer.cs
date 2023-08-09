@@ -31,7 +31,7 @@ namespace Sla.DECCORE
             //  uint elemId = decoder.openElement();
             decodeBasic(decoder); ;
             decoder.rewindAttributes();
-            for (; ; ) {
+            while(true) {
                 AttributeId attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
                 if (attrib == AttributeId.ATTRIB_WORDSIZE) {

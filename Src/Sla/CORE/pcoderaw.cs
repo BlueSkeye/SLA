@@ -134,7 +134,7 @@ namespace Sla.CORE
         /// \param invar is an array of storage for the input Varnodes
         /// \param outvar is a (handle) to the storage for the output Varnode
         /// \return the p-code op OpCode
-        public static OpCode decode(Decoder decoder, int isize, VarnodeData[] invar,
+        public static OpCode decode(Sla.CORE.Decoder decoder, int isize, VarnodeData[] invar,
             out VarnodeData? outvar)
         {
             OpCode opcode = (OpCode)decoder.readSignedInteger(AttributeId.ATTRIB_CODE);

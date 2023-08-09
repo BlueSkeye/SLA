@@ -120,7 +120,7 @@ namespace Sla.DECCORE
         /// Immediate dominating block
         private FlowBlock immed_dom;
         /// Back reference to a BlockCopy of \b this
-        private FlowBlockcopymap;
+        private FlowBlock copymap;
         /// Reference index for this block (reverse post order)
         private int index;
         /// A count of visits of this node for various algorithms
@@ -162,7 +162,7 @@ namespace Sla.DECCORE
         /// Parse the next \<edge> element in the stream
         /// \param decoder is the stream decoder
         /// \param resolver is used to resolve block references
-        private void decodeNextInEdge(Decoder decoder, BlockMap resolver)
+        private void decodeNextInEdge(Sla.CORE.Decoder decoder, BlockMap resolver)
         {
             BlockEdge inedge = new BlockEdge();
             intothis.Add(inedge);
@@ -289,8 +289,8 @@ namespace Sla.DECCORE
             inb.outofthis[inblock_outslot].reverse_index = outblock_inslot;
             outb.intothis[outblock_inslot].point = inb;
             outb.intothis[outblock_inslot].reverse_index = inblock_outslot;
-            halfDeleteInEdge(in);
-            halfDeleteOutEdge(out);
+            halfDeleteInEdge(@in);
+            halfDeleteOutEdge(@out);
 #if BLOCKCONSISTENT_DEBUG
             checkEdges();
             inb.checkEdges();
@@ -534,9 +534,6 @@ namespace Sla.DECCORE
         /// Get the mapped FlowBlock
         public FlowBlock getCopyMap() => copymap;
 
-        /// Get the parent FlowBlock of \b this
-        public FlowBlock getParent() => (FlowBlock) parent;
-
         /// Get the block_flags properties
         public uint getFlags() => flags;
 
@@ -712,35 +709,98 @@ namespace Sla.DECCORE
         }
 
         /// Encode basic information as attributes
-        public virtual void encodeHeader(Encoder encoder)
+        /// \param encoder is the stream encoder
+        public virtual void encodeHeader(Sla.CORE.Encoder encoder)
+        {
+            encoder.writeSignedInteger(AttributeId.ATTRIB_INDEX, index);
+        }
 
         /// Decode basic information from element attributes
-        public virtual void decodeHeader(Decoder decoder)
+        /// \param decoder is the stream decoder to pull attributes from
+        public virtual void decodeHeader(Sla.CORE.Decoder decoder)
+        {
+            index = (int)decoder.readSignedInteger(AttributeId.ATTRIB_INDEX);
+        }
 
         ///< Encode detail about components to a stream
-        public virtual void encodeBody(Encoder encoder)
+        public virtual void encodeBody(Sla.CORE.Encoder encoder)
         {
         }
 
         /// \brief Restore details about \b this FlowBlock from an element stream
         /// \param decoder is the stream decoder
-        public virtual void decodeBody(Decoder decoder)
+        public virtual void decodeBody(Sla.CORE.Decoder decoder)
         {
         }
 
         /// Encode edge information to a stream
-        public void encodeEdges(Encoder encoder)
+        /// Write \<edge> element to a stream
+        /// \param encoder is the stream encoder
+        public void encodeEdges(Sla.CORE.Encoder encoder)
+        {
+            for (int i = 0; i < intothis.size(); ++i) {
+                intothis[i].encode(encoder);
+            }
+        }
 
-        public void decodeEdges(Decoder decoder, BlockMap resolver)
+        /// \brief Restore edges from an encoded stream
+        ///
+        /// \param decoder is the stream decoder
+        /// \param resolver is used to recover FlowBlock cross-references
+        public void decodeEdges(Sla.CORE.Decoder decoder, BlockMap resolver)
+        {
+            while(true)
+            {
+                uint subId = decoder.peekElement();
+                if (subId != ElementId.ELEM_EDGE)
+                    break;
+                decodeNextInEdge(decoder, resolver);
+            }
+        }
 
         /// Encode \b this to a stream
-        public void encode(Encoder encoder)
+        /// Encode \b this and all its sub-components as a \<block> element.
+        /// \param encoder is the stream encoder
+        public void encode(Sla.CORE.Encoder encoder)
+        {
+            encoder.openElement(ElementId.ELEM_BLOCK);
+            encodeHeader(encoder);
+            encodeBody(encoder);
+            encodeEdges(encoder);
+            encoder.closeElement(ElementId.ELEM_BLOCK);
+        }
 
         /// Decode \b this from a stream
-        public void decode(Decoder decoder, BlockMap resolver)
+        /// Recover \b this and all it sub-components from a \<block> element.
+        ///
+        /// This will construct all the sub-components using \b resolver as a factory.
+        /// \param decoder is the stream decoder
+        /// \param resolver acts as a factory and resolves cross-references
+        public void decode(Sla.CORE.Decoder decoder, BlockMap resolver)
+        {
+            uint elemId = decoder.openElement(ElementId.ELEM_BLOCK);
+            decodeHeader(decoder);
+            decodeBody(decoder);
+            decodeEdges(decoder, resolver);
+            decoder.closeElement(elemId);
+        }
 
         /// Return next block to be executed in flow
-        public FlowBlock nextInFlow()
+        /// If there are two branches, pick the fall-thru branch
+        /// \return the next block in flow, or NULL otherwise
+        public FlowBlock? nextInFlow()
+        {
+            PcodeOp? op;
+
+            if (sizeOut() == 1) return getOut(0);
+            if (sizeOut() == 2) {
+                op = lastOp();
+                if (op == (PcodeOp)null) return (FlowBlock)null;
+                if (op.code() != OpCode.CPUI_CBRANCH) return (FlowBlock)null;
+                return op.isFallthruTrue() ? getOut(1) : getOut(0);
+            }
+            return (FlowBlock)null;
+        }
 
         /// Set the number of times this block has been visited
         public void setVisitCount(int i)

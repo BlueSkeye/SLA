@@ -146,8 +146,8 @@ namespace Sla.DECCORE
             --iterlast;         // Move back 1 to prevent deleting under the iterator
             Dictionary<HighEdge, bool>::iterator iter;
             for (iter = iterfirst; iter != iterlast; ++iter)
-                highedgemap.erase(HighEdge((*iter).first.b, (*iter).first.a));
-            highedgemap.erase(HighEdge((*iter).first.b, (*iter).first.a));
+                highedgemap.erase(HighEdge(iter.Current.Key.b, iter.Current.Key.a));
+            highedgemap.erase(HighEdge(iter.Current.Key.b, iter.Current.Key.a));
             ++iterlast;         // Restore original range (with possibly new open endpoint)
 
             highedgemap.erase(iterfirst, iterlast);
@@ -169,7 +169,7 @@ namespace Sla.DECCORE
 
             for (iter = iterfirst; iter != iterlast; ++iter)
             {
-                HighVariable* b = (*iter).first.b;
+                HighVariable* b = iter.Current.Key.b;
                 if (b == high1) continue;
                 if ((*iter).second)     // Save all high2's intersections
                     yesinter.Add(b);  // as they are still valid for the merge
@@ -184,19 +184,19 @@ namespace Sla.DECCORE
             {   // Delete all the high2 tests
                 --iterlast;         // Move back 1 to prevent deleting under the iterator
                 for (iter = iterfirst; iter != iterlast; ++iter)
-                    highedgemap.erase(HighEdge((*iter).first.b, (*iter).first.a));
-                highedgemap.erase(HighEdge((*iter).first.b, (*iter).first.a));
+                    highedgemap.erase(HighEdge(iter.Current.Key.b, iter.Current.Key.a));
+                highedgemap.erase(HighEdge(iter.Current.Key.b, iter.Current.Key.a));
                 ++iterlast;         // Restore original range (with possibly new open endpoint)
 
                 highedgemap.erase(iterfirst, iterlast);
             }
 
             iter = highedgemap.lower_bound(HighEdge(high1, (HighVariable)null));
-            while ((iter != highedgemap.end()) && ((*iter).first.a == high1))
+            while ((iter != highedgemap.end()) && (iter.Current.Key.a == high1))
             {
                 if (!(*iter).second)
                 {   // If test is intersection==false
-                    if (!(*iter).first.b.isMark()) // and there was no test with high2
+                    if (!iter.Current.Key.b.isMark()) // and there was no test with high2
                         highedgemap.erase(iter++); // Delete the test
                     else
                         ++iter;

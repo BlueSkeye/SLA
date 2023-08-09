@@ -43,7 +43,7 @@ namespace Sla.EXTRA
             }
             else
                 cur = getConstraint(stateind);
-            for (; ; )
+            while(true)
             {
                 if (cur.step(state)) return true;
                 if (!traverse.step()) break;

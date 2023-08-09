@@ -97,7 +97,7 @@ namespace Sla.DECCORE
 
         public override Datatype clone() => new TypePartialUnion(this);
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_TYPE);
             encodeBasic(metatype, encoder);

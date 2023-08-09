@@ -265,7 +265,7 @@ namespace Sla.CORE {
         /// \param base is the containing space
         /// \param dl is the heritage delay
         /// \param isFormal is the formal stack space indicator
-        public SpacebaseSpace(AddrSpaceManager m, Translate t, ref string nm, int ind, int sz,
+        public SpacebaseSpace(AddrSpaceManager m, Translate t, string nm, int ind, int sz,
             AddrSpace @base, int dl,bool isFormal)
             : base(m, t, spacetype.IPTR_SPACEBASE, nm, (uint)sz, @base.getWordSize(), ind,0, dl)
         {
@@ -451,7 +451,7 @@ namespace Sla.CORE {
             }
             // Lexigraphic sort on pieces
             int i = 0;
-            for (; ; ) {
+            while(true) {
                 if (op1.pieces.Count == i) {
                     // If more pieces in op2, it is bigger (return true), if same number this==op2, return false
                     return (op2.pieces.Count > i);
@@ -879,7 +879,7 @@ namespace Sla.CORE {
         /// This method establishes for a single address space, what range of constants are checked
         /// as possible symbol starts, when it is not known apriori that a constant is a pointer.
         /// \param range is the range of values for a single address space
-        protected void setInferPtrBounds(ref Range range)
+        protected void setInferPtrBounds(Sla.CORE.Range range)
         {
             range.getSpace().pointerLowerBound = range.getFirst();
             range.getSpace().pointerUpperBound = range.getLast();
@@ -1636,7 +1636,7 @@ namespace Sla.CORE {
         /// A translator gets initialized once, possibly using XML documents
         /// to configure it.
         /// \param store is a set of configuration documents
-        public abstract void initialize(ref DocumentStorage store);
+        public abstract void initialize(DocumentStorage store);
 
         /// \brief Add a new context variable to the model for this processor
         /// Add the name of a context register used by the processor and

@@ -66,13 +66,13 @@ namespace Sla.DECCORE
         /// Symbols are stored elsewhere, so symbol backed parameters are not serialized.
         /// If there are any internal parameters an \<internallist> element is emitted.
         /// \param encoder is the stream encoder
-        public abstract void encode(Encoder encoder);
+        public abstract void encode(Sla.CORE.Encoder encoder);
 
         /// \brief Restore any internal parameter descriptions from a stream
         ///
         /// Parse an \<internallist> element containing \<param> and \<retparam> child elements.
         /// \param decoder is the stream decoder
         /// \param model is prototype model for determining storage for unassigned parameters
-        public abstract void decode(Decoder decoder, ProtoModel model);
+        public abstract void decode(Sla.CORE.Decoder decoder, ProtoModel model);
     }
 }

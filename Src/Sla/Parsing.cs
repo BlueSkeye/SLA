@@ -803,7 +803,7 @@ namespace ghidra
                 /* Each real token shifted decrements this.  */
                 yyerrstatus = 3;
 
-                for (; ; ) {
+                while(true) {
                     yyn = yypact[yystate];
                     if (!yypact_value_is_default(yyn)) {
                         yyn += YYTERROR;

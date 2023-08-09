@@ -16,13 +16,13 @@ namespace Sla.EXTRA
         {
         }
 
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_CALLFIXUP);
             name = decoder.readString(AttributeId.ATTRIB_NAME);
             bool pcodeSubtag = false;
 
-            for (; ; )
+            while(true)
             {
                 uint subId = decoder.openElement();
                 if (subId == 0) break;

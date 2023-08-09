@@ -334,7 +334,7 @@ namespace Sla.CORE
         ///< Print a description of \b this RangeList to stream
         /// Print a one line description of each disjoint Range making up \b this RangeList
         /// \param s is the output stream
-        public void printBounds(StreamWriter s)
+        public void printBounds(TextWriter s)
         {
             if (this.empty()) {
                 s.WriteLine("all");
@@ -350,7 +350,7 @@ namespace Sla.CORE
         /// Encode \b this RangeList to a stream
         /// Encode \b this as a \<rangelist> element
         /// \param encoder is the stream encoder
-        public void encode(Encoder encoder)
+        public void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_RANGELIST);
             foreach(Range scannedRange in tree) {
@@ -362,7 +362,7 @@ namespace Sla.CORE
         /// Decode \b this RangeList from a \<rangelist> element
         /// Recover each individual disjoint Range for \b this RangeList.
         /// \param decoder is the stream decoder
-        public void decode(Decoder decoder)
+        public void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_RANGELIST);
             while (0 != decoder.peekElement()) {

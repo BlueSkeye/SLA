@@ -1,4 +1,4 @@
-﻿using Sla.DECCORE;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -104,16 +104,16 @@ namespace Sla.DECCORE
             PcodeOp op;
             BlockBasic parent;
             FlowBlock? bl;
-            list<PcodeOp*>::const_iterator iter, iterend;
-            List<int> splitedge;
-            List<BlockBasic> retnode;
+            IEnumerator<PcodeOp> iter, iterend;
+            List<int> splitedge = new List<int>();
+            List<BlockBasic> retnode = new List<BlockBasic>();
 
             if (data.getStructure().getSize() == 0) {
                 // Some other restructuring happened first
                 return 0;
             }
-            iterend = data.endOp(CPUI_RETURN);
-            for (iter = data.beginOp(CPUI_RETURN); iter != iterend; ++iter) {
+            iterend = data.endOp(OpCode.CPUI_RETURN);
+            for (iter = data.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter) {
                 op = *iter;
                 if (op.isDead()) {
                     continue;

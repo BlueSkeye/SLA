@@ -90,12 +90,12 @@ namespace Sla.DECCORE
             if (iter == cover.end())
                 a = 1000000;
             else
-                a = (*iter).first;
+                a = iter.Current.Key;
             iter = op2.cover.begin();
             if (iter == op2.cover.end())
                 b = 1000000;
             else
-                b = (*iter).first;
+                b = iter.Current.Key;
 
             if (a < b)
             {
@@ -138,14 +138,14 @@ namespace Sla.DECCORE
             iter = cover.begin();
             iter2 = op2.cover.begin();
 
-            for (; ; )
+            while(true)
             {
                 if (iter == cover.end()) return res;
                 if (iter2 == op2.cover.end()) return res;
 
-                if ((*iter).first < (*iter2).first)
+                if (iter.Current.Key < (*iter2).first)
                     ++iter;
-                else if ((*iter).first > (*iter2).first)
+                else if (iter.Current.Key > (*iter2).first)
                     ++iter2;
                 else
                 {
@@ -202,20 +202,20 @@ namespace Sla.DECCORE
             iter = cover.begin();
             iter2 = op2.cover.begin();
 
-            for (; ; )
+            while(true)
             {
                 if (iter == cover.end()) return;
                 if (iter2 == op2.cover.end()) return;
 
-                if ((*iter).first < (*iter2).first)
+                if (iter.Current.Key < (*iter2).first)
                     ++iter;
-                else if ((*iter).first > (*iter2).first)
+                else if (iter.Current.Key > (*iter2).first)
                     ++iter2;
                 else
                 {
                     val = (*iter).second.intersect((*iter2).second);
                     if (val >= level)
-                        listout.Add((*iter).first);
+                        listout.Add(iter.Current.Key);
                     ++iter;
                     ++iter2;
                 }

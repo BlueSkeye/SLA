@@ -21,7 +21,7 @@ namespace Sla.EXTRA
                 throw new IfaceExecutionError("No load image");
             if (dcp.cgraph == (CallGraph)null)
                 throw new IfaceExecutionError("Callgraph has not been built");
-            if (dcp.conf.evalfp_current == (ProtoModel*)0)
+            if (dcp.conf.evalfp_current == (ProtoModel)null)
             {
                 *status.optr << "Always using default prototype" << endl;
                 return;

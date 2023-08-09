@@ -24,7 +24,7 @@ namespace Sla.DECCORE
         /// Parse the \<type> tag.
         /// \param decoder is the stream decoder
         /// \param typegrp is the factory owning \b this data-type
-        internal void decode(Decoder decoder, TypeFactory typegrp)
+        internal void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
             //  uint elemId = decoder.openElement();
             decodeBasic(decoder);
@@ -83,7 +83,7 @@ namespace Sla.DECCORE
         public override Datatype getSubType(ulong off, ulong newoff)
         {
             Scope* scope = getMap();
-            off = AddrSpace::byteToAddress(off, spaceid.getWordSize());    // Convert from byte offset to address unit
+            off = AddrSpace.byteToAddress(off, spaceid.getWordSize());    // Convert from byte offset to address unit
                                                                             // It should always be the case that the given offset represents a full encoding of the
                                                                             // pointer, so the point of context is unused and the size is given as -1
             Address nullPoint;
@@ -107,7 +107,7 @@ namespace Sla.DECCORE
         public override Datatype nearestArrayedComponentForward(ulong off, ulong newoff, int elSize)
         {
             Scope* scope = getMap();
-            off = AddrSpace::byteToAddress(off, spaceid.getWordSize());    // Convert from byte offset to address unit
+            off = AddrSpace.byteToAddress(off, spaceid.getWordSize());    // Convert from byte offset to address unit
                                                                             // It should always be the case that the given offset represents a full encoding of the
                                                                             // pointer, so the point of context is unused and the size is given as -1
             Address nullPoint;
@@ -193,7 +193,7 @@ namespace Sla.DECCORE
 
         public override Datatype clone() => new TypeSpacebase(this);
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             if (typedefImm != (Datatype)null)
             {

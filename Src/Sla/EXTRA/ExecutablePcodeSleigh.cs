@@ -48,7 +48,7 @@ namespace Sla.EXTRA
             con.cacher.emit(con.baseaddr, &emit);
         }
 
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement();
             if (elemId != ELEM_PCODE && elemId != ELEM_CASE_PCODE &&

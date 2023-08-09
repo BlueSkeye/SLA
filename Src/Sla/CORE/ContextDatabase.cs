@@ -164,17 +164,17 @@ namespace Sla.CORE
 
         /// \brief Encode the entire database to a stream
         /// \param encoder is the stream encoder
-        internal abstract void encode(Encoder encoder);
+        internal abstract void encode(Sla.CORE.Encoder encoder);
 
         /// \brief Restore the state of \b this database object from the given stream decoder
         /// \param decoder is the given stream decoder
-        protected abstract void decode(Decoder decoder);
+        internal abstract void decode(Sla.CORE.Decoder decoder);
 
         /// \brief Add initial context state from elements in the compiler/processor specifications
         /// Parse a \<context_data> element from the given stream decoder from either the compiler
         /// or processor specification file for the architecture, initializing this database.
         /// \param decoder is the given stream decoder
-        protected abstract void decodeFromSpec(Decoder decoder);
+        internal abstract void decodeFromSpec(Sla.CORE.Decoder decoder);
 
         ///< Provide a default value for a context variable
         /// The default value is returned for addresses that have not been overlaid with other values.

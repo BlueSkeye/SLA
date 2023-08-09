@@ -156,8 +156,8 @@ namespace Sla.DECCORE
             int loadsize = loadop.getOut().getSize();
             BlockBasic curblock = loadop.getParent();
             IEnumerator<PcodeOp> begiter = curblock.beginOp();
-            list<PcodeOp*>::iterator iter = loadop.getBasicIter();
-            for (; ; ) {
+            IEnumerator<PcodeOp> iter = loadop.getBasicIter();
+            while(true) {
                 if (iter == begiter) {
                     if (curblock.sizeIn() != 1) {
                         // Can trace back to next basic block if only one path

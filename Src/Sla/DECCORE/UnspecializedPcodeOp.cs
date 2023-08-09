@@ -18,7 +18,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
         }
     }

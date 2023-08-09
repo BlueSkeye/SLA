@@ -330,7 +330,7 @@ namespace Sla.DECCORE
             istrivial = false;
         }
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             set<Address>::const_iterator iter;
 
@@ -361,10 +361,10 @@ namespace Sla.DECCORE
             encoder.closeElement(ElementId.ELEM_BASICOVERRIDE);
         }
 
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_BASICOVERRIDE);
-            for (; ; )
+            while(true)
             {
                 uint subId = decoder.openElement();
                 if (subId == 0) break;

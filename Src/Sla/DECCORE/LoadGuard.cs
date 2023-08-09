@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -130,7 +130,7 @@ namespace Sla.DECCORE
         /// \param o is the LOAD op
         /// \param s is the (stack) space it is loading from
         /// \param off is the base offset that is indexed from
-        private void set(PcodeOp o, AddrSpace s, ulong off)
+        internal void set(PcodeOp o, AddrSpace s, ulong off)
         {
             op = o;
             spc = s;

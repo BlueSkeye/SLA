@@ -57,18 +57,16 @@ namespace Sla.DECCORE
         public ResolvedUnion(Datatype parent, int fldNum, TypeFactory typegrp)
         {
             if (parent.getMetatype() == type_metatype.TYPE_PARTIALUNION)
-                parent = ((TypePartialUnion*)parent).getParentUnion();
+                parent = ((TypePartialUnion)parent).getParentUnion();
             baseType = parent;
             fieldNum = fldNum;
-            lock = false;
+            @lock = false;
             if (fldNum < 0)
                 resolve = parent;
-            else
-            {
-                if (parent.getMetatype() == type_metatype.TYPE_PTR)
-                {
-                    TypePointer* pointer = (TypePointer*)parent;
-                    Datatype* field = pointer.getPtrTo().getDepend(fldNum);
+            else {
+                if (parent.getMetatype() == type_metatype.TYPE_PTR) {
+                    TypePointer pointer = (TypePointer)parent;
+                    Datatype field = pointer.getPtrTo().getDepend(fldNum);
                     resolve = typegrp.getTypePointer(parent.getSize(), field, pointer.getWordSize());
                 }
                 else

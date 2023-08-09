@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -107,25 +107,22 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            ParamActive* active = data.getActiveOutput();
-            if (active != (ParamActive)null)
-            {
-                PcodeOp* op;
-                Varnode* vn;
-                list<PcodeOp*>::const_iterator iter, iterend;
+            ParamActive? active = data.getActiveOutput();
+            if (active != (ParamActive)null) {
+                PcodeOp op;
+                Varnode vn;
+                IEnumerator<PcodeOp> iter, iterend;
                 int i;
 
                 int maxancestor = data.getArch().trim_recurse_max;
-                iterend = data.endOp(CPUI_RETURN);
+                iterend = data.endOp(OpCode.CPUI_RETURN);
                 AncestorRealistic ancestorReal;
-                for (iter = data.beginOp(CPUI_RETURN); iter != iterend; ++iter)
-                {
+                for (iter = data.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter) {
                     op = *iter;
                     if (op.isDead()) continue;
                     if (op.getHaltType() != 0) continue; // Don't evaluate special halts
-                    for (i = 0; i < active.getNumTrials(); ++i)
-                    {
-                        ParamTrial & trial(active.getTrial(i));
+                    for (i = 0; i < active.getNumTrials(); ++i) {
+                        ParamTrial trial = active.getTrial(i);
                         if (trial.isChecked()) continue; // Already checked
                         int slot = trial.getSlot();
                         vn = op.getIn(slot);
@@ -140,12 +137,10 @@ namespace Sla.DECCORE
                 if (active.getNumPasses() > active.getMaxPass())
                     active.markFullyChecked();
 
-                if (active.isFullyChecked())
-                {
+                if (active.isFullyChecked()) {
                     data.getFuncProto().deriveOutputMap(active);
-                    iterend = data.endOp(CPUI_RETURN);
-                    for (iter = data.beginOp(CPUI_RETURN); iter != iterend; ++iter)
-                    {
+                    iterend = data.endOp(OpCode.CPUI_RETURN);
+                    for (iter = data.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter) {
                         op = *iter;
                         if (op.isDead()) continue;
                         if (op.getHaltType() != 0) continue;

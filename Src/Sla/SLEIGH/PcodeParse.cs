@@ -1197,7 +1197,7 @@ namespace Sla.SLEIGH
         //        YYSIZE_T yyn = 0;
         //        char * yyp = yystr;
 
-        //        for (; ; )
+        //        while(true)
         //            switch (*++yyp)
         //            {
         //                case '\'':
@@ -1838,7 +1838,7 @@ namespace Sla.SLEIGH
 
         //    case 24:
 
-        //        { (yyval.stmt) = pcode.createOpNoOut(CPUI_RETURN, (yyvsp[-2].tree)); }
+        //        { (yyval.stmt) = pcode.createOpNoOut(OpCode.CPUI_RETURN, (yyvsp[-2].tree)); }
 
         //        break;
 
@@ -2556,7 +2556,7 @@ namespace Sla.SLEIGH
         //yyerrlab1:
         //yyerrstatus = 3;      /* Each real token shifted decrements this.  */
 
-        //for (; ; )
+        //while(true)
         //{
         //    yyn = yypact[yystate];
         //    if (!yypact_value_is_default(yyn))

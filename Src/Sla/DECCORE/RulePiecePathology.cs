@@ -23,7 +23,7 @@ namespace Sla.DECCORE
             int pos = 0;
             int slot = 0;
             bool res = false;
-            for (; ; )
+            while(true)
             {
                 if (vn.isInput() && !vn.isPersist())
                 {

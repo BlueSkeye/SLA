@@ -248,26 +248,24 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            List<Varnode*> namerec;
+            List<Varnode> namerec = new List<Varnode>();
 
             linkSymbols(data, namerec);
             data.getScopeLocal().recoverNameRecommendationsForSymbols(); // Make sure recommended names hit before subfunc
             lookForBadJumpTables(data);
             lookForFuncParamNames(data, namerec);
 
-            int base = 1;
-            for (uint i = 0; i < namerec.size(); ++i)
-            {
-                Varnode* vn = namerec[i];
-                Symbol* sym = vn.getHigh().getSymbol();
-                if (sym.isNameUndefined())
-                {
-                    Scope* scope = sym.getScope();
-                    string newname = scope.buildDefaultName(sym, base, vn);
+            int @base = 1;
+            for (uint i = 0; i < namerec.size(); ++i) {
+                Varnode vn = namerec[i];
+                Symbol sym = vn.getHigh().getSymbol();
+                if (sym.isNameUndefined()) {
+                    Scope scope = sym.getScope();
+                    string newname = scope.buildDefaultName(sym, @base, vn);
                     scope.renameSymbol(sym, newname);
                 }
             }
-            data.getScopeLocal().assignDefaultNames(base);
+            data.getScopeLocal().assignDefaultNames(@base);
             return 0;
         }
     }

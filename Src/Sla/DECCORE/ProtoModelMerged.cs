@@ -178,17 +178,17 @@ namespace Sla.DECCORE
 
         public override bool isMerged() => true;
 
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_RESOLVEPROTOTYPE);
             name = decoder.readString(AttributeId.ATTRIB_NAME);
-            for (; ; )
+            while(true)
             { // A tag for each merged prototype
                 uint subId = decoder.openElement();
                 if (subId != ELEM_MODEL) break;
                 string modelName = decoder.readString(AttributeId.ATTRIB_NAME);
                 ProtoModel* mymodel = glb.getModel(modelName);
-                if (mymodel == (ProtoModel*)0)
+                if (mymodel == (ProtoModel)null)
                     throw new LowlevelError("Missing prototype model: " + modelName);
                 decoder.closeElement(subId);
                 foldIn(mymodel);

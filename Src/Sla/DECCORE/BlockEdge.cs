@@ -1,7 +1,6 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Sla.DECCORE
@@ -36,7 +35,7 @@ namespace Sla.DECCORE
         /// Encode \b this edge to a stream
         /// The edge is saved assuming we already know what block we are @in.
         /// \param encoder is the stream encoder
-        internal void encode(Encoder encoder)
+        internal void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_EDGE);
             // We are not saving label currently
@@ -51,7 +50,7 @@ namespace Sla.DECCORE
         /// Parse an \<edge> element
         /// \param decoder is the stream decoder
         /// \param resolver is used to cross-reference the edge's FlowBlock endpoints
-        internal void decode(Decoder decoder, BlockMap resolver)
+        internal void decode(Sla.CORE.Decoder decoder, BlockMap resolver)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_EDGE);
             // Tag does not currently contain info about label

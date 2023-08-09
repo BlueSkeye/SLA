@@ -61,61 +61,58 @@ namespace Sla.EXTRA
             }
         }
 
-        public void disassemble(Address addr,DisassemblyResult res)
+        public void disassemble(Address addr, DisassemblyResult res)
         {
-            jumpaddr.clear();
+            jumpaddr.Clear();
             lastop = OpCode.CPUI_COPY;
             hascall = false;
             hitsaddress = false;
             res.flags = 0;
-            try
-            {
+            try {
                 res.length = trans.oneInstruction(*this, addr);
             }
             catch (BadDataError err) {
                 res.success = false;
                 return;
-            } catch (DataUnavailError err) {
+            }
+            catch (DataUnavailError err) {
                 res.success = false;
                 return;
-            } catch (UnimplError err) {
+            }
+            catch (UnimplError err) {
                 res.length = err.instruction_length;
             }
             res.success = true;
             if (hascall)
-                res.flags |= CodeUnit::call;
-            if (hitsaddress)
-            {
-                res.flags |= CodeUnit::targethit;
+                res.flags |= CodeUnit.Flags.call;
+            if (hitsaddress) {
+                res.flags |= CodeUnit.Flags.targethit;
                 res.targethit = targethit;
             }
             Address lastaddr = addr + res.length;
-            switch (lastop)
-            {
+            switch (lastop) {
                 case OpCode.CPUI_BRANCH:
                 case OpCode.CPUI_BRANCHIND:
                     if (hitsaddress)
-                        res.flags |= CodeUnit::thunkhit; // Hits target via indirect jump
+                        res.flags |= CodeUnit.Flags.thunkhit; // Hits target via indirect jump
                     break;
                 case OpCode.CPUI_RETURN:
                     break;
                 default:
-                    res.flags |= CodeUnit::fallthru;
+                    res.flags |= CodeUnit.Flags.fallthru;
                     break;
             }
-            for (int i = 0; i < jumpaddr.size(); ++i)
-            {
+            for (int i = 0; i < jumpaddr.size(); ++i) {
                 if (jumpaddr[i] == lastaddr)
-                    res.flags |= CodeUnit::fallthru;
-                else if (jumpaddr[i] != addr)
-                {
-                    res.flags |= CodeUnit::jump;
+                    res.flags |= CodeUnit.Flags.fallthru;
+                else if (jumpaddr[i] != addr) {
+                    res.flags |= CodeUnit.Flags.jump;
                     res.jumpaddress = jumpaddr[i];
                 }
             }
-            }
+        }
 
-            public void addTarget(Address addr)
+        public void addTarget(Address addr)
         {
             targetoffsets.insert(addr.getOffset() );
         }

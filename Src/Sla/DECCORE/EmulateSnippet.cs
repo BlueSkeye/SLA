@@ -181,9 +181,9 @@ namespace Sla.DECCORE
         ~EmulateSnippet()
         {
             for (int i = 0; i < opList.size(); ++i)
-                delete opList[i];
+                // delete opList[i];
             for (int i = 0; i < varList.size(); ++i)
-                delete varList[i];
+                // delete varList[i];
         }
 
         public override void setExecuteAddress(Address addr)

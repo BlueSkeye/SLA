@@ -11,7 +11,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace Sla.DECCORE
 {
     /// \brief Check for constants, with pointer type, that correspond to global symbols
-    internal class ActionConstantPtr
+    internal class ActionConstantPtr : Action
     {
         private int localcount;        ///< Number of passes made for this function
 
@@ -72,30 +72,26 @@ namespace Sla.DECCORE
         /// \param op is the PcodeOp which uses the constant
         /// \param spaceList is the list of address spaces to select from
         /// \return the selected address space or null
-        private static AddrSpace selectInferSpace(Varnode* vn, PcodeOp* op,
-            List<AddrSpace*> &spaceList)
+        private static AddrSpace? selectInferSpace(Varnode vn, PcodeOp op,
+            List<AddrSpace> spaceList)
         {
-            AddrSpace* resSpace = (AddrSpace)null;
-            if (vn.getType().getMetatype() == type_metatype.TYPE_PTR)
-            {
-                AddrSpace* spc = ((TypePointer*)vn.getType()).getSpace();
+            AddrSpace? resSpace = (AddrSpace)null;
+            if (vn.getType().getMetatype() == type_metatype.TYPE_PTR) {
+                AddrSpace? spc = ((TypePointer)vn.getType()).getSpace();
                 if (spc != (AddrSpace)null && spc.getAddrSize() == vn.getSize())
                     return spc;
             }
-            for (int i = 0; i < spaceList.size(); ++i)
-            {
-                AddrSpace* spc = spaceList[i];
+            for (int i = 0; i < spaceList.size(); ++i) {
+                AddrSpace spc = spaceList[i];
                 int minSize = spc.getMinimumPtrSize();
-                if (minSize == 0)
-                {
+                if (minSize == 0) {
                     if (vn.getSize() != spc.getAddrSize())
                         continue;
                 }
                 else if (vn.getSize() < minSize)
                     continue;
-                if (resSpace != (AddrSpace)null)
-                {
-                    AddrSpace* searchSpc = searchForSpaceAttribute(vn, op);
+                if (resSpace != (AddrSpace)null) {
+                    AddrSpace? searchSpc = searchForSpaceAttribute(vn, op);
                     if (searchSpc != (AddrSpace)null)
                         resSpace = searchSpc;
                     break;
@@ -119,25 +115,23 @@ namespace Sla.DECCORE
         /// \param fullEncoding will hold the full pointer encoding being passed back
         /// \param data is the function being analyzed
         /// \return the recovered symbol or NULL
-        private static SymbolEntry isPointer(AddrSpace spc, Varnode vn, PcodeOp* op, int slot,
-                Address &rampoint, ulong &fullEncoding, Funcdata &data)
+        private static SymbolEntry? isPointer(AddrSpace spc, Varnode vn, PcodeOp op, int slot,
+            out Address rampoint, out ulong fullEncoding, Funcdata data)
         {
             bool needexacthit;
-            Architecture* glb = data.getArch();
-            Varnode* outvn;
-            if (vn.getTypeReadFacing(op).getMetatype() == type_metatype.TYPE_PTR)
-            { // Are we explicitly marked as a pointer
+            Architecture glb = data.getArch();
+            Varnode outvn;
+            if (vn.getTypeReadFacing(op).getMetatype() == type_metatype.TYPE_PTR) {
+                // Are we explicitly marked as a pointer
                 rampoint = glb.resolveConstant(spc, vn.getOffset(), vn.getSize(), op.getAddr(), fullEncoding);
                 needexacthit = false;
             }
-            else
-            {
+            else {
                 if (vn.isTypeLock()) return (SymbolEntry)null; // Locked as NOT a pointer
                 needexacthit = true;
                 // Check if the constant is involved in a potential pointer expression
                 // as the base
-                switch (op.code())
-                {
+                switch (op.code()) {
                     case OpCode.CPUI_RETURN:
                     case OpCode.CPUI_CALL:
                     case OpCode.CPUI_CALLIND:
@@ -158,8 +152,7 @@ namespace Sla.DECCORE
                         break;
                     case OpCode.CPUI_INT_ADD:
                         outvn = op.getOut();
-                        if (outvn.getTypeDefFacing().getMetatype() == type_metatype.TYPE_PTR)
-                        {
+                        if (outvn.getTypeDefFacing().getMetatype() == type_metatype.TYPE_PTR) {
                             // Is there another pointer base in this expression
                             if (op.getIn(1 - slot).getTypeReadFacing(op).getMetatype() == type_metatype.TYPE_PTR)
                                 return (SymbolEntry)null; // If so, we are not a pointer
@@ -190,13 +183,11 @@ namespace Sla.DECCORE
             if (rampoint.isInvalid()) return (SymbolEntry)null;
             // Since we are looking for a global address
             // Assume it is address tied and use empty usepoint
-            SymbolEntry* entry = data.getScopeLocal().getParent().queryContainer(rampoint, 1, Address());
-            if (entry != (SymbolEntry)null)
-            {
-                Datatype* ptrType = entry.getSymbol().getType();
-                if (ptrType.getMetatype() == type_metatype.TYPE_ARRAY)
-                {
-                    Datatype* ct = ((TypeArray*)ptrType).getBase();
+            SymbolEntry? entry = data.getScopeLocal().getParent().queryContainer(rampoint, 1, new Address());
+            if (entry != (SymbolEntry)null) {
+                Datatype ptrType = entry.getSymbol().getType();
+                if (ptrType.getMetatype() == type_metatype.TYPE_ARRAY) {
+                    Datatype ct = ((TypeArray)ptrType).getBase();
                     // In the special case of strings (character arrays) we allow the constant pointer to
                     // refer to the middle of the string
                     if (ct.isCharPrint())

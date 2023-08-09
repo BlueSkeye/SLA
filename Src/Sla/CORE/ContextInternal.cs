@@ -306,7 +306,7 @@ namespace Sla.CORE
             return res;
         }
 
-        internal override void encode(Encoder encoder)
+        internal override void encode(Sla.CORE.Encoder encoder)
         {
             if (database.empty() && trackbase.empty()) {
                 return;
@@ -328,10 +328,10 @@ namespace Sla.CORE
             encoder.closeElement(ElementId.ELEM_CONTEXT_POINTS);
         }
 
-        protected override void decode(Decoder decoder)
+        protected override void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_CONTEXT_POINTS);
-            for (; ; ) {
+            while(true) {
                 uint subId = decoder.openElement();
                 if (subId == 0) {
                     break;
@@ -363,7 +363,7 @@ namespace Sla.CORE
         protected override void decodeFromSpec(Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_CONTEXT_DATA);
-            for (; ; ) {
+            while(true) {
                 uint subId = decoder.openElement();
                 if (subId == 0) {
                     break;

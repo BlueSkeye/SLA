@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -33,16 +33,15 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            FuncCallSpecs* fc;
-            PcodeOp* op;
+            FuncCallSpecs fc;
+            PcodeOp op;
 
             if (stackspace == (AddrSpace)null) return 0; // No stack to speak of
             VarnodeData point = stackspace.getSpacebase(0);
-            Address sb_addr(point.space, point.offset);
+            Address sb_addr = new Address(point.space, point.offset);
             int sb_size = point.size;
 
-            for (int i = 0; i < data.numCalls(); ++i)
-            {
+            for (int i = 0; i < data.numCalls(); ++i) {
                 fc = data.getCallSpecs(i);
                 if (fc.getExtraPop() == 0) continue; // Stack pointer is undisturbed
                 op = data.newOp(2, fc.getOp().getAddr());

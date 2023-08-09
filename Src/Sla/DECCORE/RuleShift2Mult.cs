@@ -51,7 +51,7 @@ namespace Sla.DECCORE
                 return 0;
             arithop = op.getIn(0).getDef();
             desc = vn.beginDescend();
-            for (; ; )
+            while(true)
             {
                 if (arithop != (PcodeOp)null)
                 {

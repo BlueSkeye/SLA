@@ -138,7 +138,7 @@ namespace Sla.DECCORE
             return commentset.lower_bound(&testcomm);
         }
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_COMMENTDB);
             foreach (Comment iter in commentset) {
@@ -147,7 +147,7 @@ namespace Sla.DECCORE
             encoder.closeElement(ElementId.ELEM_COMMENTDB);
         }
 
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_COMMENTDB);
             while (decoder.peekElement() != 0) {

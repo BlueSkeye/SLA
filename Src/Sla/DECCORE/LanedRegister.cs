@@ -96,11 +96,11 @@ namespace Sla.DECCORE
         /// Parse any List lane sizes.
         /// \param decoder is the stream decoder
         /// \return \b true if the XML description provides lane sizes
-        public bool decode(Decoder decoder)
+        public bool decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_REGISTER);
             string laneSizes;
-            for (; ; )
+            while(true)
             {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;

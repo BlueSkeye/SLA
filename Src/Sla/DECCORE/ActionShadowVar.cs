@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -9,7 +9,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace Sla.DECCORE
 {
     /// \brief Check for one OpCode.CPUI_MULTIEQUAL input set defining more than one Varnode
-    internal class ActionShadowVar
+    internal class ActionShadowVar : Action
     {
         /// Constructor
         public ActionShadowVar(string g)
@@ -25,32 +25,29 @@ namespace Sla.DECCORE
         public override int apply(Funcdata data)
         {
             BlockGraph bblocks = data.getBasicBlocks();
-            BlockBasic* bl;
-            PcodeOp* op;
-            Varnode* vn;
-            List<Varnode*> vnlist;
-            list<PcodeOp*> oplist;
+            BlockBasic bl;
+            PcodeOp op;
+            Varnode vn;
+            List<Varnode> vnlist = new List<Varnode>();
+            List<PcodeOp> oplist;
             ulong startoffset;
-            for (int i = 0; i < bblocks.getSize(); ++i)
-            {
-                vnlist.clear();
-                bl = (BlockBasic*)bblocks.getBlock(i);
+            for (int i = 0; i < bblocks.getSize(); ++i) {
+                vnlist.Clear();
+                bl = (BlockBasic)bblocks.getBlock(i);
                 // Iterator over all MULTIEQUALs in the block
                 // We have to check all ops in the first address
                 // We cannot stop at first non-MULTIEQUAL because
                 // other ops creep in because of multi_collapse
                 startoffset = bl.getStart().getOffset();
-                list<PcodeOp*>::iterator iter = bl.beginOp();
-                while (iter != bl.endOp())
-                {
+                IEnumerator<PcodeOp> iter = bl.beginOp();
+                while (iter != bl.endOp()) {
                     op = *iter++;
                     if (op.getAddr().getOffset() != startoffset) break;
                     if (op.code() != OpCode.CPUI_MULTIEQUAL) continue;
                     vn = op.getIn(0);
                     if (vn.isMark())
                         oplist.Add(op);
-                    else
-                    {
+                    else {
                         vn.setMark();
                         vnlist.Add(vn);
                     }
@@ -58,20 +55,18 @@ namespace Sla.DECCORE
                 for (int j = 0; j < vnlist.size(); ++j)
                     vnlist[j].clearMark();
             }
-            list<PcodeOp*>::iterator oiter;
-            for (oiter = oplist.begin(); oiter != oplist.end(); ++oiter)
-            {
+            IEnumerator<PcodeOp> oiter;
+            for (oiter = oplist.begin(); oiter != oplist.end(); ++oiter) {
                 op = *oiter;
-                PcodeOp* op2;
-                for (op2 = op.previousOp(); op2 != (PcodeOp)null; op2 = op2.previousOp())
-                {
+                PcodeOp op2;
+                for (op2 = op.previousOp(); op2 != (PcodeOp)null; op2 = op2.previousOp()) {
                     if (op2.code() != OpCode.CPUI_MULTIEQUAL) continue;
                     int i;
                     for (i = 0; i < op.numInput(); ++i) // Check for match in each branch
                         if (op.getIn(i) != op2.getIn(i)) break;
                     if (i != op.numInput()) continue; // All branches did not match
 
-                    List<Varnode*> plist;
+                    List<Varnode> plist = new List<Varnode>();
                     plist.Add(op2.getOut());
                     data.opSetOpcode(op, OpCode.CPUI_COPY);
                     data.opSetAllInput(op, plist);

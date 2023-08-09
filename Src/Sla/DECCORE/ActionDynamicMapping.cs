@@ -22,14 +22,13 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            ScopeLocal* localmap = data.getScopeLocal();
-            list<SymbolEntry>::iterator iter, enditer;
+            ScopeLocal localmap = data.getScopeLocal();
+            IEnumerator<SymbolEntry> iter, enditer;
             iter = localmap.beginDynamic();
             enditer = localmap.endDynamic();
             DynamicHash dhash;
-            while (iter != enditer)
-            {
-                SymbolEntry* entry = &(*iter);
+            while (iter != enditer) {
+                SymbolEntry entry = &(*iter);
                 ++iter;
                 if (data.attemptDynamicMapping(entry, dhash))
                     count += 1;

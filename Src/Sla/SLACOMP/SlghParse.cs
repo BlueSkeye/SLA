@@ -1605,7 +1605,7 @@ namespace Sla.SLACOMP
         //        YYSIZE_T yyn = 0;
         //        char * yyp = yystr;
 
-        //        for (; ; )
+        //        while(true)
         //            switch (*++yyp)
         //            {
         //                case '\'':
@@ -2909,7 +2909,7 @@ namespace Sla.SLACOMP
 
         //    case 171:
 
-        //        { (yyval.stmt) = slgh.pcode.createOpNoOut(CPUI_RETURN, (yyvsp[-2].tree)); }
+        //        { (yyval.stmt) = slgh.pcode.createOpNoOut(OpCode.CPUI_RETURN, (yyvsp[-2].tree)); }
 
         //        break;
 
@@ -4089,7 +4089,7 @@ namespace Sla.SLACOMP
         //yyerrlab1:
         //yyerrstatus = 3;      /* Each real token shifted decrements this.  */
 
-        //for (; ; )
+        //while(true)
         //{
         //    yyn = yypact[yystate];
         //    if (!yypact_value_is_default(yyn))

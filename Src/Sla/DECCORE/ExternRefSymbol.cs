@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -64,7 +64,7 @@ namespace Sla.DECCORE
         ///< Return the \e placeholder address
         public Address getRefAddr() => refaddr;
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_EXTERNREFSYMBOL);
             encoder.writeString(AttributeId.ATTRIB_NAME, name);
@@ -72,12 +72,12 @@ namespace Sla.DECCORE
             encoder.closeElement(ElementId.ELEM_EXTERNREFSYMBOL);
         }
 
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_EXTERNREFSYMBOL);
             name.clear();           // Name is empty
             displayName.clear();
-            for (; ; )
+            while(true)
             {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;

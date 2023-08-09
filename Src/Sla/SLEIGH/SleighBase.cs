@@ -209,7 +209,7 @@ namespace Sla.SLEIGH
             Dictionary<VarnodeData, string>::const_iterator iter = varnode_xref.upper_bound(sym); // First point greater than offset
             if (iter == varnode_xref.begin()) return "";
             iter--;
-            VarnodeData point = (*iter).first;
+            VarnodeData point = iter.Current.Key;
             if (point.space != base) return "";
             ulong offbase = point.offset;
             if (point.offset + point.size >= off + size)
@@ -218,7 +218,7 @@ namespace Sla.SLEIGH
             while (iter != varnode_xref.begin())
             {
                 --iter;
-                VarnodeData point = (*iter).first;
+                VarnodeData point = iter.Current.Key;
                 if ((point.space != base) || (point.offset != offbase)) return "";
                 if (point.offset + point.size >= off + size)
                     return (*iter).second;

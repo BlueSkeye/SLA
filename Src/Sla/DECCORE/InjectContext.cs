@@ -49,6 +49,6 @@ namespace Sla.DECCORE
         /// \brief Encode \b this context to a stream as a \<context> element
         ///
         /// \param encoder is the stream encoder
-        public abstract void encode(Encoder encoder);
+        public abstract void encode(Sla.CORE.Encoder encoder);
     }
 }

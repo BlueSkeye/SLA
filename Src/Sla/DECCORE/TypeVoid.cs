@@ -33,7 +33,7 @@ namespace Sla.DECCORE
         
         internal override Datatype clone() => new TypeVoid(this);
     
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             if (typedefImm != (Datatype)null)
             {

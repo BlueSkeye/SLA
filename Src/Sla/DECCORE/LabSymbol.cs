@@ -37,14 +37,14 @@ namespace Sla.DECCORE
             buildType();
         }
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_LABELSYM);
             encodeHeader(encoder);      // We never set category
             encoder.closeElement(ElementId.ELEM_LABELSYM);
         }
 
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_LABELSYM);
             decodeHeader(decoder);

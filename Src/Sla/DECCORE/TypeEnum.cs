@@ -56,7 +56,7 @@ namespace Sla.DECCORE
 
                     for (iter = namemap.begin(); iter != namemap.end(); ++iter) {
                         // For every named enumeration value
-                        ulong val = (*iter).first;
+                        ulong val = iter.Current.Key;
                         if ((val & curmask) != 0) {
                             // If the value shares ANY bits in common with the current mask
                             curmask |= val;     // Absorb ALL defined bits of the value into the current mask
@@ -97,7 +97,7 @@ namespace Sla.DECCORE
         /// Parse a \<type> element with children describing each specific enumeration value.
         /// \param decoder is the stream decoder
         /// \param typegrp is the factory owning \b this data-type
-        internal void decode(Decoder decoder, TypeFactory typegrp)
+        internal void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
             //  uint elemId = decoder.openElement();
             decodeBasic(decoder);
@@ -111,7 +111,7 @@ namespace Sla.DECCORE
                 if (childId == 0) break;
                 ulong val = 0;
                 string nm;
-                for (; ; )
+                while(true)
                 {
                     AttributeId  attrib = decoder.getNextAttributeId();
                     if (attrib == 0) break;

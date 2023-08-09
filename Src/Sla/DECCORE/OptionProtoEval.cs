@@ -22,7 +22,7 @@ namespace Sla.DECCORE
         /// model used to evaluate sub-functions.
         public override string apply(Architecture glb, string p1, string p2, string p3)
         {
-            ProtoModel* model = (ProtoModel*)0;
+            ProtoModel* model = (ProtoModel)null;
 
             if (p1.size() == 0)
                 throw ParseError("Must specify prototype model");
@@ -32,7 +32,7 @@ namespace Sla.DECCORE
             else
             {
                 model = glb.getModel(p1);
-                if (model == (ProtoModel*)0)
+                if (model == (ProtoModel)null)
                     throw ParseError("Unknown prototype model: " + p1);
             }
             string res = "Set current evaluation to " + p1;

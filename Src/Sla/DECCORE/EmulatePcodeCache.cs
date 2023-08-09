@@ -40,11 +40,11 @@ namespace Sla.DECCORE
         private void clearCache()
         {
             for (int i = 0; i < opcache.size(); ++i)
-                delete opcache[i];
+                // delete opcache[i];
             for (int i = 0; i < varcache.size(); ++i)
-                delete varcache[i];
-            opcache.clear();
-            varcache.clear();
+                // delete varcache[i];
+            opcache.Clear();
+            varcache.Clear();
         }
 
         /// Cache pcode for instruction at given address

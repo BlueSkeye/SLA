@@ -104,7 +104,7 @@ namespace Sla.DECCORE
             PcodeOp? pairop;
             IEnumerator<PcodeOp> iter = bl.beginOp();
             while (iter.MoveNext()) {
-                PcodeOp op iter.Current;
+                PcodeOp op = iter.Current;
                 OpCode opc = op.code();
                 if (opc == OpCode.CPUI_COPY) continue;
                 if (opc != OpCode.CPUI_MULTIEQUAL) break;

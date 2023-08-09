@@ -109,11 +109,11 @@ namespace Sla.DECCORE
                 const EffectRecord &curRecord(*iter);
                 uint type = model.hasEffect(curRecord.getAddress(), curRecord.getSize());
                 if (type == curRecord.getType()) continue;
-                if (curRecord.getType() == EffectRecord::unaffected)
+                if (curRecord.getType() == EffectRecord.EffectType.unaffected)
                     unaffectedList.Add(&curRecord);
                 else if (curRecord.getType() == EffectRecord::killedbycall)
                     killedByCallList.Add(&curRecord);
-                else if (curRecord.getType() == EffectRecord::return_address)
+                else if (curRecord.getType() == EffectRecord.EffectType.return_address)
                     retAddr = &curRecord;
             }
             if (!unaffectedList.empty())
@@ -228,7 +228,7 @@ namespace Sla.DECCORE
         /// \param paramshift is the number of parameters to add (must be >0)
         protected void paramShift(int paramshift)
         {
-            if ((model == (ProtoModel*)0) || (store == (ProtoStore*)0))
+            if ((model == (ProtoModel)null) || (store == (ProtoStore*)0))
                 throw new LowlevelError("Cannot parameter shift without a model");
 
             List<string> nmlist;
@@ -298,7 +298,7 @@ namespace Sla.DECCORE
     
         public FuncProto()
         {
-            model = (ProtoModel*)0;
+            model = (ProtoModel)null;
             store = (ProtoStore*)0;
             flags = 0;
             injectid = -1;
@@ -365,7 +365,7 @@ namespace Sla.DECCORE
         /// \param pieces is the raw collection of names and data-types
         public void setPieces(PrototypePieces pieces)
         {
-            if (pieces.model != (ProtoModel*)0)
+            if (pieces.model != (ProtoModel)null)
                 setModel(pieces.model);
             List<Datatype*> typelist;
             List<string> nmlist;
@@ -393,7 +393,7 @@ namespace Sla.DECCORE
         public void setScope(Scope s, Address startpoint)
         {
             store = new ProtoStoreSymbol(s, startpoint);
-            if (model == (ProtoModel*)0)
+            if (model == (ProtoModel)null)
                 setModel(s.getArch().defaultfp);
         }
 
@@ -405,7 +405,7 @@ namespace Sla.DECCORE
         public void setInternal(ProtoModel m, Datatype vt)
         {
             store = new ProtoStoreInternal(vt);
-            if (model == (ProtoModel*)0)
+            if (model == (ProtoModel)null)
                 setModel(m);
         }
 
@@ -416,11 +416,11 @@ namespace Sla.DECCORE
         /// \param m is the new prototype model to set
         public void setModel(ProtoModel m)
         {
-            if (m != (ProtoModel*)0)
+            if (m != (ProtoModel)null)
             {
                 int expop = m.getExtraPop();
                 // If a model previously existed don't overwrite extrapop with unknown
-                if ((model == (ProtoModel*)0) || (expop != ProtoModel.extrapop_unknown))
+                if ((model == (ProtoModel)null) || (expop != ProtoModel.extrapop_unknown))
                     extrapop = expop;
                 if (m.hasThisPointer())
                     flags |= has_thisptr;
@@ -672,7 +672,7 @@ namespace Sla.DECCORE
             {
                 if (outparam.isSizeTypeLocked())
                 {
-                    if (model != (ProtoModel*)0)
+                    if (model != (ProtoModel)null)
                         outparam.resetSizeLockType(getArch().types);
                 }
             }
@@ -715,7 +715,7 @@ namespace Sla.DECCORE
         /// \param active is the set of parameter trials to evaluate with
         public void resolveModel(ParamActive active)
         {
-            if (model == (ProtoModel*)0) return;
+            if (model == (ProtoModel)null) return;
             if (!model.isMerged()) return; // Already been resolved
             ProtoModelMerged* mergemodel = (ProtoModelMerged*)model;
             ProtoModel* newmodel = mergemodel.selectModel(active);
@@ -1005,7 +1005,7 @@ namespace Sla.DECCORE
         /// will have on the storage.
         /// \param addr is the starting address of the storage location
         /// \param size is the number of bytes in the storage
-        /// \return the type of side-effect: EffectRecord::unaffected, EffectRecord::killedbycall, etc.
+        /// \return the type of side-effect: EffectRecord.EffectType.unaffected, EffectRecord::killedbycall, etc.
         public uint hasEffect(Address addr, int size)
         {
             if (effectlist.empty())
@@ -1421,7 +1421,7 @@ namespace Sla.DECCORE
         /// \param s is the output stream
         public void printRaw(string funcname, TextWriter s)
         {
-            if (model != (ProtoModel*)0)
+            if (model != (ProtoModel)null)
                 s << model.getName() << ' ';
             else
                 s << "(no model) ";
@@ -1455,7 +1455,7 @@ namespace Sla.DECCORE
         /// may \e not include input parameters, as these are typically
         /// controlled by the function's symbol table scope.
         /// \param encoder is the stream encoder
-        public void encode(Encoder encoder)
+        public void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_PROTOTYPE);
             encoder.writeString(AttributeId.ATTRIB_MODEL, model.getName());
@@ -1505,18 +1505,18 @@ namespace Sla.DECCORE
         /// setStore() or setInternal().
         /// \param decoder is the given stream decoder
         /// \param glb is the Architecture owning the prototype
-        public void decode(Decoder decoder, Architecture glb)
+        public void decode(Sla.CORE.Decoder decoder, Architecture glb)
         {
             // Model must be set first
             if (store == (ProtoStore*)0)
                 throw new LowlevelError("Prototype storage must be set before restoring FuncProto");
-            ProtoModel* mod = (ProtoModel*)0;
+            ProtoModel* mod = (ProtoModel)null;
             bool seenextrapop = false;
             int readextrapop;
             flags = 0;
             injectid = -1;
             uint elemId = decoder.openElement(ElementId.ELEM_PROTOTYPE);
-            for (; ; )
+            while(true)
             {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
@@ -1528,7 +1528,7 @@ namespace Sla.DECCORE
                     else
                     {
                         mod = glb.getModel(modelname);
-                        if (mod == (ProtoModel*)0)  // Model name is unrecognized
+                        if (mod == (ProtoModel)null)  // Model name is unrecognized
                             mod = glb.createUnknownModel(modelname);   // Create model with placeholder behavior
                     }
                 }
@@ -1578,7 +1578,7 @@ namespace Sla.DECCORE
                         flags |= is_destructor;
                 }
             }
-            if (mod != (ProtoModel*)0) // If a model was specified
+            if (mod != (ProtoModel)null) // If a model was specified
                 setModel(mod);      // This sets extrapop to model default
             if (seenextrapop)       // If explicitly set
                 extrapop = readextrapop;
@@ -1592,7 +1592,7 @@ namespace Sla.DECCORE
                 if (subId == ELEM_RETURNSYM)
                 {
                     decoder.openElement();
-                    for (; ; )
+                    while(true)
                     {
                         uint attribId = decoder.getNextAttributeId();
                         if (attribId == 0) break;
@@ -1624,7 +1624,7 @@ namespace Sla.DECCORE
             if (((flags & voidinputlock) != 0) || (isOutputLocked()))
                 flags |= modellock;
 
-            for (; ; )
+            while(true)
             {
                 subId = decoder.peekElement();
                 if (subId == 0) break;
@@ -1634,7 +1634,7 @@ namespace Sla.DECCORE
                     while (decoder.peekElement() != 0)
                     {
                         effectlist.emplace_back();
-                        effectlist.GetLastItem().decode(EffectRecord::unaffected, decoder);
+                        effectlist.GetLastItem().decode(EffectRecord.EffectType.unaffected, decoder);
                     }
                     decoder.closeElement(subId);
                 }
@@ -1654,7 +1654,7 @@ namespace Sla.DECCORE
                     while (decoder.peekElement() != 0)
                     {
                         effectlist.emplace_back();
-                        effectlist.GetLastItem().decode(EffectRecord::return_address, decoder);
+                        effectlist.GetLastItem().decode(EffectRecord.EffectType.return_address, decoder);
                     }
                     decoder.closeElement(subId);
                 }

@@ -147,7 +147,7 @@ namespace Sla.EXTRA
                 int slot = (*iter).second;
                 if (namemap.size() <= slot)
                     throw new LowlevelError("Name indices do not match constraint");
-                namemap[slot] = (*iter).first;
+                namemap[slot] = iter.Current.Key;
             }
         }
 

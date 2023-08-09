@@ -23,6 +23,7 @@ namespace Sla.DECCORE
         //friend class SymbolCompareName;
 
         /// \brief Possible display (dispflag) properties for a Symbol
+        [Flags()]
         public enum DisplayFlags
         {
             force_hex = 1,      ///< Force hexadecimal printing of constant symbol
@@ -33,7 +34,8 @@ namespace Sla.DECCORE
             size_typelock = 8,          ///< Only the size of the symbol is typelocked
             isolate = 16,       ///< Symbol should not speculatively merge automatically
             merge_problems = 32,    ///< Set if some SymbolEntrys did not get merged
-            is_this_ptr = 64        ///< We are the "this" symbol for a class method
+            is_this_ptr = 64,        ///< We are the "this" symbol for a class method
+            MASK = 7
         }
 
         /// \brief The possible specialize Symbol \e categories
@@ -55,21 +57,21 @@ namespace Sla.DECCORE
         /// Name to use when displaying symbol in output
         protected string displayName;
         /// The symbol's data-type
-        internal Datatype type;
+        internal Datatype? type;
         /// id to distinguish symbols with the same name
         protected uint nameDedup;
         /// Varnode-like properties of the symbol
-        protected Varnode.varnode_flags flags;
+        internal Varnode.varnode_flags flags;
         // only typelock,namelock,readonly,externref
         // addrtied, persist inherited from scope
         /// Flags affecting the display of this symbol
-        protected uint dispflags;
+        protected DisplayFlags dispflags;
         /// Special category (\b function_parameter, \b equate, etc.)
-        protected short category;
+        protected SymbolCategory category;
         /// Index within category
         protected ushort catindex;
         /// Unique id, 0=unassigned
-        protected ulong symbolId;
+        internal ulong symbolId;
         /// List of storage locations labeled with \b this Symbol
         protected List<IEnumerator<SymbolEntry>> mapentry;
         /// Scope associated with current depth resolution
@@ -86,9 +88,9 @@ namespace Sla.DECCORE
         ///< Set the display format for \b this Symbol
         /// Force a specific display format for constant symbols
         /// \param val is the format:  force_hex, force_dec, force_oct, etc.
-        protected void setDisplayFormat(uint val)
+        protected void setDisplayFormat(DisplayFlags val)
         {
-            dispflags &= 0xfffffff8;
+            dispflags &= (DisplayFlags)0xfffffff8;
             dispflags |= val;
         }
 
@@ -98,9 +100,9 @@ namespace Sla.DECCORE
         /// is locked, but the data-type is not locked (and can float)
         protected void checkSizeTypeLock()
         {
-            dispflags &= ~((uint)size_typelock);
+            dispflags &= ~(DisplayFlags.size_typelock);
             if (isTypeLocked() && (type.getMetatype() == type_metatype.TYPE_UNKNOWN))
-                dispflags |= size_typelock;
+                dispflags |= DisplayFlags.size_typelock;
         }
 
         /// Toggle whether \b this is the "this" pointer for a class method
@@ -108,16 +110,16 @@ namespace Sla.DECCORE
         internal void setThisPointer(bool val)
         {
             if (val)
-                dispflags |= is_this_ptr;
+                dispflags |= DisplayFlags.is_this_ptr;
             else
-                dispflags &= ~((uint)is_this_ptr);
+                dispflags &= ~(DisplayFlags.is_this_ptr);
         }
 
         /// Construct given a name and data-type
         /// \param sc is the scope containing the new symbol
         /// \param nm is the local name of the symbol
         /// \param ct is the data-type of the symbol
-        public Symbol(Scope sc, string nm, Datatype ct)
+        public Symbol(Scope sc, string nm, Datatype? ct)
         {
             scope = sc;
             name = nm;
@@ -126,7 +128,7 @@ namespace Sla.DECCORE
             type = ct;
             flags = 0;
             dispflags = 0;
-            category = no_category;
+            category = SymbolCategory.no_category;
             catindex = 0;
             symbolId = 0;
             wholeCount = 0;
@@ -143,7 +145,7 @@ namespace Sla.DECCORE
             type = (Datatype)null;
             flags = 0;
             dispflags = 0;
-            category = no_category;
+            category = SymbolCategory.no_category;
             catindex = 0;
             symbolId = 0;
             wholeCount = 0;
@@ -158,63 +160,63 @@ namespace Sla.DECCORE
         public string getDisplayName() => displayName;
 
         /// Get the data-type
-        public Datatype getType() => type;
+        public Datatype? getType() => type;
 
         /// Get a unique id for the symbol
         public ulong getId() => symbolId;
 
         /// Get the boolean properties of the Symbol
-        public uint getFlags() => flags;
+        public Varnode.varnode_flags getFlags() => flags;
 
         /// Get the format to display the Symbol in
-        public uint getDisplayFormat() => (dispflags & 7);
+        public DisplayFlags getDisplayFormat() => (dispflags & DisplayFlags.MASK);
 
         /// Get the Symbol category
-        public short getCategory() => category;
+        public SymbolCategory getCategory() => category;
 
         /// Get the position of the Symbol within its category
         public ushort getCategoryIndex() => catindex;
 
         /// Is the Symbol type-locked
-        public bool isTypeLocked() => ((flags&Varnode.varnode_flags.typelock)!= 0);
+        public bool isTypeLocked() => ((flags & Varnode.varnode_flags.typelock) != 0);
 
         /// Is the Symbol name-locked
-        public bool isNameLocked() => ((flags&Varnode.varnode_flags.namelock)!= 0);
+        public bool isNameLocked() => ((flags & Varnode.varnode_flags.namelock) != 0);
 
         /// Is the Symbol size type-locked
-        public bool isSizeTypeLocked() => ((dispflags & size_typelock)!= 0);
+        public bool isSizeTypeLocked() => ((dispflags & DisplayFlags.size_typelock)!= 0);
 
         /// Is the Symbol volatile
         public bool isVolatile() => ((flags & Varnode.varnode_flags.volatil)!= 0);
 
         /// Is \b this the "this" pointer
-        public bool isThisPointer() => ((dispflags & is_this_ptr)!= 0);
+        public bool isThisPointer() => ((dispflags & DisplayFlags.is_this_ptr)!= 0);
 
         /// Is storage really a pointer to the true Symbol
-        public bool isIndirectStorage() => ((flags&Varnode::indirectstorage)!= 0);
+        public bool isIndirectStorage() => ((flags&Varnode.varnode_flags.indirectstorage)!= 0);
 
         /// Is this a reference to the function return value
-        public bool isHiddenReturn() => ((flags&Varnode::hiddenretparm)!= 0);
+        public bool isHiddenReturn() => ((flags & Varnode.varnode_flags.hiddenretparm) != 0);
 
         /// Does \b this have an undefined name
         public bool isNameUndefined()
         {
-            return ((name.size() == 15) && (0 == name.compare(0, 7, "$$undef")));
+            return (name.Length == 15) && name.StartsWith("$$undef");
         }
 
         /// Does \b this have more than one \e entire mapping
         public bool isMultiEntry() => (wholeCount > 1);
 
         /// Were some SymbolEntrys not merged
-        public bool hasMergeProblems() => ((dispflags & merge_problems)!= 0);
+        public bool hasMergeProblems() => ((dispflags & DisplayFlags.merge_problems)!= 0);
 
         /// Mark that some SymbolEntrys could not be merged
         public void setMergeProblems()
         {
-            dispflags |= merge_problems;
+            dispflags |= DisplayFlags.merge_problems;
         }
 
-        public bool isIsolated() => ((dispflags & isolate)!= 0); ///< Return \b true if \b this is isolated from speculative merging
+        public bool isIsolated() => ((dispflags & DisplayFlags.isolate)!= 0); ///< Return \b true if \b this is isolated from speculative merging
 
         /// Set whether \b this Symbol should be speculatively merged
         /// If the given value is \b true, any Varnodes that map directly to \b this Symbol,
@@ -222,14 +224,13 @@ namespace Sla.DECCORE
         /// \param val is the given boolean value
         public void setIsolated(bool val)
         {
-            if (val)
-            {
-                dispflags |= isolate;
+            if (val) {
+                dispflags |= DisplayFlags.isolate;
                 flags |= Varnode.varnode_flags.typelock;     // Isolated Symbol must be typelocked
                 checkSizeTypeLock();
             }
             else
-                dispflags &= ~((uint)isolate);
+                dispflags &= ~(DisplayFlags.isolate);
         }
 
         /// Get the scope owning \b this Symbol
@@ -241,7 +242,7 @@ namespace Sla.DECCORE
         {
             if (mapentry.empty())
                 throw new LowlevelError("No mapping for symbol: " + name);
-            return &(*mapentry[0]);
+            return mapentry[0];
         }
 
         /// Get first mapping of the symbol that contains the given Address
@@ -251,9 +252,9 @@ namespace Sla.DECCORE
         /// \return the first matching SymbolEntry
         public SymbolEntry? getMapEntry(Address addr)
         {
-            SymbolEntry* res;
+            SymbolEntry res;
             for (int i = 0; i < mapentry.size(); ++i) {
-                res = &(*mapentry[i]);
+                res = mapentry[i];
                 Address entryaddr = res.getAddr();
                 if (addr.getSpace() != entryaddr.getSpace()) continue;
                 if (addr.getOffset() < entryaddr.getOffset()) continue;
@@ -303,7 +304,7 @@ namespace Sla.DECCORE
         {
             if (scope == useScope) return 0;    // Symbol is in scope where it is used
             if (useScope == null) {  // Treat null useScope as resolving the full path
-                Scope point = scope;
+                Scope? point = scope;
                 int count = 0;
                 while (point != null) {
                     count += 1;
@@ -317,7 +318,7 @@ namespace Sla.DECCORE
             Scope distinguishScope = scope.findDistinguishingScope(useScope);
             depthResolution = 0;
             string distinguishName;
-            Scope terminatingScope;
+            Scope? terminatingScope;
             if (distinguishScope == null) {  // Symbol scope is ancestor of use scope
                 distinguishName = name;
                 terminatingScope = scope;
@@ -325,10 +326,10 @@ namespace Sla.DECCORE
             else {
                 distinguishName = distinguishScope.getName();
                 Scope currentScope = scope;
-                while (currentScope != distinguishScope)
-                {   // For any scope up to the distinguishing scope
+                while (currentScope != distinguishScope) {
+                    // For any scope up to the distinguishing scope
                     depthResolution += 1;           // Print its name
-                    currentScope = currentScope.getParent();
+                    currentScope = currentScope.getParent() ?? throw new BugException();
                 }
                 depthResolution += 1;       // Also print the distinguishing scope name
                 terminatingScope = distinguishScope.getParent();
@@ -340,7 +341,7 @@ namespace Sla.DECCORE
 
         /// Encode basic Symbol properties as attributes
         /// \param encoder is the stream encoder
-        public void encodeHeader(Encoder encoder)
+        public void encodeHeader(Sla.CORE.Encoder encoder)
         {
             encoder.writeString(AttributeId.ATTRIB_NAME, name);
             encoder.writeUnsignedInteger(AttributeId.ATTRIB_ID, getId());
@@ -352,18 +353,17 @@ namespace Sla.DECCORE
                 encoder.writeBool(AttributeId.ATTRIB_READONLY, true);
             if ((flags & Varnode.varnode_flags.volatil) != 0)
                 encoder.writeBool(AttributeId.ATTRIB_VOLATILE, true);
-            if ((flags & Varnode::indirectstorage) != 0)
+            if ((flags & Varnode.varnode_flags.indirectstorage) != 0)
                 encoder.writeBool(AttributeId.ATTRIB_INDIRECTSTORAGE, true);
-            if ((flags & Varnode::hiddenretparm) != 0)
+            if ((flags & Varnode.varnode_flags.hiddenretparm) != 0)
                 encoder.writeBool(AttributeId.ATTRIB_HIDDENRETPARM, true);
-            if ((dispflags & isolate) != 0)
+            if ((dispflags & DisplayFlags.isolate) != 0)
                 encoder.writeBool(AttributeId.ATTRIB_MERGE, false);
-            if ((dispflags & is_this_ptr) != 0)
+            if ((dispflags & DisplayFlags.is_this_ptr) != 0)
                 encoder.writeBool(AttributeId.ATTRIB_THISPTR, true);
-            int format = getDisplayFormat();
-            if (format != 0)
-            {
-                encoder.writeString(AttributeId.ATTRIB_FORMAT, Datatype::decodeIntegerFormat(format));
+            DisplayFlags format = getDisplayFormat();
+            if (format != 0) {
+                encoder.writeString(AttributeId.ATTRIB_FORMAT, Datatype.decodeIntegerFormat(format));
             }
             encoder.writeSignedInteger(AttributeId.ATTRIB_CAT, category);
             if (category >= 0)
@@ -459,7 +459,7 @@ namespace Sla.DECCORE
 
         /// Encode \b this Symbol to a stream
         /// \param encoder is the stream encoder
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_SYMBOL);
             encodeHeader(encoder);

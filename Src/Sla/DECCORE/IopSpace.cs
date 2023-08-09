@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -33,38 +33,38 @@ namespace Sla.DECCORE
         public IopSpace(AddrSpaceManager m, Translate t, int ind)
             : base(m, t, spacetype.IPTR_IOP, NAME,sizeof(void*),1, ind,0,1)
         {
-            clearFlags(heritaged | does_deadcode | big_endian);
+            clearFlags(Properties.heritaged | Properties.does_deadcode | Properties.big_endian);
             if (HOST_ENDIAN == 1)       // Endianness always set to host
-                setFlags(big_endian);
+                setFlags(Properties.big_endian);
         }
 
-        public override void encodeAttributes(Encoder encoder, ulong offset)
+        public override void encodeAttributes(Sla.CORE.Encoder encoder, ulong offset)
         {
             encoder.writeString(AttributeId.ATTRIB_SPACE, "iop");
         }
 
-        public override void encodeAttributes(Encoder encoder, ulong offset, int size)
+        public override void encodeAttributes(Sla.CORE.Encoder encoder, ulong offset, int size)
         {
             encoder.writeString(AttributeId.ATTRIB_SPACE, "iop");
         }
 
         public override void printRaw(TextWriter s, ulong offset)
-        {               // Print info about op this address refers to
-            BlockBasic* bs;
-            BlockBasic* bl;
-            PcodeOp* op = (PcodeOp*)(ulong)offset; // Treat offset as op
+        {
+            // Print info about op this address refers to
+            BlockBasic bs;
+            BlockBasic bl;
+            PcodeOp op = (PcodeOp*)(ulong)offset; // Treat offset as op
 
-            if (!op.isBranch())
-            {   // op parameter for OpCode.CPUI_INDIRECT
-                s << op.getSeqNum();
+            if (!op.isBranch()) {   // op parameter for OpCode.CPUI_INDIRECT
+                s.Write(op.getSeqNum());
                 return;
             }
             bs = op.getParent();
             if (bs.sizeOut() == 2)     // We print the non-fallthru condition
-                bl = (BlockBasic*)(op.isFallthruTrue() ? bs.getOut(0) : bs.getOut(1));
+                bl = (BlockBasic)(op.isFallthruTrue() ? bs.getOut(0) : bs.getOut(1));
             else
-                bl = (BlockBasic*)bs.getOut(0);
-            s << "code_" << bl.getStart().getShortcut();
+                bl = (BlockBasic)bs.getOut(0);
+            s.Write($"code_{bl.getStart().getShortcut()}");
             bl.getStart().printRaw(s);
         }
 
@@ -73,7 +73,7 @@ namespace Sla.DECCORE
             throw new LowlevelError("Should never encode iop space to stream");
         }
 
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
             throw new LowlevelError("Should never decode iop space from stream");
         }

@@ -28,7 +28,7 @@ namespace Sla.DECCORE
             uint elemId = decoder.openElement(ElementId.ELEM_FIELD);
             ident = -1;
             offset = -1;
-            for (; ; )
+            while(true)
             {
                 uint attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;

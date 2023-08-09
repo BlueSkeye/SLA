@@ -15,6 +15,7 @@ using System.Xml;
 using System.Runtime.Intrinsics;
 
 using ScopeMap = System.Collections.Generic.Dictionary<ulong, Sla.DECCORE.Scope>;
+using static Sla.DECCORE.Varnode;
 
 namespace Sla.DECCORE
 {
@@ -220,7 +221,7 @@ namespace Sla.DECCORE
                     *addrmatch = fd;
                     return scope1;
                 }
-                if (scope1.inScope(addr, 1, Address()))
+                if (scope1.inScope(addr, 1, new Address()))
                     return scope1;      // Discovery of new variable
                 scope1 = scope1.getParent();
             }
@@ -283,7 +284,7 @@ namespace Sla.DECCORE
                     *addrmatch = sym;
                     return scope1;
                 }
-                if (scope1.inScope(addr, 1, Address()))
+                if (scope1.inScope(addr, 1, new Address()))
                     return scope1;      // Discovery of new variable
                 scope1 = scope1.getParent();
             }
@@ -343,7 +344,7 @@ namespace Sla.DECCORE
         /// \param sz is the number of bytes in the range
         /// \param uselim is the given \b usepoint (which may be \e invalid)
         /// \return the newly created SymbolEntry
-        protected abstract SymbolEntry addMapInternal(Symbol sym, uint exfl, Address addr,
+        protected abstract SymbolEntry addMapInternal(Symbol sym, varnode_flags exfl, Address addr,
             int off, int sz, RangeList uselim);
 
         /// \brief Create a new SymbolEntry for a Symbol given a dynamic hash
@@ -356,7 +357,7 @@ namespace Sla.DECCORE
         /// \param sz is the number of bytes occupied by the Varnode
         /// \param uselim is the given \b usepoint
         /// \return the newly created SymbolEntry
-        protected abstract SymbolEntry addDynamicMapInternal(Symbol sym, uint exfl, ulong hash,
+        protected abstract SymbolEntry addDynamicMapInternal(Symbol sym, varnode_flags exfl, ulong hash,
             int off, int sz, RangeList uselim);
 
         /// Integrate a SymbolEntry into the range maps
@@ -385,40 +386,38 @@ namespace Sla.DECCORE
                 }
             }
 
-            SymbolEntry* res;
+            SymbolEntry res;
             int consumeSize = entry.symbol.getBytesConsumed();
             if (entry.addr.isInvalid())
-                res = addDynamicMapInternal(entry.symbol, Varnode.varnode_flags.mapped, entry.hash, 0, consumeSize, entry.uselimit);
-            else
-            {
-                if (entry.uselimit.empty())
-                {
+                res = addDynamicMapInternal(entry.symbol, Varnode.varnode_flags.mapped, entry.hash, 0,
+                    consumeSize, entry.uselimit);
+            else {
+                if (entry.uselimit.empty()) {
                     entry.symbol.flags |= Varnode.varnode_flags.addrtied;
                     // Global properties (like readonly and volatile)
                     // can only happen if use is not limited
                     entry.symbol.flags |= glb.symboltab.getProperty(entry.addr);
                 }
-                res = addMapInternal(entry.symbol, Varnode.varnode_flags.mapped, entry.addr, 0, consumeSize, entry.uselimit);
+                res = addMapInternal(entry.symbol, varnode_flags.mapped, entry.addr, 0, consumeSize, entry.uselimit);
                 if (entry.addr.isJoin())
                 {
                     // The address is a join,  we add extra SymbolEntry maps for each of the pieces
-                    JoinRecord* rec = glb.findJoin(entry.addr.getOffset());
-                    uint exfl;
+                    JoinRecord rec = glb.findJoin(entry.addr.getOffset());
+                    varnode_flags exfl;
                     int num = rec.numPieces();
                     ulong off = 0;
                     bool bigendian = entry.addr.isBigEndian();
-                    for (int j = 0; j < num; ++j)
-                    {
+                    for (int j = 0; j < num; ++j) {
                         int i = bigendian ? j : (num - 1 - j); // Take pieces in endian order
                         VarnodeData vdat = rec.getPiece(i);
                         if (i == 0)     // i==0 is most signif
-                            exfl = Varnode.varnode_flags.precishi;
+                            exfl = varnode_flags.precishi;
                         else if (i == num - 1)
-                            exfl = Varnode.varnode_flags.precislo;
+                            exfl = varnode_flags.precislo;
                         else
                             exfl = Varnode.varnode_flags.precislo | Varnode.varnode_flags.precishi; // Middle pieces have both flags set
                                                                           // NOTE: we do not turn on the mapped flag for the pieces
-                        addMapInternal(entry.symbol, exfl, vdat.getAddr(), off, vdat.size, entry.uselimit);
+                        addMapInternal(entry.symbol, exfl, vdat.getAddr(), (int)off, (int)vdat.size, entry.uselimit);
                         off += vdat.size;
                     }
                     // Note: we fall thru here so that we return a SymbolEntry for the unified symbol
@@ -469,12 +468,12 @@ namespace Sla.DECCORE
 
         ~Scope()
         {
-            ScopeMap::iterator iter = children.begin();
-            while (iter != children.end())
-            {
-                delete(*iter).second;
-                ++iter;
-            }
+            //ScopeMap::iterator iter = children.begin();
+            //while (iter != children.end())
+            //{
+            //    // delete (*iter).second;
+            //    ++iter;
+            //}
         }
 
         /// Beginning iterator to mapped SymbolEntrys
@@ -482,12 +481,6 @@ namespace Sla.DECCORE
 
         ///// Ending iterator to mapped SymbolEntrys
         //public abstract MapIterator end();
-
-        /// Beginning iterator to dynamic SymbolEntrys
-        public abstract IEnumerator<SymbolEntry> beginDynamic();
-
-        /// Ending iterator to dynamic SymbolEntrys
-        public abstract IEnumerator<SymbolEntry> endDynamic();
 
         /// Beginning iterator to dynamic SymbolEntrys
         public abstract IEnumerator<SymbolEntry> beginDynamic();
@@ -602,7 +595,7 @@ namespace Sla.DECCORE
         /// If the name is used \b true is returned.
         /// \param nm is the given name to test
         /// \param op2 is the terminating ancestor scope (or null)
-        public abstract bool isNameUsed(string nm, Scope op2);
+        public abstract bool isNameUsed(string nm, Scope? op2);
 
         /// \brief Convert an \e external \e reference to the referenced function
         /// \param sym is the Symbol marking the external reference
@@ -616,8 +609,8 @@ namespace Sla.DECCORE
         /// \param index is a reference to an index used to make the name unique, which will be updated
         /// \param flags are boolean properties of the variable we need the name for
         /// \return the new variable name
-        public abstract string buildVariableName(Address addr, Address pc, Datatype ct, int index,
-            uint flags);
+        public abstract string buildVariableName(Address addr, Address pc, Datatype? ct, int index,
+            varnode_flags flags);
 
         /// \brief Build a formal \b undefined name, used internally when a Symbol is not given a name
         /// \return a special internal name that won't collide with other names in \b this Scope
@@ -763,8 +756,7 @@ namespace Sla.DECCORE
         /// \param usepoint is a point at which the memory range is accessed (may be \e invalid)
         /// \param flags is a reference used to pass back the boolean properties of the memory range
         /// \return the smallest SymbolEntry containing the range, or NULL
-        public SymbolEntry? queryProperties(Address addr, int size, Address usepoint,
-            out Varnode.varnode_flags flags)
+        public SymbolEntry? queryProperties(Address addr, int size, Address usepoint, out varnode_flags flags)
         {
             SymbolEntry? res = (SymbolEntry)null;
             Scope basescope = glb.symboltab.mapScope(this, addr, usepoint);
@@ -942,7 +934,7 @@ namespace Sla.DECCORE
         /// \return \b true if \b this is a sub-scope
         public bool isSubScope(Scope scp)
         {
-            Scope tmp = this;
+            Scope? tmp = this;
             do {
                 if (tmp == scp) return true;
                 tmp = tmp.parent;
@@ -989,7 +981,7 @@ namespace Sla.DECCORE
         /// If \b this is an ancestor of the other given scope, then null is returned.
         /// \param op2 is the other given Scope
         /// \return the first ancestor Scope that is not in common or null
-        public Scope findDistinguishingScope(Scope op2)
+        public Scope? findDistinguishingScope(Scope op2)
         {
             if (this == op2) return (Scope)null;    // Quickly check most common cases
             if (parent == op2) return this;
@@ -1053,7 +1045,7 @@ namespace Sla.DECCORE
         /// The new Symbol and SymbolEntry mappings are integrated into \b this Scope.
         /// \param decoder is the stream decoder
         /// \return the new Symbol
-        public Symbol addMapSym(Sla.CORE.Decoder decoder)
+        public Symbol? addMapSym(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_MAPSYM);
             uint subId = decoder.peekElement();
@@ -1079,16 +1071,15 @@ namespace Sla.DECCORE
                 sym.decode(decoder);
             }
             catch (RecovError err) {
-                delete sym;
+                // delete sym;
                 throw;
             }
             addSymbolInternal(sym); // This routine may throw, but it will delete sym in this case
             while (decoder.peekElement() != 0)
             {
-                SymbolEntry entry(sym);
+                SymbolEntry entry = new SymbolEntry(sym);
                 entry.decode(decoder);
-                if (entry.isInvalid())
-                {
+                if (entry.isInvalid()) {
                     glb.printMessage("WARNING: Throwing out symbol with invalid mapping: " + sym.getName());
                     removeSymbol(sym);
                     decoder.closeElement(elemId);
@@ -1109,20 +1100,17 @@ namespace Sla.DECCORE
         /// \return the new FunctionSymbol object
         public FunctionSymbol addFunction(Address addr, string nm)
         {
-            FunctionSymbol* sym;
+            FunctionSymbol sym;
 
-            SymbolEntry* overlap = queryContainer(addr, 1, Address());
-            if (overlap != (SymbolEntry)null)
-            {
-                string errmsg = "WARNING: Function " + name;
-                errmsg += " overlaps object: " + overlap.getSymbol().getName();
-                glb.printMessage(errmsg);
+            SymbolEntry? overlap = queryContainer(addr, 1, new Address());
+            if (overlap != (SymbolEntry)null) {
+                glb.printMessage($"WARNING: Function {name} overlaps object: {overlap.getSymbol().getName()}");
             }
             sym = new FunctionSymbol(owner, nm, glb.min_funcsymbol_size);
             addSymbolInternal(sym);
             // Map symbol to base address of function
             // there is no limit on the applicability of this map within scope
-            addMapPoint(sym, addr, Address());
+            addMapPoint(sym, addr, new Address());
             return sym;
         }
 
@@ -1136,16 +1124,14 @@ namespace Sla.DECCORE
         /// \return the new ExternRefSymbol
         public ExternRefSymbol addExternalRef(Address addr, Address refaddr, string nm)
         {
-            ExternRefSymbol* sym;
-
-            sym = new ExternRefSymbol(owner, refaddr, nm);
+            ExternRefSymbol sym = new ExternRefSymbol(owner, refaddr, nm);
             addSymbolInternal(sym);
             // Map symbol to given address
             // there is no limit on applicability of this map within scope
-            SymbolEntry* ret = addMapPoint(sym, addr, Address());
+            SymbolEntry ret = addMapPoint(sym, addr, new Address());
             // Even if the external reference is in a readonly region, treat it as not readonly
             // As the value in the image probably isn't valid
-            ret.symbol.flags &= ~((uint)Varnode.varnode_flags.@readonly);
+            ret.symbol.flags &= ~(Varnode.varnode_flags.@readonly);
             return sym;
         }
 
@@ -1157,18 +1143,17 @@ namespace Sla.DECCORE
         /// \return the new LabSymbol
         public LabSymbol addCodeLabel(Address addr, string nm)
         {
-            LabSymbol* sym;
+            LabSymbol sym;
 
-            SymbolEntry* overlap = queryContainer(addr, 1, addr);
-            if (overlap != (SymbolEntry)null)
-            {
+            SymbolEntry? overlap = queryContainer(addr, 1, addr);
+            if (overlap != (SymbolEntry)null) {
                 string errmsg = "WARNING: Codelabel " + nm;
                 errmsg += " overlaps object: " + overlap.getSymbol().getName();
                 glb.printMessage(errmsg);
             }
             sym = new LabSymbol(owner, nm);
             addSymbolInternal(sym);
-            addMapPoint(sym, addr, Address());
+            addMapPoint(sym, addr, new Address());
             return sym;
         }
 
@@ -1183,14 +1168,12 @@ namespace Sla.DECCORE
         /// \return the new Symbol
         public Symbol addDynamicSymbol(string nm, Datatype ct, Address caddr, ulong hash)
         {
-            Symbol* sym;
-
-            sym = new Symbol(owner, nm, ct);
+            Symbol sym = new Symbol(owner, nm, ct);
             addSymbolInternal(sym);
-            RangeList rnglist;
+            RangeList rnglist = new RangeList();
             if (!caddr.isInvalid())
                 rnglist.insertRange(caddr.getSpace(), caddr.getOffset(), caddr.getOffset());
-            addDynamicMapInternal(sym, Varnode.varnode_flags.mapped, hash, 0, ct.getSize(), rnglist);
+            addDynamicMapInternal(sym, varnode_flags.mapped, hash, 0, ct.getSize(), rnglist);
             return sym;
         }
 
@@ -1204,13 +1187,12 @@ namespace Sla.DECCORE
         /// \return the new EquateSymbol
         public Symbol addEquateSymbol(string nm, uint format, ulong value, Address addr, ulong hash)
         {
-            Symbol* sym;
-
-            sym = new EquateSymbol(owner, nm, format, value);
+            Symbol sym = new EquateSymbol(owner, nm, format, value);
             addSymbolInternal(sym);
-            RangeList rnglist;
-            if (!addr.isInvalid())
+            RangeList rnglist = new RangeList();
+            if (!addr.isInvalid()) {
                 rnglist.insertRange(addr.getSpace(), addr.getOffset(), addr.getOffset());
+            }
             addDynamicMapInternal(sym, Varnode.varnode_flags.mapped, hash, 0, 1, rnglist);
             return sym;
         }
@@ -1229,11 +1211,12 @@ namespace Sla.DECCORE
         public Symbol addUnionFacetSymbol(string nm, Datatype dt, int fieldNum, Address addr,
             ulong hash)
         {
-            Symbol* sym = new UnionFacetSymbol(owner, nm, dt, fieldNum);
+            Symbol sym = new UnionFacetSymbol(owner, nm, dt, fieldNum);
             addSymbolInternal(sym);
-            RangeList rnglist;
-            if (!addr.isInvalid())
+            RangeList rnglist = new RangeList();
+            if (!addr.isInvalid()) {
                 rnglist.insertRange(addr.getSpace(), addr.getOffset(), addr.getOffset());
+            }
             addDynamicMapInternal(sym, Varnode.varnode_flags.mapped, hash, 0, 1, rnglist);
             return sym;
         }
@@ -1248,37 +1231,33 @@ namespace Sla.DECCORE
         /// \return the default name
         public string buildDefaultName(Symbol sym, int @base, Varnode vn)
         {
-            if (vn != (Varnode)null && !vn.isConstant())
-            {
+            if (vn != (Varnode)null && !vn.isConstant()) {
                 Address usepoint;
                 if (!vn.isAddrTied() && fd != (Funcdata)null)
                     usepoint = vn.getUsePoint(*fd);
-                HighVariable* high = vn.getHigh();
-                if (sym.getCategory() == Symbol::function_parameter || high.isInput())
-                {
+                HighVariable high = vn.getHigh();
+                if (sym.getCategory() == Symbol.SymbolCategory.function_parameter || high.isInput()) {
                     int index = -1;
-                    if (sym.getCategory() == Symbol::function_parameter)
+                    if (sym.getCategory() == Symbol.SymbolCategory.function_parameter)
                         index = sym.getCategoryIndex() + 1;
                     return buildVariableName(vn.getAddr(), usepoint, sym.getType(), index, vn.getFlags() | Varnode.varnode_flags.input);
                 }
-                return buildVariableName(vn.getAddr(), usepoint, sym.getType(), base, vn.getFlags());
+                return buildVariableName(vn.getAddr(), usepoint, sym.getType(), @base, vn.getFlags());
             }
-            if (sym.numEntries() != 0)
-            {
-                SymbolEntry* entry = sym.getMapEntry(0);
+            if (sym.numEntries() != 0) {
+                SymbolEntry entry = sym.getMapEntry(0);
                 Address addr = entry.getAddr();
                 Address usepoint = entry.getFirstUseAddress();
-                uint flags = usepoint.isInvalid() ? Varnode.varnode_flags.addrtied : 0;
-                if (sym.getCategory() == Symbol::function_parameter)
-                {
+                varnode_flags flags = usepoint.isInvalid() ? Varnode.varnode_flags.addrtied : 0;
+                if (sym.getCategory() == Symbol.SymbolCategory.function_parameter) {
                     flags |= Varnode.varnode_flags.input;
                     int index = sym.getCategoryIndex() + 1;
                     return buildVariableName(addr, usepoint, sym.getType(), index, flags);
                 }
-                return buildVariableName(addr, usepoint, sym.getType(), base, flags);
+                return buildVariableName(addr, usepoint, sym.getType(), @base, flags);
             }
             // Should never reach here
-            return buildVariableName(Address(), Address(), sym.getType(), base, 0);
+            return buildVariableName(new Address(), new Address(), sym.getType(), @base, 0);
         }
 
         /// \brief Is the given memory range marked as \e read-only
@@ -1291,9 +1270,9 @@ namespace Sla.DECCORE
         /// \return \b true if the memory is marked as \e read-only
         public bool isReadOnly(Address addr, int size, Address usepoint)
         {
-            uint flags;
-            queryProperties(addr, size, usepoint, flags);
-            return ((flags & Varnode.varnode_flags.@readonly)!= 0);
+            varnode_flags flags;
+            queryProperties(addr, size, usepoint, out flags);
+            return ((flags & varnode_flags.@readonly)!= 0);
         }
 
         /// Print a description of \b this Scope's \e owned memory ranges

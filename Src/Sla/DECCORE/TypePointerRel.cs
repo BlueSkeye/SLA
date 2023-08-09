@@ -48,14 +48,14 @@ namespace Sla.DECCORE
         /// and the parent data-type.
         /// \param decoder is the stream decoder
         /// \param typegrp is the factory owning \b this data-type
-        protected void decode(Decoder decoder, TypeFactory typegrp)
+        protected void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
             //  uint elemId = decoder.openElement();
             flags |= is_ptrrel;
             decodeBasic(decoder);
             metatype = type_metatype.TYPE_PTR;        // Don't use type_metatype.TYPE_PTRREL internally
             decoder.rewindAttributes();
-            for (; ; )
+            while(true)
             {
                 uint attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
@@ -179,7 +179,7 @@ namespace Sla.DECCORE
 
         public override Datatype clone() => new TypePointerRel(this);
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_TYPE);
             encodeBasic(TYPE_PTRREL, encoder);  // Override the metatype for XML

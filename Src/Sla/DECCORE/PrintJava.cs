@@ -173,7 +173,7 @@ namespace Sla.DECCORE
         protected override void pushTypeStart(Datatype ct,bool noident)
         {
             int arrayCount = 0;
-            for (; ; )
+            while(true)
             {
                 if (ct.getMetatype() == type_metatype.TYPE_PTR)
                 {

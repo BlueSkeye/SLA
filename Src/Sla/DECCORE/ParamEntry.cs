@@ -559,7 +559,7 @@ namespace Sla.DECCORE
         /// \param normalstack is \b true if the parameters should be allocated from the front of the range
         /// \param grouped is \b true if \b this will be grouped with other entries
         /// \param curList is the list of ParamEntry defined up to this point
-        public void decode(Decoder decoder, bool normalstack, bool grouped, List<ParamEntry> curList)
+        public void decode(Sla.CORE.Decoder decoder, bool normalstack, bool grouped, List<ParamEntry> curList)
         {
             flags = 0;
             type = type_metatype.TYPE_UNKNOWN;
@@ -568,7 +568,7 @@ namespace Sla.DECCORE
             numslots = 1;
 
             uint elemId = decoder.openElement(ElementId.ELEM_PENTRY);
-            for (; ; )
+            while(true)
             {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;

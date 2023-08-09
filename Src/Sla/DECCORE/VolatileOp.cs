@@ -42,7 +42,7 @@ namespace Sla.DECCORE
         }
 
         /// Currently volatile ops only need their name
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
         }
     }

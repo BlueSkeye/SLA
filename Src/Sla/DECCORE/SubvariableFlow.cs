@@ -1467,7 +1467,7 @@ namespace Sla.DECCORE
             // Clear marks
             Dictionary<Varnode*, ReplaceVarnode>::iterator iter;
             for (iter = varmap.begin(); iter != varmap.end(); ++iter)
-                (*iter).first.clearMark();
+                iter.Current.Key.clearMark();
 
             if (!retval) return false;
             if (pullcount == 0) return false;

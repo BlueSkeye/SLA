@@ -188,7 +188,7 @@ namespace Sla.DECCORE
         /// \param typestack will hold the sub-types involved in the displaying the declaration
         protected void buildTypeStack(Datatype ct, List<Datatype> typestack)
         {
-            for (; ; ) {
+            while(true) {
                 typestack.Add(ct);
                 if (ct.getName().Length != 0)  // This can be a base type
                     break;
@@ -367,7 +367,7 @@ namespace Sla.DECCORE
             pushMod();
             setMod(force_dec);
 
-            for (; ; ) {
+            while(true) {
                 if (ct.getName().Length != 0)  // This is the base type
                     break;
                 if (ct.getMetatype() == type_metatype.TYPE_PTR)
@@ -426,7 +426,7 @@ namespace Sla.DECCORE
                 HighVariable high = vn.getHigh();
                 Symbol sym = high.getSymbol();
                 if (sym != (Symbol)null) {
-                    if (sym.isNameLocked() && (sym.getCategory() == Symbol::equate)) {
+                    if (sym.isNameLocked() && (sym.getCategory() == Symbol.SymbolCategory.equate)) {
                         if (pushEquate(val, vn.getSize(), (EquateSymbol)sym, vn, op))
                             return;
                     }
@@ -723,7 +723,7 @@ namespace Sla.DECCORE
                 emit.spaces(1);
                 emit.print(EQUALSIGN, EmitMarkup.syntax_highlight.no_color);
                 emit.spaces(1);
-                push_integer((*iter).first, ct.getSize(), sign, (Varnode)null, (PcodeOp)null);
+                push_integer(iter.Current.Key, ct.getSize(), sign, (Varnode)null, (PcodeOp)null);
                 recurse();
                 emit.print(SEMICOLON);
                 ++iter;
@@ -1332,7 +1332,7 @@ namespace Sla.DECCORE
                 HighVariable high = vn.getHigh();
                 Symbol sym = high.getSymbol();
                 if (sym != (Symbol)null) {
-                    if (sym.isNameLocked() && (sym.getCategory() == Symbol::equate)) {
+                    if (sym.isNameLocked() && (sym.getCategory() == Symbol.SymbolCategory.equate)) {
                         if (pushEquate(val, vn.getSize(), (EquateSymbol)sym, vn, op))
                             return;
                     }
@@ -1684,7 +1684,7 @@ namespace Sla.DECCORE
                 HighVariable high = vn.getHigh();
                 Symbol? sym = high.getSymbol();
                 if (sym != (Symbol)null) {
-                    if (sym.isNameLocked() && (sym.getCategory() == Symbol::equate)) {
+                    if (sym.isNameLocked() && (sym.getCategory() == Symbol.SymbolCategory.equate)) {
                         if (pushEquate(val, sz, (EquateSymbol)sym, vn, op))
                             return;
                     }

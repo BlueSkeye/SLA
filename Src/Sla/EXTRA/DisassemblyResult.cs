@@ -11,7 +11,7 @@ namespace Sla.EXTRA
     {
         internal bool success;
         internal int length;
-        internal uint flags;
+        internal CodeUnit.Flags flags;
         internal Address jumpaddress;
         internal ulong targethit;
     }

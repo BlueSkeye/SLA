@@ -246,7 +246,7 @@ namespace Sla.DECCORE
                 else
                 {
                     pathout = -1;       // Make sure not to use pathout next time around
-                    for (; ; )
+                    while(true)
                     {
                         if (bl.sizeIn() != 1)
                         {

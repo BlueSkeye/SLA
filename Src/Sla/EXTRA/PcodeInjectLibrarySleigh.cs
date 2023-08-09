@@ -146,7 +146,7 @@ namespace Sla.EXTRA
         public override void decodeDebug(Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_INJECTDEBUG);
-            for (; ; )
+            while(true)
             {
                 uint subId = decoder.openElement();
                 if (subId != ELEM_INJECT) break;

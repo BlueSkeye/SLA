@@ -133,16 +133,15 @@ namespace Sla.DECCORE
                 if (outResolve < 0) return false;
             }
 
-            TypeFactory* typegrp = data.getArch().types;
+            TypeFactory typegrp = data.getArch().types;
             if (inType.needsResolution())
             {
-                ResolvedUnion resolve(inType, inResolve,* typegrp);
+                ResolvedUnion resolve = new ResolvedUnion(inType, inResolve,* typegrp);
                 if (!data.setUnionField(inType, op, slot, resolve))
                     return false;
             }
-            if (outType.needsResolution())
-            {
-                ResolvedUnion resolve(outType, outResolve,* typegrp);
+            if (outType.needsResolution()) {
+                ResolvedUnion resolve = new ResolvedUnion(outType, outResolve,* typegrp);
                 if (!data.setUnionField(outType, op, -1, resolve))
                     return false;
             }
@@ -237,13 +236,13 @@ namespace Sla.DECCORE
                 if (tokenct.needsResolution())
                 {
                     // operation copies directly to outvn AS a union
-                    ResolvedUnion resolve(tokenct); // Force the varnode to resolve to the parent data-type
+                    ResolvedUnion resolve = new ResolvedUnion(tokenct); // Force the varnode to resolve to the parent data-type
                     data.setUnionField(tokenct, op, -1, resolve);
                 }
                 // Short circuit more sophisticated casting tests.  If they are the same type, there is no cast
                 return 0;
             }
-            Datatype* outHighResolve = outHighType;
+            Datatype outHighResolve = outHighType;
             if (outHighType.needsResolution())
             {
                 if (outHighType != outvn.getType())
@@ -318,13 +317,11 @@ namespace Sla.DECCORE
         /// \return 1 if a change is made, 0 otherwise
         private static int castInput(PcodeOp op, int slot, Funcdata data, CastStrategy castStrategy)
         {
-            Datatype* ct;
-            Varnode* vn,*vnout;
-            PcodeOp* newop;
+            Varnode vn, vnout;
+            PcodeOp newop;
 
-            ct = op.getOpcode().getInputCast(op, slot, castStrategy); // Input type expected by this operation
-            if (ct == (Datatype)null)
-            {
+            Datatype? ct = op.getOpcode().getInputCast(op, slot, castStrategy); // Input type expected by this operation
+            if (ct == (Datatype)null) {
                 bool resUnsigned = castStrategy.markExplicitUnsigned(op, slot);
                 bool resSized = castStrategy.markExplicitLongSize(op, slot);
                 if (resUnsigned || resSized)

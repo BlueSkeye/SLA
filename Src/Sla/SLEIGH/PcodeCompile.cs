@@ -543,7 +543,7 @@ namespace Sla.SLEIGH
             if ((var.getOffset().getType() == ConstTpl.const_type.real) && (var.getSpace().getType() == ConstTpl.const_type.spaceid))
             {
                 AddrSpace* spc = var.getSpace().getSpace();
-                ulong off = AddrSpace::byteToAddress(var.getOffset().getReal(), spc.getWordSize());
+                ulong off = AddrSpace.byteToAddress(var.getOffset().getReal(), spc.getWordSize());
                 res = new VarnodeTpl(ConstTpl(constantspace),
                           ConstTpl(ConstTpl.const_type.real, off),
                           ConstTpl(ConstTpl.const_type.real, size));

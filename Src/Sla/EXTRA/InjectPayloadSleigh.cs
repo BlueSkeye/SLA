@@ -68,7 +68,7 @@ namespace Sla.EXTRA
             con.cacher.emit(con.baseaddr, emit);
         }
 
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
             // Restore a raw <pcode> tag.  Used for uponentry, uponreturn
             uint elemId = decoder.openElement(ElementId.ELEM_PCODE);

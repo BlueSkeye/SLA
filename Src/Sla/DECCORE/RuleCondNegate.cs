@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Sla.DECCORE
         {
         }
 
-        public override Rule clone(ActionGroupList grouplist)
+        public override Rule? clone(ActionGroupList grouplist)
         {
             if (!grouplist.contains(getGroup())) return (Rule)null;
             return new RuleCondNegate(getGroup());
@@ -31,13 +31,13 @@ namespace Sla.DECCORE
         /// This Rule introduces a BOOL_NEGATE op as necessary to get the meanings to align.
         public override void getOpList(List<OpCode> oplist)
         {
-            oplist.Add(CPUI_CBRANCH);
+            oplist.Add(OpCode.CPUI_CBRANCH);
         }
 
         public override int applyOp(PcodeOp op, Funcdata data)
         {
-            PcodeOp* newop;
-            Varnode* vn,*outvn;
+            PcodeOp newop;
+            Varnode vn, outvn;
 
             if (!op.isBooleanFlip()) return 0;
 

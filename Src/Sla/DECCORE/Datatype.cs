@@ -58,7 +58,7 @@ namespace Sla.DECCORE
         /// Sub-type of of the meta-type, for comparisons
         internal sub_metatype submeta;
         /// The immediate data-type being typedefed by \e this
-        internal Datatype typedefImm;
+        internal Datatype? typedefImm;
 
         /// Recover basic data-type properties
         /// Restore the basic properties (name,size,id) of a data-type from an XML element
@@ -296,7 +296,8 @@ namespace Sla.DECCORE
         public bool isPointerRel() => ((flags & Properties.is_ptrrel)!= 0);
 
         /// Is \b this a non-ephemeral TypePointerRel
-        public bool isFormalPointerRel() => (flags & (Properties.is_ptrrel | Properties.has_stripped))== Properties.is_ptrrel;
+        public bool isFormalPointerRel()
+            => (flags & (Properties.is_ptrrel | Properties.has_stripped)) == Properties.is_ptrrel;
 
         /// Return \b true if \b this has a stripped form
         public bool hasStripped() => (flags & Properties.has_stripped)!= 0;
@@ -319,7 +320,8 @@ namespace Sla.DECCORE
         ///   - 4 for binary
         ///   - 5 for char
         ///
-        public Symbol.DisplayFlags getDisplayFormat() => (flags & Properties.force_format) >> 12;
+        public Symbol.DisplayFlags getDisplayFormat()
+            => (Symbol.DisplayFlags)((uint)(flags & Properties.force_format) >> 12);
 
         /// Get the type \b meta-type
         public type_metatype getMetatype() => metatype;
@@ -405,7 +407,7 @@ namespace Sla.DECCORE
         /// \param newoff is used to pass back the offset difference
         /// \param elSize is used to pass back the array element size
         /// \return the component data-type or null
-        public virtual Datatype nearestArrayedComponentBackward(ulong off, ulong newoff, int elSize)
+        public virtual Datatype? nearestArrayedComponentBackward(ulong off, ulong newoff, int elSize)
         {
             return (TypeArray)null;
         }
@@ -417,7 +419,7 @@ namespace Sla.DECCORE
         public virtual int numDepend() => 0;
 
         /// Return the i-th component sub-type
-        public virtual Datatype getDepend(int index) => (Datatype)null;
+        public virtual Datatype? getDepend(int index) => (Datatype)null;
 
         /// Print name as short prefix
         public virtual void printNameBase(TextWriter s) 
@@ -458,7 +460,7 @@ namespace Sla.DECCORE
         /// For composite data-types, the description goes down one level, describing
         /// the component types only by reference.
         /// \param encoder is the stream encoder
-        public virtual void encode(Encoder encoder)
+        public virtual void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_TYPE);
             encodeBasic(metatype, encoder);
@@ -534,7 +536,7 @@ namespace Sla.DECCORE
         /// Order this with -op- datatype
         public int typeOrder(Datatype op)
         {
-            if (this==&op) return 0;
+            if (this == op) return 0;
             return compare(op, 10);
         }
 
@@ -547,7 +549,7 @@ namespace Sla.DECCORE
         /// \return -1, 0, or 1
         public int typeOrderBool(Datatype op)
         {
-            if (this == &op) return 0;
+            if (this == op) return 0;
             if (metatype == type_metatype.TYPE_BOOL) return 1;        // Never prefer bool over other data-types
             if (op.metatype == type_metatype.TYPE_BOOL) return -1;
             return compare(op, 10);
@@ -619,17 +621,17 @@ namespace Sla.DECCORE
         /// Possible encoded values are 1-5 corresponding to "hex", "dec", "oct", "bin", "char"
         /// \param val is the value to decode
         /// \return the decoded string
-        public static string decodeIntegerFormat(uint val)
+        public static string decodeIntegerFormat(Symbol.DisplayFlags val)
         {
-            if (val == 1)
+            if (val == Symbol.DisplayFlags.force_hex)
                 return "hex";
-            else if (val == 2)
+            else if (val == Symbol.DisplayFlags.force_dec)
                 return "dec";
-            else if (val == 3)
+            else if (val == Symbol.DisplayFlags.force_oct)
                 return "oct";
-            else if (val == 4)
+            else if (val == Symbol.DisplayFlags.force_bin)
                 return "bin";
-            else if (val == 5)
+            else if (val == Symbol.DisplayFlags.force_char)
                 return "char";
             throw new LowlevelError("Unrecognized integer format encoding");
         }

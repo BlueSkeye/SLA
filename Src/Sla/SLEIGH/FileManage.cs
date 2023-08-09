@@ -333,7 +333,7 @@ namespace Sla.SLEIGH
             int skiplevel = 0;
             bool isAbs = isAbsolutePath(cur);
 
-            for (; ; )
+            while(true)
             {
                 int sizebefore = cur.size();
                 splitPath(cur, cur, base);
@@ -352,7 +352,7 @@ namespace Sla.SLEIGH
                 FileManage curdir;
                 curdir.addCurrentDir();
                 cur = curdir.pathlist[0];
-                for (; ; )
+                while(true)
                 {
                     int sizebefore = cur.size();
                     splitPath(cur, cur, base);

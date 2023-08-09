@@ -162,7 +162,7 @@ namespace Sla.DECCORE
             glb = g;
             input = (ParamList*)0;
             output = (ParamList*)0;
-            compatModel = (ProtoModel*)0;
+            compatModel = (ProtoModel)null;
             extrapop = 0;
             injectUponEntry = -1;
             injectUponReturn = -1;
@@ -584,7 +584,7 @@ namespace Sla.DECCORE
             injectUponReturn = -1;
             likelytrash.Clear();
             uint elemId = decoder.openElement(ElementId.ELEM_PROTOTYPE);
-            for (; ; )
+            while(true)
             {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
@@ -614,7 +614,7 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Missing prototype attributes");
 
             buildParamList(strategystring); // Allocate input and output ParamLists
-            for (; ; )
+            while(true)
             {
                 uint subId = decoder.peekElement();
                 if (subId == 0) break;
@@ -633,7 +633,7 @@ namespace Sla.DECCORE
                     decoder.openElement();
                     while (decoder.peekElement() != 0) {
                         effectlist.emplace_back();
-                        effectlist.GetLastItem().decode(EffectRecord::unaffected, decoder);
+                        effectlist.GetLastItem().decode(EffectRecord.EffectType.unaffected, decoder);
                     }
                     decoder.closeElement(subId);
                 }
@@ -650,7 +650,7 @@ namespace Sla.DECCORE
                     decoder.openElement();
                     while (decoder.peekElement() != 0) {
                         effectlist.emplace_back();
-                        effectlist.GetLastItem().decode(EffectRecord::return_address, decoder);
+                        effectlist.GetLastItem().decode(EffectRecord.EffectType.return_address, decoder);
                     }
                     decoder.closeElement(subId);
                     sawretaddr = true;
@@ -697,7 +697,7 @@ namespace Sla.DECCORE
             decoder.closeElement(elemId);
             if (!sawretaddr && (glb.defaultReturnAddr.space != (AddrSpace)null)) {
                 // Provide the default return address, if there isn't a specific one for the model
-                effectlist.Add(new EffectRecord(glb.defaultReturnAddr, EffectRecord::return_address));
+                effectlist.Add(new EffectRecord(glb.defaultReturnAddr, EffectRecord.EffectType.return_address));
             }
             effectlist.Sort(EffectRecord::compareByAddress);
             likelytrash.Sort();
@@ -717,7 +717,7 @@ namespace Sla.DECCORE
         public static uint lookupEffect(List<EffectRecord> efflist, Address addr, int size)
         {
             // Unique is always local to function
-            if (addr.getSpace().getType() == spacetype.IPTR_INTERNAL) return EffectRecord::unaffected;
+            if (addr.getSpace().getType() == spacetype.IPTR_INTERNAL) return EffectRecord.EffectType.unaffected;
 
             EffectRecord cur(addr, size);
 
@@ -731,7 +731,7 @@ namespace Sla.DECCORE
             Address hit = (*iter).getAddress();
             int sz = (*iter).getSize();
             if (sz == 0 && (hit.getSpace() == addr.getSpace())) // A size of zero indicates the whole space is unaffected
-                return EffectRecord::unaffected;
+                return EffectRecord.EffectType.unaffected;
             int where = addr.overlap(0, hit, sz);
             if ((where >= 0) && (where + size <= sz))
                 return (*iter).getType();

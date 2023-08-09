@@ -68,7 +68,7 @@ namespace Sla.DECCORE
         {
             if (offset + size > ct.getSize()) return false;
             ulong newOff = offset;
-            for (; ; )
+            while(true)
             {
                 ct = ct.getSubType(newOff, &newOff);
                 if (ct == (Datatype)null) return true;    // Don't know what it spans, assume multiple
@@ -210,7 +210,7 @@ namespace Sla.DECCORE
             }
 
             List<PieceNode> stack;
-            for (; ; )
+            while(true)
             {
                 PieceNode::gatherPieces(stack, outvn, op, baseOffset);
                 if (!findReplaceZext(stack, ct, data))  // Check for INT_ZEXT leaves that need to be converted to PIECEs

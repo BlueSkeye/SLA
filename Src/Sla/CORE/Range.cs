@@ -35,7 +35,7 @@ namespace Sla.CORE
         }
 
         /// Construct range out of basic properties
-        public Range(ref RangeProperties properties, AddrSpaceManager manage)
+        public Range(RangeProperties properties, AddrSpaceManager manage)
         {
             if (properties.isRegister) {
                 Translate trans = manage.getDefaultCodeSpace().getTrans();
@@ -152,7 +152,7 @@ namespace Sla.CORE
         ///< Print \b this Range to a stream
         /// Output a description of this Range like:  ram: 7f-9c
         /// \param s is the output stream
-        public void printBounds(StreamWriter s)
+        public void printBounds(TextWriter s)
         {
             s.Write($"{spc.getName()}: {first:X}-{last:X}");
         }
@@ -160,7 +160,7 @@ namespace Sla.CORE
         ///< Encode \b this Range to a stream
         /// Encode \b this to a stream as a \<range> element.
         /// \param encoder is the stream encoder
-        public void encode(Encoder encoder)
+        public void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_RANGE);
             encoder.writeSpace(AttributeId.ATTRIB_SPACE, spc);
@@ -172,7 +172,7 @@ namespace Sla.CORE
         ///< Restore \b this from a stream
         /// Reconstruct this object from a \<range> or \<register> element
         /// \param decoder is the stream decoder
-        public void decode(Decoder decoder)
+        public void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement();
             if ((elemId != ElementId.ELEM_RANGE) && (elemId != ElementId.ELEM_REGISTER)) {
@@ -191,7 +191,7 @@ namespace Sla.CORE
             bool seenLast = false;
             first = 0;
             last = 0;
-            for (; ; ) {
+            while(true) {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) {
                     break;

@@ -86,7 +86,7 @@ namespace Sla.CORE
 
         public override int GetHashCode()
         {
-            return @base.GetHashCode();
+            return base.GetHashCode();
         }
 
         /// Get the location of the varnode as an address
@@ -110,7 +110,7 @@ namespace Sla.CORE
         /// Recover this object from a stream
         /// Build this VarnodeData from an \<addr>, \<register>, or \<varnode> element.
         /// \param decoder is the stream decoder
-        public static VarnodeData decode(Decoder decoder)
+        public static VarnodeData decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement();
             VarnodeData result = VarnodeData.decodeFromAttributes(decoder);

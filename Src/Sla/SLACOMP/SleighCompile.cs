@@ -371,7 +371,7 @@ namespace Sla.SLACOMP
             int collisionCount = 0;
             SubtableSymbol* sym = root; // Start with the instruction table
             int i = -1;
-            for (; ; )
+            while(true)
             {
                 int numconst = sym.getNumConstructors();
                 for (int j = 0; j < numconst; ++j)
@@ -574,7 +574,7 @@ namespace Sla.SLACOMP
             int i = -1;
             string sectionstring = "   Main section: ";
             int max = vec.getMaxId();
-            for (; ; )
+            while(true)
             {
                 string errstring;
 
@@ -802,7 +802,7 @@ namespace Sla.SLACOMP
             int secsize = sections.size(); // This is the upper bound for section numbers
             SubtableSymbol* sym = root; // Start with the instruction table
             int i = -1;
-            for (; ; )
+            while(true)
             {
                 int numconst = sym.getNumConstructors();
                 for (int j = 0; j < numconst; ++j)
@@ -2025,7 +2025,7 @@ namespace Sla.SLACOMP
             Dictionary<string, string>::const_iterator iter = defines.begin();
             for (iter = defines.begin(); iter != defines.end(); iter++)
             {
-                setPreprocValue((*iter).first, (*iter).second);
+                setPreprocValue(iter.Current.Key, (*iter).second);
             }
             setUnnecessaryPcodeWarning(unnecessaryPcodeWarning);
             setLenientConflict(lenientConflict);

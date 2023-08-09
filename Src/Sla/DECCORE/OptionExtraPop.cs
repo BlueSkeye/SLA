@@ -50,9 +50,9 @@ namespace Sla.DECCORE
             else
             {
                 glb.defaultfp.setExtraPop(expop);
-                if (glb.evalfp_current != (ProtoModel*)0)
+                if (glb.evalfp_current != (ProtoModel)null)
                     glb.evalfp_current.setExtraPop(expop);
-                if (glb.evalfp_called != (ProtoModel*)0)
+                if (glb.evalfp_called != (ProtoModel)null)
                     glb.evalfp_called.setExtraPop(expop);
                 res = "Global extrapop set";
             }

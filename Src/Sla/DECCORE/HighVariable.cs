@@ -59,15 +59,15 @@ namespace Sla.DECCORE
         // friend class VariablePiece;
         // friend class HighIntersectTest;
         /// The member Varnode objects making up \b this HighVariable
-        private List<Varnode> inst;
+        private List<Varnode> inst = new List<Varnode>();
         /// Number of different speculative merge classes in \b this
         private int numMergeClasses;
         /// Dirtiness flags
-        private /*mutable*/ uint highflags;
+        private /*mutable*/ DirtinessFlags highflags;
         /// Boolean properties inherited from Varnode members
         private /*mutable*/ Varnode.varnode_flags flags;
         /// The data-type for \b this
-        private /*mutable*/ Datatype type;
+        private /*mutable*/ Datatype? type;
         /// The storage location used to generate a Symbol name
         private /*mutable*/ Varnode nameRepresentative;
         /// The ranges of code addresses covered by this HighVariable
@@ -75,7 +75,7 @@ namespace Sla.DECCORE
         /// Additional info about intersections with other pieces (if non-null)
         internal /*mutable*/ VariablePiece? piece;
         /// The Symbol \b this HighVariable is tied to
-        private /*mutable*/ Symbol symbol;
+        private /*mutable*/ Symbol? symbol;
         /// -1=perfect symbol match >=0, offset
         private /*mutable*/ int symboloffset;
 
@@ -85,11 +85,8 @@ namespace Sla.DECCORE
         /// \return the index of the member or -1 if it is not a member
         private int instanceIndex(Varnode vn)
         {
-            int i;
-
-            for (i = 0; i < inst.size(); ++i)
+            for (int i = 0; i < inst.size(); ++i)
                 if (inst[i] == vn) return i;
-
             return -1;
         }
 
@@ -306,22 +303,19 @@ namespace Sla.DECCORE
         {
             if (tv2 == this) return;
 
-            if (testCache != (HighIntersectTest*)0)
+            if (testCache != (HighIntersectTest)null)
                 testCache.moveIntersectTests(this, tv2);
-            if (piece == (VariablePiece)null && tv2.piece == (VariablePiece)null)
-            {
+            if (piece == (VariablePiece)null && tv2.piece == (VariablePiece)null) {
                 mergeInternal(tv2, isspeculative);
                 return;
             }
-            if (tv2.piece == (VariablePiece)null)
-            {
+            if (tv2.piece == (VariablePiece)null) {
                 // Keep group that this is already in
                 piece.markExtendCoverDirty();
                 mergeInternal(tv2, isspeculative);
                 return;
             }
-            if (piece == (VariablePiece)null)
-            {
+            if (piece == (VariablePiece)null) {
                 // Move ownership of the VariablePiece object from the HighVariable that will be freed
                 transferPiece(tv2);
                 piece.markExtendCoverDirty();
@@ -331,13 +325,13 @@ namespace Sla.DECCORE
             // Reaching here both HighVariables are part of a group
             if (isspeculative)
                 throw new LowlevelError("Trying speculatively merge variables in separate groups");
-            List<HighVariable*> mergePairs;
+            List<HighVariable> mergePairs = new List<HighVariable>();
             piece.mergeGroups(tv2.piece, mergePairs);
             for (int i = 0; i < mergePairs.size(); i += 2)
             {
-                HighVariable* high1 = mergePairs[i];
-                HighVariable* high2 = mergePairs[i + 1];
-                if (testCache != (HighIntersectTest*)0)
+                HighVariable high1 = mergePairs[i];
+                HighVariable high2 = mergePairs[i + 1];
+                if (testCache != (HighIntersectTest)null)
                     testCache.moveIntersectTests(high1, high2);
                 high1.mergeInternal(high2, isspeculative);
             }
@@ -346,27 +340,22 @@ namespace Sla.DECCORE
 
         /// Update Symbol information for \b this from the given member Varnode
         /// The given Varnode \b must be a member and \b must have a non-null SymbolEntry
-        private void setSymbol(Varnode vn)
+        internal void setSymbol(Varnode vn)
         {
-            SymbolEntry* entry = vn.getSymbolEntry();
-            if (symbol != (Symbol)null && symbol != entry.getSymbol())
-            {
-                if ((highflags & HighVariable.DirtinessFlags.symboldirty) == 0)
-                {
-                    ostringstream s;
-                    s << "Symbols \"" << symbol.getName() << "\" and \"" << entry.getSymbol().getName();
-                    s << "\" assigned to the same variable";
-                    throw new LowlevelError(s.str());
+            SymbolEntry entry = vn.getSymbolEntry();
+            if (symbol != (Symbol)null && symbol != entry.getSymbol()) {
+                if ((highflags & HighVariable.DirtinessFlags.symboldirty) == 0) {
+                    throw new LowlevelError(
+                        $"Symbols \"{symbol.getName()}\" and \"{entry.getSymbol().getName()}\" assigned to the same variable");
                 }
             }
             symbol = entry.getSymbol();
-            if (vn.isProtoPartial() && piece != (VariablePiece)null)
-            {
+            if (vn.isProtoPartial() && piece != (VariablePiece)null) {
                 symboloffset = piece.getOffset() + piece.getGroup().getSymbolOffset();
             }
             else if (entry.isDynamic())    // Dynamic symbols (that aren't partials) match whole variable
                 symboloffset = -1;
-            else if (symbol.getCategory() == Symbol::equate)
+            else if (symbol.getCategory() == Symbol.SymbolCategory.equate)
                 symboloffset = -1;          // For equates, we don't care about size
             else if (symbol.getType().getSize() == vn.getSize() &&
                 entry.getAddr() == vn.getAddr() && !entry.isPiece())
@@ -388,11 +377,11 @@ namespace Sla.DECCORE
         /// the actual value of the Symbol.
         /// \param sym is the given Symbol to attach
         /// \param off is the byte offset into the Symbol of the reference
-        private void setSymbolReference(Symbol sym, int off)
+        internal void setSymbolReference(Symbol sym, int off)
         {
             symbol = sym;
             symboloffset = off;
-            highflags &= ~((uint)symboldirty);
+            highflags &= ~(DirtinessFlags.symboldirty);
         }
 
         /// Transfer ownership of another's VariablePiece to \b this
@@ -424,19 +413,19 @@ namespace Sla.DECCORE
         /// Mark the data-type as \e dirty
         private void typeDirty()
         {
-            highflags |= HighVariable.DirtinessFlags.typedirty;
+            highflags |= DirtinessFlags.typedirty;
         }
 
         /// Mark the symbol as \e dirty
-        private void symbolDirty()
+        internal void symbolDirty()
         {
-            highflags |= HighVariable.DirtinessFlags.symboldirty;
+            highflags |= DirtinessFlags.symboldirty;
         }
 
         /// Mark \b this as having merge problems
         private void setUnmerged() 
         {
-            highflags |= HighVariable.DirtinessFlags.unmerged;
+            highflags |= DirtinessFlags.unmerged;
         }
 
         /// Is the cover returned by getCover() up-to-date
@@ -444,7 +433,7 @@ namespace Sla.DECCORE
         /// \return \b true if the cover needs to be recomputed.
         private bool isCoverDirty()
         {
-            return ((highflags & (Varnode.varnode_flags.coverdirty | HighVariable.DirtinessFlags.extendcoverdirty)) != 0);
+            return ((highflags & (DirtinessFlags.coverdirty | DirtinessFlags.extendcoverdirty)) != 0);
         }
 
         /// Construct a HighVariable with a single member Varnode
@@ -453,7 +442,8 @@ namespace Sla.DECCORE
         public HighVariable(Varnode vn)
         {
             numMergeClasses = 1;
-            highflags = HighVariable.DirtinessFlags.flagsdirty | HighVariable.DirtinessFlags.namerepdirty | HighVariable.DirtinessFlags.typedirty | HighVariable.DirtinessFlags.coverdirty;
+            highflags = DirtinessFlags.flagsdirty | DirtinessFlags.namerepdirty | DirtinessFlags.typedirty
+                | DirtinessFlags.coverdirty;
             flags = 0;
             type = (Datatype)null;
             piece = (VariablePiece)null;
@@ -486,7 +476,7 @@ namespace Sla.DECCORE
         public Cover getCover() => (piece == (VariablePiece)null) ? internalCover : piece.getCover();
 
         /// Get the Symbol associated with \b this or null
-        public Symbol getSymbol() 
+        public Symbol? getSymbol() 
         {
             updateSymbol();
             return symbol;
@@ -872,7 +862,7 @@ namespace Sla.DECCORE
 
         /// Encode \b this variable to stream as a \<high> element
         /// \param encoder is the stream encoder
-        public void encode(Encoder encoder)
+        public void encode(Sla.CORE.Encoder encoder)
         {
             Varnode vn = getNameRepresentative(); // Get representative varnode
             encoder.openElement(ElementId.ELEM_HIGH);
@@ -885,7 +875,7 @@ namespace Sla.DECCORE
                 encoder.writeString(AttributeId.ATTRIB_CLASS, "constant");
             else if (!isPersist() && (symbol != (Symbol)null))
             {
-                if (symbol.getCategory() == Symbol::function_parameter)
+                if (symbol.getCategory() == Symbol.SymbolCategory.function_parameter)
                     encoder.writeString(AttributeId.ATTRIB_CLASS, "param");
                 else if (symbol.getScope().isGlobal())
                     encoder.writeString(AttributeId.ATTRIB_CLASS, "global");

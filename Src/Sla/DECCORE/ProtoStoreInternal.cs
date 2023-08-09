@@ -125,7 +125,7 @@ namespace Sla.DECCORE
             return res;
         }
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_INTERNALLIST);
             if (outparam != (ProtoParameter)null)
@@ -170,7 +170,7 @@ namespace Sla.DECCORE
             encoder.closeElement(ElementId.ELEM_INTERNALLIST);
         }
 
-        public override void decode(Decoder decoder, ProtoModel model)
+        public override void decode(Sla.CORE.Decoder decoder, ProtoModel model)
         {
             Architecture* glb = model.getArch();
             List<ParameterPieces> pieces;
@@ -189,13 +189,13 @@ namespace Sla.DECCORE
                 addressesdetermined = false;
 
             uint elemId = decoder.openElement(ElementId.ELEM_INTERNALLIST);
-            for (; ; )
+            while(true)
             { // This is only the input params
                 uint subId = decoder.openElement();        // <retparam> or <param>
                 if (subId == 0) break;
                 string name;
                 uint flags = 0;
-                for (; ; )
+                while(true)
                 {
                     uint attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;

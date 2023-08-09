@@ -35,8 +35,8 @@ namespace Sla.DECCORE
                 { // If we don't have a void type
                     OutputParamMeasures.Add(ParamMeasure(outparam.getAddress(), outparam.getSize(),
                                          outparam.getType(), ParamMeasure::OUTPUT));
-                    list<PcodeOp*>::const_iterator rtn_iter = fd.beginOp(CPUI_RETURN);
-                    while (rtn_iter != fd.endOp(CPUI_RETURN))
+                    list<PcodeOp*>::const_iterator rtn_iter = fd.beginOp(OpCode.CPUI_RETURN);
+                    while (rtn_iter != fd.endOp(OpCode.CPUI_RETURN))
                     {
                         PcodeOp* rtn_op = *rtn_iter;
                         // For RETURN op, input0 is address location of indirect return, input1,
@@ -71,7 +71,7 @@ namespace Sla.DECCORE
             }
         }
 
-        public void encode(Encoder encoder, bool moredetail)
+        public void encode(Sla.CORE.Encoder encoder, bool moredetail)
         {
             encoder.openElement(ElementId.ELEM_PARAMMEASURES);
             encoder.writeString(AttributeId.ATTRIB_NAME, fd.getName());

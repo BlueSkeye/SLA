@@ -15,9 +15,9 @@ namespace Sla.DECCORE
         {
             /// Parameter is "this" pointer
             isthis = 1,
-            /// Parameter is hidden pointer to return value, mirrors Varnode::hiddenretparm
+            /// Parameter is hidden pointer to return value, mirrors Varnode.varnode_flags.hiddenretparm
             hiddenretparm = 2,
-            /// Parameter is indirect pointer to true parameter, mirrors Varnode::indirectstorage
+            /// Parameter is indirect pointer to true parameter, mirrors Varnode.varnode_flags.indirectstorage
             indirectstorage = 4,
             /// Parameter's name is locked, mirrors Varnode.varnode_flags.namelock
             namelock = 8,

@@ -19,7 +19,7 @@ namespace Sla.CORE
         private Element rootel;          ///< The root XML element
         private string archtype;                ///< The architecture string
         private AddrSpaceManager manage;     ///< Manager of addresses
-        private set<Address> readonlyset;           ///< Starting address of read-only chunks
+        private HashSet<Address> readonlyset = new HashSet<Address>(); ///< Starting address of read-only chunks
         private Dictionary<Address, List<byte>> chunk;      ///< Chunks of image data, mapped by address
         private Dictionary<Address, string> addrtosymbol;      ///< Symbols sorted by address
         /// Current symbol being reported. Reset to null pointer when enumeration end is reached.
@@ -37,10 +37,10 @@ namespace Sla.CORE
             ++iter;
             while (iter != chunk.end())
             {
-                if ((*lastiter).first.getSpace() == (*iter).first.getSpace())
+                if ((*lastiter).first.getSpace() == iter.Current.Key.getSpace())
                 {
                     ulong end1 = (*lastiter).first.getOffset() + (*lastiter).second.size() - 1;
-                    ulong end2 = (*iter).first.getOffset() + (*iter).second.size() - 1;
+                    ulong end2 = iter.Current.Key.getOffset() + (*iter).second.size() - 1;
                     if (end1 >= end2)
                     {
                         chunk.erase(iter);
@@ -56,8 +56,8 @@ namespace Sla.CORE
             iter = chunk.begin();
             while (iter != chunk.end())
             {
-                Address endaddr = (*iter).first + (*iter).second.size();
-                if (endaddr < (*iter).first)
+                Address endaddr = iter.Current.Key + (*iter).second.size();
+                if (endaddr < iter.Current.Key)
                 {
                     ++iter;
                     continue; // All the way to end of space
@@ -67,10 +67,10 @@ namespace Sla.CORE
                 ulong room = endaddr.getSpace().getHighest() - endaddr.getOffset() + 1;
                 if ((ulong)maxsize > room)
                     maxsize = (int)room;
-                if ((iter != chunk.end()) && ((*iter).first.getSpace() == endaddr.getSpace()))
+                if ((iter != chunk.end()) && (iter.Current.Key.getSpace() == endaddr.getSpace()))
                 {
-                    if (endaddr.getOffset() >= (*iter).first.getOffset()) continue;
-                    room = (*iter).first.getOffset() - endaddr.getOffset();
+                    if (endaddr.getOffset() >= iter.Current.Key.getOffset()) continue;
+                    room = iter.Current.Key.getOffset() - endaddr.getOffset();
                     if ((ulong)maxsize > room)
                         maxsize = (int)room;
                 }
@@ -84,7 +84,7 @@ namespace Sla.CORE
         /// \param el is the parsed form of the file
         public LoadImageXml(string f, Element el)
         {
-            manage = (AddrSpaceManager*)0;
+            manage = (AddrSpaceManager)null;
             rootel = el;
 
             // Extract architecture information
@@ -101,34 +101,32 @@ namespace Sla.CORE
             uint sz;           // unused size
 
             // Read parsed xml file
-            XmlDecode decoder(m, rootel);
+            XmlDecode decoder = new XmlDecode(m, rootel);
             uint elemId = decoder.openElement(ElementId.ELEM_BINARYIMAGE);
-            for (; ; )
-            {
+            while (true) {
                 uint subId = decoder.openElement();
                 if (subId == 0) break;
-                if (subId == ELEM_SYMBOL)
-                {
+                if (subId == ElementId.ELEM_SYMBOL) {
                     AddrSpace @base = decoder.readSpace(AttributeId.ATTRIB_SPACE);
-                    Address addr(@base, @base.decodeAttributes(decoder, sz));
+                    Address addr = new Address(@base, @base.decodeAttributes(decoder, out sz));
                     string nm = decoder.readString(AttributeId.ATTRIB_NAME);
                     addrtosymbol[addr] = nm;
                 }
-                else if (subId == ELEM_BYTECHUNK) {
+                else if (subId == ElementId.ELEM_BYTECHUNK) {
                     AddrSpace @base = decoder.readSpace(AttributeId.ATTRIB_SPACE);
-                    Address addr(@base, @base.decodeAttributes(decoder, sz));
+                    Address addr = new Address(@base, @base.decodeAttributes(decoder, out sz));
                     Dictionary<Address, List<byte>>.Enumerator chnkiter;
-                    List<byte> & vec(chunk[addr]);
-                    vec.clear();
+                    List<byte> vec = chunk[addr];
+                    vec.Clear();
                     decoder.rewindAttributes();
-                    for (; ; ) {
+                    while (true) {
                         uint attribId = decoder.getNextAttributeId();
                         if (attribId == 0) break;
-                        if (attribId == ATTRIB_READONLY)
+                        if (attribId == AttributeId.ATTRIB_READONLY)
                             if (decoder.readBool())
                                 readonlyset.insert(addr);
                     }
-                    istringstream @is = new istringstream(decoder.readString(AttributeId.ATTRIB_CONTENT));
+                    StringReader @is = new StringReader(decoder.readString(AttributeId.ATTRIB_CONTENT));
                     int val;
                     char c1, c2;
                     @is >> ws;
@@ -165,48 +163,45 @@ namespace Sla.CORE
         /// Clear out all the caches
         public void clear()
         {
-            archtype.clear();
-            manage = (AddrSpaceManager*)0;
-            chunk.clear();
-            addrtosymbol.clear();
+            archtype.Clear();
+            manage = (AddrSpaceManager)null;
+            chunk.Clear();
+            addrtosymbol.Clear();
         }
 
         /// Encode the image to a stream
         /// Encode the byte chunks and symbols as elements
         /// \param encoder is the stream encoder
-        public void encode(Encoder encoder)
+        public void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_BINARYIMAGE);
             encoder.writeString(AttributeId.ATTRIB_ARCH, archtype);
 
             Dictionary<Address, List<byte>>.Enumerator iter1;
-            for (iter1 = chunk.begin(); iter1 != chunk.end(); ++iter1)
-            {
-                List<byte> &vec((*iter1).second);
+            foreach (KeyValuePair<Address, List<byte>>  pair in chunk) {
+                List<byte> vec = pair.Value;
                 if (vec.size() == 0) continue;
                 encoder.openElement(ElementId.ELEM_BYTECHUNK);
-                (*iter1).first.getSpace().encodeAttributes(encoder, (*iter1).first.getOffset());
-                if (readonlyset.find((*iter1).first) != readonlyset.end())
+                pair.Key.getSpace().encodeAttributes(encoder, pair.Key.getOffset());
+                if (readonlyset.find(pair.Key) != readonlyset.end())
                     encoder.writeBool(AttributeId.ATTRIB_READONLY, "true");
-                ostringstream s;
-                s << '\n' << setfill('0');
-                for (int i = 0; i < vec.size(); ++i)
-                {
-                    s << hex << setw(2) << (int)vec[i];
+                StringWriter s = new StringWriter();
+                s.WriteLine();
+                for (int i = 0; i < vec.size(); ++i) {
+                    s.Write($"{(int)vec[i]:X02}");
                     if (i % 20 == 19)
-                        s << '\n';
+                        s.WriteLine();
                 }
-                s << '\n';
-                encoder.writeString(AttributeId.ATTRIB_CONTENT, s.str());
+                s.WriteLine();
+                encoder.writeString(AttributeId.ATTRIB_CONTENT, s.ToString());
                 encoder.closeElement(ElementId.ELEM_BYTECHUNK);
             }
 
             Dictionary<Address, string>.Enumerator iter2;
-            for (iter2 = addrtosymbol.begin(); iter2 != addrtosymbol.end(); ++iter2)
-            {
+            foreach (KeyValuePair<Address, string>  pair in addrtosymbol) {
                 encoder.openElement(ElementId.ELEM_SYMBOL);
-                (*iter2).first.getSpace().encodeAttributes(encoder, (*iter2).first.getOffset());
-                encoder.writeString(AttributeId.ATTRIB_NAME, (*iter2).second);
+                pair.Key.getSpace().encodeAttributes(encoder, pair.Key.getOffset());
+                encoder.writeString(AttributeId.ATTRIB_NAME, pair.Value);
                 encoder.closeElement(ElementId.ELEM_SYMBOL);
             }
             encoder.closeElement(ElementId.ELEM_BINARYIMAGE);
@@ -227,7 +222,7 @@ namespace Sla.CORE
             Dictionary<Address, List<byte>>.Enumerator iter = chunk.upper_bound(curaddr);
             if (iter != chunk.begin())
                 --iter;         // Last one less or equal
-            while ((size > 0) && (iter != chunk.end())) {
+                while ((size > 0) && (iter != chunk.end())) {
                 List<byte> chnk = iter.Current.Value;
                 int chnksize = chnk.Count;
                 int over = curaddr.overlap(0, iter.Current.Key, chnksize);

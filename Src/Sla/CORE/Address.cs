@@ -490,7 +490,7 @@ namespace Sla.CORE
         /// stream.  The exact format is determined by the address space,
         /// but this generally has a \e space and an \e offset attribute.
         /// \param encoder is the stream encoder
-        public void encode(Encoder encoder)
+        public void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_ADDR);
             if (@base != null) {
@@ -505,7 +505,7 @@ namespace Sla.CORE
         /// so that it can describe an entire memory range.
         /// \param encoder is the stream encoder
         /// \param size is the number of bytes in the range
-        public void encode(Encoder encoder, int size)
+        public void encode(Sla.CORE.Encoder encoder, int size)
         {
             encoder.openElement(ElementId.ELEM_ADDR);
             if (@base != null) {
@@ -523,7 +523,7 @@ namespace Sla.CORE
         /// based on a register name.
         /// \param decoder is the stream decoder
         /// \return the resulting Address
-        public static Address decode(Decoder decoder)
+        public static Address decode(Sla.CORE.Decoder decoder)
         {
             VarnodeData var = VarnodeData.decode(decoder);
             return new Address(var.space, var.offset);
@@ -542,7 +542,7 @@ namespace Sla.CORE
         /// \param decoder is the stream decoder
         /// \param size is the reference to any recovered size
         /// \return the resulting Address
-        public static Address decode(Decoder decoder, out int size)
+        public static Address decode(Sla.CORE.Decoder decoder, out int size)
         {
             VarnodeData var = VarnodeData.decode(decoder);
             size = (int)var.size;

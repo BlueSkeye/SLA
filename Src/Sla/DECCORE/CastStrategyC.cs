@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -11,25 +11,25 @@ namespace Sla.DECCORE
     /// \brief Casting strategies that are specific to the C language
     internal class CastStrategyC : CastStrategy
     {
-        public virtual int localExtensionType(Varnode vn, PcodeOp op)
+        public override IntPromotionCode localExtensionType(Varnode vn, PcodeOp op)
         {
             type_metatype meta = vn.getHighTypeReadFacing(op).getMetatype();
             // 1= natural zero extension, 2= natural sign extension
-            int natural;
+            IntPromotionCode natural;
             if ((meta == type_metatype.TYPE_UINT) || (meta == type_metatype.TYPE_BOOL) || (meta == type_metatype.TYPE_UNKNOWN)) {
-                natural = UNSIGNED_EXTENSION;
+                natural = IntPromotionCode.UNSIGNED_EXTENSION;
             }
             else if (meta == type_metatype.TYPE_INT) {
-                natural = SIGNED_EXTENSION;
+                natural = IntPromotionCode.SIGNED_EXTENSION;
             }
             else {
-                return UNKNOWN_PROMOTION;
+                return IntPromotionCode.UNKNOWN_PROMOTION;
             }
             if (vn.isConstant()) {
                 if (!signbit_negative(vn.getOffset(), vn.getSize())) {
                     // If the high-bit is zero
                     // Can be viewed as either extension
-                    return EITHER_EXTENSION;
+                    return IntPromotionCode.EITHER_EXTENSION;
                 }
                 return natural;
             }
@@ -37,11 +37,11 @@ namespace Sla.DECCORE
                 return natural;
             }
             if (!vn.isWritten()) {
-                return UNKNOWN_PROMOTION;
+                return IntPromotionCode.UNKNOWN_PROMOTION;
             }
-            PcodeOp defOp = vn.getDef();
+            PcodeOp defOp = vn.getDef() ?? throw new BugException();
             if (defOp.isBoolOutput()) {
-                return EITHER_EXTENSION;
+                return IntPromotionCode.EITHER_EXTENSION;
             }
             OpCode opc = defOp.code();
             if ((opc == OpCode.CPUI_CAST) || (opc == OpCode.CPUI_LOAD) || defOp.isCall()) {
@@ -51,47 +51,47 @@ namespace Sla.DECCORE
                 // This is kind of recursing
                 Varnode tmpvn = defOp.getIn(1);
                 if (tmpvn.isConstant()) {
-                    return (!signbit_negative(tmpvn.getOffset(), tmpvn.getSize()))
-                        ? EITHER_EXTENSION
+                    return (!Globals.signbit_negative(tmpvn.getOffset(), tmpvn.getSize()))
+                        ? IntPromotionCode.EITHER_EXTENSION
                         : natural;
                 }
             }
-            return UNKNOWN_PROMOTION;
+            return IntPromotionCode.UNKNOWN_PROMOTION;
         }
 
-        public virtual int intPromotionType(Varnode vn)
+        public override IntPromotionCode intPromotionType(Varnode vn)
         {
-            int val;
+            IntPromotionCode val;
             if (vn.getSize() >= promoteSize) {
-                return NO_PROMOTION;
+                return IntPromotionCode.NO_PROMOTION;
             }
             if (vn.isConstant()) {
                 return localExtensionType(vn, vn.loneDescend());
             }
             if (vn.isExplicit()) {
-                return NO_PROMOTION;
+                return IntPromotionCode.NO_PROMOTION;
             }
             if (!vn.isWritten()) {
-                return UNKNOWN_PROMOTION;
+                return IntPromotionCode.UNKNOWN_PROMOTION;
             }
-            PcodeOp op = vn.getDef();
+            PcodeOp op = vn.getDef() ?? throw new BugException();
             Varnode othervn;
             switch (op.code()) {
                 case OpCode.CPUI_INT_AND:
                     othervn = op.getIn(1);
-                    if ((localExtensionType(othervn, op) & UNSIGNED_EXTENSION) != 0) {
-                        return UNSIGNED_EXTENSION;
+                    if ((localExtensionType(othervn, op) & IntPromotionCode.UNSIGNED_EXTENSION) != 0) {
+                        return IntPromotionCode.UNSIGNED_EXTENSION;
                     }
                     othervn = op.getIn(0);
-                    if ((localExtensionType(othervn, op) & UNSIGNED_EXTENSION) != 0) {
+                    if ((localExtensionType(othervn, op) & IntPromotionCode.UNSIGNED_EXTENSION) != 0) {
                         // If either side has zero extension, result has zero extension
-                        return UNSIGNED_EXTENSION;
+                        return IntPromotionCode.UNSIGNED_EXTENSION;
                     }
                     break;
                 case OpCode.CPUI_INT_RIGHT:
                     othervn = op.getIn(0);
                     val = localExtensionType(othervn, op);
-                    if ((val & UNSIGNED_EXTENSION) != 0) {
+                    if ((val & IntPromotionCode.UNSIGNED_EXTENSION) != 0) {
                         // If the input provably zero extends
                         // then the result is a zero extension (plus possibly a sign extension)
                         return val;
@@ -100,7 +100,7 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_INT_SRIGHT:
                     othervn = op.getIn(0);
                     val = localExtensionType(othervn, op);
-                    if ((val & SIGNED_EXTENSION) != 0) {
+                    if ((val & IntPromotionCode.SIGNED_EXTENSION) != 0) {
                         // If input can be construed as a sign-extension
                         // then the result is a sign extension (plus possibly a zero extension)
                         return val;
@@ -111,32 +111,32 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_INT_DIV:
                 case OpCode.CPUI_INT_REM:
                     othervn = op.getIn(0);
-                    if ((localExtensionType(othervn, op) & UNSIGNED_EXTENSION) == 0) {
-                        return UNKNOWN_PROMOTION;
+                    if ((localExtensionType(othervn, op) & IntPromotionCode.UNSIGNED_EXTENSION) == 0) {
+                        return IntPromotionCode.UNKNOWN_PROMOTION;
                     }
                     othervn = op.getIn(1);
-                    if ((localExtensionType(othervn, op) & UNSIGNED_EXTENSION) == 0) {
-                        return UNKNOWN_PROMOTION;
+                    if ((localExtensionType(othervn, op) & IntPromotionCode.UNSIGNED_EXTENSION) == 0) {
+                        return IntPromotionCode.UNKNOWN_PROMOTION;
                     }
                     // If both sides have zero extension, result has zero extension
-                    return UNSIGNED_EXTENSION;
+                    return IntPromotionCode.UNSIGNED_EXTENSION;
                 case OpCode.CPUI_INT_SDIV:
                 case OpCode.CPUI_INT_SREM:
                     othervn = op.getIn(0);
-                    if ((localExtensionType(othervn, op) & SIGNED_EXTENSION) == 0) {
-                        return UNKNOWN_PROMOTION;
+                    if ((localExtensionType(othervn, op) & IntPromotionCode.SIGNED_EXTENSION) == 0) {
+                        return IntPromotionCode.UNKNOWN_PROMOTION;
                     }
                     othervn = op.getIn(1);
-                    if ((localExtensionType(othervn, op) & SIGNED_EXTENSION) == 0) {
-                        return UNKNOWN_PROMOTION;
+                    if ((localExtensionType(othervn, op) & IntPromotionCode.SIGNED_EXTENSION) == 0) {
+                        return IntPromotionCode.UNKNOWN_PROMOTION;
                     }
                     // If both sides have sign extension, result has sign extension
-                    return SIGNED_EXTENSION;
+                    return IntPromotionCode.SIGNED_EXTENSION;
                 case OpCode.CPUI_INT_NEGATE:
                 case OpCode.CPUI_INT_2COMP:
                     othervn = op.getIn(0);
-                    if ((localExtensionType(othervn, op) & SIGNED_EXTENSION) != 0) {
-                        return SIGNED_EXTENSION;
+                    if ((localExtensionType(othervn, op) & IntPromotionCode.SIGNED_EXTENSION) != 0) {
+                        return IntPromotionCode.SIGNED_EXTENSION;
                     }
                     break;
                 case OpCode.CPUI_INT_ADD:
@@ -146,28 +146,28 @@ namespace Sla.DECCORE
                     break;
                 default:
                     // No integer promotion at all
-                    return NO_PROMOTION;
+                    return IntPromotionCode.NO_PROMOTION;
             }
-            return UNKNOWN_PROMOTION;
+            return IntPromotionCode.UNKNOWN_PROMOTION;
         }
 
-        public bool checkIntPromotionForCompare(PcodeOp op, int slot)
+        public override bool checkIntPromotionForCompare(PcodeOp op, int slot)
         {
             Varnode vn = op.getIn(slot);
-            int exttype1 = intPromotionType(vn);
-            if (exttype1 == NO_PROMOTION) {
+            IntPromotionCode exttype1 = intPromotionType(vn);
+            if (exttype1 == IntPromotionCode.NO_PROMOTION) {
                 return false;
             }
-            if (exttype1 == UNKNOWN_PROMOTION) {
+            if (exttype1 == IntPromotionCode.UNKNOWN_PROMOTION) {
                 // If there is promotion and we don't know type, we need a cast
                 return true;
             }
-            int exttype2 = intPromotionType(op.getIn(1 - slot));
+            IntPromotionCode exttype2 = intPromotionType(op.getIn(1 - slot));
             if ((exttype1 & exttype2) != 0) {
                 // If both sides share a common extension, then these bits aren't determining factor
                 return false;
             }
-            if (exttype2 == NO_PROMOTION) {
+            if (exttype2 == IntPromotionCode.NO_PROMOTION) {
                 // other side would not have integer promotion, but our side is forcing it
                 // but both sides get extended in the same way
                 return false;
@@ -175,86 +175,84 @@ namespace Sla.DECCORE
             return true;
         }
 
-        public bool checkIntPromotionForExtension(PcodeOp op)
+        public override bool checkIntPromotionForExtension(PcodeOp op)
         {
             Varnode vn = op.getIn(0);
-            int exttype = intPromotionType(vn);
-            if (exttype == NO_PROMOTION) {
+            IntPromotionCode exttype = intPromotionType(vn);
+            if (exttype == IntPromotionCode.NO_PROMOTION) {
                 return false;
             }
-            if (exttype == UNKNOWN_PROMOTION) {
+            if (exttype == IntPromotionCode.UNKNOWN_PROMOTION) {
                 // If there is an extension and we don't know type, we need a cast
                 return true;
             }
 
             // Test if the promotion extension matches the explicit extension
-            if (((exttype & UNSIGNED_EXTENSION) != 0) && (op.code() == OpCode.CPUI_INT_ZEXT)) {
+            if (((exttype & IntPromotionCode.UNSIGNED_EXTENSION) != 0) && (op.code() == OpCode.CPUI_INT_ZEXT)) {
                 return false;
             }
-            if (((exttype & SIGNED_EXTENSION) != 0) && (op.code() == OpCode.CPUI_INT_SEXT)) {
+            if (((exttype & IntPromotionCode.SIGNED_EXTENSION) != 0) && (op.code() == OpCode.CPUI_INT_SEXT)) {
                 return false;
             }
             // Otherwise we need a cast before we extend
             return true;
         }
 
-        public bool isExtensionCastImplied(PcodeOp op, PcodeOp readOp)
+        public override bool isExtensionCastImplied(PcodeOp op, PcodeOp readOp)
         {
             Varnode outVn = op.getOut();
             if (outVn.isExplicit()) {
+                return false;
             }
-            else {
-                if (readOp == null) {
-                    return false;
-                }
-                type_metatype metatype = outVn.getHighTypeReadFacing(readOp).getMetatype();
-                Varnode otherVn;
-                int slot;
-                switch (readOp.code()) {
-                    case OpCode.CPUI_PTRADD:
-                        break;
-                    case OpCode.CPUI_INT_ADD:
-                    case OpCode.CPUI_INT_SUB:
-                    case OpCode.CPUI_INT_MULT:
-                    case OpCode.CPUI_INT_DIV:
-                    case OpCode.CPUI_INT_AND:
-                    case OpCode.CPUI_INT_OR:
-                    case OpCode.CPUI_INT_XOR:
-                    case OpCode.CPUI_INT_EQUAL:
-                    case OpCode.CPUI_INT_NOTEQUAL:
-                    case OpCode.CPUI_INT_LESS:
-                    case OpCode.CPUI_INT_LESSEQUAL:
-                    case OpCode.CPUI_INT_SLESS:
-                    case OpCode.CPUI_INT_SLESSEQUAL:
-                        slot = readOp.getSlot(outVn);
-                        otherVn = readOp.getIn(1 - slot);
-                        // Check if the expression involves an explicit variable of the right integer type
-                        if (otherVn.isConstant()) {
-                            // Integer tokens do not naturally indicate their size, and
-                            // integers that are bigger than the promotion size are NOT naturally extended.
-                            if (otherVn.getSize() > promoteSize) {
-                                // So if the integer is bigger than the promotion size
-                                // The extension cast on the other side must be explicit
-                                return false;
-                            }
-                        }
-                        else if (!otherVn.isExplicit()) {
+            if (readOp == null) {
+                return false;
+            }
+            type_metatype metatype = outVn.getHighTypeReadFacing(readOp).getMetatype();
+            Varnode otherVn;
+            int slot;
+            switch (readOp.code()) {
+                case OpCode.CPUI_PTRADD:
+                    break;
+                case OpCode.CPUI_INT_ADD:
+                case OpCode.CPUI_INT_SUB:
+                case OpCode.CPUI_INT_MULT:
+                case OpCode.CPUI_INT_DIV:
+                case OpCode.CPUI_INT_AND:
+                case OpCode.CPUI_INT_OR:
+                case OpCode.CPUI_INT_XOR:
+                case OpCode.CPUI_INT_EQUAL:
+                case OpCode.CPUI_INT_NOTEQUAL:
+                case OpCode.CPUI_INT_LESS:
+                case OpCode.CPUI_INT_LESSEQUAL:
+                case OpCode.CPUI_INT_SLESS:
+                case OpCode.CPUI_INT_SLESSEQUAL:
+                    slot = readOp.getSlot(outVn);
+                    otherVn = readOp.getIn(1 - slot);
+                    // Check if the expression involves an explicit variable of the right integer type
+                    if (otherVn.isConstant()) {
+                        // Integer tokens do not naturally indicate their size, and
+                        // integers that are bigger than the promotion size are NOT naturally extended.
+                        if (otherVn.getSize() > promoteSize) {
+                            // So if the integer is bigger than the promotion size
+                            // The extension cast on the other side must be explicit
                             return false;
                         }
-                        if (otherVn.getHighTypeReadFacing(readOp).getMetatype() != metatype) {
-                            return false;
-                        }
-                        break;
-                    default:
+                    }
+                    else if (!otherVn.isExplicit()) {
                         return false;
-                }
-                // Everything is integer promotion
-                return true;
+                    }
+                    if (otherVn.getHighTypeReadFacing(readOp).getMetatype() != metatype) {
+                        return false;
+                    }
+                    break;
+                default:
+                    return false;
             }
-            return false;
+            // Everything is integer promotion
+            return true;
         }
 
-        public Datatype? castStandard(Datatype reqtype, Datatype curtype, bool care_uint_int,
+        public override Datatype? castStandard(Datatype reqtype, Datatype curtype, bool care_uint_int,
             bool care_ptr_uint)
         {
             // Generic casting rules that apply for most ops
@@ -265,7 +263,9 @@ namespace Sla.DECCORE
             Datatype reqbase = reqtype;
             Datatype curbase = curtype;
             bool isptr = false;
-            while ((reqbase.getMetatype() == type_metatype.TYPE_PTR) && (curbase.getMetatype() == type_metatype.TYPE_PTR)) {
+            while ((reqbase.getMetatype() == type_metatype.TYPE_PTR)
+                && (curbase.getMetatype() == type_metatype.TYPE_PTR))
+            {
                 TypePointer reqptr = (TypePointer)reqbase;
                 TypePointer curptr = (TypePointer)curbase;
                 if (reqptr.getWordSize() != curptr.getWordSize()) {
@@ -368,7 +368,7 @@ namespace Sla.DECCORE
             return reqtype;
         }
 
-        public Datatype arithmeticOutputStandard(PcodeOp op)
+        public override Datatype arithmeticOutputStandard(PcodeOp op)
         {
             Datatype res1 = op.getIn(0).getHighTypeReadFacing(op);
             if (res1.getMetatype() == type_metatype.TYPE_BOOL) {
@@ -382,14 +382,14 @@ namespace Sla.DECCORE
                 if (res2.getMetatype() == type_metatype.TYPE_BOOL) {
                     continue;
                 }
-                if (0 > res2.typeOrder(*res1)) {
+                if (0 > res2.typeOrder(res1)) {
                     res1 = res2;
                 }
             }
             return res1;
         }
 
-        public bool isSubpieceCast(Datatype outtype, Datatype intype, uint offset)
+        public override bool isSubpieceCast(Datatype outtype, Datatype intype, uint offset)
         {
             if (offset != 0) {
                 return false;
@@ -426,7 +426,7 @@ namespace Sla.DECCORE
             return true;
         }
 
-        public bool isSubpieceCastEndian(Datatype outtype, Datatype intype, uint offset,
+        public override bool isSubpieceCastEndian(Datatype outtype, Datatype intype, uint offset,
             bool isbigend)
         {
             uint tmpoff = offset;
@@ -436,7 +436,7 @@ namespace Sla.DECCORE
             return isSubpieceCast(outtype, intype, tmpoff);
         }
 
-        public bool isSextCast(Datatype outtype, Datatype intype)
+        public override bool isSextCast(Datatype outtype, Datatype intype)
         {
             type_metatype metaout = outtype.getMetatype();
             if (metaout != type_metatype.TYPE_UINT && metaout != type_metatype.TYPE_INT) {
@@ -448,7 +448,7 @@ namespace Sla.DECCORE
             return ((metain == type_metatype.TYPE_INT) || (metain = type_metatype.TYPE_BOOL));
         }
 
-        public bool isZextCast(Datatype outtype, Datatype intype)
+        public override bool isZextCast(Datatype outtype, Datatype intype)
         {
             type_metatype metaout = outtype.getMetatype();
             if (metaout != type_metatype.TYPE_UINT && metaout != type_metatype.TYPE_INT) {

@@ -84,7 +84,7 @@ namespace Sla.CORE
             List<VarnodeData> pieces = new List<VarnodeData>();
             uint sizesum = 0;
             uint logicalsize = 0;
-            for (; ; ) {
+            while(true) {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_LOGICALSIZE) {

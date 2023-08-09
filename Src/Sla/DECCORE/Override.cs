@@ -248,7 +248,7 @@ namespace Sla.DECCORE
             Dictionary<Address, Address>::const_iterator iter;
 
             for (iter = forcegoto.begin(); iter != forcegoto.end(); ++iter)
-                data.forceGoto((*iter).first, (*iter).second);
+                data.forceGoto(iter.Current.Key, (*iter).second);
         }
 
         /// Are there any flow overrides
@@ -274,7 +274,7 @@ namespace Sla.DECCORE
             Dictionary<Address, Address>::const_iterator iter;
 
             for (iter = forcegoto.begin(); iter != forcegoto.end(); ++iter)
-                s << "force goto at " << (*iter).first << " jumping to " << (*iter).second << endl;
+                s << "force goto at " << iter.Current.Key << " jumping to " << (*iter).second << endl;
 
             for (int i = 0; i < deadcodedelay.size(); ++i)
             {
@@ -284,7 +284,7 @@ namespace Sla.DECCORE
             }
 
             for (iter = indirectover.begin(); iter != indirectover.end(); ++iter)
-                s << "override indirect at " << (*iter).first << " to call directly to " << (*iter).second << endl;
+                s << "override indirect at " << iter.Current.Key << " to call directly to " << (*iter).second << endl;
 
             Dictionary<Address, FuncProto*>::const_iterator fiter;
 
@@ -316,7 +316,7 @@ namespace Sla.DECCORE
         /// All the commands are written as children of a root \<override> element.
         /// \param encoder is the stream encoder
         /// \param glb is the Architecture
-        public void encode(Encoder encoder, Architecture glb)
+        public void encode(Sla.CORE.Encoder encoder, Architecture glb)
         {
             if (forcegoto.empty() && deadcodedelay.empty() && indirectover.empty() && protoover.empty() &&
                 multistagejump.empty() && flowoverride.empty())
@@ -328,7 +328,7 @@ namespace Sla.DECCORE
             for (iter = forcegoto.begin(); iter != forcegoto.end(); ++iter)
             {
                 encoder.openElement(ElementId.ELEM_FORCEGOTO);
-                (*iter).first.encode(encoder);
+                iter.Current.Key.encode(encoder);
                 (*iter).second.encode(encoder);
                 encoder.closeElement(ElementId.ELEM_FORCEGOTO);
             }
@@ -346,7 +346,7 @@ namespace Sla.DECCORE
             for (iter = indirectover.begin(); iter != indirectover.end(); ++iter)
             {
                 encoder.openElement(ElementId.ELEM_INDIRECTOVERRIDE);
-                (*iter).first.encode(encoder);
+                iter.Current.Key.encode(encoder);
                 (*iter).second.encode(encoder);
                 encoder.closeElement(ElementId.ELEM_INDIRECTOVERRIDE);
             }
@@ -383,10 +383,10 @@ namespace Sla.DECCORE
         ///
         /// \param decoder is the stream decoder
         /// \param glb is the Architecture
-        public void decode(Decoder decoder, Architecture glb)
+        public void decode(Sla.CORE.Decoder decoder, Architecture glb)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_OVERRIDE);
-            for (; ; )
+            while(true)
             {
                 uint subId = decoder.openElement();
                 if (subId == 0) break;

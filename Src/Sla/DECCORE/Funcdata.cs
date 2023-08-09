@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualBasic.FileIO;
 using Sla.CORE;
-using System;
+using Sla.DECCORE;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
@@ -10,7 +10,6 @@ using System.Reflection.PortableExecutable;
 using System.Runtime.Intrinsics;
 using System.Text;
 using System.Threading.Tasks;
-using static ghidra.ScoreProtoModel;
 using static System.Formats.Asn1.AsnWriter;
 
 using ScopeMap = System.Collections.Generic.Dictionary<ulong, Sla.DECCORE.Scope>;
@@ -112,7 +111,7 @@ namespace Sla.DECCORE
         /// Variable range intersection algorithms
         private Merge covermerge;
         /// Data for assessing which parameters are passed to \b this function
-        private ParamActive activeoutput;
+        private ParamActive? activeoutput;
         /// Overrides of data-flow, prototypes, etc. that are local to \b this function
         private Override localoverride;
         /// Current storage locations which may be laned registers
@@ -401,24 +400,22 @@ namespace Sla.DECCORE
         /// \param list is the list of Varnodes
         private void coverVarnodes(SymbolEntry entry, List<Varnode> list)
         {
-            Scope* scope = entry.getSymbol().getScope();
-            for (int i = 0; i < list.size(); ++i)
-            {
-                Varnode* vn = list[i];
+            Scope scope = entry.getSymbol().getScope();
+            for (int i = 0; i < list.size(); ++i) {
+                Varnode vn = list[i];
                 // We only need to check once for all Varnodes at the same Address
                 // Of these, pick the biggest Varnode
                 if (i + 1 < list.size() && list[i + 1].getAddr() == vn.getAddr())
                     continue;
                 Address usepoint = vn.getUsePoint(*this);
-                SymbolEntry* overlapEntry = scope.findContainer(vn.getAddr(), vn.getSize(), usepoint);
-                if (overlapEntry == (SymbolEntry)null)
-                {
+                SymbolEntry overlapEntry = scope.findContainer(vn.getAddr(), vn.getSize(), usepoint);
+                if (overlapEntry == (SymbolEntry)null) {
                     int diff = (int)(vn.getOffset() - entry.getAddr().getOffset());
-                    ostringstream s;
-                    s << entry.getSymbol().getName() << '_' << diff;
+                    StringWriter s = new StringWriter();
+                    s.Write($"{entry.getSymbol().getName()}_{diff}");
                     if (vn.isAddrTied())
-                        usepoint = Address();
-                    scope.addSymbol(s.str(), vn.getHigh().getType(), vn.getAddr(), usepoint);
+                        usepoint = new Address();
+                    scope.addSymbol(s.ToString(), vn.getHigh().getType(), vn.getAddr(), usepoint);
                 }
             }
         }
@@ -433,13 +430,13 @@ namespace Sla.DECCORE
         /// \return \b true if the UnionFacetSymbol is successfully cached
         private bool applyUnionFacet(SymbolEntry entry, DynamicHash dhash)
         {
-            Symbol* sym = entry.getSymbol();
-            PcodeOp* op = dhash.findOp(this, entry.getFirstUseAddress(), entry.getHash());
+            Symbol sym = entry.getSymbol();
+            PcodeOp op = dhash.findOp(this, entry.getFirstUseAddress(), entry.getHash());
             if (op == (PcodeOp)null)
                 return false;
-            int slot = DynamicHash::getSlotFromHash(entry.getHash());
-            int fldNum = ((UnionFacetSymbol*)sym).getFieldNumber();
-            ResolvedUnion resolve(sym.getType(), fldNum, * glb.types);
+            int slot = DynamicHash.getSlotFromHash(entry.getHash());
+            int fldNum = ((UnionFacetSymbol)sym).getFieldNumber();
+            ResolvedUnion resolve = new ResolvedUnion(sym.getType(), fldNum, glb.types);
             resolve.setLock(true);
             return setUnionField(sym.getType(), op, slot, resolve);
         }
@@ -1762,7 +1759,7 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         /// \param id is the unique id associated with the function symbol
         /// \param savetree is \b true if the p-code tree should be emitted
-        public void encode(Encoder encoder, ulong id, bool savetree)
+        public void encode(Sla.CORE.Encoder encoder, ulong id, bool savetree)
         {
             encoder.openElement(ElementId.ELEM_FUNCTION);
             if (id != 0)
@@ -1794,7 +1791,7 @@ namespace Sla.DECCORE
         /// jump-table, and override information for \b this function.
         /// \param decoder is the stream decoder
         /// \return the symbol id associated with the function
-        public ulong decode(Decoder decoder)
+        public ulong decode(Sla.CORE.Decoder decoder)
         {
             //  clear();  // Shouldn't be needed
             name.clear();
@@ -1802,7 +1799,7 @@ namespace Sla.DECCORE
             ulong id = 0;
             AddrSpace* stackid = glb.getStackSpace();
             uint elemId = decoder.openElement(ElementId.ELEM_FUNCTION);
-            for (; ; )
+            while(true)
             {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
@@ -1831,7 +1828,7 @@ namespace Sla.DECCORE
             if (size == -1)
                 throw new LowlevelError("Missing function size");
             baseaddr = Address.decode(decoder);
-            for (; ; )
+            while(true)
             {
                 uint subId = decoder.peekElement();
                 if (subId == 0) break;
@@ -2100,19 +2097,19 @@ namespace Sla.DECCORE
         {
             int sz = rampoint.getAddrSize();
             AddrSpace spaceid = rampoint.getSpace();
-            Datatype sb_type = glb.types.getTypeSpacebase(spaceid, Address());
+            Datatype sb_type = glb.types.getTypeSpacebase(spaceid, new Address());
             sb_type = glb.types.getTypePointer(sz, sb_type, spaceid.getWordSize());
             Varnode spacebase_vn;
             Varnode outvn;
             Varnode newconst;
 
             ulong extra = rampoint.getOffset() - entry.getAddr().getOffset();      // Offset from beginning of entry
-            extra = AddrSpace::byteToAddress(extra, rampoint.getSpace().getWordSize());    // Convert to address units
+            extra = AddrSpace.byteToAddress(extra, rampoint.getSpace().getWordSize());    // Convert to address units
 
-            PcodeOp* addOp = (PcodeOp)null;
-            PcodeOp* extraOp = (PcodeOp)null;
-            PcodeOp* zextOp = (PcodeOp)null;
-            PcodeOp* subOp = (PcodeOp)null;
+            PcodeOp? addOp = (PcodeOp)null;
+            PcodeOp? extraOp = (PcodeOp)null;
+            PcodeOp? zextOp = (PcodeOp)null;
+            PcodeOp? subOp = (PcodeOp)null;
             bool isCopy = false;
             if (op.code() == OpCode.CPUI_COPY)
             {   // We replace COPY with final op of this calculation
@@ -2154,9 +2151,9 @@ namespace Sla.DECCORE
             opSetInput(addOp, spacebase_vn, 0);
             opSetInput(addOp, newconst, 1);
 
-            Symbol* sym = entry.getSymbol();
-            Datatype* entrytype = sym.getType();
-            Datatype* ptrentrytype = glb.types.getTypePointerStripArray(sz, entrytype, spaceid.getWordSize());
+            Symbol sym = entry.getSymbol();
+            Datatype entrytype = sym.getType();
+            Datatype ptrentrytype = glb.types.getTypePointerStripArray(sz, entrytype, spaceid.getWordSize());
             bool typelock = sym.isTypeLocked();
             if (typelock && (entrytype.getMetatype() == type_metatype.TYPE_UNKNOWN))
                 typelock = false;
@@ -2268,9 +2265,7 @@ namespace Sla.DECCORE
         public FuncCallSpecs getCallSpecs(PcodeOp op)
         {
             int i;
-            Varnode* vn;
-
-            vn = op.getIn(0);
+            Varnode vn = op.getIn(0);
             if (vn.getSpace().getType() == spacetype.IPTR_FSPEC)
                 return FuncCallSpecs::getFspecFromConst(vn.getAddr());
 
@@ -2298,7 +2293,7 @@ namespace Sla.DECCORE
             if (iter == endOp(OpCode.CPUI_RETURN)) return 0; // If no return statements, answer is irrelevant
 
             PcodeOp retop = *iter;
-            byte buffer[4];
+            byte[] buffer = new byte[4];
 
             glb.loader.loadFill(buffer, 4, retop.getAddr());
 
@@ -2355,8 +2350,8 @@ namespace Sla.DECCORE
         /// \return the new temporary register Varnode
         public Varnode newUniqueOut(int s, PcodeOp op)
         {
-            Datatype* ct = glb.types.getBase(s, type_metatype.TYPE_UNKNOWN);
-            Varnode* vn = vbank.createDefUnique(s, ct, op);
+            Datatype ct = glb.types.getBase(s, type_metatype.TYPE_UNKNOWN);
+            Varnode vn = vbank.createDefUnique(s, ct, op);
             op.setOutput(vn);
             assignHigh(vn);
             if (s >= minLanedSize)
@@ -2373,18 +2368,17 @@ namespace Sla.DECCORE
         /// \return the newly allocated Varnode object
         public Varnode newVarnode(int s, Address m, Datatype ct = null)
         {
-            Varnode* vn;
 
             if (ct == (Datatype)null)
                 ct = glb.types.getBase(s, type_metatype.TYPE_UNKNOWN);
 
-            vn = vbank.create(s, m, ct);
+            Varnode vn = vbank.create(s, m, ct);
             assignHigh(vn);
 
             if (s >= minLanedSize)
                 checkForLanedRegister(s, m);
             uint vflags = 0;
-            SymbolEntry* entry = localmap.queryProperties(vn.getAddr(), vn.getSize(), Address(), vflags);
+            SymbolEntry entry = localmap.queryProperties(vn.getAddr(), vn.getSize(), new Address(), vflags);
             if (entry != (SymbolEntry)null)   // Let entry try to force type
                 vn.setSymbolProperties(entry);
             else
@@ -2416,10 +2410,7 @@ namespace Sla.DECCORE
         /// \return the newly allocated Varnode
         public Varnode newVarnode(int s, AddrSpace @base, ulong off)
         {
-            Varnode* vn;
-
-            vn = newVarnode(s, Address(base, off));
-
+            Varnode vn = newVarnode(s, new Address(@base, off));
             return vn;
         }
 
@@ -2431,9 +2422,9 @@ namespace Sla.DECCORE
         /// \return the newly allocated \e annotation Varnode
         public Varnode newVarnodeIop(PcodeOp op)
         {
-            Datatype* ct = glb.types.getBase(sizeof(op), type_metatype.TYPE_UNKNOWN);
-            AddrSpace* cspc = glb.getIopSpace();
-            Varnode* vn = vbank.create(sizeof(op), Address(cspc, (ulong)(ulong)op), ct);
+            Datatype ct = glb.types.getBase(sizeof(op), type_metatype.TYPE_UNKNOWN);
+            AddrSpace cspc = glb.getIopSpace();
+            Varnode vn = vbank.create(sizeof(op), Address(cspc, (ulong)(ulong)op), ct);
             assignHigh(vn);
             return vn;
         }
@@ -2445,9 +2436,8 @@ namespace Sla.DECCORE
         /// \return the newly allocated constant Varnode
         public Varnode newVarnodeSpace(AddrSpace spc)
         {
-            Datatype* ct = glb.types.getBase(sizeof(spc), type_metatype.TYPE_UNKNOWN);
-
-            Varnode* vn = vbank.create(sizeof(spc), glb.createConstFromSpace(spc), ct);
+            Datatype ct = glb.types.getBase(sizeof(spc), type_metatype.TYPE_UNKNOWN);
+            Varnode vn = vbank.create(sizeof(spc), glb.createConstFromSpace(spc), ct);
             assignHigh(vn);
             return vn;
         }
@@ -2460,10 +2450,9 @@ namespace Sla.DECCORE
         /// \return the newly allocated \e annotation Varnode
         public Varnode newVarnodeCallSpecs(FuncCallSpecs fc)
         {
-            Datatype* ct = glb.types.getBase(sizeof(fc), type_metatype.TYPE_UNKNOWN);
-
-            AddrSpace* cspc = glb.getFspecSpace();
-            Varnode* vn = vbank.create(sizeof(fc), Address(cspc, (ulong)(ulong)fc), ct);
+            Datatype ct = glb.types.getBase(sizeof(fc), type_metatype.TYPE_UNKNOWN);
+            AddrSpace cspc = glb.getFspecSpace();
+            Varnode vn = vbank.create(sizeof(fc), new Address(cspc, (ulong)(ulong)fc), ct);
             assignHigh(vn);
             return vn;
         }
@@ -2478,7 +2467,7 @@ namespace Sla.DECCORE
         {
             if (ct == (Datatype)null)
                 ct = glb.types.getBase(s, type_metatype.TYPE_UNKNOWN);
-            Varnode* vn = vbank.createUnique(s, ct);
+            Varnode vn = vbank.createUnique(s, ct);
             assignHigh(vn);
             if (s >= minLanedSize)
                 checkForLanedRegister(s, vn.getAddr());
@@ -2496,11 +2485,8 @@ namespace Sla.DECCORE
         /// \return the newly allocated \e annotation Varnode
         public Varnode newCodeRef(Address m)
         {
-            Varnode* vn;
-            Datatype* ct;
-
-            ct = glb.types.getTypeCode();
-            vn = vbank.create(1, m, ct);
+            Datatype ct = glb.types.getTypeCode();
+            Varnode vn = vbank.create(1, m, ct);
             vn.setFlags(Varnode.varnode_flags.annotation);
             assignHigh(vn);
             return vn;
@@ -2519,7 +2505,7 @@ namespace Sla.DECCORE
         /// \return the marked Varnode
         public Varnode setInputVarnode(Varnode vn)
         {
-            Varnode* invn;
+            Varnode invn;
 
             if (vn.isInput()) return vn;   // Already an input
                                             // First we check if it overlaps any other varnode
@@ -2544,10 +2530,10 @@ namespace Sla.DECCORE
 
             vn = vbank.setInput(vn);
             setVarnodeProperties(vn);
-            uint effecttype = funcp.hasEffect(vn.getAddr(), vn.getSize());
-            if (effecttype == EffectRecord::unaffected)
+            EffectRecord.EffectType effecttype = funcp.hasEffect(vn.getAddr(), vn.getSize());
+            if (effecttype == EffectRecord.EffectType.unaffected)
                 vn.setUnaffected();
-            if (effecttype == EffectRecord::return_address)
+            if (effecttype == EffectRecord.EffectType.return_address)
             {
                 vn.setUnaffected();    // Should be unaffected over the course of the function
                 vn.setReturnAddress();
@@ -2566,13 +2552,13 @@ namespace Sla.DECCORE
         public void adjustInputVarnodes(Address addr, int sz)
         {
             Address endaddr = addr + (sz - 1);
-            List<Varnode*> inlist;
+            List<Varnode> inlist = new List<Varnode>();
             VarnodeDefSet::const_iterator iter, enditer;
             iter = vbank.beginDef(Varnode.varnode_flags.input, addr);
             enditer = vbank.endDef(Varnode.varnode_flags.input, endaddr);
             while (iter != enditer)
             {
-                Varnode* vn = *iter;
+                Varnode vn = iter.Current;
                 ++iter;
                 if (vn.getOffset() + (vn.getSize() - 1) > endaddr.getOffset())
                     throw new LowlevelError("Cannot properly adjust input varnodes");
@@ -2581,22 +2567,22 @@ namespace Sla.DECCORE
 
             for (uint i = 0; i < inlist.size(); ++i)
             {
-                Varnode* vn = inlist[i];
+                Varnode vn = inlist[i];
                 int sa = addr.justifiedContain(sz, vn.getAddr(), vn.getSize(), false);
                 if ((!vn.isInput()) || (sa < 0) || (sz <= vn.getSize()))
                     throw new LowlevelError("Bad adjustment to input varnode");
-                PcodeOp* subop = newOp(2, getAddress());
+                PcodeOp subop = newOp(2, getAddress());
                 opSetOpcode(subop, OpCode.CPUI_SUBPIECE);
                 opSetInput(subop, newConstant(4, sa), 1);
-                Varnode* newvn = newVarnodeOut(vn.getSize(), vn.getAddr(), subop);
+                Varnode newvn = newVarnodeOut(vn.getSize(), vn.getAddr(), subop);
                 // newvn must not be free in order to give all vn's descendants
-                opInsertBegin(subop, (BlockBasic*)bblocks.getBlock(0));
+                opInsertBegin(subop, (BlockBasic)bblocks.getBlock(0));
                 totalReplace(vn, newvn);
                 deleteVarnode(vn); // Get rid of old input before creating new input
                 inlist[i] = newvn;
             }
             // Now that all the intersecting inputs have been pulled out, we can create the new input
-            Varnode* invn = newVarnode(sz, addr);
+            Varnode invn = newVarnode(sz, addr);
             invn = setInputVarnode(invn);
             // The new input may cause new heritage and "Heritage AFTER dead removal" errors
             // So tell heritage to ignore it
@@ -2605,7 +2591,7 @@ namespace Sla.DECCORE
             // Now change all old inputs to be created as SUBPIECE from the new input
             for (uint i = 0; i < inlist.size(); ++i)
             {
-                PcodeOp* op = inlist[i].getDef();
+                PcodeOp op = inlist[i].getDef();
                 opSetInput(op, invn, 0);
             }
         }
@@ -2627,18 +2613,16 @@ namespace Sla.DECCORE
             Address endaddr = addr + vn.getSize();
             VarnodeLocSet::const_iterator iter = vn.lociter;
 
-            while (iter != beginLoc())
-            {
+            while (iter != beginLoc()) {
                 --iter;
-                Varnode* curvn = *iter;
+                Varnode curvn = iter.Current;
                 Address curEnd = curvn.getAddr() + curvn.getSize();
                 if (curEnd <= addr) break;
                 addr = curvn.getAddr();
             }
             iter = vn.lociter;
-            while (iter != endLoc())
-            {
-                Varnode* curvn = *iter;
+            while (iter != endLoc()) {
+                Varnode curvn = iter;
                 ++iter;
                 if (endaddr <= curvn.getAddr()) break;
                 endaddr = curvn.getAddr() + curvn.getSize();
@@ -2741,10 +2725,10 @@ namespace Sla.DECCORE
         /// \param addr is the starting address of the storage range
         public void checkForLanedRegister(int sz, Address addr)
         {
-            LanedRegister* lanedRegister = glb.getLanedRegister(addr, sz);
-            if (lanedRegister == (LanedRegister*)0)
+            LanedRegister lanedRegister = glb.getLanedRegister(addr, sz);
+            if (lanedRegister == (LanedRegister)null)
                 return;
-            VarnodeData storage;
+            VarnodeData storage = new VarnodeData();
             storage.space = addr.getSpace();
             storage.offset = addr.getOffset();
             storage.size = sz;
@@ -2752,15 +2736,15 @@ namespace Sla.DECCORE
         }
 
         /// Beginning iterator over laned accesses
-        public Dictionary<VarnodeData, LanedRegister>::const_iterator beginLaneAccess() => lanedMap.begin();
+        public Dictionary<VarnodeData, LanedRegister>.Enumerator beginLaneAccess() => lanedMap.begin();
 
         /// Ending iterator over laned accesses
-        public Dictionary<VarnodeData, LanedRegister>::const_iterator endLaneAccess() => lanedMap.end();
+        public Dictionary<VarnodeData, LanedRegister>.Enumerator endLaneAccess() => lanedMap.end();
 
         /// Clear records from the laned access list
         public void clearLanedAccessMap()
         {
-            lanedMap.clear();
+            lanedMap.Clear();
         }
 
         /// Find a high-level variable by name
@@ -2771,11 +2755,11 @@ namespace Sla.DECCORE
         /// \return the matching HighVariable or NULL
         public HighVariable findHigh(string nm)
         {
-            List<Symbol*> symList;
+            List<Symbol> symList = new List<Symbol>();
             localmap.queryByName(nm, symList);
             if (symList.empty()) return (HighVariable)null;
-            Symbol* sym = symList[0];
-            Varnode* vn = findLinkedVarnode(sym.getFirstWholeMap());
+            Symbol sym = symList[0];
+            Varnode vn = findLinkedVarnode(sym.getFirstWholeMap());
             if (vn != (Varnode)null)
                 return vn.getHigh();
 
@@ -2787,12 +2771,12 @@ namespace Sla.DECCORE
         /// build a new global Symbol if one didn't exist before.
         public void mapGlobals()
         {
-            SymbolEntry* entry;
+            SymbolEntry entry;
             VarnodeLocSet::const_iterator iter, enditer;
-            Varnode* vn,*maxvn;
-            Datatype* ct;
+            Varnode vn, maxvn;
+            Datatype ct;
             uint fl;
-            List<Varnode*> uncoveredVarnodes;
+            List<Varnode> uncoveredVarnodes = new List<Varnode>();
             bool inconsistentuse = false;
 
             iter = vbank.beginLoc(); // Go through all varnodes for this space
@@ -2806,10 +2790,10 @@ namespace Sla.DECCORE
                 maxvn = vn;
                 Address addr = vn.getAddr();
                 Address endaddr = addr + vn.getSize();
-                uncoveredVarnodes.clear();
+                uncoveredVarnodes.Clear();
                 while (iter != enditer)
                 {
-                    vn = *iter;
+                    vn = iter.Current;
                     if (!vn.isPersist()) break;
                     if (vn.getAddr() < endaddr)
                     {
@@ -2838,12 +2822,12 @@ namespace Sla.DECCORE
                 entry = localmap.queryProperties(addr, 1, usepoint, fl);
                 if (entry == (SymbolEntry)null)
                 {
-                    Scope* discover = localmap.discoverScope(addr, ct.getSize(), usepoint);
+                    Scope? discover = localmap.discoverScope(addr, ct.getSize(), usepoint);
                     if (discover == (Scope)null)
                         throw new LowlevelError("Could not discover scope");
                     int index = 0;
                     string symbolname = discover.buildVariableName(addr, usepoint, ct, index,
-                                            Varnode.varnode_flags.addrtied | Varnode.varnode_flags.persist);
+                        Varnode.varnode_flags.addrtied | Varnode.varnode_flags.persist);
                     discover.addSymbol(symbolname, ct, addr, usepoint);
                 }
                 else if ((addr.getOffset() + ct.getSize()) - 1 > (entry.getAddr().getOffset() + entry.getSize()) - 1)
@@ -2863,9 +2847,8 @@ namespace Sla.DECCORE
         public void prepareThisPointer()
         {
             int numInputs = funcp.numParams();
-            for (int i = 0; i < numInputs; ++i)
-            {
-                ProtoParameter* param = funcp.getParam(i);
+            for (int i = 0; i < numInputs; ++i) {
+                ProtoParameter param = funcp.getParam(i);
                 if (param.isThisPointer() && param.isTypeLocked())
                     return;     // Data-type will be obtained directly from symbol
             }
@@ -2875,8 +2858,8 @@ namespace Sla.DECCORE
             if (localmap.hasTypeRecommendations())
                 return;
 
-            Datatype* dt = glb.types.getTypeVoid();
-            AddrSpace* spc = glb.getDefaultDataSpace();
+            Datatype dt = glb.types.getTypeVoid();
+            AddrSpace spc = glb.getDefaultDataSpace();
             dt = glb.types.getTypePointer(spc.getAddrSize(), dt, spc.getWordSize());
             Address addr = funcp.getThisPointerStorage(dt);
             localmap.addTypeRecommendation(addr, dt);
@@ -2893,13 +2876,13 @@ namespace Sla.DECCORE
         /// \param fl indicates what p-code ops were crossed to reach \e vn
         /// \param trial is the given parameter trial
         /// \return \b true for a legitimate double use
-        public bool checkCallDoubleUse(PcodeOp opmatch, PcodeOp op, Varnode vn, uint fl,
+        public bool checkCallDoubleUse(PcodeOp opmatch, PcodeOp op, Varnode vn, TraverseNode.Flags fl,
             ParamTrial trial)
         {
             int j = op.getSlot(vn);
             if (j <= 0) return false;   // Flow traces to indirect call variable, definitely not a param
-            FuncCallSpecs* fc = getCallSpecs(op);
-            FuncCallSpecs* matchfc = getCallSpecs(opmatch);
+            FuncCallSpecs fc = getCallSpecs(op);
+            FuncCallSpecs matchfc = getCallSpecs(opmatch);
             if (op.code() == opmatch.code())
             {
                 bool isdirect = (opmatch.code() == OpCode.CPUI_CALL);
@@ -2932,7 +2915,7 @@ namespace Sla.DECCORE
                     if (curtrial.isActive())
                         return false;
                 }
-                else if (TraverseNode::isAlternatePathValid(vn, fl))
+                else if (TraverseNode.isAlternatePathValid(vn, fl))
                     return false;
                 return true;
             }
@@ -2948,33 +2931,31 @@ namespace Sla.DECCORE
         /// \param trial is the parameter trial object associated with the Varnode
         /// \param mainFlags are flags describing traversals along the \e main path, from \e invn to \e opmatch
         /// \return \b true if the Varnode seems only to be used as parameter to \b opmatch
-        public bool onlyOpUse(Varnode invn, PcodeOp opmatch, ParamTrial trial, uint mainFlags)
+        public bool onlyOpUse(Varnode invn, PcodeOp opmatch, ParamTrial trial, TraverseNode.Flags mainFlags)
         {
-            List<TraverseNode> varlist;
-            list<PcodeOp*>::const_iterator iter;
-            Varnode* vn,*subvn;
-            PcodeOp* op;
+            List<TraverseNode> varlist = new List<TraverseNode>();
+            IEnumerator<PcodeOp> iter;
+            Varnode vn;
+            Varnode? subvn;
+            PcodeOp op;
             int i;
             bool res = true;
 
             varlist.reserve(64);
             invn.setMark();        // Marks prevent infinite loops
-            varlist.emplace_back(invn, mainFlags);
+            varlist.Add(new TraverseNode(invn, mainFlags));
 
-            for (i = 0; i < varlist.size(); ++i)
-            {
+            for (i = 0; i < varlist.size(); ++i) {
                 vn = varlist[i].vn;
-                uint baseFlags = varlist[i].flags;
-                for (iter = vn.descend.begin(); iter != vn.descend.end(); ++iter)
-                {
-                    op = *iter;
+                TraverseNode.Flags baseFlags = varlist[i].flags;
+                for (iter = vn.descend.begin(); iter != vn.descend.end(); ++iter) {
+                    op = iter.Current;
                     if (op == opmatch)
                     {
                         if (op.getIn(trial.getSlot()) == vn) continue;
                     }
-                    uint curFlags = baseFlags;
-                    switch (op.code())
-                    {
+                    TraverseNode.Flags curFlags = baseFlags;
+                    switch (op.code()) {
                         case OpCode.CPUI_BRANCH:       // These ops define a USE of a variable
                         case OpCode.CPUI_CBRANCH:
                         case OpCode.CPUI_BRANCHIND:
@@ -2988,12 +2969,12 @@ namespace Sla.DECCORE
                             res = false;
                             break;
                         case OpCode.CPUI_INDIRECT:
-                            curFlags |= TraverseNode::indirectalt;
+                            curFlags |= TraverseNode.Flags.indirectalt;
                             break;
                         case OpCode.CPUI_COPY:
                             if ((op.getOut().getSpace().getType() != spacetype.IPTR_INTERNAL) && !op.isIncidentalCopy() && !vn.isIncidentalCopy())
                             {
-                                curFlags |= TraverseNode::actionalt;
+                                curFlags |= TraverseNode.Flags.actionalt;
                             }
                             break;
                         case OpCode.CPUI_RETURN:
@@ -3006,7 +2987,7 @@ namespace Sla.DECCORE
                             {   // Are we in the middle of analyzing returns
                                 if (op.getIn(0) != vn)
                                 {       // Unless we hold actual return value
-                                    if (!TraverseNode::isAlternatePathValid(vn, curFlags))
+                                    if (!TraverseNode.isAlternatePathValid(vn, curFlags))
                                         continue;               // Don't consider this a "use"
                                 }
                             }
@@ -3020,37 +3001,34 @@ namespace Sla.DECCORE
                         case OpCode.CPUI_PIECE:
                             if (op.getIn(0) == vn)
                             {   // Concatenated as most significant piece
-                                if ((curFlags & TraverseNode::lsb_truncated) != 0)
+                                if ((curFlags & TraverseNode.Flags.lsb_truncated) != 0)
                                 {
                                     // Original lsb has been truncated and replaced
                                     continue;   // No longer assume this is a possible use
                                 }
-                                curFlags |= TraverseNode::concat_high;
+                                curFlags |= TraverseNode.Flags.concat_high;
                             }
                             break;
                         case OpCode.CPUI_SUBPIECE:
                             if (op.getIn(1).getOffset() != 0)
                             {           // Throwing away least significant byte(s)
-                                if ((curFlags & TraverseNode::concat_high) == 0)    // If no previous concatenation has occurred
-                                    curFlags |= TraverseNode::lsb_truncated;        // Byte(s) of original value have been thrown away
+                                if ((curFlags & TraverseNode.Flags.concat_high) == 0)    // If no previous concatenation has occurred
+                                    curFlags |= TraverseNode.Flags.lsb_truncated;        // Byte(s) of original value have been thrown away
                             }
                             break;
                         default:
-                            curFlags |= TraverseNode::actionalt;
+                            curFlags |= TraverseNode.Flags.actionalt;
                             break;
                     }
                     if (!res) break;
                     subvn = op.getOut();
-                    if (subvn != (Varnode)null)
-                    {
-                        if (subvn.isPersist())
-                        {
+                    if (subvn != (Varnode)null) {
+                        if (subvn.isPersist()) {
                             res = false;
                             break;
                         }
-                        if (!subvn.isMark())
-                        {
-                            varlist.emplace_back(subvn, curFlags);
+                        if (!subvn.isMark()) {
+                            varlist.Add(new TraverseNode(subvn, curFlags));
                             subvn.setMark();
                         }
                     }
@@ -3074,12 +3052,11 @@ namespace Sla.DECCORE
         /// \param mainFlags describes traversals along the path from \e invn to \e op
         /// \return \b true if the Varnode is only used for the CALL/RETURN
         public bool ancestorOpUse(int maxlevel, Varnode invn, PcodeOp op, ParamTrial trial,
-            int offset, uint mainFlags)
+            int offset, TraverseNode.Flags mainFlags)
         {
             if (maxlevel == 0) return false;
 
-            if (!invn.isWritten())
-            {
+            if (!invn.isWritten()) {
                 if (!invn.isInput()) return false;
                 if (!invn.isTypeLock()) return false;
                 // If the input is typelocked
@@ -3087,25 +3064,23 @@ namespace Sla.DECCORE
                 return onlyOpUse(invn, op, trial, mainFlags); // Test if varnode is only used in op
             }
 
-            PcodeOp def = invn.getDef();
-            switch (def.code())
-            {
+            PcodeOp def = invn.getDef() ?? throw new BugException();
+            switch (def.code()) {
                 case OpCode.CPUI_INDIRECT:
                     // An indirectCreation is an indication of an output trial, this should not count as
                     // as an "only use"
                     if (def.isIndirectCreation())
                         return false;
-                    return ancestorOpUse(maxlevel - 1, def.getIn(0), op, trial, offset, mainFlags | TraverseNode::indirect);
+                    return ancestorOpUse(maxlevel - 1, def.getIn(0), op, trial, offset,
+                        mainFlags | TraverseNode.Flags.indirect);
                 case OpCode.CPUI_MULTIEQUAL:
                     // Check if there is any ancestor whose only
                     // use is in this op
                     if (def.isMark()) return false;    // Trim the loop
                     def.setMark();     // Mark that this MULTIEQUAL is on the path
                                         // Note: onlyOpUse is using Varnode::setMark
-                    for (int i = 0; i < def.numInput(); ++i)
-                    {
-                        if (ancestorOpUse(maxlevel - 1, def.getIn(i), op, trial, offset, mainFlags))
-                        {
+                    for (int i = 0; i < def.numInput(); ++i) {
+                        if (ancestorOpUse(maxlevel - 1, def.getIn(i), op, trial, offset, mainFlags)) {
                             def.clearMark();
                             return true;
                         }
@@ -3113,7 +3088,9 @@ namespace Sla.DECCORE
                     def.clearMark();
                     return false;
                 case OpCode.CPUI_COPY:
-                    if ((invn.getSpace().getType() == spacetype.IPTR_INTERNAL) || def.isIncidentalCopy() || def.getIn(0).isIncidentalCopy())
+                    if ((invn.getSpace().getType() == spacetype.IPTR_INTERNAL)
+                        || def.isIncidentalCopy()
+                        || def.getIn(0).isIncidentalCopy())
                     {
                         return ancestorOpUse(maxlevel - 1, def.getIn(0), op, trial, offset, mainFlags);
                     }
@@ -3131,12 +3108,10 @@ namespace Sla.DECCORE
                         // This is a rather kludgy way to get around where a DIV (or other similar) instruction
                         // causes a register that looks like the high precision piece of the function return
                         // to be set with the remainder as a side effect
-                        if (newOff == 0)
-                        {
+                        if (newOff == 0) {
                             Varnode vn = def.getIn(0);
-                            if (vn.isWritten())
-                            {
-                                PcodeOp remop = vn.getDef();
+                            if (vn.isWritten()) {
+                                PcodeOp remop = vn.getDef() ?? throw new BugException();
                                 if ((remop.code() == OpCode.CPUI_INT_REM) || (remop.code() == OpCode.CPUI_INT_SREM))
                                     trial.setRemFormed();
                             }
@@ -3172,7 +3147,8 @@ namespace Sla.DECCORE
         {
             ulong newConsume = (vn.getConsume() >> 8 * lsbOffset) & Globals.calc_mask(newVn.getSize());
 
-            uint vnFlags = vn.getFlags() & (Varnode.varnode_flags.directwrite | Varnode.varnode_flags.addrforce);
+            Varnode.varnode_flags vnFlags = vn.getFlags()
+                & (Varnode.varnode_flags.directwrite | Varnode.varnode_flags.addrforce);
 
             newVn.setFlags(vnFlags);   // Preserve addrforce setting
             newVn.setConsume(newConsume);
@@ -3187,7 +3163,7 @@ namespace Sla.DECCORE
         {
             if (vn.isWritten()) {
                 // Can't replace output with constant
-                PcodeOp? defop = vn.getDef();
+                PcodeOp? defop = vn.getDef() ?? throw new BugException();
                 if (defop.isMarker())
                     defop.setAdditionalFlag(PcodeOp.AdditionalFlags.warning); // Not a true write, ignore it
                 else if (!defop.isWarning()) {
@@ -3269,22 +3245,22 @@ namespace Sla.DECCORE
         /// \return \b true if a change was made
         public bool replaceVolatile(Varnode vn)
         {
-            PcodeOp* newop;
-            if (vn.isWritten())
-            {   // A written value
-                VolatileWriteOp* vw_op = glb.userops.getVolatileWrite();
+            PcodeOp newop;
+            if (vn.isWritten()) {
+                // A written value
+                VolatileWriteOp vw_op = glb.userops.getVolatileWrite();
                 if (!vn.hasNoDescend()) throw new LowlevelError("Volatile memory was propagated");
-                PcodeOp* defop = vn.getDef();
+                PcodeOp defop = vn.getDef() ?? throw new BugException();
                 newop = newOp(3, defop.getAddr());
                 opSetOpcode(newop, OpCode.CPUI_CALLOTHER);
                 // Create a userop of type specified by vw_op
                 opSetInput(newop, newConstant(4, vw_op.getIndex()), 0);
                 // The first parameter is the offset of volatile memory location
-                Varnode* annoteVn = newCodeRef(vn.getAddr());
+                Varnode annoteVn = newCodeRef(vn.getAddr());
                 annoteVn.setFlags(Varnode.varnode_flags.volatil);
                 opSetInput(newop, annoteVn, 1);
                 // Replace the volatile variable with a temp
-                Varnode* tmp = newUnique(vn.getSize());
+                Varnode tmp = newUnique(vn.getSize());
                 opSetOutput(defop, tmp);
                 // The temp is the second parameter to the userop
                 opSetInput(newop, tmp, 2);
@@ -3292,19 +3268,19 @@ namespace Sla.DECCORE
             }
             else
             {           // A read value
-                VolatileReadOp* vr_op = glb.userops.getVolatileRead();
+                VolatileReadOp vr_op = glb.userops.getVolatileRead();
                 if (vn.hasNoDescend()) return false; // Dead
-                PcodeOp* readop = vn.loneDescend();
+                PcodeOp readop = vn.loneDescend();
                 if (readop == (PcodeOp)null)
                     throw new LowlevelError("Volatile memory value used more than once");
                 newop = newOp(2, readop.getAddr());
                 opSetOpcode(newop, OpCode.CPUI_CALLOTHER);
                 // Create a temp to replace the volatile variable
-                Varnode* tmp = newUniqueOut(vn.getSize(), newop);
+                Varnode tmp = newUniqueOut(vn.getSize(), newop);
                 // Create a userop of type specified by vr_op
                 opSetInput(newop, newConstant(4, vr_op.getIndex()), 0);
                 // The first parameter is the offset of the volatile memory loc
-                Varnode* annoteVn = newCodeRef(vn.getAddr());
+                Varnode annoteVn = newCodeRef(vn.getAddr());
                 annoteVn.setFlags(Varnode.varnode_flags.volatil);
                 opSetInput(newop, annoteVn, 1);
                 opSetInput(readop, tmp, readop.getSlot(vn));
@@ -3313,7 +3289,7 @@ namespace Sla.DECCORE
                     newop.setHoldOutput();     // read value may not be used. Keep it around anyway.
             }
             if (vn.isTypeLock())       // If the original varnode had a type locked on it
-                newop.setAdditionalFlag(PcodeOp::special_prop); // Mark this op as doing special propagation
+                newop.setAdditionalFlag(PcodeOp.AdditionalFlags.special_prop); // Mark this op as doing special propagation
             return true;
         }
 
@@ -3326,9 +3302,9 @@ namespace Sla.DECCORE
 
             iter = beginDef(Varnode.varnode_flags.input);
             enditer = endDef(Varnode.varnode_flags.input);
-            for (; iter != enditer; ++iter)
-            {   // Loop over all inputs
-                Varnode* vn = *iter;
+            for (; iter != enditer; ++iter) {
+                // Loop over all inputs
+                Varnode vn = iter.Current;
                 if (!vn.isIllegalInput()) continue; // Only check illegal inputs
                 if (checkIndirectUse(vn))
                     vn.setFlags(Varnode.varnode_flags.indirectonly);
@@ -3428,8 +3404,8 @@ namespace Sla.DECCORE
         /// Turn on HighVariable objects for all Varnodes
         public void setHighLevel()
         {
-            if ((flags & highlevel_on) != 0) return;
-            flags |= highlevel_on;
+            if ((flags & Flags.highlevel_on) != 0) return;
+            flags |= Flags.highlevel_on;
             high_level_index = vbank.getCreateIndex();
             VarnodeLocSet::const_iterator iter;
 
@@ -3443,16 +3419,13 @@ namespace Sla.DECCORE
         public void clearDeadVarnodes()
         {
             VarnodeLocSet::const_iterator iter;
-            Varnode* vn;
+            Varnode vn;
 
             iter = vbank.beginLoc();
-            while (iter != vbank.endLoc())
-            {
+            while (iter != vbank.endLoc()) {
                 vn = *iter++;
-                if (vn.hasNoDescend())
-                {
-                    if (vn.isInput() && !vn.isLockedInput())
-                    {
+                if (vn.hasNoDescend()) {
+                    if (vn.isInput() && !vn.isLockedInput()) {
                         vbank.makeFree(vn);
                         vn.clearCover();
                     }
@@ -3573,7 +3546,7 @@ namespace Sla.DECCORE
         public void remapDynamicVarnode(Varnode vn, Symbol sym, Address usepoint, ulong hash)
         {
             vn.clearSymbolLinks();
-            SymbolEntry* entry = localmap.remapSymbolDynamic(sym, hash, usepoint);
+            SymbolEntry entry = localmap.remapSymbolDynamic(sym, hash, usepoint);
             vn.setSymbolEntry(entry);
         }
 
@@ -3584,17 +3557,17 @@ namespace Sla.DECCORE
         /// else or the whole Varnode can't be found, do nothing.
         public void linkProtoPartial(Varnode vn)
         {
-            HighVariable* high = vn.getHigh();
+            HighVariable high = vn.getHigh();
             if (high.getSymbol() != (Symbol)null) return;
-            Varnode* rootVn = PieceNode::findRoot(vn);
+            Varnode rootVn = PieceNode.findRoot(vn);
             if (rootVn == vn) return;
 
-            HighVariable* rootHigh = rootVn.getHigh();
-            Varnode* nameRep = rootHigh.getNameRepresentative();
-            Symbol* sym = linkSymbol(nameRep);
+            HighVariable rootHigh = rootVn.getHigh();
+            Varnode nameRep = rootHigh.getNameRepresentative();
+            Symbol? sym = linkSymbol(nameRep);
             if (sym == (Symbol)null) return;
             rootHigh.establishGroupSymbolOffset();
-            SymbolEntry* entry = sym.getFirstWholeMap();
+            SymbolEntry entry = sym.getFirstWholeMap();
             vn.setSymbolEntry(entry);
         }
 
@@ -3604,35 +3577,33 @@ namespace Sla.DECCORE
         /// is global and there is no pre-existing Symbol.  (see mapGlobals())
         /// \param vn is the given Varnode
         /// \return the associated Symbol or NULL
-        public Symbol linkSymbol(Varnode vn)
+        public Symbol? linkSymbol(Varnode vn)
         {
             if (vn.isProtoPartial())
                 linkProtoPartial(vn);
-            HighVariable* high = vn.getHigh();
-            SymbolEntry* entry;
+            HighVariable high = vn.getHigh();
+            SymbolEntry? entry;
             uint fl = 0;
-            Symbol* sym = high.getSymbol();
+            Symbol? sym = high.getSymbol();
             if (sym != (Symbol)null) return sym; // Symbol already assigned
 
             Address usepoint = vn.getUsePoint(*this);
             // Find any entry overlapping base address
             entry = localmap.queryProperties(vn.getAddr(), 1, usepoint, fl);
-            if (entry != (SymbolEntry)null)
-            {
+            if (entry != (SymbolEntry)null) {
                 sym = handleSymbolConflict(entry, vn);
             }
-            else
-            {           // Must create a symbol entry
-                if (!vn.isPersist())
-                {   // Only create local symbol
+            else {
+                // Must create a symbol entry
+                if (!vn.isPersist()) {
+                    // Only create local symbol
                     if (vn.isAddrTied())
-                        usepoint = Address();
+                        usepoint = new Address();
                     entry = localmap.addSymbol("", high.getType(), vn.getAddr(), usepoint);
                     sym = entry.getSymbol();
                     vn.setSymbolEntry(entry);
                 }
             }
-
             return sym;
         }
 
@@ -3646,18 +3617,18 @@ namespace Sla.DECCORE
         /// \return the symbol being referred to or null
         public Symbol linkSymbolReference(Varnode vn)
         {
-            PcodeOp* op = vn.loneDescend();
-            Varnode* in0 = op.getIn(0);
-            TypePointer* ptype = (TypePointer*)in0.getHigh().getType();
+            PcodeOp op = vn.loneDescend();
+            Varnode in0 = op.getIn(0);
+            TypePointer ptype = (TypePointer)in0.getHigh().getType();
             if (ptype.getMetatype() != type_metatype.TYPE_PTR) return (Symbol)null;
-            TypeSpacebase* sb = (TypeSpacebase*)ptype.getPtrTo();
+            TypeSpacebase sb = (TypeSpacebase)ptype.getPtrTo();
             if (sb.getMetatype() != type_metatype.TYPE_SPACEBASE)
                 return (Symbol)null;
-            Scope* scope = sb.getMap();
+            Scope scope = sb.getMap();
             Address addr = sb.getAddress(vn.getOffset(), in0.getSize(), op.getAddr());
             if (addr.isInvalid())
                 throw new LowlevelError("Unable to generate proper address from spacebase");
-            SymbolEntry* entry = scope.queryContainer(addr, 1, Address());
+            SymbolEntry entry = scope.queryContainer(addr, 1, new Address());
             if (entry == (SymbolEntry)null)
                 return (Symbol)null;
             int off = (int)(addr.getOffset() - entry.getAddr().getOffset()) + entry.getOffset();
@@ -3778,14 +3749,14 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Cannot currently have a dynamic symbol outside the local scope");
             dhash.clear();
             int category = sym.getCategory();
-            if (category == Symbol::union_facet)
+            if (category == Symbol.SymbolCategory.union_facet)
             {
                 return applyUnionFacet(entry, dhash);
             }
             Varnode* vn = dhash.findVarnode(this, entry.getFirstUseAddress(), entry.getHash());
             if (vn == (Varnode)null) return false;
             if (vn.getSymbolEntry() != (SymbolEntry)null) return false;  // Varnode is already labeled
-            if (category == Symbol::equate)
+            if (category == Symbol.SymbolCategory.equate)
             {   // Is this an equate symbol
                 vn.setSymbolEntry(entry);
                 return true;
@@ -3809,28 +3780,27 @@ namespace Sla.DECCORE
         public bool attemptDynamicMappingLate(SymbolEntry entry, DynamicHash dhash)
         {
             dhash.clear();
-            Symbol* sym = entry.getSymbol();
-            if (sym.getCategory() == Symbol::union_facet)
-            {
+            Symbol sym = entry.getSymbol();
+            if (sym.getCategory() == Symbol.SymbolCategory.union_facet) {
                 return applyUnionFacet(entry, dhash);
             }
-            Varnode* vn = dhash.findVarnode(this, entry.getFirstUseAddress(), entry.getHash());
+            Varnode? vn = dhash.findVarnode(this, entry.getFirstUseAddress(), entry.getHash());
             if (vn == (Varnode)null)
                 return false;
             if (vn.getSymbolEntry() != (SymbolEntry)null) return false; // Symbol already applied
-            if (sym.getCategory() == Symbol::equate)
+            if (sym.getCategory() == Symbol.SymbolCategory.equate)
             {   // Equate symbol does not depend on size
                 vn.setSymbolEntry(entry);
                 return true;
             }
             if (vn.getSize() != entry.getSize())
             {
-                ostringstream s;
-                s << "Unable to use symbol ";
+                StringWriter s = new StringWriter();
+                s.Write("Unable to use symbol ");
                 if (!sym.isNameUndefined())
-                    s << sym.getName() << ' ';
-                s << ": Size does not match variable it labels";
-                warningHeader(s.str());
+                    s.Write($"{sym.getName()} ");
+                s.Write(": Size does not match variable it labels");
+                warningHeader(s.ToString());
                 return false;
             }
 
@@ -3852,15 +3822,12 @@ namespace Sla.DECCORE
             }
 
             vn.setSymbolEntry(entry);
-            if (!sym.isTypeLocked())
-            {   // If the dynamic symbol did not lock its type
+            if (!sym.isTypeLocked()) {
+                // If the dynamic symbol did not lock its type
                 localmap.retypeSymbol(sym, vn.getType()); // use the type propagated into the varnode
             }
-            else if (sym.getType() != vn.getType())
-            {
-                ostringstream s;
-                s << "Unable to use type for symbol " << sym.getName();
-                warningHeader(s.str());
+            else if (sym.getType() != vn.getType()) {
+                warningHeader($"Unable to use type for symbol {sym.getName()}");
                 localmap.retypeSymbol(sym, vn.getType()); // use the type propagated into the varnode
             }
             return true;
@@ -4499,7 +4466,7 @@ namespace Sla.DECCORE
             opSetOpcode(addop, OpCode.CPUI_INT_ADD);
             addout = newUniqueOut(addrsize, addop);
             opSetInput(addop, stackptr, 0);
-            off = AddrSpace::byteToAddress(off, spc.getWordSize());
+            off = AddrSpace.byteToAddress(off, spc.getWordSize());
             opSetInput(addop, newConstant(addrsize, off), 1);
             if (insertafter)
                 opInsertAfter(addop, op);

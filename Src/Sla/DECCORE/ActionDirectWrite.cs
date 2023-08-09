@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -40,53 +40,46 @@ namespace Sla.DECCORE
         public override int apply(Funcdata data)
         {
             VarnodeLocSet::const_iterator iter;
-            list<PcodeOp*>::const_iterator oiter;
-            Varnode* vn,*dvn;
-            PcodeOp* op;
-            List<Varnode*> worklist;
+            IEnumerator<PcodeOp> oiter;
+            Varnode vn, dvn;
+            PcodeOp op;
+            List<Varnode> worklist = new List<Varnode>();
 
             // Collect legal inputs and other auto direct writes
-            for (iter = data.beginLoc(); iter != data.endLoc(); ++iter)
-            {
+            for (iter = data.beginLoc(); iter != data.endLoc(); ++iter) {
                 vn = *iter;
                 vn.clearDirectWrite();
-                if (vn.isInput())
-                {
-                    if (vn.isPersist() || vn.isSpacebase())
-                    {
+                if (vn.isInput()) {
+                    if (vn.isPersist() || vn.isSpacebase()) {
                         vn.setDirectWrite();
                         worklist.Add(vn);
                     }
-                    else if (data.getFuncProto().possibleInputParam(vn.getAddr(), vn.getSize()))
-                    {
+                    else if (data.getFuncProto().possibleInputParam(vn.getAddr(), vn.getSize())) {
                         vn.setDirectWrite();
                         worklist.Add(vn);
                     }
                 }
-                else if (vn.isWritten())
-                {
+                else if (vn.isWritten()) {
                     op = vn.getDef();
-                    if (!op.isMarker())
-                    {
-                        if (vn.isPersist())
-                        {
+                    if (!op.isMarker()) {
+                        if (vn.isPersist()) {
                             // Anything that writes to a global variable (in a real way) is considered a direct write
                             vn.setDirectWrite();
                             worklist.Add(vn);
                         }
-                        else if (op.code() == OpCode.CPUI_COPY)
-                        {   // For most COPYs, do not consider it a direct write
-                            if (vn.isStackStore())
-                            {       // But, if the original operation was really a OpCode.CPUI_STORE
-                                Varnode* invn = op.getIn(0);   // Trace COPY source
-                                if (invn.isWritten())
-                                {       // Through possible multiple COPYs
-                                    PcodeOp* curop = invn.getDef();
+                        else if (op.code() == OpCode.CPUI_COPY) {
+                            // For most COPYs, do not consider it a direct write
+                            if (vn.isStackStore()) {
+                                // But, if the original operation was really a OpCode.CPUI_STORE
+                                Varnode invn = op.getIn(0);   // Trace COPY source
+                                if (invn.isWritten()) {
+                                    // Through possible multiple COPYs
+                                    PcodeOp curop = invn.getDef();
                                     if (curop.code() == OpCode.CPUI_COPY)
                                         invn = curop.getIn(0);
                                 }
-                                if (invn.isWritten() && invn.getDef().isMarker())
-                                {   // if source is from an INDIRECT
+                                if (invn.isWritten() && invn.getDef().isMarker()) {
+                                    // if source is from an INDIRECT
                                     vn.setDirectWrite();                   // then treat this as a direct write
                                     worklist.Add(vn);
                                 }
@@ -99,9 +92,8 @@ namespace Sla.DECCORE
                             worklist.Add(vn);
                         }
                     }
-                    else if (!propagateIndirect && op.code() == OpCode.CPUI_INDIRECT)
-                    {
-                        Varnode* outvn = op.getOut();
+                    else if (!propagateIndirect && op.code() == OpCode.CPUI_INDIRECT) {
+                        Varnode outvn = op.getOut();
                         if (op.getIn(0).getAddr() != outvn.getAddr())    // Check if storage address changes from input to output
                             vn.setDirectWrite();                   // Indicates an active COPY, which is a direct write
                         else if (outvn.isPersist())                // Value must be present at global storage at point call is made
@@ -109,27 +101,22 @@ namespace Sla.DECCORE
                                                                     // We do NOT add vn to worklist as INDIRECT otherwise does not propagate
                     }
                 }
-                else if (vn.isConstant())
-                {
-                    if (!vn.isIndirectZero())
-                    {
+                else if (vn.isConstant()) {
+                    if (!vn.isIndirectZero()) {
                         vn.setDirectWrite();
                         worklist.Add(vn);
                     }
                 }
             }
             // Let legalness taint
-            while (!worklist.empty())
-            {
+            while (!worklist.empty()) {
                 vn = worklist.GetLastItem();
                 worklist.RemoveLastItem();
-                for (oiter = vn.beginDescend(); oiter != vn.endDescend(); ++oiter)
-                {
+                for (oiter = vn.beginDescend(); oiter != vn.endDescend(); ++oiter) {
                     op = *oiter;
                     if (!op.isAssignment()) continue;
                     dvn = op.getOut();
-                    if (!dvn.isDirectWrite())
-                    {
+                    if (!dvn.isDirectWrite()) {
                         dvn.setDirectWrite();
                         // For call based INDIRECTs, output is marked, but does not propagate depending on setting
                         if (propagateIndirect || op.code() != OpCode.CPUI_INDIRECT || op.isIndirectStore())

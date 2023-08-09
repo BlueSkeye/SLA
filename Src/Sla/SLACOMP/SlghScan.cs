@@ -1326,7 +1326,7 @@ namespace Sla.SLACOMP
         //        if (pos == string::npos)
         //            return;
         //        string res;
-        //        for (; ; )
+        //        while(true)
         //        {
         //            if (pos == string::npos)
         //            {

@@ -102,7 +102,7 @@ namespace Sla.DECCORE
             return pcodeScript.evaluate(input);
         }
 
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_SEGMENTOP);
             spc = (AddrSpace)null;
@@ -111,7 +111,7 @@ namespace Sla.DECCORE
             innerinsize = 0;
             supportsfarpointer = false;
             name = "segment";       // Default name, might be overridden by userop attribute
-            for (; ; ) {
+            while(true) {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_SPACE)
@@ -132,7 +132,7 @@ namespace Sla.DECCORE
             if ((otherop as UnspecializedPcodeOp) == (UnspecializedPcodeOp)null)
                 throw new LowlevelError("Redefining userop " + name);
 
-            for (; ; ) {
+            while(true) {
                 uint subId = decoder.peekElement();
                 if (subId == 0) break;
                 if (subId == ElementId.ELEM_CONSTRESOLVE) {

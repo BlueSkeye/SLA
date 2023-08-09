@@ -43,7 +43,7 @@ namespace Sla.DECCORE
         /// Get the particular field associate with \b this
         public int getFieldNumber() => fieldNum;
     
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_FACETSYMBOL);
             encodeHeader(encoder);
@@ -52,7 +52,7 @@ namespace Sla.DECCORE
             encoder.closeElement(ElementId.ELEM_FACETSYMBOL);
         }
 
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_FACETSYMBOL);
             decodeHeader(decoder);

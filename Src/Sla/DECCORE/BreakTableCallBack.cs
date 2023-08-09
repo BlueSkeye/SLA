@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -43,20 +43,18 @@ namespace Sla.DECCORE
         /// for freeing the breakpoint object.
         /// \param name is the name of the user-defined pcode op
         /// \param func is the breakpoint object to associate with the pcode op
-        public void registerPcodeCallback(string nm, BreakCallBack func)
+        public void registerPcodeCallback(string name, BreakCallBack func)
         {
             func.setEmulate(emulate);
             List<string> userops;
             trans.getUserOpNames(userops);
-            for (int i = 0; i < userops.size(); ++i)
-            {
-                if (userops[i] == name)
-                {
+            for (int i = 0; i < userops.size(); ++i) {
+                if (userops[i] == name) {
                     pcodecallback[(ulong)i] = func;
                     return;
                 }
             }
-            throw new LowlevelError("Bad userop name: " + name);
+            throw new LowlevelError($"Bad userop name: {name}");
         }
 
         /// Register an address based breakpoint
@@ -75,18 +73,14 @@ namespace Sla.DECCORE
         /// This routine invokes the setEmulate method on each breakpoint currently in the table
         /// \param emu is the emulator to be associated with the breakpoints
         public override void setEmulate(Emulate emu)
-        { // Make sure all callbbacks are aware of new emulator
+        {
+            // Make sure all callbbacks are aware of new emulator
             emulate = emu;
-            Dictionary<Address, BreakCallBack*>::iterator iter1;
 
-            for (iter1 = addresscallback.begin(); iter1 != addresscallback.end(); ++iter1)
-                (*iter1).second.setEmulate(emu);
-
-            Dictionary<ulong, BreakCallBack*>::iterator iter2;
-
-
-            for (iter2 = pcodecallback.begin(); iter2 != pcodecallback.end(); ++iter2)
-                (*iter2).second.setEmulate(emu);
+            foreach (BreakCallBack callBack in addresscallback.Values)
+                callBack.setEmulate(emu);
+            foreach (BreakCallBack callBack in pcodecallback.Values)
+                callBack.setEmulate(emu);
         }
 
         /// Invoke any breakpoints for the given pcode op
@@ -97,11 +91,8 @@ namespace Sla.DECCORE
         public override bool doPcodeOpBreak(PcodeOpRaw curop)
         {
             ulong val = curop.getInput(0).offset;
-            Dictionary<ulong, BreakCallBack*>::const_iterator iter;
-
-            iter = pcodecallback.find(val);
-            if (iter == pcodecallback.end()) return false;
-            return (*iter).second.pcodeCallback(curop);
+            BreakCallBack? callBack;
+            return pcodecallback.TryGetValue(val, out callBack) && callBack.pcodeCallback(curop);
         }
 
         /// Invoke any breakpoints for the given address
@@ -111,11 +102,8 @@ namespace Sla.DECCORE
         /// \return \b true if the breakpoint exists and returns \b true, otherwise return \b false
         public override bool doAddressBreak(Address addr)
         {
-            Dictionary<Address, BreakCallBack*>::const_iterator iter;
-
-            iter = addresscallback.find(addr);
-            if (iter == addresscallback.end()) return false;
-            return (*iter).second.addressCallback(addr);
+            BreakCallBack? callBack;
+            return addresscallback.TryGetValue(addr, out callBack) && callBack.addressCallback(addr);
         }
     }
 }

@@ -22,13 +22,13 @@ namespace Sla.DECCORE
         /// Parse a \<type> element with a child describing the array element data-type.
         /// \param decoder is the stream decoder
         /// \param typegrp is the factory owning \b this data-type
-        protected void decode(Decoder decoder, TypeFactory typegrp)
+        protected void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
             //  uint elemId = decoder.openElement();
             decodeBasic(decoder);
             arraysize = -1;
             decoder.rewindAttributes();
-            for (; ; )
+            while(true)
             {
                 uint attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
@@ -152,7 +152,7 @@ namespace Sla.DECCORE
 
         public override Datatype clone() => new TypeArray(this);
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             if (typedefImm != (Datatype)null)
             {

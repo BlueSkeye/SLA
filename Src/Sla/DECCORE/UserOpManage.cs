@@ -1,4 +1,5 @@
 ﻿using ghidra;
+using Sla.CORE;
 using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
@@ -57,14 +58,13 @@ namespace Sla.DECCORE
                 if (useroplist[ind].getName() != op.getName())
                     throw new LowlevelError("User op " + op.getName() + " has same index as " + useroplist[ind].getName());
                 // We assume this registration customizes an existing userop
-                delete useroplist[ind];     // Delete the old spec
+                // delete useroplist[ind];     // Delete the old spec
             }
             useroplist[ind] = op;       // Index crossref
             useropmap[op.getName()] = op; // Name crossref
 
-            SegmentOp* s_op = dynamic_cast<SegmentOp*>(op);
-            if (s_op != (SegmentOp)null)
-            {
+            SegmentOp? s_op = op as SegmentOp;
+            if (s_op != (SegmentOp)null) {
                 int index = s_op.getSpace().getIndex();
 
                 while (segmentop.size() <= index)
@@ -75,18 +75,17 @@ namespace Sla.DECCORE
                 segmentop[index] = s_op;
                 return;
             }
-            VolatileReadOp* tmpVolRead = dynamic_cast<VolatileReadOp*>(op);
-            if (tmpVolRead != (VolatileReadOp*)0)
-            {
-                if (vol_read != (VolatileReadOp*)0)
+            VolatileReadOp? tmpVolRead = op as VolatileReadOp;
+            if (tmpVolRead != (VolatileReadOp)null) {
+                if (vol_read != (VolatileReadOp)null)
                     throw new LowlevelError("Multiple volatile reads registered");
                 vol_read = tmpVolRead;
                 return;
             }
-            VolatileWriteOp* tmpVolWrite = dynamic_cast<VolatileWriteOp*>(op);
-            if (tmpVolWrite != (VolatileWriteOp*)0)
+            VolatileWriteOp? tmpVolWrite = op as VolatileWriteOp;
+            if (tmpVolWrite != (VolatileWriteOp)null)
             {
-                if (vol_write != (VolatileWriteOp*)0)
+                if (vol_write != (VolatileWriteOp)null)
                     throw new LowlevelError("Multiple volatile writes registered");
                 vol_write = tmpVolWrite;
             }
@@ -95,8 +94,8 @@ namespace Sla.DECCORE
         /// Construct an empty manager
         public UserOpManage()
         {
-            vol_read = (VolatileReadOp*)0;
-            vol_write = (VolatileWriteOp*)0;
+            vol_read = (VolatileReadOp)null;
+            vol_write = (VolatileWriteOp)null;
         }
 
         ~UserOpManage()
@@ -133,12 +132,12 @@ namespace Sla.DECCORE
         /// \param glb is the owning Architecture
         public void setDefaults(Architecture glb)
         {
-            if (vol_read == (VolatileReadOp*)0)
+            if (vol_read == (VolatileReadOp)null)
             {
                 VolatileReadOp* volread = new VolatileReadOp(glb, "read_volatile", useroplist.size(), false);
                 registerOp(volread);
             }
-            if (vol_write == (VolatileWriteOp*)0)
+            if (vol_write == (VolatileWriteOp)null)
             {
                 VolatileWriteOp* volwrite = new VolatileWriteOp(glb, "write_volatile", useroplist.size(), false);
                 registerOp(volwrite);
@@ -188,18 +187,16 @@ namespace Sla.DECCORE
         /// register it with \b this manager.
         /// \param decoder is the stream decoder
         /// \param glb is the owning Architecture
-        public void decodeSegmentOp(Decoder decoder, Architecture glb)
+        public void decodeSegmentOp(Sla.CORE.Decoder decoder, Architecture glb)
         {
-            SegmentOp* s_op;
-            s_op = new SegmentOp(glb, "", useroplist.size());
-            try
-            {
+            SegmentOp s_op = new SegmentOp(glb, "", useroplist.size());
+            try {
                 s_op.decode(decoder);
                 registerOp(s_op);
             }
             catch (LowlevelError err) {
-                delete s_op;
-                throw err;
+                // delete s_op;
+                throw;
             }
         }
 
@@ -208,25 +205,21 @@ namespace Sla.DECCORE
         /// the element and register it with \b this manager.
         /// \param decoder is the stream decoder
         /// \param glb is the owning Architecture
-        public void decodeVolatile(Decoder decoder, Architecture glb)
+        public void decodeVolatile(Sla.CORE.Decoder decoder, Architecture glb)
         {
             string readOpName;
             string writeOpName;
             bool functionalDisplay = false;
-            for (; ; )
-            {
-                uint attribId = decoder.getNextAttributeId();
+            while (true) {
+                AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
-                if (attribId == ATTRIB_INPUTOP)
-                {
+                if (attribId == AttributeId.ATTRIB_INPUTOP) {
                     readOpName = decoder.readString();
                 }
-                else if (attribId == ATTRIB_OUTPUTOP)
-                {
+                else if (attribId == AttributeId.ATTRIB_OUTPUTOP) {
                     writeOpName = decoder.readString();
                 }
-                else if (attribId == ATTRIB_FORMAT)
-                {
+                else if (attribId == AttributeId.ATTRIB_FORMAT) {
                     string format = decoder.readString();
                     if (format == "functional")
                         functionalDisplay = true;
@@ -234,23 +227,21 @@ namespace Sla.DECCORE
             }
             if (readOpName.size() == 0 || writeOpName.size() == 0)
                 throw new LowlevelError("Missing inputop/outputop attributes in <volatile> element");
-            VolatileReadOp* vr_op = new VolatileReadOp(glb, readOpName, useroplist.size(), functionalDisplay);
-            try
-            {
+            VolatileReadOp vr_op = new VolatileReadOp(glb, readOpName, useroplist.size(), functionalDisplay);
+            try {
                 registerOp(vr_op);
             }
             catch (LowlevelError err) {
-                delete vr_op;
-                throw err;
+                // delete vr_op;
+                throw;
             }
-            VolatileWriteOp* vw_op = new VolatileWriteOp(glb, writeOpName, useroplist.size(), functionalDisplay);
-            try
-            {
+            VolatileWriteOp vw_op = new VolatileWriteOp(glb, writeOpName, useroplist.size(), functionalDisplay);
+            try {
                 registerOp(vw_op);
             }
             catch (LowlevelError err) {
-                delete vw_op;
-                throw err;
+                // delete vw_op;
+                throw;
             }
         }
 
@@ -259,16 +250,15 @@ namespace Sla.DECCORE
         /// and register it with \b this manager.
         /// \param decoder is the stream decoder
         /// \param glb is the owning Architecture
-        public void decodeCallOtherFixup(Decoder decoder, Architecture glb)
+        public void decodeCallOtherFixup(Sla.CORE.Decoder decoder, Architecture glb)
         {
-            InjectedUserOp* op = new InjectedUserOp(glb, "", 0, 0);
-            try
-            {
+            InjectedUserOp op = new InjectedUserOp(glb, "", 0, 0);
+            try {
                 op.decode(decoder);
                 registerOp(op);
             }
             catch (LowlevelError err) {
-                delete op;
+                // delete op;
                 throw err;
             }
         }
@@ -278,17 +268,16 @@ namespace Sla.DECCORE
         /// and register it with \b this manager.
         /// \param decoder is the stream decoder
         /// \param glb is the owning Architecture
-        public void decodeJumpAssist(Decoder decoder, Architecture glb)
+        public void decodeJumpAssist(Sla.CORE.Decoder decoder, Architecture glb)
         {
-            JumpAssistOp* op = new JumpAssistOp(glb);
-            try
-            {
+            JumpAssistOp op = new JumpAssistOp(glb);
+            try {
                 op.decode(decoder);
                 registerOp(op);
             }
             catch (LowlevelError err) {
-                delete op;
-                throw err;
+                /// delete op;
+                throw;
             }
         }
 
@@ -304,20 +293,19 @@ namespace Sla.DECCORE
         public void manualCallOtherFixup(string useropname, string outname, List<string> inname,
             string snippet, Architecture glb)
         {
-            UserPcodeOp* userop = getOp(useropname);
+            UserPcodeOp? userop = getOp(useropname);
             if (userop == (UserPcodeOp)null)
                 throw new LowlevelError("Unknown userop: " + useropname);
-            if (dynamic_cast<UnspecializedPcodeOp*>(userop) == (UnspecializedPcodeOp)null)
+            if ((userop as UnspecializedPcodeOp) == (UnspecializedPcodeOp)null)
                 throw new LowlevelError("Cannot fixup userop: " + useropname);
 
             int injectid = glb.pcodeinjectlib.manualCallOtherFixup(useropname, outname, inname, snippet);
-            InjectedUserOp* op = new InjectedUserOp(glb, useropname, userop.getIndex(), injectid);
-            try
-            {
+            InjectedUserOp op = new InjectedUserOp(glb, useropname, userop.getIndex(), (uint)injectid);
+            try {
                 registerOp(op);
             }
             catch (LowlevelError err) {
-                delete op;
+                // delete op;
                 throw err;
             }
         }

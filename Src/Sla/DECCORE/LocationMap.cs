@@ -34,19 +34,19 @@ namespace Sla.DECCORE
             iterator iter = themap.lower_bound(addr);
             if (iter != themap.begin())
                 --iter;
-            if ((iter != themap.end()) && (-1 == addr.overlap(0, (*iter).first, (*iter).second.size)))
+            if ((iter != themap.end()) && (-1 == addr.overlap(0, iter.Current.Key, (*iter).second.size)))
                 ++iter;
 
             int where = 0;
             intersect = 0;
-            if ((iter != themap.end()) && (-1 != (where = addr.overlap(0, (*iter).first, (*iter).second.size))))
+            if ((iter != themap.end()) && (-1 != (where = addr.overlap(0, iter.Current.Key, (*iter).second.size))))
             {
                 if (where + size <= (*iter).second.size)
                 {
                     intersect = ((*iter).second.pass < pass) ? 2 : 0; // Completely contained in previous element
                     return iter;
                 }
-                addr = (*iter).first;
+                addr = iter.Current.Key;
                 size = where + size;
                 if ((*iter).second.pass < pass)
                 {
@@ -55,7 +55,7 @@ namespace Sla.DECCORE
                 }
                 themap.erase(iter++);
             }
-            while ((iter != themap.end()) && (-1 != (where = (*iter).first.overlap(0, addr, size))))
+            while ((iter != themap.end()) && (-1 != (where = iter.Current.Key.overlap(0, addr, size))))
             {
                 if (where + (*iter).second.size > size)
                     size = where + (*iter).second.size;
@@ -82,7 +82,7 @@ namespace Sla.DECCORE
             iterator iter = themap.upper_bound(addr); // First range after address
             if (iter == themap.begin()) return themap.end();
             --iter;         // First range before or equal to address
-            if (-1 != addr.overlap(0, (*iter).first, (*iter).second.size))
+            if (-1 != addr.overlap(0, iter.Current.Key, (*iter).second.size))
                 return iter;
             return themap.end();
         }
@@ -96,7 +96,7 @@ namespace Sla.DECCORE
             Dictionary<Address, SizePass>::const_iterator iter = themap.upper_bound(addr); // First range after address
             if (iter == themap.begin()) return -1;
             --iter;         // First range before or equal to address
-            if (-1 != addr.overlap(0, (*iter).first, (*iter).second.size))
+            if (-1 != addr.overlap(0, iter.Current.Key, (*iter).second.size))
                 return (*iter).second.pass;
             return -1;
         }

@@ -154,41 +154,37 @@ namespace Sla.DECCORE
         /// \param inslot indicates the edge's input Varnode
         /// \param outslot indicates the edge's output Varnode
         /// \return \b true if the data-type propagates
-        private static bool propagateTypeEdge(TypeFactory typegrp, PcodeOp op, int inslot,
-            int outslot)
+        private static bool propagateTypeEdge(TypeFactory typegrp, PcodeOp op, int inslot, int outslot)
         {
-            Varnode* invn,*outvn;
+            Varnode invn, outvn;
 
             invn = (inslot == -1) ? op.getOut() : op.getIn(inslot);
-            Datatype* alttype = invn.getTempType();
-            if (alttype.needsResolution())
-            {
+            Datatype alttype = invn.getTempType();
+            if (alttype.needsResolution()) {
                 // Always give incoming data-type a chance to resolve, even if it would not otherwise propagate
                 alttype = alttype.resolveInFlow(op, inslot);
             }
             if (inslot == outslot) return false; // don't backtrack
             if (outslot < 0)
                 outvn = op.getOut();
-            else
-            {
+            else {
                 outvn = op.getIn(outslot);
                 if (outvn.isAnnotation()) return false;
             }
             if (outvn.isTypeLock()) return false; // Can't propagate through typelock
             if (outvn.stopsUpPropagation() && outslot >= 0) return false;  // Propagation is blocked
 
-            if (alttype.getMetatype() == type_metatype.TYPE_BOOL)
-            {   // Only propagate boolean
+            if (alttype.getMetatype() == type_metatype.TYPE_BOOL) {
+                // Only propagate boolean
                 if (outvn.getNZMask() > 1)         // If we know output can only take boolean values
                     return false;
             }
 
-            Datatype* newtype = op.getOpcode().propagateType(alttype, op, invn, outvn, inslot, outslot);
+            Datatype newtype = op.getOpcode().propagateType(alttype, op, invn, outvn, inslot, outslot);
             if (newtype == (Datatype)null)
                 return false;
 
-            if (0 > newtype.typeOrder(*outvn.getTempType()))
-            {
+            if (0 > newtype.typeOrder(*outvn.getTempType())) {
 #if TYPEPROP_DEBUG
                 propagationDebug(typegrp.getArch(), outvn, newtype, op, inslot, (Varnode)null);
 #endif

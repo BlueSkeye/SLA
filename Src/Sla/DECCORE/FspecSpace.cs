@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -34,9 +34,9 @@ namespace Sla.DECCORE
         public FspecSpace(AddrSpaceManager m, Translate t, int ind)
             : base(m, t, spacetype.IPTR_FSPEC, NAME, sizeof(void*), 1, ind, 0, 1)
         {
-            clearFlags(heritaged | does_deadcode | big_endian);
+            clearFlags(Properties.heritaged | Properties.does_deadcode | Properties.big_endian);
             if (HOST_ENDIAN == 1)       // Endianness always set by host
-                setFlags(big_endian);
+                setFlags(Properties.big_endian);
         }
 
         public override void encodeAttributes(Encoder encoder, ulong offset)
@@ -86,7 +86,7 @@ namespace Sla.DECCORE
             throw new LowlevelError("Should never encode fspec space to stream");
         }
 
-        public override void decode(Decoder decoder)
+        public override void decode(Sla.CORE.Decoder decoder)
         {
             throw new LowlevelError("Should never decode fspec space from stream");
         }

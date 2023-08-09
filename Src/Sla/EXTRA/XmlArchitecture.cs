@@ -40,7 +40,7 @@ namespace Sla.EXTRA
 
         /// Prepend extra stuff to specify binary file and spec
         /// \param encoder is the stream encoder
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_XML_SAVEFILE);
             encodeHeader(encoder);

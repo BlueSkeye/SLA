@@ -47,7 +47,7 @@ namespace Sla.DECCORE
 
         /// Encode a description of \b this as an \<loadtable> element
         /// \param encoder is the stream encoder
-        public void encode(Encoder encoder)
+        public void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_LOADTABLE);
             encoder.writeSignedInteger(AttributeId.ATTRIB_SIZE, size);
@@ -58,7 +58,7 @@ namespace Sla.DECCORE
 
         /// \param decoder is the stream decoder
         /// Decode \b this table from a \<loadtable> element
-        public void decode(Decoder decoder)
+        public void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_LOADTABLE);
             size = decoder.readSignedInteger(AttributeId.ATTRIB_SIZE);

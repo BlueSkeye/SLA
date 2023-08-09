@@ -73,13 +73,13 @@ namespace Sla.DECCORE
         /// (If supported) A \<constantpool> element is written containing \<cpoolrec>
         /// child elements for each CPoolRecord in the container.
         /// \param encoder is the stream encoder
-        public abstract void encode(Encoder encoder);
+        public abstract void encode(Sla.CORE.Encoder encoder);
 
         /// \brief Restore constant pool records from the given stream decoder
         /// (If supported) The container is populated with CPoolRecords initialized
         /// from a \<constantpool> element.
         /// \param decoder is the given stream decoder
         /// \param typegrp is the TypeFactory used to resolve data-type references in the XML
-        public abstract void decode(Decoder decoder, TypeFactory typegrp);
+        public abstract void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp);
     }
 }

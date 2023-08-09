@@ -208,7 +208,7 @@ namespace Sla.DECCORE
                 walkbackward(state, ignoreop, basevn);
         }
 
-        private void encode(Encoder encoder, ElementId tag, bool moredetail)
+        private void encode(Sla.CORE.Encoder encoder, ElementId tag, bool moredetail)
         {
             encoder.openElement(tag);
             encoder.openElement(ElementId.ELEM_ADDR);

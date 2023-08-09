@@ -39,7 +39,7 @@ namespace Sla.EXTRA
             else
                 sym = symList[0];
 
-            if (sym.getCategory() == Symbol::function_parameter)
+            if (sym.getCategory() == Symbol.SymbolCategory.function_parameter)
                 dcp.fd.getFuncProto().setInputLock(true);
             sym.getScope().retypeSymbol(sym, ct);
             sym.getScope().setAttribute(sym, Varnode.varnode_flags.typelock);

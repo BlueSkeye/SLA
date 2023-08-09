@@ -1044,7 +1044,7 @@ namespace Sla.DECCORE
             }
             if (count > 0 && domCopyIsNew)
             {
-                high.merge(domVn.getHigh(), (HighIntersectTest*)0, true);
+                high.merge(domVn.getHigh(), (HighIntersectTest)null, true);
             }
         }
 

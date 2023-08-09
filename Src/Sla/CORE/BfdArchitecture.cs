@@ -69,7 +69,7 @@ namespace Sla.CORE
             ((LoadImageBfd)loader).attachToSpace(getDefaultCodeSpace());
         }
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             // prepend extra stuff to specify binary file and spec
             encoder.openElement(ElementId.ELEM_BFD_SAVEFILE);

@@ -368,7 +368,7 @@ namespace Sla.DECCORE
                     valid = false;      // Cannot find mapped variable but nonmult is non-empty
                     return;
                 }
-                extra = AddrSpace::byteToAddress(extra, ct.getWordSize()); // Convert back to address units
+                extra = AddrSpace.byteToAddress(extra, ct.getWordSize()); // Convert back to address units
                 offset = (nonmultsum - extra) & ptrmask;
                 isSubtype = true;
             }
@@ -387,7 +387,7 @@ namespace Sla.DECCORE
                     }
                     extra = 0;  // No field, but pretend there is something there
                 }
-                extra = AddrSpace::byteToAddress(extra, ct.getWordSize()); // Convert back to address units
+                extra = AddrSpace.byteToAddress(extra, ct.getWordSize()); // Convert back to address units
                 offset = (nonmultsum - extra) & ptrmask;
                 if (pRelType != (TypePointerRel*)0 && offset == pRelType.getPointerOffset())
                 {

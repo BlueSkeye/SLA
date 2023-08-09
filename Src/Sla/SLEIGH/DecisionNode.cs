@@ -198,7 +198,7 @@ namespace Sla.SLEIGH
             {       // The node is terminal
                 List<pair<DisjointPattern*, Constructor*>>::const_iterator iter;
                 for (iter = list.begin(); iter != list.end(); ++iter)
-                    if ((*iter).first.isMatch(walker))
+                    if (iter.Current.Key.isMatch(walker))
                         return (*iter).second;
                 ostringstream s;
                 s << walker.getAddr().getShortcut();

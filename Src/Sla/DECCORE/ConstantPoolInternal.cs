@@ -67,7 +67,7 @@ namespace Sla.DECCORE
             }
 
             /// Encode the \e reference to a stream
-            public void encode(Encoder encoder)
+            public void encode(Sla.CORE.Encoder encoder)
             {
                 encoder.openElement(ElementId.ELEM_REF);
                 encoder.writeUnsignedInteger(AttributeId.ATTRIB_A, a);
@@ -78,7 +78,7 @@ namespace Sla.DECCORE
             /// Decode the \e reference from a stream
             /// Restore \b this \e reference from a \<ref> element
             /// \param decoder is the stream decoder
-            public void decode(Decoder decoder)
+            public void decode(Sla.CORE.Decoder decoder)
             {
                 uint elemId = decoder.openElement(ElementId.ELEM_REF);
                 a = decoder.readUnsignedInteger(AttributeId.ATTRIB_A);
@@ -117,19 +117,19 @@ namespace Sla.DECCORE
             cpoolMap.Clear();
         }
 
-        public override void encode(Encoder encoder)
+        public override void encode(Sla.CORE.Encoder encoder)
         {
             Dictionary<CheapSorter, CPoolRecord>::const_iterator iter;
             encoder.openElement(ElementId.ELEM_CONSTANTPOOL);
             for (iter = cpoolMap.begin(); iter != cpoolMap.end(); ++iter)
             {
-                (*iter).first.encode(encoder);
+                iter.Current.Key.encode(encoder);
                 (*iter).second.encode(encoder);
             }
             encoder.closeElement(ElementId.ELEM_CONSTANTPOOL);
         }
 
-        public override void decode(Decoder decoder, TypeFactory typegrp)
+        public override void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_CONSTANTPOOL);
             while (decoder.peekElement() != 0)

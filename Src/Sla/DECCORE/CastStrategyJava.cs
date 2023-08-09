@@ -1,5 +1,4 @@
-﻿using ghidra;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -14,8 +13,8 @@ namespace Sla.DECCORE
     /// decompiler's data-type system.
     internal class CastStrategyJava : CastStrategyC
     {
-        public virtual Datatype castStandard(Datatype reqtype, Datatype curtype,
-            bool care_uint_int, bool care_ptr_uint)
+        public override Datatype? castStandard(Datatype reqtype, Datatype curtype, bool care_uint_int,
+            bool care_ptr_uint)
         {
             if (curtype == reqtype) {
                 // Types are equal, no cast required
@@ -74,7 +73,7 @@ namespace Sla.DECCORE
                 case type_metatype.TYPE_CODE:
                     if (curbase.getMetatype() == type_metatype.TYPE_CODE) {
                         // Don't cast between function pointer and generic code pointer
-                        if (((TypeCode)reqbase).getPrototype() == null {
+                        if (((TypeCode)reqbase).getPrototype() == null) {
                             return null;
                         }
                         if (((TypeCode)curbase).getPrototype() == null) {
@@ -88,7 +87,7 @@ namespace Sla.DECCORE
             return reqtype;
         }
 
-        public virtual bool isZextCast(Datatype outtype, Datatype intype)
+        public override bool isZextCast(Datatype outtype, Datatype intype)
         {
             type_metatype outmeta = outtype.getMetatype();
             if ((outmeta != type_metatype.TYPE_INT) && (outmeta != type_metatype.TYPE_UINT) && (outmeta != type_metatype.TYPE_BOOL)) {

@@ -123,19 +123,19 @@ namespace Sla.DECCORE
         }
 
         private bool mapResHiSmallConst(Varnode rhi)
-        { // find reshi=hi1*lo2 + (tmp>>32)
+        {
+            // find reshi=hi1*lo2 + (tmp>>32)
             reshi = rhi;
             if (!reshi.isWritten()) return false;
             add1 = reshi.getDef();
             if (add1.code() != OpCode.CPUI_INT_ADD) return false;
-            Varnode* ad1,*ad2;
+            Varnode ad1, ad2;
             ad1 = add1.getIn(0);
             ad2 = add1.getIn(1);
             if (!ad1.isWritten()) return false;
             if (!ad2.isWritten()) return false;
             multhi1 = ad1.getDef();
-            if (multhi1.code() != OpCode.CPUI_INT_MULT)
-            {
+            if (multhi1.code() != OpCode.CPUI_INT_MULT) {
                 subhi = multhi1;
                 multhi1 = ad2.getDef();
             }
@@ -153,12 +153,13 @@ namespace Sla.DECCORE
         }
 
         private bool findLoFromIn()
-        { // Assuming we have -multhi1-, -multhi2-, -lo1-, and -hi1- in hand, try to label lo2/hi2 pair
-            Varnode* vn1 = multhi1.getIn(0);
-            Varnode* vn2 = multhi1.getIn(1);
+        {
+            // Assuming we have -multhi1-, -multhi2-, -lo1-, and -hi1- in hand, try to label lo2/hi2 pair
+            Varnode vn1 = multhi1.getIn(0);
+            Varnode vn2 = multhi1.getIn(1);
             if ((vn1 != lo1) && (vn2 != lo1))
             { // Try to normalize so multhi1 contains lo1
-                PcodeOp* tmpop = multhi1;
+                PcodeOp tmpop = multhi1;
                 multhi1 = multhi2;
                 multhi2 = tmpop;
                 vn1 = multhi1.getIn(0);
@@ -184,8 +185,8 @@ namespace Sla.DECCORE
 
         private bool findLoFromInSmallConst()
         { // Assuming we have -multhi1-, -lo1-, and -hi1- in hand, try to label -lo2-
-            Varnode* vn1 = multhi1.getIn(0);
-            Varnode* vn2 = multhi1.getIn(1);
+            Varnode vn1 = multhi1.getIn(0);
+            Varnode vn2 = multhi1.getIn(1);
             if (vn1 == hi1)
                 lo2 = vn2;
             else if (vn2 == hi1)

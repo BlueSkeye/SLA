@@ -199,7 +199,7 @@ namespace Sla.CORE {
         internal void decodeBasicAttributes(Decoder decoder)
         {
             deadcodedelay = -1;
-            for (; ; ) {
+            while(true) {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_NAME) {
@@ -679,12 +679,12 @@ namespace Sla.CORE {
         /// \param decoder is the stream decoder
         /// \param size is a reference where the recovered size should be stored
         /// \return the recovered offset
-        public virtual ulong decodeAttributes(Decoder decoder, ref uint size)
+        public virtual ulong decodeAttributes(Decoder decoder, out uint size)
         {
             ulong offset = 0;
             bool foundoffset = false;
-            for (; ; ) {
-                uint attribId = decoder.getNextAttributeId();
+            while(true) {
+                AttributeId attribId = decoder.getNextAttributeId();
                 if (0 == attribId) {
                     break;
                 }
@@ -804,7 +804,7 @@ namespace Sla.CORE {
         }
 
         /// Recover the details of this space from XML
-        public virtual void decode(Decoder decoder)
+        public virtual void decode(Sla.CORE.Decoder decoder)
         {
             // Multiple tags: <space>, <space_other>, <space_unique>
             uint elemId = decoder.openElement();

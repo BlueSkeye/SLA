@@ -43,7 +43,7 @@ namespace Sla.DECCORE
                     reachable.Add(op);
                 }
             }
-            for (; ; ) {
+            while(true) {
                 IEnumerator<PcodeOp> iter = vn.beginDescend();
                 while (iter.MoveNext()) {
                     PcodeOp op = iter.Current;

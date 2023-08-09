@@ -149,7 +149,7 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         /// \param effectlist is a container collecting EffectRecords across all parameters
         /// \param normalstack is \b true if parameters are pushed on the stack in the normal order
-        public abstract void decode(Decoder decoder, List<EffectRecord> effectlist, bool normalstack);
+        public abstract void decode(Sla.CORE.Decoder decoder, List<EffectRecord> effectlist, bool normalstack);
 
         /// Clone this parameter list model
         public abstract ParamList clone();

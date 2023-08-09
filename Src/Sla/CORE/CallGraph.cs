@@ -293,7 +293,7 @@ namespace Sla.CORE
             cycleStructure();
             if (0 == seeds.Count) return (CallGraphNode)null;
             CallGraphNode node = seeds[0];
-            for (; ; ) {
+            while(true) {
                 CallGraphNode pushnode = pushPossible(node, 0);
                 if (pushnode == (CallGraphNode)null)
                     break;
@@ -307,7 +307,7 @@ namespace Sla.CORE
             int outslot;
             node = popPossible(node, out outslot);
             outslot += 1;
-            for (; ; ) {
+            while(true) {
                 CallGraphNode? pushnode = pushPossible(node, outslot);
                 if (pushnode == (CallGraphNode)null)
                     break;
@@ -352,7 +352,7 @@ namespace Sla.CORE
             }
         }
 
-        public void encode(Encoder encoder)
+        public void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_CALLGRAPH);
             foreach (CallGraphNode node in graph.Values)
@@ -369,7 +369,7 @@ namespace Sla.CORE
         public void decoder(Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_CALLGRAPH);
-            for (; ; )
+            while(true)
             {
                 uint subId = decoder.peekElement();
                 if (subId == 0) break;

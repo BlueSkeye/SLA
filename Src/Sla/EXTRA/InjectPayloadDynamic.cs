@@ -61,7 +61,7 @@ namespace Sla.EXTRA
             decoder.closeElement(rootId);
         }
 
-        protected override void decode(Decoder decoder)
+        protected override void decode(Sla.CORE.Decoder decoder)
         {
             throw new LowlevelError("decode not supported for InjectPayloadDynamic");
         }

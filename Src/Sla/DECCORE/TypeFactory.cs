@@ -843,7 +843,7 @@ namespace Sla.DECCORE
                 elemId = decoder.openElement();
                 ulong newid = 0;
                 int size = -1;
-                for (; ; )
+                while(true)
                 {
                     uint attribId = decoder.getNextAttributeId();
                     if (attribId == 0) break;
@@ -882,7 +882,7 @@ namespace Sla.DECCORE
             tp.decodeBasic(decoder);
             if (tp.getMetatype() != type_metatype.TYPE_PTR)
                 throw new LowlevelError("Special type decode does not see pointer");
-            for (; ; )
+            while(true)
             {
                 uint attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
@@ -1333,7 +1333,7 @@ namespace Sla.DECCORE
         /// Encode \b this container to stream
         /// All data-types, in dependency order, are encoded to a stream
         /// \param encoder is the stream encoder
-        public void encode(Encoder encoder)
+        public void encode(Sla.CORE.Encoder encoder)
         {
             List<Datatype> deporder = new List<Datatype>();
             IEnumerator<Datatype> iter;
@@ -1385,7 +1385,7 @@ namespace Sla.DECCORE
         /// Scan configuration parameters of the factory and parse elements describing data-types
         /// into this container.
         /// \param decoder is the stream decoder
-        public void decode(Decoder decoder)
+        public void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_TYPEGRP);
 
@@ -1428,7 +1428,7 @@ namespace Sla.DECCORE
             uint defaultSize = glb.getDefaultSize();
             align = 0;
             uint elemId = decoder.openElement(ElementId.ELEM_DATA_ORGANIZATION);
-            for (; ; )
+            while(true)
             {
                 uint subId = decoder.openElement();
                 if (subId == 0) break;
@@ -1439,7 +1439,7 @@ namespace Sla.DECCORE
                     sizeOfLong = (int)decoder.readSignedInteger(AttributeId.ATTRIB_VALUE);
                 }
                 else if (subId == ElementId.ELEM_SIZE_ALIGNMENT_MAP) {
-                    for (; ; ) {
+                    while(true) {
                         uint mapId = decoder.openElement();
                         if (mapId != ElementId.ELEM_ENTRY) break;
                         int sz = (int)decoder.readSignedInteger(AttributeId.ATTRIB_SIZE);

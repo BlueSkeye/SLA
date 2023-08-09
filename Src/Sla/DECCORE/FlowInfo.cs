@@ -743,19 +743,19 @@ namespace Sla.DECCORE
             iter = visited.upper_bound(addr); // First range greater than addr
             if (iter != visited.begin()) {
                 --iter;         // Last range less than or equal to us
-                if (addr == (*iter).first) {
+                if (addr == iter.Current.Key) {
                     // If we have already visited this address
                     PcodeOp op = target(addr); // But make sure the address
                     data.opMarkStartBasic(op); // starts a basic block
                     addrlist.RemoveLastItem();    // Throw it away
                     return false;
                 }
-                if (addr < (*iter).first + (*iter).second.size)
+                if (addr < iter.Current.Key + (*iter).second.size)
                     reinterpreted(addr);
                 ++iter;
             }
             if (iter != visited.end())  // Whats the maximum distance we can go
-                bound = (*iter).first;
+                bound = iter.Current.Key;
             else
                 bound = eaddr;
             return true;
@@ -818,7 +818,7 @@ namespace Sla.DECCORE
             iter = visited.upper_bound(addr);
             if (iter == visited.begin()) return; // Should never happen
             --iter;
-            Address addr2 = (*iter).first;
+            Address addr2 = iter.Current.Key;
             StringWriter s = new StringWriter();
 
             s.Write($"Instruction at ({addr.getSpace().getName()},");
@@ -1326,7 +1326,7 @@ namespace Sla.DECCORE
                     break;
                 }
                 // Visit fall thru address in case of no-op
-                iter = visited.find((*iter).first + (*iter).second.size);
+                iter = visited.find(iter.Current.Key + (*iter).second.size);
             }
             ostringstream errmsg;
             errmsg << "Could not find op at target address: (";

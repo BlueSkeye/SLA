@@ -97,7 +97,7 @@ namespace Sla.DECCORE
             int sz = ct.getSize();
             if (!range.inRange(Address(spaceid, st), sz))
                 return;
-            long sst = (long)AddrSpace::byteToAddress(st, spaceid.getWordSize());
+            long sst = (long)AddrSpace.byteToAddress(st, spaceid.getWordSize());
             Globals.sign_extend(sst, spaceid.getAddrSize() * 8 - 1);
             sst = (long)AddrSpace.addressToByte(sst, spaceid.getWordSize());
             RangeHint* newRange = new RangeHint(st, sz, sst, ct, fl, rt, hi);
@@ -209,7 +209,7 @@ namespace Sla.DECCORE
             if (lastrange == (Range*)0) return false;
             if (maplist.empty()) return false;
             ulong high = spaceid.wrapOffset(lastrange.getLast() + 1);
-            long sst = (long)AddrSpace::byteToAddress(high, spaceid.getWordSize());
+            long sst = (long)AddrSpace.byteToAddress(high, spaceid.getWordSize());
             Globals.sign_extend(sst, spaceid.getAddrSize() * 8 - 1);
             sst = (long)AddrSpace.addressToByte(sst, spaceid.getWordSize());
             // Add extra range to bound any final open entry
