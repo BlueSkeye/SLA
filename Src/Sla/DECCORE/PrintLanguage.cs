@@ -735,10 +735,10 @@ namespace Sla.DECCORE
         protected void resetDefaultsInternal()
         {
             mods = 0;
-            head_comment_type = Comment::header | Comment::warningheader;
+            head_comment_type = Comment::header | Comment.comment_type.warningheader;
             line_commentindent = 20;
             namespc_strategy = MINIMAL_NAMESPACES;
-            instr_comment_type = Comment::user2 | Comment::warning;
+            instr_comment_type = Comment::user2 | Comment.comment_type.warning;
         }
 
         /// \brief Print a single unicode character as a \e character \e constant for the high-level language

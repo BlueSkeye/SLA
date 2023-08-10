@@ -97,18 +97,16 @@ namespace Sla.DECCORE
         private void updateFlags()
         {
             if ((highflags & HighVariable.DirtinessFlags.flagsdirty) == 0) return; // flags are up to date
+            Varnode.varnode_flags fl = 0;
 
-            List<Varnode*>::const_iterator iter;
-            uint fl = 0;
-
-            for (iter = inst.begin(); iter != inst.end(); ++iter)
-                fl |= (*iter).getFlags();
+            foreach (Varnode node in inst)
+                fl |= node.getFlags();
 
             // Keep these flags
             flags &= (Varnode.varnode_flags.mark | Varnode.varnode_flags.typelock);
             // Update all but these
             flags |= fl & ~(Varnode.varnode_flags.mark | Varnode.varnode_flags.directwrite | Varnode.varnode_flags.typelock);
-            highflags &= ~flagsdirty; // Clear the dirty flag
+            highflags &= ~DirtinessFlags.flagsdirty; // Clear the dirty flag
         }
 
         /// (Re)derive the internal cover of \b this from the member Varnodes
@@ -116,15 +114,13 @@ namespace Sla.DECCORE
         /// Merge the covers of all Varnode instances.
         private void updateInternalCover()
         {
-            if ((highflags & HighVariable.DirtinessFlags.coverdirty) != 0)
-            {
+            if ((highflags & DirtinessFlags.coverdirty) != 0) {
                 internalCover.clear();
-                if (inst[0].hasCover())
-                {
+                if (inst[0].hasCover()) {
                     for (int i = 0; i < inst.size(); ++i)
-                        internalCover.merge(*inst[i].getCover());
+                        internalCover.merge(inst[i].getCover());
                 }
-                highflags &= ~coverdirty;
+                highflags &= ~DirtinessFlags.coverdirty;
             }
         }
 
@@ -134,8 +130,7 @@ namespace Sla.DECCORE
         {
             if (piece == (VariablePiece)null)
                 updateInternalCover();
-            else
-            {
+            else {
                 piece.updateIntersections();
                 piece.updateCover();
             }
@@ -146,20 +141,17 @@ namespace Sla.DECCORE
         /// Get the most locked, most specific data-type from member Varnode objects.
         private void updateType()
         {
-            Varnode* vn;
+            Varnode vn;
 
-            if ((highflags & HighVariable.DirtinessFlags.typedirty) == 0) return; // Type is up to date
-            highflags &= ~typedirty; // Mark type as clean
-            if ((highflags & HighVariable.DirtinessFlags.type_finalized) != 0) return;  // Type has been finalized
+            if ((highflags & DirtinessFlags.typedirty) == 0) return; // Type is up to date
+            highflags &= ~DirtinessFlags.typedirty; // Mark type as clean
+            if ((highflags & DirtinessFlags.type_finalized) != 0) return;  // Type has been finalized
             vn = getTypeRepresentative();
 
             type = vn.getType();
-            if (type.hasStripped())
-            {
-                if (type.getMetatype() == type_metatype.TYPE_PARTIALUNION)
-                {
-                    if (symbol != (Symbol)null && symboloffset != -1)
-                    {
+            if (type.hasStripped()) {
+                if (type.getMetatype() == type_metatype.TYPE_PARTIALUNION) {
+                    if (symbol != (Symbol)null && symboloffset != -1) {
                         type_metatype meta = symbol.getType().getMetatype();
                         if (meta != type_metatype.TYPE_STRUCT && meta != type_metatype.TYPE_UNION)  // If partial union does not have a bigger backing symbol
                             type = type.getStripped();         // strip the partial union
@@ -177,17 +169,13 @@ namespace Sla.DECCORE
         /// (Re)derive the Symbol and offset for \b this from member Varnodes
         private void updateSymbol()
         {
-            if ((highflags & HighVariable.DirtinessFlags.symboldirty) == 0) return; // flags are up to date
-            highflags &= ~((uint)symboldirty);
-            List<Varnode*>::const_iterator iter;
+            if ((highflags & DirtinessFlags.symboldirty) == 0) return; // flags are up to date
+            highflags &= ~(DirtinessFlags.symboldirty);
             symbol = (Symbol)null;
 
-            for (iter = inst.begin(); iter != inst.end(); ++iter)
-            {
-                Varnode* vn = *iter;
-                if (vn.getSymbolEntry() != (SymbolEntry)null)
-                {
-                    setSymbol(vn);
+            foreach (Varnode node in inst) {
+                if (node.getSymbolEntry() != (SymbolEntry)null) {
+                    setSymbol(node);
                     return;
                 }
             }
@@ -196,43 +184,39 @@ namespace Sla.DECCORE
         /// Mark the existence of one COPY into \b this
         internal void setCopyIn1() 
         {
-            highflags |= HighVariable.DirtinessFlags.copy_in1;
+            highflags |= DirtinessFlags.copy_in1;
         }
 
         /// Mark the existence of two COPYs into \b this
         internal void setCopyIn2() 
         {
-            highflags |= HighVariable.DirtinessFlags.copy_in2;
+            highflags |= DirtinessFlags.copy_in2;
         }
 
         /// Clear marks indicating COPYs into \b this
         private void clearCopyIns() 
         {
-            highflags &= ~(copy_in1 | HighVariable.DirtinessFlags.copy_in2);
+            highflags &= ~(DirtinessFlags.copy_in1 | DirtinessFlags.copy_in2);
         }
 
         /// Is there at least one COPY into \b this
-        internal bool hasCopyIn1() => ((highflags&copy_in1)!= 0);
+        internal bool hasCopyIn1() => ((highflags & DirtinessFlags.copy_in1) != 0);
 
         /// Is there at least two COPYs into \b this
-        internal bool hasCopyIn2() => ((highflags&copy_in2)!= 0);
+        internal bool hasCopyIn2() => ((highflags & DirtinessFlags.copy_in2) != 0);
 
         /// Remove a member Varnode from \b this
         /// Search for the given Varnode and cut it out of the list, marking all properties as \e dirty.
         /// \param vn is the given Varnode member to remove
         private void remove(Varnode vn)
         {
-            List<Varnode*>::iterator iter;
-
-            iter = lower_bound(inst.begin(), inst.end(), vn, compareJustLoc);
-            for (; iter != inst.end(); ++iter)
-            {
-                if (*iter == vn)
-                {
+            IEnumerator<Varnode> iter = lower_bound(inst.begin(), inst.end(), vn, compareJustLoc);
+            while (iter.MoveNext()) {
+                if (iter.Current == vn) {
                     inst.erase(iter);
-                    highflags |= (flagsdirty | HighVariable.DirtinessFlags.namerepdirty | HighVariable.DirtinessFlags.coverdirty | HighVariable.DirtinessFlags.typedirty);
+                    highflags |= (DirtinessFlags.flagsdirty | DirtinessFlags.namerepdirty | DirtinessFlags.coverdirty | HighVariable.DirtinessFlags.typedirty);
                     if (vn.getSymbolEntry() != (SymbolEntry)null)
-                        highflags |= HighVariable.DirtinessFlags.symboldirty;
+                        highflags |= DirtinessFlags.symboldirty;
                     if (piece != (VariablePiece)null)
                         piece.markExtendCoverDirty();
                     return;
@@ -248,47 +232,43 @@ namespace Sla.DECCORE
         {
             int i;
 
-            highflags |= (flagsdirty | HighVariable.DirtinessFlags.namerepdirty | HighVariable.DirtinessFlags.typedirty);
-            if (tv2.symbol != (Symbol)null)
-            {       // Check if we inherit a Symbol
-                if ((tv2.highflags & HighVariable.DirtinessFlags.symboldirty) == 0)
-                {
+            highflags |= (DirtinessFlags.flagsdirty | DirtinessFlags.namerepdirty | DirtinessFlags.typedirty);
+            if (tv2.symbol != (Symbol)null) {
+                // Check if we inherit a Symbol
+                if ((tv2.highflags & DirtinessFlags.symboldirty) == 0) {
                     symbol = tv2.symbol;           // Overwrite our Symbol (assume it is the same)
                     symboloffset = tv2.symboloffset;
-                    highflags &= ~((uint)symboldirty); // Mark that we are not symbol dirty
+                    highflags &= ~(DirtinessFlags.symboldirty); // Mark that we are not symbol dirty
                 }
             }
 
-            if (isspeculative)
-            {
-                for (i = 0; i < tv2.inst.size(); ++i)
-                {
-                    Varnode* vn = tv2.inst[i];
-                    vn.setHigh(this, vn.getMergeGroup() + numMergeClasses);
+            if (isspeculative) {
+                for (i = 0; i < tv2.inst.size(); ++i) {
+                    Varnode vn = tv2.inst[i];
+                    vn.setHigh(this, (short)(vn.getMergeGroup() + numMergeClasses));
                 }
                 numMergeClasses += tv2.numMergeClasses;
             }
-            else
-            {
+            else {
                 if ((numMergeClasses != 1) || (tv2.numMergeClasses != 1))
-                    throw new LowlevelError("Making a non-speculative merge after speculative merges have occurred");
-                for (i = 0; i < tv2.inst.size(); ++i)
-                {
-                    Varnode* vn = tv2.inst[i];
+                    throw new LowlevelError(
+                        "Making a non-speculative merge after speculative merges have occurred");
+                for (i = 0; i < tv2.inst.size(); ++i) {
+                    Varnode vn = tv2.inst[i];
                     vn.setHigh(this, vn.getMergeGroup());
                 }
             }
-            List<Varnode*> instcopy(inst);
+            List<Varnode> instcopy(inst);
             inst.resize(inst.size() + tv2.inst.size(), (Varnode)null);
             std::merge(instcopy.begin(), instcopy.end(), tv2.inst.begin(), tv2.inst.end(), inst.begin(), compareJustLoc);
-            tv2.inst.clear();
+            tv2.inst.Clear();
 
             if (((highflags & HighVariable.DirtinessFlags.coverdirty) == 0) && ((tv2.highflags & HighVariable.DirtinessFlags.coverdirty) == 0))
                 internalCover.merge(tv2.internalCover);
             else
                 highflags |= HighVariable.DirtinessFlags.coverdirty;
 
-            delete tv2;
+            // delete tv2;
         }
 
         /// Merge with another HighVariable taking into account groups
@@ -360,14 +340,13 @@ namespace Sla.DECCORE
             else if (symbol.getType().getSize() == vn.getSize() &&
                 entry.getAddr() == vn.getAddr() && !entry.isPiece())
                 symboloffset = -1;          // A matching entry
-            else
-            {
+            else {
                 symboloffset = vn.getAddr().overlapJoin(0, entry.getAddr(), symbol.getType().getSize()) + entry.getOffset();
             }
 
             if (type != (Datatype)null && type.getMetatype() == type_metatype.TYPE_PARTIALUNION)
-                highflags |= HighVariable.DirtinessFlags.typedirty;
-            highflags &= ~((uint)symboldirty);     // We are no longer dirty
+                highflags |= DirtinessFlags.typedirty;
+            highflags &= ~(DirtinessFlags.symboldirty);     // We are no longer dirty
         }
 
         /// Attach a reference to a Symbol to \b this
@@ -390,14 +369,14 @@ namespace Sla.DECCORE
             piece = tv2.piece;
             tv2.piece = (VariablePiece)null;
             piece.setHigh(this);
-            highflags |= (tv2.highflags & (intersectdirty | HighVariable.DirtinessFlags.extendcoverdirty));
-            tv2.highflags &= ~(uint)(intersectdirty | HighVariable.DirtinessFlags.extendcoverdirty);
+            highflags |= (tv2.highflags & (DirtinessFlags.intersectdirty | DirtinessFlags.extendcoverdirty));
+            tv2.highflags &= ~(DirtinessFlags.intersectdirty | DirtinessFlags.extendcoverdirty);
         }
 
         /// Mark the boolean properties as \e dirty
         internal void flagsDirty() 
         {
-            highflags |= HighVariable.DirtinessFlags.flagsdirty | HighVariable.DirtinessFlags.namerepdirty;
+            highflags |= DirtinessFlags.flagsdirty | DirtinessFlags.namerepdirty;
         }
 
         /// Mark the cover as \e dirty
@@ -405,7 +384,7 @@ namespace Sla.DECCORE
         /// HighVariables it intersects with are marked as having a dirty extended cover.
         internal void coverDirty()
         {
-            highflags |= HighVariable.DirtinessFlags.coverdirty;
+            highflags |= DirtinessFlags.coverdirty;
             if (piece != (VariablePiece)null)
                 piece.markExtendCoverDirty();
         }
@@ -458,12 +437,12 @@ namespace Sla.DECCORE
 
         ~HighVariable()
         {
-            if (piece != (VariablePiece)null)
-                delete piece;
+            //if (piece != (VariablePiece)null)
+            //    delete piece;
         }
 
         /// Get the data-type
-        public Datatype getType() 
+        public Datatype? getType() 
         {
             updateType();
             return type;
@@ -588,7 +567,7 @@ namespace Sla.DECCORE
         /// \param s is the output stream
         public void printCover(TextWriter s)
         {
-            if ((highflags&HighVariable::coverdirty)== 0)
+            if ((highflags & DirtinessFlags.coverdirty) == 0)
                 internalCover.print(s);
             else s.Write("Cover dirty");
         }
@@ -598,12 +577,9 @@ namespace Sla.DECCORE
         /// \param s is the output stream
         public void printInfo(TextWriter s)
         {
-            List<Varnode>::const_iterator viter;
-            Varnode vn;
-
             updateType();
             if (symbol == (Symbol)null) {
-                s.WriteLine("Variable: UNNAMED";
+                s.WriteLine("Variable: UNNAMED");
             }
             else {
                 s.Write($"Variable: {symbol.getName()}");
@@ -617,10 +593,9 @@ namespace Sla.DECCORE
             s.WriteLine();
             s.WriteLine();
 
-            for (viter = inst.begin(); viter != inst.end(); ++viter) {
-                vn = *viter;
-                s << dec << vn.getMergeGroup() << ": ";
-                vn.printInfo(s);
+            foreach (Varnode node in inst) {
+                s.Write($"{node.getMergeGroup()}: ");
+                node.printInfo(s);
             }
         }
 
@@ -648,13 +623,12 @@ namespace Sla.DECCORE
                 if (!vn.isIndirectOnly())
                     indirectonly = false;
             }
-            if (isUnaffected())
-            {
+            if (isUnaffected()) {
                 if (!isInput()) return false;
                 if (indirectonly) return false;
                 Varnode vn = getInputVarnode();
-                if (!vn.isIllegalInput())
-                { // A leftover unaff illegal input gets named
+                if (!vn.isIllegalInput()) {
+                    // A leftover unaff illegal input gets named
                     if (vn.isSpacebase())  // A legal input, unaff, gets named
                         return false;       // Unless it is the stackpointer
                 }
@@ -699,20 +673,17 @@ namespace Sla.DECCORE
         /// \return the representative member
         public Varnode getTypeRepresentative()
         {
-            List<Varnode>::const_iterator iter;
-            Varnode vn;
-            Varnode rep;
 
-            iter = inst.begin();
-            rep = *iter;
-            ++iter;
-            for (; iter != inst.end(); ++iter) {
-                vn = *iter;
+            IEnumerator<Varnode> iter = inst.GetEnumerator();
+            if (!iter.MoveNext()) throw new BugException();
+            Varnode rep = iter.Current;
+            while (iter.MoveNext()) {
+                Varnode vn = iter.Current;
                 if (rep.isTypeLock() != vn.isTypeLock()) {
                     if (vn.isTypeLock())
                         rep = vn;
                 }
-                else if (0 > vn.getType().typeOrderBool(*rep.getType()))
+                else if (0 > vn.getType().typeOrderBool(rep.getType()))
                     rep = vn;
             }
             return rep;
@@ -723,19 +694,16 @@ namespace Sla.DECCORE
         /// \return the highest scoring Varnode member
         public Varnode getNameRepresentative()
         {
-            if ((highflags & HighVariable.DirtinessFlags.namerepdirty) == 0)
+            if ((highflags & DirtinessFlags.namerepdirty) == 0)
                 return nameRepresentative;      // Name representative is up to date
-            highflags &= ~namerepdirty;
+            highflags &= ~DirtinessFlags.namerepdirty;
 
-            List<Varnode>::const_iterator iter;
-            Varnode vn;
 
-            iter = inst.begin();
-            nameRepresentative = *iter;
-            ++iter;
-            for (; iter != inst.end(); ++iter)
-            {
-                vn = *iter;
+            IEnumerator<Varnode> iter = inst.GetEnumerator();
+            if (!iter.MoveNext()) throw new BugException();
+            nameRepresentative = iter.Current;
+            while (iter.MoveNext()) {
+                Varnode vn = iter.Current;
                 if (compareName(nameRepresentative, vn))
                     nameRepresentative = vn;
             }
@@ -828,10 +796,10 @@ namespace Sla.DECCORE
         }
 
         /// Return \b true if \b this is marked
-        public bool isMark() => ((flags&Varnode.varnode_flags.mark)!= 0);
+        public bool isMark() => ((flags & Varnode.varnode_flags.mark) != 0);
 
         /// Return \b true if \b this has merge problems
-        public bool isUnmerged() => ((highflags&unmerged)!= 0);
+        public bool isUnmerged() => ((highflags & DirtinessFlags.unmerged) != 0);
 
         /// \brief Determine if \b this HighVariable has an associated cover.
         ///
@@ -873,8 +841,7 @@ namespace Sla.DECCORE
                 encoder.writeString(AttributeId.ATTRIB_CLASS, "global");
             else if (isConstant())
                 encoder.writeString(AttributeId.ATTRIB_CLASS, "constant");
-            else if (!isPersist() && (symbol != (Symbol)null))
-            {
+            else if (!isPersist() && (symbol != (Symbol)null)) {
                 if (symbol.getCategory() == Symbol.SymbolCategory.function_parameter)
                     encoder.writeString(AttributeId.ATTRIB_CLASS, "param");
                 else if (symbol.getScope().isGlobal())
@@ -882,26 +849,23 @@ namespace Sla.DECCORE
                 else
                     encoder.writeString(AttributeId.ATTRIB_CLASS, "local");
             }
-            else
-            {
+            else {
                 encoder.writeString(AttributeId.ATTRIB_CLASS, "other");
             }
             if (isTypeLock())
                 encoder.writeBool(AttributeId.ATTRIB_TYPELOCK, true);
-            if (symbol != (Symbol)null)
-            {
+            if (symbol != (Symbol)null) {
                 encoder.writeUnsignedInteger(AttributeId.ATTRIB_SYMREF, symbol.getId());
                 if (symboloffset >= 0)
                     encoder.writeSignedInteger(AttributeId.ATTRIB_OFFSET, symboloffset);
             }
             getType().encode(encoder);
-            for (int j = 0; j < inst.size(); ++j)
-            {
+            for (int j = 0; j < inst.size(); ++j) {
                 encoder.openElement(ElementId.ELEM_ADDR);
                 encoder.writeUnsignedInteger(AttributeId.ATTRIB_REF, inst[j].getCreateIndex());
                 encoder.closeElement(ElementId.ELEM_ADDR);
             }
-            encoder.closeElement(ElementId.ElementId.ELEM_HIGH);
+            encoder.closeElement(ElementId.ELEM_HIGH);
         }
 
 #if MERGEMULTI_DEBUG
@@ -980,7 +944,7 @@ namespace Sla.DECCORE
         /// \param a is the first Varnode to compare
         /// \param b is the second Varnode
         /// \return \b true if the first Varnode should be ordered before the second
-        public static bool compareJustLoc(Varnode a, Varnode b) = >(a.getAddr() < b.getAddr());
+        public static bool compareJustLoc(Varnode a, Varnode b) =>(a.getAddr() < b.getAddr());
 
         /// Mark and collect variables in expression
         /// Given a Varnode at the root of an expression, we collect all the \e explicit HighVariables
@@ -998,32 +962,29 @@ namespace Sla.DECCORE
         /// \return a value based on call and LOAD instructions in the expression
         public static int markExpression(Varnode vn, List<HighVariable> highList)
         {
-            HighVariable* high = vn.getHigh();
+            HighVariable high = vn.getHigh();
             high.setMark();
             highList.Add(high);
             int retVal = 0;
             if (!vn.isWritten()) return retVal;
 
-            List<PcodeOpNode> path;
-            PcodeOp* op = vn.getDef();
+            List<PcodeOpNode> path = new List<PcodeOpNode>();
+            PcodeOp op = vn.getDef();
             if (op.isCall())
                 retVal |= 1;
             if (op.code() == OpCode.CPUI_LOAD)
                 retVal |= 2;
-            path.Add(PcodeOpNode(op, 0));
-            while (!path.empty())
-            {
-                PcodeOpNode & node(path.GetLastItem());
-                if (node.op.numInput() <= node.slot)
-                {
+            path.Add(new PcodeOpNode(op, 0));
+            while (!path.empty()) {
+                PcodeOpNode node = path.GetLastItem();
+                if (node.op.numInput() <= node.slot) {
                     path.RemoveLastItem();
                     continue;
                 }
-                Varnode* curVn = node.op.getIn(node.slot);
+                Varnode curVn = node.op.getIn(node.slot);
                 node.slot += 1;
                 if (curVn.isAnnotation()) continue;
-                if (curVn.isExplicit())
-                {
+                if (curVn.isExplicit()) {
                     high = curVn.getHigh();
                     if (high.isMark()) continue;   // Already in the list
                     high.setMark();
@@ -1036,7 +997,7 @@ namespace Sla.DECCORE
                     retVal |= 1;
                 if (op.code() == OpCode.CPUI_LOAD)
                     retVal |= 2;
-                path.Add(PcodeOpNode(curVn.getDef(), 0));
+                path.Add(new PcodeOpNode(curVn.getDef(), 0));
             }
             return retVal;
         }

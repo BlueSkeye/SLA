@@ -289,7 +289,7 @@ namespace Sla.CORE
         /// \param addr is the given address
         /// \param maxsize is the large range to consider before giving up
         /// \return the size (in bytes) of the biggest range
-        public ulong longestFit(ref Address addr,ulong maxsize)
+        public ulong longestFit(Address addr,ulong maxsize)
         {
             if (addr.isInvalid()) {
                 return 0;

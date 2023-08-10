@@ -624,7 +624,7 @@ namespace Sla.DECCORE
         /// \param reads are add-on PcodeOps where we would like to know input ValueSets at the point of read
         /// \param stackReg (if non-NULL) gives the stack pointer (for keeping track of relative offsets)
         /// \param indirectAsCopy is \b true if solver should treat OpCode.CPUI_INDIRECT as OpCode.CPUI_COPY operations
-        public void establishValueSets(List<Varnode> sinks, List<PcodeOp> reads, Varnode stackReg,
+        public void establishValueSets(List<Varnode> sinks, List<PcodeOp> reads, Varnode? stackReg,
             bool indirectAsCopy)
         {
             List<Varnode> worklist = new List<Varnode>();

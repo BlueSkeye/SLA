@@ -40,8 +40,8 @@ namespace Sla.DECCORE
                 // other ops creep in because of multi_collapse
                 startoffset = bl.getStart().getOffset();
                 IEnumerator<PcodeOp> iter = bl.beginOp();
-                while (iter != bl.endOp()) {
-                    op = *iter++;
+                while (iter.MoveNext()) {
+                    op = iter.Current;
                     if (op.getAddr().getOffset() != startoffset) break;
                     if (op.code() != OpCode.CPUI_MULTIEQUAL) continue;
                     vn = op.getIn(0);

@@ -32,9 +32,9 @@ namespace Sla.DECCORE
         {
             // friend class ValueSet;
             /// The input parameter slot to which the constraint is attached
-            private int slot;
+            internal int slot;
             /// The constraint characteristic 0=absolute 1=relative to a spacebase register
-            private int typeCode;
+            internal int typeCode;
             /// The range constraint
             private CircleRange range;
 
@@ -78,10 +78,8 @@ namespace Sla.DECCORE
         /// \return \b true if the Equation exists and applies
         private bool doesEquationApply(int num, int slot)
         {
-            if (num < equations.size())
-            {
-                if (equations[num].slot == slot)
-                {
+            if (num < equations.size()) {
+                if (equations[num].slot == slot) {
                     if (equations[num].typeCode == typeCode)
                         return true;
                 }
@@ -90,7 +88,7 @@ namespace Sla.DECCORE
         }
 
         /// Mark value set as possibly containing any value
-        private void setFull()
+        internal void setFull()
         {
             range.setFull(vn.getSize());
             typeCode = 0;

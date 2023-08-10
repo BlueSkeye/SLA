@@ -456,20 +456,18 @@ namespace Sla.DECCORE
         {
             if (markedop.empty()) return;
 
-            PcodeOp* copyop,*op;
-            BlockBasic* bl;
+            PcodeOp copyop;
+            BlockBasic bl;
             Address pc;
-            PcodeOp* afterop;
+            PcodeOp afterop;
 
             // Figure out where copy is inserted
-            if (vn.isInput())
-            {
-                bl = (BlockBasic*)data.getBasicBlocks().getBlock(0);
+            if (vn.isInput()) {
+                bl = (BlockBasic)data.getBasicBlocks().getBlock(0);
                 pc = bl.getStart();
                 afterop = (PcodeOp)null;
             }
-            else
-            {
+            else {
                 bl = vn.getDef().getParent();
                 pc = vn.getDef().getAddr();
                 if (vn.getDef().code() == OpCode.CPUI_INDIRECT) // snip must come after OP CAUSING EFFECT
@@ -484,10 +482,7 @@ namespace Sla.DECCORE
             else
                 data.opInsertAfter(copyop, afterop);
 
-            list<PcodeOp*>::iterator iter;
-            for (iter = markedop.begin(); iter != markedop.end(); ++iter)
-            {
-                op = *iter;
+            foreach (PcodeOp op in markedop) {
                 int slot = op.getSlot(vn);
                 data.opSetInput(op, copyop.getOut(), slot);
             }
@@ -502,10 +497,10 @@ namespace Sla.DECCORE
         /// \param indop is the given INDIRECT op
         private void snipIndirect(PcodeOp indop)
         {
-            PcodeOp* op = PcodeOp.getOpFromConst(indop.getIn(1).getAddr()); // Indirect effect op
-            List<Varnode*> problemvn;
-            list<PcodeOp*> correctable;
-            List<int> correctslot;
+            PcodeOp op = PcodeOp.getOpFromConst(indop.getIn(1).getAddr()); // Indirect effect op
+            List<Varnode> problemvn = new List<Varnode>();
+            List<PcodeOp> correctable = new List<PcodeOp>();
+            List<int> correctslot = new List<int>();
             // Collect instances of output.high that are defined
             // before (and right up to) op. These need to be snipped.
             collectCovering(problemvn, indop.getOut().getHigh(), op);
@@ -518,8 +513,8 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Unable to force indirect merge");
 
             if (correctable.empty()) return;
-            Varnode* refvn = correctable.front().getIn(correctslot[0]);
-            PcodeOp* snipop,*insertop;
+            Varnode refvn = correctable.front().getIn(correctslot[0]);
+            PcodeOp snipop;
 
             // NOTE: the covers for any input to op which is
             // an instance of the output high must
@@ -527,13 +522,13 @@ namespace Sla.DECCORE
             // traceable via COPY to the same root
             snipop = allocateCopyTrim(refvn, op.getAddr(), correctable.front());
             data.opInsertBefore(snipop, op);
-            list<PcodeOp*>::iterator oiter;
-            int i, slot;
-            for (oiter = correctable.begin(), i = 0; i < correctslot.size(); ++oiter, ++i)
-            {
-                insertop = *oiter;
-                slot = correctslot[i];
+            int i = 0;
+            foreach (PcodeOp insertop in correctable) {
+                int slot = correctslot[i];
                 data.opSetInput(insertop, snipop.getOut(), slot);
+                if (++i >= correctslot.size()) {
+                    break;
+                }
             }
         }
 
@@ -666,20 +661,20 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp
         private void trimOpOutput(PcodeOp op)
         {
-            PcodeOp* copyop;
-            Varnode* uniq,*vn;
-            PcodeOp* afterop;
+            PcodeOp copyop;
+            Varnode uniq;
+            Varnode vn;
+            PcodeOp afterop;
 
             if (op.code() == OpCode.CPUI_INDIRECT)
                 afterop = PcodeOp.getOpFromConst(op.getIn(1).getAddr()); // Insert copyop AFTER source of indirect
             else
                 afterop = op;
             vn = op.getOut();
-            Datatype* ct = vn.getType();
+            Datatype ct = vn.getType();
             copyop = data.newOp(1, op.getAddr());
             data.opSetOpcode(copyop, OpCode.CPUI_COPY);
-            if (ct.needsResolution())
-            {
+            if (ct.needsResolution()) {
                 int fieldNum = data.inheritResolution(ct, copyop, -1, op, -1);
                 data.forceFacingType(ct, fieldNum, copyop, 0);
                 if (ct.getMetatype() == type_metatype.TYPE_PARTIALUNION)
@@ -1296,15 +1291,16 @@ namespace Sla.DECCORE
         /// \param opc is the op-code type to merge
         public void mergeOpcode(OpCode opc)
         {
-            BlockBasic* bl;
-            list<PcodeOp*>::iterator iter;
-            PcodeOp* op;
-            Varnode* vn1,*vn2;
+            BlockBasic bl;
+            IEnumerator<PcodeOp> iter;
+            PcodeOp op;
+            Varnode vn1;
+            Varnode vn2;
             BlockGraph bblocks = data.getBasicBlocks();
 
             for (int i = 0; i < bblocks.getSize(); ++i)
             { // Do merges in linear block order
-                bl = (BlockBasic*)bblocks.getBlock(i);
+                bl = (BlockBasic)bblocks.getBlock(i);
                 for (iter = bl.beginOp(); iter != bl.endOp(); ++iter)
                 {
                     op = *iter;

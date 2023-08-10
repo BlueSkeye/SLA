@@ -22,7 +22,7 @@ namespace Sla.DECCORE
         {
             Funcdata* infd = glb.symboltab.getGlobalScope().queryFunction(p1);
             if (infd == (Funcdata)null)
-                throw RecovError("Unknown function name: " + p1);
+                throw new RecovError("Unknown function name: " + p1);
             bool val;
             if (p2.size() == 0)
                 val = true;

@@ -441,13 +441,13 @@ namespace Sla.DECCORE
         /// \return the corresponding name string
         public static string typeToString(uint tp)
         {
-            if (tp == Override::BRANCH)
+            if (tp == Override.Branching.BRANCH)
                 return "branch";
-            if (tp == Override::CALL)
+            if (tp == Override.Branching.CALL)
                 return "call";
-            if (tp == Override::CALL_RETURN)
+            if (tp == Override.Branching.CALL_RETURN)
                 return "callreturn";
-            if (tp == Override::RETURN)
+            if (tp == Override.Branching.RETURN)
                 return "return";
             return "none";
         }
@@ -458,13 +458,13 @@ namespace Sla.DECCORE
         public static uint stringToType(string nm)
         {
             if (nm == "branch")
-                return Override::BRANCH;
+                return Override.Branching.BRANCH;
             else if (nm == "call")
-                return Override::CALL;
+                return Override.Branching.CALL;
             else if (nm == "callreturn")
-                return Override::CALL_RETURN;
+                return Override.Branching.CALL_RETURN;
             else if (nm == "return")
-                return Override::RETURN;
+                return Override.Branching.RETURN;
             return Override.Branching.NONE;
         }
     }

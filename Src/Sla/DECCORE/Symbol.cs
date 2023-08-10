@@ -53,13 +53,13 @@ namespace Sla.DECCORE
         /// The scope that owns this symbol
         protected Scope scope;
         /// The local name of the symbol
-        protected string name;
+        internal string name;
         /// Name to use when displaying symbol in output
         protected string displayName;
         /// The symbol's data-type
         internal Datatype? type;
         /// id to distinguish symbols with the same name
-        protected uint nameDedup;
+        internal uint nameDedup;
         /// Varnode-like properties of the symbol
         internal Varnode.varnode_flags flags;
         // only typelock,namelock,readonly,externref
@@ -67,9 +67,9 @@ namespace Sla.DECCORE
         /// Flags affecting the display of this symbol
         protected DisplayFlags dispflags;
         /// Special category (\b function_parameter, \b equate, etc.)
-        protected SymbolCategory category;
+        internal SymbolCategory category;
         /// Index within category
-        protected ushort catindex;
+        internal ushort catindex;
         /// Unique id, 0=unassigned
         internal ulong symbolId;
         /// List of storage locations labeled with \b this Symbol

@@ -1323,8 +1323,8 @@ namespace Sla.CORE {
         /// \param loaddr is the address of the least significant piece
         /// \param losz is the size of the least significant piece
         /// \return an address representing the start of the joined range
-        public Address constructJoinAddress(Translate translate, ref Address hiaddr, int hisz,
-            ref Address loaddr, int losz)
+        public Address constructJoinAddress(Translate translate, Address hiaddr, int hisz, Address loaddr,
+            int losz)
         {
             spacetype hitp = hiaddr.getSpace().getType();
             spacetype lotp = loaddr.getSpace().getType();

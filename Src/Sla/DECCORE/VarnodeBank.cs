@@ -609,23 +609,22 @@ namespace Sla.DECCORE
         /// \param iter is an iterator to the given start Varnode
         /// \param bounds holds the array of iterator pairs passed back
         /// \return the union of Varnode flags across the range
-        public uint overlapLoc(VarnodeLocSet::const_iterator iter, List<VarnodeLocSet::const_iterator> bounds)
+        public Varnode.varnode_flags overlapLoc(VarnodeLocSet::const_iterator iter,
+            List<VarnodeLocSet::const_iterator> bounds)
         {
-            Varnode* vn = *iter;
-            AddrSpace* spc = vn.getSpace();
+            Varnode vn = *iter;
+            AddrSpace spc = vn.getSpace();
             ulong off = vn.getOffset();
-            ulong maxOff = off + (vn.getSize() - 1);
-            uint flags = vn.getFlags();
+            ulong maxOff = off + (uint)(vn.getSize() - 1);
+            Varnode.varnode_flags flags = vn.getFlags();
             bounds.Add(iter);
             iter = endLoc(vn.getSize(), vn.getAddr(), Varnode.varnode_flags.written);
             bounds.Add(iter);
-            while (iter != loc_tree.end())
-            {
+            while (iter != loc_tree.end()) {
                 vn = *iter;
                 if (vn.getSpace() != spc || vn.getOffset() > maxOff)
                     break;
-                if (vn.isFree())
-                {
+                if (vn.isFree()) {
                     iter = endLoc(vn.getSize(), vn.getAddr(), 0);
                     continue;
                 }
@@ -656,14 +655,13 @@ namespace Sla.DECCORE
         ///    - 0 for \e free Varnodes
         /// \param fl is the property restriction
         /// \return the beginning iterator
-        public VarnodeDefSet::const_iterator beginDef(uint fl)
+        public VarnodeDefSet::const_iterator beginDef(Varnode.varnode_flags fl)
         {
             VarnodeDefSet::const_iterator iter;
 
             if (fl == Varnode.varnode_flags.input)
                 return def_tree.begin();    // Inputs occur first with def_tree
-            else if (fl == Varnode.varnode_flags.written)
-            {
+            else if (fl == Varnode.varnode_flags.written) {
                 searchvn.loc = new Address(Address.mach_extreme.m_minimal); // Lowest possible location
                 searchvn.flags = Varnode.varnode_flags.written;
                 SeqNum sq = new SeqNum(Address.mach_extreme.m_minimal); // Lowest possible seqnum
@@ -694,7 +692,7 @@ namespace Sla.DECCORE
         ///    - 0 for \e free Varnodes
         /// \param fl is the property restriction
         /// \return the ending iterator
-        public VarnodeDefSet::const_iterator endDef(uint fl)
+        public VarnodeDefSet::const_iterator endDef(Varnode.varnode_flags fl)
         {
             VarnodeDefSet::const_iterator iter;
 
@@ -735,7 +733,8 @@ namespace Sla.DECCORE
         /// \param addr is the given starting address
         /// \return the beginning iterator
         public VarnodeDefSet::const_iterator beginDef(Varnode.varnode_flags fl, Address addr)
-        {               // Get varnodes with addr and with definition type
+        {
+            // Get varnodes with addr and with definition type
             VarnodeDefSet::const_iterator iter;
 
             if (fl == Varnode.varnode_flags.written)
@@ -767,14 +766,13 @@ namespace Sla.DECCORE
         /// \param fl is the property restriction
         /// \param addr is the given starting address
         /// \return the ending iterator
-        public VarnodeDefSet::const_iterator endDef(uint fl,Address addr)
+        public VarnodeDefSet::const_iterator endDef(Varnode.varnode_flags fl,Address addr)
         {
             VarnodeDefSet::const_iterator iter;
 
             if (fl == Varnode.varnode_flags.written)
                 throw new LowlevelError("Cannot get contiguous written AND addressed");
-            else if (fl == Varnode.varnode_flags.input)
-            {
+            else if (fl == Varnode.varnode_flags.input) {
                 searchvn.loc = addr;
                 searchvn.size = 1000000;
                 iter = def_tree.lower_bound(searchvn);

@@ -16,15 +16,15 @@ namespace Sla.DECCORE
     {
         // friend class Heritage;
         /// The LOAD op
-        private PcodeOp op;
+        internal PcodeOp op;
         /// The stack space being loaded from
-        private AddrSpace spc;
+        internal AddrSpace spc;
         /// Base offset of the pointer
         private ulong pointerBase;
         /// Minimum offset of the LOAD
-        private ulong minimumOffset;
+        internal ulong minimumOffset;
         /// Maximum offset of the LOAD
-        private ulong maximumOffset;
+        internal ulong maximumOffset;
         /// Step of any access into this range (0=unknown)
         private int step;
         /// 0=unanalyzed, 1=analyzed(partial result), 2=analyzed(full result)
@@ -95,26 +95,25 @@ namespace Sla.DECCORE
         }
 
         /// Convert value set analysis to final guard range
-        private void finalizeRange(ValueSetRead valueSet)
+        internal void finalizeRange(ValueSetRead valueSet)
         {
             analysisState = 1;      // In all cases the settings determined here are final
             CircleRange range = valueSet.getRange();
             ulong rangeSize = range.getSize();
-            if (rangeSize == 0x100 || rangeSize == 0x10000)
-            {
+            if (rangeSize == 0x100 || rangeSize == 0x10000) {
                 // These sizes likely result from the storage size of the index
                 if (step == 0)  // If we didn't see signs of iteration
                     rangeSize = 0;  // don't use this range
             }
-            if (rangeSize > 1 && rangeSize < 0xffffff)
-            {   // Did we converge to something reasonable
+            if (rangeSize > 1 && rangeSize < 0xffffff) {
+                // Did we converge to something reasonable
                 analysisState = 2;          // Mark that we got a definitive result
                 if (rangeSize > 2)
                     step = range.getStep();
                 minimumOffset = range.getMin();
                 maximumOffset = (range.getEnd() - 1) & range.getMask(); // NOTE: Don't subtract a whole step
-                if (maximumOffset < minimumOffset)
-                {   // Values extend into what is usually stack parameters
+                if (maximumOffset < minimumOffset) {
+                    // Values extend into what is usually stack parameters
                     maximumOffset = spc.getHighest();
                     analysisState = 1;  // Remove the lock as we have likely overflowed
                 }

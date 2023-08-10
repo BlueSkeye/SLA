@@ -176,7 +176,7 @@ namespace Sla.DECCORE
                 s << "Duplicate scope id: ";
                 s << newscope.getFullName();
                 delete newscope;
-                throw RecovError(s.str());
+                throw new RecovError(s.str());
             }
             parent.attachScope(newscope);
         }

@@ -23,13 +23,10 @@ namespace Sla.DECCORE
         public override int apply(Funcdata data)
         {
             ScopeLocal localmap = data.getScopeLocal();
-            IEnumerator<SymbolEntry> iter, enditer;
-            iter = localmap.beginDynamic();
-            enditer = localmap.endDynamic();
-            DynamicHash dhash;
-            while (iter != enditer) {
-                SymbolEntry entry = &(*iter);
-                ++iter;
+            IEnumerator<SymbolEntry> iter = localmap.beginDynamic();
+            DynamicHash dhash = new DynamicHash();
+            while (iter.MoveNext()) {
+                SymbolEntry entry = iter.Current;
                 if (data.attemptDynamicMappingLate(entry, dhash))
                     count += 1;
             }

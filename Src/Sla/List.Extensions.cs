@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.DECCORE;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,10 @@ namespace Sla
 
         internal static int size<T>(this List<T> from) => from.Count;
 
+        internal static IBiDirEnumerator<T> GetBiDirectionalEnumerator<T>(this List<T> from,
+            bool reverseOrder = false)
+            => new BiDirEnumerator<T>(from, reverseOrder);
+        
         internal static T GetLastItem<T>(this List<T> from)
         {
             int lastItemIndex = from.Count - 1;
@@ -87,6 +92,142 @@ namespace Sla
             {
                 AssertNotDisposed();
                 index = from.Count;
+            }
+        }
+
+        private class BiDirEnumerator<T> : IBiDirEnumerator<T>
+        {
+            private int _currentIndex;
+            private List<T> _data;
+            private bool _defaultIsReverse;
+            private bool _disposed = false;
+            private bool _reverseEnumerate;
+
+            internal BiDirEnumerator(List<T> data, bool reverseOrder = false)
+            {
+                _currentIndex = reverseOrder ? data.Count : -1;
+                _data = data;
+                _defaultIsReverse = reverseOrder;
+            }
+
+            private void AssertNotDisposed()
+            {
+                if (_disposed) throw new ObjectDisposedException(GetType().Name);
+            }
+
+            public T Current
+            {
+                get
+                {
+                    AssertNotDisposed();
+                    if (!IsPositionValid) throw new InvalidOperationException();
+                    return _data[_currentIndex];
+                }
+            }
+
+            public bool IsAfterLast
+            {
+                get
+                {
+                    AssertNotDisposed();
+                    return (_data.Count <= _currentIndex);
+                }
+            }
+
+            public bool IsBeforeFirst
+            {
+                get
+                {
+                    AssertNotDisposed();
+                    return (0 > _currentIndex);
+                }
+            }
+
+            public bool IsEnumeratingForward
+            {
+                get
+                {
+                    AssertNotDisposed();
+                    return !_reverseEnumerate;
+                }
+            }
+
+            public bool IsPositionValid
+            {
+                get
+                {
+                    AssertNotDisposed();
+                    return (_currentIndex >= 0) && (_currentIndex < _data.Count);
+                }
+            }
+
+            object IEnumerator.Current => this.Current;
+
+            public void Dispose()
+            {
+                _disposed = true;
+            }
+
+            public bool MoveNext()
+            {
+                AssertNotDisposed();
+                if (_reverseEnumerate) {
+                    if (0 == _currentIndex) {
+                        _currentIndex = -1;
+                        return false;
+                    }
+                    if (0 > _currentIndex) {
+                        return false;
+                    }
+                    _currentIndex--;
+                    return true;
+                }
+                if ((_data.Count - 1) == _currentIndex) {
+                    _currentIndex = _data.Count;
+                    return false;
+                }
+                if (_data.Count <= _currentIndex) {
+                    return false;
+                }
+                _currentIndex++;
+                return true;
+            }
+
+            public bool MovePrevious()
+            {
+                AssertNotDisposed();
+                if (!_reverseEnumerate) {
+                    if (0 == _currentIndex) {
+                        _currentIndex = -1;
+                        return false;
+                    }
+                    if (0 > _currentIndex) {
+                        return false;
+                    }
+                    _currentIndex--;
+                    return true;
+                }
+                if ((_data.Count - 1) == _currentIndex) {
+                    _currentIndex = _data.Count;
+                    return false;
+                }
+                if (_data.Count <= _currentIndex) {
+                    return false;
+                }
+                _currentIndex++;
+                return true;
+            }
+
+            public void Reset()
+            {
+                AssertNotDisposed();
+                _reverseEnumerate = _defaultIsReverse;
+            }
+
+            public void ReverseEnumDirection()
+            {
+                AssertNotDisposed();
+                _reverseEnumerate = !_reverseEnumerate;
             }
         }
     }

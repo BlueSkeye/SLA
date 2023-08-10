@@ -315,7 +315,7 @@ namespace Sla.CORE
         /// \param op2 is the start of the second given range
         /// \param sz2 is the number of bytes in the second given range
         /// \return \b true if the second given range contains \b this range
-        public bool containedBy(int sz, ref Address op2, int sz2)
+        public bool containedBy(int sz, Address op2, int sz2)
         {
             if (@base != op2.@base) {
                 return false;

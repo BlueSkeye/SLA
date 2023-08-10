@@ -29,7 +29,7 @@ namespace Sla.DECCORE
                 val = onOrOff(p2);
             bool res = glb.allacts.getCurrent().setWarning(val, p1);
             if (!res)
-                throw RecovError("Bad action/rule specifier: " + p1);
+                throw new RecovError("Bad action/rule specifier: " + p1);
             string prop;
             prop = val ? "on" : "off";
             return "Warnings for " + p1 + " turned " + prop;

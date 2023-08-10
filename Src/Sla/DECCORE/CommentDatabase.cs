@@ -51,7 +51,8 @@ namespace Sla.DECCORE
         /// \param ad is the address to which the comment is attached
         /// \param txt is the body of the comment
         /// \return \b true if a new Comment was created, \b false if there was a duplicate
-        public abstract bool addCommentNoDuplicate(uint tp, Address fad, Address ad, string txt);
+        public abstract bool addCommentNoDuplicate(Comment.comment_type tp, Address fad, Address ad,
+            string txt);
 
         /// \brief Remove the given Comment object from the container
         /// \param com is the given Comment

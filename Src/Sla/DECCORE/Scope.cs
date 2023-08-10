@@ -638,7 +638,7 @@ namespace Sla.DECCORE
         /// \brief Get the number of Symbols in the given category
         /// \param cat is the Symbol \e category
         /// \return the number in that \e category
-        public abstract int getCategorySize(int cat);
+        public abstract int getCategorySize(Symbol.SymbolCategory cat);
 
         /// \brief Retrieve a Symbol by index within a specific \e category
         /// \param cat is the Symbol \e category

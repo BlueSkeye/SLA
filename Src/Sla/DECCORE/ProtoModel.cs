@@ -228,11 +228,11 @@ namespace Sla.DECCORE
         /// Determine side-effect of \b this on the given memory range
         /// The model is searched for an EffectRecord matching the given range
         /// and the effect type is returned. If there is no EffectRecord or the
-        /// effect generally isn't known,  EffectRecord::unknown_effect is returned.
+        /// effect generally isn't known,  EffectRecord.EffectType.unknown_effect is returned.
         /// \param addr is the starting address of the given memory range
         /// \param size is the number of bytes in the given range
         /// \return the EffectRecord type
-        public uint hasEffect(Address addr, int size)
+        public EffectRecord.EffectType hasEffect(Address addr, int size)
         {
             return lookupEffect(effectlist, addr, size);
         }
@@ -386,7 +386,7 @@ namespace Sla.DECCORE
         /// \param loc is the starting address of the given range
         /// \param size is the number of bytes in the given range
         /// \return the characterization code
-        public int characterizeAsInputParam(Address loc, int size)
+        public ParamEntry.Containment characterizeAsInputParam(Address loc, int size)
         {
             return input.characterizeAsParam(loc, size);
         }
@@ -496,9 +496,9 @@ namespace Sla.DECCORE
         /// \param res is the parameter storage to pass back
         /// \return the extension operator (INT_ZEXT INT_SEXT) or INT_COPY if there is no extension.
         /// INT_PIECE indicates the extension is determined by the specific prototype.
-        public OpCode assumedOutputExtension(Address addr, int size, VarnodeData res)
+        public OpCode assumedOutputExtension(Address addr, int size, out VarnodeData res)
         {
-            return output.assumedExtension(addr, size, res);
+            return output.assumedExtension(addr, size, out res);
         }
 
         /// \brief Pass-back the biggest input parameter contained within the given range
@@ -642,7 +642,7 @@ namespace Sla.DECCORE
                     while (decoder.peekElement() != 0)
                     {
                         effectlist.emplace_back();
-                        effectlist.GetLastItem().decode(EffectRecord::killedbycall, decoder);
+                        effectlist.GetLastItem().decode(EffectRecord.EffectType.killedbycall, decoder);
                     }
                     decoder.closeElement(subId);
                 }
@@ -709,33 +709,31 @@ namespace Sla.DECCORE
 
         /// \brief Look up an effect from the given EffectRecord list
         /// If a given memory range matches an EffectRecord, return the effect type.
-        /// Otherwise return EffectRecord::unknown_effect
+        /// Otherwise return EffectRecord.EffectType.unknown_effect
         /// \param efflist is the list of EffectRecords which must be sorted
         /// \param addr is the starting address of the given memory range
         /// \param size is the number of bytes in the memory range
         /// \return the EffectRecord type
-        public static uint lookupEffect(List<EffectRecord> efflist, Address addr, int size)
+        public static EffectRecord.EffectType lookupEffect(List<EffectRecord> efflist, Address addr, int size)
         {
             // Unique is always local to function
-            if (addr.getSpace().getType() == spacetype.IPTR_INTERNAL) return EffectRecord.EffectType.unaffected;
+            if (addr.getSpace().getType() == spacetype.IPTR_INTERNAL)
+                return EffectRecord.EffectType.unaffected;
 
-            EffectRecord cur(addr, size);
-
-            List<EffectRecord>::const_iterator iter;
-
-            iter = upper_bound(efflist.begin(), efflist.end(), cur, EffectRecord::compareByAddress);
+            EffectRecord cur = new EffectRecord(addr, size);
+            IEnumerator<EffectRecord> iter = upper_bound(efflist.begin(), efflist.end(), cur, EffectRecord::compareByAddress);
             // First element greater than cur  (address must be greater)
             // go back one more, and we get first el less or equal to cur
-            if (iter == efflist.begin()) return EffectRecord::unknown_effect; // Can't go back one
+            if (iter == efflist.begin()) return EffectRecord.EffectType.unknown_effect; // Can't go back one
             --iter;
-            Address hit = (*iter).getAddress();
-            int sz = (*iter).getSize();
+            Address hit = iter.Current.getAddress();
+            int sz = iter.Current.getSize();
             if (sz == 0 && (hit.getSpace() == addr.getSpace())) // A size of zero indicates the whole space is unaffected
                 return EffectRecord.EffectType.unaffected;
             int where = addr.overlap(0, hit, sz);
             if ((where >= 0) && (where + size <= sz))
-                return (*iter).getType();
-            return EffectRecord::unknown_effect;
+                return iter.Current.getType();
+            return EffectRecord.EffectType.unknown_effect;
         }
 
         /// \brief Look up a particular EffectRecord from a given list by its Address and size
@@ -757,8 +755,8 @@ namespace Sla.DECCORE
             if (listSize == 0) return -1;
             EffectRecord cur = new EffectRecord(addr, size);
 
-            List<EffectRecord>::const_iterator begiter = efflist.begin();
-            List<EffectRecord>::const_iterator enditer = begiter + listSize;
+            IEnumerator<EffectRecord> begiter = efflist.begin();
+            IEnumerator<EffectRecord> enditer = begiter + listSize;
             
             IEnumerator<EffectRecord> iter = upper_bound(begiter, enditer, cur, EffectRecord.compareByAddress);
             // First element greater than cur  (address must be greater)

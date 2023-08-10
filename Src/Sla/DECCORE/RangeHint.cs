@@ -1,4 +1,4 @@
-﻿using Sla.DECCORE;
+﻿using Sla.CORE;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -33,17 +33,17 @@ namespace Sla.DECCORE
         }
 
         /// Starting offset of \b this range of bytes
-        private ulong start;
+        internal ulong start;
         /// Number of bytes in a single element of this range
-        private int size;
+        internal int size;
         /// A signed version of the starting offset
-        private long sstart;
+        internal long sstart;
         /// Putative data-type for a single element of this range
-        private Datatype type;
+        internal Datatype type;
         /// Additional boolean properties of this range
-        private uint flags;
+        internal Varnode.varnode_flags flags;
         /// The type of range
-        private RangeType rangeType;
+        internal RangeType rangeType;
         /// Minimum upper bound on the array index (if \b this is \e open)
         private int highind;
     
@@ -76,10 +76,10 @@ namespace Sla.DECCORE
             if (mod < 0)
                 mod += a.type.getSize();
 
-            Datatype* sub = a.type;
-            ulong umod = mod;
+            Datatype sub = a.type;
+            ulong umod = (ulong)mod;
             while ((sub != (Datatype)null) && (sub.getSize() > b.type.getSize()))
-                sub = sub.getSubType(umod, &umod);
+                sub = sub.getSubType(umod, out umod);
 
             if (sub == (Datatype)null) return false;
             if (umod != 0) return false;
@@ -88,15 +88,13 @@ namespace Sla.DECCORE
             // If we reach here, component sizes do not match
             // Check for data-types we want to protect more
             type_metatype meta = a.type.getMetatype();
-            if (meta != type_metatype.TYPE_STRUCT && meta != type_metatype.TYPE_UNION)
-            {
-                if (meta != type_metatype.TYPE_ARRAY || ((TypeArray*)(a.type)).getBase().getMetatype() == type_metatype.TYPE_UNKNOWN)
+            if (meta != type_metatype.TYPE_STRUCT && meta != type_metatype.TYPE_UNION) {
+                if (meta != type_metatype.TYPE_ARRAY || ((TypeArray)(a.type)).getBase().getMetatype() == type_metatype.TYPE_UNKNOWN)
                     return false;
             }
             // For structures, unions, and arrays, test if b looks like a partial data-type
             meta = b.type.getMetatype();
-            if (meta == type_metatype.TYPE_UNKNOWN || meta == type_metatype.TYPE_INT || meta == type_metatype.TYPE_UINT)
-            {
+            if (meta == type_metatype.TYPE_UNKNOWN || meta == type_metatype.TYPE_INT || meta == type_metatype.TYPE_UINT) {
                 return true;
             }
             return false;
@@ -129,16 +127,15 @@ namespace Sla.DECCORE
             if (start != b.start)
                 return true;        // Something must occupy a.start to b.start
                                     // Prefer the locked type
-            if ((b.flags & Varnode.varnode_flags.typelock) != 0)
-            {
+            if ((b.flags & Varnode.varnode_flags.typelock) != 0) {
                 if ((flags & Varnode.varnode_flags.typelock) == 0)
                     return false;
             }
             else if ((flags & Varnode.varnode_flags.typelock) != 0)
                 return true;
 
-            if (!reconcile)
-            {       // If the ranges don't reconcile
+            if (!reconcile) {
+                // If the ranges don't reconcile
                 if (rangeType == open && b.rangeType != open) // Throw out the open range
                     return false;
                 if (b.rangeType == open && rangeType != open)
@@ -165,29 +162,24 @@ namespace Sla.DECCORE
             if (rangeType != open) return false;
             if (highind < 0) return false;
             if (b.rangeType == endpoint) return false;         // Don't merge with bounding range
-            Datatype* settype = type;                   // Assume we will keep this data-type
+            Datatype settype = type;                   // Assume we will keep this data-type
             if (settype.getSize() != b.type.getSize()) return false;
-            if (settype != b.type)
-            {
-                Datatype* aTestType = type;
-                Datatype* bTestType = b.type;
-                while (aTestType.getMetatype() == type_metatype.TYPE_PTR)
-                {
+            if (settype != b.type) {
+                Datatype aTestType = type;
+                Datatype bTestType = b.type;
+                while (aTestType.getMetatype() == type_metatype.TYPE_PTR) {
                     if (bTestType.getMetatype() != type_metatype.TYPE_PTR)
                         break;
-                    aTestType = ((TypePointer*)aTestType).getPtrTo();
-                    bTestType = ((TypePointer*)bTestType).getPtrTo();
+                    aTestType = ((TypePointer)aTestType).getPtrTo();
+                    bTestType = ((TypePointer)bTestType).getPtrTo();
                 }
                 if (aTestType.getMetatype() == type_metatype.TYPE_UNKNOWN)
                     settype = b.type;
-                else if (bTestType.getMetatype() == type_metatype.TYPE_UNKNOWN)
-                {
+                else if (bTestType.getMetatype() == type_metatype.TYPE_UNKNOWN) {
                 }
-                else if (aTestType.getMetatype() == type_metatype.TYPE_INT && bTestType.getMetatype() == type_metatype.TYPE_UINT)
-                {
+                else if (aTestType.getMetatype() == type_metatype.TYPE_INT && bTestType.getMetatype() == type_metatype.TYPE_UINT) {
                 }
-                else if (aTestType.getMetatype() == type_metatype.TYPE_UINT && bTestType.getMetatype() == type_metatype.TYPE_INT)
-                {
+                else if (aTestType.getMetatype() == type_metatype.TYPE_UINT && bTestType.getMetatype() == type_metatype.TYPE_INT) {
                 }
                 else if (aTestType != bTestType)    // If they are both not unknown, they must be the same
                     return false;
@@ -211,14 +203,13 @@ namespace Sla.DECCORE
         /// \param b is the other RangeHint to absorb
         public void absorb(RangeHint b)
         {
-            if (b.rangeType == open && type.getSize() == b.type.getSize())
-            {
-                rangeType = open;
+            if (b.rangeType == RangeType.open && type.getSize() == b.type.getSize()) {
+                rangeType = RangeType.open;
                 if (0 <= b.highind)
                 { // If b has array indexing
                     long diffsz = b.sstart - sstart;
                     diffsz /= type.getSize();
-                    int trialhi = b.highind + diffsz;
+                    int trialhi = (int)b.highind + (int)diffsz;
                     if (highind < trialhi)
                         highind = trialhi;
                 }
@@ -240,24 +231,21 @@ namespace Sla.DECCORE
             bool didReconcile;
             int resType;       // 0=this, 1=b, 2=confuse
 
-            if (contain(b))
-            {           // Does one range contain the other
+            if (contain(b)) {
+                // Does one range contain the other
                 didReconcile = reconcile(b);    // Can the data-type layout be reconciled
                 if (!didReconcile && start != b.start)
                     resType = 2;
                 else
                     resType = preferred(b, didReconcile) ? 0 : 1;
             }
-            else
-            {
+            else {
                 didReconcile = false;
                 resType = ((flags & Varnode.varnode_flags.typelock) != 0) ? 0 : 2;
             }
             // Check for really problematic cases
-            if (!didReconcile)
-            {
-                if ((flags & Varnode.varnode_flags.typelock) != 0)
-                {
+            if (!didReconcile) {
+                if ((flags & Varnode.varnode_flags.typelock) != 0) {
                     if ((b.flags & Varnode.varnode_flags.typelock) != 0)
                         throw new LowlevelError("Overlapping forced variable types : " + type.getName() + "   " + b.type.getName());
                     if (start != b.start)
@@ -265,33 +253,29 @@ namespace Sla.DECCORE
                 }
             }
 
-            if (resType == 0)
-            {
+            if (resType == 0) {
                 if (didReconcile)
                     absorb(b);
             }
-            else if (resType == 1)
-            {
+            else if (resType == 1) {
                 RangeHint copyRange = *this;
                 type = b.type;
                 flags = b.flags;
                 rangeType = b.rangeType;
                 highind = b.highind;
                 size = b.size;
-                absorb(&copyRange);
+                absorb(copyRange);
             }
-            else if (resType == 2)
-            {
+            else if (resType == 2) {
                 // Concede confusion about types, set unknown type rather than this or b's type
                 flags = 0;
-                rangeType = fixed;
+                rangeType = RangeType.@fixed;
                 int diff = (int)(b.sstart - sstart);
                 if (diff + b.size > size)
                     size = diff + b.size;
-                if (size != 1 && size != 2 && size != 4 && size != 8)
-                {
+                if (size != 1 && size != 2 && size != 4 && size != 8) {
                     size = 1;
-                    rangeType = open;
+                    rangeType = RangeType.open;
                 }
                 type = typeFactory.getBase(size, type_metatype.TYPE_UNKNOWN);
                 flags = 0;
@@ -314,8 +298,8 @@ namespace Sla.DECCORE
                 return (size < op2.size) ? -1 : 1;      // Small sizes come first
             if (rangeType != op2.rangeType)
                 return (rangeType < op2.rangeType) ? -1 : 1;
-            uint thisLock = flags & Varnode.varnode_flags.typelock;
-            uint op2Lock = op2.flags & Varnode.varnode_flags.typelock;
+            Varnode.varnode_flags thisLock = flags & Varnode.varnode_flags.typelock;
+            Varnode.varnode_flags op2Lock = op2.flags & Varnode.varnode_flags.typelock;
             if (thisLock != op2Lock)
                 return (thisLock < op2Lock) ? -1 : 1;
             if (highind != op2.highind)
@@ -326,7 +310,7 @@ namespace Sla.DECCORE
         /// Compare two RangeHint pointers
         public static bool compareRanges(RangeHint a, RangeHint b)
         {
-            return (a.compare(*b) < 0);
+            return (a.compare(b) < 0);
         }
     }
 }

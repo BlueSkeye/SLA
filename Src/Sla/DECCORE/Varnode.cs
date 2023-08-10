@@ -136,7 +136,7 @@ namespace Sla.DECCORE
         /// The collection of boolean attributes for this Varnode
         internal /*mutable*/ varnode_flags flags;
         /// Size of the Varnode in bytes
-        private int size;
+        internal int size;
         /// A unique one-up index assigned to Varnode at its creation
         private uint create_index;
         /// Which group of forced merges does this Varnode belong to
@@ -144,7 +144,7 @@ namespace Sla.DECCORE
         /// Additional flags
         private Varnode.addl_flags addlflags;
         /// Storage location (or constant value) of the Varnode
-        private Address loc;
+        internal Address loc;
 
         // Heritage fields
         /// The defining operation of this Varnode
@@ -162,7 +162,7 @@ namespace Sla.DECCORE
         /// List of every op using this varnode as input
         internal List<PcodeOp> descend;
         /// Addresses covered by the def.use of this Varnode
-        private /*mutable*/ Cover cover;
+        internal /*mutable*/ Cover? cover;
         
         private /*mutable*/ struct TempStorage
         {
@@ -198,12 +198,12 @@ namespace Sla.DECCORE
 
         /// Turn on the Cover object for this Varnode
         /// Initialize a new Cover and set dirty bit so that updateCover will rebuild
-        private void calcCover()
+        internal void calcCover()
         {
             if (hasCover())
             {
                 if (cover != (Cover)null)
-                    delete cover;
+                    // delete cover;
                 cover = new Cover;
                 setFlags(Varnode.varnode_flags.coverdirty);
             }

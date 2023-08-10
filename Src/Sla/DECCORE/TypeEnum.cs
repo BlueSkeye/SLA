@@ -161,10 +161,10 @@ namespace Sla.DECCORE
         }
 
         /// Beginning of name map
-        public IEnumerator<KeyValuePair<ulong, string>> beginEnum() => namemap.begin();
+        public IEnumerator<KeyValuePair<ulong, string>> beginEnum() => namemap.GetEnumerator();
 
-        /// End of name map
-        public IEnumerator<KeyValuePair<ulong, string>> endEnum() => namemap.end();
+        ///// End of name map
+        //public IEnumerator<KeyValuePair<ulong, string>> endEnum() => namemap.end();
 
         /// Recover the named representation
         /// Given a specific value of the enumeration, calculate the named representation of that value.

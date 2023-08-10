@@ -126,19 +126,17 @@ namespace Sla.DECCORE
         /// \param vn is the given Varnode
         private void setVarnodeProperties(Varnode vn)
         {
-            if (!vn.isMapped())
-            {
+            if (!vn.isMapped()) {
                 // One more chance to find entry, now that we know usepoint
-                uint vflags = 0;
-                SymbolEntry* entry = localmap.queryProperties(vn.getAddr(), vn.getSize(), vn.getUsePoint(*this), vflags);
+                Varnode.varnode_flags vflags = 0;
+                SymbolEntry entry = localmap.queryProperties(vn.getAddr(), vn.getSize(), vn.getUsePoint(*this), vflags);
                 if (entry != (SymbolEntry)null) // Let entry try to force type
                     vn.setSymbolProperties(entry);
                 else
                     vn.setFlags(vflags & ~Varnode.varnode_flags.typelock); // typelock set by updateType
             }
 
-            if (vn.cover == (Cover)null)
-            {
+            if (vn.cover == (Cover)null) {
                 if (isHighOn())
                     vn.calcCover();
             }
@@ -149,14 +147,12 @@ namespace Sla.DECCORE
         /// a dedicated HighVariable, that contains only the one Varnode if necessary.
         /// \param vn is the given Varnode
         /// \return the assigned HighVariable or NULL if one is not assigned
-        private HighVariable assignHigh(Varnode vn)
+        private HighVariable? assignHigh(Varnode vn)
         {
-            if ((flags & highlevel_on) != 0)
-            {
+            if ((flags & Flags.highlevel_on) != 0) {
                 if (vn.hasCover())
                     vn.calcCover();
-                if (!vn.isAnnotation())
-                {
+                if (!vn.isAnnotation()) {
                     return new HighVariable(vn);
                 }
             }
@@ -842,10 +838,10 @@ namespace Sla.DECCORE
         {
             int i;
 
-            for (i = 0; i < qlst.size(); ++i)
-                delete qlst[i];     // Delete each func_callspec
+            //for (i = 0; i < qlst.size(); ++i)
+            //    delete qlst[i];     // Delete each func_callspec
 
-            qlst.clear();           // Delete list of pointers
+            qlst.Clear();           // Delete list of pointers
         }
 
         /// \brief Split given basic block b along an \e in edge
@@ -942,20 +938,20 @@ namespace Sla.DECCORE
         /// \param inedge is the incoming edge index that was split on
         private void nodeSplitInputPatch(BlockBasic b, BlockBasic bprime, int inedge)
         {
-            IEnumerator<PcodeOp> biter, piter;
             PcodeOp bop, pop;
-            Varnode bvn, pvn;
+            Varnode bvn;
+            Varnode pvn;
             Dictionary<PcodeOp, PcodeOp> btop; // Map from b to bprime
             List<PcodeOp> pind = new List<PcodeOp>();  // pop needing b input
             List<PcodeOp> bind = new List<PcodeOp>();  // bop giving input
             List<int> pslot;     // slot within pop needing b input
 
-            biter = b.beginOp();
-            piter = bprime.beginOp();
+            IEnumerator<PcodeOp> biter = b.beginOp();
+            IEnumerator<PcodeOp> piter = bprime.beginOp();
 
             while (piter != bprime.endOp()) {
-                bop = *biter;
-                pop = *piter;
+                bop = biter.Current;
+                pop = piter.Current;
                 btop[bop] = pop;        // Establish mapping
                 if (bop.code() == OpCode.CPUI_MULTIEQUAL) {
                     pop.setNumInputs(1);   // One edge now goes into bprime
@@ -1032,12 +1028,11 @@ namespace Sla.DECCORE
         /// \param encoder is the stream encoder
         /// \param iter is the beginning of the set
         /// \param enditer is the end of the set
-        private static void encodeVarnode(Encoder encoder, VarnodeLocSet::const_iterator iter,
+        private static void encodeVarnode(Sla.CORE.Encoder encoder, VarnodeLocSet::const_iterator iter,
             VarnodeLocSet::const_iterator enditer)
         {
-            Varnode* vn;
-            while (iter != enditer)
-            {
+            Varnode vn;
+            while (iter != enditer) {
                 vn = *iter++;
                 vn.encode(encoder);
             }
@@ -1100,18 +1095,15 @@ namespace Sla.DECCORE
         /// \param findcall is \b true if the caller expects to see CALL or CALLIND
         /// \param findreturn is \b true if the caller expects to see RETURN
         /// \return the first branching PcodeOp that matches the criteria or NULL
-        private static PcodeOp findPrimaryBranch(PcodeOpTree::const_iterator iter, PcodeOpTree::const_iterator enditer,
+        private static PcodeOp? findPrimaryBranch(PcodeOpTree::const_iterator iter, PcodeOpTree::const_iterator enditer,
             bool findbranch, bool findcall, bool findreturn)
         {
-            while (iter != enditer)
-            {
-                PcodeOp* op = (*iter).second;
-                switch (op.code())
-                {
+            while (iter != enditer) {
+                PcodeOp op = (*iter).second;
+                switch (op.code()) {
                     case OpCode.CPUI_BRANCH:
                     case OpCode.CPUI_CBRANCH:
-                        if (findbranch)
-                        {
+                        if (findbranch) {
                             if (!op.getIn(0).isConstant()) // Make sure this is not an internal branch
                                 return op;
                         }
@@ -1162,21 +1154,19 @@ namespace Sla.DECCORE
             displayName = disp;
 
             size = sz;
-            AddrSpace* stackid = glb.getStackSpace();
+            AddrSpace stackid = glb.getStackSpace();
             if (nm.size() == 0)
-                localmap = (ScopeLocal*)0; // Filled in by decode
-            else
-            {
+                localmap = (ScopeLocal)null; // Filled in by decode
+            else {
                 ulong id;
                 if (sym != (FunctionSymbol)null)
                     id = sym.getId();
-                else
-                {
+                else {
                     // Missing a symbol, build unique id based on address
                     id = 0x57AB12CD;
                     id = (id << 32) | (addr.getOffset() & 0xffffffff);
                 }
-                ScopeLocal* newMap = new ScopeLocal(id, stackid, this, glb);
+                ScopeLocal newMap = new ScopeLocal(id, stackid, this, glb);
                 glb.symboltab.attachScope(newMap, scope);     // This may throw and delete newMap
                 localmap = newMap;
                 funcp.setScope(localmap, baseaddr + -1);
@@ -1197,12 +1187,12 @@ namespace Sla.DECCORE
         ~Funcdata()
         {
             //  clear();
-            if (localmap != (ScopeLocal*)0)
+            if (localmap != (ScopeLocal)null)
                 glb.symboltab.deleteScope(localmap);
 
             clearCallSpecs();
-            for (int i = 0; i < jumpvec.size(); ++i) // Delete jumptables
-                delete jumpvec[i];
+            //for (int i = 0; i < jumpvec.size(); ++i) // Delete jumptables
+            //    delete jumpvec[i];
             glb = (Architecture)null;
         }
 
@@ -1225,30 +1215,30 @@ namespace Sla.DECCORE
         public FunctionSymbol getSymbol() => functionSymbol;
 
         /// Are high-level variables assigned to Varnodes
-        public bool isHighOn() => ((flags & highlevel_on) != 0);
+        public bool isHighOn() => ((flags & Flags.highlevel_on) != 0);
 
         /// Has processing of the function started
-        public bool isProcStarted() => ((flags & processing_started) != 0);
+        public bool isProcStarted() => ((flags & Flags.processing_started) != 0);
 
         /// Is processing of the function complete
-        public bool isProcComplete() => ((flags & processing_complete) != 0);
+        public bool isProcComplete() => ((flags & Flags.processing_complete) != 0);
 
         /// Did this function exhibit unreachable code
-        public bool hasUnreachableBlocks() => ((flags & blocks_unreachable) != 0);
+        public bool hasUnreachableBlocks() => ((flags & Flags.blocks_unreachable) != 0);
 
         ///< Will data-type analysis be performed
-        public bool isTypeRecoveryOn() => ((flags & typerecovery_on) != 0);
+        public bool isTypeRecoveryOn() => ((flags & Flags.typerecovery_on) != 0);
 
         ///< Has data-type recovery processes started
-        public bool hasTypeRecoveryStarted() => ((flags & typerecovery_start) != 0);
+        public bool hasTypeRecoveryStarted() => ((flags & Flags.typerecovery_start) != 0);
 
         ///< Return \b true if \b this function has no code body
-        public bool hasNoCode() => ((flags & no_code) != 0);
+        public bool hasNoCode() => ((flags & Flags.no_code) != 0);
 
         public void setNoCode(bool val)
         {
-            if (val) flags |= no_code;
-            else flags &= ~no_code;
+            if (val) flags |= Flags.no_code;
+            else flags &= ~Flags.no_code;
         }   ///< Toggle whether \b this has a body
 
         ///< Mark that laned registers have been collected
@@ -1262,24 +1252,24 @@ namespace Sla.DECCORE
         /// \param val is \b true to indicate a jump-table is being recovered
         public void setJumptableRecovery(bool val)
         {
-            if (val) flags &= ~jumptablerecovery_dont;
-            else flags |= jumptablerecovery_dont;
+            if (val) flags &= ~Flags.jumptablerecovery_dont;
+            else flags |= Flags.jumptablerecovery_dont;
         }
 
         ///< Is \b this used for jump-table recovery
-        public bool isJumptableRecoveryOn() => ((flags & jumptablerecovery_on) != 0);
+        public bool isJumptableRecoveryOn() => ((flags & Flags.jumptablerecovery_on) != 0);
 
         /// \brief Toggle whether double precision analysis is used
         ///
         /// \param val is \b true if double precision analysis is enabled
         public void setDoublePrecisRecovery(bool val)
         {
-            if (val) flags |= double_precis_on;
-            else flags &= ~double_precis_on;
+            if (val) flags |= Flags.double_precis_on;
+            else flags &= ~Flags.double_precis_on;
         }
 
         ///< Is double precision analysis enabled
-        public bool isDoublePrecisOn() => ((flags & double_precis_on) != 0);
+        public bool isDoublePrecisOn() => ((flags & Flags.double_precis_on) != 0);
 
         ///< Return \b true if no block structuring was performed
         public bool hasNoStructBlocks() => (sblocks.getSize() == 0);
@@ -1288,19 +1278,19 @@ namespace Sla.DECCORE
         public void clear()
         {
             // Clear everything associated with decompilation (analysis)
-            flags &= ~(highlevel_on | blocks_generated | processing_started | typerecovery_start | typerecovery_on |
-                double_precis_on | restart_pending);
+            flags &= ~(Flags.highlevel_on | Flags.blocks_generated | Flags.processing_started | Flags.typerecovery_start
+                | Flags.typerecovery_on | Flags.double_precis_on | Flags.restart_pending);
             clean_up_index = 0;
             high_level_index = 0;
             cast_phase_index = 0;
-            minLanedSize = glb.getMinimumLanedRegisterSize();
+            minLanedSize = (uint)glb.getMinimumLanedRegisterSize();
 
             localmap.clearUnlocked();  // Clear non-permanent stuff
             localmap.resetLocalWindow();
 
             clearActiveOutput();
             funcp.clearUnlockedOutput();    // Inputs are cleared by localmap
-            unionMap.clear();
+            unionMap.Clear();
             clearBlocks();
             obank.clear();
             vbank.clear();
@@ -1323,12 +1313,12 @@ namespace Sla.DECCORE
         public void warning(string txt, Address ad)
         {
             string msg;
-            if ((flags & jumptablerecovery_on) != 0)
+            if ((flags & Flags.jumptablerecovery_on) != 0)
                 msg = "WARNING (jumptable): ";
             else
                 msg = "WARNING: ";
             msg += txt;
-            glb.commentdb.addCommentNoDuplicate(Comment::warning, baseaddr, ad, msg);
+            glb.commentdb.addCommentNoDuplicate(Comment.comment_type.warning, baseaddr, ad, msg);
         }
 
         /// Add a warning comment as part of the function header
@@ -1339,12 +1329,12 @@ namespace Sla.DECCORE
         public void warningHeader(string txt)
         {
             string msg;
-            if ((flags & jumptablerecovery_on) != 0)
+            if ((flags & Flags.jumptablerecovery_on) != 0)
                 msg = "WARNING (jumptable): ";
             else
                 msg = "WARNING: ";
             msg += txt;
-            glb.commentdb.addCommentNoDuplicate(Comment::warningheader, baseaddr, baseaddr, msg);
+            glb.commentdb.addCommentNoDuplicate(Comment.comment_type.warningheader, baseaddr, baseaddr, msg);
         }
 
         /// Start processing for this function
@@ -1353,9 +1343,9 @@ namespace Sla.DECCORE
         /// objects.
         public void startProcessing()
         {
-            if ((flags & processing_started) != 0)
+            if ((flags & Flags.processing_started) != 0)
                 throw new LowlevelError("Function processing already started");
-            flags |= processing_started;
+            flags |= Flags.processing_started;
 
             if (funcp.isInline())
                 warningHeader("This is an inlined function");
@@ -1373,7 +1363,7 @@ namespace Sla.DECCORE
         /// Mark that processing has completed for this function
         public void stopProcessing()
         {
-            flags |= processing_complete;
+            flags |= Flags.processing_complete;
             obank.destroyDead();        // Free up anything in the dead list
 #if CPUI_STATISTICS
             glb.stats.process(*this);
@@ -1383,8 +1373,8 @@ namespace Sla.DECCORE
         ///< Mark that data-type analysis has started
         public bool startTypeRecovery()
         {
-            if ((flags & typerecovery_start) != 0) return false; // Already started
-            flags |= typerecovery_start;
+            if ((flags & Flags.typerecovery_start) != 0) return false; // Already started
+            flags |= Flags.typerecovery_start;
             return true;
         }
 
@@ -1392,7 +1382,7 @@ namespace Sla.DECCORE
         /// \param val is \b true if data-type analysis is enabled
         public void setTypeRecovery(bool val)
         {
-            flags = val ? (flags | typerecovery_on) : (flags & ~typerecovery_on);
+            flags = val ? (flags | Flags.typerecovery_on) : (flags & ~Flags.typerecovery_on);
         }
 
         public void startCastPhase()
@@ -1425,7 +1415,7 @@ namespace Sla.DECCORE
         {
             if (!obank.empty())
             {
-                if ((flags & blocks_generated) == 0)
+                if ((flags & Flags.blocks_generated) == 0)
                     throw new LowlevelError("Function loaded for inlining");
                 return; // Already translated
             }
@@ -1442,12 +1432,12 @@ namespace Sla.DECCORE
             //  glb.symboltab.update_size(name,size);
 
             flow.generateBlocks();
-            flags |= blocks_generated;
+            flags |= Flags.blocks_generated;
             switchOverJumpTables(flow);
             if (flow.hasUnimplemented())
-                flags |= unimplemented_present;
+                flags |= Flags.unimplemented_present;
             if (flow.hasBadData())
-                flags |= baddata_present;
+                flags |= Flags.baddata_present;
         }
 
         /// \brief Generate a clone with truncated control-flow given a partial function
@@ -1502,10 +1492,10 @@ namespace Sla.DECCORE
                 partialflow.injectPcode();
             // Clear error reporting flags
             // Keep possible unreachable flag
-            partialflow.clearFlags(~((uint)FlowInfo::possible_unreachable));
+            partialflow.clearFlags(~((uint)FlowInfo.FlowFlag.possible_unreachable));
 
             partialflow.generateBlocks(); // Generate basic blocks for partial flow
-            flags |= blocks_generated;
+            flags |= Flags.blocks_generated;
         }
 
         /// \brief In-line the p-code from another function into \b this function
@@ -1537,17 +1527,17 @@ namespace Sla.DECCORE
 
             if (inlineflow.checkEZModel()) {
                 // With an EZ clone there are no jumptables to clone
-                list<PcodeOp*>::const_iterator oiter = obank.endDead();
+                IEnumerator<PcodeOp> oiter = obank.endDead();
                 // There is at least one op
                 --oiter;
                 flow.inlineEZClone(inlineflow, callop.getAddr());
                 ++oiter;
                 if (oiter != obank.endDead()) {
                     // If there was at least one PcodeOp cloned
-                    PcodeOp firstop = *oiter;
+                    PcodeOp firstop = oiter.Current;
                     oiter = obank.endDead();
                     --oiter;
-                    PcodeOp lastop = *oiter;
+                    PcodeOp lastop = oiter.Current;
                     obank.moveSequenceDead(firstop, lastop, callop); // Move cloned sequence to right after callop
                     if (callop.isBlockStart())
                         firstop.setFlag(PcodeOp.Flags.startbasic); // First op of inline inherits callop's startbasic flag
@@ -1557,7 +1547,7 @@ namespace Sla.DECCORE
                 opDestroyRaw(callop);
             }
             else {
-                Address retaddr;
+                Address retaddr = new Address();
                 if (!flow.testHardInlineRestrictions(inlinefd, callop, retaddr))
                     return false;
                 // Clone any jumptables from inline piece
@@ -1586,27 +1576,26 @@ namespace Sla.DECCORE
         /// the instruction at the given address, based on the Override type.
         /// \param addr is the given address of the instruction to modify
         /// \param type is the Override type
-        public void overrideFlow(Address addr, uint type)
+        public void overrideFlow(Address addr, Override.Branching type)
         {
             PcodeOpTree::const_iterator iter = beginOp(addr);
             PcodeOpTree::const_iterator enditer = endOp(addr);
 
-            PcodeOp* op = (PcodeOp)null;
-            if (type == Override::BRANCH)
+            PcodeOp? op = (PcodeOp)null;
+            if (type == Override.Branching.BRANCH)
                 op = findPrimaryBranch(iter, enditer, false, true, true);
-            else if (type == Override::CALL)
+            else if (type == Override.Branching.CALL)
                 op = findPrimaryBranch(iter, enditer, true, false, true);
-            else if (type == Override::CALL_RETURN)
+            else if (type == Override.Branching.CALL_RETURN)
                 op = findPrimaryBranch(iter, enditer, true, true, true);
-            else if (type == Override::RETURN)
+            else if (type == Override.Branching.RETURN)
                 op = findPrimaryBranch(iter, enditer, true, true, false);
 
             if ((op == (PcodeOp)null) || (!op.isDead()))
                 throw new LowlevelError("Could not apply flowoverride");
 
             OpCode opc = op.code();
-            if (type == Override::BRANCH)
-            {
+            if (type == Override.Branching.BRANCH) {
                 if (opc == OpCode.CPUI_CALL)
                     opSetOpcode(op, OpCode.CPUI_BRANCH);
                 else if (opc == OpCode.CPUI_CALLIND)
@@ -1614,8 +1603,7 @@ namespace Sla.DECCORE
                 else if (opc == OpCode.CPUI_RETURN)
                     opSetOpcode(op, OpCode.CPUI_BRANCHIND);
             }
-            else if ((type == Override::CALL) || (type == Override::CALL_RETURN))
-            {
+            else if ((type == Override.Branching.CALL) || (type == Override.Branching.CALL_RETURN)) {
                 if (opc == OpCode.CPUI_BRANCH)
                     opSetOpcode(op, OpCode.CPUI_CALL);
                 else if (opc == OpCode.CPUI_BRANCHIND)
@@ -1624,16 +1612,15 @@ namespace Sla.DECCORE
                     throw new LowlevelError("Do not currently support CBRANCH overrides");
                 else if (opc == OpCode.CPUI_RETURN)
                     opSetOpcode(op, OpCode.CPUI_CALLIND);
-                if (type == Override::CALL_RETURN)
-                { // Insert a new return op after call
-                    PcodeOp* newReturn = newOp(1, addr);
+                if (type == Override.Branching.CALL_RETURN) {
+                    // Insert a new return op after call
+                    PcodeOp newReturn = newOp(1, addr);
                     opSetOpcode(newReturn, OpCode.CPUI_RETURN);
                     opSetInput(newReturn, newConstant(1, 0), 0);
                     opDeadInsertAfter(newReturn, op);
                 }
             }
-            else if (type == Override::RETURN)
-            {
+            else if (type == Override.Branching.RETURN) {
                 if ((opc == OpCode.CPUI_BRANCH) || (opc == OpCode.CPUI_CBRANCH) || (opc == OpCode.CPUI_CALL))
                     throw new LowlevelError("Do not currently support complex overrides");
                 else if (opc == OpCode.CPUI_BRANCHIND)
@@ -1689,17 +1676,15 @@ namespace Sla.DECCORE
         /// \param s is the output stream
         public void printRaw(TextWriter s)
         {
-            if (bblocks.getSize() == 0)
-            {
+            if (bblocks.getSize() == 0) {
                 if (obank.empty())
-                    throw RecovError("No operations to print");
+                    throw new RecovError("No operations to print");
                 PcodeOpTree::const_iterator iter;
-                s << "Raw operations: \n";
-                for (iter = obank.beginAll(); iter != obank.endAll(); ++iter)
-                {
+                s.WriteLine("Raw operations: ");
+                for (iter = obank.beginAll(); iter != obank.endAll(); ++iter) {
                     s << (*iter).second.getSeqNum() << ":\t";
                     (*iter).second.printRaw(s);
-                    s << endl;
+                    s.WriteLine();
                 }
             }
             else
@@ -1714,13 +1699,11 @@ namespace Sla.DECCORE
         public void printVarnodeTree(TextWriter s)
         {
             VarnodeDefSet::const_iterator iter, enditer;
-            Varnode* vn;
 
             iter = vbank.beginDef();
             enditer = vbank.endDef();
-            while (iter != enditer)
-            {
-                vn = *iter++;
+            while (iter != enditer) {
+                Varnode vn = *iter++;
                 vn.printInfo(s);
             }
         }
@@ -1834,7 +1817,7 @@ namespace Sla.DECCORE
                 if (subId == 0) break;
                 if (subId == ELEM_LOCALDB)
                 {
-                    if (localmap != (ScopeLocal*)0)
+                    if (localmap != (ScopeLocal)null)
                         throw new LowlevelError("Pre-existing local scope when restoring: " + name);
                     ScopeLocal* newMap = new ScopeLocal(id, stackid, this, glb);
                     glb.symboltab.decodeScope(decoder, newMap);   // May delete newMap and throw
@@ -1844,7 +1827,7 @@ namespace Sla.DECCORE
                     localoverride.decode(decoder, glb);
                 else if (subId == ELEM_PROTOTYPE)
                 {
-                    if (localmap == (ScopeLocal*)0)
+                    if (localmap == (ScopeLocal)null)
                     {
                         // If we haven't seen a <localdb> tag yet, assume we have a default local scope
                         ScopeLocal* newMap = new ScopeLocal(id, stackid, this, glb);
@@ -1859,7 +1842,7 @@ namespace Sla.DECCORE
                     decodeJumpTable(decoder);
             }
             decoder.closeElement(elemId);
-            if (localmap == (ScopeLocal*)0)
+            if (localmap == (ScopeLocal)null)
             { // Seen neither <localdb> or <prototype>
               // This is a function shell, so we provide default locals
                 ScopeLocal* newMap = new ScopeLocal(id, stackid, this, glb);
@@ -1890,12 +1873,11 @@ namespace Sla.DECCORE
         /// Parse a \<jumptablelist> element and build a JumpTable object for
         /// each \<jumptable> child element.
         /// \param decoder is the stream decoder
-        public void decodeJumpTable(Decoder decoder)
+        public void decodeJumpTable(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_JUMPTABLELIST);
-            while (decoder.peekElement() != 0)
-            {
-                JumpTable* jt = new JumpTable(glb);
+            while (decoder.peekElement() != 0) {
+                JumpTable jt = new JumpTable(glb);
                 jt.decode(decoder);
                 jumpvec.Add(jt);
             }
@@ -1910,17 +1892,15 @@ namespace Sla.DECCORE
         {
             encoder.openElement(ElementId.ELEM_AST);
             encoder.openElement(ElementId.ELEM_VARNODES);
-            for (int i = 0; i < glb.numSpaces(); ++i)
-            {
-                AddrSpace * base = glb.getSpace(i);
-                if (base == (AddrSpace)null || @base.getType() == spacetype.IPTR_IOP) continue;
-                VarnodeLocSet::const_iterator iter = vbank.beginLoc(base);
-                VarnodeLocSet::const_iterator enditer = vbank.endLoc(base);
+            for (int i = 0; i < glb.numSpaces(); ++i) {
+                AddrSpace? @base = glb.getSpace(i);
+                if (@base == (AddrSpace)null || @base.getType() == spacetype.IPTR_IOP) continue;
+                VarnodeLocSet::const_iterator iter = vbank.beginLoc(@base);
+                VarnodeLocSet::const_iterator enditer = vbank.endLoc(@base);
                 encodeVarnode(encoder, iter, enditer);
             }
             encoder.closeElement(ElementId.ELEM_VARNODES);
 
-            IEnumerator<PcodeOp> oiter, endoiter;
             PcodeOp op;
             BlockBasic bs;
             for (int i = 0; i < bblocks.getSize(); ++i) {
@@ -1928,10 +1908,9 @@ namespace Sla.DECCORE
                 encoder.openElement(ElementId.ELEM_BLOCK);
                 encoder.writeSignedInteger(AttributeId.ATTRIB_INDEX, bs.getIndex());
                 bs.encodeBody(encoder);
-                oiter = bs.beginOp();
-                endoiter = bs.endOp();
-                while (oiter != endoiter) {
-                    op = *oiter++;
+                IEnumerator<PcodeOp> oiter = bs.beginOp();
+                while (oiter.MoveNext()) {
+                    op = oiter.Current;
                     op.encode(encoder);
                 }
                 encoder.closeElement(ElementId.ELEM_BLOCK);
@@ -1957,7 +1936,7 @@ namespace Sla.DECCORE
             HighVariable high;
 
             if (!isHighOn()) return;
-            encoder.openElement(ElmeentId.ELEM_HIGHLIST);
+            encoder.openElement(ElementId.ELEM_HIGHLIST);
             VarnodeLocSet::const_iterator iter;
             for (iter = beginLoc(); iter != endLoc(); ++iter) {
                 vn = *iter;
@@ -1982,19 +1961,19 @@ namespace Sla.DECCORE
         /// \param val is \b true if a reset is required
         public void setRestartPending(bool val)
         {
-            flags = val ? (flags | restart_pending) : (flags & ~((uint)restart_pending));
+            flags = val ? (flags | Flags.restart_pending) : (flags & ~(Flags.restart_pending));
         }
 
         /// \brief Does \b this function need to restart its analysis
         /// \return \b true if analysis should be restarted
-        public bool hasRestartPending() => ((flags & restart_pending) != 0);
+        public bool hasRestartPending() => ((flags & Flags.restart_pending) != 0);
 
         /// \brief Does \b this function have instructions marked as \e unimplemented
         /// \return \b true if the function's body contains at least one unimplemented instruction
-        public bool hasUnimplemented() => ((flags & unimplemented_present) != 0);
+        public bool hasUnimplemented() => ((flags & Flags.unimplemented_present) != 0);
 
         ///< Does \b this function flow into bad data
-        public bool hasBadData() => ((flags & baddata_present) != 0);
+        public bool hasBadData() => ((flags & Flags.baddata_present) != 0);
 
         /// Mark registers that map to a virtual address space
         /// This routine searches for an marks Varnode objects, like stack-pointer registers,
@@ -2004,38 +1983,33 @@ namespace Sla.DECCORE
         {
             VarnodeLocSet::const_iterator iter, enditer;
             int i, j, numspace;
-            Varnode* vn;
-            AddrSpace* spc;
+            Varnode vn;
 
-            for (j = 0; j < glb.numSpaces(); ++j)
-            {
-                spc = glb.getSpace(j);
+            for (int j = 0; j < glb.numSpaces(); ++j) {
+                AddrSpace? spc = glb.getSpace(j);
                 if (spc == (AddrSpace)null) continue;
                 numspace = spc.numSpacebase();
-                for (i = 0; i < numspace; ++i)
-                {
+                for (i = 0; i < numspace; ++i) {
                     VarnodeData point = spc.getSpacebase(i);
                     // Find input varnode at this size and location
-                    Datatype* ct = glb.types.getTypeSpacebase(spc, getAddress());
-                    Datatype* ptr = glb.types.getTypePointer(point.size, ct, spc.getWordSize());
+                    Datatype ct = glb.types.getTypeSpacebase(spc, getAddress());
+                    Datatype ptr = glb.types.getTypePointer(point.size, ct, spc.getWordSize());
 
-                    iter = vbank.beginLoc(point.size, Address(point.space, point.offset));
-                    enditer = vbank.endLoc(point.size, Address(point.space, point.offset));
-                    while (iter != enditer)
-                    {
+                    iter = vbank.beginLoc(point.size, new Address(point.space, point.offset));
+                    enditer = vbank.endLoc(point.size, new Address(point.space, point.offset));
+                    while (iter != enditer) {
                         vn = *iter++;
                         if (vn.isFree()) continue;
-                        if (vn.isSpacebase())
-                        { // This has already been marked spacebase
+                        if (vn.isSpacebase()) {
+                            // This has already been marked spacebase
                           // We have given it a chance for descendants to
                           // be eliminated naturally, now force a split if
                           // it still has multiple descendants
-                            PcodeOp* op = vn.getDef();
+                            PcodeOp? op = vn.getDef();
                             if ((op != (PcodeOp)null) && (op.code() == OpCode.CPUI_INT_ADD))
                                 splitUses(vn);
                         }
-                        else
-                        {
+                        else {
                             vn.setFlags(Varnode.varnode_flags.spacebase); // Mark all base registers (not just input)
                             if (vn.isInput())  // Only set type on the input spacebase register
                                 vn.updateType(ptr, true, true);
@@ -2052,11 +2026,9 @@ namespace Sla.DECCORE
         /// \return a newly allocated stack-pointer Varnode
         public Varnode newSpacebasePtr(AddrSpace id)
         {
-            Varnode* vn;
-
             // Assume that id has a base register (otherwise an exception is thrown)
             VarnodeData point = id.getSpacebase(0);
-            vn = newVarnode(point.size, Address(point.space, point.offset));
+            Varnode vn = newVarnode((int)point.size, new Address(point.space, point.offset));
             return vn;
         }
 
@@ -2067,11 +2039,10 @@ namespace Sla.DECCORE
         /// \return the input stack-pointer Varnode (or NULL if it doesn't exist)
         public Varnode findSpacebaseInput(AddrSpace id)
         {
-            Varnode* vn;
 
             // Assume that id has a base register (otherwise an exception is thrown)
             VarnodeData point = id.getSpacebase(0);
-            vn = vbank.findInput(point.size, Address(point.space, point.offset));
+            Varnode vn = vbank.findInput(point.size, new Address(point.space, point.offset));
             return vn;
         }
 
@@ -2111,13 +2082,12 @@ namespace Sla.DECCORE
             PcodeOp? zextOp = (PcodeOp)null;
             PcodeOp? subOp = (PcodeOp)null;
             bool isCopy = false;
-            if (op.code() == OpCode.CPUI_COPY)
-            {   // We replace COPY with final op of this calculation
+            if (op.code() == OpCode.CPUI_COPY) {
+                // We replace COPY with final op of this calculation
                 isCopy = true;
                 if (sz < origsize)
                     zextOp = op;
-                else
-                {
+                else {
                     op.insertInput(1); // PTRSUB, ADD, SUBPIECE all take 2 parameters
                     if (origsize < sz)
                         subOp = op;
@@ -2130,15 +2100,13 @@ namespace Sla.DECCORE
             spacebase_vn = newConstant(sz, 0);
             spacebase_vn.updateType(sb_type, true, true);
             spacebase_vn.setFlags(Varnode.varnode_flags.spacebase);
-            if (addOp == (PcodeOp)null)
-            {
+            if (addOp == (PcodeOp)null) {
                 addOp = newOp(2, op.getAddr());
                 opSetOpcode(addOp, OpCode.CPUI_PTRSUB);
                 newUniqueOut(sz, addOp);
                 opInsertBefore(addOp, op);
             }
-            else
-            {
+            else {
                 opSetOpcode(addOp, OpCode.CPUI_PTRSUB);
             }
             outvn = addOp.getOut();
@@ -2158,10 +2126,8 @@ namespace Sla.DECCORE
             if (typelock && (entrytype.getMetatype() == type_metatype.TYPE_UNKNOWN))
                 typelock = false;
             outvn.updateType(ptrentrytype, typelock, false);
-            if (extra != 0)
-            {
-                if (extraOp == (PcodeOp)null)
-                {
+            if (extra != 0) {
+                if (extraOp == (PcodeOp)null) {
                     extraOp = newOp(2, op.getAddr());
                     opSetOpcode(extraOp, OpCode.CPUI_INT_ADD);
                     newUniqueOut(sz, extraOp);
@@ -2169,16 +2135,15 @@ namespace Sla.DECCORE
                 }
                 else
                     opSetOpcode(extraOp, OpCode.CPUI_INT_ADD);
-                Varnode* extconst = newConstant(sz, extra);
+                Varnode extconst = newConstant(sz, extra);
                 extconst.setPtrCheck();
                 opSetInput(extraOp, outvn, 0);
                 opSetInput(extraOp, extconst, 1);
                 outvn = extraOp.getOut();
             }
-            if (sz < origsize)
-            {       // The new constant is smaller than the original varnode, so we extend it
-                if (zextOp == (PcodeOp)null)
-                {
+            if (sz < origsize) {
+                // The new constant is smaller than the original varnode, so we extend it
+                if (zextOp == (PcodeOp)null) {
                     zextOp = newOp(1, op.getAddr());
                     opSetOpcode(zextOp, OpCode.CPUI_INT_ZEXT); // Create an extension to get back to original varnode size
                     newUniqueOut(origsize, zextOp);
@@ -2189,10 +2154,9 @@ namespace Sla.DECCORE
                 opSetInput(zextOp, outvn, 0);
                 outvn = zextOp.getOut();
             }
-            else if (origsize < sz)
-            {   // The new constant is bigger than the original varnode, truncate it
-                if (subOp == (PcodeOp)null)
-                {
+            else if (origsize < sz) {
+                // The new constant is bigger than the original varnode, truncate it
+                if (subOp == (PcodeOp)null) {
                     subOp = newOp(2, op.getAddr());
                     opSetOpcode(subOp, OpCode.CPUI_SUBPIECE);
                     newUniqueOut(origsize, subOp);
@@ -2252,7 +2216,7 @@ namespace Sla.DECCORE
         public List<LoadGuard> getStoreGuards() => heritage.getStoreGuards();
 
         ///< Get LoadGuard associated with STORE op
-        public LoadGuard getStoreGuard(PcodeOp op) => heritage.getStoreGuard(op);
+        public LoadGuard? getStoreGuard(PcodeOp op) => heritage.getStoreGuard(op);
 
         // Function prototype and call specification routines
         /// Get the number of calls made by \b this function
@@ -2267,7 +2231,7 @@ namespace Sla.DECCORE
             int i;
             Varnode vn = op.getIn(0);
             if (vn.getSpace().getType() == spacetype.IPTR_FSPEC)
-                return FuncCallSpecs::getFspecFromConst(vn.getAddr());
+                return FuncCallSpecs.getFspecFromConst(vn.getAddr());
 
             for (i = 0; i < qlst.size(); ++i)
                 if (qlst[i].getOp() == op) return qlst[i];
@@ -2299,8 +2263,7 @@ namespace Sla.DECCORE
 
             // We are assuming x86 code here
             int extrapop = 4;      // The default case
-            if (buffer[0] == 0xc2)
-            {
+            if (buffer[0] == 0xc2) {
                 extrapop = buffer[2];   // Pull out immediate 16-bits
                 extrapop <<= 8;
                 extrapop += buffer[1];
@@ -2325,15 +2288,15 @@ namespace Sla.DECCORE
         /// \return the new Varnode object
         public Varnode newVarnodeOut(int s, Address m, PcodeOp op)
         {
-            Datatype* ct = glb.types.getBase(s, type_metatype.TYPE_UNKNOWN);
-            Varnode* vn = vbank.createDef(s, m, ct, op);
+            Datatype ct = glb.types.getBase(s, type_metatype.TYPE_UNKNOWN);
+            Varnode vn = vbank.createDef(s, m, ct, op);
             op.setOutput(vn);
             assignHigh(vn);
 
             if (s >= minLanedSize)
                 checkForLanedRegister(s, m);
-            uint vflags = 0;
-            SymbolEntry* entry = localmap.queryProperties(m, s, op.getAddr(), vflags);
+            Varnode.varnode_flags vflags = 0;
+            SymbolEntry? entry = localmap.queryProperties(m, s, op.getAddr(), out vflags);
             if (entry != (SymbolEntry)null)
                 vn.setSymbolProperties(entry);
             else
@@ -2377,8 +2340,8 @@ namespace Sla.DECCORE
 
             if (s >= minLanedSize)
                 checkForLanedRegister(s, m);
-            uint vflags = 0;
-            SymbolEntry entry = localmap.queryProperties(vn.getAddr(), vn.getSize(), new Address(), vflags);
+            Varnode.varnode_flags vflags = 0;
+            SymbolEntry? entry = localmap.queryProperties(vn.getAddr(), vn.getSize(), new Address(), out vflags);
             if (entry != (SymbolEntry)null)   // Let entry try to force type
                 vn.setSymbolProperties(entry);
             else
@@ -2513,14 +2476,11 @@ namespace Sla.DECCORE
             iter = vbank.beginDef(Varnode.varnode_flags.input, vn.getAddr() + vn.getSize());
 
             // Iter points at first varnode AFTER vn
-            if (iter != vbank.beginDef())
-            {
+            if (iter != vbank.beginDef()) {
                 --iter;         // previous varnode
                 invn = *iter;       // comes before vn or intersects
-                if (invn.isInput())
-                {
-                    if ((-1 != vn.overlap(*invn)) || (-1 != invn.overlap(*vn)))
-                    {
+                if (invn.isInput()) {
+                    if ((-1 != vn.overlap(*invn)) || (-1 != invn.overlap(*vn))) {
                         if ((vn.getSize() == invn.getSize()) && (vn.getAddr() == invn.getAddr()))
                             return invn;
                         throw new LowlevelError("Overlapping input varnodes");
@@ -2533,8 +2493,7 @@ namespace Sla.DECCORE
             EffectRecord.EffectType effecttype = funcp.hasEffect(vn.getAddr(), vn.getSize());
             if (effecttype == EffectRecord.EffectType.unaffected)
                 vn.setUnaffected();
-            if (effecttype == EffectRecord.EffectType.return_address)
-            {
+            if (effecttype == EffectRecord.EffectType.return_address) {
                 vn.setUnaffected();    // Should be unaffected over the course of the function
                 vn.setReturnAddress();
             }
@@ -2589,8 +2548,7 @@ namespace Sla.DECCORE
             // FIXME: It would probably be better to insert this directly into heritage's globaldisjoint
             invn.setWriteMask();
             // Now change all old inputs to be created as SUBPIECE from the new input
-            for (uint i = 0; i < inlist.size(); ++i)
-            {
+            for (uint i = 0; i < inlist.size(); ++i) {
                 PcodeOp op = inlist[i].getDef();
                 opSetInput(op, invn, 0);
             }
@@ -3715,9 +3673,9 @@ namespace Sla.DECCORE
         public void buildDynamicSymbol(Varnode vn)
         {
             if (vn.isTypeLock() || vn.isNameLock())
-                throw RecovError("Trying to build dynamic symbol on locked varnode");
+                throw new RecovError("Trying to build dynamic symbol on locked varnode");
             if (!isHighOn())
-                throw RecovError("Cannot create dynamic symbols until decompile has completed");
+                throw new RecovError("Cannot create dynamic symbols until decompile has completed");
             HighVariable* high = vn.getHigh();
             if (high.getSymbol() != (Symbol)null)
                 return;         // Symbol already exists
@@ -3725,7 +3683,7 @@ namespace Sla.DECCORE
 
             dhash.uniqueHash(vn, this); // Calculate a unique dynamic hash for this varnode
             if (dhash.getHash() == 0)
-                throw RecovError("Unable to find unique hash for varnode");
+                throw new RecovError("Unable to find unique hash for varnode");
 
             Symbol* sym;
             if (vn.isConstant())
@@ -3744,25 +3702,23 @@ namespace Sla.DECCORE
         /// \return \b true if a Varnode was adjusted
         public bool attemptDynamicMapping(SymbolEntry entry, DynamicHash dhash)
         {
-            Symbol* sym = entry.getSymbol();
+            Symbol sym = entry.getSymbol();
             if (sym.getScope() != localmap)
                 throw new LowlevelError("Cannot currently have a dynamic symbol outside the local scope");
             dhash.clear();
-            int category = sym.getCategory();
-            if (category == Symbol.SymbolCategory.union_facet)
-            {
+            Symbol.SymbolCategory category = sym.getCategory();
+            if (category == Symbol.SymbolCategory.union_facet) {
                 return applyUnionFacet(entry, dhash);
             }
-            Varnode* vn = dhash.findVarnode(this, entry.getFirstUseAddress(), entry.getHash());
+            Varnode vn = dhash.findVarnode(this, entry.getFirstUseAddress(), entry.getHash());
             if (vn == (Varnode)null) return false;
             if (vn.getSymbolEntry() != (SymbolEntry)null) return false;  // Varnode is already labeled
-            if (category == Symbol.SymbolCategory.equate)
-            {   // Is this an equate symbol
+            if (category == Symbol.SymbolCategory.equate) {
+                // Is this an equate symbol
                 vn.setSymbolEntry(entry);
                 return true;
             }
-            else if (entry.getSize() == vn.getSize())
-            {
+            else if (entry.getSize() == vn.getSize()) {
                 if (vn.setSymbolProperties(entry))
                     return true;
             }
@@ -4087,17 +4043,17 @@ namespace Sla.DECCORE
         ///  - MULTIEQUALS in a basic block all occur first
         ///  - INDIRECTs occur immediately before their op
         ///  - a branch op must be the very last op in a basic block
-        ///
         /// \param op is the given PcodeOp to insert
         /// \param bl is the basic block to insert into
         public void opInsertEnd(PcodeOp op, BlockBasic bl)
         {
-            IEnumerator<PcodeOp> iter = bl.endOp();
+            IBiDirEnumerator<PcodeOp> iter = bl.GetBiDirectionalEnumerator(true);
 
-            if (iter != bl.beginOp()) {
-                --iter;
+            if (!iter.MoveNext()) throw new BugException();
+            if (!iter.IsBeforeFirst) {
+                if (!iter.MoveNext()) throw new BugException();
                 if (!iter.Current.isFlowBreak())
-                    ++iter;
+                    if (!iter.MoveNext()) throw new BugException();
             }
             opInsert(op, bl, iter);
         }
@@ -4222,7 +4178,6 @@ namespace Sla.DECCORE
         }
 
         /// \brief Insert the given PcodeOp at specific point in a basic block
-        ///
         /// The PcodeOp is removed from the \e dead list and is inserted \e immediately before
         /// the specified iterator.
         /// \param op is the given PcodeOp
@@ -5828,7 +5783,7 @@ namespace Sla.DECCORE
         /// \param data is the function being modified
         /// \param list is the list of (hash, PcodeOp) pairs
         /// \param outlist will hold Varnodes produced by duplicate calculations
-        private static void cseEliminateList(Funcdata data, List<pair<uint, PcodeOp>> list,
+        private static void cseEliminateList(Funcdata data, List<KeyValuePair<uint, PcodeOp>> list,
             List<Varnode> outlist)
         {
             PcodeOp op1;

@@ -1,4 +1,5 @@
-﻿using Sla.DECCORE;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -52,7 +53,7 @@ namespace Sla.DECCORE
         /// queries, without specifying storage and data-type information about the symbol.
         /// This is modeled currently by creating an unmapped symbol.
         /// \param decoder is the stream decoder
-        private void decodeCollision(Decoder decoder)
+        private void decodeCollision(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_COLLISION);
             string nm = decoder.readString(AttributeId.ATTRIB_NAME);
@@ -431,25 +432,13 @@ namespace Sla.DECCORE
         //    return new MapIterator(&maptable, maptable.end(), curiter);
         //}
 
-        public override IEnumerator<SymbolEntry> beginDynamic()
-        {
-            return dynamicentry.begin();
-        }
+        public override IEnumerator<SymbolEntry> beginDynamic() => dynamicentry.GetEnumerator();
 
-        public override IEnumerator<SymbolEntry> endDynamic()
-        {
-            return dynamicentry.end();
-        }
+        //public override IEnumerator<SymbolEntry> endDynamic() => dynamicentry.end();
 
-        public override IEnumerator<SymbolEntry> beginDynamic()
-        {
-            return dynamicentry.begin();
-        }
+        // public override IEnumerator<SymbolEntry> beginDynamic() => dynamicentry.begin();
 
-        public override IEnumerator<SymbolEntry> endDynamic()
-        {
-            return dynamicentry.end();
-        }
+        //public override IEnumerator<SymbolEntry> endDynamic() => dynamicentry.end();
 
         public override void removeSymbolMappings(Symbol symbol)
         {
@@ -533,7 +522,7 @@ namespace Sla.DECCORE
                     return;
                 }
             }
-            throw RecovError("Unable to retype symbol: " + sym.name);
+            throw new RecovError("Unable to retype symbol: " + sym.name);
         }
 
         public override void setAttribute(Symbol sym, uint attr)
@@ -994,19 +983,15 @@ namespace Sla.DECCORE
             }
             getRangeTree().encode(encoder);
 
-            if (!nametree.empty())
-            {
+            if (!nametree.empty()) {
                 encoder.openElement(ElementId.ELEM_SYMBOLLIST);
                 SymbolNameTree::const_iterator iter;
-                for (iter = nametree.begin(); iter != nametree.end(); ++iter)
-                {
-                    Symbol* sym = *iter;
+                for (iter = nametree.begin(); iter != nametree.end(); ++iter) {
+                    Symbol sym = iter.Current;
                     int symbolType = 0;
-                    if (!sym.mapentry.empty())
-                    {
+                    if (!sym.mapentry.empty()) {
                         SymbolEntry entry = *sym.mapentry.front();
-                        if (entry.isDynamic())
-                        {
+                        if (entry.isDynamic()) {
                             if (sym.getCategory() == Symbol.SymbolCategory.union_facet)
                                 continue;       // Don't save override
                             symbolType = (sym.getCategory() == Symbol.SymbolCategory.equate) ? 2 : 1;
@@ -1018,9 +1003,8 @@ namespace Sla.DECCORE
                     else if (symbolType == 2)
                         encoder.writeString(AttributeId.ATTRIB_TYPE, "equate");
                     sym.encode(encoder);
-                    List<list<SymbolEntry>::iterator>::const_iterator miter;
-                    for (miter = sym.mapentry.begin(); miter != sym.mapentry.end(); ++miter)
-                    {
+                    List<IEnumerator<SymbolEntry>> miter;
+                    for (miter = sym.mapentry.begin(); miter != sym.mapentry.end(); ++miter) {
                         SymbolEntry entry = (*(*miter));
                         entry.encode(encoder);
                     }
@@ -1038,42 +1022,35 @@ namespace Sla.DECCORE
             bool rangeequalssymbols = false;
 
             uint subId = decoder.peekElement();
-            if (subId == ELEM_PARENT)
-            {
+            if (subId == ElementId.ELEM_PARENT) {
                 decoder.skipElement();  // Skip <parent> tag processed elsewhere
                 subId = decoder.peekElement();
             }
-            if (subId == ELEM_RANGELIST)
-            {
+            if (subId == ElementId.ELEM_RANGELIST) {
                 RangeList newrangetree;
                 newrangetree.decode(decoder);
                 glb.symboltab.setRange(this, newrangetree);
             }
-            else if (subId == ELEM_RANGEEQUALSSYMBOLS)
-            {
+            else if (subId == ElementId.ELEM_RANGEEQUALSSYMBOLS) {
                 decoder.openElement();
                 decoder.closeElement(subId);
                 rangeequalssymbols = true;
             }
             subId = decoder.openElement(ElementId.ELEM_SYMBOLLIST);
-            if (subId != 0)
-            {
-                while(true)
-                {
+            if (subId != 0) {
+                while(true) {
                     uint symId = decoder.peekElement();
                     if (symId == 0) break;
-                    if (symId == ELEM_MAPSYM)
-                    {
-                        Symbol* sym = addMapSym(decoder);
-                        if (rangeequalssymbols)
-                        {
-                            SymbolEntry* e = sym.getFirstWholeMap();
+                    if (symId == ElementId.ELEM_MAPSYM) {
+                        Symbol sym = addMapSym(decoder);
+                        if (rangeequalssymbols) {
+                            SymbolEntry e = sym.getFirstWholeMap();
                             glb.symboltab.addRange(this, e.getAddr().getSpace(), e.getFirst(), e.getLast());
                         }
                     }
-                    else if (symId == ELEM_HOLE)
+                    else if (symId == ElementId.ELEM_HOLE)
                         decodeHole(decoder);
-                    else if (symId == ELEM_COLLISION)
+                    else if (symId == ElementId.ELEM_COLLISION)
                         decodeCollision(decoder);
                     else
                         throw new LowlevelError("Unknown symbollist tag");
@@ -1086,27 +1063,25 @@ namespace Sla.DECCORE
 
         public override void printEntries(TextWriter s)
         {
-            s << "Scope " << name << endl;
-            for (int i = 0; i < maptable.size(); ++i)
-            {
-                EntryMap* rangemap = maptable[i];
+            s.WriteLine($"Scope {name}");
+            for (int i = 0; i < maptable.size(); ++i) {
+                EntryMap? rangemap = maptable[i];
                 if (rangemap == (EntryMap)null) continue;
-                list<SymbolEntry>::const_iterator iter, enditer;
-                iter = rangemap.begin_list();
-                enditer = rangemap.end_list();
+                IEnumerator<SymbolEntry> iter = rangemap.begin_list();
+                IEnumerator<SymbolEntry> enditer = rangemap.end_list();
                 for (; iter != enditer; ++iter)
                     (*iter).printEntry(s);
             }
         }
 
-        public override int getCategorySize(int cat)
+        public override int getCategorySize(Symbol.SymbolCategory cat)
         {
-            if ((cat >= category.size()) || (cat < 0))
+            if (((int)cat >= category.size()) || ((int)cat < 0))
                 return 0;
-            return category[cat].size();
+            return category[(int)cat].size();
         }
 
-        public override Symbol getCategorySymbol(int cat, int ind)
+        public override Symbol? getCategorySymbol(int cat, int ind)
         {
             if ((cat >= category.size()) || (cat < 0))
                 return (Symbol)null;
@@ -1115,22 +1090,21 @@ namespace Sla.DECCORE
             return category[cat][ind];
         }
 
-        public override void setCategory(Symbol sym, int cat, int ind)
+        public override void setCategory(Symbol sym, Symbol.SymbolCategory cat, int ind)
         {
-            if (sym.category >= 0)
-            {
-                List<Symbol*> & list(category[sym.category]);
+            if (sym.category >= 0) {
+                List<Symbol> list = category[(int)sym.category];
                 list[sym.catindex] = (Symbol)null;
                 while ((!list.empty()) && (list.GetLastItem() == (Symbol)null))
                     list.RemoveLastItem();
             }
 
             sym.category = cat;
-            sym.catindex = ind;
+            sym.catindex = (ushort)ind;
             if (cat < 0) return;
             while (category.size() <= sym.category)
-                category.Add(List<Symbol*>());
-            List<Symbol*> & list(category[sym.category]);
+                category.Add(new List<Symbol>());
+            List<Symbol?> list = category[(int)sym.category];
             while (list.size() <= sym.catindex)
                 list.Add((Symbol)null);
             list[sym.catindex] = sym;
@@ -1144,29 +1118,22 @@ namespace Sla.DECCORE
         {
             SymbolNameTree::const_iterator iter;
 
-            Symbol testsym = new Symbol((Scope)null,"$$undef",(Datatype)null);
+            Symbol testsym = new Symbol((Scope)null, "$$undef", (Datatype)null);
 
-            iter = nametree.upper_bound(&testsym);
-            while (iter != nametree.end())
-            {
-                Symbol* sym = *iter;
+            iter = nametree.upper_bound(testsym);
+            while (iter != nametree.end()) {
+                Symbol sym = *iter;
                 if (!sym.isNameUndefined()) break;
                 ++iter;     // Advance before renaming
-                string nm = buildDefaultName(sym, base, (Varnode)null);
+                string nm = buildDefaultName(sym, @base, (Varnode)null);
                 renameSymbol(sym, nm);
             }
         }
 
         /// Start of symbols with more than one entry
-        public IEnumerator<Symbol> beginMultiEntry()
-        {
-            return multiEntrySet.begin();
-        }
+        public IEnumerator<Symbol> beginMultiEntry() => multiEntrySet.begin();
 
         /// End of symbols with more than one entry
-        public IEnumerator<Symbol> endMultiEntry()
-        {
-            return multiEntrySet.end();
-        }
+        public IEnumerator<Symbol> endMultiEntry() => multiEntrySet.end();
     }
 }

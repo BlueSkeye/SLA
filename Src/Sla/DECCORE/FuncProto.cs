@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
@@ -7,8 +7,6 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using static ghidra.ParameterPieces;
-using static ghidra.ProtoModel;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Runtime.Intrinsics;
 using System.Runtime.ConstrainedExecution;
@@ -66,7 +64,7 @@ namespace Sla.DECCORE
         /// Extra bytes popped from stack
         private int extrapop;
         /// Boolean properties of the function prototype
-        private uint flags;
+        private FuncFlags flags;
         /// Side-effects associated with non-parameter storage locations
         private List<EffectRecord> effectlist;
         /// Locations that may contain \e trash values
@@ -111,7 +109,7 @@ namespace Sla.DECCORE
                 if (type == curRecord.getType()) continue;
                 if (curRecord.getType() == EffectRecord.EffectType.unaffected)
                     unaffectedList.Add(&curRecord);
-                else if (curRecord.getType() == EffectRecord::killedbycall)
+                else if (curRecord.getType() == EffectRecord.EffectType.killedbycall)
                     killedByCallList.Add(&curRecord);
                 else if (curRecord.getType() == EffectRecord.EffectType.return_address)
                     retAddr = &curRecord;
@@ -783,16 +781,13 @@ namespace Sla.DECCORE
             store.clearAllInputs();
             int count = 0;
             int numtrials = activeinput.getNumTrials();
-            for (int i = 0; i < numtrials; ++i)
-            {
-                ParamTrial & trial(activeinput.getTrial(i));
-                if (trial.isUsed())
-                {
-                    Varnode* vn = triallist[trial.getSlot() - 1];
+            for (int i = 0; i < numtrials; ++i) {
+                ParamTrial trial = activeinput.getTrial(i);
+                if (trial.isUsed()) {
+                    Varnode vn = triallist[trial.getSlot() - 1];
                     if (vn.isMark()) continue;
-                    ParameterPieces pieces;
-                    if (vn.isPersist())
-                    {
+                    ParameterPieces pieces = new ParameterPieces();
+                    if (vn.isPersist()) {
                         int sz;
                         pieces.addr = data.findDisjointCover(vn, sz);
                         if (sz == vn.getSize())
@@ -801,8 +796,7 @@ namespace Sla.DECCORE
                             pieces.type = data.getArch().types.getBase(sz, type_metatype.TYPE_UNKNOWN);
                         pieces.flags = 0;
                     }
-                    else
-                    {
+                    else {
                         pieces.addr = trial.getAddress();
                         pieces.type = vn.getHigh().getType();
                         pieces.flags = 0;
@@ -832,24 +826,20 @@ namespace Sla.DECCORE
             store.clearAllInputs();
             int count = 0;
             int numtrials = activeinput.getNumTrials();
-            TypeFactory* factory = data.getArch().types;
-            for (int i = 0; i < numtrials; ++i)
-            {
-                ParamTrial & trial(activeinput.getTrial(i));
-                if (trial.isUsed())
-                {
-                    Varnode* vn = triallist[trial.getSlot() - 1];
+            TypeFactory factory = data.getArch().types ?? throw new BugException();
+            for (int i = 0; i < numtrials; ++i) {
+                ParamTrial trial = activeinput.getTrial(i);
+                if (trial.isUsed()) {
+                    Varnode vn = triallist[trial.getSlot() - 1];
                     if (vn.isMark()) continue;
-                    ParameterPieces pieces;
-                    if (vn.isPersist())
-                    {
+                    ParameterPieces pieces = new ParameterPieces();
+                    if (vn.isPersist()) {
                         int sz;
                         pieces.addr = data.findDisjointCover(vn, sz);
                         pieces.type = factory.getBase(sz, type_metatype.TYPE_UNKNOWN);
                         pieces.flags = 0;
                     }
-                    else
-                    {
+                    else {
                         pieces.addr = trial.getAddress();
                         pieces.type = factory.getBase(vn.getSize(), type_metatype.TYPE_UNKNOWN);
                         pieces.flags = 0;
@@ -871,17 +861,14 @@ namespace Sla.DECCORE
         /// \param triallist is the list of Varnodes
         public void updateOutputTypes(List<Varnode> triallist)
         {
-            ProtoParameter* outparm = getOutput();
-            if (!outparm.isTypeLocked())
-            {
-                if (triallist.empty())
-                {
+            ProtoParameter outparm = getOutput();
+            if (!outparm.isTypeLocked()) {
+                if (triallist.empty()) {
                     store.clearOutput();
                     return;
                 }
             }
-            else if (outparm.isSizeTypeLocked())
-            {
+            else if (outparm.isSizeTypeLocked()) {
                 if (triallist.empty()) return;
                 if ((triallist[0].getAddr() == outparm.getAddress()) && (triallist[0].getSize() == outparm.getSize()))
                     outparm.overrideSizeLockType(triallist[0].getHigh().getType());
@@ -892,10 +879,12 @@ namespace Sla.DECCORE
 
             if (triallist.empty()) return;
             // If we reach here, output is not locked, not sizelocked, and there is a valid trial
-            ParameterPieces pieces;
-            pieces.addr = triallist[0].getAddr();
-            pieces.type = triallist[0].getHigh().getType();
-            pieces.flags = 0;
+            ParameterPieces pieces = new ParameterPieces()
+            {
+                addr = triallist[0].getAddr(),
+                type = triallist[0].getHigh().getType(),
+                flags = 0
+            };
             store.setOutput(pieces);
         }
 
@@ -910,15 +899,15 @@ namespace Sla.DECCORE
         public void updateOutputNoTypes(List<Varnode> triallist, TypeFactory factory)
         {
             if (isOutputLocked()) return;
-            if (triallist.empty())
-            {
+            if (triallist.empty()) {
                 store.clearOutput();
                 return;
             }
-            ParameterPieces pieces;
-            pieces.type = factory.getBase(triallist[0].getSize(), type_metatype.TYPE_UNKNOWN);
-            pieces.addr = triallist[0].getAddr();
-            pieces.flags = 0;
+            ParameterPieces pieces = new ParameterPieces() {
+                type = factory.getBase(triallist[0].getSize(), type_metatype.TYPE_UNKNOWN),
+                addr = triallist[0].getAddr(),
+                flags = 0
+            };
             store.setOutput(pieces);
         }
 
@@ -936,21 +925,18 @@ namespace Sla.DECCORE
             setModel(model);        // This resets extrapop
             store.clearAllInputs();
             store.clearOutput();
-            flags &= ~((uint)voidinputlock);
+            flags &= ~(FuncFlags.voidinputlock);
             setDotdotdot(dtdtdt);
 
             List<ParameterPieces> pieces;
 
             // Calculate what memory locations hold each type
-            try
-            {
+            try {
                 model.assignParameterStorage(typelist, pieces, false);
                 store.setOutput(pieces[0]);
                 uint j = 1;
-                for (uint i = 1; i < pieces.size(); ++i)
-                {
-                    if ((pieces[i].flags & ParameterPieces::hiddenretparm) != 0)
-                    {
+                for (uint i = 1; i < pieces.size(); ++i) {
+                    if ((pieces[i].flags & ParameterPieces::hiddenretparm) != 0) {
                         store.setInput(i - 1, "rethidden", pieces[i]);
                         continue;       // increment i but not j
                     }
@@ -959,7 +945,7 @@ namespace Sla.DECCORE
                 }
             }
             catch (ParamUnassignedError err) {
-                flags |= error_inputparam;
+                flags |= FuncFlags.error_inputparam;
             }
             updateThisPointer();
         }
@@ -983,19 +969,19 @@ namespace Sla.DECCORE
 
         public bool isStackGrowsNegative() => model.isStackGrowsNegative(); ///< Return \b true if the stack grows toward smaller addresses
 
-        public bool isDotdotdot() => ((flags&dotdotdot)!= 0); ///< Return \b true if \b this takes a variable number of arguments
+        public bool isDotdotdot() => ((flags & FuncFlags.dotdotdot) != 0); ///< Return \b true if \b this takes a variable number of arguments
 
         public void setDotdotdot(bool val)
         {
-            flags = val ? (flags | dotdotdot) : (flags & ~((uint)dotdotdot));
+            flags = val ? (flags | FuncFlags.dotdotdot) : (flags & ~(FuncFlags.dotdotdot));
         }    ///< Toggle whether \b this takes variable arguments
 
-        public bool isOverride() => ((flags&is_override)!= 0); ///< Return \b true if \b this is a call site override
+        public bool isOverride() => ((flags & FuncFlags.is_override) != 0); ///< Return \b true if \b this is a call site override
 
         /// Toggle whether \b this is a call site override
         public void setOverride(bool val)
         {
-            flags = val ? (flags | is_override) : (flags & ~((uint)is_override));
+            flags = val ? (flags | FuncFlags.is_override) : (flags & ~(FuncFlags.is_override));
         }
 
         /// \brief Calculate the effect \b this has an a given storage location
@@ -1005,47 +991,30 @@ namespace Sla.DECCORE
         /// will have on the storage.
         /// \param addr is the starting address of the storage location
         /// \param size is the number of bytes in the storage
-        /// \return the type of side-effect: EffectRecord.EffectType.unaffected, EffectRecord::killedbycall, etc.
-        public uint hasEffect(Address addr, int size)
+        /// \return the type of side-effect: EffectRecord.EffectType.unaffected, EffectRecord.EffectType.killedbycall, etc.
+        public EffectRecord.EffectType hasEffect(Address addr, int size)
         {
-            if (effectlist.empty())
-                return model.hasEffect(addr, size);
-
-            return ProtoModel::lookupEffect(effectlist, addr, size);
+            return (effectlist.empty())
+                ? model.hasEffect(addr, size)
+                : ProtoModel.lookupEffect(effectlist, addr, size);
         }
 
         /// Get iterator to front of EffectRecord list
         public IEnumerator<EffectRecord> effectBegin()
-        {
-            if (effectlist.empty())
-                return model.effectBegin();
-            return effectlist.begin();
-        }
+            => (effectlist.empty()) ? model.effectBegin() : effectlist.begin();
 
         /// Get iterator to end of EffectRecord list
         public IEnumerator<EffectRecord> effectEnd()
-        {
-            if (effectlist.empty())
-                return model.effectEnd();
-            return effectlist.end();
-        }
+            => (effectlist.empty()) ? model.effectEnd() : effectlist.end();
 
         /// Get iterator to front of \e likelytrash list
         public IEnumerator<VarnodeData> trashBegin()
-        {
-            if (likelytrash.empty())
-                return model.trashBegin();
-            return likelytrash.begin();
-        }
+            => (likelytrash.empty()) ? model.trashBegin() : likelytrash.begin();
 
         /// Get iterator to end of \e likelytrash list
         /// \return the iterator to the end of the list
         public IEnumerator<VarnodeData> trashEnd()
-        {
-            if (likelytrash.empty())
-                return model.trashEnd();
-            return likelytrash.end();
-        }
+            => (likelytrash.empty()) ? model.trashEnd() : likelytrash.end();
 
         /// \brief Decide whether a given storage location could be, or could hold, an input parameter
         ///
@@ -1059,20 +1028,18 @@ namespace Sla.DECCORE
         /// \param addr is the starting address of the given storage location
         /// \param size is the number of bytes in the storage
         /// \return the characterization code
-        public int characterizeAsInputParam(Address addr, int size)
+        public ParamEntry.Containment characterizeAsInputParam(Address addr, int size)
         {
-            if (!isDotdotdot())
-            {       // If the proto is varargs, go straight to the model
-                if ((flags & voidinputlock) != 0) return 0;
+            if (!isDotdotdot()) {
+                // If the proto is varargs, go straight to the model
+                if ((flags & FuncFlags.voidinputlock) != 0) return 0;
                 int num = numParams();
-                if (num > 0)
-                {
+                if (num > 0) {
                     bool locktest = false;  // Have tested against locked symbol
                     bool resContains = false;
                     bool resContainedBy = false;
-                    for (int i = 0; i < num; ++i)
-                    {
-                        ProtoParameter* param = getParam(i);
+                    for (int i = 0; i < num; ++i) {
+                        ProtoParameter param = getParam(i);
                         if (!param.isTypeLocked()) continue;
                         locktest = true;
                         Address iaddr = param.getAddress();
@@ -1080,17 +1047,16 @@ namespace Sla.DECCORE
                         // to the endianness of the space, irregardless of the forceleft flag
                         int off = iaddr.justifiedContain(param.getSize(), addr, size, false);
                         if (off == 0)
-                            return ParamEntry::contains_justified;
+                            return ParamEntry.Containment.contains_justified;
                         else if (off > 0)
                             resContains = true;
                         if (iaddr.containedBy(param.getSize(), addr, size))
                             resContainedBy = true;
                     }
-                    if (locktest)
-                    {
-                        if (resContains) return ParamEntry::contains_unjustified;
+                    if (locktest) {
+                        if (resContains) return ParamEntry.Containment.contains_unjustified;
                         if (resContainedBy) return ParamEntry.Containment.contained_by;
-                        return ParamEntryParamEntry.Containment.no_containment;
+                        return ParamEntry.Containment.no_containment;
                     }
                 }
             }
@@ -1121,9 +1087,9 @@ namespace Sla.DECCORE
                 // to the endianness of the space, irregardless of the forceleft flag
                 int off = iaddr.justifiedContain(outparam.getSize(), addr, size, false);
                 if (off == 0)
-                    return ParamEntry::contains_justified;
+                    return ParamEntry.Containment.contains_justified;
                 else if (off > 0)
-                    return ParamEntry::contains_unjustified;
+                    return ParamEntry.Containment.contains_unjustified;
                 if (iaddr.containedBy(outparam.getSize(), addr, size))
                     return ParamEntry.Containment.contained_by;
                 return ParamEntryParamEntry.Containment.no_containment;
@@ -1274,9 +1240,9 @@ namespace Sla.DECCORE
         /// \param res is the parameter storage to pass back
         /// \return the extension operator (INT_ZEXT INT_SEXT) or INT_COPY if there is no extension.
         /// INT_PIECE indicates the extension is determined by the specific prototype.
-        public OpCode assumedOutputExtension(Address addr, int size, VarnodeData res)
+        public OpCode assumedOutputExtension(Address addr, int size, out VarnodeData res)
         {
-            return model.assumedOutputExtension(addr, size, res);
+            return model.assumedOutputExtension(addr, size, out  res);
         }
 
         /// \brief Pass-back the biggest potential input parameter contained within the given range
@@ -1644,7 +1610,7 @@ namespace Sla.DECCORE
                     while (decoder.peekElement() != 0)
                     {
                         effectlist.emplace_back();
-                        effectlist.GetLastItem().decode(EffectRecord::killedbycall, decoder);
+                        effectlist.GetLastItem().decode(EffectRecord.EffectType.killedbycall, decoder);
                     }
                     decoder.closeElement(subId);
                 }

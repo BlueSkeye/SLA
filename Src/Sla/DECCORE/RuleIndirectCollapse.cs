@@ -89,7 +89,7 @@ namespace Sla.DECCORE
                     if (indop.code() == OpCode.CPUI_STORE)
                     {
                         LoadGuard* guard = data.getStoreGuard(indop);
-                        if (guard != (LoadGuard*)0) {
+                        if (guard != (LoadGuard)null) {
                             if (guard.isGuarded(op.getOut().getAddr()))
                                 return 0;
                         }

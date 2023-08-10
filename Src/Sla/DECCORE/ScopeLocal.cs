@@ -1,18 +1,5 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Numerics;
-using System.Reflection;
-using System.Reflection.Metadata;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using static ghidra.ParamMeasure;
-using static ghidra.ScoreProtoModel;
 
 using EntryMap = Sla.EXTRA.rangemap<Sla.DECCORE.SymbolEntry>;
 
@@ -53,16 +40,16 @@ namespace Sla.DECCORE
         {
             if (a.size == 0) return false;  // Nothing to fit
             if ((a.flags & Varnode.varnode_flags.typelock) != 0) return false; // Already entered
-            Address addr(space, a.start);
-            ulong maxsize = getRangeTree().longestFit(addr, a.size);
+            Address addr = new Address(space, (ulong)a.start);
+            ulong maxsize = getRangeTree().longestFit(addr, (ulong)a.size);
             if (maxsize == 0) return false;
-            if (maxsize < a.size)
-            {   // Suggested range doesn't fit
-                if (maxsize < a.type.getSize()) return false; // Can't shrink that match
+            if (maxsize < (uint)a.size) {
+                // Suggested range doesn't fit
+                if (maxsize < (uint)a.type.getSize()) return false; // Can't shrink that match
                 a.size = (int)maxsize;
             }
             // We want ANY symbol that might be within this range
-            SymbolEntry* entry = findOverlap(addr, a.size);
+            SymbolEntry? entry = findOverlap(addr, a.size);
             if (entry == (SymbolEntry)null)
                 return true;
             if (entry.getAddr() <= addr)
@@ -72,8 +59,8 @@ namespace Sla.DECCORE
                 return false;
             }
             maxsize = entry.getAddr().getOffset() - a.start;
-            if (maxsize < a.type.getSize()) return false;  // Can't shrink for this type
-            a.size = maxsize;
+            if (maxsize < (uint)a.type.getSize()) return false;  // Can't shrink for this type
+            a.size = (int)maxsize;
             return true;
         }
 
@@ -83,9 +70,9 @@ namespace Sla.DECCORE
         /// \param a is the given RangeHint to create a Symbol for
         private void createEntry(RangeHint a)
         {
-            Address addr(space, a.start);
-            Address usepoint;
-            Datatype* ct = glb.types.concretize(a.type);
+            Address addr = new Address(space, a.start);
+            Address usepoint = new Address();
+            Datatype ct = glb.types.concretize(a.type);
             int num = a.size / ct.getSize();
             if (num > 1)
                 ct = glb.types.getTypeArray(num, ct);
@@ -103,31 +90,28 @@ namespace Sla.DECCORE
         private bool restructure(MapState state)
         {
             RangeHint cur;
-            RangeHint* next;
+            RangeHint next;
             // This implementation does not allow a range
             // to contain both ~0 and 0
             bool overlapProblems = false;
             if (!state.initialize())
                 return overlapProblems; // No references to stack at all
 
-            cur = *state.next();
-            while (state.getNext())
-            {
+            cur = state.next();
+            while (state.getNext()) {
                 next = state.next();
-                if (next.sstart < cur.sstart + cur.size)
-                {   // Do the ranges intersect
+                if (next.sstart < cur.sstart + cur.size) {
+                    // Do the ranges intersect
                     if (cur.merge(next, space, glb.types)) // Union them
                         overlapProblems = true;
                 }
-                else
-                {
-                    if (!cur.attemptJoin(next))
-                    {
-                        if (cur.rangeType == RangeHint::open)
-                            cur.size = next.sstart - cur.sstart;
+                else {
+                    if (!cur.attemptJoin(next)) {
+                        if (cur.rangeType == RangeHint.RangeType.open)
+                            cur.size = (int)(next.sstart - cur.sstart);
                         if (adjustFit(cur))
                             createEntry(cur);
-                        cur = *next;
+                        cur = next;
                     }
                 }
             }
@@ -144,7 +128,7 @@ namespace Sla.DECCORE
         /// \param alias is the given set of alias starting offsets
         private void markUnaliased(List<ulong> alias)
         {
-            EntryMap rangemap = maptable[space.getIndex()];
+            EntryMap? rangemap = maptable[space.getIndex()];
             if (rangemap == (EntryMap)null) return;
             IEnumerator<Sla.CORE.Range> rangeIter = getRangeTree().begin();
 
@@ -153,21 +137,18 @@ namespace Sla.DECCORE
             ulong curalias = 0;
             int i = 0;
 
-            list<SymbolEntry>::iterator iter, enditer;
-            iter = rangemap.begin_list();
-            enditer = rangemap.end_list();
+            IEnumerator<SymbolEntry> iter = rangemap.begin_list();
+            IEnumerator<SymbolEntry> enditer = rangemap.end_list();
 
-            while (iter != enditer)
-            {
-                SymbolEntry & entry(*iter++);
+            while (iter != enditer) {
+                SymbolEntry entry = *iter++;
                 ulong curoff = entry.getAddr().getOffset() + entry.getSize() - 1;
                 while ((i < alias.Count) && (alias[i] <= curoff)) {
                     aliason = true;
                     curalias = alias[i++];
                 }
                 // Aliases shouldn't go thru unmapped regions of the local variables
-                while (rangeIter.MoveNext())
-                {
+                while (rangeIter.MoveNext()) {
                     Sla.CORE.Range rng = rangeIter.Current;
                     if (rng.getSpace() == space) {
                         if (rng.getFirst() > curalias && curoff >= rng.getFirst())
@@ -184,12 +165,10 @@ namespace Sla.DECCORE
                 // stack parameters and stack locals
                 if (aliason && (curoff - curalias > 0xffff)) aliason = false;
                 if (!aliason) symbol.getScope().setAttribute(symbol, Varnode.varnode_flags.nolocalalias);
-                if (symbol.isTypeLocked() && alias_block_level != 0)
-                {
+                if (symbol.isTypeLocked() && alias_block_level != 0) {
                     if (alias_block_level == 3)
                         aliason = false;        // For this level, all locked data-types block aliases
-                    else
-                    {
+                    else {
                         type_metatype meta = symbol.getType().getMetatype();
                         if (meta == type_metatype.TYPE_STRUCT)
                             aliason = false;        // Only structures block aliases
@@ -425,12 +404,12 @@ namespace Sla.DECCORE
                 if (last > maxParamOffset)
                     maxParamOffset = last;
             }
-            Address addr(space, first);
+            Address addr = new Address(space, first);
             // Remove any symbols under range
-            SymbolEntry* overlap = findOverlap(addr, sz);
+            SymbolEntry? overlap = findOverlap(addr, sz);
             while (overlap != (SymbolEntry)null)
             { // For every overlapping entry
-                Symbol* sym = overlap.getSymbol();
+                Symbol sym = overlap.getSymbol();
                 if ((sym.getFlags() & Varnode.varnode_flags.typelock) != 0)
                 {
                     // If the symbol and the use are both as parameters
@@ -731,11 +710,10 @@ namespace Sla.DECCORE
         /// and try to apply the data-type to it.  Do not override existing type lock.
         public void applyTypeRecommendations()
         {
-            list<TypeRecommend>::const_iterator iter;
-            for (iter = typeRecommend.begin(); iter != typeRecommend.end(); ++iter)
-            {
-                Datatype* dt = (*iter).getType();
-                Varnode* vn = fd.findVarnodeInput(dt.getSize(), (*iter).getAddress());
+            IEnumerator<TypeRecommend> iter;
+            for (iter = typeRecommend.begin(); iter != typeRecommend.end(); ++iter) {
+                Datatype dt = iter.Current.getType();
+                Varnode? vn = fd.findVarnodeInput(dt.getSize(), iter.Current.getAddress());
                 if (vn != (Varnode)null)
                     vn.updateType(dt, true, false);
             }
@@ -751,7 +729,7 @@ namespace Sla.DECCORE
         /// \param dt is the given data-type
         public void addTypeRecommendation(Address addr, Datatype dt)
         {
-            typeRecommend.Add(TypeRecommend(addr, dt));
+            typeRecommend.Add(new TypeRecommend(addr, dt));
         }
     }
 }

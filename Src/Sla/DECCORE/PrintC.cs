@@ -702,8 +702,6 @@ namespace Sla.DECCORE
         /// \param ct is the enumerated data-type
         protected void emitEnumDefinition(TypeEnum ct)
         {
-            Dictionary<ulong, string>::const_iterator iter;
-
             if (ct.getName().Length == 0) {
                 clear();
                 throw new LowlevelError("Trying to save unnamed enumeration");
@@ -717,18 +715,20 @@ namespace Sla.DECCORE
             int id = emit.startIndent();
             emit.print(OPEN_CURLY);
             emit.tagLine();
-            iter = ct.beginEnum();
-            while (iter != ct.endEnum()) {
-                emit.print((*iter).second, EmitMarkup.syntax_highlight.const_color);
+            IEnumerator<KeyValuePair<ulong, string>> iter = ct.beginEnum();
+            bool firstLine = true;
+            while (iter.MoveNext()) {
+                if (firstLine)
+                    firstLine = false;
+                else
+                    emit.tagLine();
+                emit.print(iter.Current.Value, EmitMarkup.syntax_highlight.const_color);
                 emit.spaces(1);
                 emit.print(EQUALSIGN, EmitMarkup.syntax_highlight.no_color);
                 emit.spaces(1);
                 push_integer(iter.Current.Key, ct.getSize(), sign, (Varnode)null, (PcodeOp)null);
                 recurse();
                 emit.print(SEMICOLON);
-                ++iter;
-                if (iter != ct.endEnum())
-                    emit.tagLine();
             }
             popMod();
             emit.stopIndent(id);
@@ -2005,12 +2005,11 @@ namespace Sla.DECCORE
                 notempty = true;
                 emitVarDeclStatement(sym);
             }
-            list<SymbolEntry>::const_iterator iter_d = symScope.beginDynamic();
-            list<SymbolEntry>::const_iterator enditer_d = symScope.endDynamic();
-            for (; iter_d != enditer_d; ++iter_d) {
-                SymbolEntry entry = &(*iter_d);
+            IEnumerator<SymbolEntry> iter_d = symScope.beginDynamic();
+            while (iter_d.MoveNext()) {
+                SymbolEntry entry = iter_d.Current;
                 if (entry.isPiece()) continue; // Don't do a partial entry
-                Symbol sym = (*iter_d).getSymbol();
+                Symbol sym = iter_d.Current.getSymbol();
                 if (sym.getCategory() != cat) continue;
                 if (sym.getName().Length == 0) continue;
                 if ((FunctionSymbol)(sym) != (FunctionSymbol)null)
@@ -2269,7 +2268,7 @@ namespace Sla.DECCORE
                 emit.flush();
 #if CPUI_DEBUG
                 if ((mods != modsave) || (!isModStackEmpty()))
-                    throw RecovError("Printing modification stack has not been purged");
+                    throw new RecovError("Printing modification stack has not been purged");
 #endif
                 mods = modsave;
             }

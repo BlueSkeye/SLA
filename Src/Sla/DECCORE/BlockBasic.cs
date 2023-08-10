@@ -41,7 +41,7 @@ namespace Sla.DECCORE
         /// This method also assigns the ordering index for the PcodeOp, getSeqNum().getOrder()
         /// \param iter points at the PcodeOp to insert before
         /// \param inst is the PcodeOp to insert
-        private void insert(IEnumerator<PcodeOp> iter, PcodeOp inst)
+        internal void insert(IEnumerator<PcodeOp> iter, PcodeOp inst)
         {
             uint ordbefore;
             uint ordafter;
@@ -433,15 +433,18 @@ namespace Sla.DECCORE
                     return false;
                 }
             }
-            PcodeOp lastop = lastOp();
+            PcodeOp? lastop = lastOp();
             return ((lastop == null) || (lastop.code() != OpCode.CPUI_BRANCHIND) || hasOnlyMarkers());
         }
 
         /// Return an iterator to the beginning of the PcodeOps
         public IEnumerator<PcodeOp> beginOp() => op.GetEnumerator();
 
+        public IBiDirEnumerator<PcodeOp> GetBiDirectionalEnumerator(bool reverseOrder = false)
+            => op.GetBiDirectionalEnumerator(reverseOrder); 
+
         /// <summary>Return an enumerator in reverse order</summary>
-        public IEnumerator<PcodeOp> reverseEnumerator() => op.GetReverseEnumerator();
+        public IEnumerator<PcodeOp> reverseEnumerator() => op.GetBiDirectionalEnumerator(true);
 
         // list<PcodeOp*>::iterator endOp(void) { return op.end(); }       ///< Return an iterator to the end of the PcodeOps
         //list<PcodeOp*>::const_iterator beginOp(void) { return op.begin(); }	///< Return an iterator to the beginning of the PcodeOps
@@ -517,12 +520,12 @@ namespace Sla.DECCORE
         public static bool liftVerifyUnroll(List<Varnode> varArray, int slot)
         {
             OpCode opc;
-            Varnode cvn;
+            Varnode? cvn;
             Varnode vn = varArray[0];
             if (!vn.isWritten()) {
                 return false;
             }
-            PcodeOp op = vn.getDef();
+            PcodeOp op = vn.getDef() ?? throw new BugException();
             opc = op.code();
             if (op.numInput() == 2) {
                 cvn = op.getIn(1 - slot);
@@ -539,7 +542,7 @@ namespace Sla.DECCORE
                 if (!vn.isWritten()) {
                     return false;
                 }
-                op = vn.getDef();
+                op = vn.getDef() ?? throw new BugException();
                 if (op.code() != opc) {
                     return false;
                 }

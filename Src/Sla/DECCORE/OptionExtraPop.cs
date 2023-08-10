@@ -43,7 +43,7 @@ namespace Sla.DECCORE
                 Funcdata* fd;
                 fd = glb.symboltab.getGlobalScope().queryFunction(p2);
                 if (fd == (Funcdata)null)
-                    throw RecovError("Unknown function name: " + p2);
+                    throw new RecovError("Unknown function name: " + p2);
                 fd.getFuncProto().setExtraPop(expop);
                 res = "ExtraPop set for function " + p2;
             }

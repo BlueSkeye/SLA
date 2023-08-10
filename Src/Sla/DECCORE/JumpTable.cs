@@ -459,7 +459,7 @@ namespace Sla.DECCORE
             IEnumerator<IndexPair> iter = block2addr.GetEnumerator();
             while (iter.MoveNext()) {
                 int curPos = iter.Current.blockPosition;
-                List<IndexPair>::const_iterator nextiter = iter;
+                IEnumerator<IndexPair> nextiter = iter;
                 int count = 0;
                 while (nextiter != block2addr.end() && (*nextiter).blockPosition == curPos) {
                     count += 1;
@@ -726,7 +726,7 @@ namespace Sla.DECCORE
         /// Parse addresses, \e case labels, and any override information from a \<jumptable> element.
         /// Other parts of the model and jump-table will still need to be recovered.
         /// \param decoder is the stream decoder
-        private void decode(Sla.CORE.Decoder decoder)
+        internal void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement(ElementId.ELEM_JUMPTABLE);
             opaddress = Address.decode(decoder);

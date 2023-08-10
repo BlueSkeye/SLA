@@ -13,22 +13,22 @@ namespace Sla.DECCORE
     {
         // friend class Heritage;
         /// The address space \b this record describes
-        private AddrSpace space;
+        internal AddrSpace? space;
         /// How many passes to delay heritage of this space
-        private int delay;
+        internal int delay;
         /// How many passes to delay deadcode removal of this space
         private int deadcodedelay;
         /// >0 if Varnodes in this space have been eliminated
-        private int deadremoved;
+        internal int deadremoved;
         /// \b true if the search for LOAD ops to guard has been performed
-        private bool loadGuardSearch;
+        internal bool loadGuardSearch;
         /// \b true if warning issued previously
-        private bool warningissued;
+        internal bool warningissued;
         /// \b true for the \e stack space, if stack placeholders have not been removed
         internal bool hasCallPlaceholders;
 
         /// Return \b true if heritage is performed on this space
-        private bool isHeritaged() => (space != (AddrSpace)null);
+        internal bool isHeritaged() => (space != (AddrSpace)null);
 
         /// Reset the state
         internal void reset()

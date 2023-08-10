@@ -38,7 +38,7 @@ namespace Sla.DECCORE
                 op = fc.getOp();
 
                 if (!fc.isInputLocked()) continue;
-                if (fc.getSpacebaseOffset() == FuncCallSpecs::offset_unknown) continue;
+                if (fc.getSpacebaseOffset() == FuncCallSpecs.Offsets.offset_unknown) continue;
                 int numparam = fc.numParams();
                 for (int j = 0; j < numparam; ++j) {
                     ProtoParameter param = fc.getParam(j);
@@ -53,7 +53,7 @@ namespace Sla.DECCORE
             endeiter = data.getFuncProto().effectEnd();
             for (; eiter != endeiter; ++eiter) {
                 // Iterate through saved registers
-                if ((*eiter).getType() == EffectRecord::killedbycall) continue;  // Not saved
+                if ((*eiter).getType() == EffectRecord.EffectType.killedbycall) continue;  // Not saved
                 vn = data.findVarnodeInput((*eiter).getSize(), (*eiter).getAddress());
                 if ((vn != (Varnode)null) && (vn.isUnaffected())) {
                     // Mark storage locations for saved registers as not mapped

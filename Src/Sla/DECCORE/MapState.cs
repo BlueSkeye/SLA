@@ -76,10 +76,10 @@ namespace Sla.DECCORE
             if (guard.isRangeLocked())
             {
                 int minItems = ((guard.getMaximum() - guard.getMinimum()) + 1) / step;
-                addRange(guard.getMinimum(), ct, 0, RangeHint::open, minItems - 1);
+                addRange(guard.getMinimum(), ct, 0, RangeHint.RangeType.open, minItems - 1);
             }
             else
-                addRange(guard.getMinimum(), ct, 0, RangeHint::open, 3);
+                addRange(guard.getMinimum(), ct, 0, RangeHint.RangeType.open, 3);
         }
 
         /// Add a hint to the collection
@@ -343,7 +343,7 @@ namespace Sla.DECCORE
                 {
                     minItems = -1;
                 }
-                addRange(offset, ct, 0, RangeHint::open, minItems);
+                addRange(offset, ct, 0, RangeHint.RangeType.open, minItems);
             }
 
             TypeFactory* typeFactory = fd.getArch().types;
