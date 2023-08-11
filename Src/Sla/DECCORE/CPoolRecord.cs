@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -50,7 +50,7 @@ namespace Sla.DECCORE
 
         // friend class ConstantPool;
         /// Descriptor of type of the object
-        private uint tag;
+        private ConstantPoolTagTypes tag;
         /// Additional boolean properties on the record
         private MethodType flags;
         /// Name or token associated with the object
@@ -58,9 +58,9 @@ namespace Sla.DECCORE
         /// Constant value of the object (if known)
         private ulong value;
         /// Data-type associated with the object
-        private Datatype type;
+        private Datatype? type;
         /// For string literals, the raw byte data of the string
-        private byte byteData;
+        private byte[]? byteData;
         /// The number of bytes in the data for a string literal
         private int byteDataLen;
 
@@ -68,29 +68,29 @@ namespace Sla.DECCORE
         public CPoolRecord()
         {
             type = null;
-            byteData = (byte*)0;
+            byteData = null;
         }
 
         /// Destructor
         ~CPoolRecord()
         {
-            if (byteData != (byte*)0) delete[] byteData;
+            // if (byteData != null) delete[] byteData;
         }
 
         /// Get the type of record
-        public uint getTag() => tag;
+        public ConstantPoolTagTypes getTag() => tag;
 
         /// Get name of method or data-type
         public string getToken() => token;
 
         /// Get pointer to string literal data
-        public byte getByteData() => byteData;
+        public byte[]? getByteData() => byteData;
 
         /// Number of bytes of string literal data
         public int getByteDataLength() => byteDataLen;
 
         /// Get the data-type associated with \b this
-        public Datatype getType() => type;
+        public Datatype? getType() => type;
 
         /// Get the constant value associated with \b this
         public ulong getValue() => value;
@@ -107,19 +107,19 @@ namespace Sla.DECCORE
         public void encode(Sla.CORE.Encoder encoder)
         {
             encoder.openElement(ElementId.ELEM_CPOOLREC);
-            if (tag == pointer_method)
+            if (tag == ConstantPoolTagTypes.pointer_method)
                 encoder.writeString(AttributeId.ATTRIB_TAG, "method");
-            else if (tag == pointer_field)
+            else if (tag == ConstantPoolTagTypes.pointer_field)
                 encoder.writeString(AttributeId.ATTRIB_TAG, "field");
-            else if (tag == instance_of)
+            else if (tag == ConstantPoolTagTypes.instance_of)
                 encoder.writeString(AttributeId.ATTRIB_TAG, "instanceof");
-            else if (tag == array_length)
+            else if (tag == ConstantPoolTagTypes.array_length)
                 encoder.writeString(AttributeId.ATTRIB_TAG, "arraylength");
-            else if (tag == check_cast)
+            else if (tag == ConstantPoolTagTypes.check_cast)
                 encoder.writeString(AttributeId.ATTRIB_TAG, "checkcast");
-            else if (tag == string_literal)
+            else if (tag == ConstantPoolTagTypes.string_literal)
                 encoder.writeString(AttributeId.ATTRIB_TAG, "string");
-            else if (tag == class_reference)
+            else if (tag == ConstantPoolTagTypes.class_reference)
                 encoder.writeString(AttributeId.ATTRIB_TAG, "classref");
             else
                 encoder.writeString(AttributeId.ATTRIB_TAG, "primitive");
@@ -127,38 +127,34 @@ namespace Sla.DECCORE
                 encoder.writeBool(AttributeId.ATTRIB_CONSTRUCTOR, true);
             if (isDestructor())
                 encoder.writeBool(AttributeId.ATTRIB_DESTRUCTOR, true);
-            if (tag == primitive)
+            if (tag == ConstantPoolTagTypes.primitive)
             {
                 encoder.openElement(ElementId.ELEM_VALUE);
                 encoder.writeUnsignedInteger(AttributeId.ATTRIB_CONTENT, value);
                 encoder.closeElement(ElementId.ELEM_VALUE);
             }
-            if (byteData != (byte*)0)
-            {
+            if (byteData != null) {
                 encoder.openElement(ElementId.ELEM_DATA);
                 encoder.writeSignedInteger(AttributeId.ATTRIB_LENGTH, byteDataLen);
                 int wrap = 0;
-                ostringstream s;
-                for (int i = 0; i < byteDataLen; ++i)
-                {
-                    s << setfill('0') << setw(2) << hex << byteData[i] << ' ';
+                StringWriter s = new StringWriter();
+                for (int i = 0; i < byteDataLen; ++i) {
+                    s.Write($"{byteData[i]:X02} ");
                     wrap += 1;
-                    if (wrap > 15)
-                    {
-                        s << '\n';
+                    if (wrap > 15) {
+                        s.WriteLine();
                         wrap = 0;
                     }
                 }
-                encoder.writeString(AttributeId.ATTRIB_CONTENT, s.str());
+                encoder.writeString(AttributeId.ATTRIB_CONTENT, s.ToString());
                 encoder.closeElement(ElementId.ELEM_DATA);
             }
-            else
-            {
+            else {
                 encoder.openElement(ElementId.ELEM_TOKEN);
                 encoder.writeString(AttributeId.ATTRIB_CONTENT, token);
                 encoder.closeElement(ElementId.ELEM_TOKEN);
             }
-            type.encode(encoder);
+            (type ?? throw new BugException()).encode(encoder);
             encoder.closeElement(ElementId.ELEM_CPOOLREC);
         }
 
@@ -168,72 +164,66 @@ namespace Sla.DECCORE
         /// \param typegrp is the TypeFactory used to resolve data-types
         public void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
-            tag = primitive;    // Default tag
+            tag = ConstantPoolTagTypes.primitive;    // Default tag
             value = 0;
             flags = 0;
             uint elemId = decoder.openElement(ElementId.ELEM_CPOOLREC);
-            while(true)
-            {
-                uint attribId = decoder.getNextAttributeId();
+            while(true) {
+                AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
-                if (attribId == ATTRIB_TAG)
-                {
+                if (attribId == AttributeId.ATTRIB_TAG) {
                     string tagstring = decoder.readString();
                     if (tagstring == "method")
-                        tag = pointer_method;
+                        tag = ConstantPoolTagTypes.pointer_method;
                     else if (tagstring == "field")
-                        tag = pointer_field;
+                        tag = ConstantPoolTagTypes.pointer_field;
                     else if (tagstring == "instanceof")
-                        tag = instance_of;
+                        tag = ConstantPoolTagTypes.instance_of;
                     else if (tagstring == "arraylength")
-                        tag = array_length;
+                        tag = ConstantPoolTagTypes.array_length;
                     else if (tagstring == "checkcast")
-                        tag = check_cast;
+                        tag = ConstantPoolTagTypes.check_cast;
                     else if (tagstring == "string")
-                        tag = string_literal;
+                        tag = ConstantPoolTagTypes.string_literal;
                     else if (tagstring == "classref")
-                        tag = class_reference;
+                        tag = ConstantPoolTagTypes.class_reference;
                 }
-                else if (attribId == ATTRIB_CONSTRUCTOR)
-                {
+                else if (attribId == AttributeId.ATTRIB_CONSTRUCTOR) {
                     if (decoder.readBool())
-                        flags |= CPoolRecord::is_constructor;
+                        flags |= MethodType.is_constructor;
                 }
-                else if (attribId == ATTRIB_DESTRUCTOR)
-                {
+                else if (attribId == AttributeId.ATTRIB_DESTRUCTOR) {
                     if (decoder.readBool())
-                        flags |= CPoolRecord::is_destructor;
+                        flags |= MethodType.is_destructor;
                 }
             }
             uint subId;
-            if (tag == primitive)
-            {   // First tag must be value
+            if (tag == ConstantPoolTagTypes.primitive) {
+                // First tag must be value
                 subId = decoder.openElement(ElementId.ELEM_VALUE);
                 value = decoder.readUnsignedInteger(AttributeId.ATTRIB_CONTENT);
                 decoder.closeElement(subId);
             }
             subId = decoder.openElement();
-            if (subId == ELEM_TOKEN)
+            if (subId == ElementId.ELEM_TOKEN)
                 token = decoder.readString(AttributeId.ATTRIB_CONTENT);
-            else
-            {
-                byteDataLen = decoder.readSignedInteger(AttributeId.ATTRIB_LENGTH);
+            else {
+                byteDataLen = (int)decoder.readSignedInteger(AttributeId.ATTRIB_LENGTH);
                 istringstream s3(decoder.readString(AttributeId.ATTRIB_CONTENT));
                 byteData = new byte[byteDataLen];
-                for (int i = 0; i < byteDataLen; ++i)
-                {
+                for (int i = 0; i < byteDataLen; ++i) {
                     uint val;
                     s3 >> ws >> hex >> val;
                     byteData[i] = (byte)val;
                 }
             }
             decoder.closeElement(subId);
-            if (tag == string_literal && (byteData == (byte*)0))
+            if (tag == ConstantPoolTagTypes.string_literal && (byteData == null))
                 throw new LowlevelError("Bad constant pool record: missing <data>");
             if (flags != 0)
             {
-                bool isConstructor = ((flags & is_constructor) != 0);
-                bool isDestructor = ((flags & is_destructor) != 0);
+                bool isConstructor = ((flags & MethodType.is_constructor) != 0);
+                bool isDestructor = ((flags & MethodType.is_destructor) != 0);
                 type = typegrp.decodeTypeWithCodeFlags(decoder, isConstructor, isDestructor);
             }
             else

@@ -22,10 +22,10 @@ namespace Sla.DECCORE
         {
         }
 
-        public abstract uint getType();
+        public abstract TypeModifier.Modifier getType();
 
         public abstract bool isValid();
 
-        public abstract Datatype modType(Datatype @base, TypeDeclarator decl, Architecture glb);
+        public abstract Datatype modType(Datatype? @base, TypeDeclarator decl, Architecture glb);
     }
 }

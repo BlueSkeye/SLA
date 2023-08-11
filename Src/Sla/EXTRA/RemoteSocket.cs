@@ -27,7 +27,7 @@ namespace Sla.EXTRA
             fileDescriptor = 0;
             inbuf = (basic_filebuf<char>*)0;
             outbuf = (basic_filebuf<char>*)0;
-            inStream = (istream*)0;
+            inStream = (FileStream)null;
             outStream = (ostream*)0;
             isOpen = false;
         }
@@ -84,10 +84,10 @@ namespace Sla.EXTRA
         ///< Close the streams and socket
         public void close()
         {
-            if (inStream != (istream*)0)
+            if (inStream != (FileStream)null)
             {
                 delete inStream;
-                inStream = (istream*)0;
+                inStream = (FileStream)null;
             }
             if (outStream != (ostream*)0)
             {

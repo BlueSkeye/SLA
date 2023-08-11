@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
@@ -66,7 +66,7 @@ namespace Sla.DECCORE
             // Expanding puts the leftmost element at reference 0
             // So we need to adjust references
             for (int i = 0; i < max; ++i)
-                scanqueue.@ref(i) = (scanqueue.@ref(i) +max - left) % max;
+                scanqueue.SetRef(i, (scanqueue.@ref(i) +max - left) % max);
             // The number of elements in scanqueue is always less than
             // or equal to the number of elements in tokqueue, so
             // if we keep scanqueue and tokqueue with the same max
@@ -79,9 +79,8 @@ namespace Sla.DECCORE
         /// whitespace token if necessary, before emitting a \e start token.
         private void checkstart()
         {
-            if (needbreak)
-            {
-                TokenSplit & tok(tokqueue.push());
+            if (needbreak) {
+                TokenSplit tok = tokqueue.push();
                 tok.spaces(0, 0);
                 scan();
             }
@@ -94,10 +93,9 @@ namespace Sla.DECCORE
         /// an \e end token.
         private void checkend()
         {
-            if (!needbreak)
-            {
-                TokenSplit & tok(tokqueue.push());
-                tok.print(EMPTY_STRING, EmitMarkup::no_color); // Add a blank string
+            if (!needbreak) {
+                TokenSplit tok = tokqueue.push();
+                tok.print(EMPTY_STRING, syntax_highlight.no_color); // Add a blank string
                 scan();
             }
             needbreak = true;
@@ -108,9 +106,8 @@ namespace Sla.DECCORE
         /// whitespace token if necessary, before emitting a \e content token.
         private void checkstring()
         {
-            if (needbreak)
-            {
-                TokenSplit & tok(tokqueue.push());
+            if (needbreak) {
+                TokenSplit tok = tokqueue.push();
                 tok.spaces(0, 0);
                 scan();
             }
@@ -123,10 +120,9 @@ namespace Sla.DECCORE
         /// a \e line \e break token.
         private void checkbreak()
         {
-            if (!needbreak)
-            {
-                TokenSplit & tok(tokqueue.push());
-                tok.print(EMPTY_STRING, EmitMarkup::no_color); // Add a blank string
+            if (!needbreak) {
+                TokenSplit tok = tokqueue.push();
+                tok.print(EMPTY_STRING, syntax_highlight.no_color); // Add a blank string
                 scan();
             }
             needbreak = false;
@@ -139,8 +135,7 @@ namespace Sla.DECCORE
         private void overflow()
         {
             int half = maxlinesize / 2;
-            for (int i = indentstack.size() - 1; i >= 0; --i)
-            {
+            for (int i = indentstack.size() - 1; i >= 0; --i) {
                 if (indentstack[i] < half)
                     indentstack[i] = half;
                 else
@@ -153,14 +148,13 @@ namespace Sla.DECCORE
                 newspaceremain = maxlinesize;
             if (newspaceremain == spaceremain)
                 return;     // Line breaking doesn't give us any additional space
-            if (commentmode && (newspaceremain == spaceremain + commentfill.size()))
+            if (commentmode && (newspaceremain == spaceremain + commentfill.Length))
                 return;     // Line breaking doesn't give us any additional space
             spaceremain = newspaceremain;
             lowlevel.tagLine(maxlinesize - spaceremain);
-            if (commentmode && (commentfill.size() != 0))
-            {
-                lowlevel.print(commentfill, EmitMarkup::comment_color);
-                spaceremain -= commentfill.size();
+            if (commentmode && (commentfill.Length != 0)) {
+                lowlevel.print(commentfill, EmitMarkup.syntax_highlight.comment_color);
+                spaceremain -= commentfill.Length;
             }
         }
 
@@ -172,29 +166,29 @@ namespace Sla.DECCORE
         {
             int val = 0;
 
-            switch (tok.getClass())
-            {
-                case TokenSplit::ignore:
+            switch (tok.getClass()) {
+                case TokenSplit.printclass.ignore:
                     tok.print(lowlevel);    // Markup or other that doesn't use space
                     break;
-                case TokenSplit::begin_indent:
+                case TokenSplit.printclass.begin_indent:
                     val = indentstack.GetLastItem() - tok.getIndentBump();
                     indentstack.Add(val);
 #if PRETTY_DEBUG
                     checkid.Add(tok.getCount());
 #endif
                     break;
-                case TokenSplit::begin_comment:
+                case TokenSplit.printclass.begin_comment:
                     commentmode = true;
-                // fallthru, treat as a group begin
-                case TokenSplit::begin:
+                    // fallthru, treat as a group begin
+                    goto case TokenSplit.printclass.begin;
+                case TokenSplit.printclass.begin:
                     tok.print(lowlevel);
                     indentstack.Add(spaceremain);
 #if PRETTY_DEBUG
                     checkid.Add(tok.getCount());
 #endif
                     break;
-                case TokenSplit::end_indent:
+                case TokenSplit.printclass.end_indent:
                     if (indentstack.empty())
                         throw new LowlevelError("indent error");
 #if PRETTY_DEBUG
@@ -206,10 +200,11 @@ namespace Sla.DECCORE
 #endif
                     indentstack.RemoveLastItem();
                     break;
-                case TokenSplit::end_comment:
+                case TokenSplit.printclass.end_comment:
                     commentmode = false;
-                // fallthru, treat as a group end
-                case TokenSplit::end:
+                    // fallthru, treat as a group end
+                    goto case TokenSplit.printclass.end;
+                case TokenSplit.printclass.end:
                     tok.print(lowlevel);
 #if PRETTY_DEBUG
                     if (checkid.empty() || (checkid.GetLastItem() != tok.getCount()))
@@ -220,19 +215,19 @@ namespace Sla.DECCORE
 #endif
                     indentstack.RemoveLastItem();
                     break;
-                case TokenSplit::tokenstring:
+                case TokenSplit.printclass.tokenstring:
                     if (tok.getSize() > spaceremain)
                         overflow();
                     tok.print(lowlevel);
                     spaceremain -= tok.getSize();
                     break;
-                case TokenSplit::tokenbreak:
+                case TokenSplit.printclass.tokenbreak:
                     if (tok.getSize() > spaceremain)
                     {
-                        if (tok.getTag() == TokenSplit::line_t) // Absolute indent
+                        if (tok.getTag() == TokenSplit.tag_type.line_t) // Absolute indent
                             spaceremain = maxlinesize - tok.getIndentBump();
-                        else
-                        {           // relative indent
+                        else {
+                            // relative indent
                             val = indentstack.GetLastItem() - tok.getIndentBump();
                             // If creating a line break doesn't save that much
                             // don't do the line break
@@ -243,18 +238,16 @@ namespace Sla.DECCORE
                                 spaceremain -= tok.getNumSpaces();
                                 return;
                             }
-                            indentstack.GetLastItem() = val;
+                            indentstack.SetLastItem(val);
                             spaceremain = val;
                         }
                         lowlevel.tagLine(maxlinesize - spaceremain);
-                        if (commentmode && (commentfill.size() != 0))
-                        {
-                            lowlevel.print(commentfill, EmitMarkup::comment_color);
-                            spaceremain -= commentfill.size();
+                        if (commentmode && (commentfill.Length != 0)) {
+                            lowlevel.print(commentfill, syntax_highlight.comment_color);
+                            spaceremain -= commentfill.Length;
                         }
                     }
-                    else
-                    {
+                    else {
                         lowlevel.spaces(tok.getNumSpaces());
                         spaceremain -= tok.getNumSpaces();
                     }
@@ -273,16 +266,14 @@ namespace Sla.DECCORE
         private void advanceleft()
         {
             int l = tokqueue.bottom().getSize();
-            while (l >= 0)
-            {
+            while (l >= 0) {
                 TokenSplit tok = tokqueue.bottom();
                 print(tok);
-                switch (tok.getClass())
-                {
-                    case TokenSplit::tokenbreak:
+                switch (tok.getClass()) {
+                    case TokenSplit.printclass.tokenbreak:
                         leftotal += tok.getNumSpaces();
                         break;
-                    case TokenSplit::tokenstring:
+                    case TokenSplit.printclass.tokenstring:
                         leftotal += l;
                         break;
                     default:
@@ -308,69 +299,61 @@ namespace Sla.DECCORE
             if (tokqueue.empty())       // If we managed to overflow queue
                 expand();           // Expand it
                                     // Delay creating reference until after the possible expansion
-            TokenSplit & tok(tokqueue.top());
-            switch (tok.getClass())
-            {
-                case TokenSplit::begin_comment:
-                case TokenSplit::begin:
-                    if (scanqueue.empty())
-                    {
+            TokenSplit tok = tokqueue.top();
+            switch (tok.getClass()) {
+                case TokenSplit.printclass.begin_comment:
+                case TokenSplit.printclass.begin:
+                    if (scanqueue.empty()) {
                         leftotal = rightotal = 1;
                     }
                     tok.setSize(-rightotal);
-                    scanqueue.push() = tokqueue.topref();
+                    scanqueue.push(tokqueue.topref());
                     break;
-                case TokenSplit::end_comment:
-                case TokenSplit::end:
+                case TokenSplit.printclass.end_comment:
+                case TokenSplit.printclass.end:
                     tok.setSize(0);
-                    if (!scanqueue.empty())
-                    {
-                        TokenSplit @ref = new TokenSplit(tokqueue.@ref (scanqueue.pop() ) );
+                    if (!scanqueue.empty()) {
+                        TokenSplit @ref = tokqueue.@ref(scanqueue.pop());
                         @ref.setSize(@ref.getSize() + rightotal);
-                        if ((ref.getClass() == TokenSplit::tokenbreak) && (!scanqueue.empty()))
-                        {
-                            TokenSplit ref2 = new TokenSplit(tokqueue.@ref (scanqueue.pop()));
+                        if ((@ref.getClass() == TokenSplit.printclass.tokenbreak) && (!scanqueue.empty())) {
+                            TokenSplit ref2 = tokqueue.@ref(scanqueue.pop());
                             ref2.setSize(ref2.getSize() + rightotal);
                         }
                         if (scanqueue.empty())
                             advanceleft();
                     }
                     break;
-                case TokenSplit::tokenbreak:
-                    if (scanqueue.empty())
-                    {
+                case TokenSplit.printclass.tokenbreak:
+                    if (scanqueue.empty()) {
                         leftotal = rightotal = 1;
                     }
-                    else
-                    {
-                        TokenSplit @ref = new TokenSplit(tokqueue.@ref (scanqueue.top() ) );
-                        if (@ref.getClass() == TokenSplit::tokenbreak)
-                        {
+                    else {
+                        TokenSplit @ref = tokqueue.@ref(scanqueue.top());
+                        if (@ref.getClass() == TokenSplit.printclass.tokenbreak) {
                             scanqueue.pop();
                             @ref.setSize(@ref.getSize() + rightotal);
                         }
                     }
                     tok.setSize(-rightotal);
-                    scanqueue.push() = tokqueue.topref();
+                    scanqueue.push(tokqueue.topref());
                     rightotal += tok.getNumSpaces();
                     break;
-                case TokenSplit::begin_indent:
-                case TokenSplit::end_indent:
-                case TokenSplit::ignore:
+                case TokenSplit.printclass.begin_indent:
+                case TokenSplit.printclass.end_indent:
+                case TokenSplit.printclass.ignore:
                     tok.setSize(0);
                     break;
-                case TokenSplit::tokenstring:
-                    if (!scanqueue.empty())
-                    {
+                case TokenSplit.printclass.tokenstring:
+                    if (!scanqueue.empty()) {
                         rightotal += tok.getSize();
-                        while (rightotal - leftotal > spaceremain)
-                        {
-                            TokenSplit @ref = new TokenSplit(tokqueue.@ref (scanqueue.popbottom() ) );
+                        while (rightotal - leftotal > spaceremain) {
+                            TokenSplit @ref = tokqueue.@ref(scanqueue.popbottom());
                             @ref.setSize(999999);
                             advanceleft();
                             if (scanqueue.empty()) break;
                         }
                     }
+                    break;
             }
         }
 
@@ -395,253 +378,253 @@ namespace Sla.DECCORE
 
         ~EmitPrettyPrint()
         {
-            delete lowlevel;
+            // delete lowlevel;
         }
 
-        private override int beginDocument()
+        public override int beginDocument()
         {
             checkstart();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             int id = tok.beginDocument();
             scan();
             return id;
         }
 
-        private override void endDocument(int id)
+        public override void endDocument(int id)
         {
             checkend();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.endDocument(id);
             scan();
         }
 
-        private override int beginFunction(Funcdata fd)
+        public override int beginFunction(Funcdata fd)
         {
 #if PRETTY_DEBUG
             if (!tokqueue.empty())
                 throw new LowlevelError("Starting with non-empty token queue");
 #endif
             checkstart();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             int id = tok.beginFunction(fd);
             scan();
             return id;
         }
 
-        private override void endFunction(int id)
+        public override void endFunction(int id)
         {
             checkend();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.endFunction(id);
             scan();
         }
 
-        private override int beginBlock(FlowBlock bl)
+        public override int beginBlock(FlowBlock bl)
         {
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             int id = tok.beginBlock(bl);
             scan();
             return id;
         }
 
-        private override void endBlock(int id)
+        public override void endBlock(int id)
         {
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.endBlock(id);
             scan();
         }
 
-        private override void tagLine()
+        public override void tagLine()
         {
             emitPending();
             checkbreak();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.tagLine();
             scan();
         }
 
-        private override void tagLine(int indent)
+        public override void tagLine(int indent)
         {
             emitPending();
             checkbreak();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.tagLine(indent);
             scan();
         }
 
-        private override int beginReturnType(Varnode vn)
+        public override int beginReturnType(Varnode vn)
         {
             checkstart();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             int id = tok.beginReturnType(vn);
             scan();
             return id;
         }
 
-        private override void endReturnType(int id)
+        public override void endReturnType(int id)
         {
             checkend();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.endReturnType(id);
             scan();
         }
 
-        private override int beginVarDecl(Symbol sym)
+        public override int beginVarDecl(Symbol sym)
         {
             checkstart();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             int id = tok.beginVarDecl(sym);
             scan();
             return id;
         }
 
-        private override void endVarDecl(int id)
+        public override void endVarDecl(int id)
         {
             checkend();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.endVarDecl(id);
             scan();
         }
 
-        private override int beginStatement(PcodeOp op)
+        public override int beginStatement(PcodeOp op)
         {
             checkstart();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             int id = tok.beginStatement(op);
             scan();
             return id;
         }
 
-        private override void endStatement(int id)
+        public override void endStatement(int id)
         {
             checkend();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.endStatement(id);
             scan();
         }
 
-        private override int beginFuncProto()
+        public override int beginFuncProto()
         {
             checkstart();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             int id = tok.beginFuncProto();
             scan();
             return id;
         }
 
-        private override void endFuncProto(int id)
+        public override void endFuncProto(int id)
         {
             checkend();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.endFuncProto(id);
             scan();
         }
 
-        private override void tagVariable(string name,syntax_highlight hl, Varnode vn, PcodeOp op)
+        public override void tagVariable(string name, syntax_highlight hl, Varnode vn, PcodeOp op)
         {
             checkstring();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.tagVariable(name, hl, vn, op);
             scan();
         }
 
-        private override void tagOp(string name,syntax_highlight hl, PcodeOp op)
+        public override void tagOp(string name, syntax_highlight hl, PcodeOp op)
         {
             checkstring();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.tagOp(name, hl, op);
             scan();
         }
 
-        private override void tagFuncName(string name,syntax_highlight hl, Funcdata fd, PcodeOp op)
+        public override void tagFuncName(string name,syntax_highlight hl, Funcdata fd, PcodeOp op)
         {
             checkstring();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.tagFuncName(name, hl, fd, op);
             scan();
         }
 
-        private override void tagType(string name,syntax_highlight hl, Datatype ct)
+        public override void tagType(string name,syntax_highlight hl, Datatype ct)
         {
             checkstring();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.tagType(name, hl, ct);
             scan();
         }
 
-        private override void tagField(string name,syntax_highlight hl, Datatype ct, int off, PcodeOp op)
+        public override void tagField(string name,syntax_highlight hl, Datatype ct, int off, PcodeOp op)
         {
             checkstring();
-            TokenSplit & tok(tokqueue.push());
-            tok.tagField(name, hl, ct, o, op);
+            TokenSplit tok = tokqueue.push();
+            tok.tagField(name, hl, ct, off, op);
             scan();
         }
 
-        private override void tagComment(string name,syntax_highlight hl, AddrSpace spc, ulong off)
+        public override void tagComment(string name,syntax_highlight hl, AddrSpace spc, ulong off)
         {
             checkstring();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.tagComment(name, hl, spc, off);
             scan();
         }
 
-        private override void tagLabel(string name,syntax_highlight hl, AddrSpace spc, ulong off)
+        public override void tagLabel(string name,syntax_highlight hl, AddrSpace spc, ulong off)
         {
             checkstring();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.tagLabel(name, hl, spc, off);
             scan();
         }
 
-        private override void print(string data,syntax_highlight hl = no_color)
+        public override void print(string data, syntax_highlight hl = syntax_highlight.no_color)
         {
             checkstring();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.print(data, hl);
             scan();
         }
 
-        private override int openParen(string paren,int id = 0)
+        public override int openParen(string paren,int id = 0)
         {
             id = openGroup();          // Open paren automatically opens group
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.openParen(paren, id);
             scan();
             needbreak = true;
             return id;
         }
 
-        private override void closeParen(string paren,int id)
+        public override void closeParen(string paren,int id)
         {
             checkstring();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.closeParen(paren, id);
             scan();
             closeGroup(id);
         }
 
-        private override int openGroup()
+        public override int openGroup()
         {
             checkstart();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             int id = tok.openGroup();
             scan();
             return id;
         }
 
-        private override void closeGroup(int id)
+        public override void closeGroup(int id)
         {
             checkend();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.closeGroup(id);
             scan();
         }
 
-        private override void clear()
+        public override void clear()
         {
-            Emit::clear();
+            base.clear();
             lowlevel.clear();
-            indentstack.clear();
+            indentstack.Clear();
             scanqueue.clear();
             tokqueue.clear();
             leftotal = 1;
@@ -651,58 +634,57 @@ namespace Sla.DECCORE
             spaceremain = maxlinesize;
         }
 
-        private override void setOutputStream(TextWriter t)
+        public override void setOutputStream(TextWriter t)
         {
             lowlevel.setOutputStream(t);
         }
 
-        private override TextWriter getOutputStream() => lowlevel.getOutputStream();
+        public override TextWriter getOutputStream() => lowlevel.getOutputStream();
 
-        private override void spaces(int num, int bump = 0)
+        public override void spaces(int num, int bump = 0)
         {
             checkbreak();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.spaces(num, bump);
             scan();
         }
 
-        private override int startIndent()
+        public override int startIndent()
         {
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             int id = tok.startIndent(indentincrement);
             scan();
             return id;
         }
 
-        private override void stopIndent(int id)
+        public override void stopIndent(int id)
         {
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.stopIndent(id);
             scan();
         }
 
-        private override int startComment()
+        public override int startComment()
         {
             checkstart();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             int id = tok.startComment();
             scan();
             return id;
         }
 
-        private override void stopComment(int id)
+        public override void stopComment(int id)
         {
             checkend();
-            TokenSplit & tok(tokqueue.push());
+            TokenSplit tok = tokqueue.push();
             tok.stopComment(id);
             scan();
         }
 
-        private override void flush()
+        public override void flush()
         {
-            while (!tokqueue.empty())
-            {
-                TokenSplit & tok(tokqueue.popbottom());
+            while (!tokqueue.empty()) {
+                TokenSplit tok = tokqueue.popbottom();
                 if (tok.getSize() < 0)
                     throw new LowlevelError("Cannot flush pretty printer. Missing group end");
                 print(tok);
@@ -717,7 +699,7 @@ namespace Sla.DECCORE
             lowlevel.flush();
         }
 
-        private override void setMaxLineSize(int val)
+        public override void setMaxLineSize(int val)
         {
             if ((val < 20) || (val > 10000))
                 throw new LowlevelError("Bad maximum line size");
@@ -728,16 +710,16 @@ namespace Sla.DECCORE
             clear();
         }
 
-        private override int getMaxLineSize() => maxlinesize;
+        public override int getMaxLineSize() => maxlinesize;
 
-        private override void setCommentFill(string fill)
+        public override void setCommentFill(string fill)
         {
             commentfill = fill;
         }
 
-        private override bool emitsMarkup() => lowlevel.emitsMarkup();
+        public override bool emitsMarkup() => lowlevel.emitsMarkup();
 
-        private override void resetDefaults()
+        public override void resetDefaults()
         {
             lowlevel.resetDefaults();
             resetDefaultsInternal();
@@ -748,14 +730,14 @@ namespace Sla.DECCORE
         /// This method toggles the low-level emitter between EmitMarkup and EmitNoMarkup depending
         /// on whether markup is desired.
         /// \param val is \b true if markup is desired
-        private override void setMarkup(bool val)
+        public virtual void setMarkup(bool val)
         {
-            ostream* t = lowlevel.getOutputStream();
-            delete lowlevel;
+            TextWriter t = lowlevel.getOutputStream();
+            // delete lowlevel;
             if (val)
-                lowlevel = new EmitMarkup;
+                lowlevel = new EmitMarkup();
             else
-                lowlevel = new EmitNoMarkup;
+                lowlevel = new EmitNoMarkup();
             lowlevel.setOutputStream(t);
         }
     }

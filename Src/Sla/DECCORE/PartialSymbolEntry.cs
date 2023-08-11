@@ -22,6 +22,6 @@ namespace Sla.DECCORE
         /// The name of the field
         internal string fieldname;
         /// Highlight information for the field token
-        internal EmitMarkup::syntax_highlight hilite;
+        internal EmitMarkup.syntax_highlight hilite;
     }
 }

@@ -13,7 +13,7 @@ namespace Sla.DECCORE
     internal class PrototypePieces
     {
         /// (Optional) model on which prototype is based
-        internal ProtoModel model;
+        internal ProtoModel? model;
         /// Identifier (function name) associated with prototype
         internal string name;
         /// Return data-type

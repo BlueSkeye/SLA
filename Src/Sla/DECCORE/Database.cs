@@ -167,16 +167,13 @@ namespace Sla.DECCORE
             }
             if (newscope.name.size() == 0)
                 throw new LowlevelError("Non-global scope has empty name");
-            pair<ulong, Scope*> value(newscope.uniqueId, newscope);
             pair<ScopeMap::iterator, bool> res;
-            res = idmap.insert(value);
-            if (res.second == false)
-            {
-                ostringstream s;
-                s << "Duplicate scope id: ";
-                s << newscope.getFullName();
-                delete newscope;
-                throw new RecovError(s.str());
+            res = idmap.Add(newscope.uniqueId, newscope);
+            if (res.second == false) {
+                StringWriter s = new StringWriter();
+                s.Write($"Duplicate scope id: {newscope.getFullName()}");
+                // delete newscope;
+                throw new RecovError(s.ToString());
             }
             parent.attachScope(newscope);
         }

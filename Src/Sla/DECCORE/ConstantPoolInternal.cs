@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -91,26 +91,24 @@ namespace Sla.DECCORE
         private Dictionary<CheapSorter, CPoolRecord> cpoolMap =
             new Dictionary<CheapSorter, CPoolRecord>();
 
-        private override CPoolRecord createRecord(List<ulong> refs)
+        internal override CPoolRecord createRecord(List<ulong> refs)
         {
-            CheapSorter sorter(refs);
-            pair<Dictionary<CheapSorter, CPoolRecord>::iterator, bool> res;
+            CheapSorter sorter = new CheapSorter(refs);
+            KeyValuePair<Dictionary<CheapSorter, CPoolRecord>.Enumerator, bool> res;
             res = cpoolMap.emplace(piecewise_construct, forward_as_tuple(sorter), forward_as_tuple());
             if (res.second == false)
                 throw new LowlevelError("Creating duplicate entry in constant pool: " + (*res.first).second.getToken());
             return &(*res.first).second;
         }
 
-        public override CPoolRecord getRecord(List<ulong> refs)
+        public override CPoolRecord? getRecord(List<ulong> refs)
         {
-            CheapSorter sorter(refs);
-            Dictionary<CheapSorter, CPoolRecord>::const_iterator iter = cpoolMap.find(sorter);
-            if (iter == cpoolMap.end())
-                return (CPoolRecord*)0;
-            return &(*iter).second;
+            CheapSorter sorter = new CheapSorter(refs);
+            CPoolRecord? result;
+            return cpoolMap.TryGetValue(sorter, out result) ? result : null;
         }
 
-        public override bool empty() => cpoolMap.empty();
+        public override bool empty() => (0 == cpoolMap.Count);
 
         public override void clear()
         {
@@ -119,12 +117,10 @@ namespace Sla.DECCORE
 
         public override void encode(Sla.CORE.Encoder encoder)
         {
-            Dictionary<CheapSorter, CPoolRecord>::const_iterator iter;
             encoder.openElement(ElementId.ELEM_CONSTANTPOOL);
-            for (iter = cpoolMap.begin(); iter != cpoolMap.end(); ++iter)
-            {
-                iter.Current.Key.encode(encoder);
-                (*iter).second.encode(encoder);
+            foreach (KeyValuePair<CheapSorter, CPoolRecord> pair in cpoolMap) {
+                pair.Key.encode(encoder);
+                pair.Value.encode(encoder);
             }
             encoder.closeElement(ElementId.ELEM_CONSTANTPOOL);
         }

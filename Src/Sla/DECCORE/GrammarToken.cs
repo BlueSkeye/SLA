@@ -31,7 +31,7 @@ namespace Sla.DECCORE
             stringval = 0x106,
         }
         
-        private uint type;
+        private Token type;
 
         private struct /*union*/ tokenvalue
         {
@@ -44,19 +44,85 @@ namespace Sla.DECCORE
         private int colno;         // Column where this token starts
         private int filenum;           // Which file were we in
 
-        private void set(uint tp);
-        private void set(uint tp, char ptr, int len);
+        internal void set(Token tp)
+        {
+            type = tp;
+        }
 
-        private void setPosition(int file, int line, int col)
+        private void set(Token tp, char ptr, int len)
+        {
+            type = tp;
+            switch (tp) {
+                case Token.integer:
+                    string charstring(ptr, len);
+                    istringstream s(charstring);
+                    // s.unsetf(ios::dec | ios::hex | ios::oct);
+                    intb val;
+                    s >> val;
+                    value.integer = (uintb)val;
+                    break;
+                case Token.identifier:
+                case Token.stringval:
+                    value.stringval = new string(ptr, len);
+                    break;
+                case Token.charconstant:
+                    if (len == 1)
+                        value.integer = (uintb) * ptr;
+                    else {
+                        // Backslash
+                        switch (ptr[1]) {
+                            case 'n':
+                                value.integer = 10;
+                                break;
+                            case '0':
+                                value.integer = 0;
+                                break;
+                            case 'a':
+                                value.integer = 7;
+                                break;
+                            case 'b':
+                                value.integer = 8;
+                                break;
+                            case 't':
+                                value.integer = 9;
+                                break;
+                            case 'v':
+                                value.integer = 11;
+                                break;
+                            case 'f':
+                                value.integer = 12;
+                                break;
+                            case 'r':
+                                value.integer = 13;
+                                break;
+                            default:
+                                value.integer = (uintb)ptr[1];
+                                break;
+                        }
+                    }
+                    break;
+                default:
+                    throw new LowlevelError("Bad internal grammar token set");
+            }
+        }
+
+        internal void setPosition(int file, int line, int col)
         {
             filenum = file;
             lineno = line;
             colno = col;
         }
     
-        public GrammarToken();
+        public GrammarToken()
+        {
+            type = 0;
+            value.integer = 0;
+            lineno = -1;
+            colno = -1;
+            filenum = -1;
+        }
 
-        public uint getType() => type;
+        public Token getType() => type;
 
         public ulong getInteger() => value.integer;
 

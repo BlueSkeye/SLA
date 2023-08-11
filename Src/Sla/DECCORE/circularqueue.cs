@@ -15,7 +15,7 @@ namespace Sla.DECCORE
     internal class circularqueue<_type>
     {
         /// An array of the template object
-        private _type cache;
+        private _type[] cache;
         /// Index within the array of the leftmost object in the queue
         private int left;
         /// Index within the array of the rightmost object in the queue
@@ -34,7 +34,7 @@ namespace Sla.DECCORE
 
         ~circularqueue()
         {
-            delete[] cache;
+            //delete[] cache;
         }
 
         /// Establish a new maximum queue size
@@ -42,9 +42,8 @@ namespace Sla.DECCORE
         /// \param sz the maximum size of the new queue
         public void setMax(int sz)
         {
-            if (max != sz)
-            {
-                delete[] cache;
+            if (max != sz) {
+                // delete[] cache;
                 max = sz;
                 cache = new _type[sz];
             }
@@ -63,14 +62,13 @@ namespace Sla.DECCORE
         /// \param amount is the number of additional objects the resized queue will support
         public void expand(int amount)
         {
-            _type* newcache = new _type[max + amount];
+            _type[] newcache = new _type[max + amount];
 
             int i = left;
             int j = 0;
 
             // Assume there is at least one element in queue
-            while (i != right)
-            {
+            while (i != right) {
                 newcache[j++] = cache[i];
                 i = (i + 1) % max;
             }
@@ -78,7 +76,7 @@ namespace Sla.DECCORE
             left = 0;
             right = j;
 
-            delete[] cache;
+            /// delete[] cache;
             cache = newcache;
             max += amount;
         }
@@ -101,6 +99,11 @@ namespace Sla.DECCORE
         /// Retrieve an object by its reference
         public _type @ref(int r) => cache[r];
 
+        public void SetRef(int r, _type @ref)
+        {
+            cache[r] = @ref;
+        }
+
         /// Get the last object on the queue/stack
         public _type top() => cache[right];
 
@@ -112,6 +115,13 @@ namespace Sla.DECCORE
         {
             right = (right + 1) % max;
             return cache[right];
+        }
+
+        public void push(_type pushedValue)
+        {
+            right = (right + 1) % max;
+            cache[right] = pushedValue;
+            return;
         }
 
         /// Pop the (last) object on the stack

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -117,7 +117,7 @@ namespace Sla.DECCORE
         /// Characters of token (if any)
         private string tok;
         /// Highlighting for token
-        private EmitMarkup::syntax_highlight hl;
+        private EmitMarkup.syntax_highlight hl;
         // Additional markup elements for token
         /// Pcode-op associated with \b this token
         private PcodeOp op;
@@ -160,8 +160,8 @@ namespace Sla.DECCORE
         /// \return an id associated with the document
         public int beginDocument()
         {
-            tagtype = docu_b;
-            delimtype = begin;
+            tagtype = tag_type.docu_b;
+            delimtype = printclass.begin;
             size = 0;
             count = countbase++;
             return count;
@@ -172,8 +172,8 @@ namespace Sla.DECCORE
         /// \param id is the id associated with the document (as returned by beginDocument)
         public void endDocument(int id)
         {
-            tagtype = docu_e;
-            delimtype = end;
+            tagtype = tag_type.docu_e;
+            delimtype = printclass.end;
             size = 0;
             count = id;
         }
@@ -183,8 +183,8 @@ namespace Sla.DECCORE
         /// \return an id associated with the function body
         public int beginFunction(Funcdata f)
         {
-            tagtype = func_b;
-            delimtype = begin;
+            tagtype = tag_type.func_b;
+            delimtype = printclass.begin;
             size = 0;
             ptr_second.fd = f;
             count = countbase++;
@@ -196,8 +196,8 @@ namespace Sla.DECCORE
         /// \param id is the id associated with the function body (as returned by beginFunction)
         public void endFunction(int id)
         {
-            tagtype = func_e;
-            delimtype = end;
+            tagtype = tag_type.func_e;
+            delimtype = printclass.end;
             size = 0;
             count = id;
         }
@@ -208,8 +208,8 @@ namespace Sla.DECCORE
         /// \return an id associated with the section
         public int beginBlock(FlowBlock b)
         {
-            tagtype = bloc_b;
-            delimtype = ignore;
+            tagtype = tag_type.bloc_b;
+            delimtype = printclass.ignore;
             ptr_second.bl = b;
             count = countbase++;
             return count;
@@ -220,8 +220,8 @@ namespace Sla.DECCORE
         /// \param id is the id associated with the section (as returned by beginBlock)
         public void endBlock(int id)
         {
-            tagtype = bloc_e;
-            delimtype = ignore;
+            tagtype = tag_type.bloc_e;
+            delimtype = printclass.ignore;
             count = id;
         }
 
@@ -231,8 +231,8 @@ namespace Sla.DECCORE
         /// \return an id associated with the return type
         public int beginReturnType(Varnode v)
         {
-            tagtype = rtyp_b;
-            delimtype = begin;
+            tagtype = tag_type.rtyp_b;
+            delimtype = printclass.begin;
             ptr_second.vn = v;
             count = countbase++;
             return count;
@@ -243,8 +243,8 @@ namespace Sla.DECCORE
         /// \param id is the id associated with the return type (as returned by beginReturnType)
         public void endReturnType(int id)
         {
-            tagtype = rtyp_e;
-            delimtype = end;
+            tagtype = tag_type.rtyp_e;
+            delimtype = printclass.end;
             count = id;
         }
 
@@ -254,8 +254,8 @@ namespace Sla.DECCORE
         /// \return an id associated with the declaration
         public int beginVarDecl(Symbol sym)
         {
-            tagtype = vard_b;
-            delimtype = begin;
+            tagtype = tag_type.vard_b;
+            delimtype = printclass.begin;
             ptr_second.symbol = sym;
             count = countbase++;
             return count;
@@ -266,8 +266,8 @@ namespace Sla.DECCORE
         /// \param id is the id associated with the declaration (as returned by beginVarDecl)
         public void endVarDecl(int id)
         {
-            tagtype = vard_e;
-            delimtype = end;
+            tagtype = tag_type.vard_e;
+            delimtype = printclass.end;
             count = id;
         }
 
@@ -277,8 +277,8 @@ namespace Sla.DECCORE
         /// \return an id associated with the statement
         public int beginStatement(PcodeOp o)
         {
-            tagtype = stat_b;
-            delimtype = begin;
+            tagtype = tag_type.stat_b;
+            delimtype = printclass.begin;
             op = o;
             count = countbase++;
             return count;
@@ -289,8 +289,8 @@ namespace Sla.DECCORE
         /// \param id is the id associated with the statement (as returned by beginStatement)
         public void endStatement(int id)
         {
-            tagtype = stat_e;
-            delimtype = end;
+            tagtype = tag_type.stat_e;
+            delimtype = printclass.end;
             count = id;
         }
 
@@ -299,8 +299,8 @@ namespace Sla.DECCORE
         /// \return an id associated with the prototype
         public int beginFuncProto()
         {
-            tagtype = prot_b;
-            delimtype = begin;
+            tagtype = tag_type.prot_b;
+            delimtype = printclass.begin;
             count = countbase++;
             return count;
         }
@@ -310,8 +310,8 @@ namespace Sla.DECCORE
         /// \param id is the id associated with the prototype (as returned by beginFuncProto)
         public void endFuncProto(int id)
         {
-            tagtype = prot_e;
-            delimtype = end;
+            tagtype = tag_type.prot_e;
+            delimtype = printclass.end;
             count = id;
         }
 
@@ -321,12 +321,12 @@ namespace Sla.DECCORE
         /// \param h indicates how the identifier should be highlighted
         /// \param v is the Varnode representing the variable within the syntax tree
         /// \param o is a p-code operation related to the use of the variable (may be null)
-        public void tagVariable(string name, EmitMarkup::syntax_highlight h, Varnode v, PcodeOp o)
+        public void tagVariable(string name, EmitMarkup.syntax_highlight h, Varnode v, PcodeOp o)
         {
             tok = name;
-            size = tok.size();
-            tagtype = vari_t;
-            delimtype = tokenstring;
+            size = tok.Length;
+            tagtype = tag_type.vari_t;
+            delimtype = printclass.tokenstring;
             hl = h;
             ptr_second.vn = v;
             op = o;
@@ -337,12 +337,12 @@ namespace Sla.DECCORE
         /// \param name is the character data for the emitted representation
         /// \param h indicates how the token should be highlighted
         /// \param o is the PcodeOp object associated with the operation with the syntax tree
-        public void tagOp(string name, EmitMarkup::syntax_highlight h, PcodeOp o)
+        public void tagOp(string name, EmitMarkup.syntax_highlight h, PcodeOp o)
         {
             tok = name;
-            size = tok.size();
-            tagtype = op_t;
-            delimtype = tokenstring;
+            size = tok.Length;
+            tagtype = tag_type.op_t;
+            delimtype = printclass.tokenstring;
             hl = h;
             op = o;
         }
@@ -353,12 +353,12 @@ namespace Sla.DECCORE
         /// \param h indicates how the identifier should be highlighted
         /// \param f is the function
         /// \param o is the CALL operation associated within the syntax tree or null for a declaration
-        public void tagFuncName(string name, EmitMarkup::syntax_highlight h, Funcdata f, PcodeOp o)
+        public void tagFuncName(string name, EmitMarkup.syntax_highlight h, Funcdata f, PcodeOp o)
         {
             tok = name;
-            size = tok.size();
-            tagtype = fnam_t;
-            delimtype = tokenstring;
+            size = tok.Length;
+            tagtype = tag_type.fnam_t;
+            delimtype = printclass.tokenstring;
             hl = h;
             ptr_second.fd = f;
             op = o;
@@ -369,12 +369,12 @@ namespace Sla.DECCORE
         /// \param name is the character data for the identifier
         /// \param h indicates how the identifier should be highlighted
         /// \param ct is the data-type description object
-        public void tagType(string name, EmitMarkup::syntax_highlight h, Datatype ct)
+        public void tagType(string name, EmitMarkup.syntax_highlight h, Datatype ct)
         {
             tok = name;
-            size = tok.size();
-            tagtype = type_t;
-            delimtype = tokenstring;
+            size = tok.Length;
+            tagtype = tag_type.type_t;
+            delimtype = printclass.tokenstring;
             hl = h;
             ptr_second.ct = ct;
         }
@@ -386,12 +386,12 @@ namespace Sla.DECCORE
         /// \param ct is the data-type associated with the field
         /// \param o is the (byte) offset of the field within its structured data-type
         /// \param inOp is the PcodeOp associated with the field (usually PTRSUB or SUBPIECE)
-        public void tagField(string name, EmitMarkup::syntax_highlight h, Datatype ct, int o, PcodeOp inOp)
+        public void tagField(string name, EmitMarkup.syntax_highlight h, Datatype ct, int o, PcodeOp inOp)
         {
             tok = name;
-            size = tok.size();
-            tagtype = field_t;
-            delimtype = tokenstring;
+            size = tok.Length;
+            tagtype = tag_type.field_t;
+            delimtype = printclass.tokenstring;
             hl = h;
             ptr_second.ct = ct;
             off = (ulong)o;
@@ -404,14 +404,14 @@ namespace Sla.DECCORE
         /// \param h indicates how the comment should be highlighted
         /// \param s is the address space of the address where the comment is attached
         /// \param o is the offset of the address where the comment is attached
-        public void tagComment(string name, EmitMarkup::syntax_highlight h, AddrSpace s, ulong o)
+        public void tagComment(string name, EmitMarkup.syntax_highlight h, AddrSpace s, ulong o)
         {
             tok = name;
-            size = tok.size(); 
+            size = tok.Length;
             ptr_second.spc = s;
             off = o;
-            tagtype = comm_t;
-            delimtype = tokenstring;
+            tagtype = tag_type.comm_t;
+            delimtype = printclass.tokenstring;
             hl = h;
         }
 
@@ -421,14 +421,14 @@ namespace Sla.DECCORE
         /// \param h indicates how the label should be highlighted
         /// \param s is the address space of the code address being labeled
         /// \param o is the offset of the code address being labeled
-        public void tagLabel(string name, EmitMarkup::syntax_highlight h, AddrSpace s, ulong o)
+        public void tagLabel(string name, EmitMarkup.syntax_highlight h, AddrSpace s, ulong o)
         {
             tok = name;
-            size = tok.size();
+            size = tok.Length;
             ptr_second.spc = s;
             off = o;
-            tagtype = label_t;
-            delimtype = tokenstring;
+            tagtype = tag_type.label_t;
+            delimtype = printclass.tokenstring;
             hl = h;
         }
 
@@ -436,12 +436,12 @@ namespace Sla.DECCORE
         ///
         /// \param data is the character data of the syntax being emitted
         /// \param h indicates how the syntax should be highlighted
-        public void print(string data, EmitMarkup::syntax_highlight h)
+        public void print(string data, EmitMarkup.syntax_highlight h)
         {
             tok = data;
-            size = tok.size();
-            tagtype = synt_t;
-            delimtype = tokenstring;
+            size = tok.Length;
+            tagtype = tag_type.synt_t;
+            delimtype = printclass.tokenstring;
             hl = h;
         }
 
@@ -453,8 +453,8 @@ namespace Sla.DECCORE
         {
             tok = paren;
             size = 1;
-            tagtype = opar_t;
-            delimtype = tokenstring;
+            tagtype = tag_type.opar_t;
+            delimtype = printclass.tokenstring;
             count = id;
         }
 
@@ -466,8 +466,8 @@ namespace Sla.DECCORE
         {
             tok = paren;
             size = 1;
-            tagtype = cpar_t;
-            delimtype = tokenstring;
+            tagtype = tag_type.cpar_t;
+            delimtype = printclass.tokenstring;
             count = id;
         }
 
@@ -476,8 +476,8 @@ namespace Sla.DECCORE
         /// \return an id associated with the group
         public int openGroup()
         {
-            tagtype = oinv_t;
-            delimtype = begin;
+            tagtype = tag_type.oinv_t;
+            delimtype = printclass.begin;
             count = countbase++;
             return count;
         }
@@ -487,8 +487,8 @@ namespace Sla.DECCORE
         /// \param id is the id associated with the group (as returned by openGroup)
         public void closeGroup(int id)
         {
-            tagtype = cinv_t;
-            delimtype = end;
+            tagtype = tag_type.cinv_t;
+            delimtype = printclass.end;
             count = id;
         }
 
@@ -498,8 +498,8 @@ namespace Sla.DECCORE
         /// \return an id associated with the nesting
         public int startIndent(int bump)
         {
-            tagtype = bump_t;
-            delimtype = begin_indent;
+            tagtype = tag_type.bump_t;
+            delimtype = printclass.begin_indent;
             indentbump = bump;
             size = 0;
             count = countbase++;
@@ -511,8 +511,8 @@ namespace Sla.DECCORE
         /// \param id is the id associated with the nesting (as returned by startIndent)
         public void stopIndent(int id)
         {
-            tagtype = bump_t;
-            delimtype = end_indent;
+            tagtype = tag_type.bump_t;
+            delimtype = printclass.end_indent;
             size = 0;
             count = id;
         }
@@ -522,8 +522,8 @@ namespace Sla.DECCORE
         /// \return an id associated with the comment block
         public int startComment()
         {
-            tagtype = oinv_t;
-            delimtype = begin_comment;
+            tagtype = tag_type.oinv_t;
+            delimtype = printclass.begin_comment;
             count = countbase++;
             return count;
         }
@@ -533,8 +533,8 @@ namespace Sla.DECCORE
         /// \param id is the id associated with the block (as returned by startComment)
         public void stopComment(int id)
         {
-            tagtype = cinv_t;
-            delimtype = end_comment;
+            tagtype = tag_type.cinv_t;
+            delimtype = printclass.end_comment;
             count = id;
         }
 
@@ -544,8 +544,8 @@ namespace Sla.DECCORE
         /// \param bump is the number of characters to indent if the spaces force a line break
         public void spaces(int num, int bump)
         {
-            tagtype = spac_t;
-            delimtype = tokenbreak;
+            tagtype = tag_type.spac_t;
+            delimtype = printclass.tokenbreak;
             numspaces = num;
             indentbump = bump;
         }
@@ -553,8 +553,8 @@ namespace Sla.DECCORE
         /// \brief Create a line break token
         public void tagLine()
         {
-            tagtype = bump_t;
-            delimtype = tokenbreak;
+            tagtype = tag_type.bump_t;
+            delimtype = printclass.tokenbreak;
             numspaces = 999999;
             indentbump = 0;
         }
@@ -562,8 +562,8 @@ namespace Sla.DECCORE
         /// \brief Create a line break token with special indentation
         public void tagLine(int indent)
         {
-            tagtype = line_t;
-            delimtype = tokenbreak;
+            tagtype = tag_type.line_t;
+            delimtype = printclass.tokenbreak;
             numspaces = 999999;
             indentbump = indent;
         }
@@ -575,91 +575,89 @@ namespace Sla.DECCORE
         /// \param emit is the low-level emitter to output to
         public void print(Emit emit)
         {
-            switch (tagtype)
-            {
-                case docu_b:    // beginDocument
+            switch (tagtype) {
+                case tag_type.docu_b:    // beginDocument
                     emit.beginDocument();
                     break;
-                case docu_e:    // endDocument
+                case tag_type.docu_e:    // endDocument
                     emit.endDocument(count);
                     break;
-                case func_b:    // beginFunction
+                case tag_type.func_b:    // beginFunction
                     emit.beginFunction(ptr_second.fd);
                     break;
-                case func_e:    // endFunction
+                case tag_type.func_e:    // endFunction
                     emit.endFunction(count);
                     break;
-                case bloc_b:    // beginBlock
+                case tag_type.bloc_b:    // beginBlock
                     emit.beginBlock(ptr_second.bl);
                     break;
-                case bloc_e:    // endBlock
+                case tag_type.bloc_e:    // endBlock
                     emit.endBlock(count);
                     break;
-                case rtyp_b:    // beginReturnType
+                case tag_type.rtyp_b:    // beginReturnType
                     emit.beginReturnType(ptr_second.vn);
                     break;
-                case rtyp_e:    // endReturnType
+                case tag_type.rtyp_e:    // endReturnType
                     emit.endReturnType(count);
                     break;
-                case vard_b:    // beginVarDecl
+                case tag_type.vard_b:    // beginVarDecl
                     emit.beginVarDecl(ptr_second.symbol);
                     break;
-                case vard_e:    // endVarDecl
+                case tag_type.vard_e:    // endVarDecl
                     emit.endVarDecl(count);
                     break;
-                case stat_b:    // beginStatement
+                case tag_type.stat_b:    // beginStatement
                     emit.beginStatement(op);
                     break;
-                case stat_e:    // endStatement
+                case tag_type.stat_e:    // endStatement
                     emit.endStatement(count);
                     break;
-                case prot_b:    // beginFuncProto
+                case tag_type.prot_b:    // beginFuncProto
                     emit.beginFuncProto();
                     break;
-                case prot_e:    // endFuncProto
+                case tag_type.prot_e:    // endFuncProto
                     emit.endFuncProto(count);
                     break;
-                case vari_t:    // tagVariable
+                case tag_type.vari_t:    // tagVariable
                     emit.tagVariable(tok, hl, ptr_second.vn, op);
                     break;
-                case op_t:      // tagOp
+                case tag_type.op_t:      // tagOp
                     emit.tagOp(tok, hl, op);
                     break;
-                case fnam_t:    // tagFuncName
+                case tag_type.fnam_t:    // tagFuncName
                     emit.tagFuncName(tok, hl, ptr_second.fd, op);
                     break;
-                case type_t:    // tagType
+                case tag_type.type_t:    // tagType
                     emit.tagType(tok, hl, ptr_second.ct);
                     break;
-                case field_t: // tagField
+                case tag_type.field_t: // tagField
                     emit.tagField(tok, hl, ptr_second.ct, (int)off, op);
                     break;
-                case comm_t:    // tagComment
+                case tag_type.comm_t:    // tagComment
                     emit.tagComment(tok, hl, ptr_second.spc, off);
                     break;
-                case label_t:   // tagLabel
+                case tag_type.label_t:   // tagLabel
                     emit.tagLabel(tok, hl, ptr_second.spc, off);
                     break;
-                case synt_t:    // print
+                case tag_type.synt_t:    // print
                     emit.print(tok, hl);
                     break;
-                case opar_t:    // openParen
+                case tag_type.opar_t:    // openParen
                     emit.openParen(tok, count);
                     break;
-                case cpar_t:    // closeParen
+                case tag_type.cpar_t:    // closeParen
                     emit.closeParen(tok, count);
                     break;
-                case oinv_t:    // Invisible open
+                case tag_type.oinv_t:    // Invisible open
                     break;
-                case cinv_t:    // Invisible close
+                case tag_type.cinv_t:    // Invisible close
                     break;
-                case spac_t:    // Spaces
+                case tag_type.spac_t:    // Spaces
                     emit.spaces(numspaces);
                     break;
-                case line_t:    // tagLine
-                case bump_t:
+                case tag_type.line_t:    // tagLine
+                case tag_type.bump_t:
                     throw new LowlevelError("Should never get called");
-                    break;
             }
         }
 
@@ -692,91 +690,91 @@ namespace Sla.DECCORE
         public void printDebug(TextWriter s)
         {
           switch(tagtype) {
-          case docu_b:	// beginDocument
+          case tag_type.docu_b:	// beginDocument
             s << "docu_b";
             break;
-          case docu_e:	// endDocument
+          case tag_type.docu_e:	// endDocument
             s << "docu_e";
             break;
-          case func_b:	// beginFunction
+          case tag_type.func_b:	// beginFunction
             s << "func_b";
             break;
-          case func_e:	// endFunction
+          case tag_type.func_e:	// endFunction
             s << "func_e";
             break;
-          case bloc_b:	// beginBlock
+          case tag_type.bloc_b:	// beginBlock
             s << "bloc_b";
             break;
-          case bloc_e:	// endBlock
+          case tag_type.bloc_e:	// endBlock
             s << "bloc_e";
             break;
-          case rtyp_b:	// beginReturnType
+          case tag_type.rtyp_b:	// beginReturnType
             s << "rtyp_b";
             break;
-          case rtyp_e:	// endReturnType
+          case tag_type.rtyp_e:	// endReturnType
             s << "rtyp_e";
             break;
-          case vard_b:	// beginVarDecl
+          case tag_type.vard_b:	// beginVarDecl
             s << "vard_b";
             break;
-          case vard_e:	// endVarDecl
+          case tag_type.vard_e:	// endVarDecl
             s << "vard_e";
             break;
-          case stat_b:	// beginStatement
+          case tag_type.stat_b:	// beginStatement
             s << "stat_b";
             break;
-          case stat_e:	// endStatement
+          case tag_type.stat_e:	// endStatement
             s << "stat_e";
             break;
-          case prot_b:	// beginFuncProto
+          case tag_type.prot_b:	// beginFuncProto
             s << "prot_b";
             break;
-          case prot_e:	// endFuncProto
+          case tag_type.prot_e:	// endFuncProto
             s << "prot_e";
             break;
-          case vari_t:	// tagVariable
+          case tag_type.vari_t:	// tagVariable
             s << "vari_t";
             break;
-          case op_t:		// tagOp
+          case tag_type.op_t:		// tagOp
             s << "op_t";
             break;
-          case fnam_t:	// tagFuncName
+          case tag_type.fnam_t:	// tagFuncName
             s << "fnam_t";
             break;
-          case type_t:	// tagType
+          case tag_type.type_t:	// tagType
             s << "type_t";
             break;
-          case field_t: // tagField
+          case tag_type.field_t: // tagField
             s << "field_t";
             break;
-          case comm_t:	// tagComment
+          case tag_type.comm_t:	// tagComment
             s << "comm_t";
             break;
-          case label_t:	// tagLabel
+          case tag_type.label_t:	// tagLabel
             s << "label_t";
             break;
-          case synt_t:	// print
+          case tag_type.synt_t:	// print
             s << "synt_t";
             break;
-          case opar_t:	// openParen
+          case tag_type.opar_t:	// openParen
             s << "opar_t";
             break;
-          case cpar_t:	// closeParen
+          case tag_type.cpar_t:	// closeParen
             s << "cpar_t";
             break;
-          case oinv_t:	// Invisible open
+          case tag_type.oinv_t:	// Invisible open
             s << "oinv_t";
             break;
-          case cinv_t:	// Invisible close
+          case tag_type.cinv_t:	// Invisible close
             s << "cinv_t";
             break;
-          case spac_t:	// Spaces
+          case tag_type.spac_t:	// Spaces
             s << "spac_t";
             break;
-          case line_t:	// tagLine
+          case tag_type.line_t:	// tagLine
             s << "line_t";
             break;
-          case bump_t:
+          case tag_type.bump_t:
             s << "bump_t";
             break;
           }

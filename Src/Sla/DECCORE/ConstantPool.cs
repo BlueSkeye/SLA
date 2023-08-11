@@ -32,7 +32,7 @@ namespace Sla.DECCORE
         /// \param refs is the \e reference (made up of 1 or more identifying integers)
         /// \return the matching CPoolRecord or NULL if none matches the reference
 
-        public abstract CPoolRecord getRecord(List<ulong> refs);
+        public abstract CPoolRecord? getRecord(List<ulong> refs);
 
         /// \brief A a new constant pool record to \b this database
         /// Given the basic constituents of the record, type, name, and data-type, create

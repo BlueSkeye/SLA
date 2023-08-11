@@ -12,18 +12,19 @@ namespace Sla.DECCORE
 {
     internal class GrammarLexer
     {
-        private Dictionary<int, string> filenamemap;  // All files ever seen
-        private Dictionary<int, istream> streammap;
+        private Dictionary<int, string> filenamemap = new Dictionary<int, string>();  // All files ever seen
+        private Dictionary<int, FileStream> streammap = new Dictionary<int, FileStream>();
         private List<int> filestack; // Stack of current files
         private int buffersize;        // maximum characters in buffer
         private char[] buffer;           // Current line being processed
         private int bufstart;      // Next character to process
         private int bufend;            // Next open position in buffer
         private int curlineno;
-        private istream @in;            // Current stream
+        private FileStream? @in;            // Current stream
         private bool endoffile;
-        private uint state;            // State of parser
+        private State state;            // State of parser
         private string error;
+        
         private enum State
         {
             start,
@@ -50,45 +51,40 @@ namespace Sla.DECCORE
             bufend = 0;
         }
 
-        private uint moveState(char lookahead)
-        { // Change finite state machine based on lookahead
-            uint res;
+        private GrammarToken.Token moveState(char lookahead)
+        {
+            // Change finite state machine based on lookahead
+            GrammarToken.Token res;
             bool newline = false;
 
-            if (lookahead < 32)
-            {
+            if (lookahead < 32) {
                 if ((lookahead == 9) || (lookahead == 11) || (lookahead == 12) ||
                 (lookahead == 13))
                     lookahead = ' ';
-                else if (lookahead == '\n')
-                {
+                else if (lookahead == '\n') {
                     newline = true;
                     lookahead = ' ';
                 }
-                else
-                {
+                else {
                     setError("Illegal character");
-                    return GrammarToken::badtoken;
+                    return GrammarToken.Token.badtoken;
                 }
             }
-            else if (lookahead >= 127)
-            {
+            else if (lookahead >= 127) {
                 setError("Illegal character");
-                return GrammarToken::badtoken;
+                return GrammarToken.Token.badtoken;
             }
 
             res = 0;
             bool syntaxerror = false;
-            switch (state)
-            {
-                case start:
-                    switch (lookahead)
-                    {
+            switch (state) {
+                case State.start:
+                    switch (lookahead) {
                         case '/':
-                            state = slash;
+                            state = State.slash;
                             break;
                         case '.':
-                            state = dot1;
+                            state = State.dot1;
                             break;
                         case '*':
                         case ',':
@@ -100,7 +96,7 @@ namespace Sla.DECCORE
                         case '}':
                         case ';':
                         case '=':
-                            state = punctuation;
+                            state = State.punctuation;
                             bufstart = bufend - 1;
                             break;
                         case '-':
@@ -114,17 +110,17 @@ namespace Sla.DECCORE
                         case '7':
                         case '8':
                         case '9':
-                            state = number;
+                            state = State.number;
                             bufstart = bufend - 1;
                             break;
                         case ' ':
                             break;          // Ignore since we are already open
                         case '\"':
-                            state = doublequote;
+                            state = State.doublequote;
                             bufstart = bufend - 1;
                             break;
                         case '\'':
-                            state = singlequote;
+                            state = State.singlequote;
                             break;
                         case 'a':
                         case 'b':
@@ -179,133 +175,119 @@ namespace Sla.DECCORE
                         case 'Y':
                         case 'Z':
                         case '_':
-                            state = identifier;
+                            state = State.identifier;
                             bufstart = bufend - 1;
                             break;
                         default:
                             setError("Illegal character");
-                            return GrammarToken::badtoken;
+                            return GrammarToken.Token.badtoken;
                     }
                     break;
-                case slash:
+                case State.slash:
                     if (lookahead == '*')
-                        state = c_comment;
+                        state = State.c_comment;
                     else if (lookahead == '/')
-                        state = endofline_comment;
+                        state = State.endofline_comment;
                     else
                         syntaxerror = true;
                     break;
-                case dot1:
+                case State.dot1:
                     if (lookahead == '.')
-                        state = dot2;
+                        state = State.dot2;
                     else
                         syntaxerror = true;
                     break;
-                case dot2:
+                case State.dot2:
                     if (lookahead == '.')
-                        state = dot3;
+                        state = State.dot3;
                     else
                         syntaxerror = true;
                     break;
-                case dot3:
-                    state = start;
-                    res = GrammarToken::dotdotdot;
+                case State.dot3:
+                    state = State.start;
+                    res = GrammarToken.Token.dotdotdot;
                     break;
-                case punctuation:
-                    state = start;
-                    res = (uint)buffer[bufstart];
+                case State.punctuation:
+                    state = State.start;
+                    res = (GrammarToken.Token)buffer[bufstart];
                     break;
-                case endofline_comment:
+                case State.endofline_comment:
                     if (newline)
-                        state = start;
+                        state = State.start;
                     break;          // Anything else is part of comment
-                case c_comment:
-                    if (lookahead == '/')
-                    {
+                case State.c_comment:
+                    if (lookahead == '/') {
                         if ((bufend > 1) && (buffer[bufend - 2] == '*'))
-                            state = start;
+                            state = State.start;
                     }
                     break;          // Anything else is part of comment
-                case doublequote:
+                case State.doublequote:
                     if (lookahead == '\"')
-                        state = doublequoteend;
+                        state = State.doublequoteend;
                     break;          // Anything else is part of string
-                case doublequoteend:
-                    state = start;
-                    res = GrammarToken::stringval;
+                case State.doublequoteend:
+                    state = State.start;
+                    res = GrammarToken.Token.stringval;
                     break;
-                case singlequote:
+                case State.singlequote:
                     if (lookahead == '\\')
-                        state = singlebackslash;
+                        state = State.singlebackslash;
                     else if (lookahead == '\'')
-                        state = singlequoteend;
+                        state = State.singlequoteend;
                     break;          // Anything else is part of string
-                case singlequoteend:
-                    state = start;
-                    res = GrammarToken::charconstant;
+                case State.singlequoteend:
+                    state = State.start;
+                    res = GrammarToken.Token.charconstant;
                     break;
-                case singlebackslash:   // Seen backslash in a single quoted string
-                    state = singlequote;
+                case State.singlebackslash:   // Seen backslash in a single quoted string
+                    state = State.singlequote;
                     break;
-                case number:
-                    if (lookahead == 'x')
-                    {
+                case State.number:
+                    if (lookahead == 'x') {
                         if (((bufend - bufstart) != 2) || (buffer[bufstart] != '0'))
                             syntaxerror = true; // x only allowed as 0x hex indicator
                     }
-                    else if ((lookahead >= '0') && (lookahead <= '9'))
-                    {
+                    else if ((lookahead >= '0') && (lookahead <= '9')) {
                     }
-                    else if ((lookahead >= 'A') && (lookahead <= 'Z'))
-                    {
+                    else if ((lookahead >= 'A') && (lookahead <= 'Z')) {
                     }
-                    else if ((lookahead >= 'a') && (lookahead <= 'z'))
-                    {
+                    else if ((lookahead >= 'a') && (lookahead <= 'z')) {
                     }
-                    else if (lookahead == '_')
-                    {
+                    else if (lookahead == '_') {
                     }
-                    else
-                    {
-                        state = start;
-                        res = GrammarToken::integer;
+                    else {
+                        state = State.start;
+                        res = GrammarToken.Token.integer;
                     }
                     break;
-                case identifier:
-                    if ((lookahead >= '0') && (lookahead <= '9'))
-                    {
+                case State.identifier:
+                    if ((lookahead >= '0') && (lookahead <= '9')) {
                     }
-                    else if ((lookahead >= 'A') && (lookahead <= 'Z'))
-                    {
+                    else if ((lookahead >= 'A') && (lookahead <= 'Z')) {
                     }
-                    else if ((lookahead >= 'a') && (lookahead <= 'z'))
-                    {
+                    else if ((lookahead >= 'a') && (lookahead <= 'z')) {
                     }
-                    else if (lookahead == '_' || lookahead == ':')
-                    {
+                    else if (lookahead == '_' || lookahead == ':') {
                     }
-                    else
-                    {
-                        state = start;
-                        res = GrammarToken::identifier;
+                    else {
+                        state = State.start;
+                        res = GrammarToken.Token.identifier;
                     }
                     break;
             }
-            if (syntaxerror)
-            {
+            if (syntaxerror) {
                 setError("Syntax error");
-                return GrammarToken::badtoken;
+                return GrammarToken.Token.badtoken;
             }
             if (newline) bumpLine();
             return res;
         }
 
-        private void establishToken(GrammarToken token, uint val)
+        private void establishToken(GrammarToken token, GrammarToken.Token val)
         {
-            if (val < GrammarToken::integer)
+            if (val < GrammarToken.Token.integer)
                 token.set(val);
-            else
-            {
+            else {
                 token.set(val, buffer + bufstart, (bufend - bufstart) - 1);
             }
             token.setPosition(filestack.GetLastItem(), curlineno, bufstart);
@@ -323,35 +305,36 @@ namespace Sla.DECCORE
             bufstart = 0;
             bufend = 0;
             curlineno = 0;
-            state = start;
-            @in = (istream*)0;
+            state = State.start;
+            @in = (FileStream)null;
             endoffile = true;
         }
 
         ~GrammarLexer()
         {
-            delete[] buffer;
+            // delete[] buffer;
         }
 
         public void clear()
-        { // Clear lexer for a brand new parse
-            filenamemap.clear();
-            streammap.clear();
-            filestack.clear();
+        {
+            // Clear lexer for a brand new parse
+            filenamemap.Clear();
+            streammap.Clear();
+            filestack.Clear();
             bufstart = 0;
             bufend = 0;
             curlineno = 0;
-            state = start;
-            @in = (istream*)0;
+            state = State.start;
+            @in = (FileStream)null;
             endoffile = true;
-            error.clear();
+            error = string.Empty;
         }
 
-        public istream getCurStream() => @in;
+        public FileStream getCurStream() => @in;
 
-        public void pushFile(string filename, istream i)
+        public void pushFile(string filename, FileStream i)
         {
-            int filenum = filenamemap.size();
+            int filenum = filenamemap.Count();
             filenamemap[filenum] = filename;
             streammap[filenum] = i;
             filestack.Add(filenum);
@@ -374,12 +357,11 @@ namespace Sla.DECCORE
         public void getNextToken(GrammarToken token)
         { // Read next token, return true if end of stream
             char nextchar;
-            uint tok = GrammarToken::badtoken;
+            GrammarToken.Token tok = GrammarToken.Token.badtoken;
             bool firsttimethru = true;
 
-            if (endoffile)
-            {
-                token.set(GrammarToken::endoffile);
+            if (endoffile) {
+                token.set(GrammarToken.Token.endoffile);
                 return;
             }
             do
@@ -389,11 +371,11 @@ namespace Sla.DECCORE
                     if (bufend >= buffersize)
                     {
                         setError("Line too long");
-                        tok = GrammarToken::badtoken;
+                        tok = GrammarToken.Token.badtoken;
                         break;
                     }
                     @in.get(nextchar);
-                    if (!(*@in)) {
+                    if (!@in) {
                         endoffile = true;
                         break;
                     }
@@ -404,34 +386,31 @@ namespace Sla.DECCORE
                 tok = moveState(nextchar);
                 firsttimethru = false;
             } while (tok == 0);
-            if (endoffile)
-            {
+            if (endoffile) {
                 buffer[bufend++] = ' '; // Simulate a space
                 tok = moveState(' ');   // to let the final token resolve
-                if ((tok == 0) && (state != start) && (state != endofline_comment))
-                {
+                if ((tok == 0) && (state != State.start) && (state != State.endofline_comment)) {
                     setError("Incomplete token");
-                    tok = GrammarToken::badtoken;
+                    tok = GrammarToken.Token.badtoken;
                 }
             }
             establishToken(token, tok);
         }
 
-        public void writeLocation(ostream s, int line, int filenum)
+        public void writeLocation(TextWriter s, int line, int filenum)
         {
-            s << " at line " << dec << line;
-            s << " in " << filenamemap[filenum];
+            s.Write($" at line {line} in {filenamemap[filenum]}");
         }
 
-        public void writeTokenLocation(ostream s, int line, int colno)
+        public void writeTokenLocation(TextWriter s, int line, int colno)
         {
             if (line != curlineno) return;  // Does line match current line in buffer
             for (int i = 0; i < bufend; ++i)
-                s << buffer[i];
-            s << '\n';
+                s.Write(buffer[i]);
+            s.WriteLine();
             for (int i = 0; i < colno; ++i)
-                s << ' ';
-            s << "^--\n";
+                s.Write(' ');
+            s.Write("^--\n");
         }
 
         public string getError() => error;

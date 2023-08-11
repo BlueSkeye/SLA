@@ -413,7 +413,7 @@ namespace Sla.SLEIGH
 
         public PcodeLexer()
         {
-            s = (istream*)0;
+            s = (FileStream)null;
         }
 
         public void initialize(istream t)

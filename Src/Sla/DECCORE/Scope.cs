@@ -57,20 +57,21 @@ namespace Sla.DECCORE
         /// Attach the child as an immediate sub-scope of \b this.
         /// Take responsibility of the child's memory: the child will be freed when this is freed.
         /// \param child is the Scope to make a child
-        private void attachScope(Scope child)
+        internal void attachScope(Scope child)
         {
             child.parent = this;
             children[child.uniqueId] = child;  // uniqueId is guaranteed to be unique by Database
         }
 
+        // WARNING : Modified prototype
         /// Detach a child Scope from \b this
         /// The indicated child Scope is deleted
         /// \param iter points to the Scope to delete
-        private void detachScope(ScopeMap::iterator iter)
+        private void detachScope(ulong scopeId)
         {
-            Scope* child = (*iter).second;
-            children.erase(iter);
-            delete child;
+            Scope child = children[scopeId];
+            children.Remove(scopeId);
+            // delete child;
         }
 
         /// \brief Create a Scope id based on the scope's name and its parent's id
@@ -103,7 +104,7 @@ namespace Sla.DECCORE
         /// (If non-null) the function which \b this is the local Scope for
         internal Funcdata? fd;
         /// Unique id for the scope, for deduping scope names, assigning symbol ids
-        protected ulong uniqueId;
+        internal ulong uniqueId;
 
         /// \brief Query for Symbols starting at a given address, which match a given \b usepoint
         /// Searching starts at a first scope, continuing thru parents up to a second scope,

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
@@ -54,7 +54,10 @@ namespace Sla.DECCORE
     internal abstract class Emit
     {
         /// An empty string
-        public const string EMPTY_STRING = string.Empty;
+        public static readonly string EMPTY_STRING = string.Empty;
+        private static readonly string[] spacearray = new string[] {
+            "", " ", "  ", "   ", "    ", "     ", "      ", "       ",
+            "        ", "         ", "          " };
 
         /// Current indent level (in fixed width characters)
         protected int indentlevel;
@@ -72,13 +75,19 @@ namespace Sla.DECCORE
         }
 
         /// Emit any pending print commands
-        protected void emitPending();
-        
+        protected void emitPending()
+        {
+            if (pendPrint != (PendPrint)null) {
+                pendPrint.callback(this);
+                pendPrint = (PendPrint)null;
+            }
+        }
+
         public Emit()
         {
             indentlevel = 0;
             parenlevel = 0;
-            pendPrint = (PendPrint*)0;
+            pendPrint = (PendPrint)null;
             resetDefaultsInternal();
         }
 
@@ -166,7 +175,7 @@ namespace Sla.DECCORE
         /// Inform the emitter that generation of a function's return type is starting.
         /// \param vn (if non-null) is the storage location for the return value
         /// \return an id associated with the return type
-        public abstract int beginReturnTypeVarnode vn);
+        public abstract int beginReturnType(Varnode vn);
 
         /// \brief End a return type declaration
         ///
@@ -287,7 +296,7 @@ namespace Sla.DECCORE
         /// spaces, semi-colons, braces, and other punctuation.
         /// \param data is the character data of the syntax being emitted
         /// \param hl indicates how the syntax should be highlighted
-        public abstract void print(string data, syntax_highlight hl = no_color);
+        public abstract void print(string data, syntax_highlight hl = syntax_highlight.no_color);
 
         /// \brief Emit an open parenthesis
         ///
@@ -328,7 +337,7 @@ namespace Sla.DECCORE
         {
             parenlevel = 0;
             indentlevel = 0;
-            pendPrint = (PendPrint*)0;
+            pendPrint = (PendPrint)null;
         }
 
         /// Set the output stream for the emitter
@@ -343,13 +352,10 @@ namespace Sla.DECCORE
         /// \param bump is the number of characters to indent if the spaces force a line break
         public virtual void spaces(int num, int bump = 0)
         {
-            static const string spacearray[] = { "", " ", "  ", "   ", "    ", "     ", "      ", "       ",
-      "        ", "         ", "          " };
             if (num <= 10)
                 print(spacearray[num]);
-            else
-            {
-                string spc;
+            else {
+                string spc = string.Empty;
                 for (int i = 0; i < num; ++i)
                     spc += ' ';
                 print(spc);
@@ -472,7 +478,7 @@ namespace Sla.DECCORE
         /// If there is any print callback pending, cancel it
         public void cancelPendingPrint()
         {
-            pendPrint = (PendPrint*)0;
+            pendPrint = (PendPrint)null;
         }
 
         /// \brief Check if the given print callback is still pending

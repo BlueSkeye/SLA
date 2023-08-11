@@ -1,4 +1,4 @@
-﻿using Sla.DECCORE;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -330,33 +330,27 @@ namespace Sla.DECCORE
         public void addRefPoint(PcodeOp @ref, Varnode vn)
         {
             int j;
-            FlowBlock* bl;
             uint ustop;
 
-            bl = @ref.getParent();
-            CoverBlock & block(cover[bl.getIndex()]);
-            if (block.empty())
-            {
+            FlowBlock bl = @ref.getParent();
+            CoverBlock block = cover[bl.getIndex()];
+            if (block.empty()) {
                 block.setEnd(@ref);
             }
-            else
-            {
-                if (block.contain(@ref))
-                {
+            else {
+                if (block.contain(@ref)) {
                     if (@ref.code() != OpCode.CPUI_MULTIEQUAL) return;
                     // Even if MULTIEQUAL ref is contained
                     // we may be adding new cover because we are
                     // looking at a different branch. So don't return
                 }
-                else
-                {
-                    PcodeOp* op = block.getStop();
-                    PcodeOp* startop = block.getStart();
+                else {
+                    PcodeOp? op = block.getStop();
+                    PcodeOp? startop = block.getStart();
                     block.setEnd(@ref);      // Otherwise update endpoint
-                    ustop = CoverBlock::getUIndex(block.getStop());
-                    if (ustop >= CoverBlock::getUIndex(startop))
-                    {
-                        if ((op != (PcodeOp)null)&& (op != (PcodeOp*)2)&&
+                    ustop = (uint)CoverBlock.getUIndex(block.getStop());
+                    if (ustop >= CoverBlock.getUIndex(startop)) {
+                        if ((op != (PcodeOp)null)&& (op != (PcodeOp)2)&&
                             (op.code() == OpCode.CPUI_MULTIEQUAL) && (startop == (PcodeOp)null)) {
                             // This block contains only an infinitesimal tip
                             // of cover through one branch of a MULTIEQUAL
@@ -370,10 +364,9 @@ namespace Sla.DECCORE
             }
             //  if (bl.InSize()==0)
             //    throw new LowlevelError("Ref point is not in flow of defpoint");
-            if (ref.code() == OpCode.CPUI_MULTIEQUAL)
-            {
-                for (j = 0; j < ref.numInput(); ++j)
-                    if (ref.getIn(j) == vn)
+            if (@ref.code() == OpCode.CPUI_MULTIEQUAL) {
+                for (j = 0; j < @ref.numInput(); ++j)
+                    if (@ref.getIn(j) == vn)
                         addRefRecurse(bl.getIn(j));
             }
             else

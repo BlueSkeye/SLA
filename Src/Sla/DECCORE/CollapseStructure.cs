@@ -26,7 +26,7 @@ namespace Sla.DECCORE
         /// The current \e likely \e goto list
         private List<FloatingEdge> likelygoto;
         /// Iterator to the next most \e likely \e goto edge
-        private list<FloatingEdge>::iterator likelyiter;
+        private IEnumerator<FloatingEdge> likelyiter;
         /// The list of loop bodies for this control-flow graph
         private List<LoopBody> loopbody;
         /// Current (innermost) loop being structured

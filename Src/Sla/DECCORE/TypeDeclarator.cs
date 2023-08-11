@@ -1,5 +1,4 @@
-﻿using ghidra;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -13,11 +12,11 @@ namespace Sla.DECCORE
     internal class TypeDeclarator
     {
         // friend class CParse;
-        private List<TypeModifier> mods;
-        private Datatype basetype;
+        internal List<TypeModifier> mods;
+        internal Datatype? basetype;
         private string ident;           // variable identifier associated with type
-        private string model;           // name of model associated with function pointer
-        private uint flags;            // Specifiers qualifiers
+        internal string model;           // name of model associated with function pointer
+        internal CParse.Flags flags;            // Specifiers qualifiers
         
         public TypeDeclarator()
         {
@@ -25,30 +24,30 @@ namespace Sla.DECCORE
             flags = 0;
         }
 
-        private TypeDeclarator(string nm)
+        internal TypeDeclarator(string nm)
         {
             ident=nm;
-            basetype=(Datatype)null;
+            basetype = (Datatype)null;
             flags=0;
         }
     
         ~TypeDeclarator()
         {
-            for (uint i = 0; i < mods.size(); ++i)
-                delete mods[i];
+            //for (uint i = 0; i < mods.size(); ++i)
+            //    delete mods[i];
         }
 
-        private Datatype getBaseType() => basetype;
+        private Datatype? getBaseType() => basetype;
 
         private int numModifiers() => mods.size();
 
-        private string getIdentifier() => ident;
+        internal string getIdentifier() => ident;
 
-        private ProtoModel getModel(Architecture glb)
+        private ProtoModel? getModel(Architecture glb)
         {
             // Get prototype model
-            ProtoModel* protomodel = (ProtoModel)null;
-            if (model.size() != 0)
+            ProtoModel? protomodel = (ProtoModel)null;
+            if (model.Length != 0)
                 protomodel = glb.getModel(model);
             if (protomodel == (ProtoModel)null)
                 protomodel = glb.defaultfp;
@@ -57,80 +56,76 @@ namespace Sla.DECCORE
 
         private bool getPrototype(PrototypePieces pieces, Architecture glb)
         {
-            TypeModifier* mod = (TypeModifier*)0;
+            TypeModifier? mod = (TypeModifier)null;
             if (mods.size() > 0)
                 mod = mods[0];
-            if ((mod == (TypeModifier*)0) || (mod.getType() != TypeModifier::function_mod))
+            if ((mod == (TypeModifier)null) || (mod.getType() != TypeModifier.Modifier.function_mod))
                 return false;
-            FunctionModifier* fmod = (FunctionModifier*)mod;
+            FunctionModifier fmod = (FunctionModifier)mod;
 
             pieces.model = getModel(glb);
             pieces.name = ident;
-            pieces.intypes.clear();
+            pieces.intypes.Clear();
             fmod.getInTypes(pieces.intypes, glb);
-            pieces.innames.clear();
+            pieces.innames.Clear();
             fmod.getInNames(pieces.innames);
             pieces.dotdotdot = fmod.isDotdotdot();
 
             // Construct the output type
             pieces.outtype = basetype;
-            List<TypeModifier*>::const_iterator iter;
-            iter = mods.end();
-            --iter;         // At least one modification
-            while (iter != mods.begin())
-            { // Do not apply function modifier
-                pieces.outtype = (*iter).modType(pieces.outtype, this, glb);
-                --iter;
+            IEnumerator<TypeModifier> iter = mods.GetReverseEnumerator();
+            // At least one modification
+            if (!iter.MoveNext()) throw new BugException();
+            while (iter.MoveNext()) {
+                // Do not apply function modifier
+                pieces.outtype = iter.Current.modType(pieces.outtype, this, glb);
             }
             return true;
         }
 
-        private bool hasProperty(uint mask) => ((flags & mask) != 0);
+        private bool hasProperty(CParse.Flags mask) => ((flags & mask) != 0);
 
-        private Datatype buildType(Architecture glb)
-        { // Apply modifications to the basetype, (in reverse order of binding)
-            Datatype* restype = basetype;
-            List<TypeModifier*>::const_iterator iter;
-            iter = mods.end();
-            while (iter != mods.begin())
-            {
-                --iter;
-                restype = (*iter).modType(restype, this, glb);
+        internal Datatype? buildType(Architecture glb)
+        {
+            // Apply modifications to the basetype, (in reverse order of binding)
+            Datatype? restype = basetype;
+            IEnumerator<TypeModifier> iter = mods.GetReverseEnumerator();
+            while (iter.MoveNext()) {
+                restype = iter.Current.modType(restype, this, glb);
             }
             return restype;
         }
 
-        private bool isValid()
+        internal bool isValid()
         {
             if (basetype == (Datatype)null)
                 return false;       // No basetype
 
             int count = 0;
-            if ((flags & CParse::f_typedef) != 0)
+            if ((flags & CParse.Flags.f_typedef) != 0)
                 count += 1;
-            if ((flags & CParse::f_extern) != 0)
+            if ((flags & CParse.Flags.f_extern) != 0)
                 count += 1;
-            if ((flags & CParse::f_static) != 0)
+            if ((flags & CParse.Flags.f_static) != 0)
                 count += 1;
-            if ((flags & CParse::f_auto) != 0)
+            if ((flags & CParse.Flags.f_auto) != 0)
                 count += 1;
-            if ((flags & CParse::f_register) != 0)
+            if ((flags & CParse.Flags.f_register) != 0)
                 count += 1;
             if (count > 1)
-                throw ParseError("Multiple storage specifiers");
+                throw new ParseError("Multiple storage specifiers");
 
             count = 0;
-            if ((flags & CParse::f_const) != 0)
+            if ((flags & CParse.Flags.f_const) != 0)
                 count += 1;
-            if ((flags & CParse::f_restrict) != 0)
+            if ((flags & CParse.Flags.f_restrict) != 0)
                 count += 1;
-            if ((flags & CParse::f_volatile) != 0)
+            if ((flags & CParse.Flags.f_volatile) != 0)
                 count += 1;
             if (count > 1)
-                throw ParseError("Multiple type qualifiers");
+                throw new ParseError("Multiple type qualifiers");
 
-            for (uint i = 0; i < mods.size(); ++i)
-            {
+            for (int i = 0; i < mods.size(); ++i) {
                 if (!mods[i].isValid())
                     return false;
             }

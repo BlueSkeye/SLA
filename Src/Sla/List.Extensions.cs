@@ -28,6 +28,17 @@ namespace Sla
             return from[lastItemIndex];
         }
 
+        internal static void SetLastItem<T>(this List<T> from, T newValue)
+        {
+            int lastItemIndex = from.Count - 1;
+
+            if (lastItemIndex < 0) {
+                throw new BugException();
+            }
+            from[lastItemIndex] = newValue;
+            return;
+        }
+
         internal static IEnumerator<T> GetReverseEnumerator<T>(this List<T> from)
             => new ReverseEnumerator<T>(from);
  

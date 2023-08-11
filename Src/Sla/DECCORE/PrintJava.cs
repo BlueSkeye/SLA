@@ -351,7 +351,7 @@ namespace Sla.DECCORE
                     default:
                         {
                             Datatype* ct = rec.getType();
-                            EmitMarkup::syntax_highlight color = EmitMarkup::var_color;
+                            EmitMarkup.syntax_highlight color = EmitMarkup::var_color;
                             if (ct.getMetatype() == type_metatype.TYPE_PTR)
                             {
                                 ct = ((TypePointer*)ct).getPtrTo();

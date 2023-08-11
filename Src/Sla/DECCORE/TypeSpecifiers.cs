@@ -11,9 +11,9 @@ namespace Sla.DECCORE
     {
         internal Datatype type_specifier;
         internal string function_specifier;
-        internal uint flags;
+        internal CParse.Flags flags;
 
-        internal TypeSpecifiers()
+        public TypeSpecifiers()
         {
             type_specifier = (Datatype)null;
             flags = 0;

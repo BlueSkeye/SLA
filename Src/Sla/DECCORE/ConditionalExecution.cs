@@ -381,7 +381,7 @@ namespace Sla.DECCORE
         private Varnode getNewMulti(PcodeOp op, BlockBasic bl)
         {
             PcodeOp newop = fd.newOp(bl.sizeIn(), bl.getStart());
-            Varnode outvn = op?getOut();
+            Varnode outvn = op.getOut();
             Varnode newoutvn;
             // Using the original outvn address may cause merge conflicts
             //  newoutvn = fd.newVarnodeOut(outvn.getSize(),outvn.getAddr(),newop);

@@ -7,14 +7,16 @@ using System.Threading.Tasks;
 namespace Sla.DECCORE
 {
     /// Compare two Datatype pointers for equivalence of their description
-    internal struct DatatypeCompare
+    internal class DatatypeCompare : IComparer<Datatype>
     {
         /// Comparison operator
-        internal static bool operator()(Datatype a, Datatype b)
+        public int Compare(Datatype? a, Datatype? b)
         {
-            int res = a.compareDependency(*b);
-            if (res != 0) return (res<0);
-            return a.getId() < b.getId();
+            if (null == a) throw new BugException();
+            if (null == b) throw new BugException();
+            int res = a.compareDependency(b);
+            if (res != 0) return res;
+            return a.getId().CompareTo(b.getId());
         }
     }
 }

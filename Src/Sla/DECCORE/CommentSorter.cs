@@ -78,11 +78,11 @@ namespace Sla.DECCORE
         /// Comments for the current function, sorted by block
         private Dictionary<Subsort, Comment> commmap;
 
-        private /*mutable*/ Dictionary<Subsort, Comment >::const_iterator start;  ///< Iterator to current comment being walked
+        private /*mutable*/ Dictionary<Subsort, Comment >.Enumerator start;  ///< Iterator to current comment being walked
 
-        private Dictionary<Subsort, Comment>::const_iterator stop;        ///< Last comment in current set being walked
+        private Dictionary<Subsort, Comment>.Enumerator stop;        ///< Last comment in current set being walked
         
-        private Dictionary<Subsort, Comment>::const_iterator opstop;  ///< Statement landmark within current set of comments
+        private Dictionary<Subsort, Comment>.Enumerator opstop;  ///< Statement landmark within current set of comments
 
         /// True if unplaced comments should be displayed (in the header)
         private bool displayUnplacedComments;

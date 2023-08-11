@@ -48,8 +48,7 @@ namespace Sla.DECCORE
         /// Explicit step size
         private int step;
         /// Map from raw overlaps to normalized overlap code
-        private static const string arrange =
-            "gcgbegdagggggggeggggcgbggggggggcdfgggggggegdggggbgggfggggcgbegda";
+        private const string arrange = "gcgbegdagggggggeggggcgbggggggggcdfgggggggegdggggbgggfggggcgbegda";
 
         /// Normalize the representation of full sets
         /// All the instantiations where left == right represent the same set. We
@@ -404,15 +403,23 @@ namespace Sla.DECCORE
         /// Equals operator
         /// \param op2 is the range to compare \b this to
         /// \return \b true if the two ranges are equal
-        public static bool operator ==(CircleRange op2)
+        public static bool operator ==(CircleRange op1, CircleRange op2)
         {
-            if (isempty != op2.isempty) return false;
-            if (isempty) return true;
-            return (left == op2.left) && (right == op2.right) && (mask == op2.mask) && (step == op2.step);
+            if (op1.isempty != op2.isempty) return false;
+            if (op1.isempty) return true;
+            return (op1.left == op2.left)
+                && (op1.right == op2.right)
+                && (op1.mask == op2.mask)
+                && (op1.step == op2.step);
+        }
+
+        public static bool operator !=(CircleRange op1, CircleRange op2)
+        {
+            return !(op1 == op2);
         }
 
         /// Advance an integer within the range
-        public bool getNext(ulong val)
+            public bool getNext(ulong val)
         {
             val = (val+step)&mask;
             return (val != right);

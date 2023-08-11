@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
@@ -38,7 +39,7 @@ namespace Sla.DECCORE
         }
         
         private Architecture glb;
-        private Dictionary<string, uint> keywords;
+        private Dictionary<string, Flags> keywords = new Dictionary<string, Flags>();
         private GrammarLexer lexer;
         private int lineno;
         private int colno;
@@ -58,47 +59,44 @@ namespace Sla.DECCORE
 
         private void setError(string msg)
         {
-            ostringstream s;
+            StringWriter s = new StringWriter();
 
-            s << msg;
+            s.Write(msg);
             lexer.writeLocation(s, lineno, filenum);
-            s << '\n';
+            s.WriteLine();
             lexer.writeTokenLocation(s, lineno, colno);
-            lasterror = s.str();
+            lasterror = s.ToString();
         }
 
         private int lookupIdentifier(string nm)
         {
-            Dictionary<string, uint>::const_iterator iter = keywords.find(nm);
-            if (iter != keywords.end())
-            {
-                switch ((*iter).second)
-                {
-                    case f_typedef:
-                    case f_extern:
-                    case f_static:
-                    case f_auto:
-                    case f_register:
+            Flags result;
+            if (keywords.TryGetValue(nm, out result)) {
+                switch (result) {
+                    case Flags.f_typedef:
+                    case Flags.f_extern:
+                    case Flags.f_static:
+                    case Flags.f_auto:
+                    case Flags.f_register:
                         return STORAGE_CLASS_SPECIFIER;
-                    case f_const:
-                    case f_restrict:
-                    case f_volatile:
+                    case Flags.f_const:
+                    case Flags.f_restrict:
+                    case Flags.f_volatile:
                         return TYPE_QUALIFIER;
-                    case f_inline:
+                    case Flags.f_inline:
                         return FUNCTION_SPECIFIER;
-                    case f_struct:
+                    case Flags.f_struct:
                         return STRUCT;
-                    case f_union:
+                    case Flags.f_union:
                         return UNION;
-                    case f_enum:
+                    case Flags.f_enum:
                         return ENUM;
                     default:
                         break;
                 }
             }
-            Datatype* tp = glb.types.findByName(nm);
-            if (tp != (Datatype)null)
-            {
+            Datatype tp = glb.types.findByName(nm);
+            if (tp != (Datatype)null) {
                 yylval.type = tp;
                 return TYPE_NAME;
             }
@@ -107,14 +105,14 @@ namespace Sla.DECCORE
             return IDENTIFIER;      // Unknown identifier
         }
 
-        private bool runParse(uint doctype)
-        { // Assuming the stream has been setup, parse it
-            switch (doctype)
-            {
-                case doc_declaration:
+        private bool runParse(DocType doctype)
+        {
+            // Assuming the stream has been setup, parse it
+            switch (doctype) {
+                case DocType.doc_declaration:
                     firsttoken = DECLARATION_RESULT;
                     break;
-                case doc_parameter_declaration:
+                case DocType.doc_parameter_declaration:
                     firsttoken = PARAM_RESULT;
                     break;
                 default:
@@ -122,9 +120,8 @@ namespace Sla.DECCORE
             }
             parse = this;           // Setup global object for yyparse
             int res = yyparse();
-            if (res != 0)
-            {
-                if (lasterror.size() == 0)
+            if (res != 0) {
+                if (lasterror.Length == 0)
                     setError("Syntax error");
                 return false;
             }
@@ -139,19 +136,19 @@ namespace Sla.DECCORE
             lineno = -1;
             colno = -1;
             filenum = -1;
-            lastdecls = (List<TypeDeclarator*>*)0;
-            keywords["typedef"] = f_typedef;
-            keywords["extern"] = f_extern;
-            keywords["static"] = f_static;
-            keywords["auto"] = f_auto;
-            keywords["register"] = f_register;
-            keywords["const"] = f_const;
-            keywords["restrict"] = f_restrict;
-            keywords["volatile"] = f_volatile;
-            keywords["inline"] = f_inline;
-            keywords["struct"] = f_struct;
-            keywords["union"] = f_union;
-            keywords["enum"] = f_enum;
+            lastdecls = (List<TypeDeclarator>)null;
+            keywords["typedef"] = Flags.f_typedef;
+            keywords["extern"] = Flags.f_extern;
+            keywords["static"] = Flags.f_static;
+            keywords["auto"] = Flags.f_auto;
+            keywords["register"] = Flags.f_register;
+            keywords["const"] = Flags.f_const;
+            keywords["restrict"] = Flags.f_restrict;
+            keywords["volatile"] = Flags.f_volatile;
+            keywords["inline"] = Flags.f_inline;
+            keywords["struct"] = Flags.f_struct;
+            keywords["union"] = Flags.f_union;
+            keywords["enum"] = Flags.f_enum;
         }
 
         ~CParse()
@@ -162,18 +159,17 @@ namespace Sla.DECCORE
         public void clear()
         {
             clearAllocation();
-            lasterror.clear();
-            lastdecls = (List<TypeDeclarator*>*)0;
+            lasterror = string.Empty;
+            lastdecls = (List<TypeDeclarator>)null;
             lexer.clear();
             firsttoken = -1;
         }
 
         public List<TypeDeclarator> mergeSpecDecVec(TypeSpecifiers spec)
         {
-            List<TypeDeclarator*>* declist;
-            declist = new List<TypeDeclarator*>();
+            List<TypeDeclarator> declist = new List<TypeDeclarator>();
             vecdec_alloc.Add(declist);
-            TypeDeclarator* dec = new TypeDeclarator();
+            TypeDeclarator dec = new TypeDeclarator();
             typedec_alloc.Add(dec);
             declist.Add(dec);
             return mergeSpecDecVec(spec, declist);
@@ -182,8 +178,8 @@ namespace Sla.DECCORE
         public List<TypeDeclarator> mergeSpecDecVec(TypeSpecifiers spec,
             List<TypeDeclarator> declist)
         {
-            for (uint i = 0; i < declist.size(); ++i)
-                mergeSpecDec(spec, (*declist)[i]);
+            for (int i = 0; i < declist.size(); ++i)
+                mergeSpecDec(spec, declist[i]);
             return declist;
         }
 
@@ -205,7 +201,7 @@ namespace Sla.DECCORE
 
         public TypeSpecifiers addSpecifier(TypeSpecifiers spec, string str)
         {
-            uint flag = convertFlag(str);
+            Flags flag = convertFlag(str);
             spec.flags |= flag;
             return spec;
         }
@@ -220,25 +216,21 @@ namespace Sla.DECCORE
 
         public TypeSpecifiers addFuncSpecifier(TypeSpecifiers spec, string str)
         {
-            Dictionary<string, uint>::const_iterator iter;
-
-            iter = keywords.find(*str);
-            if (iter != keywords.end())
-                spec.flags |= (*iter).second; // A reserved specifier
-            else
-            {
-                if (spec.function_specifier.size() != 0)
+            Flags result;
+            if (keywords.TryGetValue(str, out result))
+                spec.flags |= result; // A reserved specifier
+            else {
+                if (spec.function_specifier.Length != 0)
                     setError("Multiple parameter models");
-                spec.function_specifier = *str;
+                spec.function_specifier = str;
             }
             return spec;
         }
 
         public TypeDeclarator mergePointer(List<uint> ptr, TypeDeclarator dec)
         {
-            for (uint i = 0; i < ptr.size(); ++i)
-            {
-                PointerModifier* newmod = new PointerModifier((*ptr)[i]);
+            for (int i = 0; i < ptr.size(); ++i) {
+                PointerModifier newmod = new PointerModifier(ptr[i]);
                 dec.mods.Add(newmod);
             }
             return dec;
@@ -246,42 +238,42 @@ namespace Sla.DECCORE
 
         public TypeDeclarator newDeclarator(string str)
         {
-            TypeDeclarator* res = new TypeDeclarator(*str);
+            TypeDeclarator res = new TypeDeclarator(str);
             typedec_alloc.Add(res);
             return res;
         }
 
         public TypeDeclarator newDeclarator()
         {
-            TypeDeclarator* res = new TypeDeclarator();
+            TypeDeclarator res = new TypeDeclarator();
             typedec_alloc.Add(res);
             return res;
         }
 
         public TypeSpecifiers newSpecifier()
         {
-            TypeSpecifiers* spec = new TypeSpecifiers();
+            TypeSpecifiers spec = new TypeSpecifiers();
             typespec_alloc.Add(spec);
             return spec;
         }
 
         public List<TypeDeclarator> newVecDeclarator()
         {
-            List<TypeDeclarator*>* res = new List<TypeDeclarator*>();
+            List<TypeDeclarator> res = new List<TypeDeclarator>();
             vecdec_alloc.Add(res);
             return res;
         }
 
         public List<uint> newPointer()
         {
-            List<uint>* res = new List<uint>();
+            List<uint> res = new List<uint>();
             vecuint4_alloc.Add(res);
             return res;
         }
 
         public TypeDeclarator newArray(TypeDeclarator dec, uint flags, ulong num)
         {
-            ArrayModifier* newmod = new ArrayModifier(flags, (int) * num);
+            ArrayModifier newmod = new ArrayModifier(flags, (int)num);
             dec.mods.Add(newmod);
             return dec;
         }
@@ -289,29 +281,26 @@ namespace Sla.DECCORE
         public TypeDeclarator newFunc(TypeDeclarator dec, List<TypeDeclarator> declist)
         {
             bool dotdotdot = false;
-            if (!declist.empty())
-            {
-                if (declist.GetLastItem() == (TypeDeclarator*)0)
-                {
+            if (!declist.empty()) {
+                if (declist.GetLastItem() == (TypeDeclarator)null) {
                     dotdotdot = true;
                     declist.RemoveLastItem();
                 }
             }
-            FunctionModifier* newmod = new FunctionModifier(declist, dotdotdot);
+            FunctionModifier newmod = new FunctionModifier(declist, dotdotdot);
             dec.mods.Add(newmod);
             return dec;
         }
 
         public Datatype newStruct(string ident, List<TypeDeclarator> declist)
-        { // Build a new structure
-            TypeStruct* res = glb.types.getTypeStruct(ident); // Create stub (for recursion)
-            List<TypeField> sublist;
+        {
+            // Build a new structure
+            TypeStruct res = glb.types.getTypeStruct(ident); // Create stub (for recursion)
+            List<TypeField> sublist = new List<TypeField>();
 
-            for (uint i = 0; i < declist.size(); ++i)
-            {
-                TypeDeclarator* decl = (*declist)[i];
-                if (!decl.isValid())
-                {
+            for (int i = 0; i < declist.size(); ++i) {
+                TypeDeclarator decl = declist[i];
+                if (!decl.isValid()) {
                     setError("Invalid structure declarator");
                     glb.types.destroyType(res);
                     return (Datatype)null;
@@ -319,9 +308,8 @@ namespace Sla.DECCORE
                 sublist.emplace_back(0, -1, decl.getIdentifier(), decl.buildType(glb));
             }
 
-            TypeStruct::assignFieldOffsets(sublist, glb.types.getStructAlign());
-            if (!glb.types.setFields(sublist, res, -1, 0))
-            {
+            TypeStruct.assignFieldOffsets(sublist, glb.types.getStructAlign());
+            if (!glb.types.setFields(sublist, res, -1, 0)) {
                 setError("Bad structure definition");
                 glb.types.destroyType(res);
                 return (Datatype)null;
@@ -329,9 +317,9 @@ namespace Sla.DECCORE
             return res;
         }
 
-        public Datatype oldStruct(string ident)
+        public Datatype? oldStruct(string ident)
         {
-            Datatype* res = glb.types.findByName(ident);
+            Datatype? res = glb.types.findByName(ident);
             if ((res == (Datatype)null) || (res.getMetatype() != type_metatype.TYPE_STRUCT))
                 setError("Identifier does not represent a struct as required");
             return res;
@@ -339,14 +327,12 @@ namespace Sla.DECCORE
 
         public Datatype newUnion(string ident, List<TypeDeclarator> declist)
         {
-            TypeUnion* res = glb.types.getTypeUnion(ident); // Create stub (for recursion)
-            List<TypeField> sublist;
+            TypeUnion res = glb.types.getTypeUnion(ident); // Create stub (for recursion)
+            List<TypeField> sublist = new List<TypeField>();
 
-            for (uint i = 0; i < declist.size(); ++i)
-            {
-                TypeDeclarator* decl = (*declist)[i];
-                if (!decl.isValid())
-                {
+            for (int i = 0; i < declist.size(); ++i) {
+                TypeDeclarator decl = declist[i];
+                if (!decl.isValid()) {
                     setError("Invalid union declarator");
                     glb.types.destroyType(res);
                     return (Datatype)null;
@@ -354,8 +340,7 @@ namespace Sla.DECCORE
                 sublist.emplace_back(i, 0, decl.getIdentifier(), decl.buildType(glb));
             }
 
-            if (!glb.types.setFields(sublist, res, -1, 0))
-            {
+            if (!glb.types.setFields(sublist, res, -1, 0)) {
                 setError("Bad union definition");
                 glb.types.destroyType(res);
                 return (Datatype)null;
@@ -363,9 +348,9 @@ namespace Sla.DECCORE
             return res;
         }
 
-        public Datatype oldUnion(string ident)
+        public Datatype? oldUnion(string ident)
         {
-            Datatype* res = glb.types.findByName(ident);
+            Datatype? res = glb.types.findByName(ident);
             if ((res == (Datatype)null) || (res.getMetatype() != type_metatype.TYPE_UNION))
                 setError("Identifier does not represent a union as required");
             return res;
@@ -373,40 +358,38 @@ namespace Sla.DECCORE
 
         public Enumerator newEnumerator(string ident)
         {
-            Enumerator* res = new Enumerator(ident);
+            Enumerator res = new Enumerator(ident);
             enum_alloc.Add(res);
             return res;
         }
 
         public Enumerator newEnumerator(string ident,ulong val)
         {
-            Enumerator* res = new Enumerator(ident, val);
+            Enumerator res = new Enumerator(ident, val);
             enum_alloc.Add(res);
             return res;
         }
 
         public List<Enumerator> newVecEnumerator()
         {
-            List<Enumerator*>* res = new List<Enumerator*>();
+            List<Enumerator> res = new List<Enumerator>();
             vecenum_alloc.Add(res);
             return res;
         }
 
         public Datatype newEnum(string ident, List<Enumerator> vecenum)
         {
-            TypeEnum* res = glb.types.getTypeEnum(ident);
-            List<string> namelist;
-            List<ulong> vallist;
-            List<bool> assignlist;
-            for (uint i = 0; i < vecenum.size(); ++i)
-            {
-                Enumerator* enumer = (*vecenum)[i];
+            TypeEnum res = glb.types.getTypeEnum(ident);
+            List<string> namelist = new List<string>();
+            List<ulong> vallist = new List<ulong>();
+            List<bool> assignlist = new List<bool>();
+            for (int i = 0; i < vecenum.size(); ++i) {
+                Enumerator enumer = vecenum[i];
                 namelist.Add(enumer.enumconstant);
                 vallist.Add(enumer.value);
                 assignlist.Add(enumer.constantassigned);
             }
-            if (!glb.types.setEnumValues(namelist, vallist, assignlist, res))
-            {
+            if (!glb.types.setEnumValues(namelist, vallist, assignlist, res)) {
                 setError("Bad enumeration values");
                 glb.types.destroyType(res);
                 return (Datatype)null;
@@ -414,80 +397,78 @@ namespace Sla.DECCORE
             return res;
         }
 
-        public Datatype oldEnum(string ident)
+        public Datatype? oldEnum(string ident)
         {
-            Datatype* res = glb.types.findByName(ident);
+            Datatype? res = glb.types.findByName(ident);
             if ((res == (Datatype)null) || (!res.isEnumType()))
                 setError("Identifier does not represent an enum as required");
             return res;
         }
 
-        public uint convertFlag(string str)
+        public Flags convertFlag(string str)
         {
-            Dictionary<string, uint>::const_iterator iter;
+            Flags flags;
 
-            iter = keywords.find(*str);
-            if (iter != keywords.end())
-                return (*iter).second;
+            if (keywords.TryGetValue(str, out flags))
+                return flags;
             setError("Unknown qualifier");
             return 0;
         }
 
         public void clearAllocation()
         {
-            list<TypeDeclarator*>::iterator iter1;
+            //list<TypeDeclarator*>::iterator iter1;
 
-            for (iter1 = typedec_alloc.begin(); iter1 != typedec_alloc.end(); ++iter1)
-                delete* iter1;
-            typedec_alloc.clear();
+            //for (iter1 = typedec_alloc.begin(); iter1 != typedec_alloc.end(); ++iter1)
+            //    delete* iter1;
+            typedec_alloc.Clear();
 
-            list<TypeSpecifiers*>::iterator iter2;
-            for (iter2 = typespec_alloc.begin(); iter2 != typespec_alloc.end(); ++iter2)
-                delete* iter2;
-            typespec_alloc.clear();
+            //list<TypeSpecifiers*>::iterator iter2;
+            //for (iter2 = typespec_alloc.begin(); iter2 != typespec_alloc.end(); ++iter2)
+            //    delete* iter2;
+            typespec_alloc.Clear();
 
-            list<List<uint>*>::iterator iter3;
-            for (iter3 = vecuint4_alloc.begin(); iter3 != vecuint4_alloc.end(); ++iter3)
-                delete* iter3;
-            vecuint4_alloc.clear();
+            //list<List<uint>*>::iterator iter3;
+            //for (iter3 = vecuint4_alloc.begin(); iter3 != vecuint4_alloc.end(); ++iter3)
+            //    delete* iter3;
+            vecuint4_alloc.Clear();
 
-            list<List<TypeDeclarator*>*>::iterator iter4;
-            for (iter4 = vecdec_alloc.begin(); iter4 != vecdec_alloc.end(); ++iter4)
-                delete* iter4;
-            vecdec_alloc.clear();
+            //list<List<TypeDeclarator*>*>::iterator iter4;
+            //for (iter4 = vecdec_alloc.begin(); iter4 != vecdec_alloc.end(); ++iter4)
+            //    delete* iter4;
+            vecdec_alloc.Clear();
 
-            list<string*>::iterator iter5;
-            for (iter5 = string_alloc.begin(); iter5 != string_alloc.end(); ++iter5)
-                delete* iter5;
-            string_alloc.clear();
+            //list<string*>::iterator iter5;
+            //for (iter5 = string_alloc.begin(); iter5 != string_alloc.end(); ++iter5)
+            //    delete* iter5;
+            string_alloc.Clear();
 
-            list<ulong*>::iterator iter6;
-            for (iter6 = num_alloc.begin(); iter6 != num_alloc.end(); ++iter6)
-                delete* iter6;
-            num_alloc.clear();
+            //list<ulong*>::iterator iter6;
+            //for (iter6 = num_alloc.begin(); iter6 != num_alloc.end(); ++iter6)
+            //    delete* iter6;
+            num_alloc.Clear();
 
-            list<Enumerator*>::iterator iter7;
-            for (iter7 = enum_alloc.begin(); iter7 != enum_alloc.end(); ++iter7)
-                delete* iter7;
-            enum_alloc.clear();
+            //list<Enumerator*>::iterator iter7;
+            //for (iter7 = enum_alloc.begin(); iter7 != enum_alloc.end(); ++iter7)
+            //    delete* iter7;
+            enum_alloc.Clear();
 
-            list<List<Enumerator*>*>::iterator iter8;
-            for (iter8 = vecenum_alloc.begin(); iter8 != vecenum_alloc.end(); ++iter8)
-                delete* iter8;
-            vecenum_alloc.clear();
+            //list<List<Enumerator*>*>::iterator iter8;
+            //for (iter8 = vecenum_alloc.begin(); iter8 != vecenum_alloc.end(); ++iter8)
+            //    delete* iter8;
+            vecenum_alloc.Clear();
         }
 
         public int lex()
         {
-            GrammarToken tok;
+            GrammarToken tok = new GrammarToken();
 
-            if (firsttoken != -1)
-            {
+            if (firsttoken != -1) {
                 int retval = firsttoken;
                 firsttoken = -1;
                 return retval;
             }
-            if (lasterror.size() != 0)
+            if (lasterror.Length != 0)
                 return BADTOKEN;
             lexer.getNextToken(tok);
             lineno = tok.getLineNo();
@@ -495,50 +476,54 @@ namespace Sla.DECCORE
             filenum = tok.getFileNum();
             switch (tok.getType())
             {
-                case GrammarToken::integer:
-                case GrammarToken::charconstant:
+                case GrammarToken.Token.integer:
+                case GrammarToken.Token.charconstant:
                     yylval.i = new ulong(tok.getInteger());
                     num_alloc.Add(yylval.i);
                     return NUMBER;
-                case GrammarToken::identifier:
+                case GrammarToken.Token.identifier:
                     yylval.str = tok.getString();
                     string_alloc.Add(yylval.str);
                     return lookupIdentifier(*yylval.str);
-                case GrammarToken::stringval:
-                    delete tok.getString();
+                case GrammarToken.Token.stringval:
+                    // delete tok.getString();
                     setError("Illegal string constant");
                     return BADTOKEN;
-                case GrammarToken::dotdotdot:
+                case GrammarToken.Token.dotdotdot:
                     return DOTDOTDOT;
-                case GrammarToken::badtoken:
+                case GrammarToken.Token.badtoken:
                     setError(lexer.getError()); // Error from lexer
                     return BADTOKEN;
-                case GrammarToken::endoffile:
+                case GrammarToken.Token.endoffile:
                     return -1;          // No more tokens
                 default:
                     return (int)tok.getType();
             }
         }
 
-        public bool parseFile(string filename, uint doctype)
-        { // Run the parser on a file, return true if no parse errors
+        public bool parseFile(string filename, DocType doctype)
+        {
+            // Run the parser on a file, return true if no parse errors
             clear();            // Clear out any old parsing
 
-            ifstream s(nm.c_str()); // open file
-            if (!s)
-                throw new LowlevelError("Unable to open file for parsing: " + nm);
+            FileStream s;
 
-            lexer.pushFile(nm, &s);     // Inform lexer of filename and stream
+            try { s = File.OpenRead(filename); }// open file
+            catch {
+                throw new LowlevelError($"Unable to open file for parsing: {filename}");
+            }
+
+            lexer.pushFile(filename, s);     // Inform lexer of filename and stream
             bool res = runParse(doctype);
-            s.close();
+            s.Close();
             return res;
         }
 
-        public bool parseStream(istream s, uint doctype)
+        public bool parseStream(FileStream s, DocType doctype)
         {
             clear();
 
-            lexer.pushFile("stream", &s);
+            lexer.pushFile("stream", s);
             return runParse(doctype);
         }
 
