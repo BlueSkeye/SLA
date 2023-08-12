@@ -39,7 +39,7 @@ namespace Sla.EXTRA
             }
             decoder.closeElement(elemId);
             if (!pcodeSubtag)
-                throw new LowlevelError("<callfixup> is missing <pcode> subtag: " + name);
+                throw new CORE.LowlevelError("<callfixup> is missing <pcode> subtag: " + name);
         }
     }
 }

@@ -37,11 +37,11 @@ namespace Sla.DECCORE
             }
 
             if (vn.isTypeLock() && vn.getType().getMetatype() != type_metatype.TYPE_PARTIALSTRUCT)
-                return (TransformVar*)0;
+                return (TransformVar)null;
             if (vn.isInput())
-                return (TransformVar*)0;        // Right now we can't split inputs
+                return (TransformVar)null;        // Right now we can't split inputs
             if (vn.isFree() && (!vn.isConstant()))
-                return (TransformVar*)0;        // Abort
+                return (TransformVar)null;        // Abort
 
             res = newSplit(vn, laneDescription);    // Create new ReplaceVarnode and put it in map
             vn.setMark();
@@ -68,11 +68,11 @@ namespace Sla.DECCORE
             else
             {
                 outvn = setReplacement(op.getOut());
-                if (outvn == (TransformVar*)0)
+                if (outvn == (TransformVar)null)
                     return false;
             }
 
-            if (outvn.getDef() != (TransformOp*)0)
+            if (outvn.getDef() != (TransformOp)null)
                 return true;    // Already traversed
 
             TransformOp* loOp = newOpReplace(op.numInput(), op.code(), op);
@@ -92,7 +92,7 @@ namespace Sla.DECCORE
                 else
                 {
                     invn = setReplacement(op.getIn(i));
-                    if (invn == (TransformVar*)0)
+                    if (invn == (TransformVar)null)
                         return false;
                 }
                 opSetInput(loOp, invn, i);      // Low piece with low op

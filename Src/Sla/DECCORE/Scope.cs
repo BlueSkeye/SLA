@@ -1,6 +1,6 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
+using Sla.EXTRA;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
@@ -117,20 +117,21 @@ namespace Sla.DECCORE
         /// \param usepoint is the given point at which the memory is being accessed (can be an invalid address)
         /// \param addrmatch is used to pass-back any matching SymbolEntry
         /// \return the Scope owning the address or NULL if none found
-        protected Scope? stackAddr(Scope scope1, Scope scope2, Address addr, Address usepoint,
-            out SymbolEntry addrmatch)
+        protected Scope? stackAddr(Scope? scope1, Scope scope2, Address addr, Address usepoint,
+            out SymbolEntry? addrmatch)
         {
-            SymbolEntry entry = new SymbolEntry();
+            SymbolEntry? entry = new SymbolEntry();
+            addrmatch = null;
             if (addr.isConstant()) return null;
-            while ((scope1 != (Scope)null)&& (scope1 != scope2)) {
+            while ((scope1 != (Scope)null) && (scope1 != scope2)) {
                 entry = scope1.findAddr(addr, usepoint);
-                if (entry != (SymbolEntry)null)
-                {
-                    *addrmatch = entry;
+                if (entry != (SymbolEntry)null) {
+                    addrmatch = entry;
                     return scope1;
                 }
-                if (scope1.inScope(addr, 1, usepoint))
+                if (scope1.inScope(addr, 1, usepoint)) {
                     return scope1;      // Discovery of new variable
+                }
                 scope1 = scope1.getParent();
             }
             return (Scope)null;
@@ -149,15 +150,15 @@ namespace Sla.DECCORE
         /// \param addrmatch is used to pass-back any matching SymbolEntry
         /// \return the Scope owning the address or NULL if none found
         protected static Scope stackContainer(Scope scope1, Scope scope2, Address addr, int size,
-            Address usepoint, out SymbolEntry addrmatch)
+            Address usepoint, out SymbolEntry? addrmatch)
         {
-            SymbolEntry* entry;
+            SymbolEntry? entry;
+            addrmatch = null;
             if (addr.isConstant()) return (Scope)null;
             while ((scope1 != (Scope)null)&& (scope1 != scope2)) {
                 entry = scope1.findContainer(addr, size, usepoint);
-                if (entry != (SymbolEntry)null)
-                {
-                    *addrmatch = entry;
+                if (entry != (SymbolEntry)null) {
+                    addrmatch = entry;
                     return scope1;
                 }
                 if (scope1.inScope(addr, size, usepoint))
@@ -180,16 +181,16 @@ namespace Sla.DECCORE
         /// \param usepoint is the point at which the memory is being accessed (can be an invalid address)
         /// \param addrmatch is used to pass-back any matching SymbolEntry
         /// \return the Scope owning the address or NULL if none found
-        protected Scope stackClosestFit(Scope scope1, Scope scope2, Address addr, int size,
+        protected Scope stackClosestFit(Scope? scope1, Scope scope2, Address addr, int size,
             Address usepoint, out SymbolEntry addrmatch)
         {
-            SymbolEntry* entry;
+            SymbolEntry entry;
+            addrmatch = null;
             if (addr.isConstant()) return (Scope)null;
-            while ((scope1 != (Scope)null)&& (scope1 != scope2)) {
+            while ((scope1 != (Scope) null)&& (scope1 != scope2)) {
                 entry = scope1.findClosestFit(addr, size, usepoint);
-                if (entry != (SymbolEntry)null)
-                {
-                    *addrmatch = entry;
+                if (entry != (SymbolEntry)null) {
+                    addrmatch = entry;
                     return scope1;
                 }
                 if (scope1.inScope(addr, size, usepoint))
@@ -210,16 +211,16 @@ namespace Sla.DECCORE
         /// \param addr is the given address where the function should start
         /// \param addrmatch is used to pass-back any matching function
         /// \return the Scope owning the address or NULL if none found
-        protected static Scope stackFunction(Scope scope1, Scope scope2, Address addr,
-            out Funcdata addrmatch)
+        protected static Scope stackFunction(Scope? scope1, Scope scope2, Address addr,
+            out Funcdata? addrmatch)
         {
-            Funcdata* fd;
+            Funcdata fd;
+            addrmatch = null;
             if (addr.isConstant()) return (Scope)null;
-            while ((scope1 != (Scope)null)&& (scope1 != scope2)) {
+            while ((scope1 != (Scope)null) && (scope1 != scope2)) {
                 fd = scope1.findFunction(addr);
-                if (fd != (Funcdata)null)
-                {
-                    *addrmatch = fd;
+                if (fd != (Funcdata)null) {
+                    addrmatch = fd;
                     return scope1;
                 }
                 if (scope1.inScope(addr, 1, new Address()))
@@ -240,16 +241,16 @@ namespace Sla.DECCORE
         /// \param addr is the given address
         /// \param addrmatch is used to pass-back any matching Symbol
         /// \return the Scope owning the address or NULL if none found
-        protected static Scope stackExternalRef(Scope scope1, Scope scope2, Address addr,
-            out ExternRefSymbol addrmatch)
+        protected static Scope stackExternalRef(Scope? scope1, Scope scope2, Address addr,
+            out ExternRefSymbol? addrmatch)
         {
-            ExternRefSymbol* sym;
+            ExternRefSymbol sym;
+            addrmatch = null;
             if (addr.isConstant()) return (Scope)null;
-            while ((scope1 != (Scope)null)&& (scope1 != scope2)) {
+            while ((scope1 != (Scope)null) && (scope1 != scope2)) {
                 sym = scope1.findExternalRef(addr);
-                if (sym != (ExternRefSymbol)null)
-                {
-                    *addrmatch = sym;
+                if (sym != (ExternRefSymbol)null) {
+                    addrmatch = sym;
                     return scope1;
                 }
                 // When searching for externalref, don't do discovery
@@ -273,16 +274,16 @@ namespace Sla.DECCORE
         /// \param addr is the given address
         /// \param addrmatch is used to pass-back any matching Symbol
         /// \return the Scope owning the address or NULL if none found
-        protected static Scope stackCodeLabel(Scope scope1, Scope scope2, Address addr,
-            out LabSymbol addrmatch)
+        protected static Scope stackCodeLabel(Scope? scope1, Scope scope2, Address addr,
+            out LabSymbol? addrmatch)
         {
-            LabSymbol* sym;
+            LabSymbol sym;
+            addrmatch = null;
             if (addr.isConstant()) return (Scope)null;
             while ((scope1 != (Scope)null)&& (scope1 != scope2)) {
                 sym = scope1.findCodeLabel(addr);
-                if (sym != (LabSymbol)null)
-                {
-                    *addrmatch = sym;
+                if (sym != (LabSymbol)null) {
+                    addrmatch = sym;
                     return scope1;
                 }
                 if (scope1.inScope(addr, 1, new Address()))
@@ -301,7 +302,7 @@ namespace Sla.DECCORE
         /// \param id is the globally unique id associated with the scope
         /// \param nm is the name of the new scope
         /// \return the new Scope object
-        protected abstract Scope buildSubScope(ulong id, string nm);
+        internal abstract Scope buildSubScope(ulong id, string nm);
 
         /// Convert \b this to a local Scope
         /// Attach \b this to the given function, which makes \b this the local scope for the function
@@ -374,14 +375,12 @@ namespace Sla.DECCORE
             //  entry.symbol.flags |= Varnode.varnode_flags.mapped;
             if (isGlobal())
                 entry.symbol.flags |= Varnode.varnode_flags.persist;
-            else if (!entry.addr.isInvalid())
-            {
+            else if (!entry.addr.isInvalid()) {
                 // If this is not a global scope, but the address is in the global discovery range
                 // we still mark the symbol as persistent
-                Scope* glbScope = glb.symboltab.getGlobalScope();
-                Address addr;
-                if (glbScope.inScope(entry.addr, 1, addr))
-                {
+                Scope glbScope = glb.symboltab.getGlobalScope();
+                Address addr = new Address();
+                if (glbScope.inScope(entry.addr, 1, addr)) {
                     entry.symbol.flags |= Varnode.varnode_flags.persist;
                     entry.uselimit.clear(); // FIXME: Kludge for incorrectly generated XML
                 }
@@ -399,9 +398,9 @@ namespace Sla.DECCORE
                     // can only happen if use is not limited
                     entry.symbol.flags |= glb.symboltab.getProperty(entry.addr);
                 }
-                res = addMapInternal(entry.symbol, varnode_flags.mapped, entry.addr, 0, consumeSize, entry.uselimit);
-                if (entry.addr.isJoin())
-                {
+                res = addMapInternal(entry.symbol, varnode_flags.mapped, entry.addr, 0, consumeSize,
+                    entry.uselimit);
+                if (entry.addr.isJoin()) {
                     // The address is a join,  we add extra SymbolEntry maps for each of the pieces
                     JoinRecord rec = glb.findJoin(entry.addr.getOffset());
                     varnode_flags exfl;
@@ -410,14 +409,15 @@ namespace Sla.DECCORE
                     bool bigendian = entry.addr.isBigEndian();
                     for (int j = 0; j < num; ++j) {
                         int i = bigendian ? j : (num - 1 - j); // Take pieces in endian order
-                        VarnodeData vdat = rec.getPiece(i);
+                        VarnodeData vdat = rec.getPiece((uint)i);
                         if (i == 0)     // i==0 is most signif
                             exfl = varnode_flags.precishi;
                         else if (i == num - 1)
                             exfl = varnode_flags.precislo;
                         else
-                            exfl = Varnode.varnode_flags.precislo | Varnode.varnode_flags.precishi; // Middle pieces have both flags set
-                                                                          // NOTE: we do not turn on the mapped flag for the pieces
+                            // Middle pieces have both flags set
+                            exfl = Varnode.varnode_flags.precislo | Varnode.varnode_flags.precishi;
+                        // NOTE: we do not turn on the mapped flag for the pieces
                         addMapInternal(entry.symbol, exfl, vdat.getAddr(), (int)off, (int)vdat.size, entry.uselimit);
                         off += vdat.size;
                     }
@@ -534,10 +534,10 @@ namespace Sla.DECCORE
         public abstract void retypeSymbol(Symbol sym, Datatype ct);
 
         /// Set boolean Varnode properties on a Symbol
-        public abstract void setAttribute(Symbol sym, uint attr);
+        public abstract void setAttribute(Symbol sym, Varnode.varnode_flags attr);
 
         /// Clear boolean Varnode properties on a Symbol
-        public abstract void clearAttribute(Symbol sym, uint attr);
+        public abstract void clearAttribute(Symbol sym, Varnode.varnode_flags attr);
 
         /// Set the display format for a Symbol
         public abstract void setDisplayFormat(Symbol sym, uint attr);
@@ -645,13 +645,13 @@ namespace Sla.DECCORE
         /// \param cat is the Symbol \e category
         /// \param ind is the index (within the category) of the Symbol
         /// \return the indicated Symbol or NULL if no Symbol with that index exists
-        public abstract Symbol getCategorySymbol(int cat, int ind);
+        public abstract Symbol getCategorySymbol(Symbol.SymbolCategory cat, int ind);
 
         /// \brief Set the \e category and index for the given Symbol
         /// \param sym is the given Symbol
         /// \param cat is the \e category to set for the Symbol
         /// \param ind is the index position to set (within the category)
-        public abstract void setCategory(Symbol sym, int cat, int ind);
+        public abstract void setCategory(Symbol sym, Symbol.SymbolCategory cat, int ind);
 
         /// \brief Add a new Symbol to \b this Scope, given a name, data-type, and a single mapping
         ///
@@ -1071,13 +1071,12 @@ namespace Sla.DECCORE
                 // Protect against duplicate scope errors
                 sym.decode(decoder);
             }
-            catch (RecovError err) {
+            catch (RecovError) {
                 // delete sym;
                 throw;
             }
             addSymbolInternal(sym); // This routine may throw, but it will delete sym in this case
-            while (decoder.peekElement() != 0)
-            {
+            while (decoder.peekElement() != 0) {
                 SymbolEntry entry = new SymbolEntry(sym);
                 entry.decode(decoder);
                 if (entry.isInvalid()) {
@@ -1230,12 +1229,12 @@ namespace Sla.DECCORE
         /// \param base is an index (which may get updated) used to uniquify the name
         /// \param vn is an optional (may be null) Varnode representative of the Symbol
         /// \return the default name
-        public string buildDefaultName(Symbol sym, int @base, Varnode vn)
+        public string buildDefaultName(Symbol sym, int @base, Varnode? vn)
         {
             if (vn != (Varnode)null && !vn.isConstant()) {
-                Address usepoint;
+                Address usepoint = new Address();
                 if (!vn.isAddrTied() && fd != (Funcdata)null)
-                    usepoint = vn.getUsePoint(*fd);
+                    usepoint = vn.getUsePoint(fd);
                 HighVariable high = vn.getHigh();
                 if (sym.getCategory() == Symbol.SymbolCategory.function_parameter || high.isInput()) {
                     int index = -1;

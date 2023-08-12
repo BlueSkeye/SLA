@@ -62,14 +62,13 @@ namespace Sla.SLACOMP
                 else if (argv[i][1] == 'D')
                 {
                     string preproc = argv[i].Substring(2);
-                    string::size_type pos = preproc.find('=');
-                    if (pos == string::npos)
-                    {
-                        cerr << "Bad sleigh option: " << argv[i] << endl;
+                    int pos = preproc.IndexOf('=');
+                    if (0 > pos) {
+                        cerr.WriteLine($"Bad sleigh option: {argv[i]}");
                         exit(1);
                     }
-                    string name = preproc.substr(0, pos);
-                    string value = preproc.substr(pos + 1);
+                    string name = preproc.Substring(0, pos);
+                    string value = preproc.Substring(pos + 1);
                     defines[name] = value;
                 }
                 else if (argv[i][1] == 'u')
@@ -99,97 +98,85 @@ namespace Sla.SLACOMP
                 }
             }
   
-            if (compileAll)
-            {
-
-                if (i < argc - 1)
-                {
-                    cerr << "Too many parameters" << endl;
+            if (compileAll) {
+                if (i < argc - 1) {
+                    cerr.WriteLine("Too many parameters");
                     exit(1);
                 }
-                string::size_type slaspecExtLen = SLASPECEXT.length();
+                int slaspecExtLen = SLASPECEXT.Length;
 
                 List<string> slaspecs;
                 string dirStr = ".";
                 if (i != argc)
                     dirStr = argv[i];
                 Globals.findSlaSpecs(slaspecs, dirStr, SLASPECEXT);
-                cout << "Compiling " << dec << slaspecs.size() << " slaspec files in " << dirStr << endl;
-                for (int j = 0; j < slaspecs.size(); ++j)
-                {
+                cout.WriteLine($"Compiling {slaspecs.size()} slaspec files in {dirStr}");
+                for (int j = 0; j < slaspecs.size(); ++j) {
                     string slaspec = slaspecs[j];
-                    cout << "Compiling (" << dec << (j + 1) << " of " << dec << slaspecs.size() << ") " << slaspec << endl;
+                    cout.WriteLine("Compiling ({(j + 1)} of {slaspecs.size()}) {slaspec}");
                     string sla = slaspec;
-                    sla.replace(slaspec.length() - slaspecExtLen, slaspecExtLen, SLAEXT);
-                    SleighCompile compiler;
+                    sla = sla.Replace(slaspec.Length - slaspecExtLen, slaspecExtLen, SLAEXT);
+                    SleighCompile compiler = new SleighCompile();
                     compiler.setAllOptions(defines, unnecessaryPcodeWarning, lenientConflict, allCollisionWarning, allNopWarning,
-                               deadTempWarning, enforceLocalKeyWord, largeTemporaryWarning, caseSensitiveRegisterNames);
+                        deadTempWarning, enforceLocalKeyWord, largeTemporaryWarning, caseSensitiveRegisterNames);
                     retval = compiler.run_compilation(slaspec, sla);
-                    if (retval != 0)
-                    {
+                    if (retval != 0) {
                         return retval; // stop on first error
                     }
                 }
 
             }
-            else
-            { // compile single specification
-
-                if (i == argc)
-                {
-                    cerr << "Missing input file name" << endl;
+            else {
+                // compile single specification
+                if (i == argc) {
+                    cerr.WriteLie("Missing input file name");
                     exit(1);
                 }
 
-                string fileinExamine(argv[i]);
+                string fileinExamine = argv[i];
 
-                string::size_type extInPos = fileinExamine.find(SLASPECEXT);
+                int extInPos = fileinExamine.IndexOf(SLASPECEXT);
                 bool autoExtInSet = false;
                 bool extIsSLASPECEXT = false;
                 string fileinPreExt = "";
-                if (extInPos == string::npos)
-                { //No Extension Given...
+                if (-1 == extInPos) {
+                    //No Extension Given...
                     fileinPreExt = fileinExamine;
-                    fileinExamine.append(SLASPECEXT);
+                    fileinExamine += SLASPECEXT;
                     autoExtInSet = true;
                 }
-                else
-                {
-                    fileinPreExt = fileinExamine.substr(0, extInPos);
+                else {
+                    fileinPreExt = fileinExamine.Substring(0, extInPos);
                     extIsSLASPECEXT = true;
                 }
 
-                if (i < argc - 2)
-                {
-                    cerr << "Too many parameters" << endl;
+                if (i < argc - 2) {
+                    cerr.WriteLine("Too many parameters");
                     exit(1);
                 }
 
-                SleighCompile compiler;
-                compiler.setAllOptions(defines, unnecessaryPcodeWarning, lenientConflict, allCollisionWarning, allNopWarning,
-                           deadTempWarning, enforceLocalKeyWord, largeTemporaryWarning, caseSensitiveRegisterNames);
-
-                if (i < argc - 1)
-                {
-                    string fileoutExamine(argv[i + 1]);
-                    string::size_type extOutPos = fileoutExamine.find(SLAEXT);
-                    if (extOutPos == string::npos)
-                    { // No Extension Given...
-                        fileoutExamine.append(SLAEXT);
+                SleighCompile compiler = new SleighCompile();
+                compiler.setAllOptions(defines, unnecessaryPcodeWarning, lenientConflict, allCollisionWarning,
+                    allNopWarning, deadTempWarning, enforceLocalKeyWord, largeTemporaryWarning,
+                    caseSensitiveRegisterNames);
+                if (i < argc - 1) {
+                    string fileoutExamine = argv[i + 1];
+                    int extOutPos = fileoutExamine.IndexOf(SLAEXT);
+                    if (-1 == extOutPos) {
+                        // No Extension Given...
+                        fileoutExamine += SLAEXT;
                     }
                     retval = compiler.run_compilation(fileinExamine, fileoutExamine);
                 }
-                else
-                {
+                else {
                     // First determine whether or not to use Run_XML...
-                    if (autoExtInSet || extIsSLASPECEXT)
-                    {   // Assumed format of at least "sleigh file" . "sleigh file.slaspec file.sla"
+                    if (autoExtInSet || extIsSLASPECEXT) {
+                        // Assumed format of at least "sleigh file" . "sleigh file.slaspec file.sla"
                         string fileoutSTR = fileinPreExt;
-                        fileoutSTR.append(SLAEXT);
+                        fileoutSTR += SLAEXT;
                         retval = compiler.run_compilation(fileinExamine, fileoutSTR);
                     }
-                    else
-                    {
+                    else {
                         retval = Globals.run_xml(fileinExamine, compiler);
                     }
 

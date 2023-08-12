@@ -184,7 +184,7 @@ namespace Sla.DECCORE
             if (outparam.isTypeLocked())
                 pieces.GetLastItem().flags |= ParameterPieces::typelock;
             if (outparam.isIndirectStorage())
-                pieces.GetLastItem().flags |= ParameterPieces::indirectstorage;
+                pieces.GetLastItem().flags |= ParameterPieces.Flags.indirectstorage;
             if (outparam.getAddress().isInvalid())
                 addressesdetermined = false;
 
@@ -219,15 +219,15 @@ namespace Sla.DECCORE
                     else if (attribId == ATTRIB_INDIRECTSTORAGE)
                     {
                         if (decoder.readBool())
-                            flags |= ParameterPieces::indirectstorage;
+                            flags |= ParameterPieces.Flags.indirectstorage;
                     }
                     else if (attribId == ATTRIB_HIDDENRETPARM)
                     {
                         if (decoder.readBool())
-                            flags |= ParameterPieces::hiddenretparm;
+                            flags |= ParameterPieces.Flags.hiddenretparm;
                     }
                 }
-                if ((flags & ParameterPieces::hiddenretparm) == 0)
+                if ((flags & ParameterPieces.Flags.hiddenretparm) == 0)
                     namelist.Add(name);
                 pieces.emplace_back();
                 ParameterPieces & curparam(pieces.GetLastItem());
@@ -253,7 +253,7 @@ namespace Sla.DECCORE
                 uint k = 0;
                 for (uint i = 0; i < pieces.size(); ++i)
                 {
-                    if ((pieces[i].flags & ParameterPieces::hiddenretparm) != 0)
+                    if ((pieces[i].flags & ParameterPieces.Flags.hiddenretparm) != 0)
                         continue;   // Increment i but not k
                     pieces[i].flags = addrPieces[k].flags;      // Use the original flags
                     k = k + 1;
@@ -268,7 +268,7 @@ namespace Sla.DECCORE
             uint j = 1;
             for (uint i = 1; i < pieces.size(); ++i)
             {
-                if ((pieces[i].flags & ParameterPieces::hiddenretparm) != 0)
+                if ((pieces[i].flags & ParameterPieces.Flags.hiddenretparm) != 0)
                 {
                     curparam = setInput(i - 1, "rethidden", pieces[i]);
                     curparam.setTypeLock((pieces[0].flags & ParameterPieces::typelock) != 0);   // Has output's typelock

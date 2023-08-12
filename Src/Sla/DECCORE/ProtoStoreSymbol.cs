@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -34,11 +34,11 @@ namespace Sla.DECCORE
         {
             while (inparam.size() <= i)
                 inparam.Add((ProtoParameter)null);
-            ParameterSymbol* res = dynamic_cast<ParameterSymbol*>(inparam[i]);
-            if (res != (ParameterSymbol*)0)
+            ParameterSymbol? res = inparam[i] as ParameterSymbol;
+            if (res != (ParameterSymbol)null)
                 return res;
-            if (inparam[i] != (ProtoParameter)null)
-                delete inparam[i];
+            //if (inparam[i] != (ProtoParameter)null)
+            //    delete inparam[i];
             res = new ParameterSymbol();
             inparam[i] = res;
             return res;
@@ -51,51 +51,46 @@ namespace Sla.DECCORE
             scope = sc;
             restricted_usepoint = usepoint;
             outparam = (ProtoParameter)null;
-            ParameterPieces pieces;
+            ParameterPieces pieces = new ParameterPieces();
             pieces.type = scope.getArch().types.getTypeVoid();
             pieces.flags = 0;
-            ProtoStoreSymbol::setOutput(pieces);
+            setOutput(pieces);
         }
 
         ~ProtoStoreSymbol()
         {
-            for (int i = 0; i < inparam.size(); ++i)
-            {
-                ProtoParameter* param = inparam[i];
-                if (param != (ProtoParameter)null)
-                    delete param;
+            for (int i = 0; i < inparam.size(); ++i) {
+                ProtoParameter param = inparam[i];
+                //if (param != (ProtoParameter)null)
+                //    delete param;
             }
-            if (outparam != (ProtoParameter)null)
-                delete outparam;
+            //if (outparam != (ProtoParameter)null)
+            //    delete outparam;
         }
 
         public override ProtoParameter setInput(int i, string nm, ParameterPieces pieces)
         {
-            ParameterSymbol* res = getSymbolBacked(i);
+            ParameterSymbol res = getSymbolBacked(i);
             res.sym = scope.getCategorySymbol(Symbol.SymbolCategory.function_parameter, i);
-            SymbolEntry* entry;
+            SymbolEntry entry;
             Address usepoint;
 
-            bool isindirect = (pieces.flags & ParameterPieces::indirectstorage) != 0;
-            bool ishidden = (pieces.flags & ParameterPieces::hiddenretparm) != 0;
-            if (res.sym != (Symbol)null)
-            {
+            bool isindirect = (pieces.flags & ParameterPieces.Flags.indirectstorage) != 0;
+            bool ishidden = (pieces.flags & ParameterPieces.Flags.hiddenretparm) != 0;
+            if (res.sym != (Symbol)null) {
                 entry = res.sym.getFirstWholeMap();
-                if ((entry.getAddr() != pieces.addr) || (entry.getSize() != pieces.type.getSize()))
-                {
+                if ((entry.getAddr() != pieces.addr) || (entry.getSize() != pieces.type.getSize())) {
                     scope.removeSymbol(res.sym);
                     res.sym = (Symbol)null;
                 }
             }
-            if (res.sym == (Symbol)null)
-            {
+            if (res.sym == (Symbol)null) {
                 if (scope.discoverScope(pieces.addr, pieces.type.getSize(), usepoint) == (Scope)null)
                     usepoint = restricted_usepoint;
                 res.sym = scope.addSymbol(nm, pieces.type, pieces.addr, usepoint).getSymbol();
                 scope.setCategory(res.sym, Symbol.SymbolCategory.function_parameter, i);
-                if (isindirect || ishidden)
-                {
-                    uint mirror = 0;
+                if (isindirect || ishidden) {
+                    Varnode.varnode_flags mirror = 0;
                     if (isindirect)
                         mirror |= Varnode.varnode_flags.indirectstorage;
                     if (ishidden)
@@ -104,21 +99,19 @@ namespace Sla.DECCORE
                 }
                 return res;
             }
-            if (res.sym.isIndirectStorage() != isindirect)
-            {
+            if (res.sym.isIndirectStorage() != isindirect) {
                 if (isindirect)
                     scope.setAttribute(res.sym, Varnode.varnode_flags.indirectstorage);
                 else
                     scope.clearAttribute(res.sym, Varnode.varnode_flags.indirectstorage);
             }
-            if (res.sym.isHiddenReturn() != ishidden)
-            {
+            if (res.sym.isHiddenReturn() != ishidden) {
                 if (ishidden)
                     scope.setAttribute(res.sym, Varnode.varnode_flags.hiddenretparm);
                 else
                     scope.clearAttribute(res.sym, Varnode.varnode_flags.hiddenretparm);
             }
-            if ((nm.size() != 0) && (nm != res.sym.getName()))
+            if ((nm.Length != 0) && (nm != res.sym.getName()))
                 scope.renameSymbol(res.sym, nm);
             if (pieces.type != res.sym.getType())
                 scope.retypeSymbol(res.sym, pieces.type);
@@ -127,16 +120,14 @@ namespace Sla.DECCORE
 
         public override void clearInput(int i)
         {
-            Symbol* sym = scope.getCategorySymbol(Symbol.SymbolCategory.function_parameter, i);
-            if (sym != (Symbol)null)
-            {
-                scope.setCategory(sym, Symbol::no_category, 0); // Remove it from category list
+            Symbol? sym = scope.getCategorySymbol(Symbol.SymbolCategory.function_parameter, i);
+            if (sym != (Symbol)null) {
+                scope.setCategory(sym, Symbol.SymbolCategory.no_category, 0); // Remove it from category list
                 scope.removeSymbol(sym);   // Remove it altogether
             }
             // Renumber any category 0 symbol with index greater than i
             int sz = scope.getCategorySize(Symbol.SymbolCategory.function_parameter);
-            for (int j = i + 1; j < sz; ++j)
-            {
+            for (int j = i + 1; j < sz; ++j) {
                 sym = scope.getCategorySymbol(Symbol.SymbolCategory.function_parameter, j);
                 if (sym != (Symbol)null)
                     scope.setCategory(sym, Symbol.SymbolCategory.function_parameter, j - 1);
@@ -155,28 +146,28 @@ namespace Sla.DECCORE
 
         public override ProtoParameter getInput(int i)
         {
-            Symbol* sym = scope.getCategorySymbol(Symbol.SymbolCategory.function_parameter, i);
+            Symbol? sym = scope.getCategorySymbol(Symbol.SymbolCategory.function_parameter, i);
             if (sym == (Symbol)null)
                 return (ProtoParameter)null;
-            ParameterSymbol* res = getSymbolBacked(i);
+            ParameterSymbol res = getSymbolBacked(i);
             res.sym = sym;
             return res;
         }
 
         public override ProtoParameter setOutput(ParameterPieces piece)
         {
-            if (outparam != (ProtoParameter)null)
-                delete outparam;
+            //if (outparam != (ProtoParameter)null)
+            //    delete outparam;
             outparam = new ParameterBasic("", piece.addr, piece.type, piece.flags);
             return outparam;
         }
 
         public override void clearOutput()
         {
-            ParameterPieces pieces;
-            pieces.type = scope.getArch().types.getTypeVoid();
-            pieces.flags = 0;
-            setOutput(pieces);
+            setOutput(new ParameterPieces() {
+                type = scope.getArch().types.getTypeVoid(),
+                flags = 0
+            });
         }
 
         public override ProtoParameter getOutput()
@@ -186,9 +177,8 @@ namespace Sla.DECCORE
 
         public override ProtoStore clone()
         {
-            ProtoStoreSymbol* res;
-            res = new ProtoStoreSymbol(scope, restricted_usepoint);
-            delete res.outparam;
+            ProtoStoreSymbol res = new ProtoStoreSymbol(scope, restricted_usepoint);
+            // delete res.outparam;
             if (outparam != (ProtoParameter)null)
                 res.outparam = outparam.clone();
             else
@@ -197,8 +187,9 @@ namespace Sla.DECCORE
         }
 
         public override void encode(Sla.CORE.Encoder encoder)
-        { // Do not store anything explicitly for a symboltable backed store
-          // as the symboltable will be stored separately
+        {
+            // Do not store anything explicitly for a symboltable backed store
+            // as the symboltable will be stored separately
         }
 
         public override void decode(Sla.CORE.Decoder decoder, ProtoModel model)

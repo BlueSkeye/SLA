@@ -39,7 +39,7 @@ namespace Sla.CORE {
     public class UnimplError : LowlevelError
     {
         ///< Number of bytes in the unimplemented instruction
-        private int instruction_length;
+        internal int instruction_length;
 
         /// \brief Constructor
         /// \param s is a more verbose description of the error
@@ -174,7 +174,7 @@ namespace Sla.CORE {
         /// \param addr is the Address of the machine instruction
         /// \param mnem is the decoded instruction mnemonic
         /// \param body is the decode body (or operands) of the instruction
-        public abstract void dump(ref Address addr, ref string mnem, ref string body);
+        public abstract void dump(Address addr, string mnem, string body);
     }
 
     /// \brief Abstract class for converting native constants to addresses
@@ -1647,7 +1647,7 @@ namespace Sla.CORE {
         /// \param name is the name of the new context variable
         /// \param sbit is the first bit of the variable in the packed state
         /// \param ebit is the last bit of the variable in the packed state
-        public virtual void registerContext(ref string name, int sbit, int ebit)
+        public virtual void registerContext(string name, int sbit, int ebit)
         {
         }
 
@@ -1657,7 +1657,7 @@ namespace Sla.CORE {
         /// for the variable.
         /// \param name is the name of the context variable
         /// \param val is the value to be considered default
-        public virtual void setContextDefault(ref string name, uint val)
+        public virtual void setContextDefault(string name, uint val)
         {
         }
 
@@ -1711,7 +1711,7 @@ namespace Sla.CORE {
         /// instruction stream.
         /// \param baseaddr is the Address of the instruction
         /// \return the number of bytes in the instruction
-        public abstract int instructionLength(ref Address baseaddr);
+        public abstract int instructionLength(Address baseaddr);
 
         /// \brief Transform a single machine instruction into pcode
         /// This is the main interface to the pcode translation engine.
@@ -1724,7 +1724,7 @@ namespace Sla.CORE {
         /// \param emit is the tailored pcode emitting object
         /// \param baseaddr is the Address of the machine instruction
         /// \return the number of bytes in the machine instruction
-        public abstract int oneInstruction(ref PcodeEmit emit, ref Address baseaddr);
+        public abstract int oneInstruction(PcodeEmit emit, Address baseaddr);
 
         /// \brief Disassemble a single machine instruction
         /// This is the main interface to the disassembler for the
@@ -1733,6 +1733,6 @@ namespace Sla.CORE {
         /// method in the \e emit object.
         /// \param emit is the disassembly emitting object
         /// \param baseaddr is the address of the machine instruction to disassemble
-        public abstract int printAssembly(AssemblyEmit emit, ref Address baseaddr);
+        public abstract int printAssembly(AssemblyEmit emit, Address baseaddr);
     }
 }

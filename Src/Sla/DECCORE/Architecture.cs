@@ -307,7 +307,7 @@ namespace Sla.DECCORE
                     }
                 }
             }
-            throw new LowlevelError("Unable to find entry for spacebase register");
+            throw new CORE.LowlevelError("Unable to find entry for spacebase register");
         }
 
         /// Get LanedRegister associated with storage
@@ -459,7 +459,7 @@ namespace Sla.DECCORE
             }
             PrintLanguageCapability? capa = PrintLanguageCapability.findCapability(nm);
             if (null == capa)
-                throw new LowlevelError($"Unknown print language: {nm}");
+                throw new CORE.LowlevelError($"Unknown print language: {nm}");
             // Copy settings for current print language
             bool printMarkup = print.emitsMarkup();
             TextWriter t = print.getOutputStream();
@@ -551,7 +551,7 @@ namespace Sla.DECCORE
         {
             Element? el = store.getTag(ElementId.ELEM_SAVE_STATE.getName());
             if (null == el) {
-                throw new LowlevelError("Could not find save_state tag");
+                throw new CORE.LowlevelError("Could not find save_state tag");
             }
             XmlDecode decoder = new XmlDecode(this, el);
             uint elemId = decoder.openElement(ElementId.ELEM_SAVE_STATE);
@@ -598,7 +598,7 @@ namespace Sla.DECCORE
                     pcodeinjectlib.decodeDebug(decoder);
                 }
                 else {
-                    throw new LowlevelError("XML error restoring architecture");
+                    throw new CORE.LowlevelError("XML error restoring architecture");
                 }
             }
             decoder.closeElement(elemId);
@@ -897,14 +897,14 @@ namespace Sla.DECCORE
         {
             ProtoModel? model;
             if (!protoModels.TryGetValue(parentName, out model)) {
-                throw new LowlevelError(
+                throw new CORE.LowlevelError(
                     $"Requesting non-existent prototype model: {parentName}");
             }
             if (null != model.getAliasParent()) {
-                throw new LowlevelError("Cannot make alias of an alias: {parentName}");
+                throw new CORE.LowlevelError("Cannot make alias of an alias: {parentName}");
             }
             if (protoModels.ContainsKey(aliasName)) {
-                throw new LowlevelError("Duplicate ProtoModel name: {aliasName}");
+                throw new CORE.LowlevelError("Duplicate ProtoModel name: {aliasName}");
             }
             protoModels[aliasName] = new ProtoModel(aliasName, model);
         }
@@ -917,7 +917,7 @@ namespace Sla.DECCORE
         {
             Element? el = store.getTag("processor_spec");
             if (null == el) {
-                throw new LowlevelError("No processor configuration tag found");
+                throw new CORE.LowlevelError("No processor configuration tag found");
             }
             XmlDecode decoder = new XmlDecode(this, el);
 
@@ -980,7 +980,7 @@ namespace Sla.DECCORE
                     decoder.closeElementSkipping(subId);
                 }
                 else {
-                        throw new LowlevelError("Unknown element in <processor_spec>");
+                        throw new CORE.LowlevelError("Unknown element in <processor_spec>");
                 }
             }
             decoder.closeElement(elemId);
@@ -994,7 +994,7 @@ namespace Sla.DECCORE
             List<RangeProperties> globalRanges = new List<RangeProperties>();
             Element? el = store.getTag("compiler_spec");
             if (null == el) {
-                throw new LowlevelError("No compiler configuration tag found");
+                throw new CORE.LowlevelError("No compiler configuration tag found");
             }
             XmlDecode decoder = new XmlDecode(this, el);
 
@@ -1122,7 +1122,7 @@ namespace Sla.DECCORE
                     setDefaultModel((*protoModels.begin()).second);
                 }
                 else {
-                    throw new LowlevelError("No default prototype specified");
+                    throw new CORE.LowlevelError("No default prototype specified");
                 }
             }
             // We must have a __thiscall calling convention
@@ -1177,14 +1177,14 @@ namespace Sla.DECCORE
                     enabled = decoder.readBool();
                 }
                 else {
-                    throw new LowlevelError("Dynamic rule tag contains illegal attribute");
+                    throw new CORE.LowlevelError("Dynamic rule tag contains illegal attribute");
                 }
             }
             if (rulename.Length == 0) {
-                throw new LowlevelError("Dynamic rule has no name");
+                throw new CORE.LowlevelError("Dynamic rule has no name");
             }
             if (groupname.Length == 0) {
-                throw new LowlevelError("Dynamic rule has no group");
+                throw new CORE.LowlevelError("Dynamic rule has no group");
             }
             if (!enabled) {
                 return;
@@ -1193,7 +1193,7 @@ namespace Sla.DECCORE
             Rule dynrule = RuleGeneric.build(rulename, groupname, el.getContent());
             extra_pool_rules.Add(dynrule);
 #else
-            throw new LowlevelError("Dynamic rules have not been enabled for this decompiler");
+            throw new CORE.LowlevelError("Dynamic rules have not been enabled for this decompiler");
 #endif
             decoder.closeElement(elemId);
         }
@@ -1214,7 +1214,7 @@ namespace Sla.DECCORE
                 res = new ProtoModelMerged(this);
             }
             else {
-                throw new LowlevelError("Expecting <prototype> or <resolveprototype> tag");
+                throw new CORE.LowlevelError("Expecting <prototype> or <resolveprototype> tag");
             }
 
             res.decode(decoder);
@@ -1223,7 +1223,7 @@ namespace Sla.DECCORE
             if (other != null) {
                 string errMsg = $"Duplicate ProtoModel name: {res.getName()}";
                 // delete res;
-                throw new LowlevelError(errMsg);
+                throw new CORE.LowlevelError(errMsg);
             }
             protoModels[res.getName()] = res;
             return res;
@@ -1240,17 +1240,17 @@ namespace Sla.DECCORE
             string modelName = decoder.readString(AttributeId.ATTRIB_NAME);
             ProtoModel? res = getModel(modelName);
             if (null == res)
-                throw new LowlevelError($"Unknown prototype model name: {modelName}");
+                throw new CORE.LowlevelError($"Unknown prototype model name: {modelName}");
 
             if (elemId == ElementId.ELEM_EVAL_CALLED_PROTOTYPE) {
                 if (null != evalfp_called) {
-                    throw new LowlevelError("Duplicate <eval_called_prototype> tag");
+                    throw new CORE.LowlevelError("Duplicate <eval_called_prototype> tag");
                 }
                 evalfp_called = res;
             }
             else {
                 if (null != evalfp_current) {
-                    throw new LowlevelError("Duplicate <eval_current_prototype> tag");
+                    throw new CORE.LowlevelError("Duplicate <eval_current_prototype> tag");
                 }
                 evalfp_current = res;
             }
@@ -1267,7 +1267,7 @@ namespace Sla.DECCORE
             uint elemId = decoder.openElement(ElementId.ELEM_DEFAULT_PROTO);
             while (decoder.peekElement() != 0) {
                 if (null != defaultfp) {
-                    throw new LowlevelError("More than one default prototype model");
+                    throw new CORE.LowlevelError("More than one default prototype model");
                 }
                 ProtoModel model = decodeProto(decoder);
                 setDefaultModel(model);
@@ -1383,7 +1383,7 @@ namespace Sla.DECCORE
             uint subId = decoder.peekElement();
             if (subId != 0) {
                 if (null != defaultReturnAddr.space) {
-                    throw new LowlevelError("Multiple <returnaddress> tags in .cspec");
+                    throw new CORE.LowlevelError("Multiple <returnaddress> tags in .cspec");
                 }
                 defaultReturnAddr.decode(decoder);
             }
@@ -1467,7 +1467,7 @@ namespace Sla.DECCORE
             }
 
             if (null == basespace) {
-                throw new LowlevelError(
+                throw new CORE.LowlevelError(
                     $"{ElementId.ELEM_STACKPOINTER.getName()} element missing \"space\" attribute");
             }
 
@@ -1497,7 +1497,7 @@ namespace Sla.DECCORE
                 setDeadcodeDelay(spc, delay);
             }
             else {
-                throw new LowlevelError("Bad <deadcodedelay> tag");
+                throw new CORE.LowlevelError("Bad <deadcodedelay> tag");
             }
             decoder.closeElement(elemId);
         }
@@ -1580,7 +1580,7 @@ namespace Sla.DECCORE
             uint elemId = decoder.openElement(ElementId.ELEM_PREFERSPLIT);
             string style = decoder.readString(AttributeId.ATTRIB_STYLE);
             if (style != "inhalf") {
-                throw new LowlevelError($"Unknown prefersplit style: {style}");
+                throw new CORE.LowlevelError($"Unknown prefersplit style: {style}");
             }
 
             while (decoder.peekElement() != 0) {

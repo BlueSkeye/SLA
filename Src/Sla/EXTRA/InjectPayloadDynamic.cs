@@ -42,7 +42,7 @@ namespace Sla.EXTRA
                 addrMap[addr] = doc;
             }
             catch (DecoderError err) {
-                throw new LowlevelError("Error decoding dynamic payload");
+                throw new CORE.LowlevelError("Error decoding dynamic payload");
             }
             decoder.closeElement(subId);
         }
@@ -51,7 +51,7 @@ namespace Sla.EXTRA
         {
             Dictionary<Address, Document*>::const_iterator eiter = addrMap.find(context.baseaddr);
             if (eiter == addrMap.end())
-                throw new LowlevelError("Missing dynamic inject");
+                throw new CORE.LowlevelError("Missing dynamic inject");
             Element el = (*eiter).second.getRoot();
             XmlDecode decoder(glb.translate, el);
             uint rootId = decoder.openElement(ElementId.ELEM_INST);
@@ -63,7 +63,7 @@ namespace Sla.EXTRA
 
         protected override void decode(Sla.CORE.Decoder decoder)
         {
-            throw new LowlevelError("decode not supported for InjectPayloadDynamic");
+            throw new CORE.LowlevelError("decode not supported for InjectPayloadDynamic");
         }
 
         protected override void printTemplate(TextWriter s)

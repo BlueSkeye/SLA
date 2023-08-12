@@ -38,27 +38,27 @@ namespace Sla.DECCORE
             {
                 FloatFormat form2 = getFunction().getArch().translate.getFloatFormat(vn.getSize());
                 if (form2 == (FloatFormat*)0)
-                    return (TransformVar*)0;  // Unsupported constant format
+                    return (TransformVar)null;  // Unsupported constant format
                                 // Return the converted form of the constant
                 return newConstant(precision, 0, format.convertEncoding(vn.getOffset(), form2));
             }
 
             if (vn.isFree())
-                return (TransformVar*)0; // Abort
+                return (TransformVar)null; // Abort
 
             if (vn.isAddrForce() && (vn.getSize() != precision))
-                return (TransformVar*)0;
+                return (TransformVar)null;
 
             if (vn.isTypeLock() && vn.getType().getMetatype() != type_metatype.TYPE_PARTIALSTRUCT)
             {
                 int sz = vn.getType().getSize();
                 if (sz != precision)
-                    return (TransformVar*)0;
+                    return (TransformVar)null;
             }
 
             if (vn.isInput())
             {       // Must be careful with inputs
-                if (vn.getSize() != precision) return (TransformVar*)0;
+                if (vn.getSize() != precision) return (TransformVar)null;
             }
 
             vn.setMark();
@@ -110,7 +110,7 @@ namespace Sla.DECCORE
                         {
                             TransformOp* rop = newOpReplace(op.numInput(), op.code(), op);
                             TransformVar* outrvn = setReplacement(outvn);
-                            if (outrvn == (TransformVar*)0) return false;
+                            if (outrvn == (TransformVar)null) return false;
                             opSetInput(rop, rvn, op.getSlot(vn));
                             opSetOutput(rop, outrvn);
                             break;
@@ -131,7 +131,7 @@ namespace Sla.DECCORE
                         {
                             int slot = op.getSlot(vn);
                             TransformVar* rvn2 = setReplacement(op.getIn(1 - slot));
-                            if (rvn2 == (TransformVar*)0) return false;
+                            if (rvn2 == (TransformVar)null) return false;
                             if (rvn == rvn2)
                             {
                                 list<PcodeOp*>::const_iterator ourIter = iter;
@@ -190,7 +190,7 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_MULTIEQUAL:
                     {
                         TransformOp* rop = rvn.getDef();
-                        if (rop == (TransformOp*)0)
+                        if (rop == (TransformOp)null)
                         {
                             rop = newOpReplace(op.numInput(), op.code(), op);
                             opSetOutput(rop, rvn);
@@ -198,10 +198,10 @@ namespace Sla.DECCORE
                         for (int i = 0; i < op.numInput(); ++i)
                         {
                             TransformVar* newvar = rop.getIn(i);
-                            if (newvar == (TransformVar*)0)
+                            if (newvar == (TransformVar)null)
                             {
                                 newvar = setReplacement(op.getIn(i));
-                                if (newvar == (TransformVar*)0)
+                                if (newvar == (TransformVar)null)
                                     return false;
                                 opSetInput(rop, newvar, i);
                             }
@@ -232,7 +232,7 @@ namespace Sla.DECCORE
                             else
                             {
                                 newvar = setReplacement(vn);    // Convert constant to precision size
-                                if (newvar == (TransformVar*)0)
+                                if (newvar == (TransformVar)null)
                                     return false;           // Unsupported float format
                             }
                         }

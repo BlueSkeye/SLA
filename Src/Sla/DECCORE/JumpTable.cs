@@ -397,7 +397,7 @@ namespace Sla.DECCORE
         }
 
         /// Set out-edge of the switch destination considered to be \e default
-        private void setDefaultBlock(int bl)
+        internal void setDefaultBlock(int bl)
         {
             defaultBlock = bl;
         }
@@ -414,11 +414,11 @@ namespace Sla.DECCORE
         /// can also be provided. The new target is appended directly to the end of the table.
         /// \param bl is the given basic-block
         /// \param lab is the case label for the block
-        private void addBlockToSwitch(BlockBasic bl, ulong lab)
+        internal void addBlockToSwitch(BlockBasic bl, ulong lab)
         {
             addresstable.Add(bl.getStart());
             lastBlock = indirect.getParent().sizeOut();       // The block WILL be added to the end of the out-edges
-            block2addr.Add(IndexPair(lastBlock, addresstable.size() - 1));
+            block2addr.Add(new IndexPair(lastBlock, addresstable.size() - 1));
             label.Add(lab);
         }
 

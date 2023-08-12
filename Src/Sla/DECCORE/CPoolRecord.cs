@@ -209,11 +209,11 @@ namespace Sla.DECCORE
                 token = decoder.readString(AttributeId.ATTRIB_CONTENT);
             else {
                 byteDataLen = (int)decoder.readSignedInteger(AttributeId.ATTRIB_LENGTH);
-                istringstream s3(decoder.readString(AttributeId.ATTRIB_CONTENT));
+                string s3 = decoder.readString(AttributeId.ATTRIB_CONTENT);
                 byteData = new byte[byteDataLen];
                 for (int i = 0; i < byteDataLen; ++i) {
-                    uint val;
-                    s3 >> ws >> hex >> val;
+                    uint val = uint.Parse(s3, System.Globalization.NumberStyles.HexNumber);
+                    // s3 >> ws >> hex >> val;
                     byteData[i] = (byte)val;
                 }
             }

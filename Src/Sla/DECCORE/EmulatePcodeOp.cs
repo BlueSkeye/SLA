@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -22,7 +22,7 @@ namespace Sla.DECCORE
     ///   - STORE
     ///   - CPOOLREF
     ///   - NEW
-    internal class EmulatePcodeOp : Emulate
+    internal abstract class EmulatePcodeOp : Emulate
     {
         protected Architecture glb;        ///< The underlying Architecture for the program being emulated
         protected PcodeOp currentOp;     ///< Current PcodeOp being executed
@@ -36,28 +36,28 @@ namespace Sla.DECCORE
         /// \param offset is the starting address offset (from within the space) to pull the value from
         /// \param sz is the number of bytes to pull from memory
         /// \return indicated bytes arranged as a constant value
-        protected override ulong getLoadImageValue(AddrSpace spc, ulong offset, int sz)
+        protected virtual ulong getLoadImageValue(AddrSpace spc, ulong offset, int sz)
         {
-            LoadImage* loadimage = glb.loader;
+            LoadImage loadimage = glb.loader ?? throw new BugException();
             ulong res;
 
-            loadimage.loadFill((byte*)&res, sizeof(ulong), Address(spc, off));
+            loadimage.loadFill((byte*)&res, sizeof(ulong), new Address(spc, offset));
 
             if ((HOST_ENDIAN == 1) != spc.isBigEndian())
                 res = Globals.byte_swap(res, sizeof(ulong));
             if (spc.isBigEndian() && (sz < sizeof(ulong)))
                 res >>= (sizeof(ulong) - sz) * 8;
             else
-                res &= Globals.calc_mask(sz);
+                res &= Globals.calc_mask((uint)sz);
             return res;
         }
 
         protected override void executeUnary()
         {
             ulong in1 = getVarnodeValue(currentOp.getIn(0));
-            ulong out = currentBehave.evaluateUnary(currentOp.getOut().getSize(),
+            ulong @out = currentBehave.evaluateUnary(currentOp.getOut().getSize(),
                                  currentOp.getIn(0).getSize(), in1);
-            setVarnodeValue(currentOp.getOut(), out);
+            setVarnodeValue(currentOp.getOut(), @out);
         }
 
         protected override void executeBinary()
@@ -73,7 +73,7 @@ namespace Sla.DECCORE
         {
             // op will be null, use current_op
             ulong off = getVarnodeValue(currentOp.getIn(1));
-            AddrSpace* spc = currentOp.getIn(0).getSpaceFromConst();
+            AddrSpace spc = currentOp.getIn(0).getSpaceFromConst();
             off = AddrSpace.addressToByte(off, spc.getWordSize());
             int sz = currentOp.getOut().getSize();
             ulong res = getLoadImageValue(spc, off, sz);
@@ -106,8 +106,8 @@ namespace Sla.DECCORE
         {
             // op will be null, use current_op
             int i;
-            FlowBlock* bl = currentOp.getParent();
-            FlowBlock* last_bl = lastOp.getParent();
+            FlowBlock bl = currentOp.getParent();
+            FlowBlock last_bl = lastOp.getParent();
 
             for (i = 0; i < bl.sizeIn(); ++i)
                 if (bl.getIn(i) == last_bl) break;
@@ -128,13 +128,13 @@ namespace Sla.DECCORE
 
         protected override void executeSegmentOp()
         {
-            SegmentOp* segdef = glb.userops.getSegmentOp(currentOp.getIn(0).getSpaceFromConst().getIndex());
+            SegmentOp segdef = glb.userops.getSegmentOp(currentOp.getIn(0).getSpaceFromConst().getIndex());
             if (segdef == (SegmentOp)null)
                 throw new LowlevelError("Segment operand missing definition");
 
             ulong in1 = getVarnodeValue(currentOp.getIn(1));
             ulong in2 = getVarnodeValue(currentOp.getIn(2));
-            List<ulong> bindlist;
+            List<ulong> bindlist = new List<ulong>();
             bindlist.Add(in1);
             bindlist.Add(in2);
             ulong res = segdef.execute(bindlist);

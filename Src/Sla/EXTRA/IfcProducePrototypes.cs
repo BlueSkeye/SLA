@@ -71,7 +71,7 @@ namespace Sla.EXTRA
                 duration *= 1000.0;
                 *status.optr << " time=" << fixed << setprecision(0) << duration << " ms" << endl;
             }
-            catch (LowlevelError err) {
+            catch (CORE.LowlevelError err) {
                 *status.optr << "Skipping " << fd.getName() << ": " << err.ToString() << endl;
             }
             dcp.conf.clearAnalysis(fd);

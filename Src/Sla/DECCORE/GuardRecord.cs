@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -84,16 +84,16 @@ namespace Sla.DECCORE
         public int valueMatch(Varnode vn2, Varnode baseVn2, int bitsPreserved2)
         {
             if (vn == vn2) return 1;        // Same varnode, same value
-            PcodeOp* loadOp,*loadOp2;
-            if (bitsPreserved == bitsPreserved2)
-            {   // Are the same number of bits being copied
+            PcodeOp? loadOp;
+            PcodeOp? loadOp2;
+            if (bitsPreserved == bitsPreserved2) {
+                // Are the same number of bits being copied
                 if (baseVn == baseVn2)          // Are bits being copied from same varnode
                     return 1;                   // If so, values are the same
                 loadOp = baseVn.getDef();          // Otherwise check if different base varnodes hold same value
                 loadOp2 = baseVn2.getDef();
             }
-            else
-            {
+            else {
                 loadOp = vn.getDef();          // Check if different varnodes hold same value
                 loadOp2 = vn2.getDef();
             }
@@ -104,18 +104,18 @@ namespace Sla.DECCORE
             if (loadOp.code() != OpCode.CPUI_LOAD) return 0;
             if (loadOp2.code() != OpCode.CPUI_LOAD) return 0;
             if (loadOp.getIn(0).getOffset() != loadOp2.getIn(0).getOffset()) return 0;
-            Varnode* ptr = loadOp.getIn(1);
-            Varnode* ptr2 = loadOp2.getIn(1);
+            Varnode ptr = loadOp.getIn(1);
+            Varnode ptr2 = loadOp2.getIn(1);
             if (ptr == ptr2) return 2;
             if (!ptr.isWritten()) return 0;
             if (!ptr2.isWritten()) return 0;
-            PcodeOp* addop = ptr.getDef();
+            PcodeOp addop = ptr.getDef() ?? throw new BugException();
             if (addop.code() != OpCode.CPUI_INT_ADD) return 0;
-            Varnode* constvn = addop.getIn(1);
+            Varnode constvn = addop.getIn(1);
             if (!constvn.isConstant()) return 0;
-            PcodeOp* addop2 = ptr2.getDef();
+            PcodeOp addop2 = ptr2.getDef() ?? throw new BugException();
             if (addop2.code() != OpCode.CPUI_INT_ADD) return 0;
-            Varnode* constvn2 = addop2.getIn(1);
+            Varnode constvn2 = addop2.getIn(1);
             if (!constvn2.isConstant()) return 0;
             if (addop.getIn(0) != addop2.getIn(0)) return 0;
             if (constvn.getOffset() != constvn2.getOffset()) return 0;
@@ -133,8 +133,7 @@ namespace Sla.DECCORE
         {
             if (op1.code() != op2.code())
                 return 0;
-            switch (op1.code())
-            {
+            switch (op1.code()) {
                 case OpCode.CPUI_INT_AND:
                 case OpCode.CPUI_INT_ADD:
                 case OpCode.CPUI_INT_XOR:
@@ -171,20 +170,17 @@ namespace Sla.DECCORE
             ulong mask = 1;
             mask <<= bitsPreserved;
             mask -= 1;
-            PcodeOp* op = vn.getDef();
-            Varnode* constVn;
-            while (op != (PcodeOp)null)
-            {
-                switch (op.code())
-                {
+            PcodeOp? op = vn.getDef();
+            Varnode constVn;
+            while (op != (PcodeOp)null) {
+                switch (op.code()) {
                     case OpCode.CPUI_COPY:
                         vn = op.getIn(0);
                         op = vn.getDef();
                         break;
                     case OpCode.CPUI_INT_AND:
                         constVn = op.getIn(1);
-                        if (constVn.isConstant() && constVn.getOffset() == mask)
-                        {
+                        if (constVn.isConstant() && constVn.getOffset() == mask) {
                             vn = op.getIn(0);
                             op = vn.getDef();
                         }
@@ -193,7 +189,8 @@ namespace Sla.DECCORE
                         break;
                     case OpCode.CPUI_INT_OR:
                         constVn = op.getIn(1);
-                        if (constVn.isConstant() && ((constVn.getOffset() | mask) == (constVn.getOffset() ^ mask)))
+                        if (constVn.isConstant()
+                            && ((constVn.getOffset() | mask) == (constVn.getOffset() ^ mask)))
                         {
                             vn = op.getIn(0);
                             op = vn.getDef();
@@ -203,8 +200,7 @@ namespace Sla.DECCORE
                         break;
                     case OpCode.CPUI_INT_SEXT:
                     case OpCode.CPUI_INT_ZEXT:
-                        if (op.getIn(0).getSize() * 8 >= bitsPreserved)
-                        {
+                        if (op.getIn(0).getSize() * 8 >= bitsPreserved) {
                             vn = op.getIn(0);
                             op = vn.getDef();
                         }
@@ -212,8 +208,7 @@ namespace Sla.DECCORE
                             op = (PcodeOp)null;
                         break;
                     case OpCode.CPUI_PIECE:
-                        if (op.getIn(1).getSize() * 8 >= bitsPreserved)
-                        {
+                        if (op.getIn(1).getSize() * 8 >= bitsPreserved) {
                             vn = op.getIn(1);
                             op = vn.getDef();
                         }
@@ -222,8 +217,7 @@ namespace Sla.DECCORE
                         break;
                     case OpCode.CPUI_SUBPIECE:
                         constVn = op.getIn(1);
-                        if (constVn.isConstant() && constVn.getOffset() == 0)
-                        {
+                        if (constVn.isConstant() && constVn.getOffset() == 0) {
                             vn = op.getIn(0);
                             op = vn.getDef();
                         }

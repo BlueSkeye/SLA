@@ -69,7 +69,7 @@ namespace Sla.EXTRA
             catch (DecoderError err) {
                 errmsg = err.ToString();
                 iserror = true;
-            } catch (LowlevelError err) {
+            } catch (CORE.LowlevelError err) {
                 errmsg = err.ToString();
                 iserror = true;
             }

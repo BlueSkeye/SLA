@@ -7,7 +7,7 @@ namespace Sla.EXTRA
     /// This error is generated when parsing character data of some
     /// form, as in a user command from the console or when parsing
     /// C syntax.
-    internal class ParseError : LowlevelError
+    internal class ParseError : CORE.LowlevelError
     {
         // Parsing error
         /// Initialize the error with an explanatory string

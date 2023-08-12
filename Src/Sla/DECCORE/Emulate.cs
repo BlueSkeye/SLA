@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -111,6 +111,82 @@ namespace Sla.DECCORE
         public abstract Address getExecuteAddress();
 
         /// Do a single pcode op step
-        public void executeCurrentOp();
+        /// This method executes a single pcode operation, the current one (returned by getCurrentOp()).
+        /// The MemoryState of the emulator is queried and changed as needed to accomplish this.
+        public void executeCurrentOp()
+        {
+            if (currentBehave == (OpBehavior)null) {   // Presumably a NO-OP
+                fallthruOp();
+                return;
+            }
+            if (currentBehave.isSpecial()) {
+                switch (currentBehave.getOpcode()) {
+                    case OpCode.CPUI_LOAD:
+                        executeLoad();
+                        fallthruOp();
+                        break;
+                    case OpCode.CPUI_STORE:
+                        executeStore();
+                        fallthruOp();
+                        break;
+                    case OpCode.CPUI_BRANCH:
+                        executeBranch();
+                        break;
+                    case OpCode.CPUI_CBRANCH:
+                        if (executeCbranch())
+                            executeBranch();
+                        else
+                            fallthruOp();
+                        break;
+                    case OpCode.CPUI_BRANCHIND:
+                        executeBranchind();
+                        break;
+                    case OpCode.CPUI_CALL:
+                        executeCall();
+                        break;
+                    case OpCode.CPUI_CALLIND:
+                        executeCallind();
+                        break;
+                    case OpCode.CPUI_CALLOTHER:
+                        executeCallother();
+                        break;
+                    case OpCode.CPUI_RETURN:
+                        executeBranchind();
+                        break;
+                    case OpCode.CPUI_MULTIEQUAL:
+                        executeMultiequal();
+                        fallthruOp();
+                        break;
+                    case OpCode.CPUI_INDIRECT:
+                        executeIndirect();
+                        fallthruOp();
+                        break;
+                    case OpCode.CPUI_SEGMENTOP:
+                        executeSegmentOp();
+                        fallthruOp();
+                        break;
+                    case OpCode.CPUI_CPOOLREF:
+                        executeCpoolRef();
+                        fallthruOp();
+                        break;
+                    case OpCode.CPUI_NEW:
+                        executeNew();
+                        fallthruOp();
+                        break;
+                    default:
+                        throw new LowlevelError("Bad special op");
+                }
+            }
+            else if (currentBehave.isUnary()) {
+                // Unary operation
+                executeUnary();
+                fallthruOp();
+            }
+            else {
+                // Binary operation
+                executeBinary();
+                fallthruOp();       // All binary ops are fallthrus
+            }
+        }
     }
 }

@@ -69,13 +69,13 @@ namespace Sla.EXTRA
             hitsaddress = false;
             res.flags = 0;
             try {
-                res.length = trans.oneInstruction(*this, addr);
+                res.length = trans.oneInstruction(this, addr);
             }
-            catch (BadDataError err) {
+            catch (BadDataError) {
                 res.success = false;
                 return;
             }
-            catch (DataUnavailError err) {
+            catch (DataUnavailError) {
                 res.success = false;
                 return;
             }

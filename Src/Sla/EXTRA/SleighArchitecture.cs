@@ -201,9 +201,9 @@ namespace Sla.EXTRA
                 if (null == name) throw new BugException();
                 if (null == addr) throw new BugException();
                 if (name.Length == 0)
-                    throw new LowlevelError("Missing name attribute in <symbol> element");
+                    throw new CORE.LowlevelError("Missing name attribute in <symbol> element");
                 if (addr.isInvalid())
-                    throw new LowlevelError("Missing address attribute in <symbol> element");
+                    throw new CORE.LowlevelError("Missing address attribute in <symbol> element");
                 if (size == 0)
                     size = (int)addr.getSpace().getWordSize();
                 if (volatileState >= 0)
@@ -249,7 +249,7 @@ namespace Sla.EXTRA
                 serr << "\n " << err.ToString();
                 throw new SleighError(serr.str());
             }
-            catch (LowlevelError err) {
+            catch (CORE.LowlevelError err) {
                 ostringstream serr;
                 serr << "Error reading processor specification: " << processorfile;
                 serr << "\n " << err.ToString();
@@ -267,7 +267,7 @@ namespace Sla.EXTRA
                 serr << "\n " << err.ToString();
                 throw new SleighError(serr.str());
             }
-            catch (LowlevelError err) {
+            catch (CORE.LowlevelError err) {
                 ostringstream serr;
                 serr << "Error reading compiler specification: " << compilerfile;
                 serr << "\n " << err.ToString();
@@ -287,7 +287,7 @@ namespace Sla.EXTRA
                     serr << "\n " << err.ToString();
                     throw new SleighError(serr.str());
                 }
-                catch (LowlevelError err) {
+                catch (CORE.LowlevelError err) {
                     ostringstream serr;
                     serr << "Error reading SLEIGH file: " << slafile;
                     serr << "\n " << err.ToString();
@@ -335,7 +335,7 @@ namespace Sla.EXTRA
             }
 
             if (languageindex == -1)
-                throw new LowlevelError("No sleigh specification for " + baseid);
+                throw new CORE.LowlevelError("No sleigh specification for " + baseid);
         }
 
         /// Construct given executable file
@@ -456,7 +456,7 @@ namespace Sla.EXTRA
                 pos[i] = curpos;
             }
             if ((i != 3) && (i != 4))
-                throw new LowlevelError("Architecture string does not look like sleigh id: " + nm);
+                throw new CORE.LowlevelError("Architecture string does not look like sleigh id: " + nm);
             processor = nm.substr(0, pos[0]);
             endian = nm.substr(pos[0] + 1, pos[1] - pos[0] - 1);
             size = nm.substr(pos[1] + 1, pos[2] - pos[1] - 1);
@@ -534,7 +534,7 @@ namespace Sla.EXTRA
             ostringstream s;
             collectSpecFiles(s);
             if (!s.str().empty())
-                throw new LowlevelError(s.str());
+                throw new CORE.LowlevelError(s.str());
             return description;
         }
 

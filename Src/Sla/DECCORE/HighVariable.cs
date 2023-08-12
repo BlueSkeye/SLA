@@ -126,7 +126,7 @@ namespace Sla.DECCORE
 
         /// (Re)derive the external cover of \b this, as a union of internal covers
         /// This is \b only called by the Merge class which knows when to call it properly.
-        private void updateCover()
+        internal void updateCover()
         {
             if (piece == (VariablePiece)null)
                 updateInternalCover();
@@ -194,7 +194,7 @@ namespace Sla.DECCORE
         }
 
         /// Clear marks indicating COPYs into \b this
-        private void clearCopyIns() 
+        internal void clearCopyIns() 
         {
             highflags &= ~(DirtinessFlags.copy_in1 | DirtinessFlags.copy_in2);
         }
@@ -258,7 +258,7 @@ namespace Sla.DECCORE
                     vn.setHigh(this, vn.getMergeGroup());
                 }
             }
-            List<Varnode> instcopy(inst);
+            List<Varnode> instcopy = new List<Varnode>(inst);
             inst.resize(inst.size() + tv2.inst.size(), (Varnode)null);
             std::merge(instcopy.begin(), instcopy.end(), tv2.inst.begin(), tv2.inst.end(), inst.begin(), compareJustLoc);
             tv2.inst.Clear();
@@ -279,7 +279,7 @@ namespace Sla.DECCORE
         /// \param tv2 is the other HighVariable to merge into \b this
         /// \param testCache if non-null is a cache of intersection tests that must be updated to reflect the merge
         /// \param isspeculative is \b true to keep the new members in separate \e merge classes
-        private void merge(HighVariable tv2, HighIntersectTest testCache, bool isspeculative)
+        internal void merge(HighVariable tv2, HighIntersectTest testCache, bool isspeculative)
         {
             if (tv2 == this) return;
 
@@ -402,7 +402,7 @@ namespace Sla.DECCORE
         }
 
         /// Mark \b this as having merge problems
-        private void setUnmerged() 
+        internal void setUnmerged() 
         {
             highflags |= DirtinessFlags.unmerged;
         }

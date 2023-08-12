@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -61,7 +61,7 @@ namespace Sla.DECCORE
 
             if (vn.isTypeLock() && vn.getType().getMetatype() != type_metatype.TYPE_PARTIALSTRUCT)
             {
-                return (TransformVar*)0;
+                return (TransformVar)null;
             }
 
             vn.setMark();
@@ -139,15 +139,15 @@ namespace Sla.DECCORE
                 return false;
             if (highLanes == 1)
             {
-                TransformVar* highRvn = getPreexistingVarnode(highVn);
-                TransformOp* rop = newOpReplace(1, OpCode.CPUI_COPY, op);
+                TransformVar highRvn = getPreexistingVarnode(highVn);
+                TransformOp rop = newOpReplace(1, OpCode.CPUI_COPY, op);
                 opSetInput(rop, highRvn, 0);
                 opSetOutput(rop, outVars + (numLanes - 1));
             }
             else
             {   // Multi-lane high
                 TransformVar* highRvn = setReplacement(highVn, highLanes, highSkip);
-                if (highRvn == (TransformVar*)0) return false;
+                if (highRvn == (TransformVar)null) return false;
                 int outHighStart = numLanes - highLanes;
                 for (int i = 0; i < highLanes; ++i)
                 {
@@ -166,7 +166,7 @@ namespace Sla.DECCORE
             else
             {   // Multi-lane low
                 TransformVar* lowRvn = setReplacement(lowVn, lowLanes, lowSkip);
-                if (lowRvn == (TransformVar*)0) return false;
+                if (lowRvn == (TransformVar)null) return false;
                 for (int i = 0; i < lowLanes; ++i)
                 {
                     TransformOp* rop = newOpReplace(1, OpCode.CPUI_COPY, op);
@@ -193,7 +193,7 @@ namespace Sla.DECCORE
             for (int i = 0; i < numInput; ++i)
             {
                 TransformVar* inVn = setReplacement(op.getIn(i), numLanes, skipLanes);
-                if (inVn == (TransformVar*)0) return false;
+                if (inVn == (TransformVar)null) return false;
                 inVarSets.Add(inVn);
             }
             for (int i = 0; i < numLanes; ++i)
@@ -217,7 +217,7 @@ namespace Sla.DECCORE
         private bool buildStore(PcodeOp op, int numLanes, int skipLanes)
         {
             TransformVar* inVars = setReplacement(op.getIn(2), numLanes, skipLanes);
-            if (inVars == (TransformVar*)0) return false;
+            if (inVars == (TransformVar)null) return false;
             ulong spaceConst = op.getIn(0).getOffset();
             int spaceConstSize = op.getIn(0).getSize();
             AddrSpace* spc = op.getIn(0).getSpaceFromConst(); // Address space being stored to
@@ -334,7 +334,7 @@ namespace Sla.DECCORE
                 destLane += 1;
             }
             TransformVar* inVars = setReplacement(op.getIn(0), numLanes, skipLanes);
-            if (inVars == (TransformVar*)0) return false;
+            if (inVars == (TransformVar)null) return false;
             buildUnaryOp(CPUI_COPY, op, inVars + (startLane - skipLanes), outVars, numLanes - (startLane - skipLanes));
             for (int zeroLane = numLanes - (startLane - skipLanes); zeroLane < numLanes; ++zeroLane)
             {
@@ -356,48 +356,40 @@ namespace Sla.DECCORE
         /// \return \b true if the lanes can be naturally pushed forward
         private bool traceForward(TransformVar rvn, int numLanes, int skipLanes)
         {
-            Varnode* origvn = rvn.getOriginal();
-            list<PcodeOp*>::const_iterator iter, enditer;
-            iter = origvn.beginDescend();
-            enditer = origvn.endDescend();
-            while (iter != enditer)
-            {
-                PcodeOp* op = *iter++;
-                Varnode* outvn = op.getOut();
+            Varnode origvn = rvn.getOriginal();
+            IEnumerator<PcodeOp> iter = origvn.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
+                Varnode? outvn = op.getOut();
                 if ((outvn != (Varnode)null) && (outvn.isMark()))
                     continue;
-                switch (op.code())
-                {
+                switch (op.code()) {
                     case OpCode.CPUI_SUBPIECE:
                         {
                             int bytePos = (int)op.getIn(1).getOffset();
                             int outLanes, outSkip;
-                            if (!description.restriction(numLanes, skipLanes, bytePos, outvn.getSize(), outLanes, outSkip))
-                            {
-                                if (allowSubpieceTerminator)
-                                {
+                            if (!description.restriction(numLanes, skipLanes, bytePos, outvn.getSize(), outLanes, outSkip)) {
+                                if (allowSubpieceTerminator) {
                                     int laneIndex = description.getBoundary(bytePos);
                                     if (laneIndex < 0 || laneIndex >= description.getNumLanes())    // Does piece start on lane boundary?
                                         return false;
                                     if (description.getSize(laneIndex) <= outvn.getSize())     // Is the piece smaller than a lane?
                                         return false;
                                     // Treat SUBPIECE as terminating
-                                    TransformOp* rop = newPreexistingOp(2, OpCode.CPUI_SUBPIECE, op);
+                                    TransformOp rop = newPreexistingOp(2, OpCode.CPUI_SUBPIECE, op);
                                     opSetInput(rop, rvn + (laneIndex - skipLanes), 0);
                                     opSetInput(rop, newConstant(4, 0, 0), 1);
                                     break;
                                 }
                                 return false;
                             }
-                            if (outLanes == 1)
-                            {
-                                TransformOp* rop = newPreexistingOp(1, OpCode.CPUI_COPY, op);
+                            if (outLanes == 1) {
+                                TransformOp rop = newPreexistingOp(1, OpCode.CPUI_COPY, op);
                                 opSetInput(rop, rvn + (outSkip - skipLanes), 0);
                             }
-                            else
-                            {
-                                TransformVar* outRvn = setReplacement(outvn, outLanes, outSkip);
-                                if (outRvn == (TransformVar*)0) return false;
+                            else {
+                                TransformVar outRvn = setReplacement(outvn, outLanes, outSkip);
+                                if (outRvn == (TransformVar)null) return false;
                                 // Don't create the placeholder ops, let traceBackward make them
                             }
                             break;
@@ -408,8 +400,8 @@ namespace Sla.DECCORE
                             int bytePos = (op.getIn(0) == origvn) ? op.getIn(1).getSize() : 0;
                             if (!description.extension(numLanes, skipLanes, bytePos, outvn.getSize(), outLanes, outSkip))
                                 return false;
-                            TransformVar* outRvn = setReplacement(outvn, outLanes, outSkip);
-                            if (outRvn == (TransformVar*)0) return false;
+                            TransformVar outRvn = setReplacement(outvn, outLanes, outSkip);
+                            if (outRvn == (TransformVar)null) return false;
                             // Don't create the placeholder ops, let traceBackward make them
                             break;
                         }
@@ -418,18 +410,16 @@ namespace Sla.DECCORE
                     case OpCode.CPUI_INT_AND:
                     case OpCode.CPUI_INT_OR:
                     case OpCode.CPUI_INT_XOR:
-                    case OpCode.CPUI_MULTIEQUAL:
-                        {
-                            TransformVar* outRvn = setReplacement(outvn, numLanes, skipLanes);
-                            if (outRvn == (TransformVar*)0) return false;
+                    case OpCode.CPUI_MULTIEQUAL: {
+                            TransformVar outRvn = setReplacement(outvn, numLanes, skipLanes);
+                            if (outRvn == (TransformVar)null) return false;
                             // Don't create the placeholder ops, let traceBackward make them
                             break;
                         }
-                    case OpCode.CPUI_INT_RIGHT:
-                        {
+                    case OpCode.CPUI_INT_RIGHT: {
                             if (!op.getIn(1).isConstant()) return false;  // Trace must come through op.getIn(0)
-                            TransformVar* outRvn = setReplacement(outvn, numLanes, skipLanes);
-                            if (outRvn == (TransformVar*)0) return false;
+                            TransformVar outRvn = setReplacement(outvn, numLanes, skipLanes);
+                            if (outRvn == (TransformVar)null) return false;
                             // Don't create the placeholder ops, let traceBackward make them
                             break;
                         }
@@ -456,27 +446,24 @@ namespace Sla.DECCORE
         /// \return \b true if the lanes can be naturally pulled back
         private bool traceBackward(TransformVar rvn, int numLanes, int skipLanes)
         {
-            PcodeOp* op = rvn.getOriginal().getDef();
+            PcodeOp? op = rvn.getOriginal().getDef();
             if (op == (PcodeOp)null) return true; // If vn is input
 
-            switch (op.code())
-            {
+            switch (op.code()) {
                 case OpCode.CPUI_INT_NEGATE:
-                case OpCode.CPUI_COPY:
-                    {
-                        TransformVar* inVars = setReplacement(op.getIn(0), numLanes, skipLanes);
-                        if (inVars == (TransformVar*)0) return false;
+                case OpCode.CPUI_COPY: {
+                        TransformVar? inVars = setReplacement(op.getIn(0), numLanes, skipLanes);
+                        if (inVars == (TransformVar)null) return false;
                         buildUnaryOp(op.code(), op, inVars, rvn, numLanes);
                         break;
                     }
                 case OpCode.CPUI_INT_AND:
                 case OpCode.CPUI_INT_OR:
-                case OpCode.CPUI_INT_XOR:
-                    {
-                        TransformVar* in0Vars = setReplacement(op.getIn(0), numLanes, skipLanes);
-                        if (in0Vars == (TransformVar*)0) return false;
-                        TransformVar* in1Vars = setReplacement(op.getIn(1), numLanes, skipLanes);
-                        if (in1Vars == (TransformVar*)0) return false;
+                case OpCode.CPUI_INT_XOR: {
+                        TransformVar? in0Vars = setReplacement(op.getIn(0), numLanes, skipLanes);
+                        if (in0Vars == (TransformVar)null) return false;
+                        TransformVar? in1Vars = setReplacement(op.getIn(1), numLanes, skipLanes);
+                        if (in1Vars == (TransformVar)null) return false;
                         buildBinaryOp(op.code(), op, in0Vars, in1Vars, rvn, numLanes);
                         break;
                     }
@@ -484,16 +471,15 @@ namespace Sla.DECCORE
                     if (!buildMultiequal(op, rvn, numLanes, skipLanes))
                         return false;
                     break;
-                case OpCode.CPUI_SUBPIECE:
-                    {
-                        Varnode* inVn = op.getIn(0);
+                case OpCode.CPUI_SUBPIECE: {
+                        Varnode inVn = op.getIn(0);
                         int bytePos = (int)op.getIn(1).getOffset();
                         int inLanes, inSkip;
                         if (!description.extension(numLanes, skipLanes, bytePos, inVn.getSize(), inLanes, inSkip))
                             return false;
-                        TransformVar* inVars = setReplacement(inVn, inLanes, inSkip);
-                        if (inVars == (TransformVar*)0) return false;
-                        buildUnaryOp(CPUI_COPY, op, inVars + (skipLanes - inSkip), rvn, numLanes);
+                        TransformVar? inVars = setReplacement(inVn, inLanes, inSkip);
+                        if (inVars == (TransformVar)null) return false;
+                        buildUnaryOp(OpCode.CPUI_COPY, op, inVars + (skipLanes - inSkip), rvn, numLanes);
                         break;
                     }
                 case OpCode.CPUI_PIECE:
@@ -518,7 +504,7 @@ namespace Sla.DECCORE
         /// \return \b true if the lane split for the top Varnode on the work list is propagated through local operators
         private bool processNextWork()
         {
-            TransformVar* rvn = workList.GetLastItem().lanes;
+            TransformVar rvn = workList.GetLastItem().lanes;
             int numLanes = workList.GetLastItem().numLanes;
             int skipLanes = workList.GetLastItem().skipLanes;
 
@@ -549,10 +535,9 @@ namespace Sla.DECCORE
             if (workList.empty())
                 return false;       // Nothing to do
             bool retval = true;
-            while (!workList.empty())
-            {   // Process the work list until its done
-                if (!processNextWork())
-                {
+            while (!workList.empty()) {
+                // Process the work list until its done
+                if (!processNextWork()) {
                     retval = false;
                     break;
                 }

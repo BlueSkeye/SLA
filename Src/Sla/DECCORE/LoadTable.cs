@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -17,9 +17,9 @@ namespace Sla.DECCORE
     internal class LoadTable
     {
         // friend class EmulateFunction;
-        private Address addr;           ///< Starting address of table
-        private int size;          ///< Size of table entry
-        private int num;           ///< Number of entries in table;
+        internal Address addr;           ///< Starting address of table
+        internal int size;          ///< Size of table entry
+        internal int num;           ///< Number of entries in table;
 
         // Constructor for use with decode
         public LoadTable()
@@ -43,7 +43,7 @@ namespace Sla.DECCORE
         }
 
         /// Compare \b this with another table by address
-        public static bool operator <(LoadTable op2) => (addr<op2.addr);
+        public static bool operator <(LoadTable op1, LoadTable op2) => (op1.addr < op2.addr);
 
         /// Encode a description of \b this as an \<loadtable> element
         /// \param encoder is the stream encoder
@@ -74,29 +74,26 @@ namespace Sla.DECCORE
         public static void collapseTable(List<LoadTable> table)
         {
             if (table.empty()) return;
-            List<LoadTable>::iterator iter, lastiter;
+            IEnumerator<LoadTable> lastiter;
             int count = 1;
-            iter = table.begin();
+            IEnumerator<LoadTable> iter = table.GetEnumerator();
             lastiter = iter;
             Address nextaddr = (*iter).addr + (*iter).size * (*iter).num;
             ++iter;
-            for (; iter != table.end(); ++iter)
-            {
-                if (((*iter).addr == nextaddr) && ((*iter).size == (*lastiter).size))
-                {
-                    (*lastiter).num += (*iter).num;
-                    nextaddr = (*iter).addr + (*iter).size * (*iter).num;
+            while (iter.MoveNext()) {
+                if ((iter.Current.addr == nextaddr) && (iter.Current.size == (*lastiter).size)) {
+                    (*lastiter).num += iter.Current.num;
+                    nextaddr = iter.Current.addr + iter.Current.size * iter.Current.num;
                 }
-                else if ((nextaddr < (*iter).addr) || ((*iter).size != (*lastiter).size))
-                {
+                else if ((nextaddr < iter.Current.addr) || (iter.Current.size != (*lastiter).size)) {
                     // Starting a new table
                     lastiter++;
                     *lastiter = *iter;
-                    nextaddr = (*iter).addr + (*iter).size * (*iter).num;
+                    nextaddr = iter.Current.addr + iter.Current.size * iter.Current.num;
                     count += 1;
                 }
             }
-            table.resize(count, LoadTable(nextaddr, 0));
+            table.resize(count, new LoadTable(nextaddr, 0));
         }
     }
 }

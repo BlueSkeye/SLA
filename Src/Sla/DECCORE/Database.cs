@@ -108,7 +108,7 @@ namespace Sla.DECCORE
             ulong id = decoder.readUnsignedInteger(AttributeId.ATTRIB_ID);
             Scope* res = resolveScope(id);
             if (res == (Scope)null)
-                throw new LowlevelError("Could not find scope matching id");
+                throw new CORE.LowlevelError("Could not find scope matching id");
             decoder.closeElement(elemId);
             return res;
         }
@@ -158,15 +158,15 @@ namespace Sla.DECCORE
             if (parent == (Scope)null)
             {
                 if (globalscope != (Scope)null)
-                    throw new LowlevelError("Multiple global scopes");
+                    throw new CORE.LowlevelError("Multiple global scopes");
                 if (newscope.name.size() != 0)
-                    throw new LowlevelError("Global scope does not have empty name");
+                    throw new CORE.LowlevelError("Global scope does not have empty name");
                 globalscope = newscope;
                 idmap[globalscope.uniqueId] = globalscope;
                 return;
             }
             if (newscope.name.size() == 0)
-                throw new LowlevelError("Non-global scope has empty name");
+                throw new CORE.LowlevelError("Non-global scope has empty name");
             pair<ScopeMap::iterator, bool> res;
             res = idmap.Add(newscope.uniqueId, newscope);
             if (res.second == false) {
@@ -192,7 +192,7 @@ namespace Sla.DECCORE
             {
                 ScopeMap::iterator iter = scope.parent.children.find(scope.uniqueId);
                 if (iter == scope.parent.children.end())
-                    throw new LowlevelError("Could not remove parent reference to: " + scope.name);
+                    throw new CORE.LowlevelError("Could not remove parent reference to: " + scope.name);
                 scope.parent.detachScope(iter);
             }
         }
@@ -331,9 +331,9 @@ namespace Sla.DECCORE
         /// \param nm is the given name of the Scope
         /// \param parent is the given parent scope to search
         /// \return the subscope object either found or created
-        public Scope findCreateScope(ulong, string nm, Scope parent)
+        public Scope findCreateScope(ulong id, string nm, Scope parent)
         {
-            Scope* res = resolveScope(id);
+            Scope? res = resolveScope(id);
             if (res != (Scope)null)
                 return res;
             res = globalscope.buildSubScope(id, nm);
@@ -365,7 +365,7 @@ namespace Sla.DECCORE
                 endmark = fullname.IndexOf(delim, mark);
                 if (-1 == endmark) break;
                 if (!idByNameHash)
-                    throw new LowlevelError("Scope name hashes not allowed");
+                    throw new CORE.LowlevelError("Scope name hashes not allowed");
                 string scopename = fullname.Substring(mark, endmark - mark);
                 ulong nameId = Scope.hashScopeName(start.uniqueId, scopename);
                 start = findCreateScope(nameId, scopename, start);

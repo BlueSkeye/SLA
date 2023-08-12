@@ -109,7 +109,7 @@ namespace Sla.DECCORE
             if ((model.input.getType() != ParamList::p_standard) &&
                 (model.input.getType() != ParamList::p_register))
                 throw new LowlevelError("Can only resolve between standard prototype models");
-            if (input == (ParamList*)0)
+            if (input == (ParamList)null)
             { // First fold in
                 input = new ParamListMerged();
                 output = new ParamListStandardOut(*(ParamListStandardOut*)model.output);

@@ -50,10 +50,10 @@ namespace Sla.EXTRA
 
             CallGraphNode fromnode = graph.findNode(fromaddr);
             if (fromnode == (CallGraphNode)null)
-                throw new LowlevelError("Could not find from node");
+                throw new CORE.LowlevelError("Could not find from node");
             CallGraphNode tonode = graph.findNode(toaddr);
             if (tonode == (CallGraphNode)null)
-                throw new LowlevelError("Could not find to node");
+                throw new CORE.LowlevelError("Could not find to node");
 
             graph.addEdge(fromnode, tonode, siteaddr);
         }

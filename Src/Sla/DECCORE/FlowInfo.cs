@@ -358,7 +358,7 @@ namespace Sla.DECCORE
             bool emptyflag;
             bool isfallthru = true;
             //  JumpTable *jt;
-            list<PcodeOp*>::const_iterator oiter;
+            IEnumerator<PcodeOp> oiter;
             int step;
             Override.Branching flowoverride;
 
@@ -1442,24 +1442,22 @@ namespace Sla.DECCORE
         /// \return \b true if all the \e hard model restrictions are met
         public bool testHardInlineRestrictions(Funcdata inlinefd, PcodeOp op, Address retaddr)
         {
-            if (inline_recursion.find(inlinefd.getAddress()) != inline_recursion.end())
-            {
+            if (inline_recursion.Contains(inlinefd.getAddress())) {
                 // This function has already been included with current inlining
                 inline_head.warning("Could not inline here", op.getAddr());
                 return false;
             }
 
             if (!inlinefd.getFuncProto().isNoReturn()) {
-                list<PcodeOp*>::iterator iter = op.getInsertIter();
+                IEnumerator<PcodeOp> iter = op.getInsertIter();
                 ++iter;
                 if (iter == obank.endDead()) {
                     inline_head.warning("No fallthrough prevents inlining here", op.getAddr());
                     return false;
                 }
-                PcodeOp* nextop = *iter;
+                PcodeOp nextop = *iter;
                 retaddr = nextop.getAddr();
-                if (op.getAddr() == retaddr)
-                {
+                if (op.getAddr() == retaddr) {
                     inline_head.warning("Return address prevents inlining here", op.getAddr());
                     return false;
                 }
@@ -1467,7 +1465,7 @@ namespace Sla.DECCORE
                 data.opMarkStartBasic(nextop);
             }
 
-            inline_recursion.insert(inlinefd.getAddress());
+            inline_recursion.Add(inlinefd.getAddress());
             return true;
         }
 

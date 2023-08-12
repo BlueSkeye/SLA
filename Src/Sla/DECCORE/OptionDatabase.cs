@@ -1,4 +1,4 @@
-﻿using ghidra;
+﻿using Sla.CORE;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +29,7 @@ namespace Sla.DECCORE
         /// \param option is the new ArchOption instance
         private void registerOption(ArchOption option)
         {
-            uint id = ElementId::find(option.getName());  // Option name must match a known element name
+            uint id = ElementId.find(option.getName());  // Option name must match a known element name
             optionmap[id] = option;
         }
 
@@ -79,9 +79,9 @@ namespace Sla.DECCORE
 
         ~OptionDatabase()
         {
-            Dictionary<uint, ArchOption*>::iterator iter;
-            for (iter = optionmap.begin(); iter != optionmap.end(); ++iter)
-                delete(*iter).second;
+            //Dictionary<uint, ArchOption*>::iterator iter;
+            //for (iter = optionmap.begin(); iter != optionmap.end(); ++iter)
+            //    delete(*iter).second;
         }
 
         /// Issue an option command
@@ -93,35 +93,30 @@ namespace Sla.DECCORE
         /// \return the confirmation/failure method after trying to apply the option
         public string set(uint nameId, string p1="", string p2="", string p3="")
         {
-            Dictionary<uint, ArchOption*>::const_iterator iter;
-            iter = optionmap.find(nameId);
-            if (iter == optionmap.end())
-                throw ParseError("Unknown option");
-            ArchOption* opt = (*iter).second;
-            return opt.apply(glb, p1, p2, p3);
+            ArchOption? options;
+            if (!optionmap.TryGetValue(nameId, out options))
+                throw new ParseError("Unknown option");
+            return options.apply(glb, p1, p2, p3);
         }
 
         ///< Parse and execute a single option element
         /// Scan the name and optional parameters and call method set()
         /// \param decoder is the stream decoder
-        public void decodeOne(Decoder decoder)
+        public void decodeOne(Sla.CORE.Decoder decoder)
         {
             string p1, p2, p3;
 
             uint elemId = decoder.openElement();
             uint subId = decoder.openElement();
-            if (subId == ELEM_PARAM1)
-            {
+            if (subId == ElementId.ELEM_PARAM1) {
                 p1 = decoder.readString(AttributeId.ATTRIB_CONTENT);
                 decoder.closeElement(subId);
                 subId = decoder.openElement();
-                if (subId == ELEM_PARAM2)
-                {
+                if (subId == ElementId.ELEM_PARAM2) {
                     p2 = decoder.readString(AttributeId.ATTRIB_CONTENT);
                     decoder.closeElement(subId);
                     subId = decoder.openElement();
-                    if (subId == ELEM_PARAM3)
-                    {
+                    if (subId == ElementId.ELEM_PARAM3) {
                         p3 = decoder.readString(AttributeId.ATTRIB_CONTENT);
                         decoder.closeElement(subId);
                     }

@@ -41,7 +41,7 @@ namespace Sla.EXTRA
         {
             OpBehavior* behavior = state.getBehavior(opc);
             if (behavior.isSpecial())
-                throw new LowlevelError("Cannot evaluate special operator in constant expression");
+                throw new CORE.LowlevelError("Cannot evaluate special operator in constant expression");
             ulong res;
             if (behavior.isUnary())
             {
@@ -124,7 +124,7 @@ namespace Sla.EXTRA
                     break;
                 //  case OpCode.CPUI_INT_SRIGHT:
                 default:
-                    throw new LowlevelError("Unable to generate C for this expression element");
+                    throw new CORE.LowlevelError("Unable to generate C for this expression element");
             }
             if (type == 0)
             {

@@ -23,7 +23,7 @@ namespace Sla.DECCORE
             PcodeOp* op;
             Varnode* vn;
 
-            if (outvar != (VarnodeData*)0)
+            if (outvar != (VarnodeData)null)
             {
                 Address oaddr(outvar.space, outvar.offset);
                 op = fd.newOp(isize, addr);

@@ -65,7 +65,7 @@ namespace Sla.EXTRA
                 resultgraph.encode(encoder);
                 sout.close();
             }
-            catch (LowlevelError err) {
+            catch (CORE.LowlevelError err) {
                 *status.optr << err.ToString() << endl;
             }
         }

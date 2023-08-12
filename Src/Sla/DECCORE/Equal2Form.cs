@@ -12,12 +12,12 @@ namespace Sla.DECCORE
     {
         private SplitVarnode @in;
         private Varnode hi1;
-        private Varnode hi2;
+        private Varnode? hi2;
         private Varnode lo1;
-        private Varnode lo2;
+        private Varnode? lo2;
         private PcodeOp equalop;
         private PcodeOp orop;
-        private PcodeOp hixor;
+        private PcodeOp? hixor;
         private PcodeOp loxor;
         private int orhislot;
         private int xorhislot;
@@ -73,46 +73,39 @@ namespace Sla.DECCORE
 
         private bool replace(Funcdata data)
         {
-            if ((hi2 == (Varnode)null) && (lo2 == (Varnode)null))
-            {
+            if ((hi2 == (Varnode)null) && (lo2 == (Varnode)null)) {
                 param2.initPartial(@in.getSize(), 0); // Double precis zero constant
-                return SplitVarnode.prepareBoolOp(in, param2, equalop);
+                return SplitVarnode.prepareBoolOp(@in, param2, equalop);
             }
-            if ((hi2 == (Varnode)null) && (lo2.isConstant()))
-            {
+            if ((hi2 == (Varnode)null) && (lo2.isConstant())) {
                 param2.initPartial(@in.getSize(), lo2.getOffset());
-                return SplitVarnode.prepareBoolOp(in, param2, equalop);
+                return SplitVarnode.prepareBoolOp(@in, param2, equalop);
             }
-            if ((lo2 == (Varnode)null) && (hi2.isConstant()))
-            {
+            if ((lo2 == (Varnode)null) && (hi2.isConstant())) {
                 param2.initPartial(@in.getSize(), hi2.getOffset() << 8 * lo1.getSize());
-                return SplitVarnode.prepareBoolOp(in, param2, equalop);
+                return SplitVarnode.prepareBoolOp(@in, param2, equalop);
             }
-            if (lo2 == (Varnode)null)
-            {
+            if (lo2 == (Varnode)null) {
                 // Equal to a zero extended and shifted var
                 return false;
             }
-            if (hi2 == (Varnode)null)
-            {
+            if (hi2 == (Varnode)null) {
                 // Equal to a zero extended var
                 return false;
             }
-            if (hi2.isConstant() && lo2.isConstant())
-            {
+            if (hi2.isConstant() && lo2.isConstant()) {
                 ulong val = hi2.getOffset();
                 val <<= 8 * lo1.getSize();
                 val |= lo2.getOffset();
                 param2.initPartial(@in.getSize(), val);
-                return SplitVarnode.prepareBoolOp(in, param2, equalop);
+                return SplitVarnode.prepareBoolOp(@in, param2, equalop);
             }
-            if (hi2.isConstant() || lo2.isConstant())
-            {
+            if (hi2.isConstant() || lo2.isConstant()) {
                 // Some kind of mixed form
                 return false;
             }
             param2.initPartial(@in.getSize(), lo2, hi2);
-            return SplitVarnode.prepareBoolOp(in, param2, equalop);
+            return SplitVarnode.prepareBoolOp(@in, param2, equalop);
         }
 
         // Given a known double precis input, look for double precision compares of the form

@@ -334,7 +334,7 @@ namespace Sla.EXTRA
             if (titer != targets.end())
                 mask = titer.Current.Value.featuremask;
             else
-                throw new LowlevelError("Found thunk without a feature mask");
+                throw new CORE.LowlevelError("Found thunk without a feature mask");
             targethits.emplace_back(funcstart, codeaddr, thunkaddr, mask);
         }
 

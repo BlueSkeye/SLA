@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -88,7 +88,6 @@ namespace Sla.DECCORE
         {
             if (!addr.getSpace().hasPhysical())
                 throw new LowlevelError("Bad execute address");
-
             currentOp = fd.target(addr);
             if (currentOp == (PcodeOp)null)
                 throw new LowlevelError("Could not set execute address");
@@ -102,11 +101,9 @@ namespace Sla.DECCORE
             // this is just part of the label
             if (vn.isConstant())
                 return vn.getOffset();
-            Dictionary<Varnode*, ulong>::const_iterator iter;
-            iter = varnodeMap.find(vn);
-            if (iter != varnodeMap.end())
-                return (*iter).second;  // We have seen this varnode before
-
+            ulong value;
+            if (varnodeMap.TryGetValue(vn, out value))
+                return value;  // We have seen this varnode before
             return getLoadImageValue(vn.getSpace(), vn.getOffset(), vn.getSize());
         }
 
@@ -175,32 +172,26 @@ namespace Sla.DECCORE
         {
             if (loadpoints.empty()) return;
             bool issorted = true;
-            List<LoadTable>::const_iterator iter;
-            List<LoadTable>::iterator lastiter;
 
-            iter = loadpoints.begin();
-            res.Add(*iter);   // Copy the first entry
-            ++iter;
-            lastiter = res.begin();
-
-            Address nextaddr = (*lastiter).addr + (*lastiter).size;
-            for (; iter != loadpoints.end(); ++iter)
-            {
-                if (issorted && (((*iter).addr == nextaddr) && ((*iter).size == (*lastiter).size)))
-                {
-                    (*lastiter).num += (*iter).num;
-                    nextaddr = (*iter).addr + (*iter).size;
+            IEnumerator<LoadTable> iter = loadpoints.GetEnumerator();
+            if (!iter.MoveNext()) throw new BugException();
+            res.Add(iter.Current);   // Copy the first entry
+            IEnumerator<LoadTable> lastiter = res.GetEnumerator();
+            if (!lastiter.MoveNext()) throw new BugException();
+            Address nextaddr = lastiter.Current.addr + lastiter.Current.size;
+            while (iter.MoveNext()) {
+                if (issorted && ((iter.Current.addr == nextaddr) && (iter.Current.size == lastiter.Current.size))) {
+                    lastiter.Current.num += iter.Current.num;
+                    nextaddr = iter.Current.addr + iter.Current.size;
                 }
-                else
-                {
+                else {
                     issorted = false;
-                    res.Add(*iter);
+                    res.Add(iter.Current);
                 }
             }
-            if (!issorted)
-            {
-                sort(res.begin(), res.end());
-                LoadTable::collapseTable(res);
+            if (!issorted) {
+                res.Sort();
+                LoadTable.collapseTable(res);
             }
         }
     }

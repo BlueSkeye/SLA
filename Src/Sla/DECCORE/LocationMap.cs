@@ -39,28 +39,23 @@ namespace Sla.DECCORE
 
             int where = 0;
             intersect = 0;
-            if ((iter != themap.end()) && (-1 != (where = addr.overlap(0, iter.Current.Key, (*iter).second.size))))
-            {
-                if (where + size <= (*iter).second.size)
-                {
+            if ((iter != themap.end()) && (-1 != (where = addr.overlap(0, iter.Current.Key, (*iter).second.size)))) {
+                if (where + size <= (*iter).second.size) {
                     intersect = ((*iter).second.pass < pass) ? 2 : 0; // Completely contained in previous element
                     return iter;
                 }
                 addr = iter.Current.Key;
                 size = where + size;
-                if ((*iter).second.pass < pass)
-                {
+                if ((*iter).second.pass < pass) {
                     intersect = 1;          // Partial overlap with old element
                     pass = (*iter).second.pass;
                 }
                 themap.erase(iter++);
             }
-            while ((iter != themap.end()) && (-1 != (where = iter.Current.Key.overlap(0, addr, size))))
-            {
+            while ((iter != themap.end()) && (-1 != (where = iter.Current.Key.overlap(0, addr, size)))) {
                 if (where + (*iter).second.size > size)
                     size = where + (*iter).second.size;
-                if ((*iter).second.pass < pass)
-                {
+                if ((*iter).second.pass < pass) {
                     intersect = 1;
                     pass = (*iter).second.pass;
                 }
@@ -102,9 +97,9 @@ namespace Sla.DECCORE
         }
 
         /// Remove a particular entry from the map
-        public void erase(iterator iter)
+        public void erase(Address removed)
         {
-            themap.erase(iter);
+            themap.Remove(removed);
         }
 
         /// Get starting iterator over heritaged ranges

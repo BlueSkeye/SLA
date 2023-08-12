@@ -27,7 +27,7 @@ namespace Sla.DECCORE
         public void extendInput(Funcdata data, Varnode invn, ProtoParameter param, BlockBasic topbl)
         {
             VarnodeData vdata;
-            OpCode res = data.getFuncProto().assumedInputExtension(invn.getAddr(), invn.getSize(), vdata);
+            OpCode res = data.getFuncProto().assumedInputExtension(invn.getAddr(), invn.getSize(), out vdata);
             if (res == OpCode.CPUI_COPY) return;       // no extension
             if (res == OpCode.CPUI_PIECE)
             {   // Do an extension based on type of parameter
@@ -36,15 +36,15 @@ namespace Sla.DECCORE
                 else
                     res = OpCode.CPUI_INT_ZEXT;
             }
-            PcodeOp* op = data.newOp(1, topbl.getStart());
-            data.newVarnodeOut(vdata.size, vdata.getAddr(), op);
+            PcodeOp op = data.newOp(1, topbl.getStart());
+            data.newVarnodeOut((int)vdata.size, vdata.getAddr(), op);
             data.opSetOpcode(op, res);
             data.opSetInput(op, invn, 0);
             data.opInsertBegin(op, topbl);
         }
 
         public ActionPrototypeTypes(string g)
-            : base(rule_onceperfunc,"prototypetypes", g)
+            : base(ruleflags.rule_onceperfunc,"prototypetypes", g)
         {
         }
 
@@ -58,7 +58,7 @@ namespace Sla.DECCORE
             IEnumerator<PcodeOp> iter, iterend;
 
             // Set the evaluation prototype if we are not already locked
-            ProtoModel evalfp = data.getArch().evalfp_current;
+            ProtoModel? evalfp = data.getArch().evalfp_current;
             if (evalfp == (ProtoModel)null)
                 evalfp = data.getArch().defaultfp;
             if ((!data.getFuncProto().isModelLocked()) && !data.getFuncProto().hasMatchingModel(evalfp))
@@ -72,7 +72,7 @@ namespace Sla.DECCORE
             // (Because we don't want to see this compiler
             // mechanism in the high-level C output)
             for (iter = data.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter) {
-                PcodeOp op = *iter;
+                PcodeOp op = iter.Current;
                 if (op.isDead()) continue;
                 if (!op.getIn(0).isConstant()) {
                     Varnode vn = data.newConstant(op.getIn(0).getSize(), 0);
@@ -84,7 +84,7 @@ namespace Sla.DECCORE
                 ProtoParameter outparam = data.getFuncProto().getOutput();
                 if (outparam.getType().getMetatype() != type_metatype.TYPE_VOID) {
                     for (iter = data.beginOp(OpCode.CPUI_RETURN); iter != iterend; ++iter) {
-                        PcodeOp op = *iter;
+                        PcodeOp op = iter.Current;
                         if (op.isDead()) continue;
                         if (op.getHaltType() != 0) continue;
                         Varnode vn = data.newVarnode(outparam.getSize(), outparam.getAddress());
@@ -103,7 +103,7 @@ namespace Sla.DECCORE
                 AddrSpace stackspc = data.getArch().getStackSpace();
                 BlockBasic topbl = (BlockBasic)null;
                 if (data.getBasicBlocks().getSize() > 0)
-                    topbl = (BlockBasic*)data.getBasicBlocks().getBlock(0);
+                    topbl = (BlockBasic)data.getBasicBlocks().getBlock(0);
                 if ((stackspc != (AddrSpace)null) && (topbl != (BlockBasic)null)) {
                     for (int i = 0; i < stackspc.numSpacebase(); ++i) {
                         VarnodeData fullReg = new VarnodeData(stackspc.getSpacebaseFull(i));
@@ -111,7 +111,7 @@ namespace Sla.DECCORE
                         Varnode invn = data.newVarnode(truncReg.size, truncReg.getAddr());
                         invn = data.setInputVarnode(invn);
                         PcodeOp extop = data.newOp(1, topbl.getStart());
-                        data.newVarnodeOut(fullReg.size, fullReg.getAddr(), extop);
+                        data.newVarnodeOut((int)fullReg.size, fullReg.getAddr(), extop);
                         data.opSetOpcode(extop, OpCode.CPUI_INT_ZEXT);
                         data.opSetInput(extop, invn, 0);
                         data.opInsertBegin(extop, topbl);

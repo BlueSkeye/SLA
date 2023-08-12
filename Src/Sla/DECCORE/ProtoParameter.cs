@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -77,8 +77,8 @@ namespace Sla.DECCORE
         /// \return \b true if the parameters share a data-type and storage location
         public static bool operator ==(ProtoParameter op1, ProtoParameter op2)
         {
-            if (getAddress() != op2.getAddress()) return false;
-            if (getType() != op2.getType()) return false;
+            if (op1.getAddress() != op2.getAddress()) return false;
+            if (op1.getType() != op2.getType()) return false;
             return true;
         }
 

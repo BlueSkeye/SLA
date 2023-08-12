@@ -61,7 +61,7 @@ namespace Sla.DECCORE
         {
             ulong in1 = getVarnodeValue(currentOp.getInput(0));
             ulong @out = currentBehave.evaluateUnary(currentOp.getOutput().size,
-                                 currentOp.getInput(0).size, in1);
+                currentOp.getInput(0).size, in1);
             setVarnodeValue(currentOp.getOutput().offset, @out);
         }
 
@@ -69,16 +69,16 @@ namespace Sla.DECCORE
         {
             ulong in1 = getVarnodeValue(currentOp.getInput(0));
             ulong in2 = getVarnodeValue(currentOp.getInput(1));
-            ulong out = currentBehave.evaluateBinary(currentOp.getOutput().size,
-                                  currentOp.getInput(0).size, in1, in2);
-            setVarnodeValue(currentOp.getOutput().offset, out);
+            ulong @out = currentBehave.evaluateBinary(currentOp.getOutput().size,
+                currentOp.getInput(0).size, in1, in2);
+            setVarnodeValue(currentOp.getOutput().offset, @out);
         }
 
         protected override void executeLoad()
         {
             // op will be null, use current_op
             ulong off = getVarnodeValue(currentOp.getInput(1));
-            AddrSpace* spc = currentOp.getInput(0).getSpaceFromConst();
+            AddrSpace spc = currentOp.getInput(0).getSpaceFromConst();
             off = AddrSpace.addressToByte(off, spc.getWordSize());
             int sz = currentOp.getOutput().size;
             ulong res = getLoadImageValue(spc, off, sz);
@@ -92,15 +92,14 @@ namespace Sla.DECCORE
 
         protected override void executeBranch()
         {
-            VarnodeData* vn = currentOp.getInput(0);
+            VarnodeData vn = currentOp.getInput(0);
             if (vn.space.getType() != spacetype.IPTR_CONSTANT)
                 throw new LowlevelError("Tried to emulate absolute branch in snippet code");
             int rel = (int)vn.offset;
             pos += rel;
             if ((pos < 0) || (pos > opList.size()))
                 throw new LowlevelError("Relative branch out of bounds in snippet code");
-            if (pos == opList.size())
-            {
+            if (pos == opList.size()) {
                 emu_halted = true;
                 return;
             }
@@ -117,54 +116,62 @@ namespace Sla.DECCORE
 
         protected override void executeBranchind()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
+            throw new LowlevelError(
+                $"Illegal p-code operation in snippet: {(string)get_opname(currentOp.getOpcode())}");
         }
 
         protected override void executeCall()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
+            throw new LowlevelError(
+                $"Illegal p-code operation in snippet: {(string)get_opname(currentOp.getOpcode())}");
         }
 
         protected override void executeCallind()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
+            throw new LowlevelError(
+                $"Illegal p-code operation in snippet: {(string)get_opname(currentOp.getOpcode())}");
         }
 
         protected override void executeCallother()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
+            throw new LowlevelError(
+                $"Illegal p-code operation in snippet: {(string)get_opname(currentOp.getOpcode())}");
         }
 
         protected override void executeMultiequal()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
+            throw new LowlevelError(
+                $"Illegal p-code operation in snippet: {(string)get_opname(currentOp.getOpcode())}");
         }
 
         protected override void executeIndirect()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
+            throw new LowlevelError(
+                $"Illegal p-code operation in snippet: {(string)get_opname(currentOp.getOpcode())}");
         }
 
         protected override void executeSegmentOp()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
+            throw new LowlevelError(
+                $"Illegal p-code operation in snippet: {(string)get_opname(currentOp.getOpcode())}");
         }
 
         protected override void executeCpoolRef()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
+            throw new LowlevelError(
+                $"Illegal p-code operation in snippet: {(string)get_opname(currentOp.getOpcode())}");
         }
 
         protected override void executeNew()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
+            throw new LowlevelError(
+                $"Illegal p-code operation in snippet: {(string)get_opname(currentOp.getOpcode())}");
         }
 
         protected override void fallthruOp()
         {
             pos += 1;
-            if (pos == opList.size())
-            {
+            if (pos == opList.size()) {
                 emu_halted = true;
                 return;
             }
@@ -200,7 +207,7 @@ namespace Sla.DECCORE
         /// Reset the memory state, and set the first p-code op as current.
         public void resetMemory()
         {
-            tempValues.clear();
+            tempValues.Clear();
             setCurrentOp(0);
             emu_halted = false;
         }
@@ -229,29 +236,25 @@ namespace Sla.DECCORE
         /// \return \b true if the current snippet is legal
         public bool checkForLegalCode()
         {
-            for (int i = 0; i < opList.size(); ++i)
-            {
-                PcodeOpRaw* op = opList[i];
-                VarnodeData* vn;
+            for (int i = 0; i < opList.size(); ++i) {
+                PcodeOpRaw op = opList[i];
+                VarnodeData vn;
                 OpCode opc = op.getOpcode();
                 if (opc == OpCode.CPUI_BRANCHIND || opc == OpCode.CPUI_CALL || opc == OpCode.CPUI_CALLIND || opc == OpCode.CPUI_CALLOTHER ||
                 opc == OpCode.CPUI_STORE || opc == OpCode.CPUI_SEGMENTOP || opc == OpCode.CPUI_CPOOLREF ||
                 opc == OpCode.CPUI_NEW || opc == OpCode.CPUI_MULTIEQUAL || opc == OpCode.CPUI_INDIRECT)
                     return false;
-                if (opc == OpCode.CPUI_BRANCH)
-                {
+                if (opc == OpCode.CPUI_BRANCH) {
                     vn = op.getInput(0);
                     if (vn.space.getType() != spacetype.IPTR_CONSTANT)  // Only relative branching allowed
                         return false;
                 }
                 vn = op.getOutput();
-                if (vn != (VarnodeData*)0)
-                {
+                if (vn != (VarnodeData)null) {
                     if (vn.space.getType() != spacetype.IPTR_INTERNAL)
                         return false;                   // Can only write to temporaries
                 }
-                for (int j = 0; j < op.numInput(); ++j)
-                {
+                for (int j = 0; j < op.numInput(); ++j) {
                     vn = op.getInput(j);
                     if (vn.space.getType() == spacetype.IPTR_PROCESSOR)
                         return false;                   // Cannot read from normal registers

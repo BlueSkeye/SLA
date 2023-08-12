@@ -93,20 +93,20 @@ namespace Sla.EXTRA
         // Open any descriptors
         public void open()
         {
-            if (thebfd != (bfd*)0) throw new LowlevelError("BFD library did not initialize");
+            if (thebfd != (bfd*)0) throw new CORE.LowlevelError("BFD library did not initialize");
             thebfd = bfd_openr(filename.c_str(), target.c_str());
             if (thebfd == (bfd*)0)
             {
                 string errmsg = "Unable to open image file: ";
                 errmsg += filename;
-                throw new LowlevelError(errmsg);
+                throw new CORE.LowlevelError(errmsg);
             }
             if (!bfd_check_format(thebfd, bfd_object))
             {
                 string errmsg = "File: ";
                 errmsg += filename;
                 errmsg += " : not in recognized object file format";
-                throw new LowlevelError(errmsg);
+                throw new CORE.LowlevelError(errmsg);
             }
         }
 
@@ -119,7 +119,7 @@ namespace Sla.EXTRA
 
         public void getImportTable(List<ImportRecord> irec)
         {
-            throw new LowlevelError("Not implemented");
+            throw new CORE.LowlevelError("Not implemented");
         }
         
         ~LoadImageBfd()

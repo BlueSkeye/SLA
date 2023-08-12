@@ -54,9 +54,9 @@ namespace Sla.DECCORE
         /// The model \b this is a copy of
         private ProtoModel compatModel;
         /// List of side-effects
-        private List<EffectRecord> effectlist;
+        private List<EffectRecord> effectlist = new List<EffectRecord>();
         /// Storage locations potentially carrying \e trash values
-        private List<VarnodeData> likelytrash;
+        private List<VarnodeData> likelytrash = new List<VarnodeData>();
         /// Id of injection to perform at beginning of function (-1 means not used)
         private int injectUponEntry;
         /// Id of injection to perform after a call to this function (-1 means not used)
@@ -77,11 +77,11 @@ namespace Sla.DECCORE
         /// Set the default stack range used for local variables
         private void defaultLocalRange()
         {
-            AddrSpace* spc = glb.getStackSpace();
+            AddrSpace spc = glb.getStackSpace();
             ulong first, last;
 
-            if (stackgrowsnegative)
-            {   // This the normal stack convention
+            if (stackgrowsnegative) {
+                // This the normal stack convention
                 // Default locals are negative offsets off the stack
                 last = spc.getHighest();
                 if (spc.getAddrSize() >= 4)
@@ -92,8 +92,8 @@ namespace Sla.DECCORE
                     first = last - 99;
                 localrange.insertRange(spc, first, last);
             }
-            else
-            {           // This is the flipped stack convention
+            else {
+                // This is the flipped stack convention
                 first = 0;
                 if (spc.getAddrSize() >= 4)
                     last = 999999;
@@ -108,11 +108,11 @@ namespace Sla.DECCORE
         /// Set the default stack range used for input parameters
         private void defaultParamRange()
         {
-            AddrSpace* spc = glb.getStackSpace();
+            AddrSpace spc = glb.getStackSpace();
             ulong first, last;
 
-            if (stackgrowsnegative)
-            {   // This the normal stack convention
+            if (stackgrowsnegative) {
+                // This the normal stack convention
                 // Default parameters are positive offsets off the stack
                 first = 0;
                 if (spc.getAddrSize() >= 4)
@@ -123,8 +123,8 @@ namespace Sla.DECCORE
                     last = 15;
                 paramrange.insertRange(spc, first, last);
             }
-            else
-            {           // This is the flipped stack convention
+            else {
+                // This is the flipped stack convention
                 last = spc.getHighest();
                 if (spc.getAddrSize() >= 4)
                     first = last - 511;
@@ -141,13 +141,11 @@ namespace Sla.DECCORE
         /// \param strategy is the resource \e strategy: currently "standard" or "register"
         private void buildParamList(string strategy)
         {
-            if ((strategy == "") || (strategy == "standard"))
-            {
+            if ((strategy == string.Empty) || (strategy == "standard")) {
                 input = new ParamListStandard();
                 output = new ParamListStandardOut();
             }
-            else if (strategy == "register")
-            {
+            else if (strategy == "register") {
                 input = new ParamListRegister();
                 output = new ParamListRegisterOut();
             }
@@ -160,8 +158,8 @@ namespace Sla.DECCORE
         public ProtoModel(Architecture g)
         {
             glb = g;
-            input = (ParamList*)0;
-            output = (ParamList*)0;
+            input = (ParamList)null;
+            output = (ParamList)null;
             compatModel = (ProtoModel)null;
             extrapop = 0;
             injectUponEntry = -1;
@@ -184,14 +182,14 @@ namespace Sla.DECCORE
             name = nm;
             isPrinted = true;       // Don't inherit. Always print unless setPrintInDecl called explicitly
             extrapop = op2.extrapop;
-            if (op2.input != (ParamList*)0)
+            if (op2.input != (ParamList)null)
                 input = op2.input.clone();
             else
-                input = (ParamList*)0;
-            if (op2.output != (ParamList*)0)
+                input = (ParamList)null;
+            if (op2.output != (ParamList)null)
                 output = op2.output.clone();
             else
-                output = (ParamList*)0;
+                output = (ParamList)null;
 
             effectlist = op2.effectlist;
             likelytrash = op2.likelytrash;
@@ -205,15 +203,15 @@ namespace Sla.DECCORE
             isConstruct = op2.isConstruct;
             if (name == "__thiscall")
                 hasThis = true;
-            compatModel = &op2;
+            compatModel = op2;
         }
 
         ~ProtoModel()
         {
-            if (input != (ParamList*)0)
-                delete input;
-            if (output != (ParamList*)0)
-                delete output;
+            //if (input != (ParamList)null)
+            //    delete input;
+            //if (output != (ParamList)null)
+            //    delete output;
         }
 
         /// Get the name of the prototype model
@@ -301,25 +299,23 @@ namespace Sla.DECCORE
         public void assignParameterStorage(List<Datatype> typelist, List<ParameterPieces> res,
             bool ignoreOutputError)
         {
-            if (ignoreOutputError)
-            {
-                try
-                {
-                    output.assignMap(typelist, *glb.types, res);
+            if (ignoreOutputError) {
+                try {
+                    output.assignMap(typelist, glb.types, res);
                 }
-                catch (ParamUnassignedError err) {
-                    res.clear();
-                    res.emplace_back();
-                    // leave address undefined
-                    res.GetLastItem().flags = 0;
-                    res.GetLastItem().type = glb.types.getTypeVoid();
+                catch (ParamUnassignedError) {
+                    res.Clear();
+                    res.Add(new ParameterPieces() {
+                        // leave address undefined
+                        flags = 0,
+                        type = glb.types.getTypeVoid()
+                    });
                 }
             }
-            else
-            {
-                output.assignMap(typelist, *glb.types, res);
+            else {
+                output.assignMap(typelist, glb.types, res);
             }
-            input.assignMap(typelist, *glb.types, res);
+            input.assignMap(typelist, glb.types, res);
         }
 
         /// \brief Check if the given two input storage locations can represent a single logical parameter
@@ -367,11 +363,11 @@ namespace Sla.DECCORE
 
         public RangeList getParamRange() => paramrange; ///< Get the range of (possible) stack parameters
 
-        public IEnumerator<EffectRecord> effectBegin() => effectlist.begin(); ///< Get an iterator to the first EffectRecord
+        public IEnumerator<EffectRecord> effectBegin() => effectlist.GetEnumerator(); ///< Get an iterator to the first EffectRecord
 
         public IEnumerator<EffectRecord> effectEnd() => effectlist.end(); ///< Get an iterator to the last EffectRecord
 
-        public IEnumerator<VarnodeData> trashBegin() => likelytrash.begin(); ///< Get an iterator to the first \e likelytrash
+        public IEnumerator<VarnodeData> trashBegin() => likelytrash.GetEnumerator(); ///< Get an iterator to the first \e likelytrash
 
         public IEnumerator<VarnodeData> trashEnd() => likelytrash.end(); ///< Get an iterator to the last \e likelytrash
 
@@ -402,7 +398,7 @@ namespace Sla.DECCORE
         /// \param loc is the starting address of the given range
         /// \param size is the number of bytes in the given range
         /// \return the characterization code
-        public int characterizeAsOutput(Address loc, int size)
+        public ParamEntry.Containment characterizeAsOutput(Address loc, int size)
         {
             return output.characterizeAsParam(loc, size);
         }
@@ -481,9 +477,9 @@ namespace Sla.DECCORE
         /// \param res is the parameter storage to pass back
         /// \return the extension operator (INT_ZEXT INT_SEXT) or INT_COPY if there is no extension.
         /// INT_PIECE indicates the extension is determined by the specific prototype.
-        public OpCode assumedInputExtension(Address addr, int size, VarnodeData res)
+        public OpCode assumedInputExtension(Address addr, int size, out VarnodeData res)
         {
-            return input.assumedExtension(addr, size, res);
+            return input.assumedExtension(addr, size, out res);
         }
 
         /// \brief Get the type of extension and containing return value location for the given storage
@@ -572,7 +568,7 @@ namespace Sla.DECCORE
             AddrSpace? stackspc = glb.getStackSpace();
             if (stackspc != (AddrSpace)null)
                 stackgrowsnegative = stackspc.stackGrowsNegative();    // Get growth boolean from stack space itself
-            string strategystring;
+            string strategystring = string.Empty;
             localrange.clear();
             paramrange.clear();
             extrapop = -300;
@@ -584,14 +580,13 @@ namespace Sla.DECCORE
             injectUponReturn = -1;
             likelytrash.Clear();
             uint elemId = decoder.openElement(ElementId.ELEM_PROTOTYPE);
-            while(true)
-            {
-                uint attribId = decoder.getNextAttributeId();
+            while(true) {
+                AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_NAME)
                     name = decoder.readString();
                 else if (attribId == AttributeId.ATTRIB_EXTRAPOP) {
-                    extrapop = decoder.readSignedIntegerExpectString("unknown", extrapop_unknown);
+                    extrapop = (int)decoder.readSignedIntegerExpectString("unknown", extrapop_unknown);
                 }
                 else if (attribId == AttributeId.ATTRIB_STACKSHIFT) {
                     // Allow this attribute for backward compatibility
@@ -632,25 +627,26 @@ namespace Sla.DECCORE
                 else if (subId == ElementId.ELEM_UNAFFECTED) {
                     decoder.openElement();
                     while (decoder.peekElement() != 0) {
-                        effectlist.emplace_back();
-                        effectlist.GetLastItem().decode(EffectRecord.EffectType.unaffected, decoder);
+                        EffectRecord newEffect = new EffectRecord();
+                        newEffect.decode(EffectRecord.EffectType.unaffected, decoder);
+                        effectlist.Add(newEffect);
                     }
                     decoder.closeElement(subId);
                 }
                 else if (subId == ElementId.ELEM_KILLEDBYCALL) {
                     decoder.openElement();
-                    while (decoder.peekElement() != 0)
-                    {
-                        effectlist.emplace_back();
-                        effectlist.GetLastItem().decode(EffectRecord.EffectType.killedbycall, decoder);
+                    while (decoder.peekElement() != 0) {
+                        EffectRecord newEffect = new EffectRecord();
+                        newEffect.decode(EffectRecord.EffectType.killedbycall, decoder);
+                        effectlist.Add(newEffect);
                     }
                     decoder.closeElement(subId);
                 }
                 else if (subId == ElementId.ELEM_RETURNADDRESS) {
                     decoder.openElement();
                     while (decoder.peekElement() != 0) {
-                        effectlist.emplace_back();
-                        effectlist.GetLastItem().decode(EffectRecord.EffectType.return_address, decoder);
+                        EffectRecord newEffect = new EffectRecord();
+                        newEffect.decode(EffectRecord.EffectType.return_address, decoder);
                     }
                     decoder.closeElement(subId);
                     sawretaddr = true;
@@ -699,7 +695,7 @@ namespace Sla.DECCORE
                 // Provide the default return address, if there isn't a specific one for the model
                 effectlist.Add(new EffectRecord(glb.defaultReturnAddr, EffectRecord.EffectType.return_address));
             }
-            effectlist.Sort(EffectRecord::compareByAddress);
+            effectlist.Sort(EffectRecord.compareByAddress);
             likelytrash.Sort();
             if (!sawlocalrange)
                 defaultLocalRange();
@@ -721,7 +717,8 @@ namespace Sla.DECCORE
                 return EffectRecord.EffectType.unaffected;
 
             EffectRecord cur = new EffectRecord(addr, size);
-            IEnumerator<EffectRecord> iter = upper_bound(efflist.begin(), efflist.end(), cur, EffectRecord::compareByAddress);
+            IEnumerator<EffectRecord> iter = upper_bound(efflist.begin(), efflist.end(), cur,
+                EffectRecord.compareByAddress);
             // First element greater than cur  (address must be greater)
             // go back one more, and we get first el less or equal to cur
             if (iter == efflist.begin()) return EffectRecord.EffectType.unknown_effect; // Can't go back one
@@ -755,7 +752,7 @@ namespace Sla.DECCORE
             if (listSize == 0) return -1;
             EffectRecord cur = new EffectRecord(addr, size);
 
-            IEnumerator<EffectRecord> begiter = efflist.begin();
+            IEnumerator<EffectRecord> begiter = efflist.GetEnumerator();
             IEnumerator<EffectRecord> enditer = begiter + listSize;
             
             IEnumerator<EffectRecord> iter = upper_bound(begiter, enditer, cur, EffectRecord.compareByAddress);

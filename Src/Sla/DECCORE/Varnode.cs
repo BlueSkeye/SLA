@@ -200,11 +200,10 @@ namespace Sla.DECCORE
         /// Initialize a new Cover and set dirty bit so that updateCover will rebuild
         internal void calcCover()
         {
-            if (hasCover())
-            {
+            if (hasCover()) {
                 if (cover != (Cover)null)
                     // delete cover;
-                cover = new Cover;
+                cover = new Cover();
                 setFlags(Varnode.varnode_flags.coverdirty);
             }
         }

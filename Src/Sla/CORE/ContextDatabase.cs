@@ -129,7 +129,7 @@ namespace Sla.CORE
         /// \param nm is the name of the new variable
         /// \param sbit is the position of the variable's most significant bit within the blob
         /// \param ebit is the position of the variable's least significant bit within the blob
-        protected abstract void registerVariable(ref string nm, int sbit, int ebit);
+        internal abstract void registerVariable(string nm, int sbit, int ebit);
 
         /// \brief Get the context blob of values associated with a given address
         /// \param addr is the given address
@@ -180,7 +180,7 @@ namespace Sla.CORE
         /// The default value is returned for addresses that have not been overlaid with other values.
         /// \param nm is the name of the context variable
         /// \param val is the default value to establish
-        protected void setVariableDefault(ref string nm, uint val)
+        internal void setVariableDefault(string nm, uint val)
         {
             getVariable(nm).setValue(getDefaultValue(), val);
         }

@@ -161,41 +161,38 @@ namespace Sla.DECCORE
         /// \param high2 is the variable object being eliminated
         public void moveIntersectTests(HighVariable high1, HighVariable high2)
         {
-            List<HighVariable*> yesinter;     // Highs that high2 intersects
-            List<HighVariable*> nointer;      // Highs that high2 does not intersect
-            Dictionary<HighEdge, bool>::iterator iterfirst = highedgemap.lower_bound(HighEdge(high2, (HighVariable)null));
-            Dictionary<HighEdge, bool>::iterator iterlast = highedgemap.lower_bound(HighEdge(high2, (HighVariable*)~((ulong)0)));
-            Dictionary<HighEdge, bool>::iterator iter;
+            List<HighVariable> yesinter = new List<HighVariable>();     // Highs that high2 intersects
+            List<HighVariable> nointer = new List<HighVariable>();      // Highs that high2 does not intersect
+            Dictionary<HighEdge, bool>.Enumerator iterfirst = highedgemap.lower_bound(HighEdge(high2, (HighVariable)null));
+            Dictionary<HighEdge, bool>.Enumerator iterlast = highedgemap.lower_bound(HighEdge(high2, (HighVariable*)~((ulong)0)));
+            Dictionary<HighEdge, bool>.Enumerator iter;
 
-            for (iter = iterfirst; iter != iterlast; ++iter)
-            {
-                HighVariable* b = iter.Current.Key.b;
+            for (iter = iterfirst; iter != iterlast; ++iter) {
+                HighVariable b = iter.Current.Key.b;
                 if (b == high1) continue;
-                if ((*iter).second)     // Save all high2's intersections
+                if (iter.Current.Value)     // Save all high2's intersections
                     yesinter.Add(b);  // as they are still valid for the merge
-                else
-                {
+                else {
                     nointer.Add(b);
                     b.setMark();       // Mark that high2 did not intersect
                 }
             }
             // Do a purge of all high2's tests
-            if (iterfirst != iterlast)
-            {   // Delete all the high2 tests
+            if (iterfirst != iterlast) {
+                // Delete all the high2 tests
                 --iterlast;         // Move back 1 to prevent deleting under the iterator
                 for (iter = iterfirst; iter != iterlast; ++iter)
-                    highedgemap.erase(HighEdge(iter.Current.Key.b, iter.Current.Key.a));
-                highedgemap.erase(HighEdge(iter.Current.Key.b, iter.Current.Key.a));
+                    highedgemap.erase(new HighEdge(iter.Current.Key.b, iter.Current.Key.a));
+                highedgemap.erase(new HighEdge(iter.Current.Key.b, iter.Current.Key.a));
                 ++iterlast;         // Restore original range (with possibly new open endpoint)
 
                 highedgemap.erase(iterfirst, iterlast);
             }
 
-            iter = highedgemap.lower_bound(HighEdge(high1, (HighVariable)null));
-            while ((iter != highedgemap.end()) && (iter.Current.Key.a == high1))
-            {
-                if (!(*iter).second)
-                {   // If test is intersection==false
+            iter = highedgemap.lower_bound(new HighEdge(high1, (HighVariable)null));
+            while ((iter != highedgemap.end()) && (iter.Current.Key.a == high1)) {
+                if (!iter.Current.Value) {
+                    // If test is intersection==false
                     if (!iter.Current.Key.b.isMark()) // and there was no test with high2
                         highedgemap.erase(iter++); // Delete the test
                     else
@@ -204,15 +201,13 @@ namespace Sla.DECCORE
                 else            // Keep any intersection==true tests
                     ++iter;
             }
-            List<HighVariable*>::iterator titer;
-            for (titer = nointer.begin(); titer != nointer.end(); ++titer)
-                (*titer).clearMark();
+            foreach (HighVariable variable in nointer)
+                variable.clearMark();
 
             // Reinsert high2's intersection==true tests for high1 now
-            for (titer = yesinter.begin(); titer != yesinter.end(); ++titer)
-            {
-                highedgemap[HighEdge(high1, *titer)] = true;
-                highedgemap[HighEdge(*titer, high1)] = true;
+            foreach (HighVariable variable in yesinter) {
+                highedgemap[new HighEdge(high1, variable)] = true;
+                highedgemap[new HighEdge(variable, high1)] = true;
             }
         }
 
@@ -244,16 +239,16 @@ namespace Sla.DECCORE
             if (a == b) return false;
             bool ares = updateHigh(a);
             bool bres = updateHigh(b);
-            if (ares && bres)
-            {       // If neither high was dirty
-                Dictionary<HighEdge, bool>::iterator iter = highedgemap.find(HighEdge(a, b));
-                if (iter != highedgemap.end()) // If previous test is present
-                    return (*iter).second;  // Use it
+            if (ares && bres) {
+                // If neither high was dirty
+                bool result;
+                if (highedgemap.TryGetValue(new HighEdge(a, b), out result)) // If previous test is present
+                    return result;  // Use it
             }
 
             bool res = false;
             int blk;
-            List<int> blockisect;
+            List<int> blockisect = new List<int>();
             a.getCover().intersectList(blockisect, b.getCover(), 2);
             for (blk = 0; blk < blockisect.size(); ++blk)
             {
@@ -263,14 +258,14 @@ namespace Sla.DECCORE
                     break;
                 }
             }
-            highedgemap[HighEdge(a, b)] = res; // Cache the result
-            highedgemap[HighEdge(b, a)] = res;
+            highedgemap[new HighEdge(a, b)] = res; // Cache the result
+            highedgemap[new HighEdge(b, a)] = res;
             return res;
         }
 
         public void clear()
         {
-            highedgemap.clear();
+            highedgemap.Clear();
         }
     }
 }

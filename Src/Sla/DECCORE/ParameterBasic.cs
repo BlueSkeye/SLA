@@ -54,9 +54,9 @@ namespace Sla.DECCORE
 
         public override bool isThisPointer() => ((flags&ParameterPieces::isthis)!= 0);
 
-        public override bool isIndirectStorage() => ((flags&ParameterPieces::indirectstorage)!= 0);
+        public override bool isIndirectStorage() => ((flags&ParameterPieces.Flags.indirectstorage)!= 0);
 
-        public override bool isHiddenReturn() => ((flags&ParameterPieces::hiddenretparm)!= 0);
+        public override bool isHiddenReturn() => ((flags&ParameterPieces.Flags.hiddenretparm)!= 0);
 
         public override bool isNameUndefined() => (name.size()== 0);
 

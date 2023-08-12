@@ -2655,7 +2655,7 @@ namespace Sla.DECCORE
             => vbank.endLoc(s, addr, pc, uniq);
 
         /// \brief Given start, return maximal range of overlapping Varnodes
-        public uint overlapLoc(VarnodeLocSet::const_iterator iter, List<VarnodeLocSet::const_iterator> bounds)
+        public Varnode.varnode_flags overlapLoc(VarnodeLocSet::const_iterator iter, List<VarnodeLocSet::const_iterator> bounds)
             => vbank.overlapLoc(iter, bounds);
 
         /// \brief Start of all Varnodes sorted by definition address
@@ -4702,13 +4702,13 @@ namespace Sla.DECCORE
         /// \param oldSlot is the old slot (-1 for write, >=0 for read)
         public int inheritResolution(Datatype parent, PcodeOp op, int slot, PcodeOp oldOp, int oldSlot)
         {
-            Dictionary<ResolveEdge, ResolvedUnion>::const_iterator iter;
             ResolveEdge edge = new ResolveEdge(parent, oldOp, oldSlot);
-            iter = unionMap.find(edge);
-            if (iter == unionMap.end())
+            ResolvedUnion? targetUnion;
+            if (unionMap.TryGetValue(edge, out targetUnion))
                 return -1;
-            setUnionField(parent, op, slot, (*iter).second);
-            return (*iter).second.getFieldNum();
+            if (null == targetUnion) throw new BugException();
+            setUnionField(parent, op, slot, targetUnion);
+            return targetUnion.getFieldNum();
         }
 
         // Jumptable routines
@@ -5789,7 +5789,7 @@ namespace Sla.DECCORE
             PcodeOp op1;
             PcodeOp op2;
             PcodeOp resop;
-            List<pair<uint, PcodeOp*>>::iterator liter1, liter2;
+            List<pair<uint, PcodeOp>>::iterator liter1, liter2;
 
             if (list.empty()) return;
             stable_sort(list.begin(), list.end(), compareCseHash);

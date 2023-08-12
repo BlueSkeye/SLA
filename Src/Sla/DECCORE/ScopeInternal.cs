@@ -265,7 +265,7 @@ namespace Sla.DECCORE
                     {
                         Symbol* sym = list[j];
                         if (sym == (Symbol)null) continue;
-                        setCategory(sym, Symbol::no_category, 0);
+                        setCategory(sym, Symbol.SymbolCategory.no_category, 0);
                     }
                 }
             }

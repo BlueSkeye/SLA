@@ -30,7 +30,7 @@ namespace Sla.EXTRA
                 decoder.closeElement(elemId);
             }
             if (parsestring.size() == 0 && (!dynamic))
-                throw new LowlevelError("Missing <body> subtag in <pcode>: " + getSource());
+                throw new CORE.LowlevelError("Missing <body> subtag in <pcode>: " + getSource());
         }
 
         public InjectPayloadSleigh(string src, string nm, int tp)
@@ -89,20 +89,20 @@ namespace Sla.EXTRA
             List<InjectParameter> inputlist, List<InjectParameter> output, string source)
         { // Verify that the storage locations passed in -con- match the restrictions set for this payload
             if (inputlist.size() != con.inputlist.size())
-                throw new LowlevelError("Injection parameter list has different number of parameters than p-code operation: " + source);
+                throw new CORE.LowlevelError("Injection parameter list has different number of parameters than p-code operation: " + source);
             for (int i = 0; i < inputlist.size(); ++i)
             {
                 uint sz = inputlist[i].getSize();
                 if ((sz != 0) && (sz != con.inputlist[i].size))
-                    throw new LowlevelError("P-code input parameter size does not match injection specification: " + source);
+                    throw new CORE.LowlevelError("P-code input parameter size does not match injection specification: " + source);
             }
             if (output.size() != con.output.size())
-                throw new LowlevelError("Injection output does not match output of p-code operation: " + source);
+                throw new CORE.LowlevelError("Injection output does not match output of p-code operation: " + source);
             for (int i = 0; i < output.size(); ++i)
             {
                 uint sz = output[i].getSize();
                 if ((sz != 0) && (sz != con.output[i].size))
-                    throw new LowlevelError("P-code output size does not match injection specification: " + source);
+                    throw new CORE.LowlevelError("P-code output size does not match injection specification: " + source);
             }
         }
 

@@ -12,6 +12,10 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
+/// Container holding the stack system for the renaming algorithm.  Every disjoint address
+/// range (indexed by its initial address) maps to its own Varnode stack.
+using VariableStack = System.Collections.Generic.Dictionary<Sla.CORE.Address, System.Collections.Generic.List<Sla.DECCORE.Varnode>>;
+
 namespace Sla.DECCORE
 {
     /// \brief Manage the construction of Static Single Assignment (SSA) form
@@ -1440,10 +1444,10 @@ namespace Sla.DECCORE
         {
             VarnodeData vData;
 
-            if (!fc.getBiggestContainedOutput(addr, size, vData))
+            if (!fc.getBiggestContainedOutput(addr, size, out vData))
                 return false;
             ParamActive active = fc.getActiveOutput();
-            Address truncAddr(vData.space, vData.offset);
+            Address truncAddr = new Address(vData.space, vData.offset);
             if (active.whichTrial(truncAddr, size) >= 0)
                 return false;       // Trial already exists
             int sizeFront = (int)(vData.offset - addr.getOffset());
@@ -1958,9 +1962,9 @@ namespace Sla.DECCORE
             // Alter the disjoint cover (both locally and globally) to reflect our refinement
             LocationMap::iterator iter = disjoint.find(addr);
             int addrPass = (*iter).second.pass;
-            disjoint.erase(iter);
+            disjoint.erase(iter.Key);
             iter = globaldisjoint.find(addr);
-            globaldisjoint.erase(iter);
+            globaldisjoint.erase(iter.Key);
             Address curaddr = addr;
             int cut = 0;
             int intersect;
@@ -2304,7 +2308,7 @@ namespace Sla.DECCORE
         /// \param delay is the number of passes to delay
         public void setDeadCodeDelay(AddrSpace spc, int delay)
         {
-            HeritageInfo* info = getInfo(spc);
+            HeritageInfo info = getInfo(spc);
             if (delay < info.delay)
                 throw new LowlevelError("Illegal deadcode delay setting");
             info.deadcodedelay = delay;
@@ -2331,7 +2335,7 @@ namespace Sla.DECCORE
         /// \return \b true if dead code removal is allowed
         public bool deadRemovalAllowedSeen(AddrSpace spc)
         {
-            HeritageInfo* info = getInfo(spc);
+            HeritageInfo info = getInfo(spc);
             bool res = (pass > info.deadcodedelay);
             if (res)
                 info.deadremoved = 1;
@@ -2348,7 +2352,7 @@ namespace Sla.DECCORE
             AddrSpaceManager manage = fd.getArch();
             infolist.reserve(manage.numSpaces());
             for (int i = 0; i < manage.numSpaces(); ++i)
-                infolist.emplace_back(manage.getSpace(i));
+                infolist.Add(new HeritageInfo(manage.getSpace(i)));
         }
 
         /// Force regeneration of basic block structures
@@ -2364,14 +2368,14 @@ namespace Sla.DECCORE
         {
             disjoint.clear();
             globaldisjoint.clear();
-            domchild.clear();
-            augment.clear();
-            flags.clear();
-            depth.clear();
-            merge.clear();
+            domchild.Clear();
+            augment.Clear();
+            flags.Clear();
+            depth.Clear();
+            merge.Clear();
             clearInfoList();
-            loadGuard.clear();
-            storeGuard.clear();
+            loadGuard.Clear();
+            storeGuard.Clear();
             maxdepth = -1;
             pass = 0;
         }

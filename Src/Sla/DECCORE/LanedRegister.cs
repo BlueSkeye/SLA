@@ -122,22 +122,19 @@ namespace Sla.DECCORE
             decoder.closeElement(elemId);
             wholeSize = storage.size;
             sizeBitMask = 0;
-            string::size_type pos = 0;
-            while (pos != string::npos)
-            {
-                string::size_type nextPos = laneSizes.find(',', pos);
+            int pos = 0;
+            while (-1 != pos) {
+                int nextPos = laneSizes.IndexOf(',', pos);
                 string value;
-                if (nextPos == string::npos)
-                {
-                    value = laneSizes.substr(pos);  // To the end of the string
+                if (-1 == nextPos) {
+                    value = laneSizes.Substring(pos);  // To the end of the string
                     pos = nextPos;
                 }
-                else
-                {
-                    value = laneSizes.substr(pos, (nextPos - pos));
+                else {
+                    value = laneSizes.Substring(pos, (nextPos - pos));
                     pos = nextPos + 1;
-                    if (pos >= laneSizes.size())
-                        pos = string::npos;
+                    if (pos >= laneSizes.Length)
+                        pos = -1;
                 }
                 istringstream s = new istringstream(value);
                 s.unsetf(ios::dec | ios::hex | ios::oct);

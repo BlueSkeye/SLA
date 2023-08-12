@@ -348,7 +348,7 @@ namespace Sla.DECCORE
                 else
                 {
                     clear();
-                    throw new LowlevelError("Bad type expression");
+                    throw new CORE.LowlevelError("Bad type expression");
                 }
             }
         }
@@ -499,7 +499,7 @@ namespace Sla.DECCORE
                     return;
                 case type_metatype.TYPE_VOID:
                     clear();
-                    throw new LowlevelError("Cannot have a constant of type void");
+                    throw new CORE.LowlevelError("Cannot have a constant of type void");
                 case type_metatype.TYPE_PTR:
                 case type_metatype.TYPE_PTRREL:
                     if (option_NULL && (val == 0))
@@ -667,7 +667,7 @@ namespace Sla.DECCORE
         {
             if (ct.getName().Length == 0) {
                 clear();
-                throw new LowlevelError("Trying to save unnamed structure");
+                throw new CORE.LowlevelError("Trying to save unnamed structure");
             }
 
             emit.tagLine();
@@ -704,7 +704,7 @@ namespace Sla.DECCORE
         {
             if (ct.getName().Length == 0) {
                 clear();
-                throw new LowlevelError("Trying to save unnamed enumeration");
+                throw new CORE.LowlevelError("Trying to save unnamed enumeration");
             }
 
             pushMod();
@@ -2077,7 +2077,7 @@ namespace Sla.DECCORE
                 emitEnumDefinition((TypeEnum)ct);
             else {
                 clear();
-                throw new LowlevelError("Unsupported typedef");
+                throw new CORE.LowlevelError("Unsupported typedef");
             }
         }
 
@@ -2205,7 +2205,7 @@ namespace Sla.DECCORE
                  ((nm.Length >= 2) && (nm[0] == '/') && (nm[1] == '/')))
                 setCPlusPlusStyleComments();
             else
-                throw new LowlevelError("Unknown comment style. Use \"c\" or \"cplusplus\"");
+                throw new CORE.LowlevelError("Unknown comment style. Use \"c\" or \"cplusplus\"");
         }
 
         public override void docTypeDefinitions(TypeFactory typegrp)
@@ -2272,8 +2272,8 @@ namespace Sla.DECCORE
 #endif
                 mods = modsave;
             }
-            catch (LowlevelError err) {
-                clear();               // Don't leave printer in partial state
+            catch (CORE.LowlevelError err) {
+                base.clear();               // Don't leave printer in partial state
                 throw err;
             }
         }
@@ -2851,7 +2851,7 @@ namespace Sla.DECCORE
             }
             else {
                 clear();
-                throw new LowlevelError("Missing function callspec");
+                throw new CORE.LowlevelError("Missing function callspec");
             }
             // TODO: Cannot hide "this" on a direct call until we print the whole
             // thing with the proper C++ method invocation format. Otherwise the output
@@ -2881,7 +2881,7 @@ namespace Sla.DECCORE
             Funcdata fd = op.getParent().getFuncdata();
             FuncCallSpecs? fc = fd.getCallSpecs(op);
             if (fc == (FuncCallSpecs)null)
-                throw new LowlevelError("Missing indirect function callspec");
+                throw new CORE.LowlevelError("Missing indirect function callspec");
             int skip = getHiddenThisSlot(op, fc);
             int count = op.numInput() - 1;
             count -= (skip < 0) ? 0 : 1;
@@ -3391,7 +3391,7 @@ namespace Sla.DECCORE
             ptype = (TypePointer)in0.getHighTypeReadFacing(op);
             if (ptype.getMetatype() != type_metatype.TYPE_PTR) {
                 clear();
-                throw new LowlevelError("PTRSUB off of non-pointer type");
+                throw new CORE.LowlevelError("PTRSUB off of non-pointer type");
             }
             if (ptype.isFormalPointerRel() && ((TypePointerRel)ptype).evaluateThruParent(in1const)) {
                 ptrel = (TypePointerRel)ptype;
@@ -3427,11 +3427,11 @@ namespace Sla.DECCORE
                 int newoff;
                 if (ct.getMetatype() == type_metatype.TYPE_UNION) {
                     if (suboff != 0)
-                        throw new LowlevelError("PTRSUB accesses union with non-zero offset");
+                        throw new CORE.LowlevelError("PTRSUB accesses union with non-zero offset");
                     Funcdata fd = op.getParent().getFuncdata();
                     ResolvedUnion? resUnion = fd.getUnionField(ptype, op, -1);
                     if (resUnion == (ResolvedUnion)null || resUnion.getFieldNum() < 0)
-                        throw new LowlevelError("PTRSUB for union that does not resolve to a field");
+                        throw new CORE.LowlevelError("PTRSUB for union that does not resolve to a field");
                     TypeField fld = ((TypeUnion)ct).getField(resUnion.getFieldNum());
                     fieldid = fld.ident;
                     fieldname = fld.name;
@@ -3443,7 +3443,7 @@ namespace Sla.DECCORE
                     if (fld == (TypeField)null) {
                         if (ct.getSize() <= suboff) {
                             clear();
-                            throw new LowlevelError("PTRSUB out of bounds into struct");
+                            throw new CORE.LowlevelError("PTRSUB out of bounds into struct");
                         }
                         // Try to match the Ghidra's default field name from DataTypeComponent.getDefaultFieldName
                         StringWriter s = new StringWriter();
@@ -3555,7 +3555,7 @@ namespace Sla.DECCORE
             else if (ct.getMetatype() == type_metatype.TYPE_ARRAY) {
                 if (in1const != 0) {
                     clear();
-                    throw new LowlevelError("PTRSUB with non-zero offset into array type");
+                    throw new CORE.LowlevelError("PTRSUB with non-zero offset into array type");
                 }
                 // We are treating array as a structure
                 // and this PTRSUB(*,0) represents changing
@@ -3598,7 +3598,7 @@ namespace Sla.DECCORE
             }
             else {
                 clear();
-                throw new LowlevelError("PTRSUB off of non structured pointer type");
+                throw new CORE.LowlevelError("PTRSUB off of non structured pointer type");
             }
         }
 

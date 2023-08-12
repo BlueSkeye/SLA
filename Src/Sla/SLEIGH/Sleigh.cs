@@ -365,15 +365,15 @@ namespace Sla.SLEIGH
         private LoadImage loader;          ///< The mapped bytes in the program
         private ContextDatabase context_db;        ///< Database of context values steering disassembly
         private ContextCache cache;            ///< Cache of recently used context values
-        private /*mutable*/ DisassemblyCache *discache; ///< Cache of recently parsed instructions
+        private /*mutable*/ DisassemblyCache? discache; ///< Cache of recently parsed instructions
         private /*mutable*/ PcodeCacher pcode_cache;    ///< Cache of p-code data just prior to emitting
 
         ///< Delete the context and disassembly caches
         private void clearForDelete()
         {
-            delete cache;
-            if (discache != (DisassemblyCache)null)
-                delete discache;
+            // delete cache;
+            //if (discache != (DisassemblyCache)null)
+            //    delete discache;
         }
 
         /// \brief Obtain a parse tree for the instruction at the given address
@@ -385,7 +385,7 @@ namespace Sla.SLEIGH
         /// \param addr is the given address of the instruction
         /// \param state is the desired parse state.
         /// \return the parse tree object (ParseContext)
-        protected ParserContext obtainContext(Address addr,int state)
+        protected ParserContext obtainContext(Address addr,ParserContext.State state)
         {
             ParserContext pos = discache.getParserContext(addr);
             ParserContext.State curstate = pos.getParserState();
@@ -396,7 +396,7 @@ namespace Sla.SLEIGH
                 if (state == ParserContext.State.disassembly)
                     return pos;
             }
-            // If we reach here,  state must be ParserContext::pcode
+            // If we reach here,  state must be ParserContext.State.pcode
             resolveHandles(pos);
             return pos;
         }
@@ -407,7 +407,7 @@ namespace Sla.SLEIGH
         private void resolve(ParserContext pos)
         {
             loader.loadFill(pos.getBuffer(), 16, pos.getAddr());
-            ParserWalkerChange walker = new ParserWalkerChange(&pos);
+            ParserWalkerChange walker = new ParserWalkerChange(pos);
             pos.deallocateState(walker);    // Clear the previous resolve and initialize the walker
             Constructor ct;
             Constructor subct;
@@ -421,23 +421,19 @@ namespace Sla.SLEIGH
             ct = root.resolve(walker); // Base constructor
             walker.setConstructor(ct);
             ct.applyContext(walker);
-            while (walker.isState())
-            {
+            while (walker.isState()) {
                 ct = walker.getConstructor();
                 oper = walker.getOperand();
                 numoper = ct.getNumOperands();
-                while (oper < numoper)
-                {
+                while (oper < numoper) {
                     OperandSymbol sym = ct.getOperand(oper);
                     off = walker.getOffset(sym.getOffsetBase()) + sym.getRelativeOffset();
                     pos.allocateOperand(oper, walker); // Descend into new operand and reserve space
                     walker.setOffset(off);
                     TripleSymbol tsym = sym.getDefiningSymbol();
-                    if (tsym != (TripleSymbol)null)
-                    {
+                    if (tsym != (TripleSymbol)null) {
                         subct = tsym.resolve(walker);
-                        if (subct != (Constructor)null)
-                        {
+                        if (subct != (Constructor)null) {
                             walker.setConstructor(subct);
                             subct.applyContext(walker);
                             break;
@@ -447,18 +443,18 @@ namespace Sla.SLEIGH
                     walker.popOperand();
                     oper += 1;
                 }
-                if (oper >= numoper)
-                { // Finished processing constructor
+                if (oper >= numoper) {
+                    // Finished processing constructor
                     walker.calcCurrentLength(ct.getMinimumLength(), numoper);
                     walker.popOperand();
                     // Check for use of delayslot
                     ConstructTpl templ = ct.getTempl();
                     if ((templ != (ConstructTpl)null) && (templ.delaySlot() > 0))
-                        pos.setDelaySlot(templ.delaySlot());
+                        pos.setDelaySlot((int)templ.delaySlot());
                 }
             }
             pos.setNaddr(pos.getAddr() + pos.getLength());  // Update Naddr to pointer after instruction
-            pos.setParserState(ParserContext::disassembly);
+            pos.setParserState(ParserContext.State.disassembly);
         }
 
         ///< Prepare the parse tree for p-code generation
@@ -467,24 +463,21 @@ namespace Sla.SLEIGH
         /// \param pos is the given parse tree
         private void resolveHandles(ParserContext pos)
         {
-            TripleSymbol triple;
+            TripleSymbol? triple;
             Constructor ct;
             int oper, numoper;
 
-            ParserWalker walker = new ParserWalker(&pos);
+            ParserWalker walker = new ParserWalker(pos);
             walker.baseState();
-            while (walker.isState())
-            {
+            while (walker.isState()) {
                 ct = walker.getConstructor();
                 oper = walker.getOperand();
                 numoper = ct.getNumOperands();
-                while (oper < numoper)
-                {
+                while (oper < numoper) {
                     OperandSymbol sym = ct.getOperand(oper);
                     walker.pushOperand(oper);   // Descend into node
                     triple = sym.getDefiningSymbol();
-                    if (triple != (TripleSymbol)null)
-                    {
+                    if (triple != (TripleSymbol)null) {
                         if (triple.getType() ==  SleighSymbol.symbol_type.subtable_symbol)
                             break;
                         else            // Some other kind of symbol as an operand
@@ -494,7 +487,7 @@ namespace Sla.SLEIGH
                     {           // Must be an expression
                         PatternExpression patexp = sym.getDefiningExpression();
                         long res = patexp.getValue(walker);
-                        FixedHandle hand = new FixedHandle(walker.getParentHandle());
+                        FixedHandle hand = walker.getParentHandle();
                         hand.space = pos.getConstSpace(); // Result of expression is a constant
                         hand.offset_space = (AddrSpace)null;
                         hand.offset_offset = (ulong)res;
@@ -503,11 +496,10 @@ namespace Sla.SLEIGH
                     walker.popOperand();
                     oper += 1;
                 }
-                if (oper >= numoper)
-                {   // Finished processing constructor
-                    ConstructTpl* templ = ct.getTempl();
-                    if (templ != (ConstructTpl)null)
-                    {
+                if (oper >= numoper) {
+                    // Finished processing constructor
+                    ConstructTpl? templ = ct.getTempl();
+                    if (templ != (ConstructTpl)null) {
                         HandleTpl res = templ.getResult();
                         if (res != (HandleTpl)null)   // Pop up handle to containing operand
                             res.fix(walker.getParentHandle(), walker);
@@ -518,7 +510,7 @@ namespace Sla.SLEIGH
                     walker.popOperand();
                 }
             }
-            pos.setParserState(ParserContext::pcode);
+            pos.setParserState(ParserContext.State.pcode);
         }
 
         /// \param ld is the LoadImage to draw program bytes from
@@ -558,7 +550,7 @@ namespace Sla.SLEIGH
         {
             if (!isInitialized())
             {   // Initialize the base if not already
-                Element* el = store.getTag("sleigh");
+                Element? el = store.getTag("sleigh");
                 if (el == (Element)null)
                     throw new LowlevelError("Could not find sleigh tag");
                 restoreXml(el);
@@ -567,12 +559,12 @@ namespace Sla.SLEIGH
                 reregisterContext();
             uint parser_cachesize = 2;
             uint parser_windowsize = 32;
-            if ((maxdelayslotbytes > 1) || (unique_allocatemask != 0))
-            {
+            if ((maxdelayslotbytes > 1) || (unique_allocatemask != 0)) {
                 parser_cachesize = 8;
                 parser_windowsize = 256;
             }
-            discache = new DisassemblyCache(this, cache, getConstantSpace(), parser_cachesize, parser_windowsize);
+            discache = new DisassemblyCache(this, cache, getConstantSpace(), (int)parser_cachesize,
+                (int)parser_windowsize);
         }
 
         public override void registerContext(string name,int sbit, int ebit)
@@ -580,7 +572,7 @@ namespace Sla.SLEIGH
             context_db.registerVariable(name, sbit, ebit);
         }
 
-        public override void setContextDefault(string nm,uint val)
+        public override void setContextDefault(string name, uint val)
         {
             context_db.setVariableDefault(name, val);
         }
@@ -592,34 +584,29 @@ namespace Sla.SLEIGH
 
         public override int instructionLength(Address baseaddr)
         {
-            ParserContext* pos = obtainContext(baseaddr, ParserContext::disassembly);
+            ParserContext pos = obtainContext(baseaddr, ParserContext.State.disassembly);
             return pos.getLength();
         }
 
         public override int oneInstruction(PcodeEmit emit, Address baseaddr)
         {
             int fallOffset;
-            if (alignment != 1)
-            {
-                if ((baseaddr.getOffset() % alignment) != 0)
-                {
-                    ostringstream s;
-                    s << "Instruction address not aligned: " << baseaddr;
-                    throw UnimplError(s.str(), 0);
+            if (alignment != 1) {
+                if ((baseaddr.getOffset() % (uint)alignment) != 0) {
+                    throw new UnimplError($"Instruction address not aligned: {baseaddr}", 0);
                 }
             }
 
-            ParserContext* pos = obtainContext(baseaddr, ParserContext::pcode);
+            ParserContext pos = obtainContext(baseaddr, ParserContext.State.pcode);
             pos.applyCommits();
             fallOffset = pos.getLength();
 
-            if (pos.getDelaySlot() > 0)
-            {
+            if (pos.getDelaySlot() > 0) {
                 int bytecount = 0;
-                do
-                {
+                do {
                     // Do not pass pos.getNaddr() to obtainContext, as pos may have been previously cached and had naddr adjusted
-                    ParserContext* delaypos = obtainContext(pos.getAddr() + fallOffset, ParserContext::pcode);
+                    ParserContext delaypos = obtainContext(pos.getAddr() + fallOffset,
+                        ParserContext.State.pcode);
                     delaypos.applyCommits();
                     int len = delaypos.getLength();
                     fallOffset += len;
@@ -631,13 +618,12 @@ namespace Sla.SLEIGH
             walker.baseState();
             pcode_cache.clear();
             SleighBuilder builder = new SleighBuilder(walker, discache, pcode_cache, getConstantSpace(), getUniqueSpace(), unique_allocatemask);
-            try
-            {
+            try {
                 builder.build(walker.getConstructor().getTempl(), -1);
                 pcode_cache.resolveRelatives();
                 pcode_cache.emit(baseaddr, emit);
             }
-            catch (UnimplError err) {
+            catch (UnimplError) {
                 StringWriter s = new StringWriter();
                 s.Write("Instruction not implemented in pcode:\n ");
                 ParserWalker cur = builder.getCurrentWalker();
@@ -657,16 +643,16 @@ namespace Sla.SLEIGH
         {
             int sz;
 
-            ParserContext pos = obtainContext(baseaddr, ParserContext::disassembly);
+            ParserContext pos = obtainContext(baseaddr, ParserContext.State.disassembly);
             ParserWalker walker = new ParserWalker(pos);
             walker.baseState();
 
             Constructor ct = walker.getConstructor();
-            ostringstream mons;
+            TextWriter mons = new StringWriter();
             ct.printMnemonic(mons, walker);
-            ostringstream body;
+            TextWriter body = new StringWriter();
             ct.printBody(body, walker);
-            emit.dump(baseaddr, mons.str(), body.str());
+            emit.dump(baseaddr, mons.ToString(), body.ToString());
             sz = pos.getLength();
             return sz;
         }

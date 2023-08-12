@@ -49,13 +49,13 @@ namespace Sla.SLEIGH
             for (uint i = 0; i < issued.size(); ++i)
             {
                 VarnodeData* outvar = issued[i].outvar;
-                if (outvar != (VarnodeData*)0)
+                if (outvar != (VarnodeData)null)
                 {
                     outvar = newpool + (outvar - poolstart);
                     issued[i].outvar = outvar;
                 }
                 VarnodeData* invar = issued[i].invar;
-                if (invar != (VarnodeData*)0)
+                if (invar != (VarnodeData)null)
                 {
                     invar = newpool + (invar - poolstart);
                     issued[i].invar = invar;
@@ -112,8 +112,8 @@ namespace Sla.SLEIGH
         {
             issued.emplace_back();
             PcodeData* res = &issued.GetLastItem();
-            res.outvar = (VarnodeData*)0;
-            res.invar = (VarnodeData*)0;
+            res.outvar = (VarnodeData)null;
+            res.invar = (VarnodeData)null;
             return res;
         }
 

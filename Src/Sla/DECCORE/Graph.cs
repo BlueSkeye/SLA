@@ -91,7 +91,7 @@ namespace Sla.DECCORE
             s.WriteLine("  Command=AddEdges,");
             s.WriteLine("  Parsing=WhiteSpace,");
             s.WriteLine("  Fields=({Name=*FromKey, Location=1},");
-            s.WriteLine("          {Name=*ToKey, Location=2});";
+            s.WriteLine("          {Name=*ToKey, Location=2});");
             s.WriteLine();
 
             for (int i = 0; i < graph.getSize(); ++i)

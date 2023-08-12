@@ -24,7 +24,7 @@ namespace Sla.DECCORE
 
         /// \brief Possible display (dispflag) properties for a Symbol
         [Flags()]
-        public enum DisplayFlags
+        public enum DisplayFlags : uint
         {
             force_hex = 1,      ///< Force hexadecimal printing of constant symbol
             force_dec = 2,      ///< Force decimal printing of constant symbol
@@ -242,7 +242,7 @@ namespace Sla.DECCORE
         {
             if (mapentry.empty())
                 throw new LowlevelError("No mapping for symbol: " + name);
-            return mapentry[0];
+            return mapentry[0].Current;
         }
 
         /// Get first mapping of the symbol that contains the given Address
@@ -254,7 +254,7 @@ namespace Sla.DECCORE
         {
             SymbolEntry res;
             for (int i = 0; i < mapentry.size(); ++i) {
-                res = mapentry[i];
+                res = mapentry[i].Current;
                 Address entryaddr = res.getAddr();
                 if (addr.getSpace() != entryaddr.getSpace()) continue;
                 if (addr.getOffset() < entryaddr.getOffset()) continue;
@@ -270,7 +270,7 @@ namespace Sla.DECCORE
         public int numEntries() => mapentry.Count;
 
         /// Return the i-th SymbolEntry for \b this Symbol
-        public SymbolEntry getMapEntry(int i) => &(*mapentry[i]);
+        public SymbolEntry getMapEntry(int i) => mapentry[i].Current;
 
         /// Position of given SymbolEntry within \b this multi-entry Symbol
         /// Among all the SymbolEntrys that map \b this entire Symbol, calculate
@@ -280,9 +280,8 @@ namespace Sla.DECCORE
         public int getMapEntryPosition(SymbolEntry entry)
         {
             int pos = 0;
-            for (int i = 0; i < mapentry.size(); ++i)
-            {
-                SymbolEntry tmp = &(*mapentry[i]);
+            for (int i = 0; i < mapentry.size(); ++i) {
+                SymbolEntry tmp = mapentry[i].Current;
                 if (tmp == entry)
                     return pos;
                 if (entry.getSize() == type.getSize())
@@ -365,7 +364,7 @@ namespace Sla.DECCORE
             if (format != 0) {
                 encoder.writeString(AttributeId.ATTRIB_FORMAT, Datatype.decodeIntegerFormat(format));
             }
-            encoder.writeSignedInteger(AttributeId.ATTRIB_CAT, category);
+            encoder.writeSignedInteger(AttributeId.ATTRIB_CAT, (long)category);
             if (category >= 0)
                 encoder.writeUnsignedInteger(AttributeId.ATTRIB_INDEX, catindex);
         }
@@ -374,18 +373,18 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decodeHeader(Sla.CORE.Decoder decoder)
         {
-            name.clear();
-            displayName.clear();
-            category = no_category;
+            name = string.Empty;
+            displayName = string.Empty;
+            category = SymbolCategory.no_category;
             symbolId = 0;
             while (true) {
                 AttributeId attribId = decoder.getNextAttributeId();
                 if (attribId == 0) break;
                 if (attribId == AttributeId.ATTRIB_CAT) {
-                    category = (short)decoder.readSignedInteger();
+                    category = (SymbolCategory)decoder.readSignedInteger();
                 }
                 else if (attribId == AttributeId.ATTRIB_FORMAT) {
-                    dispflags |= Datatype.encodeIntegerFormat(decoder.readString());
+                    dispflags |= (DisplayFlags)Datatype.encodeIntegerFormat(decoder.readString());
                 }
                 else if (attribId == AttributeId.ATTRIB_HIDDENRETPARM) {
                     if (decoder.readBool())
@@ -402,7 +401,7 @@ namespace Sla.DECCORE
                 }
                 else if (attribId == AttributeId.ATTRIB_MERGE) {
                     if (!decoder.readBool()) {
-                        dispflags |= isolate;
+                        dispflags |= DisplayFlags.isolate;
                         flags |= Varnode.varnode_flags.typelock;
                     }
                 }
@@ -422,7 +421,7 @@ namespace Sla.DECCORE
                 }
                 else if (attribId == AttributeId.ATTRIB_THISPTR) {
                     if (decoder.readBool())
-                        dispflags |= is_this_ptr;
+                        dispflags |= DisplayFlags.is_this_ptr;
                 }
                 else if (attribId == AttributeId.ATTRIB_VOLATILE) {
                     if (decoder.readBool())
@@ -432,26 +431,26 @@ namespace Sla.DECCORE
                     displayName = decoder.readString();
                 }
             }
-            if (category == function_parameter) {
-                catindex = decoder.readUnsignedInteger(AttributeId.ATTRIB_INDEX);
+            if (category == SymbolCategory.function_parameter) {
+                catindex = (ushort)decoder.readUnsignedInteger(AttributeId.ATTRIB_INDEX);
             }
             else
                 catindex = 0;
-            if (displayName.size() == 0)
+            if (displayName.Length == 0)
                 displayName = name;
         }
 
         /// Encode details of the Symbol to a stream
         /// Encode the data-type for the Symbol
         /// \param encoder is the stream encoder
-        public void encodeBody(Encoder encoder)
+        public void encodeBody(Sla.CORE.Encoder encoder)
         {
             type.encodeRef(encoder);
         }
 
         /// Decode details of the Symbol from a \<symbol> element
         /// \param decoder is the stream decoder
-        public void decodeBody(Decoder decoder)
+        public void decodeBody(Sla.CORE.Decoder decoder)
         {
             type = scope.getArch().types.decodeType(decoder);
             checkSizeTypeLock();

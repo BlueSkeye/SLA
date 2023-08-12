@@ -257,7 +257,7 @@ namespace Sla.SLEIGH
                 Address newaddr = baseaddr + fallOffset;
                 setUniqueOffset(newaddr);
                 ParserContext pos = discache.getParserContext(newaddr);
-                if (pos.getParserState() != ParserContext::pcode)
+                if (pos.getParserState() != ParserContext.State.pcode)
                     throw new LowlevelError("Could not obtain cached delay slot instruction");
                 int len = pos.getLength();
 
@@ -295,7 +295,7 @@ namespace Sla.SLEIGH
             Address newaddr(spc, addr);
             setUniqueOffset(newaddr);
             ParserContext pos = discache.getParserContext(newaddr);
-            if (pos.getParserState() != ParserContext::pcode)
+            if (pos.getParserState() != ParserContext.State.pcode)
                 throw new LowlevelError("Could not obtain cached crossbuild instruction");
 
             ParserWalker newwalker(pos, tmp.getParserContext() );

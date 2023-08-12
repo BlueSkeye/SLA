@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -16,70 +16,72 @@ namespace Sla.DECCORE
     {
         // friend class ProtoStoreSymbol;
         /// Backing Symbol for \b this parameter
-        private Symbol sym;
+        internal Symbol? sym;
         
         public ParameterSymbol()
         {
             sym = (Symbol)null;
         }
 
-        public override string getName() => sym.getName();
+        private Symbol AssertedNonNullSymbol => sym ?? throw new BugException();
 
-        public override Datatype getType() => sym.getType();
+        public override string getName() => AssertedNonNullSymbol.getName();
 
-        public override Address getAddress() => sym.getFirstWholeMap().getAddr();
+        public override Datatype getType() => AssertedNonNullSymbol.getType() ?? throw new BugException();
 
-        public override int getSize() => sym.getFirstWholeMap().getSize();
+        public override Address getAddress() => AssertedNonNullSymbol.getFirstWholeMap().getAddr();
 
-        public override bool isTypeLocked() => sym.isTypeLocked();
+        public override int getSize() => AssertedNonNullSymbol.getFirstWholeMap().getSize();
 
-        public override bool isNameLocked() => sym.isNameLocked();
+        public override bool isTypeLocked() => AssertedNonNullSymbol.isTypeLocked();
 
-        public override bool isSizeTypeLocked() => sym.isSizeTypeLocked();
+        public override bool isNameLocked() => AssertedNonNullSymbol.isNameLocked();
 
-        public override bool isThisPointer() => sym.isThisPointer();
+        public override bool isSizeTypeLocked() => AssertedNonNullSymbol.isSizeTypeLocked();
 
-        public override bool isIndirectStorage() => sym.isIndirectStorage();
+        public override bool isThisPointer() => AssertedNonNullSymbol.isThisPointer();
 
-        public override bool isHiddenReturn() => sym.isHiddenReturn();
+        public override bool isIndirectStorage() => AssertedNonNullSymbol.isIndirectStorage();
 
-        public override bool isNameUndefined() => sym.isNameUndefined();
+        public override bool isHiddenReturn() => AssertedNonNullSymbol.isHiddenReturn();
+
+        public override bool isNameUndefined() => AssertedNonNullSymbol.isNameUndefined();
 
         public override void setTypeLock(bool val)
         {
-            Scope* scope = sym.getScope();
-            uint attrs = Varnode.varnode_flags.typelock;
-            if (!sym.isNameUndefined())
+            Scope scope = AssertedNonNullSymbol.getScope();
+            Varnode.varnode_flags attrs = Varnode.varnode_flags.typelock;
+            if (!AssertedNonNullSymbol.isNameUndefined())
                 attrs |= Varnode.varnode_flags.namelock;
             if (val)
-                scope.setAttribute(sym, attrs);
+                scope.setAttribute(AssertedNonNullSymbol, attrs);
             else
-                scope.clearAttribute(sym, attrs);
+                scope.clearAttribute(AssertedNonNullSymbol, attrs);
         }
 
         public override void setNameLock(bool val)
         {
-            Scope* scope = sym.getScope();
+            Scope scope = AssertedNonNullSymbol.getScope();
             if (val)
-                scope.setAttribute(sym, Varnode.varnode_flags.namelock);
+                scope.setAttribute(AssertedNonNullSymbol, Varnode.varnode_flags.namelock);
             else
-                scope.clearAttribute(sym, Varnode.varnode_flags.namelock);
+                scope.clearAttribute(AssertedNonNullSymbol, Varnode.varnode_flags.namelock);
         }
 
         public override void setThisPointer(bool val)
         {
-            Scope* scope = sym.getScope();
-            scope.setThisPointer(sym, val);
+            Scope scope = AssertedNonNullSymbol.getScope();
+            scope.setThisPointer(AssertedNonNullSymbol, val);
         }
 
         public override void overrideSizeLockType(Datatype ct)
         {
-            sym.getScope().overrideSizeLockType(sym, ct);
+            AssertedNonNullSymbol.getScope().overrideSizeLockType(AssertedNonNullSymbol, ct);
         }
 
         public override void resetSizeLockType(TypeFactory factory)
         {
-            sym.getScope().resetSizeLockType(sym);
+            AssertedNonNullSymbol.getScope().resetSizeLockType(AssertedNonNullSymbol);
         }
 
         public override ProtoParameter clone()
@@ -87,6 +89,6 @@ namespace Sla.DECCORE
             throw new LowlevelError("Should not be cloning ParameterSymbol");
         }
 
-        public override Symbol getSymbol() => sym;
+        public override Symbol getSymbol() => AssertedNonNullSymbol;
     }
 }

@@ -17,7 +17,7 @@ namespace Sla.DECCORE
         /// How many passes to delay heritage of this space
         internal int delay;
         /// How many passes to delay deadcode removal of this space
-        private int deadcodedelay;
+        internal int deadcodedelay;
         /// >0 if Varnodes in this space have been eliminated
         internal int deadremoved;
         /// \b true if the search for LOAD ops to guard has been performed

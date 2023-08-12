@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -26,27 +26,26 @@ namespace Sla.DECCORE
         }
 
         /// Original op which \b this is splitting (or null)
-        private PcodeOp op;
+        internal PcodeOp op;
         /// The new replacement op
-        private PcodeOp replacement;
+        internal PcodeOp replacement;
         /// Opcode of the new op
-        private OpCode opc;
+        internal OpCode opc;
         /// Special handling code when creating
-        private uint special;
+        internal Annotation special;
         /// Varnode output
-        private TransformVar output;
+        internal TransformVar? output;
         /// Varnode inputs
-        private List<TransformVar> input;
+        internal List<TransformVar> input = new List<TransformVar>();
         /// The following op after \b this (if not null)
-        private TransformOp follow;
+        internal TransformOp? follow;
 
         /// Create a new PcodeOp or modify an existing one so that it matches this placeholder description.
         /// Go ahead an insert the new PcodeOp into the basic block if possible
         /// \param fd is the function in which to make the modifications
-        private void createReplacement(Funcdata fd)
+        internal void createReplacement(Funcdata fd)
         {
-            if ((special & TransformOp::op_preexisting) != 0)
-            {
+            if ((special & TransformOp.Annotation.op_preexisting) != 0) {
                 replacement = op;
                 fd.opSetOpcode(op, opc);
                 while (input.size() < op.numInput())
@@ -56,14 +55,12 @@ namespace Sla.DECCORE
                 while (op.numInput() < input.size())
                     fd.opInsertInput(op, (Varnode)null, op.numInput() - 1);
             }
-            else
-            {
+            else {
                 replacement = fd.newOp(input.size(), op.getAddr());
                 fd.opSetOpcode(replacement, opc);
-                if (output != (TransformVar*)0)
+                if (output != (TransformVar)null)
                     output.createReplacement(fd);
-                if (follow == (TransformOp*)0)
-                {       // Can be inserted immediately
+                if (follow == (TransformOp)null) {       // Can be inserted immediately
                     if (opc == OpCode.CPUI_MULTIEQUAL)
                         fd.opInsertBegin(replacement, op.getParent());
                     else
@@ -75,17 +72,16 @@ namespace Sla.DECCORE
         /// Try to put the new PcodeOp into its basic block
         /// \param fd is the function into which the PcodeOp will be inserted
         /// \return \b true if the op is successfully inserted or already inserted
-        private bool attemptInsertion(Funcdata fd)
+        internal bool attemptInsertion(Funcdata fd)
         {
-            if (follow != (TransformOp*)0)
-            {
-                if (follow.follow == (TransformOp*)0)
-                {   // Check if the follow is inserted
+            if (follow != (TransformOp)null) {
+                if (follow.follow == (TransformOp)null) {
+                    // Check if the follow is inserted
                     if (opc == OpCode.CPUI_MULTIEQUAL)
                         fd.opInsertBegin(replacement, follow.replacement.getParent());
                     else
                         fd.opInsertBefore(replacement, follow.replacement);
-                    follow = (TransformOp*)0;   // Mark that this has been inserted
+                    follow = (TransformOp)null;   // Mark that this has been inserted
                     return true;
                 }
                 return false;
