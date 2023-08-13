@@ -75,7 +75,6 @@ namespace Sla.DECCORE
         {
             List<PcodeOp> allroutes = new List<PcodeOp>(); // Keep track of merging ops (with more than 1 input)
             List<Varnode> markedlist = new List<Varnode>();    // All varnodes we have visited on paths from -vn-
-            IEnumerator<PcodeOp> iter, enditer;
             Varnode outvn;
             ulong val;
             uint traced = 0;
@@ -84,11 +83,10 @@ namespace Sla.DECCORE
             bool istrash = true;
 
             while (traced < markedlist.size()) {
-                Varnode curvn = markedlist[traced++];
-                iter = curvn.beginDescend();
-                enditer = curvn.endDescend();
-                for (; iter != enditer; ++iter) {
-                    PcodeOp op = *iter;
+                Varnode curvn = markedlist[(int)traced++];
+                IEnumerator<PcodeOp> iter = curvn.beginDescend();
+                while (iter.MoveNext()) {
+                    PcodeOp op = iter.Current;
                     outvn = op.getOut();
                     switch (op.code()) {
                         case OpCode.CPUI_INDIRECT:
@@ -175,20 +173,18 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            List<PcodeOp> indlist;
+            List<PcodeOp> indlist = new ;
 
-            IEnumerator<VarnodeData> iter, enditer;
-            iter = data.getFuncProto().trashBegin();
-            enditer = data.getFuncProto().trashEnd();
-            for (; iter != enditer; ++iter) {
-                VarnodeData vdata = *iter;
-                Varnode vn = data.findCoveredInput(vdata.size, vdata.getAddr());
+            IEnumerator<VarnodeData> iter = data.getFuncProto().trashBegin();
+            while (iter.MoveNext()) {
+                VarnodeData vdata = iter.Current;
+                Varnode vn = data.findCoveredInput((int)vdata.size, vdata.getAddr());
                 if (vn == (Varnode)null) continue;
                 if (vn.isTypeLock() || vn.isNameLock()) continue;
-                indlist.clear();
+                indlist.Clear();
                 if (!traceTrash(vn, indlist)) continue;
-
-                for (uint i = 0; i < indlist.size(); ++i) {
+                
+                for (int i = 0; i < indlist.size(); ++i) {
                     PcodeOp op = indlist[i];
                     if (op.code() == OpCode.CPUI_INDIRECT) {
                         // Trucate data-flow through INDIRECT, turning it into indirect creation

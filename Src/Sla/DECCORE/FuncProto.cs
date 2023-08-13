@@ -193,12 +193,14 @@ namespace Sla.DECCORE
             List<VarnodeData> tmpList = new List<VarnodeData>();
             tmpList.swap(likelytrash);
             IEnumerator<VarnodeData> iter1 = model.trashBegin();
-            IEnumerator<VarnodeData> iter2 = model.trashEnd();
-            for (List<VarnodeData>::const_iterator iter = iter1; iter != iter2; ++iter)
-                likelytrash.Add(*iter);
-            for (List<VarnodeData>::const_iterator iter = tmpList.begin(); iter != tmpList.end(); ++iter) {
-                if (!binary_search(iter1, iter2, *iter))
-                    likelytrash.Add(*iter);       // Add in the new register
+            // IEnumerator<VarnodeData> iter2 = model.trashEnd();
+            while (iter1.MoveNext())
+                likelytrash.Add(iter1.Current);
+            IEnumerator<VarnodeData> iter = tmpList.GetEnumerator();
+            while (iter.MoveNext()) {
+                if (!model.IsKnownLikelyTrash(iter.Current))
+                    // Add in the new register
+                    likelytrash.Add(iter.Current);
             }
             likelytrash.Sort();
         }
@@ -979,20 +981,20 @@ namespace Sla.DECCORE
 
         /// Get iterator to front of EffectRecord list
         public IEnumerator<EffectRecord> effectBegin()
-            => (effectlist.empty()) ? model.effectBegin() : effectlist.begin();
+            => (effectlist.empty()) ? model.effectBegin() : effectlist.GetEnumerator();
 
-        /// Get iterator to end of EffectRecord list
-        public IEnumerator<EffectRecord> effectEnd()
-            => (effectlist.empty()) ? model.effectEnd() : effectlist.end();
+        ///// Get iterator to end of EffectRecord list
+        //public IEnumerator<EffectRecord> effectEnd()
+        //    => (effectlist.empty()) ? model.effectEnd() : effectlist.end();
 
         /// Get iterator to front of \e likelytrash list
         public IEnumerator<VarnodeData> trashBegin()
             => (likelytrash.empty()) ? model.trashBegin() : likelytrash.begin();
 
-        /// Get iterator to end of \e likelytrash list
-        /// \return the iterator to the end of the list
-        public IEnumerator<VarnodeData> trashEnd()
-            => (likelytrash.empty()) ? model.trashEnd() : likelytrash.end();
+        ///// Get iterator to end of \e likelytrash list
+        ///// \return the iterator to the end of the list
+        //public IEnumerator<VarnodeData> trashEnd()
+        //    => (likelytrash.empty()) ? model.trashEnd() : likelytrash.end();
 
         /// \brief Decide whether a given storage location could be, or could hold, an input parameter
         ///

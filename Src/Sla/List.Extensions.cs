@@ -5,12 +5,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Sla.Extensions;
 
 namespace Sla
 {
     internal static class Extensions
     {
         internal static bool empty<T>(this List<T> from) => from.Count == 0;
+
+        internal delegate T ResizeInstantiatorDelegate<T>();
+
+        internal static void resize<T>(this List<T> list, int newSize,
+            ResizeInstantiatorDelegate<T>? instantiator = null)
+        {
+            int currentCount = list.Count;
+            if (currentCount > newSize) {
+                list.Capacity = newSize;
+                return;
+            }
+            if (currentCount == newSize) return;
+            list.Capacity = newSize;
+            for(int index = currentCount; index < newSize; index++) {
+                list[index] = (null == instantiator) ? default(T) : instantiator();
+            }
+        }
 
         internal static int size<T>(this List<T> from) => from.Count;
 

@@ -102,7 +102,7 @@ namespace Sla.DECCORE
             return false;
         }
 
-        private bool applyRule(SplitVarnode i, PcodeOp op, bool workishi, Funcdata data)
+        internal bool applyRule(SplitVarnode i, PcodeOp op, bool workishi, Funcdata data)
         {
             if (!workishi) return false;
             if (!i.hasBothPieces()) return false;
@@ -113,10 +113,10 @@ namespace Sla.DECCORE
 
             indoub.initPartial(@in.getSize(), lo2, hi2);
             outdoub.initPartial(@in.getSize(), reslo, reshi);
-            existop = SplitVarnode::prepareBinaryOp(outdoub, @in, indoub);
+            existop = SplitVarnode.prepareBinaryOp(outdoub, @in, indoub);
             if (existop == (PcodeOp)null)
                 return false;
-            SplitVarnode::createBinaryOp(data, outdoub, @in, indoub, existop, OpCode.CPUI_INT_SUB);
+            SplitVarnode.createBinaryOp(data, outdoub, @in, indoub, existop, OpCode.CPUI_INT_SUB);
             return true;
         }
     }

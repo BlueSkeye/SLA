@@ -51,15 +51,16 @@ namespace Sla.DECCORE
 
             eiter = data.getFuncProto().effectBegin();
             endeiter = data.getFuncProto().effectEnd();
-            for (; eiter != endeiter; ++eiter) {
+            while (eiter.MoveNext()) {
                 // Iterate through saved registers
-                if ((*eiter).getType() == EffectRecord.EffectType.killedbycall) continue;  // Not saved
-                vn = data.findVarnodeInput((*eiter).getSize(), (*eiter).getAddress());
+                if (eiter.Current.getType() == EffectRecord.EffectType.killedbycall) continue;  // Not saved
+                vn = data.findVarnodeInput(eiter.Current.getSize(), eiter.Current.getAddress());
                 if ((vn != (Varnode)null) && (vn.isUnaffected())) {
                     // Mark storage locations for saved registers as not mapped
                     // This should pickup unaffected, reload, and return_address effecttypes
-                    for (iter = vn.beginDescend(); iter != vn.endDescend(); ++iter) {
-                        op = *iter;
+                    iter = vn.beginDescend();
+                    while (iter.MoveNext()) {
+                        op = iter.Current;
                         if (op.code() != OpCode.CPUI_COPY) continue;
                         Varnode outvn = op.getOut();
                         if (!data.getScopeLocal().isUnaffectedStorage(outvn))  // Is this where unaffected values get saved

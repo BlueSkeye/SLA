@@ -54,7 +54,7 @@ namespace Sla.DECCORE
             else if (valueSet.getCount() == widenIteration)
             {
                 CircleRange landmark = valueSet.getLandMark();
-                if (landmark != (CircleRange*)0) {
+                if (landmark != (CircleRange)null) {
                     bool leftIsStable = range.getMin() == newRange.getMin();
                     range = newRange;   // Preserve any new step information
                     if (landmark.contains(range))

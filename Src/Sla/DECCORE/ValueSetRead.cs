@@ -48,10 +48,9 @@ namespace Sla.DECCORE
         /// \param slt is the given slot
         /// \param type is the constraint characteristic
         /// \param constraint is the given range
-        private void addEquation(int slt, int type, CircleRange constraint)
+        internal void addEquation(int slt, int type, CircleRange constraint)
         {
-            if (slot == slt)
-            {
+            if (slot == slt) {
                 equationTypeCode = type;
                 equationConstraint = constraint;
             }

@@ -116,12 +116,9 @@ namespace Sla.DECCORE
                     lovec.Clear();
                     hivec.Clear();
                     bool otherUse = false;      // Have we seen use other than splitting into hi and lo
-                    IEnumerator<PcodeOp> iter, enditer;
-                    iter = vn.beginDescend();
-                    enditer = vn.endDescend();
-                    while (iter != enditer) {
-                        PcodeOp subop = *iter;
-                        ++iter;
+                    IEnumerator<PcodeOp> iter = vn.beginDescend();
+                    while (iter.MoveNext()) {
+                        PcodeOp subop = iter.Current;
                         if (subop.code() != OpCode.CPUI_SUBPIECE) continue;
                         Varnode outvn = subop.getOut();
                         if (outvn.getSize() != halfSize) continue;
@@ -129,8 +126,7 @@ namespace Sla.DECCORE
                             lovec.Add(outvn);
                         else if (subop.getIn(1).getOffset() == halfSize)  // Possible hi precision piece
                             hivec.Add(outvn);
-                        else
-                        {
+                        else {
                             otherUse = true;
                             break;
                         }

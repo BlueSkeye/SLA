@@ -365,11 +365,16 @@ namespace Sla.DECCORE
 
         public IEnumerator<EffectRecord> effectBegin() => effectlist.GetEnumerator(); ///< Get an iterator to the first EffectRecord
 
-        public IEnumerator<EffectRecord> effectEnd() => effectlist.end(); ///< Get an iterator to the last EffectRecord
+        //public IEnumerator<EffectRecord> effectEnd() => effectlist.end(); ///< Get an iterator to the last EffectRecord
 
-        public IEnumerator<VarnodeData> trashBegin() => likelytrash.GetEnumerator(); ///< Get an iterator to the first \e likelytrash
+        /// Get an iterator to the first \e likelytrash
+        public IEnumerator<VarnodeData> trashBegin() => likelytrash.GetEnumerator();
 
-        public IEnumerator<VarnodeData> trashEnd() => likelytrash.end(); ///< Get an iterator to the last \e likelytrash
+        ///// Get an iterator to the last \e likelytrash
+        //public IEnumerator<VarnodeData> trashEnd() => likelytrash.end();
+
+        // TODO : Use a binary search to fasten search
+        internal bool IsKnownLikelyTrash(VarnodeData candidate) => likelytrash.Contains(candidate);
 
         /// \brief Characterize whether the given range overlaps parameter storage
         ///

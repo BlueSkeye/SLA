@@ -14,12 +14,12 @@ namespace Sla.DECCORE
         internal class SplitInstance
         {
             // friend class PreferSplitManager;
-            private int splitoffset;
+            internal int splitoffset;
             internal Varnode vn;
             // Most significant piece
-            private Varnode? hi;
+            internal Varnode? hi;
             // Least significant piece
-            private Varnode? lo;
+            internal Varnode? lo;
             
             public SplitInstance(Varnode v, int off)
             {
@@ -48,8 +48,8 @@ namespace Sla.DECCORE
             if (vn.isConstant()) {
                 ulong origval = vn.getOffset();
 
-                ulong loval = origval & Globals.calc_mask(losize);// Split the constant into two pieces
-                ulong hival = (origval >> 8 * losize) & Globals.calc_mask(hisize);
+                ulong loval = origval & Globals.calc_mask((uint)losize);// Split the constant into two pieces
+                ulong hival = (origval >> 8 * losize) & Globals.calc_mask((uint)hisize);
                 if (setlo && (inst.lo == (Varnode)null))
                     inst.lo = data.newConstant(losize, loval);
                 if (sethi && (inst.hi == (Varnode)null))
@@ -91,7 +91,7 @@ namespace Sla.DECCORE
             tempsplits.Add(loop);
         }
 
-        private bool testDefiningCopy(SplitInstance inst, PcodeOp def, bool istemp)
+        private bool testDefiningCopy(SplitInstance inst, PcodeOp def, out bool istemp)
         {
             // Check that -inst- defined by -def- is really splittable
             Varnode invn = def.getIn(0);
@@ -113,19 +113,19 @@ namespace Sla.DECCORE
         {
             // Do split of prefered split varnode that is defined by a COPY
             Varnode invn = def.getIn(0);
-            SplitInstance ininst(invn, inst.splitoffset);
+            SplitInstance ininst = new SplitInstance(invn, inst.splitoffset);
             bool bigendian = inst.vn.getSpace().isBigEndian();
             fillinInstance(inst, bigendian, true, true);
-            fillinInstance(&ininst, bigendian, true, true);
-            createCopyOps(&ininst, inst, def, istemp);
+            fillinInstance(ininst, bigendian, true, true);
+            createCopyOps(ininst, inst, def, istemp);
         }
 
-        private bool testReadingCopy(SplitInstance inst, PcodeOp readop, bool istemp)
+        private bool testReadingCopy(SplitInstance inst, PcodeOp readop, out bool istemp)
         { // Check that -inst- read by -readop- is really splittable
             Varnode outvn = readop.getOut();
             istemp = false;
             if (outvn.getSpace().getType() != spacetype.IPTR_INTERNAL) {
-                PreferSplitRecord outrec = findRecord(outvn);
+                PreferSplitRecord? outrec = findRecord(outvn);
                 if (outrec == (PreferSplitRecord)null) return false;
                 if (outrec.splitoffset != inst.splitoffset) return false;
             }
@@ -138,11 +138,11 @@ namespace Sla.DECCORE
         {
             // Do split of varnode that is read by a COPY
             Varnode outvn = readop.getOut();
-            SplitInstance outinst(outvn, inst.splitoffset);
+            SplitInstance outinst = new SplitInstance(outvn, inst.splitoffset);
             bool bigendian = inst.vn.getSpace().isBigEndian();
             fillinInstance(inst, bigendian, true, true);
-            fillinInstance(&outinst, bigendian, true, true);
-            createCopyOps(inst, &outinst, readop, istemp);
+            fillinInstance(outinst, bigendian, true, true);
+            createCopyOps(inst, outinst, readop, istemp);
         }
 
         private bool testZext(SplitInstance inst, PcodeOp op)
@@ -176,8 +176,8 @@ namespace Sla.DECCORE
             }
             if (ininst.vn.isConstant()) {
                 ulong origval = ininst.vn.getOffset();
-                ulong loval = origval & Globals.calc_mask(losize);// Split the constant into two pieces
-                ulong hival = (origval >> 8 * losize) & Globals.calc_mask(hisize);
+                ulong loval = origval & Globals.calc_mask((uint)losize);// Split the constant into two pieces
+                ulong hival = (origval >> 8 * losize) & Globals.calc_mask((uint)hisize);
                 ininst.lo = data.newConstant(losize, loval);
                 ininst.hi = data.newConstant(hisize, hival);
             }
@@ -187,7 +187,7 @@ namespace Sla.DECCORE
             }
 
             fillinInstance(inst, bigendian, true, true);
-            createCopyOps(&ininst, inst, op, false);
+            createCopyOps(ininst, inst, op, false);
         }
 
         private bool testPiece(SplitInstance inst, PcodeOp op)
@@ -290,7 +290,7 @@ namespace Sla.DECCORE
 
             Varnode addvn = data.newUniqueOut(ptrvn.getSize(), addop);
             data.opSetInput(addop, ptrvn, 0);
-            data.opSetInput(addop, data.newConstant(ptrvn.getSize(), inst.splitoffset), 1);
+            data.opSetInput(addop, data.newConstant(ptrvn.getSize(), (ulong)inst.splitoffset), 1);
 
             data.opSetOutput(hiop, inst.hi); // Outputs are the pieces of the original
             data.opSetOutput(loop, inst.lo);
@@ -340,7 +340,7 @@ namespace Sla.DECCORE
 
             Varnode addvn = data.newUniqueOut(ptrvn.getSize(), addop);
             data.opSetInput(addop, ptrvn, 0);
-            data.opSetInput(addop, data.newConstant(ptrvn.getSize(), inst.splitoffset), 1);
+            data.opSetInput(addop, data.newConstant(ptrvn.getSize(), (ulong)inst.splitoffset), 1);
 
             data.opSetInput(hiop, inst.hi, 2); // Varnodes "being stored" are the pieces of the original
             data.opSetInput(loop, inst.lo, 2);
@@ -373,7 +373,7 @@ namespace Sla.DECCORE
                 PcodeOp op = vn.getDef() ?? throw new BugException();
                 switch (op.code()) {
                     case OpCode.CPUI_COPY:
-                        if (!testDefiningCopy(inst, op, istemp))
+                        if (!testDefiningCopy(inst, op, out istemp))
                             return false;
                         splitDefiningCopy(inst, op, istemp);
                         break;
@@ -404,7 +404,7 @@ namespace Sla.DECCORE
                     return false;
                 switch (op.code()) {
                     case OpCode.CPUI_COPY:
-                        if (!testReadingCopy(inst, op, istemp))
+                        if (!testReadingCopy(inst, op, out istemp))
                             return false;
                         splitReadingCopy(inst, op, istemp);
                         break;
@@ -432,17 +432,17 @@ namespace Sla.DECCORE
             VarnodeLocSet::const_iterator iter, enditer;
 
             SplitInstance inst = new SplitInstance((Varnode)null,rec.splitoffset);
-            iter = data.beginLoc(rec.storage.size, addr);
-            enditer = data.endLoc(rec.storage.size, addr);
+            iter = data.beginLoc((int)rec.storage.size, addr);
+            enditer = data.endLoc((int)rec.storage.size, addr);
             while (iter != enditer) {
                 inst.vn = *iter;
                 ++iter;
                 inst.lo = (Varnode)null;
                 inst.hi = (Varnode)null;
-                if (splitVarnode(&inst))
-                {   // If we found something, regenerate iterators, as they may be stale
-                    iter = data.beginLoc(rec.storage.size, addr);
-                    enditer = data.endLoc(rec.storage.size, addr);
+                if (splitVarnode(inst)) {
+                    // If we found something, regenerate iterators, as they may be stale
+                    iter = data.beginLoc((int)rec.storage.size, addr);
+                    enditer = data.endLoc((int)rec.storage.size, addr);
                 }
             }
         }
@@ -466,12 +466,9 @@ namespace Sla.DECCORE
                 default:
                     return false;
             }
-            IEnumerator<PcodeOp> iter, enditer;
-            iter = inst.vn.beginDescend();
-            enditer = inst.vn.endDescend();
-            while (iter != enditer) {
-                PcodeOp readop = *iter;
-                ++iter;
+            IEnumerator<PcodeOp> iter = inst.vn.beginDescend();
+            while (iter.MoveNext()) {
+                PcodeOp readop = iter.Current;
                 switch (readop.code()) {
                     case OpCode.CPUI_SUBPIECE:
                         if (!testSubpiece(inst, readop))
@@ -506,8 +503,10 @@ namespace Sla.DECCORE
                     break;
             }
 
-            while (vn.beginDescend() != vn.endDescend()) {
-                PcodeOp readop = *vn.beginDescend();
+            while (true) {
+                IEnumerator<PcodeOp> opEnumerator = vn.beginDescend();
+                if (!opEnumerator.MoveNext()) break;
+                PcodeOp readop = opEnumerator.Current;
                 switch (readop.code()) {
                     case OpCode.CPUI_SUBPIECE:
                         splitSubpiece(inst, readop);
@@ -529,19 +528,20 @@ namespace Sla.DECCORE
             records = rec;
         }
 
-        public PreferSplitRecord findRecord(Varnode vn)
-        { // Find the split record that applies to -vn-, otherwise return null
-            PreferSplitRecord templ;
+        public PreferSplitRecord? findRecord(Varnode vn)
+        {
+            // Find the split record that applies to -vn-, otherwise return null
+            PreferSplitRecord templ = new PreferSplitRecord();
             templ.storage.space = vn.getSpace();
-            templ.storage.size = vn.getSize();
+            templ.storage.size = (uint)vn.getSize();
             templ.storage.offset = vn.getOffset();
-            List<PreferSplitRecord>::const_iterator iter;
+            IEnumerator<PreferSplitRecord> iter;
             iter = lower_bound(records.begin(), records.end(), templ);
             if (iter == records.end())
                 return (PreferSplitRecord)null;
-            if (templ < *iter)
+            if (templ < iter.Current)
                 return (PreferSplitRecord)null;
-            return &(*iter);
+            return iter.Current;
         }
 
         public static void initialize(List<PreferSplitRecord> records)
@@ -552,7 +552,7 @@ namespace Sla.DECCORE
         public void split()
         {
             for (int i = 0; i < records.size(); ++i)
-                splitRecord((*records)[i]);
+                splitRecord(records[i]);
         }
 
         public void splitAdditional()
@@ -571,12 +571,9 @@ namespace Sla.DECCORE
                             defops.Add(defop);
                     }
                 }
-                IEnumerator<PcodeOp> iter, enditer;
-                iter = op.getOut().beginDescend();
-                enditer = op.getOut().endDescend();
-                while (iter != enditer) {
-                    PcodeOp defop = *iter;
-                    ++iter;
+                IEnumerator<PcodeOp> iter = op.getOut().beginDescend();
+                while (iter.MoveNext()) {
+                    PcodeOp defop = iter.Current;
                     if (defop.code() == OpCode.CPUI_PIECE) {
                         // COPY flowing into PIECEs
                         Varnode outvn = defop.getOut();

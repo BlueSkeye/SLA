@@ -378,7 +378,8 @@ namespace Sla.DECCORE
                 bound = vn.getCover().getCoverBlock(blk).boundary(op);
                 if (bound == 0) return false;
                 if (bound == 2) continue;   // Not defined before op (intersects with write op)
-                for (oiter = vn.beginDescend(); oiter != vn.endDescend(); ++oiter) {
+                oiter = vn.beginDescend();
+                while (oiter.MoveNext()) {
                     edgeop = oiter.Current;
                     if (CoverBlock.getUIndex(edgeop) == opuindex) {
                         // Correctable

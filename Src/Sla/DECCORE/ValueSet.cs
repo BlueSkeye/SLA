@@ -36,7 +36,7 @@ namespace Sla.DECCORE
             /// The constraint characteristic 0=absolute 1=relative to a spacebase register
             internal int typeCode;
             /// The range constraint
-            private CircleRange range;
+            internal CircleRange range;
 
             public Equation(int s, int tc, CircleRange rng)
             {
@@ -52,7 +52,7 @@ namespace Sla.DECCORE
         /// Number of input parameters to defining operation
         private int numParams;
         /// Depth first numbering / widening count
-        private int count;
+        internal int count;
         /// Op-code defining Varnode
         internal OpCode opCode;
         /// Set to \b true if left boundary of range didn't change (last iteration)
@@ -60,13 +60,13 @@ namespace Sla.DECCORE
         /// Set to \b true if right boundary of range didn't change (last iteration)
         private bool rightIsStable;
         /// Varnode whose set this represents
-        private Varnode vn;
+        internal Varnode vn;
         /// Range of values or offsets in this set
         private CircleRange range;
         /// Any equations associated with this value set
         private List<Equation> equations;
         /// If Varnode is a component head, pointer to corresponding Partition
-        private Partition partHead;
+        internal Partition partHead;
         /// Next ValueSet to iterate
         internal ValueSet next;
 
@@ -150,17 +150,19 @@ namespace Sla.DECCORE
         /// \param slot is the given slot
         /// \param type is the constraint characteristic
         /// \param constraint is the given range
-        private void addEquation(int slot, int type, CircleRange constraint)
+        internal void addEquation(int slot, int type, CircleRange constraint)
         {
-            List<Equation>::iterator iter;
-            iter = equations.begin();
-            while (iter != equations.end())
-            {
-                if ((*iter).slot > slot)
+            int equationsCount = equations.Count;
+            int insertionIndex;
+            for(insertionIndex = 0; insertionIndex < equationsCount; insertionIndex++) {
+                if (equations[insertionIndex].slot > slot)
                     break;
-                ++iter;
             }
-            equations.insert(iter, new Equation(slot, type, constraint));
+            Equation newEquation = new Equation(slot, type, constraint);
+            if (insertionIndex >= equationsCount)
+                equations.Add(newEquation);
+            else
+                equations.Insert(insertionIndex, newEquation;
         }
 
         /// Add a widening landmark
@@ -179,24 +181,20 @@ namespace Sla.DECCORE
         {
             int relCount = 0;
             int lastTypeCode = 0;
-            PcodeOp* op = vn.getDef();
-            for (int i = 0; i < numParams; ++i)
-            {
-                ValueSet* valueSet = op.getIn(i).getValueSet();
-                if (valueSet.typeCode != 0)
-                {
+            PcodeOp op = vn.getDef() ?? throw new BugException();
+            for (int i = 0; i < numParams; ++i) {
+                ValueSet valueSet = op.getIn(i).getValueSet();
+                if (valueSet.typeCode != 0) {
                     relCount += 1;
                     lastTypeCode = valueSet.typeCode;
                 }
             }
-            if (relCount == 0)
-            {
+            if (relCount == 0) {
                 typeCode = 0;
                 return false;
             }
             // Only certain operations can propagate a relative value set
-            switch (opCode)
-            {
+            switch (opCode) {
                 case OpCode.CPUI_PTRSUB:
                 case OpCode.CPUI_PTRADD:
                 case OpCode.CPUI_INT_ADD:
@@ -226,108 +224,92 @@ namespace Sla.DECCORE
         internal bool iterate(Widener widener)
         {
             if (!vn.isWritten()) return false;
-            if (widener.checkFreeze(*this)) return false;
-            if (count == 0)
-            {
-                if (computeTypeCode())
-                {
+            if (widener.checkFreeze(this)) return false;
+            if (count == 0) {
+                if (computeTypeCode()) {
                     setFull();
                     return true;
                 }
             }
             count += 1;     // Count this iteration
-            CircleRange res;
-            PcodeOp* op = vn.getDef();
+            CircleRange res = new CircleRange();
+            PcodeOp op = vn.getDef();
             int eqPos = 0;
-            if (opCode == OpCode.CPUI_MULTIEQUAL)
-            {
+            if (opCode == OpCode.CPUI_MULTIEQUAL) {
                 int pieces = 0;
-                for (int i = 0; i < numParams; ++i)
-                {
-                    ValueSet* inSet = op.getIn(i).getValueSet();
-                    if (doesEquationApply(eqPos, i))
-                    {
-                        CircleRange rangeCopy(inSet.range);
-                        if (0 != rangeCopy.intersect(equations[eqPos].range))
-                        {
+                for (int i = 0; i < numParams; ++i) {
+                    ValueSet inSet = op.getIn(i).getValueSet();
+                    if (doesEquationApply(eqPos, i)) {
+                        CircleRange rangeCopy = inSet.range;
+                        if (0 != rangeCopy.intersect(equations[eqPos].range)) {
                             rangeCopy = equations[eqPos].range;
                         }
                         pieces = res.circleUnion(rangeCopy);
                         eqPos += 1; // Equation was used
                     }
-                    else
-                    {
+                    else {
                         pieces = res.circleUnion(inSet.range);
                     }
-                    if (pieces == 2)
-                    {
-                        if (res.minimalContainer(inSet.range, MAX_STEP))   // Could not get clean union, force it
+                    if (pieces == 2) {
+                        if (res.minimalContainer(inSet.range, MAX_STEP))
+                            // Could not get clean union, force it
                             break;
                     }
                 }
-                if (0 != res.circleUnion(range))
-                {   // Union with the previous iteration's set
+                if (0 != res.circleUnion(range)) {
+                    // Union with the previous iteration's set
                     res.minimalContainer(range, MAX_STEP);
                 }
-                if (!range.isEmpty() && !res.isEmpty())
-                {
+                if (!range.isEmpty() && !res.isEmpty()) {
                     leftIsStable = range.getMin() == res.getMin();
                     rightIsStable = range.getEnd() == res.getEnd();
                 }
             }
-            else if (numParams == 1)
-            {
-                ValueSet* inSet1 = op.getIn(0).getValueSet();
-                if (doesEquationApply(eqPos, 0))
-                {
-                    CircleRange rangeCopy(inSet1.range);
-                    if (0 != rangeCopy.intersect(equations[eqPos].range))
-                    {
+            else if (numParams == 1) {
+                ValueSet inSet1 = op.getIn(0).getValueSet();
+                if (doesEquationApply(eqPos, 0)) {
+                    CircleRange rangeCopy = inSet1.range;
+                    if (0 != rangeCopy.intersect(equations[eqPos].range)) {
                         rangeCopy = equations[eqPos].range;
                     }
-                    if (!res.pushForwardUnary(opCode, rangeCopy, inSet1.vn.getSize(), vn.getSize()))
-                    {
+                    if (!res.pushForwardUnary(opCode, rangeCopy, inSet1.vn.getSize(), (uint)vn.getSize())) {
                         setFull();
                         return true;
                     }
                     eqPos += 1;
                 }
-                else if (!res.pushForwardUnary(opCode, inSet1.range, inSet1.vn.getSize(), vn.getSize()))
-                {
+                else if (!res.pushForwardUnary(opCode, inSet1.range, inSet1.vn.getSize(), (uint)vn.getSize())) {
                     setFull();
                     return true;
                 }
                 leftIsStable = inSet1.leftIsStable;
                 rightIsStable = inSet1.rightIsStable;
             }
-            else if (numParams == 2)
-            {
-                ValueSet* inSet1 = op.getIn(0).getValueSet();
-                ValueSet* inSet2 = op.getIn(1).getValueSet();
-                if (equations.size() == 0)
-                {
-                    if (!res.pushForwardBinary(opCode, inSet1.range, inSet2.range, inSet1.vn.getSize(), vn.getSize(), MAX_STEP))
+            else if (numParams == 2) {
+                ValueSet inSet1 = op.getIn(0).getValueSet();
+                ValueSet inSet2 = op.getIn(1).getValueSet();
+                if (equations.size() == 0) {
+                    if (!res.pushForwardBinary(opCode, inSet1.range, inSet2.range, inSet1.vn.getSize(),
+                        vn.getSize(), MAX_STEP))
                     {
                         setFull();
                         return true;
                     }
                 }
-                else
-                {
+                else {
                     CircleRange range1 = inSet1.range;
                     CircleRange range2 = inSet2.range;
-                    if (doesEquationApply(eqPos, 0))
-                    {
+                    if (doesEquationApply(eqPos, 0)) {
                         if (0 != range1.intersect(equations[eqPos].range))
                             range1 = equations[eqPos].range;
                         eqPos += 1;
                     }
-                    if (doesEquationApply(eqPos, 1))
-                    {
+                    if (doesEquationApply(eqPos, 1)) {
                         if (0 != range2.intersect(equations[eqPos].range))
                             range2 = equations[eqPos].range;
                     }
-                    if (!res.pushForwardBinary(opCode, range1, range2, inSet1.vn.getSize(), vn.getSize(), MAX_STEP))
+                    if (!res.pushForwardBinary(opCode, range1, range2, inSet1.vn.getSize(), vn.getSize(),
+                        MAX_STEP))
                     {
                         setFull();
                         return true;
@@ -336,25 +318,23 @@ namespace Sla.DECCORE
                 leftIsStable = inSet1.leftIsStable && inSet2.leftIsStable;
                 rightIsStable = inSet1.rightIsStable && inSet2.rightIsStable;
             }
-            else if (numParams == 3)
-            {
-                ValueSet* inSet1 = op.getIn(0).getValueSet();
-                ValueSet* inSet2 = op.getIn(1).getValueSet();
-                ValueSet* inSet3 = op.getIn(2).getValueSet();
+            else if (numParams == 3) {
+                ValueSet inSet1 = op.getIn(0).getValueSet();
+                ValueSet inSet2 = op.getIn(1).getValueSet();
+                ValueSet inSet3 = op.getIn(2).getValueSet();
                 CircleRange range1 = inSet1.range;
                 CircleRange range2 = inSet2.range;
-                if (doesEquationApply(eqPos, 0))
-                {
+                if (doesEquationApply(eqPos, 0)) {
                     if (0 != range1.intersect(equations[eqPos].range))
                         range1 = equations[eqPos].range;
                     eqPos += 1;
                 }
-                if (doesEquationApply(eqPos, 1))
-                {
+                if (doesEquationApply(eqPos, 1)) {
                     if (0 != range2.intersect(equations[eqPos].range))
                         range2 = equations[eqPos].range;
                 }
-                if (!res.pushForwardTrinary(opCode, range1, range2, inSet3.range, inSet1.vn.getSize(), vn.getSize(), MAX_STEP))
+                if (!res.pushForwardTrinary(opCode, range1, range2, inSet3.range, inSet1.vn.getSize(),
+                    vn.getSize(), MAX_STEP))
                 {
                     setFull();
                     return true;
@@ -367,9 +347,8 @@ namespace Sla.DECCORE
 
             if (res == range)
                 return false;
-            if (partHead != (Partition)null)
-            {
-                if (!widener.doWidening(*this, range, res))
+            if (partHead != (Partition)null) {
+                if (!widener.doWidening(this, range, res))
                     setFull();
             }
             else
@@ -384,17 +363,16 @@ namespace Sla.DECCORE
         /// If a landmark was associated with \b this value set, return its range,
         /// otherwise return null.
         /// \return the landmark range or null
-        public CircleRange getLandMark()
+        public CircleRange? getLandMark()
         {
             // Any equation can serve as a landmark.  We prefer the one restricting the
             // value of an input branch, as these usually give a tighter approximation
             // of the stable point.
-            for (int i = 0; i < equations.size(); ++i)
-            {
+            for (int i = 0; i < equations.size(); ++i) {
                 if (equations[i].typeCode == typeCode)
-                    return &equations[i].range;
+                    return equations[i].range;
             }
-            return (CircleRange*)0;
+            return (CircleRange)null;
         }
 
         /// Return '0' for normal constant, '1' for spacebase relative
@@ -417,23 +395,22 @@ namespace Sla.DECCORE
         public void printRaw(TextWriter s)
         {
             if (vn == (Varnode)null)
-                s << "root";
+                s.Write("root");
             else
                 vn.printRaw(s);
             if (typeCode == 0)
-                s << " absolute";
+                s.Write(" absolute");
             else
-                s << " stackptr";
-            if (opCode == OpCode.CPUI_MAX)
-            {
+                s.Write(" stackptr");
+            if (opCode == OpCode.CPUI_MAX) {
                 if (vn.isConstant())
-                    s << " const";
+                    s.Write(" const");
                 else
-                    s << " input";
+                    s.Write(" input");
             }
             else
-                s << ' ' << Globals.get_opname(opCode);
-            s << ' ';
+                s.Write($" {Globals.get_opname(opCode)}");
+            s.Write(' ');
             range.printRaw(s);
         }
     }

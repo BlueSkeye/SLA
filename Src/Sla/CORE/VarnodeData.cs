@@ -18,7 +18,7 @@ namespace Sla.CORE
     public class VarnodeData
     {
         /// The address space
-        internal AddrSpace space;
+        internal AddrSpace? space;
         /// The offset within the space
         internal ulong offset;
         /// <summary>WARNING : The original library uses some trick to store a pointer
@@ -138,7 +138,7 @@ namespace Sla.CORE
                 if (attribId == AttributeId.ATTRIB_SPACE) {
                     result.space = decoder.readSpace();
                     decoder.rewindAttributes();
-                    result.offset = result.space.decodeAttributes(decoder, ref result.size);
+                    result.offset = result.space.decodeAttributes(decoder, out result.size);
                     return result;
                 }
                 if (attribId == AttributeId.ATTRIB_NAME) {

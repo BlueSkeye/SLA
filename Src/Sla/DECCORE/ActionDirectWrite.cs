@@ -112,8 +112,9 @@ namespace Sla.DECCORE
             while (!worklist.empty()) {
                 vn = worklist.GetLastItem();
                 worklist.RemoveLastItem();
-                for (oiter = vn.beginDescend(); oiter != vn.endDescend(); ++oiter) {
-                    op = *oiter;
+                oiter = vn.beginDescend();
+                while (oiter.MoveNext()) {
+                    op = oiter.Current;
                     if (!op.isAssignment()) continue;
                     dvn = op.getOut();
                     if (!dvn.isDirectWrite()) {

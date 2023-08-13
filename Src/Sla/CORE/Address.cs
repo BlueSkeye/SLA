@@ -412,7 +412,7 @@ namespace Sla.CORE
         /// \param op is the start of the range to check
         /// \param size is the size of the range
         /// \return an integer indicating how overlap occurs
-        public int overlapJoin(int skip, ref Address op, int size)
+        public int overlapJoin(int skip, Address op, int size)
         {
             return op.getSpace().overlapJoin(op.getOffset(), size, @base, offset, skip);
         }

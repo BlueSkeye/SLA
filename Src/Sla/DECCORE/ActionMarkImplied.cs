@@ -16,14 +16,16 @@ namespace Sla.DECCORE
         internal struct DescTreeElement
         {
             /// The Varnode at this particular point in the path
-            private Varnode vn;
+            internal Varnode vn;
             /// The current edge being traversed
-            private IEnumerator<PcodeOp> desciter;
+            internal IEnumerator<PcodeOp> desciter;
+            internal bool _traversalCompleted;
 
             internal DescTreeElement(Varnode v)
             {
                 vn = v;
                 desciter = v.beginDescend();
+                _traversalCompleted = false;
             }
         }
 
@@ -39,9 +41,15 @@ namespace Sla.DECCORE
             for (int i = 0; i < 2; ++i) {
                 Varnode vncur = var[i];
                 if (!vncur.isWritten()) continue;
-                PcodeOp op = vncur.getDef();
+                PcodeOp op = vncur.getDef() ?? throw new BugException();
                 OpCode opc = op.code();
-                if ((opc != OpCode.CPUI_INT_ADD) && (opc != OpCode.CPUI_PTRSUB) && (opc != OpCode.CPUI_PTRADD) && (opc != OpCode.CPUI_INT_XOR)) continue;
+                if (opc != OpCode.CPUI_INT_ADD
+                    && (opc != OpCode.CPUI_PTRSUB)
+                    && (opc != OpCode.CPUI_PTRADD)
+                    && (opc != OpCode.CPUI_INT_XOR))
+                {
+                    continue;
+                }
                 if (var[1 - i] != op.getIn(0)) continue;
                 if (op.getIn(1).isConstant()) return false;
             }
@@ -57,8 +65,7 @@ namespace Sla.DECCORE
         private static bool isPossibleAlias(Varnode vn1, Varnode vn2, int depth)
         {
             if (vn1 == vn2) return true;    // Definite alias
-            if ((!vn1.isWritten()) || (!vn2.isWritten()))
-            {
+            if ((!vn1.isWritten()) || (!vn2.isWritten())) {
                 if (vn1.isConstant() && vn2.isConstant())
                     return (vn1.getOffset() == vn2.getOffset()); // FIXME: these could be NEAR each other and still have an alias
                 return isPossibleAliasStep(vn1, vn2);
@@ -131,13 +138,12 @@ namespace Sla.DECCORE
         /// \return \b true if there is a Cover violation
         private static bool checkImpliedCover(Funcdata data, Varnode vn)
         {
-            PcodeOp op;
             PcodeOp storeop;
             PcodeOp callop;
             Varnode defvn;
             int i;
 
-            op = vn.getDef();
+            PcodeOp op = vn.getDef() ?? throw new BugException();
             if (op.code() == OpCode.CPUI_LOAD) {
                 // Check for loads crossing stores
                 IEnumerator<PcodeOp> oiter;
@@ -185,7 +191,6 @@ namespace Sla.DECCORE
         public override int apply(Funcdata data)
         {
             VarnodeLocSet::const_iterator viter;
-            IEnumerator<PcodeOp> oiter;
             Varnode vn;
             Varnode vncur;
             Varnode defvn;
@@ -194,7 +199,7 @@ namespace Sla.DECCORE
             List<DescTreeElement> varstack = new List<DescTreeElement>();
 
             for (viter = data.beginLoc(); viter != data.endLoc(); ++viter) {
-                vn = *viter;
+                vn = viter.Current;
                 if (vn.isFree()) continue;
                 if (vn.isExplicit()) continue;
                 if (vn.isImplied()) continue;
@@ -208,7 +213,7 @@ namespace Sla.DECCORE
                             vncur.setExplicit();   // if not, mark explicit
                         else {
                             vncur.setImplied();    // Mark as implied
-                            op = vncur.getDef();
+                            op = vncur.getDef() ?? throw new BugException();
                             // setting the implied type is now taken care of by ActionSetCasts
                             //    vn.updatetype(op.outputtype_token(),false,false); // implied must have parsed type
                             // Back propagate varnode's cover to inputs of defining op
@@ -221,7 +226,7 @@ namespace Sla.DECCORE
                         varstack.RemoveLastItem();
                     }
                     else {
-                        Varnode? outvn = (*varstack.GetLastItem().desciter++).getOut();
+                        Varnode? outvn = (varstack.GetLastItem().desciter++).getOut();
                         if (outvn != (Varnode)null) {
                             if ((!outvn.isExplicit()) && (!outvn.isImplied()))
                                 varstack.Add(new DescTreeElement(outvn));

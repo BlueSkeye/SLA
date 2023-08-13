@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
-    internal struct PreferSplitRecord
+    internal class PreferSplitRecord
     {
         internal VarnodeData storage;
         // Number of initial bytes (in address order) to split into first piece

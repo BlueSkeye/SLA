@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.Intrinsics;
@@ -56,12 +57,12 @@ namespace Sla.DECCORE
                     subhi = otherhi.getDef() ?? throw new BugException();
                 }
                 if (subhi.code() != OpCode.CPUI_SUBPIECE) return false;
-                if (subhi.getIn(1).getOffset() != wholesize - hi.getSize()) return false;
+                if (subhi.getIn(1).getOffset() != (ulong)(wholesize - hi.getSize())) return false;
                 whole = subhi.getIn(0);
                 if (!lo.isWritten()) return false;
                 PcodeOp sublo = lo.getDef() ?? throw new BugException();
-                if (sublo.code() == OpCode.CPUI_COPY)
-                { // Go thru one level of copy, if the piece is addrtied
+                if (sublo.code() == OpCode.CPUI_COPY) {
+                    // Go thru one level of copy, if the piece is addrtied
                     Varnode otherlo = sublo.getIn(0);
                     if (!otherlo.isWritten()) return false;
                     sublo = otherlo.getDef() ?? throw new BugException();
@@ -77,13 +78,11 @@ namespace Sla.DECCORE
                 if (whole == (Varnode)null) return false;
             }
 
-            if (whole.isWritten())
-            {
+            if (whole.isWritten()) {
                 defpoint = whole.getDef();
                 defblock = defpoint.getParent();
             }
-            else if (whole.isInput())
-            {
+            else if (whole.isInput()) {
                 defpoint = (PcodeOp)null;
                 defblock = (BlockBasic)null;
             }
@@ -615,7 +614,7 @@ namespace Sla.DECCORE
             lo.setPrecisLo();
             hi.setPrecisHi();
             if (whole != (Varnode)null) return;
-            Address newaddr;
+            Address newaddr = new Address();
             if (!isAddrTiedContiguous(lo, hi, newaddr)) {
                 newaddr = data.getArch().constructJoinAddress(data.getArch().translate, hi.getAddr(),
                     hi.getSize(), lo.getAddr(), lo.getSize());
@@ -775,12 +774,16 @@ namespace Sla.DECCORE
         /// \param spc is used to pass back the LOAD address space
         /// \param sizeres is used to pass back the combined LOAD size
         /// \return true if the given PcodeOps are contiguous LOADs
-        public static bool testContiguousPointers(PcodeOp most, PcodeOp least, out PcodeOp first,
-            out PcodeOp second, out AddrSpace spc)
+        public static bool testContiguousPointers(PcodeOp most, PcodeOp least,
+            [MaybeNullWhen(false)] out PcodeOp first, [MaybeNullWhen(false)] out PcodeOp second,
+            out AddrSpace spc)
         {
             spc = least.getIn(0).getSpaceFromConst();
-            if (most.getIn(0).getSpaceFromConst() != spc) return false;
-
+            if (most.getIn(0).getSpaceFromConst() != spc) {
+                first = null;
+                second = null;
+                return false;
+            }
             if (spc.isBigEndian()) {
                 // Convert significance order to address order
                 first = most;
@@ -792,12 +795,11 @@ namespace Sla.DECCORE
             }
             Varnode firstptr = first.getIn(1);
             if (firstptr.isFree()) return false;
-            int sizeres;
-            if (first.code() == OpCode.CPUI_LOAD)
-                sizeres = first.getOut().getSize(); // # of bytes read by lowest address load
-            else        // OpCode.CPUI_STORE
-                sizeres = first.getIn(2).getSize();
-
+            int sizeres = (first.code() == OpCode.CPUI_LOAD)
+                // # of bytes read by lowest address load
+                ? first.getOut().getSize()
+                // OpCode.CPUI_STORE
+                : sizeres = first.getIn(2).getSize();
             // Check if the loads are adjacent to each other
             return adjacentOffsets(first.getIn(1), second.getIn(1), (ulong)sizeres);
         }
@@ -830,12 +832,12 @@ namespace Sla.DECCORE
             ulong hioffset = hi.getOffset();
             if (spc.isBigEndian()) {
                 if (hioffset >= looffset) return false;
-                if (hioffset + hi.getSize() != looffset) return false;
+                if (hioffset + (ulong)hi.getSize() != looffset) return false;
                 res = hi.getAddr();
             }
             else {
                 if (looffset >= hioffset) return false;
-                if (looffset + lo.getSize() != hioffset) return false;
+                if (looffset + (ulong)lo.getSize() != hioffset) return false;
                 res = lo.getAddr();
             }
             return true;
@@ -863,7 +865,7 @@ namespace Sla.DECCORE
                 if (subop.code() != OpCode.CPUI_SUBPIECE) continue;
                 Varnode vn = subop.getOut();
                 if (vn.isPrecisHi()) {
-                    if (subop.getIn(1).getOffset() != basic.wholesize - vn.getSize()) continue;
+                    if (subop.getIn(1).getOffset() != (ulong)(basic.wholesize - vn.getSize())) continue;
                     basic.hi = vn;
                     res |= 2;
                 }
@@ -1244,19 +1246,14 @@ namespace Sla.DECCORE
         public static int applyRuleIn(SplitVarnode @in, Funcdata data)
         {
             for (int i = 0; i < 2; ++i) {
-                Varnode vn = (i == 0) ? @in.getHi() : @in.getLo();
+                Varnode? vn = (i == 0) ? @in.getHi() : @in.getLo();
                 if (vn == (Varnode)null) continue;
                 bool workishi = (i == 0);
-                list<PcodeOp*>::const_iterator iter, enditer;
-                iter = vn.beginDescend();
-                enditer = vn.endDescend();
-                while (iter != enditer)
-                {
-                    PcodeOp workop = *iter;
-                    ++iter;
+                IEnumerator<PcodeOp> iter = vn.beginDescend();
+                while (iter.MoveNext()) {
+                    PcodeOp workop = iter.Current;
                     switch (workop.code()) {
-                        case OpCode.CPUI_INT_ADD:
-                            {
+                        case OpCode.CPUI_INT_ADD: {
                                 AddForm addform = new AddForm();
                                 if (addform.applyRule(@in, workop, workishi, data))
                                     return 1;

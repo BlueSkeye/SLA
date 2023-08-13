@@ -1,4 +1,5 @@
 ﻿using Sla.CORE;
+using Sla.EXTRA;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -104,7 +105,9 @@ namespace Sla.DECCORE
         /// \param decoder is the stream decoder
         public void decodeOne(Sla.CORE.Decoder decoder)
         {
-            string p1, p2, p3;
+            string p1 = string.Empty;
+            string p2 = string.Empty;
+            string p3 = string.Empty;
 
             uint elemId = decoder.openElement();
             uint subId = decoder.openElement();

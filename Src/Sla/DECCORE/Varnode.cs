@@ -188,11 +188,10 @@ namespace Sla.DECCORE
         /// Merge class which knows when to call it properly
         private void updateCover()
         {
-            if ((flags & Varnode.varnode_flags.coverdirty) != 0)
-            {
+            if ((flags & varnode_flags.coverdirty) != 0) {
                 if (hasCover() && (cover != (Cover)null))
                     cover.rebuild(this);
-                clearFlags(Varnode.varnode_flags.coverdirty);
+                clearFlags(varnode_flags.coverdirty);
             }
         }
 
@@ -457,7 +456,7 @@ namespace Sla.DECCORE
         /// \return the resolved data-type
         public Datatype getHighTypeDefFacing()
         {
-            Datatype* ct = high.getType();
+            Datatype ct = high.getType() ?? throw new BugException();
             if (!ct.needsResolution())
                 return ct;
             return ct.findResolve(def, -1);
@@ -471,7 +470,7 @@ namespace Sla.DECCORE
         /// \return the resolved data-type
         public Datatype getHighTypeReadFacing(PcodeOp op)
         {
-            Datatype* ct = high.getType();
+            Datatype ct = high.getType() ?? throw new BugException();
             if (!ct.needsResolution())
                 return ct;
             return ct.findResolve(op, op.getSlot(this));
@@ -499,7 +498,7 @@ namespace Sla.DECCORE
         public uint getCreateIndex() => create_index;
 
         /// Get Varnode coverage information
-        public Cover getCover()
+        public Cover? getCover()
         {
             updateCover();
             return cover;
@@ -615,7 +614,7 @@ namespace Sla.DECCORE
             int expect = printRawNoMarkup(s);
 
             if (expect != size)
-                s << ':' << setw(1) << size;
+                s.Write($":{size}");
             if ((flags & Varnode.varnode_flags.input) != 0)
                 s.Write("(i)");
             if (isWritten())
@@ -706,11 +705,11 @@ namespace Sla.DECCORE
             }
             else if ((tp == spacetype.IPTR_FSPEC) || (tp == spacetype.IPTR_IOP)) {
                 flags = Varnode.varnode_flags.annotation | Varnode.varnode_flags.coverdirty;
-                nzm = ~((ulong)0);
+                nzm = ulong.MaxValue;
             }
             else {
                 flags = Varnode.varnode_flags.coverdirty;
-                nzm = ~((ulong)0);
+                nzm = ulong.MaxValue;
             }
         }
 
@@ -746,7 +745,8 @@ namespace Sla.DECCORE
         /// \param op2 is the Varnode to compare \b this to
         /// \return true if they are equivalent
         public static bool operator ==(Varnode op1, Varnode op2)
-        {               // Compare two varnodes
+        {
+            // Compare two varnodes
             if (op1.loc != op2.loc) return false;
             if (op1.size != op2.size) return false;
             varnode_flags f1 = op1.flags & (varnode_flags.input | varnode_flags.written);
@@ -782,8 +782,7 @@ namespace Sla.DECCORE
             if (loc.getSpace().getType() == spacetype.IPTR_CONSTANT) return false;
             ulong a = loc.getOffset();
             ulong b = op.loc.getOffset();
-            if (b < a)
-            {
+            if (b < a) {
                 if (a >= (ulong)((int)b + op.size)) return false;
                 return true;
             }
@@ -802,8 +801,7 @@ namespace Sla.DECCORE
             if (loc.getSpace().getType() == spacetype.IPTR_CONSTANT) return false;
             ulong a = loc.getOffset();
             ulong b = op2loc.getOffset();
-            if (b < a)
-            {
+            if (b < a) {
                 if (a >= b + (uint)op2size) return false;
                 return true;
             }

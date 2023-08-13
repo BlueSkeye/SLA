@@ -161,9 +161,8 @@ namespace Sla.DECCORE
         {
             foreach (TransformVar variable in pieceMap.Values) {
                 Varnode? vn = variable.vn;
-                if (vn == (Varnode)null)
-                    continue;
-                vn.clearMark();
+                if (vn != (Varnode)null)
+                    vn.clearMark();
             }
         }
 

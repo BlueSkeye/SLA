@@ -55,8 +55,8 @@ namespace Sla.DECCORE
             slot += 1;
             if (slot < op.numInput())
                 return;
-            if (iter != vn.endDescend()) {
-                op = *iter++;
+            if (iter.MoveNext()) {
+                op = iter.Current;
                 if (op.getOut() != (Varnode)null)
                     slot = -1;
                 else

@@ -75,9 +75,8 @@ namespace Sla.DECCORE
                     }
                     return (ValueSet)null;
                 }
-                while (iter != vn.endDescend()) {
+                while (iter.MoveNext()) {
                     PcodeOp op = iter.Current;
-                    ++iter;
                     Varnode? outVn = op.getOut();
                     if (outVn != (Varnode)null && outVn.isMark()) {
                         return outVn.getValueSet();
@@ -146,7 +145,7 @@ namespace Sla.DECCORE
         private void partitionSurround(Partition part)
         {
             recordStorage.Add(part);
-            part.startNode.partHead = &recordStorage.GetLastItem();
+            part.startNode.partHead = recordStorage.GetLastItem();
         }
 
         /// Generate a partition component given its head
@@ -156,10 +155,9 @@ namespace Sla.DECCORE
         /// \param part will hold the constructed Partition
         private void component(ValueSet vertex, Partition part)
         {
-            ValueSetEdge edgeIterator(vertex, rootNodes);
-            ValueSet* succ = edgeIterator.getNext();
-            while (succ != (ValueSet)null)
-            {
+            ValueSetEdge edgeIterator = new ValueSetEdge(vertex, rootNodes);
+            ValueSet? succ = edgeIterator.getNext();
+            while (succ != (ValueSet)null) {
                 if (succ.count == 0)
                     visit(succ, part);
                 succ = edgeIterator.getNext();
@@ -179,41 +177,31 @@ namespace Sla.DECCORE
             vertex.count = depthFirstIndex;
             int head = depthFirstIndex;
             bool loop = false;
-            ValueSetEdge edgeIterator(vertex, rootNodes);
-            ValueSet* succ = edgeIterator.getNext();
-            while (succ != (ValueSet)null)
-            {
-                int min;
-                if (succ.count == 0)
-                    min = visit(succ, part);
-                else
-                    min = succ.count;
-                if (min <= head)
-                {
+            ValueSetEdge edgeIterator = new ValueSetEdge(vertex, rootNodes);
+            ValueSet? succ = edgeIterator.getNext();
+            while (succ != (ValueSet)null) {
+                int min = (succ.count == 0) ? visit(succ, part) : succ.count;
+                if (min <= head) {
                     head = min;
                     loop = true;
                 }
                 succ = edgeIterator.getNext();
             }
-            if (head == vertex.count)
-            {
+            if (head == vertex.count) {
                 vertex.count = 0x7fffffff; // Set to "infinity"
-                ValueSet* element = nodeStack.GetLastItem();
+                ValueSet element = nodeStack.GetLastItem();
                 nodeStack.RemoveLastItem();
-                if (loop)
-                {
-                    while (element != vertex)
-                    {
+                if (loop) {
+                    while (element != vertex) {
                         element.count = 0;
                         element = nodeStack.GetLastItem();
                         nodeStack.RemoveLastItem();
                     }
-                    Partition compPart;         // empty partition
+                    Partition compPart = new Partition();         // empty partition
                     component(vertex, compPart);
                     partitionPrepend(compPart, part);
                 }
-                else
-                {
+                else {
                     partitionPrepend(vertex, part);
                 }
             }
@@ -231,16 +219,15 @@ namespace Sla.DECCORE
         /// Varnode::isMark() returning \b true.
         private void establishTopologicalOrder()
         {
-            for (list<ValueSet>::iterator iter = valueNodes.begin(); iter != valueNodes.end(); ++iter)
-            {
-                (*iter).count = 0;
-                (*iter).next = (ValueSet)null;
-                (*iter).partHead = (Partition)null;
+            foreach (ValueSet target in valueNodes) {
+                target.count = 0;
+                target.next = (ValueSet)null;
+                target.partHead = (Partition)null;
             }
-            ValueSet rootNode;
+            ValueSet rootNode = new ValueSet();
             rootNode.vn = (Varnode)null;
             depthFirstIndex = 0;
-            visit(&rootNode, orderPartition);
+            visit(rootNode, orderPartition);
             orderPartition.startNode = orderPartition.startNode.next;  // Remove simulated root
         }
 
