@@ -202,8 +202,9 @@ namespace Sla.EXTRA
                 else if (subel.getName() == "stringmatch")
                 {
                     sawTests = true;
-                    testList.emplace_back();
-                    testList.GetLastItem().restoreXml(subel);
+                    FunctionTestProperty newProperty = new FunctionTestProperty();
+                    testList.Add(newProperty);
+                    newProperty.restoreXml(subel);
                 }
                 else if (subel.getName() == "binaryimage")
                 {

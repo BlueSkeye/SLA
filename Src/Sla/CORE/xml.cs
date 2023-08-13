@@ -233,7 +233,7 @@ namespace Sla.CORE {
         /// \param s is the output stream
         /// \param attr is the name of the attribute
         /// \param val is the given integer value
-        internal static void a_v_i(StreamWriter s, string attr, long val)
+        internal static void a_v_i(TextWriter s, string attr, long val)
         {
             s.Write(' ');
             s.Write(attr);
@@ -246,7 +246,7 @@ namespace Sla.CORE {
         /// \param s is the output stream
         /// \param attr is the name of the attribute
         /// \param val is the given unsigned integer value
-        internal static void a_v_u(StreamWriter s, string attr, ulong val)
+        internal static void a_v_u(TextWriter s, string attr, ulong val)
         {
             s.Write(' ');
             s.Write(attr);
@@ -257,7 +257,7 @@ namespace Sla.CORE {
         /// \param s is the output stream
         /// \param attr is the name of the attribute
         /// \param val is the given boolean value
-        internal static void a_v_b(StreamWriter s, string attr, bool val)
+        internal static void a_v_b(TextWriter s, string attr, bool val)
         {
             s.Write(' ');
             s.Write(attr);

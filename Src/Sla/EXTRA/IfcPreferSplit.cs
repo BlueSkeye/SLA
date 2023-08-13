@@ -35,15 +35,15 @@ namespace Sla.EXTRA
             s >> dec >> split;
             if (split == -1)
                 throw new IfaceParseError("Bad split offset");
-            dcp.conf.splitrecords.emplace_back();
-            PreferSplitRecord & rec(dcp.conf.splitrecords.GetLastItem());
+            PreferSplitRecord rec = new PreferSplitRecord();
+            dcp.conf.splitrecords.Add(rec);
 
             rec.storage.space = addr.getSpace();
             rec.storage.offset = addr.getOffset();
             rec.storage.size = size;
             rec.splitoffset = split;
 
-            *status.optr << "Successfully added split record" << endl;
+            status.optr.WriteLine("Successfully added split record");
         }
     }
 }

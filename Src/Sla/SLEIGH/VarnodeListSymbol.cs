@@ -21,7 +21,7 @@ namespace Sla.SLEIGH
             tableisfilled = (min >= 0) && (max < varnode_table.size());
             for (uint i = 0; i < varnode_table.size(); ++i)
             {
-                if (varnode_table[i] == (VarnodeSymbol*)0)
+                if (varnode_table[i] == (VarnodeSymbol)null)
                     tableisfilled = false;
             }
         }
@@ -43,7 +43,7 @@ namespace Sla.SLEIGH
             if (!tableisfilled)
             {
                 long ind = patval.getValue(walker);
-                if ((ind < 0) || (ind >= varnode_table.size()) || (varnode_table[ind] == (VarnodeSymbol*)0))
+                if ((ind < 0) || (ind >= varnode_table.size()) || (varnode_table[ind] == (VarnodeSymbol)null))
                 {
                     ostringstream s;
                     s << walker.getAddr().getShortcut();
@@ -71,7 +71,7 @@ namespace Sla.SLEIGH
             for (int i = 0; i < varnode_table.size(); ++i)
             {
                 VarnodeSymbol* vnsym = varnode_table[i]; // Assume all are same size
-                if (vnsym != (VarnodeSymbol*)0)
+                if (vnsym != (VarnodeSymbol)null)
                     return vnsym.getSize();
             }
             throw new SleighError("No register attached to: " + getName());
@@ -95,7 +95,7 @@ namespace Sla.SLEIGH
             patval.saveXml(s);
             for (int i = 0; i < varnode_table.size(); ++i)
             {
-                if (varnode_table[i] == (VarnodeSymbol*)0)
+                if (varnode_table[i] == (VarnodeSymbol)null)
                     s << "<null/>\n";
                 else
                     s << "<var id=\"0x" << hex << varnode_table[i].getId() << "\"/>\n";
@@ -130,7 +130,7 @@ namespace Sla.SLEIGH
                     varnode_table.Add((VarnodeSymbol*)trans.findSymbol(id));
                 }
                 else
-                    varnode_table.Add((VarnodeSymbol*)0);
+                    varnode_table.Add((VarnodeSymbol)null);
                 ++iter;
             }
             checkTableFill();

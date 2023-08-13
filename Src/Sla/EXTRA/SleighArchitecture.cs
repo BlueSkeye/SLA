@@ -382,7 +382,7 @@ namespace Sla.EXTRA
 
         ~SleighArchitecture()
         {
-            translate = (Translate*)0;
+            translate = (Translate)null;
         }
 
         public override string getDescription() => description[languageindex].getDescription();

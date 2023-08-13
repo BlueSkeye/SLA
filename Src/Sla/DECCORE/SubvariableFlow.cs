@@ -174,51 +174,49 @@ namespace Sla.DECCORE
         /// \param mask is the given mask describing the bits of the logical value
         /// \param inworklist will hold \b true if the new node should be traced further
         /// \return the new subgraph variable node
-        private ReplaceVarnode setReplacement(Varnode vn, ulong mask, bool inworklist)
+        private ReplaceVarnode? setReplacement(Varnode vn, ulong mask, bool inworklist)
         {
-            ReplaceVarnode* res;
-            if (vn.isMark())
-            {       // Already seen before
-                Dictionary<Varnode*, ReplaceVarnode>::iterator iter;
+            ReplaceVarnode res;
+            if (vn.isMark()) {       // Already seen before
+                Dictionary<Varnode, ReplaceVarnode>::iterator iter;
                 iter = varmap.find(vn);
                 res = &(*iter).second;
                 inworklist = false;
                 if (res.mask != mask)
-                    return (ReplaceVarnode*)0;
+                    return (ReplaceVarnode)null;
                 return res;
             }
 
-            if (vn.isConstant())
-            {
+            if (vn.isConstant()) {
                 inworklist = false;
-                if (sextrestrictions)
-                {   // Check that -vn- is a sign extension
+                if (sextrestrictions) {
+                    // Check that -vn- is a sign extension
                     ulong cval = vn.getOffset();
                     ulong smallval = cval & mask; // From its logical size
                     ulong sextval = Globals.sign_extend(smallval, flowsize, vn.getSize());// to its fullsize
                     if (sextval != cval)
-                        return (ReplaceVarnode*)0;
+                        return (ReplaceVarnode)null;
                 }
-                return addConstant((ReplaceOp*)0, mask, 0, vn);
+                return addConstant((ReplaceOp)null, mask, 0, vn);
             }
 
             if (vn.isFree())
-                return (ReplaceVarnode*)0; // Abort
+                return (ReplaceVarnode)null; // Abort
 
             if (vn.isAddrForce() && (vn.getSize() != flowsize))
-                return (ReplaceVarnode*)0;
+                return (ReplaceVarnode)null;
 
             if (sextrestrictions)
             {
                 if (vn.getSize() != flowsize)
                 {
-                    if ((!aggressive) && vn.isInput()) return (ReplaceVarnode*)0; // Cannot assume input is sign extended
-                    if (vn.isPersist()) return (ReplaceVarnode*)0;
+                    if ((!aggressive) && vn.isInput()) return (ReplaceVarnode)null; // Cannot assume input is sign extended
+                    if (vn.isPersist()) return (ReplaceVarnode)null;
                 }
                 if (vn.isTypeLock() && vn.getType().getMetatype() != type_metatype.TYPE_PARTIALSTRUCT)
                 {
                     if (vn.getType().getSize() != flowsize)
-                        return (ReplaceVarnode*)0;
+                        return (ReplaceVarnode)null;
                 }
             }
             else
@@ -228,20 +226,20 @@ namespace Sla.DECCORE
                         // If the logical variable is not a flag, don't consider the case where multiple variables
                         // are packed into a single location, i.e. always consider it a single variable
                     if ((!aggressive) && ((vn.getConsume() & ~mask) != 0)) // If there is any use of value outside of the logical variable
-                        return (ReplaceVarnode*)0; // This probably means the whole thing is a variable, i.e. quit
+                        return (ReplaceVarnode)null; // This probably means the whole thing is a variable, i.e. quit
                     if (vn.isTypeLock() && vn.getType().getMetatype() != type_metatype.TYPE_PARTIALSTRUCT)
                     {
                         int sz = vn.getType().getSize();
                         if (sz != flowsize)
-                            return (ReplaceVarnode*)0;
+                            return (ReplaceVarnode)null;
                     }
                 }
 
                 if (vn.isInput())
                 {       // Must be careful with inputs
                         // Inputs must come in from the right register/memory
-                    if (bitsize < 8) return (ReplaceVarnode*)0; // Dont create input flag
-                    if ((mask & 1) == 0) return (ReplaceVarnode*)0; // Dont create unique input
+                    if (bitsize < 8) return (ReplaceVarnode)null; // Dont create input flag
+                    if ((mask & 1) == 0) return (ReplaceVarnode)null; // Dont create unique input
                                                                     // Its extremely important that the code (above) which doesn't allow packed variables be applied
                                                                     // or the mechanisms we use for inputs will give us spurious temporary inputs
                 }
@@ -252,7 +250,7 @@ namespace Sla.DECCORE
             res.vn = vn;
             res.replacement = (Varnode)null;
             res.mask = mask;
-            res.def = (ReplaceOp*)0;
+            res.def = (ReplaceOp)null;
             inworklist = true;
             // Check if vn already represents the logical variable being traced
             if (vn.getSize() == flowsize)
@@ -282,16 +280,16 @@ namespace Sla.DECCORE
         /// \return the new logical subgraph operator object
         private ReplaceOp createOp(OpCode opc, int numparam, ReplaceVarnode outrvn)
         {
-            if (outrvn.def != (ReplaceOp*)0)
+            if (outrvn.def != (ReplaceOp)null)
                 return outrvn.def;
-            oplist.emplace_back();
-            ReplaceOp* rop = &oplist.GetLastItem();
+            ReplaceOp rop = new ReplaceOp() {
+                op = outrvn.vn.getDef(),
+                numparams = numparam,
+                opc = opc,
+                output = outrvn
+            };
+            oplist.Add(rop);
             outrvn.def = rop;
-            rop.op = outrvn.vn.getDef();
-            rop.numparams = numparam;
-            rop.opc = opc;
-            rop.output = outrvn;
-
             return rop;
         }
 
@@ -305,14 +303,15 @@ namespace Sla.DECCORE
         /// \return the new logical subgraph operator objects
         private ReplaceOp createOpDown(OpCode opc, int numparam, PcodeOp op, ReplaceVarnode inrvn, int slot)
         {
-            oplist.emplace_back();
-            ReplaceOp* rop = &oplist.GetLastItem();
-            rop.op = op;
-            rop.opc = opc;
-            rop.numparams = numparam;
-            rop.output = (ReplaceVarnode*)0;
+            ReplaceOp rop = new ReplaceOp() {
+                op = op,
+                opc = opc,
+                numparams = numparam,
+                output = (ReplaceVarnode)null
+            };
+            oplist.Add(rop);
             while (rop.input.size() <= slot)
-                rop.input.Add((ReplaceVarnode*)0);
+                rop.input.Add((ReplaceVarnode)null);
             rop.input[slot] = inrvn;
             return rop;
         }
@@ -329,21 +328,21 @@ namespace Sla.DECCORE
         private bool tryCallPull(PcodeOp op, ReplaceVarnode rvn, int slot)
         {
             if (slot == 0) return false;
-            if (!aggressive)
-            {
+            if (!aggressive) {
                 if ((rvn.vn.getConsume() & ~rvn.mask) != 0)  // If there's something outside the mask being consumed
                     return false;               // Don't truncate
             }
-            FuncCallSpecs* fc = fd.getCallSpecs(op);
+            FuncCallSpecs? fc = fd.getCallSpecs(op);
             if (fc == (FuncCallSpecs)null) return false;
             if (fc.isInputActive()) return false; // Don't trim while in the middle of figuring out params
             if (fc.isInputLocked() && (!fc.isDotdotdot())) return false;
 
-            patchlist.emplace_back();
-            patchlist.GetLastItem().type = PatchRecord::parameter_patch;
-            patchlist.GetLastItem().patchOp = op;
-            patchlist.GetLastItem().in1 = rvn;
-            patchlist.GetLastItem().slot = slot;
+            patchlist.Add(new PatchRecord() {
+                type = PatchRecord.patchtype.parameter_patch,
+                patchOp = op,
+                in1 = rvn,
+                slot = slot
+            });
             pullcount += 1;     // A true terminal modification
             return true;
         }
@@ -360,49 +359,47 @@ namespace Sla.DECCORE
         {
             if (slot == 0) return false;    // Don't deal with actual return address container
             if (fd.getFuncProto().isOutputLocked()) return false;
-            if (!aggressive)
-            {
+            if (!aggressive) {
                 if ((rvn.vn.getConsume() & ~rvn.mask) != 0)  // If there's something outside the mask being consumed
                     return false;               // Don't truncate
             }
 
-            if (!returnsTraversed)
-            {
+            if (!returnsTraversed) {
                 // If we plan to truncate the size of a return variable, we need to propagate the logical size to any other
                 // return variables so that there can still be a single return value type for the function
-                list<PcodeOp*>::const_iterator iter, enditer;
+                IEnumerator<PcodeOp> iter, enditer;
                 iter = fd.beginOp(OpCode.CPUI_RETURN);
                 enditer = fd.endOp(OpCode.CPUI_RETURN);
-                while (iter != enditer)
-                {
-                    PcodeOp* retop = *iter;
+                while (iter != enditer) {
+                    PcodeOp retop = iter.Current;
                     ++iter;
                     if (retop.getHaltType() != 0) continue;        // Artificial halt
-                    Varnode* retvn = retop.getIn(slot);
+                    Varnode retvn = retop.getIn(slot);
                     bool inworklist;
-                    ReplaceVarnode* rep = setReplacement(retvn, rvn.mask, inworklist);
-                    if (rep == (ReplaceVarnode*)0)
+                    ReplaceVarnode? rep = setReplacement(retvn, rvn.mask, inworklist);
+                    if (rep == (ReplaceVarnode)null)
                         return false;
                     if (inworklist)
                         worklist.Add(rep);
-                    else if (retvn.isConstant() && retop != op)
-                    {
+                    else if (retvn.isConstant() && retop != op) {
                         // Trace won't revisit this RETURN, so we need to generate patch now
-                        patchlist.emplace_back();
-                        patchlist.GetLastItem().type = PatchRecord::parameter_patch;
-                        patchlist.GetLastItem().patchOp = retop;
-                        patchlist.GetLastItem().in1 = rep;
-                        patchlist.GetLastItem().slot = slot;
+                        patchlist.Add(new PatchRecord() {
+                            type = PatchRecord.patchtype.parameter_patch,
+                            patchOp = retop,
+                            in1 = rep,
+                            slot = slot
+                        });
                         pullcount += 1;
                     }
                 }
                 returnsTraversed = true;
             }
-            patchlist.emplace_back();
-            patchlist.GetLastItem().type = PatchRecord::parameter_patch;
-            patchlist.GetLastItem().patchOp = op;
-            patchlist.GetLastItem().in1 = rvn;
-            patchlist.GetLastItem().slot = slot;
+            patchlist.Add(new PatchRecord() {
+                type = PatchRecord.patchtype.parameter_patch,
+                patchOp = op,
+                in1 = rvn,
+                slot = slot
+            });
             pullcount += 1;     // A true terminal modification
             return true;
         }
@@ -416,14 +413,13 @@ namespace Sla.DECCORE
         /// \return \b true if we can successfully trim the value to its logical size
         private bool tryCallReturnPush(PcodeOp op, ReplaceVarnode rvn)
         {
-            if (!aggressive)
-            {
+            if (!aggressive) {
                 if ((rvn.vn.getConsume() & ~rvn.mask) != 0)  // If there's something outside the mask being consumed
                     return false;               // Don't truncate
             }
             if ((rvn.mask & 1) == 0) return false; // Verify the logical value is the least significant part
             if (bitsize < 8) return false;      // Make sure logical value is at least a byte
-            FuncCallSpecs* fc = fd.getCallSpecs(op);
+            FuncCallSpecs? fc = fd.getCallSpecs(op);
             if (fc == (FuncCallSpecs)null) return false;
             if (fc.isOutputLocked()) return false;
             if (fc.isOutputActive()) return false; // Don't trim while in the middle of figuring out return value
@@ -445,11 +441,12 @@ namespace Sla.DECCORE
             if ((rvn.mask & 1) == 0) return false; // Logical value must be justified
             if ((rvn.vn.getConsume() & ~rvn.mask) != 0)  // If there's something outside the mask being consumed
                 return false;               //  we can't trim
-            patchlist.emplace_back();
-            patchlist.GetLastItem().type = PatchRecord::parameter_patch;
-            patchlist.GetLastItem().patchOp = op;
-            patchlist.GetLastItem().in1 = rvn;
-            patchlist.GetLastItem().slot = 0;
+            patchlist.Add(new PatchRecord() {
+                type = PatchRecord.patchtype.parameter_patch,
+                patchOp = op,
+                in1 = rvn,
+                slot = 0
+            });
             pullcount += 1;     // A true terminal modification
             return true;
         }
@@ -480,8 +477,7 @@ namespace Sla.DECCORE
                     continue;
                 dcount += 1;        // Count this descendant
                 slot = op.getSlot(rvn.vn);
-                switch (op.code())
-                {
+                switch (op.code()) {
                     case OpCode.CPUI_COPY:
                     case OpCode.CPUI_MULTIEQUAL:
                     case OpCode.CPUI_INT_NEGATE:
@@ -557,7 +553,7 @@ namespace Sla.DECCORE
                         if (rvn.mask != (newmask >> sa)) return false; // subvar is clipped
                                                                         // Is the small variable getting zero padded into something that is fully consumed
                         if (((rvn.mask & 1) != 0) && (sa + bitsize == 8 * outvn.getSize())
-                        && (Globals.calc_mask(outvn.getSize()) == outvn.getConsume()))
+                            && (Globals.calc_mask(outvn.getSize()) == outvn.getConsume()))
                         {
                             addSuggestedPatch(rvn, op, sa);
                             hcount += 1;
@@ -594,7 +590,7 @@ namespace Sla.DECCORE
                         }
                         // Is the small variable getting zero padded into something that is fully consumed
                         if (((newmask & 1) == 1) && (sa + bitsize == 8 * outvn.getSize())
-                            && (Globals.calc_mask(outvn.getSize()) == outvn.getConsume()))
+                            && (Globals.calc_mask((uint)outvn.getSize()) == outvn.getConsume()))
                         {
                             addSuggestedPatch(rvn, op, 0);
                             hcount += 1;
@@ -783,7 +779,7 @@ namespace Sla.DECCORE
                     return true;
                 case OpCode.CPUI_INT_ZEXT:
                 case OpCode.CPUI_INT_SEXT:
-                    if ((rvn.mask & Globals.calc_mask(op.getIn(0).getSize())) != rvn.mask) {
+                    if ((rvn.mask & Globals.calc_mask((uint)op.getIn(0).getSize())) != rvn.mask) {
                         if ((rvn.mask & 1) != 0 && flowsize > op.getIn(0).getSize()) {
                             addPush(op, rvn);
                             return true;
@@ -821,7 +817,7 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_INT_RIGHT:
                     if (!op.getIn(1).isConstant()) break; // Dynamic shift
                     sa = (int)op.getIn(1).getOffset();
-                    newmask = (rvn.mask << sa) & Globals.calc_mask(op.getIn(0).getSize());
+                    newmask = (rvn.mask << sa) & Globals.calc_mask((uint)op.getIn(0).getSize());
                     if (newmask == 0) {
                         // Subvariable filled with shifted zero
                         rop = createOp(OpCode.CPUI_COPY, 1, rvn);
@@ -836,7 +832,7 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_INT_SRIGHT:
                     if (!op.getIn(1).isConstant()) break; // Dynamic shift
                     sa = (int)op.getIn(1).getOffset();
-                    newmask = (rvn.mask << sa) & Globals.calc_mask(op.getIn(0).getSize());
+                    newmask = (rvn.mask << sa) & Globals.calc_mask((uint)op.getIn(0).getSize());
                     if ((newmask >> sa) != rvn.mask)
                         break;          // subvariable is truncated by shift
                     rop = createOp(OpCode.CPUI_COPY, 1, rvn);
@@ -844,8 +840,7 @@ namespace Sla.DECCORE
                     return true;
                 case OpCode.CPUI_INT_MULT:
                     sa = Globals.leastsigbit_set(rvn.mask);
-                    if (sa != 0)
-                    {
+                    if (sa != 0) {
                         int sa2 = Globals.leastsigbit_set(op.getIn(1).getNZMask());
                         if (sa2 < sa) return false; // Cannot deal with carries into logical multiply
                         newmask = rvn.mask >> sa;
@@ -869,7 +864,7 @@ namespace Sla.DECCORE
                     if (!createLink(rop, newmask, 0, op.getIn(0))) return false;
                     return true;
                 case OpCode.CPUI_PIECE:
-                    if ((rvn.mask & Globals.calc_mask(op.getIn(1).getSize())) == rvn.mask) {
+                    if ((rvn.mask & Globals.calc_mask((uint)op.getIn(1).getSize())) == rvn.mask) {
                         rop = createOp(OpCode.CPUI_COPY, 1, rvn);
                         if (!createLink(rop, rvn.mask, 0, op.getIn(1))) return false;
                         return true;
@@ -1016,12 +1011,11 @@ namespace Sla.DECCORE
         /// \return \b true if the logical value can successfully traced backward one level
         private bool traceBackwardSext(ReplaceVarnode rvn)
         {
-            PcodeOp* op = rvn.vn.getDef();
+            PcodeOp? op = rvn.vn.getDef();
             if (op == (PcodeOp)null) return true; // If vn is input
-            ReplaceOp* rop;
+            ReplaceOp rop;
 
-            switch (op.code())
-            {
+            switch (op.code()) {
                 case OpCode.CPUI_COPY:
                 case OpCode.CPUI_MULTIEQUAL:
                 case OpCode.CPUI_INT_NEGATE:
@@ -1034,8 +1028,7 @@ namespace Sla.DECCORE
                             return false;
                     return true;
                 case OpCode.CPUI_INT_ZEXT:
-                    if (op.getIn(0).getSize() < flowsize)
-                    {
+                    if (op.getIn(0).getSize() < flowsize) {
                         // zero extension from a smaller size still acts as a signed extension
                         addPush(op, rvn);
                         return true;
@@ -1053,7 +1046,7 @@ namespace Sla.DECCORE
                     rop = createOp(OpCode.CPUI_INT_SRIGHT, 2, rvn);
                     if (!createLink(rop, rvn.mask, 0, op.getIn(0))) return false; // Keep the same mask
                     if (rop.input.size() == 1)
-                        addConstant(rop, Globals.calc_mask(op.getIn(1).getSize()), 1, op.getIn(1)); // Preserve the shift amount
+                        addConstant(rop, Globals.calc_mask((uint)op.getIn(1).getSize()), 1, op.getIn(1)); // Preserve the shift amount
                     return true;
                 case OpCode.CPUI_CALL:
                 case OpCode.CPUI_CALLIND:
@@ -1080,20 +1073,17 @@ namespace Sla.DECCORE
         private bool createLink(ReplaceOp rop, ulong mask, int slot, Varnode vn)
         {
             bool inworklist;
-            ReplaceVarnode* rep = setReplacement(vn, mask, inworklist);
-            if (rep == (ReplaceVarnode*)0) return false;
+            ReplaceVarnode? rep = setReplacement(vn, mask, inworklist);
+            if (rep == (ReplaceVarnode)null) return false;
 
-            if (rop != (ReplaceOp*)0)
-            {
-                if (slot == -1)
-                {
+            if (rop != (ReplaceOp)null) {
+                if (slot == -1) {
                     rop.output = rep;
                     rep.def = rop;
                 }
-                else
-                {
+                else {
                     while (rop.input.size() <= slot)
-                        rop.input.Add((ReplaceVarnode*)0);
+                        rop.input.Add((ReplaceVarnode)null);
                     rop.input[slot] = rep;
                 }
             }
@@ -1116,8 +1106,8 @@ namespace Sla.DECCORE
         private bool createCompareBridge(PcodeOp op, ReplaceVarnode inrvn, int slot, Varnode othervn)
         {
             bool inworklist;
-            ReplaceVarnode* rep = setReplacement(othervn, inrvn.mask, inworklist);
-            if (rep == (ReplaceVarnode*)0) return false;
+            ReplaceVarnode? rep = setReplacement(othervn, inrvn.mask, inworklist);
+            if (rep == (ReplaceVarnode)null) return false;
 
             if (slot == 0)
                 addComparePatch(inrvn, rep, op);
@@ -1137,10 +1127,12 @@ namespace Sla.DECCORE
         /// \param rvn is the output variable holding the logical value
         private void addPush(PcodeOp pushOp, ReplaceVarnode rvn)
         {
-            patchlist.push_front(PatchRecord());        // Push to the front of the patch list
-            patchlist.front().type = PatchRecord::push_patch;
-            patchlist.front().patchOp = pushOp;
-            patchlist.front().in1 = rvn;
+            // Push to the front of the patch list
+            patchlist.Insert(0, new PatchRecord() {
+                type = PatchRecord.patchtype.push_patch,
+                patchOp = pushOp,
+                in1 = rvn
+            });
         }
 
         /// \brief Mark an operation where a subgraph variable is naturally copied into the original data-flow
@@ -1152,11 +1144,16 @@ namespace Sla.DECCORE
         /// \param rvn is the given subgraph variable holding the logical value
         private void addTerminalPatch(PcodeOp pullop, ReplaceVarnode rvn)
         {
-            patchlist.emplace_back();
-            patchlist.GetLastItem().type = PatchRecord::copy_patch;    // Ultimately gets converted to a COPY
-            patchlist.GetLastItem().patchOp = pullop;  // Operation pulling the variable out
-            patchlist.GetLastItem().in1 = rvn; // Point in container flow for pull
-            pullcount += 1;     // a true terminal modification
+            patchlist.Add(new PatchRecord() {
+                // Ultimately gets converted to a COPY
+                type = PatchRecord.patchtype.copy_patch,
+                // Operation pulling the variable out
+                patchOp = pullop,
+                // Point in container flow for pull
+                in1 = rvn
+            });
+            // a true terminal modification
+            pullcount += 1;
         }
 
         /// \brief Mark an operation where a subgraph variable is naturally pulled into the original data-flow
@@ -1169,11 +1166,12 @@ namespace Sla.DECCORE
         /// \param slot is the input slot to the operation
         private void addTerminalPatchSameOp(PcodeOp pullop, ReplaceVarnode rvn, int slot)
         {
-            patchlist.emplace_back();
-            patchlist.GetLastItem().type = PatchRecord::parameter_patch;   // Keep the original op, just change input
-            patchlist.GetLastItem().patchOp = pullop;  // Operation pulling the variable out
-            patchlist.GetLastItem().in1 = rvn; // Point in container flow for pull
-            patchlist.GetLastItem().slot = slot;
+            patchlist.Add(new PatchRecord() {
+                type = PatchRecord.patchtype.parameter_patch, // Keep the original op, just change input
+                patchOp = pullop,  // Operation pulling the variable out
+                in1 = rvn, // Point in container flow for pull
+                slot = slot
+            });
             pullcount += 1;     // a true terminal modification
         }
 
@@ -1186,11 +1184,15 @@ namespace Sla.DECCORE
         /// \param slot is the input slot of the variable to the operation
         private void addBooleanPatch(PcodeOp pullop, ReplaceVarnode rvn, int slot)
         {
-            patchlist.emplace_back();
-            patchlist.GetLastItem().type = PatchRecord::parameter_patch;   // Make no change to the operator, just put in the new input
-            patchlist.GetLastItem().patchOp = pullop;  // Operation pulling the variable out
-            patchlist.GetLastItem().in1 = rvn; // Point in container flow for pull
-            patchlist.GetLastItem().slot = slot;
+            patchlist.Add(new PatchRecord() {
+                // Make no change to the operator, just put in the new input
+                type = PatchRecord.patchtype.parameter_patch,
+                // Operation pulling the variable out
+                patchOp = pullop,
+                // Point in container flow for pull
+                in1 = rvn,
+                slot = slot
+            });
             // this is not a true modification
         }
 
@@ -1203,10 +1205,11 @@ namespace Sla.DECCORE
         /// \param sa is the amount the logical value is shifted to the left
         private void addSuggestedPatch(ReplaceVarnode rvn, PcodeOp pushop, int sa)
         {
-            patchlist.emplace_back();
-            patchlist.GetLastItem().type = PatchRecord::extension_patch;
-            patchlist.GetLastItem().in1 = rvn;
-            patchlist.GetLastItem().patchOp = pushop;
+            patchlist.Add(new PatchRecord() {
+                type = PatchRecord.patchtype.extension_patch,
+                in1 = rvn,
+                patchOp = pushop
+            });
             if (sa == -1)
                 sa = Globals.leastsigbit_set(rvn.mask);
             patchlist.GetLastItem().slot = sa;
@@ -1222,11 +1225,12 @@ namespace Sla.DECCORE
         /// \param op is the comparison operation
         private void addComparePatch(ReplaceVarnode in1, ReplaceVarnode in2, PcodeOp op)
         {
-            patchlist.emplace_back();
-            patchlist.GetLastItem().type = PatchRecord::compare_patch;
-            patchlist.GetLastItem().patchOp = op;
-            patchlist.GetLastItem().in1 = in1;
-            patchlist.GetLastItem().in2 = in2;
+            patchlist.Add(new PatchRecord() {
+                type = PatchRecord.patchtype.compare_patch,
+                patchOp = op,
+                in1 = in1,
+                in2 = in2
+            });
             pullcount += 1;
         }
 
@@ -1239,20 +1243,20 @@ namespace Sla.DECCORE
         /// \return the new constant variable node
         private ReplaceVarnode addConstant(ReplaceOp rop, ulong mask, uint slot, Varnode constvn)
         {
-            newvarlist.emplace_back();
-            ReplaceVarnode* res = &newvarlist.GetLastItem();
-            res.vn = constvn;
-            res.replacement = (Varnode)null;
-            res.mask = mask;
+            ReplaceVarnode res = new ReplaceVarnode() {
+                vn = constvn,
+                replacement = (Varnode)null
+                mask = mask
+            };
+            newvarlist.Add(res);
 
             // Calculate the actual constant value
             int sa = Globals.leastsigbit_set(mask);
             res.val = (mask & constvn.getOffset()) >> sa;
-            res.def = (ReplaceOp*)0;
-            if (rop != (ReplaceOp*)0)
-            {
+            res.def = (ReplaceOp)null;
+            if (rop != (ReplaceOp)null) {
                 while (rop.input.size() <= slot)
-                    rop.input.Add((ReplaceVarnode*)0);
+                    rop.input.Add((ReplaceVarnode)null);
                 rop.input[slot] = res;
             }
             return res;
@@ -1267,17 +1271,17 @@ namespace Sla.DECCORE
         /// \return the new constant variable node
         private ReplaceVarnode addNewConstant(ReplaceOp rop, uint slot, ulong val)
         {
-            newvarlist.emplace_back();
-            ReplaceVarnode* res = &newvarlist.GetLastItem();
-            res.vn = (Varnode)null;
-            res.replacement = (Varnode)null;
-            res.mask = 0;
-            res.val = val;
-            res.def = (ReplaceOp*)0;
-            if (rop != (ReplaceOp*)0)
-            {
+            ReplaceVarnode res = new ReplaceVarnode() {
+                vn = (Varnode)null,
+                replacement = (Varnode)null,
+                mask = 0,
+                val = val,
+                def = (ReplaceOp)null
+            };
+            newvarlist.Add(res);
+            if (rop != (ReplaceOp)null) {
                 while (rop.input.size() <= slot)
-                    rop.input.Add((ReplaceVarnode*)0);
+                    rop.input.Add((ReplaceVarnode)null);
                 rop.input[slot] = res;
             }
             return res;
@@ -1291,12 +1295,12 @@ namespace Sla.DECCORE
         /// \param mask describes the logical value
         private void createNewOut(ReplaceOp rop, ulong mask)
         {
-            newvarlist.emplace_back();
-            ReplaceVarnode* res = &newvarlist.GetLastItem();
-            res.vn = (Varnode)null;
-            res.replacement = (Varnode)null;
-            res.mask = mask;
-
+            ReplaceVarnode res = new ReplaceVarnode() {
+                vn = (Varnode)null,
+                replacement = (Varnode)null,
+                mask = mask
+            };
+            newvarlist.Add(res);
             rop.output = res;
             res.def = rop;
         }
@@ -1309,7 +1313,7 @@ namespace Sla.DECCORE
         /// \param rvn is the logical variable to replace
         private void replaceInput(ReplaceVarnode rvn)
         {
-            Varnode* newvn = fd.newUnique(rvn.vn.getSize());
+            Varnode newvn = fd.newUnique(rvn.vn.getSize());
             newvn = fd.setInputVarnode(newvn);
             fd.totalReplace(rvn.vn, newvn);
             fd.deleteVarnode(rvn.vn);
@@ -1350,23 +1354,20 @@ namespace Sla.DECCORE
         {
             if (rvn.replacement != (Varnode)null)
                 return rvn.replacement;
-            if (rvn.vn == (Varnode)null)
-            {
-                if (rvn.def == (ReplaceOp*)0) // A constant that did not come from an original Varnode
+            if (rvn.vn == (Varnode)null) {
+                if (rvn.def == (ReplaceOp)null) // A constant that did not come from an original Varnode
                     return fd.newConstant(flowsize, rvn.val);
                 rvn.replacement = fd.newUnique(flowsize);
                 return rvn.replacement;
             }
-            if (rvn.vn.isConstant())
-            {
-                Varnode* newVn = fd.newConstant(flowsize, rvn.val);
+            if (rvn.vn.isConstant()) {
+                Varnode newVn = fd.newConstant(flowsize, rvn.val);
                 newVn.copySymbolIfValid(rvn.vn);
                 return newVn;
             }
 
             bool isinput = rvn.vn.isInput();
-            if (useSameAddress(rvn))
-            {
+            if (useSameAddress(rvn)) {
                 Address addr = getReplacementAddress(rvn);
                 if (isinput)
                     replaceInput(rvn);  // Replace input to avoid overlap errors
@@ -1386,12 +1387,11 @@ namespace Sla.DECCORE
         /// \return \b true if the node was successfully processed
         private bool processNextWork()
         {
-            ReplaceVarnode* rvn = worklist.GetLastItem();
+            ReplaceVarnode rvn = worklist.GetLastItem();
 
             worklist.RemoveLastItem();
 
-            if (sextrestrictions)
-            {
+            if (sextrestrictions) {
                 if (!traceBackwardSext(rvn)) return false;
                 return traceForwardSext(rvn);
             }
@@ -1409,14 +1409,13 @@ namespace Sla.DECCORE
         {
             fd = f;
             returnsTraversed = false;
-            if (mask == (ulong)0)
-            {
+            if (mask == (ulong)0) {
                 fd = (Funcdata)null;
                 return;
             }
             aggressive = aggr;
             sextrestrictions = sext;
-            bitsize = (mostsigbit_set(mask) - Globals.leastsigbit_set(mask)) + 1;
+            bitsize = (Globals.mostsigbit_set(mask) - Globals.leastsigbit_set(mask)) + 1;
             if (bitsize <= 8)
                 flowsize = 1;
             else if (bitsize <= 16)
@@ -1425,21 +1424,18 @@ namespace Sla.DECCORE
                 flowsize = 3;
             else if (bitsize <= 32)
                 flowsize = 4;
-            else if (bitsize <= 64)
-            {
-                if (!big)
-                {
+            else if (bitsize <= 64){
+                if (!big) {
                     fd = (Funcdata)null;
                     return;
                 }
                 flowsize = 8;
             }
-            else
-            {
+            else {
                 fd = (Funcdata)null;
                 return;
             }
-            createLink((ReplaceOp*)0, mask, 0, root);
+            createLink((ReplaceOp)null, mask, 0, root);
         }
 
         /// Trace logical value through data-flow, constructing transform
@@ -1451,13 +1447,10 @@ namespace Sla.DECCORE
         {
             pullcount = 0;
             bool retval = false;
-            if (fd != (Funcdata)null)
-            {
+            if (fd != (Funcdata)null) {
                 retval = true;
-                while (!worklist.empty())
-                {
-                    if (!processNextWork())
-                    {
+                while (!worklist.empty()) {
+                    if (!processNextWork()) {
                         retval = false;
                         break;
                     }
@@ -1465,9 +1458,8 @@ namespace Sla.DECCORE
             }
 
             // Clear marks
-            Dictionary<Varnode*, ReplaceVarnode>::iterator iter;
-            for (iter = varmap.begin(); iter != varmap.end(); ++iter)
-                iter.Current.Key.clearMark();
+            foreach (Varnode node in varmap.Keys)
+                node.clearMark();
 
             if (!retval) return false;
             if (pullcount == 0) return false;
@@ -1477,33 +1469,32 @@ namespace Sla.DECCORE
         /// Perform the discovered transform, making logical values explicit
         public void doReplacement()
         {
-            list<PatchRecord>::iterator piter;
-            list<ReplaceOp>::iterator iter;
+            IEnumerator<PatchRecord> piter = patchlist.GetEnumerator();
 
             // Do up front processing of the call return patches, which will be at the front of the list
-            for (piter = patchlist.begin(); piter != patchlist.end(); ++piter)
+            while (piter.MoveNext())
             {
-                if ((*piter).type != PatchRecord::push_patch) break;
-                PcodeOp* pushOp = (*piter).patchOp;
-                Varnode* newVn = getReplaceVarnode((*piter).in1);
-                Varnode* oldVn = pushOp.getOut();
+                if (piter.Current.type != PatchRecord.patchtype.push_patch) break;
+                PcodeOp pushOp = piter.Current.patchOp;
+                Varnode newVn = getReplaceVarnode(piter.Current.in1);
+                Varnode oldVn = pushOp.getOut();
                 fd.opSetOutput(pushOp, newVn);
 
                 // Create placeholder defining op for old Varnode, until dead code cleans it up
-                PcodeOp* newZext = fd.newOp(1, pushOp.getAddr());
+                PcodeOp newZext = fd.newOp(1, pushOp.getAddr());
                 fd.opSetOpcode(newZext, OpCode.CPUI_INT_ZEXT);
                 fd.opSetInput(newZext, newVn, 0);
                 fd.opSetOutput(newZext, oldVn);
                 fd.opInsertAfter(newZext, pushOp);
             }
 
+            IEnumerator<ReplaceOp> iter = oplist.GetEnumerator();
             // Define all the outputs first
-            for (iter = oplist.begin(); iter != oplist.end(); ++iter)
-            {
-                PcodeOp* newop = fd.newOp((*iter).numparams, (*iter).op.getAddr());
-                (*iter).replacement = newop;
-                fd.opSetOpcode(newop, (*iter).opc);
-                ReplaceVarnode* rout = (*iter).output;
+            while (iter.MoveNext()) {
+                PcodeOp newop = fd.newOp(iter.Current.numparams, iter.Current.op.getAddr());
+                iter.Current.replacement = newop;
+                fd.opSetOpcode(newop, iter.Current.opc);
+                ReplaceVarnode rout = iter.Current.output;
                 //      if (rout != (ReplaceVarnode *)0) {
                 //	if (rout.replacement == (Varnode *)0)
                 //	  rout.replacement = fd.newUniqueOut(flowsize,newop);
@@ -1511,59 +1502,55 @@ namespace Sla.DECCORE
                 //	  fd.opSetOutput(newop,rout.replacement);
                 //      }
                 fd.opSetOutput(newop, getReplaceVarnode(rout));
-                fd.opInsertAfter(newop, (*iter).op);
+                fd.opInsertAfter(newop, iter.Current.op);
             }
 
             // Set all the inputs
-            for (iter = oplist.begin(); iter != oplist.end(); ++iter)
-            {
-                PcodeOp* newop = (*iter).replacement;
-                for (uint i = 0; i < (*iter).input.size(); ++i)
-                    fd.opSetInput(newop, getReplaceVarnode((*iter).input[i]), i);
+            iter = oplist.GetEnumerator();
+            while (iter.MoveNext()) {
+                PcodeOp newop = iter.Current.replacement;
+                for (int i = 0; i < iter.Current.input.size(); ++i)
+                    fd.opSetInput(newop, getReplaceVarnode(iter.Current.input[i]), i);
             }
 
             // These are operations that carry flow from the small variable into an existing
             // variable of the correct size
-            for (; piter != patchlist.end(); ++piter)
-            {
-                PcodeOp* pullop = (*piter).patchOp;
-                switch ((*piter).type)
-                {
-                    case PatchRecord::copy_patch:
+            while (piter.MoveNext()) {
+                PcodeOp pullop = piter.Current.patchOp;
+                switch (piter.Current.type) {
+                    case PatchRecord.patchtype.copy_patch:
                         while (pullop.numInput() > 1)
                             fd.opRemoveInput(pullop, pullop.numInput() - 1);
-                        fd.opSetInput(pullop, getReplaceVarnode((*piter).in1), 0);
+                        fd.opSetInput(pullop, getReplaceVarnode(piter.Current.in1), 0);
                         fd.opSetOpcode(pullop, OpCode.CPUI_COPY);
                         break;
-                    case PatchRecord::compare_patch:
-                        fd.opSetInput(pullop, getReplaceVarnode((*piter).in1), 0);
-                        fd.opSetInput(pullop, getReplaceVarnode((*piter).in2), 1);
+                    case PatchRecord.patchtype.compare_patch:
+                        fd.opSetInput(pullop, getReplaceVarnode(piter.Current.in1), 0);
+                        fd.opSetInput(pullop, getReplaceVarnode(piter.Current.in2), 1);
                         break;
-                    case PatchRecord::parameter_patch:
-                        fd.opSetInput(pullop, getReplaceVarnode((*piter).in1), (*piter).slot);
+                    case PatchRecord.patchtype.parameter_patch:
+                        fd.opSetInput(pullop, getReplaceVarnode(piter.Current.in1), piter.Current.slot);
                         break;
-                    case PatchRecord::extension_patch:
-                        {
+                    case PatchRecord.patchtype.extension_patch: {
                             // These are operations that flow the small variable into a bigger variable but
                             // where all the remaining bits are zero
-                            int sa = (*piter).slot;
-                            List<Varnode*> invec;
-                            Varnode* inVn = getReplaceVarnode((*piter).in1);
+                            int sa = piter.Current.slot;
+                            List<Varnode> invec;
+                            Varnode inVn = getReplaceVarnode(piter.Current.in1);
                             int outSize = pullop.getOut().getSize();
-                            if (sa == 0)
-                            {
+                            if (sa == 0) {
                                 invec.Add(inVn);
-                                OpCode opc = (inVn.getSize() == outSize) ? OpCode.CPUI_COPY : OpCode.CPUI_INT_ZEXT;
+                                OpCode opc = (inVn.getSize() == outSize)
+                                    ? OpCode.CPUI_COPY
+                                    : OpCode.CPUI_INT_ZEXT;
                                 fd.opSetOpcode(pullop, opc);
                                 fd.opSetAllInput(pullop, invec);
                             }
-                            else
-                            {
-                                if (inVn.getSize() != outSize)
-                                {
-                                    PcodeOp* zextop = fd.newOp(1, pullop.getAddr());
+                            else {
+                                if (inVn.getSize() != outSize) {
+                                    PcodeOp zextop = fd.newOp(1, pullop.getAddr());
                                     fd.opSetOpcode(zextop, OpCode.CPUI_INT_ZEXT);
-                                    Varnode* zextout = fd.newUniqueOut(outSize, zextop);
+                                    Varnode zextout = fd.newUniqueOut(outSize, zextop);
                                     fd.opSetInput(zextop, inVn, 0);
                                     fd.opInsertBefore(zextop, pullop);
                                     invec.Add(zextout);
@@ -1576,7 +1563,7 @@ namespace Sla.DECCORE
                             }
                             break;
                         }
-                    case PatchRecord::push_patch:
+                    case PatchRecord.patchtype.push_patch:
                         break;  // Shouldn't see these here, handled earlier
                 }
             }

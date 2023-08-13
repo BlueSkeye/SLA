@@ -1,5 +1,5 @@
 ﻿using Sla.CORE;
-using Sla.DECCORE;
+using Sla.SLEIGH;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -1467,7 +1467,7 @@ namespace Sla.SLACOMP
                 for (int j = 0; j < varlist.size(); ++j)
                 {
                     VarnodeSymbol* vsym = (VarnodeSymbol*)(*varlist)[j];
-                    if (vsym != (VarnodeSymbol*)0)
+                    if (vsym != (VarnodeSymbol)null)
                     {
                         if (sz == 0)
                             sz = vsym.getFixedVarnode().size;
@@ -1902,8 +1902,9 @@ namespace Sla.SLACOMP
         /// \param contvec is a context change applied to each Constructor, or null
         public void pushWith(SubtableSymbol ss, PatternEquation pateq, List<ContextChange> contvec)
         {
-            withstack.emplace_back();
-            withstack.GetLastItem().set(ss, pateq, contvec);
+            WithBlock newBlock = new WithBlock();
+            newBlock.set(ss, pateq, contvec);
+            withstack.Add(newBlock);
         }
 
         /// \brief Pop the current \b with block from the stack

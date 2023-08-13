@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.Intrinsics;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -42,20 +41,16 @@ namespace Sla.DECCORE
         /// Parse children of the \<type> element describing each field.
         /// \param decoder is the stream decoder
         /// \param typegrp is the factory owning the new union
-        protected void decodeFields(Decoder decoder, TypeFactory typegrp)
+        protected void decodeFields(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
-            while (decoder.peekElement() != 0)
-            {
-                field.emplace_back(decoder, typegrp);
-                if (field.GetLastItem().offset + field.GetLastItem().type.getSize() > size)
-                {
-                    ostringstream s;
-                    s << "Field " << field.GetLastItem().name << " does not fit in union " << name;
-                    throw new LowlevelError(s.str());
+            while (decoder.peekElement() != 0) {
+                field.Add(new TypeField(decoder, typegrp));
+                if (field.GetLastItem().offset + field.GetLastItem().type.getSize() > size) {
+                    throw new LowlevelError($"Field {field.GetLastItem().name} does not fit in union {name}");
                 }
             }
             if (size == 0)      // We can decode an incomplete structure, indicated by 0 size
-                flags |= type_incomplete;
+                flags |= Properties.type_incomplete;
             else
                 markComplete();     // Otherwise the union is complete
         }

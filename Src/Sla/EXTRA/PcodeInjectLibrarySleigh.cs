@@ -51,7 +51,7 @@ namespace Sla.EXTRA
             }
             if (contextCache.pos == (ParserContext)null)
             {   // Make sure we have a context
-                contextCache.pos = new ParserContext((ContextCache)null, (Translate*)0);
+                contextCache.pos = new ParserContext((ContextCache)null, (Translate)null);
                 contextCache.pos.initialize(8, 8, slgh.getConstantSpace());
             }
             PcodeSnippet compiler(slgh);

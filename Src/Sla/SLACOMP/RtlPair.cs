@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.SLEIGH;
 using System.Collections.Generic;
 using System.Diagnostics.SymbolStore;
 using System.Linq;
@@ -17,9 +17,9 @@ namespace Sla.SLACOMP
     internal class RtlPair
     {
         /// A named p-code section
-        internal ConstructTpl section;
+        internal ConstructTpl? section;
         /// Symbol scope associated with the section
-        internal SymbolScope scope;
+        internal SymbolScope? scope;
 
         ///< Construct on empty pair
         internal RtlPair()

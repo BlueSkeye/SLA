@@ -106,68 +106,63 @@ namespace Sla.SLEIGH
 
         public void addCommit(TripleSymbol sym, int num, uint mask, bool flow, ConstructState point)
         {
-            contextcommit.emplace_back();
-            ContextSet & set(contextcommit.GetLastItem());
-
-            set.sym = sym;
-            set.point = point;      // This is the current state
-            set.num = num;
-            set.mask = mask;
-            set.value = context[num] & mask;
-            set.flow = flow;
+            contextcommit.Add(new ContextSet() {
+                sym = sym,
+                point = point,      // This is the current state
+                num = num,
+                mask = mask,
+                value = context[num] & mask,
+                flow = flow
+            };
         }
 
         public void clearCommits()
         {
-            contextcommit.clear();
+            contextcommit.Clear();
         }
 
         public void applyCommits()
         {
             if (contextcommit.empty()) return;
-            ParserWalker walker(this);
+            ParserWalker walker = new ParserWalker(this);
             walker.baseState();
 
             List<ContextSet>::iterator iter;
 
-            for (iter = contextcommit.begin(); iter != contextcommit.end(); ++iter)
-            {
-                TripleSymbol* sym = (*iter).sym;
+            foreach (ContextSet set in contextcommit) {
+                TripleSymbol sym = set.sym;
                 Address commitaddr;
-                if (sym.getType() == SleighSymbol::operand_symbol)
-                {
+                if (sym.getType() == SleighSymbol.symbol_type.operand_symbol) {
                     // The value for an OperandSymbol is probabably already
                     // calculated, we just need to find the right
                     // tree node of the state
-                    int i = ((OperandSymbol*)sym).getIndex();
-                    FixedHandle & h((*iter).point.resolve[i].hand);
-                    commitaddr = Address(h.space, h.offset_offset);
+                    int i = ((OperandSymbol)sym).getIndex();
+                    FixedHandle h = set.point.resolve[i].hand;
+                    commitaddr = new Address(h.space, h.offset_offset);
                 }
-                else
-                {
+                else {
                     FixedHandle hand;
-                    sym.getFixedHandle(hand, walker);
-                    commitaddr = Address(hand.space, hand.offset_offset);
+                    sym.getFixedHandle(out hand, walker);
+                    commitaddr = new Address(hand.space, hand.offset_offset);
                 }
-                if (commitaddr.isConstant())
-                {
+                if (commitaddr.isConstant()) {
                     // If the symbol handed to globalset was a computed value, the getFixedHandle calculation
                     // will return a value in the constant space. If this is a case, we explicitly convert the
                     // offset into the current address space
                     ulong newoff = AddrSpace.addressToByte(commitaddr.getOffset(), addr.getSpace().getWordSize());
-                    commitaddr = Address(addr.getSpace(), newoff);
+                    commitaddr = new Address(addr.getSpace(), newoff);
                 }
 
                 // Commit context change
-                if ((*iter).flow)       // The context flows
-                    contcache.setContext(commitaddr, (*iter).num, (*iter).mask, (*iter).value);
+                if (set.flow)       // The context flows
+                    contcache.setContext(commitaddr, set.num, set.mask, set.value);
                 else
                 {  // Set the context so that is doesn't flow
                     Address nextaddr = commitaddr + 1;
                     if (nextaddr.getOffset() < commitaddr.getOffset())
-                        contcache.setContext(commitaddr, (*iter).num, (*iter).mask, (*iter).value);
+                        contcache.setContext(commitaddr, set.num, set.mask, set.value);
                     else
-                        contcache.setContext(commitaddr, nextaddr, (*iter).num, (*iter).mask, (*iter).value);
+                        contcache.setContext(commitaddr, nextaddr, set.num, set.mask, set.value);
                 }
             }
         }
@@ -178,9 +173,8 @@ namespace Sla.SLEIGH
 
         public Address getN2addr()
         {
-            if (n2addr.isInvalid())
-            {
-                if (translate == (Translate*)0 || parsestate == uninitialized)
+            if (n2addr.isInvalid()) {
+                if (translate == (Translate)null || parsestate == State.uninitialized)
                     throw new LowlevelError("inst_next2 not available in this context");
                 int length = translate.instructionLength(naddr);
                 n2addr = naddr + length;
@@ -197,15 +191,15 @@ namespace Sla.SLEIGH
         public AddrSpace getConstSpace() => const_space;
 
         public uint getInstructionBytes(int byteoff, int numbytes, uint off)
-        {               // Get bytes from the instruction stream into a intm
+        {
+            // Get bytes from the instruction stream into a intm
                         // (assuming big endian format)
             off += bytestart;
             if (off >= 16)
-                throw BadDataError("Instruction is using more than 16 bytes");
+                throw new BadDataError("Instruction is using more than 16 bytes");
             byte* ptr = buf + off;
             uint res = 0;
-            for (int i = 0; i < size; ++i)
-            {
+            for (int i = 0; i < size; ++i) {
                 res <<= 8;
                 res |= ptr[i];
             }
@@ -213,7 +207,8 @@ namespace Sla.SLEIGH
         }
 
         public uint getContextBytes(int byteoff, int numbytes)
-        {               // Get bytes from context into a uint
+        {
+            // Get bytes from context into a uint
             int intstart = bytestart / sizeof(uint);
             uint res = context[intstart];
             int byteOffset = bytestart % sizeof(uint);
@@ -221,8 +216,8 @@ namespace Sla.SLEIGH
             res <<= byteOffset * 8;
             res >>= unusedBytes * 8;
             int remaining = size - sizeof(uint) + byteOffset;
-            if ((remaining > 0) && (++intstart < contextsize))
-            { // If we extend beyond boundary of a single uint
+            if ((remaining > 0) && (++intstart < contextsize)) {
+                // If we extend beyond boundary of a single uint
                 uint res2 = context[intstart];
                 unusedBytes = sizeof(uint) - remaining;
                 res2 >>= unusedBytes * 8;
@@ -235,13 +230,12 @@ namespace Sla.SLEIGH
         {
             off += (startbit / 8);
             if (off >= 16)
-                throw BadDataError("Instruction is using more than 16 bytes");
+                throw new BadDataError("Instruction is using more than 16 bytes");
             byte* ptr = buf + off;
             startbit = startbit % 8;
             int bytesize = (startbit + size - 1) / 8 + 1;
             uint res = 0;
-            for (int i = 0; i < bytesize; ++i)
-            {
+            for (int i = 0; i < bytesize; ++i) {
                 res <<= 8;
                 res |= ptr[i];
             }
@@ -259,8 +253,7 @@ namespace Sla.SLEIGH
             res <<= bitOffset;  // Shift startbit to highest position
             res >>= unusedBits;
             int remaining = size - 8 * sizeof(uint) + bitOffset;
-            if ((remaining > 0) && (++intstart < contextsize))
-            {
+            if ((remaining > 0) && (++intstart < contextsize)) {
                 uint res2 = context[intstart];
                 unusedBits = 8 * sizeof(uint) - remaining;
                 res2 >>= unusedBits;

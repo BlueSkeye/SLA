@@ -1,11 +1,4 @@
-﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.SLEIGH;
 
 namespace Sla.SLACOMP
 {
@@ -17,7 +10,7 @@ namespace Sla.SLACOMP
     internal class WithBlock
     {
         private SubtableSymbol ss;         ///< Subtable containing each Constructor (or null for root table)
-        private PatternEquation pateq;     ///< Pattern to prepend to each Constructor (or null)
+        private PatternEquation? pateq;     ///< Pattern to prepend to each Constructor (or null)
         private List<ContextChange> contvec; ///< Context change to associate with each constructor (or null)
         
         public WithBlock()
@@ -36,22 +29,20 @@ namespace Sla.SLACOMP
             pateq = pq;
             if (pateq != (PatternEquation)null)
                 pateq.layClaim();
-            if (cvec != (List<ContextChange*>*)0)
-            {
+            if (cvec != (List<ContextChange>)null) {
                 for (int i = 0; i < cvec.size(); ++i)
-                    contvec.Add((*cvec)[i]);  // Lay claim to -cvec-s pointers, we don't clone
-                delete cvec;
+                    contvec.Add(cvec[i]);  // Lay claim to -cvec-s pointers, we don't clone
+                // delete cvec;
             }
         }
 
         ~WithBlock()
         {
             if (pateq != (PatternEquation)null)
-                PatternEquation::release(pateq);
-            for (int i = 0; i < contvec.size(); ++i)
-            {
-                delete contvec[i];
-            }
+                PatternEquation.release(pateq);
+            //for (int i = 0; i < contvec.size(); ++i) {
+            //    delete contvec[i];
+            //}
         }
 
         /// \brief Build a complete pattern equation from any surrounding \b with blocks
@@ -64,10 +55,8 @@ namespace Sla.SLACOMP
         /// \return the final pattern equation
         public static PatternEquation collectAndPrependPattern(List<WithBlock> stack, PatternEquation pateq)
         {
-            list<WithBlock>::const_iterator iter;
-            for (iter = stack.begin(); iter != stack.end(); ++iter)
-            {
-                PatternEquation* witheq = (*iter).pateq;
+            foreach (WithBlock block in stack) {
+                PatternEquation? witheq = block.pateq;
                 if (witheq != (PatternEquation)null)
                     pateq = new EquationAnd(witheq, pateq);
             }
@@ -84,29 +73,24 @@ namespace Sla.SLACOMP
         /// \return the new list of ContextChanges
         public static List<ContextChange> collectAndPrependContext(List<WithBlock> stack, List<ContextChange> contvec)
         {
-            List<ContextChange*>* res = (List<ContextChange*>*)0;
-            list<WithBlock>::const_iterator iter;
-            for (iter = stack.begin(); iter != stack.end(); ++iter)
-            {
-                List<ContextChange> changelist = (*iter).contvec;
+            List<ContextChange>? res = (List<ContextChange>)null;
+            foreach (WithBlock block in stack) {
+                List<ContextChange> changelist = block.contvec;
                 if (changelist.size() == 0) continue;
-                if (res == (List<ContextChange*>*)0)
-                    res = new List<ContextChange*>();
-                for (int i = 0; i < changelist.size(); ++i)
-                {
+                if (res == (List<ContextChange>)null)
+                    res = new List<ContextChange>();
+                for (int i = 0; i < changelist.size(); ++i) {
                     res.Add(changelist[i].clone());
                 }
             }
-            if (contvec != (List<ContextChange*>*)0)
-            {
-                if (contvec.size() != 0)
-                {
-                    if (res == (List<ContextChange*>*)0)
-                        res = new List<ContextChange*>();
+            if (contvec != (List<ContextChange>)null) {
+                if (contvec.size() != 0) {
+                    if (res == (List<ContextChange>)null)
+                        res = new List<ContextChange>();
                     for (int i = 0; i < contvec.size(); ++i)
-                        res.Add((*contvec)[i]);      // lay claim to contvecs pointer
+                        res.Add(contvec[i]);      // lay claim to contvecs pointer
                 }
-                delete contvec;
+                // delete contvec;
             }
             return res;
         }
@@ -116,13 +100,11 @@ namespace Sla.SLACOMP
         /// Find the subtable associated with the innermost \b with block and return it.
         /// \param stack is the stack of currently active \b with blocks
         /// \return the innermost subtable (or null)
-        public static SubtableSymbol getCurrentSubtable(List<WithBlock> stack)
+        public static SubtableSymbol? getCurrentSubtable(List<WithBlock> stack)
         {
-            list<WithBlock>::const_iterator iter;
-            for (iter = stack.begin(); iter != stack.end(); ++iter)
-            {
-                if ((*iter).ss != (SubtableSymbol)null)
-                    return (*iter).ss;
+            foreach (WithBlock block in stack) {
+                if (block.ss != (SubtableSymbol)null)
+                    return block.ss;
             }
             return (SubtableSymbol)null;
         }

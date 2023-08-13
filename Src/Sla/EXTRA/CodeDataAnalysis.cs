@@ -187,18 +187,19 @@ namespace Sla.EXTRA
             }
             while (true) {
                 disengine.disassemble(curaddr, disresult);
-                codevec.emplace_back();
+                CodeUnit addedUnit = new CodeUnit();
+                codevec.Add(addedUnit);
                 if (!disresult.success) {
-                    codevec.GetLastItem().flags = CodeUnit.Flags.notcode;
-                    codevec.GetLastItem().size = 1;
+                    addedUnit.flags = CodeUnit.Flags.notcode;
+                    addedUnit.size = 1;
                     curaddr = curaddr + 1;
                     break;
                 }
                 if ((disresult.flags & CodeUnit.Flags.jump) != 0) {
                     fromto_vec[AddrLink(curaddr, disresult.jumpaddress)] = disresult.flags;
                 }
-                codevec.GetLastItem().flags = disresult.flags;
-                codevec.GetLastItem().size = disresult.length;
+                addedUnit.flags = disresult.flags;
+                addedUnit.size = disresult.length;
                 curaddr = curaddr + disresult.length;
                 while (lastaddr < curaddr) {
                     if ((!hardend) && (iter.Current.Value.flags & CodeUnit.Flags.notcode) != 0) {
@@ -335,7 +336,7 @@ namespace Sla.EXTRA
                 mask = titer.Current.Value.featuremask;
             else
                 throw new CORE.LowlevelError("Found thunk without a feature mask");
-            targethits.emplace_back(funcstart, codeaddr, thunkaddr, mask);
+            targethits.Add(new TargetHit(funcstart, codeaddr, thunkaddr, mask));
         }
 
         public void resolveThunkHit(Address codeaddr, ulong targethit)
@@ -421,12 +422,13 @@ namespace Sla.EXTRA
                 if (curaddr == iter.Current.Key) break; // Back on cut
                 disengine.disassemble(curaddr, disresult);
                 if (!disresult.success) return false;
-                codevec.emplace_back();
+                CodeUnit addedUnit = new CodeUnit();
+                codevec.Add(addedUnit);
                 if ((disresult.flags & CodeUnit::jump) != 0) {
                     fromto_vec[AddrLink(curaddr, disresult.jumpaddress)] = disresult.flags;
                 }
-                codevec.GetLastItem().flags = disresult.flags;
-                codevec.GetLastItem().size = disresult.length;
+                addedUnit.flags = disresult.flags;
+                addedUnit.size = disresult.length;
                 curaddr = curaddr + disresult.length;
             }
             clearCodeUnits(addr, curaddr);

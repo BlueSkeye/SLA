@@ -152,23 +152,23 @@ namespace Sla.SLEIGH
             }
             if (version != SLA_FORMAT_VERSION)
                 throw new LowlevelError(".sla file has wrong format");
-            List list = el.getChildren();
-            List::const_iterator iter;
-            iter = list.begin();
-            while ((*iter).getName() == "floatformat")
-            {
-                floatformats.emplace_back();
-                floatformats.GetLastItem().restoreXml(*iter);
+            List<Element> list = el.getChildren();
+            IEnumerator<Element> iter = list.GetEnumerator();
+            while (iter.MoveNext()) {
+                if (iter.Current.getName() != "floatformat") break;
+                FloatFormat newFormat = new FloatFormat();
+                newFormat.restoreXml(*iter);
+                floatformats.Add(newFormat);
                 ++iter;
             }
-            indexer.restoreXml(*iter);
+            indexer.restoreXml(iter.Current);
             iter++;
-            XmlDecode decoder(this,* iter);
+            XmlDecode decoder = new XmlDecode(this, iter.Current);
             decodeSpaces(decoder, this);
             iter++;
             symtab.restoreXml(*iter, this);
-            root = (SubtableSymbol*)symtab.getGlobalScope().findSymbol("instruction");
-            List<string> errorPairs;
+            root = (SubtableSymbol)symtab.getGlobalScope().findSymbol("instruction");
+            List<string> errorPairs = new List<string>();
             buildXrefs(errorPairs);
             if (!errorPairs.empty())
                 throw new SleighError("Duplicate register pairs");
@@ -192,10 +192,10 @@ namespace Sla.SLEIGH
 
         public override VarnodeData getRegister(string nm)
         {
-            VarnodeSymbol* sym = (VarnodeSymbol*)findSymbol(nm);
-            if (sym == (VarnodeSymbol*)0)
+            VarnodeSymbol sym = (VarnodeSymbol)findSymbol(nm);
+            if (sym == (VarnodeSymbol)null)
                 throw new SleighError("Unknown register name: " + nm);
-            if (sym.getType() != SleighSymbol::varnode_symbol)
+            if (sym.getType() != SleighSymbol.symbol_type.varnode_symbol)
                 throw new SleighError("Symbol is not a register: " + nm);
             return sym.getFixedVarnode();
         }
@@ -203,14 +203,14 @@ namespace Sla.SLEIGH
         public override string getRegisterName(AddrSpace @base, ulong off, int size)
         {
             VarnodeData sym;
-            sym.space = base;
+            sym.space = @base;
             sym.offset = off;
             sym.size = size;
             Dictionary<VarnodeData, string>::const_iterator iter = varnode_xref.upper_bound(sym); // First point greater than offset
             if (iter == varnode_xref.begin()) return "";
             iter--;
             VarnodeData point = iter.Current.Key;
-            if (point.space != base) return "";
+            if (point.space != @base) return "";
             ulong offbase = point.offset;
             if (point.offset + point.size >= off + size)
                 return (*iter).second;
@@ -219,7 +219,7 @@ namespace Sla.SLEIGH
             {
                 --iter;
                 VarnodeData point = iter.Current.Key;
-                if ((point.space != base) || (point.offset != offbase)) return "";
+                if ((point.space != @base) || (point.offset != offbase)) return "";
                 if (point.offset + point.size >= off + size)
                     return (*iter).second;
             }
@@ -250,25 +250,24 @@ namespace Sla.SLEIGH
         /// \param s is the output stream
         public void saveXml(TextWriter s)
         {
-            s << "<sleigh";
-            a_v_i(s, "version", SLA_FORMAT_VERSION);
-            a_v_b(s, "bigendian", isBigEndian());
-            a_v_i(s, "align", alignment);
-            a_v_u(s, "uniqbase", getUniqueBase());
+            s.Write("<sleigh");
+            Xml.a_v_i(s, "version", SLA_FORMAT_VERSION);
+            Xml.a_v_b(s, "bigendian", isBigEndian());
+            Xml.a_v_i(s, "align", alignment);
+            Xml.a_v_u(s, "uniqbase", getUniqueBase());
             if (maxdelayslotbytes > 0)
-                a_v_u(s, "maxdelay", maxdelayslotbytes);
+                Xml.a_v_u(s, "maxdelay", maxdelayslotbytes);
             if (unique_allocatemask != 0)
-                a_v_u(s, "uniqmask", unique_allocatemask);
+                Xml.a_v_u(s, "uniqmask", unique_allocatemask);
             if (numSections != 0)
-                a_v_u(s, "numsections", numSections);
-            s << ">\n";
+                Xml.a_v_u(s, "numsections", numSections);
+            s.WriteLine(">");
             indexer.saveXml(s);
-            s << "<spaces";
-            a_v(s, "defaultspace", getDefaultCodeSpace().getName());
-            s << ">\n";
-            for (int i = 0; i < numSpaces(); ++i)
-            {
-                AddrSpace* spc = getSpace(i);
+            s.Write("<spaces");
+            Xml.a_v(s, "defaultspace", getDefaultCodeSpace().getName());
+            s.WriteLine(">");
+            for (int i = 0; i < numSpaces(); ++i) {
+                AddrSpace? spc = getSpace(i);
                 if (spc == (AddrSpace)null) continue;
                 if ((spc.getType() == spacetype.IPTR_CONSTANT) ||
                 (spc.getType() == spacetype.IPTR_FSPEC) ||
@@ -277,9 +276,9 @@ namespace Sla.SLEIGH
                     continue;
                 spc.saveXml(s);
             }
-            s << "</spaces>\n";
+            s.WriteLine("</spaces>");
             symtab.saveXml(s);
-            s << "</sleigh>\n";
+            s.WriteLine("</sleigh>");
         }
     }
 }

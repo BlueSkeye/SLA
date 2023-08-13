@@ -1,4 +1,4 @@
-﻿using Sla.SLACOMP;
+﻿using Sla.SLEIGH;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.SymbolStore;
@@ -66,8 +66,8 @@ namespace Sla.SLACOMP
         public void append(ConstructTpl rtl, SymbolScope scope)
         {
             while (named.size() <= nextindex)
-                named.emplace_back();
-            named[nextindex] = RtlPair(rtl, scope);
+                named.Add(new RtlPair());
+            named[nextindex] = new RtlPair(rtl, scope);
         }
     }
 }

@@ -260,19 +260,16 @@ namespace Sla.DECCORE
             bool outHole;
             int curOff = 0;
             int sizeLeft = inBase.getSize();
-            if (inCategory == 1)
-            {
-                while (sizeLeft > 0)
-                {
-                    Datatype* curOut = getComponent(outBase, curOff, outHole);
+            if (inCategory == 1) {
+                while (sizeLeft > 0) {
+                    Datatype curOut = getComponent(outBase, curOff, outHole);
                     if (curOut == (Datatype)null) return false;
                     // Throw away primitive data-type if it is a constant
-                    Datatype* curIn = inConstant ? curOut : types.getBase(curOut.getSize(), type_metatype.TYPE_UNKNOWN);
-                    dataTypePieces.emplace_back(curIn, curOut, curOff);
+                    Datatype curIn = inConstant ? curOut : types.getBase(curOut.getSize(), type_metatype.TYPE_UNKNOWN);
+                    dataTypePieces.Add(new Component(curIn, curOut, curOff));
                     sizeLeft -= curOut.getSize();
                     curOff += curOut.getSize();
-                    if (outHole)
-                    {
+                    if (outHole) {
                         if (dataTypePieces.size() == 1)
                             return false;       // Initial offset into structure is at a hole
                         if (sizeLeft == 0 && dataTypePieces.size() == 2)
@@ -280,18 +277,15 @@ namespace Sla.DECCORE
                     }
                 }
             }
-            else if (outCategory == 1)
-            {
-                while (sizeLeft > 0)
-                {
-                    Datatype* curIn = getComponent(inBase, curOff, inHole);
+            else if (outCategory == 1) {
+                while (sizeLeft > 0) {
+                    Datatype? curIn = getComponent(inBase, curOff, inHole);
                     if (curIn == (Datatype)null) return false;
-                    Datatype* curOut = types.getBase(curIn.getSize(), type_metatype.TYPE_UNKNOWN);
-                    dataTypePieces.emplace_back(curIn, curOut, curOff);
+                    Datatype curOut = types.getBase(curIn.getSize(), type_metatype.TYPE_UNKNOWN);
+                    dataTypePieces.Add(new Component(curIn, curOut, curOff));
                     sizeLeft -= curIn.getSize();
                     curOff += curIn.getSize();
-                    if (inHole)
-                    {
+                    if (inHole) {
                         if (dataTypePieces.size() == 1)
                             return false;       // Initial offset into structure is at a hole
                         if (sizeLeft == 0 && dataTypePieces.size() == 2)
@@ -303,30 +297,25 @@ namespace Sla.DECCORE
             {   // Both in and out data-types have components
                 while (sizeLeft > 0)
                 {
-                    Datatype* curIn = getComponent(inBase, curOff, inHole);
+                    Datatype? curIn = getComponent(inBase, curOff, inHole);
                     if (curIn == (Datatype)null) return false;
-                    Datatype* curOut = getComponent(outBase, curOff, outHole);
+                    Datatype? curOut = getComponent(outBase, curOff, outHole);
                     if (curOut == (Datatype)null) return false;
-                    while (curIn.getSize() != curOut.getSize())
-                    {
-                        if (curIn.getSize() > curOut.getSize())
-                        {
-                            if (inHole)
-                                curIn = types.getBase(curOut.getSize(), type_metatype.TYPE_UNKNOWN);
-                            else
-                                curIn = getComponent(curIn, 0, inHole);
+                    while (curIn.getSize() != curOut.getSize()) {
+                        if (curIn.getSize() > curOut.getSize()) {
+                            curIn = (inHole)
+                                ? types.getBase(curOut.getSize(), type_metatype.TYPE_UNKNOWN)
+                                : getComponent(curIn, 0, inHole);
                             if (curIn == (Datatype)null) return false;
                         }
-                        else
-                        {
-                            if (outHole)
-                                curOut = types.getBase(curIn.getSize(), type_metatype.TYPE_UNKNOWN);
-                            else
-                                curOut = getComponent(curOut, 0, outHole);
+                        else {
+                            curOut = (outHole)
+                                ? types.getBase(curIn.getSize(), type_metatype.TYPE_UNKNOWN)
+                                : getComponent(curOut, 0, outHole);
                             if (curOut == (Datatype)null) return false;
                         }
                     }
-                    dataTypePieces.emplace_back(curIn, curOut, curOff);
+                    dataTypePieces.Add(new Component(curIn, curOut, curOff));
                     sizeLeft -= curIn.getSize();
                     curOff += curIn.getSize();
                 }
