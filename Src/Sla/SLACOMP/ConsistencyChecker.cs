@@ -849,7 +849,7 @@ namespace Sla.SLACOMP
             {
                 OpTpl* op = *iter;
                 VarnodeTpl* outvn = op.getOut();
-                if (outvn != (VarnodeTpl*)0)
+                if (outvn != (VarnodeTpl)null)
                 {
                     if (!checkVarnodeTruncation(ct, -1, op, outvn, isbigendian))
                         testresult = false;
@@ -1060,7 +1060,7 @@ namespace Sla.SLACOMP
         /// \param secnum is the section number containing the operator
         private static void examineVn(Dictionary<ulong, OptimizeRecord> recs, VarnodeTpl vn, uint i,int inslot, int secnum)
         {
-            if (vn == (VarnodeTpl*)0) return;
+            if (vn == (VarnodeTpl)null) return;
             if (!vn.getSpace().isUniqueSpace()) return;
             if (vn.getOffset().getType() != ConstTpl.const_type.real) return;
 
@@ -1162,7 +1162,7 @@ namespace Sla.SLACOMP
 
             // We always check for writes to -vn-
             VarnodeTpl vn2 = op.getOut();
-            if (vn2 != (VarnodeTpl*)0) {
+            if (vn2 != (VarnodeTpl)null) {
                 if (possibleIntersection(vn, vn2))
                     return true;
             }

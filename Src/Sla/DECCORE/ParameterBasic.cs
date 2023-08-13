@@ -46,13 +46,13 @@ namespace Sla.DECCORE
 
         public override int getSize() => type.getSize();
 
-        public override bool isTypeLocked() => ((flags&ParameterPieces::typelock)!= 0);
+        public override bool isTypeLocked() => ((flags&ParameterPieces.Flags.typelock)!= 0);
 
-        public override bool isNameLocked() => ((flags&ParameterPieces::namelock)!= 0);
+        public override bool isNameLocked() => ((flags&ParameterPieces.Flags.namelock)!= 0);
 
         public override bool isSizeTypeLocked() => ((flags&ParameterPieces::sizelock)!= 0);
 
-        public override bool isThisPointer() => ((flags&ParameterPieces::isthis)!= 0);
+        public override bool isThisPointer() => ((flags&ParameterPieces.Flags.isthis)!= 0);
 
         public override bool isIndirectStorage() => ((flags&ParameterPieces.Flags.indirectstorage)!= 0);
 
@@ -64,28 +64,28 @@ namespace Sla.DECCORE
         {
             if (val)
             {
-                flags |= ParameterPieces::typelock;
+                flags |= ParameterPieces.Flags.typelock;
                 if (type.getMetatype() == type_metatype.TYPE_UNKNOWN) // Check if we are locking type_metatype.TYPE_UNKNOWN
                     flags |= ParameterPieces::sizelock;
             }
             else
-                flags &= ~((uint)(ParameterPieces::typelock | ParameterPieces::sizelock));
+                flags &= ~((uint)(ParameterPieces.Flags.typelock | ParameterPieces::sizelock));
         }
 
         public override void setNameLock(bool val)
         {
             if (val)
-                flags |= ParameterPieces::namelock;
+                flags |= ParameterPieces.Flags.namelock;
             else
-                flags &= ~((uint)ParameterPieces::namelock);
+                flags &= ~((uint)ParameterPieces.Flags.namelock);
         }
 
         public override void setThisPointer(bool val)
         {
             if (val)
-                flags |= ParameterPieces::isthis;
+                flags |= ParameterPieces.Flags.isthis;
             else
-                flags &= ~((uint)ParameterPieces::isthis);
+                flags &= ~((uint)ParameterPieces.Flags.isthis);
         }
 
         public override void overrideSizeLockType(Datatype ct)

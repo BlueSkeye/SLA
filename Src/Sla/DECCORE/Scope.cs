@@ -629,7 +629,7 @@ namespace Sla.DECCORE
         public abstract void decode(Sla.CORE.Decoder decoder);
 
         ///< Restore attributes for \b this Scope from wrapping element
-        public void decodeWrappingAttributes(Sla.CORE.Decoder decoder)
+        public virtual void decodeWrappingAttributes(Sla.CORE.Decoder decoder)
         {
         }
 

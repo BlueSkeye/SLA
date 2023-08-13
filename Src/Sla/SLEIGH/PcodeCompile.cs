@@ -153,7 +153,7 @@ namespace Sla.SLEIGH
             OpTpl* op = new OpTpl(opc);
             op.addInput(vn1.outvn);
             op.addInput(vn2.outvn);
-            vn2.outvn = (VarnodeTpl*)0;
+            vn2.outvn = (VarnodeTpl)null;
             op.setOutput(outvn);
             vn1.ops.Add(op);
             vn1.outvn = new VarnodeTpl(*outvn);
@@ -168,7 +168,7 @@ namespace Sla.SLEIGH
             OpTpl* op = new OpTpl(opc);
             op.addInput(vn1.outvn);
             op.addInput(vn2.outvn);
-            vn2.outvn = (VarnodeTpl*)0;
+            vn2.outvn = (VarnodeTpl)null;
             op.setOutput(outvn);
             vn1.ops.Add(op);
             vn1.outvn = new VarnodeTpl(*outvn);
@@ -191,7 +191,7 @@ namespace Sla.SLEIGH
                         // and single input vn.   Free the input expression
             OpTpl* op = new OpTpl(opc);
             op.addInput(vn.outvn);
-            vn.outvn = (VarnodeTpl*)0; // There is no longer an output to this expression
+            vn.outvn = (VarnodeTpl)null; // There is no longer an output to this expression
             List<OpTpl*>* res = vn.ops;
             vn.ops = (List<OpTpl*>*)0;
             delete vn;
@@ -208,9 +208,9 @@ namespace Sla.SLEIGH
             vn2.ops.clear();
             OpTpl* op = new OpTpl(opc);
             op.addInput(vn1.outvn);
-            vn1.outvn = (VarnodeTpl*)0;
+            vn1.outvn = (VarnodeTpl)null;
             op.addInput(vn2.outvn);
-            vn2.outvn = (VarnodeTpl*)0;
+            vn2.outvn = (VarnodeTpl)null;
             res.Add(op);
             delete vn1;
             delete vn2;
@@ -270,8 +270,8 @@ namespace Sla.SLEIGH
             op.addInput(val.outvn);
             res.Add(op);
             force_size(val.outvn, ConstTpl(ConstTpl.const_type.real, qual.size), *res);
-            ptr.outvn = (VarnodeTpl*)0;
-            val.outvn = (VarnodeTpl*)0;
+            ptr.outvn = (VarnodeTpl)null;
+            val.outvn = (VarnodeTpl)null;
             delete ptr;
             delete val;
             delete qual;
@@ -334,20 +334,20 @@ namespace Sla.SLEIGH
             {
                 // If we know the size of base, make sure the bit range is in bounds
                 fullsz = basevn.getSize().getReal();
-                if (fullsz == 0) return (VarnodeTpl*)0;
+                if (fullsz == 0) return (VarnodeTpl)null;
                 if (byteoffset + numbytes > fullsz)
                     throw new SleighError("Requested bit range out of bounds");
             }
 
-            if ((bitoffset % 8) != 0) return (VarnodeTpl*)0;
-            if ((numbits % 8) != 0) return (VarnodeTpl*)0;
+            if ((bitoffset % 8) != 0) return (VarnodeTpl)null;
+            if ((numbits % 8) != 0) return (VarnodeTpl)null;
 
             if (basevn.getSpace().isUniqueSpace()) // Do we really want to prevent truncated uniques??
-                return (VarnodeTpl*)0;
+                return (VarnodeTpl)null;
 
             ConstTpl::const_type offset_type = basevn.getOffset().getType();
             if ((offset_type != ConstTpl.const_type.real) && (offset_type != ConstTpl.const_type.handle))
-                return (VarnodeTpl*)0;
+                return (VarnodeTpl)null;
 
             ConstTpl specialoff;
             if (offset_type == ConstTpl.const_type.handle)
@@ -400,7 +400,7 @@ namespace Sla.SLEIGH
 
             if (errmsg.size() > 0)
             {   // Was there an error condition
-                reportError((Location*)0, errmsg);    // Report the error
+                reportError((Location)null, errmsg);    // Report the error
                 delete vn;          // Clean up
                 List<OpTpl*>* resops = rhs.ops; // Passthru old expression
                 rhs.ops = (List<OpTpl*>*)0;
@@ -413,7 +413,7 @@ namespace Sla.SLEIGH
 
             ExprTree* res;
             VarnodeTpl* finalout = buildTruncatedVarnode(vn, bitoffset, numbits);
-            if (finalout != (VarnodeTpl*)0)
+            if (finalout != (VarnodeTpl)null)
             {
                 delete vn;  // Don't keep the original Varnode object
                 res = createOpOutUnary(finalout, OpCode.CPUI_COPY, rhs);
@@ -433,7 +433,7 @@ namespace Sla.SLEIGH
                 res = createOpOut(finalout, OpCode.CPUI_INT_OR, res, rhs);
             }
             if (errmsg.size() > 0)
-                reportError((Location*)0, errmsg);
+                reportError((Location)null, errmsg);
             List<OpTpl*>* resops = res.ops;
             res.ops = (List<OpTpl*>*)0;
             delete res;
@@ -471,7 +471,7 @@ namespace Sla.SLEIGH
             if (errmsg.size() == 0)
             {
                 VarnodeTpl* truncvn = buildTruncatedVarnode(vn, bitoffset, numbits);
-                if (truncvn != (VarnodeTpl*)0)
+                if (truncvn != (VarnodeTpl)null)
                 { // If we are able to construct a simple truncated varnode
                     ExprTree* res = new ExprTree(truncvn); // Return just the varnode as an expression
                     delete vn;
@@ -571,7 +571,7 @@ namespace Sla.SLEIGH
             {
                 op = ops[i];
                 vn = op.getOut();
-                if ((vn != (VarnodeTpl*)0) && (vn.isLocalTemp()))
+                if ((vn != (VarnodeTpl)null) && (vn.isLocalTemp()))
                 {
                     if (vn.getOffset() == vt.getOffset())
                     {
@@ -599,25 +599,25 @@ namespace Sla.SLEIGH
         {               // Find something to fill in zero size varnode
                         // j is the slot we are trying to fill (-1=output)
                         // Don't check output for non-zero if inputonly is true
-            VarnodeTpl* match = (VarnodeTpl*)0;
+            VarnodeTpl* match = (VarnodeTpl)null;
             VarnodeTpl* vt;
             int i, inputsize;
 
             vt = (j == -1) ? op.getOut() : op.getIn(j);
             if (!inputonly)
             {
-                if (op.getOut() != (VarnodeTpl*)0)
+                if (op.getOut() != (VarnodeTpl)null)
                     if (!op.getOut().isZeroSize())
                         match = op.getOut();
             }
             inputsize = op.numInput();
             for (i = 0; i < inputsize; ++i)
             {
-                if (match != (VarnodeTpl*)0) break;
+                if (match != (VarnodeTpl)null) break;
                 if (op.getIn(i).isZeroSize()) continue;
                 match = op.getIn(i);
             }
-            if (match != (VarnodeTpl*)0)
+            if (match != (VarnodeTpl)null)
                 force_size(vt, match.getSize(), ops);
         }
 
@@ -653,7 +653,7 @@ namespace Sla.SLEIGH
                 case OpCode.CPUI_FLOAT_CEIL:
                 case OpCode.CPUI_FLOAT_FLOOR:
                 case OpCode.CPUI_FLOAT_ROUND:
-                    if ((op.getOut() != (VarnodeTpl*)0) && (op.getOut().isZeroSize()))
+                    if ((op.getOut() != (VarnodeTpl)null) && (op.getOut().isZeroSize()))
                         matchSize(-1, op, false, ops);
                     inputsize = op.numInput();
                     for (i = 0; i < inputsize; ++i)

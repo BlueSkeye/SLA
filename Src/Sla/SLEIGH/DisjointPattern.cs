@@ -20,7 +20,7 @@ namespace Sla.SLEIGH
         public uint getMask(int startbit, int size, bool context)
         {
             PatternBlock* block = getBlock(context);
-            if (block != (PatternBlock*)0)
+            if (block != (PatternBlock)null)
                 return block.getMask(startbit, size);
             return 0;
         }
@@ -28,7 +28,7 @@ namespace Sla.SLEIGH
         public uint getValue(int startbit, int size, bool context)
         {
             PatternBlock* block = getBlock(context);
-            if (block != (PatternBlock*)0)
+            if (block != (PatternBlock)null)
                 return block.getValue(startbit, size);
             return 0;
         }
@@ -36,7 +36,7 @@ namespace Sla.SLEIGH
         public int getLength(bool context)
         {
             PatternBlock* block = getBlock(context);
-            if (block != (PatternBlock*)0)
+            if (block != (PatternBlock)null)
                 return block.getLength();
             return 0;
         }
@@ -48,16 +48,16 @@ namespace Sla.SLEIGH
 
             a = getBlock(false);
             b = op2.getBlock(false);
-            if ((b != (PatternBlock*)0) && (!b.alwaysTrue()))
+            if ((b != (PatternBlock)null) && (!b.alwaysTrue()))
             {   // a must match existing block
-                if (a == (PatternBlock*)0) return false;
+                if (a == (PatternBlock)null) return false;
                 if (!a.specializes(b)) return false;
             }
             a = getBlock(true);
             b = op2.getBlock(true);
-            if ((b != (PatternBlock*)0) && (!b.alwaysTrue()))
+            if ((b != (PatternBlock)null) && (!b.alwaysTrue()))
             {   // a must match existing block
-                if (a == (PatternBlock*)0) return false;
+                if (a == (PatternBlock)null) return false;
                 if (!a.specializes(b)) return false;
             }
             return true;
@@ -69,9 +69,9 @@ namespace Sla.SLEIGH
 
             a = getBlock(false);
             b = op2.getBlock(false);
-            if (b != (PatternBlock*)0)
+            if (b != (PatternBlock)null)
             {   // a must match existing block
-                if (a == (PatternBlock*)0)
+                if (a == (PatternBlock)null)
                 {
                     if (!b.alwaysTrue())
                         return false;
@@ -81,14 +81,14 @@ namespace Sla.SLEIGH
             }
             else
             {
-                if ((a != (PatternBlock*)0) && (!a.alwaysTrue()))
+                if ((a != (PatternBlock)null) && (!a.alwaysTrue()))
                     return false;
             }
             a = getBlock(true);
             b = op2.getBlock(true);
-            if (b != (PatternBlock*)0)
+            if (b != (PatternBlock)null)
             {   // a must match existing block
-                if (a == (PatternBlock*)0)
+                if (a == (PatternBlock)null)
                 {
                     if (!b.alwaysTrue())
                         return false;
@@ -98,7 +98,7 @@ namespace Sla.SLEIGH
             }
             else
             {
-                if ((a != (PatternBlock*)0) && (!a.alwaysTrue()))
+                if ((a != (PatternBlock)null) && (!a.alwaysTrue()))
                     return false;
             }
             return true;
@@ -131,21 +131,21 @@ namespace Sla.SLEIGH
             bool allocated = false;
             bool res = true;
 
-            if (bl1 == (PatternBlock*)0)
+            if (bl1 == (PatternBlock)null)
                 inter = bl2;
-            else if (bl2 == (PatternBlock*)0)
+            else if (bl2 == (PatternBlock)null)
                 inter = bl1;
             else
             {
                 allocated = true;
                 inter = bl1.intersect(bl2);
             }
-            if (inter == (PatternBlock*)0)
+            if (inter == (PatternBlock)null)
             {
-                if (thisblock != (PatternBlock*)0)
+                if (thisblock != (PatternBlock)null)
                     res = false;
             }
-            else if (thisblock == (PatternBlock*)0)
+            else if (thisblock == (PatternBlock)null)
                 res = false;
             else
                 res = thisblock.identical(inter);

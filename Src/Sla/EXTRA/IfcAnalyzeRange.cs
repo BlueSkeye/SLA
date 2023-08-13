@@ -1,12 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -33,46 +26,39 @@ namespace Sla.EXTRA
             s >> ws >> token;
             if (token == "full")
                 useFullWidener = true;
-            else if (token == "partial")
-            {
+            else if (token == "partial") {
                 useFullWidener = false;
             }
             else
                 throw new IfaceParseError("Must specify \"full\" or \"partial\" widening");
-            Varnode* vn = dcp.readVarnode(s);
-            List<Varnode*> sinks;
-            List<PcodeOp*> reads;
+            Varnode vn = dcp.readVarnode(s);
+            List<Varnode> sinks = new List<Varnode>();
+            List<PcodeOp> reads = new List<PcodeOp>();
             sinks.Add(vn);
-            for (list<PcodeOp*>::const_iterator iter = vn.beginDescend(); iter != vn.endDescend(); ++iter)
-            {
-                PcodeOp* op = *iter;
+            IEnumerator<PcodeOp> opEnumerator = vn.beginDescend();
+            while (opEnumerator.MoveNext()) {
+                PcodeOp op = opEnumerator.Current;
                 if (op.code() == OpCode.CPUI_LOAD || op.code() == OpCode.CPUI_STORE)
                     reads.Add(op);
             }
-            Varnode* stackReg = dcp.fd.findSpacebaseInput(dcp.conf.getStackSpace());
-            ValueSetSolver vsSolver;
+            Varnode stackReg = dcp.fd.findSpacebaseInput(dcp.conf.getStackSpace());
+            ValueSetSolver vsSolver = new ValueSetSolver();
             vsSolver.establishValueSets(sinks, reads, stackReg, false);
-            if (useFullWidener)
-            {
-                WidenerFull widener;
-                vsSolver.solve(10000, widener);
+            if (useFullWidener) {
+                vsSolver.solve(10000, new WidenerFull());
             }
-            else
-            {
-                WidenerNone widener;
-                vsSolver.solve(10000, widener);
+            else {
+                vsSolver.solve(10000, new WidenerNone());
             }
-            list<ValueSet>::const_iterator iter;
-            for (iter = vsSolver.beginValueSets(); iter != vsSolver.endValueSets(); ++iter)
-            {
-                (*iter).printRaw(*status.optr);
-                *status.optr << endl;
+            IEnumerator<ValueSet> valueSetEnumerator = vsSolver.beginValueSets();
+            while (valueSetEnumerator.MoveNext()) {
+                valueSetEnumerator.Current.printRaw(status.optr);
+                status.optr.WriteLine();
             }
-            Dictionary<SeqNum, ValueSetRead>::const_iterator riter;
-            for (riter = vsSolver.beginValueSetReads(); riter != vsSolver.endValueSetReads(); ++riter)
-            {
-                (*riter).second.printRaw(*status.optr);
-                *status.optr << endl;
+            IEnumerator<KeyValuePair<SeqNum, ValueSetRead>> riter = vsSolver.beginValueSetReads();
+            while (riter.MoveNext()) {
+                riter.Current.Value.printRaw(status.optr);
+                status.optr.WriteLine();
             }
         }
     }

@@ -206,27 +206,23 @@ namespace Sla.DECCORE
         /// \param vn is the Varnode holding the root data-type to push
         private static void propagateOneType(TypeFactory typegrp, Varnode vn)
         {
-            PropagationState* ptr;
-            List<PropagationState> state;
-
-            state.emplace_back(vn);
+            PropagationState ptr;
+            List<PropagationState> state = new List<PropagationState>();
+            state.Add(new PropagationState(vn));
             vn.setMark();
 
-            while (!state.empty())
-            {
+            while (!state.empty()) {
                 ptr = &state.GetLastItem();
-                if (!ptr.valid())
-                {   // If we are out of edges to traverse
+                if (!ptr.valid()) {
+                    // If we are out of edges to traverse
                     ptr.vn.clearMark();
                     state.RemoveLastItem();
                 }
-                else
-                {
-                    if (propagateTypeEdge(typegrp, ptr.op, ptr.inslot, ptr.slot))
-                    {
+                else {
+                    if (propagateTypeEdge(typegrp, ptr.op, ptr.inslot, ptr.slot)) {
                         vn = (ptr.slot == -1) ? ptr.op.getOut() : ptr.op.getIn(ptr.slot);
                         ptr.step();        // Make sure to step before push_back
-                        state.emplace_back(vn);
+                        state.Add(new PropagationState(vn));
                         vn.setMark();
                     }
                     else

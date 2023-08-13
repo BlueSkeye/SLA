@@ -219,7 +219,7 @@ namespace Sla.SLACOMP
         {
             if (root == 0)
             {
-                reportError((Location*)0, "No patterns to match.");
+                reportError((Location)null, "No patterns to match.");
                 return;
             }
             ostringstream msg;
@@ -660,7 +660,7 @@ namespace Sla.SLACOMP
             {
                 op = ops[i];
                 vn = op.getOut();
-                if ((vn != (VarnodeTpl*)0) && (vn.isLocalTemp()))
+                if ((vn != (VarnodeTpl)null) && (vn.isLocalTemp()))
                 {
                     if (vn.getOffset() == offset)
                         return vn;
@@ -672,7 +672,7 @@ namespace Sla.SLACOMP
                         return vn;
                 }
             }
-            return (VarnodeTpl*)0;
+            return (VarnodeTpl)null;
         }
 
         /// \brief Propagate local variable sizes into an \b export statement
@@ -691,13 +691,13 @@ namespace Sla.SLACOMP
             if (result.getPtrSpace().isUniqueSpace() && result.getPtrSize().isZero())
             {
                 vt = findSize(result.getPtrOffset(), ct);
-                if (vt == (VarnodeTpl*)0) return false;
+                if (vt == (VarnodeTpl)null) return false;
                 result.setPtrSize(vt.getSize());
             }
             else if (result.getSpace().isUniqueSpace() && result.getSize().isZero())
             {
                 vt = findSize(result.getPtrOffset(), ct);
-                if (vt == (VarnodeTpl*)0) return false;
+                if (vt == (VarnodeTpl)null) return false;
                 result.setSize(vt.getSize());
             }
             return true;
@@ -724,7 +724,7 @@ namespace Sla.SLACOMP
         private static void shiftUniqueOp(OpTpl op, int sa)
         {
             VarnodeTpl* outvn = op.getOut();
-            if (outvn != (VarnodeTpl*)0)
+            if (outvn != (VarnodeTpl)null)
                 shiftUniqueVn(outvn, sa);
             for (int i = 0; i < op.numInput(); ++i)
                 shiftUniqueVn(op.getIn(i), sa);
@@ -780,7 +780,7 @@ namespace Sla.SLACOMP
         private static string formatStatusMessage(Location loc, string msg)
         {
             ostringstream s;
-            if (loc != (Location*)0)
+            if (loc != (Location)null)
             {
                 s << loc.format();
                 s << ": ";
@@ -1729,7 +1729,7 @@ namespace Sla.SLACOMP
             for (uint i = 0; i < param.size(); ++i)
             {
                 VarnodeTpl* outvn = param[i].getOut();
-                if (outvn == (VarnodeTpl*)0) continue;
+                if (outvn == (VarnodeTpl)null) continue;
                 // Check if an OperandSymbol was passed into this macro
                 if (outvn.getOffset().getType() != ConstTpl.const_type.handle) continue;
                 int hand = outvn.getOffset().getHandleIndex();

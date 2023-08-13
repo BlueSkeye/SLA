@@ -1,13 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Sla.DECCORE
 {
@@ -32,8 +23,8 @@ namespace Sla.DECCORE
 
         /// Formal name of the payload
         protected string name;
-        /// Type of this payload: CALLFIXUP_TYPE, CALLOTHERFIXUP_TYPE, etc.
-        protected int type;
+        /// Type of this payload: InjectPayload.InjectionType.CALLFIXUP_TYPE, InjectPayload.InjectionType.CALLOTHERFIXUP_TYPE, etc.
+        protected InjectionType type;
         /// True if the injection is generated dynamically
         protected bool dynamic;
         /// True if injected COPYs are considered \e incidental
@@ -137,11 +128,11 @@ namespace Sla.DECCORE
             orderParameters();
         }
 
-        public InjectPayload(string nm,int tp)
+        public InjectPayload(string nm, InjectionType tp)
         {
-            name=nm;
-            type=tp;
-            paramshift=0;
+            name = nm;
+            type = tp;
+            paramshift = 0;
             dynamic = false;
             incidentalCopy = false;
         }
@@ -190,7 +181,7 @@ namespace Sla.DECCORE
         /// Return the name of the injection
         internal virtual string getName() => name;
 
-        /// Return the type of injection (CALLFIXUP_TYPE, CALLOTHERFIXUP_TYPE, etc.)
+        /// Return the type of injection (CALLFIXUP_TYPE, InjectPayload.InjectionType.CALLOTHERFIXUP_TYPE, etc.)
         protected virtual int getType() => type;
 
         /// Return a string describing the \e source of the injection (.cspec, prototype model, etc.)

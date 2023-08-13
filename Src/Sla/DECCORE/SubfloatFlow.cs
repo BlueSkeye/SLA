@@ -37,7 +37,7 @@ namespace Sla.DECCORE
             if (vn.isConstant())
             {
                 FloatFormat form2 = getFunction().getArch().translate.getFloatFormat(vn.getSize());
-                if (form2 == (FloatFormat*)0)
+                if (form2 == (FloatFormat)null)
                     return (TransformVar)null;  // Unsupported constant format
                                 // Return the converted form of the constant
                 return newConstant(precision, 0, format.convertEncoding(vn.getOffset(), form2));
@@ -278,7 +278,7 @@ namespace Sla.DECCORE
         {
             precision = prec;
             format = f.getArch().translate.getFloatFormat(precision);
-            if (format == (FloatFormat*)0)
+            if (format == (FloatFormat)null)
                 return;
             setReplacement(root);
         }
@@ -296,7 +296,7 @@ namespace Sla.DECCORE
         /// \return \b true if a transform consistent with the given precision can be built
         public bool doTrace()
         {
-            if (format == (FloatFormat*)0)
+            if (format == (FloatFormat)null)
                 return false;
             terminatorCount = 0;    // Have seen no terminators
             bool retval = true;

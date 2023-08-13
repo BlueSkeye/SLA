@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -38,37 +38,39 @@ namespace Sla.DECCORE
         private void build()
         {
             if (built) return;
-            InjectContext & icontext(glb.pcodeinjectlib.getCachedContext());
+            InjectContext icontext = glb.pcodeinjectlib.getCachedContext();
             icontext.clear();
             ulong uniqReserve = 0x10;           // Temporary register space reserved for inputs and output
-            AddrSpace* codeSpace = glb.getDefaultCodeSpace();
-            AddrSpace* uniqSpace = glb.getUniqueSpace();
-            icontext.baseaddr = Address(codeSpace, 0x1000); // Fake address
+            AddrSpace codeSpace = glb.getDefaultCodeSpace();
+            AddrSpace uniqSpace = glb.getUniqueSpace();
+            icontext.baseaddr = new Address(codeSpace, 0x1000); // Fake address
             icontext.nextaddr = icontext.baseaddr;
-            for (int i = 0; i < sizeInput(); ++i)
-            {   // Skip the first operand containing the injectid
-                InjectParameter & param(getInput(i));
-                icontext.inputlist.emplace_back();
-                icontext.inputlist.GetLastItem().space = uniqSpace;
-                icontext.inputlist.GetLastItem().offset = uniqReserve;
-                icontext.inputlist.GetLastItem().size = param.getSize();
+            for (int i = 0; i < sizeInput(); ++i) {
+                // Skip the first operand containing the injectid
+                InjectParameter param = getInput(i);
+                VarnodeData newNode = new VarnodeData();
+                icontext.inputlist.Add(new VarnodeData() {
+                    space = uniqSpace,
+                    offset = uniqReserve,
+                    size = param.getSize()
+                });
                 inputList.Add(uniqReserve);
                 uniqReserve += 0x20;
             }
-            for (int i = 0; i < sizeOutput(); ++i)
-            {
-                InjectParameter & param(getOutput(i));
-                icontext.output.emplace_back();
-                icontext.output.GetLastItem().space = uniqSpace;
-                icontext.output.GetLastItem().offset = uniqReserve;
-                icontext.output.GetLastItem().size = param.getSize();
+            for (int i = 0; i < sizeOutput(); ++i) {
+                InjectParameter param = getOutput(i);
+                icontext.output.Add(new VarnodeData() {
+                    space = uniqSpace,
+                    offset = uniqReserve,
+                    size = param.getSize()
+                });
                 outputList.Add(uniqReserve);
                 uniqReserve += 0x20;
             }
             emitter = emulator.buildEmitter(glb.pcodeinjectlib.getBehaviors(), uniqReserve);
-            inject(icontext, *emitter);
-            delete emitter;
-            emitter = (PcodeEmit*)0;
+            inject(icontext, emitter);
+            // delete emitter;
+            emitter = (PcodeEmit)null;
             if (!emulator.checkForLegalCode())
                 throw new LowlevelError("Illegal p-code in executable snippet");
             built = true;
@@ -80,14 +82,14 @@ namespace Sla.DECCORE
         public ExecutablePcode(Architecture g, string src, string nm)
         {
             glb = g;
-            emitter = (PcodeEmit*)0;
+            emitter = (PcodeEmit)null;
             source = src;
             built = false;
         }
 
         ~ExecutablePcode()
         {
-            if (emitter != (PcodeEmit*)0) delete emitter;
+            if (emitter != (PcodeEmit)null) delete emitter;
         }
     
         public override string getSource() => source;

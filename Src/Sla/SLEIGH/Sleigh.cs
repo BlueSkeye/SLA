@@ -481,7 +481,7 @@ namespace Sla.SLEIGH
                         if (triple.getType() ==  SleighSymbol.symbol_type.subtable_symbol)
                             break;
                         else            // Some other kind of symbol as an operand
-                            triple.getFixedHandle(walker.getParentHandle(), walker);
+                            triple.getFixedHandle(out walker.getParentHandle(), walker);
                     }
                     else
                     {           // Must be an expression

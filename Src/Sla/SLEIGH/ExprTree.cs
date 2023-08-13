@@ -20,7 +20,7 @@ namespace Sla.SLEIGH
         public ExprTree()
         {
             ops = (List<OpTpl*>*)0;
-            outvn = (VarnodeTpl*)0;
+            outvn = (VarnodeTpl)null;
         }
 
         public ExprTree(VarnodeTpl vn)
@@ -33,15 +33,15 @@ namespace Sla.SLEIGH
         {
             ops = new List<OpTpl*>;
             ops.Add(op);
-            if (op.getOut() != (VarnodeTpl*)0)
+            if (op.getOut() != (VarnodeTpl)null)
                 outvn = new VarnodeTpl(*op.getOut());
             else
-                outvn = (VarnodeTpl*)0;
+                outvn = (VarnodeTpl)null;
         }
 
         ~ExprTree()
         {
-            if (outvn != (VarnodeTpl*)0)
+            if (outvn != (VarnodeTpl)null)
                 delete outvn;
             if (ops != (List<OpTpl*>*)0)
             {
@@ -56,7 +56,7 @@ namespace Sla.SLEIGH
                         // If the original output is named, this requires
                         // an extra COPY op
             OpTpl* op;
-            if (outvn == (VarnodeTpl*)0)
+            if (outvn == (VarnodeTpl)null)
                 throw new SleighError("Expression has no output");
             if (outvn.isUnnamed())
             {
@@ -89,7 +89,7 @@ namespace Sla.SLEIGH
                 res.insert(res.end(), (*param)[i].ops.begin(), (*param)[i].ops.end());
                 (*param)[i].ops.clear();
                 op.addInput((*param)[i].outvn);
-                (*param)[i].outvn = (VarnodeTpl*)0;
+                (*param)[i].outvn = (VarnodeTpl)null;
                 delete(*param)[i];
             }
             res.Add(op);

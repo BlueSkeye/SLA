@@ -1525,29 +1525,31 @@ namespace Sla.DECCORE
                     }
                     TypeField? field = ct.findTruncation(off, sz, op, inslot, off);
                     if (field != (TypeField)null) {
-                        stack.emplace_back();
-                        PartialSymbolEntry entry = new PartialSymbolEntry(stack.GetLastItem());
-                        entry.token = &object_member;
-                        entry.field = field;
-                        entry.parent = ct;
-                        entry.fieldname = field.name;
-                        entry.hilite = EmitMarkup.syntax_highlight.no_color;
+                        PartialSymbolEntry entry = new PartialSymbolEntry() {
+                            token = object_member,
+                            field = field,
+                            parent = ct,
+                            fieldname = field.name,
+                            hilite = EmitMarkup.syntax_highlight.no_color
+                        };
+                        stack.Add(entry);
                         ct = field.type;
                         succeeded = true;
                     }
                 }
                 else if (ct.getMetatype() == type_metatype.TYPE_ARRAY) {
                     int el;
-                    Datatype? arrayof = ((TypeArray)ct).getSubEntry(off, sz, &off, &el);
+                    Datatype? arrayof = ((TypeArray)ct).getSubEntry(off, sz, off, el);
                     if (arrayof != (Datatype)null) {
-                        stack.emplace_back();
-                        PartialSymbolEntry entry = new PartialSymbolEntry(stack.GetLastItem());
-                        entry.token = &subscript;
                         StringWriter s = new StringWriter();
                         s.Write(el);
-                        entry.fieldname = s.ToString();
-                        entry.field = (TypeField)null;
-                        entry.hilite = EmitMarkup.syntax_highlight.const_color;
+                        PartialSymbolEntry entry = new PartialSymbolEntry() {
+                            token = subscript,
+                            fieldname = s.ToString(),
+                            field = (TypeField)null,
+                            hilite = EmitMarkup.syntax_highlight.const_color
+                        };
+                        stack.Add(entry);
                         ct = arrayof;
                         succeeded = true;
                     }
@@ -1555,13 +1557,14 @@ namespace Sla.DECCORE
                 else if (ct.getMetatype() == type_metatype.TYPE_UNION) {
                     TypeField? field = ct.findTruncation(off, sz, op, inslot, off);
                     if (field != (TypeField)null) {
-                        stack.emplace_back();
-                        PartialSymbolEntry entry = new PartialSymbolEntry(stack.GetLastItem());
-                        entry.token = &object_member;
-                        entry.field = field;
-                        entry.parent = ct;
-                        entry.fieldname = entry.field.name;
-                        entry.hilite = EmitMarkup.syntax_highlight.no_color;
+                        PartialSymbolEntry entry = new PartialSymbolEntry() {
+                            token = object_member,
+                            field = field,
+                            parent = ct,
+                            fieldname = entry.field.name,
+                            hilite = EmitMarkup.syntax_highlight.no_color
+                        };
+                        stack.Add(entry);
                         ct = field.type;
                         succeeded = true;
                     }
@@ -1581,14 +1584,16 @@ namespace Sla.DECCORE
                 }
                 if (!succeeded) {
                     // Subtype was not good
-                    stack.emplace_back();
-                    PartialSymbolEntry entry = new PartialSymbolEntry(stack.GetLastItem());
-                    entry.token = &object_member;
                     if (sz == 0)
                         sz = ct.getSize() - off;
-                    entry.fieldname = unnamedField(off, sz);    // If nothing else works, generate artificial field name
-                    entry.field = (TypeField)null;
-                    entry.hilite = EmitMarkup.syntax_highlight.no_color;
+                    PartialSymbolEntry entry = new PartialSymbolEntry() {
+                        token = object_member,
+                        // If nothing else works, generate artificial field name
+                        fieldname = unnamedField(off, sz),
+                        field = (TypeField)null,
+                        hilite = EmitMarkup.syntax_highlight.no_color
+                    };
+                    stack.Add(entry);
                     ct = (Datatype)null;
                 }
             }

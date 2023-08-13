@@ -23,19 +23,19 @@ namespace Sla.EXTRA
         public void init(Translate t)
         {
             trans = t;
-            jumpaddr.clear();
+            jumpaddr.Clear();
             targetoffsets.clear();
         }
 
-        public override void dump(Address addr,OpCode opc, VarnodeData outvar,VarnodeData vars,
+        public override void dump(Address addr,OpCode opc, VarnodeData? outvar,VarnodeData[] vars,
             int isize)
         {
             lastop = opc;
-            switch (opc)
-            {
+            switch (opc) {
                 case OpCode.CPUI_CALL:
                     hascall = true;
-                // fallthru
+                    // fallthru
+                    goto case OpCode.CPUI_BRANCH;
                 case OpCode.CPUI_BRANCH:
                 case OpCode.CPUI_CBRANCH:
                     jumpaddr.Add(new Address(vars[0].space, vars[0].offset));
@@ -43,15 +43,13 @@ namespace Sla.EXTRA
                 case OpCode.CPUI_COPY:
                 case OpCode.CPUI_BRANCHIND:
                 case OpCode.CPUI_CALLIND:
-                    if (targetoffsets.end() != targetoffsets.find(vars[0].offset))
-                    {
+                    if (targetoffsets.end() != targetoffsets.find(vars[0].offset)) {
                         hitsaddress = true;
                         targethit = vars[0].offset;
                     }
                     break;
                 case OpCode.CPUI_LOAD:
-                    if (targetoffsets.end() != targetoffsets.find(vars[1].offset))
-                    {
+                    if (targetoffsets.end() != targetoffsets.find(vars[1].offset)) {
                         hitsaddress = true;
                         targethit = vars[1].offset;
                     }

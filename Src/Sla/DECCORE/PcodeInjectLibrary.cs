@@ -17,7 +17,7 @@ namespace Sla.DECCORE
     /// via manualCallFixup() and manualCallOtherFixup().  Each payload is assigned an integer \e id
     /// when it is read in, and getPayload() fetches the payload during analysis. The library
     /// also associates the formal names of payloads with the id. Payloads of different types,
-    /// CALLFIXUP_TYPE, CALLOTHERFIXUP_TYPE, etc., are stored in separate namespaces.
+    /// InjectPayload.InjectionType.CALLFIXUP_TYPE, InjectPayload.InjectionType.CALLOTHERFIXUP_TYPE, etc., are stored in separate namespaces.
     ///
     /// This is an abstract base class. The derived classes determine the type of storage used
     /// by the payloads.  The library also provides a reusable InjectContext object to match
@@ -113,7 +113,7 @@ namespace Sla.DECCORE
         /// \b this library allocates a new object that fits with its storage scheme and returns the id.
         /// \param sourceName is a string describing the source of the new payload
         /// \param name is the formal name of the payload
-        /// \param type is the formal type (CALLFIXUP_TYPE, CALLOTHERFIXUP_TYPE, etc.) of the payload
+        /// \param type is the formal type (CALLFIXUP_TYPE, InjectPayload.InjectionType.CALLOTHERFIXUP_TYPE, etc.) of the payload
         /// \return the id associated with the new InjectPayload object
         protected abstract int allocateInject(string sourceName, string name, InjectPayload.InjectionType type);
 
@@ -217,7 +217,7 @@ namespace Sla.DECCORE
         /// Then the InjectPayload is finalized with the library.
         /// \param src is a string describing the source of the payload being decoded
         /// \param nm is the name of the payload
-        /// \param tp is the type of the payload (CALLFIXUP_TYPE, EXECUTABLEPCODE_TYPE, etc.)
+        /// \param tp is the type of the payload (CALLFIXUP_TYPE, InjectPayload.InjectionType.EXECUTABLEPCODE_TYPE, etc.)
         /// \param decoder is the stream decoder
         /// \return the id of the newly registered payload
         public int decodeInject(string src, string suffix, InjectPayload.InjectionType tp,

@@ -278,28 +278,26 @@ namespace Sla.DECCORE
                 recurse();          // So we must recurse
 
             bool paren;
-            int4 id;
+            int id;
 
-            if (revpol.empty())
-            {
+            if (revpol.empty()) {
                 paren = false;
                 id = emit.openGroup();
             }
-            else
-            {
-                emitOp(revpol.back());
+            else {
+                emitOp(revpol.GetLastItem());
                 paren = parentheses(tok);
-                if (paren)
-                    id = emit.openParen(OPEN_PAREN);
-                else
-                    id = emit.openGroup();
+                id = (paren)
+                    ? emit.openParen(OPEN_PAREN)
+                    : emit.openGroup();
             }
-            revpol.emplace_back();
-            revpol.back().tok = tok;
-            revpol.back().visited = 0;
-            revpol.back().paren = paren;
-            revpol.back().op = op;
-            revpol.back().id = id;
+            revpol.Add(new ReversePolish() {
+                tok = tok,
+                visited = 0,
+                paren = paren,
+                op = op,
+                id = id
+            });
         }
 
         ///< Push a variable token onto the RPN stack
@@ -357,7 +355,7 @@ namespace Sla.DECCORE
             //   }
 
             // But it is more efficient to just call them in reverse order
-            nodepend.emplace_back(vn, op, m);
+            nodepend.Add(new NodePending(vn, op, m));
         }
 
         ///< Push an explicit variable onto the RPN stack

@@ -1,4 +1,5 @@
 ﻿using Sla.CORE;
+using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace Sla.EXTRA
         private List<string> targetSymbolNames = new List<string>();
         
         public InjectPayloadCallfixup(string sourceName)
-            : base(sourceName,"unknown", CALLFIXUP_TYPE)
+            : base(sourceName,"unknown", InjectPayload.InjectionType.CALLFIXUP_TYPE)
         {
         }
 
@@ -26,14 +27,13 @@ namespace Sla.EXTRA
             {
                 uint subId = decoder.openElement();
                 if (subId == 0) break;
-                if (subId == ELEM_PCODE)
-                {
+                if (subId == ElementId.ELEM_PCODE) {
                     decodePayloadAttributes(decoder);
                     decodePayloadParams(decoder);
                     decodeBody(decoder);
                     pcodeSubtag = true;
                 }
-                else if (subId == ELEM_TARGET)
+                else if (subId == ElementId.ELEM_TARGET)
                     targetSymbolNames.Add(decoder.readString(AttributeId.ATTRIB_NAME));
                 decoder.closeElement(subId);
             }

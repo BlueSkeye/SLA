@@ -252,21 +252,21 @@ namespace Sla.DECCORE
         /// \param sym is the given Symbol to treat as a name recommendation
         private void addRecommendName(Symbol sym)
         {
-            SymbolEntry* entry = sym.getFirstWholeMap();
+            SymbolEntry? entry = sym.getFirstWholeMap();
             if (entry == (SymbolEntry)null) return;
-            if (entry.isDynamic())
-            {
-                dynRecommend.emplace_back(entry.getFirstUseAddress(), entry.getHash(), sym.getName(), sym.getId());
+            if (entry.isDynamic()) {
+                dynRecommend.Add(
+                    new DynamicRecommend(entry.getFirstUseAddress(), entry.getHash(),
+                        sym.getName(), sym.getId()));
             }
-            else
-            {
+            else {
                 Address usepoint = new Address((AddrSpace)null,0);
-                if (!entry.getUseLimit().empty())
-                {
-                    Range range = entry.getUseLimit().getFirstRange();
-                    usepoint = Address(range.getSpace(), range.getFirst());
+                if (!entry.getUseLimit().empty()) {
+                    Sla.CORE.Range? range = entry.getUseLimit().getFirstRange();
+                    usepoint = new Address(range.getSpace(), range.getFirst());
                 }
-                nameRecommend.emplace_back(entry.getAddr(), usepoint, entry.getSize(), sym.getName(), sym.getId());
+                nameRecommend.Add(
+                    new NameRecommend(entry.getAddr(), usepoint, entry.getSize(), sym.getName(), sym.getId()));
             }
             if (sym.getCategory() < 0)
                 removeSymbol(sym);
@@ -279,25 +279,21 @@ namespace Sla.DECCORE
         /// the specific location, it will use the original name.
         private void collectNameRecs()
         {
-            nameRecommend.clear();  // Clear out any old name recommendations
-            dynRecommend.clear();
+            nameRecommend.Clear();  // Clear out any old name recommendations
+            dynRecommend.Clear();
 
             SymbolNameTree::iterator iter = nametree.begin();
-            while (iter != nametree.end())
-            {
-                Symbol* sym = *iter++;
-                if (sym.isNameLocked() && (!sym.isTypeLocked()))
-                {
-                    if (sym.isThisPointer())
-                    {       // If there is a "this" pointer
-                        Datatype* dt = sym.getType();
-                        if (dt.getMetatype() == type_metatype.TYPE_PTR)
-                        {
-                            if (((TypePointer*)dt).getPtrTo().getMetatype() == type_metatype.TYPE_STRUCT)
-                            {
+            while (iter != nametree.end()) {
+                Symbol sym = *iter++;
+                if (sym.isNameLocked() && (!sym.isTypeLocked())) {
+                    if (sym.isThisPointer()) {
+                        // If there is a "this" pointer
+                        Datatype dt = sym.getType() ?? throw new BugException();
+                        if (dt.getMetatype() == type_metatype.TYPE_PTR) {
+                            if (((TypePointer)dt).getPtrTo().getMetatype() == type_metatype.TYPE_STRUCT) {
                                 // If the "this" pointer points to a class, try to preserve the data-type
                                 // even though the symbol is not preserved.
-                                SymbolEntry* entry = sym.getFirstWholeMap();
+                                SymbolEntry entry = sym.getFirstWholeMap();
                                 addTypeRecommendation(entry.getAddr(), dt);
                             }
                         }
@@ -314,24 +310,22 @@ namespace Sla.DECCORE
         private void annotateRawStackPtr()
         {
             if (!fd.hasTypeRecoveryStarted()) return;
-            Varnode* spVn = fd.findSpacebaseInput(space);
+            Varnode spVn = fd.findSpacebaseInput(space);
             if (spVn == (Varnode)null) return;
-            list<PcodeOp*>::const_iterator iter;
-            List<PcodeOp*> refOps;
-            for (iter = spVn.beginDescend(); iter != spVn.endDescend(); ++iter)
-            {
-                PcodeOp* op = *iter;
+            IEnumerator<PcodeOp> iter = spVn.beginDescend();
+            List<PcodeOp> refOps = new List<PcodeOp>();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if (op.getEvalType() == PcodeOp.Flags.special && !op.isCall()) continue;
                 OpCode opc = op.code();
                 if (opc == OpCode.CPUI_INT_ADD || opc == OpCode.CPUI_PTRSUB || opc == OpCode.CPUI_PTRADD)
                     continue;
                 refOps.Add(op);
             }
-            for (int i = 0; i < refOps.size(); ++i)
-            {
-                PcodeOp* op = refOps[i];
+            for (int i = 0; i < refOps.size(); ++i) {
+                PcodeOp op = refOps[i];
                 int slot = op.getSlot(spVn);
-                PcodeOp* ptrsub = fd.newOpBefore(op, OpCode.CPUI_PTRSUB, spVn, fd.newConstant(spVn.getSize(), 0));
+                PcodeOp ptrsub = fd.newOpBefore(op, OpCode.CPUI_PTRSUB, spVn, fd.newConstant(spVn.getSize(), 0));
                 fd.opSetInput(op, ptrsub.getOut(), slot);
             }
         }
@@ -345,7 +339,7 @@ namespace Sla.DECCORE
             : base(id, fd.getName(), g)
         {
             space = spc;
-            minParamOffset = ~((ulong)0);
+            minParamOffset = ulong.MaxValue;
             maxParamOffset = 0;
             rangeLocked = false;
             stackGrowsNegative = true;
@@ -388,7 +382,7 @@ namespace Sla.DECCORE
         /// \param first is the starting offset of the given range
         /// \param sz is the number of bytes in the range
         /// \param parameter is \b true if the range is being used to store a sub-function parameter
-        public void markNotMapped(AddrSpace spc, ulong first, int sz, bool param)
+        public void markNotMapped(AddrSpace spc, ulong first, int sz, bool parameter)
         {
             if (space != spc) return;
             ulong last = first + sz - 1;
@@ -397,8 +391,8 @@ namespace Sla.DECCORE
                 last = spc.getHighest();
             else if (last > spc.getHighest())
                 last = spc.getHighest();
-            if (parameter)
-            {       // Everything above parameter
+            if (parameter) {
+                // Everything above parameter
                 if (first < minParamOffset)
                     minParamOffset = first;
                 if (last > maxParamOffset)
@@ -407,16 +401,15 @@ namespace Sla.DECCORE
             Address addr = new Address(space, first);
             // Remove any symbols under range
             SymbolEntry? overlap = findOverlap(addr, sz);
-            while (overlap != (SymbolEntry)null)
-            { // For every overlapping entry
+            while (overlap != (SymbolEntry)null) {
+                // For every overlapping entry
                 Symbol sym = overlap.getSymbol();
-                if ((sym.getFlags() & Varnode.varnode_flags.typelock) != 0)
-                {
+                if ((sym.getFlags() & Varnode.varnode_flags.typelock) != 0) {
                     // If the symbol and the use are both as parameters
                     // this is likely the special case of a shared return call sharing the parameter location
                     // of the original function in which case we don't print a warning
                     if ((!parameter) || (sym.getCategory() != Symbol.SymbolCategory.function_parameter))
-                        fd.warningHeader("Variable defined which should be unmapped: " + sym.getName());
+                        fd.warningHeader($"Variable defined which should be unmapped: {sym.getName()}");
                     return;
                 }
                 removeSymbol(sym);
@@ -431,13 +424,13 @@ namespace Sla.DECCORE
             encoder.openElement(ElementId.ELEM_LOCALDB);
             encoder.writeSpace(AttributeId.ATTRIB_MAIN, space);
             encoder.writeBool(AttributeId.ATTRIB_LOCK, rangeLocked);
-            ScopeInternal::encode(encoder);
+            base.encode(encoder);
             encoder.closeElement(ElementId.ELEM_LOCALDB);
         }
 
         public override void decode(Sla.CORE.Decoder decoder)
         {
-            ScopeInternal::decode(decoder);
+            base.decode(decoder);
             collectNameRecs();
         }
 
@@ -449,41 +442,39 @@ namespace Sla.DECCORE
             space = decoder.readSpace(AttributeId.ATTRIB_MAIN);
         }
 
-        public override string buildVariableName(Address addr, Address pc, Datatype ct, int index, uint flags)
+        public override string buildVariableName(Address addr, Address pc, Datatype ct, int index,
+            Varnode.varnode_flags flags)
         {
             if (((flags & (Varnode.varnode_flags.addrtied | Varnode.varnode_flags.persist)) == Varnode.varnode_flags.addrtied) &&
                 addr.getSpace() == space)
             {
-                if (fd.getFuncProto().getLocalRange().inRange(addr, 1))
-                {
+                if (fd.getFuncProto().getLocalRange().inRange(addr, 1)) {
                     long start = (long)AddrSpace.byteToAddress(addr.getOffset(), space.getWordSize());
-                    Globals.sign_extend(start, addr.getAddrSize() * 8 - 1);
+                    Globals.sign_extend(ref start, addr.getAddrSize() * 8 - 1);
                     if (stackGrowsNegative)
                         start = -start;
-                    ostringstream s;
+                    TextWriter s;
                     if (ct != (Datatype)null)
                         ct.printNameBase(s);
-                    string spacename = addr.getSpace().getName();
+                    string spacename =  addr.getSpace().getName();
                     spacename[0] = toupper(spacename[0]);
-                    s << spacename;
-                    if (start <= 0)
-                    {
-                        s << 'X';       // Indicate local stack space allocated by caller
+                    s.Write(spacename);
+                    if (start <= 0) {
+                        s.Write('X');       // Indicate local stack space allocated by caller
                         start = -start;
                     }
-                    else
-                    {
+                    else {
                         if ((minParamOffset < maxParamOffset) &&
                             (stackGrowsNegative ? (addr.getOffset() < minParamOffset) : (addr.getOffset() > maxParamOffset)))
                         {
-                            s << 'Y';       // Indicate unusual region of stack
+                            s.Write('Y');       // Indicate unusual region of stack
                         }
                     }
-                    s << '_' << hex << start;
-                    return makeNameUnique(s.str());
+                    s.Write($"_{start:X}");
+                    return makeNameUnique(s.ToString());
                 }
             }
-            return ScopeInternal::buildVariableName(addr, pc, ct, index, flags);
+            return ScopeInternal.buildVariableName(addr, pc, ct, index, flags);
         }
 
         /// Reset the set of addresses that are considered mapped by the scope to the default
@@ -492,7 +483,7 @@ namespace Sla.DECCORE
         public void resetLocalWindow()
         {
             stackGrowsNegative = fd.getFuncProto().isStackGrowsNegative();
-            minParamOffset = ~(ulong)0;
+            minParamOffset = ulong.MaxValue;
             maxParamOffset = 0;
 
             if (rangeLocked) return;
@@ -500,21 +491,20 @@ namespace Sla.DECCORE
             RangeList localRange = fd.getFuncProto().getLocalRange();
             RangeList paramrange = fd.getFuncProto().getParamRange();
 
-            RangeList newrange;
+            RangeList newrange = new RangeList();
 
-            set<Range>::const_iterator iter;
-            for (iter = localRange.begin(); iter != localRange.end(); ++iter)
-            {
-                AddrSpace* spc = (*iter).getSpace();
-                ulong first = (*iter).getFirst();
-                ulong last = (*iter).getLast();
+            IEnumerator<Sla.CORE.Range> iter = localRange.begin();
+            while (iter.MoveNext()) {
+                AddrSpace spc = iter.Current.getSpace();
+                ulong first = iter.Current.getFirst();
+                ulong last = iter.Current.getLast();
                 newrange.insertRange(spc, first, last);
             }
-            for (iter = paramrange.begin(); iter != paramrange.end(); ++iter)
-            {
-                AddrSpace* spc = (*iter).getSpace();
-                ulong first = (*iter).getFirst();
-                ulong last = (*iter).getLast();
+            iter = paramrange.begin();
+            while (iter.MoveNext()) {
+                AddrSpace spc = iter.Current.getSpace();
+                ulong first = iter.Current.getFirst();
+                ulong last = iter.Current.getLast();
                 newrange.insertRange(spc, first, last);
             }
             glb.symboltab.setRange(this, newrange);
@@ -530,14 +520,14 @@ namespace Sla.DECCORE
         {
             clearUnlockedCategory(-1);  // Clear out any unlocked entries
             MapState state = new MapState(space, getRangeTree(), fd.getFuncProto().getParamRange(),
-                    glb.types.getBase(1,TYPE_UNKNOWN)); // Organize list of ranges to insert
+                glb.types.getBase(1, type_metatype.TYPE_UNKNOWN)); // Organize list of ranges to insert
 
 #if OPACTION_DEBUG
             if (debugon)
                 state.turnOnDebug(glb);
 #endif
-            state.gatherVarnodes(*fd); // Gather stack type information from varnodes
-            state.gatherOpen(*fd);
+            state.gatherVarnodes(fd); // Gather stack type information from varnodes
+            state.gatherOpen(fd);
             state.gatherSymbols(maptable[space.getIndex()]);
             restructure(state);
 
@@ -550,8 +540,10 @@ namespace Sla.DECCORE
             state.sortAlias();
             if (aliasyes)
                 markUnaliased(state.getAlias());
-            if (!state.getAlias().empty() && state.getAlias()[0] == 0)  // If a zero offset use of the stack pointer exists
-                annotateRawStackPtr();                  // Add a special placeholder PTRSUB
+            // If a zero offset use of the stack pointer exists
+            if (!state.getAlias().empty() && state.getAlias()[0] == 0)
+                // Add a special placeholder PTRSUB
+                annotateRawStackPtr();
         }
 
         /// Layout mapped symbols based on HighVariable information
@@ -560,17 +552,19 @@ namespace Sla.DECCORE
         /// all data-type propagation has settled. It creates a consistent data-type for all Varnode instances of
         /// a HighVariable.
         public void restructureHigh()
-        {               // Define stack mapping based on highs
+        {
+            // Define stack mapping based on highs
             clearUnlockedCategory(-1);  // Clear out any unlocked entries
+            // Organize list of ranges to insert
             MapState state = new MapState(space, getRangeTree(), fd.getFuncProto().getParamRange(),
-                    glb.types.getBase(1,TYPE_UNKNOWN)); // Organize list of ranges to insert
+                glb.types.getBase(1, type_metatype.TYPE_UNKNOWN));
 
 #if OPACTION_DEBUG
             if (debugon)
                 state.turnOnDebug(glb);
 #endif
-            state.gatherHighs(*fd); // Gather stack type information from highs
-            state.gatherOpen(*fd);
+            state.gatherHighs(fd); // Gather stack type information from highs
+            state.gatherOpen(fd);
             state.gatherSymbols(maptable[space.getIndex()]);
             bool overlapProblems = restructure(state);
 
@@ -587,12 +581,10 @@ namespace Sla.DECCORE
         /// \return the new mapping
         public SymbolEntry remapSymbol(Symbol sym, Address addr, Address usepoint)
         {
-            SymbolEntry* entry = sym.getFirstWholeMap();
+            SymbolEntry entry = sym.getFirstWholeMap();
             int size = entry.getSize();
-            if (!entry.isDynamic())
-            {
-                if (entry.getAddr() == addr)
-                {
+            if (!entry.isDynamic()) {
+                if (entry.getAddr() == addr) {
                     if (usepoint.isInvalid() && entry.getFirstUseAddress().isInvalid())
                         return entry;
                     if (entry.getFirstUseAddress() == usepoint)
@@ -600,7 +592,7 @@ namespace Sla.DECCORE
                 }
             }
             removeSymbolMappings(sym);
-            RangeList rnglist;
+            RangeList rnglist = new RangeList();
             if (!usepoint.isInvalid())
                 rnglist.insertRange(usepoint.getSpace(), usepoint.getOffset(), usepoint.getOffset());
             return addMapInternal(sym, Varnode.varnode_flags.mapped, addr, 0, size, rnglist);
@@ -616,15 +608,14 @@ namespace Sla.DECCORE
         /// \return the new dynamic mapping
         public SymbolEntry remapSymbolDynamic(Symbol sym, ulong hash, Address usepoint)
         {
-            SymbolEntry* entry = sym.getFirstWholeMap();
+            SymbolEntry entry = sym.getFirstWholeMap();
             int size = entry.getSize();
-            if (entry.isDynamic())
-            {
+            if (entry.isDynamic()) {
                 if (entry.getHash() == hash && entry.getFirstUseAddress() == usepoint)
                     return entry;
             }
             removeSymbolMappings(sym);
-            RangeList rnglist;
+            RangeList rnglist = new RangeList();
             if (!usepoint.isInvalid())
                 rnglist.insertRange(usepoint.getSpace(), usepoint.getOffset(), usepoint.getOffset());
             return addDynamicMapInternal(sym, Varnode.varnode_flags.mapped, hash, 0, size, rnglist);
@@ -639,17 +630,15 @@ namespace Sla.DECCORE
         public void recoverNameRecommendationsForSymbols()
         {
             Address param_usepoint = fd.getAddress() - 1;
-            list<NameRecommend>::const_iterator iter;
-            for (iter = nameRecommend.begin(); iter != nameRecommend.end(); ++iter)
-            {
-                Address addr = (*iter).getAddr();
-                Address usepoint = (*iter).getUseAddr();
-                int size = (*iter).getSize();
-                Symbol* sym;
-                Varnode* vn = (Varnode)null;
-                if (usepoint.isInvalid())
-                {
-                    SymbolEntry* entry = findOverlap(addr, size);   // Recover any Symbol regardless of usepoint
+            IEnumerator<NameRecommend> iter = nameRecommend.GetEnumerator();
+            while (iter.MoveNext()) {
+                Address addr = iter.Current.getAddr();
+                Address usepoint = iter.Current.getUseAddr();
+                int size = iter.Current.getSize();
+                Symbol sym;
+                Varnode? vn = (Varnode)null;
+                if (usepoint.isInvalid()) {
+                    SymbolEntry? entry = findOverlap(addr, size);   // Recover any Symbol regardless of usepoint
                     if (entry == (SymbolEntry)null) continue;
                     if (entry.getAddr() != addr)       // Make sure Symbol has matching address
                         continue;
@@ -658,8 +647,7 @@ namespace Sla.DECCORE
                         continue;               // Symbol must be address tied to match this name recommendation
                     vn = fd.findLinkedVarnode(entry);
                 }
-                else
-                {
+                else {
                     if (usepoint == param_usepoint)
                         vn = fd.findVarnodeInput(size, addr);
                     else
@@ -669,32 +657,30 @@ namespace Sla.DECCORE
                     if (sym == (Symbol)null) continue;
                     if ((sym.getFlags() & Varnode.varnode_flags.addrtied) != 0)
                         continue;               // Cannot use untied varnode as primary map for address tied symbol
-                    SymbolEntry* entry = sym.getFirstWholeMap();
+                    SymbolEntry entry = sym.getFirstWholeMap();
                     // entry.getAddr() does not need to match address of the recommendation
                     if (entry.getSize() != size) continue;
                 }
                 if (!sym.isNameUndefined()) continue;
-                renameSymbol(sym, makeNameUnique((*iter).getName()));
-                setSymbolId(sym, (*iter).getSymbolId());
+                renameSymbol(sym, makeNameUnique(iter.Current.getName()));
+                setSymbolId(sym, iter.Current.getSymbolId());
                 setAttribute(sym, Varnode.varnode_flags.namelock);
-                if (vn != (Varnode)null)
-                {
+                if (vn != (Varnode)null) {
                     fd.remapVarnode(vn, sym, usepoint);
                 }
             }
 
             if (dynRecommend.empty()) return;
 
-            list<DynamicRecommend>::const_iterator dyniter;
-            DynamicHash dhash;
-            for (dyniter = dynRecommend.begin(); dyniter != dynRecommend.end(); ++dyniter)
-            {
+            IEnumerator<DynamicRecommend> dyniter = dynRecommend.GetEnumerator();
+            DynamicHash dhash = new DynamicHash();
+            while (dyniter.MoveNext()) {
                 dhash.clear();
-                DynamicRecommend dynEntry = *dyniter;
-                Varnode* vn = dhash.findVarnode(fd, dynEntry.getAddress(), dynEntry.getHash());
+                DynamicRecommend dynEntry = dyniter.Current;
+                Varnode? vn = dhash.findVarnode(fd, dynEntry.getAddress(), dynEntry.getHash());
                 if (vn == (Varnode)null) continue;
                 if (vn.isAnnotation()) continue;
-                Symbol* sym = vn.getHigh().getSymbol();
+                Symbol? sym = vn.getHigh().getSymbol();
                 if (sym == (Symbol)null) continue;
                 if (sym.getScope() != this) continue;
                 if (!sym.isNameUndefined()) continue;
@@ -710,8 +696,8 @@ namespace Sla.DECCORE
         /// and try to apply the data-type to it.  Do not override existing type lock.
         public void applyTypeRecommendations()
         {
-            IEnumerator<TypeRecommend> iter;
-            for (iter = typeRecommend.begin(); iter != typeRecommend.end(); ++iter) {
+            IEnumerator<TypeRecommend> iter = typeRecommend.GetEnumerator();
+            while (iter.MoveNext()) {
                 Datatype dt = iter.Current.getType();
                 Varnode? vn = fd.findVarnodeInput(dt.getSize(), iter.Current.getAddress());
                 if (vn != (Varnode)null)

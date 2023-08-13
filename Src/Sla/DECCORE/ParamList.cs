@@ -98,7 +98,7 @@ namespace Sla.DECCORE
         /// \param slot if the \e slot number to pass back
         /// \param slotsize is the number of consumed slots to pass back
         /// \return \b true if the location can be a parameter
-        public abstract bool possibleParamWithSlot(Address loc,int size, int slot,int slotsize);
+        public abstract bool possibleParamWithSlot(Address loc, int size, out int slot, out int slotsize);
 
         /// \brief Pass-back the biggest parameter contained within the given range
         /// \param loc is the starting address of the given range

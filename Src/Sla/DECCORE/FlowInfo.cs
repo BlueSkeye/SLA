@@ -1009,17 +1009,19 @@ namespace Sla.DECCORE
             for (int i = 1; i < op.numInput(); ++i) {
                 // Skip the first operand containing the injectid
                 Varnode vn = op.getIn(i);
-                icontext.inputlist.emplace_back();
-                icontext.inputlist.GetLastItem().space = vn.getSpace();
-                icontext.inputlist.GetLastItem().offset = vn.getOffset();
-                icontext.inputlist.GetLastItem().size = vn.getSize();
+                icontext.inputlist.Add(new VarnodeData() {
+                    space = vn.getSpace(),
+                    offset = vn.getOffset(),
+                    size = (uint)vn.getSize()
+                });
             }
             Varnode? outvn = op.getOut();
             if (outvn != (Varnode)null) {
-                icontext.output.emplace_back();
-                icontext.output.GetLastItem().space = outvn.getSpace();
-                icontext.output.GetLastItem().offset = outvn.getOffset();
-                icontext.output.GetLastItem().size = outvn.getSize();
+                icontext.output.Add(new VarnodeData() {
+                    space = outvn.getSpace(),
+                    offset = outvn.getOffset(),
+                    size = outvn.getSize()
+                });
             }
             doInjection(payload, icontext, op, (FuncCallSpecs)null);
         }

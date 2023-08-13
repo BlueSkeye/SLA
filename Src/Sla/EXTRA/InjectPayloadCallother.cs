@@ -9,7 +9,7 @@ namespace Sla.EXTRA
     internal class InjectPayloadCallother : InjectPayloadSleigh
     {
         public InjectPayloadCallother(string sourceName)
-            : base(sourceName,"unknown", CALLOTHERFIXUP_TYPE)
+            : base(sourceName,"unknown", InjectPayload.InjectionType.CALLOTHERFIXUP_TYPE)
         {
         }
 

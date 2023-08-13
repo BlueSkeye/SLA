@@ -1461,7 +1461,9 @@ namespace Sla.DECCORE
             }
 
             int i;
-            foreach (PcodeOp op in descend.GetEnumerator()) {
+            IEnumerator<PcodeOp> opEnumerator = descend.GetEnumerator();
+            while (opEnumerator.MoveNext()) {
+                PcodeOp op = opEnumerator.Current;
                 i = op.getSlot(this);
                 newct = op.inputTypeLocal(i);
 
@@ -1539,7 +1541,7 @@ namespace Sla.DECCORE
                         whole = whole.getDef().getIn(0);
                     if (!whole.isConstant()) return false;
                     ulong off = whole.getOffset() >> leastByte * 8;
-                    off &= Globals.calc_mask(vn.getSize());
+                    off &= Globals.calc_mask((uint)vn.getSize());
                     return (off == vn.getOffset());
                 }
                 return false;
@@ -1702,7 +1704,7 @@ namespace Sla.DECCORE
         public static bool comparePointers(Varnode a, Varnode b)
         {
             throw new NotImplementedException();
-            return (*a < *b);
+            return (a < b);
         }
 
         /// Print raw info about a Varnode to stream

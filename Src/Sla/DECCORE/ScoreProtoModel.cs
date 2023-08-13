@@ -69,18 +69,17 @@ namespace Sla.DECCORE
             int slot, slotsize;
             bool isparam;
             if (isinputscore)
-                isparam = model.possibleInputParamWithSlot(addr, sz, slot, slotsize);
+                isparam = model.possibleInputParamWithSlot(addr, sz, out slot, out slotsize);
             else
-                isparam = model.possibleOutputParamWithSlot(addr, sz, slot, slotsize);
-            if (isparam)
-            {
-                entry.emplace_back();
-                entry.GetLastItem().origIndex = orig;
-                entry.GetLastItem().slot = slot;
-                entry.GetLastItem().size = slotsize;
+                isparam = model.possibleOutputParamWithSlot(addr, sz, out slot, out slotsize);
+            if (isparam) {
+                entry.Add(new PEntry() {
+                    origIndex = orig,
+                    slot = slot,
+                    size = slotsize
+                });
             }
-            else
-            {
+            else {
                 mismatch += 1;
             }
         }
@@ -88,41 +87,32 @@ namespace Sla.DECCORE
         /// Compute the fitness score
         public void doScore()
         {
-            sort(entry.begin(), entry.end()); // Sort our entries via slot
+            // Sort our entries via slot
+            entry.Sort();
 
             int nextfree = 0;      // Next slot we expect to see
             int basescore = 0;
-            int penalty[4];
-            penalty[0] = 16;
-            penalty[1] = 10;
-            penalty[2] = 7;
-            penalty[3] = 5;
+            int[] penalty = new int[4] { 16, 10, 7, 5 };
             int penaltyfinal = 3;
             int mismatchpenalty = 20;
 
-            for (int i = 0; i < entry.size(); ++i)
-            {
+            for (int i = 0; i < entry.size(); ++i) {
                 PEntry p = entry[i];
-                if (p.slot > nextfree)
-                {   // We have some kind of hole in our slot coverage
-                    while (nextfree < p.slot)
-                    {
-                        if (nextfree < 4)
-                            basescore += penalty[nextfree];
-                        else
-                            basescore += penaltyfinal;
+                if (p.slot > nextfree) {
+                    // We have some kind of hole in our slot coverage
+                    while (nextfree < p.slot) {
+                        basescore += (nextfree < 4) ? penalty[nextfree] : penaltyfinal;
                         nextfree += 1;
                     }
                     nextfree += p.size;
                 }
-                else if (nextfree > p.slot)
-                { // Some kind of slot duplication
+                else if (nextfree > p.slot) {
+                    // Some kind of slot duplication
                     basescore += mismatchpenalty;
                     if (p.slot + p.size > nextfree)
                         nextfree = p.slot + p.size;
                 }
-                else
-                {
+                else {
                     nextfree = p.slot + p.size;
                 }
             }

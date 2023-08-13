@@ -365,7 +365,7 @@ namespace Sla.DECCORE
         /// \param slot is the index of the Varnode being accessed, -1 for the output, >=0 for an input
         /// \param newoff points to the renormalized offset to pass back
         /// \return the containing field or NULL if the range is not contained
-        public virtual TypeField findTruncation(int off, int sz, PcodeOp op, int slot, int newoff)
+        public virtual TypeField? findTruncation(int off, int sz, PcodeOp op, int slot, int newoff)
         {
             return (TypeField)null;
         }

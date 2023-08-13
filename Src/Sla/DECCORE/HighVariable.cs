@@ -208,7 +208,7 @@ namespace Sla.DECCORE
         /// Remove a member Varnode from \b this
         /// Search for the given Varnode and cut it out of the list, marking all properties as \e dirty.
         /// \param vn is the given Varnode member to remove
-        private void remove(Varnode vn)
+        internal void remove(Varnode vn)
         {
             IEnumerator<Varnode> iter = lower_bound(inst.begin(), inst.end(), vn, compareJustLoc);
             while (iter.MoveNext()) {

@@ -155,7 +155,7 @@ namespace Sla.SLEIGH
             OpTpl* op = vec[index];
             VarnodeTpl* oldvn = op.getIn(slot);
             op.setInput(vn, slot);
-            if (oldvn != (VarnodeTpl*)0)
+            if (oldvn != (VarnodeTpl)null)
                 delete oldvn;
         }
 
@@ -165,7 +165,7 @@ namespace Sla.SLEIGH
             OpTpl* op = vec[index];
             VarnodeTpl* oldvn = op.getOut();
             op.setOutput(vn);
-            if (oldvn != (VarnodeTpl*)0)
+            if (oldvn != (VarnodeTpl)null)
                 delete oldvn;
         }
 

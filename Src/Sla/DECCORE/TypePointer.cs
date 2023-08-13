@@ -1,13 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Sla.DECCORE
 {
@@ -26,7 +18,7 @@ namespace Sla.DECCORE
         /// Parse a \<type> element with a child describing the data-type being pointed to
         /// \param decoder is the stream decoder
         /// \param typegrp is the factory owning \b this data-type
-        internal void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
+        internal virtual void decode(Sla.CORE.Decoder decoder, TypeFactory typegrp)
         {
             //  uint elemId = decoder.openElement();
             decodeBasic(decoder); ;
@@ -189,7 +181,6 @@ namespace Sla.DECCORE
         }
 
         /// \brief Find a sub-type pointer given an offset into \b this
-        ///
         /// Add a constant offset to \b this pointer.
         /// If there is a valid component at that offset, return a pointer
         /// to the data-type of the component or NULL otherwise.
@@ -203,8 +194,8 @@ namespace Sla.DECCORE
         /// \param allowArrayWrap is \b true if the pointer should be treated as a pointer to an array
         /// \param typegrp is the factory producing the (possibly new) data-type
         /// \return a pointer datatype for the component or NULL
-        public override TypePointer downChain(ulong off, TypePointer par, ulong parOff, bool allowArrayWrap,
-            TypeFactory typegrp)
+        public virtual TypePointer downChain(ulong off, out TypePointer par, out ulong parOff,
+            bool allowArrayWrap, TypeFactory typegrp)
         {
             int ptrtoSize = ptrto.getSize();
             if (off >= ptrtoSize)

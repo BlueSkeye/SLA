@@ -1,15 +1,7 @@
 ﻿using Sla.CORE;
+using Sla.DECCORE;
+using Sla.SLACOMP;
 using Sla.SLEIGH;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.ConstrainedExecution;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.WebRequestMethods;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla
 {
@@ -134,18 +126,18 @@ namespace Sla
         /// \param sizein is the size to treat that value as an input
         /// \param sizeout is the size to sign-extend the value to
         /// \return the sign-extended value
-        public static ulong sign_extend(ulong @in, int sizein, int sizeout)
+        public static ulong sign_extend(ref ulong @in, int sizein, int sizeout)
         {
             int signbit;
             ulong mask;
 
             signbit = sizein * 8 - 1;
-            @in &= Globals.calc_mask((uint)sizein);
+            @in &= calc_mask((uint)sizein);
             if (sizein >= sizeout) {
                 return @in;
             }
             if ((@in >> signbit) != 0) {
-                mask = Globals.calc_mask((uint)sizeout);
+                mask = calc_mask((uint)sizeout);
                 // Split shift into two pieces
                 ulong tmp = mask << signbit;
                 // In case, everything is shifted out
@@ -280,7 +272,7 @@ namespace Sla
             if (val == 0) {
                 return 8 * sizeof(ulong);
             }
-            ulong mask = ~((ulong)0);
+            ulong mask = ulong.MaxValue;
             int maskSize = 4 * sizeof(ulong);
             mask &= (mask << maskSize);
             int bit = 0;
@@ -447,7 +439,7 @@ namespace Sla
                 else {
                     tmpq >>= 1;
                 }
-                Globals.mult64to128(mult, divisor, tmpq);
+                mult64to128(mult, divisor, tmpq);
                 if (unsignedCompare128(fullpower, mult) < 0) {
                     max = tmpq - 1;
                 }
@@ -457,10 +449,10 @@ namespace Sla
             }
             // min is now our putative quotient
             if (tmpq != min) {
-                Globals.mult64to128(mult, divisor, min);
+                mult64to128(mult, divisor, min);
             }
             // Calculate remainder
-            Globals.unsignedSubtract128(fullpower, mult);
+            unsignedSubtract128(fullpower, mult);
             // min might be 1 too small
             if (fullpower[1] != 0 || fullpower[0] >= divisor) {
                 q = min + 1;
@@ -634,12 +626,11 @@ namespace Sla
         /// \return \b true if they are pieces of a whole
         internal static bool contiguous_test(Varnode vn1, Varnode vn2)
         {
-            if (vn1.isInput() || vn2.isInput())
-            {
+            if (vn1.isInput() || vn2.isInput()) {
                 return false;
             }
             if ((!vn1.isWritten()) || (!vn2.isWritten())) return false;
-            PcodeOp op1 = vn1.getDef();
+            PcodeOp op1 = vn1.getDef() ?? throw new BugException();
             PcodeOp op2 = vn2.getDef();
             Varnode vnwhole;
             switch (op1.code()) {
@@ -663,7 +654,7 @@ namespace Sla
         /// \param vn1 is the high Varnode
         /// \param vn2 is the low Varnode
         /// \return the whole Varnode
-        internal static Varnode findContiguousWhole(Funcdata data, Varnode vn1, Varnode vn2)
+        internal static Varnode? findContiguousWhole(Funcdata data, Varnode vn1, Varnode vn2)
         {
             if (vn1.isWritten())
                 if (vn1.getDef().code() == OpCode.CPUI_SUBPIECE)
@@ -673,40 +664,38 @@ namespace Sla
 
         internal static int run_xml(string filein, SleighCompile compiler)
         {
-            ifstream s = new ifstream(filein);
+            StreamReader s = new StreamReader(File.OpenRead(filein));
             Document doc;
-            string specfileout;
-            string specfilein;
+            string specfileout = string.Empty;
+            string specfilein = string.Empty;
 
-            try
-            {
-                doc = xml_tree(s);
+            try {
+                doc = Xml.xml_tree(s);
             }
-            catch (DecoderError)
-            {
-                cerr << "Unable to parse single input file as XML spec: " << filein << endl;
-                exit(1);
+            catch (DecoderError) {
+                Console.Error.WriteLine($"Unable to parse single input file as XML spec: {filein}");
+                return 1;
             }
-            s.close();
+            s.Close();
 
-            Element* el = doc.getRoot();
-            while(true)
-            {
-                List & list(el.getChildren());
-                List::const_iterator iter;
-                for (iter = list.begin(); iter != list.end(); ++iter)
-                {
-                    el = *iter;
-                    if (el.getName() == "processorfile")
-                    {
+            Element el = doc.getRoot() ?? throw new BugException();
+            while(true) {
+                List<Element> list = el.getChildren();
+                bool listCompleted = false;
+                IEnumerator<Element> iter = list.GetEnumerator();
+                while (true) {
+                    if (!iter.MoveNext()) {
+                        listCompleted = true;
+                        break;
+                    }
+                    el = iter.Current;
+                    if (el.getName() == "processorfile") {
                         specfileout = el.getContent();
                         int num = el.getNumAttributes();
-                        for (int i = 0; i < num; ++i)
-                        {
+                        for (int i = 0; i < num; ++i) {
                             if (el.getAttributeName(i) == "slaspec")
                                 specfilein = el.getAttributeValue(i);
-                            else
-                            {
+                            else {
                                 compiler.setPreprocValue(el.getAttributeName(i), el.getAttributeValue(i));
                             }
                         }
@@ -716,19 +705,17 @@ namespace Sla
                     else if (el.getName() == "language_description")
                         break;
                 }
-                if (iter == list.end()) break;
+                if (listCompleted) break;
             }
-            delete doc;
+            // delete doc;
 
-            if (specfilein.size() == 0)
-            {
-                cerr << "Input slaspec file was not specified in " << filein << endl;
-                exit(1);
+            if (specfilein.Length == 0) {
+                Console.Error.WriteLine($"Input slaspec file was not specified in {filein}");
+                return 1;
             }
-            if (specfileout.size() == 0)
-            {
-                cerr << "Output sla file was not specified in " << filein << endl;
-                exit(1);
+            if (specfileout.Length == 0) {
+                Console.Error.WriteLine($"Output sla file was not specified in {filein}");
+                return 1;
             }
             return compiler.run_compilation(specfilein, specfileout);
         }
@@ -737,12 +724,9 @@ namespace Sla
         {
             FileManage.matchListDir(res, suffix, true, dir, false);
 
-            List<string> dirs;
+            List<string> dirs = new List<string>();
             FileManage.directoryList(dirs, dir);
-            List<string>::const_iterator iter;
-            for (iter = dirs.begin(); iter != dirs.end(); ++iter)
-            {
-                string nextdir = *iter;
+            foreach (string nextdir in dirs) {
                 Globals.findSlaSpecs(res, nextdir, suffix);
             }
         }
@@ -758,7 +742,7 @@ namespace Sla
 
         internal static int pcodeerror(string s)
         {
-            pcode.reportError((Location*)0, s);
+            pcode.reportError((Location)null, s);
             return 0;
         }
 
@@ -815,25 +799,21 @@ namespace Sla
             int max = (int)OpCode.CPUI_MAX - 1;
             int cur, ind;
 
-            while (min <= max)
-            {
+            while (min <= max) {
                 // Binary search
                 cur = (min + max) / 2;
                 // Get opcode in cur's sort slot
                 ind = opcode_indices[cur];
                 int comparisonResult = string.Compare(opcode_name[ind], nm);
-                if (comparisonResult < 0)
-                {
+                if (comparisonResult < 0) {
                     // Everything equal or below cur is less
                     min = cur + 1;
                 }
-                else if (comparisonResult > 0)
-                {
+                else if (comparisonResult > 0) {
                     // Everything equal or above cur is greater
                     max = cur - 1;
                 }
-                else
-                {
+                else {
                     // Found the match
                     return (OpCode)ind;
                 }
@@ -850,8 +830,7 @@ namespace Sla
         /// \return the complementary OpCode or OpCode.CPUI_MAX if not given a comparison operation
         public static OpCode get_booleanflip(OpCode opc, ref bool reorder)
         {
-            switch (opc)
-            {
+            switch (opc) {
                 case OpCode.CPUI_INT_EQUAL:
                     reorder = false;
                     return OpCode.CPUI_INT_NOTEQUAL;

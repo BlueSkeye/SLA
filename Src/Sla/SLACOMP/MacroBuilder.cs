@@ -44,12 +44,12 @@ namespace Sla.SLACOMP
             bool hasrealsize = false;
             ulong realsize = 0;
 
-            if (outvn != (VarnodeTpl*)0)
+            if (outvn != (VarnodeTpl)null)
             {
                 plus = outvn.transfer(@params);
                 if (plus >= 0)
                 {
-                    reportError((Location*)0, "Cannot currently assign to bitrange of macro parameter that is a temporary");
+                    reportError((Location)null, "Cannot currently assign to bitrange of macro parameter that is a temporary");
                     return false;
                 }
             }
@@ -67,7 +67,7 @@ namespace Sla.SLACOMP
                 {
                     if (!hasrealsize)
                     {
-                        reportError((Location*)0, "Problem with bit range operator in macro");
+                        reportError((Location)null, "Problem with bit range operator in macro");
                         return false;
                     }
                     ulong newtemp = slgh.getUniqueAddr(); // Generate a new temporary location
@@ -100,7 +100,7 @@ namespace Sla.SLACOMP
 
             clone = new OpTpl(op.getOpcode());
             vn = op.getOut();
-            if (vn != (VarnodeTpl*)0)
+            if (vn != (VarnodeTpl)null)
             {
                 v_clone = new VarnodeTpl(*vn);
                 clone.setOutput(v_clone);

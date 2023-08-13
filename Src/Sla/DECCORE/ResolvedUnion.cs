@@ -26,11 +26,11 @@ namespace Sla.DECCORE
     {
         // friend class ScoreUnionFields;
         /// The resolved data-type
-        private Datatype resolve;
+        internal Datatype resolve;
         /// Union or Structure being resolved
         private Datatype baseType;
         /// Index of field referenced by \b resolve
-        private int fieldNum;
+        internal int fieldNum;
         /// If \b true, resolution cannot be overridden
         private bool @lock;
 

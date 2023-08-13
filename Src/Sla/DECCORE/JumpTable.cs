@@ -735,16 +735,13 @@ namespace Sla.DECCORE
             {
                 uint subId = decoder.peekElement();
                 if (subId == 0) break;
-                if (subId == ELEM_DEST)
-                {
+                if (subId == ElementId.ELEM_DEST) {
                     decoder.openElement();
                     bool foundlabel = false;
-                    while(true)
-                    {
+                    while(true) {
                         uint attribId = decoder.getNextAttributeId();
                         if (attribId == 0) break;
-                        if (attribId == ATTRIB_LABEL)
-                        {
+                        if (attribId == AttributeId.ATTRIB_LABEL) {
                             if (missedlabel)
                                 throw new LowlevelError("Jumptable entries are missing labels");
                             ulong lab = decoder.readUnsignedInteger();
@@ -757,13 +754,12 @@ namespace Sla.DECCORE
                         missedlabel = true; // No following entries are allowed to have a label attribute
                     addresstable.Add(Address.decode(decoder));
                 }
-                else if (subId == ELEM_LOADTABLE)
-                {
-                    loadpoints.emplace_back();
-                    loadpoints.GetLastItem().decode(decoder);
+                else if (subId == ElementId.ELEM_LOADTABLE) {
+                    LoadTable newTable = new LoadTable();
+                    newTable.decode(decoder);
+                    loadpoints.Add(newTable);
                 }
-                else if (subId == ELEM_BASICOVERRIDE)
-                {
+                else if (subId == ElementId.ELEM_BASICOVERRIDE) {
                     if (jmodel != (JumpModel)null)
                         throw new LowlevelError("Duplicate jumptable override specs");
                     jmodel = new JumpBasicOverride(this);
@@ -771,9 +767,7 @@ namespace Sla.DECCORE
                 }
             }
             decoder.closeElement(elemId);
-
-            if (label.size() != 0)
-            {
+            if (label.size() != 0) {
                 while (label.size() < addresstable.size())
                     label.Add(0xBAD1ABE1);
             }

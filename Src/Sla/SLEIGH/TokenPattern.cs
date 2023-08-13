@@ -39,22 +39,23 @@ namespace Sla.SLEIGH
         }
 
         private static PatternBlock buildBigBlock(int size, int bitstart, int bitend, long value)
-        {               // Build pattern block given a bigendian contiguous
-                        // range of bits and a value for those bits
+        {
+            // Build pattern block given a bigendian contiguous
+            // range of bits and a value for those bits
             int tmpstart, startbit, endbit;
-            PatternBlock* tmpblock,*block;
+            PatternBlock tmpblock, block;
 
             startbit = 8 * size - 1 - bitend;
             endbit = 8 * size - 1 - bitstart;
 
-            block = (PatternBlock*)0;
+            block = (PatternBlock)null;
             while (endbit >= startbit)
             {
                 tmpstart = endbit - (endbit & 7);
                 if (tmpstart < startbit)
                     tmpstart = startbit;
                 tmpblock = buildSingle(tmpstart, endbit, (uint)value);
-                if (block == (PatternBlock*)0)
+                if (block == (PatternBlock)null)
                     block = tmpblock;
                 else
                 {
@@ -75,7 +76,7 @@ namespace Sla.SLEIGH
             PatternBlock* tmpblock,*block;
             int startbit, endbit;
 
-            block = (PatternBlock*)0;
+            block = (PatternBlock)null;
 
             // we need to convert a bit range specified on a little endian token where the
             // bit indices label the least sig bit as 0 into a bit range on big endian bytes
@@ -103,7 +104,7 @@ namespace Sla.SLEIGH
                 while (startbit != endbit)
                 {
                     tmpblock = buildSingle(startbit, startbit + 7, (uint)value);
-                    if (block == (PatternBlock*)0)
+                    if (block == (PatternBlock)null)
                         block = tmpblock;
                     else
                     {
@@ -116,7 +117,7 @@ namespace Sla.SLEIGH
                     startbit += 8;
                 }
                 tmpblock = buildSingle(endbit + (7 - bitend), endbit + 7, (uint)value);
-                if (block == (PatternBlock*)0)
+                if (block == (PatternBlock)null)
                     block = tmpblock;
                 else
                 {

@@ -24,12 +24,12 @@ namespace Sla.SLEIGH
         public OpTpl(OpCode oc)
         {
             opc = oc;
-            output = (VarnodeTpl*)0;
+            output = (VarnodeTpl)null;
         }
         
         ~OpTpl()
         {               // An OpTpl owns its varnode_tpls
-            if (output != (VarnodeTpl*)0)
+            if (output != (VarnodeTpl)null)
                 delete output;
             List<VarnodeTpl*>::iterator iter;
             for (iter = input.begin(); iter != input.end(); ++iter)
@@ -48,7 +48,7 @@ namespace Sla.SLEIGH
         {               // Return if any input or output has zero size
             List<VarnodeTpl*>::const_iterator iter;
 
-            if (output != (VarnodeTpl*)0)
+            if (output != (VarnodeTpl)null)
                 if (output.isZeroSize()) return true;
             for (iter = input.begin(); iter != input.end(); ++iter)
                 if ((*iter).isZeroSize()) return true;
@@ -68,7 +68,7 @@ namespace Sla.SLEIGH
         public void clearOutput()
         {
             delete output;
-            output = (VarnodeTpl*)0;
+            output = (VarnodeTpl)null;
         }
 
         public void addInput(VarnodeTpl vt)
@@ -92,7 +92,7 @@ namespace Sla.SLEIGH
 
         public void changeHandleIndex(List<int> handmap)
         {
-            if (output != (VarnodeTpl*)0)
+            if (output != (VarnodeTpl)null)
                 output.changeHandleIndex(handmap);
             List<VarnodeTpl*>::const_iterator iter;
 
@@ -103,7 +103,7 @@ namespace Sla.SLEIGH
         public void saveXml(TextWriter s)
         {
             s << "<op_tpl code=\"" << Globals.get_opname(opc) << "\">";
-            if (output == (VarnodeTpl*)0)
+            if (output == (VarnodeTpl)null)
                 s << "<null/>\n";
             else
                 output.saveXml(s);
@@ -119,7 +119,7 @@ namespace Sla.SLEIGH
             List::const_iterator iter;
             iter = list.begin();
             if ((*iter).getName() == "null")
-                output = (VarnodeTpl*)0;
+                output = (VarnodeTpl)null;
             else
             {
                 output = new VarnodeTpl();

@@ -34,16 +34,10 @@ namespace Sla.CORE
         }
 
         ///< Return \b true if \b this is empty
-        public bool empty()
-        {
-            return (0 == tree.Count);
-        }
+        public bool empty() => (0 == tree.Count);
 
         /// Get iterator to beginning Range
-        public IEnumerator<Range> begin() 
-        {
-            return tree.GetEnumerator();
-        }
+        public IEnumerator<Range> begin() => tree.GetEnumerator();
 
         ///// Get iterator to ending Range
         //public set<Range>::const_iterator end()

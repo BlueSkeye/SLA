@@ -45,33 +45,30 @@ namespace Sla.DECCORE
         /// \param numLanes is the number of lanes in the subset
         /// \param skipLanes is the start (least significant) lane in the subset
         /// \return the array of placeholders describing the split or null
-        private TransformVar setReplacement(Varnode vn, int numLanes, int skipLanes)
+        private TransformVar[]? setReplacement(Varnode vn, int numLanes, int skipLanes)
         {
             if (vn.isMark())       // Already seen before
                 return getSplit(vn, description, numLanes, skipLanes);
 
-            if (vn.isConstant())
-            {
+            if (vn.isConstant()) {
                 return newSplit(vn, description, numLanes, skipLanes);
             }
 
             // Allow free varnodes to be split
             //  if (vn.isFree())
-            //    return (TransformVar *)0;
-
-            if (vn.isTypeLock() && vn.getType().getMetatype() != type_metatype.TYPE_PARTIALSTRUCT)
-            {
+            //    return (TransformVar)null;
+            if (vn.isTypeLock() && vn.getType().getMetatype() != type_metatype.TYPE_PARTIALSTRUCT) {
                 return (TransformVar)null;
             }
 
             vn.setMark();
-            TransformVar* res = newSplit(vn, description, numLanes, skipLanes);
-            if (!vn.isFree())
-            {
-                workList.emplace_back();
-                workList.GetLastItem().lanes = res;
-                workList.GetLastItem().numLanes = numLanes;
-                workList.GetLastItem().skipLanes = skipLanes;
+            TransformVar[] res = newSplit(vn, description, numLanes, skipLanes);
+            if (!vn.isFree()) {
+                workList.Add(new WorkNode() {
+                    lanes = res,
+                    numLanes = numLanes,
+                    skipLanes = skipLanes
+                });
             }
             return res;
         }

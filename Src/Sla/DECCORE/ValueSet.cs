@@ -48,7 +48,7 @@ namespace Sla.DECCORE
 
         // friend class ValueSetSolver;
         /// 0=pure constant 1=stack relative
-        private int typeCode;
+        internal int typeCode;
         /// Number of input parameters to defining operation
         private int numParams;
         /// Depth first numbering / widening count

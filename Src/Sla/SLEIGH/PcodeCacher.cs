@@ -30,7 +30,7 @@ namespace Sla.SLEIGH
         /// a pointer to first available element.
         /// \param size is the number of elements to expand the pool by
         /// \return the first available VarnodeData
-        internal VarnodeData expandPool(uint size)
+        internal VarnodeData[] expandPool(uint size)
         {
             uint curmax = endpool - poolstart;
             uint cursize = curpool - poolstart;
@@ -42,33 +42,29 @@ namespace Sla.SLEIGH
 
             uint newsize = curmax + increase;
 
-            VarnodeData* newpool = new VarnodeData[newsize];
+            VarnodeData newpool = new VarnodeData[newsize];
             for (uint i = 0; i < cursize; ++i)
                 newpool[i] = poolstart[i];  // Copy old data
                                             // Update references to the old pool
-            for (uint i = 0; i < issued.size(); ++i)
-            {
-                VarnodeData* outvar = issued[i].outvar;
-                if (outvar != (VarnodeData)null)
-                {
+            for (uint i = 0; i < issued.size(); ++i) {
+                VarnodeData? outvar = issued[i].outvar;
+                if (outvar != (VarnodeData)null) {
                     outvar = newpool + (outvar - poolstart);
                     issued[i].outvar = outvar;
                 }
-                VarnodeData* invar = issued[i].invar;
-                if (invar != (VarnodeData)null)
-                {
+                VarnodeData? invar = issued[i].invar;
+                if (invar != (VarnodeData)null) {
                     invar = newpool + (invar - poolstart);
                     issued[i].invar = invar;
                 }
             }
-            list<RelativeRecord>::iterator iter;
-            for (iter = label_refs.begin(); iter != label_refs.end(); ++iter)
-            {
-                VarnodeData * ref = (*iter).dataptr;
-                (*iter).dataptr = newpool + (ref -poolstart);
+            IEnumerator<RelativeRecord> iter;
+            for (iter = label_refs.begin(); iter != label_refs.end(); ++iter) {
+                VarnodeData @ref = (*iter).dataptr;
+                (*iter).dataptr = newpool + (@ref -poolstart);
             }
 
-            delete[] poolstart;     // Free up old pool
+            // delete[] poolstart;     // Free up old pool
             poolstart = newpool;
             curpool = newpool + (cursize + size);
             endpool = newpool + newsize;
@@ -86,19 +82,17 @@ namespace Sla.SLEIGH
 
         ~PcodeCacher()
         {
-            delete[] poolstart;
+            // delete[] poolstart;
         }
 
         /// \brief Allocate data objects for a new set of Varnodes
-        ///
         /// \param size is the number of objects to allocate
         /// \return a pointer to the array of available VarnodeData objects
-        public VarnodeData allocateVarnodes(uint size)
+        public VarnodeData[] allocateVarnodes(uint size)
         {
-            VarnodeData* newptr = curpool + size;
-            if (newptr <= endpool)
-            {
-                VarnodeData* res = curpool;
+            VarnodeData newptr = curpool + size;
+            if (newptr <= endpool) {
+                VarnodeData res = curpool;
                 curpool = newptr;
                 return res;
             }
@@ -110,10 +104,11 @@ namespace Sla.SLEIGH
         /// \return the new PcodeData object
         public PcodeData allocateInstruction()
         {
-            issued.emplace_back();
-            PcodeData* res = &issued.GetLastItem();
-            res.outvar = (VarnodeData)null;
-            res.invar = (VarnodeData)null;
+            PcodeData res = new PcodeData() {
+                outvar = (VarnodeData)null,
+                invar = (VarnodeData)null
+            };
+            issued.Add(res);
             return res;
         }
 
@@ -123,9 +118,10 @@ namespace Sla.SLEIGH
         /// \param ptr is the Varnode reference
         public void addLabelRef(VarnodeData ptr)
         {
-            label_refs.emplace_back();
-            label_refs.GetLastItem().dataptr = ptr;
-            label_refs.GetLastItem().calling_index = issued.size();
+            label_refs.Add(new RelativeRecord() {
+                dataptr = ptr,
+                calling_index = (ulong)issued.size()
+            });
         }
 
         /// Attach a label to the \e next p-code instruction

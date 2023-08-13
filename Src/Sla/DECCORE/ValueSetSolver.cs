@@ -1,12 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
@@ -259,7 +251,7 @@ namespace Sla.DECCORE
         /// \param range is the range of \b true values, which must be complemented
         private void generateFalseEquation(Varnode vn, PcodeOp op, int slot, int type, CircleRange range)
         {
-            CircleRange falseRange(range);
+            CircleRange falseRange = range;
             falseRange.invert();
             if (vn != (Varnode)null)
                 vn.getValueSet().addEquation(slot, type, falseRange);
@@ -361,20 +353,18 @@ namespace Sla.DECCORE
         private void constraintsFromPath(int type, CircleRange lift, Varnode startVn, Varnode endVn,
             PcodeOp cbranch)
         {
-            while (startVn != endVn)
-            {
-                Varnode* constVn;
-                startVn = lift.pullBack(startVn.getDef(), &constVn, false);
+            while (startVn != endVn) {
+                Varnode constVn;
+                startVn = lift.pullBack(startVn.getDef(), constVn, false);
                 if (startVn == (Varnode)null) return; // Couldn't pull all the way back to our value set
             }
-            while(true)
-            {
-                Varnode* constVn;
+            while(true) {
+                Varnode constVn;
                 applyConstraints(endVn, type, lift, cbranch);
                 if (!endVn.isWritten()) break;
-                PcodeOp* op = endVn.getDef();
+                PcodeOp op = endVn.getDef();
                 if (op.isCall() || op.isMarker()) break;
-                endVn = lift.pullBack(op, &constVn, false);
+                endVn = lift.pullBack(op, constVn, false);
                 if (endVn == (Varnode)null) break;
                 if (!endVn.isMark()) break;
             }
@@ -388,22 +378,19 @@ namespace Sla.DECCORE
         /// \param cbranch is the given condition branch
         private void constraintsFromCBranch(PcodeOp cbranch)
         {
-            Varnode* vn = cbranch.getIn(1); // Get Varnode deciding the condition
-            while (!vn.isMark())
-            {
+            Varnode vn = cbranch.getIn(1); // Get Varnode deciding the condition
+            while (!vn.isMark()) {
                 if (!vn.isWritten()) break;
-                PcodeOp* op = vn.getDef();
+                PcodeOp op = vn.getDef();
                 if (op.isCall() || op.isMarker())
                     break;
                 int num = op.numInput();
                 if (num == 0 || num > 2) break;
                 vn = op.getIn(0);
-                if (num == 2)
-                {
+                if (num == 2) {
                     if (vn.isConstant())
                         vn = op.getIn(1);
-                    else if (!op.getIn(1).isConstant())
-                    {
+                    else if (!op.getIn(1).isConstant()) {
                         // If we reach here, both inputs are non-constant
                         generateRelativeConstraint(op, cbranch);
                         return;
@@ -411,8 +398,7 @@ namespace Sla.DECCORE
                     // If we reach here, vn is non-constant, other input is constant
                 }
             }
-            if (vn.isMark())
-            {
+            if (vn.isMark()) {
                 CircleRange lift = new CircleRange(true);
                 Varnode startVn = cbranch.getIn(1);
                 constraintsFromPath(0, lift, startVn, vn, cbranch);
@@ -430,20 +416,16 @@ namespace Sla.DECCORE
         /// \param reads is the additional set of PcodeOps that read a Varnode from the system
         private void generateConstraints(List<Varnode> worklist, List<PcodeOp> reads)
         {
-            List<FlowBlock*> blockList;
+            List<FlowBlock> blockList = new List<FlowBlock>();
             // Collect all blocks that contain a system op (input) or dominate a container
-            for (int i = 0; i < worklist.size(); ++i)
-            {
-                PcodeOp* op = worklist[i].getDef();
+            for (int i = 0; i < worklist.size(); ++i) {
+                PcodeOp? op = worklist[i].getDef();
                 if (op == (PcodeOp)null) continue;
-                FlowBlock* bl = op.getParent();
-                if (op.code() == OpCode.CPUI_MULTIEQUAL)
-                {
-                    for (int j = 0; j < bl.sizeIn(); ++j)
-                    {
-                        FlowBlock* curBl = bl.getIn(j);
-                        do
-                        {
+                FlowBlock bl = op.getParent();
+                if (op.code() == OpCode.CPUI_MULTIEQUAL) {
+                    for (int j = 0; j < bl.sizeIn(); ++j) {
+                        FlowBlock? curBl = bl.getIn(j);
+                        do {
                             if (curBl.isMark()) break;
                             curBl.setMark();
                             blockList.Add(curBl);
@@ -451,10 +433,8 @@ namespace Sla.DECCORE
                         } while (curBl != (FlowBlock)null);
                     }
                 }
-                else
-                {
-                    do
-                    {
+                else {
+                    do {
                         if (bl.isMark()) break;
                         bl.setMark();
                         blockList.Add(bl);
@@ -462,11 +442,9 @@ namespace Sla.DECCORE
                     } while (bl != (FlowBlock)null);
                 }
             }
-            for (int i = 0; i < reads.size(); ++i)
-            {
-                FlowBlock* bl = reads[i].getParent();
-                do
-                {
+            for (int i = 0; i < reads.size(); ++i) {
+                FlowBlock bl = reads[i].getParent();
+                do {
                     if (bl.isMark()) break;
                     bl.setMark();
                     blockList.Add(bl);
@@ -476,19 +454,16 @@ namespace Sla.DECCORE
             for (int i = 0; i < blockList.size(); ++i)
                 blockList[i].clearMark();
 
-            List<FlowBlock*> finalList;
+            List<FlowBlock> finalList = new List<FlowBlock>();
             // Now go through input blocks to the previously calculated blocks
-            for (int i = 0; i < blockList.size(); ++i)
-            {
-                FlowBlock* bl = blockList[i];
-                for (int j = 0; j < bl.sizeIn(); ++j)
-                {
-                    BlockBasic* splitPoint = (BlockBasic*)bl.getIn(j);
+            for (int i = 0; i < blockList.size(); ++i) {
+                FlowBlock bl = blockList[i];
+                for (int j = 0; j < bl.sizeIn(); ++j) {
+                    BlockBasic splitPoint = (BlockBasic)bl.getIn(j);
                     if (splitPoint.isMark()) continue;
                     if (splitPoint.sizeOut() != 2) continue;
-                    PcodeOp* lastOp = splitPoint.lastOp();
-                    if (lastOp != (PcodeOp)null && lastOp.code() == OpCode.CPUI_CBRANCH)
-                    {
+                    PcodeOp? lastOp = splitPoint.lastOp();
+                    if (lastOp != (PcodeOp)null && lastOp.code() == OpCode.CPUI_CBRANCH) {
                         splitPoint.setMark();
                         finalList.Add(splitPoint);
                         constraintsFromCBranch(lastOp);     // Try to generate constraints from this splitPoint
@@ -507,28 +482,25 @@ namespace Sla.DECCORE
         /// \param typeCode will hold the base register code (if found)
         /// \param value will hold the additive value relative to the base register (if found)
         /// \return \b true if the Varnode is a \e relative constant
-        private bool checkRelativeConstant(Varnode vn, int typeCode, ulong value)
+        private bool checkRelativeConstant(Varnode vn, out int typeCode, out ulong value)
         {
             value = 0;
-            while(true)
-            {
-                if (vn.isMark())
-                {
-                    ValueSet* valueSet = vn.getValueSet();
-                    if (valueSet.typeCode != 0)
-                    {
+            typeCode = 0;
+            while(true) {
+                if (vn.isMark()) {
+                    ValueSet valueSet = vn.getValueSet();
+                    if (valueSet.typeCode != 0) {
                         typeCode = valueSet.typeCode;
                         break;
                     }
                 }
                 if (!vn.isWritten()) return false;
-                PcodeOp* op = vn.getDef();
+                PcodeOp op = vn.getDef() ?? throw new BugException();
                 OpCode opc = op.code();
                 if (opc == OpCode.CPUI_COPY || opc == OpCode.CPUI_INDIRECT)
                     vn = op.getIn(0);
-                else if (opc == OpCode.CPUI_INT_ADD || opc == OpCode.CPUI_PTRSUB)
-                {
-                    Varnode* constVn = op.getIn(1);
+                else if (opc == OpCode.CPUI_INT_ADD || opc == OpCode.CPUI_PTRSUB) {
+                    Varnode constVn = op.getIn(1);
                     if (!constVn.isConstant())
                         return false;
                     value = (value + constVn.getOffset()) & Globals.calc_mask(constVn.getSize());
@@ -570,12 +542,12 @@ namespace Sla.DECCORE
             Varnode inVn0 = compOp.getIn(0);
             Varnode inVn1 = compOp.getIn(1);
             CircleRange lift = new CircleRange(true);
-            if (checkRelativeConstant(inVn0, typeCode, value)) {
+            if (checkRelativeConstant(inVn0, out typeCode, out value)) {
                 vn = inVn1;
                 if (!lift.pullBackBinary(opc, value, 1, vn.getSize(), 1))
                     return;
             }
-            else if (checkRelativeConstant(inVn1, typeCode, value)) {
+            else if (checkRelativeConstant(inVn1, out typeCode, out value)) {
                 vn = inVn0;
                 if (!lift.pullBackBinary(opc, value, 0, vn.getSize(), 1))
                     return;
@@ -586,7 +558,7 @@ namespace Sla.DECCORE
             Varnode endVn = vn;
             while (!endVn.isMark()) {
                 if (!endVn.isWritten()) return;
-                PcodeOpop = endVn.getDef();
+                PcodeOp op = endVn.getDef() ?? throw new BugException();
                 opc = op.code();
                 if (opc == OpCode.CPUI_COPY || opc == OpCode.CPUI_PTRSUB) {
                     endVn = op.getIn(0);
@@ -644,7 +616,7 @@ namespace Sla.DECCORE
                         rootNodes.Add(vn.getValueSet());
                     continue;
                 }
-                PcodeOp op = vn.getDef();
+                PcodeOp op = vn.getDef() ?? throw new BugException();
                 switch (op.code()) {
                     // Distinguish ops where we can never predict an integer range
                     case OpCode.CPUI_INDIRECT:
@@ -656,8 +628,7 @@ namespace Sla.DECCORE
                                 worklist.Add(inVn);
                             }
                         }
-                        else
-                        {
+                        else {
                             vn.getValueSet().setFull();
                             rootNodes.Add(vn.getValueSet());
                         }
@@ -728,10 +699,10 @@ namespace Sla.DECCORE
         {
             maxIterations = max;
             numIterations = 0;
-            for (list<ValueSet>::iterator iter = valueNodes.begin(); iter != valueNodes.end(); ++iter)
-                (*iter).count = 0;
+            foreach (ValueSet currentSet in valueNodes)
+                currentSet.count = 0;
 
-            List<Partition> componentStack;
+            List<Partition> componentStack = new List<Partition>();
             Partition? curComponent = (Partition)null;
             ValueSet curSet = orderPartition.startNode;
 
@@ -743,7 +714,7 @@ namespace Sla.DECCORE
                     curComponent = curSet.partHead;
                     curComponent.isDirty = false;
                     // Reset component counter upon entry
-                    curComponent.startNode.count = widener.determineIterationReset(*curComponent.startNode);
+                    curComponent.startNode.count = widener.determineIterationReset(curComponent.startNode);
                 }
                 if (curComponent != (Partition)null) {
                     if (curSet.iterate(widener))
@@ -789,14 +760,14 @@ namespace Sla.DECCORE
         /// Start of all ValueSets in the system
         public IEnumerator<ValueSet> beginValueSets() => valueNodes.GetEnumerator();
 
-        /// End of all ValueSets in the system
-        public IEnumerator<ValueSet> endValueSets() => valueNodes.end();
+        ///// End of all ValueSets in the system
+        //public IEnumerator<ValueSet> endValueSets() => valueNodes.end();
 
         /// Start of ValueSetReads
-        public IEnumerator<KeyValuePair<SeqNum, ValueSetRead>> beginValueSetReads() => readNodes.begin();
+        public IEnumerator<KeyValuePair<SeqNum, ValueSetRead>> beginValueSetReads() => readNodes.GetEnumerator();
 
-        /// End of ValueSetReads
-        public IEnumerator<KeyValuePair<SeqNum, ValueSetRead>> endValueSetReads() => readNodes.end();
+        ///// End of ValueSetReads
+        //public IEnumerator<KeyValuePair<SeqNum, ValueSetRead>> endValueSetReads() => readNodes.end();
 
         /// Get ValueSetRead by SeqNum
         public ValueSetRead? getValueSetRead(SeqNum seq)

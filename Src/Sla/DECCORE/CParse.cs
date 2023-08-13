@@ -292,7 +292,7 @@ namespace Sla.DECCORE
             return dec;
         }
 
-        public Datatype newStruct(string ident, List<TypeDeclarator> declist)
+        public Datatype? newStruct(string ident, List<TypeDeclarator> declist)
         {
             // Build a new structure
             TypeStruct res = glb.types.getTypeStruct(ident); // Create stub (for recursion)
@@ -305,7 +305,7 @@ namespace Sla.DECCORE
                     glb.types.destroyType(res);
                     return (Datatype)null;
                 }
-                sublist.emplace_back(0, -1, decl.getIdentifier(), decl.buildType(glb));
+                sublist.Add(new TypeField(0, -1, decl.getIdentifier(), decl.buildType(glb)));
             }
 
             TypeStruct.assignFieldOffsets(sublist, glb.types.getStructAlign());
@@ -337,7 +337,7 @@ namespace Sla.DECCORE
                     glb.types.destroyType(res);
                     return (Datatype)null;
                 }
-                sublist.emplace_back(i, 0, decl.getIdentifier(), decl.buildType(glb));
+                sublist.Add(new TypeField(i, 0, decl.getIdentifier(), decl.buildType(glb)));
             }
 
             if (!glb.types.setFields(sublist, res, -1, 0)) {

@@ -14,7 +14,7 @@ namespace Sla.SLEIGH
         private int index;         // Index of this token, for resolving offsets
         private bool bigendian;
         
-        public Token(string ,int sz,bool be, int ind)
+        public Token(string nm,int sz,bool be, int ind)
         {
             name = nm;
             size = sz;

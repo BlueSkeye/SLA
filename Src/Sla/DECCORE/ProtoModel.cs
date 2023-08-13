@@ -439,9 +439,9 @@ namespace Sla.DECCORE
         /// \param slot if the \e slot number to pass back
         /// \param slotsize is the number of consumed slots to pass back
         /// \return \b true if the location can be a parameter
-        public bool possibleInputParamWithSlot(Address loc, int size, int slot, int slotsize)
+        public bool possibleInputParamWithSlot(Address loc, int size, out int slot, out int slotsize)
         {
-            return input.possibleParamWithSlot(loc, size, slot, slotsize);
+            return input.possibleParamWithSlot(loc, size, out slot, out slotsize);
         }
 
         /// \brief Pass-back the slot and slot size for the given storage location as a return value
@@ -453,9 +453,9 @@ namespace Sla.DECCORE
         /// \param slot if the \e slot number to pass back
         /// \param slotsize is the number of consumed slots to pass back
         /// \return \b true if the location can be a parameter
-        public bool possibleOutputParamWithSlot(Address loc, int size, int slot, int slotsize)
+        public bool possibleOutputParamWithSlot(Address loc, int size, out int slot, out int slotsize)
         {
-            return output.possibleParamWithSlot(loc, size, slot, slotsize);
+            return output.possibleParamWithSlot(loc, size, out slot, out slotsize);
         }
 
         /// \brief Check if the given storage location looks like an \e unjustified input parameter

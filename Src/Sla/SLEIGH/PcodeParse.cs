@@ -1418,25 +1418,25 @@ namespace Sla.SLEIGH
 
         //        case 88: /* jumpdest  */
 
-        //            { if (((*yyvaluep).varnode) != (VarnodeTpl*)0) delete((*yyvaluep).varnode); }
+        //            { if (((*yyvaluep).varnode) != (VarnodeTpl)null) delete((*yyvaluep).varnode); }
 
         //            break;
 
         //        case 89: /* varnode  */
 
-        //            { if (((*yyvaluep).varnode) != (VarnodeTpl*)0) delete((*yyvaluep).varnode); }
+        //            { if (((*yyvaluep).varnode) != (VarnodeTpl)null) delete((*yyvaluep).varnode); }
 
         //            break;
 
         //        case 90: /* integervarnode  */
 
-        //            { if (((*yyvaluep).varnode) != (VarnodeTpl*)0) delete((*yyvaluep).varnode); }
+        //            { if (((*yyvaluep).varnode) != (VarnodeTpl)null) delete((*yyvaluep).varnode); }
 
         //            break;
 
         //        case 91: /* lhsvarnode  */
 
-        //            { if (((*yyvaluep).varnode) != (VarnodeTpl*)0) delete((*yyvaluep).varnode); }
+        //            { if (((*yyvaluep).varnode) != (VarnodeTpl)null) delete((*yyvaluep).varnode); }
 
         //            break;
 
@@ -2294,7 +2294,7 @@ namespace Sla.SLEIGH
 
         //    case 100:
 
-        //        { (yyval.varnode) = (VarnodeTpl*)0; string errmsg = "Unknown jump destination: " + *(yyvsp[0].str); delete(yyvsp[0].str); yyerror(errmsg.c_str()); YYERROR; }
+        //        { (yyval.varnode) = (VarnodeTpl)null; string errmsg = "Unknown jump destination: " + *(yyvsp[0].str); delete(yyvsp[0].str); yyerror(errmsg.c_str()); YYERROR; }
 
         //        break;
 
@@ -2312,7 +2312,7 @@ namespace Sla.SLEIGH
 
         //    case 103:
 
-        //        { (yyval.varnode) = (VarnodeTpl*)0; string errmsg = "Unknown varnode parameter: " + *(yyvsp[0].str); delete(yyvsp[0].str); yyerror(errmsg.c_str()); YYERROR; }
+        //        { (yyval.varnode) = (VarnodeTpl)null; string errmsg = "Unknown varnode parameter: " + *(yyvsp[0].str); delete(yyvsp[0].str); yyerror(errmsg.c_str()); YYERROR; }
 
         //        break;
 
@@ -2354,7 +2354,7 @@ namespace Sla.SLEIGH
 
         //    case 110:
 
-        //        { (yyval.varnode) = (VarnodeTpl*)0; string errmsg = "Unknown assignment varnode: " + *(yyvsp[0].str); delete(yyvsp[0].str); yyerror(errmsg.c_str()); YYERROR; }
+        //        { (yyval.varnode) = (VarnodeTpl)null; string errmsg = "Unknown assignment varnode: " + *(yyvsp[0].str); delete(yyvsp[0].str); yyerror(errmsg.c_str()); YYERROR; }
 
         //        break;
 

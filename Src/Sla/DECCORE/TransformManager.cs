@@ -426,10 +426,10 @@ namespace Sla.DECCORE
         /// \param numLanes is the number of lanes in the subset
         /// \param startLane is the starting (least significant) lane in the subset
         /// \return an array of the TransformVar placeholders from least to most significant
-        public TransformVar getSplit(Varnode vn, LaneDescription description, int numLanes, int startLane)
+        public TransformVar[] getSplit(Varnode vn, LaneDescription description, int numLanes, int startLane)
         {
-            TransformVar result;
-            return (pieceMap.TryGetValue((int)vn.getCreateIndex(), out result)
+            TransformVar[] result;
+            return pieceMap.TryGetValue((int)vn.getCreateIndex(), out result)
                 ? result
                 : newSplit(vn, description, numLanes, startLane);
         }

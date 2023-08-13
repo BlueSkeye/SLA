@@ -1,13 +1,6 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
 using Sla.SLEIGH;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sla.EXTRA
 {
@@ -24,16 +17,15 @@ namespace Sla.EXTRA
         protected void decodeBody(Decoder decoder)
         {
             uint elemId = decoder.openElement();       // Tag may not be present
-            if (elemId == ELEM_BODY)
-            {
+            if (elemId == ElementId.ELEM_BODY) {
                 parsestring = decoder.readString(AttributeId.ATTRIB_CONTENT);
                 decoder.closeElement(elemId);
             }
-            if (parsestring.size() == 0 && (!dynamic))
-                throw new CORE.LowlevelError("Missing <body> subtag in <pcode>: " + getSource());
+            if (parsestring.Length == 0 && !dynamic)
+                throw new CORE.LowlevelError($"Missing <body> subtag in <pcode>: {getSource()}");
         }
 
-        public InjectPayloadSleigh(string src, string nm, int tp)
+        public InjectPayloadSleigh(string src, string nm, InjectPayload.InjectionType tp)
             : base(nm, tp)
         {
             source = src;
@@ -43,8 +35,8 @@ namespace Sla.EXTRA
 
         ~InjectPayloadSleigh()
         {
-            if (tpl != (ConstructTpl)null)
-                delete tpl;
+            //if (tpl != (ConstructTpl)null)
+            //    delete tpl;
         }
 
         public override void inject(InjectContext context, PcodeEmit emit)

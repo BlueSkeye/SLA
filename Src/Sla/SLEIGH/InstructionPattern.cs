@@ -15,11 +15,11 @@ namespace Sla.SLEIGH
         private PatternBlock maskvalue;
 
         protected virtual PatternBlock getBlock(bool context)
-            => context? (PatternBlock*)0 : maskvalue;
+            => context? (PatternBlock)null : maskvalue;
     
         public InstructionPattern()
         {
-            maskvalue = (PatternBlock*)0;
+            maskvalue = (PatternBlock)null;
         }
 
         public InstructionPattern(PatternBlock mv)
@@ -36,7 +36,7 @@ namespace Sla.SLEIGH
 
         ~InstructionPattern()
         {
-            if (maskvalue != (PatternBlock*)0) delete maskvalue;
+            if (maskvalue != (PatternBlock)null) delete maskvalue;
         }
 
         public override Pattern simplifyClone() => new InstructionPattern(maskvalue.clone());

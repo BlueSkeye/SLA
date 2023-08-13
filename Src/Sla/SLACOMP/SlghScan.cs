@@ -1164,7 +1164,7 @@ namespace Sla.SLACOMP
         //    void preproc_error(string &err)
 
         //    {
-        //        slgh.reportError((Location*)0, err);
+        //        slgh.reportError((Location)null, err);
         //        cerr << "Terminating due to error in preprocessing" << endl;
         //        exit(1);
         //    }

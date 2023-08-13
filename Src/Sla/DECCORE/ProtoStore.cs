@@ -42,7 +42,7 @@ namespace Sla.DECCORE
         public abstract int getNumInputs();
 
         /// Get the i-th input parameter (or NULL if it doesn't exist)
-        public abstract ProtoParameter getInput(int i);
+        public abstract ProtoParameter? getInput(int i);
 
         /// \brief Establish the data-type and storage of the return value
         ///
