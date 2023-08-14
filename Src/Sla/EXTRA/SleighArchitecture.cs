@@ -226,7 +226,7 @@ namespace Sla.EXTRA
         { // Given a specific language, make sure relevant spec files are loaded
             bool language_reuse = isTranslateReused();
             LanguageDescription language = description[languageindex];
-            string compiler = archid.substr(archid.rfind(':') + 1);
+            string compiler = archid.Substring(archid.rfind(':') + 1);
             CompilerTag compilertag = language.getCompiler(compiler);
 
             string processorfile;
@@ -320,7 +320,7 @@ namespace Sla.EXTRA
                 archid.erase(0, 8);
 
             archid = normalizeArchitecture(archid);
-            string baseid = archid.substr(0, archid.rfind(':'));
+            string baseid = archid.Substring(0, archid.rfind(':'));
             int i;
             languageindex = -1;
             for (i = 0; i < description.size(); ++i)
@@ -457,18 +457,18 @@ namespace Sla.EXTRA
             }
             if ((i != 3) && (i != 4))
                 throw new CORE.LowlevelError("Architecture string does not look like sleigh id: " + nm);
-            processor = nm.substr(0, pos[0]);
-            endian = nm.substr(pos[0] + 1, pos[1] - pos[0] - 1);
-            size = nm.substr(pos[1] + 1, pos[2] - pos[1] - 1);
+            processor = nm.Substring(0, pos[0]);
+            endian = nm.Substring(pos[0] + 1, pos[1] - pos[0] - 1);
+            size = nm.Substring(pos[1] + 1, pos[2] - pos[1] - 1);
 
             if (i == 4)
             {
-                variant = nm.substr(pos[2] + 1, pos[3] - pos[2] - 1);
-                compile = nm.substr(pos[3] + 1);
+                variant = nm.Substring(pos[2] + 1, pos[3] - pos[2] - 1);
+                compile = nm.Substring(pos[3] + 1);
             }
             else
             {
-                variant = nm.substr(pos[2] + 1);
+                variant = nm.Substring(pos[2] + 1);
                 compile = "default";
             }
 

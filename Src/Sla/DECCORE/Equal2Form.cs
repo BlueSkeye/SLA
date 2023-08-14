@@ -18,16 +18,17 @@ namespace Sla.DECCORE
         private PcodeOp equalop;
         private PcodeOp orop;
         private PcodeOp? hixor;
-        private PcodeOp loxor;
+        private PcodeOp? loxor;
         private int orhislot;
         private int xorhislot;
         private SplitVarnode param2;
 
         private bool checkLoForm()
-        { // Assuming we have equal <- or <- xor <- hi1, verify if we have the full equal form
-            Varnode* orvnin = orop.getIn(1 - orhislot);
-            if (orvnin == lo1)
-            {       // lo2 is an implied 0
+        {
+            // Assuming we have equal <- or <- xor <- hi1, verify if we have the full equal form
+            Varnode orvnin = orop.getIn(1 - orhislot);
+            if (orvnin == lo1) {
+                // lo2 is an implied 0
                 loxor = (PcodeOp)null;
                 lo2 = (Varnode)null;
                 return true;
@@ -35,13 +36,11 @@ namespace Sla.DECCORE
             if (!orvnin.isWritten()) return false;
             loxor = orvnin.getDef();
             if (loxor.code() != OpCode.CPUI_INT_XOR) return false;
-            if (loxor.getIn(0) == lo1)
-            {
+            if (loxor.getIn(0) == lo1) {
                 lo2 = loxor.getIn(1);
                 return true;
             }
-            else if (loxor.getIn(1) == lo1)
-            {
+            else if (loxor.getIn(1) == lo1) {
                 lo2 = loxor.getIn(0);
                 return true;
             }

@@ -151,19 +151,20 @@ namespace Sla.SLEIGH
             return max;
         }
 
-        private void consistentValues(List<uint> bins, DisjointPattern pat)
-        {               // Produce all possible values of -pat- by
-                        // iterating through all possible values of the
-                        // "don't care" bits within the value of -pat-
-                        // that intersects with this node (startbit,bitsize,context)
+        private void consistentValues(List<int> bins, DisjointPattern pat)
+        {
+            // Produce all possible values of -pat- by
+            // iterating through all possible values of the
+            // "don't care" bits within the value of -pat-
+            // that intersects with this node (startbit,bitsize,context)
             uint m = (bitsize == 8 * sizeof(uint)) ? 0 : (((uint)1) << bitsize);
             m = m - 1;
             uint commonMask = m & pat.getMask(startbit, bitsize, contextdecision);
             uint commonValue = commonMask & pat.getValue(startbit, bitsize, contextdecision);
             uint dontCareMask = m ^ commonMask;
 
-            for (uint i = 0; i <= dontCareMask; ++i)
-            { // Iterate over values that contain all don't care bits
+            for (uint i = 0; i <= dontCareMask; ++i) {
+                // Iterate over values that contain all don't care bits
                 if ((i & dontCareMask) != i) continue; // If all 1 bits in the value are don't cares
                 bins.Add(commonValue | i); // add 1 bits into full value and store
             }
@@ -184,27 +185,27 @@ namespace Sla.SLEIGH
 
         ~DecisionNode()
         {               // We own sub nodes
-            List<DecisionNode*>::iterator iter;
-            for (iter = children.begin(); iter != children.end(); ++iter)
-                delete* iter;
-            List<pair<DisjointPattern*, Constructor*>>::iterator piter;
-            for (piter = list.begin(); piter != list.end(); ++piter)
-                delete(*piter).first;   // Delete the patterns
+            //List<DecisionNode*>::iterator iter;
+            //for (iter = children.begin(); iter != children.end(); ++iter)
+            //    delete* iter;
+            //List<pair<DisjointPattern*, Constructor*>>::iterator piter;
+            //for (piter = list.begin(); piter != list.end(); ++piter)
+            //    delete(*piter).first;   // Delete the patterns
         }
 
         public Constructor resolve(ParserWalker walker)
         {
             if (bitsize == 0)
             {       // The node is terminal
-                List<pair<DisjointPattern*, Constructor*>>::const_iterator iter;
+                List<pair<DisjointPattern, Constructor>>::const_iterator iter;
                 for (iter = list.begin(); iter != list.end(); ++iter)
                     if (iter.Current.Key.isMatch(walker))
                         return (*iter).second;
-                ostringstream s;
-                s << walker.getAddr().getShortcut();
+                TextWriter s = new StringWriter();
+                s.Write(walker.getAddr().getShortcut());
                 walker.getAddr().printRaw(s);
-                s << ": Unable to resolve constructor";
-                throw BadDataError(s.str());
+                s.Write(": Unable to resolve constructor");
+                throw new BadDataError(s.ToString());
             }
             uint val;
             if (contextdecision)
@@ -216,47 +217,43 @@ namespace Sla.SLEIGH
 
         public void addConstructorPair(DisjointPattern pat, Constructor ct)
         {
-            DisjointPattern* clone = (DisjointPattern*)pat.simplifyClone(); // We need to own pattern
-            list.Add(pair<DisjointPattern*, Constructor*>(clone, ct));
+            DisjointPattern clone = (DisjointPattern)pat.simplifyClone(); // We need to own pattern
+            list.Add(pair<DisjointPattern, Constructor>(clone, ct));
             num += 1;
         }
 
         public void split(DecisionProperties props)
         {
-            if (list.size() <= 1)
-            {
+            if (list.size() <= 1) {
                 bitsize = 0;        // Only one pattern, terminal node by default
                 return;
             }
 
             chooseOptimalField();
-            if (bitsize == 0)
-            {
+            if (bitsize == 0) {
                 orderPatterns(props);
                 return;
             }
-            if ((parent != (DecisionNode*)0) && (list.size() >= parent.num))
+            if ((parent != (DecisionNode)null) && (list.size() >= parent.num))
                 throw new LowlevelError("Child has as many Patterns as parent");
 
             int numChildren = 1 << bitsize;
 
-            for (int i = 0; i < numChildren; ++i)
-            {
-                DecisionNode* nd = new DecisionNode(this);
+            for (int i = 0; i < numChildren; ++i) {
+                DecisionNode nd = new DecisionNode(this);
                 children.Add(nd);
             }
-            for (int i = 0; i < list.size(); ++i)
-            {
-                List<uint> vals;     // Bins this pattern belongs in
+            for (int i = 0; i < list.size(); ++i) {
+                List<int> vals = new List<int>();     // Bins this pattern belongs in
                                         // If the pattern does not care about some
                                         // bits in the field we are splitting on, that
                                         // pattern will get put into multiple bins
                 consistentValues(vals, list[i].first);
                 for (int j = 0; j < vals.size(); ++j)
                     children[vals[j]].addConstructorPair(list[i].first, list[i].second);
-                delete list[i].first;   // We no longer need original pattern
+                // delete list[i].first;   // We no longer need original pattern
             }
-            list.clear();
+            list.Clear();
 
             for (int i = 0; i < numChildren; ++i)
                 children[i].split(props);

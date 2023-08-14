@@ -131,7 +131,7 @@ namespace Sla.DECCORE
         }
 
         /// Pointer to class providing behavioral details of the operation
-        private TypeOp opcode;
+        internal TypeOp opcode;
         /// Collection of boolean attributes on this op
         internal /*mutable*/ Flags flags;
         /// Additional boolean attributes for this op
@@ -156,7 +156,7 @@ namespace Sla.DECCORE
         /// Set the behavioral class (opcode) of this operation. For most applications this should only be called
         /// by the PcodeOpBank.  This is fairly low-level but does cache various boolean flags associated with the opcode
         /// \param t_op is the behavioural class to set
-        private void setOpcode(TypeOp t_op)
+        internal void setOpcode(TypeOp t_op)
         {
             flags &= ~(PcodeOp.Flags.branch | PcodeOp.Flags.call | PcodeOp.Flags.coderef | PcodeOp.Flags.commutative |
                    PcodeOp.Flags.returns | PcodeOp.Flags.nocollapse | PcodeOp.Flags.marker | PcodeOp.Flags.booloutput |

@@ -98,19 +98,19 @@ namespace Sla.DECCORE
         /// Clear all PcodeOps from \b this container
         public void clear()
         {
-            list<PcodeOp*>::iterator iter;
+            //IEnumerator<PcodeOp> iter;
 
-            for (iter = alivelist.begin(); iter != alivelist.end(); ++iter)
-                delete* iter;
-            for (iter = deadlist.begin(); iter != deadlist.end(); ++iter)
-                delete* iter;
-            for (iter = deadandgone.begin(); iter != deadandgone.end(); ++iter)
-                delete* iter;
+            //for (iter = alivelist.begin(); iter != alivelist.end(); ++iter)
+            //    delete* iter;
+            //for (iter = deadlist.begin(); iter != deadlist.end(); ++iter)
+            //    delete* iter;
+            //for (iter = deadandgone.begin(); iter != deadandgone.end(); ++iter)
+            //    delete* iter;
             optree.clear();
-            alivelist.clear();
-            deadlist.clear();
+            alivelist.Clear();
+            deadlist.Clear();
             clearCodeLists();
-            deadandgone.clear();
+            deadandgone.Clear();
             uniqid = 0;
         }
 
@@ -143,10 +143,10 @@ namespace Sla.DECCORE
         /// \return the newly allocated PcodeOp
         public PcodeOp create(int inputs, Address pc)
         {
-            PcodeOp* op = new PcodeOp(inputs, SeqNum(pc, uniqid++));
+            PcodeOp op = new PcodeOp(inputs, new SeqNum(pc, uniqid++));
             optree[op.getSeqNum()] = op;
-            op.setFlag(PcodeOp::dead);     // Start out life as dead
-            op.insertiter = deadlist.insert(deadlist.end(), op);
+            op.setFlag(PcodeOp.Flags.dead);     // Start out life as dead
+            op.insertiter = deadlist.Add(op);
             return op;
         }
 
@@ -158,14 +158,13 @@ namespace Sla.DECCORE
         /// \return the newly allocated PcodeOp
         public PcodeOp create(int inputs, SeqNum sq)
         {
-            PcodeOp* op;
-            op = new PcodeOp(inputs, sq);
+            PcodeOp op = new PcodeOp(inputs, sq);
             if (sq.getTime() >= uniqid)
                 uniqid = sq.getTime() + 1;
 
             optree[op.getSeqNum()] = op;
-            op.setFlag(PcodeOp::dead);     // Start out life as dead
-            op.insertiter = deadlist.insert(deadlist.end(), op);
+            op.setFlag(PcodeOp.Flags.dead);     // Start out life as dead
+            op.insertiter = deadlist.Add(op);
             return op;
         }
 
@@ -189,13 +188,7 @@ namespace Sla.DECCORE
         /// Destroy/retire all PcodeOps in the \e dead list
         public void destroyDead()
         {
-            list<PcodeOp*>::iterator iter;
-            PcodeOp* op;
-
-            iter = deadlist.begin();
-            while (iter != deadlist.end())
-            {
-                op = *iter++;
+            foreach (PcodeOp op in deadlist) {
                 destroy(op);
             }
         }
@@ -207,7 +200,7 @@ namespace Sla.DECCORE
         /// \param newopc is the new op-code object
         public void changeOpcode(PcodeOp op, TypeOp newopc)
         {
-            if (op.opcode != (TypeOp*)0)
+            if (op.opcode != (TypeOp)null)
                 removeFromCodeList(op);
             op.setOpcode(newopc);
             addToCodeList(op);
@@ -244,7 +237,7 @@ namespace Sla.DECCORE
             if ((!op.isDead()) || (!prev.isDead()))
                 throw new LowlevelError("Dead move called on ops which aren't dead");
             deadlist.erase(op.insertiter);
-            list<PcodeOp*>::iterator iter = prev.insertiter;
+            IEnumerator<PcodeOp> iter = prev.insertiter;
             ++iter;
             op.insertiter = deadlist.insert(iter, op);
         }
@@ -257,9 +250,9 @@ namespace Sla.DECCORE
         /// \param prev is the provided point to move to
         public void moveSequenceDead(PcodeOp firstop, PcodeOp lastop, PcodeOp prev)
         {
-            list<PcodeOp*>::iterator enditer = lastop.insertiter;
+            IEnumerator<PcodeOp> enditer = lastop.insertiter;
             ++enditer;
-            list<PcodeOp*>::iterator previter = prev.insertiter;
+            IEnumerator<PcodeOp> previter = prev.insertiter;
             ++previter;
             if (previter != firstop.insertiter) // Check for degenerate move
                 deadlist.splice(previter, deadlist, firstop.insertiter, enditer);
@@ -272,15 +265,14 @@ namespace Sla.DECCORE
         /// \param lastop is the end of the range of incidental COPY ops
         public void markIncidentalCopy(PcodeOp firstop, PcodeOp lastop)
         {
-            list<PcodeOp*>::iterator iter = firstop.insertiter;
-            list<PcodeOp*>::iterator enditer = lastop.insertiter;
+            IEnumerator<PcodeOp> iter = firstop.insertiter;
+            IEnumerator<PcodeOp> enditer = lastop.insertiter;
             ++enditer;
-            while (iter != enditer)
-            {
-                PcodeOp* op = *iter;
+            while (iter != enditer) {
+                PcodeOp op = iter.Current;
                 ++iter;
                 if (op.code() == OpCode.CPUI_COPY)
-                    op.setAdditionalFlag(PcodeOp::incidental_copy);
+                    op.setAdditionalFlag(PcodeOp.AdditionalFlags.incidental_copy);
             }
         }
 
@@ -315,16 +307,14 @@ namespace Sla.DECCORE
         /// \return the fallthru PcodeOp
         public PcodeOp fallthru(PcodeOp op)
         {
-            PcodeOp* retop;
-            if (op.isDead())
-            {
+            PcodeOp retop;
+            if (op.isDead()) {
                 // In this case we know an instruction is contiguous
                 // in the dead list
-                list<PcodeOp*>::const_iterator iter = op.insertiter;
+                IEnumerator<PcodeOp> iter = op.insertiter;
                 ++iter;
-                if (iter != deadlist.end())
-                {
-                    retop = *iter;
+                if (iter != deadlist.end()) {
+                    retop iter.Current;
                     if (!retop.isInstructionStart()) // If the next in dead list is not marked
                         return retop;       // It is in the same instruction, and is the fallthru
                 }
@@ -336,8 +326,7 @@ namespace Sla.DECCORE
                 // This is probably -op- itself because it is the
                 // last op in the instruction, but it might not be
                 // because of delay slot reordering
-                while ((iter != deadlist.end()) && (*iter != op))
-                {
+                while ((iter != deadlist.end()) && (*iter != op)) {
                     if (max < (*iter).getSeqNum())
                         max = (*iter).getSeqNum();
                     ++iter;

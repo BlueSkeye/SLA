@@ -1676,7 +1676,7 @@ namespace Sla.CORE {
         /// Retrieve the location and size of a register given its name
         /// \param nm is the name of the register
         /// \return the VarnodeData for the register
-        public abstract ref VarnodeData getRegister(string nm);
+        public abstract VarnodeData getRegister(string nm);
 
         /// \brief Get the name of a register given its location
         /// Generic references to locations in a \e register space can
@@ -1703,7 +1703,7 @@ namespace Sla.CORE {
         /// and an index.  This method returns a list of these ops
         /// in index order.
         /// \param res is the resulting List of user op names
-        public abstract void getUserOpNames(ref List<string> res);
+        public abstract void getUserOpNames(List<string> res);
 
         /// \brief Get the length of a machine instruction
         /// This method decodes an instruction at a specific address

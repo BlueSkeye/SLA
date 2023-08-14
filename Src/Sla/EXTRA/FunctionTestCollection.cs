@@ -55,14 +55,13 @@ namespace Sla.EXTRA
         /// Build program (Architecture) from \<binaryimage> tag
         private void buildProgram(DocumentStorage store)
         {
-            ArchitectureCapability* capa = ArchitectureCapability::getCapability("xml");
-            if (capa == (ArchitectureCapability*)0)
+            ArchitectureCapability? capa = ArchitectureCapability::getCapability("xml");
+            if (capa == (ArchitectureCapability)null)
                 throw new IfaceExecutionError("Missing XML architecture capability");
             dcp.conf = capa.buildArchitecture("test", "", console.optr);
             string errmsg;
             bool iserror = false;
-            try
-            {
+            try {
                 dcp.conf.init(docStorage);
                 dcp.conf.readLoaderSymbols("::"); // Read in loader symbols
             }
@@ -130,7 +129,7 @@ namespace Sla.EXTRA
         {
             console = new ConsoleCommands(s, commands);
             consoleOwner = true;
-            dcp = (IfaceDecompData*)console.getData("decompile");
+            dcp = (IfaceDecompData)console.getData("decompile");
             console.setErrorIsDone(true);
             numTestsApplied = 0;
             numTestsSucceeded = 0;
@@ -141,7 +140,7 @@ namespace Sla.EXTRA
         {
             console = con;
             consoleOwner = false;
-            dcp = (IfaceDecompData*)console.getData("decompile");
+            dcp = (IfaceDecompData)console.getData("decompile");
             numTestsApplied = 0;
             numTestsSucceeded = 0;
         }
@@ -171,9 +170,9 @@ namespace Sla.EXTRA
         public void loadTest(string filename)
         {
             fileName = filename;
-            DocumentStorage docStorage;
-            Document* doc = docStorage.openDocument(filename);
-            Element* el = doc.getRoot();
+            DocumentStorage docStorage = new DocumentStorage();
+            Document doc = docStorage.openDocument(filename);
+            Element el = doc.getRoot() ?? throw new BugException();
             if (el.getName() == "decompilertest")
                 restoreXml(docStorage, el);
             else if (el.getName() == "binaryimage")
@@ -185,29 +184,21 @@ namespace Sla.EXTRA
         /// Load tests from a \<decompilertest> tag.
         public void restoreXml(DocumentStorage store, Element el)
         {
-            List list = el.getChildren();
-            List::const_iterator iter = list.begin();
             bool sawScript = false;
             bool sawTests = false;
             bool sawProgram = false;
-            while (iter != list.end())
-            {
-                Element subel = *iter;
-                ++iter;
-                if (subel.getName() == "script")
-                {
+            foreach(Element subel in ) {
+                if (subel.getName() == "script") {
                     sawScript = true;
                     restoreXmlCommands(subel);
                 }
-                else if (subel.getName() == "stringmatch")
-                {
+                else if (subel.getName() == "stringmatch") {
                     sawTests = true;
                     FunctionTestProperty newProperty = new FunctionTestProperty();
                     testList.Add(newProperty);
                     newProperty.restoreXml(subel);
                 }
-                else if (subel.getName() == "binaryimage")
-                {
+                else if (subel.getName() == "binaryimage") {
                     sawProgram = true;
                     store.registerTag(subel);
                     buildProgram(store);
@@ -237,7 +228,7 @@ namespace Sla.EXTRA
         /// \param lateStream collects messages for a final summary
         public void runTests(List<string> lateStream)
         {
-            ostream* origStream = console.optr;
+            TextWriter origStream = console.optr;
             numTestsApplied = 0;
             numTestsSucceeded = 0;
             ostringstream midBuffer;        // Collect command console output
@@ -247,36 +238,28 @@ namespace Sla.EXTRA
             mainloop(console);
             console.optr = origStream;
             console.fileoptr = origStream;
-            if (console.isInError())
-            {
-                *console.optr << "Error: Did not apply tests in " << fileName << endl;
-                *console.optr << midBuffer.str() << endl;
-                ostringstream fs;
-                fs << "Execution failed for " << fileName;
-                lateStream.Add(fs.str());
+            if (console.isInError()) {
+                console.optr.WriteLine("Error: Did not apply tests in {fileName}");
+                console.optr.WriteLine(midBuffer.str());
+                lateStream.Add($"Execution failed for {fileName}");
                 return;
             }
             string result = bulkout.str();
-            if (result.size() == 0)
-            {
-                ostringstream fs;
-                fs << "No output for " << fileName;
-                lateStream.Add(fs.str());
+            if (result.Length == 0) {
+                lateStream.Add($"No output for {fileName}");
                 return;
             }
             startTests();
-            string::size_type prevpos = 0;
-            string::size_type pos = result.find_first_of('\n');
-            while (pos != string::npos)
-            {
-                string line = result.substr(prevpos, pos - prevpos);
+            int prevpos = 0;
+            int pos = result.find_first_of('\n');
+            while (-1 != pos) {
+                string line = result.Substring(prevpos, pos - prevpos);
                 passLineToTests(line);
                 prevpos = pos + 1;
                 pos = result.find_first_of('\n', prevpos);
             }
-            if (prevpos != result.size())
-            {
-                string line = result.substr(prevpos);   // Process final line without a newline char
+            if (prevpos != result.Length) {
+                string line = result.Substring(prevpos);   // Process final line without a newline char
                 passLineToTests(line);
             }
             evaluateTests(lateStream);
@@ -290,12 +273,10 @@ namespace Sla.EXTRA
         {
             int totalTestsApplied = 0;
             int totalTestsSucceeded = 0;
-            list<string> failures;
-            FunctionTestCollection testCollection(s);
-            for (int i = 0; i < testFiles.size(); ++i)
-            {
-                try
-                {
+            List<string> failures = new List<string>();
+            FunctionTestCollection testCollection = new FunctionTestCollection(s);
+            for (int i = 0; i < testFiles.size(); ++i) {
+                try {
                     testCollection.clear();
                     testCollection.loadTest(testFiles[i]);
                     testCollection.runTests(failures);
@@ -303,29 +284,21 @@ namespace Sla.EXTRA
                     totalTestsSucceeded += testCollection.getTestsSucceeded();
                 }
                 catch (IfaceParseError err) {
-                    ostringstream fs;
-                    fs << "Error parsing " << testFiles[i] << ": " << err.ToString();
-                    s << fs.str() << endl;
-                    failures.Add(fs.str());
-                } catch (IfaceExecutionError err) {
-                    ostringstream fs;
-                    fs << "Error executing " << testFiles[i] << ": " << err.ToString();
-                    s << fs.str() << endl;
-                    failures.Add(fs.str());
+                    failures.Add($"Error parsing {testFiles[i]}: {err.ToString()}{fs.ToString()}\n");
+                }
+                catch (IfaceExecutionError err) {
+                    failures.Add($"Error executing {testFiles[i]}: {err.ToString()}{fs.ToString()}\n");
                 }
             }
 
-            s << endl;
-            s << "Total tests applied = " << totalTestsApplied << endl;
-            s << "Total passing tests = " << totalTestsSucceeded << endl;
-            s << endl;
+            s.WriteLine();
+            s.WriteLine($"Total tests applied = {totalTestsApplied}");
+            s.WriteLine($"Total passing tests = { totalTestsSucceeded})";
+            s.WriteLine();
             if (!failures.empty()) {
-                s << "Failures: " << endl;
-                list<string>::const_iterator iter = failures.begin();
-                for (int i = 0; i < 10; ++i) {
-                    s << "  " << *iter << endl;
-                    ++iter;
-                    if (iter == failures.end()) break;
+                s.WriteLine("Failures: ");
+                foreach (string failure in failures) {
+                    s.WriteLine($"  {failure}");
                 }
             }
             return totalTestsApplied - totalTestsSucceeded;

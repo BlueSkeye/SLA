@@ -129,7 +129,7 @@ namespace Sla.DECCORE
         /// Boolean options for flow following
         private FlowFlag flags;
         /// First function in the in-lining chain
-        private Funcdata inline_head;
+        private Funcdata? inline_head;
         /// Active list of addresses for function that are in-lined
         private HashSet<Address> inline_recursion;
         /// Storage for addresses of functions that are in-lined
@@ -1102,10 +1102,11 @@ namespace Sla.DECCORE
                     PcodeOp targ = target(addr);
                     data.opMarkStartBasic(targ);
                     // Make sure the following op starts a basic block
-                    list<PcodeOp*>::const_iterator oiter = op.getInsertIter();
-                    ++oiter;
-                    if (oiter != obank.endDead())
-                        data.opMarkStartBasic(*oiter);
+                    IEnumerator<PcodeOp> oiter = op.getInsertIter();
+                    // First item is omited
+                    if (!oiter.MoveNext()) throw new BugException();
+                    if (oiter.MoveNext()) 
+                        data.opMarkStartBasic(oiter.Current);
                     // Restore original address
                     data.opSetInput(op, data.newCodeRef(addr), 0);
                     iter = qlst.erase(iter);    // Delete the call
@@ -1140,24 +1141,22 @@ namespace Sla.DECCORE
         private void recoverJumpTables(List<JumpTable> newTables, List<PcodeOp> notreached)
         {
             PcodeOp op = tablelist[0];
-            ostringstream s1;
-            s1 << data.getName() << "@@jump@";
+            TextWriter s1 = new StringWriter();
+            s1.Write($"{data.getName()}@@jump@");
             op.getAddr().printRaw(s1);
 
-            string nm = s1.str();
+            string nm = s1.ToString();
             // Prepare partial Funcdata object for analysis if necessary
             Funcdata partial = new Funcdata(nm, nm, data.getScopeLocal().getParent(), data.getAddress(),
                 (FunctionSymbol)null);
 
-            for (int i = 0; i < tablelist.size(); ++i)
-            {
+            for (int i = 0; i < tablelist.size(); ++i) {
                 op = tablelist[i];
                 int failuremode;
                 JumpTable? jt = data.recoverJumpTable(partial, op, this, out failuremode); // Recover it
-                if (jt == (JumpTable)null)
-                { // Could not recover jumptable
-                    if ((failuremode == 3) && (tablelist.size() > 1) && (!isInArray(notreached, op)))
-                    {
+                if (jt == (JumpTable)null) {
+                    // Could not recover jumptable
+                    if ((failuremode == 3) && (tablelist.size() > 1) && (!isInArray(notreached, op))) {
                         // If the indirect op was not reachable with current flow AND there is more flow to generate,
                         //     AND we haven't tried to recover this table before
                         notreached.Add(op); // Save this op so we can try to recovery table again later
@@ -1180,7 +1179,7 @@ namespace Sla.DECCORE
             if (i == qlst.size())
                 throw new LowlevelError("Misplaced callspec");
 
-            delete fc;
+            // delete fc;
             qlst.erase(qlst.begin() + i);
         }
 
@@ -1195,7 +1194,7 @@ namespace Sla.DECCORE
                 data.getCallSpecs(op).setBadJumpTable(true);   // Consider using special name for switch variable
 
             // Create an artificial return
-            PcodeOp* truncop = artificialHalt(op.getAddr(), 0);
+            PcodeOp truncop = artificialHalt(op.getAddr(), 0);
             data.opDeadInsertAfter(truncop, op);
 
             data.warning("Treating indirect jump as call", op.getAddr());
@@ -1208,8 +1207,7 @@ namespace Sla.DECCORE
         /// \return \b true if the op is a member of the array
         private static bool isInArray(List<PcodeOp> array, PcodeOp op)
         {
-            for (int i = 0; i < array.size(); ++i)
-            {
+            for (int i = 0; i < array.size(); ++i) {
                 if (array[i] == op) return true;
             }
             return false;
@@ -1229,13 +1227,13 @@ namespace Sla.DECCORE
             qlst = q;
             baddr = new Address(d.getAddress().getSpace(), 0);
             eaddr = new Address(d.getAddress().getSpace(), ~((ulong)0));
-            minaddr = new Address(d.getAddress());
-            maxaddr = new Address(d.getAddress());
+            minaddr = d.getAddress();
+            maxaddr = d.getAddress();
             glb = data.getArch();
             flags = 0;
-            emitter.setFuncdata(&d);
+            emitter.setFuncdata(d);
             inline_head = (Funcdata)null;
-            inline_recursion = (set<Address>*)0;
+            inline_recursion = (HashSet<Address>)null;
             insn_count = 0;
             insn_max = uint.MaxValue;
             flowoverride_present = data.getOverride().hasFlowOverride();
@@ -1257,14 +1255,14 @@ namespace Sla.DECCORE
             obank = o;
             bblocks = b;
             qlst = q;
-            baddr = new Address(op2.baddr);
-            eaddr = new Address(op2.eaddr);
-            minaddr = new Address(d.getAddress());
-            maxaddr = new Address(d.getAddress());
+            baddr = op2.baddr;
+            eaddr = op2.eaddr;
+            minaddr = d.getAddress();
+            maxaddr = d.getAddress();
 
             glb = data.getArch();
             flags = op2.flags;
-            emitter.setFuncdata(&d);
+            emitter.setFuncdata(d);
             unprocessed = op2.unprocessed; // Clone the flow address information
             addrlist = op2.addrlist;
             visited = op2.visited;
@@ -1274,7 +1272,7 @@ namespace Sla.DECCORE
                 inline_recursion = inline_base;
             }
             else
-                inline_recursion = (set<Address>)null;
+                inline_recursion = (HashSet<Address>)null;
             insn_count = op2.insn_count;
             insn_max = op2.insn_max;
             flowoverride_present = data.getOverride().hasFlowOverride();
@@ -1317,12 +1315,10 @@ namespace Sla.DECCORE
             Dictionary<Address, VisitStat>::const_iterator iter;
 
             iter = visited.find(addr);
-            while (iter != visited.end())
-            {
-                SeqNum seq = (*iter).second.seqnum;
-                if (!seq.getAddr().isInvalid())
-                {
-                    PcodeOp* retop = obank.findOp(seq);
+            while (iter != visited.end()) {
+                SeqNum seq = (iter).second.seqnum;
+                if (!seq.getAddr().isInvalid()){
+                    PcodeOp retop = obank.findOp(seq);
                     if (retop != (PcodeOp)null)
                         return retop;
                     break;
@@ -1330,12 +1326,11 @@ namespace Sla.DECCORE
                 // Visit fall thru address in case of no-op
                 iter = visited.find(iter.Current.Key + (*iter).second.size);
             }
-            ostringstream errmsg;
-            errmsg << "Could not find op at target address: (";
-            errmsg << addr.getSpace().getName() << ',';
+            TextWriter errmsg = new StringWriter();
+            errmsg.Write($"Could not find op at target address: ({addr.getSpace().getName()},");
             addr.printRaw(errmsg);
-            errmsg << ')';
-            throw new LowlevelError(errmsg.str());
+            errmsg.Write(')');
+            throw new LowlevelError(errmsg.ToString());
         }
 
         /// Find the target referred to by a given BRANCH or CBRANCH
@@ -1348,13 +1343,11 @@ namespace Sla.DECCORE
         public PcodeOp branchTarget(PcodeOp op)
         {
             Address addr = op.getIn(0).getAddr();
-            if (addr.isConstant())
-            {   // This is a relative sequence number
+            if (addr.isConstant()) {
+                // This is a relative sequence number
                 Address res;
-                PcodeOp* retop = findRelTarget(op, res);
-                if (retop != (PcodeOp)null)
-                    return retop;
-                return target(res);
+                PcodeOp? retop = findRelTarget(op, out res);
+                return retop ?? target(res);
             }
             return target(addr);    // Otherwise a normal address target
         }
@@ -1362,7 +1355,7 @@ namespace Sla.DECCORE
         /// Generate raw control-flow from the function's base address
         public void generateOps()
         {
-            List<PcodeOp*> notreached;    // indirect ops that are not reachable
+            List<PcodeOp> notreached = new List<PcodeOp>();    // indirect ops that are not reachable
             int notreachcnt = 0;
             clearProperties();
             addrlist.Add(data.getAddress());
@@ -1370,17 +1363,15 @@ namespace Sla.DECCORE
                 fallthru();
             if (hasInject())
                 injectPcode();
-            do
-            {
+            do {
                 bool collapsed_jumptable = false;
-                while (!tablelist.empty())
-                {   // For each jumptable found
-                    List<JumpTable*> newTables;
+                while (!tablelist.empty()) {
+                    // For each jumptable found
+                    List<JumpTable> newTables = new List<JumpTable>();
                     recoverJumpTables(newTables, notreached);
-                    tablelist.clear();
-                    for (int i = 0; i < newTables.size(); ++i)
-                    {
-                        JumpTable* jt = newTables[i];
+                    tablelist.Clear();
+                    for (int i = 0; i < newTables.size(); ++i) {
+                        JumpTable? jt = newTables[i];
                         if (jt == (JumpTable)null) continue;
 
                         int num = jt.numEntries();
@@ -1396,8 +1387,7 @@ namespace Sla.DECCORE
                 checkContainedCall();   // Check for PIC constructions
                 if (collapsed_jumptable)
                     checkMultistageJumptables();
-                while (notreachcnt < notreached.size())
-                {
+                while (notreachcnt < notreached.size()) {
                     tablelist.Add(notreached[notreachcnt]);
                     notreachcnt += 1;
                 }
@@ -1413,12 +1403,10 @@ namespace Sla.DECCORE
             collectEdges();
             splitBasic();       // Split ops up into basic blocks
             connectBasic();     // Generate edges between basic blocks
-            if (bblocks.getSize() != 0)
-            {
+            if (bblocks.getSize() != 0) {
                 FlowBlock startblock = bblocks.getBlock(0);
-                if (startblock.sizeIn() != 0)
-                { // Make sure the entry block has no incoming edges
-
+                if (startblock.sizeIn() != 0) {
+                    // Make sure the entry block has no incoming edges
                     // If it does we create a new entry block that flows into the old entry block
                     BlockBasic newfront = bblocks.newBlockBasic(data);
                     bblocks.addEdge(newfront, startblock);
@@ -1426,7 +1414,6 @@ namespace Sla.DECCORE
                     data.setBasicBlockRange(newfront, data.getAddress(), data.getAddress());
                 }
             }
-
             if (hasPossibleUnreachable())
                 data.removeUnreachableBlocks(false, true);
         }
@@ -1457,7 +1444,7 @@ namespace Sla.DECCORE
                     inline_head.warning("No fallthrough prevents inlining here", op.getAddr());
                     return false;
                 }
-                PcodeOp nextop = *iter;
+                PcodeOp nextop = iter.Current;
                 retaddr = nextop.getAddr();
                 if (op.getAddr() == retaddr) {
                     inline_head.warning("Return address prevents inlining here", op.getAddr());
@@ -1494,20 +1481,19 @@ namespace Sla.DECCORE
         /// allow a sub-function to be in-lined more than once.
         public void injectPcode()
         {
-            if (inline_head == (Funcdata)null)
-            {
+            if (inline_head == (Funcdata)null) {
                 // This is the top level of inlining
                 inline_head = data;    // Set up head of inlining
                 inline_recursion = inline_base;
-                inline_recursion.insert(data.getAddress()); // Insert ourselves
+                inline_recursion.Add(data.getAddress()); // Insert ourselves
                                                              //    inline_head = (Funcdata *)0;
             }
             else {
-                inline_recursion.insert(data.getAddress()); // Insert ourselves
+                inline_recursion.Add(data.getAddress()); // Insert ourselves
             }
 
             for (int i = 0; i < injectlist.size(); ++i) {
-                PcodeOp* op = injectlist[i];
+                PcodeOp op = injectlist[i];
                 if (op == (PcodeOp)null) continue;
                 injectlist[i] = (PcodeOp)null;    // Nullify entry, so we don't inject more than once
                 if (op.code() == OpCode.CPUI_CALLOTHER) {
@@ -1515,12 +1501,12 @@ namespace Sla.DECCORE
                 }
                 else {
                     // OpCode.CPUI_CALL or OpCode.CPUI_CALLIND
-                    FuncCallSpecs fc = FuncCallSpecs::getFspecFromConst(op.getIn(0).getAddr());
+                    FuncCallSpecs fc = FuncCallSpecs.getFspecFromConst(op.getIn(0).getAddr());
                     if (fc.isInline()) {
                         if (fc.getInjectId() >= 0) {
                             if (injectSubFunction(fc)) {
-                                data.warningHeader("Function: " + fc.getName() + " replaced with injection: " +
-                                           glb.pcodeinjectlib.getCallFixupName(fc.getInjectId()));
+                                data.warningHeader(
+                                    $"Function: {fc.getName()} replaced with injection: {glb.pcodeinjectlib.getCallFixupName(fc.getInjectId())}");
                                 deleteCallSpec(fc);
                             }
                         }
@@ -1546,7 +1532,6 @@ namespace Sla.DECCORE
         }
 
         /// \brief Clone the given in-line flow into \b this flow using the \e hard model
-        ///
         /// Individual PcodeOps from the Funcdata being in-lined are cloned into
         /// the Funcdata for \b this flow, preserving their original address.
         /// Any RETURN op is replaced with jump to first address following the call site.
@@ -1554,10 +1539,9 @@ namespace Sla.DECCORE
         /// \param retaddr is the first address after the call site in \b this flow
         public void inlineClone(FlowInfo inlineflow, Address retaddr)
         {
-            IEnumerator<PcodeOp> iter;
-            for (iter = inlineflow.data.beginOpDead(); iter != inlineflow.data.endOpDead(); ++iter)
-            {
-                PcodeOp op = *iter;
+            IEnumerator<PcodeOp> iter = inlineflow.data.beginOpDead();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 PcodeOp cloneop;
                 if ((op.code() == OpCode.CPUI_RETURN) && (!retaddr.isInvalid())) {
                     cloneop = data.newOp(1, op.getSeqNum());
@@ -1571,11 +1555,11 @@ namespace Sla.DECCORE
                     xrefInlinedBranch(cloneop);
             }
             // Copy in the cross-referencing
-            unprocessed.insert(unprocessed.end(), inlineflow.unprocessed.begin(),
-                       inlineflow.unprocessed.end());
-            addrlist.insert(addrlist.end(), inlineflow.addrlist.begin(),
-                    inlineflow.addrlist.end());
-            visited.insert(inlineflow.visited.begin(), inlineflow.visited.end());
+            unprocessed.AddRange(inlineflow.unprocessed);
+            addrlist.AddRange(inlineflow.addrlist);
+            foreach(KeyValuePair<Address, VisitStat> pair in inlineflow.visited) {
+                visited.Add(pair.Key, pair.Value);
+            }
             // We don't copy inline_recursion or inline_head here
         }
 
@@ -1588,10 +1572,9 @@ namespace Sla.DECCORE
         /// \param calladdr is the fixed address assigned to the cloned PcodeOps
         public void inlineEZClone(FlowInfo inlineflow, Address calladdr)
         {
-            IEnumerator<PcodeOp> iter;
-            for (iter = inlineflow.data.beginOpDead(); iter != inlineflow.data.endOpDead(); ++iter)
-            {
-                PcodeOp op = *iter;
+            IEnumerator<PcodeOp> iter = inlineflow.data.beginOpDead();
+            while (iter.MoveNext()) {
+                PcodeOp op = iter.Current;
                 if (op.code() == OpCode.CPUI_RETURN) break;
                 SeqNum myseq = new SeqNum(calladdr, op.getSeqNum().getTime());
                 data.cloneOp(op, myseq);
@@ -1607,24 +1590,24 @@ namespace Sla.DECCORE
         public bool hasInject() => !injectlist.empty();
 
         /// Does \b this flow have unimiplemented instructions
-        public bool hasUnimplemented() => ((flags & unimplemented_present)!= 0);
+        public bool hasUnimplemented() => ((flags & FlowFlag.unimplemented_present)!= 0);
 
         /// Does \b this flow reach inaccessible data
-        public bool hasBadData() => ((flags & baddata_present)!= 0);
+        public bool hasBadData() => ((flags & FlowFlag.baddata_present)!= 0);
 
         /// Does \b this flow out of bound
-        public bool hasOutOfBounds() => ((flags & outofbounds_present)!= 0);
+        public bool hasOutOfBounds() => ((flags & FlowFlag.outofbounds_present)!= 0);
 
         /// Does \b this flow reinterpret bytes
-        public bool hasReinterpreted() => ((flags & reinterpreted_present)!= 0);
+        public bool hasReinterpreted() => ((flags & FlowFlag.reinterpreted_present)!= 0);
 
         /// Does \b this flow have too many instructions
-        public bool hasTooManyInstructions() => ((flags & toomanyinstructions_present)!= 0);
+        public bool hasTooManyInstructions() => ((flags & FlowFlag.toomanyinstructions_present)!= 0);
 
         /// Is \b this flow to be in-lined
-        public bool isFlowForInline() => ((flags & flow_forinline)!= 0);
+        public bool isFlowForInline() => ((flags & FlowFlag.flow_forinline)!= 0);
 
         /// Should jump table structure be recorded
-        public bool doesJumpRecord() => ((flags & record_jumploads)!= 0);
+        public bool doesJumpRecord() => ((flags & FlowFlag.record_jumploads)!= 0);
     }
 }

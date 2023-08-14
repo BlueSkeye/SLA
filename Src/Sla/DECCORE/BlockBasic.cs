@@ -92,7 +92,7 @@ namespace Sla.DECCORE
         }
 
         /// Copy address ranges from another basic block
-        private void copyRange(BlockBasic bb)
+        internal void copyRange(BlockBasic bb)
         {
             cover = bb.cover;
         }

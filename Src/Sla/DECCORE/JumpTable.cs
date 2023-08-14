@@ -292,7 +292,7 @@ namespace Sla.DECCORE
         internal bool isOverride() => (jmodel != (JumpModel)null) && jmodel.isOverride();
 
         /// Return \b true if this could be multi-staged
-        private bool isPossibleMultistage() => (addresstable.Count == 1);
+        internal bool isPossibleMultistage() => (addresstable.Count == 1);
 
         /// Return what stage of recovery this jump-table is @in.
         internal int getStage() => recoverystage;
@@ -398,7 +398,7 @@ namespace Sla.DECCORE
         }
 
         /// Set whether LOAD records should be collected
-        private void setLoadCollect(bool val)
+        internal void setLoadCollect(bool val)
         {
             collectloads = val;
         }
@@ -511,7 +511,7 @@ namespace Sla.DECCORE
         ///
         /// A sanity check is also run, which might truncate the original set of addresses.
         /// \param fd is the function containing the switch
-        private void recoverAddresses(Funcdata fd)
+        internal void recoverAddresses(Funcdata fd)
         {
             recoverModel(fd);
             if (jmodel == (JumpModel)null) {
@@ -525,17 +525,17 @@ namespace Sla.DECCORE
             if (collectloads)
                 jmodel.buildAddresses(fd, indirect, addresstable, loadpoints);
             else
-                jmodel.buildAddresses(fd, indirect, addresstable, (List<LoadTable>*)0);
+                jmodel.buildAddresses(fd, indirect, addresstable, (List<LoadTable>)null);
             sanityCheck(fd);
         }
 
         /// Recover jump-table addresses keeping track of a possible previous stage
         /// Do a normal recoverAddresses, but save off the old JumpModel, and if we fail recovery, put back the old model.
         /// \param fd is the function containing the switch
-        private void recoverMultistage(Funcdata fd)
+        internal void recoverMultistage(Funcdata fd)
         {
-            if (origmodel != (JumpModel)null)
-                delete origmodel;
+            //if (origmodel != (JumpModel)null)
+            //    delete origmodel;
             origmodel = jmodel;
             jmodel = (JumpModel)null;
 
@@ -584,12 +584,10 @@ namespace Sla.DECCORE
                 throw new LowlevelError("Trying to recover jumptable labels without addresses");
 
             // Unless the model is an override, move model (created on a flow copy) so we can create a current instance
-            if (jmodel != (JumpModel)null)
-            {
-                if (origmodel != (JumpModel)null)
-                    delete origmodel;
-                if (!jmodel.isOverride())
-                {
+            if (jmodel != (JumpModel)null) {
+                //if (origmodel != (JumpModel)null)
+                //    delete origmodel;
+                if (!jmodel.isOverride()) {
                     origmodel = jmodel;
                     jmodel = (JumpModel)null;
                 }
@@ -599,36 +597,30 @@ namespace Sla.DECCORE
 
             bool multistagerestart = false;
             recoverModel(fd);       // Create a current instance of the model
-            if (jmodel != (JumpModel)null)
-            {
-                if (jmodel.getTableSize() != addresstable.size())
-                {
+            if (jmodel != (JumpModel)null) {
+                if (jmodel.getTableSize() != addresstable.size()) {
                     fd.warning("Could not find normalized switch variable to match jumptable", opaddress);
                     if ((addresstable.size() == 1) && (jmodel.getTableSize() > 1))
                         multistagerestart = true;
                 }
-                if ((origmodel == (JumpModel)null) || (origmodel.getTableSize() == 0))
-                {
+                if ((origmodel == (JumpModel)null) || (origmodel.getTableSize() == 0)) {
                     jmodel.findUnnormalized(maxaddsub, maxleftright, maxext);
                     jmodel.buildLabels(fd, addresstable, label, jmodel);
                 }
-                else
-                {
+                else {
                     jmodel.findUnnormalized(maxaddsub, maxleftright, maxext);
                     jmodel.buildLabels(fd, addresstable, label, origmodel);
                 }
             }
-            else
-            {
+            else {
                 jmodel = new JumpModelTrivial(this);
                 jmodel.recoverModel(fd, indirect, addresstable.size(), glb.max_jumptable_size);
-                jmodel.buildAddresses(fd, indirect, addresstable, (List<LoadTable>*)0);
+                jmodel.buildAddresses(fd, indirect, addresstable, (List<LoadTable>)null);
                 trivialSwitchOver();
                 jmodel.buildLabels(fd, addresstable, label, origmodel);
             }
-            if (origmodel != (JumpModel)null)
-            {
-                delete origmodel;
+            if (origmodel != (JumpModel)null) {
+                // delete origmodel;
                 origmodel = (JumpModel)null;
             }
             return multistagerestart;
@@ -686,29 +678,26 @@ namespace Sla.DECCORE
         /// The recovered addresses and case labels are encode to the stream.
         /// If override information is present, this is also incorporated into the element.
         /// \param encoder is the stream encoder
-        private void encode(Sla.CORE.Encoder encoder)
+        internal void encode(Sla.CORE.Encoder encoder)
         {
             if (!isRecovered())
                 throw new LowlevelError("Trying to save unrecovered jumptable");
 
             encoder.openElement(ElementId.ELEM_JUMPTABLE);
             opaddress.encode(encoder);
-            for (int i = 0; i < addresstable.size(); ++i)
-            {
+            for (int i = 0; i < addresstable.size(); ++i) {
                 encoder.openElement(ElementId.ELEM_DEST);
-                AddrSpace* spc = addresstable[i].getSpace();
+                AddrSpace spc = addresstable[i].getSpace();
                 ulong off = addresstable[i].getOffset();
                 if (spc != (AddrSpace)null)
                     spc.encodeAttributes(encoder, off);
-                if (i < label.size())
-                {
+                if (i < label.size()) {
                     if (label[i] != 0xBAD1ABE1)
                         encoder.writeUnsignedInteger(AttributeId.ATTRIB_LABEL, label[i]);
                 }
                 encoder.closeElement(ElementId.ELEM_DEST);
             }
-            if (!loadpoints.empty())
-            {
+            if (!loadpoints.empty()) {
                 for (int i = 0; i < loadpoints.size(); ++i)
                     loadpoints[i].encode(encoder);
             }

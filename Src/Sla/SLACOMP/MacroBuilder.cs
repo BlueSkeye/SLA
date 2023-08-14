@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.SLEIGH;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -38,55 +38,52 @@ namespace Sla.SLACOMP
         private bool transferOp(OpTpl op, List<HandleTpl> @params)
         { // Fix handle details of a macro generated OpTpl relative to its specific invocation
           // and transfer it into the output stream
-            VarnodeTpl* outvn = op.getOut();
+            VarnodeTpl outvn = op.getOut();
             int handleIndex = 0;
             int plus;
             bool hasrealsize = false;
             ulong realsize = 0;
 
-            if (outvn != (VarnodeTpl)null)
-            {
+            if (outvn != (VarnodeTpl)null) {
                 plus = outvn.transfer(@params);
-                if (plus >= 0)
-                {
-                    reportError((Location)null, "Cannot currently assign to bitrange of macro parameter that is a temporary");
+                if (plus >= 0) {
+                    reportError((Location)null,
+                        "Cannot currently assign to bitrange of macro parameter that is a temporary");
                     return false;
                 }
             }
-            for (int i = 0; i < op.numInput(); ++i)
-            {
-                VarnodeTpl* vn = op.getIn(i);
-                if (vn.getOffset().getType() == ConstTpl.const_type.handle)
-                {
+            for (int i = 0; i < op.numInput(); ++i) {
+                VarnodeTpl vn = op.getIn(i);
+                if (vn.getOffset().getType() == ConstTpl.const_type.handle) {
                     handleIndex = vn.getOffset().getHandleIndex();
                     hasrealsize = (vn.getSize().getType() == ConstTpl.const_type.real);
                     realsize = vn.getSize().getReal();
                 }
                 plus = vn.transfer(@params);
-                if (plus >= 0)
-                {
-                    if (!hasrealsize)
-                    {
+                if (plus >= 0) {
+                    if (!hasrealsize) {
                         reportError((Location)null, "Problem with bit range operator in macro");
                         return false;
                     }
                     ulong newtemp = slgh.getUniqueAddr(); // Generate a new temporary location
 
                     // Generate a SUBPIECE op that implements the offset_plus
-                    OpTpl* subpieceop = new OpTpl(CPUI_SUBPIECE);
-                    VarnodeTpl* newvn = new VarnodeTpl(ConstTpl(slgh.getUniqueSpace()), ConstTpl(ConstTpl.const_type.real, newtemp),
-                                   ConstTpl(ConstTpl.const_type.real, realsize));
+                    OpTpl subpieceop = new OpTpl(CPUI_SUBPIECE);
+                    VarnodeTpl newvn = new VarnodeTpl(new ConstTpl(slgh.getUniqueSpace()),
+                        new ConstTpl(ConstTpl.const_type.real, newtemp),
+                        new ConstTpl(ConstTpl.const_type.real, realsize));
                     subpieceop.setOutput(newvn);
-                    HandleTpl* hand = @params[handleIndex];
-                    VarnodeTpl* origvn = new VarnodeTpl(hand.getSpace(), hand.getPtrOffset(), hand.getSize());
+                    HandleTpl hand = @params[handleIndex];
+                    VarnodeTpl origvn = new VarnodeTpl(hand.getSpace(), hand.getPtrOffset(), hand.getSize());
                     subpieceop.addInput(origvn);
-                    VarnodeTpl* plusvn = new VarnodeTpl(ConstTpl(slgh.getConstantSpace()), ConstTpl(ConstTpl.const_type.real, plus),
-                                     ConstTpl(ConstTpl.const_type.real, 4));
+                    VarnodeTpl plusvn = new VarnodeTpl(new ConstTpl(slgh.getConstantSpace()),
+                        new ConstTpl(ConstTpl.const_type.real, plus),
+                        new ConstTpl(ConstTpl.const_type.real, 4));
                     subpieceop.addInput(plusvn);
                     outvec.Add(subpieceop);
 
-                    delete vn;        // Replace original varnode
-                    op.setInput(new VarnodeTpl(*newvn), i); // with output of subpiece
+                    // delete vn;        // Replace original varnode
+                    op.setInput(new VarnodeTpl(newvn), i); // with output of subpiece
                 }
             }
             outvec.Add(op);
@@ -95,41 +92,38 @@ namespace Sla.SLACOMP
         
         protected virtual void dump(OpTpl op)
         {
-            OpTpl* clone;
-            VarnodeTpl* v_clone,*vn;
+            OpTpl clone;
+            VarnodeTpl v_clone;
+            VarnodeTpl? vn;
 
             clone = new OpTpl(op.getOpcode());
             vn = op.getOut();
-            if (vn != (VarnodeTpl)null)
-            {
-                v_clone = new VarnodeTpl(*vn);
+            if (vn != (VarnodeTpl)null) {
+                v_clone = new VarnodeTpl(vn);
                 clone.setOutput(v_clone);
             }
-            for (int i = 0; i < op.numInput(); ++i)
-            {
+            for (int i = 0; i < op.numInput(); ++i) {
                 vn = op.getIn(i);
-                v_clone = new VarnodeTpl(*vn);
-                if (v_clone.isRelative())
-                {
+                v_clone = new VarnodeTpl(vn);
+                if (v_clone.isRelative()) {
                     // Adjust relative index, depending on the labelbase
                     ulong val = v_clone.getOffset().getReal() + getLabelBase();
                     v_clone.setRelative(val);
                 }
                 clone.addInput(v_clone);
             }
-            if (!transferOp(clone,params))
-                delete clone;
+            //if (!transferOp(clone, @params))
+            //    delete clone;
         }
 
         /// Free resources used by the builder
         private void free()
         {
-            List<HandleTpl*>::iterator iter;
+            //IEnumerator<HandleTpl> iter;
 
-            for (iter = @params.begin(); iter != @params.end(); ++iter)
-                delete* iter;
-
-            @params.clear();
+            //for (iter = @params.begin(); iter != @params.end(); ++iter)
+            //    delete* iter;
+            @params.Clear();
         }
 
         /// Report error encountered expanding the macro
@@ -143,9 +137,11 @@ namespace Sla.SLACOMP
             haserror = true;
         }
 
-        public MacroBuilder(SleighCompile sl, List<OpTpl> ovec, uint lbcnt) : PcodeBuilder(lbcnt),outvec(ovec)
+        public MacroBuilder(SleighCompile sl, List<OpTpl> ovec, uint lbcnt)
+            : PcodeBuilder(lbcnt),outvec(ovec)
         {
-            slgh = sl; haserror = false;
+            slgh = sl;
+            haserror = false;
         }
 
         ///< Establish the MACRO directive to expand
@@ -153,13 +149,10 @@ namespace Sla.SLACOMP
         /// \param macroop is the given MACRO directive op
         public void setMacroOp(OpTpl macroop)
         {
-            VarnodeTpl* vn;
-            HandleTpl* hand;
             free();
-            for (int i = 1; i < macroop.numInput(); ++i)
-            {
-                vn = macroop.getIn(i);
-                hand = new HandleTpl(vn);
+            for (int i = 1; i < macroop.numInput(); ++i) {
+                VarnodeTpl vn = macroop.getIn(i);
+                HandleTpl hand = new HandleTpl(vn);
                 @params.Add(hand);
             }
         }
@@ -171,26 +164,25 @@ namespace Sla.SLACOMP
             free();
         }
 
-        public virtual void appendBuild(OpTpl bld, int secnum)
+        public override void appendBuild(OpTpl bld, int secnum)
         {
             dump(bld);
         }
 
-        public virtual void delaySlot(OpTpl op)
+        public override void delaySlot(OpTpl op)
         {
             dump(op);
         }
 
-        public virtual void setLabel(OpTpl op)
-        { // A label within a macro is local to the macro, but when
-          // we expand the macro, we have to adjust the index of
-          // the label, which is local to the macro, so that it fits
-          // in with other labels local to the parent
-            OpTpl* clone;
-            VarnodeTpl* v_clone;
+        public override void setLabel(OpTpl op)
+        {
+            // A label within a macro is local to the macro, but when
+            // we expand the macro, we have to adjust the index of
+            // the label, which is local to the macro, so that it fits
+            // in with other labels local to the parent
 
-            clone = new OpTpl(op.getOpcode());
-            v_clone = new VarnodeTpl(*op.getIn(0)); // Clone the label index
+            OpTpl clone = new OpTpl(op.getOpcode());
+            VarnodeTpl v_clone = new VarnodeTpl(op.getIn(0)); // Clone the label index
                                                      // Make adjustment to macro local value so that it is parent local
             ulong val = v_clone.getOffset().getReal() + getLabelBase();
             v_clone.setOffset(val);
@@ -198,7 +190,7 @@ namespace Sla.SLACOMP
             outvec.Add(clone);
         }
 
-        public virtual void appendCrossBuild(OpTpl bld, int secnum)
+        public override void appendCrossBuild(OpTpl bld, int secnum)
         {
             dump(bld);
         }

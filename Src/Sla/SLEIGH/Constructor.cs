@@ -553,8 +553,8 @@ namespace Sla.SLEIGH
             {
                 string src_and_line = el.getAttributeValue("line");
                 size_t pos = src_and_line.find(":");
-                src_index = stoi(src_and_line.substr(0, pos), NULL, 10);
-                lineno = stoi(src_and_line.substr(pos + 1, src_and_line.length()), NULL, 10);
+                src_index = stoi(src_and_line.Substring(0, pos), NULL, 10);
+                lineno = stoi(src_and_line.Substring(pos + 1, src_and_line.length()), NULL, 10);
             }
             List list = el.getChildren();
             List::const_iterator iter;

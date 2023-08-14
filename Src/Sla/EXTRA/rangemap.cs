@@ -164,7 +164,8 @@ namespace Sla.EXTRA
                 return (iter != op2.iter);
             }
 
-            public typename std::list<_recordtype>::iterator getValueIter()  => (* iter).getValue();                ///< Get the \b recordtype iterator
+            /// Get the \b recordtype iterator
+            public typename IEnumerator<_recordtype> getValueIter()  => (iter).getValue();
         }
 
         // typedef PartIterator const_iterator;		///< The main sub-range iterator data-type
@@ -273,17 +274,17 @@ namespace Sla.EXTRA
         public std::pair<const_iterator, const_iterator> find(linetype a, subsorttype subsort1,
             subsorttype subsort2)
         {
-            AddrRange addrrange(point, sub1);
+            AddrRange addrrange = new AddrRange(point, sub1);
             typename std::multiset<AddrRange>::const_iterator iter1, iter2;
 
             iter1 = tree.lower_bound(addrrange);
             if ((iter1 == tree.end()) || (point < (*iter1).first))
-                return std::pair<PartIterator, PartIterator>(PartIterator(iter1), PartIterator(iter1));
+                return std::pair<PartIterator, PartIterator>(new PartIterator(iter1), new PartIterator(iter1));
 
-            AddrRange addrend((* iter1).last, sub2);
+            AddrRange addrend = new AddrRange(iter1.last, sub2);
             iter2 = tree.upper_bound(addrend);
 
-            return std::pair<PartIterator, PartIterator>(PartIterator(iter1), PartIterator(iter2));
+            return std::pair<PartIterator, PartIterator>(new PartIterator(iter1), new PartIterator(iter2));
         }
 
         /// \brief Find beginning of sub-ranges that contain the given boundary point
@@ -354,7 +355,7 @@ namespace Sla.EXTRA
             record.emplace_front(data, a, b);
             liter = record.begin();
 
-            AddrRange addrrange(b, (* liter).getSubsort());
+            AddrRange addrrange = new AddrRange(b, liter.getSubsort());
             addrrange.a = a;
             addrrange.b = b;
             addrrange.value = liter;

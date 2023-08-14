@@ -1,5 +1,6 @@
 ﻿using Sla.CORE;
 using Sla.SLEIGH;
+using System.Text;
 
 namespace Sla.SLACOMP
 {
@@ -65,25 +66,20 @@ namespace Sla.SLACOMP
         /// \param op is the p-code operator using the Varnode
         /// \param ct is the Constructor containing the p-code and operands
         /// \return the associated operand or null
-        private OperandSymbol getOperandSymbol(int slot, OpTpl op, Constructor ct)
+        private OperandSymbol? getOperandSymbol(int slot, OpTpl op, Constructor ct)
         {
-            VarnodeTpl* vn;
-            OperandSymbol* opsym;
+            OperandSymbol? opsym;
             int handindex;
 
-            if (slot == -1)
-                vn = op.getOut();
-            else
-                vn = op.getIn(slot);
+            VarnodeTpl vn = (slot == -1) ? op.getOut() : op.getIn(slot);
 
-            switch (vn.getSize().getType())
-            {
+            switch (vn.getSize().getType()) {
                 case ConstTpl.const_type.handle:
                     handindex = vn.getSize().getHandleIndex();
                     opsym = ct.getOperand(handindex);
                     break;
                 default:
-                    opsym = (OperandSymbol*)0;
+                    opsym = (OperandSymbol)null;
                     break;
             }
             return opsym;
@@ -96,205 +92,204 @@ namespace Sla.SLACOMP
         /// \param op is the operator to print
         private void printOpName(TextWriter s, OpTpl op)
         {
-            switch (op.getOpcode())
-            {
+            switch (op.getOpcode()) {
                 case OpCode.CPUI_COPY:
-                    s << "Copy(=)";
+                    s.Write("Copy(=)");
                     break;
                 case OpCode.CPUI_LOAD:
-                    s << "Load(*)";
+                    s.Write("Load(*)");
                     break;
                 case OpCode.CPUI_STORE:
-                    s << "Store(*)";
+                    s.Write("Store(*)");
                     break;
                 case OpCode.CPUI_BRANCH:
-                    s << "Branch(goto)";
+                    s.Write("Branch(goto)");
                     break;
                 case OpCode.CPUI_CBRANCH:
-                    s << "Conditional branch(if)";
+                    s.Write("Conditional branch(if)");
                     break;
                 case OpCode.CPUI_BRANCHIND:
-                    s << "Indirect branch(goto[])";
+                    s.Write("Indirect branch(goto[])");
                     break;
                 case OpCode.CPUI_CALL:
-                    s << "Call";
+                    s.Write("Call");
                     break;
                 case OpCode.CPUI_CALLIND:
-                    s << "Indirect Call";
+                    s.Write("Indirect Call");
                     break;
                 case OpCode.CPUI_CALLOTHER:
-                    s << "User defined";
+                    s.Write("User defined");
                     break;
                 case OpCode.CPUI_RETURN:
-                    s << "Return";
+                    s.Write("Return");
                     break;
                 case OpCode.CPUI_INT_EQUAL:
-                    s << "Equality(==)";
+                    s.Write("Equality(==)");
                     break;
                 case OpCode.CPUI_INT_NOTEQUAL:
-                    s << "Notequal(!=)";
+                    s.Write("Notequal(!=)");
                     break;
                 case OpCode.CPUI_INT_SLESS:
-                    s << "Signed less than(s<)";
+                    s.Write("Signed less than(s<)");
                     break;
                 case OpCode.CPUI_INT_SLESSEQUAL:
-                    s << "Signed less than or equal(s<=)";
+                    s.Write("Signed less than or equal(s<=)");
                     break;
                 case OpCode.CPUI_INT_LESS:
-                    s << "Less than(<)";
+                    s.Write("Less than(<)");
                     break;
                 case OpCode.CPUI_INT_LESSEQUAL:
-                    s << "Less than or equal(<=)";
+                    s.Write("Less than or equal(<=)");
                     break;
                 case OpCode.CPUI_INT_ZEXT:
-                    s << "Zero extension(zext)";
+                    s.Write("Zero extension(zext)");
                     break;
                 case OpCode.CPUI_INT_SEXT:
-                    s << "Signed extension(sext)";
+                    s.Write("Signed extension(sext)");
                     break;
                 case OpCode.CPUI_INT_ADD:
-                    s << "Addition(+)";
+                    s.Write("Addition(+)");
                     break;
                 case OpCode.CPUI_INT_SUB:
-                    s << "Subtraction(-)";
+                    s.Write("Subtraction(-)");
                     break;
                 case OpCode.CPUI_INT_CARRY:
-                    s << "Carry";
+                    s.Write("Carry");
                     break;
                 case OpCode.CPUI_INT_SCARRY:
-                    s << "Signed carry";
+                    s.Write("Signed carry");
                     break;
                 case OpCode.CPUI_INT_SBORROW:
-                    s << "Signed borrow";
+                    s.Write("Signed borrow");
                     break;
                 case OpCode.CPUI_INT_2COMP:
-                    s << "Twos complement(-)";
+                    s.Write("Twos complement(-)");
                     break;
                 case OpCode.CPUI_INT_NEGATE:
-                    s << "Negate(~)";
+                    s.Write("Negate(~)");
                     break;
                 case OpCode.CPUI_INT_XOR:
-                    s << "Exclusive or(^)";
+                    s.Write("Exclusive or(^)");
                     break;
                 case OpCode.CPUI_INT_AND:
-                    s << "And(&)";
+                    s.Write("And(&)");
                     break;
                 case OpCode.CPUI_INT_OR:
-                    s << "Or(|)";
+                    s.Write("Or(|)");
                     break;
                 case OpCode.CPUI_INT_LEFT:
-                    s << "Left shift(<<)";
+                    s.Write("Left shift(<<)");
                     break;
                 case OpCode.CPUI_INT_RIGHT:
-                    s << "Right shift(>>)";
+                    s.Write("Right shift(>>)");
                     break;
                 case OpCode.CPUI_INT_SRIGHT:
-                    s << "Signed right shift(s>>)";
+                    s.Write("Signed right shift(s>>)");
                     break;
                 case OpCode.CPUI_INT_MULT:
-                    s << "Multiplication(*)";
+                    s.Write("Multiplication(*)");
                     break;
                 case OpCode.CPUI_INT_DIV:
-                    s << "Division(/)";
+                    s.Write("Division(/)");
                     break;
                 case OpCode.CPUI_INT_SDIV:
-                    s << "Signed division(s/)";
+                    s.Write("Signed division(s/)");
                     break;
                 case OpCode.CPUI_INT_REM:
-                    s << "Remainder(%)";
+                    s.Write("Remainder(%)");
                     break;
                 case OpCode.CPUI_INT_SREM:
-                    s << "Signed remainder(s%)";
+                    s.Write("Signed remainder(s%)");
                     break;
                 case OpCode.CPUI_BOOL_NEGATE:
-                    s << "Boolean negate(!)";
+                    s.Write("Boolean negate(!)");
                     break;
                 case OpCode.CPUI_BOOL_XOR:
-                    s << "Boolean xor(^^)";
+                    s.Write("Boolean xor(^^)");
                     break;
                 case OpCode.CPUI_BOOL_AND:
-                    s << "Boolean and(&&)";
+                    s.Write("Boolean and(&&)");
                     break;
                 case OpCode.CPUI_BOOL_OR:
-                    s << "Boolean or(||)";
+                    s.Write("Boolean or(||)");
                     break;
                 case OpCode.CPUI_FLOAT_EQUAL:
-                    s << "Float equal(f==)";
+                    s.Write("Float equal(f==)");
                     break;
                 case OpCode.CPUI_FLOAT_NOTEQUAL:
-                    s << "Float notequal(f!=)";
+                    s.Write("Float notequal(f!=)");
                     break;
                 case OpCode.CPUI_FLOAT_LESS:
-                    s << "Float less than(f<)";
+                    s.Write("Float less than(f<)");
                     break;
                 case OpCode.CPUI_FLOAT_LESSEQUAL:
-                    s << "Float less than or equal(f<=)";
+                    s.Write("Float less than or equal(f<=)");
                     break;
                 case OpCode.CPUI_FLOAT_NAN:
-                    s << "Not a number(nan)";
+                    s.Write("Not a number(nan)");
                     break;
                 case OpCode.CPUI_FLOAT_ADD:
-                    s << "Float addition(f+)";
+                    s.Write("Float addition(f+)");
                     break;
                 case OpCode.CPUI_FLOAT_DIV:
-                    s << "Float division(f/)";
+                    s.Write("Float division(f/)");
                     break;
                 case OpCode.CPUI_FLOAT_MULT:
-                    s << "Float multiplication(f*)";
+                    s.Write("Float multiplication(f*)");
                     break;
                 case OpCode.CPUI_FLOAT_SUB:
-                    s << "Float subtractions(f-)";
+                    s.Write("Float subtractions(f-)");
                     break;
                 case OpCode.CPUI_FLOAT_NEG:
-                    s << "Float minus(f-)";
+                    s.Write("Float minus(f-)");
                     break;
                 case OpCode.CPUI_FLOAT_ABS:
-                    s << "Absolute value(abs)";
+                    s.Write("Absolute value(abs)");
                     break;
                 case OpCode.CPUI_FLOAT_SQRT:
-                    s << "Square root";
+                    s.Write("Square root");
                     break;
                 case OpCode.CPUI_FLOAT_INT2FLOAT:
-                    s << "Integer to float conversion(int2float)";
+                    s.Write("Integer to float conversion(int2float)");
                     break;
                 case OpCode.CPUI_FLOAT_FLOAT2FLOAT:
-                    s << "Float to float conversion(float2float)";
+                    s.Write("Float to float conversion(float2float)");
                     break;
                 case OpCode.CPUI_FLOAT_TRUNC:
-                    s << "Float truncation(trunc)";
+                    s.Write("Float truncation(trunc)");
                     break;
                 case OpCode.CPUI_FLOAT_CEIL:
-                    s << "Ceiling(ceil)";
+                    s.Write("Ceiling(ceil)");
                     break;
                 case OpCode.CPUI_FLOAT_FLOOR:
-                    s << "Floor";
+                    s.Write("Floor");
                     break;
                 case OpCode.CPUI_FLOAT_ROUND:
-                    s << "Round";
+                    s.Write("Round");
                     break;
                 case OpCode.CPUI_MULTIEQUAL:
-                    s << "Build";
+                    s.Write("Build");
                     break;
                 case OpCode.CPUI_INDIRECT:
-                    s << "Delay";
+                    s.Write("Delay");
                     break;
                 case OpCode.CPUI_SUBPIECE:
-                    s << "Truncation(:)";
+                    s.Write("Truncation(:)");
                     break;
                 case OpCode.CPUI_SEGMENTOP:
-                    s << "Segment table(segment)";
+                    s.Write("Segment table(segment)");
                     break;
                 case OpCode.CPUI_CPOOLREF:
-                    s << "Constant Pool(cpool)";
+                    s.Write("Constant Pool(cpool)");
                     break;
                 case OpCode.CPUI_NEW:
-                    s << "New object(newobject)";
+                    s.Write("New object(newobject)");
                     break;
                 case OpCode.CPUI_POPCOUNT:
-                    s << "Count bits(popcount)";
+                    s.Write("Count bits(popcount)");
                     break;
                 case OpCode.CPUI_LZCOUNT:
-                    s << "Count leading zero bits(lzcount)";
+                    s.Write("Count leading zero bits(lzcount)");
                     break;
                 default:
                     break;
@@ -314,31 +309,32 @@ namespace Sla.SLACOMP
         /// \param msg is additional description that is appended to the error message
         private void printOpError(OpTpl op, Constructor ct, int err1, int err2, string message)
         {
-            SubtableSymbol* sym = ct.getParent();
-            OperandSymbol* op1,*op2;
+            SubtableSymbol sym = ct.getParent();
+            OperandSymbol? op1;
+            OperandSymbol? op2;
 
             op1 = getOperandSymbol(err1, op, ct);
             if (err2 != err1)
                 op2 = getOperandSymbol(err2, op, ct);
             else
-                op2 = (OperandSymbol*)0;
+                op2 = (OperandSymbol)null;
 
-            ostringstream msgBuilder;
+            TextWriter msgBuilder = new StringBuilder();
 
-            msgBuilder << "Size restriction error in table '" << sym.getName() << "'" << endl;
-            if ((op1 != (OperandSymbol*)0) && (op2 != (OperandSymbol*)0))
-                msgBuilder << "  Problem with operands '" << op1.getName() << "' and '" << op2.getName() << "'";
-            else if (op1 != (OperandSymbol*)0)
-                msgBuilder << "  Problem with operand 1 '" << op1.getName() << "'";
-            else if (op2 != (OperandSymbol*)0)
-                msgBuilder << "  Problem with operand 2 '" << op2.getName() << "'";
+            msgBuilder.WriteLine($"Size restriction error in table '{sym.getName()}'");
+            if ((op1 != (OperandSymbol)null) && (op2 != (OperandSymbol)null))
+                msgBuilder.Write($"  Problem with operands '{op1.getName()}' and '{op2.getName()}'");
+            else if (op1 != (OperandSymbol)null)
+                msgBuilder.Write($"  Problem with operand 1 '{op1.getName()}'");
+            else if (op2 != (OperandSymbol)null)
+                msgBuilder.Write($"  Problem with operand 2 '{op2.getName()}'");
             else
-                msgBuilder << "  Problem";
-            msgBuilder << " in ";
+                msgBuilder.Write("  Problem");
+            msgBuilder.Write(" in ");
             printOpName(msgBuilder, op);
-            msgBuilder << " operator" << endl << "  " << msg;
-
-            compiler.reportError(compiler.getLocation(ct), msgBuilder.str());
+            msgBuilder.WriteLine(" operator");
+            msgBuilder.Write($"  {message}");
+            compiler.reportError(compiler.getLocation(ct), msgBuilder.ToString());
         }
 
         /// \brief Recover a specific value for the size associated with a Varnode template
@@ -355,12 +351,11 @@ namespace Sla.SLACOMP
         private int recoverSize(ConstTpl sizeconst,Constructor ct)
         {
             int size, handindex;
-            OperandSymbol* opsym;
-            SubtableSymbol* tabsym;
-            Dictionary<SubtableSymbol*, int>::const_iterator iter;
+            OperandSymbol opsym;
+            SubtableSymbol? tabsym;
+            Dictionary<SubtableSymbol, int>.Enumerator iter;
 
-            switch (sizeconst.getType())
-            {
+            switch (sizeconst.getType()) {
                 case ConstTpl.const_type.real:
                     size = (int)sizeconst.getReal();
                     break;
@@ -368,15 +363,14 @@ namespace Sla.SLACOMP
                     handindex = sizeconst.getHandleIndex();
                     opsym = ct.getOperand(handindex);
                     size = opsym.getSize();
-                    if (size == -1)
-                    {
-                        tabsym = dynamic_cast<SubtableSymbol*>(opsym.getDefiningSymbol());
+                    if (size == -1) {
+                        tabsym = opsym.getDefiningSymbol() as SubtableSymbol;
                         if (tabsym == (SubtableSymbol)null)
                             throw new SleighError("Could not recover varnode template size");
-                        iter = sizemap.find(tabsym);
-                        if (iter == sizemap.end())
+                        int result;
+                        if (!sizemap.TryGetValue(tabsym, out result))
                             throw new SleighError("Subtable out of order");
-                        size = (*iter).second;
+                        size = result;
                     }
                     break;
                 default:
@@ -393,16 +387,14 @@ namespace Sla.SLACOMP
         /// \param op is the given operator
         /// \param ct is the Constructor owning the operator
         /// \return \b false if the operator is fatally misused
-        private bool checkOpMisuse(OpTplop, Constructor ct)
+        private bool checkOpMisuse(OpTpl op, Constructor ct)
         {
-            switch (op.getOpcode())
-            {
-                case OpCode.CPUI_INT_LESS:
-                    {
-                        VarnodeTpl* vn = op.getIn(1);
-                        if (vn.getSpace().isConstSpace() && vn.getOffset().isZero())
-                        {
-                            compiler.reportWarning(compiler.getLocation(ct), "Unsigned comparison with zero is always false");
+            switch (op.getOpcode()) {
+                case OpCode.CPUI_INT_LESS: {
+                        VarnodeTpl vn = op.getIn(1);
+                        if (vn.getSpace().isConstSpace() && vn.getOffset().isZero()) {
+                            compiler.reportWarning(compiler.getLocation(ct),
+                                "Unsigned comparison with zero is always false");
                         }
                     }
                     break;
@@ -421,10 +413,11 @@ namespace Sla.SLACOMP
         /// \param ct is the Constructor owning the operator
         /// \return \b true if there are no size restriction violations
         private bool sizeRestriction(OpTpl op, Constructor ct)
-        { // Make sure op template meets size restrictions
-          // Return false and any info about mismatched sizes
+        {
+            // Make sure op template meets size restrictions
+            // Return false and any info about mismatched sizes
             int vnout, vn0, vn1;
-            AddrSpace* spc;
+            AddrSpace spc;
 
             switch (op.getOpcode())
             {
@@ -438,14 +431,12 @@ namespace Sla.SLACOMP
                 case OpCode.CPUI_FLOAT_FLOOR:
                 case OpCode.CPUI_FLOAT_ROUND:
                     vnout = recoverSize(op.getOut().getSize(), ct);
-                    if (vnout == -1)
-                    {
+                    if (vnout == -1) {
                         printOpError(op, ct, -1, -1, "Using subtable with exports in expression");
                         return false;
                     }
                     vn0 = recoverSize(op.getIn(0).getSize(), ct);
-                    if (vn0 == -1)
-                    {
+                    if (vn0 == -1) {
                         printOpError(op, ct, 0, 0, "Using subtable with exports in expression");
                         return false;
                     }
@@ -468,48 +459,40 @@ namespace Sla.SLACOMP
                 case OpCode.CPUI_FLOAT_MULT:
                 case OpCode.CPUI_FLOAT_SUB:
                     vnout = recoverSize(op.getOut().getSize(), ct);
-                    if (vnout == -1)
-                    {
+                    if (vnout == -1) {
                         printOpError(op, ct, -1, -1, "Using subtable with exports in expression");
                         return false;
                     }
                     vn0 = recoverSize(op.getIn(0).getSize(), ct);
-                    if (vn0 == -1)
-                    {
+                    if (vn0 == -1) {
                         printOpError(op, ct, 0, 0, "Using subtable with exports in expression");
                         return false;
                     }
                     vn1 = recoverSize(op.getIn(1).getSize(), ct);
-                    if (vn1 == -1)
-                    {
+                    if (vn1 == -1) {
                         printOpError(op, ct, 1, 1, "Using subtable with exports in expression");
                         return false;
                     }
-                    if ((vnout != 0) && (vn0 != 0) && (vnout != vn0))
-                    {
+                    if ((vnout != 0) && (vn0 != 0) && (vnout != vn0)) {
                         printOpError(op, ct, -1, 0, "The output and all input sizes must match");
                         return false;
                     }
-                    if ((vnout != 0) && (vn1 != 0) && (vnout != vn1))
-                    {
+                    if ((vnout != 0) && (vn1 != 0) && (vnout != vn1)) {
                         printOpError(op, ct, -1, 1, "The output and all input sizes must match");
                         return false;
                     }
-                    if ((vn0 != 0) && (vn1 != 0) && (vn0 != vn1))
-                    {
+                    if ((vn0 != 0) && (vn1 != 0) && (vn0 != vn1)) {
                         printOpError(op, ct, 0, 1, "The output and all input sizes must match");
                         return false;
                     }
                     return true;
                 case OpCode.CPUI_FLOAT_NAN:
                     vnout = recoverSize(op.getOut().getSize(), ct);
-                    if (vnout == -1)
-                    {
+                    if (vnout == -1) {
                         printOpError(op, ct, -1, -1, "Using subtable with exports in expression");
                         return false;
                     }
-                    if (vnout != 1)
-                    {
+                    if (vnout != 1) {
                         printOpError(op, ct, -1, -1, "Output must be a boolean (size 1)");
                         return false;
                     }
@@ -528,31 +511,26 @@ namespace Sla.SLACOMP
                 case OpCode.CPUI_FLOAT_LESS:
                 case OpCode.CPUI_FLOAT_LESSEQUAL:
                     vnout = recoverSize(op.getOut().getSize(), ct);
-                    if (vnout == -1)
-                    {
+                    if (vnout == -1) {
                         printOpError(op, ct, -1, -1, "Using subtable with exports in expression");
                         return false;
                     }
-                    if (vnout != 1)
-                    {
+                    if (vnout != 1) {
                         printOpError(op, ct, -1, -1, "Output must be a boolean (size 1)");
                         return false;
                     }
                     vn0 = recoverSize(op.getIn(0).getSize(), ct);
-                    if (vn0 == -1)
-                    {
+                    if (vn0 == -1) {
                         printOpError(op, ct, 0, 0, "Using subtable with exports in expression");
                         return false;
                     }
                     vn1 = recoverSize(op.getIn(1).getSize(), ct);
-                    if (vn1 == -1)
-                    {
+                    if (vn1 == -1) {
                         printOpError(op, ct, 1, 1, "Using subtable with exports in expression");
                         return false;
                     }
                     if ((vn0 == 0) || (vn1 == 0)) return true;
-                    if (vn0 != vn1)
-                    {
+                    if (vn0 != vn1) {
                         printOpError(op, ct, 0, 1, "Inputs must be the same size");
                         return false;
                     }
@@ -561,48 +539,40 @@ namespace Sla.SLACOMP
                 case OpCode.CPUI_BOOL_AND:
                 case OpCode.CPUI_BOOL_OR:
                     vnout = recoverSize(op.getOut().getSize(), ct);
-                    if (vnout == -1)
-                    {
+                    if (vnout == -1) {
                         printOpError(op, ct, -1, -1, "Using subtable with exports in expression");
                         return false;
                     }
-                    if (vnout != 1)
-                    {
+                    if (vnout != 1) {
                         printOpError(op, ct, -1, -1, "Output must be a boolean (size 1)");
                         return false;
                     }
                     vn0 = recoverSize(op.getIn(0).getSize(), ct);
-                    if (vn0 == -1)
-                    {
+                    if (vn0 == -1) {
                         printOpError(op, ct, 0, 0, "Using subtable with exports in expression");
                         return false;
                     }
-                    if (vn0 != 1)
-                    {
+                    if (vn0 != 1) {
                         printOpError(op, ct, 0, 0, "Input must be a boolean (size 1)");
                         return false;
                     }
                     return true;
                 case OpCode.CPUI_BOOL_NEGATE:
                     vnout = recoverSize(op.getOut().getSize(), ct);
-                    if (vnout == -1)
-                    {
+                    if (vnout == -1) {
                         printOpError(op, ct, -1, -1, "Using subtable with exports in expression");
                         return false;
                     }
-                    if (vnout != 1)
-                    {
+                    if (vnout != 1) {
                         printOpError(op, ct, -1, -1, "Output must be a boolean (size 1)");
                         return false;
                     }
                     vn0 = recoverSize(op.getIn(0).getSize(), ct);
-                    if (vn0 == -1)
-                    {
+                    if (vn0 == -1) {
                         printOpError(op, ct, 0, 0, "Using subtable with exports in expression");
                         return false;
                     }
-                    if (vn0 != 1)
-                    {
+                    if (vn0 != 1) {
                         printOpError(op, ct, 0, 0, "Input must be a boolean (size 1)");
                         return false;
                     }
@@ -613,20 +583,17 @@ namespace Sla.SLACOMP
                 case OpCode.CPUI_INT_RIGHT:
                 case OpCode.CPUI_INT_SRIGHT:
                     vnout = recoverSize(op.getOut().getSize(), ct);
-                    if (vnout == -1)
-                    {
+                    if (vnout == -1) {
                         printOpError(op, ct, -1, -1, "Using subtable with exports in expression");
                         return false;
                     }
                     vn0 = recoverSize(op.getIn(0).getSize(), ct);
-                    if (vn0 == -1)
-                    {
+                    if (vn0 == -1) {
                         printOpError(op, ct, 0, 0, "Using subtable with exports in expression");
                         return false;
                     }
                     if ((vnout == 0) || (vn0 == 0)) return true;
-                    if (vnout != vn0)
-                    {
+                    if (vnout != vn0) {
                         printOpError(op, ct, -1, 0, "Output and first input must be the same size");
                         return false;
                     }
@@ -634,38 +601,32 @@ namespace Sla.SLACOMP
                 case OpCode.CPUI_INT_ZEXT:
                 case OpCode.CPUI_INT_SEXT:
                     vnout = recoverSize(op.getOut().getSize(), ct);
-                    if (vnout == -1)
-                    {
+                    if (vnout == -1) {
                         printOpError(op, ct, -1, -1, "Using subtable with exports in expression");
                         return false;
                     }
                     vn0 = recoverSize(op.getIn(0).getSize(), ct);
-                    if (vn0 == -1)
-                    {
+                    if (vn0 == -1) {
                         printOpError(op, ct, 0, 0, "Using subtable with exports in expression");
                         return false;
                     }
                     if ((vnout == 0) || (vn0 == 0)) return true;
-                    if (vnout == vn0)
-                    {
+                    if (vnout == vn0) {
                         dealWithUnnecessaryExt(op, ct);
                         return true;
                     }
-                    else if (vnout < vn0)
-                    {
+                    else if (vnout < vn0) {
                         printOpError(op, ct, -1, 0, "Output size must be strictly bigger than input size");
                         return false;
                     }
                     return true;
                 case OpCode.CPUI_CBRANCH:
                     vn1 = recoverSize(op.getIn(1).getSize(), ct);
-                    if (vn1 == -1)
-                    {
+                    if (vn1 == -1) {
                         printOpError(op, ct, 1, 1, "Using subtable with exports in expression");
                         return false;
                     }
-                    if (vn1 != 1)
-                    {
+                    if (vn1 != 1) {
                         printOpError(op, ct, 1, 1, "Input must be a boolean (size 1)");
                         return false;
                     }
@@ -676,44 +637,38 @@ namespace Sla.SLACOMP
                         return true;
                     spc = op.getIn(0).getOffset().getSpace();
                     vn1 = recoverSize(op.getIn(1).getSize(), ct);
-                    if (vn1 == -1)
-                    {
+                    if (vn1 == -1) {
                         printOpError(op, ct, 1, 1, "Using subtable with exports in expression");
                         return false;
                     }
-                    if ((vn1 != 0) && (vn1 != spc.getAddrSize()))
-                    {
+                    if ((vn1 != 0) && (vn1 != spc.getAddrSize())) {
                         printOpError(op, ct, 1, 1, "Pointer size must match size of space");
                         return false;
                     }
                     return true;
                 case OpCode.CPUI_SUBPIECE:
                     vnout = recoverSize(op.getOut().getSize(), ct);
-                    if (vnout == -1)
-                    {
+                    if (vnout == -1) {
                         printOpError(op, ct, -1, -1, "Using subtable with exports in expression");
                         return false;
                     }
                     vn0 = recoverSize(op.getIn(0).getSize(), ct);
-                    if (vn0 == -1)
-                    {
+                    if (vn0 == -1) {
                         printOpError(op, ct, 0, 0, "Using subtable with exports in expression");
                         return false;
                     }
                     vn1 = op.getIn(1).getOffset().getReal();
                     if ((vnout == 0) || (vn0 == 0)) return true;
-                    if ((vnout == vn0) && (vn1 == 0))
-                    { // No actual truncation is occuring
+                    if ((vnout == vn0) && (vn1 == 0)) {
+                        // No actual truncation is occuring
                         dealWithUnnecessaryTrunc(op, ct);
                         return true;
                     }
-                    else if (vnout >= vn0)
-                    {
+                    else if (vnout >= vn0) {
                         printOpError(op, ct, -1, 0, "Output must be strictly smaller than input");
                         return false;
                     }
-                    if (vnout > vn0 - vn1)
-                    {
+                    if (vnout > vn0 - vn1) {
                         printOpError(op, ct, -1, 0, "Too much truncation");
                         return false;
                     }
@@ -736,15 +691,13 @@ namespace Sla.SLACOMP
         {
             if (cttpl == (ConstructTpl)null)
                 return true;        // Nothing to check
-            List<OpTpl*>::const_iterator iter;
             List<OpTpl> ops = cttpl.getOpvec();
             bool testresult = true;
 
-            for (iter = ops.begin(); iter != ops.end(); ++iter)
-            {
-                if (!sizeRestriction(*iter, ct))
+            foreach (OpTpl template in ops) {
+                if (!sizeRestriction(template, ct))
                     testresult = false;
-                if (!checkOpMisuse(*iter, ct))
+                if (!checkOpMisuse(template, ct))
                     testresult = false;
             }
             return testresult;
@@ -762,8 +715,7 @@ namespace Sla.SLACOMP
             if ((@out != (VarnodeTpl)null) && isTemporaryAndTooBig(@out)) {
                 return true;
             }
-            for (int i = 0; i < op.numInput(); ++i)
-            {
+            for (int i = 0; i < op.numInput(); ++i) {
                 VarnodeTpl @in = op.getIn(i);
                 if (isTemporaryAndTooBig(@in)) {
                     return true;
@@ -780,7 +732,7 @@ namespace Sla.SLACOMP
         /// \return \b true if the Varnode is a too large temporary register
         private bool isTemporaryAndTooBig(VarnodeTpl vn)
         {
-            return vn.getSpace().isUniqueSpace() && (vn.getSize().getReal() > SleighBase::MAX_UNIQUE_SIZE);
+            return vn.getSpace().isUniqueSpace() && (vn.getSize().getReal() > SleighBase.MAX_UNIQUE_SIZE);
         }
 
         /// \brief Resolve the offset of the given \b truncated Varnode
@@ -801,22 +753,19 @@ namespace Sla.SLACOMP
         {
             ConstTpl off = vn.getOffset();
             if (off.getType() != ConstTpl.const_type.handle) return true;
-            if (off.getSelect() != ConstTpl::v_offset_plus) return true;
-            ConstTpl::const_type sztype = vn.getSize().getType();
-            if ((sztype != ConstTpl.const_type.real) && (sztype != ConstTpl.const_type.handle))
-            {
+            if (off.getSelect() != ConstTpl.v_field.v_offset_plus) return true;
+            ConstTpl.const_type sztype = vn.getSize().getType();
+            if ((sztype != ConstTpl.const_type.real) && (sztype != ConstTpl.const_type.handle)) {
                 printOpError(op, ct, slot, slot, "Bad truncation expression");
                 return false;
             }
             int sz = recoverSize(off, ct); // Recover the size of the original operand
-            if (sz <= 0)
-            {
+            if (sz <= 0) {
                 printOpError(op, ct, slot, slot, "Could not recover size");
                 return false;
             }
             bool res = vn.adjustTruncation(sz, isbigendian);
-            if (!res)
-            {
+            if (!res) {
                 printOpError(op, ct, slot, slot, "Truncation operator out of bounds");
                 return false;
             }
@@ -834,21 +783,17 @@ namespace Sla.SLACOMP
         /// \return \b true if all truncation expressions were valid
         private bool checkSectionTruncations(Constructor ct, ConstructTpl cttpl, bool isbigendian)
         {
-            List<OpTpl*>::const_iterator iter;
+            IEnumerator<OpTpl> iter;
             List<OpTpl> ops = cttpl.getOpvec();
             bool testresult = true;
 
-            for (iter = ops.begin(); iter != ops.end(); ++iter)
-            {
-                OpTpl* op = *iter;
-                VarnodeTpl* outvn = op.getOut();
-                if (outvn != (VarnodeTpl)null)
-                {
+            foreach (OpTpl op in ops) {
+                VarnodeTpl? outvn = op.getOut();
+                if (outvn != (VarnodeTpl)null) {
                     if (!checkVarnodeTruncation(ct, -1, op, outvn, isbigendian))
                         testresult = false;
                 }
-                for (int i = 0; i < op.numInput(); ++i)
-                {
+                for (int i = 0; i < op.numInput(); ++i) {
                     if (!checkVarnodeTruncation(ct, i, op, op.getIn(i), isbigendian))
                         testresult = false;
                 }
@@ -867,66 +812,52 @@ namespace Sla.SLACOMP
         {
             int tablesize = -1;
             int numconstruct = sym.getNumConstructors();
-            Constructor* ct;
+            Constructor ct;
             bool testresult = true;
             bool seenemptyexport = false;
             bool seennonemptyexport = false;
 
-            for (int i = 0; i < numconstruct; ++i)
-            {
+            for (int i = 0; i < numconstruct; ++i) {
                 ct = sym.getConstructor(i);
                 if (!checkConstructorSection(ct, ct.getTempl()))
                     testresult = false;
                 int numsection = ct.getNumSections();
-                for (int j = 0; j < numsection; ++j)
-                {
+                for (int j = 0; j < numsection; ++j) {
                     if (!checkConstructorSection(ct, ct.getNamedTempl(j)))
                         testresult = false;
                 }
 
                 if (ct.getTempl() == (ConstructTpl)null) continue;   // Unimplemented
-                HandleTpl* exportres = ct.getTempl().getResult();
-                if (exportres != (HandleTpl)null)
-                {
-                    if (seenemptyexport && (!seennonemptyexport))
-                    {
-                        ostringstream msg;
-                        msg << "Table '" << sym.getName() << "' exports inconsistently; ";
-                        msg << "Constructor starting at line " << dec << ct.getLineno() << " is first inconsistency";
-                        compiler.reportError(compiler.getLocation(ct), msg.str());
+                HandleTpl? exportres = ct.getTempl().getResult();
+                if (exportres != (HandleTpl)null) {
+                    if (seenemptyexport && (!seennonemptyexport)) {
+                        compiler.reportError(compiler.getLocation(ct),
+                            $"Table '{sym.getName()}' exports inconsistently; Constructor starting at line [ct.getLineno()} is first inconsistency");
                         testresult = false;
                     }
                     seennonemptyexport = true;
                     int exsize = recoverSize(exportres.getSize(), ct);
                     if (tablesize == -1)
                         tablesize = exsize;
-                    if (exsize != tablesize)
-                    {
-                        ostringstream msg;
-                        msg << "Table '" << sym.getName() << "' has inconsistent export size; ";
-                        msg << "Constructor starting at line " << dec << ct.getLineno() << " is first conflict";
-                        compiler.reportError(compiler.getLocation(ct), msg.str());
+                    if (exsize != tablesize) {
+                        compiler.reportError(compiler.getLocation(ct),
+                            $"Table '{sym.getName()}' has inconsistent export size; Constructor starting at line {ct.getLineno()} is first conflict");
                         testresult = false;
                     }
                 }
-                else
-                {
-                    if (seennonemptyexport && (!seenemptyexport))
-                    {
-                        ostringstream msg;
-                        msg << "Table '" << sym.getName() << "' exports inconsistently; ";
-                        msg << "Constructor starting at line " << dec << ct.getLineno() << " is first inconsistency";
-                        compiler.reportError(compiler.getLocation(ct), msg.str());
+                else {
+                    if (seennonemptyexport && (!seenemptyexport)) {
+                        compiler.reportError(compiler.getLocation(ct),
+                            $"Table '{sym.getName()}' exports inconsistently; Constructor starting at line {ct.getLineno()} is first inconsistency");
                         testresult = false;
                     }
                     seenemptyexport = true;
                 }
             }
-            if (seennonemptyexport)
-            {
-                if (tablesize == 0)
-                {
-                    compiler.reportWarning(compiler.getLocation(sym), "Table '" + sym.getName() + "' exports size 0");
+            if (seennonemptyexport) {
+                if (tablesize == 0) {
+                    compiler.reportWarning(compiler.getLocation(sym),
+                        $"Table '{sym.getName()}' exports size 0");
                 }
                 sizemap[sym] = tablesize;   // Remember recovered size
             }
@@ -945,12 +876,11 @@ namespace Sla.SLACOMP
         /// \param ct is the Constructor containing the operator
         private void dealWithUnnecessaryExt(OpTpl op, Constructor ct)
         {
-            if (printextwarning)
-            {
-                ostringstream msg;
-                msg << "Unnecessary ";
+            if (printextwarning) {
+                TextWriter msg = new StringWriter();
+                msg.Write("Unnecessary ");
                 printOpName(msg, op);
-                compiler.reportWarning(compiler.getLocation(ct), msg.str());
+                compiler.reportWarning(compiler.getLocation(ct), msg.ToString());
             }
             op.setOpcode(OpCode.CPUI_COPY);   // Equivalent to copy
             unnecessarypcode += 1;
@@ -965,12 +895,11 @@ namespace Sla.SLACOMP
         /// \param ct is the containing Constructor
         private void dealWithUnnecessaryTrunc(OpTpl op, Constructor ct)
         {
-            if (printextwarning)
-            {
-                ostringstream msg;
-                msg << "Unnecessary ";
+            if (printextwarning) {
+                TextWriter msg = new StringWriter();
+                msg.Write("Unnecessary ");
                 printOpName(msg, op);
-                compiler.reportWarning(compiler.getLocation(ct), msg.str());
+                compiler.reportWarning(compiler.getLocation(ct), msg.ToString());
             }
             op.setOpcode(OpCode.CPUI_COPY);   // Equivalent to copy
             op.removeInput(1);
@@ -986,49 +915,42 @@ namespace Sla.SLACOMP
         /// \param root is the root subtable
         private void setPostOrder(SubtableSymbol root)
         {
-            postorder.clear();
-            sizemap.clear();
+            postorder.Clear();
+            sizemap.Clear();
 
-            List<SubtableSymbol*> path;
-            List<int> state;
-            List<int> ctstate;
+            List<SubtableSymbol> path = new List<SubtableSymbol>();
+            List<int> state = new List<int>();
+            List<int> ctstate = new List<int>();
 
             sizemap[root] = -1;     // Mark root as traversed
             path.Add(root);
             state.Add(0);
             ctstate.Add(0);
 
-            while (!path.empty())
-            {
-                SubtableSymbol* cur = path.GetLastItem();
+            while (!path.empty()) {
+                SubtableSymbol cur = path.GetLastItem();
                 int ctind = state.GetLastItem();
-                if (ctind >= cur.getNumConstructors())
-                {
+                if (ctind >= cur.getNumConstructors()) {
                     path.RemoveLastItem();        // Table is fully traversed
                     state.RemoveLastItem();
                     ctstate.RemoveLastItem();
                     postorder.Add(cur);   // Post the traversed table
                 }
-                else
-                {
-                    Constructor* ct = cur.getConstructor(ctind);
+                else {
+                    Constructor ct = cur.getConstructor(ctind);
                     int oper = ctstate.GetLastItem();
-                    if (oper >= ct.getNumOperands())
-                    {
-                        state.GetLastItem() = ctind + 1; // Constructor fully traversed
-                        ctstate.GetLastItem() = 0;
+                    if (oper >= ct.getNumOperands()) {
+                        state.SetLastItem(ctind + 1); // Constructor fully traversed
+                        ctstate.SetLastItem(0);
                     }
-                    else
-                    {
-                        ctstate.GetLastItem() = oper + 1;
-                        OperandSymbol* opsym = ct.getOperand(oper);
-                        SubtableSymbol* subsym = dynamic_cast<SubtableSymbol*>(opsym.getDefiningSymbol());
-                        if (subsym != (SubtableSymbol)null)
-                        {
-                            Dictionary<SubtableSymbol*, int>::const_iterator iter;
-                            iter = sizemap.find(subsym);
-                            if (iter == sizemap.end())
-                            { // Not traversed yet
+                    else {
+                        ctstate.SetLastItem(oper + 1);
+                        OperandSymbol opsym = ct.getOperand(oper);
+                        SubtableSymbol? subsym = opsym.getDefiningSymbol() as SubtableSymbol;
+                        if (subsym != (SubtableSymbol)null) {
+                            int result;
+                            if (!sizemap.TryGetValue(subsym, out result)) {
+                                // Not traversed yet
                                 sizemap[subsym] = -1; // Mark table as traversed
                                 path.Add(subsym); // Recurse
                                 state.Add(0);
@@ -1058,16 +980,15 @@ namespace Sla.SLACOMP
             if (vn.getOffset().getType() != ConstTpl.const_type.real) return;
 
             Dictionary<ulong, OptimizeRecord>::iterator iter;
-            iter = recs.insert(pair<uint, OptimizeRecord>(vn.getOffset().getReal(), OptimizeRecord())).first;
-            if (inslot >= 0)
-            {
+            OptimizeRecord newRecord = new OptimizeRecord();
+            iter = recs.insert(pair<uint, OptimizeRecord>(vn.getOffset().getReal(), newRecord)).first;
+            if (inslot >= 0) {
                 (*iter).second.readop = i;
                 (*iter).second.readcount += 1;
                 (*iter).second.inslot = inslot;
                 (*iter).second.readsection = secnum;
             }
-            else
-            {
+            else {
                 (*iter).second.writeop = i;
                 (*iter).second.writecount += 1;
                 (*iter).second.writesection = secnum;
@@ -1082,7 +1003,8 @@ namespace Sla.SLACOMP
         /// \param vn2 is the second Varnode to check
         /// \return \b true if there is a possible intersection of the Varnodes' storage
         private static bool possibleIntersection(VarnodeTpl vn1, VarnodeTpl vn2)
-        { // Conservatively test whether vn1 and vn2 can intersect
+        {
+            // Conservatively test whether vn1 and vn2 can intersect
             if (vn1.getSpace().isConstSpace()) return false;
             if (vn2.getSpace().isConstSpace()) return false;
 
@@ -1093,7 +1015,7 @@ namespace Sla.SLACOMP
 
             if (vn1.getSpace().getType() != ConstTpl.const_type.spaceid) return true;
             if (vn2.getSpace().getType() != ConstTpl.const_type.spaceid) return true;
-            AddrSpace* spc = vn1.getSpace().getSpace();
+            AddrSpace spc = vn1.getSpace().getSpace();
             if (spc != vn2.getSpace().getSpace()) return false;
 
 
@@ -1124,8 +1046,7 @@ namespace Sla.SLACOMP
         /// \return \b true if there is write (or read) interference
         private bool readWriteInterference(VarnodeTpl vn, OpTpl op,bool checkread)
         {
-            switch (op.getOpcode())
-            {
+            switch (op.getOpcode()) {
                 case BUILD:
                 case CROSSBUILD:
                 case DELAY_SLOT:
@@ -1145,8 +1066,7 @@ namespace Sla.SLACOMP
                     break;
             }
 
-            if (checkread)
-            {
+            if (checkread) {
                 int numinputs = op.numInput();
                 for (int i = 0; i < numinputs; ++i)
                     if (possibleIntersection(vn, op.getIn(i)))
@@ -1154,7 +1074,7 @@ namespace Sla.SLACOMP
             }
 
             // We always check for writes to -vn-
-            VarnodeTpl vn2 = op.getOut();
+            VarnodeTpl? vn2 = op.getOut();
             if (vn2 != (VarnodeTpl)null) {
                 if (possibleIntersection(vn, vn2))
                     return true;
@@ -1171,19 +1091,13 @@ namespace Sla.SLACOMP
         /// \param secnum is the given p-code section number
         private void optimizeGather1(Constructor ct, Dictionary<ulong, OptimizeRecord> recs, int secnum)
         {
-            ConstructTpl* tpl;
-            if (secnum < 0)
-                tpl = ct.getTempl();
-            else
-                tpl = ct.getNamedTempl(secnum);
+            ConstructTpl? tpl = (secnum < 0) ? ct.getTempl() : ct.getNamedTempl(secnum);
             if (tpl == (ConstructTpl)null)
                 return;
             List<OpTpl> ops = tpl.getOpvec();
-            for (uint i = 0; i < ops.size(); ++i)
-            {
+            for (uint i = 0; i < ops.size(); ++i) {
                 OpTpl op = ops[i];
-                for (uint j = 0; j < op.numInput(); ++j)
-                {
+                for (int j = 0; j < op.numInput(); ++j) {
                     VarnodeTpl vnin = op.getIn(j);
                     examineVn(recs, vnin, i, j, secnum);
                 }
@@ -1202,19 +1116,13 @@ namespace Sla.SLACOMP
         /// \param secnum is the given p-code section number
         private void optimizeGather2(Constructor ct, Dictionary<ulong, OptimizeRecord> recs, int secnum)
         {
-            ConstructTpl* tpl;
-            if (secnum < 0)
-                tpl = ct.getTempl();
-            else
-                tpl = ct.getNamedTempl(secnum);
+            ConstructTpl? tpl = (secnum < 0) ? ct.getTempl() : ct.getNamedTempl(secnum);
             if (tpl == (ConstructTpl)null)
                 return;
-            HandleTpl* hand = tpl.getResult();
+            HandleTpl? hand = tpl.getResult();
             if (hand == (HandleTpl)null) return;
-            if (hand.getPtrSpace().isUniqueSpace())
-            {
-                if (hand.getPtrOffset().getType() == ConstTpl.const_type.real)
-                {
+            if (hand.getPtrSpace().isUniqueSpace()) {
+                if (hand.getPtrOffset().getType() == ConstTpl.const_type.real) {
                     pair<Dictionary<ulong, OptimizeRecord>::iterator, bool> res;
                     ulong offset = hand.getPtrOffset().getReal();
                     res = recs.insert(pair<ulong, OptimizeRecord>(offset, OptimizeRecord()));
@@ -1226,10 +1134,9 @@ namespace Sla.SLACOMP
                     (*res.first).second.writesection = -2;
                 }
             }
-            if (hand.getSpace().isUniqueSpace())
-            {
-                if ((hand.getPtrSpace().getType() == ConstTpl.const_type.real) &&
-                (hand.getPtrOffset().getType() == ConstTpl.const_type.real))
+            if (hand.getSpace().isUniqueSpace()) {
+                if (   (hand.getPtrSpace().getType() == ConstTpl.const_type.real)
+                    && (hand.getPtrOffset().getType() == ConstTpl.const_type.real))
                 {
                     pair<Dictionary<ulong, OptimizeRecord>::iterator, bool> res;
                     ulong offset = hand.getPtrOffset().getReal();
@@ -1255,62 +1162,53 @@ namespace Sla.SLACOMP
         /// \param ct is the Constructor owning the p-code
         /// \param recs is the collection of OptimizeRecords to search
         /// \return a passing OptimizeRecord or null
-        private OptimizeRecord findValidRule(Constructor ct, Dictionary<ulong, OptimizeRecord> recs)
+        private OptimizeRecord? findValidRule(Constructor ct, Dictionary<ulong, OptimizeRecord> recs)
         {
-            Dictionary<ulong, OptimizeRecord>::const_iterator iter;
-            iter = recs.begin();
-            while (iter != recs.end())
-            {
-                OptimizeRecord currec = (*iter).second;
-                ++iter;
-                if ((currec.writecount == 1) && (currec.readcount == 1) && (currec.readsection == currec.writesection))
+            foreach (OptimizeRecord currec in recs.Values) {
+                if (   (currec.writecount == 1)
+                    && (currec.readcount == 1)
+                    && (currec.readsection == currec.writesection))
                 {
                     // Temporary must be read and written exactly once
-                    ConstructTpl* tpl;
-                    if (currec.readsection < 0)
-                        tpl = ct.getTempl();
-                    else
-                        tpl = ct.getNamedTempl(currec.readsection);
+                    ConstructTpl tpl = (currec.readsection < 0)
+                        ? ct.getTempl()
+                        : ct.getNamedTempl(currec.readsection);
                     List<OpTpl> ops = tpl.getOpvec();
                     OpTpl op = ops[currec.readop];
                     if (currec.writeop >= currec.readop) // Read must come after write
                         throw new SleighError("Read of temporary before write");
-                    if (op.getOpcode() == OpCode.CPUI_COPY)
-                    {
+                    if (op.getOpcode() == OpCode.CPUI_COPY) {
                         bool saverecord = true;
                         currec.opttype = 0; // Read op is a COPY
                         VarnodeTpl vn = op.getOut();
-                        for (int i = currec.writeop + 1; i < currec.readop; ++i)
-                        { // Check for interference between write and read
-                            if (readWriteInterference(vn, ops[i], true))
-                            {
+                        for (int i = currec.writeop + 1; i < currec.readop; ++i) {
+                            // Check for interference between write and read
+                            if (readWriteInterference(vn, ops[i], true)) {
                                 saverecord = false;
                                 break;
                             }
                         }
                         if (saverecord)
-                            return &currec;
+                            return currec;
                     }
                     op = ops[currec.writeop];
-                    if (op.getOpcode() == OpCode.CPUI_COPY)
-                    {
+                    if (op.getOpcode() == OpCode.CPUI_COPY) {
                         bool saverecord = true;
                         currec.opttype = 1; // Write op is a COPY
                         VarnodeTpl vn = op.getIn(0);
-                        for (int i = currec.writeop + 1; i < currec.readop; ++i)
-                        { // Check for interference between write and read
-                            if (readWriteInterference(vn, ops[i], false))
-                            {
+                        for (int i = currec.writeop + 1; i < currec.readop; ++i) {
+                            // Check for interference between write and read
+                            if (readWriteInterference(vn, ops[i], false)) {
                                 saverecord = false;
                                 break;
                             }
                         }
                         if (saverecord)
-                            return &currec;
+                            return currec;
                     }
                 }
             }
-            return (OptimizeRecord*)0;
+            return (OptimizeRecord)null;
         }
 
         /// \brief Remove an extraneous COPY going through a temporary Varnode
@@ -1325,26 +1223,22 @@ namespace Sla.SLACOMP
         /// \param rec is record describing the temporary and its read/write operators
         private void applyOptimization(Constructor ct, OptimizeRecord rec)
         {
-            List<int> deleteops;
-            ConstructTpl* ctempl;
-            if (rec.readsection < 0)
-                ctempl = ct.getTempl();
-            else
-                ctempl = ct.getNamedTempl(rec.readsection);
+            List<int> deleteops = new List<int>();
+            ConstructTpl ctempl = (rec.readsection < 0) ? ct.getTempl() : ct.getNamedTempl(rec.readsection);
 
-            if (rec.opttype == 0)
-            { // If read op is COPY
+            if (rec.opttype == 0) {
+                // If read op is COPY
                 int readop = rec.readop;
-                OpTpl* op = ctempl.getOpvec()[readop];
-                VarnodeTpl* vnout = new VarnodeTpl(*op.getOut()); // Make COPY output
+                OpTpl op = ctempl.getOpvec()[readop];
+                VarnodeTpl vnout = new VarnodeTpl(op.getOut()); // Make COPY output
                 ctempl.setOutput(vnout, rec.writeop); // become write output
                 deleteops.Add(readop); // and then delete the read (COPY)
             }
-            else if (rec.opttype == 1)
-            { // If write op is COPY
+            else if (rec.opttype == 1) {
+                // If write op is COPY
                 int writeop = rec.writeop;
-                OpTpl* op = ctempl.getOpvec()[writeop];
-                VarnodeTpl* vnin = new VarnodeTpl(*op.getIn(0));   // Make COPY input
+                OpTpl op = ctempl.getOpvec()[writeop];
+                VarnodeTpl vnin = new VarnodeTpl(op.getIn(0));   // Make COPY input
                 ctempl.setInput(vnin, rec.readop, rec.inslot); // become read input
                 deleteops.Add(writeop); // and then delete the write (COPY)
             }
@@ -1359,23 +1253,16 @@ namespace Sla.SLACOMP
         /// \param recs is the collection of records associated with each temporary Varnode
         private void checkUnusedTemps(Constructor ct, Dictionary<ulong, OptimizeRecord> recs)
         {
-            Dictionary<ulong, OptimizeRecord>::const_iterator iter;
-            iter = recs.begin();
-            while (iter != recs.end())
-            {
-                OptimizeRecord currec = (*iter).second;
-                if (currec.readcount == 0)
-                {
+            foreach (OptimizeRecord currec in recs.Values) {
+                if (currec.readcount == 0) {
                     if (printdeadwarning)
                         compiler.reportWarning(compiler.getLocation(ct), "Temporary is written but not read");
                     writenoread += 1;
                 }
-                else if (currec.writecount == 0)
-                {
+                else if (currec.writecount == 0) {
                     compiler.reportError(compiler.getLocation(ct), "Temporary is read but not written");
                     readnowrite += 1;
                 }
-                ++iter;
             }
         }
 
@@ -1388,16 +1275,13 @@ namespace Sla.SLACOMP
         /// \param ctpl is the specific p-code section
         private void checkLargeTemporaries(Constructor ct, ConstructTpl ctpl)
         {
-            List<OpTpl*> ops = ctpl.getOpvec();
-            for (List<OpTpl*>::iterator iter = ops.begin(); iter != ops.end(); ++iter)
-            {
-                if (hasLargeTemporary(*iter))
-                {
-                    if (printlargetempwarning)
-                    {
+            List<OpTpl> ops = ctpl.getOpvec();
+            foreach (OpTpl op in ops) {
+                if (hasLargeTemporary(op)) {
+                    if (printlargetempwarning) {
                         compiler.reportWarning(
                             compiler.getLocation(ct),
-                            "Constructor uses temporary varnode larger than " + to_string(SleighBase::MAX_UNIQUE_SIZE) + " bytes.");
+                            $"Constructor uses temporary varnode larger than {SleighBase.MAX_UNIQUE_SIZE} bytes.");
                     }
                     largetemp++;
                     return;
@@ -1412,21 +1296,19 @@ namespace Sla.SLACOMP
         /// \param ct is the given Constructor
         private void optimize(Constructor ct)
         {
-            OptimizeRecord currec;
-            Dictionary<ulong, OptimizeRecord> recs;
+            Dictionary<ulong, OptimizeRecord> recs = new Dictionary<ulong, OptimizeRecord>();
             int numsections = ct.getNumSections();
-            do
-            {
-                recs.clear();
-                for (int i = -1; i < numsections; ++i)
-                {
+            OptimizeRecord? currec;
+            do {
+                recs.Clear();
+                for (int i = -1; i < numsections; ++i) {
                     optimizeGather1(ct, recs, i);
                     optimizeGather2(ct, recs, i);
                 }
                 currec = findValidRule(ct, recs);
-                if (currec != (OptimizeRecord*)0)
-                    applyOptimization(ct, *currec);
-            } while (currec != (OptimizeRecord*)0);
+                if (currec != (OptimizeRecord)null)
+                    applyOptimization(ct, currec.Value);
+            } while (currec != (OptimizeRecord)null);
             checkUnusedTemps(ct, recs);
         }
 
@@ -1486,11 +1368,7 @@ namespace Sla.SLACOMP
 
                     int numsections = ct.getNumSections();
                     for (int k = -1; k < numsections; ++k) {
-                        ConstructTpl tpl;
-                        if (k < 0)
-                            tpl = ct.getTempl();
-                        else
-                            tpl = ct.getNamedTempl(k);
+                        ConstructTpl? tpl = (k < 0) ? ct.getTempl() : ct.getNamedTempl(k);
                         if (tpl == (ConstructTpl)null)
                             continue;
                         if (!checkSectionTruncations(ct, tpl, isbigendian))
@@ -1514,11 +1392,7 @@ namespace Sla.SLACOMP
 
                     int numsections = ct.getNumSections();
                     for (int k = -1; k < numsections; ++k) {
-                        ConstructTpl tpl;
-                        if (k < 0)
-                            tpl = ct.getTempl();
-                        else
-                            tpl = ct.getNamedTempl(k);
+                        ConstructTpl? tpl = (k < 0) ? ct.getTempl() : ct.getNamedTempl(k);
                         if (tpl == (ConstructTpl)null)
                             continue;
                         checkLargeTemporaries(ct, tpl);

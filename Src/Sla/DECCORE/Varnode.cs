@@ -154,11 +154,11 @@ namespace Sla.DECCORE
         /// cached SymbolEntry associated with Varnode
         private SymbolEntry mapentry;
         /// Datatype associated with this varnode
-        private Datatype type;
+        private Datatype? type;
         /// Iterator into VarnodeBank sorted by location
-        private VarnodeLocSet::iterator lociter;
+        internal VarnodeLocSet::iterator lociter;
         /// Iterator into VarnodeBank sorted by definition
-        private VarnodeDefSet::iterator defiter;
+        internal VarnodeDefSet::iterator defiter;
         /// List of every op using this varnode as input
         internal List<PcodeOp> descend;
         /// Addresses covered by the def.use of this Varnode
@@ -267,7 +267,7 @@ namespace Sla.DECCORE
 
         // These functions should be only private things used by VarnodeBank
         /// Mark Varnode as \e input
-        private void setInput()
+        internal void setInput()
         {
             setFlags(Varnode.varnode_flags.input | Varnode.varnode_flags.coverdirty);
         }
@@ -275,7 +275,7 @@ namespace Sla.DECCORE
         /// Set the defining PcodeOp of this Varnode
         /// Directly change the defining PcodeOp and set appropriate dirty bits
         /// \param op is the pointer to the new PcodeOp, which can be \b null
-        private void setDef(PcodeOp op)
+        internal void setDef(PcodeOp? op)
         {               // Set the defining op
             def = op;
             if (op == (PcodeOp)null) {
@@ -681,7 +681,7 @@ namespace Sla.DECCORE
         /// \param s is the size of the new Varnode
         /// \param m is the starting storage Address
         /// \param dt is the Datatype
-        public Varnode(int s, Address m, Datatype dt)
+        public Varnode(int s, Address m, Datatype? dt)
         {
             // Construct a varnode
             loc = m;

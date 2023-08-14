@@ -1330,20 +1330,20 @@ namespace Sla.SLACOMP
         //        {
         //            if (pos == string::npos)
         //            {
-        //                res += str.substr(lastpos);
+        //                res += str.Substring(lastpos);
         //                str = res;
         //                return;
         //            }
         //            else
         //            {
-        //                res += str.substr(lastpos, (pos - lastpos));
+        //                res += str.Substring(lastpos, (pos - lastpos));
         //                string::size_type endpos = str.find(')', pos + 2);
         //                if (endpos == string::npos)
         //                {
         //                    preproc_error("Unterminated macro in string");
         //                    break;
         //                }
-        //                string macro = str.substr(pos + 2, endpos - (pos + 2));
+        //                string macro = str.Substring(pos + 2, endpos - (pos + 2));
         //                string value;
         //                if (!slgh.getPreprocValue(macro, value))
         //                {

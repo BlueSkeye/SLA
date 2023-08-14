@@ -45,7 +45,7 @@ namespace Sla.CORE
         /// its contents into an in-memory DOM tree. An XmlException is thrown for any parsing error.
         /// \param filename is the name of the XML document file
         /// \return the in-memory DOM tree
-        public Document openDocument(ref string filename)
+        public Document openDocument(string filename)
         {
             try {
                 using (FileStream inputStream = File.OpenRead(filename)) {

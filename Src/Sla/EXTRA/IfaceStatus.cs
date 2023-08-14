@@ -45,20 +45,20 @@ namespace Sla.EXTRA
         /// \param first will hold an iterator to the first command in the range
         /// \param last will hold an iterator (one after) the last command in the range
         /// \param input is the list of command tokens to match on
-        private void restrictCom(List<IfaceCommand>::const_iterator first,
-            List<IfaceCommand>::const_iterator last, List<string> input)
+        private void restrictCom(IEnumerator<IfaceCommand> first, IEnumerator<IfaceCommand> last,
+            List<string> input)
         {
-            List<IfaceCommand*>::const_iterator newfirst, newlast;
-            IfaceCommandDummy dummy;
+            IEnumerator<IfaceCommand> newfirst, newlast;
+            IfaceCommandDummy dummy = new IfaceCommandDummy();
 
             dummy.addWords(input);
-            newfirst = lower_bound(first, last, &dummy, compare_ifacecommand);
+            newfirst = lower_bound(first, last, dummy, compare_ifacecommand);
             dummy.removeWord();
-            string temp(input.GetLastItem() ); // Make copy of last word
-            temp[temp.size() - 1] += 1; // temp will now be greater than any word
+            string temp = input.GetLastItem(); // Make copy of last word
+            temp[temp.Length - 1] += 1; // temp will now be greater than any word
                                         // whose first letters match input.GetLastItem()
             dummy.addWord(temp);
-            newlast = upper_bound(first, last, &dummy, compare_ifacecommand);
+            newlast = upper_bound(first, last, dummy, compare_ifacecommand);
             first = newfirst;
             last = newlast;
         }
@@ -99,37 +99,33 @@ namespace Sla.EXTRA
         /// \param first will hold the beginning of the matching range of commands
         /// \param last will hold the end of the matching range of commands
         /// \return the number of matching commands
-        protected int expandCom(List<string> expand, TextReader s,
-              List<IfaceCommand>::const_iterator first,
-              List<IfaceCommand>::const_iterator last)
+        protected int expandCom(List<string> expand, TextReader s, IEnumerator<IfaceCommand> first,
+            IEnumerator<IfaceCommand> last)
         {
             int pos;           // Which word are we currently expanding
             string tok;
             bool res;
 
-            expand.clear();     // Make sure command list is empty
+            expand.Clear();     // Make sure command list is empty
             res = true;
             if (first == last)      // If subrange is empty, return 0
                 return 0;
-            for (pos = 0; ; ++pos)
-            {
+            for (pos = 0; ; ++pos) {
                 s >> ws;            // Skip whitespace
-                if (first == (last - 1))
-                {   // If subrange is unique
+                if (first == (last - 1)) {
+                    // If subrange is unique
                     if (s.eof())        // If no more input
-                        for (; pos < (*first).numWords(); ++pos) // Automatically provide missing words
+                        for (; pos < first.Current.numWords(); ++pos) // Automatically provide missing words
                             expand.Add((*first).getCommandWord(pos));
-                    if ((*first).numWords() == pos) // If all words are matched
+                    if (first.Current.numWords() == pos) // If all words are matched
                         return 1;       // Finished
                 }
-                if (!res)
-                {           // Last word was ambiguous
+                if (!res) {           // Last word was ambiguous
                     if (!s.eof())
                         return (last - first);
                     return (first - last);  // Negative number to indicate last word incomplete
                 }
-                if (s.eof())
-                {       // if no other words
+                if (s.eof()) {       // if no other words
                     if (expand.empty())
                         return (first - last);
                     return (last - first);  // return number of matches
@@ -139,7 +135,7 @@ namespace Sla.EXTRA
                 restrictCom(first, last, expand);
                 if (first == last)      // If subrange is empty, return 0
                     return 0;
-                res = maxmatch(tok, (*first).getCommandWord(pos), (*(last - 1)).getCommandWord(pos));
+                res = maxmatch(tok, first.Current.getCommandWord(pos), (*(last - 1)).getCommandWord(pos));
                 expand.GetLastItem() = tok;
             }
         }
@@ -156,7 +152,7 @@ namespace Sla.EXTRA
         /// \param mxhist is the maximum number of lines to store in history
         public IfaceStatus(string prmpt, TextWriter os, int mxhist = 10)
         {
-            optr = &os;
+            optr = os;
             fileoptr = optr;        // Bulk out, defaults to command line output
             sorted = false;
             inerror = false;
@@ -169,19 +165,18 @@ namespace Sla.EXTRA
 
         ~IfaceStatus()
         {
-            if (optr != fileoptr)
-            {
-                ((ofstream*)fileoptr).close();
-                delete fileoptr;
+            if (optr != fileoptr) {
+                fileoptr.Close();
+                // delete fileoptr;
             }
             while (!promptstack.empty())
                 popScript();
-            for (int i = 0; i < comlist.size(); ++i)
-                delete comlist[i];
-            Dictionary<string, IfaceData*>::const_iterator iter;
-            for (iter = datamap.begin(); iter != datamap.end(); ++iter)
-                if ((*iter).second != (IfaceData*)0)
-                    delete(*iter).second;
+            //for (int i = 0; i < comlist.size(); ++i)
+            //    delete comlist[i];
+            //Dictionary<string, IfaceData*>::const_iterator iter;
+            //for (iter = datamap.begin(); iter != datamap.end(); ++iter)
+            //    if ((*iter).second != (IfaceData*)0)
+            //        delete(*iter).second;
         }
 
         /// Set if processing should terminate on an error
@@ -197,9 +192,9 @@ namespace Sla.EXTRA
         /// \param newprompt is the command line prompt to associate with the file
         public void pushScript(string filename, string newprompt)
         {
-            ifstream* s = new ifstream(filename.c_str());
-            if (!*s)
-                throw new IfaceParseError("Unable to open script file: " + filename);
+            TextReader s;
+            try { s = new StreamReader(File.OpenRead(filename)); }
+            catch { throw new IfaceParseError($"Unable to open script file: {filename}"); }
             pushScript(s, newprompt);
         }
 
@@ -209,7 +204,7 @@ namespace Sla.EXTRA
         /// Once commands from the stream are exhausted, parsing will resume in the previous stream.
         /// \param iptr is the new input stream
         /// \param newprompt is the command line prompt to associate with the new stream
-        public override void pushScript(TextReader iptr, string newprompt)
+        public virtual void pushScript(TextReader iptr, string newprompt)
         {
             promptstack.Add(prompt);
             uint flags = 0;
@@ -224,7 +219,7 @@ namespace Sla.EXTRA
         ///
         /// The current input stream, as established by a script, is popped from the stack,
         /// along with its command prompt, and processing continues with the previous stream.
-        public override void popScript()
+        public virtual void popScript()
         {
             prompt = promptstack.GetLastItem();
             promptstack.RemoveLastItem();
@@ -235,7 +230,7 @@ namespace Sla.EXTRA
         }
 
         /// Pop any existing script streams and return to processing from the base stream
-        public override void reset()
+        public virtual void reset()
         {
             while (!promptstack.empty())
                 popScript();
@@ -249,7 +244,7 @@ namespace Sla.EXTRA
         /// Write the current command prompt to the current output stream
         public void writePrompt()
         {
-            *optr << prompt;
+            optr.Write(prompt);
         }
 
         /// \brief Register a command with this interface
@@ -263,32 +258,31 @@ namespace Sla.EXTRA
         /// \param nm3 is the third token (or null)
         /// \param nm4 is the fourth token (or null)
         /// \param nm5 is the fifth token (or null)
-        public void registerCom(IfaceCommand fptr, string nm1, string nm2 = null, string nm3 = null,
-            string nm4 = null, string nm5 = null)
+        public void registerCom(IfaceCommand fptr, string nm1, string? nm2 = null, string? nm3 = null,
+            string? nm4 = null, string? nm5 = null)
         {
             fptr.addWord(nm1);
-            if (nm2 != (char*)0)
+            if (nm2 != null)
                 fptr.addWord(nm2);
-            if (nm3 != (char*)0)
+            if (nm3 != null)
                 fptr.addWord(nm3);
-            if (nm4 != (char*)0)
+            if (nm4 != null)
                 fptr.addWord(nm4);
-            if (nm5 != (char*)0)
+            if (nm5 != null)
                 fptr.addWord(nm5);
 
             comlist.Add(fptr);    // Enter new command
             sorted = false;
 
-            string nm(fptr.getModule()); // Name of module this command belongs to
-            Dictionary<string, IfaceData*>::const_iterator iter = datamap.find(nm);
-            IfaceData* data;
-            if (iter == datamap.end())
-            {
+            string nm = fptr.getModule(); // Name of module this command belongs to
+            IfaceData result;
+            IfaceData data;
+            if (!datamap.TryGetValue(nm, out result)) {
                 data = fptr.createData();
                 datamap[nm] = data;
             }
             else
-                data = (*iter).second;
+                data = result;
             fptr.setData(this, data);  // Inform command of its data
         }
 
@@ -298,12 +292,10 @@ namespace Sla.EXTRA
         /// retrieves the module specific data object by name.
         /// \param nm is the name of the module
         /// \return the IfaceData object or null
-        public IfaceData getData(string nm)
+        public IfaceData? getData(string nm)
         {
-            Dictionary<string, IfaceData*>::const_iterator iter = datamap.find(nm);
-            if (iter == datamap.end())
-                return (IfaceData*)0;
-            return (*iter).second;
+            IfaceData result;
+            return datamap.TryGetValue(nm, out result) ? result : null;
         }
 
         /// Run the next command
@@ -315,41 +307,38 @@ namespace Sla.EXTRA
         {
             string line;            // Next line from input stream
 
-            if (!sorted)
-            {
-                sort(comlist.begin(), comlist.end(), compare_ifacecommand);
+            if (!sorted) {
+                comlist.Sort(compare_ifacecommand);
                 sorted = true;
             }
-            readLine(line);
+            readLine(out line);
             if (line.empty()) return false;
             saveHistory(line);
 
-            List<string> fullcommand;
-            List<IfaceCommand*>::const_iterator first = comlist.begin();
-            List<IfaceCommand*>::const_iterator last = comlist.end();
-            istringstream is (line);
+            List<string> fullcommand = new List<string>();
+            IEnumerator<IfaceCommand> first = comlist.begin();
+            IEnumerator<IfaceCommand> last = comlist.end();
+            TextReader @is = new StringReader(line);
             int match;
 
-            match = expandCom(fullcommand, is, first, last); // Try to expand the command
-            if (match == 0)
-            {
-                *optr << "ERROR: Invalid command" << endl;
+            match = expandCom(fullcommand, @is, first, last); // Try to expand the command
+            if (match == 0) {
+                optr.WriteLine("ERROR: Invalid command");
                 return false;
             }
             else if (fullcommand.size() == 0) // Nothing useful typed
                 return false;
-            else if (match > 1)
-            {
-                if ((*first).numWords() != fullcommand.size())
-                { // Check for complete but not unique
-                    *optr << "ERROR: Incomplete command" << endl;
+            else if (match > 1) {
+                if (first.Current.numWords() != fullcommand.size()) {
+                    // Check for complete but not unique
+                    optr.WriteLine("ERROR: Incomplete command");
                     return false;
                 }
             }
             else if (match < 0)
-                *optr << "ERROR: Incomplete command" << endl;
+                optr.WriteLine("ERROR: Incomplete command");
 
-            (*first).execute(is);  // Try to execute the (first) command
+            first.Current.execute(@is);  // Try to execute the (first) command
             return true;            // Indicate a command was executed
         }
 
@@ -381,16 +370,15 @@ namespace Sla.EXTRA
         // The last command has failed, decide if we are completely abandoning this stream
         public void evaluateError()
         {
-            if (errorisdone)
-            {
-                *optr << "Aborting process" << endl;
+            if (errorisdone) {
+                optr.WriteLine("Aborting process");
                 inerror = true;
                 done = true;
                 return;
             }
-            if (getNumInputStreamSize() != 0)
-            { // we have something to pop
-                *optr << "Aborting " << prompt << endl;
+            if (getNumInputStreamSize() != 0) {
+                // we have something to pop
+                optr.WriteLine($"Aborting {prompt}");
                 inerror = true;
                 return;
             }
@@ -399,27 +387,26 @@ namespace Sla.EXTRA
 
         /// Concatenate tokens
         /// Concatenate a list of tokens into a single string, separated by a space character
-        public static void wordsToString(string res, List<string> list)
+        public static void wordsToString(out string res, List<string> list)
         {
-            List<string>::const_iterator iter;
-
-            res.erase();
-            for (iter = list.begin(); iter != list.end(); ++iter)
-            {
-                if (iter != list.begin())
-                    res += ' ';
-                res += *iter;
+            res = string.Empty;
+            bool firstItem = true;
+            foreach (string item in list) {
+                if (firstItem) firstItem = false;
+                else res += ' ';
+                res += item;
             }
         }
 
         private static bool maxmatch(string res, string op1, string op2)
-        {               // Set res to maximum characters in common
-                        // at the beginning of op1 and op2
+        {
+            // Set res to maximum characters in common
+            // at the beginning of op1 and op2
             int len;
 
-            len = (op1.size() < op2.size()) ? op1.size() : op2.size();
+            len = (op1.Length < op2.Length) ? op1.Length : op2.Length;
 
-            res.erase();
+            res = string.Empty;
             for (int i = 0; i < len; ++i) {
                 if (op1[i] == op2[i])
                     res += op1[i];

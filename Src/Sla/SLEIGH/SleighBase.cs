@@ -108,47 +108,21 @@ namespace Sla.SLEIGH
             unique_allocatemask = 0;
             numSections = 0;
             int version = 0;
-            setBigEndian(xml_readbool(el.getAttributeValue("bigendian")));
-            {
-                istringstream s = new istringstream(el.getAttributeValue("align"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                s >> alignment;
-            }
-            {
-                istringstream s = new istringstream(el.getAttributeValue("uniqbase"));
-                s.unsetf(ios::dec | ios::hex | ios::oct);
-                uint ubase;
-                s >> ubase;
-                setUniqueBase(ubase);
-            }
+            setBigEndian(Xml.xml_readbool(el.getAttributeValue("bigendian")));
+            alignment = int.Parse(el.getAttributeValue("align"));
+            uint ubase = uint.Parse(el.getAttributeValue("uniqbase"));
+            setUniqueBase(ubase);
             int numattr = el.getNumAttributes();
-            for (int i = 0; i < numattr; ++i)
-            {
+            for (int i = 0; i < numattr; ++i) {
                 string attrname = el.getAttributeName(i);
                 if (attrname == "maxdelay")
-                {
-                    istringstream s1(el.getAttributeValue(i));
-                    s1.unsetf(ios::dec | ios::hex | ios::oct);
-                    s1 >> maxdelayslotbytes;
-                }
+                    maxdelayslotbytes = uint.Parse(el.getAttributeValue(i));
                 else if (attrname == "uniqmask")
-                {
-                    istringstream s2(el.getAttributeValue(i));
-                    s2.unsetf(ios::dec | ios::hex | ios::oct);
-                    s2 >> unique_allocatemask;
-                }
+                    unique_allocatemask = uint.Parse(el.getAttributeValue(i));
                 else if (attrname == "numsections")
-                {
-                    istringstream s3(el.getAttributeValue(i));
-                    s3.unsetf(ios::dec | ios::hex | ios::oct);
-                    s3 >> numSections;
-                }
+                    numSections = uint.Parse(el.getAttributeValue(i));
                 else if (attrname == "version")
-                {
-                    istringstream s = new istringstream(el.getAttributeValue(i));
-                    s.unsetf(ios::dec | ios::hex | ios::oct);
-                    s >> version;
-                }
+                    version = int.Parse(el.getAttributeValue(i));
             }
             if (version != SLA_FORMAT_VERSION)
                 throw new LowlevelError(".sla file has wrong format");
@@ -157,16 +131,15 @@ namespace Sla.SLEIGH
             while (iter.MoveNext()) {
                 if (iter.Current.getName() != "floatformat") break;
                 FloatFormat newFormat = new FloatFormat();
-                newFormat.restoreXml(*iter);
+                newFormat.restoreXml(iter.Current);
                 floatformats.Add(newFormat);
-                ++iter;
             }
             indexer.restoreXml(iter.Current);
-            iter++;
+            if (!iter.MoveNext()) throw new BugException();
             XmlDecode decoder = new XmlDecode(this, iter.Current);
             decodeSpaces(decoder, this);
-            iter++;
-            symtab.restoreXml(*iter, this);
+            if (!iter.MoveNext()) throw new BugException();
+            symtab.restoreXml(iter.Current, this);
             root = (SubtableSymbol)symtab.getGlobalScope().findSymbol("instruction");
             List<string> errorPairs = new List<string>();
             buildXrefs(errorPairs);
@@ -202,10 +175,10 @@ namespace Sla.SLEIGH
 
         public override string getRegisterName(AddrSpace @base, ulong off, int size)
         {
-            VarnodeData sym;
+            VarnodeData sym = new VarnodeData();
             sym.space = @base;
             sym.offset = off;
-            sym.size = size;
+            sym.size = (uint)size;
             Dictionary<VarnodeData, string>::const_iterator iter = varnode_xref.upper_bound(sym); // First point greater than offset
             if (iter == varnode_xref.begin()) return "";
             iter--;
@@ -215,8 +188,7 @@ namespace Sla.SLEIGH
             if (point.offset + point.size >= off + size)
                 return (*iter).second;
 
-            while (iter != varnode_xref.begin())
-            {
+            while (iter != varnode_xref.begin()) {
                 --iter;
                 VarnodeData point = iter.Current.Key;
                 if ((point.space != @base) || (point.offset != offbase)) return "";
@@ -233,7 +205,8 @@ namespace Sla.SLEIGH
 
         public override void getUserOpNames(List<string> res)
         {
-            res = userop;       // Return list of all language defined user ops (with index)
+            // Return list of all language defined user ops (with index)
+            res = userop;
         }
 
         /// Find a specific SLEIGH symbol by name in the current scope

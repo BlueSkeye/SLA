@@ -13,7 +13,7 @@ namespace Sla.EXTRA
     {
         // friend class PcodeInjectLibrarySleigh;
         protected string parsestring;
-        protected ConstructTpl tpl;
+        protected ConstructTpl? tpl;
         
         public ExecutablePcodeSleigh(Architecture g, string src, string nm)
             : base(g, src, nm)
@@ -23,37 +23,42 @@ namespace Sla.EXTRA
 
         ~ExecutablePcodeSleigh()
         {
-            if (tpl != (ConstructTpl)null)
-                delete tpl;
+            //if (tpl != (ConstructTpl)null)
+            //    delete tpl;
         }
 
-        public override void inject(InjectContext context, PcodeEmit emit)
+        internal override void inject(InjectContext context, PcodeEmit emit)
         {
-            InjectContextSleigh & con((InjectContextSleigh &)context);
+            InjectContextSleigh con = (InjectContextSleigh)context;
 
             con.cacher.clear();
-
             con.pos.setAddr(con.baseaddr);
             con.pos.setNaddr(con.nextaddr);
             con.pos.setCalladdr(con.calladdr);
 
-            ParserWalkerChange walker(con.pos);
+            ParserWalkerChange walker = new ParserWalkerChange(con.pos);
             con.pos.deallocateState(walker);
-            InjectPayloadSleigh::setupParameters(con, walker, inputlist, output, getSource());
+            InjectPayloadSleigh.setupParameters(con, walker, inputlist, output, getSource());
             // delayslot and crossbuild directives are not allowed in snippets, so we don't need the DisassemblyCache
             // and we don't need a unique allocation mask
-            SleighBuilder builder = new SleighBuilder(&walker,(DisassemblyCache)null,&con.cacher,con.glb.getConstantSpace(),con.glb.getUniqueSpace(),0);
+            SleighBuilder builder = new SleighBuilder(walker, (DisassemblyCache)null, con.cacher,
+                con.glb.getConstantSpace(), con.glb.getUniqueSpace(),0);
             builder.build(tpl, -1);
             con.cacher.resolveRelatives();
-            con.cacher.emit(con.baseaddr, &emit);
+            con.cacher.emit(con.baseaddr, emit);
         }
 
-        public override void decode(Sla.CORE.Decoder decoder)
+        internal override void decode(Sla.CORE.Decoder decoder)
         {
             uint elemId = decoder.openElement();
-            if (elemId != ELEM_PCODE && elemId != ELEM_CASE_PCODE &&
-                elemId != ELEM_ADDR_PCODE && elemId != ELEM_DEFAULT_PCODE && elemId != ELEM_SIZE_PCODE)
-                throw DecoderError("Expecting <pcode>, <case_pcode>, <addr_pcode>, <default_pcode>, or <size_pcode>");
+            if (   elemId != ElementId.ELEM_PCODE
+                && elemId != ElementId.ELEM_CASE_PCODE
+                && elemId != ElementId.ELEM_ADDR_PCODE
+                && elemId != ElementId.ELEM_DEFAULT_PCODE
+                && elemId != ElementId.ELEM_SIZE_PCODE)
+            {
+                throw new DecoderError("Expecting <pcode>, <case_pcode>, <addr_pcode>, <default_pcode>, or <size_pcode>");
+            }
             decodePayloadAttributes(decoder);
             decodePayloadParams(decoder);
             uint subId = decoder.openElement(ElementId.ELEM_BODY);
@@ -62,7 +67,7 @@ namespace Sla.EXTRA
             decoder.closeElement(elemId);
         }
 
-        public override void printTemplate(TextWriter s)
+        internal override void printTemplate(TextWriter s)
         {
             tpl.saveXml(s, -1);
         }

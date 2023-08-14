@@ -1185,7 +1185,8 @@ namespace Sla.DECCORE
         /// \param addr is the address of the p-code op reading the constant
         /// \param hash is the dynamic hash identifying the constant
         /// \return the new EquateSymbol
-        public Symbol addEquateSymbol(string nm, uint format, ulong value, Address addr, ulong hash)
+        public Symbol addEquateSymbol(string nm, Symbol.DisplayFlags format, ulong value, Address addr,
+            ulong hash)
         {
             Symbol sym = new EquateSymbol(owner, nm, format, value);
             addSymbolInternal(sym);

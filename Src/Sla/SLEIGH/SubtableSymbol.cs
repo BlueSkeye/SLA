@@ -22,7 +22,7 @@ namespace Sla.SLEIGH
         public SubtableSymbol()
         {
             pattern = (TokenPattern)null;
-            decisiontree = (DecisionNode*)0;
+            decisiontree = (DecisionNode)null;
         }
 
         public SubtableSymbol(string nm)
@@ -30,7 +30,7 @@ namespace Sla.SLEIGH
         {
             beingbuilt = false;
             pattern = (TokenPattern)null;
-            decisiontree = (DecisionNode*)0;
+            decisiontree = (DecisionNode)null;
             errors = 0;
         }
 
@@ -38,7 +38,7 @@ namespace Sla.SLEIGH
         {
             if (pattern != (TokenPattern)null)
                 delete pattern;
-            if (decisiontree != (DecisionNode*)0)
+            if (decisiontree != (DecisionNode)null)
                 delete decisiontree;
             List<Constructor*>::iterator iter;
             for (iter = construct.begin(); iter != construct.end(); ++iter)
@@ -56,15 +56,15 @@ namespace Sla.SLEIGH
         }
 
         public void buildDecisionTree(DecisionProperties props)
-        {               // Associate pattern disjoints to constructors
+        {
+            // Associate pattern disjoints to constructors
             if (pattern == (TokenPattern)null) return; // Pattern not fully formed
-            Pattern* pat;
-            decisiontree = new DecisionNode((DecisionNode*)0);
-            for (int i = 0; i < construct.size(); ++i)
-            {
+            Pattern pat;
+            decisiontree = new DecisionNode((DecisionNode)null);
+            for (int i = 0; i < construct.size(); ++i) {
                 pat = construct[i].getPattern().getPattern();
                 if (pat.numDisjoint() == 0)
-                    decisiontree.addConstructorPair((DisjointPattern*)pat, construct[i]);
+                    decisiontree.addConstructorPair((DisjointPattern)pat, construct[i]);
                 else
                     for (int j = 0; j < pat.numDisjoint(); ++j)
                         decisiontree.addConstructorPair(pat.getDisjoint(j), construct[i]);
@@ -149,7 +149,7 @@ namespace Sla.SLEIGH
 
         public override void saveXml(TextWriter s)
         {
-            if (decisiontree == (DecisionNode*)0) return; // Not fully formed
+            if (decisiontree == (DecisionNode)null) return; // Not fully formed
             s << "<subtable_sym";
             SleighSymbol::saveXmlHeader(s);
             s << " numct=\"" << dec << construct.size() << "\">\n";
@@ -189,7 +189,7 @@ namespace Sla.SLEIGH
                 else if ((*iter).getName() == "decision")
                 {
                     decisiontree = new DecisionNode();
-                    decisiontree.restoreXml(*iter, (DecisionNode*)0, this);
+                    decisiontree.restoreXml(*iter, (DecisionNode)null, this);
                 }
                 ++iter;
             }

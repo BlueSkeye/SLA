@@ -72,7 +72,7 @@ namespace Sla.EXTRA
                 case TypeKind.block_type:
                     break;
                 case TypeKind.const_type:
-                    delete storespot.cn;
+                    // delete storespot.cn;
                     break;
                 default:
                     throw new LowlevelError("Bad unify datatype");

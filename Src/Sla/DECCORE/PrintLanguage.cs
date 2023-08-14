@@ -871,7 +871,7 @@ namespace Sla.DECCORE
                         if (tok == '}') break;  // Search for brace ending the annotation
                     }
                     // Treat annotation as one token
-                    string annote = text.substr(pos - count, count);
+                    string annote = text.Substring(pos - count, count);
                     emit.tagComment(annote, EmitMarkup::comment_color, spc, off);
                 }
                 else
@@ -884,7 +884,7 @@ namespace Sla.DECCORE
                         count += 1;
                         pos += 1;
                     }
-                    string sub = text.substr(pos - count, count);
+                    string sub = text.Substring(pos - count, count);
                     emit.tagComment(sub, EmitMarkup::comment_color, spc, off);
                 }
             }

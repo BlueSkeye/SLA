@@ -77,22 +77,22 @@ namespace Sla.SLACOMP
             root = new SubtableSymbol("instruction"); // Base constructors
             symtab.addSymbol(root);
             insertSpace(new ConstantSpace(this, this));
-            SpaceSymbol* spacesym = new SpaceSymbol(getConstantSpace()); // Constant space
+            SpaceSymbol spacesym = new SpaceSymbol(getConstantSpace()); // Constant space
             symtab.addSymbol(spacesym);
-            OtherSpace* otherSpace = new OtherSpace(this, this, OtherSpace::INDEX);
+            OtherSpace otherSpace = new OtherSpace(this, this, OtherSpace::INDEX);
             insertSpace(otherSpace);
             spacesym = new SpaceSymbol(otherSpace);
             symtab.addSymbol(spacesym);
             insertSpace(new UniqueSpace(this, this, numSpaces(), 0));
             spacesym = new SpaceSymbol(getUniqueSpace()); // Temporary register space
             symtab.addSymbol(spacesym);
-            StartSymbol* startsym = new StartSymbol("inst_start", getConstantSpace());
+            StartSymbol startsym = new StartSymbol("inst_start", getConstantSpace());
             symtab.addSymbol(startsym);
-            EndSymbol* endsym = new EndSymbol("inst_next", getConstantSpace());
+            EndSymbol endsym = new EndSymbol("inst_next", getConstantSpace());
             symtab.addSymbol(endsym);
-            Next2Symbol* next2sym = new Next2Symbol("inst_next2", getConstantSpace());
+            Next2Symbol next2sym = new Next2Symbol("inst_next2", getConstantSpace());
             symtab.addSymbol(next2sym);
-            EpsilonSymbol* epsilon = new EpsilonSymbol("epsilon", getConstantSpace());
+            EpsilonSymbol epsilon = new EpsilonSymbol("epsilon", getConstantSpace());
             symtab.addSymbol(epsilon);
             pcode.setConstantSpace(getConstantSpace());
             pcode.setUniqueSpace(getUniqueSpace());
@@ -113,13 +113,14 @@ namespace Sla.SLACOMP
         /// \return the total number of allocated bits (after the new allocations)
         private int calcContextVarLayout(int start, int sz, int numbits)
         {
-            VarnodeSymbol* sym = contexttable[start].sym;
-            FieldQuality* qual;
+            VarnodeSymbol sym = contexttable[start].sym;
+            FieldQuality qual;
             int i, j;
             int maxbits;
 
             if ((sym.getSize()) % 4 != 0)
-                reportError(getCurrentLocation(), "Invalid size of context register '" + sym.getName() + "': must be a multiple of 4 bytes");
+                reportError(getCurrentLocation(), 
+                    $"Invalid size of context register '{sym.getName()}': must be a multiple of 4 bytes");
             maxbits = sym.getSize() * 8 - 1;
             i = 0;
             while (i < sz)
@@ -129,16 +130,17 @@ namespace Sla.SLACOMP
                 int min = qual.low;
                 int max = qual.high;
                 if ((max - min) > (8 * sizeof(uint)))
-                    reportError(getCurrentLocation(), "Size of bitfield '" + qual.name + "' larger than 32 bits");
+                    reportError(getCurrentLocation(),
+                        $"Size of bitfield '{qual.name}' larger than 32 bits");
                 if (max > maxbits)
-                    reportError(getCurrentLocation(), "Scope of bitfield '" + qual.name + "' extends beyond the size of context register");
+                    reportError(getCurrentLocation(),
+                        $"Scope of bitfield '{qual.name}' extends beyond the size of context register");
                 j = i + 1;
                 // Find union of fields overlapping with first field
-                while (j < sz)
-                {
+                while (j < sz) {
                     qual = contexttable[j + start].qual;
-                    if (qual.low <= max)
-                    {   // We have overlap of context variables
+                    if (qual.low <= max) {
+                        // We have overlap of context variables
                         if (qual.high > max)
                             max = qual.high;
                         // reportWarning("Local context variables overlap in "+sym.getName(),false);
@@ -162,7 +164,7 @@ namespace Sla.SLACOMP
                     qual = contexttable[i + start].qual;
                     uint l = qual.low - min + low;
                     uint h = numbits - 1 - (max - qual.high);
-                    ContextField* field = new ContextField(qual.signext, l, h);
+                    ContextField field = new ContextField(qual.signext, l, h);
                     addSymbol(new ContextSymbol(qual.name, field, sym, qual.low, qual.high, qual.flow));
                 }
 
@@ -445,18 +447,18 @@ namespace Sla.SLACOMP
         /// \return the accumulated error messages
         private string checkSymbols(SymbolScope scope)
         {
-            ostringstream msg;
+            TextWriter msg = new StringWriter();
             SymbolTree::const_iterator iter;
             for (iter = scope.begin(); iter != scope.end(); ++iter)
             {
-                LabelSymbol* sym = (LabelSymbol*)*iter;
-                if (sym.getType() != SleighSymbol::label_symbol) continue;
+                LabelSymbol sym = (LabelSymbol)iter.Current;
+                if (sym.getType() != SleighSymbol.symbol_type.label_symbol) continue;
                 if (sym.getRefCount() == 0)
-                    msg << "   Label <" << sym.getName() << "> was placed but not used" << endl;
+                    msg.WriteLine($"   Label <{sym.getName()}> was placed but not used");
                 else if (!sym.isPlaced())
-                    msg << "   Label <" << sym.getName() << "> was referenced but never placed" << endl;
+                    msg.WriteLine($"   Label <{sym.getName()}> was referenced but never placed");
             }
-            return msg.str();
+            return msg.ToString();
         }
 
         ///< Add a new symbol to the current scope
@@ -467,10 +469,9 @@ namespace Sla.SLACOMP
         /// \param sym is the new symbol
         private void addSymbol(SleighSymbol sym)
         {
-            try
-            {
+            try {
                 symtab.addSymbol(sym);
-                symbolLocationMap[sym] = *getCurrentLocation();
+                symbolLocationMap[sym] = getCurrentLocation();
             }
             catch (SleighError err) {
                 reportError(err.ToString());
@@ -483,19 +484,17 @@ namespace Sla.SLACOMP
         /// no duplicates.
         /// \param symlist is the given list of symbols (which may contain nulls)
         /// \return an example symbol with a duplicate are null
-        private SleighSymbol dedupSymbolList(List<SleighSymbol> symlist)
+        private SleighSymbol? dedupSymbolList(List<SleighSymbol?> symlist)
         {
-            SleighSymbol* res = (SleighSymbol)null;
-            for (int i = 0; i < symlist.size(); ++i)
-            {
-                SleighSymbol* sym = (*symlist)[i];
+            SleighSymbol? res = (SleighSymbol)null;
+            for (int i = 0; i < symlist.size(); ++i) {
+                SleighSymbol? sym = symlist[i];
                 if (sym == (SleighSymbol)null) continue;
-                for (int j = i + 1; j < symlist.size(); ++j)
-                {
-                    if ((*symlist)[j] == sym)
-                    { // Found a duplicate
+                for (int j = i + 1; j < symlist.size(); ++j) {
+                    if (symlist[j] == sym) {
+                        // Found a duplicate
                         res = sym;      // Return example duplicate for error reporting
-                        (*symlist)[j] = (SleighSymbol)null; // Null out the duplicate
+                        symlist[j] = (SleighSymbol)null; // Null out the duplicate
                     }
                 }
             }
@@ -513,7 +512,7 @@ namespace Sla.SLACOMP
         private bool expandMacros(ConstructTpl ctpl)
         {
             List<OpTpl> newvec = new List<OpTpl>();
-            List<OpTpl*>::const_iterator iter;
+            IEnumerator<OpTpl> iter;
             OpTpl op;
 
             for (iter = ctpl.getOpvec().begin(); iter != ctpl.getOpvec().end(); ++iter) {

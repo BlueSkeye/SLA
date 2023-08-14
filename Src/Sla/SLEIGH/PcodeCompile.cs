@@ -70,18 +70,19 @@ namespace Sla.SLEIGH
         public AddrSpace getConstantSpace() => constantspace;
 
         public VarnodeTpl buildTemporary()
-        {               // Build temporary variable (with zerosize)
-            VarnodeTpl* res = new VarnodeTpl(ConstTpl(uniqspace),
-                             ConstTpl(ConstTpl.const_type.real, allocateTemp()),
-                             ConstTpl(ConstTpl.const_type.real, 0));
+        {
+            // Build temporary variable (with zerosize)
+            VarnodeTpl res = new VarnodeTpl(new ConstTpl(uniqspace),
+                new ConstTpl(ConstTpl.const_type.real, allocateTemp()), new ConstTpl(ConstTpl.const_type.real, 0));
             res.setUnnamed(true);
             return res;
         }
 
         public LabelSymbol defineLabel(string name)
-        { // Create a label symbol
-            LabelSymbol* labsym = new LabelSymbol(*name, local_labelcount++);
-            delete name;
+        {
+            // Create a label symbol
+            LabelSymbol labsym = new LabelSymbol(name, local_labelcount++);
+            // delete name;
             addSymbol(labsym);      // Add symbol to local scope
             return labsym;
         }
@@ -125,22 +126,23 @@ namespace Sla.SLEIGH
 
         public void newLocalDefinition(string varname, uint size = 0)
         { // Create a new temporary symbol (without generating any pcode)
-            VarnodeSymbol* sym;
-            sym = new VarnodeSymbol(*varname, uniqspace, allocateTemp(), size);
+            VarnodeSymbol sym;
+            sym = new VarnodeSymbol(varname, uniqspace, allocateTemp(), size);
             addSymbol(sym);
-            delete varname;
+            // delete varname;
         }
 
         public ExprTree createOp(OpCode opc, ExprTree vn)
-        {               // Create new expression with output -outvn-
-                        // built by performing -opc- on input vn.
-                        // Free input expression
-            VarnodeTpl* outvn = buildTemporary();
-            OpTpl* op = new OpTpl(opc);
+        {
+            // Create new expression with output -outvn-
+            // built by performing -opc- on input vn.
+            // Free input expression
+            VarnodeTpl outvn = buildTemporary();
+            OpTpl op = new OpTpl(opc);
             op.addInput(vn.outvn);
             op.setOutput(outvn);
             vn.ops.Add(op);
-            vn.outvn = new VarnodeTpl(*outvn);
+            vn.outvn = new VarnodeTpl(outvn);
             return vn;
         }
 
@@ -148,17 +150,17 @@ namespace Sla.SLEIGH
         {               // Create new expression with output -outvn-
                         // built by performing -opc- on inputs vn1 and vn2.
                         // Free input expressions
-            VarnodeTpl* outvn = buildTemporary();
+            VarnodeTpl outvn = buildTemporary();
             vn1.ops.insert(vn1.ops.end(), vn2.ops.begin(), vn2.ops.end());
             vn2.ops.clear();
-            OpTpl* op = new OpTpl(opc);
+            OpTpl op = new OpTpl(opc);
             op.addInput(vn1.outvn);
             op.addInput(vn2.outvn);
             vn2.outvn = (VarnodeTpl)null;
             op.setOutput(outvn);
             vn1.ops.Add(op);
             vn1.outvn = new VarnodeTpl(*outvn);
-            delete vn2;
+            // delete vn2;
             return vn1;
         }
 
@@ -166,65 +168,66 @@ namespace Sla.SLEIGH
         { // Create an op with explicit output and two inputs
             vn1.ops.insert(vn1.ops.end(), vn2.ops.begin(), vn2.ops.end());
             vn2.ops.clear();
-            OpTpl* op = new OpTpl(opc);
+            OpTpl op = new OpTpl(opc);
             op.addInput(vn1.outvn);
             op.addInput(vn2.outvn);
             vn2.outvn = (VarnodeTpl)null;
             op.setOutput(outvn);
             vn1.ops.Add(op);
             vn1.outvn = new VarnodeTpl(*outvn);
-            delete vn2;
+            // delete vn2;
             return vn1;
         }
 
         public ExprTree createOpOutUnary(VarnodeTpl outvn, OpCode opc, ExprTree vn)
         { // Create an op with explicit output and 1 input
-            OpTpl* op = new OpTpl(opc);
+            OpTpl op = new OpTpl(opc);
             op.addInput(vn.outvn);
             op.setOutput(outvn);
             vn.ops.Add(op);
-            vn.outvn = new VarnodeTpl(*outvn);
+            vn.outvn = new VarnodeTpl(outvn);
             return vn;
         }
 
         public List<OpTpl> createOpNoOut(OpCode opc, ExprTree vn)
-        {               // Create new expression by creating op with given -opc-
-                        // and single input vn.   Free the input expression
-            OpTpl* op = new OpTpl(opc);
+        {
+            // Create new expression by creating op with given -opc-
+            // and single input vn.   Free the input expression
+            OpTpl op = new OpTpl(opc);
             op.addInput(vn.outvn);
             vn.outvn = (VarnodeTpl)null; // There is no longer an output to this expression
-            List<OpTpl*>* res = vn.ops;
-            vn.ops = (List<OpTpl*>*)0;
-            delete vn;
+            List<OpTpl> res = vn.ops;
+            vn.ops = (List<OpTpl>)null;
+            // delete vn;
             res.Add(op);
             return res;
         }
 
         public List<OpTpl> createOpNoOut(OpCode opc, ExprTree vn1, ExprTree vn2)
-        {               // Create new expression by creating op with given -opc-
-                        // and inputs vn1 and vn2. Free the input expressions
-            List<OpTpl*>* res = vn1.ops;
-            vn1.ops = (List<OpTpl*>*)0;
+        {
+            // Create new expression by creating op with given -opc-
+            // and inputs vn1 and vn2. Free the input expressions
+            List<OpTpl> res = vn1.ops;
+            vn1.ops = (List<OpTpl>)null;
             res.insert(res.end(), vn2.ops.begin(), vn2.ops.end());
             vn2.ops.clear();
-            OpTpl* op = new OpTpl(opc);
+            OpTpl op = new OpTpl(opc);
             op.addInput(vn1.outvn);
             vn1.outvn = (VarnodeTpl)null;
             op.addInput(vn2.outvn);
             vn2.outvn = (VarnodeTpl)null;
             res.Add(op);
-            delete vn1;
-            delete vn2;
+            //delete vn1;
+            //delete vn2;
             return res;
         }
 
         public List<OpTpl> createOpConst(OpCode opc, ulong val)
         {
-            VarnodeTpl* vn = new VarnodeTpl(ConstTpl(constantspace),
-                              ConstTpl(ConstTpl.const_type.real, val),
-                              ConstTpl(ConstTpl.const_type.real, 4));
-            List<OpTpl*>* res = new List<OpTpl*>;
-            OpTpl* op = new OpTpl(opc);
+            VarnodeTpl vn = new VarnodeTpl(new ConstTpl(constantspace),
+                new ConstTpl(ConstTpl.const_type.real, val), new ConstTpl(ConstTpl.const_type.real, 4));
+            List<OpTpl> res = new List<OpTpl>();
+            OpTpl op = new OpTpl(opc);
             op.addInput(vn);
             res.Add(op);
             return res;
@@ -232,107 +235,106 @@ namespace Sla.SLEIGH
 
         public ExprTree createLoad(StarQuality qual, ExprTree ptr)
         {               // Create new load expression, free ptr expression
-            VarnodeTpl* outvn = buildTemporary();
-            OpTpl* op = new OpTpl(CPUI_LOAD);
+            VarnodeTpl outvn = buildTemporary();
+            OpTpl op = new OpTpl(OpCode.CPUI_LOAD);
             // The first varnode input to the load is a constant reference to the AddrSpace being loaded
             // from.  Internally, we really store the pointer to the AddrSpace as the reference, but this
             // isn't platform independent. So officially, we assume that the constant reference will be the
             // AddrSpace index.  We can safely assume this always has size 4.
-            VarnodeTpl* spcvn = new VarnodeTpl(ConstTpl(constantspace),
-                               qual.id,
-                               ConstTpl(ConstTpl.const_type.real, 8));
+            VarnodeTpl spcvn = new VarnodeTpl(new ConstTpl(constantspace), qual.id,
+                new ConstTpl(ConstTpl.const_type.real, 8));
             op.addInput(spcvn);
             op.addInput(ptr.outvn);
             op.setOutput(outvn);
             ptr.ops.Add(op);
             if (qual.size > 0)
-                force_size(outvn, ConstTpl(ConstTpl.const_type.real, qual.size), *ptr.ops);
-            ptr.outvn = new VarnodeTpl(*outvn);
-            delete qual;
+                force_size(outvn, new ConstTpl(ConstTpl.const_type.real, qual.size), ptr.ops);
+            ptr.outvn = new VarnodeTpl(outvn);
+            // delete qual;
             return ptr;
         }
 
         public List<OpTpl> createStore(StarQuality qual, ExprTree ptr, ExprTree val)
         {
-            List<OpTpl*>* res = ptr.ops;
-            ptr.ops = (List<OpTpl*>*)0;
+            List<OpTpl> res = ptr.ops;
+            ptr.ops = (List<OpTpl>)null;
             res.insert(res.end(), val.ops.begin(), val.ops.end());
             val.ops.clear();
-            OpTpl* op = new OpTpl(CPUI_STORE);
+            OpTpl op = new OpTpl(OpCode.CPUI_STORE);
             // The first varnode input to the store is a constant reference to the AddrSpace being loaded
             // from.  Internally, we really store the pointer to the AddrSpace as the reference, but this
             // isn't platform independent. So officially, we assume that the constant reference will be the
             // AddrSpace index.  We can safely assume this always has size 4.
-            VarnodeTpl* spcvn = new VarnodeTpl(ConstTpl(constantspace),
-                               qual.id,
-                               ConstTpl(ConstTpl.const_type.real, 8));
+            VarnodeTpl spcvn = new VarnodeTpl(new ConstTpl(constantspace), qual.id,
+                new ConstTpl(ConstTpl.const_type.real, 8));
             op.addInput(spcvn);
             op.addInput(ptr.outvn);
             op.addInput(val.outvn);
             res.Add(op);
-            force_size(val.outvn, ConstTpl(ConstTpl.const_type.real, qual.size), *res);
+            force_size(val.outvn, new ConstTpl(ConstTpl.const_type.real, qual.size), *res);
             ptr.outvn = (VarnodeTpl)null;
             val.outvn = (VarnodeTpl)null;
-            delete ptr;
-            delete val;
-            delete qual;
+            //delete ptr;
+            //delete val;
+            //delete qual;
             return res;
         }
 
         public ExprTree createUserOp(UserOpSymbol sym, List<ExprTree> param)
         { // Create userdefined pcode op, given symbol and parameters
-            VarnodeTpl* outvn = buildTemporary();
-            ExprTree* res = new ExprTree();
+            VarnodeTpl outvn = buildTemporary();
+            ExprTree res = new ExprTree();
             res.ops = createUserOpNoOut(sym, param);
             res.ops.GetLastItem().setOutput(outvn);
-            res.outvn = new VarnodeTpl(*outvn);
+            res.outvn = new VarnodeTpl(outvn);
             return res;
         }
 
         public List<OpTpl> createUserOpNoOut(UserOpSymbol sym, List<ExprTree> param)
         {
-            OpTpl* op = new OpTpl(CPUI_CALLOTHER);
-            VarnodeTpl* vn = new VarnodeTpl(ConstTpl(constantspace),
-                              ConstTpl(ConstTpl.const_type.real, sym.getIndex()),
-                              ConstTpl(ConstTpl.const_type.real, 4));
+            OpTpl op = new OpTpl(OpCode.CPUI_CALLOTHER);
+            VarnodeTpl vn = new VarnodeTpl(new ConstTpl(constantspace),
+                new ConstTpl(ConstTpl.const_type.real, sym.getIndex()),
+                new ConstTpl(ConstTpl.const_type.real, 4));
             op.addInput(vn);
-            return ExprTree::appendParams(op, param);
+            return ExprTree.appendParams(op, param);
         }
 
         public ExprTree createVariadic(OpCode opc, List<ExprTree> param)
         {
-            VarnodeTpl* outvn = buildTemporary();
-            ExprTree* res = new ExprTree();
-            OpTpl* op = new OpTpl(opc);
-            res.ops = ExprTree::appendParams(op, param);
+            VarnodeTpl outvn = buildTemporary();
+            ExprTree res = new ExprTree();
+            OpTpl op = new OpTpl(opc);
+            res.ops = ExprTree.appendParams(op, param);
             res.ops.GetLastItem().setOutput(outvn);
-            res.outvn = new VarnodeTpl(*outvn);
+            res.outvn = new VarnodeTpl(outvn);
             return res;
         }
 
         public void appendOp(OpCode opc, ExprTree res, ulong constval, int constsz)
-        { // Take output of res expression, combine with constant,
-          // using opc operation, return the resulting expression
-            OpTpl* op = new OpTpl(opc);
-            VarnodeTpl* constvn = new VarnodeTpl(ConstTpl(constantspace),
-                               ConstTpl(ConstTpl.const_type.real, constval),
-                               ConstTpl(ConstTpl.const_type.real, constsz));
-            VarnodeTpl* outvn = buildTemporary();
+        {
+            // Take output of res expression, combine with constant,
+            // using opc operation, return the resulting expression
+            OpTpl op = new OpTpl(opc);
+            VarnodeTpl constvn = new VarnodeTpl(new ConstTpl(constantspace),
+                new ConstTpl(ConstTpl.const_type.real, constval),
+                new ConstTpl(ConstTpl.const_type.real, constsz));
+            VarnodeTpl outvn = buildTemporary();
             op.addInput(res.outvn);
             op.addInput(constvn);
             op.setOutput(outvn);
             res.ops.Add(op);
-            res.outvn = new VarnodeTpl(*outvn);
+            res.outvn = new VarnodeTpl(outvn);
         }
 
-        public VarnodeTpl buildTruncatedVarnode(VarnodeTpl basevn, uint bitoffset, uint numbits)
-        { // Build a truncated form -basevn- that matches the bitrange [ -bitoffset-, -numbits- ] if possible
-          // using just ConstTpl mechanics, otherwise return null
+        public VarnodeTpl? buildTruncatedVarnode(VarnodeTpl basevn, uint bitoffset, uint numbits)
+        {
+            // Build a truncated form -basevn- that matches the bitrange [ -bitoffset-, -numbits- ] if possible
+            // using just ConstTpl mechanics, otherwise return null
             uint byteoffset = bitoffset / 8; // Convert to byte units
             uint numbytes = numbits / 8;
             ulong fullsz = 0;
-            if (basevn.getSize().getType() == ConstTpl.const_type.real)
-            {
+            if (basevn.getSize().getType() == ConstTpl.const_type.real) {
                 // If we know the size of base, make sure the bit range is in bounds
                 fullsz = basevn.getSize().getReal();
                 if (fullsz == 0) return (VarnodeTpl)null;
@@ -346,21 +348,19 @@ namespace Sla.SLEIGH
             if (basevn.getSpace().isUniqueSpace()) // Do we really want to prevent truncated uniques??
                 return (VarnodeTpl)null;
 
-            ConstTpl::const_type offset_type = basevn.getOffset().getType();
+            ConstTpl.const_type offset_type = basevn.getOffset().getType();
             if ((offset_type != ConstTpl.const_type.real) && (offset_type != ConstTpl.const_type.handle))
                 return (VarnodeTpl)null;
 
             ConstTpl specialoff;
-            if (offset_type == ConstTpl.const_type.handle)
-            {
+            if (offset_type == ConstTpl.const_type.handle) {
                 // We put in the correct adjustment to offset assuming things are little endian
                 // We defer the correct big endian calculation until after the consistency check
                 // because we need to know the subtable export sizes
-                specialoff = ConstTpl(ConstTpl.const_type.handle, basevn.getOffset().getHandleIndex(),
-                          ConstTpl::v_offset_plus, byteoffset);
+                specialoff = new ConstTpl(ConstTpl.const_type.handle, basevn.getOffset().getHandleIndex(),
+                    ConstTpl.v_field.v_offset_plus, byteoffset);
             }
-            else
-            {
+            else {
                 if (basevn.getSize().getType() != ConstTpl.const_type.real)
                     throw new SleighError("Could not construct requested bit range");
                 ulong plus;
@@ -368,14 +368,16 @@ namespace Sla.SLEIGH
                     plus = fullsz - (byteoffset + numbytes);
                 else
                     plus = byteoffset;
-                specialoff = ConstTpl(ConstTpl.const_type.real, basevn.getOffset().getReal() + plus);
+                specialoff = new ConstTpl(ConstTpl.const_type.real, basevn.getOffset().getReal() + plus);
             }
-            VarnodeTpl* res = new VarnodeTpl(basevn.getSpace(), specialoff, ConstTpl(ConstTpl.const_type.real, numbytes));
+            VarnodeTpl res = new VarnodeTpl(basevn.getSpace(), specialoff,
+                new ConstTpl(ConstTpl.const_type.real, numbytes));
             return res;
         }
 
         public List<OpTpl> assignBitRange(VarnodeTpl vn, uint bitoffset, uint numbits, ExprTree rhs)
-        { // Create an expression assigning the rhs to a bitrange within sym
+        {
+            // Create an expression assigning the rhs to a bitrange within sym
             string errmsg;
             if (numbits == 0)
                 errmsg = "Size of bitrange is zero";
@@ -385,8 +387,7 @@ namespace Sla.SLEIGH
             ulong mask = (ulong)2;
             mask = ~(((mask << (numbits - 1)) - 1) << bitoffset);
 
-            if (vn.getSize().getType() == ConstTpl.const_type.real)
-            {
+            if (vn.getSize().getType() == ConstTpl.const_type.real) {
                 // If we know the size of the bitranged varnode, we can
                 // do some immediate checks, and possibly simplify things
                 uint symsize = vn.getSize().getReal();
@@ -399,57 +400,56 @@ namespace Sla.SLEIGH
                     errmsg = "Assigning to bitrange is superfluous";
             }
 
-            if (errmsg.size() > 0)
-            {   // Was there an error condition
+            if (errmsg.Length > 0) {
+                // Was there an error condition
                 reportError((Location)null, errmsg);    // Report the error
-                delete vn;          // Clean up
-                List<OpTpl*>* resops = rhs.ops; // Passthru old expression
-                rhs.ops = (List<OpTpl*>*)0;
-                delete rhs;
+                // delete vn;          // Clean up
+                List<OpTpl> resops = rhs.ops; // Passthru old expression
+                rhs.ops = (List<OpTpl>)null;
+                // delete rhs;
                 return resops;
             }
 
             // We know what the size of the input has to be
             force_size(rhs.outvn, ConstTpl(ConstTpl.const_type.real, smallsize), *rhs.ops);
 
-            ExprTree* res;
-            VarnodeTpl* finalout = buildTruncatedVarnode(vn, bitoffset, numbits);
-            if (finalout != (VarnodeTpl)null)
-            {
-                delete vn;  // Don't keep the original Varnode object
+            ExprTree res;
+            VarnodeTpl? finalout = buildTruncatedVarnode(vn, bitoffset, numbits);
+            if (finalout != (VarnodeTpl)null) {
+                // delete vn;  // Don't keep the original Varnode object
                 res = createOpOutUnary(finalout, OpCode.CPUI_COPY, rhs);
             }
-            else
-            {
+            else {
                 if (bitoffset + numbits > 64)
                     errmsg = "Assigned bitrange extends past first 64 bits";
                 res = new ExprTree(vn);
-                appendOp(CPUI_INT_AND, res, mask, 0);
+                appendOp(OpCode.CPUI_INT_AND, res, mask, 0);
                 if (zextneeded)
-                    createOp(CPUI_INT_ZEXT, rhs);
+                    createOp(OpCode.CPUI_INT_ZEXT, rhs);
                 if (shiftneeded)
-                    appendOp(CPUI_INT_LEFT, rhs, bitoffset, 4);
+                    appendOp(OpCode.CPUI_INT_LEFT, rhs, bitoffset, 4);
 
-                finalout = new VarnodeTpl(*vn);
+                finalout = new VarnodeTpl(vn);
                 res = createOpOut(finalout, OpCode.CPUI_INT_OR, res, rhs);
             }
-            if (errmsg.size() > 0)
+            if (errmsg.Length > 0)
                 reportError((Location)null, errmsg);
-            List<OpTpl*>* resops = res.ops;
-            res.ops = (List<OpTpl*>*)0;
-            delete res;
+            List<OpTpl> resops = res.ops;
+            res.ops = (List<OpTpl>)null;
+            // delete res;
             return resops;
         }
 
         public ExprTree createBitRange(SpecificSymbol sym, uint bitoffset, uint numbits)
-        { // Create an expression computing the indicated bitrange of sym
-          // The result is truncated to the smallest byte size that can
-          // contain the indicated number of bits. The result has the
-          // desired bits shifted all the way to the right
+        {
+            // Create an expression computing the indicated bitrange of sym
+            // The result is truncated to the smallest byte size that can
+            // contain the indicated number of bits. The result has the
+            // desired bits shifted all the way to the right
             string errmsg;
             if (numbits == 0)
                 errmsg = "Size of bitrange is zero";
-            VarnodeTpl* vn = sym.getVarnode();
+            VarnodeTpl vn = sym.getVarnode();
             uint finalsize = (numbits + 7) / 8; // Round up to neareast byte size
             uint truncshift = 0;
             bool maskneeded = ((numbits % 8) != 0);
@@ -457,36 +457,31 @@ namespace Sla.SLEIGH
 
             // Special case where we can set the size, without invoking
             // a truncation operator
-            if ((errmsg.size() == 0) && (bitoffset == 0) && (!maskneeded))
-            {
-                if ((vn.getSpace().getType() == ConstTpl.const_type.handle) && vn.isZeroSize())
-                {
+            if ((errmsg.Length == 0) && (bitoffset == 0) && (!maskneeded)) {
+                if ((vn.getSpace().getType() == ConstTpl.const_type.handle) && vn.isZeroSize()) {
                     vn.setSize(ConstTpl(ConstTpl.const_type.real, finalsize));
-                    ExprTree* res = new ExprTree(vn);
+                    ExprTree res = new ExprTree(vn);
                     //      VarnodeTpl *cruft = buildTemporary();
                     //      delete cruft;
                     return res;
                 }
             }
 
-            if (errmsg.size() == 0)
-            {
-                VarnodeTpl* truncvn = buildTruncatedVarnode(vn, bitoffset, numbits);
-                if (truncvn != (VarnodeTpl)null)
-                { // If we are able to construct a simple truncated varnode
-                    ExprTree* res = new ExprTree(truncvn); // Return just the varnode as an expression
-                    delete vn;
+            if (errmsg.Length == 0) {
+                VarnodeTpl? truncvn = buildTruncatedVarnode(vn, bitoffset, numbits);
+                if (truncvn != (VarnodeTpl)null) {
+                    // If we are able to construct a simple truncated varnode
+                    ExprTree res = new ExprTree(truncvn); // Return just the varnode as an expression
+                    // delete vn;
                     return res;
                 }
             }
 
-            if (vn.getSize().getType() == ConstTpl.const_type.real)
-            {
+            if (vn.getSize().getType() == ConstTpl.const_type.real) {
                 // If we know the size of the input varnode, we can
                 // do some immediate checks, and possibly simplify things
                 uint insize = vn.getSize().getReal();
-                if (insize > 0)
-                {
+                if (insize > 0) {
                     truncneeded = (finalsize < insize);
                     insize *= 8;        // Convert to number of bits
                     if ((bitoffset >= insize) || (bitoffset + numbits > insize))
@@ -499,8 +494,7 @@ namespace Sla.SLEIGH
             ulong mask = (ulong)2;
             mask = ((mask << (numbits - 1)) - 1);
 
-            if (truncneeded && ((bitoffset % 8) == 0))
-            {
+            if (truncneeded && ((bitoffset % 8) == 0)) {
                 truncshift = bitoffset / 8;
                 bitoffset = 0;
             }
@@ -511,47 +505,47 @@ namespace Sla.SLEIGH
             if (maskneeded && (finalsize > 8))
                 errmsg = "Illegal masked bitrange producing varnode larger than 64 bits: " + sym.getName();
 
-            ExprTree* res = new ExprTree(vn);
+            ExprTree res = new ExprTree(vn);
 
-            if (errmsg.size() > 0)
-            {   // Check for error condition
+            if (errmsg.Length > 0) {
+                // Check for error condition
                 reportError(getLocation(sym), errmsg);
                 return res;
             }
 
             if (bitoffset != 0)
-                appendOp(CPUI_INT_RIGHT, res, bitoffset, 4);
+                appendOp(OpCode.CPUI_INT_RIGHT, res, bitoffset, 4);
             if (truncneeded)
-                appendOp(CPUI_SUBPIECE, res, truncshift, 4);
+                appendOp(OpCode.CPUI_SUBPIECE, res, truncshift, 4);
             if (maskneeded)
-                appendOp(CPUI_INT_AND, res, mask, finalsize);
-            force_size(res.outvn, ConstTpl(ConstTpl.const_type.real, finalsize), *res.ops);
+                appendOp(OpCode.CPUI_INT_AND, res, mask, finalsize);
+            force_size(res.outvn, ConstTpl(ConstTpl.const_type.real, finalsize), res.ops);
             return res;
         }
 
         public VarnodeTpl addressOf(VarnodeTpl var, uint size)
-        {               // Produce constant varnode that is the offset
-                        // portion of varnode -var-
-            if (size == 0)
-            {       // If no size specified
-                if (var.getSpace().getType() == ConstTpl.const_type.spaceid)
-                {
-                    AddrSpace* spc = var.getSpace().getSpace();    // Look to the particular space
+        {
+            // Produce constant varnode that is the offset
+            // portion of varnode -var-
+            if (size == 0) {
+                // If no size specified
+                if (var.getSpace().getType() == ConstTpl.const_type.spaceid) {
+                    AddrSpace spc = var.getSpace().getSpace();    // Look to the particular space
                     size = spc.getAddrSize(); // to see if it has a standard address size
                 }
             }
-            VarnodeTpl* res;
+            VarnodeTpl res;
             if ((var.getOffset().getType() == ConstTpl.const_type.real) && (var.getSpace().getType() == ConstTpl.const_type.spaceid))
             {
-                AddrSpace* spc = var.getSpace().getSpace();
+                AddrSpace spc = var.getSpace().getSpace();
                 ulong off = AddrSpace.byteToAddress(var.getOffset().getReal(), spc.getWordSize());
-                res = new VarnodeTpl(ConstTpl(constantspace),
-                          ConstTpl(ConstTpl.const_type.real, off),
-                          ConstTpl(ConstTpl.const_type.real, size));
+                res = new VarnodeTpl(new ConstTpl(constantspace), new ConstTpl(ConstTpl.const_type.real, off),
+                    new ConstTpl(ConstTpl.const_type.real, size));
             }
             else
-                res = new VarnodeTpl(ConstTpl(constantspace), var.getOffset(), ConstTpl(ConstTpl.const_type.real, size));
-            delete var;
+                res = new VarnodeTpl(new ConstTpl(constantspace), var.getOffset(),
+                    new ConstTpl(ConstTpl.const_type.real, size));
+            // delete var;
             return res;
         }
 
@@ -565,28 +559,23 @@ namespace Sla.SLEIGH
             // If the variable is a local temporary
             // The size may need to be propagated to the various
             // uses of the variable
-            OpTpl* op;
-            VarnodeTpl* vn;
+            OpTpl op;
+            VarnodeTpl? vn;
 
-            for (int i = 0; i < ops.size(); ++i)
-            {
+            for (int i = 0; i < ops.size(); ++i) {
                 op = ops[i];
                 vn = op.getOut();
-                if ((vn != (VarnodeTpl)null) && (vn.isLocalTemp()))
-                {
-                    if (vn.getOffset() == vt.getOffset())
-                    {
+                if ((vn != (VarnodeTpl)null) && (vn.isLocalTemp())) {
+                    if (vn.getOffset() == vt.getOffset()) {
                         if ((size.getType() == ConstTpl.const_type.real) && (vn.getSize().getType() == ConstTpl.const_type.real) &&
                             (vn.getSize().getReal() != 0) && (vn.getSize().getReal() != size.getReal()))
                             throw new SleighError("Localtemp size mismatch");
                         vn.setSize(size);
                     }
                 }
-                for (int j = 0; j < op.numInput(); ++j)
-                {
+                for (int j = 0; j < op.numInput(); ++j) {
                     vn = op.getIn(j);
-                    if (vn.isLocalTemp() && (vn.getOffset() == vt.getOffset()))
-                    {
+                    if (vn.isLocalTemp() && (vn.getOffset() == vt.getOffset())) {
                         if ((size.getType() == ConstTpl.const_type.real) && (vn.getSize().getType() == ConstTpl.const_type.real) &&
                             (vn.getSize().getReal() != 0) && (vn.getSize().getReal() != size.getReal()))
                             throw new SleighError("Localtemp size mismatch");
@@ -597,23 +586,22 @@ namespace Sla.SLEIGH
         }
 
         public static void matchSize(int j, OpTpl op, bool inputonly, List<OpTpl> ops)
-        {               // Find something to fill in zero size varnode
-                        // j is the slot we are trying to fill (-1=output)
-                        // Don't check output for non-zero if inputonly is true
-            VarnodeTpl* match = (VarnodeTpl)null;
-            VarnodeTpl* vt;
+        {
+            // Find something to fill in zero size varnode
+            // j is the slot we are trying to fill (-1=output)
+            // Don't check output for non-zero if inputonly is true
+            VarnodeTpl? match = (VarnodeTpl)null;
+            VarnodeTpl vt;
             int i, inputsize;
 
             vt = (j == -1) ? op.getOut() : op.getIn(j);
-            if (!inputonly)
-            {
+            if (!inputonly) {
                 if (op.getOut() != (VarnodeTpl)null)
                     if (!op.getOut().isZeroSize())
                         match = op.getOut();
             }
             inputsize = op.numInput();
-            for (i = 0; i < inputsize; ++i)
-            {
+            for (i = 0; i < inputsize; ++i) {
                 if (match != (VarnodeTpl)null) break;
                 if (op.getIn(i).isZeroSize()) continue;
                 match = op.getIn(i);
@@ -723,27 +711,24 @@ namespace Sla.SLEIGH
         {               // Fill in size for varnodes with size 0
                         // Return first OpTpl with a size 0 varnode
                         // that cannot be filled in or NULL otherwise
-            List<OpTpl*> zerovec, zerovec2;
-            List<OpTpl*>::const_iterator iter;
+            List<OpTpl> zerovec, zerovec2;
+            IEnumerator<OpTpl> iter;
             int lastsize;
 
             for (iter = ct.getOpvec().begin(); iter != ct.getOpvec().end(); ++iter)
-                if ((*iter).isZeroSize())
-                {
-                    fillinZero(*iter, ct.getOpvec());
-                    if ((*iter).isZeroSize())
-                        zerovec.Add(*iter);
+                if (iter.Current.isZeroSize()) {
+                    fillinZero(iter.Current, ct.getOpvec());
+                    if (iter.Current.isZeroSize())
+                        zerovec.Add(iter.Current);
                 }
             lastsize = zerovec.size() + 1;
-            while (zerovec.size() < lastsize)
-            {
+            while (zerovec.size() < lastsize) {
                 lastsize = zerovec.size();
-                zerovec2.clear();
-                for (iter = zerovec.begin(); iter != zerovec.end(); ++iter)
-                {
-                    fillinZero(*iter, ct.getOpvec());
-                    if ((*iter).isZeroSize())
-                        zerovec2.Add(*iter);
+                zerovec2.Clear();
+                for (iter = zerovec.begin(); iter != zerovec.end(); ++iter) {
+                    fillinZero(iter.Current, ct.getOpvec());
+                    if (iter.Current.isZeroSize())
+                        zerovec2.Add(iter.Current);
                 }
                 zerovec = zerovec2;
             }

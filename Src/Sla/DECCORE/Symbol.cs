@@ -79,7 +79,7 @@ namespace Sla.DECCORE
         /// Number of namespace elements required to resolve symbol in current scope
         protected /*mutable*/ int depthResolution;
         /// Number of SymbolEntries that map to the whole Symbol
-        protected uint wholeCount;
+        internal uint wholeCount;
         
         ~Symbol()
         {
@@ -88,7 +88,7 @@ namespace Sla.DECCORE
         ///< Set the display format for \b this Symbol
         /// Force a specific display format for constant symbols
         /// \param val is the format:  force_hex, force_dec, force_oct, etc.
-        protected void setDisplayFormat(DisplayFlags val)
+        internal void setDisplayFormat(DisplayFlags val)
         {
             dispflags &= (DisplayFlags)0xfffffff8;
             dispflags |= val;

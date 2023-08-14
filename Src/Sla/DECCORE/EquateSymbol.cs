@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -23,11 +23,11 @@ namespace Sla.DECCORE
         /// \param nm is the name of the equate (an empty string can be used for a convert)
         /// \param format is the desired display conversion (0 for no conversion)
         /// \param val is the constant value whose display is being altered
-        public EquateSymbol(Scope sc, string nm, uint format, ulong val)
+        public EquateSymbol(Scope sc, string nm, DisplayFlags format, ulong val)
             : base(sc, nm, null)
         {
             value = val;
-            category = equate;
+            category = SymbolCategory.equate;
             type = sc.getArch().types.getBase(1, type_metatype.TYPE_UNKNOWN);
             dispflags |= format;
         }
@@ -37,7 +37,7 @@ namespace Sla.DECCORE
             : base(sc)
         {
             value = 0;
-            category = equate;
+            category = SymbolCategory.equate;
         }
         
         public ulong getValue() => value; ///< Get the constant value
@@ -53,11 +53,11 @@ namespace Sla.DECCORE
         public bool isValueClose(ulong op2Value, int size)
         {
             if (value == op2Value) return true;
-            ulong mask = Globals.calc_mask(size);
+            ulong mask = Globals.calc_mask((uint)size);
             ulong maskValue = value & mask;
-            if (maskValue != value)
-            {       // If '1' bits are getting masked off
-                    // Make sure only sign-extension is getting masked off
+            if (maskValue != value) {
+                // If '1' bits are getting masked off
+                // Make sure only sign-extension is getting masked off
                 if (value != Globals.sign_extend(maskValue, size, sizeof(ulong)))
                     return false;
             }
@@ -88,7 +88,7 @@ namespace Sla.DECCORE
             value = decoder.readUnsignedInteger(AttributeId.ATTRIB_CONTENT);
             decoder.closeElement(subId);
 
-            TypeFactory* types = scope.getArch().types;
+            TypeFactory types = scope.getArch().types ?? throw new BugException();
             type = types.getBase(1, type_metatype.TYPE_UNKNOWN);
             decoder.closeElement(elemId);
         }

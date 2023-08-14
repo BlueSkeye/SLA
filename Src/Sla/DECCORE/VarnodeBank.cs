@@ -47,14 +47,14 @@ namespace Sla.DECCORE
         private Varnode xref(Varnode vn)
         {
             pair<VarnodeLocSet::iterator, bool> check;
-            Varnode* othervn;
+            Varnode othervn;
 
             check = loc_tree.insert(vn);
-            if (!check.second)
-            {       // Set already contains this varnode
+            if (!check.second) {
+                // Set already contains this varnode
                 othervn = *(check.first);
                 replace(vn, othervn); // Patch ops using the old varnode
-                delete vn;
+                // delete vn;
                 return othervn;
             }
             // Otherwise a new insertion
@@ -73,7 +73,7 @@ namespace Sla.DECCORE
             manage = m;
             searchvn.flags = Varnode.varnode_flags.input; // searchvn is always an input varnode of size 0
             uniq_space = m.getUniqueSpace();
-            uniqbase = uniq_space.getTrans().getUniqueStart(Translate::ANALYSIS);
+            uniqbase = uniq_space.getTrans().getUniqueStart(Translate.UniqueLayout.ANALYSIS);
             uniqid = uniqbase;
             create_index = 0;
         }
@@ -81,10 +81,10 @@ namespace Sla.DECCORE
         /// Clear out all Varnodes and reset counters
         public void clear()
         {
-            VarnodeLocSet::iterator iter;
+            //VarnodeLocSet::iterator iter;
 
-            for (iter = loc_tree.begin(); iter != loc_tree.end(); ++iter)
-                delete* iter;
+            //for (iter = loc_tree.begin(); iter != loc_tree.end(); ++iter)
+            //    delete* iter;
 
             loc_tree.clear();
             def_tree.clear();
@@ -109,11 +109,11 @@ namespace Sla.DECCORE
         /// \return the newly allocated Varnode object
         public Varnode create(int s, Address m, Datatype ct)
         {
-            Varnode* vn = new Varnode(s, m, ct);
-
-            vn.create_index = create_index++;
-            vn.lociter = loc_tree.insert(vn).first; // Frees can always be inserted without duplication
-            vn.defiter = def_tree.insert(vn).first;
+            Varnode vn = new Varnode(s, m, ct) {
+                create_index = create_index++,
+                lociter = loc_tree.insert(vn).first, // Frees can always be inserted without duplication
+                defiter = def_tree.insert(vn).first
+            };
             return vn;
         }
 
@@ -126,9 +126,10 @@ namespace Sla.DECCORE
         /// \param op is the given PcodeOp
         public Varnode createDef(int s, Address m, Datatype ct, PcodeOp op)
         {
-            Varnode* vn = new Varnode(s, m, ct);
-            vn.create_index = create_index++;
-            vn.setDef(op);
+            Varnode vn = new Varnode(s, m, ct) {
+                create_index = create_index++,
+                setDef(op)
+            };
             return xref(vn);
         }
 
@@ -139,7 +140,7 @@ namespace Sla.DECCORE
         /// \param ct is the data-type to assign (must not be NULL)
         public Varnode createUnique(int s, Datatype ct)
         {
-            Address addr(uniq_space, uniqid); // Generate a unique address
+            Address addr = new Address(uniq_space, uniqid); // Generate a unique address
             uniqid += s;            // Update counter for next call
             return create(s, addr, ct); // Build varnode with our generated address
         }
@@ -152,8 +153,9 @@ namespace Sla.DECCORE
         /// \param ct is the data-type to associate
         /// \param op is the given PcodeOp
         public Varnode createDefUnique(int s, Datatype ct, PcodeOp op)
-        { // Create unique varnode as output of op
-            Address addr(uniq_space, uniqid);
+        {
+            // Create unique varnode as output of op
+            Address addr = new Address(uniq_space, uniqid);
             uniqid += s;
             return createDef(s, addr, ct, op);
         }
@@ -169,7 +171,7 @@ namespace Sla.DECCORE
 
             loc_tree.erase(vn.lociter);
             def_tree.erase(vn.defiter);
-            delete vn;
+            // delete vn;
         }
 
         /// Mark a Varnode as an input to the function
@@ -201,26 +203,22 @@ namespace Sla.DECCORE
         /// \return the modified Varnode, which may be a different object than the original
         public Varnode setDef(Varnode vn, PcodeOp op)
         {
-            if (!vn.isFree())
-            {
-                ostringstream s;
+            if (!vn.isFree()) {
+                TextWriter s = new StringWriter();
                 Address addr = op.getAddr();
-                s << "Defining varnode which is not free at " << addr.getShortcut();
+                s.Write($"Defining varnode which is not free at {addr.getShortcut()}");
                 addr.printRaw(s);
-                throw new LowlevelError(s.str());
+                throw new LowlevelError(s.ToString());
             }
-            if (vn.isConstant())
-            {
-                ostringstream s;
+            if (vn.isConstant()) {
+                TextWriter s = new StringWriter();
                 Address addr = op.getAddr();
-                s << "Assignment to constant at " << addr.getShortcut();
+                s.Write($"Assignment to constant at {addr.getShortcut()}");
                 addr.printRaw(s);
-                throw new LowlevelError(s.str());
+                throw new LowlevelError(s.ToString());
             }
-
             loc_tree.erase(vn.lociter);
             def_tree.erase(vn.defiter);
-
             vn.setDef(op);     // Change the varnode to be defined
             return xref(vn);
         }
@@ -248,8 +246,8 @@ namespace Sla.DECCORE
         /// \param newvn is the Varnode to replace it with
         public void replace(Varnode oldvn, Varnode newvn)
         {
-            list<PcodeOp*>::iterator iter, tmpiter;
-            PcodeOp* op;
+            IEnumerator<PcodeOp> iter, tmpiter;
+            PcodeOp op;
             int i;
 
             iter = oldvn.descend.begin();
@@ -278,18 +276,16 @@ namespace Sla.DECCORE
         public Varnode find(int s, Address loc, Address pc, uint uniq = uint.MaxValue)
         {
             VarnodeLocSet::const_iterator iter;
-            Varnode* vn;
-            PcodeOp* op;
+            Varnode vn;
+            PcodeOp op;
 
             iter = beginLoc(s, loc, pc, uniq);
-            while (iter != loc_tree.end())
-            {
+            while (iter != loc_tree.end()) {
                 vn = *iter;
                 if (vn.getSize() != s) break;
                 if (vn.getAddr() != loc) break;
                 op = vn.getDef();
-                if ((op != (PcodeOp)null) && (op.getAddr() == pc))
-                {
+                if ((op != (PcodeOp)null) && (op.getAddr() == pc)) {
                     if ((uniq == uint.MaxValue) || (op.getTime() == uniq)) return vn;
                 }
                 ++iter;
@@ -302,14 +298,14 @@ namespace Sla.DECCORE
         /// \param s is the size
         /// \param loc is the starting address
         /// \return the match Varnode object or NULL
-        public Varnode findInput(int s, Address loc)
+        public Varnode? findInput(int s, Address loc)
         {
             VarnodeLocSet::const_iterator iter;
-            Varnode* vn;
+            Varnode vn;
 
             iter = beginLoc(s, loc, Varnode.varnode_flags.input);
-            if (iter != loc_tree.end())
-            {   // There is only one possible varnode matching this
+            if (iter != loc_tree.end()) {
+                // There is only one possible varnode matching this
                 vn = *iter;
                 if (vn.isInput() && (vn.getSize() == s) && (vn.getAddr() == loc))
                     return vn;
@@ -323,24 +319,23 @@ namespace Sla.DECCORE
         /// \param s is the size of the range
         /// \param loc is the starting address of the range
         /// \return the Varnode object or NULL if no Varnode met the conditions
-        public Varnode findCoveredInput(int s, Address loc)
+        public Varnode? findCoveredInput(int s, Address loc)
         {
             VarnodeDefSet::const_iterator iter, enditer;
-            Varnode* vn;
+            Varnode vn;
             ulong highest = loc.getSpace().getHighest();
             ulong end = loc.getOffset() + s - 1;
 
             iter = beginDef(Varnode.varnode_flags.input, loc);
-            if (end == highest)
-            {   // Check for wrap around of address
-                Address tmp(loc.getSpace(), highest);
+            if (end == highest) {
+                // Check for wrap around of address
+                Address tmp = new Address(loc.getSpace(), highest);
                 enditer = endDef(Varnode.varnode_flags.input, tmp);
             }
             else
                 enditer = beginDef(Varnode.varnode_flags.input, loc + s);
 
-            while (iter != enditer)
-            {
+            while (iter != enditer) {
                 vn = *iter++;       // we know vn is input with vn.Loc in (loc,loc+s)
                 if (vn.getOffset() + vn.getSize() - 1 <= end) // vn is completely contained
                     return vn;
@@ -353,16 +348,14 @@ namespace Sla.DECCORE
         /// as an input to the function. If it exists, it is unique.
         /// \param s is the size of the range
         /// \param loc is the starting address of the range
-        public Varnode findCoveringInput(int s, Address loc)
+        public Varnode? findCoveringInput(int s, Address loc)
         {
             VarnodeDefSet::const_iterator iter;
-            Varnode* vn;
+            Varnode vn;
             iter = beginDef(Varnode.varnode_flags.input, loc);
-            if (iter != def_tree.end())
-            {
-                vn = *iter;
-                if ((vn.getAddr() != loc) && (iter != def_tree.begin()))
-                {
+            if (iter != def_tree.end()) {
+                vn = iter.Current;
+                if ((vn.getAddr() != loc) && (iter != def_tree.begin())) {
                     --iter;
                     vn = *iter;
                 }
@@ -565,7 +558,7 @@ namespace Sla.DECCORE
                 uniq = 0;           // find earliest
             SeqNum sq = new SeqNum(pc, uniq);
             PcodeOp searchop = new PcodeOp(0,sq);
-            searchvn.def = &searchop;
+            searchvn.def = searchop;
             iter = loc_tree.lower_bound(searchvn);
 
             searchvn.size = 0;

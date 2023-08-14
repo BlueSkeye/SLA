@@ -31,20 +31,17 @@ namespace Sla.DECCORE
         private static uint countMarks(PcodeOp op)
         {
             uint res = 0;
-            for (int i = 0; i < op.numInput(); ++i)
-            {
-                Varnode* vn = op.getIn(i);
-                while(true)
-                {
-                    if (vn.isMark())
-                    {
+            for (int i = 0; i < op.numInput(); ++i) {
+                Varnode vn = op.getIn(i);
+                while(true) {
+                    if (vn.isMark()) {
                         res += 1;
                         break;
                     }
                     if (!vn.isWritten()) break;
-                    PcodeOp* defOp = vn.getDef();
-                    if (defOp == op)
-                    {   // We have looped all the way around
+                    PcodeOp defOp = vn.getDef() ?? throw new BugException();
+                    if (defOp == op) {
+                        // We have looped all the way around
                         res += 1;
                         break;
                     }
@@ -133,8 +130,10 @@ namespace Sla.DECCORE
                             // If the AND is using only the topmost significant bytes then it is likely trash
                             if (op.getIn(1).isConstant()) {
                                 val = op.getIn(1).getOffset();
-                                ulong mask = Globals.calc_mask(op.getIn(1).getSize());
-                                if ((val == ((mask << 8) & mask)) || (val == ((mask << 16) & mask)) || (val == ((mask << 32) & mask)))
+                                ulong mask = Globals.calc_mask((uint)op.getIn(1).getSize());
+                                if (   (val == ((mask << 8) & mask))
+                                    || (val == ((mask << 16) & mask))
+                                    || (val == ((mask << 32) & mask)))
                                 {
                                     indlist.Add(op);
                                     break;
@@ -178,7 +177,7 @@ namespace Sla.DECCORE
             IEnumerator<VarnodeData> iter = data.getFuncProto().trashBegin();
             while (iter.MoveNext()) {
                 VarnodeData vdata = iter.Current;
-                Varnode vn = data.findCoveredInput((int)vdata.size, vdata.getAddr());
+                Varnode vn? = data.findCoveredInput((int)vdata.size, vdata.getAddr());
                 if (vn == (Varnode)null) continue;
                 if (vn.isTypeLock() || vn.isNameLock()) continue;
                 indlist.Clear();

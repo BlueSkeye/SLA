@@ -34,60 +34,61 @@ namespace Sla.EXTRA
         /// \param line is current command-line and will hold the final completion
         /// \param cursor is the current position of the cursor
         /// \return the (possibly new) position of the cursor, after completion
-        private int doCompletion(string &line, int cursor)
+        private int doCompletion(string line, int cursor)
         {
-            List<string> fullcommand;
+            List<string> fullcommand = new List<string>();
             istringstream s = new istringstream(line);
             string tok;
-            List<IfaceCommand*>::const_iterator first, last;
+            IEnumerator<IfaceCommand> first, last;
             int oldsize, match;
 
             first = comlist.begin();
             last = comlist.end();
             match = expandCom(fullcommand, s, first, last); // Try to expand the command
-            if (match == 0)
-            {
-                *optr << endl << "Invalid command" << endl;
+            if (match == 0) {
+                optr.WriteLine();
+                optr.WriteLine("Invalid command");
                 return cursor;      // No change to command line
             }
 
             // At least one match
-            oldsize = line.size();
-            wordsToString(line, fullcommand);
+            oldsize = line.Length;
+            wordsToString(out line, fullcommand);
             if (match < 0)
                 match = -match;
             else
                 line += ' ';        // Provide extra space if command word is complete
-            if (!s.eof())
-            {       // Read any additional parameters back to command line
+            if (!s.eof()) {
+                // Read any additional parameters back to command line
                 s >> tok >> ws;
                 line += tok;        // Assume first space is present before extra params
             }
-            while (!s.eof())
-            {
+            while (!s.eof()) {
                 line += ' ';        // Provide space between extra parameters
                 s >> tok >> ws;
                 line += tok;
             }
-            if (oldsize < line.size())  // If we have expanded at all
-                return line.size();     // Just display expansion
+            if (oldsize < line.Length)  // If we have expanded at all
+                return line.Length;     // Just display expansion
 
-            if (match > 1)
-            {       // If more than one possible command
+            if (match > 1) {
+                // If more than one possible command
                 string complete;        // Display all possible completions
-                *optr << endl;
-                for (; first != last; ++first)
-                {
+                optr.WriteLine();
+                for (; first != last; ++first) {
                     (*first).commandString(complete); // Get possible completion
-                    *optr << complete << endl;
+                    optr.WriteLine(complete);
                 }
             }
-            else                // Command is unique and expanded
-                *optr << endl << "Command is complete" << endl;
-            return line.size();
+            else {
+                // Command is unique and expanded
+                optr.WriteLine();
+                optr.WriteLine("Command is complete");
+            }
+            return line.Length;
         }
 
-        private override void readLine(string line)
+        protected override void readLine(string line)
         {
             char val;
             int escval;
@@ -96,18 +97,16 @@ namespace Sla.EXTRA
             int hist;
             string saveline;
 
-            line.erase();
+            line = string.Empty;
             cursor = 0;
             hist = 0;
-            do
-            {
+            do {
                 onecharecho = false;
-                lastlen = line.size();
+                lastlen = line.Length;
                 val = sptr.get();
                 if (sptr.eof())
                     val = '\n';
-                switch (val)
-                {
+                switch (val) {
                     case 0x01:          // C-a
                         cursor = 0;     // Jump to beginning
                         break;
@@ -125,10 +124,10 @@ namespace Sla.EXTRA
                         line.erase(cursor, 1);  // Delete character cursor is on
                         break;
                     case 0x05:          // C-e
-                        cursor = line.size();   // Jump to end
+                        cursor = line.Length;   // Jump to end
                         break;
                     case 0x06:          // C-f
-                        if (cursor < line.size())
+                        if (cursor < line.Length)
                             cursor += 1;        // Move forward one character
                         break;
                     case 0x07:          // C-g
@@ -138,7 +137,7 @@ namespace Sla.EXTRA
                         break;
                     case 0x0a:          // Newline
                     case 0x0d:          // Carriage return
-                        cursor = line.size();
+                        cursor = line.Length;
                         onecharecho = true;
                         break;
                     case 0x0b:          // C-k
@@ -147,14 +146,13 @@ namespace Sla.EXTRA
                     case 0x0c:          // C-l
                         break;
                     case 0x0e:          // C-n
-                        if (hist > 0)
-                        {
+                        if (hist > 0) {
                             hist -= 1;      // Get more recent history
                             if (hist > 0)
                                 getHistory(line, hist - 1);
                             else
                                 line = saveline;
-                            cursor = line.size();
+                            cursor = line.Length;
                         }
                         break;
                     case 0x10:          // C-p
@@ -164,7 +162,7 @@ namespace Sla.EXTRA
                             if (hist == 1)
                                 saveline = line;
                             getHistory(line, hist - 1);
-                            cursor = line.size();
+                            cursor = line.Length;
                         }
                         break;
                     case 0x12:          // C-r
@@ -177,8 +175,7 @@ namespace Sla.EXTRA
                         escval = sptr.get();
                         escval <<= 8;
                         escval += sptr.get();
-                        switch (escval)
-                        {
+                        switch (escval) {
                             case 0x4f44:        // left arrow
                                 if (cursor > 0)
                                     cursor -= 1;
@@ -202,12 +199,11 @@ namespace Sla.EXTRA
                 }
                 if (onecharecho)
                     optr.put(val);     // Echo most characters
-                else
-                {
+                else {
                     optr.put('\r');        // Ontop of old line
                     writePrompt();
-                    *optr << line;      // print new line
-                    for (i = line.size(); i < lastlen; ++i)
+                    optr << line;      // print new line
+                    for (i = line.Length; i < lastlen; ++i)
                         optr.put(' ');     // Erase any old characters
                     for (i = i - cursor; i > 0; --i)
                         optr.put('\b');    // Put cursor in the right place
@@ -218,7 +214,7 @@ namespace Sla.EXTRA
         public IfaceTerm(string prmpt, TextReader @is, TextWriter os)
             : base(prmpt, os)
         {
-            sptr = &is;
+            sptr = @is;
 #if __TERMINAL__
             struct termios ittypass;
 
@@ -250,9 +246,8 @@ namespace Sla.EXTRA
 
         ~IfaceTerm()
         {
-            while (!inputstack.empty())
-            {
-                delete sptr;
+            while (!inputstack.empty()) {
+                // delete sptr;
                 sptr = inputstack.GetLastItem();
                 inputstack.RemoveLastItem();
             }
@@ -268,15 +263,15 @@ namespace Sla.EXTRA
         {
             inputstack.Add(sptr);
             sptr = iptr;
-            IfaceStatus::pushScript(iptr, newprompt);
+            base.pushScript(iptr, newprompt);
         }
 
         public override void popScript()
         {
-            delete sptr;
+            // delete sptr;
             sptr = inputstack.GetLastItem();
             inputstack.RemoveLastItem();
-            IfaceStatus::popScript();
+            base.popScript();
         }
 
         public override bool isStreamFinished()

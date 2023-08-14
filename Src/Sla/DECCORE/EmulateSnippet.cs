@@ -43,17 +43,17 @@ namespace Sla.DECCORE
         /// \return indicated bytes arranged as a constant value
         private ulong getLoadImageValue(AddrSpace spc, ulong offset, int sz)
         {
-            LoadImage* loadimage = glb.loader;
+            LoadImage loadimage = glb.loader;
             ulong res;
 
-            loadimage.loadFill((byte*)&res, sizeof(ulong), Address(spc, off));
+            loadimage.loadFill((byte*)&res, sizeof(ulong), new Address(spc, off));
 
             if ((HOST_ENDIAN == 1) != spc.isBigEndian())
                 res = Globals.byte_swap(res, sizeof(ulong));
             if (spc.isBigEndian() && (sz < sizeof(ulong)))
                 res >>= (sizeof(ulong) - sz) * 8;
             else
-                res &= Globals.calc_mask(sz);
+                res &= Globals.calc_mask((uint)sz);
             return res;
         }
 
@@ -87,7 +87,8 @@ namespace Sla.DECCORE
 
         protected override void executeStore()
         {
-            throw new LowlevelError("Illegal p-code operation in snippet: " + (string)get_opname(currentOp.getOpcode()));
+            throw new LowlevelError(
+                $"Illegal p-code operation in snippet: {(string)Globals.get_opname(currentOp.getOpcode())}");
         }
 
         protected override void executeBranch()
@@ -117,55 +118,55 @@ namespace Sla.DECCORE
         protected override void executeBranchind()
         {
             throw new LowlevelError(
-                $"Illegal p-code operation in snippet: {(string)get_opname(currentOp.getOpcode())}");
+                $"Illegal p-code operation in snippet: {(string)Globals.get_opname(currentOp.getOpcode())}");
         }
 
         protected override void executeCall()
         {
             throw new LowlevelError(
-                $"Illegal p-code operation in snippet: {(string)get_opname(currentOp.getOpcode())}");
+                $"Illegal p-code operation in snippet: {(string)Globals.get_opname(currentOp.getOpcode())}");
         }
 
         protected override void executeCallind()
         {
             throw new LowlevelError(
-                $"Illegal p-code operation in snippet: {(string)get_opname(currentOp.getOpcode())}");
+                $"Illegal p-code operation in snippet: {(string)Globals.get_opname(currentOp.getOpcode())}");
         }
 
         protected override void executeCallother()
         {
             throw new LowlevelError(
-                $"Illegal p-code operation in snippet: {(string)get_opname(currentOp.getOpcode())}");
+                $"Illegal p-code operation in snippet: {(string)Globals.get_opname(currentOp.getOpcode())}");
         }
 
         protected override void executeMultiequal()
         {
             throw new LowlevelError(
-                $"Illegal p-code operation in snippet: {(string)get_opname(currentOp.getOpcode())}");
+                $"Illegal p-code operation in snippet: {(string)Globals.get_opname(currentOp.getOpcode())}");
         }
 
         protected override void executeIndirect()
         {
             throw new LowlevelError(
-                $"Illegal p-code operation in snippet: {(string)get_opname(currentOp.getOpcode())}");
+                $"Illegal p-code operation in snippet: {(string)Globals.get_opname(currentOp.getOpcode())}");
         }
 
         protected override void executeSegmentOp()
         {
             throw new LowlevelError(
-                $"Illegal p-code operation in snippet: {(string)get_opname(currentOp.getOpcode())}");
+                $"Illegal p-code operation in snippet: {(string)Globals.get_opname(currentOp.getOpcode())}");
         }
 
         protected override void executeCpoolRef()
         {
             throw new LowlevelError(
-                $"Illegal p-code operation in snippet: {(string)get_opname(currentOp.getOpcode())}");
+                $"Illegal p-code operation in snippet: {(string)Globals.get_opname(currentOp.getOpcode())}");
         }
 
         protected override void executeNew()
         {
             throw new LowlevelError(
-                $"Illegal p-code operation in snippet: {(string)get_opname(currentOp.getOpcode())}");
+                $"Illegal p-code operation in snippet: {(string)Globals.get_opname(currentOp.getOpcode())}");
         }
 
         protected override void fallthruOp()

@@ -23,15 +23,16 @@ namespace Sla.EXTRA
         private /*mutable*/ asymbol[] symbol_table;
         private /*mutable*/ long number_of_symbols;
         private /*mutable*/ long cursymbol;
-        private /*mutable*/ asection* secinfoptr;
+        private /*mutable*/ asection secinfoptr;
 
         // Find section containing given offset
         private asection findSection(ulong offset, ulong ssize)
-        { // Return section containing offset, or closest greater section
-            asection* p;
+        {
+            // Return section containing offset, or closest greater section
+            asection p;
             ulong start, stop;
 
-            for (p = thebfd.sections; p != (asection*)NULL; p = p.next)
+            for (p = thebfd.sections; p != (asection)null; p = p.next)
             {
                 start = p.vma;
                 secsize = (p.size != 0) ? p.size : p.rawsize;
@@ -39,12 +40,10 @@ namespace Sla.EXTRA
                 if ((offset >= start) && (offset < stop))
                     return p;
             }
-            asection* champ = (asection*)0;
-            for (p = thebfd.sections; p != (asection*)NULL; p = p.next)
-            {
-                if (p.vma > offset)
-                {
-                    if (champ == (asection*)0)
+            asection champ = (asection)null;
+            for (p = thebfd.sections; p != (asection)null; p = p.next) {
+                if (p.vma > offset) {
+                    if (champ == (asection)null)
                         champ = p;
                     else if (p.vma < champ.vma)
                         champ = p;
@@ -55,11 +54,9 @@ namespace Sla.EXTRA
 
         private void advanceToNextSymbol()
         {
-            while (cursymbol < number_of_symbols)
-            {
+            while (cursymbol < number_of_symbols) {
                 asymbol a = symbol_table[cursymbol];
-                if ((a.flags & BSF_FUNCTION) != 0)
-                {
+                if ((a.flags & BSF_FUNCTION) != 0) {
                     if (a.name != null)
                         return;
                 }
@@ -71,17 +68,16 @@ namespace Sla.EXTRA
         {
             target = t;
 
-            if (bfdinit == 0)
-            {
+            if (bfdinit == 0) {
                 bfdinit = 1;
                 bfd_init();
             }
-            thebfd = (bfd*)0;
+            thebfd = (bfd)null;
             spaceid = (AddrSpace)null;
             symbol_table = (asymbol**)0;
 
             bufsize = 512;      // Default buffer size
-            bufoffset = ~((ulong)0);
+            bufoffset = ulong.MaxValue;
             buffer = new byte[bufsize];
         }
 
@@ -93,20 +89,13 @@ namespace Sla.EXTRA
         // Open any descriptors
         public void open()
         {
-            if (thebfd != (bfd*)0) throw new CORE.LowlevelError("BFD library did not initialize");
-            thebfd = bfd_openr(filename.c_str(), target.c_str());
-            if (thebfd == (bfd*)0)
-            {
-                string errmsg = "Unable to open image file: ";
-                errmsg += filename;
-                throw new CORE.LowlevelError(errmsg);
+            if (thebfd != (bfd)null) throw new CORE.LowlevelError("BFD library did not initialize");
+            thebfd = bfd_openr(filename, target);
+            if (thebfd == (bfd)0) {
+                throw new CORE.LowlevelError($"Unable to open image file: {filename}");
             }
-            if (!bfd_check_format(thebfd, bfd_object))
-            {
-                string errmsg = "File: ";
-                errmsg += filename;
-                errmsg += " : not in recognized object file format";
-                throw new CORE.LowlevelError(errmsg);
+            if (!bfd_check_format(thebfd, bfd_object)) {
+                throw new CORE.LowlevelError($"File: {filename} : not in recognized object file format");
             }
         }
 
@@ -114,7 +103,7 @@ namespace Sla.EXTRA
         public void close()
         {
             bfd_close(thebfd);
-            thebfd = (bfd*)0;
+            thebfd = (bfd)null;
         }
 
         public void getImportTable(List<ImportRecord> irec)
@@ -124,17 +113,17 @@ namespace Sla.EXTRA
         
         ~LoadImageBfd()
         {
-            if (symbol_table != (asymbol**)0)
-                delete[] symbol_table;
-            if (thebfd != (bfd*)0)
+            //if (symbol_table != (asymbol**)0)
+            //    delete[] symbol_table;
+            if (thebfd != (bfd)null)
                 close();
-            delete[] buffer;
+            // delete[] buffer;
         }
 
         // Load a chunk of image
         public override void loadFill(byte[] ptr, int size, Address addr)
         {
-            asection* p;
+            asection p;
             ulong secsize;
             ulong curaddr, offset;
             bfd_size_type readsize;
@@ -153,19 +142,17 @@ namespace Sla.EXTRA
             offset = 0;
             cursize = bufsize;      // Read an entire buffer
 
-            while (cursize > 0)
-            {
+            while (cursize > 0) {
                 p = findSection(curaddr, secsize);
-                if (p == (asection*)0)
-                {
+                if (p == (asection)null) {
                     if (offset == 0)        // Initial address not mapped
                         break;
                     memset(buffer + offset, 0, cursize); // Fill out the rest of the buffer with 0
                     memcpy(ptr, buffer, size);
                     return;
                 }
-                if (p.vma > curaddr)
-                {   // No section matches
+                if (p.vma > curaddr) {
+                    // No section matches
                     if (offset == 0)        // Initial address not mapped
                         break;
                     readsize = p.vma - curaddr;
@@ -173,8 +160,7 @@ namespace Sla.EXTRA
                         readsize = cursize;
                     memset(buffer + offset, 0, readsize); // Fill in with zeroes to next section
                 }
-                else
-                {
+                else {
                     readsize = cursize;
                     if (curaddr + readsize > p.vma + secsize)  // Adjust to biggest possible read
                         readsize = (bfd_size_type)(p.vma + secsize - curaddr);
@@ -184,12 +170,10 @@ namespace Sla.EXTRA
                 cursize -= readsize;
                 curaddr += readsize;
             }
-            if (cursize > 0)
-            {
-                ostringstream errmsg;
-                errmsg << "Unable to load " << dec << cursize << " bytes at " << addr.getShortcut();
+            if (cursize > 0) {
+                string errmsg = $"Unable to load {cursize} bytes at {addr.getShortcut()}";
                 addr.printRaw(errmsg);
-                throw new DataUnavailError(errmsg.str());
+                throw new DataUnavailError(errmsg);
             }
             memcpy(ptr, buffer, size);  // Copy requested bytes from the buffer
         }
@@ -198,31 +182,27 @@ namespace Sla.EXTRA
         {
             long storage_needed;
             cursymbol = 0;
-            if (symbol_table != (asymbol**)0)
-            {
+            if (symbol_table != (asymbol**)0) {
                 advanceToNextSymbol();
                 return;
             }
 
-            if (!(bfd_get_file_flags(thebfd) & HAS_SYMS))
-            { // There are no symbols
+            if (!(bfd_get_file_flags(thebfd) & HAS_SYMS)) { // There are no symbols
                 number_of_symbols = 0;
                 return;
             }
 
             storage_needed = bfd_get_symtab_upper_bound(thebfd);
-            if (storage_needed <= 0)
-            {
+            if (storage_needed <= 0) {
                 number_of_symbols = 0;
                 return;
             }
 
             symbol_table = (asymbol**)new byte[storage_needed]; // Storage needed in bytes
             number_of_symbols = bfd_canonicalize_symtab(thebfd, symbol_table);
-            if (number_of_symbols <= 0)
-            {
-                delete[] symbol_table;
-                symbol_table = (asymbol**)0;
+            if (number_of_symbols <= 0) {
+                // delete[] symbol_table;
+                symbol_table = null;
                 number_of_symbols = 0;
                 return;
             }
@@ -232,15 +212,16 @@ namespace Sla.EXTRA
 
         public override void closeSymbols()
         {
-            if (symbol_table != (asymbol**)0)
-                delete[] symbol_table;
-            symbol_table = (asymbol**)0;
+            //if (symbol_table != (asymbol**)0)
+            //    delete[] symbol_table;
+            symbol_table = null;
             number_of_symbols = 0;
             cursymbol = 0;
         }
 
         public override bool getNextSymbol(LoadImageFunc record)
-        { // Get record for next symbol if it exists, otherwise return false
+        {
+            // Get record for next symbol if it exists, otherwise return false
             if (cursymbol >= number_of_symbols) return false;
 
             asymbol a = symbol_table[cursymbol];
@@ -248,7 +229,7 @@ namespace Sla.EXTRA
             advanceToNextSymbol();
             record.name = a.name;
             ulong val = bfd_asymbol_value(a);
-            record.address = Address(spaceid, val);
+            record.address = new Address(spaceid, val);
             return true;
         }
 
@@ -259,40 +240,39 @@ namespace Sla.EXTRA
 
         public override void closeSectionInfo()
         {
-            secinfoptr = (asection*)0;
+            secinfoptr = (asection)null;
         }
 
         public override bool getNextSection(LoadImageSection sec)
         {
-            if (secinfoptr == (asection*)0)
+            if (secinfoptr == (asection)null)
                 return false;
 
-            record.address = Address(spaceid, secinfoptr.vma);
+            record.address = new Address(spaceid, secinfoptr.vma);
             record.size = (secinfoptr.size != 0) ? secinfoptr.size : secinfoptr.rawsize;
             record.flags = 0;
             if ((secinfoptr.flags & SEC_ALLOC) == 0)
-                record.flags |= LoadImageSection::unalloc;
+                record.flags |= LoadImageSection.Properties.unalloc;
             if ((secinfoptr.flags & SEC_LOAD) == 0)
-                record.flags |= LoadImageSection::noload;
+                record.flags |= LoadImageSection.Properties.noload;
             if ((secinfoptr.flags & SEC_READONLY) != 0)
-                record.flags |= LoadImageSection::readonly;
+                record.flags |= LoadImageSection.Properties.@readonly;
             if ((secinfoptr.flags & SEC_CODE) != 0)
-                record.flags |= LoadImageSection::code;
+                record.flags |= LoadImageSection.Properties.code;
             if ((secinfoptr.flags & SEC_DATA) != 0)
-                record.flags |= LoadImageSection::data;
+                record.flags |= LoadImageSection.Properties.data;
             secinfoptr = secinfoptr.next;
-            return (secinfoptr != (asection*)0);
+            return (secinfoptr != (asection)null);
         }
 
         public override void getReadonly(RangeList list)
-        { // List all ranges that are read only
+        {
+            // List all ranges that are read only
             ulong start, stop, secsize;
-            asection* p;
+            asection p;
 
-            for (p = thebfd.sections; p != (asection*)NULL; p = p.next)
-            {
-                if ((p.flags & SEC_READONLY) != 0)
-                {
+            for (p = thebfd.sections; p != (asection)null; p = p.next) {
+                if ((p.flags & SEC_READONLY) != 0) {
                     start = p.vma;
                     secsize = (p.size != 0) ? p.size : p.rawsize;
                     if (secsize == 0) continue;
@@ -315,10 +295,9 @@ namespace Sla.EXTRA
 
         public override void adjustVma(long adjust)
         {
-            asection* s;
+            asection s;
             adjust = AddrSpace.addressToByte(adjust, spaceid.getWordSize());
-            for (s = thebfd.sections; s != (asection*)NULL; s = s.next)
-            {
+            for (s = thebfd.sections; s != (asection)null; s = s.next) {
                 s.vma += adjust;
                 s.lma += adjust;
             }

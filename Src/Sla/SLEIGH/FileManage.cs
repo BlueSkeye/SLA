@@ -26,21 +26,22 @@ namespace Sla.SLEIGH
             ;
 
         private static string buildPath(List<string> pathels,int level)
-        { // Build an absolute path using elements from -pathels-, in reverse order
-          // Build up to and including pathels[level]
-            ostringstream s;
+        {
+            // Build an absolute path using elements from -pathels-, in reverse order
+            // Build up to and including pathels[level]
+            TextWriter s = new StringWriter();
 
-            for (int i = pathels.size() - 1; i >= level; --i)
-            {
-                s << separator;
-                s << pathels[i];
+            for (int i = pathels.size() - 1; i >= level; --i) {
+                s.Write(separator);
+                s.Write(pathels[i]);
             }
-            return s.str();
+            return s.ToString();
         }
 
         private static bool testDevelopmentPath(List<string> pathels, int level, out string root)
         {
             // Given pathels[level] is "Ghidra", determine if this is a Ghidra development layout
+            root = string.Empty;
             if (level + 2 >= pathels.size()) return false;
             string parent = pathels[level + 1];
             if (parent.Length < 11) return false;
@@ -61,8 +62,8 @@ namespace Sla.SLEIGH
         {
             if (level + 1 >= pathels.size()) return false;
             root = buildPath(pathels, level + 1);
-            List<string> testpaths1;
-            List<string> testpaths2;
+            List<string> testpaths1 = new List<string>();
+            List<string> testpaths2 = new List<string>();
             scanDirectoryRecursive(testpaths1, "server", root, 1);
             if (testpaths1.size() != 1) return false;
             scanDirectoryRecursive(testpaths2, "server.conf", testpaths1[0], 1);
@@ -71,24 +72,17 @@ namespace Sla.SLEIGH
 
         public void addDir2Path(string path)
         {
-            if (path.size() > 0)
-            {
+            if (path.Length > 0) {
                 pathlist.Add(path);
-                if (path[path.size() - 1] != separator)
-                    pathlist.GetLastItem() += separator;
+                if (path[path.Length - 1] != separator)
+                    pathlist.SetLastItem(pathlist.GetLastItem() + separator);
             }
         }
 
         public void addCurrentDir()
 #if _WINDOWS
         {
-            char dirname[256];
-
-            if (0 != GetCurrentDirectoryA(256, dirname))
-            {
-                string filename(dirname);
-                addDir2Path(filename);
-            }
+            addDir2Path(Environment.CurrentDirectory);
         }
 #else
         {
@@ -108,12 +102,10 @@ namespace Sla.SLEIGH
         {               // Search through paths to find file with given name
             List<string>::const_iterator iter;
 
-            if (name[0] == separator)
-            {
+            if (name[0] == separator) {
                 res = name;
                 ifstream s(res.c_str());
-                if (s)
-                {
+                if (s) {
                     s.close();
                     return;
                 }
@@ -279,7 +271,8 @@ namespace Sla.SLEIGH
         }
 #endif
 
-        public static void scanDirectoryRecursive(List<string> res, string matchname, string rootpath,int maxdepth)
+        public static void scanDirectoryRecursive(List<string> res, string matchname, string rootpath,
+            int maxdepth)
         {
             if (maxdepth == 0) return;
             List<string> subdir = new List<string>();
