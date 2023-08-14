@@ -12,96 +12,96 @@ namespace Sla.SLEIGH
     {
         // A flattened expression tree
         // friend class PcodeCompile;
-        private List<OpTpl> ops;    // flattened ops making up the expression
-        private VarnodeTpl outvn;      // Output varnode of the expression
-                                // If the last op has an output, -outvn- is
-                                // a COPY of that varnode
+        // flattened ops making up the expression
+        private List<OpTpl>? ops;
+        // Output varnode of the expression
+        // If the last op has an output, -outvn- is
+        // a COPY of that varnode
+        private VarnodeTpl outvn;
         
         public ExprTree()
         {
-            ops = (List<OpTpl*>*)0;
+            ops = (List<OpTpl>)nulll;
             outvn = (VarnodeTpl)null;
         }
 
         public ExprTree(VarnodeTpl vn)
         {
             outvn = vn;
-            ops = new List<OpTpl*>;
+            ops = new List<OpTpl>();
         }
 
         public ExprTree(OpTpl op)
         {
-            ops = new List<OpTpl*>;
+            ops = new List<OpTpl>();
             ops.Add(op);
             if (op.getOut() != (VarnodeTpl)null)
-                outvn = new VarnodeTpl(*op.getOut());
+                outvn = new VarnodeTpl(op.getOut());
             else
                 outvn = (VarnodeTpl)null;
         }
 
         ~ExprTree()
         {
-            if (outvn != (VarnodeTpl)null)
-                delete outvn;
-            if (ops != (List<OpTpl*>*)0)
-            {
-                for (int i = 0; i < ops.size(); ++i)
-                    delete(*ops)[i];
-                delete ops;
+            //if (outvn != (VarnodeTpl)null)
+            //    delete outvn;
+            if (ops != (List<OpTpl>)null) {
+                //for (int i = 0; i < ops.size(); ++i)
+                //    delete(*ops)[i];
+                //delete ops;
             }
         }
 
         public void setOutput(VarnodeTpl newout)
-        {               // Force the output of the expression to be new out
-                        // If the original output is named, this requires
-                        // an extra COPY op
-            OpTpl* op;
+        {
+            // Force the output of the expression to be new out
+            // If the original output is named, this requires
+            // an extra COPY op
+            OpTpl op;
             if (outvn == (VarnodeTpl)null)
                 throw new SleighError("Expression has no output");
-            if (outvn.isUnnamed())
-            {
-                delete outvn;
+            if (outvn.isUnnamed()) {
+                // delete outvn;
                 op = ops.GetLastItem();
                 op.clearOutput();
                 op.setOutput(newout);
             }
-            else
-            {
-                op = new OpTpl(CPUI_COPY);
+            else {
+                op = new OpTpl(CORE.OpCode.CPUI_COPY);
                 op.addInput(outvn);
                 op.setOutput(newout);
                 ops.Add(op);
             }
-            outvn = new VarnodeTpl(*newout);
+            outvn = new VarnodeTpl(newout);
         }
 
         public VarnodeTpl getOut() => outvn;
 
         public ConstTpl getSize() => outvn.getSize();
 
-        public static List<OpTpl> appendParams(OpTpl op, List<ExprTree> param)
-        {               // Create op expression with entire list of expression
-                        // inputs
-            List<OpTpl*>* res = new List<OpTpl*>;
+        public static List<OpTpl?> appendParams(OpTpl op, List<ExprTree> param)
+        {
+            // Create op expression with entire list of expression inputs
+            List<OpTpl?> res = new List<OpTpl?>();
 
-            for (int i = 0; i < param.size(); ++i)
-            {
-                res.insert(res.end(), (*param)[i].ops.begin(), (*param)[i].ops.end());
-                (*param)[i].ops.clear();
-                op.addInput((*param)[i].outvn);
-                (*param)[i].outvn = (VarnodeTpl)null;
-                delete(*param)[i];
+            for (int i = 0; i < param.Count; ++i) {
+                res.AddRange(param[i].ops);
+                param[i].ops.Clear();
+                op.addInput(param[i].outvn);
+                param[i].outvn = (VarnodeTpl)null;
+                // delete(*param)[i];
             }
             res.Add(op);
-            delete param;
+            // delete param;
             return res;
         }
 
-        public static List<OpTpl> toVector(ExprTree expr)
-        {               // Grab the op List and delete the output expression
-            List<OpTpl*>* res = expr.ops;
-            expr.ops = (List<OpTpl*>*)0;
-            delete expr;
+        public static List<OpTpl>? toVector(ExprTree expr)
+        {
+            // Grab the op List and delete the output expression
+            List<OpTpl>? res = expr.ops;
+            expr.ops = (List<OpTpl>)null;
+            // delete expr;
             return res;
         }
     }

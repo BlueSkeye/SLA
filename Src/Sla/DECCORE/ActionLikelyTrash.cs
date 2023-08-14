@@ -173,7 +173,7 @@ namespace Sla.DECCORE
 
         public override int apply(Funcdata data)
         {
-            List<PcodeOp> indlist = new ;
+            List<PcodeOp> indlist = new List<PcodeOp>();
 
             IEnumerator<VarnodeData> iter = data.getFuncProto().trashBegin();
             while (iter.MoveNext()) {

@@ -128,7 +128,7 @@ namespace Sla.DECCORE
                 hixor = (PcodeOp)null;
                 hi2 = (Varnode)null;
                 if (fillOutFromOr(data)) {
-                    SplitVarnode.replaceBoolOp(data, equalop, in, param2, equalop.code());
+                    SplitVarnode.replaceBoolOp(data, equalop, @in, param2, equalop.code());
                     return true;
                 }
             }

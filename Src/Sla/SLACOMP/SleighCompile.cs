@@ -24,7 +24,8 @@ namespace Sla.SLACOMP
     internal class SleighCompile : SleighBase
     {
         // friend class SleighPcode;
-        public SleighPcode pcode;            ///< The p-code parsing (sub)engine
+        /// The p-code parsing (sub)engine
+        public SleighPcode pcode = new SleighPcode();
 
         private Dictionary<string, string> preproc_defines;  ///< Defines for the preprocessor
         private List<FieldContext> contexttable;  ///< Context field definitions (prior to defining ContextField and ContextSymbol)
@@ -33,8 +34,8 @@ namespace Sla.SLACOMP
         private List<SubtableSymbol> tables; ///< SLEIGH subtables
         private List<SectionSymbol> sections;    ///< Symbols defining Constructor sections
         private List<WithBlock> withstack;      ///< Current stack of \b with blocks
-        private Constructor curct;         ///< Current Constructor being defined
-        private MacroSymbol curmacro;      ///< Current macro being defined
+        private Constructor? curct;         ///< Current Constructor being defined
+        private MacroSymbol? curmacro;      ///< Current macro being defined
         private bool contextlock;           ///< If the context layout has been established yet
         private List<string> relpath;     ///< Relative path (to cwd) for each filename
         private List<string> filename;        ///< Stack of current files being parsed
@@ -248,7 +249,8 @@ namespace Sla.SLACOMP
         /// checks are performed.  Errors and warnings are reported as appropriate.
         private void checkConsistency()
         {
-            ConsistencyChecker checker(this, root, warnunnecessarypcode, warndeadtemps, largetemporarywarning);
+            ConsistencyChecker checker = new ConsistencyChecker(this, root, warnunnecessarypcode,
+                warndeadtemps, largetemporarywarning);
 
             if (!checker.testSizeRestrictions())
             {
@@ -339,22 +341,17 @@ namespace Sla.SLACOMP
             if (ct.getNumOperands() < 2)
                 return true;        // Collision can only happen with multiple operands
             bool noCollisions = true;
-            Dictionary<ulong, int> collect;
-            for (int i = 0; i < ct.getNumOperands(); ++i)
-            {
+            Dictionary<ulong, int> collect = new Dictionary<ulong, int>();
+            for (int i = 0; i < ct.getNumOperands(); ++i) {
                 List<ulong> newCollect;
                 ct.getOperand(i).collectLocalValues(newCollect);
                 if (newCollect.empty()) continue;
                 int collideOperand = findCollision(collect, newCollect, i);
-                if (collideOperand >= 0)
-                {
+                if (collideOperand >= 0) {
                     noCollisions = false;
-                    if (warnalllocalcollisions)
-                    {
-                        reportWarning(getLocation(ct), "Possible operand collision between symbols '"
-                                  + ct.getOperand(collideOperand).getName()
-                                  + "' and '"
-                                  + ct.getOperand(i).getName() + "'");
+                    if (warnalllocalcollisions) {
+                        reportWarning(getLocation(ct),
+                            $"Possible operand collision between symbols '{ct.getOperand(collideOperand).getName()}' and '{ct.getOperand(i).getName()}'");
                     }
                     break;  // Don't continue
                 }
@@ -369,13 +366,11 @@ namespace Sla.SLACOMP
         private void checkLocalCollisions()
         {
             int collisionCount = 0;
-            SubtableSymbol* sym = root; // Start with the instruction table
+            SubtableSymbol sym = root; // Start with the instruction table
             int i = -1;
-            while(true)
-            {
+            while(true) {
                 int numconst = sym.getNumConstructors();
-                for (int j = 0; j < numconst; ++j)
-                {
+                for (int j = 0; j < numconst; ++j) {
                     if (!checkLocalExports(sym.getConstructor(j)))
                         collisionCount += 1;
                 }
@@ -383,11 +378,8 @@ namespace Sla.SLACOMP
                 if (i >= tables.size()) break;
                 sym = tables[i];
             }
-            if (collisionCount > 0)
-            {
-                ostringstream msg;
-                msg << dec << collisionCount << " constructors with local collisions between operands";
-                reportWarning(msg.str());
+            if (collisionCount > 0) {
+                reportWarning($"{collisionCount} constructors with local collisions between operands");
                 if (!warnalllocalcollisions)
                     reportWarning("Use -c switch to list each individually");
             }
@@ -398,16 +390,12 @@ namespace Sla.SLACOMP
         /// Optionally, empty Constructors are reported individually.
         private void checkNops()
         {
-            if (noplist.size() > 0)
-            {
-                if (warnallnops)
-                {
+            if (noplist.size() > 0) {
+                if (warnallnops) {
                     for (int i = 0; i < noplist.size(); ++i)
                         reportWarning(noplist[i]);
                 }
-                ostringstream msg;
-                msg << dec << noplist.size() << " NOP constructors found";
-                reportWarning(msg.str());
+                reportWarning($"{noplist.size()} NOP constructors found");
                 if (!warnallnops)
                     reportWarning("Use -n switch to list each individually");
             }
@@ -421,33 +409,30 @@ namespace Sla.SLACOMP
         private void checkCaseSensitivity()
         {
             if (!failinsensitivedups) return;       // Case insensitive duplicates don't cause error
-            Dictionary<string, SleighSymbol*> registerMap;
-            SymbolScope* scope = symtab.getGlobalScope();
+            Dictionary<string, SleighSymbol> registerMap = new Dictionary<string, SleighSymbol>();
+            SymbolScope scope = symtab.getGlobalScope();
             SymbolTree::const_iterator iter;
-            for (iter = scope.begin(); iter != scope.end(); ++iter)
-            {
-                SleighSymbol* sym = *iter;
-                if (sym.getType() != SleighSymbol::varnode_symbol) continue;
-                VarnodeSymbol* vsym = (VarnodeSymbol*)sym;
-                AddrSpace* space = vsym.getFixedVarnode().space;
+            for (iter = scope.begin(); iter != scope.end(); ++iter) {
+                SleighSymbol sym = *iter;
+                if (sym.getType() != SleighSymbol.symbol_type.varnode_symbol) continue;
+                VarnodeSymbol vsym = (VarnodeSymbol)sym;
+                AddrSpace space = vsym.getFixedVarnode().space ?? throw new BugException();
                 if (space.getType() != spacetype.IPTR_PROCESSOR) continue;
-                string nm = sym.getName();
-                transform(nm.begin(), nm.end(), nm.begin(), ::toupper);
-                pair<Dictionary<string, SleighSymbol*>::iterator, bool> check;
-                check = registerMap.insert(pair<string, SleighSymbol*>(nm, sym));
-                if (!check.second)
-                {   // Name already existed
-                    SleighSymbol* oldsym = (*check.first).second;
-                    ostringstream s;
-                    s << "Name collision: " << sym.getName() << " --- ";
-                    s << "Duplicate symbol " << oldsym.getName();
+                string nm = sym.getName().ToUpper();
+                SleighSymbol oldsym;
+                if (!registerMap.TryGetValue(nm, out oldsym)) {
+                    registerMap.Add(nm, sym);
+                }
+                else {
+                    // Name already existed
+                    TextWriter s = new StringWriter();
+                    s.Write($"Name collision: {sym.getName()} --- Duplicate symbol {oldsym.getName()}");
                     Location oldLocation = getLocation(oldsym);
-                    if (oldLocation != (Location*)0x0)
-                    {
-                        s << " defined at " << oldLocation.format();
+                    if (oldLocation != (Location)null) {
+                        s.Write(" defined at {oldLocation.format()}";
                     }
                     Location location = getLocation(sym);
-                    reportError(location, s.str());
+                    reportError(location, s.ToString());
                 }
             }
         }
@@ -527,24 +512,22 @@ namespace Sla.SLACOMP
         /// \return \b true if there were no errors expanding a macro
         private bool expandMacros(ConstructTpl ctpl)
         {
-            List<OpTpl*> newvec;
+            List<OpTpl> newvec = new List<OpTpl>();
             List<OpTpl*>::const_iterator iter;
-            OpTpl* op;
+            OpTpl op;
 
-            for (iter = ctpl.getOpvec().begin(); iter != ctpl.getOpvec().end(); ++iter)
-            {
+            for (iter = ctpl.getOpvec().begin(); iter != ctpl.getOpvec().end(); ++iter) {
                 op = *iter;
-                if (op.getOpcode() == MACROBUILD)
-                {
-                    MacroBuilder builder(this, newvec, ctpl.numLabels());
+                if (op.getOpcode() == MACROBUILD) {
+                    MacroBuilder builder = new MacroBuilder(this, newvec, ctpl.numLabels());
                     int index = op.getIn(0).getOffset().getReal();
                     if (index >= macrotable.size())
                         return false;
                     builder.setMacroOp(op);
-                    ConstructTpl* macro_tpl = macrotable[index];
+                    ConstructTpl macro_tpl = macrotable[index];
                     builder.build(macro_tpl, -1);
                     ctpl.setNumLabels(ctpl.numLabels() + macro_tpl.numLabels());
-                    delete op;      // Throw away the place holder op
+                    // delete op;      // Throw away the place holder op
                     if (builder.hasError())
                         return false;
                 }
@@ -568,26 +551,23 @@ namespace Sla.SLACOMP
         /// \return \b true if there were no fatal errors
         private bool finalizeSections(Constructor big, SectionVector vec)
         {
-            List<string> errors;
+            List<string> errors = new List<string>();
 
             RtlPair cur = vec.getMainPair();
             int i = -1;
             string sectionstring = "   Main section: ";
             int max = vec.getMaxId();
-            while(true)
-            {
+            while(true) {
                 string errstring;
 
                 errstring = checkSymbols(cur.scope); // Check labels in the section's scope
-                if (errstring.size() != 0)
-                {
+                if (errstring.Length != 0) {
                     errors.Add(sectionstring + errstring);
                 }
-                else
-                {
+                else {
                     if (!expandMacros(cur.section))
                         errors.Add(sectionstring + "Could not expand macros");
-                    List<int> check;
+                    List<int> check = new List<int>();
                     big.markSubtableOperands(check);
                     int res = cur.section.fillinBuild(check, getConstantSpace());
                     if (res == 1)
@@ -595,49 +575,47 @@ namespace Sla.SLACOMP
                     if (res == 2)
                         errors.Add(sectionstring + "Unnecessary BUILD statements");
 
-                    if (!PcodeCompile::propagateSize(cur.section))
+                    if (!PcodeCompile.propagateSize(cur.section))
                         errors.Add(sectionstring + "Could not resolve at least 1 variable size");
                 }
-                if (i < 0)
-                {       // These potential errors only apply to main section
-                    if (cur.section.getResult() != (HandleTpl)null)
-                    {   // If there is an export statement
+                if (i < 0) {
+                    // These potential errors only apply to main section
+                    if (cur.section.getResult() != (HandleTpl)null) {
+                        // If there is an export statement
                         if (big.getParent() == root)
                             errors.Add("   Cannot have export statement in root constructor");
                         else if (!forceExportSize(cur.section))
                             errors.Add("   Size of export is unknown");
                     }
                 }
-                if (cur.section.delaySlot() != 0)
-                { // Delay slot is present in this constructor
-                    if (root != big.getParent())
-                    { // it is not in a root constructor
-                        ostringstream msg;
-                        msg << "Delay slot used in non-root constructor ";
+                if (cur.section.delaySlot() != 0) {
+                    // Delay slot is present in this constructor
+                    if (root != big.getParent()) {
+                        // it is not in a root constructor
+                        TextWriter msg = new StringWriter();
+                        msg.Write("Delay slot used in non-root constructor ");
                         big.printInfo(msg);
-                        msg << endl;
-                        reportWarning(getLocation(big), msg.str());
+                        msg.WriteLine();
+                        reportWarning(getLocation(big), msg.ToString());
                     }
                     if (cur.section.delaySlot() > maxdelayslotbytes)   // Keep track of maximum delayslot parameter
                         maxdelayslotbytes = cur.section.delaySlot();
                 }
-                do
-                {
+                do {
                     i += 1;
                     if (i >= max) break;
                     cur = vec.getNamedPair(i);
                 } while (cur.section == (ConstructTpl)null);
 
                 if (i >= max) break;
-                SectionSymbol* sym = sections[i];
-                sectionstring = "   " + sym.getName() + " section: ";
+                SectionSymbol sym = sections[i];
+                sectionstring = $"   ${sym.getName()} section: ";
             }
-            if (!errors.empty())
-            {
-                ostringstream s;
-                s << "in ";
+            if (!errors.empty()) {
+                TextWriter s = new StringWriter();
+                s.Write("in ");
                 big.printInfo(s);
-                reportError(getLocation(big), s.str());
+                reportError(getLocation(big), s.ToString());
                 for (int j = 0; j < errors.size(); ++j)
                     reportError(getLocation(big), errors[j]);
                 return false;
@@ -653,20 +631,16 @@ namespace Sla.SLACOMP
         private static VarnodeTpl findSize(ConstTpl offset, ConstructTpl ct)
         {
             List<OpTpl> ops = ct.getOpvec();
-            VarnodeTpl* vn;
-            OpTpl* op;
+            VarnodeTpl vn;
 
-            for (int i = 0; i < ops.size(); ++i)
-            {
-                op = ops[i];
+            for (int i = 0; i < ops.size(); ++i) {
+                OpTpl op = ops[i];
                 vn = op.getOut();
-                if ((vn != (VarnodeTpl)null) && (vn.isLocalTemp()))
-                {
+                if ((vn != (VarnodeTpl)null) && (vn.isLocalTemp())) {
                     if (vn.getOffset() == offset)
                         return vn;
                 }
-                for (int j = 0; j < op.numInput(); ++j)
-                {
+                for (int j = 0; j < op.numInput(); ++j) {
                     vn = op.getIn(j);
                     if (vn.isLocalTemp() && (vn.getOffset() == offset))
                         return vn;
@@ -683,19 +657,17 @@ namespace Sla.SLACOMP
         /// \return \b false if a local zero size can't be updated
         private static bool forceExportSize(ConstructTpl ct)
         {
-            HandleTpl* result = ct.getResult();
+            HandleTpl? result = ct.getResult();
             if (result == (HandleTpl)null) return true;
 
-            VarnodeTpl* vt;
+            VarnodeTpl? vt;
 
-            if (result.getPtrSpace().isUniqueSpace() && result.getPtrSize().isZero())
-            {
+            if (result.getPtrSpace().isUniqueSpace() && result.getPtrSize().isZero()) {
                 vt = findSize(result.getPtrOffset(), ct);
                 if (vt == (VarnodeTpl)null) return false;
                 result.setPtrSize(vt.getSize());
             }
-            else if (result.getSpace().isUniqueSpace() && result.getSize().isZero())
-            {
+            else if (result.getSpace().isUniqueSpace() && result.getSize().isZero()) {
                 vt = findSize(result.getPtrOffset(), ct);
                 if (vt == (VarnodeTpl)null) return false;
                 result.setSize(vt.getSize());
@@ -709,8 +681,7 @@ namespace Sla.SLACOMP
         /// \param sa is the number of bits to shift by
         private static void shiftUniqueVn(VarnodeTpl vn, int sa)
         {
-            if (vn.getSpace().isUniqueSpace() && (vn.getOffset().getType() == ConstTpl.const_type.real))
-            {
+            if (vn.getSpace().isUniqueSpace() && (vn.getOffset().getType() == ConstTpl.const_type.real)) {
                 ulong val = vn.getOffset().getReal();
                 val <<= sa;
                 vn.setOffset(val);
@@ -723,7 +694,7 @@ namespace Sla.SLACOMP
         /// \param sa is the number of bits to shift by
         private static void shiftUniqueOp(OpTpl op, int sa)
         {
-            VarnodeTpl* outvn = op.getOut();
+            VarnodeTpl? outvn = op.getOut();
             if (outvn != (VarnodeTpl)null)
                 shiftUniqueVn(outvn, sa);
             for (int i = 0; i < op.numInput(); ++i)
@@ -736,21 +707,24 @@ namespace Sla.SLACOMP
         /// \param sa is the number of bits to shift by
         private static void shiftUniqueHandle(HandleTpl hand, int sa)
         {
-            if (hand.getSpace().isUniqueSpace() && (hand.getPtrSpace().getType() == ConstTpl.const_type.real)
+            if (   hand.getSpace().isUniqueSpace()
+                && (hand.getPtrSpace().getType() == ConstTpl.const_type.real)
                 && (hand.getPtrOffset().getType() == ConstTpl.const_type.real))
             {
                 ulong val = hand.getPtrOffset().getReal();
                 val <<= sa;
                 hand.setPtrOffset(val);
             }
-            else if (hand.getPtrSpace().isUniqueSpace() && (hand.getPtrOffset().getType() == ConstTpl.const_type.real))
+            else if (hand.getPtrSpace().isUniqueSpace()
+                && (hand.getPtrOffset().getType() == ConstTpl.const_type.real))
             {
                 ulong val = hand.getPtrOffset().getReal();
                 val <<= sa;
                 hand.setPtrOffset(val);
             }
 
-            if (hand.getTempSpace().isUniqueSpace() && (hand.getTempOffset().getType() == ConstTpl.const_type.real))
+            if (hand.getTempSpace().isUniqueSpace()
+                && (hand.getTempOffset().getType() == ConstTpl.const_type.real))
             {
                 ulong val = hand.getTempOffset().getReal();
                 val <<= sa;
@@ -764,7 +738,7 @@ namespace Sla.SLACOMP
         /// \param sa is the number of bits to shift by
         private static void shiftUniqueConstruct(ConstructTpl tpl, int sa)
         {
-            HandleTpl* result = tpl.getResult();
+            HandleTpl? result = tpl.getResult();
             if (result != (HandleTpl)null)
                 shiftUniqueHandle(result, sa);
             List<OpTpl> vec = tpl.getOpvec();
@@ -779,14 +753,12 @@ namespace Sla.SLACOMP
         /// \return the formatted message
         private static string formatStatusMessage(Location loc, string msg)
         {
-            ostringstream s;
-            if (loc != (Location)null)
-            {
-                s << loc.format();
-                s << ": ";
+            TextWriter s = new StringWriter();
+            if (loc != (Location)null) {
+                s.Write($"{loc.format()}: ");
             }
-            s << msg;
-            return s.str();
+            s.Write(msg);
+            return s.ToString();
         }
 
         ///< Modify temporary Varnode offsets to support \b crossbuilds
@@ -800,20 +772,17 @@ namespace Sla.SLACOMP
             unique_allocatemask = 0xff; // Provide 8 bits of free space
             int sa = 8;
             int secsize = sections.size(); // This is the upper bound for section numbers
-            SubtableSymbol* sym = root; // Start with the instruction table
+            SubtableSymbol sym = root; // Start with the instruction table
             int i = -1;
-            while(true)
-            {
+            while(true) {
                 int numconst = sym.getNumConstructors();
-                for (int j = 0; j < numconst; ++j)
-                {
-                    Constructor* ct = sym.getConstructor(j);
-                    ConstructTpl* tpl = ct.getTempl();
+                for (int j = 0; j < numconst; ++j) {
+                    Constructor ct = sym.getConstructor(j);
+                    ConstructTpl? tpl = ct.getTempl();
                     if (tpl != (ConstructTpl)null)
                         shiftUniqueConstruct(tpl, sa);
-                    for (int k = 0; k < secsize; ++k)
-                    {
-                        ConstructTpl* namedtpl = ct.getNamedTempl(k);
+                    for (int k = 0; k < secsize; ++k) {
+                        ConstructTpl namedtpl = ct.getNamedTempl(k);
                         if (namedtpl != (ConstructTpl)null)
                             shiftUniqueConstruct(namedtpl, sa);
                     }
@@ -849,16 +818,14 @@ namespace Sla.SLACOMP
             if (errors > 0) return;
             buildDecisionTrees();
             if (errors > 0) return;
-            List<string> errorPairs;
+            List<string> errorPairs = new List<string>();
             buildXrefs(errorPairs);     // Make sure we can build crossrefs properly
-            if (!errorPairs.empty())
-            {
-                for (int i = 0; i < errorPairs.size(); i += 2)
-                {
-                    ostringstream s;
-                    s << "Duplicate (offset,size) pair for registers: ";
-                    s << errorPairs[i] << " and " << errorPairs[i + 1] << endl;
-                    reportError(s.str());
+            if (!errorPairs.empty()) {
+                for (int i = 0; i < errorPairs.size(); i += 2) {
+                    TextWriter s = new StringWriter();
+                    s.Write("Duplicate (offset,size) pair for registers: ");
+                    s.WriteLine($"{errorPairs[i]} and {errorPairs[i + 1]}");
+                    reportError(s.ToString());
                 }
                 return;
             }
@@ -881,7 +848,7 @@ namespace Sla.SLACOMP
             warnallnops = false;
             failinsensitivedups = true;
             root = (SubtableSymbol)null;
-            curmacro = (MacroSymbol*)0;
+            curmacro = (MacroSymbol)null;
             curct = (Constructor)null;
         }
 
@@ -895,9 +862,8 @@ namespace Sla.SLACOMP
         /// \return the filename and line number or null if location not found
         public Location getLocation(SleighSymbol sym)
         {
-            try
-            {
-                return &symbolLocationMap.at(sym);
+            try {
+                return symbolLocationMap[sym];
             }
             catch (out_of_range e) {
                 return nullptr;
@@ -911,11 +877,10 @@ namespace Sla.SLACOMP
         /// \param msg is the error message
         public void reportError(string msg)
         {
-            cerr << filename.GetLastItem() << ":" << lineno.GetLastItem() << " - ERROR " << msg << endl;
+            Console.Error.WriteLine($"{filename.GetLastItem()}:{lineno.GetLastItem()} - ERROR {msg}");
             errors += 1;
-            if (errors > 1000000)
-            {
-                cerr << "Too many errors: Aborting" << endl;
+            if (errors > 1000000) {
+                Console.Error.WriteLine("Too many errors: Aborting");
                 exit(2);
             }
         }
@@ -937,7 +902,7 @@ namespace Sla.SLACOMP
         /// \param msg is the warning message
         public void reportWarning(string msg)
         {
-            cerr << "WARN  " << msg << endl;
+            Console.Error.WriteLine($"WARN  {msg}");
         }
 
         ///< Issue a warning message with a source location
@@ -961,9 +926,9 @@ namespace Sla.SLACOMP
         /// \return the starting offset of the new temporary register
         public uint getUniqueAddr()
         {
-            uint base = getUniqueBase();
-            setUniqueBase(base + SleighBase::MAX_UNIQUE_SIZE);
-            return base;
+            uint @base = getUniqueBase();
+            setUniqueBase(@base + SleighBase::MAX_UNIQUE_SIZE);
+            return @base;
         }
 
         /// \brief Set whether unnecessary truncation and extension operators generate warnings individually
@@ -1053,13 +1018,12 @@ namespace Sla.SLACOMP
             //  context_size = (context_offset+8*sizeof(uint)-1)/(8*sizeof(uint));
 
             // Delete the quals
-            for (int i = 0; i < contexttable.size(); ++i)
-            {
-                FieldQuality* qual = contexttable[i].qual;
-                delete qual;
+            for (int i = 0; i < contexttable.size(); ++i) {
+                FieldQuality qual = contexttable[i].qual;
+                //delete qual;
             }
 
-            contexttable.clear();
+            contexttable.Clear();
         }
 
         ///< Get the path to the current source file
@@ -1081,9 +1045,9 @@ namespace Sla.SLACOMP
         {
             string @base;
             string path;
-            FileManage::splitPath(fname, path, @base);
+            FileManage.splitPath(fname, out path, out @base);
             filename.Add(@base);
-            if (relpath.empty() || FileManage::isAbsolutePath(path))
+            if (relpath.empty() || FileManage.isAbsolutePath(path))
                 relpath.Add(path);
             else
             {           // Relative paths from successive includes, combine
@@ -1124,12 +1088,9 @@ namespace Sla.SLACOMP
         /// \param nm is the name of the given preprocessor variable
         /// \param res will hold string value passed back
         /// \return \b true if the variable was defined
-        public bool getPreprocValue(string nm, string res)
+        public bool getPreprocValue(string nm, out string res)
         {
-            Dictionary<string, string>::const_iterator iter = preproc_defines.find(nm);
-            if (iter == preproc_defines.end()) return false;
-            res = (*iter).second;
-            return true;
+            return preproc_defines.TryGetValue(nm, out res);
         }
 
         ///< Set a given preprocessor variable
@@ -1147,10 +1108,7 @@ namespace Sla.SLACOMP
         /// \return \b true if the variable had a value (was defined) initially
         public bool undefinePreprocValue(string nm)
         {
-            Dictionary<string, string>::iterator iter = preproc_defines.find(nm);
-            if (iter == preproc_defines.end()) return false;
-            preproc_defines.erase(iter);
-            return true;
+            return preproc_defines.Remove(nm);
         }
 
         // Parser functions
@@ -1167,11 +1125,10 @@ namespace Sla.SLACOMP
         /// \return the new token symbol
         public TokenSymbol defineToken(string name, ulong sz, int endian)
         {
-            uint size = *sz;
-            delete sz;
-            if ((size & 7) != 0)
-            {
-                reportError(getCurrentLocation(), "'" + *name + "': token size must be multiple of 8");
+            uint size = sz;
+            // delete sz;
+            if ((size & 7) != 0) {
+                reportError(getCurrentLocation(), $"'{name}': token size must be multiple of 8");
                 size = (size / 8) + 1;
             }
             else
@@ -1181,10 +1138,10 @@ namespace Sla.SLACOMP
                 isBig = isBigEndian();
             else
                 isBig = (endian > 0);
-            Token* newtoken = new Token(*name, size, isBig, tokentable.size());
+            Token newtoken = new Token(name, size, isBig, tokentable.size());
             tokentable.Add(newtoken);
-            delete name;
-            TokenSymbol* res = new TokenSymbol(newtoken);
+            // delete name;
+            TokenSymbol res = new TokenSymbol(newtoken);
             addSymbol(res);
             return res;
         }
@@ -1195,21 +1152,16 @@ namespace Sla.SLACOMP
         /// \param qual is the set of parsed qualities to associate with the new field
         public void addTokenField(TokenSymbol sym, FieldQuality qual)
         {
-            if (qual.high < qual.low)
-            {
-                ostringstream s;
-                s << "Field '" << qual.name << "' starts at " << qual.low << " and ends at " << qual.high;
-                reportError(getCurrentLocation(), s.str());
+            if (qual.high < qual.low) {
+                reportError(getCurrentLocation(),
+                    $"Field '{qual.name}' starts at {qual.low} and ends at {qual.high}");
             }
-            if (sym.getToken().getSize() * 8 <= qual.high)
-            {
-                ostringstream s;
-                s << "Field '" << qual.name << "' high must be less than token size";
-                reportError(getCurrentLocation(), s.str());
+            if (sym.getToken().getSize() * 8 <= qual.high) {
+                reportError(getCurrentLocation(), $"Field '{qual.name}' high must be less than token size");
             }
-            TokenField* field = new TokenField(sym.getToken(), qual.signext, qual.low, qual.high);
+            TokenField field = new TokenField(sym.getToken(), qual.signext, qual.low, qual.high);
             addSymbol(new ValueSymbol(qual.name, field));
-            delete qual;
+            // delete qual;
         }
 
         /// \brief Add a new context field definition to the given backing Varnode
@@ -1218,22 +1170,18 @@ namespace Sla.SLACOMP
         /// \param qual is the set of parsed qualities to associate with the new field
         public bool addContextField(VarnodeSymbol sym, FieldQuality qual)
         {
-            if (qual.high < qual.low)
-            {
-                ostringstream s;
-                s << "Context field '" << qual.name << "' starts at " << qual.low << " and ends at " << qual.high;
-                reportError(getCurrentLocation(), s.str());
+            if (qual.high < qual.low) {
+                reportError(getCurrentLocation(),
+                    $"Context field '{qual.name}' starts at {qual.low} and ends at {qual.high}");
             }
-            if (sym.getSize() * 8 <= qual.high)
-            {
-                ostringstream s;
-                s << "Context field '" << qual.name << "' high must be less than context size";
-                reportError(getCurrentLocation(), s.str());
+            if (sym.getSize() * 8 <= qual.high) {
+                reportError(getCurrentLocation(),
+                    $"Context field '{qual.name}' high must be less than context size");
             }
             if (contextlock)
                 return false;       // Context layout has already been satisfied
 
-            contexttable.Add(FieldContext(sym, qual));
+            contexttable.Add(new FieldContext(sym, qual));
             return true;
         }
 
@@ -1242,27 +1190,26 @@ namespace Sla.SLACOMP
         /// \param qual is the set of parsed qualities to associate with the new space
         public void newSpace(SpaceQuality qual)
         {
-            if (qual.size == 0)
-            {
-                reportError(getCurrentLocation(), "Space definition '" + qual.name + "' missing size attribute");
-                delete qual;
+            if (qual.size == 0) {
+                reportError(getCurrentLocation(), $"Space definition '{qual.name}' missing size attribute");
+                // delete qual;
                 return;
             }
 
-            int delay = (qual.type == SpaceQuality::registertype) ? 0 : 1;
-            AddrSpace* spc = new AddrSpace(this, this, spacetype.IPTR_PROCESSOR, qual.name, qual.size, qual.wordsize, numSpaces(), AddrSpace::hasphysical, delay);
+            int delay = (qual.type == SpaceQuality.registertype) ? 0 : 1;
+            AddrSpace spc = new AddrSpace(this, this, spacetype.IPTR_PROCESSOR, qual.name, qual.size,
+                qual.wordsize, numSpaces(), AddrSpace::hasphysical, delay);
             insertSpace(spc);
-            if (qual.isdefault)
-            {
+            if (qual.isdefault) {
                 if (getDefaultCodeSpace() != (AddrSpace)null)
-                    reportError(getCurrentLocation(), "Multiple default spaces -- '" + getDefaultCodeSpace().getName() + "', '" + qual.name + "'");
-                else
-                {
+                    reportError(getCurrentLocation(),
+                        $"Multiple default spaces -- '{getDefaultCodeSpace().getName()}', '{qual.name}'");
+                else {
                     setDefaultCodeSpace(spc.getIndex());   // Make the flagged space the default
                     pcode.setDefaultSpace(spc);
                 }
             }
-            delete qual;
+            // delete qual;
             addSymbol(new SpaceSymbol(spc));
         }
 
@@ -1272,16 +1219,15 @@ namespace Sla.SLACOMP
         /// \return the new section symbol
         public SectionSymbol newSectionSymbol(string nm)
         {
-            SectionSymbol* sym = new SectionSymbol(nm, sections.size());
-            try
-            {
+            SectionSymbol sym = new SectionSymbol(nm, sections.size());
+            try {
                 symtab.addGlobalSymbol(sym);
             }
             catch (SleighError err) {
                 reportError(getCurrentLocation(), err.ToString());
             }
             sections.Add(sym);
-            numSections = sections.size();
+            numSections = sections.Length;
             return sym;
         }
 
@@ -1314,17 +1260,16 @@ namespace Sla.SLACOMP
         /// \param names is the list of Varnode names to define
         public void defineVarnodes(SpaceSymbol spacesym, ulong off, ulong size, List<string> names)
         {
-            AddrSpace* spc = spacesym.getSpace();
-            ulong myoff = *off;
-            for (int i = 0; i < names.size(); ++i)
-            {
-                if ((*names)[i] != "_")
-                    addSymbol(new VarnodeSymbol((*names)[i], spc, myoff, *size));
-                myoff += *size;
+            AddrSpace spc = spacesym.getSpace();
+            ulong myoff = off;
+            for (int i = 0; i < names.Count; ++i) {
+                if (names[i] != "_")
+                    addSymbol(new VarnodeSymbol(names[i], spc, myoff, size));
+                myoff += size;
             }
-            delete names;
-            delete off;
-            delete size;
+            //delete names;
+            //delete off;
+            //delete size;
         }
 
         /// \brief Define a new Varnode symbol as a subrange of bits within another symbol
@@ -1338,23 +1283,20 @@ namespace Sla.SLACOMP
         /// \param numb is the number of bits in the new Varnode
         public void defineBitrange(string name, VarnodeSymbol sym, uint bitoffset, uint numb)
         {
-            string namecopy = *name;
-            delete name;
-            uint size = 8 * sym.getSize(); // Number of bits
-            if (numb == 0)
-            {
-                reportError(getCurrentLocation(), "'" + namecopy + "': size of bitrange is zero");
+            string namecopy = name;
+            // delete name;
+            uint size = 8U * (uint)sym.getSize(); // Number of bits
+            if (numb == 0) {
+                reportError(getCurrentLocation(), $"'{namecopy}': size of bitrange is zero");
                 return;
             }
-            if ((bitoffset >= size) || ((bitoffset + numb) > size))
-            {
-                reportError(getCurrentLocation(), "'" + namecopy + "': bad bitrange");
+            if ((bitoffset >= size) || ((bitoffset + numb) > size)) {
+                reportError(getCurrentLocation(), $"'{namecopy}': bad bitrange");
                 return;
             }
-            if ((bitoffset % 8 == 0) && (numb % 8 == 0))
-            {
+            if ((bitoffset % 8 == 0) && (numb % 8 == 0)) {
                 // This can be reduced to an ordinary varnode definition
-                AddrSpace* newspace = sym.getFixedVarnode().space;
+                AddrSpace newspace = sym.getFixedVarnode().space;
                 ulong newoffset = sym.getFixedVarnode().offset;
                 int newsize = numb / 8;
                 if (isBigEndian())
@@ -1373,13 +1315,12 @@ namespace Sla.SLACOMP
         /// \param names is the list of names
         public void addUserOp(List<string> names)
         {
-            for (int i = 0; i < names.size(); ++i)
-            {
-                UserOpSymbol* sym = new UserOpSymbol((*names)[i]);
+            for (int i = 0; i < names.Count; ++i) {
+                UserOpSymbol sym = new UserOpSymbol(names[i]);
                 sym.setIndex(userop_count++);
                 addSymbol(sym);
             }
-            delete names;
+            // delete names;
         }
 
         /// \brief Attach a list integer values, to each value symbol in the given list
@@ -1390,25 +1331,22 @@ namespace Sla.SLACOMP
         /// \param numlist is the list of integer values to attach
         public void attachValues(List<SleighSymbol> symlist, List<long> numlist)
         {
-            SleighSymbol* dupsym = dedupSymbolList(symlist);
+            SleighSymbol? dupsym = dedupSymbolList(symlist);
             if (dupsym != (SleighSymbol)null)
-                reportWarning(getCurrentLocation(), "'attach values' list contains duplicate entries: " + dupsym.getName());
-            for (int i = 0; i < symlist.size(); ++i)
-            {
-                ValueSymbol* sym = (ValueSymbol*)(*symlist)[i];
-                if (sym == (ValueSymbol*)0) continue;
-                PatternValue* patval = sym.getPatternValue();
-                if (patval.maxValue() + 1 != numlist.size())
-                {
-                    ostringstream msg;
-                    msg << "Attach value '" + sym.getName();
-                    msg << "' (range 0.." << patval.maxValue() << ") is wrong size for list (of " << numlist.size() << " entries)";
-                    reportError(getCurrentLocation(), msg.str());
+                reportWarning(getCurrentLocation(), 
+                    $"'attach values' list contains duplicate entries: {dupsym.getName()}");
+            for (int i = 0; i < symlist.size(); ++i) {
+                ValueSymbol? sym = (ValueSymbol)symlist[i];
+                if (sym == (ValueSymbol)null) continue;
+                PatternValue patval = sym.getPatternValue();
+                if (patval.maxValue() + 1 != numlist.size()) {
+                    reportError(getCurrentLocation(),
+                        $"Attach value '{sym.getName()}' (range 0..{patval.maxValue()}) is wrong size for list (of {numlist.size()} entries)");
                 }
-                symtab.replaceSymbol(sym, new ValueMapSymbol(sym.getName(), patval, *numlist));
+                symtab.replaceSymbol(sym, new ValueMapSymbol(sym.getName(), patval, numlist));
             }
-            delete numlist;
-            delete symlist;
+            //delete numlist;
+            //delete symlist;
         }
 
         /// \brief Attach a list of display names to the given list of value symbols
@@ -1419,25 +1357,22 @@ namespace Sla.SLACOMP
         /// \param names is the list of display names to attach
         public void attachNames(List<SleighSymbol> symlist, List<string> names)
         {
-            SleighSymbol* dupsym = dedupSymbolList(symlist);
+            SleighSymbol? dupsym = dedupSymbolList(symlist);
             if (dupsym != (SleighSymbol)null)
-                reportWarning(getCurrentLocation(), "'attach names' list contains duplicate entries: " + dupsym.getName());
-            for (int i = 0; i < symlist.size(); ++i)
-            {
-                ValueSymbol* sym = (ValueSymbol*)(*symlist)[i];
-                if (sym == (ValueSymbol*)0) continue;
-                PatternValue* patval = sym.getPatternValue();
-                if (patval.maxValue() + 1 != names.size())
-                {
-                    ostringstream msg;
-                    msg << "Attach name '" + sym.getName();
-                    msg << "' (range 0.." << patval.maxValue() << ") is wrong size for list (of " << names.size() << " entries)";
-                    reportError(getCurrentLocation(), msg.str());
+                reportWarning(getCurrentLocation(),
+                    $"'attach names' list contains duplicate entries: {dupsym.getName()}");
+            for (int i = 0; i < symlist.size(); ++i) {
+                ValueSymbol? sym = (ValueSymbol)symlist[i];
+                if (sym == (ValueSymbol)null) continue;
+                PatternValue patval = sym.getPatternValue();
+                if (patval.maxValue() + 1 != names.Count) {
+                    reportError(getCurrentLocation(),
+                        $"Attach name '{sym.getName()}' (range 0..{patval.maxValue()}) is wrong size for list (of {names.size()} entries)");
                 }
-                symtab.replaceSymbol(sym, new NameSymbol(sym.getName(), patval, *names));
+                symtab.replaceSymbol(sym, new NameSymbol(sym.getName(), patval, names));
             }
-            delete names;
-            delete symlist;
+            //delete names;
+            //delete symlist;
         }
 
         /// \brief Attach a list of Varnodes to the given list of value symbols
@@ -1448,42 +1383,34 @@ namespace Sla.SLACOMP
         /// \param varlist is the list of Varnodes to attach
         public void attachVarnodes(List<SleighSymbol> symlist, List<SleighSymbol> varlist)
         {
-            SleighSymbol* dupsym = dedupSymbolList(symlist);
+            SleighSymbol? dupsym = dedupSymbolList(symlist);
             if (dupsym != (SleighSymbol)null)
                 reportWarning(getCurrentLocation(), "'attach variables' list contains duplicate entries: " + dupsym.getName());
-            for (int i = 0; i < symlist.size(); ++i)
-            {
-                ValueSymbol* sym = (ValueSymbol*)(*symlist)[i];
-                if (sym == (ValueSymbol*)0) continue;
-                PatternValue* patval = sym.getPatternValue();
-                if (patval.maxValue() + 1 != varlist.size())
-                {
-                    ostringstream msg;
-                    msg << "Attach varnode '" + sym.getName();
-                    msg << "' (range 0.." << patval.maxValue() << ") is wrong size for list (of " << varlist.size() << " entries)";
-                    reportError(getCurrentLocation(), msg.str());
+            for (int i = 0; i < symlist.size(); ++i) {
+                ValueSymbol? sym = (ValueSymbol)symlist[i];
+                if (sym == (ValueSymbol)null) continue;
+                PatternValue patval = sym.getPatternValue();
+                if (patval.maxValue() + 1 != varlist.Count) {
+                    reportError(getCurrentLocation(),
+                        $"Attach varnode '{sym.getName()}' (range 0..{patval.maxValue()}) is wrong size for list (of {varlist.size()} entries)");
                 }
                 int sz = 0;
-                for (int j = 0; j < varlist.size(); ++j)
-                {
-                    VarnodeSymbol* vsym = (VarnodeSymbol*)(*varlist)[j];
-                    if (vsym != (VarnodeSymbol)null)
-                    {
+                for (int j = 0; j < varlist.Count; ++j) {
+                    VarnodeSymbol? vsym = (VarnodeSymbol)(varlist)[j];
+                    if (vsym != (VarnodeSymbol)null) {
                         if (sz == 0)
                             sz = vsym.getFixedVarnode().size;
-                        else if (sz != vsym.getFixedVarnode().size)
-                        {
-                            ostringstream msg;
-                            msg << "Attach statement contains varnodes of different sizes -- " << dec << sz << " != " << dec << vsym.getFixedVarnode().size;
-                            reportError(getCurrentLocation(), msg.str());
+                        else if (sz != vsym.getFixedVarnode().size) {
+                            reportError(getCurrentLocation(),
+                                $"Attach statement contains varnodes of different sizes -- {sz} != {vsym.getFixedVarnode().size}");
                             break;
                         }
                     }
                 }
                 symtab.replaceSymbol(sym, new VarnodeListSymbol(sym.getName(), patval, *varlist));
             }
-            delete varlist;
-            delete symlist;
+            //delete varlist;
+            //delete symlist;
         }
 
         /// \brief Define a new SLEIGH subtable
@@ -1492,10 +1419,10 @@ namespace Sla.SLACOMP
         /// \param nm is the name of the new subtable
         public SubtableSymbol newTable(string nm)
         {
-            SubtableSymbol* sym = new SubtableSymbol(*nm);
+            SubtableSymbol sym = new SubtableSymbol(nm);
             addSymbol(sym);
             tables.Add(sym);
-            delete nm;
+            // delete nm;
             return sym;
         }
 
@@ -1508,10 +1435,10 @@ namespace Sla.SLACOMP
         public void newOperand(Constructor ct, string nm)
         {
             int index = ct.getNumOperands();
-            OperandSymbol* sym = new OperandSymbol(*nm, index, ct);
+            OperandSymbol sym = new OperandSymbol(nm, index, ct);
             addSymbol(sym);
             ct.addOperand(sym);
-            delete nm;
+            // delete nm;
         }
 
         /// \brief Create a new constraint equation based on the given operand
@@ -1520,18 +1447,18 @@ namespace Sla.SLACOMP
         /// \param sym is the given operand
         /// \param patexp is the specified expression
         /// \return the new constraint equation
-        public PatternEquation constrainOperand(OperandSymbol sym, PatternExpression patexp)
+        public PatternEquation? constrainOperand(OperandSymbol sym, PatternExpression patexp)
         {
-            PatternEquation* res;
-            FamilySymbol* famsym = dynamic_cast<FamilySymbol*>(sym.getDefiningSymbol());
-            if (famsym != (FamilySymbol*)0)
-            { // Operand already defined as family symbol
+            PatternEquation? res;
+            FamilySymbol? famsym = sym.getDefiningSymbol() as FamilySymbol;
+            if (famsym != (FamilySymbol)null) {
+                // Operand already defined as family symbol
               // This equation must be a constraint
                 res = new EqualEquation(famsym.getPatternValue(), patexp);
             }
-            else
-            {           // Operand is currently undefined, so we can't constrain
-                PatternExpression::release(patexp);
+            else {
+                // Operand is currently undefined, so we can't constrain
+                PatternExpression.release(patexp);
                 res = (PatternEquation)null;
             }
             return res;
@@ -1545,8 +1472,7 @@ namespace Sla.SLACOMP
         /// \param patexp is the expression to map to the operand
         public void defineOperand(OperandSymbol sym, PatternExpression patexp)
         {
-            try
-            {
+            try {
                 sym.defineOperand(patexp);
                 sym.setOffsetIrrelevant(); // If not a self-definition, the operand has no
                                             // pattern directly associated with it, so
@@ -1554,7 +1480,7 @@ namespace Sla.SLACOMP
             }
             catch (SleighError err) {
                 reportError(getCurrentLocation(), err.ToString());
-                PatternExpression::release(patexp);
+                PatternExpression.release(patexp);
             }
         }
 
@@ -1568,19 +1494,18 @@ namespace Sla.SLACOMP
         public PatternEquation defineInvisibleOperand(TripleSymbol sym)
         {
             int index = curct.getNumOperands();
-            OperandSymbol* opsym = new OperandSymbol(sym.getName(), index, curct);
+            OperandSymbol opsym = new OperandSymbol(sym.getName(), index, curct);
             addSymbol(opsym);
             curct.addInvisibleOperand(opsym);
-            PatternEquation* res = new OperandEquation(opsym.getIndex());
-            SleighSymbol::symbol_type tp = sym.getType();
-            try
-            {
-                if ((tp == SleighSymbol::value_symbol) || (tp == SleighSymbol::context_symbol))
+            PatternEquation res = new OperandEquation(opsym.getIndex());
+            SleighSymbol.symbol_type tp = sym.getType();
+            try {
+                if (   (tp == SleighSymbol.symbol_type.value_symbol)
+                    || (tp == SleighSymbol.symbol_type.context_symbol))
                 {
                     opsym.defineOperand(sym.getPatternExpression());
                 }
-                else
-                {
+                else {
                     opsym.defineOperand(sym);
                 }
             }
@@ -1597,16 +1522,15 @@ namespace Sla.SLACOMP
         /// \param sym is the given operand
         public void selfDefine(OperandSymbol sym)
         {
-            TripleSymbol* glob = dynamic_cast<TripleSymbol*>(symtab.findSymbol(sym.getName(), 1));
-            if (glob == (TripleSymbol)null)
-            {
+            TripleSymbol? glob = dynamic_cast<TripleSymbol*>(symtab.findSymbol(sym.getName(), 1));
+            if (glob == (TripleSymbol)null) {
                 reportError(getCurrentLocation(), "No matching global symbol '" + sym.getName() + "'");
                 return;
             }
-            SleighSymbol::symbol_type tp = glob.getType();
-            try
-            {
-                if ((tp == SleighSymbol::value_symbol) || (tp == SleighSymbol::context_symbol))
+            SleighSymbol.symbol_type tp = glob.getType();
+            try {
+                if (   (tp == SleighSymbol.symbol_type.value_symbol)
+                    || (tp == SleighSymbol.symbol_type.context_symbol))
                 {
                     sym.defineOperand(glob.getPatternExpression());
                 }
@@ -1626,8 +1550,8 @@ namespace Sla.SLACOMP
         /// \return the p-code section
         public ConstructTpl setResultVarnode(ConstructTpl ct, VarnodeTpl vn)
         {
-            HandleTpl* res = new HandleTpl(vn);
-            delete vn;
+            HandleTpl res = new HandleTpl(vn);
+            // delete vn;
             ct.setResult(res);
             return ct;
         }
@@ -1641,10 +1565,10 @@ namespace Sla.SLACOMP
         /// \return the p-code section
         public ConstructTpl setResultStarVarnode(ConstructTpl ct, StarQuality star, VarnodeTpl vn)
         {
-            HandleTpl* res = new HandleTpl(star.id, ConstTpl(ConstTpl.const_type.real, star.size), vn,
-                             getUniqueSpace(), getUniqueAddr());
-            delete star;
-            delete vn;
+            HandleTpl res = new HandleTpl(star.id, new ConstTpl(ConstTpl.const_type.real, star.size), vn,
+                getUniqueSpace(), getUniqueAddr());
+            //delete star;
+            //delete vn;
             ct.setResult(res);
             return ct;
         }
@@ -1664,16 +1588,15 @@ namespace Sla.SLACOMP
         {
             List<PatternValue> vallist =new List<PatternValue>();
             pe.listValues(vallist);
-            for (uint i = 0; i < vallist.size(); ++i)
-            {
-                if (dynamic_cast<EndInstructionValue*>(vallist[i]) != (EndInstructionValue*)0)
+            for (uint i = 0; i < vallist.size(); ++i) {
+                if ((vallist[i] as EndInstructionValue) != (EndInstructionValue)null)
                     return false;
-                if (dynamic_cast<Next2InstructionValue*>(vallist[i]) != (Next2InstructionValue*)0)
+                if ((vallist[i] as Next2InstructionValue) != (Next2InstructionValue)null)
                     return false;
             }
             // Otherwise we generate a "temporary" change to context instruction  (ContextOp)
-            ContextField* field = (ContextField*)sym.getPatternValue();
-            ContextOp* op = new ContextOp(field.getStartBit(), field.getEndBit(), pe);
+            ContextField field = (ContextField)sym.getPatternValue();
+            ContextOp op = new ContextOp(field.getStartBit(), field.getEndBit(), pe);
             vec.Add(op);
             return true;
         }
@@ -1689,8 +1612,8 @@ namespace Sla.SLACOMP
         /// \param cvar is the given context variable
         public void contextSet(List<ContextChange> vec, TripleSymbol sym, ContextSymbol cvar)
         {
-            ContextField* field = (ContextField*)cvar.getPatternValue();
-            ContextCommit* op = new ContextCommit(sym, field.getStartBit(), field.getEndBit(), cvar.getFlow());
+            ContextField field = (ContextField)cvar.getPatternValue();
+            ContextCommit op = new ContextCommit(sym, field.getStartBit(), field.getEndBit(), cvar.getFlow());
             vec.Add(op);
         }
 
@@ -1704,17 +1627,17 @@ namespace Sla.SLACOMP
         public MacroSymbol createMacro(string name, List<string> param)
         {
             curct = (Constructor)null;    // Not currently defining a Constructor
-            curmacro = new MacroSymbol(*name, macrotable.size());
-            delete name;
+            curmacro = new MacroSymbol(name, macrotable.size());
+            // delete name;
             addSymbol(curmacro);
             symtab.addScope();      // New scope for the body of the macro definition
             pcode.resetLabelCount();    // Macros have their own labels
-            for (int i = 0; i <@params.size(); ++i) {
-                OperandSymbol* oper = new OperandSymbol((*@params)[i], i,(Constructor *)0);
+            for (int i = 0; i < @params.size(); ++i) {
+                OperandSymbol oper = new OperandSymbol(@params[i], i,(Constructor)null);
                 addSymbol(oper);
                 curmacro.addOperand(oper);
             }
-            delete @params;
+            // delete @params;
             return curmacro;
         }
 
@@ -1726,17 +1649,16 @@ namespace Sla.SLACOMP
         /// \param param is the list of expressions passed to the macro
         public void compareMacroParams(MacroSymbol sym, List<ExprTree> param)
         {
-            for (uint i = 0; i < param.size(); ++i)
-            {
-                VarnodeTpl* outvn = param[i].getOut();
+            for (uint i = 0; i < param.size(); ++i) {
+                VarnodeTpl outvn = param[i].getOut();
                 if (outvn == (VarnodeTpl)null) continue;
                 // Check if an OperandSymbol was passed into this macro
                 if (outvn.getOffset().getType() != ConstTpl.const_type.handle) continue;
                 int hand = outvn.getOffset().getHandleIndex();
 
                 // The matching operands
-                OperandSymbol* macroop = sym.getOperand(i);
-                OperandSymbol* parentop;
+                OperandSymbol macroop = sym.getOperand(i);
+                OperandSymbol parentop;
                 if (curct == (Constructor)null)
                     parentop = curmacro.getOperand(hand);
                 else
@@ -1757,20 +1679,19 @@ namespace Sla.SLACOMP
         /// \return the p-code sequence
         public List<OpTpl> createMacroUse(MacroSymbol sym, List<ExprTree> param)
         {
-            if (sym.getNumOperands() != param.size())
-            {
+            if (sym.getNumOperands() != param.size()) {
                 bool tooManyParams = param.size() > sym.getNumOperands();
                 string errmsg = "Invocation of macro '" + sym.getName() + "' passes too " + (tooManyParams ? "many" : "few") + " parameters";
                 reportError(getCurrentLocation(), errmsg);
-                return new List<OpTpl*>;
+                return new List<OpTpl>();
             }
-            compareMacroParams(sym, *param);
-            OpTpl* op = new OpTpl(MACROBUILD);
-            VarnodeTpl* idvn = new VarnodeTpl(ConstTpl(getConstantSpace()),
-                                ConstTpl(ConstTpl.const_type.real, sym.getIndex()),
-                                ConstTpl(ConstTpl.const_type.real, 4));
+            compareMacroParams(sym, param);
+            OpTpl op = new OpTpl(OpCode.MACROBUILD);
+            VarnodeTpl idvn = new VarnodeTpl(new ConstTpl(getConstantSpace()),
+                new ConstTpl(ConstTpl.const_type.real, (ulong)sym.getIndex()),
+                new ConstTpl(ConstTpl.const_type.real, 4));
             op.addInput(idvn);
-            return ExprTree::appendParams(op, param);
+            return ExprTree.appendParams(op, param);
         }
 
         /// \brief Create a SectionVector containing just the \e main p-code section with no named sections
@@ -1779,7 +1700,7 @@ namespace Sla.SLACOMP
         /// \return the new SectionVector
         public SectionVector standaloneSection(ConstructTpl main)
         {
-            SectionVector* res = new SectionVector(main, symtab.getCurrentScope());
+            SectionVector res = new SectionVector(main, symtab.getCurrentScope());
             return res;
         }
 
@@ -1794,12 +1715,12 @@ namespace Sla.SLACOMP
         public SectionVector firstNamedSection(ConstructTpl main, SectionSymbol sym)
         {
             sym.incrementDefineCount();
-            SymbolScope* curscope = symtab.getCurrentScope(); // This should be a Constructor scope
-            SymbolScope* parscope = curscope.getParent();
+            SymbolScope curscope = symtab.getCurrentScope(); // This should be a Constructor scope
+            SymbolScope parscope = curscope.getParent();
             if (parscope != symtab.getGlobalScope())
                 throw new LowlevelError("firstNamedSection called when not in Constructor scope"); // Unrecoverable error
             symtab.addScope();      // Add new scope under the Constructor scope
-            SectionVector* res = new SectionVector(main, curscope);
+            SectionVector res = new SectionVector(main, curscope);
             res.setNextIndex(sym.getTemplateId());
             return res;
         }
@@ -1816,9 +1737,9 @@ namespace Sla.SLACOMP
         public SectionVector nextNamedSection(SectionVector vec, ConstructTpl section, SectionSymbol sym)
         {
             sym.incrementDefineCount();
-            SymbolScope* curscope = symtab.getCurrentScope();
+            SymbolScope curscope = symtab.getCurrentScope();
             symtab.popScope();      // Pop the scope of the last named section
-            SymbolScope* parscope = symtab.getCurrentScope().getParent();
+            SymbolScope parscope = symtab.getCurrentScope().getParent();
             if (parscope != symtab.getGlobalScope())
                 throw new LowlevelError("nextNamedSection called when not in section scope"); // Unrecoverable
             symtab.addScope();      // Add new scope under the Constructor scope (not the last section scope)
@@ -1849,12 +1770,12 @@ namespace Sla.SLACOMP
         public List<OpTpl> createCrossBuild(VarnodeTpl addr, SectionSymbol sym)
         {
             unique_allocatemask = 1;
-            List<OpTpl*>* res = new List<OpTpl*>();
-            VarnodeTpl* sectionid = new VarnodeTpl(ConstTpl(getConstantSpace()),
-                                                   ConstTpl(ConstTpl.const_type.real, sym.getTemplateId()),
-                                                   ConstTpl(ConstTpl.const_type.real, 4));
+            List<OpTpl> res = new List<OpTpl>();
+            VarnodeTpl sectionid = new VarnodeTpl(new ConstTpl(getConstantSpace()),
+                new ConstTpl(ConstTpl.const_type.real, (ulong)sym.getTemplateId()),
+                new ConstTpl(ConstTpl.const_type.real, 4));
             // This is simply a single pcodeop (template), where the opcode indicates the crossbuild directive
-            OpTpl* op = new OpTpl(OpCode.CROSSBUILD);
+            OpTpl op = new OpTpl(OpCode.CROSSBUILD);
             op.addInput(addr);     // The first input is the VarnodeTpl representing the address
             op.addInput(sectionid);    // The second input is the indexed representing the named pcode section to build
             res.Add(op);
@@ -1870,13 +1791,13 @@ namespace Sla.SLACOMP
         public Constructor createConstructor(SubtableSymbol sym)
         {
             if (sym == (SubtableSymbol)null)
-                sym = WithBlock::getCurrentSubtable(withstack);
+                sym = WithBlock.getCurrentSubtable(withstack);
             if (sym == (SubtableSymbol)null)
                 sym = root;
-            curmacro = (MacroSymbol*)0; // Not currently defining a macro
+            curmacro = (MacroSymbol)null; // Not currently defining a macro
             curct = new Constructor(sym);
             curct.setLineno(lineno.GetLastItem());
-            ctorLocationMap[curct] = *getCurrentLocation();
+            ctorLocationMap[curct] = getCurrentLocation();
             sym.addConstructor(curct);
             symtab.addScope();      // Make a new symbol scope for our constructor
             pcode.resetLabelCount();
@@ -1922,7 +1843,7 @@ namespace Sla.SLACOMP
         /// \param contvec is the list of context changes or null
         /// \param vec is the collection of p-code sections, or null
         public void buildConstructor(Constructor big, PatternEquation pateq, List<ContextChange> contvec,
-            SectionVector vec)
+            SectionVector? vec)
         {
             bool noerrors = true;
             if (vec != (SectionVector)null) {
@@ -1945,8 +1866,8 @@ namespace Sla.SLACOMP
                 contvec = WithBlock.collectAndPrependContext(withstack, contvec);
                 big.addEquation(pateq);
                 big.removeTrailingSpace();
-                if (contvec != (List<ContextChange*>*)0) {
-                    big.addContext(*contvec);
+                if (contvec != (List<ContextChange>)null) {
+                    big.addContext(contvec);
                     // delete contvec;
                 }
             }
@@ -1962,17 +1883,15 @@ namespace Sla.SLACOMP
         public void buildMacro(MacroSymbol sym, ConstructTpl rtl)
         {
             string errstring = checkSymbols(symtab.getCurrentScope());
-            if (errstring.size() != 0)
-            {
+            if (errstring.Length != 0) {
                 reportError(getCurrentLocation(), "In definition of macro '" + sym.getName() + "': " + errstring);
                 return;
             }
-            if (!expandMacros(rtl))
-            {
+            if (!expandMacros(rtl)) {
                 reportError(getCurrentLocation(), "Could not expand submacro in definition of macro '" + sym.getName() + "'");
                 return;
             }
-            PcodeCompile::propagateSize(rtl); // Propagate size information (as much as possible)
+            PcodeCompile.propagateSize(rtl); // Propagate size information (as much as possible)
             sym.setConstruct(rtl);
             symtab.popScope();      // Pop local variables used to define macro
             macrotable.Add(rtl);
@@ -1989,21 +1908,21 @@ namespace Sla.SLACOMP
         }
 
         // Virtual functions (not used by the compiler)
-        public virtual void initialize(DocumentStorage store)
+        public override void initialize(DocumentStorage store)
         {
         }
 
-        public virtual int instructionLength(Address baseaddr)
-        {
-            return 0;
-        }
-
-        public virtual int oneInstruction(PcodeEmit emit, Address baseaddr)
+        public override int instructionLength(Address baseaddr)
         {
             return 0;
         }
 
-        public virtual int printAssembly(AssemblyEmit emit, Address baseaddr)
+        public override int oneInstruction(PcodeEmit emit, Address baseaddr)
+        {
+            return 0;
+        }
+
+        public override int printAssembly(AssemblyEmit emit, Address baseaddr)
         {
             return 0;
         }
@@ -2023,10 +1942,8 @@ namespace Sla.SLACOMP
              bool lenientConflict, bool allCollisionWarning, bool allNopWarning, bool deadTempWarning,
              bool enforceLocalKeyWord, bool largeTemporaryWarning, bool caseSensitiveRegisterNames)
         {
-            Dictionary<string, string>::const_iterator iter = defines.begin();
-            for (iter = defines.begin(); iter != defines.end(); iter++)
-            {
-                setPreprocValue(iter.Current.Key, (*iter).second);
+            foreach (KeyValuePair<string, string> pair in defines) {
+                setPreprocValue(pair.Key, pair.Value);
             }
             setUnnecessaryPcodeWarning(unnecessaryPcodeWarning);
             setLenientConflict(lenientConflict);
@@ -2050,40 +1967,35 @@ namespace Sla.SLACOMP
         {
             parseFromNewFile(filein);
             slgh = this;        // Set global pointer up for parser
-            sleighin = fopen(filein.c_str(), "r");  // Open the file for the lexer
-            if (sleighin == (FILE*)0)
-            {
-                cerr << "Unable to open specfile: " << filein << endl;
+            sleighin = File.OpenRead(filein);  // Open the file for the lexer
+            if (sleighin == (FILE*)0) {
+                Console.Error.WriteLine($"Unable to open specfile: {filein}");
                 return 2;
             }
 
-            try
-            {
+            try {
                 int parseres = sleighparse();  // Try to parse
-                fclose(sleighin);
+                sleighin.Close();
                 if (parseres == 0)
                     process();  // Do all the post-processing
-                if ((parseres == 0) && (numErrors() == 0))
-                { // If no errors
-                    ofstream s(fileout);
-                    if (!s)
-                    {
-                        ostringstream errs;
-                        errs << "Unable to open output file: " << fileout;
-                        throw new SleighError(errs.str());
+                if ((parseres == 0) && (numErrors() == 0)) {
+                    // If no errors
+                    StreamWriter s;
+                    try { s = File.OpenWrite(fileout); }
+                    catch {
+                        throw new SleighError($"Unable to open output file: {fileout}");
                     }
                     saveXml(s); // Dump output xml
-                    s.close();
+                    s.Close();
                 }
-                else
-                {
-                    cerr << "No output produced" << endl;
+                else {
+                    Console.Error.WriteLine("No output produced");
                     return 2;
                 }
                 sleighlex_destroy(); // Make sure lexer is reset so we can parse multiple files
             }
             catch (LowlevelError err) {
-                cerr << "Unrecoverable error: " << err.ToString() << endl;
+                Console.Error.WriteLine($"Unrecoverable error: {err.ToString()}");
                 return 2;
             }
             return 0;

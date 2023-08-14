@@ -38,18 +38,19 @@ namespace Sla.SLEIGH
             return s.str();
         }
 
-        private static bool testDevelopmentPath(List<string> pathels,int level,string root)
-        { // Given pathels[level] is "Ghidra", determine if this is a Ghidra development layout
+        private static bool testDevelopmentPath(List<string> pathels, int level, out string root)
+        {
+            // Given pathels[level] is "Ghidra", determine if this is a Ghidra development layout
             if (level + 2 >= pathels.size()) return false;
             string parent = pathels[level + 1];
-            if (parent.size() < 11) return false;
-            string piecestr = parent.substr(0, 7);
+            if (parent.Length < 11) return false;
+            string piecestr = parent.Substring(0, 7);
             if (piecestr != "ghidra.") return false;
-            piecestr = parent.substr(parent.size() - 4);
+            piecestr = parent.Substring(parent.Length - 4);
             if (piecestr != ".git") return false;
             root = buildPath(pathels, level + 2);
-            List<string> testpaths1;
-            List<string> testpaths2;
+            List<string> testpaths1 = new List<string>();
+            List<string> testpaths2 = new List<string>();
             scanDirectoryRecursive(testpaths1, "ghidra.git", root, 1);
             if (testpaths1.size() != 1) return false;
             scanDirectoryRecursive(testpaths2, "Ghidra", testpaths1[0], 1);
@@ -281,14 +282,11 @@ namespace Sla.SLEIGH
         public static void scanDirectoryRecursive(List<string> res, string matchname, string rootpath,int maxdepth)
         {
             if (maxdepth == 0) return;
-            List<string> subdir;
+            List<string> subdir = new List<string>();
             directoryList(subdir, rootpath);
-            List<string>::const_iterator iter;
-            for (iter = subdir.begin(); iter != subdir.end(); ++iter)
-            {
-                string curpath = *iter;
-                string::size_type pos = curpath.rfind(separator);
-                if (pos == string::npos)
+            foreach (string curpath in subdir) {
+                int pos = curpath.LastIndexOf(separator);
+                if (-1 == pos)
                     pos = 0;
                 else
                     pos = pos + 1;
@@ -299,24 +297,24 @@ namespace Sla.SLEIGH
             }
         }
 
-        public static void splitPath(string full,string path,string @base)
-        { // Split path string -full- into its -base-name and -path- (relative or absolute)
-          // If there is no path, i.e. only a basename in full, then -path- will return as an empty string
-          // otherwise -path- will be non-empty and end in a separator character
-            string::size_type end = full.size() - 1;
-            if (full[full.size() - 1] == separator) // Take into account terminating separator
-                end = full.size() - 2;
-            string::size_type pos = full.rfind(separator, end);
-            if (pos == string::npos)
-            {   // Didn't find any separator
-                base = full;
-                path.clear();
+        public static void splitPath(string full,out string path,out string @base)
+        {
+            // Split path string -full- into its -base-name and -path- (relative or absolute)
+            // If there is no path, i.e. only a basename in full, then -path- will return as an empty string
+            // otherwise -path- will be non-empty and end in a separator character
+            int end = full.Length - 1;
+            if (full[full.Length - 1] == separator) // Take into account terminating separator
+                end = full.Length - 2;
+            int pos = full.rfind(separator, end);
+            if (-1 == pos) {
+                // Didn't find any separator
+                @base = full;
+                path = string.Empty;
             }
-            else
-            {
-                string::size_type sz = (end - pos);
-                base = full.substr(pos + 1, sz);
-                path = full.substr(0, pos + 1);
+            else {
+                int sz = (end - pos);
+                @base = full.Substring(pos + 1, sz);
+                path = full.Substring(0, pos + 1);
             }
         }
 
@@ -326,43 +324,40 @@ namespace Sla.SLEIGH
         }
 
         public static string discoverGhidraRoot(string argv0)
-        { // Find the root of the ghidra distribution based on current working directory and passed in path
-            List<string> pathels;
-            string cur(argv0);
-            string base;
+        {
+            // Find the root of the ghidra distribution based on current working directory and passed in path
+            List<string> pathels = new List<string>();
+            string cur = argv0;
+            string @base;
             int skiplevel = 0;
             bool isAbs = isAbsolutePath(cur);
 
-            while(true)
-            {
+            while(true) {
                 int sizebefore = cur.size();
-                splitPath(cur, cur, base);
-                if (cur.size() == sizebefore) break;
-                if (base == ".")
+                splitPath(cur, out cur, out @base);
+                if (cur.Length == sizebefore) break;
+                if (@base == ".")
                     skiplevel += 1;
-                else if (base == "..")
+                else if (@base == "..")
                     skiplevel += 2;
                 if (skiplevel > 0)
                     skiplevel -= 1;
                 else
-                    pathels.Add(base);
+                    pathels.Add(@base);
             }
-            if (!isAbs)
-            {
-                FileManage curdir;
+            if (!isAbs) {
+                FileManage curdir = new FileManage();
                 curdir.addCurrentDir();
                 cur = curdir.pathlist[0];
-                while(true)
-                {
-                    int sizebefore = cur.size();
-                    splitPath(cur, cur, base);
-                    if (cur.size() == sizebefore) break;
-                    pathels.Add(base);
+                while(true) {
+                    int sizebefore = cur.Length;
+                    splitPath(cur, out cur, out @base);
+                    if (cur.Length == sizebefore) break;
+                    pathels.Add(@base);
                 }
             }
 
-            for (int i = 0; i < pathels.size(); ++i)
-            {
+            for (int i = 0; i < pathels.size(); ++i) {
                 if (pathels[i] != "Ghidra") continue;
                 string root;
                 if (testDevelopmentPath(pathels, i, root))

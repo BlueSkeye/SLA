@@ -1,4 +1,5 @@
-﻿using Sla.DECCORE;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,42 +27,36 @@ namespace Sla.EXTRA
             dcp.cgraph.buildAllNodes();       // Build a node in the graph for existing symbols
             quick = false;
             iterateFunctionsAddrOrder();
-            *status.optr << "Successfully built callgraph" << endl;
+            status.optr.WriteLine("Successfully built callgraph");
         }
 
         public override void iterationCallback(Funcdata fd)
         {
-            clock_t start_time, end_time;
-            float duration;
+            DateTime start_time, end_time;
 
-            if (fd.hasNoCode())
-            {
-                *status.optr << "No code for " << fd.getName() << endl;
+            if (fd.hasNoCode()) {
+                status.optr.WriteLine($"No code for {fd.getName()}");
                 return;
             }
-            if (quick)
-            {
+            if (quick) {
                 dcp.fd = fd;
-                dcp.followFlow(*status.optr, 0);
+                dcp.followFlow(status.optr, 0);
             }
-            else
-            {
-                try
-                {
+            else {
+                try {
                     dcp.conf.clearAnalysis(fd); // Clear any old analysis
-                    dcp.conf.allacts.getCurrent().reset(*fd);
-                    start_time = clock();
-                    dcp.conf.allacts.getCurrent().perform(*fd);
-                    end_time = clock();
-                    *status.optr << "Decompiled " << fd.getName();
+                    dcp.conf.allacts.getCurrent().reset(fd);
+                    start_time = DateTime.UtcNow();
+                    dcp.conf.allacts.getCurrent().perform(fd);
+                    end_time = DateTime.UtcNow();
+                    status.optr.Write($"Decompiled {fd.getName()}");
                     //	  *status.optr << ": " << hex << fd.getAddress().getOffset();
-                    *status.optr << '(' << dec << fd.getSize() << ')';
-                    duration = ((float)(end_time - start_time)) / CLOCKS_PER_SEC;
-                    duration *= 1000.0;
-                    *status.optr << " time=" << fixed << setprecision(0) << duration << " ms" << endl;
+                    status.optr.Write($"({fd.getSize()})");
+                    TimeSpan duration = (end_time - start_time);
+                    status.optr.WriteLine($" time={(int)duration.TotalMilliseconds} ms");
                 }
                 catch (LowlevelError err) {
-                    *status.optr << "Skipping " << fd.getName() << ": " << err.ToString() << endl;
+                    status.optr.WriteLine($"Skipping {fd.getName()}: {err.ToString()}");
                 }
             }
             dcp.cgraph.buildEdges(fd);

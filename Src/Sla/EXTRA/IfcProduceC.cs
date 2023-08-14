@@ -1,4 +1,5 @@
-﻿using Sla.DECCORE;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,45 +21,39 @@ namespace Sla.EXTRA
             string name;
 
             s >> ws >> name;
-            if (name.size() == 0)
+            if (name.Length == 0)
                 throw new IfaceParseError("Need file name to write to");
 
-            ofstream os;
-            os.open(name.c_str());
-            dcp.conf.print.setOutputStream(&os);
-
-            iterateFunctionsAddrOrder();
-
-            os.close();
+            using (StreamWriter os = new StreamWriter(File.OpenWrite(name.ToString()))) {
+                dcp.conf.print.setOutputStream(os);
+                iterateFunctionsAddrOrder();
+            }
         }
 
         public override void iterationCallback(Funcdata fd)
         {
-            clock_t start_time, end_time;
-            float duration;
+            DateTime start_time, end_time;
 
-            if (fd.hasNoCode())
-            {
-                *status.optr << "No code for " << fd.getName() << endl;
+            if (fd.hasNoCode()) {
+                status.optr.WriteLine("No code for {fd.getName()}");
                 return;
             }
-            try
-            {
+            try {
                 dcp.conf.clearAnalysis(fd); // Clear any old analysis
-                dcp.conf.allacts.getCurrent().reset(*fd);
-                start_time = clock();
+                dcp.conf.allacts.getCurrent().reset(fd);
+                start_time = DateTime.UtcNow();
                 dcp.conf.allacts.getCurrent().perform(*fd);
-                end_time = clock();
-                *status.optr << "Decompiled " << fd.getName();
+                end_time = DateTime.UtcNow();
+                status.optr.Write($"Decompiled {fd.getName()}");
                 //	  *status.optr << ": " << hex << fd.getAddress().getOffset();
-                *status.optr << '(' << dec << fd.getSize() << ')';
-                duration = ((float)(end_time - start_time)) / CLOCKS_PER_SEC;
+                status.optr.Write($"({fd.getSize()})");
+                TimeSpan duration = (end_time - start_time);
                 duration *= 1000.0;
-                *status.optr << " time=" << fixed << setprecision(0) << duration << " ms" << endl;
+                status.optr.WriteLine($" time={(int)duration.TotalMilliseconds} ms");
                 dcp.conf.print.docFunction(fd);
             }
             catch (LowlevelError err) {
-                *status.optr << "Skipping " << fd.getName() << ": " << err.ToString() << endl;
+                status.optr.WriteLine($"Skipping {fd.getName()}: {err.ToString()}");
             }
             dcp.conf.clearAnalysis(fd);
         }

@@ -87,17 +87,17 @@ namespace Sla.SLEIGH
         }
 
         public List<OpTpl> placeLabel(LabelSymbol sym)
-        { // Create placeholder OpTpl for a label
-            if (labsym.isPlaced())
-            {
-                reportError(getLocation(labsym), "Label '" + labsym.getName() + "' is placed more than once");
+        {
+            // Create placeholder OpTpl for a label
+            if (labsym.isPlaced()) {
+                reportError(getLocation(labsym), $"Label '{labsym.getName()}' is placed more than once");
             }
             labsym.setPlaced();
-            List<OpTpl*>* res = new List<OpTpl*>;
-            OpTpl* op = new OpTpl(LABELBUILD);
-            VarnodeTpl* idvn = new VarnodeTpl(ConstTpl(constantspace),
-                                ConstTpl(ConstTpl.const_type.real, labsym.getIndex()),
-                                ConstTpl(ConstTpl.const_type.real, 4));
+            List<OpTpl> res = new List<OpTpl();
+            OpTpl op = new OpTpl(OpCode.LABELBUILD);
+            VarnodeTpl idvn = new VarnodeTpl(new ConstTpl(constantspace),
+                new ConstTpl(ConstTpl.const_type.real, labsym.getIndex()),
+                new ConstTpl(ConstTpl.const_type.real, 4));
             op.addInput(idvn);
             res.Add(op);
             return res;
@@ -105,21 +105,22 @@ namespace Sla.SLEIGH
 
         public List<OpTpl> newOutput(bool usesLocalKey, ExprTree rhs, string varname, uint size = 0)
         {
-            VarnodeSymbol* sym;
-            VarnodeTpl* tmpvn = buildTemporary();
+            VarnodeSymbol sym;
+            VarnodeTpl tmpvn = buildTemporary();
             if (size != 0)
-                tmpvn.setSize(ConstTpl(ConstTpl.const_type.real, size)); // Size was explicitly specified
+                tmpvn.setSize(new ConstTpl(ConstTpl.const_type.real, size)); // Size was explicitly specified
             else if ((rhs.getSize().getType() == ConstTpl.const_type.real) && (rhs.getSize().getReal() != 0))
                 tmpvn.setSize(rhs.getSize()); // Inherit size from unnamed expression result
                                                 // Only inherit if the size is real, otherwise we
                                                 // cannot build the VarnodeSymbol with a placeholder constant
             rhs.setOutput(tmpvn);
-            sym = new VarnodeSymbol(*varname, tmpvn.getSpace().getSpace(), tmpvn.getOffset().getReal(), tmpvn.getSize().getReal()); // Create new symbol regardless
+            sym = new VarnodeSymbol(varname, tmpvn.getSpace().getSpace(), tmpvn.getOffset().getReal(),
+                (int)tmpvn.getSize().getReal()); // Create new symbol regardless
             addSymbol(sym);
             if ((!usesLocalKey) && enforceLocalKey)
-                reportError(getLocation(sym), "Must use 'local' keyword to define symbol '" + *varname + "'");
-            delete varname;
-            return ExprTree::toVector(rhs);
+                reportError(getLocation(sym), $"Must use 'local' keyword to define symbol '{varname}'");
+            // delete varname;
+            return ExprTree.toVector(rhs);
         }
 
         public void newLocalDefinition(string varname, uint size = 0)

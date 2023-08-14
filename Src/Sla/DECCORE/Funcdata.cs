@@ -4771,7 +4771,7 @@ namespace Sla.DECCORE
         /// \param failuremode will hold the final success/failure code (0=success)
         /// \return the recovered JumpTable or NULL if there was no success
         public JumpTable? recoverJumpTable(Funcdata partial, PcodeOp op, FlowInfo flow,
-            int failuremode)
+            out int failuremode)
         {
             failuremode = 0;
             JumpTable? jt = linkJumpTable(op);     // Search for pre-existing jumptable
@@ -4797,7 +4797,7 @@ namespace Sla.DECCORE
                 return (JumpTable)null;
             //  if (trialjt.is_twostage())
             //    warning("Jumptable maybe incomplete. Second-stage recovery not implemented",trialjt.Opaddress());
-            jt = new JumpTable(&trialjt); // Make the jumptable permanent
+            jt = new JumpTable(trialjt); // Make the jumptable permanent
             jumpvec.Add(jt);
             jt.setIndirectOp(op);      // Relink table back to original op
             return jt;

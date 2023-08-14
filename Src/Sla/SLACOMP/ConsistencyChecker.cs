@@ -1,12 +1,5 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
+using Sla.SLEIGH;
 
 namespace Sla.SLACOMP
 {
@@ -1444,17 +1437,20 @@ namespace Sla.SLACOMP
         /// \param un is \b true to request "Unnecessary extension" warnings
         /// \param warndead is \b true to request warnings for written but not read temporaries
         /// \param warnlargetemp is \b true to request warnings for temporaries that are too large
-        public ConsistencyChecker(SleighCompile sleigh, SubtableSymbol rt, bool unnecessary, bool warndead, bool warnlargetemp)
+        public ConsistencyChecker(SleighCompile sleigh, SubtableSymbol rt, bool unnecessary, bool warndead,
+            bool warnlargetemp)
         {
             compiler = sleigh;
             root_symbol = rt;
             unnecessarypcode = 0;
             readnowrite = 0;
             writenoread = 0;
-            largetemp = 0;        ///<Number of constructors using at least one temporary varnode larger than SleighBase::MAX_UNIQUE_SIZE
-            printextwarning = un;
+            /// Number of constructors using at least one temporary varnode larger than SleighBase::MAX_UNIQUE_SIZE
+            largetemp = 0;
+            printextwarning = unnecessary;
             printdeadwarning = warndead;
-            printlargetempwarning = warnlargetemp; ///< If true, prints a warning about each constructor using a temporary varnode larger than SleighBase::MAX_UNIQUE_SIZE
+            /// If true, prints a warning about each constructor using a temporary varnode larger than SleighBase::MAX_UNIQUE_SIZE
+            printlargetempwarning = warnlargetemp;
         }
 
         /// Test size consistency of all p-code
@@ -1465,9 +1461,8 @@ namespace Sla.SLACOMP
             setPostOrder(root_symbol);
             bool testresult = true;
 
-            for (int i = 0; i < postorder.size(); ++i)
-            {
-                SubtableSymbol* sym = postorder[i];
+            for (int i = 0; i < postorder.size(); ++i) {
+                SubtableSymbol sym = postorder[i];
                 if (!checkSubtable(sym))
                     testresult = false;
             }
@@ -1482,19 +1477,16 @@ namespace Sla.SLACOMP
         {
             bool testresult = true;
             bool isbigendian = slgh.isBigEndian();
-            for (int i = 0; i < postorder.size(); ++i)
-            {
-                SubtableSymbol* sym = postorder[i];
+            for (int i = 0; i < postorder.size(); ++i) {
+                SubtableSymbol sym = postorder[i];
                 int numconstruct = sym.getNumConstructors();
-                Constructor* ct;
-                for (int j = 0; j < numconstruct; ++j)
-                {
+                Constructor ct;
+                for (int j = 0; j < numconstruct; ++j) {
                     ct = sym.getConstructor(j);
 
                     int numsections = ct.getNumSections();
-                    for (int k = -1; k < numsections; ++k)
-                    {
-                        ConstructTpl* tpl;
+                    for (int k = -1; k < numsections; ++k) {
+                        ConstructTpl tpl;
                         if (k < 0)
                             tpl = ct.getTempl();
                         else
@@ -1514,19 +1506,15 @@ namespace Sla.SLACOMP
         /// If requested, an individual warning is printed for each Constructor.
         public void testLargeTemporary()
         {
-            for (int i = 0; i < postorder.size(); ++i)
-            {
-                SubtableSymbol* sym = postorder[i];
+            for (int i = 0; i < postorder.size(); ++i) {
+                SubtableSymbol sym = postorder[i];
                 int numconstruct = sym.getNumConstructors();
-                Constructor* ct;
-                for (int j = 0; j < numconstruct; ++j)
-                {
-                    ct = sym.getConstructor(j);
+                for (int j = 0; j < numconstruct; ++j) {
+                    Constructor ct = sym.getConstructor(j);
 
                     int numsections = ct.getNumSections();
-                    for (int k = -1; k < numsections; ++k)
-                    {
-                        ConstructTpl* tpl;
+                    for (int k = -1; k < numsections; ++k) {
+                        ConstructTpl tpl;
                         if (k < 0)
                             tpl = ct.getTempl();
                         else
@@ -1542,25 +1530,26 @@ namespace Sla.SLACOMP
         /// Do COPY propagation optimization on all p-code
         public void optimizeAll()
         {
-            for (int i = 0; i < postorder.size(); ++i)
-            {
-                SubtableSymbol* sym = postorder[i];
+            for (int i = 0; i < postorder.size(); ++i) {
+                SubtableSymbol sym = postorder[i];
                 int numconstruct = sym.getNumConstructors();
-                Constructor* ct;
-                for (int i = 0; i < numconstruct; ++i)
-                {
-                    ct = sym.getConstructor(i);
+                for (int j = 0; j < numconstruct; ++j) {
+                    Constructor ct = sym.getConstructor(j);
                     optimize(ct);
                 }
             }
         }
 
-        public int getNumUnnecessaryPcode() => unnecessarypcode; ///< Return the number of unnecessary extensions and truncations
+        /// Return the number of unnecessary extensions and truncations
+        public int getNumUnnecessaryPcode() => unnecessarypcode;
 
-        public int getNumReadNoWrite() => readnowrite; ///< Return the number of temporaries read but not written
+        /// Return the number of temporaries read but not written
+        public int getNumReadNoWrite() => readnowrite;
 
-        public int getNumWriteNoRead() => writenoread; ///< Return the number of temporaries written but not read
+        /// Return the number of temporaries written but not read
+        public int getNumWriteNoRead() => writenoread;
 
-        public int getNumLargeTemporaries() => largetemp; ///< Return the number of \e too large temporaries
+        /// Return the number of \e too large temporaries
+        public int getNumLargeTemporaries() => largetemp;
     }
 }

@@ -21,11 +21,9 @@ namespace Sla.EXTRA
             if (filename.empty())
                 throw new IfaceParseError("No filename specified");
 
-            status.fileoptr = new ofstream;
-            ((ofstream*)status.fileoptr).open(filename.c_str());
-            if (!*status.fileoptr)
-            {
-                delete status.fileoptr;
+            try { status.fileoptr = new StreamWriter(File.OpenWrite(filename)); }
+            catch {
+                // delete status.fileoptr;
                 status.fileoptr = status.optr;
                 throw new IfaceExecutionError("Unable to open file: " + filename);
             }

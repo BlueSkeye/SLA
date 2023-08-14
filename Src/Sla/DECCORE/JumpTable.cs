@@ -289,18 +289,13 @@ namespace Sla.DECCORE
         private bool isLabelled() => !label.empty();
 
         /// Return \b true if \b this table was manually overridden
-        private bool isOverride()
-        {
-            if (jmodel == (JumpModel)null)
-                return false;
-            return jmodel.isOverride();
-        }
+        internal bool isOverride() => (jmodel != (JumpModel)null) && jmodel.isOverride();
 
         /// Return \b true if this could be multi-staged
         private bool isPossibleMultistage() => (addresstable.Count == 1);
 
         /// Return what stage of recovery this jump-table is @in.
-        private int getStage() => recoverystage;
+        internal int getStage() => recoverystage;
 
         /// Return the size of the address table for \b this jump-table
         internal int numEntries() => addresstable.Count;

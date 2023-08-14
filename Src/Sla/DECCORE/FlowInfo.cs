@@ -1153,7 +1153,7 @@ namespace Sla.DECCORE
             {
                 op = tablelist[i];
                 int failuremode;
-                JumpTable* jt = data.recoverJumpTable(partial, op, this, failuremode); // Recover it
+                JumpTable? jt = data.recoverJumpTable(partial, op, this, out failuremode); // Recover it
                 if (jt == (JumpTable)null)
                 { // Could not recover jumptable
                     if ((failuremode == 3) && (tablelist.size() > 1) && (!isInArray(notreached, op)))

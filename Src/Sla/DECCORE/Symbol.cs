@@ -98,7 +98,7 @@ namespace Sla.DECCORE
         /// Examine the data-type to decide if the Symbol has the special property
         /// called \b size_typelock, which indicates the \e size of the Symbol
         /// is locked, but the data-type is not locked (and can float)
-        protected void checkSizeTypeLock()
+        internal void checkSizeTypeLock()
         {
             dispflags &= ~(DisplayFlags.size_typelock);
             if (isTypeLocked() && (type.getMetatype() == type_metatype.TYPE_UNKNOWN))

@@ -1,4 +1,5 @@
-﻿using Sla.DECCORE;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 using static Sla.DECCORE.FlowBlock;
 using static Sla.DECCORE.TokenSplit;
 using static Sla.SLEIGH.ConstTpl;
@@ -40,7 +41,7 @@ namespace Sla.EXTRA
                 case TypeKind.block_type:
                     break;
                 case TypeKind.const_type:
-                    storespot.cn = new ulong;
+                    storespot.cn = 0UL;
                     break;
                 default:
                     throw new LowlevelError("Bad unify datatype");
@@ -56,7 +57,7 @@ namespace Sla.EXTRA
                 case TypeKind.block_type:
                     break;
                 case TypeKind.const_type:
-                    storespot.cn = new ulong; // Copy needs its own memory
+                    storespot.cn = 0; // Copy needs its own memory
                     break;
                 default:
                     throw new LowlevelError("Bad unify datatype");
@@ -83,7 +84,7 @@ namespace Sla.EXTRA
                 case TypeKind.block_type:
                     break;
                 case TypeKind.const_type:
-                    storespot.cn = new ulong; // Copy needs its own memory
+                    storespot.cn = 0; // Copy needs its own memory
                     break;
                 default:
                     throw new LowlevelError("Bad unify datatype");

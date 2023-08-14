@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -14,7 +7,7 @@ namespace Sla.DECCORE
     {
         // protected: friend class TypeFactory;
         /// type of which we have an array
-        protected Datatype arrayof;
+        protected Datatype? arrayof;
         /// Number of elements in the array
         protected int arraysize;
 
@@ -28,20 +21,18 @@ namespace Sla.DECCORE
             decodeBasic(decoder);
             arraysize = -1;
             decoder.rewindAttributes();
-            while(true)
-            {
-                uint attrib = decoder.getNextAttributeId();
+            while(true) {
+                AttributeId attrib = decoder.getNextAttributeId();
                 if (attrib == 0) break;
-                if (attrib == ATTRIB_ARRAYSIZE)
-                {
-                    arraysize = decoder.readSignedInteger();
+                if (attrib == AttributeId.ATTRIB_ARRAYSIZE) {
+                    arraysize = (int)decoder.readSignedInteger();
                 }
             }
             arrayof = typegrp.decodeType(decoder);
             if ((arraysize <= 0) || (arraysize * arrayof.getSize() != size))
                 throw new LowlevelError("Bad size for array of type " + arrayof.getName());
             if (arraysize == 1)
-                flags |= needs_resolution;      // Array of size 1 needs special treatment
+                flags |= Properties.needs_resolution;      // Array of size 1 needs special treatment
                                                 //  decoder.closeElement(elemId);
         }
 
@@ -69,11 +60,11 @@ namespace Sla.DECCORE
             // A varnode which is an array of size 1, should generally always be treated
             // as the element data-type
             if (n == 1)
-                flags |= needs_resolution;
+                flags |= Properties.needs_resolution;
         }
 
         /// Get the element data-type
-        public Datatype getBase() => arrayof;
+        public Datatype? getBase() => arrayof;
 
         /// Get the number of elements
         public int numElements() => arraysize;
@@ -88,74 +79,81 @@ namespace Sla.DECCORE
         /// \return the element data-type or NULL if the piece overlaps more than one
         public Datatype getSubEntry(int off, int sz, int newoff, int el)
         {
+            if (null == arrayof) throw new BugException();
             int noff = off % arrayof.getSize();
             int nel = off / arrayof.getSize();
             if (noff + sz > arrayof.getSize()) // Requesting parts of more then one element
                 return (Datatype)null;
-            *newoff = noff;
-            *el = nel;
+            newoff = noff;
+            el = nel;
             return arrayof;
         }
 
         public override void printRaw(TextWriter s)
         {
+            if (null == arrayof) throw new BugException();
             arrayof.printRaw(s);
-            s << " [" << dec << arraysize << ']';
+            s.Write($"[{arraysize}]");
         }
 
-        public override Datatype getSubType(ulong off, ulong newoff)
+        public override Datatype getSubType(ulong off, out ulong newoff)
         {
+            if (null == arrayof) throw new BugException();
             // Go down exactly one level, to type of element
-            *newoff = off % arrayof.getSize();
+            newoff = off % arrayof.getSize();
             return arrayof;
         }
 
         public override int getHoleSize(int off)
         {
+            if (null == arrayof) throw new BugException();
             int newOff = off % arrayof.getSize();
             return arrayof.getHoleSize(newOff);
         }
 
         public override int numDepend() => 1;
 
-        public override Datatype getDepend(int index) => arrayof;
+        public override Datatype? getDepend(int index) => arrayof;
 
         public override void printNameBase(TextWriter s) 
         {
-            s << 'a';
+            if (null == arrayof) throw new BugException();
+            s.Write('a');
             arrayof.printNameBase(s);
         }
 
         // For tree structure
         public override int compare(Datatype op, int level)
         {
-            int res = Datatype::compare(op, level);
+            if (null == arrayof) throw new BugException();
+            int res = base.compare(op, level);
             if (res != 0) return res;
             level -= 1;
-            if (level < 0)
-            {
+            if (level < 0) {
                 if (id == op.getId()) return 0;
                 return (id < op.getId()) ? -1 : 1;
             }
-            TypeArray* ta = (TypeArray*)&op;    // Both must be arrays
-            return arrayof.compare(*ta.arrayof, level); // Compare array elements
+            TypeArray ta = (TypeArray)op;    // Both must be arrays
+            return arrayof.compare(ta.arrayof, level); // Compare array elements
         }
 
         // For tree structure
         public override int compareDependency(Datatype op)
         {
+            if (null == arrayof) throw new BugException();
             if (submeta != op.getSubMeta()) return (submeta < op.getSubMeta()) ? -1 : 1;
-            TypeArray* ta = (TypeArray*)&op;    // Both must be arrays
-            if (arrayof != ta.arrayof) return (arrayof < ta.arrayof) ? -1 : 1;    // Compare absolute pointers
+            TypeArray ta = (TypeArray)op;    // Both must be arrays
+            // Compare absolute pointers
+            if (arrayof != ta.arrayof) return (this.arrayof < ta.arrayof) ? -1 : 1;
             return (op.getSize() - size);
         }
 
-        public override Datatype clone() => new TypeArray(this);
+        internal override Datatype clone() => new TypeArray(this);
 
         public override void encode(Sla.CORE.Encoder encoder)
         {
-            if (typedefImm != (Datatype)null)
-            {
+            if (null == arrayof) throw new BugException();
+            if (typedefImm != (Datatype)null) {
                 encodeTypedef(encoder);
                 return;
             }
@@ -168,22 +166,20 @@ namespace Sla.DECCORE
 
         public override Datatype resolveInFlow(PcodeOp op, int slot)
         {
-            Funcdata* fd = op.getParent().getFuncdata();
-            ResolvedUnion res = fd.getUnionField(this, op, slot);
+            Funcdata fd = op.getParent().getFuncdata();
+            ResolvedUnion? res = fd.getUnionField(this, op, slot);
             if (res != (ResolvedUnion)null)
                 return res.getDatatype();
-
-            int fieldNum = TypeStruct::scoreSingleComponent(this, op, slot);
-
-            ResolvedUnion compFill(this, fieldNum,* fd.getArch().types);
+            int fieldNum = TypeStruct.scoreSingleComponent(this, op, slot);
+            ResolvedUnion compFill = new ResolvedUnion(this, fieldNum, fd.getArch().types);
             fd.setUnionField(this, op, slot, compFill);
             return compFill.getDatatype();
         }
 
-        public override Datatype findResolve(PcodeOp op, int slot)
+        public override Datatype? findResolve(PcodeOp op, int slot)
         {
             Funcdata fd = op.getParent().getFuncdata();
-            ResolvedUnion res = fd.getUnionField(this, op, slot);
+            ResolvedUnion? res = fd.getUnionField(this, op, slot);
             if (res != (ResolvedUnion)null)
                 return res.getDatatype();
             return arrayof;     // If not calculated before, assume referring to the element
@@ -191,8 +187,8 @@ namespace Sla.DECCORE
 
         public override int findCompatibleResolve(Datatype ct)
         {
-            if (ct.needsResolution() && !arrayof.needsResolution())
-            {
+            if (null == arrayof) throw new BugException();
+            if (ct.needsResolution() && !arrayof.needsResolution()) {
                 if (ct.findCompatibleResolve(arrayof) >= 0)
                     return 0;
             }

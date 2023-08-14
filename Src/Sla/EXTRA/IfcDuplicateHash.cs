@@ -1,4 +1,5 @@
-﻿using Sla.DECCORE;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,23 +16,20 @@ namespace Sla.EXTRA
         /// \param s is the stream to write messages to
         public static void check(Funcdata fd, TextWriter s)
         {
-            DynamicHash dhash;
+            DynamicHash dhash = new DynamicHash();
 
             VarnodeLocSet::const_iterator iter, enditer;
             pair<set<ulong>::iterator, bool> res;
             iter = fd.beginLoc();
             enditer = fd.endLoc();
-            while (iter != enditer)
-            {
-                Varnode* vn = *iter;
+            while (iter != enditer) {
+                Varnode vn = *iter;
                 ++iter;
                 if (vn.isAnnotation()) continue;
-                if (vn.isConstant())
-                {
-                    PcodeOp* op = vn.loneDescend();
+                if (vn.isConstant()) {
+                    PcodeOp op = vn.loneDescend() ?? throw new BugException();
                     int slot = op.getSlot(vn);
-                    if (slot == 0)
-                    {
+                    if (slot == 0) {
                         if (op.code() == OpCode.CPUI_LOAD) continue;
                         if (op.code() == OpCode.CPUI_STORE) continue;
                         if (op.code() == OpCode.CPUI_RETURN) continue;
@@ -42,35 +40,25 @@ namespace Sla.EXTRA
                 else if (vn.isImplied())
                     continue;
                 dhash.uniqueHash(vn, fd);
-                if (dhash.getHash() == 0)
-                {
+                if (dhash.getHash() == 0) {
                     // We have a duplicate
-                    PcodeOp op;
-                    if (vn.beginDescend() != vn.endDescend())
-                        op = *vn.beginDescend();
-                    else
-                        op = vn.getDef();
-                    s << "Could not get unique hash for : ";
+                    PcodeOp op = (vn.beginDescend() != vn.endDescend()) ? vn.beginDescend() : vn.getDef();
+                    s.Write("Could not get unique hash for : ");
                     vn.printRaw(s);
-                    s << " : ";
+                    s.Write(" : ");
                     op.printRaw(s);
-                    s << endl;
+                    s.WriteLine();
                     return;
                 }
-                uint total = DynamicHash::getTotalFromHash(dhash.getHash());
-                if (total != 1)
-                {
-                    PcodeOp op;
-                    if (vn.beginDescend() != vn.endDescend())
-                        op = *vn.beginDescend();
-                    else
-                        op = vn.getDef();
-                    s << "Duplicate : ";
-                    s << dec << DynamicHash::getPositionFromHash(dhash.getHash()) << " out of " << total << " : ";
+                uint total = DynamicHash.getTotalFromHash(dhash.getHash());
+                if (total != 1) {
+                    PcodeOp op = (vn.beginDescend() != vn.endDescend()) ? vn.beginDescend() : vn.getDef();
+                    s.Write("Duplicate : ");
+                    s.Write($"{DynamicHash.getPositionFromHash(dhash.getHash())} out of {total} : ");
                     vn.printRaw(s);
-                    s << " : ";
+                    s.Write(" : ");
                     op.printRaw(s);
-                    s << endl;
+                    s.WriteLine();
                 }
             }
         }
@@ -87,31 +75,27 @@ namespace Sla.EXTRA
 
         public override void iterationCallback(Funcdata fd)
         {
-            clock_t start_time, end_time;
-            float duration;
+            DateTime start_time, end_time;
 
-            if (fd.hasNoCode())
-            {
-                *status.optr << "No code for " << fd.getName() << endl;
+            if (fd.hasNoCode()) {
+                status.optr.WriteLine("No code for {fd.getName()}");
                 return;
             }
-            try
-            {
+            try {
                 dcp.conf.clearAnalysis(fd); // Clear any old analysis
-                dcp.conf.allacts.getCurrent().reset(*fd);
-                start_time = clock();
+                dcp.conf.allacts.getCurrent().reset(fd);
+                start_time = DateTime.UtcNow;
                 dcp.conf.allacts.getCurrent().perform(*fd);
-                end_time = clock();
-                *status.optr << "Decompiled " << fd.getName();
+                end_time = DateTime.UtcNow;
+                status.optr.Write($"Decompiled {fd.getName()}");
                 //	  *status.optr << ": " << hex << fd.getAddress().getOffset();
-                *status.optr << '(' << dec << fd.getSize() << ')';
-                duration = ((float)(end_time - start_time)) / CLOCKS_PER_SEC;
-                duration *= 1000.0;
-                *status.optr << " time=" << fixed << setprecision(0) << duration << " ms" << endl;
-                check(fd, *status.optr);
+                status.optr.Write($"({fd.getSize()})");
+                TimeSpan duration = (end_time - start_time);
+                status.optr.WriteLine($" time={(int)duration.TotalMilliseconds} ms");
+                check(fd, status.optr);
             }
             catch (LowlevelError err) {
-                *status.optr << "Skipping " << fd.getName() << ": " << err.ToString() << endl;
+                status.optr.WriteLine("Skipping {fd.getName()}: {err.ToString()}");
             }
             dcp.conf.clearAnalysis(fd);
         }

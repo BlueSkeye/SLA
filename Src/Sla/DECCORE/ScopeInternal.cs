@@ -493,23 +493,20 @@ namespace Sla.DECCORE
         {
             if (ct.hasStripped())
                 ct = ct.getStripped();
-            if ((sym.type.getSize() == ct.getSize()) || (sym.mapentry.empty()))
-            {
+            if ((sym.type.getSize() == ct.getSize()) || (sym.mapentry.empty())) {
                 // If size is the same, or no mappings nothing special to do
                 sym.type = ct;
                 sym.checkSizeTypeLock();
                 return;
             }
-            else if (sym.mapentry.size() == 1)
-            {
-                list<SymbolEntry>::iterator iter = sym.mapentry.GetLastItem();
-                if ((*iter).isAddrTied())
-                {
+            else if (sym.mapentry.size() == 1) {
+                IEnumerator<SymbolEntry> iter = sym.mapentry.GetLastItem();
+                if ((*iter).isAddrTied()) {
                     // Save the starting address of map
-                    Address addr((* iter).getAddr());
+                    Address addr = iter.getAddr();
 
                     // Find the correct rangemap
-                    EntryMap* rangemap = maptable[(*iter).getAddr().getSpace().getIndex()];
+                    EntryMap rangemap = maptable[(*iter).getAddr().getSpace().getIndex()];
                     // Remove the map entry
                     rangemap.erase(iter);
                     sym.mapentry.RemoveLastItem();   // Remove reference to map entry

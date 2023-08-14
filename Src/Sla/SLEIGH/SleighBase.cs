@@ -28,7 +28,7 @@ namespace Sla.SLEIGH
         private List<string> userop;      ///< Names of user-define p-code ops for \b this Translate object
         private Dictionary<VarnodeData, string> varnode_xref;  ///< A map from Varnodes in the \e register space to register names
         
-        protected SubtableSymbol root;     ///< The root SLEIGH decoding symbol
+        protected SubtableSymbol? root;     ///< The root SLEIGH decoding symbol
         protected SymbolTable symtab;     ///< The SLEIGH symbol table
         protected uint maxdelayslotbytes;    ///< Maximum number of bytes in a delay-slot directive
         protected uint unique_allocatemask;  ///< Bits that are guaranteed to be zero in the unique allocation scheme
