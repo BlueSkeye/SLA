@@ -40,35 +40,31 @@ namespace Sla.SLEIGH
         /// registers (for the map), user-op names, and context fields.
         protected void buildXrefs(List<string> errorPairs)
         {
-            SymbolScope* glb = symtab.getGlobalScope();
+            SymbolScope glb = symtab.getGlobalScope();
             SymbolTree::const_iterator iter;
-            SleighSymbol* sym;
             ostringstream s;
 
-            for (iter = glb.begin(); iter != glb.end(); ++iter)
-            {
-                sym = *iter;
+            for (iter = glb.begin(); iter != glb.end(); ++iter) {
+                SleighSymbol sym = *iter;
                 if (sym.getType() == SleighSymbol::varnode_symbol)
                 {
-                    pair<VarnodeData, string> ins(((VarnodeSymbol*) sym).getFixedVarnode(), sym.getName());
+                    Tuple<VarnodeData, string> ins = 
+                        new Tuple<VarnodeData, string>(((VarnodeSymbol) sym).getFixedVarnode(), sym.getName());
                     pair<Dictionary<VarnodeData, string>::iterator, bool> res = varnode_xref.insert(ins);
-                    if (!res.second)
-                    {
+                    if (!res.second) {
                         errorPairs.Add(sym.getName());
                         errorPairs.Add((*(res.first)).second);
                     }
                 }
-                else if (sym.getType() == SleighSymbol::userop_symbol)
-                {
-                    int index = ((UserOpSymbol*)sym).getIndex();
+                else if (sym.getType() == SleighSymbol.symbol_type.userop_symbol) {
+                    int index = (int)((UserOpSymbol)sym).getIndex();
                     while (userop.size() <= index)
                         userop.Add("");
                     userop[index] = sym.getName();
                 }
-                else if (sym.getType() == SleighSymbol::context_symbol)
-                {
-                    ContextSymbol* csym = (ContextSymbol*)sym;
-                    ContextField* field = (ContextField*)csym.getPatternValue();
+                else if (sym.getType() == SleighSymbol.symbol_type.context_symbol) {
+                    ContextSymbol csym = (ContextSymbol)sym;
+                    ContextField field = (ContextField)csym.getPatternValue();
                     int startbit = field.getStartBit();
                     int endbit = field.getEndBit();
                     registerContext(csym.getName(), startbit, endbit);
@@ -81,16 +77,14 @@ namespace Sla.SLEIGH
         /// variables need to be registered with the new program's database
         protected void reregisterContext()
         {
-            SymbolScope* glb = symtab.getGlobalScope();
+            SymbolScope glb = symtab.getGlobalScope();
             SymbolTree::const_iterator iter;
-            SleighSymbol* sym;
-            for (iter = glb.begin(); iter != glb.end(); ++iter)
-            {
+            SleighSymbol sym;
+            for (iter = glb.begin(); iter != glb.end(); ++iter) {
                 sym = *iter;
-                if (sym.getType() == SleighSymbol::context_symbol)
-                {
-                    ContextSymbol* csym = (ContextSymbol*)sym;
-                    ContextField* field = (ContextField*)csym.getPatternValue();
+                if (sym.getType() == SleighSymbol.symbol_type.context_symbol) {
+                    ContextSymbol csym = (ContextSymbol)sym;
+                    ContextField field = (ContextField)csym.getPatternValue();
                     int startbit = field.getStartBit();
                     int endbit = field.getEndBit();
                     registerContext(csym.getName(), startbit, endbit);

@@ -45,7 +45,7 @@ namespace Sla.DECCORE
         }
 
         /// Return \b true if \b this group has no pieces
-        public bool empty() => pieceSet.empty();
+        public bool empty() => (0 == pieceSet.Count);
 
         /// Add a new piece to \b this group
         /// The VariablePiece takes partial ownership of \b this, via refCount.
@@ -65,11 +65,8 @@ namespace Sla.DECCORE
         /// \param amt is the given amount to add to offsets
         public void adjustOffsets(int amt)
         {
-            SortedSet<VariablePiece>, VariableGroup::PieceCompareByOffset>::iterator iter;
-
-            for (iter = pieceSet.begin(); iter != pieceSet.end(); ++iter)
-            {
-                (*iter).groupOffset += amt;
+            foreach (VariablePiece piece in pieceSet) {
+                piece.groupOffset += amt;
             }
             size += amt;
         }

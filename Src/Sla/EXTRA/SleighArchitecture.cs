@@ -233,65 +233,61 @@ namespace Sla.EXTRA
             string compilerfile;
             string slafile;
 
-            specpaths.findFile(processorfile, language.getProcessorSpec());
-            specpaths.findFile(compilerfile, compilertag.getSpec());
+            specpaths.findFile(out processorfile, language.getProcessorSpec());
+            specpaths.findFile(out compilerfile, compilertag.getSpec());
             if (!language_reuse)
-                specpaths.findFile(slafile, language.getSlaFile());
+                specpaths.findFile(out slafile, language.getSlaFile());
 
-            try
-            {
-                Document* doc = store.openDocument(processorfile);
+            try {
+                Document doc = store.openDocument(processorfile);
                 store.registerTag(doc.getRoot());
             }
             catch (DecoderError err) {
-                ostringstream serr;
-                serr << "XML error parsing processor specification: " << processorfile;
-                serr << "\n " << err.ToString();
-                throw new SleighError(serr.str());
+                TextWriter serr = new StringWriter();
+                serr.Write($"XML error parsing processor specification: {processorfile}");
+                serr.Write($"\n{err.ToString()}");
+                throw new SleighError(serr.ToString());
             }
             catch (CORE.LowlevelError err) {
-                ostringstream serr;
-                serr << "Error reading processor specification: " << processorfile;
-                serr << "\n " << err.ToString();
-                throw new SleighError(serr.str());
+                TextWriter serr = new StringWriter();
+                serr.Write($"Error reading processor specification: {processorfile}");
+                serr.Write("\n {err.ToString()}");
+                throw new SleighError(serr.ToString());
             }
 
-            try
-            {
-                Document* doc = store.openDocument(compilerfile);
+            try {
+                Document doc = store.openDocument(compilerfile);
                 store.registerTag(doc.getRoot());
             }
             catch (DecoderError err) {
-                ostringstream serr;
-                serr << "XML error parsing compiler specification: " << compilerfile;
-                serr << "\n " << err.ToString();
-                throw new SleighError(serr.str());
+                TextWriter serr = new StringWriter();
+                serr.Write($"XML error parsing compiler specification: {compilerfile}");
+                serr.Write($"\n {err.ToString()}");
+                throw new SleighError(serr.ToString());
             }
             catch (CORE.LowlevelError err) {
-                ostringstream serr;
-                serr << "Error reading compiler specification: " << compilerfile;
-                serr << "\n " << err.ToString();
-                throw new SleighError(serr.str());
+                TextWriter serr = new StringWriter();
+                serr.Write($"Error reading compiler specification: {compilerfile}");
+                serr.Write($"\n {err.ToString()}");
+                throw new SleighError(serr.ToString());
             }
 
-            if (!language_reuse)
-            {
-                try
-                {
-                    Document* doc = store.openDocument(slafile);
+            if (!language_reuse) {
+                try {
+                    Document doc = store.openDocument(slafile);
                     store.registerTag(doc.getRoot());
                 }
                 catch (DecoderError err) {
-                    ostringstream serr;
-                    serr << "XML error parsing SLEIGH file: " << slafile;
-                    serr << "\n " << err.ToString();
-                    throw new SleighError(serr.str());
+                    TextWriter serr = new StringWriter();
+                    serr.Write($"XML error parsing SLEIGH file: {slafile}");
+                    serr.Write($"\n {err.ToString()}");
+                    throw new SleighError(serr.ToString());
                 }
                 catch (CORE.LowlevelError err) {
-                    ostringstream serr;
-                    serr << "Error reading SLEIGH file: " << slafile;
-                    serr << "\n " << err.ToString();
-                    throw new SleighError(serr.str());
+                    TextWriter serr = new StringWriter();
+                    serr.Write($"Error reading SLEIGH file: {slafile}");
+                    serr.Write($"\n {err.ToString()}");
+                    throw new SleighError(serr.ToString());
                 }
             }
         }
@@ -306,27 +302,24 @@ namespace Sla.EXTRA
         }
 
         protected override void resolveArchitecture()
-        { // Find best architecture
-            if (archid.Length == 0)
-            {
-                if ((target.Length == 0) || (target == "default"))
-                    archid = loader.getArchType();
-                else
-                    archid = target;
+        {
+            // Find best architecture
+            if (archid.Length == 0) {
+                archid = ((target.Length == 0) || (target == "default"))
+                    ? loader.getArchType()
+                    : target;
             }
-            if (archid.find("binary-") == 0)
+            if (archid.StartsWith("binary-"))
                 archid.erase(0, 7);
-            else if (archid.find("default-") == 0)
+            else if (archid.StartsWith("default-"))
                 archid.erase(0, 8);
 
             archid = normalizeArchitecture(archid);
             string baseid = archid.Substring(0, archid.rfind(':'));
             int i;
             languageindex = -1;
-            for (i = 0; i < description.size(); ++i)
-            {
-                if (description[i].getId() == baseid)
-                {
+            for (i = 0; i < description.size(); ++i) {
+                if (description[i].getId() == baseid) {
                     languageindex = i;
                     if (description[i].isDeprecated())
                         printMessage("WARNING: Language " + baseid + " is deprecated");
@@ -377,7 +370,7 @@ namespace Sla.EXTRA
 
         public override void printMessage(string message)
         {
-            *errorstream << message << endl;
+            errorstream.WriteLine(message);
         }
 
         ~SleighArchitecture()
@@ -394,9 +387,7 @@ namespace Sla.EXTRA
         /// \return the processor field
         public static string normalizeProcessor(string nm)
         {
-            if (nm.find("386") != string::npos)
-                return "x86";
-            return nm;
+            return (-1 == nm.IndexOf("386")) ? nm : "x86";
         }
 
         /// Try to recover a \e language \e id endianess field
@@ -406,9 +397,9 @@ namespace Sla.EXTRA
         /// \return the endianness field
         public static string normalizeEndian(string nm)
         {
-            if (nm.find("big") != string::npos)
+            if (-1 != nm.IndexOf("big"))
                 return "BE";
-            if (nm.find("little") != string::npos)
+            if (-1 != nm.IndexOf("little"))
                 return "LE";
             return nm;
         }
@@ -421,13 +412,13 @@ namespace Sla.EXTRA
         public static string normalizeSize(string nm)
         {
             string res = nm;
-            string::size_type pos;
+            int pos;
 
-            pos = res.find("bit");
-            if (pos != string::npos)
+            pos = res.IndexOf("bit");
+            if (pos != -1)
                 res.erase(pos, 3);
-            pos = res.find('-');
-            if (pos != string::npos)
+            pos = res.IndexOf('-');
+            if (pos != -1)
                 res.erase(pos, 1);
             return res;
         }
@@ -446,13 +437,12 @@ namespace Sla.EXTRA
             string variant;
             string compile;
 
-            string::size_type pos[4];
+            int[] pos = new int[4];
             int i;
-            string::size_type curpos = 0;
-            for (i = 0; i < 4; ++i)
-            {
-                curpos = nm.find(':', curpos + 1);
-                if (curpos == string::npos) break;
+            int curpos = 0;
+            for (i = 0; i < 4; ++i) {
+                curpos = nm.IndexOf(':', curpos + 1);
+                if (curpos == -1) break;
                 pos[i] = curpos;
             }
             if ((i != 3) && (i != 4))
@@ -461,13 +451,11 @@ namespace Sla.EXTRA
             endian = nm.Substring(pos[0] + 1, pos[1] - pos[0] - 1);
             size = nm.Substring(pos[1] + 1, pos[2] - pos[1] - 1);
 
-            if (i == 4)
-            {
+            if (i == 4) {
                 variant = nm.Substring(pos[2] + 1, pos[3] - pos[2] - 1);
                 compile = nm.Substring(pos[3] + 1);
             }
-            else
-            {
+            else {
                 variant = nm.Substring(pos[2] + 1);
                 compile = "default";
             }
@@ -485,43 +473,41 @@ namespace Sla.EXTRA
         /// \param rootpath is the root path of the Ghidra installation
         public static void scanForSleighDirectories(string rootpath)
         {
-            List<string> ghidradir;
-            List<string> procdir;
-            List<string> procdir2;
-            List<string> languagesubdirs;
+            List<string> ghidradir = new List<string>();
+            List<string> procdir = new List<string>();
+            List<string> procdir2 = new List<string>();
+            List<string> languagesubdirs = new List<string>();
 
-            FileManage::scanDirectoryRecursive(ghidradir, "Ghidra", rootpath, 2);
-            for (uint i = 0; i < ghidradir.size(); ++i)
-            {
-                FileManage::scanDirectoryRecursive(procdir, "Processors", ghidradir[i], 1); // Look for Processors structure
-                FileManage::scanDirectoryRecursive(procdir, "contrib", ghidradir[i], 1);
+            FileManage.scanDirectoryRecursive(ghidradir, "Ghidra", rootpath, 2);
+            for (int i = 0; i < ghidradir.size(); ++i) {
+                FileManage.scanDirectoryRecursive(procdir, "Processors", ghidradir[i], 1); // Look for Processors structure
+                FileManage.scanDirectoryRecursive(procdir, "contrib", ghidradir[i], 1);
             }
-            if (procdir.size() != 0)
-            {
-                for (uint i = 0; i < procdir.size(); ++i)
-                    FileManage::directoryList(procdir2, procdir[i]);
+            if (procdir.size() != 0) {
+                for (int i = 0; i < procdir.size(); ++i)
+                    FileManage.directoryList(procdir2, procdir[i]);
 
-                List<string> datadirs;
-                for (uint i = 0; i < procdir2.size(); ++i)
-                    FileManage::scanDirectoryRecursive(datadirs, "data", procdir2[i], 1);
+                List<string> datadirs = new List<string>();
+                for (int i = 0; i < procdir2.size(); ++i)
+                    FileManage.scanDirectoryRecursive(datadirs, "data", procdir2[i], 1);
 
-                List<string> languagedirs;
-                for (uint i = 0; i < datadirs.size(); ++i)
-                    FileManage::scanDirectoryRecursive(languagedirs, "languages", datadirs[i], 1);
+                List<string> languagedirs = new List<string>();
+                for (int i = 0; i < datadirs.size(); ++i)
+                    FileManage.scanDirectoryRecursive(languagedirs, "languages", datadirs[i], 1);
 
-                for (uint i = 0; i < languagedirs.size(); ++i)
+                for (int i = 0; i < languagedirs.size(); ++i)
                     languagesubdirs.Add(languagedirs[i]);
 
                 // In the old version we have to go down one more level to get to the ldefs
-                for (uint i = 0; i < languagedirs.size(); ++i)
-                    FileManage::directoryList(languagesubdirs, languagedirs[i]);
+                for (int i = 0; i < languagedirs.size(); ++i)
+                    FileManage.directoryList(languagesubdirs, languagedirs[i]);
             }
             // If we haven't matched this directory structure, just use the rootpath as the directory containing
             // the ldef
             if (languagesubdirs.size() == 0)
                 languagesubdirs.Add(rootpath);
 
-            for (uint i = 0; i < languagesubdirs.size(); ++i)
+            for (int i = 0; i < languagesubdirs.size(); ++i)
                 specpaths.addDir2Path(languagesubdirs[i]);
         }
 
@@ -531,20 +517,20 @@ namespace Sla.EXTRA
         /// \return the list of LanguageDescription objects
         public static List<LanguageDescription> getDescriptions()
         {
-            ostringstream s;
+            TextWriter s = new StringWriter();
             collectSpecFiles(s);
-            if (!s.str().empty())
-                throw new CORE.LowlevelError(s.str());
+            if (0 != s.ToString().Length)
+                throw new CORE.LowlevelError(s.ToString());
             return description;
         }
 
         /// Shutdown all Translate objects and free global resources.
         public static void shutdown()
         {
-            if (translators.empty()) return;    // Already cleared
-            for (Dictionary<int, Sleigh*>::const_iterator iter = translators.begin(); iter != translators.end(); ++iter)
-                delete(*iter).second;
-            translators.clear();
+            if (0 == translators.Count) return;    // Already cleared
+            //for (Dictionary<int, Sleigh*>::const_iterator iter = translators.begin(); iter != translators.end(); ++iter)
+            //    delete(*iter).second;
+            translators.Clear();
             // description.clear();  // static List is destroyed by the normal exit handler
         }
 

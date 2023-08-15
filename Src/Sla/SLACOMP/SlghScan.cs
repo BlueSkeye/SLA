@@ -1323,12 +1323,12 @@ namespace Sla.SLACOMP
         //        string::size_type pos;
         //        string::size_type lastpos = 0;
         //        pos = str.find("$(", lastpos);
-        //        if (pos == string::npos)
+        //        if (pos == -1)
         //            return;
         //        string res;
         //        while(true)
         //        {
-        //            if (pos == string::npos)
+        //            if (pos == -1)
         //            {
         //                res += str.Substring(lastpos);
         //                str = res;
@@ -1338,7 +1338,7 @@ namespace Sla.SLACOMP
         //            {
         //                res += str.Substring(lastpos, (pos - lastpos));
         //                string::size_type endpos = str.find(')', pos + 2);
-        //                if (endpos == string::npos)
+        //                if (endpos == -1)
         //                {
         //                    preproc_error("Unterminated macro in string");
         //                    break;
@@ -1362,7 +1362,7 @@ namespace Sla.SLACOMP
         //    {
         //        string str(sleightext);
         //        string::size_type pos = str.find('#');
-        //        if (pos != string::npos)
+        //        if (pos != -1)
         //            str.erase(pos);
         //        istringstream s = new istringstream(str);
         //        string type;
@@ -1550,7 +1550,7 @@ namespace Sla.SLACOMP
         //            case SleighSymbol::token_symbol:
         //                sleighlval.tokensym = (TokenSymbol*)sym;
         //                return TOKENSYM;
-        //            case SleighSymbol::userop_symbol:
+        //            case SleighSymbol.symbol_type.userop_symbol:
         //                sleighlval.useropsym = (UserOpSymbol*)sym;
         //                return USEROPSYM;
         //            case SleighSymbol::value_symbol:
@@ -1595,7 +1595,7 @@ namespace Sla.SLACOMP
         //            case SleighSymbol::epsilon_symbol:
         //                sleighlval.specsym = (SpecificSymbol*)sym;
         //                return SPECSYM;
-        //            case SleighSymbol::context_symbol:
+        //            case SleighSymbol.symbol_type.context_symbol:
         //                sleighlval.contextsym = (ContextSymbol*)sym;
         //                return CONTEXTSYM;
         //            case SleighSymbol::dummy_symbol:

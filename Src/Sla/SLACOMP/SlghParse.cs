@@ -2453,7 +2453,7 @@ namespace Sla.SLACOMP
         //    case 92:
 
         //        {
-        //            if ((actionon == 1) && ((yyvsp[0].famsym).getType() != SleighSymbol::context_symbol))
+        //            if ((actionon == 1) && ((yyvsp[0].famsym).getType() != SleighSymbol.symbol_type.context_symbol))
         //            { string errmsg = "Global symbol " + (yyvsp[0].famsym).getName(); errmsg += " is not allowed in action expression"; slgh.reportError(errmsg); } (yyval.patexp) = (yyvsp[0].famsym).getPatternValue();
         //        }
 

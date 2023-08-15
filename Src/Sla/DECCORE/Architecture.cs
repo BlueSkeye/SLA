@@ -518,7 +518,7 @@ namespace Sla.DECCORE
         }
 
         /// Get a string describing \b this architecture
-        public string getDescription() => archid;
+        public virtual string getDescription() => archid;
 
         /// \brief Print an error message to console
         /// Write the given message to whatever the registered error stream is

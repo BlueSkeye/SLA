@@ -249,8 +249,8 @@ namespace Sla.SLEIGH
                     throw new LowlevelError("Could not obtain cached delay slot instruction");
                 int len = pos.getLength();
 
-                ParserWalker newwalker(pos );
-                walker = &newwalker;
+                ParserWalker newwalker = new ParserWalker(pos);
+                walker = newwalker;
                 walker.baseState();
                 build(walker.getConstructor().getTempl(), -1); // Build the whole delay slot
                 fallOffset += len;

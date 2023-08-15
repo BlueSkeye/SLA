@@ -686,32 +686,29 @@ namespace Sla.DECCORE
             if (!ot.isIncomplete())
                 throw new LowlevelError("Can only set fields on an incomplete structure");
             int offset = 0;
-            List<TypeField>::iterator iter;
 
             // Find the maximum offset, from the explicitly set offsets
-            for (iter = fd.begin(); iter != fd.end(); ++iter)
-            {
-                Datatype* ct = (*iter).type;
+            foreach (TypeField thisField in fd) {
+                Datatype ct = thisField.type;
                 // Do some sanity checks on the field
                 if (ct.getMetatype() == type_metatype.TYPE_VOID) return false;
-                if ((*iter).name.size() == 0) return false;
+                if (thisField.name.Length == 0) return false;
 
-                if ((*iter).offset != -1)
-                {
-                    int end = (*iter).offset + ct.getSize();
+                if (thisField.offset != -1) {
+                    int end = thisField.offset + ct.getSize();
                     if (end > offset)
                         offset = end;
                 }
             }
 
-            sort(fd.begin(), fd.end()); // Sort fields by offset
+            fd.Sort(); // Sort fields by offset
 
             // We could check field overlapping here
 
             tree.erase(ot);
             ot.setFields(fd);
-            ot.flags &= ~(uint)Datatype.Properties.type_incomplete;
-            ot.flags |= (flags & (Datatype::opaque_string | Datatype.Properties.variable_length | Datatype.Properties.type_incomplete));
+            ot.flags &= ~Datatype.Properties.type_incomplete;
+            ot.flags |= (flags & (Datatype.Properties.opaque_string | Datatype.Properties.variable_length | Datatype.Properties.type_incomplete));
             if (fixedsize > 0)
             {       // If the caller is trying to force a size
                 if (fixedsize > ot.size)   // If the forced size is bigger than the size required for fields
@@ -720,8 +717,8 @@ namespace Sla.DECCORE
                     throw new LowlevelError("Trying to force too small a size on " + ot.getName());
             }
             tree.insert(ot);
-            recalcPointerSubmeta(ot, SUB_PTR);
-            recalcPointerSubmeta(ot, SUB_PTR_STRUCT);
+            recalcPointerSubmeta(ot, sub_metatype.SUB_PTR);
+            recalcPointerSubmeta(ot, sub_metatype.SUB_PTR_STRUCT);
             return true;
         }
 
@@ -733,24 +730,22 @@ namespace Sla.DECCORE
         /// \param fixedsize is 0 or the forced size of the union
         /// \param flags are other flags to set on the union
         /// \return true if modification was successful
-        public bool setFields(List<TypeField> fd, TypeUnion ot, int fixedsize, uint flags)
+        public bool setFields(List<TypeField> fd, TypeUnion ot, int fixedsize, Datatype.Properties flags)
         {
             if (!ot.isIncomplete())
                 throw new LowlevelError("Can only set fields on an incomplete union");
-            List<TypeField>::iterator iter;
 
-            for (iter = fd.begin(); iter != fd.end(); ++iter)
-            {
-                Datatype* ct = (*iter).type;
+            foreach (TypeField thisField in fd) {
+                Datatype ct = thisField.type;
                 // Do some sanity checks on the field
                 if (ct.getMetatype() == type_metatype.TYPE_VOID) return false;
-                if ((*iter).offset != 0) return false;
-                if ((*iter).name.size() == 0) return false;
+                if (thisField.offset != 0) return false;
+                if (thisField.name.Length == 0) return false;
             }
 
             tree.erase(ot);
             ot.setFields(fd);
-            ot.flags &= ~(uint)Datatype.Properties.type_incomplete;
+            ot.flags &= ~Datatype.Properties.type_incomplete;
             ot.flags |= (flags & (Datatype.Properties.variable_length | Datatype.Properties.type_incomplete));
             if (fixedsize > 0)
             {       // If the caller is trying to force a size
@@ -966,7 +961,7 @@ namespace Sla.DECCORE
         /// \return the Database object
         public Datatype getBase(int s, type_metatype m,string n)
         {
-            TypeBase tmp(s, m, n);
+            TypeBase tmp = new TypeBase(s, m, n);
             tmp.id = Datatype.hashName(n);
             return findAdd(tmp);
         }
@@ -998,9 +993,9 @@ namespace Sla.DECCORE
             if (pt.hasStripped())
                 pt = pt.getStripped();
             if (pt.getMetatype() == type_metatype.TYPE_ARRAY)
-                pt = ((TypeArray*)pt).getBase();       // Strip the first ARRAY type
-            TypePointer tmp(s, pt, ws);
-            return (TypePointer*)findAdd(tmp);
+                pt = ((TypeArray)pt).getBase();       // Strip the first ARRAY type
+            TypePointer tmp = new TypePointer(s, pt, ws);
+            return (TypePointer)findAdd(tmp);
         }
 
         /// Construct an absolute pointer data-type
@@ -1013,8 +1008,8 @@ namespace Sla.DECCORE
         {
             if (pt.hasStripped())
                 pt = pt.getStripped();
-            TypePointer tmp(s, pt, ws);
-            return (TypePointer*)findAdd(tmp);
+            TypePointer tmp = new TypePointer(s, pt, ws);
+            return (TypePointer)findAdd(tmp);
         }
 
         /// Construct a named pointer data-type
@@ -1029,11 +1024,11 @@ namespace Sla.DECCORE
         {
             if (pt.hasStripped())
                 pt = pt.getStripped();
-            TypePointer tmp(s, pt, ws);
+            TypePointer tmp = new TypePointer(s, pt, ws);
             tmp.name = n;
             tmp.displayName = n;
             tmp.id = Datatype.hashName(n);
-            return (TypePointer*)findAdd(tmp);
+            return (TypePointer)findAdd(tmp);
         }
 
         /// Construct a depth limited pointer data-type
@@ -1042,19 +1037,17 @@ namespace Sla.DECCORE
         /// \param pt is the pointed-to data-type
         /// \param ws is the wordsize associated with the pointer
         /// \return the TypePointer object
-        public TypePointer getTypePointerNoDepth(int s, Datatypept, uint ws)
+        public TypePointer getTypePointerNoDepth(int s, Datatype pt, uint ws)
         {
-            if (pt.getMetatype() == type_metatype.TYPE_PTR)
-            {
-                Datatype* basetype = ((TypePointer*)pt).getPtrTo();
+            if (pt.getMetatype() == type_metatype.TYPE_PTR) {
+                Datatype basetype = ((TypePointer)pt).getPtrTo();
                 type_metatype meta = basetype.getMetatype();
                 // Make sure that at least we return a pointer to something the size of -pt-
                 if (meta == type_metatype.TYPE_PTR)
                     pt = getBase(pt.getSize(), type_metatype.TYPE_UNKNOWN);      // Pass back unknown *
-                else if (meta == type_metatype.TYPE_UNKNOWN)
-                {
+                else if (meta == type_metatype.TYPE_UNKNOWN) {
                     if (basetype.getSize() == pt.getSize())   // If -pt- is pointer to UNKNOWN of the size of a pointer
-                        return (TypePointer*)pt; // Just return pt, don't add another pointer
+                        return (TypePointer)pt; // Just return pt, don't add another pointer
                     pt = getBase(pt.getSize(), type_metatype.TYPE_UNKNOWN);  // Otherwise construct pointer to UNKNOWN of size of pointer
                 }
             }
@@ -1069,8 +1062,8 @@ namespace Sla.DECCORE
         {
             if (ao.hasStripped())
                 ao = ao.getStripped();
-            TypeArray tmp(@as,ao);
-            return (TypeArray*)findAdd(tmp);
+            TypeArray tmp = new TypeArray(@as,ao);
+            return (TypeArray)findAdd(tmp);
         }
 
         /// Create an (empty) structure
@@ -1083,15 +1076,15 @@ namespace Sla.DECCORE
             tmp.name = n;
             tmp.displayName = n;
             tmp.id = Datatype.hashName(n);
-            return (TypeStruct*)findAdd(tmp);
+            return (TypeStruct)findAdd(tmp);
         }
 
         /// Create a partial structure
         public TypePartialStruct getTypePartialStruct(Datatype contain, int off, int sz)
         {
-            Datatype* strip = getBase(sz, type_metatype.TYPE_UNKNOWN);
-            TypePartialStruct tps(contain, off, sz, strip);
-            return (TypePartialStruct*)findAdd(tps);
+            Datatype strip = getBase(sz, type_metatype.TYPE_UNKNOWN);
+            TypePartialStruct tps = new TypePartialStruct(contain, off, sz, strip);
+            return (TypePartialStruct)findAdd(tps);
         }
 
         /// Create an (empty) union
@@ -1110,9 +1103,9 @@ namespace Sla.DECCORE
         /// Create a partial union
         public TypePartialUnion getTypePartialUnion(TypeUnion contain, int off, int sz)
         {
-            Datatype* strip = getBase(sz, type_metatype.TYPE_UNKNOWN);
-            TypePartialUnion tpu(contain, off, sz, strip);
-            return (TypePartialUnion*)findAdd(tpu);
+            Datatype strip = getBase(sz, type_metatype.TYPE_UNKNOWN);
+            TypePartialUnion tpu = new TypePartialUnion(contain, off, sz, strip);
+            return (TypePartialUnion)findAdd(tpu);
         }
 
         /// Create an (empty) enumeration
@@ -1122,9 +1115,9 @@ namespace Sla.DECCORE
         /// \return the TypeEnum object
         public TypeEnum getTypeEnum(string n)
         {
-            TypeEnum tmp(enumsize, enumtype, n);
+            TypeEnum tmp = new TypeEnum(enumsize, enumtype, n);
             tmp.id = Datatype.hashName(n);
-            return (TypeEnum*)findAdd(tmp);
+            return (TypeEnum)findAdd(tmp);
         }
 
         /// Create a "spacebase" type
@@ -1134,8 +1127,8 @@ namespace Sla.DECCORE
         /// \return the TypeSpacebase object
         public TypeSpacebase getTypeSpacebase(AddrSpace id, Address addr)
         {
-            TypeSpacebase tsb(id, addr, glb);
-            return (TypeSpacebase*)findAdd(tsb);
+            TypeSpacebase tsb = new TypeSpacebase(id, addr, glb);
+            return (TypeSpacebase)findAdd(tsb);
         }
 
         /// Create a "function" datatype
@@ -1192,9 +1185,9 @@ namespace Sla.DECCORE
         /// \return the new/matching pointer
         public TypePointerRel getTypePointerRel(TypePointer parentPtr, Datatype ptrTo, int off)
         {
-            TypePointerRel tp(parentPtr.size, ptrTo, parentPtr.wordsize, parentPtr.ptrto, off);
-            tp.markEphemeral(*this);        // Mark as ephemeral
-            TypePointerRel* res = (TypePointerRel*)findAdd(tp);
+            TypePointerRel tp = new TypePointerRel(parentPtr.size, ptrTo, parentPtr.wordsize, parentPtr.ptrto, off);
+            tp.markEphemeral(this);        // Mark as ephemeral
+            TypePointerRel res = (TypePointerRel)findAdd(tp);
             return res;
         }
 
@@ -1212,11 +1205,11 @@ namespace Sla.DECCORE
         public TypePointerRel getTypePointerRel(int sz, Datatype parent, Datatype ptrTo, int ws, int off,
             string nm)
         {
-            TypePointerRel tp(sz, ptrTo, ws, parent, off);
+            TypePointerRel tp = new TypePointerRel(sz, ptrTo, ws, parent, off);
             tp.name = nm;
             tp.displayName = nm;
             tp.id = Datatype.hashName(nm);
-            TypePointerRel* res = (TypePointerRel*)findAdd(tp);
+            TypePointerRel res = (TypePointerRel)findAdd(tp);
             return res;
         }
 
@@ -1230,11 +1223,11 @@ namespace Sla.DECCORE
         /// \return the new/matching pointer
         public TypePointer getTypePointerWithSpace(Datatype ptrTo, AddrSpace spc, string nm)
         {
-            TypePointer tp(ptrTo, spc);
+            TypePointer tp = new TypePointer(ptrTo, spc);
             tp.name = nm;
             tp.displayName = nm;
             tp.id = Datatype.hashName(nm);
-            TypePointer* res = (TypePointer*)findAdd(tp);
+            TypePointer res = (TypePointer)findAdd(tp);
             return res;
         }
 

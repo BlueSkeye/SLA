@@ -33,7 +33,7 @@ namespace Sla.DECCORE
         /// This TypePointerRel is not considered a formal data-type but is only used to provide extra
         /// context for the pointer during propagation.
         /// \param typegrp is the factory from which to fetch the base pointer
-        protected void markEphemeral(TypeFactory typegrp)
+        internal void markEphemeral(TypeFactory typegrp)
         {
             stripped = typegrp.getTypePointer(size, ptrto, wordsize);
             flags |= Properties.has_stripped;

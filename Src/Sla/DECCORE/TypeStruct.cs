@@ -21,7 +21,7 @@ namespace Sla.DECCORE
         /// Copy a list of fields into this structure, establishing its size.
         /// Should only be called once when constructing the type
         /// \param fd is the list of fields to copy in
-        protected void setFields(List<TypeField> fd)
+        internal void setFields(List<TypeField> fd)
         {
             int end;
             // Need to calculate size

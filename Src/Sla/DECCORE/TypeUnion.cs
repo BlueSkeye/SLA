@@ -23,7 +23,7 @@ namespace Sla.DECCORE
         /// Copy a list of fields into this union, establishing its size.
         /// Should only be called once when constructing the type.  TypeField \b offset is assumed to be 0.
         /// \param fd is the list of fields to copy in
-        protected void setFields(List<TypeField> fd)
+        internal void setFields(List<TypeField> fd)
         {
             // Need to calculate size
             size = 0;

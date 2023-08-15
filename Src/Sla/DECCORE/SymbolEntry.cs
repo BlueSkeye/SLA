@@ -115,9 +115,9 @@ namespace Sla.DECCORE
             /// \brief Compare \b this with another sub-sort
             public static bool operator <(EntrySubsort op1, EntrySubsort op2)
             {
-                if (useindex != op2.useindex)
-                    return (useindex < op2.useindex);
-                return (useoffset < op2.useoffset);
+                if (op1.useindex != op2.useindex)
+                    return (op1.useindex < op2.useindex);
+                return (op1.useoffset < op2.useoffset);
             }
         }
 

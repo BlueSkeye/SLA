@@ -431,7 +431,7 @@ namespace Sla.SLACOMP
                     s.Write($"Name collision: {sym.getName()} --- Duplicate symbol {oldsym.getName()}");
                     Location oldLocation = getLocation(oldsym);
                     if (oldLocation != (Location)null) {
-                        s.Write(" defined at {oldLocation.format()}";
+                        s.Write(" defined at {oldLocation.format()}");
                     }
                     Location location = getLocation(sym);
                     reportError(location, s.ToString());

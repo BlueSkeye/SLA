@@ -152,7 +152,7 @@ namespace Sla.SLEIGH
                         case SleighSymbol::space_symbol:
                             yylval.spacesym = (SpaceSymbol*)sym;
                             return SPACESYM;
-                        case SleighSymbol::userop_symbol:
+                        case SleighSymbol.symbol_type.userop_symbol:
                             yylval.useropsym = (UserOpSymbol*)sym;
                             return USEROPSYM;
                         case SleighSymbol::varnode_symbol:

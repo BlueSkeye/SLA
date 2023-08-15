@@ -20,7 +20,7 @@ namespace Sla.DECCORE
         /// HighVariable owning \b this piece
         private HighVariable high;
         /// Byte offset of \b this piece within the group
-        private int groupOffset;
+        internal int groupOffset;
         /// Number of bytes in \b this piece
         private int size;
 

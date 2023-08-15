@@ -98,7 +98,7 @@ namespace Sla.SLEIGH
 #endif
 
         // Resolve full pathname
-        public void findFile(ref string res, string name)
+        public void findFile(out string res, string name)
         {
             if (name[0] == separator) {
                 res = name;
@@ -278,7 +278,7 @@ namespace Sla.SLEIGH
                     pos = 0;
                 else
                     pos = pos + 1;
-                if (curpath.compare(pos, string::npos, matchname) == 0)
+                if (curpath.compare(pos, -1, matchname) == 0)
                     res.Add(curpath);
                 else
                     scanDirectoryRecursive(res, matchname, curpath, maxdepth - 1); // Recurse
