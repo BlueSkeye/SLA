@@ -27,12 +27,13 @@ namespace Sla.EXTRA
                 throw new IfaceParseError("Missing output file");
             if (!dcp.fd.isProcStarted())
                 throw new IfaceExecutionError("Basic block structure not calculated");
-            ofstream thefile(filename.c_str());
-            if (!thefile)
+            TextWriter thefile;
+            try { thefile = new StreamWriter(File.OpenWrite(filename)); }
+            catch {
                 throw new IfaceExecutionError("Unable to open output file: " + filename);
-
+            }
             dump_dom_graph(dcp.fd.getName(), dcp.fd.getBasicBlocks(), thefile);
-            thefile.close();
+            thefile.Close();
         }
     }
 }

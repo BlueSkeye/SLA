@@ -122,9 +122,9 @@ namespace Sla.SLEIGH
             temp_offset.changeHandleIndex(handmap);
         }
 
-        public void saveXml(ostream s)
+        public void saveXml(TextWriter s)
         {
-            s << "<handle_tpl>";
+            s.Write("<handle_tpl>");
             space.saveXml(s);
             size.saveXml(s);
             ptrspace.saveXml(s);
@@ -132,7 +132,7 @@ namespace Sla.SLEIGH
             ptrsize.saveXml(s);
             temp_space.saveXml(s);
             temp_offset.saveXml(s);
-            s << "</handle_tpl>\n";
+            s.WriteLine("</handle_tpl>");
         }
 
         public void restoreXml(Element el, AddrSpaceManager manage)

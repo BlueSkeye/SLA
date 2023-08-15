@@ -20,15 +20,15 @@ namespace Sla.EXTRA
         public UnifyState(ConstraintGroup uni)
         {
             container = uni;
-            storemap.resize(container.getMaxNum() + 1, UnifyDatatype());
+            storemap.resize(container.getMaxNum() + 1, new UnifyDatatype());
             container.collectTypes(storemap);
-            container.buildTraverseState(*this);
+            container.buildTraverseState(this);
         }
 
         ~UnifyState()
         {
-            for (int i = 0; i < traverselist.size(); ++i)
-                delete traverselist[i];
+            //for (int i = 0; i < traverselist.size(); ++i)
+            //    delete traverselist[i];
         }
 
         public int numTraverse() => traverselist.size();
@@ -44,10 +44,11 @@ namespace Sla.EXTRA
 
         public Funcdata getFunction() => fd;
 
-        public OpBehavior getBehavior(OpCode opc)
-        { // Get the behavior associated with a particular opcode
-            Architecture* glb = fd.getArch();
-            return glb.inst[opc].getBehavior();
+        public OpBehavior? getBehavior(OpCode opc)
+        {
+            // Get the behavior associated with a particular opcode
+            Architecture glb = fd.getArch();
+            return glb.inst[(int)opc].getBehavior();
         }
 
         public void setFunction(Funcdata f)

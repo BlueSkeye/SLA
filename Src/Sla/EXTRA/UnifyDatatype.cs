@@ -89,7 +89,7 @@ namespace Sla.EXTRA
                 default:
                     throw new LowlevelError("Bad unify datatype");
             }
-            return *this;
+            return this;
         }
 
         ~UnifyDatatype()
@@ -101,7 +101,7 @@ namespace Sla.EXTRA
                 case TypeKind.block_type:
                     break;
                 case TypeKind.const_type:
-                    delete storespot.cn;
+                    // delete storespot.cn;
                     break;
                 default:
                     break;

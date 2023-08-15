@@ -141,7 +141,7 @@ namespace Sla.DECCORE
         protected int getParamShift() => paramshift;
 
         /// Return \b true if p-code in the injection is generated dynamically
-        protected bool isDynamic() => dynamic;
+        internal bool isDynamic() => dynamic;
 
         /// Return \b true if any injected COPY is considered \e incidental
         internal bool isIncidentalCopy() => incidentalCopy;
@@ -182,9 +182,9 @@ namespace Sla.DECCORE
         internal virtual string getName() => name;
 
         /// Return the type of injection (CALLFIXUP_TYPE, InjectPayload.InjectionType.CALLOTHERFIXUP_TYPE, etc.)
-        protected virtual int getType() => type;
+        internal virtual InjectionType getType() => type;
 
         /// Return a string describing the \e source of the injection (.cspec, prototype model, etc.)
-        protected abstract string getSource();
+        internal abstract string getSource();
     }
 }

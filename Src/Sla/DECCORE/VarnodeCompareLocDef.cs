@@ -18,15 +18,12 @@ namespace Sla.DECCORE
         /// \return true if \b a occurs earlier than \b b
         internal static bool operator/*()*/(Varnode a, Varnode b)
         {
-            uint f1, f2;
-
             if (a.getAddr() != b.getAddr()) return (a.getAddr() < b.getAddr());
             if (a.getSize() != b.getSize()) return (a.getSize() < b.getSize());
-            f1 = a.getFlags() & (Varnode.varnode_flags.input | Varnode.varnode_flags.written);
-            f2 = b.getFlags() & (Varnode.varnode_flags.input | Varnode.varnode_flags.written);
+            Varnode.varnode_flags f1 = a.getFlags() & (Varnode.varnode_flags.input | Varnode.varnode_flags.written);
+            Varnode.varnode_flags f2 = b.getFlags() & (Varnode.varnode_flags.input | Varnode.varnode_flags.written);
             if (f1 != f2) return ((f1 - 1) < (f2 - 1)); // -1 forces free varnodes to come last
-            if (f1 == Varnode.varnode_flags.written)
-            {
+            if (f1 == Varnode.varnode_flags.written) {
                 if (a.getDef().getSeqNum() != b.getDef().getSeqNum())
                     return (a.getDef().getSeqNum() < b.getDef().getSeqNum());
             }

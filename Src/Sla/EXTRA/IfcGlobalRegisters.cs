@@ -1,11 +1,5 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -19,37 +13,33 @@ namespace Sla.EXTRA
         {
             if (dcp.conf == (Architecture)null)
                 throw new IfaceExecutionError("No load image present");
-            Dictionary<VarnodeData, string> reglist;
+            Dictionary<VarnodeData, string> reglist = new Dictionary<VarnodeData, string>();
             dcp.conf.translate.getAllRegisters(reglist);
-            Dictionary<VarnodeData, string>::const_iterator iter;
-            AddrSpace* spc = (AddrSpace)null;
+            AddrSpace? spc = (AddrSpace)null;
             ulong lastoff = 0;
-            Scope* globalscope = dcp.conf.symboltab.getGlobalScope();
+            Scope globalscope = dcp.conf.symboltab.getGlobalScope();
             int count = 0;
-            for (iter = reglist.begin(); iter != reglist.end(); ++iter)
-            {
-                VarnodeData dat = iter.Current.Key;
-                if (dat.space == spc)
-                {
+            foreach (KeyValuePair< VarnodeData, string> pair in reglist) {
+                VarnodeData dat = pair.Key;
+                if (dat.space == spc) {
                     if (dat.offset <= lastoff) continue; // Nested register def
                 }
                 spc = dat.space;
                 lastoff = dat.offset + dat.size - 1;
-                Address addr(spc, dat.offset);
-                uint flags = 0;
+                Address addr = new Address(spc, dat.offset);
+                Varnode.varnode_flags flags = 0;
                 // Check if the register location is global
                 globalscope.queryProperties(addr, dat.size, new Address(), flags);
-                if ((flags & Varnode.varnode_flags.persist) != 0)
-                {
-                    Datatype* ct = dcp.conf.types.getBase(dat.size, type_metatype.TYPE_UINT);
-                    globalscope.addSymbol((*iter).second, ct, addr, new Address());
+                if ((flags & Varnode.varnode_flags.persist) != 0) {
+                    Datatype ct = dcp.conf.types.getBase(dat.size, type_metatype.TYPE_UINT);
+                    globalscope.addSymbol(pair.Value, ct, addr, new Address());
                     count += 1;
                 }
             }
             if (count == 0)
-                *status.optr << "No global registers" << endl;
+                status.optr.WriteLine("No global registers");
             else
-                *status.optr << "Successfully made a global symbol for " << count << " registers" << endl;
+                status.optr.WriteLine($"Successfully made a global symbol for {count} registers");
         }
     }
 }

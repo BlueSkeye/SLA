@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpIntOr(TypeFactory t)
             : base(t, OpCode.CPUI_INT_OR,"|", type_metatype.TYPE_UINT, type_metatype.TYPE_UINT)
         {
-            opflags = PcodeOp.Flags.binary | PcodeOp::commutative;
+            opflags = PcodeOp.Flags.binary | PcodeOp.Flags.commutative;
             addlflags = logical_op | inherits_sign;
             behave = new OpBehaviorIntOr();
         }

@@ -8,7 +8,7 @@ namespace Sla.EXTRA
     {
         // friend class PcodeInjectLibrarySleigh;
         private ConstructTpl? tpl;
-        private string parsestring;
+        internal string parsestring;
         private string source;
 
         ///< Parse the <body> tag

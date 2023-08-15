@@ -33,7 +33,7 @@ namespace Sla.CORE
         /// An XmlException is thrown for any parsing error.
         /// \param s is the given stream to parse
         /// \return the in-memory DOM tree
-        Document parseDocument(StreamReader s)
+        internal Document parseDocument(TextReader s)
         {
             Document result = Xml.xml_tree(s);
             doclist.Add(result);

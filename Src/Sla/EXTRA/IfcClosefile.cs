@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Sla.EXTRA
 {
     internal class IfcClosefile : IfaceBaseCommand
@@ -17,8 +11,8 @@ namespace Sla.EXTRA
         {
             if (status.optr == status.fileoptr)
                 throw new IfaceExecutionError("No file open");
-            ((ofstream*)status.fileoptr).close();
-            delete status.fileoptr;
+            ((StreamWriter)status.fileoptr).Close();
+            // delete status.fileoptr;
             status.fileoptr = status.optr;
         }
     }

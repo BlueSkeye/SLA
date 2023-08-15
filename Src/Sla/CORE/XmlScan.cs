@@ -36,7 +36,7 @@ namespace Sla.CORE
         /// The current scanning mode
         private mode curmode;
         /// The stream being scanned
-        private StreamReader s;
+        private TextReader s;
         /// Current string being built
         private string? lvalue;
         /// Lookahead into the byte stream
@@ -355,7 +355,7 @@ namespace Sla.CORE
         }
 
         /// Construct scanner given a stream
-        public XmlScan(StreamReader t)
+        public XmlScan(TextReader t)
         {
             s = t;
             curmode = mode.SingleMode;

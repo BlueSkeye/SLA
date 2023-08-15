@@ -122,7 +122,7 @@ namespace Sla.CORE {
         /// \param hand is the ContentHandler that stores or processes the XML content events
         /// \param dbg is non-zero if the parser should output debug information during its parse
         /// \return 0 if there is no error during parsing or a (non-zero) error condition
-        internal static int xml_parse(StreamReader i, ContentHandler hand, int dbg = 0)
+        internal static int xml_parse(TextReader i, ContentHandler hand, int dbg = 0)
         {
             //#if YYDEBUG
             //  yydebug = dbg;
@@ -154,12 +154,11 @@ namespace Sla.CORE {
         /// DOM representation of the XML document.
         /// \param i is the given stream
         /// \return the in-memory XML document
-        internal static Document xml_tree(StreamReader i)
+        internal static Document xml_tree(TextReader i)
         {
             Document doc = new Document();
             TreeHandler handle = new TreeHandler(doc);
-            if (0 != xml_parse(i, handle))
-            {
+            if (0 != xml_parse(i, handle)) {
                 // delete doc;
                 throw new DecoderError(handle.getError() ?? "NULL");
             }
@@ -176,23 +175,19 @@ namespace Sla.CORE {
         ///
         /// \param s is the stream to write to
         /// \param str is the given character array to escape
-        internal static void xml_escape(StreamWriter s, string str)
+        internal static void xml_escape(TextWriter s, string str)
         {
             int stringLength = str.Length;
-            for (int index = 0; index < stringLength; index++)
-            {
+            for (int index = 0; index < stringLength; index++) {
                 char scannedCharacter = str[index];
-                if ('\0' == scannedCharacter)
-                {
+                if ('\0' == scannedCharacter) {
                     break;
                 }
-                if ('?' <= scannedCharacter)
-                {
+                if ('?' <= scannedCharacter) {
                     s.Write(str);
                     continue;
                 }
-                switch (scannedCharacter)
-                {
+                switch (scannedCharacter) {
                     case '<':
                         s.Write("&lt;");
                         break;
@@ -220,7 +215,7 @@ namespace Sla.CORE {
         /// \param s is the output stream
         /// \param attr is the name of the attribute
         /// \param val is the attribute value
-        internal static void a_v(StreamWriter s, string attr, string val)
+        internal static void a_v(TextWriter s, string attr, string val)
         {
             s.Write(' ');
             s.Write(attr);

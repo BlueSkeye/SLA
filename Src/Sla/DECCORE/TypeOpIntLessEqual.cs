@@ -11,7 +11,7 @@ namespace Sla.DECCORE
         public TypeOpIntLessEqual(TypeFactory t)
             : base(t, OpCode.CPUI_INT_LESSEQUAL,"<=", type_metatype.TYPE_BOOL, type_metatype.TYPE_UINT)
         {
-            opflags = PcodeOp.Flags.binary | PcodeOp::booloutput;
+            opflags = PcodeOp.Flags.binary | PcodeOp.Flags.booloutput;
             addlflags = inherits_sign;
             behave = new OpBehaviorIntLessEqual();
         }

@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpNotEqual(TypeFactory t)
             : base(t, OpCode.CPUI_INT_NOTEQUAL, "!=", type_metatype.TYPE_BOOL, type_metatype.TYPE_INT)
         {
-            opflags = PcodeOp.Flags.binary | PcodeOp::booloutput | PcodeOp::commutative;
+            opflags = PcodeOp.Flags.binary | PcodeOp.Flags.booloutput | PcodeOp.Flags.commutative;
             addlflags = inherits_sign;
             behave = new OpBehaviorNotEqual();
         }

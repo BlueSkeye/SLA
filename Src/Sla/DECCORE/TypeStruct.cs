@@ -185,10 +185,12 @@ namespace Sla.DECCORE
                 }
                 i += 1;
             }
+            newoff = 0;
+            elSize = 0;
             return (Datatype)null;
         }
 
-        public override Datatype? nearestArrayedComponentBackward(ulong off, ulong newoff, int elSize)
+        public override Datatype? nearestArrayedComponentBackward(ulong off, out ulong newoff, out int elSize)
         {
             int i = getLowerBoundField((int)off);
             while (i >= 0) {
@@ -201,17 +203,17 @@ namespace Sla.DECCORE
                     elSize = ((TypeArray)subtype).getBase().getSize();
                     return subtype;
                 }
-                else {
-                    ulong suboff;
-                    Datatype res = subtype.nearestArrayedComponentBackward(subtype.getSize(),
-                        out suboff, out elSize);
-                    if (res != (Datatype)null) {
-                        newoff = (ulong)diff;
-                        return subtype;
-                    }
+                ulong suboff;
+                Datatype? res = subtype.nearestArrayedComponentBackward((ulong)subtype.getSize(),
+                    out suboff, out elSize);
+                if (res != (Datatype)null) {
+                    newoff = (ulong)diff;
+                    return subtype;
                 }
                 i -= 1;
             }
+            newoff = 0;
+            elSize = 0;
             return (Datatype)null;
         }
 

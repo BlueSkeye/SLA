@@ -1,12 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.Intrinsics.Arm;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -28,20 +21,22 @@ namespace Sla.EXTRA
             string name;
 
             s >> ws >> name;
-            if (name.size() == 0)
+            if (name.Length == 0)
                 throw new IfaceExecutionError("Need name of file to read callgraph from");
 
-            ifstream @is = new ifstream(name.c_str());
-            if (!@is)
-                throw new IfaceExecutionError("Unable to open callgraph file " + name);
+            TextReader @is;
+            try { @is = new StreamReader(File.OpenRead(name)); }
+            catch {
+                throw new IfaceExecutionError($"Unable to open callgraph file {name}");
+            }
 
-            DocumentStorage store;
+            DocumentStorage store = new DocumentStorage();
             Document doc = store.parseDocument(@is);
 
             dcp.allocateCallGraph();
-            XmlDecode decoder(dcp.conf, doc.getRoot());
+            XmlDecode decoder = new XmlDecode(dcp.conf, doc.getRoot());
             dcp.cgraph.decoder(decoder);
-            *status.optr << "Successfully read in callgraph" << endl;
+            status.optr.WriteLine("Successfully read in callgraph");
 
             Scope gscope = dcp.conf.symboltab.getGlobalScope();
             Dictionary<Address, CallGraphNode>.Enumerator iter = dcp.cgraph.begin();

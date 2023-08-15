@@ -1,9 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.SLEIGH
 {
@@ -18,13 +13,13 @@ namespace Sla.SLEIGH
         
         public VarnodeTpl(int hand, bool zerosize)
         {
-            space = new ConstTpl(ConstTpl.const_type.handle, hand, ConstTpl::v_space);
-            offset = new ConstTpl(ConstTpl.const_type.handle, hand, ConstTpl::v_offset);
-            size = new ConstTpl(ConstTpl.const_type.handle, hand, ConstTpl::v_size);
+            space = new ConstTpl(ConstTpl.const_type.handle, hand, ConstTpl.v_field.v_space);
+            offset = new ConstTpl(ConstTpl.const_type.handle, hand, ConstTpl.v_field.v_offset);
+            size = new ConstTpl(ConstTpl.const_type.handle, hand, ConstTpl.v_field.v_size);
                 // Varnode built from a handle
                         // if zerosize is true, set the size constant to zero
             if (zerosize)
-                size = ConstTpl(ConstTpl.const_type.real, 0);
+                size = new ConstTpl(ConstTpl.const_type.real, 0);
             unnamed_flag = false;
         }
 
@@ -38,9 +33,9 @@ namespace Sla.SLEIGH
         
         public VarnodeTpl(ConstTpl sp, ConstTpl off, ConstTpl sz)
         {
-            space = new ConstTpl(sp);
-            offset = new ConstTpl(off);
-            size = new ConstTpl(sz);
+            space = sp;
+            offset = off;
+            size = sz;
             unnamed_flag = false;
         }
 
@@ -73,9 +68,10 @@ namespace Sla.SLEIGH
         public int transfer(List<HandleTpl> @params)
         {
             bool doesOffsetPlus = false;
-            int handleIndex;
-            int plus;
-            if ((offset.getType() == ConstTpl.const_type.handle) && (offset.getSelect() == ConstTpl::v_offset_plus))
+            int handleIndex = 0;
+            int plus = 0;
+            if (   (offset.getType() == ConstTpl.const_type.handle)
+                && (offset.getSelect() == ConstTpl.v_field.v_offset_plus))
             {
                 handleIndex = offset.getHandleIndex();
                 plus = (int)offset.getReal();
@@ -84,8 +80,7 @@ namespace Sla.SLEIGH
             space.transfer (@params);
             offset.transfer (@params);
             size.transfer (@params);
-            if (doesOffsetPlus)
-            {
+            if (doesOffsetPlus) {
                 if (isLocalTemp())
                     return plus;        // A positive number indicates truncation of a local temp
                 if (@params[handleIndex].getSize().isZero())
@@ -98,9 +93,9 @@ namespace Sla.SLEIGH
 
         public static bool operator <(VarnodeTpl op1, VarnodeTpl op2)
         {
-            if (!(space == op2.space)) return (space < op2.space);
-            if (!(offset == op2.offset)) return (offset < op2.offset);
-            if (!(size == op2.size)) return (size < op2.size);
+            if (!(op1.space == op2.space)) return (op1.space < op2.space);
+            if (!(op1.offset == op2.offset)) return (op1.offset < op2.offset);
+            if (!(op1.size == op2.size)) return (op1.size < op2.size);
             return false;
         }
 
@@ -146,9 +141,10 @@ namespace Sla.SLEIGH
         }
 
         public bool adjustTruncation(int sz, bool isbigendian)
-        { // We know this.offset is an offset_plus, check that the truncation is in bounds (given -sz-)
-          // adjust plus for endianness if necessary
-          // return true if truncation is in bounds
+        {
+            // We know this.offset is an offset_plus, check that the truncation is in bounds (given -sz-)
+            // adjust plus for endianness if necessary
+            // return true if truncation is in bounds
             if (size.getType() != ConstTpl.const_type.real)
                 return false;
             int numbytes = (int)size.getReal();
@@ -156,41 +152,34 @@ namespace Sla.SLEIGH
             if (numbytes + byteoffset > sz) return false;
 
             // Encode the original truncation amount with the plus value
-            ulong val = byteoffset;
+            ulong val = (ulong)byteoffset;
             val <<= 16;
-            if (isbigendian)
-            {
-                val |= (ulong)(sz - (numbytes + byteoffset));
-            }
-            else
-            {
-                val |= (ulong)byteoffset;
-            }
-
-
-            offset = ConstTpl(ConstTpl.const_type.handle, offset.getHandleIndex(), ConstTpl::v_offset_plus, val);
+            val |= (isbigendian) 
+                ? (ulong)(sz - (numbytes + byteoffset))
+                : (ulong)byteoffset;
+            offset = new ConstTpl(ConstTpl.const_type.handle, offset.getHandleIndex(),
+                ConstTpl.v_field.v_offset_plus, val);
             return true;
         }
 
         public void saveXml(TextWriter s)
         {
-            s << "<varnode_tpl>";
+            s.Write("<varnode_tpl>");
             space.saveXml(s);
             offset.saveXml(s);
             size.saveXml(s);
-            s << "</varnode_tpl>\n";
+            s.WriteLine("</varnode_tpl>");
         }
 
         public void restoreXml(Element el, AddrSpaceManager manage)
         {
-            List list = el.getChildren();
-            List::const_iterator iter;
-            iter = list.begin();
-            space.restoreXml(*iter, manage);
-            ++iter;
-            offset.restoreXml(*iter, manage);
-            ++iter;
-            size.restoreXml(*iter, manage);
+            IEnumerator<Element> iter = el.getChildren().GetEnumerator();
+            if (!iter.MoveNext()) throw new BugException();
+            space.restoreXml(iter.Current, manage);
+            if (!iter.MoveNext()) throw new BugException();
+            offset.restoreXml(iter.Current, manage);
+            if (!iter.MoveNext()) throw new BugException();
+            size.restoreXml(iter.Current, manage);
         }
     }
 }

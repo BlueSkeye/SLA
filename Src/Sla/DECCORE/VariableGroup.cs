@@ -1,8 +1,5 @@
-﻿using System;
+﻿using Sla.CORE;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
@@ -34,7 +31,8 @@ namespace Sla.DECCORE
         }
 
         /// The set of VariablePieces making up \b this group
-        private set<VariablePiece, PieceCompareByOffset> pieceSet;
+        internal SortedSet<VariablePiece> pieceSet =
+            new SortedSet<VariablePiece>(VariableGroup.PieceCompareByOffset);
         /// Number of contiguous bytes covered by the whole group
         private int size;
         /// Byte offset of \b this group within its containing Symbol
@@ -67,7 +65,7 @@ namespace Sla.DECCORE
         /// \param amt is the given amount to add to offsets
         public void adjustOffsets(int amt)
         {
-            set<VariablePiece*, VariableGroup::PieceCompareByOffset>::iterator iter;
+            SortedSet<VariablePiece>, VariableGroup::PieceCompareByOffset>::iterator iter;
 
             for (iter = pieceSet.begin(); iter != pieceSet.end(); ++iter)
             {
@@ -79,7 +77,7 @@ namespace Sla.DECCORE
         /// Remove a piece from \b this group
         public void removePiece(VariablePiece piece)
         {
-            pieceSet.erase(piece);
+            pieceSet.Remove(piece);
             // We currently don't adjust size here as removePiece is currently only called during clean up
         }
 
@@ -102,13 +100,7 @@ namespace Sla.DECCORE
         /// \param op2 is the given VariableGroup to merge into \b this
         public void combineGroups(VariableGroup op2)
         {
-            set<VariablePiece*, VariableGroup::PieceCompareByOffset>::iterator iter = op2.pieceSet.begin();
-            set<VariablePiece*, VariableGroup::PieceCompareByOffset>::iterator enditer = op2.pieceSet.end();
-
-            while (iter != enditer)
-            {
-                VariablePiece* piece = *iter;
-                ++iter;
+            foreach (VariablePiece piece in op2.pieceSet) {
                 piece.transferGroup(this);
             }
         }

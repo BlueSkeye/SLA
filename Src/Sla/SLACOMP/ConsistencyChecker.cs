@@ -38,9 +38,16 @@ namespace Sla.SLACOMP
             internal /*mutable*/ int opttype;  ///< 0 = register read by a COPY, 1 = register written by a COPY (-1 otherwise)
 
             /// \brief Construct a record, initializing counts
-            internal OptimizeRecord()
+            public OptimizeRecord()
             {
-                writeop = -1; readop = -1; inslot = -1; writecount = 0; readcount = 0; writesection = -2; readsection = -2; opttype = -1;
+                writeop = -1;
+                readop = -1;
+                inslot = -1;
+                writecount = 0;
+                readcount = 0;
+                writesection = -2;
+                readsection = -2;
+                opttype = -1;
             }
         }
         
@@ -319,7 +326,7 @@ namespace Sla.SLACOMP
             else
                 op2 = (OperandSymbol)null;
 
-            TextWriter msgBuilder = new StringBuilder();
+            TextWriter msgBuilder = new StringWriter();
 
             msgBuilder.WriteLine($"Size restriction error in table '{sym.getName()}'");
             if ((op1 != (OperandSymbol)null) && (op2 != (OperandSymbol)null))
@@ -657,7 +664,7 @@ namespace Sla.SLACOMP
                         printOpError(op, ct, 0, 0, "Using subtable with exports in expression");
                         return false;
                     }
-                    vn1 = op.getIn(1).getOffset().getReal();
+                    vn1 = (int)op.getIn(1).getOffset().getReal();
                     if ((vnout == 0) || (vn0 == 0)) return true;
                     if ((vnout == vn0) && (vn1 == 0)) {
                         // No actual truncation is occuring
@@ -818,7 +825,7 @@ namespace Sla.SLACOMP
             bool seennonemptyexport = false;
 
             for (int i = 0; i < numconstruct; ++i) {
-                ct = sym.getConstructor(i);
+                ct = sym.getConstructor((uint)i);
                 if (!checkConstructorSection(ct, ct.getTempl()))
                     testresult = false;
                 int numsection = ct.getNumSections();
@@ -832,7 +839,7 @@ namespace Sla.SLACOMP
                 if (exportres != (HandleTpl)null) {
                     if (seenemptyexport && (!seennonemptyexport)) {
                         compiler.reportError(compiler.getLocation(ct),
-                            $"Table '{sym.getName()}' exports inconsistently; Constructor starting at line [ct.getLineno()} is first inconsistency");
+                            $"Table '{sym.getName()}' exports inconsistently; Constructor starting at line {ct.getLineno()} is first inconsistency");
                         testresult = false;
                     }
                     seennonemptyexport = true;
@@ -937,7 +944,7 @@ namespace Sla.SLACOMP
                     postorder.Add(cur);   // Post the traversed table
                 }
                 else {
-                    Constructor ct = cur.getConstructor(ctind);
+                    Constructor ct = cur.getConstructor((uint)ctind);
                     int oper = ctstate.GetLastItem();
                     if (oper >= ct.getNumOperands()) {
                         state.SetLastItem(ctind + 1); // Constructor fully traversed
@@ -1364,7 +1371,7 @@ namespace Sla.SLACOMP
                 int numconstruct = sym.getNumConstructors();
                 Constructor ct;
                 for (int j = 0; j < numconstruct; ++j) {
-                    ct = sym.getConstructor(j);
+                    ct = sym.getConstructor((uint)j);
 
                     int numsections = ct.getNumSections();
                     for (int k = -1; k < numsections; ++k) {
@@ -1388,7 +1395,7 @@ namespace Sla.SLACOMP
                 SubtableSymbol sym = postorder[i];
                 int numconstruct = sym.getNumConstructors();
                 for (int j = 0; j < numconstruct; ++j) {
-                    Constructor ct = sym.getConstructor(j);
+                    Constructor ct = sym.getConstructor((uint)j);
 
                     int numsections = ct.getNumSections();
                     for (int k = -1; k < numsections; ++k) {
@@ -1408,7 +1415,7 @@ namespace Sla.SLACOMP
                 SubtableSymbol sym = postorder[i];
                 int numconstruct = sym.getNumConstructors();
                 for (int j = 0; j < numconstruct; ++j) {
-                    Constructor ct = sym.getConstructor(j);
+                    Constructor ct = sym.getConstructor((uint)j);
                     optimize(ct);
                 }
             }

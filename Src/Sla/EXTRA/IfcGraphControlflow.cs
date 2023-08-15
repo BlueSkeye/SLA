@@ -1,10 +1,4 @@
 ﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -23,16 +17,29 @@ namespace Sla.EXTRA
                 throw new IfaceExecutionError("No function selected");
 
             s >> filename;
-            if (filename.size() == 0)
+            if (filename.Length == 0)
                 throw new IfaceParseError("Missing output file");
             if (dcp.fd.getBasicBlocks().getSize() == 0)
                 throw new IfaceExecutionError("Basic block structure not calculated");
-            ofstream thefile(filename.c_str());
-            if (!thefile)
-                throw new IfaceExecutionError("Unable to open output file: " + filename);
+            StreamWriter thefile;
+
+            try { thefile = new StreamWriter(File.OpenWrite(filename)); }
+            catch {
+                throw new IfaceExecutionError($"Unable to open output file: {filename}");
+            }
 
             dump_controlflow_graph(dcp.fd.getName(), dcp.fd.getBasicBlocks(), thefile);
-            thefile.close();
+            thefile.Close();
+        }
+
+        private static void dump_controlflow_graph(string name, BlockGraph graph, TextWriter s)
+        {
+            s.WriteLine($"*CMD=NewGraphWindow, WindowName={name}-controlflow;");
+            s.WriteLine($"*CMD=*NEXUS,Name={name}-controlflow;");
+            Graph.dump_block_properties(s);
+            Graph.dump_block_attributes(s);
+            Graph.dump_block_vertex(graph, s, false);
+            dump_block_edges(graph, s);
         }
     }
 }

@@ -30,20 +30,19 @@ namespace Sla.SLEIGH
         private void initialize(int min, int hashsize)
         {
             minimumreuse = min;
-            mask = hashsize - 1;
+            mask = (uint)(hashsize - 1);
             ulong masktest = Globals.coveringmask((ulong)mask);
             if (masktest != (ulong)mask)    // -hashsize- must be a power of 2
                 throw new LowlevelError("Bad windowsize for disassembly cache");
-            list = new ParserContext*[minimumreuse];
+            list = new ParserContext[minimumreuse];
             nextfree = 0;
-            hashtable = new ParserContext*[hashsize];
-            for (int i = 0; i < minimumreuse; ++i)
-            {
-                ParserContext* pos = new ParserContext(contextcache, translate);
+            hashtable = new ParserContext[hashsize];
+            for (int i = 0; i < minimumreuse; ++i) {
+                ParserContext pos = new ParserContext(contextcache, translate);
                 pos.initialize(75, 20, constspace);
                 list[i] = pos;
             }
-            ParserContext* pos = list[0];
+            ParserContext pos = list[0];
             for (int i = 0; i < hashsize; ++i)
                 hashtable[i] = pos;     // Make sure all hashtable positions point to a real ParserContext
         }
@@ -51,10 +50,10 @@ namespace Sla.SLEIGH
         /// Free the hash-table of ParserContexts
         private void free()
         {
-            for (int i = 0; i < minimumreuse; ++i)
-                delete list[i];
-            delete[] list;
-            delete[] hashtable;
+            //for (int i = 0; i < minimumreuse; ++i)
+            //    delete list[i];
+            //delete[] list;
+            //delete[] hashtable;
         }
 
         /// \param trans is the Translate object instantiating this cache (for inst_next2 callbacks)
@@ -62,7 +61,8 @@ namespace Sla.SLEIGH
         /// \param cspace is the constant address space used for minting constant Varnodes
         /// \param cachesize is the number of distinct ParserContext objects in this cache
         /// \param windowsize is the size of the ParserContext hash-table
-        public DisassemblyCache(Translate trans, ContextCache ccache, AddrSpace cspace, int cachesize, int windowsize)
+        public DisassemblyCache(Translate trans, ContextCache ccache, AddrSpace cspace, int cachesize,
+            int windowsize)
         {
             translate = trans;
             contextcache = ccache;
@@ -87,7 +87,7 @@ namespace Sla.SLEIGH
         public ParserContext getParserContext(Address addr)
         {
             int hashindex = ((int)addr.getOffset()) & mask;
-            ParserContext* res = hashtable[hashindex];
+            ParserContext res = hashtable[hashindex];
             if (res.getAddr() == addr)
                 return res;
             res = list[nextfree];
@@ -95,7 +95,7 @@ namespace Sla.SLEIGH
             if (nextfree >= minimumreuse)
                 nextfree = 0;
             res.setAddr(addr);
-            res.setParserState(ParserContext::uninitialized);  // Need to start over with parsing
+            res.setParserState(ParserContext.State.uninitialized);  // Need to start over with parsing
             hashtable[hashindex] = res; // Stick it into the hashtable
             return res;
         }

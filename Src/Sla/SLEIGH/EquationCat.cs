@@ -36,36 +36,30 @@ namespace Sla.SLEIGH
         {
             bool res = left.resolveOperandLeft(state);
             if (!res) return false;
-            int cur_base = state.base;
+            int cur_base = state.@base;
             int cur_offset = state.offset;
-            if ((!left.getTokenPattern().getLeftEllipsis()) && (!left.getTokenPattern().getRightEllipsis()))
-            {
+            if ((!left.getTokenPattern().getLeftEllipsis()) && (!left.getTokenPattern().getRightEllipsis())) {
                 // Keep the same base
                 state.offset += left.getTokenPattern().getMinimumLength(); // But add to its size
             }
-            else if (state.cur_rightmost != -1)
-            {
-                state.base = state.cur_rightmost;
+            else if (state.cur_rightmost != -1) {
+                state.@base = state.cur_rightmost;
                 state.offset = state.size;
             }
-            else if (state.size != -1)
-            {
+            else if (state.size != -1) {
                 state.offset += state.size;
             }
-            else
-            {
-                state.base = -2;        // We have no anchor
+            else {
+                state.@base = -2;        // We have no anchor
             }
             int cur_rightmost = state.cur_rightmost;
             int cur_size = state.size;
             res = right.resolveOperandLeft(state);
             if (!res) return false;
-            state.base = cur_base;  // Restore base and offset
+            state.@base = cur_base;  // Restore base and offset
             state.offset = cur_offset;
-            if (state.cur_rightmost == -1)
-            {
-                if ((state.size != -1) && (cur_rightmost != -1) && (cur_size != -1))
-                {
+            if (state.cur_rightmost == -1) {
+                if ((state.size != -1) && (cur_rightmost != -1) && (cur_size != -1)) {
                     state.cur_rightmost = cur_rightmost;
                     state.size += cur_size;
                 }

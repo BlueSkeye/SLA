@@ -5,7 +5,6 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using static ghidra.ConditionalJoin;
 
 namespace Sla.DECCORE
 {
@@ -17,7 +16,7 @@ namespace Sla.DECCORE
     {
         // friend class VariableGroup;
         /// Group to which \b this piece belongs
-        private VariableGroup group;
+        internal VariableGroup group;
         /// HighVariable owning \b this piece
         private HighVariable high;
         /// Byte offset of \b this piece within the group
@@ -50,8 +49,9 @@ namespace Sla.DECCORE
         ~VariablePiece()
         {
             group.removePiece(this);
-            if (group.empty())
-                delete group;
+            if (group.empty()) {
+                // delete group;
+            }
             else
                 markIntersectionDirty();
         }
@@ -80,59 +80,53 @@ namespace Sla.DECCORE
         /// Mark all pieces as needing intersection recalculation
         public void markIntersectionDirty()
         {
-            set<VariablePiece*, VariableGroup::PieceCompareByOffset>::const_iterator iter;
-
-            for (iter = group.pieceSet.begin(); iter != group.pieceSet.end(); ++iter)
-                (*iter).high.highflags |= (HighVariable::intersectdirty | HighVariable::extendcoverdirty);
+            foreach (VariablePiece piece in group.pieceSet)
+                piece.high.highflags |=
+                    (HighVariable.DirtinessFlags.intersectdirty | HighVariable.DirtinessFlags.extendcoverdirty);
         }
 
         /// Mark all intersecting pieces as having a dirty extended cover
         public void markExtendCoverDirty()
         {
-            if ((high.highflags & HighVariable::intersectdirty) != 0)
+            if ((high.highflags & HighVariable.DirtinessFlags.intersectdirty) != 0)
                 return; // intersection list itself is dirty, extended covers will be recomputed anyway
-            for (int i = 0; i < intersection.size(); ++i)
-            {
-                intersection[i].high.highflags |= HighVariable::extendcoverdirty;
+            for (int i = 0; i < intersection.size(); ++i) {
+                intersection[i].high.highflags |= HighVariable.DirtinessFlags.extendcoverdirty;
             }
-            high.highflags |= HighVariable::extendcoverdirty;
+            high.highflags |= HighVariable.DirtinessFlags.extendcoverdirty;
         }
 
         /// Calculate intersections with other pieces in the group
         /// Compute list of exactly the HighVariable pieces that intersect with \b this.
         public void updateIntersections()
         {
-            if ((high.highflags & HighVariable::intersectdirty) == 0) return;
-            set<VariablePiece*, VariableGroup::PieceCompareByOffset>::const_iterator iter;
+            if ((high.highflags & HighVariable.DirtinessFlags.intersectdirty) == 0) return;
 
             int endOffset = groupOffset + size;
-            intersection.clear();
-            for (iter = group.pieceSet.begin(); iter != group.pieceSet.end(); ++iter)
-            {
-                VariablePiece* otherPiece = *iter;
+            intersection.Clear();
+            foreach (VariablePiece otherPiece in group.pieceSet) {
                 if (otherPiece == this) continue;
                 if (endOffset <= otherPiece.groupOffset) continue;
                 int otherEndOffset = otherPiece.groupOffset + otherPiece.size;
                 if (groupOffset >= otherEndOffset) continue;
                 intersection.Add(otherPiece);
             }
-            high.highflags &= ~(uint)HighVariable::intersectdirty;
+            high.highflags &= ~HighVariable.DirtinessFlags.intersectdirty;
         }
 
         /// Calculate extended cover based on intersections
         /// Union internal covers of all pieces intersecting with \b this.
         public void updateCover()
         {
-            if ((high.highflags & (HighVariable::coverdirty | HighVariable::extendcoverdirty)) == 0) return;
+            if ((high.highflags & (HighVariable.DirtinessFlags.coverdirty | HighVariable.DirtinessFlags.extendcoverdirty)) == 0) return;
             high.updateInternalCover();
             cover = high.internalCover;
-            for (int i = 0; i < intersection.size(); ++i)
-            {
+            for (int i = 0; i < intersection.size(); ++i) {
                 HighVariable high = intersection[i].high;
                 high.updateInternalCover();
                 cover.merge(high.internalCover);
             }
-            high.highflags &= ~(uint)HighVariable::extendcoverdirty;
+            high.highflags &= ~HighVariable.DirtinessFlags.extendcoverdirty;
         }
 
         /// Transfer \b this piece to another VariableGroup
@@ -141,8 +135,8 @@ namespace Sla.DECCORE
         public void transferGroup(VariableGroup newGroup)
         {
             group.removePiece(this);
-            if (group.empty())
-                delete group;
+            //if (group.empty())
+            //    delete group;
             newGroup.addPiece(this);
         }
 
@@ -168,19 +162,13 @@ namespace Sla.DECCORE
                 op2.group.adjustOffsets(diff);
             else if (diff < 0)
                 group.adjustOffsets(-diff);
-            set<VariablePiece*, VariableGroup::PieceCompareByOffset>::iterator iter = op2.group.pieceSet.begin();
-            set<VariablePiece*, VariableGroup::PieceCompareByOffset>::iterator enditer = op2.group.pieceSet.end();
-            while (iter != enditer)
-            {
-                VariablePiece* piece = *iter;
-                ++iter;
-                set<VariablePiece*, VariableGroup::PieceCompareByOffset>::iterator matchiter = group.pieceSet.find(piece);
-                if (matchiter != group.pieceSet.end())
-                {
-                    mergePairs.Add((*matchiter).high);
+            foreach (VariablePiece piece in op2.group.pieceSet) {
+                VariablePiece? variablePiece;
+                if (group.pieceSet.TryGetValue(piece, out variablePiece)) {
+                    mergePairs.Add(variablePiece.high);
                     mergePairs.Add(piece.high);
                     piece.high.piece = (VariablePiece)null; // Detach HighVariable from its original VariablePiece
-                    delete piece;
+                    // delete piece;
                 }
                 else
                     piece.transferGroup(group);

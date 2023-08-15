@@ -19,7 +19,7 @@ namespace Sla.SLEIGH
         protected uint delayslot;
         protected uint numlabels;        // Number of label templates
         protected List<OpTpl> vec;
-        protected HandleTpl result;
+        protected HandleTpl? result;
 
         protected void setOpvec(List<OpTpl> opvec)
         {
@@ -40,11 +40,11 @@ namespace Sla.SLEIGH
         
         ~ConstructTpl()
         {               // Constructor owns its ops and handles
-            List<OpTpl*>::iterator oiter;
-            for (oiter = vec.begin(); oiter != vec.end(); ++oiter)
-                delete* oiter;
-            if (result != (HandleTpl)null)
-                delete result;
+            //List<OpTpl*>::iterator oiter;
+            //for (oiter = vec.begin(); oiter != vec.end(); ++oiter)
+            //    delete* oiter;
+            //if (result != (HandleTpl)null)
+            //    delete result;
         }
 
         public uint delaySlot() => delayslot;
@@ -53,17 +53,16 @@ namespace Sla.SLEIGH
 
         public List<OpTpl> getOpvec() => vec;
 
-        public HandleTpl getResult() => result;
+        public HandleTpl? getResult() => result;
 
         public bool addOp(OpTpl ot)
         {
-            if (ot.getOpcode() == DELAY_SLOT)
-            {
+            if (ot.getOpcode() == OpCode.DELAY_SLOT) {
                 if (delayslot != 0)
                     return false;       // Cannot have multiple delay slots
                 delayslot = ot.getIn(0).getOffset().getReal();
             }
-            else if (ot.getOpcode() == LABELBUILD)
+            else if (ot.getOpcode() == OpCode.LABELBUILD)
                 numlabels += 1;     // Count labels
             vec.Add(ot);
             return true;
@@ -85,31 +84,26 @@ namespace Sla.SLEIGH
         public int fillinBuild(List<int> check, AddrSpace const_space)
         { // Make sure there is a build statement for all subtable params
           // Return 0 upon success, 1 if there is a duplicate BUILD, 2 if there is a build for a non-subtable
-            List<OpTpl*>::iterator iter;
-            OpTpl* op;
-            VarnodeTpl* indvn;
+            IEnumerator<OpTpl> iter;
+            OpTpl op;
+            VarnodeTpl indvn;
 
-            for (iter = vec.begin(); iter != vec.end(); ++iter)
-            {
-                op = *iter;
-                if (op.getOpcode() == BUILD)
-                {
+            foreach (OpTpl op in vec) {
+                if (op.getOpcode() == OpCode.BUILD) {
                     int index = op.getIn(0).getOffset().getReal();
                     if (check[index] != 0)
                         return check[index];    // Duplicate BUILD statement or non-subtable
                     check[index] = 1;       // Mark to avoid future duplicate build
                 }
             }
-            for (int i = 0; i < check.size(); ++i)
-            {
-                if (check[i] == 0)
-                {   // Didn't see a BUILD statement
-                    op = new OpTpl(BUILD);
-                    indvn = new VarnodeTpl(ConstTpl(const_space),
-                                ConstTpl(ConstTpl.const_type.real, i),
-                                ConstTpl(ConstTpl.const_type.real, 4));
+            for (int i = 0; i < check.size(); ++i) {
+                if (check[i] == 0) {
+                    // Didn't see a BUILD statement
+                    op = new OpTpl(OpCode.BUILD);
+                    indvn = new VarnodeTpl(new ConstTpl(const_space), new ConstTpl(ConstTpl.const_type.real, (uint)i),
+                        new ConstTpl(ConstTpl.const_type.real, 4));
                     op.addInput(indvn);
-                    vec.insert(vec.begin(), op);
+                    vec.Insert(0, op);
                 }
             }
             return 0;
@@ -117,12 +111,8 @@ namespace Sla.SLEIGH
 
         public bool buildOnly()
         {
-            List<OpTpl*>::const_iterator iter;
-            OpTpl* op;
-            for (iter = vec.begin(); iter != vec.end(); ++iter)
-            {
-                op = *iter;
-                if (op.getOpcode() != BUILD)
+            foreach (OpTpl op in vec) {
+                if (op.getOpcode() != OpCode.BUILD)
                     return false;
             }
             return true;
@@ -130,17 +120,11 @@ namespace Sla.SLEIGH
 
         public void changeHandleIndex(List<int> handmap)
         {
-            List<OpTpl*>::const_iterator iter;
-            OpTpl* op;
-
-            for (iter = vec.begin(); iter != vec.end(); ++iter)
-            {
-                op = *iter;
-                if (op.getOpcode() == BUILD)
-                {
-                    int index = op.getIn(0).getOffset().getReal();
+            foreach (OpTpl op in vec) {
+                if (op.getOpcode() == OpCode.BUILD) {
+                    int index = (int)op.getIn(0).getOffset().getReal();
                     index = handmap[index];
-                    op.getIn(0).setOffset(index);
+                    op.getIn(0).setOffset((ulong)index);
                 }
                 else
                     op.changeHandleIndex(handmap);
@@ -150,38 +134,38 @@ namespace Sla.SLEIGH
         }
 
         public void setInput(VarnodeTpl vn, int index, int slot)
-        { // set the VarnodeTpl input for a particular op
-          // for use with optimization routines
-            OpTpl* op = vec[index];
-            VarnodeTpl* oldvn = op.getIn(slot);
+        {
+            // set the VarnodeTpl input for a particular op
+            // for use with optimization routines
+            OpTpl op = vec[index];
+            VarnodeTpl? oldvn = op.getIn(slot);
             op.setInput(vn, slot);
-            if (oldvn != (VarnodeTpl)null)
-                delete oldvn;
+            //if (oldvn != (VarnodeTpl)null)
+            //    delete oldvn;
         }
 
         public void setOutput(VarnodeTpl vn, int index)
-        { // set the VarnodeTpl output for a particular op
-          // for use with optimization routines
-            OpTpl* op = vec[index];
-            VarnodeTpl* oldvn = op.getOut();
+        {
+            // set the VarnodeTpl output for a particular op
+            // for use with optimization routines
+            OpTpl op = vec[index];
+            VarnodeTpl oldvn = op.getOut();
             op.setOutput(vn);
-            if (oldvn != (VarnodeTpl)null)
-                delete oldvn;
+            //if (oldvn != (VarnodeTpl)null)
+            //    delete oldvn;
         }
 
         public void deleteOps(List<int> indices)
-        { // delete a particular set of ops
-            for (uint i = 0; i < indices.size(); ++i)
-            {
-                delete vec[indices[i]];
-                vec[indices[i]] = (OpTpl*)0;
+        {
+            // delete a particular set of ops
+            for (int i = 0; i < indices.size(); ++i) {
+                // delete vec[indices[i]];
+                vec[indices[i]] = (OpTpl)null;
             }
-            uint poscur = 0;
-            for (uint i = 0; i < vec.size(); ++i)
-            {
-                OpTpl* op = vec[i];
-                if (op != (OpTpl*)0)
-                {
+            int poscur = 0;
+            for (uint i = 0; i < vec.size(); ++i) {
+                OpTpl? op = vec[(int)i];
+                if (op != (OpTpl)null) {
                     vec[poscur] = op;
                     poscur += 1;
                 }
@@ -192,64 +176,49 @@ namespace Sla.SLEIGH
 
         public void saveXml(TextWriter s, int sectionid)
         {
-            s << "<construct_tpl";
+            s.Write("<construct_tpl");
             if (sectionid >= 0)
-                s << " section=\"" << dec << sectionid << "\"";
+                s.Write($" section=\"{sectionid}");
             if (delayslot != 0)
-                s << " delay=\"" << dec << delayslot << "\"";
+                s.Write($" delay=\"{delayslot}\"");
             if (numlabels != 0)
-                s << " labels=\"" << dec << numlabels << "\"";
-            s << ">\n";
+                s.Write($" labels=\"{numlabels}\"");
+            s.WriteLine(">");
             if (result != (HandleTpl)null)
                 result.saveXml(s);
             else
-                s << "<null/>";
+                s.Write("<null/>");
             for (int i = 0; i < vec.size(); ++i)
                 vec[i].saveXml(s);
-            s << "</construct_tpl>\n";
+            s.WriteLine("</construct_tpl>");
         }
 
         public int restoreXml(Element el, AddrSpaceManager manage)
         {
             int sectionid = -1;
-            for (int i = 0; i < el.getNumAttributes(); ++i)
-            {
+            for (int i = 0; i < el.getNumAttributes(); ++i) {
                 if (el.getAttributeName(i) == "delay")
-                {
-                    istringstream s = new istringstream(el.getAttributeValue(i));
-                    s.unsetf(ios::dec | ios::hex | ios::oct);
-                    s >> delayslot;
+                    delayslot = uint.Parse(el.getAttributeValue(i));
+                else if (el.getAttributeName(i) == "labels") {
+                    numlabels = uint.Parse(el.getAttributeValue(i));
                 }
-                else if (el.getAttributeName(i) == "labels")
-                {
-                    istringstream s = new istringstream(el.getAttributeValue(i));
-                    s.unsetf(ios::dec | ios::hex | ios::oct);
-                    s >> numlabels;
-                }
-                else if (el.getAttributeName(i) == "section")
-                {
-                    istringstream s = new istringstream(el.getAttributeValue(i));
-                    s.unsetf(ios::dec | ios::hex | ios::oct);
-                    s >> sectionid;
+                else if (el.getAttributeName(i) == "section") {
+                    sectionid = int.Parse(el.getAttributeValue(i));
                 }
             }
-            List list = el.getChildren();
-            List::const_iterator iter;
-            iter = list.begin();
-            if ((*iter).getName() == "null")
+            List<Element> list = el.getChildren();
+            IEnumerator<Element> iter =  list.GetEnumerator();
+            if (!iter.MoveNext()) throw new BugException();
+            if (iter.Current.getName() == "null")
                 result = (HandleTpl)null;
-            else
-            {
+            else {
                 result = new HandleTpl();
-                result.restoreXml(*iter, manage);
+                result.restoreXml(iter.Current, manage);
             }
-            ++iter;
-            while (iter != list.end())
-            {
-                OpTpl* op = new OpTpl();
-                op.restoreXml(*iter, manage);
+            while (iter.MoveNext()) {
+                OpTpl op = new OpTpl();
+                op.restoreXml(iter.Current, manage);
                 vec.Add(op);
-                ++iter;
             }
             return sectionid;
         }

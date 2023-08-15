@@ -1,10 +1,4 @@
 ﻿using Sla.CORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
@@ -25,15 +19,15 @@ namespace Sla.EXTRA
             if (name.size() == 0)
                 throw new IfaceParseError("Need file name to write callgraph to");
 
-            ofstream os;
-            os.open(name.c_str());
-            if (!os)
-                throw new IfaceExecutionError("Unable to open file " + name);
-
-            XmlEncode encoder(os);
+            TextWriter os;
+            try { os = new StreamWriter(File.OpenWrite(name)); }
+            catch {
+                throw new IfaceExecutionError($"Unable to open file {name}");
+            }
+            XmlEncode encoder = new XmlEncode(os);
             dcp.cgraph.encode(encoder);
             os.close();
-            *status.optr << "Successfully saved callgraph to " << name << endl;
+            status.optr.WriteLine($"Successfully saved callgraph to {name}");
         }
     }
 }

@@ -86,7 +86,7 @@ namespace Sla.SLEIGH
 
         public ConstTpl()
         {
-            type = real;
+            type = const_type.real;
             value_real = 0;
         }
     
@@ -99,7 +99,8 @@ namespace Sla.SLEIGH
         }
 
         public ConstTpl(const_type tp, ulong val)
-        {               // Constructor for real constants
+        {
+            // Constructor for real constants
             type = tp;
             value_real = val;
             value.handle_index = 0;
@@ -107,7 +108,8 @@ namespace Sla.SLEIGH
         }
 
         public ConstTpl(const_type tp)
-        {               // Constructor for relative jump constants and uniques
+        {
+            // Constructor for relative jump constants and uniques
             type = tp;
         }
 
@@ -298,7 +300,7 @@ namespace Sla.SLEIGH
         {
             // Replace old handles with new handles
             if (type != handle) return;
-            HandleTpl newhandle = params[value.handle_index] ;
+            HandleTpl newhandle = @params[value.handle_index] ;
 
             switch (select) {
                 case v_field.v_space:

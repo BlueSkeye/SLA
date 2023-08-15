@@ -55,12 +55,8 @@ namespace Sla.DECCORE
         /// normalize the representation so we can compare sets easily.
         private void normalize()
         {
-            if (left == right)
-            {
-                if (step != 1)
-                    left = left % step;
-                else
-                    left = 0;
+            if (left == right) {
+                left = (step != 1) ? left % (uint)step : 0;
                 right = left;
             }
         }
@@ -139,32 +135,20 @@ namespace Sla.DECCORE
         private static bool newStride(ulong mask, int step, int oldStep, uint rem, ulong myleft,
             ulong myright)
         {
-            if (oldStep != 1)
-            {
-                uint oldRem = (uint)(myleft % oldStep);
+            if (oldStep != 1) {
+                uint oldRem = (uint)(myleft % (uint)oldStep);
                 if (oldRem != (rem % oldStep))
                     return true;            // Step is completely off
             }
             bool origOrder = (myleft < myright);
-            uint leftRem = (uint)(myleft % step);
-            uint rightRem = (uint)(myright % step);
-            if (leftRem > rem)
-                myleft += rem + step - leftRem;
-            else
-                myleft += rem - leftRem;
-
-            if (rightRem > rem)
-                myright += rem + step - rightRem;
-            else
-                myright += rem - rightRem;
+            uint leftRem = (uint)(myleft % (uint)step);
+            uint rightRem = (uint)(myright % (uint)step);
+            myleft += (ulong)((leftRem > rem) ? rem + step - leftRem : rem - leftRem);
+            myright += (ulong)((rightRem > rem) ? rem + step - rightRem : rem - rightRem);
             myleft &= mask;
             myright &= mask;
-
             bool newOrder = (myleft < myright);
-            if (origOrder != newOrder)
-                return true;
-
-            return false;           // not empty
+            return (origOrder != newOrder);
         }
 
         /// \brief Make \b this range fit in a new domain
@@ -179,15 +163,10 @@ namespace Sla.DECCORE
         /// \return \b true if the truncated domain is empty
         private static bool newDomain(ulong newMask, int newStep, ulong myleft, ulong myright)
         {
-            ulong rem;
-            if (newStep != 1)
-                rem = myleft % newStep;
-            else
-                rem = 0;
-            if (myleft > newMask)
-            {
-                if (myright > newMask)
-                {   // Both bounds out of range of newMask
+            ulong rem = (newStep != 1) ? myleft % (uint)newStep : 0;
+            if (myleft > newMask) {
+                if (myright > newMask) {
+                    // Both bounds out of range of newMask
                     if (myleft < myright) return true; // Old range is completely out of bounds of new mask
                     myleft = rem;
                     myright = rem;      // Old range contained everything in newMask
@@ -195,12 +174,10 @@ namespace Sla.DECCORE
                 }
                 myleft = rem;       // Take everything up to left edge of new range
             }
-            if (myright > newMask)
-            {
+            if (myright > newMask) {
                 myright = rem;      // Take everything up to right edge of new range
             }
-            if (myleft == myright)
-            {
+            if (myleft == myright) {
                 myleft = rem;       // Normalize the everything
                 myright = rem;
             }
@@ -336,13 +313,13 @@ namespace Sla.DECCORE
         public bool isFull() => ((!isempty) && (step == 1) && (left == right));
 
         /// Return \b true if \b this contains single value
-        public bool isSingle() => (!isempty) && (right == ((left + step) & mask));
+        public bool isSingle() => (!isempty) && (right == ((left + (uint)step) & mask));
 
         /// Get the left boundary of the range
         public ulong getMin() => left;
 
         /// Get the right-most integer contained in the range
-        public ulong getMax() => (right-step)&mask;
+        public ulong getMax() => (right - (uint)step) & mask;
 
         /// Get the right boundary of the range
         public ulong getEnd() => right;
@@ -357,16 +334,14 @@ namespace Sla.DECCORE
             if (isempty) return 0;
             ulong val;
             if (left < right)
-                val = (right - left) / step;
-            else
-            {
-                val = (mask - (left - right) + step) / step;
-                if (val == 0)
-                {       // This is an overflow, when all ulong values are in the range
+                val = (right - left) / (uint)step;
+            else {
+                val = (mask - (left - right) + (uint)step) / (uint)step;
+                if (val == 0) {
+                    // This is an overflow, when all ulong values are in the range
                     val = mask;               // We lie by one, which shouldn't matter for our jumptable application
-                    if (step > 1)
-                    {
-                        val = val / step;
+                    if (step > 1) {
+                        val = val / (uint)step;
                         val += 1;
                     }
                 }
@@ -421,7 +396,7 @@ namespace Sla.DECCORE
         /// Advance an integer within the range
             public bool getNext(ulong val)
         {
-            val = (val+step)&mask;
+            val = (val + (uint)step) & mask;
             return (val != right);
         }
 
@@ -443,7 +418,7 @@ namespace Sla.DECCORE
             }
             if (left == right) return true;
             if (op2.left == op2.right) return false;
-            if (left % step != op2.left % step) return false;   // Wrong phase
+            if (left % (uint)step != op2.left % (uint)step) return false;   // Wrong phase
             if (left == op2.left && right == op2.right) return true;
 
             char overlapCode = encodeRangeOverlaps(left, right, op2.left, op2.right);
@@ -465,18 +440,15 @@ namespace Sla.DECCORE
         public bool contains(ulong val)
         {
             if (isempty) return false;
-            if (step != 1)
-            {
-                if ((left % step) != (val % step))
+            if (step != 1) {
+                if ((left % (uint)step) != (val % (uint)step))
                     return false;   // Phase is wrong
             }
-            if (left < right)
-            {
+            if (left < right) {
                 if (val < left) return false;
                 if (right <= val) return false;
             }
-            else if (right < left)
-            {
+            else if (right < left) {
                 if (val < right) return true;
                 if (val >= left) return true;
                 return false;
@@ -507,22 +479,19 @@ namespace Sla.DECCORE
             myright = right;
             op2left = op2.left;
             op2right = op2.right;
-            if (step < op2.step)
-            {
+            if (step < op2.step) {
                 newStep = op2.step;
-                uint rem = (uint)(op2left % newStep);
-                if (newStride(mask, newStep, step, rem, myleft, myright))
-                {   // Increase the smaller stride
+                uint rem = (uint)(op2left % (uint)newStep);
+                if (newStride(mask, newStep, step, rem, myleft, myright)) {
+                    // Increase the smaller stride
                     isempty = true;
                     return 0;
                 }
             }
-            else if (op2.step < step)
-            {
+            else if (op2.step < step) {
                 newStep = step;
-                uint rem = (uint)(myleft % newStep);
-                if (newStride(op2.mask, newStep, op2.step, rem, op2left, op2right))
-                {
+                uint rem = (uint)(myleft % (uint)newStep);
+                if (newStride(op2.mask, newStep, op2.step, rem, op2left, op2right)) {
                     isempty = true;
                     return 0;
                 }
@@ -530,39 +499,33 @@ namespace Sla.DECCORE
             else
                 newStep = step;
             newMask = mask & op2.mask;
-            if (mask != newMask)
-            {
-                if (newDomain(newMask, newStep, myleft, myright))
-                {
+            if (mask != newMask) {
+                if (newDomain(newMask, newStep, myleft, myright)) {
                     isempty = true;
                     return 0;
                 }
             }
-            else if (op2.mask != newMask)
-            {
-                if (newDomain(newMask, newStep, op2left, op2right))
-                {
+            else if (op2.mask != newMask) {
+                if (newDomain(newMask, newStep, op2left, op2right)) {
                     isempty = true;
                     return 0;
                 }
             }
-            if (myleft == myright)
-            {   // Intersect with this everything
+            if (myleft == myright) {
+                // Intersect with this everything
                 left = op2left;
                 right = op2right;
                 retval = 0;
             }
-            else if (op2left == op2right)
-            { // Intersect with op2 everything
+            else if (op2left == op2right) {
+                // Intersect with op2 everything
                 left = myleft;
                 right = myright;
                 retval = 0;
             }
-            else
-            {
+            else {
                 char overlapCode = encodeRangeOverlaps(myleft, myright, op2left, op2right);
-                switch (overlapCode)
-                {
+                switch (overlapCode) {
                     case 'a':           // order (l r op2.l op2.r)
                     case 'f':           // order (op2.l op2.r l r)
                         isempty = true;
@@ -593,16 +556,14 @@ namespace Sla.DECCORE
                         retval = 0;
                         break;
                     case 'g':           // order (l op2.r op2.l r)
-                        if (myleft == op2right)
-                        {
+                        if (myleft == op2right) {
                             left = op2left;
                             right = myright;
                             if (left == right)
                                 isempty = true;
                             retval = 0;
                         }
-                        else if (op2left == myright)
-                        {
+                        else if (op2left == myright) {
                             left = myleft;
                             right = op2right;
                             if (left == right)
@@ -657,9 +618,9 @@ namespace Sla.DECCORE
             int shift = Globals.leastsigbit_set(nzmask);
             step = 1;
             step <<= shift;
-            mask = Globals.calc_mask(size);
+            mask = Globals.calc_mask((uint)size);
             left = 0;
-            right = (nzmask + step) & mask;
+            right = (nzmask + (uint)step) & mask;
             return true;
         }
 
@@ -682,37 +643,31 @@ namespace Sla.DECCORE
             ulong aRight = right;
             ulong bRight = op2.right;
             int newStep = step;
-            if (step < op2.step)
-            {
-                if (isSingle())
-                {
+            if (step < op2.step) {
+                if (isSingle()) {
                     newStep = op2.step;
-                    aRight = (left + newStep) & mask;
+                    aRight = (left + (uint)newStep) & mask;
                 }
                 else
                     return 2;
             }
-            else if (op2.step < step)
-            {
-                if (op2.isSingle())
-                {
+            else if (op2.step < step) {
+                if (op2.isSingle()) {
                     newStep = step;
-                    bRight = (op2.left + newStep) & mask;
+                    bRight = (op2.left + (uint)newStep) & mask;
                 }
                 else
                     return 2;
             }
             ulong rem;
-            if (newStep != 1)
-            {
-                rem = left % newStep;
-                if (rem != (op2.left % newStep))
+            if (newStep != 1) {
+                rem = left % (uint)newStep;
+                if (rem != (op2.left % (uint)newStep))
                     return 2;
             }
             else
                 rem = 0;
-            if ((left == aRight) || (op2.left == bRight))
-            {
+            if ((left == aRight) || (op2.left == bRight)) {
                 left = rem;
                 right = rem;
                 step = newStep;
@@ -720,8 +675,7 @@ namespace Sla.DECCORE
             }
 
             char overlapCode = encodeRangeOverlaps(left, aRight, op2.left, bRight);
-            switch (overlapCode)
-            {
+            switch (overlapCode) {
                 case 'a':           // order (l r op2.l op2.r)
                 case 'f':           // order (op2.l op2.r l r)
                     if (aRight == op2.left)
@@ -790,49 +744,42 @@ namespace Sla.DECCORE
                     max = getMin();
                 }
                 ulong diff = max - min;
-                if (diff > 0 && diff <= maxStep)
-                {
-                    if (leastsigbit_set(diff) == Globals.mostsigbit_set(diff))
-                    {
+                if (diff > 0 && diff <= (uint)maxStep) {
+                    if (leastsigbit_set(diff) == Globals.mostsigbit_set(diff)) {
                         step = (int)diff;
                         left = min;
-                        right = (max + step) & mask;
+                        right = (max + (uint)step) & mask;
                         return false;
                     }
                 }
             }
 
-            ulong aRight = right - step + 1;        // Treat original ranges as having step=1
-            ulong bRight = op2.right - op2.step + 1;
+            ulong aRight = right - (uint)step + 1;        // Treat original ranges as having step=1
+            ulong bRight = op2.right - (uint)op2.step + 1;
             step = 1;
             mask |= op2.mask;
             ulong vacantSize1, vacantSize2;
 
             char overlapCode = encodeRangeOverlaps(left, aRight, op2.left, bRight);
-            switch (overlapCode)
-            {
+            switch (overlapCode) {
                 case 'a':           // order (l r op2.l op2.r)
                     vacantSize1 = left + (mask - bRight) + 1;
                     vacantSize2 = op2.left - aRight;
-                    if (vacantSize1 < vacantSize2)
-                    {
+                    if (vacantSize1 < vacantSize2) {
                         left = op2.left;
                         right = aRight;
                     }
-                    else
-                    {
+                    else {
                         right = bRight;
                     }
                     break;
                 case 'f':           // order (op2.l op2.r l r)
                     vacantSize1 = op2.left + (mask - aRight) + 1;
                     vacantSize2 = left - bRight;
-                    if (vacantSize1 < vacantSize2)
-                    {
+                    if (vacantSize1 < vacantSize2) {
                         right = bRight;
                     }
-                    else
-                    {
+                    else {
                         left = op2.left;
                         right = aRight;
                     }
@@ -880,14 +827,14 @@ namespace Sla.DECCORE
         {
             bool iseverything = (!isempty) && (left == right);
             if (newStep == step) return;
-            ulong aRight = right - step;
+            ulong aRight = right - (uint)step;
             step = newStep;
             if (step == 1) return;      // No remainder to fill in
-            ulong curRem = left % step;
+            ulong curRem = left % (uint)step;
             left = (left - curRem) + rem;
-            curRem = aRight % step;
+            curRem = aRight % (uint)step;
             aRight = (aRight - curRem) + rem;
-            right = aRight + step;
+            right = aRight + (uint)step;
             if ((!iseverything) && (left == right))
                 isempty = true;
         }
@@ -914,19 +861,19 @@ namespace Sla.DECCORE
                 case OpCode.CPUI_COPY:
                     break;          // Identity transform on range
                 case OpCode.CPUI_INT_2COMP:
-                    val = (~left + 1 + step) & mask;
-                    left = (~right + 1 + step) & mask;
+                    val = (~left + 1 + (uint)step) & mask;
+                    left = (~right + 1 + (uint)step) & mask;
                     right = val;
                     break;
                 case OpCode.CPUI_INT_NEGATE:
-                    val = (~left + step) & mask;
-                    left = (~right + step) & mask;
+                    val = (~left + (uint)step) & mask;
+                    left = (~right + (uint)step) & mask;
                     right = val;
                     break;
                 case OpCode.CPUI_INT_ZEXT:
                     {
-                        val = Globals.calc_mask(inSize); // (smaller) input mask
-                        ulong rem = left % step;
+                        val = Globals.calc_mask((uint)inSize); // (smaller) input mask
+                        ulong rem = left % (uint)step;
                         CircleRange zextrange;
                         zextrange.left = rem;
                         zextrange.right = val + 1 + rem;    // Biggest possible range of ZEXT
@@ -942,8 +889,8 @@ namespace Sla.DECCORE
                     }
                 case OpCode.CPUI_INT_SEXT:
                     {
-                        val = Globals.calc_mask(inSize); // (smaller) input mask
-                        ulong rem = left & step;
+                        val = Globals.calc_mask((uint)inSize); // (smaller) input mask
+                        ulong rem = left & (uint)step;
                         CircleRange sextrange;
                         sextrange.left = val ^ (val >> 1); // High order bit for (small) input space
                         sextrange.left += rem;
@@ -951,14 +898,12 @@ namespace Sla.DECCORE
                         sextrange.mask = mask;
                         sextrange.step = step;  // Keep the same stride
                         sextrange.isempty = false;
-                        if (sextrange.intersect(*this) != 0)
+                        if (sextrange.intersect(this) != 0)
                             return false;
-                        else
-                        {
+                        else {
                             if (!sextrange.isEmpty())
                                 return false;
-                            else
-                            {
+                            else {
                                 left &= val;
                                 right &= val;
                                 mask &= val;        // Preserve the stride
@@ -987,11 +932,10 @@ namespace Sla.DECCORE
             // If there is nothing in the output set, no input will map to it
             if (isempty) return true;
 
-            switch (opc)
-            {
+            switch (opc) {
                 case OpCode.CPUI_INT_EQUAL:
                     bothTrueFalse = convertToBoolean();
-                    mask = Globals.calc_mask(inSize);
+                    mask = Globals.calc_mask((uint)inSize);
                     if (bothTrueFalse)
                         break;  // All possible outs => all possible ins
                     yescomplement = (left == 0);
@@ -1002,7 +946,7 @@ namespace Sla.DECCORE
                     break;
                 case OpCode.CPUI_INT_NOTEQUAL:
                     bothTrueFalse = convertToBoolean();
-                    mask = Globals.calc_mask(inSize);
+                    mask = Globals.calc_mask((uint)inSize);
                     if (bothTrueFalse) break;   // All possible outs => all possible ins
                     yescomplement = (left == 0);
                     left = (val + 1) & mask;
@@ -1012,25 +956,21 @@ namespace Sla.DECCORE
                     break;
                 case OpCode.CPUI_INT_LESS:
                     bothTrueFalse = convertToBoolean();
-                    mask = Globals.calc_mask(inSize);
+                    mask = Globals.calc_mask((uint)inSize);
                     if (bothTrueFalse) break;   // All possible outs => all possible ins
                     yescomplement = (left == 0);
-                    if (slot == 0)
-                    {
+                    if (slot == 0) {
                         if (val == 0)
                             isempty = true;     // X < 0  is always false
-                        else
-                        {
+                        else {
                             left = 0;
                             right = val;
                         }
                     }
-                    else
-                    {
+                    else {
                         if (val == mask)
                             isempty = true;     // 0xffff < X  is always false
-                        else
-                        {
+                        else {
                             left = (val + 1) & mask;
                             right = 0;
                         }
@@ -1040,16 +980,14 @@ namespace Sla.DECCORE
                     break;
                 case OpCode.CPUI_INT_LESSEQUAL:
                     bothTrueFalse = convertToBoolean();
-                    mask = Globals.calc_mask(inSize);
+                    mask = Globals.calc_mask((uint)inSize);
                     if (bothTrueFalse) break;   // All possible outs => all possible ins
                     yescomplement = (left == 0);
-                    if (slot == 0)
-                    {
+                    if (slot == 0) {
                         left = 0;
                         right = (val + 1) & mask;
                     }
-                    else
-                    {
+                    else {
                         left = val;
                         right = 0;
                     }
@@ -1058,25 +996,21 @@ namespace Sla.DECCORE
                     break;
                 case OpCode.CPUI_INT_SLESS:
                     bothTrueFalse = convertToBoolean();
-                    mask = Globals.calc_mask(inSize);
+                    mask = Globals.calc_mask((uint)inSize);
                     if (bothTrueFalse) break;   // All possible outs => all possible ins
                     yescomplement = (left == 0);
-                    if (slot == 0)
-                    {
+                    if (slot == 0) {
                         if (val == (mask >> 1) + 1)
                             isempty = true;     // X < -infinity, is always false
-                        else
-                        {
+                        else {
                             left = (mask >> 1) + 1; // -infinity
                             right = val;
                         }
                     }
-                    else
-                    {
+                    else {
                         if (val == (mask >> 1))
                             isempty = true;     // infinity < X, is always false
-                        else
-                        {
+                        else {
                             left = (val + 1) & mask;
                             right = (mask >> 1) + 1;    // -infinity
                         }
@@ -1086,16 +1020,14 @@ namespace Sla.DECCORE
                     break;
                 case OpCode.CPUI_INT_SLESSEQUAL:
                     bothTrueFalse = convertToBoolean();
-                    mask = Globals.calc_mask(inSize);
+                    mask = Globals.calc_mask((uint)inSize);
                     if (bothTrueFalse) break;   // All possible outs => all possible ins
                     yescomplement = (left == 0);
-                    if (slot == 0)
-                    {
+                    if (slot == 0) {
                         left = (mask >> 1) + 1; // -infinity
                         right = (val + 1) & mask;
                     }
-                    else
-                    {
+                    else {
                         left = val;
                         right = (mask >> 1) + 1;    // -infinity
                     }
@@ -1104,13 +1036,12 @@ namespace Sla.DECCORE
                     break;
                 case OpCode.CPUI_INT_CARRY:
                     bothTrueFalse = convertToBoolean();
-                    mask = Globals.calc_mask(inSize);
+                    mask = Globals.calc_mask((uint)inSize);
                     if (bothTrueFalse) break;   // All possible outs => all possible ins
                     yescomplement = (left == 0);
                     if (val == 0)
                         isempty = true;     // Nothing carries adding zero
-                    else
-                    {
+                    else {
                         left = ((mask - val) + 1) & mask;
                         right = 0;
                     }
@@ -1122,22 +1053,18 @@ namespace Sla.DECCORE
                     right = (right - val) & mask;
                     break;
                 case OpCode.CPUI_INT_SUB:
-                    if (slot == 0)
-                    {
+                    if (slot == 0) {
                         left = (left + val) & mask;
                         right = (right + val) & mask;
                     }
-                    else
-                    {
+                    else {
                         left = (val - left) & mask;
                         right = (val - right) & mask;
                     }
                     break;
-                case OpCode.CPUI_INT_RIGHT:
-                    {
-                        if (step == 1)
-                        {
-                            ulong rightBound = (Globals.calc_mask(inSize) >> val) + 1; // The maximal right bound
+                case OpCode.CPUI_INT_RIGHT: {
+                        if (step == 1) {
+                            ulong rightBound = (Globals.calc_mask((uint)inSize) >> (int)val) + 1; // The maximal right bound
                             if (((left >= rightBound) && (right >= rightBound) && (left >= right))
                                 || ((left == 0) && (right >= rightBound)) || (left == right))
                             {
@@ -1145,14 +1072,13 @@ namespace Sla.DECCORE
                                 left = 0;       // So domain is everything
                                 right = 0;
                             }
-                            else
-                            {
+                            else {
                                 if (left > rightBound)
                                     left = rightBound;
                                 if (right > rightBound)
                                     right = 0;
-                                left = (left << val) & mask;
-                                right = (right << val) & mask;
+                                left = (left << (int)val) & mask;
+                                right = (right << (int)val) & mask;
                                 if (left == right)
                                     isempty = true;
                             }
@@ -1161,12 +1087,10 @@ namespace Sla.DECCORE
                             return false;
                         break;
                     }
-                case OpCode.CPUI_INT_SRIGHT:
-                    {
-                        if (step == 1)
-                        {
-                            ulong rightb = Globals.calc_mask(inSize);
-                            ulong leftb = rightb >> (val + 1);
+                case OpCode.CPUI_INT_SRIGHT: {
+                        if (step == 1) {
+                            ulong rightb = Globals.calc_mask((uint)inSize);
+                            ulong leftb = rightb >> (int)(val + 1);
                             rightb = leftb ^ rightb; // Smallest negative possible
                             leftb += 1;     // Biggest positive (+1) possible
                             if (((left >= leftb) && (left <= rightb) && (right >= leftb)
@@ -1176,14 +1100,13 @@ namespace Sla.DECCORE
                                 left = 0;       // So domain is everything
                                 right = 0;
                             }
-                            else
-                            {
+                            else {
                                 if ((left > leftb) && (left < rightb))
                                     left = leftb;
                                 if ((right > leftb) && (right < rightb))
                                     right = rightb;
-                                left = (left << val) & mask;
-                                right = (right << val) & mask;
+                                left = (left << (int)val) & mask;
+                                right = (right << (int)val) & mask;
                                 if (left == right)
                                     isempty = true;
                             }
@@ -1216,10 +1139,11 @@ namespace Sla.DECCORE
         /// \param constMarkup is the reference for passing back the constant relevant to the pull-back
         /// \param usenzmask specifies whether to use the NZMASK
         /// \return the input Varnode or NULL
-        public Varnode? pullBack(PcodeOp op, out Varnode constMarkup, bool usenzmask)
+        public Varnode? pullBack(PcodeOp op, out Varnode? constMarkup, bool usenzmask)
         {
             Varnode res;
 
+            constMarkup = null;
             if (op.numInput() == 1) {
                 res = op.getIn(0);
                 if (res.isConstant()) return (Varnode)null;
@@ -1253,7 +1177,7 @@ namespace Sla.DECCORE
                         if (op.getOut().getSize() < msbset) // Some bytes we are chopping off might not be zero
                             return (Varnode)null;
                         else {
-                            mask = Globals.calc_mask(res.getSize()); // Keep the range but make the mask bigger
+                            mask = Globals.calc_mask((uint)res.getSize()); // Keep the range but make the mask bigger
                                                               // If the range wraps (left>right) then, increasing the mask adds all the new space into
                                                               // the range, and it would be an inaccurate pullback by itself, but with the nzmask intersection
                                                               // all the new space will get intersected away again.
@@ -1303,7 +1227,7 @@ namespace Sla.DECCORE
                     step = in1.step;
                     mask = Globals.calc_mask(outSize);
                     if (in1.left == in1.right) {
-                        left = in1.left % step;
+                        left = in1.left % (uint)step;
                         right = in1.mask + 1 + left;
                     }
                     else {
@@ -1319,33 +1243,33 @@ namespace Sla.DECCORE
                     step = in1.step;
                     mask = Globals.calc_mask(outSize);
                     if (in1.left == in1.right) {
-                        ulong rem = in1.left % step;
-                        right = Globals.calc_mask(inSize) >> 1;
+                        ulong rem = in1.left % (uint)step;
+                        right = Globals.calc_mask((uint)inSize) >> 1;
                         left = (Globals.calc_mask(outSize) ^ right) + rem;
                         right = right + 1 + rem;
                     }
                     else {
                         left = Globals.sign_extend(in1.left, inSize, outSize);
-                        right = Globals.sign_extend((in1.right - in1.step) & in1.mask, inSize, outSize);
+                        right = Globals.sign_extend((in1.right - (uint)in1.step) & in1.mask, inSize, outSize);
                         if ((long)right < (long)left)
                             return false;   // Extending causes 2 pieces
-                        right = (right + step) & mask;
+                        right = (right + (uint)step) & mask;
                     }
                     break;
                 case OpCode.CPUI_INT_2COMP:
                     isempty = false;
                     step = in1.step;
                     mask = in1.mask;
-                    right = (~in1.left + 1 + step) & mask;
-                    left = (~in1.right + 1 + step) & mask;
+                    right = (~in1.left + 1 + (uint)step) & mask;
+                    left = (~in1.right + 1 + (uint)step) & mask;
                     normalize();
                     break;
                 case OpCode.CPUI_INT_NEGATE:
                     isempty = false;
                     step = in1.step;
                     mask = in1.mask;
-                    left = (~in1.right + step) & mask;
-                    right = (~in1.left + step) & mask;
+                    left = (~in1.right + (uint)step) & mask;
+                    right = (~in1.left + (uint)step) & mask;
                     normalize();
                     break;
                 case OpCode.CPUI_BOOL_NEGATE:
@@ -1388,7 +1312,7 @@ namespace Sla.DECCORE
                     mask = in1.mask | in2.mask;
                     if (in1.left == in1.right || in2.left == in2.right) {
                         step = (in1.step < in2.step) ? in1.step : in2.step; // Smaller step
-                        left = (in1.left + in2.left) % step;
+                        left = (in1.left + in2.left) % (uint)step;
                         right = left;
                     }
                     else if (in2.isSingle()) {
@@ -1597,8 +1521,8 @@ namespace Sla.DECCORE
         public void widen(CircleRange op2, bool leftIsStable)
         {
             if (leftIsStable) {
-                ulong lmod = left % step;
-                ulong mod = op2.right % step;
+                ulong lmod = left % (uint)step;
+                ulong mod = op2.right % (uint)step;
                 if (mod <= lmod)
                     right = op2.right + (lmod - mod);
                 else

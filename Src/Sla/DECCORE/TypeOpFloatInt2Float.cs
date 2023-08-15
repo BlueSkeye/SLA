@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -13,7 +8,7 @@ namespace Sla.DECCORE
             : base(t, OpCode.CPUI_FLOAT_INT2FLOAT,"INT2FLOAT", type_metatype.TYPE_FLOAT, type_metatype.TYPE_INT)
         {
             opflags = PcodeOp.Flags.unary;
-            addlflags = floatingpoint_op;
+            addlflags = OperationType.floatingpoint_op;
             behave = new OpBehaviorFloatInt2Float(trans);
         }
 

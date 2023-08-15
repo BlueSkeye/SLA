@@ -98,42 +98,37 @@ namespace Sla.SLEIGH
 #endif
 
         // Resolve full pathname
-        public void findFile(string res, string name)
-        {               // Search through paths to find file with given name
-            List<string>::const_iterator iter;
-
+        public void findFile(ref string res, string name)
+        {
             if (name[0] == separator) {
                 res = name;
-                ifstream s(res.c_str());
-                if (s) {
-                    s.close();
-                    return;
+                try {
+                    FileStream s = File.OpenRead(res);
+                    s.Close();
                 }
+                catch { }
             }
-            else
-            {
-                for (iter = pathlist.begin(); iter != pathlist.end(); ++iter)
-                {
-                    res = *iter + name;
-                    ifstream s(res.c_str());
-                    if (s)
-                    {
-                        s.close();
-                        return;
+            else {
+                // Search through paths to find file with given name
+                foreach (string path in pathlist) {
+                    res = path + name;
+                    try {
+                        FileStream s = File.OpenRead(res);
+                        s.Close();
                     }
+                    catch { }
                 }
             }
-            res.clear();            // Can't find it, return empty string
+            // Can't find it, return empty string
+            res = string.Empty;
         }
 
 
         // List of files with suffix
         public void matchList(List<string> res, string match,bool isSuffix)
         {
-            List<string>::const_iterator iter;
-
-            for (iter = pathlist.begin(); iter != pathlist.end(); ++iter)
-                matchListDir(res, match, isSuffix, *iter, false);
+            foreach (string path in pathlist)
+                matchListDir(res, match, isSuffix, path, false);
         }
 
         public static bool isDirectory(string path)
@@ -161,18 +156,18 @@ namespace Sla.SLEIGH
                 string dirfinal;
 
                 dirfinal = dirname;
-          if (dirfinal[dirfinal.size() - 1] != separator)
+          if (dirfinal[dirfinal.Length - 1] != separator)
             dirfinal += separator;
           string regex = dirfinal + '*';
 
                 hFind = FindFirstFileA(regex.c_str(),&FindFileData);
           if (hFind == INVALID_HANDLE_VALUE) return;
           do {
-            string fullname(FindFileData.cFileName);
-            if (match.size() <= fullname.size()) {
+            string fullname = FindFileData.cFileName;
+            if (match.Length <= fullname.Length) {
               if (allowdot||(fullname[0] != '.')) {
 	        if (isSuffix) {
-	          if (0==fullname.compare(fullname.size()-match.size(),match.size(),match))
+	          if (0==fullname.compare(fullname.Length - match.Length,match.Length,match))
 	            res.Add(dirfinal + fullname);
 	        }
 	        else {

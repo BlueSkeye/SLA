@@ -13,13 +13,13 @@ namespace Sla.CORE
     {
         // friend class XmlDecode;
         /// The stream receiving the encoded data
-        private StreamWriter outStream;
+        private TextWriter outStream;
 
         ///< If \b true, new attributes can be written to the current element
         private bool elementTagIsOpen;
 
         /// Construct from a stream
-        public XmlEncode(StreamWriter s)
+        public XmlEncode(TextWriter s)
         {
             outStream = s;
             elementTagIsOpen = false;
@@ -87,7 +87,7 @@ namespace Sla.CORE
                 outStream.Write("0x{0:X}", val);
                 return;
             }
-            Globals.a_v_u(outStream, attribId.getName(), val);
+            Xml.a_v_u(outStream, attribId.getName(), val);
         }
 
         public override void writeString(AttributeId attribId, string val)
@@ -98,7 +98,7 @@ namespace Sla.CORE
                     outStream.Write('>');
                     elementTagIsOpen = false;
                 }
-                Globals.xml_escape(outStream, val);
+                Xml.xml_escape(outStream, val);
                 return;
             }
             Xml.a_v(outStream, attribId.getName(), val);
@@ -110,7 +110,7 @@ namespace Sla.CORE
             outStream.Write(attribId.getName());
             outStream.Write(index + 1);
             outStream.Write("=\"");
-            Globals.xml_escape(outStream, val);
+            Xml.xml_escape(outStream, val);
             outStream.Write("\"");
         }
 
@@ -122,7 +122,7 @@ namespace Sla.CORE
                     outStream.Write('>');
                     elementTagIsOpen = false;
                 }
-                Globals.xml_escape(outStream, spc.getName());
+                Xml.xml_escape(outStream, spc.getName());
                 return;
             }
             Xml.a_v(outStream, attribId.getName(), spc.getName());

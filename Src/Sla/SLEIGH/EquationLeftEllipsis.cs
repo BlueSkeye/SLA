@@ -14,7 +14,7 @@ namespace Sla.SLEIGH
 
         ~EquationLeftEllipsis()
         {
-            PatternEquation::release(eq);
+            base.release(eq);
         }
 
         public EquationLeftEllipsis(PatternEquation e)
@@ -31,12 +31,11 @@ namespace Sla.SLEIGH
 
         public override bool resolveOperandLeft(OperandResolve state)
         {
-            int cur_base = state.base;
-            state.base = -2;
+            int cur_base = state.@base;
+            state.@base = -2;
             bool res = eq.resolveOperandLeft(state);
             if (!res) return false;
-            state.base = cur_base;
-
+            state.@base = cur_base;
             return true;
         }
 

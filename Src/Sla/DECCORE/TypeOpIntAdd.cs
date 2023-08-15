@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpIntAdd(TypeFactory t)
             : base(t, OpCode.CPUI_INT_ADD,"+", type_metatype.TYPE_INT, type_metatype.TYPE_INT)
         {
-            opflags = PcodeOp.Flags.binary | PcodeOp::commutative;
+            opflags = PcodeOp.Flags.binary | PcodeOp.Flags.commutative;
             addlflags = arithmetic_op | inherits_sign;
             behave = new OpBehaviorIntAdd();
         }

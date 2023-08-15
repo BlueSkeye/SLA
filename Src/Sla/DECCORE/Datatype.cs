@@ -240,7 +240,7 @@ namespace Sla.DECCORE
         {
             size = s;
             metatype = m;
-            submeta = base2sub[m];
+            submeta = base2sub[(int)m];
             flags = 0;
             id = 0;
             typedefImm = (Datatype)null;
@@ -407,8 +407,10 @@ namespace Sla.DECCORE
         /// \param newoff is used to pass back the offset difference
         /// \param elSize is used to pass back the array element size
         /// \return the component data-type or null
-        public virtual Datatype? nearestArrayedComponentBackward(ulong off, ulong newoff, int elSize)
+        public virtual Datatype? nearestArrayedComponentBackward(ulong off, out ulong newoff, out int elSize)
         {
+            newoff = 0;
+            elSize
             return (TypeArray)null;
         }
 

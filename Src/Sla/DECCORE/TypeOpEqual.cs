@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpEqual(TypeFactory t)
             : base(t, OpCode.CPUI_INT_EQUAL, "==", type_metatype.TYPE_BOOL, type_metatype.TYPE_INT)
         {
-            opflags = PcodeOp.Flags.binary | PcodeOp::booloutput | PcodeOp::commutative;
+            opflags = PcodeOp.Flags.binary | PcodeOp.Flags.booloutput | PcodeOp.Flags.commutative;
             addlflags = inherits_sign;
             behave = new OpBehaviorEqual();
         }

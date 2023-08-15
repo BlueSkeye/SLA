@@ -37,7 +37,7 @@ namespace Sla.EXTRA
             for (int i = 0; i < inst.size(); ++i)
             {
                 OpBehavior* t_op = inst[i];
-                if (t_op != (OpBehavior*)0)
+                if (t_op != (OpBehavior)null)
                     delete t_op;
             }
         }

@@ -32,41 +32,42 @@ namespace Sla.EXTRA
             if (outfile.empty())
                 throw new IfaceParseError("Missing output file");
 
-            ifstream fs;
-            fs.open(infile.c_str());
-            if (!fs)
-                throw new IfaceExecutionError("Unable to open file: " + infile);
+            TextReader fs;
+            try { fs = new StreamReader(File.OpenRead(infile)); }
+            catch {
+                throw new IfaceExecutionError($"Unable to open file: {infile}");
+            }
 
-            DocumentStorage store;
-            Document* doc = store.parseDocument(fs);
-            fs.close();
+            DocumentStorage store = new DocumentStorage();
+            Document doc = store.parseDocument(fs);
+            fs.Close();
 
-            try
-            {
-                BlockGraph ingraph;
-                XmlDecode decoder(dcp.conf, doc.getRoot());
+            try {
+                BlockGraph ingraph = new BlockGraph();
+                XmlDecode decoder = new XmlDecode(dcp.conf, doc.getRoot());
                 ingraph.decode(decoder);
 
-                BlockGraph resultgraph;
-                List<FlowBlock*> rootlist;
+                BlockGraph resultgraph = new BlockGraph();
+                List<FlowBlock> rootlist = new List<FlowBlock>();
 
                 resultgraph.buildCopy(ingraph);
                 resultgraph.structureLoops(rootlist);
                 resultgraph.calcForwardDominator(rootlist);
 
-                CollapseStructure collapse(resultgraph);
+                CollapseStructure collapse = new CollapseStructure(resultgraph);
                 collapse.collapseAll();
 
-                ofstream sout;
-                sout.open(outfile.c_str());
-                if (!sout)
-                    throw new IfaceExecutionError("Unable to open output file: " + outfile);
-                XmlEncode encoder(sout);
+                TextWriter sout;
+                try { sout = new StreamWriter(File.OpenWrite(outfile)); }
+                catch {
+                    throw new IfaceExecutionError($"Unable to open output file: {outfile}");
+                }
+                XmlEncode encoder = new XmlEncode(sout);
                 resultgraph.encode(encoder);
-                sout.close();
+                sout.Close();
             }
             catch (CORE.LowlevelError err) {
-                *status.optr << err.ToString() << endl;
+                status.optr.WriteLine(err.ToString());
             }
         }
     }

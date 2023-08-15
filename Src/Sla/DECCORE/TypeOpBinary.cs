@@ -1,10 +1,5 @@
-﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 
 namespace Sla.DECCORE
 {
@@ -41,11 +36,11 @@ namespace Sla.DECCORE
 
         public override void printRaw(TextWriter s, PcodeOp op)
         {
-            Varnode::printRaw(s, op.getOut());
-            s << " = ";
-            Varnode::printRaw(s, op.getIn(0));
-            s << ' ' << getOperatorName(op) << ' ';
-            Varnode::printRaw(s, op.getIn(1));
+            Varnode.printRaw(s, op.getOut());
+            s.Write(" = ");
+            Varnode.printRaw(s, op.getIn(0));
+            s.Write($" {getOperatorName(op)} ");
+            Varnode.printRaw(s, op.getIn(1));
         }
     }
 }

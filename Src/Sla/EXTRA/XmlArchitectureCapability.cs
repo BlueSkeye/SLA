@@ -1,10 +1,5 @@
-﻿using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
+using Sla.DECCORE;
 
 namespace Sla.EXTRA
 {
@@ -25,7 +20,7 @@ namespace Sla.EXTRA
 
         ~XmlArchitectureCapability()
         {
-            SleighArchitecture::shutdown();
+            SleighArchitecture.shutdown();
         }
 
         public override Architecture buildArchitecture(string filename, string target, TextWriter estream)
@@ -33,15 +28,15 @@ namespace Sla.EXTRA
 
         public override bool isFileMatch(string filename)
         {
-            ifstream s(filename.c_str());
-            if (!s)
-                return false;
+            TextReader s;
+            try { s = new StreamReader(File.OpenRead(filename)); }
+            catch { return false; }
             int val1, val2, val3;
             s >> ws;
             val1 = s.get();
             val2 = s.get();
             val3 = s.get();
-            s.close();
+            s.Close();
             if ((val1 == '<') && (val2 == 'b') && (val3 == 'i')) // Probably <binaryimage> tag
                 return true;
             return false;

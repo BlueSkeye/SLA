@@ -12,7 +12,7 @@ namespace Sla.DECCORE
         public TypeOpBoolAnd(TypeFactory t)
             : base(t, OpCode.CPUI_BOOL_AND,"&&", type_metatype.TYPE_BOOL, type_metatype.TYPE_BOOL)
         {
-            opflags = PcodeOp.Flags.binary | PcodeOp::commutative | PcodeOp::booloutput;
+            opflags = PcodeOp.Flags.binary | PcodeOp.Flags.commutative | PcodeOp.Flags.booloutput;
             addlflags = logical_op;
             behave = new OpBehaviorBoolAnd();
         }

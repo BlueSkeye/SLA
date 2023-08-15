@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -13,8 +8,8 @@ namespace Sla.DECCORE
         public TypeOpFloatNan(TypeFactory t, Translate trans)
             : base(t, OpCode.CPUI_FLOAT_NAN,"NAN", type_metatype.TYPE_BOOL, type_metatype.TYPE_FLOAT)
         {
-            opflags = PcodeOp.Flags.unary | PcodeOp::booloutput;
-            addlflags = floatingpoint_op;
+            opflags = PcodeOp.Flags.unary | PcodeOp.Flags.booloutput;
+            addlflags = OperationType.floatingpoint_op;
             behave = new OpBehaviorFloatNan(trans);
         }
 

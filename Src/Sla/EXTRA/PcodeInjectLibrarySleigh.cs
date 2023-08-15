@@ -54,32 +54,28 @@ namespace Sla.EXTRA
                 contextCache.pos = new ParserContext((ContextCache)null, (Translate)null);
                 contextCache.pos.initialize(8, 8, slgh.getConstantSpace());
             }
-            PcodeSnippet compiler(slgh);
+            PcodeSnippet compiler = new PcodeSnippet(slgh);
             //  compiler.clear();			// Not necessary unless we reuse
-            for (int i = 0; i < payload.sizeInput(); ++i)
-            {
-                InjectParameter & param(payload.getInput(i));
+            for (int i = 0; i < payload.sizeInput(); ++i) {
+                InjectParameter param = payload.getInput(i);
                 compiler.addOperand(param.getName(), param.getIndex());
             }
-            for (int i = 0; i < payload.sizeOutput(); ++i)
-            {
-                InjectParameter & param(payload.getOutput(i));
+            for (int i = 0; i < payload.sizeOutput(); ++i) {
+                InjectParameter param = payload.getOutput(i);
                 compiler.addOperand(param.getName(), param.getIndex());
             }
-            if (payload.getType() == InjectPayload.InjectionType.EXECUTABLEPCODE_TYPE)
-            {
+            if (payload.getType() == InjectPayload.InjectionType.EXECUTABLEPCODE_TYPE) {
                 compiler.setUniqueBase(0x2000); // Don't need to deconflict with anything other injects
-                ExecutablePcodeSleigh* sleighpayload = (ExecutablePcodeSleigh*)payload;
+                ExecutablePcodeSleigh sleighpayload = (ExecutablePcodeSleigh)payload;
                 istringstream s = new istringstream(sleighpayload.parsestring);
                 if (!compiler.parseStream(s))
                     throw new CORE.LowlevelError(payload.getSource() + ": Unable to compile pcode: " + compiler.getErrorMessage());
                 sleighpayload.tpl = compiler.releaseResult();
                 sleighpayload.parsestring = "";        // No longer need the memory
             }
-            else
-            {
+            else {
                 compiler.setUniqueBase(tempbase);
-                InjectPayloadSleigh* sleighpayload = (InjectPayloadSleigh*)payload;
+                InjectPayloadSleigh sleighpayload = (InjectPayloadSleigh)payload;
                 istringstream s = new istringstream(sleighpayload.parsestring);
                 if (!compiler.parseStream(s))
                     throw new CORE.LowlevelError(payload.getSource() + ": Unable to compile pcode: " + compiler.getErrorMessage());
@@ -89,7 +85,7 @@ namespace Sla.EXTRA
             }
         }
 
-        protected override int allocateInject(string sourceName, string name,int type)
+        protected override int allocateInject(string sourceName, string name, InjectPayload.InjectionType type)
         {
             int injectid = injection.size();
             if (type == InjectPayload.InjectionType.CALLFIXUP_TYPE)
@@ -105,11 +101,10 @@ namespace Sla.EXTRA
 
         protected override void registerInject(int injectid)
         {
-            InjectPayload* payload = injection[injectid];
-            if (payload.isDynamic())
-            {
-                InjectPayload* sub = new InjectPayloadDynamic(glb, payload.getName(), payload.getType());
-                delete payload;
+            InjectPayload payload = injection[injectid];
+            if (payload.isDynamic()) {
+                InjectPayload sub = new InjectPayloadDynamic(glb, payload.getName(), payload.getType());
+                // delete payload;
                 payload = sub;
                 injection[injectid] = payload;
             }
@@ -164,17 +159,17 @@ namespace Sla.EXTRA
             decoder.closeElement(elemId);
         }
 
-        protected override int manualCallFixup(string name, string snippetstring)
+        public override int manualCallFixup(string name, string snippetstring)
         {
             string sourceName = "(manual callfixup name=\"" + name + "\")";
             int injectid = allocateInject(sourceName, name, InjectPayload.InjectionType.CALLFIXUP_TYPE);
-            InjectPayloadSleigh* payload = (InjectPayloadSleigh*)getPayload(injectid);
+            InjectPayloadSleigh payload = (InjectPayloadSleigh)getPayload(injectid);
             payload.parsestring = snippetstring;
             registerInject(injectid);
             return injectid;
         }
 
-        protected override int manualCallOtherFixup(string name, string outname, List<string> inname,
+        public override int manualCallOtherFixup(string name, string outname, List<string> inname,
             string snippet)
         {
             string sourceName = "<manual callotherfixup name=\"" + name + "\")";
@@ -190,9 +185,9 @@ namespace Sla.EXTRA
             return injectid;
         }
 
-        protected override InjectContext getCachedContext() => contextCache;
+        public override InjectContext getCachedContext() => contextCache;
 
-        protected override List<OpBehavior> getBehaviors()
+        public override List<OpBehavior> getBehaviors()
         {
             if (inst.empty())
                 glb.collectBehaviors(inst);

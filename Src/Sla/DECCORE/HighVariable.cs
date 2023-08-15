@@ -63,7 +63,7 @@ namespace Sla.DECCORE
         /// Number of different speculative merge classes in \b this
         private int numMergeClasses;
         /// Dirtiness flags
-        private /*mutable*/ DirtinessFlags highflags;
+        internal /*mutable*/ DirtinessFlags highflags;
         /// Boolean properties inherited from Varnode members
         private /*mutable*/ Varnode.varnode_flags flags;
         /// The data-type for \b this
@@ -71,7 +71,7 @@ namespace Sla.DECCORE
         /// The storage location used to generate a Symbol name
         private /*mutable*/ Varnode nameRepresentative;
         /// The ranges of code addresses covered by this HighVariable
-        private /*mutable*/ Cover internalCover;
+        internal /*mutable*/ Cover internalCover;
         /// Additional info about intersections with other pieces (if non-null)
         internal /*mutable*/ VariablePiece? piece;
         /// The Symbol \b this HighVariable is tied to
@@ -112,7 +112,7 @@ namespace Sla.DECCORE
         /// (Re)derive the internal cover of \b this from the member Varnodes
         /// Only update if the cover is marked as \e dirty.
         /// Merge the covers of all Varnode instances.
-        private void updateInternalCover()
+        internal void updateInternalCover()
         {
             if ((highflags & DirtinessFlags.coverdirty) != 0) {
                 internalCover.clear();
@@ -390,7 +390,7 @@ namespace Sla.DECCORE
         }
 
         /// Mark the data-type as \e dirty
-        private void typeDirty()
+        internal void typeDirty()
         {
             highflags |= DirtinessFlags.typedirty;
         }

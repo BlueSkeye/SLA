@@ -13,13 +13,13 @@ namespace Sla.SLEIGH
         // A pattern with no ORs in it
         protected abstract PatternBlock getBlock(bool context);
         
-        public virtual int numDisjoint() => 0;
+        public override int numDisjoint() => 0;
 
-        public virtual DisjointPattern getDisjoint(int i) => (DisjointPattern*)0;
+        public override DisjointPattern getDisjoint(int i) => (DisjointPattern)null;
 
         public uint getMask(int startbit, int size, bool context)
         {
-            PatternBlock* block = getBlock(context);
+            PatternBlock? block = getBlock(context);
             if (block != (PatternBlock)null)
                 return block.getMask(startbit, size);
             return 0;
@@ -27,7 +27,7 @@ namespace Sla.SLEIGH
 
         public uint getValue(int startbit, int size, bool context)
         {
-            PatternBlock* block = getBlock(context);
+            PatternBlock? block = getBlock(context);
             if (block != (PatternBlock)null)
                 return block.getValue(startbit, size);
             return 0;
@@ -35,28 +35,30 @@ namespace Sla.SLEIGH
 
         public int getLength(bool context)
         {
-            PatternBlock* block = getBlock(context);
+            PatternBlock? block = getBlock(context);
             if (block != (PatternBlock)null)
                 return block.getLength();
             return 0;
         }
 
         public bool specializes(DisjointPattern op2)
-        {               // Return true, if everywhere this's mask is non-zero
-                        // op2's mask is non-zero and op2's value match this's
-            PatternBlock* a,*b;
+        {
+            // Return true, if everywhere this's mask is non-zero
+            // op2's mask is non-zero and op2's value match this's
+            PatternBlock a;
+            PatternBlock b;
 
             a = getBlock(false);
             b = op2.getBlock(false);
-            if ((b != (PatternBlock)null) && (!b.alwaysTrue()))
-            {   // a must match existing block
+            if ((b != (PatternBlock)null) && (!b.alwaysTrue())) {
+                // a must match existing block
                 if (a == (PatternBlock)null) return false;
                 if (!a.specializes(b)) return false;
             }
             a = getBlock(true);
             b = op2.getBlock(true);
-            if ((b != (PatternBlock)null) && (!b.alwaysTrue()))
-            {   // a must match existing block
+            if ((b != (PatternBlock)null) && (!b.alwaysTrue())) {
+                // a must match existing block
                 if (a == (PatternBlock)null) return false;
                 if (!a.specializes(b)) return false;
             }
@@ -64,40 +66,35 @@ namespace Sla.SLEIGH
         }
 
         public bool identical(DisjointPattern op2)
-        {               // Return true if patterns match exactly
-            PatternBlock* a,*b;
-
-            a = getBlock(false);
-            b = op2.getBlock(false);
-            if (b != (PatternBlock)null)
-            {   // a must match existing block
-                if (a == (PatternBlock)null)
-                {
+        { 
+            // Return true if patterns match exactly
+            PatternBlock? a = getBlock(false);
+            PatternBlock? b = op2.getBlock(false);
+            if (b != (PatternBlock)null) {
+                // a must match existing block
+                if (a == (PatternBlock)null) {
                     if (!b.alwaysTrue())
                         return false;
                 }
                 else if (!a.identical(b))
                     return false;
             }
-            else
-            {
+            else {
                 if ((a != (PatternBlock)null) && (!a.alwaysTrue()))
                     return false;
             }
             a = getBlock(true);
             b = op2.getBlock(true);
-            if (b != (PatternBlock)null)
-            {   // a must match existing block
-                if (a == (PatternBlock)null)
-                {
+            if (b != (PatternBlock)null) {
+                // a must match existing block
+                if (a == (PatternBlock)null) {
                     if (!b.alwaysTrue())
                         return false;
                 }
                 else if (!a.identical(b))
                     return false;
             }
-            else
-            {
+            else {
                 if ((a != (PatternBlock)null) && (!a.alwaysTrue()))
                     return false;
             }
@@ -105,15 +102,17 @@ namespace Sla.SLEIGH
         }
 
         public bool resolvesIntersect(DisjointPattern op1, DisjointPattern op2)
-        { // Is this pattern equal to the intersection of -op1- and -op2-
+        {
+            // Is this pattern equal to the intersection of -op1- and -op2-
             if (!resolveIntersectBlock(op1.getBlock(false), op2.getBlock(false), getBlock(false)))
                 return false;
             return resolveIntersectBlock(op1.getBlock(true), op2.getBlock(true), getBlock(true));
         }
 
         public static DisjointPattern restoreDisjoint(Element el)
-        {               // DisjointPattern factory
-            DisjointPattern* res;
+        {
+            // DisjointPattern factory
+            DisjointPattern res;
             if (el.getName() == "instruct_pat")
                 res = new InstructionPattern();
             else if (el.getName() == "context_pat")
@@ -127,7 +126,7 @@ namespace Sla.SLEIGH
         private static bool resolveIntersectBlock(PatternBlock bl1, PatternBlock bl2,
             PatternBlock thisblock)
         {
-            PatternBlock* inter;
+            PatternBlock inter;
             bool allocated = false;
             bool res = true;
 
@@ -135,13 +134,11 @@ namespace Sla.SLEIGH
                 inter = bl2;
             else if (bl2 == (PatternBlock)null)
                 inter = bl1;
-            else
-            {
+            else {
                 allocated = true;
                 inter = bl1.intersect(bl2);
             }
-            if (inter == (PatternBlock)null)
-            {
+            if (inter == (PatternBlock)null) {
                 if (thisblock != (PatternBlock)null)
                     res = false;
             }
@@ -149,8 +146,8 @@ namespace Sla.SLEIGH
                 res = false;
             else
                 res = thisblock.identical(inter);
-            if (allocated)
-                delete inter;
+            //if (allocated)
+            //    delete inter;
             return res;
         }
 

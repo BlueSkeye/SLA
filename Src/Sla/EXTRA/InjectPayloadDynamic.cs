@@ -1,20 +1,15 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Sla.EXTRA
 {
-    internal abstract class InjectPayloadDynamic : InjectPayload
+    internal class InjectPayloadDynamic : InjectPayload
     {
         private Architecture glb;
         // Map from address to specific inject
         private Dictionary<Address, Document> addrMap = new Dictionary<Address, Document>();
         
-        public InjectPayloadDynamic(Architecture g, string nm,int tp)
+        public InjectPayloadDynamic(Architecture g, string nm, InjectionType tp)
             : base(nm, tp)
         {
             glb = g;
@@ -23,37 +18,37 @@ namespace Sla.EXTRA
         
         ~InjectPayloadDynamic()
         {
-            Dictionary<Address, Document*>::iterator iter;
-            for (iter = addrMap.begin(); iter != addrMap.end(); ++iter)
-                delete(*iter).second;
+            //Dictionary<Address, Document*>::iterator iter;
+            //for (iter = addrMap.begin(); iter != addrMap.end(); ++iter)
+            //    delete(*iter).second;
         }
 
         public void decodeEntry(Decoder decoder)
         {
             Address addr = Address.decode(decoder);
             uint subId = decoder.openElement(ElementId.ELEM_PAYLOAD);
-            istringstream s = new istringstream(decoder.readString(AttributeId.ATTRIB_CONTENT));
-            try
-            {
-                Document* doc = xml_tree(s);
-                Dictionary<Address, Document*>::iterator iter = addrMap.find(addr);
-                if (iter != addrMap.end())
-                    delete(*iter).second;       // Delete any preexisting document
+            StringReader s = new StringReader(decoder.readString(AttributeId.ATTRIB_CONTENT));
+            try {
+                Document doc = Xml.xml_tree(s);
+                //Dictionary<Address, Document*>::iterator iter = addrMap.find(addr);
+                //if (iter != addrMap.end())
+                //    delete(*iter).second;       // Delete any preexisting document
                 addrMap[addr] = doc;
             }
-            catch (DecoderError err) {
+            catch (DecoderError) {
                 throw new CORE.LowlevelError("Error decoding dynamic payload");
             }
             decoder.closeElement(subId);
         }
 
-        protected override void inject(InjectContext context, PcodeEmit emit)
+        internal override void inject(InjectContext context, PcodeEmit emit)
         {
-            Dictionary<Address, Document*>::const_iterator eiter = addrMap.find(context.baseaddr);
-            if (eiter == addrMap.end())
+            Document document;
+            
+            if (!addrMap.TryGetValue(context.baseaddr, out document))
                 throw new CORE.LowlevelError("Missing dynamic inject");
-            Element el = (*eiter).second.getRoot();
-            XmlDecode decoder(glb.translate, el);
+            Element el = document.getRoot() ?? throw new BugException();
+            XmlDecode decoder = new XmlDecode(glb.translate, el);
             uint rootId = decoder.openElement(ElementId.ELEM_INST);
             Address addr = Address.decode(decoder);
             while (decoder.peekElement() != 0)
@@ -61,16 +56,16 @@ namespace Sla.EXTRA
             decoder.closeElement(rootId);
         }
 
-        protected override void decode(Sla.CORE.Decoder decoder)
+        internal override void decode(Sla.CORE.Decoder decoder)
         {
             throw new CORE.LowlevelError("decode not supported for InjectPayloadDynamic");
         }
 
-        protected override void printTemplate(TextWriter s)
+        internal override void printTemplate(TextWriter s)
         {
-            s << "dynamic";
+            s.Write("dynamic");
         }
 
-        protected override string getSource() => "dynamic";
+        internal override string getSource() => "dynamic";
     }
 }

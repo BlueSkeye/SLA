@@ -1,10 +1,4 @@
-﻿using ghidra;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Sla.CORE;
 
 namespace Sla.DECCORE
 {
@@ -15,7 +9,7 @@ namespace Sla.DECCORE
             : base(t, OpCode.CPUI_FLOAT_ROUND,"ROUND", type_metatype.TYPE_FLOAT, type_metatype.TYPE_FLOAT)
         {
             opflags = PcodeOp.Flags.unary;
-            addlflags = floatingpoint_op;
+            addlflags = OperationType.floatingpoint_op;
             behave = new OpBehaviorFloatRound(trans);
         }
 

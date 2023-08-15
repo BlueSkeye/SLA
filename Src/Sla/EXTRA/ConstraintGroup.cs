@@ -1,4 +1,5 @@
-﻿using Sla.EXTRA;
+﻿using Sla.CORE;
+using Sla.EXTRA;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -33,37 +34,34 @@ namespace Sla.EXTRA
 
         public void addConstraint(UnifyConstraint a)
         {
-            constraintlist.Add(c);
+            constraintlist.Add(a);
 
-            if (c.getMaxNum() > maxnum)
-                maxnum = c.getMaxNum();
+            if (a.getMaxNum() > maxnum)
+                maxnum = a.getMaxNum();
         }
 
         public int numConstraints() => constraintlist.size();
 
         public void deleteConstraint(int slot)
         {
-            List<UnifyConstraint*>::iterator iter = constraintlist.begin();
-            iter = iter + slot;
-            UnifyConstraint* mydel = *iter;
-            constraintlist.erase(iter);
-            delete mydel;
+            constraintlist.RemoveAt(slot);
+            // delete mydel;
         }
 
         public void mergeIn(ConstraintGroup b)
-        { // Merge all the subconstraints from -b- into this
+        {
+            // Merge all the subconstraints from -b- into this
             for (int i = 0; i < b.constraintlist.size(); ++i)
                 addConstraint(b.constraintlist[i]);
-            b.constraintlist.clear();  // Constraints are no longer controlled by -b-
-            delete b;
+            b.constraintlist.Clear();  // Constraints are no longer controlled by -b-
+            // delete b;
         }
 
         public override UnifyConstraint clone()
         {
-            ConstraintGroup* res = new ConstraintGroup();
-            for (int i = 0; i < constraintlist.size(); ++i)
-            {
-                UnifyConstraint* subconst = constraintlist[i].clone();
+            ConstraintGroup res = new ConstraintGroup();
+            for (int i = 0; i < constraintlist.size(); ++i) {
+                UnifyConstraint subconst = constraintlist[i].clone();
                 res.constraintlist.Add(subconst);
             }
             res.copyid(this);
@@ -72,51 +70,48 @@ namespace Sla.EXTRA
 
         public override void initialize(UnifyState state)
         {
-            TraverseGroupState* traverse = (TraverseGroupState*)state.getTraverse(uniqid);
+            TraverseGroupState traverse = (TraverseGroupState)state.getTraverse(uniqid);
             traverse.setState(-1);
         }
 
         public override bool step(UnifyState state)
         {
-            TraverseGroupState* traverse = (TraverseGroupState*)state.getTraverse(uniqid);
+            TraverseGroupState traverse = (TraverseGroupState)state.getTraverse(uniqid);
 
-            UnifyConstraint* subconstraint;
-            TraverseConstraint* subtraverse;
+            UnifyConstraint subconstraint;
+            TraverseConstraint subtraverse;
             int subindex;
             int stateint;
             int max = constraintlist.size();
-            do
-            {
+            do {
                 stateint = traverse.getState();
-                if (stateint == 0)
-                {       // Attempt a step at current constraint
+                if (stateint == 0) {
+                    // Attempt a step at current constraint
                     subindex = traverse.getCurrentIndex();
                     subtraverse = traverse.getSubTraverse(subindex);
                     subconstraint = constraintlist[subindex];
-                    if (subconstraint.step(state))
-                    {
+                    if (subconstraint.step(state)) {
                         traverse.setState(1);  // Now try a push
                         subindex += 1;
                         traverse.setCurrentIndex(subindex);
                     }
-                    else
-                    {
+                    else {
                         subindex -= 1;
                         if (subindex < 0) return false; // Popped off the top
                         traverse.setCurrentIndex(subindex);
                         traverse.setState(0);  // Try a step next
                     }
                 }
-                else if (stateint == 1)
-                {   // Push
+                else if (stateint == 1) {
+                    // Push
                     subindex = traverse.getCurrentIndex();
                     subtraverse = traverse.getSubTraverse(subindex);
                     subconstraint = constraintlist[subindex];
                     subconstraint.initialize(state);
                     traverse.setState(0);  // Try a step next
                 }
-                else
-                {           // Very first time through
+                else {
+                    // Very first time through
                     traverse.setCurrentIndex(0);
                     subindex = 0;
                     subtraverse = traverse.getSubTraverse(subindex);
@@ -141,21 +136,20 @@ namespace Sla.EXTRA
         {
             if (uniqid != state.numTraverse())
                 throw new LowlevelError("Traverse id does not match index");
-            TraverseGroupState* basetrav = new TraverseGroupState(uniqid);
+            TraverseGroupState basetrav = new TraverseGroupState(uniqid);
             state.registerTraverseConstraint(basetrav);
 
-            for (int i = 0; i < constraintlist.size(); ++i)
-            {
-                UnifyConstraint* subconstraint = constraintlist[i];
+            for (int i = 0; i < constraintlist.size(); ++i) {
+                UnifyConstraint subconstraint = constraintlist[i];
                 subconstraint.buildTraverseState(state);
-                TraverseConstraint* subtraverse = state.getTraverse(subconstraint.getId());
+                TraverseConstraint subtraverse = state.getTraverse(subconstraint.getId());
                 basetrav.addTraverse(subtraverse);
             }
         }
 
         public override void setId(int id)
         {
-            UnifyConstraint::setId(id);
+            base.setId(id);
             for (int i = 0; i < constraintlist.size(); ++i)
                 constraintlist[i].setId(id);
         }
@@ -169,18 +163,16 @@ namespace Sla.EXTRA
         }
 
         public override void removeDummy()
-        { // Remove any dummy constraints within us
-            List<UnifyConstraint*> newlist;
+        {
+            // Remove any dummy constraints within us
+            List<UnifyConstraint> newlist = new List<UnifyConstraint>();
 
-            for (int i = 0; i < constraintlist.size(); ++i)
-            {
-                UnifyConstraint* cur = constraintlist[i];
-                if (cur.isDummy())
-                {
-                    delete cur;
+            for (int i = 0; i < constraintlist.size(); ++i) {
+                UnifyConstraint cur = constraintlist[i];
+                if (cur.isDummy()) {
+                    // delete cur;
                 }
-                else
-                {
+                else {
                     cur.removeDummy();
                     newlist.Add(cur);
                 }

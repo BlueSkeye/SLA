@@ -27,9 +27,9 @@ namespace Sla.SLEIGH
 
         public override VarnodeTpl getVarnode()
         {
-            ConstTpl spc(const_space);
-            ConstTpl off(ConstTpl.const_type.j_flowdest);
-            ConstTpl sz_zero;
+            ConstTpl spc = new ConstTpl(const_space);
+            ConstTpl off = new ConstTpl(ConstTpl.const_type.j_flowdest);
+            ConstTpl sz_zero = new ConstTpl();
             return new VarnodeTpl(spc, off, sz_zero);
         }
 
@@ -44,29 +44,29 @@ namespace Sla.SLEIGH
             hand.space = const_space;
             hand.offset_space = (AddrSpace)null;
             hand.offset_offset = refAddr.getOffset();
-            hand.size = refAddr.getAddrSize();
+            hand.size = (uint)refAddr.getAddrSize();
         }
 
         public override void print(TextWriter s, ParserWalker walker)
         {
             long val = (long)walker.getDestAddr().getOffset();
-            s << "0x" << hex << val;
+            s.Write($"0x{val:X}");
         }
 
         public override symbol_type getType() => SleighSymbol.symbol_type.start_symbol;
 
         public override void saveXml(TextWriter s)
         {
-            s << "<flowdest_sym";
-            SleighSymbol::saveXmlHeader(s);
-            s << "/>\n";
+            s.Write("<flowdest_sym");
+            base.saveXmlHeader(s);
+            s.WriteLine("/>");
         }
 
         public override void saveXmlHeader(TextWriter s)
         {
-            s << "<flowdest_sym_head";
-            SleighSymbol::saveXmlHeader(s);
-            s << "/>\n";
+            s.Write("<flowdest_sym_head");
+            base.saveXmlHeader(s);
+            s.WriteLine("/>");
         }
 
         public override void restoreXml(Element el, SleighBase trans)

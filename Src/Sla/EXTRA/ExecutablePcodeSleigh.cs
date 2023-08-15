@@ -12,8 +12,8 @@ namespace Sla.EXTRA
     internal class ExecutablePcodeSleigh : ExecutablePcode
     {
         // friend class PcodeInjectLibrarySleigh;
-        protected string parsestring;
-        protected ConstructTpl? tpl;
+        internal string parsestring;
+        internal ConstructTpl? tpl;
         
         public ExecutablePcodeSleigh(Architecture g, string src, string nm)
             : base(g, src, nm)

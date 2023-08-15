@@ -67,7 +67,7 @@ namespace Sla.CORE {
     {
         /// \brief Constructor
         /// \param s is a more verbose description of the error
-        public BadDataError(ref string s)
+        public BadDataError(string s)
             : base(s)
         {
         }
@@ -129,7 +129,7 @@ namespace Sla.CORE {
         /// returned to the application via the PcodeEmit::dump method.
         /// \param addr is the address (of the instruction) to associate with the p-code op
         /// \param decoder is the stream decoder
-        public void decodeOp(ref Address addr, ref Decoder decoder)
+        public void decodeOp(Address addr, Decoder decoder)
         {
             OpCode opcode;
             int isize;

@@ -277,7 +277,7 @@ namespace Sla.DECCORE
             parent = (BlockBasic)null; // No parent yet
 
             output = (Varnode)null;
-            opcode = (TypeOp*)0;
+            opcode = (TypeOp)null;
             for (int i = 0; i < inrefs.size(); ++i)
                 inrefs[i] = (Varnode)null;
         }
@@ -386,7 +386,7 @@ namespace Sla.DECCORE
         public bool notPrinted() => ((flags&(PcodeOp::marker|PcodeOp.Flags.nonprinting|PcodeOp::noreturn))!= 0);
         
         /// \brief Return \b true if this op produces a boolean output
-        public bool isBoolOutput() => ((flags&PcodeOp::booloutput)!= 0);
+        public bool isBoolOutput() => ((flags&PcodeOp.Flags.booloutput)!= 0);
 
         /// Return \b true if this op is a branch
         public bool isBranch() => ((flags&PcodeOp::branch)!= 0);
@@ -461,7 +461,7 @@ namespace Sla.DECCORE
         public bool isIncidentalCopy() => ((addlflags&PcodeOp::incidental_copy)!= 0);
 
         /// \brief Return \b true if output is 1-bit boolean
-        public bool isCalculatedBool() => ((flags&(PcodeOp.Flags.calculated_bool|PcodeOp::booloutput))!= 0);
+        public bool isCalculatedBool() => ((flags&(PcodeOp.Flags.calculated_bool|PcodeOp.Flags.booloutput))!= 0);
         
         /// \brief Return \b true if we have already examined this cpool
         public bool isCpoolTransformed() => ((addlflags&PcodeOp::is_cpool_transformed)!= 0);
@@ -700,7 +700,7 @@ namespace Sla.DECCORE
         public OpCode code() => opcode.getOpcode();
 
         /// Return \b true if inputs commute
-        public bool isCommutative() => ((flags & PcodeOp::commutative)!= 0);
+        public bool isCommutative() => ((flags & PcodeOp.Flags.commutative)!= 0);
 
         /// Calculate the constant output produced by this op
         /// Assuming all the inputs to this op are constants, compute the constant result of evaluating

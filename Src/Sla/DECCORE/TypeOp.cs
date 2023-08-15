@@ -1,12 +1,5 @@
 ﻿using Sla.CORE;
 using Sla.DECCORE;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sla.DECCORE
 {
@@ -41,13 +34,13 @@ namespace Sla.DECCORE
         /// The op-code value
         protected OpCode opcode;
         /// Cached pcode-op properties for this op-code
-        protected uint opflags;
+        protected PcodeOp.Flags opflags;
         /// Additional properties
-        protected uint addlflags;
+        protected OperationType addlflags;
         /// Symbol denoting this operation
         protected string name;
         /// Object for emulating the behavior of the op-code
-        protected OpBehavior behave;
+        protected OpBehavior? behave;
 
         /// Set the data-type associated with inputs to this opcode
         protected virtual void setMetatypeIn(type_metatype val)
@@ -75,13 +68,13 @@ namespace Sla.DECCORE
             name = n;
             opflags = 0;
             addlflags = 0;
-            behave = (OpBehavior*)0;
+            behave = (OpBehavior)null;
         }
 
         ~TypeOp()
         {
-            if (behave != (OpBehavior*)0)
-                delete behave;
+            //if (behave != (OpBehavior)null)
+            //    delete behave;
         }
 
         /// Get the display name of the op-code
@@ -91,10 +84,10 @@ namespace Sla.DECCORE
         public OpCode getOpcode() => opcode;
 
         /// Get the properties associated with the op-code
-        public uint getFlags() => opflags;
+        public PcodeOp.Flags getFlags() => opflags;
 
         /// Get the behavior associated with the op-code
-        public OpBehavior getBehavior() => behave;
+        public OpBehavior? getBehavior() => behave;
 
         /// \brief Emulate the unary op-code on an input value
         ///
@@ -113,7 +106,7 @@ namespace Sla.DECCORE
         /// \param in2 is the second input value
         /// \return the output value
         public ulong evaluateBinary(int sizeout, int sizein, ulong in1, ulong in2)
-                    => behave.evaluateBinary(sizeout, sizein, in1, in2);
+            => behave.evaluateBinary(sizeout, sizein, in1, in2);
 
         /// \brief Reverse the binary op-code operation, recovering a constant input value
         /// If the output value and one of the input values is known, recover the value
@@ -141,26 +134,26 @@ namespace Sla.DECCORE
         /// \return \b true if the ordering of the inputs does not affect the output
         public bool isCommutative()
         {
-            return ((opflags & PcodeOp::commutative) != 0);
+            return ((opflags & PcodeOp.Flags.commutative) != 0);
         }
 
         /// \brief Return \b true if the op-code inherits its signedness from its inputs
-        public bool inheritsSign() => ((addlflags & inherits_sign)!= 0);
+        public bool inheritsSign() => ((addlflags & OperationType.inherits_sign)!= 0);
 
         /// \brief Return \b true if the op-code inherits its signedness from only its first input
-        public bool inheritsSignFirstParamOnly() => ((addlflags & inherits_sign_zero)!= 0);
+        public bool inheritsSignFirstParamOnly() => ((addlflags & OperationType.inherits_sign_zero)!= 0);
 
         /// \brief Return \b true if the op-code is a shift (INT_LEFT, INT_RIGHT, or INT_SRIGHT)
-        public bool isShiftOp() => ((addlflags & shift_op)!= 0);
+        public bool isShiftOp() => ((addlflags & OperationType.shift_op)!= 0);
 
         /// \brief Return \b true if the opcode is INT_ADD, INT_MULT, INT_DIV, INT_REM, or other arithmetic op
-        public bool isArithmeticOp() => ((addlflags & arithmetic_op)!= 0);
+        public bool isArithmeticOp() => ((addlflags & OperationType.arithmetic_op)!= 0);
 
         /// \brief Return \b true if the opcode is INT_AND, INT_OR, INT_XOR, or other logical op
-        public bool isLogicalOp() => ((addlflags & logical_op)!= 0);
+        public bool isLogicalOp() => ((addlflags & OperationType.logical_op)!= 0);
 
         /// \brief Return \b true if the opcode is FLOAT_ADD, FLOAT_MULT, or other floating-point operation
-        public bool isFloatingPointOp() => ((addlflags & floatingpoint_op)!= 0);
+        public bool isFloatingPointOp() => ((addlflags & OperationType.floatingpoint_op)!= 0);
 
         /// \brief Find the minimal (or suggested) data-type of an output to \b this op-code
         /// The result should depend only on the op-code itself (and the size of the output)
@@ -178,7 +171,8 @@ namespace Sla.DECCORE
         /// \param slot is the input being considered
         /// \return the data-type
         public virtual Datatype getInputLocal(PcodeOp op, int slot)
-        {               // Default type lookup
+        {
+            // Default type lookup
             return tlst.getBase(op.getIn(slot).getSize(), type_metatype.TYPE_UNKNOWN);
         }
 
@@ -201,12 +195,12 @@ namespace Sla.DECCORE
         /// \param slot is the input to consider
         /// \param castStrategy is the current casting strategy
         /// \return the data-type
-        public virtual Datatype getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
+        public virtual Datatype? getInputCast(PcodeOp op, int slot, CastStrategy castStrategy)
         {
             Varnode vn = op.getIn(slot);
             if (vn.isAnnotation()) return (Datatype)null;
-            Datatype* reqtype = op.inputTypeLocal(slot);
-            Datatype* curtype = vn.getHighTypeReadFacing(op);
+            Datatype reqtype = op.inputTypeLocal(slot);
+            Datatype curtype = vn.getHighTypeReadFacing(op);
             return castStrategy.castStandard(reqtype, curtype, false, true);
         }
 
@@ -223,7 +217,7 @@ namespace Sla.DECCORE
         /// \param inslot indicates how the incoming Varnode is attached to the PcodeOp (-1 indicates output >= indicates input)
         /// \param outslot indicates how the outgoing Varnode is attached to the PcodeOp
         /// \return the outgoing data-type or null (to indicate no propagation)
-        public virtual Datatype propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
+        public virtual Datatype? propagateType(Datatype alttype, PcodeOp op, Varnode invn, Varnode outvn,
                 int inslot, int outslot)
         {
             return (Datatype)null;        // Don't propagate by default
@@ -256,7 +250,7 @@ namespace Sla.DECCORE
         /// \param trans is the Translate object for floating-point formats
         public static void registerInstructions(List<TypeOp> inst, TypeFactory tlst, Translate trans)
         {
-            inst.insert(inst.end(), OpCode.CPUI_MAX, (TypeOp*)0);
+            inst.insert(inst.end(), OpCode.CPUI_MAX, (TypeOp)null);
 
             inst[(int)OpCode.CPUI_COPY] = new TypeOpCopy(tlst);
             inst[(int)OpCode.CPUI_LOAD] = new TypeOpLoad(tlst);
@@ -348,34 +342,33 @@ namespace Sla.DECCORE
         {
             if (val)
             {
-                inst[(int)OpCode.CPUI_INT_ZEXT].setMetatypeIn(TYPE_UNKNOWN);
-                inst[(int)OpCode.CPUI_INT_ZEXT].setMetatypeOut(TYPE_INT);
-                inst[(int)OpCode.CPUI_INT_NEGATE].setMetatypeIn(TYPE_INT);
-                inst[(int)OpCode.CPUI_INT_NEGATE].setMetatypeOut(TYPE_INT);
-                inst[(int)OpCode.CPUI_INT_XOR].setMetatypeIn(TYPE_INT);
-                inst[(int)OpCode.CPUI_INT_XOR].setMetatypeOut(TYPE_INT);
-                inst[(int)OpCode.CPUI_INT_OR].setMetatypeIn(TYPE_INT);
-                inst[(int)OpCode.CPUI_INT_OR].setMetatypeOut(TYPE_INT);
-                inst[(int)OpCode.CPUI_INT_AND].setMetatypeIn(TYPE_INT);
-                inst[(int)OpCode.CPUI_INT_AND].setMetatypeOut(TYPE_INT);
-                inst[(int)OpCode.CPUI_INT_RIGHT].setMetatypeIn(TYPE_INT);
-                inst[(int)OpCode.CPUI_INT_RIGHT].setMetatypeOut(TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_ZEXT].setMetatypeIn(type_metatype.TYPE_UNKNOWN);
+                inst[(int)OpCode.CPUI_INT_ZEXT].setMetatypeOut(type_metatype.TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_NEGATE].setMetatypeIn(type_metatype.TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_NEGATE].setMetatypeOut(type_metatype.TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_XOR].setMetatypeIn(type_metatype.TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_XOR].setMetatypeOut(type_metatype.TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_OR].setMetatypeIn(type_metatype.TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_OR].setMetatypeOut(type_metatype.TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_AND].setMetatypeIn(type_metatype.TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_AND].setMetatypeOut(type_metatype.TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_RIGHT].setMetatypeIn(type_metatype.TYPE_INT);
+                inst[(int)OpCode.CPUI_INT_RIGHT].setMetatypeOut(type_metatype.TYPE_INT);
                 inst[(int)OpCode.CPUI_INT_RIGHT].setSymbol(">>>");
             }
-            else
-            {
-                inst[(int)OpCode.CPUI_INT_ZEXT].setMetatypeIn(TYPE_UINT);
-                inst[(int)OpCode.CPUI_INT_ZEXT].setMetatypeOut(TYPE_UINT);
-                inst[(int)OpCode.CPUI_INT_NEGATE].setMetatypeIn(TYPE_UINT);
-                inst[(int)OpCode.CPUI_INT_NEGATE].setMetatypeOut(TYPE_UINT);
-                inst[(int)OpCode.CPUI_INT_XOR].setMetatypeIn(TYPE_UINT);
-                inst[(int)OpCode.CPUI_INT_XOR].setMetatypeOut(TYPE_UINT);
-                inst[(int)OpCode.CPUI_INT_OR].setMetatypeIn(TYPE_UINT);
-                inst[(int)OpCode.CPUI_INT_OR].setMetatypeOut(TYPE_UINT);
-                inst[(int)OpCode.CPUI_INT_AND].setMetatypeIn(TYPE_UINT);
-                inst[(int)OpCode.CPUI_INT_AND].setMetatypeOut(TYPE_UINT);
-                inst[(int)OpCode.CPUI_INT_RIGHT].setMetatypeIn(TYPE_UINT);
-                inst[(int)OpCode.CPUI_INT_RIGHT].setMetatypeOut(TYPE_UINT);
+            else {
+                inst[(int)OpCode.CPUI_INT_ZEXT].setMetatypeIn(type_metatype.TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_ZEXT].setMetatypeOut(type_metatype.TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_NEGATE].setMetatypeIn(type_metatype.TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_NEGATE].setMetatypeOut(type_metatype.TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_XOR].setMetatypeIn(type_metatype.TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_XOR].setMetatypeOut(type_metatype.TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_OR].setMetatypeIn(type_metatype.TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_OR].setMetatypeOut(type_metatype.TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_AND].setMetatypeIn(type_metatype.TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_AND].setMetatypeOut(type_metatype.TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_RIGHT].setMetatypeIn(type_metatype.TYPE_UINT);
+                inst[(int)OpCode.CPUI_INT_RIGHT].setMetatypeOut(type_metatype.TYPE_UINT);
                 inst[(int)OpCode.CPUI_INT_RIGHT].setSymbol(">>");
             }
         }
